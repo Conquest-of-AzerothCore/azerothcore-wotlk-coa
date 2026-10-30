@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "The Trollbane trial's Paragons and their guards are spawned where Ascension has them",
-  "contract": "Hardcore - Trollbane (challenge 214, Prestige 428) requires killing Vazul 254168 before level 40, Zazera 254170 before 45 and Yahola 254169 before 59; none of them existed. Ascension footage and in-game .gps place Vazul (level 40 elite) in the Witherbark Village cave with two Elite Witherbark Headhunters 254176 (34-35), Zazera (45) on the Sandsorrow Watch tower in Tanaris, and Yahola (59) on the Mazra'Alor temple steps with the Left and Right Hand of Yahola 254172/254173 (59). Zazera took 13480 damage to kill on Ascension (with overkill), matching her cached health modifier 9.0 (13302 on these base stats); Vazul keeps her cached 9.0 (11034). Yahola has 68290 base health on Ascension, 3.2029 times her cached modifier. Asserted from the world phase at each spot: the Paragon is there once at her level with her model and health and can be attacked, and her guards are there at theirs.",
+  "contract": "Hardcore - Trollbane (challenge 214, Prestige 428) requires killing Vazul 254168 before level 40, Zazera 254170 before 45 and Yahola 254169 before 59; none of them existed. Ascension footage and in-game .gps place Vazul (level 40 elite) in the Witherbark Village cave with two Elite Witherbark Headhunters 254176 (34-35), Zazera (45) on the Sandsorrow Watch tower in Tanaris, and Yahola (59) on the Mazra'Alor temple steps with the Left and Right Hand of Yahola 254172/254173 (59). Zazera took 13480 damage to kill on Ascension (with overkill), matching her cached health modifier 9.0 (13302 on these base stats); Vazul keeps her cached 9.0 (11034). Yahola has 68290 base health on Ascension and each Hand of Yahola 24935; a level 35 Elite Witherbark Headhunter has 4624 (its cached modifier). Asserted from the world phase at each spot: the Paragon is there once at her level with her model and health and can be attacked, and her guards are there at theirs.",
   "timeout_ms": 120000,
   "location": { "map": 0, "x": -8914, "y": -133, "z": 80.6 },
   "players": [
@@ -31,6 +31,8 @@
     { "action": "assert", "label": "Yahola uses her own model", "actor": "p", "metric": "nearby_creature_display", "entry": 254169, "equals": 254027 },
     { "action": "assert", "label": "Yahola can be attacked", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 254169, "equals": 1 },
     { "action": "assert", "label": "The Left Hand of Yahola guards her at level 59", "actor": "p", "metric": "nearby_creature_count", "entry": 254172, "min_level": 59, "max_level": 59, "equals": 1 },
-    { "action": "assert", "label": "The Right Hand of Yahola guards her at level 59", "actor": "p", "metric": "nearby_creature_count", "entry": 254173, "min_level": 59, "max_level": 59, "equals": 1 }
+    { "action": "assert", "label": "The Left Hand of Yahola has Ascension's 24935 health", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254172, "equals": 24935 },
+    { "action": "assert", "label": "The Right Hand of Yahola guards her at level 59", "actor": "p", "metric": "nearby_creature_count", "entry": 254173, "min_level": 59, "max_level": 59, "equals": 1 },
+    { "action": "assert", "label": "The Right Hand of Yahola has Ascension's 24935 health", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254173, "equals": 24935 }
   ]
 }
