@@ -4652,7 +4652,7 @@ private:
             metric == "pet_attack_power" || metric == "pet_run_speed_rate" || metric == "pet_is_banker" ||
             metric == "pet_display" || metric == "pet_native_display" || metric == "pet_scale" ||
             metric == "pet_knows_spell" ||
-            metric == "pet_distance" || metric == "pet_spell_bar_count")
+            metric == "pet_distance" || metric == "pet_bearing" || metric == "pet_spell_bar_count")
         {
             Creature* pet = player->GetGuardianPet();
             if (!pet)
@@ -4669,6 +4669,11 @@ private:
                 return pet ? pet->GetNativeDisplayId() : 0;
             if (metric == "pet_scale")
                 return pet ? double(pet->GetObjectScale()) : 0.0;
+            if (metric == "pet_bearing")
+            {
+                Require(pet, "Metric needs a pet");
+                return double(player->GetRelativeAngle(pet)) * 180.0 / M_PI;
+            }
             if (metric == "pet_spell_bar_count")
             {
                 Require(pet && pet->GetCharmInfo(), "Metric needs a controllable pet");
