@@ -451,6 +451,24 @@ def check_maelstrom_weapon(dbc):
     return ok
 
 
+NAMESAKE_PROCS_SQL = ROOT / "data/sql/updates/pending_db_world/rev_20261030_61_coa_reborn_namesake_procs.sql"
+NAMESAKE_PROCS = {1120165: ("spell_pal_seal_of_light", 1120167), 1130823: ("spell_sha_shamanistic_rage", 1130824),
+                  1151525: ("spell_sha_static_shock", 0),
+                  1115273: ("spell_ascension_reborn_improved_mind_blast", 1148301)}
+
+
+def check_namesake_procs(dbc):
+    rows = spell_rows(dbc, set(NAMESAKE_PROCS) | {trigger for _, trigger in NAMESAKE_PROCS.values() if trigger})
+    text = NAMESAKE_PROCS_SQL.read_text(encoding="utf-8")
+    ok = True
+    for spell, (script, trigger) in NAMESAKE_PROCS.items():
+        ok &= spell in rows and f"({spell}, '{script}')" in text and f"({spell}, 0, " in text
+        ok &= not trigger or (trigger in rows and trigger in rows[spell][116:119])
+    print(f"{'PASS' if ok else 'FAIL'}: Reborn Seal of Light, Shamanistic Rage, Static Shock and Improved Mind Blast "
+          "proc from their stock spells' rows and scripts")
+    return ok
+
+
 COEFFICIENTS_SQL = ROOT / "data/sql/updates/pending_db_world/rev_20261008_20_coa_reborn_spell_coefficients.sql"
 
 
@@ -563,7 +581,8 @@ def main():
         result = subprocess.run([str(executable), str(args.dbc_dir.resolve())], text=True)
         bindings_ok = (check_form_only_bindings(args.dbc_dir.resolve()) &
                        check_deep_freeze_immunity(args.dbc_dir.resolve()) &
-                       check_twin_proc_fallback(args.dbc_dir.resolve()) & check_maelstrom_weapon(args.dbc_dir.resolve()))
+                       check_twin_proc_fallback(args.dbc_dir.resolve()) & check_maelstrom_weapon(args.dbc_dir.resolve()) &
+                       check_namesake_procs(args.dbc_dir.resolve()))
         twins_ok = (check_twin_copies() & check_reborn_coefficients(args.dbc_dir.resolve()) &
                     check_class_spell_bindings(args.dbc_dir.resolve()))
         raise SystemExit(result.returncode or (0 if bindings_ok and twins_ok else 1))

@@ -68,6 +68,21 @@ class spell_ascension_reborn_penance : public SpellScript
         OnEffectHitTarget += SpellEffectFn(spell_ascension_reborn_penance::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
     }
 };
+
+class spell_ascension_reborn_improved_mind_blast : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_reborn_improved_mind_blast);
+
+    bool CheckProc(ProcEventInfo&)
+    {
+        return GetTarget()->GetShapeshiftForm() == FORM_SHADOW;
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_ascension_reborn_improved_mind_blast::CheckProc);
+    }
+};
 }
 }
 
@@ -86,4 +101,5 @@ void AddAscensionWarcraftRebornPriestScripts()
 {
     using namespace AscensionWarcraftReborn;
     RegisterSpellScript(spell_ascension_reborn_penance);
+    RegisterSpellScript(spell_ascension_reborn_improved_mind_blast);
 }
