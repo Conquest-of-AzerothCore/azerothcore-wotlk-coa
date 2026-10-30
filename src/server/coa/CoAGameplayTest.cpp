@@ -4627,6 +4627,12 @@ private:
             Require(pet != nullptr, "Pet react state observation needs a current pet");
             return pet->GetReactState();
         }
+        if (metric == "pet_free_talent_points")
+        {
+            Pet* pet = player->GetPet();
+            Require(pet != nullptr, "Pet talent point observation needs a current pet");
+            return pet->GetFreeTalentPoints();
+        }
         if (metric == "pet_player_react_state")
         {
             Pet* pet = player->GetPet();
