@@ -6893,7 +6893,10 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
 
                     // not allow cast fly spells if not have req. skills  (all spells is self target)
                     // allow always ghost flight spells
-                    if (m_originalCaster && m_originalCaster->IsPlayer() && m_originalCaster->IsAlive())
+                    // CoA: a known mount that also has ground speed is grounded by AscensionMountSpeed instead
+                    if (m_originalCaster && m_originalCaster->IsPlayer() && m_originalCaster->IsAlive() &&
+                        !(m_spellInfo->HasAura(SPELL_AURA_MOUNTED) && m_spellInfo->HasAura(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED) &&
+                          m_originalCaster->ToPlayer()->HasSpell(m_spellInfo->Id)))
                     {
                         // No flying in battlegrounds
                         if (m_originalCaster->ToPlayer()->InBattleground())
