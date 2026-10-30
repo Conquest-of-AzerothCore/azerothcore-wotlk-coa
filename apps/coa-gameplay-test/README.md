@@ -433,6 +433,8 @@ checks through separate socketless character sessions and does not test simultan
 `client_packet` fields may use `item_guid` with a carried item entry, `item_bag` or `item_slot` with a carried
 item entry (its u8 bag and slot), or `gameobject_guid` with an entry of
 exactly one owned fixture gameobject. Both write the native raw GUID and require the referenced object to exist.
+`mail_id` and `mail_item_guid` take an item entry and write the u32 id of the first held mail carrying it and that
+item's low GUID, as `CMSG_MAIL_TAKE_ITEM` sends them.
 Optional `location` supplies `map`, `x`, `y`, `z`, `o` for a fixture
 teleport. `location.ignore_access` optionally bypasses entry requirements for a fixture (for example a solo
 raid test), without enabling GM mode during combat. Actors share their lane's phase (`1 << 30` with one lane) to
