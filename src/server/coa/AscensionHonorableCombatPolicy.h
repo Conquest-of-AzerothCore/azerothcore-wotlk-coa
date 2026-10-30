@@ -41,6 +41,12 @@ constexpr bool CanEngage(std::uint64_t attacker, std::uint64_t attackerPartner, 
     return (!targetPartner || targetPartner == attacker) && (!attackerPartner || attackerPartner == target);
 }
 
+constexpr bool BlocksAssist(std::uint64_t helper, std::uint64_t helperPartner, std::uint64_t target,
+    std::uint64_t targetPartner)
+{
+    return helper != target && (helperPartner || targetPartner);
+}
+
 constexpr bool StartsLock(bool targetHonorable, bool targetInitiated, bool attackerLocked, bool targetLocked)
 {
     return targetHonorable && !targetInitiated && !attackerLocked && !targetLocked;

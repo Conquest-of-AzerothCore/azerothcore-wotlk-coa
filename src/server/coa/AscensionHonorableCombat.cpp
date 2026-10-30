@@ -5,6 +5,7 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+#include "Spell.h"
 #include "SpellAuras.h"
 #include "SpellInfo.h"
 #include "WorldPacket.h"
@@ -84,6 +85,15 @@ bool Engageable(Player const* attacker, Player const* target)
 {
     return Dueling(attacker, target) || CanEngage(attacker->GetGUID().GetRawValue(),
         PartnerOf(attacker).GetRawValue(), target->GetGUID().GetRawValue(), PartnerOf(target).GetRawValue());
+}
+
+bool AssistBlocked(Unit const* first, Unit const* second)
+{
+    Player const* firstPlayer = OwnerPlayer(first);
+    Player const* secondPlayer = OwnerPlayer(second);
+    return firstPlayer && secondPlayer && BlocksAssist(firstPlayer->GetGUID().GetRawValue(),
+        PartnerOf(firstPlayer).GetRawValue(), secondPlayer->GetGUID().GetRawValue(),
+        PartnerOf(secondPlayer).GetRawValue());
 }
 
 void SendHonorableZones(Player* player)
@@ -167,7 +177,13 @@ class AscensionHonorableCombatUnit final : public UnitScript
 public:
     AscensionHonorableCombatUnit() : UnitScript("AscensionHonorableCombatUnit", true,
         {UNITHOOK_ON_DAMAGE, UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AURA_REMOVE, UNITHOOK_CAN_UNIT_ATTACK,
-         UNITHOOK_ON_UNIT_EXIT_COMBAT, UNITHOOK_ON_UNIT_DEATH}) { }
+         UNITHOOK_ON_UNIT_EXIT_COMBAT, UNITHOOK_ON_UNIT_DEATH, UNITHOOK_MODIFY_HEAL_RECEIVED}) { }
+
+    void ModifyHealReceived(Unit* first, Unit* second, uint32& heal, SpellInfo const*) override
+    {
+        if (AssistBlocked(first, second))
+            heal = 0;
+    }
 
     bool CanUnitAttack(Unit const* attacker, Unit const* target, SpellInfo const*) override
     {
@@ -264,6 +280,21 @@ public:
     }
 };
 
+class AscensionHonorableCombatSpells final : public AllSpellScript
+{
+public:
+    AscensionHonorableCombatSpells() : AllSpellScript("AscensionHonorableCombatSpells",
+        {ALLSPELLHOOK_ON_SPELL_CHECK_CAST}) { }
+
+    void OnSpellCheckCast(Spell* spell, bool, SpellCastResult& result) override
+    {
+        Unit* target = spell->m_targets.GetUnitTarget();
+        if (result == SPELL_CAST_OK && target && spell->GetSpellInfo()->IsPositive()
+            && AssistBlocked(spell->GetCaster(), target))
+            result = SPELL_FAILED_BAD_TARGETS;
+    }
+};
+
 class AscensionHonorableCombatPlayer final : public PlayerScript
 {
 public:
@@ -301,5 +332,6 @@ public:
 void AddSC_AscensionHonorableCombat()
 {
     new AscensionHonorableCombatUnit();
+    new AscensionHonorableCombatSpells();
     new AscensionHonorableCombatPlayer();
 }

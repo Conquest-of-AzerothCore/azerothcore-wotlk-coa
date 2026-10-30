@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Honorable Combat: Western Plaguelands locks a 1v1 and credits the win",
-  "contract": "A High-Risk player in Western Plaguelands receives Honorable 9930870, and the login stream sends SMSG 0x0768 with the zone list 28 and 618. When an opposing High-Risk player attacks them, both receive Honorable Combat 9930871 and a third player can no longer attack the defender or be attacked by them. When the challenger kills the defender, the challenger earns realm-first achievement 10534 (6534 is its disabled WildCard copy) and the lock ends; the bystander earns none. Winterspring, pets, healing by third parties and the lock ending on leaving combat are untested.",
+  "contract": "A High-Risk player in Western Plaguelands receives Honorable 9930870, and the login stream sends SMSG 0x0768 with the zone list 28 and 618. When an opposing High-Risk player attacks them, both receive Honorable Combat 9930871 and a third player can no longer attack the defender or be attacked by them, and heals between a locked player and anyone else are refused at cast and zeroed on landing. When the challenger kills the defender, the challenger earns realm-first achievement 10534 (6534 is its disabled WildCard copy) and the lock ends; the bystander earns none. Winterspring, pets, untargeted shields or buffs from third parties and the lock ending on leaving combat are untested.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -26,7 +26,7 @@
     {
       "id": "bystander",
       "race": 1,
-      "class": 1,
+      "class": 5,
       "level": 60
     }
   ],
@@ -155,6 +155,20 @@
       "equals": 1
     },
     {
+      "action": "learn",
+      "actor": "bystander",
+      "spell": 2050
+    },
+    {
+      "action": "assert",
+      "label": "The bystander's heal reaches the challenger before Honorable Combat",
+      "actor": "bystander",
+      "metric": "script_heal_received",
+      "target": "challenger",
+      "spell": 2050,
+      "equals": 1000
+    },
+    {
       "action": "attack",
       "actor": "challenger",
       "target": "defender"
@@ -199,6 +213,48 @@
       "metric": "can_attack",
       "target": "bystander",
       "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "A third player's heal on the locked challenger is zeroed",
+      "actor": "bystander",
+      "metric": "script_heal_received",
+      "target": "challenger",
+      "spell": 2050,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The locked challenger's heal on the third player is zeroed",
+      "actor": "challenger",
+      "metric": "script_heal_received",
+      "target": "bystander",
+      "spell": 2050,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The locked challenger still heals themselves",
+      "actor": "challenger",
+      "metric": "script_heal_received",
+      "target": "challenger",
+      "spell": 2050,
+      "equals": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bystander",
+      "spell": 2050,
+      "target": "challenger"
+    },
+    {
+      "action": "assert",
+      "label": "A third player cannot cast a heal on the locked challenger",
+      "actor": "bystander",
+      "metric": "cast_failure",
+      "spell": 2050,
+      "within_ms": 3000,
+      "equals": 12
     },
     {
       "action": "set_health",

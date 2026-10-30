@@ -20,6 +20,11 @@ int main()
     assert(!CanEngage(3, 0, 2, 1));
     assert(!CanEngage(1, 2, 3, 0));
 
+    assert(BlocksAssist(3, 0, 2, 1));
+    assert(BlocksAssist(1, 2, 3, 0));
+    assert(!BlocksAssist(1, 2, 1, 2));
+    assert(!BlocksAssist(3, 0, 4, 0));
+
     assert(StartsLock(true, false, false, false));
     assert(!StartsLock(false, false, false, false));
     assert(!StartsLock(true, true, false, false));
