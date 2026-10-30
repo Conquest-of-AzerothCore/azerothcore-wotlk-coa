@@ -239,7 +239,7 @@ class spell_pal_seal_of_command : public SpellScript
 
     void Register() override
     {
-        if (m_scriptSpellId == 20424)
+        if (sSpellMgr->GetSpellTwinSource(m_scriptSpellId) == 20424)
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_pal_seal_of_command::FilterTargets, EFFECT_0, TARGET_UNIT_TARGET_ENEMY);
     }
 };
@@ -1928,7 +1928,7 @@ class spell_pal_seal_of_vengeance_aura : public AuraScript
     bool Load() override
     {
         // Seal of Vengeance = 31801, Seal of Corruption = 53736
-        _isVengeance = GetSpellInfo()->Id == 31801;
+        _isVengeance = sSpellMgr->GetSpellTwinSource(GetSpellInfo()->Id) == 31801;
         return true;
     }
 
@@ -1962,7 +1962,7 @@ class spell_pal_seal_of_vengeance_aura : public AuraScript
                 return;
         }
 
-        uint32 dotSpell = _isVengeance ? SPELL_PALADIN_HOLY_VENGEANCE : SPELL_PALADIN_BLOOD_CORRUPTION;
+        uint32 dotSpell = sSpellMgr->GetSpellTwinFor(_isVengeance ? SPELL_PALADIN_HOLY_VENGEANCE : SPELL_PALADIN_BLOOD_CORRUPTION, GetId());
         eventInfo.GetActor()->CastSpell(eventInfo.GetActionTarget(), dotSpell, true, nullptr, aurEff);
     }
 
@@ -1980,7 +1980,7 @@ class spell_pal_seal_of_vengeance_aura : public AuraScript
         uint8 stacks = sealDot->GetBase()->GetStackAmount();
         uint8 maxStacks = sealDot->GetSpellInfo()->StackAmount;
 
-        uint32 damageSpell = _isVengeance ? SPELL_PALADIN_SEAL_OF_VENGEANCE_EFFECT : SPELL_PALADIN_SEAL_OF_CORRUPTION_EFFECT;
+        uint32 damageSpell = sSpellMgr->GetSpellTwinFor(_isVengeance ? SPELL_PALADIN_SEAL_OF_VENGEANCE_EFFECT : SPELL_PALADIN_SEAL_OF_CORRUPTION_EFFECT, GetId());
 
         // Scale weapon damage % by stacks (6.6% per stack, up to 33% at 5 stacks)
         SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(damageSpell);
