@@ -4046,6 +4046,11 @@ public:
                onDemand.Rows, onDemand.SpellRows, onDemand.Bytes, player->GetName());
   }
 
+    static std::unordered_set<uint32> OwnedItemIds(Player* player)
+    {
+        return CollectOwnedItemIds(player);
+    }
+
     void SendItemRowOnDemand(Player* player, uint32 itemId)
     {
         if (!ReceivesPatchRows(player))
@@ -6086,6 +6091,10 @@ public:
       _playerStates.erase(player->GetGUID().GetCounter());
       _loginStates.erase(player->GetGUID().GetCounter());
     }
+    {
+      std::lock_guard lock(_woodworkingRowMutex);
+      _sentWoodworkingItems.erase(player->GetGUID().GetCounter());
+    }
 
     if (!ReceivesClientRequests(player))
       return;
@@ -7052,13 +7061,41 @@ private:
             packet << "APPEARANCE_DISPLAY_TYPE_ITEM";
             player->GetSession()->SendPacket(&packet);
         }
+
+        std::unordered_set<uint32> const owned = AscensionDisplayPatchService::OwnedItemIds(player);
+        std::unordered_set<uint32> sent;
         for (auto const& row : _woodworkingItemAppearancePatches)
+            if (owned.contains(row[1]) && sent.insert(row[1]).second)
+                SendWoodworkingItemAppearanceRow(player, row);
+
+        std::lock_guard lock(_woodworkingRowMutex);
+        _sentWoodworkingItems[player->GetGUID().GetCounter()] = std::move(sent);
+    }
+
+public:
+    void SendWoodworkingItemAppearanceOnDemand(Player* player, uint32 itemId)
+    {
+        if (!player || !player->GetSession())
+            return;
+        auto const row = std::find_if(_woodworkingItemAppearancePatches.begin(), _woodworkingItemAppearancePatches.end(),
+            [itemId](std::array<uint32, 3> const& patch) { return patch[1] == itemId; });
+        if (row == _woodworkingItemAppearancePatches.end())
+            return;
         {
-            WorldPacket packet(SMSG_PATCH_ITEM_APPEARANCES, 3 * sizeof(uint32));
-            for (uint32 field : row)
-                packet << field;
-            player->GetSession()->SendPacket(&packet);
+            std::lock_guard lock(_woodworkingRowMutex);
+            if (!_sentWoodworkingItems[player->GetGUID().GetCounter()].insert(itemId).second)
+                return;
         }
+        SendWoodworkingItemAppearanceRow(player, *row);
+    }
+
+private:
+    static void SendWoodworkingItemAppearanceRow(Player* player, std::array<uint32, 3> const& row)
+    {
+        WorldPacket packet(SMSG_PATCH_ITEM_APPEARANCES, 3 * sizeof(uint32));
+        for (uint32 field : row)
+            packet << field;
+        player->GetSession()->SendPacket(&packet);
     }
 
   void UnlockLocalAppearanceCatalog(Player *player,
@@ -8208,6 +8245,8 @@ private:
   std::vector<uint32> _allVanityItemIds;
     std::vector<std::array<uint32, 17>> _woodworkingAppearancePatches;
     std::vector<std::array<uint32, 3>> _woodworkingItemAppearancePatches;
+    std::mutex _woodworkingRowMutex;
+    std::unordered_map<uint32, std::unordered_set<uint32>> _sentWoodworkingItems;
 
   std::mutex _packetMutex;
   std::unordered_map<uint32, std::deque<WorldPacket>> _pendingPackets;
@@ -9529,6 +9568,8 @@ public:
                             uint32) override {
     AscensionCollectionService::Instance().OnItemObtained(player, item);
     SendObtainedItemPatchRow(player, item);
+    if (item && player->IsInWorld())
+      AscensionCollectionService::Instance().SendWoodworkingItemAppearanceOnDemand(player, item->GetEntry());
     if (item && player->IsInWorld() &&
         ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
     {
@@ -9541,6 +9582,8 @@ public:
                            uint32) override {
     AscensionCollectionService::Instance().OnItemObtained(player, item);
     SendObtainedItemPatchRow(player, item);
+    if (item && player->IsInWorld())
+      AscensionCollectionService::Instance().SendWoodworkingItemAppearanceOnDemand(player, item->GetEntry());
   }
 
   static void SendObtainedItemPatchRow(Player *player, Item const *item) {
