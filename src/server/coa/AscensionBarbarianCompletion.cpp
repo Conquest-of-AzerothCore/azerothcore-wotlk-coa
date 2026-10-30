@@ -87,6 +87,10 @@ void ApplyContracts(SpellInfo* info)
     if (!info || info->SpellFamilyName != 18)
         return;
     uint32 id = info->Id;
+    if (id == 707775)
+        info->AttributesCu |= SPELL_ATTR0_CU_POSITIVE_EFF1;
+    if (id == 707763)
+        info->AttributesCu |= SPELL_ATTR0_CU_POSITIVE_EFF2;
     if (id == 705171)
         info->Effects[EFFECT_2].Effect = 0;
     if (id == 705186)
