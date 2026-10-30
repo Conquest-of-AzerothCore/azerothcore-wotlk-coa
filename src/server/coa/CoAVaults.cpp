@@ -154,6 +154,7 @@ enum VaultsData : uint32
     DISPLAY_INVISIBLE = 11686,
     DISPLAY_SOAK_RING = 132245,
     VAULTS_MAP_ID = 936,
+    OTHER_SIDE_MAP_ID = 937,
     GO_TOWER_BOSS_DOOR = 2300560,
     GO_TOWER_BOSS_BARRIER = 2300561,
     GO_TOWER_BOSS_BARRIER_2 = 2300576,
@@ -2056,6 +2057,37 @@ class spell_coa_vaults_void_wrath_tick : public SpellScript
     }
 };
 
+class spell_coa_custom_dungeon_fierce_blow : public SpellScript
+{
+    PrepareSpellScript(spell_coa_custom_dungeon_fierce_blow);
+
+    void HandleHit()
+    {
+        Unit* caster = GetCaster();
+        Unit* target = GetHitUnit();
+        if (!caster || !target || !caster->IsCreature() || !GetHitDamage())
+            return;
+        uint32 const mapId = caster->GetMapId();
+        if (mapId != VAULTS_MAP_ID && mapId != OTHER_SIDE_MAP_ID)
+            return;
+        uint32 blow = caster->CalculateDamage(BASE_ATTACK, false, true, 0, target);
+        blow = caster->MeleeDamageBonusDone(target, blow, BASE_ATTACK, nullptr, SPELL_SCHOOL_MASK_NORMAL);
+        blow = target->MeleeDamageBonusTaken(caster, blow, BASE_ATTACK, nullptr, SPELL_SCHOOL_MASK_NORMAL);
+        sScriptMgr->ModifyMeleeDamage(target, caster, blow);
+        constexpr int32 Probe = 1000000;
+        int32 taken = Probe;
+        sScriptMgr->ModifySpellDamageTaken(target, caster, taken, GetSpellInfo());
+        if (taken <= 0)
+            return;
+        SetHitDamage(std::max<int32>(1, int32(std::lround(double(blow) * Probe / taken))));
+    }
+
+    void Register() override
+    {
+        OnHit += SpellHitFn(spell_coa_custom_dungeon_fierce_blow::HandleHit);
+    }
+};
+
 class vaults_spell_attributes : public GlobalScript
 {
 public:
@@ -2104,5 +2136,6 @@ void AddSC_CoAVaults()
     RegisterSpellAndAuraScriptPair(spell_coa_vaults_damage, spell_coa_vaults_damage_aura);
     RegisterSpellScript(spell_coa_vaults_void_wrath);
     RegisterSpellScript(spell_coa_vaults_void_wrath_tick);
+    RegisterSpellScript(spell_coa_custom_dungeon_fierce_blow);
     new vaults_spell_attributes();
 }
