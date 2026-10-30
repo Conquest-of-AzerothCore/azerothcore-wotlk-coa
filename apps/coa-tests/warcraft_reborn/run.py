@@ -469,6 +469,24 @@ def check_namesake_procs(dbc):
     return ok
 
 
+TRAINER_SEAL_SQL = ROOT / "data/sql/updates/pending_db_world/rev_20261030_63_coa_reborn_trainer_seal_of_command.sql"
+
+
+def check_trainer_seal_of_command(dbc):
+    ranks = range(1470375, 1470380)
+    rows = spell_rows(dbc, set(ranks) | {20375})
+    text = TRAINER_SEAL_SQL.read_text(encoding="utf-8")
+    paladin = (ROOT / "src/server/scripts/Spells/spell_paladin.cpp").read_text(encoding="utf-8")
+    ok = (len(rows) == 6 and rows[20375][34] == 0x4 and all(not rows[rank][34] for rank in ranks) and
+          all(f"({rank}, 0, 10, 0, 0x00168000, 0, 0x4, 0x1, 0x2, 0, 0, 0, 0, 100, 0, 0)" in text and
+              f"({rank}, 'spell_pal_seal_of_command')" in text for rank in ranks) and
+          "sSpellMgr->GetSpellTwinSource(GetSpellInfo()->Id) == 31801" in paladin and
+          "sSpellMgr->GetSpellTwinSource(m_scriptSpellId) == 20424" in paladin)
+    print(f"{'PASS' if ok else 'FAIL'}: the trainer's Seal of Command procs on melee hits like stock, and the Seal of "
+          "Vengeance script casts the Reborn spells for the Reborn seal")
+    return ok
+
+
 BLAZING_SPEED_SQL = ROOT / "data/sql/updates/pending_db_world/rev_20261030_62_coa_reborn_blazing_speed.sql"
 
 
@@ -596,7 +614,8 @@ def main():
         bindings_ok = (check_form_only_bindings(args.dbc_dir.resolve()) &
                        check_deep_freeze_immunity(args.dbc_dir.resolve()) &
                        check_twin_proc_fallback(args.dbc_dir.resolve()) & check_maelstrom_weapon(args.dbc_dir.resolve()) &
-                       check_namesake_procs(args.dbc_dir.resolve()) & check_blazing_speed(args.dbc_dir.resolve()))
+                       check_namesake_procs(args.dbc_dir.resolve()) & check_blazing_speed(args.dbc_dir.resolve()) &
+                       check_trainer_seal_of_command(args.dbc_dir.resolve()))
         twins_ok = (check_twin_copies() & check_reborn_coefficients(args.dbc_dir.resolve()) &
                     check_class_spell_bindings(args.dbc_dir.resolve()))
         raise SystemExit(result.returncode or (0 if bindings_ok and twins_ok else 1))
