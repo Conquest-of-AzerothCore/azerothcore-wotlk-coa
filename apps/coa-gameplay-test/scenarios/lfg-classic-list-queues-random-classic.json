@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "name": "Dungeon Finder: the client's Random Classic list below level 60 queues Random Classic Dungeon",
+  "contract": "Below level 60 the Ascension client does not send Random Classic Dungeon (258): Ascension_PVE.lua queues every dungeon its list filter shows instead. That filter keeps a dungeon only when the player's level minus 15 is at most its recommended level, and Vaults of the Inquisition (401) and Road to De Other Side (402) are the only classic entries recommended at 59 that open at 15. Players of different levels therefore shared little more than those two, and nearly every group went there. Expected: a list made only of classic normal dungeons, from a player inside Random Classic Dungeon's level range, joins as Random Classic Dungeon, so the server draws among every classic dungeon the group can enter and the members receive the random dungeon cooldown 71328.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 48
+    },
+    {
+      "id": "p2",
+      "race": 1,
+      "class": 1,
+      "level": 48
+    },
+    {
+      "id": "p3",
+      "race": 1,
+      "class": 1,
+      "level": 48
+    },
+    {
+      "id": "p4",
+      "race": 1,
+      "class": 1,
+      "level": 48
+    },
+    {
+      "id": "p5",
+      "race": 1,
+      "class": 1,
+      "level": 48
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p2"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p3"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p4"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p5"
+    },
+    {
+      "action": "lfg_join",
+      "label": "The leader queues with the list the client sends for Random Classic Dungeon below level 60",
+      "actor": "p1",
+      "dungeons": [
+        24,
+        26,
+        28,
+        30,
+        34,
+        36,
+        38,
+        40,
+        272,
+        273,
+        274,
+        401,
+        402
+      ],
+      "roles": 3
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p2",
+      "roles": 4
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p3",
+      "roles": 8
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p4",
+      "roles": 8
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p5",
+      "roles": 8
+    },
+    {
+      "action": "wait",
+      "label": "Let the queue form the proposal",
+      "ms": 20000
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p1"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p2"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p3"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p4"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p5"
+    },
+    {
+      "action": "assert",
+      "label": "The group enters the dungeon the proposal chose",
+      "actor": "p1",
+      "metric": "map_id",
+      "min": 33,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the list counts as Random Classic Dungeon, so the leader carries the random dungeon cooldown",
+      "actor": "p1",
+      "metric": "aura",
+      "spell": 71328,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

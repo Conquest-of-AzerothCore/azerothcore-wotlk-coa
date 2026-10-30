@@ -40,6 +40,7 @@
 #include "SocialMgr.h"
 #include "SpellAuras.h"
 #include "WorldSession.h"
+#include <algorithm>
 
 namespace lfg
 {
@@ -642,6 +643,22 @@ namespace lfg
         {
             dungeons.clear();
             dungeons.insert(GetDungeon(gguid));
+        }
+        else if (dungeons.size() > 1)
+        {
+            LFGDungeonData const* random = GetLFGDungeon(LFG_DUNGEON_RANDOM_CLASSIC);
+            uint8 const level = player->GetLevel();
+            if (random && random->type == LFG_TYPE_RANDOM && level >= random->minlevel && level <= random->maxlevel &&
+                std::all_of(dungeons.begin(), dungeons.end(), [&](uint32 id)
+                {
+                    LFGDungeonData const* dungeon = GetLFGDungeon(id);
+                    return dungeon && dungeon->type == LFG_TYPE_DUNGEON && dungeon->group == random->group &&
+                        dungeon->difficulty == DUNGEON_DIFFICULTY_NORMAL;
+                }))
+            {
+                dungeons.clear();
+                dungeons.insert(LFG_DUNGEON_RANDOM_CLASSIC);
+            }
         }
 
         LfgState state = GetState(gguid);
