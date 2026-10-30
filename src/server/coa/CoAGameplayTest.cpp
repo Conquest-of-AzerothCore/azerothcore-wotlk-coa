@@ -4116,6 +4116,12 @@ private:
         {
             Unit* attacker = GetUnit(step.get<std::string>("target"));
             SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
+            Unit* victim = player;
+            if (auto entry = step.get_optional<uint32>("entry"))
+            {
+                victim = GetOwnedCreature(player, *entry);
+                Require(victim != nullptr, "Scripted damage observation needs a present owned creature");
+            }
             if (metric == "script_melee_damage_dealt")
             {
                 uint32 damage = 1000;
@@ -4125,17 +4131,17 @@ private:
             if (metric == "script_melee_damage_taken")
             {
                 uint32 damage = 1000;
-                sScriptMgr->ModifyMeleeDamage(player, attacker, damage);
+                sScriptMgr->ModifyMeleeDamage(victim, attacker, damage);
                 float minDamage = float(damage);
                 float maxDamage = float(damage);
-                sScriptMgr->ModifyMeleeDamageRange(player, attacker, minDamage, maxDamage);
+                sScriptMgr->ModifyMeleeDamageRange(victim, attacker, minDamage, maxDamage);
                 return (minDamage + maxDamage) / 2.0f;
             }
             Require(info != nullptr, "Unknown spell for scripted damage taken");
             if (metric == "script_spell_damage_taken")
             {
                 int32 damage = 1000;
-                sScriptMgr->ModifySpellDamageTaken(player, attacker, damage, info);
+                sScriptMgr->ModifySpellDamageTaken(victim, attacker, damage, info);
                 return damage;
             }
             if (metric == "script_heal_received")
@@ -4146,7 +4152,7 @@ private:
             }
             Require(metric == "script_periodic_damage_taken", "Unknown scripted damage metric");
             uint32 damage = 1000;
-            sScriptMgr->ModifyPeriodicDamageAurasTick(player, attacker, damage, info);
+            sScriptMgr->ModifyPeriodicDamageAurasTick(victim, attacker, damage, info);
             return damage;
         }
         if (metric == "spell_done_crit_chance" || metric == "spell_taken_crit_chance" ||

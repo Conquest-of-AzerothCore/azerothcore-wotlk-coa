@@ -760,7 +760,8 @@ including target health and school conditions. It requires the same `spell` and 
 `aura_crit_chance` reads a
 periodic aura effect's snapshotted crit chance; `aura_script_value` requires `key`. `script_melee_damage_taken`,
 `script_spell_damage_taken` and `script_periodic_damage_taken` require `target` as the attacker (and `spell` for
-the latter two) and return 1000 after the registered module damage-taken hooks. `script_heal_received` requires
+the latter two) and return 1000 after the registered module damage-taken hooks. With `entry` they take the actor's
+owned creature of that entry as the victim instead of the actor. `script_heal_received` requires
 `spell` and `target` as the healer and returns 1000 after the registered heal-received hooks, with the actor as recipient.
 `script_melee_damage_dealt` requires `target` as the victim and returns 1000 after the registered melee damage hooks
 with the actor as the attacker.
