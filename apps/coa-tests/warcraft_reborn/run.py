@@ -469,6 +469,20 @@ def check_namesake_procs(dbc):
     return ok
 
 
+BLAZING_SPEED_SQL = ROOT / "data/sql/updates/pending_db_world/rev_20261030_62_coa_reborn_blazing_speed.sql"
+
+
+def check_blazing_speed(dbc):
+    rows = spell_rows(dbc, {1131641, 1131642, 1131643, 31643})
+    text = BLAZING_SPEED_SQL.read_text(encoding="utf-8")
+    ok = (len(rows) == 4 and rows[1131641][35] == 50 and rows[1131642][35] == 100 and
+          all(f"({spell}, 0, 0, 0, 0, 0, 0x28, 0x1, 0x2, 0, 0, 0, 0, 0, 0, 0)" in text and
+              f"({spell}, 'spell_ascension_reborn_blazing_speed')" in text for spell in (1131641, 1131642)))
+    print(f"{'PASS' if ok else 'FAIL'}: Reborn Blazing Speed procs at its own 50% or 100% from melee hits taken and casts "
+          "the Reborn buff, not stock's")
+    return ok
+
+
 COEFFICIENTS_SQL = ROOT / "data/sql/updates/pending_db_world/rev_20261008_20_coa_reborn_spell_coefficients.sql"
 
 
@@ -582,7 +596,7 @@ def main():
         bindings_ok = (check_form_only_bindings(args.dbc_dir.resolve()) &
                        check_deep_freeze_immunity(args.dbc_dir.resolve()) &
                        check_twin_proc_fallback(args.dbc_dir.resolve()) & check_maelstrom_weapon(args.dbc_dir.resolve()) &
-                       check_namesake_procs(args.dbc_dir.resolve()))
+                       check_namesake_procs(args.dbc_dir.resolve()) & check_blazing_speed(args.dbc_dir.resolve()))
         twins_ok = (check_twin_copies() & check_reborn_coefficients(args.dbc_dir.resolve()) &
                     check_class_spell_bindings(args.dbc_dir.resolve()))
         raise SystemExit(result.returncode or (0 if bindings_ok and twins_ok else 1))
