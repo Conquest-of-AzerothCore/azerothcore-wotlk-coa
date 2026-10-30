@@ -19,6 +19,10 @@
     "mythic-plus-client-data-at-login": "Sets the process-global Mythic+ affix week (.mythic week) that other running cases read",
     "test-zone-bonus-command": "Changes the process-global test zone table that every running case's experience reads",
     "test-zone-bonus-westfall": "Changes the process-global test zone table that every running case's experience reads",
-    "path-to-ascension-arena-solo-queue-tutorial": "Joins the process-global rated solo queues that other running cases match from"
+    "path-to-ascension-arena-solo-queue-tutorial": "Joins the process-global rated solo queues that other running cases match from",
+    "mercenary-battleground-team-faction": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
+    "mercenary-war-mode-battleground": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
+    "high-risk-challenge-survives-battleground": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
+    "mercenary-wintergrasp-team-faction": "Starts and stops the process-global Wintergrasp battle that every player in the zone takes part in"
   }
 }

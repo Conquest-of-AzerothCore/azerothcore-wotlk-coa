@@ -10,6 +10,7 @@
 #include "AscensionClientDbcStream.h"
 #include "AscensionFelsworn.h"
 #include "AscensionHighRiskPolicy.h"
+#include "AscensionRulesets.h"
 #include "AscensionItemScaling.h"
 #include "AscensionPyromancer.h"
 #include "AscensionCultist.h"
@@ -10736,8 +10737,8 @@ class spell_ascension_vanity_use_restriction : public SpellScript
                     : "Only usable as Guild Master or Officer.";
             case SPELL_SUMMON_PORTABLE_TRANSPOLYPORTER:
             case SPELL_PORTABLE_TRANSPOLYPORTER_TELEPORT:
-                return player->HasAura(HighRisk::HighRiskAura) ? "Cannot be used by High-Risk players."
-                    : std::string_view{};
+                return player->HasAura(HighRisk::HighRiskAura) || AscensionRulesets::HighRiskSuspended(player)
+                    ? "Cannot be used by High-Risk players." : std::string_view{};
             default:
                 return player->GetMap()->IsDungeon() ? "Can only be used on continents and in battlegrounds."
                     : std::string_view{};

@@ -838,12 +838,14 @@ namespace CoAChallenges
     }
 
     // Called each tick while the rule is active: losing the High Risk aura
-    // ("must remain in High Risk at all times") fails the challenge.
+    // ("must remain in High Risk at all times") fails the challenge. High Risk
+    // suspended for a battleground, arena or Wintergrasp battle still counts;
+    // it returns on leaving.
     void EnforceHighRisk(Player* player)
     {
         if (!player || !HighRiskTracked(player->GetGUID().GetCounter()))
             return;
-        if (player->HasAura(HighRiskAura()))
+        if (player->HasAura(HighRiskAura()) || AscensionRulesets::HighRiskSuspended(player))
             return;
         uint32 level = 0;
         uint32 cid = ActiveChallengeWithRule(player, "CHALLENGE_RULES_TYPE_HIGH_RISK_ONLY", level);

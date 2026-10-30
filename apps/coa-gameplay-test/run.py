@@ -93,7 +93,7 @@ METRICS = TIMELINE_METRICS | {
     'unit_scale', 'combat_reach',
     'token_count', 'item_sell_price', 'monster_chat_count', 'creature_model_scale', 'creature_model_display',
     'taxi_node', 'in_flight', 'taxi_destination', 'stabled_pet_count', 'stable_result', 'pet_rows', 'instance_binds_listed', 'pet_entry', 'pet_aura_stacks', 'pet_aura_duration_ms', 'pet_is_banker', 'pet_display',
-    'pet_native_display', 'race', 'pet_scale', 'pet_knows_spell', 'pet_distance', 'pet_casting', 'pet_loading',
+    'pet_native_display', 'race', 'faction', 'pet_scale', 'pet_knows_spell', 'pet_distance', 'pet_casting', 'pet_loading',
     'pet_spell_bar_count',
     'owned_creature_count', 'owned_creature_spacing', 'owned_creature_weapon_damage_min',
     'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_victim',
