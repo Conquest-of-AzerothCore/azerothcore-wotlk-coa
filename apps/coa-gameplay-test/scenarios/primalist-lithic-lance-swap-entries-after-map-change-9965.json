@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Lithic Lance stand-in entries are resent after a map change (#9965)",
+  "contract": [
+    "Lithic Lance Ready 807048 temporarily replaces the highest Geode Barrage rank with Lithic Lance 681251.",
+    "Before each SMSG_SUPERCEDED_SPELL the server sends the stand-in rows (SMSG_PATCH_CHARACTER_ADVANCEMENT 0x064A)",
+    "that keep the client from printing 'You have learned a new spell', but only rows it has not sent this session.",
+    "A far teleport such as the Dungeon Finder can drop those rows on the client while the server still counts",
+    "them as sent, so every later swap printed the learned-spell message until relog. The first swap sends the",
+    "rows; repeating the swap on the same map sends none; after a teleport to another map the next swap sends",
+    "them again."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login state settle", "ms": 3000},
+    {"action": "learn", "actor": "primalist", "spell": 706159},
+    {"action": "learn", "actor": "primalist", "spell": 500402},
+    {"action": "learn", "actor": "primalist", "spell": 502769},
+    {"action": "learn", "actor": "primalist", "spell": 502770},
+    {"action": "snapshot", "actor": "primalist", "metric": "server_packets", "opcode": 1610, "save_as": "start"},
+    {"action": "set_aura", "label": "Fixture: Lithic Lance Ready", "actor": "primalist", "spell": 807048, "stacks": 1},
+    {"action": "assert", "label": "Lithic Lance replaces the highest Geode Barrage rank", "actor": "primalist", "metric": "temporary_spell_replacement", "spell": 502770, "equals": 681251, "within_ms": 1000},
+    {"action": "assert", "label": "The first swap sends the stand-in rows", "actor": "primalist", "metric": "server_packets", "opcode": 1610, "relative_to": "start", "min": 1},
+    {"action": "set_aura", "actor": "primalist", "spell": 807048, "stacks": 0},
+    {"action": "assert", "actor": "primalist", "metric": "temporary_spell_replacement", "spell": 502770, "equals": 502770, "within_ms": 1000},
+    {"action": "snapshot", "actor": "primalist", "metric": "server_packets", "opcode": 1610, "save_as": "same_map"},
+    {"action": "set_aura", "actor": "primalist", "spell": 807048, "stacks": 1},
+    {"action": "assert", "actor": "primalist", "metric": "temporary_spell_replacement", "spell": 502770, "equals": 681251, "within_ms": 1000},
+    {"action": "assert", "label": "Control: a repeated swap on the same map sends no rows again", "actor": "primalist", "metric": "server_packets", "opcode": 1610, "relative_to": "same_map", "equals": 0},
+    {"action": "set_aura", "actor": "primalist", "spell": 807048, "stacks": 0},
+    {"action": "teleport", "actor": "primalist", "map": 1, "x": 1676.21, "y": -4315.29, "z": 61.52, "o": 0},
+    {"action": "wait", "ms": 2000},
+    {"action": "snapshot", "actor": "primalist", "metric": "server_packets", "opcode": 1610, "save_as": "new_map"},
+    {"action": "set_aura", "actor": "primalist", "spell": 807048, "stacks": 1},
+    {"action": "assert", "actor": "primalist", "metric": "temporary_spell_replacement", "spell": 502770, "equals": 681251, "within_ms": 1000},
+    {"action": "assert", "label": "After a map change the next swap resends the stand-in rows", "actor": "primalist", "metric": "server_packets", "opcode": 1610, "relative_to": "new_map", "min": 1}
+  ]
+}

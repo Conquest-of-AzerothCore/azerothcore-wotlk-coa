@@ -316,6 +316,22 @@ namespace CoAPrestige
     constexpr uint32_t DailyCreditDungeons      = 900003; // "Dungeons Completed"
     constexpr uint32_t DailyCreditWorldQuests   = 900004; // "Daily Quests Completed"
 
+    struct RidingTome
+    {
+        uint32_t spell = 0;
+        uint32_t tome = 0;
+    };
+
+    constexpr RidingTome RidingTomes[] =
+    {
+        { 33388, 2200037 },
+        { 33391, 1039605 },
+        { 34090, 1046168 },
+        { 34091, 1052731 },
+        { 91774, 2179243 },
+        { 54197, 2179244 },
+    };
+
     constexpr uint32_t DailyQuestBattlegrounds = 80954; // "Prestige: Battlegrounds"
     constexpr uint32_t DailyQuestDungeons = 80955;      // "Prestige: Dungeons"
     constexpr uint32_t DailyQuestOpenWorld = 80956;     // "Prestige: Open World"

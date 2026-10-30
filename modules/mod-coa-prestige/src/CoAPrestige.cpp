@@ -430,6 +430,18 @@ namespace
         });
     }
 
+    std::vector<RewardItem> ForgetRiding(Player* player)
+    {
+        std::vector<RewardItem> tomes;
+        for (RidingTome const& riding : RidingTomes)
+            if (player->HasSpell(riding.spell))
+            {
+                player->removeSpell(riding.spell, SPEC_MASK_ALL, false);
+                tomes.push_back({ riding.tome, 1 });
+            }
+        return tomes;
+    }
+
     void MailEquippedItems(Player* player, std::vector<Item*>& mailed, CharacterDatabaseTransaction trans)
     {
         for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
@@ -569,6 +581,7 @@ namespace
             player->resetTalents(true);
         uint32 const enchants = area52 ? resetResult.Enchants :
             reborn ? AscensionMysticEnchant::ClearActivePreset(player) : 0;
+        std::vector<RewardItem> const ridingTomes = ForgetRiding(player);
         std::unordered_set<uint32> chains = ForgetRanksAbove(player, FirstLevel);
         if (reborn)
             chains.merge(AscensionWarcraftReborn::ForgetClassSpellsAbove(player, FirstLevel));
@@ -594,6 +607,7 @@ namespace
         player->AddAura(PrestigedAura, player);
         player->KilledMonsterCredit(PrestigeKillCredit);
         GrantRewards(player, Rewards(), mailed, trans);
+        GrantRewards(player, ridingTomes, mailed, trans);
         GrantPrestigeDaily(player);
         player->SetHomebind(WorldLocation(start->mapId, start->positionX, start->positionY, start->positionZ,
             start->orientation), start->areaId);
@@ -723,6 +737,8 @@ public:
         // Pull the character's active prestige daily into the gossip quest list, so
         // the client's PrestigeModeUI (GetGossipActiveQuests / SelectGossipActiveQuest)
         // and the standard quest dialog can turn it in.
+        if (IsActive(player))
+            GrantPrestigeDaily(player, CycleDailyQuest(player));
         SyncDailyMaxLevelCredit(player);
         player->PrepareQuestMenu(creature->GetGUID());
         AddGossipItemFor(player, GOSSIP_ICON_CHAT, std::string(OptionActivate), GOSSIP_SENDER_MAIN, ACTION_ACTIVATE);

@@ -389,7 +389,7 @@ public:
         return service;
     }
 
-    void SendPatchStream(Player*, bool = false) { }
+    void SendPatchStream(Player*) { }
 
     std::vector<uint32> ItemRequests;
 

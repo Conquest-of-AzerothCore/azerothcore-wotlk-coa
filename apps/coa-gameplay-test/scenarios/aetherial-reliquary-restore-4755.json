@@ -1,0 +1,195 @@
+{
+  "schema": 1,
+  "name": "Aetherial Reliquary restores the stored experience boosts after Prestige (#4755)",
+  "contract": "On a level-60 realm (MaxPlayerLevel 60, the cap Prestige also follows), #4755: after reaching the realm level cap with Aura of Experience 818059 and Potion of Experience 818046, a character that prestiges with Chromie and uses Aetherial Reliquary 8263512 (Aetherial Displacement: 'Use the charged Aetherial Boon Reliquary to restore your stored buffs.') gets both boosts back, the Potion with the time it had left when it was stored, and the Reliquary is used up. A Reliquary with nothing stored, such as one bought from the Guardian of Time, is kept when used and the player is told it holds nothing; that text is not from a live source.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8816.5,
+    "y": 627.0,
+    "z": 94.1,
+    "o": 3.8
+  },
+  "players": [
+    {
+      "id": "prestiger",
+      "race": 1,
+      "class": 20,
+      "level": 59
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chromie",
+      "owner": "prestiger",
+      "entry": 178081,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "prestiger",
+      "id": 25
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "prestiger",
+      "spell": 818059,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "prestiger",
+      "spell": 818046,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "The Potion time left when it is stored",
+      "actor": "prestiger",
+      "metric": "aura_duration_ms",
+      "spell": 818046,
+      "save_as": "potion_left"
+    },
+    {
+      "action": "set_level",
+      "actor": "prestiger",
+      "value": 60
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both boosts were stored at the cap",
+      "actor": "prestiger",
+      "metric": "carried_aura_count",
+      "spells": [
+        818059,
+        818046
+      ],
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Reliquary is carried",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 8263512,
+      "equals": 1
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie",
+      "label": "Speak to Chromie"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0,
+      "label": "I would like to prestige!"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Prestige returned the character to level 1",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the character is prestiged",
+      "actor": "prestiger",
+      "metric": "aura",
+      "spell": 9930831,
+      "equals": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "prestiger",
+      "item": 8263512,
+      "spell": 8263512
+    },
+    {
+      "action": "assert",
+      "label": "Aura of Experience is restored",
+      "actor": "prestiger",
+      "metric": "aura",
+      "spell": 818059,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Potion of Experience is restored",
+      "actor": "prestiger",
+      "metric": "aura",
+      "spell": 818046,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Potion resumes with the time it had left when stored",
+      "actor": "prestiger",
+      "metric": "aura_duration_ms",
+      "spell": 818046,
+      "relative_to": "potion_left",
+      "min": -5000,
+      "max": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Reliquary was used up",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 8263512,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the Reliquary's 5-second cooldown pass",
+      "ms": 6000
+    },
+    {
+      "action": "add_item",
+      "actor": "prestiger",
+      "item": 8263512
+    },
+    {
+      "action": "use_item",
+      "actor": "prestiger",
+      "item": 8263512,
+      "spell": 8263512
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "An empty Reliquary is kept",
+      "actor": "prestiger",
+      "metric": "item_count",
+      "item": 8263512,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The player is told it holds nothing",
+      "actor": "prestiger",
+      "metric": "notification_contains",
+      "text": "Your Aetherial Reliquary holds no stored buffs.",
+      "equals": 1
+    }
+  ]
+}

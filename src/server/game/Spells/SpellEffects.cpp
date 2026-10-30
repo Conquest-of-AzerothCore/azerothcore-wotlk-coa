@@ -986,7 +986,7 @@ void Spell::EffectAscensionResetCooldown(SpellEffIndex effIndex)
     Unit* target = unitTarget ? unitTarget : m_caster;
     Player* player = target ? target->ToPlayer() : nullptr;
     SpellEffectInfo const& effect = m_spellInfo->Effects[effIndex];
-    ResetAscensionCooldown(player, effect.MiscValue, effect.MiscValueB != 0);
+    ModifyAscensionCooldown(player, effect.MiscValue, 0, effect.MiscValueB != 0);
 }
 
 // Effect 197: the 165 cooldown change applied to every cooling spell of the caster's family that the effect's class

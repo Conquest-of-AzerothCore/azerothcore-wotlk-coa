@@ -5,6 +5,7 @@
  */
 
 #include "AccountMgr.h"
+#include "AscensionAetherialReliquary.h"
 #include "AscensionAccountProgress.h"
 #include "AscensionClientDbcStream.h"
 #include "AscensionFelsworn.h"
@@ -208,7 +209,6 @@ constexpr uint16 SMSG_PATCH_SPELL_SHAPESHIFT_FORM = 0x0949;
 constexpr uint16 SMSG_PATCH_CREATURE_MODEL_DATA = 0x0974;
 constexpr uint32 CUSTOM_DISPLAY_ID_FALLBACK_MIN = 652000;
 constexpr uint32 DISPLAY_PATCH_FALLBACK_DELAY_MS = 5000;
-constexpr uint32 DISPLAY_PATCH_RESEND_COOLDOWN_MS = 10000;
 
 constexpr uint16 SMSG_PATCH_VANITY_COLLECTION = 0x0573;
 constexpr uint16 SMSG_UPDATE_OBJECT_ADDON = 0x0578;
@@ -4017,8 +4017,7 @@ public:
     _sentItemRows.erase(guid);
     _sentItemSpellRows.erase(guid);
     _onDemandItemRows.erase(guid);
-    _lastStreamMs.erase(guid);
-    _fallbackTimers[guid] = { DISPLAY_PATCH_FALLBACK_DELAY_MS, false };
+    _fallbackTimers[guid] = DISPLAY_PATCH_FALLBACK_DELAY_MS;
     std::lock_guard entries(_swapEntryMutex);
     _sentSwapEntries.erase(guid);
   }
@@ -4032,7 +4031,6 @@ public:
       _sentItemRows.erase(guid);
       _sentItemSpellRows.erase(guid);
       _fallbackTimers.erase(guid);
-      _lastStreamMs.erase(guid);
       if (auto node = _onDemandItemRows.extract(guid))
         onDemand = node.mapped();
     }
@@ -4045,6 +4043,11 @@ public:
       LOG_INFO("coa", "Streamed {} Item and {} linked Spell patch rows ({} bytes) on demand to {} during the session",
                onDemand.Rows, onDemand.SpellRows, onDemand.Bytes, player->GetName());
   }
+
+    static std::unordered_set<uint32> OwnedItemIds(Player* player)
+    {
+        return CollectOwnedItemIds(player);
+    }
 
     void SendItemRowOnDemand(Player* player, uint32 itemId)
     {
@@ -4102,6 +4105,12 @@ public:
         SendSpellRow(player, *row);
     }
 
+    void ForgetSwapEntries(Player* player)
+    {
+        std::lock_guard entries(_swapEntryMutex);
+        _sentSwapEntries.erase(player->GetGUID().GetCounter());
+    }
+
     void SendSwapEntries(Player* player, std::vector<uint32> const& spells)
     {
         if (spells.empty() || !ReceivesPatchRows(player) || !player->IsInWorld())
@@ -4145,17 +4154,15 @@ public:
 
     uint32 const guid = player->GetGUID().GetCounter();
     bool expired = false;
-    bool force = false;
     {
       std::lock_guard lock(_mutex);
       auto const itr = _fallbackTimers.find(guid);
       if (itr != _fallbackTimers.end())
       {
-        if (itr->second.DelayMs > diff)
-          itr->second.DelayMs -= diff;
+        if (itr->second > diff)
+          itr->second -= diff;
         else
         {
-          force = itr->second.Force;
           _fallbackTimers.erase(itr);
           expired = true;
         }
@@ -4163,10 +4170,10 @@ public:
     }
 
     if (expired)
-      SendPatchStream(player, force);
+      SendPatchStream(player);
   }
 
-  void SendPatchStream(Player *player, bool force = false) {
+  void SendPatchStream(Player *player) {
     if (!ascensionCompatConfig.GetConfigValue<bool>(
             AscensionCompatConfig::SEND_DISPLAY_PATCHES))
       return;
@@ -4179,24 +4186,9 @@ public:
     PreparedPatchRows const &rows = GetPreparedPatchRows();
     {
       std::lock_guard lock(_mutex);
-      if (force)
-      {
-        auto const last = _lastStreamMs.find(guid);
-        if (last != _lastStreamMs.end())
-        {
-          uint32 const elapsed = GetMSTimeDiffToNow(last->second);
-          if (elapsed < DISPLAY_PATCH_RESEND_COOLDOWN_MS)
-          {
-            _fallbackTimers[guid] = { DISPLAY_PATCH_RESEND_COOLDOWN_MS - elapsed, true };
-            return;
-          }
-        }
-        _streamedPlayers.erase(guid);
-      }
       if (!_streamedPlayers.insert(guid).second)
         return;
       _fallbackTimers.erase(guid);
-      _lastStreamMs[guid] = getMSTime();
     }
 
     std::vector<ItemPatchRow> itemRows;
@@ -5723,14 +5715,7 @@ private:
   std::unordered_map<uint32, std::unordered_set<uint32>> _sentItemRows;
   std::unordered_map<uint32, std::unordered_set<uint32>> _sentItemSpellRows;
   std::unordered_map<uint32, PatchRowTally> _onDemandItemRows;
-  struct FallbackResend
-  {
-    uint32 DelayMs;
-    bool Force;
-  };
-
-  std::unordered_map<uint32, FallbackResend> _fallbackTimers;
-  std::unordered_map<uint32, uint32> _lastStreamMs;
+  std::unordered_map<uint32, uint32> _fallbackTimers;
 
   std::mutex _cacheMutex;
   bool _rowsPrepared = false;
@@ -6085,6 +6070,10 @@ public:
       std::lock_guard lock(_stateMutex);
       _playerStates.erase(player->GetGUID().GetCounter());
       _loginStates.erase(player->GetGUID().GetCounter());
+    }
+    {
+      std::lock_guard lock(_woodworkingRowMutex);
+      _sentWoodworkingItems.erase(player->GetGUID().GetCounter());
     }
 
     if (!ReceivesClientRequests(player))
@@ -7052,13 +7041,41 @@ private:
             packet << "APPEARANCE_DISPLAY_TYPE_ITEM";
             player->GetSession()->SendPacket(&packet);
         }
+
+        std::unordered_set<uint32> const owned = AscensionDisplayPatchService::OwnedItemIds(player);
+        std::unordered_set<uint32> sent;
         for (auto const& row : _woodworkingItemAppearancePatches)
+            if (owned.contains(row[1]) && sent.insert(row[1]).second)
+                SendWoodworkingItemAppearanceRow(player, row);
+
+        std::lock_guard lock(_woodworkingRowMutex);
+        _sentWoodworkingItems[player->GetGUID().GetCounter()] = std::move(sent);
+    }
+
+public:
+    void SendWoodworkingItemAppearanceOnDemand(Player* player, uint32 itemId)
+    {
+        if (!player || !player->GetSession())
+            return;
+        auto const row = std::find_if(_woodworkingItemAppearancePatches.begin(), _woodworkingItemAppearancePatches.end(),
+            [itemId](std::array<uint32, 3> const& patch) { return patch[1] == itemId; });
+        if (row == _woodworkingItemAppearancePatches.end())
+            return;
         {
-            WorldPacket packet(SMSG_PATCH_ITEM_APPEARANCES, 3 * sizeof(uint32));
-            for (uint32 field : row)
-                packet << field;
-            player->GetSession()->SendPacket(&packet);
+            std::lock_guard lock(_woodworkingRowMutex);
+            if (!_sentWoodworkingItems[player->GetGUID().GetCounter()].insert(itemId).second)
+                return;
         }
+        SendWoodworkingItemAppearanceRow(player, *row);
+    }
+
+private:
+    static void SendWoodworkingItemAppearanceRow(Player* player, std::array<uint32, 3> const& row)
+    {
+        WorldPacket packet(SMSG_PATCH_ITEM_APPEARANCES, 3 * sizeof(uint32));
+        for (uint32 field : row)
+            packet << field;
+        player->GetSession()->SendPacket(&packet);
     }
 
   void UnlockLocalAppearanceCatalog(Player *player,
@@ -7451,7 +7468,7 @@ private:
         SendSecureAddonList(player->GetSession());
         player->SendAllSpellChargeStates();
         SendAscensionRunemasterEchoesCooldown(player);
-        AscensionDisplayPatchService::Instance().SendPatchStream(player, true);
+        AscensionDisplayPatchService::Instance().SendPatchStream(player);
         LOG_DEBUG("coa", "Resent spell charge state to {} after client world entry",
                   player->GetName());
         break;
@@ -8208,6 +8225,8 @@ private:
   std::vector<uint32> _allVanityItemIds;
     std::vector<std::array<uint32, 17>> _woodworkingAppearancePatches;
     std::vector<std::array<uint32, 3>> _woodworkingItemAppearancePatches;
+    std::mutex _woodworkingRowMutex;
+    std::unordered_map<uint32, std::unordered_set<uint32>> _sentWoodworkingItems;
 
   std::mutex _packetMutex;
   std::unordered_map<uint32, std::deque<WorldPacket>> _pendingPackets;
@@ -9125,10 +9144,10 @@ class AscensionCompatPlayerScript : public PlayerScript {
         }
     }
 
-    void RemoveExpiredExperienceAura(Player* player)
+    void StoreExperienceBuffsAtRealmCap(Player* player)
     {
-        if (player->GetLevel() >= sWorld->getIntConfig(CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL))
-            player->RemoveAurasDueToSpell(818059);
+        if (AetherialReliquary::IsAtCaptureLevel(player, AetherialReliquary::CaptureReason::RealmCap))
+            AetherialReliquary::CaptureBuffs(player, AetherialReliquary::CaptureReason::RealmCap);
     }
 
     static bool CanUseVanityRealmLevelItem(Player* player, Item* item, uint8 castCount)
@@ -9346,7 +9365,7 @@ public:
       AscensionDisplayPatchService::Instance().OnPlayerLogin(player);
       RefreshScaledQuestQueries(player);
       SendAverageItemLevel(player);
-      RemoveExpiredExperienceAura(player);
+      StoreExperienceBuffsAtRealmCap(player);
     }
   }
 
@@ -9367,7 +9386,7 @@ public:
       AscensionClassService::Instance().SendCharacterAdvancementKnownEntries(player);
 
       RefreshScaledQuestQueries(player);
-      RemoveExpiredExperienceAura(player);
+      StoreExperienceBuffsAtRealmCap(player);
     }
   }
 
@@ -9375,6 +9394,7 @@ public:
     {
         if (ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED) && player->IsInWorld())
             SendAverageItemLevel(player);
+        AscensionDisplayPatchService::Instance().ForgetSwapEntries(player);
     }
 
   void OnPlayerLearnSpell(Player *player, uint32 spellId) override {
@@ -9529,6 +9549,8 @@ public:
                             uint32) override {
     AscensionCollectionService::Instance().OnItemObtained(player, item);
     SendObtainedItemPatchRow(player, item);
+    if (item && player->IsInWorld())
+      AscensionCollectionService::Instance().SendWoodworkingItemAppearanceOnDemand(player, item->GetEntry());
     if (item && player->IsInWorld() &&
         ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
     {
@@ -9541,6 +9563,8 @@ public:
                            uint32) override {
     AscensionCollectionService::Instance().OnItemObtained(player, item);
     SendObtainedItemPatchRow(player, item);
+    if (item && player->IsInWorld())
+      AscensionCollectionService::Instance().SendWoodworkingItemAppearanceOnDemand(player, item->GetEntry());
   }
 
   static void SendObtainedItemPatchRow(Player *player, Item const *item) {
