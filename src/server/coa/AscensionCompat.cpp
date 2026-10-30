@@ -7978,10 +7978,10 @@ public:
         };
 
         static std::unordered_set<std::string_view> const secureAscensionAddons = {
-            "AscensionUI", "Ascension_Collections", "Ascension_CompactRaidFrames", "Ascension_EnchantCollection",
+            "AscensionUI", "Ascension_CharacterAdvancement", "Ascension_CharacterAdvancementSeason9",
+            "Ascension_Collections", "Ascension_CompactRaidFrames", "Ascension_EnchantCollection",
             "Ascension_HelpUI", "Ascension_InspectUI", "Ascension_Manastorm", "Ascension_MythicPlus",
-            "Ascension_SeasonCollection",
-            "Ascension_TicketUI", "Ascension_UIDevelopmentTools", "Ascension_WildCard",
+            "Ascension_SeasonCollection", "Ascension_TicketUI", "Ascension_UIDevelopmentTools", "Ascension_WildCard",
         };
 
         std::vector<std::string> names = session->GetClientAddonNames();
