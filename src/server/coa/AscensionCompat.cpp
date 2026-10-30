@@ -774,6 +774,26 @@ std::vector<uint32> GetAscensionRacialSpells(Player const* player)
     return spells;
 }
 
+bool IsForeignRacialSpell(Player const* player, uint32 spellId)
+{
+    auto const bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spellId);
+    if (bounds.first == bounds.second)
+        return false;
+
+    bool racial = false;
+    for (auto itr = bounds.first; itr != bounds.second; ++itr)
+    {
+        uint8 race = AscensionRacialAbilities::GetRace(itr->second->SkillLine);
+        if (!race)
+            return false;
+        racial = true;
+        if (race == player->getRace() &&
+            AscensionRacialAbilities::CanLearn(*itr->second, player->getRace(), player->getClass()))
+            return false;
+    }
+    return racial;
+}
+
 struct FelswornRiftGrant
 {
     uint32 SpellId;
@@ -921,6 +941,15 @@ public:
     if (removed)
       LOG_INFO("coa", "Reconciled {} proven class grants for {} against live level {}",
           removed, player->GetName(), uint32(player->GetLevel()));
+    std::vector<uint32> foreignRacialSpells;
+    for (auto const& knownSpell : player->GetSpellMap())
+      if (IsForeignRacialSpell(player, knownSpell.first))
+        foreignRacialSpells.push_back(knownSpell.first);
+    for (uint32 spellId : foreignRacialSpells)
+      player->removeSpell(spellId, SPEC_MASK_ALL, false);
+    if (!foreignRacialSpells.empty())
+      LOG_INFO("coa", "Removed {} racial abilities that do not belong to race {} for {}",
+          uint32(foreignRacialSpells.size()), uint32(player->getRace()), player->GetName());
     uint32 learned = 0;
     bool const botCannotBuyBooksOfAscension = player->GetSession() && player->GetSession()->IsBot();
     bool const automaticProgression =
