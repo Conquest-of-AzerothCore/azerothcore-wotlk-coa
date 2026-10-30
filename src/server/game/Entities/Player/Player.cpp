@@ -9811,9 +9811,14 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
 
         if (pet->isControlled())
         {
-            WorldPacket data(SMSG_PET_SPELLS, 8);
-            data << uint64(0);
-            SendDirectMessage(&data);
+            // Conquest of Azeroth: the possess bar (e.g. a Tinker's Destructo-Bot) is also sent as
+            // SMSG_PET_SPELLS, so clearing the pet bar while possessing would take it away.
+            if (!isPossessing())
+            {
+                WorldPacket data(SMSG_PET_SPELLS, 8);
+                data << uint64(0);
+                SendDirectMessage(&data);
+            }
 
             if (GetGroup())
                 SetGroupUpdateFlag(GROUP_UPDATE_PET);
