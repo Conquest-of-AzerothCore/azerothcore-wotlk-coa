@@ -2084,21 +2084,26 @@ class spell_coa_custom_dungeon_fierce_blow : public SpellScript
     {
         Unit* caster = GetCaster();
         Unit* target = GetHitUnit();
-        if (!caster || !target || !caster->IsCreature() || !GetHitDamage())
+        if (!caster || !target || !caster->IsCreature())
             return;
         uint32 const mapId = caster->GetMapId();
         if (mapId != VAULTS_MAP_ID && mapId != OTHER_SIDE_MAP_ID)
             return;
+        PreventHitDamage();
         uint32 blow = caster->CalculateDamage(BASE_ATTACK, false, true, 0, target);
         blow = caster->MeleeDamageBonusDone(target, blow, BASE_ATTACK, nullptr, SPELL_SCHOOL_MASK_NORMAL);
         blow = target->MeleeDamageBonusTaken(caster, blow, BASE_ATTACK, nullptr, SPELL_SCHOOL_MASK_NORMAL);
         sScriptMgr->ModifyMeleeDamage(target, caster, blow);
-        constexpr int32 Probe = 1000000;
-        int32 taken = Probe;
-        sScriptMgr->ModifySpellDamageTaken(target, caster, taken, GetSpellInfo());
-        if (taken <= 0)
-            return;
-        SetHitDamage(std::max<int32>(1, int32(std::lround(double(blow) * Probe / taken))));
+        uint32 const mitigated = Unit::CalcArmorReducedDamage(caster, target, blow, nullptr, 0, BASE_ATTACK);
+        DamageInfo absorb(caster, target, mitigated, GetSpellInfo(), SPELL_SCHOOL_MASK_NORMAL, SPELL_DIRECT_DAMAGE, blow - mitigated);
+        Unit::CalcAbsorbResist(absorb);
+        SpellNonMeleeDamage damage(caster, target, GetSpellInfo(), SPELL_SCHOOL_MASK_NORMAL);
+        damage.damage = absorb.GetDamage();
+        damage.absorb = absorb.GetAbsorb();
+        damage.resist = absorb.GetResist();
+        damage.cleanDamage = blow - mitigated;
+        caster->DealSpellDamage(&damage, true);
+        caster->SendSpellNonMeleeDamageLog(&damage);
     }
 
     void Register() override
