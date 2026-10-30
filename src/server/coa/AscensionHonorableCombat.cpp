@@ -2,6 +2,7 @@
 
 #include "AscensionHonorableCombatPolicy.h"
 #include "DataMap.h"
+#include "Group.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -81,19 +82,26 @@ bool Dueling(Player const* first, Player const* second)
     return first->duel && first->duel->Opponent == second;
 }
 
+bool SeparatedByRespite(Player const* first, Player const* second)
+{
+    return RespiteSeparates(first->GetGUID().GetRawValue(), second->GetGUID().GetRawValue(),
+        first->HasAura(RespiteAura), second->HasAura(RespiteAura));
+}
+
 bool Engageable(Player const* attacker, Player const* target)
 {
-    return Dueling(attacker, target) || CanEngage(attacker->GetGUID().GetRawValue(),
-        PartnerOf(attacker).GetRawValue(), target->GetGUID().GetRawValue(), PartnerOf(target).GetRawValue());
+    return Dueling(attacker, target) || (!SeparatedByRespite(attacker, target)
+        && CanEngage(attacker->GetGUID().GetRawValue(), PartnerOf(attacker).GetRawValue(),
+            target->GetGUID().GetRawValue(), PartnerOf(target).GetRawValue()));
 }
 
 bool AssistBlocked(Unit const* first, Unit const* second)
 {
     Player const* firstPlayer = OwnerPlayer(first);
     Player const* secondPlayer = OwnerPlayer(second);
-    return firstPlayer && secondPlayer && BlocksAssist(firstPlayer->GetGUID().GetRawValue(),
-        PartnerOf(firstPlayer).GetRawValue(), secondPlayer->GetGUID().GetRawValue(),
-        PartnerOf(secondPlayer).GetRawValue());
+    return firstPlayer && secondPlayer && (SeparatedByRespite(firstPlayer, secondPlayer)
+        || BlocksAssist(firstPlayer->GetGUID().GetRawValue(), PartnerOf(firstPlayer).GetRawValue(),
+            secondPlayer->GetGUID().GetRawValue(), PartnerOf(secondPlayer).GetRawValue()));
 }
 
 void SendHonorableZones(Player* player)
@@ -105,10 +113,31 @@ void SendHonorableZones(Player* player)
     player->GetSession()->SendPacket(&packet);
 }
 
+void SendSkull(Player* player, ObjectGuid target)
+{
+    WorldPacket packet(MSG_RAID_TARGET_UPDATE, 1 + 8 + 1 + 8);
+    packet << uint8(0);
+    packet << player->GetGUID();
+    packet << SkullIcon;
+    packet << target;
+    player->GetSession()->SendPacket(&packet);
+}
+
+void ClearSkull(Player* player)
+{
+    SendSkull(player, ObjectGuid::Empty);
+    if (Group* group = player->GetGroup())
+        group->SendTargetIconList(player->GetSession());
+}
+
 void ClearLock(Player* player)
 {
-    if (HonorableState* state = player->CustomData.Get<HonorableState>(HonorableStateKey))
+    HonorableState* state = player->CustomData.Get<HonorableState>(HonorableStateKey);
+    if (state && !state->Partner.IsEmpty())
+    {
         state->Partner.Clear();
+        ClearSkull(player);
+    }
     player->RemoveAurasDueToSpell(CombatAura);
 }
 
@@ -130,6 +159,8 @@ void StartLock(Player* attacker, Player* target)
     State(target).Partner = attacker->GetGUID();
     attacker->AddAura(CombatAura, attacker);
     target->AddAura(CombatAura, target);
+    SendSkull(attacker, target->GetGUID());
+    SendSkull(target, attacker->GetGUID());
 }
 
 void SyncHonorable(Player* player)
@@ -170,6 +201,20 @@ void CreditWin(Player* winner, uint32 zone)
     state.CreditingWin = true;
     winner->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA, zone);
     state.CreditingWin = false;
+}
+
+void RewardWinner(Player* winner)
+{
+    if (!winner->IsAlive())
+        return;
+
+    winner->SetFullHealth();
+    winner->RemoveAllSpellCooldown();
+    if (Aura* respite = winner->AddAura(RespiteAura, winner))
+    {
+        respite->SetMaxDuration(RespiteDurationMs);
+        respite->SetDuration(RespiteDurationMs);
+    }
 }
 
 class AscensionHonorableCombatUnit final : public UnitScript
@@ -272,11 +317,14 @@ public:
         if (partner.IsEmpty())
             return;
 
-        if (Player* winner = OwnerPlayer(killer))
-            if (IsWin(winner->GetGUID().GetRawValue(), partner.GetRawValue(), loser->GetZoneId()))
-                CreditWin(winner, loser->GetZoneId());
+        Player* winner = OwnerPlayer(killer);
+        bool won = winner && IsWin(winner->GetGUID().GetRawValue(), partner.GetRawValue(), loser->GetZoneId());
+        if (won)
+            CreditWin(winner, loser->GetZoneId());
 
         EndLock(loser);
+        if (won)
+            RewardWinner(winner);
     }
 };
 

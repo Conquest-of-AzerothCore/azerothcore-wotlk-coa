@@ -37,5 +37,11 @@ int main()
 
     assert(IsWin(1, 1, 28) && IsWin(1, 1, 618));
     assert(!IsWin(3, 1, 28) && !IsWin(1, 1, 357) && !IsWin(0, 0, 28));
+
+    assert(RespiteAura == 9930878 && RespiteDurationMs == 30000 && SkullIcon == 7);
+    assert(RespiteSeparates(1, 2, true, false));
+    assert(RespiteSeparates(1, 2, false, true));
+    assert(!RespiteSeparates(1, 2, false, false));
+    assert(!RespiteSeparates(1, 1, true, true));
     std::cout << "honorable combat policy ok\n";
 }

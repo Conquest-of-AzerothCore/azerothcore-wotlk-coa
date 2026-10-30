@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Honorable Combat: Western Plaguelands locks a 1v1 and credits the win",
-  "contract": "A High-Risk player in Western Plaguelands receives Honorable 9930870, and the login stream sends SMSG 0x0768 with the zone list 28 and 618. When an opposing High-Risk player attacks them, both receive Honorable Combat 9930871 and a third player can no longer attack the defender or be attacked by them, and heals between a locked player and anyone else are refused at cast and zeroed on landing. When the challenger kills the defender, the challenger earns realm-first achievement 10534 (6534 is its disabled WildCard copy) and the lock ends; the bystander earns none. Winterspring, pets, untargeted shields or buffs from third parties and the lock ending on leaving combat are untested.",
+  "contract": "A High-Risk player in Western Plaguelands receives Honorable 9930870, and the login stream sends SMSG 0x0768 with the zone list 28 and 618. When an opposing High-Risk player attacks them, both receive Honorable Combat 9930871 and a third player can no longer attack the defender or be attacked by them, and heals between a locked player and anyone else are refused at cast and zeroed on landing. When the challenger kills the defender, the challenger earns realm-first achievement 10534 (6534 is its disabled WildCard copy) and the lock ends; the bystander earns none. The winner is restored to full health, has every cooldown reset and receives Respite 9930878 for 30 seconds, during which the bystander can neither attack nor heal them and they cannot attack the bystander; the defeated defender gets no Respite. Winterspring, pets, untargeted shields or buffs from third parties, the lock ending on leaving combat and the private skull marker (MSG_RAID_TARGET_UPDATE is not recorded by the harness) are untested.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -257,6 +257,30 @@
       "equals": 12
     },
     {
+      "action": "learn",
+      "actor": "challenger",
+      "spell": 2687
+    },
+    {
+      "action": "cast",
+      "actor": "challenger",
+      "spell": 2687
+    },
+    {
+      "action": "assert",
+      "label": "Bloodrage is on cooldown before the win",
+      "actor": "challenger",
+      "metric": "cooldown_ms",
+      "spell": 2687,
+      "within_ms": 3000,
+      "min": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "challenger",
+      "value": 1000
+    },
+    {
       "action": "set_health",
       "actor": "defender",
       "value": 1
@@ -301,6 +325,78 @@
       "metric": "aura",
       "spell": 9930871,
       "within_ms": 5000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The winner receives Respite",
+      "actor": "challenger",
+      "metric": "aura",
+      "spell": 9930878,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Respite lasts 30 seconds",
+      "actor": "challenger",
+      "metric": "aura_duration_ms",
+      "spell": 9930878,
+      "min": 20000,
+      "max": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The defeated defender gets no Respite",
+      "actor": "defender",
+      "metric": "aura",
+      "spell": 9930878,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "challenger",
+      "metric": "max_health",
+      "save_as": "winner_max_health"
+    },
+    {
+      "action": "assert",
+      "label": "The winner is restored to full health",
+      "actor": "challenger",
+      "metric": "health",
+      "ratio_to": "winner_max_health",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The winner's cooldowns are reset",
+      "actor": "challenger",
+      "metric": "cooldown_ms",
+      "spell": 2687,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The bystander cannot attack the winner during Respite",
+      "actor": "bystander",
+      "metric": "can_attack",
+      "target": "challenger",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The winner cannot attack the bystander during Respite",
+      "actor": "challenger",
+      "metric": "can_attack",
+      "target": "bystander",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The bystander's heal on the winner is zeroed during Respite",
+      "actor": "bystander",
+      "metric": "script_heal_received",
+      "target": "challenger",
+      "spell": 2050,
       "equals": 0
     }
   ]
