@@ -105,9 +105,9 @@ namespace
     constexpr char DEFAULT_SCALING_DUNGEONS[] = "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402 401";
 
     /// Finder entries whose band is set here instead of read from LFGDungeons.dbc, as `entry:low-high`:
-    /// Road to De Other Side scales with the character like the classic dungeons (15-59), while its finder row
-    /// admits 10-59.
-    constexpr char DEFAULT_SCALING_BANDS[] = "402:15-59";
+    /// Vaults of the Inquisition and Road to De Other Side scale with the character like the classic dungeons
+    /// (15-59), while their finder rows admit 10-59.
+    constexpr char DEFAULT_SCALING_BANDS[] = "401:15-59 402:15-59";
 
     /// Where a view can exist at all: the open-world maps, and the classic dungeons with the band their
     /// creatures are held inside. Built on every config load and at startup, and published whole, so a
@@ -137,11 +137,9 @@ namespace
         return ids;
     }
 
-    std::unordered_map<uint32, LocalLevelScaling::LevelBand> ConfigBands()
+    std::unordered_map<uint32, LocalLevelScaling::LevelBand> ParseBands(std::string_view value)
     {
         std::unordered_map<uint32, LocalLevelScaling::LevelBand> bands;
-        std::string const value = sConfigMgr->GetOption<std::string>("DestinyWeaver.Scaling.DungeonBands",
-                                                                     DEFAULT_SCALING_BANDS);
         for (std::string_view token : Acore::Tokenize(value, ' ', false))
         {
             std::vector<std::string_view> entry = Acore::Tokenize(token, ':', false);
@@ -155,6 +153,24 @@ namespace
             Optional<uint32> high = Acore::StringTo<uint32>(levels[1]);
             if (dungeonId && low && high)
                 bands[*dungeonId] = LocalLevelScaling::DungeonBandFromFinder(*low, *high);
+        }
+        return bands;
+    }
+
+    /// The default bands are the floor of a configured one, like the default entries: a config written
+    /// before Road to De Other Side's band widened to 15-59 still holds "402:15-20", and must not keep a
+    /// level 60 character fighting level 20 creatures. A configured band can widen a default one, never
+    /// narrow it.
+    std::unordered_map<uint32, LocalLevelScaling::LevelBand> ConfigBands()
+    {
+        std::unordered_map<uint32, LocalLevelScaling::LevelBand> bands = ParseBands(DEFAULT_SCALING_BANDS);
+        std::string const value = sConfigMgr->GetOption<std::string>("DestinyWeaver.Scaling.DungeonBands",
+                                                                     DEFAULT_SCALING_BANDS);
+        for (auto const& [dungeonId, band] : ParseBands(value))
+        {
+            auto [itr, inserted] = bands.try_emplace(dungeonId, band);
+            if (!inserted)
+                itr->second = LocalLevelScaling::MergeBands(itr->second, band);
         }
         return bands;
     }
