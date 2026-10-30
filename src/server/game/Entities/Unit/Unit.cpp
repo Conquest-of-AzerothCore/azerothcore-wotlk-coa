@@ -4954,6 +4954,8 @@ bool Unit::CanCastSpellWhileMoving(SpellInfo const* info) const
     // Its aura 313 family differs from CoA class spells such as Elemental Burst.
     if (HasManastormMovementGrace())
         return true;
+    if (HasFormLandingGrace())
+        return true;
     // Ascension Fire Walk With Me (Warcraft Reborn Mystic Enchant): "your Scorch can be cast while moving"
     if (IsPlayer() && info->SpellFamilyName == SPELLFAMILY_MAGE && (info->SpellFamilyFlags[0] & 0x10) && HasAura(1584166))
         return true;
@@ -6150,6 +6152,18 @@ void Unit::RemoveNotOwnSingleTargetAuras()
         else
             ++iter;
     }
+}
+
+void Unit::GrantFormLandingGrace(Milliseconds duration)
+{
+    _formLandingGraceEnd = GameTime::GetGameTimeMS() + duration;
+}
+
+bool Unit::HasFormLandingGrace() const
+{
+    // Settling after a hovering form ends only moves the unit vertically; walking or strafing still interrupts.
+    return IsPlayer() && GameTime::GetGameTimeMS() < _formLandingGraceEnd &&
+        !m_movementInfo.HasMovementFlag(MOVEMENTFLAG_MASK_MOVING & ~(MOVEMENTFLAG_FALLING | MOVEMENTFLAG_FALLING_FAR));
 }
 
 bool Unit::HasManastormMovementGrace() const

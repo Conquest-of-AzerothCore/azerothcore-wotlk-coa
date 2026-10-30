@@ -5852,6 +5852,12 @@ private:
             else
                 player->RemoveUnitMovementFlag(movementFlag);
         }
+        else if (action == "relocate")
+        {
+            player->UpdatePosition(player->GetPositionX() + step.get<float>("dx", 0.0f),
+                player->GetPositionY() + step.get<float>("dy", 0.0f),
+                player->GetPositionZ() + step.get<float>("dz", 0.0f), player->GetOrientation());
+        }
         else if (action == "stop_attack")
         {
             WorldPacket packet(CMSG_ATTACKSTOP, 0);
