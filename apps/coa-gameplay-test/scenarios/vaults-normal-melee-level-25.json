@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Vaults of the Inquisition Normal trash hits a level 25 player as hard as in the June 2026 Normal log",
-  "contract": "Vaults of the Inquisition (map 936) Normal creatures are level 59-60 and DestinyWeaver scales each blow to the viewer's level (finder entry 401, band 15-59). The Normal combat log of 2026-06-06 (level 25 group) shows median non-crit melee of 49 from Inquisitorial Torturer (162733). A class 1 creature of level 60 deals 118.3 per point of DamageModifier and DestinyWeaver's view of a level 25 player takes 0.345 of it: 40.8 per point. Creatures spawned in a Normal dungeon take CoA.CreatureScaling.Dungeon.Damage (x1.5) on top, which this fixture does not get (it is summoned by the player), so it hits for the log / 1.5: Torturer 0.801 * 40.8 = 32.7 (49 on a real spawn). Darkandle Brute (162763) is held at its Heroic blow at level 59 (166): 0.956 * 40.8 = 39.0 (58.5 on a real spawn). script_melee_hit_taken averages the creature's own blows through the done/taken bonuses and DestinyWeaver's view, before armor.",
+  "contract": "Vaults of the Inquisition (map 936) Normal creatures are level 59-60 and DestinyWeaver scales each blow to the viewer's level (finder entry 401, band 15-59). The Normal combat log of 2026-06-06 (level 25 group) shows median non-crit melee of 49 from Inquisitorial Torturer (162733). A class 1 creature of level 60 deals 118.3 per point of DamageModifier and DestinyWeaver's view of a level 25 player takes 0.345 of it: 40.8 per point. Creatures spawned in a Normal dungeon take CoA.CreatureScaling.Dungeon.Damage (x1.5) on top, which this fixture does not get (it is summoned by the player), so it hits for the log / 1.5: Torturer 0.801 * 40.8 = 32.7 (49 on a real spawn). Darkandle Brute (162763) is held at its Heroic blow at level 59 (166): 0.956 * 40.8 = 39.0 (58.5 on a real spawn). script_melee_hit_taken averages the creature's own blows through the done/taken bonuses and DestinyWeaver's view, before armor. The map is closed by a type 2 `disables` row, so the tank has security 1, whose RBAC role carries RBAC_PERM_SKIP_CHECK_DISABLE_MAP, to enter it.",
   "timeout_ms": 60000,
   "location": {
     "map": 936,
@@ -12,7 +12,7 @@
     "ignore_access": true
   },
   "players": [
-    { "id": "tank", "race": 1, "class": 1, "level": 25 }
+    { "id": "tank", "race": 1, "class": 1, "level": 25, "security": 1 }
   ],
   "creatures": [
     { "id": "torturer", "owner": "tank", "entry": 162733, "level": 60, "distance": 5 },
