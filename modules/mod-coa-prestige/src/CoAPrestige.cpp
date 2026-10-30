@@ -723,6 +723,8 @@ public:
         // Pull the character's active prestige daily into the gossip quest list, so
         // the client's PrestigeModeUI (GetGossipActiveQuests / SelectGossipActiveQuest)
         // and the standard quest dialog can turn it in.
+        if (IsActive(player))
+            GrantPrestigeDaily(player, CycleDailyQuest(player));
         SyncDailyMaxLevelCredit(player);
         player->PrepareQuestMenu(creature->GetGUID());
         AddGossipItemFor(player, GOSSIP_ICON_CHAT, std::string(OptionActivate), GOSSIP_SENDER_MAIN, ACTION_ACTIVATE);
