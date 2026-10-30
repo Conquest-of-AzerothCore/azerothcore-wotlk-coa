@@ -33,6 +33,9 @@
     { "action": "assert", "label": "The Left Hand of Yahola guards her at level 59", "actor": "p", "metric": "nearby_creature_count", "entry": 254172, "min_level": 59, "max_level": 59, "equals": 1 },
     { "action": "assert", "label": "The Left Hand of Yahola has Ascension's 24935 health", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254172, "equals": 24935 },
     { "action": "assert", "label": "The Right Hand of Yahola guards her at level 59", "actor": "p", "metric": "nearby_creature_count", "entry": 254173, "min_level": 59, "max_level": 59, "equals": 1 },
-    { "action": "assert", "label": "The Right Hand of Yahola has Ascension's 24935 health", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254173, "equals": 24935 }
+    { "action": "assert", "label": "The Right Hand of Yahola has Ascension's 24935 health", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254173, "equals": 24935 },
+    { "action": "attack_nearby", "actor": "p", "entry": 254169 },
+    { "action": "assert", "label": "In combat Yahola casts Army of the Dead, which raises four Risen Servants", "actor": "p", "metric": "nearby_creature_count", "entry": 254171, "min": 4, "within_ms": 15000 },
+    { "action": "assert", "label": "Each Risen Servant has Ascension's 5420 health", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254171, "equals": 5420 }
   ]
 }
