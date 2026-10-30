@@ -258,8 +258,8 @@
       "action": "assert",
       "actor": "ally",
       "metric": "aura_amplitude_ms",
-      "spell": 800180,
-      "effect": 1,
+      "spell": 800186,
+      "effect": 0,
       "equals": 2000
     },
     {
