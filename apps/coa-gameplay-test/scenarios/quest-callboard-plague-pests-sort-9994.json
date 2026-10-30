@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Plague's Predatory Pests is sorted under Eastern Plaguelands, not Felwood (#9994)",
+  "contract": [
+    "Quest 18030 'Plague's Predatory Pests' kills Eastern Plaguelands creatures (Frenzied Plaguehounds,",
+    "Carrion Devourers, Monstrous Plaguebats) and its POIs are on the Eastern Plaguelands map. The client's",
+    "Quest.dbc still carries the old live Felwood sort (-540), and the server used the board category -380,",
+    "so the call board and quest log labelled it 'Felwood: Plague of Shadows'.",
+    "The quest must carry the Eastern Plaguelands: Blighted Experiments series sort (-542), which the server",
+    "sends in SMSG_QUEST_QUERY_RESPONSE as the zone-or-sort field (uint32 4294966754), while the board still",
+    "lists it under PvE."
+  ],
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Take Plague's Predatory Pests", "actor": "hero", "quest": 18030, "complete": false },
+    {
+      "action": "client_packet", "label": "Query the 18030 quest template", "actor": "hero", "opcode": 92, "consumed": false,
+      "fields": [{ "u32": 18030 }]
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: 18030 is sorted under the Eastern Plaguelands series", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 93, "row": 18030, "offset": 16, "index": 0,
+      "equals": 4294966754, "within_ms": 3000
+    }
+  ]
+}
