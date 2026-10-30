@@ -972,6 +972,9 @@ server lists for that dungeon in the player's Dungeon Finder info (0 when it is 
 `LfgLockStatusType`, such as 2 too low level or 4 too low gear score).
 `lfg_state` takes a player `actor` and returns its native Dungeon Finder state (0 none, 1 role check, 2 queued,
 3 proposal, 4 vote kick, 5 in dungeon, 6 finished dungeon, 7 raid browser).
+`lfg_selected_dungeon_count` takes a player `actor` and returns how many dungeons the server keeps as that player's
+Dungeon Finder selection; `lfg_selected_dungeon` also takes an LFGDungeons.dbc `dungeon` id and returns 1 when the
+selection holds it, otherwise 0.
 `lfg_need_allowed` takes a player `actor` and an `item` entry and returns 1 when the native Dungeon Finder
 loot rule lets the actor roll Need on that item at the actor's position, otherwise 0. Outside a Dungeon Finder
 group or its dungeon every item returns 1.

@@ -3059,6 +3059,16 @@ private:
             Require(unit->IsPlayer(), "LFG state needs a player");
             return double(sLFGMgr->GetState(unit->GetGUID()));
         }
+        if (metric == "lfg_selected_dungeon_count")
+        {
+            Require(unit->IsPlayer(), "LFG selected dungeons need a player");
+            return double(sLFGMgr->GetSelectedDungeons(unit->GetGUID()).size());
+        }
+        if (metric == "lfg_selected_dungeon")
+        {
+            Require(unit->IsPlayer(), "LFG selected dungeons need a player");
+            return sLFGMgr->GetSelectedDungeons(unit->GetGUID()).contains(step.get<uint32>("dungeon")) ? 1 : 0;
+        }
         if (metric == "lfg_need_allowed")
         {
             Player* player = unit->ToPlayer();
