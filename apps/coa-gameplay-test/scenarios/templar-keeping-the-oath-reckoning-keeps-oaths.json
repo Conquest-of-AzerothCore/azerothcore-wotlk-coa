@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "Templar: Keeping the Oath keeps Oaths through Reckoning",
+  "contract": [
+    "Reckoning 572741 (rank of 805421) reads 'Unleash a powerful Oath Breaker ... Consumes your Oaths'. Keeping the",
+    "Oath 92109 reads 'you no longer consume your Oaths with Oath Breakers' and names no exception (client Spell.dbc",
+    "patch-T.MPQ and area-52 patch-D.MPQ). Righteous Lunge 570233 grants Oath: Righteous Lunge 804904. Expected:",
+    "with Keeping the Oath a Reckoning that hits keeps 804904; without it the same Reckoning consumes 804904."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "keeper", "race": 1, "class": 19, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000, "expertise_rating": 10000 },
+    { "id": "breaker", "race": 1, "class": 19, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "keeper_dummy", "owner": "keeper", "entry": 36, "health": 1000000, "distance": 3 },
+    { "id": "breaker_dummy", "owner": "breaker", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "label": "Keeping the Oath", "actor": "keeper", "spell": 92109 },
+    { "action": "learn", "actor": "keeper", "spell": 570233 },
+    { "action": "learn", "actor": "keeper", "spell": 572741 },
+    { "action": "learn", "actor": "breaker", "spell": 570233 },
+    { "action": "learn", "actor": "breaker", "spell": 572741 },
+    { "action": "add_item", "actor": "keeper", "item": 2495 },
+    { "action": "equip", "actor": "keeper", "item": 2495, "slot": 15 },
+    { "action": "add_item", "actor": "breaker", "item": 2495 },
+    { "action": "equip", "actor": "breaker", "item": 2495, "slot": 15 },
+    { "action": "assert", "label": "SETUP: the keeper has Keeping the Oath", "actor": "keeper", "metric": "aura", "spell": 92109, "equals": 1 },
+    { "action": "assert", "label": "CONTROL: the breaker lacks Keeping the Oath", "actor": "breaker", "metric": "aura", "spell": 92109, "equals": 0 },
+    { "action": "set_power", "actor": "keeper", "power": 3, "value": 100 },
+    { "action": "set_power", "actor": "breaker", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "keeper", "spell": 570233, "target": "keeper_dummy" },
+    { "action": "cast", "actor": "breaker", "spell": 570233, "target": "breaker_dummy" },
+    { "action": "assert", "label": "SETUP: Righteous Lunge grants the keeper its Oath", "actor": "keeper", "metric": "aura", "spell": 804904, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: Righteous Lunge grants the breaker its Oath", "actor": "breaker", "metric": "aura", "spell": 804904, "equals": 1, "within_ms": 2000 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "snapshot", "actor": "keeper_dummy", "metric": "health", "save_as": "keeper_dummy_before" },
+    { "action": "snapshot", "actor": "breaker_dummy", "metric": "health", "save_as": "breaker_dummy_before" },
+    { "action": "set_power", "actor": "keeper", "power": 3, "value": 100 },
+    { "action": "set_power", "actor": "breaker", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "keeper", "spell": 572741, "target": "keeper_dummy" },
+    { "action": "cast", "actor": "breaker", "spell": 572741, "target": "breaker_dummy" },
+    { "action": "assert", "label": "SETUP: the keeper's Reckoning hits", "actor": "keeper_dummy", "metric": "health", "relative_to": "keeper_dummy_before", "max": -1, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: the breaker's Reckoning hits", "actor": "breaker_dummy", "metric": "health", "relative_to": "breaker_dummy_before", "max": -1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTROL: without Keeping the Oath Reckoning consumes the Oath", "actor": "breaker", "metric": "aura", "spell": 804904, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "REGRESSION: with Keeping the Oath Reckoning keeps the Oath", "actor": "keeper", "metric": "aura", "spell": 804904, "equals": 1 },
+    { "action": "assert", "label": "REGRESSION: with Keeping the Oath Reckoning keeps the Oath Chain", "actor": "keeper", "metric": "aura", "spell": 704576, "equals": 1 }
+  ]
+}
