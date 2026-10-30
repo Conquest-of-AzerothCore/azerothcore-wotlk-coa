@@ -48,7 +48,9 @@ namespace
     {
         SortPvE = -380,
         SortPvP = -381,
-        SortProfessions = -382
+        SortProfessions = -382,
+        SortZoneSeriesFirst = -548,
+        SortZoneSeriesLast = -538
     };
 
     constexpr uint32 WorldStateWeeklyReset = 20002;
@@ -111,6 +113,9 @@ namespace
 
         int32 const sort = quest->GetZoneOrSort();
         if (sort > 0)
+            return CategoryPvE;
+
+        if (sort >= SortZoneSeriesFirst && sort <= SortZoneSeriesLast)
             return CategoryPvE;
 
         switch (sort)
