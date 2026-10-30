@@ -1475,6 +1475,14 @@ void Battleground::RemovePlayerFromResurrectQueue(Player* player)
             }
 }
 
+bool Battleground::IsPlayerInResurrectQueue(ObjectGuid playerGuid) const
+{
+    for (auto const& [guideGuid, queue] : m_ReviveQueue)
+        if (std::find(queue.begin(), queue.end(), playerGuid) != queue.end())
+            return true;
+    return false;
+}
+
 void Battleground::RelocateDeadPlayers(ObjectGuid queueIndex)
 {
     // Those who are waiting to resurrect at this node are taken to the closest own node's graveyard
