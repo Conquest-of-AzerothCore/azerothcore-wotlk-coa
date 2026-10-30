@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "name": "Vaults of the Inquisition: the Deceiver emerges and the Shadow Projections drop combat",
+  "contract": "The Deceiver's Presence (162704) lies sealed under the ground until his Holy Crystals (162705) break: he keeps the invisible display 11686 while sealed and emerges (native display 138704) during the awakening sequence. A Shadow Projection (162748), the rooted tentacle in the walls, lashes players within 25 yd; dungeon creatures never leash by distance, so it kept its victim and the player stayed in combat after walking away. Expected: the boss is hidden a few seconds after spawning with no crystal nearby and shows his model before he wakes, and the player leaves combat once more than 25 yd from the tentacle.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 936,
+    "x": -6658.51,
+    "y": -5569.48,
+    "z": 175.073,
+    "o": 4.72967,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "tentacle",
+      "owner": "p",
+      "entry": 162748,
+      "level": 60,
+      "health": 100000,
+      "distance": 5
+    },
+    {
+      "id": "deceiver",
+      "owner": "p",
+      "entry": 162704,
+      "level": 60,
+      "health": 100000,
+      "distance": 12
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "label": "Survive the tentacle's lashes",
+      "actor": "p",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "assert",
+      "label": "The sealed Deceiver is still under the ground",
+      "actor": "deceiver",
+      "metric": "display_id",
+      "equals": 11686,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The tentacle engages the nearby player",
+      "actor": "p",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "relocate",
+      "actor": "p",
+      "dx": -20
+    },
+    {
+      "action": "relocate",
+      "actor": "p",
+      "dx": -20
+    },
+    {
+      "action": "assert",
+      "label": "Out of the tentacle's reach the player leaves combat",
+      "actor": "p",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The Deceiver emerges with his own model",
+      "actor": "deceiver",
+      "metric": "display_id",
+      "equals": 138704,
+      "within_ms": 20000
+    }
+  ]
+}
