@@ -120,7 +120,8 @@ METRICS = TIMELINE_METRICS | {
     'carried_item_stat',
     'nearby_gameobject_count', 'nearby_gameobject_quest_active', 'nearby_gameobject_state', 'nearby_gameobject_scale',
     'nearby_gameobject_ground_offset',
-    'nearby_creature_count', 'map_creature_count', 'nearby_gameobject_at_client', 'voidportal_group',
+    'nearby_creature_count', 'map_creature_count', 'map_creatures_below_floor', 'nearby_gameobject_at_client',
+    'voidportal_group',
     'carried_money',
     'channel_object_entry',
     'quest_rewarded', 'has_achievement', 'has_title', 'spell_damage_taken', 'melee_damage_taken', 'spell_healing_taken',
@@ -865,7 +866,10 @@ def validate(scenario):
                     f'{where}: placement audit metric needs an earlier placement_audit')
             if metric == 'map_creature_count':
                 require(step['actor'] in player_ids, f'{where}: creature count needs a player')
-                number(step.get('entry'), f'{where}.entry', 1, 2**32 - 1, True)
+                if 'entry' in step:
+                    number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
+            if metric == 'map_creatures_below_floor':
+                require(step['actor'] in player_ids, f'{where}: floor check needs a player')
             if metric == 'nearby_creature_count':
                 require(step['actor'] in player_ids, f'{where}: creature count needs a player')
                 number(step.get('entry'), f'{where}.entry', 1, 2**32 - 1, True)

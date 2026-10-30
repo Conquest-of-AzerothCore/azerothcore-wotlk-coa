@@ -3851,11 +3851,35 @@ private:
         }
         if (metric == "map_creature_count")
         {
-            uint32 const entry = step.get<uint32>("entry");
+            uint32 const entry = step.get<uint32>("entry", 0);
             auto const& spawns = player->GetMap()->GetCreatureBySpawnIdStore();
             return std::count_if(spawns.begin(), spawns.end(), [entry](auto const& spawn)
             {
-                return spawn.second->GetEntry() == entry && spawn.second->IsInWorld() && spawn.second->IsAlive();
+                return (!entry || spawn.second->GetEntry() == entry) && spawn.second->IsInWorld()
+                    && spawn.second->IsAlive();
+            });
+        }
+        if (metric == "map_creatures_below_floor")
+        {
+            float constexpr tolerance = 3.0f;
+            Map* map = player->GetMap();
+            auto const& spawns = map->GetCreatureBySpawnIdStore();
+            return std::count_if(spawns.begin(), spawns.end(), [map, tolerance](auto const& spawn)
+            {
+                Creature const* creature = spawn.second;
+                if (!creature->IsInWorld() || !creature->IsAlive())
+                    return false;
+                CreatureData const* data = creature->GetCreatureData();
+                float const spawnZ = data ? data->posZ : creature->GetHomePosition().GetPositionZ();
+                float const floor = map->GetHeight(creature->GetPhaseMask(), creature->GetPositionX(),
+                    creature->GetPositionY(), std::max(creature->GetPositionZ(), spawnZ) + Z_OFFSET_FIND_HEIGHT,
+                    true, MAX_FALL_DISTANCE);
+                bool const below = floor <= INVALID_HEIGHT || creature->GetPositionZ() < floor - tolerance;
+                if (below)
+                    LOG_WARN("coa.gameplay_test", "Creature {} (entry {}) at {:.2f} {:.2f} {:.2f} is below floor {:.2f} "
+                        "(spawn z {:.2f})", creature->GetSpawnId(), creature->GetEntry(), creature->GetPositionX(),
+                        creature->GetPositionY(), creature->GetPositionZ(), floor, spawnZ);
+                return below;
             });
         }
         if (IsPlacementMetric(metric))
