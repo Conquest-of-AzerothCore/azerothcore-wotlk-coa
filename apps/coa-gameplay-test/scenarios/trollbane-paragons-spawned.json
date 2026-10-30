@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "The Trollbane trial's Paragons and their guards are spawned where Ascension has them",
-  "contract": "Hardcore - Trollbane (challenge 214, Prestige 428) requires killing Vazul 254168 before level 40, Zazera 254170 before 45 and Yahola 254169 before 59; none of them existed. Ascension footage and in-game .gps place Vazul (level 40 elite) in the Witherbark Village cave with two Elite Witherbark Headhunters 254176 (34-35), Zazera (45) on the Sandsorrow Watch tower in Tanaris, and Yahola (59) on the Mazra'Alor temple steps with the Left and Right Hand of Yahola 254172/254173 (59). Zazera took 13480 damage to kill on Ascension (with overkill), matching her cached health modifier 9.0 (13302 on these base stats); Vazul keeps her cached 9.0 (11034). Yahola has 68290 base health on Ascension and each Hand of Yahola 24935; a level 35 Elite Witherbark Headhunter has 4624 (its cached modifier). Asserted from the world phase at each spot: the Paragon is there once at her level with her model and health and can be attacked, and her guards are there at theirs. In combat Vazul opens with Chains of Ice, and Yahola raises four Risen Servants with Army of the Dead once she falls below 99% health.",
+  "contract": "Hardcore - Trollbane (challenge 214, Prestige 428) requires killing Vazul 254168 before level 40, Zazera 254170 before 45 and Yahola 254169 before 59; none of them existed. Ascension footage and in-game .gps place Vazul (level 40 elite) in the Witherbark Village cave with two Elite Witherbark Headhunters 254176 (34-35), Zazera (45) on the Sandsorrow Watch tower in Tanaris, and Yahola (59) on the Mazra'Alor temple steps with the Left and Right Hand of Yahola 254172/254173 (59). On Ascension these trial NPCs are not raised by the open-world health scaling: Zazera took 13480 damage to kill (with overkill), her cached modifier 9.0 without scaling (13302), and Yahola has 68290 health, each Hand of Yahola 24935 and each Risen Servant 5420. Their modifiers are divided by our open-world health scaling at their level, so after it Vazul has 11034 (her cached 9.0), Zazera 13301 and Yahola 68291 (the scaling steps by 1.755 and 1.937 health, so 13302 and 68290 cannot be hit exactly). Asserted from the world phase at each spot: the Paragon is there once at her level with her model and health and can be attacked, and her guards are there at theirs. In combat Vazul opens with Chains of Ice, and Yahola raises four Risen Servants with Army of the Dead once she falls below 99% health.",
   "timeout_ms": 120000,
   "location": { "map": 0, "x": -8914, "y": -133, "z": 80.6 },
   "players": [
@@ -17,7 +17,7 @@
 
     { "action": "teleport", "actor": "p", "map": 0, "x": -2065.27, "y": -3266.685, "z": 50.2637 },
     { "action": "assert", "label": "Vazul is in the Witherbark Village cave at level 40", "actor": "p", "metric": "nearby_creature_count", "entry": 254168, "min_level": 40, "max_level": 40, "equals": 1, "within_ms": 10000 },
-    { "action": "assert", "label": "Vazul has 11034 health", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254168, "equals": 11034 },
+    { "action": "assert", "label": "Vazul has 11034 health after world scaling", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254168, "equals": 11034 },
     { "action": "assert", "label": "Vazul uses her own model", "actor": "p", "metric": "nearby_creature_display", "entry": 254168, "equals": 254026 },
     { "action": "assert", "label": "Vazul can be attacked", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 254168, "equals": 1 },
     { "action": "assert", "label": "Two Elite Witherbark Headhunters guard her", "actor": "p", "metric": "nearby_creature_count", "entry": 254176, "min_level": 34, "max_level": 35, "equals": 2 },
@@ -27,13 +27,13 @@
 
     { "action": "teleport", "actor": "p", "map": 1, "x": -7189.39, "y": -3003.82, "z": 31.232 },
     { "action": "assert", "label": "Zazera is on the Sandsorrow Watch tower at level 45", "actor": "p", "metric": "nearby_creature_count", "entry": 254170, "min_level": 45, "max_level": 45, "equals": 1, "within_ms": 10000 },
-    { "action": "assert", "label": "Zazera has 13302 health, matching the 13480 damage it took to kill her on Ascension", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254170, "equals": 13302 },
+    { "action": "assert", "label": "Zazera has 13301 health after world scaling, matching the 13480 damage it took to kill her on Ascension", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254170, "equals": 13301 },
     { "action": "assert", "label": "Zazera uses her own model", "actor": "p", "metric": "nearby_creature_display", "entry": 254170, "equals": 254028 },
     { "action": "assert", "label": "Zazera can be attacked", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 254170, "equals": 1 },
 
     { "action": "teleport", "actor": "p", "map": 0, "x": 3429.6, "y": -5038.86, "z": 183.602 },
     { "action": "assert", "label": "Yahola is on the Mazra'Alor steps at level 59", "actor": "p", "metric": "nearby_creature_count", "entry": 254169, "min_level": 59, "max_level": 59, "equals": 1, "within_ms": 10000 },
-    { "action": "assert", "label": "Yahola has Ascension's 68290 health", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254169, "equals": 68290 },
+    { "action": "assert", "label": "Yahola has Ascension's 68290 health, within 1 after world scaling", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254169, "equals": 68291 },
     { "action": "assert", "label": "Yahola uses her own model", "actor": "p", "metric": "nearby_creature_display", "entry": 254169, "equals": 254027 },
     { "action": "assert", "label": "Yahola can be attacked", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 254169, "equals": 1 },
     { "action": "assert", "label": "The Left Hand of Yahola guards her at level 59", "actor": "p", "metric": "nearby_creature_count", "entry": 254172, "min_level": 59, "max_level": 59, "equals": 1 },
