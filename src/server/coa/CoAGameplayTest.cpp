@@ -4388,9 +4388,15 @@ private:
                 return objects.size();
             if (objects.empty())
                 return 0;
-            Require(objects.size() == 1, "Gameobject metric needs exactly one owned object");
             if (metric == "gameobject_display")
-                return objects.front()->GetDisplayId();
+            {
+                uint32 const display = objects.front()->GetDisplayId();
+                Require(std::all_of(objects.begin(), objects.end(),
+                    [display](GameObject* object) { return object->GetDisplayId() == display; }),
+                    "Owned gameobjects of this entry have different displays");
+                return display;
+            }
+            Require(objects.size() == 1, "Gameobject metric needs exactly one owned object");
             if (metric == "gameobject_scale")
                 return objects.front()->GetObjectScale();
             time_t expiry = objects.front()->GetRespawnTime();

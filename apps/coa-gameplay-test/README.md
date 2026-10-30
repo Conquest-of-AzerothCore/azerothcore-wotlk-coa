@@ -924,8 +924,9 @@ owned creatures of that entry in the same phase and within 100 yards, so every c
 native `GetArmor()`, zero when absent. `owned_creature_max_health` reads the same creature's `GetMaxHealth()` and
 requires it to be present.
 `owned_gameobject_count` requires a player and `entry`. It counts their summoned gameobjects of that entry
-in the same phase and within 100 yards. `gameobject_display` and `gameobject_scale` read the single owned
-object's native display id and scale, returning zero when absent. They do not verify client rendering.
+in the same phase and within 100 yards. `gameobject_display` reads the native display id shared by every owned
+object of that entry and fails when they differ. `gameobject_scale` reads the single owned object's native
+scale. Both return zero when absent and do not verify client rendering.
 `gameobject_remaining_ms` uses the same lookup and requires exactly
 one object when present; it returns the remaining lifetime with one-second precision, zero when absent,
 or -1 for an object without an expiry. Moving out of range is not proof of despawn.
