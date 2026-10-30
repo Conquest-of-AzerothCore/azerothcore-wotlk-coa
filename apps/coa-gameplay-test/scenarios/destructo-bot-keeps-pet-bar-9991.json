@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Destructo-Bot: releasing the bot restores the built pet's action bar (#9991)",
+  "contract": [
+    "Build: Destructo-Bot 804673 summons puppet 50300 that the Tinker possesses; PossessSpellInitialize replaces the",
+    "pet bar with the bot's. #9991 reports that with a Mechano-Bear 803405 (60671) out, the pet bar stayed empty after",
+    "the bot ended, so the bear could not be commanded until rebuilt. Unit::RemoveCharmedBy sent the empty control bar",
+    "(SMSG_PET_SPELLS 0x179 with a null guid) because the bot is not the owner's first controlled unit, and the bot's",
+    "SetMinion release never re-sent the bar because the bear keeps UNIT_FIELD_SUMMON. Expected: after the bot",
+    "self-destructs (802176) the bear is still out and the latest SMSG_PET_SPELLS names a unit again (its low guid",
+    "word is non-zero) instead of the cleared bar.",
+    "The bar is also re-sent after the puppet despawn settles: the client's possession teardown clears the control",
+    "bar when the possessed unit is destroyed, so the delayed packet must land after it. A self-destruct therefore",
+    "produces two restored-bar packets (the immediate one and the delayed one)."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "tinker", "race": 1, "class": 28, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the world settle", "ms": 5000 },
+    { "action": "learn", "label": "Build: Mechano-Bear", "actor": "tinker", "spell": 803405 },
+    { "action": "cast", "label": "Build: Mechano-Bear", "actor": "tinker", "spell": 803405 },
+    {
+      "action": "assert", "label": "SETUP: the Mechano-Bear is built", "actor": "tinker", "metric": "pet_entry",
+      "equals": 60671, "within_ms": 9000
+    },
+    { "action": "wait", "label": "Let the pet spell packets settle", "ms": 1000 },
+    {
+      "action": "assert", "label": "SETUP: the bear's bar reaches the client", "actor": "tinker",
+      "metric": "server_packet_u32", "opcode": 377, "index": 0, "min": 1
+    },
+    { "action": "learn", "actor": "tinker", "spell": 804673 },
+    { "action": "cast", "actor": "tinker", "spell": 804673 },
+    {
+      "action": "assert", "label": "The build spell possesses its Destructo-Bot", "actor": "tinker",
+      "metric": "charm_entry", "equals": 50300, "within_ms": 7000
+    },
+    {
+      "action": "assert", "label": "SETUP: the build aura is on the Tinker", "actor": "tinker",
+      "metric": "aura", "spell": 804673, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "snapshot", "label": "Pet bar packets before the bot self-destructs", "actor": "tinker",
+      "metric": "server_packets", "opcode": 377, "save_as": "pet_packets_before"
+    },
+    { "action": "cast_charm", "label": "The bot self-destructs", "actor": "tinker", "spell": 802176 },
+    {
+      "action": "assert", "label": "The possession ends", "actor": "tinker", "metric": "charm_entry",
+      "equals": 0, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The Build: Destructo-Bot aura ends with the bot", "actor": "tinker",
+      "metric": "aura", "spell": 804673, "equals": 0, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The released bot is gone", "actor": "tinker", "metric": "owned_creature_count",
+      "entry": 50300, "equals": 0, "within_ms": 5000
+    },
+    { "action": "assert", "label": "The bear is still out", "actor": "tinker", "metric": "pet_entry", "equals": 60671 },
+    { "action": "wait", "label": "Let the pet spell packets settle", "ms": 1000 },
+    {
+      "action": "assert", "label": "The restored bar is sent again after the possession teardown", "actor": "tinker",
+      "metric": "server_packets", "opcode": 377, "relative_to": "pet_packets_before", "min": 2, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The bear's bar is restored instead of cleared", "actor": "tinker",
+      "metric": "server_packet_u32", "opcode": 377, "index": 0, "min": 1
+    }
+  ]
+}
