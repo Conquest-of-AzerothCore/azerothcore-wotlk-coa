@@ -268,9 +268,9 @@ Not scaled, deliberately, and matching the reference implementation: the creatur
 (template-based and level-independent there too; only the level terms above follow the view) and **loot
 tables**, which are one corpse shared by everyone who tagged it. Scaling gear on that corpse takes the level
 of whoever loots it or wins the roll, a master looter's pick the receiver's. Inside a scaled dungeon loot
-scales for everyone, whatever their own or their leader's switch, and only down: the item takes the
-looter's level when that is below its own item level, with that ladder row's stats, armor and required
-level, and otherwise stays authored. Elsewhere, scaling gear from loot or a quest reward scales only for a
+scales for everyone, whatever their own or their leader's switch, up or down: the item takes the
+looter's level, with that ladder row's stats, armor and required level, as the corpse and roll frame
+preview it. Elsewhere, scaling gear from loot or a quest reward scales only for a
 character whose scaling is on, by the same answer the creature view asks (their choice, or their leader's
 in a group, and no challenge or open-world ruleset holding them to the authored world); everyone else
 receives the authored item, and their corpse and roll frame preview none.
