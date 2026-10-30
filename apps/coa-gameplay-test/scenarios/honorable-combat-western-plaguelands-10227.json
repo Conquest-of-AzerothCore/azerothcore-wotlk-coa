@@ -1,0 +1,307 @@
+{
+  "schema": 1,
+  "name": "Honorable Combat: Western Plaguelands locks a 1v1 and credits the win",
+  "contract": "A High-Risk player in Western Plaguelands receives Honorable 9930870, and the login stream sends SMSG 0x0768 with the zone list 28 and 618. When an opposing High-Risk player attacks them, both receive Honorable Combat 9930871 and a third player can no longer attack the defender or be attacked by them, and heals between a locked player and anyone else are refused at cast and zeroed on landing. When the challenger kills the defender, the challenger earns realm-first achievement 10534 (6534 is its disabled WildCard copy) and the lock ends; the bystander earns none. Winterspring, pets, untargeted shields or buffs from third parties and the lock ending on leaving combat are untested.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": 1170.2,
+    "y": -1716.6,
+    "z": 61.11,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "challenger",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "defender",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "bystander",
+      "race": 1,
+      "class": 5,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "challenger",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "challenger",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "challenger",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "challenger",
+      "enabled": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "defender",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "defender",
+      "enabled": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "bystander",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "bystander",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "bystander",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "bystander",
+      "enabled": true
+    },
+    {
+      "action": "login_hooks",
+      "actor": "challenger"
+    },
+    {
+      "action": "assert",
+      "label": "The login stream lists two Honorable Combat zones",
+      "actor": "challenger",
+      "metric": "server_packet_u32",
+      "opcode": 1896,
+      "index": 0,
+      "within_ms": 5000,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Western Plaguelands is the first Honorable Combat zone",
+      "actor": "challenger",
+      "metric": "server_packet_u32",
+      "opcode": 1896,
+      "index": 1,
+      "equals": 28
+    },
+    {
+      "action": "assert",
+      "label": "Winterspring is the second Honorable Combat zone",
+      "actor": "challenger",
+      "metric": "server_packet_u32",
+      "opcode": 1896,
+      "index": 2,
+      "equals": 618
+    },
+    {
+      "action": "assert",
+      "label": "A High-Risk player in Western Plaguelands is Honorable",
+      "actor": "defender",
+      "metric": "aura",
+      "spell": 9930870,
+      "within_ms": 5000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The bystander can attack the defender before Honorable Combat",
+      "actor": "bystander",
+      "metric": "can_attack",
+      "target": "defender",
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "bystander",
+      "spell": 2050
+    },
+    {
+      "action": "assert",
+      "label": "The bystander's heal reaches the challenger before Honorable Combat",
+      "actor": "bystander",
+      "metric": "script_heal_received",
+      "target": "challenger",
+      "spell": 2050,
+      "equals": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "challenger",
+      "target": "defender"
+    },
+    {
+      "action": "assert",
+      "label": "Being attacked starts Honorable Combat on the defender",
+      "actor": "defender",
+      "metric": "aura",
+      "spell": 9930871,
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The challenger is in Honorable Combat too",
+      "actor": "challenger",
+      "metric": "aura",
+      "spell": 9930871,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The challenger can still attack the defender",
+      "actor": "challenger",
+      "metric": "can_attack",
+      "target": "defender",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The bystander cannot attack the locked defender",
+      "actor": "bystander",
+      "metric": "can_attack",
+      "target": "defender",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The locked defender cannot attack the bystander",
+      "actor": "defender",
+      "metric": "can_attack",
+      "target": "bystander",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "A third player's heal on the locked challenger is zeroed",
+      "actor": "bystander",
+      "metric": "script_heal_received",
+      "target": "challenger",
+      "spell": 2050,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The locked challenger's heal on the third player is zeroed",
+      "actor": "challenger",
+      "metric": "script_heal_received",
+      "target": "bystander",
+      "spell": 2050,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The locked challenger still heals themselves",
+      "actor": "challenger",
+      "metric": "script_heal_received",
+      "target": "challenger",
+      "spell": 2050,
+      "equals": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "bystander",
+      "spell": 2050,
+      "target": "challenger"
+    },
+    {
+      "action": "assert",
+      "label": "A third player cannot cast a heal on the locked challenger",
+      "actor": "bystander",
+      "metric": "cast_failure",
+      "spell": 2050,
+      "within_ms": 3000,
+      "equals": 12
+    },
+    {
+      "action": "set_health",
+      "actor": "defender",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "The challenger defeats the defender",
+      "actor": "defender",
+      "metric": "alive",
+      "within_ms": 15000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The win earns First Honorable Combat Victory In Western Plaguelands",
+      "actor": "challenger",
+      "metric": "has_achievement",
+      "achievement": 10534,
+      "within_ms": 5000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The disabled WildCard realm-first copy stays unearned",
+      "actor": "challenger",
+      "metric": "has_achievement",
+      "achievement": 6534,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The bystander earns no Honorable Combat achievement",
+      "actor": "bystander",
+      "metric": "has_achievement",
+      "achievement": 10534,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Honorable Combat lock ends with the defeat",
+      "actor": "challenger",
+      "metric": "aura",
+      "spell": 9930871,
+      "within_ms": 5000,
+      "equals": 0
+    }
+  ]
+}

@@ -24,6 +24,7 @@ void AddSC_AscensionRulesets();
 void AddSC_AscensionTrainerProficiency();
 void AddSC_AscensionMercenary();
 void AddSC_AscensionHighRisk();
+void AddSC_AscensionHonorableCombat();
 void AddSC_AscensionFelCommutation();
 void AddSC_AscensionClientHotPatch();
 void AddSC_AscensionCrowsCache();
@@ -783,6 +784,7 @@ void AddCoAScripts()
     AddSC_AscensionTrainerProficiency();
     AddSC_AscensionMercenary();
     AddSC_AscensionHighRisk();
+    AddSC_AscensionHonorableCombat();
     AddSC_AscensionFelCommutation();
     AddSC_AscensionClientHotPatch();
     AddSC_AscensionCrowsCache();
