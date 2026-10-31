@@ -1,5 +1,6 @@
 #include "AscensionWarcraftReborn.h"
 #include "ScriptMgr.h"
+#include "Spell.h"
 #include "SpellAuraEffects.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
@@ -18,6 +19,11 @@ namespace
     flag96 const INSECT_SWARM_FLAGS(0x00200000, 0, 0);
     flag96 const WRATH_FLAGS(0x00000001, 0, 0);
     flag96 const MAUL_SHRED_FLAGS(0x00008800, 0, 0);
+    flag96 const TRAP_EFFECT_FLAGS(0x00000018, 0, 0);
+    flag96 const BLIZZARD_FLAGS(0x00000080, 0, 0);
+    constexpr std::array<uint32, 2> POINT_OF_NO_ESCAPE = { 1153298, 1153299 };
+    constexpr std::array<uint32, 3> IMPROVED_BLIZZARD = { 1111185, 1112487, 1112488 };
+    constexpr std::array<uint32, 3> CHILLED = { 12484, 12485, 12486 };
 
     template <std::size_t N>
     int32 RankAmount(Unit const* unit, std::array<uint32, N> const& ranks, SpellEffIndex effect)
@@ -76,7 +82,36 @@ public:
     }
 };
 
+class AscensionWarcraftRebornSpellConditions : public AllSpellScript
+{
+public:
+    AscensionWarcraftRebornSpellConditions() : AllSpellScript("AscensionWarcraftRebornSpellConditions",
+        { ALLSPELLHOOK_ON_CRIT_CHANCE, ALLSPELLHOOK_ON_HIT_RESULT }) { }
+
+    void OnSpellCritChance(Spell* spell, Unit* target, float& chance) override
+    {
+        Unit* caster = spell->GetCaster();
+        if (caster && target && caster->IsPlayer() && HasOwnAura(target, caster, SPELLFAMILY_HUNTER, TRAP_EFFECT_FLAGS))
+            chance += float(RankAmount(caster, POINT_OF_NO_ESCAPE, EFFECT_0));
+    }
+
+    void OnSpellHitResult(Spell* spell, Unit* target, uint8 missInfo, uint32 damage, uint32, bool) override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster || !target || missInfo != SPELL_MISS_NONE || !damage || !caster->IsPlayer() ||
+            !Matches(spell->GetSpellInfo(), SPELLFAMILY_MAGE, BLIZZARD_FLAGS))
+            return;
+        for (std::size_t rank = 0; rank < IMPROVED_BLIZZARD.size(); ++rank)
+            if (caster->HasAura(IMPROVED_BLIZZARD[rank]))
+            {
+                caster->CastSpell(target, sSpellMgr->GetSpellTwinFor(CHILLED[rank], IMPROVED_BLIZZARD[rank]), true);
+                return;
+            }
+    }
+};
+
 void AddAscensionWarcraftRebornConditionScripts()
 {
     new AscensionWarcraftRebornDamageConditions();
+    new AscensionWarcraftRebornSpellConditions();
 }
