@@ -2107,6 +2107,7 @@ public:
     uint32 const activeSpecialization = GetActiveSpecialization(player);
     uint32 const targetSpec = requestedSpec.value_or(uploaded.SpecId ? uploaded.SpecId : activeSpecialization);
     bool const switching = targetSpec != activeSpecialization;
+    bool const callerPlacesBar = requestedSpec.has_value();
     std::unordered_map<uint32, uint32> wanted;
     std::unordered_set<uint32> received;
     std::unordered_set<uint32> selectedGroups;
@@ -2285,7 +2286,7 @@ public:
       }
     }
 
-    if (std::string reason; switching && !SwitchSpecialization(player, targetSpec, &reason, false))
+    if (std::string reason; switching && !SwitchSpecialization(player, targetSpec, &reason, false, !callerPlacesBar))
     {
       refusal = SpecializationSwitchRefused(targetSpec, std::move(reason));
       return false;
@@ -2315,8 +2316,12 @@ public:
         refusal.Result = "CA_UPDATE_ENTRIES_UNKNOWN";
         refusal.Entry = entry->EntryId;
         refusal.Rank = rank;
+        if (switching && !callerPlacesBar)
+          RestoreBarButtons(player, targetSpec, activeSpecialization);
         return false;
       }
+    if (switching && !callerPlacesBar)
+      RestoreBarButtons(player, targetSpec, activeSpecialization);
 
     if (payment.Marks)
       player->DestroyItemCount(AscensionCoATalentState::MARK_OF_ASCENSION_ITEM, payment.Marks, true);
@@ -2684,7 +2689,7 @@ public:
   }
 
   bool SwitchSpecialization(Player* player, uint32 specializationId, std::string* refusal = nullptr,
-                            bool restoreStoredBuild = true)
+                            bool restoreStoredBuild = true, bool rememberBar = true)
   {
     if (!IsAscensionCustomClass(player) || (!specializationId && restoreStoredBuild))
       return false;
@@ -2744,7 +2749,7 @@ public:
             if (spellId && player->HasSpell(spellId))
               talentSpells.insert(spellId);
       player->SendActionButtons(2);
-      if (restoreStoredBuild)
+      if (rememberBar)
         RememberBarButtons(player, previousSpecialization, talentSpells);
     }
     for (AscensionCompatData::CoATalentEntry const &entry :
@@ -2775,7 +2780,7 @@ public:
     uint32 granted = SynchronizeProgression(player);
     if (restoreStoredBuild)
       RestoreBarButtons(player, specializationId, previousSpecialization);
-    else
+    else if (!rememberBar)
       player->SendInitialActionButtons();
     ChatHandler(player->GetSession())
         .PSendSysMessage(
@@ -7978,10 +7983,10 @@ public:
         };
 
         static std::unordered_set<std::string_view> const secureAscensionAddons = {
-            "AscensionUI", "Ascension_Collections", "Ascension_CompactRaidFrames", "Ascension_EnchantCollection",
+            "AscensionUI", "Ascension_CharacterAdvancement", "Ascension_CharacterAdvancementSeason9",
+            "Ascension_Collections", "Ascension_CompactRaidFrames", "Ascension_EnchantCollection",
             "Ascension_HelpUI", "Ascension_InspectUI", "Ascension_Manastorm", "Ascension_MythicPlus",
-            "Ascension_SeasonCollection",
-            "Ascension_TicketUI", "Ascension_UIDevelopmentTools", "Ascension_WildCard",
+            "Ascension_SeasonCollection", "Ascension_TicketUI", "Ascension_UIDevelopmentTools", "Ascension_WildCard",
         };
 
         std::vector<std::string> names = session->GetClientAddonNames();
