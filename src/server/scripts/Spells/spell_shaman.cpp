@@ -1170,6 +1170,8 @@ class spell_sha_nature_guardian : public AuraScript
             return false;
 
         int32 healthpct = GetSpellInfo()->Effects[EFFECT_1].CalcValue();
+        if (!healthpct)
+            healthpct = sSpellMgr->AssertSpellInfo(sSpellMgr->GetSpellTwinSource(GetId()))->Effects[EFFECT_1].CalcValue();
         if (Unit* target = eventInfo.GetActionTarget())
             if (target->HealthBelowPctDamaged(healthpct, damageInfo->GetDamage()))
                 return true;

@@ -1066,9 +1066,10 @@ class spell_mage_combustion : public AuraScript
             // it (this hook runs from Aura::GetProcEffectMask); defer it so the insert can't
             // invalidate the live iterator (aura containers are flat_multimaps).
             Unit* actor = eventInfo.GetActor();
-            actor->m_Events.AddEventAtOffset([actor]()
+            uint32 const proc = sSpellMgr->GetSpellTwinFor(SPELL_MAGE_COMBUSTION_PROC, GetId());
+            actor->m_Events.AddEventAtOffset([actor, proc]()
             {
-                actor->CastSpell(static_cast<Unit*>(nullptr), SPELL_MAGE_COMBUSTION_PROC, true);
+                actor->CastSpell(static_cast<Unit*>(nullptr), proc, true);
             }, 1ms);
             return false;
         }

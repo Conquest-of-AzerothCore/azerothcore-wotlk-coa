@@ -834,7 +834,7 @@ class spell_pal_hand_of_sacrifice_aura : public AuraScript
 
         if (remainingAmount <= 0)
         {
-            GetTarget()->RemoveAura(SPELL_PALADIN_HAND_OF_SACRIFICE);
+            Remove();
         }
     }
 
@@ -1102,7 +1102,7 @@ class spell_pal_lay_on_hands : public SpellScript
             caster->CastSpell(caster, SPELL_PALADIN_IMMUNE_SHIELD_MARKER, true);
         }
         // Xinef: Glyph of Divinity
-        else if (target && caster->HasAuraOrTwin(54939) && GetSpellInfo()->Id != 633 && _manaAmount > 0) // excluding first rank
+        else if (target && caster->HasAuraOrTwin(54939) && sSpellMgr->GetSpellTwinSource(GetSpellInfo()->Id) != 633 && _manaAmount > 0) // excluding first rank
         {
             _manaAmount = target->GetPower(POWER_MANA) - _manaAmount;
             if (_manaAmount > 0)
