@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "A level-10 Barbarian choosing Ancestry learns Ancestral Roar and keeps it after relog (#8857)",
+  "contract": [
+    "CharacterAdvancement entry 30762 is the Ancestry signature and teaches Ancestral Roar 500918 for 1 AE without a",
+    "level gate or connected prerequisite. A level-10 Barbarian has that 1 AE. The native specialization upload",
+    "carries identity 4003, signature 30762 and the free Keg Smash node, so Ancestral Roar must be in the spellbook",
+    "immediately and after logging back in."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "barb", "race": 1, "class": 12, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "specialization", "actor": "barb", "id": 3 },
+    {
+      "action": "assert", "actor": "barb", "metric": "knows_spell",
+      "label": "DISCRIMINATING: the paid Ancestry signature teaches Ancestral Roar", "spell": 500918, "equals": 1
+    },
+    {
+      "action": "assert", "actor": "barb", "metric": "knows_spell",
+      "label": "The free Keg Smash node is granted", "spell": 805808, "equals": 1
+    },
+    { "action": "relog", "actor": "barb" },
+    {
+      "action": "assert", "actor": "barb", "metric": "knows_spell",
+      "label": "Ancestral Roar survives a relog", "spell": 500918, "equals": 1, "within_ms": 5000
+    }
+  ]
+}
