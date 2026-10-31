@@ -37,10 +37,11 @@
     { "action": "assert", "label": "Zazera burns with Burning Sands", "actor": "p", "metric": "nearby_creature_aura_count", "entry": 254170, "spell": 254622, "equals": 1, "within_ms": 10000 },
     { "action": "attack_nearby", "actor": "p", "entry": 254170 },
     { "action": "assert", "label": "Attacking Zazera puts the player in combat", "actor": "p", "metric": "combat", "equals": 1, "within_ms": 3000 },
-    { "action": "assert", "label": "In combat Zazera spins into Firestorm", "actor": "p", "metric": "nearby_creature_aura_count", "entry": 254170, "spell": 254619, "equals": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "Zazera opens the fight with Firestorm", "actor": "p", "metric": "nearby_creature_aura_count", "entry": 254170, "spell": 254619, "equals": 1, "within_ms": 3000 },
     { "action": "cast", "actor": "p", "spell": 254623 },
     { "action": "assert", "label": "A Water Bucket splash puts out her Burning Sands", "actor": "p", "metric": "nearby_creature_aura_count", "entry": 254170, "spell": 254622, "equals": 0, "within_ms": 2000 },
     { "action": "assert", "label": "and leaves her Extinguished", "actor": "p", "metric": "nearby_creature_aura_count", "entry": 254170, "spell": 254624, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "Burning Sands rekindles 30 seconds after the splash", "actor": "p", "metric": "nearby_creature_aura_count", "entry": 254170, "spell": 254622, "equals": 1, "within_ms": 32000 },
 
     { "action": "teleport", "actor": "p", "map": 0, "x": 3412.4, "y": -5024.5, "z": 174.13 },
     { "action": "assert", "label": "Yahola is on the Mazra'Alor steps at level 59", "actor": "p", "metric": "nearby_creature_count", "entry": 254169, "min_level": 59, "max_level": 59, "equals": 1, "within_ms": 10000 },

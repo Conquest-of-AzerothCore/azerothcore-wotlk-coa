@@ -16,17 +16,19 @@
 -- Zalas Witherbark's). She died 11 s in without casting again, so her repeat timers (12-16 s) are estimated.
 -- Zazera carries Burning Sands (254622: her hits and harmful spells add Burning Sands fire damage, 254621; "Maybe there
 -- is some way to cool down this effect..."). In footage she spins under Firestorm (254619, a Bladestorm that whirlwinds
--- once a second for 6 s); its first cast and repeat (10-12 s, then 25-30 s) are estimated. Two Water Buckets on the
--- tower (one use each, back after 40 s) cast Water Bucket (254623) for whoever uses them: a splash that only hits
--- Zazera, within 5 yards of the user. In game it plays the splash; the spell itself has only a dummy effect, so
--- Zazera's AI does the rest: while she burns, the splash puts out Burning Sands and stuns her with Extinguished
--- (254624, 5 s). Burning Sands returns when she resets. The bucket model is the Hallow's End Water Bucket (display
--- 7484), matching footage. Out of combat Yahola channels Blackfathom Channeling (8734), the shadowy casting pose of the
--- static Mossflayer Shadowhunters around the Mazra'Alor altar on Ascension. The spell is a channel, so its pose and
--- shadow only show while it is cast; the Shadowhunters' stock creature_addon aura showed nothing. Creatures that carry
--- that addon aura (the static altar Shadowhunters, and Yahola) cast the channel whenever they are out of combat and
--- stop it when they engage; evading restores the aura. Spectral Volley needs no change to be uninterruptible: its
--- PreventionType is 0, so interrupts and silences cannot stop it.
+-- once a second for 6 s); she opens with it as soon as she is pulled; its repeat (25-30 s) is estimated. Two Water
+-- Buckets on the tower (one use each, back after 40 s) cast Water Bucket (254623) for whoever uses them: a splash that
+-- only hits Zazera, within 5 yards of the user. In game it plays the splash; the spell itself has only a dummy effect,
+-- so Zazera's AI does the rest: while she burns, the splash puts out Burning Sands and stuns her with Extinguished
+-- (254624, 5 s). Burning Sands returns 30 s after a splash (no data gives its real timer) and when she resets. With
+-- each bucket gone for 40 s, the fight is a loop: kite her to one bucket, splash and stun her, kite her to the other
+-- before she rekindles. The bucket model is the Hallow's End Water Bucket (display 7484), matching footage. Out of
+-- combat Yahola channels Blackfathom Channeling (8734), the shadowy casting pose of the static Mossflayer Shadowhunters
+-- around the Mazra'Alor altar on Ascension. The spell is a channel, so its pose and shadow only show while it is cast;
+-- the Shadowhunters' stock creature_addon aura showed nothing. Creatures that carry that addon aura (the static altar
+-- Shadowhunters, and Yahola) cast the channel whenever they are out of combat and stop it when they engage; evading
+-- restores the aura. Spectral Volley needs no change to be uninterruptible: its PreventionType is 0, so interrupts and
+-- silences cannot stop it.
 -- Loot: of their Ascension drops only Vazul's three Whispershade greens are her own; the rest (Ephemeral Key,
 -- recipes, world greens) are shared world drops. Their chances were not recorded, so they use a common rare-elite
 -- rate: 20% each in one group, at most one per kill (as Geomancer Flintdagger's own greens).
@@ -122,7 +124,9 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (254169, 0, 4, 0, 4, 0, 100, 0, 0, 0, 0, 0, 0, 0, 92, 1, 8734, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Yahola - On Aggro - Stop Blackfathom Channeling'),
 (8561, 0, 3, 0, 1, 0, 100, 0, 1000, 2000, 5000, 5000, 0, 0, 11, 8734, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Mossflayer Shadowhunter - Out of Combat - Channel Blackfathom Channeling'),
 (8561, 0, 4, 0, 4, 0, 100, 0, 0, 0, 0, 0, 0, 0, 92, 1, 8734, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Mossflayer Shadowhunter - On Aggro - Stop Blackfathom Channeling'),
-(254170, 0, 0, 0, 0, 0, 100, 0, 10000, 12000, 25000, 30000, 0, 0, 11, 254619, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Zazera - In Combat - Cast Firestorm'),
+(254170, 0, 0, 0, 0, 0, 100, 0, 0, 0, 25000, 30000, 0, 0, 11, 254619, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Zazera - In Combat - Cast Firestorm'),
 (254170, 0, 1, 2, 8, 0, 100, 0, 254623, 0, 0, 0, 0, 0, 28, 254622, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Zazera - On Water Bucket Hit - Remove Burning Sands'),
-(254170, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 11, 254624, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Zazera - On Water Bucket Hit - Cast Extinguished'),
+(254170, 0, 2, 3, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 11, 254624, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Zazera - On Water Bucket Hit - Cast Extinguished'),
+(254170, 0, 3, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 67, 1, 30000, 30000, 0, 0, 100, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Zazera - On Water Bucket Hit - Rekindle in 30 seconds'),
+(254170, 0, 4, 0, 59, 0, 100, 0, 1, 0, 0, 0, 0, 0, 11, 254622, 34, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Zazera - Rekindle - Cast Burning Sands'),
 (254171, 0, 0, 0, 54, 0, 100, 0, 0, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 25, 30, 1, 0, 0, 0, 0, 0, 0, 'Risen Servant - On Just Summoned - Attack the closest player within 30 yards');
