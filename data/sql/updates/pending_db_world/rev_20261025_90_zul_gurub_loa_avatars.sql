@@ -24,3 +24,15 @@ INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`,
 (666990, 0, 963, 1, 1, 0),
 (666991, 0, 14559, 1, 1, 0),
 (666992, 0, 14562, 1, 1, 0);
+
+-- The live videos of 2026-08 (youtube 6ihbw1PKc2E, c7iqfz04PmI) show the Avatars of Bethekk and Shadra standing in
+-- their temples before the pull and at full health again after a wipe, so each avatar is a temple spawn the priest
+-- drains (and respawns at reset). Only the temples are seen; the exact spots are estimated next to each priest's
+-- altar: Bethekk between Arlokk's arrival point and her gong, the others a few yards from the priest's spawn.
+DELETE FROM `creature` WHERE `guid` BETWEEN 9999801 AND 9999805;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`, `Comment`) VALUES
+(9999801, 666988, 309, 0, 0, 15, 1, 0, -11565.4, -1628.96, 41.34, 0, 604800, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Zul''Gurub: Avatar of Bethekk, Temple of Bethekk (estimated)'),
+(9999802, 666989, 309, 0, 0, 15, 1, 0, -11700.8, -2003.0, 62.42, 1.6057, 604800, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Zul''Gurub: Avatar of Shirvallah, Temple of Shirvallah (estimated)'),
+(9999803, 666990, 309, 0, 0, 15, 1, 0, -12326.5, -1581.1, 133.0, 4.81711, 604800, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Zul''Gurub: Avatar of Shadra, Temple of Shadra (estimated)'),
+(9999804, 666991, 309, 0, 0, 15, 1, 0, -12025.6, -1705.2, 39.4, 3.71755, 604800, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Zul''Gurub: Avatar of Hethiss, Temple of Hethiss (estimated)'),
+(9999805, 666992, 309, 0, 0, 15, 1, 0, -12293.95, -1377.4, 145.0, 2.28638, 604800, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Zul''Gurub: Avatar of Hir''eek, Temple of Hir''eek (estimated)');

@@ -124,16 +124,19 @@ namespace coa_zg
 
     // A Loa Avatar, the loa a High Priest (and later Hakkar) feeds on.
     //
-    // The CoA log of 2026-08-02 shows one per priest pull (a new creature each
-    // pull, buffed by players at the pull), friendly to the raid. At about half
-    // health each priest takes ~1% damage for 3-4 seconds, the time Drain Power
-    // (20-24% of the avatar's health per second, -99% damage taken on the caster)
-    // needs to kill it, and the priest's second kit starts the moment the avatar
-    // dies. Where it stands is not in any data: here, 5 yards behind the priest.
+    // The CoA log of 2026-08-02 shows one per priest pull (buffed by players at
+    // the pull), friendly to the raid. The live videos of 2026-08 show the
+    // Avatars of Bethekk and Shadra standing in their temples before the pull
+    // and back at full health after a wipe, so each priest's avatar is a spawn
+    // in its temple (rev_20261025_90; the exact spots are estimated) that the
+    // priest finds again at every reset and pull. At about half health each
+    // priest takes ~1% damage for 3-4 seconds, the time Drain Power (20-24% of
+    // the avatar's health per second, -99% damage taken on the caster) needs to
+    // kill it, and the priest's second kit starts the moment the avatar dies.
     // The drain itself, the Aspect and the Gift of the Blood God are not in the
     // log, so the order drain -> death -> Aspect + Gift is read from the spells
     // ("Drains the essence from the closest Loa Avatar", "Consumed the Avatar of
-    // ...") and from that timing.
+    // ...") and from that timing. Hakkar summons his own ring of avatars.
     class LoaAvatar
     {
     public:
@@ -150,17 +153,30 @@ namespace coa_zg
             }
         }
 
-        void Summon(Creature* owner)
+        // The priest's own avatar in its temple, brought back if a past pull drained it.
+        void Restore(Creature* owner)
         {
-            Summon(owner, owner->GetNearPosition(5.0f, float(M_PI)));
+            Release(owner);
+            Creature* avatar = owner->FindNearestCreature(_entry, TEMPLE_RANGE);
+            if (!avatar)
+            {
+                avatar = owner->FindNearestCreature(_entry, TEMPLE_RANGE, false);
+                if (avatar)
+                    avatar->Respawn(true);
+            }
+            if (avatar)
+                avatar->SetReactState(REACT_PASSIVE);
+            _guid = avatar ? avatar->GetGUID() : ObjectGuid::Empty;
         }
 
+        // A drain that cannot reach the avatar (line of sight) returns false, so the caller moves on without it.
         bool Drain(Creature* owner)
         {
             Creature* avatar = Get(owner);
             if (_draining || !avatar || !avatar->IsAlive())
                 return false;
-            owner->CastSpell(avatar, _drain, true);
+            if (owner->CastSpell(avatar, _drain, true) != SPELL_CAST_OK)
+                return false;
             _draining = true;
             return true;
         }
@@ -188,12 +204,20 @@ namespace coa_zg
             if (Creature* avatar = Get(owner))
                 avatar->DespawnOrUnsummon();
             _guid.Clear();
+            Release(owner);
+        }
+
+        // Ends a drain without touching the avatar (the priest died or reset).
+        void Release(Creature* owner)
+        {
             if (_draining)
                 owner->RemoveAurasDueToSpell(sSpellMgr->GetSpellIdForDifficulty(_drain, owner));
             _draining = false;
         }
 
     private:
+        static constexpr float TEMPLE_RANGE = 150.0f;
+
         Creature* Get(Creature* owner) const
         {
             return _guid ? ObjectAccessor::GetCreature(*owner, _guid) : nullptr;

@@ -11,7 +11,10 @@
  *   Troll form
  *     Drain Life         first 6s,  every 10s   random player, interruptible
  *     Poison Bolt Volley first 12s, every 15s   everyone, stacking poison
- *     Hatch Eggs         at 17s                  the four nearest eggs hatch
+ *     Hatch Eggs         at 17s                  the four nearest eggs hatch;
+ *                                               on Ascended every 30s after
+ *                                               (a DBM bar in the live video
+ *                                               of 2026-08-04)
  *     Evolve             first 22s, every 60s   an egg hatches a colossal spider
  *     Infest             first 87s, every 60s   an egg hatches a festering
  *                                               spider that bursts on death
@@ -120,10 +123,11 @@ namespace
         PHASE_SPIDER = 2
     };
 
-    constexpr float VOLLEY_RANGE = 200.0f;
-    constexpr uint8 FIRST_HATCH  = 4;
-    constexpr float NOVA_RANGE   = 20.0f;
-    constexpr Milliseconds BURROW_LENGTH = 3s;
+    constexpr float VOLLEY_RANGE   = 200.0f;
+    constexpr uint8 EGGS_PER_HATCH = 4;
+    constexpr float NOVA_RANGE     = 20.0f;
+    constexpr Milliseconds BURROW_LENGTH        = 3s;
+    constexpr Milliseconds ASCENDED_HATCH_EVERY = 30s;
 
     struct boss_marli_coa : public BossAI
     {
@@ -134,7 +138,7 @@ namespace
             me->RemoveAurasDueToSpell(SPELL_ASPECT_OF_SHADRA);
             me->RemoveAurasDueToSpell(SPELL_FURIOUS_STRIKES);
             me->RemoveAurasDueToSpell(SPELL_GIFT_OF_THE_BLOOD_GOD);
-            _avatar.Despawn(me);
+            _avatar.Restore(me);
             _spider = false;
             _festering.clear();
             Emerge();
@@ -153,7 +157,7 @@ namespace
         {
             BossAI::JustEngagedWith(who);
             Talk(SAY_AGGRO);
-            _avatar.Summon(me);
+            _avatar.Restore(me);
 
             events.SetPhase(PHASE_TROLL);
             events.ScheduleEvent(EVENT_THRASH, 4s, 6s);
@@ -168,7 +172,7 @@ namespace
         void JustDied(Unit* killer) override
         {
             BossAI::JustDied(killer);
-            _avatar.Despawn(me);
+            _avatar.Release(me);
             Talk(SAY_DEATH);
         }
 
@@ -211,7 +215,7 @@ namespace
                     break;
                 case SPELL_HATCH_EGGS:
                     Talk(SAY_SPIDER_SPAWN);
-                    for (uint8 i = 0; i < FIRST_HATCH; ++i)
+                    for (uint8 i = 0; i < EGGS_PER_HATCH; ++i)
                         HatchEgg();
                     break;
                 case SPELL_ACID_SPIT:
@@ -336,6 +340,8 @@ namespace
                         break;
                     case EVENT_HATCH_EGGS:
                         DoCastSelf(SPELL_HATCH_EGGS);
+                        if (me->GetMap()->GetSpawnMode() == RAID_DIFFICULTY_25MAN_HEROIC)
+                            events.ScheduleEvent(EVENT_HATCH_EGGS, ASCENDED_HATCH_EVERY, 0, PHASE_TROLL);
                         break;
                     case EVENT_EVOLVE:
                         if (Creature* spawn = HatchEgg())

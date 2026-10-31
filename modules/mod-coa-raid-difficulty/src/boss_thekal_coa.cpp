@@ -107,7 +107,7 @@ namespace
         {
             _Reset();
             _drained = false;
-            _avatar.Despawn(me);
+            _avatar.Restore(me);
             scheduler.CancelAll();
             me->RemoveAurasDueToSpell(SPELL_FRENZY);
             me->RemoveAurasDueToSpell(SPELL_GIFT_OF_THE_BLOOD_GOD);
@@ -125,7 +125,7 @@ namespace
         void JustDied(Unit* /*killer*/) override
         {
             _JustDied();
-            _avatar.Despawn(me);
+            _avatar.Release(me);
             Talk(SAY_DEATH);
             if (Creature* zealot = instance->GetCreature(DATA_LORKHAN))
                 zealot->Kill(zealot, zealot);
@@ -136,7 +136,7 @@ namespace
         void JustEngagedWith(Unit* /*who*/) override
         {
             _JustEngagedWith();
-            _avatar.Summon(me);
+            _avatar.Restore(me);
             scheduler.CancelAll();
             ScheduleTroll();
         }
@@ -246,7 +246,7 @@ namespace
 
         void EnterEvadeMode(EvadeReason why) override
         {
-            _avatar.Despawn(me);
+            _avatar.Release(me);
             BossAI::EnterEvadeMode(why);
         }
 

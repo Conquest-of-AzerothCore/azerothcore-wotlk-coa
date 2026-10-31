@@ -132,7 +132,7 @@ namespace
         {
             BossAI::Reset();
             me->RemoveAllAuras();
-            _avatar.Despawn(me);
+            _avatar.Restore(me);
             _snake = false;
             _frenzied = false;
             _burst.clear();
@@ -141,7 +141,7 @@ namespace
         void JustEngagedWith(Unit* who) override
         {
             BossAI::JustEngagedWith(who);
-            _avatar.Summon(me);
+            _avatar.Restore(me);
 
             events.SetPhase(PHASE_TROLL);
             events.ScheduleEvent(EVENT_THRASH, 8s);
@@ -156,7 +156,7 @@ namespace
         {
             BossAI::JustDied(killer);
             Talk(SAY_DEATH);
-            _avatar.Despawn(me);
+            _avatar.Release(me);
             me->RemoveAllAuras();
         }
 

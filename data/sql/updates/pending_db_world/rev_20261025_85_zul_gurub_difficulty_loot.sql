@@ -1,10 +1,10 @@
 -- Zul'Gurub loot on Heroic, Mythic and Ascended for the 13 bosses, from the per-difficulty boss loot
 -- in the db.exil.es dump of 2026-10-04. Each variant gets its own loot id. Normalized as in
 -- rev_20260930_80_molten_core_loot.sql: 0 % rows are dropped, guaranteed rows sit in group 0, and
--- items sharing one chance that adds up to 100 % form an equal-chance group. Left out by decision:
--- the Zandalar set (19822-19849, 20033, 20034), the Battleweaver pieces (12390, 12391, 12473, 12503,
--- 12504) and their tiered copies, and the Dungeon Spoils 1202039/1027965. Hakkar's Ascended cache is
--- 2500039 (Cache of the Blood God, Ascended). The dump has no Mythic Heart of Hakkar; 1319802 follows
+-- items sharing one chance that adds up to 100 % form an equal-chance group. The Zandalar set
+-- (19822-19849, 20033, 20034) and its tiered copies come from rev_20261025_93. Left out by decision:
+-- the Battleweaver pieces (12390, 12391, 12473, 12503, 12504) and their tiered copies, and the
+-- Dungeon Spoils 1202039/1027965. Hakkar's Ascended cache is 2500039 (Cache of the Blood God, Ascended). The dump has no Mythic Heart of Hakkar; 1319802 follows
 -- the tier offset of the client item and quest 408183.
 -- Trash variants keep the Normal loot id.
 

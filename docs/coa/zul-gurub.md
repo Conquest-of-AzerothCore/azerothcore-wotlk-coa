@@ -31,6 +31,7 @@ The server only has Normal:
 | **dbc** | installed game client vs `data/dbc` | Map, MapDifficulty, LFGDungeons, DungeonEncounter, Spell, SpellDifficulty: identical |
 | **tavern** | coatavern.com | items, spells and achievements only; NPC and quest pages return 404 |
 | **descension** | Project Descension (78dcaeeb) | stock ZG scripts; WDB and Exiles staging rows for the Loa Avatars and Heart of Hakkar |
+| **video** | YouTube c7iqfz04PmI (launch-day Normal, 7 bosses incl. Hakkar) and 6ihbw1PKc2E (Ascended, 2026-08-04: Arlokk, Thekal, Mar'li wipes) | Zandalar drops, per-kill runes and commendations, avatars in their temples, Mar'li's Ascended Hatch Eggs bar |
 
 A value found only in an archive (exiles, sub, or a lone wdb row that contradicts other sources) needs approval before
 it goes into a fix. Health in exiles and sub does not scale consistently against the log (ratios 5.4x-10.2x), so
@@ -134,9 +135,15 @@ All 520 item ids that sub lists in ZG boss loot exist in `item_template`.
 | missing quests | — | Zanza 1508184-1508189, [HEROIC] Paragons 208053-208079, Heart of Hakkar 208183/308183/408183, Inscriptions 208184-208198, Hero's Call 77878 | wdb, questcache; givers unknown |
 | Rin'wosho 14921 | 22 items | plus 27 reputation-gated CoA items 195065-195097 | wdb, sub |
 
-Archive-only loot (approval needed): Zandalar set and Battleweaver pieces as 3.333 % boss drops (sub only; quest
-rewards in vanilla and live AtlasLoot), 0 %-chance CoA pieces on bosses and 43 trash greens, Edge 12504, Gahz'ranka
-12503 and 1022739.
+Both videos show Zandalar pieces dropping from bosses (Thekal: Zandalar Augur's Hauberk; Arlokk: Zandalar
+Freethinker's Armguards), so the sub chances of 3.333 % on the priests, Mandokir and Jin'do are used. Every boss
+kill in the Normal video gives each player Runes of Ascension and Raider's Commendations (2 per boss, 6 from Hakkar).
+The video shows 175 runes per boss and 2500 from Hakkar; that exceeds a loot row's count (255), so the runes follow
+Molten Core: one per boss. The Hakkar kill shows no Cache of the Blood God; the cache 1400023 stays by decision.
+
+Archive-only loot (approval needed): Battleweaver pieces as boss drops (sub only), 0 %-chance CoA pieces on bosses
+and 43 trash greens, Edge 12504, Gahz'ranka 12503 and 1022739, Dungeon Spoils 2021814 / 1202039 / 1027965 (sub; the
+Hakkar video shows Dungeon Spoils).
 
 Left as is unless decided otherwise: quests 580290 and 580295 carry local Path to Ascension titles and MinLevel 8.
 
@@ -149,12 +156,14 @@ Left as is unless decided otherwise: quests 580290 and 580295 carry local Path t
 | Hakkar Normal: 1400023 Cache of the Blood God 100 %, 97725 Offering Key 100 %; 13 boss sigils 1 %; Edge of Madness blood items 100 % | `rev_20261025_82` | wdb, exiles, sub |
 | access rows for difficulties 0-3 at level 60; every map-309 spawn on `spawnMask` 15 | `rev_20261025_83` | dbc |
 | Heroic, Mythic and Ascended templates for 61 families at +100000/+200000/+300000, health and melee damage ×1.44/×1.88/×2.32, `coa_boss_flex` hp_d1..d3 on the same ladder | `rev_20261025_84` | wdb (Hakkar, Mar'li, Arlokk, Bloodseeker Bat), Molten Core precedent |
-| own loot ids for 39 boss variants, 642 rows; Hakkar caches 1400039 / 2400039 / 2500039; no Zandalar set or Battleweaver pieces | `rev_20261025_85` | sub |
+| own loot ids for 39 boss variants, 642 rows; Hakkar caches 1400039 / 2400039 / 2500039; no Battleweaver pieces | `rev_20261025_85` | sub |
+| the 27 Zandalar pieces at 3.333 % on the priests, Mandokir and Jin'do, each tier with its own item ids; Rune of Ascension 375250 ×1 and Raider's Commendation 400750 ×2 (Hakkar ×6) at 100 % on all 13 bosses and their variants | `rev_20261025_93` | video, sub, Molten Core ids |
 | quest reputation from the faction reward index (+250/+350/+500); MinLevel 10 and 60 | `rev_20261025_86` | wdb, exiles |
 | Rin'wosho 14921 sells the 27 CoA reputation items | `rev_20261025_87` | wdb, sub |
 | trash kits from the log; Fierce Blow 975011 and Berserking 1126297; SmartAI on 11361, 11387, 14880, 15068 | `rev_20261025_88` | log |
 | boss timers from the log, Mar'li's Burrow and Poison Nova, Fierce Blow on bosses and adds; zealot, Ohgan, Chained Spirit, Bat Rider, Spawn of Mar'li and Zulian Prowler kits | `modules/mod-coa-raid-difficulty/src/*_coa.cpp`, stock `ZulGurub/*.cpp`, `rev_20261025_89` | log |
-| Loa Avatars 666988-666992 (faction 35, level 63): each High Priest summons its avatar at the pull and at 50 % drains it with Drain Power (-99 % damage taken) until it dies, then gains the Gift of the Blood God and its second kit; Hakkar drains the avatar of every living priest at the pull and gains that Aspect when it dies | `rev_20261025_90`, `zg_coa_common.h` (`LoaAvatar`), the five priests, `boss_hakkar_coa.cpp` | wdb, log, dbc |
+| Loa Avatars 666988-666992 (faction 35, level 63): each avatar is a passive spawn in its priest's temple (guids 9999801-9999805), respawned at every reset and pull if a past pull drained it; at 50 % the priest drains it with Drain Power (-99 % damage taken) until it dies, then gains the Gift of the Blood God and its second kit; Hakkar drains the avatar of every living priest at the pull and gains that Aspect when it dies | `rev_20261025_90`, `zg_coa_common.h` (`LoaAvatar`), the five priests, `boss_hakkar_coa.cpp` | wdb, log, dbc, video |
+| Mar'li: on Ascended, Hatch Eggs repeats every 30 s in the troll phase | `boss_marli_coa.cpp` | video (DBM bar) |
 | Thekal: no false death, no zealot revival, no tiger phase at full health; tiger form when the avatar dies | `boss_thekal_coa.cpp` | log |
 | boss achievements per difficulty: Normal, Heroic, Mythic and Ascended criteria get `achievement_criteria_data` scripts that match the exact difficulty | `rev_20261025_91`, `AscensionAchievementConditions.cpp` | dbc |
 | Mandokir: Threatening Gaze 4 s, then Menacing Gaze 4 s; a hostile spell with a power cost on the global cooldown gives Sentenced to Die and Decapitate; Mounted out of combat; Bloodlord's Presence (no durability loss) at the pull | `boss_mandokir_coa.cpp` | dbc |
@@ -169,7 +178,7 @@ to it in the log.
 2. Ascended attunement: `Tutorial.dbc` 142 says Ascended needs an attunement begun at an NPC. Neither the NPC nor
    the quest is in any source, so Ascended opens without one; no NPC is invented.
 3. Missing quests: their givers are unknown.
-4. Dungeon Spoils on the variants are left out.
+4. Dungeon Spoils are left out (archive-only ids); rune counts follow Molten Core, not the video's 175 / 2500.
 5. The Mythic Heart of Hakkar 1319802 is inferred from the tier offset; the dump has no Mythic row.
 6. Trash variants keep the Normal loot id; Edge of Madness variants use the sub 11.111 % chances.
 7. DamageModifier follows the health ladder as in Molten Core; no log measures variant melee damage.
@@ -177,8 +186,8 @@ to it in the log.
 9. Archive-only spawn swaps other than 51391, the sub-only Hakkari Priest and the possible stacked duplicates.
 10. Mar'li's Burrow lasts an estimated 3 s; Storm Shield stays on Lor'Khan, although the log mostly shows it on Zath;
     2118267 "Storm Shield - Extra" and Shred's Razor Claws part are not scripted.
-11. Estimated, not in any data: the avatars' level 63, faction 35 and position (5 yd behind a priest, a 10 yd ring
-    around Hakkar); the order drain → death → Gift and Aspect; Mandokir's gaze order and Bloodlord's Presence once
+11. Estimated, not in any data: the avatars' level 63, faction 35 and position (the temple spots, a 10 yd
+    ring around Hakkar); the order drain → death → Gift and Aspect; Mandokir's gaze order and Bloodlord's Presence once
     at the pull; which totem casts which spell; exact-difficulty achievement credit (no credit for a lower
     difficulty).
 12. Left out for lack of data: Realm of the Blood God 2118425 (its phase 4 content is missing), Mounted 2118411 on

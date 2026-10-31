@@ -139,7 +139,7 @@ namespace
             me->RemoveAurasDueToSpell(SPELL_ASPECT_OF_HIREEK);
             me->RemoveAurasDueToSpell(SPELL_VAMPIRISM);
             me->RemoveAurasDueToSpell(SPELL_GIFT_OF_THE_BLOOD_GOD);
-            _avatar.Despawn(me);
+            _avatar.Restore(me);
             _bat = false;
             _riders = 0;
             DoCastSelf(SPELL_GREEN_CHANNELING, true);
@@ -164,7 +164,7 @@ namespace
             me->SetDisableGravity(false);
             me->SetCombatMovement(true);
             me->SetReactState(REACT_AGGRESSIVE);
-            _avatar.Summon(me);
+            _avatar.Restore(me);
 
             events.SetPhase(PHASE_TROLL);
             events.ScheduleEvent(EVENT_MIND_FLAY, 4s, 0, PHASE_TROLL);
@@ -180,14 +180,14 @@ namespace
         {
             if (why != EvadeReason::EVADE_REASON_NO_PATH)
                 me->DespawnOnEvade(5s);
-            _avatar.Despawn(me);
+            _avatar.Release(me);
             BossAI::EnterEvadeMode(why);
         }
 
         void JustDied(Unit* killer) override
         {
             BossAI::JustDied(killer);
-            _avatar.Despawn(me);
+            _avatar.Release(me);
             Talk(SAY_DEATH);
         }
 

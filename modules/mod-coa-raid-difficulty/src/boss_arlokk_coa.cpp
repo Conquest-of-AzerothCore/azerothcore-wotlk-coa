@@ -122,7 +122,7 @@ namespace
             _summonCountB = 0;
             _marking = false;
             _drained = false;
-            _avatar.Despawn(me);
+            _avatar.Restore(me);
             me->RemoveAurasDueToSpell(SPELL_GIFT_OF_THE_BLOOD_GOD);
             me->RemoveAurasDueToSpell(SPELL_ASPECT_OF_BETHEKK);
             me->RemoveAurasDueToSpell(SPELL_RAZOR_CLAWS);
@@ -136,7 +136,7 @@ namespace
         void JustDied(Unit* /*killer*/) override
         {
             _JustDied();
-            _avatar.Despawn(me);
+            _avatar.Release(me);
             Talk(SAY_DEATH);
             ClearMarks();
         }
@@ -145,7 +145,7 @@ namespace
         {
             _JustEngagedWith();
             Talk(SAY_AGGRO);
-            _avatar.Summon(me);
+            _avatar.Restore(me);
 
             events.SetPhase(PHASE_ONE);
             ScheduleTroll(2s);
@@ -186,7 +186,7 @@ namespace
         void EnterEvadeMode(EvadeReason why) override
         {
             BossAI::EnterEvadeMode(why);
-            _avatar.Despawn(me);
+            _avatar.Release(me);
             ClearMarks();
             std::list<Creature*> panthers;
             GetCreatureListWithEntryInGrid(panthers, me, NPC_ZULIAN_PROWLER, 200.0f);
