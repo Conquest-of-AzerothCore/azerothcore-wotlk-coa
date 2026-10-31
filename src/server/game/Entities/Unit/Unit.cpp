@@ -10315,7 +10315,7 @@ float Unit::SpellTakenCritChance(Unit const* caster, SpellInfo const* spellProto
                                 break;
                             case 7997: // Renewed Hope
                             case 7998:
-                                if (HasAura(6788))
+                                if (HasAura(6788) || HasAura(sSpellMgr->GetSpellTwinFor(6788, (*i)->GetId())))
                                     crit_chance += (*i)->GetAmount();
                                 break;
                             case 7798: // Glyph of Regrowth: Ascension's glyph also adds crit chance (effect 1)

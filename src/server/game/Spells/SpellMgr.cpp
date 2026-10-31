@@ -1544,6 +1544,30 @@ uint32 SpellMgr::GetSpellTwinSource(uint32 spellId) const
     return source;
 }
 
+namespace
+{
+    thread_local std::vector<uint32> RunningScriptTwins;
+}
+
+void SpellMgr::PushScriptTwin(uint32 spellId)
+{
+    RunningScriptTwins.push_back(sSpellMgr->GetSpellTwinSource(spellId) != spellId ? spellId : 0);
+}
+
+void SpellMgr::PopScriptTwin(uint32 /*spellId*/)
+{
+    if (!RunningScriptTwins.empty())
+        RunningScriptTwins.pop_back();
+}
+
+uint32 SpellMgr::GetRunningScriptTwin()
+{
+    for (auto itr = RunningScriptTwins.rbegin(); itr != RunningScriptTwins.rend(); ++itr)
+        if (*itr)
+            return *itr;
+    return 0;
+}
+
 uint32 SpellMgr::GetSpellTwinFor(uint32 stockSpellId, uint32 relatedSpellId) const
 {
     uint32 const relatedSource = GetSpellTwinSource(relatedSpellId);
