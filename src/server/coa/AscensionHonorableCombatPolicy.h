@@ -13,6 +13,9 @@ constexpr std::array<std::uint32_t, 4> WinCriteria = {15691, 15695, 21691, 21695
 constexpr unsigned HonorableAura = 9930870;
 constexpr unsigned CombatAura = 9930871;
 constexpr unsigned ZonesOpcode = 0x0768;
+constexpr unsigned RespiteAura = 9930878;
+constexpr int RespiteDurationMs = 30000;
+constexpr std::uint8_t SkullIcon = 7;
 
 constexpr bool IsHonorableZone(std::uint32_t zone)
 {
@@ -60,6 +63,11 @@ constexpr bool IsInitiation(bool attackerLocked, bool targetStartedAgainstAttack
 constexpr bool IsWin(std::uint64_t killer, std::uint64_t loserPartner, std::uint32_t zone)
 {
     return killer && killer == loserPartner && IsHonorableZone(zone);
+}
+
+constexpr bool RespiteSeparates(std::uint64_t first, std::uint64_t second, bool firstRespite, bool secondRespite)
+{
+    return first != second && (firstRespite || secondRespite);
 }
 }
 
