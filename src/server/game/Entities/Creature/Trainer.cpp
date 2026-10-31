@@ -174,7 +174,7 @@ namespace Trainer
 
             SpellInfo const* trainerSpellInfo = sSpellMgr->AssertSpellInfo(trainerSpell.SpellId);
 
-            bool primaryProfessionFirstRank = false;
+            bool spendsPrimaryProfessionSlot = false;
             bool knownOnlyBySkillMaximum = false;
             bool teachesLearnedSpell = false;
             for (SpellEffectInfo const& spellEffectInfo : trainerSpellInfo->GetEffects())
@@ -187,8 +187,8 @@ namespace Trainer
                     knownOnlyBySkillMaximum = true;
 
                 SpellInfo const* learnedSpellInfo = sSpellMgr->GetSpellInfo(spellEffectInfo.TriggerSpell);
-                if (learnedSpellInfo && learnedSpellInfo->IsPrimaryProfessionFirstRank())
-                    primaryProfessionFirstRank = true;
+                if (learnedSpellInfo && player->SpendsPrimaryProfessionSlot(learnedSpellInfo))
+                    spendsPrimaryProfessionSlot = true;
             }
 
             if (knownOnlyBySkillMaximum || (onlyTrainable && spellState == SpellState::Known && teachesLearnedSpell))
@@ -200,7 +200,7 @@ namespace Trainer
             trainerListSpell.Usable = AsUnderlyingType(spellState);
             trainerListSpell.MoneyCost = int32(trainerSpell.MoneyCost * reputationDiscount);
             trainerListSpell.PointCost[0] = 0; // spells don't cost talent points
-            trainerListSpell.PointCost[1] = (primaryProfessionFirstRank ? 1 : 0);
+            trainerListSpell.PointCost[1] = (spendsPrimaryProfessionSlot ? 1 : 0);
             trainerListSpell.ReqLevel = trainerSpell.ReqLevel;
             trainerListSpell.ReqSkillLine = trainerSpell.ReqSkillLine;
             trainerListSpell.ReqSkillRank = trainerSpell.ReqSkillRank;
@@ -332,7 +332,7 @@ namespace Trainer
                 knowsAllLearnedSpells = false;
 
                 SpellInfo const* learnedSpellInfo = sSpellMgr->GetSpellInfo(spellEffectInfo.TriggerSpell);
-                if (learnedSpellInfo && learnedSpellInfo->IsPrimaryProfessionFirstRank() && !player->GetFreePrimaryProfessionPoints())
+                if (learnedSpellInfo && player->SpendsPrimaryProfessionSlot(learnedSpellInfo) && !player->GetFreePrimaryProfessionPoints())
                     return SpellState::Unavailable;
             }
 
