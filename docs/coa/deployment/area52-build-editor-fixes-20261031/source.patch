@@ -1,0 +1,139 @@
+--- a/Interface/AddOns/Ascension_BuildCreator/BuildEditor/EditableBuildView.lua
++++ b/Interface/AddOns/Ascension_BuildCreator/BuildEditor/EditableBuildView.lua
+@@ -289,7 +289,7 @@
+             else
+                 publishButton.tooltipText = ""
+             end
+-            publishButton.tooltipText = publishButton.tooltipText .. (_G[reason] or reason)
++            publishButton.tooltipText = publishButton.tooltipText .. Area52BuildPublishReason(reason)
+         end
+         publishButton.tooltipText = RED_FONT_COLOR:WrapText(publishButton.tooltipText)
+         publishButton:Disable()
+@@ -554,8 +554,12 @@
+     end
+     if view.Area52ArchetypeDropdown then
+         view.Area52ArchetypeDropdown:SetShown(applies)
+-        if C_Player:IsGM() then UIDropDownMenu_EnableDropDown(view.Area52ArchetypeDropdown)
+-        else UIDropDownMenu_DisableDropDown(view.Area52ArchetypeDropdown) end
++        local dropdown=view.Area52ArchetypeDropdown
++        local enabled=C_Player:IsGM()
++        local color=enabled and HIGHLIGHT_FONT_COLOR or GRAY_FONT_COLOR
++        dropdown.Text:SetVertexColor(color.r,color.g,color.b)
++        if enabled then dropdown.Button:Enable() else dropdown.Button:Disable() end
++        dropdown.isDisabled=not enabled and 1 or nil
+         local entry=byID[view.Area52ArchetypeID]
+         UIDropDownMenu_SetText(view.Area52ArchetypeDropdown,entry and entry.name or 'Choose a character-creation archetype')
+     end
+@@ -577,3 +581,99 @@
+     area52LibraryPreviousUpdate(self, ...)
+     if Area52BuildLibrary then Area52BuildLibrary.AttachEditor(self) end
+ end
++
++local reasons = {
++    UNKNOWN="The build could not be validated. Reopen the editor and try again.",
++    LOW_LEVEL="Your character has not reached the level required to publish builds.",
++    NO_SPELLS="Add at least one ability or talent.",
++    NO_WEAPON_TYPES="Select at least one weapon type.",
++    NO_ARMOR_TYPES="Select at least one armor type.",
++    NO_NAME="Enter a build name.", DEFAULT_NAME="Replace the default build name.",
++    NAME_TOO_LONG="Shorten the build name.", NO_ICON="Choose a build icon.",
++    DEFAULT_ICON="Replace the question-mark icon with a build icon.",
++    ICON_TOO_LONG="Choose another build icon.",
++    NO_DESCRIPTION="Add a build description.", DEFAULT_DESCRIPTION="Replace the default build description.",
++    DESCRIPTION_TOO_LONG="Shorten the build description.",
++    ALREADY_EXISTS="This build already exists. Open the saved build before editing it.",
++    UNCOMMON_QUALITY_RESTRICTIONS="The build exceeds its uncommon rarity allowance.",
++    RARE_QUALITY_RESTRICTIONS="The build exceeds its rare rarity allowance.",
++    EPIC_QUALITY_RESTRICTIONS="The build exceeds its epic rarity allowance.",
++    LEGENDARY_QUALITY_RESTRICTIONS="The build exceeds its legendary rarity allowance.",
++    BAD_CATEGORY="This build category is not available to your character. Featured builds require a GM.",
++    NOT_ENOUGH_AE_INVESTMENT="Spend more ability points for the selected endgame category, or select Leveling.",
++    NOT_ENOUGH_TE_INVESTMENT="Spend more talent points for the selected endgame category, or select Leveling.",
++    SPELL_COMMENT_TOO_LONG="Shorten an ability or talent comment.",
++    RANDOM_ENCHANT_COMMENT_TOO_LONG="Shorten a Mystic Enchant comment.",
++    WEAPON_TYPE_COMMENT_TOO_LONG="Shorten a weapon-type comment.",
++    ARMOR_TYPE_COMMENT_TOO_LONG="Shorten an armor-type comment.",
++    NAME_PROFANITY="The build name was rejected by the text filter.",
++    DESCRIPTION_PROFANITY="The build description was rejected by the text filter.",
++    SPELL_COMMENT_PROFANITY="An ability or talent comment was rejected by the text filter.",
++    RANDOM_ENCHANT_COMMENT_PROFANITY="A Mystic Enchant comment was rejected by the text filter.",
++    WEAPON_TYPE_COMMENT_PROFANITY="A weapon-type comment was rejected by the text filter.",
++    ARMOR_TYPE_COMMENT_PROFANITY="An armor-type comment was rejected by the text filter.",
++    MULTIPLE_ABILITY_TYPES="An ability has more than one role tag. Keep only one tag per ability.",
++    NOT_FOUND="The saved build is no longer available. Refresh the build list.",
++    NO_PERMISSION="You do not have permission to change this build. Make a personal copy first.",
++    CLASS_MISMATCH="This build belongs to a different character class."
++}
++local spellReasons = {
++    SET_SPELL_LEVEL_TOO_LOW="requires a later learning level",
++    SET_SPELL_LEVEL_TOO_HIGH="is scheduled beyond the realm's level limit",
++    SET_SPELL_LEVEL_BAD_RANK="has ranks scheduled out of order",
++    SET_SPELL_LEVEL_BAD_SPELL="is not available in the advancement catalog",
++    SET_SPELL_LEVEL_DOESNT_EXIST="is missing from the pending build"
++}
++local function progressionDetails()
++    local lines={};local seen={}
++    local function add(text)
++        if not seen[text] and #lines<4 then lines[#lines+1]=text;seen[text]=true end
++    end
++    if type(C_BuildEditor.GetEssenceForLevel)=="function" then
++        local foundAE,foundTE=false,false
++        for level=1,80 do
++            local ok,_,ae,_,te=pcall(C_BuildEditor.GetEssenceForLevel,level)
++            if ok then
++                if not foundAE and type(ae)=="number" and ae<0 then
++                    add(string.format("Level %d: short by %d ability points.",level,-ae));foundAE=true
++                end
++                if not foundTE and type(te)=="number" and te<0 then
++                    add(string.format("Level %d: short by %d talent points.",level,-te));foundTE=true
++                end
++            end
++            if foundAE and foundTE then break end
++        end
++    end
++    local ok,build=pcall(C_BuildEditor.GetPendingBuild)
++    if ok and type(build)=="table" and type(build.Spells)=="table" and type(C_BuildEditor.CanSetSpellLevel)=="function" then
++        for index,spell in ipairs(build.Spells) do
++            if index>512 or #lines>=4 then break end
++            if type(spell)=="table" and type(spell.Spell)=="number" and type(spell.Level)=="number" then
++                local success,_,errors=pcall(C_BuildEditor.CanSetSpellLevel,spell.Spell,spell.Level)
++                if success and type(errors)=="table" then
++                    for _,reason in ipairs(errors) do
++                        if spellReasons[reason] then
++                            local name,rank=GetSpellInfo(spell.Spell)
++                            name=name or ("Spell "..spell.Spell)
++                            if rank and rank~="" then name=name.." ("..rank..")" end
++                            add(string.format("Level %d - %s: %s.",spell.Level,name,spellReasons[reason]))
++                        end
++                    end
++                end
++            end
++        end
++    end
++    return lines
++end
++function Area52BuildPublishReason(reason)
++    if GetRealmName()~="Area 52 - Free-Pick" then return _G[reason] or reason end
++    if reason=="PUBLISH_BUILD_NOT_TRAVERSIBLE" or reason=="PUBLISH_BUILD_LEVEL_INAPPROPRIATE_SPELL" or reason=="BUILD_NOT_TRAVERSIBLE" or reason=="BUIL_NOT_TRAVERSIBLE" then
++        local lines=progressionDetails()
++        if #lines>0 then
++            return "The build has progression problems:\n"..table.concat(lines,"\n").."\nCorrect these entries, then check again."
++        end
++        return "The build cannot be learned in its current order. Check learning levels, prerequisites, rank order and point or rarity limits. The exact failed requirement is not available."
++    end
++    local key=type(reason)=="string" and reason:match("^PUBLISH_BUILD_(.+)$")
++    return reasons[key] or _G[reason] or "The build did not pass validation. Review its selections and try again."
++end
+--- a/Interface/AddOns/Ascension_BuildCreator/BuildCreator.lua
++++ b/Interface/AddOns/Ascension_BuildCreator/BuildCreator.lua
+@@ -1274,6 +1274,10 @@
+     controls.SaveBuild:SetEnabled(controls.PublishBuild:IsEnabled())
+     controls.SaveBuild.tooltipTitle="Save Build"
+     controls.SaveBuild.tooltipText="Save this build to this server's build library. It will not be uploaded to the public Shared Library."
++    if not controls.PublishBuild:IsEnabled() then
++        controls.SaveBuild.tooltipTitle="Cannot Save Build"
++        controls.SaveBuild.tooltipText=controls.PublishBuild.tooltipText or "Review the build requirements before saving."
++    end
+     if controls.PublishBuild:IsEnabled() then
+         controls.PublishBuild.tooltipTitle="Publish Build"
+         controls.PublishBuild.tooltipText="Save and publish a copy to the public Area 52 Shared Library on GitHub, after you confirm the public author alias and contribution terms."
