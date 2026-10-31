@@ -509,6 +509,16 @@ public:
         return damage;
     }
 
+    /// the same pet auras for a Warcraft Reborn twin: each aura replaced by its own twin
+    template <typename Resolve>
+    [[nodiscard]] PetAura ForTwin(Resolve&& resolve) const
+    {
+        PetAura copy = *this;
+        for (auto& [petEntry, aura] : copy.auras)
+            aura = resolve(aura);
+        return copy;
+    }
+
 private:
     PetAuraMap auras;
     bool removeOnChangePet{false};

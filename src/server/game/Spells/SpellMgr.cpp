@@ -2790,7 +2790,10 @@ void SpellMgr::LoadSpellPetAuras()
         {
             auto const itr = mSpellPetAuraMap.find((source << 8) + i);
             if (itr != mSpellPetAuraMap.end() && !mSpellPetAuraMap.contains((twin << 8) + i))
-                mSpellPetAuraMap.emplace((twin << 8) + i, itr->second);
+                mSpellPetAuraMap.emplace((twin << 8) + i, itr->second.ForTwin([this, twin](uint32 aura)
+                {
+                    return GetSpellTwinFor(aura, twin);
+                }));
         }
     }
 
