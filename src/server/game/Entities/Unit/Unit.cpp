@@ -10669,10 +10669,10 @@ float Unit::SpellPctHealingModsDone(Unit* victim, SpellInfo const* spellProto, D
     {
         case SPELLFAMILY_GENERIC:
             // Talents and glyphs for healing stream totem
-            if (spellProto->Id == 52042)
+            if (sSpellMgr->GetSpellTwinSource(spellProto->Id) == 52042)
             {
                 // Glyph of Healing Stream Totem
-                if (AuraEffect* dummy = owner->GetAuraEffect(55456, EFFECT_0))
+                if (AuraEffect* dummy = owner->GetAuraEffectOfRankedSpellOrTwin(55456, EFFECT_0))
                     AddPct(DoneTotalMod, dummy->GetAmount());
 
                 // Healing Stream totem - Restorative Totems
@@ -10682,7 +10682,7 @@ float Unit::SpellPctHealingModsDone(Unit* victim, SpellInfo const* spellProto, D
             break;
         case SPELLFAMILY_PRIEST:
             // T9 HEALING 4P, empowered renew instant heal
-            if (spellProto->Id == 63544)
+            if (sSpellMgr->GetSpellTwinSource(spellProto->Id) == 63544)
                 if (AuraEffect* aurEff = GetAuraEffect(67202, EFFECT_0))
                     AddPct(DoneTotalMod, aurEff->GetAmount());
             break;
