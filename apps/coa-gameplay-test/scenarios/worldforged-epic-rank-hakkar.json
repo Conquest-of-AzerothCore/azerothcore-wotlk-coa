@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Worldforged upgrades stop at item level 64 until the account has defeated Hakkar",
+  "contract": [
+    "Zul'Gurub loot is item level 63 (Hakkar's own 66 to 68). Before Hakkar falls a Worldforged item may be upgraded",
+    "at the Guardian of Time up to item level 64; the item level 67 epic ranks open once the account has defeated",
+    "Hakkar (user decision). Flesh Flayer Hook 278843 (blue, item level 59, no dungeon variant) upgrades to 1378062",
+    "(item level 67, store key 4, 3926 Runes of Ascension). Junglewood Recurve 1389875, a level 60 blue dungeon variant,",
+    "upgrades to 1379880 (item level 67, key 2, 3926 runes). Decayed Breeches 1389233, also a level 60 blue dungeon",
+    "variant, upgrades to 1379719 (item level 64, key 1569, 5000 runes) without any kill. The item level 67 purchases",
+    "name Hakkar and take nothing until he dies; afterwards both are sold for their price."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 309, "x": -11787.4, "y": -1649.34, "z": 54.1017, "o": 4.76475, "ignore_access": true},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "creatures": [
+    {"id": "hakkar", "owner": "hero", "entry": 14834, "level": 63, "health": 20, "distance": 4}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the instance settle", "ms": 3000},
+    {"action": "add_item", "actor": "hero", "item": 278843},
+    {"action": "add_item", "actor": "hero", "item": 1389875},
+    {"action": "add_item", "actor": "hero", "item": 1389233},
+    {"action": "add_item", "actor": "hero", "item": 375250, "count": 20000},
+
+    {"action": "client_packet", "label": "Upgrade the Flesh Flayer Hook to item level 67 before Hakkar", "actor": "hero", "opcode": 1723, "fields": [{"u32": 4}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "DISCRIMINATING: the item level 67 rank waits for Hakkar", "actor": "hero", "metric": "server_packet_contains", "opcode": 1724, "text": "Defeat Hakkar", "equals": 1},
+    {"action": "assert", "label": "and is not handed out", "actor": "hero", "metric": "item_count", "item": 1378062, "equals": 0},
+    {"action": "assert", "label": "the base item stays", "actor": "hero", "metric": "item_count", "item": 278843, "equals": 1},
+
+    {"action": "client_packet", "label": "Upgrade the Junglewood Recurve dungeon variant to item level 67 before Hakkar", "actor": "hero", "opcode": 1723, "fields": [{"u32": 2}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "DISCRIMINATING: the item level 67 rank is not handed out", "actor": "hero", "metric": "item_count", "item": 1379880, "equals": 0},
+    {"action": "assert", "label": "the dungeon variant stays", "actor": "hero", "metric": "item_count", "item": 1389875, "equals": 1},
+    {"action": "assert", "label": "and no runes are taken", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 20000},
+
+    {"action": "client_packet", "label": "Upgrade the Decayed Breeches dungeon variant to item level 64 before Hakkar", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1569}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The item level 64 rank stays open", "actor": "hero", "metric": "item_count", "item": 1379719, "equals": 1},
+    {"action": "assert", "label": "in place of the dungeon variant", "actor": "hero", "metric": "item_count", "item": 1389233, "equals": 0},
+    {"action": "assert", "label": "for 5000 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 15000},
+
+    {"action": "learn", "label": "Death Touch Copy kills outright", "actor": "hero", "spell": 24080},
+    {"action": "cast", "actor": "hero", "spell": 24080, "target": "hakkar"},
+    {"action": "assert", "label": "Hakkar falls", "actor": "hakkar", "metric": "alive", "equals": 0, "within_ms": 45000},
+
+    {"action": "client_packet", "label": "Upgrade the Flesh Flayer Hook after Hakkar", "actor": "hero", "opcode": 1723, "fields": [{"u32": 4}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The item level 67 hook is sold", "actor": "hero", "metric": "item_count", "item": 1378062, "equals": 1},
+    {"action": "assert", "label": "in place of the base item", "actor": "hero", "metric": "item_count", "item": 278843, "equals": 0},
+    {"action": "assert", "label": "for 3926 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 11074},
+
+    {"action": "client_packet", "label": "Upgrade the Junglewood Recurve after Hakkar", "actor": "hero", "opcode": 1723, "fields": [{"u32": 2}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The item level 67 recurve is sold", "actor": "hero", "metric": "item_count", "item": 1379880, "equals": 1},
+    {"action": "assert", "label": "in place of the dungeon variant", "actor": "hero", "metric": "item_count", "item": 1389875, "equals": 0},
+    {"action": "assert", "label": "for 3926 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 7148}
+  ]
+}
