@@ -300,6 +300,13 @@ void DealLogged(Unit* caster, Player* target, uint32 spellId, Damage3 const& val
     caster->SendSpellNonMeleeDamageLog(&damage);
 }
 
+// Back to the boss's own model at its own size: RestoreDisplayId sets scale 1 and loses the DisplayScale of
+// creature_template_model (the Deceiver 2.5, the Echo 1.6).
+void RestoreModel(Creature* me)
+{
+    me->SetDisplayId(me->GetNativeDisplayId(), me->GetNativeObjectScale());
+}
+
 void SetEngageable(Creature* me, bool engageable, bool keepCombat = false)
 {
     if (engageable)
@@ -823,7 +830,7 @@ struct boss_coa_vaults_darkandle : public ScriptedAI
             return;
         }
         _introStarted = false;
-        me->RestoreDisplayId();
+        RestoreModel(me);
         SetEngageable(me, false);
         me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
     }
@@ -1345,7 +1352,7 @@ private:
                         helper->DespawnOrUnsummon();
                 break;
             case EVENT_DEC_SEAL_RING:
-                me->RestoreDisplayId();
+                RestoreModel(me);
                 me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
                 KeepAura(me, SPELL_SHADOWY_RING_INNER);
                 break;
@@ -2076,9 +2083,9 @@ class spell_coa_vaults_void_wrath_tick : public SpellScript
     }
 };
 
-class spell_coa_custom_dungeon_fierce_blow : public SpellScript
+class spell_coa_custom_dungeon_regular_blow : public SpellScript
 {
-    PrepareSpellScript(spell_coa_custom_dungeon_fierce_blow);
+    PrepareSpellScript(spell_coa_custom_dungeon_regular_blow);
 
     void HandleHit()
     {
@@ -2108,7 +2115,7 @@ class spell_coa_custom_dungeon_fierce_blow : public SpellScript
 
     void Register() override
     {
-        OnHit += SpellHitFn(spell_coa_custom_dungeon_fierce_blow::HandleHit);
+        OnHit += SpellHitFn(spell_coa_custom_dungeon_regular_blow::HandleHit);
     }
 };
 
@@ -2160,6 +2167,6 @@ void AddSC_CoAVaults()
     RegisterSpellAndAuraScriptPair(spell_coa_vaults_damage, spell_coa_vaults_damage_aura);
     RegisterSpellScript(spell_coa_vaults_void_wrath);
     RegisterSpellScript(spell_coa_vaults_void_wrath_tick);
-    RegisterSpellScript(spell_coa_custom_dungeon_fierce_blow);
+    RegisterSpellScript(spell_coa_custom_dungeon_regular_blow);
     new vaults_spell_attributes();
 }
