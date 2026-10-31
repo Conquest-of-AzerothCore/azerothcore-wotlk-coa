@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionWarcraftRebornMage.h"
+#include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
 #include "SpellInfo.h"
@@ -80,6 +81,25 @@ class spell_ascension_reborn_blazing_speed : public AuraScript
             SPELL_AURA_PROC_TRIGGER_SPELL);
     }
 };
+
+class spell_ascension_reborn_conjure_mana_gem : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_reborn_conjure_mana_gem);
+
+    void HandleCreate(SpellEffIndex effIndex)
+    {
+        Player* player = GetHitUnit() ? GetHitUnit()->ToPlayer() : nullptr;
+        uint32 const item = GetSpellInfo()->Effects[effIndex].ItemType;
+        if (player && item)
+            player->AddItem(item, 1);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_ascension_reborn_conjure_mana_gem::HandleCreate, EFFECT_0,
+            SPELL_EFFECT_SCRIPT_EFFECT);
+    }
+};
 }
 }
 
@@ -111,4 +131,5 @@ void AddAscensionWarcraftRebornMageScripts()
     using namespace AscensionWarcraftReborn;
     RegisterSpellScript(spell_ascension_reborn_magic_absorption);
     RegisterSpellScript(spell_ascension_reborn_blazing_speed);
+    RegisterSpellScript(spell_ascension_reborn_conjure_mana_gem);
 }
