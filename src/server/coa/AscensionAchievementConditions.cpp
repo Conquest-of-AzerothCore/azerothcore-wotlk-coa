@@ -2,6 +2,7 @@
 #include "AchievementCriteriaScript.h"
 #include "AchievementMgr.h"
 #include "AchievementScript.h"
+#include "Map.h"
 #include "Player.h"
 #include "RBAC.h"
 #include "ScriptMgr.h"
@@ -58,6 +59,34 @@ private:
     uint32 _modes;
 };
 
+struct DifficultyCriteria
+{
+    char const* Name;
+    Difficulty SpawnMode;
+};
+
+constexpr DifficultyCriteria DIFFICULTY_CRITERIA[] = {
+    { "achievement_coa_difficulty_normal", RAID_DIFFICULTY_10MAN_NORMAL },
+    { "achievement_coa_difficulty_heroic", RAID_DIFFICULTY_25MAN_NORMAL },
+    { "achievement_coa_difficulty_mythic", RAID_DIFFICULTY_10MAN_HEROIC },
+    { "achievement_coa_difficulty_ascended", RAID_DIFFICULTY_25MAN_HEROIC }
+};
+
+class AchievementDifficultyCriteria final : public AchievementCriteriaScript
+{
+public:
+    explicit AchievementDifficultyCriteria(DifficultyCriteria const& criteria)
+        : AchievementCriteriaScript(criteria.Name), _spawnMode(criteria.SpawnMode) { }
+
+    bool OnCheck(Player* player, Unit*, uint32) override
+    {
+        return player->GetMap()->GetSpawnMode() == _spawnMode;
+    }
+
+private:
+    Difficulty _spawnMode;
+};
+
 class RealmFirstAchievementPermission final : public PlayerScript
 {
 public:
@@ -96,6 +125,9 @@ void AddAscensionAchievementConditionScripts()
 {
     for (GameModeCriteria const& criteria : GAME_MODE_CRITERIA)
         new AchievementGameModeCriteria(criteria);
+
+    for (DifficultyCriteria const& criteria : DIFFICULTY_CRITERIA)
+        new AchievementDifficultyCriteria(criteria);
 
     new RealmFirstAchievementPermission();
     new LearnSkillLineSpellsCriteriaDataGate();

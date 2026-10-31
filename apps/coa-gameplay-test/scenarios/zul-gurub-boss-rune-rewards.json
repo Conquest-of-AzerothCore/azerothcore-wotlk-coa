@@ -1,0 +1,192 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: boss kills give the live-video Runes of Ascension, commendations and Dungeon Spoils",
+  "contract": [
+    "The launch-day Normal kill video (youtube c7iqfz04PmI) gives each player 175 Runes of Ascension (375250) and",
+    "two Raider's Commendations (400750) per boss. Hakkar (14834) gives six commendations, Dungeon Spoils (2021814)",
+    "and 2500 runes: more than a loot row's 8-bit count holds, so boss_hakkar_coa.cpp adds them to every player who",
+    "tapped him at his death, and his corpse carries no rune slot. High Priest Venoxis (14507) stands for the other",
+    "bosses. Runes and commendations are currency tokens (BagFamily 8192), which the looter stores as the corpse loot",
+    "opens, so their counts are read from the bags."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 309,
+    "x": -11787.4,
+    "y": -1649.34,
+    "z": 54.1017,
+    "o": 4.76475,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "venoxis",
+      "owner": "hero",
+      "entry": 14507,
+      "level": 63,
+      "health": 100000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero carries no Runes of Ascension",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 375250,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 14507,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Venoxis dies",
+      "actor": "venoxis",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "hero",
+      "target": "venoxis"
+    },
+    {
+      "action": "assert",
+      "label": "Opening the corpse stores 175 Runes of Ascension",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 375250,
+      "equals": 175,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and two Raider's Commendations",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 400750,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14834,
+      "as": "hakkar",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 14834,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Hakkar dies",
+      "actor": "hakkar",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Hakkar's death adds 2500 Runes of Ascension to the hero who tapped him",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 375250,
+      "equals": 2675,
+      "within_ms": 2000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "hero",
+      "target": "hakkar"
+    },
+    {
+      "action": "assert",
+      "label": "Hakkar's corpse has no Rune of Ascension slot",
+      "actor": "hero",
+      "metric": "loot_count",
+      "item": 375250,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Hakkar's corpse holds Dungeon Spoils",
+      "actor": "hero",
+      "metric": "loot_count",
+      "item": 2021814,
+      "equals": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "hero",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "label": "The hero loots Dungeon Spoils",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Hakkar gives six Raider's Commendations",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 400750,
+      "equals": 8,
+      "within_ms": 2000
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    }
+  ]
+}
