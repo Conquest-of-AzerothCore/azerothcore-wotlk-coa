@@ -30,9 +30,11 @@
 -- (the static altar Shadowhunters, and Yahola) cast the channel whenever they are out of combat and stop it when they
 -- engage; evading restores the aura. Spectral Volley needs no change to be uninterruptible: its PreventionType is 0, so
 -- interrupts and silences cannot stop it.
--- Loot: of their Ascension drops only Vazul's three Whispershade greens are her own; the rest (Ephemeral Key,
--- recipes, world greens) are shared world drops. Their chances were not recorded, so they use a common rare-elite
--- rate: 20% each in one group, at most one per kill (as Geomancer Flintdagger's own greens).
+-- Loot: of their Ascension drops only Vazul's three Whispershade greens, Zazera's Sandswept Garment and Yahola's
+-- Faded Enclave Shirt are their own (the db.exil.es dump of 2026-10-04 lists no other source and sources the two
+-- shirts to Zazera and Yahola); the rest (Ephemeral Key, recipes, world greens) are shared world drops. Their
+-- chances were not recorded, so they use a common rare-elite rate: 20% each in one group, at most one per kill
+-- (as Geomancer Flintdagger's own greens).
 
 -- Vazul <Witherbark Paragon> (254168): level 40 elite in the Witherbark Village cave, Arathi Highlands,
 -- guarded by two Elite Witherbark Headhunters (254176, level 34-35). Objective: kill before level 40.
@@ -42,8 +44,8 @@
 -- by the Left and Right Hand of Yahola (254172, 254173, level 59 elites). Objective: kill before level 59.
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
 (254168,0,0,0,0,0,'Vazul','Witherbark Paragon',NULL,0,40,40,0,654,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,254168,0,0,0,0,200,300,'SmartAI',0,1,5.325041,2,1,1,0,0,1,0,0,'',12340),
-(254170,0,0,0,0,0,'Zazera','Sandfury Paragon',NULL,0,45,45,0,37,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,0,0,0,0,0,300,450,'SmartAI',0,1,5.127537,3,1,1,0,0,1,0,0,'',12340),
-(254169,0,0,0,0,0,'Yahola','Mossflayer Paragon',NULL,0,59,59,0,37,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,0,0,0,0,0,600,900,'SmartAI',0,1,14.882018,3.6,1,1,0,0,1,0,0,'',12340),
+(254170,0,0,0,0,0,'Zazera','Sandfury Paragon',NULL,0,45,45,0,37,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,254170,0,0,0,0,300,450,'SmartAI',0,1,5.127537,3,1,1,0,0,1,0,0,'',12340),
+(254169,0,0,0,0,0,'Yahola','Mossflayer Paragon',NULL,0,59,59,0,37,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,254169,0,0,0,0,600,900,'SmartAI',0,1,14.882018,3.6,1,1,0,0,1,0,0,'',12340),
 (254171,0,0,0,0,0,'Risen Servant',NULL,NULL,0,59,59,0,37,0,1,1.14286,1,1,20,0,0,1,2000,2000,1,1,1,32768,2048,0,0,7,0,0,0,0,0,0,0,0,'SmartAI',0,1,0.944782,1,1,1,0,0,1,0,0,'',12340),
 (254172,0,0,0,0,0,'Left Hand of Yahola',NULL,NULL,0,59,59,0,37,0,1,1.14286,1,1,20,1,0,1.5,2000,2000,1,1,1,32768,2048,0,0,7,0,0,0,0,0,0,200,400,'',0,1,4.347349,1,1,1,0,0,1,0,0,'',12340),
 (254173,0,0,0,0,0,'Right Hand of Yahola',NULL,NULL,0,59,59,0,37,0,1,1.14286,1,1,20,1,0,1.5,2000,2000,1,1,1,32768,2048,0,0,7,0,0,0,0,0,0,200,400,'',0,1,4.347349,1,1,1,0,0,1,0,0,'',12340),
@@ -105,11 +107,13 @@ INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, 
 (2541684, 2541685, 1.5, 88, 7, 0, 0),
 (2541684, 2541686, 1.7, 271, 7, 0, 0);
 
-DELETE FROM `creature_loot_template` WHERE `Entry` = 254168;
+DELETE FROM `creature_loot_template` WHERE `Entry` IN (254168, 254169, 254170);
 INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES
 (254168, 2061076, 0, 20, 0, 1, 1, 1, 1, 'Vazul - Vazul''s Whispershade Blindfold'),
 (254168, 2067258, 0, 20, 0, 1, 1, 1, 1, 'Vazul - Mystic Whispershade Belt'),
-(254168, 2072023, 0, 20, 0, 1, 1, 1, 1, 'Vazul - Spiritbound Whispershade Bindings');
+(254168, 2072023, 0, 20, 0, 1, 1, 1, 1, 'Vazul - Spiritbound Whispershade Bindings'),
+(254170, 2063769, 0, 20, 0, 1, 1, 1, 1, 'Zazera - Sandswept Garment'),
+(254169, 2063774, 0, 20, 0, 1, 1, 1, 1, 'Yahola - Faded Enclave Shirt');
 
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (254168, 254169, 254170, 254171) AND `source_type` = 0;
 DELETE FROM `smart_scripts` WHERE `entryorguid` = 8561 AND `source_type` = 0 AND `id` IN (3, 4);
