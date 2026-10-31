@@ -3873,11 +3873,23 @@ namespace CoAChallenges
         CoAChallengesUnit() : UnitScript("CoAChallengesUnit", true,
             { UNITHOOK_ON_DAMAGE, UNITHOOK_ON_HEAL, UNITHOOK_MODIFY_HEAL_RECEIVED, UNITHOOK_ON_BEFORE_ROLL_MELEE_OUTCOME_AGAINST, UNITHOOK_CAN_UNIT_ATTACK,
               UNITHOOK_ON_UNIT_EXIT_COMBAT, UNITHOOK_SHOULD_TRACK_VALUES_UPDATE_POS_BY_INDEX,
-              UNITHOOK_ON_PATCH_VALUES_UPDATE }) { }
+              UNITHOOK_ON_PATCH_VALUES_UPDATE, UNITHOOK_ON_UNIT_DEATH }) { }
 
         void OnUnitExitCombat(Unit* unit) override
         {
             RestoreAdventureHealth(unit);
+        }
+
+        void OnUnitDeath(Unit* unit, Unit* killer) override
+        {
+            Creature* killed = unit ? unit->ToCreature() : nullptr;
+            if (!killed || !killer || killer->IsPlayer() || killer->IsPet() || killer->IsTotem())
+                return;
+            if (Player* guardianOwner = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
+            {
+                CoAChallengesPlayer::CreditKill(guardianOwner, killed);
+                CoAChallengesPlayer::FailForbiddenKill(guardianOwner, killed);
+            }
         }
 
         bool ShouldTrackValuesUpdatePosByIndex(Unit const* unit, uint8 /*updateType*/, uint16 index) override
