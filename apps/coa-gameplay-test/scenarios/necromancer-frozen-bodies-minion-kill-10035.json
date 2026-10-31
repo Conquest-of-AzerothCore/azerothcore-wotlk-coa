@@ -1,0 +1,184 @@
+{
+  "schema": 1,
+  "name": "Frozen Bodies grants a stack when a Necromancer minion kills an experience-yielding enemy (#10035)",
+  "contract": [
+    "Frozen Bodies 707562 grants a stack of 712434 when the Necromancer kills an enemy that yields experience or",
+    "honor. Pet and player kills already grant it, but a Necromancer Ghoul is a guardian, so Unit::Kill fires",
+    "neither OnPlayerCreatureKill nor OnPlayerCreatureKilledByPet when it lands the killing blow. A level-30",
+    "Necromancer commands the Ghoul to kill a level-30 Rabbit, a critter that yields no experience and must grant",
+    "nothing, then a level-30 enemy, which must grant one stack. The Necromancer never attacks, so no Frost",
+    "critical strike can grant it."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "necro",
+      "race": 5,
+      "class": 23,
+      "level": 30,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "critter",
+      "owner": "necro",
+      "entry": 721,
+      "faction": 7,
+      "level": 30,
+      "health": 300,
+      "distance": 4
+    },
+    {
+      "id": "worthy",
+      "owner": "necro",
+      "entry": 3473,
+      "faction": 7,
+      "level": 30,
+      "health": 300,
+      "distance": 7
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 707562
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Necromancer has Frozen Bodies",
+      "actor": "necro",
+      "metric": "aura",
+      "spell": 707562,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 500971
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 504868
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 0,
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "label": "Raise a Ghoul",
+      "actor": "necro",
+      "spell": 500971
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one Ghoul is raised",
+      "actor": "necro",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Ghoul take its formation place",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Command: Undead on the Rabbit",
+      "actor": "necro",
+      "spell": 504868,
+      "target": "critter"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Ghoul kills the Rabbit",
+      "actor": "critter",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 60000
+    },
+    {
+      "action": "wait",
+      "label": "Let a stack from the Rabbit kill appear if one were granted",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a critter kill by the Ghoul grants no Frozen Bodies stack",
+      "actor": "necro",
+      "metric": "aura_stacks",
+      "spell": 712434,
+      "equals": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "necro",
+      "spell": 504868
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Command: Undead on the experience-yielding enemy",
+      "actor": "necro",
+      "spell": 504868,
+      "target": "worthy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Ghoul kills the experience-yielding enemy",
+      "actor": "worthy",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Necromancer never swung at either target",
+      "actor": "necro",
+      "metric": "melee_attack_count",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Ghoul's kill of an experience-yielding enemy grants one Frozen Bodies stack",
+      "actor": "necro",
+      "metric": "aura_stacks",
+      "spell": 712434,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}
