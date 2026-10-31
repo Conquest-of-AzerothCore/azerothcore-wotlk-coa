@@ -334,7 +334,7 @@ class spell_warr_slam : public SpellScript
         if (info->Id >= SPELL_WARRIOR_FROZEN_SLAM_FIRST_RANK && info->Id <= SPELL_WARRIOR_FROZEN_SLAM_LAST_RANK)
             return SPELL_WARRIOR_FROZEN_SLAM_DAMAGE;
 
-        return SPELL_WARRIOR_SLAM;
+        return sSpellMgr->GetSpellTwinFor(SPELL_WARRIOR_SLAM, info->GetFirstRankSpell()->Id);
     }
 
     bool Validate(SpellInfo const* info) override
