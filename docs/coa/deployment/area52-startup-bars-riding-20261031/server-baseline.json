@@ -1,0 +1,34 @@
+{
+  "src/server/coa/AscensionCompat.cpp": {
+    "path": "/home/dml/games/ascension-freepick-test/private/active-build-source/src/server/coa/AscensionCompat.cpp",
+    "sha256": "106787f105c30832c5227016441f914ca5ab3a7a96de47be822aefdc9ca30c53"
+  },
+  "src/server/coa/AscensionMysticEnchant.cpp": {
+    "path": "/home/dml/games/ascension-freepick-test/private/active-build-source/src/server/coa/AscensionMysticEnchant.cpp",
+    "sha256": "30a77988e29c2e5612a96cd56af99c5d1c73ffd9577b032f5a04337df014bde5"
+  },
+  "src/server/coa/AscensionMysticEnchantCatalog.h": {
+    "path": "/home/dml/games/ascension-freepick-test/private/active-build-source/src/server/coa/AscensionMysticEnchantCatalog.h",
+    "sha256": "36cd3f410bc3d02dccd7428c1b7ff1cc0b2ced5f7b5de22861391b2d97866f95"
+  },
+  "src/server/coa/AscensionMysticKnightEpics.cpp": {
+    "path": "/home/dml/games/ascension-freepick-test/private/active-build-source/src/server/coa/AscensionMysticKnightEpics.cpp",
+    "sha256": "1a78f1660991995d1db3c98f678d1f7580f7a6f1b18c9dea4aba1beaff20c3da"
+  },
+  "src/server/game/Entities/Player/Player.cpp": {
+    "path": "/home/dml/games/ascension-freepick-test/private/active-build-source/src/server/game/Entities/Player/Player.cpp",
+    "sha256": "18091ef22d28b9d9b6f6581b274de2b04cc190b768c0885b6b0c12323ba16232"
+  },
+  "src/server/game/Entities/Player/Player.h": {
+    "path": "/home/dml/games/ascension-freepick-test/private/active-build-source/src/server/game/Entities/Player/Player.h",
+    "sha256": "48af8c27f916a5e8c0e2ea4764e62fca8b176b61b360f9f9d5e049315a9b4217"
+  },
+  "apps/coa-tests/area52_mystic_grant_ownership/harness.cpp": {
+    "path": "/home/dml/games/ascension-freepick-test/private/active-build-source/apps/coa-tests/area52_mystic_grant_ownership/harness.cpp",
+    "sha256": "8509064b72e1562498c24edc4f1ba743b232ab045cef10492078738f8df9a170"
+  },
+  "apps/coa-tests/area52_mystic_grant_ownership/run.py": {
+    "path": "/home/dml/games/ascension-freepick-test/private/active-build-source/apps/coa-tests/area52_mystic_grant_ownership/run.py",
+    "sha256": "f883c2a8d6bcb8eeff481adf929ddf5f8e34a865e949b2ddf363127f5c2f455f"
+  }
+}
