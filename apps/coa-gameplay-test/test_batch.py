@@ -318,7 +318,9 @@ SHIPPED_EXCLUSIVE = {'bloodforged-high-risk-drop', 'coa-prestige-chromie-spawns'
                      'test-zone-bonus-command', 'test-zone-bonus-westfall', 'void-portal-capture',
                      'path-to-ascension-arena-solo-queue-tutorial', 'molten-core-lucifron-encounter',
                      'battleground-spirit-guide-queue-follows-range',
-                     'battleground-spirit-guide-client-queue-request-10146'}
+                     'battleground-spirit-guide-client-queue-request-10146',
+                     'mercenary-battleground-team-faction', 'mercenary-war-mode-battleground',
+                     'high-risk-challenge-survives-battleground', 'mercenary-wintergrasp-team-faction'}
 UTC_EVENING = datetime(2026, 9, 24, 22, 40, tzinfo=timezone.utc)
 
 

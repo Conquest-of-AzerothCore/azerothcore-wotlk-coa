@@ -4,6 +4,7 @@
 #include "AscensionFelCommutationPolicy.h"
 #include "AscensionHighRiskPolicy.h"
 #include "AscensionBloodforging.h"
+#include "AscensionRulesets.h"
 #include "Bag.h"
 #include "Chat.h"
 #include "Config.h"
@@ -90,8 +91,8 @@ bool InHighRisk(Player const* player)
 
 bool CannotQueue(Player const* player)
 {
-    return QueueBlocked(InHighRisk(player), OpenWorld(player), player->HasPlayerFlag(PLAYER_FLAGS_RESTING),
-        player->GetSession()->IsBot());
+    return QueueBlocked(InHighRisk(player) || AscensionRulesets::HighRiskSuspended(player), OpenWorld(player),
+        player->HasPlayerFlag(PLAYER_FLAGS_RESTING), player->GetSession()->IsBot());
 }
 
 bool RefuseOutsideRest(Player* player, bool wholeGroup, std::string_view action)

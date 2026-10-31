@@ -2903,6 +2903,8 @@ private:
             return unit->GetName() == step.get<std::string>("name") ? 1.0 : 0.0;
         if (metric == "race")
             return unit->getRace();
+        if (metric == "faction")
+            return unit->GetFaction();
         if (metric == "name_lookup")
         {
             std::string name = step.get<std::string>("name");
