@@ -137,13 +137,14 @@ All 520 item ids that sub lists in ZG boss loot exist in `item_template`.
 
 Both videos show Zandalar pieces dropping from bosses (Thekal: Zandalar Augur's Hauberk; Arlokk: Zandalar
 Freethinker's Armguards), so the sub chances of 3.333 % on the priests, Mandokir and Jin'do are used. Every boss
-kill in the Normal video gives each player Runes of Ascension and Raider's Commendations (2 per boss, 6 from Hakkar).
-The video shows 175 runes per boss and 2500 from Hakkar; that exceeds a loot row's count (255), so the runes follow
-Molten Core: one per boss. The Hakkar kill shows no Cache of the Blood God; the cache 1400023 stays by decision.
+kill in the Normal video gives each player 175 Runes of Ascension and 2 Raider's Commendations; Hakkar gives 2500
+runes, 6 commendations and Dungeon Spoils. 2500 exceeds a loot row's 8-bit count, so Hakkar's script hands those
+runes to every player who tapped him. The variants take the Normal amounts. Dungeon Spoils on Hakkar: 2021814 on
+Normal (video) and Ascended (as Ragnaros), Heroic 1202039 and Mythic 1027965 (sub). The Hakkar kill shows no Cache
+of the Blood God; the cache 1400023 stays by decision.
 
 Archive-only loot (approval needed): Battleweaver pieces as boss drops (sub only), 0 %-chance CoA pieces on bosses
-and 43 trash greens, Edge 12504, Gahz'ranka 12503 and 1022739, Dungeon Spoils 2021814 / 1202039 / 1027965 (sub; the
-Hakkar video shows Dungeon Spoils).
+and 43 trash greens, Edge 12504, Gahz'ranka 12503 and 1022739.
 
 Left as is unless decided otherwise: quests 580290 and 580295 carry local Path to Ascension titles and MinLevel 8.
 
@@ -157,7 +158,7 @@ Left as is unless decided otherwise: quests 580290 and 580295 carry local Path t
 | access rows for difficulties 0-3 at level 60; every map-309 spawn on `spawnMask` 15 | `rev_20261025_83` | dbc |
 | Heroic, Mythic and Ascended templates for 61 families at +100000/+200000/+300000, health and melee damage ×1.44/×1.88/×2.32, `coa_boss_flex` hp_d1..d3 on the same ladder | `rev_20261025_84` | wdb (Hakkar, Mar'li, Arlokk, Bloodseeker Bat), Molten Core precedent |
 | own loot ids for 39 boss variants, 642 rows; Hakkar caches 1400039 / 2400039 / 2500039; no Battleweaver pieces | `rev_20261025_85` | sub |
-| the 27 Zandalar pieces at 3.333 % on the priests, Mandokir and Jin'do, each tier with its own item ids; Rune of Ascension 375250 ×1 and Raider's Commendation 400750 ×2 (Hakkar ×6) at 100 % on all 13 bosses and their variants | `rev_20261025_93` | video, sub, Molten Core ids |
+| the 27 Zandalar pieces at 3.333 % on the priests, Mandokir and Jin'do, each tier with its own item ids; Rune of Ascension 375250 ×175 and Raider's Commendation 400750 ×2 at 100 % on all 13 bosses and their variants; Hakkar ×6 commendations, Dungeon Spoils, and 2500 runes from his script | `rev_20261025_93`, `boss_hakkar_coa.cpp` | video, sub, Molten Core ids |
 | quest reputation from the faction reward index (+250/+350/+500); MinLevel 10 and 60 | `rev_20261025_86` | wdb, exiles |
 | Rin'wosho 14921 sells the 27 CoA reputation items | `rev_20261025_87` | wdb, sub |
 | trash kits from the log; Fierce Blow 975011 and Berserking 1126297; SmartAI on 11361, 11387, 14880, 15068 | `rev_20261025_88` | log |
@@ -178,7 +179,8 @@ to it in the log.
 2. Ascended attunement: `Tutorial.dbc` 142 says Ascended needs an attunement begun at an NPC. Neither the NPC nor
    the quest is in any source, so Ascended opens without one; no NPC is invented.
 3. Missing quests: their givers are unknown.
-4. Dungeon Spoils are left out (archive-only ids); rune counts follow Molten Core, not the video's 175 / 2500.
+4. Rune, commendation and Dungeon Spoils amounts on Heroic, Mythic and Ascended copy Normal; Ascended Dungeon
+   Spoils is 2021814 as on Ragnaros. Only the Normal video shows them.
 5. The Mythic Heart of Hakkar 1319802 is inferred from the tier offset; the dump has no Mythic row.
 6. Trash variants keep the Normal loot id; Edge of Madness variants use the sub 11.111 % chances.
 7. DamageModifier follows the health ladder as in Molten Core; no log measures variant melee damage.

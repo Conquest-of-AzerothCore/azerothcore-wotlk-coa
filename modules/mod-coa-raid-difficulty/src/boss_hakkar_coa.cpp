@@ -139,6 +139,11 @@ namespace
     constexpr uint8 SCYTHE_STACKS        = 10;
     constexpr float AVATAR_RING          = 10.0f;
 
+    // The launch-day Normal kill (youtube c7iqfz04PmI) gives each player 2500 Runes of Ascension in one loot slot,
+    // more than a loot row's 8-bit count holds, so they are handed out at his death instead.
+    constexpr uint32 ITEM_RUNE_OF_ASCENSION = 375250;
+    constexpr uint32 HAKKAR_RUNES           = 2500;
+
     struct PriestLoa
     {
         uint32 priest;
@@ -244,6 +249,16 @@ namespace
                 loa.avatar.Despawn(me);
             ClearWill();
             BossAI::JustDied(killer);
+            GrantRunes();
+        }
+
+        void GrantRunes()
+        {
+            me->GetMap()->DoForAllPlayers([&](Player* player)
+            {
+                if (!player->IsGameMaster() && me->isTappedBy(player))
+                    player->AddItem(ITEM_RUNE_OF_ASCENSION, HAKKAR_RUNES);
+            });
         }
 
         // Where a Son of Hakkar dies, his blood pools.
