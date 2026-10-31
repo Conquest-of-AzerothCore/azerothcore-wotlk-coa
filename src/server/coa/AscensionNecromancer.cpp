@@ -321,6 +321,12 @@ void Spread(Player* player, Unit* source, bool refresh, bool allDiseases, uint32
 namespace
 {
 using namespace AscensionNecromancer;
+void Reward(Player* player, Unit* killed)
+{
+    if (player && Owner(player) == player && killed && killed->GetCharmerOrOwnerPlayerOrPlayerItself() != player &&
+        player->isHonorOrXPTarget(killed) && player->HasAura(707562))
+        Cast(player, player, 712434);
+}
 class necromancer_sessions : public PlayerScript
 {
   public:
@@ -337,12 +343,6 @@ class necromancer_sessions : public PlayerScript
     void OnPlayerLogout(Player* player) override
     {
         Forget(player);
-    }
-    void Reward(Player* player, Unit* killed)
-    {
-        if (player && Owner(player) == player && killed && killed->GetCharmerOrOwnerPlayerOrPlayerItself() != player &&
-            player->isHonorOrXPTarget(killed) && player->HasAura(707562))
-            Cast(player, player, 712434);
     }
     void OnPlayerPVPKill(Player* player, Player* killed) override
     {
@@ -364,8 +364,10 @@ class necromancer_lifecycle : public UnitScript
         : UnitScript("necromancer_lifecycle", true, {UNITHOOK_ON_UNIT_UPDATE, UNITHOOK_ON_UNIT_DEATH})
     {
     }
-    void OnUnitDeath(Unit* unit, Unit*) override
+    void OnUnitDeath(Unit* unit, Unit* killer) override
     {
+        if (killer && !killer->IsPlayer() && !killer->IsPet() && !killer->IsTotem())
+            Reward(Owner(killer), unit);
         Player* player = Owner(unit);
         if (player == unit)
             Prune(player, true);
