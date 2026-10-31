@@ -17758,6 +17758,9 @@ private:
 
 void Unit::CastDelayedSpellWithPeriodicAmount(Unit* caster, uint32 spellId, AuraType auraType, int32 addAmount, uint8 effectIndex)
 {
+    // the delayed cast runs outside the script that asked for it: the Reborn spell is chosen now
+    if (uint32 const twin = SpellMgr::GetRunningScriptTwin())
+        spellId = sSpellMgr->GetSpellTwinFor(spellId, twin);
     AuraEffect* aurEff = nullptr;
     for (AuraEffectList::iterator i = m_modAuras[auraType].begin(); i != m_modAuras[auraType].end(); ++i)
     {
