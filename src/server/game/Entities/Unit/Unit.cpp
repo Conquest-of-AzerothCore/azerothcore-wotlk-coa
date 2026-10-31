@@ -15109,7 +15109,7 @@ void Unit::CastPetAura(PetAura const* aura)
     if (!auraId)
         return;
 
-    if (auraId == 35696)                                      // Demonic Knowledge
+    if (sSpellMgr->GetSpellTwinSource(auraId) == 35696)       // Demonic Knowledge
     {
         int32 basePoints = aura->GetDamage();
         CastCustomSpell(this, auraId, &basePoints, nullptr, nullptr, true);
