@@ -2252,9 +2252,9 @@ class spell_pal_light_s_beacon : public AuraScript
             return;
 
         uint32 healSpellId;
-        if (procSpell->IsRankOf(sSpellMgr->AssertSpellInfo(SPELL_PALADIN_HOLY_LIGHT_R1)))
+        if (sSpellMgr->GetSpellTwinSource(procSpell->GetFirstRankSpell()->Id) == SPELL_PALADIN_HOLY_LIGHT_R1)
             healSpellId = SPELL_PALADIN_BEACON_OF_LIGHT_HL;
-        else if (procSpell->IsRankOf(sSpellMgr->AssertSpellInfo(SPELL_PALADIN_FLASH_OF_LIGHT_R1)))
+        else if (sSpellMgr->GetSpellTwinSource(procSpell->GetFirstRankSpell()->Id) == SPELL_PALADIN_FLASH_OF_LIGHT_R1)
             healSpellId = SPELL_PALADIN_BEACON_OF_LIGHT_FOL;
         else
             healSpellId = SPELL_PALADIN_BEACON_OF_LIGHT_HS;

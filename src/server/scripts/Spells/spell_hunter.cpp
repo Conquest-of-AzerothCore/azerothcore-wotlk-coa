@@ -693,8 +693,8 @@ class spell_hun_readiness : public SpellScript
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
             if (spellInfo
             && spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER
-            && spellInfo->Id != SPELL_HUNTER_READINESS
-            && spellInfo->Id != SPELL_HUNTER_BESTIAL_WRATH
+            && sSpellMgr->GetSpellTwinSource(spellInfo->Id) != SPELL_HUNTER_READINESS
+            && sSpellMgr->GetSpellTwinSource(spellInfo->Id) != SPELL_HUNTER_BESTIAL_WRATH
             && spellInfo->Id != SPELL_DRAENEI_GIFT_OF_THE_NAARU)
             {
                 if (spellInfo->RecoveryTime > 0)

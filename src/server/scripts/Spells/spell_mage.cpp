@@ -382,7 +382,7 @@ class spell_mage_brain_freeze : public AuraScript
 
         // xinef: Improved Blizzard, generic chilled check
         if (spellInfo->SpellFamilyFlags[0] & 0x100000)
-            return spellInfo->Id == SPELL_MAGE_IMPROVED_BLIZZARD_CHILLED;
+            return sSpellMgr->GetSpellTwinSource(spellInfo->Id) == SPELL_MAGE_IMPROVED_BLIZZARD_CHILLED;
 
         return true;
     }
@@ -501,7 +501,7 @@ class spell_mage_cold_snap : public SpellScript
         for (PlayerSpellMap::const_iterator itr = spellMap.begin(); itr != spellMap.end(); ++itr)
         {
             SpellInfo const* spellInfo = sSpellMgr->AssertSpellInfo(itr->first);
-            if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && (spellInfo->GetSchoolMask() & SPELL_SCHOOL_MASK_FROST) && spellInfo->Id != SPELL_MAGE_COLD_SNAP && spellInfo->GetRecoveryTime() > 0)
+            if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && (spellInfo->GetSchoolMask() & SPELL_SCHOOL_MASK_FROST) && spellInfo->Id != GetSpellInfo()->Id && spellInfo->GetRecoveryTime() > 0)
             {
                 SpellCooldowns::iterator citr = caster->GetSpellCooldownMap().find(spellInfo->Id);
                 if (citr != caster->GetSpellCooldownMap().end() && citr->second.needSendToClient)
@@ -1099,7 +1099,7 @@ class spell_mage_empowered_fire : public AuraScript
             return false;
 
         // Only proc on Ignite
-        return spellInfo->Id == SPELL_MAGE_IGNITE;
+        return sSpellMgr->GetSpellTwinSource(spellInfo->Id) == SPELL_MAGE_IGNITE;
     }
 
     void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& /*eventInfo*/)
@@ -1139,7 +1139,7 @@ class spell_mage_gen_extra_effects : public AuraScript
     {
         Unit* caster = eventInfo.GetActor();
         // T8 4P bonus: prevent double proc on Arcane Missiles
-        if (GetSpellInfo()->Id == SPELL_MAGE_HOT_STREAK_PROC && caster->HasAura(SPELL_MAGE_T8_4P_BONUS))
+        if (sSpellMgr->GetSpellTwinSource(GetSpellInfo()->Id) == SPELL_MAGE_HOT_STREAK_PROC && caster->HasAura(SPELL_MAGE_T8_4P_BONUS))
         {
             SpellInfo const* spellInfo = eventInfo.GetSpellInfo();
             if (spellInfo && spellInfo->SpellFamilyName == SPELLFAMILY_MAGE &&

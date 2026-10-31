@@ -1028,7 +1028,7 @@ class spell_war_sudden_death_aura : public AuraScript
         if (eventInfo.GetSpellPhaseMask() != PROC_SPELL_PHASE_FINISH)
             return isTriggeredAtSpellProcEvent;
         if (Spell const* procSpell = eventInfo.GetProcSpell())
-            if (procSpell->GetSpellInfo()->GetFirstRankSpell()->Id == SPELL_WARRIOR_EXECUTE_R1)
+            if (sSpellMgr->GetSpellTwinSource(procSpell->GetSpellInfo()->GetFirstRankSpell()->Id) == SPELL_WARRIOR_EXECUTE_R1)
                 return isTriggeredAtSpellProcEvent;
         return false;
     }

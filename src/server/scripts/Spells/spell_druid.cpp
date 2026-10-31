@@ -123,13 +123,13 @@ class spell_dru_bear_form_passive : public AuraScript
 
     void CalculateAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
     {
-        if (!GetUnitOwner()->HasAura(SPELL_DRUID_ENRAGE) || GetUnitOwner()->HasAura(SPELL_DRUID_ITEM_T10_FERAL_4P_BONUS))
+        if (!GetUnitOwner()->HasAuraOrTwin(SPELL_DRUID_ENRAGE) || GetUnitOwner()->HasAura(SPELL_DRUID_ITEM_T10_FERAL_4P_BONUS))
         {
             return;
         }
 
         int32 mod = 0;
-        switch (GetId())
+        switch (sSpellMgr->GetSpellTwinSource(GetId()))
         {
             case SPELL_DRUID_BEAR_FORM_PASSIVE:
                 mod = -48;
