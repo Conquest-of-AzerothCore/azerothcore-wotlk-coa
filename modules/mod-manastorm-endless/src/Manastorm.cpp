@@ -543,7 +543,7 @@ public:
                 ManastormMobilityClient::OnMixtureRemoved(player);
     }
 
-    void ResolveSpellCast(Unit* caster, SpellInfo const*& spellInfo) override
+    void ResolveSpellCast(Unit* caster, SpellInfo const*& spellInfo, AuraEffect const* /*triggeredByAura*/) override
     {
         if (!ManastormModuleConfig::Enabled() || !spellInfo ||
             spellInfo->Id == 93378 || spellInfo->Id == 93380 || spellInfo->Id == 93412)

@@ -72,7 +72,7 @@ protected:
 
 public:
     // Resolve metadata before Spell construction, preserving targets, flags and forwarded values.
-    virtual void ResolveSpellCast(Unit* /*caster*/, SpellInfo const*& /*spellInfo*/) { }
+    virtual void ResolveSpellCast(Unit* /*caster*/, SpellInfo const*& /*spellInfo*/, AuraEffect const* /*triggeredByAura*/) { }
 
     // Called when a unit deals healing to another unit
     virtual void OnHeal(Unit* /*healer*/, Unit* /*reciever*/, uint32& /*gain*/) { }

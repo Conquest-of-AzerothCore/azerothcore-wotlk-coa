@@ -2971,8 +2971,15 @@ void SpellMgr::LoadSpellLinked()
         for (auto twin = begin; twin != end; ++twin)
         {
             int32 const twinTrigger = trigger + (trigger < 0 ? -1 : 1) * (int32(twin->second) - spellId);
-            if (!mSpellLinkedMap.contains(twinTrigger))
-                twinLinks.emplace(twinTrigger, effects);
+            if (mSpellLinkedMap.contains(twinTrigger))
+                continue;
+            std::vector<int32> twinEffects;
+            for (int32 effect : effects)
+            {
+                int32 const twinEffect = int32(GetSpellTwinFor(uint32(std::abs(effect)), twin->second));
+                twinEffects.push_back(effect < 0 ? -twinEffect : twinEffect);
+            }
+            twinLinks.emplace(twinTrigger, std::move(twinEffects));
         }
     }
     mSpellLinkedMap.merge(twinLinks);

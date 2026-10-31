@@ -504,11 +504,13 @@ public:
     AscensionWarcraftRebornScriptTwinCasts() : UnitScript("AscensionWarcraftRebornScriptTwinCasts", true,
         { UNITHOOK_RESOLVE_SPELL_CAST }) { }
 
-    void ResolveSpellCast(Unit*, SpellInfo const*& spellInfo) override
+    void ResolveSpellCast(Unit*, SpellInfo const*& spellInfo, AuraEffect const* triggeredByAura) override
     {
         if (!spellInfo)
             return;
-        uint32 const twin = sSpellMgr->GetRunningScriptTwin();
+        uint32 twin = sSpellMgr->GetRunningScriptTwin();
+        if (!twin && triggeredByAura && sSpellMgr->GetSpellTwinSource(triggeredByAura->GetId()) != triggeredByAura->GetId())
+            twin = triggeredByAura->GetId();
         if (!twin)
             return;
         uint32 const resolved = sSpellMgr->GetSpellTwinFor(spellInfo->Id, twin);

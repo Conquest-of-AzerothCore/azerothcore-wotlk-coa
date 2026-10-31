@@ -1493,7 +1493,7 @@ thread_local bool TriggerLoopLogged = false;
 
 SpellCastResult Unit::CastSpell(SpellCastTargets const& targets, SpellInfo const* spellInfo, CustomSpellValues const* value, TriggerCastFlags triggerFlags, Item* castItem, AuraEffect const* triggeredByAura, ObjectGuid originalCaster)
 {
-    sScriptMgr->ResolveSpellCast(this, spellInfo);
+    sScriptMgr->ResolveSpellCast(this, spellInfo, triggeredByAura);
 
     if (!spellInfo)
     {

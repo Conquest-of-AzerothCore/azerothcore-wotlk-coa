@@ -1842,27 +1842,27 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpellOrTwin(31221, 0))
                 {
                     if (!apply)
-                        target->CastSpell(target, 31666, true);
+                        target->CastSpell(target, 31666, true, nullptr, aurEff);
                     else
                     {
                         // Remove counter aura
-                        target->RemoveAurasDueToSpell(31666);
+                        target->RemoveAurasDueToSpell(sSpellMgr->GetSpellTwinFor(31666, aurEff->GetId()));
 
                         int32 amount = aurEff->GetAmount();
-                        target->CastCustomSpell(target, 31665, &amount, nullptr, nullptr, true);
+                        target->CastCustomSpell(target, 31665, &amount, nullptr, nullptr, true, nullptr, aurEff);
                     }
                 }
                 // Overkill
-                if (target->HasAuraOrTwin(58426))
+                if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpellOrTwin(58426, 0))
                 {
                     if (!apply)
-                        target->CastSpell(target, 58428, true);
+                        target->CastSpell(target, 58428, true, nullptr, aurEff);
                     else
                     {
                         // Remove counter aura
-                        target->RemoveAurasDueToSpell(58428);
+                        target->RemoveAurasDueToSpell(sSpellMgr->GetSpellTwinFor(58428, aurEff->GetId()));
 
-                        target->CastSpell(target, 58427, true);
+                        target->CastSpell(target, 58427, true, nullptr, aurEff);
                     }
                 }
             }

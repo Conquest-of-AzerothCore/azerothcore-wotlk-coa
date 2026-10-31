@@ -4169,7 +4169,7 @@ void Spell::_cast(bool skipCheck)
     if (m_spellInfo->HasAttribute(SPELL_ATTR7_CAN_CAUSE_INTERRUPT))
         if (Unit* target = m_targets.GetUnitTarget())
             if (target->IsCreature())
-                m_caster->CastSpell(target, 32747, true);
+                m_caster->CastSpell(target, sSpellMgr->GetSpellTwinFor(32747, m_spellInfo->Id), true);
 
     if (m_caster->IsPlayer())
         if (m_caster->ToPlayer()->GetCommandStatus(CHEAT_COOLDOWN))
