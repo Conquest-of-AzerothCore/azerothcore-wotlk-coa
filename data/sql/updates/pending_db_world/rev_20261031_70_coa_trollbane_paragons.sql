@@ -22,13 +22,14 @@
 -- so Zazera's AI does the rest: while she burns, the splash puts out Burning Sands and stuns her with Extinguished
 -- (254624, 5 s). Burning Sands returns 30 s after a splash (no data gives its real timer) and when she resets. With
 -- each bucket gone for 40 s, the fight is a loop: kite her to one bucket, splash and stun her, kite her to the other
--- before she rekindles. The bucket model is the Hallow's End Water Bucket (display 7484), matching footage. Out of
--- combat Yahola channels Blackfathom Channeling (8734), the shadowy casting pose of the static Mossflayer Shadowhunters
--- around the Mazra'Alor altar on Ascension. The spell is a channel, so its pose and shadow only show while it is cast;
--- the Shadowhunters' stock creature_addon aura showed nothing. Creatures that carry that addon aura (the static altar
--- Shadowhunters, and Yahola) cast the channel whenever they are out of combat and stop it when they engage; evading
--- restores the aura. Spectral Volley needs no change to be uninterruptible: its PreventionType is 0, so interrupts and
--- silences cannot stop it.
+-- before she rekindles. The bucket model is the Hallow's End Water Bucket (display 7484), matching footage; Ascension's
+-- own bucket object was not captured, so it is CoA object 2541700, outside the range of restored Ascension objects. Out
+-- of combat Yahola channels Blackfathom Channeling (8734), the shadowy casting pose of the static Mossflayer
+-- Shadowhunters around the Mazra'Alor altar on Ascension. The spell is a channel, so its pose and shadow only show
+-- while it is cast; the Shadowhunters' stock creature_addon aura showed nothing. Creatures that carry that addon aura
+-- (the static altar Shadowhunters, and Yahola) cast the channel whenever they are out of combat and stop it when they
+-- engage; evading restores the aura. Spectral Volley needs no change to be uninterruptible: its PreventionType is 0, so
+-- interrupts and silences cannot stop it.
 -- Loot: of their Ascension drops only Vazul's three Whispershade greens are her own; the rest (Ephemeral Key,
 -- recipes, world greens) are shared world drops. Their chances were not recorded, so they use a common rare-elite
 -- rate: 20% each in one group, at most one per kill (as Geomancer Flintdagger's own greens).
