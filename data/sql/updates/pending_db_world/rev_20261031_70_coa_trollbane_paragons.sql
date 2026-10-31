@@ -21,9 +21,12 @@
 -- Zazera, within 5 yards of the user. In game it plays the splash; the spell itself has only a dummy effect, so
 -- Zazera's AI does the rest: while she burns, the splash puts out Burning Sands and stuns her with Extinguished
 -- (254624, 5 s). Burning Sands returns when she resets. The bucket model is the Hallow's End Water Bucket (display
--- 7484), matching footage. Yahola idles in the channelling pose of Blackfathom Channeling (8734), as the static
--- Mossflayer Shadowhunters around the Mazra'Alor altar do; the three of them that lacked it get it too. Spectral Volley
--- needs no change to be uninterruptible: its PreventionType is 0, so interrupts and silences cannot stop it.
+-- 7484), matching footage. Out of combat Yahola channels Blackfathom Channeling (8734), the shadowy casting pose of the
+-- static Mossflayer Shadowhunters around the Mazra'Alor altar on Ascension. The spell is a channel, so its pose and
+-- shadow only show while it is cast; the Shadowhunters' stock creature_addon aura showed nothing. Creatures that carry
+-- that addon aura (the altar Shadowhunters, three of which lacked it, and Yahola) cast the channel whenever they are
+-- out of combat and stop it when they engage; evading restores the aura. Spectral Volley needs no change to be
+-- uninterruptible: its PreventionType is 0, so interrupts and silences cannot stop it.
 -- Loot: of their Ascension drops only Vazul's three Whispershade greens are her own; the rest (Ephemeral Key,
 -- recipes, world greens) are shared world drops. Their chances were not recorded, so they use a common rare-elite
 -- rate: 20% each in one group, at most one per kill (as Geomancer Flintdagger's own greens).
@@ -87,9 +90,12 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 13 AND `SourceEntry` = 254623;
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 22 AND `SourceEntry` = 254170 AND `SourceId` = 0;
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 22 AND `SourceGroup` = 4 AND `SourceEntry` IN (254169, 8561) AND `SourceId` = 0;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (13, 1, 254623, 0, 0, 31, 0, 3, 254170, 0, 0, 0, 0, '', 'Water Bucket - splash hits only Zazera'),
-(22, 2, 254170, 0, 0, 1, 1, 254622, 0, 0, 0, 0, 0, '', 'Zazera - Water Bucket only puts her out while she has Burning Sands');
+(22, 2, 254170, 0, 0, 1, 1, 254622, 0, 0, 0, 0, 0, '', 'Zazera - Water Bucket only puts her out while she has Burning Sands'),
+(22, 4, 254169, 0, 0, 1, 1, 8734, 0, 0, 0, 0, 0, '', 'Yahola - Channels Blackfathom Channeling only while she has its idle aura'),
+(22, 4, 8561, 0, 0, 1, 1, 8734, 0, 0, 0, 0, 0, '', 'Mossflayer Shadowhunter - Channels Blackfathom Channeling only with its idle aura');
 
 DELETE FROM `creature_formations` WHERE `memberGUID` IN (2541680, 2541681, 2541682, 2541684, 2541685, 2541686);
 INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
@@ -107,12 +113,17 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 (254168, 2072023, 0, 20, 0, 1, 1, 1, 1, 'Vazul - Spiritbound Whispershade Bindings');
 
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (254168, 254169, 254170, 254171) AND `source_type` = 0;
+DELETE FROM `smart_scripts` WHERE `entryorguid` = 8561 AND `source_type` = 0 AND `id` IN (3, 4);
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
 (254168, 0, 0, 0, 0, 0, 100, 0, 1000, 2000, 12000, 16000, 0, 0, 11, 113, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'Vazul - In Combat - Cast Chains of Ice'),
 (254168, 0, 1, 0, 0, 0, 100, 0, 2000, 3000, 12000, 16000, 0, 0, 11, 9081, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Vazul - In Combat - Cast Shadow Bolt Volley'),
 (254169, 0, 0, 0, 0, 0, 100, 0, 1000, 2000, 3500, 4000, 0, 0, 11, 254625, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'Yahola - In Combat - Cast Spectral Bolt'),
 (254169, 0, 1, 0, 2, 0, 100, 1, 0, 99, 0, 0, 0, 0, 11, 254626, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Yahola - Below 99% Health - Cast Army of the Dead (once)'),
 (254169, 0, 2, 0, 0, 0, 100, 0, 10000, 11000, 11000, 11000, 0, 0, 11, 254632, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Yahola - In Combat - Cast Spectral Volley'),
+(254169, 0, 3, 0, 1, 0, 100, 0, 1000, 2000, 5000, 5000, 0, 0, 11, 8734, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Yahola - Out of Combat - Channel Blackfathom Channeling'),
+(254169, 0, 4, 0, 4, 0, 100, 0, 0, 0, 0, 0, 0, 0, 92, 1, 8734, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Yahola - On Aggro - Stop Blackfathom Channeling'),
+(8561, 0, 3, 0, 1, 0, 100, 0, 1000, 2000, 5000, 5000, 0, 0, 11, 8734, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Mossflayer Shadowhunter - Out of Combat - Channel Blackfathom Channeling'),
+(8561, 0, 4, 0, 4, 0, 100, 0, 0, 0, 0, 0, 0, 0, 92, 1, 8734, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Mossflayer Shadowhunter - On Aggro - Stop Blackfathom Channeling'),
 (254170, 0, 0, 0, 0, 0, 100, 0, 10000, 12000, 25000, 30000, 0, 0, 11, 254619, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Zazera - In Combat - Cast Firestorm'),
 (254170, 0, 1, 2, 8, 0, 100, 0, 254623, 0, 0, 0, 0, 0, 28, 254622, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Zazera - On Water Bucket Hit - Remove Burning Sands'),
 (254170, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 11, 254624, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Zazera - On Water Bucket Hit - Cast Extinguished'),
