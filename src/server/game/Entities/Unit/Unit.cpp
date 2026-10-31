@@ -10978,8 +10978,11 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
         for (AuraEffectList::const_iterator i = mHealingDoneOfStatPercent.begin(); i != mHealingDoneOfStatPercent.end(); ++i)
         {
             // stat used dependent from misc value (stat index)
-            Stats usedStat = Stats((*i)->GetSpellInfo()->Effects[(*i)->GetEffIndex()].MiscValue);
-            AdvertisedBenefit += int32(CalculatePct(GetStat(usedStat), (*i)->GetAmount()));
+            SpellEffectInfo const& effect = (*i)->GetSpellInfo()->Effects[(*i)->GetEffIndex()];
+            int32 const stat = effect.MiscValue >= STAT_STRENGTH && effect.MiscValue < MAX_STATS ? effect.MiscValue : effect.MiscValueB;
+            if (stat < STAT_STRENGTH || stat >= MAX_STATS)
+                continue;
+            AdvertisedBenefit += int32(CalculatePct(GetStat(Stats(stat)), (*i)->GetAmount()));
         }
 
         // ... and attack power
