@@ -12,10 +12,10 @@
     {"id": "p", "race": 3, "class": 25, "level": 37}
   ],
   "creatures": [
-    {"id": "aldaria", "owner": "p", "entry": 164318, "distance": 3, "faction": 35},
-    {"id": "sylana", "owner": "p", "entry": 164319, "distance": 5, "faction": 35},
-    {"id": "findan", "owner": "p", "entry": 164320, "distance": 7, "faction": 35},
-    {"id": "remmos", "owner": "p", "entry": 164321, "distance": 9, "faction": 35}
+    {"id": "aldaria", "owner": "p", "entry": 164318, "distance": 2, "faction": 35},
+    {"id": "sylana", "owner": "p", "entry": 164319, "distance": 3, "faction": 35},
+    {"id": "findan", "owner": "p", "entry": 164320, "distance": 4, "faction": 35},
+    {"id": "remmos", "owner": "p", "entry": 164321, "distance": 5, "faction": 35}
   ],
   "steps": [
     {"action": "wait", "label": "Let the fixtures settle", "ms": 2500},
