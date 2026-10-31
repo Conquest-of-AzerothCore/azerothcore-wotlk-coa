@@ -865,6 +865,7 @@ public:
     static void PushScriptTwin(uint32 spellId, uint32 triggeringSpellId = 0);
     static void PopScriptTwin(uint32 spellId);
     [[nodiscard]] static uint32 GetRunningScriptTwin();
+    [[nodiscard]] static uint32 GetScriptTwinOf(uint32 spellId);
     void LoadSpellRequired();
     void LoadSpellLearnSkills();
     void LoadSpellTargetPositions();

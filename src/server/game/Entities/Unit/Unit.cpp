@@ -5890,6 +5890,8 @@ void Unit::RemoveAurasDueToSpell(uint32 spellId, ObjectGuid casterGUID, uint8 re
         else
             ++iter;
     }
+    if (uint32 const twin = SpellMgr::GetScriptTwinOf(spellId))
+        RemoveAurasDueToSpell(twin, casterGUID, reqEffMask, removeMode);
 }
 
 void Unit::RemoveAuraFromStack(uint32 spellId, ObjectGuid casterGUID, AuraRemoveMode removeMode)
@@ -5907,6 +5909,8 @@ void Unit::RemoveAuraFromStack(uint32 spellId, ObjectGuid casterGUID, AuraRemove
         else
             ++iter;
     }
+    if (uint32 const twin = SpellMgr::GetScriptTwinOf(spellId))
+        RemoveAuraFromStack(twin, casterGUID, removeMode);
 }
 
 void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint32 dispellerSpellId, ObjectGuid casterGUID, Unit* dispeller, uint8 chargesRemoved/*= 1*/)
@@ -6522,6 +6526,8 @@ AuraEffect* Unit::GetAuraEffect(uint32 spellId, uint8 effIndex, ObjectGuid caste
             return itr->second->GetBase()->GetEffect(effIndex);
         }
     }
+    if (uint32 const twin = SpellMgr::GetScriptTwinOf(spellId))
+        return GetAuraEffect(twin, effIndex, caster);
     return nullptr;
 }
 
@@ -6595,6 +6601,8 @@ AuraApplication* Unit::GetAuraApplication(uint32 spellId, ObjectGuid casterGUID,
             return app;
         }
     }
+    if (uint32 const twin = SpellMgr::GetScriptTwinOf(spellId))
+        return GetAuraApplication(twin, casterGUID, itemCasterGUID, reqEffMask, except);
     return nullptr;
 }
 
@@ -6697,6 +6705,8 @@ bool Unit::HasAuraEffect(uint32 spellId, uint8 effIndex, ObjectGuid caster) cons
             return true;
         }
     }
+    if (uint32 const twin = SpellMgr::GetScriptTwinOf(spellId))
+        return HasAuraEffect(twin, effIndex, caster);
     return false;
 }
 
@@ -6713,6 +6723,8 @@ uint32 Unit::GetAuraCount(uint32 spellId) const
             count += (uint32)itr->second->GetBase()->GetStackAmount();
     }
 
+    if (uint32 const twin = SpellMgr::GetScriptTwinOf(spellId))
+        count += GetAuraCount(twin);
     return count;
 }
 

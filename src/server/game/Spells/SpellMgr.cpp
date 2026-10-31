@@ -1571,6 +1571,17 @@ uint32 SpellMgr::GetRunningScriptTwin()
     return 0;
 }
 
+uint32 SpellMgr::GetScriptTwinOf(uint32 spellId)
+{
+    if (RunningScriptTwins.empty())
+        return 0;
+    uint32 const running = GetRunningScriptTwin();
+    if (!running)
+        return 0;
+    uint32 const twin = sSpellMgr->GetSpellTwinFor(spellId, running);
+    return twin != spellId ? twin : 0;
+}
+
 uint32 SpellMgr::GetSpellTwinFor(uint32 stockSpellId, uint32 relatedSpellId) const
 {
     uint32 const relatedSource = GetSpellTwinSource(relatedSpellId);
