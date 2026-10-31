@@ -89,7 +89,7 @@ METRICS = TIMELINE_METRICS | {
     'system_messages',
     'system_message_contains', 'whispers_received', 'challenge_start_responses', 'challenge_start_code',
     'owned_creature_scale', 'owned_creature_visible', 'owned_creature_display', 'owned_creature_virtual_item',
-    'owned_creature_armor', 'owned_creature_max_health',
+    'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health',
     'unit_scale', 'combat_reach',
     'token_count', 'item_sell_price', 'monster_chat_count', 'creature_model_scale', 'creature_model_display',
     'taxi_node', 'in_flight', 'taxi_destination', 'stabled_pet_count', 'stable_result', 'pet_rows', 'instance_binds_listed', 'pet_entry', 'pet_aura_stacks', 'pet_aura_duration_ms', 'pet_is_banker', 'pet_display',
@@ -228,7 +228,7 @@ ACTIONS = {
     'cancel_aura': ({'actor', 'spell'}, {'actor', 'spell'}),
     'cancel_mount': ({'actor'}, {'actor'}),
     'cast': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'destination', 'target_pet', 'target_item',
-                                  'target_gameobject'}),
+                                  'target_gameobject', 'target_owned_entry'}),
     'attack': ({'actor', 'target'}, {'actor', 'target', 'pet'}),
     'pvp': ({'actor', 'enabled'}, {'actor', 'enabled'}),
     'group': ({'actor', 'target'}, {'actor', 'target', 'loot_method', 'master_looter'}),
@@ -241,7 +241,7 @@ ACTIONS = {
     'encounter_credit': ({'actor', 'entry'}, {'actor', 'entry'}),
     'encounter_start': ({'actor', 'boss_entry'}, {'actor', 'boss_entry', 'radius'}),
     'leave_group': ({'actor'}, {'actor'}),
-    'die': ({'actor'}, {'actor', 'revived'}),
+    'die': ({'actor'}, {'actor', 'revived', 'pet'}),
     'release_spirit': ({'actor'}, {'actor'}),
     'cast_charm': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'pet', 'destination'}),
     'gossip_hello': ({'actor'}, {'actor', 'target'}),
@@ -571,6 +571,10 @@ def validate(scenario):
                 require(type(step['target_pet']) is bool, f'{where}: target_pet must be boolean')
                 require(step['actor'] in player_ids and 'target' not in step,
                         f'{where}: target_pet casts from a player at their current pet')
+            if action == 'cast' and 'target_owned_entry' in step:
+                require(step['actor'] in player_ids and 'target' not in step and 'target_pet' not in step,
+                        f'{where}: target_owned_entry casts from a player at a creature they own')
+                number(step['target_owned_entry'], f'{where}.target_owned_entry', 1, 2**32 - 1, True)
         for key in ('target', 'caster'):
             if key in step:
                 require(step[key] in actor_ids, f'{where}: unknown {key}')
@@ -706,6 +710,9 @@ def validate(scenario):
                 require(step['code_actor'] in player_ids, f'{where}: code_actor must be a player')
         if action == 'die' and 'revived' in step:
             require(type(step['revived']) is bool, f'{where}: revived must be boolean')
+        if action == 'die' and 'pet' in step:
+            require(type(step['pet']) is bool and 'revived' not in step,
+                    f'{where}: pet death is a boolean without revived')
         if action == 'relog':
             require(step['actor'] in player_ids, f'{where}: relog needs a player')
             if 'race' in step:
@@ -1074,7 +1081,7 @@ def validate(scenario):
             if metric in {'owned_creature_scale', 'owned_creature_visible', 'owned_creature_display',
                           'owned_creature_virtual_item', 'owned_creature_spacing', 'owned_creature_weapon_damage_min',
                           'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_victim',
-                          'owned_creature_armor', 'owned_creature_max_health'}:
+                          'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health'}:
                 require('entry' in step, f'{where}: metric needs creature entry')
             if metric == 'owned_creature_attackable':
                 require(step.get('target') in actor_ids, f'{where}: metric needs the attacking unit')
@@ -1155,7 +1162,7 @@ def validate(scenario):
                           'challenge_start_responses', 'challenge_start_code', 'owned_creature_scale', 'cast_failure',
                           'owned_creature_weapon_damage_min', 'owned_creature_spell_hit_chance',
                           'owned_creature_attackable', 'owned_creature_victim', 'owned_creature_virtual_item',
-                          'owned_creature_armor', 'owned_creature_max_health',
+                          'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health',
                           'pet_entry', 'pet_aura_stacks', 'pet_is_banker', 'pet_display', 'pet_native_display', 'pet_scale',
                           'pet_knows_spell', 'pet_distance', 'pet_bearing', 'pet_casting', 'pet_loading',
                           'owned_creature_count', 'owned_creature_spacing', 'charm_entry',

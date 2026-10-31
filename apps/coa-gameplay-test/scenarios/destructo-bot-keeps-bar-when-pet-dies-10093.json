@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Destructo-Bot: the bot's bar survives the built pet's death (#10093)",
+  "contract": [
+    "#10093 reports that while a Tinker possesses Destructo-Bot 50300 (Build: Destructo-Bot 804673), the death of the",
+    "Mechano-Bear 803405 (60671) switched the action bar back to the Tinker's, so the bot could not self-destruct.",
+    "Expected: the Tinker keeps possessing the bot after the bear dies, and the latest SMSG_PET_SPELLS (0x179) still",
+    "names a unit (its low guid word is non-zero) instead of the cleared bar."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "tinker", "race": 1, "class": 28, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the world settle", "ms": 5000 },
+    { "action": "learn", "actor": "tinker", "spell": 803405 },
+    { "action": "cast", "actor": "tinker", "spell": 803405 },
+    {
+      "action": "assert", "label": "SETUP: the Mechano-Bear is built", "actor": "tinker", "metric": "pet_entry",
+      "equals": 60671, "within_ms": 9000
+    },
+    { "action": "learn", "actor": "tinker", "spell": 804673 },
+    { "action": "cast", "actor": "tinker", "spell": 804673 },
+    {
+      "action": "assert", "label": "SETUP: the build spell possesses its Destructo-Bot", "actor": "tinker",
+      "metric": "charm_entry", "equals": 50300, "within_ms": 7000
+    },
+    { "action": "wait", "label": "Let the possess bar packets settle", "ms": 1000 },
+    {
+      "action": "assert", "label": "SETUP: the bot's bar reaches the client", "actor": "tinker",
+      "metric": "server_packet_u32", "opcode": 377, "index": 0, "min": 1
+    },
+    { "action": "die", "label": "The Mechano-Bear dies", "actor": "tinker", "pet": true },
+    { "action": "wait", "label": "Let the pet removal settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "The Tinker still possesses the bot", "actor": "tinker", "metric": "charm_entry",
+      "equals": 50300
+    },
+    {
+      "action": "assert", "label": "The bot's bar is not cleared by the bear's death", "actor": "tinker",
+      "metric": "server_packet_u32", "opcode": 377, "index": 0, "min": 1
+    }
+  ]
+}

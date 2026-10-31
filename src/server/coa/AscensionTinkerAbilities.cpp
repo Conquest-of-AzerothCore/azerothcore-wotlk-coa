@@ -274,7 +274,7 @@ public:
                     for (Unit* ally : Allies(player,device,Radius(681513),1))
                         Cast(device,ally,681513);
         }
-        if (healing && Named(info,801707) && player->HasAura(524834))
+        if (Named(info,801707) && player->HasAura(524834))
             if (Creature* device = target->ToCreature(); device && Owned(player,device))
                 Overcharge(player,device);
         bool brilliance = spell->GetScriptValue(653273) != 0;

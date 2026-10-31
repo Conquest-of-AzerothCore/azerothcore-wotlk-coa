@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Tinker: Repair Shot overcharges a full-health beacon (#10018)",
+  "contract": [
+    "Beacon Charging (524834) says beacons are Overcharged by healing them with Repair Shot. A freshly built Shield",
+    "Beacon (50036) is at full health, so the shot heals nothing; it must still overcharge the beacon and give the",
+    "Tinker Overcharge: Shield Beacon (560709)."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "t", "race": 1, "class": 28, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "t", "spell": 801799 },
+    { "action": "learn", "actor": "t", "spell": 801707 },
+    { "action": "set_aura", "actor": "t", "spell": 524834, "stacks": 1 },
+    { "action": "cast", "actor": "t", "spell": 801799 },
+    { "action": "assert", "label": "SETUP: the Shield Beacon is out", "actor": "t", "metric": "owned_creature_count",
+      "entry": 50036, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "snapshot", "actor": "t", "metric": "owned_creature_max_health", "entry": 50036,
+      "save_as": "beacon_max" },
+    { "action": "assert", "label": "SETUP: the beacon is at full health, so Repair Shot heals nothing", "actor": "t",
+      "metric": "owned_creature_health", "entry": 50036, "ratio_to": "beacon_max", "equals": 1 },
+    { "action": "cast", "actor": "t", "spell": 801707, "target_owned_entry": 50036 },
+    { "action": "assert", "label": "Repair Shot on the full-health beacon gives the Tinker the Overcharge shield",
+      "actor": "t", "metric": "aura", "spell": 560709, "equals": 1, "within_ms": 5000 }
+  ]
+}
