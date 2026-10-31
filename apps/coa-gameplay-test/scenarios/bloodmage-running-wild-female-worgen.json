@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "A female Bloodmage takes the female worgen display in Running Wild",
+  "contract": "Running Wild 800175 effect 1 is SPELL_AURA_TRANSFORM into creature 56332, the same male worgen (display 574) that Eternal Curse 800157 uses. aura_ascension_bloodmage_female_worgen (PR #9631) swaps it for the female worgen display 142818 when the character's PLAYER_BYTES_3 gender is female, but only Blood Curse's visual 563124 and Eternal Curse carried it. Expected: a female human Bloodmage wears display 142818 while Running Wild is active outdoors and her mortal display returns when it ends; the male case keeps 574. display_id reads the server's selected display only; client rendering is not tested.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "gender": 1,
+      "level": 35
+    },
+    {
+      "id": "male",
+      "race": 1,
+      "class": 20,
+      "level": 35
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 800175
+    },
+    {
+      "action": "learn",
+      "actor": "male",
+      "spell": 800175
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "display_id",
+      "save_as": "mortal_display"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the fixture is a female human (ChrRaces 1 FemaleDisplayId 50)",
+      "actor": "bloodmage",
+      "metric": "display_id",
+      "equals": 50
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 800175,
+      "label": "run wild outdoors"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Running Wild is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 800175,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Running Wild gives her the female worgen display",
+      "actor": "bloodmage",
+      "metric": "display_id",
+      "equals": 142818
+    },
+    {
+      "action": "cancel_aura",
+      "label": "Stop running wild",
+      "actor": "bloodmage",
+      "spell": 800175
+    },
+    {
+      "action": "assert",
+      "label": "Her mortal display returns after Running Wild",
+      "actor": "bloodmage",
+      "metric": "display_id",
+      "relative_to": "mortal_display",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "male",
+      "spell": 800175,
+      "label": "the male Bloodmage runs wild"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: his Running Wild is active",
+      "actor": "male",
+      "metric": "aura",
+      "spell": 800175,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a male Bloodmage keeps the male worgen display",
+      "actor": "male",
+      "metric": "display_id",
+      "equals": 574
+    }
+  ]
+}
