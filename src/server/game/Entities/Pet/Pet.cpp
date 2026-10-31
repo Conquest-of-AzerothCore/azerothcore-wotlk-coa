@@ -852,7 +852,13 @@ void Pet::Update(uint32 diff)
                     }
                 }
 
-                if (getPetType() == HUNTER_PET)
+                // CoA: Wildwalker pets are always happy (Ascension changelog 70528)
+                if (getPetType() == HUNTER_PET && GetOwner()->getClass() == CLASS_WILDWALKER)
+                {
+                    if (GetPower(POWER_HAPPINESS) != GetMaxPower(POWER_HAPPINESS))
+                        SetPower(POWER_HAPPINESS, GetMaxPower(POWER_HAPPINESS));
+                }
+                else if (getPetType() == HUNTER_PET)
                 {
                     m_happinessTimer -= diff;
                     if (m_happinessTimer <= int32(0))
