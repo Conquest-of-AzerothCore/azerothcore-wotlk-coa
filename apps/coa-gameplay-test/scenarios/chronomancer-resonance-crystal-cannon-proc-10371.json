@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "Resonance procs from Crystal Cannon's channel as well as Artificer's Wand (#10371)",
+  "contract": "Resonance 706079 is a passive aura 42 (proc trigger spell) on 570084, the helper that shortens Hasten 801304's cooldown by 1000 ms. Its spell_proc row is masked to Artificer's Wand damage 561064 (family 28 word2 0x200) and Crystal Cannon damage 560134 (word2 0x1000), but it only ever fired for the former: 560134 is cast from Crystal Cannon's 704481 channel by the periodic-trigger handler with TRIGGERED_FULL_MASK, which includes TRIGGERED_DISALLOW_PROC_EVENTS, and Aura::GetProcEffectMask rejects triggered-spell events for a proc entry without PROC_ATTR_TRIGGERED_CAN_PROC. 561064 escaped the same gate only because it carries SPELL_ATTR3_NOT_A_PROC, the gate's other exemption. The repair adds PROC_ATTR_TRIGGERED_CAN_PROC (AttributesMask 2) to 706079, leaving the family mask to keep the proc limited to those two damage spells. The scenario casts the Crystal Cannon channel 704481 at the dummy ten times; each 1000 ms channel ticks every 500 ms for two 560134 ranged hits, so 20 landed hits at the tooltip's 35% each give P(no proc) = 0.65^20, about 0.02%, and spell_proc_count on 706079 counts the resonance procs through the 570084 casts they trigger. Before the repair that count stays 0 because every 560134 event is a suppressed triggered cast.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "chronomancer", "entry": 36, "level": 80, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "add_item", "actor": "chronomancer", "item": 5069 },
+    { "action": "equip", "label": "Crystal Cannon's 560134 hits use the ranged slot", "actor": "chronomancer", "item": 5069, "slot": 17 },
+    { "action": "wait", "label": "Let the weapon swap cooldown expire", "ms": 2000 },
+    { "action": "learn", "label": "Learn Resonance", "actor": "chronomancer", "spell": 706079 },
+    { "action": "set_aura", "label": "Apply the Resonance proc aura", "actor": "chronomancer", "spell": 706079, "stacks": 1 },
+    { "action": "learn", "label": "Learn Crystal Cannon's channel", "actor": "chronomancer", "spell": 704481 },
+    { "action": "learn", "label": "Learn Hasten", "actor": "chronomancer", "spell": 801304 },
+    { "action": "assert", "label": "SETUP: Resonance aura is applied", "actor": "chronomancer", "metric": "aura", "spell": 706079, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: Resonance still carries the tooltip's 35% chance", "actor": "chronomancer", "metric": "spell_proc_chance", "spell": 706079, "equals": 35 },
+    { "action": "cast", "label": "Cast Hasten so its cooldown is running", "actor": "chronomancer", "spell": 801304 },
+    { "action": "assert", "label": "SETUP: no Resonance proc before any Crystal Cannon hit", "actor": "chronomancer", "metric": "spell_proc_count", "spell": 706079, "equals": 0 },
+    { "action": "cast", "label": "Crystal Cannon channel 1", "actor": "chronomancer", "spell": 704481, "target": "dummy" },
+    { "action": "wait", "label": "Let the two channel ticks land", "ms": 2200 },
+    { "action": "cast", "label": "Crystal Cannon channel 2", "actor": "chronomancer", "spell": 704481, "target": "dummy" },
+    { "action": "wait", "ms": 2200 },
+    { "action": "cast", "label": "Crystal Cannon channel 3", "actor": "chronomancer", "spell": 704481, "target": "dummy" },
+    { "action": "wait", "ms": 2200 },
+    { "action": "cast", "label": "Crystal Cannon channel 4", "actor": "chronomancer", "spell": 704481, "target": "dummy" },
+    { "action": "wait", "ms": 2200 },
+    { "action": "cast", "label": "Crystal Cannon channel 5", "actor": "chronomancer", "spell": 704481, "target": "dummy" },
+    { "action": "wait", "ms": 2200 },
+    { "action": "cast", "label": "Crystal Cannon channel 6", "actor": "chronomancer", "spell": 704481, "target": "dummy" },
+    { "action": "wait", "ms": 2200 },
+    { "action": "cast", "label": "Crystal Cannon channel 7", "actor": "chronomancer", "spell": 704481, "target": "dummy" },
+    { "action": "wait", "ms": 2200 },
+    { "action": "cast", "label": "Crystal Cannon channel 8", "actor": "chronomancer", "spell": 704481, "target": "dummy" },
+    { "action": "wait", "ms": 2200 },
+    { "action": "cast", "label": "Crystal Cannon channel 9", "actor": "chronomancer", "spell": 704481, "target": "dummy" },
+    { "action": "wait", "ms": 2200 },
+    { "action": "cast", "label": "Crystal Cannon channel 10", "actor": "chronomancer", "spell": 704481, "target": "dummy" },
+    { "action": "wait", "label": "Let the last two channel ticks land", "ms": 2200 },
+    { "action": "assert", "label": "SETUP: every Crystal Cannon channel cast was accepted", "actor": "chronomancer", "metric": "cast_failure", "spell": 704481, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: Crystal Cannon's triggered hits proc Resonance", "actor": "chronomancer", "metric": "spell_proc_count", "spell": 706079, "min": 1, "within_ms": 3000 }
+  ]
+}
