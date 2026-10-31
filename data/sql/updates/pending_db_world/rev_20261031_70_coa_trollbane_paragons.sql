@@ -24,9 +24,9 @@
 -- 7484), matching footage. Out of combat Yahola channels Blackfathom Channeling (8734), the shadowy casting pose of the
 -- static Mossflayer Shadowhunters around the Mazra'Alor altar on Ascension. The spell is a channel, so its pose and
 -- shadow only show while it is cast; the Shadowhunters' stock creature_addon aura showed nothing. Creatures that carry
--- that addon aura (the altar Shadowhunters, three of which lacked it, and Yahola) cast the channel whenever they are
--- out of combat and stop it when they engage; evading restores the aura. Spectral Volley needs no change to be
--- uninterruptible: its PreventionType is 0, so interrupts and silences cannot stop it.
+-- that addon aura (the static altar Shadowhunters, and Yahola) cast the channel whenever they are out of combat and
+-- stop it when they engage; evading restores the aura. Spectral Volley needs no change to be uninterruptible: its
+-- PreventionType is 0, so interrupts and silences cannot stop it.
 -- Loot: of their Ascension drops only Vazul's three Whispershade greens are her own; the rest (Ephemeral Key,
 -- recipes, world greens) are shared world drops. Their chances were not recorded, so they use a common rare-elite
 -- rate: 20% each in one group, at most one per kill (as Geomancer Flintdagger's own greens).
@@ -73,8 +73,6 @@ DELETE FROM `creature_template_addon` WHERE `entry` IN (254169, 254170);
 INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
 (254169, 0, 0, 0, 1, 0, 0, '8734'),
 (254170, 0, 0, 0, 1, 0, 0, '254622');
-
-UPDATE `creature_addon` SET `auras` = '8734' WHERE `guid` IN (91973, 92238, 92239) AND `auras` IS NULL;
 
 DELETE FROM `spell_proc` WHERE `SpellId` = 254622;
 INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
