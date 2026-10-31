@@ -108,7 +108,7 @@ METRICS = TIMELINE_METRICS | {
     'vendor_list_packets', 'vendor_items', 'vendor_price', 'vendor_price_sum', 'vendor_extended_cost', 'vendor_stock',
     'spellbook_superseded_packets', 'spellbook_superseded_for', 'spellbook_loud_supersedes_for',
     'client_chat_lines_for', 'client_removals_keeping_buttons_for', 'client_placing_learns_for',
-    'client_placing_supersedes_for', 'client_spell_rank_for',
+    'client_placing_supersedes_for', 'client_spell_rank_for', 'client_spell_caster_aura_for',
     'client_spell_row_restored',
     'spellbook_client_notable', 'spellbook_notify_id_mismatches',
     'spellbook_cues_in_last_buy', 'spellbook_last_buy_cued',
@@ -955,7 +955,8 @@ def validate(scenario):
                     'spellbook_loud_supersedes_for', 'spellbook_client_notable',
                     'spellbook_notify_id_mismatches', 'client_chat_lines_for',
                     'client_removals_keeping_buttons_for', 'client_placing_learns_for',
-                    'client_placing_supersedes_for', 'client_spell_rank_for', 'client_spell_row_restored'}:
+                    'client_placing_supersedes_for', 'client_spell_rank_for', 'client_spell_caster_aura_for',
+                    'client_spell_row_restored'}:
                 require('spell' in step, f'{where}: metric needs spell')
             for key in ('pet', 'critical'):
                 if key in step:
@@ -1191,7 +1192,7 @@ def validate(scenario):
                           'spellbook_superseded_packets',
                           'spellbook_superseded_for', 'spellbook_loud_supersedes_for', 'client_chat_lines_for',
                           'client_removals_keeping_buttons_for', 'client_placing_learns_for',
-                          'client_placing_supersedes_for', 'client_spell_rank_for',
+                          'client_placing_supersedes_for', 'client_spell_rank_for', 'client_spell_caster_aura_for',
                           'client_spell_row_restored',
                           'spellbook_client_notable',
                           'spellbook_cues_in_last_buy', 'spellbook_last_buy_cued',
