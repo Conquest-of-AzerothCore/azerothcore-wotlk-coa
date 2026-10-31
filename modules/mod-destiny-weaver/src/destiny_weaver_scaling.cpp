@@ -54,6 +54,7 @@
 #include "Player.h"
 #include "Random.h"
 #include "ScriptMgr.h"
+#include "SpellInfo.h"
 #include "StringConvert.h"
 #include "Timer.h"
 #include "Tokenize.h"
@@ -499,6 +500,57 @@ namespace
         if (!ViewFor(creature, const_cast<Player*>(viewer), view))
             return 0;
         return view.MaxHealth;
+    }
+
+    /// What the average blow of a creature built at this level hits for, from the warrior row every melee
+    /// creature is built from. Only the ratio between two levels is used, so the attack time and the
+    /// template, rank and aura multipliers it leaves out cancel.
+    double AverageHitAt(uint8 level)
+    {
+        CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(level, CLASS_WARRIOR);
+        return DestinyWeaver::AverageCreatureMeleeHit(stats->BaseDamage[EXPANSION_CLASSIC], stats->AttackPower,
+                                                      1.0f, BASE_ATTACK_TIME);
+    }
+
+    /// A share of the receiver's health is already the receiver's size.
+    bool HealsShareOfHealth(SpellInfo const* spell)
+    {
+        return spell && (spell->HasEffect(SPELL_EFFECT_HEAL_PCT) || spell->HasEffect(SPELL_EFFECT_HEAL_MAX_HEALTH) ||
+                         spell->HasAura(SPELL_AURA_OBS_MOD_HEALTH));
+    }
+
+    /// Installed as the core's resolver for heals between characters in a scaled dungeon. The healer's
+    /// creatures stand at the healer's level and the receiver's at the receiver's, both held inside the
+    /// dungeon's band, and each takes blows the size of their own version (DamageTakenFactor). A heal is
+    /// sized for the blows of the healer's version, so it is carried over to the receiver's by the ratio
+    /// of the two average blows: a level-20 healer keeps a level-38 tank up as well as a level-20 one,
+    /// and a level-60 healer in the same group is held to the band's top like their creatures are.
+    double HealReceivedForCore(Unit const* healer, Unit const* receiver, SpellInfo const* spell)
+    {
+        if (!ScalingAvailable() || !healer || !receiver || HealsShareOfHealth(spell))
+            return 1.0;
+
+        Player const* from = healer->GetCharmerOrOwnerPlayerOrPlayerItself();
+        Player const* to = receiver->GetCharmerOrOwnerPlayerOrPlayerItself();
+        if (!from || !to || from == to)
+            return 1.0;
+
+        Map const* map = to->FindMap();
+        if (from->FindMap() != map || !ScaledDungeon(map))
+            return 1.0;
+
+        // A character held to the authored creatures by a challenge fights blows of the authored size.
+        if ((LocalLevelScaling::ScalingBlocksFor(from) | LocalLevelScaling::ScalingBlocksFor(to)) &
+            LocalLevelScaling::ChallengeBlocksCreatureScaling)
+            return 1.0;
+
+        LocalLevelScaling::LevelBand const* band = DungeonBandFor(map);
+        uint8 const fromLevel = LocalLevelScaling::ScaleDungeonCreatureLevelForViewer(from->GetLevel(), *band);
+        uint8 const toLevel = LocalLevelScaling::ScaleDungeonCreatureLevelForViewer(to->GetLevel(), *band);
+        if (fromLevel == toLevel)
+            return 1.0;
+
+        return DestinyWeaver::ViewDamageTakenFactor(AverageHitAt(toLevel), AverageHitAt(fromLevel));
     }
 
     /// The fields a view rewrites, in one list. The patch looks a position up by index, and a forced
@@ -1184,6 +1236,8 @@ public:
                                                      std::memory_order_relaxed);
         LocalLevelScaling::ScaledDungeonOwner.store(available ? &InScaledDungeonForCore : nullptr,
                                                     std::memory_order_relaxed);
+        LocalLevelScaling::HealReceivedOwner.store(available ? &HealReceivedForCore : nullptr,
+                                                   std::memory_order_relaxed);
 
         LOG_INFO("module.destiny_weaver",
                  "open world scaling: creatures per character, level - {} in the open world and the "
@@ -1217,6 +1271,7 @@ public:
         LocalLevelScaling::CreatureViewMaxHealthOwner.store(nullptr);
         LocalLevelScaling::ScalingChangedOwner.store(nullptr);
         LocalLevelScaling::ScaledDungeonOwner.store(nullptr);
+        LocalLevelScaling::HealReceivedOwner.store(nullptr);
     }
 };
 

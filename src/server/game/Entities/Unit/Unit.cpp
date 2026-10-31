@@ -9187,7 +9187,8 @@ void Unit::SendHealSpellLog(HealInfo const& healInfo, bool critical)
 
 int32 Unit::HealBySpell(HealInfo& healInfo, bool critical)
 {
-    uint32 heal = healInfo.GetHeal();
+    uint32 heal = LocalLevelScaling::HealReceivedFor(healInfo.GetHealer(), healInfo.GetTarget(),
+        healInfo.GetSpellInfo(), healInfo.GetHeal());
     sScriptMgr->ModifyHealReceived(this, healInfo.GetTarget(), heal, healInfo.GetSpellInfo());
     healInfo.SetHeal(heal);
 
