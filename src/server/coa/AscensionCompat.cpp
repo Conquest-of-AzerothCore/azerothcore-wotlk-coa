@@ -8528,6 +8528,11 @@ class spell_ascension_personal_bank : public SpellScript
 
         player->AddSpellCooldown(GetSpellInfo()->Id, 0, BANK_VAULT_DURATION * IN_MILLISECONDS, true);
 
+        WorldPacket cooldownPacket;
+        player->BuildCooldownPacket(cooldownPacket, SPELL_COOLDOWN_FLAG_NONE, GetSpellInfo()->Id,
+                                     BANK_VAULT_DURATION * IN_MILLISECONDS);
+        player->SendDirectMessage(&cooldownPacket);
+
         LOG_INFO("coa",
                  "Summoned bank object {} (kind {}, entry {}, spell {}) for {} at "
                  "{:.2f} {:.2f} {:.2f} (caster feet {:.2f})",

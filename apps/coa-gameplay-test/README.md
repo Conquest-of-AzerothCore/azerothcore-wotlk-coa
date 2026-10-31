@@ -573,7 +573,7 @@ a previously named snapshot of the same metric; it is available on snapshots and
 
 Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`, `map_id`, `combat`, `casting`,
 `level`, `quest_objective_count` (needs `quest`, optional `index`), `knows_spell`, `has_talent`, `talent_points`, `active_talent_spec`,
-`cooldown_ms`, `item_count`, `carried_item_count`, `bank_bag_slots`, `aura`, `aura_stacks`, `aura_charges`,
+`cooldown_ms`, `spell_cooldown_packet_ms`, `item_count`, `carried_item_count`, `bank_bag_slots`, `aura`, `aura_stacks`, `aura_charges`,
 `aura_duration_ms`, `aura_amount`, `pet_entry`, `pet_aura_stacks`, `owned_creature_count`, `owned_creature_spacing`,
 `charm_entry`, `charm_aura_stacks`, `controls_self`, `private_instance`, `dynamic_object`,
 `dynamic_object_duration_ms`, `dynamic_object_height`, `distance`, `spell_proc_count`, `spell_proc_chance`,
@@ -882,6 +882,9 @@ banker click is answered with. `system_messages` counts the chat lines the sessi
 `cast_failure` requires `spell` and reports the reason the client was told the last submitted cast of
 that spell was refused, or zero if it was not refused since (the record is cleared when the scenario
 submits that spell again).
+`spell_cooldown_packet_ms` requires `spell` and reads the cooldown duration from the last native
+`SMSG_SPELL_COOLDOWN` the session was sent for it, or -1 if none was observed; unlike `cooldown_ms`,
+which reads the server-side cooldown map directly, this proves the client was actually notified.
 `pet_aura_stacks`
 requires `spell`, accepts `caster` for aura ownership, and returns zero if the pet or aura is absent.
 `pet_aura_amount` and `pet_aura_amplitude_ms` accept `effect` and read its amount or tick interval.

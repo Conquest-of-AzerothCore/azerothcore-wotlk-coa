@@ -885,6 +885,7 @@ struct Actor
     std::vector<SpellEnergizeEvent> spellEnergizes;
     Tree castFailures;
     std::map<uint32, uint8> castFailureReason;
+    std::map<uint32, uint32> spellCooldownPacketMs;
     uint32 bankShows = 0;
     uint32 systemMessages = 0;
     uint32 monsterChats = 0;
@@ -1212,6 +1213,20 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         failure.put("reason", uint32(reason));
         actor.castFailures.push_back({"", failure});
         actor.castFailureReason[spell] = reason;
+    }
+    if (packet.GetOpcode() == SMSG_SPELL_COOLDOWN && packet.size() >= 8 + 1 + 4 + 4)
+    {
+        WorldPacket response(packet);
+        ObjectGuid unit;
+        uint8 flags;
+        response >> unit >> flags;
+        while (response.rpos() < response.size())
+        {
+            uint32 spell, cooldown;
+            response >> spell >> cooldown;
+            if (unit == actor.guid)
+                actor.spellCooldownPacketMs[spell] = cooldown;
+        }
     }
 
     if (packet.GetOpcode() == SMSG_MESSAGECHAT)
@@ -4620,6 +4635,12 @@ private:
             auto const& reasons = _actors.at(step.get<std::string>("actor")).castFailureReason;
             auto const found = reasons.find(spell);
             return found == reasons.end() ? 0.0 : double(found->second);
+        }
+        if (metric == "spell_cooldown_packet_ms")
+        {
+            auto const& packets = _actors.at(step.get<std::string>("actor")).spellCooldownPacketMs;
+            auto const found = packets.find(spell);
+            return found == packets.end() ? -1.0 : double(found->second);
         }
         if (metric == "pet_autocast_enabled")
         {
