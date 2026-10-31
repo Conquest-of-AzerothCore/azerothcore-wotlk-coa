@@ -17,6 +17,7 @@
 #include "AscensionTinker.h"
 #include "AscensionTinkerData.h"
 #include "AscensionSunCleric.h"
+#include "AscensionStormbringer.h"
 #include "AscensionXoroth.h"
 #include "AllCreatureScript.h"
 #include "AllItemScript.h"
@@ -5409,6 +5410,11 @@ private:
     }
     if (info->Id == AscensionSunCleric::Dawn)
       row.Values[4] = info->Attributes;
+    if (info->Id == AscensionStormbringer::SPELL_ATMOSPHERIC_PRESSURE)
+    {
+      row.Values[SPELL_ATTRIBUTES_FIELD] = info->Attributes;
+      row.Values[SPELL_ATTRIBUTES_FIELD + 5] = info->AttributesEx5;
+    }
     if (info->Id == 805027 ||
         (info->Id >= 807938 && info->Id <= 807941))
     {
