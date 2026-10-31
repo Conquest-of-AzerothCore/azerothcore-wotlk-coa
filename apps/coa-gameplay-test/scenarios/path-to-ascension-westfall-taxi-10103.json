@@ -18,6 +18,7 @@
   "steps": [
     {"action": "wait", "label": "Let the fixture settle", "ms": 2500},
     {"action": "prepare_quest", "label": "Take Path to Ascension: Westfall", "actor": "p", "quest": 100466, "complete": false},
+    {"action": "set_money", "label": "Fund the Stormwind -> Westfall flight cost", "actor": "p", "value": 10000},
     {"action": "assert", "label": "CONTROL: not in flight yet", "actor": "p", "metric": "in_flight", "equals": 0},
     {"action": "gossip_hello", "label": "Speak to Dungar Longdrink", "actor": "p", "target": "dungar"},
     {"action": "assert", "label": "the visit-the-flightmaster credit still fires", "actor": "p",
