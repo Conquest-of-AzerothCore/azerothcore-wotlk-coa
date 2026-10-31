@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Windswept Milk and Mold: the objective areas are on the Shadewell Spring map where Almo gives them (COA-9584)",
+  "contract": [
+    "Windswept Milk 175074 and Windswept Mold 175075 are given by Grand Cheesemonger Almo at Shadewell Spring (WorldMapAreaId 2027); their objective areas lie on the Scadeald map (2062).",
+    "A real client asks CMSG_QUEST_POI_QUERY (483) and reads SMSG_QUEST_POI_QUERY_RESPONSE (484): quest count, quest id, POI count, then per POI its id, objective index, map, area, floor, priority, flags, point count and points.",
+    "Each quest now sends four POIs: the objective area on Scadeald, the turn-in on Shadewell Spring, the same objective area on Shadewell Spring (POI 2, at byte 180) and the same turn-in on Scadeald.",
+    "These are data assertions on the bytes the server sends; the harness cannot see the client's tracker."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8057.0, "y": -130.0, "z": 302.0, "o": 0 },
+  "players": [
+    { "id": "a", "race": 1, "class": 1, "level": 42 }
+  ],
+  "steps": [
+    { "action": "prepare_quest", "actor": "a", "quest": 175074, "complete": false },
+    { "action": "client_packet", "label": "Ask the map to mark 175074, as the quest log does", "actor": "a", "opcode": 483, "consumed": false, "fields": [ { "u32": 1 }, { "u32": 175074 } ] },
+    { "action": "assert", "label": "SETUP: the answer is 175074's own POI list", "actor": "a", "metric": "server_packet_u32", "opcode": 484, "row": 1, "offset": 4, "index": 0, "equals": 175074, "within_ms": 4000 },
+    { "action": "assert", "label": "DISCRIMINATING: 175074 sends four POIs, not two", "actor": "a", "metric": "server_packet_u32", "opcode": 484, "row": 1, "offset": 8, "index": 0, "equals": 4 },
+    { "action": "assert", "label": "POI 2 is the milk objective, ObjectiveIndex 4", "actor": "a", "metric": "server_packet_u32", "opcode": 484, "row": 1, "offset": 184, "index": 0, "equals": 4 },
+    { "action": "assert", "label": "POI 2 is drawn on the Shadewell Spring map, WorldMapAreaId 2027", "actor": "a", "metric": "server_packet_u32", "opcode": 484, "row": 1, "offset": 192, "index": 0, "equals": 2027 },
+    { "action": "assert", "label": "POI 2 has the twelve pasture points", "actor": "a", "metric": "server_packet_u32", "opcode": 484, "row": 1, "offset": 208, "index": 0, "equals": 12 },
+    { "action": "prepare_quest", "actor": "a", "quest": 175075, "complete": false },
+    { "action": "client_packet", "label": "Ask the map to mark 175075", "actor": "a", "opcode": 483, "consumed": false, "fields": [ { "u32": 1 }, { "u32": 175075 } ] },
+    { "action": "assert", "label": "SETUP: the answer is 175075's own POI list", "actor": "a", "metric": "server_packet_u32", "opcode": 484, "row": 1, "offset": 4, "index": 0, "equals": 175075, "within_ms": 4000 },
+    { "action": "assert", "label": "175075 sends four POIs", "actor": "a", "metric": "server_packet_u32", "opcode": 484, "row": 1, "offset": 8, "index": 0, "equals": 4 },
+    { "action": "assert", "label": "POI 2 is the mold objective on the Shadewell Spring map", "actor": "a", "metric": "server_packet_u32", "opcode": 484, "row": 1, "offset": 192, "index": 0, "equals": 2027 }
+  ]
+}

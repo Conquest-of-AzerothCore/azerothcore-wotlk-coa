@@ -11,6 +11,7 @@
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
 #include <algorithm>
+#include <numbers>
 #include <set>
 namespace AscensionPyromancer
 {
@@ -53,6 +54,8 @@ Milliseconds PhoenixPeriod(Player* player)
     player->ApplySpellMod(712290, SPELLMOD_ACTIVATION_TIME, period);
     return Milliseconds(std::max(period, 1));
 }
+constexpr float PhoenixFollowAngle = 3.0f * std::numbers::pi_v<float> / 2.0f;
+
 struct npc_ascension_pyromancer_summon : public ScriptedAI
 {
     explicit npc_ascension_pyromancer_summon(Creature* creature) : ScriptedAI(creature) {}
@@ -85,6 +88,8 @@ struct npc_ascension_pyromancer_summon : public ScriptedAI
                 old->DespawnOrUnsummon();
             owned = me->GetGUID();
         }
+        if (me->GetEntry() == 50258 && me->IsGuardian())
+            static_cast<Minion*>(me)->SetFollowAngle(PhoenixFollowAngle);
         if (me->GetEntry() == 50359)
             me->CastSpell(me, 704279, true);
         timers.ScheduleEvent(1, me->GetEntry() == 50258 ? PhoenixPeriod(player) : 200ms);

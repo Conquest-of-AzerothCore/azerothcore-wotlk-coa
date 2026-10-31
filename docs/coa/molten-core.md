@@ -873,11 +873,13 @@ wowhead.com/classic/guide/majordomo-executus-molten-core-strategy-wow-classic, W
    Lucifron) as outweighing a "no adds" report. On a direct, later in-game account of the correct spot and "no
    adds", the player's memory is the decision: Flamewaker Protector (12119, guids 56606/56607) is removed
    outright, not relocated with Lucifron to his corrected alcove position (also `rev_20260930_98`, see §3).
-8. **Shadow of Lucifron (12268) timing.** The 5s summon delay and its Shadow Bolt/Cleave/Dark Sundering
-   cadences are still `designed`, not measured — no static spawn or summon-spell evidence exists for this
-   creature anywhere in the export. Its health is no longer designed (§5: a Bronzebeard video reading × the
-   BB→CoA coefficient, replacing the old 25%-of-Lucifron placeholder). Awaiting the player's own logs for the
-   remaining timings.
+8. **Shadow of Lucifron (12268) timing.** Combat logs 294, 1289, 1602 and 1734 (`coa-log-history`) bound the
+   summon: players first hit the Shadow 10.08, 10.20, 10.07 and 10.06 s after Lucifron's first log line, so it
+   exists within about 10 s of the pull; the logs do not record the spawn itself. The 5s `coa_boss_summon`
+   delay fits that bound but stays `designed`, as do its Shadow Bolt/Cleave/Dark Sundering cadences — no static
+   spawn or summon-spell evidence exists for this creature anywhere in the export. Its health is no longer
+   designed (§5: a Bronzebeard video reading × the BB→CoA coefficient, replacing the old 25%-of-Lucifron
+   placeholder).
 9. **Magmadar's Core Hound cadence.** The Core Hound (11671) reinforcement cadence (first 45s, repeat 50s) is
    still `designed` — no CoA log or export evidence places it. The head/body health split is resolved: the
    heads now mirror the body's own health (§3/§5) instead of holding a designed fraction of it.
@@ -1022,6 +1024,29 @@ captured, a test-observability gap); Son of Flame chain confirmed (all three mer
 clean single-pull session at the expected health; a Ghost-harness artifact, not a server defect, suppressed
 combat on a chained multi-tier session's 2nd/3rd pull). No repository bugs found; the one bug found
 (Majordomo-pull facing) was in the throwaway test, fixed in the scratchpad, not committed.
+
+### Automated Lucifron encounter
+
+`apps/coa-gameplay-test/scenarios/molten-core-lucifron-encounter.json` fights the real Lucifron spawn
+(guid 56605) with ten CoA-class level-60 bots of the in-process gameplay harness (1 tank, 2 healers, 4 melee,
+3 ranged), without a client or a human. The bots form one raid before entering Molten Core, so they share the
+leader's instance; a fresh group gets a fresh instance, which the scenario checks by requiring an undamaged
+Lucifron before the pull. After 80 s of fighting it asserts on the recorded encounter timeline:
+
+- Shadow of Lucifron (12268) appears within 11 s of the engage (combat logs 294, 1289, 1602 and 1734: players
+  first hit it 10.06-10.20 s after Lucifron's first line; the designed 5000 ms summon row is context only).
+- Shadow Bolt (2105212) completes its first 1.5 s cast 5.8-7.8 s after the engage and repeats every
+  14.0-16.2 s (combat logs 294, 1289, 1602 and 1734: cast start 5.93-5.98 s, then every 15.0-15.1 s).
+- Fierce Blow (975011) is cast at least five times, only on the tank (tank-only in all four logs).
+- Nothing evades, and the killing blow marks the boss state `DONE`.
+
+Recorded without assertion, because the expectation is still uncertain: Curse of Lucifron (schedule 79.9 s;
+the logs repeat it every 66.6-70.7 s, 79.9 s only in fight 1289), Suppressing Shadows (cast every 25.0-25.1 s
+in the logs, matching the schedule; only its per-target aura events recur every 1-5 s) and Impending Doom
+(schedule first 20.9-27.5 s, every 22.2-22.6 s, `rev_20261005_20`, from its 2105205 hits in fights 1289, 1602
+and 1734; fight 1289 alone logs its 2105201 aura, first at 13.3 s and then every 26.5-27.7 s, so the two readings
+disagree). Each run's result keeps their casts in its `timeline`. Health fixtures keep the raid alive through the window, and
+the tank's threat floor is a harness fixture, so the scenario does not measure Lucifron's damage or threat.
 
 ## 9. Batch G mechanics (2026-10-01)
 

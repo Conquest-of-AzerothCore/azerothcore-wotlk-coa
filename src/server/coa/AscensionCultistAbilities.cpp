@@ -10,6 +10,7 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "TemporarySummon.h"
 #include "ThreatManager.h"
 #include <algorithm>
 namespace
@@ -527,6 +528,52 @@ class aura_ascension_cultist_shadow_training : public AuraScript
             aura_ascension_cultist_shadow_training::AddGazeHealingModifier, EFFECT_1, SPELL_AURA_MOD_EXPERTISE);
     }
 };
+constexpr float GazeJumpRadius = 10.0f;
+
+class spell_ascension_cultist_gaze_of_cthun_jump : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_cultist_gaze_of_cthun_jump);
+    static bool IsCompanion(WorldObject* object)
+    {
+        Creature* creature = object ? object->ToCreature() : nullptr;
+        if (!creature)
+            return false;
+        if (creature->GetCreatureType() == CREATURE_TYPE_NON_COMBAT_PET)
+            return true;
+        TempSummon* summon = creature->ToTempSummon();
+        return summon && summon->m_Properties && summon->m_Properties->Type == SUMMON_TYPE_MINIPET;
+    }
+    void SkipCompanions(std::list<WorldObject*>& targets)
+    {
+        Unit* primary = GetExplTargetUnit();
+        size_t const jumps = targets.size();
+        targets.remove_if([](WorldObject* target) { return IsCompanion(target); });
+        if (!primary || targets.size() == jumps)
+            return;
+        std::list<Unit*> candidates = Nearby(primary, GazeJumpRadius);
+        candidates.remove_if([&](Unit* unit)
+        {
+            return unit == primary || IsCompanion(unit) ||
+                std::find(targets.begin(), targets.end(), unit) != targets.end() ||
+                GetSpellInfo()->CheckTarget(GetCaster(), unit, true) != SPELL_CAST_OK ||
+                !primary->IsWithinLOSInMap(unit, VMAP::ModelIgnoreFlags::M2);
+        });
+        candidates.sort([primary](Unit* a, Unit* b) { return primary->GetDistanceOrder(a, b); });
+        for (Unit* unit : candidates)
+        {
+            if (targets.size() == jumps)
+                break;
+            targets.push_back(unit);
+        }
+    }
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
+            spell_ascension_cultist_gaze_of_cthun_jump::SkipCompanions, EFFECT_0, TARGET_UNIT_TARGET_ANY);
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
+            spell_ascension_cultist_gaze_of_cthun_jump::SkipCompanions, EFFECT_1, TARGET_UNIT_TARGET_ANY);
+    }
+};
 }
 void AddSC_AscensionCultistAbilities()
 {
@@ -537,4 +584,5 @@ void AddSC_AscensionCultistAbilities()
     RegisterSpellScript(spell_ascension_cultist_ability);
     RegisterSpellScript(spell_ascension_cultist_shield);
     RegisterSpellScript(aura_ascension_cultist_shadow_training);
+    RegisterSpellScript(spell_ascension_cultist_gaze_of_cthun_jump);
 }

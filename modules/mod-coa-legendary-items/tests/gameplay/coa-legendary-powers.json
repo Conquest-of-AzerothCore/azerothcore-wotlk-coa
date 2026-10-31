@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "CoA Legendary Items: powers",
-  "contract": "Requires CoALegendaryItems.Enable=1, DropChance=100, StopDropLevel=60, DestinyWeaver.Enable=1, LevelScaling=1, offset=5, CoA.SendDisplayPatches=1. Equipped native auras change actual AP/RAP/SP, speed and armor. Healthy, wounded and after-kill conditions, unequip via the destroy handler, death cleanup, eight-second expiry and strongest-copy stacking are checked.",
+  "contract": "Requires CoALegendaryItems.Enable=1, DropChance=100, DestinyWeaver.Enable=1, LevelScaling=1, offset=5, CoA.SendDisplayPatches=1. Equipped native auras change actual AP/RAP/SP, speed and armor. Healthy, wounded and after-kill conditions, unequip via the destroy handler, death cleanup, eight-second expiry and strongest-copy stacking are checked.",
   "timeout_ms": 180000,
   "location": {
     "map": 0,
@@ -161,7 +161,7 @@
       "metric": "aura_amount",
       "spell": 9710003,
       "effect": 0,
-      "equals": 41
+      "equals": 17
     },
     {
       "action": "assert",
@@ -169,7 +169,7 @@
       "metric": "aura_amount",
       "spell": 9710003,
       "effect": 1,
-      "equals": 41
+      "equals": 17
     },
     {
       "action": "snapshot",
@@ -198,7 +198,7 @@
       "metric": "spell_power",
       "school": 2,
       "relative_to": "healthy_sp",
-      "equals": -41
+      "equals": -17
     },
     {
       "action": "assert",
@@ -226,7 +226,7 @@
       "spell": 9710006,
       "effect": 0,
       "within_ms": 1000,
-      "equals": 82
+      "equals": 35
     },
     {
       "action": "assert",
@@ -234,7 +234,7 @@
       "metric": "aura_amount",
       "spell": 9710006,
       "effect": 1,
-      "equals": 41
+      "equals": 17
     },
     {
       "action": "assert",
@@ -242,7 +242,7 @@
       "metric": "aura_amount",
       "spell": 9710006,
       "effect": 2,
-      "equals": 41
+      "equals": 17
     },
     {
       "action": "assert",
@@ -310,21 +310,21 @@
       "metric": "aura_amount",
       "spell": 9710000,
       "within_ms": 1000,
-      "equals": 82
+      "equals": 35
     },
     {
       "action": "assert",
       "actor": "physical",
       "metric": "attack_power",
       "relative_to": "ap_before_kill",
-      "equals": 82
+      "equals": 35
     },
     {
       "action": "assert",
       "actor": "physical",
       "metric": "ranged_attack_power",
       "relative_to": "rap_before_kill",
-      "equals": 82
+      "equals": 35
     },
     {
       "action": "destroy_item",
@@ -337,7 +337,7 @@
       "metric": "aura_amount",
       "spell": 9710000,
       "within_ms": 1000,
-      "equals": 44
+      "equals": 16
     },
     {
       "action": "wait",

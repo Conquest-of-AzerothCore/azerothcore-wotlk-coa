@@ -35,7 +35,7 @@ void SyncReplacements(Player* player)
         else if (IsHex(info))
         {
             selected = true;
-            if (player->HasAura(UmbralReady))
+            if (player->HasAura(UmbralReady) && id == KnownRank(player, id))
                 child = Umbral;
         }
         else if (Family(info, 1, 32768) && !IsArrow(info) && id != HexfireWrath)

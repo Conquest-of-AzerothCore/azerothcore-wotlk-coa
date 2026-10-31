@@ -132,7 +132,7 @@ constexpr std::array<uint32, 2> CodexItems = { 97871, 2200001 };
             continue;
 
         SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
-        if (info && info->IsPrimaryProfessionFirstRank())
+        if (info && player->SpendsPrimaryProfessionSlot(info))
             ++known;
     }
 
@@ -396,7 +396,7 @@ public:
             return;
 
         SpellInfo const* removed = sSpellMgr->GetSpellInfo(spellId);
-        if (!removed || !removed->IsPrimaryProfessionFirstRank())
+        if (!removed || !player->SpendsPrimaryProfessionSlot(removed))
             return;
 
         uint32 const unlocked = CodexStore::Instance().Slots(player->GetGUID().GetCounter());

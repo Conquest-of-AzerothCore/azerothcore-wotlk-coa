@@ -6,6 +6,7 @@
 #include "GroupScript.h"
 #include "Log.h"
 #include "ManastormModuleConfig.h"
+#include "ManastormClientUIFixes.h"
 #include "ManastormNativeProtocol.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
@@ -431,6 +432,7 @@ void ManastormClientBridge::SendState(Player* player, ManastormRun const* run) c
 
     player->SendDirectMessage(
         &packet);
+    ManastormClientUIFixes::SendObjectiveHighlight(player);
 
     SendChaoticLink(
         player,

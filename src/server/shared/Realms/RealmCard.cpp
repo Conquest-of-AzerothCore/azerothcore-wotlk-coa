@@ -32,6 +32,6 @@ RealmCardSlot GetRealmCardSlot(std::size_t order)
 
 std::string BuildRealmCardName(std::string const& realmName, RealmCardStyle const& style, RealmCardSlot slot)
 {
-    return Acore::StringFormat("{}!{}!{}!{}!1!{}!{}!0", realmName, style.Expansion, style.GameMode, style.Image,
-        uint32(slot.Page), slot.Index);
+    return Acore::StringFormat("{}!{}!{}!{}!1!{}!{}!{}", realmName, style.Expansion, style.GameMode, style.Image,
+        uint32(slot.Page), slot.Index, style.DescriptionSpell);
 }

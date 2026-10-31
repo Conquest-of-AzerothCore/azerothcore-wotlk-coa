@@ -4,9 +4,11 @@ import io
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 import tempfile
+import threading
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
@@ -14,7 +16,83 @@ from unittest.mock import patch
 import run
 
 
+class CopyServer:
+    def __init__(self, tables, obstacles=(0, 0, 0, 0, 0), fail=None, barrier=None):
+        self.tables = tables
+        self.obstacles = obstacles
+        self.fail = fail
+        self.barrier = barrier
+        self.queries = []
+        self.scripts = []
+        self.threads = set()
+        self.active = self.peak = 0
+        self.lock = threading.Lock()
+
+    def sql(self, role, statement, timeout=60):
+        if not statement.startswith(run.COPY_SESSION):
+            self.queries.append(statement)
+            if 'information_schema.VIEWS' in statement:
+                return '\t'.join(map(str, self.obstacles))
+            if 'information_schema.TABLES' in statement:
+                return '\n'.join(f'{name}\tBASE TABLE\t{size}' for name, size in self.tables.items())
+            if 'information_schema.COLUMNS' in statement:
+                return '\n'.join(f'{name}\t{column}' for name in self.tables for column in ('id', 'value'))
+            names = re.findall(r'SHOW CREATE TABLE `[^`]+`\.`([^`]+)`;', statement)
+            return '\n'.join(f'{name}\tCREATE TABLE `{name}` (\\n  `id` int NOT NULL\\n) ENGINE=InnoDB'
+                             for name in names)
+        table = re.search(r'(?:CREATE TABLE|INSERT INTO `[^`]+`\.) ?`([^`]+)`', statement)[1]
+        with self.lock:
+            self.scripts.append((table, statement))
+            self.threads.add(threading.get_ident())
+            self.active += 1
+            self.peak = max(self.peak, self.active)
+        try:
+            if self.barrier and len(self.scripts) <= self.barrier.parties:
+                self.barrier.wait()
+            if table == self.fail:
+                raise ValueError(f'MySQL operation failed for {role}: ERROR 1062 (23000): Duplicate entry')
+        finally:
+            with self.lock:
+                self.active -= 1
+        return ''
+
+
 class RunnerTests(unittest.TestCase):
+    def with_players(self, schema, count):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['schema'] = schema
+        template = scenario['players'][0]
+        scenario['players'] += [{**template, 'id': f'raider{index}'} for index in range(count - 1)]
+        return scenario
+
+    def test_schema_2_accepts_twenty_five_players(self):
+        scenario = self.with_players(2, 25)
+        self.assertIs(run.validate(scenario), scenario)
+
+    def test_schema_2_rejects_twenty_six_players(self):
+        with self.assertRaisesRegex(ValueError, r'1\.\.25 players'):
+            run.validate(self.with_players(2, 26))
+
+    def test_schema_1_still_rejects_nine_players(self):
+        with self.assertRaisesRegex(ValueError, r'1\.\.8 players'):
+            run.validate(self.with_players(1, 9))
+
+    def test_schema_2_timeout_limit(self):
+        scenario = self.with_players(2, 1)
+        scenario['timeout_ms'] = 1200000
+        self.assertIs(run.validate(scenario), scenario)
+        scenario['timeout_ms'] = 1200001
+        with self.assertRaisesRegex(ValueError, 'too large'):
+            run.validate(scenario)
+        legacy = self.with_players(1, 1)
+        legacy['timeout_ms'] = 600001
+        with self.assertRaisesRegex(ValueError, 'too large'):
+            run.validate(legacy)
+
+    def test_unknown_schema_rejected(self):
+        with self.assertRaisesRegex(ValueError, 'Unsupported scenario schema'):
+            run.validate(self.with_players(3, 1))
+
     def test_player_account_sharing_requires_an_earlier_player(self):
         self.scenario['players'].append({'id': 'alt', 'race': 1, 'class': 1, 'account_of': 'caster'})
         self.assertIs(run.validate(self.scenario), self.scenario)
@@ -46,6 +124,134 @@ class RunnerTests(unittest.TestCase):
                                      'metric': 'health', 'min': 1, field: 1})
             with self.subTest(field=field), self.assertRaises(ValueError):
                 run.validate(scenario)
+
+    def test_nearby_creature_health_pct_needs_a_player_and_entry(self):
+        step = {'action': 'assert', 'actor': 'caster', 'metric': 'nearby_creature_health_pct', 'entry': 12118,
+                'equals': 100}
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].append(step)
+        self.assertIs(run.validate(scenario), scenario)
+        for change in ({'actor': 'target'}, {'entry': 0}, {'entry': '12118'}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({**step, **change})
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                run.validate(scenario)
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].append({key: value for key, value in step.items() if key != 'entry'})
+        with self.assertRaises(ValueError):
+            run.validate(scenario)
+
+    def test_nearby_creature_can_attack_needs_a_player_and_entry(self):
+        step = {'action': 'assert', 'actor': 'caster', 'metric': 'nearby_creature_can_attack', 'entry': 24484,
+                'equals': 0}
+        self.assert_step_validates(step)
+        for change in ({'actor': 'target'}, {'entry': 0}, {'entry': '24484'}):
+            self.assert_step_rejected({**step, **change})
+        self.assert_step_rejected({key: value for key, value in step.items() if key != 'entry'})
+
+    def test_nearby_creature_mount_display_needs_a_player_and_entry(self):
+        step = {'action': 'assert', 'actor': 'caster', 'metric': 'nearby_creature_mount_display', 'entry': 23543,
+                'min': 1}
+        self.assert_step_validates(step)
+        for change in ({'actor': 'target'}, {'entry': 0}, {'entry': '23543'}):
+            self.assert_step_rejected({**step, **change})
+        self.assert_step_rejected({key: value for key, value in step.items() if key != 'entry'})
+
+    def test_nearby_creature_display_needs_a_player_and_entry(self):
+        step = {'action': 'assert', 'actor': 'caster', 'metric': 'nearby_creature_display', 'entry': 24468,
+                'equals': 2790}
+        self.assert_step_validates(step)
+        for change in ({'actor': 'target'}, {'entry': 0}, {'entry': '24468'}):
+            self.assert_step_rejected({**step, **change})
+        self.assert_step_rejected({key: value for key, value in step.items() if key != 'entry'})
+
+    def test_nearby_creature_aura_count_needs_a_player_entry_and_spell(self):
+        step = {'action': 'assert', 'actor': 'caster', 'metric': 'nearby_creature_aura_count', 'entry': 23686,
+                'spell': 42074, 'min': 1}
+        self.assert_step_validates(step)
+        for change in ({'actor': 'target'}, {'entry': 0}, {'spell': 0}, {'spell': '42074'}):
+            self.assert_step_rejected({**step, **change})
+        for field in ('entry', 'spell'):
+            self.assert_step_rejected({key: value for key, value in step.items() if key != field})
+
+    def assert_step_validates(self, step):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].append(step)
+        self.assertIs(run.validate(scenario), scenario)
+
+    def assert_step_rejected(self, step):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].append(step)
+        with self.subTest(step=step), self.assertRaises(ValueError):
+            run.validate(scenario)
+
+    def test_spawn_placement_metrics_need_a_player_guid_and_spawn_type(self):
+        for metric in ('spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state',
+                       'spawn_stand_state', 'spawn_clearance', 'spawn_headroom'):
+            step = {'action': 'assert', 'actor': 'caster', 'metric': metric, 'guid': 6942106,
+                    'spawn_type': 'gameobject', 'equals': 0}
+            if metric == 'spawn_placement':
+                step['tolerance'] = 1
+            self.assert_step_validates(step)
+            for change in ({'actor': 'target'}, {'guid': 0}, {'guid': '1'}, {'guid': True}, {'spawn_type': 'unit'}):
+                self.assert_step_rejected({**step, **change})
+            for missing in ('guid', 'spawn_type'):
+                self.assert_step_rejected({key: value for key, value in step.items() if key != missing})
+
+    def test_point_placement_metrics_need_map_and_coordinates(self):
+        step = {'action': 'assert', 'actor': 'caster', 'metric': 'point_placement', 'map': 1, 'x': 10269.8,
+                'y': 1472.1, 'z': 1340.21, 'tolerance': 1, 'equals': 2}
+        self.assert_step_validates(step)
+        gap = {key: value for key, value in step.items() if key not in {'tolerance', 'equals'}}
+        self.assert_step_validates({**gap, 'metric': 'point_ground_gap', 'max': -1})
+        self.assert_step_rejected({key: value for key, value in step.items() if key != 'z'})
+        for change in ({'map': -1}, {'x': 17001}, {'actor': 'target'}):
+            self.assert_step_rejected({**step, **change})
+
+    def test_placement_tolerance_only_applies_to_placement_verdicts(self):
+        spawn = {'action': 'assert', 'actor': 'caster', 'metric': 'spawn_placement', 'guid': 42919,
+                 'spawn_type': 'creature', 'tolerance': 0.5, 'equals': 0}
+        point = {'action': 'assert', 'actor': 'caster', 'metric': 'point_placement', 'map': 0, 'x': 1, 'y': 2,
+                 'z': 3, 'tolerance': 0.5, 'equals': 0}
+        self.assert_step_validates(spawn)
+        self.assert_step_validates(point)
+        for step in (spawn, point):
+            self.assert_step_rejected({key: value for key, value in step.items() if key != 'tolerance'})
+            for tolerance in (0, -1, 11, '1'):
+                self.assert_step_rejected({**step, 'tolerance': tolerance})
+        self.assert_step_rejected({**spawn, 'metric': 'spawn_ground_gap'})
+        self.assert_step_rejected({'action': 'assert', 'actor': 'target', 'metric': 'health', 'tolerance': 0.5,
+                                   'min': 1})
+
+    def test_spawn_fields_only_apply_to_placement_metrics(self):
+        for field, value in (('guid', 42919), ('spawn_type', 'creature'), ('map', 0), ('z', 1)):
+            self.assert_step_rejected({'action': 'assert', 'actor': 'target', 'metric': 'health', field: value,
+                                       'min': 1})
+
+    def test_placement_audit_action_fields(self):
+        step = {'action': 'placement_audit', 'map': 1, 'zone': 493}
+        self.assert_step_validates(step)
+        self.assert_step_validates({**step, 'tolerance': 0.5})
+        self.assert_step_validates({**step, 'gameobject_types': [3, 10]})
+        self.assert_step_validates({'action': 'placement_audit', 'map': 409})
+        self.assert_step_rejected({'action': 'placement_audit', 'zone': 493})
+        for change in ({'map': -1}, {'zone': 0}, {'tolerance': 0}, {'gameobject_types': []},
+                       {'gameobject_types': [3, 3]}, {'gameobject_types': [36]}, {'gameobject_types': ['3']},
+                       {'actor': 'caster'}):
+            self.assert_step_rejected({**step, **change})
+
+    def test_placement_audit_metrics_need_an_earlier_audit(self):
+        audit = {'action': 'placement_audit', 'map': 1, 'zone': 493}
+        for metric in ('placement_audit_spawns', 'placement_audit_anomalies', 'placement_audit_event_spawns'):
+            measured = {'action': 'assert', 'actor': 'caster', 'metric': metric, 'min': 0}
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'] += [audit, measured]
+            self.assertIs(run.validate(scenario), scenario)
+            for steps in ([measured, audit], [measured]):
+                scenario = copy.deepcopy(self.scenario)
+                scenario['steps'] += steps
+                with self.subTest(metric=metric, steps=steps), self.assertRaises(ValueError):
+                    run.validate(scenario)
 
     def test_player_packet_fields_require_a_player(self):
         step = {'action': 'client_packet', 'actor': 'caster', 'opcode': 364, 'consumed': False}
@@ -436,6 +642,178 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(missing=field), self.assertRaises(ValueError):
                 run.validate(invalid)
 
+    def with_encounter(self, *steps):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'] += [{'action': 'encounter_start', 'actor': 'caster', 'boss_entry': 36, 'radius': 30},
+                              *steps]
+        return scenario
+
+    def timeline_step(self, **fields):
+        return {'action': 'assert', 'actor': 'caster', 'metric': 'timeline_count', 'event': 'cast', 'min': 0,
+                **fields}
+
+    def test_encounter_start_requires_actor_and_boss_entry(self):
+        scenario = self.with_encounter()
+        self.assertIs(run.validate(scenario), scenario)
+        del scenario['steps'][-1]['radius']
+        self.assertIs(run.validate(scenario), scenario)
+        for change in ({'actor': 'target'}, {'actor': 'absent'}, {'boss_entry': 0}, {'boss_entry': -36},
+                       {'boss_entry': True}, {'boss_entry': 36.5}, {'radius': 0}, {'radius': 201},
+                       {'radius': -5}, {'radius': True}, {'spell': 116}):
+            invalid = self.with_encounter()
+            invalid['steps'][-1].update(change)
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                run.validate(invalid)
+        for field in ('actor', 'boss_entry'):
+            invalid = self.with_encounter()
+            del invalid['steps'][-1][field]
+            with self.subTest(missing=field), self.assertRaises(ValueError):
+                run.validate(invalid)
+        twice = self.with_encounter({'action': 'encounter_start', 'actor': 'caster', 'boss_entry': 36})
+        with self.assertRaisesRegex(ValueError, 'one encounter_start'):
+            run.validate(twice)
+
+    def test_timeline_metrics_require_known_event(self):
+        metrics = ('timeline_count', 'timeline_first_ms', 'timeline_interval_min_ms', 'timeline_interval_max_ms',
+                   'timeline_interval_median_ms')
+        for metric in metrics:
+            for event in ('cast', 'aura_applied', 'aura_removed', 'death', 'enter_combat', 'evade', 'spawn',
+                          'boss_state'):
+                scenario = self.with_encounter(self.timeline_step(metric=metric, event=event))
+                with self.subTest(metric=metric, event=event):
+                    self.assertIs(run.validate(scenario), scenario)
+        for change in ({'event': 'heal'}, {'event': ''}, {'event': 1}, {'spell': 0}, {'source_entry': 0},
+                       {'source_entry': 'boss'}):
+            invalid = self.with_encounter(self.timeline_step(**change))
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                run.validate(invalid)
+        missing = self.with_encounter(self.timeline_step())
+        del missing['steps'][-1]['event']
+        with self.assertRaisesRegex(ValueError, 'event'):
+            run.validate(missing)
+        before = copy.deepcopy(self.scenario)
+        before['steps'].append(self.timeline_step())
+        with self.assertRaisesRegex(ValueError, 'encounter_start'):
+            run.validate(before)
+        other = self.with_encounter({'action': 'assert', 'actor': 'caster', 'metric': 'health', 'event': 'cast',
+                                     'min': 0})
+        with self.assertRaisesRegex(ValueError, 'timeline'):
+            run.validate(other)
+        ordered = self.with_encounter(
+            {'action': 'snapshot', 'actor': 'caster', 'metric': 'timeline_first_ms', 'event': 'spawn',
+             'save_as': 'first_spawn'},
+            self.timeline_step(metric='timeline_first_ms', event='cast', relative_to='first_spawn'))
+        self.assertIs(run.validate(ordered), ordered)
+
+    def test_timeline_state_only_with_boss_state(self):
+        for state in ('NOT_STARTED', 'IN_PROGRESS', 'FAIL', 'DONE', 'SPECIAL'):
+            scenario = self.with_encounter(self.timeline_step(event='boss_state', state=state))
+            with self.subTest(state=state):
+                self.assertIs(run.validate(scenario), scenario)
+        for event, state in (('cast', 'DONE'), ('death', 'DONE'), ('boss_state', 'done'),
+                             ('boss_state', 'TO_BE_DECIDED'), ('boss_state', 3)):
+            invalid = self.with_encounter(self.timeline_step(event=event, state=state))
+            with self.subTest(event=event, state=state), self.assertRaises(ValueError):
+                run.validate(invalid)
+
+    def test_timeline_target_actors_must_exist(self):
+        for field in ('target_actors', 'exclude_target_actors'):
+            for actors in (['caster'], ['target'], ['caster', 'target']):
+                scenario = self.with_encounter(self.timeline_step(**{field: actors}))
+                with self.subTest(field=field, actors=actors):
+                    self.assertIs(run.validate(scenario), scenario)
+            for actors in (['absent'], [], 'caster', ['caster', 'caster'], [1]):
+                invalid = self.with_encounter(self.timeline_step(**{field: actors}))
+                with self.subTest(field=field, actors=actors), self.assertRaises(ValueError):
+                    run.validate(invalid)
+
+    def test_set_health_pct_requires_actor_and_one_target(self):
+        base = {'action': 'set_health_pct', 'actor': 'caster', 'pct': 50}
+        for extra in ({'target': 'target'}, {'entry': 36}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({**base, **extra})
+            with self.subTest(extra=extra):
+                self.assertIs(run.validate(scenario), scenario)
+        for step in ({**base}, {**base, 'target': 'target', 'entry': 36}, {'action': 'set_health_pct', 'pct': 50,
+                     'target': 'target'}, {**base, 'target': 'absent'}, {**base, 'actor': 'target', 'entry': 36}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append(step)
+            with self.subTest(step=step), self.assertRaises(ValueError):
+                run.validate(scenario)
+
+    def test_set_health_pct_range(self):
+        for pct, valid in ((0, False), (100, False), (1, True), (99, True), (50.5, False), ('50', False)):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'set_health_pct', 'actor': 'caster', 'target': 'target', 'pct': pct})
+            with self.subTest(pct=pct):
+                if valid:
+                    self.assertIs(run.validate(scenario), scenario)
+                else:
+                    with self.assertRaises(ValueError):
+                        run.validate(scenario)
+
+    def with_role(self, **fields):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['players'][0].update(fields)
+        return scenario
+
+    def test_role_requires_known_value(self):
+        for fields in ({'role': 'tank'}, {'role': 'tank', 'taunt_spell': 355, 'rotation': [801576]},
+                       {'role': 'healer', 'heal_spell': 500143}, {'role': 'melee', 'rotation': [801576]},
+                       {'role': 'ranged', 'rotation': [133, 116]}):
+            scenario = self.with_role(**fields)
+            with self.subTest(fields=fields):
+                self.assertIs(run.validate(scenario), scenario)
+        for role in ('Tank', 'dps', '', 1, None, ['tank']):
+            with self.subTest(role=role), self.assertRaisesRegex(ValueError, 'role'):
+                run.validate(self.with_role(role=role))
+        for fields in ({'rotation': [801576]}, {'heal_spell': 500143}, {'taunt_spell': 355},
+                       {'role': 'melee', 'taunt_spell': 355}, {'role': 'tank', 'heal_spell': 500143},
+                       {'role': 'healer', 'heal_spell': 500143, 'rotation': [801576]}, {'role': 'ranged'}):
+            with self.subTest(fields=fields), self.assertRaises(ValueError):
+                run.validate(self.with_role(**fields))
+
+    def test_rotation_assist_is_a_boolean_opt_in_for_a_role(self):
+        for fields in ({'role': 'ranged', 'rotation': [133], 'rotation_assist': True},
+                       {'role': 'healer', 'heal_spell': 500143, 'rotation_assist': False}):
+            scenario = self.with_role(**fields)
+            with self.subTest(fields=fields):
+                self.assertIs(run.validate(scenario), scenario)
+        for value in (1, 0, 'true', None, [True]):
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'rotation_assist'):
+                run.validate(self.with_role(role='tank', rotation_assist=value))
+        with self.assertRaisesRegex(ValueError, 'need a player role'):
+            run.validate(self.with_role(rotation_assist=True))
+
+    def test_healer_requires_heal_spell(self):
+        with self.assertRaisesRegex(ValueError, 'heal_spell'):
+            run.validate(self.with_role(role='healer'))
+        for spell in (0, -1, 2**32, '500143', 1.5, None):
+            with self.subTest(spell=spell), self.assertRaisesRegex(ValueError, 'heal_spell'):
+                run.validate(self.with_role(role='healer', heal_spell=spell))
+
+    def test_rotation_spells_are_positive_ids(self):
+        for rotation in ([0], [-5], [801576, 0], ['801576'], [1.5], [], 801576, [801576, 801576]):
+            with self.subTest(rotation=rotation), self.assertRaisesRegex(ValueError, 'rotation'):
+                run.validate(self.with_role(role='melee', rotation=rotation))
+        for spell in (0, 2**32, '355'):
+            with self.subTest(taunt=spell), self.assertRaisesRegex(ValueError, 'taunt_spell'):
+                run.validate(self.with_role(role='tank', taunt_spell=spell))
+
+    def test_melee_attacks_taken_needs_a_player(self):
+        for extra in ({}, {'target': 'target'}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'melee_attacks_taken',
+                                      'equals': 0, **extra})
+            with self.subTest(extra=extra):
+                self.assertIs(run.validate(scenario), scenario)
+        for change in ({'actor': 'target'}, {'target': 'absent'}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'melee_attacks_taken',
+                                      'equals': 0, **change})
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                run.validate(scenario)
+
     def test_cancel_mount_requires_player(self):
         self.scenario['steps'].append({'action': 'cancel_mount', 'actor': 'caster'})
         self.assertIs(run.validate(self.scenario), self.scenario)
@@ -684,6 +1062,8 @@ class RunnerTests(unittest.TestCase):
             lambda s: s['steps'].append({'action': 'assert', 'actor': 'caster',
                                          'metric': 'melee_damage_done', 'target': 'missing', 'equals': 1000}),
             lambda s: s['players'][0].update(race=0),
+            lambda s: s['players'][0].update(gender=2),
+            lambda s: s['players'][0].update(gender=True),
             lambda s: s['players'][0].update(ranged_hit_rating=-1),
             lambda s: s['players'][0].update(melee_hit_rating=-1),
             lambda s: s['players'][0].update(melee_crit_rating=-1),
@@ -797,10 +1177,154 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(text=text), self.assertRaises(ValueError):
                 run.Connection.parse(text)
 
-    def database(self, directory):
+    def database(self, directory, copy_workers=1):
         connections = {role: run.Connection('127.0.0.1', 3306, 'user', 'secret', f'source_{role}')
                        for role in ('auth', 'characters', 'world')}
-        return run.Databases('mysql', 'mysqldump', directory, connections, '012345abcdef')
+        return run.Databases('mysql', 'mysqldump', directory, connections, '012345abcdef', copy_workers=copy_workers)
+
+    def copy_with(self, server, copy_workers=1, **arguments):
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary), copy_workers)
+            with patch.object(database, 'sql', side_effect=server.sql), \
+                    patch.object(database, 'dump_copy') as dump, patch('sys.stdout', new=io.StringIO()) as output:
+                database.copy(arguments.pop('role', 'world'), **arguments)
+            return dump, output.getvalue()
+
+    def test_copy_uses_server_side_statements_for_plain_tables(self):
+        server = CopyServer({'creature': 500, 'item_template': 900, 'version': 1})
+        dump, _ = self.copy_with(server)
+        dump.assert_not_called()
+        self.assertEqual([table for table, _ in server.scripts], ['item_template', 'creature', 'version'])
+        target = '`coa_test_012345abcdef_world`'
+        for table, script in server.scripts:
+            self.assertEqual(script, f"{run.COPY_SESSION}\nUSE {target};\n"
+                                     f'CREATE TABLE `{table}` (\n  `id` int NOT NULL\n) ENGINE=InnoDB;\n'
+                                     'USE `source_world`;\n'
+                                     f'INSERT INTO {target}.`{table}` (`id`, `value`) SELECT `id`, `value` '
+                                     f'FROM `{table}`;')
+        self.assertNotIn('LIKE', '\n'.join(script for _, script in server.scripts))
+
+    def test_copy_falls_back_to_dump_when_source_has_triggers(self):
+        for index, reason in enumerate(('views', 'triggers', 'routines', 'events', 'statement-based binary logging')):
+            server = CopyServer({'creature': 1}, obstacles=[int(position == index) for position in range(5)])
+            with self.subTest(reason=reason):
+                dump, output = self.copy_with(server, tables=('creature',), where='id > 0')
+                dump.assert_called_once_with('world', False, ('creature',), 'id > 0')
+                self.assertEqual(server.scripts, [])
+                self.assertIn(f'Copying world with mysqldump: source_world has {reason}', output)
+
+    def test_copy_schema_only_creates_tables_without_rows(self):
+        server = CopyServer({'account': 10, 'realmlist': 20})
+        self.copy_with(server, role='auth', schema_only=True)
+        self.assertEqual([table for table, _ in server.scripts], ['realmlist', 'account'])
+        for table, script in server.scripts:
+            self.assertIn(f'CREATE TABLE `{table}`', script)
+            self.assertNotIn('INSERT', script)
+        self.assertFalse(any('information_schema.COLUMNS' in statement for statement in server.queries))
+
+    def test_copy_respects_where_and_tables(self):
+        server = CopyServer({'coa_build_creator': 5, 'coa_build_creator_spell': 50, 'characters': 500})
+        where = 'entry IN (SELECT entry FROM coa_build_creator WHERE owner_account = 0)'
+        self.copy_with(server, role='characters', tables=('coa_build_creator', 'coa_build_creator_spell'), where=where)
+        self.assertEqual([table for table, _ in server.scripts], ['coa_build_creator_spell', 'coa_build_creator'])
+        for table, script in server.scripts:
+            self.assertNotIn('CREATE TABLE', script)
+            self.assertIn('USE `source_characters`;\n', script)
+            self.assertTrue(script.endswith(f'FROM `{table}` WHERE {where};'))
+        with self.assertRaisesRegex(ValueError, 'Missing source table for characters: missing'):
+            self.copy_with(CopyServer({'characters': 1}), role='characters', tables=('missing',))
+
+    def test_copy_workers_one_runs_serially(self):
+        tables = {f'table_{index}': index for index in range(6)}
+        serial = CopyServer(tables)
+        self.copy_with(serial)
+        self.assertEqual((serial.peak, serial.threads), (1, {threading.get_ident()}))
+        self.assertEqual([table for table, _ in serial.scripts], sorted(tables, key=tables.get, reverse=True))
+        concurrent = CopyServer(tables, barrier=threading.Barrier(3, timeout=10))
+        self.copy_with(concurrent, copy_workers=3)
+        self.assertEqual(concurrent.peak, 3)
+        self.assertEqual(sorted(table for table, _ in concurrent.scripts), sorted(tables))
+        with self.assertRaisesRegex(ValueError, 'copy workers'):
+            self.database(Path(tempfile.gettempdir()), copy_workers=0)
+
+    def test_partial_copy_is_dropped_on_failure(self):
+        server = CopyServer({'broken': 900, 'creature': 500, 'version': 1}, fail='broken')
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary))
+            with patch.object(database, 'sql', side_effect=server.sql), patch('sys.stdout', new=io.StringIO()):
+                with self.assertRaisesRegex(ValueError, 'Database copy failed for world: .*ERROR 1062'):
+                    database.prepare(roles=('world',))
+                self.assertEqual(database.cleanup(), [])
+            database.remove_credentials()
+        self.assertEqual([table for table, _ in server.scripts], ['broken'])
+        self.assertEqual(server.queries[-1], 'DROP DATABASE `coa_test_012345abcdef_world`;')
+
+    def test_drop_uses_long_timeout(self):
+        self.assertEqual(run.DROP_TIMEOUT, 600)
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary))
+            database.created.append('world')
+            result = subprocess.CompletedProcess([], 0, stdout='', stderr='')
+            with patch('run.subprocess.run', return_value=result) as runner:
+                self.assertEqual(database.cleanup(), [])
+            database.remove_credentials()
+        self.assertEqual(runner.call_args.args[0][0], 'mysql')
+        self.assertEqual(runner.call_args.kwargs['input'], 'DROP DATABASE `coa_test_012345abcdef_world`;')
+        self.assertEqual(runner.call_args.kwargs['timeout'], 600)
+
+    def test_cleanup_failed_keeps_error_text(self):
+        errors = [subprocess.TimeoutExpired(['mysql', '--defaults-extra-file=/private/world.cnf'], 600),
+                  ValueError('MySQL operation failed for characters: ERROR 1051 table is locked\n')]
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary))
+            database.created.extend(['characters', 'world'])
+            with patch.object(database, 'drop', side_effect=errors):
+                failures = database.cleanup()
+            database.remove_credentials()
+        self.assertEqual(failures, [
+            {'schema': 'coa_test_012345abcdef_world', 'error': 'timed out after 600 s'},
+            {'schema': 'coa_test_012345abcdef_characters',
+             'error': 'MySQL operation failed for characters: ERROR 1051 table is locked'}])
+        self.assertNotIn('private', json.dumps(failures))
+
+    def test_release_databases_records_schema_and_error(self):
+        database = SimpleNamespace(names={'world': 'coa_test_world'}, cleanup=lambda: [])
+        cache = SimpleNamespace(finish=lambda server_still_running: (_ for _ in ()).throw(ValueError('drop refused')))
+        summary = {}
+        failures = run.release_databases(database, cache, False, summary)
+        expected = [{'schema': 'coa_test_world', 'error': 'drop refused'}]
+        self.assertEqual(failures, expected)
+        self.assertEqual(summary['cleanup_failed'], expected)
+
+    def test_release_databases_keeps_the_defaults_file_out_of_the_cache_error(self):
+        timeout = subprocess.TimeoutExpired(['mysql', '--defaults-extra-file=/private/world.cnf'], 600)
+        database = SimpleNamespace(names={'world': 'coa_test_world'}, cleanup=lambda: [])
+        cache = SimpleNamespace(finish=lambda server_still_running: (_ for _ in ()).throw(timeout))
+        summary = {}
+        run.release_databases(database, cache, False, summary)
+        self.assertEqual(summary['cache_cleanup_error'], 'timed out after 600 s')
+        self.assertNotIn('private', json.dumps(summary))
+
+    def test_sql_decodes_mysql_text_as_utf8(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary))
+            result = subprocess.CompletedProcess([], 0, stdout="COMMENT 'caf\u00e9'\n", stderr='')
+            with patch('run.subprocess.run', return_value=result) as runner:
+                self.assertEqual(database.sql('world', 'SHOW CREATE TABLE `t`;'), "COMMENT 'caf\u00e9'")
+            database.remove_credentials()
+        self.assertEqual(runner.call_args.kwargs['encoding'], 'utf-8')
+
+    def test_parallel_copy_failure_is_wrapped_and_the_partial_copy_dropped(self):
+        server = CopyServer({f'table_{index}': 100 - index for index in range(20)}, fail='table_0')
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary), copy_workers=3)
+            with patch.object(database, 'sql', side_effect=server.sql), patch('sys.stdout', new=io.StringIO()):
+                with self.assertRaisesRegex(ValueError, 'Database copy failed for world: .*ERROR 1062'):
+                    database.prepare(roles=('world',))
+                self.assertEqual(database.cleanup(), [])
+            database.remove_credentials()
+        self.assertIn('table_0', [table for table, _ in server.scripts])
+        self.assertEqual(server.queries[-1], 'DROP DATABASE `coa_test_012345abcdef_world`;')
 
     def test_admin_credentials_preserve_source_endpoint_and_schema(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -826,7 +1350,7 @@ class RunnerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             database = self.database(Path(temporary))
             statements = []
-            with patch.object(database, 'sql', side_effect=lambda role, sql: statements.append(sql)), \
+            with patch.object(database, 'sql', side_effect=lambda role, sql, timeout=60: statements.append(sql)), \
                     patch.object(database, 'copy', side_effect=ValueError('copy failed')):
                 with self.assertRaisesRegex(ValueError, 'copy failed'):
                     database.prepare()
@@ -1023,7 +1547,7 @@ class RunnerTests(unittest.TestCase):
                 worldserver=worldserver, config=config, mysql=mysql, mysqldump=mysqldump,
                 database_client_config=None, modules_config_dir=None,
                 server_modules_dir=directory / 'server-modules', output=output, startup_timeout=3,
-                fresh_databases=True, refresh_world=False, world_cache_dir=directory / 'cache')
+                fresh_databases=True, refresh_world=False, world_cache_dir=directory / 'cache', copy_workers=1)
             report = self.report()
             credential_dirs = []
             server_settings = []
@@ -1092,7 +1616,7 @@ class RunnerTests(unittest.TestCase):
                         mysqldump=directory / 'mysqldump', database_client_config=None, modules_config_dir=None,
                         server_modules_dir=directory / name / 'modules', output=directory / name,
                         startup_timeout=3, fresh_databases=True, refresh_world=False,
-                        world_cache_dir=directory / 'cache')
+                        world_cache_dir=directory / 'cache', copy_workers=1)
                     self.assertEqual(run.execute(args, scenario), 0)
             self.assertEqual([environment['TZ'] for environment in observed], ['UTC+10:40', 'Europe/Moscow'])
             summaries = [run.read_json(directory / name / 'summary.json') for name in ('noon', 'plain')]

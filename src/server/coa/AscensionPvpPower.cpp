@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionItemPower.h"
 #include "AscensionPvpPowerPolicy.h"
 #include "Config.h"
 #include "Item.h"
@@ -27,9 +28,7 @@ unsigned EquippedPower(Player const* player)
     for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
         if (Item const* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
             if (!item->IsBroken())
-                for (auto const& spell : item->GetTemplate()->Spells)
-                    if (spell.SpellTrigger == ITEM_SPELLTRIGGER_ON_EQUIP)
-                        total += SpellPower(spell.SpellId);
+                total += AscensionItemPower::OfItem(item->GetTemplate(), true);
     return std::min(total, Cap);
 }
 
@@ -70,7 +69,7 @@ public:
     Configuration() : WorldScript("PvpPowerConfiguration") { }
     void OnAfterConfigLoad(bool) override
     {
-        enabled.store(sConfigMgr->GetOption<bool>("PvpPower.Enable", false));
+        enabled.store(sConfigMgr->GetOption<bool>("PvpPower.Enable", true));
     }
 };
 

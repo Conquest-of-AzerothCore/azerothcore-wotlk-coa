@@ -1,0 +1,1118 @@
+{
+  "schema": 2,
+  "name": "Molten Core: ten CoA bots fight Lucifron and his timeline follows the measured kit",
+  "contract": [
+    "Lucifron 12118 is the real Molten Core spawn (creature guid 56605, map 409,",
+    "923.3191/-925.5587/-189.90823, o 5.962888, phaseMask 1; pending_db_world rev_20261001_30, checked in the",
+    "slot world database before the runs). His AI is coa_boss_ai, driven by coa_boss_schedule; the Flamewaker",
+    "Protector adds are deleted (rev_20260930_98). The ten players are CoA classes at level 60, the Normal",
+    "access level (rev_20260930_82): a Barbarian tank and four Barbarian melee with Ancestral Strike 802450",
+    "(the level 56 rank, AscensionSpellProgressionData.h) and a Worn Shortsword, two Sun Clerics healing with",
+    "Illumination 502429 (level 60 rank) and three Pyromancers casting Flare Bolt 502018 (level 60 rank;",
+    "Spell.dbc CastingTimeIndex 19 = SpellCastTimes 2500 ms; SpellRange 35 = 35 yd). They group into one raid before entering, so every member",
+    "follows the leader's instance bind (InstanceSaveMgr::PlayerGetDestinationInstanceId); a scenario location",
+    "inside the raid would give each ungrouped player its own instance. Phase 1 shows them the real spawns.",
+    "They gather 37.8 yd from Lucifron on the floor of his previous spawn (rev_20260930_98, .gps -181.997),",
+    "outside his aggro radius; once the tank has engaged, the healers and ranged move onto his spawn point",
+    "(teleport_to_spawn), the only other floor position known, so the bots' 40 yd heal and 30 yd ranged limits",
+    "reach the whole raid. Lucifron has 588759 health at the base flex tier (coa_boss_flex hp_d0), far beyond",
+    "what the bots deal in the window, so the fight ends with a killing blow through the normal death path.",
+    "Health fixtures (set_health maximum) keep the tank and the raid alive through the window: they are",
+    "calibration, not a claim about real damage: in calibration slot run 20261025T141348198910288Z the tank",
+    "kept 96.5 percent of 2,000,000 and every other player at least 89 percent of 500,000 after 80 s.",
+    "Asserted, with their independent sources: Shadow of Lucifron 12268 appears within 11 s of the engage: in",
+    "combat logs 294, 1289, 1602 and 1734 (coa-log-history) players first hit it 10.08, 10.20, 10.07 and 10.06",
+    "s after Lucifron's first log line, so it exists by then (the logs do not show its spawn itself); 11 s is",
+    "that bound rounded up. The designed coa_boss_summon row (5000 ms after engage, rev_20260930_92) is",
+    "context, not the source. Shadow Bolt 2105212 has a 1500 ms cast (Spell.dbc CastingTimeIndex 16) and the",
+    "timeline records a cast when it completes. Combat logs 294, 1289, 1602 and 1734 (coa-log-history) start",
+    "it 5.93-5.98 s after Lucifron's first log line and every 15.0-15.1 s (its 2105213 hits follow 1.6-1.7 s",
+    "later), matching the 5300/15100 ms schedule within a second; so the first completed cast lands 5.8-7.8 s",
+    "after the engage (5300 ms plus the cast time, plus or minus a second of engage and tick jitter) and the",
+    "casts repeat every 14.0-16.2 s. Fierce Blow 975011 is cast at least five times and only on the tank: the",
+    "four logs show it on one player only (the tank) in every fight, roughly every 7.8 s on average with high",
+    "variance, and Spell.dbc gives it melee range (SpellRange 2). Nothing evades during the encounter, and the",
+    "kill moves the instance boss state to DONE once. Recorded, not asserted (uncertain expectations, evidence",
+    "in the result timeline): Curse of Lucifron 2105206 (schedule 18.8 s first, 79.9 s period; the four logs",
+    "start it at 16.6-19.9 s and repeat it every 66.6-70.7 s, except 79.9 s in fight 1289); Suppressing",
+    "Shadows 2105218 (schedule 29.2 s first, 25.1 s period; the logs start the cast at 29.9-30.0 s and every",
+    "25.0-25.1 s, and only its per-target aura events recur every 1-5 s); Impending Doom 2105201 (schedule",
+    "first 20.9-27.5 s, every 22.2-22.6 s, rev_20261005_20, from its 2105205 hits in fights 1289, 1602 and 1734;",
+    "fight 1289 alone logs its 2105201 aura, first at 13.3 s and then every 26.5-27.7 s, so the readings",
+    "disagree). The bots follow the harness raid roles; the tank's threat floor is a test fixture that keeps the",
+    "victim deterministic, not threat realism."
+  ],
+  "timeout_ms": 300000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 12,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "role": "tank",
+      "rotation": [
+        802450
+      ]
+    },
+    {
+      "id": "healer1",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "role": "healer",
+      "heal_spell": 502429
+    },
+    {
+      "id": "healer2",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "role": "healer",
+      "heal_spell": 502429
+    },
+    {
+      "id": "melee1",
+      "race": 1,
+      "class": 12,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "role": "melee",
+      "rotation": [
+        802450
+      ]
+    },
+    {
+      "id": "melee2",
+      "race": 1,
+      "class": 12,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "role": "melee",
+      "rotation": [
+        802450
+      ]
+    },
+    {
+      "id": "melee3",
+      "race": 1,
+      "class": 12,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "role": "melee",
+      "rotation": [
+        802450
+      ]
+    },
+    {
+      "id": "melee4",
+      "race": 1,
+      "class": 12,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "role": "melee",
+      "rotation": [
+        802450
+      ]
+    },
+    {
+      "id": "ranged1",
+      "race": 1,
+      "class": 24,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "role": "ranged",
+      "rotation": [
+        502018
+      ]
+    },
+    {
+      "id": "ranged2",
+      "race": 1,
+      "class": 24,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "role": "ranged",
+      "rotation": [
+        502018
+      ]
+    },
+    {
+      "id": "ranged3",
+      "race": 1,
+      "class": 24,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "role": "ranged",
+      "rotation": [
+        502018
+      ]
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the characters finish logging in",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "label": "healer1 joins the tank's raid group",
+      "actor": "tank",
+      "target": "healer1"
+    },
+    {
+      "action": "group",
+      "label": "healer2 joins the tank's raid group",
+      "actor": "tank",
+      "target": "healer2"
+    },
+    {
+      "action": "group",
+      "label": "melee1 joins the tank's raid group",
+      "actor": "tank",
+      "target": "melee1"
+    },
+    {
+      "action": "group",
+      "label": "melee2 joins the tank's raid group",
+      "actor": "tank",
+      "target": "melee2"
+    },
+    {
+      "action": "group",
+      "label": "melee3 joins the tank's raid group",
+      "actor": "tank",
+      "target": "melee3"
+    },
+    {
+      "action": "group",
+      "label": "melee4 joins the tank's raid group",
+      "actor": "tank",
+      "target": "melee4"
+    },
+    {
+      "action": "group",
+      "label": "ranged1 joins the tank's raid group",
+      "actor": "tank",
+      "target": "ranged1"
+    },
+    {
+      "action": "group",
+      "label": "ranged2 joins the tank's raid group",
+      "actor": "tank",
+      "target": "ranged2"
+    },
+    {
+      "action": "group",
+      "label": "ranged3 joins the tank's raid group",
+      "actor": "tank",
+      "target": "ranged3"
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "tank",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 802450
+    },
+    {
+      "action": "learn",
+      "actor": "melee1",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "melee1",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "melee1",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "melee1",
+      "spell": 802450
+    },
+    {
+      "action": "learn",
+      "actor": "melee2",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "melee2",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "melee2",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "melee2",
+      "spell": 802450
+    },
+    {
+      "action": "learn",
+      "actor": "melee3",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "melee3",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "melee3",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "melee3",
+      "spell": 802450
+    },
+    {
+      "action": "learn",
+      "actor": "melee4",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "melee4",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "melee4",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "melee4",
+      "spell": 802450
+    },
+    {
+      "action": "learn",
+      "actor": "healer1",
+      "spell": 502429
+    },
+    {
+      "action": "learn",
+      "actor": "healer2",
+      "spell": 502429
+    },
+    {
+      "action": "learn",
+      "actor": "ranged1",
+      "spell": 502018
+    },
+    {
+      "action": "learn",
+      "actor": "ranged2",
+      "spell": 502018
+    },
+    {
+      "action": "learn",
+      "actor": "ranged3",
+      "spell": 502018
+    },
+    {
+      "action": "set_phase",
+      "label": "tank sees the real Molten Core spawns",
+      "actor": "tank",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "healer1 sees the real Molten Core spawns",
+      "actor": "healer1",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "healer2 sees the real Molten Core spawns",
+      "actor": "healer2",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "melee1 sees the real Molten Core spawns",
+      "actor": "melee1",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "melee2 sees the real Molten Core spawns",
+      "actor": "melee2",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "melee3 sees the real Molten Core spawns",
+      "actor": "melee3",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "melee4 sees the real Molten Core spawns",
+      "actor": "melee4",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "ranged1 sees the real Molten Core spawns",
+      "actor": "ranged1",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "ranged2 sees the real Molten Core spawns",
+      "actor": "ranged2",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "ranged3 sees the real Molten Core spawns",
+      "actor": "ranged3",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "label": "tank enters the raid's Molten Core at the alcove mouth",
+      "actor": "tank",
+      "map": 409,
+      "x": 959.0,
+      "y": -938.0,
+      "z": -181.997,
+      "o": 2.806
+    },
+    {
+      "action": "assert",
+      "label": "tank is in Molten Core",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 409,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "healer1 enters the raid's Molten Core at the alcove mouth",
+      "actor": "healer1",
+      "map": 409,
+      "x": 959.0,
+      "y": -938.0,
+      "z": -181.997,
+      "o": 2.806
+    },
+    {
+      "action": "assert",
+      "label": "healer1 is in Molten Core",
+      "actor": "healer1",
+      "metric": "map_id",
+      "equals": 409,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "healer2 enters the raid's Molten Core at the alcove mouth",
+      "actor": "healer2",
+      "map": 409,
+      "x": 959.0,
+      "y": -938.0,
+      "z": -181.997,
+      "o": 2.806
+    },
+    {
+      "action": "assert",
+      "label": "healer2 is in Molten Core",
+      "actor": "healer2",
+      "metric": "map_id",
+      "equals": 409,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "melee1 enters the raid's Molten Core at the alcove mouth",
+      "actor": "melee1",
+      "map": 409,
+      "x": 959.0,
+      "y": -938.0,
+      "z": -181.997,
+      "o": 2.806
+    },
+    {
+      "action": "assert",
+      "label": "melee1 is in Molten Core",
+      "actor": "melee1",
+      "metric": "map_id",
+      "equals": 409,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "melee2 enters the raid's Molten Core at the alcove mouth",
+      "actor": "melee2",
+      "map": 409,
+      "x": 959.0,
+      "y": -938.0,
+      "z": -181.997,
+      "o": 2.806
+    },
+    {
+      "action": "assert",
+      "label": "melee2 is in Molten Core",
+      "actor": "melee2",
+      "metric": "map_id",
+      "equals": 409,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "melee3 enters the raid's Molten Core at the alcove mouth",
+      "actor": "melee3",
+      "map": 409,
+      "x": 959.0,
+      "y": -938.0,
+      "z": -181.997,
+      "o": 2.806
+    },
+    {
+      "action": "assert",
+      "label": "melee3 is in Molten Core",
+      "actor": "melee3",
+      "metric": "map_id",
+      "equals": 409,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "melee4 enters the raid's Molten Core at the alcove mouth",
+      "actor": "melee4",
+      "map": 409,
+      "x": 959.0,
+      "y": -938.0,
+      "z": -181.997,
+      "o": 2.806
+    },
+    {
+      "action": "assert",
+      "label": "melee4 is in Molten Core",
+      "actor": "melee4",
+      "metric": "map_id",
+      "equals": 409,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "ranged1 enters the raid's Molten Core at the alcove mouth",
+      "actor": "ranged1",
+      "map": 409,
+      "x": 959.0,
+      "y": -938.0,
+      "z": -181.997,
+      "o": 2.806
+    },
+    {
+      "action": "assert",
+      "label": "ranged1 is in Molten Core",
+      "actor": "ranged1",
+      "metric": "map_id",
+      "equals": 409,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "ranged2 enters the raid's Molten Core at the alcove mouth",
+      "actor": "ranged2",
+      "map": 409,
+      "x": 959.0,
+      "y": -938.0,
+      "z": -181.997,
+      "o": 2.806
+    },
+    {
+      "action": "assert",
+      "label": "ranged2 is in Molten Core",
+      "actor": "ranged2",
+      "metric": "map_id",
+      "equals": 409,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "ranged3 enters the raid's Molten Core at the alcove mouth",
+      "actor": "ranged3",
+      "map": 409,
+      "x": 959.0,
+      "y": -938.0,
+      "z": -181.997,
+      "o": 2.806
+    },
+    {
+      "action": "assert",
+      "label": "ranged3 is in Molten Core",
+      "actor": "ranged3",
+      "metric": "map_id",
+      "equals": 409,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Molten Core runs at normal difficulty",
+      "actor": "tank",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "set_health",
+      "actor": "healer1",
+      "value": 500000,
+      "maximum": 500000
+    },
+    {
+      "action": "set_health",
+      "actor": "healer2",
+      "value": 500000,
+      "maximum": 500000
+    },
+    {
+      "action": "set_health",
+      "actor": "melee1",
+      "value": 500000,
+      "maximum": 500000
+    },
+    {
+      "action": "set_health",
+      "actor": "melee2",
+      "value": 500000,
+      "maximum": 500000
+    },
+    {
+      "action": "set_health",
+      "actor": "melee3",
+      "value": 500000,
+      "maximum": 500000
+    },
+    {
+      "action": "set_health",
+      "actor": "melee4",
+      "value": 500000,
+      "maximum": 500000
+    },
+    {
+      "action": "set_health",
+      "actor": "ranged1",
+      "value": 500000,
+      "maximum": 500000
+    },
+    {
+      "action": "set_health",
+      "actor": "ranged2",
+      "value": 500000,
+      "maximum": 500000
+    },
+    {
+      "action": "set_health",
+      "actor": "ranged3",
+      "value": 500000,
+      "maximum": 500000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: tank's bot spell is its active rank",
+      "actor": "tank",
+      "metric": "spell_active",
+      "spell": 802450,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: healer1's bot spell is its active rank",
+      "actor": "healer1",
+      "metric": "spell_active",
+      "spell": 502429,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: healer2's bot spell is its active rank",
+      "actor": "healer2",
+      "metric": "spell_active",
+      "spell": 502429,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: melee1's bot spell is its active rank",
+      "actor": "melee1",
+      "metric": "spell_active",
+      "spell": 802450,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: melee2's bot spell is its active rank",
+      "actor": "melee2",
+      "metric": "spell_active",
+      "spell": 802450,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: melee3's bot spell is its active rank",
+      "actor": "melee3",
+      "metric": "spell_active",
+      "spell": 802450,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: melee4's bot spell is its active rank",
+      "actor": "melee4",
+      "metric": "spell_active",
+      "spell": 802450,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: ranged1's bot spell is its active rank",
+      "actor": "ranged1",
+      "metric": "spell_active",
+      "spell": 502018,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: ranged2's bot spell is its active rank",
+      "actor": "ranged2",
+      "metric": "spell_active",
+      "spell": 502018,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: ranged3's bot spell is its active rank",
+      "actor": "ranged3",
+      "metric": "spell_active",
+      "spell": 502018,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Lucifron's real spawn stands in the alcove",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 12118,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Lucifron is undamaged, so the instance is fresh",
+      "actor": "tank",
+      "metric": "nearby_creature_health_pct",
+      "entry": 12118,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: nobody pulled Lucifron before the encounter",
+      "actor": "tank",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "encounter_start",
+      "actor": "tank",
+      "boss_entry": 12118,
+      "radius": 60
+    },
+    {
+      "action": "assert",
+      "actor": "tank",
+      "label": "Lucifron engages within five seconds of the encounter start",
+      "metric": "timeline_count",
+      "event": "enter_combat",
+      "source_entry": 12118,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let the tank engage before the raid closes in",
+      "ms": 1000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "healer1 closes in on Lucifron",
+      "actor": "healer1",
+      "guid": 56605
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "healer2 closes in on Lucifron",
+      "actor": "healer2",
+      "guid": 56605
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "ranged1 closes in on Lucifron",
+      "actor": "ranged1",
+      "guid": 56605
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "ranged2 closes in on Lucifron",
+      "actor": "ranged2",
+      "guid": 56605
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "ranged3 closes in on Lucifron",
+      "actor": "ranged3",
+      "guid": 56605
+    },
+    {
+      "action": "wait",
+      "label": "Let the raid fight Lucifron",
+      "ms": 80000
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: tank's swings",
+      "actor": "tank",
+      "metric": "melee_attack_count",
+      "save_as": "tank_swings"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: melee1's swings",
+      "actor": "melee1",
+      "metric": "melee_attack_count",
+      "save_as": "melee1_swings"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: melee2's swings",
+      "actor": "melee2",
+      "metric": "melee_attack_count",
+      "save_as": "melee2_swings"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: melee3's swings",
+      "actor": "melee3",
+      "metric": "melee_attack_count",
+      "save_as": "melee3_swings"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: melee4's swings",
+      "actor": "melee4",
+      "metric": "melee_attack_count",
+      "save_as": "melee4_swings"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: tank's bot casts",
+      "actor": "tank",
+      "metric": "spell_cast_count",
+      "spell": 802450,
+      "save_as": "tank_casts"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: tank's health",
+      "actor": "tank",
+      "metric": "health_pct",
+      "save_as": "tank_health"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: healer1's bot casts",
+      "actor": "healer1",
+      "metric": "spell_cast_count",
+      "spell": 502429,
+      "save_as": "healer1_casts"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: healer1's health",
+      "actor": "healer1",
+      "metric": "health_pct",
+      "save_as": "healer1_health"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: healer2's bot casts",
+      "actor": "healer2",
+      "metric": "spell_cast_count",
+      "spell": 502429,
+      "save_as": "healer2_casts"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: healer2's health",
+      "actor": "healer2",
+      "metric": "health_pct",
+      "save_as": "healer2_health"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: melee1's bot casts",
+      "actor": "melee1",
+      "metric": "spell_cast_count",
+      "spell": 802450,
+      "save_as": "melee1_casts"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: melee1's health",
+      "actor": "melee1",
+      "metric": "health_pct",
+      "save_as": "melee1_health"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: melee2's bot casts",
+      "actor": "melee2",
+      "metric": "spell_cast_count",
+      "spell": 802450,
+      "save_as": "melee2_casts"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: melee2's health",
+      "actor": "melee2",
+      "metric": "health_pct",
+      "save_as": "melee2_health"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: melee3's bot casts",
+      "actor": "melee3",
+      "metric": "spell_cast_count",
+      "spell": 802450,
+      "save_as": "melee3_casts"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: melee3's health",
+      "actor": "melee3",
+      "metric": "health_pct",
+      "save_as": "melee3_health"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: melee4's bot casts",
+      "actor": "melee4",
+      "metric": "spell_cast_count",
+      "spell": 802450,
+      "save_as": "melee4_casts"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: melee4's health",
+      "actor": "melee4",
+      "metric": "health_pct",
+      "save_as": "melee4_health"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: ranged1's bot casts",
+      "actor": "ranged1",
+      "metric": "spell_cast_count",
+      "spell": 502018,
+      "save_as": "ranged1_casts"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: ranged1's health",
+      "actor": "ranged1",
+      "metric": "health_pct",
+      "save_as": "ranged1_health"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: ranged2's bot casts",
+      "actor": "ranged2",
+      "metric": "spell_cast_count",
+      "spell": 502018,
+      "save_as": "ranged2_casts"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: ranged2's health",
+      "actor": "ranged2",
+      "metric": "health_pct",
+      "save_as": "ranged2_health"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: ranged3's bot casts",
+      "actor": "ranged3",
+      "metric": "spell_cast_count",
+      "spell": 502018,
+      "save_as": "ranged3_casts"
+    },
+    {
+      "action": "snapshot",
+      "label": "Evidence: ranged3's health",
+      "actor": "ranged3",
+      "metric": "health_pct",
+      "save_as": "ranged3_health"
+    },
+    {
+      "action": "assert",
+      "label": "The tank survived the fight",
+      "actor": "tank",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Shadow of Lucifron appears within 11 s of the engage (combat logs: first hit at 10.06-10.20 s)",
+      "actor": "tank",
+      "metric": "timeline_first_ms",
+      "event": "spawn",
+      "source_entry": 12268,
+      "min": 0,
+      "max": 11000
+    },
+    {
+      "action": "assert",
+      "label": "First Shadow Bolt completes 5.8-7.8 s after the engage",
+      "actor": "tank",
+      "metric": "timeline_first_ms",
+      "event": "cast",
+      "spell": 2105212,
+      "source_entry": 12118,
+      "min": 5800,
+      "max": 7800
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Bolt repeats no faster than 14 s",
+      "actor": "tank",
+      "metric": "timeline_interval_min_ms",
+      "event": "cast",
+      "spell": 2105212,
+      "source_entry": 12118,
+      "min": 14000
+    },
+    {
+      "action": "assert",
+      "label": "Shadow Bolt repeats no slower than 16.2 s",
+      "actor": "tank",
+      "metric": "timeline_interval_max_ms",
+      "event": "cast",
+      "spell": 2105212,
+      "source_entry": 12118,
+      "max": 16200
+    },
+    {
+      "action": "assert",
+      "label": "Lucifron keeps casting Fierce Blow",
+      "actor": "tank",
+      "metric": "timeline_count",
+      "event": "cast",
+      "spell": 975011,
+      "source_entry": 12118,
+      "min": 5
+    },
+    {
+      "action": "assert",
+      "label": "Fierce Blow only ever hits the tank",
+      "actor": "tank",
+      "metric": "timeline_count",
+      "event": "cast",
+      "spell": 975011,
+      "source_entry": 12118,
+      "exclude_target_actors": [
+        "tank"
+      ],
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Nothing evades during the encounter",
+      "actor": "tank",
+      "metric": "timeline_count",
+      "event": "evade",
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "label": "End the fight through the normal death path",
+      "actor": "tank",
+      "entry": 12118,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "The encounter is recorded as done",
+      "actor": "tank",
+      "metric": "timeline_count",
+      "event": "boss_state",
+      "state": "DONE",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The healers shared the tank's instance: their Lucifron is the dead one",
+      "actor": "healer1",
+      "metric": "nearby_creature_count",
+      "entry": 12118,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The ranged shared the tank's instance: their Lucifron is the dead one",
+      "actor": "ranged3",
+      "metric": "nearby_creature_count",
+      "entry": 12118,
+      "equals": 0
+    }
+  ]
+}

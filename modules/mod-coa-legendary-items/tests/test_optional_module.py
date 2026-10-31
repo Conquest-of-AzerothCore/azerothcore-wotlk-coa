@@ -7,6 +7,8 @@ import unittest
 ROOT = Path(__file__).resolve().parents[3]
 MODULE = ROOT / 'modules/mod-coa-legendary-items'
 PENDING = ROOT / 'data/sql/updates/pending_db_world'
+LEGACY_TOOLTIPS = ('', '18', [13, 34, 72], '0')
+FABLED_TOOLTIPS = ('@Fabled@', '5', [3, 14, 33], '134217728')
 spec = importlib.util.spec_from_file_location(
     'isolated_mysql', ROOT / 'apps/test-framework/test_enchantment_migrations.py')
 fixture = importlib.util.module_from_spec(spec)
@@ -77,37 +79,45 @@ class OptionalLegendaryModule(unittest.TestCase):
         paths = self.core_updates() + list((MODULE / 'data/sql/db-world').glob('*.sql'))
         self.apply(paths)
         self.assertEqual(self.legendary_counts(), [('5120',), ('3840',), ('64',), ('0',)])
-        self.assert_native_tooltips()
+        self.assert_native_tooltips(FABLED_TOOLTIPS)
         self.apply(paths)
         self.assertEqual(self.legendary_counts(), [('5120',), ('3840',), ('64',), ('0',)])
-        self.assert_native_tooltips()
+        self.assert_native_tooltips(FABLED_TOOLTIPS)
 
-    def assert_native_tooltips(self):
+    def assert_native_tooltips(self, expected):
+        description, spell_power_stat, powers, realm_bound = expected
         self.assertEqual(self.query('SELECT COUNT(*) FROM spell_dbc WHERE ID >= 9720000 AND ID < 9726400;'),
                          [('3840',)])
         self.assertEqual(self.query('SELECT COUNT(*) FROM spell_dbc WHERE ID >= 9720000 AND ID < 9726400 '
                                    'AND (Effect_1 <> 0 OR Effect_2 <> 0 OR Effect_3 <> 0);'), [('0',)])
         self.assertEqual(self.query('SELECT spellid_1, spelltrigger_1, description, stat_value3 '
-                                   'FROM item_template WHERE entry = 9705122;'), [('9725122', '1', '', '18')])
+                                   'FROM item_template WHERE entry = 9705122;'),
+                         [('9725122', '1', description, spell_power_stat)])
+        self.assertEqual(self.query('SELECT bonding, Flags & 0x08000000 FROM item_template WHERE entry = 9705122;'),
+                         [('1', realm_bound)])
         self.assertEqual(self.query('SELECT Description_Lang_enUS FROM spell_dbc '
-                                   'WHERE ID IN (9725101, 9725122, 9725160) ORDER BY ID;'), [
-            ('Gain 13 spell power while at or below 35% health.',),
-            ('Gain 34 spell power while at or below 35% health.',),
-            ('Gain 72 spell power while at or below 35% health.',)])
+                                   'WHERE ID IN (9725101, 9725122, 9725160) ORDER BY ID;'),
+                         [(f'Gain {power} spell power while at or below 35% health.',) for power in powers])
 
     def test_tooltip_upgrade_is_idempotent_and_preserves_legacy_variants(self):
         self.apply(list((MODULE / 'data/sql/db-world').glob('*.sql')))
         legacy = self.query('SELECT * FROM item_template WHERE entry = 9705180;')
         upgrades = list(PENDING.glob('*coa_legendary_item_equip_tooltips.sql'))
         self.apply(upgrades)
-        self.assert_native_tooltips()
+        self.assert_native_tooltips(LEGACY_TOOLTIPS)
         self.apply(upgrades)
-        self.assert_native_tooltips()
+        self.assert_native_tooltips(LEGACY_TOOLTIPS)
+        self.assertEqual(self.query('SELECT * FROM item_template WHERE entry = 9705180;'), legacy)
+        fabled = list(PENDING.glob('*coa_legendary_items_fabled.sql'))
+        self.apply(fabled)
+        self.assert_native_tooltips(FABLED_TOOLTIPS)
+        self.apply(fabled)
+        self.assert_native_tooltips(FABLED_TOOLTIPS)
         self.assertEqual(self.query('SELECT * FROM item_template WHERE entry = 9705180;'), legacy)
 
     def test_generated_catalog_uses_native_equip_tooltips(self):
         self.query(catalog.render_sql(catalog.load_catalog()))
-        self.assert_native_tooltips()
+        self.assert_native_tooltips(FABLED_TOOLTIPS)
 
 
 if __name__ == '__main__':

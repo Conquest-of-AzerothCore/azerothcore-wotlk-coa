@@ -5,6 +5,7 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "TemporarySummon.h"
 #include <array>
 
 namespace
@@ -13,7 +14,8 @@ enum FalconstrikeSpells : uint32
 {
     SPELL_FALCONSTRIKE_TALENT = 573060,
     SPELL_FALCONSTRIKE_COUNTER = 573248,
-    SPELL_FALCONSTRIKE_READY = 573338
+    SPELL_FALCONSTRIKE_READY = 573338,
+    SPELL_FALCONSTRIKE_SUMMON = 520588
 };
 
 constexpr std::array<uint32, 7> QuickShots = {500074, 572727, 572728, 572729, 572730, 572731, 572732};
@@ -122,11 +124,24 @@ public:
     void OnPlayerLogin(Player* player) override { SyncFalconstrike(player); }
     void OnPlayerUpdate(Player* player, uint32) override { SyncFalconstrike(player); }
 };
+
+class ranger_falconstrike_summon : public AllSpellScript
+{
+public:
+    ranger_falconstrike_summon() : AllSpellScript("ranger_falconstrike_summon", {ALLSPELLHOOK_ON_GUARDIAN_SUMMONED}) { }
+
+    void OnGuardianSummoned(Spell* spell, TempSummon* summon) override
+    {
+        if (spell->GetSpellInfo()->Id == SPELL_FALCONSTRIKE_SUMMON && summon)
+            summon->SetReactState(REACT_DEFENSIVE);
+    }
+};
 }
 
 void AddSC_AscensionRangerFalconstrike()
 {
     new ranger_falconstrike_casts();
     new ranger_falconstrike_lifecycle();
+    new ranger_falconstrike_summon();
     RegisterSpellScript(spell_ascension_ranger_falconstrike);
 }

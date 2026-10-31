@@ -12,6 +12,8 @@ void AddSC_manastorm_dire_maul_compat();
 void AddSC_manastorm_zul_farrak_compat();
 void AddSC_manastorm_blackfathom_deeps_compat();
 void AddSC_manastorm_molten_core_isolation();
+void AddSC_manastorm_sunken_temple_compat();
+void AddSC_manastorm_shadowfang_keep_compat();
 
 void Addmod_manastorm_endlessScripts()
 {
@@ -31,4 +33,6 @@ void Addmod_manastorm_endlessScripts()
     AddSC_manastorm_zul_farrak_compat();
     AddSC_manastorm_blackfathom_deeps_compat();
     AddSC_manastorm_molten_core_isolation();
+    AddSC_manastorm_sunken_temple_compat();
+    AddSC_manastorm_shadowfang_keep_compat();
 }

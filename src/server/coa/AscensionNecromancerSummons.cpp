@@ -42,6 +42,14 @@ bool Follows(uint32 entry)
 {
     return !Stationary(entry) && entry != 523032 && entry != 542065;
 }
+bool PlayerInCloud(Creature* minion, uint32 spell)
+{
+    SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
+    for (Unit* unit : Nearby(minion, info->Effects[EFFECT_0].CalcRadius(minion)))
+        if (unit->GetCharmerOrOwnerPlayerOrPlayerItself() && minion->_IsValidAttackTarget(unit, info))
+            return true;
+    return false;
+}
 bool Travelling(Player const* player)
 {
     return player->IsMounted() || player->IsInFlight();
@@ -174,13 +182,63 @@ bool Responds(uint32 entry, uint32 command)
         return false;
     }
 }
+constexpr float OwnerStaminaPerLifeForce = 0.2714f;
+float NakedHealth(Player const* player)
+{
+    float stamina = player->GetCreateStat(STAT_STAMINA);
+    float firstTwenty = std::min(stamina, 20.0f);
+    return player->GetCreateHealth() + firstTwenty + (stamina - firstTwenty) * 10.0f;
+}
+float HealthShare(uint32 entry, uint8 cost)
+{
+    switch (entry)
+    {
+    case 50065:
+    case 51065:
+        return 0.54f;
+    case 50073:
+    case 50075:
+        return 0.66f;
+    case 50115:
+        return 0.79f;
+    case 50323:
+        return 0.94f;
+    case 50068:
+        return 1.38f;
+    case 51275:
+        return 1.44f;
+    case 50177:
+        return 2.53f;
+    case 500482:
+    case 500483:
+    case 500484:
+        return 4.0f;
+    default:
+        break;
+    }
+    switch (cost)
+    {
+    case 1:
+        return 0.54f;
+    case 2:
+        return 0.94f;
+    case 3:
+        return 1.38f;
+    default:
+        return 1.0f;
+    }
+}
+float HealthPerStamina(uint32 entry)
+{
+    return entry == 50073 ? 5.0f : 10.0f;
+}
 void Scale(Player* player, Creature* minion, uint8 cost, float& inheritedSpeed)
 {
     float weight = float(std::max<uint8>(1, cost));
     float healthFraction = minion->GetHealthPct() / 100.0f;
     float manaFraction =
         minion->GetMaxPower(POWER_MANA) ? float(minion->GetPower(POWER_MANA)) / minion->GetMaxPower(POWER_MANA) : 1.0f;
-    float stamina = (player->GetLevel() * 3.0f + player->GetStat(STAT_STAMINA) * 0.3f) * weight;
+    float stamina = player->GetStat(STAT_STAMINA) * OwnerStaminaPerLifeForce * cost;
     float intellect = player->GetStat(STAT_INTELLECT);
     float spellPower = float(std::max(player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST),
                                       player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)));
@@ -189,8 +247,10 @@ void Scale(Player* player, Creature* minion, uint8 cost, float& inheritedSpeed)
     minion->SetStatFlatModifier(UNIT_MOD_STAT_INTELLECT, BASE_VALUE, intellect * 0.3f * weight);
     minion->UpdateStats(STAT_STAMINA);
     minion->UpdateStats(STAT_INTELLECT);
+    float minionStamina = std::max(0.0f, minion->GetStat(STAT_STAMINA) - minion->GetCreateStat(STAT_STAMINA));
     minion->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE,
-                                50.0f * player->GetLevel() * weight + minion->GetStat(STAT_STAMINA) * 10);
+                                NakedHealth(player) * HealthShare(minion->GetEntry(), cost) +
+                                    minionStamina * HealthPerStamina(minion->GetEntry()));
     minion->UpdateMaxHealth();
     minion->SetHealth(std::max(1u, uint32(healthFraction * minion->GetMaxHealth())));
     minion->setPowerType(POWER_MANA);
@@ -384,10 +444,11 @@ class npc_ascension_necromancer : public ScriptedAI
     float _inheritedSpeed = 1.0f;
     float _followRange = 0.0f;
     bool _travelling = false;
+    bool _charmed = false;
 
     bool Pacified(Player const* player) const
     {
-        return _travelling || player->HasAura(500983);
+        return _travelling || player->HasAura(500983) || player->IsCharmed();
     }
     void IsSummonedBy(WorldObject* summoner) override
     {
@@ -404,7 +465,7 @@ class npc_ascension_necromancer : public ScriptedAI
         }
         me->SetOwnerGUID(_owner);
         me->SetCreatorGUID(_owner);
-        me->SetFaction(player->GetFaction());
+        me->SetFaction(player->IsCharmed() ? player->GetOldFactionId() : player->GetFaction());
         me->SetReactState(REACT_DEFENSIVE);
         me->SetCombatMovement(!Stationary(me->GetEntry()) && !Ranged(me->GetEntry()));
         State(player).minions.push_back({me->GetGUID(), _spell, _cost});
@@ -422,8 +483,11 @@ class npc_ascension_necromancer : public ScriptedAI
             me->CastSpell(me, champion, true);
         for (uint32 ward : {680388, 681460, 681529})
             if (Aura const* active = player->GetAura(ward))
-                if (Aura* copy = player->AddAura(ward, me))
+            {
+                SpellInfo const* wardInfo = sSpellMgr->GetSpellInfo(ward);
+                if (Aura* copy = player->AddAura(wardInfo, WardMinionEffectMask(wardInfo), me))
                     copy->SetDuration(active->GetDuration());
+            }
         if (me->GetEntry() == 50132)
         {
             ObjectGuid previous = State(player).phylactery;
@@ -635,6 +699,11 @@ class npc_ascension_necromancer : public ScriptedAI
             me->SetImmuneToNPC(travelling);
             _events.RescheduleEvent(1, 1ms);
         }
+        if (bool charmed = player->IsCharmed(); charmed != _charmed)
+        {
+            _charmed = charmed;
+            _events.RescheduleEvent(1, 1ms);
+        }
         _events.Update(diff);
         while (uint32 event = _events.ExecuteEvent())
         {
@@ -700,7 +769,7 @@ class npc_ascension_necromancer : public ScriptedAI
             {
                 if (!Pacified(player) && !me->HasUnitState(UNIT_STATE_CONTROLLED))
                 {
-                    if (me->GetEntry() == 50068)
+                    if (me->GetEntry() == 50068 && (me->IsInCombat() || PlayerInCloud(me, 802353)))
                         Cast(me, me, 802353);
                     if (Unit* victim = me->GetVictim(); victim && InReach(me, victim))
                         if (uint32 ability = AttackSpell(me->GetEntry()))

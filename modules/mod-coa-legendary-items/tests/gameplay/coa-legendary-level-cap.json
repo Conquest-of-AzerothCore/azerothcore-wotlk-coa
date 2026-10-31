@@ -3,7 +3,7 @@
   "name": "CoA legendary catalog: only levels 1 through 60 are streamed",
   "contract": [
     "Requires the legendary catalog and its level-cap migration.",
-    "Level-60 variants retain item level 72 and required level 60.",
+    "Level-60 variants retain item level 66 and required level 60.",
     "Removed level-61 and level-80 client definitions are not patched.",
     "Historical server templates remain for saved-item compatibility."
   ],
@@ -69,7 +69,7 @@
       "offset": 16,
       "skip_strings": 4,
       "index": 9,
-      "equals": 72
+      "equals": 66
     },
     {
       "action": "assert",
@@ -99,7 +99,7 @@
       "offset": 16,
       "skip_strings": 4,
       "index": 9,
-      "equals": 72
+      "equals": 66
     },
     {
       "action": "assert",

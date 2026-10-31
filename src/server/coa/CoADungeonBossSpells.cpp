@@ -443,8 +443,52 @@ class spell_coa_summon_hearty_heart : public SpellScript
     }
 };
 
+class spell_coa_petrifying_gaze : public SpellScript
+{
+    PrepareSpellScript(spell_coa_petrifying_gaze);
+
+    float _facing = 0.0f;
+    bool _locked = false;
+
+    SpellCastResult LockFacing()
+    {
+        if (!_locked)
+            if (Unit* caster = GetCaster())
+            {
+                _facing = caster->GetOrientation();
+                _locked = true;
+            }
+        return SPELL_CAST_OK;
+    }
+
+    void FilterCone(std::list<WorldObject*>& targets)
+    {
+        Unit* caster = GetCaster();
+        if (!_locked || !caster)
+            return;
+
+        float const halfAngle = float(M_PI) * 24.0f / 360.0f;
+        float const facing = _facing;
+        targets.remove_if([caster, facing, halfAngle](WorldObject* target)
+        {
+            float offset = Position::NormalizeOrientation(caster->GetAngle(target) - facing);
+            if (offset > float(M_PI))
+                offset -= 2.0f * float(M_PI);
+            return std::fabs(offset) > halfAngle;
+        });
+    }
+
+    void Register() override
+    {
+        OnCheckCast += SpellCheckCastFn(spell_coa_petrifying_gaze::LockFacing);
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_coa_petrifying_gaze::FilterCone, EFFECT_0,
+            TARGET_UNIT_CONE_ENEMY_24);
+    }
+};
+
 void AddSC_CoADungeonBossSpells()
 {
+    RegisterSpellScript(spell_coa_petrifying_gaze);
     RegisterSpellScript(spell_coa_summon_hearty_heart);
     RegisterSpellScript(spell_coa_massive_fire_nova);
     RegisterSpellScript(spell_coa_torrent_spin);

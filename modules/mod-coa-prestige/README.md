@@ -27,7 +27,7 @@ client piece reads:
 
 Chromie refuses unless all of these hold:
 - the character is a Conquest of Azeroth class, or a stock class on Warcraft Reborn, at
-  `CoAPrestige.RequiredLevel`;
+  the configured realm level cap (`MaxPlayerLevel`);
 - it has a specialization;
 - it is alive, out of combat, not travelling and not in an instance.
 
@@ -44,9 +44,7 @@ Then, in this order:
    `Player::GiveLevel`, whose CoA progression pass removes the class abilities that level 1 does not
    allow. The rank left below a removed one is learned again, so it can be cast.
 6. Temporary buffs and debuffs are removed, and the ruleset becomes War Mode (High-Risk and PvE Mode
-   are removed). Equipment the character can no longer use goes to the
-   bags, or to the mailbox if they are full. This includes a weapon or shield whose proficiency came
-   from a forgotten talent.
+   are removed). All equipped gear is mailed to the character; bags and their contents are retained.
 7. The rewards (`CoAPrestige.Rewards`) are added to the bags, or mailed if they do not fit.
 8. The hearthstone is bound to the racial starting location. The character is saved in one
    transaction with any mail, then teleported there.
@@ -104,20 +102,39 @@ The spawn points are chosen, not recovered. Every price is a row of the client's
 - Gameplay scenarios in `apps/coa-gameplay-test/scenarios/coa-prestige-*.json` cover activation,
   refusals and shops, the experience bonus, and the spawns.
 
+## Prestige caches and daily quests
+
+The generic Classic Prestigious Cache (1287330) converts to the highest configured populated Classic
+pool allowed by `Ascension.CallboardCache.ReleaseStage`. The same release check applies when opening
+an already-owned named cache and when selecting content tokens. `ClassicStages` can restrict the
+available pools further; it cannot unlock a tier ahead of the shared release stage. At the Mythic
+Dungeon release, only the existing Heroic Dungeon Prestige pool is available; no new Mythic pool is
+invented. An unavailable cache is kept, not consumed or downgraded.
+
+TBC pools remain controlled by `TbcStages` and require a realm cap of at least 70. TBC generic caches
+never fall back to Classic gear. No WotLK pool has been recovered, so the WotLK generic cache is kept
+with an unavailable message. Pool contents, stat preference and configured token probabilities remain
+unchanged; the probabilities are reconstruction settings, not confirmed universal Ascension rates.
+
+Daily quests 80954/80955/80956 rotate through game events 191/192/193. The existing daily grants,
+quest progress, XP auras, completion rewards and turn-in gossip remain implemented. Main Prestige
+rewards still pay at activation; historical activation/completion policies vary by realm and are not
+changed without version-specific evidence and an entitlement migration.
+
 ## Not implemented
 
-- The daily Prestige quest ("Today's Prestige Quest is ...").
 - Temporal Contracts. The client's tab for them is disabled.
 - The Draft reset. Conquest of Azeroth has no Draft mode.
 
 ## Open questions
 
 - **Experience bonus.** The client tooltip says "by 300%", while the aura's Spell.dbc amount is 150.
-  The default follows the amount.
+  The dummy aura does not supply this multiplier. `CoAPrestige.ExperienceBonusPercent = 300`
+  is 300% of baseline (3x total), applied by the challenge XP hook.
 - **Cache.** The client's window shows the Prestigious Cache 97304, which nothing on this server can
   open. The default reward is 1287330, the Prestigious Cache CoA opens into the newest released tier.
-- **"1x Experience" trials.** The Prestige bonus still applies inside mod-coa-challenges' "Resolute
-  1x Experience" trials, which only block experience items today.
+- **"1x Experience" trials.** The challenge XP hook excludes the Prestige multiplier when
+  `CHALLENGE_RULES_TYPE_NO_BONUS_EXPERIENCE` is active, including Resolute.
 
 ## Realm level cap and classless characters
 

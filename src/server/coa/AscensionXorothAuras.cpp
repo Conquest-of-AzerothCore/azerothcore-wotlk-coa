@@ -40,6 +40,9 @@ class aura_ascension_xoroth_lifecycle : public AuraScript
         }
         if (id == 803889)
             amount = int32(amount * (1 + .2f * State(player).fire));
+        if (id == 804785 && effect->GetEffIndex() == EFFECT_0)
+            if (AuraEffect const* mount = player->GetAuraEffect(804703, EFFECT_0))
+                amount += mount->GetAmount();
         if (id == 801063 && effect->GetEffIndex() == EFFECT_2)
             amount = player->HasAura(707232) ? Amount(707232, 0) : 0;
         if (id == 801019 && effect->GetEffIndex() == EFFECT_1)

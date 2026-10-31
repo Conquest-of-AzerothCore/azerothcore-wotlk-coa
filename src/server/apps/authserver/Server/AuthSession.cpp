@@ -878,13 +878,15 @@ void AuthSession::RealmListCallback(PreparedQueryResult result)
     {
         RealmCardStyle const style{ sConfigMgr->GetOption<uint32>("RealmCards.Expansion", 2),
             sConfigMgr->GetOption<uint32>("RealmCards.GameMode", 11),
-            sConfigMgr->GetOption<std::string>("RealmCards.Image", "Default") };
+            sConfigMgr->GetOption<std::string>("RealmCards.Image", "Default"), 0 };
         uint8 const category = uint8(sConfigMgr->GetOption<uint32>("RealmCards.Category", 41));
         for (std::size_t order = 0; order < listedRealms.size(); ++order)
         {
+            std::string const realmKey = "RealmCards.Realm." + std::to_string(listedRealms[order].first);
             RealmCardStyle realmStyle = style;
-            realmStyle.GameMode = sConfigMgr->GetOption<uint32>(
-                "RealmCards.Realm." + std::to_string(listedRealms[order].first) + ".GameMode", style.GameMode, false);
+            realmStyle.GameMode = sConfigMgr->GetOption<uint32>(realmKey + ".GameMode", style.GameMode, false);
+            realmStyle.Image = sConfigMgr->GetOption<std::string>(realmKey + ".Image", style.Image, false);
+            realmStyle.DescriptionSpell = sConfigMgr->GetOption<uint32>(realmKey + ".DescriptionSpell", 0, false);
             pkt << uint8(REALM_TYPE_NORMAL);
             pkt << uint8(0);
             pkt << uint8(REALM_FLAG_OFFLINE);

@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Adventurer's Lost Sack rests on the Shadowglen bench, not floating in the road (#8770)",
+  "contract": "The realm-map pass left the Forgotten Sack (gameobject entry 90636, guid 6941386) floating 0.57 yd above the road. The pickup's own first-pass position sat on the Stonebench01 seat 7 yd away; the fix moves it back there. The narrow gap window proves it rests on the bench top rather than merely closer to the road's terrain (which would still read about +0.88).",
+  "timeout_ms": 90000,
+  "location": { "map": 1, "x": 10208.0, "y": 699.0, "z": 1362.0, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "the sack stands at the bench", "actor": "p", "metric": "nearby_gameobject_count", "entry": 90636, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: it rests on the bench top, not above it", "actor": "p", "metric": "spawn_ground_gap", "guid": 6941386, "spawn_type": "gameobject", "min": -0.2, "max": 0.2 },
+    { "action": "assert", "label": "it is grounded", "actor": "p", "metric": "spawn_placement", "guid": 6941386, "spawn_type": "gameobject", "tolerance": 0.3, "equals": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 90636 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "it is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

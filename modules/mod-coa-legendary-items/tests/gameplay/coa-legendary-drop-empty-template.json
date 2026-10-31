@@ -2,9 +2,9 @@
   "schema": 1,
   "name": "CoA Legendary Items: loot an empty-template corpse, then skin it",
   "contract": [
-    "Requires CoALegendaryItems.Enable=1, DropChance=100, StopDropLevel=60, DestinyWeaver.Enable=1, LevelScaling=1,",
+    "Requires CoALegendaryItems.Enable=1, DropChance=100, DestinyWeaver.Enable=1, LevelScaling=1,",
     "offset=5, CoA.SendDisplayPatches=1. An eligible corpse receives exactly one class-pool legendary. Required level",
-    "equals its effective NPC level. Gray creatures, level-60 players and legacy classes receive none. Loot uses the",
+    "equals its effective NPC level. Gray creatures and legacy classes receive none. Loot uses the",
     "native kill and corpse handlers. Black Riding Wolf 5194 has no normal corpse loot or money and uses skinning",
     "table 100001. Collecting the legendary through the native loot handler restores skinning; skinning generates no",
     "legendary."
@@ -90,28 +90,28 @@
       "action": "assert",
       "actor": "looter",
       "metric": "loot_count",
-      "quality": 5,
+      "quality": 3,
       "equals": 1
     },
     {
       "action": "assert",
       "actor": "looter",
       "metric": "loot_required_level",
-      "quality": 5,
+      "quality": 3,
       "equals": 27
     },
     {
       "action": "assert",
       "actor": "looter",
       "metric": "loot_item_level",
-      "quality": 5,
-      "equals": 39
+      "quality": 3,
+      "equals": 33
     },
     {
       "action": "assert",
       "actor": "looter",
       "metric": "loot_entry",
-      "quality": 5,
+      "quality": 3,
       "min": 9700001,
       "max": 9706380
     },
@@ -159,7 +159,7 @@
       "label": "Skinning does not roll a second legendary",
       "actor": "looter",
       "metric": "loot_count",
-      "quality": 5,
+      "quality": 3,
       "equals": 0
     }
   ]

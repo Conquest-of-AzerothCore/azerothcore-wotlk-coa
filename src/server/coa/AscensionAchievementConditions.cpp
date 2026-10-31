@@ -1,5 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AchievementCriteriaScript.h"
+#include "AchievementMgr.h"
+#include "AchievementScript.h"
 #include "Map.h"
 #include "Player.h"
 #include "RBAC.h"
@@ -100,6 +102,23 @@ public:
         return !session || !session->HasPermission(rbac::RBAC_PERM_CANNOT_EARN_REALM_FIRST_ACHIEVEMENTS);
     }
 };
+
+class LearnSkillLineSpellsCriteriaDataGate final : public AchievementScript
+{
+public:
+    LearnSkillLineSpellsCriteriaDataGate()
+        : AchievementScript("LearnSkillLineSpellsCriteriaDataGate", { ACHIEVEMENTHOOK_IS_COMPLETED_CRITERIA }) { }
+
+    bool IsCompletedCriteria(AchievementMgr* mgr, AchievementCriteriaEntry const* achievementCriteria,
+        AchievementEntry const*, CriteriaProgress const*) override
+    {
+        if (achievementCriteria->requiredType != ACHIEVEMENT_CRITERIA_TYPE_LEARN_SKILLLINE_SPELLS)
+            return true;
+
+        AchievementCriteriaDataSet const* data = sAchievementMgr->GetCriteriaDataSet(achievementCriteria);
+        return !data || data->Meets(mgr->GetPlayer(), nullptr);
+    }
+};
 }
 
 void AddAscensionAchievementConditionScripts()
@@ -111,4 +130,5 @@ void AddAscensionAchievementConditionScripts()
         new AchievementDifficultyCriteria(criteria);
 
     new RealmFirstAchievementPermission();
+    new LearnSkillLineSpellsCriteriaDataGate();
 }

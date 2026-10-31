@@ -21,9 +21,9 @@ def check(folder):
     amount = values['one_stack_amount']
     for phase, stacks in [('one', 1), ('five', 5)]:
         expected = int(amount * stacks) + int(stacks * values['unchanged_rap'] * 0.15)
-        if expected <= 0 or abs(means[phase] - expected) > 1:
-            raise ValueError(f'{phase}: mean damage {means[phase]:g} does not match '
-                             f'{stacks} times the native aura amount and 15 percent owner RAP ({expected})')
+        if expected <= 0 or not 0.75 * expected <= means[phase] <= expected + 1:
+            raise ValueError(f'{phase}: mean damage {means[phase]:g} is not {stacks} times the native aura amount '
+                             f'and 15 percent owner RAP ({expected}) less monster partial resists')
     ratio = means['five'] / means['one']
     if not 4.5 <= ratio <= 5.3:
         raise ValueError(f'Five stacks must multiply the whole proc damage: observed ratio {ratio:g}')

@@ -115,7 +115,13 @@ void AppenderFile::_write(LogMessage const* message)
     }
 
     fprintf(logfile, "%s%s\n", message->prefix.c_str(), message->text.c_str());
-    fflush(logfile);
+
+    auto const now = std::chrono::steady_clock::now();
+    if (message->level <= LOG_LEVEL_WARN || now - _lastFlush >= std::chrono::milliseconds(250))
+    {
+        fflush(logfile);
+        _lastFlush = now;
+    }
     _fileSize += uint64(message->Size());
 }
 

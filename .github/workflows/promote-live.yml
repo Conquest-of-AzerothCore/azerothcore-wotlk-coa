@@ -1,0 +1,124 @@
+name: Promote to live
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Commit or tag on main to promote. Leave empty to promote the newest main."
+        required: false
+        type: string
+      dry_run:
+        description: "List what would go live without tagging or pushing."
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: promote-live
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    if: github.repository == 'Conquest-of-AzerothCore/azerothcore-wotlk-coa' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: live
+    env:
+      DEV_REPO: ${{ github.repository }}
+      LIVE_URL: git@github.com:Conquest-of-AzerothCore/coa-server-live.git
+      GH_TOKEN: ${{ github.token }}
+      PROMOTE_REF: ${{ inputs.ref }}
+      DRY_RUN: ${{ inputs.dry_run }}
+    steps:
+      - name: Configure live repository access
+        env:
+          LIVE_DEPLOY_KEY: ${{ secrets.LIVE_DEPLOY_KEY }}
+        run: |
+          if [[ -z "$LIVE_DEPLOY_KEY" ]]; then
+            echo "::error::The live environment has no LIVE_DEPLOY_KEY secret."
+            exit 1
+          fi
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$LIVE_DEPLOY_KEY" > ~/.ssh/live_deploy_key
+          chmod 600 ~/.ssh/live_deploy_key
+          echo 'github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl' \
+            > ~/.ssh/known_hosts_github
+          ssh_options="-i $HOME/.ssh/live_deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes"
+          echo "GIT_SSH_COMMAND=ssh $ssh_options -o UserKnownHostsFile=$HOME/.ssh/known_hosts_github" >> "$GITHUB_ENV"
+
+      - name: Promote
+        run: |
+          set -euo pipefail
+          fail() { echo "::error::$1"; exit 1; }
+
+          ref="${PROMOTE_REF:-main}"
+          [[ "$ref" =~ ^[A-Za-z0-9._/-]+$ ]] || fail "Invalid ref: $ref"
+
+          git init -q promote
+          cd promote
+          gh auth setup-git
+          git remote add dev "https://github.com/$DEV_REPO.git"
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR_ID+$GITHUB_ACTOR@users.noreply.github.com"
+
+          sha=$(gh api "repos/$DEV_REPO/commits/$ref" --jq .sha) || fail "Cannot resolve $ref."
+          on_main=$(gh api "repos/$DEV_REPO/compare/$sha...main" --jq .status)
+          [[ "$on_main" == ahead || "$on_main" == identical ]] \
+            || fail "${sha:0:10} is not on main: only commits merged into dev can go live."
+
+          live_sha=$(git ls-remote "$LIVE_URL" refs/heads/main | cut -f1)
+          [[ -n "$live_sha" ]] || fail "Cannot read main of coa-server-live."
+          if [[ "$sha" == "$live_sha" ]]; then
+            echo "::notice::${sha:0:10} is already live."
+            exit 0
+          fi
+
+          range=$(gh api "repos/$DEV_REPO/compare/$live_sha...$sha" --jq '"\(.status) \(.ahead_by)"') \
+            || fail "Live main ${live_sha:0:10} is not on dev: refusing a non-fast-forward."
+          read -r status count <<< "$range"
+          [[ "$status" == ahead ]] \
+            || fail "Live main ${live_sha:0:10} is not an ancestor of ${sha:0:10}: refusing a non-fast-forward."
+
+          git fetch -q --no-tags --depth="$((count + 1))" dev "$sha"
+          if ! git merge-base --is-ancestor "$live_sha" "$sha" 2> /dev/null; then
+            git fetch -q --no-tags --unshallow dev "$sha"
+            git merge-base --is-ancestor "$live_sha" "$sha" \
+              || fail "Live main ${live_sha:0:10} is not an ancestor of ${sha:0:10}: refusing a non-fast-forward."
+          fi
+
+          today=$(date -u +%F)
+          existing=$({
+            git ls-remote --tags "$LIVE_URL" "live-$today*"
+            git ls-remote --tags dev "live-$today*"
+          } | sed -n 's#^.*refs/tags/\([^^]*\)$#\1#p' | sort -u)
+          tag="live-$today"
+          n=2
+          while grep -qxF "$tag" <<< "$existing"; do
+            tag="live-$today.$n"
+            n=$((n + 1))
+          done
+
+          log=$(git log --oneline --no-decorate "$live_sha..$sha")
+          {
+            echo "### $tag"
+            echo
+            echo "\`${live_sha:0:10}\` -> \`${sha:0:10}\` ($count commits)"
+            echo
+            echo '```'
+            echo "$log"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "$tag: ${live_sha:0:10} -> ${sha:0:10} ($count commits)"
+          echo "$log"
+
+          if [[ "$DRY_RUN" == true ]]; then
+            echo "Dry run: nothing tagged or pushed."
+            exit 0
+          fi
+
+          printf 'Live release %s\n\n%s commits since %s\n\n%s\n' "$tag" "$count" "${live_sha:0:10}" "$log" \
+            | git tag -a "$tag" "$sha" -F -
+          git push --atomic "$LIVE_URL" "$sha:refs/heads/main" "refs/tags/$tag"
+          git push dev "refs/tags/$tag"
+          echo "Pushed $tag to coa-server-live main and tagged it on $DEV_REPO."

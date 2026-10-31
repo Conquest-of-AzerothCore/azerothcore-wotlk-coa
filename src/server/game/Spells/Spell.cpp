@@ -5346,6 +5346,9 @@ void Spell::SendResurrectRequest(Player* target)
                                ? ""
                                : m_caster->GetNameForLocaleIdx(target->GetSession()->GetSessionDbLocaleIndex()));
 
+    if (m_caster->IsPlayer() || m_spellInfo->HasAttribute(SPELL_ATTR3_NO_RES_TIMER))
+        target->SendCorpseReclaimDelay(0);
+
     WorldPacket data(SMSG_RESURRECT_REQUEST, (8 + 4 + sentName.size() + 1 + 1 + 1 + 4));
     data << m_caster->GetGUID();
     data << uint32(sentName.size() + 1);
@@ -5354,8 +5357,8 @@ void Spell::SendResurrectRequest(Player* target)
     data << uint8(0); // null terminator
 
     data << uint8(m_caster->IsPlayer() ? 0 : 1); // "you'll be afflicted with resurrection sickness"
-    // override delay sent with SMSG_CORPSE_RECLAIM_DELAY, set instant resurrection for spells with this attribute
-    if (m_spellInfo->HasAttribute(SPELL_ATTR3_NO_RES_TIMER))
+    // override delay sent with SMSG_CORPSE_RECLAIM_DELAY, instant for player resurrections and spells with this attribute
+    if (m_caster->IsPlayer() || m_spellInfo->HasAttribute(SPELL_ATTR3_NO_RES_TIMER))
         data << uint32(0);
     target->SendDirectMessage(&data);
 }
@@ -5865,7 +5868,15 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
             checkForm = false;
             break;
         }
-        if (checkForm)
+        if (checkForm && sScriptMgr->CanIgnoreShapeshift(this))
+            checkForm = false;
+        // CoA: Venomancer forms are stances, not shapeshift-locked kits; let a mount cast drop
+        // them the way Unit::Mount does for every other player, instead of refusing the cast.
+        bool prophetMount = m_caster->IsPlayer() && m_caster->getClass() == CLASS_PROPHET &&
+            (m_spellInfo->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_MOUNTED ||
+                m_spellInfo->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_MOUNTED ||
+                m_spellInfo->Effects[EFFECT_2].ApplyAuraName == SPELL_AURA_MOUNTED);
+        if (checkForm && !prophetMount)
         {
             // Cannot be used in this stance/form
             SpellCastResult shapeError = m_spellInfo->CheckShapeshift(m_caster->GetShapeshiftForm());
@@ -6023,8 +6034,22 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
         if (target != m_caster)
         {
             // Must be behind the target
-            if (m_spellInfo->HasAttribute(SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET) && target->HasInArc(static_cast<float>(M_PI), m_caster))
-                return SPELL_FAILED_NOT_BEHIND;
+            if (m_spellInfo->HasAttribute(SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET) &&
+                target->HasInArc(static_cast<float>(M_PI), m_caster))
+            {
+                bool ignored = false;
+                for (AuraEffect const* effect : m_caster->GetAuraEffectsByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS))
+                    if (effect->GetMiscValue() == ASCENSION_IGNORE_BEHIND_REQUIREMENT &&
+                        effect->IsAffectedOnSpell(m_spellInfo) &&
+                        (effect->GetMiscValueB() == ASCENSION_POSITION_SCOPE_ALL ||
+                            (effect->GetMiscValueB() == ASCENSION_POSITION_SCOPE_MONSTERS && !target->IsPlayer())))
+                    {
+                        ignored = true;
+                        break;
+                    }
+                if (!ignored)
+                    return SPELL_FAILED_NOT_BEHIND;
+            }
 
             // Target must be facing you
             if (m_spellInfo->HasAttribute(SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER) && !target->HasInArc(static_cast<float>(M_PI), m_caster))
@@ -6143,8 +6168,9 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
     Unit const* divineCaster = divineCharge ? divineCharge->GetCaster() : nullptr;
     bool divineSteed = divineCaster && divineCaster->IsPlayer() && divineCaster->getClass() == CLASS_MONK &&
         m_caster->GetMountID() == 14584 && !m_caster->IsInFlight();
+    bool tinkerMechsuitConsumable = m_CastItem && m_CastItem->GetTemplate()->Class == ITEM_CLASS_CONSUMABLE;
     bool tinkerMechsuit = m_caster->IsPlayer() && m_caster->getClass() == CLASS_TINKER &&
-        m_spellInfo->SpellFamilyName == 34 && !m_caster->IsInFlight() &&
+        (m_spellInfo->SpellFamilyName == 34 || tinkerMechsuitConsumable) && !m_caster->IsInFlight() &&
         m_caster->HasAura(801384, m_caster->GetGUID()) && m_caster->HasAura(803451, m_caster->GetGUID());
     if (m_caster->IsMounted() && m_caster->IsPlayer() && !HasTriggeredCastFlag(TRIGGERED_IGNORE_CASTER_MOUNTED_OR_ON_VEHICLE) &&
             !m_spellInfo->IsPassive() && !m_spellInfo->HasAttribute(SPELL_ATTR0_ALLOW_WHILE_MOUNTED) && !divineSteed &&
@@ -6832,11 +6858,14 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
                     if (m_caster->IsPlayer() && !allowMount && !m_spellInfo->AreaGroupId && !tinkerMechsuit)
                         return SPELL_FAILED_NO_MOUNTS_ALLOWED;
 
-                    if (m_caster->IsInDisallowedMountForm())
+                    // CoA: a Venomancer's Beetle/Spider stance is dropped by the mount itself.
+                    if (m_caster->IsInDisallowedMountForm() &&
+                        !(m_caster->IsPlayer() && m_caster->getClass() == CLASS_PROPHET))
                         return SPELL_FAILED_NOT_SHAPESHIFT;
 
                     // xinef: dont allow to cast mounts in specific transforms
-                    if (m_caster->getTransForm())
+                    if (m_caster->getTransForm() &&
+                        !(m_caster->IsPlayer() && m_caster->getClass() == CLASS_PROPHET))
                         if (SpellInfo const* transformSpellInfo = sSpellMgr->GetSpellInfo(m_caster->getTransForm()))
                             if (transformSpellInfo->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES) &&
                                     !transformSpellInfo->HasAttribute(SpellAttr0(SPELL_ATTR0_ALLOW_WHILE_MOUNTED | SPELL_ATTR0_AURA_IS_DEBUFF)))
@@ -6864,7 +6893,10 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
 
                     // not allow cast fly spells if not have req. skills  (all spells is self target)
                     // allow always ghost flight spells
-                    if (m_originalCaster && m_originalCaster->IsPlayer() && m_originalCaster->IsAlive())
+                    // CoA: a known mount that also has ground speed is grounded by AscensionMountSpeed instead
+                    if (m_originalCaster && m_originalCaster->IsPlayer() && m_originalCaster->IsAlive() &&
+                        !(m_spellInfo->HasAura(SPELL_AURA_MOUNTED) && m_spellInfo->HasAura(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED) &&
+                          m_originalCaster->ToPlayer()->HasSpell(m_spellInfo->Id)))
                     {
                         // No flying in battlegrounds
                         if (m_originalCaster->ToPlayer()->InBattleground())
@@ -9175,6 +9207,9 @@ void Spell::TriggerGlobalCooldown()
         else if (gcd > MAX_GCD)
             gcd = MAX_GCD;
     }
+
+    sScriptMgr->OnSpellGlobalCooldown(this, gcd);
+    gcd = std::max(gcd, 0);
 
     // Only players or controlled units have global cooldown
     if (m_caster->GetCharmInfo())

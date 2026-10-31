@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "name": "Tinker: Upgrade! turns the standing Sentry Turret into a Molten Grenade Turret (#9951)",
+  "contract": [
+    "Upgrade! 800349 reads 'Upgrade nearby Sentry Turrets to a Molten Grenade Turret for $706692d.' #9951 reported",
+    "that casting it with a turret out does nothing. spell_ascension_tinker_ability casts Molten Grenade Turret 706692",
+    "(60 s, ranged and spell haste) on every owned Sentry Turret 50046 within 40 yards, and an upgraded turret fires",
+    "Molten Grenade 706694 at its focus target instead of Sentry Shot 706689. 706692 has TargetAuraSpell 750001",
+    "(Sentry Turret Hidden Identifier), so the turret must carry that aura or the triggered cast fails silently.",
+    "Expected at level 45 with the turret already firing at a hostile target: the cast is accepted, the turret carries",
+    "706692, Molten Grenades land on the target, and Sentry Shots stop while the upgrade lasts.",
+    "Not covered here: the turret's appearance. The aura's transform effect is cleared in AscensionTinkerContracts",
+    "because its creature 3313900 does not exist, so an upgraded turret looks unchanged."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 45
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 45,
+      "distance": 8,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the spawn and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Build: Sentry Turret",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "learn",
+      "label": "Learn Upgrade!",
+      "actor": "tinker",
+      "spell": 800349
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "cast",
+      "label": "Build the Sentry Turret",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a Sentry Turret stands",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "attack",
+      "label": "SETUP: give the turret a focus target",
+      "actor": "tinker",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Sentry Turret is landing Sentry Shots",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 706689,
+      "entry": 50046,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no turret is upgraded before the cast",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "spell": 706692,
+      "equals": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 800349
+    },
+    {
+      "action": "cast",
+      "label": "Cast Upgrade!",
+      "actor": "tinker",
+      "spell": 800349
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Upgrade! cast was accepted",
+      "actor": "tinker",
+      "metric": "cast_failure",
+      "spell": 800349,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the turret becomes a Molten Grenade Turret",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "spell": 706692,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "SETUP: Molten Grenade impacts before the upgrade fires",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 706694,
+      "entry": 50046,
+      "target": "enemy",
+      "save_as": "grenades"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the upgraded turret lands Molten Grenades on its target",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 706694,
+      "entry": 50046,
+      "target": "enemy",
+      "relative_to": "grenades",
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "snapshot",
+      "label": "SETUP: Sentry Shot impacts once grenades are landing",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 706689,
+      "entry": 50046,
+      "target": "enemy",
+      "save_as": "shots"
+    },
+    {
+      "action": "wait",
+      "label": "Let the upgraded turret attack several more times",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the upgraded turret fires no Sentry Shots",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 706689,
+      "entry": 50046,
+      "target": "enemy",
+      "relative_to": "shots",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The fixture survived the trial",
+      "actor": "tinker",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

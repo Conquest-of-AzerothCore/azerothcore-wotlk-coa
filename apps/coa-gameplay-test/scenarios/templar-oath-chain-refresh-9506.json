@@ -1,0 +1,33 @@
+{
+ "schema": 1,
+ "name": "Oath Chain duration refreshes to max on every oath grant, not only the first (#9506)",
+ "contract": "Righteous Lunge 570233 (rank 8) grants Oath: Righteous Lunge 804904 and refreshes Oath Chain 704576's duration to its max duration (15000 ms) on every grant, not only the first one, so oaths keep accruing as long as new ones arrive before the chain would otherwise expire.",
+ "timeout_ms": 90000,
+ "players": [
+  { "id": "templar", "race": 1, "class": 19, "level": 80, "melee_hit_rating": 10000, "spell_hit_rating": 10000, "expertise_rating": 10000 }
+ ],
+ "creatures": [
+  { "id": "dummy", "owner": "templar", "entry": 36, "health": 1000000, "distance": 3 }
+ ],
+ "steps": [
+  { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+  { "action": "learn", "actor": "templar", "spell": 570233 },
+  { "action": "add_item", "actor": "templar", "item": 2495 },
+  { "action": "equip", "actor": "templar", "item": 2495, "slot": 15 },
+  { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+  { "action": "cast", "actor": "templar", "spell": 570233, "target": "dummy" },
+  { "action": "assert", "label": "First Lunge grants its Oath", "actor": "templar", "metric": "aura", "spell": 804904, "equals": 1, "within_ms": 2000 },
+  { "action": "assert", "label": "The Oath Chain starts at one stack", "actor": "templar", "metric": "aura_stacks", "spell": 704576, "equals": 1, "within_ms": 2000 },
+  { "action": "wait", "label": "Well under the 15 s base duration", "ms": 8000 },
+  { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+  { "action": "cast", "actor": "templar", "spell": 570233, "target": "dummy" },
+  { "action": "assert", "label": "Second Lunge stacks the Oath Chain", "actor": "templar", "metric": "aura_stacks", "spell": 704576, "equals": 2, "within_ms": 2000 },
+  { "action": "assert", "label": "Second grant refreshes the chain to its max duration, not the stale remaining time", "actor": "templar", "metric": "aura_duration_ms", "spell": 704576, "min": 14000, "max": 15000 },
+  { "action": "wait", "label": "Longer than the stale remaining time the bug would have left (7 s), still under a refreshed 15 s window", "ms": 8000 },
+  { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+  { "action": "cast", "actor": "templar", "spell": 570233, "target": "dummy" },
+  { "action": "assert", "label": "The Oath Chain is still alive for the third grant", "actor": "templar", "metric": "aura", "spell": 704576, "equals": 1, "within_ms": 2000 },
+  { "action": "assert", "label": "Third Lunge stacks the Oath Chain", "actor": "templar", "metric": "aura_stacks", "spell": 704576, "equals": 3, "within_ms": 2000 },
+  { "action": "assert", "label": "Third grant refreshes the chain to its max duration again", "actor": "templar", "metric": "aura_duration_ms", "spell": 704576, "min": 14000, "max": 15000 }
+ ]
+}

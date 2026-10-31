@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "set_health_pct lowers a creature to a health threshold",
+  "contract": "set_health_pct deals the missing health as direct damage from the actor, so a creature at full health lowered to 50 percent reports a health percentage within one point of 50.",
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 12,
+      "level": 2
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 2,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_health_pct",
+      "actor": "caster",
+      "target": "enemy",
+      "pct": 50
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "health_pct",
+      "min": 49,
+      "max": 51
+    }
+  ]
+}

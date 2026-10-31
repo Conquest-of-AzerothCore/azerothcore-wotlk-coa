@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Apex Stormfang: spell damage counts",
+  "contract": [
+    "A caster lands repeated Fireballs.",
+    "The boss loses health, so the probe counts spell damage."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "learn",
+      "label": "Fireball",
+      "actor": "tank",
+      "spell": 133
+    },
+    {
+      "action": "summon",
+      "label": "Spawn stormfang",
+      "actor": "tank",
+      "as": "boss",
+      "entry": 9916212,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "cast",
+      "label": "Fireball",
+      "actor": "tank",
+      "spell": 133,
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "label": "Fireball",
+      "actor": "tank",
+      "spell": 133,
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "label": "Fireball",
+      "actor": "tank",
+      "spell": 133,
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "label": "Fireball",
+      "actor": "tank",
+      "spell": 133,
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "label": "Fireball",
+      "actor": "tank",
+      "spell": 133,
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "label": "Fireball",
+      "actor": "tank",
+      "spell": 133,
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "label": "Fireball",
+      "actor": "tank",
+      "spell": 133,
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "label": "Fireball",
+      "actor": "tank",
+      "spell": 133,
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Spell damage reached the boss",
+      "actor": "tank",
+      "metric": "spell_damage_done",
+      "min": 1,
+      "within_ms": 40000,
+      "spell": 133,
+      "target": "boss"
+    }
+  ]
+}

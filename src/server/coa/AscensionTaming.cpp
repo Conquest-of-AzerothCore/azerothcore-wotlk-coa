@@ -12,6 +12,10 @@
 #include "ScriptMgr.h"
 #include "SpellScript.h"
 #include "SpellScriptLoader.h"
+#include "SpellMgr.h"
+#include <algorithm>
+#include <array>
+#include <unordered_map>
 
 namespace AscensionTaming
 {
@@ -21,6 +25,58 @@ bool IsKind(uint32 creatureEntry, uint32 kind)
 {
     CreatureTemplate const* creature = sObjectMgr->GetCreatureTemplate(creatureEntry);
     return creature && creature->type == kind;
+}
+
+uint32 FamilyPetStatsEntry(uint32 family)
+{
+    static std::unordered_map<uint32, uint32> const entries = []
+    {
+        std::unordered_map<uint32, uint32> lowest;
+        for (auto const& [entry, creature] : *sObjectMgr->GetCreatureTemplates())
+            if (creature.family && sObjectMgr->GetPetLevelInfo(entry, 1))
+                if (uint32& found = lowest[creature.family]; !found || entry < found)
+                    found = entry;
+        return lowest;
+    }();
+    auto const found = entries.find(family);
+    return found == entries.end() ? 0 : found->second;
+}
+
+uint32 TamedPetBaseMana(CreatureTemplate const* creature, uint8 level)
+{
+    if (uint32 const entry = FamilyPetStatsEntry(creature->family))
+        if (uint32 const mana = sObjectMgr->GetPetLevelInfo(entry, level)->mana)
+            return mana;
+    if (uint32 const mana = sObjectMgr->GetCreatureBaseStats(level, creature->unit_class)->BaseMana)
+        return mana;
+    return sObjectMgr->GetCreatureBaseStats(level, CLASS_PALADIN)->BaseMana;
+}
+
+Powers TamedPetPowerType(uint32 family)
+{
+    static std::unordered_map<uint32, Powers> const types = []
+    {
+        std::unordered_map<uint32, Powers> kits;
+        for (CreatureFamilyEntry const* entry : sCreatureFamilyStore)
+        {
+            PetLevelupSpellSet const* spells = sSpellMgr->GetPetLevelupSpellList(entry->ID);
+            if (!spells)
+                continue;
+            bool energy = false, mana = false;
+            for (auto const& [level, spellId] : *spells)
+                if (SpellInfo const* spell = sSpellMgr->GetSpellInfo(spellId);
+                    spell && (spell->ManaCost || spell->ManaCostPercentage))
+                {
+                    energy |= spell->PowerType == POWER_ENERGY;
+                    mana |= spell->PowerType == POWER_MANA;
+                }
+            if (energy || mana)
+                kits[entry->ID] = energy ? POWER_ENERGY : POWER_MANA;
+        }
+        return kits;
+    }();
+    auto const found = types.find(family);
+    return found == types.end() ? POWER_FOCUS : found->second;
 }
 
 bool IsHunterPetOfKind(PetStable::PetInfo const& pet, uint32 kind)
@@ -263,10 +319,85 @@ public:
             player->RemovePet(out, PET_SAVE_AS_CURRENT);
     }
 };
+
+class AscensionTamingPet final : public PetScript
+{
+public:
+    AscensionTamingPet() : PetScript("AscensionTamingPet", { PETHOOK_ON_INIT_STATS_FOR_LEVEL }) { }
+
+    void OnInitStatsForLevel(Guardian* guardian, uint8 petlevel) override
+    {
+        CreatureTemplate const* creature = guardian->GetCreatureTemplate();
+        if (!guardian->IsHunterPet() || creature->type == CREATURE_TYPE_BEAST)
+            return;
+        uint32 const mana = TamedPetBaseMana(creature, petlevel);
+        guardian->SetCreateMana(mana);
+        guardian->SetStatFlatModifier(UNIT_MOD_MANA, BASE_VALUE, float(mana));
+
+        Powers const power = TamedPetPowerType(creature->family);
+        guardian->setPowerType(power);
+        if (power == POWER_ENERGY)
+            guardian->SetPower(POWER_ENERGY, guardian->GetMaxPower(POWER_ENERGY));
+    }
+};
+
+enum PetKitSpells : uint32
+{
+    SPELL_TAIL_SWEEP            = 891013,
+    SPELL_TREANT_REJUVENATION   = 93717,
+    SPELL_TREANT_RENEW          = 93726,
+    SPELL_RESPLENDENT_LIGHT     = 414260
+};
+
+constexpr std::array<uint32, 4> SOOTHING_KISS = { 6360, 7813, 11784, 11785 };
+constexpr uint32 DURATION_UNTIL_CANCELLED = 21;
+
+class AscensionTamingSpellData final : public GlobalScript
+{
+public:
+    AscensionTamingSpellData() : GlobalScript("AscensionTamingSpellData", { GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR }) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* info) override
+    {
+        if (info->Id == SPELL_TAIL_SWEEP)
+            info->AttributesEx3 &= ~SPELL_ATTR3_ONLY_ON_PLAYER;
+        else if (std::find(SOOTHING_KISS.begin(), SOOTHING_KISS.end(), info->Id) != SOOTHING_KISS.end() &&
+            !info->DurationEntry)
+            info->DurationEntry = sSpellDurationStore.LookupEntry(DURATION_UNTIL_CANCELLED);
+        else if (info->Id == SPELL_TREANT_REJUVENATION || info->Id == SPELL_TREANT_RENEW)
+        {
+            SpellInfo const* sibling = sSpellMgr->GetSpellInfo(SPELL_RESPLENDENT_LIGHT);
+            for (SpellEffectInfo& effect : info->Effects)
+                if (sibling && effect.TargetA.GetTarget() == TARGET_UNIT_DEST_AREA_ALLY && !effect.RadiusEntry)
+                    effect.RadiusEntry = sibling->Effects[EFFECT_0].RadiusEntry;
+        }
+    }
+};
+
+class spell_ascension_pet_lowest_health_allies : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_pet_lowest_health_allies);
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        targets.sort(Acore::HealthPctOrderPred());
+        if (uint32 const limit = GetSpellInfo()->MaxAffectedTargets; targets.size() > limit)
+            targets.resize(limit);
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ascension_pet_lowest_health_allies::FilterTargets,
+            EFFECT_ALL, TARGET_UNIT_DEST_AREA_ALLY);
+    }
+};
 }
 
 void AddAscensionTamingScripts()
 {
     RegisterSpellScriptWithArgs(AscensionTaming::spell_ascension_family_call, "spell_ascension_family_call");
     new AscensionTaming::AscensionTamingPlayer();
+    new AscensionTaming::AscensionTamingPet();
+    new AscensionTaming::AscensionTamingSpellData();
+    RegisterSpellScript(AscensionTaming::spell_ascension_pet_lowest_health_allies);
 }

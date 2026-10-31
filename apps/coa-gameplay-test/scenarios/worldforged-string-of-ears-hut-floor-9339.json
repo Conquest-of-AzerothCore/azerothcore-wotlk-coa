@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Worldforged String of Ears stands on the hut floor it belongs on, not under it (#9339)",
+  "contract": "The pickup (entry 1345142, guid 6942256, item 450788) was aligned to the stock terrain, 2.69 yd under the Troll_Hotel_Burn01.wmo floor of its hut, matching the reporter's own follow-up comment that it spawned under the structure. Restore the hut floor height. The ground probe reads grounded on both the terrain and the floor (it finds the nearer surface, not the authored layer), so reachability is proven by a successful Opening cast with line of sight from the floor.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -1132.42, "y": -5572.84, "z": 9.908, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the pickup stands in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 1345142, "equals": 1 },
+    { "action": "assert", "label": "SETUP: the restored height is a real floor, not a float", "actor": "p", "metric": "point_ground_gap", "map": 1, "x": -1126.26, "y": -5574.23, "z": 9.908, "min": -0.2, "max": 0.2 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 1345142 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup is within reach and line of sight from the hut floor", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

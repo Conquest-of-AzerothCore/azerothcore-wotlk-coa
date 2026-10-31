@@ -1,0 +1,187 @@
+{
+  "schema": 1,
+  "name": "Adventure Mode can be reduced from tier 100 to 1 without retaining high-tier rewards",
+  "contract": "An active Adventure Mode run can be reduced after leveling, outside combat. The tier-100 auras are removed, tier-1 effects replace them, and relogging preserves tier 1. Upgrades and zero are refused. Completing the run pays the tier-1 row set of coa_challenge_reward (achievement 13715 'Adventurer Mode Level: 1' with 10000 Runes of Descension 375250 and 113 Marks 1297309 by mail) rather than the tier-100 set (achievement 13814, 59500 and 3825). Rewards are selected as one row set per level, so the awarded achievement identifies the paid tier; the mail metrics prove the item rewards were posted.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "hero",
+      "challenge": 211,
+      "level": 100
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "hero",
+      "value": 10
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "hero",
+      "quest": 7
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "quest_log_sent_xp",
+      "quest": 7,
+      "save_as": "high_tier_xp"
+    },
+    {
+      "action": "command",
+      "actor": "hero",
+      "command": ".coa adventure 1"
+    },
+    {
+      "action": "assert",
+      "label": "Quest log reward falls immediately with the tier",
+      "actor": "hero",
+      "metric": "quest_log_sent_xp",
+      "quest": 7,
+      "ratio_to": "high_tier_xp",
+      "min": 0.01,
+      "max": 0.99,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Difficulty aura replacement",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 302882,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Difficulty aura replacement",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 302883,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Difficulty aura replacement",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 302884,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Difficulty aura replacement",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 302053,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Difficulty aura replacement",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 302054,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Difficulty aura replacement",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 302058,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "command",
+      "actor": "hero",
+      "command": ".coa adventure 100",
+      "rejected": true
+    },
+    {
+      "action": "command",
+      "actor": "hero",
+      "command": ".coa adventure 0",
+      "rejected": true
+    },
+    {
+      "action": "relog",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 302053,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "hero",
+      "value": 80
+    },
+    {
+      "action": "assert",
+      "label": "Completion uses the reduced reward tier",
+      "actor": "hero",
+      "metric": "has_achievement",
+      "achievement": 13715,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Completion does not pay the tier-100 reward",
+      "actor": "hero",
+      "metric": "has_achievement",
+      "achievement": 13814,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Tier-1 reward items are posted",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 375250,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Tier-1 reward items are posted",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 1297309,
+      "equals": 1
+    }
+  ]
+}

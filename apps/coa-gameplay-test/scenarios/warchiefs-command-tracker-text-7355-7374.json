@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "Warchief's Command: Ashenvale! and Ratchet! track the NPC that ends them",
+  "contract": "Issues #7355 and #7374: the quest tracker shows QuestCompletionLog, which for 14231 still said 'Report to Mitsuwa at Splintertree Post in Ashenvale.' and for 14233 'Report to Furien at Tethris Aran in Desolace.', while the quest log and the ender (Mitsuwa 12721 at Zoram'gar Outpost, Mebok Mizzyrix 3446 at Ratchet) agree on the current destination. The case sends the native quest query for both and reads the strings the client receives.",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 1,
+    "x": 1629.0,
+    "y": -4373.0,
+    "z": 31.3,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "client_packet",
+      "label": "Query quest 14231",
+      "actor": "p",
+      "opcode": 92,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 14231
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the quest log text names Zoram'gar Outpost",
+      "actor": "p",
+      "metric": "quest_query_text_contains",
+      "quest": 14231,
+      "text": "Report to Mitsuwa at Zoram'gar Outpost in Ashenvale.",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the tracker no longer sends players to Splintertree Post",
+      "actor": "p",
+      "metric": "quest_query_text_contains",
+      "quest": 14231,
+      "text": "Splintertree",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query quest 14233",
+      "actor": "p",
+      "opcode": 92,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 14233
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the quest log text names Ratchet",
+      "actor": "p",
+      "metric": "quest_query_text_contains",
+      "quest": 14233,
+      "text": "Report to Mebok Mizzyrix at Ratchet in the Barrens.",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the tracker no longer names Furien at Tethris Aran",
+      "actor": "p",
+      "metric": "quest_query_text_contains",
+      "quest": 14233,
+      "text": "Tethris Aran",
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

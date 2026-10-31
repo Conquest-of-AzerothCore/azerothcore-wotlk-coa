@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS `recovery_worldforged_offer` (
+  `id` INT UNSIGNED NOT NULL,
+  `required_item` INT UNSIGNED NOT NULL,
+  `refunded_item` INT UNSIGNED NOT NULL,
+  `rune_count` INT UNSIGNED NOT NULL DEFAULT 0,
+  `starts_at` INT UNSIGNED NOT NULL,
+  `ends_at` INT UNSIGNED NOT NULL,
+  `enabled` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

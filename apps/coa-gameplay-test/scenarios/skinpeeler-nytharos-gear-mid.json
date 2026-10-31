@@ -1,0 +1,388 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: scaling with mid gear",
+  "contract": [
+    "A three player group in level 74-84 equipment pulls above the bottom of the gear curve.",
+    "The scaled pool stays inside 19000-32000 on the 21360 template."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps2",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 201
+    },
+    {
+      "action": "set_skill",
+      "actor": "tank",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 860437
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 860457
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 860467
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 860477
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 860487
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 860447
+    },
+    {
+      "action": "add_item",
+      "actor": "tank",
+      "item": 100569
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 860437,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 860457,
+      "slot": 2
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 860467,
+      "slot": 4
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 860477,
+      "slot": 6
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 860487,
+      "slot": 7
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 860447,
+      "slot": 9
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "tank",
+      "item": 100569,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "dps1",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "dps1",
+      "spell": 201
+    },
+    {
+      "action": "set_skill",
+      "actor": "dps1",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 860437
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 860457
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 860467
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 860477
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 860487
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 860447
+    },
+    {
+      "action": "add_item",
+      "actor": "dps1",
+      "item": 100569
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 860437,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 860457,
+      "slot": 2
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 860467,
+      "slot": 4
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 860477,
+      "slot": 6
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 860487,
+      "slot": 7
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 860447,
+      "slot": 9
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps1",
+      "item": 100569,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "dps2",
+      "spell": 750
+    },
+    {
+      "action": "learn",
+      "actor": "dps2",
+      "spell": 201
+    },
+    {
+      "action": "set_skill",
+      "actor": "dps2",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 860437
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 860457
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 860467
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 860477
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 860487
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 860447
+    },
+    {
+      "action": "add_item",
+      "actor": "dps2",
+      "item": 100569
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps2",
+      "item": 860437,
+      "slot": 0
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps2",
+      "item": 860457,
+      "slot": 2
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps2",
+      "item": 860467,
+      "slot": 4
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps2",
+      "item": 860477,
+      "slot": 6
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps2",
+      "item": 860487,
+      "slot": 7
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps2",
+      "item": 860447,
+      "slot": 9
+    },
+    {
+      "action": "equip",
+      "label": "Gear",
+      "actor": "dps2",
+      "item": 100569,
+      "slot": 15
+    },
+    {
+      "action": "summon",
+      "label": "Spawn the boss",
+      "actor": "tank",
+      "as": "boss",
+      "entry": 9916214,
+      "distance": 5
+    },
+    {
+      "action": "wait",
+      "label": "Let the boss settle",
+      "ms": 3000
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Middle of the curve",
+      "actor": "boss",
+      "metric": "max_health",
+      "min": 19000,
+      "max": 32000,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Gear raised the pool",
+      "actor": "tank",
+      "metric": "max_health",
+      "min": 4000
+    }
+  ]
+}

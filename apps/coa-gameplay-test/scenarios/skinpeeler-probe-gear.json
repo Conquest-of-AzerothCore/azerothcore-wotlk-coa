@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler probe: proficiency unlocks equipment",
+  "contract": [
+    "Learning the plate and sword proficiency spells lets a harness character equip real gear.",
+    "Equipping a full set raises maximum health and attack power above the unarmed baseline."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 1, "x": 2269.03, "y": -6608.37, "z": 125.192, "o": 0 },
+  "players": [
+    { "id": "tank", "race": 1, "class": 1, "level": 60, "allow_regeneration": false }
+  ],
+  "creatures": [],
+  "steps": [
+    { "action": "learn", "label": "Plate proficiency", "actor": "tank", "spell": 750 },
+    { "action": "learn", "label": "Swords", "actor": "tank", "spell": 201 },
+    { "action": "add_item", "actor": "tank", "item": 1008273 },
+    { "action": "add_item", "actor": "tank", "item": 1008276 },
+    { "action": "add_item", "actor": "tank", "item": 1008249 },
+    { "action": "equip", "label": "Head", "actor": "tank", "item": 1008273, "slot": 0 },
+    { "action": "equip", "label": "Chest", "actor": "tank", "item": 1008276, "slot": 4 },
+    { "action": "equip", "label": "Legs", "actor": "tank", "item": 1008249, "slot": 6 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "Head equipped", "actor": "tank", "metric": "equipped_item", "slot": 0, "equals": 1008273 },
+    { "action": "assert", "label": "Chest equipped", "actor": "tank", "metric": "equipped_item", "slot": 4, "equals": 1008276 },
+    { "action": "assert", "label": "Pool grew with gear", "actor": "tank", "metric": "max_health", "min": 4000 },
+    { "action": "assert", "label": "Attack power raised", "actor": "tank", "metric": "attack_power", "min": 100 }
+  ]
+}

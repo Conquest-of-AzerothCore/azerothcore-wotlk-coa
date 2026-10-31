@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "name": "Worldforged Quilbow rests on its crate, not buried under the slope (#9337)",
+  "contract": "The Discarded Bow pickup (entry 95625, guid 6942054, item 450696) kept its dump-sighting height after the realm-map pass moved it 6.4 yd up a steep slope, leaving it 1.92 yd under the Orccrate02 top it stands on. Restore it to the crate top.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": 89.0, "y": -4544.1, "z": 59.6, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the Discarded Bow stands in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95625, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: it rests on the crate, not sunk into the slope", "actor": "p", "metric": "spawn_ground_gap", "guid": 6942054, "spawn_type": "gameobject", "min": -0.3, "max": 0.3 },
+    { "action": "assert", "label": "it is grounded", "actor": "p", "metric": "spawn_placement", "guid": 6942054, "spawn_type": "gameobject", "tolerance": 0.5, "equals": 0 }
+  ]
+}

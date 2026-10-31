@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "name": "Encounter timeline records three player casts 3000 ms apart",
+  "contract": "Ancestral Strike 801576 is instant with no cooldown in the supplied Spell.dbc (CastingTimeIndex 1, RecoveryTime 0, CategoryRecoveryTime 0) and costs 35 Energy, refilled before each cast. The scenario itself spaces the three casts by a 3000 ms wait, so the recorded cast count is 3 and each interval is 3000 ms plus at most the few world ticks of the cast and refill steps (2900-3200 ms). All casts target the enemy fixture.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 12,
+      "level": 2,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 2,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and local level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 801576,
+      "equals": 1
+    },
+    {
+      "action": "encounter_start",
+      "actor": "caster",
+      "boss_entry": 36,
+      "radius": 30
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801576,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801576,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801576,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Three recorded casts",
+      "actor": "caster",
+      "metric": "timeline_count",
+      "event": "cast",
+      "spell": 801576,
+      "equals": 3,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Every cast targets the enemy",
+      "actor": "caster",
+      "metric": "timeline_count",
+      "event": "cast",
+      "spell": 801576,
+      "target_actors": [
+        "enemy"
+      ],
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "No cast targets anything else",
+      "actor": "caster",
+      "metric": "timeline_count",
+      "event": "cast",
+      "spell": 801576,
+      "exclude_target_actors": [
+        "enemy"
+      ],
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Shortest interval follows the 3000 ms wait",
+      "actor": "caster",
+      "metric": "timeline_interval_min_ms",
+      "event": "cast",
+      "spell": 801576,
+      "min": 2900
+    },
+    {
+      "action": "assert",
+      "label": "Longest interval follows the 3000 ms wait",
+      "actor": "caster",
+      "metric": "timeline_interval_max_ms",
+      "event": "cast",
+      "spell": 801576,
+      "max": 3200
+    }
+  ]
+}

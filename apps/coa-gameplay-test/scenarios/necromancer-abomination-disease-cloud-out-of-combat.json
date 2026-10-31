@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Necromancer: an idle Abomination's Disease Cloud spares neutral and invisible creatures",
+  "contract": [
+    "Raise: Abomination 500335 summons creature 50068. Its AI self-casts Disease Cloud 802353 every 3 s (SCHOOL_DAMAGE, TARGET_UNIT_SRC_AREA_ENEMY, 10 yd radius). AzerothCore lets area spells hit invisible units, so an idle Abomination damaged nearby neutral and invisible creatures such as the Lordaeron Citizen spirits (3617, Greater Invisibility 34426) and dragged them and the necromancer into a fight the Abomination could not answer.",
+    "With a Lordaeron Citizen (template faction 7) and a passive golem within 10 yd, an idle Abomination must deal no Disease Cloud damage and the necromancer must stay out of combat through three pulse windows. Before the repair the cloud hits both fixtures and puts the necromancer in combat.",
+    "Once the necromancer attacks the golem, the Abomination joins the fight and its Disease Cloud must damage the golem."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "n", "entry": 36, "level": 80, "health": 1000000, "distance": 3 },
+    { "id": "citizen", "owner": "n", "entry": 3617, "faction": 7, "level": 80, "health": 1000000, "distance": 6 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 92123 },
+    { "action": "learn", "actor": "n", "spell": 680283 },
+    { "action": "learn", "actor": "n", "spell": 500335 },
+    {
+      "action": "assert", "label": "SETUP: two Life Force passives raise the capacity to 4", "actor": "n",
+      "metric": "aura_stacks", "spell": 805011, "equals": 4, "within_ms": 3000
+    },
+    { "action": "cast", "label": "Raise the Abomination", "actor": "n", "spell": 500335 },
+    {
+      "action": "assert", "label": "SETUP: one Abomination", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50068, "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Idle through three Disease Cloud pulse windows", "ms": 10000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the idle Abomination's cloud never hits the citizen", "actor": "n",
+      "metric": "spell_damage_count", "spell": 802353, "entry": 50068, "target": "citizen", "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the idle Abomination's cloud never hits the golem", "actor": "n",
+      "metric": "spell_damage_count", "spell": 802353, "entry": 50068, "target": "golem", "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the necromancer stays out of combat", "actor": "n",
+      "metric": "combat", "equals": 0
+    },
+    { "action": "attack", "label": "Attack the golem", "actor": "n", "target": "golem" },
+    {
+      "action": "assert", "label": "CONTROL: in combat the Abomination's cloud damages the golem", "actor": "n",
+      "metric": "spell_damage_count", "spell": 802353, "entry": 50068, "target": "golem", "min": 1,
+      "within_ms": 10000
+    }
+  ]
+}

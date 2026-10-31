@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "name": "Templar: Graceful Fighter gives parry (COA-7309)",
+  "contract": "Graceful Fighter 705303, the Templar level 20 passive, raises parry rating by 20% of Agility. A level 20 Templar with it must have a parry chance above zero.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "t", "race": 1, "class": 19, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "t", "spell": 705303 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "the Templar can parry", "actor": "t", "metric": "parry_chance", "min": 0.5, "within_ms": 3000 }
+  ]
+}

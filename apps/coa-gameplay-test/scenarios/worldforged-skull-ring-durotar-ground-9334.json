@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "name": "Worldforged Skull Ring rests on the ground in Durotar, not buried under it (#9334)",
+  "contract": "The Skull Ring pickup (entry 95645, guid 6942195, item 450740) stands at the realm-map marker XY in Durotar, 3.44 yd under the terrain there. Restore its stored height to the terrain.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": 1349.9, "y": -4606.0, "z": 28.5, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the Skull Ring stands in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95645, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: it rests on the ground, not sunk into it", "actor": "p", "metric": "spawn_ground_gap", "guid": 6942195, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "assert", "label": "it is grounded", "actor": "p", "metric": "spawn_placement", "guid": 6942195, "spawn_type": "gameobject", "tolerance": 1, "equals": 0 }
+  ]
+}

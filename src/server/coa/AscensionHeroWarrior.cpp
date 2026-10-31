@@ -46,6 +46,10 @@ class aura_hero_warrior_enrage : public AuraScript
 
     bool CheckProc(ProcEventInfo& eventInfo)
     {
+        if (sSpellMgr->GetSpellTwinSource(GetId()) != GetId())
+            return (eventInfo.GetTypeMask() & TAKEN_HIT_PROC_FLAG_MASK) && eventInfo.GetDamageInfo() &&
+                eventInfo.GetDamageInfo()->GetDamage();
+
         if (SpellInfo const* spell = eventInfo.GetSpellInfo(); spell &&
             (eventInfo.GetTypeMask() & PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS))
             return spell->SpellFamilyName == SPELLFAMILY_WARRIOR && (spell->SpellFamilyFlags[0] & ENRAGE_TRIGGER_FLAGS);

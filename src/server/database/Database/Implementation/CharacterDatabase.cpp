@@ -37,6 +37,11 @@ void CharacterDatabaseConnection::DoPrepareStatements()
 
     PrepareStatement(CHAR_SEL_RAF_DELIVERY, "SELECT mail_id FROM raf_reward_delivery WHERE claim_id = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_INS_RAF_DELIVERY, "INSERT INTO raf_reward_delivery (claim_id, account_id, guid, mail_id) VALUES (?, ?, ?, ?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_RAF_RECRUIT_DELIVERY,
+        "SELECT mail_id FROM raf_recruit_reward_delivery WHERE claim_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_RAF_RECRUIT_DELIVERY,
+        "INSERT INTO raf_recruit_reward_delivery (claim_id, account_id, guid, mail_id) VALUES (?, ?, ?, ?)",
+        CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_RAF_RECIPIENT, "SELECT account FROM characters WHERE guid = ?", CONNECTION_SYNCH);
 
     PrepareStatement(CHAR_SEL_COA_ACCOUNT_CHALLENGE_COMPLETION,
@@ -48,6 +53,8 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_INS_COA_ACCOUNT_CHALLENGE_COMPLETION,
         "INSERT IGNORE INTO coa_account_challenge_completion (account, challengeId, level, completeTime, startTime) "
         "VALUES (?, ?, ?, UNIX_TIMESTAMP(), ?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_UPD_COA_ADVENTURE_LEVEL,
+        "UPDATE coa_character_challenge SET level = ? WHERE guid = ? AND challengeId = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_DEL_COA_ACCOUNT_CHALLENGE_COMPLETIONS,
         "DELETE FROM coa_account_challenge_completion WHERE account = ?", CONNECTION_SYNCH);
 
@@ -828,6 +835,21 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_RECOVERY_ITEM_OLD_ITEMS, "SELECT Guid, ItemEntry FROM recovery_item WHERE DeleteDate IS NOT NULL AND DeleteDate < ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_DEL_RECOVERY_ITEM_BY_GUID, "DELETE FROM recovery_item WHERE Guid = ?", CONNECTION_ASYNC);
 
+    PrepareStatement(CHAR_INS_EXACT_RECOVERY,
+        "INSERT INTO recovery_item_snapshot (owner_guid, original_guid, source, item_entry, item_count, price, created_at, item_values, item_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_BOTH);
+    PrepareStatement(CHAR_SEL_EXACT_RECOVERY_LIST,
+        "SELECT id, original_guid, item_entry, item_count, price, created_at FROM recovery_item_snapshot WHERE owner_guid = ? AND source = ? ORDER BY id DESC LIMIT 500", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_EXACT_RECOVERY,
+        "SELECT original_guid, item_entry, item_count, price, item_values, item_text FROM recovery_item_snapshot WHERE id = ? AND owner_guid = ? AND source = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_EXACT_RECOVERY_VENDOR,
+        "DELETE FROM recovery_item_snapshot WHERE owner_guid = ? AND original_guid = ? AND source = 2", CONNECTION_BOTH);
+    PrepareStatement(CHAR_INS_EXACT_RECOVERY_RECEIPT,
+        "INSERT INTO recovery_item_snapshot_receipt (recovery_id, owner_guid, mail_id) VALUES (?, ?, ?)", CONNECTION_BOTH);
+    PrepareStatement(CHAR_DEL_EXACT_RECOVERY,
+        "DELETE FROM recovery_item_snapshot WHERE id = ? AND owner_guid = ?", CONNECTION_BOTH);
+    PrepareStatement(CHAR_PRUNE_EXACT_RECOVERY,
+        "DELETE FROM recovery_item_snapshot WHERE owner_guid = ? AND id < COALESCE((SELECT oldest FROM (SELECT id AS oldest FROM recovery_item_snapshot WHERE owner_guid = ? ORDER BY id DESC LIMIT 1 OFFSET 499) AS retained), 0)", CONNECTION_BOTH);
+
     PrepareStatement(CHAR_SEL_HONORPOINTS, "SELECT totalHonorPoints FROM characters WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_ARENAPOINTS, "SELECT arenaPoints FROM characters WHERE guid = ?", CONNECTION_SYNCH);
 
@@ -848,6 +870,11 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_ACCOUNT_CHARACTER_SETTINGS_BY_SOURCE,
         "SELECT s.data FROM character_settings s JOIN characters c ON c.guid = s.guid "
         "WHERE c.account = ? AND s.guid <> ? AND s.source = ?", CONNECTION_ASYNC);
+
+    PrepareStatement(CHAR_SEL_ACCOUNT_LEVEL_OR_PRESTIGE,
+        "SELECT c.level, COALESCE(s.data, '') FROM characters c "
+        "LEFT JOIN character_settings s ON s.guid = c.guid AND s.source = ? "
+        "WHERE c.account = ? AND c.guid <> ? AND c.deleteDate IS NULL", CONNECTION_SYNCH);
 
     // Instance saved data. Stores the states of gameobjects in instances to be loaded on server start
     PrepareStatement(CHAR_SELECT_INSTANCE_SAVED_DATA, "SELECT guid, state FROM instance_saved_go_state_data WHERE id = ?", CONNECTION_SYNCH);
@@ -908,6 +935,31 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "REPLACE INTO character_appearance_outfit (guid, name, appearances) VALUES (?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_APPEARANCE_OUTFIT,
         "DELETE FROM character_appearance_outfit WHERE guid = ? AND name = ?", CONNECTION_ASYNC);
+
+    PrepareStatement(CHAR_SEL_ACCOUNT_FRIENDS,
+        "SELECT friend_account, original_guid, original_name, note FROM account_friend WHERE account = ? "
+        "UNION ALL SELECT 0, 0, '', ''", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_ACCOUNT_FRIEND,
+        "INSERT INTO account_friend (account, friend_account, original_guid, original_name, note) "
+        "VALUES (?, ?, ?, ?, ?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_ACCOUNT_FRIEND,
+        "DELETE FROM account_friend WHERE account = ? AND friend_account = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_UPD_ACCOUNT_FRIEND_NOTE,
+        "UPDATE account_friend SET note = ? WHERE account = ? AND friend_account = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_FRIEND_FALLBACK,
+        "SELECT guid FROM characters WHERE account = ? AND deleteinfos_name IS NULL ORDER BY guid LIMIT 1",
+        CONNECTION_SYNCH);
+
+    PrepareStatement(CHAR_SEL_ACCOUNT_FRIEND_MIGRATION,
+        "SELECT COUNT(*) FROM account_friend_migration WHERE account = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_ACCOUNT_FRIEND_MIGRATION,
+        "INSERT INTO account_friend_migration (account) VALUES (?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_ACCOUNT_FRIEND_LEGACY,
+        "SELECT t.account, t.guid AS original_guid, t.name, s.note, s.guid AS owner_guid, s.flags "
+        "FROM character_social s JOIN characters o ON o.guid=s.guid JOIN characters t ON t.guid=s.friend "
+        "WHERE o.account=? AND s.flags & 1 AND o.account<>t.account "
+        "AND o.deleteinfos_name IS NULL AND t.deleteinfos_name IS NULL "
+        "UNION ALL SELECT 0,0,'','',0,0 ORDER BY owner_guid,original_guid,flags", CONNECTION_SYNCH);
 
     PrepareStatement(CHAR_INS_PLAYER_ANTICHEAT_ALERT, "INSERT INTO player_anticheat_alert (account, guid, name, reason, details, size) VALUES (?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
 #ifdef MOD_MANASTORM_ENDLESS

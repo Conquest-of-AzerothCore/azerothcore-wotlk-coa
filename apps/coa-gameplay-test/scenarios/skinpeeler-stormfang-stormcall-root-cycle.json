@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Stormfang: Stormcall root cycle",
+  "contract": [
+    "Stormcall runs one seven-second self-root cycle at 30 seconds.",
+    "The root must expire after the channel; it must not be refreshed by duplicate cast callbacks.",
+    "No player receives Stormcall control or fear."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -155.771, "y": -2879.57, "z": 117.037, "o": 0 },
+  "players": [
+    { "id": "tank", "race": 1, "class": 1, "level": 60, "allow_regeneration": false },
+    { "id": "dps1", "race": 1, "class": 1, "level": 60, "allow_regeneration": false },
+    { "id": "dps2", "race": 1, "class": 1, "level": 60, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "boss", "owner": "tank", "entry": 9916212, "level": 60, "health": 5000000, "reaction": 2, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "set_health", "actor": "tank", "value": 100000000, "maximum": 100000000 },
+    { "action": "set_health", "actor": "dps1", "value": 100000000, "maximum": 100000000 },
+    { "action": "set_health", "actor": "dps2", "value": 100000000, "maximum": 100000000 },
+    { "action": "wait", "label": "Let the boss and local AI settle", "ms": 3000 },
+    { "action": "attack", "label": "Tank establishes threat", "actor": "tank", "target": "boss" },
+    { "action": "assert", "label": "Stormcall starts at 30 seconds", "actor": "boss", "metric": "rooted", "equals": 1, "within_ms": 35000 },
+    { "action": "teleport", "label": "Move the tank out of melee but inside Stormcall range", "actor": "tank", "map": 0, "x": -125.771, "y": -2879.57, "z": 117.037, "o": 0 },
+    { "action": "set_health", "label": "Reset tank health while the boss is rooted", "actor": "tank", "value": 100000000, "maximum": 100000000 },
+    { "action": "wait", "label": "Wait for all seven Lightning Call ticks", "ms": 6900 },
+    { "action": "assert", "label": "Stormcall damage is applied (at least 700)", "actor": "tank", "metric": "health", "max": 99999300 },
+    { "action": "wait", "label": "Wait past the seven-second root", "ms": 9000 },
+    { "action": "assert", "label": "Stormcall root expires and is not refreshed", "actor": "boss", "metric": "rooted", "equals": 0 },
+    { "action": "assert", "label": "Stormcall leaves no control aura on the tank", "actor": "tank", "metric": "aura", "spell": 1004117, "equals": 0 },
+    { "action": "assert", "label": "Stormcall leaves no control aura on the first non-tank", "actor": "dps1", "metric": "aura", "spell": 1004117, "equals": 0 },
+    { "action": "assert", "label": "Stormcall leaves no control aura on the second non-tank", "actor": "dps2", "metric": "aura", "spell": 1004117, "equals": 0 }
+  ]
+}

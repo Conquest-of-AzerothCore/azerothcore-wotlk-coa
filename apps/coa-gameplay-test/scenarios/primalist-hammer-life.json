@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Primalist Hammer of Life resolved damage copies",
-  "contract": "The active CAD spell 803973 heals at most three allies and damages at most three enemies for 20% of actual melee-ability damage. Check first/highest Wildclaw, AP/SP, unrelated legacy ID exclusion, baseline and removal; an independent checker validates exact copied amounts.",
+  "contract": "The active CAD spell 803973 heals at most three allies and damages at most three enemies for 20% of actual melee-ability damage, once per melee-damage proc event. Check first/highest Wildclaw, AP/SP, unrelated legacy ID exclusion, baseline and removal; an independent checker validates exact copied amounts. Wildclaw (800140/520560-520566) triggers its offhand copy 504240 as a TRIGGERED melee hit alongside the direct main-hand hit, so each Wildclaw cast is two separate proc events (#8775).",
   "players": [
     {
       "id": "primalist",
@@ -397,6 +397,14 @@
     {
       "action": "snapshot",
       "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 504240,
+      "save_as": "first_offhand_before",
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
       "metric": "spell_heal_total",
       "spell": 806073,
       "save_as": "first_heals_before"
@@ -454,6 +462,15 @@
     {
       "action": "snapshot",
       "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 504240,
+      "relative_to": "first_offhand_before",
+      "save_as": "first_offhand",
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
       "metric": "spell_heal_total",
       "spell": 806073,
       "relative_to": "first_heals_before",
@@ -469,19 +486,21 @@
     },
     {
       "action": "assert",
+      "label": "Wildclaw 800140 triggers its offhand copy 504240 too, each proc splitting to 3 allies (#8775)",
       "actor": "primalist",
       "metric": "spell_heal_count",
       "spell": 806073,
       "relative_to": "first_heal_count_before",
-      "equals": 3
+      "equals": 6
     },
     {
       "action": "assert",
+      "label": "Wildclaw 800140 triggers its offhand copy 504240 too, each proc splitting to 3 enemies (#8775)",
       "actor": "primalist",
       "metric": "spell_damage_count",
       "spell": 807651,
       "relative_to": "first_damage_count_before",
-      "equals": 3
+      "equals": 6
     },
     {
       "action": "wait",
@@ -562,6 +581,14 @@
     {
       "action": "snapshot",
       "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 504240,
+      "save_as": "highest_offhand_before",
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
       "metric": "spell_heal_total",
       "spell": 806073,
       "save_as": "highest_heals_before"
@@ -619,6 +646,15 @@
     {
       "action": "snapshot",
       "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 504240,
+      "relative_to": "highest_offhand_before",
+      "save_as": "highest_offhand",
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
       "metric": "spell_heal_total",
       "spell": 806073,
       "relative_to": "highest_heals_before",
@@ -634,19 +670,21 @@
     },
     {
       "action": "assert",
+      "label": "Wildclaw 520566 triggers its offhand copy 504240 too, each proc splitting to 3 allies (#8775)",
       "actor": "primalist",
       "metric": "spell_heal_count",
       "spell": 806073,
       "relative_to": "highest_heal_count_before",
-      "equals": 3
+      "equals": 6
     },
     {
       "action": "assert",
+      "label": "Wildclaw 520566 triggers its offhand copy 504240 too, each proc splitting to 3 enemies (#8775)",
       "actor": "primalist",
       "metric": "spell_damage_count",
       "spell": 807651,
       "relative_to": "highest_damage_count_before",
-      "equals": 3
+      "equals": 6
     },
     {
       "action": "wait",
@@ -739,6 +777,14 @@
     {
       "action": "snapshot",
       "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 504240,
+      "save_as": "ap_sp_offhand_before",
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
       "metric": "spell_heal_total",
       "spell": 806073,
       "save_as": "ap_sp_heals_before"
@@ -796,6 +842,15 @@
     {
       "action": "snapshot",
       "actor": "primalist",
+      "metric": "spell_damage_total",
+      "spell": 504240,
+      "relative_to": "ap_sp_offhand_before",
+      "save_as": "ap_sp_offhand",
+      "target": "target"
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
       "metric": "spell_heal_total",
       "spell": 806073,
       "relative_to": "ap_sp_heals_before",
@@ -811,19 +866,21 @@
     },
     {
       "action": "assert",
+      "label": "Wildclaw 520566 triggers its offhand copy 504240 too, each proc splitting to 3 allies (#8775)",
       "actor": "primalist",
       "metric": "spell_heal_count",
       "spell": 806073,
       "relative_to": "ap_sp_heal_count_before",
-      "equals": 3
+      "equals": 6
     },
     {
       "action": "assert",
+      "label": "Wildclaw 520566 triggers its offhand copy 504240 too, each proc splitting to 3 enemies (#8775)",
       "actor": "primalist",
       "metric": "spell_damage_count",
       "spell": 807651,
       "relative_to": "ap_sp_damage_count_before",
-      "equals": 3
+      "equals": 6
     },
     {
       "action": "wait",
@@ -995,6 +1052,76 @@
       "spell": 807651,
       "relative_to": "removed_damage_count_before",
       "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803973
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 300733
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally2",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally3",
+      "maximum": 100000,
+      "value": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 520566
+    },
+    {
+      "action": "assert",
+      "label": "Battleweaver (#9412): no stray buff before the heal",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 300737,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 520566,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING (#9412): Hammer of Life's heal (806073) is cast with TRIGGERED_DISALLOW_PROC_EVENTS stripped, so its effective healing procs Battleweaver",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 300737,
+      "equals": 1,
+      "within_ms": 3000
     },
     {
       "action": "wait",

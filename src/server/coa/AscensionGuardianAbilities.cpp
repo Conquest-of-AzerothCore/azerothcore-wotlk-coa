@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionGuardianCompletion.h"
+#include "DBCStores.h"
 #include "EventProcessor.h"
 #include "Map.h"
 #include "MoveSpline.h"
@@ -18,6 +19,36 @@
 
 namespace
 {
+class guardian_hammer_of_the_law_metadata : public GlobalScript
+{
+public:
+    guardian_hammer_of_the_law_metadata() : GlobalScript("guardian_hammer_of_the_law_metadata",
+        {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR}) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* info) override
+    {
+        if (info->Id != 704418 && info->Id != 707710 && info->Id != 707711 && info->Id != 707712 &&
+            info->Id != 707713 && info->Id != 707714 && info->Id != 707715)
+            return;
+        for (SpellEffectInfo& effect : info->Effects)
+            if (effect.TargetB.GetTarget() == TARGET_UNIT_CONE_ENEMY_54)
+                effect.RadiusEntry = sSpellRadiusStore.LookupEntry(13);
+    }
+};
+
+class guardian_battle_rush_metadata : public GlobalScript
+{
+public:
+    guardian_battle_rush_metadata() : GlobalScript("guardian_battle_rush_metadata",
+        {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR}) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* info) override
+    {
+        if (info->Id == 501546 || info->Id == 501547 || info->Id == 501548 || info->Id == 802197)
+            info->Mechanic = MECHANIC_NONE;
+    }
+};
+
 class GuardianLanding : public BasicEvent
 {
 public:
@@ -266,6 +297,8 @@ class aura_ascension_guardian_hold_the_line : public AuraScript
 
 void AddAscensionGuardianAbilityScripts()
 {
+    new guardian_hammer_of_the_law_metadata();
+    new guardian_battle_rush_metadata();
     RegisterSpellScript(spell_ascension_guardian_ability);
     RegisterSpellScript(aura_ascension_guardian_advance);
     RegisterSpellScript(aura_ascension_guardian_hold_the_line);

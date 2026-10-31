@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Destroyer's Legacy alone does not unlock Pyroclasm; 23 invested tab points does (#7996)",
+  "contract": [
+    "CharacterAdvancement.dbc (Incineration, ClassType 26, Tab 62): Destroyer's Legacy (entry 11803, rank spell 704815) is TabTEInvestment 8, itself gated behind 8 TE invested in the tab's threshold-0 entries. Pyroclasm (entry 7174, rank spell 520019) is TabTEInvestment 23, RequiredEntry 0/0/0: nothing links the two entries directly.",
+    "AscensionCompat.cpp TabInvestmentShortfall / AscensionFreepickRules.cpp InvestedBelowThreshold refuse a purchase while the sum of TalentEssenceCost already invested in strictly-lower-threshold tab entries is below the entry's own TabTEInvestment. The report assumes Destroyer's Legacy leads to Pyroclasm; the DBC data has no such link, and Pyroclasm's own gate is the 23 TE invested in threshold-below-23 Incineration entries, not Destroyer's Legacy specifically.",
+    "#8685 (batch 5) listed this as open without a safe server-side fix; 7b635cdad5 (#9182) added the generic tab-investment gate afterward, for #5351/#3941, not this report. This proves the already-working, by-design behavior with an independent expected value (the DBC's own TabTEInvestment 23), not a number taken from the implementation."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "pyromancer", "race": 1, "class": 24, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "specialization", "actor": "pyromancer", "id": 38 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "advancement_rank", "label": "Buy the 8 threshold-0 entries Destroyer's Legacy itself needs", "actor": "pyromancer", "entry": 5187, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 6985, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 6986, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 7804, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 11986, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 29854, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 30304, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 33877, "rank": 1 },
+    { "action": "advancement_rank", "label": "Buy only Destroyer's Legacy (tier 8)", "actor": "pyromancer", "entry": 11803, "rank": 1 },
+    { "action": "assert", "actor": "pyromancer", "metric": "knows_spell", "spell": 704815, "equals": 1 },
+    {
+      "action": "advancement_rank", "label": "Pyroclasm is refused with only 9 tab points invested", "actor": "pyromancer",
+      "entry": 7174, "rank": 1, "refused": true
+    },
+    {
+      "action": "assert", "label": "Destroyer's Legacy alone does not unlock Pyroclasm", "actor": "pyromancer",
+      "metric": "knows_spell", "spell": 520019, "equals": 0
+    },
+    { "action": "advancement_rank", "label": "Invest 14 more tab points (23 total) without touching Destroyer's Legacy's own tier", "actor": "pyromancer", "entry": 6499, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 6500, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 6807, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 6987, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 7006, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 7008, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 7009, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 7171, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 7176, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 29548, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 29552, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 30601, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 30644, "rank": 1 },
+    { "action": "advancement_rank", "actor": "pyromancer", "entry": 30680, "rank": 1 },
+    {
+      "action": "advancement_rank", "label": "Pyroclasm is now accepted with 23 tab points invested", "actor": "pyromancer",
+      "entry": 7174, "rank": 1
+    },
+    {
+      "action": "assert", "label": "23 invested tab points unlocks Pyroclasm", "actor": "pyromancer",
+      "metric": "knows_spell", "spell": 520019, "equals": 1
+    }
+  ]
+}

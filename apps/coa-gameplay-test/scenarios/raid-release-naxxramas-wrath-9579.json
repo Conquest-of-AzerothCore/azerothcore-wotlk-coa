@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "A level 80 character can enter Wrath Naxxramas below the Classic release ladder's final stage (#9579)",
+  "contract": [
+    "AscensionRaidReleasePolicy.h gates raids by map id. In the 3.3.5 client, map 533 is the Wrath 10/25-man",
+    "Naxxramas reached through the Dragonblight entrance; MapDifficulty.dbc exposes only its four Wrath raid",
+    "difficulties (0-3) for that map id, with no separate Classic 40-man mode. The ladder's Classic-tier gate",
+    "(StageNaxxramas, reached at Ascension.CallboardCache.ReleaseStage 8) must not close map 533, unlike before",
+    "the fix, while every other Wrath raid (here Ulduar, map 603) stays open at any stage, below or above it."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 18,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 2000 },
+    {
+      "action": "teleport",
+      "label": "CONTROL: an unrelated Wrath raid is open at this low release stage",
+      "actor": "hero",
+      "map": 603,
+      "x": -914.041,
+      "y": -148.98,
+      "z": 463.137,
+      "o": 6.28
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Ulduar entry succeeds",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 603,
+      "within_ms": 15000
+    },
+    {
+      "action": "teleport",
+      "label": "Back to the starting spot before the discriminating attempt",
+      "actor": "hero",
+      "map": 0,
+      "x": -8914.0,
+      "y": -133.0,
+      "z": 80.6,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: back in Eastern Kingdoms",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "teleport",
+      "label": "DISCRIMINATING: enter Wrath Naxxramas through its Dragonblight entrance at the default low release stage",
+      "actor": "hero",
+      "map": 533,
+      "x": 3005.68,
+      "y": -3447.77,
+      "z": 293.93,
+      "o": 4.65
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Naxxramas entry succeeds instead of staying closed",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 533,
+      "within_ms": 15000
+    }
+  ]
+}

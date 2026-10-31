@@ -509,6 +509,7 @@ bool HasPermaDeathFailure(Player* player);
 uint32 ValidateChallenge(Player* player, uint32 challengeID, uint32 level);
 void DoActivateChallenge(Player* player, uint32 challengeID, uint32 level);
 uint32 ActivateChallenge(Player* player, uint32 challengeID, uint32 level);
+bool AdventureModeChangeBlocked(Player* player);
 void DeactivateChallenge(Player* player, uint32 challengeID);
 bool RuleListContains(std::string const& list, std::string const& rule);
 bool PlayerHasRule(Player* player, char const* rule);

@@ -19,6 +19,7 @@ namespace DungeonLoot
         {
             case 33: case 34: case 36: case 43: case 47: case 48: case 70: case 90: case 109:
             case 129: case 189: case 209: case 229: case 230: case 289: case 329: case 349: case 389: case 429:
+            case 936: // Vaults of the Inquisition
             case 937: // Road to De Other Side
                 return difficulty;
             default:

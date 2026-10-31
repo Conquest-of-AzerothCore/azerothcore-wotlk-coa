@@ -99,6 +99,7 @@ struct State
     std::vector<Slots> Presets = std::vector<Slots>(1, Slots{});
     std::vector<uint32> Known;
     std::unordered_map<uint32, uint32> Auras;
+    std::unordered_set<uint32> LearnedReplacements;
 
     Slots& Active() { return Presets[ActivePreset]; }
 };
@@ -211,6 +212,129 @@ void SaveSlot(Player const* player, uint32 preset, uint32 slot, uint32 spell)
             player->GetGUID().GetCounter(), preset, slot);
 }
 
+std::vector<uint32> CrossoverGrants(Enchant const& enchant)
+{
+    constexpr uint32 CROSSOVER_ENCHANT_OFFSET = 200000;
+    std::vector<uint32> grants;
+    if (enchant.Spell != enchant.Id + CROSSOVER_ENCHANT_OFFSET)
+        return grants;
+    SpellInfo const* marker = sSpellMgr->GetSpellInfo(enchant.Spell);
+    SpellInfo const* talent = sSpellMgr->GetSpellInfo(enchant.Id);
+    if (!marker || !talent || !talent->IsPassive())
+        return grants;
+    for (SpellEffectInfo const& effect : marker->Effects)
+        if (effect.Effect && !effect.IsAura(SPELL_AURA_DUMMY))
+            return grants;
+    for (SpellEffectInfo const& effect : talent->Effects)
+        if (effect.IsAura() && !effect.IsAura(SPELL_AURA_DUMMY))
+        {
+            grants.push_back(enchant.Id);
+            break;
+        }
+    return grants;
+}
+
+bool HeldInForm(Player const* player, uint32 spell)
+{
+    SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
+    if (!info || !info->Stances)
+        return true;
+    uint8 const form = player->GetShapeshiftForm();
+    return form && (info->Stances & (uint64(1) << (form - 1)));
+}
+
+void SyncGrants(Player* player, Enchant const& enchant, bool active)
+{
+    if (player->HasSpell(enchant.Id))
+        return;
+    for (uint32 grant : CrossoverGrants(enchant))
+    {
+        if (player->HasSpell(grant))
+            continue;
+        if (active && HeldInForm(player, grant))
+        {
+            if (!player->HasAura(grant))
+                player->AddAura(grant, player);
+        }
+        else
+            player->RemoveAurasDueToSpell(grant);
+    }
+}
+
+void NamedReplacements(Enchant const& enchant, std::vector<std::pair<uint32, uint32>>& pairs)
+{
+    static std::unordered_map<uint32, std::vector<std::pair<uint32, uint32>>> resolved;
+    auto [itr, inserted] = resolved.try_emplace(enchant.Spell);
+    if (inserted)
+    {
+        SpellInfo const* replacement = sSpellMgr->GetSpellInfo(enchant.Named.To);
+        if (replacement && !replacement->IsPassive())
+            for (uint32 id = 0; id < sSpellMgr->GetSpellInfoStoreSize(); ++id)
+                if (SpellInfo const* info = sSpellMgr->GetSpellInfo(id))
+                    if (info != replacement && !info->IsPassive() && info->GetFirstRankSpell() == info &&
+                        info->SpellFamilyName == replacement->SpellFamilyName && info->SpellName[LOCALE_enUS] &&
+                        enchant.Named.From == info->SpellName[LOCALE_enUS])
+                        itr->second.emplace_back(id, replacement->Id);
+    }
+    pairs.insert(pairs.end(), itr->second.begin(), itr->second.end());
+}
+
+std::vector<std::pair<uint32, uint32>> Replacements(Enchant const& enchant)
+{
+    std::vector<std::pair<uint32, uint32>> pairs;
+    SpellInfo const* info = sSpellMgr->GetSpellInfo(enchant.Spell);
+    if (!info)
+        return pairs;
+    for (SpellEffectInfo const& effect : info->Effects)
+    {
+        if (effect.IsAura(SPELL_AURA_ASCENSION_OVERRIDE_SPELL) && effect.MiscValue > 0 && !effect.MiscValueB)
+        {
+            SpellInfo const* original = sSpellMgr->GetSpellInfo(uint32(effect.MiscValue));
+            SpellInfo const* replacement = sSpellMgr->GetSpellInfo(uint32(effect.CalcValue()));
+            if (original && replacement && original != replacement && !original->IsPassive() &&
+                std::find(enchant.Taught.begin(), enchant.Taught.end(), replacement->Id) == enchant.Taught.end())
+                pairs.emplace_back(original->Id, replacement->Id);
+            continue;
+        }
+        if (!effect.IsAura(SPELL_AURA_DUMMY) || effect.MiscValue <= 0 || effect.MiscValueB <= 0 ||
+            effect.MiscValue == effect.MiscValueB)
+            continue;
+        SpellInfo const* original = sSpellMgr->GetSpellInfo(effect.MiscValue);
+        SpellInfo const* replacement = sSpellMgr->GetSpellInfo(effect.MiscValueB);
+        if (!original || !replacement || original->IsPassive() ||
+            std::find(enchant.Taught.begin(), enchant.Taught.end(), replacement->Id) != enchant.Taught.end())
+            continue;
+        char const* const fromName = original->SpellName[LOCALE_enUS];
+        char const* const toName = replacement->SpellName[LOCALE_enUS];
+        std::string_view const from = fromName ? fromName : "";
+        if (enchant.Transforms || (!from.empty() && toName && std::string_view(toName).find(from) != std::string_view::npos))
+            pairs.emplace_back(original->Id, replacement->Id);
+    }
+    if (pairs.empty() && !enchant.Named.From.empty())
+        NamedReplacements(enchant, pairs);
+    return pairs;
+}
+
+void SyncReplacements(Player* player, State& state, Enchant const& enchant, bool active)
+{
+    for (auto const& [original, replacement] : Replacements(enchant))
+    {
+        if (active && !player->HasSpell(replacement))
+        {
+            player->learnSpell(replacement, true);
+            state.LearnedReplacements.insert(replacement);
+        }
+        for (SpellInfo const* rank = sSpellMgr->GetSpellInfo(sSpellMgr->GetFirstSpellInChain(original)); rank;
+             rank = rank->GetNextRankSpell())
+            if (active && player->HasActiveSpell(rank->Id))
+                player->SetTemporarySpellReplacement(rank->Id, replacement);
+            else if (!active && player->GetTemporarySpellReplacement(rank->Id) == replacement)
+                player->SetTemporarySpellReplacement(rank->Id, 0);
+        if (!active && state.LearnedReplacements.erase(replacement))
+            player->removeSpell(replacement, SPEC_MASK_ALL, true);
+    }
+}
+
 void SyncAuras(Player* player, State& state)
 {
     std::unordered_map<uint32, uint32> wanted;
@@ -221,13 +345,24 @@ void SyncAuras(Player* player, State& state)
         if (!wanted.contains(spell))
         {
             player->RemoveAurasDueToSpell(spell);
-            if (Enchant const* enchant = Loaded.FindSpell(spell); enchant && enchant->Taught)
-                player->removeSpell(enchant->Taught, SPEC_MASK_ALL, true);
+            if (Enchant const* enchant = Loaded.FindSpell(spell))
+            {
+                for (uint32 taught : enchant->Taught)
+                    player->removeSpell(taught, SPEC_MASK_ALL, true);
+                SyncGrants(player, *enchant, false);
+                SyncReplacements(player, state, *enchant, false);
+            }
         }
     for (auto const& [spell, stacks] : wanted)
     {
-        if (Enchant const* enchant = Loaded.FindSpell(spell); enchant && enchant->Taught && !player->HasSpell(enchant->Taught))
-            player->learnSpell(enchant->Taught, true);
+        if (Enchant const* enchant = Loaded.FindSpell(spell))
+        {
+            for (uint32 taught : enchant->Taught)
+                if (!player->HasSpell(taught))
+                    player->learnSpell(taught, true);
+            SyncGrants(player, *enchant, true);
+            SyncReplacements(player, state, *enchant, true);
+        }
         Aura* aura = player->GetAura(spell);
         if (!aura)
             aura = player->AddAura(spell, player);
@@ -766,7 +901,20 @@ class AscensionMysticEnchantPlayer final : public PlayerScript
 {
 public:
     AscensionMysticEnchantPlayer() : PlayerScript("AscensionMysticEnchantPlayer", { PLAYERHOOK_ON_LOGIN,
-        PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_DELETE_FROM_DB }) { }
+        PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_DELETE_FROM_DB, PLAYERHOOK_ON_LEARN_SPELL }) { }
+
+    void OnPlayerLearnSpell(Player* player, uint32 spellId) override
+    {
+        State* state = Ready ? Find(player) : nullptr;
+        if (!state)
+            return;
+        uint32 const chain = sSpellMgr->GetFirstSpellInChain(spellId);
+        for (auto const& [spell, stacks] : state->Auras)
+            if (Enchant const* enchant = Loaded.FindSpell(spell))
+                for (auto const& [original, replacement] : Replacements(*enchant))
+                    if (sSpellMgr->GetFirstSpellInChain(original) == chain && spellId != replacement)
+                        player->SetTemporarySpellReplacement(spellId, replacement);
+    }
 
     void OnPlayerLogin(Player* player) override
     {
@@ -819,6 +967,31 @@ public:
         transaction->Append("DELETE FROM coa_mystic_enchant WHERE guid = {}", guid);
         transaction->Append("DELETE FROM coa_mystic_enchant_known WHERE guid = {}", guid);
         transaction->Append("DELETE FROM coa_mystic_enchant_slot WHERE guid = {}", guid);
+    }
+};
+
+class AscensionMysticEnchantForms final : public UnitScript
+{
+public:
+    AscensionMysticEnchantForms() : UnitScript("AscensionMysticEnchantForms", true,
+        { UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AURA_REMOVE }) { }
+
+    static void Refresh(Unit* unit, Aura const* aura)
+    {
+        Player* player = unit->ToPlayer();
+        State const* state = player && Ready && aura->GetSpellInfo()->HasAura(SPELL_AURA_MOD_SHAPESHIFT) ? Find(player) : nullptr;
+        if (!state)
+            return;
+        for (auto const& [spell, stacks] : state->Auras)
+            if (Enchant const* enchant = Loaded.FindSpell(spell))
+                SyncGrants(player, *enchant, true);
+    }
+
+    void OnAuraApply(Unit* unit, Aura* aura) override { Refresh(unit, aura); }
+
+    void OnAuraRemove(Unit* unit, AuraApplication* application, AuraRemoveMode) override
+    {
+        Refresh(unit, application->GetBase());
     }
 };
 
@@ -1114,6 +1287,7 @@ void AddAscensionMysticEnchantScripts()
         AscensionCompatOpcodes::Claim(opcode, &AscensionMysticEnchant::QueueRequest);
     RegisterAscensionClientConfig(&AscensionMysticEnchant::AppendExtractCosts);
     new AscensionMysticEnchant::AscensionMysticEnchantPlayer();
+    new AscensionMysticEnchant::AscensionMysticEnchantForms();
     new AscensionMysticEnchant::AscensionMysticEnchantWorld();
     new AscensionMysticEnchant::AscensionMysticEnchantLoot();
     new AscensionMysticEnchant::AscensionMysticEnchantScrollDrops();

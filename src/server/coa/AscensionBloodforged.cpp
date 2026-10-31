@@ -14,6 +14,7 @@
 #include "Player.h"
 #include "Random.h"
 #include "ScriptMgr.h"
+#include "World.h"
 #include "WorldSession.h"
 #include <algorithm>
 #include <atomic>
@@ -31,7 +32,7 @@ using Pools = std::array<std::array<std::vector<uint32>, 3>, 61>;
 struct Settings
 {
     std::array<Rates, 5> rates = DefaultRates;
-    Pools pools;
+    std::array<std::unique_ptr<LootTemplate>, 61> templates;
     bool enabled = false;
 };
 
@@ -82,7 +83,7 @@ private:
         std::atomic_store(&settings, std::make_shared<Settings const>());
         if (!sConfigMgr->GetOption<bool>("Bloodforged.Enable", false))
             return;
-        if (!sConfigMgr->GetOption<bool>("PvpPower.Enable", false))
+        if (!sConfigMgr->GetOption<bool>("PvpPower.Enable", true))
         {
             LOG_ERROR("server.loading", "Bloodforged disabled: PvP Power support must be enabled first");
             return;
@@ -113,6 +114,7 @@ private:
             }
         }
 
+        Pools pools;
         std::set<uint32> entries;
         QueryResult catalogue = WorldDatabase.Query(
             "SELECT entry,quality,required_level,item_level FROM coa_bloodforged_catalogue");
@@ -140,7 +142,7 @@ private:
             }
             for (unsigned level = 15; level <= 60; ++level)
                 if (EligibleItem(requiredLevel, itemLevel, level))
-                    next->pools[level][quality - 2].push_back(entry);
+                    pools[level][quality - 2].push_back(entry);
         } while (catalogue->NextRow());
         if (entries.empty())
         {
@@ -148,7 +150,7 @@ private:
             return;
         }
         for (unsigned level = 15; level <= 60; ++level)
-            for (auto& pool : next->pools[level])
+            for (auto& pool : pools[level])
             {
                 uint32 highest = 0;
                 for (uint32 entry : pool)
@@ -159,11 +161,30 @@ private:
                 });
             }
         for (unsigned level = 15; level <= 60; ++level)
-            if (next->pools[level][0].empty() || next->pools[level][1].empty())
+            if (pools[level][0].empty() || pools[level][1].empty())
             {
                 LOG_ERROR("server.loading", "Bloodforged disabled: green/blue pool missing at level {}", level);
                 return;
             }
+        for (unsigned level = 15; level <= 60; ++level)
+        {
+            auto entriesForLevel = std::make_unique<LootTemplate>();
+            for (unsigned index = 0; index < 3; ++index)
+            {
+                unsigned rate = next->rates[Band(level)][index];
+                auto const& pool = pools[level][index];
+                if (!rate || pool.empty())
+                    continue;
+                for (uint32 entry : pool)
+                {
+                    auto* item = new LootStoreItem(entry, 0, EntryChance(rate, pool.size()), false,
+                        LOOT_MODE_DEFAULT, index + 1, 1, 1);
+                    item->conditions = { &riskCondition, &levelCondition };
+                    entriesForLevel->AddEntry(item);
+                }
+            }
+            next->templates[level] = std::move(entriesForLevel);
+        }
         next->enabled = true;
         std::atomic_store(&settings, std::shared_ptr<Settings const>(next));
         LOG_INFO("server.loading", "Bloodforged world drops ready: {} verified catalogue entries", entries.size());
@@ -181,8 +202,7 @@ public:
         auto current = std::atomic_load(&settings);
         if (!current || !current->enabled || !owner || !loot || personal
             || &store != &LootTemplates_Creature || !(lootMode & LOOT_MODE_DEFAULT)
-            || !owner->GetMap() || owner->GetMap()->Instanceable()
-            || loot->items.size() >= MAX_NR_LOOT_ITEMS)
+            || !owner->GetMap() || owner->GetMap()->Instanceable())
             return;
 
         auto* creature = owner->GetMap()->GetCreature(loot->sourceWorldObjectGUID);
@@ -204,18 +224,28 @@ public:
             return;
 
         unsigned targetLevel = std::clamp<unsigned>(eligibleOwner->GetLevel(), 15, 60);
-        unsigned quality = RollQuality(urand(0, 9999), current->rates[Band(targetLevel)]);
-        if (!quality)
-            return;
-        auto const& pool = current->pools[targetLevel][quality - 2];
-        if (pool.empty())
-            return;
-
-        uint32 entry = pool[urand(0, pool.size() - 1)];
-        LootStoreItem item(entry, 0, 100.0f, false, LOOT_MODE_DEFAULT, 0, 1, 1);
-        item.conditions = { &riskCondition, &levelCondition };
-        loot->AddItem(item);
+        current->templates[targetLevel]->Process(*loot, store, lootMode, eligibleOwner);
     }
+};
+
+class NativeRates : public GlobalScript
+{
+public:
+    NativeRates() : GlobalScript("BloodforgedNativeRates", { GLOBALHOOK_ON_ITEM_ROLL }) { }
+
+    bool OnItemRoll(Player const*, LootStoreItem const* item, float& chance, Loot&, LootStore const& store) override
+    {
+        if (&store != &LootTemplates_Creature || item->conditions.empty() || item->conditions.front() != &riskCondition)
+            return true;
+        auto const* proto = sObjectMgr->GetItemTemplate(item->itemid);
+        if (proto && proto->Quality >= ITEM_QUALITY_UNCOMMON && proto->Quality <= ITEM_QUALITY_EPIC)
+            chance *= sWorld->getRate(QualityRates[proto->Quality - ITEM_QUALITY_UNCOMMON]);
+        return true;
+    }
+
+private:
+    static constexpr std::array<ServerConfigs, 3> QualityRates =
+        { RATE_DROP_ITEM_UNCOMMON, RATE_DROP_ITEM_RARE, RATE_DROP_ITEM_EPIC };
 };
 }
 
@@ -223,4 +253,5 @@ void AddSC_AscensionBloodforged()
 {
     new Bloodforged::Configuration();
     new Bloodforged::WorldDrops();
+    new Bloodforged::NativeRates();
 }

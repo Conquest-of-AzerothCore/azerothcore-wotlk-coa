@@ -1,0 +1,284 @@
+{
+  "schema": 1,
+  "name": "Dungeon Finder: a new dungeon on the same map starts a fresh instance",
+  "contract": "A group that finished Scarlet Monastery - Library and queues for the Armory while still inside is teleported to a new instance of map 189 instead of staying in the finished one with its creatures dead (#8947, #9059). A group that fills up a dungeon it is still running keeps its instance (LFGMgr::MakeNewGroup, not isNew).",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    },
+    {
+      "id": "p2",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    },
+    {
+      "id": "p3",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    },
+    {
+      "id": "p4",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    },
+    {
+      "id": "p5",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p2"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p3"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p4"
+    },
+    {
+      "action": "group",
+      "actor": "p1",
+      "target": "p5"
+    },
+    {
+      "action": "lfg_join",
+      "label": "The group queues for Scarlet Monastery - Library",
+      "actor": "p1",
+      "dungeons": [
+        165
+      ],
+      "roles": 3
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p2",
+      "roles": 4
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p3",
+      "roles": 8
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p4",
+      "roles": 8
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p5",
+      "roles": 8
+    },
+    {
+      "action": "wait",
+      "ms": 20000
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p1"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p2"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p3"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p4"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p5"
+    },
+    {
+      "action": "assert",
+      "label": "p1 enters Scarlet Monastery",
+      "actor": "p1",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p2 enters Scarlet Monastery",
+      "actor": "p2",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p3 enters Scarlet Monastery",
+      "actor": "p3",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p4 enters Scarlet Monastery",
+      "actor": "p4",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p5 enters Scarlet Monastery",
+      "actor": "p5",
+      "metric": "map_id",
+      "equals": 189,
+      "within_ms": 20000
+    },
+    {
+      "action": "snapshot",
+      "label": "The Library instance",
+      "actor": "p1",
+      "metric": "instance_id",
+      "save_as": "library"
+    },
+    {
+      "action": "lfg_final_credit",
+      "label": "The Library is finished",
+      "actor": "p1"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "lfg_join",
+      "label": "Still inside, the group queues for the next wing on the same map, the Armory",
+      "actor": "p1",
+      "dungeons": [
+        163
+      ],
+      "roles": 3
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p2",
+      "roles": 4
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p3",
+      "roles": 8
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p4",
+      "roles": 8
+    },
+    {
+      "action": "lfg_set_roles",
+      "actor": "p5",
+      "roles": 8
+    },
+    {
+      "action": "wait",
+      "ms": 20000
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p1"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p2"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p3"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p4"
+    },
+    {
+      "action": "lfg_accept",
+      "actor": "p5"
+    },
+    {
+      "action": "assert",
+      "label": "p1 is moved to a fresh instance for the Armory",
+      "actor": "p1",
+      "metric": "instance_id",
+      "relative_to": "library",
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p2 is moved to a fresh instance for the Armory",
+      "actor": "p2",
+      "metric": "instance_id",
+      "relative_to": "library",
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p3 is moved to a fresh instance for the Armory",
+      "actor": "p3",
+      "metric": "instance_id",
+      "relative_to": "library",
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p4 is moved to a fresh instance for the Armory",
+      "actor": "p4",
+      "metric": "instance_id",
+      "relative_to": "library",
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "p5 is moved to a fresh instance for the Armory",
+      "actor": "p5",
+      "metric": "instance_id",
+      "relative_to": "library",
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "and is still in Scarlet Monastery",
+      "actor": "p1",
+      "metric": "map_id",
+      "equals": 189
+    }
+  ]
+}

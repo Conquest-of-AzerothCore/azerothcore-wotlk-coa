@@ -103,6 +103,8 @@ class HoundActions
   public:
     explicit HoundActions(Creature* creature) : _me(creature)
     {
+        Player* owner = Owner(creature->GetOwner());
+        _restoredFromSave = owner && owner->GetTemporaryUnsummonedPetNumber() != 0;
         _events.ScheduleEvent(EVENT_REFRESH_OWNER, 1ms);
         _events.ScheduleEvent(EVENT_AUTO_LEAP, 20s);
     }
@@ -150,13 +152,16 @@ class HoundActions
                     if (_me->GetDisplayId() != display)
                         _me->SetDisplayId(display, _me->GetObjectScale());
                 }
-                float healthFraction = _me->GetHealthPct() / 100.0f;
                 uint32 maximum = std::max(1u, owner->CountPctFromMaxHealth(_me->GetEntry() == 50124 ? 40 : 20));
                 if (maximum != _me->GetMaxHealth())
                 {
+                    uint32 health = (!_ownerRefreshed && _restoredFromSave)
+                        ? std::min(_me->GetHealth(), maximum)
+                        : std::max(1u, uint32(maximum * (_me->GetHealthPct() / 100.0f)));
                     _me->SetMaxHealth(maximum);
-                    _me->SetHealth(std::max(1u, uint32(maximum * healthFraction)));
+                    _me->SetHealth(std::max(1u, health));
                 }
+                _ownerRefreshed = true;
                 _me->SetLevel(owner->GetLevel());
                 float damage = owner->GetLevel() + owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.04f;
                 _me->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, damage * 0.9f);
@@ -194,8 +199,8 @@ class HoundActions
                     continue;
                 }
                 _landingChecks = 0;
-                int32 value = sSpellMgr->GetSpellInfo(706332)->Effects[EFFECT_1].CalcValue(owner) +
-                              int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.35f);
+                int32 value = sSpellMgr->GetSpellInfo(706332)->Effects[EFFECT_1].CalcValue(owner) * 315 / 225 +
+                              int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.55f);
                 if (owner->HasAura(705450))
                     value += owner->GetLevel() * 2;
                 _me->CastCustomSpell(706332, SPELLVALUE_BASE_POINT1, value, target, TRIGGERED_FULL_MASK);
@@ -225,6 +230,8 @@ class HoundActions
     EventMap _events;
     uint8 _landingChecks = 0;
     bool _called = false;
+    bool _ownerRefreshed = false;
+    bool _restoredFromSave = false;
 };
 
 struct npc_ascension_witch_hunter_pet : PetAI
@@ -314,6 +321,11 @@ struct npc_ascension_witch_hunter_field : ScriptedAI
         me->SetLevel(owner->GetLevel());
         me->SetReactState(REACT_PASSIVE);
         me->SetImmuneToNPC(true);
+        if (me->GetEntry() >= 506250 && me->GetEntry() <= 506253)
+        {
+            me->SetImmuneToPC(true);
+            me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+        }
         me->GetMotionMaster()->Clear();
         me->GetMotionMaster()->MoveIdle();
         if (me->GetEntry() == 50519)

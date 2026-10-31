@@ -32,8 +32,20 @@ void LoginDatabaseConnection::DoPrepareStatements()
     PrepareStatement(LOGIN_SEL_RAF_RECRUITS, "SELECT a.id, r.validated_at, COALESCE(MAX(p.qualified_seconds), 0) FROM account a LEFT JOIN raf_accounts r ON r.account_id = a.id LEFT JOIN raf_progress p ON p.account_id = a.id WHERE a.recruiter = ? GROUP BY a.id, r.validated_at ORDER BY a.id", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_RAF_VALID_COUNT, "SELECT COUNT(*) FROM account a JOIN raf_accounts r ON r.account_id = a.id WHERE a.recruiter = ? AND r.validated_at IS NOT NULL", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_INS_RAF_CLAIM, "INSERT IGNORE INTO raf_claims (account_id, reward_id, realm_id, guid, item_id, quantity, created_at) SELECT ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP() WHERE (SELECT COUNT(*) FROM account a JOIN raf_accounts r ON r.account_id = a.id WHERE a.recruiter = ? AND r.validated_at IS NOT NULL) >= ?", CONNECTION_SYNCH);
-    PrepareStatement(LOGIN_SEL_RAF_CLAIMS, "SELECT claim_id, reward_id, realm_id, guid, item_id, quantity, delivered_at FROM raf_claims WHERE account_id = ? ORDER BY claim_id", CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_SEL_RAF_CLAIMS, "SELECT claim_id, reward_id, realm_id, guid, item_id, quantity, delivered_at FROM raf_claims WHERE account_id = ? ORDER BY claim_id", CONNECTION_BOTH);
     PrepareStatement(LOGIN_UPD_RAF_CLAIM_DELIVERED, "UPDATE raf_claims SET delivered_at = UNIX_TIMESTAMP() WHERE claim_id = ? AND delivered_at IS NULL", CONNECTION_SYNCH);
+
+    PrepareStatement(LOGIN_INS_RAF_RECRUIT_CLAIM,
+        "INSERT IGNORE INTO raf_recruit_claims "
+        "(account_id, reward_id, realm_id, guid, item_id, quantity, created_at) "
+        "SELECT ?, ?, ?, ?, ?, ?, UNIX_TIMESTAMP() FROM account WHERE id = ? AND recruiter <> 0",
+        CONNECTION_SYNCH);
+    PrepareStatement(LOGIN_SEL_RAF_RECRUIT_CLAIMS,
+        "SELECT claim_id, reward_id, realm_id, guid, item_id, quantity, delivered_at "
+        "FROM raf_recruit_claims WHERE account_id = ? ORDER BY claim_id", CONNECTION_BOTH);
+    PrepareStatement(LOGIN_UPD_RAF_RECRUIT_CLAIM_DELIVERED,
+        "UPDATE raf_recruit_claims SET delivered_at = UNIX_TIMESTAMP() "
+        "WHERE claim_id = ? AND delivered_at IS NULL", CONNECTION_SYNCH);
 
     // COUNT always returns a row: a failed read must not prove an ID absent.
     PrepareStatement(LOGIN_SEL_FRESH_CHECK_ACCOUNT_COUNT, "SELECT COUNT(*) FROM account WHERE id = ?", CONNECTION_SYNCH);

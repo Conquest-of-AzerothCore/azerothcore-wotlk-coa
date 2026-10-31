@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Seismic Smash rank 1 comes from the Mountain King talent, not the trainer (#7555)",
+  "contract": [
+    "Seismic Smash rank 1 (300693) is the Mountain King capstone, CharacterAdvancement entry 7498, which needs 23",
+    "points invested in its tab. #7555 could not find it because the reporter had not invested them. Teaching it",
+    "at Mathrengyl Bearwalker (creature 4217, trainer 900031) and listing it in AscensionCompatData::ClassSpells",
+    "let any level 59 Primalist skip the capstone, and PersistentRank then counted the capstone as owned, so every",
+    "switch to Mountain King was refused for missing tab investment. At level 60 the trainer window must not list",
+    "rank 1 and the spell must not be granted; Greater Earthen Endurance's rank 1 row (570756, level 60) is the",
+    "control that the window lists ordinary rank-1 rows."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 3,
+      "class": 31,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "trainer",
+      "owner": "primalist",
+      "entry": 4217,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 4000 },
+    { "action": "gossip_hello", "actor": "primalist", "target": "trainer", "label": "right-click Mathrengyl Bearwalker at level 60" },
+    { "action": "gossip_select", "actor": "primalist", "option": 0, "label": "I seek training as a Primalist" },
+    { "action": "assert", "label": "SETUP: the trainer window opened", "actor": "primalist", "metric": "trainer_list_packets", "equals": 1 },
+    { "action": "assert", "label": "CONTROL: an ordinary level 60 rank-1 row is listed", "actor": "primalist", "metric": "trainer_window_state", "spell": 570756, "min": 0 },
+    { "action": "assert", "label": "THE FIX: the capstone's rank 1 is not sold by the trainer", "actor": "primalist", "metric": "trainer_window_state", "spell": 300693, "equals": -1 },
+    { "action": "assert", "label": "The capstone is not granted with the level", "actor": "primalist", "metric": "knows_spell", "spell": 300693, "equals": 0 }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Echo of Aessina summons its Echo of Aessina guardian (#7128)",
+  "contract": "Issue #7128: using the Echo of Aessina trinket 451047 plays the cast but nothing is summoned. Its on-use spell 901521 has a SPELL_EFFECT_SUMMON with MiscValue 901521 and SummonProperties 61 (ally guardian) for 15 seconds; no creature_template defined 901521, so Map::SummonCreature failed in Creature::Create. The captured AscensionDB WDB row (creaturecache, 2026-09-04) names 901521 'Echo of Aessina', a beast with display 10045. Expected: after the trinket is used, the Starcaller owns one living Echo of Aessina 901521 with display 10045.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "starcaller", "race": 1, "class": 26, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "add_item", "actor": "starcaller", "item": 451047 },
+    { "action": "equip", "label": "On-use trinkets work only while equipped", "actor": "starcaller", "item": 451047, "slot": 12 },
+    { "action": "wait", "label": "Equipping an on-use trinket starts its 30 second item cooldown", "ms": 31000 },
+    {
+      "action": "assert", "label": "Baseline: no Echo of Aessina", "actor": "starcaller",
+      "metric": "owned_creature_count", "entry": 901521, "equals": 0
+    },
+    { "action": "snapshot", "actor": "starcaller", "metric": "spell_go_count", "spell": 901521, "save_as": "echo_go" },
+    { "action": "use_item", "actor": "starcaller", "item": 451047, "spell": 901521 },
+    {
+      "action": "assert", "label": "SETUP: the trinket casts Echo of Aessina", "actor": "starcaller",
+      "metric": "spell_go_count", "spell": 901521, "relative_to": "echo_go", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "The cast summons one Echo of Aessina", "actor": "starcaller",
+      "metric": "owned_creature_count", "entry": 901521, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The Echo shows the WDB display 10045", "actor": "starcaller",
+      "metric": "owned_creature_display", "entry": 901521, "equals": 10045
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Three Sisters Cry: both Ealdir Dark Druid templates count toward the kills (COA-9740)",
+  "contract": "Issue #9740: quest 175062 asks for eight Ealdir Dark Druid kills (164081). Snowsong Valley also spawns a second Ealdir Dark Druid template (164033) among them, with the same name and models. Killing either druid gives one kill credit. The case kills one of each and expects the objective at 2.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -7187.98, "y": 604.70, "z": 328.18, "o": 0 },
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the valley's grid activate", "ms": 2000 },
+    { "action": "prepare_quest", "actor": "p", "quest": 175062, "complete": false },
+    { "action": "summon", "actor": "p", "as": "quest_druid", "entry": 164081, "distance": 3 },
+    { "action": "attack_nearby", "label": "Slay the quest's Ealdir Dark Druid", "actor": "p", "entry": 164081, "kill": true },
+    { "action": "assert", "label": "CONTROL: the quest's druid counts", "actor": "p", "metric": "quest_objective_count", "quest": 175062, "index": 0, "equals": 1, "within_ms": 2000 },
+    { "action": "summon", "actor": "p", "as": "other_druid", "entry": 164033, "distance": 3 },
+    { "action": "attack_nearby", "label": "Slay the second Ealdir Dark Druid template", "actor": "p", "entry": 164033, "kill": true },
+    { "action": "assert", "label": "DISCRIMINATING: the second druid template counts as well", "actor": "p", "metric": "quest_objective_count", "quest": 175062, "index": 0, "equals": 2, "within_ms": 2000 }
+  ]
+}

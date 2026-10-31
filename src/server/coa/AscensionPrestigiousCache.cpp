@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionCacheRewards.h"
+#include "AscensionRaidReleasePolicy.h"
 #include "Chat.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
@@ -13,6 +14,7 @@
 #include "ScriptMgr.h"
 #include "World.h"
 #include <algorithm>
+#include <memory>
 #include <mutex>
 #include <unordered_map>
 #include <vector>
@@ -37,23 +39,83 @@ struct ContentToken
 };
 
 std::mutex g_poolLock;
-std::unordered_map<uint32, CachePool> g_pools;
+std::unordered_map<uint32, std::shared_ptr<CachePool const>> g_pools;
 std::unordered_map<uint32, std::vector<ContentToken>> g_tokens;
 
-uint32 g_tokenChancePercent = 25;
-uint32 g_secondTokenChancePercent = 5;
-uint8 g_releasedTokenStage = 12;
-uint8 g_classicStages = 8;
-uint8 g_tbcStages = 0;
+struct CacheConfig
+{
+    uint32 tokenChancePercent = 25;
+    uint32 secondTokenChancePercent = 5;
+    uint8 releasedTokenStage = 12;
+    uint8 classicStages = 8;
+    uint8 tbcStages = 0;
+};
+
+CacheConfig g_config;
+
+CacheConfig CurrentConfig()
+{
+    std::lock_guard<std::mutex> guard(g_poolLock);
+    return g_config;
+}
+
+uint32 ClassicStage(uint32 cacheItemId)
+{
+    switch (cacheItemId)
+    {
+        case 1287304: return RaidRelease::StageHeroicDungeons;
+        case 1287305: return RaidRelease::StageZulGurub;
+        case 1287306: return RaidRelease::StageMoltenCore;
+        case 1287307: return RaidRelease::StageOnyxiasLair;
+        case 1287308: return RaidRelease::StageBlackwingLair;
+        case 1287309:
+        case 1287310: return RaidRelease::StageAhnQiraj;
+        case 1287311: return RaidRelease::StageNaxxramas;
+        default: return 0;
+    }
+}
+
+bool IsCacheReleased(uint32 cacheItemId, CacheConfig const& config)
+{
+    uint32 const released = RaidRelease::ReleasedStage();
+    for (std::size_t index = 0; index < ClassicLadder.size(); ++index)
+        if (ClassicLadder[index] == cacheItemId)
+            return index < config.classicStages && ClassicStage(cacheItemId) <= released;
+
+    for (std::size_t index = 0; index < TbcLadder.size(); ++index)
+        if (TbcLadder[index] == cacheItemId)
+            return sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) >= 70 && index < config.tbcStages;
+    return false;
+}
+
+bool IsTokenReleased(uint8 tokenStage, uint32 cacheItemId)
+{
+    uint32 stage = 0;
+    switch (tokenStage)
+    {
+        case 2: stage = RaidRelease::StageMoltenCore; break;
+        case 4: stage = cacheItemId == 1287307 ? RaidRelease::StageOnyxiasLair :
+            RaidRelease::StageBlackwingLair; break;
+        case 5: stage = RaidRelease::StageAhnQiraj; break;
+        case 6: stage = RaidRelease::StageNaxxramas; break;
+        default: return tokenStage >= 8 && sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) >= 70;
+    }
+    return stage <= RaidRelease::ReleasedStage();
+}
 
 void LoadPrestigiousCachePools()
 {
-    g_tokenChancePercent = sConfigMgr->GetOption<uint32>("Ascension.PrestigiousCache.TokenChancePercent", 25);
-    g_secondTokenChancePercent = sConfigMgr->GetOption<uint32>("Ascension.PrestigiousCache.SecondTokenChancePercent", 5);
-    g_releasedTokenStage = uint8(std::min<uint32>(
-        sConfigMgr->GetOption<uint32>("Ascension.PrestigiousCache.ReleaseStage", 6) * 2, 12));
-    g_classicStages = uint8(sConfigMgr->GetOption<uint32>("Ascension.PrestigiousCache.ClassicStages", 8));
-    g_tbcStages = uint8(sConfigMgr->GetOption<uint32>("Ascension.PrestigiousCache.TbcStages", 0));
+    CacheConfig config;
+    config.tokenChancePercent = std::min<uint32>(
+        sConfigMgr->GetOption<uint32>("Ascension.PrestigiousCache.TokenChancePercent", 25), 100);
+    config.secondTokenChancePercent = std::min<uint32>(
+        sConfigMgr->GetOption<uint32>("Ascension.PrestigiousCache.SecondTokenChancePercent", 5), 100);
+    config.releasedTokenStage = uint8(std::min<uint32>(
+        sConfigMgr->GetOption<uint32>("Ascension.PrestigiousCache.ReleaseStage", 6), 6) * 2);
+    config.classicStages = uint8(std::min<uint32>(
+        sConfigMgr->GetOption<uint32>("Ascension.PrestigiousCache.ClassicStages", 8), ClassicLadder.size()));
+    config.tbcStages = uint8(std::min<uint32>(
+        sConfigMgr->GetOption<uint32>("Ascension.PrestigiousCache.TbcStages", 0), TbcLadder.size()));
 
     std::unordered_map<uint32, CachePool> pools;
     if (QueryResult result = WorldDatabase.Query(
@@ -91,39 +153,47 @@ void LoadPrestigiousCachePools()
             "ascension_cache_content_token is missing: Prestigious Caches pay no tier tokens.");
     }
 
+    std::unordered_map<uint32, std::shared_ptr<CachePool const>> snapshots;
+    for (auto& [cacheItemId, pool] : pools)
+        snapshots.emplace(cacheItemId, std::make_shared<CachePool const>(std::move(pool)));
+
     std::lock_guard<std::mutex> guard(g_poolLock);
-    g_pools = std::move(pools);
+    g_config = config;
+    g_pools = std::move(snapshots);
     g_tokens = std::move(tokens);
 }
 
-CachePool const* GetPool(uint32 cacheItemId)
+std::shared_ptr<CachePool const> GetPool(uint32 cacheItemId)
 {
     std::lock_guard<std::mutex> guard(g_poolLock);
     auto it = g_pools.find(cacheItemId);
-    return it == g_pools.end() ? nullptr : &it->second;
+    return it == g_pools.end() ? nullptr : it->second;
 }
 
-uint32 NewestReleasedTier(std::vector<uint32> const& ladder, uint8 released)
+uint32 NewestReleasedTier(std::vector<uint32> const& ladder, CacheConfig const& config)
 {
     uint32 resolved = 0;
-    for (uint8 index = 0; index < ladder.size() && index < released; ++index)
+    for (uint32 cacheItemId : ladder)
     {
-        CachePool const* pool = GetPool(ladder[index]);
+        if (!IsCacheReleased(cacheItemId, config))
+            continue;
+        std::shared_ptr<CachePool const> pool = GetPool(cacheItemId);
         if (pool && !pool->empty())
-            resolved = ladder[index];
+            resolved = cacheItemId;
     }
     return resolved;
 }
 
-uint32 NewestReleasedCache()
+uint32 NewestReleasedCache(uint32 genericCacheItemId, CacheConfig const& config)
 {
-    if (g_tbcStages)
-    {
-        uint32 tier = NewestReleasedTier(TbcLadder, g_tbcStages);
-        if (tier)
+    if (genericCacheItemId == GenericCacheWotlk)
+        return 0;
+    if (genericCacheItemId == GenericCacheTbc)
+        return NewestReleasedTier(TbcLadder, config);
+    if (config.tbcStages && sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) >= 70)
+        if (uint32 const tier = NewestReleasedTier(TbcLadder, config))
             return tier;
-    }
-    return NewestReleasedTier(ClassicLadder, g_classicStages);
+    return NewestReleasedTier(ClassicLadder, config);
 }
 
 uint8 PrimaryStat(Player const* player)
@@ -160,8 +230,12 @@ bool PickReward(Player* player, CachePool const& pool, AscensionCacheRewards::Re
     return true;
 }
 
-bool PickToken(Player* player, uint32 cacheItemId, AscensionCacheRewards::Reward& out)
+bool PickToken(Player* player, uint32 cacheItemId, CacheConfig const& config,
+    AscensionCacheRewards::Reward& out)
 {
+    if (!IsCacheReleased(cacheItemId, config))
+        return false;
+
     std::vector<uint32> eligible;
     {
         std::lock_guard<std::mutex> guard(g_poolLock);
@@ -171,7 +245,7 @@ bool PickToken(Player* player, uint32 cacheItemId, AscensionCacheRewards::Reward
 
         for (ContentToken const& token : it->second)
         {
-            if (token.stage > g_releasedTokenStage)
+            if (token.stage > config.releasedTokenStage || !IsTokenReleased(token.stage, cacheItemId))
                 continue;
 
             ItemTemplate const* proto = sObjectMgr->GetItemTemplate(token.itemId);
@@ -198,7 +272,7 @@ bool GrantNewestCache(Player* player, Item* item)
 {
     player->SendEquipError(EQUIP_ERR_NONE, item, nullptr);
 
-    uint32 cacheItemId = NewestReleasedCache();
+    uint32 cacheItemId = NewestReleasedCache(item->GetEntry(), CurrentConfig());
     if (!cacheItemId)
     {
         ChatHandler(player->GetSession()).SendSysMessage("No Prestigious Cache is available yet.");
@@ -215,15 +289,28 @@ bool OpenPrestigiousCache(Player* player, Item* item)
         return GrantNewestCache(player, item);
 
     uint32 cacheItemId = item->GetEntry();
-    CachePool const* pool = GetPool(cacheItemId);
+    std::shared_ptr<CachePool const> pool = GetPool(cacheItemId);
     if (!pool)
-        return false;
+    {
+        if (!ClassicStage(cacheItemId) &&
+            std::find(TbcLadder.begin(), TbcLadder.end(), cacheItemId) == TbcLadder.end())
+            return false;
+        ChatHandler(player->GetSession()).SendSysMessage("This Prestigious Cache has no configured rewards.");
+        return true;
+    }
 
     player->SendEquipError(EQUIP_ERR_NONE, item, nullptr);
 
     if (player->GetLevel() < uint32(sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL)))
     {
         ChatHandler(player->GetSession()).SendSysMessage("Requires max level to open.");
+        return true;
+    }
+
+    CacheConfig const config = CurrentConfig();
+    if (!IsCacheReleased(cacheItemId, config))
+    {
+        ChatHandler(player->GetSession()).SendSysMessage("This Prestigious Cache is not released yet.");
         return true;
     }
 
@@ -236,13 +323,13 @@ bool OpenPrestigiousCache(Player* player, Item* item)
     }
 
     std::vector<AscensionCacheRewards::Reward> payout = { reward };
-    if (roll_chance_i(int32(g_tokenChancePercent)))
+    if (roll_chance_i(int32(config.tokenChancePercent)))
     {
-        uint32 tokens = roll_chance_i(int32(g_secondTokenChancePercent)) ? 2 : 1;
+        uint32 tokens = roll_chance_i(int32(config.secondTokenChancePercent)) ? 2 : 1;
         for (uint32 index = 0; index < tokens; ++index)
         {
             AscensionCacheRewards::Reward token;
-            if (!PickToken(player, cacheItemId, token))
+            if (!PickToken(player, cacheItemId, config, token))
                 break;
             payout.push_back(token);
         }

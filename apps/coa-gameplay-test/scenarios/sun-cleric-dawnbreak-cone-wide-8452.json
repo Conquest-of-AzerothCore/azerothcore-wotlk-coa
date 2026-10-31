@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "sun-cleric-dawnbreak-cone-wide-8452",
+  "contract": [
+    "Dawnbreak 800654 (and its ranks 502496-502499, 504579, 504580) uses DBC implicit target 24",
+    "(TARGET_UNIT_CONE_ENEMY_24) with a 12 yd radius. That '24' is the DBC implicit-target id, not an",
+    "angle, but Spell::SelectImplicitConeTargets falls back to reading it as a 24 degree cone (+/-12)",
+    "when `spell_cone` has no row: a strip 2-4 yd wide at 4-10 yd, matching the report of 'mostly one",
+    "target, often none'. The pending SQL (rev_20261027_02_dawnbreak_cone.sql) adds a spell_cone row of",
+    "90 degrees (+/-45), the repo's precedent for target-24 spells (Flames of Xoroth,",
+    "rev_20260916_13_flames_of_xoroth_cone.sql). The harness places a creature fixture only along the",
+    "owner's absolute +x axis, so the angle between the caster and the target is produced by turning the",
+    "caster in place (teleport to the same point with a new `o`) instead of moving the target.",
+    "A target 30 degrees off the caster's facing falls outside the old +/-12 degree cone (never hit",
+    "before the fix) and inside the new +/-45 degree cone (must be hit after it); a target directly",
+    "behind (180 degrees) must stay unhit by a frontal cone either way. The 12 yd radius is unchanged."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    { "id": "a", "owner": "cleric", "entry": 36, "faction": 14, "level": 80, "health": 100000, "distance": 6, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 800654 },
+    { "action": "add_item", "actor": "cleric", "item": 406570 },
+    { "action": "equip", "actor": "cleric", "item": 406570, "slot": 15 },
+    { "action": "add_item", "actor": "cleric", "item": 406742 },
+    { "action": "equip", "actor": "cleric", "item": 406742, "slot": 16 },
+
+    { "action": "snapshot", "label": "Health before the control cast (facing 0, target straight ahead)", "actor": "a", "metric": "health", "save_as": "h_front" },
+    { "action": "cast", "label": "CONTROL: cast Dawnbreak facing the target directly", "actor": "cleric", "spell": 800654 },
+    { "action": "assert", "label": "CONTROL: a target straight ahead is always hit", "actor": "a", "metric": "health", "relative_to": "h_front", "max": -1, "within_ms": 3000 },
+
+    { "action": "wait", "label": "Let the global cooldown clear", "ms": 2000 },
+    { "action": "reset_cooldown", "actor": "cleric", "spell": 800654 },
+    { "action": "teleport", "label": "Turn 30 degrees away from the target", "actor": "cleric", "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0.5236 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "snapshot", "label": "Health before the 30-degree cast", "actor": "a", "metric": "health", "save_as": "h_side" },
+    { "action": "cast", "label": "DISCRIMINATING: cast Dawnbreak with the target 30 degrees off facing", "actor": "cleric", "spell": 800654 },
+    { "action": "assert", "label": "DISCRIMINATING: the widened 90-degree cone (+/-45) hits a target 30 degrees off facing, which the old 24-degree cone (+/-12) could not", "actor": "a", "metric": "health", "relative_to": "h_side", "max": -1, "within_ms": 3000 },
+
+    { "action": "wait", "label": "Let the global cooldown clear", "ms": 2000 },
+    { "action": "reset_cooldown", "actor": "cleric", "spell": 800654 },
+    { "action": "teleport", "label": "Turn fully away so the target is behind", "actor": "cleric", "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 3.14159 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "snapshot", "label": "Health before the rear cast", "actor": "a", "metric": "health", "save_as": "h_rear" },
+    { "action": "cast", "label": "CONTROL: cast Dawnbreak with the target behind", "actor": "cleric", "spell": 800654 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "CONTROL: a target directly behind is never hit by a frontal cone", "actor": "a", "metric": "health", "relative_to": "h_rear", "equals": 0 }
+  ]
+}

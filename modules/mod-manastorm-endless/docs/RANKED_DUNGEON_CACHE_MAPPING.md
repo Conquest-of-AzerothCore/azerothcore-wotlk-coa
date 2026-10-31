@@ -2,7 +2,8 @@
 
 SQL 61 restores four scriptless HAS_LOOT containers, all empty in the supplied loot export.
 It embeds four independent gear pools and is self-contained; previous cache migrations are not prerequisites.
-These four caches are outside SQL 47's active Classic award catalogue. Restoration does not activate them,
+These four caches were outside SQL 47's historical Classic award catalogue. The selected S9-based S10 progression
+now activates them through `zzzz_rev_20261025_100_manastorm_s9_classic_cache_progression.sql`. Restoration does not activate them,
 change brackets or replace any current raid cache rewards. Existing/manual copies can use their loot.
 
 ## Exported descriptions and selected reconstruction policy
@@ -19,7 +20,7 @@ This is a CoA reconstruction policy. The wording 'up to' establishes a ceiling, 
 original lower-tier mixing, tier probabilities, quantities or exact cache membership. No lower-band,
 plain Mythic, raid or Ascended items are added under this policy. Candidate metadata and rank identity
 are supported by the supplied item export and the previously reviewed Classic dungeon catalogue.
-Exported depths are historical evidence; SQL 47's active progression remains unchanged.
+Exported depths are historical evidence; see MANASTORM_CLASSIC_CACHE_UNLOCKS.md for the current selected progression.
 
 Exact descriptions:
 

@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Worldforged Decayed Sharpshot stands behind the manor, by the Hound of House Cain (#9200)",
+  "contract": "Pickup template 520047 (item 824390, guid 6940332) was placed behind the Cain Family Estate manor by the 2026-09-26 in-game audit (1941.99,1989.43,156.585), 4.5 yd from the Hound of House Cain's grave (creature 161836, quest 1660042 'Defeat the Hound of House Cain behind the manor'). rev_20261016_90 (an in-game position-check pass) later moved it 27.6 yd away, into the manor, 9 yd from the Gaudy Painting objective. Restore the audited spot, guarded on the rev_20261016_90 coordinates. The estate floor is built from gameobject platform geometry, not a vmap model (confirmed: the harness's spawn_ground_gap reads +26.9 yd there, the open terrain below the estate), so presence/absence at each spot is the metric, not the gap.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": 1941.99, "y": 1989.43, "z": 158.0, "o": 0 },
+  "players": [ { "id": "p", "race": 5, "class": 12, "level": 10 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "the Decayed Sharpshot stands behind the manor", "actor": "p", "metric": "nearby_gameobject_count", "entry": 520047, "equals": 1 },
+    { "action": "teleport", "actor": "p", "map": 0, "x": 1926.1, "y": 1966.9, "z": 158.0, "o": 0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: no copy left inside the manor", "actor": "p", "metric": "nearby_gameobject_count", "entry": 520047, "equals": 0 },
+    { "action": "teleport", "actor": "p", "map": 0, "x": 1941.99, "y": 1989.43, "z": 158.0, "o": 0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: it stands behind the manor again, not in it", "actor": "p", "metric": "nearby_gameobject_count", "entry": 520047, "equals": 1 }
+  ]
+}

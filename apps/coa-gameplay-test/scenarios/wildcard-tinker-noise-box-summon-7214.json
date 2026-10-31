@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Build: Noise Box summons its device instead of nothing",
+  "contract": [
+    "Build: Noise Box 280310 is SPELL_EFFECT_SUMMON with EffectMiscValue[0] = 280311, a creature entry that has no",
+    "creature_template row anywhere in data/sql. Spell::EffectSummonType silently no-ops when the template lookup",
+    "fails, so the cooldown fires and nothing spawns. Entry 52036 ('Noise Box') already has a creature_template row",
+    "(rev_20260910_15_tinker_completion.sql) and its AI (npc_ascension_tinker_device, AscensionTinkerSummons.cpp)",
+    "already periodically casts 561269 on nearby enemies for that exact entry. A GlobalScript correction retargets",
+    "280310's summon effect to 52036 at load time. Expected: casting it spawns a 52036 device near the caster",
+    "instead of nothing."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "tinker", "race": 1, "class": 28, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "learn", "label": "Learn Build: Noise Box", "actor": "tinker", "spell": 280310},
+    {"action": "cast", "label": "Build a Noise Box", "actor": "tinker", "spell": 280310},
+    {"action": "assert", "label": "The Noise Box device spawns (entry 52036, not the missing 280311)", "actor": "tinker", "metric": "owned_creature_count", "entry": 52036, "min": 1, "within_ms": 2000},
+    {"action": "wait", "ms": 6000},
+    {"action": "assert", "label": "The device is still alive and owned after settling into its periodic AI", "actor": "tinker", "metric": "owned_creature_count", "entry": 52036, "min": 1}
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "name": "Warcraft Reborn Shaman weapon imbues wire their extra-attack and heal procs (#8854)",
+  "contract": [
+    "Report: none of a Reborn Shaman's weapon imbues proc; the enchant appears to apply, but the temporary",
+    "enchantment proc never goes off. rev_20261022_86_coa_windfury_custom_proc already fixed Reborn Windfury",
+    "Weapon rank 1's enchant trigger (spell 1133757), but SpellItemEnchantment 10284 (cloned from stock 284,",
+    "the enchant Reborn Windfury Weapon rank 2, spell 1108235, applies) triggers spell 1133758 instead, which",
+    "had no spell_script_names/spell_proc row: Spell::EffectEnchantItemTmp still applies the temporary enchant",
+    "(matching 'appears to apply'), but Player::CastItemCombatSpell's ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL path",
+    "casts a SPELL_AURA_DUMMY aura that sSpellMgr->GetSpellProcEntry never recognizes, so spell_sha_windfury_weapon",
+    "never runs and the extra attack never fires. Reborn Earthliving Weapon's only rank (spell 1151730, enchant",
+    "103345 cloned from stock 3345) triggers spell 1151940 the same way, also missing both rows.",
+    "rev_20261028_03_coa_reborn_shaman_weapon_imbue_procs clones stock Windfury's own trigger (33757) for",
+    "1133758, and stock Earthliving's twin-keyed proc (-51940) for 1151940, exactly as rev_20261022_86 and",
+    "rev_20261008_27_coa_reborn_shaman_spells.sql cloned their own Reborn Shaman trigger spells. Before the fix",
+    "sSpellMgr->GetSpellProcEntry(1133758) and (1151940) are null (Player::CastItemCombatSpell's unknown-spell",
+    "log path never fires because the spell itself exists; the aura is simply never recognized as proccable),",
+    "so the server cannot even describe their proc chance; after the fix each entry's effective Chance falls",
+    "back to the triggered spell's own Spell.dbc ProcChance (20 for 1133758, 100 for 1151940), an expectation",
+    "derived from Spell.dbc/SpellItemEnchantment.dbc independently of this fix's SQL values."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "windfury", "race": 2, "class": 7, "level": 60 },
+    { "id": "earthliving", "race": 2, "class": 7, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+
+    { "action": "add_item", "actor": "windfury", "item": 36 },
+    { "action": "equip", "actor": "windfury", "item": 36, "slot": 15 },
+    { "action": "learn", "actor": "windfury", "spell": 1108235 },
+    {
+      "action": "assert", "label": "SETUP: the weapon has no temp enchant yet", "actor": "windfury",
+      "metric": "item_enchantment", "item": 36, "slot": 1, "equals": 0
+    },
+    { "action": "cast", "actor": "windfury", "spell": 1108235, "target_item": 36 },
+    { "action": "assert", "actor": "windfury", "metric": "cast_failure", "spell": 1108235, "equals": 0 },
+    {
+      "action": "assert", "label": "Windfury Weapon rank 2 enchants the weapon with SpellItemEnchantment 10284",
+      "actor": "windfury", "metric": "item_enchantment", "item": 36, "slot": 1, "equals": 10284, "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the extra-attack trigger (1133758) that enchant 10284 casts on hit is a recognized proc",
+      "actor": "windfury", "metric": "spell_proc_chance", "spell": 1133758, "equals": 20
+    },
+
+    { "action": "add_item", "actor": "earthliving", "item": 36 },
+    { "action": "equip", "actor": "earthliving", "item": 36, "slot": 15 },
+    { "action": "learn", "actor": "earthliving", "spell": 1151730 },
+    {
+      "action": "assert", "label": "SETUP: the weapon has no temp enchant yet", "actor": "earthliving",
+      "metric": "item_enchantment", "item": 36, "slot": 1, "equals": 0
+    },
+    { "action": "cast", "actor": "earthliving", "spell": 1151730, "target_item": 36 },
+    { "action": "assert", "actor": "earthliving", "metric": "cast_failure", "spell": 1151730, "equals": 0 },
+    {
+      "action": "assert", "label": "Earthliving Weapon enchants the weapon with SpellItemEnchantment 103345",
+      "actor": "earthliving", "metric": "item_enchantment", "item": 36, "slot": 1, "equals": 103345, "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the heal trigger (1151940) that enchant 103345 casts on hit is a recognized proc",
+      "actor": "earthliving", "metric": "spell_proc_chance", "spell": 1151940, "equals": 100
+    }
+  ]
+}

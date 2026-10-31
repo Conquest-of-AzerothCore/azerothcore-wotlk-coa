@@ -237,7 +237,7 @@ class spell_coa_other_side_trash_damage : public SpellScript
         auto itr = Damages.find(BaseSpellId(GetSpellInfo()->Id));
         if (itr == Damages.end() || !itr->second.hit.mythic || !GetHitDamage())
             return;
-        SetHitDamage(Rolled(GetCaster(), GetHitUnit(), itr->second.hit));
+        SetHitDamage(Rolled(GetCaster(), GetHitUnit(), itr->second.hit, GetSpellInfo()));
     }
 
     void Register() override
@@ -256,7 +256,7 @@ class spell_coa_other_side_trash_damage_aura : public AuraScript
         if (itr == Damages.end() || !itr->second.tick.mythic)
             return;
         if (Unit* caster = GetCaster())
-            amount = Rolled(caster, GetUnitOwner(), itr->second.tick);
+            amount = Rolled(caster, GetUnitOwner(), itr->second.tick, GetSpellInfo());
     }
 
     void Register() override
@@ -289,7 +289,7 @@ class spell_coa_other_side_fissure_strike : public SpellScript
             float const across = std::fabs(dist * std::sin(off));
             if (along < 0.0f || along > FissureLength || across > FissureHalfWidth)
                 continue;
-            uint32 const value = player->SpellDamageBonusTaken(caster, strike, uint32(Rolled(caster, player, Damages.at(SPELL_FISSURE_STRIKE).hit)), SPELL_DIRECT_DAMAGE);
+            uint32 const value = player->SpellDamageBonusTaken(caster, strike, uint32(Rolled(caster, player, Damages.at(SPELL_FISSURE_STRIKE).hit, strike)), SPELL_DIRECT_DAMAGE);
             SpellNonMeleeDamage damage(caster, player, strike, strike->GetSchoolMask());
             caster->CalculateSpellDamageTaken(&damage, int32(value), strike);
             Unit::DealDamageMods(player, damage.damage, &damage.absorb);

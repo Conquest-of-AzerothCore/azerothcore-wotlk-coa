@@ -5,11 +5,14 @@ Real clock (default): each worker owns one worldserver at a time and its own wor
 at a time. Failed or unrun catalog cases are rerun once in single mode; a case that failed in a batch and passes
 only there is reported as batch-sensitive, and an unrun case that passes there is reported as isolated-only.
 
-Simulated clock (--clock simulated): one worldserver runs up to --lanes cases at once in phase-isolated lanes on a
-game clock that skips scripted waits. Cases that enter the normal world phase or are listed as exclusive in
-clock_policy.json run while no other case runs.
+Simulated clock (--clock simulated): each of the --jobs worldservers (default 1) runs up to --lanes cases at once in
+phase-isolated lanes on its own game clock that skips scripted waits, with its own world-cache slot and port. Cases
+that enter the normal world phase or are listed as exclusive in clock_policy.json run while no other case runs on
+their worldserver. With several worldservers, one that holds an exclusive case takes no other case, and a busy one
+leaves the next exclusive case to an idle one.
 An accelerated failure remains failed by default. --real-pace-rerun explicitly enables slower same-server
-diagnostics after the accelerated queue; a case that passes only there is reported as acceleration-sensitive.
+diagnostics once every accelerated case has a result; a case that passes only there is reported as
+acceleration-sensitive.
 That retry alone does not establish a clock dependency. --isolated-rerun adds single-mode reruns of failed cases.
 A case that has not returned its result is treated as hung 3 * timeout_ms / 1000 + 60
 seconds after a lane could first have admitted it. This worldserver writes its character database through
@@ -17,7 +20,7 @@ seconds after a lane could first have admitted it. This worldserver writes its c
 worldservers keep one worker at the MySQL server's default isolation.
 
 A scenario with an "hour" runs at that realm-local hour. The simulated clock starts its realm-local time at
-10:00 and runs such a case exclusively, after the other cases, once it has jumped ahead to that hour; the next
+10:00 and runs such a case exclusively, queued after the other cases, once it has jumped ahead to that hour; the next
 case without an hour, such as a real-pace rerun, jumps back to 10:00 first. The real clock runs it in single mode
 instead, on a worldserver whose TZ is a fixed offset that puts local time at the start of that hour; single-mode
 reruns do the same.
@@ -97,6 +100,7 @@ RECORDED_MEASURES = ('lane', 'game_elapsed_ms', 'real_elapsed_ms', 'realm_local_
 REAL_CLOCK_MEASURES = ('realm_local_start',)
 SINGLE_MEASURES = ('timezone', 'realm_local_start')
 ELAPSED_TOTALS = ('game_elapsed_ms', 'real_elapsed_ms')
+STATEMENT_LIMIT = "Can't create more than max_prepared_stmt_count statements"
 SHUTDOWN_MESSAGES = ('Server shut down before the scenario completed',
                      'Server shut down before the case teardown completed')
 
@@ -329,7 +333,8 @@ class Server:
         refresh = batch.refresh_pending(self.slot)
         try:
             self.case_directory.mkdir(parents=True)
-            database = run.Databases(batch.mysql, batch.dump, credentials, batch.connections, self.batch_id)
+            database = run.Databases(batch.mysql, batch.dump, credentials, batch.connections, self.batch_id,
+                                     batch.args.copy_workers)
             self.summary['databases'] = database.names
             if not batch.args.fresh_databases:
                 cache = run.WorldCache(database, batch.cache_root / f'slot-{self.slot}', batch.inputs,
@@ -344,6 +349,7 @@ class Server:
                                               credentials, self.batch_id,
                                               cache.metadata['world_id'] if cache else self.batch_id, files,
                                               batch.clock_settings) | batch.database_settings
+            overrides['WorldServerPort'] = batch.claim_port(overrides['WorldServerPort'])
             run.write_config(batch.source_config, generated, overrides)
             self.serve(run.server_command(batch.binary, generated), run.server_environment(overrides), cache)
         except run.ServerStillRunning as error:
@@ -357,7 +363,14 @@ class Server:
             self.fatal = True
             self.fail(str(error), unattributed=True)
         except FAILURES as error:
-            self.fail(str(error), unattributed=self.phase == 'stopping')
+            message = str(error)
+            exited_early = isinstance(error, ServerExited) and self.phase == 'starting'
+            if exited_early and self.statement_limit_reached():
+                message += ('; MySQL refused its prepared statements (max_prepared_stmt_count): raise '
+                            'max_prepared_stmt_count on the MySQL server or lower the character database workers '
+                            '(verify_all.py --gameplay-db-workers or setting gameplay_db_workers; '
+                            'batch.py --character-db-workers)')
+            self.fail(message, unattributed=self.phase == 'stopping' or (exited_early and batch.spread))
         finally:
             try:
                 if refresh and cache and cache.info.get('mode') in REFRESHED_MODES:
@@ -373,15 +386,21 @@ class Server:
                 self.summary['total_seconds'] = round(time.monotonic() - started, 3)
                 self.finish()
 
+    def statement_limit_reached(self):
+        try:
+            return STATEMENT_LIMIT in (self.directory / 'Errors.log').read_text(encoding='utf-8', errors='replace')
+        except OSError:
+            return False
+
     def release(self, database, cache):
         try:
             failures = run.release_databases(database, cache, self.stuck, self.summary)
         except FAILURES as error:
-            failures = list(database.names.values())
-            self.summary.update(status='failed', cleanup_failed=failures, cleanup_error=str(error))
+            failures = [run.cleanup_failure(name, error) for name in database.names.values()]
+            self.summary.update(status='failed', cleanup_failed=failures, cleanup_error=run.failure_text(error))
         self.summary['cleanup'] = 'failed' if failures else 'passed'
         if failures:
-            self.fail(f'Database cleanup failed: {failures}', unattributed=True)
+            self.fail(f"Database cleanup failed: {[failure['schema'] for failure in failures]}", unattributed=True)
 
     def check_start(self):
         if self.batch.stopping.is_set():
@@ -460,10 +479,14 @@ class Server:
     def closing(self):
         return any(attempt.cut_short for attempt in self.running)
 
+    @property
+    def reserved(self):
+        return self.batch.spread and any(attempt.case.exclusive for attempt in self.running)
+
     def admit(self):
         if self.closing:
             return
-        while len(self.running) < self.batch.window:
+        while len(self.running) < self.batch.window and not self.reserved:
             case = self.batch.take(idle=not self.running)
             if case is None:
                 break
@@ -723,6 +746,8 @@ class Batch:
         self.singles = longest_first(case for case in cases if self.single(case))
         self.queue = deque(longest_first(case for case in cases if not self.single(case)))
         self.queued = len(self.queue)
+        self.queue_servers = min(args.jobs, self.queued)
+        self.spread = self.simulated and self.queue_servers > 1
         self.lock = threading.Lock()
         self.console_lock = threading.Lock()
         self.stopping = threading.Event()
@@ -731,6 +756,8 @@ class Batch:
         self.accelerated = {}
         self.real_pace = {}
         self.real_pace_queued = False
+        self.outstanding = 0
+        self.ports = set()
         self.isolated = {}
         self.servers = []
         self.failures = []
@@ -786,7 +813,7 @@ class Batch:
 
     def queue_real_pace(self):
         if (not self.simulated or not self.args.real_pace_rerun or self.real_pace_queued or
-                self.queue or self.stopping.is_set()):
+                self.queue or self.outstanding or self.stopping.is_set()):
             return
         self.real_pace_queued = True
         self.queue.extend(longest_first(replace(case, pace=REAL_CLOCK) for case in self.cases
@@ -798,11 +825,22 @@ class Batch:
                 return None
             if idle:
                 self.queue_real_pace()
-            return self.queue.popleft() if self.queue else None
+            if not self.queue or (self.spread and not idle and self.queue[0].exclusive):
+                return None
+            self.outstanding += 1
+            return self.queue.popleft()
 
     def requeue(self, cases):
         with self.lock:
+            self.outstanding -= len(cases)
             self.queue.extendleft(reversed(cases))
+
+    def claim_port(self, port):
+        with self.lock:
+            while port in self.ports:
+                port = run.unused_port()
+            self.ports.add(port)
+            return port
 
     def pending(self):
         with self.lock:
@@ -841,8 +879,9 @@ class Batch:
             print(text, file=self.console, flush=True)
 
     def announce(self, attempt):
-        if attempt.mode == SIMULATED_CLOCK:
-            with self.lock:
+        with self.lock:
+            self.outstanding -= 1
+            if attempt.mode == SIMULATED_CLOCK:
                 self.accelerated[attempt.case.label] = attempt.status
         pace = ' real-pace' if attempt.mode == 'real_pace' else ''
         self.progress(f"{'PASS' if attempt.status == 'passed' else 'FAIL'} {attempt.case.label} "
@@ -973,6 +1012,7 @@ class Batch:
             output=directory, startup_timeout=self.args.startup_timeout, fresh_databases=self.args.fresh_databases,
             refresh_world=refresh, world_cache_dir=self.cache_root / f'slot-{slot}',
             staged_module_configs=self.staged if self.args.server_modules_dir else None,
+            copy_workers=self.args.copy_workers,
             should_stop=self.stopping.is_set)
         kind = 'single-mode run' if mode == 'single' else 'isolated rerun'
         started = time.monotonic()
@@ -1136,7 +1176,7 @@ class Batch:
                 self.staged = run.stage_modules(self.module_source, self.module_target, run.reserved_settings())
                 try:
                     self.module_hashes = {path.name: run.sha256(path) for path in self.staged}
-                    self.run_threads(self.work, range(min(self.args.jobs, self.queued)))
+                    self.run_threads(self.work, range(self.queue_servers))
                     if not self.interrupted():
                         self.run_singles()
                     self.interrupted()
@@ -1162,8 +1202,9 @@ def run_batch(args, directory=catalog.DIRECTORY):
         for case in cases:
             world_phase = any(step['action'] == 'set_phase' and step['value'] & 1
                               for step in case.scenario['steps'])
-            game_event = any(step['action'] == 'game_event' for step in case.scenario['steps'])
-            case.exclusive = (world_phase or game_event or case.scenario.get('creature_scaling', False)
+            process_global = any(step['action'] in {'game_event', 'encounter_start'}
+                                 for step in case.scenario['steps'])
+            case.exclusive = (world_phase or process_global or case.scenario.get('creature_scaling', False)
                               or 'vanity_ownership' in case.scenario or 'two_side' in case.scenario
                               or (not case.exploratory and case.key in exclusive) or case.hour is not None)
     output = args.output.resolve()
@@ -1179,7 +1220,6 @@ def option_name(option):
 def resolve_clock(args):
     simulated = args.clock == SIMULATED_CLOCK
     if simulated:
-        run.require(args.jobs == 1, '--clock simulated runs one worldserver; use --lanes for concurrent cases')
         args.lanes = MAX_LANES if args.lanes is None else args.lanes
         run.require(1 <= args.lanes <= MAX_LANES, f'--lanes must be between 1 and {MAX_LANES}')
         for option, name in CLOCK_OPTIONS.items():
@@ -1222,7 +1262,8 @@ def parser():
                         help='Optional MySQL [client] file with credentials allowed to create/drop test schemas')
     result.add_argument('--output', type=Path, required=True, help='New or empty directory for all results')
     result.add_argument('--jobs', type=int, default=1,
-                        help='Concurrent worldservers (default 1; the simulated clock needs 1)')
+                        help='Concurrent worldservers, each with its own world-cache slot and port (default 1); '
+                             'a simulated-clock worldserver runs up to --lanes cases')
     result.add_argument('--clock', choices=(REAL_CLOCK, SIMULATED_CLOCK), default=REAL_CLOCK,
                         help='Real clock with one case per worldserver, or accelerated lanes (default real)')
     result.add_argument('--lanes', type=int,
@@ -1249,6 +1290,10 @@ def parser():
     result.add_argument('--skip-scenario', nargs='+', default=[], help='Catalog ids omitted from default selection')
     result.add_argument('--world-cache-root', type=Path, default=CACHE_ROOT,
                         help='Parent directory of the per-worker world-cache slots')
+    result.add_argument('--copy-workers', type=run.copy_worker_count, default=run.DEFAULT_COPY_WORKERS,
+                        help='MySQL connections that copy test schemas in parallel and, capped at 8, checksum the '
+                             'world for each worldserver '
+                             f'(1-{run.MAX_COPY_WORKERS}, default {run.DEFAULT_COPY_WORKERS}: min(8, CPU count))')
     return result
 
 

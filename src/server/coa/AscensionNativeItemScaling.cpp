@@ -2,6 +2,7 @@
 
 #include "AscensionNativeItemScaling.h"
 #include "AscensionCompatOpcodes.h"
+#include "AscensionItemAddonFile.h"
 #include "AscensionItemLadder.h"
 #include "AscensionItemScaling.h"
 #include "Bag.h"
@@ -38,10 +39,6 @@ namespace
 {
 constexpr uint32 HeaderBytes = 20;
 constexpr uint32 ScanChunkRecords = 8192;
-constexpr uint32 AddonFields = 48;
-constexpr uint32 AddonRecordSize = AddonFields * sizeof(uint32);
-constexpr uint32 AddonEntryField = 1;
-constexpr uint32 AddonRebornArmorField = 43;
 
 std::atomic<bool> enabled{false};
 std::atomic<int32> lootLevelOffset{0};
@@ -53,32 +50,15 @@ std::vector<std::pair<uint32, uint32>> authoredRebornArmor;
 
 bool LoadAuthoredRebornArmor(std::filesystem::path const& path)
 {
-    std::ifstream file(path, std::ios::binary);
-    uint32 header[5] = {};
-    if (!file || !file.read(reinterpret_cast<char*>(header), sizeof(header)) || header[0] != 0x43424457 ||
-        header[2] != AddonFields || header[3] != AddonRecordSize)
-        return false;
-
-    uint32 const records = header[1];
     std::vector<std::pair<uint32, uint32>> armor;
-    std::vector<uint8> chunk(std::size_t(ScanChunkRecords) * AddonRecordSize);
-    for (uint32 first = 0; first < records; first += ScanChunkRecords)
+    bool const scanned = ItemAddonFile::Scan(path, [&armor](uint8 const* record)
     {
-        uint32 const count = std::min(ScanChunkRecords, records - first);
-        if (!file.read(reinterpret_cast<char*>(chunk.data()), std::streamsize(count) * AddonRecordSize))
-            return false;
-
-        for (uint32 i = 0; i < count; ++i)
-        {
-            uint8 const* record = chunk.data() + std::size_t(i) * AddonRecordSize;
-            uint32 entry;
-            uint32 reborn;
-            std::memcpy(&entry, record + AddonEntryField * sizeof(uint32), sizeof(uint32));
-            std::memcpy(&reborn, record + AddonRebornArmorField * sizeof(uint32), sizeof(uint32));
-            if (reborn)
-                armor.emplace_back(entry, reborn);
-        }
-    }
+        uint32 const reborn = ItemAddonFile::Field(record, ItemAddonFile::RebornArmorField);
+        if (reborn)
+            armor.emplace_back(ItemAddonFile::Field(record, ItemAddonFile::EntryField), reborn);
+    });
+    if (!scanned)
+        return false;
 
     std::sort(armor.begin(), armor.end());
     armor.erase(std::unique(armor.begin(), armor.end(),
@@ -388,14 +368,8 @@ void AssignDropLevel(Player* looter, Item* item, uint32 base = 0)
     if (!looter || !item)
         return;
 
-    uint32 const key = DropKey(looter, base);
-    if (LocalLevelScaling::DungeonLootScales(looter))
-    {
-        if (key < item->GetTemplate()->ItemLevel)
-            AssignLevel(looter, item, key);
-    }
-    else if (ScalingChosenBy(looter))
-        AssignLevel(looter, item, key);
+    if (LootScalesFor(looter))
+        AssignLevel(looter, item, DropKey(looter, base));
 }
 
 void AssignQuestRewardLevel(Player* player, Item* item)

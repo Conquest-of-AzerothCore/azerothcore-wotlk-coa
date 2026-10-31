@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Hallow's End: the Crossroads pumpkin west of the inn rests on the ground",
+  "contract": "Hallow's End pumpkin 37332 (G_Pumpkin_03 180407, event 12) at (-556.35, -2640.97) in the Crossroads stood at z 106.91, 10.64 yd above the ground below it (#8632). It now rests on that ground; the nearest other spawn is the Midsummer lamp 78486, 4.9 yd away, so nothing overlaps it. The mailbox 13449 that #8632 also reports already stands on the ground and stays where it is. Rendering is untested.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -438.28,
+    "y": -2647.33,
+    "z": 95.40,
+    "o": 0.0
+  },
+  "players": [
+    { "id": "auditor", "race": 2, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "CONTROL: the mailbox 13449 stands on the ground", "actor": "auditor",
+      "metric": "spawn_ground_gap", "guid": 13449, "spawn_type": "gameobject", "min": -1, "max": 1 },
+    { "action": "assert", "label": "Pumpkin 37332 rests within a yard of the ground below it", "actor": "auditor",
+      "metric": "spawn_ground_gap", "guid": 37332, "spawn_type": "gameobject", "min": -1, "max": 1 }
+  ]
+}

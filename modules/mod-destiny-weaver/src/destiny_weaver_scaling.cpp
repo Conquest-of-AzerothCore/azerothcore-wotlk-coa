@@ -54,6 +54,7 @@
 #include "Player.h"
 #include "Random.h"
 #include "ScriptMgr.h"
+#include "SpellInfo.h"
 #include "StringConvert.h"
 #include "Timer.h"
 #include "Tokenize.h"
@@ -67,6 +68,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -101,12 +103,12 @@ namespace
     /// The dungeon finder entries whose dungeons scale: the classic five-player dungeons the client's own
     /// scaling list names, plus Blackrock Depths, Lower and Upper Blackrock Spire, Dire Maul, Stratholme
     /// and Scholomance, the classic dungeons the client list leaves out.
-    constexpr char DEFAULT_SCALING_DUNGEONS[] = "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402";
+    constexpr char DEFAULT_SCALING_DUNGEONS[] = "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402 401";
 
     /// Finder entries whose band is set here instead of read from LFGDungeons.dbc, as `entry:low-high`:
-    /// Road to De Other Side scales with the character like the classic dungeons (15-59), while its finder row
-    /// admits 10-59.
-    constexpr char DEFAULT_SCALING_BANDS[] = "402:15-59";
+    /// Vaults of the Inquisition and Road to De Other Side scale with the character like the classic dungeons
+    /// (15-59), while their finder rows admit 10-59.
+    constexpr char DEFAULT_SCALING_BANDS[] = "401:15-59 402:15-59";
 
     /// Where a view can exist at all: the open-world maps, and the classic dungeons with the band their
     /// creatures are held inside. Built on every config load and at startup, and published whole, so a
@@ -136,11 +138,9 @@ namespace
         return ids;
     }
 
-    std::unordered_map<uint32, LocalLevelScaling::LevelBand> ConfigBands()
+    std::unordered_map<uint32, LocalLevelScaling::LevelBand> ParseBands(std::string_view value)
     {
         std::unordered_map<uint32, LocalLevelScaling::LevelBand> bands;
-        std::string const value = sConfigMgr->GetOption<std::string>("DestinyWeaver.Scaling.DungeonBands",
-                                                                     DEFAULT_SCALING_BANDS);
         for (std::string_view token : Acore::Tokenize(value, ' ', false))
         {
             std::vector<std::string_view> entry = Acore::Tokenize(token, ':', false);
@@ -158,10 +158,28 @@ namespace
         return bands;
     }
 
-    /// The bands come from LFGDungeons.dbc unless DestinyWeaver.Scaling.DungeonBands sets one. An entry with a band
-    /// of its own scales even when DestinyWeaver.Scaling.DungeonIds leaves it out: a config written before the entry
-    /// joined the default list still has the old list. The first config load runs before the store is filled, so
-    /// it publishes a scope without dungeons; startup publishes the complete one.
+    /// The default bands are the floor of a configured one, like the default entries: a config written
+    /// before Road to De Other Side's band widened to 15-59 still holds "402:15-20", and must not keep a
+    /// level 60 character fighting level 20 creatures. A configured band can widen a default one, never
+    /// narrow it.
+    std::unordered_map<uint32, LocalLevelScaling::LevelBand> ConfigBands()
+    {
+        std::unordered_map<uint32, LocalLevelScaling::LevelBand> bands = ParseBands(DEFAULT_SCALING_BANDS);
+        std::string const value = sConfigMgr->GetOption<std::string>("DestinyWeaver.Scaling.DungeonBands",
+                                                                     DEFAULT_SCALING_BANDS);
+        for (auto const& [dungeonId, band] : ParseBands(value))
+        {
+            auto [itr, inserted] = bands.try_emplace(dungeonId, band);
+            if (!inserted)
+                itr->second = LocalLevelScaling::MergeBands(itr->second, band);
+        }
+        return bands;
+    }
+
+    /// The bands come from LFGDungeons.dbc unless DestinyWeaver.Scaling.DungeonBands sets one. The default entries
+    /// and every entry with a band of its own scale even when DestinyWeaver.Scaling.DungeonIds leaves them out: a
+    /// config written before an entry joined the default list still has the old list. The first config load runs
+    /// before the store is filled, so it publishes a scope without dungeons; startup publishes the complete one.
     void PublishScope()
     {
         auto scope = std::make_unique<ScalingScope>();
@@ -170,6 +188,10 @@ namespace
 
         std::unordered_map<uint32, LocalLevelScaling::LevelBand> const configured = ConfigBands();
         std::vector<uint32> dungeonIds = ConfigIds("DestinyWeaver.Scaling.DungeonIds", DEFAULT_SCALING_DUNGEONS);
+        for (std::string_view token : Acore::Tokenize(DEFAULT_SCALING_DUNGEONS, ' ', false))
+            if (Optional<uint32> dungeonId = Acore::StringTo<uint32>(token))
+                if (std::find(dungeonIds.begin(), dungeonIds.end(), *dungeonId) == dungeonIds.end())
+                    dungeonIds.push_back(*dungeonId);
         for (auto const& [dungeonId, band] : configured)
             if (std::find(dungeonIds.begin(), dungeonIds.end(), dungeonId) == dungeonIds.end())
                 dungeonIds.push_back(dungeonId);
@@ -279,13 +301,19 @@ namespace
 
     /// Whether a creature may be given a view at all, whoever is looking at it.
     ///
-    /// These exclusions are not optional: a creature that belongs to somebody - a pet, a guardian, a
-    /// summon, a totem, a charmed unit - must never be re-levelled, and neither must a trigger, a
-    /// critter or a non-combat pet, which are scenery with a health bar. A world boss is authored for a
-    /// raid at its level, and a creature that cannot be fought keeps its level for everyone. A creature
-    /// that serves (any npcflag but gossip) is decided per character in `ViewableBy`. Both flags are read
-    /// from the creature's spawn and template rather than from its live flags, which scripts toggle during
+    /// These exclusions are not optional: a creature that belongs to a player - a pet, a guardian, a
+    /// totem, a charmed unit - must never be re-levelled, and neither must a trigger, a critter or a
+    /// non-combat pet, which are scenery with a health bar. A guardian or totem of a creature (a Dark Iron
+    /// Land Mine, a boss's totem) stands at its owner's real level and is fought like its owner, so it
+    /// scales like any other creature. A world boss is authored for a raid at its level. A creature that
+    /// serves (any npcflag but gossip) is decided per character in `ViewableBy`. Both flags are read from
+    /// the creature's spawn and template rather than from its live flags, which scripts toggle during
     /// events: a client caches the level it was told, so the view must not appear and vanish with them.
+    ///
+    /// A creature that cannot be fought when it spawns keeps its level until it can be: a boss woken by an
+    /// event (Ironaya, Arugal, Vol'zeen) scales from that moment on and keeps its view afterwards, held by
+    /// its scaling flag, which `OnAllCreatureUpdate` announces with `ForceViewFields`. Scenery that is never
+    /// fought (a Mythical Boon, a prisoner) never gets one.
     ///
     /// The maps are the open world the realm lists and the classic dungeons with a band. Raids,
     /// battlegrounds and arenas never scale, and neither does CoA's scripted private content. A dungeon
@@ -312,9 +340,9 @@ namespace
         else if (!scope->WorldMaps.contains(map->GetId()))
             return false;
 
-        if (creature->IsPet() || creature->IsTotem() || creature->IsGuardian() || creature->IsTrigger() ||
-            creature->IsCritter() || creature->isWorldBoss() ||
-            creature->GetCreatureType() == CREATURE_TYPE_NON_COMBAT_PET || creature->GetCharmerOrOwner())
+        if (creature->IsPet() || creature->IsTrigger() || creature->IsCritter() || creature->isWorldBoss() ||
+            creature->GetCreatureType() == CREATURE_TYPE_NON_COMBAT_PET || creature->IsControlledByPlayer() ||
+            creature->GetCharmerOrOwnerPlayerOrPlayerItself())
             return false;
 
         CreatureTemplate const* info = creature->GetCreatureTemplate();
@@ -325,7 +353,10 @@ namespace
         uint32 unitFlags = 0;
         uint32 dynamicFlags = 0;
         ObjectMgr::ChooseCreatureFlags(info, npcFlags, unitFlags, dynamicFlags, creature->GetCreatureData());
-        return !(unitFlags & (UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC));
+        uint32 const notFightable = UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC;
+        if (!(unitFlags & notFightable))
+            return true;
+        return creature->HasDynamicFlag(UNIT_DYNFLAG_LEVEL_SCALING) || !creature->HasUnitFlag(UnitFlags(notFightable));
     }
 
     /// Whether a creature offers a service (any npcflag but gossip), read from its spawn and template for
@@ -471,6 +502,57 @@ namespace
         return view.MaxHealth;
     }
 
+    /// What the average blow of a creature built at this level hits for, from the warrior row every melee
+    /// creature is built from. Only the ratio between two levels is used, so the attack time and the
+    /// template, rank and aura multipliers it leaves out cancel.
+    double AverageHitAt(uint8 level)
+    {
+        CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(level, CLASS_WARRIOR);
+        return DestinyWeaver::AverageCreatureMeleeHit(stats->BaseDamage[EXPANSION_CLASSIC], stats->AttackPower,
+                                                      1.0f, BASE_ATTACK_TIME);
+    }
+
+    /// A share of the receiver's health is already the receiver's size.
+    bool HealsShareOfHealth(SpellInfo const* spell)
+    {
+        return spell && (spell->HasEffect(SPELL_EFFECT_HEAL_PCT) || spell->HasEffect(SPELL_EFFECT_HEAL_MAX_HEALTH) ||
+                         spell->HasAura(SPELL_AURA_OBS_MOD_HEALTH));
+    }
+
+    /// Installed as the core's resolver for heals between characters in a scaled dungeon. The healer's
+    /// creatures stand at the healer's level and the receiver's at the receiver's, both held inside the
+    /// dungeon's band, and each takes blows the size of their own version (DamageTakenFactor). A heal is
+    /// sized for the blows of the healer's version, so it is carried over to the receiver's by the ratio
+    /// of the two average blows: a level-20 healer keeps a level-38 tank up as well as a level-20 one,
+    /// and a level-60 healer in the same group is held to the band's top like their creatures are.
+    double HealReceivedForCore(Unit const* healer, Unit const* receiver, SpellInfo const* spell)
+    {
+        if (!ScalingAvailable() || !healer || !receiver || HealsShareOfHealth(spell))
+            return 1.0;
+
+        Player const* from = healer->GetCharmerOrOwnerPlayerOrPlayerItself();
+        Player const* to = receiver->GetCharmerOrOwnerPlayerOrPlayerItself();
+        if (!from || !to || from == to)
+            return 1.0;
+
+        Map const* map = to->FindMap();
+        if (from->FindMap() != map || !ScaledDungeon(map))
+            return 1.0;
+
+        // A character held to the authored creatures by a challenge fights blows of the authored size.
+        if ((LocalLevelScaling::ScalingBlocksFor(from) | LocalLevelScaling::ScalingBlocksFor(to)) &
+            LocalLevelScaling::ChallengeBlocksCreatureScaling)
+            return 1.0;
+
+        LocalLevelScaling::LevelBand const* band = DungeonBandFor(map);
+        uint8 const fromLevel = LocalLevelScaling::ScaleDungeonCreatureLevelForViewer(from->GetLevel(), *band);
+        uint8 const toLevel = LocalLevelScaling::ScaleDungeonCreatureLevelForViewer(to->GetLevel(), *band);
+        if (fromLevel == toLevel)
+            return 1.0;
+
+        return DestinyWeaver::ViewDamageTakenFactor(AverageHitAt(toLevel), AverageHitAt(fromLevel));
+    }
+
     /// The fields a view rewrites, in one list. The patch looks a position up by index, and a forced
     /// values update is what carries an index to a client at all, so a field added here is both
     /// tracked and re-sendable without a second place to keep in step.
@@ -521,7 +603,7 @@ namespace
         data.put(pos.UnitDynamicFlagsPos, flags);
     }
 
-    constexpr char DAMAGE_REMAINDER_KEY[] = "DestinyWeaver.DamageRemainder";
+    std::string const DAMAGE_REMAINDER_KEY = "DestinyWeaver.DamageRemainder";
 
     // The remainder belongs to the shared health pool, not to a particular attacker.
     struct DamageRemainder : DataMap::Base
@@ -529,7 +611,7 @@ namespace
         double Value = 0.0;
     };
 
-    constexpr char SEEN_FACTION_KEY[] = "DestinyWeaver.SeenFaction";
+    std::string const SEEN_FACTION_KEY = "DestinyWeaver.SeenFaction";
 
     struct SeenFaction : DataMap::Base
     {
@@ -1023,8 +1105,12 @@ public:
         if (!creature->IsAlive() || creature->IsEvadingAttacks())
             creature->CustomData.Erase(DAMAGE_REMAINDER_KEY);
 
-        if (creature->IsAlive())
+        if (creature->IsAlive() && !creature->HasDynamicFlag(UNIT_DYNFLAG_LEVEL_SCALING))
+        {
             MarkScalable(creature);
+            if (creature->HasDynamicFlag(UNIT_DYNFLAG_LEVEL_SCALING))
+                ForceViewFields(creature);
+        }
 
         if (creature->HasDynamicFlag(UNIT_DYNFLAG_LEVEL_SCALING) && FactionChanged(creature))
             ForceViewFields(creature);
@@ -1150,6 +1236,8 @@ public:
                                                      std::memory_order_relaxed);
         LocalLevelScaling::ScaledDungeonOwner.store(available ? &InScaledDungeonForCore : nullptr,
                                                     std::memory_order_relaxed);
+        LocalLevelScaling::HealReceivedOwner.store(available ? &HealReceivedForCore : nullptr,
+                                                   std::memory_order_relaxed);
 
         LOG_INFO("module.destiny_weaver",
                  "open world scaling: creatures per character, level - {} in the open world and the "
@@ -1183,6 +1271,7 @@ public:
         LocalLevelScaling::CreatureViewMaxHealthOwner.store(nullptr);
         LocalLevelScaling::ScalingChangedOwner.store(nullptr);
         LocalLevelScaling::ScaledDungeonOwner.store(nullptr);
+        LocalLevelScaling::HealReceivedOwner.store(nullptr);
     }
 };
 

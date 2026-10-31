@@ -58,6 +58,17 @@ void CorrectKnownRows()
     auto itr = curves.find(DiscoverRolfsFate);
     if (itr != curves.end() && itr->second.MaxLevel < ElwynnScalingCap)
         itr->second.MaxLevel = ElwynnScalingCap;
+
+    constexpr std::array<std::uint32_t, 7> ThreeTotemsChain =
+        { 1660030, 1660031, 1660032, 1660033, 1660034, 1660035, 1660043 };
+    constexpr std::int32_t ThreeTotemsScalingCap = 60;
+
+    for (std::uint32_t const quest : ThreeTotemsChain)
+    {
+        itr = curves.find(quest);
+        if (itr != curves.end() && itr->second.MaxLevel < ThreeTotemsScalingCap)
+            itr->second.MaxLevel = ThreeTotemsScalingCap;
+    }
 }
 
 class Configuration : public WorldScript

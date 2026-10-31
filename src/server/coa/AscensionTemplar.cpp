@@ -166,9 +166,10 @@ void GrantOath(Player* player, uint32 oath)
     Cast(player, player, 704576);
     if (Aura* aura = player->GetAura(704576))
     {
-        aura->SetDuration(first ? aura->GetMaxDuration() : duration);
-        if (Aura* granted = first ? player->GetAura(oath) : nullptr)
-            granted->SetDuration(aura->GetDuration());
+        aura->SetDuration(aura->GetMaxDuration());
+        for (uint32 held : oaths)
+            if (Aura* granted = player->GetAura(held))
+                granted->SetDuration(aura->GetDuration());
     }
     if (first && State(player).retribution)
     {
@@ -287,6 +288,8 @@ class templar_player : public PlayerScript
                                state.copies.end());
             if (!player->IsAlive())
                 AscensionTemplar::ClearOaths(player);
+            if (player->HasAura(705303) && !player->CanParry())
+                player->SetCanParry(true);
             if (player->HasAura(560096) && !player->HasAura(567572))
                 AscensionTemplar::Cast(player, player, 567572);
             else if (!player->HasAura(560096) && player->HasAura(567572, player->GetGUID()))

@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Shadra: Stalk timer probe",
+  "contract": "Probe: hold combat for 30 seconds and let the first stalk fire.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "tank", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "shadra", "owner": "tank", "entry": 9916213, "level": 60, "health": 900000, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the spawn settle", "ms": 4000 },
+    { "action": "attack", "actor": "tank", "target": "shadra" },
+    { "action": "wait", "label": "Hold the fight through the first stalk", "ms": 26000 },
+    { "action": "set_health", "actor": "tank", "value": 250000, "maximum": 250000 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "She is still carrying Hunger", "actor": "shadra",
+      "metric": "aura", "spell": 1004200, "equals": 1, "within_ms": 2000 }
+  ]
+}

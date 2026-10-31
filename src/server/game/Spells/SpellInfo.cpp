@@ -1496,6 +1496,40 @@ namespace
         }();
         return targets;
     }
+
+    // DmgClass is an ability-roll category (melee/ranged/magic/none), not "does this deal damage" --
+    // a pure heal like Greater Heal is still SPELL_DAMAGE_CLASS_MAGIC. Flame Throwing's tooltip names
+    // damaging spells specifically, so look for an actual damage-dealing effect instead.
+    bool DealsDamage(SpellInfo const* info)
+    {
+        for (SpellEffectInfo const& effect : info->GetEffects())
+        {
+            switch (effect.Effect)
+            {
+                case SPELL_EFFECT_SCHOOL_DAMAGE:
+                case SPELL_EFFECT_WEAPON_DAMAGE:
+                case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+                case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+                case SPELL_EFFECT_HEALTH_LEECH:
+                    return true;
+                default:
+                    break;
+            }
+            if (effect.ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE ||
+                effect.ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE_PERCENT ||
+                effect.ApplyAuraName == SPELL_AURA_PERIODIC_LEECH)
+                return true;
+        }
+        return false;
+    }
+
+    int32 TrackedResourceType(SpellInfo const* info)
+    {
+        for (SpellEffectInfo const& effect : info->GetEffects())
+            if (effect.IsAura(SPELL_AURA_TRACK_RESOURCES))
+                return effect.MiscValue;
+        return 0;
+    }
 }
 
 bool SpellInfo::IsAffectedBySpellMods() const
@@ -1537,6 +1571,12 @@ bool SpellInfo::IsAffectedBySpellMod(SpellModifier const* mod) const
 
     if (mod->targetSpellId && mod->targetSpellId != Id)
         return false;
+
+    // Flame Throwing has no SpellAffect.dbc row and a zero class mask, so the generic lookup below
+    // would match nothing for its range modifier; its tooltip names every damaging spell of its
+    // owner, not one spell family. Its other (undocumented) modifier effect is left alone.
+    if ((mod->spellId == 11100 || mod->spellId == 12353) && mod->op == SPELLMOD_RANGE)
+        return DealsDamage(this);
 
     if (SpellFamilyName == 31 && affectSpell->SpellFamilyName == 31)
     {
@@ -1656,6 +1696,14 @@ bool SpellInfo::IsAuraExclusiveBySpecificWith(SpellInfo const* spellInfo) const
     switch (spellSpec1)
     {
         case SPELL_SPECIFIC_TRACKER:
+        {
+            if (spellSpec2 != SPELL_SPECIFIC_TRACKER)
+                return false;
+            // Ascension lets gathering trackers of different resource types (herbs, minerals, trees) run together.
+            int32 const resource1 = TrackedResourceType(this);
+            int32 const resource2 = TrackedResourceType(spellInfo);
+            return !resource1 || !resource2 || resource1 == resource2;
+        }
         case SPELL_SPECIFIC_WARLOCK_ARMOR:
         case SPELL_SPECIFIC_MAGE_ARMOR:
         case SPELL_SPECIFIC_ELEMENTAL_SHIELD:
@@ -1702,6 +1750,17 @@ bool SpellInfo::IsAuraExclusiveBySpecificPerCasterWith(SpellInfo const* spellInf
 
 SpellCastResult SpellInfo::CheckShapeshift(uint32 form) const
 {
+    if (form == 48)
+    {
+        bool const healing = HasEffect(SPELL_EFFECT_HEAL) || HasEffect(SPELL_EFFECT_HEAL_PCT) ||
+            HasEffect(SPELL_EFFECT_HEAL_MAX_HEALTH) || HasAura(SPELL_AURA_PERIODIC_HEAL);
+        std::string_view const name = SpellName[LOCALE_enUS] ? SpellName[LOCALE_enUS] : "";
+        if (healing || HasAura(SPELL_AURA_MOD_SHAPESHIFT) || IsPassive() ||
+            name == "Lightning Bolt" || name == "Chain Lightning")
+            return SPELL_CAST_OK;
+        return SPELL_FAILED_NOT_SHAPESHIFT;
+    }
+
     // talents that learn spells can have stance requirements that need ignore
     // (this requirement only for client-side stance show in talent description)
     if (GetTalentSpellCost(Id) > 0 &&
@@ -2996,6 +3055,9 @@ float SpellInfo::GetMaxRange(bool positive, Unit* caster, Spell* spell) const
     if (caster)
         if (Player* modOwner = caster->GetSpellModOwner())
             modOwner->ApplySpellMod(Id, SPELLMOD_RANGE, range, spell);
+    // Ascension Fire Walk With Me (Warcraft Reborn Mystic Enchant): "but its range is reduced by 10 yards"
+    if (caster && SpellFamilyName == SPELLFAMILY_MAGE && (SpellFamilyFlags[0] & 0x10) && caster->HasAura(1584166))
+        range = std::max(0.0f, range - 10.0f);
     if (caster && caster->IsPlayer() && caster->getClass() == CLASS_STARCALLER && caster->HasAura(801975) &&
         SpellFamilyName == 32 && DmgClass == SPELL_DAMAGE_CLASS_RANGED)
         range = 50.0f;
@@ -3179,7 +3241,7 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, S
     if (PowerType == POWER_MANA && caster->IsPlayer() && caster->getClass() == CLASS_CULTIST && SpellFamilyName == 31)
     {
         uint32 insanity = caster->GetAura(500706) ? caster->GetAura(500706)->GetStackAmount() : 0;
-        if (Id == 801153 && insanity > 60)
+        if (Id == 801153 && insanity >= 60)
             return 0;
         if (!IsChanneled() && (!CastTimeEntry || CastTimeEntry->CastTime == 0))
             if (AuraEffect const* talent = caster->GetAuraEffect(582307, EFFECT_0))

@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "name": "Scaled dungeon: a heal between characters of different levels follows the receiver's creatures (#10311)",
+  "contract": "In a scaled dungeon every character fights creatures at their own band-clamped level, so a heal from a level-20 Witch Doctor must be worth as much to a level-38 tank as the same heal is to a level-20 ally: Loa's Brew (501199) on the level-38 tank lands larger by the ratio of the level-38 to the level-20 creature blow (warrior row, about 1.79). Outside a dungeon the same cast lands as cast on both. Forced critical heals keep the crit multiplier out of the ratio; the Loa's Brew roll (350..449 at level 20) bounds the open-world ratio to 0.78..1.29 and the dungeon ratio to 1.39..2.30. Healing totals include overhealing and come from native heal logs. This covers direct heals between characters, not absorbs, percent heals or client tooltips.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "healer",
+      "race": 2,
+      "class": 13,
+      "level": 20,
+      "spell_crit_rating": 100000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally",
+      "race": 2,
+      "class": 1,
+      "level": 20,
+      "allow_regeneration": false
+    },
+    {
+      "id": "tank",
+      "race": 2,
+      "class": 1,
+      "level": 38,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "group", "actor": "healer", "target": "ally" },
+    { "action": "group", "actor": "healer", "target": "tank" },
+    { "action": "wait", "ms": 500 },
+    { "action": "learn", "actor": "healer", "spell": 501199 },
+    { "action": "assert", "label": "CONTROL: the healer can pay four casts from a 300-mana refill", "actor": "healer", "metric": "max_power", "power": 0, "min": 300 },
+
+    { "action": "set_health", "actor": "ally", "value": 1 },
+    { "action": "set_health", "actor": "tank", "value": 1 },
+    { "action": "set_power", "actor": "healer", "value": 300 },
+    { "action": "cast", "actor": "healer", "spell": 501199, "target": "ally" },
+    { "action": "assert", "label": "CONTROL: open-world heal lands on the ally", "actor": "healer", "metric": "spell_heal_count", "spell": 501199, "target": "ally", "equals": 1, "within_ms": 8000 },
+    { "action": "assert", "label": "CONTROL: the forced heal is critical", "actor": "healer", "metric": "spell_heal_count", "spell": 501199, "target": "ally", "critical": true, "equals": 1 },
+    { "action": "snapshot", "actor": "healer", "metric": "spell_heal_total", "spell": 501199, "target": "ally", "save_as": "ally_open" },
+    { "action": "wait", "ms": 1600 },
+    { "action": "set_power", "actor": "healer", "value": 300 },
+    { "action": "cast", "actor": "healer", "spell": 501199, "target": "tank" },
+    { "action": "assert", "label": "CONTROL: open-world heal lands on the tank", "actor": "healer", "metric": "spell_heal_count", "spell": 501199, "target": "tank", "critical": true, "equals": 1, "within_ms": 8000 },
+    { "action": "assert", "label": "Outside a dungeon the tank receives the heal as cast", "actor": "healer", "metric": "spell_heal_total", "spell": 501199, "target": "tank", "ratio_to": "ally_open", "min": 0.75, "max": 1.32 },
+    { "action": "snapshot", "actor": "healer", "metric": "spell_heal_total", "spell": 501199, "target": "ally", "save_as": "ally_before" },
+    { "action": "snapshot", "actor": "healer", "metric": "spell_heal_total", "spell": 501199, "target": "tank", "save_as": "tank_before" },
+
+    { "action": "teleport", "actor": "healer", "map": 36, "x": -16.4, "y": -383.07, "z": 61.78 },
+    { "action": "teleport", "actor": "ally", "map": 36, "x": -16.4, "y": -383.07, "z": 61.78 },
+    { "action": "teleport", "actor": "tank", "map": 36, "x": -16.4, "y": -383.07, "z": 61.78 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "CONTROL: the healer is in the Deadmines", "actor": "healer", "metric": "map_id", "equals": 36 },
+    { "action": "assert", "label": "CONTROL: the ally is in the Deadmines", "actor": "ally", "metric": "map_id", "equals": 36 },
+    { "action": "assert", "label": "CONTROL: the tank is in the Deadmines", "actor": "tank", "metric": "map_id", "equals": 36 },
+
+    { "action": "set_health", "actor": "ally", "value": 1 },
+    { "action": "set_health", "actor": "tank", "value": 1 },
+    { "action": "set_power", "actor": "healer", "value": 300 },
+    { "action": "cast", "actor": "healer", "spell": 501199, "target": "ally" },
+    { "action": "assert", "label": "CONTROL: dungeon heal lands on the ally", "actor": "healer", "metric": "spell_heal_count", "spell": 501199, "target": "ally", "critical": true, "equals": 2, "within_ms": 8000 },
+    { "action": "snapshot", "actor": "healer", "metric": "spell_heal_total", "spell": 501199, "target": "ally", "relative_to": "ally_before", "save_as": "ally_dungeon" },
+    { "action": "assert", "label": "A heal between two level-20 characters lands as cast in the dungeon", "actor": "healer", "metric": "spell_heal_total", "spell": 501199, "target": "ally", "relative_to": "ally_before", "ratio_to": "ally_open", "min": 0.75, "max": 1.32 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "set_power", "actor": "healer", "value": 300 },
+    { "action": "cast", "actor": "healer", "spell": 501199, "target": "tank" },
+    { "action": "assert", "label": "CONTROL: dungeon heal lands on the tank", "actor": "healer", "metric": "spell_heal_count", "spell": 501199, "target": "tank", "critical": true, "equals": 2, "within_ms": 8000 },
+    { "action": "assert", "label": "In the dungeon the level-38 tank receives the level-20 heal scaled to its creatures (about 1.79x)", "actor": "healer", "metric": "spell_heal_total", "spell": 501199, "target": "tank", "relative_to": "tank_before", "ratio_to": "ally_dungeon", "min": 1.35, "max": 2.35 }
+  ]
+}

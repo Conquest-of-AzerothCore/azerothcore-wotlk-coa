@@ -12,7 +12,7 @@ configuration templates in `src/server/coa/conf/`. They install to
 `etc/modules/coa.conf` and `etc/modules/coa_bugreport.conf`; runtime configuration is
 supplied there, not by committing live local credentials. CoA logs under `coa`,
 `coa.gameplay_test`, `coa.highrisk` and `coa.hotpatch`. Server-sent interface Lua is described in
-`client-hot-patch.md`.
+`client-hot-patch.md`; streamed client DBC rows in `client-dbc-stream.md`.
 
 This fork, CoA included, is licensed under the root `LICENSE` (GNU GPL v2), like
 AzerothCore. Most CoA source files still carry the short "GNU AGPL v3" notice from
@@ -74,9 +74,9 @@ those three rows in a separate output and never packages or installs a client ar
 
 ## World database installation
 
-Import the [world database package](../../apps/coa-world/README.md) into an empty
-world schema before the first worldserver startup. The same guide covers auditing
-an existing database and updating the package.
+The worldserver and `dbimport` populate an empty world database from the
+[world database package](../../apps/coa-world/README.md) instead of `data/sql/base/db_world/`.
+The same guide covers the manual import, auditing an existing database and updating the package.
 
 ## Equipped gear drops
 
@@ -477,6 +477,9 @@ supports. Client binaries are maintained outside this repository.
 - `SMSG_ACCOUNT_INFO` (0x09BB) is sent at login with the account's GM level and characters.
 - Help menu tickets use the ticket packets 0x0701-0x071E and the `.support` GM commands; see
   [player tickets](player-tickets.md).
+- `SMSG_PATCH_GLOBAL_STRINGS` (0x0676) carries the eight PvE and PvP Power tooltip lines at login with `%g` in
+  place of the client's `%d`, so the character sheet shows the exact percentage; see
+  [item power](item-power.md).
 - Requests the core session handles like stock ones, registered in its opcode table and let
   through the CoA packet filter: the portrait menu's reset all dungeons (`CMSG_RESET_DUNGEONS`,
   0x061F); the ghost frame's return to graveyard (`CMSG_PORT_GRAVEYARD`, 0x0544), which

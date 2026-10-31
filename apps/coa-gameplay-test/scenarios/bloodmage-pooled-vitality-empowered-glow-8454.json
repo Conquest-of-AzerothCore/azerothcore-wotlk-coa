@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Ten Pooled Vitality stacks show the Empowered glow aura (#8454)",
+  "contract": [
+    "Pooled Vitality 681078: Mortal Form spells that cost Rage consume 10 stacks of Pooled Vitality 680687",
+    "(StackAmount 10) to become empowered. The client marks that state with Empowered 524899, whose tooltip reads",
+    "'You are empowered. Your next spell that costs Rage will have an additional effect.', and its",
+    "SpellActivationOverlays.dbc rows 346-351 and 1259 light Sanguine Mend 802310, Crimson Tide 504282, Heartbreak",
+    "520314, Fleshcraft 801952, Aortic Aegis 806274 and Animated Blood 573299 while 524899 exists. So the server",
+    "must hold 524899 exactly while ten stacks can empower a cast: absent at nine stacks, present at ten, gone",
+    "once an empowered Crimson Tide 504134 spends the stacks, and absent in a restricting Cursed Form (Blood",
+    "Curse 800157 and its 802877 marker), where Crimson Tide is refused. This observes the server aura; the",
+    "client's button rendering is outside the runner's coverage."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "mortal", "race": 1, "class": 20, "level": 60, "spell_hit_rating": 10000, "allow_regeneration": false },
+    { "id": "curse", "race": 1, "class": 20, "level": 60, "spell_hit_rating": 10000, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "mortal_target", "owner": "mortal", "entry": 36, "level": 60, "health": 1000000, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "mortal", "spell": 681078 },
+    { "action": "learn", "actor": "mortal", "spell": 504134 },
+    { "action": "set_aura", "label": "Nine stacks of Pooled Vitality", "actor": "mortal", "spell": 680687, "stacks": 9 },
+    { "action": "assert", "actor": "mortal", "metric": "aura_stacks", "spell": 680687, "equals": 9 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "Nine stacks do not empower", "actor": "mortal", "metric": "aura", "spell": 524899, "equals": 0 },
+    { "action": "set_aura", "label": "The tenth stack", "actor": "mortal", "spell": 680687, "stacks": 10 },
+    { "action": "assert", "actor": "mortal", "metric": "aura_stacks", "spell": 680687, "equals": 10 },
+    { "action": "assert", "label": "Ten stacks show Empowered", "actor": "mortal", "metric": "aura", "spell": 524899, "caster": "mortal", "equals": 1, "within_ms": 1000 },
+    { "action": "set_power", "actor": "mortal", "power": 1, "value": 0 },
+    { "action": "cast", "label": "An empowered Crimson Tide spends the stacks", "actor": "mortal", "spell": 504134 },
+    { "action": "assert", "actor": "mortal", "metric": "cast_failure", "spell": 504134, "equals": 0 },
+    { "action": "assert", "actor": "mortal", "metric": "aura_stacks", "spell": 680687, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "Spending the stacks ends Empowered", "actor": "mortal", "metric": "aura", "spell": 524899, "equals": 0, "within_ms": 1000 },
+    { "action": "learn", "actor": "curse", "spell": 681078 },
+    { "action": "set_aura", "label": "Blood Curse, a restricting Cursed Form", "actor": "curse", "spell": 800157, "stacks": 1 },
+    { "action": "assert", "label": "The restricting Cursed Form marker is present", "actor": "curse", "metric": "aura", "spell": 802877, "equals": 1, "within_ms": 2000 },
+    { "action": "set_aura", "actor": "curse", "spell": 680687, "stacks": 10 },
+    { "action": "assert", "actor": "curse", "metric": "aura_stacks", "spell": 680687, "equals": 10 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "Cursed Form cannot empower, so no Empowered", "actor": "curse", "metric": "aura", "spell": 524899, "equals": 0 },
+    { "action": "cancel_aura", "label": "Leave Blood Curse", "actor": "curse", "spell": 800157 },
+    { "action": "assert", "actor": "curse", "metric": "aura", "spell": 802877, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "Back in Mortal Form ten stacks show Empowered", "actor": "curse", "metric": "aura", "spell": 524899, "caster": "curse", "equals": 1, "within_ms": 1000 }
+  ]
+}

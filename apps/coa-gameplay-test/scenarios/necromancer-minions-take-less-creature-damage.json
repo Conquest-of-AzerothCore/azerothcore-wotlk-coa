@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "Necromancer minions take 45% of creature damage and full damage from players",
+  "contract": [
+    "Live-scaled minion health left minions dying within seconds to creatures that the server scales to 2.2-2.4x",
+    "damage. Minions therefore take 45% of the melee, spell and periodic damage of creatures no player owns or",
+    "controls. Damage from players, and the Necromancer's own damage taken, stay unchanged so PvP is not affected.",
+    "The damage-taken hooks are read for a 1000-point hit at owner levels 17 and 60 against a same-level creature.",
+    "Expected: creature hits on the Skeletal Warrior at 0.45 of the same hits on its owner; player hits at 1.0."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n17", "race": 5, "class": 23, "level": 17 },
+    { "id": "n60", "race": 5, "class": 23, "level": 60 },
+    { "id": "rival", "race": 2, "class": 1, "level": 17 }
+  ],
+  "creatures": [
+    { "id": "mob17", "owner": "n17", "entry": 36, "level": 17, "health": 100000, "distance": 15 },
+    { "id": "mob60", "owner": "n60", "entry": 36, "level": 60, "health": 100000, "distance": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "n17", "spell": 500970 },
+    { "action": "learn", "actor": "n60", "spell": 500970 },
+    { "action": "cast", "label": "Raise a Lesser Skeletal Warrior", "actor": "n17", "spell": 500970 },
+    { "action": "cast", "label": "Raise a Lesser Skeletal Warrior", "actor": "n60", "spell": 500970 },
+    {
+      "action": "assert", "label": "SETUP: the level-17 warrior is out", "actor": "n17",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "SETUP: the level-60 warrior is out", "actor": "n60",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "snapshot", "actor": "n17",
+      "metric": "script_melee_damage_taken", "target": "mob17", "save_as": "owner17_melee"
+    },
+    {
+      "action": "snapshot", "actor": "n17",
+      "metric": "script_spell_damage_taken", "target": "mob17", "spell": 133, "save_as": "owner17_spell"
+    },
+    {
+      "action": "snapshot", "actor": "n17",
+      "metric": "script_periodic_damage_taken", "target": "mob17", "spell": 589, "save_as": "owner17_periodic"
+    },
+    {
+      "action": "snapshot", "actor": "n60",
+      "metric": "script_melee_damage_taken", "target": "mob60", "save_as": "owner60_melee"
+    },
+    {
+      "action": "assert", "label": "CONTROL: a creature's melee on the Necromancer is not reduced", "actor": "n17",
+      "metric": "script_melee_damage_taken", "target": "mob17", "min": 990, "max": 1010
+    },
+    {
+      "action": "assert", "label": "Creature melee on the level-17 warrior is 45%", "actor": "n17",
+      "metric": "script_melee_damage_taken", "target": "mob17", "entry": 50065, "ratio_to": "owner17_melee",
+      "min": 0.44, "max": 0.46
+    },
+    {
+      "action": "assert", "label": "Creature spell damage on the level-17 warrior is 45%", "actor": "n17",
+      "metric": "script_spell_damage_taken", "target": "mob17", "spell": 133, "entry": 50065,
+      "ratio_to": "owner17_spell", "min": 0.44, "max": 0.46
+    },
+    {
+      "action": "assert", "label": "Creature periodic damage on the level-17 warrior is 45%", "actor": "n17",
+      "metric": "script_periodic_damage_taken", "target": "mob17", "spell": 589, "entry": 50065,
+      "ratio_to": "owner17_periodic", "min": 0.44, "max": 0.46
+    },
+    {
+      "action": "assert", "label": "Creature melee on the level-60 warrior is 45%", "actor": "n60",
+      "metric": "script_melee_damage_taken", "target": "mob60", "entry": 50065, "ratio_to": "owner60_melee",
+      "min": 0.44, "max": 0.46
+    },
+    {
+      "action": "assert", "label": "A player's melee on the warrior is not reduced", "actor": "n17",
+      "metric": "script_melee_damage_taken", "target": "rival", "entry": 50065, "min": 990, "max": 1010
+    },
+    {
+      "action": "assert", "label": "A player's spell on the warrior is not reduced", "actor": "n17",
+      "metric": "script_spell_damage_taken", "target": "rival", "spell": 133, "entry": 50065, "min": 990, "max": 1010
+    }
+  ]
+}

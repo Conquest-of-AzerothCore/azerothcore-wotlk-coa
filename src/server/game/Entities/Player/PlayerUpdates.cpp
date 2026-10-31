@@ -16,6 +16,7 @@
  */
 
 #include "AchievementMgr.h"
+#include "AscensionQuestMarkers.h"
 #include "BattlefieldMgr.h"
 #include "CellImpl.h"
 #include "Channel.h"
@@ -1817,6 +1818,8 @@ void Player::UpdateVisibilityOf(T* target, UpdateData& data,
 void Player::GetInitialVisiblePackets(Unit* target)
 {
     GetAurasForTarget(target);
+    if (Creature* creature = target->ToCreature())
+        AscensionQuestMarkers::Refresh(this, creature);
     if (target->IsAlive())
     {
         if (target->HasUnitState(UNIT_STATE_MELEE_ATTACKING) &&
@@ -1901,6 +1904,9 @@ void Player::UpdateTriggerVisibility()
 
 void Player::UpdateForQuestWorldObjects()
 {
+    if (!GetSession() || GetSession()->IsHeadlessBot())
+        return;
+
     if (GetObjectVisibilityContainer().GetVisibleWorldObjectsMap()->empty())
         return;
 
@@ -1979,7 +1985,7 @@ void Player::UpdateTitansGrip()
         RemoveAurasDueToSpell(TitansGripStaffPenalty);
 
     // 10% damage reduce if 2x2h weapons are used
-    if (HasBurningCommander() || !CanTitanGrip())
+    if (HasBurningCommander() || HasValkyrGrip() || !CanTitanGrip())
         RemoveAurasDueToSpell(49152);
     else if (Aura* aur = GetAura(49152))
         aur->RecalculateAmountOfEffects();

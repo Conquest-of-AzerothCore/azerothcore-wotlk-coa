@@ -13,14 +13,14 @@ namespace DungeonHealth
     using Values = std::map<std::tuple<std::uint32_t, std::uint32_t, std::uint32_t>, std::uint32_t>;
 
     // Classic dungeons plus Ascension's own low-level dungeons, which share their Heroic/Mythic rules
-    // (937: Road to De Other Side).
+    // (936: Vaults of the Inquisition, 937: Road to De Other Side).
     inline bool IsVanillaDungeon(std::uint32_t map)
     {
         switch (map)
         {
             case 33: case 34: case 36: case 43: case 47: case 48: case 70: case 90: case 109: case 129:
             case 189: case 209: case 229: case 230: case 289: case 329: case 349: case 389: case 429:
-            case 937:
+            case 936: case 937:
                 return true;
             default:
                 return false;

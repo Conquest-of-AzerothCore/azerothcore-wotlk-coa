@@ -27,6 +27,12 @@
       "actor": "t",
       "id": 24
     },
+    { "action": "advancement_rank", "actor": "t", "entry": 31174, "rank": 2 },
+    { "action": "advancement_rank", "actor": "t", "entry": 30440, "rank": 2 },
+    { "action": "advancement_rank", "actor": "t", "entry": 34382, "rank": 1 },
+    { "action": "advancement_rank", "actor": "t", "entry": 34372, "rank": 1 },
+    { "action": "advancement_rank", "actor": "t", "entry": 34343, "rank": 1 },
+    { "action": "advancement_rank", "actor": "t", "entry": 30965, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "t",
@@ -115,6 +121,12 @@
       "equals": 0,
       "spell": 705291
     },
+    { "action": "advancement_rank", "actor": "t", "entry": 31174, "rank": 2 },
+    { "action": "advancement_rank", "actor": "t", "entry": 30440, "rank": 2 },
+    { "action": "advancement_rank", "actor": "t", "entry": 34382, "rank": 1 },
+    { "action": "advancement_rank", "actor": "t", "entry": 34372, "rank": 1 },
+    { "action": "advancement_rank", "actor": "t", "entry": 34343, "rank": 1 },
+    { "action": "advancement_rank", "actor": "t", "entry": 30965, "rank": 1 },
     {
       "action": "advancement_rank",
       "label": "Repurchase through the complete native upload",

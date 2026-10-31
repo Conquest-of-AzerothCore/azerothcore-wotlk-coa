@@ -17,6 +17,7 @@
 
 #include "GossipDef.h"
 #include "AscensionQuestLog.h"
+#include "AscensionQuestMarkers.h"
 #include "Formulas.h"
 #include "LocalLevelScaling.h"
 #include "Object.h"
@@ -443,6 +444,7 @@ void PlayerMenu::SendQuestGiverStatus(uint8 questStatus, ObjectGuid npcGUID) con
     data << uint8(questStatus);
 
     _session->SendPacket(&data);
+    AscensionQuestMarkers::Send(_session->GetPlayer(), npcGUID, questStatus);
     LOG_DEBUG("network", "WORLD: Sent SMSG_QUESTGIVER_STATUS NPC {}, status={}", npcGUID.ToString(), questStatus);
 }
 

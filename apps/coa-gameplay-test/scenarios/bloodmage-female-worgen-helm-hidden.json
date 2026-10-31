@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "A female Bloodmage's helm is hidden while she wears the female worgen display",
+  "contract": "In-game report: the female worgen form showed a checkered box on the head. Display 142818 (CreatureDisplayInfoExtra 500031, race 13 gender 1) draws the character's own visible gear, and most helm models have no race-13 female variant: of 797 helm stems with a _HuF model in the installed client MPQs only about 211 have _WoF, and a missing variant renders as the placeholder box. The male worgen display 574 is a creature model without gear, so male Bloodmages never show it. Chosen fix: while the female worgen display is active the server sends no head item in PLAYER_VISIBLE_ITEM (entry and enchantment 0), including after a helm is equipped in form, and restores the equipped helm when the form ends. Expected: the visible head entry is the helm before the form, 0 during Running Wild (also after equipping another helm), and a helm again afterwards. visible_item reads the server's visible-item field only; client rendering is not tested.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "gender": 1, "level": 35 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 4000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 800175 },
+    { "action": "add_item", "actor": "bloodmage", "item": 7048 },
+    { "action": "add_item", "actor": "bloodmage", "item": 7050 },
+    { "action": "equip", "actor": "bloodmage", "item": 7048, "slot": 0 },
+    {
+      "action": "assert", "label": "SETUP: the Azure Silk Hood is equipped on the head",
+      "actor": "bloodmage", "metric": "equipped_item", "slot": 0, "equals": 7048
+    },
+    {
+      "action": "assert", "label": "SETUP: other clients are told to draw a helm",
+      "actor": "bloodmage", "metric": "visible_item", "slot": 0, "min": 1
+    },
+    { "action": "cast", "actor": "bloodmage", "spell": 800175, "label": "run wild outdoors" },
+    {
+      "action": "assert", "label": "SETUP: Running Wild gives her the female worgen display", "actor": "bloodmage",
+      "metric": "display_id", "equals": 142818, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: no helm is drawn on the female worgen", "actor": "bloodmage",
+      "metric": "visible_item", "slot": 0, "equals": 0
+    },
+    { "action": "equip", "actor": "bloodmage", "item": 7050, "slot": 0, "label": "put on another helm in form" },
+    {
+      "action": "assert", "label": "SETUP: the Silk Headband is now equipped", "actor": "bloodmage",
+      "metric": "equipped_item", "slot": 0, "equals": 7050
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: equipping a helm in form keeps it hidden", "actor": "bloodmage",
+      "metric": "visible_item", "slot": 0, "equals": 0
+    },
+    { "action": "cancel_aura", "label": "Stop running wild", "actor": "bloodmage", "spell": 800175 },
+    {
+      "action": "assert", "label": "Her mortal display returns", "actor": "bloodmage",
+      "metric": "display_id", "equals": 50, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The equipped helm is drawn again after the form", "actor": "bloodmage",
+      "metric": "visible_item", "slot": 0, "min": 1
+    }
+  ]
+}

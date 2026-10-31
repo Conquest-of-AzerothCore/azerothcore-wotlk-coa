@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Lakeshire: the seated chapel congregation has pews to sit on",
+  "contract": "rev_20261015_20 seats Cateline, Vernell, Emelyne and Marinus (9950411-9950414) in the Lakeshire chapel's front pews, but the client chapel has no pews, so they sat on thin air (#9224). Four Wooden Benches (151955) now stand under them on the chapel floor. Rendering and the exact seat alignment are untested.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9428.5,
+    "y": -2078.0,
+    "z": 67.6,
+    "o": 4.71
+  },
+  "players": [
+    {
+      "id": "auditor",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The east front pew 9001377 rests on the chapel floor",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 9001377,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "The east back pew 9001378 rests on the chapel floor",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 9001378,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "The west front pew 9001379 rests on the chapel floor",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 9001379,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "The west back pew 9001380 rests on the chapel floor",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 9001380,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}

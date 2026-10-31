@@ -1,0 +1,220 @@
+{
+  "schema": 1,
+  "name": "Tinker: trainers keep Build: Sentry Turret known while the turret stands (#9563)",
+  "contract": [
+    "#9563: with a Sentry Turret out, the Northshire trainer showed Build: Sentry Turret 500239 as learnable, buying it",
+    "did nothing, and the row vanished once the turret was dismissed. Building the turret swaps 500239 for Deconstruct",
+    "500470 through Player::SetTemporarySpellReplacement, which sends SMSG_SUPERCEDED_SPELL so the client's spellbook",
+    "drops 500239, but leaves 500239 in the server's spell map. Both trainers that teach it therefore still report the",
+    "row as Known (state 2) and refuse the purchase: the Beginner's Book of Ascension 75118 (mod-spellbook BuildRows,",
+    "HasRankOrBetter) and Norman Goldshire 50287 (trainer 900028, Trainer::GetSpellState). The green row is the client",
+    "judging the row from its own spellbook, which no longer lists 500239 while Deconstruct stands in for it.",
+    "Expected: before and while the turret stands, both windows read 500239 as Known, a purchase is refused, and the",
+    "turret and the Deconstruct swap are untouched by the attempt."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 4
+    }
+  ],
+  "creatures": [
+    {
+      "id": "book",
+      "owner": "tinker",
+      "entry": 75118,
+      "distance": 2,
+      "faction": 35
+    },
+    {
+      "id": "norman",
+      "owner": "tinker",
+      "entry": 50287,
+      "distance": 3,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the spawn and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Build: Sentry Turret",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "gossip_hello",
+      "label": "Open the Beginner's Book of Ascension without a turret",
+      "actor": "tinker",
+      "target": "book"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the book window opened",
+      "actor": "tinker",
+      "metric": "trainer_list_packets",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without a turret the book reads Build: Sentry Turret as known",
+      "actor": "tinker",
+      "metric": "trainer_window_state",
+      "spell": 500239,
+      "equals": 2
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "cast",
+      "label": "Build the Sentry Turret",
+      "actor": "tinker",
+      "spell": 500239
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a Sentry Turret stands",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Deconstruct stands in for Build",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500239,
+      "equals": 500470,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the client's spellbook no longer lists Build",
+      "actor": "tinker",
+      "metric": "client_knows_spell",
+      "spell": 500239,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the server still holds Build",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 500239,
+      "equals": 1
+    },
+    {
+      "action": "gossip_hello",
+      "label": "Open the book with the turret standing",
+      "actor": "tinker",
+      "target": "book"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the book window opened again",
+      "actor": "tinker",
+      "metric": "trainer_list_packets",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: with the turret standing the book still reads Build as known",
+      "actor": "tinker",
+      "metric": "trainer_window_state",
+      "spell": 500239,
+      "equals": 2
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Try to buy Build from the book",
+      "actor": "tinker",
+      "spell": 500239,
+      "target": "book"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the book refuses the purchase",
+      "actor": "tinker",
+      "metric": "spellbook_buy_failed",
+      "spell": 500239,
+      "equals": 1
+    },
+    {
+      "action": "gossip_hello",
+      "label": "Talk to Norman Goldshire with the turret standing",
+      "actor": "tinker",
+      "target": "norman"
+    },
+    {
+      "action": "gossip_select",
+      "label": "I seek training as a Tinker",
+      "actor": "tinker",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Norman's window opened",
+      "actor": "tinker",
+      "metric": "trainer_list_packets",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Norman also reads Build as known with the turret standing",
+      "actor": "tinker",
+      "metric": "trainer_window_state",
+      "spell": 500239,
+      "equals": 2
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Try to buy Build from Norman",
+      "actor": "tinker",
+      "spell": 500239,
+      "target": "norman"
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Norman refuses the purchase",
+      "actor": "tinker",
+      "metric": "spellbook_buy_failed",
+      "spell": 500239,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "The purchase attempts leave the turret standing",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 50046,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The purchase attempts leave Deconstruct in place",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 500239,
+      "equals": 500470
+    }
+  ]
+}

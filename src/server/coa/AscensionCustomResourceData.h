@@ -109,7 +109,7 @@ struct ResourceGainRule
     std::uint8_t ChancePercent = 100;
 };
 
-inline constexpr std::array<ResourceGainRule, 189> ResourceGainRules =
+inline constexpr std::array<ResourceGainRule, 191> ResourceGainRules =
 {{
     {14, 524706, 524706, 800058, 1, ResourceMutation::AuraStacks,
         ResourceGainEvent::FirstSuccessfulHostileTarget},
@@ -124,12 +124,9 @@ inline constexpr std::array<ResourceGainRule, 189> ResourceGainRules =
         ResourceGainEvent::FirstSuccessfulHostileTarget},
     {14, 803484, 803487, 800058, 1, ResourceMutation::AuraStacks,
         ResourceGainEvent::FirstSuccessfulHostileTarget},
-    {14, 563268, 563268, 800058, 1, ResourceMutation::AuraStacks,
-        ResourceGainEvent::FirstSuccessfulHostileTarget},
-    {14, 800210, 800210, 800058, 1, ResourceMutation::AuraStacks,
-        ResourceGainEvent::FirstSuccessfulHostileTarget},
-    {14, 802405, 802409, 800058, 1, ResourceMutation::AuraStacks,
-        ResourceGainEvent::FirstSuccessfulHostileTarget},
+    {14, 563268, 563268, 800058, 1, ResourceMutation::AuraStacks},
+    {14, 800210, 800210, 800058, 1, ResourceMutation::AuraStacks},
+    {14, 802405, 802409, 800058, 1, ResourceMutation::AuraStacks},
     {14, 560759, 560762, 800058, 2, ResourceMutation::AuraStacks,
         ResourceGainEvent::FirstSuccessfulHostileTarget},
     {14, 572803, 572804, 800058, 2, ResourceMutation::AuraStacks,
@@ -379,6 +376,10 @@ inline constexpr std::array<ResourceGainRule, 189> ResourceGainRules =
         ResourceGainEvent::FirstSuccessfulDamagingHit},
     {30, 505326, 505326, 355461, 1, ResourceMutation::TriggerSpell,
         ResourceGainEvent::FirstSuccessfulDamagingHit},
+    {30, 500523, 500523, 805077, 1, ResourceMutation::AuraStacks,
+        ResourceGainEvent::FirstSuccessfulDamagingHit},
+    {30, 500523, 500523, 355461, 1, ResourceMutation::TriggerSpell,
+        ResourceGainEvent::FirstSuccessfulDamagingHit},
     {30, 801328, 801328, 355461, 1, ResourceMutation::TriggerSpell,
         ResourceGainEvent::FirstSuccessfulHostileTarget},
     {30, 803834, 803839, 355461, 1, ResourceMutation::TriggerSpell,
@@ -512,7 +513,7 @@ struct ResourceCostRule
     std::uint8_t PreserveCostChancePercent = 0;
 };
 
-inline constexpr std::array<ResourceCostRule, 71> ResourceCostRules =
+inline constexpr std::array<ResourceCostRule, 75> ResourceCostRules =
 {{
     {14, 801904, 801904, 800058, 2, ResourceConsumption::Fixed,
         705137, 30},
@@ -592,7 +593,11 @@ inline constexpr std::array<ResourceCostRule, 71> ResourceCostRules =
     {22, 804438, 804438, 804455, 1, ResourceConsumption::All},
     {22, 806203, 806203, 804455, 1, ResourceConsumption::All},
     {22, 572417, 572417, 804455, 1, ResourceConsumption::All},
-    {22, 804503, 804503, 804455, 1, ResourceConsumption::All}
+    {22, 804503, 804503, 804455, 1, ResourceConsumption::All},
+    {22, 807950, 807950, 804455, 1, ResourceConsumption::All},
+    {22, 807951, 807951, 804455, 1, ResourceConsumption::All},
+    {22, 807952, 807952, 804455, 1, ResourceConsumption::All},
+    {22, 807953, 807953, 804455, 1, ResourceConsumption::All}
 }};
 }
 

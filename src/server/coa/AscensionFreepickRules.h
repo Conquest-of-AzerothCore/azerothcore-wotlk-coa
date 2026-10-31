@@ -8,6 +8,7 @@
 #include <functional>
 #include <string>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace AscensionFreepick
@@ -165,6 +166,9 @@ struct Realm
 
 bool Visible(Catalog const& catalog, Realm const& realm, Row const& row);
 bool ClassAdmits(Catalog const& catalog, Row const& row, std::uint32_t classId);
+
+std::uint32_t InvestedBelowThreshold(std::vector<std::pair<std::uint32_t, std::uint32_t>> const& costAndThreshold,
+    std::uint32_t minimum);
 
 struct Entry
 {

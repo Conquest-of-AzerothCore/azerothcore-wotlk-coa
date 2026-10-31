@@ -15,7 +15,7 @@ struct Spell
     std::uint32_t SpellId;
 };
 
-inline constexpr std::array<Spell, 315> Spells =
+inline constexpr std::array<Spell, 317> Spells =
 {{
     {12, 0, 81},
     {12, 0, 107},
@@ -23,6 +23,7 @@ inline constexpr std::array<Spell, 315> Spells =
     {12, 0, 2764},
     {12, 0, 6603},
     {12, 0, 552011},
+    {12, 0, 561174},
     {12, 0, 801576},
     {12, 0, 804136},
     {12, 1, 20597},
@@ -245,6 +246,7 @@ inline constexpr std::array<Spell, 315> Spells =
     {27, 0, 81},
     {27, 0, 107},
     {27, 0, 3018},
+    {27, 0, 3124},
     {27, 0, 5019},
     {27, 0, 6603},
     {27, 0, 500143},
@@ -342,7 +344,7 @@ struct Skill
     std::uint16_t Maximum;
 };
 
-inline constexpr std::array<Skill, 449> Skills =
+inline constexpr std::array<Skill, 450> Skills =
 {{
     {12, 41, 1, 1},
     {12, 42, 1, 1},
@@ -742,6 +744,7 @@ inline constexpr std::array<Skill, 449> Skills =
     {30, 162, 1, 1},
     {30, 172, 1, 1},
     {30, 173, 1, 1},
+    {30, 176, 1, 1},
     {30, 226, 1, 1},
     {30, 229, 1, 1},
     {30, 293, 1, 1},
@@ -802,7 +805,7 @@ struct Proficiency
     std::uint32_t SpellId;
 };
 
-inline constexpr std::array<Proficiency, 242> Proficiencies =
+inline constexpr std::array<Proficiency, 243> Proficiencies =
 {{
     {12, 44, 196},
     {12, 172, 197},
@@ -1019,6 +1022,7 @@ inline constexpr std::array<Proficiency, 242> Proficiencies =
     {30, 45, 264},
     {30, 293, 750},
     {30, 173, 1180},
+    {30, 176, 2567},
     {30, 226, 5011},
     {30, 413, 8737},
     {30, 414, 9077},

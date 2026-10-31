@@ -566,6 +566,9 @@ void AchievementMgr::DeleteFromDB(ObjectGuid::LowType lowguid)
 
 void AchievementMgr::SaveToDB(CharacterDatabaseTransaction trans)
 {
+    if (WorldSession* session = GetPlayer()->GetSession(); session && session->IsBot())
+        return;
+
     if (!_completedAchievements.empty())
     {
         for (CompletedAchievementMap::iterator iter = _completedAchievements.begin(); iter != _completedAchievements.end(); ++iter)
@@ -1836,6 +1839,10 @@ bool AchievementMgr::IsCompletedCriteria(AchievementCriteriaEntry const* achieve
         // someone on this realm has already completed that achievement
         if (sAchievementMgr->IsRealmCompleted(achievement))
             return false;
+
+        if (sWorld->getBoolConfig(CONFIG_ACHIEVEMENT_REALM_FIRST_BLOCK_BOTS))
+            if (Player* owner = GetPlayer(); owner && owner->GetSession() && owner->GetSession()->IsBot())
+                return false;
 
         if (sWorld->getBoolConfig(CONFIG_ACHIEVEMENT_REALM_FIRST_RACE_LIMIT_ONE_PER_CHARACTER))
         {

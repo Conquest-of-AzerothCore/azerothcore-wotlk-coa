@@ -4,7 +4,9 @@
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+#include "SpellAuraEffects.h"
 #include "SpellInfo.h"
+#include "SpellMgr.h"
 #include "SpellScript.h"
 #include "Unit.h"
 
@@ -14,8 +16,13 @@ enum HeroShamanSpells : uint32
 {
     ImprovedEarthShieldCapstone = 851561,
     ImprovedEarthShieldTidal    = 851562,
-    TidalWavesFinalRank         = 51564
+    TidalWavesFinalRank         = 51564,
+    ElectrocuteDamage           = 272034,
+    ElectrocuteIncapacitate     = 272053,
+    ElectrocuteIncapacitateLock = 272056
 };
+
+constexpr float ELECTROCUTE_DAMAGE_PER_LEVEL = 2.6f;
 
 constexpr float ELEMENTAL_REACH_YARDS = 20.0f;
 constexpr uint32 IMPROVED_EARTH_SHIELD_COOLDOWN_MS = 5000;
@@ -100,6 +107,43 @@ class spell_hero_shaman_earth_shield_heal : public SpellScript
     }
 };
 
+class aura_hero_shaman_doused : public AuraScript
+{
+    PrepareAuraScript(aura_hero_shaman_doused);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({ ElectrocuteDamage, ElectrocuteIncapacitate, ElectrocuteIncapacitateLock });
+    }
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        DamageInfo* damage = eventInfo.GetDamageInfo();
+        return eventInfo.GetActor() && damage && damage->GetDamage();
+    }
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        Unit* attacker = eventInfo.GetActor();
+        Unit* target = GetTarget();
+        if (!attacker || !target->IsAlive())
+            return;
+
+        SpellInfo const* electrocute = sSpellMgr->AssertSpellInfo(ElectrocuteDamage);
+        int32 damage = electrocute->Effects[EFFECT_0].CalcValue(attacker) +
+            int32(float(attacker->GetLevel()) * ELECTROCUTE_DAMAGE_PER_LEVEL);
+        attacker->CastCustomSpell(target, ElectrocuteDamage, &damage, nullptr, nullptr, true, nullptr, aurEff);
+        if (target->IsAlive() && !target->HasAura(ElectrocuteIncapacitateLock))
+            attacker->CastSpell(target, ElectrocuteIncapacitate, true, nullptr, aurEff);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_hero_shaman_doused::CheckProc);
+        OnEffectProc += AuraEffectProcFn(aura_hero_shaman_doused::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+    }
+};
+
 class spell_hero_shaman_sundering : public SpellScript
 {
     PrepareSpellScript(spell_hero_shaman_sundering);
@@ -126,4 +170,5 @@ void AddSC_AscensionHeroShaman()
     RegisterSpellScript(aura_hero_shaman_enhancing_totems);
     RegisterSpellScript(aura_hero_shaman_dual_wield_specialization);
     RegisterSpellScript(spell_hero_shaman_earth_shield_heal);
+    RegisterSpellScript(aura_hero_shaman_doused);
 }

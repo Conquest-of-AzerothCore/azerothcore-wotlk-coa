@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Sun Cleric: Dawn client patches permit recasting the active phase (#5741)",
-  "contract": "Requires CoA.SendDisplayPatches=1. Raw Dawn 804584 requires caster aura 704396 and excludes active Dawn 807440. The clarified cancellation behavior requires both restrictions to be zero in the client SMSG_PATCH_SPELL row (opcode 2346, numeric fields 24 and 26). Explicitly require the Dawn row before checking zero-valued fields, and use Runeshroud 500639 as a control proving the login patch stream is present. This verifies emitted client data, while client rendering and input remain outside the native harness. The Dawn aura 807440 must also stream with the raw non-shapeshifted attribute (65536) retained and the debuff and no-cancel attributes cleared, allowing manual buff cancellation.",
+  "name": "Sun Cleric: Dawn streams its raw readiness restrictions; Radiant Conversion ends the active phase (#5741, #9727)",
+  "contract": "Requires CoA.SendDisplayPatches=1. Raw Dawn 804584 requires caster aura 704396 (the hidden '20 Solar Power' marker) and excludes active Dawn 807440. #5741 first cleared both restrictions in the client SMSG_PATCH_SPELL row so Dawn could be recast to end the phase, which left Dawn looking usable at any Solar Power (#9727). Since #9438 the server supersedes Dawn with Radiant Conversion 807453 (CasterAuraSpell 807440) while the phase is active, so the cancel path no longer needs Dawn's own restrictions. The Dawn row (opcode 2346) must therefore carry the raw CasterAuraSpell 704396 at numeric field 24 and ExcludeCasterAuraSpell 807440 at field 26. Runeshroud 500639 is a control proving the login patch stream is present. This verifies emitted client data; client rendering and input remain outside the native harness. The Dawn aura 807440 must also stream with the raw non-shapeshifted attribute (65536) retained and the debuff and no-cancel attributes cleared, allowing manual buff cancellation.",
   "timeout_ms": 60000,
   "players": [
     {
@@ -38,23 +38,23 @@
     },
     {
       "action": "assert",
-      "label": "Recasting Dawn does not require the twenty-Solar-Power readiness aura",
+      "label": "Dawn requires the twenty-Solar-Power readiness aura on the client",
       "actor": "cleric",
       "metric": "server_packet_u32",
       "opcode": 2346,
       "row": 804584,
       "index": 24,
-      "equals": 0
+      "equals": 704396
     },
     {
       "action": "assert",
-      "label": "Active Dawn no longer excludes recasting the same spell",
+      "label": "Active Dawn excludes Dawn itself; Radiant Conversion takes its button",
       "actor": "cleric",
       "metric": "server_packet_u32",
       "opcode": 2346,
       "row": 804584,
       "index": 26,
-      "equals": 0
+      "equals": 807440
     },
     {
       "action": "assert",

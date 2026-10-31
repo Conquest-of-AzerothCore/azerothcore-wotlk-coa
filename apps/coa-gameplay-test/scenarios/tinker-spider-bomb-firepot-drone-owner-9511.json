@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Spider Bomb and Firepot Drone carry a resolvable owner for damage attribution (#9511)",
+  "contract": [
+    "Build: Spider Bomb 500535 and Build: Firepot Drone 500600 summon a device (entry 226012/226112) through",
+    "the shared Summon() helper in AscensionTinkerSummons.cpp. That helper called player->SummonCreature()",
+    "with no SummonProperties, leaving the device's UNIT_FIELD_SUMMONEDBY empty, so damage meters could not",
+    "trace its explosion damage back to the Tinker even though the ability otherwise worked. The native",
+    "GetOwnedCreature() lookup (owned_creature_display metric) requires creature->GetOwnerGUID() == player,",
+    "exactly the field this fix populates, so it only returns the device's display (nonzero) once the owner",
+    "link exists."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "tinker", "race": 1, "class": 28, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "tinker", "entry": 36, "level": 80, "distance": 20, "health": 1000000 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "tinker", "spell": 500535 },
+    { "action": "learn", "actor": "tinker", "spell": 500600 },
+    { "action": "set_power", "actor": "tinker", "power": 0, "value": 3000 },
+    { "action": "reset_cooldown", "actor": "tinker", "spell": 500535 },
+    { "action": "cast", "actor": "tinker", "spell": 500535, "target": "golem", "label": "Build Spider Bomb" },
+    { "action": "assert", "label": "Spider Bomb is built", "actor": "tinker", "metric": "owned_creature_count", "entry": 226012, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "Spider Bomb carries a resolvable owner link (UNIT_FIELD_SUMMONEDBY) to the Tinker", "actor": "tinker", "metric": "owned_creature_display", "entry": 226012, "min": 1, "within_ms": 1000 },
+    { "action": "wait", "label": "Let the device detonate and despawn before the next build", "ms": 8000 },
+    { "action": "set_power", "actor": "tinker", "power": 0, "value": 3000 },
+    { "action": "reset_cooldown", "actor": "tinker", "spell": 500600 },
+    { "action": "restore_charges", "actor": "tinker", "spell": 500600 },
+    { "action": "cast", "actor": "tinker", "spell": 500600, "target": "golem", "label": "Build Firepot Drone" },
+    { "action": "assert", "label": "Firepot Drone is built", "actor": "tinker", "metric": "owned_creature_count", "entry": 226112, "equals": 1, "within_ms": 4000 },
+    { "action": "assert", "label": "Firepot Drone carries a resolvable owner link (UNIT_FIELD_SUMMONEDBY) to the Tinker", "actor": "tinker", "metric": "owned_creature_display", "entry": 226112, "min": 1, "within_ms": 1000 }
+  ]
+}

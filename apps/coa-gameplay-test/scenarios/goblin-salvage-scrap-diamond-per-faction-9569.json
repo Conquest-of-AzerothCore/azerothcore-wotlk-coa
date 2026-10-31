@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "A Strange Piece of Scrap: each faction's quest diamond points at its own salvage engineer (COA-9569)",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1 (the default).",
+    "A Strange Piece of Scrap 176000 is turned in to Fizzlebolt Gearwhistle at the Rebel Camp (SuperTrack node 20900) or Grizzik Scrapsnatch at Grom'gol Base Camp (node 20901). The client tracks the nearest turn-in node of QuestSuperTrack row 33400, so both nodes reached every player and Horde players in northern Stranglethorn were sent to the Alliance camp.",
+    "The login stream sends row 33400 as SMSG_PATCH_QUEST_SUPER_TRACK (1727): ID, quest, then 20 nodes for each of objectives 0-3 and 20 turn-in nodes, which start at field 82. An Alliance character gets only node 20900 there and a Horde character only node 20901."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -11621.7, "y": -268.8, "z": 39.9, "o": 0 },
+  "players": [
+    { "id": "alliance", "race": 1, "class": 1, "level": 35 },
+    { "id": "horde", "race": 2, "class": 1, "level": 35 }
+  ],
+  "steps": [
+    { "action": "assert", "label": "SETUP: the Alliance character receives row 33400 of quest 176000", "actor": "alliance", "metric": "server_packet_u32", "opcode": 1727, "row": 33400, "index": 1, "equals": 176000, "within_ms": 8000 },
+    { "action": "assert", "label": "SETUP: the Horde character receives row 33400 of quest 176000", "actor": "horde", "metric": "server_packet_u32", "opcode": 1727, "row": 33400, "index": 1, "equals": 176000, "within_ms": 8000 },
+    { "action": "assert", "label": "the Alliance turn-in node is Fizzlebolt at the Rebel Camp", "actor": "alliance", "metric": "server_packet_u32", "opcode": 1727, "row": 33400, "index": 82, "equals": 20900 },
+    { "action": "assert", "label": "the Alliance character gets no second turn-in node", "actor": "alliance", "metric": "server_packet_u32", "opcode": 1727, "row": 33400, "index": 83, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: the Horde turn-in node is Grizzik at Grom'gol, not the Rebel Camp", "actor": "horde", "metric": "server_packet_u32", "opcode": 1727, "row": 33400, "index": 82, "equals": 20901 },
+    { "action": "assert", "label": "the Horde character gets no second turn-in node", "actor": "horde", "metric": "server_packet_u32", "opcode": 1727, "row": 33400, "index": 83, "equals": 0 }
+  ]
+}

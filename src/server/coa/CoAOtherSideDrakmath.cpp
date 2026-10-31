@@ -650,7 +650,7 @@ class spell_coa_drakmath_spiritual_parasitism : public SpellScript
     {
         if (!GetHitDamage())
             return;
-        SetHitDamage(Rolled(GetCaster(), GetHitUnit(), ParasitismHit));
+        SetHitDamage(Rolled(GetCaster(), GetHitUnit(), ParasitismHit, GetSpellInfo()));
     }
 
     void Register() override
@@ -666,7 +666,7 @@ class spell_coa_drakmath_spiritual_parasitism_aura : public AuraScript
     void CalcTick(AuraEffect const* , int32& amount, bool& )
     {
         if (Unit* caster = GetCaster())
-            amount = Rolled(caster, GetUnitOwner(), ParasitismTick);
+            amount = Rolled(caster, GetUnitOwner(), ParasitismTick, GetSpellInfo());
     }
 
     void Register() override
@@ -681,7 +681,7 @@ class spell_coa_drakmath_necrotic_emerge : public SpellScript
 
     void HandleHit()
     {
-        SetHitDamage(Rolled(GetCaster(), GetHitUnit(), NecroticEmerge));
+        SetHitDamage(Rolled(GetCaster(), GetHitUnit(), NecroticEmerge, GetSpellInfo()));
     }
 
     void Register() override
@@ -697,7 +697,7 @@ class spell_coa_drakmath_death_missile : public SpellScript
     void HandleHit()
     {
         Unit* source = GetOriginalCaster() ? GetOriginalCaster() : GetCaster();
-        SetHitDamage(Rolled(source, GetHitUnit(), DeathMissile));
+        SetHitDamage(Rolled(source, GetHitUnit(), DeathMissile, GetSpellInfo()));
     }
 
     void Register() override
@@ -712,7 +712,7 @@ class spell_coa_drakmath_necrotic_explosion : public SpellScript
 
     void HandleHit()
     {
-        SetHitDamage(Rolled(GetCaster(), GetHitUnit(), NecroticExplosion));
+        SetHitDamage(Rolled(GetCaster(), GetHitUnit(), NecroticExplosion, GetSpellInfo()));
     }
 
     void Register() override
@@ -730,7 +730,7 @@ class spell_coa_volzeen_colossal_smash : public SpellScript
         Unit* target = GetHitUnit();
         Unit* caster = GetCaster();
         if (target && caster && caster->GetEntry() == NPC_VOLZEEN)
-            SetHitDamage(int32(Unscaled(caster, target, float(target->CountPctFromMaxHealth(12.0f)))));
+            SetHitDamage(int32(Unscaled(caster, target, float(target->CountPctFromMaxHealth(12.0f)), GetSpellInfo())));
     }
 
     void Register() override
@@ -762,7 +762,7 @@ class spell_coa_drakmath_death_beam : public SpellScript
     void HandleHit()
     {
         if (Unit* target = GetHitUnit())
-            SetHitDamage(int32(Unscaled(GetCaster(), target, float(target->CountPctFromMaxHealth(float(GetSpellInfo()->Effects[EFFECT_0].CalcValue()))))));
+            SetHitDamage(int32(Unscaled(GetCaster(), target, float(target->CountPctFromMaxHealth(float(GetSpellInfo()->Effects[EFFECT_0].CalcValue()))), GetSpellInfo())));
     }
 
     void Register() override

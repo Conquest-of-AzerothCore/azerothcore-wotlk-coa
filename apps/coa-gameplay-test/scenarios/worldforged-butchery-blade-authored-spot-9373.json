@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "Worldforged Butchery Blade stands at its authored Tirisfal spot, not the ditch (#9373)",
+  "contract": "The Butchery Blade pickup (entry 95805, guid 6940210, item 450874) was hand-authored in game at (2485.38, 21.7031, 27.6361), a torch-and-skeleton scene 0.59 yd above terrain, then LootCollector alignment overwrote it with a terrain-fallback spot 13.2 yd away in a ditch. Restore the authored, in-game verified spot. The reporter's own coordinates are 0.7 yd from it.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": 2488.29, "y": 30.22, "z": 25.0, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup stands in the authored area, not the ditch 13.2 yd away", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95805, "equals": 1 },
+    { "action": "assert", "label": "it stands on the authored table scene, not sunk far below it", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940210, "spawn_type": "gameobject", "min": 0.35, "max": 0.85 }
+  ]
+}

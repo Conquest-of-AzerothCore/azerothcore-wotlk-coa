@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Hallow's End: a Water Bucket thrown on a Goldshire training fire counts for Fire Brigade Practice",
+  "contract": "'Fire Brigade Practice' 11360 from Costumed Orphan Matron 24519 sends the player north of Goldshire, where Headless Horseman - Fire (DND) 23537 training fires burn during Hallow's End (event 12); its objective is five 23537 credits. Water Bucket 32971 casts Throw Bucket 42340, a missile to the chosen ground point that triggers Bucket Lands 42339 on units within 3 yd of it; a burning training fire hit by it is splashed by Water Splash 42348 and gives the thrower one credit (#9052). The Headless Horseman Flame Bunny 23686 fires of the Shade of the Horseman around the inn belong to 'Stop the Fires!' and give no practice credit. Client visuals are untested.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9336.0,
+    "y": 56.0,
+    "z": 63.5,
+    "o": 0.0
+  },
+  "players": [
+    { "id": "brigade", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "Join world phase 1, where the event spawns live", "actor": "brigade", "value": 1 },
+    { "action": "game_event", "label": "Hallow's End is running", "event": 12, "active": true },
+    { "action": "assert", "label": "The training fires north of Goldshire are spawned", "actor": "brigade",
+      "metric": "nearby_creature_count", "entry": 23537, "min": 1, "within_ms": 15000 },
+    { "action": "teleport", "label": "Back to the Goldshire matron", "actor": "brigade", "map": 0,
+      "x": -9431.25, "y": 52.69, "z": 56.59 },
+    { "action": "assert", "label": "The Goldshire matron is spawned", "actor": "brigade",
+      "metric": "nearby_creature_count", "entry": 24519, "equals": 1, "within_ms": 15000 },
+    { "action": "quest_accept", "label": "Accept Fire Brigade Practice", "actor": "brigade", "quest": 11360,
+      "entry": 24519 },
+    { "action": "assert", "label": "11360 is in the log with no fire put out", "actor": "brigade",
+      "metric": "quest_objective_count", "quest": 11360, "equals": 0, "within_ms": 3000 },
+    { "action": "teleport", "label": "Walk north to the practice area", "actor": "brigade", "map": 0,
+      "x": -9336.0, "y": 56.0, "z": 63.5 },
+    { "action": "wait", "label": "Let the training fires light", "ms": 6000 },
+    { "action": "add_item", "label": "SETUP: a Water Bucket from the barrel", "actor": "brigade", "item": 32971 },
+    { "action": "use_item", "label": "Throw the bucket onto training fire 240016", "actor": "brigade",
+      "item": 32971, "spell": 42340, "destination": { "x": -9328.26, "y": 55.9236, "z": 62.8563 } },
+    { "action": "assert", "label": "The splashed training fire gives one credit", "actor": "brigade",
+      "metric": "quest_objective_count", "quest": 11360, "equals": 1, "within_ms": 5000 }
+  ]
+}

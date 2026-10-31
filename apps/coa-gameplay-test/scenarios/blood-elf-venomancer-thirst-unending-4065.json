@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Thirst Unending: a Blood Elf Venomancer's Arcane Torrent credits the Mana Wyrm objective (#4065)",
+  "contract": [
+    "Report #4065: a level 2 Blood Elf Venomancer on Sunstrider Isle had no active racial and could not finish",
+    "'Thirst Unending' (8346), which asks for Arcane Torrent on a Mana Wyrm (15274). PR #5379 teaches Venomancers the",
+    "CoA mana variant 814287, and the Mana Wyrm's SmartAI casts Quest Credit 8346 (61314, kill credit for 15468) on",
+    "the invoker when hit by 814286-814292. 814287 silences enemies within 8 yd of the caster, so a Mana Wyrm beside",
+    "the Venomancer, spawned with its own neutral faction 7, must be hit and credit the quest."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "venomancer", "race": 10, "class": 29, "level": 2 }
+  ],
+  "location": { "map": 530, "x": 10417.7, "y": -6318.6, "z": 35.66, "o": 0 },
+  "creatures": [
+    { "id": "wyrm", "owner": "venomancer", "entry": 15274, "level": 1, "distance": 4, "faction": 7 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Fixture: Thirst Unending is in progress", "actor": "venomancer",
+      "quest": 8346, "complete": false },
+    { "action": "assert", "label": "SETUP: the quest is in the log", "actor": "venomancer", "metric": "quest_status",
+      "quest": 8346, "equals": 3, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: the Blood Elf Venomancer knows Arcane Torrent 814287",
+      "actor": "venomancer", "metric": "knows_spell", "spell": 814287, "equals": 1 },
+    { "action": "assert", "label": "SETUP: no credit before the cast", "actor": "venomancer",
+      "metric": "quest_objective_count", "quest": 8346, "index": 0, "equals": 0 },
+    { "action": "cast", "label": "Arcane Torrent beside the Mana Wyrm", "actor": "venomancer", "spell": 814287 },
+    { "action": "assert", "label": "SETUP: the cast succeeded", "actor": "venomancer", "metric": "cast_failure",
+      "spell": 814287, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: the Mana Wyrm objective is credited", "actor": "venomancer",
+      "metric": "quest_objective_count", "quest": 8346, "index": 0, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The quest is complete", "actor": "venomancer", "metric": "quest_status",
+      "quest": 8346, "equals": 1, "within_ms": 3000 }
+  ]
+}

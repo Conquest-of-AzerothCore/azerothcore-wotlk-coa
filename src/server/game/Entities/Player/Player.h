@@ -1509,7 +1509,7 @@ public:
     void RemoveActiveQuest(uint32 questId, bool update = true);
     void RemoveRewardedQuest(uint32 questId, bool update = true);
     void SendQuestUpdate(uint32 questId);
-    QuestGiverStatus GetQuestDialogStatus(Object* questGiver);
+    QuestGiverStatus GetQuestDialogStatus(Object* questGiver, uint32 questFilter = 0);
     float GetQuestRate(bool isDFQuest = false, int32 questLevel = 0);
     void SetDailyQuestStatus(uint32 quest_id);
     bool IsDailyQuestDone(uint32 quest_id);
@@ -1730,6 +1730,8 @@ public:
     void VehicleSpellInitialize();
     void SendRemoveControlBar();
     [[nodiscard]] bool HasSpell(uint32 spell) const override;
+    /// HasSpell that also matches a stock spell's twins and namesakes (SpellMgr::GetSpellAndRelatives)
+    [[nodiscard]] bool HasSpellOrTwin(uint32 spell) const;
     [[nodiscard]] bool HasActiveSpell(uint32 spell) const;            // show in spellbook
     [[nodiscard]] bool IsSpellFitByClassAndRace(uint32 spell_id) const;
     bool IsNeedCastPassiveSpellAtLearn(SpellInfo const* spellInfo) const;
@@ -1818,6 +1820,7 @@ public:
     [[nodiscard]] uint32 GetFreePrimaryProfessionPoints() const { return GetUInt32Value(PLAYER_CHARACTER_POINTS2); }
     void SetFreePrimaryProfessions(uint16 profs) { SetUInt32Value(PLAYER_CHARACTER_POINTS2, profs); }
     void InitPrimaryProfessions();
+    [[nodiscard]] bool SpendsPrimaryProfessionSlot(SpellInfo const* spellInfo) const;
 
     [[nodiscard]] PlayerSpellMap const& GetSpellMap() const { return m_spells; }
     PlayerSpellMap&       GetSpellMap()       { return m_spells; }
@@ -3113,6 +3116,7 @@ protected:
     bool m_needZoneUpdate;
 
 private:
+    [[nodiscard]] bool HasStoredActiveSpell(uint32 spell) const;
     // internal common parts for CanStore/StoreItem functions
     InventoryResult CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool swap, Item* pSrcItem) const;
     InventoryResult CanStoreItem_InBag(uint8 bag, ItemPosCountVec& dest, ItemTemplate const* pProto, uint32& count, bool merge, bool non_specialized, Item* pSrcItem, uint8 skip_bag, uint8 skip_slot) const;

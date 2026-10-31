@@ -25,6 +25,7 @@
 #include "CreatureGroups.h"
 #include "MoveSpline.h"
 #include "DatabaseEnv.h"
+#include "FleeingMovementGenerator.h"
 #include "Formulas.h"
 #include "GameEventMgr.h"
 #include "GameTime.h"
@@ -1135,12 +1136,19 @@ void Creature::DoFleeToGetAssistance()
         SetNoSearchAssistance(true);
         UpdateSpeed(MOVE_RUN, false);
 
+        bool const walk = sWorld->getBoolConfig(CONFIG_CREATURE_FAMILY_FLEE_WALK);
         if (!creature)
+        {
             //SetFeared(true, GetVictim()->GetGUID(), 0, sWorld->getIntConfig(CONFIG_CREATURE_FAMILY_FLEE_DELAY));
             //TODO: use 31365
             SetControlled(true, UNIT_STATE_FLEEING, GetVictim());
+            MovementGenerator* controlled = GetMotionMaster()->GetMotionSlot(MOTION_SLOT_CONTROLLED);
+            if (auto* flee = dynamic_cast<FleeingMovementGenerator<Creature>*>(controlled); flee && walk)
+                flee->SetWalk(true);
+        }
         else
-            GetMotionMaster()->MoveSeekAssistance(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ());
+            GetMotionMaster()->MoveSeekAssistance(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(),
+                walk ? FORCED_MOVEMENT_WALK : FORCED_MOVEMENT_NONE);
     }
 }
 
@@ -1258,6 +1266,7 @@ bool Creature::Create(ObjectGuid::LowType guidlow, Map* map, uint32 phaseMask, u
     }
 
     LoadCreaturesAddon();
+    sObjectMgr->ApplyAscensionNpcOverheadIcon(*this);
     LoadSparringPct();
 
     //! Need to be called after LoadCreaturesAddon - MOVEMENTFLAG_HOVER is set there
@@ -2181,6 +2190,7 @@ void Creature::setDeathState(DeathState state, bool despawn)
 
         Motion_Initialize();
         LoadCreaturesAddon(true);
+        sObjectMgr->ApplyAscensionNpcOverheadIcon(*this);
         LoadSparringPct();
 
         if (GetCreatureData() && GetPhaseMask() != GetCreatureData()->phaseMask)
@@ -3260,9 +3270,9 @@ void Creature::AddSpellCooldown(uint32 spell_id, uint32 /*itemid*/, uint32 end_t
             _AddCreatureSpellCooldown(i_scset->second, categoryId, categorycooldown);
         }
     }
-    else if (spellcooldown)
+    if (spellcooldown)
     {
-        _AddCreatureSpellCooldown(spellInfo->Id, 0, spellcooldown);
+        _AddCreatureSpellCooldown(spellInfo->Id, categorycooldown ? categoryId : 0, spellcooldown);
     }
 
     if (sSpellMgr->HasSpellCooldownOverride(spellInfo->Id))

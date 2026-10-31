@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Barbarian Thane's Grip ends when the Barbarian leaves Ancestry (#9946)",
+  "contract": [
+    "Thane's Grip 803798 is the Ancestry talent entry 11219 (TE 1, eight Ancestry points invested). Its",
+    "SPELL_EFFECT_TITAN_GRIP lets the Barbarian wield a two-handed axe, mace or sword in each hand. Switching to",
+    "Brutality removes the Ancestry talents, so the second two-hander must leave the off hand, the Titan's Grip",
+    "penalty 49152 must end and a two-hander can no longer be equipped there. The main-hand two-hander stays."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "barbarian",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Settle login",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "label": "FIXTURE: dual wield, so only the two-handed grip varies",
+      "actor": "barbarian",
+      "spell": 674
+    },
+    {
+      "action": "set_money",
+      "label": "FIXTURE: a purse for the unlearn price of the Ancestry talents the Brutality switch removes",
+      "actor": "barbarian",
+      "value": 1000000
+    },
+    {
+      "action": "specialization",
+      "label": "Enter Ancestry with eight Ancestry points and Thane's Grip",
+      "actor": "barbarian",
+      "id": 3,
+      "entries": [
+        29284,
+        29799,
+        31153,
+        31220,
+        34258,
+        34259,
+        34260,
+        34306,
+        11219
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Thane's Grip is learned in Ancestry",
+      "actor": "barbarian",
+      "metric": "knows_spell",
+      "spell": 803798,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "barbarian",
+      "item": 2479
+    },
+    {
+      "action": "equip",
+      "label": "Two-handed axe in the main hand",
+      "actor": "barbarian",
+      "item": 2479,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "barbarian",
+      "item": 2491
+    },
+    {
+      "action": "equip",
+      "label": "SETUP: Thane's Grip allows a second two-handed axe in the off hand",
+      "actor": "barbarian",
+      "item": 2491,
+      "slot": 16
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both two-handers are equipped",
+      "actor": "barbarian",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 2491
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Titan's Grip penalty applies to two two-handers",
+      "actor": "barbarian",
+      "metric": "aura",
+      "spell": 49152,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "specialization",
+      "label": "Switch to Brutality",
+      "actor": "barbarian",
+      "id": 2
+    },
+    {
+      "action": "assert",
+      "label": "Brutality does not keep Thane's Grip",
+      "actor": "barbarian",
+      "metric": "knows_spell",
+      "spell": 803798,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the second two-hander leaves the off hand",
+      "actor": "barbarian",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the main-hand two-hander stays equipped",
+      "actor": "barbarian",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 2479
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the Titan's Grip penalty ends",
+      "actor": "barbarian",
+      "metric": "aura",
+      "spell": 49152,
+      "equals": 0
+    },
+    {
+      "action": "equip",
+      "label": "THE FIX: Brutality cannot equip a second two-hander",
+      "actor": "barbarian",
+      "item": 2491,
+      "slot": 16,
+      "rejected": true
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the off hand stays empty",
+      "actor": "barbarian",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 0
+    }
+  ]
+}

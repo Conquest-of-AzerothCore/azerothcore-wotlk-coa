@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AscensionBazaarTokenReserve.h"
 #include "AuctionHouseMgr.h"
 #include "AuctionHouseSearcher.h"
 #include "Chat.h"
@@ -227,6 +228,14 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recvData)
 
     if (!finalCount)
     {
+        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
+        return;
+    }
+
+    // Elite Warchest Bazaar Tokens are Realm Bound: the account must keep its reserve.
+    if (itemEntry == AscensionBazaarTokenReserve::TOKEN_ITEM && !AscensionBazaarTokenReserve::CanGiveAway(_player, finalCount))
+    {
+        AscensionBazaarTokenReserve::SendRefusal(_player);
         SendAuctionCommandResult(0, AUCTION_SELL_ITEM, ERR_AUCTION_DATABASE_ERROR);
         return;
     }

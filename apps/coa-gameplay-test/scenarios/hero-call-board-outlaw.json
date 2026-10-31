@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "name": "Outlaw's Contract Board: the neutral board in Ratchet gives the shared call board quests and the Legion quest",
+  "contract": "The Outlaw's Contract Board (gameobject 1804480) stands in Ratchet and serves both factions. It gives every quest that the Hero's Call Board (402000) and the Warchief's Command Board (402001) both give, plus the High-Risk quest 982019 For The Legion: A Heap of..., which no faction board gives. A level-60 Orc picks PvE Quests and finds the shared PvE daily 18017 Culling the Felpaw. A level-70 Human without the High-Risk ruleset aura (1004019) cannot take 982019; with the aura the board adds the High-Risk category, which lists 982019 and the shared Karazhan quest 420460 but not the Alliance-only daily 980019 of the Hero's Call Board. Accepting 982019 from the board adds it to the log.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "outlaw",
+      "race": 1,
+      "class": 1,
+      "level": 70
+    },
+    {
+      "id": "orc",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 1,
+    "x": -941.5,
+    "y": -3701.3,
+    "z": 7.6,
+    "o": 3.1
+  },
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join the world phase the board is spawned in",
+      "actor": "outlaw",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "The Orc joins it too",
+      "actor": "orc",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the Ratchet board's grid load",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Outlaw's Contract Board stands in Ratchet",
+      "actor": "outlaw",
+      "metric": "nearby_gameobject_count",
+      "entry": 1804480,
+      "equals": 1
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "The Orc clicks the board",
+      "actor": "orc",
+      "entry": 1804480
+    },
+    {
+      "action": "assert",
+      "label": "and gets the three ordinary categories",
+      "actor": "orc",
+      "metric": "gossip_options",
+      "equals": 3
+    },
+    {
+      "action": "gossip_select",
+      "label": "Choose PvE Quests",
+      "actor": "orc",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "The shared PvE daily is offered to the Horde",
+      "actor": "orc",
+      "metric": "quest_menu_has",
+      "quest": 18017,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Without the High-Risk ruleset the Legion quest cannot be taken",
+      "actor": "outlaw",
+      "metric": "quest_takeable",
+      "quest": 982019,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Give the Human the High-Risk ruleset",
+      "actor": "outlaw",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Legion quest is takeable",
+      "actor": "outlaw",
+      "metric": "quest_takeable",
+      "quest": 982019,
+      "equals": 1
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Click the board",
+      "actor": "outlaw",
+      "entry": 1804480
+    },
+    {
+      "action": "assert",
+      "label": "The board adds the High-Risk category",
+      "actor": "outlaw",
+      "metric": "gossip_options",
+      "equals": 4
+    },
+    {
+      "action": "gossip_select",
+      "label": "Choose High-Risk Quests",
+      "actor": "outlaw",
+      "option": 3
+    },
+    {
+      "action": "assert",
+      "label": "The Legion quest is offered",
+      "actor": "outlaw",
+      "metric": "quest_menu_has",
+      "quest": 982019,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "with the shared Karazhan quest",
+      "actor": "outlaw",
+      "metric": "quest_menu_has",
+      "quest": 420460,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "but not the Hero's Call Board's Alliance-only daily",
+      "actor": "outlaw",
+      "metric": "quest_menu_has",
+      "quest": 980019,
+      "equals": 0
+    },
+    {
+      "action": "quest_accept",
+      "label": "Accept the Legion quest from the board",
+      "actor": "outlaw",
+      "gameobject": 1804480,
+      "quest": 982019
+    },
+    {
+      "action": "assert",
+      "label": "The quest is in the log",
+      "actor": "outlaw",
+      "metric": "quest_status",
+      "quest": 982019,
+      "equals": 3
+    }
+  ]
+}

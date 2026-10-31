@@ -39,6 +39,13 @@ bool Selected(SpellInfo const* info, uint32 aura)
         return false;
     }
 }
+bool RighteousTempest(SpellInfo const* info)
+{
+    for (uint32 spell : {805410, 570200, 570201, 570202, 570203, 570204, 570205})
+        if (info->Id == spell)
+            return true;
+    return false;
+}
 constexpr uint32 SPELL_VISUAL_KIT_BENEDICTION_CAST = 4565;
 constexpr uint32 SPELL_VISUAL_KIT_BENEDICTION_IMPACT = 4566;
 constexpr uint32 SPELL_RECENTLY_PARRIED_OR_DODGED = 681170;
@@ -103,7 +110,7 @@ class templar_casts : public AllSpellScript
         if (Named(info, 804929))
             spell->SetScriptValue(801832, 1);
         float factor = 1.0f;
-        if (Named(info, 805410))
+        if (RighteousTempest(info))
             for (auto const& pair : player->GetAppliedAuras())
                 if (Aura* aura = pair.second->GetBase(); Named(aura->GetSpellInfo(), 805409))
                 {
@@ -282,7 +289,7 @@ class templar_casts : public AllSpellScript
             spell->SetScriptValue(806106, 1);
             ReduceLibrams(player, std::abs(Amount(806106)));
         }
-        if (Named(info, 805410) && player->HasAura(301339))
+        if (RighteousTempest(info) && player->HasAura(301339))
             SpreadCondemn(player, target);
         if (Named(info, 804929))
         {

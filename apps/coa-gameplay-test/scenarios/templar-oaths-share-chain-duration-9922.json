@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Templar Oaths held on the Oath Chain last as long as the refreshed chain (#9922)",
+  "contract": [
+    "Every Oath grant refreshes Oath Chain 704576 to its 15000 ms duration (#9506), and the chain's removal clears",
+    "every Oath. The Oaths themselves last 10 min in Spell.dbc and hide their duration (SPELL_ATTR5_DO_NOT_DISPLAY_DURATION),",
+    "so they belong to the chain rather than timing out on their own. GrantOath gave only the newly granted Oath the",
+    "chain's duration, so an Oath of another type kept its older timer and expired while the refreshed chain stayed up.",
+    "Expected: after Righteous Lunge grants Oath: Righteous Lunge 804904 and Condemn grants Oath: Condemn 804922 6 s",
+    "later, 804904 carries the refreshed chain's remaining duration and is still held 10 s after Condemn, when its",
+    "original 15 s timer would have run out, together with the chain."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "templar", "race": 1, "class": 19, "level": 80,
+      "melee_hit_rating": 10000, "spell_hit_rating": 10000, "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "templar", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "templar", "spell": 570233 },
+    { "action": "learn", "actor": "templar", "spell": 567541 },
+    { "action": "add_item", "actor": "templar", "item": 2495 },
+    { "action": "equip", "actor": "templar", "item": 2495, "slot": 15 },
+    { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "templar", "spell": 570233, "target": "dummy" },
+    {
+      "action": "assert", "label": "Righteous Lunge grants its Oath",
+      "actor": "templar", "metric": "aura", "spell": 804904, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The Oath Chain starts",
+      "actor": "templar", "metric": "aura", "spell": 704576, "equals": 1, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Let the first Oath's timer run down", "ms": 6000 },
+    { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "templar", "spell": 567541, "target": "dummy" },
+    {
+      "action": "assert", "label": "Condemn grants its Oath",
+      "actor": "templar", "metric": "aura", "spell": 804922, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Condemn refreshes the chain",
+      "actor": "templar", "metric": "aura_duration_ms", "spell": 704576, "min": 13000
+    },
+    {
+      "action": "assert", "label": "THE FIX: the older Oath follows the refreshed chain instead of its stale 9 s remainder",
+      "actor": "templar", "metric": "aura_duration_ms", "spell": 804904, "min": 13000
+    },
+    { "action": "wait", "label": "Outlast the first Oath's original 15 s timer", "ms": 10000 },
+    {
+      "action": "assert", "label": "The chain is still up",
+      "actor": "templar", "metric": "aura", "spell": 704576, "equals": 1
+    },
+    {
+      "action": "assert", "label": "THE FIX: the older Oath is still held while the chain is up",
+      "actor": "templar", "metric": "aura", "spell": 804904, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Condemn's Oath is still held",
+      "actor": "templar", "metric": "aura", "spell": 804922, "equals": 1
+    }
+  ]
+}

@@ -284,14 +284,24 @@ struct Multipliers
     std::map<std::uint32_t, Formula> maps;
 };
 
+struct SpellMultipliers
+{
+    Formula world;
+    std::map<std::uint32_t, Formula> maps;
+};
+
 inline constexpr char WorldDefault[] = "1.17 + 0.013 * level";
+inline constexpr char WorldDamageDefault[] = "2.16 + 0.013 * level";
+inline constexpr char WorldDamageSpreadDefault[] = "max(1.55, 1.85 - 0.05 * level)";
 
 struct Settings
 {
     bool enabled = false;
     Multipliers health{ Formula::Of(WorldDefault), 2.5f, 2.2f,
         { { 36, 2.2f }, { 43, 2.0f }, { 229, 4.0f }, { 389, 3.0f }, { 469, 5.0f } } };
-    Multipliers damage{ Formula::Of(WorldDefault), 1.5f, 1.0f, {} };
+    Multipliers damage{ Formula::Of(WorldDamageDefault), 1.5f, 1.0f, {} };
+    Multipliers damageSpread{ Formula::Of(WorldDamageSpreadDefault), 0.0f, 0.0f, {} };
+    SpellMultipliers spellDamage{ 1.0f, {} };
 };
 
 inline Context ContextOf(bool battlegroundOrArena, bool scriptedPrivateInstance, bool regularDifficulty, bool raid,
@@ -318,6 +328,34 @@ inline float Multiplier(Multipliers const& multipliers, Context context, std::ui
             return multipliers.dungeon.Evaluate(level);
         default:
             return multipliers.raid.Evaluate(level);
+    }
+}
+
+inline float SpellMultiplier(Settings const& settings, Context context, std::uint32_t mapId, std::uint8_t level,
+    bool weaponSpell)
+{
+    if (!weaponSpell && context != Context::None)
+    {
+        if (auto itr = settings.spellDamage.maps.find(mapId); itr != settings.spellDamage.maps.end())
+            return itr->second.Evaluate(level);
+        if (context == Context::World)
+            return settings.spellDamage.world.Evaluate(level);
+    }
+    return Multiplier(settings.damage, context, mapId, level);
+}
+
+inline void ScaleRange(float& minDamage, float& maxDamage, float multiplier, float spread)
+{
+    if (multiplier > 0.0f)
+    {
+        minDamage *= multiplier;
+        maxDamage *= multiplier;
+    }
+    if (spread > 1.0f && maxDamage > 0.0f)
+    {
+        float const average = (minDamage + maxDamage) / 2.0f;
+        minDamage = average * 2.0f / (1.0f + spread);
+        maxDamage = minDamage * spread;
     }
 }
 

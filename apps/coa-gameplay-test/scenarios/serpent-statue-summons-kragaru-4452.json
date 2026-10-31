@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "Book of the Ancients: the Gem of the Serpent on the Serpent Statue summons Lord Kragaru",
+  "contract": "Issue #4452: quest 6027 has the player open the Serpent Statue (177673, spawn 12609 on Ranazjar Isle) with the Gem of the Serpent (item 15766, spell 19470). That lights the Naga Beam (177705) and, 3.5 s later, summons Lord Kragaru (12369), the only source of the Book of the Ancients. The summon used to hang off the beam, which despawns after 3-4 s and so often vanished before its timer fired. The case joins world phase 1 beside the real statue, activates it with a native use request (the same activation the gem's open-lock performs; the lock itself is not exercised) and expects the beam and then exactly one Kragaru in front of the statue.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 254.6,
+    "y": 2965.8,
+    "z": 1.7,
+    "o": 3.9
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 57
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the statue is spawned",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the isle's grid activate",
+      "ms": 2500
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 6027,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: accepting the quest hands over the Gem of the Serpent",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 15766,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Lord Kragaru is not up before the statue is used",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 12369,
+      "equals": 0
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Activate the Serpent Statue, as the gem's open-lock does",
+      "actor": "p",
+      "entry": 177673
+    },
+    {
+      "action": "assert",
+      "label": "the statue is activated",
+      "actor": "p",
+      "metric": "nearby_gameobject_state",
+      "entry": 177673,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the Naga Beam lights up",
+      "actor": "p",
+      "metric": "nearby_gameobject_state",
+      "entry": 177705,
+      "max": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Lord Kragaru is summoned",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 12369,
+      "equals": 1,
+      "within_ms": 8000
+    }
+  ]
+}

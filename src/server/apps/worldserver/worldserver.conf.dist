@@ -2337,6 +2337,15 @@ Achievement.RealmFirstKillWindow = 60
 Achievement.RealmFirstRaceLimitOnePerCharacter = 1
 
 #
+#    Achievement.RealmFirstBlockBots
+#        Description: Companions (bots) cannot earn 'Realm First!' achievements, so they never take
+#                     a server first away from real players.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled, bots can earn them like any player)
+
+Achievement.RealmFirstBlockBots = 1
+
+#
 ###################################################################################################
 
 ###################################################################################################
@@ -3153,6 +3162,15 @@ CreatureFamilyAssistancePeriod = 3000
 #        Default:     7000 (7 Seconds)
 
 CreatureFamilyFleeDelay = 7000
+
+#
+#    CreatureFamilyFleeWalk
+#        Description: Creatures that flee at low health walk instead of running, both while
+#                     seeking assistance and while fleeing without it. Fear effects are unchanged.
+#        Default:     0 - (Disabled, creatures run)
+#                     1 - (Enabled, creatures walk)
+
+CreatureFamilyFleeWalk = 0
 
 #
 #    WorldBossLevelDiff
@@ -4745,9 +4763,10 @@ RecruitAFriend.MaxLevel = 60
 #    RecruitAFriend.MaxDifference
 #        Description: Highest level difference between linked Recruiter and Friend benefit from
 #                     the Recruit-A-Friend experience multiplier.
-#        Default:     4
+#        Default:     30
 
-RecruitAFriend.MaxDifference = 4
+#    Legacy value 4 is automatically treated as 30 when loading or reloading the config.
+RecruitAFriend.MaxDifference = 30
 
 #
 #    MaxRecruitAFriendBonusDistance
@@ -5108,3 +5127,11 @@ Cluster.IsCrossrealm=0
 # CLUSTER SETTINGS END                                                                            #
 #                                                                                                 #
 ###################################################################################################
+
+# Social.AccountWideFriends
+# Share friends/notes across owner characters and follow the friend's current character.
+# Requires the Ascension client friend-metadata protocol. Not for stock 3.3.5 clients.
+# Existing character friendships are imported once per account on first use after enabling.
+# Conflicting notes or more than 50 friend accounts require administrator reconciliation.
+# Ignore lists remain character-specific. Restart required; default disabled.
+Social.AccountWideFriends = 0

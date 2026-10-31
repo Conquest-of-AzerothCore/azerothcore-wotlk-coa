@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Worldforged Loop of the Sly Rogue stands on the Mirror Lake house floor, not in the stairs (#8603)",
+  "contract": "The LootCollector alignment pass overwrote the hand-authored spot of the Fargodeep Mine ring pickup (entry 90238, guid 6940714) with the open-ground height next to the house's rising stairs, 1.15 yd under the vmap floor there and half embedded in the stairs. The fix restores the authored position on the house floor.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -9435.3, "y": 464.5, "z": 54.0, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "the Loop of the Sly Rogue stands on the house floor", "actor": "p", "metric": "nearby_gameobject_count", "entry": 90238, "equals": 1 },
+    { "action": "assert", "label": "it rests on the floor, not sunk into the stairs", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940714, "spawn_type": "gameobject", "min": -1, "max": 1 },
+    { "action": "assert", "label": "it is grounded", "actor": "p", "metric": "spawn_placement", "guid": 6940714, "spawn_type": "gameobject", "tolerance": 1, "equals": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 90238 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "it is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

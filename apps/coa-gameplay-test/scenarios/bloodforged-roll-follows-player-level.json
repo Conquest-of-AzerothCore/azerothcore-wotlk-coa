@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Bloodforged roll follows the player's level",
-  "contract": "Requires Bloodforged.Enable = 1 with Bloodforged.Rates45 = \"0.02 0.01 0.00\" (a rate that almost never drops) and Bloodforged.Rates55 = \"99.98 0.01 0.00\" (a rate that guarantees the roll), PvpPower.Enable = 1 and the catalogue SQL. The rate band follows the looter's level, not the creature's: a level 55 High-Risk character kills a natural Diseased Black Bear (level 51-52, not grey to them, in the level 45 band) and finds one Bloodforged item rolled from the level 55 band.",
+  "contract": "Requires Bloodforged.Enable = 1 with Bloodforged.Rates45 = \"0.02 0.01 0.00\" (a rate that almost never drops) and Bloodforged.Rates55 = \"99.98 0.01 0.00\" (a rate that guarantees the roll), Rate.Drop.Item.Uncommon, .Rare and .Epic = 1 (they scale Bloodforged drops), PvpPower.Enable = 1 and the catalogue SQL. The rate band follows the looter's level, not the creature's: a level 55 High-Risk character kills a natural Diseased Black Bear (level 51-52, not grey to them, in the level 45 band) and finds one Bloodforged item rolled from the level 55 band.",
   "players": [
     {
       "id": "h",

@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "A mount restored after the Dungeon Finder flies only where flying is allowed",
+  "contract": [
+    "Issues #9587, #9612, #9818: a player who enters a Dungeon Finder dungeon mounted gets the mount back when",
+    "teleported out. Ash'adar, Harbinger of Dusk 917000 carries a 280% mounted flight aura, and Azeroth allows no",
+    "flying at any riding skill, so mounting it in Stormwind grants no flight. The mount restored at the entry point",
+    "in Stormwind must follow the same rule: it carries the rider at ground speed and grants no flight.",
+    "Socketless sessions never acknowledge flight, so the test counts the server's SMSG_MOVE_SET_CAN_FLY packets."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8833.38,
+    "y": 628.628,
+    "z": 94.0066,
+    "o": 1.06535
+  },
+  "players": [
+    { "id": "rider", "race": 1, "class": 1, "level": 80 },
+    { "id": "partner", "race": 1, "class": 1, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "rider", "spell": 917000 },
+    { "action": "set_skill", "actor": "rider", "skill": 762, "value": 300, "maximum": 300 },
+    { "action": "group", "actor": "rider", "target": "partner" },
+    { "action": "lfg_dungeon", "label": "The group is assigned Deadmines", "actor": "rider", "dungeon": 6 },
+    { "action": "snapshot", "actor": "rider", "metric": "server_packets", "opcode": 835, "save_as": "grants_before_mount" },
+    { "action": "cast", "actor": "rider", "spell": 917000 },
+    { "action": "assert", "label": "Ash'adar mounts the rider in Stormwind", "actor": "rider",
+      "metric": "mount_display_id", "min": 1, "within_ms": 5000 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "CONTROL: mounting in Stormwind grants no flight", "actor": "rider",
+      "metric": "server_packets", "opcode": 835, "relative_to": "grants_before_mount", "equals": 0 },
+    { "action": "lfg_teleport", "actor": "rider" },
+    { "action": "assert", "label": "The rider enters Deadmines", "actor": "rider", "metric": "map_id",
+      "equals": 36, "within_ms": 15000 },
+    { "action": "assert", "label": "CONTROL: the dungeon removes the mount", "actor": "rider",
+      "metric": "mount_display_id", "equals": 0, "within_ms": 5000 },
+    { "action": "snapshot", "actor": "rider", "metric": "server_packets", "opcode": 835, "save_as": "grants_before_return" },
+    { "action": "lfg_teleport", "actor": "rider", "out": true },
+    { "action": "assert", "label": "The rider returns to Stormwind", "actor": "rider", "metric": "map_id",
+      "equals": 0, "within_ms": 15000 },
+    { "action": "assert", "label": "The rider gets Ash'adar back", "actor": "rider",
+      "metric": "mount_display_id", "min": 1, "within_ms": 5000 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "The restored mount grants no flight in Stormwind", "actor": "rider",
+      "metric": "server_packets", "opcode": 835, "relative_to": "grants_before_return", "equals": 0 },
+    { "action": "assert", "label": "The restored mount cannot fly", "actor": "rider", "metric": "can_fly", "equals": 0 },
+    { "action": "assert", "label": "The restored mount keeps its 100% ground speed", "actor": "rider",
+      "metric": "run_speed_rate", "min": 1.999, "max": 2.001 }
+  ]
+}

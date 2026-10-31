@@ -35,6 +35,11 @@
       "actor": "buyer",
       "id": 26
     },
+    { "action": "advancement_rank", "actor": "buyer", "entry": 33690, "rank": 2 },
+    { "action": "advancement_rank", "actor": "buyer", "entry": 29195, "rank": 2 },
+    { "action": "advancement_rank", "actor": "buyer", "entry": 6405, "rank": 2 },
+    { "action": "advancement_rank", "actor": "buyer", "entry": 30360, "rank": 1 },
+    { "action": "advancement_rank", "actor": "buyer", "entry": 29628, "rank": 1 },
     {
       "action": "advancement_rank",
       "actor": "buyer",

@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "A Slimy Solution: the Simple Crystal Vial collects spittle from a slain murloc",
+  "contract": "Issue #8529: quest 17003 needs 10 Slimy Murloc Spittle (kill credit 300220). Esyra provides the Simple Crystal Vial 157006, whose spell 966240 'Collect Slimy Murloc Spittle' is cast on a dead Murloc Forager 46 or Lurker 732 (condition 17: target not alive); the murloc's SmartAI then credits the caster and despawns the corpse. Killing a murloc alone gives no credit. The case kills one summoned Forager, checks that the kill alone leaves the objective at 0, then uses the vial on the corpse and expects exactly one credit.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9562.33,
+    "y": -722.93,
+    "z": 64.74,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the tower's grid activate",
+      "ms": 2000
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 17003,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: accepting the quest provides the Simple Crystal Vial",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 157006,
+      "equals": 1
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "as": "murloc",
+      "entry": 46,
+      "distance": 3
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Slay the Murloc Forager",
+      "actor": "p",
+      "entry": 46,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "the kill alone collects no spittle",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 17003,
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "use_item",
+      "label": "Use the vial on the murloc corpse",
+      "actor": "p",
+      "item": 157006,
+      "spell": 966240,
+      "target": "murloc"
+    },
+    {
+      "action": "assert",
+      "label": "the vial collects one Slimy Murloc Spittle",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 17003,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    }
+  ]
+}

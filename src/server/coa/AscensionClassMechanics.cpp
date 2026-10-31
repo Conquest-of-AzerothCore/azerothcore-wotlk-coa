@@ -98,6 +98,7 @@ constexpr uint32 SPELL_GUARDIAN_REPRISAL = 800316;
 constexpr uint32 SPELL_GUARDIAN_REPRISAL_READY = 504885;
 constexpr uint32 SPELL_GUARDIAN_CENTURION_SWORD_ATTACKS = 807967;
 constexpr uint8 GUARDIAN_CENTURION_SWORD_EVENT = 16;
+constexpr uint8 GUARDIAN_CENTURION_POLEARM_EVENT = 22;
 constexpr uint32 SPELL_GUARDIAN_CENTURION_AXE_EFFECTS = 542238;
 constexpr uint32 SPELL_GUARDIAN_CENTURION_MACE_EFFECTS = 542265;
 constexpr uint32 SPELL_GUARDIAN_RAISE_SHIELD = 500168;
@@ -1211,6 +1212,7 @@ void ApplyAscensionClassMechanics(SpellInfo* spellInfo)
         HasDeprecatedWord(spellInfo->SpellName[0]) || HasDeprecatedWord(spellInfo->Rank[0]);
     ApplyClientSpellCharges(spellInfo);
     AscensionTinker::ApplyBeaconChargePool(spellInfo);
+    AscensionTinker::ApplyReplenishmentFieldAura(spellInfo);
 
     if (IsCustomClassFamily(spellInfo->SpellFamilyName))
         spellInfo->EquippedItemInventoryTypeMask = int32(RepairedRangedInventoryMask(spellInfo->EquippedItemClass,
@@ -1292,19 +1294,6 @@ void HandleAscensionClassMechanicsCalculatedTarget(Spell* spell, Player* player,
 
     HandleAscensionClassMechanics12To17CalculatedTarget(spell, player, target,
         targetInfo);
-
-    if (player->getClass() == CLASS_GUARDIAN &&
-        IsGuardianCenturionStrike(spell->GetSpellInfo()->Id) &&
-        GetMainHandWeaponSubclass(player) == ITEM_SUBCLASS_WEAPON_POLEARM)
-    {
-        Unit* primary = spell->GetOriginalTarget();
-        if (!primary || targetInfo.targetGUID != primary->GetGUID())
-            return;
-
-        targetInfo.damage *= 2;
-        targetInfo.damageBeforeTakenMods *= 2;
-        return;
-    }
 }
 
 void HandleAscensionClassMechanicsHit(Spell* spell, Player* player,
@@ -1340,6 +1329,19 @@ void HandleAscensionClassMechanicsHit(Spell* spell, Player* player,
         {
             player->CastSpell(player,
                 SPELL_GUARDIAN_CENTURION_SWORD_ATTACKS, true);
+        }
+
+        if (IsGuardianCenturionStrike(spellId) && damage &&
+            GetMainHandWeaponSubclass(player) == ITEM_SUBCLASS_WEAPON_POLEARM &&
+            target == spell->GetOriginalTarget() &&
+            spell->TryMarkScriptEventHandled(GUARDIAN_CENTURION_POLEARM_EVENT))
+        {
+            SpellInfo const* centurion = spell->GetSpellInfo();
+            uint32 const struck = Unit::DealDamage(player, target, damage,
+                nullptr, SPELL_DIRECT_DAMAGE, centurion->GetSchoolMask(),
+                centurion, false);
+            player->SendSpellNonMeleeDamageLog(target, centurion, struck,
+                centurion->GetSchoolMask(), 0, 0, true, 0, critical);
         }
 
         if (!damage)

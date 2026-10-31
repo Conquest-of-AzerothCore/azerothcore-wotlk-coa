@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "name": "Coming into Demonhood: a Demon Hunter finds the Skull of Kaz on the Valley of Trials floor beside Grillok (COA-9619)",
+  "contract": [
+    "Coming into Demonhood 200022 (Demon Hunter only) asks for the Skull of Kaz 661320 from the Skull of Kaz objects 9301201 (lock 1689, quest 200022). Both spawns (7912302, 7912303) lay on rocks about 30 yd above Grillok Morzog, out of sight and reach. They now lie on the valley floor, so a Demon Hunter standing beside Grillok has a skull within opening range and can take it.",
+    "Requires CoA.SendDisplayPatches=1 (the default). The quest had no QuestSuperTrack row, so the diamond fell back to the map area at height 0 and moved with the player. Row 33420 now tracks the two skulls (SuperTrack 18632, 18633) and Grillok for the turn-in (18634)."
+  ],
+  "timeout_ms": 30000,
+  "location": {
+    "map": 1,
+    "x": -591.0,
+    "y": -4133.0,
+    "z": 46.0,
+    "o": 4.0
+  },
+  "players": [
+    {
+      "id": "a",
+      "race": 2,
+      "class": 14,
+      "level": 7
+    }
+  ],
+  "steps": [
+    {
+      "action": "assert",
+      "label": "SETUP: the Demon Hunter receives row 33420 of quest 200022",
+      "actor": "a",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33420,
+      "index": 1,
+      "equals": 200022,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "the diamond tracks the first skull",
+      "actor": "a",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33420,
+      "index": 2,
+      "equals": 18632
+    },
+    {
+      "action": "assert",
+      "label": "and the second",
+      "actor": "a",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33420,
+      "index": 3,
+      "equals": 18633
+    },
+    {
+      "action": "assert",
+      "label": "and Grillok for the turn-in",
+      "actor": "a",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 33420,
+      "index": 82,
+      "equals": 18634
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "a",
+      "quest": 52003,
+      "complete": true
+    },
+    {
+      "action": "reward_quest",
+      "actor": "a",
+      "quest": 52003
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "quest_accept",
+      "actor": "a",
+      "quest": 200022,
+      "entry": 502760
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Demon Hunter is on Coming into Demonhood",
+      "actor": "a",
+      "metric": "quest_status",
+      "quest": 200022,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_phase",
+      "actor": "a",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "the skull is in the Demon Hunter's world",
+      "actor": "a",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 9301201,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "a",
+      "spell": 3365,
+      "target_gameobject": 9301201
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the skull is within opening range of the valley floor",
+      "actor": "a",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "a",
+      "item": 661320
+    },
+    {
+      "action": "close_loot",
+      "actor": "a"
+    },
+    {
+      "action": "assert",
+      "label": "the Demon Hunter takes the Skull of Kaz",
+      "actor": "a",
+      "metric": "item_count",
+      "item": 661320,
+      "equals": 1
+    }
+  ],
+  "creatures": [
+    {
+      "id": "grillok",
+      "owner": "a",
+      "entry": 502760,
+      "distance": 3,
+      "faction": 35,
+      "level": 10
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Felrend generates 1 Felfury even when it hits nothing (#7299)",
+  "contract": [
+    "Felrend 563268 is a two-hand area swing (Effect0 NORMALIZED_WEAPON_DMG and Effect1 TRIGGER_SPELL_WITH_VALUE,",
+    "both SRC_CASTER / SRC_AREA_ENEMY, 6 yd) whose tooltip reads 'Generates 1 Felfury' with no on-hit condition.",
+    "Live combat logs show every no-hit Felrend cast below the cap gaining Felfury 800058 within milliseconds.",
+    "With no creature anywhere near, the accepted cast must still add one Felfury stack."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "felsworn", "race": 1, "class": 14, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "add_item", "actor": "felsworn", "item": 38481 },
+    { "action": "equip", "label": "Felrend needs a two-hand weapon", "actor": "felsworn", "item": 38481, "slot": 15 },
+    { "action": "learn", "actor": "felsworn", "spell": 563268 },
+    { "action": "set_power", "actor": "felsworn", "power": 3, "value": 100 },
+    {
+      "action": "assert", "label": "SETUP: no Felfury before the cast",
+      "actor": "felsworn", "metric": "aura_stacks", "spell": 800058, "equals": 0
+    },
+    { "action": "cast", "label": "Felrend with no enemy in range", "actor": "felsworn", "spell": 563268 },
+    {
+      "action": "assert", "label": "SETUP: the cast was accepted",
+      "actor": "felsworn", "metric": "cast_failure", "spell": 563268, "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the swing that hit nothing still grants 1 Felfury",
+      "actor": "felsworn", "metric": "aura_stacks", "spell": 800058, "equals": 1, "within_ms": 3000
+    }
+  ]
+}

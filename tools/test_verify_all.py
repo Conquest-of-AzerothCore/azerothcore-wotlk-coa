@@ -121,7 +121,8 @@ class SettingsTests(WorkspaceTest):
 
     def test_setting_values_are_type_checked(self):
         for data in [{'jobs': 0}, {'gameplay_jobs': True}, {'cmake_args': '-G Ninja'}, {'mysql': ''}, [],
-                     {'gameplay_db_workers': 0}, {'gameplay_db_workers': '4'}, {'gameplay_db_workers': 33}]:
+                     {'gameplay_db_workers': 0}, {'gameplay_db_workers': '4'}, {'gameplay_db_workers': 33},
+                     {'gameplay_copy_workers': 0}, {'gameplay_copy_workers': 33}]:
             with self.subTest(data=data):
                 path = write(Path(self.directory.name) / 'settings.json', json.dumps(data))
                 with self.assertRaises(ValueError):
@@ -519,6 +520,19 @@ class HarnessClassificationTests(WorkspaceTest):
         entry = self.classify(workspace, mysql_source, settings=settings)
         self.assertEqual(entry['status'], 'run')
         self.assertEqual(entry['command'][3:], ['--mysql-bin', str(server)])
+
+    def test_client_lab_is_supplied_only_for_an_existing_descriptor(self):
+        workspace = self.workspace()
+        source = "parser.add_argument('--client-lab', type=Path, required=True)\n"
+        descriptor = workspace.base / 'lab.json'
+        for settings in (workspace.settings(), workspace.settings({'client_lab': str(descriptor)})):
+            entry = self.classify(workspace, source, settings=settings)
+            self.assertEqual(entry['status'], 'unavailable')
+            self.assertIn('--client-lab', entry['reason'])
+        write(descriptor, '{}')
+        entry = self.classify(workspace, source, settings=workspace.settings({'client_lab': str(descriptor)}))
+        self.assertEqual(entry['status'], 'run')
+        self.assertEqual(entry['command'][-2:], ['--client-lab', str(descriptor)])
 
     def test_optional_suppliable_arguments_are_passed_when_known(self):
         workspace = self.workspace()
@@ -921,10 +935,21 @@ class GameplayTests(WorkspaceTest):
                 else:
                     self.assertFalse({'--clock', '--lanes', '--character-db-workers'} & set(command))
 
+    def test_copy_workers_setting_reaches_the_gameplay_runner(self):
+        workspace = self.workspace()
+        self.assertNotIn('--copy-workers', self.planned_gameplay(workspace, [])['commands'][0])
+        settings = write(workspace.base / 'settings.json', json.dumps({'gameplay_copy_workers': 3}))
+        for clock in verify_all.GAMEPLAY_CLOCKS:
+            with self.subTest(clock=clock):
+                command = self.planned_gameplay(workspace, ['--settings', str(settings), '--gameplay-clock', clock])
+                command = command['commands'][0]
+                self.assertEqual(command[command.index('--copy-workers') + 1], '3')
+                self.assertEqual(verify_all.gameplay_module('batch').parser().parse_args(command[3:]).copy_workers,
+                                 3)
+
     def test_gameplay_concurrency_options_must_match_the_clock(self):
         workspace = self.workspace()
-        for arguments, message in [(['--gameplay-jobs', '2'], '--gameplay-jobs above 1 requires --gameplay-clock real'),
-                                   (['--gameplay-clock', 'real', '--gameplay-lanes', '2'],
+        for arguments, message in [(['--gameplay-clock', 'real', '--gameplay-lanes', '2'],
                                     '--gameplay-lanes above 1 requires --gameplay-clock simulated'),
                                    (['--gameplay-clock', 'real', '--gameplay-db-workers', '2'],
                                     '--gameplay-db-workers above 1 requires --gameplay-clock simulated')]:
@@ -948,6 +973,32 @@ class GameplayTests(WorkspaceTest):
                 verify_all.parser().parse_args(arguments)
         self.assertEqual(verify_all.parser().parse_args(['--gameplay-lanes', '15']).gameplay_lanes, 15)
         self.assertEqual(verify_all.parser().parse_args(['--gameplay-db-workers', '32']).gameplay_db_workers, 32)
+
+    def test_simulated_clock_accepts_several_jobs(self):
+        workspace = self.workspace()
+        for arguments, (lanes, jobs) in [(['--gameplay-jobs', '4'], (15, 4)),
+                                         (['--gameplay-jobs', '2', '--gameplay-lanes', '6'], (6, 2))]:
+            with self.subTest(arguments=arguments):
+                plan = self.planned_gameplay(workspace, arguments)
+                self.assertEqual((plan['clock'], plan['lanes'], plan['gameplay_jobs']), ('simulated', lanes, jobs))
+                command = plan['commands'][0]
+                self.assertEqual(command[command.index('--jobs') + 1], str(jobs))
+                self.assertEqual(command[command.index('--clock') + 1], 'simulated')
+                args = verify_all.gameplay_module('batch').parser().parse_args(command[3:])
+                self.assertEqual((args.jobs, args.clock, args.lanes), (jobs, 'simulated', lanes))
+
+    def test_default_jobs_is_unchanged(self):
+        workspace = self.workspace()
+        settings = write(workspace.base / 'settings.json', json.dumps({'gameplay_jobs': 3}))
+        for arguments in ([], ['--settings', str(settings)]):
+            with self.subTest(arguments=arguments):
+                plan = self.planned_gameplay(workspace, arguments)
+                self.assertEqual((plan['clock'], plan['gameplay_jobs']), ('simulated', 1))
+                command = plan['commands'][0]
+                self.assertEqual(command[command.index('--jobs') + 1], '1')
+        self.assertIsNone(verify_all.parser().parse_args([]).gameplay_jobs)
+        requested = verify_all.parser().parse_args([])
+        self.assertEqual(verify_all.gameplay_concurrency(requested, {'gameplay_jobs': 3}, 32)[0], 1)
 
     def test_windows_selections_beyond_the_command_line_limit_are_rejected(self):
         workspace = self.workspace()

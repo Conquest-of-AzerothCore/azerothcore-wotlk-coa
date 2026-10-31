@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "A female Bloodmage takes the female worgen display in Blood Curse and Eternal Curse",
+  "contract": "PR #9631 gave Worgen Form Visual 563124 (linked from Blood Curse 562720) and Eternal Curse 800157 an aura script that swaps the male worgen display 574 of creature 56332 for the female worgen display 142818 (CreatureDisplayInfo 142818: CreatureModelData 114067 Character\\Worgen\\Female\\WorgenFemale.mdx, CreatureDisplayInfoExtra 500031 race 13 gender 1, in both the server and the installed client DBC). The script tested Unit::getGender(), but Unit::SetDisplayId rewrites UNIT_FIELD_BYTES_0 byte 2 from creature_model_info, and display 574 is Gender 0, so once the transform set 574 every caster read as male and kept the male worgen. The character's own gender is PLAYER_BYTES_3 byte 0, which transforms leave alone. Expected: a female human Bloodmage wears display 142818 while Blood Curse or Eternal Curse is active and her mortal display returns afterwards; the male case (574) is bloodmage-blood-curse-worgen-model. display_id reads the server's selected display only; client rendering is not tested.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "gender": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 562720 },
+    { "action": "snapshot", "actor": "bloodmage", "metric": "display_id", "save_as": "mortal_display" },
+    {
+      "action": "assert", "label": "SETUP: the fixture is a female human (ChrRaces 1 FemaleDisplayId 50)",
+      "actor": "bloodmage", "metric": "display_id", "equals": 50
+    },
+    { "action": "cast", "actor": "bloodmage", "spell": 562720 },
+    {
+      "action": "assert", "label": "SETUP: the Worgen Form Visual rides on Blood Curse", "actor": "bloodmage",
+      "metric": "aura", "spell": 563124, "caster": "bloodmage", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Blood Curse gives her the female worgen display", "actor": "bloodmage",
+      "metric": "display_id", "equals": 142818
+    },
+    { "action": "cancel_aura", "label": "Return to Mortal Form", "actor": "bloodmage", "spell": 562720 },
+    {
+      "action": "assert", "label": "The worgen visual ends with the form", "actor": "bloodmage",
+      "metric": "aura", "spell": 563124, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Her mortal display returns after Blood Curse", "actor": "bloodmage",
+      "metric": "display_id", "relative_to": "mortal_display", "equals": 0
+    },
+    { "action": "set_aura", "label": "Enter Eternal Curse", "actor": "bloodmage", "spell": 800157, "stacks": 1 },
+    {
+      "action": "assert", "label": "SETUP: Eternal Curse is active", "actor": "bloodmage",
+      "metric": "aura", "spell": 800157, "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Eternal Curse gives her the female worgen display", "actor": "bloodmage",
+      "metric": "display_id", "equals": 142818
+    },
+    { "action": "set_aura", "label": "Leave Eternal Curse", "actor": "bloodmage", "spell": 800157, "stacks": 0 },
+    {
+      "action": "assert", "label": "Her mortal display returns after Eternal Curse", "actor": "bloodmage",
+      "metric": "display_id", "relative_to": "mortal_display", "equals": 0, "within_ms": 2000
+    }
+  ]
+}

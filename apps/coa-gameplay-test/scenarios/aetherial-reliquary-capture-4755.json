@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "name": "Aetherial Reliquary preserves the experience boosts at the realm level cap (#4755)",
+  "contract": "On a level-60 realm (MaxPlayerLevel 60, the cap Prestige also follows), #4755 (duplicate #4803): on Ascension, reaching max level moved any active store experience boost, Aura of Experience 818059 and the remaining time of Potion of Experience 818046, into Aetherial Reliquary 8263512, removed both auras and showed 'Your Experience boosts have been preserved in your Aetherial Boon Reliquary.' in the centre of the screen (screenshot in the issue). The boosts are stored on the character, so a relog keeps them stored and the item present. A character reaching the cap without either boost gets no Reliquary. Using the Reliquary at the cap restores nothing and keeps the item, because the boosts only work below max level; this refusal text is not from a live source.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "boosted",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    },
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "boosted",
+      "spell": 818059,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "boosted",
+      "spell": 818046,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Potion of Experience is running",
+      "actor": "boosted",
+      "metric": "aura_duration_ms",
+      "spell": 818046,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Reliquary yet",
+      "actor": "boosted",
+      "metric": "item_count",
+      "item": 8263512,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "boosted",
+      "value": 60
+    },
+    {
+      "action": "assert",
+      "label": "Aura of Experience was removed at the cap",
+      "actor": "boosted",
+      "metric": "aura",
+      "spell": 818059,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Potion of Experience was removed at the cap",
+      "actor": "boosted",
+      "metric": "aura",
+      "spell": 818046,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "One Aetherial Reliquary was placed in the bags",
+      "actor": "boosted",
+      "metric": "item_count",
+      "item": 8263512,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The live preservation notice was shown",
+      "actor": "boosted",
+      "metric": "notification_contains",
+      "text": "Your Experience boosts have been preserved in your Aetherial Boon Reliquary.",
+      "equals": 1
+    },
+    {
+      "action": "relog",
+      "actor": "boosted"
+    },
+    {
+      "action": "assert",
+      "label": "After a relog the Reliquary is still carried",
+      "actor": "boosted",
+      "metric": "item_count",
+      "item": 8263512,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "After a relog the Aura stays stored, not active",
+      "actor": "boosted",
+      "metric": "aura",
+      "spell": 818059,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "After a relog the Potion stays stored, not active",
+      "actor": "boosted",
+      "metric": "aura",
+      "spell": 818046,
+      "equals": 0
+    },
+    {
+      "action": "use_item",
+      "actor": "boosted",
+      "item": 8263512,
+      "spell": 8263512
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Used at the cap, the Reliquary is kept",
+      "actor": "boosted",
+      "metric": "item_count",
+      "item": 8263512,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Used at the cap, the Aura is not restored",
+      "actor": "boosted",
+      "metric": "aura",
+      "spell": 818059,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Used at the cap, the Potion is not restored",
+      "actor": "boosted",
+      "metric": "aura",
+      "spell": 818046,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Used at the cap, the player is told why",
+      "actor": "boosted",
+      "metric": "notification_contains",
+      "text": "Your stored experience buffs only work below max level.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The stored boosts survived the relog: the Reliquary is not empty",
+      "actor": "boosted",
+      "metric": "notification_contains",
+      "text": "Your Aetherial Reliquary holds no stored buffs.",
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "plain",
+      "value": 60
+    },
+    {
+      "action": "assert",
+      "label": "Without boosts no Reliquary is carried",
+      "actor": "plain",
+      "metric": "item_count",
+      "item": 8263512,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Without boosts no Reliquary is mailed",
+      "actor": "plain",
+      "metric": "mail_has_item",
+      "item": 8263512,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Without boosts no preservation notice is shown",
+      "actor": "plain",
+      "metric": "notification_contains",
+      "text": "Your Experience boosts have been preserved in your Aetherial Boon Reliquary.",
+      "equals": 0
+    }
+  ]
+}

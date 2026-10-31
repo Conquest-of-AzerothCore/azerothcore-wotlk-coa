@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AscensionBazaarTokenReserve.h"
 #include "Chat.h"
 #include "Item.h"
 #include "Language.h"
@@ -297,6 +298,23 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
         trader->GetSession()->SendTradeStatus(info);
         his_trade->SetAccepted(false, true);
         return;
+    }
+
+    // Elite Warchest Bazaar Tokens: check again, tokens may have been spent since they were put in the trade.
+    {
+        uint32 tokens = 0;
+        for (uint8 i = 0; i < TRADE_SLOT_TRADED_COUNT; ++i)
+            if (Item* item = my_trade->GetItem(TradeSlots(i)))
+                if (item->GetEntry() == AscensionBazaarTokenReserve::TOKEN_ITEM)
+                    tokens += item->GetCount();
+
+        if (!AscensionBazaarTokenReserve::CanGiveAway(_player, tokens))
+        {
+            AscensionBazaarTokenReserve::SendRefusal(_player);
+            info.Status = TRADE_STATUS_TRADE_CANCELED;
+            SendTradeStatus(info);
+            return;
+        }
     }
 
     // not accept if some items now can't be trade (cheating)
@@ -920,6 +938,24 @@ void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
         info.Status = TRADE_STATUS_CLOSE_WINDOW;
         SendTradeStatus(info);
         return;
+    }
+
+    // Elite Warchest Bazaar Tokens are Realm Bound: the account must keep its reserve.
+    if (tradeSlot != TRADE_SLOT_NONTRADED && item->GetEntry() == AscensionBazaarTokenReserve::TOKEN_ITEM)
+    {
+        uint32 tokens = item->GetCount();
+        for (uint8 i = 0; i < TRADE_SLOT_TRADED_COUNT; ++i)
+            if (Item* traded = my_trade->GetItem(TradeSlots(i)))
+                if (i != tradeSlot && traded->GetEntry() == AscensionBazaarTokenReserve::TOKEN_ITEM)
+                    tokens += traded->GetCount();
+
+        if (!AscensionBazaarTokenReserve::CanGiveAway(_player, tokens))
+        {
+            AscensionBazaarTokenReserve::SendRefusal(_player);
+            info.Status = TRADE_STATUS_TRADE_CANCELED;
+            SendTradeStatus(info);
+            return;
+        }
     }
 
     if (tradeSlot != TRADE_SLOT_NONTRADED && item->IsBindedNotWith(my_trade->GetTrader()))

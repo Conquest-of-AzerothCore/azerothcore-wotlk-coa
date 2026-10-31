@@ -1,0 +1,597 @@
+{
+  "schema": 1,
+  "name": "Level-21 Spider Bomb and Firepot Drone deal damage in The Deadmines (#9792)",
+  "contract": [
+    "#9792 reports that Build: Spider Bomb 500535 and Build: Firepot Drone 500600 deal 0 damage for a level-21",
+    "Tinker in The Deadmines (map 36, Mr. Smite's cove). Both builds summon a device (226012 / 226112) whose",
+    "npc_ascension_tinker_device AI casts Spider Bomb Explosion 801982 or Firepot 500601 on enemies once it is",
+    "within 2 yd of its focus. Expected minimum from Spell.dbc at device level 21 (the device takes its",
+    "owner's level): 801982 is 28 base + 1 die + 4.5 per level above SpellLevel 11 = 28 + 1 + 45 = 74 Fire;",
+    "500601 is 181 + 1 = 182 scaled by the Tinker level curve .0267291844 + .0048541098 L + .0001859598 L^2",
+    "= 0.2107 at L 21, about 38 Fire. Owner Ranged Attack Power and spell power coefficients only add.",
+    "The golem fixture stands at the viewer's level 21 so the Deadmines per-viewer view never shrinks the",
+    "damage the shared pool takes (a band below 21 would only enlarge it). Linear monster resistance at",
+    "level 21 averages 21 / 5 = 4.2 %, whose discrete partial resist removes at most 20 %: one landed",
+    "explosion takes at least 59 health and one landed Firepot at least 30. Equal-level NPC casts keep their",
+    "4 % magic / 5 % ranged miss, so four detonations per device must together reach that floor; four",
+    "misses in a row have a probability below 7e-6. The players and fixtures are phased away from the",
+    "dungeon's own creatures. Refill 150 Mana (both builds cost a percentage of base mana), reset the",
+    "build cooldown and restore Firepot's three charges between trials without touching hit chance or",
+    "damage."
+  ],
+  "timeout_ms": 300000,
+  "location": {
+    "map": 36,
+    "x": -30.55,
+    "y": -792.89,
+    "z": 19.12,
+    "o": 5.76,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 21
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 21,
+      "distance": 7,
+      "health": 1000000,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "bomb_baseline",
+      "label": "Health before four bomb detonations"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 150
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "save_as": "bomb_0_go"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500535,
+      "target": "golem",
+      "label": "Level-21 bomb build 1 in The Deadmines"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Exactly one Spider Bomb is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "relative_to": "bomb_0_go",
+      "equals": 1,
+      "within_ms": 6000,
+      "label": "The Spider Bomb reaches the golem and casts Spider Bomb Explosion"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated Spider Bomb disappears"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 150
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "save_as": "bomb_1_go"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500535,
+      "target": "golem",
+      "label": "Level-21 bomb build 2 in The Deadmines"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Exactly one Spider Bomb is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "relative_to": "bomb_1_go",
+      "equals": 1,
+      "within_ms": 6000,
+      "label": "The Spider Bomb reaches the golem and casts Spider Bomb Explosion"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated Spider Bomb disappears"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 150
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "save_as": "bomb_2_go"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500535,
+      "target": "golem",
+      "label": "Level-21 bomb build 3 in The Deadmines"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Exactly one Spider Bomb is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "relative_to": "bomb_2_go",
+      "equals": 1,
+      "within_ms": 6000,
+      "label": "The Spider Bomb reaches the golem and casts Spider Bomb Explosion"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated Spider Bomb disappears"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 150
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500535
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "save_as": "bomb_3_go"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500535,
+      "target": "golem",
+      "label": "Level-21 bomb build 4 in The Deadmines"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Exactly one Spider Bomb is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 801982,
+      "entry": 226012,
+      "relative_to": "bomb_3_go",
+      "equals": 1,
+      "within_ms": 6000,
+      "label": "The Spider Bomb reaches the golem and casts Spider Bomb Explosion"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226012,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated Spider Bomb disappears"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "assert",
+      "actor": "golem",
+      "metric": "health",
+      "relative_to": "bomb_baseline",
+      "max": -59,
+      "label": "Four Spider Bomb detonations take at least one landed explosion's 59 health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "golem",
+      "metric": "health",
+      "save_as": "drone_baseline",
+      "label": "Health before four drone detonations"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 150
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "restore_charges",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "save_as": "drone_0_go"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500600,
+      "target": "golem",
+      "label": "Level-21 drone build 1 in The Deadmines"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "Exactly one Firepot Drone is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "relative_to": "drone_0_go",
+      "min": 1,
+      "within_ms": 8000,
+      "label": "The Firepot Drone reaches the golem and casts Firepot"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated Firepot Drone disappears"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 150
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "restore_charges",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "save_as": "drone_1_go"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500600,
+      "target": "golem",
+      "label": "Level-21 drone build 2 in The Deadmines"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "Exactly one Firepot Drone is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "relative_to": "drone_1_go",
+      "min": 1,
+      "within_ms": 8000,
+      "label": "The Firepot Drone reaches the golem and casts Firepot"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated Firepot Drone disappears"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 150
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "restore_charges",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "save_as": "drone_2_go"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500600,
+      "target": "golem",
+      "label": "Level-21 drone build 3 in The Deadmines"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "Exactly one Firepot Drone is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "relative_to": "drone_2_go",
+      "min": 1,
+      "within_ms": 8000,
+      "label": "The Firepot Drone reaches the golem and casts Firepot"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated Firepot Drone disappears"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "set_power",
+      "actor": "tinker",
+      "power": 0,
+      "value": 150
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "restore_charges",
+      "actor": "tinker",
+      "spell": 500600
+    },
+    {
+      "action": "snapshot",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "save_as": "drone_3_go"
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 500600,
+      "target": "golem",
+      "label": "Level-21 drone build 4 in The Deadmines"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 1,
+      "within_ms": 4000,
+      "label": "Exactly one Firepot Drone is built"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 500601,
+      "entry": 226112,
+      "relative_to": "drone_3_go",
+      "min": 1,
+      "within_ms": 8000,
+      "label": "The Firepot Drone reaches the golem and casts Firepot"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "owned_creature_count",
+      "entry": 226112,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The detonated Firepot Drone disappears"
+    },
+    {
+      "action": "wait",
+      "ms": 1600,
+      "label": "Clear the native global cooldown between builds"
+    },
+    {
+      "action": "assert",
+      "actor": "golem",
+      "metric": "health",
+      "relative_to": "drone_baseline",
+      "max": -30,
+      "label": "Four Firepot Drone detonations take at least one landed Firepot's 30 health"
+    }
+  ]
+}

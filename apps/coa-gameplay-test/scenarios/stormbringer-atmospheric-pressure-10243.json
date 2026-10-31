@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Atmospheric Pressure reads as a cancellable self buff and generates Static on damage taken (#10243, #9843)",
+  "contract": "Atmospheric Pressure (803565) is the fourth Stormbringer stance. Unlike Barometric (803563) and Crushing (803564) Pressure, its Spell.dbc row has SPELL_ATTR0_AURA_IS_DEBUFF and SPELL_ATTR5_NO_CASTER_AURA_ICON instead of SPELL_ATTR5_NO_TARGET_AURA_ICON, so the client hid the caster's own aura and never lit the stance button, and the server kept it negative and uncancellable. The contract gives it its siblings' flags and streams the corrected row to the client (SMSG_PATCH_SPELL 2346). Its tooltip also says it makes you 'generate additional Static on damage taken': Effect[1] is PROC_TRIGGER_SPELL 803568 (-> 807945 Add 1 Static) but ProcFlags is 0; a spell_proc row on damage taken lets it fire.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "storm", "race": 1, "class": 16, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "storm", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "assert", "label": "FIX: the corrected Atmospheric Pressure row is streamed to the client",
+      "actor": "storm", "metric": "server_packet_contains", "opcode": 2346, "row": 803565,
+      "text": "Atmospheric Pressure", "equals": 1, "within_ms": 5000 },
+
+    { "action": "learn", "actor": "storm", "spell": 803565 },
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "cast", "actor": "storm", "spell": 803565 },
+    { "action": "assert", "label": "SETUP: Atmospheric Pressure is applied on the caster",
+      "actor": "storm", "metric": "aura", "spell": 803565, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "FIX: the caster's own Atmospheric Pressure reads as a buff",
+      "actor": "storm", "metric": "aura_positive", "spell": 803565, "equals": 1 },
+    { "action": "assert", "label": "CONTRACT: the nearby enemy still gets the debuff",
+      "actor": "enemy", "metric": "aura", "spell": 803565, "caster": "storm", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: the enemy-side application still reads as a debuff",
+      "actor": "enemy", "metric": "aura_positive", "spell": 803565, "caster": "storm", "equals": 0 },
+
+    { "action": "assert", "label": "BASELINE: no Static and no proc before taking damage",
+      "actor": "storm", "metric": "aura_stacks", "spell": 803102, "equals": 0 },
+    { "action": "set_aura", "label": "Self Corruption rank 8: a damage tick every 3 sec",
+      "actor": "storm", "spell": 27216, "stacks": 1 },
+    { "action": "wait", "label": "First Corruption tick", "ms": 3500 },
+    { "action": "assert", "label": "FIX: damage taken procs Atmospheric Pressure",
+      "actor": "storm", "metric": "spell_proc_count", "spell": 803565, "min": 1 },
+    { "action": "assert", "label": "FIX: the proc adds Static",
+      "actor": "storm", "metric": "aura_stacks", "spell": 803102, "min": 1, "within_ms": 1500 },
+    { "action": "cancel_aura", "actor": "storm", "spell": 27216 },
+
+    { "action": "cancel_aura", "actor": "storm", "spell": 803565 },
+    { "action": "assert", "label": "FIX: cancelling Atmospheric Pressure removes the caster's buff",
+      "actor": "storm", "metric": "aura", "spell": 803565, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "label": "CONTRACT: cancelling it also ends the enemy debuff",
+      "actor": "enemy", "metric": "aura", "spell": 803565, "caster": "storm", "equals": 0, "within_ms": 1000 }
+  ]
+}

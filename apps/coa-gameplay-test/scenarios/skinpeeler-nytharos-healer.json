@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: a healer keeps the tank up",
+  "contract": [
+    "A priest in the group casts a heal and produces healing on the tank.",
+    "The tank survives the first cycle when healing is present."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "healer",
+      "race": 1,
+      "class": 5,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "healer",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "summon",
+      "label": "Spawn the boss",
+      "actor": "tank",
+      "as": "boss",
+      "entry": 9916214,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps1",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "learn",
+      "label": "Healer learns Greater Heal",
+      "actor": "healer",
+      "spell": 2060
+    },
+    {
+      "action": "wait",
+      "label": "First cycle with healing",
+      "ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Healer produced healing",
+      "actor": "healer",
+      "metric": "spell_healing_done",
+      "min": 1,
+      "spell": 2060,
+      "target": "tank"
+    },
+    {
+      "action": "assert",
+      "label": "Tank still alive with a healer",
+      "actor": "tank",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

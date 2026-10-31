@@ -4,6 +4,8 @@
 #include "SpellInfo.h"
 namespace AscensionStormbringer
 {
+constexpr uint32 SPELL_ATMOSPHERIC_PRESSURE = 803565;
+
 void ApplyContracts(SpellInfo* info);
 }
 #endif

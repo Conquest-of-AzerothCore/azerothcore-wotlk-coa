@@ -14,7 +14,8 @@ enum WitchHunterSharedSpells : uint32
 {
     SPELL_BRAND_OF_THE_DAMNED_DAMAGE = 807683,
     SPELL_SILVER_BOLTS = 804026,
-    SPELL_SHADOW_TRAPPED = 681177
+    SPELL_SHADOW_TRAPPED = 681177,
+    SPELL_SHADOW_BRAND = 680517
 };
 
 inline bool Family(SpellInfo const* info, uint8 word, uint32 mask)
@@ -61,6 +62,7 @@ Unit* Hound(Player* player);
 uint32 GetShadowhoundDisplay(Player* player);
 std::list<Unit*> Nearby(Unit* center, float range);
 void Cast(Unit* caster, Unit* target, uint32 id);
+void Brand(Unit* caster, Unit* target);
 void Reset(Player* player, uint32 id);
 void Replacement(Player* player, uint32 word, uint32 mask, uint32 child);
 void ClearReplacement(Player* player, uint32 word, uint32 mask);

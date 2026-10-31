@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Etching of the Dextrous shares the Agility class-buff category (COA-6091)",
+  "contract": "Class buffs that grant the same statistic form one exclusive group (2110001 for Agility): the newest replaces the previous one. The Runemaster's Etching of the Dextrous 561237 joins it, so it replaces the Templar's Inquisitor's Edict 706741 instead of stacking with it, while a Runemaster's own Etchings keep their class rules.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "target", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_aura", "actor": "target", "spell": 706741, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: Inquisitor's Edict is on the target", "actor": "target",
+      "metric": "aura", "spell": 706741, "equals": 1, "within_ms": 2000 },
+    { "action": "set_aura", "actor": "target", "spell": 561237, "stacks": 1 },
+    { "action": "assert", "label": "Etching of the Dextrous is applied", "actor": "target",
+      "metric": "aura", "spell": 561237, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "it replaces Inquisitor's Edict instead of stacking", "actor": "target",
+      "metric": "aura", "spell": 706741, "equals": 0 }
+  ]
+}

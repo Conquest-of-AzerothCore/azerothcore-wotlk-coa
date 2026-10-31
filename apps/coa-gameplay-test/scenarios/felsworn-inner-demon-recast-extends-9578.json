@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Felsworn: recasting Inner Demon adds its Felfury duration up to 30 seconds (#9578)",
+  "contract": [
+    "#9578: recasting Inner Demon 804216 while it is active must add 5 s per consumed Felfury 800058 to the remaining",
+    "duration, capped at the 6-Felfury maximum of 30 s, instead of replacing it with the new cast's shorter duration.",
+    "A first cast still lasts 5 s per Felfury."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "f", "race": 1, "class": 14, "level": 44, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "f", "spell": 804216 },
+    { "action": "set_power", "actor": "f", "power": 3, "value": 100 },
+    { "action": "set_aura", "actor": "f", "spell": 800058, "stacks": 2 },
+    { "action": "cast", "actor": "f", "spell": 804216 },
+    {
+      "action": "assert", "label": "SETUP: a first cast with two Felfury lasts 10 s",
+      "actor": "f", "metric": "aura_duration_ms", "spell": 804216, "min": 9000, "max": 10000, "within_ms": 500
+    },
+    { "action": "set_aura", "actor": "f", "spell": 800058, "stacks": 1 },
+    { "action": "cast", "actor": "f", "spell": 804216 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: a one-Felfury recast adds 5 s to the remaining duration",
+      "actor": "f", "metric": "aura_duration_ms", "spell": 804216, "min": 13500, "max": 15000, "within_ms": 500
+    },
+    { "action": "set_aura", "actor": "f", "spell": 800058, "stacks": 6 },
+    { "action": "cast", "actor": "f", "spell": 804216 },
+    {
+      "action": "assert", "label": "A six-Felfury recast stops at the 30 s maximum",
+      "actor": "f", "metric": "aura_duration_ms", "spell": 804216, "min": 29000, "max": 30000, "within_ms": 500
+    },
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_aura", "actor": "f", "spell": 800058, "stacks": 2 },
+    { "action": "cast", "actor": "f", "spell": 804216 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: a two-Felfury recast at 27 s refills to the 30 s maximum, not 10 s",
+      "actor": "f", "metric": "aura_duration_ms", "spell": 804216, "min": 29000, "max": 30000, "within_ms": 500
+    },
+    {
+      "action": "assert", "label": "Each recast consumes its Felfury",
+      "actor": "f", "metric": "aura_stacks", "spell": 800058, "equals": 0
+    }
+  ]
+}

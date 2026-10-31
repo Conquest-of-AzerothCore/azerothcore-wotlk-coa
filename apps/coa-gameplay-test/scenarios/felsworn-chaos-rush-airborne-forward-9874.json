@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Chaos Rush cast mid-jump while running forward still dashes forward (#9874)",
+  "contract": "Chaos Rush 500422 triggers Chaos Rush Jump 802028: effect 0 SPELL_EFFECT_CHARGE_DEST to TARGET_DEST_CASTER_FRONT with radius 10 yd, tooltip 'dash forward in the direction you're running'. A grounded caster holding a movement key gets a run-speed surge instead of the forced spline (#9397/#9404), but an airborne client keeps its take-off horizontal speed for the whole jump, so a surge during a running jump moves it nowhere. A running jump carries forward plus falling: the cast must keep the native 10 yd charge, exactly like a standing jump, and must not surge the run speed. The movement flags are fixtured through the harness, so this proves the server takes the charge path; the client-side jump arc needs a real client.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "dh", "race": 1, "class": 14, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "e", "owner": "dh", "entry": 36, "level": 80, "health": 500000, "distance": 30 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "dh", "spell": 500422 },
+    { "action": "assert", "label": "SETUP: the Felsworn knows Chaos Rush", "actor": "dh", "metric": "knows_spell", "spell": 500422, "equals": 1 },
+    { "action": "snapshot", "label": "Baseline run speed rate", "actor": "dh", "metric": "run_speed_rate", "save_as": "rate0" },
+
+    { "action": "set_moving", "label": "Run forward", "actor": "dh", "enabled": true, "flag": "forward" },
+    { "action": "set_moving", "label": "Jump while running", "actor": "dh", "enabled": true, "flag": "falling" },
+    { "action": "assert", "label": "SETUP: the Felsworn is moving", "actor": "dh", "metric": "moving", "equals": 1 },
+    { "action": "snapshot", "label": "Gap to the dummy before the airborne cast", "actor": "dh", "metric": "distance_2d", "target": "e", "save_as": "air0" },
+    { "action": "reset_cooldown", "actor": "dh", "spell": 500422 },
+    { "action": "cast", "label": "Chaos Rush mid-jump while running forward", "actor": "dh", "spell": 500422 },
+    { "action": "assert", "label": "SETUP: the airborne cast was accepted", "actor": "dh", "metric": "cast_failure", "spell": 500422, "equals": 0 },
+    { "action": "wait", "label": "Let the dash finish", "ms": 2000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the running jump dashes forward, closing the 30 yd gap by the 10 yd radius",
+      "actor": "dh", "metric": "distance_2d", "target": "e", "relative_to": "air0", "min": -14, "max": -4
+    },
+    {
+      "action": "assert", "label": "The airborne cast leaves the run speed rate unchanged",
+      "actor": "dh", "metric": "run_speed_rate", "relative_to": "rate0", "min": -0.05, "max": 0.05
+    },
+    { "action": "set_moving", "label": "Land", "actor": "dh", "enabled": false, "flag": "falling" },
+    { "action": "set_moving", "label": "Stop running", "actor": "dh", "enabled": false, "flag": "forward" }
+  ]
+}

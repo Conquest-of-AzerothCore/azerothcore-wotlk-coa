@@ -1,6 +1,7 @@
 #include "ManastormClientUIFixes.h"
 #include "AscensionClientLua.h"
 #include "Config.h"
+#include "DataMap.h"
 #include "ManastormModuleConfig.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
@@ -154,6 +155,50 @@ else
 end
 )lua";
 
+    constexpr std::string_view NativeObjectiveHighlightLua = R"lua(
+local frame = _G.CoAManastormObjectiveHighlight
+if not enabled and not frame then return end
+if not frame then
+    frame = CreateFrame("Frame")
+    _G.CoAManastormObjectiveHighlight = frame
+end
+frame:UnregisterAllEvents()
+frame:SetScript("OnUpdate", nil)
+frame:SetScript("OnEvent", nil)
+frame:Hide()
+if not enabled then return end
+local function Active()
+    return C_Manastorm and type(C_Manastorm.IsInManastorm) == "function"
+        and type(C_Manastorm.ShowObjectiveIcon) == "function" and C_Manastorm.IsInManastorm()
+end
+local function Refresh(self)
+    self.elapsed = 0
+    if Active() then
+        C_Manastorm.ShowObjectiveIcon()
+        self:Show()
+    else
+        self:Hide()
+    end
+end
+frame:SetScript("OnEvent", Refresh)
+frame:SetScript("OnUpdate", function(self, elapsed)
+    self.elapsed = (self.elapsed or 0) + elapsed
+    if self.elapsed >= 8 then Refresh(self) end
+end)
+frame:RegisterEvent("ACTIVE_MANASTORM_UPDATED")
+frame:RegisterEvent("PLAYER_ENTERING_WORLD")
+frame:RegisterEvent("MANASTORM_LEVEL_COMPLETED")
+Refresh(frame)
+)lua";
+
+    std::string const ObjectiveHighlightStateKey = "ManastormObjectiveHighlightDelivery";
+
+    struct ObjectiveHighlightState final : DataMap::Base
+    {
+        bool Ready = false;
+        bool Enabled = false;
+    };
+
     bool CanPush(Player* player)
     {
         WorldSession* session = player ? player->GetSession() : nullptr;
@@ -189,16 +234,50 @@ namespace ManastormClientUIFixes
         return lua;
     }
 
+    void SendObjectiveHighlight(Player* player)
+    {
+        if (!CanPush(player))
+            return;
+        ObjectiveHighlightState* state = player->CustomData.Get<ObjectiveHighlightState>(ObjectiveHighlightStateKey);
+        if (!state || !state->Ready)
+            return;
+        bool const enabled = ManastormModuleConfig::NativeObjectiveHighlight();
+        if (state->Enabled == enabled)
+            return;
+        state->Enabled = enabled;
+        AscensionClientLuaChunk chunk;
+        chunk.RequirementTypeId = RequirementTypeId;
+        chunk.RequirementId = 16263;
+        chunk.Token = "MANASTORM_OBJECTIVE_HIGHLIGHT";
+        chunk.Lua = enabled ? "local enabled = true\n" : "local enabled = false\n";
+        chunk.Lua.append(NativeObjectiveHighlightLua);
+        RunAscensionClientLua(player, chunk);
+    }
+
+    void ResetObjectiveHighlight(Player* player)
+    {
+        if (player)
+            player->CustomData.Erase(ObjectiveHighlightStateKey);
+    }
+
     void ScheduleLoginPush(Player* player)
     {
-        if (!CanPush(player) || !ConfiguredFixes())
+        if (!CanPush(player))
             return;
 
+        player->CustomData.GetDefault<ObjectiveHighlightState>(ObjectiveHighlightStateKey);
         player->m_Events.AddEventAtOffset([guid = player->GetGUID()]()
         {
             Player* current = ObjectAccessor::FindPlayer(guid);
             uint32 const fixes = ConfiguredFixes();
-            if (!CanPush(current) || !fixes)
+            if (!CanPush(current))
+                return;
+            ObjectiveHighlightState* state = current->CustomData.Get<ObjectiveHighlightState>(ObjectiveHighlightStateKey);
+            if (!state)
+                return;
+            state->Ready = true;
+            SendObjectiveHighlight(current);
+            if (!fixes)
                 return;
 
             AscensionClientLuaChunk chunk;

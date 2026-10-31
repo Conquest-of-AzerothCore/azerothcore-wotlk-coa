@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Vow of Dawn's splash copy no longer re-hits the original target (#9207)",
+  "contract": [
+    "Vow of Dawn's proc handler for id 803491 (AscensionSunClericEvents.cpp) manually selects up to Amount(803492)",
+    "nearby enemies (excluding the original target) and calls Copy() once per selected neighbor, intending each",
+    "call to land on exactly that one explicit unit. 803493 (the triggered copy-damage spell) carries its own",
+    "native EffectChainTarget[0]=3, so Unit::CastCustomSpell's ordinary chain-target selection additionally",
+    "auto-picked more nearby enemies on top of the handler's own explicit unit -- including, when the original",
+    "target was the only other enemy around, re-hitting that same original target with its own splash copy.",
+    "Copy() now caps MaxAffectedTargets to 1 for this call site (SPELLVALUE_MAX_TARGETS), so the manual",
+    "neighbor-selection loop is the only thing choosing targets and the native chain expansion can no longer",
+    "widen it. With only the original target and one eligible neighbor nearby, the neighbor must still take the",
+    "splash, but the original target must take zero of its own copy."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 27, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "target1", "owner": "caster", "entry": 36, "level": 80, "health": 100000, "distance": 5 },
+    { "id": "splash_a", "owner": "caster", "entry": 36, "level": 80, "health": 100000, "distance": 7 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "caster", "spell": 803491 },
+    { "action": "learn", "actor": "caster", "spell": 116 },
+    { "action": "cast", "actor": "caster", "spell": 803491 },
+    {
+      "action": "assert", "label": "Vow of Dawn is active on the caster", "actor": "caster",
+      "metric": "aura", "spell": 803491, "caster": "caster", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "wait", "ms": 1200,
+      "label": "Vow of Dawn and Frostbolt share StartRecoveryCategory 133 (1000 ms); let that GCD clear"
+    },
+    { "action": "cast", "actor": "caster", "spell": 116, "target": "target1" },
+    { "action": "wait", "ms": 2000, "label": "Let the direct hit, the Vow proc and its splash copy resolve" },
+    {
+      "action": "assert", "label": "The nearby neighbor still takes the Vow of Dawn splash",
+      "actor": "caster", "metric": "spell_damage_count", "spell": 803493, "target": "splash_a", "min": 1
+    },
+    {
+      "action": "assert", "label": "The original target takes none of its own splash copy",
+      "actor": "caster", "metric": "spell_damage_count", "spell": 803493, "target": "target1", "equals": 0
+    }
+  ]
+}

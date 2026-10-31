@@ -11,6 +11,8 @@
 #include "Log.h"
 #include "Map.h"
 #include "QueryResult.h"
+#include "SpellInfo.h"
+#include "TemporarySummon.h"
 #include "UnitScript.h"
 #include "WorldScript.h"
 #include <atomic>
@@ -49,9 +51,20 @@ namespace
         return script == "npc_training_dummy" || script == "npc_target_dummy";
     }
 
+    bool SummonedByPlayer(Creature const* creature)
+    {
+        TempSummon const* summon = creature->ToTempSummon();
+        if (!summon)
+            return false;
+        if (summon->GetSummonerGUID().IsPlayer())
+            return true;
+        Unit const* summoner = summon->GetSummonerUnit();
+        return summoner && (summoner->IsControlledByPlayer() || summoner->GetCharmerOrOwnerPlayerOrPlayerItself());
+    }
+
     bool IsEligible(Creature const* creature)
     {
-        return creature && !creature->IsPet() && !creature->IsSummon() && !creature->IsTotem() && !creature->IsTrigger()
+        return creature && !creature->IsPet() && !SummonedByPlayer(creature) && !creature->IsTotem() && !creature->IsTrigger()
             && !creature->IsCritter() && !creature->GetCharmerOrOwnerGUID() && !IsDummy(creature);
     }
 
@@ -64,25 +77,50 @@ namespace
             map->IsRegularDifficulty(), map->IsRaid(), map->IsDungeon());
     }
 
-    float DamageMultiplier(Unit const* target, Unit const* attacker)
+    Creature const* ScaledAttacker(Unit const* target, Unit const* attacker, CreatureScaling::Context& context)
     {
         if (!Enabled || !target || !attacker || !target->GetCharmerOrOwnerPlayerOrPlayerItself())
-            return 1.0f;
+            return nullptr;
         Creature const* creature = attacker->ToCreature();
-        if (!IsEligible(creature) || !creature->IsHostileTo(target))
+        if (!IsEligible(creature) || creature->IsFriendlyTo(target))
+            return nullptr;
+        context = ContextOf(creature);
+        return context == CreatureScaling::Context::None ? nullptr : creature;
+    }
+
+    float DamageValue(Unit const* target, Unit const* attacker,
+        CreatureScaling::Multipliers CreatureScaling::Settings::* values)
+    {
+        CreatureScaling::Context context;
+        Creature const* creature = ScaledAttacker(target, attacker, context);
+        if (!creature)
             return 1.0f;
-        CreatureScaling::Context const context = ContextOf(creature);
-        if (context == CreatureScaling::Context::None)
+        return CreatureScaling::Multiplier((*Active()).*values, context, creature->GetMapId(), creature->GetLevel());
+    }
+
+    float DamageMultiplier(Unit const* target, Unit const* attacker)
+    {
+        return DamageValue(target, attacker, &CreatureScaling::Settings::damage);
+    }
+
+    float SpellDamageMultiplier(Unit const* target, Unit const* attacker, SpellInfo const* spellInfo)
+    {
+        CreatureScaling::Context context;
+        Creature const* creature = ScaledAttacker(target, attacker, context);
+        if (!creature)
             return 1.0f;
-        return CreatureScaling::Multiplier(Active()->damage, context, creature->GetMapId(), creature->GetLevel());
+        bool const weaponSpell = spellInfo && (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE ||
+            spellInfo->DmgClass == SPELL_DAMAGE_CLASS_RANGED);
+        return CreatureScaling::SpellMultiplier(*Active(), context, creature->GetMapId(), creature->GetLevel(),
+            weaponSpell);
     }
 
     template <typename T>
-    void ScaleDamage(T& damage, Unit const* target, Unit const* attacker)
+    void ScaleDamage(T& damage, Unit const* target, Unit const* attacker, SpellInfo const* spellInfo)
     {
         if (damage <= 0)
             return;
-        if (float const multiplier = DamageMultiplier(target, attacker); multiplier != 1.0f)
+        if (float const multiplier = SpellDamageMultiplier(target, attacker, spellInfo); multiplier != 1.0f)
             damage = T(CreatureScaling::Scaled(uint32(damage), multiplier));
     }
 
@@ -106,11 +144,25 @@ namespace
             "CoA.CreatureScaling.Map" + kind, CreatureScaling::FormatMapMultipliers(defaults.maps), false));
         return result;
     }
+
+    CreatureScaling::SpellMultipliers ReadSpellMultipliers(CreatureScaling::SpellMultipliers const& defaults)
+    {
+        CreatureScaling::SpellMultipliers result;
+        result.world = ReadFormula("CoA.CreatureScaling.World.SpellDamage", defaults.world);
+        result.maps = CreatureScaling::ParseMapMultipliers(sConfigMgr->GetOption<std::string>(
+            "CoA.CreatureScaling.MapSpellDamage", CreatureScaling::FormatMapMultipliers(defaults.maps), false));
+        return result;
+    }
 }
 
 float CreatureScaling::DamageMultiplier(Unit const* target, Unit const* attacker)
 {
     return ::DamageMultiplier(target, attacker);
+}
+
+float CreatureScaling::SpellDamageMultiplier(Unit const* target, Unit const* attacker, SpellInfo const* spell)
+{
+    return ::SpellDamageMultiplier(target, attacker, spell);
 }
 
 CreatureScaling::TestOverride::TestOverride()
@@ -142,6 +194,8 @@ public:
         settings->enabled = sConfigMgr->GetOption<bool>("CoA.CreatureScaling.Enable", false);
         settings->health = ReadMultipliers("Health", defaults.health);
         settings->damage = ReadMultipliers("Damage", defaults.damage);
+        settings->damageSpread = ReadMultipliers("DamageSpread", defaults.damageSpread);
+        settings->spellDamage = ReadSpellMultipliers(defaults.spellDamage);
         std::lock_guard<std::mutex> lock(SettingsMutex);
         Configured = std::move(settings);
         Publish();
@@ -160,11 +214,13 @@ public:
         }
         auto settings = Active();
         LOG_INFO("server.loading",
-            ">> CoA creature scaling {}: health {}/{}/{}, damage {}/{}/{} (world/dungeon/raid), "
-            "{} map health overrides, {} flex health entries kept",
+            ">> CoA creature scaling {}: health {}/{}/{}, damage {}/{}/{}, damage spread {}/{}/{} (world/dungeon/raid), "
+            "world spell damage {}, {} map health overrides, {} flex health entries kept",
             settings->enabled ? "enabled" : "disabled", settings->health.world.Text(), settings->health.dungeon.Text(),
             settings->health.raid.Text(), settings->damage.world.Text(), settings->damage.dungeon.Text(),
-            settings->damage.raid.Text(), settings->health.maps.size(), FlexHealthEntries.size());
+            settings->damage.raid.Text(), settings->damageSpread.world.Text(), settings->damageSpread.dungeon.Text(),
+            settings->damageSpread.raid.Text(), settings->spellDamage.world.Text(), settings->health.maps.size(),
+            FlexHealthEntries.size());
     }
 };
 
@@ -196,25 +252,26 @@ public:
 class CoACreatureScalingDamage final : public UnitScript
 {
 public:
-    CoACreatureScalingDamage() : UnitScript("CoACreatureScalingDamage", true, { UNITHOOK_MODIFY_MELEE_DAMAGE,
+    CoACreatureScalingDamage() : UnitScript("CoACreatureScalingDamage", true, { UNITHOOK_MODIFY_MELEE_DAMAGE_RANGE,
         UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN, UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK })
     { }
 
-    void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
+    void ModifyMeleeDamageRange(Unit* target, Unit* attacker, float& minDamage, float& maxDamage) override
     {
-        ScaleDamage(damage, target, attacker);
+        CreatureScaling::ScaleRange(minDamage, maxDamage, DamageMultiplier(target, attacker),
+            DamageValue(target, attacker, &CreatureScaling::Settings::damageSpread));
     }
 
     void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo) override
     {
         if (!CoADungeonNormal::TunesSpell(attacker, spellInfo))
-            ScaleDamage(damage, target, attacker);
+            ScaleDamage(damage, target, attacker, spellInfo);
     }
 
     void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const* spellInfo) override
     {
         if (!CoADungeonNormal::TunesSpell(attacker, spellInfo))
-            ScaleDamage(damage, target, attacker);
+            ScaleDamage(damage, target, attacker, spellInfo);
     }
 };
 

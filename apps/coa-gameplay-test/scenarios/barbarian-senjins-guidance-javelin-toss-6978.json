@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Barbarian Sen'jin's Guidance turns Throw Weapon into Javelin Toss (#6978)",
+  "contract": [
+    "Sen'jin's Guidance 707661 is a Tactics talent (CharacterAdvancement 6801, Tab 32 = ChrSpecs 1 BARBARIAN TACTICS)",
+    "whose client text reads 'Transforms your Throw Weapon into Javelin Toss' and names Javelin Toss 504217",
+    "(@s:504217:0@). The passive itself is only a spell modifier, so nothing replaced Throw Weapon 804136.",
+    "Expected: in Tactics, owning the talent teaches 504217 and stands it in for Throw Weapon on the bars; removing",
+    "the talent restores Throw Weapon and drops 504217."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "b", "race": 1, "class": 12, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "specialization", "actor": "b", "id": 1 },
+    { "action": "learn", "actor": "b", "spell": 804136 },
+    {
+      "action": "assert", "label": "CONTROL: without the talent Throw Weapon stands for itself",
+      "actor": "b", "metric": "temporary_spell_replacement", "spell": 804136, "equals": 804136, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTROL: Javelin Toss is not known without the talent",
+      "actor": "b", "metric": "knows_spell", "spell": 504217, "equals": 0
+    },
+    { "action": "learn", "actor": "b", "spell": 707661 },
+    {
+      "action": "assert", "label": "THE FIX: the talent teaches Javelin Toss",
+      "actor": "b", "metric": "knows_spell", "spell": 504217, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "THE FIX: Javelin Toss replaces Throw Weapon",
+      "actor": "b", "metric": "temporary_spell_replacement", "spell": 804136, "equals": 504217, "within_ms": 2000
+    },
+    { "action": "unlearn", "actor": "b", "spell": 707661 },
+    {
+      "action": "assert", "label": "Removing the talent restores Throw Weapon",
+      "actor": "b", "metric": "temporary_spell_replacement", "spell": 804136, "equals": 804136, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Removing the talent drops Javelin Toss",
+      "actor": "b", "metric": "knows_spell", "spell": 504217, "equals": 0, "within_ms": 2000
+    }
+  ]
+}

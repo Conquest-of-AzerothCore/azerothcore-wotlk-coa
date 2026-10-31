@@ -5,8 +5,14 @@ The package contains world templates, reference data, and migration metadata.
 
 ## Install
 
-Use Python 3.11 or newer and a MySQL 8 client/server. Create an empty world schema,
-then import the package **before the first worldserver startup**:
+The worldserver and `dbimport` install the package automatically. When `Updates.AutoSetup` finds the
+world database empty, they verify `baseline.json`, the archive and every table checksum, then import
+the tables with the migration ledger last instead of `data/sql/base/db_world/`. The normal updater then
+applies the migrations the package does not cover. A failed import leaves a partial schema; drop it
+before restarting.
+
+To import the package without the server, use Python 3.11 or newer and a MySQL 8 client/server.
+Create an empty world schema, then import the package **before the first worldserver startup**:
 
 ```sh
 python apps/coa-world/world_data.py verify
