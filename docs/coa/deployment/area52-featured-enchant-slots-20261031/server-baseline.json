@@ -1,0 +1,18 @@
+{
+  "src/server/coa/AscensionMysticEnchant.cpp": {
+    "path": "/home/dml/games/ascension-freepick-test/private/active-build-source/src/server/coa/AscensionMysticEnchant.cpp",
+    "sha256": "0130ab6a49404e2d2ffd80a3855c29f8727f23bb1e8ed697a6e8191448563593"
+  },
+  "src/server/coa/AscensionMysticEnchantCatalog.cpp": {
+    "path": "/home/dml/games/ascension-freepick-test/private/active-build-source/src/server/coa/AscensionMysticEnchantCatalog.cpp",
+    "sha256": "fb7d2ba4cf1dfa417bcb0b4ed223001b02b8b4e1d137f270c3551fcf1da237de"
+  },
+  "src/server/coa/AscensionMysticEnchantCatalog.h": {
+    "path": "/home/dml/games/ascension-freepick-test/private/active-build-source/src/server/coa/AscensionMysticEnchantCatalog.h",
+    "sha256": "9b71a6fcf5c1d91c55dedcc03a34ecec3d3aa99cf5462cb2c267a667221ccfc7"
+  },
+  "apps/coa-tests/mystic_enchant_catalog/harness.cpp": {
+    "path": "/home/dml/games/ascension-freepick-test/private/active-build-source/apps/coa-tests/mystic_enchant_catalog/harness.cpp",
+    "sha256": "59367d378a59dad12bf486d28e132f813dff9cf200b01486de6248f92a82f4aa"
+  }
+}
