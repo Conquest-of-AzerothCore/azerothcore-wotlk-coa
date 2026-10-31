@@ -24,6 +24,7 @@
 #include "ScriptMgr.h"
 #include "SpellAuraDefines.h"
 #include "SpellAuraEffects.h"
+#include "World.h"
 
 namespace
 {
@@ -320,6 +321,9 @@ void KillRewarder::Reward()
         // 3.2. Reward single killer (not group case).
         // 3.2.1. Initialize initial XP amount based on killer's level.
         _InitXP(_killer);
+        if (Creature const* creature = _victim->ToCreature())
+            if (sWorld->getBoolConfig(CONFIG_SOLO_KILL_REQUIRES_PLAYER_HIT) && !creature->WasAttackedDirectlyBy(_killer->GetGUID()))
+                _xp = 0;
         // To avoid unnecessary calculations and calls,
         // proceed only if XP is not ZERO or player is not on battleground
         // (battleground rewards only XP, that's why).

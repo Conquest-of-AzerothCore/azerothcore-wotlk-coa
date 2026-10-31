@@ -4164,6 +4164,7 @@ void Creature::ResetPlayerDamageReq()
     _playerDamageReq = GetHealth() / 2;
     _damagedByPlayer = false;
     _highestPlayerAttackerLevel = 0;
+    _directPlayerAttackers.clear();
 }
 
 uint32 Creature::GetPlayerDamageReq() const

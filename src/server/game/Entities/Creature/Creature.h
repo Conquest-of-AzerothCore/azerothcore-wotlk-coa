@@ -431,6 +431,8 @@ public:
     void ResetPlayerDamageReq();
     [[nodiscard]] uint32 GetPlayerDamageReq() const;
     [[nodiscard]] uint8 GetHighestPlayerAttackerLevel() const { return _highestPlayerAttackerLevel; }
+    void AddDirectPlayerAttacker(ObjectGuid guid) { _directPlayerAttackers.insert(guid); }
+    [[nodiscard]] bool WasAttackedDirectlyBy(ObjectGuid guid) const { return _directPlayerAttackers.contains(guid); }
 
     [[nodiscard]] uint32 GetOriginalEntry() const { return m_originalEntry; }
     void SetOriginalEntry(uint32 entry) { m_originalEntry = entry; }
@@ -610,6 +612,7 @@ private:
     uint32 _playerDamageReq;
     bool _damagedByPlayer;
     uint8 _highestPlayerAttackerLevel;
+    GuidUnorderedSet _directPlayerAttackers;
     bool _isCombatMovementAllowed;
 };
 
