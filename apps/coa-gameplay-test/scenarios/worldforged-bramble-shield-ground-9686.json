@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Worldforged Bramble Shield at Razormane Grounds already stands on the ground (#9686)",
+  "contract": "#9686 reports the Bramble Shield worldforged pickup clipped into the bonfire at Razormane Grounds. Gameobject entry 95651 (guid 6941486), the only pickup there, measures spawn_ground_gap -0.19 yd against the live map/vmap data: well within the 0.8 yd placement tolerance, i.e. already grounded, not sunk into the bonfire's base. No coordinate change is applied.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": 433.6, "y": -4225.3, "z": 25.3, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the pickup is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95651, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup already stands within tolerance of the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 6941486, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 95651 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the pickup is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}
