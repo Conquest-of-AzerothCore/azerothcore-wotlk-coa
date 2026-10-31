@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Woolly Pride: an Ealdfrost Yak's spell-click stays feedable again after the 60 s cooldown (#10028 #10122)",
+  "contract": [
+    "Issue #10028 #10122. The Ealdfrost Yak 164420's smart_scripts chain cleared its SPELLCLICK npcflag on feed and",
+    "relied on a linked SMART_ACTION_CREATE_TIMED_EVENT (id 2) to restore it 60 s later, but that row's max delay",
+    "param was missing (defaulted to 0 < min 60000), so SmartAIMgr::IsMinMaxValid dropped the whole action at load",
+    "and the timer never fired. Expected: feeding a yak clears its spell-click prompt, and after the 60 s cooldown",
+    "it becomes feedable again (and credits the quest objective a second time), instead of staying permanently",
+    "unclickable."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -6395.49, "y": 123.35, "z": 513.94, "o": 0.81},
+  "players": [
+    {"id": "p", "race": 3, "class": 20, "level": 25}
+  ],
+  "steps": [
+    {"action": "set_phase", "label": "Join world phase 1, where the yaks are", "actor": "p", "value": 1},
+    {"action": "wait", "label": "Let the yak reach the client", "ms": 2500},
+    {"action": "prepare_quest", "label": "Take Woolly Pride", "actor": "p", "quest": 175133, "complete": false},
+    {"action": "add_item", "label": "Carry Yak Feed", "actor": "p", "item": 559921},
+    {"action": "assert", "label": "SETUP: the yak can be clicked", "actor": "p",
+     "metric": "nearby_creature_sent_spellclick", "entry": 164420, "equals": 1, "within_ms": 3000},
+    {"action": "spell_click_nearby", "label": "Feed the yak the first time", "actor": "p", "entry": 164420},
+    {"action": "assert", "label": "Yaks fed counts one", "actor": "p",
+     "metric": "quest_objective_count", "quest": 175133, "index": 0, "equals": 1, "within_ms": 5000},
+    {"action": "assert", "label": "the yak is no longer clickable right after feeding", "actor": "p",
+     "metric": "nearby_creature_sent_spellclick", "entry": 164420, "equals": 0, "within_ms": 3000},
+    {"action": "wait", "label": "Wait past the 60 s restore timer", "ms": 65000},
+    {"action": "assert", "label": "the yak is feedable again after the cooldown", "actor": "p",
+     "metric": "nearby_creature_sent_spellclick", "entry": 164420, "equals": 1, "within_ms": 5000},
+    {"action": "spell_click_nearby", "label": "Feed the same yak a second time", "actor": "p", "entry": 164420},
+    {"action": "assert", "label": "Yaks fed counts two", "actor": "p",
+     "metric": "quest_objective_count", "quest": 175133, "index": 0, "equals": 2, "within_ms": 5000}
+  ]
+}
