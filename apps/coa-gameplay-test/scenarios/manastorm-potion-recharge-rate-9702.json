@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Endless Manastorm Potion keeps up with its own 6 s cooldown (#9702)",
+  "contract": "ManastormMgr gates the Endless Manastorm Potion (item 254041, spell 254440) on a custom 3-charge pool that recovers one charge every ManastormBaseline::PotionRechargeMs, independent of the core's own per-spell cooldown (Spell.dbc RecoveryTime 6000 ms for 254440, which the engine still applies on every cast). The verified native handler data (SpellCharges.dbc links 992090 to SpellChargesCategory 63, whose own RecoveryTime is 5000 ms, MaxCharges 3, already read and validated by ManastormPotionClient::Load()) is the intended recharge rate, not the module's old hardcoded 10000 ms. With a 6000 ms native cooldown between attempts: at 5000 ms/charge the pool always refills a slot before the next attempt is allowed, so repeated use at the natural 6 s cadence never runs dry (#9702's expectation: 'should work immediately after the 6 second cooldown'). At the old 10000 ms/charge rate, hand-tracing ConsumeManastormPotionCharge/UpdateManastormPotionCharges shows the pool first hits zero on the 4th attempt (t=0,6000,12000,18000ms: charges go 3,2,1,0 because only one charge regenerates, at t=10000, before the 4th attempt), which is the exact 'works, works, works, randomly fails for a few more seconds' symptom reported. This asserts the fixed rate: four consecutive uses spaced past the native 6 s cooldown must all succeed.",
+  "timeout_ms": 90000,
+  "players": [ { "id": "player", "race": 1, "class": 15, "level": 60 } ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "client_packet", "actor": "player", "opcode": 1617, "fields": [ { "u32": 1 } ] },
+    { "action": "assert", "label": "SETUP: a solo Manastorm run was entered", "actor": "player", "metric": "private_instance", "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "SETUP: the Endless Manastorm Potion was granted", "actor": "player", "metric": "item_count", "item": 254041, "equals": 1 },
+    { "action": "use_item", "label": "Use #1 (3 charges -> 2)", "actor": "player", "item": 254041, "spell": 254440 },
+    { "action": "assert", "label": "SETUP: use #1 succeeds", "actor": "player", "metric": "cast_failure", "spell": 254440, "equals": 0 },
+    { "action": "wait", "label": "Past the native 6 s cooldown and one 5 s recharge tick", "ms": 6200 },
+    { "action": "use_item", "label": "Use #2, right as the cooldown clears", "actor": "player", "item": 254041, "spell": 254440 },
+    { "action": "assert", "label": "DISCRIMINATING: use #2 is not 'not ready'", "actor": "player", "metric": "cast_failure", "spell": 254440, "equals": 0 },
+    { "action": "wait", "ms": 6200 },
+    { "action": "use_item", "label": "Use #3", "actor": "player", "item": 254041, "spell": 254440 },
+    { "action": "assert", "label": "DISCRIMINATING: use #3 is not 'not ready'", "actor": "player", "metric": "cast_failure", "spell": 254440, "equals": 0 },
+    { "action": "wait", "ms": 6200 },
+    { "action": "use_item", "label": "Use #4 (the attempt that fails at the old 10 s recharge rate)", "actor": "player", "item": 254041, "spell": 254440 },
+    { "action": "assert", "label": "DISCRIMINATING: use #4 still is not 'not ready'", "actor": "player", "metric": "cast_failure", "spell": 254440, "equals": 0 }
+  ]
+}
