@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionWarcraftRebornShaman.h"
 #include "Creature.h"
 #include "Item.h"
 #include "Map.h"
@@ -9,6 +10,8 @@
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include <algorithm>
+#include <array>
 
 namespace AscensionWarcraftReborn
 {
@@ -19,6 +22,7 @@ constexpr uint32 MAELSTROM_WEAPON_OVERLAY = 1153816;
 constexpr uint32 MAELSTROM_WEAPON_CONSUMPTION = 1153822;
 constexpr uint32 SHAMAN_FLAMETONGUE_WEAPON = 0x200000;
 constexpr int32 LAVA_SWEEP_FLAMETONGUE_PCT = 50;
+constexpr std::array<uint32, 3> DUAL_WIELD_SPECIALIZATION = { 1130816, 1130818, 1130819 };
 
 bool HasFlametongue(Player const* player, Item const* weapon)
 {
@@ -171,7 +175,53 @@ class spell_ascension_reborn_spirit_guard : public AuraScript
         OnEffectAbsorb += AuraEffectAbsorbFn(spell_ascension_reborn_spirit_guard::Absorb, EFFECT_0);
     }
 };
+
+class spell_ascension_reborn_dual_wield_specialization : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_reborn_dual_wield_specialization);
+
+    void CalculateAmount(AuraEffect const*, int32& amount, bool& canBeRecalculated)
+    {
+        canBeRecalculated = true;
+        if (!GetUnitOwner()->HasOffhandWeapon())
+            amount = 0;
+    }
+
+    void CalcPeriodic(AuraEffect const*, bool& isPeriodic, int32& amplitude)
+    {
+        isPeriodic = true;
+        amplitude = 1 * IN_MILLISECONDS;
+    }
+
+    void Update(AuraEffect const* aurEff)
+    {
+        PreventDefaultAction();
+        if ((aurEff->GetAmount() != 0) != GetUnitOwner()->HasOffhandWeapon())
+            GetEffect(aurEff->GetEffIndex())->RecalculateAmount();
+    }
+
+    void Register() override
+    {
+        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_ascension_reborn_dual_wield_specialization::CalculateAmount,
+            EFFECT_0, SPELL_AURA_MOD_HIT_CHANCE);
+        DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(spell_ascension_reborn_dual_wield_specialization::CalcPeriodic,
+            EFFECT_0, SPELL_AURA_MOD_HIT_CHANCE);
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_ascension_reborn_dual_wield_specialization::Update, EFFECT_0,
+            SPELL_AURA_MOD_HIT_CHANCE);
+    }
+};
 }
+}
+
+void ApplyAscensionWarcraftRebornShamanContracts(SpellInfo* spellInfo)
+{
+    using namespace AscensionWarcraftReborn;
+    if (!spellInfo || std::find(DUAL_WIELD_SPECIALIZATION.begin(), DUAL_WIELD_SPECIALIZATION.end(), spellInfo->Id) ==
+        DUAL_WIELD_SPECIALIZATION.end())
+        return;
+    SpellEffectInfo& hit = spellInfo->Effects[EFFECT_0];
+    if (hit.Effect == SPELL_EFFECT_APPLY_AURA && hit.ApplyAuraName == SPELL_AURA_DUMMY)
+        hit.ApplyAuraName = SPELL_AURA_MOD_HIT_CHANCE;
 }
 
 void AddAscensionWarcraftRebornShamanScripts()
@@ -182,4 +232,5 @@ void AddAscensionWarcraftRebornShamanScripts()
     RegisterSpellScript(spell_ascension_reborn_tidal_force);
     RegisterSpellScript(spell_ascension_reborn_totemic_projection);
     RegisterSpellScript(spell_ascension_reborn_spirit_guard);
+    RegisterSpellScript(spell_ascension_reborn_dual_wield_specialization);
 }
