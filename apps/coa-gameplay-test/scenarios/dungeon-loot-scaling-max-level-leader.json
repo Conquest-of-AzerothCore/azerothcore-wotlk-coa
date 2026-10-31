@@ -1,18 +1,18 @@
 {
   "schema": 1,
-  "name": "Loot in a scaled dungeon scales down to the looter, never up, even with a level-60 leader whose open world scaling is off",
+  "name": "Loot in a scaled dungeon scales up and down to the looter, even with a level-60 leader whose open world scaling is off",
   "contract": [
     "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1 with the default DestinyWeaver.Scaling.DungeonIds,",
     "CoA.ItemScaling=1 and CoA.ItemScaling.Native=1 with ItemStat.dbc in the data directory. Loot scales only inside",
-    "a scaled dungeon, whatever the leader's open world switch, and only down to the looter's level: an item whose",
-    "own item level is at or below it keeps its authored stats. War Master Voone 9237 drops Flightblade Throwing",
+    "a scaled dungeon, whatever the leader's open world switch, up or down to the looter's level, as the corpse and",
+    "roll frame preview it. War Master Voone 9237 drops Flightblade Throwing",
     "Axe 28972 (blue, item level 57, required level 55, 5 stamina, 8 attack power) at 100%; the client's item key",
     "for level 30 is 30 + 3 = 33, and its ItemStat.dbc row at 33 requires level 30 and carries 2 stamina and",
     "2 attack power. The Rake 5807 drops Lionfur Armor 17922",
     "(green, item level 10, required level 5, 108 armor) at 100%. In Maraudon (map 349) a level-30 member of a group",
     "led by a level-60 character with the switch off loots the axe at scaling level 33 with that row's stats, and",
-    "Lionfur Armor stays authored rather than rising to 30. The leader's own axe stays authored, because level 60",
-    "is above its item level. Free-for-all loot keeps a roll out of the way."
+    "Lionfur Armor rises to the same key 33 with required level 30. The leader's own axe rises to the level-60 key",
+    "60 + 5 = 65 and requires level 60. Free-for-all loot keeps a roll out of the way."
   ],
   "timeout_ms": 180000,
   "location": {
@@ -110,20 +110,20 @@
     { "action": "loot_slot", "actor": "member", "item": 17922 },
     {
       "action": "assert",
-      "label": "The item-level-10 armor gets no scaling level rather than rising to 30",
+      "label": "DISCRIMINATING: the item-level-10 armor rises to the client key 33 for the member's level 30",
       "actor": "member",
       "metric": "carried_item_scaling_level",
       "item": 17922,
-      "equals": 0,
+      "equals": 33,
       "within_ms": 2000
     },
     {
       "action": "assert",
-      "label": "The armor keeps its authored 108 armor",
+      "label": "The armor requires the member's level 30 from its row at 33 instead of 5",
       "actor": "member",
-      "metric": "carried_item_armor",
+      "metric": "carried_item_required_level",
       "item": 17922,
-      "equals": 108
+      "equals": 30
     },
     { "action": "close_loot", "actor": "member" },
 
@@ -133,29 +133,20 @@
     { "action": "loot_slot", "actor": "leader", "item": 28972 },
     {
       "action": "assert",
-      "label": "The level-60 leader's axe gets no scaling level",
+      "label": "The level-60 leader's axe rises to the client key 65",
       "actor": "leader",
       "metric": "carried_item_scaling_level",
       "item": 28972,
-      "equals": 0,
+      "equals": 65,
       "within_ms": 2000
     },
     {
       "action": "assert",
-      "label": "The leader's axe keeps its authored required level 55",
+      "label": "The leader's axe requires level 60 from its row at 65",
       "actor": "leader",
       "metric": "carried_item_required_level",
       "item": 28972,
-      "equals": 55
-    },
-    {
-      "action": "assert",
-      "label": "The leader's axe keeps its authored 5 stamina",
-      "actor": "leader",
-      "metric": "carried_item_stat",
-      "item": 28972,
-      "stat": 7,
-      "equals": 5
+      "equals": 60
     },
     { "action": "close_loot", "actor": "leader" }
   ]

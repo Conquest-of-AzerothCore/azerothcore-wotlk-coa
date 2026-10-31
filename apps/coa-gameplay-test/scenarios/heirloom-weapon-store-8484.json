@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "The Heirloom Weapon Token opens custom store 7 and sells heirloom weapons for one token each",
-  "contract": "Issue #8484: item 414010 'Heirloom Weapon Token' ('Right-click to browse and purchase heirloom weapons!') is charged by ItemExtendedCost 5250 (1 x 414010) and the client's Enum.CustomStores.HeirloomWeapons is 7. The client queries a store with CMSG 0x6B9 {u32 store} and gets SMSG 0x6BA QUERY_CUSTOM_STORE_OK with 64-byte records; it buys with CMSG 0x6BB {u32 key, u32 quantity} and gets SMSG 0x6BC. Using the token opens the store with SMSG_OPEN_CUSTOM_STORE 0x73E. The Experience Heirloom Caches hand these tokens out (x3) and the store must let the player spend them: a weapon costs one token (the user's price; no capture of the store survives), and a player without a token keeps nothing and loses nothing.",
+  "contract": "Issue #8484: item 414010 'Heirloom Weapon Token' ('Right-click to browse and purchase heirloom weapons!') is charged by ItemExtendedCost 5250 (1 x 414010) and the client's Enum.CustomStores.HeirloomWeapons is 7. The client queries a store with CMSG 0x6B9 {u32 store} and gets SMSG 0x6BA QUERY_CUSTOM_STORE_OK with 64-byte records; it buys with CMSG 0x6BB {u32 key, u32 quantity} and gets SMSG 0x6BC. Using the token opens the store with SMSG_OPEN_CUSTOM_STORE 0x73E. The Experience Heirloom Caches hand these tokens out (x3) and the store must let the player spend them: a weapon costs one token (the user's price; no capture of the store survives), and a player without a token keeps nothing and loses nothing. Sturdied Arcanite Spear is sold as 3142943 (experience bonus, vanity); its appearance-only copy 1542943 is not in the store.",
   "timeout_ms": 60000,
   "players": [
     {"id": "buyer", "race": 1, "class": 1, "level": 10}
@@ -28,10 +28,15 @@
     {"action": "assert", "label": "as that heirloom", "actor": "buyer", "metric": "item_count", "item": 1642943, "equals": 1},
     {"action": "assert", "label": "for one token", "actor": "buyer", "metric": "item_count", "item": 414010, "equals": 2},
 
-    {"action": "client_packet", "label": "Buy the second weapon", "actor": "buyer", "opcode": 1723, "fields": [{"u32": 1644092}, {"u32": 1}]},
+    {"action": "client_packet", "label": "Buy the Sturdied Arcanite Spear with the experience bonus", "actor": "buyer", "opcode": 1723, "fields": [{"u32": 3142943}, {"u32": 1}]},
     {"action": "wait", "ms": 500},
-    {"action": "assert", "label": "The second weapon is sold", "actor": "buyer", "metric": "item_count", "item": 1644092, "equals": 1},
+    {"action": "assert", "label": "The experience spear 3142943 is sold", "actor": "buyer", "metric": "item_count", "item": 3142943, "equals": 1},
     {"action": "assert", "label": "for another token", "actor": "buyer", "metric": "item_count", "item": 414010, "equals": 1},
+
+    {"action": "client_packet", "label": "Try to buy the appearance-only Sturdied Arcanite Spear 1542943", "actor": "buyer", "opcode": 1723, "fields": [{"u32": 1542943}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The appearance copy is not sold", "actor": "buyer", "metric": "item_count", "item": 1542943, "equals": 0},
+    {"action": "assert", "label": "and costs no token", "actor": "buyer", "metric": "item_count", "item": 414010, "equals": 1},
 
     {"action": "client_packet", "label": "Buy the Polished Observer's Shield with the last token", "actor": "buyer", "opcode": 1723, "fields": [{"u32": 3148335}, {"u32": 1}]},
     {"action": "wait", "ms": 500},

@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Vaults of the Inquisition Normal trash hits a level 25 player as hard as in the June 2026 Normal log",
+  "contract": "Vaults of the Inquisition (map 936) Normal creatures are level 59-60 and DestinyWeaver scales each blow to the viewer's level (finder entry 401, band 15-59). The Normal combat log of 2026-06-06 (level 25 group) shows median non-crit melee of 49 from Inquisitorial Torturer (162733). A class 1 creature of level 60 deals 118.3 per point of DamageModifier and DestinyWeaver's view of a level 25 player takes 0.345 of it: 40.8 per point. Creatures spawned in a Normal dungeon take CoA.CreatureScaling.Dungeon.Damage (x1.5) on top, which this fixture does not get (it is summoned by the player), so it hits for the log / 1.5: Torturer 0.801 * 40.8 = 32.7 (49 on a real spawn). Darkandle Brute (162763) is held at its Heroic blow at level 59 (166): 0.956 * 40.8 = 39.0 (58.5 on a real spawn). script_melee_hit_taken averages the creature's own blows through the done/taken bonuses and DestinyWeaver's view, before armor.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 936,
+    "x": -6658.51,
+    "y": -5569.48,
+    "z": 175.073,
+    "o": 4.72967,
+    "ignore_access": true
+  },
+  "players": [
+    { "id": "tank", "race": 1, "class": 1, "level": 25 }
+  ],
+  "creatures": [
+    { "id": "torturer", "owner": "tank", "entry": 162733, "level": 60, "distance": 5 },
+    { "id": "brute", "owner": "tank", "entry": 162763, "level": 60, "distance": 7 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 2000 },
+    { "action": "assert", "label": "CONTROL: the player is in Vaults of the Inquisition", "actor": "tank",
+      "metric": "map_id", "equals": 936 },
+    { "action": "assert", "label": "CONTROL: the instance is Normal", "actor": "tank", "metric": "map_difficulty",
+      "equals": 0 },
+    { "action": "assert", "label": "Inquisitorial Torturer hits a level 25 player for about 32.7 before the dungeon x1.5 (49 as in the log)",
+      "actor": "tank", "metric": "script_melee_hit_taken", "target": "torturer", "min": 30.7, "max": 34.6 },
+    { "action": "assert", "label": "Darkandle Brute hits a level 25 player for about 39 before the dungeon x1.5 (58.5, held at its Heroic blow at 59)",
+      "actor": "tank", "metric": "script_melee_hit_taken", "target": "brute", "min": 36.7, "max": 41.3 }
+  ]
+}

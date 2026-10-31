@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Bloodthirsty doubles Outrage's critical-strike extension to 2 seconds (#7605)",
+  "contract": [
+    "Outrage 801759 lasts 10 seconds; each critical physical hit extends it by \"Outrage - Increase Duration\" 560016",
+    "(1000 ms) up to 20 seconds in total with Bloodthirsty 300497. Bloodthirsty is a +100% SPELLMOD_EFFECT1 modifier",
+    "whose class mask covers 560016, so each crit extends Outrage by 2000 ms. One Whirling Advance that critically",
+    "hits five enemies in front grants five extensions in the same moment: 5 x 2000 reaches the 10-second budget, while",
+    "the unmodified 1000 ms step stops at 5 seconds."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    {
+      "id": "b", "race": 1, "class": 12, "level": 60,
+      "melee_hit_rating": 10000, "expertise_rating": 10000, "melee_crit_rating": 100000
+    }
+  ],
+  "creatures": [
+    { "id": "e1", "owner": "b", "entry": 1601, "level": 60, "health": 500000, "distance": 3 },
+    { "id": "e2", "owner": "b", "entry": 1601, "level": 60, "health": 500000, "distance": 5 },
+    { "id": "e3", "owner": "b", "entry": 1601, "level": 60, "health": 500000, "distance": 7 },
+    { "id": "e4", "owner": "b", "entry": 1601, "level": 60, "health": 500000, "distance": 9 },
+    { "id": "e5", "owner": "b", "entry": 1601, "level": 60, "health": 500000, "distance": 11 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "b", "spell": 300497 },
+    { "action": "learn", "actor": "b", "spell": 504915 },
+    { "action": "set_power", "actor": "b", "power": 3, "value": 100 },
+    { "action": "set_aura", "actor": "b", "spell": 801759, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: Outrage is on the Barbarian", "actor": "b", "metric": "aura", "spell": 801759, "equals": 1, "within_ms": 2000 },
+    { "action": "snapshot", "actor": "b", "metric": "aura_duration_ms", "spell": 801759, "save_as": "outrage_before" },
+    { "action": "cast", "actor": "b", "spell": 504915 },
+    { "action": "assert", "label": "Whirling Advance is accepted", "actor": "b", "metric": "cast_failure", "spell": 504915, "equals": 0 },
+    {
+      "action": "assert", "label": "SETUP: Whirling Advance critically hits all five enemies",
+      "actor": "b", "metric": "spell_damage_count", "spell": 504915, "critical": true, "min": 5, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: five crits extend Outrage by the full 10-second budget",
+      "actor": "b", "metric": "aura_duration_ms", "spell": 801759, "relative_to": "outrage_before",
+      "min": 7000, "max": 10000
+    }
+  ]
+}

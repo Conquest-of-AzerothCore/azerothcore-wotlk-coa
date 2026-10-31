@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionStormbringer.h"
+#include "AscensionClientSpellPatches.h"
 #include "SpellDefines.h"
 
 namespace
@@ -17,7 +18,8 @@ enum StormbringerContractSpells : uint32
     SPELL_BAROMETRIC_PRESSURE_RANK_2 = 803566,
     SPELL_CRUSHING_PRESSURE = 803564,
     SPELL_CRUSHING_PRESSURE_RANK_2 = 803567,
-    SPELL_CRUSHING_PRESSURE_RANK_3 = 803569
+    SPELL_CRUSHING_PRESSURE_RANK_3 = 803569,
+    SPELL_WINDRIDE = 804724
 };
 
 constexpr uint32 SHOCK_FAMILY_MASK = 2048;
@@ -33,6 +35,7 @@ bool IsCancellablePressureSpell(uint32 id)
         case SPELL_CRUSHING_PRESSURE:
         case SPELL_CRUSHING_PRESSURE_RANK_2:
         case SPELL_CRUSHING_PRESSURE_RANK_3:
+        case AscensionStormbringer::SPELL_ATMOSPHERIC_PRESSURE:
             return true;
         default:
             return false;
@@ -63,6 +66,15 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
     if (info->Id == SPELL_ELECTRIFIED_WATERS_TRIGGER && info->TargetAuraSpell == SPELL_DROWN_TARGET_AURA_STUB)
         info->TargetAuraSpell = 0;
+    if (info->Id == SPELL_WINDRIDE)
+        info->AttributesEx2 |= SPELL_ATTR2_IGNORE_LINE_OF_SIGHT;
+    if (info->Id == SPELL_ATMOSPHERIC_PRESSURE && info->HasAttribute(SPELL_ATTR5_NO_CASTER_AURA_ICON))
+    {
+        info->Attributes &= ~SPELL_ATTR0_AURA_IS_DEBUFF;
+        info->AttributesEx5 &= ~SPELL_ATTR5_NO_CASTER_AURA_ICON;
+        info->AttributesEx5 |= SPELL_ATTR5_NO_TARGET_AURA_ICON;
+        Ascension::ClientSpellPatches::Instance().Register(info->Id);
+    }
     if (IsCancellablePressureSpell(info->Id))
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             if (info->Effects[i].IsEffect() && !info->Effects[i].IsEffect(SPELL_EFFECT_APPLY_AREA_AURA_ENEMY))

@@ -58,11 +58,19 @@ enum StormbringerTalentSpells : uint32
     SPELL_THORIMS_GIFT = 570173,
     SPELL_THORIMS_GIFT_PATCH = 570174,
     SPELL_HURRICANES_BUFF = 570129,
-    SPELL_UNBOUND_ELEMENTALIST = 705702
+    SPELL_UNBOUND_ELEMENTALIST = 705702,
+    SPELL_CONDUCTIVE_PASSIVE = 92098,
+    SPELL_CONDUCTIVE = 567559,
+    SPELL_CONDUCTIVE_STACKS = 567573,
+    SPELL_CONDUCTION = 567560
 };
 
 constexpr int32 ASCENSION_SPELLMOD_BONUS_MULTIPLIER = 41;
 constexpr uint32 CONJURE_STORM_FAMILY_FLAG_TWO = 16;
+constexpr uint32 SHOCK_FAMILY_FLAG_ZERO = 2048;
+constexpr uint32 BRINE_FAMILY_FLAG_ONE = 128;
+constexpr uint32 TORRENTIAL_WRATH_FAMILY_FLAG_ONE = 1;
+constexpr uint32 TORRENTIAL_WRATH_FAMILY_FLAG_TWO = 32;
 
 bool IsConjureStorm(SpellInfo const* info)
 {
@@ -221,6 +229,19 @@ public:
             sSpellMgr->GetFirstSpellInChain(info->Id) == SPELL_ELECTROCUTE &&
             roll_chance_i(TalentProcChance(SPELL_NEVER_STRIKES_TWICE)))
             player->CastSpell(target, info->Id, true);
+
+        if (damage && !spell->IsTriggered() && (info->SpellFamilyFlags[1] & TORRENTIAL_WRATH_FAMILY_FLAG_ONE) &&
+            (info->SpellFamilyFlags[2] & TORRENTIAL_WRATH_FAMILY_FLAG_TWO) && player->HasAura(SPELL_CONDUCTIVE))
+        {
+            player->CastSpell(target, SPELL_CONDUCTION, true);
+            player->RemoveAurasDueToSpell(SPELL_CONDUCTIVE);
+            player->RemoveAurasDueToSpell(SPELL_CONDUCTIVE_STACKS);
+        }
+
+        if (damage && !spell->IsTriggered() &&
+            ((info->SpellFamilyFlags[0] & SHOCK_FAMILY_FLAG_ZERO) || (info->SpellFamilyFlags[1] & BRINE_FAMILY_FLAG_ONE)) &&
+            player->HasAura(SPELL_CONDUCTIVE_PASSIVE))
+            player->CastSpell(player, SPELL_CONDUCTIVE, true);
 
         bool repeat =info->Id == SPELL_PERPETUAL_SHOCK;
         if (!repeat && (spell->IsTriggered() || sSpellMgr->GetFirstSpellInChain(info->Id) != SPELL_SHOCK))

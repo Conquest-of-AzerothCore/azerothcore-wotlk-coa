@@ -14,7 +14,8 @@ namespace
 enum SacredGroveSpells : uint32
 {
     SacredGrove = 800180,
-    GroveRecovery = 800179
+    GroveRecovery = 800179,
+    GroveBlessing = 800186
 };
 
 class primalist_sacred_grove_metadata : public GlobalScript
@@ -28,21 +29,15 @@ public:
         if (info->SpellFamilyName != 37)
             return;
         if (info->Id == SacredGrove)
+            info->Effects[EFFECT_1].TargetB = SpellImplicitTargetInfo(TARGET_DEST_DYNOBJ_ALLY);
+        else if (info->Id == GroveBlessing)
         {
-            SpellEffectInfo& periodic = info->Effects[EFFECT_1];
-            periodic.ApplyAuraName = SPELL_AURA_PERIODIC_TRIGGER_SPELL;
-            periodic.TriggerSpell = GroveRecovery;
-            periodic.Amplitude = 2000;
-            periodic.TargetB = SpellImplicitTargetInfo(TARGET_DEST_DYNOBJ_ALLY);
-            SpellEffectInfo& healing = info->Effects[EFFECT_2];
-            healing.Effect = SPELL_EFFECT_PERSISTENT_AREA_AURA;
-            healing.ApplyAuraName = SPELL_AURA_MOD_HEALING_PCT;
-            healing.BasePoints = 24;
-            healing.DieSides = 1;
-            healing.TargetA = periodic.TargetA;
-            healing.TargetB = periodic.TargetB;
-            healing.RadiusEntry = periodic.RadiusEntry;
-            healing.MiscValue = SPELL_SCHOOL_MASK_ALL;
+            for (SpellEffectInfo& effect : info->Effects)
+            {
+                effect.Effect = SPELL_EFFECT_APPLY_AURA;
+                effect.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ALLY);
+            }
+            info->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_MOD_HEALING_PCT;
         }
         else if (info->Id == GroveRecovery)
         {
@@ -63,7 +58,7 @@ class aura_ascension_sacred_grove : public AuraScript
 {
     PrepareAuraScript(aura_ascension_sacred_grove);
 
-    bool Validate(SpellInfo const*) override { return ValidateSpellInfo({GroveRecovery}); }
+    bool Validate(SpellInfo const*) override { return ValidateSpellInfo({GroveBlessing}); }
 
     bool Check(Unit* target)
     {
@@ -71,18 +66,28 @@ class aura_ascension_sacred_grove : public AuraScript
             GetAura()->GetApplicationMap().size() < GetSpellInfo()->MaxAffectedTargets;
     }
 
-    void Recover(AuraEffect const* effect)
+    void Bless(AuraEffect const*, AuraEffectHandleModes)
     {
-        PreventDefaultAction();
-        if (Unit* caster = GetCaster())
-            caster->CastSpell(GetTarget(), GroveRecovery, TRIGGERED_FULL_MASK, nullptr, effect);
+        Unit* caster = GetCaster();
+        if (!caster)
+            return;
+        caster->CastSpell(GetTarget(), GroveBlessing, TRIGGERED_FULL_MASK);
+        if (Aura* blessing = GetTarget()->GetAura(GroveBlessing, caster->GetGUID()))
+            blessing->SetDuration(GetDuration());
+    }
+
+    void Unbless(AuraEffect const*, AuraEffectHandleModes)
+    {
+        GetTarget()->RemoveAurasDueToSpell(GroveBlessing, GetCasterGUID());
     }
 
     void Register() override
     {
         DoCheckAreaTarget += AuraCheckAreaTargetFn(aura_ascension_sacred_grove::Check);
-        OnEffectPeriodic += AuraEffectPeriodicFn(aura_ascension_sacred_grove::Recover,
-            EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_sacred_grove::Bless,
+            EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_sacred_grove::Unbless,
+            EFFECT_1, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
     }
 };
 

@@ -1763,8 +1763,13 @@ void WorldSession::HandleRequestPetInfo(WorldPackets::Pet::RequestPetInfo& /*pac
         recv_data.hexlike();
     */
 
-    if (_player->GetPet())
+    if (Pet* pet = _player->GetPet())
+    {
         _player->PetSpellInitialize();
+        // CoA: a UI reload also clears the client's pet talent points; send them again
+        if (pet->getPetType() == HUNTER_PET)
+            _player->SendTalentsInfoData(true);
+    }
     else if (Unit* charm = _player->GetCharm())
     {
         if (charm->HasUnitState(UNIT_STATE_POSSESSED))

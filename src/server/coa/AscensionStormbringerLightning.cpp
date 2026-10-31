@@ -24,7 +24,9 @@ enum StormbringerLightningSpells : uint32
     SPELL_FORKED_LIGHTNING_FIRST_RANK = 801851,
     SPELL_ARM_OF_THORIM_FIRST_RANK = 801847,
     SPELL_CALL_LIGHTNING = 500040,
-    SPELL_ELECTROCUTE_FIRST_RANK = 801844
+    SPELL_ELECTROCUTE_FIRST_RANK = 801844,
+    SPELL_VOLT_FIRST_RANK = 500928,
+    SPELL_VOLT_HIGH_VOLTAGE = 500936
 };
 
 class stormbringer_lightning_procs : public AllSpellScript
@@ -39,10 +41,14 @@ public:
         SpellInfo const* info = spell->GetSpellInfo();
         if (!owner || owner->getClass() != CLASS_STORMBRINGER || info->SpellFamilyName != 22 ||
             !target || !target->IsAlive() || !owner->IsValidAttackTarget(target) ||
-            miss != SPELL_MISS_NONE || !damage)
+            miss != SPELL_MISS_NONE)
             return;
 
         uint32 source = sSpellMgr->GetFirstSpellInChain(info->Id);
+        ApplyHighVoltage(owner, target, source);
+        if (!damage)
+            return;
+
         MarkFluxArc(owner, target, source);
         SplashFluxArc(owner, target, source, damage);
         ApplySparks(owner, target, source);
@@ -50,6 +56,13 @@ public:
     }
 
 private:
+    void ApplyHighVoltage(Player* owner, Unit* target, uint32 source) const
+    {
+        if (source != SPELL_VOLT_FIRST_RANK)
+            return;
+        owner->CastSpell(target, SPELL_VOLT_HIGH_VOLTAGE, true);
+    }
+
     void MarkFluxArc(Player* owner, Unit* target, uint32 source) const
     {
         if ((source != SPELL_FORKED_LIGHTNING_FIRST_RANK && source != SPELL_ARM_OF_THORIM_FIRST_RANK) ||

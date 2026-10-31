@@ -1892,14 +1892,15 @@ class spell_sha_static_shock : public AuraScript
         if (!lightningShield)
             return;
 
-        uint32 spellId = sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_LIGHTNING_SHIELD_DAMAGE_R1, lightningShield->GetSpellInfo()->GetRank());
+        uint8 const rank = sSpellMgr->GetSpellInfo(sSpellMgr->GetSpellTwinSource(lightningShield->GetId()))->GetRank();
+        uint32 spellId = sSpellMgr->GetSpellTwinFor(sSpellMgr->GetSpellWithRank(SPELL_SHAMAN_LIGHTNING_SHIELD_DAMAGE_R1, rank), lightningShield->GetId());
         eventInfo.GetActor()->CastSpell(eventInfo.GetActionTarget(), spellId, true, nullptr, aurEff);
         lightningShield->GetBase()->DropCharge();
     }
 
     void Register() override
     {
-        OnEffectProc += AuraEffectProcFn(spell_sha_static_shock::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+        OnEffectProc += AuraEffectProcFn(spell_sha_static_shock::HandleProc, EFFECT_0, SPELL_AURA_ANY);
     }
 };
 

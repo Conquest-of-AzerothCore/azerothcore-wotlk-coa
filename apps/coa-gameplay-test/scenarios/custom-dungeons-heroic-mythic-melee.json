@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "name": "Vaults of the Inquisition and Road to De Other Side Heroic/Mythic templates hit a level 60 player as their logs",
+  "contract": "The Heroic/Mythic templates (+100000/+200000) of both custom dungeons are level 60 and take no DestinyWeaver or dungeon multiplier, so their blow is the DamageModifier times 118.3 per point for class 1 and 112.4 for class 2 (open world, level 60 viewer, before armor). Mythic follows the 2026-08-05 Mythic logs: Inquisitorial Torturer (362733) 479, Merciless Echo (362700) 1261, The Deceiver's Presence (362704, class 2) 1921, Interstitial Wanderer (362765) 805. Heroic is Mythic / 2.5 for trash: Torturer (262733) 192. Before this, c = 857.1 per point was assumed and the Deceiver hit a level 60 player for 63 on Heroic (#10053).",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9449.06,
+    "y": 64.8392,
+    "z": 56.3581,
+    "o": 3.07,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "torturer_m",
+      "owner": "tank",
+      "entry": 362733,
+      "level": 60,
+      "distance": 5
+    },
+    {
+      "id": "torturer_h",
+      "owner": "tank",
+      "entry": 262733,
+      "level": 60,
+      "distance": 6
+    },
+    {
+      "id": "echo_m",
+      "owner": "tank",
+      "entry": 362700,
+      "level": 60,
+      "distance": 7
+    },
+    {
+      "id": "deceiver_m",
+      "owner": "tank",
+      "entry": 362704,
+      "level": 60,
+      "distance": 8
+    },
+    {
+      "id": "wanderer_m",
+      "owner": "tank",
+      "entry": 362765,
+      "level": 60,
+      "distance": 9
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Mythic Inquisitorial Torturer hits for about 479, as in the Mythic log",
+      "actor": "tank",
+      "metric": "script_melee_hit_taken",
+      "target": "torturer_m",
+      "min": 450.3,
+      "max": 507.7
+    },
+    {
+      "action": "assert",
+      "label": "Heroic Inquisitorial Torturer hits for about 192 (Mythic / 2.5)",
+      "actor": "tank",
+      "metric": "script_melee_hit_taken",
+      "target": "torturer_h",
+      "min": 180.5,
+      "max": 203.5
+    },
+    {
+      "action": "assert",
+      "label": "Mythic Merciless Echo hits for about 1261, as in the Mythic log",
+      "actor": "tank",
+      "metric": "script_melee_hit_taken",
+      "target": "echo_m",
+      "min": 1185.3,
+      "max": 1336.7
+    },
+    {
+      "action": "assert",
+      "label": "Mythic The Deceiver's Presence hits for about 1921, as in the Mythic log",
+      "actor": "tank",
+      "metric": "script_melee_hit_taken",
+      "target": "deceiver_m",
+      "min": 1805.7,
+      "max": 2036.3
+    },
+    {
+      "action": "assert",
+      "label": "Mythic Interstitial Wanderer hits for about 805, as in the Mythic log",
+      "actor": "tank",
+      "metric": "script_melee_hit_taken",
+      "target": "wanderer_m",
+      "min": 756.7,
+      "max": 853.3
+    }
+  ]
+}

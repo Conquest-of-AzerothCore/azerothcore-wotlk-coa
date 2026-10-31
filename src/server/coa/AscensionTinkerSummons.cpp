@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionTinker.h"
+#include "AscensionTinkerData.h"
 #include "Creature.h"
 #include "DBCStores.h"
 #include "GameObject.h"
@@ -535,6 +536,9 @@ struct npc_ascension_tinker_device : ScriptedAI
                                 if (ally->GetMaxPower(power))
                                     player->EnergizeBySpell(ally,560751,power == POWER_RAGE || power == POWER_RUNIC_POWER ?
                                         Amount(560751) : Amount(560751)/10,power);
+                            if (ally->IsPlayer())
+                                if (Aura* field = player->AddAura(TinkerReplenishmentFieldAura,ally))
+                                    field->SetDuration(2400);
                             next = 2500;
                         }
                         else if (entry == 500361)

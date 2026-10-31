@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "name": "Gathering trackers of different resource types stay active together (#8915, #4872)",
+  "contract": "On Ascension, Find Herbs 2383 (SPELL_AURA_TRACK_RESOURCES MiscValue 2), Find Minerals 2580 (MiscValue 3) and Find Trees 109498 (MiscValue 24) could be tracked at the same time; the player field PLAYER_TRACK_RESOURCES is a bitmask with one bit per resource type and the client's tracking menu checks every active entry. Their tooltips keep the stock line \"Only one form of tracking can be active at a time.\", which the reports #4872 and #8915 contradict. Each tracker used to replace the others through SPELL_SPECIFIC_TRACKER, so casting Find Minerals removed Find Herbs. Resource trackers of different types now coexist; a creature tracker (Track Beasts 1494, SPELL_AURA_TRACK_CREATURES) still replaces them all, and a second resource tracker of the same type (Find Herbs 8387, MiscValue 2) still replaces 2383, because both would own the same field bit. Each cast waits out the 1.5 sec global cooldown.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    { "id": "gatherer", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "gatherer", "spell": 2383 },
+    { "action": "learn", "actor": "gatherer", "spell": 2580 },
+    { "action": "learn", "actor": "gatherer", "spell": 109498 },
+    { "action": "learn", "actor": "gatherer", "spell": 1494 },
+    { "action": "learn", "actor": "gatherer", "spell": 8387 },
+    { "action": "cast", "label": "Find Herbs", "actor": "gatherer", "spell": 2383, "target": "gatherer" },
+    {
+      "action": "assert", "label": "SETUP: Find Herbs is active", "actor": "gatherer",
+      "metric": "aura", "spell": 2383, "equals": 1, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Find Minerals", "actor": "gatherer", "spell": 2580, "target": "gatherer" },
+    {
+      "action": "assert", "label": "SETUP: Find Minerals is active", "actor": "gatherer",
+      "metric": "aura", "spell": 2580, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Find Minerals leaves Find Herbs active", "actor": "gatherer",
+      "metric": "aura", "spell": 2383, "equals": 1
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Find Trees", "actor": "gatherer", "spell": 109498, "target": "gatherer" },
+    {
+      "action": "assert", "label": "SETUP: Find Trees is active", "actor": "gatherer",
+      "metric": "aura", "spell": 109498, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Find Trees leaves Find Herbs active", "actor": "gatherer",
+      "metric": "aura", "spell": 2383, "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Find Trees leaves Find Minerals active", "actor": "gatherer",
+      "metric": "aura", "spell": 2580, "equals": 1
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Track Beasts", "actor": "gatherer", "spell": 1494, "target": "gatherer" },
+    {
+      "action": "assert", "label": "SETUP: Track Beasts is active", "actor": "gatherer",
+      "metric": "aura", "spell": 1494, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Track Beasts still replaces Find Herbs", "actor": "gatherer",
+      "metric": "aura", "spell": 2383, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Track Beasts still replaces Find Minerals", "actor": "gatherer",
+      "metric": "aura", "spell": 2580, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Track Beasts still replaces Find Trees", "actor": "gatherer",
+      "metric": "aura", "spell": 109498, "equals": 0
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Find Herbs again", "actor": "gatherer", "spell": 2383, "target": "gatherer" },
+    {
+      "action": "assert", "label": "SETUP: Find Herbs is active again", "actor": "gatherer",
+      "metric": "aura", "spell": 2383, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "Find Herbs still replaces Track Beasts", "actor": "gatherer",
+      "metric": "aura", "spell": 1494, "equals": 0
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "The other Find Herbs", "actor": "gatherer", "spell": 8387, "target": "gatherer" },
+    {
+      "action": "assert", "label": "SETUP: the other Find Herbs is active", "actor": "gatherer",
+      "metric": "aura", "spell": 8387, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "A same-type herb tracker still replaces Find Herbs", "actor": "gatherer",
+      "metric": "aura", "spell": 2383, "equals": 0
+    }
+  ]
+}

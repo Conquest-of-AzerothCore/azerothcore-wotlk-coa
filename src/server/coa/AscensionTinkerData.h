@@ -113,4 +113,5 @@ constexpr uint32 TinkerBeacons[] = {
     560750, 560754, 801799, 801801, 803799, 803800, 803801, 803802, 803803,
 };
 constexpr uint32 TinkerBeaconChargeRoot = 801799;
+constexpr uint32 TinkerReplenishmentFieldAura = 560765;
 #endif

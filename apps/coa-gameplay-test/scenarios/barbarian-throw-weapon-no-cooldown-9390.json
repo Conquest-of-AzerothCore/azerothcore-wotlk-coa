@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Barbarians get the Axe Throw cooldown fixer that removes Throw Weapon's weapon-speed cooldown (#9390)",
+  "contract": [
+    "Throw Weapon (806877 and its ranks) has no recovery time in Spell.dbc, but the client shows the hasted ranged",
+    "weapon speed as its cooldown. The hidden passive \"Axe Throw CD Fixer\" 561174 is a -101% SPELLMOD_COOLDOWN",
+    "modifier on family 18 mask[1] 262144, which covers every Throw Weapon rank and Javelin Toss. A Barbarian knows",
+    "it, the modifier removes Throw Weapon's cooldown, and an existing Barbarian without it gets it back on login."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "b", "race": 1, "class": 12, "level": 30 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "b", "spell": 806877 },
+    { "action": "assert", "label": "A Barbarian knows the Axe Throw cooldown fixer", "actor": "b", "metric": "knows_spell", "spell": 561174, "equals": 1 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Throw Weapon's cooldown is modified to nothing",
+      "actor": "b", "metric": "spell_modifier", "spell": 806877, "op": 11, "base": 1000, "max": 0
+    },
+    { "action": "unlearn", "label": "An older Barbarian without the fixer", "actor": "b", "spell": 561174 },
+    { "action": "relog", "actor": "b" },
+    {
+      "action": "assert", "label": "The fixer comes back on login", "actor": "b",
+      "metric": "knows_spell", "spell": 561174, "equals": 1, "within_ms": 10000
+    }
+  ]
+}

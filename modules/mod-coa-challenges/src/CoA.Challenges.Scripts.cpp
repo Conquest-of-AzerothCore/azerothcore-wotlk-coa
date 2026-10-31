@@ -1039,10 +1039,24 @@ namespace CoAChallenges
     // character so a non-prestige trial cannot be started (facet of
     // OUTSIDE_INTERACTION). During the trial: the NO_MAIL rule forbids both
     // sending and receiving mail. Store items / reward caches are exempt.
+    constexpr uint32 BazaarTokenItem = 975001;
+    std::unordered_set<uint32> StoreItems;
+
+    void LoadStoreItems()
+    {
+        StoreItems = { BazaarTokenItem };
+        if (QueryResult r = WorldDatabase.Query("SELECT `ItemID` FROM `coa_client_vanity_collection`"))
+            do
+                StoreItems.insert(r->Fetch()[0].Get<uint32>());
+            while (r->NextRow());
+    }
+
     bool IsMailExemptItem(uint32 entry)
     {
         if (!entry)
             return false;
+        if (StoreItems.contains(entry))
+            return true;
         return CoAParse::ListContains(
             sConfigMgr->GetOption<std::string>("CoAChallenges.MailExemptItems", "1397884;1397885;1397886"),
             std::to_string(entry));
@@ -2474,6 +2488,7 @@ namespace CoAChallenges
             {
                 EnsureTables();
                 LoadChallengeDefinitions();
+                LoadStoreItems();
             }
 
         void OnUpdate(uint32 diff) override

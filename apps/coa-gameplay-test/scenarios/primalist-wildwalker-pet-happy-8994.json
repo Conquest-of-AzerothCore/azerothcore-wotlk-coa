@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Wildwalker pets stay happy and deal full damage (#8994)",
+  "contract": [
+    "A beast tamed through Harness Animal Spirit starts at 166500 of 1050000 happiness, the native Unhappy state",
+    "that cuts pet melee damage to 75% (and its threat with it), and kept decaying because a Wildwalker has no way to",
+    "raise it. Ascension fixed this in changelog 70528 (2026-08-11): Wildwalker pets are always happy. Expected: the",
+    "tamed pet reaches full happiness and stays there, also after its owner relogs."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "p", "race": 1, "class": 31, "level": 20}
+  ],
+  "creatures": [
+    {"id": "beast", "owner": "p", "entry": 1188, "level": 19, "health": 100000, "distance": 5}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "specialization", "actor": "p", "id": 59},
+    {"action": "cast", "label": "Harness the beast's spirit", "actor": "p", "spell": 574301, "target": "beast"},
+    {"action": "assert", "label": "SETUP: the beast is tamed", "actor": "p", "metric": "pet_entry", "equals": 1188,
+     "within_ms": 24000},
+    {"action": "assert", "label": "SETUP: happiness tops out at 1050000", "actor": "p", "metric": "pet_max_power",
+     "power": 4, "equals": 1050000},
+    {"action": "assert", "label": "The tamed pet is fully happy", "actor": "p", "metric": "pet_power", "power": 4,
+     "equals": 1050000, "within_ms": 2000},
+    {"action": "wait", "ms": 16000},
+    {"action": "assert", "label": "Happiness does not decay", "actor": "p", "metric": "pet_power", "power": 4,
+     "equals": 1050000},
+    {"action": "relog", "actor": "p"},
+    {"action": "assert", "label": "SETUP: the pet returns after relog", "actor": "p", "metric": "pet_entry",
+     "equals": 1188, "within_ms": 5000},
+    {"action": "assert", "label": "The pet is still fully happy after relog", "actor": "p", "metric": "pet_power",
+     "power": 4, "equals": 1050000, "within_ms": 2000}
+  ]
+}

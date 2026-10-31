@@ -10,8 +10,11 @@ namespace
 enum WaspFormSpells : uint32
 {
     SPELL_WASP_FORM = 805141,
-    SPELL_WASP_FORM_FLIGHT = 805142
+    SPELL_WASP_FORM_FLIGHT = 805142,
+    SPELL_VENOMWING_HELPER = 520330
 };
+
+constexpr Milliseconds VenomwingLandingGrace = 2s;
 
 class aura_ascension_venomancer_wasp_form : public AuraScript
 {
@@ -38,6 +41,8 @@ private:
     void RemoveFlight(AuraEffect const*, AuraEffectHandleModes)
     {
         GetTarget()->RemoveAurasDueToSpell(_flight);
+        if (_flight == SPELL_VENOMWING_HELPER)
+            GetTarget()->GrantFormLandingGrace(VenomwingLandingGrace);
     }
 
     void Register() override
