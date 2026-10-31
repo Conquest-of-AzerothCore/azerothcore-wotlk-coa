@@ -1,0 +1,85 @@
+--- a/Interface/SharedXML/Util/NewCharacterSetupUtil.lua
++++ b/Interface/SharedXML/Util/NewCharacterSetupUtil.lua
+@@ -1,3 +1,66 @@
++local area52CreationBuildReferences = {
++    ["05901096-411d-4810-8e07-19c58128fdc8"]="9223372036854775827",
++    ["08535f9f-9321-4eef-9bb2-9c4e6911c22a"]="9223372036854775839",
++    ["0ee35b68-fa06-4e7a-83cd-51a65fd8cf3b"]="9223372036854775951",
++    ["189df2a3-7042-49b2-b2f7-6d50ea12f556"]="9223372036854775825",
++    ["1b11581f-253f-426f-82d1-b8e5e25a7c96"]="9223372036854775818",
++    ["1bc9c682-d6f9-4aeb-975e-46045eb73d22"]="9223372036854775890",
++    ["1ef4bae3-780c-444c-833f-ecf46149de94"]="9223372036854775881",
++    ["20d5063d-66a5-48ab-a57f-f942be41fb02"]="9223372036854775837",
++    ["223c330a-dda1-4935-92e5-9ea579c46eb1"]="9223372036854775896",
++    ["22c3cb4c-d314-4208-ac4b-e4d7aaf803cb"]="9223372036854775838",
++    ["393912ff-28db-4e44-86da-d25f83c1fbe4"]="9223372036854775882",
++    ["39c35111-46ed-4265-94ad-8189326d99a7"]="9223372036854775952",
++    ["3db13932-7c25-4109-b885-68530c3b9b2f"]="9223372036854775883",
++    ["446ab71a-f80d-4aa3-a9f8-d5b333302b9c"]="9223372036854775823",
++    ["446e3d1c-da7b-44c5-b6a3-75aabce67df7"]="9223372036854775898",
++    ["4b175aaf-fc60-40ed-b52c-83596ee7caf5"]="9223372036854775942",
++    ["5151922f-e024-44e3-8c8a-fbb048cbf254"]="9223372036854775828",
++    ["558dd336-cb28-4bda-b0d0-1e615bb21dbc"]="9223372036854775939",
++    ["5657ab7b-ca87-428b-9d0f-dc829adf5d85"]="9223372036854775840",
++    ["567c3acc-5acc-4820-bdc7-fdf710e63beb"]="9223372036854775940",
++    ["58af0250-fe83-4afb-9a48-f9ba48ba9de6"]="9223372036854775829",
++    ["5d47b23f-8d91-4afb-a393-f7401bc46c68"]="9223372036854775841",
++    ["5fd35166-8149-49f6-a5ab-462f31ccecb4"]="9223372036854775941",
++    ["5ff2ea6e-2b63-4a0e-b16a-db9565f53cf6"]="9223372036854775944",
++    ["63b2be6f-d76f-4a36-b56b-7472a6661105"]="9223372036854775815",
++    ["69011001-2adf-43ff-9bf6-c478d7af9f30"]="9223372036854775885",
++    ["6ca246c8-4971-40f3-81e4-3befe43103ce"]="9223372036854775886",
++    ["6ceabc35-65b2-4c96-a23b-3559f3707cfb"]="9223372036854775903",
++    ["76d99cd9-b8fe-4f71-9905-e1f3a6f42484"]="9223372036854775887",
++    ["79c8ee8e-e4a0-45bc-ac6e-c5167961797b"]="9223372036854775888",
++    ["87575f0f-f6bb-42b4-8cac-37f6ecade09a"]="9223372036854775821",
++    ["87a12d24-6e00-4435-9f28-d6991ec0bd99"]="9223372036854775892",
++    ["8b274e7c-fc3c-41fb-8b08-21408a5b6e40"]="9223372036854775809",
++    ["8d479f80-ba6e-4dc9-be01-a453be1925e5"]="9223372036854775893",
++    ["90a2d5fc-6bd5-4d67-830d-996cc653b274"]="9223372036854775905",
++    ["9375977c-24a8-4e8c-b772-b924711438bc"]="9223372036854775824",
++    ["9c6cbaef-9895-42e3-885d-303a06dec111"]="9223372036854775894",
++    ["9fcd478d-4b9b-496f-92c7-d2a998cc4a21"]="9223372036854775947",
++    ["a252ae0e-94a2-40dd-bd5b-35db13933f44"]="9223372036854775833",
++    ["a5957bf3-5e54-468b-82b7-29f26c3fa6d0"]="9223372036854775811",
++    ["b8d832b9-2f84-4a5d-92c2-8d864b83457c"]="9223372036854775830",
++    ["bbb7a620-06dd-4266-abf7-b3da935a9525"]="9223372036854775826",
++    ["bcd1a08d-f311-4977-b899-f5b16df35546"]="9223372036854775909",
++    ["c483eaf6-a46d-49e4-a55a-ae807d02d279"]="9223372036854775810",
++    ["d52bf48a-b38a-41fe-b582-b958ed1b82b9"]="9223372036854775834",
++    ["d5bf1cc2-ed7e-4094-a239-4048b488cd71"]="9223372036854775822",
++    ["d62e4ddb-ad34-4c67-8dac-862c15f001c9"]="9223372036854775842",
++    ["d836c2b6-c794-4460-8413-46c4d459d1b6"]="9223372036854775948",
++    ["d91df67f-a60b-482d-8804-d445ccfe427d"]="9223372036854775835",
++    ["dc6ba192-b5fe-48dc-a1ed-7bb9f3aba8bb"]="9223372036854775949",
++    ["e57ef0d4-2e26-4e89-9b5b-da4f5ae21ad6"]="9223372036854775832",
++    ["ea155d28-ee8e-4a6e-89cb-6d0605d89242"]="9223372036854775912",
++    ["eb1d6d38-3928-4822-902c-0e62e28665b9"]="9223372036854775950",
++    ["f4522101-5b74-43ee-aa54-5a742e60ebfa"]="9223372036854775814",
++    ["fb4ebbac-a2c8-4548-a963-59602d89021d"]="9223372036854775937",
++    ["ffc7753e-ffec-49e3-9417-4e046595e075"]="9223372036854775820",
++}
++function Area52CreationBuildReference(buildID)
++    if GetRealmName() ~= "Area 52 - Free-Pick" then return buildID end
++    return area52CreationBuildReferences[buildID] or buildID
++end
++
+ NewCharacterSetupUtil = {}
+ 
+ local ReadCustomWTF, WriteCustomWTF = ReadCustomWTF, WriteCustomWTF
+@@ -67,6 +130,7 @@
+         realmData[characterName] = characterData
+     end
+     
++    if key == "archetypeBuildID" then value = Area52CreationBuildReference(value) end
+     characterData[key] = value
+     
+     -- clean up table as needed
+@@ -204,6 +268,7 @@
+ 
+ function Draft.Begin(playerName, buildID)
+     if GetRealmName() ~= "Area 52 - Free-Pick" then return false end
++    buildID = Area52CreationBuildReference(buildID)
+     generation = generation + 1
+     local current = generation
+     request, attempts, awaiting = {name = playerName, id = buildID}, 0, false
