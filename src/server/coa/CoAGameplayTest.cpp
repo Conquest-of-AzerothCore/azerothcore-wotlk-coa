@@ -5336,6 +5336,16 @@ private:
                             request << StabledPetNumber(player, value.get_value<uint32>());
                         else if (kind == "actor_guid")
                             request << GetUnit(value.get_value<std::string>())->GetGUID().GetRawValue();
+                        else if (kind == "nearest_creature_guid")
+                        {
+                            std::list<Creature*> creatures;
+                            player->GetCreatureListWithEntryInGrid(creatures, value.get_value<uint32>(), 100.0f);
+                            Require(!creatures.empty(), "Packet creature GUID requires that entry within 100 yards");
+                            Creature* nearest = *std::min_element(creatures.begin(), creatures.end(),
+                                [player](Creature* a, Creature* b)
+                                { return player->GetExactDistSq(a) < player->GetExactDistSq(b); });
+                            request << nearest->GetGUID().GetRawValue();
+                        }
                         else if (kind == "duel_arbiter")
                         {
                             ObjectGuid const arbiter = GetPlayer(value.get_value<std::string>())

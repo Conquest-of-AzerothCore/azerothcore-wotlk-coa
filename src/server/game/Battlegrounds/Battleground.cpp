@@ -1460,7 +1460,9 @@ void Battleground::AddPlayerToResurrectQueue(ObjectGuid npc_guid, ObjectGuid pla
     if (!player)
         return;
 
-    player->CastSpell(player, SPELL_WAITING_FOR_RESURRECT, true);
+    // Recasting would reapply the aura, and its removal handler takes the player back out of the queue.
+    if (!player->HasAura(SPELL_WAITING_FOR_RESURRECT))
+        player->CastSpell(player, SPELL_WAITING_FOR_RESURRECT, true);
 }
 
 void Battleground::RemovePlayerFromResurrectQueue(Player* player)

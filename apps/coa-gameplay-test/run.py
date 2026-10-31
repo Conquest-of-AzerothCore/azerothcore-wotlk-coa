@@ -767,7 +767,7 @@ def validate(scenario):
                 require(isinstance(field, dict) and len(field) == 1, f'{where}.fields[{index}]: expected one typed value')
                 (kind, value), = field.items()
                 require(kind in {'u8', 'u32', 'u64', 'string', 'buyback_guid', 'item_guid', 'item_bag', 'item_slot', 'gameobject_guid',
-                                 'actor_guid', 'packed_actor_guid',
+                                 'actor_guid', 'packed_actor_guid', 'nearest_creature_guid',
                                  'pet_guid', 'stabled_pet', 'duel_arbiter', 'invited_battleground_type',
                                  'wildcard_entry', 'wildcard_pending_cards', 'wildcard_lowest_card'},
                         f'{where}.fields[{index}]: unknown field type')
@@ -780,6 +780,7 @@ def validate(scenario):
                 else:
                     maximum = {'u8': 255, 'u32': 2**32 - 1, 'u64': 2**64 - 1, 'buyback_guid': 2**31 - 1,
                                'item_guid': 2**32 - 1, 'item_bag': 2**32 - 1, 'item_slot': 2**32 - 1, 'gameobject_guid': 2**32 - 1,
+                               'nearest_creature_guid': 2**32 - 1,
                                'stabled_pet': 3, 'wildcard_entry': 255, 'wildcard_pending_cards': 1000,
                                'wildcard_lowest_card': 7}[kind]
                     number(value, f'{where}.fields[{index}]', 0, maximum, True)
