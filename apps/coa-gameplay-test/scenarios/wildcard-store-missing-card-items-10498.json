@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Wildcard card stores sell cards whose items were missing from the world package (#10498)",
+  "contract": "The Skill Card and Golden Skill Card stores list every non-legendary, non-starter Wildcard Hero card in SkillCard.dbc. 403 of those card items had no item_template row, so CMSG_PURCHASE_CUSTOM_STORE_ITEM (0x06BB: u32 item, u32 count) failed in CanStoreNewItem and answered PURCHASE_CUSTOM_STORE_ITEM_UNKNOWN. Golden Skill Card - Seal of Command (2206244) and Golden Skill Card - Aspect of the Beast (2206176) cost 250 Golden Darkmoon Tickets (97399) each; Skill Card - Summoner's Armor (2206339) costs 250 Darkmoon Tickets (246190). Expected: each purchase puts the card in the bags and takes its 250 tickets.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "hero", "race": 1, "class": 10, "level": 60 } ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Harnessa" },
+    { "action": "assert", "label": "SETUP: the Hero plays Wildcard", "actor": "hero", "metric": "game_mode_mask", "min": 64 },
+    { "action": "add_item", "actor": "hero", "item": 97399, "count": 500 },
+    { "action": "add_item", "actor": "hero", "item": 246190, "count": 250 },
+    {
+      "action": "client_packet", "label": "Buy Golden Skill Card - Seal of Command", "actor": "hero", "opcode": 1723,
+      "fields": [ { "u32": 2206244 }, { "u32": 1 } ]
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Golden Skill Card - Seal of Command is in the bags",
+      "actor": "hero", "metric": "item_count", "item": 2206244, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "client_packet", "label": "Buy Golden Skill Card - Aspect of the Beast", "actor": "hero", "opcode": 1723,
+      "fields": [ { "u32": 2206176 }, { "u32": 1 } ]
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Golden Skill Card - Aspect of the Beast is in the bags",
+      "actor": "hero", "metric": "item_count", "item": 2206176, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Both golden cards took 250 Golden Darkmoon Tickets each",
+      "actor": "hero", "metric": "item_count", "item": 97399, "equals": 0
+    },
+    {
+      "action": "client_packet", "label": "Buy Skill Card - Summoner's Armor", "actor": "hero", "opcode": 1723,
+      "fields": [ { "u32": 2206339 }, { "u32": 1 } ]
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Skill Card - Summoner's Armor is in the bags",
+      "actor": "hero", "metric": "item_count", "item": 2206339, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The normal card took 250 Darkmoon Tickets",
+      "actor": "hero", "metric": "item_count", "item": 246190, "equals": 0
+    }
+  ]
+}
