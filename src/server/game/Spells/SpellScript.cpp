@@ -364,7 +364,9 @@ void SpellScript::_InitHit()
 void SpellScript::_PrepareScriptCall(SpellScriptHookType hookType)
 {
     m_currentScriptState = hookType;
-    SpellMgr::PushScriptTwin(m_scriptSpellId);
+    // a stock spell triggered by a Reborn aura runs for that Reborn spell too (Deep Wounds' stock trigger)
+    SpellInfo const* triggeredBy = m_spell ? m_spell->GetTriggeredByAuraSpellInfo() : nullptr;
+    SpellMgr::PushScriptTwin(m_scriptSpellId, triggeredBy ? triggeredBy->Id : 0);
 }
 
 void SpellScript::_FinishScriptCall()

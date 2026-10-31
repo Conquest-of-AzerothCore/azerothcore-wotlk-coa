@@ -862,7 +862,7 @@ public:
     /// the twin or namesake of a stock spell that belongs with a related spell's own twin, or the stock spell
     [[nodiscard]] uint32 GetSpellTwinFor(uint32 stockSpellId, uint32 relatedSpellId) const;
     /// the twin whose script is running on this thread (a stock script bound to it through its stock spell), or 0
-    static void PushScriptTwin(uint32 spellId);
+    static void PushScriptTwin(uint32 spellId, uint32 triggeringSpellId = 0);
     static void PopScriptTwin(uint32 spellId);
     [[nodiscard]] static uint32 GetRunningScriptTwin();
     void LoadSpellRequired();

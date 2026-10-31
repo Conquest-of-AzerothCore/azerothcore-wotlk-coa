@@ -2287,8 +2287,12 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
                     {
                         // get furor proc chance
                         uint32 FurorChance = 0;
+                        uint32 furorId = 0;
                         if (AuraEffect const* dummy = target->GetDummyAuraEffect(SPELLFAMILY_DRUID, 238, 0))
+                        {
                             FurorChance = std::max(dummy->GetAmount(), 0);
+                            furorId = dummy->GetId();
+                        }
 
                         switch (GetMiscValue())
                         {
@@ -2298,13 +2302,14 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
                                         break;
                                     int32 basePoints = int32(std::min(oldPower, FurorChance));
                                     target->SetPower(POWER_ENERGY, 0);
-                                    target->CastCustomSpell(target, 17099, &basePoints, nullptr, nullptr, true, nullptr, this);
+                                    target->CastCustomSpell(target, sSpellMgr->GetSpellTwinFor(17099, furorId), &basePoints, nullptr,
+                                        nullptr, true, nullptr, this);
                                     break;
                                 }
                             case FORM_BEAR:
                             case FORM_DIREBEAR:
                                 if (urand(0, 99) < FurorChance)
-                                    target->CastSpell(target, 17057, true);
+                                    target->CastSpell(target, sSpellMgr->GetSpellTwinFor(17057, furorId), true);
                                 break;
                             default:
                                 {

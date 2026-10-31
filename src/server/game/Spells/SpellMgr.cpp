@@ -1549,9 +1549,12 @@ namespace
     thread_local std::vector<uint32> RunningScriptTwins;
 }
 
-void SpellMgr::PushScriptTwin(uint32 spellId)
+void SpellMgr::PushScriptTwin(uint32 spellId, uint32 triggeringSpellId)
 {
-    RunningScriptTwins.push_back(sSpellMgr->GetSpellTwinSource(spellId) != spellId ? spellId : 0);
+    uint32 twin = sSpellMgr->GetSpellTwinSource(spellId) != spellId ? spellId : 0;
+    if (!twin && triggeringSpellId && sSpellMgr->GetSpellTwinSource(triggeringSpellId) != triggeringSpellId)
+        twin = triggeringSpellId;
+    RunningScriptTwins.push_back(twin);
 }
 
 void SpellMgr::PopScriptTwin(uint32 /*spellId*/)
