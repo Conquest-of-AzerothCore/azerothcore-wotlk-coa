@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Whirling Advance damages enemies along its whole path, not only near its end (#7333)",
+  "contract": [
+    "Whirling Advance (500919, 504912-504916) whirls the Barbarian 12 yards forward, \"dealing damage to enemies in your",
+    "way\". Its damage effect targets TARGET_UNIT_CONE_ENEMY_24, a 24-degree cone that is narrow close to the caster,",
+    "so an enemy just beside the path 6 yards ahead (18 degrees off the facing) was skipped while the same sideways",
+    "offset 11 yards ahead (10 degrees) was hit. The Barbarian stands 2 yards to the side of the line through both",
+    "enemies; each is inside the path's width (caster plus target combat reach) and within 12 yards, so both take damage."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "b", "race": 1, "class": 12, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "near", "owner": "b", "entry": 1601, "level": 60, "health": 500000, "distance": 6 },
+    { "id": "far", "owner": "b", "entry": 1601, "level": 60, "health": 500000, "distance": 11 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "relocate", "actor": "b", "dy": 2 },
+    { "action": "learn", "actor": "b", "spell": 504915 },
+    { "action": "set_power", "actor": "b", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "b", "spell": 504915 },
+    { "action": "assert", "label": "Whirling Advance is accepted", "actor": "b", "metric": "cast_failure", "spell": 504915, "equals": 0 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the enemy beside the start of the path takes damage",
+      "actor": "near", "metric": "health", "max": 499999, "within_ms": 3000
+    },
+    { "action": "assert", "label": "The enemy farther along the path takes damage", "actor": "far", "metric": "health", "max": 499999 }
+  ]
+}

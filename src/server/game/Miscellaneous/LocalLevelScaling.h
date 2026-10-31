@@ -19,6 +19,7 @@ class Creature;
 class Item;
 class Player;
 class Quest;
+class SpellInfo;
 class Unit;
 struct ItemTemplate;
 
@@ -92,6 +93,26 @@ inline bool InScaledDungeon(Player const* player)
 inline bool DungeonLootScales(Player const* player)
 {
     return InScaledDungeon(player) && !(ScalingBlocksFor(player) & ChallengeBlocksCreatureScaling);
+}
+
+/// What one character's heal is worth to another inside a scaled dungeon, as a factor on the amount: each
+/// of them fights their own version of the creatures, so a heal sized for the blows of the healer's version
+/// is carried over to the blows of the receiver's. The module that owns the creature view installs the
+/// resolver; 1 means the heal lands as cast.
+using HealReceivedResolver = double (*)(Unit const* healer, Unit const* receiver, SpellInfo const* spell);
+inline std::atomic<HealReceivedResolver> HealReceivedOwner{nullptr};
+
+inline std::uint32_t HealReceivedFor(Unit const* healer, Unit const* receiver, SpellInfo const* spell,
+    std::uint32_t heal)
+{
+    HealReceivedResolver const owner = HealReceivedOwner.load(std::memory_order_relaxed);
+    if (!owner || !heal)
+        return heal;
+
+    double const factor = owner(healer, receiver, spell);
+    if (factor == 1.0)
+        return heal;
+    return std::max<std::uint32_t>(1, static_cast<std::uint32_t>(double(heal) * factor + 0.5));
 }
 
 /// Something other than the character's own choice changed whether they see scaled content: a

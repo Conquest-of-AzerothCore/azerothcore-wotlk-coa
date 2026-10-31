@@ -8799,7 +8799,19 @@ void Player::SendLoot(ObjectGuid guid, LootType loot_type)
                 // here also keeps the automatic retry silent, where Player::StoreLootItem would
                 // send an inventory error to the client on every companion tick.
                 ItemPosCountVec dest;
-                if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, itemCount) != EQUIP_ERR_OK)
+                uint32 noSpaceForCount = 0;
+                InventoryResult storable = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, itemCount, &noSpaceForCount);
+                // StoreLootItem takes the part of a quest stack that the carry limit still allows.
+                if (storable == EQUIP_ERR_CANT_CARRY_MORE_OF_THIS && noSpaceForCount < itemCount)
+                {
+                    LootItem* lootItem = loot->LootItemInSlot(slot, this);
+                    if (lootItem && lootItem->needs_quest)
+                    {
+                        dest.clear();
+                        storable = CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, itemCount - noSpaceForCount);
+                    }
+                }
+                if (storable != EQUIP_ERR_OK)
                     continue;
                 sScriptMgr->OnPlayerAfterCreatureLoot(this);
                 InventoryResult result;
@@ -9811,9 +9823,14 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
 
         if (pet->isControlled())
         {
-            WorldPacket data(SMSG_PET_SPELLS, 8);
-            data << uint64(0);
-            SendDirectMessage(&data);
+            // Conquest of Azeroth: the possess bar (e.g. a Tinker's Destructo-Bot) is also sent as
+            // SMSG_PET_SPELLS, so clearing the pet bar while possessing would take it away.
+            if (!isPossessing())
+            {
+                WorldPacket data(SMSG_PET_SPELLS, 8);
+                data << uint64(0);
+                SendDirectMessage(&data);
+            }
 
             if (GetGroup())
                 SetGroupUpdateFlag(GROUP_UPDATE_PET);

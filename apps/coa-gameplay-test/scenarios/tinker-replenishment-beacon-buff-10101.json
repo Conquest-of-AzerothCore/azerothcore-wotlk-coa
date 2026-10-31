@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Tinker: Replenishment Beacon applies its field buff (#10101)",
+  "contract": [
+    "Build: Replenishment Beacon 560750 summons creature 500360 for 15 sec and restores 5% base mana plus",
+    "rage/energy/focus/runic power every 2.5 sec to the Tinker and grouped allies within 10 yd. Its spell",
+    "description promises a force field, but the beacon applied no aura, so affected allies saw no buff. The",
+    "authored field aura is 560765 'Beacon Replenishment' (persistent-area-aura in client data); the server",
+    "converts it to an ally aura and the beacon now applies it to every player it restores, refreshing it each",
+    "tick. Expected: the Tinker and a grouped ally carry aura 560765 while inside the field, an ungrouped",
+    "player inside the same radius does not, the base-mana restore still fires once per tick through 561267,",
+    "and the 15 sec field aura itself never ticks (it is re-applied with a 2.4 sec duration each tick)."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "t", "race": 1, "class": 28, "level": 24 },
+    { "id": "ally", "race": 1, "class": 8, "level": 24 },
+    { "id": "enemy", "race": 5, "class": 8, "level": 24 }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "group", "actor": "t", "target": "ally" },
+    { "action": "learn", "actor": "t", "spell": 560750 },
+    { "action": "cast", "actor": "t", "spell": 560750 },
+    {
+      "action": "assert", "label": "The beacon is placed", "actor": "t",
+      "metric": "owned_creature_count", "entry": 500360, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Tinker carries the field buff", "actor": "t",
+      "metric": "aura", "spell": 560765, "equals": 1, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "The grouped ally carries the field buff", "actor": "ally",
+      "metric": "aura", "spell": 560765, "equals": 1, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "The ungrouped player gets no field buff", "actor": "enemy",
+      "metric": "aura", "spell": 560765, "equals": 0, "within_ms": 4000
+    },
+    { "action": "set_power", "actor": "t", "power": 0, "value": 0 },
+    { "action": "set_power", "actor": "ally", "power": 0, "value": 0 },
+    { "action": "wait", "label": "Let two beacon ticks run", "ms": 6000 },
+    {
+      "action": "assert", "label": "The base-mana restore still fires for the Tinker", "actor": "t",
+      "metric": "spell_energize_count", "spell": 561267, "target": "t", "min": 1
+    },
+    {
+      "action": "assert", "label": "The base-mana restore still fires for the ally", "actor": "t",
+      "metric": "spell_energize_count", "spell": 561267, "target": "ally", "min": 1
+    },
+    {
+      "action": "assert", "label": "The field aura itself restores nothing", "actor": "t",
+      "metric": "spell_energize_count", "spell": 560765, "target": "t", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The buff is kept refreshed while the beacon lasts", "actor": "t",
+      "metric": "aura", "spell": 560765, "equals": 1
+    }
+  ]
+}

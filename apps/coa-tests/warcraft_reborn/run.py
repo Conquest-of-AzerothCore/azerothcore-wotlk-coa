@@ -398,13 +398,107 @@ TWIN_COPIES = {
         "CopyToSpellTwins(mSpellBonusMap);", "CopyToSpellTwins(mSpellThreatMap);",
         "CopyToSpellTwins(mSpellMixologyMap);", "CopyToSpellTwins(mSpellCones);", "twinRequirements", "twinGroups",
         "twinLinks", "GetSpellTwinFor(spellReq, twin->second)", "mSpellTargetPositions[{ twin, SpellEffIndex(i) }]", "mSpellPetAuraMap.emplace((twin << 8) + i",
-        "databaseAttributes.contains(twin)"],
+        "databaseAttributes.contains(twin)",
+        "twinInfo->ProcFlags ? twinInfo->ProcFlags : sourceInfo->ProcFlags",
+        "twinInfo->ProcChance ? twinInfo->ProcChance : sourceInfo->ProcChance",
+        "spellInfo->ProcFlags || !twinSourceInfo ? spellInfo->ProcFlags : twinSourceInfo->ProcFlags",
+        "spellInfo->ProcChance || !twinSourceInfo ? spellInfo->ProcChance : twinSourceInfo->ProcChance"],
     "src/server/game/Globals/ObjectMgr.cpp": ["sSpellMgr->GetSpellTwins()"],
     "src/server/game/World/World.cpp": ["sSpellMgr->LoadSpellTwins(false);", "sSpellMgr->LoadSpellTwins(true);"],
     "src/server/game/Spells/SpellInfoCorrections.cpp": ["SameSpellTuning(spellInfo, twin)"],
     "src/server/coa/AscensionWarcraftReborn.cpp": ["sSpellMgr->SetSpellTwins(&AscensionWarcraftReborn::LoadTwins);"],
     "src/server/scripts/Spells/spell_warlock.cpp": ["bonus ? bonus->direct_damage : 0.5f"],
 }
+
+
+PROC_FALLBACK_TWINS = {20375: 1120375, 31801: 1131801, 53736: 1153736, 31641: 1131641, 9452: 1109452, 58914: 1158914}
+MAELSTROM_SQL = ROOT / "data/sql/updates/pending_db_world/rev_20261030_60_coa_reborn_maelstrom_weapon.sql"
+
+
+def spell_rows(dbc, wanted):
+    data = (dbc / "Spell.dbc").read_bytes()
+    count, fields, size, strings = struct.unpack_from("<4I", data, 4)
+    rows = {}
+    for row in range(count):
+        record = struct.unpack_from("<%dI" % fields, data, 20 + row * size)
+        if record[0] in wanted:
+            rows[record[0]] = record
+    return rows
+
+
+def check_twin_proc_fallback(dbc):
+    rows = spell_rows(dbc, set(PROC_FALLBACK_TWINS) | set(PROC_FALLBACK_TWINS.values()))
+    ok = len(rows) == 2 * len(PROC_FALLBACK_TWINS) and all(
+        any(rows[source][field] and not rows[twin][field] for field in (34, 35))
+        for source, twin in PROC_FALLBACK_TWINS.items())
+    print(f"{'PASS' if ok else 'FAIL'}: Reborn Seal of Command, Seal of Vengeance, Seal of Corruption, Blazing Speed, "
+          "Vindication and Kill Command lack the proc flags or chance of their stock spell, so their entries take stock's")
+    return ok
+
+
+def check_maelstrom_weapon(dbc):
+    rows = spell_rows(dbc, {1151528, 1151529, 1151530, 1153817, 1153816, 1153822})
+    text = MAELSTROM_SQL.read_text(encoding="utf-8")
+    ranks = re.findall(r"\((115152[89]|1151530), 0, 0, 0, 0, 0, 0, 0x1, 0x2, 0, 0, 0, ([0-9.]+), 0, 0, 0\)", text)
+    buff = re.search(r"\(1153817, 0, 11, 0x000001C3, 0x00008000, 0, 0, 0x0, 0x1, 0, 0x8, 0, 0, 100, 0, 0\)", text)
+    ok = (len(rows) == 6 and all(not rows[r][35] and rows[r][34] for r in (1151528, 1151529, 1151530)) and
+          all(rows[r][116] == 1153817 and rows[r][117] == 1153816 for r in (1151528, 1151529, 1151530)) and
+          rows[1153817][49] == 8 and rows[1153816][49] == 8 and struct.unpack("<i", struct.pack("<I", rows[1153822][80]))[0] + 1 == 5 and
+          sorted(float(p) for _, p in ranks) == [2.0, 4.0, 6.0] and buff is not None and
+          "(1153817, 'spell_ascension_reborn_maelstrom_weapon')" in text)
+    print(f"{'PASS' if ok else 'FAIL'}: Reborn Maelstrom Weapon ranks proc per minute from weapon damage and stack the "
+          "8-stack buff, which a Lightning Bolt, Chain Lightning, heal or Hex consumes 5 at a time")
+    return ok
+
+
+NAMESAKE_PROCS_SQL = ROOT / "data/sql/updates/pending_db_world/rev_20261030_61_coa_reborn_namesake_procs.sql"
+NAMESAKE_PROCS = {1120165: ("spell_pal_seal_of_light", 1120167), 1130823: ("spell_sha_shamanistic_rage", 1130824),
+                  1151525: ("spell_sha_static_shock", 0),
+                  1115273: ("spell_ascension_reborn_improved_mind_blast", 1148301)}
+
+
+def check_namesake_procs(dbc):
+    rows = spell_rows(dbc, set(NAMESAKE_PROCS) | {trigger for _, trigger in NAMESAKE_PROCS.values() if trigger})
+    text = NAMESAKE_PROCS_SQL.read_text(encoding="utf-8")
+    ok = True
+    for spell, (script, trigger) in NAMESAKE_PROCS.items():
+        ok &= spell in rows and f"({spell}, '{script}')" in text and f"({spell}, 0, " in text
+        ok &= not trigger or (trigger in rows and trigger in rows[spell][116:119])
+    print(f"{'PASS' if ok else 'FAIL'}: Reborn Seal of Light, Shamanistic Rage, Static Shock and Improved Mind Blast "
+          "proc from their stock spells' rows and scripts")
+    return ok
+
+
+TRAINER_SEAL_SQL = ROOT / "data/sql/updates/pending_db_world/rev_20261030_63_coa_reborn_trainer_seal_of_command.sql"
+
+
+def check_trainer_seal_of_command(dbc):
+    ranks = range(1470375, 1470380)
+    rows = spell_rows(dbc, set(ranks) | {20375})
+    text = TRAINER_SEAL_SQL.read_text(encoding="utf-8")
+    paladin = (ROOT / "src/server/scripts/Spells/spell_paladin.cpp").read_text(encoding="utf-8")
+    ok = (len(rows) == 6 and rows[20375][34] == 0x4 and all(not rows[rank][34] for rank in ranks) and
+          all(f"({rank}, 0, 10, 0, 0x00168000, 0, 0x4, 0x1, 0x2, 0, 0, 0, 0, 100, 0, 0)" in text and
+              f"({rank}, 'spell_pal_seal_of_command')" in text for rank in ranks) and
+          "sSpellMgr->GetSpellTwinSource(GetSpellInfo()->Id) == 31801" in paladin and
+          "sSpellMgr->GetSpellTwinSource(m_scriptSpellId) == 20424" in paladin)
+    print(f"{'PASS' if ok else 'FAIL'}: the trainer's Seal of Command procs on melee hits like stock, and the Seal of "
+          "Vengeance script casts the Reborn spells for the Reborn seal")
+    return ok
+
+
+BLAZING_SPEED_SQL = ROOT / "data/sql/updates/pending_db_world/rev_20261030_62_coa_reborn_blazing_speed.sql"
+
+
+def check_blazing_speed(dbc):
+    rows = spell_rows(dbc, {1131641, 1131642, 1131643, 31643})
+    text = BLAZING_SPEED_SQL.read_text(encoding="utf-8")
+    ok = (len(rows) == 4 and rows[1131641][35] == 50 and rows[1131642][35] == 100 and
+          all(f"({spell}, 0, 0, 0, 0, 0, 0x28, 0x1, 0x2, 0, 0, 0, 0, 0, 0, 0)" in text and
+              f"({spell}, 'spell_ascension_reborn_blazing_speed')" in text for spell in (1131641, 1131642)))
+    print(f"{'PASS' if ok else 'FAIL'}: Reborn Blazing Speed procs at its own 50% or 100% from melee hits taken and casts "
+          "the Reborn buff, not stock's")
+    return ok
 
 
 COEFFICIENTS_SQL = ROOT / "data/sql/updates/pending_db_world/rev_20261008_20_coa_reborn_spell_coefficients.sql"
@@ -517,7 +611,11 @@ def main():
         if build.returncode:
             raise SystemExit("Warcraft Reborn rules harness did not compile:\n" + build.stdout + build.stderr)
         result = subprocess.run([str(executable), str(args.dbc_dir.resolve())], text=True)
-        bindings_ok = check_form_only_bindings(args.dbc_dir.resolve()) & check_deep_freeze_immunity(args.dbc_dir.resolve())
+        bindings_ok = (check_form_only_bindings(args.dbc_dir.resolve()) &
+                       check_deep_freeze_immunity(args.dbc_dir.resolve()) &
+                       check_twin_proc_fallback(args.dbc_dir.resolve()) & check_maelstrom_weapon(args.dbc_dir.resolve()) &
+                       check_namesake_procs(args.dbc_dir.resolve()) & check_blazing_speed(args.dbc_dir.resolve()) &
+                       check_trainer_seal_of_command(args.dbc_dir.resolve()))
         twins_ok = (check_twin_copies() & check_reborn_coefficients(args.dbc_dir.resolve()) &
                     check_class_spell_bindings(args.dbc_dir.resolve()))
         raise SystemExit(result.returncode or (0 if bindings_ok and twins_ok else 1))

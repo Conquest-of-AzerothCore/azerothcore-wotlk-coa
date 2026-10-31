@@ -154,6 +154,7 @@ enum VaultsData : uint32
     DISPLAY_INVISIBLE = 11686,
     DISPLAY_SOAK_RING = 132245,
     VAULTS_MAP_ID = 936,
+    OTHER_SIDE_MAP_ID = 937,
     GO_TOWER_BOSS_DOOR = 2300560,
     GO_TOWER_BOSS_BARRIER = 2300561,
     GO_TOWER_BOSS_BARRIER_2 = 2300576,
@@ -1115,6 +1116,7 @@ constexpr Milliseconds DeceiverSealRingAt = 14s;
 constexpr Milliseconds DeceiverRoarAt = 15500ms;
 constexpr Milliseconds DeceiverAwakeAt = 17s;
 constexpr uint32 VoidflareHoldMs = 1000;
+constexpr uint32 DeceiverSubmergedDisplay = 11686;
 constexpr Milliseconds DeceiverCycle = 40s;
 constexpr Milliseconds DeceiverRingDelay = 5s;
 constexpr uint32 DeceiverVeilRecastMs = 29000;
@@ -1149,6 +1151,7 @@ struct boss_coa_vaults_deceiver : public ScriptedAI
         _breaking = false;
         _checkMs = 1000;
         _veilMs = 0;
+        me->SetDisplayId(DeceiverSubmergedDisplay);
         SetEngageable(me, false);
     }
 
@@ -1342,6 +1345,8 @@ private:
                         helper->DespawnOrUnsummon();
                 break;
             case EVENT_DEC_SEAL_RING:
+                me->RestoreDisplayId();
+                me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
                 KeepAura(me, SPELL_SHADOWY_RING_INNER);
                 break;
             case EVENT_DEC_ROAR:
@@ -1785,6 +1790,7 @@ struct Ability
     uint32 firstMs;
     uint32 repeatMs;
     Aim aim;
+    uint8 minDifficulty = 0;
 };
 
 Ability const FierceBlow = { SPELL_FIERCE_BLOW, 7000, 9000, Aim::Victim };
@@ -1793,14 +1799,14 @@ std::unordered_map<uint32, std::vector<Ability>> const Abilities =
 {
     { NPC_TORTURER, { { SPELL_SWORD_STRIKE, 1000, 6500, Aim::Victim }, FierceBlow } },
     { NPC_PHANTASMAL_BOUND, { { SPELL_MANA_BURN, 2500, 16000, Aim::Random }, { SPELL_SILENCE, 7500, 16000, Aim::Self },
-        { SPELL_PSYCHIC_SCREAM, 13000, 16000, Aim::Self }, FierceBlow } },
+        { SPELL_PSYCHIC_SCREAM, 13000, 16000, Aim::Self, 1 }, FierceBlow } },
     { NPC_FREED_PRISONER, { { SPELL_MANIFEST, 4000, 600000, Aim::Self }, FierceBlow } },
-    { NPC_WRATHFUL_TORMENT, { { SPELL_ENDLESS_AFFLICTION, 4500, 8000, Aim::Self }, { SPELL_HAUNTING_WRATH, 9500, 8000, Aim::Self }, FierceBlow } },
+    { NPC_WRATHFUL_TORMENT, { { SPELL_ENDLESS_AFFLICTION, 4500, 8000, Aim::Self }, { SPELL_HAUNTING_WRATH, 9500, 8000, Aim::Self, 1 }, FierceBlow } },
     { NPC_KOBOLD, { { SPELL_PICKAXE_STRIKE, 4300, 10000, Aim::Self }, FierceBlow } },
     { NPC_KOBOLD_NORMAL, { { SPELL_PICKAXE_STRIKE, 4300, 10000, Aim::Self }, FierceBlow } },
     { NPC_KOBOLD_ELITE, { { SPELL_PICKAXE_STRIKE, 4700, 10000, Aim::Self }, FierceBlow } },
-    { NPC_BRUTE, { { SPELL_DARK_WAX_EXPLOSION, 4500, 19500, Aim::Self }, { SPELL_CHARGE_IMPACT, 12500, 19300, Aim::Charge }, FierceBlow } },
-    { NPC_BRUTE_ELITE, { { SPELL_DARK_WAX_EXPLOSION, 4500, 19500, Aim::Self }, { SPELL_CHARGE_IMPACT, 9000, 19300, Aim::Charge }, FierceBlow } },
+    { NPC_BRUTE, { { SPELL_DARK_WAX_EXPLOSION, 4500, 19500, Aim::Self }, { SPELL_CHARGE_IMPACT, 12500, 19300, Aim::Charge, 1 }, FierceBlow } },
+    { NPC_BRUTE_ELITE, { { SPELL_DARK_WAX_EXPLOSION, 4500, 19500, Aim::Self }, { SPELL_CHARGE_IMPACT, 9000, 19300, Aim::Charge, 1 }, FierceBlow } },
     { NPC_KOBOLD_FLAME, { { SPELL_KOBOLD_FLAME, 200, 2000, Aim::Victim }, FierceBlow } },
     { NPC_SHADOW_PROJECTION, { { SPELL_LASH_OF_THE_VOID, 500, 5000, Aim::Near } } },
     { NPC_CORPOREAL_SHADOW, { { SPELL_SHADOWFURY, 5000, 16500, Aim::Random }, FierceBlow } },
@@ -1839,8 +1845,10 @@ struct npc_coa_vaults_trash : public ScriptedAI
         auto itr = Abilities.find(me->GetEntry());
         if (itr == Abilities.end())
             return;
+        uint8 const difficulty = DifficultyIndex(me->GetMap());
         for (Ability const& ability : itr->second)
-            _timers.push_back({ &ability, ability.firstMs + urand(0, 1500) });
+            if (difficulty >= ability.minDifficulty)
+                _timers.push_back({ &ability, ability.firstMs + urand(0, 1500) });
     }
 
     void JustEngagedWith(Unit*) override
@@ -1855,6 +1863,13 @@ struct npc_coa_vaults_trash : public ScriptedAI
         auto itr = TrashTalk.find(me->GetEntry());
         if (itr != TrashTalk.end() && roll_chance_i(itr->second.death))
             Talk(SAY_TRASH_DEATH);
+    }
+
+    void EnterEvadeMode(EvadeReason why) override
+    {
+        ScriptedAI::EnterEvadeMode(why);
+        if (me->GetVehicle())
+            me->ClearUnitState(UNIT_STATE_EVADE);
     }
 
     void AttackStart(Unit* who) override
@@ -1880,8 +1895,16 @@ struct npc_coa_vaults_trash : public ScriptedAI
 
     void UpdateAI(uint32 diff) override
     {
-        if (me->GetEntry() == NPC_SHADOW_PROJECTION && !me->IsInCombat())
-            ScanForPlayers(diff);
+        if (me->GetEntry() == NPC_SHADOW_PROJECTION)
+        {
+            if (!me->IsInCombat())
+                ScanForPlayers(diff);
+            else if (PlayersInRange(me, TentacleAggroRange).empty())
+            {
+                EnterEvadeMode(EVADE_REASON_NO_HOSTILES);
+                return;
+            }
+        }
         if (!UpdateVictim())
             return;
         for (Timer& timer : _timers)
@@ -2053,6 +2076,42 @@ class spell_coa_vaults_void_wrath_tick : public SpellScript
     }
 };
 
+class spell_coa_custom_dungeon_fierce_blow : public SpellScript
+{
+    PrepareSpellScript(spell_coa_custom_dungeon_fierce_blow);
+
+    void HandleHit()
+    {
+        Unit* caster = GetCaster();
+        Unit* target = GetHitUnit();
+        if (!caster || !target || !caster->IsCreature())
+            return;
+        uint32 const mapId = caster->GetMapId();
+        if (mapId != VAULTS_MAP_ID && mapId != OTHER_SIDE_MAP_ID)
+            return;
+        PreventHitDamage();
+        uint32 blow = caster->CalculateDamage(BASE_ATTACK, false, true, 0, target);
+        blow = caster->MeleeDamageBonusDone(target, blow, BASE_ATTACK, nullptr, SPELL_SCHOOL_MASK_NORMAL);
+        blow = target->MeleeDamageBonusTaken(caster, blow, BASE_ATTACK, nullptr, SPELL_SCHOOL_MASK_NORMAL);
+        sScriptMgr->ModifyMeleeDamage(target, caster, blow);
+        uint32 const mitigated = Unit::CalcArmorReducedDamage(caster, target, blow, nullptr, 0, BASE_ATTACK);
+        DamageInfo absorb(caster, target, mitigated, GetSpellInfo(), SPELL_SCHOOL_MASK_NORMAL, SPELL_DIRECT_DAMAGE, blow - mitigated);
+        Unit::CalcAbsorbResist(absorb);
+        SpellNonMeleeDamage damage(caster, target, GetSpellInfo(), SPELL_SCHOOL_MASK_NORMAL);
+        damage.damage = absorb.GetDamage();
+        damage.absorb = absorb.GetAbsorb();
+        damage.resist = absorb.GetResist();
+        damage.cleanDamage = blow - mitigated;
+        caster->DealSpellDamage(&damage, true);
+        caster->SendSpellNonMeleeDamageLog(&damage);
+    }
+
+    void Register() override
+    {
+        OnHit += SpellHitFn(spell_coa_custom_dungeon_fierce_blow::HandleHit);
+    }
+};
+
 class vaults_spell_attributes : public GlobalScript
 {
 public:
@@ -2101,5 +2160,6 @@ void AddSC_CoAVaults()
     RegisterSpellAndAuraScriptPair(spell_coa_vaults_damage, spell_coa_vaults_damage_aura);
     RegisterSpellScript(spell_coa_vaults_void_wrath);
     RegisterSpellScript(spell_coa_vaults_void_wrath_tick);
+    RegisterSpellScript(spell_coa_custom_dungeon_fierce_blow);
     new vaults_spell_attributes();
 }

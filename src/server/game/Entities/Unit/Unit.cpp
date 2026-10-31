@@ -9187,7 +9187,8 @@ void Unit::SendHealSpellLog(HealInfo const& healInfo, bool critical)
 
 int32 Unit::HealBySpell(HealInfo& healInfo, bool critical)
 {
-    uint32 heal = healInfo.GetHeal();
+    uint32 heal = LocalLevelScaling::HealReceivedFor(healInfo.GetHealer(), healInfo.GetTarget(),
+        healInfo.GetSpellInfo(), healInfo.GetHeal());
     sScriptMgr->ModifyHealReceived(this, healInfo.GetTarget(), heal, healInfo.GetSpellInfo());
     healInfo.SetHeal(heal);
 
@@ -16391,7 +16392,31 @@ void Unit::RemoveCharmedBy(Unit* charmer)
 
     // a guardian should always have charminfo
     if (playerCharmer && this != charmer->GetFirstControlled())
-        playerCharmer->SendRemoveControlBar();
+    {
+        // Restore the bar of a pet or guardian still controlled after the charm ends
+        Unit* controlled = charmer->GetFirstControlled();
+        if (controlled && controlled->GetCharmInfo())
+        {
+            if (controlled->IsPet())
+                playerCharmer->PetSpellInitialize();
+            else
+                playerCharmer->CharmSpellInitialize();
+
+            playerCharmer->m_Events.AddEventAtOffset([playerCharmer]()
+            {
+                if (Unit* lateControlled = playerCharmer->GetFirstControlled();
+                    lateControlled && lateControlled->GetCharmInfo())
+                {
+                    if (lateControlled->IsPet())
+                        playerCharmer->PetSpellInitialize();
+                    else
+                        playerCharmer->CharmSpellInitialize();
+                }
+            }, 250ms);
+        }
+        else
+            playerCharmer->SendRemoveControlBar();
+    }
 
     // xinef: Always delete charm info (restores react state)
     if (IsPlayer() || (IsCreature() && !ToCreature()->IsGuardian()))

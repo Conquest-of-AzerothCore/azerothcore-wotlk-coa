@@ -54,6 +54,7 @@
 #include "Player.h"
 #include "Random.h"
 #include "ScriptMgr.h"
+#include "SpellInfo.h"
 #include "StringConvert.h"
 #include "Timer.h"
 #include "Tokenize.h"
@@ -105,9 +106,9 @@ namespace
     constexpr char DEFAULT_SCALING_DUNGEONS[] = "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402 401";
 
     /// Finder entries whose band is set here instead of read from LFGDungeons.dbc, as `entry:low-high`:
-    /// Road to De Other Side scales with the character like the classic dungeons (15-59), while its finder row
-    /// admits 10-59.
-    constexpr char DEFAULT_SCALING_BANDS[] = "402:15-59";
+    /// Vaults of the Inquisition and Road to De Other Side scale with the character like the classic dungeons
+    /// (15-59), while their finder rows admit 10-59.
+    constexpr char DEFAULT_SCALING_BANDS[] = "401:15-59 402:15-59";
 
     /// Where a view can exist at all: the open-world maps, and the classic dungeons with the band their
     /// creatures are held inside. Built on every config load and at startup, and published whole, so a
@@ -137,11 +138,9 @@ namespace
         return ids;
     }
 
-    std::unordered_map<uint32, LocalLevelScaling::LevelBand> ConfigBands()
+    std::unordered_map<uint32, LocalLevelScaling::LevelBand> ParseBands(std::string_view value)
     {
         std::unordered_map<uint32, LocalLevelScaling::LevelBand> bands;
-        std::string const value = sConfigMgr->GetOption<std::string>("DestinyWeaver.Scaling.DungeonBands",
-                                                                     DEFAULT_SCALING_BANDS);
         for (std::string_view token : Acore::Tokenize(value, ' ', false))
         {
             std::vector<std::string_view> entry = Acore::Tokenize(token, ':', false);
@@ -155,6 +154,24 @@ namespace
             Optional<uint32> high = Acore::StringTo<uint32>(levels[1]);
             if (dungeonId && low && high)
                 bands[*dungeonId] = LocalLevelScaling::DungeonBandFromFinder(*low, *high);
+        }
+        return bands;
+    }
+
+    /// The default bands are the floor of a configured one, like the default entries: a config written
+    /// before Road to De Other Side's band widened to 15-59 still holds "402:15-20", and must not keep a
+    /// level 60 character fighting level 20 creatures. A configured band can widen a default one, never
+    /// narrow it.
+    std::unordered_map<uint32, LocalLevelScaling::LevelBand> ConfigBands()
+    {
+        std::unordered_map<uint32, LocalLevelScaling::LevelBand> bands = ParseBands(DEFAULT_SCALING_BANDS);
+        std::string const value = sConfigMgr->GetOption<std::string>("DestinyWeaver.Scaling.DungeonBands",
+                                                                     DEFAULT_SCALING_BANDS);
+        for (auto const& [dungeonId, band] : ParseBands(value))
+        {
+            auto [itr, inserted] = bands.try_emplace(dungeonId, band);
+            if (!inserted)
+                itr->second = LocalLevelScaling::MergeBands(itr->second, band);
         }
         return bands;
     }
@@ -483,6 +500,57 @@ namespace
         if (!ViewFor(creature, const_cast<Player*>(viewer), view))
             return 0;
         return view.MaxHealth;
+    }
+
+    /// What the average blow of a creature built at this level hits for, from the warrior row every melee
+    /// creature is built from. Only the ratio between two levels is used, so the attack time and the
+    /// template, rank and aura multipliers it leaves out cancel.
+    double AverageHitAt(uint8 level)
+    {
+        CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(level, CLASS_WARRIOR);
+        return DestinyWeaver::AverageCreatureMeleeHit(stats->BaseDamage[EXPANSION_CLASSIC], stats->AttackPower,
+                                                      1.0f, BASE_ATTACK_TIME);
+    }
+
+    /// A share of the receiver's health is already the receiver's size.
+    bool HealsShareOfHealth(SpellInfo const* spell)
+    {
+        return spell && (spell->HasEffect(SPELL_EFFECT_HEAL_PCT) || spell->HasEffect(SPELL_EFFECT_HEAL_MAX_HEALTH) ||
+                         spell->HasAura(SPELL_AURA_OBS_MOD_HEALTH));
+    }
+
+    /// Installed as the core's resolver for heals between characters in a scaled dungeon. The healer's
+    /// creatures stand at the healer's level and the receiver's at the receiver's, both held inside the
+    /// dungeon's band, and each takes blows the size of their own version (DamageTakenFactor). A heal is
+    /// sized for the blows of the healer's version, so it is carried over to the receiver's by the ratio
+    /// of the two average blows: a level-20 healer keeps a level-38 tank up as well as a level-20 one,
+    /// and a level-60 healer in the same group is held to the band's top like their creatures are.
+    double HealReceivedForCore(Unit const* healer, Unit const* receiver, SpellInfo const* spell)
+    {
+        if (!ScalingAvailable() || !healer || !receiver || HealsShareOfHealth(spell))
+            return 1.0;
+
+        Player const* from = healer->GetCharmerOrOwnerPlayerOrPlayerItself();
+        Player const* to = receiver->GetCharmerOrOwnerPlayerOrPlayerItself();
+        if (!from || !to || from == to)
+            return 1.0;
+
+        Map const* map = to->FindMap();
+        if (from->FindMap() != map || !ScaledDungeon(map))
+            return 1.0;
+
+        // A character held to the authored creatures by a challenge fights blows of the authored size.
+        if ((LocalLevelScaling::ScalingBlocksFor(from) | LocalLevelScaling::ScalingBlocksFor(to)) &
+            LocalLevelScaling::ChallengeBlocksCreatureScaling)
+            return 1.0;
+
+        LocalLevelScaling::LevelBand const* band = DungeonBandFor(map);
+        uint8 const fromLevel = LocalLevelScaling::ScaleDungeonCreatureLevelForViewer(from->GetLevel(), *band);
+        uint8 const toLevel = LocalLevelScaling::ScaleDungeonCreatureLevelForViewer(to->GetLevel(), *band);
+        if (fromLevel == toLevel)
+            return 1.0;
+
+        return DestinyWeaver::ViewDamageTakenFactor(AverageHitAt(toLevel), AverageHitAt(fromLevel));
     }
 
     /// The fields a view rewrites, in one list. The patch looks a position up by index, and a forced
@@ -1168,6 +1236,8 @@ public:
                                                      std::memory_order_relaxed);
         LocalLevelScaling::ScaledDungeonOwner.store(available ? &InScaledDungeonForCore : nullptr,
                                                     std::memory_order_relaxed);
+        LocalLevelScaling::HealReceivedOwner.store(available ? &HealReceivedForCore : nullptr,
+                                                   std::memory_order_relaxed);
 
         LOG_INFO("module.destiny_weaver",
                  "open world scaling: creatures per character, level - {} in the open world and the "
@@ -1201,6 +1271,7 @@ public:
         LocalLevelScaling::CreatureViewMaxHealthOwner.store(nullptr);
         LocalLevelScaling::ScalingChangedOwner.store(nullptr);
         LocalLevelScaling::ScaledDungeonOwner.store(nullptr);
+        LocalLevelScaling::HealReceivedOwner.store(nullptr);
     }
 };
 

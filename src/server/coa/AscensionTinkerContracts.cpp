@@ -287,6 +287,19 @@ void ApplyBeaconChargePool(SpellInfo* info)
         if (info->Id == beacon)
             info->ChargeRecoveryKey = TinkerBeaconChargeRoot;
 }
+void ApplyReplenishmentFieldAura(SpellInfo* info)
+{
+    if (!info || info->Id != TinkerReplenishmentFieldAura)
+        return;
+    for (SpellEffectInfo& effect : info->Effects)
+        if (effect.Effect == SPELL_EFFECT_PERSISTENT_AREA_AURA)
+        {
+            effect.Effect = SPELL_EFFECT_APPLY_AURA;
+            effect.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ALLY);
+            effect.TargetB = SpellImplicitTargetInfo();
+        }
+    info->_InitializeExplicitTargetMask();
+}
 }
 namespace
 {

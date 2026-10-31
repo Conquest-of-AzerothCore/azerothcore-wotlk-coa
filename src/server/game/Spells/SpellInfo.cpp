@@ -1522,6 +1522,14 @@ namespace
         }
         return false;
     }
+
+    int32 TrackedResourceType(SpellInfo const* info)
+    {
+        for (SpellEffectInfo const& effect : info->GetEffects())
+            if (effect.IsAura(SPELL_AURA_TRACK_RESOURCES))
+                return effect.MiscValue;
+        return 0;
+    }
 }
 
 bool SpellInfo::IsAffectedBySpellMods() const
@@ -1688,6 +1696,14 @@ bool SpellInfo::IsAuraExclusiveBySpecificWith(SpellInfo const* spellInfo) const
     switch (spellSpec1)
     {
         case SPELL_SPECIFIC_TRACKER:
+        {
+            if (spellSpec2 != SPELL_SPECIFIC_TRACKER)
+                return false;
+            // Ascension lets gathering trackers of different resource types (herbs, minerals, trees) run together.
+            int32 const resource1 = TrackedResourceType(this);
+            int32 const resource2 = TrackedResourceType(spellInfo);
+            return !resource1 || !resource2 || resource1 == resource2;
+        }
         case SPELL_SPECIFIC_WARLOCK_ARMOR:
         case SPELL_SPECIFIC_MAGE_ARMOR:
         case SPELL_SPECIFIC_ELEMENTAL_SHIELD:

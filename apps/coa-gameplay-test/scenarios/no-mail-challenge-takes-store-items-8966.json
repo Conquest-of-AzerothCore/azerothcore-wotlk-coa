@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "A no-mail challenge still lets the hero take store items from the mailbox (#8966)",
+  "contract": [
+    "Reports #5573 and #8966: during a trial that forbids mail, Bazaar and Vanity Store items sent from another character cannot be taken.",
+    "Store items are the Vanity Collection's items and Bazaar Tokens; Potion of Experience 818046 is one, Peacebloom 2447 is not.",
+    "Expected: under Bloodbath (challenge 15, NO_MAIL) the challenge packet hook passes the potion's CMSG_MAIL_TAKE_ITEM and the hero receives it, while the Peacebloom take is refused with MAIL_ERR_INTERNAL_ERROR and stays in the mail."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914, "y": -133, "z": 80.6, "o": 0 },
+  "players": [
+    { "id": "sender", "name": "Coastoremail", "race": 1, "class": 1, "level": 1 },
+    { "id": "hero", "name": "Coastorehero", "race": 1, "class": 1, "level": 1, "account_of": "sender" }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "start_challenge", "label": "Fixture: the hero runs Bloodbath (NO_MAIL)", "actor": "hero",
+      "challenge": 15, "level": 1 },
+    { "action": "assert", "actor": "hero", "metric": "challenge_start_code", "equals": 0 },
+
+    { "action": "summon_gameobject", "actor": "sender", "entry": 142119 },
+    { "action": "add_item", "actor": "sender", "item": 818046 },
+    { "action": "add_item", "actor": "sender", "item": 2447 },
+    { "action": "client_packet", "label": "Mail the Potion of Experience to the hero", "actor": "sender",
+      "opcode": 568, "consumed": false,
+      "fields": [
+        { "gameobject_guid": 142119 }, { "string": "Coastorehero" }, { "string": "Store item" },
+        { "string": "Potion of Experience" }, { "u32": 41 }, { "u32": 0 }, { "u8": 1 }, { "u8": 0 },
+        { "item_guid": 818046 }, { "u32": 0 }, { "u32": 0 }, { "u64": 0 }, { "u8": 0 }
+      ] },
+    { "action": "assert", "actor": "sender", "metric": "server_packet_u32", "opcode": 569, "index": 2,
+      "equals": 0, "label": "The potion mail is accepted" },
+    { "action": "client_packet", "label": "Mail the Peacebloom to the hero", "actor": "sender",
+      "opcode": 568, "consumed": false,
+      "fields": [
+        { "gameobject_guid": 142119 }, { "string": "Coastorehero" }, { "string": "Ordinary item" },
+        { "string": "Peacebloom" }, { "u32": 41 }, { "u32": 0 }, { "u8": 1 }, { "u8": 0 },
+        { "item_guid": 2447 }, { "u32": 0 }, { "u32": 0 }, { "u64": 0 }, { "u8": 0 }
+      ] },
+    { "action": "assert", "actor": "sender", "metric": "server_packet_u32", "opcode": 569, "index": 2,
+      "equals": 0, "label": "The Peacebloom mail is accepted" },
+
+    { "action": "relog", "actor": "hero" },
+    { "action": "assert", "actor": "hero", "metric": "mail_has_item", "item": 818046, "equals": 1,
+      "within_ms": 1000 },
+    { "action": "assert", "actor": "hero", "metric": "mail_has_item", "item": 2447, "equals": 1 },
+    { "action": "summon_gameobject", "actor": "hero", "entry": 142119 },
+
+    { "action": "client_packet", "label": "DISCRIMINATING: the challenge hook passes the potion take",
+      "actor": "hero", "opcode": 582, "early": false, "consumed": false,
+      "fields": [ { "gameobject_guid": 142119 }, { "mail_id": 818046 }, { "mail_item_guid": 818046 } ] },
+    { "action": "client_packet", "label": "The mailbox hands over the potion", "actor": "hero",
+      "opcode": 582, "consumed": false,
+      "fields": [ { "gameobject_guid": 142119 }, { "mail_id": 818046 }, { "mail_item_guid": 818046 } ] },
+    { "action": "assert", "actor": "hero", "metric": "server_packet_u32", "opcode": 569, "index": 2,
+      "equals": 0, "label": "The potion take succeeds" },
+    { "action": "assert", "actor": "hero", "metric": "item_count", "item": 818046, "equals": 1,
+      "within_ms": 1000 },
+
+    { "action": "client_packet", "label": "Control: the challenge refuses the Peacebloom take", "actor": "hero",
+      "opcode": 582, "early": false, "consumed": true,
+      "fields": [ { "gameobject_guid": 142119 }, { "mail_id": 2447 }, { "mail_item_guid": 2447 } ] },
+    { "action": "assert", "actor": "hero", "metric": "server_packet_u32", "opcode": 569, "index": 2,
+      "equals": 6, "label": "The refusal is MAIL_ERR_INTERNAL_ERROR" },
+    { "action": "assert", "actor": "hero", "metric": "mail_has_item", "item": 2447, "equals": 1 },
+    { "action": "assert", "actor": "hero", "metric": "item_count", "item": 2447, "equals": 0 }
+  ]
+}

@@ -16,6 +16,8 @@ namespace
 constexpr uint32 MAGE_LIVING_BOMB = 0x20000;
 constexpr std::array<uint32, 3> WORLD_IN_FLAMES = { 1111108, 1112349, 1112350 };
 constexpr std::array<uint32, 3> FIRE_POWER = { 1111124, 1112378, 1112398 };
+constexpr uint32 BLAZING_SPEED = 1131643;
+constexpr int32 BLAZING_SPEED_HEALTH_PCT = 5;
 
 class spell_ascension_reborn_magic_absorption : public AuraScript
 {
@@ -49,6 +51,35 @@ class spell_ascension_reborn_magic_absorption : public AuraScript
         OnEffectProc += AuraEffectProcFn(spell_ascension_reborn_magic_absorption::Restore, EFFECT_0, SPELL_AURA_DUMMY);
     }
 };
+
+class spell_ascension_reborn_blazing_speed : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_reborn_blazing_speed);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({ BLAZING_SPEED });
+    }
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        DamageInfo const* damage = eventInfo.GetDamageInfo();
+        return damage && damage->GetDamage() > CalculatePct(GetTarget()->GetMaxHealth(), BLAZING_SPEED_HEALTH_PCT);
+    }
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo&)
+    {
+        PreventDefaultAction();
+        GetTarget()->CastSpell(GetTarget(), BLAZING_SPEED, true, nullptr, aurEff);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_ascension_reborn_blazing_speed::CheckProc);
+        OnEffectProc += AuraEffectProcFn(spell_ascension_reborn_blazing_speed::HandleProc, EFFECT_0,
+            SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
 }
 }
 
@@ -79,4 +110,5 @@ void AddAscensionWarcraftRebornMageScripts()
 {
     using namespace AscensionWarcraftReborn;
     RegisterSpellScript(spell_ascension_reborn_magic_absorption);
+    RegisterSpellScript(spell_ascension_reborn_blazing_speed);
 }

@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Tiraxis: Stones of Retreat no longer sells the Outland Cenarion Refuge stone (#9547)",
+  "contract": "On a realm with a priced Vanity Store, Tiraxis' Stones of Retreat list (900010) does not offer Stone of Retreat: Cenarion Refuge 1175643 (Outland), while Stone of Retreat: Cenarion Hold 777013 (Silithus) stays at 350 tokens (ItemExtendedCost 3015).",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8914, "y": -133, "z": 80.6, "o": 0 },
+  "players": [
+    { "id": "buyer", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "tiraxis", "owner": "buyer", "entry": 900007, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    { "action": "gossip_hello", "actor": "buyer", "target": "tiraxis", "label": "Speak to Tiraxis" },
+    { "action": "gossip_select", "actor": "buyer", "option": 5, "label": "Stones of Retreat" },
+    { "action": "assert", "label": "Cenarion Hold stays at 350 tokens", "actor": "buyer", "metric": "vendor_extended_cost", "item": 777013, "equals": 3015, "within_ms": 2000 },
+    { "action": "assert", "label": "Cenarion Refuge (Outland) is not on the list", "actor": "buyer", "metric": "vendor_price", "item": 1175643, "equals": -1 }
+  ]
+}

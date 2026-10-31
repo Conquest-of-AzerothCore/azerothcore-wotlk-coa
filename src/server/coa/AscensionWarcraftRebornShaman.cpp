@@ -7,6 +7,7 @@
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
 #include "SpellInfo.h"
+#include "SpellMgr.h"
 #include "SpellScript.h"
 
 namespace AscensionWarcraftReborn
@@ -14,6 +15,8 @@ namespace AscensionWarcraftReborn
 namespace
 {
 constexpr uint32 TIDAL_FORCE_CRIT = 1155166;
+constexpr uint32 MAELSTROM_WEAPON_OVERLAY = 1153816;
+constexpr uint32 MAELSTROM_WEAPON_CONSUMPTION = 1153822;
 constexpr uint32 SHAMAN_FLAMETONGUE_WEAPON = 0x200000;
 constexpr int32 LAVA_SWEEP_FLAMETONGUE_PCT = 50;
 
@@ -101,6 +104,30 @@ class spell_ascension_reborn_tidal_force : public AuraScript
     }
 };
 
+class spell_ascension_reborn_maelstrom_weapon : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_reborn_maelstrom_weapon);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({ MAELSTROM_WEAPON_OVERLAY, MAELSTROM_WEAPON_CONSUMPTION });
+    }
+
+    void HandleProc(ProcEventInfo&)
+    {
+        Unit* target = GetTarget();
+        int32 const consumed = sSpellMgr->AssertSpellInfo(MAELSTROM_WEAPON_CONSUMPTION)->Effects[EFFECT_0].CalcValue(target);
+        if (Aura* overlay = target->GetAura(MAELSTROM_WEAPON_OVERLAY))
+            overlay->ModStackAmount(-consumed);
+        ModStackAmount(-consumed);
+    }
+
+    void Register() override
+    {
+        AfterProc += AuraProcFn(spell_ascension_reborn_maelstrom_weapon::HandleProc);
+    }
+};
+
 class spell_ascension_reborn_totemic_projection : public SpellScript
 {
     PrepareSpellScript(spell_ascension_reborn_totemic_projection);
@@ -129,6 +156,7 @@ void AddAscensionWarcraftRebornShamanScripts()
 {
     using namespace AscensionWarcraftReborn;
     RegisterSpellScript(spell_ascension_reborn_lava_sweep);
+    RegisterSpellScript(spell_ascension_reborn_maelstrom_weapon);
     RegisterSpellScript(spell_ascension_reborn_tidal_force);
     RegisterSpellScript(spell_ascension_reborn_totemic_projection);
 }
