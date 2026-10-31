@@ -7107,10 +7107,10 @@ SpellCastResult Spell::CheckCasterAuras(bool preventionOnly) const
                 bool foundNotStun = false;
                 uint64 mask = (1ULL << MECHANIC_STUN) | (1ULL << MECHANIC_FREEZE) | (1ULL << MECHANIC_HORROR);
                 // Barkskin should skip sleep effects, sap and fears
-                if (m_spellInfo->Id == 22812)
+                if (sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 22812)
                     mask |= 1ULL << MECHANIC_SAPPED | 1ULL << MECHANIC_HORROR | 1ULL << MECHANIC_SLEEP;
                 // Hand of Freedom, can be used while sapped and while under fear-mechanic stuns (e.g. Intimidating Shout primary target)
-                if (m_spellInfo->Id == 1044)
+                if (sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 1044)
                     mask |= (1ULL << MECHANIC_SAPPED) | (1ULL << MECHANIC_FEAR);
                 Unit::AuraEffectList const& stunAuras = m_caster->GetAuraEffectsByType(SPELL_AURA_MOD_STUN);
                 for (Unit::AuraEffectList::const_iterator i = stunAuras.begin(); i != stunAuras.end(); ++i)
@@ -7172,10 +7172,10 @@ SpellCastResult Spell::CheckCasterAuras(bool preventionOnly) const
                                 {
                                     uint64 mask = 1ULL << MECHANIC_STUN;
                                     // Barkskin should skip sleep effects, sap and fears
-                                    if (m_spellInfo->Id == 22812)
+                                    if (sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 22812)
                                         mask |= 1ULL << MECHANIC_SAPPED | 1ULL << MECHANIC_HORROR | 1ULL << MECHANIC_SLEEP;
                                     // Hand of Freedom, can be used while sapped and while under fear-mechanic stuns (e.g. Intimidating Shout primary target)
-                                    if (m_spellInfo->Id == 1044)
+                                    if (sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 1044)
                                         mask |= (1ULL << MECHANIC_SAPPED) | (1ULL << MECHANIC_FEAR);
 
                                     if (!usableInStun || !(auraInfo->GetAllEffectsMechanicMask() & mask))
@@ -9120,8 +9120,9 @@ void Spell::PrepareTriggersExecutedOnHit()
         case SPELLFAMILY_DRUID:
             {
                 // Faerie Fire (Feral)
-                if (m_spellInfo->Id == 16857 && (m_caster->GetShapeshiftForm() == FORM_BEAR || m_caster->GetShapeshiftForm() == FORM_DIREBEAR))
-                    m_preCastSpell = 60089;
+                if (sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 16857 &&
+                    (m_caster->GetShapeshiftForm() == FORM_BEAR || m_caster->GetShapeshiftForm() == FORM_DIREBEAR))
+                    m_preCastSpell = sSpellMgr->GetSpellTwinFor(60089, m_spellInfo->Id);
 
                 break;
             }
