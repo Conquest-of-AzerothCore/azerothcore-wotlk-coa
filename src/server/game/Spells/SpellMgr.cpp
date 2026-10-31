@@ -35,6 +35,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <unordered_set>
 
 namespace
 {
@@ -2631,7 +2632,18 @@ void SpellMgr::LoadSpellBonuses()
         ++count;
     } while (result->NextRow());
 
+    std::unordered_set<uint32> listed;
+    for (auto const& [entry, bonus] : mSpellBonusMap)
+        listed.insert(entry);
     CopyToSpellTwins(mSpellBonusMap);
+    for (auto itr = mSpellBonusMap.begin(); itr != mSpellBonusMap.end();)
+    {
+        uint32 const firstRank = GetFirstSpellInChain(itr->first);
+        if (!listed.contains(itr->first) && firstRank != itr->first && listed.contains(firstRank))
+            itr = mSpellBonusMap.erase(itr);
+        else
+            ++itr;
+    }
 
     LOG_INFO("server.loading", ">> Loaded {} Extra Spell Bonus Data in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
     LOG_INFO("server.loading", " ");
