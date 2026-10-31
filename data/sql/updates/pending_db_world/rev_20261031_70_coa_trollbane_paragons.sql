@@ -15,12 +15,15 @@
 -- Vazul opens with Chains of Ice (113) and follows at once with Shadow Bolt Volley (9081, the Witherbark caster
 -- Zalas Witherbark's). She died 11 s in without casting again, so her repeat timers (12-16 s) are estimated.
 -- Zazera carries Burning Sands (254622: her hits and harmful spells add Burning Sands fire damage, 254621; "Maybe there
--- is some way to cool down this effect..."). In footage she spins under Firestorm (254619, a Bladestorm that
--- whirlwinds once a second for 6 s); its first cast and repeat (10-12 s, then 25-30 s) are estimated. Two Water
--- Buckets on the tower cast Water Bucket (254623) for whoever uses them: a splash that only hits Zazera, within
--- 5 yards of the user. In game it plays the splash; the spell itself has only a dummy effect, so Zazera's AI does the
--- rest: while she burns, the splash puts out Burning Sands and stuns her with Extinguished (254624, 5 s). Burning
--- Sands returns when she resets. The bucket model is the Hallow's End Water Bucket (display 7484), matching footage.
+-- is some way to cool down this effect..."). In footage she spins under Firestorm (254619, a Bladestorm that whirlwinds
+-- once a second for 6 s); its first cast and repeat (10-12 s, then 25-30 s) are estimated. Two Water Buckets on the
+-- tower (one use each, back after 40 s) cast Water Bucket (254623) for whoever uses them: a splash that only hits
+-- Zazera, within 5 yards of the user. In game it plays the splash; the spell itself has only a dummy effect, so
+-- Zazera's AI does the rest: while she burns, the splash puts out Burning Sands and stuns her with Extinguished
+-- (254624, 5 s). Burning Sands returns when she resets. The bucket model is the Hallow's End Water Bucket (display
+-- 7484), matching footage. Yahola idles in the channelling pose of Blackfathom Channeling (8734), as the static
+-- Mossflayer Shadowhunters around the Mazra'Alor altar do; the three of them that lacked it get it too. Spectral Volley
+-- needs no change to be uninterruptible: its PreventionType is 0, so interrupts and silences cannot stop it.
 -- Loot: of their Ascension drops only Vazul's three Whispershade greens are her own; the rest (Ephemeral Key,
 -- recipes, world greens) are shared world drops. Their chances were not recorded, so they use a common rare-elite
 -- rate: 20% each in one group, at most one per kill (as Geomancer Flintdagger's own greens).
@@ -59,25 +62,28 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (2541681,254176,0,45,317,1,1,0,-2058.8413,-3264.2786,49.9604,3.5953,300,0,0,1,0,0,0,0,0,'',NULL,0,'Elite Witherbark Headhunter (Vazul)'),
 (2541682,254176,0,45,317,1,1,0,-2060.2793,-3274.6387,50.393,2.7118,300,0,0,1,0,0,0,0,0,'',NULL,0,'Elite Witherbark Headhunter (Vazul)'),
 (2541683,254170,1,440,979,1,1,0,-7190.723,-3004.4932,31.2314,5.9651,300,0,0,1,0,0,0,0,0,'',NULL,0,'Zazera <Sandfury Paragon>'),
-(2541684,254169,0,139,2274,1,1,0,3432.53,-5036.13,183.602,0.750492,300,0,0,1,0,0,0,0,0,'',NULL,0,'Yahola <Mossflayer Paragon>'),
-(2541685,254172,0,139,2274,1,1,0,3430.48,-5033.94,183.602,0.750492,300,0,0,1,0,0,0,0,0,'',NULL,0,'Left Hand of Yahola'),
-(2541686,254173,0,139,2274,1,1,0,3434.58,-5038.32,183.602,0.750492,300,0,0,1,0,0,0,0,0,'',NULL,0,'Right Hand of Yahola');
+(2541684,254169,0,139,2274,1,1,0,3410.3218,-5026.6255,174.1336,0.7061,300,0,0,1,0,0,0,0,0,'',NULL,0,'Yahola <Mossflayer Paragon>'),
+(2541685,254172,0,139,2274,1,1,0,3409.3809,-5025.46,174.1052,0.4705,300,0,0,1,0,0,0,0,0,'',NULL,0,'Left Hand of Yahola'),
+(2541686,254173,0,139,2274,1,1,0,3411.4453,-5027.8877,174.1595,0.6995,300,0,0,1,0,0,0,0,0,'',NULL,0,'Right Hand of Yahola');
 
-DELETE FROM `creature_template_addon` WHERE `entry` = 254170;
+DELETE FROM `creature_template_addon` WHERE `entry` IN (254169, 254170);
 INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(254169, 0, 0, 0, 1, 0, 0, '8734'),
 (254170, 0, 0, 0, 1, 0, 0, '254622');
+
+UPDATE `creature_addon` SET `auras` = '8734' WHERE `guid` IN (91973, 92238, 92239) AND `auras` IS NULL;
 
 DELETE FROM `spell_proc` WHERE `SpellId` = 254622;
 INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
 (254622, 0, 0, 0, 0, 0, 0x10014, 1, 2, 0, 0, 0, 0, 100, 0, 0);
 
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `size`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`, `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`, `Data22`, `Data23`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
-(254623, 22, 7484, 'Water Bucket', '', '', '', 1, 254623, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 12340) ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`), `IconName` = VALUES(`IconName`), `castBarCaption` = VALUES(`castBarCaption`), `unk1` = VALUES(`unk1`), `size` = VALUES(`size`), `Data0` = VALUES(`Data0`), `Data1` = VALUES(`Data1`), `Data2` = VALUES(`Data2`), `Data3` = VALUES(`Data3`), `Data4` = VALUES(`Data4`), `Data5` = VALUES(`Data5`), `Data6` = VALUES(`Data6`), `Data7` = VALUES(`Data7`), `Data8` = VALUES(`Data8`), `Data9` = VALUES(`Data9`), `Data10` = VALUES(`Data10`), `Data11` = VALUES(`Data11`), `Data12` = VALUES(`Data12`), `Data13` = VALUES(`Data13`), `Data14` = VALUES(`Data14`), `Data15` = VALUES(`Data15`), `Data16` = VALUES(`Data16`), `Data17` = VALUES(`Data17`), `Data18` = VALUES(`Data18`), `Data19` = VALUES(`Data19`), `Data20` = VALUES(`Data20`), `Data21` = VALUES(`Data21`), `Data22` = VALUES(`Data22`), `Data23` = VALUES(`Data23`), `AIName` = VALUES(`AIName`), `ScriptName` = VALUES(`ScriptName`), `VerifiedBuild` = VALUES(`VerifiedBuild`);
+(254623, 22, 7484, 'Water Bucket', '', '', '', 1, 254623, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 12340) ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`), `IconName` = VALUES(`IconName`), `castBarCaption` = VALUES(`castBarCaption`), `unk1` = VALUES(`unk1`), `size` = VALUES(`size`), `Data0` = VALUES(`Data0`), `Data1` = VALUES(`Data1`), `Data2` = VALUES(`Data2`), `Data3` = VALUES(`Data3`), `Data4` = VALUES(`Data4`), `Data5` = VALUES(`Data5`), `Data6` = VALUES(`Data6`), `Data7` = VALUES(`Data7`), `Data8` = VALUES(`Data8`), `Data9` = VALUES(`Data9`), `Data10` = VALUES(`Data10`), `Data11` = VALUES(`Data11`), `Data12` = VALUES(`Data12`), `Data13` = VALUES(`Data13`), `Data14` = VALUES(`Data14`), `Data15` = VALUES(`Data15`), `Data16` = VALUES(`Data16`), `Data17` = VALUES(`Data17`), `Data18` = VALUES(`Data18`), `Data19` = VALUES(`Data19`), `Data20` = VALUES(`Data20`), `Data21` = VALUES(`Data21`), `Data22` = VALUES(`Data22`), `Data23` = VALUES(`Data23`), `AIName` = VALUES(`AIName`), `ScriptName` = VALUES(`ScriptName`), `VerifiedBuild` = VALUES(`VerifiedBuild`);
 
 DELETE FROM `gameobject` WHERE `guid` IN (2541700, 2541701);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `ScriptName`, `VerifiedBuild`, `Comment`) VALUES
-(2541700, 254623, 1, 440, 979, 1, 1, -7182.6714, -3000.8193, 31.1741, 0.4996, 0, 0, 0.247216, 0.968961, 300, 100, 1, '', NULL, 'Water Bucket (Zazera)'),
-(2541701, 254623, 1, 440, 979, 1, 1, -7187.974, -3012.8828, 31.1893, 4.835, 0, 0, 0.662457, -0.7491, 300, 100, 1, '', NULL, 'Water Bucket (Zazera)');
+(2541700, 254623, 1, 440, 979, 1, 1, -7182.6714, -3000.8193, 31.1741, 0.4996, 0, 0, 0.247216, 0.968961, 40, 100, 1, '', NULL, 'Water Bucket (Zazera)'),
+(2541701, 254623, 1, 440, 979, 1, 1, -7187.974, -3012.8828, 31.1893, 4.835, 0, 0, 0.662457, -0.7491, 40, 100, 1, '', NULL, 'Water Bucket (Zazera)');
 
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 13 AND `SourceEntry` = 254623;
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 22 AND `SourceEntry` = 254170 AND `SourceId` = 0;
@@ -91,8 +97,8 @@ INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, 
 (2541680, 2541681, 5.6, 262, 7, 0, 0),
 (2541680, 2541682, 4.9, 86, 7, 0, 0),
 (2541684, 2541684, 0, 0, 7, 0, 0),
-(2541684, 2541685, 3, 90, 7, 0, 0),
-(2541684, 2541686, 3, 270, 7, 0, 0);
+(2541684, 2541685, 1.5, 88, 7, 0, 0),
+(2541684, 2541686, 1.7, 271, 7, 0, 0);
 
 DELETE FROM `creature_loot_template` WHERE `Entry` = 254168;
 INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES

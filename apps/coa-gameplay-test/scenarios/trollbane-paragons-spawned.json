@@ -42,11 +42,12 @@
     { "action": "assert", "label": "A Water Bucket splash puts out her Burning Sands", "actor": "p", "metric": "nearby_creature_aura_count", "entry": 254170, "spell": 254622, "equals": 0, "within_ms": 2000 },
     { "action": "assert", "label": "and leaves her Extinguished", "actor": "p", "metric": "nearby_creature_aura_count", "entry": 254170, "spell": 254624, "equals": 1, "within_ms": 2000 },
 
-    { "action": "teleport", "actor": "p", "map": 0, "x": 3429.6, "y": -5038.86, "z": 183.602 },
+    { "action": "teleport", "actor": "p", "map": 0, "x": 3412.4, "y": -5024.5, "z": 174.13 },
     { "action": "assert", "label": "Yahola is on the Mazra'Alor steps at level 59", "actor": "p", "metric": "nearby_creature_count", "entry": 254169, "min_level": 59, "max_level": 59, "equals": 1, "within_ms": 10000 },
     { "action": "assert", "label": "Yahola has Ascension's 68290 health, within 5%", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254169, "min": 64876, "max": 71704 },
     { "action": "assert", "label": "Yahola uses her own model", "actor": "p", "metric": "nearby_creature_display", "entry": 254169, "equals": 254027 },
     { "action": "assert", "label": "Yahola can be attacked", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 254169, "equals": 1 },
+    { "action": "assert", "label": "Out of combat Yahola idles in the Shadowhunters' channelling pose", "actor": "p", "metric": "nearby_creature_aura_count", "entry": 254169, "spell": 8734, "equals": 1 },
     { "action": "assert", "label": "The Left Hand of Yahola guards her at level 59", "actor": "p", "metric": "nearby_creature_count", "entry": 254172, "min_level": 59, "max_level": 59, "equals": 1 },
     { "action": "assert", "label": "The Left Hand of Yahola has Ascension's 24935 health, within 5%", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254172, "min": 23688, "max": 26182 },
     { "action": "assert", "label": "The Right Hand of Yahola guards her at level 59", "actor": "p", "metric": "nearby_creature_count", "entry": 254173, "min_level": 59, "max_level": 59, "equals": 1 },
