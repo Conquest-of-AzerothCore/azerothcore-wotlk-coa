@@ -1842,7 +1842,17 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpellOrTwin(31221, 0))
                 {
                     if (!apply)
-                        target->CastSpell(target, 31666, true, nullptr, aurEff);
+                    {
+                        SpellInfo const* trackerInfo = sSpellMgr->GetSpellInfo(sSpellMgr->GetSpellTwinFor(31666, aurEff->GetId()));
+                        if (trackerInfo && !trackerInfo->HasAura(SPELL_AURA_PERIODIC_DUMMY))
+                        {
+                            target->RemoveAurasDueToSpell(sSpellMgr->GetSpellTwinFor(31665, aurEff->GetId()));
+                            int32 amount = aurEff->GetAmount();
+                            target->CastCustomSpell(target, 31666, &amount, nullptr, nullptr, true, nullptr, aurEff);
+                        }
+                        else
+                            target->CastSpell(target, 31666, true, nullptr, aurEff);
+                    }
                     else
                     {
                         // Remove counter aura
@@ -1856,7 +1866,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpellOrTwin(58426, 0))
                 {
                     if (!apply)
+                    {
+                        uint32 const tracker = sSpellMgr->GetSpellTwinFor(58428, aurEff->GetId());
+                        SpellInfo const* trackerInfo = sSpellMgr->GetSpellInfo(tracker);
+                        if (trackerInfo && !trackerInfo->HasAura(SPELL_AURA_PERIODIC_DUMMY))
+                            target->RemoveAurasDueToSpell(sSpellMgr->GetSpellTwinFor(58427, aurEff->GetId()));
                         target->CastSpell(target, 58428, true, nullptr, aurEff);
+                    }
                     else
                     {
                         // Remove counter aura
