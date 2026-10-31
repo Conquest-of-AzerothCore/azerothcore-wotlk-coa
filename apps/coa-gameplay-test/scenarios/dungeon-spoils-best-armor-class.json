@@ -1,0 +1,204 @@
+{
+  "schema": 1,
+  "name": "Dungeon Spoils give body armor of the best armor class the opener can wear",
+  "contract": [
+    "Ascension (CoA changelog 2025-03-31): \"Caches/Spoils Armor Type acquisition based on proficiencies of",
+    "classes improved.\" Dungeon Spoils (2021814) drop cloth, leather and mail body armor (head, shoulders, chest,",
+    "wrists, hands, waist, legs, feet) for an opener who can wear plate; cloaks, shields, jewelry and weapons stay",
+    "in the pool. A level 44 Warrior who knows Plate Mail opens ten spoils and gets no cloth, leather or mail body",
+    "armor. About 3 in 10 items of the pool the Warrior can use at level 41-44 are lower armor, so without the",
+    "armor class rule ten opens give one in about 97 runs out of 100."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 1,
+      "level": 44
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "p1",
+      "spell": 750,
+      "label": "p1 knows Plate Mail"
+    },
+    {
+      "action": "add_item",
+      "actor": "p1",
+      "item": 2021814,
+      "count": 10
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: p1 holds ten Dungeon Spoils",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 10,
+      "within_ms": 2000
+    },
+    {
+      "action": "open_item",
+      "actor": "p1",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 9,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p1",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 8,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p1",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 7,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p1",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 6,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p1",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p1",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p1",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p1",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p1",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p1",
+      "item": 2021814
+    },
+    {
+      "action": "assert",
+      "actor": "p1",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ten spoils put ten of their items in p1's bags",
+      "actor": "p1",
+      "metric": "carried_pool_item_count",
+      "cache": 2021814,
+      "table": "loot",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "None is cloth, leather or mail body armor",
+      "actor": "p1",
+      "metric": "carried_pool_item_count",
+      "cache": 2021814,
+      "table": "loot",
+      "below_armor_class": 4,
+      "equals": 0
+    }
+  ]
+}

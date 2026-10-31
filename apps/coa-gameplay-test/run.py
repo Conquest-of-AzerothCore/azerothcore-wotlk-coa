@@ -194,7 +194,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'type_mask', 'hit_mask', 'spell_type_mask',
                  'phase_mask', 'trigger_spell', 'trials', 'incoming', 'heal', 'quality',
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
-                 'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'spells',
+                 'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'below_armor_class', 'spells',
                  'min_level', 'max_level', 'min_home_distance', 'spawn',
                  'guid', 'spawn_type', 'tolerance', 'map', 'z'} | TIMELINE_FIELDS
 ACTIONS = {
@@ -1047,6 +1047,8 @@ def validate(scenario):
                 for option in ('dominant_stat', 'off_stat'):
                     if option in step:
                         number(step[option], f'{where}.{option}', 3, 6, True)
+                if 'below_armor_class' in step:
+                    number(step['below_armor_class'], f'{where}.below_armor_class', 2, 4, True)
             if metric == 'pool_variant_count':
                 require('cache' in step, f'{where}: metric needs the cache item it checks against')
             if metric == 'pool_retired_item_count':
