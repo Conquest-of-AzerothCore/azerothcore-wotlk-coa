@@ -1,0 +1,226 @@
+{
+  "schema": 1,
+  "name": "Plains Stalker credits rares killed by a Necromancer minion and lifts the level-20 gate (#10341)",
+  "contract": [
+    "Hardcore - Plains Stalker 182 requires Kodobane 3474, Owatanka 3473 and Lakota'mani 3472 before level 20",
+    "under NO_LEVEL_PAST_REQUIREMENTS, which holds the bar one point short of level 20 while any is unmet. A",
+    "Necromancer Ghoul is a guardian, not a pet, so Unit::Kill fires neither OnPlayerCreatureKill nor",
+    "OnPlayerCreatureKilledByPet when it lands the killing blow. A level-19 Necromancer on the trial first gains",
+    "a large amount of experience and stays at level 19, then commands the Ghoul to kill each rare alone. The",
+    "objectives must be credited to the owner, so a single further experience point reaches level 20."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "necro",
+      "race": 5,
+      "class": 23,
+      "level": 1,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "kodobane",
+      "owner": "necro",
+      "entry": 3474,
+      "faction": 7,
+      "level": 22,
+      "health": 300,
+      "distance": 4
+    },
+    {
+      "id": "owatanka",
+      "owner": "necro",
+      "entry": 3473,
+      "faction": 7,
+      "level": 24,
+      "health": 300,
+      "distance": 7
+    },
+    {
+      "id": "lakotamani",
+      "owner": "necro",
+      "entry": 3472,
+      "faction": 7,
+      "level": 25,
+      "health": 300,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "necro",
+      "challenge": 182,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Hardcore - Plains Stalker starts",
+      "actor": "necro",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "necro",
+      "value": 19
+    },
+    {
+      "action": "give_xp",
+      "actor": "necro",
+      "amount": 100000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: with the rares unkilled the trial holds the Necromancer at level 19",
+      "actor": "necro",
+      "metric": "level",
+      "equals": 19
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 500971
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 504868
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 0,
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "label": "Raise a Ghoul",
+      "actor": "necro",
+      "spell": 500971
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one Ghoul is raised",
+      "actor": "necro",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Ghoul take its formation place",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Command: Undead on Kodobane",
+      "actor": "necro",
+      "spell": 504868,
+      "target": "kodobane"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Ghoul kills Kodobane",
+      "actor": "kodobane",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 60000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "necro",
+      "spell": 504868
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Command: Undead on Owatanka",
+      "actor": "necro",
+      "spell": 504868,
+      "target": "owatanka"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Ghoul kills Owatanka",
+      "actor": "owatanka",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 60000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "necro",
+      "spell": 504868
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Command: Undead on Lakota'mani",
+      "actor": "necro",
+      "spell": 504868,
+      "target": "lakotamani"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Ghoul kills Lakota'mani",
+      "actor": "lakotamani",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Necromancer never swung at a rare",
+      "actor": "necro",
+      "metric": "melee_attack_count",
+      "equals": 0
+    },
+    {
+      "action": "give_xp",
+      "actor": "necro",
+      "amount": 1
+    },
+    {
+      "action": "assert",
+      "label": "Minion kills of all three rares lift the gate, so one experience point reaches level 20",
+      "actor": "necro",
+      "metric": "level",
+      "equals": 20,
+      "within_ms": 2000
+    }
+  ]
+}
