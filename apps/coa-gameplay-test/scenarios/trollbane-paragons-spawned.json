@@ -32,7 +32,7 @@
     { "action": "assert", "label": "Zazera has her cached 13302 health, within 5%, matching the 13480 damage it took to kill her on Ascension", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254170, "min": 12637, "max": 13967 },
     { "action": "assert", "label": "Zazera uses her own model", "actor": "p", "metric": "nearby_creature_display", "entry": 254170, "equals": 254028 },
     { "action": "assert", "label": "Zazera can be attacked", "actor": "p", "metric": "nearby_creature_can_attack", "entry": 254170, "equals": 1 },
-    { "action": "assert", "label": "Two Water Buckets stand on the tower", "actor": "p", "metric": "nearby_gameobject_count", "entry": 254623, "equals": 2 },
+    { "action": "assert", "label": "Two Water Buckets stand on the tower", "actor": "p", "metric": "nearby_gameobject_count", "entry": 2541700, "equals": 2 },
     { "action": "teleport_to_spawn", "actor": "p", "guid": 2541683 },
     { "action": "assert", "label": "Zazera burns with Burning Sands", "actor": "p", "metric": "nearby_creature_aura_count", "entry": 254170, "spell": 254622, "equals": 1, "within_ms": 10000 },
     { "action": "attack_nearby", "actor": "p", "entry": 254170 },

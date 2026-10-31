@@ -37,9 +37,8 @@
 -- guarded by two Elite Witherbark Headhunters (254176, level 34-35). Objective: kill before level 40.
 -- Zazera <Sandfury Paragon> (254170): level 45 elite on top of the Sandsorrow Watch tower, Tanaris, in place of
 -- the Sandfury Firecaller spawn there (guid 21812). Objective: kill before level 45.
--- Yahola <Mossflayer Paragon> (254169): level 59 elite on the Mazra'Alor temple steps, Eastern Plaguelands, in place
--- of the Mossflayer Shadowhunter spawn there (guid 53743), flanked by the Left and Right Hand of Yahola (254172,
--- 254173, level 59 elites), all facing the wall. Objective: kill before level 59.
+-- Yahola <Mossflayer Paragon> (254169): level 59 elite on the Mazra'Alor temple steps, Eastern Plaguelands, flanked
+-- by the Left and Right Hand of Yahola (254172, 254173, level 59 elites). Objective: kill before level 59.
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
 (254168,0,0,0,0,0,'Vazul','Witherbark Paragon',NULL,0,40,40,0,654,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,254168,0,0,0,0,200,300,'SmartAI',0,1,5.325041,2,1,1,0,0,1,0,0,'',12340),
 (254170,0,0,0,0,0,'Zazera','Sandfury Paragon',NULL,0,45,45,0,37,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,0,0,0,0,0,300,450,'SmartAI',0,1,5.127537,3,1,1,0,0,1,0,0,'',12340),
@@ -60,8 +59,7 @@ INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`,
 (254176,0,3998,1,1,12340),
 (254176,1,28226,1,1,12340);
 
-DELETE FROM `creature_addon` WHERE `guid` = 53743;
-DELETE FROM `creature` WHERE `guid` IN (21812, 53743, 2541680, 2541681, 2541682, 2541683, 2541684, 2541685, 2541686);
+DELETE FROM `creature` WHERE `guid` IN (21812, 2541680, 2541681, 2541682, 2541683, 2541684, 2541685, 2541686);
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`, `Comment`) VALUES
 (2541680,254168,0,45,317,1,1,0,-2059.795,-3269.7915,49.6225,3.1131,300,0,0,1,0,0,0,0,0,'',NULL,0,'Vazul <Witherbark Paragon>'),
 (2541681,254176,0,45,317,1,1,0,-2058.8413,-3264.2786,49.9604,3.5953,300,0,0,1,0,0,0,0,0,'',NULL,0,'Elite Witherbark Headhunter (Vazul)'),
@@ -81,12 +79,12 @@ INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFami
 (254622, 0, 0, 0, 0, 0, 0x10014, 1, 2, 0, 0, 0, 0, 100, 0, 0);
 
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `size`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`, `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`, `Data22`, `Data23`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
-(254623, 22, 7484, 'Water Bucket', '', '', '', 1, 254623, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 12340) ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`), `IconName` = VALUES(`IconName`), `castBarCaption` = VALUES(`castBarCaption`), `unk1` = VALUES(`unk1`), `size` = VALUES(`size`), `Data0` = VALUES(`Data0`), `Data1` = VALUES(`Data1`), `Data2` = VALUES(`Data2`), `Data3` = VALUES(`Data3`), `Data4` = VALUES(`Data4`), `Data5` = VALUES(`Data5`), `Data6` = VALUES(`Data6`), `Data7` = VALUES(`Data7`), `Data8` = VALUES(`Data8`), `Data9` = VALUES(`Data9`), `Data10` = VALUES(`Data10`), `Data11` = VALUES(`Data11`), `Data12` = VALUES(`Data12`), `Data13` = VALUES(`Data13`), `Data14` = VALUES(`Data14`), `Data15` = VALUES(`Data15`), `Data16` = VALUES(`Data16`), `Data17` = VALUES(`Data17`), `Data18` = VALUES(`Data18`), `Data19` = VALUES(`Data19`), `Data20` = VALUES(`Data20`), `Data21` = VALUES(`Data21`), `Data22` = VALUES(`Data22`), `Data23` = VALUES(`Data23`), `AIName` = VALUES(`AIName`), `ScriptName` = VALUES(`ScriptName`), `VerifiedBuild` = VALUES(`VerifiedBuild`);
+(2541700, 22, 7484, 'Water Bucket', '', '', '', 1, 254623, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 12340) ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`), `IconName` = VALUES(`IconName`), `castBarCaption` = VALUES(`castBarCaption`), `unk1` = VALUES(`unk1`), `size` = VALUES(`size`), `Data0` = VALUES(`Data0`), `Data1` = VALUES(`Data1`), `Data2` = VALUES(`Data2`), `Data3` = VALUES(`Data3`), `Data4` = VALUES(`Data4`), `Data5` = VALUES(`Data5`), `Data6` = VALUES(`Data6`), `Data7` = VALUES(`Data7`), `Data8` = VALUES(`Data8`), `Data9` = VALUES(`Data9`), `Data10` = VALUES(`Data10`), `Data11` = VALUES(`Data11`), `Data12` = VALUES(`Data12`), `Data13` = VALUES(`Data13`), `Data14` = VALUES(`Data14`), `Data15` = VALUES(`Data15`), `Data16` = VALUES(`Data16`), `Data17` = VALUES(`Data17`), `Data18` = VALUES(`Data18`), `Data19` = VALUES(`Data19`), `Data20` = VALUES(`Data20`), `Data21` = VALUES(`Data21`), `Data22` = VALUES(`Data22`), `Data23` = VALUES(`Data23`), `AIName` = VALUES(`AIName`), `ScriptName` = VALUES(`ScriptName`), `VerifiedBuild` = VALUES(`VerifiedBuild`);
 
 DELETE FROM `gameobject` WHERE `guid` IN (2541700, 2541701);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `ScriptName`, `VerifiedBuild`, `Comment`) VALUES
-(2541700, 254623, 1, 440, 979, 1, 1, -7182.6714, -3000.8193, 31.1741, 0.4996, 0, 0, 0.247216, 0.968961, 40, 100, 1, '', NULL, 'Water Bucket (Zazera)'),
-(2541701, 254623, 1, 440, 979, 1, 1, -7187.974, -3012.8828, 31.1893, 4.835, 0, 0, 0.662457, -0.7491, 40, 100, 1, '', NULL, 'Water Bucket (Zazera)');
+(2541700, 2541700, 1, 440, 979, 1, 1, -7182.6714, -3000.8193, 31.1741, 0.4996, 0, 0, 0.247216, 0.968961, 40, 100, 1, '', NULL, 'Water Bucket (Zazera)'),
+(2541701, 2541700, 1, 440, 979, 1, 1, -7187.974, -3012.8828, 31.1893, 4.835, 0, 0, 0.662457, -0.7491, 40, 100, 1, '', NULL, 'Water Bucket (Zazera)');
 
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 13 AND `SourceEntry` = 254623;
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 22 AND `SourceEntry` = 254170 AND `SourceId` = 0;
