@@ -149,6 +149,28 @@ class spell_ascension_reborn_totemic_projection : public SpellScript
         OnEffectHit += SpellEffectFn(spell_ascension_reborn_totemic_projection::HandleDummy, EFFECT_0, SPELL_EFFECT_DUMMY);
     }
 };
+
+class spell_ascension_reborn_spirit_guard : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_reborn_spirit_guard);
+
+    void CalculateAmount(AuraEffect const*, int32& amount, bool&)
+    {
+        amount = -1;
+    }
+
+    void Absorb(AuraEffect* aurEff, DamageInfo& dmgInfo, uint32& absorbAmount)
+    {
+        absorbAmount = dmgInfo.GetBlock() ? CalculatePct(dmgInfo.GetDamage(), aurEff->GetBaseAmount()) : 0;
+    }
+
+    void Register() override
+    {
+        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_ascension_reborn_spirit_guard::CalculateAmount, EFFECT_0,
+            SPELL_AURA_SCHOOL_ABSORB);
+        OnEffectAbsorb += AuraEffectAbsorbFn(spell_ascension_reborn_spirit_guard::Absorb, EFFECT_0);
+    }
+};
 }
 }
 
@@ -159,4 +181,5 @@ void AddAscensionWarcraftRebornShamanScripts()
     RegisterSpellScript(spell_ascension_reborn_maelstrom_weapon);
     RegisterSpellScript(spell_ascension_reborn_tidal_force);
     RegisterSpellScript(spell_ascension_reborn_totemic_projection);
+    RegisterSpellScript(spell_ascension_reborn_spirit_guard);
 }
