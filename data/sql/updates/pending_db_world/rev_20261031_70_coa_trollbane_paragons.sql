@@ -48,10 +48,10 @@ INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`,
 DELETE FROM `creature_addon` WHERE `guid` = 53743;
 DELETE FROM `creature` WHERE `guid` IN (21812, 53743, 2541680, 2541681, 2541682, 2541683, 2541684, 2541685, 2541686);
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`, `Comment`) VALUES
-(2541680,254168,0,45,317,1,1,0,-2065.27,-3271.685,50.2637,4.71239,300,0,0,1,0,0,0,0,0,'',NULL,0,'Vazul <Witherbark Paragon>'),
-(2541681,254176,0,45,317,1,1,0,-2062.27,-3271.685,50.2637,4.71239,300,0,0,1,0,0,0,0,0,'',NULL,0,'Elite Witherbark Headhunter (Vazul)'),
-(2541682,254176,0,45,317,1,1,0,-2068.27,-3271.685,50.2637,4.71239,300,0,0,1,0,0,0,0,0,'',NULL,0,'Elite Witherbark Headhunter (Vazul)'),
-(2541683,254170,1,440,979,1,1,0,-7189.39,-3008.6824,31.232,5.2691,300,0,0,1,0,0,0,0,0,'',NULL,0,'Zazera <Sandfury Paragon>'),
+(2541680,254168,0,45,317,1,1,0,-2059.795,-3269.7915,49.6225,3.1131,300,0,0,1,0,0,0,0,0,'',NULL,0,'Vazul <Witherbark Paragon>'),
+(2541681,254176,0,45,317,1,1,0,-2058.8413,-3264.2786,49.9604,3.5953,300,0,0,1,0,0,0,0,0,'',NULL,0,'Elite Witherbark Headhunter (Vazul)'),
+(2541682,254176,0,45,317,1,1,0,-2060.2793,-3274.6387,50.393,2.7118,300,0,0,1,0,0,0,0,0,'',NULL,0,'Elite Witherbark Headhunter (Vazul)'),
+(2541683,254170,1,440,979,1,1,0,-7190.723,-3004.4932,31.2314,5.9651,300,0,0,1,0,0,0,0,0,'',NULL,0,'Zazera <Sandfury Paragon>'),
 (2541684,254169,0,139,2274,1,1,0,3432.53,-5036.13,183.602,0.750492,300,0,0,1,0,0,0,0,0,'',NULL,0,'Yahola <Mossflayer Paragon>'),
 (2541685,254172,0,139,2274,1,1,0,3430.48,-5033.94,183.602,0.750492,300,0,0,1,0,0,0,0,0,'',NULL,0,'Left Hand of Yahola'),
 (2541686,254173,0,139,2274,1,1,0,3434.58,-5038.32,183.602,0.750492,300,0,0,1,0,0,0,0,0,'',NULL,0,'Right Hand of Yahola');
@@ -59,8 +59,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 DELETE FROM `creature_formations` WHERE `memberGUID` IN (2541680, 2541681, 2541682, 2541684, 2541685, 2541686);
 INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
 (2541680, 2541680, 0, 0, 7, 0, 0),
-(2541680, 2541681, 3, 90, 7, 0, 0),
-(2541680, 2541682, 3, 270, 7, 0, 0),
+(2541680, 2541681, 5.6, 262, 7, 0, 0),
+(2541680, 2541682, 4.9, 86, 7, 0, 0),
 (2541684, 2541684, 0, 0, 7, 0, 0),
 (2541684, 2541685, 3, 90, 7, 0, 0),
 (2541684, 2541686, 3, 270, 7, 0, 0);

@@ -15,7 +15,7 @@
     { "action": "set_health", "actor": "v", "value": 10000000, "maximum": 10000000 },
     { "action": "set_phase", "actor": "v", "value": 1 },
 
-    { "action": "teleport", "actor": "p", "map": 0, "x": -2065.27, "y": -3266.685, "z": 50.2637 },
+    { "action": "teleport", "actor": "p", "map": 0, "x": -2063.8, "y": -3269.6, "z": 49.62 },
     { "action": "assert", "label": "Vazul is in the Witherbark Village cave at level 40", "actor": "p", "metric": "nearby_creature_count", "entry": 254168, "min_level": 40, "max_level": 40, "equals": 1, "within_ms": 10000 },
     { "action": "assert", "label": "Vazul has her cached 11034 health, within 5%", "actor": "p", "metric": "nearby_creature_max_health", "entry": 254168, "min": 10482, "max": 11586 },
     { "action": "assert", "label": "Vazul uses her own model", "actor": "p", "metric": "nearby_creature_display", "entry": 254168, "equals": 254026 },
