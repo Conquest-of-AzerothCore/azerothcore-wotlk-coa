@@ -8,5 +8,6 @@ Hardcore - Trollbane asked players to kill three troll Paragons that didn't exis
 completed. Vazul, the Witherbark Paragon, now waits in the Witherbark Village cave in Arathi Highlands with two
 Elite Witherbark Headhunters. Zazera, the Sandfury Paragon, stands on top of Sandsorrow Watch in Tanaris. Yahola,
 the Mossflayer Paragon, holds the Mazra'Alor temple steps in the Eastern Plaguelands with her Left and Right Hand.
-Vazul casts Chains of Ice and Shadow Bolt Volley. Yahola casts Spectral Bolt and Spectral Volley and
-raises Risen Servants with Army of the Dead early in the fight.
+Vazul casts Chains of Ice and Shadow Bolt Volley. Zazera burns with Burning Sands and spins into Firestorm;
+the two Water Buckets on her tower put her out and stun her when she's close enough. Yahola casts Spectral Bolt
+and Spectral Volley and raises Risen Servants with Army of the Dead early in the fight.

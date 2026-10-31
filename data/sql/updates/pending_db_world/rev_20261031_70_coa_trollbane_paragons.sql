@@ -14,6 +14,13 @@
 -- (254626 -> 254627) once, as she drops below 99% health; it raises Risen Servants (254171, 5420 health at level 59).
 -- Vazul opens with Chains of Ice (113) and follows at once with Shadow Bolt Volley (9081, the Witherbark caster
 -- Zalas Witherbark's). She died 11 s in without casting again, so her repeat timers (12-16 s) are estimated.
+-- Zazera carries Burning Sands (254622: her hits and harmful spells add Burning Sands fire damage, 254621; "Maybe there
+-- is some way to cool down this effect..."). In footage she spins under Firestorm (254619, a Bladestorm that
+-- whirlwinds once a second for 6 s); its first cast and repeat (10-12 s, then 25-30 s) are estimated. Two Water
+-- Buckets on the tower cast Water Bucket (254623) for whoever uses them: a splash that only hits Zazera, within
+-- 5 yards of the user. In game it plays the splash; the spell itself has only a dummy effect, so Zazera's AI does the
+-- rest: while she burns, the splash puts out Burning Sands and stuns her with Extinguished (254624, 5 s). Burning
+-- Sands returns when she resets. The bucket model is the Hallow's End Water Bucket (display 7484), matching footage.
 -- Loot: of their Ascension drops only Vazul's three Whispershade greens are her own; the rest (Ephemeral Key,
 -- recipes, world greens) are shared world drops. Their chances were not recorded, so they use a common rare-elite
 -- rate: 20% each in one group, at most one per kill (as Geomancer Flintdagger's own greens).
@@ -27,7 +34,7 @@
 -- 254173, level 59 elites), all facing the wall. Objective: kill before level 59.
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
 (254168,0,0,0,0,0,'Vazul','Witherbark Paragon',NULL,0,40,40,0,654,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,254168,0,0,0,0,200,300,'SmartAI',0,1,5.325041,2,1,1,0,0,1,0,0,'',12340),
-(254170,0,0,0,0,0,'Zazera','Sandfury Paragon',NULL,0,45,45,0,37,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,0,0,0,0,0,300,450,'',0,1,5.127537,3,1,1,0,0,1,0,0,'',12340),
+(254170,0,0,0,0,0,'Zazera','Sandfury Paragon',NULL,0,45,45,0,37,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,0,0,0,0,0,300,450,'SmartAI',0,1,5.127537,3,1,1,0,0,1,0,0,'',12340),
 (254169,0,0,0,0,0,'Yahola','Mossflayer Paragon',NULL,0,59,59,0,37,0,1,1.14286,1,1,20,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,0,0,0,0,0,600,900,'SmartAI',0,1,14.882018,3.6,1,1,0,0,1,0,0,'',12340),
 (254171,0,0,0,0,0,'Risen Servant',NULL,NULL,0,59,59,0,37,0,1,1.14286,1,1,20,0,0,1,2000,2000,1,1,1,32768,2048,0,0,7,0,0,0,0,0,0,0,0,'SmartAI',0,1,0.944782,1,1,1,0,0,1,0,0,'',12340),
 (254172,0,0,0,0,0,'Left Hand of Yahola',NULL,NULL,0,59,59,0,37,0,1,1.14286,1,1,20,1,0,1.5,2000,2000,1,1,1,32768,2048,0,0,7,0,0,0,0,0,0,200,400,'',0,1,4.347349,1,1,1,0,0,1,0,0,'',12340),
@@ -40,8 +47,8 @@ INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`,
 (254169,0,254027,1,1,12340),
 (254170,0,254028,1,1,12340),
 (254171,0,26858,1,1,12340),
-(254172,0,945433,1,1,12340),
-(254173,0,945433,1,1,12340),
+(254172,0,945433,1.5,1,12340),
+(254173,0,945433,1.5,1,12340),
 (254176,0,3998,1,1,12340),
 (254176,1,28226,1,1,12340);
 
@@ -55,6 +62,28 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (2541684,254169,0,139,2274,1,1,0,3432.53,-5036.13,183.602,0.750492,300,0,0,1,0,0,0,0,0,'',NULL,0,'Yahola <Mossflayer Paragon>'),
 (2541685,254172,0,139,2274,1,1,0,3430.48,-5033.94,183.602,0.750492,300,0,0,1,0,0,0,0,0,'',NULL,0,'Left Hand of Yahola'),
 (2541686,254173,0,139,2274,1,1,0,3434.58,-5038.32,183.602,0.750492,300,0,0,1,0,0,0,0,0,'',NULL,0,'Right Hand of Yahola');
+
+DELETE FROM `creature_template_addon` WHERE `entry` = 254170;
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(254170, 0, 0, 0, 1, 0, 0, '254622');
+
+DELETE FROM `spell_proc` WHERE `SpellId` = 254622;
+INSERT INTO `spell_proc` (`SpellId`, `SchoolMask`, `SpellFamilyName`, `SpellFamilyMask0`, `SpellFamilyMask1`, `SpellFamilyMask2`, `ProcFlags`, `SpellTypeMask`, `SpellPhaseMask`, `HitMask`, `AttributesMask`, `DisableEffectsMask`, `ProcsPerMinute`, `Chance`, `Cooldown`, `Charges`) VALUES
+(254622, 0, 0, 0, 0, 0, 0x10014, 1, 2, 0, 0, 0, 0, 100, 0, 0);
+
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `size`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`, `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`, `Data22`, `Data23`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
+(254623, 22, 7484, 'Water Bucket', '', '', '', 1, 254623, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 12340) ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`), `IconName` = VALUES(`IconName`), `castBarCaption` = VALUES(`castBarCaption`), `unk1` = VALUES(`unk1`), `size` = VALUES(`size`), `Data0` = VALUES(`Data0`), `Data1` = VALUES(`Data1`), `Data2` = VALUES(`Data2`), `Data3` = VALUES(`Data3`), `Data4` = VALUES(`Data4`), `Data5` = VALUES(`Data5`), `Data6` = VALUES(`Data6`), `Data7` = VALUES(`Data7`), `Data8` = VALUES(`Data8`), `Data9` = VALUES(`Data9`), `Data10` = VALUES(`Data10`), `Data11` = VALUES(`Data11`), `Data12` = VALUES(`Data12`), `Data13` = VALUES(`Data13`), `Data14` = VALUES(`Data14`), `Data15` = VALUES(`Data15`), `Data16` = VALUES(`Data16`), `Data17` = VALUES(`Data17`), `Data18` = VALUES(`Data18`), `Data19` = VALUES(`Data19`), `Data20` = VALUES(`Data20`), `Data21` = VALUES(`Data21`), `Data22` = VALUES(`Data22`), `Data23` = VALUES(`Data23`), `AIName` = VALUES(`AIName`), `ScriptName` = VALUES(`ScriptName`), `VerifiedBuild` = VALUES(`VerifiedBuild`);
+
+DELETE FROM `gameobject` WHERE `guid` IN (2541700, 2541701);
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `ScriptName`, `VerifiedBuild`, `Comment`) VALUES
+(2541700, 254623, 1, 440, 979, 1, 1, -7182.6714, -3000.8193, 31.1741, 0.4996, 0, 0, 0.247216, 0.968961, 300, 100, 1, '', NULL, 'Water Bucket (Zazera)'),
+(2541701, 254623, 1, 440, 979, 1, 1, -7187.974, -3012.8828, 31.1893, 4.835, 0, 0, 0.662457, -0.7491, 300, 100, 1, '', NULL, 'Water Bucket (Zazera)');
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 13 AND `SourceEntry` = 254623;
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 22 AND `SourceEntry` = 254170 AND `SourceId` = 0;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(13, 1, 254623, 0, 0, 31, 0, 3, 254170, 0, 0, 0, 0, '', 'Water Bucket - splash hits only Zazera'),
+(22, 2, 254170, 0, 0, 1, 1, 254622, 0, 0, 0, 0, 0, '', 'Zazera - Water Bucket only puts her out while she has Burning Sands');
 
 DELETE FROM `creature_formations` WHERE `memberGUID` IN (2541680, 2541681, 2541682, 2541684, 2541685, 2541686);
 INSERT INTO `creature_formations` (`leaderGUID`, `memberGUID`, `dist`, `angle`, `groupAI`, `point_1`, `point_2`) VALUES
@@ -71,11 +100,14 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 (254168, 2067258, 0, 20, 0, 1, 1, 1, 1, 'Vazul - Mystic Whispershade Belt'),
 (254168, 2072023, 0, 20, 0, 1, 1, 1, 1, 'Vazul - Spiritbound Whispershade Bindings');
 
-DELETE FROM `smart_scripts` WHERE `entryorguid` IN (254168, 254169, 254171) AND `source_type` = 0;
+DELETE FROM `smart_scripts` WHERE `entryorguid` IN (254168, 254169, 254170, 254171) AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
 (254168, 0, 0, 0, 0, 0, 100, 0, 1000, 2000, 12000, 16000, 0, 0, 11, 113, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'Vazul - In Combat - Cast Chains of Ice'),
 (254168, 0, 1, 0, 0, 0, 100, 0, 2000, 3000, 12000, 16000, 0, 0, 11, 9081, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Vazul - In Combat - Cast Shadow Bolt Volley'),
 (254169, 0, 0, 0, 0, 0, 100, 0, 1000, 2000, 3500, 4000, 0, 0, 11, 254625, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'Yahola - In Combat - Cast Spectral Bolt'),
 (254169, 0, 1, 0, 2, 0, 100, 1, 0, 99, 0, 0, 0, 0, 11, 254626, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Yahola - Below 99% Health - Cast Army of the Dead (once)'),
 (254169, 0, 2, 0, 0, 0, 100, 0, 10000, 11000, 11000, 11000, 0, 0, 11, 254632, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Yahola - In Combat - Cast Spectral Volley'),
+(254170, 0, 0, 0, 0, 0, 100, 0, 10000, 12000, 25000, 30000, 0, 0, 11, 254619, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Zazera - In Combat - Cast Firestorm'),
+(254170, 0, 1, 2, 8, 0, 100, 0, 254623, 0, 0, 0, 0, 0, 28, 254622, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Zazera - On Water Bucket Hit - Remove Burning Sands'),
+(254170, 0, 2, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 11, 254624, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Zazera - On Water Bucket Hit - Cast Extinguished'),
 (254171, 0, 0, 0, 54, 0, 100, 0, 0, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 25, 30, 1, 0, 0, 0, 0, 0, 0, 'Risen Servant - On Just Summoned - Attack the closest player within 30 yards');
