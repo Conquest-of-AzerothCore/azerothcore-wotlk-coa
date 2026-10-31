@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "name": "Prestige Challenge 9930831 is shown as a buff, not a debuff (#9877)",
+  "contract": "Prestige Challenge carries the experience bonus the player chose, so the server applies it as a positive aura and the client lists it among the buffs.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "prestiged", "race": 1, "class": 12, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_aura", "actor": "prestiged", "spell": 9930831, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: Prestige Challenge is on the player", "actor": "prestiged",
+      "metric": "aura", "spell": 9930831, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "Prestige Challenge is applied as a buff", "actor": "prestiged",
+      "metric": "aura_positive", "spell": 9930831, "equals": 1 }
+  ]
+}
