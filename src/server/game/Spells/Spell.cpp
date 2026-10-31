@@ -3127,6 +3127,9 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
         if (m_caster->_IsValidAttackTarget(unit, m_spellInfo) && /*Intervene Trigger*/ m_spellInfo->Id != 59667)
         {
             unit->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_HITBYSPELL);
+            if (m_caster->IsPlayer() && !m_spellInfo->IsPositive())
+                if (Creature* creature = unit->ToCreature())
+                    creature->AddDirectPlayerAttacker(m_caster->GetGUID());
         }
         else if (m_caster->IsFriendlyTo(unit))
         {

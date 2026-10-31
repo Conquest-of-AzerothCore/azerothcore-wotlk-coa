@@ -1314,6 +1314,9 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
         if (!victim->ToCreature()->hasLootRecipient())
             victim->ToCreature()->SetLootRecipient(attacker);
 
+        if (damage && attacker && attacker->IsPlayer())
+            victim->ToCreature()->AddDirectPlayerAttacker(attacker->GetGUID());
+
         if (!attacker || attacker->IsControlledByPlayer() || attacker->IsCreatedByPlayer())
         {
             uint32 unDamage = health < damage ? health : damage;
@@ -15478,10 +15481,14 @@ void Unit::Kill(Unit* killer, Unit* victim, bool durabilityLoss, WeaponAttackTyp
             loot->clear();
             creature->FinalizeSharedQuestParticipants();
 
-            uint32 const lootid = creature->GetCreatureTemplate()->lootid;
-            loot->FillLoot(lootid, LootTemplates_Creature, looter, false, !lootid, creature->GetLootMode(), creature);
+            bool const unearnedSoloKill = !group && sWorld->getBoolConfig(CONFIG_SOLO_KILL_REQUIRES_PLAYER_HIT) &&
+                !creature->WasAttackedDirectlyBy(looter->GetGUID());
 
-            if (creature->GetLootMode())
+            uint32 const lootid = creature->GetCreatureTemplate()->lootid;
+            if (!unearnedSoloKill)
+                loot->FillLoot(lootid, LootTemplates_Creature, looter, false, !lootid, creature->GetLootMode(), creature);
+
+            if (creature->GetLootMode() && !unearnedSoloKill)
                 loot->generateMoneyLoot(creature->GetCreatureTemplate()->mingold, creature->GetCreatureTemplate()->maxgold);
 
             if (group)

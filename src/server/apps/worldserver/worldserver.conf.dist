@@ -4713,6 +4713,17 @@ AllowTwoSide.Interaction.Auction = 0
 AllowTwoSide.Interaction.Mail = 1
 
 #
+#    SoloKill.RequirePlayerHit
+#        Description: A player who is not in a group gets loot and experience from a creature only
+#                     if they hit it themselves, with an attack or a harmful spell. Kills made only
+#                     by their pets, guardians, totems or other summons give no loot or experience.
+#                     Quest kill credit and reputation are not affected.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+SoloKill.RequirePlayerHit = 1
+
+#
 #    AllowTwoSide.Trade
 #        Description: Allow trading between factions.
 #        Default:     1 - (Enabled)
