@@ -211,6 +211,7 @@ ACTIONS = {
     'sell_item': ({'actor', 'entry', 'item'}, {'actor', 'entry', 'item', 'count'}),
     'dungeon_difficulty_packet': ({'actor', 'value'}, {'actor', 'value'}),
     'ascension_dungeon_difficulty_packet': ({'actor', 'value'}, {'actor', 'value'}),
+    'raid_difficulty_packet': ({'actor', 'value'}, {'actor', 'value'}),
     'console': ({'command'}, {'command'}),
     'game_event': ({'event', 'active'}, {'event', 'active'}),
     'placement_audit': ({'map'}, {'map', 'zone', 'tolerance', 'gameobject_types'}),
@@ -304,7 +305,7 @@ ACTIONS = {
     'reset_cooldown': ({'actor', 'spell'}, {'actor', 'spell'}),
     'restore_charges': ({'actor', 'spell'}, {'actor', 'spell'}),
     'set_power': ({'actor', 'value'}, {'actor', 'value', 'power', 'pet'}),
-    'teleport': ({'actor', 'map', 'x', 'y', 'z'}, {'actor', 'map', 'x', 'y', 'z', 'o'}),
+    'teleport': ({'actor', 'map', 'x', 'y', 'z'}, {'actor', 'map', 'x', 'y', 'z', 'o', 'ignore_access'}),
     'teleport_to_spawn': ({'actor', 'guid'}, {'actor', 'guid'}),
     'quest_accept': ({'actor', 'quest'}, {'actor', 'quest', 'entry', 'gameobject'}),
     'quest_open': ({'actor', 'quest', 'entry'}, {'actor', 'quest', 'entry'}),
@@ -586,6 +587,8 @@ def validate(scenario):
                 number(destination[key], f'{where}.destination.{key}', -17000, 17000)
         if action in {'dungeon_difficulty_packet', 'ascension_dungeon_difficulty_packet'}:
             number(step['value'], f'{where}.value', 0, 2, True)
+        if action == 'raid_difficulty_packet':
+            number(step['value'], f'{where}.value', 0, 3, True)
         if action == 'teleport_to_spawn':
             number(step['guid'], f'{where}.guid', 1, 2**32 - 1, True)
         if action == 'teleport':
@@ -593,6 +596,7 @@ def validate(scenario):
             for key in ('x', 'y', 'z', 'o'):
                 if key in step:
                     number(step[key], f'{where}.{key}', -17000, 17000)
+            require(type(step.get('ignore_access', False)) is bool, f'{where}: ignore_access must be boolean')
         for key in ('spell', 'item', 'talent', 'count', 'entry', 'quest', 'id', 'challenge', 'level',
                     'target_item', 'target_gameobject', 'achievement', 'title'):
             if key in step:

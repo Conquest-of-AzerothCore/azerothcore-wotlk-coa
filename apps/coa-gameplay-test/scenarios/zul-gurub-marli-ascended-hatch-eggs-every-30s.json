@@ -1,0 +1,229 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: on Ascended High Priestess Mar'li hatches her eggs every 30 seconds",
+  "contract": [
+    "The Ascended kill video (youtube 6ihbw1PKc2E, 2026-08-04) shows a DBM Hatch Eggs bar that restarts at 30 s",
+    "for as long as Mar'li (14510) stays in her troll phase. Hatch Eggs (2118115) comes 17 s into the fight on",
+    "every difficulty; only Ascended (raid difficulty 3, template 314510) repeats it every 30 s, so the Normal",
+    "copy fought for the same time casts it once. Each hero fights a Mar'li summoned in their own instance and",
+    "stays above 50 % health of hers, so neither fight leaves the troll phase."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "ascended",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "ascended",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "normal",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "ascended",
+      "value": 3
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "ascended",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let both transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ascended hero is in Zul'Gurub on Ascended",
+      "actor": "ascended",
+      "metric": "map_difficulty",
+      "equals": 3
+    },
+    {
+      "action": "summon",
+      "actor": "ascended",
+      "entry": 14510,
+      "as": "marli_ascended",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li uses her Ascended template",
+      "actor": "ascended",
+      "metric": "nearby_creature_template",
+      "entry": 14510,
+      "equals": 314510
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the normal hero is in Zul'Gurub on Normal",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "normal",
+      "entry": 14510,
+      "as": "marli_normal",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li uses her Normal template",
+      "actor": "normal",
+      "metric": "nearby_creature_template",
+      "entry": 14510,
+      "equals": 14510
+    },
+    {
+      "action": "attack",
+      "label": "Engage the ascended Mar'li",
+      "actor": "ascended",
+      "target": "marli_ascended"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ascended Mar'li fights",
+      "actor": "marli_ascended",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ascended"
+    },
+    {
+      "action": "attack",
+      "label": "Engage the normal Mar'li",
+      "actor": "normal",
+      "target": "marli_normal"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the normal Mar'li fights",
+      "actor": "marli_normal",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "normal"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Ascended troll phase reaches Hatch Eggs at 17 s",
+      "actor": "ascended",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118115,
+      "min": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: so does the Normal one",
+      "actor": "normal",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118115,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: on Ascended Hatch Eggs comes back at 47 s and 77 s",
+      "actor": "ascended",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118115,
+      "min": 3,
+      "within_ms": 65000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: on Normal Mar'li hatched her eggs only once",
+      "actor": "normal",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118115,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Ascended Mar'li is still in her troll phase fight",
+      "actor": "marli_ascended",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Mar'li is still fighting",
+      "actor": "marli_normal",
+      "metric": "combat",
+      "equals": 1
+    }
+  ]
+}
