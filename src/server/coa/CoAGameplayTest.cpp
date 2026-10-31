@@ -5383,6 +5383,21 @@ private:
                             Require(item != nullptr, "Packet item position requires a carried item");
                             request << uint8(kind == "item_bag" ? item->GetBagSlot() : item->GetSlot());
                         }
+                        else if (kind == "mail_id" || kind == "mail_item_guid")
+                        {
+                            uint32 const wanted = value.get_value<uint32>();
+                            Mail const* found = nullptr;
+                            MailItemInfo const* foundItem = nullptr;
+                            for (Mail const* mail : player->GetMails())
+                                for (MailItemInfo const& item : mail->items)
+                                    if (!found && item.item_template == wanted)
+                                    {
+                                        found = mail;
+                                        foundItem = &item;
+                                    }
+                            Require(found != nullptr, "Packet mail field requires a mail carrying the item");
+                            request << (kind == "mail_id" ? found->messageID : uint32(foundItem->item_guid));
+                        }
                         else if (kind == "gameobject_guid")
                         {
                             std::list<GameObject*> objects = OwnedGameObjects(player, value.get_value<uint32>());
