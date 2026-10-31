@@ -132,7 +132,8 @@ constexpr std::array<uint32, 2> CodexItems = { 97871, 2200001 };
             continue;
 
         SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
-        if (info && info->IsPrimaryProfessionFirstRank())
+        if (info && info->IsPrimaryProfessionFirstRank() &&
+            !(player->getClass() == CLASS_RANGER && info->IsAbilityOfSkillType(SKILL_SKINNING)))
             ++known;
     }
 
