@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Tanaris quests restored from Ascension can be taken, completed and rewarded",
-  "contract": "rev_20261101_30_coa_tanaris_restore.sql restores the 16 Tanaris quests the server lacked from the Ascension questcache.wdb captures. Each is taken natively from its giver in chain order, so every PrevQuestID and ExclusiveGroup gate applies, and handed in natively at its ender. Speaking to Zalashji credits A Serpentine Strange 255028; coming within 5 yards of Prospector Ironboot, Importer Sprocketspring and Henry Crabgrass credits each delivery of Nothing to Declare 255037; taking one Contractual Concern removes the other. Battery Salvage 255055 needs a Stormborn Cloud Serpent killed and ends at the Zeppelin Battery, which starts Power From Storms 255056. The Bloodsail Logbook starts The Informant 255040; Arvon, who ends it, attacks a player who takes The Informant - Booty Bay's Ally 255041, and his death completes it for Baron Revilgaz. Importer Sprocketspring sells 16 goods and Henry Crabgrass opens an engineering trainer window. Item objectives are granted as fixtures and the Hazzali kills of 909042 are fixture-completed.",
+  "contract": "rev_20261101_30_coa_tanaris_restore.sql restores the 15 Tanaris quests the server lacked from the Ascension questcache.wdb captures. Each is taken natively from its giver in chain order, so every PrevQuestID and ExclusiveGroup gate applies, and handed in natively at its ender. Speaking to Zalashji credits A Serpentine Strange 255028; coming within 5 yards of Prospector Ironboot, Importer Sprocketspring and Henry Crabgrass credits each delivery of Nothing to Declare 255037; Zebel offers only the level-50 Contractual Concern 982257. Battery Salvage 255055 needs a Stormborn Cloud Serpent killed and ends at the Zeppelin Battery, which starts Power From Storms 255056. The Bloodsail Logbook starts The Informant 255040; Arvon, who ends it, attacks a player who takes The Informant - Booty Bay's Ally 255041, and his death completes it for Baron Revilgaz. Importer Sprocketspring sells 16 goods and Henry Crabgrass opens an engineering trainer window. Item objectives are granted as fixtures and the Hazzali kills of 909042 are fixture-completed.",
   "timeout_ms": 120000,
   "location": {
     "map": 1,
@@ -260,61 +260,45 @@
     },
     {
       "action": "quest_accept",
-      "label": "take 255035 from Zebel Shplit",
+      "label": "take 982257 from Zebel Shplit",
       "actor": "p",
-      "quest": 255035,
+      "quest": 982257,
       "entry": 449390
     },
     {
       "action": "assert",
-      "label": "255035 is in the log",
+      "label": "982257 is in the log",
       "actor": "p",
       "metric": "quest_status",
-      "quest": 255035,
+      "quest": 982257,
       "equals": 3,
       "within_ms": 3000
     },
     {
       "action": "assert",
-      "label": "255035 is complete",
+      "label": "982257 is complete",
       "actor": "p",
       "metric": "quest_status",
-      "quest": 255035,
+      "quest": 982257,
       "equals": 1,
       "within_ms": 3000
     },
     {
       "action": "quest_turn_in",
-      "label": "hand 255035 in at Snazzy Boomsprocket",
+      "label": "hand 982257 in at Snazzy Boomsprocket",
       "actor": "p",
-      "quest": 255035,
+      "quest": 982257,
       "reward": 0,
       "entry": 749258
     },
     {
       "action": "assert",
-      "label": "255035 is rewarded",
+      "label": "982257 is rewarded",
       "actor": "p",
       "metric": "quest_rewarded",
-      "quest": 255035,
+      "quest": 982257,
       "equals": 1,
       "within_ms": 3000
-    },
-    {
-      "action": "quest_accept",
-      "label": "the other Contractual Concern 982257 is no longer offered",
-      "actor": "p",
-      "quest": 982257,
-      "entry": 449390
-    },
-    {
-      "action": "assert",
-      "label": "982257 stays out of the log",
-      "actor": "p",
-      "metric": "quest_status",
-      "quest": 982257,
-      "equals": 0,
-      "within_ms": 1000
     },
     {
       "action": "quest_accept",

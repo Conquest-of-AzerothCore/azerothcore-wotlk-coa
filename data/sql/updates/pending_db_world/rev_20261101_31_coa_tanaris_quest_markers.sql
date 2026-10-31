@@ -1,4 +1,4 @@
--- CoA Tanaris: world-map and quest-log markers for the 16 quests rev_20261101_30_coa_tanaris_restore.sql restores,
+-- CoA Tanaris: world-map and quest-log markers for the 15 quests rev_20261101_30_coa_tanaris_restore.sql restores,
 -- which had none. The client's QuestSuperTrack/SuperTrack rows give only the 3D arrow and the minimap target.
 --
 -- Markers follow the client's QuestSuperTrack.dbc objective points (fields 2-81, twenty per objective) and turn-in
@@ -15,14 +15,13 @@
 -- used: their bounds also cover Lost Rigger Cove and the open sand, where a marker would not show on Tanaris.
 
 DELETE FROM `quest_poi` WHERE `QuestID` IN (
-  255028,255029,255035,255036,255037,255040,255041,255042,255048,255055,255056,909040,909041,909042,982257,982258);
+  255028,255029,255036,255037,255040,255041,255042,255048,255055,255056,909040,909041,909042,982257,982258);
 INSERT INTO `quest_poi` (`QuestID`, `id`, `ObjectiveIndex`, `MapID`, `WorldMapAreaId`, `Floor`, `Priority`,
   `Flags`) VALUES
 (255028, 0, 0, 1, 161, 0, 0, 1),
 (255028, 1, -1, 1, 161, 0, 0, 1),
 (255029, 0, 4, 1, 161, 0, 0, 1),
 (255029, 1, -1, 1, 161, 0, 0, 1),
-(255035, 0, -1, 1, 161, 0, 0, 1),
 (255036, 0, 4, 1, 161, 0, 0, 1),
 (255036, 1, -1, 1, 161, 0, 0, 1),
 (255037, 0, 0, 1, 161, 0, 0, 1),
@@ -56,7 +55,7 @@ INSERT INTO `quest_poi` (`QuestID`, `id`, `ObjectiveIndex`, `MapID`, `WorldMapAr
 (982258, 5, -1, 1, 161, 0, 0, 1);
 
 DELETE FROM `quest_poi_points` WHERE `QuestID` IN (
-  255028,255029,255035,255036,255037,255040,255041,255042,255048,255055,255056,909040,909041,909042,982257,982258);
+  255028,255029,255036,255037,255040,255041,255042,255048,255055,255056,909040,909041,909042,982257,982258);
 INSERT INTO `quest_poi_points` (`QuestID`, `Idx1`, `Idx2`, `X`, `Y`) VALUES
 (255028, 0, 0, -7352, -4874),
 (255028, 1, 0, -6974, -4846),
@@ -65,7 +64,6 @@ INSERT INTO `quest_poi_points` (`QuestID`, `Idx1`, `Idx2`, `X`, `Y`) VALUES
 (255029, 0, 2, -8140, -4542),
 (255029, 0, 3, -8260, -4542),
 (255029, 1, 0, -7352, -4874),
-(255035, 0, 0, -8260, -5051),
 (255036, 0, 0, -8650, -4878),
 (255036, 0, 1, -8410, -4878),
 (255036, 0, 2, -8410, -5118),

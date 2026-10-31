@@ -1,4 +1,4 @@
--- Tanaris restore from Ascension captures: the 16 Tanaris quests this server lacks (WDB questcache captures up to
+-- Tanaris restore from Ascension captures: the 15 Tanaris quests this server lacks (WDB questcache captures up to
 -- 2026-09-07), their givers, enders and credit NPCs (WDB creaturecache), the Bloodsail Logbook and Zeppelin Battery
 -- quest objects (WDB gameobjectcache), the quest item drops, the Steamwheedle Port vendor and engineering trainer,
 -- the rare elites Mordok Charstone, Thaladorius Rex and Ze'bulba, the vendor Rektha Gruff, and the Giant Surf
@@ -282,7 +282,6 @@ INSERT INTO `quest_template` (`ID`, `QuestType`, `QuestLevel`, `MinLevel`, `Ques
 VALUES
 (255028, 2, 45, 40, 440, 0, 0, 0, 0, 0, 0, 0, 5, 6500, 2475, 0, 0, 0, 0, 0, 8, 0, 375250, 200, 1397885, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 369, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'A Serpentine Strange', 'Investigate the strange naga sightings to the south of Steamwheedle Port.', 'I seen’ something strange lately, $r. Just behind that mountain ridge right south of here, I seen’ a naga swimmin’ around. Haven’t seen one of those slimy bastards ever in the desert, but it can’t be good. Half of our jobs are done in the water, and I don’t want that thing slithering up and taking one of my alchemists for a snack. Can you go there and deal with it?', '', 'Inform Security Chief Bilgewhizzle that the naga sighting is dealt with.', 8617, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Naga sighting resolved', '', '', '', 0),
 (255029, 2, 45, 40, 440, 0, 0, 0, 0, 0, 0, 0, 5, 6500, 2475, 0, 0, 0, 0, 0, 8, 0, 375250, 200, 1397885, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 369, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'The Corruption of the Highborne', 'Collect 1 Sands of Time near the Caverns of Time and bring it to Zalashji.', 'My people were once like yours, $r. We dwelt upon the ssssshores of a great nation. But our queen betrayed us, sssssold us to the enemy for the promise of power. Now we have it, bound to the dark depthssss…\n\nI ssseek a way to reverse our transformation and regain our losssst forms. Ssssuch power to reverse time musssst be in control of the Bronze Dragons. Find their lair and sssslaughter their young. Bring me the ssssalvation I seek.', '', 'Return to Zalashji in Zalashji''s Den.', 0, 0, 0, 0, 0, 0, 0, 0, 355083, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, '', '', '', '', 0),
-(255035, 2, 45, 40, 440, 0, 0, 0, 0, 0, 0, 255036, 2, 1500, 975, 0, 0, 0, 0, 0, 8, 0, 375250, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 369, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Contractual Concern', 'Find Zebel''s southernmost operative, Snazzy Boomsprocket.', 'Of all the times for Snazzy to be late! What the hell am I even paying him for?\n\nJust wait. When I get my claws on him, he’s gonna know why they call me The San… Ah ha! You look like just the $r I need right now. Care for a job?\n\nSnazzy is my southern operative. His job is to keep tabs on the Lost Riggers to make sure they aren’t up to something while my boats are about to leave port. The thing is, he’s just gone radio silent, and today’s cargo is worth BOAT LOADS.\n\nBut seriously, I can’t get moving until I know the coast is clear. I need you to find him and make sure he does his job, or bring him here so I can deal with him myself.', '', 'Find Snazzy Boomsprocket.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', 0),
 (255036, 2, 45, 40, 440, 1, 2, 0, 0, 0, 0, 255037, 6, 6500, 2475, 0, 0, 0, 0, 0, 8, 0, 375250, 200, 1397885, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 369, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Sea Giant Fantasy', 'Recovery Snazzy''s radio from the nearby sea giants.', 'Please don''t tell Zebel! More than my career, there''s no tellin'' what''ll happen to me if he catches me while in a bad mood.\n\nLook. I may or may not have been chillin'' near the shore line. And maybe, just maybe I dozed off with my radio there too. Who''s ta say? Or maybe.. I was ambushed! Fightin'' off sea giants left and right like a right badass, only losin'' my radio when they finally managed to knocked me out.\n\nThe second story, I think''ll find sounds better with is shiny gold, ripe with ya name on it aye? Now that I got yer attention, how''s about yous go and see about retrieving my radio? Bet It''ll be more than worth ya while.', '', 'Return to Snazzy Boomsprocket.', 0, 0, 0, 0, 0, 0, 0, 0, 355089, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, '', '', '', '', 0),
 (255037, 2, 45, 40, 440, 0, 0, 0, 0, 0, 0, 0, 5, 6500, 2475, 0, 0, 0, 0, 0, 8, 0, 375250, 200, 1397885, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 355174, 1, 355175, 1, 355176, 1, 355177, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 369, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Nothing to Declare', 'Deliver Snazzy''s goods at Steamwheedle', 'Say, since you''re headin'' back ta Steamwheedle anyways, care to do me a favor?\n\nI gots myself quite a bit of free time down ere, and wouldn''t ya know it, I make myself a pretty good product. The route to port isn''t an easy one, so most my runners end up quittin'' early, voluntarily or otherwise.\n\nBut ya clearly the type with no problems out there, so here''s the deal. Go to the port, carry and deliver my stuff, and I pay you. Doesn''t get more convenient than that aye? Plus, I''ll even throw in a free hit for you since we''re such great pals, how''s that sound?', '', 'Return to Zebel Shplit at Steamwheedle Port.', 10460, 41676, 46252, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Delivery to Prospector Ironboot', 'Delivery to Importer Sprocketspring', 'Delivery to Henry Crabgrass', '', 0),
 (255040, 2, 40, 35, 440, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'The Informant', 'Confront the Bloodsail informant in Booty Bay.', '<This logbook contains information on the inner workings of Booty Bay. It seems the Bloodsail Raiders have an informant in Booty Bay who owns a local tannery. With this information, it shouldn''t be too much trouble to track him down.>', '', 'Confront the Bloodsail informant in Booty Bay.', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', '', '', 0),
@@ -354,19 +353,18 @@ ON DUPLICATE KEY UPDATE `QuestType` = VALUES(`QuestType`), `QuestLevel` = VALUES
   `ObjectiveText3` = VALUES(`ObjectiveText3`), `ObjectiveText4` = VALUES(`ObjectiveText4`),
   `VerifiedBuild` = VALUES(`VerifiedBuild`);
 
--- Chains follow the captured NextQuestInChain and the quest texts. The two Contractual Concern captures (255035 at
--- level 45, 982257 at 50) are one quest at two levels, so only one can be done, and Sea Giant Fantasy 255036 does
--- not require either. Arvon offers two endings to The Informant: report him to Baron Revilgaz (255041) or keep his
--- secret (255042); only one can be taken (estimated).
-DELETE FROM `quest_template_addon` WHERE `ID` IN (255028,255029,255035,255036,255037,255040,255041,255042,255048,255055,
-  255056,909040,909041,909042,982257,982258);
+-- Chains follow the captured NextQuestInChain and the quest texts. Contractual Concern is captured twice, as 255035
+-- at level 45 and 982257 at level 50; Zebel offers only 982257, and Sea Giant Fantasy 255036 does not require it.
+-- Arvon offers two endings to The Informant: report him to Baron Revilgaz (255041) or keep his secret (255042); only
+-- one can be taken (estimated).
+DELETE FROM `quest_template_addon` WHERE `ID` IN (255028,255029,255036,255037,255040,255041,255042,255048,255055,255056,
+  909040,909041,909042,982257,982258);
 INSERT INTO `quest_template_addon` (`ID`, `MaxLevel`, `AllowableClasses`, `SourceSpellID`, `PrevQuestID`,
   `NextQuestID`, `ExclusiveGroup`, `BreadcrumbForQuestId`, `RewardMailTemplateID`, `RewardMailDelay`,
   `RequiredSkillID`, `RequiredSkillPoints`, `RequiredMinRepFaction`, `RequiredMaxRepFaction`, `RequiredMinRepValue`,
   `RequiredMaxRepValue`, `ProvidedItemCount`, `SpecialFlags`) VALUES
 (255028, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 (255029, 0, 0, 0, 255028, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-(255035, 0, 0, 0, 0, 0, 255035, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 (255036, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 (255037, 0, 0, 0, 255036, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 (255040, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
@@ -378,14 +376,14 @@ INSERT INTO `quest_template_addon` (`ID`, `MaxLevel`, `AllowableClasses`, `Sourc
 (909040, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0),
 (909041, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 (909042, 0, 0, 0, 982258, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-(982257, 0, 0, 0, 0, 0, 255035, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
+(982257, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
 (982258, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 -- Givers and enders follow the captured texts and the client SuperTrack turn-in points. Emergency Measures 909040
 -- hands over Bilgewhizzle's Order for Zebel; its giver is Chief Engineer Bilgewhizzle of the Gadgetzan water tower,
 -- whom the text names (estimated: no capture names the giver).
-DELETE FROM `creature_queststarter` WHERE `quest` IN (255028,255029,255035,255036,255037,255040,255041,255042,255048,
-  255055,255056,909040,909041,909042,982257,982258);
+DELETE FROM `creature_queststarter` WHERE `quest` IN (255028,255029,255036,255037,255040,255041,255042,255048,255055,
+  255056,909040,909041,909042,982257,982258);
 INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES
 (7407, 909040),
 (7882, 255028),
@@ -393,7 +391,6 @@ INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES
 (255331, 255041),
 (255331, 255042),
 (449295, 909041),
-(449390, 255035),
 (449390, 255048),
 (449390, 982257),
 (449391, 909042),
@@ -402,8 +399,8 @@ INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES
 (749258, 255036),
 (749258, 255037);
 
-DELETE FROM `creature_questender` WHERE `quest` IN (255028,255029,255035,255036,255037,255040,255041,255042,255048,
-  255055,255056,909040,909041,909042,982257,982258);
+DELETE FROM `creature_questender` WHERE `quest` IN (255028,255029,255036,255037,255040,255041,255042,255048,255055,
+  255056,909040,909041,909042,982257,982258);
 INSERT INTO `creature_questender` (`id`, `quest`) VALUES
 (2496, 255041),
 (7882, 255028),
@@ -417,7 +414,6 @@ INSERT INTO `creature_questender` (`id`, `quest`) VALUES
 (449391, 909042),
 (449391, 982258),
 (713002, 255056),
-(749258, 255035),
 (749258, 255036),
 (749258, 982257);
 
