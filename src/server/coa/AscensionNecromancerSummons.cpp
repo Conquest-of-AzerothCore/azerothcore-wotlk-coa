@@ -414,6 +414,7 @@ void Order(Player* player, Unit* target, uint32 spell)
         if (!creature->IsDamageEnoughForLootingAndReward())
             creature->LowerPlayerDamageReq(creature->GetHealth(), true, player->GetLevel());
     State(player).focus = target->GetGUID();
+    Creature* ordered = target->ToCreature();
     for (Creature* minion : Minions(player))
     {
         if (!Responds(minion->GetEntry(), spell) || !minion->IsWithinDistInMap(target, 60.0f) ||
@@ -422,6 +423,8 @@ void Order(Player* player, Unit* target, uint32 spell)
         minion->AI()->SetGUID(target->GetGUID(), 1);
         minion->AI()->SetData(1, spell);
         minion->AI()->DoAction(1);
+        if (ordered)
+            ordered->AddDirectPlayerAttacker(player->GetGUID());
     }
 }
 }

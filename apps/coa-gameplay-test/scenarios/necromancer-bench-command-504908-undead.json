@@ -1,0 +1,149 @@
+{
+  "schema": 1,
+  "name": "Bench: Command: Undead (504908) credits the necromancer for a minion kill without a swing",
+  "contract": "SoloKill.RequirePlayerHit (#10365, default 1) gives an ungrouped player experience from a creature only if they 'hit' it themselves (Creature::AddDirectPlayerAttacker, Spell.cpp:3130 / Unit.cpp:1317). Command: Undead 504908 is one of the generic Commands (AscensionNecromancerSummons.cpp Responds(), alongside 500991/504868/504908/805871) that answer any non-Stationary minion. A level-60 necromancer raises one Greater Skeletal Warrior (51065, via Raise: Greater Skeletal Warrior 504901) and never swings; Command: Undead on a weak creature lets the warrior kill it alone. This bench proves on unfixed main whether that commanded kill gives the necromancer experience (intended behaviour, 'option A': every Command order counts as the player's hit). 504908 has a single effect using TARGET_UNIT_DEST_AREA_ALLY (Spell.dbc EffectImplicitTargetA[0]=31), unlike 504907/504868 whose second effect targets TARGET_UNIT_TARGET_ENEMY (6) directly; casting it at an explicit hostile target makes Spell::prepare set the destination to that target (Spell.cpp:787) 25y from the caster and its own minion, so the ally-area search may miss the minion. This scenario instead selects the creature (so Order() can fall back to the selected target) and self-casts 504908 so its destination defaults to the caster (Spell.cpp:792), covering the minion standing next to it.",
+  "timeout_ms": 300000,
+  "players": [
+    {
+      "id": "necro",
+      "race": 1,
+      "class": 23,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "necro",
+      "entry": 36,
+      "level": 60,
+      "health": 300,
+      "distance": 25
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 504901
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 504908
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "cast",
+      "label": "Raise: Greater Skeletal Warrior",
+      "actor": "necro",
+      "spell": 504901
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Greater Skeletal Warrior exists",
+      "actor": "necro",
+      "metric": "owned_creature_count",
+      "entry": 51065,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown and formation",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "xp",
+      "save_as": "xp0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "melee_attack_count",
+      "save_as": "swings0"
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "select_nearby",
+      "actor": "necro",
+      "entry": 36
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "necro",
+      "spell": 504908
+    },
+    {
+      "action": "cast",
+      "label": "Command: Undead (504908), self-cast so its area-ally effect centers on the caster, with the creature selected",
+      "actor": "necro",
+      "spell": 504908
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Command cast went",
+      "actor": "necro",
+      "metric": "spell_go_count",
+      "spell": 504908,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the creature dies",
+      "actor": "target",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 120000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the necromancer never swung",
+      "actor": "necro",
+      "metric": "melee_attack_count",
+      "relative_to": "swings0",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "BENCH: the commanded kill gives experience",
+      "actor": "necro",
+      "metric": "xp",
+      "relative_to": "xp0",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "BENCH: the necromancer's level is unchanged",
+      "actor": "necro",
+      "metric": "level",
+      "equals": 60
+    }
+  ]
+}
