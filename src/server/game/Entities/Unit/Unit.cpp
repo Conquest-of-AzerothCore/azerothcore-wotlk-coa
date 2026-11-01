@@ -4492,6 +4492,7 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, Unit const* victi
         crit = 5.0f;
         crit += GetTotalAuraModifier(SPELL_AURA_MOD_WEAPON_CRIT_PERCENT);
         crit += GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PCT);
+        crit += GetTotalAuraModifierByMiscMask(SPELL_AURA_ASCENSION_MOD_CRIT_CHANCE, SPELL_SCHOOL_MASK_NORMAL);
     }
 
     // flat aura mods
@@ -4499,9 +4500,6 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, Unit const* victi
         crit += victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_CHANCE);
     else
         crit += victim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE);
-
-    crit += GetTotalAuraModifierByMiscMask(
-        SPELL_AURA_ASCENSION_MOD_CRIT_CHANCE, SPELL_SCHOOL_MASK_NORMAL);
 
     crit += victim->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER, [this](AuraEffect const* aurEff)
     {
@@ -10241,8 +10239,15 @@ float Unit::SpellDoneCritChance(Unit const* /*victim*/, SpellInfo const* spellPr
             return 0.0f;
     }
 
-    crit_chance += GetTotalAuraModifierByMiscMask(
-        SPELL_AURA_ASCENSION_MOD_CRIT_CHANCE, schoolMask);
+    bool const critFieldIncludesAscensionAura = IsPlayer() && attackType < MAX_ATTACK &&
+        (spellProto->DmgClass == SPELL_DAMAGE_CLASS_MELEE || spellProto->DmgClass == SPELL_DAMAGE_CLASS_RANGED);
+    crit_chance += GetTotalAuraModifier(SPELL_AURA_ASCENSION_MOD_CRIT_CHANCE,
+        [schoolMask, critFieldIncludesAscensionAura](AuraEffect const* aurEff)
+    {
+        uint32 const auraSchoolMask = uint32(aurEff->GetMiscValue());
+        return (auraSchoolMask & schoolMask) &&
+            !(critFieldIncludesAscensionAura && (auraSchoolMask & SPELL_SCHOOL_MASK_NORMAL));
+    });
 
     // percent done
     // only players use intelligence for critical chance computations
