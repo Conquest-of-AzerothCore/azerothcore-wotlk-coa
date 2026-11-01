@@ -573,7 +573,7 @@ class spell_hun_invigoration : public SpellScript
         if (Unit* unitTarget = GetHitUnit())
             if (AuraEffect* aurEff = unitTarget->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 3487, 0))
                 if (roll_chance_i(aurEff->GetAmount()))
-                    unitTarget->CastSpell(unitTarget, SPELL_HUNTER_INVIGORATION_TRIGGERED, true);
+                    unitTarget->CastSpell(unitTarget, sSpellMgr->GetSpellTwinFor(SPELL_HUNTER_INVIGORATION_TRIGGERED, aurEff->GetId()), true);
     }
 
     void Register() override
