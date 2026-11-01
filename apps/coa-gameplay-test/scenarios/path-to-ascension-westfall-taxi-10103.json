@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Path to Ascension: Westfall: talking to Dungar Longdrink flies the player to Westfall (#10103)",
+  "contract": [
+    "Issue #10103. Quest 100466 only granted its visit-the-flightmaster credit from Dungar Longdrink 352's",
+    "gossip hello, with nothing ever activating the Stormwind -> Sentinel Hill taxi connection the quest text",
+    "promises. TaxiPath.dbc record 6 (From=2 Stormwind, To=4 Sentinel Hill, Westfall) is the direct flight.",
+    "Expected: the credit still fires and the player is put in flight toward Westfall."
+  ],
+  "timeout_ms": 30000,
+  "location": {"map": 0, "x": -8838.9677734375, "y": 490.73483276367, "z": 109.6120300293, "o": 0},
+  "players": [
+    {"id": "p", "race": 1, "class": 17, "level": 10}
+  ],
+  "creatures": [
+    {"id": "dungar", "owner": "p", "entry": 352, "distance": 3, "faction": 35}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the fixture settle", "ms": 2500},
+    {"action": "prepare_quest", "label": "Take Path to Ascension: Westfall", "actor": "p", "quest": 100466, "complete": false},
+    {"action": "set_money", "label": "Fund the Stormwind -> Westfall flight cost", "actor": "p", "value": 10000},
+    {"action": "assert", "label": "CONTROL: not in flight yet", "actor": "p", "metric": "in_flight", "equals": 0},
+    {"action": "gossip_hello", "label": "Speak to Dungar Longdrink", "actor": "p", "target": "dungar"},
+    {"action": "assert", "label": "the visit-the-flightmaster credit still fires", "actor": "p",
+     "metric": "quest_objective_count", "quest": 100466, "index": 0, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "the player is now in flight toward Westfall", "actor": "p",
+     "metric": "in_flight", "equals": 1, "within_ms": 3000}
+  ]
+}
