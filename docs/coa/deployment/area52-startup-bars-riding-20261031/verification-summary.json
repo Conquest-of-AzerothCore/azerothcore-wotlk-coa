@@ -1,0 +1,12 @@
+{
+  "package": "area52-startup-bars-riding-20261031",
+  "server_sha256": "9610501e03ee938f86f1f4c49c2a62eade19ee4004be88d48f0a9d434910f259",
+  "status_changes": false,
+  "reports": [
+    "full-build-r1/report.json",
+    "native-r4/report.json",
+    "compile-r1/report.json"
+  ],
+  "scope": "No automatic Wand placement, quiet replacement-spell grants and stable riding-rank restoration",
+  "limits": "Native behavior with Player/persistence adapters; full build and unit stage. No live gameplay or login test; exact riding-message origin not captured. Existing saved bars are untouched."
+}
