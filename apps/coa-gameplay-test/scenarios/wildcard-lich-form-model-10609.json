@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Wildcard Lich Form shows the Necromancer Lich model instead of a pig (#10609)",
+  "contract": [
+    "Wildcard Lich Form 280535 ('This spell belongs to Necromancer') is APPLY_AURA TRANSFORM into creature 735821, which had no creature_template, so SPELL_AURA_TRANSFORM fell back to the pink pig display 16358.",
+    "The Necromancer's own Lich Form 500981 shows shapeshift form 50, whose SpellShapeshiftForm.dbc modelID_A is display 223570; the Wildcard copy must show that display while the aura lasts and the native model after it ends."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wild", "name": "Wildlich", "race": 1, "class": 10, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Wildlich" },
+    { "action": "assert", "label": "SETUP: the Hero plays Wildcard", "actor": "wild", "metric": "game_mode_mask", "min": 64 },
+    { "action": "snapshot", "actor": "wild", "metric": "display_id", "save_as": "native_display" },
+    { "action": "learn", "actor": "wild", "spell": 280535 },
+    { "action": "wait", "ms": 300 },
+    { "action": "cast", "label": "Lich Form", "actor": "wild", "spell": 280535 },
+    { "action": "assert", "label": "SETUP: Lich Form is accepted", "actor": "wild", "metric": "cast_failure", "spell": 280535, "equals": 0 },
+    { "action": "assert", "label": "SETUP: the Lich Form aura is up", "actor": "wild", "metric": "aura", "spell": 280535, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "DISCRIMINATING: the character shows the Lich display 223570, not the pig 16358", "actor": "wild", "metric": "display_id", "equals": 223570, "within_ms": 1000 },
+    { "action": "cancel_aura", "label": "Leave Lich Form", "actor": "wild", "spell": 280535 },
+    { "action": "assert", "label": "The aura is gone", "actor": "wild", "metric": "aura", "spell": 280535, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "label": "The native model returns", "actor": "wild", "metric": "display_id", "relative_to": "native_display", "equals": 0, "within_ms": 1000 }
+  ]
+}
