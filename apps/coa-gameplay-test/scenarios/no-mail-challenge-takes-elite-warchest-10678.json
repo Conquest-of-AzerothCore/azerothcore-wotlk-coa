@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "A no-mail challenge still lets the hero take the level 10 Elite Warchest from the mailbox (#10678)",
+  "contract": [
+    "Reports #10678 and #10300: the welcome Elite Warchest (2977351) that the server mails at level 10 cannot be taken",
+    "during a trial that forbids receiving mail; the take fails with \"Your challenge forbids receiving mail.\"",
+    "Expected: the warchest is a server gift, not player-to-player mail. Under Bloodbath (challenge 15, NO_MAIL) the",
+    "hero reaching level 10 receives it, CMSG_MAIL_TAKE_ITEM answers MAIL_OK (0) and the warchest lands in the bags,",
+    "while a Peacebloom mailed by another character stays refused with MAIL_ERR_INTERNAL_ERROR (6)."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914, "y": -133, "z": 80.6, "o": 0 },
+  "players": [
+    { "id": "sender", "name": "Coachestsend", "race": 1, "class": 23, "level": 1 },
+    { "id": "hero", "name": "Coachesthero", "race": 1, "class": 23, "level": 1, "account_of": "sender" }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "start_challenge", "label": "Fixture: the hero runs Bloodbath (NO_MAIL)", "actor": "hero",
+      "challenge": 15, "level": 1 },
+    { "action": "assert", "actor": "hero", "metric": "challenge_start_code", "equals": 0 },
+
+    { "action": "summon_gameobject", "actor": "sender", "entry": 142119 },
+    { "action": "add_item", "actor": "sender", "item": 2447 },
+    { "action": "client_packet", "label": "Mail a Peacebloom to the hero", "actor": "sender",
+      "opcode": 568, "consumed": false,
+      "fields": [
+        { "gameobject_guid": 142119 }, { "string": "Coachesthero" }, { "string": "Ordinary item" },
+        { "string": "Peacebloom" }, { "u32": 41 }, { "u32": 0 }, { "u8": 1 }, { "u8": 0 },
+        { "item_guid": 2447 }, { "u32": 0 }, { "u32": 0 }, { "u64": 0 }, { "u8": 0 }
+      ] },
+    { "action": "assert", "actor": "sender", "metric": "server_packet_u32", "opcode": 569, "index": 2,
+      "equals": 0, "label": "The Peacebloom mail is accepted" },
+
+    { "action": "set_level", "label": "The hero reaches level 10 and is mailed the warchest", "actor": "hero",
+      "value": 10 },
+    { "action": "relog", "actor": "hero" },
+    { "action": "assert", "actor": "hero", "metric": "mail_has_item", "item": 2977351, "equals": 1,
+      "within_ms": 1000 },
+    { "action": "assert", "actor": "hero", "metric": "mail_has_item", "item": 2447, "equals": 1 },
+    { "action": "summon_gameobject", "actor": "hero", "entry": 142119 },
+
+    { "action": "client_packet", "label": "DISCRIMINATING: the challenge hook passes the warchest take",
+      "actor": "hero", "opcode": 582, "early": false, "consumed": false,
+      "fields": [ { "gameobject_guid": 142119 }, { "mail_id": 2977351 }, { "mail_item_guid": 2977351 } ] },
+    { "action": "client_packet", "label": "The mailbox hands over the warchest", "actor": "hero",
+      "opcode": 582, "consumed": false,
+      "fields": [ { "gameobject_guid": 142119 }, { "mail_id": 2977351 }, { "mail_item_guid": 2977351 } ] },
+    { "action": "assert", "actor": "hero", "metric": "server_packet_u32", "opcode": 569, "index": 2,
+      "equals": 0, "label": "The warchest take succeeds" },
+    { "action": "assert", "actor": "hero", "metric": "item_count", "item": 2977351, "equals": 1,
+      "within_ms": 1000 },
+
+    { "action": "client_packet", "label": "Control: the challenge refuses the Peacebloom take", "actor": "hero",
+      "opcode": 582, "early": false, "consumed": true,
+      "fields": [ { "gameobject_guid": 142119 }, { "mail_id": 2447 }, { "mail_item_guid": 2447 } ] },
+    { "action": "assert", "actor": "hero", "metric": "server_packet_u32", "opcode": 569, "index": 2,
+      "equals": 6, "label": "The refusal is MAIL_ERR_INTERNAL_ERROR" },
+    { "action": "assert", "actor": "hero", "metric": "mail_has_item", "item": 2447, "equals": 1 },
+    { "action": "assert", "actor": "hero", "metric": "item_count", "item": 2447, "equals": 0 }
+  ]
+}

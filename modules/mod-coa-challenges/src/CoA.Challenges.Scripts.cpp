@@ -1040,11 +1040,12 @@ namespace CoAChallenges
     // OUTSIDE_INTERACTION). During the trial: the NO_MAIL rule forbids both
     // sending and receiving mail. Store items / reward caches are exempt.
     constexpr uint32 BazaarTokenItem = 975001;
+    constexpr uint32 EliteWarchestItem = 2977351;
     std::unordered_set<uint32> StoreItems;
 
     void LoadStoreItems()
     {
-        StoreItems = { BazaarTokenItem };
+        StoreItems = { BazaarTokenItem, EliteWarchestItem };
         if (QueryResult r = WorldDatabase.Query("SELECT `ItemID` FROM `coa_client_vanity_collection`"))
             do
                 StoreItems.insert(r->Fetch()[0].Get<uint32>());
