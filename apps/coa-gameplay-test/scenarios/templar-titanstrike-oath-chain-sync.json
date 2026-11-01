@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "name": "Titanstrike keeps the Oath Chain and its granted Oath in sync (#10353)",
+  "contract": "Titanstrike (806834/806835) effect 1 triggers Oath Chain (707896) on the caster, which extends the Oath Chain buff (704576) by 2999 ms through SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION (src/server/game/Spells/SpellEffects.cpp, Spell::EffectAscensionModifyAuraDuration). That engine-level effect only touches the single aura named by its own MiscValue (704576, plus the unrelated 706426) and knows nothing about the five individual 'Oath: X' auras (804903, 804904, 804922, 804924, 805332) that AscensionTemplar::GrantOath keeps in lock-step with 704576 when an oath is first granted. Before the fix, Titanstrike's trigger left the granted Oath's own duration unchanged while 704576 grew ahead of it, so the Oath expired up to ~3 seconds earlier than the Oath Chain buff that is supposed to track it -- exactly #10353's report. templar_casts::OnSpellCast (src/server/coa/AscensionTemplarAbilities.cpp) now calls the same AscensionTemplar::SyncOaths helper GrantOath uses whenever the cast is Named(info, 806521) (covers both Titanstrike ranks via the rank-chain lookup), re-syncing every currently-held Oath's duration to the Oath Chain's own duration after the engine has already applied Titanstrike's extension.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "templar",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "templar", "spell": 806835 },
+    { "action": "cast", "actor": "templar", "spell": 801443, "target": "dummy", "label": "Righteous Lunge grants an Oath and starts the Oath Chain" },
+    {
+      "action": "assert", "label": "SETUP: Righteous Lunge is accepted",
+      "actor": "templar", "metric": "cast_failure", "spell": 801443, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: Oath: Righteous Lunge is granted",
+      "actor": "templar", "metric": "aura", "spell": 804904, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the Oath Chain buff is up",
+      "actor": "templar", "metric": "aura", "spell": 704576, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the freshly granted Oath starts in sync with the Oath Chain",
+      "actor": "templar", "metric": "aura_duration_ms", "spell": 804904, "min": 10000, "max": 15000
+    },
+    {
+      "action": "assert", "label": "Wait for the native global cooldown after Righteous Lunge",
+      "actor": "templar", "metric": "global_cooldown_ms", "spell": 806835, "equals": 0, "within_ms": 2000
+    },
+    { "action": "set_health_pct", "actor": "templar", "pct": 20, "target": "dummy", "label": "Titanstrike requires the target below 35% health (AURA_STATE_HEALTHLESS_35_PERCENT)" },
+    { "action": "assert", "label": "SETUP: the dummy is below 35% health", "actor": "dummy", "metric": "health_pct", "max": 35 },
+    { "action": "wait", "label": "Let the aura-state update propagate", "ms": 500 },
+    { "action": "cast", "actor": "templar", "spell": 806835, "target": "dummy", "label": "Titanstrike extends the Oath Chain" },
+    {
+      "action": "assert", "label": "SETUP: Titanstrike is accepted",
+      "actor": "templar", "metric": "cast_failure", "spell": 806835, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: the Oath Chain buff is still up after Titanstrike",
+      "actor": "templar", "metric": "aura", "spell": 704576, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the Oath is still up after Titanstrike",
+      "actor": "templar", "metric": "aura", "spell": 804904, "equals": 1
+    },
+    { "action": "snapshot", "actor": "templar", "metric": "aura_duration_ms", "spell": 704576, "save_as": "chain_after" },
+    {
+      "action": "assert", "label": "SETUP: the Oath Chain's remaining duration is meaningfully nonzero",
+      "actor": "templar", "metric": "aura_duration_ms", "spell": 704576, "min": 5000
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#10353): the granted Oath's duration tracks the extended Oath Chain",
+      "actor": "templar", "metric": "aura_duration_ms", "spell": 804904, "relative_to": "chain_after", "min": -200, "max": 200
+    }
+  ]
+}

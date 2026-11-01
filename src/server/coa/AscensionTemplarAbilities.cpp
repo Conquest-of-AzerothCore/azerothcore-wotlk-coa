@@ -161,6 +161,8 @@ class templar_casts : public AllSpellScript
             GrantOath(player, oath);
             talent(705286, 560834);
         }
+        if (Named(info, 806521))
+            SyncOaths(player);
         if (Breaker(info))
         {
             if (player->HasAura(300502) && spell->GetScriptValue(704576) >= 10)
