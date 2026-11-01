@@ -33,7 +33,7 @@ class aura_ascension_templar_event : public AuraScript
         if (id == 801482 || id == 801483)
             return outgoing && damage && event.GetActionTarget() != player &&
                    (id != 801483 || !player->HasAura(801482));
-        bool const legacyHeal = id == 680397 && info && info->Id == 707302;
+        bool const legacyHeal = (id == 680397 || id == 705298) && info && info->Id == 707302;
         if (State(player).event && !legacyHeal)
             return false;
         if (id == 300513)
