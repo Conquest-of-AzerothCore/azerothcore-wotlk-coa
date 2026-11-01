@@ -1,0 +1,96 @@
+--- a/src/server/coa/Area52MysticTestAccess.h
++++ b/src/server/coa/Area52MysticTestAccess.h
+@@ -3,12 +3,49 @@
+ 
+ #include <boost/property_tree/ptree.hpp>
+ #include <cstdint>
++#include <charconv>
++#include <cctype>
+ #include <set>
+ #include <stdexcept>
+ #include <string>
++#include <string_view>
+ 
+ namespace AscensionMysticEnchant
+ {
++inline std::set<std::uint32_t> ParseTestAccessExcludedAccounts(std::string_view text)
++{
++    std::set<std::uint32_t> accounts;
++    while (!text.empty())
++    {
++        auto const separator = text.find(',');
++        auto token = text.substr(0, separator);
++        while (!token.empty() && std::isspace(static_cast<unsigned char>(token.front())))
++            token.remove_prefix(1);
++        while (!token.empty() && std::isspace(static_cast<unsigned char>(token.back())))
++            token.remove_suffix(1);
++        std::uint32_t account = 0;
++        if (token.empty())
++            throw std::runtime_error("Empty Mystic Enchant test-access account exclusion");
++        auto const parsed = std::from_chars(token.data(), token.data() + token.size(), account);
++        if (parsed.ec != std::errc{} || parsed.ptr != token.data() + token.size() || !account)
++            throw std::runtime_error("Invalid Mystic Enchant test-access account exclusion");
++        accounts.insert(account);
++        if (separator == std::string_view::npos)
++            break;
++        text.remove_prefix(separator + 1);
++        if (text.empty())
++            throw std::runtime_error("Trailing Mystic Enchant test-access account exclusion separator");
++    }
++    return accounts;
++}
++
++inline void AddVerifiedTestAccess(std::set<std::uint32_t>& known, std::set<std::uint32_t> const& access,
++    std::set<std::uint32_t> const& excluded, std::uint32_t account)
++{
++    if (!excluded.contains(account))
++        known.insert(access.begin(), access.end());
++}
++
+ template <typename Supported>
+ std::set<std::uint32_t> VerifiedTestAccess(boost::property_tree::ptree const& report, Supported supported)
+ {
+--- a/src/server/coa/AscensionMysticEnchant.cpp
++++ b/src/server/coa/AscensionMysticEnchant.cpp
+@@ -82,9 +82,11 @@
+ std::map<std::uint32_t, std::uint32_t> Connected;
+ bool Active = false;
+ std::set<std::uint32_t> TestAccess;
+-void AddTestAccess(std::set<std::uint32_t>& known)
+-{
+-    known.insert(TestAccess.begin(), TestAccess.end());
++std::set<std::uint32_t> TestAccessExcludedAccounts;
++void AddTestAccess(Player* player, std::set<std::uint32_t>& known)
++{
++    if (player && player->GetSession())
++        AddVerifiedTestAccess(known, TestAccess, TestAccessExcludedAccounts, player->GetSession()->GetAccountId());
+ }
+ std::atomic<std::uint64_t> NextGeneration{0};
+ constexpr char StateKey[] = "coa.freepick.mystic";
+@@ -385,7 +387,7 @@
+                     if (Data.BySpell.contains(spell))
+                         current->Known.insert(spell);
+                 } while (result->NextRow());
+-            AddTestAccess(current->Known);
++            AddTestAccess(owner, current->Known);
+             if (!current->Loaded)
+                 for (auto const& [spell, entry] : Data.BySpell)
+                     if (auto const* aura = owner->GetAura(spell, owner->GetGUID()))
+@@ -883,6 +885,8 @@
+     {
+         try
+         {
++            TestAccessExcludedAccounts = ParseTestAccessExcludedAccounts(sConfigMgr->GetOption<std::string>(
++                "CoA.FreePickMysticEnchants.VerifiedTestAccessExcludedAccounts", ""));
+             boost::property_tree::ptree report;
+             boost::property_tree::read_json(sConfigMgr->GetOption<std::string>(
+                 "CoA.FreePickMysticEnchants.VerificationFile", ""), report);
+@@ -1677,7 +1681,7 @@
+             known.insert(result->Fetch()[0].Get<std::uint32_t>());
+         } while (result->NextRow());
+     auto const slots = ReadSlots(player);
+-    AddTestAccess(known);
++    AddTestAccess(player, known);
+     if (!ValidateSlots(Data, slots, player->GetLevel(), known, Connected))
+         return;
+     for (auto const& grant : SpellGrants)

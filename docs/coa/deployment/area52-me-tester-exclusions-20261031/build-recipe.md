@@ -1,0 +1,1 @@
+Apply source.patch against server-baseline.json. Preserve active overlays and bot snapshot recorded in full-build-provenance.json. Run native fixture through tools/verify_all.py and build,unit with the existing toolchain. Exclusion configuration is private and is not published. No collection deletion, client changes or verification-label changes.
