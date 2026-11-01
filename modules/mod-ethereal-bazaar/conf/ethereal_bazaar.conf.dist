@@ -69,6 +69,36 @@ EtherealBazaar.Tokens.MaxLevelsAboveMob.WhileLeveling = grey
 EtherealBazaar.Tokens.MaxLevelsAboveMob.AtMaxLevel = 5
 EtherealBazaar.Tokens.MaxLevel = 60
 
+# Degression: repeated kills of the same creature entry, anywhere in the open
+# world (not in an instance, dungeon, raid or battleground), pay less each
+# time. A per-player, per-entry "heat" rises by one on every such kill and
+# decays over time at a rate tied to that creature's own respawn delay; the
+# ordinary Creature roll above is then multiplied by (FactorPercent/100)^heat
+# before it is granted, so each repeat kill of the same entry is worth
+# FactorPercent percent of the last. A kill whose multiplier falls under
+# CutoffPercent pays nothing instead of a token too small to matter. Dungeon
+# and raid bosses are never degressed.
+# Default: 1 (enabled)
+EtherealBazaar.Tokens.Degression.Enable = 1
+
+# Percent kept per repeat kill of the same entry.
+# Default: 67
+EtherealBazaar.Tokens.Degression.FactorPercent = 67
+
+# How many respawn cycles of the creature it takes to recover one full point
+# of heat. Lower recovers faster.
+# Default: 2
+EtherealBazaar.Tokens.Degression.RecoveryFactor = 2
+
+# Below this percent of the ordinary roll, a kill of that entry pays nothing.
+# Default: 5
+EtherealBazaar.Tokens.Degression.CutoffPercent = 5
+
+# How many creature entries a player's degression table remembers at once;
+# the least recently updated entry is dropped to make room for a new one.
+# Default: 64
+EtherealBazaar.Tokens.Degression.MaxEntries = 64
+
 # The "item received" toast in the top right. Tokens drop often enough that it
 # turns into noise; the bag updates either way.
 # Default: 0 (no toast)

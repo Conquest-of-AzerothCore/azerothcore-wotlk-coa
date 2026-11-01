@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "name": "Repeated open-world kills of the same entry stop paying Bazaar Tokens after the cutoff",
+  "contract": "At default settings (FactorPercent 67, RecoveryFactor 2, CutoffPercent 5) a level-20 player with open-world scaling on kills 14 Harvest Golems (entry 36, Westfall) one after another. The per-entry multiplier is 0.67^(kill-1), so the 9th kill's multiplier 0.67^8 is about 0.04, under the 5 percent cutoff: kills 9-14 pay exactly zero, which is deterministic. Eight Kobold Miners (entry 40) are then killed, each entry starting its own multiplier; the 16 kills together must pay at least once. The Creature roll is 0-2 and stochastic rounding also zeroes small amounts, so a single entry's first eight kills all paying zero has a few percent chance; across both entries it is about 0.1 percent. Per-entry recovery and entry independence are asserted deterministically by the bazaar_degression harness. Both entries have large, otherwise-unused open-world spawn pools so other Bazaar Token scenarios keep their living creatures.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -10978.3,
+    "y": 1367.97,
+    "z": 46.1119
+  },
+  "players": [
+    {
+      "id": "farmer",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_phase", "label": "farmer sees the real open-world spawns", "actor": "farmer", "value": 1 },
+
+    { "action": "snapshot", "actor": "farmer", "metric": "item_count", "item": 975001, "save_as": "entry36_start" },
+
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 48883 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 36, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 89899 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 36, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 89900 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 36, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 89901 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 36, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 90054 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 36, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 90141 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 36, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 90142 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 36, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 90144 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 36, "kill": true },
+
+    { "action": "snapshot", "actor": "farmer", "metric": "item_count", "item": 975001, "save_as": "entry36_after_eight" },
+
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 90152 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 36, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 90153 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 36, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 90155 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 36, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 90157 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 36, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 90158 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 36, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 90163 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 36, "kill": true },
+
+    {
+      "action": "assert",
+      "label": "kills 9-14 of the same entry pay nothing, below the cutoff",
+      "actor": "farmer",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "entry36_after_eight",
+      "equals": 0
+    },
+
+
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 80604 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 40, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 80605 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 40, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 80608 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 40, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 80609 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 40, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 80610 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 40, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 80614 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 40, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 80615 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 40, "kill": true },
+    { "action": "teleport_to_spawn", "actor": "farmer", "guid": 80616 },
+    { "action": "attack_nearby", "actor": "farmer", "entry": 40, "kill": true },
+
+    {
+      "action": "assert",
+      "label": "the two entries together paid at least once over their first kills",
+      "actor": "farmer",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "entry36_start",
+      "within_ms": 2000,
+      "min": 1
+    }
+  ]
+}
