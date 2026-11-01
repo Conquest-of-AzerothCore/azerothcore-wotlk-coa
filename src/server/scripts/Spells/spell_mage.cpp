@@ -125,6 +125,7 @@ class spell_mage_burning_determination : public AuraScript
             return false;
 
         Unit* target = eventInfo.GetActionTarget();
+        uint32 const buff = sSpellMgr->GetSpellTwinFor(54748, GetId());
 
         // This hook runs while the proc engine iterates the target's aura map; removing an
         // aura inline would invalidate the live iterator (aura containers are flat_multimaps).
@@ -132,13 +133,13 @@ class spell_mage_burning_determination : public AuraScript
         // Xinef: immuned effect should just eat charge
         if (eventInfo.GetHitMask() & PROC_EX_IMMUNE)
         {
-            target->m_Events.AddEventAtOffset([target]() { target->RemoveAurasDueToSpell(54748); }, 1ms);
+            target->m_Events.AddEventAtOffset([target, buff]() { target->RemoveAurasDueToSpell(buff); }, 1ms);
             return false;
         }
-        if (Aura* aura = target->GetAura(54748))
+        if (Aura* aura = target->GetAura(buff))
         {
             if (aura->GetDuration() < aura->GetMaxDuration())
-                target->m_Events.AddEventAtOffset([target]() { target->RemoveAurasDueToSpell(54748); }, 1ms);
+                target->m_Events.AddEventAtOffset([target, buff]() { target->RemoveAurasDueToSpell(buff); }, 1ms);
             return false;
         }
 
