@@ -5,6 +5,7 @@ character or authentication databases and never replaces an installed database.
 """
 
 import argparse
+import functools
 import hashlib
 import json
 import os
@@ -28,6 +29,16 @@ def identifier(value):
     if not IDENTIFIER.fullmatch(value):
         raise ValueError("Invalid database/table/column identifier")
     return "`" + value + "`"
+
+
+@functools.lru_cache(maxsize=None)
+def login_path_options(executable):
+    try:
+        result = subprocess.run([executable, "--help"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                text=True, errors="replace", timeout=30, **PROCESS_OPTIONS)
+    except (OSError, subprocess.TimeoutExpired):
+        return ("--no-login-paths",)
+    return ("--no-login-paths",) if "--no-login-paths" in result.stdout else ()
 
 
 def digest(stream):
@@ -88,8 +99,8 @@ class MySQL:
         if database.lower().endswith(("_auth", "_characters")):
             raise ValueError("Select a world database, not an account or character database")
         options = ["--defaults-extra-file=" + str(defaults_file.resolve())] if defaults_file else ["--no-defaults"]
-        self.command = [str(executable), *options, "--no-login-paths", *extra_args, "--batch", "--raw",
-                        "--skip-column-names", "--default-character-set=utf8mb4", "--max-allowed-packet=1GB",
+        self.command = [str(executable), *options, *login_path_options(str(executable)), *extra_args,
+                        "--batch", "--raw", "--skip-column-names", "--default-character-set=utf8mb4", "--max-allowed-packet=1GB",
                         "--connect-timeout=10", "--init-command=SET time_zone='+00:00', max_execution_time=300000",
                         "--database=" + database]
         self.process = None

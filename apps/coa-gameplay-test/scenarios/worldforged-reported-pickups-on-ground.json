@@ -1,0 +1,434 @@
+{
+  "schema": 1,
+  "name": "Worldforged pickups reported floating, sunk or buried sit on the ground",
+  "contract": "Fourteen Worldforged pickups were reported floating (#10499, #10464, #10446, #10116, #10119, #10461, #10487, #10494, #10451, #10405), sunk (#10471, #10144) or missing because buried (#10484, #10115). The server's ground under each (Map::GetHeight from above) was 3.8 yd above to 18.4 yd below them. Expected: each pickup sits between 0.15 yd below and 0.5 yd above the ground under it.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -7321.7,
+    "y": -1103.2,
+    "z": 278.07,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -7321.7,
+      "y": -1103.2,
+      "z": 278.07
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Scorched Greatblade is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 158330,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Scorched Greatblade sits on the ground (#10499)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 158330,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": 6072.4,
+      "y": -715.5,
+      "z": 398.389
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Bitterbranch Claymore is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 517276,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bitterbranch Claymore sits on the ground (#10464)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 517276,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -756.2,
+      "y": -1987.8,
+      "z": 35.147
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Musty Horse Blanket is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95847,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Musty Horse Blanket sits on the ground (#10446)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 95847,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -6933.3,
+      "y": -2017.2,
+      "z": 283.476
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Caravan Crossbow is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 66601,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Caravan Crossbow sits on the ground (#10116)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 66601,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -8025.0,
+      "y": -1261.9,
+      "z": 134.303
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Firebrand Libram is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 254657,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Firebrand Libram sits on the ground (#10119)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 254657,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": 3885.6,
+      "y": -1154.7,
+      "z": 235.868
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Acid Bolter is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 517275,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Acid Bolter sits on the ground (#10461)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 517275,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -1597.2,
+      "y": -2382.0,
+      "z": 101.867
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Forgotten Fitted Pants is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95860,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Forgotten Fitted Pants sits on the ground (#10487)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 95860,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -6733.1,
+      "y": -2526.7,
+      "z": 242.695
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Sandworn Arcanist Staff is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 518348,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Sandworn Arcanist Staff sits on the ground (#10494)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 518348,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -1308.2,
+      "y": -3174.3,
+      "z": 37.799
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Grave Spite is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95877,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Grave Spite sits on the ground (#10451)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 95877,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": -915.3,
+      "y": -4491.3,
+      "z": 30.581
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Centaur Axe is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95639,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Centaur Axe sits on the ground (#10405)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 95639,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": -1436.1,
+      "y": 1978.3,
+      "z": 87.438
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Sorrow of the Kodo is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 254275,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Sorrow of the Kodo sits on the ground (#10471)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 254275,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -11680.8,
+      "y": 559.3,
+      "z": 50.918
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Zul is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95732,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Zul sits on the ground (#10144)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 95732,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": -601.5,
+      "y": -4100.7,
+      "z": 80.815
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Worn Grunt Axe is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 90292,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Worn Grunt Axe sits on the ground (#10484)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 90292,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -6965.2,
+      "y": -2302.8,
+      "z": 251.057
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Duststorm Sash is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 518346,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Duststorm Sash sits on the ground (#10115)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 518346,
+      "min": -0.15,
+      "max": 0.5
+    }
+  ]
+}
