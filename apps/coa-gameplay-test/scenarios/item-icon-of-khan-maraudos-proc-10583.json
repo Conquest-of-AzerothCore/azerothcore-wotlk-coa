@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "name": "Icon of Khan Maraudos procs Rage of Maurados on melee or ranged damage (#10583)",
+  "contract": [
+    "Icon of Khan Maraudos (item 354206) equips the proc dummy 304120, which triggers Rage of Maurados (304121). Its DBC record carries ProcFlags 0 and ProcChance 10, and the world had no spell_proc row, so the aura never registered a proc handler and the trinket never procced while the reporter hit target dummies.",
+    "The tooltip reads: dealing damage with Melee or Ranged attacks has a chance to increase Attack Power and Critical Strike Rating. The expected proc events are therefore landed melee and ranged auto attacks and landed melee or ranged damage-class spells, at the DBC ProcChance of 10%.",
+    "The loaded proc entry is asserted directly: spell_proc_chance reads 10, and a landed melee auto attack, a ranged auto attack and a melee damage-class spell hit each proc the equipped dummy at about 10%. A magic damage-class spell hit, a periodic tick and an unlanded cast-phase event proc it zero times. Before the repair the dummy has no proc entry, so the chance lookup fails.",
+    "A trinket-less control carries no dummy aura."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    { "id": "wearer", "race": 1, "class": 12, "level": 60, "allow_regeneration": false },
+    { "id": "control", "race": 1, "class": 12, "level": 60, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "m1", "owner": "wearer", "entry": 36, "level": 60, "health": 1000000, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "add_item", "actor": "wearer", "item": 354206 },
+    { "action": "equip", "label": "Equip Icon of Khan Maraudos", "actor": "wearer", "item": 354206, "slot": 12 },
+    { "action": "assert", "label": "SETUP: equipping applies the proc dummy aura", "actor": "wearer", "metric": "aura", "spell": 304120, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTROL: a trinket-less player carries no dummy aura", "actor": "control", "metric": "aura", "spell": 304120, "equals": 0 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the loaded proc entry carries the DBC 10% chance",
+      "actor": "wearer", "metric": "spell_proc_chance", "spell": 304120, "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed melee auto attack procs at about 10%",
+      "actor": "wearer", "metric": "aura_proc_rate", "spell": 304120, "target": "m1",
+      "type_mask": 4, "phase_mask": 2, "spell_type_mask": 1, "hit_mask": 1,
+      "min": 8.5, "max": 11.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed ranged auto attack procs at about 10%",
+      "actor": "wearer", "metric": "aura_proc_rate", "spell": 304120, "target": "m1",
+      "type_mask": 64, "phase_mask": 2, "spell_type_mask": 1, "hit_mask": 1,
+      "min": 8.5, "max": 11.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed melee damage-class spell hit procs at about 10%",
+      "actor": "wearer", "metric": "aura_proc_rate", "spell": 304120, "target": "m1",
+      "type_mask": 16, "phase_mask": 2, "spell_type_mask": 1, "hit_mask": 1,
+      "min": 8.5, "max": 11.5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a magic damage-class spell hit is not a melee or ranged attack",
+      "actor": "wearer", "metric": "aura_proc_rate", "spell": 304120, "target": "m1",
+      "type_mask": 65536, "phase_mask": 2, "spell_type_mask": 1, "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a periodic tick is not a melee or ranged attack",
+      "actor": "wearer", "metric": "aura_proc_rate", "spell": 304120, "target": "m1",
+      "type_mask": 262144, "phase_mask": 2, "spell_type_mask": 1, "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: an unlanded cast-phase melee spell event is not a proc event",
+      "actor": "wearer", "metric": "aura_proc_rate", "spell": 304120, "target": "m1",
+      "type_mask": 16, "phase_mask": 1, "spell_type_mask": 1, "hit_mask": 1,
+      "equals": 0
+    }
+  ]
+}
