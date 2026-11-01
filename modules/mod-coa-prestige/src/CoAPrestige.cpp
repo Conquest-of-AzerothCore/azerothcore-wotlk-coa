@@ -432,13 +432,23 @@ namespace
 
     std::vector<RewardItem> ForgetRiding(Player* player)
     {
-        std::vector<RewardItem> tomes;
+        // Riding spells form one rank chain (Apprentice -> Journeyman -> Expert -> Artisan):
+        // removeSpell() on a lower rank recursively removes every higher rank still known
+        // (Player::removeSpell follows GetNextSpellInChain). Deciding tier by tier, mid-loop,
+        // made removing the lowest known tier erase the higher ones before they were checked,
+        // so only the lowest tier's tome was ever granted (#10262). Snapshot every known tier
+        // first, then remove and reward from that snapshot.
+        std::vector<RidingTome const*> known;
         for (RidingTome const& riding : RidingTomes)
             if (player->HasSpell(riding.spell))
-            {
-                player->removeSpell(riding.spell, SPEC_MASK_ALL, false);
-                tomes.push_back({ riding.tome, 1 });
-            }
+                known.push_back(&riding);
+
+        std::vector<RewardItem> tomes;
+        for (RidingTome const* riding : known)
+        {
+            player->removeSpell(riding->spell, SPEC_MASK_ALL, false);
+            tomes.push_back({ riding->tome, 1 });
+        }
         return tomes;
     }
 
