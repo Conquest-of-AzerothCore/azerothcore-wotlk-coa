@@ -1,0 +1,999 @@
+{
+  "schema": 1,
+  "name": "Tanaris quests restored from Ascension can be taken, completed and rewarded",
+  "contract": "rev_20261101_30_coa_tanaris_restore.sql restores the 15 Tanaris quests the server lacked from the Ascension questcache.wdb captures. Each is taken natively from its giver in chain order, so every PrevQuestID and ExclusiveGroup gate applies, and handed in natively at its ender. Speaking to Zalashji credits A Serpentine Strange 255028; the gossip option \"I have some goods to deliver for you.\" at Prospector Ironboot, Importer Sprocketspring and Henry Crabgrass credits each delivery of Nothing to Declare 255037; Zebel offers only the level-50 Contractual Concern 982257. For Smoke on the Water 255048, Gabriel Smokestacks's cigar gossip sends his bodyguard Barnabas at the player. Battery Salvage 255055 needs a Stormborn Cloud Serpent killed and ends at the Zeppelin Battery, which starts Power From Storms 255056. The Bloodsail Logbook starts The Informant 255040; Arvon, who ends it, attacks a player who takes The Informant - Booty Bay's Ally 255041, and his death completes it for Baron Revilgaz. Importer Sprocketspring sells 26 goods and Henry Crabgrass opens an engineering trainer window. Item objectives are granted as fixtures and the Hazzali kills of 909042 are fixture-completed.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": -6970.0,
+    "y": -4840.0,
+    "z": 8.1,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 55
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: a 16-slot bag for the rewards",
+      "actor": "p",
+      "item": 4500
+    },
+    {
+      "action": "equip",
+      "label": "fixture: wear the bag",
+      "actor": "p",
+      "item": 4500,
+      "slot": 19
+    },
+    {
+      "action": "summon",
+      "label": "Security Chief Bilgewhizzle stands beside the player",
+      "actor": "p",
+      "as": "n7882",
+      "entry": 7882,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Zalashji stands beside the player",
+      "actor": "p",
+      "as": "n8617",
+      "entry": 8617,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Zebel Shplit stands beside the player",
+      "actor": "p",
+      "as": "n449390",
+      "entry": 449390,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Snazzy Boomsprocket stands beside the player",
+      "actor": "p",
+      "as": "n749258",
+      "entry": 749258,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Chief Engineer Bilgewhizzle stands beside the player",
+      "actor": "p",
+      "as": "n7407",
+      "entry": 7407,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Prospector Ironboot stands beside the player",
+      "actor": "p",
+      "as": "n10460",
+      "entry": 10460,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Importer Sprocketspring stands beside the player",
+      "actor": "p",
+      "as": "n41676",
+      "entry": 41676,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Henry Crabgrass stands beside the player",
+      "actor": "p",
+      "as": "n46252",
+      "entry": 46252,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Renthar stands beside the player",
+      "actor": "p",
+      "as": "n713002",
+      "entry": 713002,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Marie stands beside the player",
+      "actor": "p",
+      "as": "n449295",
+      "entry": 449295,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Franchesca stands beside the player",
+      "actor": "p",
+      "as": "n449391",
+      "entry": 449391,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Arvon stands beside the player",
+      "actor": "p",
+      "as": "n255331",
+      "entry": 255331,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Baron Revilgaz stands beside the player",
+      "actor": "p",
+      "as": "n2496",
+      "entry": 2496,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Gabriel Smokestacks stands beside the player",
+      "actor": "p",
+      "as": "n449401",
+      "entry": 449401,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Barnabas stands beside the player",
+      "actor": "p",
+      "as": "n449402",
+      "entry": 449402,
+      "distance": 3
+    },
+    {
+      "action": "summon_gameobject",
+      "label": "the Bloodsail Logbook 255040",
+      "actor": "p",
+      "entry": 255040
+    },
+    {
+      "action": "summon_gameobject",
+      "label": "the Zeppelin Battery 255045",
+      "actor": "p",
+      "entry": 255045
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255028 from Security Chief Bilgewhizzle",
+      "actor": "p",
+      "quest": 255028,
+      "entry": 7882
+    },
+    {
+      "action": "assert",
+      "label": "255028 is in the log",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255028,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "label": "speak to Zalashji",
+      "actor": "p",
+      "target": "n8617"
+    },
+    {
+      "action": "assert",
+      "label": "Zalashji counts for 255028",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 255028,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "255028 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255028,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "hand 255028 in at Security Chief Bilgewhizzle",
+      "actor": "p",
+      "quest": 255028,
+      "reward": 0,
+      "entry": 7882
+    },
+    {
+      "action": "assert",
+      "label": "255028 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255028,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255029 from Zalashji",
+      "actor": "p",
+      "quest": 255029,
+      "entry": 8617
+    },
+    {
+      "action": "assert",
+      "label": "255029 is in the log",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255029,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the objective item 355083",
+      "actor": "p",
+      "item": 355083
+    },
+    {
+      "action": "assert",
+      "label": "255029 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255029,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "hand 255029 in at Zalashji",
+      "actor": "p",
+      "quest": 255029,
+      "reward": 0,
+      "entry": 8617
+    },
+    {
+      "action": "assert",
+      "label": "255029 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255029,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 982257 from Zebel Shplit",
+      "actor": "p",
+      "quest": 982257,
+      "entry": 449390
+    },
+    {
+      "action": "assert",
+      "label": "982257 is in the log, complete at once",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 982257,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "hand 982257 in at Snazzy Boomsprocket",
+      "actor": "p",
+      "quest": 982257,
+      "reward": 0,
+      "entry": 749258
+    },
+    {
+      "action": "assert",
+      "label": "982257 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 982257,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255036 from Snazzy Boomsprocket",
+      "actor": "p",
+      "quest": 255036,
+      "entry": 749258
+    },
+    {
+      "action": "assert",
+      "label": "255036 is in the log",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255036,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the objective item 355089",
+      "actor": "p",
+      "item": 355089
+    },
+    {
+      "action": "assert",
+      "label": "255036 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255036,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "hand 255036 in at Snazzy Boomsprocket",
+      "actor": "p",
+      "quest": 255036,
+      "reward": 0,
+      "entry": 749258
+    },
+    {
+      "action": "assert",
+      "label": "255036 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255036,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255037 from Snazzy Boomsprocket",
+      "actor": "p",
+      "quest": 255037,
+      "entry": 749258
+    },
+    {
+      "action": "assert",
+      "label": "255037 is in the log",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255037,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "label": "talk to Prospector Ironboot",
+      "actor": "p",
+      "target": "n10460"
+    },
+    {
+      "action": "gossip_select",
+      "label": "I have some goods to deliver for you.",
+      "actor": "p",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "Prospector Ironboot counts for 255037",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 255037,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "label": "talk to Importer Sprocketspring",
+      "actor": "p",
+      "target": "n41676"
+    },
+    {
+      "action": "gossip_select",
+      "label": "I have some goods to deliver for you.",
+      "actor": "p",
+      "option": 1
+    },
+    {
+      "action": "assert",
+      "label": "Importer Sprocketspring counts for 255037",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 255037,
+      "index": 1,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "label": "talk to Henry Crabgrass",
+      "actor": "p",
+      "target": "n46252"
+    },
+    {
+      "action": "gossip_select",
+      "label": "I have some goods to deliver for you.",
+      "actor": "p",
+      "option": 1
+    },
+    {
+      "action": "assert",
+      "label": "Henry Crabgrass counts for 255037",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 255037,
+      "index": 2,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "255037 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255037,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "hand 255037 in at Zebel Shplit",
+      "actor": "p",
+      "quest": 255037,
+      "reward": 0,
+      "entry": 449390
+    },
+    {
+      "action": "assert",
+      "label": "255037 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255037,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255048 from Zebel Shplit",
+      "actor": "p",
+      "quest": 255048,
+      "entry": 449390
+    },
+    {
+      "action": "assert",
+      "label": "255048 is in the log",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255048,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "label": "talk to Gabriel Smokestacks",
+      "actor": "p",
+      "target": "n449401"
+    },
+    {
+      "action": "gossip_select",
+      "label": "Zebel sent me here to pick up a cigar shipment",
+      "actor": "p",
+      "option": 0
+    },
+    {
+      "action": "gossip_select",
+      "label": "That's none of my business, I'm just here for the cigars.",
+      "actor": "p",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "Gabriel sends Barnabas at the player",
+      "actor": "n449402",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill Barnabas",
+      "actor": "p",
+      "entry": 449402,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Barnabas is dead",
+      "actor": "n449402",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: Barnabas's Zebel's Cigar Shipment 355500",
+      "actor": "p",
+      "item": 355500
+    },
+    {
+      "action": "assert",
+      "label": "255048 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255048,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "hand 255048 in at Zebel Shplit",
+      "actor": "p",
+      "quest": 255048,
+      "reward": 0,
+      "entry": 449390
+    },
+    {
+      "action": "assert",
+      "label": "255048 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255048,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 909040 from Chief Engineer Bilgewhizzle",
+      "actor": "p",
+      "quest": 909040,
+      "entry": 7407
+    },
+    {
+      "action": "assert",
+      "label": "909040 is in the log, complete at once",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 909040,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "909040 hands over Bilgewhizzle's Order",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 990900,
+      "equals": 1
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "hand 909040 in at Zebel Shplit",
+      "actor": "p",
+      "quest": 909040,
+      "reward": 0,
+      "entry": 449390
+    },
+    {
+      "action": "assert",
+      "label": "909040 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 909040,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255055 from Renthar",
+      "actor": "p",
+      "quest": 255055,
+      "entry": 713002
+    },
+    {
+      "action": "assert",
+      "label": "255055 is in the log",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255055,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "summon",
+      "label": "a Stormborn Cloud Serpent by the battery",
+      "actor": "p",
+      "as": "serpent",
+      "entry": 255334,
+      "distance": 6
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill the serpent",
+      "actor": "p",
+      "entry": 255334,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "the serpent is dead",
+      "actor": "serpent",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "255055 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255055,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "hand 255055 in at the Zeppelin Battery",
+      "actor": "p",
+      "quest": 255055,
+      "reward": 0,
+      "gameobject": 255045
+    },
+    {
+      "action": "assert",
+      "label": "255055 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255055,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255056 from the Zeppelin Battery",
+      "actor": "p",
+      "quest": 255056,
+      "gameobject": 255045
+    },
+    {
+      "action": "assert",
+      "label": "255056 is in the log",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255056,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the objective item 355103",
+      "actor": "p",
+      "item": 355103
+    },
+    {
+      "action": "assert",
+      "label": "255056 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255056,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "hand 255056 in at Renthar",
+      "actor": "p",
+      "quest": 255056,
+      "reward": 0,
+      "entry": 713002
+    },
+    {
+      "action": "assert",
+      "label": "255056 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255056,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 909041 from Marie",
+      "actor": "p",
+      "quest": 909041,
+      "entry": 449295
+    },
+    {
+      "action": "assert",
+      "label": "909041 is in the log",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 909041,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the objective item 355137",
+      "actor": "p",
+      "item": 355137
+    },
+    {
+      "action": "assert",
+      "label": "909041 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 909041,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "hand 909041 in at Marie",
+      "actor": "p",
+      "quest": 909041,
+      "reward": 0,
+      "entry": 449295
+    },
+    {
+      "action": "assert",
+      "label": "909041 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 909041,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 982258 from Franchesca",
+      "actor": "p",
+      "quest": 982258,
+      "entry": 449391
+    },
+    {
+      "action": "assert",
+      "label": "982258 is in the log",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 982258,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "label": "fixture: the objective item 9200813",
+      "actor": "p",
+      "item": 9200813
+    },
+    {
+      "action": "assert",
+      "label": "982258 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 982258,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "hand 982258 in at Franchesca",
+      "actor": "p",
+      "quest": 982258,
+      "reward": 0,
+      "entry": 449391
+    },
+    {
+      "action": "assert",
+      "label": "982258 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 982258,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 909042 from Franchesca",
+      "actor": "p",
+      "quest": 909042,
+      "entry": 449391
+    },
+    {
+      "action": "assert",
+      "label": "909042 is in the log",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 909042,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "fixture: 909042's twenty Hazzali kills",
+      "actor": "p",
+      "quest": 909042
+    },
+    {
+      "action": "assert",
+      "label": "909042 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 909042,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "hand 909042 in at Franchesca",
+      "actor": "p",
+      "quest": 909042,
+      "reward": 0,
+      "entry": 449391
+    },
+    {
+      "action": "assert",
+      "label": "909042 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 909042,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "label": "talk to Importer Sprocketspring",
+      "actor": "p",
+      "target": "n41676"
+    },
+    {
+      "action": "gossip_select",
+      "label": "I want to browse your goods",
+      "actor": "p",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "his shop opens",
+      "actor": "p",
+      "metric": "vendor_list_packets",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "he sells the ten stream goods and the 16 of the SUB vendor list",
+      "actor": "p",
+      "metric": "vendor_items",
+      "equals": 26
+    },
+    {
+      "action": "gossip_hello",
+      "label": "talk to Henry Crabgrass",
+      "actor": "p",
+      "target": "n46252"
+    },
+    {
+      "action": "gossip_select",
+      "label": "Train Me.",
+      "actor": "p",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "his engineering trainer window opens",
+      "actor": "p",
+      "metric": "trainer_list_packets",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255040 from the Bloodsail Logbook",
+      "actor": "p",
+      "quest": 255040,
+      "gameobject": 255040
+    },
+    {
+      "action": "assert",
+      "label": "255040 is in the log, complete at once",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255040,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "hand 255040 in at Arvon",
+      "actor": "p",
+      "quest": 255040,
+      "reward": 0,
+      "entry": 255331
+    },
+    {
+      "action": "assert",
+      "label": "255040 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255040,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_accept",
+      "label": "take 255041 from Arvon",
+      "actor": "p",
+      "quest": 255041,
+      "entry": 255331
+    },
+    {
+      "action": "assert",
+      "label": "255041 is in the log",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255041,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Arvon turns on the player who would report him",
+      "actor": "n255331",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill Arvon",
+      "actor": "p",
+      "entry": 255331,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Arvon is dead",
+      "actor": "n255331",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "255041 is complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255041,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "hand 255041 in at Baron Revilgaz",
+      "actor": "p",
+      "quest": 255041,
+      "reward": 0,
+      "entry": 2496
+    },
+    {
+      "action": "assert",
+      "label": "255041 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 255041,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}
