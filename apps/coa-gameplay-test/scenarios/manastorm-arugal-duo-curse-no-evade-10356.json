@@ -1,0 +1,183 @@
+{
+  "schema": 1,
+  "name": "Manastorm Shadowfang Keep: Duo Archmage Arugal does not full-heal when his Curse charms the only engaged attacker (#10356)",
+  "contract": [
+    "#10356: SetArugalEvadeSuppressed() (ManastormShadowfangKeepCompat.cpp) only calls SmartAI::SetSuppressEvade()",
+    "when ManastormMgr::GetRunFor(player)->GetMode() == ManastormMode::Solo; every other mode (Duo, Trio, Group)",
+    "returns early and leaves Arugal's evade path unsuppressed. #8345's own diagnosis of the root cause is not",
+    "about party size: 'the boss's only threat reference reads as friendly and SelectVictim() falls through to",
+    "EnterEvadeMode()' whenever Arugal's Curse charms the single player he is actually fighting. That happens in",
+    "any mode when only one party member is engaged with Arugal and the others are not (out of range, not yet",
+    "arrived, or otherwise uninvolved) -- the boss's threat list has exactly one entry at the moment the charm",
+    "lands, same as the solo case.",
+    "This scenario runs a two-player (Duo) Manastorm segment test (ManastormModeForMemberCount(2) == Duo). n1",
+    "walks up and engages Arugal alone; n2 stays back in the entry room, out of range and never engaging, so",
+    "Arugal's threat list holds only n1 when the curse is forced. The fix widens SetArugalEvadeSuppressed() to",
+    "every mode; without it, Arugal evades (his Chaotic Link encounter aura 93459 is stripped by",
+    "Unit::RemoveEvadeAuras() and he becomes unattackable) the instant the forced charm lands, exactly as in the",
+    "pre-#8345 Solo bug."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "n1",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2,
+      "melee_hit_rating": 100000,
+      "melee_crit_rating": 100000
+    },
+    {
+      "id": "n2",
+      "race": 5,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "label": "n2 joins n1's group so the run starts in Duo mode",
+      "actor": "n1",
+      "target": "n2"
+    },
+    {
+      "action": "add_item",
+      "actor": "n1",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "n1",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "command",
+      "actor": "n1",
+      "command": ".manastorm segment test 49"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: n1 (the leader) entered a private Manastorm instance",
+      "actor": "n1",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: n2 was brought along into the same private Manastorm instance",
+      "actor": "n2",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so the boss is visible to this lane",
+      "actor": "n1",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "n1 walks up to Arugal alone; n2 stays back out of range",
+      "actor": "n1",
+      "guid": 16255
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the preparation bubble at the boss clears n1's safety aura",
+      "actor": "n1",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: n2 never approached Arugal, so it is not within attack range of him",
+      "actor": "n2",
+      "metric": "nearby_creature_count",
+      "entry": 4275,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "n1",
+      "entry": 4275
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: n1 is not charmed before Arugal's Curse is cast",
+      "actor": "n1",
+      "metric": "aura",
+      "spell": 7621,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arugal's Chaotic Link encounter aura is present before the charm",
+      "actor": "n1",
+      "metric": "nearby_creature_aura_count",
+      "entry": 4275,
+      "spell": 93459,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Arugal is engaged and attackable ahead of the charm (setup is otherwise correct)",
+      "actor": "n1",
+      "metric": "nearby_creature_can_attack",
+      "entry": 4275,
+      "equals": 1
+    },
+    {
+      "action": "select_nearby",
+      "label": "Select Arugal so '.cast back' can resolve him as the caster",
+      "actor": "n1",
+      "entry": 4275
+    },
+    {
+      "action": "wait",
+      "label": "Let a little real combat happen before forcing the cast",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "n1",
+      "command": ".cast back 7621 triggered"
+    },
+    {
+      "action": "assert",
+      "label": "n1 is charmed by Arugal's Curse",
+      "actor": "n1",
+      "metric": "aura",
+      "spell": 7621,
+      "within_ms": 2000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Arugal did not evade in Duo mode either: his Chaotic Link encounter aura survives the charm",
+      "actor": "n1",
+      "metric": "nearby_creature_aura_count",
+      "entry": 4275,
+      "spell": 93459,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Arugal did not evade in Duo mode either: he is still attackable, not reset out of combat",
+      "actor": "n1",
+      "metric": "nearby_creature_can_attack",
+      "entry": 4275,
+      "equals": 1
+    }
+  ]
+}
