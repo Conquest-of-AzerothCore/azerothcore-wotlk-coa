@@ -1,0 +1,3841 @@
+{
+  "schema": 1,
+  "name": "Mountain Avatar's triggered Earthen Avatar clears the client's false cooldown (#9674)",
+  "contract": [
+    "Mountain Avatar (707616) procs Earthen Avatar (680421) via CastSpell(owner, EarthenAvatar,",
+    "TRIGGERED_FULL_MASK) with no cast item. Spell::SendSpellCooldown skips registering a server",
+    "cooldown for a TRIGGERED_IGNORE_SPELL_AND_CATEGORY_CD cast with no cast item, so cooldown_ms for",
+    "680421 stays 0 (confirmed, already correct) -- but the client still starts its own local 180s swipe",
+    "from observing the SMSG_SPELL_GO for 680421, since nothing tells it otherwise (client lab evidence,",
+    ".agents/plans/mx1/client/9674/answers/cooldown.json). The fix sends player->RemoveSpellCooldown(680421,",
+    "true) right after the triggered cast, matching the existing AscensionRunemasterEchoes.cpp:208 pattern,",
+    "which calls Player::SendClearCooldown and so emits SMSG_CLEAR_COOLDOWN (opcode 0x1DE/478) for 680421.",
+    "Mountain Avatar's proc chance is a genuine 5% roll (spell_proc Chance=5), so Geode (803138) is cast",
+    "repeatedly to make the false-failure probability negligible (spell_cast_count is used rather than",
+    "spell_proc_count because PreventDefaultAction() in the script means the native proc-cast-count never",
+    "attributes the cast to the aura, per the gameplay-test README's own guidance for that case)."
+  ],
+  "timeout_ms": 480000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 80,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 60
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 803138
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 804002
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 2136
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 707616
+    },
+    {
+      "action": "set_aura",
+      "actor": "primalist",
+      "spell": 680421,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no server-side cooldown on Earthen Avatar before any proc",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_cast_count",
+      "spell": 680421,
+      "save_as": "casts_before"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Earthen Avatar was cast through the proc at least once in 106 attempts (1-0.95^106 false-failure chance ~= 0.4%)",
+      "actor": "primalist",
+      "metric": "spell_cast_count",
+      "spell": 680421,
+      "relative_to": "casts_before",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the server still registers no real cooldown for Earthen Avatar",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the fix clears the client's false cooldown with SMSG_CLEAR_COOLDOWN for 680421",
+      "actor": "primalist",
+      "metric": "server_packets",
+      "opcode": 478,
+      "row": 680421,
+      "min": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Invest tab TE (tier-0 entry 7488 rank 1)",
+      "actor": "primalist",
+      "entry": 7488,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Invest tab TE (tier-0 entry 7492 rank 1)",
+      "actor": "primalist",
+      "entry": 7492,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Invest tab TE (tier-0 entry 7493 rank 1)",
+      "actor": "primalist",
+      "entry": 7493,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Invest tab TE (tier-0 entry 7501 rank 2)",
+      "actor": "primalist",
+      "entry": 7501,
+      "rank": 2
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Invest tab TE (tier-0 entry 7507 rank 1)",
+      "actor": "primalist",
+      "entry": 7507,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Invest tab TE (tier-0 entry 7514 rank 2)",
+      "actor": "primalist",
+      "entry": 7514,
+      "rank": 2
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Invest tab TE (tier-0 entry 7516 rank 1)",
+      "actor": "primalist",
+      "entry": 7516,
+      "rank": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Buy entry 7518, teaching Earthen Avatar as a real player-cast ability",
+      "actor": "primalist",
+      "entry": 7518,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Earthen Avatar is now a genuinely known spell",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 680421,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "label": "The player casts Earthen Avatar directly (a real, non-triggered cast)",
+      "actor": "primalist",
+      "spell": 680421
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the real direct cast registers the genuine 180s cooldown",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "min": 170000
+    },
+    {
+      "action": "set_aura",
+      "label": "Force the 20s Earthen Avatar aura to end while the real 180s cooldown keeps ticking",
+      "actor": "primalist",
+      "spell": 680421,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the aura is gone so the next proc takes the fresh-cast branch",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 680421,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "primalist",
+      "metric": "spell_cast_count",
+      "spell": 680421,
+      "save_as": "casts_before_real_cd"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 803138,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "target",
+      "value": 30000
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 804002,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Mountain Avatar procs again while the real cooldown is active (106 attempts, ~0.4% false-failure chance)",
+      "actor": "primalist",
+      "metric": "spell_cast_count",
+      "spell": 680421,
+      "relative_to": "casts_before_real_cd",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the real 180s cooldown survives the proc -- RemoveSpellCooldown is not called when a genuine cooldown is already registered",
+      "actor": "primalist",
+      "metric": "cooldown_ms",
+      "spell": 680421,
+      "min": 1
+    }
+  ]
+}
