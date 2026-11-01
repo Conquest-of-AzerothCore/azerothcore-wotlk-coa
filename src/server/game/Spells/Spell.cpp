@@ -3025,7 +3025,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
     // Check for SPELL_ATTR7_CAN_CAUSE_INTERRUPT
     if (m_spellInfo->HasAttribute(SPELL_ATTR7_CAN_CAUSE_INTERRUPT) && !effectUnit->IsPlayer())
-        caster->CastSpell(effectUnit, SPELL_INTERRUPT_NONPLAYER, true);
+        caster->CastSpell(effectUnit, sSpellMgr->GetSpellTwinFor(SPELL_INTERRUPT_NONPLAYER, m_spellInfo->Id), true);
 
     if (spellHitTarget)
     {
