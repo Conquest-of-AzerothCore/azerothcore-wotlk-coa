@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Tanaris quests restored from Ascension can be taken, completed and rewarded",
-  "contract": "rev_20261101_30_coa_tanaris_restore.sql restores the 15 Tanaris quests the server lacked from the Ascension questcache.wdb captures. Each is taken natively from its giver in chain order, so every PrevQuestID and ExclusiveGroup gate applies, and handed in natively at its ender. Speaking to Zalashji credits A Serpentine Strange 255028; coming within 5 yards of Prospector Ironboot, Importer Sprocketspring and Henry Crabgrass credits each delivery of Nothing to Declare 255037; Zebel offers only the level-50 Contractual Concern 982257. Battery Salvage 255055 needs a Stormborn Cloud Serpent killed and ends at the Zeppelin Battery, which starts Power From Storms 255056. The Bloodsail Logbook starts The Informant 255040; Arvon, who ends it, attacks a player who takes The Informant - Booty Bay's Ally 255041, and his death completes it for Baron Revilgaz. Importer Sprocketspring sells 16 goods and Henry Crabgrass opens an engineering trainer window. Item objectives are granted as fixtures and the Hazzali kills of 909042 are fixture-completed.",
+  "contract": "rev_20261101_30_coa_tanaris_restore.sql restores the 15 Tanaris quests the server lacked from the Ascension questcache.wdb captures. Each is taken natively from its giver in chain order, so every PrevQuestID and ExclusiveGroup gate applies, and handed in natively at its ender. Speaking to Zalashji credits A Serpentine Strange 255028; the gossip option \"I have some goods to deliver for you.\" at Prospector Ironboot, Importer Sprocketspring and Henry Crabgrass credits each delivery of Nothing to Declare 255037; Zebel offers only the level-50 Contractual Concern 982257. For Smoke on the Water 255048, Gabriel Smokestacks's cigar gossip sends his bodyguard Barnabas at the player. Battery Salvage 255055 needs a Stormborn Cloud Serpent killed and ends at the Zeppelin Battery, which starts Power From Storms 255056. The Bloodsail Logbook starts The Informant 255040; Arvon, who ends it, attacks a player who takes The Informant - Booty Bay's Ally 255041, and his death completes it for Baron Revilgaz. Importer Sprocketspring sells 26 goods and Henry Crabgrass opens an engineering trainer window. Item objectives are granted as fixtures and the Hazzali kills of 909042 are fixture-completed.",
   "timeout_ms": 120000,
   "location": {
     "map": 1,
@@ -138,6 +138,22 @@
       "actor": "p",
       "as": "n2496",
       "entry": 2496,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Gabriel Smokestacks stands beside the player",
+      "actor": "p",
+      "as": "n449401",
+      "entry": 449401,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "label": "Barnabas stands beside the player",
+      "actor": "p",
+      "as": "n449402",
+      "entry": 449402,
       "distance": 3
     },
     {
@@ -365,10 +381,16 @@
       "within_ms": 3000
     },
     {
-      "action": "relocate",
-      "label": "step among the three recipients",
+      "action": "gossip_hello",
+      "label": "talk to Prospector Ironboot",
       "actor": "p",
-      "dx": 0.5
+      "target": "n10460"
+    },
+    {
+      "action": "gossip_select",
+      "label": "I have some goods to deliver for you.",
+      "actor": "p",
+      "option": 0
     },
     {
       "action": "assert",
@@ -381,6 +403,18 @@
       "within_ms": 5000
     },
     {
+      "action": "gossip_hello",
+      "label": "talk to Importer Sprocketspring",
+      "actor": "p",
+      "target": "n41676"
+    },
+    {
+      "action": "gossip_select",
+      "label": "I have some goods to deliver for you.",
+      "actor": "p",
+      "option": 1
+    },
+    {
       "action": "assert",
       "label": "Importer Sprocketspring counts for 255037",
       "actor": "p",
@@ -389,6 +423,18 @@
       "index": 1,
       "equals": 1,
       "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "label": "talk to Henry Crabgrass",
+      "actor": "p",
+      "target": "n46252"
+    },
+    {
+      "action": "gossip_select",
+      "label": "I have some goods to deliver for you.",
+      "actor": "p",
+      "option": 1
     },
     {
       "action": "assert",
@@ -443,8 +489,49 @@
       "within_ms": 3000
     },
     {
+      "action": "gossip_hello",
+      "label": "talk to Gabriel Smokestacks",
+      "actor": "p",
+      "target": "n449401"
+    },
+    {
+      "action": "gossip_select",
+      "label": "Zebel sent me here to pick up a cigar shipment",
+      "actor": "p",
+      "option": 0
+    },
+    {
+      "action": "gossip_select",
+      "label": "That's none of my business, I'm just here for the cigars.",
+      "actor": "p",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "Gabriel sends Barnabas at the player",
+      "actor": "n449402",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "kill Barnabas",
+      "actor": "p",
+      "entry": 449402,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Barnabas is dead",
+      "actor": "n449402",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
       "action": "add_item",
-      "label": "fixture: the objective item 355500",
+      "label": "fixture: Barnabas's Zebel's Cigar Shipment 355500",
       "actor": "p",
       "item": 355500
     },
@@ -803,10 +890,10 @@
     },
     {
       "action": "assert",
-      "label": "he sells the 16 goods of the SUB vendor list",
+      "label": "he sells the ten stream goods and the 16 of the SUB vendor list",
       "actor": "p",
       "metric": "vendor_items",
-      "equals": 16
+      "equals": 26
     },
     {
       "action": "gossip_hello",
@@ -816,7 +903,7 @@
     },
     {
       "action": "gossip_select",
-      "label": "Train me!",
+      "label": "Train Me.",
       "actor": "p",
       "option": 0
     },

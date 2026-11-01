@@ -7,9 +7,13 @@
 --   larger radius         a square around the client circle;
 --   turn-in               a pin at ObjectiveIndex -1.
 -- ObjectiveIndex 0-3 are the RequiredNpcOrGo slots and 4 + slot the RequiredItemId slots, as in the stock data.
+-- Whispers In The Living Sand 982258 keeps its client turn-in, but its objective marker is a 40 x 40 yd box around
+-- (-8125, -3613), where a live stream (YouTube rEaTnfr2Ke4) shows it on the world map, instead of the five client
+-- points; the box size is estimated.
 -- Battery Salvage 255055, Power From Storms 255056 and Contractual Concern 982257 have no client row; their markers
--- are estimated: a 40 x 40 yd box over the restored Stormborn Cloud Serpent (255055) and Cerulis (255056) spawns,
--- and a turn-in pin on the Zeppelin Battery, Renthar and Snazzy Boomsprocket.
+-- are estimated: a 40 x 40 yd box over the restored Stormborn Cloud Serpent spawn at the zeppelin wreck, where the
+-- live stream shows the 255055 marker, and over the Cerulis spawn (255056), and a turn-in pin on the Zeppelin
+-- Battery, Renthar and Snazzy Boomsprocket.
 -- WorldMapAreaId is the zone map of the client's WorldMapArea.dbc that holds each point: 161 Tanaris, and
 -- 37 Stranglethorn for Arvon in Booty Bay. The Caverns of Time, Noxious Lair and Gaping Chasm cave maps are not
 -- used: their bounds also cover Lost Rigger Cove and the open sand, where a marker would not show on Tanaris.
@@ -48,11 +52,7 @@ INSERT INTO `quest_poi` (`QuestID`, `id`, `ObjectiveIndex`, `MapID`, `WorldMapAr
 (909042, 4, -1, 1, 161, 0, 0, 1),
 (982257, 0, -1, 1, 161, 0, 0, 1),
 (982258, 0, 4, 1, 161, 0, 0, 1),
-(982258, 1, 4, 1, 161, 0, 0, 1),
-(982258, 2, 4, 1, 161, 0, 0, 1),
-(982258, 3, 4, 1, 161, 0, 0, 1),
-(982258, 4, 4, 1, 161, 0, 0, 1),
-(982258, 5, -1, 1, 161, 0, 0, 1);
+(982258, 1, -1, 1, 161, 0, 0, 1);
 
 DELETE FROM `quest_poi_points` WHERE `QuestID` IN (
   255028,255029,255036,255037,255040,255041,255042,255048,255055,255056,909040,909041,909042,982257,982258);
@@ -79,16 +79,16 @@ INSERT INTO `quest_poi_points` (`QuestID`, `Idx1`, `Idx2`, `X`, `Y`) VALUES
 (255042, 0, 0, -14453, 406),
 (255048, 0, 0, -7024, -4761),
 (255048, 1, 0, -6955, -4882),
-(255055, 0, 0, -9538, -2460),
-(255055, 0, 1, -9498, -2460),
-(255055, 0, 2, -9498, -2500),
-(255055, 0, 3, -9538, -2500),
-(255055, 1, 0, -9524, -2485),
+(255055, 0, 0, -9318, -2388),
+(255055, 0, 1, -9278, -2388),
+(255055, 0, 2, -9278, -2428),
+(255055, 0, 3, -9318, -2428),
+(255055, 1, 0, -9305, -2415),
 (255056, 0, 0, -9529, -2475),
 (255056, 0, 1, -9489, -2475),
 (255056, 0, 2, -9489, -2515),
 (255056, 0, 3, -9529, -2515),
-(255056, 1, 0, -6981, -4852),
+(255056, 1, 0, -6850, -4759),
 (909040, 0, 0, -6955, -4881),
 (909041, 0, 0, -7936, -5462),
 (909041, 1, 0, -6905, -4839),
@@ -110,9 +110,8 @@ INSERT INTO `quest_poi_points` (`QuestID`, `Idx1`, `Idx2`, `X`, `Y`) VALUES
 (909042, 3, 3, -9583, -4422),
 (909042, 4, 0, -6907, -4691),
 (982257, 0, 0, -8260, -5051),
-(982258, 0, 0, -7835, -2882),
-(982258, 1, 0, -8006, -3189),
-(982258, 2, 0, -7998, -3355),
-(982258, 3, 0, -8557, -4322),
-(982258, 4, 0, -8824, -2709),
-(982258, 5, 0, -6907, -4691);
+(982258, 0, 0, -8145, -3593),
+(982258, 0, 1, -8105, -3593),
+(982258, 0, 2, -8105, -3633),
+(982258, 0, 3, -8145, -3633),
+(982258, 1, 0, -6907, -4691);
