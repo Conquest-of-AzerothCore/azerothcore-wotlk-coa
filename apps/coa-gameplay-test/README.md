@@ -446,7 +446,9 @@ in world steps of up to 25 ms, so keep timing assertions robust to one step.
 Without `name`, players are `Harness<a..h>` with one lane and generated 10-letter names with several;
 `Harness<a..h>` in `console` and `command` text is rewritten to match, so refer to players by actor id elsewhere.
 A scenario that depends on process-global state, such as the Who list, belongs in `clock_policy.json`
-([exclusive cases](../../docs/coa/verification.md#exclusive-cases)). A `set_phase` mask that includes the normal
+([exclusive cases](../../docs/coa/verification.md#exclusive-cases)). Players start in their lane's isolation phase (bit 30 for lane 0, bits 16 and up for the others), not in
+phase mask 1: a fixture spawned with `phaseMask` 1 stays invisible to them until a `set_phase` step moves them
+into it. A `set_phase` mask that includes the normal
 world phase (mask 1) automatically runs exclusively, including in an exploratory scenario. Phases do not
 separate creature text with
 area, zone or map range, which `system_messages` counts.
