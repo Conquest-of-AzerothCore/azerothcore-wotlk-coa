@@ -39,6 +39,10 @@ class CreatureGroup;
 // max different by z coordinate for creature aggro reaction
 #define CREATURE_Z_ATTACK_RANGE 3
 
+// The packet's own count is a uint8, so 255 looks like the ceiling. It is not: raising this and
+// giving a vendor 160 items crashed the client the moment the list opened. The 3.x vendor frame
+// does not survive a list this long whatever the protocol allows, so the limit stays where it is
+// and a vendor with more to sell gets a second vendor beside it.
 #define MAX_VENDOR_ITEMS 150    // Limitation in 3.x.x item count in SMSG_LIST_INVENTORY
 
 //used for handling non-repeatable random texts

@@ -93,6 +93,7 @@
 #include "DBCStores.h"
 #include "GameTime.h"
 #include "GossipDef.h"
+#include "GameTime.h"
 #include "GlobalScript.h"
 #include "GroupScript.h"
 #include "GridTerrainData.h"
@@ -375,6 +376,8 @@ constexpr uint32 SPELL_REAPER_GENERATE_SOUL = 805078;
 constexpr uint32 SPELL_REAPER_SCYTHE_RUSH = 500359;
 constexpr uint32 SPELL_REAPER_SCYTHE_RUSH_MARKER = 500377;
 constexpr uint32 SPELL_REAPER_HARVEST_TIME = 803995;
+constexpr uint32 SPELL_REAPER_TIER_FROSTBITTEN_4P = 2990002;
+constexpr uint32 SPELL_REAPER_HARVESTED_MIGHT = 2990003;
 constexpr char ASCENSION_ACTIVE_SPEC_SETTING[] = "core.ascension_active_spec";
 constexpr char ASCENSION_TALENT_BUILD_SETTING_PREFIX[] = "core.ascension_build.";
 constexpr char ASCENSION_PURCHASED_RANKS_SETTING[] = "core.ascension_purchased_ranks";
@@ -831,6 +834,12 @@ bool CanGrantAscensionRacialSpell(Player const* player, uint32 spellId)
     return !racial;
 }
 
+static void LearnRestoredSpell(Player* player, uint32 spellId)
+{
+    player->learnSpell(spellId, false);
+    player->MarkSpellForSave(spellId);
+}
+
 std::vector<AscensionSpecializationSwitchGuard>& SpecializationSwitchGuards()
 {
     static std::vector<AscensionSpecializationSwitchGuard> guards;
@@ -967,7 +976,7 @@ public:
     for (uint32 spellId : racialSpells)
         if (!player->HasSpell(spellId) && sSpellMgr->GetSpellInfo(spellId))
         {
-            player->learnSpell(spellId, false);
+            LearnRestoredSpell(player, spellId);
             ++learned;
         }
     for (auto const& entry : AscensionLiveBaseline::Spells)
@@ -976,7 +985,7 @@ public:
           CanGrantAscensionRacialSpell(player, entry.SpellId) &&
           !player->HasSpell(entry.SpellId) && sSpellMgr->GetSpellInfo(entry.SpellId))
       {
-        player->learnSpell(entry.SpellId, false);
+        LearnRestoredSpell(player, entry.SpellId);
         ++learned;
       }
     for (AscensionCompatData::ClassSpell const &progressionSpell :
@@ -996,7 +1005,7 @@ public:
         continue;
       }
 
-      player->learnSpell(progressionSpell.SpellId, false);
+      LearnRestoredSpell(player, progressionSpell.SpellId);
       ++learned;
     }
     if (player->getClass() == CLASS_DEMON_HUNTER)
@@ -1021,7 +1030,7 @@ public:
 
         if (sSpellMgr->GetSpellInfo(rank.SpellId))
         {
-            player->learnSpell(rank.SpellId, false);
+            LearnRestoredSpell(player, rank.SpellId);
             ++learned;
         }
     }
@@ -1254,7 +1263,7 @@ public:
         {
           if (sSpellMgr->GetSpellInfo(definition.SpellId))
           {
-            player->learnSpell(definition.SpellId, false);
+            LearnRestoredSpell(player, definition.SpellId);
             ++learned;
           }
           else
@@ -3072,7 +3081,7 @@ private:
                 if (!spellId || player->HasSpell(spellId) || !sSpellMgr->GetSpellInfo(spellId))
                     continue;
 
-                player->learnSpell(spellId, false);
+                LearnRestoredSpell(player, spellId);
                 ++learned;
                 changed = true;
             }
@@ -3830,6 +3839,21 @@ private:
                 aura->ModStackAmount(amount - 1);
     }
 
+    static void GrantHarvestedMight(Player* player)
+    {
+        if (!player->HasAura(SPELL_REAPER_TIER_FROSTBITTEN_4P))
+            return;
+
+        if (Aura* aura = player->GetAura(SPELL_REAPER_HARVESTED_MIGHT))
+        {
+            aura->ModStackAmount(1);
+            aura->RefreshDuration();
+            return;
+        }
+
+        player->AddAura(SPELL_REAPER_HARVESTED_MIGHT, player);
+    }
+
     static bool HarvestTimePreserves(Player const* player, SpellInfo const* spellInfo)
     {
         if (spellInfo->CasterAuraSpell != SPELL_REAPER_SOUL_INFUSION ||
@@ -3874,37 +3898,44 @@ private:
 
     static void ConsumeReaperSouls(Player* player, Spell* spell)
     {
+        if (ConsumeReaperSoulsImpl(player, spell))
+            GrantHarvestedMight(player);
+    }
+
+    static bool ConsumeReaperSoulsImpl(Player* player, Spell* spell)
+    {
         if (player->getClass() != CLASS_REAPER)
-            return;
+            return false;
 
         SpellInfo const* spellInfo = spell->GetSpellInfo();
-
-        if (HarvestTimePreserves(player, spellInfo))
-            return;
 
         bool const requiresSoulInfusion = spellInfo->CasterAuraSpell == SPELL_REAPER_SOUL_INFUSION &&
             player->HasAura(SPELL_REAPER_SOUL_INFUSION);
 
         uint32 spellId = spellInfo->Id;
+
+        if (HarvestTimePreserves(player, spellInfo))
+            return false;
+
         if (std::find(REAPER_ALL_SOUL_CONSUMERS.begin(),
                 REAPER_ALL_SOUL_CONSUMERS.end(), spellId) !=
             REAPER_ALL_SOUL_CONSUMERS.end())
         {
             if (WasAvoidedByEveryTarget(player, spell))
-                return;
+                return false;
 
             player->RemoveAurasDueToSpell(SPELL_REAPER_REAPED_SOUL);
             player->RemoveAurasDueToSpell(SPELL_REAPER_SOUL_INFUSION);
             if (requiresSoulInfusion)
                 ApplyAscensionReaperSoulInfusionSpent(player);
-            return;
+            return true;
         }
 
         if (requiresSoulInfusion && !WasAvoidedByEveryTarget(player, spell))
         {
             player->CastSpell(player, SPELL_REAPER_SOUL_INFUSION_REMOVER, true);
             ApplyAscensionReaperSoulInfusionSpent(player);
-            return;
+            return true;
         }
 
         for (std::pair<uint32, uint32> const& range :
@@ -3913,9 +3944,11 @@ private:
             if (spellId >= range.first && spellId <= range.second)
             {
                 ModifyAuraStacks(player, SPELL_REAPER_REAPED_SOUL, -1);
-                return;
+                return true;
             }
         }
+
+        return false;
     }
 
     void DecayStatic(Player* player, uint32 diff) const
@@ -6296,7 +6329,7 @@ public:
         for (uint32 spellId : {SPELL_RIDING_APPRENTICE, SPELL_RIDING_JOURNEYMAN,
             SPELL_RIDING_EXPERT, SPELL_RIDING_ARTISAN, SPELL_COLD_WEATHER_FLYING})
             if (sSpellMgr->GetSpellInfo(spellId) && !player->HasSpell(spellId))
-                player->learnSpell(spellId, false);
+                LearnRestoredSpell(player, spellId);
 
         player->SetSkill(SKILL_RIDING, 5, RIDING_SKILL_ARTISAN, RIDING_SKILL_ARTISAN);
     }
@@ -6312,7 +6345,7 @@ public:
         std::size_t learned = 0;
         for (uint32 spellId : spells)
         {
-            player->learnSpell(spellId, false);
+            LearnRestoredSpell(player, spellId);
             if (!player->HasSpell(spellId))
                 continue;
 
@@ -6421,7 +6454,7 @@ public:
         std::size_t learned = 0;
         for (uint32 spellId : GetMissingBankSpells(player, state))
         {
-            player->learnSpell(spellId, false);
+            LearnRestoredSpell(player, spellId);
             if (player->HasSpell(spellId))
                 ++learned;
         }
@@ -6501,7 +6534,7 @@ public:
         {
             uint32 const spellId = state->PendingCompanionSpells[state->NextCompanionSpell++];
             if (!player->HasSpell(spellId))
-                player->learnSpell(spellId, false);
+                LearnRestoredSpell(player, spellId);
         }
 
         if (state->NextCompanionSpell == state->PendingCompanionSpells.size())
@@ -8564,6 +8597,7 @@ bool QueueAscensionDungeonDifficulty(WorldSession* session, WorldPacket const& p
     session->QueuePacket(request);
     return true;
 }
+bool HandleAscensionGuideTrainerBuy(Player* player, ObjectGuid trainerGuid, uint32 spellId);
 
 class AscensionCompatServerScript : public ServerScript {
 public:
@@ -8591,6 +8625,18 @@ public:
         if (session && session->GetPlayer())
         {
             Player* player = session->GetPlayer();
+
+            if (packet.GetOpcode() == CMSG_TRAINER_BUY_SPELL &&
+                packet.size() >= sizeof(uint64) + sizeof(int32) &&
+                ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
+            {
+                uint64 rawGuid;
+                int32 spellId;
+                std::memcpy(&rawGuid, packet.contents(), sizeof(rawGuid));
+                std::memcpy(&spellId, packet.contents() + sizeof(rawGuid), sizeof(spellId));
+                if (HandleAscensionGuideTrainerBuy(player, ObjectGuid(rawGuid), uint32(spellId)))
+                    return false;
+            }
 
             if (packet.GetOpcode() == CMSG_GUILD_BANKER_ACTIVATE)
             {
@@ -10296,6 +10342,222 @@ class spell_ascension_legacy_quest_reward : public SpellScript
     }
 };
 
+constexpr uint32 kDarionIcecrownEntry = 37120;
+constexpr uint32 kShadowmourneFinalQuest = 24549;
+constexpr uint32 kItemShadowmourne = 49623;
+constexpr uint32 kItemFrostmourne = 33350;
+constexpr uint32 kSenderRuneblade = 0xA5C1;
+constexpr uint32 kActionReforge = 1;
+constexpr uint32 kRunebladeMenuId = 0xA5C1;
+
+constexpr uint32 kSenderGuideTrainer = 0xA5C2;
+constexpr uint32 kGuideMenuId = 0xA5C2;
+constexpr uint32 kGuideGossipTextId = 1;
+constexpr uint32 kClassTrainerBase = 9100000;
+constexpr uint32 kProfessionTrainerId = 200001;
+constexpr uint32 kActionRestoreAbilities = 0xA5C3;
+
+class AscensionGuideTrainer : public AllCreatureScript
+{
+public:
+    AscensionGuideTrainer() : AllCreatureScript("AscensionGuideTrainer") { _instance = this; }
+
+    static AscensionGuideTrainer* Instance() { return _instance; }
+
+    bool CanCreatureGossipHello(Player* player, Creature* creature) override
+    {
+        if (!IsGuideCompanion(player, creature))
+            return false;
+
+        ClearGossipMenuFor(player);
+        AddGossipItemFor(player, GOSSIP_ICON_TRAINER,
+            "Train my class abilities.", kSenderGuideTrainer, ClassTrainerAction(player));
+
+        if (sObjectMgr->GetTrainerById(kProfessionTrainerId))
+            AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "Train professions.",
+                kSenderGuideTrainer, kProfessionTrainerId);
+
+        if (IsAscensionCustomClass(player))
+            AddGossipItemFor(player, GOSSIP_ICON_TRAINER, "Restore my available class abilities.",
+                kSenderGuideTrainer, kActionRestoreAbilities);
+
+        player->PlayerTalkClass->GetGossipMenu().SetMenuId(kGuideMenuId);
+        SendGossipMenuFor(player, kGuideGossipTextId, creature);
+        return true;
+    }
+
+    bool CanCreatureGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
+    {
+        if (sender != kSenderGuideTrainer || !IsGuideCompanion(player, creature))
+            return false;
+
+        if (action == kActionRestoreAbilities)
+        {
+            CloseGossipMenuFor(player);
+            if (!AscensionClassService::Instance().SynchronizeProgression(player))
+                ChatHandler(player->GetSession()).SendSysMessage(
+                    "Your available class abilities are already up to date.");
+            return true;
+        }
+
+        Trainer::Trainer* trainer = sObjectMgr->GetTrainerById(action);
+        if (!trainer)
+        {
+            CloseGossipMenuFor(player);
+            return true;
+        }
+
+        _selectedTrainers[player->GetGUID().GetCounter()] = action;
+        ClearGossipMenuFor(player);
+        trainer->SendSpells(creature, player, player->GetSession()->GetSessionDbLocaleIndex());
+        return true;
+    }
+
+    bool HandleTrainerBuy(Player* player, ObjectGuid trainerGuid, uint32 spellId)
+    {
+        auto itr = _selectedTrainers.find(player->GetGUID().GetCounter());
+        if (itr == _selectedTrainers.end())
+            return false;
+
+        Creature* creature = player->GetMap()->GetCreature(trainerGuid);
+        if (!IsGuideCompanion(player, creature))
+            return false;
+
+        Trainer::Trainer* trainer = sObjectMgr->GetTrainerById(itr->second);
+        if (!trainer)
+            return false;
+
+        trainer->TeachSpell(creature, player, spellId);
+        return true;
+    }
+
+private:
+    static inline AscensionGuideTrainer* _instance = nullptr;
+
+    static uint32 ClassTrainerAction(Player const* player)
+    {
+        return kClassTrainerBase + player->getClass();
+    }
+
+    static bool IsGuideCompanion(Player const* player, Creature const* creature)
+    {
+        return player && creature &&
+            creature->GetGUID() == player->GetCritterGUID() &&
+            creature->HasNpcFlag(UNIT_NPC_FLAG_TRAINER);
+    }
+
+    std::unordered_map<uint32, uint32> _selectedTrainers;
+};
+
+
+bool HandleAscensionGuideTrainerBuy(Player* player, ObjectGuid trainerGuid, uint32 spellId)
+{
+    AscensionGuideTrainer* guide = AscensionGuideTrainer::Instance();
+    return guide && guide->HandleTrainerBuy(player, trainerGuid, spellId);
+}
+
+class AscensionRunebladeReforge : public AllCreatureScript
+{
+public:
+    AscensionRunebladeReforge() : AllCreatureScript("AscensionRunebladeReforge") { }
+
+    bool CanCreatureGossipHello(Player* player, Creature* creature) override
+    {
+        uint32 currentEntry = 0;
+        Item* item = nullptr;
+        if (!ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED) ||
+            !CanReforgeRuneblade(player, creature, currentEntry, item))
+            return false;
+
+        uint32 const darionMenuId = creature->GetGossipMenuId();
+        uint32 const textId = player->GetGossipTextId(darionMenuId, creature);
+        player->PrepareGossipMenu(creature, darionMenuId, true);
+        AddGossipItemFor(player, GOSSIP_ICON_CHAT,
+            currentEntry == kItemShadowmourne ? "<Runeblade> Reshape my weapon: Shadowmourne -> Frostmourne."
+                                              : "<Runeblade> Reshape my weapon: Frostmourne -> Shadowmourne.",
+            kSenderRuneblade, kActionReforge);
+
+        player->PlayerTalkClass->GetGossipMenu().SetMenuId(kRunebladeMenuId);
+        SendGossipMenuFor(player, textId, creature);
+        return true;
+    }
+
+    bool CanCreatureGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
+    {
+        if (sender != kSenderRuneblade || action != kActionReforge)
+            return false;
+
+        uint32 currentEntry = 0;
+        Item* item = nullptr;
+        if (!CanReforgeRuneblade(player, creature, currentEntry, item))
+            return false;
+
+        CloseGossipMenuFor(player);
+
+        uint32 const newEntry = currentEntry == kItemShadowmourne ? kItemFrostmourne : kItemShadowmourne;
+        if (!sObjectMgr->GetItemTemplate(newEntry))
+            return true;
+
+        uint8 const slot = item->GetSlot();
+        bool const equipped = item->IsEquipped();
+
+        if (equipped)
+            player->_ApplyItemMods(item, slot, false);
+
+        item->SetEntry(newEntry);
+        item->SetState(ITEM_CHANGED, player);
+
+        if (equipped)
+        {
+            player->_ApplyItemMods(item, slot, true);
+            player->SetVisibleItemSlot(slot, item);
+        }
+
+        LOG_INFO("module.ascension_compat", "Reforged runeblade {} into {} for {} (item GUID {}, gems and enchantments kept)",
+            currentEntry, newEntry, player->GetName(), item->GetGUID().GetCounter());
+        return true;
+    }
+
+private:
+    static Item* FindRunebladeInstance(Player* player, uint32& currentEntry)
+    {
+        for (uint8 slot : {EQUIPMENT_SLOT_MAINHAND, EQUIPMENT_SLOT_OFFHAND})
+        {
+            Item* equipped = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+            if (!equipped)
+                continue;
+
+            uint32 const entry = equipped->GetEntry();
+            if (entry == kItemShadowmourne || entry == kItemFrostmourne)
+            {
+                currentEntry = entry;
+                return equipped;
+            }
+        }
+
+        for (uint32 entry : {kItemShadowmourne, kItemFrostmourne})
+        {
+            if (Item* item = player->GetItemByEntry(entry))
+            {
+                currentEntry = entry;
+                return item;
+            }
+        }
+
+        return nullptr;
+    }
+
+    static bool CanReforgeRuneblade(Player* player, Creature* creature, uint32& currentEntry, Item*& item)
+    {
+        if (!player || !creature || creature->GetEntry() != kDarionIcecrownEntry ||
+            !player->GetQuestRewardStatus(kShadowmourneFinalQuest))
+            return false;
+
+        item = FindRunebladeInstance(player, currentEntry);
+        return item != nullptr;
+    }
+};
+
 class spell_ascension_jailers_bargain : public AuraScript
 {
     PrepareAuraScript(spell_ascension_jailers_bargain);
@@ -11184,6 +11446,8 @@ void AddAscensionCompatScripts() {
   RegisterSpellScript(spell_ascension_reaper_extinction_buff);
   RegisterSpellScript(spell_ascension_reaper_ruin);
   RegisterSpellScript(spell_ascension_reaper_redshade);
+  new AscensionRunebladeReforge();
+  new AscensionGuideTrainer();
   RegisterSpellScript(spell_ascension_wildcard_mount);
   RegisterSpellScript(spell_ascension_legacy_quest_reward);
   new AscensionTradesmanScroll();

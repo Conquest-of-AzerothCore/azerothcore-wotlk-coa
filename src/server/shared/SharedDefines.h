@@ -206,6 +206,26 @@ constexpr Classes GetLegacyClassForCustomClass(Classes playerClass)
     }
 }
 
+// Plate is the fork's own marker for a Strength melee frame: these are exactly the classes that
+// mod-ascension-compat grants Plate Mail (proficiency spell 750) in ClassProficiencies. WotLK
+// formulas that split by armor or by main stat have no other way to ask.
+constexpr bool AscensionClassWearsPlate(Classes playerClass)
+{
+    switch (playerClass)
+    {
+        case CLASS_FLESHWARDEN:   // Knight of Xoroth
+        case CLASS_GUARDIAN:
+        case CLASS_CULTIST:
+        case CLASS_STARCALLER:
+        case CLASS_SUN_CLERIC:
+        case CLASS_REAPER:
+        case CLASS_WILDWALKER:    // Primalist
+            return true;
+        default:
+            return false;
+    }
+}
+
 // Expand legacy item/quest restrictions without widening explicitly authored custom-class masks.
 constexpr uint32 ExpandLegacyClassMask(uint32 classMask)
 {
