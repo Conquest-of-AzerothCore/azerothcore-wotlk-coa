@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Tinker: Nanobot Swarm can target a far lower level ally (#10403)",
+  "contract": "Spell::CheckCast marks any positive SPELL_EFFECT_APPLY_AURA effect of a player-controlled, non-passive, non-channeled spell with a nonzero SpellInfo::SpellLevel for Blizzlike downrank-protection scaling, and Spell::AddUnitTarget then only keeps a cross-cast target when target->GetLevel()+10 >= m_spellInfo->GetFirstRankSpell()->SpellLevel, sending SPELL_FAILED_LOWLEVEL otherwise. Nanobot Swarm (803447) is tier 4 of a 4-tier chain rooted at 801709 in spell_ranks, reused by CoA purely for the Tinker's own ability-tier unlock bookkeeping (AscensionSpellProgressionData), not Blizzard visual rank downranking; GetFirstRankSpell() resolves to 801709 whose SpellLevel/BaseLevel is 27, so any ally below level 17 was rejected even though the tooltip states no level restriction. AscensionTinkerContracts.cpp already patches this exact chain (Named(info,801709)) to fix an unrelated periodic-dummy aura issue; this fix extends that same patch to also zero SpellLevel on every rank of the chain, which removes it from the downrank-protection path entirely (CheckCast's own gating condition requires a nonzero m_spellInfo->SpellLevel to enter scaling mode at all), so the ability always applies its own effect regardless of the target's level, matching the tooltip. The ally is a second player, not a creature fixture: Unit::_IsValidAssistTarget only lets a player assist an ordinary creature NPC when its template carries CREATURE_TYPE_FLAG_CAN_ASSIST/TREAT_AS_RAID_UNIT, which a plain mob fixture does not, independent of this bug.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    { "id": "tinker", "race": 1, "class": 28, "level": 47 },
+    { "id": "ally", "race": 1, "class": 1, "level": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "tinker", "spell": 803447 },
+    { "action": "cast", "label": "Nanobot Swarm on the level-15 ally", "actor": "tinker", "spell": 803447, "target": "ally" },
+    {
+      "action": "assert",
+      "label": "The cast was not refused for being too low level for the target",
+      "actor": "tinker",
+      "metric": "cast_failure",
+      "spell": 803447,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ally received the Nanobot Swarm aura",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 803447,
+      "caster": "tinker",
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}
