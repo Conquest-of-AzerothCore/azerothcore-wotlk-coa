@@ -23,6 +23,7 @@ constexpr uint32 MAELSTROM_WEAPON_CONSUMPTION = 1153822;
 constexpr uint32 SHAMAN_FLAMETONGUE_WEAPON = 0x200000;
 constexpr int32 LAVA_SWEEP_FLAMETONGUE_PCT = 50;
 constexpr std::array<uint32, 3> DUAL_WIELD_SPECIALIZATION = { 1130816, 1130818, 1130819 };
+constexpr uint32 EARTHEN_GUARDIAN_MASTERY = 1134980;
 
 bool HasFlametongue(Player const* player, Item const* weapon)
 {
@@ -216,7 +217,12 @@ class spell_ascension_reborn_dual_wield_specialization : public AuraScript
 void ApplyAscensionWarcraftRebornShamanContracts(SpellInfo* spellInfo)
 {
     using namespace AscensionWarcraftReborn;
-    if (!spellInfo || std::find(DUAL_WIELD_SPECIALIZATION.begin(), DUAL_WIELD_SPECIALIZATION.end(), spellInfo->Id) ==
+    if (!spellInfo)
+        return;
+    if (spellInfo->Id == EARTHEN_GUARDIAN_MASTERY && spellInfo->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_MOD_THREAT &&
+        !spellInfo->Effects[EFFECT_1].MiscValue)
+        spellInfo->Effects[EFFECT_1].MiscValue = SPELL_SCHOOL_MASK_ALL;
+    if (std::find(DUAL_WIELD_SPECIALIZATION.begin(), DUAL_WIELD_SPECIALIZATION.end(), spellInfo->Id) ==
         DUAL_WIELD_SPECIALIZATION.end())
         return;
     SpellEffectInfo& hit = spellInfo->Effects[EFFECT_0];
