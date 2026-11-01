@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Unexpected Results: the Enchanted Mineral Fragment credits on Young Forest Bears and Prowlers (COA-10094)",
+  "contract": "Issues #10094, #10054, #10320: Unexpected Results 254107 asks for five tests of the Enchanted Mineral Fragment 354047 (spell 350249) on Elwynn wildlife near the Tower of Azora. The Young Forest Bear 822 and the Prowler 118 carry the credit script, but a later baseline restore left their AIName empty, so they never credited and the fragment's ten charges ran out. Expected: a Rockhide Boar 524 credits as before, and a bear and a prowler now credit too.",
+  "timeout_ms": 40000,
+  "location": { "map": 0, "x": -9446.9, "y": -635.7, "z": 65.6, "o": 0 },
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 10 }
+  ],
+  "creatures": [
+    { "id": "boar", "owner": "p", "entry": 524, "distance": 6, "level": 10 },
+    { "id": "bear", "owner": "p", "entry": 822, "distance": 7, "level": 10 },
+    { "id": "prowler", "owner": "p", "entry": 118, "distance": 8, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "prepare_quest", "actor": "p", "quest": 254107, "complete": false },
+    { "action": "assert", "label": "SETUP: p carries the fragment", "actor": "p", "metric": "item_count", "item": 354047, "equals": 1 },
+    { "action": "use_item", "label": "Test the fragment on the boar", "actor": "p", "item": 354047, "spell": 350249, "target": "boar" },
+    { "action": "assert", "label": "CONTROL: the boar credits one test", "actor": "p", "metric": "quest_objective_count", "quest": 254107, "index": 0, "equals": 1, "within_ms": 4000 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "use_item", "label": "Test the fragment on the bear", "actor": "p", "item": 354047, "spell": 350249, "target": "bear" },
+    { "action": "assert", "label": "DISCRIMINATING: the Young Forest Bear credits a test", "actor": "p", "metric": "quest_objective_count", "quest": 254107, "index": 0, "equals": 2, "within_ms": 4000 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "use_item", "label": "Test the fragment on the prowler", "actor": "p", "item": 354047, "spell": 350249, "target": "prowler" },
+    { "action": "assert", "label": "DISCRIMINATING: the Prowler credits a test", "actor": "p", "metric": "quest_objective_count", "quest": 254107, "index": 0, "equals": 3, "within_ms": 4000 }
+  ]
+}
