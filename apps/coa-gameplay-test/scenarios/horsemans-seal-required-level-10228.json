@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "name": "The Horseman's Seal is equippable at level 60 (#10228)",
+  "contract": "item_template entry 49123 (The Horseman's Seal, Headless Horseman loot) had RequiredLevel 80 even though #8361 lowered the Headless Horseman himself (23682) to level 63 so level-60 players could reach him. CanEquipItem/CanUseItem reject equipping an item whose RequiredLevel exceeds the player's level; before this fix a level-60 player who looted 49123 could never wear it. The fix lowers RequiredLevel to 60.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 16, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "add_item", "actor": "hero", "item": 49123, "label": "Loot The Horseman's Seal" },
+    { "action": "equip", "actor": "hero", "item": 49123, "slot": 10, "label": "Equip it in a finger slot" },
+    { "action": "assert", "label": "The Horseman's Seal is worn", "actor": "hero", "metric": "equipped_item", "slot": 10, "equals": 49123 }
+  ]
+}
