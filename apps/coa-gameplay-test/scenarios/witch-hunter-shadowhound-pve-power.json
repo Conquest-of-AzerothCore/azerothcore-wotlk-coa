@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "The Shadowhound's damage follows the owner's PvE Power (#9936)",
+  "contract": "PvePower::Damage resolved the attacker side only through Unit::ToPlayer, so a pet's hit never picked up its owner's equipped PvE Power. AttackingPlayer now falls back to Unit::GetCharmerOrOwnerPlayerOrPlayerItself when the attacker is not itself a player, so a Shadowhound's melee hit scales with its Witch Hunter owner's PvE Power the same way the owner's own melee hit does. Without PvE Power the hound deals the base 1000. Equipping a chestpiece carrying PvE Power +38 (item 1273, verified by pve-power-damage.json) raises a level 60 player's damage against a creature by 38 x 0.05% = 1.9%, so the hound's hit must rise to 1019 the same way the owner's own hit does. Requires PvePower.Enable = 1 in coa.conf.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wh", "race": 1, "class": 15, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "e", "owner": "wh", "entry": 36, "level": 60, "health": 500000, "distance": 15 }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "learn", "actor": "wh", "spell": 801343 },
+    { "action": "cast", "label": "Summon the Shadowhound", "actor": "wh", "spell": 801343 },
+    { "action": "assert", "label": "The Shadowhound is out", "actor": "wh", "metric": "pet_entry", "equals": 50124, "within_ms": 5000 },
+    { "action": "assert", "label": "Without PvE Power the hound deals the base damage", "actor": "wh", "metric": "script_melee_damage_dealt", "target": "e", "pet": true, "equals": 1000 },
+    { "action": "add_item", "actor": "wh", "item": 1273, "count": 1 },
+    { "action": "equip", "actor": "wh", "item": 1273, "slot": 4 },
+    { "action": "assert", "label": "The owner's own hit also rises by 1.9%, confirming the chestpiece carries PvE Power +38", "actor": "wh", "metric": "script_melee_damage_dealt", "target": "e", "equals": 1019 },
+    { "action": "assert", "label": "PvE Power +38 raises the hound's damage by 1.9% too", "actor": "wh", "metric": "script_melee_damage_dealt", "target": "e", "pet": true, "equals": 1019 }
+  ]
+}
