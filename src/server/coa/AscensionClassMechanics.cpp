@@ -965,6 +965,10 @@ void HandleRangerAdvantageSpent(Player* player, uint8 amount)
                     SPELL_RANGER_SNIPERS_FOCUS_ENERGIZE, true);
     }
 
+}
+
+void HandleRangerMaximumPower(Player* player, uint8 amount)
+{
     if (amount == 5 && player->HasAura(SPELL_RANGER_MAXIMUM_POWER) &&
         player->HasAura(SPELL_RANGER_SKIRMISH))
     {
@@ -1425,14 +1429,16 @@ void HandleAscensionClassMechanicsCast(Spell* spell)
         HandleAscensionRangerStonemason(spell, player);
         HandleAscensionRangerPhoenixPlumes(spell, player);
 
+        uint8 spent = 0;
+        if (Aura const* advantage = player->GetAura(SPELL_RANGER_ADVANTAGE))
+            spent = advantage->GetStackAmount();
+        HandleRangerMaximumPower(player, spent);
+
         float consumeChance = 100.0f;
         player->ApplySpellMod(SPELL_RANGER_ADVANTAGE_DECREMENT_PASSIVE,
             SPELLMOD_CHANCE_OF_SUCCESS, consumeChance, spell);
         if (roll_chance_f(consumeChance))
         {
-            uint8 spent = 0;
-            if (Aura const* advantage = player->GetAura(SPELL_RANGER_ADVANTAGE))
-                spent = advantage->GetStackAmount();
             player->CastSpell(player, SPELL_RANGER_ADVANTAGE_DECREMENT, true);
             HandleRangerAdvantageSpent(player, spent);
         }
