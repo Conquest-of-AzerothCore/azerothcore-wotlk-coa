@@ -1124,7 +1124,7 @@ class spell_pri_body_and_soul : public AuraScript
             return false;
 
         SpellInfo const* spellInfo = eventInfo.GetSpellInfo();
-        return spellInfo && spellInfo->Id == 552;
+        return spellInfo && sSpellMgr->GetSpellTwinSource(spellInfo->Id) == 552;
     }
 
     void HandleProcDummy(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
