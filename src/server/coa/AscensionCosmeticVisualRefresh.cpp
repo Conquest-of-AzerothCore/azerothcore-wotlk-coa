@@ -6,6 +6,7 @@
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "UnitScript.h"
+#include "WorldPacket.h"
 #include <algorithm>
 #include <array>
 #include <vector>
@@ -69,7 +70,14 @@ void RefreshVanityVisuals(Player* player)
 
     for (AuraApplication* application : refresh)
     {
-        application->ClientUpdate(true);
+        // AuraApplication::ClientUpdate(true) asserts that the slot is already empty on the server, so the client-only
+        // removal is built here: the slot followed by spell 0, as BuildUpdatePacket writes for a removed aura.
+        WorldPacket removal(SMSG_AURA_UPDATE, 8 + 1 + 4);
+        removal << player->GetPackGUID();
+        removal << uint8(application->GetSlot());
+        removal << uint32(0);
+        player->SendMessageToSet(&removal, true);
+
         application->ClientUpdate(false);
     }
 }
