@@ -19,6 +19,17 @@ constexpr std::array<uint32, 3> WORLD_IN_FLAMES = { 1111108, 1112349, 1112350 };
 constexpr std::array<uint32, 3> FIRE_POWER = { 1111124, 1112378, 1112398 };
 constexpr uint32 BLAZING_SPEED = 1131643;
 constexpr int32 BLAZING_SPEED_HEALTH_PCT = 5;
+constexpr std::array<uint32, 3> ARCANE_MOMENTUM = { 1144397, 1144398, 1144399 };
+constexpr std::array<uint32, 3> ARCANE_MOMENTUM_HELPER = { 1144405, 1144406, 1144407 };
+constexpr std::array<uint32, 2> ARCANE_BLAST_STACKS = { 1136032, 1136033 };
+
+uint32 ArcaneMomentumHelper(Unit const* caster)
+{
+    for (std::size_t rank = ARCANE_MOMENTUM.size(); rank-- > 0;)
+        if (caster->HasAura(ARCANE_MOMENTUM[rank]))
+            return ARCANE_MOMENTUM_HELPER[rank];
+    return 0;
+}
 
 class spell_ascension_reborn_magic_absorption : public AuraScript
 {
@@ -100,6 +111,60 @@ class spell_ascension_reborn_conjure_mana_gem : public SpellScript
             SPELL_EFFECT_SCRIPT_EFFECT);
     }
 };
+
+class spell_ascension_reborn_arcane_blast_stack : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_reborn_arcane_blast_stack);
+
+    void AfterApply(AuraEffect const* aurEff, AuraEffectHandleModes)
+    {
+        uint32 const helper = ArcaneMomentumHelper(GetTarget());
+        if (helper && !GetTarget()->HasAura(helper))
+            GetTarget()->CastSpell(GetTarget(), helper, true, nullptr, aurEff);
+    }
+
+    void AfterRemove(AuraEffect const*, AuraEffectHandleModes)
+    {
+        for (uint32 stack : ARCANE_BLAST_STACKS)
+            if (GetTarget()->HasAura(stack))
+                return;
+        for (uint32 helper : ARCANE_MOMENTUM_HELPER)
+            GetTarget()->RemoveAurasDueToSpell(helper);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(spell_ascension_reborn_arcane_blast_stack::AfterApply, EFFECT_0,
+            SPELL_AURA_ADD_PCT_MODIFIER, AURA_EFFECT_HANDLE_REAL);
+        AfterEffectRemove += AuraEffectRemoveFn(spell_ascension_reborn_arcane_blast_stack::AfterRemove, EFFECT_0,
+            SPELL_AURA_ADD_PCT_MODIFIER, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+class spell_ascension_reborn_arcane_mending : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_reborn_arcane_mending);
+
+    void ConsumeStack()
+    {
+        Unit* caster = GetCaster();
+        if (!ArcaneMomentumHelper(caster))
+            return;
+        for (uint32 stack : ARCANE_BLAST_STACKS)
+        {
+            if (Aura* aura = caster->GetAura(stack))
+            {
+                aura->ModStackAmount(-1);
+                return;
+            }
+        }
+    }
+
+    void Register() override
+    {
+        AfterCast += SpellCastFn(spell_ascension_reborn_arcane_mending::ConsumeStack);
+    }
+};
 }
 }
 
@@ -132,4 +197,6 @@ void AddAscensionWarcraftRebornMageScripts()
     RegisterSpellScript(spell_ascension_reborn_magic_absorption);
     RegisterSpellScript(spell_ascension_reborn_blazing_speed);
     RegisterSpellScript(spell_ascension_reborn_conjure_mana_gem);
+    RegisterSpellScript(spell_ascension_reborn_arcane_blast_stack);
+    RegisterSpellScript(spell_ascension_reborn_arcane_mending);
 }
