@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "source_sha256": "867545d112a76e7dfe8d8da8a903b37512f79bbdb177a555910caee64a6c64f6",
+  "checks": [
+    "first level AE/TE shortfalls",
+    "spell name/rank and minimum-level failure",
+    "rank-order failure",
+    "same-level no-op ignored",
+    "unavailable API safe fallback",
+    "known and unknown validation messages",
+    "other realm unchanged",
+    "Save reason propagation and enabled tooltip restoration",
+    "complete staged Lua syntax"
+  ],
+  "limits": "Lua 5.1 API adapters; diagnostics use existing read-only client APIs and do not expose the hidden full validator result. No live visual test."
+}
