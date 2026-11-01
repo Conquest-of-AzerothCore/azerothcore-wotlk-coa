@@ -29,6 +29,13 @@ constexpr uint32 SHAMAN_CHAIN_LIGHTNING = 0x2;
 constexpr uint32 LIGHTNING_OVERLOAD_BOLT = 1145284;
 constexpr uint32 LIGHTNING_OVERLOAD_CHAIN = 1145297;
 constexpr int32 LIGHTNING_OVERLOAD_PCT = 50;
+constexpr uint32 SHAMAN_STONECLAW_TOTEM = 0x8;
+constexpr uint32 SHAMAN_SEARING_TOTEM = 0x10;
+constexpr uint32 SHAMAN_MAGMA_TOTEM = 0x1000;
+constexpr uint32 EARTHEN_GUARDIAN = 1182001;
+constexpr uint32 TOTEMIC_BOND_DAMAGE_REDUCTION = 1182042;
+constexpr std::array<uint32, 3> TOTEMIC_BOND = { 1182036, 1182037, 1182038 };
+constexpr std::array<uint32, 3> TOTEMIC_BOND_THREAT = { 1182039, 1182040, 1182041 };
 
 bool HasFlametongue(Player const* player, Item const* weapon)
 {
@@ -253,6 +260,49 @@ class spell_ascension_reborn_lightning_overload : public AuraScript
         OnEffectProc += AuraEffectProcFn(spell_ascension_reborn_lightning_overload::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
     }
 };
+
+class spell_ascension_reborn_totemic_bond : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_reborn_totemic_bond);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({ EARTHEN_GUARDIAN, TOTEMIC_BOND_DAMAGE_REDUCTION, TOTEMIC_BOND_THREAT[0],
+            TOTEMIC_BOND_THREAT[1], TOTEMIC_BOND_THREAT[2] });
+    }
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        SpellInfo const* spellInfo = eventInfo.GetSpellInfo();
+        if (!spellInfo || spellInfo->SpellFamilyName != SPELLFAMILY_SHAMAN || !spellInfo->HasEffect(SPELL_EFFECT_SUMMON))
+            return false;
+        if (spellInfo->SpellFamilyFlags[0] & SHAMAN_STONECLAW_TOTEM)
+            return GetTarget()->HasAura(EARTHEN_GUARDIAN) && roll_chance_i(GetSpellInfo()->ProcChance);
+        return spellInfo->SpellFamilyFlags[0] & (SHAMAN_SEARING_TOTEM | SHAMAN_MAGMA_TOTEM);
+    }
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        Unit* target = GetTarget();
+        SpellInfo const* spellInfo = eventInfo.GetSpellInfo();
+        if (spellInfo->SpellFamilyFlags[0] & SHAMAN_STONECLAW_TOTEM)
+        {
+            target->CastSpell(target, TOTEMIC_BOND_DAMAGE_REDUCTION, true, nullptr, aurEff);
+            return;
+        }
+        auto const rank = std::find(TOTEMIC_BOND.begin(), TOTEMIC_BOND.end(), GetId());
+        Creature* totem = target->GetMap()->GetCreature(target->m_SummonSlot[SUMMON_SLOT_TOTEM_FIRE]);
+        if (rank != TOTEMIC_BOND.end() && totem && totem->GetUInt32Value(UNIT_CREATED_BY_SPELL) == spellInfo->Id)
+            totem->CastSpell(target, TOTEMIC_BOND_THREAT[rank - TOTEMIC_BOND.begin()], true);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_ascension_reborn_totemic_bond::CheckProc);
+        OnEffectProc += AuraEffectProcFn(spell_ascension_reborn_totemic_bond::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+    }
+};
 }
 }
 
@@ -282,4 +332,5 @@ void AddAscensionWarcraftRebornShamanScripts()
     RegisterSpellScript(spell_ascension_reborn_spirit_guard);
     RegisterSpellScript(spell_ascension_reborn_dual_wield_specialization);
     RegisterSpellScript(spell_ascension_reborn_lightning_overload);
+    RegisterSpellScript(spell_ascension_reborn_totemic_bond);
 }
