@@ -1,0 +1,13 @@
+{
+  "package": "area52-featured-enchant-slots-20261031",
+  "server_sha256": "6e8e5ab020c78c451c2574531c383f8d3a4163acf11b5c9eafc4e394dc1f41d8",
+  "status_changes": false,
+  "reports": [
+    "full-build-r1/report.json",
+    "native-r3/report.json",
+    "catalog-r1/report.json",
+    "compile-r2/report.json"
+  ],
+  "scope": "Slot capacities, quality-aware Featured placement, eligible saved-preset restoration and final slot packets",
+  "limits": "Native behavior with Player/persistence adapters; full build and unit stage. No live gameplay or login test."
+}
