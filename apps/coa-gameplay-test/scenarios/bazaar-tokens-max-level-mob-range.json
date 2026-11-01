@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Bazaar kill tokens at maximum level need a mob within three levels",
-  "contract": "At default settings a level-60 character earns tokens only from creatures whose own level is at most three below them, even though Blackrock Depths scales its creatures to the character. A level-59 character is judged on the level they are shown, which in this dungeon is their own. In one group, Warder Stilgiss 9041 (level 56, spawn guid 47774) pays the level-60 member nothing and the level-59 member 6-12; Panzor the Invincible 8923 (level 57, spawn guid 300627) pays both members 6-12.",
+  "name": "Bazaar kill tokens at maximum level need a mob within five levels",
+  "contract": "At default settings a level-60 character earns tokens only from creatures whose own level is at most five below them, even though Blackrock Depths scales its creatures to the character. A level-59 character is judged on the level they are shown, which in this dungeon is their own. In one group, Fineous Darkvire 9056 (level 54, spawn guid 47631) pays the level-60 member nothing and the level-59 member 6-12; Lord Incendius 9017 (level 55, spawn guid 47733) pays both members 6-12.",
   "timeout_ms": 90000,
   "location": {
     "map": 0,
@@ -47,9 +47,9 @@
     },
     {
       "action": "teleport_to_spawn",
-      "label": "capped member reaches Warder Stilgiss",
+      "label": "capped member reaches Fineous Darkvire",
       "actor": "capped",
-      "guid": 47774
+      "guid": 47631
     },
     {
       "action": "assert",
@@ -61,9 +61,9 @@
     },
     {
       "action": "teleport_to_spawn",
-      "label": "leveling member reaches Warder Stilgiss",
+      "label": "leveling member reaches Fineous Darkvire",
       "actor": "leveling",
-      "guid": 47774
+      "guid": 47631
     },
     {
       "action": "assert",
@@ -75,10 +75,10 @@
     },
     {
       "action": "assert",
-      "label": "SETUP: Warder Stilgiss is alive",
+      "label": "SETUP: Fineous Darkvire is alive",
       "actor": "capped",
       "metric": "nearby_creature_count",
-      "entry": 9041,
+      "entry": 9056,
       "min": 1,
       "within_ms": 5000
     },
@@ -87,46 +87,46 @@
       "actor": "capped",
       "metric": "item_count",
       "item": 975001,
-      "save_as": "capped_9041"
+      "save_as": "capped_9056"
     },
     {
       "action": "snapshot",
       "actor": "leveling",
       "metric": "item_count",
       "item": 975001,
-      "save_as": "leveling_9041"
+      "save_as": "leveling_9056"
     },
     {
       "action": "attack_nearby",
       "actor": "capped",
-      "entry": 9041,
+      "entry": 9056,
       "kill": true
     },
     {
       "action": "assert",
-      "label": "level 59 from Warder Stilgiss",
+      "label": "level 59 from Fineous Darkvire",
       "actor": "leveling",
       "metric": "item_count",
       "item": 975001,
-      "relative_to": "leveling_9041",
+      "relative_to": "leveling_9056",
       "min": 6,
       "max": 12,
       "within_ms": 2000
     },
     {
       "action": "assert",
-      "label": "level 60 from Warder Stilgiss",
+      "label": "level 60 from Fineous Darkvire",
       "actor": "capped",
       "metric": "item_count",
       "item": 975001,
-      "relative_to": "capped_9041",
+      "relative_to": "capped_9056",
       "equals": 0
     },
     {
       "action": "teleport_to_spawn",
-      "label": "capped member reaches Panzor the Invincible",
+      "label": "capped member reaches Lord Incendius",
       "actor": "capped",
-      "guid": 300627
+      "guid": 47733
     },
     {
       "action": "assert",
@@ -138,9 +138,9 @@
     },
     {
       "action": "teleport_to_spawn",
-      "label": "leveling member reaches Panzor the Invincible",
+      "label": "leveling member reaches Lord Incendius",
       "actor": "leveling",
-      "guid": 300627
+      "guid": 47733
     },
     {
       "action": "assert",
@@ -152,10 +152,10 @@
     },
     {
       "action": "assert",
-      "label": "SETUP: Panzor the Invincible is alive",
+      "label": "SETUP: Lord Incendius is alive",
       "actor": "capped",
       "metric": "nearby_creature_count",
-      "entry": 8923,
+      "entry": 9017,
       "min": 1,
       "within_ms": 5000
     },
@@ -164,39 +164,39 @@
       "actor": "capped",
       "metric": "item_count",
       "item": 975001,
-      "save_as": "capped_8923"
+      "save_as": "capped_9017"
     },
     {
       "action": "snapshot",
       "actor": "leveling",
       "metric": "item_count",
       "item": 975001,
-      "save_as": "leveling_8923"
+      "save_as": "leveling_9017"
     },
     {
       "action": "attack_nearby",
       "actor": "capped",
-      "entry": 8923,
+      "entry": 9017,
       "kill": true
     },
     {
       "action": "assert",
-      "label": "level 60 from Panzor the Invincible",
+      "label": "level 60 from Lord Incendius",
       "actor": "capped",
       "metric": "item_count",
       "item": 975001,
-      "relative_to": "capped_8923",
+      "relative_to": "capped_9017",
       "min": 6,
       "max": 12,
       "within_ms": 2000
     },
     {
       "action": "assert",
-      "label": "level 59 from Panzor the Invincible",
+      "label": "level 59 from Lord Incendius",
       "actor": "leveling",
       "metric": "item_count",
       "item": 975001,
-      "relative_to": "leveling_8923",
+      "relative_to": "leveling_9017",
       "min": 6,
       "max": 12,
       "within_ms": 2000

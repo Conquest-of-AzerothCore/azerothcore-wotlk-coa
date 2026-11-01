@@ -66,7 +66,7 @@ EtherealBazaar.Tokens.BonusPercent = 100
 
 # A number of levels, or grey
 EtherealBazaar.Tokens.MaxLevelsAboveMob.WhileLeveling = grey
-EtherealBazaar.Tokens.MaxLevelsAboveMob.AtMaxLevel = 3
+EtherealBazaar.Tokens.MaxLevelsAboveMob.AtMaxLevel = 5
 EtherealBazaar.Tokens.MaxLevel = 60
 
 # The "item received" toast in the top right. Tokens drop often enough that it

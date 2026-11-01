@@ -72,7 +72,7 @@ namespace
         uint32 const level = player->GetLevel();
         bool const atMaxLevel = level >= sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.MaxLevel", 60);
         std::string const setting = atMaxLevel
-            ? sConfigMgr->GetOption<std::string>("EtherealBazaar.Tokens.MaxLevelsAboveMob.AtMaxLevel", "3")
+            ? sConfigMgr->GetOption<std::string>("EtherealBazaar.Tokens.MaxLevelsAboveMob.AtMaxLevel", "5")
             : sConfigMgr->GetOption<std::string>("EtherealBazaar.Tokens.MaxLevelsAboveMob.WhileLeveling", "grey");
 
         uint32 const killedLevel = atMaxLevel ? killed->GetLevel() : killed->getLevelForTarget(player);
