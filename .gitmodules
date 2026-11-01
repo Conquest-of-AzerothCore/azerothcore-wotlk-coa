@@ -1,0 +1,4 @@
+[submodule "apps/area52-build-library/portable"]
+	path = apps/area52-build-library/portable
+	url = https://github.com/CWO4PapaBear/Area-52-Build-Architect-Library.git
+	branch = feature/portable-build-library
