@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "baseline_failed": true,
+  "source_sha256": "13800c706cd5490ca05e817a3389a0bfedfe8a803797092d4b0a8a8c29f1bce6",
+  "checks": [
+    "actual legacy helper failure with anonymous Button reproduced",
+    "selected name displayed for all 56 archetypes",
+    "saved selection restored in another editor",
+    "GM/non-GM enable and disable transitions",
+    "repeated refresh and category visibility",
+    "other realm isolation",
+    "complete Lua syntax"
+  ],
+  "limits": "Lua 5.1 with actual dropdown helper functions and frame adapter matching reported runtime child layout; no live visual test",
+  "supersedes": "draft-dropdown-20261031/verification.json incorrectly modeled the template Button as globally named"
+}

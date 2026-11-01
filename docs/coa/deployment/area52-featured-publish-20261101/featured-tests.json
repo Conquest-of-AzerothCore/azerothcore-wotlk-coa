@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "checks": [
+    "actual selector and archetype27 binding",
+    "baseline category rejection retained",
+    "full native-validator adapter invoked under Leveling",
+    "category/name/description/spells/enchants preserved",
+    "invalid progression remains blocked",
+    "unrelated/multiple errors not suppressed",
+    "exception restoration",
+    "GM/name/ID guards",
+    "other realm/category isolation",
+    "restore failure blocks subsequent save/publish",
+    "actual PromptPublish save acknowledgement reaches consent with Featured identity"
+  ],
+  "limits": "Lua5.1 native API adapters plus read-only disassembly; no execution of proprietary validator or live client. User supplied paired Leveling-pass/Featured-fail evidence."
+}
