@@ -4246,7 +4246,9 @@ public:
     for (uint32 displayId : rows.CreatureDisplayIds) {
       if (CreatureDisplayInfoEntry const *entry =
               sCreatureDisplayInfoStore.LookupEntry(displayId)) {
-        bytes += SendDisplayInfoRow(player, *entry);
+        auto const textures = rows.CreatureDisplayTextures.find(displayId);
+        bytes += SendDisplayInfoRow(player, *entry,
+            textures != rows.CreatureDisplayTextures.end() ? &textures->second : nullptr);
         ++sent;
       }
     }
@@ -4457,6 +4459,7 @@ private:
     std::vector<ShapeshiftFormPatchRow> ShapeshiftForms;
     std::vector<CreatureModelPatchRow> CreatureModels;
     std::vector<VanityCollectionPatchRow> VanityCollections;
+    std::unordered_map<uint32, std::array<std::string, 4>> CreatureDisplayTextures;
   };
 
   static constexpr uint32 SPELL_ATTRIBUTES_FIELD = 4;
@@ -4791,7 +4794,8 @@ private:
   }
 
   std::size_t SendDisplayInfoRow(Player *player,
-                                 CreatureDisplayInfoEntry const &entry) const {
+                                 CreatureDisplayInfoEntry const &entry,
+                                 std::array<std::string, 4> const *textures) const {
     WorldPacket packet(SMSG_PATCH_CREATURE_DISPLAY_INFO, 80);
 
     uint32 const soundId = 0;
@@ -4805,7 +4809,12 @@ private:
 
     packet.append(displayRow, sizeof(displayRow));
     for (uint8 stringIndex = 0; stringIndex < 4; ++stringIndex)
-      packet << uint32(0);
+    {
+      if (textures)
+        AppendSizedString(packet, (*textures)[stringIndex]);
+      else
+        packet << uint32(0);
+    }
 
     return SendRowPacket(player, packet);
   }
@@ -5226,6 +5235,7 @@ private:
       _rows.ShapeshiftForms = LoadShapeshiftFormPatchRows();
       _rows.VanityCollections = LoadVanityCollectionPatchRows();
       _rows.CreatureModels = BuildCreatureModelPatchRows();
+      _rows.CreatureDisplayTextures = LoadCreatureDisplayTextureRows();
       _rowsPrepared = true;
     }
     return _rows;
@@ -5315,9 +5325,11 @@ private:
     if (!clientModels.Load(clientDbc.string(), CREATURE_MODEL_DATA_FIELD_COUNT))
       return rows;
 
+    std::unordered_set<uint32> fileModelIds;
     for (uint32 index = 0; index < clientModels.GetRecordCount(); ++index) {
       ClientDBC::Record const record = clientModels.GetRecord(index);
       uint32 const modelId = record.GetUInt32(0);
+      fileModelIds.insert(modelId);
       CreatureModelDataEntry const *entry =
           sCreatureModelDataStore.LookupEntry(modelId);
       if (!entry)
@@ -5345,6 +5357,57 @@ private:
         row.Values[field] = value;
       row.ModelName = std::string(record.GetString(CREATURE_MODEL_DATA_NAME_FIELD));
     }
+
+    QueryResult result = WorldDatabase.Query(
+        "SELECT `ID`, `Flags`, `ModelName`, `SizeClass`, `ModelScale`, `BloodID`, "
+        "`FootprintTextureID`, `FootprintTextureLength`, `FootprintTextureWidth`, "
+        "`FootprintParticleScale`, `FoleyMaterialID`, `FootstepShakeSize`, "
+        "`DeathThudShakeSize`, `SoundID`, `CollisionWidth`, `CollisionHeight`, "
+        "`MountHeight`, `GeoBoxMinX`, `GeoBoxMinY`, `GeoBoxMinZ`, `GeoBoxMaxX`, "
+        "`GeoBoxMaxY`, `GeoBoxMaxZ`, `WorldEffectScale`, `AttachedEffectScale`, "
+        "`MissileCollisionRadius`, `MissileCollisionPush`, `MissileCollisionRaise` "
+        "FROM `creaturemodeldata_dbc` ORDER BY `ID`");
+    if (!result)
+      return rows;
+
+    static constexpr std::array<uint32, 6> intFields = {0, 1, 3, 5, 6, 10};
+    do {
+      Field const *fields = result->Fetch();
+      if (fileModelIds.contains(fields[0].Get<uint32>()))
+        continue;
+
+      CreatureModelPatchRow &row = rows.emplace_back();
+      for (uint32 field = 0; field < CREATURE_MODEL_DATA_FIELD_COUNT; ++field) {
+        if (field == CREATURE_MODEL_DATA_NAME_FIELD)
+          row.ModelName = fields[field].Get<std::string>();
+        else if (std::ranges::find(intFields, field) != intFields.end() ||
+                 (field >= 11 && field <= 13))
+          row.Values[field] = static_cast<uint32>(fields[field].Get<int32>());
+        else
+          row.Values[field] = std::bit_cast<uint32>(fields[field].Get<float>());
+      }
+    } while (result->NextRow());
+
+    return rows;
+  }
+
+  static std::unordered_map<uint32, std::array<std::string, 4>> LoadCreatureDisplayTextureRows() {
+    std::unordered_map<uint32, std::array<std::string, 4>> rows;
+    QueryResult result = WorldDatabase.Query(
+        "SELECT `ID`, IFNULL(`TextureVariation_1`, ''), IFNULL(`TextureVariation_2`, ''), "
+        "IFNULL(`TextureVariation_3`, ''), IFNULL(`PortraitTextureName`, '') "
+        "FROM `creaturedisplayinfo_dbc` WHERE CONCAT(IFNULL(`TextureVariation_1`, ''), "
+        "IFNULL(`TextureVariation_2`, ''), IFNULL(`TextureVariation_3`, ''), "
+        "IFNULL(`PortraitTextureName`, '')) <> ''");
+    if (!result)
+      return rows;
+
+    do {
+      Field const *fields = result->Fetch();
+      std::array<std::string, 4> &textures = rows[fields[0].Get<uint32>()];
+      for (uint8 index = 0; index < 4; ++index)
+        textures[index] = fields[index + 1].Get<std::string>();
+    } while (result->NextRow());
 
     return rows;
   }
