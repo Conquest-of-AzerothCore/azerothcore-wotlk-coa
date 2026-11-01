@@ -1596,7 +1596,8 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
             && effectHandleMode == SPELL_EFFECT_HANDLE_LAUNCH_TARGET)
     {
         // special cases
-        switch (triggered_spell_id)
+        uint32 const cloakOfShadows = sSpellMgr->GetSpellTwinSource(triggered_spell_id);
+        switch (cloakOfShadows == 35729 ? cloakOfShadows : triggered_spell_id)
         {
             // Mirror Image
             case 58832:
