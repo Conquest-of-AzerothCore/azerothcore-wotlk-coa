@@ -555,7 +555,9 @@ class RunnerTests(unittest.TestCase):
                                      ('spell_go_count', 'caster', {'pet': True}),
                                      ('spell_go_count', 'caster', {'caster': 'caster'}),
                                      ('spell_go_count', 'caster', {'caster': 'target'}),
-                                     ('spell_go_count', 'caster', {'entry': 50587})]:
+                                     ('spell_go_count', 'caster', {'entry': 50587}),
+                                     ('spell_damage_count', 'caster', {'caster': 'target'}),
+                                     ('spell_damage_total', 'caster', {'caster': 'target', 'critical': False})]:
             with self.subTest(metric=metric, actor=actor, extra=extra):
                 scenario = copy.deepcopy(self.scenario)
                 scenario['steps'].append({'action': 'assert', 'actor': actor, 'metric': metric,
@@ -572,7 +574,10 @@ class RunnerTests(unittest.TestCase):
                                      ('spell_go_count', 'caster', {'caster': 'target', 'pet': True}),
                                      ('spell_go_count', 'caster', {'caster': 'target', 'pet': False}),
                                      ('spell_go_count', 'caster', {'caster': 'target', 'entry': 50587}),
-                                     ('spell_go_count', 'caster', {'entry': 50587, 'pet': True})]:
+                                     ('spell_go_count', 'caster', {'entry': 50587, 'pet': True}),
+                                     ('spell_damage_count', 'caster', {'caster': 'missing'}),
+                                     ('spell_damage_count', 'caster', {'caster': 'target', 'pet': False}),
+                                     ('spell_damage_total', 'caster', {'caster': 'target', 'entry': 50587})]:
             scenario = copy.deepcopy(self.scenario)
             scenario['steps'].append({'action': 'assert', 'actor': actor, 'metric': metric,
                                       'spell': 116, 'equals': 0, **extra})

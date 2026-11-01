@@ -976,7 +976,7 @@ def validate(scenario):
             if metric in {'spell_go_count', 'spell_damage_count', 'spell_damage_total'} and 'entry' in step:
                 number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
                 require('pet' not in step, f'{where}: spell combat query selects either pet or entry')
-            if metric == 'spell_go_count' and 'caster' in step:
+            if metric in {'spell_go_count', 'spell_damage_count', 'spell_damage_total'} and 'caster' in step:
                 require('pet' not in step and 'entry' not in step, f'{where}: cast query selects one caster source')
             if 'target_pet' in step:
                 require(metric in {'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',

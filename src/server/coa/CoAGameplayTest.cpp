@@ -4073,6 +4073,12 @@ private:
                 Require(creature != nullptr, "Spell damage observation needs a present owned creature");
                 caster = creature->GetGUID();
             }
+            if (auto id = step.get_optional<std::string>("caster"))
+            {
+                Require(!step.get_optional<bool>("pet") && !step.get_optional<uint32>("entry"),
+                    "Spell damage query selects one of pet, entry or caster");
+                caster = GetUnit(*id)->GetGUID();
+            }
             ObjectGuid target;
             if (auto id = step.get_optional<std::string>("target"))
                 target = GetUnit(*id)->GetGUID();

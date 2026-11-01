@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Scholomance Normal: Lord Alexei Barov's kit Fierce Blow deals one weapon swing",
+  "contract": [
+    "Fierce Blow (975011) is a single melee weapon strike: its only damaging effect is Weapon Percent Damage with",
+    "base points 99 and one die side, so it deals 100% of the caster's weapon damage. rev_20261009_20_dungeon_fixes",
+    "set every kit Fierce Blow to an untriggered custom cast with base points 100, but #10512 re-inserted Lord Alexei",
+    "Barov's (10504) block with the older triggered 200 cast. A landed noncritical Fierce Blow takes his weapon roll,",
+    "between weapon_damage_min and at most 1.5 times that, reduced by at most 10% by the hero's armor (600 or less).",
+    "CoADungeonNormal then applies its Normal factor 0.512 from coa_dungeon_normal_spell_damage (the CoA damage",
+    "control reads 512), and no other modifier changes it. One hit is therefore 0.46-0.77 weapon minimums, while a",
+    "200% hit is at least 0.92. The metric reads only Barov's 975011 damage logs, so his melee swings, Shadow Cleave",
+    "and Unholy Aura do not count."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 289,
+    "x": 175.3,
+    "y": -91.0,
+    "z": 70.86,
+    "o": 0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "barov",
+      "owner": "hero",
+      "entry": 10504,
+      "level": 60,
+      "health": 400000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Scholomance",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 289
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the instance is Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero's armor removes at most 10% of a physical hit",
+      "actor": "hero",
+      "metric": "armor",
+      "max": 600
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no damage-taken modifier changes Fierce Blow on the hero",
+      "actor": "hero",
+      "metric": "melee_damage_taken",
+      "spell": 975011,
+      "target": "barov",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: only the Normal-dungeon factor 0.512 scales Fierce Blow on the hero",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "spell": 975011,
+      "target": "barov",
+      "equals": 512
+    },
+    {
+      "action": "snapshot",
+      "label": "Barov's minimum weapon damage",
+      "actor": "barov",
+      "metric": "weapon_damage_min",
+      "save_as": "weapon_min"
+    },
+    {
+      "action": "attack",
+      "label": "Engage Barov",
+      "actor": "hero",
+      "target": "barov"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "barov"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Barov fights the hero",
+      "actor": "barov",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a noncritical kit Fierce Blow from Barov lands on the hero",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "caster": "barov",
+      "spell": 975011,
+      "target": "hero",
+      "critical": false,
+      "min": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The first noncritical Fierce Blow deals one weapon swing, not two",
+      "actor": "hero",
+      "metric": "spell_damage_total",
+      "caster": "barov",
+      "spell": 975011,
+      "target": "hero",
+      "critical": false,
+      "ratio_to": "weapon_min",
+      "min": 0.43,
+      "max": 0.82
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survives the measurement",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}
