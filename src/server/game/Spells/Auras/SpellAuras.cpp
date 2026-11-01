@@ -1707,7 +1707,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             int32 basepoints0 = int32(CalculatePct(caster->GetMaxPower(POWER_MANA), multiplier));
                             if (caster->HasAura(270563))
                                 basepoints0 *= 2;
-                            caster->CastCustomSpell(caster, 47755, &basepoints0, nullptr, nullptr, true);
+                            caster->CastCustomSpell(caster, sSpellMgr->GetSpellTwinFor(47755, aura->GetId()), &basepoints0, nullptr, nullptr, true);
                         }
                         // effect on aura target
                         if (AuraEffect const* aurEff = aura->GetEffect(1))
@@ -1721,7 +1721,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                 case POWER_MANA:
                                     {
                                         int32 basepoints0 = int32(CalculatePct(target->GetMaxPower(POWER_MANA), 2));
-                                        caster->CastCustomSpell(target, 63654, &basepoints0, nullptr, nullptr, true);
+                                        caster->CastCustomSpell(target, sSpellMgr->GetSpellTwinFor(63654, aura->GetId()), &basepoints0, nullptr, nullptr, true);
                                         break;
                                     }
                                 case POWER_RAGE:
@@ -1737,7 +1737,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                     break;
                             }
                             if (triggeredSpellId)
-                                caster->CastSpell(target, triggeredSpellId, true);
+                                caster->CastSpell(target, sSpellMgr->GetSpellTwinFor(triggeredSpellId, aura->GetId()), true);
                         }
                     }
                 }
