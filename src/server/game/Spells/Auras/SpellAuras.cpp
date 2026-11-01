@@ -1865,13 +1865,13 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 // Overkill
                 if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpellOrTwin(58426, 0))
                 {
+                    // Reborn Overkill's tracker 1158428 is built differently from 58428 (no twin): find it by offset
+                    uint32 const offset = aurEff->GetId() - sSpellMgr->GetSpellTwinSource(aurEff->GetId());
+                    SpellInfo const* trackerInfo = sSpellMgr->GetSpellInfo(58428 + offset);
+                    if (!trackerInfo || std::string_view(trackerInfo->SpellName[0]) != aurEff->GetSpellInfo()->SpellName[0])
+                        trackerInfo = sSpellMgr->AssertSpellInfo(58428);
                     if (!apply)
                     {
-                        // Reborn Overkill's tracker 1158428 is built differently from 58428 (no twin): find it by offset
-                        uint32 const offset = aurEff->GetId() - sSpellMgr->GetSpellTwinSource(aurEff->GetId());
-                        SpellInfo const* trackerInfo = sSpellMgr->GetSpellInfo(58428 + offset);
-                        if (!trackerInfo || std::string_view(trackerInfo->SpellName[0]) != aurEff->GetSpellInfo()->SpellName[0])
-                            trackerInfo = sSpellMgr->AssertSpellInfo(58428);
                         if (!trackerInfo->HasAura(SPELL_AURA_PERIODIC_DUMMY))
                             target->RemoveAurasDueToSpell(sSpellMgr->GetSpellTwinFor(58427, aurEff->GetId()));
                         target->CastSpell(target, trackerInfo->Id, true, nullptr, aurEff);
@@ -1879,7 +1879,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     else
                     {
                         // Remove counter aura
-                        target->RemoveAurasDueToSpell(sSpellMgr->GetSpellTwinFor(58428, aurEff->GetId()));
+                        target->RemoveAurasDueToSpell(trackerInfo->Id);
 
                         target->CastSpell(target, 58427, true, nullptr, aurEff);
                     }
