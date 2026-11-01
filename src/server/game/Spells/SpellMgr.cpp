@@ -39,6 +39,9 @@
 
 namespace
 {
+constexpr uint32 REBORN_TWIN_OFFSET = 1100000;
+constexpr uint32 CROSSOVER_TWIN_OFFSET = 1300000;
+
 bool IsValidSpellProcFamily(uint32 family)
 {
     // CoA class spell families follow the class ID with an offset of six.
@@ -1591,6 +1594,9 @@ uint32 SpellMgr::GetSpellTwinFor(uint32 stockSpellId, uint32 relatedSpellId) con
     uint32 const candidate = stockSpellId + (relatedSpellId - relatedSource);
     if (GetSpellInfo(candidate) && GetSpellTwinSource(candidate) == stockSpellId)
         return candidate;
+    if (relatedSpellId - relatedSource == CROSSOVER_TWIN_OFFSET)
+        if (uint32 const reborn = stockSpellId + REBORN_TWIN_OFFSET; GetSpellInfo(reborn) && GetSpellTwinSource(reborn) == stockSpellId)
+            return reborn;
     uint32 const firstRank = GetFirstSpellInChain(relatedSpellId);
     return firstRank != relatedSpellId ? GetSpellTwinFor(stockSpellId, firstRank) : stockSpellId;
 }
