@@ -236,7 +236,7 @@ public:
     bool OnUse(Player* player, Item* item, SpellCastTargets const&) override
     {
         std::vector<Item*> mailQueue;
-        DeliverOrQueueMail(player, mailQueue, 1004039, 3);
+        DeliverOrQueueMail(player, mailQueue, 1004039, 4);
         FlushMailQueue(player, mailQueue, "Bag of Bags");
 
         uint32 count = 1;
