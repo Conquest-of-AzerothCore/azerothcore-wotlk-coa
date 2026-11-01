@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "name": "Worldforged Blaze Runners rests on the Un'Goro ground (#10545)",
+  "contract": "#10545 reported the Blaze Runners pickup (gameobject entry 95932, guid 6941449) high in the air in Un'Goro Crater. It floated 8.57 yd above the terrain, a recorded client height of -157.05 applied to a map position where the terrain is -165.62. It is restored to the client's own sighting (-7074.72, -1306.4, -157.05), where the terrain is -157.051.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -7074.72,
+    "y": -1306.4,
+    "z": -155.8,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95932,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6941449,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "it is grounded",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "guid": 6941449,
+      "spawn_type": "gameobject",
+      "tolerance": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "it is not under liquid",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "guid": 6941449,
+      "spawn_type": "gameobject",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 95932
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}
