@@ -464,7 +464,7 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_1].Effect = 0;
     }
     if (id == 704956)
-        info->Effects[EFFECT_0].SpellClassMask = flag96(0, 16, 0);
+        info->Effects[EFFECT_0].SpellClassMask = flag96(0, 0, 16);
     if (id == 520290)
         info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
     if (id == 680900)
