@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Worldforged Bleakfang Handwraps sit on the Browman Mill floor and open (#10394)",
+  "contract": "The report claims guid 6940133's pickup is missing inside the Browman Mill. Its current position_z (73.6125, set by #6696's open-world float-height pass) measures essentially flush with the vmap floor here, not buried, and the pickup opens for loot: the placement is correct as stored, so the reported symptom is not a ground-height defect.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": 2495.2, "y": -5191.3, "z": 76.114, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 21, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "the Bleakfang Handwraps pickup exists", "actor": "p", "metric": "nearby_gameobject_count", "entry": 90620, "equals": 1 },
+    { "action": "assert", "label": "it rests on the mill floor, not under it", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940133, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "assert", "label": "it is grounded", "actor": "p", "metric": "spawn_placement", "guid": 6940133, "spawn_type": "gameobject", "tolerance": 0.5, "equals": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 90620 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "it is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

@@ -1,0 +1,334 @@
+{
+  "schema": 1,
+  "name": "Blazing Hippogryph and X-53 Touring Rocket are ground mounts usable below level 60 in Stormwind (#10460)",
+  "contract": [
+    "Blazing Hippogryph (spell 74856, item 54069) and X-53 Touring Rocket (spell 75973, item 54860), both Recruit",
+    "a Friend rewards, are ground mounts. AscensionCollectibles::MountWrappers maps each wrapper to the client mount",
+    "spells 74854 and 74855 (Hippogryph) and 75957 (Rocket), which SpellInfoCorrections strips of their flight aura and",
+    "SPELL_ATTR4_ONLY_FLYING_AREAS, so the client keeps their icons. spell_ascension_local_mount selects by riding skill:",
+    "Apprentice 75 gives 60% and Journeyman 150 and above give 100%. The generic spell_gen_mount bindings are removed",
+    "because they cancelled the mount. Both items drop their level 60 and riding 225 requirements, so a level 20 rider",
+    "carries and uses them. The Rocket wrapper no longer refuses the cast outside flying areas such as Stormwind, where",
+    "the report was made. No flight grant is sent in Azeroth even at Artisan riding."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8833.38,
+    "y": 628.628,
+    "z": 94.0066,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rider",
+      "race": 1,
+      "class": 21,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "rider",
+      "item": 54069
+    },
+    {
+      "action": "snapshot",
+      "actor": "rider",
+      "metric": "server_packets",
+      "opcode": 835,
+      "save_as": "flight_before_hippogryph"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "the Hippogryph item needs level 1, so a level 20 rider can carry it",
+      "metric": "carried_item_required_level",
+      "item": 54069,
+      "equals": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "rider",
+      "item": 54069,
+      "spell": 74856
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "a level 20 rider learns the Hippogryph from its item",
+      "metric": "knows_spell",
+      "spell": 74856,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 75,
+      "maximum": 300
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 74856
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "Apprentice riding mounts the Hippogryph in Stormwind",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "Apprentice riding gives the Hippogryph 60% ground speed",
+      "metric": "run_speed_rate",
+      "min": 1.589,
+      "max": 1.611
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "the Hippogryph aura shows the real client ground spell",
+      "metric": "aura",
+      "spell": 74854,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "the Hippogryph never grants flight in Azeroth at Apprentice riding",
+      "metric": "server_packets",
+      "opcode": 835,
+      "relative_to": "flight_before_hippogryph",
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "Dismounting removes the Hippogryph at Apprentice riding",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 74856
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "Artisan riding mounts the Hippogryph in Stormwind",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "Artisan riding gives the Hippogryph 100% ground speed",
+      "metric": "run_speed_rate",
+      "min": 1.989,
+      "max": 2.011
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "the Hippogryph aura shows the real client ground spell",
+      "metric": "aura",
+      "spell": 74855,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "the Hippogryph never grants flight in Azeroth at Artisan riding",
+      "metric": "server_packets",
+      "opcode": 835,
+      "relative_to": "flight_before_hippogryph",
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "Dismounting removes the Hippogryph at Artisan riding",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "rider",
+      "item": 54860
+    },
+    {
+      "action": "snapshot",
+      "actor": "rider",
+      "metric": "server_packets",
+      "opcode": 835,
+      "save_as": "flight_before_rocket"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "the Rocket item needs level 1, so a level 20 rider can carry it",
+      "metric": "carried_item_required_level",
+      "item": 54860,
+      "equals": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "rider",
+      "item": 54860,
+      "spell": 75973
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "a level 20 rider learns the Rocket from its item",
+      "metric": "knows_spell",
+      "spell": 75973,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 75,
+      "maximum": 300
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 75973
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "Apprentice riding mounts the Rocket in Stormwind",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "Apprentice riding gives the Rocket 60% ground speed",
+      "metric": "run_speed_rate",
+      "min": 1.589,
+      "max": 1.611
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "the Rocket aura shows the real client ground spell",
+      "metric": "aura",
+      "spell": 75957,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "the Rocket never grants flight in Azeroth at Apprentice riding",
+      "metric": "server_packets",
+      "opcode": 835,
+      "relative_to": "flight_before_rocket",
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "Dismounting removes the Rocket at Apprentice riding",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_skill",
+      "actor": "rider",
+      "skill": 762,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "cast",
+      "actor": "rider",
+      "spell": 75973
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "Artisan riding mounts the Rocket in Stormwind",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "Artisan riding gives the Rocket 100% ground speed",
+      "metric": "run_speed_rate",
+      "min": 1.989,
+      "max": 2.011
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "the Rocket aura shows the real client ground spell",
+      "metric": "aura",
+      "spell": 75957,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "the Rocket never grants flight in Azeroth at Artisan riding",
+      "metric": "server_packets",
+      "opcode": 835,
+      "relative_to": "flight_before_rocket",
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "rider"
+    },
+    {
+      "action": "assert",
+      "actor": "rider",
+      "label": "Dismounting removes the Rocket at Artisan riding",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 5000
+    }
+  ]
+}
