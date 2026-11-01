@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Personal Bank vault lands on the ground even when the caster's own feet float (#9647)",
+  "contract": "spell_ascension_personal_bank::SummonBankVault() (AscensionCompat.cpp) computes a forward point with player->GetClosePoint(x, y, z, ...), which already LOS/height-validates that z against the true terrain (falling back to the player's own position only when the forward point differs by more than 3.0 yd or fails LOS). The bug (#9647, Orgrimmar bank ramp): the code discarded that validated z and re-derived it from GroundHeightBeneath(map, x, y, player->GetPositionZ()) instead, a narrow 0.5 yd search anchored on the caster's OWN feet height. When the caster's feet differ from the forward point's true ground by more than 0.5 yd (a ramp, stairs, or here a deliberately raised stance), GroundHeightBeneath's probe finds nothing in that narrow band and falls back to returning the caster's own (wrong) feet height verbatim, floating/burying the vault there. Ground truth for this scenario's spot was measured directly with point_ground_gap: real terrain at (-8949.95, -132.49) is z=83.53 (gap -0.0016). The caster is placed 2.0 yd above that (z=85.53, still within GetClosePoint's own 3.0 yd tolerance, so its own z stays correct), which is the same order of magnitude mismatch the report describes at the bank ramp. The fix anchors the re-probe on GetClosePoint's own z instead of the caster's feet, so the vault lands on the real ground regardless of the caster's own height.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.49, "z": 85.53, "o": 0 },
+  "players": [
+    { "id": "banker", "race": 1, "class": 12, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 3000 },
+    { "action": "add_item", "label": "Acquire the Personal Bank", "actor": "banker", "item": 134985, "count": 1 },
+    { "action": "assert", "label": "SETUP: the bank spell is known", "actor": "banker", "metric": "knows_spell", "spell": 100702, "equals": 1 },
+    { "action": "use_item", "label": "Summon the vault while standing 2 yd above the real ground", "actor": "banker", "item": 134985, "spell": 100702 },
+    { "action": "wait", "label": "Let the vault summon land in the world", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the vault exists nearby", "actor": "banker", "metric": "nearby_gameobject_count", "entry": 475001, "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the vault sits on the real ground, not 2 yd up at the caster's own feet height", "actor": "banker", "metric": "nearby_gameobject_ground_offset", "entry": 475001, "min": -0.5, "max": 0.5 }
+  ]
+}

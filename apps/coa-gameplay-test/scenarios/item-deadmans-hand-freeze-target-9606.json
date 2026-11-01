@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Deadman's Hand's Freeze roots the struck creature, not the wearer (#9606)",
+  "contract": "Deadman's Hand (34227/1584227/1684227) equips spell 27867 Freeze, a SPELL_AURA_PROC_TRIGGER_SPELL passive (ProcFlags all TAKEN_*, ProcChance 5) that casts 27868 on being struck. #9606 reports the root landing on the wearer instead of the attacker. Spell.dbc's own EffectImplicitTargetA[0] for the triggered spell 27868 is TARGET_UNIT_TARGET_ENEMY (6), the explicit-unit-target kind: AuraEffect::HandleProcTriggerSpellAuraProc resolves triggerTarget to the attacker (eventInfo.GetActor()) for a taken-hit proc and calls triggerCaster->CastSpell(triggerTarget, ...), so Spell::SelectImplicitTargets should bind the root to that explicit target. This proves the live target resolution directly: casting 27868 with an explicit enemy target must root that target, not the caster.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wearer", "race": 1, "class": 12, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "wearer", "entry": 36, "level": 60, "health": 1000000, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "label": "Learn the proc's root payload for a direct, deterministic target check", "actor": "wearer", "spell": 27868 },
+    { "action": "cast", "label": "Cast Freeze's trigger spell at the dummy, as the proc's internal CastSpell(triggerTarget=attacker, ...) would", "actor": "wearer", "spell": 27868, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the cast was accepted", "actor": "wearer", "metric": "cast_failure", "spell": 27868, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: the struck creature carries the root, not the wearer", "actor": "dummy", "metric": "aura", "spell": 27868, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTROL: the wearer is not rooted by its own proc", "actor": "wearer", "metric": "aura", "spell": 27868, "equals": 0 }
+  ]
+}

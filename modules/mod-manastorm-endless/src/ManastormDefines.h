@@ -48,7 +48,7 @@ namespace ManastormBaseline
 
     // Recovered Manastorm Potion Charge System behavior.
     constexpr uint8 PotionMaxCharges = 3;
-    constexpr uint32 PotionRechargeMs = 10000;
+    constexpr uint32 PotionRechargeMs = 5000;
 }
 
 namespace ManastormResurrection

@@ -8508,7 +8508,7 @@ class spell_ascension_personal_bank : public SpellScript
         float x, y, z;
         player->GetClosePoint(x, y, z, player->GetCombatReach(), 2.0f);
 
-        z = GroundHeightBeneath(player->GetMap(), x, y, player->GetPositionZ());
+        z = GroundHeightBeneath(player->GetMap(), x, y, z);
 
         GameObject* vault = player->GetMap()->SummonGameObject(
             entry, x, y, z, player->GetOrientation(), 0.0f, 0.0f, 0.0f,
