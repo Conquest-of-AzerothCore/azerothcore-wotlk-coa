@@ -1589,7 +1589,10 @@ uint32 SpellMgr::GetSpellTwinFor(uint32 stockSpellId, uint32 relatedSpellId) con
     if (relatedSource == relatedSpellId || relatedSpellId < relatedSource)
         return stockSpellId;
     uint32 const candidate = stockSpellId + (relatedSpellId - relatedSource);
-    return GetSpellInfo(candidate) && GetSpellTwinSource(candidate) == stockSpellId ? candidate : stockSpellId;
+    if (GetSpellInfo(candidate) && GetSpellTwinSource(candidate) == stockSpellId)
+        return candidate;
+    uint32 const firstRank = GetFirstSpellInChain(relatedSpellId);
+    return firstRank != relatedSpellId ? GetSpellTwinFor(stockSpellId, firstRank) : stockSpellId;
 }
 
 std::vector<uint32> SpellMgr::GetSpellAndRelatives(uint32 spellId) const
