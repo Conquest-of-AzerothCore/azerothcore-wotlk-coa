@@ -42,6 +42,7 @@
 #include "PoolMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedGossip.h"
+#include "SmartAI.h"
 #include "SpellAuraDefines.h"
 #include "SpellAuraEffects.h"
 #include "SpellMgr.h"
@@ -3373,6 +3374,19 @@ void Creature::PauseMovementForInteraction()
 {
     if (uint32 pause = GetMovementTemplate().GetInteractionPauseTimer())
     {
+        if (SmartAI* smartAI = dynamic_cast<SmartAI*>(AI()); smartAI && smartAI->IsEscorted())
+        {
+            // Only ambient paths: CMSG_QUESTGIVER_HELLO needs no npcflag, so any player could otherwise
+            // hold another player's escort.
+            ObjectVector const* escorters = smartAI->GetScript()->GetStoredTargetVector(SMART_ESCORT_TARGETS, *this);
+            if (!escorters || escorters->empty())
+            {
+                if (!smartAI->HasEscortState(SMART_ESCORT_PAUSED | SMART_ESCORT_RETURNING) && !IsInCombat())
+                    smartAI->PausePath(pause, true);
+                return;
+            }
+        }
+
         uint8 pauseSlot = MOTION_SLOT_IDLE;
 
         if (GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_ACTIVE) == POINT_MOTION_TYPE)

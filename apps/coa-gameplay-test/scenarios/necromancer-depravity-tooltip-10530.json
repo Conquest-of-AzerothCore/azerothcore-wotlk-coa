@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Depravity's tooltip reads 'a 50% chance' (#10530)",
+  "contract": "Depravity 638403 says 'gives their critical melee auto attacks an $h% chance to trigger Bone Club'; its ProcChance is 50, so the client reads 'an 50% chance'. The streamed description keeps the Spell.dbc text with the article 'a', as for any number that does not start with a vowel sound.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "n", "race": 1, "class": 23, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the patch stream arrive", "ms": 3000 },
+    { "action": "assert", "label": "CONTROL: the description row for Depravity is streamed", "actor": "n",
+      "metric": "server_packets", "opcode": 2346, "row": 638403, "min": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "FIX: the chance reads 'a $h%'", "actor": "n",
+      "metric": "server_packet_contains", "opcode": 2346, "row": 638403,
+      "text": "critical melee auto attacks a $h% chance to trigger", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "FIX: the text no longer reads 'an $h%'", "actor": "n",
+      "metric": "server_packet_contains", "opcode": 2346, "row": 638403, "text": "an $h%", "equals": 0 },
+    { "action": "assert", "label": "CONTROL: the rest of the sentence is unchanged", "actor": "n",
+      "metric": "server_packet_contains", "opcode": 2346, "row": 638403,
+      "text": "dealing $s2% of the damage dealt as Shadow Damage.", "equals": 1 }
+  ]
+}

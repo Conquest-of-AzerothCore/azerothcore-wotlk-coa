@@ -29,6 +29,9 @@ enum RunemasterTalentProcSpells : uint32
     SPELL_ENGRAVING_EARTH = 653272,
     SPELL_ENGRAVING_AIR = 653226,
     SPELL_AIR_ENGRAVING_PROC = 653225,
+    SPELL_AIR_ENGRAVING_EQUIP = 653223,
+    SPELL_EARTH_ENGRAVING_EQUIP = 653219,
+    SPELL_EARTH_ENGRAVING_PROC = 653221,
     SPELL_ICE_ENGRAVING_PROC = 653266,
     SPELL_ICE_ENGRAVING_SLOW = 653231,
     SPELL_ICEBOUND_MOMENTUM = 712490,
@@ -158,6 +161,51 @@ class aura_ascension_runemaster_air_engraving : public AuraScript
         DoCheckProc += AuraCheckProcFn(aura_ascension_runemaster_air_engraving::CheckDirectDamage);
         OnEffectProc += AuraEffectProcFn(aura_ascension_runemaster_air_engraving::CopyDamage, EFFECT_0,
             AuraType(354));
+    }
+};
+
+class aura_ascension_runemaster_engraving_per_weapon : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_runemaster_engraving_per_weapon);
+
+    static uint32 WeaponAuraOf(uint32 equipSpellId)
+    {
+        switch (equipSpellId)
+        {
+            case SPELL_AIR_ENGRAVING_EQUIP:
+                return SPELL_AIR_ENGRAVING_PROC;
+            case SPELL_EARTH_ENGRAVING_EQUIP:
+                return SPELL_EARTH_ENGRAVING_PROC;
+            default:
+                return 0;
+        }
+    }
+
+    bool Validate(SpellInfo const* info) override
+    {
+        uint32 const weaponAura = WeaponAuraOf(info->Id);
+        return weaponAura && info->Effects[EFFECT_0].IsAura(SPELL_AURA_DUMMY) && ValidateSpellInfo({weaponAura});
+    }
+
+    void ApplyWeaponAura(AuraEffect const* effect, AuraEffectHandleModes)
+    {
+        Unit* owner = GetTarget();
+        Player* player = owner->ToPlayer();
+        Item* weapon = player ? player->GetItemByGuid(GetAura()->GetCastItemGUID()) : nullptr;
+        owner->CastSpell(owner, WeaponAuraOf(GetId()), TRIGGERED_FULL_MASK, weapon, effect);
+    }
+
+    void RemoveWeaponAura(AuraEffect const*, AuraEffectHandleModes)
+    {
+        GetTarget()->RemoveAurasDueToItemSpell(WeaponAuraOf(GetId()), GetAura()->GetCastItemGUID());
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_runemaster_engraving_per_weapon::ApplyWeaponAura,
+            EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_runemaster_engraving_per_weapon::RemoveWeaponAura,
+            EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
     }
 };
 
@@ -468,6 +516,7 @@ void AddSC_AscensionRunemasterTalentProcs()
     RegisterSpellScript(spell_ascension_runemaster_ancient_warrior);
     RegisterSpellScript(aura_ascension_runemaster_decoder);
     RegisterSpellScript(aura_ascension_runemaster_air_engraving);
+    RegisterSpellScript(aura_ascension_runemaster_engraving_per_weapon);
     RegisterSpellScript(aura_ascension_runemaster_leyfrost);
     RegisterSpellScript(aura_ascension_runemaster_convergence);
     new runemaster_ley_lock_duration();

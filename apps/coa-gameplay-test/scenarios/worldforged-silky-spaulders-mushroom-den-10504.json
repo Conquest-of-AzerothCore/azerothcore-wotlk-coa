@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Worldforged Silky Spaulders stands in the Duskwood mushroom cave, not on the hill above it (#10504)",
+  "contract": "Silk Covered Spaulders (entry 95823, guid 6941083) was moved by the LootCollector alignment to the hilltop terrain height (z 124.0), 29 yd above the cave where the reporter stood (z 91.5). It is restored to the spot the realm authored in game on 2026-09-25, (-10569.52, -1504.90, 95.12), inside the cave.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -10569.5, "y": -1504.9, "z": 96.6, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup stands in the cave, not 29 yd above on the hill", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95823, "equals": 1 },
+    { "action": "assert", "label": "the restored spot is on the cave floor", "actor": "p", "metric": "spawn_ground_gap", "guid": 6941083, "spawn_type": "gameobject", "min": -0.5, "max": 1.0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 95823 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "it is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

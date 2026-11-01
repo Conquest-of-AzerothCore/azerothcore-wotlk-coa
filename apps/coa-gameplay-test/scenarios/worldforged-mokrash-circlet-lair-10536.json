@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "name": "Worldforged Mok'rash's Circlet stands on dry ground at Mok'rash's lair (#10536)",
+  "contract": "#10536 reported the Mok'rash's Circlet pickup (gameobject entry 254352, guid 6940758) missing at the lair, with sparkles under the ground. It stood on the sea floor at z -20.916 north of Booty Bay, 48 yd from Mok'rash. It is restored to the catalog's recorded position (-14223.1, 718.328, 10.483), on the ridge 19 yd from Mok'rash's spawn and 0.13 yd above the terrain there.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -14223.1,
+    "y": 718.328,
+    "z": 11.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 254352,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6940758,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 1.0
+    },
+    {
+      "action": "assert",
+      "label": "it is grounded",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "guid": 6940758,
+      "spawn_type": "gameobject",
+      "tolerance": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "it is not under liquid",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "guid": 6940758,
+      "spawn_type": "gameobject",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 254352
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

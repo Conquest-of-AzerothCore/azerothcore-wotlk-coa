@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Investigate the Camp: the hunters' camp trigger credits the player the client reports in it (#10544)",
+  "contract": [
+    "Quest 201 Investigate the Camp is completed by areatrigger_involvedrelation (98, 201). The client fires trigger 98 from its AreaTrigger.dbc: a 30 yard sphere at (-11619.7, -54.924, 11.17). The world areatrigger row sat 15 yards away at (-11634.8, -54.0697, 13.4439), so a player who entered the client's sphere from the east was more than 30 yards from the server's centre, HandleAreaTriggerOpcode rejected the packet and the client never resent it.",
+    "Expected: with 201 in progress, a player 25 yards east of the client's centre (40 yards from the old world centre) who sends CMSG_AREATRIGGER 98 completes the quest. A player 45 yards east of the client's centre, outside the client's sphere, is still rejected."
+  ],
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": -11594.7, "y": -54.9, "z": 11.35, "o": 0 },
+  "players": [
+    { "id": "scout", "race": 1, "class": 19, "level": 37 },
+    { "id": "far", "race": 1, "class": 19, "level": 37 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "prepare_quest", "label": "Take Investigate the Camp", "actor": "scout", "quest": 201, "complete": false },
+    { "action": "prepare_quest", "label": "The far player takes it too", "actor": "far", "quest": 201, "complete": false },
+    { "action": "assert", "label": "SETUP: the quest is in progress", "actor": "scout", "metric": "quest_status", "quest": 201, "equals": 3 },
+    { "action": "assert", "label": "SETUP: the far player's quest is in progress", "actor": "far", "metric": "quest_status", "quest": 201, "equals": 3 },
+    {
+      "action": "teleport", "label": "Stand 25 yards east of the client's trigger centre", "actor": "scout",
+      "map": 0, "x": -11594.7, "y": -54.9, "z": 11.35
+    },
+    {
+      "action": "teleport", "label": "Stand 45 yards east of the client's trigger centre", "actor": "far",
+      "map": 0, "x": -11574.7, "y": -54.9, "z": 11.35
+    },
+    {
+      "action": "assert", "label": "SETUP: the scout is inside the client's 30 yard sphere", "actor": "scout",
+      "metric": "point_distance_2d", "x": -11619.7, "y": -54.924, "max": 26
+    },
+    {
+      "action": "assert", "label": "SETUP: the scout is outside 30 yards of the old world centre", "actor": "scout",
+      "metric": "point_distance_2d", "x": -11634.8, "y": -54.0697, "min": 35
+    },
+    { "action": "area_trigger", "label": "The client reports the camp trigger", "actor": "scout", "id": 98 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: locating the hunters' camp completes the quest", "actor": "scout",
+      "metric": "quest_status", "quest": 201, "equals": 1, "within_ms": 3000
+    },
+    { "action": "area_trigger", "label": "A trigger packet from outside the client's sphere", "actor": "far", "id": 98 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "CONTROL: a player outside the sphere is not credited", "actor": "far",
+      "metric": "quest_status", "quest": 201, "equals": 3
+    }
+  ]
+}

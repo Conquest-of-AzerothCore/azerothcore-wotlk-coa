@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Dungeon Finder Need on a shield follows the Shield proficiency for a Witch Doctor (#10516)",
+  "contract": [
+    "Issue #10516: a Witch Doctor could roll Need on Aegis of the Scarlet Commander 7726 (shield, all classes) although it cannot equip shields.",
+    "Equipping a shield needs the Shield proficiency 9116 (skill 433); SkillLineAbility row 4115 grants it to class mask 0x7F030A00, which includes Sun Cleric 27 but not Witch Doctor 13.",
+    "Inside the group's Dungeon Finder dungeon the Need rule for a shield follows that proficiency: no Need for the Witch Doctor without skill 433, Need for the Sun Cleric that holds it."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "doctor", "race": 1, "class": 13, "level": 60 },
+    { "id": "cleric", "race": 1, "class": 27, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "group", "actor": "doctor", "target": "cleric" },
+    { "action": "lfg_dungeon", "label": "The group is assigned Scarlet Monastery - Graveyard", "actor": "doctor", "dungeon": 18 },
+    { "action": "lfg_teleport", "actor": "doctor" },
+    { "action": "lfg_teleport", "actor": "cleric" },
+    { "action": "assert", "label": "The Witch Doctor enters Scarlet Monastery", "actor": "doctor", "metric": "map_id", "equals": 189, "within_ms": 15000 },
+    { "action": "assert", "label": "The Sun Cleric enters Scarlet Monastery", "actor": "cleric", "metric": "map_id", "equals": 189, "within_ms": 15000 },
+    { "action": "wait", "ms": 1000 },
+
+    { "action": "assert", "label": "SETUP: the Witch Doctor has no Shield proficiency", "actor": "doctor", "metric": "skill_value", "skill": 433, "equals": 0 },
+    { "action": "assert", "label": "SETUP: the Sun Cleric knows Shield", "actor": "cleric", "metric": "skill_value", "skill": 433, "min": 1 },
+    { "action": "assert", "label": "CONTRACT: the Witch Doctor cannot Need the Aegis", "actor": "doctor", "metric": "lfg_need_allowed", "item": 7726, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: the Sun Cleric can Need the Aegis", "actor": "cleric", "metric": "lfg_need_allowed", "item": 7726, "equals": 1 }
+  ]
+}
