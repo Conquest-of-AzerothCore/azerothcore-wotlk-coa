@@ -5,6 +5,7 @@
 #include "AscensionItemAddonFile.h"
 #include "AscensionItemLadder.h"
 #include "AscensionItemScaling.h"
+#include "AscensionPendingStatQueries.h"
 #include "Bag.h"
 #include "Config.h"
 #include "Creature.h"
@@ -461,6 +462,31 @@ void SendPreviewFlag(Player* player)
     player->SendDirectMessage(&data);
 }
 
+PendingStatQueries pendingStatQueries;
+
+void SendStatReply(WorldSession* session, uint32 itemId, uint32 level, ItemTemplate const* proto, bool stock)
+{
+    bool const reborn = rebornArmor.load(std::memory_order_relaxed);
+    if (stock)
+    {
+        ItemLadder::Row const stockRow =
+            ItemLadder::StockRow(*proto, reborn ? AuthoredRebornArmor(*proto) : proto->Armor);
+        WorldPacket reply = ItemLadder::BuildItemStatResponse(itemId, level, stockRow, proto);
+        session->SendPacket(&reply);
+        return;
+    }
+
+    ItemLadder::Row const* found = LadderStore::Instance().Row(itemId, level);
+    if (!found)
+        return;
+
+    ItemLadder::Row row = *found;
+    if (!reborn)
+        row.ArmorReborn = row.Armor;
+    WorldPacket reply = ItemLadder::BuildItemStatResponse(itemId, level, row, proto);
+    session->SendPacket(&reply);
+}
+
 bool HandleItemStatQuery(WorldSession* session, WorldPacket const& packet)
 {
     if (!session || packet.size() < 2 * sizeof(uint32) || !enabled.load(std::memory_order_relaxed))
@@ -472,26 +498,32 @@ bool HandleItemStatQuery(WorldSession* session, WorldPacket const& packet)
     if (!level || !proto)
         return true;
 
-    bool const reborn = rebornArmor.load(std::memory_order_relaxed);
-    if (PreviewOn() && level == proto->ItemLevel && !OwnsStoredKey(session->GetPlayer(), itemId, level))
+    if (PreviewOn() && level == proto->ItemLevel)
     {
-        ItemLadder::Row const stockRow =
-            ItemLadder::StockRow(*proto, reborn ? AuthoredRebornArmor(*proto) : proto->Armor);
-        WorldPacket stock = ItemLadder::BuildItemStatResponse(itemId, level, stockRow, proto);
-        session->SendPacket(&stock);
+        pendingStatQueries.Add(session->GetAccountId(), itemId);
         return true;
     }
 
-    ItemLadder::Row const* found = LadderStore::Instance().Row(itemId, level);
-    if (!found)
-        return true;
-
-    ItemLadder::Row row = *found;
-    if (!reborn)
-        row.ArmorReborn = row.Armor;
-    WorldPacket reply = ItemLadder::BuildItemStatResponse(itemId, level, row, proto);
-    session->SendPacket(&reply);
+    SendStatReply(session, itemId, level, proto, false);
     return true;
+}
+
+void AnswerPendingStatQueries(Player* player)
+{
+    WorldSession* session = player->GetSession();
+    if (!session)
+        return;
+
+    for (uint32 const itemId : pendingStatQueries.Take(session->GetAccountId()))
+        if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId))
+            SendStatReply(session, itemId, proto->ItemLevel, proto,
+                !OwnsStoredKey(player, itemId, proto->ItemLevel));
+}
+
+void DiscardPendingStatQueries(Player* player)
+{
+    if (WorldSession* session = player->GetSession())
+        static_cast<void>(pendingStatQueries.Take(session->GetAccountId()));
 }
 
 void LoadInstanceLevels()
@@ -585,7 +617,8 @@ class Acquisition : public PlayerScript
 {
 public:
     Acquisition() : PlayerScript("NativeItemScalingAcquisition", { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LOOT_ITEM,
-        PLAYERHOOK_ON_GROUP_ROLL_REWARD_ITEM, PLAYERHOOK_ON_QUEST_REWARD_ITEM, PLAYERHOOK_ON_STORE_NEW_ITEM }) { }
+        PLAYERHOOK_ON_GROUP_ROLL_REWARD_ITEM, PLAYERHOOK_ON_QUEST_REWARD_ITEM, PLAYERHOOK_ON_STORE_NEW_ITEM,
+        PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT }) { }
 
     void OnPlayerLogin(Player* player) override
     {
@@ -594,6 +627,17 @@ public:
 
         SendPreviewFlag(player);
         SendAllLevels(player);
+    }
+
+    void OnPlayerUpdate(Player* player, uint32) override
+    {
+        if (pendingStatQueries.Size())
+            AnswerPendingStatQueries(player);
+    }
+
+    void OnPlayerLogout(Player* player) override
+    {
+        DiscardPendingStatQueries(player);
     }
 
     void OnPlayerStoreNewItem(Player* player, Item* item, uint32) override
