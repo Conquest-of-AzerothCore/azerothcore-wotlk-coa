@@ -508,8 +508,8 @@ public:
     {
         if (!spellInfo)
             return;
-        uint32 twin = sSpellMgr->GetRunningScriptTwin();
-        if (!twin && triggeredByAura && sSpellMgr->GetSpellTwinSource(triggeredByAura->GetId()) != triggeredByAura->GetId())
+        uint32 twin = triggeredByAura ? 0 : sSpellMgr->GetRunningScriptTwin();
+        if (triggeredByAura && sSpellMgr->GetSpellTwinSource(triggeredByAura->GetId()) != triggeredByAura->GetId())
             twin = triggeredByAura->GetId();
         if (!twin)
             return;
