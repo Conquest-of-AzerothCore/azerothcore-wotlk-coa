@@ -2126,6 +2126,8 @@ bool Creature::CanStartAttack(Unit const* who, bool force) const
  */
 void Creature::setDeathState(DeathState state, bool despawn)
 {
+    bool const wasParabolic = state == DeathState::JustDied && movespline->Initialized() && !movespline->Finalized() &&
+        movespline->isParabolic();
     Unit::setDeathState(state, despawn);
 
     if (state == DeathState::JustDied)
@@ -2157,7 +2159,7 @@ void Creature::setDeathState(DeathState state, bool despawn)
         if (m_formation && m_formation->GetLeader() == this)
             m_formation->FormationReset(true, false);
 
-        bool needsFalling = !despawn && (IsFlying() || IsHovering()) && !IsUnderWater();
+        bool needsFalling = !despawn && (IsFlying() || IsHovering() || wasParabolic) && !IsUnderWater();
         SetHover(false);
         SetDisableGravity(false);
 

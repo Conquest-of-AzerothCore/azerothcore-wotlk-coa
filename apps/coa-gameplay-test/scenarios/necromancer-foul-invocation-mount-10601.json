@@ -1,0 +1,196 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Foul Invocation refuses mounting and keeps the form (#10601)",
+  "contract": [
+    "Foul Invocation (804371) is a native SPELL_AURA_TRANSFORM into creature 444914, shown as display 310061",
+    "while its aura is active. A Brown Horse (458) cast submitted in that form must be refused with the native",
+    "transform rejection SPELL_FAILED_NOT_SHAPESHIFT (68): the transform-specific gate in Spell::CheckCast reads",
+    "getTransForm() and rejects a transforming spell that carries SPELL_ATTR0_NO_IMMUNITIES and is neither",
+    "ALLOW_WHILE_MOUNTED nor a debuff. The mount aura and mount display must stay absent, the Foul Invocation",
+    "aura and display 310061 must remain, distinguishing rejection from the reported mounted form and from a",
+    "mount-then-cancel-form behavior. Once the form is removed, the same ordinary on-foot Brown Horse cast must",
+    "succeed, proving the fixture and the ordinary mount path remain valid.",
+    "Evidence boundary: this observes native aura, display, cast-failure and mount state in a socketless",
+    "session. It does not cover rendered client appearance, animations or mount speed."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "necro",
+      "race": 1,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_skill",
+      "label": "Riding skill for the mount",
+      "actor": "necro",
+      "skill": 762,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "learn",
+      "label": "Learn the mount and the form so neither cast can fail on a missing spellbook entry",
+      "actor": "necro",
+      "spell": 458
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 804371
+    },
+    {
+      "action": "cast",
+      "label": "Enter Foul Invocation",
+      "actor": "necro",
+      "spell": 804371
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Foul Invocation aura is active",
+      "actor": "necro",
+      "metric": "aura",
+      "spell": 804371,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the transform display is shown",
+      "actor": "necro",
+      "metric": "display_id",
+      "equals": 310061,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Clear the form cast's global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Try to mount the Brown Horse while transformed",
+      "actor": "necro",
+      "spell": 458
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the mount cast is refused with SPELL_FAILED_NOT_SHAPESHIFT",
+      "actor": "necro",
+      "metric": "cast_failure",
+      "spell": 458,
+      "equals": 68,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no mount aura was applied",
+      "actor": "necro",
+      "metric": "aura",
+      "spell": 458,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no mount display was set",
+      "actor": "necro",
+      "metric": "mount_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the form aura survived the refused mount",
+      "actor": "necro",
+      "metric": "aura",
+      "spell": 804371,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the transform display is retained",
+      "actor": "necro",
+      "metric": "display_id",
+      "equals": 310061
+    },
+    {
+      "action": "set_aura",
+      "label": "CONTROL: leave Foul Invocation",
+      "actor": "necro",
+      "spell": 804371,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the form is gone",
+      "actor": "necro",
+      "metric": "aura",
+      "spell": 804371,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Clear any remaining global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: mount the Brown Horse on foot",
+      "actor": "necro",
+      "spell": 458
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the on-foot mount cast is accepted",
+      "actor": "necro",
+      "metric": "cast_failure",
+      "spell": 458,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the mount aura is applied",
+      "actor": "necro",
+      "metric": "aura",
+      "spell": 458,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the mount display is set",
+      "actor": "necro",
+      "metric": "mount_display_id",
+      "min": 1
+    },
+    {
+      "action": "cancel_mount",
+      "label": "Restore the native state",
+      "actor": "necro"
+    },
+    {
+      "action": "assert",
+      "label": "The control dismounts",
+      "actor": "necro",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}
