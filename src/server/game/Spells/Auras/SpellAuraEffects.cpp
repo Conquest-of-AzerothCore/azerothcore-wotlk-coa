@@ -1668,7 +1668,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
             // Leader of the Pack
             std::vector<uint32> const leaderOfThePack = sSpellMgr->GetSpellAndRelatives(17007);
             if (std::any_of(leaderOfThePack.begin(), leaderOfThePack.end(),
-                [player](uint32 spellId) { return player->HasTalent(spellId, player->GetActiveSpec()); }))
+                [player](uint32 spellId) { return player->HasTalent(spellId, player->GetActiveSpec()) || player->HasSpell(spellId); }))
             {
                 SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(24932);
                 if (spellInfo && spellInfo->Stances & (uint64(1) << (GetMiscValue() - 1)))
