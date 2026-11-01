@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Prestige Mode grants Riding tomes that actually exist (#10262)",
+  "contract": "modules/mod-coa-prestige/src/CoAPrestige.cpp's Activate() calls ForgetRiding(), which strips every riding spell the character knows and queues a RidingTomes[] tome reward per tier, then GrantRewards(player, ridingTomes, mailed, trans). Two independent defects dropped tomes (#10262): (1) GrantRewards looks the reward item up with sObjectMgr->GetItemTemplate and silently drops any reward whose item id has no item_template row; RidingTomes[] pointed Apprentice (33388), Journeyman (33391) and Cold Weather Flying (54197) at item ids (2200037, 1039605, 2179244) that do not exist anywhere in this checkout, so GrantRewards dropped those tiers. The fix repoints them at item ids that do exist: 2200034 (Soulbound Riding Tome: Apprentice Riding), 2200033 (...Journeyman Riding) and 49177 (stock Tome of Cold Weather Flight). (2) Riding spells form one rank chain, so Player::removeSpell on a lower rank recursively removes every higher rank still known; ForgetRiding decided tier by tier mid-loop, so removing the known Apprentice rank first erased the known Journeyman rank before the loop reached it, and only the Apprentice tome was ever queued even when the character also knew Journeyman. The fix snapshots every known tier before removing any of them. This realm's effective MaxPlayerLevel is 80 (not 60), so the rider fixture must already be at 80 for Chromie to accept the prestige.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8816.5, "y": 627.0, "z": 94.1, "o": 3.8 },
+  "players": [
+    { "id": "rider", "race": 1, "class": 16, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "chromie", "owner": "rider", "entry": 178081, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 3000 },
+    { "action": "specialization", "actor": "rider", "id": 13 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "learn", "actor": "rider", "spell": 33388, "label": "Knows Apprentice Riding" },
+    { "action": "learn", "actor": "rider", "spell": 33391, "label": "Knows Journeyman Riding" },
+    { "action": "learn", "actor": "rider", "spell": 54197, "label": "Knows Cold Weather Flying" },
+
+    { "action": "gossip_hello", "actor": "rider", "target": "chromie", "label": "Speak to Chromie" },
+    { "action": "gossip_select", "actor": "rider", "option": 0, "label": "I would like to prestige!" },
+    { "action": "assert", "label": "Riding was stripped by the prestige reset", "actor": "rider", "metric": "level", "equals": 1, "within_ms": 5000 },
+
+    { "action": "assert", "label": "Apprentice Riding tome (2200034) is granted", "actor": "rider", "metric": "item_count", "item": 2200034, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Journeyman Riding tome (2200033) is granted", "actor": "rider", "metric": "item_count", "item": 2200033, "equals": 1 },
+    { "action": "assert", "label": "Cold Weather Flying tome (49177) is granted", "actor": "rider", "metric": "item_count", "item": 49177, "equals": 1 }
+  ]
+}
