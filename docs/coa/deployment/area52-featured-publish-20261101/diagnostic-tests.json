@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "checks": [
+    "hidden-validator stage",
+    "coverage and SAME limitation",
+    "unknown reason retained with entry/level/name/rank/ID",
+    "numeric rejection without reason",
+    "string reason",
+    "first shortfall level",
+    "API failure location without raw exception",
+    "pending-build read failure"
+  ],
+  "limits": "Lua API fixtures; no installed-client observation, full validator reproduction, or build mutation."
+}

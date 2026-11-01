@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "checks": [
+    "numeric 0/1 and boolean button states",
+    "failure tooltip retained",
+    "Save state forwarding unchanged",
+    "disabled/enabled repeated transitions",
+    "full Lua 5.1 syntax",
+    "all MPQ members read back"
+  ],
+  "installed_baseline_sha256": "38f5f21ce7ae2fc86a6f8ee729330ae5b62103f2eab01a980cc85d534b94fc46",
+  "candidate_sha256": "46160ad90979d9cc1d9510063ad7fef97a4a3682ef8d01d0d1a8fa4e6a2bb63e",
+  "preserved_members": 16,
+  "installed": false,
+  "limitation": "Featured-only compatibility uses full Leveling validation and restores Draft identity. Proprietary predicate not executed offline; no activation package or installed-client acceptance claimed."
+}

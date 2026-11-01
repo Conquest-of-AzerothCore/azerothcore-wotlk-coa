@@ -1,0 +1,4048 @@
+--- a/Interface/AddOns/Ascension_BuildCreator/BuildCreator.lua
++++ b/Interface/AddOns/Ascension_BuildCreator/BuildCreator.lua
+@@ -1,1308 +1,1318 @@
+-local AddonName = ...
+-local AddonVersion = tonumber(GetAddOnMetadata(AddonName, "Version"))
+-
+-local DefaultBuildCreatorSaved = {
+-	SavedBuilds = {}
+-}
+-
+-BuildCreatorMixin = {}
+-
+-local BuildCategories = {}
+-
+-local CreateCategories = {
+-	Enum.BuildCreateCategory.Import,
+-	Enum.BuildCreateCategory.CurrentBuild,
+-}
+-
+-function BuildCreatorMixin:OnLoad()
+-	PortraitFrame_SetIcon(self, "Interface\\Icons\\ability_priest_angelicfeather")
+-	PortraitFrame_SetTitle(self, HERO_ARCHITECT)
+-	self.CloseButton:SetScript("OnClick", function()
+-		HideUIPanel(Collections)
+-	end)
+-
+-	self:RegisterEvent("ADDON_LOADED")
+-	self:RegisterEvent("BUILD_CREATOR_CATEGORY_RESULT")
+-	self:RegisterEvent("BUILD_CREATOR_BUILD_RESULT")
+-	self:RegisterEvent("BUILD_CREATOR_ACTIVATE_RESULT")
+-	self:RegisterEvent("BUILD_CREATOR_DEACTIVATE_RESULT")
+-	self:RegisterEvent("BUILD_CREATOR_SAVE_RESULT")
+-	self:RegisterEvent("BUILD_CREATOR_CREATE_RESULT")
+-	self:RegisterEvent("BUILD_CREATOR_DELETE_RESULT")
+-
+-	self.BuildScroll:SetTemplate("BuildListItemTemplate")
+-	self.BuildScroll:SetGetNumResultsFunction(C_BuildCreator.GetNumBuilds)
+-	
+-	local isWildCard = C_GameMode:IsGameModeActive(Enum.GameMode.WildCard)
+-
+-	if not isWildCard then
+-		tinsert(BuildCategories, Enum.BuildCategory.BuildDraft)
+-		tinsert(BuildCategories, Enum.BuildCategory.Leveling)
+-		tinsert(CreateCategories, Enum.BuildCreateCategory.Leveling)
+-	else
+-		tinsert(BuildCategories, Enum.BuildCategory.BuildDraftEndGamePvE)
+-		tinsert(BuildCategories, Enum.BuildCategory.BuildDraftEndGamePvP)
+-	end
+-
+-	local maxLevel = GetMaxLevel()
+-	if maxLevel == 60 then
+-		tinsert(BuildCategories, Enum.BuildCategory.Level60PvE)
+-		tinsert(BuildCategories, Enum.BuildCategory.Level60PvP)
+-		tinsert(CreateCategories, Enum.BuildCreateCategory.Level60PvE)
+-		tinsert(CreateCategories, Enum.BuildCreateCategory.Level60PvP)
+-	elseif maxLevel == 70 then
+-		tinsert(BuildCategories, Enum.BuildCategory.Level70PvE)
+-		tinsert(BuildCategories, Enum.BuildCategory.Level70PvP)
+-		tinsert(CreateCategories, Enum.BuildCreateCategory.Level70PvE)
+-		tinsert(CreateCategories, Enum.BuildCreateCategory.Level70PvP)
+-	end
+-
+-	if C_Player:GetLevel() == maxLevel or C_Player:IsGM() or isWildCard then
+-		tinsert(BuildCategories, Enum.BuildCategory.None)
+-		tinsert(BuildCategories, Enum.BuildCategory.History)
+-	end
+-
+-	self.categories = BuildCategories
+-	self.isCreateMode = false
+-	self.CategoryScroll:SetTemplate("BuildListCategoryListItemTemplate")
+-	self.CategoryScroll:SetGetNumResultsFunction(function() return #self.categories end)
+-	self.CategoryScroll:GetSelectedHighlight():SetAtlas("buildcreator-category-highlight", Const.TextureKit.IgnoreAtlasSize)
+-	self.CategoryScroll:GetSelectedHighlight():SetBlendMode("ADD")
+-	self.CategoryScroll.Artwork:SetAtlas("buildcreator-category-art", Const.TextureKit.IgnoreAtlasSize)
+-	
+-	self.sort = { [Enum.BuildSort.RatingDescending] = true }
+-	self.Filter:RegisterCallback("OnFilterChanged", self.OnFilterChanged, self)
+-	self:InitializeFilterDropDown()
+-	self.Sorting:Initialize(GenerateClosure(self.InitializeSortDropDown, self), GenerateClosure(self.SetSorting, self, Enum.BuildSort.RatingDescending))
+-	
+-	self.pendingCallback = {}
+-end 
+-
+-function BuildCreatorMixin:GetCategoryAtIndex(index)
+-	return self.categories[index]
+-end
+-
+-function BuildCreatorMixin:GetCurrentCategory()
+-	return self.category
+-end
+-
+-function BuildCreatorMixin:OnHide()
+-	StaticPopup_Hide("BUILD_CREATOR_SET_COMMENT")
+-	StaticPopup_Hide("BUILD_CREATOR_SET_ENCHANT_LEVEL")
+-end
+-
+-function BuildCreatorMixin:ShowBuildList()
+-	self.CategoryScroll:Show()
+-	self.BuildScroll:Show()
+-	self.BuildScroll:SetSelectedIndex()
+-	self.SearchBox:Show()
+-	self.Filter:Show()
+-	self.Sorting:Show()
+-	self.BuildViewPanel:Hide()
+-	self.EditableBuildViewPanel:Hide()
+-	self.Filter:ClearFilters()
+-	if not self.category then
+-		self.CategoryScroll:SetSelectedIndex(2, ScrollListMixin.UpdateType.AlwaysSimulateClick)
+-	else
+-		for index, category in ipairs(self.categories) do
+-			if category == self.category then
+-				self.CategoryScroll:SetSelectedIndex(index)
+-			end
+-		end
+-	end
+-end
+-
+-function BuildCreatorMixin:HideBuildList()
+-	self.CategoryScroll:Hide()
+-	self.BuildScroll:Hide()
+-	self.BuildScroll:SetSelectedIndex()
+-	self.SearchBox:Hide()
+-	self.Filter:Hide()
+-	self.Sorting:Hide()
+-	self.BuildViewPanel:Hide()
+-	self.EditableBuildViewPanel:Hide()
+-end
+-
+-function BuildCreatorMixin:ShowCreateCategories()
+-	self.isCreateMode = true
+-	self.categories = table.Copy(CreateCategories)
+-	local showTip
+-	if BuildCreatorSaved and next(BuildCreatorSaved.SavedBuilds) then
+-		table.insert(self.categories, 1, Enum.BuildCreateCategory.SavedBuild)
+-		showTip = not self.HasSeenSavedBuildTip
+-	end
+-	self.CategoryScroll:RefreshScrollFrame()
+-
+-	if showTip then
+-		local tip = {
+-			text = TIP_RESTORE_WIP_BUILD,
+-			textJustifyH = "CENTER",
+-			targetPoint = HelpTip.Point.BottomEdgeCenter,
+-			buttonStyle = HelpTip.ButtonStyle.GotIt,
+-			highlightTarget = HelpTip.TargetType.Box,
+-			strata = "TOOLTIP",
+-		}
+-		HelpTip:Show(self.CategoryScroll.ScrollFrame, tip, self.CategoryScroll.ScrollFrame.buttons[1])
+-		self.HasSeenSavedBuildTip = true -- once per session should be ok?
+-	end
+-end
+-
+-function BuildCreatorMixin:ShowBuildCategories()
+-	self.isCreateMode = false
+-	self.categories = table.Copy(BuildCategories)
+-	tinsert(self.categories, 1, Enum.BuildCategory.ActiveBuild)
+-	self.CategoryScroll:RefreshScrollFrame()
+-end
+-
+-function BuildCreatorMixin:ToggleCreate()
+-	if self.isCreateMode then
+-		self:ShowBuildCategories()
+-	else
+-		self:ShowCreateCategories()
+-	end
+-	self.ToggleCreateButton:SetText(self.isCreateMode and BROWSE_BUILDS or CREATE_BUILD)
+-end
+-
+-function BuildCreatorMixin:OpenBuildEditor()
+-	self:HideBuildList()
+-	if not self.EditableBuildViewPanel:IsShown() then
+-		self.EditableBuildViewPanel.deserializeNext = true
+-		self.EditableBuildViewPanel:Show()
+-	else
+-		self.EditableBuildViewPanel:UpdatePendingBuild(true)
+-	end
+-end
+-
+-function BuildCreatorMixin:SelectCategory(category)
+-	if category == Enum.BuildCategory.History then
+-		self.BuildScroll:SetGetNumResultsFunction(C_BuildCreator.GetNumBookmarkedBuilds)
+-		self.lastQueried = Enum.BuildCategory.History
+-	else
+-		self.BuildScroll:SetGetNumResultsFunction(C_BuildCreator.GetNumBuilds)
+-	end
+-
+-	if category == Enum.BuildCategory.ActiveBuild then
+-		self:ViewBuildID(BuildCreatorUtil.GetActiveBuildID())
+-		return
+-	end
+-
+-	if category == Enum.BuildCategory.Featured then
+-		category = Enum.BuildCategory.None
+-		self.Filter:SetToSingleFilter(Enum.BuildFilter.Featured)
+-	elseif category == Enum.BuildCategory.MyBuilds then
+-		category = Enum.BuildCategory.None
+-		self.Filter:SetToSingleFilter(Enum.BuildFilter.Owned)
+-	end
+-
+-	if self.lastQueried == category then
+-		-- skip event because we want to return to where we were scrolled to / what search & filters we had set.
+-		self.category = category
+-		self:ShowBuildList()
+-		self:UpdateSearch()
+-		return
+-	end
+-	C_BuildCreator.QueryAllBuilds(category)
+-	self.lastQueried = category
+-	self:ShowLoading()
+-end
+-
+-function BuildCreatorMixin:CreateBuild(category, deserialize)
+-	if category == Enum.BuildCreateCategory.Import then
+-		-- import build will specify to deserialize from popup
+-		if not deserialize then
+-			StaticPopup_Show("BUILD_CREATOR_IMPORT_BUILD")
+-			return
+-		else
+-			-- guess category for imports
+-			local maxLevel = GetMaxLevel()
+-			if maxLevel > 60 then
+-				category = Enum.BuildCreateCategory.Level70PvE
+-			else
+-				category = Enum.BuildCreateCategory.Level60PvE
+-			end
+-		end
+-	elseif category == Enum.BuildCreateCategory.CurrentBuild then
+-		C_BuildEditor.DiscardPendingBuild()
+-		self.EditableBuildViewPanel:ImportCurrentBuild()
+-		-- guess category for current build
+-		local maxLevel = GetMaxLevel()
+-		if maxLevel > 60 then
+-			category = Enum.BuildCreateCategory.Level70PvE
+-		else
+-			category = Enum.BuildCreateCategory.Level60PvE
+-		end
+-	elseif category == Enum.BuildCreateCategory.SavedBuild then
+-		-- saved builds will load the saved category.
+-		if not self.SavedBuildDropDown then
+-			local dropdown = CreateFrame("Frame", "BuildCreatorSavedBuildDropDown", self, "UIDropDownMenuTemplate")
+-			UIDropDownMenu_Initialize(dropdown, GenerateClosure(self.InitializeSavedBuildDropDown, self), "MENU")
+-			self.SavedBuildDropDown = dropdown
+-		end
+-		ToggleDropDownMenu(1, nil, self.SavedBuildDropDown, "cursor", 0, 0)
+-		return
+-	else
+-		-- categories above handle their own discarding
+-		-- saved builds will pass deserialize = true
+-		if not deserialize then
+-			C_BuildEditor.DiscardPendingBuild()
+-		end
+-	end
+-	self.category = category
+-	self.EditableBuildViewPanel:SetCategory(category)
+-	self:OpenBuildEditor()
+-	BuildCreatorUtil.ReleaseHeldSpell()
+-end
+-
+-function BuildCreatorMixin:ConvertBuildEditorToCategory(category)
+-	local convertCategory = function()
+-		self:CreateBuild(category, true)
+-		local build = C_BuildEditor.GetPendingBuild()
+-		if category == Enum.BuildCreateCategory.Level60PvE or category == Enum.BuildCreateCategory.Level60PvP then
+-			for _, spell in ipairs(build.Spells) do
+-				C_BuildEditor.SetSpellLevel(spell.Spell, 60)
+-			end
+-		elseif category == Enum.BuildCreateCategory.Level70PvE or category == Enum.BuildCreateCategory.Level70PvP then
+-			for _, spell in ipairs(build.Spells) do
+-				C_BuildEditor.SetSpellLevel(spell.Spell, 70)
+-			end
+-		elseif category == Enum.BuildCreateCategory.Leveling then
+-			local maxLevel = GetMaxLevel()
+-			for _, spell in ipairs(build.Spells) do
+-				C_BuildEditor.SetSpellLevel(spell.Spell, maxLevel)
+-			end
+-		end
+-	end
+-	
+-	StaticPopup_Show("BUILD_CREATOR_CHANGE_BUILD_CATEGORY", nil, nil, convertCategory)
+-end
+-
+-function BuildCreatorMixin:OnShow()
+-	C_Quest:SendPathToAscensionEvent("ACTION_OPEN_HERO_ARCHITECT")
+-	self:ShowBuildCategories()
+-	if not self.category then
+-		if BuildCreatorUtil.GetActiveBuildID() then
+-			self:ViewBuildID(BuildCreatorUtil.GetActiveBuildID())
+-		else
+-			self:ShowBuildList()
+-		end
+-	end
+-end
+-
+-function BuildCreatorMixin:OnFilterChanged()
+-	self:UpdateSearch()
+-end
+-
+-function BuildCreatorMixin:ApplyDefaultClassFilter()
+-	local filters = self.Filter:GetFilter()
+-	filters = table.Copy(filters)
+-	-- nasty hack to make it auto select your current class.
+-	if C_Player:IsHero() then
+-		filters["FILTER_CLASS_HERO"] = true
+-	else
+-		-- always filter to my class unless i have set to another class.
+-		local class = select(2, UnitClass("player"))
+-		if not self.Filter:IsFilteredFind("FILTER_CLASS_") then
+-			if class == "PROPHET" then
+-				filters["FILTER_CLASS_VENOMANCER"] = true
+-			elseif class == "FLESHWARDEN" then
+-				filters["FILTER_CLASS_FILTER_CLASS_KNIGHT_OF_XOROTH"] = true
+-			elseif class == "WILDWALKER" then
+-				filters["FILTER_CLASS_PRIMALIST"] = true
+-			elseif class == "DEATHKNIGHT" then
+-				filters["FILTER_CLASS_DEATH_KNIGHT"] = true
+-			else
+-				filters["FILTER_CLASS_"..class] = true
+-			end
+-		end
+-	end
+-	return filters
+-end
+-
+-function BuildCreatorMixin:UpdateSearch()
+-	self.Sorting.ClearFiltersButton:SetShown(not self.sort[Enum.BuildSort.RatingDescending])
+-	if self.BuildScroll:IsVisible() then
+-		local text = self.SearchBox:GetText()
+-		
+-		C_BuildCreator.UpdateFilter(text, self:ApplyDefaultClassFilter(), self.sort)
+-		self.BuildScroll:RefreshScrollFrame()
+-	end
+-end
+-
+-function BuildCreatorMixin:InitializeFilterDropDown()
+-	local filter = self.Filter
+-	filter:AddHeader(GENERAL_LABEL)
+-
+-	filter:AddFilterOption(Enum.BuildFilter.Featured, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Featured))
+-	filter:AddFilterOption(Enum.BuildFilter.Owned, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Owned))
+-	filter:AddFilterOption(Enum.BuildFilter.Recent, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Recent))
+-	
+-	filter:AddOptionSpacer()
+-
+-	filter:AddHeader(ROLE)
+-
+-	local damageInfo = filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Damage, ROLE_COLORS["DAMAGE"], ROLE_ATLAS["DAMAGER"].."-micro")
+-	damageInfo.func = function()
+-		-- this is called before the filter sets the current filter
+-		-- so if were currently not enabled, we are enabling this filter
+-		if not filter:IsFiltered(Enum.BuildFilter.Damage) then
+-			filter:SetFilter(Enum.BuildFilter.Tank, false)
+-			filter:SetFilter(Enum.BuildFilter.Healer, false)
+-		end
+-	end
+-	filter:AddFilterOption(Enum.BuildFilter.Damage, damageInfo)
+-
+-	local tankInfo = filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Tank, ROLE_COLORS["TANK"], ROLE_ATLAS["TANK"].."-micro")
+-	tankInfo.func = function()
+-		-- this is called before the filter sets the current filter
+-		-- so if were currently not enabled, we are enabling this filter
+-		if not filter:IsFiltered(Enum.BuildFilter.Tank) then
+-			filter:SetFilter(Enum.BuildFilter.Damage, false)
+-			filter:SetFilter(Enum.BuildFilter.Healer, false)
+-		end
+-	end
+-	filter:AddFilterOption(Enum.BuildFilter.Tank, tankInfo)
+-
+-	local healerInfo = filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Healer, ROLE_COLORS["HEALER"], ROLE_ATLAS["HEALER"].."-micro")
+-	healerInfo.func = function()
+-		-- this is called before the filter sets the current filter
+-		-- so if were currently not enabled, we are enabling this filter
+-		if not filter:IsFiltered(Enum.BuildFilter.Healer) then
+-			filter:SetFilter(Enum.BuildFilter.Damage, false)
+-			filter:SetFilter(Enum.BuildFilter.Tank, false)
+-		end
+-	end
+-	filter:AddFilterOption(Enum.BuildFilter.Healer, healerInfo)
+-	
+-	filter:AddOptionSpacer()
+-
+-	filter:AddHeader(COMPLEXITY_LABEL)
+-
+-	filter:AddFilterOption(Enum.BuildFilter.Standard, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Standard, BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Standard], BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Standard]))
+-	filter:AddFilterOption(Enum.BuildFilter.Intermediate, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Intermediate, BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Intermediate], BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Intermediate]))
+-	filter:AddFilterOption(Enum.BuildFilter.Advanced, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Advanced, BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Advanced], BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Advanced]))
+-	filter:AddFilterOption(Enum.BuildFilter.Expert, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Expert, BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Expert], BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Expert]))
+-	filter:AddFilterOption(Enum.BuildFilter.Impossible, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Impossible, BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Impossible], BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Impossible]))
+-
+-	filter:AddOptionSpacer()
+-
+-	if C_Player:IsHero() then
+-		filter:AddHeader(PRIMARY_STAT)
+-
+-		filter:AddFilterOption(Enum.BuildFilter.Strength, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Strength, STAT_COLORS["Strength"], PRIMARY_STAT_ATLAS["Strength"]))
+-		filter:AddFilterOption(Enum.BuildFilter.Agility, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Agility, STAT_COLORS["Agility"], PRIMARY_STAT_ATLAS["Agility"]))
+-		filter:AddFilterOption(Enum.BuildFilter.Intellect, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Intellect, STAT_COLORS["Intellect"], PRIMARY_STAT_ATLAS["Intellect"]))
+-		filter:AddFilterOption(Enum.BuildFilter.Spirit, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Spirit, STAT_COLORS["Spirit"], PRIMARY_STAT_ATLAS["Spirit"]))
+-	elseif C_Player:IsDefaultClass() then
+-		-- class filter
+-		filter:AddHeader(CLASS)
+-
+-		-- Default classes
+-		filter:AddFilterOption("FILTER_CLASS_WARRIOR", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("WARRIOR"), nil, "groupfinder-icon-class-warrior"))
+-		filter:AddFilterOption("FILTER_CLASS_PALADIN", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("PALADIN"), nil, "groupfinder-icon-class-paladin"))
+-		filter:AddFilterOption("FILTER_CLASS_HUNTER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("HUNTER"), nil, "groupfinder-icon-class-hunter"))
+-		filter:AddFilterOption("FILTER_CLASS_ROGUE", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("ROGUE"), nil, "groupfinder-icon-class-rogue"))
+-		filter:AddFilterOption("FILTER_CLASS_PRIEST", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("PRIEST"), nil, "groupfinder-icon-class-priest"))
+-		filter:AddFilterOption("FILTER_CLASS_DEATH_KNIGHT", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("DEATHKNIGHT"), nil, "groupfinder-icon-class-deathknight"))
+-		filter:AddFilterOption("FILTER_CLASS_SHAMAN", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("SHAMAN"), nil, "groupfinder-icon-class-shaman"))
+-		filter:AddFilterOption("FILTER_CLASS_MAGE", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("MAGE"), nil, "groupfinder-icon-class-mage"))
+-		filter:AddFilterOption("FILTER_CLASS_WARLOCK", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("WARLOCK"), nil, "groupfinder-icon-class-warlock"))
+-		filter:AddFilterOption("FILTER_CLASS_DRUID", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("DRUID"), nil, "groupfinder-icon-class-druid"))
+-	elseif C_Player:IsCustomClass() then
+-		-- class filter
+-		filter:AddHeader(CLASS)
+-
+-		-- Custom classes
+-		filter:AddFilterOption("FILTER_CLASS_BARBARIAN", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("BARBARIAN"), nil, "groupfinder-icon-class-barbarian"))
+-		filter:AddFilterOption("FILTER_CLASS_WITCH_DOCTOR", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("WITCHDOCTOR"), nil, "groupfinder-icon-class-witchdoctor"))
+-		filter:AddFilterOption("FILTER_CLASS_DEMON_HUNTER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("DEMONHUNTER"), nil, "groupfinder-icon-class-demonhunter"))
+-		filter:AddFilterOption("FILTER_CLASS_WITCH_HUNTER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("WITCHHUNTER"), nil, "groupfinder-icon-class-witchhunter"))
+-		filter:AddFilterOption("FILTER_CLASS_STORMBRINGER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("STORMBRINGER"), nil, "groupfinder-icon-class-stormbringer"))
+-		filter:AddFilterOption("FILTER_CLASS_KNIGHT_OF_XOROTH", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("FLESHWARDEN"), nil, "groupfinder-icon-class-fleshwarden"))
+-		filter:AddFilterOption("FILTER_CLASS_GUARDIAN", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("GUARDIAN"), nil, "groupfinder-icon-class-guardian"))
+-		filter:AddFilterOption("FILTER_CLASS_MONK", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("MONK"), nil, "groupfinder-icon-class-monk"))
+-		filter:AddFilterOption("FILTER_CLASS_SON_OF_ARUGAL", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("SONOFARUGAL"), nil, "groupfinder-icon-class-sonofarugal"))
+-		filter:AddFilterOption("FILTER_CLASS_RANGER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("RANGER"), nil, "groupfinder-icon-class-ranger"))
+-		filter:AddFilterOption("FILTER_CLASS_CHRONOMANCER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("CHRONOMANCER"), nil, "groupfinder-icon-class-chronomancer"))
+-		filter:AddFilterOption("FILTER_CLASS_NECROMANCER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("NECROMANCER"), nil, "groupfinder-icon-class-necromancer"))
+-		filter:AddFilterOption("FILTER_CLASS_PYROMANCER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("PYROMANCER"), nil, "groupfinder-icon-class-pyromancer"))
+-		filter:AddFilterOption("FILTER_CLASS_CULTIST", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("CULTIST"), nil, "groupfinder-icon-class-cultist"))
+-		filter:AddFilterOption("FILTER_CLASS_STARCALLER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("STARCALLER"), nil, "groupfinder-icon-class-starcaller"))
+-		filter:AddFilterOption("FILTER_CLASS_SUN_CLERIC", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("SUNCLERIC"), nil, "groupfinder-icon-class-suncleric"))
+-		filter:AddFilterOption("FILTER_CLASS_TINKER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("TINKER"), nil, "groupfinder-icon-class-tinker"))
+-		filter:AddFilterOption("FILTER_CLASS_VENOMANCER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("PROPHET"), nil, "groupfinder-icon-class-prophet"))
+-		filter:AddFilterOption("FILTER_CLASS_REAPER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("REAPER"), nil, "groupfinder-icon-class-reaper"))
+-		filter:AddFilterOption("FILTER_CLASS_PRIMALIST", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("WILDWALKER"), nil, "groupfinder-icon-class-wildwalker"))
+-	end
+-end
+-
+-function BuildCreatorMixin:SetSorting(sort)
+-	wipe(self.sort)
+-	self.sort[sort] = true
+-	self:UpdateSearch()
+-end
+-
+-local function CreateSortInfo(self, key)
+-	local info = UIDropDownMenu_CreateInfo()
+-	info.text = _G["BUILD_"..key]
+-	info.arg1 = key
+-	info.checked = self.sort[key]
+-	info.func = function()
+-		self:SetSorting(key)
+-	end
+-	UIDropDownMenu_AddButton(info)
+-end
+-
+-function BuildCreatorMixin:InitializeSortDropDown(dropdown, level, menuList)
+-	if not self.Sorting:IsVisible() then return end
+-	local info
+-	info = UIDropDownMenu_CreateInfo()
+-	info.isTitle = true
+-	info.text = BUILD_SORT_RATING
+-	info.notCheckable = true
+-	UIDropDownMenu_AddButton(info, level)
+-
+-	CreateSortInfo(self, Enum.BuildSort.RatingDescending)
+-	CreateSortInfo(self, Enum.BuildSort.RatingAscending)
+-
+-	UIDropDownMenu_AddSpace(level)
+-
+-	info = UIDropDownMenu_CreateInfo()
+-	info.isTitle = true
+-	info.text = BUILD_SORT_DATE
+-	info.notCheckable = true
+-	UIDropDownMenu_AddButton(info, level)
+-
+-	CreateSortInfo(self, Enum.BuildSort.DateDescending)
+-	CreateSortInfo(self, Enum.BuildSort.DateAscending)
+-end
+-
+-function BuildCreatorMixin:ShowLoading(text, subtext)
+-	self:HideError()
+-	self.Loading:Show()
+-	self.Loading:SetText(text or "", subtext or "")
+-end
+-
+-function BuildCreatorMixin:HideLoading()
+-	self.Loading:Hide()
+-end
+-
+-function BuildCreatorMixin:ShowError(text, subtext)
+-	self:HideLoading()
+-	self.Error:Show()
+-	self.Error:SetText(text or "", subtext or "")
+-end
+-
+-function BuildCreatorMixin:HideError()
+-	self.Error:Hide()
+-end
+-
+-function BuildCreatorMixin:ViewBuild(build)
+-	self:HideBuildList()
+-	self.BuildViewPanel:Show()
+-	self.BuildViewPanel:SetBuild(build)
+-end
+-
+-function BuildCreatorMixin:ViewBuildID(buildID)
+-	local build = C_BuildCreator.GetBuild(buildID)
+-	if build then
+-		return self:ViewBuild(build)
+-	end
+-	self:ShowLoading()
+-	C_BuildCreator.QueryBuild(buildID)
+-end
+-
+-function BuildCreatorMixin:ContinueOnLoad(buildID, callback)
+-	local build = C_BuildCreator.GetBuild(buildID)
+-	if build then
+-		callback(build)
+-		return
+-	end
+-	if not self.pendingCallback[buildID] then
+-		self:ShowLoading()
+-		self.pendingCallback[buildID] = self.pendingCallback[buildID] or {}
+-		tinsert(self.pendingCallback[buildID], callback)
+-		C_BuildCreator.QueryBuild(buildID)
+-	end
+-end
+-
+-function BuildCreatorMixin:PromptPublishBuild()
+-    if Area52DraftSelector and not Area52DraftSelector.Valid(self.EditableBuildViewPanel) then return end
+-    local editor = self.EditableBuildViewPanel
+-    if editor:IsShown() then
+-        if editor.editElement then
+-            editor.editElement:HideEditModeIfEditing()
+-        else
+-            editor:UpdatePendingBuild()
+-        end
+-    end
+-	local build = C_BuildEditor.GetPendingBuild()
+-	if build then
+-		local parentCategory = BuildCreatorUtil.GetParentCategory(build.Category)
+-		local category
+-		if parentCategory then
+-			category = _G["BUILDCREATOR_CATEGORY_" .. parentCategory:upper()] .. " " .. _G["BUILDCREATOR_CATEGORY_" .. build.Category:upper()]
+-		else
+-			category = _G["BUILDCREATOR_CATEGORY_" .. build.Category:upper()]
+-		end
+-		StaticPopup_Show("BUILD_CREATOR_PUBLISH_BUILD", build.Name, category)
+-	end
+-end
+-
+-function BuildCreatorMixin:PublishBuild()
+-	local publishSent, failReason = C_BuildEditor.PublishBuild()
+-	if publishSent then
+-		self:ShowLoading(PUBLISHING_BUILD)
+-	else
+-		self:ShowError(PUBLISH_BUILD_FAILED, _G[failReason] or failReason)
+-	end
+-end
+-
+-function BuildCreatorMixin:PromptEditBuild()
+-	if self.BuildViewPanel:IsVisible() then
+-		StaticPopup_Show("BUILD_CREATOR_EDIT_BUILD", self.BuildViewPanel.build.Name, nil, self.BuildViewPanel.build)
+-	end
+-end
+-
+-function BuildCreatorMixin:PromptDeleteBuild()
+-	if self.BuildViewPanel:IsVisible() then
+-		StaticPopup_Show("BUILD_CREATOR_DELETE_BUILD", self.BuildViewPanel.build.Name, nil, self.BuildViewPanel.build.ID)
+-	end
+-end
+-
+-function BuildCreatorMixin:EditBuild(build)
+-	self.category = build.Category
+-	self.EditableBuildViewPanel:SetCategory(build.Category)
+-	C_BuildEditor.EditBuild(build.ID)
+-	self:OpenBuildEditor()
+-	BuildCreatorUtil.ReleaseHeldSpell()
+-end
+-
+-function BuildCreatorMixin:DeleteBuild(buildID)
+-	local success, failReason = C_BuildCreator.DeleteBuild(buildID)
+-	if success then
+-		self:ShowLoading()
+-	else
+-		self:ShowError(DELETE_BUILD_FAILED, _G[failReason] or failReason)
+-	end
+-end
+-
+-function BuildCreatorMixin:SerializePendingBuild()
+-	local build = C_BuildEditor.GetPendingBuild()
+-	if build then
+-		if build.Name:len() > 0 and build.Name ~= "Build Name" then
+-			local serializedBuild = C_Serialize:SerializeCompressForPrint(build)
+-			if serializedBuild then
+-				BuildCreatorSaved.SavedBuilds[build.Name] = serializedBuild
+-			end
+-		end
+-	end
+-end
+-
+-function BuildCreatorMixin:InitializeSavedBuildDropDown(dropdown, level, menuList)
+-	if not BuildCreatorSaved then return end
+-
+-	local info
+-	if menuList then
+-		info = UIDropDownMenu_CreateInfo()
+-		info.isTitle = true
+-		info.text = menuList
+-		info.notCheckable = true
+-		UIDropDownMenu_AddButton(info, level)
+-
+-		info = UIDropDownMenu_CreateInfo()
+-		info.text = EDIT_BUILD
+-		info.notCheckable = true
+-		info.func = function()
+-			self:RestoreSavedBuild(menuList)
+-		end
+-		UIDropDownMenu_AddButton(info, level)
+-		
+-		info = UIDropDownMenu_CreateInfo()
+-		info.text = DELETE
+-		info.notCheckable = true
+-		info.func = function()
+-			StaticPopup_Show("BUILD_CREATOR_DELETE_SAVED_BUILD", menuList, nil, function()
+-				self:DiscardSavedBuild(menuList)
+-				CloseDropDownMenus()
+-			end)
+-		end
+-		UIDropDownMenu_AddButton(info, level)
+-
+-		info = UIDropDownMenu_CreateInfo()
+-		info.text = CLOSE
+-		info.func = function() CloseDropDownMenus(level) end
+-		info.notCheckable = true
+-		UIDropDownMenu_AddButton(info, level)
+-		return
+-	end
+-
+-	info = UIDropDownMenu_CreateInfo()
+-	info.isTitle = true
+-	info.text = BUILDCREATOR_CREATEBUTTON_SAVEDBUILD
+-	info.notCheckable = true
+-	UIDropDownMenu_AddButton(info, level)
+-
+-	for savedBuild in pairs(BuildCreatorSaved.SavedBuilds) do
+-		info = UIDropDownMenu_CreateInfo()
+-		info.text = savedBuild
+-		info.func = function()
+-			self:RestoreSavedBuild(savedBuild)
+-		end
+-		info.menuList = savedBuild
+-		info.hasArrow = true
+-		info.notCheckable = true
+-		UIDropDownMenu_AddButton(info, level)
+-	end
+-
+-	info = UIDropDownMenu_CreateInfo()
+-	info.text = CLOSE
+-	info.func = function() CloseDropDownMenus(level) end
+-	info.notCheckable = true
+-	UIDropDownMenu_AddButton(info, level)
+-end
+-
+-function BuildCreatorMixin:DiscardSavedBuild(name)
+-	BuildCreatorSaved.SavedBuilds[name] = nil
+-end
+-
+-function BuildCreatorMixin:RestoreSavedBuild(name)
+-	local build = BuildCreatorSaved.SavedBuilds[name]
+-	if not build then
+-		return
+-	end
+-	
+-	local deserializedBuild = C_Serialize:DeserializeDecompressFromPrint(build)
+-	if not deserializedBuild then
+-		return
+-	end
+-	
+-	C_BuildEditor.DiscardPendingBuild()
+-	C_BuildEditor.SetName(deserializedBuild.Name)
+-	C_BuildEditor.SetIcon(deserializedBuild.Icon)
+-	C_BuildEditor.SetCategory(deserializedBuild.Category)
+-	C_BuildEditor.SetDescription(deserializedBuild.Description)
+-	C_BuildEditor.SetRoles(deserializedBuild.Roles)
+-	C_BuildEditor.SetPrimaryStat(deserializedBuild.PrimaryStat)
+-	C_BuildEditor.SetDifficultyRating(deserializedBuild.DifficultyRating)
+-	
+-	for _, spell in ipairs(deserializedBuild.Spells) do
+-		C_BuildEditor.AddSpell(spell)
+-	end
+-	
+-	for _, enchant in ipairs(deserializedBuild.RandomEnchants) do
+-		C_BuildEditor.AddRandomEnchant(enchant)
+-	end
+-	
+-	for _, armor in ipairs(deserializedBuild.ArmorTypes) do
+-		C_BuildEditor.AddArmorType(armor)
+-	end
+-
+-	for _, weapon in ipairs(deserializedBuild.WeaponTypes) do
+-		C_BuildEditor.AddWeaponType(weapon)
+-	end
+-
+-	self:CreateBuild(deserializedBuild.Category, true)
+-	return true
+-end
+-
+-local function ModernizeSavedVariable(savedTable, default)
+-	if not savedTable then
+-		default.__version = AddonVersion
+-		return default
+-	end
+-
+-	-- do specific version modernizations here
+-	if savedTable.__version ~= AddonVersion then
+-		C_Logger.Info("Updated BuildCreator Saved Variables to Version: %.1f", AddonVersion)
+-		for k, v in pairs(default) do
+-			if not savedTable[k] then
+-				savedTable[k] = v
+-			end
+-		end
+-
+-		savedTable.__version = AddonVersion
+-	end
+-	
+-	return savedTable
+-end
+-
+-function BuildCreatorMixin:ADDON_LOADED(addon)
+-	if addon == "Ascension_BuildCreator" then
+-		self:UnregisterEvent("ADDON_LOADED")
+-		BuildCreatorSaved = ModernizeSavedVariable(BuildCreatorSaved, DefaultBuildCreatorSaved)
+-	end
+-end
+-
+-function BuildCreatorMixin:BUILD_CREATOR_CATEGORY_RESULT(category)
+-	self:HideLoading()
+-	self.SearchBox:SetText("")
+-	C_BuildCreator.UpdateFilter("", self:ApplyDefaultClassFilter(), self.sort)
+-	self.category = category
+-	self:ShowBuildList()
+-	self.BuildScroll:RefreshScrollFrame()
+-end
+-
+-function BuildCreatorMixin:BUILD_CREATOR_BUILD_RESULT(result, buildID)
+-	C_Logger.Info("BUILD_CREATOR_BUILD_RESULT: %s, %s", buildID, result)
+-	self:HideLoading()
+-	local build = C_BuildCreator.GetBuild(buildID)
+-	if build then
+-		if self.pendingCallback[buildID] then
+-			for _, callback in ipairs(self.pendingCallback[buildID]) do
+-				callback(build)
+-			end
+-			self.pendingCallback[buildID] = nil
+-			return
+-		else
+-			return self:ViewBuild(build)
+-		end
+-	elseif self:IsShown() then
+-		self:ShowError(VIEW_BUILD_ERROR, _G[result] or result)
+-	end
+-end
+-
+-function BuildCreatorMixin:BUILD_CREATOR_ACTIVATE_RESULT(result)
+-	C_Logger.Info("BUILD_CREATOR_ACTIVATE_RESULT: %s", result)
+-	self:HideLoading()
+-	if result == "ACTIVATE_BUILD_OK" then
+-		if self.BuildViewPanel:IsVisible() then
+-			self.BuildViewPanel:UpdateControlButtons()
+-		else
+-			self.BuildScroll:RefreshScrollFrame()
+-		end
+-		self.CategoryScroll:RefreshScrollFrame()
+-		return
+-	end
+-
+-	self.Error.DeactivateButton:SetShown(result == "ACTIVATE_BUILD_DRAFTED_BUILD_ALREADY_DRAFTED")
+-	self:ShowError(ACTIVATE_BUILD_FAILED, _G[result] or result)
+-end
+-
+-function BuildCreatorMixin:BUILD_CREATOR_DEACTIVATE_RESULT(result)
+-	C_Logger.Info("BUILD_CREATOR_DEACTIVATE_RESULT: %s", result)
+-	self:HideLoading()
+-	if result == "DEACTIVATE_BUILD_OK" then
+-		if self.BuildViewPanel:IsVisible() then
+-			self.BuildViewPanel:UpdateControlButtons()
+-		else
+-			self.BuildScroll:RefreshScrollFrame()
+-		end
+-		self.CategoryScroll:RefreshScrollFrame()
+-		return
+-	end
+-
+-	self:ShowError(DEACTIVATE_BUILD_FAILED, _G[result] or result)
+-end
+-
+-function BuildCreatorMixin:BUILD_CREATOR_SAVE_RESULT(result, buildID)
+-	C_Logger.Info("BUILD_CREATOR_SAVE_RESULT: %s, %s", result, buildID)
+-	self:HideLoading()
+-	result = result:gsub("SAVE_BUILD_", "PUBLISH_BUILD_")
+-	if result == "PUBLISH_BUILD_OK" then
+-		self:ViewBuildID(buildID)
+-		return
+-	end
+-	self:ShowError(PUBLISH_BUILD_FAILED, _G[result] or result)
+-end
+-
+-function BuildCreatorMixin:BUILD_CREATOR_CREATE_RESULT(result, buildID)
+-	C_Logger.Info("BUILD_CREATOR_CREATE_RESULT: %s, %s", result, buildID)
+-	self:HideLoading()
+-	result = result:gsub("CREATE_BUILD_", "PUBLISH_BUILD_")
+-
+-	if result == "PUBLISH_BUILD_OK" then
+-		local build = C_BuildCreator.GetBuild(buildID)
+-		if build then
+-			self:DiscardSavedBuild(build.Name)
+-			self:ViewBuild(build)
+-		else
+-			-- view build ID will query the build
+-			self:ViewBuildID(buildID)
+-		end
+-		return
+-	end
+-	self:ShowError(PUBLISH_BUILD_FAILED, _G[result] or result)
+-end
+-
+-function BuildCreatorMixin:BUILD_CREATOR_DELETE_RESULT(result)
+-	C_Logger.Info("BUILD_CREATOR_DELETE_RESULT: %s", result)
+-	self:HideLoading()
+-
+-	if result == "DELETE_BUILD_OK" then
+-		if self.category then
+-			self:SelectCategory(self.category)
+-		else
+-			self:ShowBuildList()
+-		end
+-		return
+-	end
+-
+-	self:ShowError(DELETE_BUILD_FAILED, _G[result] or result)
+-end
+--- Area 52 internal build imports and portable build codes.
+-Area52BuildImport = {}
+-local Import = Area52BuildImport
+-local MAX_CODE = 100000
+-
+-local function integer(value, maximum)
+-    assert(type(value) == "number" and value >= 0 and value <= maximum and value == math.floor(value), "Invalid number")
+-    return value
+-end
+-
+-local function text(value, maximum)
+-    value = value or ""
+-    assert(type(value) == "string" and #value <= maximum and not value:find("%z"), "Invalid text")
+-    return value
+-end
+-
+-local function array(value, maximum, convert)
+-    assert(type(value) == "table" and #value <= maximum, "Invalid list")
+-    local result, seen = {}, {}
+-    for key in pairs(value) do assert(type(key) == "number" and key >= 1 and key <= #value and key == math.floor(key), "Invalid list index") end
+-    for i, row in ipairs(value) do
+-        result[i] = convert(row)
+-        local id = result[i].Spell or result[i].Enchant or result[i].Type
+-        assert(not seen[id], "Duplicate selection")
+-        seen[id] = true
+-    end
+-    return result
+-end
+-
+-function Import.Validate(build)
+-    assert(type(build) == "table", "Invalid build")
+-    local result = {}
+-    for key, limit in pairs({Name=128, Icon=256, Description=8192}) do result[key] = text(build[key], limit) end
+-    assert(#result.Name > 0, "Missing build name")
+-    for _, key in ipairs({'Category','Roles','PrimaryStat','DifficultyRating'}) do result[key]=text(build[key],64) end
+-    assert(Enum.BuildRoles[result.Roles] or result.Roles=='PLAYER_ROLE_NONE', 'Invalid role')
+-    local stats={STAT_STRENGTH=true,STAT_AGILITY=true,STAT_INTELLECT=true,STAT_SPIRIT=true}
+-    assert(stats[result.PrimaryStat], 'Invalid primary stat')
+-    local validDifficulty=false
+-    for _,value in pairs(Enum.BuildDifficulty) do if value==result.DifficultyRating then validDifficulty=true end end
+-    assert(validDifficulty,'Invalid difficulty')
+-    local validCategory = false
+-    for _, key in ipairs({"Leveling", "Level60PvE", "Level60PvP", "Level70PvE", "Level70PvP", "BuildDraft", "BuildDraftEndGamePvE", "BuildDraftEndGamePvP"}) do
+-        if Enum.BuildCategory[key] == result.Category then validCategory = true end
+-    end
+-    assert(validCategory, "Unsupported build category")
+-    result.Spells = array(build.Spells, 512, function(row)
+-        assert(type(row) == "table", "Invalid spell")
+-        local r = {Spell=integer(row.Spell, 4294967295), Level=integer(row.Level or 1, 80), Comment=text(row.Comment,128), Flags=integer(row.Flags or 0,4294967295)}
+-        assert(r.Spell > 0, "Invalid spell ID")
+-        for _, key in ipairs({"IsCoreAbility", "IsOptimalAbility", "IsEmpoweringAbility", "IsSynergisticAbility"}) do
+-            assert(row[key] == nil or type(row[key]) == "boolean", "Invalid spell role")
+-            r[key] = row[key] or false
+-        end
+-        return r
+-    end)
+-    result.RandomEnchants = array(build.RandomEnchants, 64, function(row)
+-        assert(type(row) == "table", "Invalid enchant")
+-        local r = {Enchant=integer(row.Enchant,4294967295), Stacks=integer(row.Stacks,17), Level=integer(row.Level or 1,80), Comment=text(row.Comment,128), Flags=integer(row.Flags or 0,4294967295)}
+-        assert(r.Enchant > 0 and r.Stacks > 0, "Invalid enchant selection")
+-        return r
+-    end)
+-    for _, key in ipairs({"ArmorTypes", "WeaponTypes"}) do
+-        result[key] = array(build[key],32,function(row)
+-            assert(type(row) == "table", "Invalid equipment")
+-            local kind=text(row.Type,64)
+-            local allowed=key=='ArmorTypes' and Enum.ArmorSubClassSID or Enum.WeaponSubClassSID
+-            assert(allowed[kind], 'Invalid equipment type')
+-            return {Type=kind, Comment=text(row.Comment,128)}
+-        end)
+-    end
+-    return result
+-end
+-
+-local function pack(value)
+-    if type(value) == "string" then return "s"..#value..":"..value end
+-    if type(value) == "number" then return "n"..string.format("%.0f", value)..":" end
+-    if type(value) == "boolean" then return value and "b1" or "b0" end
+-    local keys = {}
+-    for key in pairs(value) do keys[#keys+1] = key end
+-    table.sort(keys, function(a,b) return tostring(a) < tostring(b) end)
+-    local parts = {"t"..#keys..":"}
+-    for _, key in ipairs(keys) do parts[#parts+1] = pack(key); parts[#parts+1] = pack(value[key]) end
+-    return table.concat(parts)
+-end
+-
+-function Import.Encode(build)
+-    local raw = pack(Import.Validate(build))
+-    local code = "A52B1:"..raw:gsub(".", function(c) return string.format("%02x",string.byte(c)) end)
+-    assert(#code <= MAX_CODE, "Build is too large to share")
+-    return code
+-end
+-
+-function Import.Decode(code)
+-    assert(type(code) == "string" and #code <= MAX_CODE, "Build code is too large")
+-    code = code:match("^%s*(.-)%s*$")
+-    assert(code:sub(1,6) == "A52B1:", "Expected an Area 52 build code (A52B1)")
+-    local hex = code:sub(7)
+-    assert(#hex % 2 == 0 and not hex:find("[^%x]"), "Invalid build code")
+-    local raw = hex:gsub("..", function(pair) return string.char(tonumber(pair,16)) end)
+-    local pos, nodes = 1, 0
+-    local function read(depth)
+-        nodes = nodes+1
+-        assert(depth <= 5 and nodes <= 16000, "Build code exceeds limits")
+-        local kind = raw:sub(pos,pos); pos=pos+1
+-        if kind == "b" then
+-            local b=raw:sub(pos,pos);pos=pos+1
+-            assert(b=="0" or b=="1", "Invalid boolean")
+-            return b=="1"
+-        end
+-        local stop=raw:find(":",pos,true)
+-        assert(stop and stop-pos <= 10, "Invalid code length")
+-        local digits=raw:sub(pos,stop-1)
+-        assert(digits:match("^%d+$"), "Invalid code number")
+-        local size=tonumber(digits);pos=stop+1
+-        if kind=="n" then return integer(size,4294967295) end
+-        if kind=="s" then
+-            assert(size<=8192 and pos+size-1<=#raw,"Invalid text length")
+-            local s=raw:sub(pos,pos+size-1);pos=pos+size;return s
+-        end
+-        assert(kind=="t" and size<=512,"Invalid code table")
+-        local t={}
+-        for i=1,size do
+-            local key=read(depth+1)
+-            assert((type(key)=="string" or type(key)=="number") and t[key]==nil,"Invalid or repeated key")
+-            t[key]=read(depth+1)
+-        end
+-        return t
+-    end
+-    local build=read(0)
+-    assert(pos==#raw+1,"Trailing build data")
+-    return Import.Validate(build)
+-end
+-
+-local function enabled()
+-    return GetRealmName() == "Area 52 - Free-Pick"
+-end
+-
+-local function showError(message)
+-    UIErrorsFrame:AddMessage(tostring(message):gsub("^.-:%d+: ",""),1,0.2,0.2)
+-end
+-
+-function Import.Apply(build)
+-    local ok, copy=pcall(Import.Validate,build)
+-    if not ok then showError(copy);return false end
+-    if not C_Player:IsGM() and BuildCreatorUtil.IsCategoryBuildDraft(copy.Category) then
+-        copy.Category=Enum.BuildCategory.Leveling
+-    end
+-    StaticPopup_Show("AREA52_CONFIRM_BUILD_COPY",copy.Name,nil,copy)
+-    return true
+-end
+-
+-function Import.Commit(copy)
+-    copy=Import.Validate(copy)
+-    if not C_Player:IsGM() and BuildCreatorUtil.IsCategoryBuildDraft(copy.Category) then copy.Category=Enum.BuildCategory.Leveling end
+-    C_BuildEditor.DiscardPendingBuild()
+-    for _, key in ipairs({"Name","Icon","Category","Description","Roles","PrimaryStat","DifficultyRating"}) do C_BuildEditor["Set"..key](copy[key]) end
+-    for _, row in ipairs(copy.Spells) do C_BuildEditor.AddSpell(row) end
+-    for _, row in ipairs(copy.RandomEnchants) do C_BuildEditor.AddRandomEnchant(row) end
+-    for _, row in ipairs(copy.ArmorTypes) do C_BuildEditor.AddArmorType(row) end
+-    for _, row in ipairs(copy.WeaponTypes) do C_BuildEditor.AddWeaponType(row) end
+-    BuildCreatorFrame:CreateBuild(copy.Category,true)
+-end
+-
+-StaticPopupDialogs["AREA52_CONFIRM_BUILD_COPY"] = {
+-    text="Create an editable copy of %s? This replaces the current unsaved draft. The source build is unchanged.",
+-    button1="Create Copy",button2=CANCEL,whileDead=true,hideOnEscape=true,
+-    OnAccept=function(self,copy) Import.Commit(copy) end,
+-}
+-StaticPopupDialogs["AREA52_IMPORT_BUILD_CODE"] = {
+-    text="Import Build Code\nPaste an Area 52 build code. Website links are not supported.",button1="Import",button2=CANCEL,
+-    hasEditBox=true,maxLetters=MAX_CODE,maxBytes=MAX_CODE+1,whileDead=true,hideOnEscape=true,
+-    OnAccept=function(self)
+-        local ok,build=pcall(Import.Decode,self.editBox:GetText())
+-        if not ok then showError(build);return true end
+-        Import.Apply(build)
+-    end,
+-}
+-StaticPopupDialogs["AREA52_COPY_BUILD_CODE"] = {
+-    text="Build Code\nPress Ctrl+C to copy this complete build, then share it using Import Build Code.",button1=CLOSE,
+-    hasEditBox=true,maxLetters=MAX_CODE,maxBytes=MAX_CODE+1,whileDead=true,hideOnEscape=true,
+-    OnShow=function(self,code) self.editBox:SetText(code);self.editBox:SetFocus();self.editBox:HighlightText() end,
+-}
+-StaticPopupDialogs["AREA52_BUILD_IMPORT_METHOD"] = {
+-    text="Import a Build\nChoose a build from this realm's library or paste an Area 52 build code.",
+-    button1="Choose Internal Build",button2=CANCEL,button3="Import Build Code",whileDead=true,hideOnEscape=true,
+-    OnAccept=function()
+-        local frame=BuildCreatorFrame
+-        frame:ShowBuildCategories();frame.ToggleCreateButton:SetText(CREATE_BUILD)
+-        frame:SelectCategory(Enum.BuildCategory.None)
+-        UIErrorsFrame:AddMessage("Open a build, then choose Copy Build.",1,0.82,0)
+-    end,
+-    OnAlt=function() StaticPopup_Show("AREA52_IMPORT_BUILD_CODE") end,
+-}
+-
+-local originalCreate=BuildCreatorMixin.CreateBuild
+-function BuildCreatorMixin:CreateBuild(category,deserialize)
+-    if enabled() and category==Enum.BuildCreateCategory.Import and not deserialize then
+-        StaticPopup_Show("AREA52_BUILD_IMPORT_METHOD");return
+-    end
+-    return originalCreate(self,category,deserialize)
+-end
+-
+-function Import.Attach(view)
+-    if not enabled() then return end
+-    if not view.Area52ImportButtons then
+-        view.Area52ImportButtons={}
+-        view.Controls:SetHeight(76)
+-        view.MainFrame:SetHeight(593)
+-        for i,label in ipairs({"Copy Build","Copy Build Code","Import Build Code"}) do
+-            local b=CreateFrame("Button",nil,view.Controls,"SharedButtonTemplate")
+-            b:SetSize(160,26);b:SetPoint("TOPLEFT",6+(i-1)*166,-46);b:SetText(label)
+-            -- Anonymous template instances must anchor to their own texture objects.
+-            b.Center:ClearAllPoints()
+-            b.Center:SetPoint("TOPLEFT",b.Left,"TOPRIGHT",0,0)
+-            b.Center:SetPoint("BOTTOMRIGHT",b.Right,"BOTTOMLEFT",0,0)
+-            view.Area52ImportButtons[i]=b
+-        end
+-        view.Area52ImportButtons[1]:SetScript("OnClick",function() Import.Apply(view.build) end)
+-        view.Area52ImportButtons[2]:SetScript("OnClick",function()
+-            local ok,code=pcall(Import.Encode,view.build)
+-            if not ok then showError(code);return end
+-            StaticPopup_Show("AREA52_COPY_BUILD_CODE",nil,nil,code)
+-        end)
+-        view.Area52ImportButtons[3]:SetScript("OnClick",function() StaticPopup_Show("AREA52_IMPORT_BUILD_CODE") end)
+-    end
+-end
+-
+-
+-Area52BuildLibrary = {}
+-local Library = Area52BuildLibrary
+-local pending
+-local menu
+-local sequence = 0
+-function Library.IsUpdating() return pending ~= nil end
+-local frame = CreateFrame("Frame")
+-
+-local function active()
+-    return GetRealmName() == "Area 52 - Free-Pick"
+-end
+-
+-local function message(text)
+-    DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffArea 52 Library:|r " .. text)
+-end
+-
+-local function send(command)
+-    SendAddonMessage("A52LIB", command .. "|" .. pending.token, "WHISPER", UnitName("player"))
+-end
+-
+-function Library.Update()
+-    if not active() then return end
+-    if Library.PublicationPending and Library.PublicationPending() then
+-        message("Wait for the current publication request to finish.")
+-        return
+-    end
+-    if pending then
+-        message("A library update is already pending.")
+-        return
+-    end
+-    sequence = sequence + 1
+-    pending = {started=GetTime(), poll=GetTime()+3, token=string.format("%08x%08x%08x",time(),math.floor(GetTime()*1000)%4294967295,sequence)}
+-    send("UPDATE")
+-    message("Checking for new and updated shared builds...")
+-end
+-
+-function Library.Menu()
+-    if not active() then return end
+-    if not menu then
+-        menu = CreateFrame("Frame", "Area52BuildLibraryImportMenu", UIParent, "UIDropDownMenuTemplate")
+-        UIDropDownMenu_Initialize(menu, function()
+-            local info = UIDropDownMenu_CreateInfo()
+-            info.text = "This Server"
+-            info.notCheckable = true
+-            info.func = function()
+-                CloseDropDownMenus()
+-                BuildCreatorFrame:ShowBuildCategories()
+-                BuildCreatorFrame.ToggleCreateButton:SetText(CREATE_BUILD)
+-                BuildCreatorFrame:SelectCategory(Enum.BuildCategory.None)
+-            end
+-            UIDropDownMenu_AddButton(info)
+-            info = UIDropDownMenu_CreateInfo()
+-            info.text = "Import Build Code"
+-            info.notCheckable = true
+-            info.func = function() CloseDropDownMenus(); StaticPopup_Show("AREA52_IMPORT_BUILD_CODE") end
+-            UIDropDownMenu_AddButton(info)
+-            info = UIDropDownMenu_CreateInfo()
+-            info.text = "Update Library"
+-            info.notCheckable = true
+-            info.tooltipTitle = "Update Library"
+-            info.tooltipText = "Download new and updated public builds for this server. Personal copies, active builds, and Featured archetype assignments are unchanged."
+-            info.func = function() CloseDropDownMenus(); Library.Update() end
+-            UIDropDownMenu_AddButton(info)
+-        end, "MENU")
+-    end
+-    ToggleDropDownMenu(1, nil, menu, "cursor", 0, 0)
+-end
+-
+-local originalCreate = BuildCreatorMixin.CreateBuild
+-function BuildCreatorMixin:CreateBuild(category, deserialize)
+-    if active() and category == Enum.BuildCreateCategory.Import and not deserialize then
+-        Library.Menu()
+-        return
+-    end
+-    return originalCreate(self, category, deserialize)
+-end
+-
+-frame:RegisterEvent("CHAT_MSG_ADDON")
+-frame:SetScript("OnEvent", function(_, _, prefix, text, channel, sender)
+-    if not active() or not pending or prefix ~= "A52LIB" or channel ~= "WHISPER" or sender ~= UnitName("player") then return end
+-    if text:match("^ERROR|([0-9a-f]+)|") == pending.token then
+-        pending = nil
+-        message("The shared library service is unavailable. Your local builds have not been changed by this request.")
+-        return
+-    end
+-    local token, generation, state, added, updated, skipped = text:match("^UPDATE|([0-9a-f]+)|(%d+)|(%a+)|(%d+)|(%d+)|(%d+)$")
+-    if not generation or token ~= pending.token then return end
+-    if state == "queued" or state == "running" then
+-        pending.generation = generation
+-    elseif state == "complete" then
+-        if pending.generation and pending.generation ~= generation then return end
+-        pending = nil
+-        BuildCreatorFrame.lastQueried = nil
+-        message("Library updated: " .. added .. " new, " .. updated .. " updated, " .. skipped .. " incompatible. Reopen the build list to view shared copies.")
+-    elseif state == "failed" then
+-        pending = nil
+-        message("The library update could not finish. Your personal builds and active build are preserved; you can try again later.")
+-    end
+-end)
+-
+-frame:SetScript("OnUpdate", function()
+-    if not pending then return end
+-    local now = GetTime()
+-    if now - pending.started > 90 then
+-        pending = nil
+-        message("The server has not confirmed completion yet. Use Update Library again to check its status.")
+-    elseif now >= pending.poll then
+-        pending.poll = now + 3
+-        send("STATUS")
+-    end
+-end)
+-
+-local Library = Area52BuildLibrary
+-local job
+-local savingForPublish = false
+-local sequence = 0
+-local function active() return GetRealmName() == "Area 52 - Free-Pick" end
+-local function say(text) DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffArea 52 Library:|r "..text) end
+-local function status() SendAddonMessage("A52LIB","PSTATUS|"..job.token,"WHISPER",UnitName("player")) end
+-function Library.PublicationPending() return job ~= nil or savingForPublish end
+-
+-StaticPopupDialogs.AREA52_SAVE_BUILD = {
+-    text="Save %s to this server's build library? This does not publish it to GitHub.",
+-    button1="Save Build",button2=CANCEL,whileDead=true,hideOnEscape=true,
+-    OnAccept=function() BuildCreatorFrame:SaveBuild() end,
+-}
+-StaticPopupDialogs.AREA52_PUBLISH_BUILD = {
+-    text="Publish %s to the public Area 52 Shared Library on GitHub?\n\nYour description and selections will be public. By publishing, you confirm that you may contribute this content under CC0-1.0.\n\nPublic author alias (letters, numbers, spaces, _ - .):",
+-    button1="Publish under CC0",button2=CANCEL,hasEditBox=true,whileDead=true,hideOnEscape=true,
+-    OnShow=function(self) self.editBox:SetMaxLetters(48);self.editBox:SetText(UnitName("player"));self.editBox:SetFocus() end,
+-    OnAccept=function(self,build)
+-        local alias=self.editBox:GetText():gsub("^%s+", ""):gsub("%s+$", "")
+-        if not alias or not alias:find("%S") or #alias>48 or alias:find("[^a-zA-Z0-9 _%.%-]") then
+-            say("Choose a public alias using letters, numbers, spaces, underscore, dash or period.");return
+-        end
+-        if job or Library.IsUpdating() then say("Wait for the current library request to finish.");return end
+-        sequence=sequence+1
+-        local token=string.format("%08x%08x%08x",time(),math.floor(GetTime()*1000)%4294967295,sequence)
+-        job={token=token,started=GetTime(),poll=GetTime()+3}
+-        SendAddonMessage("A52LIB","PUBLISH|"..token.."|"..tostring(build.ID).."|"..tostring(build.UpdatedTime).."|"..alias.."|CC0-1.0","WHISPER",UnitName("player"))
+-        say("Publication requested. Your saved build remains available on this server.")
+-    end,
+-}
+-
+-local originalPrompt=BuildCreatorMixin.PromptPublishBuild
+-function BuildCreatorMixin:SaveBuild()
+-    local sent,reason=C_BuildEditor.PublishBuild()
+-    if sent then self:ShowLoading("Saving build...")
+-    else savingForPublish=false;self:ShowError("Unable to save build",_G[reason] or reason) end
+-end
+-function Library.PrepareEditor(view)
+-    if Area52DraftSelector and not Area52DraftSelector.Valid(view) then return false end
+-    if view:IsShown() then
+-        if view.editElement then view.editElement:HideEditModeIfEditing() else view:UpdatePendingBuild() end
+-    end
+-    return true
+-end
+-function BuildCreatorMixin:PromptSaveBuild()
+-    if not Library.PrepareEditor(self.EditableBuildViewPanel) then return end
+-    local build=C_BuildEditor.GetPendingBuild()
+-    if build then StaticPopup_Show("AREA52_SAVE_BUILD",build.Name) end
+-end
+-function BuildCreatorMixin:PromptPublishBuild()
+-    if not active() then return originalPrompt(self) end
+-    if job then
+-        job.started=GetTime();job.poll=GetTime()+3;job.timedOut=nil;status()
+-        say("Checking the previous publication request...");return
+-    end
+-    if savingForPublish or Library.IsUpdating() then say("Wait for the current library request to finish.");return end
+-    if not Library.PrepareEditor(self.EditableBuildViewPanel) then return end
+-    savingForPublish=true
+-    self:SaveBuild()
+-end
+-
+-local function saved(self,result,id,original)
+-    if not active() then return original(self,result,id) end
+-    local publish=savingForPublish;savingForPublish=false
+-    self:HideLoading()
+-    result=result:gsub("SAVE_BUILD_","PUBLISH_BUILD_"):gsub("CREATE_BUILD_","PUBLISH_BUILD_")
+-    if result~="PUBLISH_BUILD_OK" then self:ShowError("Unable to save build",_G[result] or result);return end
+-    self:ContinueOnLoad(id,function(build)
+-        self:DiscardSavedBuild(build.Name);self:ViewBuild(build)
+-        if publish then
+-            StaticPopup_Show("AREA52_PUBLISH_BUILD",build.Name,nil,{ID=build.ID,UpdatedTime=build.UpdatedTime})
+-        else say("Build saved to this server. It has not been published to GitHub.") end
+-    end)
+-end
+-local originalSave=BuildCreatorMixin.BUILD_CREATOR_SAVE_RESULT
+-local originalCreate=BuildCreatorMixin.BUILD_CREATOR_CREATE_RESULT
+-function BuildCreatorMixin:BUILD_CREATOR_SAVE_RESULT(result,id) return saved(self,result,id,originalSave) end
+-function BuildCreatorMixin:BUILD_CREATOR_CREATE_RESULT(result,id) return saved(self,result,id,originalCreate) end
+-
+-function Library.AttachEditor(view)
+-    if not active() then return end
+-    local controls=view.Controls
+-    if not controls.SaveBuild then
+-        local button=CreateFrame("Button",view:GetName().."Area52SaveBuild",controls,"SharedButtonTemplate")
+-        controls.SaveBuild=button
+-        button:SetSize(140,38);button:SetPoint("LEFT",controls.PublishBuild,"RIGHT",4,0);button:SetText("Save Build")
+-        button:SetScript("OnClick",function() BuildCreatorFrame:PromptSaveBuild() end)
+-        button:SetScript("OnEnter",GameTooltip_GenericTooltip);button:SetScript("OnLeave",GameTooltip_Hide)
+-        controls.ResetBuild:ClearAllPoints();controls.ResetBuild:SetPoint("LEFT",button,"RIGHT",4,0)
+-    end
+-    controls.SaveBuild:SetEnabled(controls.PublishBuild:IsEnabled())
+-    controls.SaveBuild.tooltipTitle="Save Build"
+-    controls.SaveBuild.tooltipText="Save this build to this server's build library. It will not be uploaded to the public Shared Library."
+-    if not controls.PublishBuild:IsEnabled() then
+-        controls.SaveBuild.tooltipTitle="Cannot Save Build"
+-        controls.SaveBuild.tooltipText=controls.PublishBuild.tooltipText or "Review the build requirements before saving."
+-    end
+-    if controls.PublishBuild:IsEnabled() then
+-        controls.PublishBuild.tooltipTitle="Publish Build"
+-        controls.PublishBuild.tooltipText="Save and publish a copy to the public Area 52 Shared Library on GitHub, after you confirm the public author alias and contribution terms."
+-    end
+-end
+-
+-local frame=CreateFrame("Frame")
+-frame:RegisterEvent("CHAT_MSG_ADDON")
+-frame:SetScript("OnEvent",function(_,_,prefix,text,channel,sender)
+-    if not active() or not job or prefix~="A52LIB" or channel~="WHISPER" or sender~=UnitName("player") then return end
+-    if text:match("^ERROR|([0-9a-f]+)|")==job.token then
+-        job=nil;say("Public publishing is unavailable. Your server-local build is saved.");return
+-    end
+-    local token,state=text:match("^PUBLISH|([0-9a-f]+)|(%a+)$")
+-    if token~=job.token then return end
+-    if state=="published" then job=nil;say("Build published to the public Shared Library on GitHub.")
+-    elseif state=="failed" or state=="conflict" or state=="rejected" then
+-        job=nil;say("Public publication could not finish. Your server-local build is preserved.")
+-    elseif (state=="queued" or state=="accepted") and not job.acknowledged then
+-        job.acknowledged=true;say("Build queued for public publication. Waiting for GitHub confirmation.")
+-    end
+-end)
+-frame:SetScript("OnUpdate",function()
+-    if not job or job.timedOut then return end
+-    if GetTime()-job.started>90 then
+-        job.timedOut=true;say("Publication has not been confirmed. Click Publish Build again to check this request; it will not send another copy.")
+-    elseif GetTime()>=job.poll then job.poll=GetTime()+3;status() end
+-end)
++local AddonName = ...
++local AddonVersion = tonumber(GetAddOnMetadata(AddonName, "Version"))
++
++local DefaultBuildCreatorSaved = {
++	SavedBuilds = {}
++}
++
++BuildCreatorMixin = {}
++
++local BuildCategories = {}
++
++local CreateCategories = {
++	Enum.BuildCreateCategory.Import,
++	Enum.BuildCreateCategory.CurrentBuild,
++}
++
++function BuildCreatorMixin:OnLoad()
++	PortraitFrame_SetIcon(self, "Interface\\Icons\\ability_priest_angelicfeather")
++	PortraitFrame_SetTitle(self, HERO_ARCHITECT)
++	self.CloseButton:SetScript("OnClick", function()
++		HideUIPanel(Collections)
++	end)
++
++	self:RegisterEvent("ADDON_LOADED")
++	self:RegisterEvent("BUILD_CREATOR_CATEGORY_RESULT")
++	self:RegisterEvent("BUILD_CREATOR_BUILD_RESULT")
++	self:RegisterEvent("BUILD_CREATOR_ACTIVATE_RESULT")
++	self:RegisterEvent("BUILD_CREATOR_DEACTIVATE_RESULT")
++	self:RegisterEvent("BUILD_CREATOR_SAVE_RESULT")
++	self:RegisterEvent("BUILD_CREATOR_CREATE_RESULT")
++	self:RegisterEvent("BUILD_CREATOR_DELETE_RESULT")
++
++	self.BuildScroll:SetTemplate("BuildListItemTemplate")
++	self.BuildScroll:SetGetNumResultsFunction(C_BuildCreator.GetNumBuilds)
++	
++	local isWildCard = C_GameMode:IsGameModeActive(Enum.GameMode.WildCard)
++
++	if not isWildCard then
++		tinsert(BuildCategories, Enum.BuildCategory.BuildDraft)
++		tinsert(BuildCategories, Enum.BuildCategory.Leveling)
++		tinsert(CreateCategories, Enum.BuildCreateCategory.Leveling)
++	else
++		tinsert(BuildCategories, Enum.BuildCategory.BuildDraftEndGamePvE)
++		tinsert(BuildCategories, Enum.BuildCategory.BuildDraftEndGamePvP)
++	end
++
++	local maxLevel = GetMaxLevel()
++	if maxLevel == 60 then
++		tinsert(BuildCategories, Enum.BuildCategory.Level60PvE)
++		tinsert(BuildCategories, Enum.BuildCategory.Level60PvP)
++		tinsert(CreateCategories, Enum.BuildCreateCategory.Level60PvE)
++		tinsert(CreateCategories, Enum.BuildCreateCategory.Level60PvP)
++	elseif maxLevel == 70 then
++		tinsert(BuildCategories, Enum.BuildCategory.Level70PvE)
++		tinsert(BuildCategories, Enum.BuildCategory.Level70PvP)
++		tinsert(CreateCategories, Enum.BuildCreateCategory.Level70PvE)
++		tinsert(CreateCategories, Enum.BuildCreateCategory.Level70PvP)
++	end
++
++	if C_Player:GetLevel() == maxLevel or C_Player:IsGM() or isWildCard then
++		tinsert(BuildCategories, Enum.BuildCategory.None)
++		tinsert(BuildCategories, Enum.BuildCategory.History)
++	end
++
++	self.categories = BuildCategories
++	self.isCreateMode = false
++	self.CategoryScroll:SetTemplate("BuildListCategoryListItemTemplate")
++	self.CategoryScroll:SetGetNumResultsFunction(function() return #self.categories end)
++	self.CategoryScroll:GetSelectedHighlight():SetAtlas("buildcreator-category-highlight", Const.TextureKit.IgnoreAtlasSize)
++	self.CategoryScroll:GetSelectedHighlight():SetBlendMode("ADD")
++	self.CategoryScroll.Artwork:SetAtlas("buildcreator-category-art", Const.TextureKit.IgnoreAtlasSize)
++	
++	self.sort = { [Enum.BuildSort.RatingDescending] = true }
++	self.Filter:RegisterCallback("OnFilterChanged", self.OnFilterChanged, self)
++	self:InitializeFilterDropDown()
++	self.Sorting:Initialize(GenerateClosure(self.InitializeSortDropDown, self), GenerateClosure(self.SetSorting, self, Enum.BuildSort.RatingDescending))
++	
++	self.pendingCallback = {}
++end 
++
++function BuildCreatorMixin:GetCategoryAtIndex(index)
++	return self.categories[index]
++end
++
++function BuildCreatorMixin:GetCurrentCategory()
++	return self.category
++end
++
++function BuildCreatorMixin:OnHide()
++	StaticPopup_Hide("BUILD_CREATOR_SET_COMMENT")
++	StaticPopup_Hide("BUILD_CREATOR_SET_ENCHANT_LEVEL")
++end
++
++function BuildCreatorMixin:ShowBuildList()
++	self.CategoryScroll:Show()
++	self.BuildScroll:Show()
++	self.BuildScroll:SetSelectedIndex()
++	self.SearchBox:Show()
++	self.Filter:Show()
++	self.Sorting:Show()
++	self.BuildViewPanel:Hide()
++	self.EditableBuildViewPanel:Hide()
++	self.Filter:ClearFilters()
++	if not self.category then
++		self.CategoryScroll:SetSelectedIndex(2, ScrollListMixin.UpdateType.AlwaysSimulateClick)
++	else
++		for index, category in ipairs(self.categories) do
++			if category == self.category then
++				self.CategoryScroll:SetSelectedIndex(index)
++			end
++		end
++	end
++end
++
++function BuildCreatorMixin:HideBuildList()
++	self.CategoryScroll:Hide()
++	self.BuildScroll:Hide()
++	self.BuildScroll:SetSelectedIndex()
++	self.SearchBox:Hide()
++	self.Filter:Hide()
++	self.Sorting:Hide()
++	self.BuildViewPanel:Hide()
++	self.EditableBuildViewPanel:Hide()
++end
++
++function BuildCreatorMixin:ShowCreateCategories()
++	self.isCreateMode = true
++	self.categories = table.Copy(CreateCategories)
++	local showTip
++	if BuildCreatorSaved and next(BuildCreatorSaved.SavedBuilds) then
++		table.insert(self.categories, 1, Enum.BuildCreateCategory.SavedBuild)
++		showTip = not self.HasSeenSavedBuildTip
++	end
++	self.CategoryScroll:RefreshScrollFrame()
++
++	if showTip then
++		local tip = {
++			text = TIP_RESTORE_WIP_BUILD,
++			textJustifyH = "CENTER",
++			targetPoint = HelpTip.Point.BottomEdgeCenter,
++			buttonStyle = HelpTip.ButtonStyle.GotIt,
++			highlightTarget = HelpTip.TargetType.Box,
++			strata = "TOOLTIP",
++		}
++		HelpTip:Show(self.CategoryScroll.ScrollFrame, tip, self.CategoryScroll.ScrollFrame.buttons[1])
++		self.HasSeenSavedBuildTip = true -- once per session should be ok?
++	end
++end
++
++function BuildCreatorMixin:ShowBuildCategories()
++	self.isCreateMode = false
++	self.categories = table.Copy(BuildCategories)
++	tinsert(self.categories, 1, Enum.BuildCategory.ActiveBuild)
++	self.CategoryScroll:RefreshScrollFrame()
++end
++
++function BuildCreatorMixin:ToggleCreate()
++	if self.isCreateMode then
++		self:ShowBuildCategories()
++	else
++		self:ShowCreateCategories()
++	end
++	self.ToggleCreateButton:SetText(self.isCreateMode and BROWSE_BUILDS or CREATE_BUILD)
++end
++
++function BuildCreatorMixin:OpenBuildEditor()
++	self:HideBuildList()
++	if not self.EditableBuildViewPanel:IsShown() then
++		self.EditableBuildViewPanel.deserializeNext = true
++		self.EditableBuildViewPanel:Show()
++	else
++		self.EditableBuildViewPanel:UpdatePendingBuild(true)
++	end
++end
++
++function BuildCreatorMixin:SelectCategory(category)
++	if category == Enum.BuildCategory.History then
++		self.BuildScroll:SetGetNumResultsFunction(C_BuildCreator.GetNumBookmarkedBuilds)
++		self.lastQueried = Enum.BuildCategory.History
++	else
++		self.BuildScroll:SetGetNumResultsFunction(C_BuildCreator.GetNumBuilds)
++	end
++
++	if category == Enum.BuildCategory.ActiveBuild then
++		self:ViewBuildID(BuildCreatorUtil.GetActiveBuildID())
++		return
++	end
++
++	if category == Enum.BuildCategory.Featured then
++		category = Enum.BuildCategory.None
++		self.Filter:SetToSingleFilter(Enum.BuildFilter.Featured)
++	elseif category == Enum.BuildCategory.MyBuilds then
++		category = Enum.BuildCategory.None
++		self.Filter:SetToSingleFilter(Enum.BuildFilter.Owned)
++	end
++
++	if self.lastQueried == category then
++		-- skip event because we want to return to where we were scrolled to / what search & filters we had set.
++		self.category = category
++		self:ShowBuildList()
++		self:UpdateSearch()
++		return
++	end
++	C_BuildCreator.QueryAllBuilds(category)
++	self.lastQueried = category
++	self:ShowLoading()
++end
++
++function BuildCreatorMixin:CreateBuild(category, deserialize)
++	if category == Enum.BuildCreateCategory.Import then
++		-- import build will specify to deserialize from popup
++		if not deserialize then
++			StaticPopup_Show("BUILD_CREATOR_IMPORT_BUILD")
++			return
++		else
++			-- guess category for imports
++			local maxLevel = GetMaxLevel()
++			if maxLevel > 60 then
++				category = Enum.BuildCreateCategory.Level70PvE
++			else
++				category = Enum.BuildCreateCategory.Level60PvE
++			end
++		end
++	elseif category == Enum.BuildCreateCategory.CurrentBuild then
++		C_BuildEditor.DiscardPendingBuild()
++		self.EditableBuildViewPanel:ImportCurrentBuild()
++		-- guess category for current build
++		local maxLevel = GetMaxLevel()
++		if maxLevel > 60 then
++			category = Enum.BuildCreateCategory.Level70PvE
++		else
++			category = Enum.BuildCreateCategory.Level60PvE
++		end
++	elseif category == Enum.BuildCreateCategory.SavedBuild then
++		-- saved builds will load the saved category.
++		if not self.SavedBuildDropDown then
++			local dropdown = CreateFrame("Frame", "BuildCreatorSavedBuildDropDown", self, "UIDropDownMenuTemplate")
++			UIDropDownMenu_Initialize(dropdown, GenerateClosure(self.InitializeSavedBuildDropDown, self), "MENU")
++			self.SavedBuildDropDown = dropdown
++		end
++		ToggleDropDownMenu(1, nil, self.SavedBuildDropDown, "cursor", 0, 0)
++		return
++	else
++		-- categories above handle their own discarding
++		-- saved builds will pass deserialize = true
++		if not deserialize then
++			C_BuildEditor.DiscardPendingBuild()
++		end
++	end
++	self.category = category
++	self.EditableBuildViewPanel:SetCategory(category)
++	self:OpenBuildEditor()
++	BuildCreatorUtil.ReleaseHeldSpell()
++end
++
++function BuildCreatorMixin:ConvertBuildEditorToCategory(category)
++	local convertCategory = function()
++		self:CreateBuild(category, true)
++		local build = C_BuildEditor.GetPendingBuild()
++		if category == Enum.BuildCreateCategory.Level60PvE or category == Enum.BuildCreateCategory.Level60PvP then
++			for _, spell in ipairs(build.Spells) do
++				C_BuildEditor.SetSpellLevel(spell.Spell, 60)
++			end
++		elseif category == Enum.BuildCreateCategory.Level70PvE or category == Enum.BuildCreateCategory.Level70PvP then
++			for _, spell in ipairs(build.Spells) do
++				C_BuildEditor.SetSpellLevel(spell.Spell, 70)
++			end
++		elseif category == Enum.BuildCreateCategory.Leveling then
++			local maxLevel = GetMaxLevel()
++			for _, spell in ipairs(build.Spells) do
++				C_BuildEditor.SetSpellLevel(spell.Spell, maxLevel)
++			end
++		end
++	end
++	
++	StaticPopup_Show("BUILD_CREATOR_CHANGE_BUILD_CATEGORY", nil, nil, convertCategory)
++end
++
++function BuildCreatorMixin:OnShow()
++	C_Quest:SendPathToAscensionEvent("ACTION_OPEN_HERO_ARCHITECT")
++	self:ShowBuildCategories()
++	if not self.category then
++		if BuildCreatorUtil.GetActiveBuildID() then
++			self:ViewBuildID(BuildCreatorUtil.GetActiveBuildID())
++		else
++			self:ShowBuildList()
++		end
++	end
++end
++
++function BuildCreatorMixin:OnFilterChanged()
++	self:UpdateSearch()
++end
++
++function BuildCreatorMixin:ApplyDefaultClassFilter()
++	local filters = self.Filter:GetFilter()
++	filters = table.Copy(filters)
++	-- nasty hack to make it auto select your current class.
++	if C_Player:IsHero() then
++		filters["FILTER_CLASS_HERO"] = true
++	else
++		-- always filter to my class unless i have set to another class.
++		local class = select(2, UnitClass("player"))
++		if not self.Filter:IsFilteredFind("FILTER_CLASS_") then
++			if class == "PROPHET" then
++				filters["FILTER_CLASS_VENOMANCER"] = true
++			elseif class == "FLESHWARDEN" then
++				filters["FILTER_CLASS_FILTER_CLASS_KNIGHT_OF_XOROTH"] = true
++			elseif class == "WILDWALKER" then
++				filters["FILTER_CLASS_PRIMALIST"] = true
++			elseif class == "DEATHKNIGHT" then
++				filters["FILTER_CLASS_DEATH_KNIGHT"] = true
++			else
++				filters["FILTER_CLASS_"..class] = true
++			end
++		end
++	end
++	return filters
++end
++
++function BuildCreatorMixin:UpdateSearch()
++	self.Sorting.ClearFiltersButton:SetShown(not self.sort[Enum.BuildSort.RatingDescending])
++	if self.BuildScroll:IsVisible() then
++		local text = self.SearchBox:GetText()
++		
++		C_BuildCreator.UpdateFilter(text, self:ApplyDefaultClassFilter(), self.sort)
++		self.BuildScroll:RefreshScrollFrame()
++	end
++end
++
++function BuildCreatorMixin:InitializeFilterDropDown()
++	local filter = self.Filter
++	filter:AddHeader(GENERAL_LABEL)
++
++	filter:AddFilterOption(Enum.BuildFilter.Featured, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Featured))
++	filter:AddFilterOption(Enum.BuildFilter.Owned, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Owned))
++	filter:AddFilterOption(Enum.BuildFilter.Recent, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Recent))
++	
++	filter:AddOptionSpacer()
++
++	filter:AddHeader(ROLE)
++
++	local damageInfo = filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Damage, ROLE_COLORS["DAMAGE"], ROLE_ATLAS["DAMAGER"].."-micro")
++	damageInfo.func = function()
++		-- this is called before the filter sets the current filter
++		-- so if were currently not enabled, we are enabling this filter
++		if not filter:IsFiltered(Enum.BuildFilter.Damage) then
++			filter:SetFilter(Enum.BuildFilter.Tank, false)
++			filter:SetFilter(Enum.BuildFilter.Healer, false)
++		end
++	end
++	filter:AddFilterOption(Enum.BuildFilter.Damage, damageInfo)
++
++	local tankInfo = filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Tank, ROLE_COLORS["TANK"], ROLE_ATLAS["TANK"].."-micro")
++	tankInfo.func = function()
++		-- this is called before the filter sets the current filter
++		-- so if were currently not enabled, we are enabling this filter
++		if not filter:IsFiltered(Enum.BuildFilter.Tank) then
++			filter:SetFilter(Enum.BuildFilter.Damage, false)
++			filter:SetFilter(Enum.BuildFilter.Healer, false)
++		end
++	end
++	filter:AddFilterOption(Enum.BuildFilter.Tank, tankInfo)
++
++	local healerInfo = filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Healer, ROLE_COLORS["HEALER"], ROLE_ATLAS["HEALER"].."-micro")
++	healerInfo.func = function()
++		-- this is called before the filter sets the current filter
++		-- so if were currently not enabled, we are enabling this filter
++		if not filter:IsFiltered(Enum.BuildFilter.Healer) then
++			filter:SetFilter(Enum.BuildFilter.Damage, false)
++			filter:SetFilter(Enum.BuildFilter.Tank, false)
++		end
++	end
++	filter:AddFilterOption(Enum.BuildFilter.Healer, healerInfo)
++	
++	filter:AddOptionSpacer()
++
++	filter:AddHeader(COMPLEXITY_LABEL)
++
++	filter:AddFilterOption(Enum.BuildFilter.Standard, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Standard, BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Standard], BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Standard]))
++	filter:AddFilterOption(Enum.BuildFilter.Intermediate, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Intermediate, BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Intermediate], BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Intermediate]))
++	filter:AddFilterOption(Enum.BuildFilter.Advanced, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Advanced, BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Advanced], BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Advanced]))
++	filter:AddFilterOption(Enum.BuildFilter.Expert, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Expert, BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Expert], BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Expert]))
++	filter:AddFilterOption(Enum.BuildFilter.Impossible, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Impossible, BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Impossible], BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Impossible]))
++
++	filter:AddOptionSpacer()
++
++	if C_Player:IsHero() then
++		filter:AddHeader(PRIMARY_STAT)
++
++		filter:AddFilterOption(Enum.BuildFilter.Strength, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Strength, STAT_COLORS["Strength"], PRIMARY_STAT_ATLAS["Strength"]))
++		filter:AddFilterOption(Enum.BuildFilter.Agility, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Agility, STAT_COLORS["Agility"], PRIMARY_STAT_ATLAS["Agility"]))
++		filter:AddFilterOption(Enum.BuildFilter.Intellect, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Intellect, STAT_COLORS["Intellect"], PRIMARY_STAT_ATLAS["Intellect"]))
++		filter:AddFilterOption(Enum.BuildFilter.Spirit, filter:CreateFilterInfo("BUILD_"..Enum.BuildFilter.Spirit, STAT_COLORS["Spirit"], PRIMARY_STAT_ATLAS["Spirit"]))
++	elseif C_Player:IsDefaultClass() then
++		-- class filter
++		filter:AddHeader(CLASS)
++
++		-- Default classes
++		filter:AddFilterOption("FILTER_CLASS_WARRIOR", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("WARRIOR"), nil, "groupfinder-icon-class-warrior"))
++		filter:AddFilterOption("FILTER_CLASS_PALADIN", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("PALADIN"), nil, "groupfinder-icon-class-paladin"))
++		filter:AddFilterOption("FILTER_CLASS_HUNTER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("HUNTER"), nil, "groupfinder-icon-class-hunter"))
++		filter:AddFilterOption("FILTER_CLASS_ROGUE", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("ROGUE"), nil, "groupfinder-icon-class-rogue"))
++		filter:AddFilterOption("FILTER_CLASS_PRIEST", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("PRIEST"), nil, "groupfinder-icon-class-priest"))
++		filter:AddFilterOption("FILTER_CLASS_DEATH_KNIGHT", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("DEATHKNIGHT"), nil, "groupfinder-icon-class-deathknight"))
++		filter:AddFilterOption("FILTER_CLASS_SHAMAN", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("SHAMAN"), nil, "groupfinder-icon-class-shaman"))
++		filter:AddFilterOption("FILTER_CLASS_MAGE", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("MAGE"), nil, "groupfinder-icon-class-mage"))
++		filter:AddFilterOption("FILTER_CLASS_WARLOCK", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("WARLOCK"), nil, "groupfinder-icon-class-warlock"))
++		filter:AddFilterOption("FILTER_CLASS_DRUID", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("DRUID"), nil, "groupfinder-icon-class-druid"))
++	elseif C_Player:IsCustomClass() then
++		-- class filter
++		filter:AddHeader(CLASS)
++
++		-- Custom classes
++		filter:AddFilterOption("FILTER_CLASS_BARBARIAN", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("BARBARIAN"), nil, "groupfinder-icon-class-barbarian"))
++		filter:AddFilterOption("FILTER_CLASS_WITCH_DOCTOR", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("WITCHDOCTOR"), nil, "groupfinder-icon-class-witchdoctor"))
++		filter:AddFilterOption("FILTER_CLASS_DEMON_HUNTER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("DEMONHUNTER"), nil, "groupfinder-icon-class-demonhunter"))
++		filter:AddFilterOption("FILTER_CLASS_WITCH_HUNTER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("WITCHHUNTER"), nil, "groupfinder-icon-class-witchhunter"))
++		filter:AddFilterOption("FILTER_CLASS_STORMBRINGER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("STORMBRINGER"), nil, "groupfinder-icon-class-stormbringer"))
++		filter:AddFilterOption("FILTER_CLASS_KNIGHT_OF_XOROTH", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("FLESHWARDEN"), nil, "groupfinder-icon-class-fleshwarden"))
++		filter:AddFilterOption("FILTER_CLASS_GUARDIAN", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("GUARDIAN"), nil, "groupfinder-icon-class-guardian"))
++		filter:AddFilterOption("FILTER_CLASS_MONK", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("MONK"), nil, "groupfinder-icon-class-monk"))
++		filter:AddFilterOption("FILTER_CLASS_SON_OF_ARUGAL", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("SONOFARUGAL"), nil, "groupfinder-icon-class-sonofarugal"))
++		filter:AddFilterOption("FILTER_CLASS_RANGER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("RANGER"), nil, "groupfinder-icon-class-ranger"))
++		filter:AddFilterOption("FILTER_CLASS_CHRONOMANCER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("CHRONOMANCER"), nil, "groupfinder-icon-class-chronomancer"))
++		filter:AddFilterOption("FILTER_CLASS_NECROMANCER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("NECROMANCER"), nil, "groupfinder-icon-class-necromancer"))
++		filter:AddFilterOption("FILTER_CLASS_PYROMANCER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("PYROMANCER"), nil, "groupfinder-icon-class-pyromancer"))
++		filter:AddFilterOption("FILTER_CLASS_CULTIST", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("CULTIST"), nil, "groupfinder-icon-class-cultist"))
++		filter:AddFilterOption("FILTER_CLASS_STARCALLER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("STARCALLER"), nil, "groupfinder-icon-class-starcaller"))
++		filter:AddFilterOption("FILTER_CLASS_SUN_CLERIC", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("SUNCLERIC"), nil, "groupfinder-icon-class-suncleric"))
++		filter:AddFilterOption("FILTER_CLASS_TINKER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("TINKER"), nil, "groupfinder-icon-class-tinker"))
++		filter:AddFilterOption("FILTER_CLASS_VENOMANCER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("PROPHET"), nil, "groupfinder-icon-class-prophet"))
++		filter:AddFilterOption("FILTER_CLASS_REAPER", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("REAPER"), nil, "groupfinder-icon-class-reaper"))
++		filter:AddFilterOption("FILTER_CLASS_PRIMALIST", filter:CreateFilterInfo(ClassInfoUtil.GetColoredClassName("WILDWALKER"), nil, "groupfinder-icon-class-wildwalker"))
++	end
++end
++
++function BuildCreatorMixin:SetSorting(sort)
++	wipe(self.sort)
++	self.sort[sort] = true
++	self:UpdateSearch()
++end
++
++local function CreateSortInfo(self, key)
++	local info = UIDropDownMenu_CreateInfo()
++	info.text = _G["BUILD_"..key]
++	info.arg1 = key
++	info.checked = self.sort[key]
++	info.func = function()
++		self:SetSorting(key)
++	end
++	UIDropDownMenu_AddButton(info)
++end
++
++function BuildCreatorMixin:InitializeSortDropDown(dropdown, level, menuList)
++	if not self.Sorting:IsVisible() then return end
++	local info
++	info = UIDropDownMenu_CreateInfo()
++	info.isTitle = true
++	info.text = BUILD_SORT_RATING
++	info.notCheckable = true
++	UIDropDownMenu_AddButton(info, level)
++
++	CreateSortInfo(self, Enum.BuildSort.RatingDescending)
++	CreateSortInfo(self, Enum.BuildSort.RatingAscending)
++
++	UIDropDownMenu_AddSpace(level)
++
++	info = UIDropDownMenu_CreateInfo()
++	info.isTitle = true
++	info.text = BUILD_SORT_DATE
++	info.notCheckable = true
++	UIDropDownMenu_AddButton(info, level)
++
++	CreateSortInfo(self, Enum.BuildSort.DateDescending)
++	CreateSortInfo(self, Enum.BuildSort.DateAscending)
++end
++
++function BuildCreatorMixin:ShowLoading(text, subtext)
++	self:HideError()
++	self.Loading:Show()
++	self.Loading:SetText(text or "", subtext or "")
++end
++
++function BuildCreatorMixin:HideLoading()
++	self.Loading:Hide()
++end
++
++function BuildCreatorMixin:ShowError(text, subtext)
++	self:HideLoading()
++	self.Error:Show()
++	self.Error:SetText(text or "", subtext or "")
++end
++
++function BuildCreatorMixin:HideError()
++	self.Error:Hide()
++end
++
++function BuildCreatorMixin:ViewBuild(build)
++	self:HideBuildList()
++	self.BuildViewPanel:Show()
++	self.BuildViewPanel:SetBuild(build)
++end
++
++function BuildCreatorMixin:ViewBuildID(buildID)
++	local build = C_BuildCreator.GetBuild(buildID)
++	if build then
++		return self:ViewBuild(build)
++	end
++	self:ShowLoading()
++	C_BuildCreator.QueryBuild(buildID)
++end
++
++function BuildCreatorMixin:ContinueOnLoad(buildID, callback)
++	local build = C_BuildCreator.GetBuild(buildID)
++	if build then
++		callback(build)
++		return
++	end
++	if not self.pendingCallback[buildID] then
++		self:ShowLoading()
++		self.pendingCallback[buildID] = self.pendingCallback[buildID] or {}
++		tinsert(self.pendingCallback[buildID], callback)
++		C_BuildCreator.QueryBuild(buildID)
++	end
++end
++
++function BuildCreatorMixin:PromptPublishBuild()
++    if Area52DraftSelector and not Area52DraftSelector.Valid(self.EditableBuildViewPanel) then return end
++    local editor = self.EditableBuildViewPanel
++    if editor:IsShown() then
++        if editor.editElement then
++            editor.editElement:HideEditModeIfEditing()
++        else
++            editor:UpdatePendingBuild()
++        end
++    end
++	local build = C_BuildEditor.GetPendingBuild()
++	if build then
++		local parentCategory = BuildCreatorUtil.GetParentCategory(build.Category)
++		local category
++		if parentCategory then
++			category = _G["BUILDCREATOR_CATEGORY_" .. parentCategory:upper()] .. " " .. _G["BUILDCREATOR_CATEGORY_" .. build.Category:upper()]
++		else
++			category = _G["BUILDCREATOR_CATEGORY_" .. build.Category:upper()]
++		end
++		StaticPopup_Show("BUILD_CREATOR_PUBLISH_BUILD", build.Name, category)
++	end
++end
++
++function BuildCreatorMixin:PublishBuild()
++	local publishSent, failReason = C_BuildEditor.PublishBuild()
++	if publishSent then
++		self:ShowLoading(PUBLISHING_BUILD)
++	else
++		self:ShowError(PUBLISH_BUILD_FAILED, _G[failReason] or failReason)
++	end
++end
++
++function BuildCreatorMixin:PromptEditBuild()
++	if self.BuildViewPanel:IsVisible() then
++		StaticPopup_Show("BUILD_CREATOR_EDIT_BUILD", self.BuildViewPanel.build.Name, nil, self.BuildViewPanel.build)
++	end
++end
++
++function BuildCreatorMixin:PromptDeleteBuild()
++	if self.BuildViewPanel:IsVisible() then
++		StaticPopup_Show("BUILD_CREATOR_DELETE_BUILD", self.BuildViewPanel.build.Name, nil, self.BuildViewPanel.build.ID)
++	end
++end
++
++function BuildCreatorMixin:EditBuild(build)
++	self.category = build.Category
++	self.EditableBuildViewPanel:SetCategory(build.Category)
++	C_BuildEditor.EditBuild(build.ID)
++	self:OpenBuildEditor()
++	BuildCreatorUtil.ReleaseHeldSpell()
++end
++
++function BuildCreatorMixin:DeleteBuild(buildID)
++	local success, failReason = C_BuildCreator.DeleteBuild(buildID)
++	if success then
++		self:ShowLoading()
++	else
++		self:ShowError(DELETE_BUILD_FAILED, _G[failReason] or failReason)
++	end
++end
++
++function BuildCreatorMixin:SerializePendingBuild()
++	local build = C_BuildEditor.GetPendingBuild()
++	if build then
++		if build.Name:len() > 0 and build.Name ~= "Build Name" then
++			local serializedBuild = C_Serialize:SerializeCompressForPrint(build)
++			if serializedBuild then
++				BuildCreatorSaved.SavedBuilds[build.Name] = serializedBuild
++			end
++		end
++	end
++end
++
++function BuildCreatorMixin:InitializeSavedBuildDropDown(dropdown, level, menuList)
++	if not BuildCreatorSaved then return end
++
++	local info
++	if menuList then
++		info = UIDropDownMenu_CreateInfo()
++		info.isTitle = true
++		info.text = menuList
++		info.notCheckable = true
++		UIDropDownMenu_AddButton(info, level)
++
++		info = UIDropDownMenu_CreateInfo()
++		info.text = EDIT_BUILD
++		info.notCheckable = true
++		info.func = function()
++			self:RestoreSavedBuild(menuList)
++		end
++		UIDropDownMenu_AddButton(info, level)
++		
++		info = UIDropDownMenu_CreateInfo()
++		info.text = DELETE
++		info.notCheckable = true
++		info.func = function()
++			StaticPopup_Show("BUILD_CREATOR_DELETE_SAVED_BUILD", menuList, nil, function()
++				self:DiscardSavedBuild(menuList)
++				CloseDropDownMenus()
++			end)
++		end
++		UIDropDownMenu_AddButton(info, level)
++
++		info = UIDropDownMenu_CreateInfo()
++		info.text = CLOSE
++		info.func = function() CloseDropDownMenus(level) end
++		info.notCheckable = true
++		UIDropDownMenu_AddButton(info, level)
++		return
++	end
++
++	info = UIDropDownMenu_CreateInfo()
++	info.isTitle = true
++	info.text = BUILDCREATOR_CREATEBUTTON_SAVEDBUILD
++	info.notCheckable = true
++	UIDropDownMenu_AddButton(info, level)
++
++	for savedBuild in pairs(BuildCreatorSaved.SavedBuilds) do
++		info = UIDropDownMenu_CreateInfo()
++		info.text = savedBuild
++		info.func = function()
++			self:RestoreSavedBuild(savedBuild)
++		end
++		info.menuList = savedBuild
++		info.hasArrow = true
++		info.notCheckable = true
++		UIDropDownMenu_AddButton(info, level)
++	end
++
++	info = UIDropDownMenu_CreateInfo()
++	info.text = CLOSE
++	info.func = function() CloseDropDownMenus(level) end
++	info.notCheckable = true
++	UIDropDownMenu_AddButton(info, level)
++end
++
++function BuildCreatorMixin:DiscardSavedBuild(name)
++	BuildCreatorSaved.SavedBuilds[name] = nil
++end
++
++function BuildCreatorMixin:RestoreSavedBuild(name)
++	local build = BuildCreatorSaved.SavedBuilds[name]
++	if not build then
++		return
++	end
++	
++	local deserializedBuild = C_Serialize:DeserializeDecompressFromPrint(build)
++	if not deserializedBuild then
++		return
++	end
++	
++	C_BuildEditor.DiscardPendingBuild()
++	C_BuildEditor.SetName(deserializedBuild.Name)
++	C_BuildEditor.SetIcon(deserializedBuild.Icon)
++	C_BuildEditor.SetCategory(deserializedBuild.Category)
++	C_BuildEditor.SetDescription(deserializedBuild.Description)
++	C_BuildEditor.SetRoles(deserializedBuild.Roles)
++	C_BuildEditor.SetPrimaryStat(deserializedBuild.PrimaryStat)
++	C_BuildEditor.SetDifficultyRating(deserializedBuild.DifficultyRating)
++	
++	for _, spell in ipairs(deserializedBuild.Spells) do
++		C_BuildEditor.AddSpell(spell)
++	end
++	
++	for _, enchant in ipairs(deserializedBuild.RandomEnchants) do
++		C_BuildEditor.AddRandomEnchant(enchant)
++	end
++	
++	for _, armor in ipairs(deserializedBuild.ArmorTypes) do
++		C_BuildEditor.AddArmorType(armor)
++	end
++
++	for _, weapon in ipairs(deserializedBuild.WeaponTypes) do
++		C_BuildEditor.AddWeaponType(weapon)
++	end
++
++	self:CreateBuild(deserializedBuild.Category, true)
++	return true
++end
++
++local function ModernizeSavedVariable(savedTable, default)
++	if not savedTable then
++		default.__version = AddonVersion
++		return default
++	end
++
++	-- do specific version modernizations here
++	if savedTable.__version ~= AddonVersion then
++		C_Logger.Info("Updated BuildCreator Saved Variables to Version: %.1f", AddonVersion)
++		for k, v in pairs(default) do
++			if not savedTable[k] then
++				savedTable[k] = v
++			end
++		end
++
++		savedTable.__version = AddonVersion
++	end
++	
++	return savedTable
++end
++
++function BuildCreatorMixin:ADDON_LOADED(addon)
++	if addon == "Ascension_BuildCreator" then
++		self:UnregisterEvent("ADDON_LOADED")
++		BuildCreatorSaved = ModernizeSavedVariable(BuildCreatorSaved, DefaultBuildCreatorSaved)
++	end
++end
++
++function BuildCreatorMixin:BUILD_CREATOR_CATEGORY_RESULT(category)
++	self:HideLoading()
++	self.SearchBox:SetText("")
++	C_BuildCreator.UpdateFilter("", self:ApplyDefaultClassFilter(), self.sort)
++	self.category = category
++	self:ShowBuildList()
++	self.BuildScroll:RefreshScrollFrame()
++end
++
++function BuildCreatorMixin:BUILD_CREATOR_BUILD_RESULT(result, buildID)
++	C_Logger.Info("BUILD_CREATOR_BUILD_RESULT: %s, %s", buildID, result)
++	self:HideLoading()
++	local build = C_BuildCreator.GetBuild(buildID)
++	if build then
++		if self.pendingCallback[buildID] then
++			for _, callback in ipairs(self.pendingCallback[buildID]) do
++				callback(build)
++			end
++			self.pendingCallback[buildID] = nil
++			return
++		else
++			return self:ViewBuild(build)
++		end
++	elseif self:IsShown() then
++		self:ShowError(VIEW_BUILD_ERROR, _G[result] or result)
++	end
++end
++
++function BuildCreatorMixin:BUILD_CREATOR_ACTIVATE_RESULT(result)
++	C_Logger.Info("BUILD_CREATOR_ACTIVATE_RESULT: %s", result)
++	self:HideLoading()
++	if result == "ACTIVATE_BUILD_OK" then
++		if self.BuildViewPanel:IsVisible() then
++			self.BuildViewPanel:UpdateControlButtons()
++		else
++			self.BuildScroll:RefreshScrollFrame()
++		end
++		self.CategoryScroll:RefreshScrollFrame()
++		return
++	end
++
++	self.Error.DeactivateButton:SetShown(result == "ACTIVATE_BUILD_DRAFTED_BUILD_ALREADY_DRAFTED")
++	self:ShowError(ACTIVATE_BUILD_FAILED, _G[result] or result)
++end
++
++function BuildCreatorMixin:BUILD_CREATOR_DEACTIVATE_RESULT(result)
++	C_Logger.Info("BUILD_CREATOR_DEACTIVATE_RESULT: %s", result)
++	self:HideLoading()
++	if result == "DEACTIVATE_BUILD_OK" then
++		if self.BuildViewPanel:IsVisible() then
++			self.BuildViewPanel:UpdateControlButtons()
++		else
++			self.BuildScroll:RefreshScrollFrame()
++		end
++		self.CategoryScroll:RefreshScrollFrame()
++		return
++	end
++
++	self:ShowError(DEACTIVATE_BUILD_FAILED, _G[result] or result)
++end
++
++function BuildCreatorMixin:BUILD_CREATOR_SAVE_RESULT(result, buildID)
++	C_Logger.Info("BUILD_CREATOR_SAVE_RESULT: %s, %s", result, buildID)
++	self:HideLoading()
++	result = result:gsub("SAVE_BUILD_", "PUBLISH_BUILD_")
++	if result == "PUBLISH_BUILD_OK" then
++		self:ViewBuildID(buildID)
++		return
++	end
++	self:ShowError(PUBLISH_BUILD_FAILED, _G[result] or result)
++end
++
++function BuildCreatorMixin:BUILD_CREATOR_CREATE_RESULT(result, buildID)
++	C_Logger.Info("BUILD_CREATOR_CREATE_RESULT: %s, %s", result, buildID)
++	self:HideLoading()
++	result = result:gsub("CREATE_BUILD_", "PUBLISH_BUILD_")
++
++	if result == "PUBLISH_BUILD_OK" then
++		local build = C_BuildCreator.GetBuild(buildID)
++		if build then
++			self:DiscardSavedBuild(build.Name)
++			self:ViewBuild(build)
++		else
++			-- view build ID will query the build
++			self:ViewBuildID(buildID)
++		end
++		return
++	end
++	self:ShowError(PUBLISH_BUILD_FAILED, _G[result] or result)
++end
++
++function BuildCreatorMixin:BUILD_CREATOR_DELETE_RESULT(result)
++	C_Logger.Info("BUILD_CREATOR_DELETE_RESULT: %s", result)
++	self:HideLoading()
++
++	if result == "DELETE_BUILD_OK" then
++		if self.category then
++			self:SelectCategory(self.category)
++		else
++			self:ShowBuildList()
++		end
++		return
++	end
++
++	self:ShowError(DELETE_BUILD_FAILED, _G[result] or result)
++end
++-- Area 52 internal build imports and portable build codes.
++Area52BuildImport = {}
++local Import = Area52BuildImport
++local MAX_CODE = 100000
++
++local function integer(value, maximum)
++    assert(type(value) == "number" and value >= 0 and value <= maximum and value == math.floor(value), "Invalid number")
++    return value
++end
++
++local function text(value, maximum)
++    value = value or ""
++    assert(type(value) == "string" and #value <= maximum and not value:find("%z"), "Invalid text")
++    return value
++end
++
++local function array(value, maximum, convert)
++    assert(type(value) == "table" and #value <= maximum, "Invalid list")
++    local result, seen = {}, {}
++    for key in pairs(value) do assert(type(key) == "number" and key >= 1 and key <= #value and key == math.floor(key), "Invalid list index") end
++    for i, row in ipairs(value) do
++        result[i] = convert(row)
++        local id = result[i].Spell or result[i].Enchant or result[i].Type
++        assert(not seen[id], "Duplicate selection")
++        seen[id] = true
++    end
++    return result
++end
++
++function Import.Validate(build)
++    assert(type(build) == "table", "Invalid build")
++    local result = {}
++    for key, limit in pairs({Name=128, Icon=256, Description=8192}) do result[key] = text(build[key], limit) end
++    assert(#result.Name > 0, "Missing build name")
++    for _, key in ipairs({'Category','Roles','PrimaryStat','DifficultyRating'}) do result[key]=text(build[key],64) end
++    assert(Enum.BuildRoles[result.Roles] or result.Roles=='PLAYER_ROLE_NONE', 'Invalid role')
++    local stats={STAT_STRENGTH=true,STAT_AGILITY=true,STAT_INTELLECT=true,STAT_SPIRIT=true}
++    assert(stats[result.PrimaryStat], 'Invalid primary stat')
++    local validDifficulty=false
++    for _,value in pairs(Enum.BuildDifficulty) do if value==result.DifficultyRating then validDifficulty=true end end
++    assert(validDifficulty,'Invalid difficulty')
++    local validCategory = false
++    for _, key in ipairs({"Leveling", "Level60PvE", "Level60PvP", "Level70PvE", "Level70PvP", "BuildDraft", "BuildDraftEndGamePvE", "BuildDraftEndGamePvP"}) do
++        if Enum.BuildCategory[key] == result.Category then validCategory = true end
++    end
++    assert(validCategory, "Unsupported build category")
++    result.Spells = array(build.Spells, 512, function(row)
++        assert(type(row) == "table", "Invalid spell")
++        local r = {Spell=integer(row.Spell, 4294967295), Level=integer(row.Level or 1, 80), Comment=text(row.Comment,128), Flags=integer(row.Flags or 0,4294967295)}
++        assert(r.Spell > 0, "Invalid spell ID")
++        for _, key in ipairs({"IsCoreAbility", "IsOptimalAbility", "IsEmpoweringAbility", "IsSynergisticAbility"}) do
++            assert(row[key] == nil or type(row[key]) == "boolean", "Invalid spell role")
++            r[key] = row[key] or false
++        end
++        return r
++    end)
++    result.RandomEnchants = array(build.RandomEnchants, 64, function(row)
++        assert(type(row) == "table", "Invalid enchant")
++        local r = {Enchant=integer(row.Enchant,4294967295), Stacks=integer(row.Stacks,17), Level=integer(row.Level or 1,80), Comment=text(row.Comment,128), Flags=integer(row.Flags or 0,4294967295)}
++        assert(r.Enchant > 0 and r.Stacks > 0, "Invalid enchant selection")
++        return r
++    end)
++    for _, key in ipairs({"ArmorTypes", "WeaponTypes"}) do
++        result[key] = array(build[key],32,function(row)
++            assert(type(row) == "table", "Invalid equipment")
++            local kind=text(row.Type,64)
++            local allowed=key=='ArmorTypes' and Enum.ArmorSubClassSID or Enum.WeaponSubClassSID
++            assert(allowed[kind], 'Invalid equipment type')
++            return {Type=kind, Comment=text(row.Comment,128)}
++        end)
++    end
++    return result
++end
++
++local function pack(value)
++    if type(value) == "string" then return "s"..#value..":"..value end
++    if type(value) == "number" then return "n"..string.format("%.0f", value)..":" end
++    if type(value) == "boolean" then return value and "b1" or "b0" end
++    local keys = {}
++    for key in pairs(value) do keys[#keys+1] = key end
++    table.sort(keys, function(a,b) return tostring(a) < tostring(b) end)
++    local parts = {"t"..#keys..":"}
++    for _, key in ipairs(keys) do parts[#parts+1] = pack(key); parts[#parts+1] = pack(value[key]) end
++    return table.concat(parts)
++end
++
++function Import.Encode(build)
++    local raw = pack(Import.Validate(build))
++    local code = "A52B1:"..raw:gsub(".", function(c) return string.format("%02x",string.byte(c)) end)
++    assert(#code <= MAX_CODE, "Build is too large to share")
++    return code
++end
++
++function Import.Decode(code)
++    assert(type(code) == "string" and #code <= MAX_CODE, "Build code is too large")
++    code = code:match("^%s*(.-)%s*$")
++    assert(code:sub(1,6) == "A52B1:", "Expected an Area 52 build code (A52B1)")
++    local hex = code:sub(7)
++    assert(#hex % 2 == 0 and not hex:find("[^%x]"), "Invalid build code")
++    local raw = hex:gsub("..", function(pair) return string.char(tonumber(pair,16)) end)
++    local pos, nodes = 1, 0
++    local function read(depth)
++        nodes = nodes+1
++        assert(depth <= 5 and nodes <= 16000, "Build code exceeds limits")
++        local kind = raw:sub(pos,pos); pos=pos+1
++        if kind == "b" then
++            local b=raw:sub(pos,pos);pos=pos+1
++            assert(b=="0" or b=="1", "Invalid boolean")
++            return b=="1"
++        end
++        local stop=raw:find(":",pos,true)
++        assert(stop and stop-pos <= 10, "Invalid code length")
++        local digits=raw:sub(pos,stop-1)
++        assert(digits:match("^%d+$"), "Invalid code number")
++        local size=tonumber(digits);pos=stop+1
++        if kind=="n" then return integer(size,4294967295) end
++        if kind=="s" then
++            assert(size<=8192 and pos+size-1<=#raw,"Invalid text length")
++            local s=raw:sub(pos,pos+size-1);pos=pos+size;return s
++        end
++        assert(kind=="t" and size<=512,"Invalid code table")
++        local t={}
++        for i=1,size do
++            local key=read(depth+1)
++            assert((type(key)=="string" or type(key)=="number") and t[key]==nil,"Invalid or repeated key")
++            t[key]=read(depth+1)
++        end
++        return t
++    end
++    local build=read(0)
++    assert(pos==#raw+1,"Trailing build data")
++    return Import.Validate(build)
++end
++
++local function enabled()
++    return GetRealmName() == "Area 52 - Free-Pick"
++end
++
++local function showError(message)
++    UIErrorsFrame:AddMessage(tostring(message):gsub("^.-:%d+: ",""),1,0.2,0.2)
++end
++
++function Import.Apply(build)
++    local ok, copy=pcall(Import.Validate,build)
++    if not ok then showError(copy);return false end
++    if not C_Player:IsGM() and BuildCreatorUtil.IsCategoryBuildDraft(copy.Category) then
++        copy.Category=Enum.BuildCategory.Leveling
++    end
++    StaticPopup_Show("AREA52_CONFIRM_BUILD_COPY",copy.Name,nil,copy)
++    return true
++end
++
++function Import.Commit(copy)
++    copy=Import.Validate(copy)
++    if not C_Player:IsGM() and BuildCreatorUtil.IsCategoryBuildDraft(copy.Category) then copy.Category=Enum.BuildCategory.Leveling end
++    C_BuildEditor.DiscardPendingBuild()
++    for _, key in ipairs({"Name","Icon","Category","Description","Roles","PrimaryStat","DifficultyRating"}) do C_BuildEditor["Set"..key](copy[key]) end
++    for _, row in ipairs(copy.Spells) do C_BuildEditor.AddSpell(row) end
++    for _, row in ipairs(copy.RandomEnchants) do C_BuildEditor.AddRandomEnchant(row) end
++    for _, row in ipairs(copy.ArmorTypes) do C_BuildEditor.AddArmorType(row) end
++    for _, row in ipairs(copy.WeaponTypes) do C_BuildEditor.AddWeaponType(row) end
++    BuildCreatorFrame:CreateBuild(copy.Category,true)
++end
++
++StaticPopupDialogs["AREA52_CONFIRM_BUILD_COPY"] = {
++    text="Create an editable copy of %s? This replaces the current unsaved draft. The source build is unchanged.",
++    button1="Create Copy",button2=CANCEL,whileDead=true,hideOnEscape=true,
++    OnAccept=function(self,copy) Import.Commit(copy) end,
++}
++StaticPopupDialogs["AREA52_IMPORT_BUILD_CODE"] = {
++    text="Import Build Code\nPaste an Area 52 build code. Website links are not supported.",button1="Import",button2=CANCEL,
++    hasEditBox=true,maxLetters=MAX_CODE,maxBytes=MAX_CODE+1,whileDead=true,hideOnEscape=true,
++    OnAccept=function(self)
++        local ok,build=pcall(Import.Decode,self.editBox:GetText())
++        if not ok then showError(build);return true end
++        Import.Apply(build)
++    end,
++}
++StaticPopupDialogs["AREA52_COPY_BUILD_CODE"] = {
++    text="Build Code\nPress Ctrl+C to copy this complete build, then share it using Import Build Code.",button1=CLOSE,
++    hasEditBox=true,maxLetters=MAX_CODE,maxBytes=MAX_CODE+1,whileDead=true,hideOnEscape=true,
++    OnShow=function(self,code) self.editBox:SetText(code);self.editBox:SetFocus();self.editBox:HighlightText() end,
++}
++StaticPopupDialogs["AREA52_BUILD_IMPORT_METHOD"] = {
++    text="Import a Build\nChoose a build from this realm's library or paste an Area 52 build code.",
++    button1="Choose Internal Build",button2=CANCEL,button3="Import Build Code",whileDead=true,hideOnEscape=true,
++    OnAccept=function()
++        local frame=BuildCreatorFrame
++        frame:ShowBuildCategories();frame.ToggleCreateButton:SetText(CREATE_BUILD)
++        frame:SelectCategory(Enum.BuildCategory.None)
++        UIErrorsFrame:AddMessage("Open a build, then choose Copy Build.",1,0.82,0)
++    end,
++    OnAlt=function() StaticPopup_Show("AREA52_IMPORT_BUILD_CODE") end,
++}
++
++local originalCreate=BuildCreatorMixin.CreateBuild
++function BuildCreatorMixin:CreateBuild(category,deserialize)
++    if enabled() and category==Enum.BuildCreateCategory.Import and not deserialize then
++        StaticPopup_Show("AREA52_BUILD_IMPORT_METHOD");return
++    end
++    return originalCreate(self,category,deserialize)
++end
++
++function Import.Attach(view)
++    if not enabled() then return end
++    if not view.Area52ImportButtons then
++        view.Area52ImportButtons={}
++        view.Controls:SetHeight(76)
++        view.MainFrame:SetHeight(593)
++        for i,label in ipairs({"Copy Build","Copy Build Code","Import Build Code"}) do
++            local b=CreateFrame("Button",nil,view.Controls,"SharedButtonTemplate")
++            b:SetSize(160,26);b:SetPoint("TOPLEFT",6+(i-1)*166,-46);b:SetText(label)
++            -- Anonymous template instances must anchor to their own texture objects.
++            b.Center:ClearAllPoints()
++            b.Center:SetPoint("TOPLEFT",b.Left,"TOPRIGHT",0,0)
++            b.Center:SetPoint("BOTTOMRIGHT",b.Right,"BOTTOMLEFT",0,0)
++            view.Area52ImportButtons[i]=b
++        end
++        view.Area52ImportButtons[1]:SetScript("OnClick",function() Import.Apply(view.build) end)
++        view.Area52ImportButtons[2]:SetScript("OnClick",function()
++            local ok,code=pcall(Import.Encode,view.build)
++            if not ok then showError(code);return end
++            StaticPopup_Show("AREA52_COPY_BUILD_CODE",nil,nil,code)
++        end)
++        view.Area52ImportButtons[3]:SetScript("OnClick",function() StaticPopup_Show("AREA52_IMPORT_BUILD_CODE") end)
++    end
++end
++
++
++Area52BuildLibrary = {}
++local Library = Area52BuildLibrary
++local pending
++local menu
++local sequence = 0
++function Library.IsUpdating() return pending ~= nil end
++local frame = CreateFrame("Frame")
++
++local function active()
++    return GetRealmName() == "Area 52 - Free-Pick"
++end
++
++local function message(text)
++    DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffArea 52 Library:|r " .. text)
++end
++
++local function send(command)
++    SendAddonMessage("A52LIB", command .. "|" .. pending.token, "WHISPER", UnitName("player"))
++end
++
++function Library.Update()
++    if not active() then return end
++    if Library.PublicationPending and Library.PublicationPending() then
++        message("Wait for the current publication request to finish.")
++        return
++    end
++    if pending then
++        message("A library update is already pending.")
++        return
++    end
++    sequence = sequence + 1
++    pending = {started=GetTime(), poll=GetTime()+3, token=string.format("%08x%08x%08x",time(),math.floor(GetTime()*1000)%4294967295,sequence)}
++    send("UPDATE")
++    message("Checking for new and updated shared builds...")
++end
++
++function Library.Menu()
++    if not active() then return end
++    if not menu then
++        menu = CreateFrame("Frame", "Area52BuildLibraryImportMenu", UIParent, "UIDropDownMenuTemplate")
++        UIDropDownMenu_Initialize(menu, function()
++            local info = UIDropDownMenu_CreateInfo()
++            info.text = "This Server"
++            info.notCheckable = true
++            info.func = function()
++                CloseDropDownMenus()
++                BuildCreatorFrame:ShowBuildCategories()
++                BuildCreatorFrame.ToggleCreateButton:SetText(CREATE_BUILD)
++                BuildCreatorFrame:SelectCategory(Enum.BuildCategory.None)
++            end
++            UIDropDownMenu_AddButton(info)
++            info = UIDropDownMenu_CreateInfo()
++            info.text = "Import Build Code"
++            info.notCheckable = true
++            info.func = function() CloseDropDownMenus(); StaticPopup_Show("AREA52_IMPORT_BUILD_CODE") end
++            UIDropDownMenu_AddButton(info)
++            info = UIDropDownMenu_CreateInfo()
++            info.text = "Update Library"
++            info.notCheckable = true
++            info.tooltipTitle = "Update Library"
++            info.tooltipText = "Download new and updated public builds for this server. Personal copies, active builds, and Featured archetype assignments are unchanged."
++            info.func = function() CloseDropDownMenus(); Library.Update() end
++            UIDropDownMenu_AddButton(info)
++        end, "MENU")
++    end
++    ToggleDropDownMenu(1, nil, menu, "cursor", 0, 0)
++end
++
++local originalCreate = BuildCreatorMixin.CreateBuild
++function BuildCreatorMixin:CreateBuild(category, deserialize)
++    if active() and category == Enum.BuildCreateCategory.Import and not deserialize then
++        Library.Menu()
++        return
++    end
++    return originalCreate(self, category, deserialize)
++end
++
++frame:RegisterEvent("CHAT_MSG_ADDON")
++frame:SetScript("OnEvent", function(_, _, prefix, text, channel, sender)
++    if not active() or not pending or prefix ~= "A52LIB" or channel ~= "WHISPER" or sender ~= UnitName("player") then return end
++    if text:match("^ERROR|([0-9a-f]+)|") == pending.token then
++        pending = nil
++        message("The shared library service is unavailable. Your local builds have not been changed by this request.")
++        return
++    end
++    local token, generation, state, added, updated, skipped = text:match("^UPDATE|([0-9a-f]+)|(%d+)|(%a+)|(%d+)|(%d+)|(%d+)$")
++    if not generation or token ~= pending.token then return end
++    if state == "queued" or state == "running" then
++        pending.generation = generation
++    elseif state == "complete" then
++        if pending.generation and pending.generation ~= generation then return end
++        pending = nil
++        BuildCreatorFrame.lastQueried = nil
++        message("Library updated: " .. added .. " new, " .. updated .. " updated, " .. skipped .. " incompatible. Reopen the build list to view shared copies.")
++    elseif state == "failed" then
++        pending = nil
++        message("The library update could not finish. Your personal builds and active build are preserved; you can try again later.")
++    end
++end)
++
++frame:SetScript("OnUpdate", function()
++    if not pending then return end
++    local now = GetTime()
++    if now - pending.started > 90 then
++        pending = nil
++        message("The server has not confirmed completion yet. Use Update Library again to check its status.")
++    elseif now >= pending.poll then
++        pending.poll = now + 3
++        send("STATUS")
++    end
++end)
++
++local Library = Area52BuildLibrary
++local job
++local savingForPublish = false
++local sequence = 0
++local function active() return GetRealmName() == "Area 52 - Free-Pick" end
++local function say(text) DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffArea 52 Library:|r "..text) end
++local function status() SendAddonMessage("A52LIB","PSTATUS|"..job.token,"WHISPER",UnitName("player")) end
++function Library.PublicationPending() return job ~= nil or savingForPublish end
++
++StaticPopupDialogs.AREA52_SAVE_BUILD = {
++    text="Save %s to this server's build library? This does not publish it to GitHub.",
++    button1="Save Build",button2=CANCEL,whileDead=true,hideOnEscape=true,
++    OnAccept=function() BuildCreatorFrame:SaveBuild() end,
++}
++StaticPopupDialogs.AREA52_PUBLISH_BUILD = {
++    text="Publish %s to the public Area 52 Shared Library on GitHub?\n\nYour description and selections will be public. By publishing, you confirm that you may contribute this content under CC0-1.0.\n\nPublic author alias (letters, numbers, spaces, _ - .):",
++    button1="Publish under CC0",button2=CANCEL,hasEditBox=true,whileDead=true,hideOnEscape=true,
++    OnShow=function(self) self.editBox:SetMaxLetters(48);self.editBox:SetText(UnitName("player"));self.editBox:SetFocus() end,
++    OnAccept=function(self,build)
++        local alias=self.editBox:GetText():gsub("^%s+", ""):gsub("%s+$", "")
++        if not alias or not alias:find("%S") or #alias>48 or alias:find("[^a-zA-Z0-9 _%.%-]") then
++            say("Choose a public alias using letters, numbers, spaces, underscore, dash or period.");return
++        end
++        if job or Library.IsUpdating() then say("Wait for the current library request to finish.");return end
++        sequence=sequence+1
++        local token=string.format("%08x%08x%08x",time(),math.floor(GetTime()*1000)%4294967295,sequence)
++        job={token=token,started=GetTime(),poll=GetTime()+3}
++        SendAddonMessage("A52LIB","PUBLISH|"..token.."|"..tostring(build.ID).."|"..tostring(build.UpdatedTime).."|"..alias.."|CC0-1.0","WHISPER",UnitName("player"))
++        say("Publication requested. Your saved build remains available on this server.")
++    end,
++}
++
++local originalPrompt=BuildCreatorMixin.PromptPublishBuild
++function BuildCreatorMixin:SaveBuild()
++    if self.EditableBuildViewPanel.Area52CategoryRestoreFailed then self:ShowError("Cannot save build",Area52BuildPublishReason("AREA52_PUBLISH_CATEGORY_RESTORE_FAILED"));return end
++    local sent,reason=C_BuildEditor.PublishBuild()
++    if sent then self:ShowLoading("Saving build...")
++    else savingForPublish=false;self:ShowError("Unable to save build",_G[reason] or reason) end
++end
++function Library.PrepareEditor(view)
++    if view.Area52CategoryRestoreFailed then return false end
++    if Area52DraftSelector and not Area52DraftSelector.Valid(view) then return false end
++    if view:IsShown() then
++        if view.editElement then view.editElement:HideEditModeIfEditing() else view:UpdatePendingBuild() end
++    end
++    return true
++end
++function BuildCreatorMixin:PromptSaveBuild()
++    if not Library.PrepareEditor(self.EditableBuildViewPanel) then return end
++    local build=C_BuildEditor.GetPendingBuild()
++    if build then StaticPopup_Show("AREA52_SAVE_BUILD",build.Name) end
++end
++function BuildCreatorMixin:PromptPublishBuild()
++    if not active() then return originalPrompt(self) end
++    if job then
++        job.started=GetTime();job.poll=GetTime()+3;job.timedOut=nil;status()
++        say("Checking the previous publication request...");return
++    end
++    if savingForPublish or Library.IsUpdating() then say("Wait for the current library request to finish.");return end
++    if not Library.PrepareEditor(self.EditableBuildViewPanel) then return end
++    local allowed,reasons=Area52CanPublishBuild(self.EditableBuildViewPanel)
++    if allowed~=true and allowed~=1 then
++        local lines={}
++        for _,reason in ipairs(reasons or {}) do lines[#lines+1]=Area52BuildPublishReason(reason) end
++        self:ShowError("Cannot publish build",table.concat(lines,"\n"));return
++    end
++    savingForPublish=true
++    self:SaveBuild()
++end
++
++local function saved(self,result,id,original)
++    if not active() then return original(self,result,id) end
++    local publish=savingForPublish;savingForPublish=false
++    self:HideLoading()
++    result=result:gsub("SAVE_BUILD_","PUBLISH_BUILD_"):gsub("CREATE_BUILD_","PUBLISH_BUILD_")
++    if result~="PUBLISH_BUILD_OK" then self:ShowError("Unable to save build",_G[result] or result);return end
++    self:ContinueOnLoad(id,function(build)
++        self:DiscardSavedBuild(build.Name);self:ViewBuild(build)
++        if publish then
++            StaticPopup_Show("AREA52_PUBLISH_BUILD",build.Name,nil,{ID=build.ID,UpdatedTime=build.UpdatedTime})
++        else say("Build saved to this server. It has not been published to GitHub.") end
++    end)
++end
++local originalSave=BuildCreatorMixin.BUILD_CREATOR_SAVE_RESULT
++local originalCreate=BuildCreatorMixin.BUILD_CREATOR_CREATE_RESULT
++function BuildCreatorMixin:BUILD_CREATOR_SAVE_RESULT(result,id) return saved(self,result,id,originalSave) end
++function BuildCreatorMixin:BUILD_CREATOR_CREATE_RESULT(result,id) return saved(self,result,id,originalCreate) end
++
++function Library.AttachEditor(view)
++    if not active() then return end
++    local controls=view.Controls
++    if not controls.SaveBuild then
++        local button=CreateFrame("Button",view:GetName().."Area52SaveBuild",controls,"SharedButtonTemplate")
++        controls.SaveBuild=button
++        button:SetSize(140,38);button:SetPoint("LEFT",controls.PublishBuild,"RIGHT",4,0);button:SetText("Save Build")
++        button:SetScript("OnClick",function() BuildCreatorFrame:PromptSaveBuild() end)
++        button:SetScript("OnEnter",GameTooltip_GenericTooltip);button:SetScript("OnLeave",GameTooltip_Hide)
++        controls.ResetBuild:ClearAllPoints();controls.ResetBuild:SetPoint("LEFT",button,"RIGHT",4,0)
++    end
++    local state=controls.PublishBuild:IsEnabled()
++    local enabled=(state==true or state==1)
++    controls.SaveBuild:SetEnabled(controls.PublishBuild:IsEnabled())
++    controls.SaveBuild.tooltipTitle="Save Build"
++    controls.SaveBuild.tooltipText="Save this build to this server's build library. It will not be uploaded to the public Shared Library."
++    if not controls.PublishBuild:IsEnabled() then
++        controls.SaveBuild.tooltipTitle="Cannot Save Build"
++        controls.SaveBuild.tooltipText=controls.PublishBuild.tooltipText or "Review the build requirements before saving."
++    end
++    if enabled then
++        controls.PublishBuild.tooltipTitle="Publish Build"
++        controls.PublishBuild.tooltipText="Save and publish a copy to the public Area 52 Shared Library on GitHub, after you confirm the public author alias and contribution terms."
++    end
++end
++
++local frame=CreateFrame("Frame")
++frame:RegisterEvent("CHAT_MSG_ADDON")
++frame:SetScript("OnEvent",function(_,_,prefix,text,channel,sender)
++    if not active() or not job or prefix~="A52LIB" or channel~="WHISPER" or sender~=UnitName("player") then return end
++    if text:match("^ERROR|([0-9a-f]+)|")==job.token then
++        job=nil;say("Public publishing is unavailable. Your server-local build is saved.");return
++    end
++    local token,state=text:match("^PUBLISH|([0-9a-f]+)|(%a+)$")
++    if token~=job.token then return end
++    if state=="published" then job=nil;say("Build published to the public Shared Library on GitHub.")
++    elseif state=="failed" or state=="conflict" or state=="rejected" then
++        job=nil;say("Public publication could not finish. Your server-local build is preserved.")
++    elseif (state=="queued" or state=="accepted") and not job.acknowledged then
++        job.acknowledged=true;say("Build queued for public publication. Waiting for GitHub confirmation.")
++    end
++end)
++frame:SetScript("OnUpdate",function()
++    if not job or job.timedOut then return end
++    if GetTime()-job.started>90 then
++        job.timedOut=true;say("Publication has not been confirmed. Click Publish Build again to check this request; it will not send another copy.")
++    elseif GetTime()>=job.poll then job.poll=GetTime()+3;status() end
++end)
+--- a/Interface/AddOns/Ascension_BuildCreator/BuildEditor/EditableBuildView.lua
++++ b/Interface/AddOns/Ascension_BuildCreator/BuildEditor/EditableBuildView.lua
+@@ -1,679 +1,737 @@
+-EditableBuildViewMixin = {}
+-
+-local PRIMARY_STAT_STRING = {
+-    [1] = "STAT_STRENGTH",
+-    [2] = "STAT_AGILITY",
+-    [3] = "STAT_INTELLECT",
+-    [4] = "STAT_SPIRIT",
+-    [5] = "STAT_STAMINA",
+-}
+-local CONTENT_TOP_OFFSET = 14
+-
+-local function ShouldShowMysticEnchantSection()
+-    return not C_GameMode:IsGameModeActive(Enum.GameMode.WildCard)
+-end
+-
+-function EditableBuildViewMixin:OnLoad()
+-    self.categories = {}
+-
+-    self.MainFrame.Author:SetPoint("TOPLEFT", self.MainFrame.Name, "BOTTOMLEFT", 0, -2)
+-    self.MainFrame.Background:SetAtlas("buildcreator-view", Const.TextureKit.IgnoreAtlasSize)
+-    self.MainFrame.SpecIcon:SetRounded(true)
+-    self.MainFrame.SpecIcon:SetBorderSize(96, 96)
+-    self.MainFrame.Icon:SetRounded(true)
+-    self.MainFrame.Icon:SetBorderSize(68, 68)
+-    self.MainFrame.Icon:SetBorderOffset(0, -1)
+-    self.MainFrame.Icon:SetBorderAtlas("build-draft-border")
+-
+-    self.CategoryScroll.Background:SetAtlas("professions-background-summarylist", Const.TextureKit.IgnoreAtlasSize)
+-    self.CategoryScroll:SetGetNumResultsFunction(function() return #self.categories end)
+-    self.CategoryScroll:SetTemplate("BuildViewSectionListItemTemplate")
+-    local selectedTexture = self.CategoryScroll:GetSelectedHighlight()
+-    selectedTexture:SetAtlas("Garr_ListButton-Selection", Const.TextureKit.IgnoreAtlasSize)
+-    selectedTexture:SetBlendMode("ADD")
+-    UIDropDownMenu_Initialize(self.MainFrame.DifficultyDropDown, GenerateClosure(self.InitializeDifficultyDropDown, self))
+-    UIDropDownMenu_Initialize(self.MainFrame.CategoryDropDown, GenerateClosure(self.InitializeCategoryDropDown, self))
+-end 
+-
+-function EditableBuildViewMixin:InitializeDifficultyDropDown(dropdown, level, menuList)
+-    if not self:IsVisible() then return end
+-    local info, color
+-
+-    info = UIDropDownMenu_CreateInfo()
+-    color = BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Standard]
+-    info.text = color:WrapText(_G[Enum.BuildDifficulty.Standard])
+-    info.iconAtlas = BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Standard]
+-    info.func = function()
+-        C_BuildEditor.SetDifficultyRating(Enum.BuildDifficulty.Standard)
+-        self:UpdatePendingBuild()
+-    end
+-    UIDropDownMenu_AddButton(info, level)
+-
+-    info = UIDropDownMenu_CreateInfo()
+-    color = BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Intermediate]
+-    info.text = color:WrapText(_G[Enum.BuildDifficulty.Intermediate])
+-    info.iconAtlas = BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Intermediate]
+-    info.func = function()
+-        C_BuildEditor.SetDifficultyRating(Enum.BuildDifficulty.Intermediate)
+-        self:UpdatePendingBuild()
+-    end
+-    UIDropDownMenu_AddButton(info, level)
+-
+-    info = UIDropDownMenu_CreateInfo()
+-    color = BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Advanced]
+-    info.text = color:WrapText(_G[Enum.BuildDifficulty.Advanced])
+-    info.iconAtlas = BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Advanced]
+-    info.func = function()
+-        C_BuildEditor.SetDifficultyRating(Enum.BuildDifficulty.Advanced)
+-        self:UpdatePendingBuild()
+-    end
+-    UIDropDownMenu_AddButton(info, level)
+-
+-    info = UIDropDownMenu_CreateInfo()
+-    color = BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Expert]
+-    info.text = color:WrapText(_G[Enum.BuildDifficulty.Expert])
+-    info.iconAtlas = BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Expert]
+-    info.func = function()
+-        C_BuildEditor.SetDifficultyRating(Enum.BuildDifficulty.Expert)
+-        self:UpdatePendingBuild()
+-    end
+-    UIDropDownMenu_AddButton(info, level)
+-
+-    info = UIDropDownMenu_CreateInfo()
+-    color = BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Impossible]
+-    info.text = color:WrapText(_G[Enum.BuildDifficulty.Impossible])
+-    info.iconAtlas = BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Impossible]
+-    info.func = function()
+-        C_BuildEditor.SetDifficultyRating(Enum.BuildDifficulty.Impossible)
+-        self:UpdatePendingBuild()
+-    end
+-    UIDropDownMenu_AddButton(info, level)
+-end
+-
+-function EditableBuildViewMixin:InitializeCategoryDropDown(dropdown, level, menuList)
+-    if not self:IsVisible() then return end
+-    local info
+-
+-    info = UIDropDownMenu_CreateInfo()
+-    info.text = CHANGE_BUILD_CATEGORY
+-    info.isTitle = true
+-    UIDropDownMenu_AddButton(info, level)
+-
+-    if not C_GameMode:IsGameModeActive(Enum.GameMode.WildCard) then
+-        info = UIDropDownMenu_CreateInfo()
+-        info.text = BUILD_EDITOR_CATEGORY_LEVELING
+-        info.func = function()
+-            BuildCreatorFrame:ConvertBuildEditorToCategory(Enum.BuildCreateCategory.Leveling)
+-        end
+-        UIDropDownMenu_AddButton(info, level)
+-    end
+-    
+-    local isLevel60 = GetMaxLevel() == 60
+-
+-    info = UIDropDownMenu_CreateInfo()
+-    info.text = isLevel60 and BUILD_EDITOR_CATEGORY_LEVEL60PVE or BUILD_EDITOR_CATEGORY_LEVEL70PVE
+-    info.func = function()
+-        local category = isLevel60 and Enum.BuildCreateCategory.Level60PvE or Enum.BuildCreateCategory.Level70PvE
+-        BuildCreatorFrame:ConvertBuildEditorToCategory(category)
+-    end
+-    UIDropDownMenu_AddButton(info, level)
+-
+-    info = UIDropDownMenu_CreateInfo()
+-    info.text = isLevel60 and BUILD_EDITOR_CATEGORY_LEVEL60PVP or BUILD_EDITOR_CATEGORY_LEVEL70PVP
+-    info.func = function()
+-        local category = isLevel60 and Enum.BuildCreateCategory.Level60PvP or Enum.BuildCreateCategory.Level70PvP
+-        BuildCreatorFrame:ConvertBuildEditorToCategory(category)
+-    end
+-    UIDropDownMenu_AddButton(info, level)
+-
+-    if C_AccountInfo.GetGMLevel() > 0 then
+-        info = UIDropDownMenu_CreateInfo()
+-        info.text = BUILD_EDITOR_CATEGORY_BUILDDRAFT
+-        info.func = function()
+-            BuildCreatorFrame:ConvertBuildEditorToCategory(Enum.BuildCreateCategory.BuildDraft)
+-        end
+-        UIDropDownMenu_AddButton(info, level)
+-        
+-        info = UIDropDownMenu_CreateInfo()
+-        info.text = BUILD_EDITOR_CATEGORY_BUILDDRAFTENDGAMEPVE
+-        info.func = function()
+-            BuildCreatorFrame:ConvertBuildEditorToCategory(Enum.BuildCreateCategory.BuildDraftEndGamePvE)
+-        end
+-        UIDropDownMenu_AddButton(info, level)
+-        
+-        info = UIDropDownMenu_CreateInfo()
+-        info.text = BUILD_EDITOR_CATEGORY_BUILDDRAFTENDGAMEPVP
+-        info.func = function()
+-            BuildCreatorFrame:ConvertBuildEditorToCategory(Enum.BuildCreateCategory.BuildDraftEndGamePvP)
+-        end
+-        UIDropDownMenu_AddButton(info, level)
+-    end
+-end
+-
+-function EditableBuildViewMixin:OnShow()
+-    self:UpdatePendingBuild(self.deserializeNext)
+-    self.deserializeNext = nil
+-end
+-
+-function EditableBuildViewMixin:OnHide()
+-    BuildCreatorUtil.ReleaseHeldSpell()
+-end
+-
+-function EditableBuildViewMixin:OnVerticalScroll(offset)
+-    local lastIndex = 0
+-    offset = offset + CONTENT_TOP_OFFSET + 5
+-    for index, categoryData in ipairs(self.categories) do
+-        if not categoryData.offset or categoryData.offset <= offset then
+-            lastIndex = index
+-        else
+-            break
+-        end
+-    end
+-    self.CategoryScroll:SetSelectedIndex(lastIndex, ScrollListMixin.UpdateType.OnlyNewIndex)
+-end
+-
+-function EditableBuildViewMixin:GetCategoryHeader(index)
+-    local header = self.categories[index] and self.categories[index].header
+-    if header == "SPELLS_AND_TALENTS" and C_Player:IsDefaultClass() then
+-        header = "TALENTS"
+-    end
+-    return header and (_G["BUILDCREATOR_SECTION_"..header] or "BUILD_CREATOR_SECTION_"..header) or UNKNOWN
+-end
+-
+-function EditableBuildViewMixin:SelectCategory(index)
+-    local data = self.categories[index]
+-    if not data then return end
+-
+-    if self.selectedCategory == data then return end
+-    self.selectedCategory = data
+-    local frame = self.MainFrame.ScrollFrame
+-    local minOffset, maxOffset = frame.ScrollBar:GetMinMaxValues()
+-    local offset = math.clamp(data.offset - CONTENT_TOP_OFFSET, minOffset, maxOffset)
+-    frame:SetVerticalScroll(offset)
+-end
+-
+-function EditableBuildViewMixin:UpdatePendingBuild(deserialize)
+-    local author = UnitName("player")
+-    self.MainFrame.Author:SetFormattedText(BUILD_AUTHOR_S, author)
+-    self.build = C_BuildEditor.GetPendingBuild()
+-
+-    local content = self.MainFrame.ScrollFrame.Content
+-    local height = CONTENT_TOP_OFFSET
+-    local top = content:GetTop()
+-
+-    if deserialize then
+-        local sectionText = BuildCreatorUtil.UnpackDescriptionByKeys(self.build.Description)
+-        for _, section in ipairs(content.sections) do
+-            section:Deserialize(sectionText[section.category])
+-        end
+-        
+-        self.MainFrame.Name:SetText(self.build.Name)
+-        self.MainFrame.Icon:SelectIcon("Interface\\Icons\\"..self.build.Icon)
+-        self.MainFrame.Role:SetRole(self.build.Roles)
+-        self.MainFrame.PrimaryStat:SetStat(self.build.PrimaryStat)
+-    end
+-
+-    self.MainFrame.PrimaryStat:SetShown(C_Player:IsHero())
+-
+-    local difficulty = self.build.DifficultyRating
+-    local difficultyColor = BuildCreatorUtil.DifficultyColors[difficulty]
+-    UIDropDownMenu_SetText(self.MainFrame.DifficultyDropDown, difficultyColor:WrapText(_G[difficulty]))
+-    UIDropDownMenu_SetText(self.MainFrame.CategoryDropDown, _G["BUILDCREATOR_CATEGORY_"..self.build.Category:upper()])
+-
+-    local equipment = content.Equipment
+-    equipment:ClearAllPoints()
+-    if ShouldShowMysticEnchantSection() then
+-        equipment:SetPoint("TOPLEFT", content.MysticEnchants, "BOTTOMLEFT", 0, -16)
+-        equipment:SetPoint("TOPRIGHT", content.MysticEnchants, "BOTTOMRIGHT", 0, -16)
+-    else
+-        equipment:SetPoint("TOPLEFT", content.Spells, "BOTTOMLEFT", 0, -16)
+-        equipment:SetPoint("TOPRIGHT", content.Spells, "BOTTOMRIGHT", 0, -16)
+-    end
+-
+-    local description
+-    local categoryIndex = 1
+-    for _, section in ipairs(content.sections) do
+-        local text = section:Serialize(self.build)
+-        local shouldShowSection = section.category ~= "MYSTIC_ENCHANTS" or ShouldShowMysticEnchantSection()
+-
+-        if shouldShowSection then
+-            height = height + section:GetHeight()
+-            self.categories[categoryIndex] = {
+-                header = section.category,
+-                offset = top - section:GetTop(),
+-            }
+-            categoryIndex = categoryIndex + 1
+-
+-            if text then -- sections that dont return text update pending build themselves
+-                if not description then
+-                    description = text
+-                else
+-                    description = description .. "\n\n" .. text
+-                end
+-            end
+-        end
+-    end
+-
+-    for index = categoryIndex, #self.categories do
+-        self.categories[index] = nil
+-    end
+-    self.MainFrame.ScrollFrame.Content:SetHeight(height)
+-    
+-    self:UpdateIcon()
+-    self:UpdateRole()
+-    self:UpdatePrimaryStat()
+-    if not deserialize then
+-        C_BuildEditor.SetDescription(Area52DraftSelector.Description(self, description))
+-        C_BuildEditor.SetName(self.MainFrame.Name:ToText())
+-        C_BuildEditor.SetIcon(self.MainFrame.Icon:ToText())
+-        C_BuildEditor.SetRoles(self.MainFrame.Role:ToText())
+-        C_BuildEditor.SetPrimaryStat(self.MainFrame.PrimaryStat:ToText())
+-        if string.isNilOrEmpty(self.build.ID) then
+-            BuildCreatorFrame:SerializePendingBuild()
+-        end
+-    end
+-
+-    -- update publish button
+-    local canPublish, failReasons = C_BuildEditor.CanPublishBuild()
+-    local publishButton = self.Controls.PublishBuild
+-    if canPublish then
+-        publishButton.tooltipTitle = nil
+-        publishButton.tooltipText = nil
+-        publishButton:Enable()
+-    else
+-        publishButton.tooltipTitle = CANNOT_PUBLISH_BUILD
+-        publishButton.tooltipText = nil
+-        for _, reason in ipairs(failReasons) do
+-            if publishButton.tooltipText then
+-                publishButton.tooltipText = publishButton.tooltipText .. "\n"
+-            else
+-                publishButton.tooltipText = ""
+-            end
+-            publishButton.tooltipText = publishButton.tooltipText .. Area52BuildPublishReason(reason)
+-        end
+-        publishButton.tooltipText = RED_FONT_COLOR:WrapText(publishButton.tooltipText)
+-        publishButton:Disable()
+-    end
+-end
+-
+-function EditableBuildViewMixin:OnEditModeHide()
+-    self:UpdatePendingBuild()
+-end
+-
+-function EditableBuildViewMixin:OnEditModeShow()
+-    self:UpdatePendingBuild()
+-end
+-
+-function EditableBuildViewMixin:LoadPendingBuild()
+-    
+-end 
+-
+-function EditableBuildViewMixin:UpdateIcon()
+-    local icon = self.MainFrame.Icon:ToText()
+-    if not icon or icon:len() == 0 then
+-        icon = "Interface\\Icons\\INV_Misc_QuestionMark"
+-    end
+-    C_BuildEditor.SetIcon(icon)
+-end
+-
+-function EditableBuildViewMixin:UpdateRole()
+-    local role = self.MainFrame.Role:ToText()
+-    if not role or role:len() == 0 then
+-        role = "PLAYER_ROLE_NONE"
+-    end
+-    C_BuildEditor.SetRoles(role)
+-    local roleKey = BuildCreatorUtil.ConvertBuildRoleToLFGRole(role)
+-    if roleKey then
+-        self.MainFrame.ContentBackground:SetTexture("Interface\\BuildCreator\\BCBackground-"..roleKey, "REPEAT", "REPEAT")
+-        self.MainFrame.Role.tooltipTitle = BUILD_CREATOR_ROLE_S:format(_G[roleKey])
+-        self.MainFrame.Role.tooltipText = _G["BUILD_CREATOR_ROLE_"..roleKey]
+-    else
+-        self.MainFrame.ContentBackground:SetTexture(nil)
+-        self.MainFrame.Role.tooltipTitle = nil
+-        self.MainFrame.Role.tooltipText = nil
+-    end
+-    if GameTooltip:IsOwned(self.MainFrame.Role) then
+-        self.MainFrame.Role:CallScript("OnEnter")
+-    end
+-end
+-
+-function EditableBuildViewMixin:UpdatePrimaryStat()
+-    local stat = self.MainFrame.PrimaryStat:ToText()
+-    if not stat or stat:len() == 0 then
+-        stat = "STAT_STRENGTH"
+-    end
+-    C_BuildEditor.SetPrimaryStat(stat)
+-end 
+-
+-function EditableBuildViewMixin:SetCategory(category)
+-    self.levelingBuild = category == Enum.BuildCreateCategory.Leveling or category == Enum.BuildCreateCategory.BuildDraft
+-    C_BuildEditor.SetCategory(category)
+-end
+-
+-function EditableBuildViewMixin:IsLevelingBuild()
+-    return self.levelingBuild
+-end 
+-
+-function EditableBuildViewMixin:ImportCurrentBuild()
+-    self.MainFrame.Icon:SelectIcon("Interface\\Icons\\INV_Misc_QuestionMark")
+-    self.MainFrame.Role:SetRole("PLAYER_ROLE_NONE")
+-    local primaryStat = C_PrimaryStat:GetActivePrimaryStat()
+-    if not primaryStat then
+-        primaryStat = Enum.PrimaryStat.Strength
+-    end
+-    self.MainFrame.PrimaryStat:SetStat(PRIMARY_STAT_STRING[primaryStat])
+-    
+-    local spell = BuildCreatorUtil.CreateSpellInfo(0) -- reused
+-    for _, spellID in ipairs(C_CharacterAdvancement.GetKnownSpells()) do
+-        -- only add talents if default class, otherwise add everything
+-        if not C_Player:IsDefaultClass() or C_CharacterAdvancement.IsTalentSpellID(self.spellID) then
+-            local talentRank = C_CharacterAdvancement.GetTalentRankBySpellID(spellID)
+-            if talentRank then
+-                local entry = C_CharacterAdvancement.GetEntryBySpellID(spellID)
+-                for i = 1, talentRank do
+-                    spell.Spell = entry.Spells[i]
+-                    C_BuildEditor.AddSpell(spell)
+-                end
+-            else
+-                spell.Spell = spellID
+-                C_BuildEditor.AddSpell(spell)
+-            end
+-        end
+-    end
+-    
+-    if ShouldShowMysticEnchantSection() then
+-        local enchant = BuildCreatorUtil.CreateEnchantInfo(0) -- reused
+-        local isHero = C_Player:IsHero()
+-        for spellID, stacks in pairs(MysticEnchantUtil.GetAppliedEnchants("player")) do
+-            local enchantInfo = C_MysticEnchant.GetEnchantInfoBySpell(spellID)
+-            enchant.Enchant = spellID
+-            enchant.Stacks = stacks
+-            enchant.Level = isHero and 1 or enchantInfo.RequiredLevel
+-            C_BuildEditor.AddRandomEnchant(enchant)
+-        end
+-    end
+-    
+-    self:UpdatePendingBuild(true)
+-end
+-
+-Area52DraftArchetypes = {
+-{id=1,label="Tank / Melee",entries={
+-{id=19,name="Blade Warden"},
+-{id=20,name="Bulwark"},
+-{id=143,name="Carnage Incarnate"},
+-{id=22,name="Relentless"},
+-{id=21,name="Swashbuckler"},
+-{id=24,name="Vanguard Sentinel"},
+-}},
+-{id=2,label="Tank / Magic",entries={
+-{id=26,name="Demoniac"},
+-{id=31,name="Icebound"},
+-{id=25,name="Templar of Flame"},
+-}},
+-{id=3,label="Tank / Hybrid",entries={
+-{id=33,name="Beast of Nightmare"},
+-{id=29,name="Crimson Champion"},
+-{id=27,name="Mystic Knight"},
+-{id=32,name="Plague Bearer"},
+-{id=30,name="Stormguard"},
+-{id=34,name="Thunderpaw"},
+-}},
+-{id=5,label="Healer / Pure Healer",entries={
+-{id=2,name="Dawnkeeper"},
+-{id=3,name="Eternal Caretaker"},
+-{id=10,name="Grove Keeper"},
+-{id=12,name="Hierophant"},
+-{id=1,name="Naturalist"},
+-{id=6,name="Sacred Sentinel"},
+-{id=16,name="Steward of Eternity"},
+-{id=7,name="Tide Mender"},
+-}},
+-{id=6,label="Healer / Combat Healer",entries={
+-{id=13,name="Cryotherapist"},
+-{id=17,name="Fire Sage"},
+-{id=15,name="Grove Ranger"},
+-{id=14,name="Tree of Wrath"},
+-{id=18,name="Vampire Lord"},
+-}},
+-{id=9,label="Damage / Melee",entries={
+-{id=86,name="Defias Gunslinger"},
+-{id=78,name="Dragon Warrior"},
+-{id=129,name="Gutripper"},
+-{id=77,name="Heavyweight"},
+-{id=73,name="Hoplite"},
+-{id=79,name="Son of Gruul"},
+-{id=74,name="Warden"},
+-{id=141,name="Wind Rager"},
+-}},
+-{id=10,label="Damage / Ranged",entries={
+-{id=85,name="Bestial Ranger"},
+-{id=140,name="Dark Ranger"},
+-{id=139,name="Locust Ranger"},
+-{id=82,name="Marksman"},
+-{id=84,name="Paratrooper"},
+-}},
+-{id=11,label="Damage / Magic",entries={
+-{id=101,name="Ascendant"},
+-{id=97,name="Cryomancer"},
+-{id=90,name="Druid of the Eclipse"},
+-{id=88,name="Evoker"},
+-{id=144,name="Fel Apostate"},
+-{id=95,name="Shadowseer"},
+-{id=104,name="Stormcaller"},
+-}},
+-{id=12,label="Damage / Hybrid",entries={
+-{id=132,name="Crusader"},
+-{id=136,name="Divine Sentinel"},
+-{id=75,name="Druid of the Fang"},
+-{id=134,name="Firelord"},
+-{id=131,name="Hellcat"},
+-{id=80,name="Master of Shadows"},
+-{id=142,name="Storm Giant"},
+-{id=133,name="White Walker"},
+-}},
+-}
+-
+-Area52DraftSelector = {}
+-local Selector = Area52DraftSelector
+-local byID = {}
+-for _, group in ipairs(Area52DraftArchetypes) do
+-    for _, entry in ipairs(group.entries) do byID[entry.id] = entry end
+-end
+-function Selector.Applies(build)
+-    return GetRealmName() == 'Area 52 - Free-Pick' and build and build.Category == Enum.BuildCategory.BuildDraft
+-end
+-function Selector.ReadID(description)
+-    local id = (description or ''):match('###AREA52_ARCHETYPE_ID\n(%d+)')
+-    return id and tonumber(id)
+-end
+-function Selector.Description(view, description)
+-    if GetRealmName() ~= 'Area 52 - Free-Pick' then return description end
+-    description = (description or ''):gsub('\n*###AREA52_ARCHETYPE_ID[^#]*','')
+-    if Selector.Applies(C_BuildEditor.GetPendingBuild()) and C_Player:IsGM() and byID[view.Area52ArchetypeID] then
+-        return description .. '\n\n###AREA52_ARCHETYPE_ID\n' .. view.Area52ArchetypeID
+-    end
+-    return description
+-end
+-function Selector.Valid(view)
+-    local build = C_BuildEditor.GetPendingBuild()
+-    if not Selector.Applies(build) then return true end
+-    local entry = byID[view.Area52ArchetypeID]
+-    return C_Player:IsGM() and entry and build.Name == entry.name
+-        and Selector.ReadID(build.Description) == entry.id
+-end
+-function Selector.Choose(view, id)
+-    if not C_Player:IsGM() or not Selector.Applies(C_BuildEditor.GetPendingBuild()) or not byID[id] then return end
+-    view.Area52ArchetypeID = id
+-    view.MainFrame.Name:SetText(byID[id].name)
+-    C_BuildEditor.SetName(byID[id].name)
+-    view:UpdatePendingBuild()
+-    CloseDropDownMenus()
+-end
+-function Selector.Menu(view, level, menuList)
+-    if not C_Player:IsGM() then return end
+-    if level == 1 then
+-        for _, group in ipairs(Area52DraftArchetypes) do
+-            local info = UIDropDownMenu_CreateInfo()
+-            info.text=group.label;info.hasArrow=true;info.notCheckable=true;info.menuList=group.id
+-            UIDropDownMenu_AddButton(info,level)
+-        end
+-    elseif level == 2 then
+-        for _, group in ipairs(Area52DraftArchetypes) do
+-            if group.id == menuList then
+-                for _, entry in ipairs(group.entries) do
+-                    local id=entry.id
+-                    local info=UIDropDownMenu_CreateInfo()
+-                    info.text=entry.name;info.checked=view.Area52ArchetypeID==id
+-                    info.func=function() Selector.Choose(view,id) end
+-                    UIDropDownMenu_AddButton(info,level)
+-                end
+-            end
+-        end
+-    end
+-end
+-function Selector.Before(view, deserialize)
+-    if GetRealmName() ~= 'Area 52 - Free-Pick' then return end
+-    local build=C_BuildEditor.GetPendingBuild()
+-    if deserialize or view.Area52LastBuildID ~= build.ID or view.Area52LastCategory ~= build.Category then
+-        view.Area52ArchetypeID=Selector.ReadID(build.Description)
+-    end
+-    view.Area52LastBuildID=build.ID;view.Area52LastCategory=build.Category
+-    if not Selector.Applies(build) then view.Area52ArchetypeID=nil end
+-end
+-function Selector.After(view)
+-    if GetRealmName() ~= 'Area 52 - Free-Pick' then return end
+-    local applies=Selector.Applies(C_BuildEditor.GetPendingBuild())
+-    view.MainFrame.Name:SetShown(not applies)
+-    if applies and not view.Area52ArchetypeDropdown then
+-        local dropdown=CreateFrame('Frame',view:GetName()..'Area52ArchetypeDropdown',view.MainFrame,'UIDropDownMenuTemplate2')
+-        dropdown:SetScale(0.8)
+-        dropdown:SetPoint('TOPLEFT',view.MainFrame.Name,'TOPLEFT',-16,4)
+-        UIDropDownMenu_SetWidth(dropdown,530)
+-        UIDropDownMenu_Initialize(dropdown,function(_,level,menuList) Selector.Menu(view,level,menuList) end)
+-        view.Area52ArchetypeDropdown=dropdown
+-    end
+-    if view.Area52ArchetypeDropdown then
+-        view.Area52ArchetypeDropdown:SetShown(applies)
+-        local dropdown=view.Area52ArchetypeDropdown
+-        local enabled=C_Player:IsGM()
+-        local color=enabled and HIGHLIGHT_FONT_COLOR or GRAY_FONT_COLOR
+-        dropdown.Text:SetVertexColor(color.r,color.g,color.b)
+-        if enabled then dropdown.Button:Enable() else dropdown.Button:Disable() end
+-        dropdown.isDisabled=not enabled and 1 or nil
+-        local entry=byID[view.Area52ArchetypeID]
+-        UIDropDownMenu_SetText(view.Area52ArchetypeDropdown,entry and entry.name or 'Choose a character-creation archetype')
+-    end
+-    if applies and not Selector.Valid(view) then
+-        view.Controls.PublishBuild:Disable()
+-        view.Controls.PublishBuild.tooltipTitle='Select a character-creation archetype'
+-        view.Controls.PublishBuild.tooltipText='Only a GM may select an archetype for a Featured Draft.'
+-    end
+-end
+-local originalUpdate=EditableBuildViewMixin.UpdatePendingBuild
+-function EditableBuildViewMixin:UpdatePendingBuild(deserialize)
+-    Selector.Before(self,deserialize)
+-    originalUpdate(self,deserialize)
+-    Selector.After(self)
+-end
+-
+-local area52LibraryPreviousUpdate = EditableBuildViewMixin.UpdatePendingBuild
+-function EditableBuildViewMixin:UpdatePendingBuild(...)
+-    area52LibraryPreviousUpdate(self, ...)
+-    if Area52BuildLibrary then Area52BuildLibrary.AttachEditor(self) end
+-end
+-
+-local reasons = {
+-    UNKNOWN="The build could not be validated. Reopen the editor and try again.",
+-    LOW_LEVEL="Your character has not reached the level required to publish builds.",
+-    NO_SPELLS="Add at least one ability or talent.",
+-    NO_WEAPON_TYPES="Select at least one weapon type.",
+-    NO_ARMOR_TYPES="Select at least one armor type.",
+-    NO_NAME="Enter a build name.", DEFAULT_NAME="Replace the default build name.",
+-    NAME_TOO_LONG="Shorten the build name.", NO_ICON="Choose a build icon.",
+-    DEFAULT_ICON="Replace the question-mark icon with a build icon.",
+-    ICON_TOO_LONG="Choose another build icon.",
+-    NO_DESCRIPTION="Add a build description.", DEFAULT_DESCRIPTION="Replace the default build description.",
+-    DESCRIPTION_TOO_LONG="Shorten the build description.",
+-    ALREADY_EXISTS="This build already exists. Open the saved build before editing it.",
+-    UNCOMMON_QUALITY_RESTRICTIONS="The build exceeds its uncommon rarity allowance.",
+-    RARE_QUALITY_RESTRICTIONS="The build exceeds its rare rarity allowance.",
+-    EPIC_QUALITY_RESTRICTIONS="The build exceeds its epic rarity allowance.",
+-    LEGENDARY_QUALITY_RESTRICTIONS="The build exceeds its legendary rarity allowance.",
+-    BAD_CATEGORY="This build category is not available to your character. Featured builds require a GM.",
+-    NOT_ENOUGH_AE_INVESTMENT="Spend more ability points for the selected endgame category, or select Leveling.",
+-    NOT_ENOUGH_TE_INVESTMENT="Spend more talent points for the selected endgame category, or select Leveling.",
+-    SPELL_COMMENT_TOO_LONG="Shorten an ability or talent comment.",
+-    RANDOM_ENCHANT_COMMENT_TOO_LONG="Shorten a Mystic Enchant comment.",
+-    WEAPON_TYPE_COMMENT_TOO_LONG="Shorten a weapon-type comment.",
+-    ARMOR_TYPE_COMMENT_TOO_LONG="Shorten an armor-type comment.",
+-    NAME_PROFANITY="The build name was rejected by the text filter.",
+-    DESCRIPTION_PROFANITY="The build description was rejected by the text filter.",
+-    SPELL_COMMENT_PROFANITY="An ability or talent comment was rejected by the text filter.",
+-    RANDOM_ENCHANT_COMMENT_PROFANITY="A Mystic Enchant comment was rejected by the text filter.",
+-    WEAPON_TYPE_COMMENT_PROFANITY="A weapon-type comment was rejected by the text filter.",
+-    ARMOR_TYPE_COMMENT_PROFANITY="An armor-type comment was rejected by the text filter.",
+-    MULTIPLE_ABILITY_TYPES="An ability has more than one role tag. Keep only one tag per ability.",
+-    NOT_FOUND="The saved build is no longer available. Refresh the build list.",
+-    NO_PERMISSION="You do not have permission to change this build. Make a personal copy first.",
+-    CLASS_MISMATCH="This build belongs to a different character class."
+-}
+-local spellReasons = {
+-    SET_SPELL_LEVEL_TOO_LOW="requires a later learning level",
+-    SET_SPELL_LEVEL_TOO_HIGH="is scheduled beyond the realm's level limit",
+-    SET_SPELL_LEVEL_BAD_RANK="has ranks scheduled out of order",
+-    SET_SPELL_LEVEL_BAD_SPELL="is not available in the advancement catalog",
+-    SET_SPELL_LEVEL_DOESNT_EXIST="is missing from the pending build"
+-}
+-local function progressionDetails()
+-    local lines={};local seen={}
+-    local function add(text)
+-        if not seen[text] and #lines<4 then lines[#lines+1]=text;seen[text]=true end
+-    end
+-    if type(C_BuildEditor.GetEssenceForLevel)=="function" then
+-        local foundAE,foundTE=false,false
+-        for level=1,80 do
+-            local ok,_,ae,_,te=pcall(C_BuildEditor.GetEssenceForLevel,level)
+-            if ok then
+-                if not foundAE and type(ae)=="number" and ae<0 then
+-                    add(string.format("Level %d: short by %d ability points.",level,-ae));foundAE=true
+-                end
+-                if not foundTE and type(te)=="number" and te<0 then
+-                    add(string.format("Level %d: short by %d talent points.",level,-te));foundTE=true
+-                end
+-            end
+-            if foundAE and foundTE then break end
+-        end
+-    end
+-    local ok,build=pcall(C_BuildEditor.GetPendingBuild)
+-    if ok and type(build)=="table" and type(build.Spells)=="table" and type(C_BuildEditor.CanSetSpellLevel)=="function" then
+-        for index,spell in ipairs(build.Spells) do
+-            if index>512 or #lines>=4 then break end
+-            if type(spell)=="table" and type(spell.Spell)=="number" and type(spell.Level)=="number" then
+-                local success,_,errors=pcall(C_BuildEditor.CanSetSpellLevel,spell.Spell,spell.Level)
+-                if success and type(errors)=="table" then
+-                    for _,reason in ipairs(errors) do
+-                        if spellReasons[reason] then
+-                            local name,rank=GetSpellInfo(spell.Spell)
+-                            name=name or ("Spell "..spell.Spell)
+-                            if rank and rank~="" then name=name.." ("..rank..")" end
+-                            add(string.format("Level %d - %s: %s.",spell.Level,name,spellReasons[reason]))
+-                        end
+-                    end
+-                end
+-            end
+-        end
+-    end
+-    return lines
+-end
+-function Area52BuildPublishReason(reason)
+-    if GetRealmName()~="Area 52 - Free-Pick" then return _G[reason] or reason end
+-    if reason=="PUBLISH_BUILD_NOT_TRAVERSIBLE" or reason=="PUBLISH_BUILD_LEVEL_INAPPROPRIATE_SPELL" or reason=="BUILD_NOT_TRAVERSIBLE" or reason=="BUIL_NOT_TRAVERSIBLE" then
+-        local lines=progressionDetails()
+-        if #lines>0 then
+-            return "The build has progression problems:\n"..table.concat(lines,"\n").."\nCorrect these entries, then check again."
+-        end
+-        return "The build cannot be learned in its current order. Check learning levels, prerequisites, rank order and point or rarity limits. The exact failed requirement is not available."
+-    end
+-    local key=type(reason)=="string" and reason:match("^PUBLISH_BUILD_(.+)$")
+-    return reasons[key] or _G[reason] or "The build did not pass validation. Review its selections and try again."
+-end
++EditableBuildViewMixin = {}
++
++local PRIMARY_STAT_STRING = {
++    [1] = "STAT_STRENGTH",
++    [2] = "STAT_AGILITY",
++    [3] = "STAT_INTELLECT",
++    [4] = "STAT_SPIRIT",
++    [5] = "STAT_STAMINA",
++}
++local CONTENT_TOP_OFFSET = 14
++
++local function ShouldShowMysticEnchantSection()
++    return not C_GameMode:IsGameModeActive(Enum.GameMode.WildCard)
++end
++
++function EditableBuildViewMixin:OnLoad()
++    self.categories = {}
++
++    self.MainFrame.Author:SetPoint("TOPLEFT", self.MainFrame.Name, "BOTTOMLEFT", 0, -2)
++    self.MainFrame.Background:SetAtlas("buildcreator-view", Const.TextureKit.IgnoreAtlasSize)
++    self.MainFrame.SpecIcon:SetRounded(true)
++    self.MainFrame.SpecIcon:SetBorderSize(96, 96)
++    self.MainFrame.Icon:SetRounded(true)
++    self.MainFrame.Icon:SetBorderSize(68, 68)
++    self.MainFrame.Icon:SetBorderOffset(0, -1)
++    self.MainFrame.Icon:SetBorderAtlas("build-draft-border")
++
++    self.CategoryScroll.Background:SetAtlas("professions-background-summarylist", Const.TextureKit.IgnoreAtlasSize)
++    self.CategoryScroll:SetGetNumResultsFunction(function() return #self.categories end)
++    self.CategoryScroll:SetTemplate("BuildViewSectionListItemTemplate")
++    local selectedTexture = self.CategoryScroll:GetSelectedHighlight()
++    selectedTexture:SetAtlas("Garr_ListButton-Selection", Const.TextureKit.IgnoreAtlasSize)
++    selectedTexture:SetBlendMode("ADD")
++    UIDropDownMenu_Initialize(self.MainFrame.DifficultyDropDown, GenerateClosure(self.InitializeDifficultyDropDown, self))
++    UIDropDownMenu_Initialize(self.MainFrame.CategoryDropDown, GenerateClosure(self.InitializeCategoryDropDown, self))
++end 
++
++function EditableBuildViewMixin:InitializeDifficultyDropDown(dropdown, level, menuList)
++    if not self:IsVisible() then return end
++    local info, color
++
++    info = UIDropDownMenu_CreateInfo()
++    color = BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Standard]
++    info.text = color:WrapText(_G[Enum.BuildDifficulty.Standard])
++    info.iconAtlas = BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Standard]
++    info.func = function()
++        C_BuildEditor.SetDifficultyRating(Enum.BuildDifficulty.Standard)
++        self:UpdatePendingBuild()
++    end
++    UIDropDownMenu_AddButton(info, level)
++
++    info = UIDropDownMenu_CreateInfo()
++    color = BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Intermediate]
++    info.text = color:WrapText(_G[Enum.BuildDifficulty.Intermediate])
++    info.iconAtlas = BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Intermediate]
++    info.func = function()
++        C_BuildEditor.SetDifficultyRating(Enum.BuildDifficulty.Intermediate)
++        self:UpdatePendingBuild()
++    end
++    UIDropDownMenu_AddButton(info, level)
++
++    info = UIDropDownMenu_CreateInfo()
++    color = BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Advanced]
++    info.text = color:WrapText(_G[Enum.BuildDifficulty.Advanced])
++    info.iconAtlas = BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Advanced]
++    info.func = function()
++        C_BuildEditor.SetDifficultyRating(Enum.BuildDifficulty.Advanced)
++        self:UpdatePendingBuild()
++    end
++    UIDropDownMenu_AddButton(info, level)
++
++    info = UIDropDownMenu_CreateInfo()
++    color = BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Expert]
++    info.text = color:WrapText(_G[Enum.BuildDifficulty.Expert])
++    info.iconAtlas = BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Expert]
++    info.func = function()
++        C_BuildEditor.SetDifficultyRating(Enum.BuildDifficulty.Expert)
++        self:UpdatePendingBuild()
++    end
++    UIDropDownMenu_AddButton(info, level)
++
++    info = UIDropDownMenu_CreateInfo()
++    color = BuildCreatorUtil.DifficultyColors[Enum.BuildDifficulty.Impossible]
++    info.text = color:WrapText(_G[Enum.BuildDifficulty.Impossible])
++    info.iconAtlas = BuildCreatorUtil.DifficultyAtlas[Enum.BuildDifficulty.Impossible]
++    info.func = function()
++        C_BuildEditor.SetDifficultyRating(Enum.BuildDifficulty.Impossible)
++        self:UpdatePendingBuild()
++    end
++    UIDropDownMenu_AddButton(info, level)
++end
++
++function EditableBuildViewMixin:InitializeCategoryDropDown(dropdown, level, menuList)
++    if not self:IsVisible() then return end
++    local info
++
++    info = UIDropDownMenu_CreateInfo()
++    info.text = CHANGE_BUILD_CATEGORY
++    info.isTitle = true
++    UIDropDownMenu_AddButton(info, level)
++
++    if not C_GameMode:IsGameModeActive(Enum.GameMode.WildCard) then
++        info = UIDropDownMenu_CreateInfo()
++        info.text = BUILD_EDITOR_CATEGORY_LEVELING
++        info.func = function()
++            BuildCreatorFrame:ConvertBuildEditorToCategory(Enum.BuildCreateCategory.Leveling)
++        end
++        UIDropDownMenu_AddButton(info, level)
++    end
++    
++    local isLevel60 = GetMaxLevel() == 60
++
++    info = UIDropDownMenu_CreateInfo()
++    info.text = isLevel60 and BUILD_EDITOR_CATEGORY_LEVEL60PVE or BUILD_EDITOR_CATEGORY_LEVEL70PVE
++    info.func = function()
++        local category = isLevel60 and Enum.BuildCreateCategory.Level60PvE or Enum.BuildCreateCategory.Level70PvE
++        BuildCreatorFrame:ConvertBuildEditorToCategory(category)
++    end
++    UIDropDownMenu_AddButton(info, level)
++
++    info = UIDropDownMenu_CreateInfo()
++    info.text = isLevel60 and BUILD_EDITOR_CATEGORY_LEVEL60PVP or BUILD_EDITOR_CATEGORY_LEVEL70PVP
++    info.func = function()
++        local category = isLevel60 and Enum.BuildCreateCategory.Level60PvP or Enum.BuildCreateCategory.Level70PvP
++        BuildCreatorFrame:ConvertBuildEditorToCategory(category)
++    end
++    UIDropDownMenu_AddButton(info, level)
++
++    if C_AccountInfo.GetGMLevel() > 0 then
++        info = UIDropDownMenu_CreateInfo()
++        info.text = BUILD_EDITOR_CATEGORY_BUILDDRAFT
++        info.func = function()
++            BuildCreatorFrame:ConvertBuildEditorToCategory(Enum.BuildCreateCategory.BuildDraft)
++        end
++        UIDropDownMenu_AddButton(info, level)
++        
++        info = UIDropDownMenu_CreateInfo()
++        info.text = BUILD_EDITOR_CATEGORY_BUILDDRAFTENDGAMEPVE
++        info.func = function()
++            BuildCreatorFrame:ConvertBuildEditorToCategory(Enum.BuildCreateCategory.BuildDraftEndGamePvE)
++        end
++        UIDropDownMenu_AddButton(info, level)
++        
++        info = UIDropDownMenu_CreateInfo()
++        info.text = BUILD_EDITOR_CATEGORY_BUILDDRAFTENDGAMEPVP
++        info.func = function()
++            BuildCreatorFrame:ConvertBuildEditorToCategory(Enum.BuildCreateCategory.BuildDraftEndGamePvP)
++        end
++        UIDropDownMenu_AddButton(info, level)
++    end
++end
++
++function EditableBuildViewMixin:OnShow()
++    self:UpdatePendingBuild(self.deserializeNext)
++    self.deserializeNext = nil
++end
++
++function EditableBuildViewMixin:OnHide()
++    BuildCreatorUtil.ReleaseHeldSpell()
++end
++
++function EditableBuildViewMixin:OnVerticalScroll(offset)
++    local lastIndex = 0
++    offset = offset + CONTENT_TOP_OFFSET + 5
++    for index, categoryData in ipairs(self.categories) do
++        if not categoryData.offset or categoryData.offset <= offset then
++            lastIndex = index
++        else
++            break
++        end
++    end
++    self.CategoryScroll:SetSelectedIndex(lastIndex, ScrollListMixin.UpdateType.OnlyNewIndex)
++end
++
++function EditableBuildViewMixin:GetCategoryHeader(index)
++    local header = self.categories[index] and self.categories[index].header
++    if header == "SPELLS_AND_TALENTS" and C_Player:IsDefaultClass() then
++        header = "TALENTS"
++    end
++    return header and (_G["BUILDCREATOR_SECTION_"..header] or "BUILD_CREATOR_SECTION_"..header) or UNKNOWN
++end
++
++function EditableBuildViewMixin:SelectCategory(index)
++    local data = self.categories[index]
++    if not data then return end
++
++    if self.selectedCategory == data then return end
++    self.selectedCategory = data
++    local frame = self.MainFrame.ScrollFrame
++    local minOffset, maxOffset = frame.ScrollBar:GetMinMaxValues()
++    local offset = math.clamp(data.offset - CONTENT_TOP_OFFSET, minOffset, maxOffset)
++    frame:SetVerticalScroll(offset)
++end
++
++function EditableBuildViewMixin:UpdatePendingBuild(deserialize)
++    local author = UnitName("player")
++    self.MainFrame.Author:SetFormattedText(BUILD_AUTHOR_S, author)
++    self.build = C_BuildEditor.GetPendingBuild()
++
++    local content = self.MainFrame.ScrollFrame.Content
++    local height = CONTENT_TOP_OFFSET
++    local top = content:GetTop()
++
++    if deserialize then
++        local sectionText = BuildCreatorUtil.UnpackDescriptionByKeys(self.build.Description)
++        for _, section in ipairs(content.sections) do
++            section:Deserialize(sectionText[section.category])
++        end
++        
++        self.MainFrame.Name:SetText(self.build.Name)
++        self.MainFrame.Icon:SelectIcon("Interface\\Icons\\"..self.build.Icon)
++        self.MainFrame.Role:SetRole(self.build.Roles)
++        self.MainFrame.PrimaryStat:SetStat(self.build.PrimaryStat)
++    end
++
++    self.MainFrame.PrimaryStat:SetShown(C_Player:IsHero())
++
++    local difficulty = self.build.DifficultyRating
++    local difficultyColor = BuildCreatorUtil.DifficultyColors[difficulty]
++    UIDropDownMenu_SetText(self.MainFrame.DifficultyDropDown, difficultyColor:WrapText(_G[difficulty]))
++    UIDropDownMenu_SetText(self.MainFrame.CategoryDropDown, _G["BUILDCREATOR_CATEGORY_"..self.build.Category:upper()])
++
++    local equipment = content.Equipment
++    equipment:ClearAllPoints()
++    if ShouldShowMysticEnchantSection() then
++        equipment:SetPoint("TOPLEFT", content.MysticEnchants, "BOTTOMLEFT", 0, -16)
++        equipment:SetPoint("TOPRIGHT", content.MysticEnchants, "BOTTOMRIGHT", 0, -16)
++    else
++        equipment:SetPoint("TOPLEFT", content.Spells, "BOTTOMLEFT", 0, -16)
++        equipment:SetPoint("TOPRIGHT", content.Spells, "BOTTOMRIGHT", 0, -16)
++    end
++
++    local description
++    local categoryIndex = 1
++    for _, section in ipairs(content.sections) do
++        local text = section:Serialize(self.build)
++        local shouldShowSection = section.category ~= "MYSTIC_ENCHANTS" or ShouldShowMysticEnchantSection()
++
++        if shouldShowSection then
++            height = height + section:GetHeight()
++            self.categories[categoryIndex] = {
++                header = section.category,
++                offset = top - section:GetTop(),
++            }
++            categoryIndex = categoryIndex + 1
++
++            if text then -- sections that dont return text update pending build themselves
++                if not description then
++                    description = text
++                else
++                    description = description .. "\n\n" .. text
++                end
++            end
++        end
++    end
++
++    for index = categoryIndex, #self.categories do
++        self.categories[index] = nil
++    end
++    self.MainFrame.ScrollFrame.Content:SetHeight(height)
++    
++    self:UpdateIcon()
++    self:UpdateRole()
++    self:UpdatePrimaryStat()
++    if not deserialize then
++        C_BuildEditor.SetDescription(Area52DraftSelector.Description(self, description))
++        C_BuildEditor.SetName(self.MainFrame.Name:ToText())
++        C_BuildEditor.SetIcon(self.MainFrame.Icon:ToText())
++        C_BuildEditor.SetRoles(self.MainFrame.Role:ToText())
++        C_BuildEditor.SetPrimaryStat(self.MainFrame.PrimaryStat:ToText())
++        if string.isNilOrEmpty(self.build.ID) then
++            BuildCreatorFrame:SerializePendingBuild()
++        end
++    end
++
++    -- update publish button
++    local canPublish, failReasons = Area52CanPublishBuild(self)
++    local publishButton = self.Controls.PublishBuild
++    if canPublish==true or canPublish==1 then
++        publishButton.tooltipTitle = nil
++        publishButton.tooltipText = nil
++        publishButton:Enable()
++    else
++        publishButton.tooltipTitle = CANNOT_PUBLISH_BUILD
++        publishButton.tooltipText = nil
++        for _, reason in ipairs(failReasons) do
++            if publishButton.tooltipText then
++                publishButton.tooltipText = publishButton.tooltipText .. "\n"
++            else
++                publishButton.tooltipText = ""
++            end
++            publishButton.tooltipText = publishButton.tooltipText .. Area52BuildPublishReason(reason)
++        end
++        publishButton.tooltipText = RED_FONT_COLOR:WrapText(publishButton.tooltipText)
++        publishButton:Disable()
++    end
++end
++
++function EditableBuildViewMixin:OnEditModeHide()
++    self:UpdatePendingBuild()
++end
++
++function EditableBuildViewMixin:OnEditModeShow()
++    self:UpdatePendingBuild()
++end
++
++function EditableBuildViewMixin:LoadPendingBuild()
++    
++end 
++
++function EditableBuildViewMixin:UpdateIcon()
++    local icon = self.MainFrame.Icon:ToText()
++    if not icon or icon:len() == 0 then
++        icon = "Interface\\Icons\\INV_Misc_QuestionMark"
++    end
++    C_BuildEditor.SetIcon(icon)
++end
++
++function EditableBuildViewMixin:UpdateRole()
++    local role = self.MainFrame.Role:ToText()
++    if not role or role:len() == 0 then
++        role = "PLAYER_ROLE_NONE"
++    end
++    C_BuildEditor.SetRoles(role)
++    local roleKey = BuildCreatorUtil.ConvertBuildRoleToLFGRole(role)
++    if roleKey then
++        self.MainFrame.ContentBackground:SetTexture("Interface\\BuildCreator\\BCBackground-"..roleKey, "REPEAT", "REPEAT")
++        self.MainFrame.Role.tooltipTitle = BUILD_CREATOR_ROLE_S:format(_G[roleKey])
++        self.MainFrame.Role.tooltipText = _G["BUILD_CREATOR_ROLE_"..roleKey]
++    else
++        self.MainFrame.ContentBackground:SetTexture(nil)
++        self.MainFrame.Role.tooltipTitle = nil
++        self.MainFrame.Role.tooltipText = nil
++    end
++    if GameTooltip:IsOwned(self.MainFrame.Role) then
++        self.MainFrame.Role:CallScript("OnEnter")
++    end
++end
++
++function EditableBuildViewMixin:UpdatePrimaryStat()
++    local stat = self.MainFrame.PrimaryStat:ToText()
++    if not stat or stat:len() == 0 then
++        stat = "STAT_STRENGTH"
++    end
++    C_BuildEditor.SetPrimaryStat(stat)
++end 
++
++function EditableBuildViewMixin:SetCategory(category)
++    self.levelingBuild = category == Enum.BuildCreateCategory.Leveling or category == Enum.BuildCreateCategory.BuildDraft
++    C_BuildEditor.SetCategory(category)
++end
++
++function EditableBuildViewMixin:IsLevelingBuild()
++    return self.levelingBuild
++end 
++
++function EditableBuildViewMixin:ImportCurrentBuild()
++    self.MainFrame.Icon:SelectIcon("Interface\\Icons\\INV_Misc_QuestionMark")
++    self.MainFrame.Role:SetRole("PLAYER_ROLE_NONE")
++    local primaryStat = C_PrimaryStat:GetActivePrimaryStat()
++    if not primaryStat then
++        primaryStat = Enum.PrimaryStat.Strength
++    end
++    self.MainFrame.PrimaryStat:SetStat(PRIMARY_STAT_STRING[primaryStat])
++    
++    local spell = BuildCreatorUtil.CreateSpellInfo(0) -- reused
++    for _, spellID in ipairs(C_CharacterAdvancement.GetKnownSpells()) do
++        -- only add talents if default class, otherwise add everything
++        if not C_Player:IsDefaultClass() or C_CharacterAdvancement.IsTalentSpellID(self.spellID) then
++            local talentRank = C_CharacterAdvancement.GetTalentRankBySpellID(spellID)
++            if talentRank then
++                local entry = C_CharacterAdvancement.GetEntryBySpellID(spellID)
++                for i = 1, talentRank do
++                    spell.Spell = entry.Spells[i]
++                    C_BuildEditor.AddSpell(spell)
++                end
++            else
++                spell.Spell = spellID
++                C_BuildEditor.AddSpell(spell)
++            end
++        end
++    end
++    
++    if ShouldShowMysticEnchantSection() then
++        local enchant = BuildCreatorUtil.CreateEnchantInfo(0) -- reused
++        local isHero = C_Player:IsHero()
++        for spellID, stacks in pairs(MysticEnchantUtil.GetAppliedEnchants("player")) do
++            local enchantInfo = C_MysticEnchant.GetEnchantInfoBySpell(spellID)
++            enchant.Enchant = spellID
++            enchant.Stacks = stacks
++            enchant.Level = isHero and 1 or enchantInfo.RequiredLevel
++            C_BuildEditor.AddRandomEnchant(enchant)
++        end
++    end
++    
++    self:UpdatePendingBuild(true)
++end
++
++Area52DraftArchetypes = {
++{id=1,label="Tank / Melee",entries={
++{id=19,name="Blade Warden"},
++{id=20,name="Bulwark"},
++{id=143,name="Carnage Incarnate"},
++{id=22,name="Relentless"},
++{id=21,name="Swashbuckler"},
++{id=24,name="Vanguard Sentinel"},
++}},
++{id=2,label="Tank / Magic",entries={
++{id=26,name="Demoniac"},
++{id=31,name="Icebound"},
++{id=25,name="Templar of Flame"},
++}},
++{id=3,label="Tank / Hybrid",entries={
++{id=33,name="Beast of Nightmare"},
++{id=29,name="Crimson Champion"},
++{id=27,name="Mystic Knight"},
++{id=32,name="Plague Bearer"},
++{id=30,name="Stormguard"},
++{id=34,name="Thunderpaw"},
++}},
++{id=5,label="Healer / Pure Healer",entries={
++{id=2,name="Dawnkeeper"},
++{id=3,name="Eternal Caretaker"},
++{id=10,name="Grove Keeper"},
++{id=12,name="Hierophant"},
++{id=1,name="Naturalist"},
++{id=6,name="Sacred Sentinel"},
++{id=16,name="Steward of Eternity"},
++{id=7,name="Tide Mender"},
++}},
++{id=6,label="Healer / Combat Healer",entries={
++{id=13,name="Cryotherapist"},
++{id=17,name="Fire Sage"},
++{id=15,name="Grove Ranger"},
++{id=14,name="Tree of Wrath"},
++{id=18,name="Vampire Lord"},
++}},
++{id=9,label="Damage / Melee",entries={
++{id=86,name="Defias Gunslinger"},
++{id=78,name="Dragon Warrior"},
++{id=129,name="Gutripper"},
++{id=77,name="Heavyweight"},
++{id=73,name="Hoplite"},
++{id=79,name="Son of Gruul"},
++{id=74,name="Warden"},
++{id=141,name="Wind Rager"},
++}},
++{id=10,label="Damage / Ranged",entries={
++{id=85,name="Bestial Ranger"},
++{id=140,name="Dark Ranger"},
++{id=139,name="Locust Ranger"},
++{id=82,name="Marksman"},
++{id=84,name="Paratrooper"},
++}},
++{id=11,label="Damage / Magic",entries={
++{id=101,name="Ascendant"},
++{id=97,name="Cryomancer"},
++{id=90,name="Druid of the Eclipse"},
++{id=88,name="Evoker"},
++{id=144,name="Fel Apostate"},
++{id=95,name="Shadowseer"},
++{id=104,name="Stormcaller"},
++}},
++{id=12,label="Damage / Hybrid",entries={
++{id=132,name="Crusader"},
++{id=136,name="Divine Sentinel"},
++{id=75,name="Druid of the Fang"},
++{id=134,name="Firelord"},
++{id=131,name="Hellcat"},
++{id=80,name="Master of Shadows"},
++{id=142,name="Storm Giant"},
++{id=133,name="White Walker"},
++}},
++}
++
++Area52DraftSelector = {}
++local Selector = Area52DraftSelector
++local byID = {}
++for _, group in ipairs(Area52DraftArchetypes) do
++    for _, entry in ipairs(group.entries) do byID[entry.id] = entry end
++end
++function Selector.Applies(build)
++    return GetRealmName() == 'Area 52 - Free-Pick' and build and build.Category == Enum.BuildCategory.BuildDraft
++end
++function Selector.ReadID(description)
++    local id = (description or ''):match('###AREA52_ARCHETYPE_ID\n(%d+)')
++    return id and tonumber(id)
++end
++function Selector.Description(view, description)
++    if GetRealmName() ~= 'Area 52 - Free-Pick' then return description end
++    description = (description or ''):gsub('\n*###AREA52_ARCHETYPE_ID[^#]*','')
++    if Selector.Applies(C_BuildEditor.GetPendingBuild()) and C_Player:IsGM() and byID[view.Area52ArchetypeID] then
++        return description .. '\n\n###AREA52_ARCHETYPE_ID\n' .. view.Area52ArchetypeID
++    end
++    return description
++end
++function Selector.Valid(view)
++    local build = C_BuildEditor.GetPendingBuild()
++    if not Selector.Applies(build) then return true end
++    local entry = byID[view.Area52ArchetypeID]
++    return C_Player:IsGM() and entry and build.Name == entry.name
++        and Selector.ReadID(build.Description) == entry.id
++end
++function Selector.Choose(view, id)
++    if not C_Player:IsGM() or not Selector.Applies(C_BuildEditor.GetPendingBuild()) or not byID[id] then return end
++    view.Area52ArchetypeID = id
++    view.MainFrame.Name:SetText(byID[id].name)
++    C_BuildEditor.SetName(byID[id].name)
++    view:UpdatePendingBuild()
++    CloseDropDownMenus()
++end
++function Selector.Menu(view, level, menuList)
++    if not C_Player:IsGM() then return end
++    if level == 1 then
++        for _, group in ipairs(Area52DraftArchetypes) do
++            local info = UIDropDownMenu_CreateInfo()
++            info.text=group.label;info.hasArrow=true;info.notCheckable=true;info.menuList=group.id
++            UIDropDownMenu_AddButton(info,level)
++        end
++    elseif level == 2 then
++        for _, group in ipairs(Area52DraftArchetypes) do
++            if group.id == menuList then
++                for _, entry in ipairs(group.entries) do
++                    local id=entry.id
++                    local info=UIDropDownMenu_CreateInfo()
++                    info.text=entry.name;info.checked=view.Area52ArchetypeID==id
++                    info.func=function() Selector.Choose(view,id) end
++                    UIDropDownMenu_AddButton(info,level)
++                end
++            end
++        end
++    end
++end
++function Selector.Before(view, deserialize)
++    if GetRealmName() ~= 'Area 52 - Free-Pick' then return end
++    local build=C_BuildEditor.GetPendingBuild()
++    if deserialize or view.Area52LastBuildID ~= build.ID or view.Area52LastCategory ~= build.Category then
++        view.Area52ArchetypeID=Selector.ReadID(build.Description)
++    end
++    view.Area52LastBuildID=build.ID;view.Area52LastCategory=build.Category
++    if not Selector.Applies(build) then view.Area52ArchetypeID=nil end
++end
++function Selector.After(view)
++    if GetRealmName() ~= 'Area 52 - Free-Pick' then return end
++    local applies=Selector.Applies(C_BuildEditor.GetPendingBuild())
++    view.MainFrame.Name:SetShown(not applies)
++    if applies and not view.Area52ArchetypeDropdown then
++        local dropdown=CreateFrame('Frame',view:GetName()..'Area52ArchetypeDropdown',view.MainFrame,'UIDropDownMenuTemplate2')
++        dropdown:SetScale(0.8)
++        dropdown:SetPoint('TOPLEFT',view.MainFrame.Name,'TOPLEFT',-16,4)
++        UIDropDownMenu_SetWidth(dropdown,530)
++        UIDropDownMenu_Initialize(dropdown,function(_,level,menuList) Selector.Menu(view,level,menuList) end)
++        view.Area52ArchetypeDropdown=dropdown
++    end
++    if view.Area52ArchetypeDropdown then
++        view.Area52ArchetypeDropdown:SetShown(applies)
++        local dropdown=view.Area52ArchetypeDropdown
++        local enabled=C_Player:IsGM()
++        local color=enabled and HIGHLIGHT_FONT_COLOR or GRAY_FONT_COLOR
++        dropdown.Text:SetVertexColor(color.r,color.g,color.b)
++        if enabled then dropdown.Button:Enable() else dropdown.Button:Disable() end
++        dropdown.isDisabled=not enabled and 1 or nil
++        local entry=byID[view.Area52ArchetypeID]
++        UIDropDownMenu_SetText(view.Area52ArchetypeDropdown,entry and entry.name or 'Choose a character-creation archetype')
++    end
++    if applies and not Selector.Valid(view) then
++        view.Controls.PublishBuild:Disable()
++        view.Controls.PublishBuild.tooltipTitle='Select a character-creation archetype'
++        view.Controls.PublishBuild.tooltipText='Only a GM may select an archetype for a Featured Draft.'
++    end
++end
++local originalUpdate=EditableBuildViewMixin.UpdatePendingBuild
++function EditableBuildViewMixin:UpdatePendingBuild(deserialize)
++    Selector.Before(self,deserialize)
++    originalUpdate(self,deserialize)
++    Selector.After(self)
++end
++
++local area52LibraryPreviousUpdate = EditableBuildViewMixin.UpdatePendingBuild
++function EditableBuildViewMixin:UpdatePendingBuild(...)
++    area52LibraryPreviousUpdate(self, ...)
++    if Area52BuildLibrary then Area52BuildLibrary.AttachEditor(self) end
++end
++
++local reasons = {
++    UNKNOWN="The build could not be validated. Reopen the editor and try again.",
++    LOW_LEVEL="Your character has not reached the level required to publish builds.",
++    NO_SPELLS="Add at least one ability or talent.",
++    NO_WEAPON_TYPES="Select at least one weapon type.",
++    NO_ARMOR_TYPES="Select at least one armor type.",
++    NO_NAME="Enter a build name.", DEFAULT_NAME="Replace the default build name.",
++    NAME_TOO_LONG="Shorten the build name.", NO_ICON="Choose a build icon.",
++    DEFAULT_ICON="Replace the question-mark icon with a build icon.",
++    ICON_TOO_LONG="Choose another build icon.",
++    NO_DESCRIPTION="Add a build description.", DEFAULT_DESCRIPTION="Replace the default build description.",
++    DESCRIPTION_TOO_LONG="Shorten the build description.",
++    ALREADY_EXISTS="This build already exists. Open the saved build before editing it.",
++    UNCOMMON_QUALITY_RESTRICTIONS="The build exceeds its uncommon rarity allowance.",
++    RARE_QUALITY_RESTRICTIONS="The build exceeds its rare rarity allowance.",
++    EPIC_QUALITY_RESTRICTIONS="The build exceeds its epic rarity allowance.",
++    LEGENDARY_QUALITY_RESTRICTIONS="The build exceeds its legendary rarity allowance.",
++    BAD_CATEGORY="This build category is not available to your character. Featured builds require a GM.",
++    NOT_ENOUGH_AE_INVESTMENT="Spend more ability points for the selected endgame category, or select Leveling.",
++    NOT_ENOUGH_TE_INVESTMENT="Spend more talent points for the selected endgame category, or select Leveling.",
++    SPELL_COMMENT_TOO_LONG="Shorten an ability or talent comment.",
++    RANDOM_ENCHANT_COMMENT_TOO_LONG="Shorten a Mystic Enchant comment.",
++    WEAPON_TYPE_COMMENT_TOO_LONG="Shorten a weapon-type comment.",
++    ARMOR_TYPE_COMMENT_TOO_LONG="Shorten an armor-type comment.",
++    NAME_PROFANITY="The build name was rejected by the text filter.",
++    DESCRIPTION_PROFANITY="The build description was rejected by the text filter.",
++    SPELL_COMMENT_PROFANITY="An ability or talent comment was rejected by the text filter.",
++    RANDOM_ENCHANT_COMMENT_PROFANITY="A Mystic Enchant comment was rejected by the text filter.",
++    WEAPON_TYPE_COMMENT_PROFANITY="A weapon-type comment was rejected by the text filter.",
++    ARMOR_TYPE_COMMENT_PROFANITY="An armor-type comment was rejected by the text filter.",
++    MULTIPLE_ABILITY_TYPES="An ability has more than one role tag. Keep only one tag per ability.",
++    NOT_FOUND="The saved build is no longer available. Refresh the build list.",
++    NO_PERMISSION="You do not have permission to change this build. Make a personal copy first.",
++    CLASS_MISMATCH="This build belongs to a different character class."
++}
++local spellReasons = {
++    SET_SPELL_LEVEL_TOO_LOW="requires a later learning level",
++    SET_SPELL_LEVEL_TOO_HIGH="is scheduled beyond the realm's level limit",
++    SET_SPELL_LEVEL_BAD_RANK="has ranks scheduled out of order",
++    SET_SPELL_LEVEL_BAD_SPELL="is not available in the advancement catalog",
++    SET_SPELL_LEVEL_DOESNT_EXIST="is missing from the pending build"
++}
++local function progressionDetails()
++    local lines={}
++    local summary={levels=0,entries=0,same=0,unexplained=0,unavailable=0}
++    local function add(text) if #lines<8 then lines[#lines+1]=text end end
++    local ok,build=pcall(C_BuildEditor.GetPendingBuild)
++    if not ok or type(build)~="table" then
++        return {"Stage: reading the pending build (GetPendingBuild failed)."},summary
++    end
++    local spells=type(build.Spells)=="table" and build.Spells or {}
++    local function location(index,spell)
++        local name,rank=GetSpellInfo(spell.Spell)
++        return string.format("Entry %d, level %s: %s%s [spell %s]",index,tostring(spell.Level),name or "Unknown spell",rank and rank~="" and (" ("..rank..")") or "",tostring(spell.Spell))
++    end
++    local foundAE,foundTE=false,false
++    for level=1,80 do
++        if type(C_BuildEditor.GetEssenceForLevel)~="function" then summary.unavailable=summary.unavailable+1;break end
++        local success,_,ae,_,te=pcall(C_BuildEditor.GetEssenceForLevel,level)
++        if success and type(ae)=="number" and type(te)=="number" then
++            summary.levels=summary.levels+1
++            if not foundAE and ae<0 then add(string.format("Level %d: short by %d ability points.",level,-ae));foundAE=true end
++            if not foundTE and te<0 then add(string.format("Level %d: short by %d talent points.",level,-te));foundTE=true end
++        else
++            summary.unavailable=summary.unavailable+1
++            add(string.format("Stage: point budget at level %d could not be read.",level))
++        end
++    end
++    for index,spell in ipairs(spells) do
++        if index>512 then add("Entry scan stopped at the 512-entry diagnostic limit.");break end
++        if type(spell)~="table" or type(spell.Spell)~="number" or type(spell.Level)~="number" then
++            add(string.format("Entry %d: missing numeric spell ID or learning level.",index))
++        elseif type(C_BuildEditor.CanSetSpellLevel)=="function" then
++            summary.entries=summary.entries+1
++            local success,allowed,errors=pcall(C_BuildEditor.CanSetSpellLevel,spell.Spell,spell.Level)
++            if not success then
++                summary.unavailable=summary.unavailable+1
++                add(location(index,spell)..": CanSetSpellLevel could not be read.")
++            else
++                if type(errors)=="string" then errors={errors} end
++                local meaningful,same=false,false
++                if type(errors)=="table" then
++                    for _,reason in ipairs(errors) do
++                        if reason=="SET_SPELL_LEVEL_SAME" then same=true
++                        elseif type(reason)=="string" then
++                            meaningful=true
++                            add(location(index,spell)..": "..(spellReasons[reason] or _G[reason] or reason)..".")
++                        end
++                    end
++                end
++                if same then summary.same=summary.same+1 end
++                if (allowed==false or allowed==0) and not meaningful and not same then
++                    summary.unexplained=summary.unexplained+1
++                    add(location(index,spell)..": the level-check API rejected the request without a reason.")
++                end
++            end
++        else summary.unavailable=summary.unavailable+1 end
++    end
++    return lines,summary
++end
++function Area52BuildValidationDetails()
++    local lines,summary=progressionDetails()
++    local header="Stage: client Publish progression validation (C_BuildEditor.CanPublishBuild)."
++    local coverage=string.format("Diagnostic coverage: %d/80 level budgets, %d spell entries; %d unchanged-level responses, %d unavailable checks.",summary.levels,summary.entries,summary.same,summary.unavailable)
++    if #lines==0 then
++        return header.."\nNo specific failing entry was exposed by the point-budget or level-edit APIs. Unchanged-level responses do not validate progression.\n"..coverage
++    end
++    return header.."\n"..table.concat(lines,"\n").."\n"..coverage.."\nLevel-edit diagnostics locate reported issues; they do not reproduce the full Publish validator."
++end
++function Area52BuildPublishReason(reason)
++    local featuredReasons={
++        AREA52_PUBLISH_ARCHETYPE_INVALID="Featured Draft assignment: select a character-creation archetype as a GM; its name and archetype ID must match.",
++        AREA52_PUBLISH_CATEGORY_RESTORE_FAILED="Featured Draft validation could not restore the category. Close and reopen the editor before saving or publishing.",
++        AREA52_PUBLISH_VALIDATION_UNAVAILABLE="Featured Draft progression validation could not complete. Nothing was published; reopen the editor and try again."
++    }
++    if featuredReasons[reason] then return featuredReasons[reason] end
++    if GetRealmName()~="Area 52 - Free-Pick" then return _G[reason] or reason end
++    if reason=="PUBLISH_BUILD_NOT_TRAVERSIBLE" or reason=="PUBLISH_BUILD_LEVEL_INAPPROPRIATE_SPELL" or reason=="BUILD_NOT_TRAVERSIBLE" or reason=="BUIL_NOT_TRAVERSIBLE" then
++        return Area52BuildValidationDetails()
++    end
++    local key=type(reason)=="string" and reason:match("^PUBLISH_BUILD_(.+)$")
++    return reasons[key] or _G[reason] or "The build did not pass validation. Review its selections and try again."
++end
++
++-- Area 52 Featured Drafts use the same authored leveling progression as Leveling builds.
++-- Keep the real Draft category/name/assignment for saving and character creation.
++function Area52CanPublishBuild(view)
++    if view.Area52CategoryRestoreFailed then return false,{"AREA52_PUBLISH_CATEGORY_RESTORE_FAILED"} end
++    local build=C_BuildEditor.GetPendingBuild()
++    local selector=Area52DraftSelector
++    if not selector or not selector.Applies(build) then return C_BuildEditor.CanPublishBuild() end
++    if not selector.Valid(view) then return false,{"AREA52_PUBLISH_ARCHETYPE_INVALID"} end
++    local allowed,reasons=C_BuildEditor.CanPublishBuild()
++    if allowed==true or allowed==1 then return allowed,reasons end
++    -- Do not suppress metadata, ownership, quality, or other failures.
++    if type(reasons)~="table" or #reasons~=1 or reasons[1]~="PUBLISH_BUILD_NOT_TRAVERSIBLE" then return allowed,reasons end
++    local category=build.Category
++    local ok,result,details=pcall(function()
++        C_BuildEditor.SetCategory(Enum.BuildCategory.Leveling)
++        if C_BuildEditor.GetPendingBuild().Category~=Enum.BuildCategory.Leveling then error("category projection failed") end
++        return C_BuildEditor.CanPublishBuild()
++    end)
++    local restored=pcall(C_BuildEditor.SetCategory,category)
++    local readable,current=pcall(C_BuildEditor.GetPendingBuild)
++    if not restored or not readable or not current or current.Category~=category then
++        view.Area52CategoryRestoreFailed=true
++        return false,{"AREA52_PUBLISH_CATEGORY_RESTORE_FAILED"}
++    end
++    view.Area52CategoryRestoreFailed=nil
++    if not ok then return false,{"AREA52_PUBLISH_VALIDATION_UNAVAILABLE"} end
++    if not selector.Valid(view) then return false,{"AREA52_PUBLISH_ARCHETYPE_INVALID"} end
++    return result,details
++end
