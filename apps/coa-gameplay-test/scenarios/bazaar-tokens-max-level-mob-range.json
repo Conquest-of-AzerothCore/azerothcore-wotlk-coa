@@ -1,0 +1,205 @@
+{
+  "schema": 1,
+  "name": "Bazaar kill tokens at maximum level need a mob within three levels",
+  "contract": "At default settings a level-60 character earns tokens only from creatures at most three levels below them, while a level-59 character is held only to the grey rule. In one Blackrock Depths group, Warder Stilgiss 9041 (level 56, spawn guid 47774) pays the level-60 member nothing and the level-59 member 6-12; Panzor the Invincible 8923 (level 57, spawn guid 300627) pays both members 6-12.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "capped",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "leveling",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "capped",
+      "target": "leveling"
+    },
+    {
+      "action": "set_phase",
+      "label": "capped member sees the real Blackrock Depths spawns",
+      "actor": "capped",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "leveling member sees the real Blackrock Depths spawns",
+      "actor": "leveling",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "capped member reaches Warder Stilgiss",
+      "actor": "capped",
+      "guid": 47774
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped member is in Blackrock Depths",
+      "actor": "capped",
+      "metric": "map_id",
+      "equals": 230,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "leveling member reaches Warder Stilgiss",
+      "actor": "leveling",
+      "guid": 47774
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: leveling member is in Blackrock Depths",
+      "actor": "leveling",
+      "metric": "map_id",
+      "equals": 230,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Warder Stilgiss is alive",
+      "actor": "capped",
+      "metric": "nearby_creature_count",
+      "entry": 9041,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "capped",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "capped_9041"
+    },
+    {
+      "action": "snapshot",
+      "actor": "leveling",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "leveling_9041"
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "capped",
+      "entry": 9041,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "level 59 from Warder Stilgiss",
+      "actor": "leveling",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "leveling_9041",
+      "min": 6,
+      "max": 12,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "level 60 from Warder Stilgiss",
+      "actor": "capped",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "capped_9041",
+      "equals": 0
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "capped member reaches Panzor the Invincible",
+      "actor": "capped",
+      "guid": 300627
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped member is in Blackrock Depths",
+      "actor": "capped",
+      "metric": "map_id",
+      "equals": 230,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "leveling member reaches Panzor the Invincible",
+      "actor": "leveling",
+      "guid": 300627
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: leveling member is in Blackrock Depths",
+      "actor": "leveling",
+      "metric": "map_id",
+      "equals": 230,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Panzor the Invincible is alive",
+      "actor": "capped",
+      "metric": "nearby_creature_count",
+      "entry": 8923,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "capped",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "capped_8923"
+    },
+    {
+      "action": "snapshot",
+      "actor": "leveling",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "leveling_8923"
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "capped",
+      "entry": 8923,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "level 60 from Panzor the Invincible",
+      "actor": "capped",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "capped_8923",
+      "min": 6,
+      "max": 12,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "level 59 from Panzor the Invincible",
+      "actor": "leveling",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "leveling_8923",
+      "min": 6,
+      "max": 12,
+      "within_ms": 2000
+    }
+  ]
+}

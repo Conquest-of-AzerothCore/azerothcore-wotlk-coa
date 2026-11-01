@@ -53,18 +53,21 @@ EtherealBazaar.Slots.Expensive = 2
 EtherealBazaar.Tokens.Enable = 1
 
 EtherealBazaar.Tokens.Quest.Min = 0
-EtherealBazaar.Tokens.Quest.Max = 12
+EtherealBazaar.Tokens.Quest.Max = 6
 EtherealBazaar.Tokens.Creature.Min = 0
-EtherealBazaar.Tokens.Creature.Max = 3
-EtherealBazaar.Tokens.DungeonBoss.Min = 14
-EtherealBazaar.Tokens.DungeonBoss.Max = 22
-EtherealBazaar.Tokens.RaidBoss.Min = 41
-EtherealBazaar.Tokens.RaidBoss.Max = 53
+EtherealBazaar.Tokens.Creature.Max = 2
+EtherealBazaar.Tokens.DungeonBoss.Min = 6
+EtherealBazaar.Tokens.DungeonBoss.Max = 12
+EtherealBazaar.Tokens.RaidBoss.Min = 30
+EtherealBazaar.Tokens.RaidBoss.Max = 40
 
-# From this level on every amount is multiplied by the percentage below, so a
-# character who has stopped levelling does not stop earning.
 EtherealBazaar.Tokens.BonusLevel = 60
-EtherealBazaar.Tokens.BonusPercent = 150
+EtherealBazaar.Tokens.BonusPercent = 100
+
+# A number of levels, or grey
+EtherealBazaar.Tokens.MaxLevelsAboveMob.WhileLeveling = grey
+EtherealBazaar.Tokens.MaxLevelsAboveMob.AtMaxLevel = 3
+EtherealBazaar.Tokens.MaxLevel = 60
 
 # The "item received" toast in the top right. Tokens drop often enough that it
 # turns into noise; the bag updates either way.
