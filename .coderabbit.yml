@@ -47,7 +47,7 @@ reviews:
     simplify:
       enabled: false
     autofix:
-      enabled: false
+      enabled: true
     fix_ci:
       enabled: false
     resolve_merge_conflict:
