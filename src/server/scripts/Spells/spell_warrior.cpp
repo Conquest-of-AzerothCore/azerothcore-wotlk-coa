@@ -41,6 +41,7 @@ enum WarriorSpells
     SPELL_WARRIOR_DEEP_WOUNDS_RANK_3                = 12868,
     SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC         = 12721,
     SPELL_WARRIOR_EXECUTE                           = 20647,
+    SPELL_WARRIOR_GLYPH_OF_BLOODTHIRST              = 58369,
     SPELL_WARRIOR_GLYPH_OF_EXECUTION                = 58367,
     SPELL_WARRIOR_GLYPH_OF_VIGILANCE                = 63326,
     SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_BUFF        = 65156,
@@ -518,6 +519,11 @@ class spell_warr_bloodthirst_heal : public SpellScript
             SetEffectValue(GetCaster()->CountPctFromMaxHealth(buff->GetAmount()));
         else if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_WARRIOR_BLOODTHIRST_DAMAGE))
             SetEffectValue(GetCaster()->CountPctFromMaxHealth(spellInfo->Effects[EFFECT_1].CalcValue(GetCaster())));
+        if (AuraEffect const* glyph = GetCaster()->GetAuraEffectOfRankedSpellOrTwin(SPELL_WARRIOR_GLYPH_OF_BLOODTHIRST, EFFECT_0))
+        {
+            int32 heal = GetEffectValue();
+            SetEffectValue(AddPct(heal, glyph->GetAmount()));
+        }
     }
 
     void Register() override
