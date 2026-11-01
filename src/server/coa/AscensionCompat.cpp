@@ -5322,11 +5322,10 @@ private:
     ClientDBC clientModels;
     std::filesystem::path const clientDbc =
         std::filesystem::path(sWorld->GetDataPath()) / "dbc" / "CreatureModelData.dbc";
-    if (!clientModels.Load(clientDbc.string(), CREATURE_MODEL_DATA_FIELD_COUNT))
-      return rows;
+    bool const fileLoaded = clientModels.Load(clientDbc.string(), CREATURE_MODEL_DATA_FIELD_COUNT);
 
     std::unordered_set<uint32> fileModelIds;
-    for (uint32 index = 0; index < clientModels.GetRecordCount(); ++index) {
+    for (uint32 index = 0; fileLoaded && index < clientModels.GetRecordCount(); ++index) {
       ClientDBC::Record const record = clientModels.GetRecord(index);
       uint32 const modelId = record.GetUInt32(0);
       fileModelIds.insert(modelId);
