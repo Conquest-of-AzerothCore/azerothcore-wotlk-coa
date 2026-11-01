@@ -39,7 +39,7 @@ MAX_ENCOUNTER_RADIUS = 200
 RAID_ROLES = {'tank', 'healer', 'melee', 'ranged'}
 RAID_ROLE_FIELDS = {'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist'}
 SPAWN_PLACEMENT_METRICS = {'spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state',
-                            'spawn_stand_state', 'spawn_clearance', 'spawn_headroom'}
+                            'spawn_stand_state', 'spawn_clearance', 'spawn_headroom', 'spawn_distance'}
 POINT_PLACEMENT_METRICS = {'point_placement', 'point_ground_gap'}
 PLACEMENT_VERDICT_METRICS = {'spawn_placement', 'point_placement'}
 SPAWN_TYPES = {'creature', 'gameobject'}
@@ -65,7 +65,8 @@ METRICS = TIMELINE_METRICS | {
     'nearby_creature_display', 'nearby_creature_aura_count',
     'spawn_respawn_remaining',
     'spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state', 'spawn_stand_state',
-    'spawn_clearance', 'spawn_headroom', 'point_placement', 'point_ground_gap', 'placement_audit_spawns', 'placement_audit_anomalies',
+    'spawn_clearance', 'spawn_headroom', 'spawn_distance', 'point_placement', 'point_ground_gap',
+    'placement_audit_spawns', 'placement_audit_anomalies',
     'placement_audit_event_spawns',
     'loot_gear_item_level',
     'position_x', 'position_y', 'position_z',
@@ -385,6 +386,9 @@ def validate_placement_metric(step, where, player_ids):
     if metric in POINT_PLACEMENT_METRICS:
         require(step['actor'] in player_ids, f'{where}: point placement metric needs a player')
         number(step.get('map'), f'{where}.map', 0, 2**31 - 1, True)
+        number(step.get('z'), f'{where}.z', -17000, 17000)
+    elif metric == 'spawn_distance':
+        require('map' not in step, f'{where}: map only applies to point placement metrics')
         number(step.get('z'), f'{where}.z', -17000, 17000)
     else:
         require(not {'map', 'z'} & step.keys(), f'{where}: map and z only apply to point placement metrics')
@@ -1004,7 +1008,7 @@ def validate(scenario):
                         require(type(step[key]) is bool, f'{where}: {key} must be boolean')
             if metric == 'distance':
                 require('target' in step, f'{where}: {metric} metric needs target')
-            if metric == 'point_distance_2d' or metric in POINT_PLACEMENT_METRICS:
+            if metric in {'point_distance_2d', 'spawn_distance'} or metric in POINT_PLACEMENT_METRICS:
                 for key in ('x', 'y'):
                     number(step.get(key), f'{where}.{key}', -17000, 17000)
             elif 'x' in step or 'y' in step:

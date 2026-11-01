@@ -187,16 +187,27 @@ class RunnerTests(unittest.TestCase):
 
     def test_spawn_placement_metrics_need_a_player_guid_and_spawn_type(self):
         for metric in ('spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state',
-                       'spawn_stand_state', 'spawn_clearance', 'spawn_headroom'):
+                       'spawn_stand_state', 'spawn_clearance', 'spawn_headroom', 'spawn_distance'):
             step = {'action': 'assert', 'actor': 'caster', 'metric': metric, 'guid': 6942106,
                     'spawn_type': 'gameobject', 'equals': 0}
             if metric == 'spawn_placement':
                 step['tolerance'] = 1
+            if metric == 'spawn_distance':
+                step.update(x=-7531, y=-3599, z=12.459)
             self.assert_step_validates(step)
             for change in ({'actor': 'target'}, {'guid': 0}, {'guid': '1'}, {'guid': True}, {'spawn_type': 'unit'}):
                 self.assert_step_rejected({**step, **change})
             for missing in ('guid', 'spawn_type'):
                 self.assert_step_rejected({key: value for key, value in step.items() if key != missing})
+
+    def test_spawn_distance_needs_a_point_without_a_map(self):
+        step = {'action': 'assert', 'actor': 'caster', 'metric': 'spawn_distance', 'guid': 6941616,
+                'spawn_type': 'gameobject', 'x': -7531, 'y': -3599, 'z': 12.459, 'max': 0.05}
+        self.assert_step_validates(step)
+        for missing in ('x', 'y', 'z'):
+            self.assert_step_rejected({key: value for key, value in step.items() if key != missing})
+        for change in ({'map': 1}, {'z': 17001}, {'actor': 'target'}):
+            self.assert_step_rejected({**step, **change})
 
     def test_point_placement_metrics_need_map_and_coordinates(self):
         step = {'action': 'assert', 'actor': 'caster', 'metric': 'point_placement', 'map': 1, 'x': 10269.8,
