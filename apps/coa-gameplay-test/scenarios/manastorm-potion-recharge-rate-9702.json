@@ -6,7 +6,7 @@
   "players": [ { "id": "player", "race": 1, "class": 15, "level": 60 } ],
   "steps": [
     { "action": "wait", "ms": 5000 },
-    { "action": "client_packet", "actor": "player", "opcode": 1617, "fields": [ { "u32": 1 } ] },
+    { "action": "client_packet", "actor": "player", "opcode": 1617, "early": false, "fields": [ { "u32": 1 } ] },
     { "action": "assert", "label": "SETUP: a solo Manastorm run was entered", "actor": "player", "metric": "private_instance", "equals": 1, "within_ms": 10000 },
     { "action": "assert", "label": "SETUP: the Endless Manastorm Potion was granted", "actor": "player", "metric": "item_count", "item": 254041, "equals": 1 },
     { "action": "use_item", "label": "Use #1 (3 charges -> 2)", "actor": "player", "item": 254041, "spell": 254440 },
