@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Infinite Power cuts the owned Timerend rank's cooldown (#10702)",
+  "contract": "Infinite Power 92118 reads 'Casting damaging spells now reduces your damaging spell cooldowns by $528312s1% of their remaining cooldown.' Its proc 503946 names Timerend rank 1 801291 in effect 0 (SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, base points 9 = 10%). Timerend ranks 1-7 are 801291, 501831-501835 and 572578 (Spell.dbc Rank 1..Rank 7, SpellLevel 4/14/22/30/38/46/52), all in Category 887 with CategoryRecoveryTime 20000. A level-60 Chronomancer casts rank 7 572578, whose cooldown the client shows and Spell::CheckCast enforces. A control Chronomancer without Infinite Power casts the same rank right after the talented one, so its cooldown is at least as long; the talented caster's cooldown can only fall below the control's through the proc. The talented caster then casts Wand of Time 520175, a direct damage spell: 10% of a remaining cooldown of 15 s or more is at least 1.5 s.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "talent", "race": 1, "class": 22, "level": 60, "spell_hit_rating": 10000, "ranged_hit_rating": 10000 },
+    { "id": "control", "race": 1, "class": 22, "level": 60, "spell_hit_rating": 10000, "ranged_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy_talent", "owner": "talent", "entry": 36, "health": 1000000, "distance": 3 },
+    { "id": "dummy_control", "owner": "control", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "talent", "spell": 572578 },
+    { "action": "learn", "actor": "talent", "spell": 520175 },
+    { "action": "learn", "actor": "talent", "spell": 92118 },
+    { "action": "learn", "actor": "control", "spell": 572578 },
+    {
+      "action": "assert", "label": "SETUP: the talented caster carries Infinite Power",
+      "actor": "talent", "metric": "aura", "spell": 92118, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the control has no Infinite Power",
+      "actor": "control", "metric": "knows_spell", "spell": 92118, "equals": 0
+    },
+    { "action": "cast", "actor": "talent", "spell": 572578, "target": "dummy_talent" },
+    { "action": "cast", "actor": "control", "spell": 572578, "target": "dummy_control" },
+    {
+      "action": "assert", "label": "SETUP: Timerend rank 7 is on cooldown for the talented caster",
+      "actor": "talent", "metric": "cooldown_ms", "spell": 572578, "min": 15000, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "SETUP: Timerend rank 7 is on cooldown for the control",
+      "actor": "control", "metric": "cooldown_ms", "spell": 572578, "min": 15000, "within_ms": 4000
+    },
+    { "action": "wait", "label": "Let the global cooldown clear", "ms": 1600 },
+    { "action": "cast", "actor": "talent", "spell": 520175, "target": "dummy_talent" },
+    { "action": "wait", "label": "Let Wand of Time resolve and Infinite Power proc", "ms": 3000 },
+    {
+      "action": "snapshot", "label": "The control's remaining Timerend cooldown",
+      "actor": "control", "metric": "cooldown_ms", "spell": 572578, "save_as": "control_timerend"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Infinite Power cut the owned Timerend rank's remaining cooldown",
+      "actor": "talent", "metric": "cooldown_ms", "spell": 572578, "relative_to": "control_timerend", "max": -1500
+    }
+  ]
+}
