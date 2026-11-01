@@ -1,0 +1,105 @@
+--- a/src/server/game/Entities/Player/Player.cpp
++++ b/src/server/game/Entities/Player/Player.cpp
+@@ -3447,6 +3447,17 @@
+ 
+     uint16 maxskill = GetMaxSkillValueForLevel();
+     SpellLearnSkillNode const* spellLearnSkill = sSpellMgr->GetSpellLearnSkill(spellId);
++    SpellLearnSkillNode ridingSkill;
++    if (spellLearnSkill && spellLearnSkill->skill == SKILL_RIDING && AscensionFreePick::Applies(this))
++        if (auto const* raceClass = GetSkillRaceClassInfo(SKILL_RIDING, getRace(), getClass()))
++            if (auto const* tiers = sSkillTiersStore.LookupEntry(raceClass->SkillTierID);
++                tiers && spellLearnSkill->step && spellLearnSkill->step <= MAX_SKILL_STEP &&
++                tiers->Value[spellLearnSkill->step - 1])
++            {
++                ridingSkill = *spellLearnSkill;
++                ridingSkill.value = ridingSkill.maxvalue = tiers->Value[ridingSkill.step - 1];
++                spellLearnSkill = &ridingSkill;
++            }
+     SkillLineAbilityMapBounds skill_bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spellId);
+     // xinef: set appropriate skill value
+     if (spellLearnSkill)
+@@ -3546,7 +3557,7 @@
+         // and Player::removeSpell answers such a grant with a single SMSG_REMOVED_SPELL. Announcing it twice
+         // leaves the client one extra copy of the spell per grant/revoke cycle, which both hides the real
+         // spellbook entry behind duplicates and keeps the client believing a revoked spell is still known.
+-        if (announce && IsInWorld() && (!temporary || learnFromSkill))
++        if (announce && IsInWorld() && (!temporary || learnFromSkill) && (!AscensionFreePick::Applies(this) || GetTemporarySpellReplacement(spellId) == spellId))
+             SendLearnPacket(spellId, true);
+     }
+ 
+@@ -13923,7 +13934,9 @@
+     }
+     if (previous != replacement && IsInWorld() && HasActiveSpell(original))
+     {
+-        if (original == 6117 && replacement == 978701)
++        bool const normalizedReplacement = (original == 6117 && replacement == 978701) ||
++            (AscensionFreePick::Applies(this) && replacement != original);
++        if (normalizedReplacement)
+         {
+             WorldPacket remove(SMSG_REMOVED_SPELL, 5);
+             remove << uint32(replacement) << uint8(0);
+@@ -13932,8 +13945,9 @@
+         WorldPacket packet(SMSG_SUPERCEDED_SPELL, 8);
+         packet << previous << replacement;
+         GetSession()->SendPacket(&packet);
+-        if (original == 6117 && replacement == original && HasActiveSpell(978701))
+-            SendLearnPacket(978701, true);
++        if (replacement == original && previous != original && HasActiveSpell(previous) &&
++            ((original == 6117 && previous == 978701) || AscensionFreePick::Applies(this)))
++            SendLearnPacket(previous, true);
+     }
+ }
+ 
+--- a/src/server/coa/AscensionCompat.cpp
++++ b/src/server/coa/AscensionCompat.cpp
+@@ -1327,7 +1327,17 @@
+     return restored != 0;
+   }
+ 
+-  void OnPlayerLogin(Player *player) {
++  void PrepareHeroProficienciesBeforeMap(Player* player)
++  {
++    if (!player || player->IsInWorld() || !player->GetSession() || !player->GetSession()->PlayerLoading())
++      return;
++    LearnHeroProficiencies(player);
++    if (player->getClass() == CLASS_HERO)
++      player->SendInitialSpells();
++  }
++
++  static void LearnHeroProficiencies(Player* player)
++  {
+     if (player && player->getClass() == CLASS_HERO)
+     {
+       constexpr std::array<uint32, 20> heroProficiencies = {
+@@ -1338,6 +1348,10 @@
+         if (!player->HasSpell(spell) && sSpellMgr->GetSpellInfo(spell))
+           player->learnSpell(spell, false);
+     }
++  }
++
++  void OnPlayerLogin(Player *player) {
++    LearnHeroProficiencies(player);
+     if (!IsAscensionCustomClass(player))
+     {
+       QueueCharacterAdvancementState(player);
+@@ -3581,8 +3595,10 @@
+             if (sSpellMgr->GetSpellInfo(spellId) && !player->HasSpell(spellId))
+                 player->learnSpell(spellId, false);
+ 
+-        if (player->GetPureSkillValue(SKILL_RIDING) != 300 || player->GetPureMaxSkillValue(SKILL_RIDING) != 300)
+-            player->SetSkill(SKILL_RIDING, 4, 300, 300);
++        if (player->GetPureSkillValue(SKILL_RIDING) < 300 || player->GetPureMaxSkillValue(SKILL_RIDING) < 300)
++            player->SetSkill(SKILL_RIDING, std::max<uint16>(player->GetSkillStep(SKILL_RIDING), 4),
++                std::max<uint16>(player->GetPureSkillValue(SKILL_RIDING), 300),
++                std::max<uint16>(player->GetPureMaxSkillValue(SKILL_RIDING), 300));
+     }
+ 
+     void PrepareOwnedCompanionsBeforeMap(Player* player)
+@@ -6047,6 +6063,7 @@
+             SendAscensionCoAConfig(player->GetSession());
+             AscensionCollectionService::Instance().PrepareOwnedCompanionsBeforeMap(player);
+             AscensionCollectionService::Instance().PrepareOwnedBankSpellsBeforeMap(player);
++            AscensionClassService::Instance().PrepareHeroProficienciesBeforeMap(player);
+             AscensionClassService::Instance().PrepareTaughtAbilitiesBeforeMap(player);
+             AscensionClassService::Instance().QueueCharacterAdvancementState(player);
+         }

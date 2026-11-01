@@ -1,0 +1,11 @@
+{
+  "package": "area52-startup-lifecycle-20261031",
+  "server_sha256": "7c9ff06aeb5bb3a4f19417c89f7ed8259dda2effedacabbc293fa0d56d6f520b",
+  "status_changes": false,
+  "reports": [
+    "full-build-r2/report.json",
+    "native-r2/report.json"
+  ],
+  "scope": "Pre-map Hero proficiency grants; Area52 riding skill-tier restoration; Area52 replacement spellbook normalization",
+  "limits": "Production function extraction with Player/client packet adapters, full link and unit tests. No live gameplay. Existing saved bars preserved. Client DLL hash matches previously decoded five-byte removal protocol."
+}

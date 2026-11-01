@@ -1,0 +1,10 @@
+{
+  "src/server/game/Entities/Player/Player.cpp": {
+    "path": "/home/dml/games/ascension-freepick-test/private/active-build-source/src/server/game/Entities/Player/Player.cpp",
+    "sha256": "5ca4c35b57ce696fe0c4754b6649cfff252d32e719f6377a077a4a749fa328cb"
+  },
+  "src/server/coa/AscensionCompat.cpp": {
+    "path": "/home/dml/games/ascension-freepick-test/private/active-build-source/src/server/coa/AscensionCompat.cpp",
+    "sha256": "1bbd38eed1bd42aaf34ae3e4c9374be4b7ebac75525310e263d6f6644416752c"
+  }
+}
