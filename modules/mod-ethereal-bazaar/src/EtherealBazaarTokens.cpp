@@ -27,6 +27,11 @@
  * A player outside a group is paid only for a creature they hit themselves,
  * like loot and experience, so pets left to fight alone cannot farm tokens
  * while the owner is away.
+ *
+ * Ordinary creatures pay in full only up to a soft cap per window of time;
+ * above it each token is paid with a chance, and at the hard cap they pay
+ * nothing until the window ends. Hours of farming then earn little more than
+ * one hour does. Bosses and quests are not limited and do not count.
  */
 
 #include "EtherealBazaar.h"
@@ -50,8 +55,89 @@
 #include "StringConvert.h"
 #include "World.h"
 
+#include <mutex>
+#include <unordered_map>
+
 namespace
 {
+    struct CreatureTokenLimits
+    {
+        Seconds window = 0s;
+        uint32 softCap = 0;
+        uint32 overSoftCapPercent = 100;
+        uint32 hardCap = 0;
+    };
+
+    struct CreatureTokenWindow
+    {
+        Seconds start = 0s;
+        uint32 paid = 0;
+    };
+
+    // A cap of 0 is off, and so are both caps without a window. The window
+    // opens with the first creature token after the previous one ended.
+    uint32 PayWithinCreatureCaps(CreatureTokenWindow& window, CreatureTokenLimits const& limits, Seconds now,
+                                 uint32 rolled)
+    {
+        if (limits.window <= 0s)
+            return rolled;
+
+        if (now - window.start >= limits.window)
+            window = { now, 0 };
+
+        uint32 pay = 0;
+        for (uint32 token = 0; token < rolled; ++token)
+        {
+            if (limits.hardCap && window.paid >= limits.hardCap)
+                break;
+
+            if (limits.softCap && window.paid >= limits.softCap &&
+                !roll_chance_i(static_cast<int>(limits.overSoftCapPercent)))
+                continue;
+
+            ++window.paid;
+            ++pay;
+        }
+        return pay;
+    }
+
+    // Kills are rewarded on the map threads, so the windows are shared under a
+    // lock. They are kept per character until the server restarts, so logging
+    // out does not reset them.
+    std::mutex creatureTokenLock;
+    CreatureTokenLimits creatureTokenLimits;
+    std::unordered_map<ObjectGuid, CreatureTokenWindow> creatureTokenWindows;
+
+    void LoadCreatureTokenLimits()
+    {
+        CreatureTokenLimits limits;
+        limits.window = Minutes(sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.Creature.WindowMinutes", 60));
+        limits.softCap = sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.Creature.SoftCap", 60);
+        limits.overSoftCapPercent = std::min<uint32>(100,
+            sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.Creature.OverSoftCapPercent", 25));
+        limits.hardCap = sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.Creature.HardCap", 80);
+
+        std::lock_guard<std::mutex> guard(creatureTokenLock);
+        creatureTokenLimits = limits;
+    }
+
+    uint32 CapCreatureTokens(Player* player, uint32 rolled)
+    {
+        if (!rolled)
+            return 0;
+
+        std::lock_guard<std::mutex> guard(creatureTokenLock);
+        CreatureTokenWindow& window = creatureTokenWindows[player->GetGUID()];
+        uint32 const pay = PayWithinCreatureCaps(window, creatureTokenLimits, GameTime::GetGameTime(), rolled);
+
+        if (pay && creatureTokenLimits.hardCap && window.paid == creatureTokenLimits.hardCap)
+            LOG_INFO("module.bazaar", "Ethereal Bazaar: {} reached the creature token cap of {} in {} minutes.",
+                     player->GetName(), creatureTokenLimits.hardCap,
+                     std::chrono::duration_cast<Minutes>(creatureTokenLimits.window).count());
+
+        return pay;
+    }
+
     bool Enabled()
     {
         return sConfigMgr->GetOption<bool>("EtherealBazaar.Tokens.Enable", true);
@@ -190,11 +276,23 @@ public:
             return;
         }
 
-        Grant(player, Wuerfeln("Creature", 0, 2), "a creature");
+        Grant(player, CapCreatureTokens(player, Wuerfeln("Creature", 0, 2)), "a creature");
+    }
+};
+
+class ethereal_bazaar_tokens_world : public WorldScript
+{
+public:
+    ethereal_bazaar_tokens_world() : WorldScript("ethereal_bazaar_tokens_world") { }
+
+    void OnAfterConfigLoad(bool /*reload*/) override
+    {
+        LoadCreatureTokenLimits();
     }
 };
 
 void AddEtherealBazaarTokenScripts()
 {
     new ethereal_bazaar_tokens();
+    new ethereal_bazaar_tokens_world();
 }

@@ -64,6 +64,19 @@ EtherealBazaar.Tokens.RaidBoss.Max = 40
 EtherealBazaar.Tokens.BonusLevel = 60
 EtherealBazaar.Tokens.BonusPercent = 100
 
+# Ordinary creature tokens per character within a window of minutes. Up to
+# SoftCap they pay in full; above it each rolled token is paid with the
+# OverSoftCapPercent chance; at HardCap creatures pay nothing until the window
+# ends. The window opens with the first creature token after the last one
+# ended and survives relogging until the server restarts. Bosses and quests
+# are neither limited nor counted. A cap of 0 is off; a window of 0 turns
+# both off. Read at startup and on config reload.
+# Default: 60, 60, 25, 80
+EtherealBazaar.Tokens.Creature.WindowMinutes = 60
+EtherealBazaar.Tokens.Creature.SoftCap = 60
+EtherealBazaar.Tokens.Creature.OverSoftCapPercent = 25
+EtherealBazaar.Tokens.Creature.HardCap = 80
+
 # A number of levels, or grey
 EtherealBazaar.Tokens.MaxLevelsAboveMob.WhileLeveling = grey
 EtherealBazaar.Tokens.MaxLevelsAboveMob.AtMaxLevel = 5
