@@ -247,7 +247,7 @@ class necromancer_casts : public AllSpellScript
                     aura && aura->GetScriptValue(805011) == spell->GetScriptValue(buff))
                     aura->DropCharge();
         };
-        consume(801747, true);
+        consume(801747, Lichfrost(info) || Named(info, 801760) || id == 704355 || (id >= 707399 && id <= 707402));
         consume(800979, Named(info, 801760));
         consume(707176, Lichfrost(info) || Family(info, 2, 8192));
         consume(807856, Lichfrost(info));
