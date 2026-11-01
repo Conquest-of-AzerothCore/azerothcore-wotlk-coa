@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Beatdown's ignore-Armor buff is consumed by the next Physical ability hit (#10056)",
+  "contract": "Beatdown801437 (#2493 talent705047's payload) reads 'Your next instance of ability damage will ignore Armor.' Spell.dbc gives801437 ProcFlags0 and ProcCharges0 and no spell_proc row existed for it, so the buff never consumed itself: it silently applied to every Physical ability hit for its whole duration instead of exactly one. The new row scopes the proc to the caster's own Physical melee/ranged-ability damage and gives it a single charge, so the buff disappears after the first qualifying hit and a second hit gets no ignore-armor benefit.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 20,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 20,
+      "health": 1000000,
+      "distance": 15,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn settle", "ms": 3000 },
+    { "action": "learn", "actor": "ranger", "spell": 802036, "label": "learn Skullpiercer rank 1" },
+    { "action": "add_item", "actor": "ranger", "item": 2504 },
+    { "action": "equip", "actor": "ranger", "item": 2504, "slot": 17 },
+    { "action": "wait", "label": "Let the equipment settle", "ms": 1500 },
+    { "action": "set_aura", "actor": "ranger", "spell": 801437, "stacks": 1, "label": "apply Beatdown directly, bypassing its own low-chance proc" },
+    { "action": "assert", "label": "SETUP: Beatdown is up", "actor": "ranger", "metric": "aura", "spell": 801437, "equals": 1 },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "set_aura", "actor": "ranger", "spell": 804329, "stacks": 1, "label": "Advantage so Skullpiercer can be cast" },
+    { "action": "cast", "label": "First Skullpiercer consumes Beatdown", "actor": "ranger", "spell": 802036, "target": "dummy" },
+    { "action": "assert", "label": "DISCRIMINATING: one qualifying Physical ability hit lands", "actor": "ranger", "metric": "spell_damage_count", "spell": 802036, "target": "dummy", "min": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: Beatdown is consumed after exactly one hit", "actor": "ranger", "metric": "aura", "spell": 801437, "equals": 0, "within_ms": 1000 },
+    { "action": "snapshot", "actor": "ranger", "metric": "spell_damage_count", "spell": 802036, "target": "dummy", "label": "hits_after_first", "save_as": "hits_after_first" },
+    { "action": "wait", "label": "Let the GCD clear", "ms": 1200 },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "set_aura", "actor": "ranger", "spell": 804329, "stacks": 1, "label": "Advantage for the second cast too" },
+    { "action": "cast", "label": "Second Skullpiercer gets no ignore-armor benefit", "actor": "ranger", "spell": 802036, "target": "dummy" },
+    { "action": "assert", "label": "CONTROL: the second hit lands too", "actor": "ranger", "metric": "spell_damage_count", "spell": 802036, "target": "dummy", "relative_to": "hits_after_first", "min": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTROL: Beatdown stays gone, not reapplied by the second hit", "actor": "ranger", "metric": "aura", "spell": 801437, "equals": 0 }
+  ]
+}
