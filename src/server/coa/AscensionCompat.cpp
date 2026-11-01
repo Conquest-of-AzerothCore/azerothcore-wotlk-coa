@@ -9961,6 +9961,10 @@ public:
                 case 9930889:
                     spellInfo->AttributesEx6 |= SPELL_ATTR6_NOT_IN_RAID_INSTANCES;
                     break;
+                case 804702:
+                case 804704:
+                    spellInfo->AttributesEx6 &= ~SPELL_ATTR6_DO_NOT_CHAIN_TO_CROWD_CONTROLLED_TARGETS;
+                    break;
                 default:
                     break;
             }

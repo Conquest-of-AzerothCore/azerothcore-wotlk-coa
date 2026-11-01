@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Tentacle of C'Thun is tracked on the owner's totem bar (#9893, #8065)",
+  "contract": "Tentacle of C'Thun 801153 is Effect0 SPELL_EFFECT_SUMMON with EffectMiscValueB 63, a SummonProperties.dbc row with Type SUMMON_TYPE_TOTEM and Slot 1 (Fire) -- confirmed via coa-dbc-viewer against the server's Spell.dbc and the raw SummonProperties.dbc bytes. EffectSummonType (SpellEffects.cpp) routes any Type SUMMON_TYPE_TOTEM summon through Totem::InitStats, which must send SMSG_TOTEM_CREATED before adding the totem to the world for the client's totem bar (dismiss, duration) to track it. PR #8637 (23d0fbca00) wrapped that send inside 'if (GetCreatureType() == CREATURE_TYPE_TOTEM)' together with the racial elemental-totem model override, to stop the tentacle (creature_template type 4, Demon, not 11, Totem) from receiving that model and its plate. Since the tentacle is never CREATURE_TYPE_TOTEM, this incidentally also suppressed SMSG_TOTEM_CREATED for it, regressing the totem-bar tracking #8065/#9893 report, though the one-per-slot bookkeeping (Unit::m_SummonSlot) that TempSummon::InitSummon sets was never affected. The fix sends SMSG_TOTEM_CREATED unconditionally for any totem-slot summon and keeps the model override scoped to CREATURE_TYPE_TOTEM creatures only. SMSG_TOTEM_CREATED (opcode 1043) is newly allow-listed in CoAGameplayTest's packet observer so the harness can see it; its first byte is the zero-based totem bar slot (Slot 1/Fire -> byte 0).",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "cultist", "spell": 801153 },
+    {
+      "action": "assert", "label": "SETUP: no SMSG_TOTEM_CREATED has been sent yet",
+      "actor": "cultist", "metric": "server_packets", "opcode": 1043, "equals": 0
+    },
+    { "action": "cast", "actor": "cultist", "spell": 801153 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: casting the tentacle sends SMSG_TOTEM_CREATED to its owner",
+      "actor": "cultist", "metric": "server_packets", "opcode": 1043, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The totem bar slot is Fire (slot 1, zero-based byte 0), matching SummonProperties row 63",
+      "actor": "cultist", "metric": "server_packet_u8", "opcode": 1043, "index": 0, "equals": 0
+    }
+  ]
+}
