@@ -818,7 +818,8 @@ The recorded core packets include duel request (359), countdown (695) and comple
 `SMSG_MOVE_KNOCK_BACK` (239), whose final two floats are horizontal
 speed and the negated vertical speed. These observations do not simulate client movement or keyboard input.
 Besides the Ascension extension opcodes (0x520 and above), the recorded packets include the learned, superseded
-and removed spell notices (299, 300 and 515) that the client prints to chat.
+and removed spell notices (299, 300 and 515) that the client prints to chat, and `SMSG_TOTEM_CREATED` (1043),
+whose leading byte is the zero-based totem bar slot.
 
 `relog` takes `actor`, commits the character through the native save path, logs it out, and reloads it
 through the native character-login handler. It preserves saved character state and the scenario phase.
