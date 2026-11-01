@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Feather of Ancients: Azeroth from the Vanity collection teaches an alt its flight paths",
+  "contract": "With CoA.UnlockAllVanity = 0, a Feather of Ancients: Azeroth (134989) obtained by one character puts it in the account's Vanity collection. Another character of the same account asks the Vanity collection to deliver it (CMSG_CUSTOM_ASCENSION_POINT_SPEND_REQUEST 0x0523, u8 currency 2, u32 item), receives one feather, and using it teaches that character its own faction's Azeroth flight paths and consumes the feather.",
+  "timeout_ms": 30000,
+  "vanity_ownership": { "unlock_all": false },
+  "players": [
+    { "id": "main", "race": 2, "class": 1, "level": 10 },
+    { "id": "alt", "race": 2, "class": 1, "level": 10, "account_of": "main" }
+  ],
+  "location": { "map": 1, "x": 16222.1, "y": 16252.1, "z": 12.5873 },
+  "steps": [
+    { "action": "add_item", "actor": "main", "item": 134989 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "relog", "actor": "alt" },
+    { "action": "assert", "actor": "alt", "metric": "taxi_node", "entry": 11, "equals": 0 },
+    {
+      "action": "client_packet", "label": "Deliver Feather of Ancients: Azeroth", "actor": "alt", "opcode": 1315,
+      "fields": [ { "u8": 2 }, { "u32": 134989 } ]
+    },
+    {
+      "action": "assert",
+      "actor": "alt",
+      "metric": "item_count",
+      "item": 134989,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "The alt is delivered the account's feather"
+    },
+    { "action": "use_item", "actor": "alt", "item": 134989, "spell": 18282 },
+    { "action": "wait", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "Undercity, Tirisfal",
+      "actor": "alt",
+      "metric": "taxi_node",
+      "entry": 11,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Neutral Ratchet, The Barrens",
+      "actor": "alt",
+      "metric": "taxi_node",
+      "entry": 80,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "No Alliance node (Stormwind)",
+      "actor": "alt",
+      "metric": "taxi_node",
+      "entry": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The used feather is consumed",
+      "actor": "alt",
+      "metric": "item_count",
+      "item": 134989,
+      "equals": 0
+    }
+  ]
+}

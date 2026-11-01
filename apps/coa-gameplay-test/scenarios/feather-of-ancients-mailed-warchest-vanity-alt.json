@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "A Feather of Ancients taken from the warchest overflow mail is summonable from Vanity on an alt",
+  "contract": [
+    "Rexxar runs CoA.UnlockAllVanity = 0. A fresh level 10 character that opens the Elite Warchest (2977351) without bags",
+    "cannot hold its rewards, so Feather of Ancients: Azeroth (134989, bind on pickup) arrives in the overflow mail.",
+    "Taking it from the mailbox binds it to the character, which puts it in the account's Vanity collection. Expected:",
+    "another character of the same account, logging in without the first one relogging, is delivered the feather by",
+    "CMSG_CUSTOM_ASCENSION_POINT_SPEND_REQUEST (0x0523, u8 currency 2, u32 item)."
+  ],
+  "timeout_ms": 60000,
+  "vanity_ownership": { "unlock_all": false },
+  "location": { "map": 1, "x": 16222.1, "y": 16252.1, "z": 12.5873 },
+  "players": [
+    { "id": "main", "race": 2, "class": 1, "level": 10 },
+    { "id": "alt", "race": 2, "class": 1, "level": 10, "account_of": "main" }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "add_item", "actor": "main", "item": 2977351 },
+    { "action": "use_item", "label": "Open the Elite Warchest without bags", "actor": "main", "item": 2977351,
+      "spell": 93461 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "relog", "actor": "main" },
+    { "action": "assert", "label": "The feather overflowed into the mail", "actor": "main", "metric": "mail_has_item",
+      "item": 134989, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "actor": "main", "metric": "item_count", "item": 134989, "equals": 0 },
+
+    { "action": "destroy_item", "label": "Make room for the feather", "actor": "main", "item": 2499004 },
+    { "action": "summon_gameobject", "actor": "main", "entry": 142119 },
+    { "action": "client_packet", "label": "Take the feather from the mailbox", "actor": "main", "opcode": 582,
+      "consumed": false,
+      "fields": [ { "gameobject_guid": 142119 }, { "mail_id": 134989 }, { "mail_item_guid": 134989 } ] },
+    { "action": "assert", "actor": "main", "metric": "server_packet_u32", "opcode": 569, "index": 2, "equals": 0,
+      "label": "The take succeeds" },
+    { "action": "assert", "actor": "main", "metric": "item_count", "item": 134989, "equals": 1, "within_ms": 1000 },
+    { "action": "wait", "ms": 1000 },
+
+    { "action": "relog", "actor": "alt" },
+    { "action": "client_packet", "label": "Deliver Feather of Ancients: Azeroth from Vanity", "actor": "alt",
+      "opcode": 1315, "fields": [ { "u8": 2 }, { "u32": 134989 } ] },
+    { "action": "assert", "label": "DISCRIMINATING: the alt is delivered the mailed feather", "actor": "alt",
+      "metric": "item_count", "item": 134989, "equals": 1, "within_ms": 2000 }
+  ]
+}
