@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "Steel Helmet pickup in Un'Goro rests on the ground (#10627)",
+  "contract": "The Worldforged Steel Helmet pickup (spawn 6942240) hung 9.15 yd above the Un'Goro ground at -216.653. Issue #10627.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the helmet rests on the ground",
+      "actor": "p", "metric": "spawn_ground_gap", "guid": 6942240, "spawn_type": "gameobject", "min": -0.3, "max": 0.3
+    }
+  ]
+}
