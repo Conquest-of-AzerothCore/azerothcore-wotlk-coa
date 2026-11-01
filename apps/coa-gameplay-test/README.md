@@ -775,7 +775,7 @@ owned creature of that entry as the victim instead of the actor. `script_heal_re
 on the actor before armor: the weapon roll with the melee range hooks, the done and taken bonuses and the melee
 damage hooks, as `Unit::CalculateMeleeDamage` applies them.
 `script_melee_damage_dealt` requires `target` as the victim and returns 1000 after the registered melee damage hooks
-with the actor as the attacker.
+with the actor as the attacker, or `pet: true` to run the hooks with the actor's current pet as the attacker instead.
 `set_health` also accepts a creature actor, or `pet: true` with a player actor to set its current pet's health.
 `cast` also accepts a creature actor: the creature casts `spell` on `target` (itself by default) with
 `TRIGGERED_FULL_MASK`, like `.cast back ... triggered`, and the step fails unless the cast starts.

@@ -4191,8 +4191,11 @@ private:
             }
             if (metric == "script_melee_damage_dealt")
             {
+                Unit* dealer = step.get<bool>("pet", false) ? static_cast<Unit*>(player->GetPet())
+                    : static_cast<Unit*>(player);
+                Require(dealer != nullptr, "Scripted melee damage dealt needs a present pet");
                 uint32 damage = 1000;
-                sScriptMgr->ModifyMeleeDamage(attacker, player, damage);
+                sScriptMgr->ModifyMeleeDamage(attacker, dealer, damage);
                 return damage;
             }
             if (metric == "script_melee_damage_taken")
