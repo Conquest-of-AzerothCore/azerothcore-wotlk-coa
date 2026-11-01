@@ -454,6 +454,10 @@ class necromancer_scaling : public UnitScript
         Player* player = Owner(caster);
         if (!player)
             return;
+        if (info->Id == 707592 && index == EFFECT_0)
+            if (Aura const* stacks = player->GetAura(712434))
+                if (stacks->GetStackAmount() >= stacks->GetSpellInfo()->StackAmount)
+                    value *= 1.5f;
         for (auto const& row : NecromancerCoefficients)
             if (info->Id == row.id && index == row.effect)
             {
