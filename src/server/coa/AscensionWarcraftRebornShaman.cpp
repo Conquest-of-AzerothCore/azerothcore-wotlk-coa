@@ -176,9 +176,10 @@ class spell_ascension_reborn_spirit_guard : public AuraScript
         amount = -1;
     }
 
-    void Absorb(AuraEffect* aurEff, DamageInfo& dmgInfo, uint32& absorbAmount)
+    void Absorb(AuraEffect*, DamageInfo& dmgInfo, uint32& absorbAmount)
     {
-        absorbAmount = dmgInfo.GetBlock() ? CalculatePct(dmgInfo.GetDamage(), aurEff->GetBaseAmount()) : 0;
+        absorbAmount = dmgInfo.GetBlock() ?
+            CalculatePct(dmgInfo.GetDamage(), GetSpellInfo()->Effects[EFFECT_0].CalcValue()) : 0;
     }
 
     void Register() override
