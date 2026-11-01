@@ -41,7 +41,8 @@ VALUES
 (255292, 0, 0, 0, 0, 0, 'Bronze Whelp', NULL, NULL, 0, 45, 45, 0, 14, 0, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 0, 2048, 0, 426, 2, 9, 255292, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.4, 1, 1, 1, 0, 999, 1, 0, 0, '', 0),
 (542311, 0, 0, 0, 0, 0, 'Mordok Charstone', 'Rogue Pyromancer', NULL, 0, 43, 43, 0, 14, 0, 1, 1.14286, 1, 1, 18, 2, 0, 1, 2000, 2000, 1, 1, 8, 0, 2048, 0, 20, 7, 1, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 4.5, 1, 1, 1, 0, 999, 1, 0, 0, '', 0),
 (542312, 0, 0, 0, 0, 0, 'Thaladorius Rex', 'Rogue Barbarian', NULL, 0, 43, 43, 0, 14, 0, 1, 1.14286, 1, 1, 18, 2, 0, 1, 2000, 2000, 1, 1, 1, 0, 2048, 0, 20, 7, 1, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 4.5, 1, 1, 1, 0, 999, 1, 0, 0, '', 0),
-(542313, 0, 0, 0, 0, 0, 'Ze''bulba', 'Rogue Tinker', NULL, 0, 43, 43, 0, 14, 0, 1, 1.14286, 1, 1, 18, 2, 0, 1, 2000, 2000, 1, 1, 1, 0, 2048, 0, 20, 7, 1, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 4.5, 1, 1, 1, 0, 999, 1, 0, 0, '', 0)
+(542313, 0, 0, 0, 0, 0, 'Ze''bulba', 'Rogue Tinker', NULL, 0, 43, 43, 0, 14, 0, 1, 1.14286, 1, 1, 18, 2, 0, 1, 2000, 2000, 1, 1, 1, 0, 2048, 0, 20, 7, 1, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 4.5, 1, 1, 1, 0, 999, 1, 0, 0, '', 0),
+(9975000, 0, 0, 0, 0, 0, 'Bloodsail Logbook', NULL, NULL, 0, 1, 1, 0, 35, 2, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 33555202, 2048, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1, 1, 1, 1, 0, 999, 1, 0, 2, '', 0)
 ON DUPLICATE KEY UPDATE `difficulty_entry_1` = VALUES(`difficulty_entry_1`),
   `difficulty_entry_2` = VALUES(`difficulty_entry_2`), `difficulty_entry_3` = VALUES(`difficulty_entry_3`),
   `KillCredit1` = VALUES(`KillCredit1`), `KillCredit2` = VALUES(`KillCredit2`), `name` = VALUES(`name`),
@@ -73,7 +74,7 @@ ON DUPLICATE KEY UPDATE `difficulty_entry_1` = VALUES(`difficulty_entry_1`),
 -- (goblin male); 449391 1546 (human female); 449401 7180 (goblin male); 542311 19174 (dwarf male); 542312 4478
 -- (human male); 542313 15210 (troll male); 713002 7337 (goblin male). Every other display is the captured one.
 DELETE FROM `creature_template_model` WHERE `CreatureID` IN (41676,46252,46996,255292,255331,255334,255335,255336,
-  449290,449295,449390,449391,449401,449402,542311,542312,542313,713002,749258);
+  449290,449295,449390,449391,449401,449402,542311,542312,542313,713002,749258,9975000);
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
   `VerifiedBuild`) VALUES
 (41676, 0, 21629, 1, 1, 0),
@@ -94,11 +95,12 @@ INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`,
 (542312, 0, 4478, 1, 1, 0),
 (542313, 0, 15210, 1, 1, 0),
 (713002, 0, 7337, 1, 1, 0),
-(749258, 0, 7343, 1, 1, 0);
+(749258, 0, 7343, 1, 1, 0),
+(9975000, 0, 11686, 1, 1, 0);
 
 -- Guids 9975000-9975025 are the new NPCs; Arvon stands in Booty Bay (map 0) where the client point of 255040 puts
 -- him. Guids 9975026-9975067 are the SUB spawns of the Giant Surf Glider, Raging Dune Smasher and Great Shark this
--- server lacks, at the dump's positions.
+-- server lacks, at the dump's positions. Guid 9975068 is the logbook's quest mark.
 DELETE FROM `creature` WHERE `guid` BETWEEN 9975000 AND 9975299;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`,
   `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`,
@@ -171,7 +173,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9975064, 12124, 1, 0, 0, 1, 1, 0, -8776.6, -5152.9, -84.9, 1.6, 300, 10, 0, 0, 0, 1, 0, 0, 0, '', 0, 0, 'Great Shark (SUB creature_spawn, db.exil.es dump 2026-10-04; facing and wander estimated)'),
 (9975065, 12124, 1, 0, 0, 1, 1, 0, -8429.4, -5566.2, -60.3, 4.39, 300, 10, 0, 0, 0, 1, 0, 0, 0, '', 0, 0, 'Great Shark (SUB creature_spawn, db.exil.es dump 2026-10-04; facing and wander estimated)'),
 (9975066, 12124, 1, 0, 0, 1, 1, 0, -7793.1, -5573.2, -60.2, 1.07, 300, 10, 0, 0, 0, 1, 0, 0, 0, '', 0, 0, 'Great Shark (SUB creature_spawn, db.exil.es dump 2026-10-04; facing and wander estimated)'),
-(9975067, 12124, 1, 0, 0, 1, 1, 0, -7578.3, -5245.5, -51.6, 5.26, 300, 10, 0, 0, 0, 1, 0, 0, 0, '', 0, 0, 'Great Shark (SUB creature_spawn, db.exil.es dump 2026-10-04; facing and wander estimated)');
+(9975067, 12124, 1, 0, 0, 1, 1, 0, -7578.3, -5245.5, -51.6, 5.26, 300, 10, 0, 0, 0, 1, 0, 0, 0, '', 0, 0, 'Great Shark (SUB creature_spawn, db.exil.es dump 2026-10-04; facing and wander estimated)'),
+(9975068, 9975000, 1, 0, 0, 1, 1, 0, -7948.9, -5436.9, 17.41, 2.1, 60, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 0, 'Bloodsail Logbook marker (invisible quest giver on the Bloodsail Logbook for its quest mark; estimated)');
 
 -- Importer Sprocketspring sells the ten drinks and fruits of the first vendor page the live stream shows, then the
 -- 16 goods of SUB npc_vendor (2026-10-04); the stream does not show pages 2 and 3, so their order is estimated.
@@ -286,13 +289,15 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 
 -- Quest objects: WDB gameobjectcache captures up to 2026-09-07. The logbook starts 255040 and the battery ends
 -- 255055 and starts 255056. The logbook's captured size 0.25 shrinks its book model to about 0.2 yd, too small to
--- see on the deck, so it takes size 1 (estimated).
+-- see on the deck, so it takes size 0.5 (estimated), about 0.4 yd. The 3.3.5a client draws a quest mark only over a
+-- quest giver creature, never over an object, so the invisible, unselectable creature 9975000 (display 11686, like
+-- the Hidden Statue 9300260) stands on the logbook and also starts 255040 (estimated).
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
   `size`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`,
   `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`,
   `Data22`, `Data23`, `AIName`, `ScriptName`, `VerifiedBuild`)
 VALUES
-(255040, 2, 1021172, 'Bloodsail Logbook', '', '', '', 1, 0, 255040, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(255040, 2, 1021172, 'Bloodsail Logbook', '', '', '', 0.5, 0, 255040, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
 (255045, 2, 1011195, 'Zeppelin Battery', '', '', '', 0.5, 0, 255045, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0)
 ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`),
   `IconName` = VALUES(`IconName`), `castBarCaption` = VALUES(`castBarCaption`), `unk1` = VALUES(`unk1`),
@@ -474,7 +479,8 @@ INSERT INTO `creature_queststarter` (`id`, `quest`) VALUES
 (449391, 982258),
 (713002, 255055),
 (749258, 255036),
-(749258, 255037);
+(749258, 255037),
+(9975000, 255040);
 
 DELETE FROM `creature_questender` WHERE `quest` IN (255028,255029,255036,255037,255040,255041,255042,255048,255055,
   255056,909040,909041,909042,982257,982258);
