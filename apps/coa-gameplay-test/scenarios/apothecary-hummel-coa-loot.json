@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Apothecary Hummel drops the CoA level-60 loot at live rates",
+  "contract": "As on live CoA, Apothecary Hummel rolls the five level-60 Love is in the Air necks at 2% each and Forever-Lovely Rose, Vile Fumigator's Mask and The Heartbreaker at 5% each instead of a guaranteed stock level-80 neck, so about 22% of kills yield a rare or better item.",
+  "players": [
+    { "id": "reveler", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "About 22% of Apothecary Hummel kills yield a rare or better item, not every kill",
+      "actor": "reveler",
+      "metric": "creature_loot_quality_rate",
+      "entry": 36296,
+      "min": 15,
+      "max": 30
+    }
+  ]
+}
