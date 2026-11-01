@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Cultist: Strength of the Black Empire transforms on Dreadnought ranks (#7632)",
-  "contract": "Strength of the Black Empire 680557 (level 40 passive) promises Dreadnought sheds the caster's mortal form into a void monstrosity. Delivery is the 680556 helper, enabled by the Cultist Refresh only while the caster holds 680557 and an aura of ranked spell 567524 (Unit::GetAuraOfRankedSpell walks the spell_ranks chain). Dreadnought's server ranks 567524/567548/567549/567550/567551/567552 were never chained, so the lookup only matched the exact rank-1 aura while the talent needs level 40 (rank 4+): the helper never applied and nothing transformed. A level 49 Cultist at 90 Insanity (Dreadnought rank 4 needs the 80-Insanity marker 680604 as its caster aura) casting Dreadnought rank 4 (567550) must gain helper 680556 and display 280071 (creature_template 250043, retargeted at load by the class contracts). Display 280071 is the FacelessOne2 brute at DBC scale 1 with a 0.75 object scale (Ascension's size), replacing 28844 at scale 4 plus a 0.25 object scale, which made the model spawn huge and visibly shrink. The display assertion also pins the template/model path, not just aura presence.",
+  "contract": "Strength of the Black Empire 680557 (level 40 passive) promises Dreadnought sheds the caster's mortal form into a void monstrosity. Delivery is the 680556 helper, enabled by the Cultist Refresh only while the caster holds 680557 and an aura of ranked spell 567524 (Unit::GetAuraOfRankedSpell walks the spell_ranks chain). Dreadnought's server ranks 567524/567548/567549/567550/567551/567552 were never chained, so the lookup only matched the exact rank-1 aura while the talent needs level 40 (rank 4+): the helper never applied and nothing transformed. A level 49 Cultist at 90 Insanity (Dreadnought rank 4 needs the 80-Insanity marker 680604 as its caster aura) casting Dreadnought rank 4 (567550) must gain helper 680556 and display 280073 (creature_template 250043, retargeted at load by the class contracts). Display 280073 is the purple FacelessOne2 brute at DBC scale 0.75 (Ascension's Dreadnought form), replacing 28844 at scale 4 plus a 0.25 object scale, which made the model spawn huge and visibly shrink. The display assertion also pins the template/model path, not just aura presence.",
   "timeout_ms": 30000,
   "location": {
     "map": 0,
@@ -95,18 +95,18 @@
     },
     {
       "action": "assert",
-      "label": "The caster shows the void-monstrosity display 280071 - fails before the fix, when the mortal form stays",
+      "label": "The caster shows the void-monstrosity display 280073 - fails before the fix, when the mortal form stays",
       "actor": "cultist",
       "metric": "display_id",
-      "equals": 280071
+      "equals": 280073
     },
     {
       "action": "assert",
-      "label": "The void monstrosity is scaled to Ascension's Dreadnought size",
+      "label": "The void monstrosity is drawn at its final size, with no object scale change after the transform",
       "actor": "cultist",
       "metric": "unit_scale",
-      "min": 0.74,
-      "max": 0.76
+      "min": 0.99,
+      "max": 1.01
     }
   ]
 }
