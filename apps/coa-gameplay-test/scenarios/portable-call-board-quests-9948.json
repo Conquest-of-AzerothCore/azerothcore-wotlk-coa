@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Portable Hero's/Warchief's Call Boards list the shared PvE daily (#9948)",
+  "contract": "Items 1913515/1913516 (Hero's/Warchief's Portable Call Board) cast item spells 995213/995214, whose SPELL_EFFECT_TRANS_DOOR effect summons gameobject 412000/412001. Both entries already spawn and open the Call Board's three categories (#4186/#7504/#9088/#9419), but neither had gameobject_queststarter/gameobject_questender rows, so every category stayed empty: HeroCallBoard.cpp's ShowCategory reads quests by the clicked gameobject's own entry, not the permanent boards it mirrors (402000 Hero's Call Board, 402001 Warchief's Command Board). Mirroring those rows onto 412000/412001 makes the PvE category list the shared daily 18017 Culling the Felpaw on both portable boards, the same quest the permanent boards offer.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8824.9, "y": 630.397, "z": 93.8, "o": 0 },
+  "players": [
+    { "id": "ally", "race": 1, "class": 12, "level": 60 },
+    { "id": "horde", "race": 2, "class": 12, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    { "action": "learn", "actor": "ally", "spell": 995213 },
+    { "action": "learn", "actor": "horde", "spell": 995214 },
+
+    { "action": "assert", "label": "SETUP: no Hero's Call Board owned yet", "actor": "ally", "metric": "owned_gameobject_count", "entry": 412000, "equals": 0 },
+    { "action": "cast", "actor": "ally", "spell": 995213, "destination": { "x": -8824.9, "y": 630.397, "z": 93.8 } },
+    { "action": "wait", "ms": 16000 },
+    { "action": "assert", "label": "the cast succeeds", "actor": "ally", "metric": "cast_failure", "spell": 995213, "equals": 0 },
+    { "action": "assert", "label": "SETUP: the Hero's Call Board spawns", "actor": "ally", "metric": "owned_gameobject_count", "entry": 412000, "equals": 1 },
+
+    { "action": "use_gameobject", "actor": "ally", "entry": 412000 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "the board answers with its three categories", "actor": "ally", "metric": "gossip_options", "equals": 3 },
+
+    { "action": "gossip_select", "label": "Choose PvE Quests", "actor": "ally", "option": 0 },
+    { "action": "assert", "label": "the category replaces the options with Return", "actor": "ally", "metric": "gossip_options", "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: Culling the Felpaw is offered on the portable Hero's board", "actor": "ally", "metric": "quest_menu_has", "quest": 18017, "equals": 1 },
+
+    { "action": "assert", "label": "SETUP: no Warchief's Command Board owned yet", "actor": "horde", "metric": "owned_gameobject_count", "entry": 412001, "equals": 0 },
+    { "action": "cast", "actor": "horde", "spell": 995214, "destination": { "x": -8824.9, "y": 630.397, "z": 93.8 } },
+    { "action": "wait", "ms": 16000 },
+    { "action": "assert", "label": "the cast succeeds", "actor": "horde", "metric": "cast_failure", "spell": 995214, "equals": 0 },
+    { "action": "assert", "label": "SETUP: the Warchief's Command Board spawns", "actor": "horde", "metric": "owned_gameobject_count", "entry": 412001, "equals": 1 },
+
+    { "action": "use_gameobject", "actor": "horde", "entry": 412001 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "the board answers with its three categories", "actor": "horde", "metric": "gossip_options", "equals": 3 },
+
+    { "action": "gossip_select", "label": "Choose PvE Quests", "actor": "horde", "option": 0 },
+    { "action": "assert", "label": "the category replaces the options with Return", "actor": "horde", "metric": "gossip_options", "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: Culling the Felpaw is offered on the portable Warchief's board", "actor": "horde", "metric": "quest_menu_has", "quest": 18017, "equals": 1 }
+  ]
+}
