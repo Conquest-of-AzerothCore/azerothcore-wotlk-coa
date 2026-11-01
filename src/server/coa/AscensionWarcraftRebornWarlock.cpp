@@ -33,7 +33,10 @@ constexpr std::array<uint32, 5> EMBERSTORM = { 1117954, 1117955, 1117956, 111795
 constexpr std::array<uint32, 5> SHADOW_MASTERY = { 1118271, 1118272, 1118273, 1118274, 1118275 };
 constexpr std::array<uint32, 3> DEMONIC_AEGIS = { 1130143, 1130144, 1130145 };
 constexpr std::array<uint32, 3> NEMESIS = { 1163117, 1163121, 1163123 };
+constexpr std::array<uint32, 3> IMPROVED_DEMONIC_TACTICS = { 1154347, 1154348, 1154349 };
+constexpr int32 SOUL_LINK_LOW_HEALTH_PCT = 20;
 constexpr std::array<uint32, 8> LIFE_TAP = { 1101454, 1101455, 1101456, 1111687, 1111688, 1111689, 1127222, 1157946 };
+constexpr uint32 DARK_FIXATION_SHIELD = 1118780;
 
 template <std::size_t N>
 bool Contains(std::array<uint32, N> const& ids, uint32 id)
@@ -84,6 +87,57 @@ class spell_ascension_reborn_reign_of_dread : public SpellScript
     void Register() override
     {
         AfterCast += SpellCastFn(spell_ascension_reborn_reign_of_dread::ShortenCooldown);
+    }
+};
+
+class spell_ascension_reborn_soul_link : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_reborn_soul_link);
+
+    void HandleSplit(AuraEffect*, DamageInfo&, uint32& splitAmount)
+    {
+        Unit* demon = GetCaster();
+        if (!demon || !demon->HealthBelowPct(SOUL_LINK_LOW_HEALTH_PCT))
+            return;
+        for (uint32 rank : IMPROVED_DEMONIC_TACTICS)
+        {
+            if (AuraEffect const* tactics = GetTarget()->GetAuraEffect(rank, EFFECT_1))
+            {
+                splitAmount = CalculatePct(splitAmount, std::max(0, 100 - tactics->GetAmount()));
+                return;
+            }
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectSplit += AuraEffectSplitFn(spell_ascension_reborn_soul_link::HandleSplit, EFFECT_0);
+    }
+};
+
+class spell_ascension_reborn_dark_fixation : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_reborn_dark_fixation);
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        SpellInfo const* spell = eventInfo.GetSpellInfo();
+        return spell && Contains(LIFE_TAP, spell->Id);
+    }
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        Unit* warlock = GetTarget();
+        int32 shield = CalculatePct(eventInfo.GetSpellInfo()->Effects[EFFECT_0].CalcValue(warlock), aurEff->GetAmount());
+        if (shield > 0)
+            warlock->CastCustomSpell(warlock, DARK_FIXATION_SHIELD, &shield, nullptr, nullptr, true, nullptr, aurEff);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_ascension_reborn_dark_fixation::CheckProc);
+        OnEffectProc += AuraEffectProcFn(spell_ascension_reborn_dark_fixation::HandleProc, EFFECT_1, SPELL_AURA_DUMMY);
     }
 };
 }
@@ -146,6 +200,13 @@ void ApplyAscensionWarcraftRebornWarlockContracts(SpellInfo* spellInfo)
     if (Contains(DEMONIC_AEGIS, spellInfo->Id) && spellInfo->Effects[EFFECT_0].MiscValue == SPELLMOD_ALL_EFFECTS)
         spellInfo->Effects[EFFECT_0].SpellClassMask[2] |= WARLOCK_ARMORS;
 
+    if (Contains(IMPROVED_DEMONIC_TACTICS, spellInfo->Id) &&
+        spellInfo->Effects[EFFECT_0].MiscValue == SPELLMOD_CRIT_DAMAGE_BONUS)
+        spellInfo->Effects[EFFECT_0].MiscValue = SPELLMOD_EFFECT1;
+
+    if (Contains(IMPROVED_DEMONIC_TACTICS, spellInfo->Id) && !spellInfo->Effects[EFFECT_1].TargetA.GetTarget())
+        spellInfo->Effects[EFFECT_1].TargetA = spellInfo->Effects[EFFECT_0].TargetA;
+
     if (Contains(LIFE_TAP, spellInfo->Id))
     {
         if (SpellEntry const* entry = sSpellStore.LookupEntry(spellInfo->Id))
@@ -163,4 +224,6 @@ void AddAscensionWarcraftRebornWarlockScripts()
     using namespace AscensionWarcraftReborn;
     RegisterSpellScript(spell_ascension_reborn_summoners_armor_demon);
     RegisterSpellScript(spell_ascension_reborn_reign_of_dread);
+    RegisterSpellScript(spell_ascension_reborn_soul_link);
+    RegisterSpellScript(spell_ascension_reborn_dark_fixation);
 }

@@ -54,6 +54,7 @@ enum WarlockSpells
     SPELL_WARLOCK_GLYPH_OF_SIPHON_LIFE              = 56216,
     SPELL_WARLOCK_HAUNT                             = 48181,
     SPELL_WARLOCK_HAUNT_HEAL                        = 48210,
+    SPELL_WARLOCK_HAUNT_HEAL_REBORN                 = 1148210,
     SPELL_WARLOCK_IMPROVED_HEALTHSTONE_R1           = 18692,
     SPELL_WARLOCK_IMPROVED_HEALTHSTONE_R2           = 18693,
     SPELL_WARLOCK_IMPROVED_HEALTH_FUNNEL_R1         = 18703,
@@ -199,8 +200,15 @@ class spell_warl_improved_demonic_tactics : public AuraScript
         amplitude = 10 * IN_MILLISECONDS;
     }
 
+    bool IsCrit(AuraEffect const* aurEff) const
+    {
+        return aurEff->GetEffIndex() == EFFECT_0 || sSpellMgr->GetSpellTwinSource(GetId()) == GetId();
+    }
+
     void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool&  /*canBeRecalculated*/)
     {
+        if (!IsCrit(aurEff))
+            return;
         if (aurEff->GetEffIndex() == EFFECT_0)
             amount = CalculatePct<int32, float>(GetUnitOwner()->ToPlayer()->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + static_cast<uint8>(SPELL_SCHOOL_FROST)), GetSpellInfo()->Effects[EFFECT_0].CalcValue());
         else
@@ -209,6 +217,8 @@ class spell_warl_improved_demonic_tactics : public AuraScript
 
     void HandleEffectCalcSpellMod(AuraEffect const* aurEff, SpellModifier*& spellMod)
     {
+        if (!IsCrit(aurEff))
+            return;
         if (!spellMod)
         {
             spellMod = new SpellModifier(aurEff->GetBase());
@@ -1015,7 +1025,9 @@ class spell_warl_haunt_aura : public AuraScript
         if (Unit* caster = GetCaster())
         {
             int32 amount = aurEff->GetAmount();
-            GetTarget()->CastCustomSpell(caster, SPELL_WARLOCK_HAUNT_HEAL, &amount, nullptr, nullptr, true, nullptr, aurEff, GetCasterGUID());
+            uint32 const heal = sSpellMgr->GetSpellTwinSource(GetId()) != GetId() ? SPELL_WARLOCK_HAUNT_HEAL_REBORN :
+                SPELL_WARLOCK_HAUNT_HEAL;
+            GetTarget()->CastCustomSpell(caster, heal, &amount, nullptr, nullptr, true, nullptr, aurEff, GetCasterGUID());
         }
     }
 

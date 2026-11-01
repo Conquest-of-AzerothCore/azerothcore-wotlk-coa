@@ -573,7 +573,7 @@ class spell_hun_invigoration : public SpellScript
         if (Unit* unitTarget = GetHitUnit())
             if (AuraEffect* aurEff = unitTarget->GetDummyAuraEffect(SPELLFAMILY_HUNTER, 3487, 0))
                 if (roll_chance_i(aurEff->GetAmount()))
-                    unitTarget->CastSpell(unitTarget, SPELL_HUNTER_INVIGORATION_TRIGGERED, true);
+                    unitTarget->CastSpell(unitTarget, sSpellMgr->GetSpellTwinFor(SPELL_HUNTER_INVIGORATION_TRIGGERED, aurEff->GetId()), true);
     }
 
     void Register() override
@@ -693,8 +693,8 @@ class spell_hun_readiness : public SpellScript
             SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
             if (spellInfo
             && spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER
-            && spellInfo->Id != SPELL_HUNTER_READINESS
-            && spellInfo->Id != SPELL_HUNTER_BESTIAL_WRATH
+            && sSpellMgr->GetSpellTwinSource(spellInfo->Id) != SPELL_HUNTER_READINESS
+            && sSpellMgr->GetSpellTwinSource(spellInfo->Id) != SPELL_HUNTER_BESTIAL_WRATH
             && spellInfo->Id != SPELL_DRAENEI_GIFT_OF_THE_NAARU)
             {
                 if (spellInfo->RecoveryTime > 0)

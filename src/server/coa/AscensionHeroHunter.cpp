@@ -45,7 +45,7 @@ class aura_hero_hunter_entrapment : public AuraScript
     void HandleProc(AuraEffect const*, ProcEventInfo& eventInfo)
     {
         Unit* target = eventInfo.GetActionTarget();
-        uint32 const root = EntrapmentRoot(GetId());
+        uint32 const root = EntrapmentRoot(sSpellMgr->GetSpellTwinSource(GetId()));
         if (target && root && target != GetTarget())
             GetTarget()->CastSpell(target, root, true);
     }

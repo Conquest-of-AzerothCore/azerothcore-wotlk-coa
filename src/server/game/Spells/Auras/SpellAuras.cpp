@@ -1707,7 +1707,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             int32 basepoints0 = int32(CalculatePct(caster->GetMaxPower(POWER_MANA), multiplier));
                             if (caster->HasAura(270563))
                                 basepoints0 *= 2;
-                            caster->CastCustomSpell(caster, 47755, &basepoints0, nullptr, nullptr, true);
+                            caster->CastCustomSpell(caster, sSpellMgr->GetSpellTwinFor(47755, aura->GetId()), &basepoints0, nullptr, nullptr, true);
                         }
                         // effect on aura target
                         if (AuraEffect const* aurEff = aura->GetEffect(1))
@@ -1721,7 +1721,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                 case POWER_MANA:
                                     {
                                         int32 basepoints0 = int32(CalculatePct(target->GetMaxPower(POWER_MANA), 2));
-                                        caster->CastCustomSpell(target, 63654, &basepoints0, nullptr, nullptr, true);
+                                        caster->CastCustomSpell(target, sSpellMgr->GetSpellTwinFor(63654, aura->GetId()), &basepoints0, nullptr, nullptr, true);
                                         break;
                                     }
                                 case POWER_RAGE:
@@ -1737,7 +1737,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                     break;
                             }
                             if (triggeredSpellId)
-                                caster->CastSpell(target, triggeredSpellId, true);
+                                caster->CastSpell(target, sSpellMgr->GetSpellTwinFor(triggeredSpellId, aura->GetId()), true);
                         }
                     }
                 }
@@ -1842,27 +1842,46 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                 if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpellOrTwin(31221, 0))
                 {
                     if (!apply)
-                        target->CastSpell(target, 31666, true);
+                    {
+                        SpellInfo const* trackerInfo = sSpellMgr->GetSpellInfo(sSpellMgr->GetSpellTwinFor(31666, aurEff->GetId()));
+                        if (trackerInfo && !trackerInfo->HasAura(SPELL_AURA_PERIODIC_DUMMY))
+                        {
+                            target->RemoveAurasDueToSpell(sSpellMgr->GetSpellTwinFor(31665, aurEff->GetId()));
+                            int32 amount = aurEff->GetAmount();
+                            target->CastCustomSpell(target, 31666, &amount, nullptr, nullptr, true, nullptr, aurEff);
+                        }
+                        else
+                            target->CastSpell(target, 31666, true, nullptr, aurEff);
+                    }
                     else
                     {
                         // Remove counter aura
-                        target->RemoveAurasDueToSpell(31666);
+                        target->RemoveAurasDueToSpell(sSpellMgr->GetSpellTwinFor(31666, aurEff->GetId()));
 
                         int32 amount = aurEff->GetAmount();
-                        target->CastCustomSpell(target, 31665, &amount, nullptr, nullptr, true);
+                        target->CastCustomSpell(target, 31665, &amount, nullptr, nullptr, true, nullptr, aurEff);
                     }
                 }
                 // Overkill
-                if (target->HasAuraOrTwin(58426))
+                if (AuraEffect const* aurEff = target->GetAuraEffectOfRankedSpellOrTwin(58426, 0))
                 {
+                    // Reborn Overkill's tracker 1158428 is built differently from 58428 (no twin): find it by offset
+                    uint32 const offset = aurEff->GetId() - sSpellMgr->GetSpellTwinSource(aurEff->GetId());
+                    SpellInfo const* trackerInfo = sSpellMgr->GetSpellInfo(58428 + offset);
+                    if (!trackerInfo || std::string_view(trackerInfo->SpellName[0]) != aurEff->GetSpellInfo()->SpellName[0])
+                        trackerInfo = sSpellMgr->AssertSpellInfo(58428);
                     if (!apply)
-                        target->CastSpell(target, 58428, true);
+                    {
+                        if (!trackerInfo->HasAura(SPELL_AURA_PERIODIC_DUMMY))
+                            target->RemoveAurasDueToSpell(sSpellMgr->GetSpellTwinFor(58427, aurEff->GetId()));
+                        target->CastSpell(target, trackerInfo->Id, true, nullptr, aurEff);
+                    }
                     else
                     {
                         // Remove counter aura
-                        target->RemoveAurasDueToSpell(58428);
+                        target->RemoveAurasDueToSpell(trackerInfo->Id);
 
-                        target->CastSpell(target, 58427, true);
+                        target->CastSpell(target, 58427, true, nullptr, aurEff);
                     }
                 }
             }

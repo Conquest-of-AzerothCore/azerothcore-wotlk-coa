@@ -35,9 +35,13 @@
 
 #include <algorithm>
 #include <memory>
+#include <unordered_set>
 
 namespace
 {
+constexpr uint32 REBORN_TWIN_OFFSET = 1100000;
+constexpr uint32 CROSSOVER_TWIN_OFFSET = 1300000;
+
 bool IsValidSpellProcFamily(uint32 family)
 {
     // CoA class spell families follow the class ID with an offset of six.
@@ -1544,13 +1548,57 @@ uint32 SpellMgr::GetSpellTwinSource(uint32 spellId) const
     return source;
 }
 
+namespace
+{
+    thread_local std::vector<uint32> RunningScriptTwins;
+}
+
+void SpellMgr::PushScriptTwin(uint32 spellId, uint32 triggeringSpellId)
+{
+    uint32 twin = sSpellMgr->GetSpellTwinSource(spellId) != spellId ? spellId : 0;
+    if (!twin && triggeringSpellId && sSpellMgr->GetSpellTwinSource(triggeringSpellId) != triggeringSpellId)
+        twin = triggeringSpellId;
+    RunningScriptTwins.push_back(twin);
+}
+
+void SpellMgr::PopScriptTwin(uint32 /*spellId*/)
+{
+    if (!RunningScriptTwins.empty())
+        RunningScriptTwins.pop_back();
+}
+
+uint32 SpellMgr::GetRunningScriptTwin()
+{
+    for (auto itr = RunningScriptTwins.rbegin(); itr != RunningScriptTwins.rend(); ++itr)
+        if (*itr)
+            return *itr;
+    return 0;
+}
+
+uint32 SpellMgr::GetScriptTwinOf(uint32 spellId)
+{
+    if (RunningScriptTwins.empty())
+        return 0;
+    uint32 const running = GetRunningScriptTwin();
+    if (!running)
+        return 0;
+    uint32 const twin = sSpellMgr->GetSpellTwinFor(spellId, running);
+    return twin != spellId ? twin : 0;
+}
+
 uint32 SpellMgr::GetSpellTwinFor(uint32 stockSpellId, uint32 relatedSpellId) const
 {
     uint32 const relatedSource = GetSpellTwinSource(relatedSpellId);
     if (relatedSource == relatedSpellId || relatedSpellId < relatedSource)
         return stockSpellId;
     uint32 const candidate = stockSpellId + (relatedSpellId - relatedSource);
-    return GetSpellInfo(candidate) && GetSpellTwinSource(candidate) == stockSpellId ? candidate : stockSpellId;
+    if (GetSpellInfo(candidate) && GetSpellTwinSource(candidate) == stockSpellId)
+        return candidate;
+    if (relatedSpellId - relatedSource == CROSSOVER_TWIN_OFFSET)
+        if (uint32 const reborn = stockSpellId + REBORN_TWIN_OFFSET; GetSpellInfo(reborn) && GetSpellTwinSource(reborn) == stockSpellId)
+            return reborn;
+    uint32 const firstRank = GetFirstSpellInChain(relatedSpellId);
+    return firstRank != relatedSpellId ? GetSpellTwinFor(stockSpellId, firstRank) : stockSpellId;
 }
 
 std::vector<uint32> SpellMgr::GetSpellAndRelatives(uint32 spellId) const
@@ -2593,7 +2641,18 @@ void SpellMgr::LoadSpellBonuses()
         ++count;
     } while (result->NextRow());
 
+    std::unordered_set<uint32> listed;
+    for (auto const& [entry, bonus] : mSpellBonusMap)
+        listed.insert(entry);
     CopyToSpellTwins(mSpellBonusMap);
+    for (auto itr = mSpellBonusMap.begin(); itr != mSpellBonusMap.end();)
+    {
+        uint32 const firstRank = GetFirstSpellInChain(itr->first);
+        if (!listed.contains(itr->first) && firstRank != itr->first && listed.contains(firstRank))
+            itr = mSpellBonusMap.erase(itr);
+        else
+            ++itr;
+    }
 
     LOG_INFO("server.loading", ">> Loaded {} Extra Spell Bonus Data in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
     LOG_INFO("server.loading", " ");
@@ -2766,7 +2825,10 @@ void SpellMgr::LoadSpellPetAuras()
         {
             auto const itr = mSpellPetAuraMap.find((source << 8) + i);
             if (itr != mSpellPetAuraMap.end() && !mSpellPetAuraMap.contains((twin << 8) + i))
-                mSpellPetAuraMap.emplace((twin << 8) + i, itr->second);
+                mSpellPetAuraMap.emplace((twin << 8) + i, itr->second.ForTwin([this, twin](uint32 aura)
+                {
+                    return GetSpellTwinFor(aura, twin);
+                }));
         }
     }
 
@@ -2918,8 +2980,15 @@ void SpellMgr::LoadSpellLinked()
         for (auto twin = begin; twin != end; ++twin)
         {
             int32 const twinTrigger = trigger + (trigger < 0 ? -1 : 1) * (int32(twin->second) - spellId);
-            if (!mSpellLinkedMap.contains(twinTrigger))
-                twinLinks.emplace(twinTrigger, effects);
+            if (mSpellLinkedMap.contains(twinTrigger))
+                continue;
+            std::vector<int32> twinEffects;
+            for (int32 effect : effects)
+            {
+                int32 const twinEffect = int32(GetSpellTwinFor(uint32(std::abs(effect)), twin->second));
+                twinEffects.push_back(effect < 0 ? -twinEffect : twinEffect);
+            }
+            twinLinks.emplace(twinTrigger, std::move(twinEffects));
         }
     }
     mSpellLinkedMap.merge(twinLinks);

@@ -730,7 +730,7 @@ class spell_sha_earthliving_weapon : public AuraScript
 
         if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
         {
-            if (spellInfo->Id == SPELL_SHAMAN_EARTH_SHIELD_HEAL)
+            if (sSpellMgr->GetSpellTwinSource(spellInfo->Id) == SPELL_SHAMAN_EARTH_SHIELD_HEAL)
             {
                 return false;
             }
@@ -1170,6 +1170,8 @@ class spell_sha_nature_guardian : public AuraScript
             return false;
 
         int32 healthpct = GetSpellInfo()->Effects[EFFECT_1].CalcValue();
+        if (!healthpct)
+            healthpct = sSpellMgr->AssertSpellInfo(sSpellMgr->GetSpellTwinSource(GetId()))->Effects[EFFECT_1].CalcValue();
         if (Unit* target = eventInfo.GetActionTarget())
             if (target->HealthBelowPctDamaged(healthpct, damageInfo->GetDamage()))
                 return true;
@@ -2035,7 +2037,7 @@ class spell_sha_t8_elemental_4p_bonus : public AuraScript
         // Do not proc from Lightning Overload (patch 3.1~)
         if (SpellInfo const* spellInfo = eventInfo.GetSpellInfo())
         {
-            if (spellInfo->Id == SPELL_SHAMAN_LIGHTNING_BOLT_OVERLOAD)
+            if (sSpellMgr->GetSpellTwinSource(spellInfo->Id) == SPELL_SHAMAN_LIGHTNING_BOLT_OVERLOAD)
                 return;
         }
 

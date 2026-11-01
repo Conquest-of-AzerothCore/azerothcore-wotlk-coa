@@ -2300,7 +2300,7 @@ bool Pet::IsPermanentPetFor(Player* owner) const
             else if (owner->IsClass(CLASS_DEATH_KNIGHT, CLASS_CONTEXT_PET))
                 return GetCreatureTemplate()->type == CREATURE_TYPE_UNDEAD;
             else if (owner->IsClass(CLASS_MAGE, CLASS_CONTEXT_PET))
-                return GetEntry() == 37994;
+                return GetStockPetEntry(GetEntry()) == NPC_WATER_ELEMENTAL_PERM;
             else if (owner->IsClass(CLASS_TINKER, CLASS_CONTEXT_PET))
                 return GetCreatureTemplate()->type == CREATURE_TYPE_MECHANICAL;
             else

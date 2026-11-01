@@ -77,9 +77,9 @@ void ScriptMgr::ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* 
         script->ModifySpellEffectBaseValue(caster, spellInfo, effectIndex, value));
 }
 
-void ScriptMgr::ResolveSpellCast(Unit* caster, SpellInfo const*& spellInfo)
+void ScriptMgr::ResolveSpellCast(Unit* caster, SpellInfo const*& spellInfo, AuraEffect const* triggeredByAura)
 {
-    CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_RESOLVE_SPELL_CAST, script->ResolveSpellCast(caster, spellInfo));
+    CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_RESOLVE_SPELL_CAST, script->ResolveSpellCast(caster, spellInfo, triggeredByAura));
 }
 
 void ScriptMgr::ModifyHealReceived(Unit* target, Unit* healer, uint32& heal, SpellInfo const* spellInfo)

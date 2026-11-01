@@ -1668,7 +1668,7 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
             // Leader of the Pack
             std::vector<uint32> const leaderOfThePack = sSpellMgr->GetSpellAndRelatives(17007);
             if (std::any_of(leaderOfThePack.begin(), leaderOfThePack.end(),
-                [player](uint32 spellId) { return player->HasTalent(spellId, player->GetActiveSpec()); }))
+                [player](uint32 spellId) { return player->HasTalent(spellId, player->GetActiveSpec()) || player->HasSpell(spellId); }))
             {
                 SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(24932);
                 if (spellInfo && spellInfo->Stances & (uint64(1) << (GetMiscValue() - 1)))
@@ -2287,8 +2287,12 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
                     {
                         // get furor proc chance
                         uint32 FurorChance = 0;
+                        uint32 furorId = 0;
                         if (AuraEffect const* dummy = target->GetDummyAuraEffect(SPELLFAMILY_DRUID, 238, 0))
+                        {
                             FurorChance = std::max(dummy->GetAmount(), 0);
+                            furorId = dummy->GetId();
+                        }
 
                         switch (GetMiscValue())
                         {
@@ -2298,13 +2302,14 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
                                         break;
                                     int32 basePoints = int32(std::min(oldPower, FurorChance));
                                     target->SetPower(POWER_ENERGY, 0);
-                                    target->CastCustomSpell(target, 17099, &basePoints, nullptr, nullptr, true, nullptr, this);
+                                    target->CastCustomSpell(target, sSpellMgr->GetSpellTwinFor(17099, furorId), &basePoints, nullptr,
+                                        nullptr, true, nullptr, this);
                                     break;
                                 }
                             case FORM_BEAR:
                             case FORM_DIREBEAR:
                                 if (urand(0, 99) < FurorChance)
-                                    target->CastSpell(target, 17057, true);
+                                    target->CastSpell(target, sSpellMgr->GetSpellTwinFor(17057, furorId), true);
                                 break;
                             default:
                                 {
@@ -5477,7 +5482,8 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
         // AT APPLY
         if (apply)
         {
-            switch (GetId())
+            uint32 const killCommand = sSpellMgr->GetSpellTwinSource(GetId());
+            switch (killCommand == 34026 ? killCommand : GetId())
             {
                 case 1515:                                      // Tame beast
                     // FIX_ME: this is 2.0.12 threat effect replaced in 2.1.x by dummy aura, must be checked for correctness
@@ -5490,11 +5496,12 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                         if (!pet)
                             break;
 
-                        target->CastSpell(target, 34027, true, nullptr, this);
+                        uint32 const ownerBuff = sSpellMgr->GetSpellTwinFor(34027, GetId());
+                        target->CastSpell(target, ownerBuff, true, nullptr, this);
 
                         // set 3 stacks and 3 charges (to make all auras not disappear at once)
-                        Aura* owner_aura = target->GetAura(34027, GetCasterGUID());
-                        Aura* pet_aura  = pet->GetAura(58914, GetCasterGUID());
+                        Aura* owner_aura = target->GetAura(ownerBuff, GetCasterGUID());
+                        Aura* pet_aura  = pet->GetAura(sSpellMgr->GetSpellTwinFor(58914, GetId()), GetCasterGUID());
                         if (owner_aura)
                         {
                             owner_aura->SetCharges(0);
