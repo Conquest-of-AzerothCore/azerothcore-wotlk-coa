@@ -370,6 +370,7 @@ void AddSC_AscensionStormwindKeepDoor();
 void AddSC_AscensionShadewellClues();
 void AddSC_AscensionIdealsArePoisonClues();
 void AddSC_AscensionTransformPresets();
+void AddSC_AscensionCosmeticVisualRefresh();
 void AddSC_AscensionAreaQuestOffers();
 void AddSC_AscensionBlackwoodRifts();
 void AddSC_AscensionCardensDiary();
@@ -664,6 +665,7 @@ void AddCoAScripts()
     AddSC_AscensionShadewellClues();
     AddSC_AscensionIdealsArePoisonClues();
     AddSC_AscensionTransformPresets();
+    AddSC_AscensionCosmeticVisualRefresh();
     AddSC_AscensionAreaQuestOffers();
     AddSC_AscensionBlackwoodRifts();
     AddSC_AscensionCardensDiary();
