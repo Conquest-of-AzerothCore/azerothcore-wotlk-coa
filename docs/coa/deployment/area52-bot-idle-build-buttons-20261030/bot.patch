@@ -1,0 +1,139 @@
+--- /dev/null
++++ b/modules/mod-playerbots/src/Area52BotPresence.h
+@@ -0,0 +1,57 @@
++#ifndef AREA52_BOT_PRESENCE_H
++#define AREA52_BOT_PRESENCE_H
++
++#include "Player.h"
++#include "PlayerbotAIConfig.h"
++#include "Playerbots.h"
++#include "WorldSession.h"
++#include "WorldSessionMgr.h"
++#include <chrono>
++
++inline bool Area52BotsShouldSleep()
++{
++    if (!sPlayerbotAIConfig.area52FixedPilot)
++        return false;
++
++    for (auto const& entry : sWorldSessionMgr->GetAllSessions())
++    {
++        WorldSession* session = entry.second;
++        Player* player = session ? session->GetPlayer() : nullptr;
++        if (player && player->IsInWorld() && !GET_PLAYERBOT_AI(player))
++            return false;
++    }
++    return true;
++}
++
++struct Area52BotIdleTimer
++{
++    bool hadPlayers = false;
++    bool waiting = false;
++    std::chrono::steady_clock::time_point emptySince;
++
++    bool LogoutDue(bool enabled, bool empty, std::chrono::steady_clock::time_point now)
++    {
++        if (!enabled)
++        {
++            hadPlayers = false;
++            waiting = false;
++            return false;
++        }
++        if (!empty)
++        {
++            hadPlayers = true;
++            waiting = false;
++            return false;
++        }
++        if (!hadPlayers)
++            return true;
++        if (!waiting)
++        {
++            emptySince = now;
++            waiting = true;
++        }
++        return now - emptySince >= std::chrono::seconds(300);
++    }
++};
++
++#endif
+--- a/modules/mod-playerbots/src/Bot/PlayerbotMgr.cpp
++++ b/modules/mod-playerbots/src/Bot/PlayerbotMgr.cpp
+@@ -29,6 +29,7 @@
+ #include "PlayerbotWorldThreadProcessor.h"
+ #include "Playerbots.h"
+ #include "RandomPlayerbotMgr.h"
++#include "Area52BotPresence.h"
+ #include "SharedDefines.h"
+ #include "WorldSession.h"
+ #include "WorldSessionMgr.h"
+@@ -120,6 +121,9 @@
+ 
+ void PlayerbotHolder::AddPlayerBot(ObjectGuid playerGuid, uint32 masterAccountId)
+ {
++    if (Area52BotsShouldSleep())
++        return;
++
+     if (botLoading.find(playerGuid) != botLoading.end())
+         return;
+ 
+--- a/modules/mod-playerbots/src/Bot/RandomPlayerbotMgr.cpp
++++ b/modules/mod-playerbots/src/Bot/RandomPlayerbotMgr.cpp
+@@ -5,6 +5,7 @@
+  */
+ 
+ #include "RandomPlayerbotMgr.h"
++#include "Area52BotPresence.h"
+ #include "CoaDungeonPool.h"
+ #include "BattlegroundUtils.h"
+ #include "AiFactory.h"
+@@ -185,6 +186,9 @@
+ // Alt bots and other bots of a real player are not random bots and are never counted or removed.
+ uint32 RandomPlayerbotMgr::GetTargetBotCount()
+ {
++    if (Area52BotsShouldSleep())
++        return 0;
++
+     uint32 const count = GetEventValue(0, "bot_count");
+     if (!sPlayerbotAIConfig.coaPlayersReplaceBots || !count)
+         return count;
+@@ -359,6 +363,18 @@
+ 
+     if (!sPlayerbotAIConfig.randomBotAutologin || !sPlayerbotAIConfig.enabled)
+         return;
++
++    static Area52BotIdleTimer idleTimer;
++    bool const empty = Area52BotsShouldSleep();
++    bool const logoutDue = idleTimer.LogoutDue(sPlayerbotAIConfig.area52FixedPilot, empty,
++        std::chrono::steady_clock::now());
++    if (empty)
++    {
++        SetNextCheckDelay(1000);
++        if (logoutDue)
++            LogoutAllBots();
++        return;
++    }
+ 
+     /*if (sPlayerbotAIConfig.enablePrototypePerformanceDiff)
+     {
+@@ -3165,6 +3181,9 @@
+ 
+ void RandomPlayerbotMgr::OnPlayerLogout(Player* player)
+ {
++    if (sPlayerbotAIConfig.area52FixedPilot)
++        SetNextCheckDelay(0);
++
+     DisablePlayerBot(player->GetGUID());
+ 
+     for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)
+@@ -3598,6 +3617,9 @@
+ 
+ void RandomPlayerbotMgr::OnPlayerLogin(Player* player)
+ {
++    if (sPlayerbotAIConfig.area52FixedPilot)
++        SetNextCheckDelay(0);
++
+     uint32 botsNearby = 0;
+ 
+     for (PlayerBotMap::const_iterator it = GetPlayerBotsBegin(); it != GetPlayerBotsEnd(); ++it)

@@ -1,0 +1,1 @@
+Apply bot.patch at the server source root against the exact deployed mod-playerbots baseline in full-build-provenance.json. Build with tools/verify_all.py build,unit using the recorded core overlays. Client patch changes only button texture anchors. No SQL or verification status updates. No DLL changes.

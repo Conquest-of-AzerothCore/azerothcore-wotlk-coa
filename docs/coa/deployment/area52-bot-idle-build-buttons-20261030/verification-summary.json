@@ -1,0 +1,11 @@
+{
+  "scope": "Five-minute bot idle logout and anonymous button center anchors",
+  "server_sha256": "c965883dca0ace8bbe3a36794a05624aa4893f7ed5cb15b7d674b3144ffbe0e9",
+  "reports": [
+    "verification-r4/report.json",
+    "full-build-r1/report.json",
+    "../build-button-layout-20261030/report.json"
+  ],
+  "status_changes": false,
+  "gameplay_tested": false
+}

@@ -1,0 +1,13 @@
+--- a/Interface/AddOns/Ascension_BuildCreator/BuildCreator.lua
++++ b/Interface/AddOns/Ascension_BuildCreator/BuildCreator.lua
+@@ -1051,6 +1051,10 @@
+         for i,label in ipairs({"Copy Build","Copy Build Code","Import Build Code"}) do
+             local b=CreateFrame("Button",nil,view.Controls,"SharedButtonTemplate")
+             b:SetSize(160,26);b:SetPoint("TOPLEFT",6+(i-1)*166,-46);b:SetText(label)
++            -- Anonymous template instances must anchor to their own texture objects.
++            b.Center:ClearAllPoints()
++            b.Center:SetPoint("TOPLEFT",b.Left,"TOPRIGHT",0,0)
++            b.Center:SetPoint("BOTTOMRIGHT",b.Right,"BOTTOMLEFT",0,0)
+             view.Area52ImportButtons[i]=b
+         end
+         view.Area52ImportButtons[1]:SetScript("OnClick",function() Import.Apply(view.build) end)
