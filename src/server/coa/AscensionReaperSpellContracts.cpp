@@ -27,6 +27,7 @@ constexpr uint32 SPELL_SOULS_FOR_SLAUGHTER_DAMAGE = 575847;
 constexpr uint32 SPELL_HARVESTING_GROUNDS = 705413;
 constexpr uint32 SPELL_HARVESTING_GROUNDS_SLOW = 707591;
 constexpr uint32 NPC_HARVESTING_GROUNDS = 300662;
+constexpr uint32 SPELL_LIMBO = 800845;
 
 class reaper_spell_contracts : public GlobalScript
 {
@@ -59,6 +60,9 @@ public:
             info->Effects[EFFECT_1].MiscValue == SPELLMOD_EFFECT1 &&
             info->Effects[EFFECT_1].SpellClassMask == flag96(0, 67108864, 0))
             info->Effects[EFFECT_1].MiscValue = SPELLMOD_EFFECT2;
+
+        if (info->Id == SPELL_LIMBO && info->Effects[EFFECT_0].Effect == SPELL_EFFECT_DUMMY)
+            info->Effects[EFFECT_0].Effect = SPELL_EFFECT_HEAL_PCT;
 
         if (info->Id == SPELL_THRESH)
         {
