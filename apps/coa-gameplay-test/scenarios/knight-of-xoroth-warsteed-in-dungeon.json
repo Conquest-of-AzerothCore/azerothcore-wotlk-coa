@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: Xorothian Warsteed mounts inside Blackfathom Deeps",
+  "contract": [
+    "Xorothian Warsteed (804703) is the Knight of Xoroth's combat mount; Dreadrider's Stomp (804702) and",
+    "Hellfire Trample (804704) require it. Blackfathom Deeps (map 48) is a 5-player dungeon with",
+    "instance_template.allowMount = 0, where Spell::CheckCast refused 804703 with SPELL_FAILED_NO_MOUNTS_ALLOWED",
+    "(83). Like the Tinker Mechsuit helper, the Warsteed is allowed for a Knight of Xoroth in non-raid dungeons."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 60 }
+  ],
+  "location": {
+    "map": 48,
+    "x": -178.368,
+    "y": 52.7392,
+    "z": -49.8229,
+    "o": 1.27409,
+    "ignore_access": true
+  },
+  "steps": [
+    { "action": "wait", "label": "Let Blackfathom Deeps settle", "ms": 8000 },
+    {
+      "action": "assert", "label": "SETUP the knight is in Blackfathom Deeps",
+      "actor": "knight", "metric": "map_id", "equals": 48
+    },
+    { "action": "learn", "actor": "knight", "spell": 804703 },
+    {
+      "action": "assert", "label": "SETUP the knight knows Xorothian Warsteed",
+      "actor": "knight", "metric": "knows_spell", "spell": 804703, "equals": 1
+    },
+    {
+      "action": "cast", "label": "The knight summons the Warsteed inside the dungeon",
+      "actor": "knight", "spell": 804703
+    },
+    {
+      "action": "assert", "label": "CONTRACT the Warsteed is mounted inside the dungeon",
+      "actor": "knight", "metric": "aura", "spell": 804703, "equals": 1, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "CONTRACT the cast was not refused with SPELL_FAILED_NO_MOUNTS_ALLOWED",
+      "actor": "knight", "metric": "cast_failure", "spell": 804703, "equals": 0
+    }
+  ]
+}

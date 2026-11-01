@@ -6858,7 +6858,10 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
                         allowMount = it->AllowMount;
                     // Mechsuit is a combat form; its mount helper carries the suit's model and form.
                     bool tinkerMechsuit = m_spellInfo->Id == 803451 && m_caster->getClass() == CLASS_TINKER;
-                    if (m_caster->IsPlayer() && !allowMount && !m_spellInfo->AreaGroupId && !tinkerMechsuit)
+                    bool xorothWarsteed = m_spellInfo->Id == 804703 && m_caster->getClass() == CLASS_FLESHWARDEN &&
+                        m_caster->GetMap()->IsNonRaidDungeon();
+                    if (m_caster->IsPlayer() && !allowMount && !m_spellInfo->AreaGroupId && !tinkerMechsuit &&
+                        !xorothWarsteed)
                         return SPELL_FAILED_NO_MOUNTS_ALLOWED;
 
                     // CoA: a Venomancer's Beetle/Spider stance is dropped by the mount itself.
