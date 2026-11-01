@@ -690,8 +690,8 @@ the `target` attacker.
 These observations do not test delivery to a network client.
 `spell_damage_count` and `spell_damage_total` require `spell` and count positive direct or periodic spell
 damage events, or sum their post-mitigation damage, from the actor's native combat packets. Optional `target`
-filters the victim, `pet: true` selects the actor's current pet as caster, and `critical` filters critical or
-noncritical hits. Values accumulate throughout the scenario; use snapshots and `relative_to` around a cast.
+filters the victim, `pet: true` selects the actor's current pet as caster, `caster` selects another actor such
+as a creature fixture, and `critical` filters critical or noncritical hits. Values accumulate throughout the scenario; use snapshots and `relative_to` around a cast.
 They exclude zero damage, melee swing packets, and healing, and do not test network delivery.
 `spell_heal_count`, `spell_heal_total` and `spell_effective_heal_total` similarly observe native direct and
 periodic healing logs, counting positive heals, summing healing including overhealing, or summing effective
