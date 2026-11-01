@@ -6515,7 +6515,10 @@ public:
     void OnMailItemObtained(Player* player, uint32 itemId)
     {
         if (auto state = GetState(player))
-            CollectItem(player, *state, itemId, true, false);
+        {
+            Item const* stored = player->GetItemByEntry(itemId);
+            CollectItem(player, *state, itemId, true, stored && stored->IsSoulBound());
+        }
     }
 
   void OnItemObtained(Player *player, Item *item) {
