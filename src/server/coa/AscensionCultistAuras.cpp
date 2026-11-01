@@ -31,9 +31,10 @@ class aura_ascension_cultist_lifecycle : public AuraScript
     PrepareAuraScript(aura_ascension_cultist_lifecycle);
     void ScaleBlackEmpire(AuraEffect const*, AuraEffectHandleModes)
     {
-        constexpr uint32 BlackEmpireDisplay = 28844;
+        // Display 280071 is the FacelessOne2 brute at DBC scale 1; 0.75 matches Ascension's Dreadnought size.
+        constexpr uint32 BlackEmpireDisplay = 280071;
         if (GetTarget()->GetDisplayId() == BlackEmpireDisplay && GetTarget()->getTransForm() == 680556)
-            GetTarget()->SetObjectScale(0.25f);
+            GetTarget()->SetObjectScale(0.75f);
     }
 
     void Apply(AuraEffect const* effect, AuraEffectHandleModes mode)
