@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "baseline_emitted_legacy_uuid": true,
+  "archetypes": 56,
+  "checks": [
+    "exact original UUIDs become server creation references",
+    "new Glue saved selections normalized",
+    "Draftone legacy retained selection normalized at login",
+    "numeric references idempotent",
+    "unknown IDs and other realms preserved",
+    "temporary failure retries normalized reference",
+    "selection cleared only after server success",
+    "full candidate Lua load"
+  ],
+  "source_sha256": "45ed172b84a802446a36980c915b6f32226d31fd2bea46c6910879eb66ef9aea",
+  "limits": "Offline Lua 5.1 with frame/API adapters; no live automatic activation or visual test."
+}
