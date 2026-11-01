@@ -14,7 +14,7 @@ struct MountWrapper
     std::uint32_t Flying280;
     std::uint32_t Flying310;
 };
-inline constexpr std::array<MountWrapper, 434> MountWrappers =
+inline constexpr std::array<MountWrapper, 436> MountWrappers =
 {{
     { 32235, 18360, 498669, 498668, 498667, 0, 0 },
     { 32239, 18357, 498666, 498665, 498664, 0, 0 },
@@ -65,6 +65,8 @@ inline constexpr std::array<MountWrapper, 434> MountWrappers =
     { 65917, 34655, 984862, 984863, 0, 0, 0 },
     { 66122, 34655, 984862, 984863, 0, 0, 0 },
     { 69395, 36837, 499190, 499189, 499188, 499187, 0 },
+    { 74856, 40165, 0, 0, 74854, 74855, 0 },
+    { 75973, 40725, 0, 0, 75957, 75972, 76154 },
     { 79024, 79005, 79025, 79026, 0, 0, 0 },
     { 79040, 79006, 79041, 79042, 0, 0, 0 },
     { 79045, 79007, 79046, 79047, 0, 0, 0 },
