@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Headless Horseman drops the CoA level-60 loot at live rates (#10228)",
+  "contract": "As on live CoA, the Headless Horseman rolls The Horseman's Helm and Blade at 5% and the Hallow Band, The Horseman's Signet Ring, Witches Band and Ring of Ghoulish Delight at 2.5% each instead of a guaranteed stock level-80 ring, so about 18% of kills yield a rare or better item. The Horseman's Seal keeps its stock RequiredLevel 80.",
+  "players": [
+    { "id": "reveler", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "About 18% of Horseman kills yield a rare or better item, not every kill",
+      "actor": "reveler",
+      "metric": "creature_loot_quality_rate",
+      "entry": 23682,
+      "min": 12,
+      "max": 25
+    },
+    { "action": "add_item", "actor": "reveler", "item": 49123 },
+    {
+      "action": "assert",
+      "label": "The Horseman's Seal requires level 80",
+      "actor": "reveler",
+      "metric": "carried_item_required_level",
+      "item": 49123,
+      "equals": 80
+    }
+  ]
+}
