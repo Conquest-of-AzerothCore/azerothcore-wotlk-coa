@@ -285,13 +285,14 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (15, 9975007, 0, 0, 0, 2, 0, 355500, 1, 0, 1, 0, 0, '', 'Gabriel Smokestacks - shipment not looted yet');
 
 -- Quest objects: WDB gameobjectcache captures up to 2026-09-07. The logbook starts 255040 and the battery ends
--- 255055 and starts 255056.
+-- 255055 and starts 255056. The logbook's captured size 0.25 shrinks its book model to about 0.2 yd, too small to
+-- see on the deck, so it takes size 1 (estimated).
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
   `size`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`,
   `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`,
   `Data22`, `Data23`, `AIName`, `ScriptName`, `VerifiedBuild`)
 VALUES
-(255040, 2, 1021172, 'Bloodsail Logbook', '', '', '', 0.25, 0, 255040, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
+(255040, 2, 1021172, 'Bloodsail Logbook', '', '', '', 1, 0, 255040, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0),
 (255045, 2, 1011195, 'Zeppelin Battery', '', '', '', 0.5, 0, 255045, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 0)
 ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`),
   `IconName` = VALUES(`IconName`), `castBarCaption` = VALUES(`castBarCaption`), `unk1` = VALUES(`unk1`),
@@ -308,7 +309,7 @@ DELETE FROM `gameobject` WHERE `guid` BETWEEN 9001900 AND 9001999;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`, `ScriptName`, `VerifiedBuild`, `Comment`) VALUES
-(9001900, 255040, 1, 0, 0, 1, 1, -7948.3, -5436.6, 17.41, 2.1, 0, 0, 0.867423, 0.497571, 60, 100, 1, '', 0, 'Bloodsail Logbook beside the Dented Footlocker at Lost Rigger Cove; spot and facing estimated'),
+(9001900, 255040, 1, 0, 0, 1, 1, -7948.9, -5436.9, 17.41, 2.1, 0, 0, 0.867423, 0.497571, 60, 100, 1, '', 0, 'Bloodsail Logbook next to the Dented Footlocker at Lost Rigger Cove; spot and facing estimated'),
 (9001901, 255045, 1, 0, 0, 1, 1, -9305.0, -2415.0, 9.46, 4.0, 0, 0, 0.909297, -0.416147, 60, 100, 1, '', 0, 'Zeppelin Battery at the zeppelin wreck as the live stream shows; spot, z terrain and facing estimated');
 
 -- Quest item drops; each comment names its source.
