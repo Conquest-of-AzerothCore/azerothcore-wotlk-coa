@@ -36,6 +36,7 @@ constexpr std::array<uint32, 3> NEMESIS = { 1163117, 1163121, 1163123 };
 constexpr std::array<uint32, 3> IMPROVED_DEMONIC_TACTICS = { 1154347, 1154348, 1154349 };
 constexpr int32 SOUL_LINK_LOW_HEALTH_PCT = 20;
 constexpr std::array<uint32, 8> LIFE_TAP = { 1101454, 1101455, 1101456, 1111687, 1111688, 1111689, 1127222, 1157946 };
+constexpr uint32 DARK_FIXATION_SHIELD = 1118780;
 
 template <std::size_t N>
 bool Contains(std::array<uint32, N> const& ids, uint32 id)
@@ -111,6 +112,32 @@ class spell_ascension_reborn_soul_link : public AuraScript
     void Register() override
     {
         OnEffectSplit += AuraEffectSplitFn(spell_ascension_reborn_soul_link::HandleSplit, EFFECT_0);
+    }
+};
+
+class spell_ascension_reborn_dark_fixation : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_reborn_dark_fixation);
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        SpellInfo const* spell = eventInfo.GetSpellInfo();
+        return spell && Contains(LIFE_TAP, spell->Id);
+    }
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        Unit* warlock = GetTarget();
+        int32 shield = CalculatePct(eventInfo.GetSpellInfo()->Effects[EFFECT_0].CalcValue(warlock), aurEff->GetAmount());
+        if (shield > 0)
+            warlock->CastCustomSpell(warlock, DARK_FIXATION_SHIELD, &shield, nullptr, nullptr, true, nullptr, aurEff);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_ascension_reborn_dark_fixation::CheckProc);
+        OnEffectProc += AuraEffectProcFn(spell_ascension_reborn_dark_fixation::HandleProc, EFFECT_1, SPELL_AURA_DUMMY);
     }
 };
 }
@@ -198,4 +225,5 @@ void AddAscensionWarcraftRebornWarlockScripts()
     RegisterSpellScript(spell_ascension_reborn_summoners_armor_demon);
     RegisterSpellScript(spell_ascension_reborn_reign_of_dread);
     RegisterSpellScript(spell_ascension_reborn_soul_link);
+    RegisterSpellScript(spell_ascension_reborn_dark_fixation);
 }
