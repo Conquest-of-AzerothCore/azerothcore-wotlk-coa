@@ -1,7 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionFelsworn.h"
 #include "GameObject.h"
-#include "MotionMaster.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "Random.h"
@@ -12,6 +11,7 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include <algorithm>
+#include <cmath>
 
 namespace
 {
@@ -479,32 +479,28 @@ class spell_ascension_felsworn_chaos_rush : public SpellScript
 {
     PrepareSpellScript(spell_ascension_felsworn_chaos_rush);
 
-    void Surge(SpellEffIndex effect)
+    void Advance(SpellDestination& destination)
     {
         Player* player = GetCaster() ? GetCaster()->ToPlayer() : nullptr;
         if (!player)
             return;
-        bool moving = player->HasUnitMovementFlag(MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_BACKWARD |
-                                                    MOVEMENTFLAG_STRAFE_LEFT | MOVEMENTFLAG_STRAFE_RIGHT);
-        bool airborne = player->HasUnitMovementFlag(MOVEMENTFLAG_FALLING | MOVEMENTFLAG_FALLING_FAR);
-        if (!moving || airborne)
+        float forward = player->HasUnitMovementFlag(MOVEMENTFLAG_BACKWARD) ? -1.0f
+                        : player->HasUnitMovementFlag(MOVEMENTFLAG_FORWARD) ? 1.0f : 0.0f;
+        float strafe = player->HasUnitMovementFlag(MOVEMENTFLAG_STRAFE_LEFT) ? 1.0f
+                       : player->HasUnitMovementFlag(MOVEMENTFLAG_STRAFE_RIGHT) ? -1.0f : 0.0f;
+        if (!forward && !strafe)
             return;
         float distance = GetSpellInfo()->Effects[EFFECT_0].CalcRadius(player);
         if (distance <= 0.0f)
             return;
-        float rate = player->GetSpeedRate(MOVE_RUN);
-        float speed = player->GetSpeed(MOVE_RUN);
-        if (speed <= 0.0f || speed >= SPEED_CHARGE)
-            return;
-        PreventHitDefaultEffect(effect);
-        auto& state = State(player);
-        state.rushSurgeRate = rate * SPEED_CHARGE / speed;
-        state.rushSurgeMs = uint32(1000.0f * distance / SPEED_CHARGE);
-        player->SetSpeed(MOVE_RUN, state.rushSurgeRate, true);
+        Position position = player->GetPosition();
+        player->MovePositionToFirstCollision(position, distance, std::atan2(strafe, forward));
+        destination.Relocate(position);
     }
     void Register() override
     {
-        OnEffectLaunch += SpellEffectFn(spell_ascension_felsworn_chaos_rush::Surge, EFFECT_0, SPELL_EFFECT_CHARGE_DEST);
+        OnDestinationTargetSelect += SpellDestinationTargetSelectFn(
+            spell_ascension_felsworn_chaos_rush::Advance, EFFECT_0, TARGET_DEST_CASTER_FRONT);
     }
 };
 }

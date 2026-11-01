@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Chaos Rush cast mid-jump while running forward still dashes forward (#9874)",
-  "contract": "Chaos Rush 500422 triggers Chaos Rush Jump 802028: effect 0 SPELL_EFFECT_CHARGE_DEST to TARGET_DEST_CASTER_FRONT with radius 10 yd, tooltip 'dash forward in the direction you're running'. A grounded caster holding a movement key gets a run-speed surge instead of the forced spline (#9397/#9404), but an airborne client keeps its take-off horizontal speed for the whole jump, so a surge during a running jump moves it nowhere. A running jump carries forward plus falling: the cast must keep the native 10 yd charge, exactly like a standing jump, and must not surge the run speed. The movement flags are fixtured through the harness, so this proves the server takes the charge path; the client-side jump arc needs a real client.",
+  "contract": "Chaos Rush 500422 triggers Chaos Rush Jump 802028: effect 0 SPELL_EFFECT_CHARGE_DEST to TARGET_DEST_CASTER_FRONT with radius 10 yd, tooltip 'dash forward in the direction you're running'. OnDestinationTargetSelect overrides this destination to MovePositionToFirstCollision(pos, 10yd, atan2(strafe, forward)) whenever a movement key is held (#9397/#9404/#10310); running straight forward (forward=1, strafe=0) resolves to angle 0, the same destination the native facing-only targeting already picked, so a running jump still gets the full native 10 yd MoveCharge regardless of being airborne, and run speed is never touched by this mechanism. The movement flags are fixtured through the harness, so this proves the server takes the charge path; the client-side jump arc needs a real client.",
   "timeout_ms": 90000,
   "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
   "players": [

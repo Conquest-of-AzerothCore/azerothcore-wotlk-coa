@@ -347,14 +347,6 @@ class felsworn_player : public PlayerScript
         if (!Owner(player))
             return;
         auto& state = State(player);
-        if (state.rushSurgeMs)
-        {
-            if (player->IsAlive() && player->GetSpeedRate(MOVE_RUN) != state.rushSurgeRate)
-                player->SetSpeed(MOVE_RUN, state.rushSurgeRate, true);
-            state.rushSurgeMs = state.rushSurgeMs > diff ? state.rushSurgeMs - diff : 0;
-            if (!state.rushSurgeMs)
-                player->UpdateSpeed(MOVE_RUN, true);
-        }
         state.timers.Update(diff);
         state.scheduler.Update(diff);
         while (uint32 event = state.timers.ExecuteEvent())
