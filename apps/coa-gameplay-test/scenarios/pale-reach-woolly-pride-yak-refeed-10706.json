@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Woolly Pride: a fed Ealdfrost Yak can be fed again after 60 seconds (#10706)",
+  "contract": [
+    "Issue #10706. Woolly Pride 175133 needs five Ealdfrost Yaks 164420 fed; seven stand in the Nivelarn stables.",
+    "Feeding is the Feed Yak spell click 9978001. The yak's SmartAI credits the feeder, removes its click flag and",
+    "restores it through timed event 1, authored as 'Create Timed Event 1 (60 s)'. Expected: the yak is not",
+    "clickable right after a feed nor 30 s later, and is clickable again once the 60 s timer has run."
+  ],
+  "timeout_ms": 180000,
+  "location": {"map": 0, "x": -6396.5, "y": 122.0, "z": 513.94, "o": 0.81},
+  "players": [
+    {"id": "p", "race": 1, "class": 26, "level": 25}
+  ],
+  "steps": [
+    {"action": "set_phase", "label": "Join world phase 1, where the yaks are", "actor": "p", "value": 1},
+    {"action": "add_item", "label": "Carry the yak feed", "actor": "p", "item": 559921},
+    {"action": "prepare_quest", "label": "Take Woolly Pride", "actor": "p", "quest": 175133, "complete": false},
+    {"action": "assert", "label": "SETUP: the client is told the nearest yak can be clicked", "actor": "p",
+     "metric": "nearby_creature_sent_spellclick", "entry": 164420, "equals": 1, "within_ms": 5000},
+    {"action": "spell_click_nearby", "label": "Feed the nearest yak", "actor": "p", "entry": 164420},
+    {"action": "assert", "label": "SETUP: Yaks fed counts one yak", "actor": "p",
+     "metric": "quest_objective_count", "quest": 175133, "index": 0, "equals": 1, "within_ms": 5000},
+    {"action": "assert", "label": "CONTROL: the fed yak is no longer clickable", "actor": "p",
+     "metric": "nearby_creature_sent_spellclick", "entry": 164420, "equals": 0, "within_ms": 3000},
+    {"action": "wait", "label": "Half of the refeed timer", "ms": 30000},
+    {"action": "assert", "label": "CONTROL: the fed yak is still not clickable after 30 s", "actor": "p",
+     "metric": "nearby_creature_sent_spellclick", "entry": 164420, "equals": 0},
+    {"action": "assert", "label": "DISCRIMINATING: the fed yak is clickable again after 60 s", "actor": "p",
+     "metric": "nearby_creature_sent_spellclick", "entry": 164420, "equals": 1, "within_ms": 45000}
+  ]
+}
