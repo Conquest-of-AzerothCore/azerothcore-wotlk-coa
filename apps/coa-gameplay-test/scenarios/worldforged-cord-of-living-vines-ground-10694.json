@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "name": "Worldforged Cord of Living Vines in Un'Goro rests on the ground and opens (#10694)",
+  "contract": "#10694 reports the Cord of Living Vines pickup missing in Un'Goro. Its gameobject 96219 (guid 6941583, loot item 515396) was spawned at z -270.602, under the ground surface at its x, y: the floor found from 3 yd above is -268.59, 1.71 yd over the box (spawn_headroom 1.71, spawn_ground_gap -1.29 against the terrain under it, worldserver map/vmap data). The pickup now rests on that surface with nothing over it and opens with the Opening cast 3365 from 1.5 yd away.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -6964.2,
+    "y": -659.0,
+    "z": -269.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 96219,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6941583,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no surface covers the pickup any more",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "guid": 6941583,
+      "spawn_type": "gameobject",
+      "min": 2.0
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 96219
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}
