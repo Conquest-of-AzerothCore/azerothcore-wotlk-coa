@@ -1,0 +1,182 @@
+{
+ "schema": 1,
+ "name": "Handing in a quest removes the surplus of its quest items, except where it is still useful (COA-10637)",
+ "contract": "A quest-drop stack can leave more of a quest item in the bags than the quest asks for. At hand-in the whole lot of a quest-class item goes when nothing else needs it, even with an unrelated quest still in the log: Incendicite Ore 3340 (Search for Incendicite 466, 6 asked, 3 extra) leaves none, and so does Essence of the Elements 11129 for an orc handing in The Last Element 7201 (10 asked, 3 extra). It stays where it can still be used: Clara's Fresh Apple 8683 has an on-use spell (Items of Some Consequence 2746, 2 asked, 2 extra, 2 stay) and Essence of the Elements belongs to a repeatable quest that asks for it again (The Last Element 3911, 10 asked, 3 extra, 3 stay).",
+ "timeout_ms": 60000,
+ "location": {
+  "map": 0,
+  "x": -9457.0,
+  "y": 64.0,
+  "z": 56.0,
+  "o": 0.0
+ },
+ "players": [
+  {
+   "id": "a",
+   "race": 1,
+   "class": 1,
+   "level": 50
+  },
+  {
+   "id": "b",
+   "race": 2,
+   "class": 1,
+   "level": 50
+  }
+ ],
+ "steps": [
+  {
+   "action": "wait",
+   "ms": 1000
+  },
+  {
+   "action": "prepare_quest",
+   "actor": "a",
+   "quest": 54,
+   "complete": false
+  },
+  {
+   "action": "prepare_quest",
+   "actor": "b",
+   "quest": 4641,
+   "complete": false
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: a keeps an unrelated quest in the log",
+   "actor": "a",
+   "metric": "quest_status",
+   "quest": 54,
+   "min": 1,
+   "within_ms": 2000
+  },
+  {
+   "action": "prepare_quest",
+   "actor": "a",
+   "quest": 466
+  },
+  {
+   "action": "add_item",
+   "actor": "a",
+   "item": 3340,
+   "count": 3
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: a holds the 6 asked and 3 extra Incendicite Ore",
+   "actor": "a",
+   "metric": "item_count",
+   "item": 3340,
+   "equals": 9
+  },
+  {
+   "action": "reward_quest",
+   "actor": "a",
+   "quest": 466
+  },
+  {
+   "action": "assert",
+   "label": "DISCRIMINATING: no Incendicite Ore is left after the hand-in",
+   "actor": "a",
+   "metric": "item_count",
+   "item": 3340,
+   "equals": 0
+  },
+  {
+   "action": "prepare_quest",
+   "actor": "a",
+   "quest": 2746
+  },
+  {
+   "action": "add_item",
+   "actor": "a",
+   "item": 8683,
+   "count": 2
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: a holds the 2 asked and 2 extra apples",
+   "actor": "a",
+   "metric": "item_count",
+   "item": 8683,
+   "equals": 4
+  },
+  {
+   "action": "reward_quest",
+   "actor": "a",
+   "quest": 2746
+  },
+  {
+   "action": "assert",
+   "label": "CONTROL: the apples have an on-use spell, so the extra 2 stay",
+   "actor": "a",
+   "metric": "item_count",
+   "item": 8683,
+   "equals": 2
+  },
+  {
+   "action": "prepare_quest",
+   "actor": "a",
+   "quest": 3911
+  },
+  {
+   "action": "add_item",
+   "actor": "a",
+   "item": 11129,
+   "count": 3
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: a holds the 10 asked and 3 extra Essences of the Elements",
+   "actor": "a",
+   "metric": "item_count",
+   "item": 11129,
+   "equals": 13
+  },
+  {
+   "action": "reward_quest",
+   "actor": "a",
+   "quest": 3911
+  },
+  {
+   "action": "assert",
+   "label": "CONTROL: The Last Element is repeatable, so the extra 3 stay for the next hand-in",
+   "actor": "a",
+   "metric": "item_count",
+   "item": 11129,
+   "equals": 3
+  },
+  {
+   "action": "prepare_quest",
+   "actor": "b",
+   "quest": 7201
+  },
+  {
+   "action": "add_item",
+   "actor": "b",
+   "item": 11129,
+   "count": 3
+  },
+  {
+   "action": "assert",
+   "label": "SETUP: b holds the 10 asked and 3 extra Essences of the Elements",
+   "actor": "b",
+   "metric": "item_count",
+   "item": 11129,
+   "equals": 13
+  },
+  {
+   "action": "reward_quest",
+   "actor": "b",
+   "quest": 7201
+  },
+  {
+   "action": "assert",
+   "label": "DISCRIMINATING: no Essence of the Elements is left after The Last Element is handed in",
+   "actor": "b",
+   "metric": "item_count",
+   "item": 11129,
+   "equals": 0
+  }
+ ]
+}
