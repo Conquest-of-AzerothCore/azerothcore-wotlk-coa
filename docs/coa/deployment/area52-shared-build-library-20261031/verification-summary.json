@@ -1,0 +1,11 @@
+{
+  "scope": "Shared Build Library, local Save, public Publish, Update Library, native progression checks, full paged build list, Featured dropdown",
+  "server_sha256": "78cf18ef9beb366a9f1799bdfa67142ca7d202ae9364f76d4411b68d6db8ca01",
+  "reports": [
+    "catalog-r4/report.json",
+    "import-r9/report.json",
+    "full-build-r1/report.json"
+  ],
+  "status_changes": false,
+  "gameplay_tested": false
+}

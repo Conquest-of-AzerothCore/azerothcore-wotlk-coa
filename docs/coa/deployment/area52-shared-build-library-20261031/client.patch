@@ -1,0 +1,262 @@
+--- a/Interface/AddOns/Ascension_BuildCreator/BuildCreator.lua
++++ b/Interface/AddOns/Ascension_BuildCreator/BuildCreator.lua
+@@ -1067,3 +1067,238 @@
+     end
+ end
+ 
++
++Area52BuildLibrary = {}
++local Library = Area52BuildLibrary
++local pending
++local menu
++local sequence = 0
++function Library.IsUpdating() return pending ~= nil end
++local frame = CreateFrame("Frame")
++
++local function active()
++    return GetRealmName() == "Area 52 - Free-Pick"
++end
++
++local function message(text)
++    DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffArea 52 Library:|r " .. text)
++end
++
++local function send(command)
++    SendAddonMessage("A52LIB", command .. "|" .. pending.token, "WHISPER", UnitName("player"))
++end
++
++function Library.Update()
++    if not active() then return end
++    if Library.PublicationPending and Library.PublicationPending() then
++        message("Wait for the current publication request to finish.")
++        return
++    end
++    if pending then
++        message("A library update is already pending.")
++        return
++    end
++    sequence = sequence + 1
++    pending = {started=GetTime(), poll=GetTime()+3, token=string.format("%08x%08x%08x",time(),math.floor(GetTime()*1000)%4294967295,sequence)}
++    send("UPDATE")
++    message("Checking for new and updated shared builds...")
++end
++
++function Library.Menu()
++    if not active() then return end
++    if not menu then
++        menu = CreateFrame("Frame", "Area52BuildLibraryImportMenu", UIParent, "UIDropDownMenuTemplate")
++        UIDropDownMenu_Initialize(menu, function()
++            local info = UIDropDownMenu_CreateInfo()
++            info.text = "This Server"
++            info.notCheckable = true
++            info.func = function()
++                CloseDropDownMenus()
++                BuildCreatorFrame:ShowBuildCategories()
++                BuildCreatorFrame.ToggleCreateButton:SetText(CREATE_BUILD)
++                BuildCreatorFrame:SelectCategory(Enum.BuildCategory.None)
++            end
++            UIDropDownMenu_AddButton(info)
++            info = UIDropDownMenu_CreateInfo()
++            info.text = "Import Build Code"
++            info.notCheckable = true
++            info.func = function() CloseDropDownMenus(); StaticPopup_Show("AREA52_IMPORT_BUILD_CODE") end
++            UIDropDownMenu_AddButton(info)
++            info = UIDropDownMenu_CreateInfo()
++            info.text = "Update Library"
++            info.notCheckable = true
++            info.tooltipTitle = "Update Library"
++            info.tooltipText = "Download new and updated public builds for this server. Personal copies, active builds, and Featured archetype assignments are unchanged."
++            info.func = function() CloseDropDownMenus(); Library.Update() end
++            UIDropDownMenu_AddButton(info)
++        end, "MENU")
++    end
++    ToggleDropDownMenu(1, nil, menu, "cursor", 0, 0)
++end
++
++local originalCreate = BuildCreatorMixin.CreateBuild
++function BuildCreatorMixin:CreateBuild(category, deserialize)
++    if active() and category == Enum.BuildCreateCategory.Import and not deserialize then
++        Library.Menu()
++        return
++    end
++    return originalCreate(self, category, deserialize)
++end
++
++frame:RegisterEvent("CHAT_MSG_ADDON")
++frame:SetScript("OnEvent", function(_, _, prefix, text, channel, sender)
++    if not active() or not pending or prefix ~= "A52LIB" or channel ~= "WHISPER" or sender ~= UnitName("player") then return end
++    if text:match("^ERROR|([0-9a-f]+)|") == pending.token then
++        pending = nil
++        message("The shared library service is unavailable. Your local builds have not been changed by this request.")
++        return
++    end
++    local token, generation, state, added, updated, skipped = text:match("^UPDATE|([0-9a-f]+)|(%d+)|(%a+)|(%d+)|(%d+)|(%d+)$")
++    if not generation or token ~= pending.token then return end
++    if state == "queued" or state == "running" then
++        pending.generation = generation
++    elseif state == "complete" then
++        if pending.generation and pending.generation ~= generation then return end
++        pending = nil
++        BuildCreatorFrame.lastQueried = nil
++        message("Library updated: " .. added .. " new, " .. updated .. " updated, " .. skipped .. " incompatible. Reopen the build list to view shared copies.")
++    elseif state == "failed" then
++        pending = nil
++        message("The library update could not finish. Your personal builds and active build are preserved; you can try again later.")
++    end
++end)
++
++frame:SetScript("OnUpdate", function()
++    if not pending then return end
++    local now = GetTime()
++    if now - pending.started > 90 then
++        pending = nil
++        message("The server has not confirmed completion yet. Use Update Library again to check its status.")
++    elseif now >= pending.poll then
++        pending.poll = now + 3
++        send("STATUS")
++    end
++end)
++
++local Library = Area52BuildLibrary
++local job
++local savingForPublish = false
++local sequence = 0
++local function active() return GetRealmName() == "Area 52 - Free-Pick" end
++local function say(text) DEFAULT_CHAT_FRAME:AddMessage("|cff00ccffArea 52 Library:|r "..text) end
++local function status() SendAddonMessage("A52LIB","PSTATUS|"..job.token,"WHISPER",UnitName("player")) end
++function Library.PublicationPending() return job ~= nil or savingForPublish end
++
++StaticPopupDialogs.AREA52_SAVE_BUILD = {
++    text="Save %s to this server's build library? This does not publish it to GitHub.",
++    button1="Save Build",button2=CANCEL,whileDead=true,hideOnEscape=true,
++    OnAccept=function() BuildCreatorFrame:SaveBuild() end,
++}
++StaticPopupDialogs.AREA52_PUBLISH_BUILD = {
++    text="Publish %s to the public Area 52 Shared Library on GitHub?\n\nYour description and selections will be public. By publishing, you confirm that you may contribute this content under CC0-1.0.\n\nPublic author alias (letters, numbers, spaces, _ - .):",
++    button1="Publish under CC0",button2=CANCEL,hasEditBox=true,whileDead=true,hideOnEscape=true,
++    OnShow=function(self) self.editBox:SetMaxLetters(48);self.editBox:SetText(UnitName("player"));self.editBox:SetFocus() end,
++    OnAccept=function(self,build)
++        local alias=self.editBox:GetText():gsub("^%s+", ""):gsub("%s+$", "")
++        if not alias or not alias:find("%S") or #alias>48 or alias:find("[^a-zA-Z0-9 _%.%-]") then
++            say("Choose a public alias using letters, numbers, spaces, underscore, dash or period.");return
++        end
++        if job or Library.IsUpdating() then say("Wait for the current library request to finish.");return end
++        sequence=sequence+1
++        local token=string.format("%08x%08x%08x",time(),math.floor(GetTime()*1000)%4294967295,sequence)
++        job={token=token,started=GetTime(),poll=GetTime()+3}
++        SendAddonMessage("A52LIB","PUBLISH|"..token.."|"..tostring(build.ID).."|"..tostring(build.UpdatedTime).."|"..alias.."|CC0-1.0","WHISPER",UnitName("player"))
++        say("Publication requested. Your saved build remains available on this server.")
++    end,
++}
++
++local originalPrompt=BuildCreatorMixin.PromptPublishBuild
++function BuildCreatorMixin:SaveBuild()
++    local sent,reason=C_BuildEditor.PublishBuild()
++    if sent then self:ShowLoading("Saving build...")
++    else savingForPublish=false;self:ShowError("Unable to save build",_G[reason] or reason) end
++end
++function Library.PrepareEditor(view)
++    if Area52DraftSelector and not Area52DraftSelector.Valid(view) then return false end
++    if view:IsShown() then
++        if view.editElement then view.editElement:HideEditModeIfEditing() else view:UpdatePendingBuild() end
++    end
++    return true
++end
++function BuildCreatorMixin:PromptSaveBuild()
++    if not Library.PrepareEditor(self.EditableBuildViewPanel) then return end
++    local build=C_BuildEditor.GetPendingBuild()
++    if build then StaticPopup_Show("AREA52_SAVE_BUILD",build.Name) end
++end
++function BuildCreatorMixin:PromptPublishBuild()
++    if not active() then return originalPrompt(self) end
++    if job then
++        job.started=GetTime();job.poll=GetTime()+3;job.timedOut=nil;status()
++        say("Checking the previous publication request...");return
++    end
++    if savingForPublish or Library.IsUpdating() then say("Wait for the current library request to finish.");return end
++    if not Library.PrepareEditor(self.EditableBuildViewPanel) then return end
++    savingForPublish=true
++    self:SaveBuild()
++end
++
++local function saved(self,result,id,original)
++    if not active() then return original(self,result,id) end
++    local publish=savingForPublish;savingForPublish=false
++    self:HideLoading()
++    result=result:gsub("SAVE_BUILD_","PUBLISH_BUILD_"):gsub("CREATE_BUILD_","PUBLISH_BUILD_")
++    if result~="PUBLISH_BUILD_OK" then self:ShowError("Unable to save build",_G[result] or result);return end
++    self:ContinueOnLoad(id,function(build)
++        self:DiscardSavedBuild(build.Name);self:ViewBuild(build)
++        if publish then
++            StaticPopup_Show("AREA52_PUBLISH_BUILD",build.Name,nil,{ID=build.ID,UpdatedTime=build.UpdatedTime})
++        else say("Build saved to this server. It has not been published to GitHub.") end
++    end)
++end
++local originalSave=BuildCreatorMixin.BUILD_CREATOR_SAVE_RESULT
++local originalCreate=BuildCreatorMixin.BUILD_CREATOR_CREATE_RESULT
++function BuildCreatorMixin:BUILD_CREATOR_SAVE_RESULT(result,id) return saved(self,result,id,originalSave) end
++function BuildCreatorMixin:BUILD_CREATOR_CREATE_RESULT(result,id) return saved(self,result,id,originalCreate) end
++
++function Library.AttachEditor(view)
++    if not active() then return end
++    local controls=view.Controls
++    if not controls.SaveBuild then
++        local button=CreateFrame("Button",view:GetName().."Area52SaveBuild",controls,"SharedButtonTemplate")
++        controls.SaveBuild=button
++        button:SetSize(140,38);button:SetPoint("LEFT",controls.PublishBuild,"RIGHT",4,0);button:SetText("Save Build")
++        button:SetScript("OnClick",function() BuildCreatorFrame:PromptSaveBuild() end)
++        button:SetScript("OnEnter",GameTooltip_GenericTooltip);button:SetScript("OnLeave",GameTooltip_Hide)
++        controls.ResetBuild:ClearAllPoints();controls.ResetBuild:SetPoint("LEFT",button,"RIGHT",4,0)
++    end
++    controls.SaveBuild:SetEnabled(controls.PublishBuild:IsEnabled())
++    controls.SaveBuild.tooltipTitle="Save Build"
++    controls.SaveBuild.tooltipText="Save this build to this server's build library. It will not be uploaded to the public Shared Library."
++    if controls.PublishBuild:IsEnabled() then
++        controls.PublishBuild.tooltipTitle="Publish Build"
++        controls.PublishBuild.tooltipText="Save and publish a copy to the public Area 52 Shared Library on GitHub, after you confirm the public author alias and contribution terms."
++    end
++end
++
++local frame=CreateFrame("Frame")
++frame:RegisterEvent("CHAT_MSG_ADDON")
++frame:SetScript("OnEvent",function(_,_,prefix,text,channel,sender)
++    if not active() or not job or prefix~="A52LIB" or channel~="WHISPER" or sender~=UnitName("player") then return end
++    if text:match("^ERROR|([0-9a-f]+)|")==job.token then
++        job=nil;say("Public publishing is unavailable. Your server-local build is saved.");return
++    end
++    local token,state=text:match("^PUBLISH|([0-9a-f]+)|(%a+)$")
++    if token~=job.token then return end
++    if state=="published" then job=nil;say("Build published to the public Shared Library on GitHub.")
++    elseif state=="failed" or state=="conflict" or state=="rejected" then
++        job=nil;say("Public publication could not finish. Your server-local build is preserved.")
++    elseif (state=="queued" or state=="accepted") and not job.acknowledged then
++        job.acknowledged=true;say("Build queued for public publication. Waiting for GitHub confirmation.")
++    end
++end)
++frame:SetScript("OnUpdate",function()
++    if not job or job.timedOut then return end
++    if GetTime()-job.started>90 then
++        job.timedOut=true;say("Publication has not been confirmed. Click Publish Build again to check this request; it will not send another copy.")
++    elseif GetTime()>=job.poll then job.poll=GetTime()+3;status() end
++end)
+--- a/Interface/AddOns/Ascension_BuildCreator/BuildEditor/EditableBuildView.lua
++++ b/Interface/AddOns/Ascension_BuildCreator/BuildEditor/EditableBuildView.lua
+@@ -545,7 +545,7 @@
+     local applies=Selector.Applies(C_BuildEditor.GetPendingBuild())
+     view.MainFrame.Name:SetShown(not applies)
+     if applies and not view.Area52ArchetypeDropdown then
+-        local dropdown=CreateFrame('Frame',nil,view.MainFrame,'UIDropDownMenuTemplate2')
++        local dropdown=CreateFrame('Frame',view:GetName()..'Area52ArchetypeDropdown',view.MainFrame,'UIDropDownMenuTemplate2')
+         dropdown:SetScale(0.8)
+         dropdown:SetPoint('TOPLEFT',view.MainFrame.Name,'TOPLEFT',-16,4)
+         UIDropDownMenu_SetWidth(dropdown,530)
+@@ -571,3 +571,9 @@
+     originalUpdate(self,deserialize)
+     Selector.After(self)
+ end
++
++local area52LibraryPreviousUpdate = EditableBuildViewMixin.UpdatePendingBuild
++function EditableBuildViewMixin:UpdatePendingBuild(...)
++    area52LibraryPreviousUpdate(self, ...)
++    if Area52BuildLibrary then Area52BuildLibrary.AttachEditor(self) end
++end

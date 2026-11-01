@@ -1,0 +1,14 @@
+{
+  "src/server/coa/Area52BuildService.cpp": {
+    "path": "/home/dml/games/ascension-freepick-test/private/active-build-source/src/server/coa/Area52BuildService.cpp",
+    "sha256": "32ff267ecb3cc14d1ee7e1f55a39adbc4a46e3a77ef1b7469a06e7a7c9529aca"
+  },
+  "src/server/database/Database/Implementation/CharacterDatabase.cpp": {
+    "path": "/home/dml/games/ascension-freepick-test/private/active-build-source/src/server/database/Database/Implementation/CharacterDatabase.cpp",
+    "sha256": "a39bbe5f299e48898bc126c6787c89b908a92c8f5d6c891cb9d46f6b406411f0"
+  },
+  "src/server/database/Database/Implementation/CharacterDatabase.h": {
+    "path": "/home/dml/games/ascension-freepick-test/private/active-build-source/src/server/database/Database/Implementation/CharacterDatabase.h",
+    "sha256": "d0948bb03ed6dfe843a15aa078862d7c80c5025d2af2c5c2eadab27f5220600b"
+  }
+}

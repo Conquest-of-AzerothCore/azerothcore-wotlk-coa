@@ -1,0 +1,24 @@
+[Unit]
+Description=Area 52 Shared Build Library worker
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+User=root
+UMask=0077
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/usr/bin/python3 /home/dml/games/ascension-freepick-test/private/build-library/runtime/tools/worker_service.py --config /home/dml/games/ascension-freepick-test/private/build-library/runtime/worker.json
+Restart=on-failure
+RestartSec=15
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=read-only
+ProtectSystem=strict
+ReadWritePaths=/home/dml/games/ascension-freepick-test/private/build-library
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+
+[Install]
+WantedBy=multi-user.target
