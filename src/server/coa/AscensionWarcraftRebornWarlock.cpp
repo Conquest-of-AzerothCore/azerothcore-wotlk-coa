@@ -33,6 +33,7 @@ constexpr std::array<uint32, 5> EMBERSTORM = { 1117954, 1117955, 1117956, 111795
 constexpr std::array<uint32, 5> SHADOW_MASTERY = { 1118271, 1118272, 1118273, 1118274, 1118275 };
 constexpr std::array<uint32, 3> DEMONIC_AEGIS = { 1130143, 1130144, 1130145 };
 constexpr std::array<uint32, 3> NEMESIS = { 1163117, 1163121, 1163123 };
+constexpr std::array<uint32, 3> IMPROVED_DEMONIC_TACTICS = { 1154347, 1154348, 1154349 };
 constexpr std::array<uint32, 8> LIFE_TAP = { 1101454, 1101455, 1101456, 1111687, 1111688, 1111689, 1127222, 1157946 };
 
 template <std::size_t N>
@@ -145,6 +146,10 @@ void ApplyAscensionWarcraftRebornWarlockContracts(SpellInfo* spellInfo)
 
     if (Contains(DEMONIC_AEGIS, spellInfo->Id) && spellInfo->Effects[EFFECT_0].MiscValue == SPELLMOD_ALL_EFFECTS)
         spellInfo->Effects[EFFECT_0].SpellClassMask[2] |= WARLOCK_ARMORS;
+
+    if (Contains(IMPROVED_DEMONIC_TACTICS, spellInfo->Id) &&
+        spellInfo->Effects[EFFECT_0].MiscValue == SPELLMOD_CRIT_DAMAGE_BONUS)
+        spellInfo->Effects[EFFECT_0].MiscValue = SPELLMOD_EFFECT1;
 
     if (Contains(LIFE_TAP, spellInfo->Id))
     {
