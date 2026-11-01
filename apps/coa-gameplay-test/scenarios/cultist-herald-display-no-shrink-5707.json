@@ -4,8 +4,8 @@
   "contract": [
     "Herald of the Depths 520326 transforms into creature 250042. Its display was 28844 (FacelessOne at display",
     "scale 4) shrunk by a 0.25 object scale (#5707), then 280071, the FacelessOne2 brute that Dreadnought also uses",
-    "(#10429). Display 142815 is the CoA masked faceless caster (facelessonecaster2_coa, purple) at its own DBC",
-    "scale. Expected: the Cultist shows display 142815 at object scale 1 while Herald is up. Client animation is",
+    "(#10429). Display 280072 is the masked faceless caster (facelessonecaster2, purple) at its own DBC scale",
+    "0.65. Expected: the Cultist shows display 280072 at object scale 1 while Herald is up. Client animation is",
     "not observable here."
   ],
   "timeout_ms": 30000,
@@ -23,7 +23,7 @@
     {"action": "assert", "label": "SETUP: Herald is active", "actor": "cultist", "metric": "aura", "spell": 520326,
      "equals": 1, "within_ms": 5000},
     {"action": "assert", "label": "The Cultist shows the masked faceless caster display", "actor": "cultist",
-     "metric": "display_id", "equals": 142815},
+     "metric": "display_id", "equals": 280072},
     {"action": "assert", "label": "No object scale change follows the transform", "actor": "cultist",
      "metric": "unit_scale", "min": 0.99, "max": 1.01}
   ]
