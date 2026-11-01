@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Heart of Xoroth allows Demon's Blood to stack 5 additional times (#1297)",
-  "contract": "Heart of Xoroth 704956 reads 'Allows Demon's Blood to stack 5 additional times' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z; matches the client's own moa_description). Its own baked effect is already the native aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER), MiscValue 31 (SPELLMOD_MAX_AURA_STACKS), BasePoints 4 (+1 from DieSides 1 rounding = 5) - the same mechanism Necromancer's Capacity() (AscensionNecromancer.cpp) uses for spell 805011 - but its SpellClassMask ([536870912,0,16]) does not overlap Demon's Blood's (500906) actual family flags (dword1 bit4 / 16) in any of the three words. AscensionXorothContracts.cpp corrects the classmask to flag96(0, 16, 0); AscensionXoroth.cpp's Gain() replaces its hardcoded 6-stack cap with player->ApplySpellMod(500906, SPELLMOD_MAX_AURA_STACKS, cap) starting from a base of 6, so SpellInfo::CalcMaxAuraStacks (also read by the CoAGameplayTest set_aura fixture and the spell_max_stacks metric) reports 11 once the talent is known.",
+  "name": "Heart of Xoroth and Hellwrath both raise Demon's Blood's stack cap (#1297, #10363)",
+  "contract": "Heart of Xoroth 704956 and Hellwrath 804014 both read 'Allows/Your Demon's Blood can now stack 5 additional times' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z; Description[enUS] of both spells names |cffffffffDemon's Blood|r explicitly, which is spell 800999 by its own Spell.dbc SpellName, not 500906 'Demonfire'). Each talent's own baked effect is the native aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER), MiscValue 31 (SPELLMOD_MAX_AURA_STACKS), +5. Hellwrath's native SpellClassMask (0x20000000, 0, 0x10) already overlaps Demon's Blood 800999's family flags (0, 0, 0x10) on word 2, so its +5 reaches 800999 without any C++ correction. Heart of Xoroth carries the identical native classmask (0x20000000, 0, 0x10), which likewise overlaps 800999 on word 2, but AscensionXorothContracts.cpp previously overrode it to flag96(0, 16, 0) (word 1 = 0x10), which only matches 500906 'Demonfire' (SpellFamilyFlags word 1 = 0x10) -- a separate resource tracked by the unrelated AscensionXoroth::Gain() helper, not Demon's Blood at all. That override is corrected to flag96(0, 0, 16), matching 800999's own word 2 bit, so SpellInfo::CalcMaxAuraStacks reports 10 (base) + 5 (Heart of Xoroth) + 5 (Hellwrath) = 20 once both talents are known, matching both tooltips and #10363's reported math.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -13,18 +13,14 @@
   ],
   "steps": [
     { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
-    { "action": "snapshot", "actor": "knight", "metric": "spell_max_stacks", "spell": 500906, "save_as": "cap_before" },
     {
-      "action": "assert", "label": "SETUP: Demon's Blood's base cap is 6 stacks",
-      "actor": "knight", "metric": "spell_max_stacks", "spell": 500906, "equals": 6
+      "action": "assert", "label": "SETUP: Demon's Blood's base cap is 10 stacks",
+      "actor": "knight", "metric": "spell_max_stacks", "spell": 800999, "equals": 10
     },
-    {
-      "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 6,
-      "label": "SETUP: the base cap holds exactly 6 stacks"
-    },
+    { "action": "set_aura", "actor": "knight", "spell": 800999, "stacks": 10, "label": "SETUP: the base cap holds exactly 10 stacks" },
     {
       "action": "assert", "label": "SETUP: Demon's Blood sits at the base cap",
-      "actor": "knight", "metric": "aura_stacks", "spell": 500906, "equals": 6
+      "actor": "knight", "metric": "aura_stacks", "spell": 800999, "equals": 10
     },
     { "action": "learn", "actor": "knight", "spell": 704956 },
     { "action": "set_aura", "actor": "knight", "spell": 704956, "stacks": 1, "label": "Force the Heart of Xoroth passive aura" },
@@ -34,16 +30,27 @@
       "actor": "knight", "metric": "aura", "spell": 704956, "equals": 1
     },
     {
-      "action": "assert", "label": "CONTRACT: Demon's Blood's cap rises to 11 (6 base + 5 from the talent)",
-      "actor": "knight", "metric": "spell_max_stacks", "spell": 500906, "equals": 11
+      "action": "assert", "label": "CONTRACT: Demon's Blood's cap rises to 15 with Heart of Xoroth alone (10 base + 5)",
+      "actor": "knight", "metric": "spell_max_stacks", "spell": 800999, "equals": 15
+    },
+    { "action": "learn", "actor": "knight", "spell": 804014 },
+    { "action": "set_aura", "actor": "knight", "spell": 804014, "stacks": 1, "label": "Force the Hellwrath passive aura" },
+    { "action": "wait", "label": "Let the passive's modifiers settle", "ms": 500 },
+    {
+      "action": "assert", "label": "SETUP: the Hellwrath passive is active",
+      "actor": "knight", "metric": "aura", "spell": 804014, "equals": 1
     },
     {
-      "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 11,
-      "label": "CONTRACT: the corrected cap accepts the full 11 stacks in practice"
+      "action": "assert", "label": "CONTRACT (#10363): Demon's Blood's cap rises to 20 with both talents known (10 base + 5 + 5)",
+      "actor": "knight", "metric": "spell_max_stacks", "spell": 800999, "equals": 20
     },
     {
-      "action": "assert", "label": "CONTRACT: Demon's Blood holds all 11 stacks",
-      "actor": "knight", "metric": "aura_stacks", "spell": 500906, "equals": 11
+      "action": "set_aura", "actor": "knight", "spell": 800999, "stacks": 20,
+      "label": "CONTRACT (#10363): the corrected combined cap accepts the full 20 stacks in practice"
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#10363): Demon's Blood holds all 20 stacks",
+      "actor": "knight", "metric": "aura_stacks", "spell": 800999, "equals": 20
     }
   ]
 }
