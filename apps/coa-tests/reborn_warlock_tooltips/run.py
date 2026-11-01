@@ -115,8 +115,16 @@ enum AuraType { SPELL_AURA_NONE = 0, SPELL_AURA_PERIODIC_DAMAGE = 3, SPELL_AURA_
     SPELL_AURA_ADD_FLAT_MODIFIER = 107, SPELL_AURA_ADD_PCT_MODIFIER = 108,
     SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE = 179, SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE = 187 };
 enum SpellEffects { SPELL_EFFECT_APPLY_AURA = 6 };
-enum SpellModOp { SPELLMOD_DAMAGE = 0, SPELLMOD_THREAT = 2, SPELLMOD_CRITICAL_CHANCE = 7, SPELLMOD_ALL_EFFECTS = 8,
-    SPELLMOD_NOT_LOSE_CASTING_TIME = 9, SPELLMOD_DOT = 22 };
+enum SpellModOp { SPELLMOD_DAMAGE = 0, SPELLMOD_THREAT = 2, SPELLMOD_EFFECT1 = 3, SPELLMOD_CRITICAL_CHANCE = 7,
+    SPELLMOD_ALL_EFFECTS = 8, SPELLMOD_NOT_LOSE_CASTING_TIME = 9, SPELLMOD_CRIT_DAMAGE_BONUS = 15, SPELLMOD_DOT = 22 };
+enum Targets : uint32 { TARGET_NONE = 0, TARGET_UNIT_CASTER = 1, TARGET_UNIT_PET = 5 };
+struct SpellImplicitTargetInfo
+{
+    Targets Target = TARGET_NONE;
+    SpellImplicitTargetInfo() = default;
+    explicit SpellImplicitTargetInfo(Targets target) : Target(target) { }
+    Targets GetTarget() const { return Target; }
+};
 enum SpellEffIndex { EFFECT_0 = 0, EFFECT_1 = 1, EFFECT_2 = 2 };
 struct flag96
 {
@@ -127,6 +135,7 @@ struct SpellEffectInfo
 {
     uint32 Effect = 0; AuraType ApplyAuraName = SPELL_AURA_NONE; int32 MiscValue = 0; int32 BasePoints = 0;
     int32 DieSides = 1; int32 Amplitude = 0; float RealPointsPerLevel = 0; flag96 SpellClassMask;
+    SpellImplicitTargetInfo TargetA;
     int32 CalcValue() const { return BasePoints + DieSides; }
 };
 struct SpellDurationEntry { uint32 ID = 0; };
@@ -237,11 +246,25 @@ int main()
     SpellInfo stock = Modifier(18275, SPELLMOD_DAMAGE, 0x80091, 0, 0);
     ApplyAscensionWarcraftRebornWarlockContracts(&stock);
     assert(stock.Effects[0].SpellClassMask[2] == 0);
+
+    for (uint32 id : { 1154347u, 1154348u, 1154349u })
+    {
+        SpellInfo tactics = Modifier(id, SPELLMOD_CRIT_DAMAGE_BONUS, 0, 0, 0);
+        tactics.Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_PET);
+        tactics.Effects[1].Effect = SPELL_EFFECT_APPLY_AURA; tactics.Effects[1].ApplyAuraName = SPELL_AURA_DUMMY;
+        ApplyAscensionWarcraftRebornWarlockContracts(&tactics);
+        assert(tactics.Effects[0].MiscValue == SPELLMOD_EFFECT1);
+        assert(tactics.Effects[1].TargetA.GetTarget() == TARGET_UNIT_PET);
+    }
+    SpellInfo stockTactics = Modifier(54347, SPELLMOD_CRIT_DAMAGE_BONUS, 0, 0, 0);
+    ApplyAscensionWarcraftRebornWarlockContracts(&stockTactics);
+    assert(stockTactics.Effects[0].MiscValue == SPELLMOD_CRIT_DAMAGE_BONUS);
 }
 """
     return check(compile_and_run(code, "coa-reborn-warlock-contracts-"),
                  "Conflagrate burns on, Backdraft r3 keeps three charges, Demonic Resilience and Contagion carry their "
-                 "full values, the talent masks cover what their tooltips name, Life Tap grows per level")
+                 "full values, the talent masks cover what their tooltips name, Life Tap grows per level, Improved Demonic "
+                 "Tactics raises the demon's crit chance and reaches the demon with its Soul Link reduction")
 
 
 def compile_and_run(code, prefix):

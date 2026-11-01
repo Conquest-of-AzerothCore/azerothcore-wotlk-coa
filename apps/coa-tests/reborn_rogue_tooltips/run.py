@@ -123,7 +123,15 @@ using uint8 = std::uint8_t;
 using int32 = std::int32_t;
 using uint32 = std::uint32_t;
 enum SpellEffects : uint32 { SPELL_EFFECT_NONE = 0, SPELL_EFFECT_SCHOOL_DAMAGE = 2, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE = 31,
-    SPELL_EFFECT_NORMALIZED_WEAPON_DMG = 121 };
+    SPELL_EFFECT_TRIGGER_SPELL = 64, SPELL_EFFECT_NORMALIZED_WEAPON_DMG = 121 };
+enum Targets : uint32 { TARGET_NONE = 0, TARGET_UNIT_CASTER = 1 };
+struct SpellImplicitTargetInfo
+{
+    Targets Target = TARGET_NONE;
+    SpellImplicitTargetInfo() = default;
+    explicit SpellImplicitTargetInfo(Targets target) : Target(target) { }
+    Targets GetTarget() const { return Target; }
+};
 enum AuraType { SPELL_AURA_NONE = 0, SPELL_AURA_DUMMY = 4, SPELL_AURA_ADD_TARGET_TRIGGER = 109 };
 enum SpellEffIndex { EFFECT_0 = 0, EFFECT_1 = 1, EFFECT_2 = 2 };
 enum SpellFamilyNames : uint32 { SPELLFAMILY_ROGUE = 8 };
@@ -140,6 +148,7 @@ struct SpellEffectInfo
     int32 DieSides = 0;
     float RealPointsPerLevel = 0;
     uint32 TriggerSpell = 0;
+    SpellImplicitTargetInfo TargetA;
 };
 struct SpellInfo { uint32 Id = 0; uint32 SpellFamilyName = SPELLFAMILY_ROGUE; flag96 SpellFamilyFlags;
     SpellEffectInfo Effects[3]; };
@@ -179,6 +188,13 @@ int main()
     SpellInfo stock = ambush; stock.Id = 48691; stock.Effects[0].BasePoints = 382;
     ApplyAscensionWarcraftRebornRogueContracts(&stock);
     assert(stock.Effects[0].BasePoints == 382);
+    SpellInfo cloak; cloak.Id = 1131224;
+    ApplyAscensionWarcraftRebornRogueContracts(&cloak);
+    assert(cloak.Effects[1].Effect == SPELL_EFFECT_TRIGGER_SPELL && cloak.Effects[1].TriggerSpell == 1135729);
+    assert(cloak.Effects[1].TargetA.GetTarget() == TARGET_UNIT_CASTER);
+    SpellInfo stockCloak; stockCloak.Id = 31224;
+    ApplyAscensionWarcraftRebornRogueContracts(&stockCloak);
+    assert(stockCloak.Effects[1].Effect == SPELL_EFFECT_NONE);
 }
 """
     compiler = shutil.which(os.environ.get("CXX", "cl.exe" if os.name == "nt" else "c++"))
@@ -193,8 +209,8 @@ int main()
             flags = ["-std=c++20", "-Wall", "-Wextra", "-Werror", str(cpp), "-o", str(exe)]
         subprocess.run([compiler, *flags], cwd=out, check=True)
         ok = subprocess.run([str(exe)], cwd=out).returncode == 0
-    return check(ok, "Ambush adds its flat bonus x2.75, Anesthetic Poison deals 68 to 86, and Relentless Strikes rolls "
-                 "on finishing moves")
+    return check(ok, "Ambush adds its flat bonus x2.75, Anesthetic Poison deals 68 to 86, Relentless Strikes rolls "
+                 "on finishing moves, and Cloak of Shadows removes harmful spells")
 
 
 def main():
