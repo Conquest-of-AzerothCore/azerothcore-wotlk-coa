@@ -36,6 +36,9 @@ namespace
 {
     constexpr char const* LOG_FILTER = "module.manastorm.endless";
     constexpr char const* CLIENT_ADDON_PREFIX = "MANASTORM\t";
+    constexpr char const* PENDING_WIPE_REPOP = "manastorm_pending_wipe_repop";
+
+    struct ManastormPendingWipeRepop : DataMap::Base { };
 
     bool ParsePositiveDepth(
         std::string const& text,
@@ -750,6 +753,7 @@ public:
                 PLAYERHOOK_PASSED_QUEST_KILLED_MONSTER_CREDIT,
                 PLAYERHOOK_ON_BEFORE_CRITERIA_PROGRESS,
                 PLAYERHOOK_ON_SEND_SPELL_CHARGE_STATES,
+                PLAYERHOOK_ON_PLAYER_RELEASED_GHOST,
                 PLAYERHOOK_CAN_REPOP_AT_GRAVEYARD
             })
     {
@@ -770,6 +774,8 @@ public:
     void OnPlayerLogout(Player* player) override
     {
         ManastormClientUIFixes::ResetObjectiveHighlight(player);
+        if (ManastormModuleConfig::Enabled())
+            ManastormMgr::Instance().OnPlayerLogout(player);
     }
 
     void OnPlayerMapChanged(Player* player) override
@@ -778,8 +784,18 @@ public:
         ManastormMgr::Instance().SyncManastormPotionCharges(player);
     }
 
+    void OnPlayerReleasedGhost(Player* player) override
+    {
+        if (ManastormModuleConfig::Enabled() &&
+            ManastormMgr::Instance().HandleReleaseAfterWipe(player))
+            player->CustomData.GetDefault<ManastormPendingWipeRepop>(PENDING_WIPE_REPOP);
+    }
+
     bool OnPlayerCanRepopAtGraveyard(Player* player) override
     {
+        if (player->CustomData.Erase(PENDING_WIPE_REPOP))
+            return false;
+
         if (ManastormModuleConfig::Enabled() &&
             ManastormMgr::Instance().HandleReleaseAfterWipe(player))
             return false;

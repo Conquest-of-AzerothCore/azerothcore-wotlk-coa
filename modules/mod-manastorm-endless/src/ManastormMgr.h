@@ -47,6 +47,7 @@ public:
 
     void SyncClientState(Player* player);
     void OnPlayerLogin(Player* player);
+    void OnPlayerLogout(Player* player);
 
     void OpenClientUI(Player* player) const;
 
@@ -168,6 +169,20 @@ private:
         uint32 RechargeTimerMs = 0;
     };
 
+    // Logging out leaves a member registered in _memberRunIds (the docs'
+    // "resume for up to 120 seconds" window) without the run's private map
+    // ever unloading, since the rest of the group keeps it alive. Without
+    // this grace timer the stale registration survives indefinitely and
+    // ValidateEnter() keeps reporting BAD_GROUP_SIZE for the rest of the
+    // group. The run id is captured at logout so a login that starts an
+    // unrelated new run before the grace elapses is never mistaken for the
+    // old one.
+    struct DisconnectGraceState
+    {
+        uint64 RunId = 0;
+        uint32 RemainingMs = 0;
+    };
+
     void HandlePlayerDeath(
         Player* player);
 
@@ -252,6 +267,7 @@ private:
     std::unordered_map<uint64, uint64> _stageRunIds;
     std::unordered_map<uint64, uint32> _transitionTimers;
     std::unordered_map<ObjectGuid::LowType,ManastormPotionChargeState>_manastormPotionCharges;
+    std::unordered_map<ObjectGuid::LowType, DisconnectGraceState> _disconnectGraceTimers;
 
     // Only item entries actually created by this process are removed again.
     // Pre-existing legitimate copies are never destroyed by Manastorm cleanup.

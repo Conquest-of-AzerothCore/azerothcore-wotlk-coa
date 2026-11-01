@@ -782,7 +782,8 @@ enum class ActorStage
     LoggingIn,
     InWorld,
     Transfer,
-    Ready
+    Ready,
+    Offline
 };
 
 struct SpellCastEvent
@@ -938,6 +939,7 @@ char const* StageName(ActorStage stage)
         case ActorStage::InWorld: return "in_world";
         case ActorStage::Transfer: return "transfer";
         case ActorStage::Ready: return "ready";
+        case ActorStage::Offline: return "offline";
     }
     return "unknown";
 }
@@ -6137,6 +6139,13 @@ private:
             Unit::DealDamage(pet, pet, pet->GetHealth(), nullptr, SELF_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr,
                 false);
             Require(!pet->IsAlive(), "Self damage did not kill the pet");
+        }
+        else if (action == "disconnect")
+        {
+            WorldSession* session = player->GetSession();
+            session->LogoutPlayer(false);
+            Require(!session->GetPlayer(), "Disconnect fixture left the session logged in");
+            Reach(_actors.at(id), ActorStage::Offline);
         }
         else if (action == "die")
         {
