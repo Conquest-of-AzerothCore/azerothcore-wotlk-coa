@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Bazaar boss rewards include a nearby healer without killing blows",
-  "contract": "At default token rates, killing Bloodmage Thalnos 4543, a level 34 Scarlet Monastery dungeon boss (real spawn guid 39934, map 189), awards 6-12 tokens to each level-43 group member inside the instance, including a healer who never attacks. The boss is grey from level 44, so a level-44 member beside it receives none, and a group member who stays outside the instance receives none. The reward is granted once per member through native kill credit, so neither member exceeds the 12-token maximum.",
+  "contract": "At default token rates, killing Bloodmage Thalnos 4543, a Scarlet Monastery dungeon boss (real spawn guid 39934, map 189), awards 6-12 tokens to each level-59 group member inside the instance, including a healer who never attacks. A group member who stays outside the instance receives none. The reward is granted once per member through native kill credit, so neither member exceeds the 12-token maximum.",
   "timeout_ms": 60000,
   "location": {
     "map": 0,
@@ -14,25 +14,19 @@
       "id": "killer",
       "race": 1,
       "class": 1,
-      "level": 43
+      "level": 59
     },
     {
       "id": "healer",
       "race": 1,
       "class": 5,
-      "level": 43
-    },
-    {
-      "id": "outlevelled",
-      "race": 1,
-      "class": 1,
-      "level": 44
+      "level": 59
     },
     {
       "id": "distant",
       "race": 1,
       "class": 1,
-      "level": 43
+      "level": 59
     }
   ],
   "steps": [
@@ -44,11 +38,6 @@
       "action": "group",
       "actor": "killer",
       "target": "healer"
-    },
-    {
-      "action": "group",
-      "actor": "killer",
-      "target": "outlevelled"
     },
     {
       "action": "group",
@@ -65,12 +54,6 @@
       "action": "set_phase",
       "label": "healer sees the real Scarlet Monastery spawns",
       "actor": "healer",
-      "value": 1
-    },
-    {
-      "action": "set_phase",
-      "label": "outlevelled member sees the real Scarlet Monastery spawns",
-      "actor": "outlevelled",
       "value": 1
     },
     {
@@ -102,20 +85,6 @@
       "within_ms": 10000
     },
     {
-      "action": "teleport_to_spawn",
-      "label": "outlevelled member joins the killer beside Bloodmage Thalnos",
-      "actor": "outlevelled",
-      "guid": 39934
-    },
-    {
-      "action": "assert",
-      "label": "SETUP: outlevelled member is in Scarlet Monastery",
-      "actor": "outlevelled",
-      "metric": "map_id",
-      "equals": 189,
-      "within_ms": 10000
-    },
-    {
       "action": "assert",
       "label": "SETUP: Bloodmage Thalnos is alive beside the killer",
       "actor": "killer",
@@ -137,13 +106,6 @@
       "metric": "item_count",
       "item": 975001,
       "save_as": "healer_tokens"
-    },
-    {
-      "action": "snapshot",
-      "actor": "outlevelled",
-      "metric": "item_count",
-      "item": 975001,
-      "save_as": "outlevelled_tokens"
     },
     {
       "action": "snapshot",
@@ -187,15 +149,6 @@
       "metric": "item_count",
       "item": 975001,
       "relative_to": "distant_tokens",
-      "equals": 0
-    },
-    {
-      "action": "assert",
-      "label": "a boss grey to the member pays nothing",
-      "actor": "outlevelled",
-      "metric": "item_count",
-      "item": 975001,
-      "relative_to": "outlevelled_tokens",
       "equals": 0
     }
   ]

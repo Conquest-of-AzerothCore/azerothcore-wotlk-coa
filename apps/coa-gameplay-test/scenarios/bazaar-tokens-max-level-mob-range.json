@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Bazaar kill tokens at maximum level need a mob within three levels",
-  "contract": "At default settings a level-60 character earns tokens only from creatures at most three levels below them, while a level-59 character is held only to the grey rule. In one Blackrock Depths group, Warder Stilgiss 9041 (level 56, spawn guid 47774) pays the level-60 member nothing and the level-59 member 6-12; Panzor the Invincible 8923 (level 57, spawn guid 300627) pays both members 6-12.",
+  "contract": "At default settings a level-60 character earns tokens only from creatures whose own level is at most three below them, even though Blackrock Depths scales its creatures to the character. A level-59 character is judged on the level they are shown, which in this dungeon is their own. In one group, Warder Stilgiss 9041 (level 56, spawn guid 47774) pays the level-60 member nothing and the level-59 member 6-12; Panzor the Invincible 8923 (level 57, spawn guid 300627) pays both members 6-12.",
   "timeout_ms": 90000,
   "location": {
     "map": 0,
