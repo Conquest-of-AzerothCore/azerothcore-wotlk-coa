@@ -7350,6 +7350,8 @@ GameObject* Unit::GetGameObject(uint32 spellId) const
             if (go->GetSpellId() == spellId)
                 return go;
 
+    if (uint32 const twin = SpellMgr::GetScriptTwinOf(spellId))
+        return GetGameObject(twin);
     return nullptr;
 }
 
