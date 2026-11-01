@@ -246,6 +246,32 @@ class aura_ascension_necromancer_ghoul_mastery : public AuraScript
     }
 };
 
+class aura_ascension_necromancer_overwhelming_force : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_necromancer_overwhelming_force);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({531131});
+    }
+
+    bool Check(ProcEventInfo& event)
+    {
+        Unit* minion = GetTarget();
+        Player* player = Owner(minion);
+        Unit* target = event.GetActionTarget();
+        DamageInfo const* damage = event.GetDamageInfo();
+        return player && GetCaster() == player && minion->IsCreature() && IsMinion(player, minion) &&
+            event.GetActor() == minion && target && player->IsValidAttackTarget(target) && damage &&
+            damage->GetDamage();
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_ascension_necromancer_overwhelming_force::Check);
+    }
+};
+
 constexpr float MinionShareOfCreatureDamage = 0.45f;
 bool CreatureHitsMinion(Unit const* attacker, Unit const* victim)
 {
@@ -316,5 +342,6 @@ void AddAscensionNecromancerEventScripts()
 {
     RegisterSpellScript(aura_ascension_necromancer_event);
     RegisterSpellScript(aura_ascension_necromancer_ghoul_mastery);
+    RegisterSpellScript(aura_ascension_necromancer_overwhelming_force);
     new necromancer_defense();
 }

@@ -48,10 +48,14 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[index].Amplitude = interval;
         info->Effects[index].TriggerSpell = 0;
     };
+    auto nativeSummonProc = [id](SpellEffectInfo const& effect)
+    {
+        return effect.Effect == SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS &&
+               ((id == 503740 && effect.TriggerSpell == 707014) ||
+                (id == 531128 && effect.TriggerSpell == 531131));
+    };
     for (SpellEffectInfo& effect : info->Effects)
-        if ((effect.ApplyAuraName == 42 || effect.ApplyAuraName == 354) &&
-            !(id == 503740 && effect.Effect == SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS &&
-                effect.TriggerSpell == 707014))
+        if ((effect.ApplyAuraName == 42 || effect.ApplyAuraName == 354) && !nativeSummonProc(effect))
         {
             effect.ApplyAuraName = SPELL_AURA_DUMMY;
             effect.TriggerSpell = 0;
