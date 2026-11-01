@@ -82,6 +82,9 @@ class aura_hero_rogue_blade_twisting : public AuraScript
 
     bool CheckProc(ProcEventInfo& eventInfo)
     {
+        if (sSpellMgr->GetSpellTwinSource(GetId()) != GetId())
+            return eventInfo.GetDamageInfo() && eventInfo.GetDamageInfo()->GetDamage();
+
         SpellInfo const* spellInfo = eventInfo.GetSpellInfo();
         if (!spellInfo)
             return false;
