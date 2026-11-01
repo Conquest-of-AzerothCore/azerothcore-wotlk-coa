@@ -37,6 +37,9 @@ bool IsRedrawableVanityAura(AuraApplication const* application)
         info->HasAura(SPELL_AURA_CLONE_CASTER);
     if (changesModel)
         return false;
+    bool const isMount = info->HasAura(SPELL_AURA_MOUNTED);
+    if (isMount)
+        return false;
     if (std::find(ChronometricPressureSpells.begin(), ChronometricPressureSpells.end(), info->Id) !=
         ChronometricPressureSpells.end())
         return false;
