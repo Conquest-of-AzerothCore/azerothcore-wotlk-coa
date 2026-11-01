@@ -4,51 +4,57 @@
 #include "ScriptMgr.h"
 #include "SpellAuras.h"
 #include "SpellInfo.h"
+#include "SpellMgr.h"
 #include "UnitScript.h"
-#include <vector>
 
-// Cosmetic visuals lost after a transform (#9463).
+// Vanity visuals lost after a transform (#9463).
 //
 // Vanity spells such as Blazing Irie Wings (12000142) are permanent auras whose look is a client-side spell
 // visual, drawn while the aura is in the player's aura list. When a transform or other model change ends, the
 // server restores the native display and the client rebuilds the player model without those visuals, although the
-// auras are still applied. Once the player is back on the native model, this re-sends each permanent, positive
-// visual aura as removed and then added again, so the client draws its visual on the rebuilt model. The auras
-// themselves are never removed on the server.
+// auras are still applied. Once the player is back on the native model, this re-sends each vanity aura's current
+// state so the client draws its visual on the rebuilt model.
+//
+// Only vanity auras (skill line 120, "!Ascension Vanity Items") are touched, and only with an "applied" update:
+// no removal is ever sent, so no aura's removal visual or sound can play and addons see no lost buff. The auras
+// themselves are not changed on the server.
 namespace
 {
+constexpr uint32 VanitySkillLine = 120;
+
 // The display change reaches the client with the next object update, while aura updates are sent at once, so wait
 // until the client has rebuilt the model before re-sending.
 constexpr Milliseconds RefreshDelay = 300ms;
 
-bool NeedsVisualRefresh(AuraApplication const* application)
+bool IsVanitySpell(uint32 spellId)
 {
-    Aura const* aura = application->GetBase();
-    SpellInfo const* info = aura->GetSpellInfo();
-    if (!info->SpellVisual[0] && !info->SpellVisual[1])
-        return false;
-    if (!aura->IsPermanent() || !application->IsPositive())
-        return false;
-    // Re-sending a model-changing aura would start another display change.
-    return !info->HasAura(SPELL_AURA_TRANSFORM) && !info->HasAura(SPELL_AURA_MOD_SHAPESHIFT) &&
-        !info->HasAura(SPELL_AURA_CLONE_CASTER);
+    SkillLineAbilityMapBounds const bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spellId);
+    for (auto itr = bounds.first; itr != bounds.second; ++itr)
+        if (itr->second->SkillLine == VanitySkillLine)
+            return true;
+    return false;
 }
 
-void RefreshCosmeticVisuals(Player* player)
+bool NeedsVisualRefresh(AuraApplication const* application)
+{
+    SpellInfo const* info = application->GetBase()->GetSpellInfo();
+    if (!info->SpellVisual[0] && !info->SpellVisual[1])
+        return false;
+    // Re-sending a model-changing aura would start another display change.
+    if (info->HasAura(SPELL_AURA_TRANSFORM) || info->HasAura(SPELL_AURA_MOD_SHAPESHIFT) ||
+        info->HasAura(SPELL_AURA_CLONE_CASTER))
+        return false;
+    return IsVanitySpell(info->Id);
+}
+
+void RefreshVanityVisuals(Player* player)
 {
     if (!player->IsInWorld() || player->GetDisplayId() != player->GetNativeDisplayId())
         return;
 
-    std::vector<AuraApplication*> refresh;
     for (auto const& [slot, application] : *player->GetVisibleAuras())
         if (NeedsVisualRefresh(application))
-            refresh.push_back(application);
-
-    for (AuraApplication* application : refresh)
-    {
-        application->ClientUpdate(true);
-        application->ClientUpdate(false);
-    }
+            application->ClientUpdate(false);
 }
 }
 
@@ -68,7 +74,7 @@ public:
         player->m_Events.AddEventAtOffset([guid]()
         {
             if (Player* target = ObjectAccessor::FindPlayer(guid))
-                RefreshCosmeticVisuals(target);
+                RefreshVanityVisuals(target);
         }, RefreshDelay);
     }
 };
