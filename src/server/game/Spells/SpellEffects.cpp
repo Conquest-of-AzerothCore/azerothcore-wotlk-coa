@@ -4429,9 +4429,6 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
                 // Stormstrike
                 if (AuraEffect* aurEff = m_caster->IsScriptOverriden(m_spellInfo, 5634))
                     m_caster->CastSpell(m_caster, 38430, true, nullptr, aurEff);
-                // Lava lash damage increased by Flametongue weapon
-                if (m_caster->GetAuraEffect(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, 688, EFFECT_0))
-                    AddPct(totalDamagePercentMod, 25.0f);
                 break;
             }
         case SPELLFAMILY_DRUID:
