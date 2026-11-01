@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "The Doctor Is In!: Loa's Brew can target Lil Wa'zoo and credits the quest (COA-9957)",
+  "contract": "Issues #9957, #10283: The Doctor Is In! 200027 asks the witch doctor to heal Lil Wa'zoo 85031 in Echo Ridge Mine with Loa's Brew. Lil Wa'zoo lacked CREATURE_TYPE_FLAG_CAN_ASSIST, which the troll patient Hi'bi Ja'min 9300203 has, so the server refused him as a heal target and the client healed the player instead. The fixture stands beside his spawn in clear line of sight. Expected: a self cast works as the control, and a cast on Lil Wa'zoo is sent and credits Save Lil Wa'zoo.",
+  "timeout_ms": 40000,
+  "location": { "map": 0, "x": -8631.0, "y": -110.0, "z": 89.0, "o": 0 },
+  "players": [
+    { "id": "p", "race": 1, "class": 13, "level": 4 }
+  ],
+  "creatures": [
+    { "id": "wazoo", "owner": "p", "entry": 85031, "distance": 1.5, "faction": 35, "level": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "prepare_quest", "actor": "p", "quest": 200027, "complete": false },
+    { "action": "assert", "label": "SETUP: p is on The Doctor Is In!", "actor": "p", "metric": "quest_status", "quest": 200027, "equals": 3 },
+    { "action": "learn", "actor": "p", "spell": 801670 },
+    { "action": "cast", "label": "CONTROL: Loa's Brew on oneself", "actor": "p", "spell": 801670 },
+    { "action": "assert", "label": "CONTROL: the self cast is sent", "actor": "p", "metric": "spell_go_count", "spell": 801670, "equals": 1, "within_ms": 3000 },
+    { "action": "reset_cooldown", "actor": "p", "spell": 801670 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "cast", "label": "Loa's Brew on Lil Wa'zoo", "actor": "p", "spell": 801670, "target": "wazoo" },
+    { "action": "assert", "label": "DISCRIMINATING: the cast on Lil Wa'zoo is sent", "actor": "p", "metric": "spell_go_count", "spell": 801670, "equals": 2, "within_ms": 3000 },
+    { "action": "assert", "label": "Save Lil Wa'zoo is credited", "actor": "p", "metric": "quest_objective_count", "quest": 200027, "equals": 1, "within_ms": 3000 }
+  ]
+}
