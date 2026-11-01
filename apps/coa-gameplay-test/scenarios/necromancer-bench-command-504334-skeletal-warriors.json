@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "BENCH: Command: Skeletal Warriors (504334) on a lone Lesser Skeletal Warrior kill, necromancer never swings",
+  "contract": "SoloKill.RequirePlayerHit (#10365) gives an ungrouped player XP/loot only if they 'hit' the creature (Creature::AddDirectPlayerAttacker). Command orders go through Order() (AscensionNecromancerSummons.cpp:405) and may not register as a hit. This probes, on unfixed main, whether a creature killed solely by a Lesser Skeletal Warrior (50065, raised by Raise: Lesser Skeletal Warrior 500970, cost 1 Life Force) under Command: Skeletal Warriors 504334 gives the necromancer experience when the necromancer never swings or casts at the target.",
+  "timeout_ms": 180000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    {
+      "id": "n", "race": 1, "class": 23, "level": 60,
+      "melee_hit_rating": 10000, "spell_hit_rating": 10000, "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "n", "entry": 36, "level": 60, "health": 300, "distance": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 500970 },
+    { "action": "learn", "actor": "n", "spell": 504334 },
+    { "action": "cast", "label": "Raise: Lesser Skeletal Warrior", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "SETUP: the Lesser Skeletal Warrior is raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "min": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear the global cooldown after summoning", "ms": 2500 },
+    { "action": "snapshot", "actor": "n", "metric": "xp", "save_as": "xp0" },
+    { "action": "snapshot", "actor": "n", "metric": "melee_attack_count", "save_as": "swings0" },
+    { "action": "set_power", "actor": "n", "power": 6, "value": 1000 },
+    { "action": "reset_cooldown", "actor": "n", "spell": 504334 },
+    {
+      "action": "cast", "label": "Command: Skeletal Warriors on the target", "actor": "n",
+      "spell": 504334, "target": "target"
+    },
+    {
+      "action": "assert", "label": "SETUP: the Command cast went", "actor": "n",
+      "metric": "spell_go_count", "spell": 504334, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: the Lesser Skeletal Warrior kills the target", "actor": "target",
+      "metric": "alive", "equals": 0, "within_ms": 120000
+    },
+    {
+      "action": "assert", "label": "SETUP: the necromancer never swung", "actor": "n",
+      "metric": "melee_attack_count", "relative_to": "swings0", "equals": 0
+    },
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert", "label": "BENCH: the necromancer gets experience from a Command kill it never swung at", "actor": "n",
+      "metric": "xp", "relative_to": "xp0", "min": 1, "within_ms": 3000
+    },
+    { "action": "assert", "label": "The necromancer's level did not change", "actor": "n", "metric": "level", "equals": 60 }
+  ]
+}
