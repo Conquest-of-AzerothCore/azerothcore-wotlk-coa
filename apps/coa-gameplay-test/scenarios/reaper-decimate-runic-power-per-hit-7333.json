@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "name": "Decimate grants its Runic Power for every enemy it hits (COA-7333)",
+  "contract": "Issue COA-7333: Decimate 500523 (the Decimation 704193 swap of Reap) says it generates $/10;359019s1 Runic Power per enemy hit: Energize Runic Power +5 (359019, base 50 = 5 Runic Power). Its ResourceGainRules row granted Reap's Energize Runic Power 355461 once on the first damaging hit instead, whatever the number of enemies in the cone. Builds the Decimation counter to 6 with Reap, casts Decimate at two enemies standing together in its frontal cone and checks that it hits both and energizes 359019 once per enemy hit.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 1,
+      "class": 30,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "second",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 354319
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 704193
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 354319,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Respect the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 354319,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Respect the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 354319,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Respect the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 354319,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Respect the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 354319,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Respect the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 354319,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Respect the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Decimation counter is capped",
+      "actor": "reaper",
+      "metric": "aura_stacks",
+      "spell": 573289,
+      "caster": "reaper",
+      "equals": 6,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Reap is swapped to Decimate",
+      "actor": "reaper",
+      "metric": "temporary_spell_replacement",
+      "spell": 354319,
+      "equals": 500523,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Respect the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Redirected to Decimate by the swap",
+      "actor": "reaper",
+      "spell": 354319,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Decimate hits both enemies in its cone",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 500523,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Decimate energizes 359019 once for each enemy it hits",
+      "actor": "reaper",
+      "metric": "spell_energize_count",
+      "spell": 359019,
+      "equals": 2,
+      "within_ms": 3000
+    }
+  ]
+}
