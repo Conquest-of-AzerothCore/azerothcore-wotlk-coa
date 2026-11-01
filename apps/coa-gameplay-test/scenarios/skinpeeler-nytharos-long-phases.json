@@ -1,0 +1,686 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: long fight repeats the loop",
+  "contract": [
+    "The fight keeps cycling past the first pass: a second spout wave appears after the first shield.",
+    "Nothing stalls the loop while the group stays alive, and the boss is still there at the end."
+  ],
+  "timeout_ms": 300000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps2",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "tank",
+      "entry": 9916214,
+      "level": 60,
+      "health": 1000000,
+      "reaction": 2,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the boss and local AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "dps1",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Establish threat",
+      "actor": "dps2",
+      "target": "boss"
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "First spout wave",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 9916216,
+      "min": 1,
+      "within_ms": 45000
+    },
+    {
+      "action": "assert",
+      "label": "First shield",
+      "actor": "boss",
+      "metric": "aura",
+      "spell": 1004300,
+      "equals": 1,
+      "within_ms": 45000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "wait",
+      "label": "Hold the fight open",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps1",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "set_health",
+      "actor": "dps2",
+      "value": 200000,
+      "maximum": 200000
+    },
+    {
+      "action": "assert",
+      "label": "Loop still cycling after two minutes",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 9916216,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Boss still standing",
+      "actor": "boss",
+      "metric": "health",
+      "min": 1
+    }
+  ]
+}

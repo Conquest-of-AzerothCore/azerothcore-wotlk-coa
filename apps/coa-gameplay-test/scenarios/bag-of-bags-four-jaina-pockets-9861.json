@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Bag of Bags mails all 4 Jaina's Dimensional Pockets it advertises",
+  "contract": "item_template.description for Bag of Bags (2977353, rev_20260924_10_coa_warchest_item_templates.sql) reads 'Contains 4x Jaina's Dimensional Pocket', an independently-established expectation from the item's own shipped tooltip. item_coa_bag_of_bags::OnUse (src/server/coa/AscensionWelcomeWarchest.cpp) mailed only 3. With bags full so the reward cannot be stored directly, opening Bag of Bags must deliver exactly 4 copies of item 1004039 by mail. Issue #9861.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "hero", "race": 1, "class": 12, "level": 1 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "add_item", "actor": "hero", "item": 2977353 },
+    { "action": "fill_bags", "actor": "hero" },
+    { "action": "assert", "label": "The fixture has no bag slot left", "actor": "hero",
+      "metric": "free_inventory_slots", "equals": 0 },
+
+    { "action": "snapshot", "actor": "hero", "metric": "mail_item_count", "save_as": "before_items" },
+
+    { "action": "use_item", "label": "Open the Bag of Bags", "actor": "hero", "item": 2977353, "spell": 93461 },
+
+    { "action": "assert", "label": "DISCRIMINATING: all 4 advertised Jaina's Dimensional Pockets are mailed, not 3",
+      "actor": "hero", "metric": "mail_item_count", "relative_to": "before_items", "equals": 4, "within_ms": 2000 },
+    { "action": "assert", "label": "The mail carries Jaina's Dimensional Pocket", "actor": "hero",
+      "metric": "mail_has_item", "item": 1004039, "equals": 1 }
+  ]
+}

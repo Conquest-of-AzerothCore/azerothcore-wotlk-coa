@@ -38,6 +38,12 @@ CoA.ProbeRelay.AccountPrefix = "COALAB"
 # Log each consumed extension packet during protocol discovery.
 CoA.LogConsumedPackets = 1
 
+# Realm Bound Bazaar Tokens from the Elite Warchest (2977351). The 1500 Bazaar Tokens (975001) it holds are
+# counted as a per-account reserve: purchases use the reserve first, and tokens can only be traded, mailed to
+# another account, auctioned or put in a guild bank while the account keeps at least the reserve. Mail between
+# the account's own characters is free. Farmed tokens above the reserve stay tradeable.
+CoA.BazaarTokens.WarchestRealmBound = 1
+
 # Ascension character screen: enable/disable (activate/deactivate) and the
 # per-account character list sort order.
 # Requests: CMSG 0x072E / 0x072F / 0x0772.
@@ -169,10 +175,19 @@ CoA.LegacyMountFlight = 0
 # Set to 0 to leave such characters on Ruleset.None instead.
 CoA.RulesetLoginDefault = 1
 
-# War Mode (1004119 without PvE Mode) and High-Risk (1004019) switch creature, chest and quest level
-# scaling off in the open world, as their tooltips state: "Level scaling is disabled while in War
-# Mode / High-Risk". Instances keep the character's own choice. Set to 0 to let the rulesets scale.
-CoA.Ruleset.DisableLevelScaling = 1
+# War Mode (1004119 without PvE Mode) and High-Risk (1004019) keep creature, chest and quest level
+# scaling in the open world, as on Ascension. Set to 1 to switch level scaling off for both rulesets
+# in the open world. Instances keep the character's own choice.
+CoA.Ruleset.DisableLevelScaling = 0
+
+# GatherMate gathering areas (pools 20000000-20099999) keep a share of their spots up that follows the
+# players in the area's zone: MinFraction with nobody there, plus PerPlayerFraction for each player, up to
+# MaxFraction. The limit is read whenever a node respawns, so a zone fills up or thins out as nodes are
+# gathered; nothing is deleted. Set ScaleWithZonePlayers to 0 to use the pool_template max_limit instead.
+CoA.GatherNodes.ScaleWithZonePlayers = 1
+CoA.GatherNodes.MinFraction = 0.10
+CoA.GatherNodes.PerPlayerFraction = 0.015
+CoA.GatherNodes.MaxFraction = 0.35
 
 # Quests with a row in the client's QuestTemplateScaling.dbc trail the character: the row's highest
 # point at or below the character's level sets the quest to that level plus its offset (the shipped
@@ -196,9 +211,8 @@ CoA.ItemScaling = 1
 # Weapons and armor that the client's ItemStat.dbc has a level ladder for keep their own entry and are
 # given a scaling level instead of a copy: the looter's level plus LootLevelOffset, from 1 to 65, set
 # once when the item is looted, won in a roll or, with QuestRewards, given by a quest. Inside a dungeon
-# listed in DestinyWeaver.Scaling.DungeonIds loot scales for everyone and only down: an item whose own
-# item level is at or below that level keeps its authored stats. Their stats come
-# from the ladder row for that level, and the client asks for the same row with opcode 0x6FF.
+# listed in DestinyWeaver.Scaling.DungeonIds loot scales for everyone, up or down, to the looter's level.
+# Their stats come from the ladder row for that level, and the client asks for the same row with opcode 0x6FF.
 # Worldforged items and items the copy path never lifts stay as they are. While it is active the copy
 # path (CoA.ItemScaling) makes no new copies at all; copies already handed out keep working.
 # Read at startup only. With 0, items keep their authored stats and the copy path handles them again.
@@ -263,6 +277,12 @@ CoA.RealmType = "live"
 #
 
 CoA.ClassModel = "coa"
+
+# Enable spell 86000's passive 15% unmounted running-speed aura on this realm.
+# Stronger ordinary running-speed auras replace its bonus; they do not add to it.
+# Mount, swim and flight speeds are unchanged. Requires a worldserver restart.
+# Opt in for Area 52; leave disabled on other realms to preserve their behavior.
+Ascension.RunSpeedAura.Enable = 0
 
 #
 #    CoA.GameModeMask

@@ -1,0 +1,130 @@
+{
+  "schema": 1,
+  "name": "Primalist Sacred Grove lasts with a companion out",
+  "contract": "With a Book of Ascension companion inside the grove, the grove, its blessing and its recovery ticks last the full duration instead of ending after the first tick.",
+  "location": {
+    "map": 0,
+    "x": -9202.17,
+    "y": 419.059,
+    "z": 92.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "timeout_ms": 60000,
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 800180
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "primalist",
+      "maximum": 1000000,
+      "value": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 800180
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 800180,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 800180,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 800180,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura_visible",
+      "spell": 800186,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "spell_heal_count",
+      "spell": 800179,
+      "target": "primalist",
+      "min": 5
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "dynamic_object",
+      "spell": 800180,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 800186,
+      "equals": 0
+    }
+  ]
+}

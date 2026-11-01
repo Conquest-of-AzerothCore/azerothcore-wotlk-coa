@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "name": "Aetherial Reliquary is mailed when the bags are full, and later boosts join it (#4755)",
+  "contract": "On a level-60 realm (MaxPlayerLevel 60, the cap Prestige also follows), #4755: when the bags cannot hold Aetherial Reliquary 8263512 at the realm level cap it is mailed instead, and the experience boosts are still removed and stored. The Reliquary only holds the key to boosts stored on the character, so a second capture while one Reliquary already waits in the mailbox merges into it and sends no second item. The second capture here comes from the login hook, which also stores boosts a character at the cap still carries.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "packed",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "packed",
+      "spell": 818059,
+      "stacks": 1
+    },
+    {
+      "action": "fill_bags",
+      "actor": "packed"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "fill_bags",
+      "label": "Refill a slot freed by a filler item that vanished",
+      "actor": "packed"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the bags are full",
+      "actor": "packed",
+      "metric": "free_inventory_slots",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Reliquary waits in the mailbox",
+      "actor": "packed",
+      "metric": "mail_has_item",
+      "item": 8263512,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "packed",
+      "value": 60
+    },
+    {
+      "action": "assert",
+      "label": "Aura of Experience was removed at the cap",
+      "actor": "packed",
+      "metric": "aura",
+      "spell": 818059,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The full bags did not take a Reliquary",
+      "actor": "packed",
+      "metric": "item_count",
+      "item": 8263512,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Reliquary was mailed instead",
+      "actor": "packed",
+      "metric": "mail_has_item",
+      "item": 8263512,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Mail held after the cap, level rewards included",
+      "actor": "packed",
+      "metric": "mail_count",
+      "save_as": "mail_after_cap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "packed",
+      "metric": "mail_item_count",
+      "save_as": "mail_items_after_cap"
+    },
+    {
+      "action": "set_aura",
+      "actor": "packed",
+      "spell": 818046,
+      "stacks": 1
+    },
+    {
+      "action": "login_hooks",
+      "actor": "packed"
+    },
+    {
+      "action": "assert",
+      "label": "The login hook stored the Potion carried at the cap",
+      "actor": "packed",
+      "metric": "aura",
+      "spell": 818046,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The waiting Reliquary took the Potion: no second mail",
+      "actor": "packed",
+      "metric": "mail_count",
+      "equals": 0,
+      "relative_to": "mail_after_cap"
+    },
+    {
+      "action": "assert",
+      "label": "No second Reliquary was mailed",
+      "actor": "packed",
+      "metric": "mail_item_count",
+      "equals": 0,
+      "relative_to": "mail_items_after_cap"
+    },
+    {
+      "action": "assert",
+      "label": "The Reliquary still waits in the mailbox",
+      "actor": "packed",
+      "metric": "mail_has_item",
+      "item": 8263512,
+      "equals": 1
+    }
+  ]
+}

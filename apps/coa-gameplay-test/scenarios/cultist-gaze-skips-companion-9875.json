@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Gaze of C'Thun jumps to a real ally, not the caster's companion (#9875)",
+  "contract": [
+    "Gaze of C'Thun rank 1 500110 reads 'Set C'thun's Gaze upon an enemy or ally, jumping to 1 additional nearby",
+    "target, dealing Shadow damage to enemies or healing allies'. Its effects 0 and 1 are TARGET_UNIT_TARGET_ANY",
+    "with EffectChainTarget 2, so the native chain search takes the closest unit of any kind within ten yards; a",
+    "spellbook companion such as Mechanical Squirrel 4055 (creature 2671, SUMMON_TYPE_MINIPET) follows at its",
+    "owner's feet and is closer than anyone else. A non-combat companion is neither an enemy nor an ally the",
+    "tooltip means, so with the cultist casting on itself, the companion at its side and an injured second player",
+    "about six yards away, the one jump must heal that player through 520335/520333. The ally is a player because",
+    "Unit::_IsValidAssistTarget refuses a player's assist on an ordinary creature without the raid-unit type flag,",
+    "so a friendly creature could never receive the heal whichever unit the jump selects."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 10 },
+    { "id": "ally", "race": 1, "class": 25, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "teleport", "label": "Stand the ally about six yards from the cultist", "actor": "ally", "map": 0, "x": -8943.95, "y": -132.49, "z": 83.6 },
+    { "action": "learn", "actor": "cultist", "spell": 4055 },
+    { "action": "cast", "label": "Summon the Mechanical Squirrel companion", "actor": "cultist", "spell": 4055 },
+    { "action": "assert", "label": "SETUP: the companion is out", "actor": "cultist", "metric": "owned_creature_count", "entry": 2671, "equals": 1, "within_ms": 4000 },
+    { "action": "wait", "label": "Let the companion settle at its owner's side", "ms": 2000 },
+    { "action": "assert", "label": "SETUP: the ally is within the ten-yard jump but beyond the companion", "actor": "cultist", "metric": "distance", "target": "ally", "min": 5, "max": 8 },
+    { "action": "assert", "label": "SETUP: the companion is the closest unit to the cultist", "actor": "cultist", "metric": "pet_distance", "max": 4.5 },
+    { "action": "set_health", "actor": "ally", "value": 50 },
+    { "action": "learn", "actor": "cultist", "spell": 500110 },
+    { "action": "cast", "label": "Gaze of C'Thun on the cultist itself", "actor": "cultist", "spell": 500110 },
+    { "action": "assert", "actor": "cultist", "metric": "cast_failure", "spell": 500110, "equals": 0 },
+    { "action": "assert", "label": "The primary target, the cultist, is healed", "actor": "cultist", "metric": "spell_heal_count", "spell": 520333, "target": "cultist", "min": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "The jump heals the injured ally instead of the companion", "actor": "cultist", "metric": "spell_heal_count", "spell": 520333, "target": "ally", "equals": 1, "within_ms": 1000 }
+  ]
+}

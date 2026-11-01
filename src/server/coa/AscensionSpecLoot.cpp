@@ -100,18 +100,29 @@ PrimaryStats ActivePrimaryStats(Player const* player)
     return {};
 }
 
+StatList TemplateStats(ItemTemplate const* item)
+{
+    StatList list;
+    for (uint32 index = 0; item && index < item->StatsCount && index < MAX_ITEM_PROTO_STATS; ++index)
+        list.emplace_back(item->ItemStat[index].ItemStatType, item->ItemStat[index].ItemStatValue);
+    return list;
+}
+
 Fit ItemFit(PrimaryStats const& stats, ItemTemplate const* item)
 {
-    if (!item || stats == PrimaryStats{})
+    return item ? StatsFit(stats, TemplateStats(item)) : Fit::None;
+}
+
+Fit StatsFit(PrimaryStats const& stats, StatList const& itemStats)
+{
+    if (stats == PrimaryStats{})
         return Fit::None;
 
     std::array<int32, ITEM_MOD_SPIRIT + 1> attributes{};
     std::array<int32, ROLE_COUNT> roles{};
     int32 stamina = 0;
-    for (uint32 index = 0; index < item->StatsCount && index < MAX_ITEM_PROTO_STATS; ++index)
+    for (auto const& [type, value] : itemStats)
     {
-        uint32 const type = item->ItemStat[index].ItemStatType;
-        int32 const value = item->ItemStat[index].ItemStatValue;
         if (value <= 0)
             continue;
         if (IsAttribute(type))

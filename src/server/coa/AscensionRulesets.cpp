@@ -1,13 +1,18 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionRulesets.h"
+#include "Battlefield.h"
+#include "BattlefieldMgr.h"
 #include "Config.h"
 #include "LocalLevelScaling.h"
 #include "Map.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellScript.h"
+#include "WorldSession.h"
 #include <atomic>
+#include <vector>
 
 namespace
 {
@@ -22,7 +27,17 @@ enum RulesetSpells : uint32
     SPELL_MERCENARY = 9930874
 };
 
-std::atomic<bool> pvpRulesetsDisableLevelScaling{true};
+constexpr char HighRiskSuspendedSetting[] = "core.ruleset.high_risk_suspended";
+constexpr Milliseconds TEAM_BATTLE_RECHECK_DELAY = 1s;
+
+std::atomic<bool> pvpRulesetsDisableLevelScaling{false};
+std::vector<AscensionRulesets::Guard> rulesetGuards;
+
+void SetHighRiskSuspended(Player* player, bool suspended)
+{
+    if (AscensionRulesets::HighRiskSuspended(player) != suspended)
+        player->UpdatePlayerSetting(HighRiskSuspendedSetting, 0, suspended ? 1 : 0);
+}
 
 bool InPvPRuleset(Player const* player)
 {
@@ -66,8 +81,27 @@ void RefreshMercenariesFor(Player* viewer)
         });
 }
 
+AscensionRulesets::Ruleset SelectedRuleset(uint32 selectionId)
+{
+    if (selectionId == SPELL_SELECT_HIGH_RISK)
+        return AscensionRulesets::Ruleset::HighRisk;
+    if (selectionId == SPELL_SELECT_PVE)
+        return AscensionRulesets::Ruleset::PvE;
+    return AscensionRulesets::Ruleset::WarMode;
+}
+
+void NotifyLevelScalingIfChanged(Player* player, bool blockedBefore)
+{
+    if (player->IsInWorld() && RulesetBlocksLevelScaling(player) != blockedBefore &&
+        !LocalLevelScaling::NotifyScalingChanged(player))
+        player->RefreshQuestLogQueries();
+}
+
 void ApplyRuleset(Player* player, uint32 selectionId)
 {
+    if (!AscensionRulesets::CanApply(player, SelectedRuleset(selectionId)))
+        return;
+    SetHighRiskSuspended(player, false);
     bool const blockedBefore = RulesetBlocksLevelScaling(player);
     player->RemoveAurasDueToSpell(SPELL_HIGH_RISK);
     player->RemoveAurasDueToSpell(SPELL_WAR_MODE);
@@ -82,10 +116,67 @@ void ApplyRuleset(Player* player, uint32 selectionId)
     player->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
     SyncRulesetPvP(player);
     RefreshMercenariesFor(player);
+    NotifyLevelScalingIfChanged(player, blockedBefore);
+}
 
-    if (player->IsInWorld() && RulesetBlocksLevelScaling(player) != blockedBefore &&
-        !LocalLevelScaling::NotifyScalingChanged(player))
-        player->RefreshQuestLogQueries();
+void SuspendHighRisk(Player* player)
+{
+    if (!player->HasAura(SPELL_HIGH_RISK))
+        return;
+
+    SetHighRiskSuspended(player, true);
+    bool const blockedBefore = RulesetBlocksLevelScaling(player);
+    player->RemoveAurasDueToSpell(SPELL_HIGH_RISK);
+    player->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
+    RefreshMercenariesFor(player);
+    NotifyLevelScalingIfChanged(player, blockedBefore);
+}
+
+void ResumeHighRisk(Player* player)
+{
+    if (!AscensionRulesets::HighRiskSuspended(player))
+        return;
+
+    if (player->HasAura(SPELL_HIGH_RISK) || player->HasAura(SPELL_WAR_MODE) || player->HasAura(SPELL_PVE))
+    {
+        SetHighRiskSuspended(player, false);
+        return;
+    }
+
+    bool const blockedBefore = RulesetBlocksLevelScaling(player);
+    player->CastSpell(player, SPELL_HIGH_RISK, true);
+    if (!player->HasAura(SPELL_HIGH_RISK))
+        return;
+    SetHighRiskSuspended(player, false);
+    player->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
+    SyncRulesetPvP(player);
+    RefreshMercenariesFor(player);
+    NotifyLevelScalingIfChanged(player, blockedBefore);
+}
+
+void SyncHighRisk(Player* player)
+{
+    if (AscensionRulesets::InTeamBattle(player))
+        SuspendHighRisk(player);
+    else
+        ResumeHighRisk(player);
+}
+
+void RecheckAfterTeamBattleChange(Player* player)
+{
+    if (player->GetSession()->PlayerLogout())
+        return;
+
+    ObjectGuid const guid = player->GetGUID();
+    player->m_Events.AddEventAtOffset([guid]()
+    {
+        Player* player = ObjectAccessor::FindPlayer(guid);
+        if (!player || !player->IsInWorld())
+            return;
+        SyncHighRisk(player);
+        player->ForceValuesUpdateAtIndex(UNIT_FIELD_BYTES_2);
+        RefreshMercenariesFor(player);
+    }, TEAM_BATTLE_RECHECK_DELAY);
 }
 
 uint32 SelectionSpell(AscensionRulesets::Ruleset ruleset)
@@ -128,7 +219,10 @@ class spell_ascension_ruleset_select : public SpellScript
     SpellCastResult CheckCast()
     {
         Player* player = GetCaster()->ToPlayer();
-        return player && player->HasPlayerFlag(PLAYER_FLAGS_RESTING) ? SPELL_CAST_OK : SPELL_FAILED_NOT_HERE;
+        if (!player || !player->HasPlayerFlag(PLAYER_FLAGS_RESTING))
+            return SPELL_FAILED_NOT_HERE;
+        return AscensionRulesets::CanApply(player, SelectedRuleset(GetSpellInfo()->Id)) ?
+            SPELL_CAST_OK : SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
     }
 
     void Select(SpellEffIndex)
@@ -169,7 +263,7 @@ public:
     void OnAfterConfigLoad(bool) override
     {
         pvpRulesetsDisableLevelScaling.store(
-            sConfigMgr->GetOption<bool>("CoA.Ruleset.DisableLevelScaling", true), std::memory_order_relaxed);
+            sConfigMgr->GetOption<bool>("CoA.Ruleset.DisableLevelScaling", false), std::memory_order_relaxed);
     }
 };
 
@@ -181,6 +275,7 @@ public:
 
     void OnPlayerMapChanged(Player* player) override
     {
+        SyncHighRisk(player);
         SyncRulesetPvP(player);
         if (pvpRulesetsDisableLevelScaling.load(std::memory_order_relaxed) && InPvPRuleset(player))
             player->RefreshQuestLogQueries();
@@ -202,13 +297,54 @@ public:
             return;
 
         bool const noRuleset = !player->HasAura(SPELL_HIGH_RISK) && !player->HasAura(SPELL_WAR_MODE) &&
-            !player->HasAura(SPELL_PVE);
+            !player->HasAura(SPELL_PVE) && !AscensionRulesets::HighRiskSuspended(player);
         if (noRuleset)
             ApplyRuleset(player, SPELL_SELECT_PVE);
         else
             SyncRulesetPvP(player);
     }
 };
+
+class ruleset_battlefield_war : public BattlefieldScript
+{
+public:
+    ruleset_battlefield_war()
+        : BattlefieldScript("ruleset_battlefield_war", {BATTLEFIELDHOOK_ON_PLAYER_JOIN_WAR,
+                                                        BATTLEFIELDHOOK_ON_PLAYER_LEAVE_WAR,
+                                                        BATTLEFIELDHOOK_ON_WAR_END}) { }
+
+    void OnBattlefieldPlayerJoinWar(Battlefield*, Player* player) override
+    {
+        SuspendHighRisk(player);
+        RecheckAfterTeamBattleChange(player);
+    }
+
+    void OnBattlefieldPlayerLeaveWar(Battlefield*, Player* player) override { RecheckAfterTeamBattleChange(player); }
+
+    void OnBattlefieldWarEnd(Battlefield* battlefield, bool) override
+    {
+        for (TeamId team : {TEAM_ALLIANCE, TEAM_HORDE})
+            for (ObjectGuid const& guid : battlefield->GetPlayersInWarSet(team))
+                if (Player* player = ObjectAccessor::FindPlayer(guid))
+                    RecheckAfterTeamBattleChange(player);
+    }
+};
+}
+
+void AscensionRulesets::RegisterGuard(Guard guard)
+{
+    if (guard)
+        rulesetGuards.push_back(guard);
+}
+
+bool AscensionRulesets::CanApply(Player* player, Ruleset ruleset)
+{
+    if (!player)
+        return false;
+    for (Guard guard : rulesetGuards)
+        if (!guard(player, ruleset))
+            return false;
+    return true;
 }
 
 void AscensionRulesets::Apply(Player* player, Ruleset ruleset)
@@ -221,6 +357,26 @@ bool AscensionRulesets::Has(Player* player, Ruleset ruleset)
     return player->HasAura(RulesetAura(ruleset));
 }
 
+bool AscensionRulesets::InTeamBattle(Player const* player)
+{
+    if (Map const* map = player->FindMap(); map && map->IsBattlegroundOrArena())
+        return true;
+
+    Battlefield* battlefield = sBattlefieldMgr->GetBattlefieldToZoneId(player->GetZoneId());
+    if (!battlefield || !battlefield->IsWarTime())
+        return false;
+    for (TeamId team : {TEAM_ALLIANCE, TEAM_HORDE})
+        if (battlefield->GetPlayersInWarSet(team).count(player->GetGUID()))
+            return true;
+    return false;
+}
+
+bool AscensionRulesets::HighRiskSuspended(Player const* player)
+{
+    PlayerSettingVector const* settings = player->FindPlayerSettings(HighRiskSuspendedSetting);
+    return settings && !settings->empty() && settings->front().value;
+}
+
 void AddSC_AscensionRulesets()
 {
     LocalLevelScaling::RulesetBlocksOwner.store(&RulesetBlocksLevelScaling, std::memory_order_relaxed);
@@ -228,4 +384,5 @@ void AddSC_AscensionRulesets()
     new ruleset_aura_metadata();
     new ruleset_level_scaling_configuration();
     new ruleset_player_spells();
+    new ruleset_battlefield_war();
 }

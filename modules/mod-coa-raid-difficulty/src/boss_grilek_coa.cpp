@@ -4,13 +4,14 @@
  * Kit: Ascension's block 2118800-2118810. No cast bars in the video; the
  * timings are the Bronzebeard player's DBM bars and boss emotes:
  * "Gri'lek sets his sights on <player>!" with a 20s Fixate bar, and "Next
- * Ground Tremor" every 11-15s.
+ * Ground Tremor" every 11-15s. Ground Slam's timer follows the CoA combat log of
+ * 2026-08-02.
  *
  *   Relentless Pursuit  from the pull, a new player every 20s (at once when
  *                       the hunted one dies): he ignores everyone else
  *   Avatar              the whole fight: +100% damage, -50% speed, he is
  *                       meant to be kited
- *   Ground Slam         first 13s, every 13s   everyone: Physical damage and
+ *   Ground Slam         first 24s, every 25s   everyone: Physical damage and
  *                                              an 8s bleed (Trauma); those within
  *                                              20 yards are stunned 2s (Ground
  *                                              Tremor)
@@ -65,7 +66,7 @@ namespace
             BossAI::JustEngagedWith(who);
             DoCastSelf(SPELL_AVATAR, true);
             events.ScheduleEvent(EVENT_PURSUIT, 1s);
-            events.ScheduleEvent(EVENT_GROUND_SLAM, 13s);
+            events.ScheduleEvent(EVENT_GROUND_SLAM, 24s);
         }
 
         void JustDied(Unit* killer) override
@@ -143,7 +144,7 @@ namespace
                         break;
                     case EVENT_GROUND_SLAM:
                         DoCastSelf(SPELL_GROUND_SLAM);
-                        events.ScheduleEvent(EVENT_GROUND_SLAM, 13s);
+                        events.ScheduleEvent(EVENT_GROUND_SLAM, 25s);
                         break;
                     default:
                         break;

@@ -8,10 +8,12 @@
 
 #include "Define.h"
 #include <cstddef>
+#include <functional>
 #include <optional>
 #include <string>
 #include <string_view>
 #include <unordered_set>
+#include <vector>
 
 struct CreatureMovementData;
 
@@ -34,6 +36,15 @@ namespace CoAGameplay
     };
 
     inline constexpr float DefaultPlacementTolerance = 0.8f;
+    inline constexpr float ClearanceReach = 10.0f;
+
+    struct ClearanceRay
+    {
+        float originHeight{0.0f};
+        float dx{0.0f};
+        float dy{0.0f};
+        float dz{0.0f};
+    };
 
     struct PlacementSample
     {
@@ -49,6 +60,10 @@ namespace CoAGameplay
     std::optional<float> GroundGap(PlacementSample const& sample);
     PlacementVerdict ClassifyPlacement(PlacementSample const& sample, float tolerance);
     bool IsSubmerged(PlacementSample const& sample);
+    std::vector<ClearanceRay> const& LevelRays();
+    std::vector<ClearanceRay> const& HeadroomRays();
+    float NearestHit(std::vector<ClearanceRay> const& rays,
+        std::function<std::optional<float>(ClearanceRay const&)> const& hitDistance);
     DisplayState ClassifyDisplay(bool inServerStore, bool inClientDbc);
     bool CreatureMayFloat(CreatureMovementData const& movement, uint32 flagsExtra, uint8 animTier);
     bool GameObjectMayFloat(uint32 type, uint32 displayId);

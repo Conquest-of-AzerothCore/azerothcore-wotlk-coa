@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Taking Vows raises Vow of Light's copied heal to 15% and its buff tooltip says so (#9780)",
+  "contract": [
+    "Vow of Light 807547 heals the nearest ally (including a lone caster) for $807750s1% of direct healing it receives;",
+    "807750 effect 1 resolves to 10. Taking Vows 300331 reads 'Your Vow of Light now heals for an additional $s1%' and is",
+    "a SPELLMOD_EFFECT1 flat modifier of 5 on 807750 (sun-cleric-taking-vows measures the modified value). The copy",
+    "read 807750 without the caster, so the heal stayed at 10% and only the spellbook text showed 15%. The copied heal",
+    "505197 is physical-school magic with ignored caster and health modifiers, so it cannot crit and is never scaled.",
+    "Two solo Sun Clerics heal themselves with Greater Heal rank 11 (10965, 746-852 base) so integer truncation of the copy",
+    "stays below 0.0014 of the ratio; rank 1 healed only 34 and truncated a 3.4 copy to 3. The copy over the effective heal must be",
+    "0.10 without the talent and 0.15 with it. The buff tooltip, which renders $807750s1 without spell modifiers, is",
+    "streamed with the talent-adjusted value; rendered client text is outside the harness."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 80, "spell_power": 1500 },
+    { "id": "vowed", "race": 1, "class": 27, "level": 80, "spell_power": 1500 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and the patch stream settle", "ms": 7000 },
+    { "action": "assert", "label": "The existing description stream is captured", "actor": "vowed", "metric": "server_packet_contains", "opcode": 2346, "row": 500639, "text": "Requires Runeshroud", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The buff tooltip adds Taking Vows when it is known", "actor": "vowed", "metric": "server_packet_contains", "opcode": 2346, "row": 807547, "text": "$?s300331[${$807750s1+$300331s1}][$807750s1]% of the value.", "equals": 1 },
+    { "action": "learn", "actor": "vowed", "spell": 300331 },
+    { "action": "learn", "actor": "control", "spell": 807547 },
+    { "action": "learn", "actor": "control", "spell": 10965 },
+    { "action": "learn", "actor": "vowed", "spell": 807547 },
+    { "action": "learn", "actor": "vowed", "spell": 10965 },
+    { "action": "cast", "actor": "control", "spell": 807547 },
+    { "action": "cast", "actor": "vowed", "spell": 807547 },
+    { "action": "assert", "label": "SETUP: control Vow of Light is active", "actor": "control", "metric": "aura", "spell": 807547, "caster": "control", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: talented Vow of Light is active", "actor": "vowed", "metric": "aura", "spell": 807547, "caster": "vowed", "equals": 1, "within_ms": 2000 },
+    { "action": "set_health", "actor": "control", "value": 100 },
+    { "action": "set_health", "actor": "vowed", "value": 100 },
+    { "action": "wait", "label": "Let the global cooldown from Vow of Light clear", "ms": 1600 },
+    { "action": "cast", "actor": "control", "spell": 10965, "target": "control" },
+    { "action": "cast", "actor": "vowed", "spell": 10965, "target": "vowed" },
+    { "action": "assert", "label": "SETUP: the control copy lands", "actor": "control", "metric": "spell_heal_count", "spell": 505197, "target": "control", "min": 1, "within_ms": 6000 },
+    { "action": "assert", "label": "SETUP: the talented copy lands", "actor": "vowed", "metric": "spell_heal_count", "spell": 505197, "target": "vowed", "min": 1, "within_ms": 6000 },
+    { "action": "snapshot", "actor": "control", "metric": "spell_effective_heal_total", "spell": 10965, "target": "control", "save_as": "control_received" },
+    { "action": "snapshot", "actor": "vowed", "metric": "spell_effective_heal_total", "spell": 10965, "target": "vowed", "save_as": "vowed_received" },
+    { "action": "assert", "label": "SETUP: the control heal is large enough to resolve the ratio", "actor": "control", "metric": "spell_effective_heal_total", "spell": 10965, "target": "control", "min": 700 },
+    { "action": "assert", "label": "SETUP: the talented heal is large enough to resolve the ratio", "actor": "vowed", "metric": "spell_effective_heal_total", "spell": 10965, "target": "vowed", "min": 700 },
+    {
+      "action": "assert", "label": "CONTROL: without Taking Vows the copy is 10% of the healing received",
+      "actor": "control", "metric": "spell_heal_total", "spell": 505197, "target": "control",
+      "ratio_to": "control_received", "min": 0.098, "max": 0.102
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Taking Vows raises the copy to 15% of the healing received",
+      "actor": "vowed", "metric": "spell_heal_total", "spell": 505197, "target": "vowed",
+      "ratio_to": "vowed_received", "min": 0.148, "max": 0.152
+    }
+  ]
+}

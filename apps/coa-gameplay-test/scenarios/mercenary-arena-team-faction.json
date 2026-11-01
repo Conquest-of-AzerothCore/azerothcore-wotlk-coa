@@ -1,0 +1,308 @@
+{
+  "schema": 1,
+  "name": "Mercenary for Hire! and High-Risk: neither applies inside an arena",
+  "contract": "Mercenary for Hire! and High-Risk are open-world states; inside an arena the arena team decides who can fight. A Human High-Risk Mercenary who enters a War Games Nagrand Arena match against a Human PvE rival keeps Mercenary for Hire! through the arena's aura cleanup, but it has no effect there: the server gives them their Human faction, and the two are on opposite teams and can attack each other. High-Risk turns itself off and is remembered, and Mercenary for Hire! cannot be cast inside. Back outside, High-Risk returns and the player is a Mercenary and an Outlaw again.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "mercenary",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "rival",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "observer",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "teri",
+      "owner": "mercenary",
+      "entry": 9990001,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "observer",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "observer",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "observer",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "mercenary",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "observer",
+      "enabled": true
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "The High-Risk player becomes a Mercenary",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "The same-faction High-Risk player can attack the Mercenary",
+      "actor": "observer",
+      "metric": "can_attack",
+      "target": "mercenary",
+      "equals": 1
+    },
+    {
+      "action": "gossip_hello",
+      "label": "Talk to Teri",
+      "actor": "mercenary",
+      "target": "teri"
+    },
+    {
+      "action": "gossip_select",
+      "label": "Challenge the rival to Nagrand Arena",
+      "actor": "mercenary",
+      "option": 1,
+      "code_actor": "rival"
+    },
+    {
+      "action": "assert",
+      "label": "The rival sees the challenge",
+      "actor": "rival",
+      "metric": "gossip_options",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_select",
+      "label": "The rival accepts",
+      "actor": "rival",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Mercenary enters Nagrand Arena",
+      "actor": "mercenary",
+      "metric": "map_id",
+      "equals": 559,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "and so does the rival",
+      "actor": "rival",
+      "metric": "map_id",
+      "equals": 559,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "Mercenary for Hire! survives the arena's aura cleanup",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "High-Risk turns itself off inside the arena",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "and is remembered for afterwards",
+      "actor": "mercenary",
+      "metric": "player_setting",
+      "source": "core.ruleset.high_risk_suspended",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The server gives the Mercenary their Human faction, not Outlaw",
+      "actor": "mercenary",
+      "metric": "faction",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Mercenary can attack the same-race rival",
+      "actor": "mercenary",
+      "metric": "can_attack",
+      "target": "rival",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The same-race rival can attack the Mercenary",
+      "actor": "rival",
+      "metric": "can_attack",
+      "target": "mercenary",
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "The Mercenary drops Mercenary for Hire!",
+      "actor": "mercenary",
+      "spell": 9930874,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 9930874
+    },
+    {
+      "action": "wait",
+      "label": "Give the cast time to land",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Mercenary for Hire! cannot be cast inside the arena",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "The Mercenary takes it up again for the trip home",
+      "actor": "mercenary",
+      "spell": 9930874,
+      "stacks": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "The Mercenary leaves the arena",
+      "actor": "mercenary",
+      "opcode": 737,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The Mercenary is back in Stormwind",
+      "actor": "mercenary",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "High-Risk returns after the arena",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "and is no longer held back",
+      "actor": "mercenary",
+      "metric": "player_setting",
+      "source": "core.ruleset.high_risk_suspended",
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Mercenary is an Outlaw again",
+      "actor": "mercenary",
+      "metric": "faction",
+      "equals": 1163,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "and a same-faction High-Risk player can attack them",
+      "actor": "observer",
+      "metric": "can_attack",
+      "target": "mercenary",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Aftershock is consumed by the Geode Barrage it empowers (#4357)",
+  "contract": "Issue #4357 (class 31 Primalist): Aftershock stayed up after Geode Barrage. Spell.dbc 301086 Aftershock: 'Your next Geode Barrage or Earthquake within 8 sec is now instant cast and costs 75% less.' Its three SPELL_AURA_ADD_PCT_MODIFIER effects (casting time -100, cost -75) carry SpellClassMask word 0 0x800, Geode Barrage 500402's family flags, but ProcCharges is 0, so Player::RemoveSpellMods never dropped a charge and the modifiers kept applying for the full duration. primalist_aftershock_metadata (AscensionPrimalistSeismicResources.cpp) gives the aura one charge. Seismic Smash 300693 grants Aftershock natively through primalist_seismic_resources; the aura must then hold one charge, survive an unrelated wait, and be removed by the next Geode Barrage cast.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "primalist", "race": 1, "class": 31, "level": 60, "melee_hit_rating": 400, "spell_hit_rating": 400 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "primalist", "entry": 36, "level": 60, "health": 1000000, "distance": 3, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "primalist", "spell": 300693 },
+    { "action": "learn", "actor": "primalist", "spell": 500402 },
+    { "action": "set_power", "actor": "primalist", "power": 1, "value": 1000 },
+
+    { "action": "assert", "label": "SETUP: no Aftershock before Seismic Smash", "actor": "primalist", "metric": "aura", "spell": 301086, "equals": 0 },
+    { "action": "cast", "actor": "primalist", "spell": 300693, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: Seismic Smash grants Aftershock", "actor": "primalist", "metric": "aura", "spell": 301086, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: Aftershock holds one charge", "actor": "primalist", "metric": "aura_charges", "spell": 301086, "equals": 1 },
+
+    { "action": "wait", "label": "Control: Aftershock is not spent by time alone", "ms": 1500 },
+    { "action": "assert", "label": "CONTROL: Aftershock is still up before Geode Barrage", "actor": "primalist", "metric": "aura", "spell": 301086, "equals": 1 },
+
+    { "action": "set_power", "actor": "primalist", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "primalist", "spell": 500402, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: Geode Barrage was cast", "actor": "primalist", "metric": "spell_cast_count", "spell": 500402, "min": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: Geode Barrage consumes Aftershock", "actor": "primalist", "metric": "aura", "spell": 301086, "equals": 0, "within_ms": 2000 }
+  ]
+}

@@ -1470,6 +1470,14 @@ namespace CoAChallenges
             && quest->GetRewOrReqMoney() >= 0;
     }
 
+    bool IsFetchOrCollectionQuest(Quest const* quest)
+    {
+        return quest && !quest->GetReqCreatureOrGOcount() && !quest->GetPlayersSlain()
+            && !quest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_EXPLORATION_OR_EVENT)
+            && !quest->GetRepObjectiveFaction() && !quest->GetRepObjectiveFaction2()
+            && quest->GetRewOrReqMoney() >= 0;
+    }
+
     // NO_LEVEL_PAST_REQUIREMENTS: the lowest level ABOVE the player's current
     // one that still has an unmet tracked objective in an active challenge
     // carrying the rule, or 0 if none. XP must be capped one point short of it,

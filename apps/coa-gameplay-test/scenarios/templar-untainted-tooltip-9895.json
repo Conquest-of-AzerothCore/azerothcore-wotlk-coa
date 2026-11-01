@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "Templar Untainted's tooltip bills a positive physical damage reduction (#9895)",
+  "contract": [
+    "Untainted (talent 705298) triggers 705299, whose effect 0 is SPELL_AURA_MOD_DAMAGE_TAKEN (physical) with",
+    "EffectBasePoints -11 and EffectDieSides 1, so $705299m1 renders -10. aura_ascension_templar_lifecycle subtracts",
+    "0.1 x Stamina from that amount, so the buff reduces physical damage taken by 10 + 0.1 x Stamina. The client text",
+    "'${$705299m1+$STA*0.1}' added the negative base to the Stamina term and read 'by -0' at about 100 Stamina.",
+    "Expected: the streamed talent text bills '${-$705299m1+$STA*0.1}' and no longer carries the old sum, the buff",
+    "text bills '${-$m1+$STA*0.1}', and a level-29 buff's effect 0 is a reduction of at least 10."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    { "id": "templar", "race": 1, "class": 19, "level": 29 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the login spell patch stream settle", "ms": 7000 },
+    {
+      "action": "assert", "label": "CONTROL: the shared description table still streams row 500639",
+      "actor": "templar", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 500639, "text": "Requires Runeshroud", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the talent's row is streamed, so the absence check cannot pass vacuously",
+      "actor": "templar", "metric": "server_packets",
+      "opcode": 2346, "row": 705298, "min": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "THE FIX: the talent text negates the negative base before adding Stamina",
+      "actor": "templar", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 705298, "text": "${-$705299m1+$STA*0.1}", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "THE FIX: the sum that rendered 'by -0' is gone",
+      "actor": "templar", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 705298, "text": "${$705299m1+$STA*0.1}", "equals": 0
+    },
+    {
+      "action": "assert", "label": "THE FIX: the buff text bills the same positive reduction",
+      "actor": "templar", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 705299, "text": "${-$m1+$STA*0.1}", "equals": 1, "within_ms": 5000
+    },
+    { "action": "set_aura", "actor": "templar", "spell": 705299, "stacks": 1 },
+    {
+      "action": "assert", "label": "The buff reduces physical damage taken by at least its 10-point base",
+      "actor": "templar", "metric": "aura_amount", "spell": 705299, "effect": 0, "max": -10, "min": -100,
+      "within_ms": 1000
+    }
+  ]
+}

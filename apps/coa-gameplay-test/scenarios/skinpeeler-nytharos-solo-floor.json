@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: solo pool floor",
+  "contract": [
+    "A single player pulls and the probe sizes the pool from their output.",
+    "The pool stays inside the solo floor and the player survives the probe."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "summon",
+      "label": "Spawn the boss",
+      "actor": "tank",
+      "as": "boss",
+      "entry": 9916214,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Probe window",
+      "ms": 18000
+    },
+    {
+      "action": "assert",
+      "label": "Solo pool at the floor",
+      "actor": "boss",
+      "metric": "max_health",
+      "min": 8000,
+      "max": 40000
+    },
+    {
+      "action": "assert",
+      "label": "Solo player alive",
+      "actor": "tank",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

@@ -161,7 +161,6 @@ class aura_ascension_cultist_event : public AuraScript
             case 300300: Cast(player, target, 560943); break;
             case 300308:
                 Resource(player, Insanity, 2);
-                Reduce(player, 805572, std::abs(Amount(300605, 1)));
                 Cast(player, player, 300605);
                 break;
             case 300313: case 706245:

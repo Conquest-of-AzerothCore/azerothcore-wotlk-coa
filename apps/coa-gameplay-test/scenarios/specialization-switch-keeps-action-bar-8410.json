@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "A talent-window specialization switch gives each specialization its own action bar back",
+  "contract": [
+    "Blood (spec 26) grants entry 4525's ability 804726 automatically; Fleshweaver (25) does not. A switch from the talent window (CMSG 0x727) removes 804726, so the button holding it is stored with Blood's bar and taken off the live bar instead of being saved as an unknown spell.",
+    "A relog while in Fleshweaver drops every saved button whose spell is unknown. Returning to Blood afterwards must put 804726 back on the button it was placed on. Issues #8410 and #9286."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "level": 25 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "specialization", "label": "Enter Blood", "actor": "bloodmage", "id": 26 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "Blood grants its automatic ability",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 804726, "equals": 1
+    },
+    {
+      "action": "set_action_button", "label": "Put the Blood ability on button 5",
+      "actor": "bloodmage", "button": 5, "spell": 804726
+    },
+    { "action": "specialization", "label": "Switch to Fleshweaver", "actor": "bloodmage", "id": 25 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "Fleshweaver does not know the Blood ability",
+      "actor": "bloodmage", "metric": "knows_spell", "spell": 804726, "equals": 0
+    },
+    { "action": "relog", "label": "Relog in Fleshweaver", "actor": "bloodmage" },
+    { "action": "wait", "ms": 2000 },
+    { "action": "specialization", "label": "Return to Blood", "actor": "bloodmage", "id": 26 },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "The Blood ability is back on button 5",
+      "actor": "bloodmage", "metric": "action_button", "button": 5, "equals": 804726
+    }
+  ]
+}

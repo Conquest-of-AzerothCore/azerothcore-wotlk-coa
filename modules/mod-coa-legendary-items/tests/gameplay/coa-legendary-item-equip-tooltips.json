@@ -3,7 +3,7 @@
   "name": "CoA Legendary Items: native equip tooltips",
   "contract": [
     "Requires CoALegendaryItems.Enable=1 and CoA.SendDisplayPatches=1.",
-    "Widow Queen Seal variants for required levels 1, 22 and 60 advertise 13, 34 and 72 spell power.",
+    "Widow Queen Seal variants for required levels 1, 22 and 60 advertise 3, 14 and 33 spell power.",
     "Single and bulk item responses attach a native equip spell and omit the power from flavor text.",
     "Login omits unowned tooltip spells. Queries and acquisition stream only associated spells once per session.",
     "Relog streams only owned variants. The capacity placeholder defers its tooltip until the item is queried.",
@@ -143,7 +143,7 @@
       "metric": "server_packet_contains",
       "opcode": 2346,
       "row": 9725101,
-      "text": "Gain 13 spell power while at or below 35% health.",
+      "text": "Gain 3 spell power while at or below 35% health.",
       "equals": 1
     },
     {
@@ -176,7 +176,7 @@
       "metric": "server_packet_contains",
       "opcode": 88,
       "row": 9705101,
-      "text": "Gain 13 spell power while at or below 35% health.",
+      "text": "Gain 3 spell power while at or below 35% health.",
       "equals": 0
     },
     {
@@ -264,7 +264,7 @@
       "metric": "server_packet_contains",
       "opcode": 2346,
       "row": 9725122,
-      "text": "Gain 34 spell power while at or below 35% health.",
+      "text": "Gain 14 spell power while at or below 35% health.",
       "equals": 1
     },
     {
@@ -297,7 +297,7 @@
       "metric": "server_packet_contains",
       "opcode": 88,
       "row": 9705122,
-      "text": "Gain 34 spell power while at or below 35% health.",
+      "text": "Gain 14 spell power while at or below 35% health.",
       "equals": 0
     },
     {
@@ -383,7 +383,7 @@
       "metric": "server_packet_contains",
       "opcode": 2346,
       "row": 9725160,
-      "text": "Gain 72 spell power while at or below 35% health.",
+      "text": "Gain 33 spell power while at or below 35% health.",
       "equals": 1
     },
     {
@@ -416,7 +416,7 @@
       "metric": "server_packet_contains",
       "opcode": 88,
       "row": 9705160,
-      "text": "Gain 72 spell power while at or below 35% health.",
+      "text": "Gain 33 spell power while at or below 35% health.",
       "equals": 0
     },
     {
@@ -745,7 +745,7 @@
       "metric": "aura_amount",
       "spell": 9710051,
       "effect": 0,
-      "equals": 34,
+      "equals": 14,
       "within_ms": 2000
     },
     {

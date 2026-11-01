@@ -65,9 +65,10 @@ enum Spells
     // Bat Rider (Trash)
     SPELL_BATRIDER_DEMO_SHOUT           = 23511,
     SPELL_BATRIDER_BATTLE_COMMAND       = 5115,
-    SPELL_BATRIDER_INFECTED_BITE        = 16128,
+    SPELL_BATRIDER_INFECTED_BITE        = 350048,
     SPELL_BATRIDER_PASSIVE_THRASH       = 8876,
-    SPELL_BATRIDER_UNSTABLE_CONCOCTION  = 24024
+    SPELL_BATRIDER_UNSTABLE_CONCOCTION  = 24024,
+    SPELL_BATRIDER_FIERCE_BLOW          = 975011
 };
 
 enum BatIds
@@ -352,6 +353,10 @@ struct npc_batrider : public CreatureAI
             {
                 DoCastVictim(SPELL_BATRIDER_INFECTED_BITE);
                 context.Repeat(8s);
+            }).Schedule(7300ms, 20700ms, [this](TaskContext context)
+            {
+                DoCastVictim(SPELL_BATRIDER_FIERCE_BLOW);
+                context.Repeat(7200ms, 13400ms);
             });
         }
     }

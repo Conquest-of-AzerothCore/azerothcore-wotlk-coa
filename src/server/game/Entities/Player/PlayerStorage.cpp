@@ -15,10 +15,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AscensionItemRecovery.h"
 #include "AccountMgr.h"
 #include "AchievementMgr.h"
 #include "ArenaTeam.h"
 #include "ArenaTeamMgr.h"
+#include "AscensionBazaarTokenReserve.h"
 #include "Battlefield.h"
 #include "Battleground.h"
 #include "BattlegroundMgr.h"
@@ -2434,7 +2436,7 @@ InventoryResult Player::CanUseItem(ItemTemplate const* proto) const
         }
     }
 
-    if (proto->RequiredSpell != 0 && !HasSpell(proto->RequiredSpell))
+    if (proto->RequiredSpell != 0 && !HasSpellOrTwin(proto->RequiredSpell))
     {
         return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
     }
@@ -2490,7 +2492,7 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
     if ((proto->AllowableClass & getClassMask()) == 0 || (proto->AllowableRace & getRaceMask()) == 0)
         return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
 
-    if (proto->RequiredSpell != 0 && !HasSpell(proto->RequiredSpell))
+    if (proto->RequiredSpell != 0 && !HasSpellOrTwin(proto->RequiredSpell))
         return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
 
     if (proto->RequiredSkill != 0)
@@ -3166,6 +3168,7 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
     if (pItem)
     {
         LOG_DEBUG("entities.player.items", "STORAGE: DestroyItem bag = {}, slot = {}, item = {}", bag, slot, pItem->GetEntry());
+        AscensionBazaarTokenReserve::SpendScope spendScope(this, pItem->GetEntry());
         // Also remove all contained items if the item is a bag.
         // This if () prevents item saving crashes if the condition for a bag to be empty before being destroyed was bypassed somehow.
         if (pItem->IsNotEmptyBag())
@@ -3256,6 +3259,7 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
 void Player::DestroyItemCount(uint32 itemEntry, uint32 count, bool update, bool unequip_check)
 {
     LOG_DEBUG("entities.player.items", "STORAGE: DestroyItemCount item = {}, count = {}", itemEntry, count);
+    AscensionBazaarTokenReserve::SpendScope spendScope(this, itemEntry);
     uint32 remcount = 0;
 
     // in inventory
@@ -3535,6 +3539,7 @@ void Player::DestroyItemCount(Item* pItem, uint32& count, bool update)
         return;
 
     LOG_DEBUG("entities.player.items", "STORAGE: DestroyItemCount item ({}, Entry: {}) count = {}", pItem->GetGUID().ToString(), pItem->GetEntry(), count);
+    AscensionBazaarTokenReserve::SpendScope spendScope(this, pItem->GetEntry());
 
     if (pItem->GetCount() <= count)
     {
@@ -4078,6 +4083,10 @@ void Player::AddItemToBuyBackSlot(Item* pItem, uint32 money)
 {
     if (pItem)
     {
+        bool const archived = AscensionItemRecovery::Capture && AscensionItemRecovery::Capture(this, pItem,
+            pItem->GetCount(), AscensionItemRecovery::Source::Vendored, money);
+        if (!archived && sWorld->getBoolConfig(CONFIG_ITEMDELETE_VENDOR))
+            GetSession()->RecordRecoveryItem(pItem, pItem->GetCount());
         uint32 slot = m_currentBuybackSlot;
         // if current back slot non-empty search oldest or free
         if (m_items[slot])
@@ -4141,6 +4150,8 @@ void Player::RemoveItemFromBuyBackSlot(uint32 slot, bool del)
         Item* pItem = m_items[slot];
         if (pItem)
         {
+            if (!del && AscensionItemRecovery::ForgetVendor)
+                AscensionItemRecovery::ForgetVendor(this, pItem);
             pItem->RemoveFromWorld();
             if (del)
                 pItem->SetState(ITEM_REMOVED, this);
@@ -7310,6 +7321,8 @@ void Player::SaveToDB(CharacterDatabaseTransaction trans, bool create, bool logo
 
     _SaveEntryPoint(trans);
     _SaveInventory(trans);
+    if (AscensionItemRecovery::Flush)
+        AscensionItemRecovery::Flush(this, trans);
     _SaveQuestStatus(trans);
     _SaveDailyQuestStatus(trans);
     _SaveWeeklyQuestStatus(trans);
@@ -7355,6 +7368,8 @@ void Player::AdditionalSavingAddMask(uint8 mask)
 void Player::SaveInventoryAndGoldToDB(CharacterDatabaseTransaction trans)
 {
     _SaveInventory(trans);
+    if (AscensionItemRecovery::Flush)
+        AscensionItemRecovery::Flush(this, trans);
     SaveGoldToDB(trans);
 }
 

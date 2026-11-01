@@ -16,6 +16,7 @@
  */
 
 #include "AccountMgr.h"
+#include "AscensionBazaarTokenReserve.h"
 #include "Chat.h"
 #include "RBAC.h"
 #include "CharacterCache.h"
@@ -290,6 +291,23 @@ void WorldSession::HandleSendMail(WorldPacket& recvData)
     {
         player->SendMailResult(0, MAIL_SEND, MAIL_ERR_INTERNAL_ERROR);
         return;
+    }
+
+    // Elite Warchest Bazaar Tokens are Realm Bound: free between the account's own characters, otherwise the
+    // account must keep its reserve.
+    if (GetAccountId() != rc_account)
+    {
+        uint32 tokens = 0;
+        for (uint8 i = 0; i < items_count; ++i)
+            if (items[i]->GetEntry() == AscensionBazaarTokenReserve::TOKEN_ITEM)
+                tokens += items[i]->GetCount();
+
+        if (!AscensionBazaarTokenReserve::CanGiveAway(player, tokens))
+        {
+            AscensionBazaarTokenReserve::SendRefusal(player);
+            player->SendMailResult(0, MAIL_SEND, MAIL_ERR_EQUIP_ERROR, EQUIP_ERR_MAIL_BOUND_ITEM);
+            return;
+        }
     }
 
     player->SendMailResult(0, MAIL_SEND, MAIL_OK);

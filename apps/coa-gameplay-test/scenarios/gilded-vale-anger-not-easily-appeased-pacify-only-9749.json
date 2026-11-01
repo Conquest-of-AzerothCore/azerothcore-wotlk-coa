@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Anger Not Easily Appeased: only the Magic Crystal pacifies a Furious Gilded Treant for credit (COA-9749)",
+  "contract": "Issue #9749: quest 175096 asks to pacify eight Furious Gilded Treants (164301) with the Magic Crystal of the Namarien Sanctuary 559904. Its spell Golden Tranquility 365042 on a treant weakened to 50% health or less makes the treant's SmartAI give the pacified credit and despawn it. Killing a treant gives no credit. The case kills one summoned treant and expects the objective to stay at 0, then weakens a second treant and uses the crystal on it and expects exactly one credit.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -7459.99, "y": 18.41, "z": 183.79, "o": 0 },
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the vale's grid activate", "ms": 2000 },
+    { "action": "prepare_quest", "actor": "p", "quest": 175096, "complete": false },
+    { "action": "assert", "label": "SETUP: accepting the quest provides the Magic Crystal", "actor": "p", "metric": "item_count", "item": 559904, "equals": 1 },
+    { "action": "summon", "actor": "p", "as": "slain", "entry": 164301, "distance": 3 },
+    { "action": "attack_nearby", "label": "Slay a Furious Gilded Treant", "actor": "p", "entry": 164301, "kill": true },
+    { "action": "assert", "label": "SETUP: the first treant is slain", "actor": "slain", "metric": "alive", "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the kill alone pacifies nothing", "actor": "p", "metric": "quest_objective_count", "quest": 175096, "index": 0, "equals": 0 },
+    { "action": "summon", "actor": "p", "as": "treant", "entry": 164301, "distance": 3 },
+    { "action": "set_health", "label": "Weaken the second treant", "actor": "treant", "value": 300 },
+    { "action": "assert", "label": "SETUP: the second treant is weakened below half health", "actor": "treant", "metric": "health_pct", "max": 50 },
+    { "action": "use_item", "label": "Use the Magic Crystal on the weakened treant", "actor": "p", "item": 559904, "spell": 365042, "target": "treant" },
+    { "action": "assert", "label": "SETUP: Golden Tranquility starts", "actor": "p", "metric": "cast_failure", "spell": 365042, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "label": "the crystal pacifies one treant", "actor": "p", "metric": "quest_objective_count", "quest": 175096, "index": 0, "equals": 1, "within_ms": 5000 }
+  ]
+}

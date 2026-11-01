@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionWitchHunterCompletion.h"
+#include "EventMap.h"
 #include "Player.h"
 #include "Random.h"
 #include "ScriptMgr.h"
@@ -12,6 +13,8 @@
 #include <algorithm>
 #include <array>
 #include <limits>
+#include <mutex>
+#include <unordered_map>
 
 namespace
 {
@@ -316,7 +319,7 @@ class aura_ascension_witch_hunter_event : public AuraScript
                 break;
             }
             case 680516:
-                Cast(owner, other, 680517);
+                Brand(owner, other);
                 break;
             case 805346:
                 for (auto const& [id, state] : player->GetSpellMap())
@@ -326,7 +329,7 @@ class aura_ascension_witch_hunter_event : public AuraScript
                 break;
             case 680528:
             {
-                Cast(owner, other, 680517);
+                Brand(owner, other);
                 SpellInfo const* dot = sSpellMgr->GetSpellInfo(680532);
                 uint32 ticks = std::max(1, dot->GetDuration() / int32(dot->Effects[EFFECT_0].Amplitude));
                 CarryDamage(owner, other, 680532,
@@ -451,9 +454,188 @@ class aura_ascension_witch_hunter_event : public AuraScript
         OnProc += AuraProcFn(aura_ascension_witch_hunter_event::Proc);
     }
 };
+
+class aura_ascension_witch_hunter_anguish : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_witch_hunter_anguish);
+
+    void ResetDarkflock(AuraEffect const*, AuraEffectHandleModes)
+    {
+        Player* player = GetTarget()->ToPlayer();
+        if (!player)
+            return;
+        for (auto const& [id, state] : player->GetSpellMap())
+            if (state->State != PLAYERSPELL_REMOVED && Family(sSpellMgr->GetSpellInfo(id), 0, 2))
+                player->RemoveSpellCooldown(id, true);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_witch_hunter_anguish::ResetDarkflock, EFFECT_0,
+                                              SPELL_AURA_ADD_PCT_MODIFIER, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+    }
+};
+
+constexpr uint32 SPELL_UNBROKEN = 707407;
+constexpr uint32 SPELL_UNBROKEN_AP = 707487;
+constexpr uint32 UNBROKEN_CONVERSION_DEMON = 325;
+constexpr uint32 UNBROKEN_CONVERSION_UNDEAD = 150;
+constexpr uint32 UNBROKEN_CONVERSION_DEFAULT = 75;
+constexpr uint32 UNBROKEN_CONVERSION_SCALE = 1000;
+constexpr uint32 UNBROKEN_CAP_PERCENT = 20;
+constexpr uint32 UNBROKEN_VERSUS_PERCENT = 50;
+constexpr uint32 UNBROKEN_DECAY_COMBAT_PERCENT = 5;
+constexpr uint32 UNBROKEN_DECAY_IDLE_PERCENT = 10;
+constexpr uint32 UNBROKEN_DECAY_EVENT = 1;
+constexpr uint32 UNBROKEN_DECAY_INTERVAL = 2000;
+
+struct UnbrokenState
+{
+    EventMap decay;
+    uint32 amount = 0;
+};
+
+std::unordered_map<ObjectGuid, UnbrokenState> unbrokenStates;
+std::mutex unbrokenStatesMutex;
+
+UnbrokenState& UnbrokenStateFor(Player* player)
+{
+    std::lock_guard<std::mutex> lock(unbrokenStatesMutex);
+    return unbrokenStates.try_emplace(player->GetGUID()).first->second;
+}
+
+UnbrokenState* UnbrokenStateOf(Player* player)
+{
+    std::lock_guard<std::mutex> lock(unbrokenStatesMutex);
+    auto itr = unbrokenStates.find(player->GetGUID());
+    return itr == unbrokenStates.end() ? nullptr : &itr->second;
+}
+
+uint32 UnbrokenConversion(Unit* attacker)
+{
+    if (!attacker)
+        return UNBROKEN_CONVERSION_DEFAULT;
+    switch (attacker->GetCreatureType())
+    {
+    case CREATURE_TYPE_DEMON:
+        return UNBROKEN_CONVERSION_DEMON;
+    case CREATURE_TYPE_UNDEAD:
+        return UNBROKEN_CONVERSION_UNDEAD;
+    default:
+        return UNBROKEN_CONVERSION_DEFAULT;
+    }
+}
+
+void UnbrokenApply(Player* player, uint32 amount)
+{
+    if (!amount)
+    {
+        player->RemoveAurasDueToSpell(SPELL_UNBROKEN_AP);
+        return;
+    }
+    if (!player->HasAura(SPELL_UNBROKEN_AP))
+        player->AddAura(SPELL_UNBROKEN_AP, player);
+    Aura* aura = player->GetAura(SPELL_UNBROKEN_AP);
+    if (!aura)
+        return;
+    int32 versus = int32(CalculatePct(amount, UNBROKEN_VERSUS_PERCENT));
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (AuraEffect* effect = aura->GetEffect(i))
+            effect->ChangeAmount(i == EFFECT_0 ? int32(amount) : versus);
+}
+
+void UnbrokenGain(Player* player, Unit* attacker, uint32 damage)
+{
+    if (!player || !damage || !player->IsAlive() || !player->HasAura(SPELL_UNBROKEN))
+        return;
+    UnbrokenState& state = UnbrokenStateFor(player);
+    uint32 cap = uint32(CalculatePct(player->GetMaxHealth(), UNBROKEN_CAP_PERCENT));
+    uint32 gain = std::max<uint32>(1, uint32(uint64(damage) * UnbrokenConversion(attacker) / UNBROKEN_CONVERSION_SCALE));
+    state.amount = std::min(cap, state.amount + gain);
+    UnbrokenApply(player, state.amount);
+}
+
+class witch_hunter_unbroken_damage : public UnitScript
+{
+  public:
+    witch_hunter_unbroken_damage()
+        : UnitScript("witch_hunter_unbroken_damage", true,
+                     {UNITHOOK_MODIFY_MELEE_DAMAGE, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN})
+    {
+    }
+
+    void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
+    {
+        UnbrokenGain(Owner(target), attacker, damage);
+    }
+
+    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const*) override
+    {
+        if (damage <= 0)
+            return;
+        UnbrokenGain(Owner(target), attacker, uint32(damage));
+    }
+};
+
+class witch_hunter_unbroken_decay : public PlayerScript
+{
+  public:
+    witch_hunter_unbroken_decay()
+        : PlayerScript("witch_hunter_unbroken_decay", {PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT})
+    {
+    }
+
+    void OnPlayerUpdate(Player* player, uint32 diff) override
+    {
+        Player* hunter = Owner(player);
+        if (!hunter)
+            return;
+        UnbrokenState* state = UnbrokenStateOf(hunter);
+        if (!state)
+            return;
+        if (!hunter->HasAura(SPELL_UNBROKEN))
+        {
+            UnbrokenApply(hunter, 0);
+            std::lock_guard<std::mutex> lock(unbrokenStatesMutex);
+            unbrokenStates.erase(hunter->GetGUID());
+            return;
+        }
+        if (!hunter->IsAlive() || !hunter->HasAura(SPELL_UNBROKEN_AP))
+        {
+            state->amount = 0;
+            UnbrokenApply(hunter, 0);
+            return;
+        }
+        if (state->amount && !state->decay.HasTimeUntilEvent(UNBROKEN_DECAY_EVENT))
+            state->decay.ScheduleEvent(UNBROKEN_DECAY_EVENT, Milliseconds(UNBROKEN_DECAY_INTERVAL));
+        state->decay.Update(diff);
+        while (state->decay.ExecuteEvent())
+        {
+            if (!state->amount)
+                continue;
+            uint32 percent = hunter->IsInCombat() ? UNBROKEN_DECAY_COMBAT_PERCENT : UNBROKEN_DECAY_IDLE_PERCENT;
+            uint32 loss = std::max<uint32>(1, uint32(CalculatePct(state->amount, percent)));
+            state->amount = state->amount > loss ? state->amount - loss : 0;
+            UnbrokenApply(hunter, state->amount);
+            if (state->amount)
+                state->decay.ScheduleEvent(UNBROKEN_DECAY_EVENT, Milliseconds(UNBROKEN_DECAY_INTERVAL));
+        }
+    }
+
+    void OnPlayerLogout(Player* player) override
+    {
+        if (!player)
+            return;
+        std::lock_guard<std::mutex> lock(unbrokenStatesMutex);
+        unbrokenStates.erase(player->GetGUID());
+    }
+};
 }
 
 void AddAscensionWitchHunterEventScripts()
 {
     RegisterSpellScript(aura_ascension_witch_hunter_event);
+    RegisterSpellScript(aura_ascension_witch_hunter_anguish);
+    new witch_hunter_unbroken_damage();
+    new witch_hunter_unbroken_decay();
 }

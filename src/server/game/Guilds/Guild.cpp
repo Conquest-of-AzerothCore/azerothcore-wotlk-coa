@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AscensionBazaarTokenReserve.h"
 #include "Guild.h"
 #include "Bag.h"
 #include "CalendarMgr.h"
@@ -773,6 +774,14 @@ bool Guild::PlayerMoveItemData::InitItem()
         // Bound items cannot be put into bank.
         else if (!m_pItem->CanBeTraded())
         {
+            m_pPlayer->SendEquipError(EQUIP_ERR_ITEMS_CANT_BE_SWAPPED, m_pItem);
+            m_pItem = nullptr;
+        }
+        // Elite Warchest Bazaar Tokens are Realm Bound: the account must keep its reserve.
+        else if (m_pItem->GetEntry() == AscensionBazaarTokenReserve::TOKEN_ITEM
+            && !AscensionBazaarTokenReserve::CanGiveAway(m_pPlayer, m_pItem->GetCount()))
+        {
+            AscensionBazaarTokenReserve::SendRefusal(m_pPlayer);
             m_pPlayer->SendEquipError(EQUIP_ERR_ITEMS_CANT_BE_SWAPPED, m_pItem);
             m_pItem = nullptr;
         }

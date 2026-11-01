@@ -35,6 +35,12 @@ bool ScriptMgr::OnSpellFocusAnswered(Spell* spell)
         script->OnSpellFocusAnswered(spell));
 }
 
+bool ScriptMgr::CanIgnoreShapeshift(Spell const* spell)
+{
+    CALL_ENABLED_BOOLEAN_HOOKS_WITH_DEFAULT_FALSE(AllSpellScript, ALLSPELLHOOK_CAN_IGNORE_SHAPESHIFT,
+        script->CanIgnoreShapeshift(spell));
+}
+
 bool ScriptMgr::CanPrepare(Spell* spell, SpellCastTargets const* targets, AuraEffect const* triggeredByAura)
 {
     CALL_ENABLED_BOOLEAN_HOOKS(AllSpellScript, ALLSPELLHOOK_CAN_PREPARE, !script->CanPrepare(spell, targets, triggeredByAura));
@@ -148,6 +154,12 @@ void ScriptMgr::OnGuardianSummoned(Spell* spell, TempSummon* summon)
 {
     CALL_ENABLED_HOOKS(AllSpellScript, ALLSPELLHOOK_ON_GUARDIAN_SUMMONED,
         script->OnGuardianSummoned(spell, summon));
+}
+
+void ScriptMgr::OnSpellGlobalCooldown(Spell* spell, int32& duration)
+{
+    CALL_ENABLED_HOOKS(AllSpellScript, ALLSPELLHOOK_ON_GLOBAL_COOLDOWN,
+        script->OnSpellGlobalCooldown(spell, duration));
 }
 
 AllSpellScript::AllSpellScript(char const* name, std::vector<uint16> enabledHooks)

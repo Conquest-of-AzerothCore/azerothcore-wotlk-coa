@@ -9,12 +9,14 @@
     "Compare mean damage per actual proc against a second otherwise identical enemy after five stacks; damage",
     "dealt while building stacks cannot enter the second sample. Assert every native refresh's stack count and",
     "completed normal-cast count. The owner's RAP and both targets stay unchanged; proc chances and attack timers",
-    "are unmodified. Each mean proc hit must equal the captured native aura amount times its stack count plus the",
+    "are unmodified. Each mean non-critical proc hit must equal the captured native aura amount times its stack count plus the",
     "unchanged owner RAP times 15 percent per stack, allowing one point of integer rounding; a generic increase",
     "is insufficient. Original 804192 applies its complete per-application amount and 15 percent owner ranged",
     "attack power once per stack. Five-stack mean proc damage must therefore be approximately five times the one-",
     "stack mean; the numerical checker preserves the main regression bounds of 4.5 to 5.3 while comparing",
-    "measured counts rather than assuming a single proc."
+    "measured counts rather than assuming a single proc.",
+    "Monster resistance rolls partial resists on Shadow Rage, so a mean may sit up to 25 percent below that amount,",
+    "and Shadow Rage can crit, so both samples count only non-critical hits."
   ],
   "timeout_ms": 240000,
   "players": [
@@ -677,7 +679,8 @@
       "spell": 567570,
       "target": "one",
       "min": 1,
-      "label": "Actual Shadow Rage procs occurred against one"
+      "label": "Actual Shadow Rage procs occurred against one",
+      "critical": false
     },
     {
       "action": "snapshot",
@@ -685,7 +688,8 @@
       "metric": "spell_damage_count",
       "spell": 567570,
       "target": "one",
-      "save_as": "one_stack_procs"
+      "save_as": "one_stack_procs",
+      "critical": false
     },
     {
       "action": "snapshot",
@@ -693,7 +697,8 @@
       "metric": "spell_damage_total",
       "spell": 567570,
       "target": "one",
-      "save_as": "one_stack_damage"
+      "save_as": "one_stack_damage",
+      "critical": false
     },
     {
       "action": "learn",
@@ -1358,7 +1363,8 @@
       "spell": 567570,
       "target": "five",
       "min": 1,
-      "label": "Actual Shadow Rage procs occurred against five"
+      "label": "Actual Shadow Rage procs occurred against five",
+      "critical": false
     },
     {
       "action": "snapshot",
@@ -1366,7 +1372,8 @@
       "metric": "spell_damage_count",
       "spell": 567570,
       "target": "five",
-      "save_as": "five_stack_procs"
+      "save_as": "five_stack_procs",
+      "critical": false
     },
     {
       "action": "snapshot",
@@ -1374,7 +1381,8 @@
       "metric": "spell_damage_total",
       "spell": 567570,
       "target": "five",
-      "save_as": "five_stack_damage"
+      "save_as": "five_stack_damage",
+      "critical": false
     }
   ]
 }

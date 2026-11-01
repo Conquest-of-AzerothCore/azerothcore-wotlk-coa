@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Deciphering The Code: the map marks Ambassador Thargas Anvilmar where he stands (COA-9707)",
+  "contract": [
+    "Issue #9707: Deciphering The Code 175135 is credited and ended by Ambassador Thargas Anvilmar 164389, who stands in the Dun Kazad throne room at (-6443, -320). Its two POIs (objective 0 and turn-in) still pointed at (-6651, -296), about 210 yards away, where he is not.",
+    "A real client asks CMSG_QUEST_POI_QUERY (483) and reads SMSG_QUEST_POI_QUERY_RESPONSE (484): quest count, quest id, POI count, then per POI its id, objective index, map, area, floor, priority, flags, point count and points (x, y as int32).",
+    "POI 0 has eight points from byte 44; POI 1 starts at byte 108 and its only point is at byte 140. Negative coordinates read as unsigned 32-bit values: -6443 is 4294960853 and -320 is 4294966976.",
+    "The quest diamond comes from QuestSuperTrack 33057 -> SuperTrack nodes 21552 (objective) and 21553 (turn-in), which the client placed at the old spot. With CoA.SendDisplayPatches=1 the login stream sends coa_client_super_track rows as SMSG_PATCH_SUPER_TRACK (0x06BE = 1726) records: ID, map, x, y, z as float words. Socketless packet construction does not establish how the client renders the diamond."
+  ],
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": -6443.07, "y": -319.93, "z": 576.76, "o": 0 },
+  "players": [
+    { "id": "a", "race": 3, "class": 1, "level": 30 }
+  ],
+  "steps": [
+    { "action": "prepare_quest", "actor": "a", "quest": 175135, "complete": false },
+    { "action": "client_packet", "label": "Ask the map to mark 175135, as the quest log does", "actor": "a", "opcode": 483, "consumed": false, "fields": [{ "u32": 1 }, { "u32": 175135 }] },
+    { "action": "assert", "label": "SETUP: the answer is 175135's own POI list", "actor": "a", "metric": "server_packet_u32", "opcode": 484, "row": 1, "offset": 4, "index": 0, "equals": 175135, "within_ms": 4000 },
+    { "action": "assert", "label": "SETUP: 175135 sends its two POIs", "actor": "a", "metric": "server_packet_u32", "opcode": 484, "row": 1, "offset": 8, "index": 0, "equals": 2 },
+    { "action": "assert", "label": "SETUP: POI 1 is the turn-in with a single point", "actor": "a", "metric": "server_packet_u32", "opcode": 484, "row": 1, "offset": 136, "index": 0, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the turn-in point is at Thargas's x (-6443), not the clothier's (-6651)", "actor": "a", "metric": "server_packet_u32", "opcode": 484, "row": 1, "offset": 140, "index": 0, "equals": 4294960853 },
+    { "action": "assert", "label": "the turn-in point is at Thargas's y (-320)", "actor": "a", "metric": "server_packet_u32", "opcode": 484, "row": 1, "offset": 144, "index": 0, "equals": 4294966976 },
+    { "action": "assert", "label": "the objective area's first point is beside Thargas (x -6453)", "actor": "a", "metric": "server_packet_u32", "opcode": 484, "row": 1, "offset": 44, "index": 0, "equals": 4294960843 },
+    { "action": "wait", "label": "Let the login patch stream finish", "ms": 6000 },
+    { "action": "assert", "label": "the login stream sends the objective diamond node 21552 once", "actor": "a", "metric": "server_packets", "opcode": 1726, "row": 21552, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: diamond node 21552 x is Thargas's -6443.07, not the clothier's -6651.3", "actor": "a", "metric": "server_packet_u32", "opcode": 1726, "row": 21552, "index": 2, "equals": 3318306959 },
+    { "action": "assert", "label": "diamond node 21552 y is Thargas's -319.93", "actor": "a", "metric": "server_packet_u32", "opcode": 1726, "row": 21552, "index": 3, "equals": 3282040586 },
+    { "action": "assert", "label": "the turn-in diamond node 21553 x is Thargas's -6443.07", "actor": "a", "metric": "server_packet_u32", "opcode": 1726, "row": 21553, "index": 2, "equals": 3318306959 }
+  ]
+}

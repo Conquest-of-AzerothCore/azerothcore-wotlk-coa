@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Dawnfall's aura tooltip states its 15% values instead of 0% (#9781)",
+  "contract": [
+    "Dawnfall 806118 is three persistent area auras: effect 1 MOD_DAMAGE_FROM_CASTER and effect 2 the Solar Flare",
+    "trigger reach enemies, effect 3 MOD_HEALING_PCT reaches allies (BasePoints 14 resolves to 15 for both percentages).",
+    "Its client tooltip reads both live amounts ${$w1} and ${$w3}, but each unit carries only one half, so",
+    "SMSG_ASCENSION_AURA_AMOUNT sends 0 for the other and the text reads 'take 0% increased'. Its damage line used",
+    "Dawnfall's own empty effect 2 amount with an SP*0.12 term, while the struck Solar Flare 807175 deals",
+    "$807175m2+$807175ppl2 plus 0.26 spell power (its own description and the Sun Cleric coefficient table).",
+    "The tooltip is streamed through coa_client_spell_description with the static $s1/$s3 values and Solar Flare's",
+    "formula, and the native description is kept. Rendered client text is outside the harness."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 7000 },
+    { "action": "assert", "label": "The existing description stream is captured", "actor": "cleric", "metric": "server_packet_contains", "opcode": 2346, "row": 500639, "text": "Requires Runeshroud", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The Dawnfall row is emitted", "actor": "cleric", "metric": "server_packets", "opcode": 2346, "row": 806118, "min": 1 },
+    { "action": "assert", "label": "Enemies see the static damage-taken value", "actor": "cleric", "metric": "server_packet_contains", "opcode": 2346, "row": 806118, "text": "Enemies inside take $s1% increased damage from the Sun Cleric", "equals": 1 },
+    { "action": "assert", "label": "Allies see the static healing value", "actor": "cleric", "metric": "server_packet_contains", "opcode": 2346, "row": 806118, "text": "Allies inside take $s3% increased healing from all sources.", "equals": 1 },
+    { "action": "assert", "label": "The damage line uses Solar Flare's formula", "actor": "cleric", "metric": "server_packet_contains", "opcode": 2346, "row": 806118, "text": "${$807175m2+$807175ppl2+$SP*0.26} Holyfire Damage", "equals": 1 },
+    { "action": "assert", "label": "No live effect 1 amount remains", "actor": "cleric", "metric": "server_packet_contains", "opcode": 2346, "row": 806118, "text": "${$w1}", "equals": 0 },
+    { "action": "assert", "label": "No live effect 3 amount remains", "actor": "cleric", "metric": "server_packet_contains", "opcode": 2346, "row": 806118, "text": "${$w3}", "equals": 0 },
+    { "action": "assert", "label": "The native description is kept", "actor": "cleric", "metric": "server_packet_contains", "opcode": 2346, "row": 806118, "text": "Bring down the light of An'she down at the target location for $d.", "equals": 1 }
+  ]
+}

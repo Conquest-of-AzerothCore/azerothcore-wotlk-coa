@@ -1,0 +1,426 @@
+{
+  "schema": 1,
+  "name": "Casting or attacking leaves Venomwing Form without interrupting the cast (#9561, #9851)",
+  "contract": [
+    "Live Venomancers left Venomwing Form 520307 when they began a cast or attacked, and the cast went on: a live",
+    "combat log shows the form removed 11 ms before a Stone of Retreat cast began and that cast completing ten",
+    "seconds later. Here the form carries the cast and attack interrupt flags. Its hover ends with it, so the",
+    "caster settles a yard; for two seconds after the form ends a purely vertical fall does not count as movement,",
+    "while walking still interrupts and so does a fall without the form. Expected: Venom Bolt 502870 drops the form",
+    "and still lands while falling; a walking caster's Venom Bolt is cancelled; a fall without the form cancels it;",
+    "Drain Life 689, cast after the client cancels the form for it, keeps channelling through a one-yard drop;",
+    "without the form the same drop ends the channel; a melee swing drops the form; an idle form stays."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "falls",
+      "race": 1,
+      "class": 29,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "walks",
+      "race": 1,
+      "class": 29,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "unformed",
+      "race": 1,
+      "class": 29,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "channel",
+      "race": 1,
+      "class": 29,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "channel_unformed",
+      "race": 1,
+      "class": 29,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "melee",
+      "race": 1,
+      "class": 29,
+      "level": 60,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_falls",
+      "owner": "falls",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    },
+    {
+      "id": "dummy_walks",
+      "owner": "walks",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    },
+    {
+      "id": "dummy_unformed",
+      "owner": "unformed",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    },
+    {
+      "id": "dummy_channel",
+      "owner": "channel",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    },
+    {
+      "id": "dummy_channel_unformed",
+      "owner": "channel_unformed",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    },
+    {
+      "id": "dummy_melee",
+      "owner": "melee",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "falls",
+      "spell": 520307
+    },
+    {
+      "action": "learn",
+      "actor": "walks",
+      "spell": 520307
+    },
+    {
+      "action": "learn",
+      "actor": "channel",
+      "spell": 520307
+    },
+    {
+      "action": "learn",
+      "actor": "melee",
+      "spell": 520307
+    },
+    {
+      "action": "learn",
+      "actor": "falls",
+      "spell": 502870
+    },
+    {
+      "action": "learn",
+      "actor": "walks",
+      "spell": 502870
+    },
+    {
+      "action": "learn",
+      "actor": "unformed",
+      "spell": 502870
+    },
+    {
+      "action": "learn",
+      "actor": "channel",
+      "spell": 689
+    },
+    {
+      "action": "learn",
+      "actor": "channel_unformed",
+      "spell": 689
+    },
+    {
+      "action": "cast",
+      "label": "Venomwing Form",
+      "actor": "falls",
+      "spell": 520307
+    },
+    {
+      "action": "cast",
+      "label": "Venomwing Form",
+      "actor": "walks",
+      "spell": 520307
+    },
+    {
+      "action": "cast",
+      "label": "Venomwing Form",
+      "actor": "channel",
+      "spell": 520307
+    },
+    {
+      "action": "cast",
+      "label": "Venomwing Form",
+      "actor": "melee",
+      "spell": 520307
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the first caster is in Venomwing Form",
+      "actor": "falls",
+      "metric": "aura",
+      "spell": 520307,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the walking caster is in Venomwing Form",
+      "actor": "walks",
+      "metric": "aura",
+      "spell": 520307,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the channeller is in Venomwing Form",
+      "actor": "channel",
+      "metric": "aura",
+      "spell": 520307,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the attacker is in Venomwing Form",
+      "actor": "melee",
+      "metric": "aura",
+      "spell": 520307,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the shapeshift global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: an idle Venomwing Form stays",
+      "actor": "falls",
+      "metric": "aura",
+      "spell": 520307,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Venom Bolt from Venomwing",
+      "actor": "falls",
+      "spell": 502870,
+      "target": "dummy_falls"
+    },
+    {
+      "action": "cast",
+      "label": "Venom Bolt from Venomwing",
+      "actor": "walks",
+      "spell": 502870,
+      "target": "dummy_walks"
+    },
+    {
+      "action": "cast",
+      "label": "Venom Bolt without the form",
+      "actor": "unformed",
+      "spell": 502870,
+      "target": "dummy_unformed"
+    },
+    {
+      "action": "assert",
+      "label": "Beginning a cast removes Venomwing Form",
+      "actor": "falls",
+      "metric": "aura",
+      "spell": 520307,
+      "equals": 0,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "The cast that removed the form is still being cast",
+      "actor": "falls",
+      "metric": "casting",
+      "equals": 1
+    },
+    {
+      "action": "set_moving",
+      "label": "Settle after the hover ends",
+      "actor": "falls",
+      "enabled": true,
+      "flag": "falling"
+    },
+    {
+      "action": "set_moving",
+      "label": "Walk during the cast",
+      "actor": "walks",
+      "enabled": true,
+      "flag": "forward"
+    },
+    {
+      "action": "set_moving",
+      "label": "Fall without the form",
+      "actor": "unformed",
+      "enabled": true,
+      "flag": "falling"
+    },
+    {
+      "action": "wait",
+      "label": "Let the movement checks run",
+      "ms": 500
+    },
+    {
+      "action": "set_moving",
+      "actor": "falls",
+      "enabled": false,
+      "flag": "falling"
+    },
+    {
+      "action": "set_moving",
+      "actor": "walks",
+      "enabled": false,
+      "flag": "forward"
+    },
+    {
+      "action": "set_moving",
+      "actor": "unformed",
+      "enabled": false,
+      "flag": "falling"
+    },
+    {
+      "action": "assert",
+      "label": "Falling as the form ends does not cancel Venom Bolt",
+      "actor": "falls",
+      "metric": "spell_damage_count",
+      "spell": 502870,
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: walking still cancels Venom Bolt after the form ends",
+      "actor": "walks",
+      "metric": "spell_damage_count",
+      "spell": 502870,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: falling without the form still cancels Venom Bolt",
+      "actor": "unformed",
+      "metric": "spell_damage_count",
+      "spell": 502870,
+      "equals": 0
+    },
+    {
+      "action": "cancel_aura",
+      "label": "The client cancels the form for a spell that needs it gone",
+      "actor": "channel",
+      "spell": 520307
+    },
+    {
+      "action": "cast",
+      "label": "Drain Life after leaving Venomwing",
+      "actor": "channel",
+      "spell": 689,
+      "target": "dummy_channel"
+    },
+    {
+      "action": "cast",
+      "label": "Drain Life without the form",
+      "actor": "channel_unformed",
+      "spell": 689,
+      "target": "dummy_channel_unformed"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the channel after Venomwing started",
+      "actor": "channel",
+      "metric": "casting",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the channel without the form started",
+      "actor": "channel_unformed",
+      "metric": "casting",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "relocate",
+      "label": "Settle a yard after the hover ends",
+      "actor": "channel",
+      "dz": -1
+    },
+    {
+      "action": "relocate",
+      "label": "Drop a yard without the form",
+      "actor": "channel_unformed",
+      "dz": -1
+    },
+    {
+      "action": "assert",
+      "label": "The channel continues through the settle",
+      "actor": "channel",
+      "metric": "casting",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the same drop without the form ends the channel",
+      "actor": "channel_unformed",
+      "metric": "casting",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The channel keeps ticking after the settle",
+      "actor": "channel",
+      "metric": "spell_damage_count",
+      "spell": 689,
+      "min": 3,
+      "within_ms": 6000
+    },
+    {
+      "action": "attack",
+      "label": "Start attacking from Venomwing",
+      "actor": "melee",
+      "target": "dummy_melee"
+    },
+    {
+      "action": "assert",
+      "label": "A melee swing removes Venomwing Form",
+      "actor": "melee",
+      "metric": "aura",
+      "spell": 520307,
+      "equals": 0,
+      "within_ms": 5000
+    }
+  ]
+}

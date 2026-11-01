@@ -4,22 +4,29 @@
  * Kit: Ascension's block 2106100-2106143. Timings: a Bronzebeard kill on video,
  * see raid-difficulty-werkzeug/zg-video-zeitplan.json. On Ascension the phases
  * run the other way round from stock: she fights as a troll first and takes
- * bat form at 50% (in the video at 50%, 147s into the fight).
+ * bat form at 50% (in the video at 50%, 147s into the fight). Mass Fear, Greater
+ * Heal, Call of Hir'eek and Fierce Blow follow the CoA combat log of 2026-08-02.
  *
  *   Troll form, from landing
  *     Mind Flay         first 4s,  every 14s   on the tank, interruptible
- *     Mass Fear         first 12s, every 48s   everyone within 20 yards
+ *     Mass Fear         first 12s, every 44s   everyone within 20 yards
  *     Shadow Word: Pain first 15s, every 27s   random player
  *     Curse of Blood    first 16s, every 31s   random player and those near
- *     Call of Hir'eek   first 20s              six Bloodseeker Bats
- *     Greater Heal      first 29s, every 46s   20% of her health, interruptible
+ *     Call of Hir'eek   first 22s              six Bloodseeker Bats
+ *     Greater Heal      first 21s, every 46s   20% of her health, interruptible
  *
- *   Bat form, at 50%
+ *   At 50% she drains the Avatar of Hir'eek (see LoaAvatar), taking ~1% damage
+ *   while it dies; then the Gift of the Blood God and her bat form.
+ *
+ *   Bat form, when the avatar dies
  *     Bat-tering Charge  first 2s, every 20s   random player, knocks back
  *                                              everyone within 10 yards
  *     Terrifying Screech first 4s, every 20s   everyone in the room
  *     Vampirism          passive, her hits drain life
  *     Bat Riders         two, from stock, throwing liquid fire
+ *
+ *   Both forms
+ *     Fierce Blow        tank, first 6.7-17.3s, then every 6-10s
  *
  * Decided here, not in the data:
  *   - Call of Hir'eek every 60s (the video shows it once);
@@ -63,7 +70,9 @@ namespace
         SPELL_CURSE_OF_BLOOD      = 2106117,
         SPELL_CURSE_OF_BLOOD_HIT  = 2106118,
         SPELL_CALL_OF_HIREEK      = 2106120,
+        SPELL_DRAIN_POWER         = 2106121,
         SPELL_ASPECT_OF_HIREEK    = 2106122,
+        SPELL_GIFT_OF_THE_BLOOD_GOD = 2106123,
         SPELL_BATTERING_CHARGE    = 2106125,
         SPELL_BATTERING_STUN      = 2106126,
         SPELL_BATTERING_IMPACT    = 2106127,
@@ -76,7 +85,8 @@ namespace
     enum Npcs
     {
         NPC_BLOODSEEKER_BAT = 11368,
-        NPC_BATRIDER        = 14750
+        NPC_BATRIDER        = 14750,
+        NPC_AVATAR_OF_HIREEK = 666992
     };
 
     enum Events
@@ -90,6 +100,7 @@ namespace
         EVENT_BATTERING_CHARGE,
         EVENT_SCREECH,
         EVENT_BAT_RIDER,
+        EVENT_FIERCE_BLOW,
     };
 
     enum Phases
@@ -127,6 +138,8 @@ namespace
             me->SetCombatMovement(false);
             me->RemoveAurasDueToSpell(SPELL_ASPECT_OF_HIREEK);
             me->RemoveAurasDueToSpell(SPELL_VAMPIRISM);
+            me->RemoveAurasDueToSpell(SPELL_GIFT_OF_THE_BLOOD_GOD);
+            _avatar.Restore(me);
             _bat = false;
             _riders = 0;
             DoCastSelf(SPELL_GREEN_CHANNELING, true);
@@ -151,26 +164,30 @@ namespace
             me->SetDisableGravity(false);
             me->SetCombatMovement(true);
             me->SetReactState(REACT_AGGRESSIVE);
+            _avatar.Restore(me);
 
             events.SetPhase(PHASE_TROLL);
             events.ScheduleEvent(EVENT_MIND_FLAY, 4s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_MASS_FEAR, 12s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_SHADOW_WORD_PAIN, 15s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_CURSE_OF_BLOOD, 16s, 0, PHASE_TROLL);
-            events.ScheduleEvent(EVENT_CALL_OF_HIREEK, 20s, 0, PHASE_TROLL);
-            events.ScheduleEvent(EVENT_GREATER_HEAL, 29s, 0, PHASE_TROLL);
+            events.ScheduleEvent(EVENT_CALL_OF_HIREEK, 22s, 0, PHASE_TROLL);
+            events.ScheduleEvent(EVENT_GREATER_HEAL, 21s, 0, PHASE_TROLL);
+            events.ScheduleEvent(EVENT_FIERCE_BLOW, FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX);
         }
 
         void EnterEvadeMode(EvadeReason why) override
         {
             if (why != EvadeReason::EVADE_REASON_NO_PATH)
                 me->DespawnOnEvade(5s);
+            _avatar.Release(me);
             BossAI::EnterEvadeMode(why);
         }
 
         void JustDied(Unit* killer) override
         {
             BossAI::JustDied(killer);
+            _avatar.Release(me);
             Talk(SAY_DEATH);
         }
 
@@ -182,7 +199,14 @@ namespace
                 return;
 
             _bat = true;
+            if (!_avatar.Drain(me))
+                TakeBatForm();
+        }
+
+        void TakeBatForm()
+        {
             me->InterruptNonMeleeSpells(false);
+            DoCastSelf(SPELL_GIFT_OF_THE_BLOOD_GOD, true);
             DoCastSelf(SPELL_ASPECT_OF_HIREEK, true);
             DoCastSelf(SPELL_VAMPIRISM, true);
             DoResetThreatList();
@@ -259,6 +283,9 @@ namespace
             if (!UpdateVictim())
                 return;
 
+            if (_avatar.Consumed(me))
+                TakeBatForm();
+
             events.Update(diff);
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
@@ -278,7 +305,7 @@ namespace
                         break;
                     case EVENT_MASS_FEAR:
                         DoCastSelf(SPELL_MASS_FEAR);
-                        events.ScheduleEvent(EVENT_MASS_FEAR, 48s, 0, PHASE_TROLL);
+                        events.ScheduleEvent(EVENT_MASS_FEAR, 44s, 0, PHASE_TROLL);
                         break;
                     case EVENT_SHADOW_WORD_PAIN:
                         CastOnRandom(SPELL_SHADOW_WORD_PAIN);
@@ -328,6 +355,7 @@ namespace
     private:
         bool _bat = false;
         uint8 _riders = 0;
+        LoaAvatar _avatar{ NPC_AVATAR_OF_HIREEK, SPELL_DRAIN_POWER };
         ObjectGuid _target;
     };
 }

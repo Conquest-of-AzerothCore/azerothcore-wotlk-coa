@@ -5,6 +5,7 @@
 #include "CoADungeonNormal.h"
 #include "Config.h"
 #include "Creature.h"
+#include "DBCStores.h"
 #include "DatabaseEnv.h"
 #include "Field.h"
 #include "Log.h"
@@ -16,6 +17,7 @@
 #include "WorldScript.h"
 #include <algorithm>
 #include <unordered_map>
+#include <unordered_set>
 
 extern uint32 (*CoADungeonKitRepeatHook)(WorldObject const* source, uint32 eventId, uint32 repeat);
 
@@ -35,6 +37,8 @@ namespace
     float AreaCapPct = 25.0f;
     float TargetCapPct = 40.0f;
     std::unordered_map<uint32, NormalSpell> Spells;
+    std::unordered_map<uint32, uint32> CastSpellOfVariant;
+    std::unordered_set<uint32> KitCasters;
 
     Creature const* NormalDungeonCreature(WorldObject const* object)
     {
@@ -101,11 +105,26 @@ namespace
         return total;
     }
 
+    float VariantFactor(Creature const* caster, SpellInfo const* spellInfo, bool periodic)
+    {
+        auto variant = CastSpellOfVariant.find(spellInfo->Id);
+        if (variant == CastSpellOfVariant.end() || caster->GetLevel() <= NormalRankMaxCasterLevel)
+            return 1.0f;
+        NormalSpell const& row = Spells.at(variant->second);
+        SpellInfo const* castInfo = sSpellMgr->GetSpellInfo(variant->second);
+        if (row.normalSpell == variant->second || !castInfo)
+            return 1.0f;
+        int32 const level = int32(caster->GetLevel());
+        float const cast = Damage(castInfo, periodic, level, CastValue);
+        float const current = Damage(spellInfo, periodic, level, CastValue);
+        return cast > 0.0f && current > 0.0f ? row.high * cast / current : row.high;
+    }
+
     float Factor(Creature const* caster, SpellInfo const* spellInfo, bool periodic)
     {
         auto itr = Spells.find(spellInfo->Id);
         if (itr == Spells.end())
-            return 1.0f;
+            return VariantFactor(caster, spellInfo, periodic);
         NormalSpell const& row = itr->second;
         if (!row.normalSpell || caster->GetLevel() > NormalRankMaxCasterLevel)
             return row.high;
@@ -143,7 +162,14 @@ namespace
 
 bool CoADungeonNormal::TunesSpell(Unit const* attacker, SpellInfo const* spellInfo)
 {
-    return spellInfo && Spells.count(spellInfo->Id) && NormalDungeonCreature(attacker);
+    if (!spellInfo)
+        return false;
+    Creature const* creature = NormalDungeonCreature(attacker);
+    if (!creature)
+        return false;
+    if (Spells.count(spellInfo->Id))
+        return true;
+    return CastSpellOfVariant.count(spellInfo->Id) && KitCasters.count(creature->GetEntry());
 }
 
 uint32 CoADungeonNormal::KitRepeat(WorldObject const* source, uint32 repeat)
@@ -180,7 +206,28 @@ public:
                 row.high = fields[2].Get<float>();
             } while (result->NextRow());
         }
-        LOG_INFO("server.loading", ">> Loaded {} CoA Normal dungeon kit spells", Spells.size());
+        CastSpellOfVariant.clear();
+        for (auto const& spell : Spells)
+        {
+            uint32 const castSpell = spell.first;
+            SpellDifficultyEntry const* difficulty = sSpellDifficultyStore.LookupEntry(sSpellMgr->GetSpellDifficultyId(castSpell));
+            if (!difficulty || difficulty->SpellID[REGULAR_DIFFICULTY] <= 0)
+                continue;
+            uint32 const normalVariant = uint32(difficulty->SpellID[REGULAR_DIFFICULTY]);
+            if (normalVariant != castSpell && !Spells.count(normalVariant))
+                CastSpellOfVariant.try_emplace(normalVariant, castSpell);
+        }
+        KitCasters.clear();
+        if (QueryResult result = WorldDatabase.Query("SELECT DISTINCT entryorguid FROM smart_scripts WHERE source_type = 0 "
+            "AND entryorguid > 0 AND id >= {} UNION SELECT DISTINCT entry FROM coa_dungeon_boss_kit", KitFirstEventId))
+        {
+            do
+            {
+                KitCasters.insert(result->Fetch()[0].Get<uint32>());
+            } while (result->NextRow());
+        }
+        LOG_INFO("server.loading", ">> Loaded {} CoA Normal dungeon kit spells, {} cast as their Normal SpellDifficulty variant "
+            "by {} kit creatures", Spells.size(), CastSpellOfVariant.size(), KitCasters.size());
     }
 };
 

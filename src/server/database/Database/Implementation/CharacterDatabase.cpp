@@ -835,6 +835,21 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_RECOVERY_ITEM_OLD_ITEMS, "SELECT Guid, ItemEntry FROM recovery_item WHERE DeleteDate IS NOT NULL AND DeleteDate < ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_DEL_RECOVERY_ITEM_BY_GUID, "DELETE FROM recovery_item WHERE Guid = ?", CONNECTION_ASYNC);
 
+    PrepareStatement(CHAR_INS_EXACT_RECOVERY,
+        "INSERT INTO recovery_item_snapshot (owner_guid, original_guid, source, item_entry, item_count, price, created_at, item_values, item_text) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_BOTH);
+    PrepareStatement(CHAR_SEL_EXACT_RECOVERY_LIST,
+        "SELECT id, original_guid, item_entry, item_count, price, created_at FROM recovery_item_snapshot WHERE owner_guid = ? AND source = ? ORDER BY id DESC LIMIT 500", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_EXACT_RECOVERY,
+        "SELECT original_guid, item_entry, item_count, price, item_values, item_text FROM recovery_item_snapshot WHERE id = ? AND owner_guid = ? AND source = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_EXACT_RECOVERY_VENDOR,
+        "DELETE FROM recovery_item_snapshot WHERE owner_guid = ? AND original_guid = ? AND source = 2", CONNECTION_BOTH);
+    PrepareStatement(CHAR_INS_EXACT_RECOVERY_RECEIPT,
+        "INSERT INTO recovery_item_snapshot_receipt (recovery_id, owner_guid, mail_id) VALUES (?, ?, ?)", CONNECTION_BOTH);
+    PrepareStatement(CHAR_DEL_EXACT_RECOVERY,
+        "DELETE FROM recovery_item_snapshot WHERE id = ? AND owner_guid = ?", CONNECTION_BOTH);
+    PrepareStatement(CHAR_PRUNE_EXACT_RECOVERY,
+        "DELETE FROM recovery_item_snapshot WHERE owner_guid = ? AND id < COALESCE((SELECT oldest FROM (SELECT id AS oldest FROM recovery_item_snapshot WHERE owner_guid = ? ORDER BY id DESC LIMIT 1 OFFSET 499) AS retained), 0)", CONNECTION_BOTH);
+
     PrepareStatement(CHAR_SEL_HONORPOINTS, "SELECT totalHonorPoints FROM characters WHERE guid = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_ARENAPOINTS, "SELECT arenaPoints FROM characters WHERE guid = ?", CONNECTION_SYNCH);
 

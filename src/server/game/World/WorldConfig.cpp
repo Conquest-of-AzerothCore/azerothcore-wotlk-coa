@@ -269,6 +269,7 @@ void WorldConfig::BuildConfigCache()
     SetConfigValue<bool>(CONFIG_ALLOW_TWO_SIDE_INTERACTION_ARENA, "AllowTwoSide.Interaction.Arena", false);
     SetConfigValue<bool>(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION, "AllowTwoSide.Interaction.Auction", false);
     SetConfigValue<bool>(CONFIG_ALLOW_TWO_SIDE_INTERACTION_MAIL, "AllowTwoSide.Interaction.Mail", true);
+    SetConfigValue<bool>(CONFIG_SOLO_KILL_REQUIRES_PLAYER_HIT, "SoloKill.RequirePlayerHit", true);
     SetConfigValue<bool>(CONFIG_ALLOW_TWO_SIDE_TRADE, "AllowTwoSide.Trade", true);
     SetConfigValue<bool>(CONFIG_ALLOW_TWO_SIDE_WHO_LIST, "AllowTwoSide.WhoList", true);
 
@@ -456,6 +457,7 @@ void WorldConfig::BuildConfigCache()
     SetConfigValue<uint32>(CONFIG_CREATURE_FAMILY_ASSISTANCE_DELAY, "CreatureFamilyAssistanceDelay", 2000);
     SetConfigValue<uint32>(CONFIG_CREATURE_FAMILY_ASSISTANCE_PERIOD, "CreatureFamilyAssistancePeriod", 3000);
     SetConfigValue<uint32>(CONFIG_CREATURE_FAMILY_FLEE_DELAY, "CreatureFamilyFleeDelay", 7000);
+    SetConfigValue<bool>(CONFIG_CREATURE_FAMILY_FLEE_WALK, "CreatureFamilyFleeWalk", false);
 
     SetConfigValue<uint32>(CONFIG_WORLD_BOSS_LEVEL_DIFF, "WorldBossLevelDiff", 3);
 

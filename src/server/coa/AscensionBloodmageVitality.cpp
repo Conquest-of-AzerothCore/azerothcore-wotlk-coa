@@ -248,6 +248,39 @@ class spell_ascension_bloodmage_empowered : public SpellScript
         OnHit += SpellHitFn(spell_ascension_bloodmage_empowered::ModifyHit);
     }
 };
+constexpr uint32 EmpoweredIndicator = 524899;
+
+void SyncEmpoweredIndicator(Unit* unit)
+{
+    Player* player = unit ? unit->ToPlayer() : nullptr;
+    if (!player || player->getClass() != CLASS_SON_OF_ARUGAL)
+        return;
+    if (!CanEmpower(player))
+        player->RemoveAurasDueToSpell(EmpoweredIndicator, player->GetGUID());
+    else if (!player->HasAura(EmpoweredIndicator, player->GetGUID()))
+        player->CastSpell(player, EmpoweredIndicator, true);
+}
+
+class aura_ascension_bloodmage_empowered_indicator : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_bloodmage_empowered_indicator);
+
+    bool Validate(SpellInfo const*) override { return ValidateSpellInfo({EmpoweredIndicator}); }
+
+    void Sync(AuraEffect const*, AuraEffectHandleModes)
+    {
+        SyncEmpoweredIndicator(GetTarget());
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_bloodmage_empowered_indicator::Sync, EFFECT_FIRST_FOUND,
+            SPELL_AURA_ANY, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_bloodmage_empowered_indicator::Sync,
+            EFFECT_FIRST_FOUND, SPELL_AURA_ANY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 constexpr uint32 EternalPresenceBuff = 560010;
 
 class aura_ascension_eternal_presence : public AuraScript
@@ -323,6 +356,7 @@ void AddSC_AscensionBloodmageVitality()
     new bloodmage_vitality_scaling();
     RegisterSpellScript(spell_ascension_bloodmage_transfusion);
     RegisterSpellScript(spell_ascension_bloodmage_empowered);
+    RegisterSpellScript(aura_ascension_bloodmage_empowered_indicator);
     RegisterSpellScript(aura_ascension_eternal_presence);
     RegisterSpellScript(aura_ascension_endure_the_curse);
 }

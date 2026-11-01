@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Guardian Call To Arms summons a selected party member (#9794 reproduction)",
+  "contract": [
+    "Call To Arms 804723 is SPELL_EFFECT_SUMMON_PLAYER with no implicit targets, Range 1 and a 5 s cast, the same",
+    "shape as Ritual of Summoning's 7720. Spell::SelectEffectTypeImplicitTargets resolves the caster's selection,",
+    "CheckCast requires a selected same-group player, and EffectSummonPlayer sends SMSG_SUMMON_REQUEST. Expected:",
+    "after the cast the ally accepts with CMSG_SUMMON_RESPONSE and is moved next to the Guardian."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "g", "race": 1, "class": 18, "level": 60 },
+    { "id": "ally", "race": 1, "class": 12, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "teleport", "actor": "g", "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+    { "action": "teleport", "actor": "ally", "map": 0, "x": -8917.41, "y": -55.853, "z": 82.3711, "o": 0 },
+    { "action": "group", "actor": "g", "target": "ally" },
+    { "action": "learn", "actor": "g", "spell": 804723 },
+    {
+      "action": "client_packet", "label": "Select the ally (CMSG_SET_SELECTION)",
+      "actor": "g", "opcode": 317, "consumed": false, "fields": [ { "actor_guid": "ally" } ]
+    },
+    { "action": "cast", "actor": "g", "spell": 804723 },
+    {
+      "action": "assert", "label": "The cast does not fail",
+      "actor": "g", "metric": "cast_failure", "spell": 804723, "equals": 0, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The cast completes",
+      "actor": "g", "metric": "spell_cast_count", "spell": 804723, "min": 1, "within_ms": 7000
+    },
+    {
+      "action": "client_packet", "label": "The ally accepts the summon (CMSG_SUMMON_RESPONSE)",
+      "actor": "ally", "opcode": 684, "consumed": false, "fields": [ { "actor_guid": "g" }, { "u8": 1 } ]
+    },
+    {
+      "action": "assert", "label": "The ally arrives at the Guardian",
+      "actor": "ally", "metric": "distance", "target": "g", "max": 5, "within_ms": 5000
+    }
+  ]
+}

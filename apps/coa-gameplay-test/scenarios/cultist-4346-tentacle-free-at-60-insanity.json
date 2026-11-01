@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Tentacle of C'Thun costs no mana at 60 Insanity or above (#4346)",
+  "contract": "#4346: on the live Ascension server Tentacle of C'Thun (801153) was free at exactly 60 Insanity (500706 stacks), shown by two slowed recordings in the issue, although its tooltip reads 'above 60'. The class spends from 100 to 60 and then uses the remaining Insanity with another spender, so 60 is the inclusive threshold. Expected: a mana cost at 59 stacks, zero at 60 and 61.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "unlearn", "label": "Remove the per-Insanity cost reduction talent", "actor": "cultist", "spell": 582307 },
+    { "action": "set_aura", "actor": "cultist", "spell": 500706, "stacks": 59 },
+    {
+      "action": "assert", "label": "Below the threshold the summon costs mana",
+      "actor": "cultist", "metric": "spell_power_cost", "spell": 801153, "min": 1
+    },
+    { "action": "set_aura", "actor": "cultist", "spell": 500706, "stacks": 60 },
+    {
+      "action": "assert", "label": "Exactly 60 Insanity makes the summon free (#4346)",
+      "actor": "cultist", "metric": "spell_power_cost", "spell": 801153, "equals": 0
+    },
+    { "action": "set_aura", "actor": "cultist", "spell": 500706, "stacks": 61 },
+    {
+      "action": "assert", "label": "Above 60 Insanity the summon stays free",
+      "actor": "cultist", "metric": "spell_power_cost", "spell": 801153, "equals": 0
+    }
+  ]
+}

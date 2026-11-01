@@ -47,6 +47,8 @@ enum AllSpellHook
     ALLSPELLHOOK_ON_INTERRUPT_DURATION,
     ALLSPELLHOOK_ON_SUCCESSFUL_DISPEL,
     ALLSPELLHOOK_ON_GUARDIAN_SUMMONED,
+    ALLSPELLHOOK_CAN_IGNORE_SHAPESHIFT,
+    ALLSPELLHOOK_ON_GLOBAL_COOLDOWN,
     ALLSPELLHOOK_END
 };
 
@@ -73,6 +75,9 @@ public:
     // skipped, no object is needed, and the spell keeps its focus field for the
     // refusal the server sends when the answer is no.
     [[nodiscard]] virtual bool OnSpellFocusAnswered(Spell* /*spell*/) { return false; }
+
+    // true lets the spell skip its shapeshift and stealth requirement (as SPELL_AURA_MOD_IGNORE_SHAPESHIFT does)
+    [[nodiscard]] virtual bool CanIgnoreShapeshift(Spell const* /*spell*/) { return false; }
 
     [[nodiscard]] virtual bool CanPrepare(Spell* /*spell*/, SpellCastTargets const* /*targets*/, AuraEffect const* /*triggeredByAura*/) { return true; }
 
@@ -153,6 +158,7 @@ public:
 
     // Called once per guardian Spell::SummonGuardian creates, after its level and stats are set.
     virtual void OnGuardianSummoned(Spell* /*spell*/, TempSummon* /*summon*/) { }
+    virtual void OnSpellGlobalCooldown(Spell* /*spell*/, int32& /*duration*/) { }
 };
 
 // Compatibility for old scripts

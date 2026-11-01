@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "A Troll's Grim Mercy: a Cage credits Hostages freed once, not on every click (COA-10437)",
+  "contract": "Quest 175053 needs 10 Hostages freed via creature 164064, credited from the Cage GO 2300662's On Use smart_scripts event (action 33). The event had event_flags 0, so SmartGameObjectAI::GossipHello re-fired the credit action on every click. event_flags now carries SMART_EVENT_FLAG_NOT_REPEATABLE, so a second use of the same spawned Cage (guid 9997016) no longer adds a second credit.",
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -6707.86, "y": 256.44, "z": 348.06, "o": 4.4},
+  "players": [
+    {"id": "p", "race": 1, "class": 24, "level": 26}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "set_phase", "label": "SETUP: join the Pale Reach's normal phase", "actor": "p", "value": 1},
+    {"action": "add_item", "label": "SETUP: Zuramunda Master Key unlocks the cage", "actor": "p", "item": 559880},
+    {"action": "prepare_quest", "actor": "p", "quest": 175053, "complete": false},
+    {"action": "assert", "label": "SETUP: a Cage stands here", "actor": "p",
+     "metric": "nearby_gameobject_count", "entry": 2300662, "equals": 1},
+    {"action": "use_nearby_gameobject", "label": "Free the hostage", "actor": "p", "entry": 2300662},
+    {"action": "assert", "label": "the first use credits a hostage freed", "actor": "p",
+     "metric": "quest_objective_count", "quest": 175053, "equals": 1, "within_ms": 2000},
+    {"action": "use_nearby_gameobject", "label": "Spam-click the same cage again", "actor": "p", "entry": 2300662},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "a second click on the same cage does not credit again", "actor": "p",
+     "metric": "quest_objective_count", "quest": 175053, "equals": 1},
+    {"action": "use_nearby_gameobject", "label": "Click it a third time for good measure", "actor": "p", "entry": 2300662},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "still only one credit after repeated clicks", "actor": "p",
+     "metric": "quest_objective_count", "quest": 175053, "equals": 1}
+  ]
+}

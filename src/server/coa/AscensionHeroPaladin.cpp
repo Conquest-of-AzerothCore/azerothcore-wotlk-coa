@@ -8,6 +8,8 @@
 #include "SpellInfo.h"
 #include "SpellScript.h"
 #include "Unit.h"
+#include <algorithm>
+#include <array>
 
 namespace
 {
@@ -21,6 +23,34 @@ enum HeroPaladinSpells : uint32
     ImprovedJudgementsCapstone = 25958,
     Unsealed          = 825958
 };
+
+struct ExecutionSentenceRank
+{
+    uint32 Active;
+    uint32 Sentence;
+    uint32 SentenceBurst;
+    uint32 Stay;
+    uint32 StayBurst;
+};
+
+constexpr std::array<ExecutionSentenceRank, 7> EXECUTION_SENTENCE_RANKS = { {
+    { 954817, 954818, 954827, 954819, 954828 },
+    { 954972, 954979, 954992, 954985, 954998 },
+    { 954973, 954980, 954993, 954986, 954999 },
+    { 954974, 954981, 954994, 954987, 955000 },
+    { 954975, 954982, 954995, 954988, 955001 },
+    { 954976, 954983, 954996, 954989, 955002 },
+    { 954977, 954984, 954997, 954991, 955003 } } };
+
+ExecutionSentenceRank const* FindExecutionSentenceRank(uint32 spellId)
+{
+    auto const rank = std::find_if(EXECUTION_SENTENCE_RANKS.begin(), EXECUTION_SENTENCE_RANKS.end(),
+        [spellId](ExecutionSentenceRank const& candidate)
+        {
+            return candidate.Active == spellId || candidate.Sentence == spellId || candidate.Stay == spellId;
+        });
+    return rank == EXECUTION_SENTENCE_RANKS.end() ? nullptr : &*rank;
+}
 
 constexpr int32 FANATICISM_PCT = 20;
 flag96 const FANATICISM_MASK(0x02800400,
@@ -175,6 +205,55 @@ class spell_hero_paladin_shield_of_righteousness : public SpellScript
     }
 };
 
+class spell_hero_paladin_execution_sentence : public SpellScript
+{
+    PrepareSpellScript(spell_hero_paladin_execution_sentence);
+
+    void HandleDummy(SpellEffIndex)
+    {
+        Unit* caster = GetCaster();
+        Unit* target = GetHitUnit();
+        ExecutionSentenceRank const* rank = FindExecutionSentenceRank(GetSpellInfo()->Id);
+        if (!rank || !target)
+            return;
+        if (caster->IsFriendlyTo(target))
+            caster->CastSpell(target, rank->Stay, true);
+        else if (caster->IsValidAttackTarget(target))
+            caster->CastSpell(target, rank->Sentence, true);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_hero_paladin_execution_sentence::HandleDummy, EFFECT_0,
+            SPELL_EFFECT_DUMMY);
+    }
+};
+
+class aura_hero_paladin_execution_sentence_burst : public AuraScript
+{
+    PrepareAuraScript(aura_hero_paladin_execution_sentence_burst);
+
+    void HandleRemove(AuraEffect const* aurEff, AuraEffectHandleModes)
+    {
+        AuraRemoveMode const mode = GetTargetApplication()->GetRemoveMode();
+        if (mode != AURA_REMOVE_BY_EXPIRE && mode != AURA_REMOVE_BY_ENEMY_SPELL)
+            return;
+        Unit* caster = GetCaster();
+        Unit* target = GetTarget();
+        ExecutionSentenceRank const* rank = FindExecutionSentenceRank(GetId());
+        if (!caster || !rank || !target->IsAlive())
+            return;
+        caster->CastSpell(target, GetId() == rank->Sentence ? rank->SentenceBurst : rank->StayBurst, true, nullptr,
+            aurEff);
+    }
+
+    void Register() override
+    {
+        AfterEffectRemove += AuraEffectRemoveFn(aura_hero_paladin_execution_sentence_burst::HandleRemove, EFFECT_0,
+            SPELL_AURA_ANY, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
 void ApplyAscensionHeroPaladinContracts(SpellInfo* spellInfo)
 {
     if (spellInfo->Id == FanaticismDebuff)
@@ -190,4 +269,6 @@ void AddSC_AscensionHeroPaladin()
     RegisterSpellScript(aura_hero_paladin_improved_blessing_of_might);
     RegisterSpellScript(spell_hero_paladin_judgement_unsealed);
     RegisterSpellScript(spell_hero_paladin_shield_of_righteousness);
+    RegisterSpellScript(spell_hero_paladin_execution_sentence);
+    RegisterSpellScript(aura_hero_paladin_execution_sentence_burst);
 }

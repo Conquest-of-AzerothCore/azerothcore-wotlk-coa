@@ -46,7 +46,7 @@ per-character system adds, and of what a port has to carry.
 | `DestinyWeaver.Scaling.Offset` | | 4 | how far below the character an open-world view sits |
 | `DestinyWeaver.Scaling.WorldMaps` | | "0 1" | the open-world maps whose creatures scale |
 | `DestinyWeaver.Scaling.DungeonIds` | | 19 classic finder entries | the dungeons that scale inside their LFGDungeons.dbc band |
-| `DestinyWeaver.Scaling.DungeonBands` | | "402:15-59" | bands that replace the LFGDungeons.dbc band of an entry; an entry listed here scales even without DungeonIds |
+| `DestinyWeaver.Scaling.DungeonBands` | | "401:10-59 402:15-59" | bands that replace the LFGDungeons.dbc band of an entry; an entry listed here scales even without DungeonIds; a configured band widens a default one, never narrows it |
 | `DestinyWeaver.ExperienceBonusControl` | | 1 | exposes the second Weaver option |
 | `DestinyWeaver.DisplayStream.Enable` | | 1 | streams the Weavers' display rows (Part 2) |
 

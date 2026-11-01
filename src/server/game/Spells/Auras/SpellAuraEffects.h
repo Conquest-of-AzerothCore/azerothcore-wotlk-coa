@@ -284,6 +284,7 @@ public:
     void HandleAuraModWeaponCritPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleModHitChance(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleAscensionModHitChanceAll(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+    void HandleAscensionModCritChance(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleModSpellHitChance(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleModSpellCritChance(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleModSpellCritChanceShool(AuraApplication const* aurApp, uint8 mode, bool apply) const;
@@ -354,6 +355,7 @@ public:
     void HandleBreakableCCAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
     void HandleProcTriggerSpellAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
     void HandleProcTriggerSpellWithValueAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
+    void HandleAscensionPercentEventProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
     void HandleProcTriggerDamageAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
     void HandleRaidProcFromChargeAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);
     void HandleRaidProcFromChargeWithValueAuraProc(AuraApplication* aurApp, ProcEventInfo& eventInfo);

@@ -8,11 +8,21 @@
 #include "AccountScript.h"
 #include "AscensionClientLua.h"
 #include "LocalLevelScaling.h"
+#include "AscensionRulesets.h"
 
 using namespace Acore::ChatCommands;
 
 namespace CoAChallenges
 {
+
+    bool ChallengeAllowsRuleset(Player* player, AscensionRulesets::Ruleset ruleset)
+    {
+        if (ruleset == AscensionRulesets::Ruleset::PvE ||
+            !PlayerHasRule(player, "CHALLENGE_RULES_TYPE_PVE_ONLY"))
+            return true;
+        NotifyPlayer(player, "Your active challenge requires PvE mode.");
+        return false;
+    }
 
     bool UsesCoreProfessionXP(Player* player)
     {
@@ -828,12 +838,14 @@ namespace CoAChallenges
     }
 
     // Called each tick while the rule is active: losing the High Risk aura
-    // ("must remain in High Risk at all times") fails the challenge.
+    // ("must remain in High Risk at all times") fails the challenge. High Risk
+    // suspended for a battleground, arena or Wintergrasp battle still counts;
+    // it returns on leaving.
     void EnforceHighRisk(Player* player)
     {
         if (!player || !HighRiskTracked(player->GetGUID().GetCounter()))
             return;
-        if (player->HasAura(HighRiskAura()))
+        if (player->HasAura(HighRiskAura()) || AscensionRulesets::HighRiskSuspended(player))
             return;
         uint32 level = 0;
         uint32 cid = ActiveChallengeWithRule(player, "CHALLENGE_RULES_TYPE_HIGH_RISK_ONLY", level);
@@ -1027,10 +1039,24 @@ namespace CoAChallenges
     // character so a non-prestige trial cannot be started (facet of
     // OUTSIDE_INTERACTION). During the trial: the NO_MAIL rule forbids both
     // sending and receiving mail. Store items / reward caches are exempt.
+    constexpr uint32 BazaarTokenItem = 975001;
+    std::unordered_set<uint32> StoreItems;
+
+    void LoadStoreItems()
+    {
+        StoreItems = { BazaarTokenItem };
+        if (QueryResult r = WorldDatabase.Query("SELECT `ItemID` FROM `coa_client_vanity_collection`"))
+            do
+                StoreItems.insert(r->Fetch()[0].Get<uint32>());
+            while (r->NextRow());
+    }
+
     bool IsMailExemptItem(uint32 entry)
     {
         if (!entry)
             return false;
+        if (StoreItems.contains(entry))
+            return true;
         return CoAParse::ListContains(
             sConfigMgr->GetOption<std::string>("CoAChallenges.MailExemptItems", "1397884;1397885;1397886"),
             std::to_string(entry));
@@ -1372,19 +1398,34 @@ namespace CoAChallenges
     class CoAChallengesPlayer : public PlayerScript
     {
     public:
-        CoAChallengesPlayer() : PlayerScript("CoAChallengesPlayer", { PLAYERHOOK_ON_COA_PRESTIGE, PLAYERHOOK_ON_COA_PRESTIGE_SAVED, PLAYERHOOK_ON_SEND_INITIAL_PACKETS_BEFORE_ADD_TO_MAP, PLAYERHOOK_ON_PLAYER_JUST_DIED, PLAYERHOOK_ON_PLAYER_RESURRECT, PLAYERHOOK_CAN_RESURRECT, PLAYERHOOK_CAN_SEND_MAIL, PLAYERHOOK_CAN_JOIN_LFG, PLAYERHOOK_CAN_JOIN_IN_BATTLEGROUND_QUEUE, PLAYERHOOK_CAN_JOIN_IN_ARENA_QUEUE, PLAYERHOOK_CAN_INIT_TRADE, PLAYERHOOK_CAN_PLACE_AUCTION_BID, PLAYERHOOK_ON_BEFORE_SEND_LOOT, PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET, PLAYERHOOK_ON_PLAYER_KILLED_BY_CREATURE, PLAYERHOOK_ON_PVP_KILL, PLAYERHOOK_ON_LOOT_ITEM, PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_CAN_GROUP_INVITE, PLAYERHOOK_CAN_GROUP_ACCEPT, PLAYERHOOK_ON_UPDATE_CRAFTING_SKILL, PLAYERHOOK_ON_UPDATE_GATHERING_SKILL, PLAYERHOOK_ON_BEFORE_QUEST_COMPLETE, PLAYERHOOK_ON_QUEST_COMPUTE_EXP, PLAYERHOOK_ON_GIVE_EXP, PLAYERHOOK_ON_GET_MAX_ALLOWED_LEVEL, PLAYERHOOK_ON_HAS_NO_BONUS_EXPERIENCE, PLAYERHOOK_CAN_LEARN_TALENT, PLAYERHOOK_CAN_USE_ITEM, PLAYERHOOK_CAN_ENTER_MAP, PLAYERHOOK_CAN_EQUIP_ITEM, PLAYERHOOK_CAN_ENTER_MANASTORM, PLAYERHOOK_ON_PLAYER_ENVIRONMENTAL_DAMAGE, PLAYERHOOK_ON_PLAYER_BREATH_INVERTED, PLAYERHOOK_ON_BEFORE_BUY_ITEM_FROM_VENDOR, PLAYERHOOK_CAN_SELL_ITEM, PLAYERHOOK_ON_CAN_UPDATE_SKILL, PLAYERHOOK_ON_UPDATE_SKILL, PLAYERHOOK_ON_PLAYER_PVP_FLAG_CHANGE, PLAYERHOOK_ON_CAN_REGENERATE, PLAYERHOOK_ON_CAN_ENERGIZE, PLAYERHOOK_ON_CAN_GIVE_LEVEL, PLAYERHOOK_ON_BEFORE_TELEPORT, PLAYERHOOK_ON_DELETE_FROM_DB, PLAYERHOOK_ON_BANK_WITHDRAW, PLAYERHOOK_ON_REWARD_KILL_REWARDER, PLAYERHOOK_ON_GIVE_REPUTATION, PLAYERHOOK_PASSED_QUEST_KILLED_MONSTER_CREDIT, PLAYERHOOK_ON_LOAD_FROM_DB, PLAYERHOOK_ON_GET_GAME_MODE_MASK }) { }
+        CoAChallengesPlayer() : PlayerScript("CoAChallengesPlayer", { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_COA_PRESTIGE, PLAYERHOOK_ON_COA_PRESTIGE_SAVED, PLAYERHOOK_ON_SEND_INITIAL_PACKETS_BEFORE_ADD_TO_MAP, PLAYERHOOK_ON_PLAYER_JUST_DIED, PLAYERHOOK_ON_PLAYER_RESURRECT, PLAYERHOOK_CAN_RESURRECT, PLAYERHOOK_CAN_SEND_MAIL, PLAYERHOOK_CAN_JOIN_LFG, PLAYERHOOK_CAN_JOIN_IN_BATTLEGROUND_QUEUE, PLAYERHOOK_CAN_JOIN_IN_ARENA_QUEUE, PLAYERHOOK_CAN_INIT_TRADE, PLAYERHOOK_CAN_PLACE_AUCTION_BID, PLAYERHOOK_ON_BEFORE_SEND_LOOT, PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET, PLAYERHOOK_ON_PLAYER_KILLED_BY_CREATURE, PLAYERHOOK_ON_PVP_KILL, PLAYERHOOK_ON_LOOT_ITEM, PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_CAN_GROUP_INVITE, PLAYERHOOK_CAN_GROUP_ACCEPT, PLAYERHOOK_ON_UPDATE_CRAFTING_SKILL, PLAYERHOOK_ON_UPDATE_GATHERING_SKILL, PLAYERHOOK_ON_BEFORE_QUEST_COMPLETE, PLAYERHOOK_ON_QUEST_COMPUTE_EXP, PLAYERHOOK_ON_GIVE_EXP, PLAYERHOOK_ON_GET_MAX_ALLOWED_LEVEL, PLAYERHOOK_ON_HAS_NO_BONUS_EXPERIENCE, PLAYERHOOK_CAN_LEARN_TALENT, PLAYERHOOK_CAN_USE_ITEM, PLAYERHOOK_CAN_ENTER_MAP, PLAYERHOOK_CAN_EQUIP_ITEM, PLAYERHOOK_CAN_ENTER_MANASTORM, PLAYERHOOK_ON_PLAYER_ENVIRONMENTAL_DAMAGE, PLAYERHOOK_ON_PLAYER_BREATH_INVERTED, PLAYERHOOK_ON_BEFORE_BUY_ITEM_FROM_VENDOR, PLAYERHOOK_CAN_SELL_ITEM, PLAYERHOOK_ON_CAN_UPDATE_SKILL, PLAYERHOOK_ON_UPDATE_SKILL, PLAYERHOOK_ON_PLAYER_PVP_FLAG_CHANGE, PLAYERHOOK_ON_CAN_REGENERATE, PLAYERHOOK_ON_CAN_ENERGIZE, PLAYERHOOK_ON_CAN_GIVE_LEVEL, PLAYERHOOK_ON_BEFORE_TELEPORT, PLAYERHOOK_ON_DELETE_FROM_DB, PLAYERHOOK_ON_BANK_WITHDRAW, PLAYERHOOK_ON_REWARD_KILL_REWARDER, PLAYERHOOK_ON_GIVE_REPUTATION, PLAYERHOOK_PASSED_QUEST_KILLED_MONSTER_CREDIT, PLAYERHOOK_ON_LOAD_FROM_DB, PLAYERHOOK_ON_GET_GAME_MODE_MASK }) { }
+
+        void OnPlayerLogin(Player* player) override
+        {
+            if (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_PVE_ONLY") &&
+                !AscensionRulesets::Has(player, AscensionRulesets::Ruleset::PvE))
+                AscensionRulesets::Apply(player, AscensionRulesets::Ruleset::PvE);
+        }
 
         void OnPlayerCoAPrestige(Player* player, CharacterDatabaseTransaction trans) override
         {
             if (!player || !trans)
                 return;
-            trans->Append("DELETE FROM coa_challenge_failure WHERE guid = {}", player->GetGUID().GetCounter());
+            uint32 guid = player->GetGUID().GetCounter();
+            trans->Append("DELETE FROM coa_challenge_failure WHERE guid = {}", guid);
+            for (uint32 challengeId : ActiveChallenges(guid))
+                if (IsPrestigeChallenge(challengeId))
+                    trans->Append("DELETE FROM coa_character_objective WHERE guid = {} AND challengeId = {}",
+                        guid, challengeId);
         }
 
         void OnPlayerCoAPrestigeSaved(Player* player) override
         {
             if (player)
+            {
                 SendFailureList(player);
+                SendCriteriaState(player);
+            }
         }
 
         bool OnPlayerGetGameModeMask(Player const* player, uint32& mask) override
@@ -1802,15 +1843,14 @@ namespace CoAChallenges
             return true;
         }
 
-        // NO_FETCH_QUEST_EXPERIENCE: quests with no objectives (talk-to and
-        // delivery quests) grant no experience; other rewards stay.
+        // NO_FETCH_QUEST_EXPERIENCE covers fetch and collection quests; other rewards stay.
         void OnPlayerQuestComputeXP(Player* player, Quest const* quest, uint32& xpValue) override
         {
             if (!player || !quest)
                 return;
             if (!PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_FETCH_QUEST_EXPERIENCE"))
                 return;
-            if (IsQuestWithoutObjectives(quest))
+            if (IsFetchOrCollectionQuest(quest))
                 xpValue = 0;
         }
 
@@ -2448,6 +2488,7 @@ namespace CoAChallenges
             {
                 EnsureTables();
                 LoadChallengeDefinitions();
+                LoadStoreItems();
             }
 
         void OnUpdate(uint32 diff) override
@@ -3832,11 +3873,23 @@ namespace CoAChallenges
         CoAChallengesUnit() : UnitScript("CoAChallengesUnit", true,
             { UNITHOOK_ON_DAMAGE, UNITHOOK_ON_HEAL, UNITHOOK_MODIFY_HEAL_RECEIVED, UNITHOOK_ON_BEFORE_ROLL_MELEE_OUTCOME_AGAINST, UNITHOOK_CAN_UNIT_ATTACK,
               UNITHOOK_ON_UNIT_EXIT_COMBAT, UNITHOOK_SHOULD_TRACK_VALUES_UPDATE_POS_BY_INDEX,
-              UNITHOOK_ON_PATCH_VALUES_UPDATE }) { }
+              UNITHOOK_ON_PATCH_VALUES_UPDATE, UNITHOOK_ON_UNIT_DEATH }) { }
 
         void OnUnitExitCombat(Unit* unit) override
         {
             RestoreAdventureHealth(unit);
+        }
+
+        void OnUnitDeath(Unit* unit, Unit* killer) override
+        {
+            Creature* killed = unit ? unit->ToCreature() : nullptr;
+            if (!killed || !killer || killer->IsPlayer() || killer->IsPet() || killer->IsTotem())
+                return;
+            if (Player* guardianOwner = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
+            {
+                CoAChallengesPlayer::CreditKill(guardianOwner, killed);
+                CoAChallengesPlayer::FailForbiddenKill(guardianOwner, killed);
+            }
         }
 
         bool ShouldTrackValuesUpdatePosByIndex(Unit const* unit, uint8 /*updateType*/, uint16 index) override
@@ -4048,6 +4101,7 @@ namespace CoAChallenges
 
 void Addmod_coa_challengesScripts()
 {
+    AscensionRulesets::RegisterGuard(&CoAChallenges::ChallengeAllowsRuleset);
     RegisterAscensionClientConfig(&CoAChallenges::AppendClientConfig);
     RegisterAscensionChallengeStateSync([](Player* player)
     {

@@ -4,30 +4,44 @@
  * Kit: Ascension's block 2118100-2118151. Timings: a Bronzebeard kill on video,
  * see raid-difficulty-werkzeug/zg-video-zeitplan.json. Stock swaps between
  * troll and spider every minute; on Ascension she stays a troll until 50% and
- * a spider after (in the video from 49%, 230s in).
+ * a spider after (in the video from 49%, 230s in). The spider form's cycle
+ * (Web Spray, Burrow, Poison Shock every 45s) and Fierce Blow follow the CoA
+ * combat log of 2026-08-02.
  *
  *   Troll form
  *     Drain Life         first 6s,  every 10s   random player, interruptible
  *     Poison Bolt Volley first 12s, every 15s   everyone, stacking poison
- *     Hatch Eggs         at 17s                  the four nearest eggs hatch
+ *     Hatch Eggs         at 17s                  the four nearest eggs hatch;
+ *                                               on Ascended every 30s after
+ *                                               (a DBM bar in the live video
+ *                                               of 2026-08-04)
  *     Evolve             first 22s, every 60s   an egg hatches a colossal spider
  *     Infest             first 87s, every 60s   an egg hatches a festering
  *                                               spider that bursts on death
  *
- *   Spider form, at 50%
+ *   At 50% she drains the Avatar of Shadra (see LoaAvatar), taking ~1% damage
+ *   while it dies; then the Gift of the Blood God and her spider form.
+ *
+ *   Spider form, when the avatar dies
  *     Acid Spit          first 1s,  every 12s   on the tank, poison and -10% armour
- *     Web Spray          first 15s, every 55s   everyone within 20 yards is
+ *     Web Spray          first 15s, every 45s   everyone within 20 yards is
  *                                               slowed, then webbed; then she
  *                                               charges a caster, as in stock
- *     Poison Shock       first 25s, every 25s   20 yards around her
+ *     Burrow             first 20.5s, every 45s under ground for 3s, untargetable
+ *     Poison Shock       first 27s, every 45s   Poison Nova, 20 yards around her,
+ *                                               less the farther away
  *     Furious Strikes    passive, her hits speed her up
+ *
+ *   Both forms
+ *     Fierce Blow        tank, first 6.7-17.3s, then every 6-10s
  *
  * Decided here, not in the data:
  *   - Evolve and Infest act on an egg she hatches for it: the spawn of Evolve
  *     is twice the size with twice the health; the spawn of Infest bursts for
  *     Poison Shock's damage where it dies;
  *   - Drain Life heals her for what each tick deals;
- *   - Poison Shock's timer (the video never shows it); no falloff with range.
+ *   - Poison Nova falls off evenly to nothing at 20 yards (the tooltip says
+ *     reduced, not by how much).
  */
 
 #include "CreatureScript.h"
@@ -63,7 +77,9 @@ namespace
         SPELL_POISON_BOLT_HIT     = 2118110,
         SPELL_HATCH_EGGS          = 2118115,
         SPELL_EVOLVE              = 2118116,
+        SPELL_DRAIN_POWER         = 2118122,
         SPELL_ASPECT_OF_SHADRA    = 2118123,
+        SPELL_GIFT_OF_THE_BLOOD_GOD = 2118124,
         SPELL_FURIOUS_STRIKES     = 2118125,
         SPELL_ACID_SPIT           = 2118127,
         SPELL_ACID_SPIT_DOT       = 2118128,
@@ -71,6 +87,8 @@ namespace
         SPELL_WEB_SPRAY           = 2118133,
         SPELL_POISON_SHOCK        = 2118145,
         SPELL_POISON_SHOCK_HIT    = 2118146,
+        SPELL_BURROW              = 2118140,
+        SPELL_POISON_NOVA         = 2118150,
         SPELL_INFEST              = 2118151,
     };
 
@@ -78,7 +96,8 @@ namespace
     {
         GO_SPIDER_EGGS     = 179985,
         NPC_SPAWN_OF_MARLI = 15041,
-        NPC_WORLD_TRIGGER  = 12999
+        NPC_WORLD_TRIGGER  = 12999,
+        NPC_AVATAR_OF_SHADRA = 666990
     };
 
     enum Events
@@ -93,6 +112,9 @@ namespace
         EVENT_WEB_SPRAY,
         EVENT_CHARGE,
         EVENT_POISON_SHOCK,
+        EVENT_BURROW,
+        EVENT_EMERGE,
+        EVENT_FIERCE_BLOW,
     };
 
     enum Phases
@@ -101,8 +123,11 @@ namespace
         PHASE_SPIDER = 2
     };
 
-    constexpr float VOLLEY_RANGE = 200.0f;
-    constexpr uint8 FIRST_HATCH  = 4;
+    constexpr float VOLLEY_RANGE   = 200.0f;
+    constexpr uint8 EGGS_PER_HATCH = 4;
+    constexpr float NOVA_RANGE     = 20.0f;
+    constexpr Milliseconds BURROW_LENGTH        = 3s;
+    constexpr Milliseconds ASCENDED_HATCH_EVERY = 30s;
 
     struct boss_marli_coa : public BossAI
     {
@@ -112,8 +137,11 @@ namespace
         {
             me->RemoveAurasDueToSpell(SPELL_ASPECT_OF_SHADRA);
             me->RemoveAurasDueToSpell(SPELL_FURIOUS_STRIKES);
+            me->RemoveAurasDueToSpell(SPELL_GIFT_OF_THE_BLOOD_GOD);
+            _avatar.Restore(me);
             _spider = false;
             _festering.clear();
+            Emerge();
 
             std::list<GameObject*> eggs;
             me->GetGameObjectListWithEntryInGrid(eggs, GO_SPIDER_EGGS, DEFAULT_VISIBILITY_INSTANCE);
@@ -129,6 +157,7 @@ namespace
         {
             BossAI::JustEngagedWith(who);
             Talk(SAY_AGGRO);
+            _avatar.Restore(me);
 
             events.SetPhase(PHASE_TROLL);
             events.ScheduleEvent(EVENT_THRASH, 4s, 6s);
@@ -137,11 +166,13 @@ namespace
             events.ScheduleEvent(EVENT_HATCH_EGGS, 17s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_EVOLVE, 22s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_INFEST, 87s, 0, PHASE_TROLL);
+            events.ScheduleEvent(EVENT_FIERCE_BLOW, FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX);
         }
 
         void JustDied(Unit* killer) override
         {
             BossAI::JustDied(killer);
+            _avatar.Release(me);
             Talk(SAY_DEATH);
         }
 
@@ -153,15 +184,23 @@ namespace
                 return;
 
             _spider = true;
+            if (!_avatar.Drain(me))
+                TakeSpiderForm();
+        }
+
+        void TakeSpiderForm()
+        {
             me->InterruptNonMeleeSpells(false);
             Talk(SAY_TRANSFORM);
+            DoCastSelf(SPELL_GIFT_OF_THE_BLOOD_GOD, true);
             DoCastSelf(SPELL_ASPECT_OF_SHADRA, true);
             DoCastSelf(SPELL_FURIOUS_STRIKES, true);
 
             events.SetPhase(PHASE_SPIDER);
             events.ScheduleEvent(EVENT_ACID_SPIT, 1s, 0, PHASE_SPIDER);
             events.ScheduleEvent(EVENT_WEB_SPRAY, 15s, 0, PHASE_SPIDER);
-            events.ScheduleEvent(EVENT_POISON_SHOCK, 25s, 0, PHASE_SPIDER);
+            events.ScheduleEvent(EVENT_BURROW, 20500ms, 0, PHASE_SPIDER);
+            events.ScheduleEvent(EVENT_POISON_SHOCK, 27s, 0, PHASE_SPIDER);
         }
 
         void OnSpellCast(SpellInfo const* spell) override
@@ -176,7 +215,7 @@ namespace
                     break;
                 case SPELL_HATCH_EGGS:
                     Talk(SAY_SPIDER_SPAWN);
-                    for (uint8 i = 0; i < FIRST_HATCH; ++i)
+                    for (uint8 i = 0; i < EGGS_PER_HATCH; ++i)
                         HatchEgg();
                     break;
                 case SPELL_ACID_SPIT:
@@ -187,7 +226,17 @@ namespace
                     }
                     break;
                 case SPELL_POISON_SHOCK:
-                    me->CastSpell(me, SPELL_POISON_SHOCK_HIT, true);
+                {
+                    int32 const full = Info(me, SPELL_POISON_SHOCK_HIT);
+                    for (Player* p : PlayersWithin(me, NOVA_RANGE))
+                        Hit(me, p, SPELL_POISON_NOVA, int32(full * (1.0f - me->GetDistance(p) / NOVA_RANGE)));
+                    break;
+                }
+                case SPELL_BURROW:
+                    me->AttackStop();
+                    me->SetReactState(REACT_PASSIVE);
+                    me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                    events.ScheduleEvent(EVENT_EMERGE, BURROW_LENGTH, 0, PHASE_SPIDER);
                     break;
                 default:
                     break;
@@ -230,6 +279,13 @@ namespace
             }
         }
 
+        void Emerge()
+        {
+            me->RemoveAurasDueToSpell(SPELL_BURROW);
+            me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            me->SetReactState(REACT_AGGRESSIVE);
+        }
+
         // The nearest egg still standing hatches a Spawn of Mar'li.
         Creature* HatchEgg()
         {
@@ -253,6 +309,9 @@ namespace
         {
             if (!UpdateVictim())
                 return;
+
+            if (_avatar.Consumed(me))
+                TakeSpiderForm();
 
             events.Update(diff);
 
@@ -281,6 +340,8 @@ namespace
                         break;
                     case EVENT_HATCH_EGGS:
                         DoCastSelf(SPELL_HATCH_EGGS);
+                        if (me->GetMap()->GetSpawnMode() == RAID_DIFFICULTY_25MAN_HEROIC)
+                            events.ScheduleEvent(EVENT_HATCH_EGGS, ASCENDED_HATCH_EVERY, 0, PHASE_TROLL);
                         break;
                     case EVENT_EVOLVE:
                         if (Creature* spawn = HatchEgg())
@@ -299,7 +360,7 @@ namespace
                     case EVENT_WEB_SPRAY:
                         DoCastSelf(SPELL_WEB_SPRAY);
                         events.ScheduleEvent(EVENT_CHARGE, 5s, 0, PHASE_SPIDER);
-                        events.ScheduleEvent(EVENT_WEB_SPRAY, 55s, 0, PHASE_SPIDER);
+                        events.ScheduleEvent(EVENT_WEB_SPRAY, 45s, 0, PHASE_SPIDER);
                         break;
                     case EVENT_CHARGE:
                         // From stock: after the webs she goes for a caster out of reach.
@@ -314,7 +375,14 @@ namespace
                         break;
                     case EVENT_POISON_SHOCK:
                         DoCastSelf(SPELL_POISON_SHOCK);
-                        events.ScheduleEvent(EVENT_POISON_SHOCK, 25s, 0, PHASE_SPIDER);
+                        events.ScheduleEvent(EVENT_POISON_SHOCK, 45s, 0, PHASE_SPIDER);
+                        break;
+                    case EVENT_BURROW:
+                        DoCastSelf(SPELL_BURROW);
+                        events.ScheduleEvent(EVENT_BURROW, 45s, 0, PHASE_SPIDER);
+                        break;
+                    case EVENT_EMERGE:
+                        Emerge();
                         break;
                 }
 
@@ -327,6 +395,7 @@ namespace
 
     private:
         bool _spider = false;
+        LoaAvatar _avatar{ NPC_AVATAR_OF_SHADRA, SPELL_DRAIN_POWER };
         GuidSet _festering;
     };
 }

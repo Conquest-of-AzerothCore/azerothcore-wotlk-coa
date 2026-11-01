@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Ranger: Skirmish moves the displayed melee crit chance (#10401)",
+  "contract": "Skirmish (802039) tooltip: 'Increases your critical strike chance by $s2%...'. Effect[1] applies SPELL_AURA_ASCENSION_MOD_CRIT_CHANCE (custom aura type 350, EffectMiscValue[1]=127 i.e. all schools), handled as HandleNoImmediateEffect: it is read live at melee/ranged/spell crit-roll time (Unit.cpp) but Player::UpdateCritPercentage never folded it into PLAYER_CRIT_PERCENTAGE, so the paperdoll/combat-log-displayed crit chance never moved even though real rolls were already correct. The fix wires AuraEffect::HandleAscensionModCritChance into the handler table at this aura index so apply/remove recomputes PLAYER_CRIT_PERCENTAGE/PLAYER_RANGED_CRIT_PERCENTAGE/PLAYER_OFFHAND_CRIT_PERCENTAGE. Skirmish's own DurationIndex is 0 (GetDuration() == 0): live, it is granted with a script-set duration tied to Advantage stacks, which the set_aura fixture bypasses, so set_aura now gives any zero/negative-max-duration fixture aura a 60s lifetime (CoAGameplayTest.cpp) so it survives long enough to assert against instead of expiring on the next tick. The DBC's EffectBasePoints[1]=14 is the stored minimum roll; AzerothCore's own BasePoints-to-effective-value convention adds 1 (DieSides=1, no further randomness), so AuraEffect::GetAmount() for this effect, confirmed directly (aura_amount), is 15 - the number this regression checks against, not the raw DBC field.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "ranger", "race": 1, "class": 21, "level": 60, "melee_crit_rating": 400 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 2000 },
+    { "action": "set_aura", "actor": "ranger", "spell": 802039, "stacks": 1, "label": "Apply Skirmish directly as a fixture aura" },
+    { "action": "snapshot", "actor": "ranger", "metric": "melee_crit_chance", "save_as": "crit_with_skirmish" },
+    { "action": "assert", "label": "SETUP: Skirmish's crit effect amount is 15", "actor": "ranger", "metric": "aura_amount", "spell": 802039, "caster": "ranger", "effect": 1, "equals": 15 },
+    { "action": "set_aura", "actor": "ranger", "spell": 802039, "stacks": 0, "label": "Remove the fixture aura" },
+    {
+      "action": "assert",
+      "label": "Removing Skirmish drops the displayed melee crit chance by its 15-point effect amount",
+      "actor": "ranger",
+      "metric": "melee_crit_chance",
+      "relative_to": "crit_with_skirmish",
+      "min": -15.1,
+      "max": -14.9,
+      "within_ms": 5000
+    }
+  ]
+}

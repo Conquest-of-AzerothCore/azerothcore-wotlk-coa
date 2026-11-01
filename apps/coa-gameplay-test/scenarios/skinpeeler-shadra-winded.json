@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Shadra: a grounded stun does not wind her",
+  "contract": "Winded only fires when a stun or root catches Shadra mid-Bloodrush. A stun that lands while she is standing must leave her without 2880. The first assertion proves the stun reached her, the second proves the gating holds. The mid-air branch is timing dependent and is covered live rather than here.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "stunner", "race": 1, "class": 2, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "shadra", "owner": "stunner", "entry": 9916213, "level": 60, "health": 900000, "distance": 3, "reaction": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the spawn settle", "ms": 4000 },
+    { "action": "learn", "actor": "stunner", "spell": 853 },
+    { "action": "attack", "actor": "stunner", "target": "shadra" },
+    { "action": "wait", "label": "Let her engage", "ms": 1500 },
+    { "action": "cast", "actor": "stunner", "spell": 853, "target": "shadra" },
+    { "action": "assert", "label": "The stun landed on her", "actor": "shadra",
+      "metric": "aura", "spell": 853, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Grounded stun does not wind her", "actor": "shadra",
+      "metric": "aura", "spell": 2880, "equals": 0, "within_ms": 1500 }
+  ]
+}

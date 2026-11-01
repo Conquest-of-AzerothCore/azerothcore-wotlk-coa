@@ -1,0 +1,296 @@
+{
+  "schema": 1,
+  "name": "Mercenary for Hire! and High-Risk: neither applies while fighting in the Wintergrasp battle",
+  "contract": "Mercenary for Hire! and High-Risk are open-world states, and the Wintergrasp battle is a team fight. A Human High-Risk Mercenary in Wintergrasp who accepts the battle's invitation keeps Mercenary for Hire! but it has no effect, and High-Risk turns itself off and is remembered: a High-Risk player nearby receives a player faction (Human or the Horde side's Orc) instead of the Outlaw faction 1163. A second such Mercenary who leaves the zone for Dalaran mid-battle gets High-Risk back and is an Outlaw again. When the battle ends, High-Risk returns and the Mercenary is an Outlaw again.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "mercenary",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "leaver",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "observer",
+      "race": 1,
+      "class": 1,
+      "level": 70
+    }
+  ],
+  "location": {
+    "map": 571,
+    "x": 5140.79,
+    "y": 2179.12,
+    "z": 390.95,
+    "o": 1.97
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "observer",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "observer",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "observer",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "The High-Risk player becomes a Mercenary",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_aura",
+      "actor": "leaver",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "leaver",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "leaver",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "leaver",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "A second High-Risk player becomes a Mercenary",
+      "actor": "leaver",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "A High-Risk player below the battle's level receives the Outlaw faction",
+      "actor": "observer",
+      "metric": "sent_faction",
+      "target": "mercenary",
+      "equals": 1163,
+      "within_ms": 5000
+    },
+    {
+      "action": "console",
+      "label": "The Wintergrasp battle starts",
+      "command": "bf start 1"
+    },
+    {
+      "action": "wait",
+      "label": "Let the battle invite the players in the zone",
+      "ms": 2000
+    },
+    {
+      "action": "client_packet",
+      "label": "The Mercenary accepts the invitation to the battle",
+      "actor": "mercenary",
+      "opcode": 1247,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The second Mercenary accepts too",
+      "actor": "leaver",
+      "opcode": 1247,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "In the war the High-Risk player receives a player faction instead of Outlaw",
+      "actor": "observer",
+      "metric": "sent_faction",
+      "target": "mercenary",
+      "min": 1,
+      "max": 2,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The server gives the Mercenary a player faction instead of Outlaw",
+      "actor": "mercenary",
+      "metric": "faction",
+      "min": 1,
+      "max": 2
+    },
+    {
+      "action": "assert",
+      "label": "The Mercenary keeps Mercenary for Hire!",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "High-Risk turns itself off in the battle",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "and is remembered for afterwards",
+      "actor": "mercenary",
+      "metric": "player_setting",
+      "source": "core.ruleset.high_risk_suspended",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The second Mercenary's High-Risk is off in the battle too",
+      "actor": "leaver",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "label": "The second Mercenary leaves the zone for Dalaran mid-battle",
+      "actor": "leaver",
+      "map": 571,
+      "x": 5807.98,
+      "y": 588.487,
+      "z": 660.94
+    },
+    {
+      "action": "assert",
+      "label": "High-Risk returns after leaving the battle",
+      "actor": "leaver",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "and is no longer held back",
+      "actor": "leaver",
+      "metric": "player_setting",
+      "source": "core.ruleset.high_risk_suspended",
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "and the second Mercenary is an Outlaw again",
+      "actor": "leaver",
+      "metric": "faction",
+      "equals": 1163,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "while the first Mercenary is still in the battle without High-Risk",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 0
+    },
+    {
+      "action": "console",
+      "label": "The Wintergrasp battle ends",
+      "command": "bf stop 1"
+    },
+    {
+      "action": "assert",
+      "label": "High-Risk returns after the battle",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "and is no longer held back",
+      "actor": "mercenary",
+      "metric": "player_setting",
+      "source": "core.ruleset.high_risk_suspended",
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "and the Mercenary is an Outlaw again",
+      "actor": "mercenary",
+      "metric": "faction",
+      "equals": 1163,
+      "within_ms": 5000
+    }
+  ]
+}

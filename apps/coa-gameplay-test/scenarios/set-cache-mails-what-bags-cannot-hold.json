@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "A set cache puts what fits in the bags and mails the rest",
+  "contract": "Item 1339054 'Champion's Battlegear - Experience Heirloom Cache' (item_ethereal_set_cache) holds x3 Heirloom Weapon Token 414010, x2 Swift Hand of Justice 1642991, Champion's Deathdealer Breastplate 1648677 and Champion Herod's Shoulder 1642950: seven unstackable items. With four free slots the cache opens, the cache frees its own slot, the three tokens and two trinkets go to the bags and the breastplate and the shoulder arrive by mail, so no piece is lost. With seven free slots it opens and gives all seven to the bags with no mail.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "cramped",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "roomy",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "add_item", "actor": "cramped", "item": 1339054},
+    {"action": "fill_bags", "actor": "cramped", "slots": 4},
+    {"action": "wait", "ms": 1000},
+    {"action": "fill_bags", "label": "Refill a slot freed by a filler item that vanished", "actor": "cramped", "slots": 4},
+    {"action": "assert", "label": "Four slots are free", "actor": "cramped", "metric": "free_inventory_slots", "equals": 4},
+    {"action": "use_item", "label": "Open the cache with four free slots", "actor": "cramped", "item": 1339054, "spell": 18282},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The cache is used up", "actor": "cramped", "metric": "item_count", "item": 1339054, "equals": 0},
+    {"action": "assert", "label": "The weapon tokens fill three slots", "actor": "cramped", "metric": "item_count", "item": 414010, "equals": 3},
+    {"action": "assert", "label": "Both trinkets fit", "actor": "cramped", "metric": "item_count", "item": 1642991, "equals": 2},
+    {"action": "assert", "label": "The breastplate is mailed", "actor": "cramped", "metric": "mail_has_item", "item": 1648677, "equals": 1},
+    {"action": "assert", "label": "The shoulder is mailed", "actor": "cramped", "metric": "mail_has_item", "item": 1642950, "equals": 1},
+    {"action": "add_item", "actor": "roomy", "item": 1339054},
+    {"action": "fill_bags", "actor": "roomy", "slots": 7},
+    {"action": "wait", "ms": 1000},
+    {"action": "fill_bags", "label": "Refill a slot freed by a filler item that vanished", "actor": "roomy", "slots": 7},
+    {"action": "assert", "label": "Seven slots are free", "actor": "roomy", "metric": "free_inventory_slots", "equals": 7},
+    {"action": "use_item", "label": "Open the cache with seven free slots", "actor": "roomy", "item": 1339054, "spell": 18282},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The cache is used up", "actor": "roomy", "metric": "item_count", "item": 1339054, "equals": 0},
+    {"action": "assert", "label": "Three weapon tokens", "actor": "roomy", "metric": "item_count", "item": 414010, "equals": 3},
+    {"action": "assert", "label": "Two Swift Hands of Justice", "actor": "roomy", "metric": "item_count", "item": 1642991, "equals": 2},
+    {"action": "assert", "label": "The breastplate", "actor": "roomy", "metric": "item_count", "item": 1648677, "equals": 1},
+    {"action": "assert", "label": "The shoulder", "actor": "roomy", "metric": "item_count", "item": 1642950, "equals": 1},
+    {"action": "assert", "label": "Nothing is mailed", "actor": "roomy", "metric": "mail_has_item", "item": 1648677, "equals": 0}
+  ]
+}

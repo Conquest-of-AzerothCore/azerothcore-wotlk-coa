@@ -833,7 +833,8 @@ class spell_warr_vigilance_redirect_threat : public SpellScript
     {
         if (Unit* warrior = GetHitUnit())
             if (AuraEffect const* glyph = warrior->GetAuraEffectOfRankedSpellOrTwin(SPELL_WARRIOR_GLYPH_OF_VIGILANCE, EFFECT_0))
-                SetEffectValue(GetEffectValue() + glyph->GetAmount());
+                // "transfers an additional 5%": Ascension's glyph row carries -5
+                SetEffectValue(GetEffectValue() + std::abs(glyph->GetAmount()));
     }
 
     void Register() override

@@ -24,6 +24,7 @@
 #include "StartProcess.h"
 #include "UpdateFetcher.h"
 #include "QueryResult.h"
+#include "WorldBaseline.h"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -142,6 +143,12 @@ template<>
 std::string DBUpdater<WorldDatabaseConnection>::GetBaseFilesDirectory()
 {
     return DBUpdater<WorldDatabaseConnection>::GetSourceDirectory() + "/data/sql/base/db_world/";
+}
+
+template<>
+std::string DBUpdater<WorldDatabaseConnection>::GetBaselineManifest()
+{
+    return DBUpdater<WorldDatabaseConnection>::GetSourceDirectory() + "/data/coa-world/baseline.json";
 }
 
 template<>
@@ -431,6 +438,44 @@ bool DBUpdater<T>::Update(DatabaseWorkerPool<T>& pool, std::vector<std::string> 
 }
 
 template<class T>
+std::string DBUpdater<T>::GetBaselineManifest()
+{
+    return {};
+}
+
+template<class T>
+bool DBUpdater<T>::PopulateFromBaseline(DatabaseWorkerPool<T>& pool, Path const& manifest)
+{
+    LOG_INFO("sql.updates", ">> Importing world baseline \"{}\"...", manifest.generic_string());
+
+    Path const workDirectory = std::filesystem::temp_directory_path()
+        / ("acore_baseline_" + pool.GetConnectionInfo()->database);
+
+    std::error_code ignored;
+    try
+    {
+        std::filesystem::remove_all(workDirectory, ignored);
+        for (Path const& file : WorldBaseline::Extract(manifest, workDirectory))
+        {
+            LOG_INFO("sql.updates", ">> Applying \'{}\'...", file.filename().generic_string());
+            ApplyFile(pool, file);
+            std::filesystem::remove(file, ignored);
+        }
+    }
+    catch (std::exception const& error)
+    {
+        LOG_FATAL("sql.updates", "{}", error.what());
+        std::filesystem::remove_all(workDirectory, ignored);
+        return false;
+    }
+
+    std::filesystem::remove_all(workDirectory, ignored);
+    LOG_INFO("sql.updates", ">> Done!");
+    LOG_INFO("sql.updates", " ");
+    return true;
+}
+
+template<class T>
 bool DBUpdater<T>::Populate(DatabaseWorkerPool<T>& pool)
 {
     {
@@ -443,6 +488,10 @@ bool DBUpdater<T>::Populate(DatabaseWorkerPool<T>& pool)
         return false;
 
     LOG_INFO("sql.updates", "Database {} is empty, auto populating it...", DBUpdater<T>::GetTableName());
+
+    Path const baselineManifest(DBUpdater<T>::GetBaselineManifest());
+    if (!baselineManifest.empty() && std::filesystem::is_regular_file(baselineManifest))
+        return DBUpdater<T>::PopulateFromBaseline(pool, baselineManifest);
 
     std::string const DirPathStr = DBUpdater<T>::GetBaseFilesDirectory();
 

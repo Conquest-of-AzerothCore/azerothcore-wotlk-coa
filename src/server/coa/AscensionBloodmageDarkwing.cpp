@@ -33,6 +33,7 @@ class bloodmage_darkwing_bat : public PlayerScript
         guardian->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, damage * 1.5f);
         guardian->SetStatFlatModifier(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(stats->AttackPower));
         guardian->UpdateAllStats();
+        guardian->SetReactState(REACT_DEFENSIVE);
     }
 };
 }

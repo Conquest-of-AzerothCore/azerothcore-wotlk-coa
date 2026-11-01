@@ -778,23 +778,64 @@ public:
     }
 };
 
+constexpr uint32 FemaleWorgenDisplay = 142818;
+
+bool ShowsFemaleWorgen(Player const* player)
+{
+    return player->GetDisplayId() == FemaleWorgenDisplay;
+}
+
+void HideFemaleWorgenHelm(Player* player)
+{
+    player->SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + EQUIPMENT_SLOT_HEAD * 2, 0);
+    player->SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + EQUIPMENT_SLOT_HEAD * 2, 0);
+}
+
 class aura_ascension_bloodmage_female_worgen : public AuraScript
 {
     PrepareAuraScript(aura_ascension_bloodmage_female_worgen);
 
-    static constexpr uint32 FemaleWorgenDisplay = 142818;
+    static bool IsNativelyFemale(Player const* player)
+    {
+        return player->GetByteValue(PLAYER_BYTES_3, PLAYER_BYTES_3_OFFSET_GENDER) == GENDER_FEMALE;
+    }
 
     void Apply(AuraEffect const*, AuraEffectHandleModes)
     {
-        Unit* target = GetTarget();
-        if (target->IsPlayer() && target->getGender() == GENDER_FEMALE && target->getTransForm() == GetId())
-            target->SetDisplayId(FemaleWorgenDisplay);
+        Player* player = GetTarget()->ToPlayer();
+        if (!player || !IsNativelyFemale(player) || player->getTransForm() != GetId())
+            return;
+        player->SetDisplayId(FemaleWorgenDisplay);
+        HideFemaleWorgenHelm(player);
+    }
+
+    void Remove(AuraEffect const*, AuraEffectHandleModes)
+    {
+        Player* player = GetTarget()->ToPlayer();
+        if (player && IsNativelyFemale(player) && !ShowsFemaleWorgen(player))
+            player->SetVisibleItemSlot(EQUIPMENT_SLOT_HEAD,
+                player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_HEAD));
     }
 
     void Register() override
     {
         AfterEffectApply += AuraEffectApplyFn(aura_ascension_bloodmage_female_worgen::Apply, EFFECT_ALL,
             SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_bloodmage_female_worgen::Remove, EFFECT_ALL,
+            SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_SEND_FOR_CLIENT_MASK);
+    }
+};
+
+class bloodmage_female_worgen_helm : public PlayerScript
+{
+public:
+    bloodmage_female_worgen_helm() : PlayerScript("bloodmage_female_worgen_helm",
+        {PLAYERHOOK_ON_AFTER_SET_VISIBLE_ITEM_SLOT}) { }
+
+    void OnPlayerAfterSetVisibleItemSlot(Player* player, uint8 slot, Item*) override
+    {
+        if (player && slot == EQUIPMENT_SLOT_HEAD && ShowsFemaleWorgen(player))
+            HideFemaleWorgenHelm(player);
     }
 };
 
@@ -818,6 +859,7 @@ void AddSC_AscensionBloodmageSecondary()
 {
     RegisterSpellScript(aura_ascension_bloodmage_shadow_colony);
     RegisterSpellScript(aura_ascension_bloodmage_female_worgen);
+    new bloodmage_female_worgen_helm();
     RegisterSpellScript(spell_ascension_bloodmage_bloodfang_bite);
     RegisterSpellScript(aura_ascension_bloodmage_bite_wound);
     RegisterSpellScript(aura_ascension_bloodmage_sacrificial_rite);

@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Tree of Life: entering the form keeps the worldserver running",
+  "contract": [
+    "aura_wildcard_tree_healing is bound to Tree of Life 34123 and computes its amount in DoEffectCalcAmount.",
+    "The aura's target is not set yet in that hook; reading it dereferenced null and the worldserver exited on the",
+    "first Tree of Life on any realm. Entering the form applies 34123 and the server keeps answering."
+  ],
+  "timeout_ms": 30000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [{"id": "druid", "race": 4, "class": 11, "level": 80}],
+  "steps": [
+    {"action": "wait", "ms": 2000},
+    {"action": "learn", "actor": "druid", "spell": 33891},
+    {"action": "cast", "actor": "druid", "spell": 33891},
+    {"action": "assert", "label": "DISCRIMINATING: in Tree of Life form", "actor": "druid", "metric": "aura",
+     "spell": 33891, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The form applies its Tree of Life aura", "actor": "druid", "metric": "aura",
+     "spell": 34123, "equals": 1, "within_ms": 3000},
+    {"action": "wait", "ms": 2000},
+    {"action": "assert", "label": "The server still answers in the form", "actor": "druid", "metric": "aura",
+     "spell": 33891, "equals": 1}
+  ]
+}

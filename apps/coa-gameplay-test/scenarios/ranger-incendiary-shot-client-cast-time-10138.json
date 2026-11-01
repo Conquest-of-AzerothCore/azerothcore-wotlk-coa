@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Ranger: Incendiary Shot's client tooltip shows the ranged-slot cast time the server uses (#10138)",
+  "contract": [
+    "Incendiary Shot 524870 is a ranged-slot spell (SPELL_ATTR0_USES_RANGED_SLOT 0x2, Attributes 0x400012) with",
+    "CastingTimeIndex 5 (SpellCastTimes 2000 ms). SpellInfo::CalcCastTime adds the 500 ms ranged preparation, so the",
+    "server casts it in 2500 ms before haste while the client's SpellCastTimes row keeps 2000 ms; the report saw a",
+    "1.63 s tooltip against a 2 s cast, which is the same mismatch the Witch Doctor and Barbarian ranged-slot fixes",
+    "answered. The client patch stream now publishes a Spell.dbc row for the ability whose CastingTimeIndex points at",
+    "the 2500 ms row (19), so the client's tooltip and cast bar use the time the server casts. The server's own cast",
+    "time is unchanged. Stock Hunter Steady Shot 34120 is not registered and receives no cast-time row."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and the client patch stream settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 524870
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the client receives 2500 ms for Incendiary Shot",
+      "actor": "ranger",
+      "metric": "client_cast_time_ms",
+      "spell": 524870,
+      "equals": 2500,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The streamed row keeps the Incendiary Shot attributes",
+      "actor": "ranger",
+      "metric": "client_attributes",
+      "spell": 524870,
+      "equals": 4194322
+    },
+    {
+      "action": "assert",
+      "label": "The server still casts Incendiary Shot in 2000 + 500 ms",
+      "actor": "ranger",
+      "metric": "spell_cast_time_ms",
+      "spell": 524870,
+      "equals": 2500
+    },
+    {
+      "action": "assert",
+      "label": "An unregistered stock ranged shot receives no cast-time row",
+      "actor": "ranger",
+      "metric": "client_cast_time_ms",
+      "spell": 34120,
+      "equals": -1
+    }
+  ]
+}

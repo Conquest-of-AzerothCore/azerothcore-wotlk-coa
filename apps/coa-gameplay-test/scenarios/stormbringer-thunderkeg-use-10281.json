@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Using the Thunderkeg gives 5 Thunderale (#10281)",
+  "contract": "Conjure Thunderkeg (807849) places Thunderkeg, gameobject 195002 (GAMEOBJECT_TYPE_SPELLCASTER). Its tooltip: 'Players in your party or raid may interact with it to receive $807850s1 tankards of Thunderale.' Data0 was 0, so using it did nothing. Data0 is now 807850 (Conjure Thunderale: CREATE_ITEM 2000150 Weak Thunder Ale, 5) and Data2 (party only) is 1.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "s", "race": 1, "class": 16, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "s", "spell": 807849 },
+    { "action": "cast", "actor": "s", "spell": 807849, "target": "s" },
+    { "action": "assert", "label": "SETUP: the Thunderkeg is placed", "actor": "s",
+      "metric": "owned_gameobject_count", "entry": 195002, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "BASELINE: no Thunderale yet", "actor": "s",
+      "metric": "item_count", "item": 2000150, "equals": 0 },
+    { "action": "use_nearby_gameobject", "label": "Use the Thunderkeg", "actor": "s", "entry": 195002 },
+    { "action": "assert", "label": "FIX: using the keg gives 5 Thunderale", "actor": "s",
+      "metric": "item_count", "item": 2000150, "equals": 5, "within_ms": 5000 }
+  ]
+}

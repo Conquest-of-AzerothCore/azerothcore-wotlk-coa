@@ -58,8 +58,9 @@ enum Spells
     SPELL_HATCH_EGGS          = 24083,
 
     // Spawn of Mar'li
-    SPELL_GROWTH              = 24086,
-    SPELL_FULL_GROWN          = 24088
+    SPELL_GROWTH              = 2118117,
+    SPELL_FULL_GROWN          = 24088,
+    SPELL_SPAWN_FIERCE_BLOW   = 975011
 };
 
 enum Phases
@@ -260,6 +261,11 @@ struct npc_spawn_of_marli : public ScriptedAI
                 Talk(EMOTE_FULL_GROWN);
                 DoCastSelf(SPELL_FULL_GROWN);
             }
+        });
+        _scheduler.Schedule(3900ms, 8400ms, [this](TaskContext context)
+        {
+            DoCastVictim(SPELL_SPAWN_FIERCE_BLOW);
+            context.Repeat(6s, 10s);
         });
     }
 

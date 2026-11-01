@@ -1705,6 +1705,8 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                                 multiplier += 0.5f;
 
                             int32 basepoints0 = int32(CalculatePct(caster->GetMaxPower(POWER_MANA), multiplier));
+                            if (caster->HasAura(270563))
+                                basepoints0 *= 2;
                             caster->CastCustomSpell(caster, 47755, &basepoints0, nullptr, nullptr, true);
                         }
                         // effect on aura target
@@ -1963,6 +1965,41 @@ bool Aura::IsAuraStronger(Aura const* newAura) const
     return false;
 }
 
+// Ascension Warcraft Reborn Mystic Enchants that loosen a per-caster spell specific: Sting Specialist ("You can apply an
+// additional sting to the same target") and Curseweaver ("Your Curse of Agony and Curse of Doom no longer occupy a Curse
+// slot")
+bool Aura::AscensionSharesSpecificSlot(Aura const* existingAura) const
+{
+    constexpr uint32 StingSpecialist = 1590490;
+    constexpr uint32 Curseweaver = 1590493;
+    constexpr uint32 CurseOfAgonyFlag0 = 0x400;
+    constexpr uint32 CurseOfDoomFlag1 = 0x2;
+    Unit const* caster = GetCaster();
+    Unit const* owner = GetOwner()->ToUnit();
+    if (!caster || !owner)
+        return false;
+    SpellSpecificType const specific = m_spellInfo->GetSpellSpecific();
+    if (specific == SPELL_SPECIFIC_STING && caster->HasAura(StingSpecialist) && m_spellInfo->Id != existingAura->GetId())
+    {
+        uint32 stings = 0;
+        for (auto const& [id, application] : owner->GetAppliedAuras())
+            if (application->GetBase() != this && application->GetBase()->GetCasterGUID() == GetCasterGUID() &&
+                application->GetBase()->GetSpellInfo()->GetSpellSpecific() == SPELL_SPECIFIC_STING)
+                ++stings;
+        return stings < 2;
+    }
+    if (specific == SPELL_SPECIFIC_CURSE && caster->HasAura(Curseweaver))
+    {
+        auto const slotless = [](SpellInfo const* info)
+        {
+            return info->SpellFamilyName == SPELLFAMILY_WARLOCK &&
+                ((info->SpellFamilyFlags[0] & CurseOfAgonyFlag0) || (info->SpellFamilyFlags[1] & CurseOfDoomFlag1));
+        };
+        return slotless(m_spellInfo) || slotless(existingAura->GetSpellInfo());
+    }
+    return false;
+}
+
 bool Aura::CanStackWith(Aura const* existingAura) const
 {
     // Can stack with self
@@ -2002,7 +2039,8 @@ bool Aura::CanStackWith(Aura const* existingAura) const
 
     // check spell specific stack rules
     if (m_spellInfo->IsAuraExclusiveBySpecificWith(existingSpellInfo)
-            || (sameCaster && m_spellInfo->IsAuraExclusiveBySpecificPerCasterWith(existingSpellInfo)))
+            || (sameCaster && m_spellInfo->IsAuraExclusiveBySpecificPerCasterWith(existingSpellInfo) &&
+                !AscensionSharesSpecificSlot(existingAura)))
         return false;
 
     // check spell group stack rules

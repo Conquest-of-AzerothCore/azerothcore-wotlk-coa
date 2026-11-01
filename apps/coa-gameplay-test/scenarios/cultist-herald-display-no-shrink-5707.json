@@ -1,11 +1,11 @@
 {
   "schema": 1,
-  "name": "Herald of the Depths transforms at its final size without a scale change (#5707)",
+  "name": "Herald of the Depths transforms into the masked faceless caster at its final size (#5707, #10429)",
   "contract": [
-    "Herald of the Depths 520326 transforms into creature 250042. Its display 28844 (FacelessOne at display scale 4)",
-    "was shrunk with a 0.25 object scale after the transform, so the client drew the full-size model and then shrank",
-    "it. Display 280071 is the same FacelessOne model and FacelessOneSkinBlue texture at display scale 1, the same",
-    "final size. Expected: the Cultist shows display 280071 at object scale 1 while Herald is up. Client animation is",
+    "Herald of the Depths 520326 transforms into creature 250042. Its display was 28844 (FacelessOne at display",
+    "scale 4) shrunk by a 0.25 object scale (#5707), then 280071, the FacelessOne2 brute that Dreadnought also uses",
+    "(#10429). Display 280072 is the masked faceless caster (facelessonecaster2, purple) at its own DBC scale",
+    "0.65. Expected: the Cultist shows display 280072 at object scale 1 while Herald is up. Client animation is",
     "not observable here."
   ],
   "timeout_ms": 30000,
@@ -22,8 +22,8 @@
     {"action": "cast", "label": "Herald of the Depths", "actor": "cultist", "spell": 520326, "target": "cultist"},
     {"action": "assert", "label": "SETUP: Herald is active", "actor": "cultist", "metric": "aura", "spell": 520326,
      "equals": 1, "within_ms": 5000},
-    {"action": "assert", "label": "The Cultist shows the scale-1 Herald display", "actor": "cultist",
-     "metric": "display_id", "equals": 280071},
+    {"action": "assert", "label": "The Cultist shows the masked faceless caster display", "actor": "cultist",
+     "metric": "display_id", "equals": 280072},
     {"action": "assert", "label": "No object scale change follows the transform", "actor": "cultist",
      "metric": "unit_scale", "min": 0.99, "max": 1.01}
   ]

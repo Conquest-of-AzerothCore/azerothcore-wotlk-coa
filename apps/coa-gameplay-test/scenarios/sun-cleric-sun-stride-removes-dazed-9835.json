@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Sun Stride frees the caster from Dazed (#9835)",
+  "contract": "Sun Stride 680700 reads 'Increases your movement speed by $s2% for $d. Also frees the caster from slows and roots.' Its mechanic immunities are root (7) and snare (11). Dazed 1604 is a SPELL_AURA_MOD_DECREASE_SPEED slow whose spell and effect mechanic are MECHANIC_DAZE (27), so the snare immunity alone left it in place. Casting Sun Stride while Dazed must start the stride and remove Dazed.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 680700 },
+    { "action": "set_aura", "label": "The Sun Cleric is Dazed", "actor": "cleric", "spell": 1604, "stacks": 1 },
+    {
+      "action": "assert", "label": "SETUP: Dazed is active", "actor": "cleric",
+      "metric": "aura", "spell": 1604, "equals": 1
+    },
+    { "action": "cast", "actor": "cleric", "spell": 680700, "target": "cleric" },
+    {
+      "action": "assert", "label": "SETUP: Sun Stride is active", "actor": "cleric",
+      "metric": "aura", "spell": 680700, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Sun Stride removes Dazed", "actor": "cleric",
+      "metric": "aura", "spell": 1604, "equals": 0, "within_ms": 1000
+    }
+  ]
+}

@@ -12,7 +12,7 @@ configuration templates in `src/server/coa/conf/`. They install to
 `etc/modules/coa.conf` and `etc/modules/coa_bugreport.conf`; runtime configuration is
 supplied there, not by committing live local credentials. CoA logs under `coa`,
 `coa.gameplay_test`, `coa.highrisk` and `coa.hotpatch`. Server-sent interface Lua is described in
-`client-hot-patch.md`.
+`client-hot-patch.md`; streamed client DBC rows in `client-dbc-stream.md`.
 
 This fork, CoA included, is licensed under the root `LICENSE` (GNU GPL v2), like
 AzerothCore. Most CoA source files still carry the short "GNU AGPL v3" notice from
@@ -74,9 +74,9 @@ those three rows in a separate output and never packages or installs a client ar
 
 ## World database installation
 
-Import the [world database package](../../apps/coa-world/README.md) into an empty
-world schema before the first worldserver startup. The same guide covers auditing
-an existing database and updating the package.
+The worldserver and `dbimport` populate an empty world database from the
+[world database package](../../apps/coa-world/README.md) instead of `data/sql/base/db_world/`.
+The same guide covers the manual import, auditing an existing database and updating the package.
 
 ## Equipped gear drops
 

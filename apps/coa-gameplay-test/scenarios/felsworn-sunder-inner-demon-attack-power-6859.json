@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "name": "Felsworn: Sunder under Inner Demon leaves its attack power reduction for 20 seconds (#6859)",
+  "contract": [
+    "The installed Sunder 705121 tooltip reads 'Inner Demon: Affected enemies have their attack power reduced by",
+    "${($803477m1+$803477ppl1)*-1} for $/1000;807428s3 sec'. Each 712399 explosion under Inner Demon applies Sunder",
+    "ATK Reducer 803477, which has no duration of its own: 807428 effect 2 adds 20000 ms to it through a flat duration",
+    "modifier on 803477's family flags. The debuff must stay on the struck enemy for about 20 seconds and lower its",
+    "attack power."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "p", "race": 1, "class": 14, "level": 43, "spell_hit_rating": 10000, "allow_regeneration": false },
+    { "id": "enemy", "race": 2, "class": 1, "level": 43, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "pvp", "actor": "p", "enabled": true },
+    { "action": "set_health", "actor": "p", "value": 100000, "maximum": 100000 },
+    { "action": "pvp", "actor": "enemy", "enabled": true },
+    { "action": "set_health", "actor": "enemy", "value": 100000, "maximum": 100000 },
+    { "action": "teleport", "actor": "enemy", "map": 0, "x": -9599.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "learn", "actor": "p", "spell": 705121 },
+    { "action": "learn", "actor": "p", "spell": 804216 },
+    { "action": "set_power", "actor": "p", "power": 3, "value": 100 },
+    { "action": "set_aura", "actor": "p", "spell": 800058, "stacks": 2 },
+    { "action": "cast", "actor": "p", "spell": 804216 },
+    {
+      "action": "assert", "label": "SETUP: Inner Demon is active",
+      "actor": "p", "metric": "aura", "spell": 804216, "equals": 1, "within_ms": 1000
+    },
+    { "action": "snapshot", "actor": "enemy", "metric": "attack_power", "save_as": "enemy_ap" },
+    { "action": "set_aura", "actor": "p", "spell": 800058, "stacks": 4 },
+    { "action": "set_power", "actor": "p", "power": 3, "value": 100 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "pvp", "actor": "p", "enabled": true },
+    { "action": "pvp", "actor": "enemy", "enabled": true },
+    { "action": "cast", "actor": "p", "spell": 705121 },
+    {
+      "action": "assert", "label": "SETUP: a Sunder explosion strikes the enemy",
+      "actor": "p", "metric": "spell_damage_count", "spell": 712399, "target": "enemy", "min": 1, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Sunder ATK Reducer stays for about 20 seconds",
+      "actor": "enemy", "metric": "aura_duration_ms", "spell": 803477, "caster": "p", "min": 17000, "max": 20000,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "The struck enemy's attack power is lowered",
+      "actor": "enemy", "metric": "attack_power", "relative_to": "enemy_ap", "max": -1
+    },
+    { "action": "wait", "ms": 5000 },
+    {
+      "action": "assert", "label": "The reduction is still present five seconds later",
+      "actor": "enemy", "metric": "aura", "spell": 803477, "caster": "p", "equals": 1
+    }
+  ]
+}

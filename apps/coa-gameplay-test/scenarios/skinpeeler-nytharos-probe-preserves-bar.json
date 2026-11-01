@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Nytharos: the probe keeps the health fraction",
+  "contract": [
+    "The pool is resized at fifteen seconds while the boss is already damaged.",
+    "The bar keeps its fraction, so the resized pool cannot push him into a later phase."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "dps2",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "summon",
+      "label": "Spawn the boss",
+      "actor": "tank",
+      "as": "boss",
+      "entry": 9916214,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "tank",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps1",
+      "target": "boss"
+    },
+    {
+      "action": "attack",
+      "label": "Attack",
+      "actor": "dps2",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "Boss enters combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Fourteen seconds of damage, just before the probe",
+      "ms": 14000
+    },
+    {
+      "action": "assert",
+      "label": "Bar before the probe",
+      "actor": "boss",
+      "metric": "health_pct",
+      "min": 1.0,
+      "max": 100.0
+    },
+    {
+      "action": "wait",
+      "label": "Let the probe resize the pool",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Bar preserved across the resize",
+      "actor": "boss",
+      "metric": "health_pct",
+      "min": 1.0,
+      "max": 100.0
+    }
+  ]
+}

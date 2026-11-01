@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Tinker: Restorative Beacon heals an opposite-faction party member (#9801)",
+  "contract": "#9801 reports beacons that do not affect opposite-faction dungeon finder party members. Restorative Beacon 801801 summons 50037; 3000 ms after the summon and every 1000 ms afterwards, the beacon casts 706829 (SPELL_EFFECT_HEAL, TARGET_UNIT_CASTER_AREA_RAID, radius index 13 = 10 yd, BasePoints 124 + DieSides 2 before the Tinker level scaling) for each raid ally in range. A grouped Orc 1 yd away at 100 health must gain health from it. An ungrouped Orc at the same distance must stay at 100 health. Regeneration is off for both players.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "tinker", "race": 1, "class": 28, "level": 21, "allow_regeneration": false },
+    { "id": "ally", "race": 2, "class": 1, "level": 21, "allow_regeneration": false },
+    { "id": "outsider", "race": 2, "class": 1, "level": 21, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "teleport", "actor": "tinker", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "ally", "map": 0, "x": -9616.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "outsider", "map": 0, "x": -9617.06, "y": -287.949, "z": 57.3053, "o": 0 },
+    { "action": "group", "actor": "tinker", "target": "ally" },
+    { "action": "set_health", "actor": "ally", "value": 100 },
+    { "action": "set_health", "actor": "outsider", "value": 100 },
+    { "action": "learn", "actor": "tinker", "spell": 801801 },
+    { "action": "cast", "actor": "tinker", "spell": 801801 },
+    {
+      "action": "assert", "label": "SETUP: the Restorative Beacon is summoned", "actor": "tinker",
+      "metric": "owned_creature_count", "entry": 50037, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The beacon heals the opposite-faction party member", "actor": "ally",
+      "metric": "health", "min": 101, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "The beacon does not heal an ungrouped opposite-faction player", "actor": "outsider",
+      "metric": "health", "equals": 100
+    }
+  ]
+}

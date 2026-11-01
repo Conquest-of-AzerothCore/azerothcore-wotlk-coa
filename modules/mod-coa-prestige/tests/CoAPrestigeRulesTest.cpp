@@ -42,6 +42,18 @@ TEST(CoAPrestige, StateRoundTripsThroughTheSetting)
     EXPECT_EQ(DecodeState({ 2, 0, 31 }), (State{ 2, false, 31 }));
 }
 
+TEST(CoAPrestige, CycleDailySurvivesSavingWithoutReinterpretingSignaturePending)
+{
+    State const cycle{ 4, true, 39, false, 80956 };
+    EXPECT_EQ(EncodeState(cycle), (std::vector<uint32_t>{ 4, 1, 39, 0, 80956 }));
+    EXPECT_EQ(DecodeState(EncodeState(cycle)), cycle);
+    State const pending{ 4, true, 39, true, 80956 };
+    EXPECT_EQ(DecodeState(EncodeState(pending)), pending);
+    EXPECT_EQ(DecodeState({ 4, 1, 39 }).dailyQuest, 0u);
+    EXPECT_EQ(DecodeState({ 4, 1, 39, 1 }).dailyQuest, 0u);
+    EXPECT_TRUE(DecodeState({ 4, 1, 39, 1 }).signaturePending);
+}
+
 TEST(CoAPrestige, ActivationNeedsTheLevelAndASpecialization)
 {
     ActivationFacts ready;
@@ -203,9 +215,10 @@ TEST(CoAPrestige, RewardsParseAsItemCountPairs)
 
 TEST(CoAPrestige, ExperienceBonusMultipliesAndSaturates)
 {
-    EXPECT_EQ(ApplyExperienceBonus(456, 150), 1140u);
-    EXPECT_EQ(ApplyExperienceBonus(146, 150), 365u);
-    EXPECT_EQ(ApplyExperienceBonus(100, 0), 100u);
+    EXPECT_EQ(ApplyExperienceBonus(100, 300), 300u);
+    EXPECT_EQ(ApplyExperienceBonus(456, 150), 684u);
+    EXPECT_EQ(ApplyExperienceBonus(146, 150), 219u);
+    EXPECT_EQ(ApplyExperienceBonus(100, 0), 0u);
     EXPECT_EQ(ApplyExperienceBonus(0, 150), 0u);
     EXPECT_EQ(ApplyExperienceBonus(std::numeric_limits<uint32_t>::max(), 150), std::numeric_limits<uint32_t>::max());
 }

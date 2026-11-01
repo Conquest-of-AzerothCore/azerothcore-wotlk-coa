@@ -1,0 +1,220 @@
+{
+  "schema": 1,
+  "name": "Infinite Power cuts the owned Chromatic Shard and Melt Reality ranks' cooldowns (#9472)",
+  "contract": [
+    "Infinite Power 92118 reads \"Casting damaging spells now reduces your damaging spell cooldowns by",
+    "$528312s1% of their remaining cooldown.\" Its aura 42 triggers 503946, whose three effect-192 entries name",
+    "Timerend 801291, Chromatic Shard 801292 and Melt Reality 806335 with 10% each. 801292 and 806335 are rank 1",
+    "of their spell_ranks chains; a level-60 Chronomancer casts Chromatic Shard rank 9 567544 and Melt Reality",
+    "rank 7 572835, whose cooldowns are the ones the client shows and Spell::CheckCast enforces. Both chains",
+    "share one Category with CategoryRecoveryTime 30000 on every rank. A control Chronomancer without Infinite",
+    "Power casts the same ranks right after the talented one, so its cooldowns are at least as long; the talented",
+    "caster's owned-rank cooldowns can only fall below the control's through the proc. After both cooldowns",
+    "run, the talented caster casts Wand of Time 520175, a direct ranged-class damage spell, so at least one",
+    "proc lands on two running cooldowns of 25 s or more: 10% of each is well over 1.5 s."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 22,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 22,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_talent",
+      "owner": "talent",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "dummy_control",
+      "owner": "control",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 572835
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 567544
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 520175
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 92118
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 572835
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 567544
+    },
+    {
+      "action": "assert",
+      "label": "The talented caster carries Infinite Power",
+      "actor": "talent",
+      "metric": "aura",
+      "spell": 92118,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The control has no Infinite Power",
+      "actor": "control",
+      "metric": "knows_spell",
+      "spell": 92118,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 572835,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 572835,
+      "target": "dummy_control"
+    },
+    {
+      "action": "assert",
+      "label": "Melt Reality rank 7 is on cooldown for the talented caster",
+      "actor": "talent",
+      "metric": "cooldown_ms",
+      "spell": 572835,
+      "min": 20000,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Melt Reality rank 7 is on cooldown for the control",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 572835,
+      "min": 20000,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown clear",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 567544,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 567544,
+      "target": "dummy_control"
+    },
+    {
+      "action": "assert",
+      "label": "Chromatic Shard rank 9 is on cooldown for the talented caster",
+      "actor": "talent",
+      "metric": "cooldown_ms",
+      "spell": 567544,
+      "min": 20000,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Chromatic Shard rank 9 is on cooldown for the control",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 567544,
+      "min": 20000,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let the shard land and the global cooldown clear",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 520175,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "label": "Let Wand of Time resolve and Infinite Power proc",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "label": "The control's remaining Melt Reality cooldown",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 572835,
+      "save_as": "control_melt_reality"
+    },
+    {
+      "action": "snapshot",
+      "label": "The control's remaining Chromatic Shard cooldown",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 567544,
+      "save_as": "control_chromatic_shard"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Infinite Power cut the owned Melt Reality rank's remaining cooldown",
+      "actor": "talent",
+      "metric": "cooldown_ms",
+      "spell": 572835,
+      "relative_to": "control_melt_reality",
+      "max": -1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Infinite Power cut the owned Chromatic Shard rank's remaining cooldown",
+      "actor": "talent",
+      "metric": "cooldown_ms",
+      "spell": 567544,
+      "relative_to": "control_chromatic_shard",
+      "max": -1500
+    }
+  ]
+}

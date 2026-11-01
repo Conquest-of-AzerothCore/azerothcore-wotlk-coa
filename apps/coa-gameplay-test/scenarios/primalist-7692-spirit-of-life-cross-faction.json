@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "Spirit of Life is friendly to opposite-faction group members (#7692)",
+  "contract": "Issue #7692 (class 31 Primalist): Spirits of Life summoned by Primordial Earth were red to, and could be attacked by, opposite-faction players in the summoner's raid. spell_ascension_primordial_spirit (AscensionPrimalistLifeSpirit.cpp) handles Spirits of Life 572853 by summoning creature 840002 with the owner's faction and owner GUID. Unit::GetReactionTo only applies its same-group REP_FRIENDLY rule when both units carry UNIT_FLAG_PLAYER_CONTROLLED; the spirit lacked the flag, so an Alliance group member fell through to the raw Horde faction check and IsValidAttackTarget allowed the attack. The spirit is now player-controlled like the other CoA class summons. An Orc Primalist is grouped with a PvP-enabled Human warrior, who must not be able to attack the spirit. A hostile monster fixture (faction 14) is the control: it must still be able to attack the spirit, so the observation is not trivially zero.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 2,
+      "class": 31,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "primalist",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9615.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "ally",
+      "enabled": true
+    },
+    {
+      "action": "group",
+      "actor": "primalist",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 572853
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 572853
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Spirits of Life summons a Spirit of Life",
+      "actor": "primalist",
+      "metric": "owned_creature_count",
+      "entry": 840002,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the opposite-faction group member cannot attack the spirit",
+      "actor": "primalist",
+      "metric": "owned_creature_attackable",
+      "entry": 840002,
+      "target": "ally",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a hostile monster can still attack the spirit",
+      "actor": "primalist",
+      "metric": "owned_creature_attackable",
+      "entry": 840002,
+      "target": "monster",
+      "equals": 1
+    }
+  ],
+  "creatures": [
+    {
+      "id": "monster",
+      "owner": "primalist",
+      "entry": 36,
+      "level": 60,
+      "health": 100000,
+      "distance": 6,
+      "faction": 14,
+      "stationary": true
+    }
+  ]
+}

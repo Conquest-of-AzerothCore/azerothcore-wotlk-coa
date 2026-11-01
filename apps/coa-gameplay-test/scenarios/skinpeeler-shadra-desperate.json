@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Shadra: Desperation buffs damage, haste and speed, and clears above 35%",
+  "contract": "Desperate (1004250) carries three effects: +30% physical damage, +20% movement speed and +20% melee haste. The aura appears at or below 35% health, the combined damage and haste is visible as heavier pressure on the tank over a fixed window, and the aura is removed once she is back above the threshold.",
+  "timeout_ms": 180000,
+  "players": [
+    { "id": "tank", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "shadra", "owner": "tank", "entry": 9916213, "level": 60, "health": 900000, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the spawn settle", "ms": 4000 },
+    { "action": "assert", "label": "No Desperate aura at full health", "actor": "shadra",
+      "metric": "aura", "spell": 1004250, "equals": 0, "within_ms": 1000 },
+
+    { "action": "set_health", "actor": "shadra", "value": 180000 },
+    { "action": "assert", "label": "Desperate appears once she is cornered", "actor": "shadra",
+      "metric": "aura", "spell": 1004250, "equals": 1, "within_ms": 4000 },
+    { "action": "assert", "label": "Effect 1 is +30% damage", "actor": "shadra",
+      "metric": "aura_amount", "spell": 1004250, "effect": 0, "equals": 29, "within_ms": 2000 },
+    { "action": "assert", "label": "Effect 2 is +20% movement speed", "actor": "shadra",
+      "metric": "aura_amount", "spell": 1004250, "effect": 1, "equals": 19, "within_ms": 2000 },
+    { "action": "assert", "label": "Effect 3 is +20% melee haste", "actor": "shadra",
+      "metric": "aura_amount", "spell": 1004250, "effect": 2, "equals": 19, "within_ms": 2000 },
+
+    { "action": "set_health", "actor": "tank", "value": 400000, "maximum": 400000 },
+    { "action": "attack", "actor": "tank", "target": "shadra" },
+    { "action": "snapshot", "actor": "tank", "metric": "health", "save_as": "hp_before" },
+    { "action": "wait", "label": "Measure the cornered pressure", "ms": 10000 },
+    { "action": "assert", "label": "Cornered Shadra lands steady pressure in ten seconds", "actor": "tank",
+      "metric": "health", "relative_to": "hp_before", "max": -5000, "within_ms": 3000 },
+    { "action": "stop_attack", "actor": "tank" },
+
+    { "action": "set_health", "actor": "shadra", "value": 900000 },
+    { "action": "assert", "label": "Desperate clears once she is back above the threshold", "actor": "shadra",
+      "metric": "aura", "spell": 1004250, "equals": 0, "within_ms": 4000 }
+  ]
+}

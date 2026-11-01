@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Hero Execution Sentence damages an enemy or heals an ally over 10 sec, then bursts (#9804)",
+  "contract": [
+    "Execution Sentence 954817 tooltip: 'A hammer slowly falls from the sky, causing Holy damage if the target is",
+    "an enemy and healing if the target is an ally, over 10 sec. This culminates in a final burst of damage or",
+    "healing. Dispelling the effect triggers the final burst.' Its only effect is a dummy. The rank's helpers carry",
+    "the result: 954818 Execution Sentence (10 sec periodic Holy damage, base 75 every 2 sec), 954827 its final",
+    "burst (551 Holy), 954819 Stay of Execution (10 sec periodic heal, base 50 every 2 sec) and 954828 its final",
+    "heal (258). The report says the cast spends mana and starts the cooldown with no effect on either target."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    { "id": "hero", "race": 1, "class": 10, "level": 40, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "hero", "entry": 36, "level": 40, "health": 2000000, "distance": 5, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "hero", "spell": 954817 },
+    {
+      "action": "snapshot", "actor": "hero", "metric": "spell_damage_count", "spell": 954818, "target": "enemy",
+      "save_as": "ticks_before"
+    },
+    {
+      "action": "snapshot", "actor": "hero", "metric": "spell_damage_count", "spell": 954827, "target": "enemy",
+      "save_as": "bursts_before"
+    },
+    {
+      "action": "snapshot", "actor": "hero", "metric": "spell_damage_total", "spell": 954827, "target": "enemy",
+      "save_as": "burst_damage_before"
+    },
+    { "action": "cast", "actor": "hero", "spell": 954817, "target": "enemy" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the enemy receives the Execution Sentence damage over time",
+      "actor": "enemy", "metric": "aura", "spell": 954818, "caster": "hero", "equals": 1, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Let the 10 sec sentence run out", "ms": 11000 },
+    {
+      "action": "assert", "label": "The sentence dealt periodic Holy damage",
+      "actor": "hero", "metric": "spell_damage_count", "spell": 954818, "target": "enemy",
+      "relative_to": "ticks_before", "min": 3
+    },
+    {
+      "action": "assert", "label": "The expiring sentence ends in its final burst",
+      "actor": "hero", "metric": "spell_damage_count", "spell": 954827, "target": "enemy",
+      "relative_to": "bursts_before", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The final burst deals Holy damage",
+      "actor": "hero", "metric": "spell_damage_total", "spell": 954827, "target": "enemy",
+      "relative_to": "burst_damage_before", "min": 200
+    },
+    {
+      "action": "snapshot", "actor": "hero", "metric": "spell_heal_count", "spell": 954828, "target": "hero",
+      "save_as": "final_heals_before"
+    },
+    { "action": "wait", "label": "Let the 45 sec category cooldown run out", "ms": 46000 },
+    { "action": "cast", "actor": "hero", "spell": 954817 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: an ally receives Stay of Execution instead",
+      "actor": "hero", "metric": "aura", "spell": 954819, "caster": "hero", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The ally is not sentenced",
+      "actor": "hero", "metric": "aura", "spell": 954818, "equals": 0
+    },
+    { "action": "wait", "label": "Let the 10 sec Stay of Execution run out", "ms": 11000 },
+    {
+      "action": "assert", "label": "The expiring Stay of Execution ends in its final heal",
+      "actor": "hero", "metric": "spell_heal_count", "spell": 954828, "target": "hero",
+      "relative_to": "final_heals_before", "equals": 1, "within_ms": 2000
+    }
+  ]
+}

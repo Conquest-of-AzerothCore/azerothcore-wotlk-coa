@@ -18,7 +18,8 @@ using namespace AscensionSunCleric;
 enum SunwellSpells : uint32
 {
     SPELL_SUNWELL = 560123,
-    SPELL_SUNWELL_VISUAL = 560124
+    SPELL_SUNWELL_VISUAL = 560124,
+    SPELL_SUN_STRIDE = 680700
 };
 bool First(AuraEffect const* effect)
 {
@@ -45,6 +46,11 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
         GetAura()->SetScriptValue(SolarPower, ++State(player).sequence);
         if (id == Sunrise || id == Sunset)
             Cast(player, player, 500643);
+        if (id == SPELL_SUN_STRIDE)
+        {
+            target->ApplySpellImmune(id, IMMUNITY_MECHANIC, MECHANIC_DAZE, true);
+            target->RemoveAurasWithMechanic(1ULL << MECHANIC_DAZE);
+        }
         if (id == SPELL_SUNWELL)
         {
             if (Aura* visual = GetCaster()->AddAura(SPELL_SUNWELL_VISUAL, target))
@@ -136,6 +142,8 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
             return;
         if (GetId() == SPELL_SUNWELL)
             GetTarget()->RemoveAurasDueToSpell(SPELL_SUNWELL_VISUAL, GetCasterGUID());
+        if (GetId() == SPELL_SUN_STRIDE)
+            GetTarget()->ApplySpellImmune(SPELL_SUN_STRIDE, IMMUNITY_MECHANIC, MECHANIC_DAZE, false);
         Player* player = Owner(GetCaster());
         if (!player)
             return;

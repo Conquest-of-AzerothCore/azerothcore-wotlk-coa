@@ -120,11 +120,13 @@ namespace
         return !inInstance && !inBattleground;
     }
 
-    // Puts the daily's aura on while its quest is in the panel and its content is where
-    // the character is, and takes it off otherwise.
+    // The cycle's daily benefit follows its content independently of reward eligibility.
+    uint32 CycleDailyQuest(Player* player);
+
     void SyncDailyAuras(Player* player)
     {
         bool const active = IsActive(player);
+        uint32 const cycleDaily = CycleDailyQuest(player);
         Battleground* const bg = player->GetBattleground();
         bool const inBattleground = bg && bg->isBattleground();
         bool const inInstance = player->GetMap() && player->GetMap()->Instanceable();
@@ -133,8 +135,8 @@ namespace
         for (PrestigeDaily const& daily : PrestigeDailies)
         {
             // The aura lasts the whole cycle: it stays after the objectives are met and
-            // drops only when the cycle ends at the required level (or the daily is gone).
-            bool const want = active && player->GetQuestStatus(daily.questId) != QUEST_STATUS_NONE
+            // drops when the cycle ends or the character leaves the matching content.
+            bool const want = active && cycleDaily == daily.questId
                 && DailyContentMatches(daily, inBattleground, inInstance, inDungeon);
             if (want)
             {
@@ -191,6 +193,27 @@ namespace
     void SaveState(Player* player, State const& state)
     {
         WriteSetting(player, StateSetting, EncodeState(state));
+    }
+
+    uint32 CycleDailyQuest(Player* player)
+    {
+        State const state = LoadState(player);
+        if (IsPrestigeDaily(state.dailyQuest))
+            return state.dailyQuest;
+        for (PrestigeDaily const& daily : PrestigeDailies)
+            if (player->GetQuestStatus(daily.questId) != QUEST_STATUS_NONE || player->IsDailyQuestDone(daily.questId))
+                return daily.questId;
+        return 0;
+    }
+
+    void RememberCycleDaily(Player* player, uint32 questId)
+    {
+        State state = LoadState(player);
+        if (state.active && state.dailyQuest != questId && IsPrestigeDaily(questId))
+        {
+            state.dailyQuest = questId;
+            SaveState(player, state);
+        }
     }
 
     uint32 OtherCharactersPrestige(Player const* player)
@@ -407,6 +430,28 @@ namespace
         });
     }
 
+    std::vector<RewardItem> ForgetRiding(Player* player)
+    {
+        // Riding spells form one rank chain (Apprentice -> Journeyman -> Expert -> Artisan):
+        // removeSpell() on a lower rank recursively removes every higher rank still known
+        // (Player::removeSpell follows GetNextSpellInChain). Deciding tier by tier, mid-loop,
+        // made removing the lowest known tier erase the higher ones before they were checked,
+        // so only the lowest tier's tome was ever granted (#10262). Snapshot every known tier
+        // first, then remove and reward from that snapshot.
+        std::vector<RidingTome const*> known;
+        for (RidingTome const& riding : RidingTomes)
+            if (player->HasSpell(riding.spell))
+                known.push_back(&riding);
+
+        std::vector<RewardItem> tomes;
+        for (RidingTome const* riding : known)
+        {
+            player->removeSpell(riding->spell, SPEC_MASK_ALL, false);
+            tomes.push_back({ riding->tome, 1 });
+        }
+        return tomes;
+    }
+
     void MailEquippedItems(Player* player, std::vector<Item*>& mailed, CharacterDatabaseTransaction trans)
     {
         for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
@@ -546,6 +591,7 @@ namespace
             player->resetTalents(true);
         uint32 const enchants = area52 ? resetResult.Enchants :
             reborn ? AscensionMysticEnchant::ClearActivePreset(player) : 0;
+        std::vector<RewardItem> const ridingTomes = ForgetRiding(player);
         std::unordered_set<uint32> chains = ForgetRanksAbove(player, FirstLevel);
         if (reborn)
             chains.merge(AscensionWarcraftReborn::ForgetClassSpellsAbove(player, FirstLevel));
@@ -556,7 +602,7 @@ namespace
         ReactivateRemainingRanks(player, chains);
         player->SendInitialActionButtons();
         StripTemporaryAuras(player);
-        AscensionRulesets::Apply(player, AscensionRulesets::Ruleset::WarMode);
+        AscensionRulesets::Apply(player, AscensionRulesets::Ruleset::PvE);
 
         CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
         std::vector<Item*> mailed;
@@ -565,11 +611,13 @@ namespace
         state.level += 1;
         state.active = true;
         state.specialization = specialization;
+        state.dailyQuest = 0;
         SaveState(player, state);
 
         player->AddAura(PrestigedAura, player);
         player->KilledMonsterCredit(PrestigeKillCredit);
         GrantRewards(player, Rewards(), mailed, trans);
+        GrantRewards(player, ridingTomes, mailed, trans);
         GrantPrestigeDaily(player);
         player->SetHomebind(WorldLocation(start->mapId, start->positionX, start->positionY, start->positionZ,
             start->orientation), start->areaId);
@@ -662,7 +710,6 @@ namespace
     {
         State state = LoadState(player);
         if ((state.active || state.signaturePending) && IsAscensionCustomClassId(player->getClass()) &&
-            state.specialization == GetAscensionActiveSpecialization(player) &&
             RestoreAscensionSpecializationSignature(player) && state.signaturePending)
         {
             state.signaturePending = false;
@@ -672,9 +719,17 @@ namespace
 
     std::string SpecializationSwitchRefusal(Player* player, uint32 /*active*/, uint32 requested)
     {
-        if (!g_enabled || IsSpecializationSwitchAllowed(LoadState(player), requested))
+        if (!g_enabled || IsAscensionCustomClassId(player->getClass()) ||
+            IsSpecializationSwitchAllowed(LoadState(player), requested))
             return {};
         return SpecializationLockedMessage(g_requiredLevel);
+    }
+
+    std::string SpecializationSlotSwitchRefusal(Player* player, uint32 active, uint32 requested)
+    {
+        if (!g_enabled || !LoadState(player).active || active == requested)
+            return {};
+        return "Your active specialization slot is Prestige locked until you complete this Prestige.";
     }
 }
 
@@ -692,6 +747,8 @@ public:
         // Pull the character's active prestige daily into the gossip quest list, so
         // the client's PrestigeModeUI (GetGossipActiveQuests / SelectGossipActiveQuest)
         // and the standard quest dialog can turn it in.
+        if (IsActive(player))
+            GrantPrestigeDaily(player, CycleDailyQuest(player));
         SyncDailyMaxLevelCredit(player);
         player->PrepareQuestMenu(creature->GetGUID());
         AddGossipItemFor(player, GOSSIP_ICON_CHAT, std::string(OptionActivate), GOSSIP_SENDER_MAIN, ACTION_ACTIVATE);
@@ -748,7 +805,7 @@ public:
     // own, so it would resend the same mail every cycle without this guard.
     bool OnPlayerCanGiveMailRewardAtGiveLevel(Player* player, uint8 /*level*/) override
     {
-        return !IsActive(player);
+        return !LoadState(player).active;
     }
 
     // A client that reconnects to a character still in the world gets its initial packets again but
@@ -778,6 +835,7 @@ public:
         CompleteIfDue(player);
         if (LoadState(player).active && !player->HasAura(PrestigedAura))
             player->AddAura(PrestigedAura, player);
+        RememberCycleDaily(player, CycleDailyQuest(player));
         SyncDailyAuras(player);
         SendPrestigeLevels(player);
     }
@@ -816,7 +874,7 @@ public:
             && !player->GetMap()->Instanceable() && !player->InBattleground())
             player->KilledMonsterCredit(DailyCreditWorldQuests);
 
-        // A turned-in daily leaves the quest panel, so its aura goes with it.
+        // Turning in the reward quest does not end the cycle benefit.
         if (g_enabled)
             SyncDailyAuras(player);
     }
@@ -921,16 +979,22 @@ namespace CoAPrestige
         for (PrestigeDaily const& daily : PrestigeDailies)
             if (player->GetQuestStatus(daily.questId) != QUEST_STATUS_NONE)
             {
+                RememberCycleDaily(player, daily.questId);
                 SyncDailyAuras(player);
                 return daily.questId;
             }
-        for (PrestigeDaily const& daily : PrestigeDailies)
-            if (player->IsDailyQuestDone(daily.questId))
-                return 0;
 
         uint32 const dailyId = questId ? questId : ActiveDailyQuest();
         if (!dailyId || !IsPrestigeDaily(dailyId))
             return 0;
+
+        RememberCycleDaily(player, dailyId);
+        for (PrestigeDaily const& daily : PrestigeDailies)
+            if (player->IsDailyQuestDone(daily.questId))
+            {
+                SyncDailyAuras(player);
+                return 0;
+            }
 
         Quest const* daily = sObjectMgr->GetQuestTemplate(dailyId);
         if (!daily)
@@ -961,9 +1025,10 @@ namespace CoAPrestige
         bool const inInstance = player->GetMap() && player->GetMap()->Instanceable();
         bool const inDungeon = player->GetMap() && player->GetMap()->IsDungeon() && !player->GetMap()->IsRaid();
 
+        uint32 const cycleDaily = CycleDailyQuest(player);
         for (PrestigeDaily const& daily : PrestigeDailies)
         {
-            if (player->GetQuestStatus(daily.questId) == QUEST_STATUS_NONE
+            if (cycleDaily != daily.questId
                 || !DailyContentMatches(daily, inBattleground, inInstance, inDungeon))
                 continue;
 
@@ -1047,4 +1112,5 @@ void AddSC_coa_prestige()
     new coa_prestige_daily_dungeon();
     new coa_prestige_talent_spec_lock();
     AddAscensionSpecializationSwitchGuard(SpecializationSwitchRefusal);
+    AddAscensionSpecializationSlotSwitchGuard(SpecializationSlotSwitchRefusal);
 }

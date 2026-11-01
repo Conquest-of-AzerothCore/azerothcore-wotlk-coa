@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Soulforged Weaponry makes only the next Murder free (#7282)",
+  "contract": [
+    "Soulforged Weaponry 561127/561340 reads 'your auto attacks have a chance to make your next Murder free of",
+    "cost' and triggers 705964, whose AuraDescription is 'Your next Murder is free of cost.' 705964 is a 15-second",
+    "SPELL_AURA_ADD_PCT_MODIFIER on SPELLMOD_COST at -100% for family 36 word1 0x40, which Murder 500376 carries.",
+    "Murder costs 300 internal Runic Power and has no cooldown beyond its 1250 ms global cooldown. The promise is",
+    "one free Murder: the first Murder with the buff must leave Runic Power untouched and spend the buff, and a",
+    "second Murder inside the buff's original 15 seconds must cost its full 300 Runic Power."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 1,
+      "class": 30,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "reaper", "entry": 36, "level": 80, "health": 5000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "reaper", "spell": 674 },
+    { "action": "learn", "actor": "reaper", "spell": 201 },
+    { "action": "learn", "actor": "reaper", "spell": 1180 },
+    { "action": "add_item", "actor": "reaper", "item": 25 },
+    { "action": "equip", "label": "Worn Shortsword in the main hand", "actor": "reaper", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "reaper", "item": 2092 },
+    { "action": "equip", "label": "Worn Dagger in the off hand", "actor": "reaper", "item": 2092, "slot": 16 },
+    { "action": "learn", "actor": "reaper", "spell": 500376 },
+    { "action": "set_aura", "label": "A free Murder from Soulforged Weaponry", "actor": "reaper", "spell": 705964, "stacks": 1 },
+    { "action": "assert", "label": "The free Murder buff is present", "actor": "reaper", "metric": "aura", "spell": 705964, "caster": "reaper", "equals": 1 },
+    { "action": "assert", "label": "The free Murder buff carries exactly one charge", "actor": "reaper", "metric": "aura_charges", "spell": 705964, "caster": "reaper", "equals": 1 },
+    { "action": "set_power", "actor": "reaper", "power": 6, "value": 300 },
+    { "action": "cast", "label": "First Murder with the buff", "actor": "reaper", "spell": 500376, "target": "dummy" },
+    { "action": "assert", "label": "The first Murder is accepted", "actor": "reaper", "metric": "cast_failure", "spell": 500376, "equals": 0 },
+    { "action": "assert", "label": "The first Murder hits", "actor": "reaper", "metric": "spell_damage_count", "spell": 500376, "target": "dummy", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The first Murder costs no Runic Power", "actor": "reaper", "metric": "power", "power": 6, "min": 200 },
+    { "action": "assert", "label": "The first Murder spends the buff", "actor": "reaper", "metric": "aura", "spell": 705964, "caster": "reaper", "equals": 0, "within_ms": 2000 },
+    { "action": "wait", "label": "Clear the global cooldown, still inside the buff's original 15 seconds", "ms": 1600 },
+    { "action": "set_power", "actor": "reaper", "power": 6, "value": 300 },
+    { "action": "cast", "label": "Second Murder", "actor": "reaper", "spell": 500376, "target": "dummy" },
+    { "action": "assert", "label": "The second Murder is accepted", "actor": "reaper", "metric": "cast_failure", "spell": 500376, "equals": 0 },
+    { "action": "assert", "label": "The second Murder hits", "actor": "reaper", "metric": "spell_damage_count", "spell": 500376, "target": "dummy", "equals": 2, "within_ms": 3000 },
+    { "action": "assert", "label": "The second Murder costs its full 300 Runic Power", "actor": "reaper", "metric": "power", "power": 6, "max": 100 }
+  ]
+}

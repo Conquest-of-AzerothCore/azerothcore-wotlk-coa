@@ -1,0 +1,235 @@
+{
+  "schema": 1,
+  "name": "Realm First! race/class achievements grant their race's title for every playable race",
+  "contract": "Every 'Realm First! Level 60 <Race> <Class>' achievement advertises its race's CharTitles title in Achievement.dbc but only two had an achievement_reward row, so completing the rest gave no title. Reaching level 60 as Human Necromancer, Orc Barbarian, Dwarf Ranger, Gnome Tinker, Draenei Runemaster, Blood Elf Pyromancer, Troll Witch Doctor and Tauren Primalist completes the achievement and now grants CharTitles 114, 116, 112, 113, 111, 110, 118 and 117.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "human",
+      "race": 1,
+      "class": 23,
+      "level": 1
+    },
+    {
+      "id": "orc",
+      "race": 2,
+      "class": 12,
+      "level": 1
+    },
+    {
+      "id": "dwarf",
+      "race": 3,
+      "class": 21,
+      "level": 1
+    },
+    {
+      "id": "gnome",
+      "race": 7,
+      "class": 28,
+      "level": 1
+    },
+    {
+      "id": "draenei",
+      "race": 11,
+      "class": 32,
+      "level": 1
+    },
+    {
+      "id": "bloodelf",
+      "race": 10,
+      "class": 24,
+      "level": 1
+    },
+    {
+      "id": "troll",
+      "race": 8,
+      "class": 13,
+      "level": 1
+    },
+    {
+      "id": "tauren",
+      "race": 6,
+      "class": 31,
+      "level": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "human",
+      "value": 60
+    },
+    {
+      "action": "set_level",
+      "actor": "orc",
+      "value": 60
+    },
+    {
+      "action": "set_level",
+      "actor": "dwarf",
+      "value": 60
+    },
+    {
+      "action": "set_level",
+      "actor": "gnome",
+      "value": 60
+    },
+    {
+      "action": "set_level",
+      "actor": "draenei",
+      "value": 60
+    },
+    {
+      "action": "set_level",
+      "actor": "bloodelf",
+      "value": 60
+    },
+    {
+      "action": "set_level",
+      "actor": "troll",
+      "value": 60
+    },
+    {
+      "action": "set_level",
+      "actor": "tauren",
+      "value": 60
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "human earns realm-first achievement 86140",
+      "actor": "human",
+      "metric": "has_achievement",
+      "achievement": 86140,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "human receives title 114",
+      "actor": "human",
+      "metric": "has_title",
+      "title": 114,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "orc earns realm-first achievement 86029",
+      "actor": "orc",
+      "metric": "has_achievement",
+      "achievement": 86029,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "orc receives title 116",
+      "actor": "orc",
+      "metric": "has_title",
+      "title": 116,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "dwarf earns realm-first achievement 86118",
+      "actor": "dwarf",
+      "metric": "has_achievement",
+      "achievement": 86118,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "dwarf receives title 112",
+      "actor": "dwarf",
+      "metric": "has_title",
+      "title": 112,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "gnome earns realm-first achievement 86184",
+      "actor": "gnome",
+      "metric": "has_achievement",
+      "achievement": 86184,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "gnome receives title 113",
+      "actor": "gnome",
+      "metric": "has_title",
+      "title": 113,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "draenei earns realm-first achievement 86221",
+      "actor": "draenei",
+      "metric": "has_achievement",
+      "achievement": 86221,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "draenei receives title 111",
+      "actor": "draenei",
+      "metric": "has_title",
+      "title": 111,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "bloodelf earns realm-first achievement 86142",
+      "actor": "bloodelf",
+      "metric": "has_achievement",
+      "achievement": 86142,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "bloodelf receives title 110",
+      "actor": "bloodelf",
+      "metric": "has_title",
+      "title": 110,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "troll earns realm-first achievement 86033",
+      "actor": "troll",
+      "metric": "has_achievement",
+      "achievement": 86033,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "troll receives title 118",
+      "actor": "troll",
+      "metric": "has_title",
+      "title": 118,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "tauren earns realm-first achievement 86215",
+      "actor": "tauren",
+      "metric": "has_achievement",
+      "achievement": 86215,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "tauren receives title 117",
+      "actor": "tauren",
+      "metric": "has_title",
+      "title": 117,
+      "equals": 1
+    }
+  ]
+}

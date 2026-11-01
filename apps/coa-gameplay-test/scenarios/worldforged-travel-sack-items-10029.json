@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "name": "Worldforged Travel Sack items now exist as real, correct containers",
+  "contract": "gameobject_loot_template Entry 9900024 (Westfall 'Forgotten Sack', rev_20261014_95_worldforged_lootcollector_alignment.sql:79) hands out item 451107; Entries 95612/95812 (Mulgore/Red Cloud Mesa 'Travel Sack' namesake pickups, 2026_09_16_00_worldforged_pickups.sql:1956,2118) hand out item 450510. Neither 450510 nor 451107 ever had an item_template row, so every acquisition path (loot roll, direct creation) failed and the chest's loot window opened empty. #10029. Both items now exist with class/subclass/SoundOverrideSubclass/Material/displayid/InventoryType matching Item.dbc exactly (450510: ClassID 1, SubclassID 0, Material 8, DisplayInfoID 15320, InventoryType 18; 451107: ClassID 1, SubclassID 0, Material 8, DisplayInfoID 138737, InventoryType 18 - both regular 18-slot-type bag containers). Note: whether a worldforged pickup chest's own one-time-per-character loot veto (WorldforgedPickups.cpp's worldforged_pickup_loot_veto GlobalScript) lets a specific character re-loot is an unrelated, pre-existing mechanic out of scope for this fix; this scenario proves the items themselves are now correct and creatable, independent of that veto.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "hero", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "add_item", "actor": "hero", "item": 450510 },
+    { "action": "assert", "label": "DISCRIMINATING: Travel Sack (450510) now exists and can be granted",
+      "actor": "hero", "metric": "item_count", "item": 450510, "equals": 1 },
+    { "action": "add_item", "actor": "hero", "item": 451107 },
+    { "action": "assert", "label": "DISCRIMINATING: Forgotten Sack (451107) now exists and can be granted",
+      "actor": "hero", "metric": "item_count", "item": 451107, "equals": 1 }
+  ]
+}

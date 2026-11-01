@@ -84,7 +84,7 @@ public:
         if (!player || info->SpellFamilyName != 33 || spell->IsTriggered() || result != SPELL_CAST_OK)
             return;
         if (info->Id == DawnCast && !player->HasAura(Dawn) && Count(player, SolarPower) < 20)
-            result = SPELL_FAILED_NO_POWER;
+            result = SPELL_FAILED_CASTER_AURASTATE;
         if (info->Id == 680630 && !player->HasAura(Dawn))
             result = SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
         if (info->Id == 805629 && !player->HasAura(Dawn))

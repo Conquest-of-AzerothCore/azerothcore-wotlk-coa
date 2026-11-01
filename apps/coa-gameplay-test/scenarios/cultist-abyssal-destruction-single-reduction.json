@@ -1,0 +1,179 @@
+{
+  "schema": 1,
+  "name": "Abyssal Destruction takes 1 sec off the owned Obliteration Beam rank once per proc (#9472)",
+  "contract": "Abyssal Destruction 300308 is a Cultist event aura (aura_ascension_cultist_event with a spell_proc row) whose proc on periodic or channeled damage grants Insanity and casts Abyssal Destruction 300605. 300605 effect 1 is SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN with BasePoints -1001 on Obliteration Beam rank 1 805572, and the talent tooltip promises 'reduces the cooldown of your Obliteration Beam by $/1000;300605s2 sec' (1 sec). Now that the core reaches the owned rank, the event handler must not also reduce it, or each proc takes 2 sec. A level-80 Cultist owns rank 7, 806897 (20 s category cooldown). Corruption 172 is instant, costs nothing and ticks every 3000 ms, so after one tick exactly one proc has fired. A control Cultist without the talent casts the same spells right after; the tester's Obliteration Beam can only fall below the control's through the proc.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "tester",
+      "race": 1,
+      "class": 25,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 25,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "tester_dummy",
+      "owner": "tester",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 10
+    },
+    {
+      "id": "control_dummy",
+      "owner": "control",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "tester",
+      "spell": 806897
+    },
+    {
+      "action": "set_aura",
+      "actor": "tester",
+      "spell": 500706,
+      "stacks": 100
+    },
+    {
+      "action": "learn",
+      "actor": "tester",
+      "spell": 300308
+    },
+    {
+      "action": "learn",
+      "actor": "tester",
+      "spell": 172
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 806897
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 500706,
+      "stacks": 100
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 172
+    },
+    {
+      "action": "assert",
+      "label": "The control has no Abyssal Destruction",
+      "actor": "control",
+      "metric": "knows_spell",
+      "spell": 300308,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "tester",
+      "spell": 806897,
+      "target": "tester_dummy"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 806897,
+      "target": "control_dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Obliteration Beam rank 7 is on cooldown",
+      "actor": "tester",
+      "metric": "cooldown_ms",
+      "spell": 806897,
+      "min": 15000,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Obliteration Beam rank 7 is on cooldown for the control",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 806897,
+      "min": 15000,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown clear",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "tester",
+      "spell": 172,
+      "target": "tester_dummy"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 172,
+      "target": "control_dummy"
+    },
+    {
+      "action": "wait",
+      "label": "One Corruption tick at 3 s, before the second at 6 s",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the tick procced Abyssal Destruction",
+      "actor": "tester",
+      "metric": "aura",
+      "spell": 300605,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "The control's remaining Obliteration Beam cooldown",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 806897,
+      "save_as": "control_cooldown"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: one proc took 1 sec off the owned rank, not 2 sec",
+      "actor": "tester",
+      "metric": "cooldown_ms",
+      "spell": 806897,
+      "relative_to": "control_cooldown",
+      "min": -1600,
+      "max": -700
+    }
+  ]
+}

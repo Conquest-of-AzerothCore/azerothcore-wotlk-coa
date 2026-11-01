@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "The display patch stream is not resent after a far teleport",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1. SMSG_PATCH_LOADING_SCREENS (0x05F8) opens every display patch stream, so its",
+    "count is the number of streams. The Extensions DLL sends CMSG_EXTENSION_INITIALIZED (0x561) after every world",
+    "entry and keeps the streamed rows in the client's in-memory DBCs for the whole client session, so only the",
+    "first world entry of a login is answered. The client's login notice gets the one stream and the 5 s fallback",
+    "does not add a second. A real teleport to another map followed by the client's notice, past the former",
+    "ten-second resend cooldown, must not stream again."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "client",
+      "race": 1,
+      "class": 1,
+      "level": 32
+    }
+  ],
+  "steps": [
+    { "action": "client_packet", "actor": "client", "opcode": 1377, "label": "The client's first world-entry notice" },
+    { "action": "assert", "label": "The first world entry receives the stream", "actor": "client", "metric": "server_packets", "opcode": 1528, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Outlast the 5 s login fallback", "ms": 6000 },
+    { "action": "assert", "label": "The login fallback does not stream a second time", "actor": "client", "metric": "server_packets", "opcode": 1528, "equals": 1 },
+    { "action": "teleport", "actor": "client", "map": 1, "x": 1676.21, "y": -4315.29, "z": 61.52, "o": 0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "client_packet", "actor": "client", "opcode": 1377, "label": "The notice the client sends after the loading screen" },
+    { "action": "wait", "label": "Outlast the former resend cooldown", "ms": 12000 },
+    { "action": "assert", "label": "DISCRIMINATING: the far teleport is not answered with the stream again", "actor": "client", "metric": "server_packets", "opcode": 1528, "equals": 1 }
+  ]
+}

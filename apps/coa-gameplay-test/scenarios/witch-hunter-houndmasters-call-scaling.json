@@ -1,0 +1,491 @@
+{
+  "schema": 1,
+  "name": "Houndmaster's Call strikes deal 315 base damage plus 55% ranged attack power",
+  "contract": [
+    "Changelog entries 71841 and 71842 (2026-08-25) raised Houndmaster's Call by 90 base damage (225 to 315 before",
+    "level scaling) and its ranged attack power scaling from 35% to 55%. Two level-60 owners Call their",
+    "Shadowhounds five times each on identical golems; one has +10000 ranged attack power. Partial resists and",
+    "level scaling cancel in the ratio of their average non-crit strikes: (315 + 55% of 10237) / (315 + 55% of",
+    "237) is about 13.5. The old base gives 16.6 and 35% gives 9.9. Expected: 12.4-14.6, checked as the inverse",
+    "0.0685-0.0806."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ranged",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_attack_power": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "plain_golem",
+      "owner": "plain",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "distance": 12
+    },
+    {
+      "id": "ranged_golem",
+      "owner": "ranged",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "distance": 12
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 801343
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 802273
+    },
+    {
+      "action": "cast",
+      "label": "Houndmaster's Whistle",
+      "actor": "plain",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Shadowhound is out",
+      "actor": "plain",
+      "metric": "pet_entry",
+      "equals": 50124,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "ranged",
+      "spell": 801343
+    },
+    {
+      "action": "learn",
+      "actor": "ranged",
+      "spell": 802273
+    },
+    {
+      "action": "cast",
+      "label": "Houndmaster's Whistle",
+      "actor": "ranged",
+      "spell": 801343
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Shadowhound is out",
+      "actor": "ranged",
+      "metric": "pet_entry",
+      "equals": 50124,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "plain",
+      "spell": 802273
+    },
+    {
+      "action": "set_power",
+      "actor": "plain",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Houndmaster's Call",
+      "actor": "plain",
+      "spell": 802273,
+      "target": "plain_golem"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ranged",
+      "spell": 802273
+    },
+    {
+      "action": "set_power",
+      "actor": "ranged",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Houndmaster's Call",
+      "actor": "ranged",
+      "spell": 802273,
+      "target": "ranged_golem"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both Call strikes landed",
+      "actor": "plain",
+      "metric": "spell_damage_count",
+      "spell": 706332,
+      "pet": true,
+      "target": "plain_golem",
+      "min": 2,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both Call strikes landed",
+      "actor": "ranged",
+      "metric": "spell_damage_count",
+      "spell": 706332,
+      "pet": true,
+      "target": "ranged_golem",
+      "min": 2,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "plain",
+      "spell": 802273
+    },
+    {
+      "action": "set_power",
+      "actor": "plain",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Houndmaster's Call",
+      "actor": "plain",
+      "spell": 802273,
+      "target": "plain_golem"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ranged",
+      "spell": 802273
+    },
+    {
+      "action": "set_power",
+      "actor": "ranged",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Houndmaster's Call",
+      "actor": "ranged",
+      "spell": 802273,
+      "target": "ranged_golem"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both Call strikes landed",
+      "actor": "plain",
+      "metric": "spell_damage_count",
+      "spell": 706332,
+      "pet": true,
+      "target": "plain_golem",
+      "min": 4,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both Call strikes landed",
+      "actor": "ranged",
+      "metric": "spell_damage_count",
+      "spell": 706332,
+      "pet": true,
+      "target": "ranged_golem",
+      "min": 4,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "plain",
+      "spell": 802273
+    },
+    {
+      "action": "set_power",
+      "actor": "plain",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Houndmaster's Call",
+      "actor": "plain",
+      "spell": 802273,
+      "target": "plain_golem"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ranged",
+      "spell": 802273
+    },
+    {
+      "action": "set_power",
+      "actor": "ranged",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Houndmaster's Call",
+      "actor": "ranged",
+      "spell": 802273,
+      "target": "ranged_golem"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both Call strikes landed",
+      "actor": "plain",
+      "metric": "spell_damage_count",
+      "spell": 706332,
+      "pet": true,
+      "target": "plain_golem",
+      "min": 6,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both Call strikes landed",
+      "actor": "ranged",
+      "metric": "spell_damage_count",
+      "spell": 706332,
+      "pet": true,
+      "target": "ranged_golem",
+      "min": 6,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "plain",
+      "spell": 802273
+    },
+    {
+      "action": "set_power",
+      "actor": "plain",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Houndmaster's Call",
+      "actor": "plain",
+      "spell": 802273,
+      "target": "plain_golem"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ranged",
+      "spell": 802273
+    },
+    {
+      "action": "set_power",
+      "actor": "ranged",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Houndmaster's Call",
+      "actor": "ranged",
+      "spell": 802273,
+      "target": "ranged_golem"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both Call strikes landed",
+      "actor": "plain",
+      "metric": "spell_damage_count",
+      "spell": 706332,
+      "pet": true,
+      "target": "plain_golem",
+      "min": 8,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both Call strikes landed",
+      "actor": "ranged",
+      "metric": "spell_damage_count",
+      "spell": 706332,
+      "pet": true,
+      "target": "ranged_golem",
+      "min": 8,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "plain",
+      "spell": 802273
+    },
+    {
+      "action": "set_power",
+      "actor": "plain",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Houndmaster's Call",
+      "actor": "plain",
+      "spell": 802273,
+      "target": "plain_golem"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "ranged",
+      "spell": 802273
+    },
+    {
+      "action": "set_power",
+      "actor": "ranged",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Houndmaster's Call",
+      "actor": "ranged",
+      "spell": 802273,
+      "target": "ranged_golem"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both Call strikes landed",
+      "actor": "plain",
+      "metric": "spell_damage_count",
+      "spell": 706332,
+      "pet": true,
+      "target": "plain_golem",
+      "min": 10,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: both Call strikes landed",
+      "actor": "ranged",
+      "metric": "spell_damage_count",
+      "spell": 706332,
+      "pet": true,
+      "target": "ranged_golem",
+      "min": 10,
+      "within_ms": 8000
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "spell_damage_count",
+      "target": "plain_golem",
+      "save_as": "plain_hits",
+      "spell": 706332,
+      "pet": true,
+      "critical": false
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: plain Call strikes landed",
+      "actor": "plain",
+      "metric": "spell_damage_count",
+      "target": "plain_golem",
+      "min": 6,
+      "spell": 706332,
+      "pet": true,
+      "critical": false
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "spell_damage_total",
+      "target": "plain_golem",
+      "ratio_to": "plain_hits",
+      "save_as": "plain_average",
+      "spell": 706332,
+      "pet": true,
+      "critical": false
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: plain Call strikes landed",
+      "actor": "ranged",
+      "metric": "spell_damage_count",
+      "target": "ranged_golem",
+      "min": 6,
+      "spell": 706332,
+      "pet": true,
+      "critical": false
+    },
+    {
+      "action": "snapshot",
+      "actor": "ranged",
+      "metric": "spell_damage_total",
+      "target": "ranged_golem",
+      "ratio_to": "plain_average",
+      "save_as": "hits_times_ratio",
+      "spell": 706332,
+      "pet": true,
+      "critical": false
+    },
+    {
+      "action": "assert",
+      "label": "+10000 ranged attack power raises a Call strike 12.4-14.6 times",
+      "actor": "ranged",
+      "metric": "spell_damage_count",
+      "target": "ranged_golem",
+      "ratio_to": "hits_times_ratio",
+      "min": 0.0685,
+      "max": 0.0806,
+      "spell": 706332,
+      "pet": true,
+      "critical": false
+    }
+  ]
+}

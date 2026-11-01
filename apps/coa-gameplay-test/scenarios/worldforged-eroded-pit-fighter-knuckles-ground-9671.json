@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Worldforged pickup at Durnholde Keep already stands on the ground (#9671)",
+  "contract": "#9671 reports a worldforged item 'fallen through the world' near Durnholde Keep. The only pickup there, gameobject entry 515386 (guid 6940442, 'Eroded Pit Fighter Knuckles', Hillsbrad Foothills), measures spawn_ground_gap -0.13 yd against the live map/vmap data: well within the 0.8 yd placement tolerance, i.e. already grounded, not sunk. No coordinate change is applied.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -501.2, "y": -1554.6, "z": 53.0, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the pickup is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 515386, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup already stands within tolerance of the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940442, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 515386 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the pickup is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

@@ -264,7 +264,7 @@ bool QueueAscensionManastormPacket(WorldSession*, WorldPacket const&)
 
 std::vector<uint32> answeredCreatures;
 
-bool SendCollectionCreatureQueryResponse(WorldSession*, uint32 entry)
+bool SendBulkCreatureQueryResponse(WorldSession*, uint32 entry)
 {
     answeredCreatures.push_back(entry);
     return true;
@@ -389,7 +389,7 @@ public:
         return service;
     }
 
-    void SendPatchStream(Player*, bool = false) { }
+    void SendPatchStream(Player*) { }
 
     std::vector<uint32> ItemRequests;
 

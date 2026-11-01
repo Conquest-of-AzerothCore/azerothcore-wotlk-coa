@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Feast of Talons unleashes crows when one Darkflock hit strikes five enemies",
+  "contract": [
+    "Feast of Talons 500056 (talent node 7427) reads 'Striking at least 5 enemies with Darkflock ... unleash a flock",
+    "of crows around each enemy struck', the crow damage over time being 500564 in a 6 yd radius. Darkflock is an",
+    "aura on the caster whose 520271 hits strike enemies in a cone in front of it. Expected: five enemies 3-7 yd in",
+    "front each get 500564 from the Witch Hunter after the first Darkflock hit and take its damage; an enemy 30 yd",
+    "away is outside both the cone and the crow radius and gets none."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "wh", "race": 1, "class": 15, "level": 60, "spell_hit_rating": 10000, "ranged_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "a", "owner": "wh", "entry": 36, "level": 60, "health": 1000000, "distance": 3},
+    {"id": "b", "owner": "wh", "entry": 36, "level": 60, "health": 1000000, "distance": 4},
+    {"id": "c", "owner": "wh", "entry": 36, "level": 60, "health": 1000000, "distance": 5},
+    {"id": "d", "owner": "wh", "entry": 36, "level": 60, "health": 1000000, "distance": 6},
+    {"id": "e", "owner": "wh", "entry": 36, "level": 60, "health": 1000000, "distance": 7},
+    {"id": "far", "owner": "wh", "entry": 36, "level": 60, "health": 1000000, "distance": 30}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Darkflock rank 5", "actor": "wh", "spell": 562025},
+    {"action": "learn", "label": "Feast of Talons", "actor": "wh", "spell": 500056},
+    {"action": "assert", "label": "SETUP: Feast of Talons is active", "actor": "wh", "metric": "aura", "spell": 500056,
+     "equals": 1},
+    {"action": "set_power", "actor": "wh", "power": 1, "value": 1000},
+    {"action": "cast", "label": "Darkflock", "actor": "wh", "spell": 562025, "target": "a"},
+    {"action": "assert", "label": "Darkflock strikes all five enemies", "actor": "wh", "metric": "spell_damage_count",
+     "spell": 520271, "target": "e", "min": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Crows on the first enemy", "actor": "a", "metric": "aura", "spell": 500564,
+     "caster": "wh", "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "Crows on the second enemy", "actor": "b", "metric": "aura", "spell": 500564,
+     "caster": "wh", "equals": 1},
+    {"action": "assert", "label": "Crows on the third enemy", "actor": "c", "metric": "aura", "spell": 500564,
+     "caster": "wh", "equals": 1},
+    {"action": "assert", "label": "Crows on the fourth enemy", "actor": "d", "metric": "aura", "spell": 500564,
+     "caster": "wh", "equals": 1},
+    {"action": "assert", "label": "Crows on the fifth enemy", "actor": "e", "metric": "aura", "spell": 500564,
+     "caster": "wh", "equals": 1},
+    {"action": "assert", "label": "No crows on the distant enemy", "actor": "far", "metric": "aura", "spell": 500564,
+     "caster": "wh", "equals": 0},
+    {"action": "assert", "label": "The crows deal damage", "actor": "wh", "metric": "spell_damage_count",
+     "spell": 500564, "target": "c", "min": 1, "within_ms": 4000}
+  ]
+}

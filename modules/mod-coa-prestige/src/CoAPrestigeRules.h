@@ -59,6 +59,7 @@ namespace CoAPrestige
         bool active = false;
         uint32_t specialization = 0;
         bool signaturePending = false;
+        uint32_t dailyQuest = 0;
 
         bool operator==(State const&) const = default;
     };
@@ -74,14 +75,18 @@ namespace CoAPrestige
             state.specialization = values[2];
         if (values.size() > 3)
             state.signaturePending = values[3] != 0;
+        if (values.size() > 4)
+            state.dailyQuest = values[4];
         return state;
     }
 
     inline std::vector<uint32_t> EncodeState(State const& state)
     {
         std::vector<uint32_t> values{ state.level, state.active ? 1u : 0u, state.specialization };
-        if (state.signaturePending)
-            values.push_back(1);
+        if (state.signaturePending || state.dailyQuest)
+            values.push_back(state.signaturePending ? 1u : 0u);
+        if (state.dailyQuest)
+            values.push_back(state.dailyQuest);
         return values;
     }
 
@@ -164,8 +169,8 @@ namespace CoAPrestige
         return {};
     }
 
-    // Once Prestige Mode is active the specialization stays locked until the character is back at
-    // the required level; choosing the locked specialization again is not a switch.
+    // Warcraft Reborn keeps its talent specialization locked during Prestige. Custom-class
+    // archetypes use separate slot-switch protection instead.
     inline bool IsSpecializationSwitchAllowed(State const& state, uint32_t requestedSpecialization)
     {
         return !state.active || !state.specialization || requestedSpecialization == state.specialization;
@@ -245,9 +250,9 @@ namespace CoAPrestige
         return rewards;
     }
 
-    inline uint32_t ApplyExperienceBonus(uint32_t amount, uint32_t bonusPercent)
+    inline uint32_t ApplyExperienceBonus(uint32_t amount, uint32_t totalPercent)
     {
-        uint64_t const boosted = uint64_t(amount) * (100u + uint64_t(bonusPercent)) / 100u;
+        uint64_t const boosted = uint64_t(amount) * totalPercent / 100u;
         return uint32_t(std::min<uint64_t>(boosted, std::numeric_limits<uint32_t>::max()));
     }
 
@@ -310,6 +315,28 @@ namespace CoAPrestige
     constexpr uint32_t DailyCreditBattlegrounds = 900002; // "Battlegrounds Completed"
     constexpr uint32_t DailyCreditDungeons      = 900003; // "Dungeons Completed"
     constexpr uint32_t DailyCreditWorldQuests   = 900004; // "Daily Quests Completed"
+
+    struct RidingTome
+    {
+        uint32_t spell = 0;
+        uint32_t tome = 0;
+    };
+
+    // Tome ids must be rows that exist in item_template: 2200034 (Soulbound Riding Tome:
+    // Apprentice Riding), 2200033 (...Journeyman Riding) and 49177 (stock Tome of Cold Weather
+    // Flight) are. Expert (34090), Artisan (34091) and Extraordinary (91774) riding have no
+    // corresponding item_template row anywhere in this checkout, so GrantRewards still drops
+    // those three silently (#10262 observation, not fixed here: no id to point them at without
+    // guessing one).
+    constexpr RidingTome RidingTomes[] =
+    {
+        { 33388, 2200034 },
+        { 33391, 2200033 },
+        { 34090, 1046168 },
+        { 34091, 1052731 },
+        { 91774, 2179243 },
+        { 54197, 49177 },
+    };
 
     constexpr uint32_t DailyQuestBattlegrounds = 80954; // "Prestige: Battlegrounds"
     constexpr uint32_t DailyQuestDungeons = 80955;      // "Prestige: Dungeons"

@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Frozen Bodies at 10 stacks guarantees a crit and 50% extra Glacial Impact damage (#10025)",
+  "contract": "Frozen Bodies712434 reads 'Increases the damage of your next Glacial Impact by $s1% for $d, stacking $u times. Reaching 10 stacks causes your next Glacial Impact to critically strike for 50% increased damage.' Spell.dbc only carries the linear per-stack %; there was no code anywhere checking GetStackAmount()==StackAmount(10), so the discrete bonus never fired. The fix forces a 100% crit chance and multiplies Glacial Impact707592's base damage by 1.5 when Frozen Bodies is at its DBC-defined StackAmount cap of 10. The control cast is forced to crit the same way via spell_crit_rating, isolating the 1.5x multiplier from the crit roll itself.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 100000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "n",
+      "entry": 299,
+      "level": 60,
+      "health": 1000000,
+      "distance": 12,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 704355 },
+    { "action": "set_aura", "actor": "n", "spell": 801747, "stacks": 1, "label": "Permafrost makes the unfrozen dummy a valid target" },
+    { "action": "set_power", "actor": "n", "power": 0, "value": 2000 },
+    { "action": "set_aura", "actor": "n", "spell": 712434, "stacks": 9, "label": "CONTROL: 9 stacks, below the 10-stack threshold" },
+    { "action": "cast", "label": "Control cast at 9 stacks", "actor": "n", "spell": 704355, "target": "d" },
+    { "action": "assert", "label": "CONTROL: the control cast crits (forced by spell_crit_rating)", "actor": "n", "metric": "spell_damage_count", "spell": 707592, "target": "d", "critical": true, "min": 1, "within_ms": 4000 },
+    { "action": "snapshot", "actor": "n", "metric": "spell_damage_total", "spell": 707592, "target": "d", "critical": true, "label": "control_damage", "save_as": "control_damage" },
+    { "action": "wait", "label": "Let 704355's own 6 sec cooldown clear", "ms": 6500 },
+    { "action": "set_power", "actor": "n", "power": 0, "value": 2000 },
+    { "action": "set_aura", "actor": "n", "spell": 712434, "stacks": 10, "label": "DISCRIMINATING: reaching the 10-stack cap" },
+    { "action": "cast", "label": "10-stack cast", "actor": "n", "spell": 704355, "target": "d" },
+    { "action": "assert", "label": "CONTRACT: the 10-stack cast crits too", "actor": "n", "metric": "spell_damage_count", "spell": 707592, "target": "d", "critical": true, "min": 2, "within_ms": 4000 },
+    { "action": "assert", "label": "CONTRACT: the 10-stack cast deals 1.5x the control crit's damage", "actor": "n", "metric": "spell_damage_total", "spell": 707592, "target": "d", "critical": true, "relative_to": "control_damage", "ratio_to": "control_damage", "min": 1.4, "max": 1.6 }
+  ]
+}

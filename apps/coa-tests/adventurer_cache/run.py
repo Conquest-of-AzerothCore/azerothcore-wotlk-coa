@@ -1,14 +1,13 @@
 import csv
-import os
 from pathlib import Path
 import re
 import sqlite3
-import subprocess
-import tempfile
 import zipfile
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
+PENDING = ROOT / 'data/sql/updates/pending_db_world'
+SATCHEL, CACHE, RARE_CACHE = 1397884, 1397885, 1397886
 
 
 def main():
@@ -17,9 +16,13 @@ def main():
     def table(name):
         return archive.read(next(p for p in archive.namelist() if p.rsplit('/', 1)[-1] == name + '.sql')).decode()
 
-    sql = (ROOT / 'data/sql/updates/pending_db_world/rev_1789371937554667200.sql').read_text()
-    variants_sql = (ROOT / 'data/sql/updates/pending_db_world/rev_1789486726522615900.sql').read_text()
-    candidates = set(map(int, re.findall(r'\b\d+\b', sql + variants_sql)))
+    sql = (PENDING / 'rev_1789371937554667200.sql').read_text()
+    variants_sql = (PENDING / 'rev_1789486726522615900.sql').read_text()
+    satchel_sql = (PENDING / 'rev_20260930_00_coa_adventurer_satchel_loot.sql').read_text()
+    gear_sql = (PENDING / 'rev_20261028_70_adventurer_cache_gear.sql').read_text()
+    supplies, gear = (set(map(int, re.findall(r'\d+', group)))
+                      for group in re.findall(r'IN \(\n([\d,\s]+)\)', gear_sql))
+    candidates = set(map(int, re.findall(r'\b\d+\b', sql + variants_sql + satchel_sql + gear_sql)))
     references = []
     for match in re.finditer(r'\((\d+),(\d+),(\d+),', table('reference_loot_template')):
         entry, item, reference = map(int, match.groups())
@@ -64,33 +67,33 @@ def main():
     db.executescript(variants_sql)
     assert list(db.iterdump()) == once
     assert list(db.execute('SELECT * FROM item_template WHERE entry NOT IN (1397884,1397886)')) == before_variants
-    reference = db.execute('''SELECT Item,Reference,Chance,QuestRequired,LootMode,GroupId,MinCount,MaxCount
-        FROM item_loot_template WHERE Entry=1397885 ORDER BY Item''').fetchall()
-    for entry in (1397884, 1397886):
-        assert db.execute('SELECT Flags & 4,ScriptName FROM item_template WHERE entry=?', (entry,)).fetchone() == (
-            4, 'item_ascension_adventurer_cache')
-        assert db.execute('''SELECT Item,Reference,Chance,QuestRequired,LootMode,GroupId,MinCount,MaxCount
-            FROM item_loot_template WHERE Entry=? ORDER BY Item''', (entry,)).fetchall() == reference
-    pool = list(db.execute('''SELECT t.entry,t.class,t.subclass,t.Quality,t.RequiredLevel,t.ItemLevel,l.MaxCount
-        FROM item_template t JOIN item_loot_template l ON t.entry=l.Item WHERE l.Entry=1397885'''))
-    assert len(pool) > 100
-    assert {r[3] for r in pool if r[1] == 4} == {1, 2, 3}
-    assert all(r[6] == (1 if r[1] == 4 else 3) for r in pool)
-    source = (ROOT / 'src/server/coa/AscensionAdventurerCache.cpp').read_text()
-    code = (HERE / 'harness.cpp').read_text() + re.sub(r'^#include.*\n', '', source, flags=re.M)
-    code += '\nvoid InitPool(){\n'
-    for entry, cls, subclass, quality, required, level, _ in pool:
-        code += f'manager.items[{entry}]={{{entry},{cls},{subclass},{quality},{required},{level}}};\n'
-    code += '}\n' + (HERE / 'cases.cpp').read_text()
-    compiler = str(Path(os.environ['VCToolsInstallDir']) / 'bin/Hostx64/x64/cl.exe')
-    with tempfile.TemporaryDirectory(prefix='coa-adventurer-cache-') as directory:
-        out = Path(directory)
-        cpp, exe = out / 'cache.cpp', out / 'cache.exe'
-        cpp.write_text(code, encoding='utf-8')
-        subprocess.run([compiler, '/nologo', '/std:c++20', '/EHsc', '/W4', '/WX', '/utf-8',
-                        str(cpp), '/Fe' + str(exe)], cwd=out, check=True, timeout=60)
-        subprocess.run([str(exe)], cwd=out, check=True, timeout=15)
-    print(f'PASS: three containers, {len(pool)} existing rewards; selection; use guards; SQL replay/preservation')
+
+    db.executescript(satchel_sql)
+    satchel_pool = list(db.execute('SELECT * FROM item_loot_template WHERE Entry=? ORDER BY Item', (SATCHEL,)))
+    assert satchel_pool
+    db.executescript(gear_sql)
+    once = list(db.iterdump())
+    db.executescript(gear_sql)
+    assert list(db.iterdump()) == once
+    assert list(db.execute('SELECT * FROM item_loot_template WHERE Entry=? ORDER BY Item', (SATCHEL,))) == satchel_pool
+    assert db.execute('SELECT Comment FROM item_loot_template WHERE Entry=123').fetchone() == ('unrelated',)
+
+    known = {row[0] for row in rows}
+    assert gear <= known and supplies <= known, sorted((gear | supplies) - known)[:10]
+    quality = dict(db.execute('SELECT entry,Quality FROM item_template'))
+    for cache, highest in ((CACHE, 2), (RARE_CACHE, 3)):
+        loot = list(db.execute('''SELECT l.Item,l.Reference,l.Chance,l.GroupId,l.MaxCount,t.class,t.Quality,t.bonding
+            FROM item_loot_template l JOIN item_template t ON t.entry=l.Item WHERE l.Entry=?''', (cache,)))
+        assert {row[0] for row in loot} == supplies | {item for item in gear if quality[item] <= highest}
+        assert all(row[1:4] == (0, 0, 1) for row in loot)
+        for item, _, _, _, max_count, item_class, item_quality, bonding in loot:
+            if item in supplies:
+                assert max_count == 3 and item_quality == 1 and item_class not in (2, 4)
+            else:
+                assert max_count == 1 and item_class in (2, 4) and item_quality in (2, 3)
+                assert bonding == 2 if item_quality == 2 else bonding in (1, 2)
+    print(f'PASS: satchel pool kept ({len(satchel_pool)} rows); caches hold {len(supplies)} supplies and '
+          f'{len(gear)} gear items; SQL replay/preservation')
 
 
 if __name__ == '__main__':

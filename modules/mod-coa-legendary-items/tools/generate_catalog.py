@@ -6,10 +6,15 @@ from pathlib import Path
 
 MODULE = Path(__file__).resolve().parents[1]
 ROOT = MODULE.parents[1]
+PENDING = ROOT / 'data/sql/updates/pending_db_world'
 ITEM_BASE = 9700000
 AURA_BASE = 9710000
 TOOLTIP_BASE = 9720000
 MAX_LEVEL = 60
+ITEM_LEVEL_BONUS = 6
+QUALITY = 3
+TOOLTIP_TAG = '@Fabled@'
+REALM_BOUND = 0x08000000
 APPEARANCES = {
     8: (1, 7, 16492),
     11: (0, 5, 6921),
@@ -60,7 +65,7 @@ def load_catalog():
 
 
 def power_text(item, required_level=None):
-    ilvl = required_level + 12 if required_level else None
+    ilvl = required_level + ITEM_LEVEL_BONUS if required_level else None
     if item['power'] == 'Signature':
         return f"Your {item['signature_name']}'s main hit deals {item['magnitude']}% more damage (all ranks)."
     if item['power'] == 'Movement':
@@ -68,12 +73,12 @@ def power_text(item, required_level=None):
     elif item['power'] == 'Armor':
         benefit = f"{item['magnitude']}% armor"
     elif item['profile'] == 'Caster':
-        benefit = f"{ilvl if ilvl else 'item level'} spell power"
+        benefit = f"{ilvl // 2 if ilvl else 'half the item level'} spell power"
     elif item['profile'].endswith('Hybrid'):
-        ap = ilvl * 2 if ilvl else '2 x item level'
-        benefit = f"{ap} attack power and {ilvl if ilvl else 'item level'} spell power"
+        sp = ilvl // 2 if ilvl else 'half the item level'
+        benefit = f"{ilvl if ilvl else 'item level'} attack power and {sp} spell power"
     else:
-        benefit = f"{ilvl * 2 if ilvl else '2 x item level'} melee and ranged attack power"
+        benefit = f"{ilvl if ilvl else 'item level'} melee and ranged attack power"
     return f"Gain {benefit}{CONDITIONS[item['condition']]}."
 
 
@@ -110,12 +115,14 @@ def insert_rows(table, columns, rows, delete='', upsert=False):
 
 def item_stats(item, ilvl):
     primary, secondary = PROFILES[item['profile']]
-    stats = [(primary, max(1, ilvl * 35 // 100)), (7, max(1, ilvl * 45 // 100))]
+    hybrid = item['profile'].endswith('Hybrid')
     if item['profile'] == 'Universal':
-        stats = [(7, max(1, ilvl * 60 // 100))]
-    stats.append((secondary, max(1, ilvl * (100 if secondary == 38 else 55) // 100)))
-    if item['profile'].endswith('Hybrid'):
-        stats.append((45, max(1, ilvl * 35 // 100)))
+        shares = [(7, 22), (secondary, 22)]
+    else:
+        shares = [(primary, 14), (7, 16), (secondary, 16 if hybrid else 30 if secondary == 38 else 18)]
+    if hybrid:
+        shares.append((45, 8))
+    stats = [(stat, max(1, ilvl * share // 100)) for stat, share in shares]
     stats += [(0, 0)] * (4 - len(stats))
     return [value for pair in stats for value in pair]
 
@@ -162,11 +169,11 @@ def render_sql(catalog):
         for level in range(1, MAX_LEVEL + 1):
             entry = ITEM_BASE + item['id'] * 100 + level
             tooltip = TOOLTIP_BASE + item['id'] * 100 + level
-            ilvl = level + 12
-            templates.append([entry, 4, subclass, -1, item['name'], display, 5, slot, mask, -1,
+            ilvl = level + ITEM_LEVEL_BONUS
+            templates.append([entry, 4, subclass, -1, item['name'], display, QUALITY, REALM_BOUND, slot, mask, -1,
                 ilvl, level, 1, 1, *item_stats(item, ilvl),
-                ilvl * 2 if slot == 16 else (ilvl * 3 // 2 if slot == 8 else 0),
-                1, '', tooltip, 1, 0, -1, 0, -1, material, 0, 12340])
+                ilvl * 2 // 3 if slot == 16 else (ilvl if slot == 8 else 0),
+                1, TOOLTIP_TAG, tooltip, 1, 0, -1, 0, -1, material, 0, 12340])
             dbc_rows.append([entry, 4, subclass, -1, material, display, slot, 0])
             tooltips.append([tooltip, 64, 65536, 1, 1, -1, 1, item['name'], power_text(item, level)])
         effects = aura_effects(item)
@@ -188,7 +195,7 @@ def render_sql(catalog):
     low, high = ITEM_BASE, ITEM_BASE + 6400
     sections = [
         insert_rows('item_template', ['entry', 'class', 'subclass', 'SoundOverrideSubclass', 'name',
-            'displayid', 'Quality', 'InventoryType', 'AllowableClass', 'AllowableRace', 'ItemLevel',
+            'displayid', 'Quality', 'Flags', 'InventoryType', 'AllowableClass', 'AllowableRace', 'ItemLevel',
             'RequiredLevel', 'maxcount', 'stackable', *[f'stat_{field}{i}' for i in range(1, 5)
                 for field in ('type', 'value')], 'armor', 'bonding', 'description', 'spellid_1', 'spelltrigger_1',
             'spellcharges_1', 'spellcooldown_1', 'spellcategory_1', 'spellcategorycooldown_1', 'Material', 'itemset',
@@ -211,6 +218,37 @@ def render_sql(catalog):
     return '\n\n'.join(sections) + '\n'
 
 
+def render_upgrade_sql(catalog):
+    stat_columns = [f'stat_{field}{i}' for i in range(1, 5) for field in ('type', 'value')]
+    rows = []
+    for item in catalog:
+        slot = item['inventory_type']
+        for level in range(1, MAX_LEVEL + 1):
+            ilvl = level + ITEM_LEVEL_BONUS
+            rows.append([ITEM_BASE + item['id'] * 100 + level, ilvl, *item_stats(item, ilvl),
+                ilvl * 2 // 3 if slot == 16 else (ilvl if slot == 8 else 0), power_text(item, level)])
+    columns = ['entry', 'ItemLevel', *stat_columns, 'armor', 'tooltip']
+    create = ('DROP TEMPORARY TABLE IF EXISTS `coa_fabled_items`;\n'
+        'CREATE TEMPORARY TABLE `coa_fabled_items` (`entry` INT UNSIGNED NOT NULL PRIMARY KEY,\n  '
+        '`ItemLevel` SMALLINT UNSIGNED NOT NULL,\n  '
+        + ', '.join(f'`{column}` INT NOT NULL' for column in stat_columns[:4]) + ',\n  '
+        + ', '.join(f'`{column}` INT NOT NULL' for column in stat_columns[4:]) + ',\n  '
+        '`armor` INT UNSIGNED NOT NULL, `tooltip` TEXT NOT NULL) ENGINE=InnoDB;')
+    assignments = ', '.join(f'`i`.`{column}` = `f`.`{column}`' for column in ['ItemLevel', *stat_columns, 'armor'])
+    update = wrap_values([f'`i`.`Quality` = {QUALITY}', f'`i`.`Flags` = `i`.`Flags` | {REALM_BOUND:#010x}',
+        '`i`.`bonding` = 1', *assignments.split(', '),
+        f'`i`.`description` = {sql_value(TOOLTIP_TAG)}'],
+        'UPDATE `item_template` AS `i`\nINNER JOIN `coa_fabled_items` AS `f` ON `f`.`entry` = `i`.`entry`\n'
+        'INNER JOIN `item_dbc` AS `d` ON `d`.`ID` = `i`.`entry`\nSET ', ';')
+    tooltips = ('UPDATE `spell_dbc` AS `s`\n'
+        f'INNER JOIN `coa_fabled_items` AS `f` ON `s`.`ID` = `f`.`entry` + {TOOLTIP_BASE - ITEM_BASE}\n'
+        'INNER JOIN `item_dbc` AS `d` ON `d`.`ID` = `f`.`entry`\n'
+        'SET `s`.`Description_Lang_enUS` = `f`.`tooltip`;')
+    return '\n\n'.join([create, insert_rows('coa_fabled_items', columns, rows,
+        'DELETE FROM `coa_fabled_items`;'), update, tooltips,
+        'DROP TEMPORARY TABLE `coa_fabled_items`;']) + '\n'
+
+
 def render_header(catalog):
     lines = ['#ifndef COA_LEGENDARY_CATALOG_H', '#define COA_LEGENDARY_CATALOG_H', '',
         '#include "CoALegendaryRules.h"', '#include <array>', '', 'namespace CoALegendary', '{',
@@ -226,8 +264,10 @@ def render_header(catalog):
 
 def render_catalog(catalog):
     lines = ['# Leveling legendary catalog', '',
-        '64 non-set designs. Required level is the effective creature level; item level is required level + 12.',
-        f'Each design has variants for creature levels 1–{MAX_LEVEL}; the default player drop cutoff is 60.', '',
+        '64 non-set designs. Required level is the effective creature level; '
+        f'item level is required level + {ITEM_LEVEL_BONUS}.',
+        f'Each variant is rare quality, Realm Bound and carries the green `{TOOLTIP_TAG}` tooltip tag.',
+        f'Each design has variants for creature levels 1–{MAX_LEVEL}.', '',
         'Stat profiles give the named primary stat, stamina and AP or SP; hybrids receive both AP and SP.',
         'The shared cloak gives stamina and critical strike rating. Powers use the fixed item level.', '',
         '| Design | Class | Name | Slot | Stats | Legendary power |',
@@ -240,7 +280,7 @@ def render_catalog(catalog):
         lines.append(f'| {item["id"]} | {item["class_name"]} | {item["name"]} | '
             f'{slots[item["inventory_type"]]} | {profiles[item["profile"]]} | {power_text(item)} |')
     lines += ['', 'Item entry = `9700000 + design * 100 + required level`.',
-        'For example, Bloodoath Signet from a level-29 creature is entry `9700029`, requires level 29 and has item level 41.',
+        'For example, Bloodoath Signet from a level-29 creature is entry `9700029`, requires level 29 and has item level 35.',
         'Only the strongest equipped copy of a design grants its legendary power.',
         'Movement powers appear only on boots. The boots use cloth armor so every intended class can equip them at level 1.', '']
     return '\n'.join(lines)
@@ -256,9 +296,12 @@ def outputs(sql_output=None):
     }
     if sql_output:
         sql_output = sql_output.resolve()
-        if not sql_output.is_relative_to(MODULE / 'data/sql/db-world'):
-            raise ValueError('SQL output must be a new module world migration')
-        generated[sql_output] = render_sql(catalog)
+        if sql_output.is_relative_to(MODULE / 'data/sql/db-world'):
+            generated[sql_output] = render_sql(catalog)
+        elif sql_output.is_relative_to(PENDING.resolve()):
+            generated[sql_output] = render_upgrade_sql(catalog)
+        else:
+            raise ValueError('SQL output must be a new module or pending world migration')
     return generated
 
 

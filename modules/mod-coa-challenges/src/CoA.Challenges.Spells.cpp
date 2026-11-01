@@ -3,6 +3,7 @@
 #include "CoA.Challenges.Review.h"
 #include "Pet.h"
 #include "TemporarySummon.h"
+#include "AscensionRulesets.h"
 
 namespace CoAChallenges
 {
@@ -212,6 +213,9 @@ namespace CoAChallenges
     {
         if (!player)
             return;
+        if (player->IsInWorld() && CoAParse::ListContains(ChallengeRules(challengeID),
+            "CHALLENGE_RULES_TYPE_PVE_ONLY") && !AscensionRulesets::Has(player, AscensionRulesets::Ruleset::PvE))
+            AscensionRulesets::Apply(player, AscensionRulesets::Ruleset::PvE);
         std::vector<Creature*> summons = GetPlayerSummons(player);
         for (uint32 spell : GetChallengeSpells(challengeID, level))
         {

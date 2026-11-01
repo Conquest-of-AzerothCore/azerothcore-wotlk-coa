@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Phoenix Egg summons the Phoenix as the caster's controllable pet, which follows its owner and keeps its model after its commands (#6312)",
-  "contract": "#6312: Phoenix Egg 800796 effect 0 summons creature 50258 with SummonProperties 1561 (Spell.dbc EffectMiscValueB, server and client DBC alike), whose SummonProperties.dbc row is Control 2 (SUMMON_CATEGORY_PET), Title 1 (pet). A pet-category summon is a controllable guardian (Guardian constructor in TemporarySummon.cpp adds UNIT_MASK_CONTROLLABLE_GUARDIAN and charm info), so the owner's pet slot holds it and the client shows its pet bar. The reporter saw a stationary Phoenix without a pet bar. A controllable guardian on the follow command follows its owner, as the native pet bar's Follow does; Phoenix Dive and Kael's Command move or hold it only for their own durations. Asserted: after one cast the caster owns exactly one 50258 and the caster's guardian pet is that Phoenix (pet_entry reads Player::GetGuardianPet, the pet slot), and a Phoenix summoned 10 yards away comes to its owner's side (pet_distance, the 2D distance of that pet, falls from at least 6 on arrival to at most 5 yards while the owner stands still). Creature 50258's own model is display 17765 at DisplayScale 0.6 (creature_template_model); Kael's Command 800816 turns it into the egg display 20245 for the dormancy of 707060, whose DurationIndex 1 is 10 s, and the reporter saw the Phoenix stay an egg after a Phoenix Dive 706854 and long after the dormancy. Phoenix Dive needs one Ember 807533 (CasterAuraSpell), set here as fixture state. Asserted: 5 s after a dive the pet shows display 17765 at scale 0.6; after Kael's Command it shows 20245, still does 8 s later, shows 17765 at scale 0.6 again within 4 s more and then returns to its owner's side.",
+  "contract": "#6312: Phoenix Egg 800796 effect 0 summons creature 50258 with SummonProperties 1561 (Spell.dbc EffectMiscValueB, server and client DBC alike), whose SummonProperties.dbc row is Control 2 (SUMMON_CATEGORY_PET), Title 1 (pet). A pet-category summon is a controllable guardian (Guardian constructor in TemporarySummon.cpp adds UNIT_MASK_CONTROLLABLE_GUARDIAN and charm info), so the owner's pet slot holds it and the client shows its pet bar. The reporter saw a stationary Phoenix without a pet bar. A controllable guardian on the follow command follows its owner, as the native pet bar's Follow does; Phoenix Dive and Kael's Command move or hold it only for their own durations. Asserted: after one cast the caster owns exactly one 50258 and the caster's guardian pet is that Phoenix (pet_entry reads Player::GetGuardianPet, the pet slot), and a Phoenix summoned 10 yards away comes to its owner's side (pet_distance, the 2D distance of that pet, falls from at least 6 on arrival to at most 5 yards while the owner stands still). Creature 50258's own model is display 18987 at DisplayScale 0.5 (creature_template_model; #10203 replaced the oversized raid Phoenix 17765 at 0.6); Kael's Command 800816 turns it into the egg display 20245 for the dormancy of 707060, whose DurationIndex 1 is 10 s, and the reporter saw the Phoenix stay an egg after a Phoenix Dive 706854 and long after the dormancy. Phoenix Dive needs one Ember 807533 (CasterAuraSpell), set here as fixture state. Asserted: 5 s after a dive the pet shows display 18987 at scale 0.5; after Kael's Command it shows 20245, still does 8 s later, shows 18987 at scale 0.5 again within 4 s more and then returns to its owner's side. #10203: the Phoenix follows on its owner's right (follow angle 3π/2), clear of a companion, which follows behind-left. pet_bearing is the pet's direction from its owner, counter-clockwise from the owner's facing, so the right reads 270 degrees. Asserted: having come to its owner, and again after hatching, the Phoenix stands between 240 and 300 degrees.",
   "timeout_ms": 60000,
   "location": {
     "map": 0,
@@ -75,8 +75,8 @@
       "label": "The Phoenix has its own size",
       "actor": "caster",
       "metric": "pet_scale",
-      "min": 0.59,
-      "max": 0.61
+      "min": 0.49,
+      "max": 0.51
     },
     {
       "action": "assert",
@@ -84,6 +84,15 @@
       "actor": "caster",
       "metric": "pet_distance",
       "max": 5,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The Phoenix follows on its owner's right",
+      "actor": "caster",
+      "metric": "pet_bearing",
+      "min": 240,
+      "max": 300,
       "within_ms": 10000
     },
     {
@@ -117,15 +126,15 @@
       "label": "The Phoenix keeps its own model after a dive",
       "actor": "caster",
       "metric": "pet_display",
-      "equals": 17765
+      "equals": 18987
     },
     {
       "action": "assert",
       "label": "The Phoenix keeps its own size after a dive",
       "actor": "caster",
       "metric": "pet_scale",
-      "min": 0.59,
-      "max": 0.61
+      "min": 0.49,
+      "max": 0.51
     },
     {
       "action": "cast",
@@ -156,7 +165,7 @@
       "label": "The Phoenix hatches when the 10 s dormancy ends",
       "actor": "caster",
       "metric": "pet_display",
-      "equals": 17765,
+      "equals": 18987,
       "within_ms": 4000
     },
     {
@@ -164,8 +173,8 @@
       "label": "The Phoenix hatches at its own size",
       "actor": "caster",
       "metric": "pet_scale",
-      "min": 0.59,
-      "max": 0.61
+      "min": 0.49,
+      "max": 0.51
     },
     {
       "action": "assert",
@@ -173,6 +182,15 @@
       "actor": "caster",
       "metric": "pet_distance",
       "max": 5,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The hatched Phoenix follows on its owner's right",
+      "actor": "caster",
+      "metric": "pet_bearing",
+      "min": 240,
+      "max": 300,
       "within_ms": 10000
     }
   ]

@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: Brimstone Bludgeon unleashes the active Pestilence (#9988)",
+  "contract": [
+    "Brimstone Bludgeon 800710 transforms Sever into 520005, whose description reads 'Bludgeon an enemy and all",
+    "nearby enemies, dealing $s2% Weapon Damage. Unleashes your active Pestilence to trigger a powerful",
+    "effect.' Unleash Pestilence 801002 is the reference unleash: with Pestilence of War 802345 active it casts",
+    "Unleash War 802855 on each hostile within 10 yd. A Brimstone Bludgeon hit with Pestilence of War active must",
+    "therefore also land 802855 on the enemy, while the stance alone and the bludgeon cast before it never do.",
+    "Unlike the half-strength talent unleashes, the description names no reduced strength."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "k", "race": 1, "class": 17, "level": 60,
+      "melee_hit_rating": 10000, "expertise_rating": 10000, "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "k", "entry": 36, "faction": 14, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "add_item", "actor": "k", "item": 629951 },
+    { "action": "equip", "actor": "k", "item": 629951, "slot": 15 },
+    { "action": "learn", "actor": "k", "spell": 802345 },
+    { "action": "learn", "actor": "k", "spell": 800710 },
+    {
+      "action": "assert", "label": "SETUP: the talent aura is applied", "actor": "k",
+      "metric": "aura", "spell": 800710, "equals": 1, "within_ms": 2000
+    },
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "SETUP: the talent grants Brimstone Bludgeon", "actor": "k",
+      "metric": "knows_spell", "spell": 520005, "equals": 1
+    },
+    { "action": "set_power", "actor": "k", "power": 1, "value": 1000 },
+    { "action": "cast", "label": "Bludgeon without an active Pestilence", "actor": "k", "spell": 520005,
+      "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP: the first bludgeon hits the enemy", "actor": "k",
+      "metric": "spell_damage_count", "spell": 520005, "target": "enemy", "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTROL: nothing is unleashed without an active Pestilence", "actor": "k",
+      "metric": "spell_damage_count", "spell": 802855, "target": "enemy", "equals": 0
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Enter Pestilence of War", "actor": "k", "spell": 802345 },
+    {
+      "action": "assert", "label": "SETUP: the Pestilence stance is active", "actor": "k",
+      "metric": "aura", "spell": 802345, "equals": 1, "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    {
+      "action": "assert", "label": "CONTROL: the stance alone unleashes nothing", "actor": "k",
+      "metric": "spell_damage_count", "spell": 802855, "target": "enemy", "equals": 0
+    },
+    { "action": "reset_cooldown", "actor": "k", "spell": 520005 },
+    { "action": "set_power", "actor": "k", "power": 1, "value": 1000 },
+    { "action": "cast", "label": "Bludgeon with Pestilence of War active", "actor": "k", "spell": 520005,
+      "target": "enemy" },
+    {
+      "action": "assert", "label": "SETUP: the second bludgeon hits the enemy", "actor": "k",
+      "metric": "spell_damage_count", "spell": 520005, "target": "enemy", "min": 2, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the bludgeon unleashes War on the enemy", "actor": "k",
+      "metric": "spell_damage_count", "spell": 802855, "target": "enemy", "min": 1, "within_ms": 3000
+    }
+  ]
+}

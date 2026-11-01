@@ -1,0 +1,263 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric Vow of Radiance adds 25% Holyfire damage and healing, 50% under Dawn (#9974)",
+  "contract": [
+    "Vow of Radiance 803489 reads 'Direct ability damage or healing generates 2 Solar Power and damages or heals",
+    "for an additional $s2% of the amount' (s2 = 25) and 'Fulfillment: Doubles the damage or healing done'; its",
+    "buff reads 'Direct damage or healing deals an additional 25% Holyflame damage or healing'. The bonus is a",
+    "separate Holyfire instance, so the original hit is unchanged: 803490 deals 25% of a direct hit and 803816",
+    "heals 25% of a direct heal's effective healing. A heal under Dawn 807440 fulfills the Vow and doubles the",
+    "copy to 50%. Ratios allow truncation of the percentage to whole points, so the probes are a spell-power",
+    "scaled heal and Frostbolt rank 42842, whose amounts make that truncation smaller than 0.2%."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_power": 3000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "cleric",
+      "entry": 36,
+      "level": 80,
+      "health": 500000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 803489
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 500143
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 42842
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 804584
+    },
+    {
+      "action": "cast",
+      "label": "Take Vow of Radiance",
+      "actor": "cleric",
+      "spell": 803489
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Vow of Radiance is active",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 803489,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Vow's global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "label": "Leave room for the whole heal and its copy",
+      "actor": "ally",
+      "maximum": 500000,
+      "value": 10
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 500143,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the heal lands",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 500143,
+      "target": "ally",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Vow copy resolve",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "spell_effective_heal_total",
+      "spell": 500143,
+      "target": "ally",
+      "save_as": "heal"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "spell_heal_total",
+      "spell": 803816,
+      "target": "ally",
+      "save_as": "heal_copy"
+    },
+    {
+      "action": "assert",
+      "label": "Vow of Radiance heals for an additional 25% of the effective heal",
+      "actor": "cleric",
+      "metric": "spell_heal_total",
+      "spell": 803816,
+      "target": "ally",
+      "ratio_to": "heal",
+      "min": 0.248,
+      "max": 0.2501
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 42842,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the direct damage lands",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 42842,
+      "target": "target",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Vow copy resolve",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "spell_damage_total",
+      "spell": 42842,
+      "target": "target",
+      "save_as": "hit"
+    },
+    {
+      "action": "assert",
+      "label": "Vow of Radiance deals an additional 25% of the direct hit as Holyfire damage",
+      "actor": "cleric",
+      "metric": "spell_damage_total",
+      "spell": 803490,
+      "target": "target",
+      "ratio_to": "hit",
+      "min": 0.248,
+      "max": 0.2501
+    },
+    {
+      "action": "set_aura",
+      "label": "FIXTURE: Dawn requires 20 Solar Power",
+      "actor": "cleric",
+      "spell": 500149,
+      "stacks": 20
+    },
+    {
+      "action": "set_aura",
+      "label": "FIXTURE: Dawn's caster aura readiness marker",
+      "actor": "cleric",
+      "spell": 704396,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Enter Dawn",
+      "actor": "cleric",
+      "spell": 804584
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Dawn is active",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 807440,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown expire",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 500143,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the fulfilling heal lands",
+      "actor": "cleric",
+      "metric": "spell_heal_count",
+      "spell": 500143,
+      "target": "ally",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Vow copy resolve",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "spell_effective_heal_total",
+      "spell": 500143,
+      "target": "ally",
+      "relative_to": "heal",
+      "save_as": "dawn_heal"
+    },
+    {
+      "action": "assert",
+      "label": "Fulfillment doubles the additional healing to 50% of the effective heal",
+      "actor": "cleric",
+      "metric": "spell_heal_total",
+      "spell": 803816,
+      "target": "ally",
+      "relative_to": "heal_copy",
+      "ratio_to": "dawn_heal",
+      "min": 0.498,
+      "max": 0.5001
+    }
+  ]
+}

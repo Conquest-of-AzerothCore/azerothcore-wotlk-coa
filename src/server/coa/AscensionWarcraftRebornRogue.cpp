@@ -3,6 +3,7 @@
 #include "AscensionWarcraftRebornRogue.h"
 #include "AscensionWarcraftRebornRules.h"
 #include "CellImpl.h"
+#include "DBCStores.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "Player.h"
@@ -32,6 +33,12 @@ constexpr uint32 RELENTLESS_STRIKES_ENERGY = 1114181;
 constexpr float CRIMSON_TEMPEST_HIT_AP = 0.012f;
 constexpr float CRIMSON_TEMPEST_BLEED_AP = 0.00744f;
 constexpr float POISON_NOVA_AP = 0.0048f;
+
+constexpr float DISPATCH_AP_MIN = 0.056f;
+
+constexpr uint32 RECUPERATE = 2315425;
+constexpr uint32 DURATION_0_TO_30_SEC = 588;
+constexpr float DISPATCH_AP_MAX = 0.07f;
 constexpr uint8 SABER_SLASH_SPREAD_POINTS = 5;
 constexpr uint8 SABER_SLASH_SPREAD_TARGETS = 2;
 constexpr float SABER_SLASH_SPREAD_RANGE = 10.0f;
@@ -126,6 +133,23 @@ class spell_ascension_reborn_crimson_tempest_bleed : public AuraScript
     }
 };
 
+class spell_ascension_reborn_dispatch : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_reborn_dispatch);
+
+    void HandleDamage(SpellEffIndex)
+    {
+        Unit* caster = GetCaster();
+        float const power = ComboPoints(caster) * caster->GetTotalAttackPowerValue(BASE_ATTACK);
+        SetEffectValue(GetEffectValue() + irand(int32(power * DISPATCH_AP_MIN), int32(power * DISPATCH_AP_MAX)));
+    }
+
+    void Register() override
+    {
+        OnEffectLaunchTarget += SpellEffectFn(spell_ascension_reborn_dispatch::HandleDamage, EFFECT_0, SPELL_EFFECT_SCHOOL_DAMAGE);
+    }
+};
+
 class spell_ascension_reborn_poison_nova : public SpellScript
 {
     PrepareSpellScript(spell_ascension_reborn_poison_nova);
@@ -217,6 +241,10 @@ void ApplyAscensionWarcraftRebornRogueContracts(SpellInfo* spellInfo)
     if (!spellInfo || spellInfo->Id < REBORN_SPELL_OFFSET || spellInfo->SpellFamilyName != SPELLFAMILY_ROGUE)
         return;
 
+    if (spellInfo->Id == RECUPERATE && spellInfo->GetMaxDuration() == 1000)
+        if (SpellDurationEntry const* duration = sSpellDurationStore.LookupEntry(DURATION_0_TO_30_SEC))
+            spellInfo->DurationEntry = duration;
+
     if ((spellInfo->SpellFamilyFlags[0] & ROGUE_AMBUSH) &&
         spellInfo->Effects[EFFECT_0].Effect == SPELL_EFFECT_NORMALIZED_WEAPON_DMG &&
         spellInfo->Effects[EFFECT_1].Effect == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE &&
@@ -247,5 +275,6 @@ void AddAscensionWarcraftRebornRogueScripts()
     RegisterSpellScript(spell_ascension_reborn_crimson_tempest);
     RegisterSpellScript(spell_ascension_reborn_crimson_tempest_bleed);
     RegisterSpellScript(spell_ascension_reborn_poison_nova);
+    RegisterSpellScript(spell_ascension_reborn_dispatch);
     RegisterSpellScript(spell_ascension_reborn_saber_slash);
 }

@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "Felsworn: Inner Demon is off the global cooldown (#9450)",
+  "contract": [
+    "#9450: 'Inner Demon is off GCD and should be castable while GCD is active.' The installed client and server",
+    "Spell.dbc give Inner Demon 804216 StartRecoveryCategory 0 and StartRecoveryTime 0, while Sargeron Smite 501318",
+    "starts the 1000 ms Felsworn global cooldown (category 133). Casting Inner Demon must not start that cooldown,",
+    "and Inner Demon must cast while Smite's global cooldown is still running."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "f", "race": 1, "class": 14, "level": 44, "spell_hit_rating": 10000, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "e", "owner": "f", "entry": 36, "level": 44, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "f", "spell": 501318 },
+    { "action": "learn", "actor": "f", "spell": 804216 },
+    { "action": "set_power", "actor": "f", "power": 3, "value": 100 },
+    { "action": "set_aura", "label": "FIXTURE: one Felfury for a 5 s Inner Demon", "actor": "f", "spell": 800058, "stacks": 1 },
+    { "action": "cast", "actor": "f", "spell": 804216 },
+    {
+      "action": "assert", "label": "SETUP: Inner Demon is active",
+      "actor": "f", "metric": "aura", "spell": 804216, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Inner Demon starts no global cooldown",
+      "actor": "f", "metric": "global_cooldown_ms", "spell": 501318, "max": 0
+    },
+    { "action": "wait", "label": "Let Inner Demon expire", "ms": 6000 },
+    {
+      "action": "assert", "label": "SETUP: Inner Demon has expired",
+      "actor": "f", "metric": "aura", "spell": 804216, "equals": 0
+    },
+    { "action": "set_aura", "actor": "f", "spell": 800058, "stacks": 2 },
+    { "action": "cast", "actor": "f", "spell": 501318, "target": "e" },
+    {
+      "action": "assert", "label": "SETUP: Sargeron Smite's global cooldown is running",
+      "actor": "f", "metric": "global_cooldown_ms", "spell": 501318, "min": 500
+    },
+    { "action": "set_aura", "actor": "f", "spell": 800058, "stacks": 2 },
+    { "action": "cast", "actor": "f", "spell": 804216 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Inner Demon casts during the global cooldown",
+      "actor": "f", "metric": "cast_failure", "spell": 804216, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Inner Demon is active again",
+      "actor": "f", "metric": "aura", "spell": 804216, "equals": 1, "within_ms": 500
+    }
+  ]
+}

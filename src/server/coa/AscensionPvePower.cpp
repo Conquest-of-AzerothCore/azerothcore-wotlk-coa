@@ -48,14 +48,23 @@ unsigned HealingPower(Unit const* caster)
     return EquippedPower(player);
 }
 
-uint32 Damage(Unit* target, Unit* attacker, uint32 amount)
+Player const* AttackingPlayer(Unit const* attacker, SpellInfo const* spell)
+{
+    if (Player const* player = attacker->ToPlayer())
+        return player;
+    if (spell && spell->AscensionInheritsResolvedAmount)
+        return nullptr;
+    return attacker->GetCharmerOrOwnerPlayerOrPlayerItself();
+}
+
+uint32 Damage(Unit* target, Unit* attacker, uint32 amount, SpellInfo const* spell = nullptr)
 {
     if (!enabled.load() || !target || !attacker || target == attacker || !amount)
         return amount;
     Map const* map = target->GetMap();
     if (!map || !Applies(DamageMaps, KindOf(map)))
         return amount;
-    Player const* source = attacker->ToPlayer();
+    Player const* source = AttackingPlayer(attacker, spell);
     Player const* recipient = target->ToPlayer();
     if (source && !PlayerControlled(target))
         amount = PvpPower::Scale(amount, EquippedPower(source), DamageBasisPoints);
@@ -87,17 +96,17 @@ public:
         amount = Damage(target, attacker, amount);
     }
 
-    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& amount, SpellInfo const*) override
+    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& amount, SpellInfo const* spell) override
     {
         if (amount > 0)
-            amount = int32(Damage(target, attacker, uint32(amount)));
+            amount = int32(Damage(target, attacker, uint32(amount), spell));
     }
 
     void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& amount,
         SpellInfo const* spell) override
     {
         if (spell && !spell->IsPositive() && !spell->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT))
-            amount = Damage(target, attacker, amount);
+            amount = Damage(target, attacker, amount, spell);
     }
 
     void OnBeforeHealAbsorb(HealInfo& healInfo) override

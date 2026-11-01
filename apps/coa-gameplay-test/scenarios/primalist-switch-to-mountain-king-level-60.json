@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "A level 60 Primalist can switch to Mountain King",
+  "contract": [
+    "Switching specialization uploads the class tree, the new specialization's identity and its signature, and",
+    "ApplyKnownEntriesUpload adds every entry of the target tab whose spell PersistentRank finds among the class's",
+    "trainer spells. Seismic Smash 300693, the Mountain King capstone entry 7498 (23 points invested in the tab),",
+    "was listed there at level 59, so the empty Mountain King build always carried the capstone and was refused",
+    "with CA_LEARN_NOT_ENOUGH_INVESTED_TE while every other specialization switched. A level 60 Primalist switches",
+    "to Wildwalker and then to Mountain King; both switches must be applied, and the capstone stays unlearned."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 3,
+      "class": 31,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "specialization", "actor": "primalist", "id": 59, "label": "CONTROL: switching to Wildwalker is applied" },
+    { "action": "specialization", "actor": "primalist", "id": 60, "label": "THE FIX: switching to Mountain King is applied" },
+    { "action": "assert", "label": "The capstone is not learned by the switch", "actor": "primalist", "metric": "knows_spell", "spell": 300693, "equals": 0 }
+  ]
+}

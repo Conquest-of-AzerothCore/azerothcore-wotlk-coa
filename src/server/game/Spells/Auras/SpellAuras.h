@@ -215,6 +215,7 @@ public:
     bool CanBeAppliedOn(Unit* target);
     bool CheckAreaTarget(Unit* target);
     bool CanStackWith(Aura const* existingAura) const;
+    bool AscensionSharesSpecificSlot(Aura const* existingAura) const;
     bool IsAuraStronger(Aura const* newAura) const;
 
     // Proc system

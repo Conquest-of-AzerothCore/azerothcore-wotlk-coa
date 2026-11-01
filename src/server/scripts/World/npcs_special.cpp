@@ -385,6 +385,291 @@ struct npc_target_dummy : ScriptedAI
 };
 
 /*########
+# npc_healing_dummy
+#########*/
+
+// A friendly dummy for healers: it starts wounded, can take steady or spiky damage of its own, never dies,
+// and reports the healing it received. Shields absorb its damage and damage-taken procs fire on it.
+enum HealingDummy
+{
+    NPC_TEXT_HEALING_DUMMY          = 9990150,
+
+    HEALING_DUMMY_START_PCT         = 20,
+    HEALING_DUMMY_STEADY_PCT        = 3,
+    HEALING_DUMMY_HEAVY_PCT         = 8,
+    HEALING_DUMMY_SPIKE_PCT         = 35,
+
+    HEALING_DUMMY_ACTION_DAMAGE_OFF     = GOSSIP_ACTION_INFO_DEF + 1,
+    HEALING_DUMMY_ACTION_DAMAGE_STEADY  = GOSSIP_ACTION_INFO_DEF + 2,
+    HEALING_DUMMY_ACTION_DAMAGE_HEAVY   = GOSSIP_ACTION_INFO_DEF + 3,
+    HEALING_DUMMY_ACTION_DAMAGE_SPIKY   = GOSSIP_ACTION_INFO_DEF + 4,
+    HEALING_DUMMY_ACTION_WOUND          = GOSSIP_ACTION_INFO_DEF + 5,
+    HEALING_DUMMY_ACTION_MATCH_PLAYER   = GOSSIP_ACTION_INFO_DEF + 6,
+    HEALING_DUMMY_ACTION_SHOW_STATS     = GOSSIP_ACTION_INFO_DEF + 7,
+    HEALING_DUMMY_ACTION_RESET_STATS    = GOSSIP_ACTION_INFO_DEF + 8,
+    HEALING_DUMMY_ACTION_AUTO_WOUND     = GOSSIP_ACTION_INFO_DEF + 9
+};
+
+enum class HealingDummyDamage : uint8
+{
+    Off,
+    Steady,
+    Heavy,
+    Spiky
+};
+
+class npc_healing_dummy : public CreatureScript
+{
+public:
+    npc_healing_dummy() : CreatureScript("npc_healing_dummy") { }
+
+    struct npc_healing_dummyAI : public ScriptedAI
+    {
+        explicit npc_healing_dummyAI(Creature* creature) : ScriptedAI(creature) { }
+
+        void Reset() override
+        {
+            me->SetControlled(true, UNIT_STATE_ROOT);
+            Wound();
+        }
+
+        void AttackStart(Unit* /*who*/) override { }
+        void MoveInLineOfSight(Unit* /*who*/) override { }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*damageType*/, SpellSchoolMask /*schoolMask*/) override
+        {
+            if (damage >= me->GetHealth())
+                damage = me->GetHealth() - 1;
+        }
+
+        void HealReceived(Unit* healer, uint32& heal) override
+        {
+            if (!healer || !heal)
+                return;
+
+            Player* player = healer->GetCharmerOrOwnerPlayerOrPlayerItself();
+            if (!player)
+                return;
+
+            uint32 const missing = me->GetMaxHealth() - me->GetHealth();
+            uint32 const effective = std::min(heal, missing);
+
+            HealerStats& stats = _healers[player->GetGUID()];
+            if (!stats.Started)
+            {
+                stats.Started = true;
+                stats.Start = GameTime::GetGameTimeMS();
+            }
+            stats.Effective += effective;
+            stats.Overheal += heal - effective;
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (_damage != HealingDummyDamage::Off)
+            {
+                _damageTimer -= Milliseconds(diff);
+                if (_damageTimer <= 0ms)
+                {
+                    TakeTrainingDamage();
+                    _damageTimer = _damage == HealingDummyDamage::Spiky ? 5s : 1s;
+                }
+                return;
+            }
+
+            if (!_autoWound || me->GetHealth() < me->GetMaxHealth())
+            {
+                _fullTimer = 3s;
+                return;
+            }
+
+            _fullTimer -= Milliseconds(diff);
+            if (_fullTimer <= 0ms)
+            {
+                ReportToHealers();
+                Wound();
+            }
+        }
+
+        void Wound()
+        {
+            me->SetHealth(me->CountPctFromMaxHealth(HEALING_DUMMY_START_PCT));
+            _fullTimer = 3s;
+        }
+
+        void SetDamage(HealingDummyDamage damage)
+        {
+            _damage = damage;
+            _damageTimer = 1s;
+        }
+
+        void MatchPlayer(Player* player)
+        {
+            uint32 const health = player->GetMaxHealth();
+            me->SetLevel(player->GetLevel());
+            me->SetCreateHealth(health);
+            me->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(health));
+            me->UpdateMaxHealth();
+            Wound();
+        }
+
+        void ToggleAutoWound()
+        {
+            _autoWound = !_autoWound;
+        }
+
+        bool AutoWound() const
+        {
+            return _autoWound;
+        }
+
+        void ResetStats()
+        {
+            _healers.clear();
+            _absorbed = 0;
+        }
+
+        void ShowStats(Player* player) const
+        {
+            ChatHandler handler(player->GetSession());
+            auto itr = _healers.find(player->GetGUID());
+            if (itr == _healers.end())
+            {
+                handler.PSendSysMessage("Healing Dummy: you have not healed me yet. Shields absorbed {} damage.", _absorbed);
+                return;
+            }
+
+            HealerStats const& stats = itr->second;
+            uint64 const total = stats.Effective + stats.Overheal;
+            uint32 const seconds = std::max<uint32>(1, uint32((GameTime::GetGameTimeMS() - stats.Start).count() / IN_MILLISECONDS));
+            handler.PSendSysMessage("Healing Dummy: {} healing in {}s ({} HPS), {} overhealing ({}%). Shields absorbed {} damage.",
+                stats.Effective, seconds, stats.Effective / seconds, stats.Overheal, total ? stats.Overheal * 100 / total : 0, _absorbed);
+        }
+
+    private:
+        struct HealerStats
+        {
+            bool Started = false;
+            Milliseconds Start = 0ms;
+            uint64 Effective = 0;
+            uint64 Overheal = 0;
+        };
+
+        void TakeTrainingDamage()
+        {
+            uint32 pct = HEALING_DUMMY_STEADY_PCT;
+            if (_damage == HealingDummyDamage::Heavy)
+                pct = HEALING_DUMMY_HEAVY_PCT;
+            else if (_damage == HealingDummyDamage::Spiky)
+                pct = HEALING_DUMMY_SPIKE_PCT;
+
+            DamageInfo dmgInfo(me, me, me->CountPctFromMaxHealth(pct), nullptr, SPELL_SCHOOL_MASK_NORMAL, DIRECT_DAMAGE);
+            Unit::CalcAbsorbResist(dmgInfo);
+            _absorbed += dmgInfo.GetAbsorb();
+
+            uint32 const damage = std::min(dmgInfo.GetDamage(), me->GetHealth() - 1);
+            uint32 hitInfo = HITINFO_AFFECTS_VICTIM;
+            if (dmgInfo.GetAbsorb())
+                hitInfo |= damage ? HITINFO_PARTIAL_ABSORB : HITINFO_FULL_ABSORB;
+            me->SendAttackStateUpdate(hitInfo, me, 1, SPELL_SCHOOL_MASK_NORMAL, damage, dmgInfo.GetAbsorb(), 0, VICTIMSTATE_HIT, 0);
+
+            if (damage)
+                Unit::DealDamage(me, me, damage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+
+            uint32 procEx = damage ? PROC_EX_NORMAL_HIT : PROC_EX_NONE;
+            if (dmgInfo.GetAbsorb())
+                procEx |= PROC_EX_ABSORB;
+            Unit::ProcSkillsAndAuras(me, me, PROC_FLAG_NONE, PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK, procEx, damage, BASE_ATTACK,
+                nullptr, nullptr, -1, nullptr, &dmgInfo);
+        }
+
+        void ReportToHealers()
+        {
+            for (auto const& [guid, stats] : _healers)
+                if (Player* player = ObjectAccessor::GetPlayer(*me, guid))
+                    if (player->IsWithinDistInMap(me, 100.0f))
+                        ShowStats(player);
+        }
+
+        std::unordered_map<ObjectGuid, HealerStats> _healers;
+        uint64 _absorbed = 0;
+        HealingDummyDamage _damage = HealingDummyDamage::Off;
+        Milliseconds _damageTimer = 1s;
+        Milliseconds _fullTimer = 3s;
+        bool _autoWound = true;
+    };
+
+    bool OnGossipHello(Player* player, Creature* creature) override
+    {
+        npc_healing_dummyAI* ai = CAST_AI(npc_healing_dummyAI, creature->AI());
+        if (!ai)
+            return false;
+
+        ClearGossipMenuFor(player);
+        AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Take no damage.", GOSSIP_SENDER_MAIN, HEALING_DUMMY_ACTION_DAMAGE_OFF);
+        AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Take steady damage (3% per second).", GOSSIP_SENDER_MAIN, HEALING_DUMMY_ACTION_DAMAGE_STEADY);
+        AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Take heavy damage (8% per second).", GOSSIP_SENDER_MAIN, HEALING_DUMMY_ACTION_DAMAGE_HEAVY);
+        AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, "Take spiky damage (35% every 5 seconds).", GOSSIP_SENDER_MAIN, HEALING_DUMMY_ACTION_DAMAGE_SPIKY);
+        AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Drop to 20% health.", GOSSIP_SENDER_MAIN, HEALING_DUMMY_ACTION_WOUND);
+        AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Match my level and maximum health.", GOSSIP_SENDER_MAIN, HEALING_DUMMY_ACTION_MATCH_PLAYER);
+        AddGossipItemFor(player, GOSSIP_ICON_CHAT, ai->AutoWound() ? "Stop dropping to 20% when healed to full." : "Drop to 20% again when healed to full.",
+            GOSSIP_SENDER_MAIN, HEALING_DUMMY_ACTION_AUTO_WOUND);
+        AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Show my healing.", GOSSIP_SENDER_MAIN, HEALING_DUMMY_ACTION_SHOW_STATS);
+        AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Reset the healing statistics.", GOSSIP_SENDER_MAIN, HEALING_DUMMY_ACTION_RESET_STATS);
+        SendGossipMenuFor(player, NPC_TEXT_HEALING_DUMMY, creature->GetGUID());
+        return true;
+    }
+
+    bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+    {
+        npc_healing_dummyAI* ai = CAST_AI(npc_healing_dummyAI, creature->AI());
+        if (!ai)
+            return false;
+
+        switch (action)
+        {
+            case HEALING_DUMMY_ACTION_DAMAGE_OFF:
+                ai->SetDamage(HealingDummyDamage::Off);
+                break;
+            case HEALING_DUMMY_ACTION_DAMAGE_STEADY:
+                ai->SetDamage(HealingDummyDamage::Steady);
+                break;
+            case HEALING_DUMMY_ACTION_DAMAGE_HEAVY:
+                ai->SetDamage(HealingDummyDamage::Heavy);
+                break;
+            case HEALING_DUMMY_ACTION_DAMAGE_SPIKY:
+                ai->SetDamage(HealingDummyDamage::Spiky);
+                break;
+            case HEALING_DUMMY_ACTION_WOUND:
+                ai->Wound();
+                break;
+            case HEALING_DUMMY_ACTION_MATCH_PLAYER:
+                ai->MatchPlayer(player);
+                break;
+            case HEALING_DUMMY_ACTION_AUTO_WOUND:
+                ai->ToggleAutoWound();
+                break;
+            case HEALING_DUMMY_ACTION_SHOW_STATS:
+                ai->ShowStats(player);
+                break;
+            case HEALING_DUMMY_ACTION_RESET_STATS:
+                ai->ResetStats();
+                break;
+            default:
+                break;
+        }
+
+        CloseGossipMenuFor(player);
+        return true;
+    }
+
+    CreatureAI* GetAI(Creature* creature) const override
+    {
+        return new npc_healing_dummyAI(creature);
+    }
+};
+
+/*########
 # npc_air_force_bots
 #########*/
 
@@ -2694,6 +2979,7 @@ void AddSC_npcs_special()
     new npc_riggle_bassbait();
     RegisterCreatureAI(npc_target_dummy);
     RegisterCreatureAI(npc_training_dummy);
+    new npc_healing_dummy();
     new npc_venomhide_hatchling();
     new npc_air_force_bots();
     new npc_chicken_cluck();

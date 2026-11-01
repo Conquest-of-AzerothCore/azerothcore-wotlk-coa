@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "name": "Echo of Nozdormu cuts the owned Meteor rank by 5% once (#5555, #9472)",
+  "contract": "Echo of Nozdormu 802174's Description reads 'reducing all spell and ability cooldowns by $802804s1%'. pyromancer_spells::OnSpellCast (AscensionPyromancerAbilities.cpp) cuts every learned spell's remaining cooldown by 5% when 802174 is cast, as the tooltip says. 802174 effect 1 also casts 802804, whose three SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT effects name rank 1 of Inferno Barrier, Meteor and Dragon Leap. Now that the core reaches the owned rank, those three would be cut twice, so 802804's effects are disabled and the script stays the one path. Echo of Nozdormu 520937 transforms Explode 800792 into the highest Echo rank the player's level allows, which at level 15 is rank 1, 802174; it needs Ember 807533. The Pyromancer also learns Meteor rank 502056 (30 s cooldown). When Echo lands about 26 s remain: one 5% cut is about 1.3 s, two are about 2.5 s. A control Pyromancer at the same level casts Meteor right after and waits through the Echo cast; the tester's Meteor can only fall below the control's through Echo.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "tester",
+      "race": 1,
+      "class": 24,
+      "level": 15,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 24,
+      "level": 15,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "tester_dummy",
+      "owner": "tester",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 10
+    },
+    {
+      "id": "control_dummy",
+      "owner": "control",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "tester",
+      "spell": 502056
+    },
+    {
+      "action": "learn",
+      "actor": "tester",
+      "spell": 800792
+    },
+    {
+      "action": "learn",
+      "actor": "tester",
+      "spell": 520937
+    },
+    {
+      "action": "assert",
+      "label": "Echo of Nozdormu rank 1 replaces Explode",
+      "actor": "tester",
+      "metric": "temporary_spell_replacement",
+      "spell": 800792,
+      "equals": 802174,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Echo of Nozdormu requires Ember (CasterAuraSpell 807533)",
+      "actor": "tester",
+      "spell": 807533,
+      "stacks": 5
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 502056
+    },
+    {
+      "action": "cast",
+      "actor": "tester",
+      "spell": 502056,
+      "destination": {
+        "x": -8913.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 502056,
+      "destination": {
+        "x": -8913.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "label": "Meteor is on cooldown",
+      "actor": "tester",
+      "metric": "cooldown_ms",
+      "spell": 502056,
+      "min": 25000,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Meteor is on cooldown for the control",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 502056,
+      "min": 25000,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown clear",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Echo of Nozdormu",
+      "actor": "tester",
+      "spell": 802174,
+      "target": "tester_dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Echo of Nozdormu cast succeeded",
+      "actor": "tester",
+      "metric": "cast_failure",
+      "spell": 802174,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let the cast finish",
+      "ms": 3500
+    },
+    {
+      "action": "snapshot",
+      "label": "The control's remaining Meteor cooldown",
+      "actor": "control",
+      "metric": "cooldown_ms",
+      "spell": 502056,
+      "save_as": "control_cooldown"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Echo cut the owned Meteor rank by one 5% step, not two",
+      "actor": "tester",
+      "metric": "cooldown_ms",
+      "spell": 502056,
+      "relative_to": "control_cooldown",
+      "min": -2000,
+      "max": -800
+    }
+  ]
+}

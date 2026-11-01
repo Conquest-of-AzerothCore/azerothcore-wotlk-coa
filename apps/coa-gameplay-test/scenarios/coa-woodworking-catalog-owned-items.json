@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "CoA woodworking catalog: item appearance rows only for owned items",
+  "contract": [
+    "Every SMSG_PATCH_ITEM_APPEARANCES (0x0693) row makes the Extensions DLL rebuild the client's whole item",
+    "appearance index, so the login woodworking catalog sends a row only for an item the character owns.",
+    "Sturdy Polearm 808974 is crafted by Woodworking and has no appearance of its own, so the catalog carries its row.",
+    "A character owning no woodworking item receives none at login. Obtaining the polearm sends its row once; a",
+    "second copy sends nothing. After a relog the owned polearm's row is in the login catalog again.",
+    "The packet count is per actor and is not reset by the relog."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -9465, "y": 64, "z": 56, "o": 0},
+  "players": [{"id": "crafter", "race": 1, "class": 1, "level": 30}],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "assert", "label": "DISCRIMINATING: no woodworking row at login for a character that owns none",
+     "actor": "crafter", "metric": "server_packets", "opcode": 1683, "equals": 0},
+    {"action": "add_item", "actor": "crafter", "item": 808974},
+    {"action": "assert", "label": "Obtaining Sturdy Polearm sends its row", "actor": "crafter",
+     "metric": "server_packets", "opcode": 1683, "equals": 1, "within_ms": 3000},
+    {"action": "add_item", "actor": "crafter", "item": 808974},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "A second polearm does not send the row again", "actor": "crafter",
+     "metric": "server_packets", "opcode": 1683, "equals": 1},
+    {"action": "relog", "actor": "crafter"},
+    {"action": "wait", "ms": 4000},
+    {"action": "assert", "label": "After a relog the owned polearm's row is in the login catalog", "actor": "crafter",
+     "metric": "server_packets", "opcode": 1683, "equals": 2, "within_ms": 5000}
+  ]
+}

@@ -49,6 +49,7 @@ class spell_ascension_primordial_spirit : public SpellScript
                 TEMPSUMMON_TIMED_DESPAWN, uint32(duration)))
             {
                 spirit->SetOwnerGUID(owner->GetGUID());
+                spirit->SetUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED);
                 spirit->SetFaction(owner->GetFaction());
                 spirit->SetLevel(owner->GetLevel());
                 spirit->SetReactState(REACT_PASSIVE);

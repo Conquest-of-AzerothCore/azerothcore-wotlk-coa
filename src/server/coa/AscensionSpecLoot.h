@@ -5,6 +5,7 @@
 
 #include "Define.h"
 #include <array>
+#include <utility>
 #include <vector>
 
 class Player;
@@ -13,6 +14,7 @@ struct ItemTemplate;
 namespace AscensionSpecLoot
 {
 using PrimaryStats = std::array<uint8, 3>;
+using StatList = std::vector<std::pair<uint32, int32>>;
 
 enum class Fit : uint8
 {
@@ -23,18 +25,20 @@ enum class Fit : uint8
 
 PrimaryStats ActivePrimaryStats(Player const* player);
 
+StatList TemplateStats(ItemTemplate const* item);
+
 Fit ItemFit(PrimaryStats const& stats, ItemTemplate const* item);
 
-template <typename Candidate, typename TemplateOf>
-std::vector<Candidate> PreferSpecialization(Player const* player, std::vector<Candidate> const& candidates,
-    TemplateOf templateOf)
+Fit StatsFit(PrimaryStats const& stats, StatList const& itemStats);
+
+template <typename Candidate, typename FitOf>
+std::vector<Candidate> PreferFit(std::vector<Candidate> const& candidates, FitOf fitOf)
 {
-    PrimaryStats const stats = ActivePrimaryStats(player);
     std::vector<Candidate> primary;
     std::vector<Candidate> shared;
     for (Candidate const& candidate : candidates)
     {
-        switch (ItemFit(stats, templateOf(candidate)))
+        switch (fitOf(candidate))
         {
             case Fit::Primary:
                 primary.push_back(candidate);
@@ -50,6 +54,14 @@ std::vector<Candidate> PreferSpecialization(Player const* player, std::vector<Ca
     if (!primary.empty())
         return primary;
     return shared.empty() ? candidates : shared;
+}
+
+template <typename Candidate, typename TemplateOf>
+std::vector<Candidate> PreferSpecialization(Player const* player, std::vector<Candidate> const& candidates,
+    TemplateOf templateOf)
+{
+    PrimaryStats const stats = ActivePrimaryStats(player);
+    return PreferFit(candidates, [&](Candidate const& candidate) { return ItemFit(stats, templateOf(candidate)); });
 }
 }
 

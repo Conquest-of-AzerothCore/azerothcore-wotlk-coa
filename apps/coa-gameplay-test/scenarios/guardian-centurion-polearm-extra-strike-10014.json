@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "name": "Centurion Strike with a polearm stabs the target an additional time (#10014)",
+  "contract": [
+    "Centurion Strike 802738 reads: 'Stab an enemy, dealing weapon damage plus an additional effect based on",
+    "your weapon'. The polearm line is 'Stabs the target and enemies behind them an additional time'.",
+    "With a polearm in the main hand, the main target must take two 802738 damage events and the enemy in",
+    "the box behind it one, the client must not receive the sword effect 807967, and the cast must not add",
+    "melee attacks. Fixture: guardian level 80 on the default location facing the spawn axis, Jeweled Halberd",
+    "30396 in the main hand, hostiles at distance 2 (front) and 5 (back) so back sits 3 yd behind front."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "front",
+      "owner": "guardian",
+      "entry": 36,
+      "faction": 14,
+      "level": 80,
+      "health": 1000000,
+      "distance": 2
+    },
+    {
+      "id": "back",
+      "owner": "guardian",
+      "entry": 36,
+      "faction": 14,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "guardian", "spell": 802738 },
+    { "action": "learn", "actor": "guardian", "spell": 802299 },
+    { "action": "learn", "actor": "guardian", "spell": 803832 },
+    { "action": "learn", "actor": "guardian", "spell": 807892 },
+    { "action": "add_item", "actor": "guardian", "item": 30396 },
+    { "action": "equip", "actor": "guardian", "item": 30396, "slot": 15 },
+    {
+      "action": "assert", "label": "SETUP: the polearm is in the main hand", "actor": "guardian",
+      "metric": "equipped_item", "slot": 15, "equals": 30396
+    },
+    { "action": "set_power", "actor": "guardian", "power": 3, "value": 100 },
+    { "action": "reset_cooldown", "actor": "guardian", "spell": 802738 },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1700 },
+    {
+      "action": "snapshot", "label": "802738 damage logs on the main target before the cast",
+      "actor": "guardian", "metric": "spell_damage_count", "spell": 802738, "target": "front",
+      "save_as": "front_before"
+    },
+    {
+      "action": "snapshot", "label": "802738 damage logs behind the target before the cast",
+      "actor": "guardian", "metric": "spell_damage_count", "spell": 802738, "target": "back",
+      "save_as": "back_before"
+    },
+    {
+      "action": "snapshot", "label": "807967 casts before the cast", "actor": "guardian",
+      "metric": "spell_cast_count", "spell": 807967, "save_as": "sword_casts_before"
+    },
+    {
+      "action": "snapshot", "label": "melee attacks before the cast", "actor": "guardian",
+      "metric": "melee_attack_count", "save_as": "melee_before"
+    },
+    {
+      "action": "cast", "label": "Centurion Strike with a polearm", "actor": "guardian",
+      "spell": 802738, "target": "front"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the main target takes the stab an additional time",
+      "actor": "guardian", "metric": "spell_damage_count", "spell": 802738, "target": "front",
+      "relative_to": "front_before", "equals": 2, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "the enemy behind takes one stab",
+      "actor": "guardian", "metric": "spell_damage_count", "spell": 802738, "target": "back",
+      "relative_to": "back_before", "equals": 1, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "a polearm never casts the sword effect 807967",
+      "actor": "guardian", "metric": "spell_cast_count", "spell": 807967,
+      "relative_to": "sword_casts_before", "equals": 0, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "a polearm adds no melee attacks",
+      "actor": "guardian", "metric": "melee_attack_count", "relative_to": "melee_before",
+      "equals": 0, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "the cast is not refused", "actor": "guardian",
+      "metric": "cast_failure", "spell": 802738, "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "March of the Black King refreshes Shadow Brand without stopping its ticks (#9865)",
+  "contract": [
+    "Shadow Brand 680516 reads 'Direct ability damage now applies Shadow Brand to enemies'; its debuff 680517 'Marks",
+    "the target for $d, dealing $o2 Shadow Damage over $d' (DurationIndex 29, 12 s) with a",
+    "SPELL_AURA_PERIODIC_DAMAGE effect every 3000 ms. March of the Black King 681217 is a 10-second caster aura that",
+    "deals its Shadow damage through 681094 every 2000 ms, and those direct hits apply Shadow Brand (spell_proc",
+    "allows triggered procs). Both tooltips promise their own damage, so while March keeps refreshing the brand",
+    "every two seconds, the brand must still tick on its three-second cadence: a refresh may extend the duration but",
+    "must not restart the tick timer, or a two-second refresh would stop every tick until March ends. Within 9.5",
+    "seconds of the first pulse the brand ticks at about 3, 6 and 9 seconds, so at least two ticks are required,",
+    "while a restarting timer would give none before March's last refresh. March's own pulses must also land:",
+    "with SPELL_ATTR5_EXTRA_INITIAL_PERIOD it pulses at 0, 2, 4, 6 and 8 seconds (and 10), so at least five",
+    "hits by the end of its ten-second lifetime."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "hunter", "race": 1, "class": 15, "level": 60, "spell_hit_rating": 100000 }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "hunter", "entry": 36, "level": 60, "health": 5000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "hunter", "spell": 680516 },
+    { "action": "learn", "actor": "hunter", "spell": 681217 },
+    { "action": "assert", "actor": "hunter", "metric": "spell_hit_chance", "min": 100 },
+    { "action": "cast", "label": "March of the Black King", "actor": "hunter", "spell": 681217 },
+    { "action": "assert", "actor": "hunter", "metric": "cast_failure", "spell": 681217, "equals": 0 },
+    { "action": "assert", "label": "A March pulse hits the target", "actor": "hunter", "metric": "spell_damage_count", "spell": 681094, "target": "target", "min": 1, "within_ms": 2500 },
+    { "action": "assert", "label": "The direct March hit applies Shadow Brand", "actor": "target", "metric": "aura", "spell": 680517, "caster": "hunter", "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "Shadow Brand keeps ticking while March refreshes it every two seconds", "actor": "hunter", "metric": "spell_damage_count", "spell": 680517, "target": "target", "min": 2, "within_ms": 9500 },
+    { "action": "assert", "label": "March keeps dealing its own damage alongside the brand", "actor": "hunter", "metric": "spell_damage_count", "spell": 681094, "target": "target", "min": 5, "within_ms": 6000 }
+  ]
+}

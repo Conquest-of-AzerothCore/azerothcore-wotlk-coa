@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Skinpeeler Stormfang: one non-tank",
+  "contract": [
+    "Pounce must target the non-tank, never the tank.",
+    "Storm Howl must summon two wolves and both must target the single non-tank.",
+    "Stormcall must not apply a player root or fear."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -155.771, "y": -2879.57, "z": 117.037, "o": 0 },
+  "players": [
+    { "id": "tank", "race": 1, "class": 1, "level": 60, "allow_regeneration": false },
+    { "id": "dps", "race": 1, "class": 1, "level": 60, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "boss", "owner": "tank", "entry": 9916212, "level": 60, "health": 5000000, "reaction": 2, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "set_health", "actor": "tank", "value": 1000000, "maximum": 1000000 },
+    { "action": "set_health", "actor": "dps", "value": 1000000, "maximum": 1000000 },
+    { "action": "wait", "label": "Let the boss and local AI settle", "ms": 3000 },
+    { "action": "attack", "label": "Tank establishes threat", "actor": "tank", "target": "boss" },
+    { "action": "assert", "label": "Boss enters combat", "actor": "boss", "metric": "combat", "equals": 1, "within_ms": 10000 },
+    { "action": "snapshot", "actor": "dps", "metric": "health", "save_as": "dps_health_before" },
+    { "action": "wait", "label": "Reach the Pounce timer", "ms": 8000 },
+    { "action": "assert", "label": "Pounce applies its landing effect to the non-tank", "actor": "dps", "metric": "aura", "spell": 1004116, "equals": 1, "within_ms": 8000 },
+    { "action": "assert", "label": "Pounce does not apply its landing effect to the tank", "actor": "tank", "metric": "aura", "spell": 1004116, "equals": 0 },
+    { "action": "wait", "label": "Reach Storm Howl", "ms": 8000 },
+    { "action": "assert", "label": "Storm Howl summons two wolves", "actor": "tank", "metric": "nearby_creature_count", "entry": 9916211, "min": 2, "within_ms": 10000 },
+    { "action": "wait", "label": "Let the wolves reach their target", "ms": 8000 },
+    { "action": "assert", "label": "The single non-tank takes damage from the pack", "actor": "dps", "metric": "health", "relative_to": "dps_health_before", "max": -1 },
+    { "action": "wait", "label": "Reach Stormcall", "ms": 10000 },
+    { "action": "assert", "label": "Stormcall does not root the non-tank", "actor": "dps", "metric": "aura", "spell": 1004117, "equals": 0, "within_ms": 5000 },
+    { "action": "assert", "label": "Stormcall does not root the tank", "actor": "tank", "metric": "aura", "spell": 1004117, "equals": 0 }
+  ]
+}

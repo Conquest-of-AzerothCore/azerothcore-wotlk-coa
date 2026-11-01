@@ -1,12 +1,10 @@
 ###################################################################################################
 #  mod-item-recovery
 #
-#  Answers the Ascension client's Item Recovery window from the character's twelve native vendor
-#  buyback slots. A recovered item is the sold instance itself, bought back for the price the
-#  vendor paid, exactly as the vendor's own buyback tab would return it.
-#
-#  The historical service also kept a longer archive of sold and deleted items with its own fees.
-#  That archive is not restored: the window lists what the buyback tab would list.
+#  Native vendored/deleted recovery using current buyback plus exact future snapshots.
+#  The archive retains the newest 500 supported disposal events per character.
+#  Existing basic recovery_item rows remain GM-only; missing original item properties
+#  are never reconstructed from entry/count alone. Archived recovery arrives by mail.
 #
 #  This code is part of the AzerothCore project. See AUTHORS file for Copyright information.
 ###################################################################################################
@@ -18,3 +16,27 @@
 #        Default:     1 - (Enabled)
 #                     0 - (Disabled; the client keeps the window hidden)
 ItemRecovery.Enable = 1
+
+#    ItemRecovery.Archive.Enable
+#        Description: Capture supported future deleted/sold items with their native item fields.
+#                     Requires the pending exact-item-recovery character migration.
+#                     Does not enable disenchantment, recycling, character restoration or refunds.
+#        Default:     1 - Enabled when ItemRecovery.Enable is enabled.
+ItemRecovery.Archive.Enable = 1
+
+#    ItemRecovery.Characters.Enable
+#        Description: Restore this account's retained soft-deleted characters without a fee.
+#                     Existing name and account/realm character limits apply.
+#                     CharDelete.Method = 1 retains future deletions; purged characters cannot be recovered.
+#        Default:     1 - Enabled under ItemRecovery.Enable.
+ItemRecovery.Characters.Enable = 1
+
+#    ItemRecovery.Worldforged.Enable
+#        Description: Answer native, time-limited Worldforged item/rune exchange offers.
+#                     Requires both pending recovery_worldforged migrations and authored offer rows.
+#                     Client category is enabled only while a valid offer is active.
+#                     Supports saved, unequipped, unmodified weapon/armor instances in bags.
+#                     Enchants, random properties, used charges and worn items are not discarded.
+#                     No refund campaigns or universal eligibility periods are invented.
+#        Default:     0 - Disabled until reviewed offer data is installed.
+ItemRecovery.Worldforged.Enable = 0

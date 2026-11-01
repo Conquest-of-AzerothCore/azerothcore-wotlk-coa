@@ -23,6 +23,8 @@ using AscensionSpecializationSwitchGuard =
 
 void AddAscensionSpecializationSwitchGuard(AscensionSpecializationSwitchGuard guard);
 
+void AddAscensionSpecializationSlotSwitchGuard(AscensionSpecializationSwitchGuard guard);
+
 std::string AscensionSpecializationSwitchRefusal(Player* player, uint32 activeSpecializationId,
     uint32 requestedSpecializationId);
 

@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Prestige Mode: Chromie replaces High-Risk with PvE Mode, so open world level scaling works after a prestige (#6014, #7107)",
+  "contract": "A level 60 character selects High-Risk the way the client does, casting High-Risk (PvP) 84421 in a rested area (the Goldshire inn trigger 562), which leaves the High-Risk aura 1004019 alone. Choosing 'I would like to prestige!' at Chromie 178081 returns the character to level 1 in Prestige Mode (Prestige Challenge 9930831) and in PvE Mode: PvE Mode 9931032 without War Mode 1004119 or High-Risk 1004019, whose tooltips say they disable level scaling. At level 10, as in #7107, turning open world scaling on through the native request views a summoned level-1 Mindless Zombie 1501 at 6 (10 minus DestinyWeaver.Scaling.Offset 4). Reaching level 15 keeps PvE Mode.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -9483.25, "y": -17.99, "z": 56.96, "o": 3.8 },
+  "players": [
+    { "id": "prestiger", "race": 1, "class": 20, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "chromie", "owner": "prestiger", "entry": 178081, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 3000 },
+    { "action": "specialization", "actor": "prestiger", "id": 25 },
+    { "action": "learn", "actor": "prestiger", "spell": 84420 },
+    { "action": "learn", "actor": "prestiger", "spell": 84421 },
+    { "action": "learn", "actor": "prestiger", "spell": 84422 },
+    { "action": "area_trigger", "label": "Enter the Goldshire inn", "actor": "prestiger", "id": 562 },
+    { "action": "assert", "label": "The inn makes the character rested", "actor": "prestiger", "metric": "resting", "equals": 1, "within_ms": 3000 },
+    { "action": "cast", "label": "Select High-Risk (PvP)", "actor": "prestiger", "spell": 84421 },
+    { "action": "assert", "label": "High-Risk is selectable in the inn", "actor": "prestiger", "metric": "cast_failure", "spell": 84421, "equals": 0, "within_ms": 4000 },
+    { "action": "assert", "label": "High-Risk is applied", "actor": "prestiger", "metric": "aura", "spell": 1004019, "equals": 1, "within_ms": 4000 },
+    { "action": "assert", "label": "High-Risk replaced PvE Mode", "actor": "prestiger", "metric": "aura", "spell": 9931032, "equals": 0 },
+    { "action": "assert", "label": "High-Risk carries no War Mode", "actor": "prestiger", "metric": "aura", "spell": 1004119, "equals": 0 },
+
+    { "action": "gossip_hello", "actor": "prestiger", "target": "chromie", "label": "Speak to Chromie" },
+    { "action": "gossip_select", "actor": "prestiger", "option": 0, "label": "I would like to prestige!" },
+    { "action": "assert", "label": "Back to level 1", "actor": "prestiger", "metric": "level", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The character is in Prestige Mode", "actor": "prestiger", "metric": "aura", "spell": 9930831, "equals": 1 },
+    { "action": "assert", "label": "The new prestige applies PvE Mode", "actor": "prestiger", "metric": "aura", "spell": 9931032, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "High-Risk is removed", "actor": "prestiger", "metric": "aura", "spell": 1004019, "equals": 0 },
+    { "action": "assert", "label": "War Mode is absent", "actor": "prestiger", "metric": "aura", "spell": 1004119, "equals": 0 },
+
+    { "action": "set_level", "actor": "prestiger", "value": 10 },
+    { "action": "summon", "actor": "prestiger", "as": "zombie", "entry": 1501, "distance": 3 },
+    { "action": "level_scaling_packet", "actor": "prestiger", "value": 1 },
+    { "action": "assert", "label": "Open world scaling views the level-1 zombie at 10 minus the offset", "actor": "prestiger", "metric": "view_level", "target": "zombie", "equals": 6, "within_ms": 2000 },
+
+    { "action": "set_level", "actor": "prestiger", "value": 15 },
+    { "action": "assert", "label": "Level 15 keeps PvE Mode", "actor": "prestiger", "metric": "aura", "spell": 9931032, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "War Mode stays off at level 15", "actor": "prestiger", "metric": "aura", "spell": 1004119, "equals": 0 },
+    { "action": "assert", "label": "High-Risk stays off", "actor": "prestiger", "metric": "aura", "spell": 1004019, "equals": 0 }
+  ]
+}

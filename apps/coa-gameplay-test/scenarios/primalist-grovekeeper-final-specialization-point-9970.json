@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "Grovekeeper can spend the final specialization point beside the level-59 Seismic Smash grant (#9970)",
+  "contract": [
+    "CharacterAdvancementEssence gives a Primalist 25 specialization points at level 60. Seismic Smash 300693 is",
+    "a Primalist class spell from level 59 and also the Mountain King talent entry 7498 (spec 60, TE 1). It",
+    "belongs to no Grovekeeper build, so it must not consume a Grovekeeper point. A Grovekeeper (spec 58)",
+    "uploads 24 Life entries of the 0 and 8 investment tiers, then buys entry 30966 (706138) with the 25th",
+    "point, which must be learned. Entry 30967 (805445) as a 26th point must still be refused."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Settle login",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mountain King Seismic Smash talent is not part of this build",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 300693,
+      "equals": 0
+    },
+    {
+      "action": "specialization",
+      "label": "Enter Grovekeeper with 24 Life points",
+      "actor": "primalist",
+      "id": 58,
+      "entries": [
+        6236,
+        6509,
+        7335,
+        9687,
+        29230,
+        29363,
+        30346,
+        30785,
+        31209,
+        6230,
+        6234,
+        6238,
+        6240,
+        6242,
+        6246,
+        6651,
+        6654,
+        7107,
+        7334,
+        11184,
+        11236,
+        29350,
+        30628,
+        30949
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The 24-point upload learned its last listed entry",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 504196,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The 24-point upload learned its first listed entry",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 504220,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "THE FIX: spend the 25th and final specialization point",
+      "actor": "primalist",
+      "entry": 30966,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the final point learns its talent",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 706138,
+      "equals": 1
+    },
+    {
+      "action": "advancement_rank",
+      "label": "CONTROL: a 26th specialization point exceeds the level-60 budget",
+      "actor": "primalist",
+      "entry": 30967,
+      "rank": 1,
+      "refused": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the over-budget talent stays unlearned",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 805445,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the refusal keeps the final point's talent",
+      "actor": "primalist",
+      "metric": "knows_spell",
+      "spell": 706138,
+      "equals": 1
+    }
+  ]
+}

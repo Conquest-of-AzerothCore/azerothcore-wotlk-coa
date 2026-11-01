@@ -30,8 +30,11 @@ if ((APPS_BUILD AND (NOT APPS_BUILD STREQUAL "none")) OR BUILD_TOOLS_DB_IMPORT)
   add_subdirectory(mysql)
 endif()
 
-if (BUILD_APPLICATION_WORLDSERVER OR BUILD_TOOLS_MAPS)
+if ((APPS_BUILD AND (NOT APPS_BUILD STREQUAL "none")) OR BUILD_TOOLS_DB_IMPORT OR BUILD_TOOLS_MAPS)
   add_subdirectory(zlib)
+endif()
+
+if (BUILD_APPLICATION_WORLDSERVER OR BUILD_TOOLS_MAPS)
   add_subdirectory(g3dlite)
   add_subdirectory(recastnavigation)
 endif()

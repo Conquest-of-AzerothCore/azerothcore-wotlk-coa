@@ -261,6 +261,7 @@ enum PlayerHook
     PLAYERHOOK_ON_MASTER_LOOT_ITEM,
     PLAYERHOOK_ON_GET_SHAPESHIFT_MODEL,
     PLAYERHOOK_ON_GET_NAME_QUERY_RACE,
+    PLAYERHOOK_CAN_LFG_TELEPORT,
     PLAYERHOOK_END
 };
 
@@ -759,6 +760,8 @@ public:
     [[nodiscard]] virtual bool OnPlayerNotSetArenaTeamInfoField(Player* /*player*/, uint8 /*slot*/, ArenaTeamInfoType /*type*/, uint32 /*value*/) { return true; } // Whats that?
 
     [[nodiscard]] virtual bool OnPlayerCanJoinLfg(Player* /*player*/, uint8 /*roles*/, std::set<uint32>& /*dungeons*/, std::string const& /*comment*/) { return true; }
+
+    [[nodiscard]] virtual bool OnPlayerCanLfgTeleport(Player* /*player*/) { return true; }
 
     [[nodiscard]] virtual bool OnPlayerCanEnterMap(Player* /*player*/, MapEntry const* /*entry*/, InstanceTemplate const* /*instance*/, MapDifficulty const* /*mapDiff*/, bool /*loginCheck*/) { return true; }
 

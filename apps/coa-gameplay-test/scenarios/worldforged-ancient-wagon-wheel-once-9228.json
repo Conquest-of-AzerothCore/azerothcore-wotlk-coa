@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "Only one Worldforged Ancient Wagon Wheel stands in Tanaris (#9228)",
+  "contract": "LootCollector alignment inserted two Ancient Wagon Wheel pickups (template 9900027, item 515791) 24 yd apart in Tanaris, both visible from the reporter's position (double WF on my coordinates). The atlas-objects sighting corroborates guid 6970028; the extra copy 6970027 is removed.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -8728.0, "y": -4301.0, "z": 15.0, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: one Ancient Wagon Wheel pickup", "actor": "p", "metric": "nearby_gameobject_count", "entry": 9900027, "equals": 1 },
+    { "action": "assert", "label": "the corroborated copy rests on the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 6970028, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 }
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "Blackmoss the Fetid keeps its Elemental creature type in bulk creature queries (#8537)",
+  "contract": [
+    "Issue #8537: the Teldrassil rare Blackmoss the Fetid (3535) showed as a Critter instead of an Elemental.",
+    "Captured Ascension client creature caches (creaturecache, season-10 and coa-beta modes, 2026-09) answer 3535 with",
+    "type 4 (CreatureType.dbc Elemental), family 382 (CreatureFamily.dbc Verdant Bog Beast) and model 1549.",
+    "The client's native CMSG_CREATURE_QUERY_BULK (0x061A) must return that world template, not a collection preview",
+    "with type 8 (Critter), because the client caches the reply for the real creature entry.",
+    "CONTROL: Tsunis (5), a collection preview with no world template, still gets its preview reply (type 8, display",
+    "13444). A native single creature query for 3535 returns the same type. This checks server packet construction",
+    "in a socketless session; it does not verify a rendered client's tooltip or its existing creature cache."
+  ],
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "p",
+      "race": 4,
+      "class": 1,
+      "level": 60,
+      "ascension_client": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "Bulk query Blackmoss the Fetid and the Tsunis preview",
+      "actor": "p",
+      "opcode": 1562,
+      "fields": [
+        {
+          "u32": 2
+        },
+        {
+          "u32": 3535
+        },
+        {
+          "u32": 5
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Blackmoss the Fetid is answered once",
+      "actor": "p",
+      "metric": "server_packets",
+      "opcode": 97,
+      "row": 3535,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Blackmoss the Fetid is an Elemental",
+      "actor": "p",
+      "metric": "server_packet_u32",
+      "opcode": 97,
+      "row": 3535,
+      "offset": 4,
+      "skip_strings": 6,
+      "index": 1,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "Blackmoss the Fetid keeps its Verdant Bog Beast family",
+      "actor": "p",
+      "metric": "server_packet_u32",
+      "opcode": 97,
+      "row": 3535,
+      "offset": 4,
+      "skip_strings": 6,
+      "index": 2,
+      "equals": 382
+    },
+    {
+      "action": "assert",
+      "label": "Blackmoss the Fetid keeps model 1549",
+      "actor": "p",
+      "metric": "server_packet_u32",
+      "opcode": 97,
+      "row": 3535,
+      "offset": 4,
+      "skip_strings": 6,
+      "index": 6,
+      "equals": 1549
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Tsunis preview is still answered as a Critter",
+      "actor": "p",
+      "metric": "server_packet_u32",
+      "opcode": 97,
+      "row": 5,
+      "offset": 4,
+      "skip_strings": 6,
+      "index": 1,
+      "equals": 8,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Tsunis preview keeps display 13444",
+      "actor": "p",
+      "metric": "server_packet_u32",
+      "opcode": 97,
+      "row": 5,
+      "offset": 4,
+      "skip_strings": 6,
+      "index": 6,
+      "equals": 13444
+    },
+    {
+      "action": "client_packet",
+      "label": "Native single query for Blackmoss the Fetid",
+      "actor": "p",
+      "opcode": 96,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 3535
+        },
+        {
+          "u64": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the single query answers too",
+      "actor": "p",
+      "metric": "server_packets",
+      "opcode": 97,
+      "row": 3535,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the single query reports the same Elemental type",
+      "actor": "p",
+      "metric": "server_packet_u32",
+      "opcode": 97,
+      "row": 3535,
+      "offset": 4,
+      "skip_strings": 6,
+      "index": 1,
+      "equals": 4
+    }
+  ]
+}

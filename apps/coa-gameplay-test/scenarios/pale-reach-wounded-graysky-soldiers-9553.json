@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Blood and Duty: the Wounded Graysky Soldiers are wounded and stay wounded for the next player (COA-9553)",
+  "contract": "Blood and Duty 175049 asks the player to tend six Wounded Graysky Soldiers (164055 credit, 164056 at Graysky Outpost) with the Roll of Thick Bandage, a First Aid channel (365018). The soldiers' spawns hold 1 health and they do not regenerate, so they stand wounded. A bandage gives the credit, and 30 s later the soldier is back at 5% health for the next player.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -6995.0, "y": 893.0, "z": 327.8, "o": 0 },
+  "players": [
+    { "id": "a", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "soldier", "owner": "a", "entry": 164055, "distance": 2, "faction": 35, "level": 30 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "prepare_quest", "actor": "a", "quest": 175049, "complete": false },
+    { "action": "use_item", "label": "a bandages the soldier with the Roll of Thick Bandage", "actor": "a", "item": 559878, "spell": 365018, "target": "soldier" },
+    { "action": "assert", "label": "SETUP: the First Aid channel starts", "actor": "a", "metric": "cast_failure", "spell": 365018, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "label": "the bandage credits a", "actor": "a", "metric": "quest_objective_count", "quest": 175049, "equals": 1, "within_ms": 2000 },
+    { "action": "wait", "label": "the First Aid channel ends and the soldier waits 30 s", "ms": 32000 },
+    { "action": "assert", "label": "the tended soldier is wounded again for the next player", "actor": "soldier", "metric": "health_pct", "max": 6 },
+    { "action": "set_phase", "actor": "a", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the outpost's spawned soldiers stand wounded, not at full health", "actor": "a", "metric": "nearby_creature_health_pct", "entry": 164056, "max": 10 }
+  ]
+}

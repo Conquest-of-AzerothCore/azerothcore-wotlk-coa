@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Shadow Bat does not pull neutral mobs on its own (#10213)",
+  "contract": "Call of the Darkwing 801958 is a stock SPELL_EFFECT_SUMMON of creature 50069 (Shadow Bat), SummonProperties 61 (ally guardian). Native Guardian::InitStats unconditionally sets SetReactState(REACT_AGGRESSIVE) for every guardian summon, and bloodmage_darkwing_bat::OnPlayerAfterGuardianInitStatsForLevel (AscensionBloodmageDarkwing.cpp) only touched weapon damage, never the react state, so the bat kept REACT_AGGRESSIVE and independently engaged any hostile-faction unit within its own sight range via the native CreatureAI::MoveInLineOfSight, regardless of whether the Son of Arugal was fighting it - exactly the reported random pulls. The fix sets REACT_DEFENSIVE at the same init hook, matching the owner's own combat state (still assists when the owner fights something, via CreatureAI::OnOwnerCombatInteraction, which only REACT_PASSIVE would block) while no longer auto-engaging on sight. The fixture creature defaults to faction 14 (hostile to all) and reaction 0 (it will not attack first), standing within the bat's native sight/visibility range; the Son of Arugal never attacks it. Discriminating metric: owned_creature_victim for the Shadow Bat against the fixture, and the fixture's own combat state, both still zero after the bat has had several seconds to notice it.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "sonofarugal",
+      "race": 5,
+      "class": 20,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "bait",
+      "owner": "sonofarugal",
+      "entry": 36,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "sonofarugal",
+      "spell": 801958
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the bait has not engaged anyone yet",
+      "actor": "bait",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Son of Arugal is not in combat",
+      "actor": "sonofarugal",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Summon the Shadow Bat directly, bypassing Grim Omen's own proc chance",
+      "actor": "sonofarugal",
+      "spell": 801958
+    },
+    {
+      "action": "wait",
+      "label": "Let the Shadow Bat spawn and settle",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Shadow Bat is present",
+      "actor": "sonofarugal",
+      "metric": "owned_creature_count",
+      "entry": 50069,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "label": "Give native MoveInLineOfSight several passes to notice the nearby bait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Shadow Bat never made the bait its victim",
+      "actor": "sonofarugal",
+      "metric": "owned_creature_victim",
+      "entry": 50069,
+      "target": "bait",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the bait never entered combat",
+      "actor": "bait",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Son of Arugal was never pulled into combat either",
+      "actor": "sonofarugal",
+      "metric": "combat",
+      "equals": 0
+    }
+  ]
+}

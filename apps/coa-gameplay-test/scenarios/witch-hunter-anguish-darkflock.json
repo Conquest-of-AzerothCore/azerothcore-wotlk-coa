@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "name": "Anguish resets Darkflock's cooldown and halves its next duration and hit interval",
+  "contract": [
+    "Anguish (talent 504742) has a 5% chance on Shadow damage to grant 500566, whose client text reads 'reset the",
+    "cooldown and reduce the channel time of your next Darkflock within 15 sec by 50%'. 500566 is two -50% modifiers",
+    "on Darkflock (class mask 0x2): duration (op 1) and hit interval (op 19), so the same hits land in half the time.",
+    "Expected: gaining 500566 clears the cooldown of a Darkflock just cast; the next Darkflock lasts 3-4 s with a hit",
+    "every 1 s, consumes 500566, and lands 3-4 hits before it ends within 4.5 s; the talent procs from about 5% of",
+    "Shadow hits and never from Fire hits."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "wh", "race": 1, "class": 15, "level": 60, "spell_hit_rating": 10000, "ranged_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "golem", "owner": "wh", "entry": 36, "level": 60, "health": 1000000, "distance": 5}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Darkflock rank 5", "actor": "wh", "spell": 562025},
+    {"action": "set_power", "actor": "wh", "power": 1, "value": 1000},
+    {"action": "cast", "label": "Darkflock", "actor": "wh", "spell": 562025, "target": "golem"},
+    {"action": "assert", "label": "SETUP: Darkflock is on its 12 s cooldown", "actor": "wh", "metric": "cooldown_ms",
+     "spell": 562025, "min": 10000, "within_ms": 500},
+    {"action": "set_aura", "label": "Anguish", "actor": "wh", "spell": 500566, "stacks": 1},
+    {"action": "assert", "label": "Anguish resets Darkflock's cooldown", "actor": "wh", "metric": "cooldown_ms",
+     "spell": 562025, "equals": 0},
+    {"action": "set_aura", "label": "Clear the first Darkflock", "actor": "wh", "spell": 562025, "stacks": 0},
+    {"action": "wait", "label": "Wait out the global cooldown", "ms": 1600},
+    {"action": "assert", "label": "SETUP: Anguish is still active", "actor": "wh", "metric": "aura", "spell": 500566,
+     "equals": 1},
+    {"action": "assert", "label": "Anguish halves Darkflock's duration", "actor": "wh", "metric": "spell_modifier",
+     "spell": 562025, "op": 1, "base": 8000, "equals": 4000},
+    {"action": "assert", "label": "Anguish halves Darkflock's hit interval", "actor": "wh", "metric": "spell_modifier",
+     "spell": 562025, "op": 19, "base": 2000, "equals": 1000},
+    {"action": "snapshot", "actor": "wh", "metric": "spell_damage_count", "spell": 520271, "target": "golem",
+     "save_as": "flock_before"},
+    {"action": "cast", "label": "Darkflock with Anguish", "actor": "wh", "spell": 562025, "target": "golem"},
+    {"action": "assert", "label": "Darkflock lasts half as long", "actor": "wh", "metric": "aura_duration_ms",
+     "spell": 562025, "min": 3000, "max": 4000, "within_ms": 500},
+    {"action": "assert", "label": "Darkflock hits every 1 s", "actor": "wh", "metric": "aura_amplitude_ms",
+     "spell": 562025, "effect": 0, "equals": 1000},
+    {"action": "assert", "label": "Darkflock consumes Anguish", "actor": "wh", "metric": "aura", "spell": 500566,
+     "equals": 0},
+    {"action": "assert", "label": "Darkflock ends within 4.5 s", "actor": "wh", "metric": "aura", "spell": 562025,
+     "equals": 0, "within_ms": 4500},
+    {"action": "assert", "label": "The shortened Darkflock still lands its hits", "actor": "wh",
+     "metric": "spell_damage_count", "spell": 520271, "target": "golem", "relative_to": "flock_before", "min": 3,
+     "max": 4, "within_ms": 1000},
+    {"action": "set_aura", "label": "Anguish talent", "actor": "wh", "spell": 504742, "stacks": 1},
+    {"action": "assert", "label": "Anguish procs from about 5% of Shadow hits", "actor": "wh",
+     "metric": "aura_proc_rate", "spell": 504742, "target": "golem", "type_mask": 65536, "trigger_spell": 520271,
+     "min": 3.5, "max": 6.5},
+    {"action": "assert", "label": "Anguish does not proc from Fire hits", "actor": "wh", "metric": "aura_proc_rate",
+     "spell": 504742, "target": "golem", "type_mask": 65536, "trigger_spell": 133, "equals": 0}
+  ]
+}

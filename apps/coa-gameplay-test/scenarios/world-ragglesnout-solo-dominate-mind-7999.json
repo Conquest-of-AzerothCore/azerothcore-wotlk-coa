@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Razorfen Downs: Ragglesnout never mind controls the only player fighting him (#7999)",
+  "contract": [
+    "Issue #7999: fighting Ragglesnout (7354) alone, his Dominate Mind charmed the player, so he lost his only",
+    "hostile target and reset. His native SmartAI row casts Dominate Mind (7645) at SMART_TARGET_HOSTILE_RANDOM_NOT_TOP,",
+    "a random hostile unit other than his current victim, so a lone player is never charmed. The Ascension kit row 9003",
+    "casts Dominate Mind (377065) at SMART_TARGET_HOSTILE_RANDOM, which also picks the current victim. With the kit",
+    "row on the native target, a solo fight has no Dominate Mind target: through his first two kit windows (13.8-15.8 s",
+    "and 20-22 s later) no Dominate Mind goes off, the player is never charmed and Ragglesnout keeps fighting him.",
+    "CONTROL: the kit runs, because his instant kit Fierce Blow (975011, first after 7-9 s) goes off, and he holds the",
+    "30 mana Dominate Mind costs, so only the target choice can keep it from going off. A group fight, where a second",
+    "player can still be charmed, is not covered here."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 129,
+    "x": 2592.55,
+    "y": 1107.5,
+    "z": 51.29,
+    "o": 4.74,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 40,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 7354,
+      "level": 40,
+      "health": 400000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Razorfen Downs",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 129
+    },
+    {
+      "action": "attack",
+      "label": "Engage Ragglesnout",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Ragglesnout fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Ragglesnout casts his kit Fierce Blow",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 7354,
+      "spell": 975011,
+      "min": 1,
+      "within_ms": 12000
+    },
+    {
+      "action": "wait",
+      "label": "Cover the first two kit Dominate Mind windows",
+      "ms": 35000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Ragglesnout has the mana for Dominate Mind",
+      "actor": "boss",
+      "metric": "power",
+      "power": 0,
+      "min": 30
+    },
+    {
+      "action": "assert",
+      "label": "No kit Dominate Mind goes off against a lone player",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 7354,
+      "spell": 377065,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No native Dominate Mind goes off against a lone player",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 7354,
+      "spell": 7645,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The hero is not charmed",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 377065,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Ragglesnout is still in combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Ragglesnout still attacks the hero",
+      "actor": "boss",
+      "metric": "victim",
+      "target": "hero",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survives the measurement",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}
