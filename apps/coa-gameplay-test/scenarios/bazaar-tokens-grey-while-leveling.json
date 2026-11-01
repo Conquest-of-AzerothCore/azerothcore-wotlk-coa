@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Bazaar kill tokens below maximum level follow the level the player is shown",
-  "contract": "At default settings a levelling character earns nothing from a creature grey to them, judged on the level they are shown. Two level-20 group members kill ten Kobold Vermin 6 (level 1-2) in Northshire. The member with open-world scaling is shown them near level 16, so they are not grey and pay 0-2 each: all ten paying zero has a chance of about 1 in 59,000. The member who switched scaling off sees level 1-2, grey from their level, and receives nothing.",
+  "contract": "At default settings a levelling character earns nothing from a creature grey to them, judged on the level they are shown. Two ungrouped level-20 characters each kill ten Kobold Vermin 6 (level 1-2) in Northshire; they are not grouped because a group follows its leader's scaling choice. The character with open-world scaling is shown them at about level 16, so they are not grey and pay 0-2 each: all ten paying zero has a chance of about 1 in 59,000. The character who switched scaling off sees level 1-2, grey at their level, and receives nothing.",
   "timeout_ms": 90000,
   "location": {
     "map": 0,
@@ -23,6 +23,24 @@
       "level": 20
     }
   ],
+  "creatures": [
+    {
+      "id": "scaled_view",
+      "owner": "scaled",
+      "entry": 1501,
+      "level": 2,
+      "health": 40,
+      "distance": 3
+    },
+    {
+      "id": "authored_view",
+      "owner": "authored",
+      "entry": 1501,
+      "level": 2,
+      "health": 40,
+      "distance": 3
+    }
+  ],
   "steps": [
     {
       "action": "wait",
@@ -34,19 +52,32 @@
       "value": 0
     },
     {
-      "action": "group",
+      "action": "assert",
+      "label": "SETUP: without scaling a level 2 creature is shown at level 2",
+      "actor": "authored",
+      "metric": "view_level",
+      "target": "authored_view",
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: with scaling a level 2 creature is shown near the player",
       "actor": "scaled",
-      "target": "authored"
+      "metric": "view_level",
+      "target": "scaled_view",
+      "min": 16,
+      "within_ms": 2000
     },
     {
       "action": "set_phase",
-      "label": "scaled member sees the real Northshire spawns",
+      "label": "scaled player sees the real Northshire spawns",
       "actor": "scaled",
       "value": 1
     },
     {
       "action": "set_phase",
-      "label": "authored member sees the real Northshire spawns",
+      "label": "authored player sees the real Northshire spawns",
       "actor": "authored",
       "value": 1
     },
@@ -70,11 +101,6 @@
       "guid": 79992
     },
     {
-      "action": "teleport_to_spawn",
-      "actor": "authored",
-      "guid": 79992
-    },
-    {
       "action": "attack_nearby",
       "actor": "scaled",
       "entry": 6,
@@ -83,11 +109,6 @@
     {
       "action": "teleport_to_spawn",
       "actor": "scaled",
-      "guid": 79993
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "authored",
       "guid": 79993
     },
     {
@@ -102,11 +123,6 @@
       "guid": 79994
     },
     {
-      "action": "teleport_to_spawn",
-      "actor": "authored",
-      "guid": 79994
-    },
-    {
       "action": "attack_nearby",
       "actor": "scaled",
       "entry": 6,
@@ -115,11 +131,6 @@
     {
       "action": "teleport_to_spawn",
       "actor": "scaled",
-      "guid": 79995
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "authored",
       "guid": 79995
     },
     {
@@ -134,11 +145,6 @@
       "guid": 79996
     },
     {
-      "action": "teleport_to_spawn",
-      "actor": "authored",
-      "guid": 79996
-    },
-    {
       "action": "attack_nearby",
       "actor": "scaled",
       "entry": 6,
@@ -147,11 +153,6 @@
     {
       "action": "teleport_to_spawn",
       "actor": "scaled",
-      "guid": 79998
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "authored",
       "guid": 79998
     },
     {
@@ -166,11 +167,6 @@
       "guid": 79999
     },
     {
-      "action": "teleport_to_spawn",
-      "actor": "authored",
-      "guid": 79999
-    },
-    {
       "action": "attack_nearby",
       "actor": "scaled",
       "entry": 6,
@@ -179,11 +175,6 @@
     {
       "action": "teleport_to_spawn",
       "actor": "scaled",
-      "guid": 80000
-    },
-    {
-      "action": "teleport_to_spawn",
-      "actor": "authored",
       "guid": 80000
     },
     {
@@ -198,11 +189,6 @@
       "guid": 80001
     },
     {
-      "action": "teleport_to_spawn",
-      "actor": "authored",
-      "guid": 80001
-    },
-    {
       "action": "attack_nearby",
       "actor": "scaled",
       "entry": 6,
@@ -214,19 +200,124 @@
       "guid": 80002
     },
     {
+      "action": "attack_nearby",
+      "actor": "scaled",
+      "entry": 6,
+      "kill": true
+    },
+    {
       "action": "teleport_to_spawn",
       "actor": "authored",
-      "guid": 80002
+      "guid": 80011
     },
     {
       "action": "attack_nearby",
-      "actor": "scaled",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 80012
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 80013
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 80014
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 80015
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 80016
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 80017
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 80018
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 80019
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 80098
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
       "entry": 6,
       "kill": true
     },
     {
       "action": "assert",
-      "label": "a creature scaled to the player pays",
+      "label": "creatures scaled to the player pay",
       "actor": "scaled",
       "metric": "item_count",
       "item": 975001,
@@ -236,7 +327,7 @@
     },
     {
       "action": "assert",
-      "label": "the same creatures, grey to a player without scaling, pay nothing",
+      "label": "creatures grey to a player without scaling pay nothing",
       "actor": "authored",
       "metric": "item_count",
       "item": 975001,
