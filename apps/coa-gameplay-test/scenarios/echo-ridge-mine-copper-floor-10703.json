@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "name": "Echo Ridge Mine Copper Veins rest on the mine floor (#10703)",
+  "contract": "GatherMate Copper Veins 12006920 (z 100.42), 12006921 (z 101.36) and 12006922 (z 103.71) in Echo Ridge Mine were imported on rock above the mine's ceiling, open above (spawn_headroom 10, the probe's cap). The reporter stood on the mine floor at z 87.60, 4.9 yd from 12006921. Height probes on the worldserver's vmap data found the lowest floor under each, with no ground below it: 92.09, 87.79 and 92.04. Each vein now stands on that floor; under 12006920 and 12006921 the mine ceiling is 8.0 and 5.8 yd up, while over 12006922 the old surface at 103.71 is 11.7 yd up, beyond the 10 yd headroom probe. Veins grow against the mine walls, so no wall clearance is required (12006920 measures 0.08). Issue #10703.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Copper Vein 12006920 stands at the mine floor measured under it",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 12006920,
+      "spawn_type": "gameobject",
+      "x": -8647.39,
+      "y": -113.25,
+      "z": 92.09,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Copper Vein 12006920 rests on the floor",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12006920,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "the mine ceiling hangs over Copper Vein 12006920",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "guid": 12006920,
+      "spawn_type": "gameobject",
+      "max": 9.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Copper Vein 12006921 stands at the mine floor measured under it",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 12006921,
+      "spawn_type": "gameobject",
+      "x": -8642.76,
+      "y": -127.13,
+      "z": 87.79,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Copper Vein 12006921 rests on the floor",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12006921,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "the mine ceiling hangs over Copper Vein 12006921",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "guid": 12006921,
+      "spawn_type": "gameobject",
+      "max": 9.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Copper Vein 12006922 stands at the mine floor measured under it",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 12006922,
+      "spawn_type": "gameobject",
+      "x": -8672.85,
+      "y": -127.13,
+      "z": 92.04,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Copper Vein 12006922 rests on the floor",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12006922,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}
