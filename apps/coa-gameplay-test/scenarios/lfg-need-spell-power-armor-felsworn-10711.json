@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Dungeon Finder Need lets a Felsworn roll on spell power armor (#10711)",
+  "contract": [
+    "Issue #10711: an Infernal Felsworn could not roll Need on Dreadmist Wraps 243779 in a Dungeon Finder dungeon. Felsworn borrows the stock Rogue's formulas, and the stock Need rule refuses a Rogue (and a Warrior) any armor with spell power.",
+    "Dreadmist Wraps 243779 (item_template): cloth wrist, item level 61, Spell Power 24 (stat type 45), no class or race restriction. Cloth is the lowest armor type and the item is below the item level 70 main-type rule, so a CoA class may Need it whatever its best armor proficiency.",
+    "Controls: Green Woolen Vest 2582 (cloth, item level 17, no spell power) is rollable before and after the fix; Warlock Mouthcover 875716 (cloth, AllowableClass 768) stays refused to the Felsworn, so the dungeon's Need rules are in force."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "felsworn", "race": 1, "class": 14, "level": 60 },
+    { "id": "cleric", "race": 1, "class": 27, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "group", "actor": "felsworn", "target": "cleric" },
+    { "action": "lfg_dungeon", "label": "The group is assigned Scarlet Monastery - Graveyard", "actor": "felsworn", "dungeon": 18 },
+    { "action": "lfg_teleport", "actor": "felsworn" },
+    { "action": "lfg_teleport", "actor": "cleric" },
+    { "action": "assert", "label": "SETUP: the Felsworn enters Scarlet Monastery", "actor": "felsworn", "metric": "map_id", "equals": 189, "within_ms": 15000 },
+    { "action": "assert", "label": "SETUP: the Sun Cleric enters Scarlet Monastery", "actor": "cleric", "metric": "map_id", "equals": 189, "within_ms": 15000 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "CONTROL: the Felsworn cannot Need another class's item", "actor": "felsworn", "metric": "lfg_need_allowed", "item": 875716, "equals": 0 },
+    { "action": "assert", "label": "CONTROL: the Felsworn can Need cloth without spell power", "actor": "felsworn", "metric": "lfg_need_allowed", "item": 2582, "equals": 1 },
+    { "action": "assert", "label": "CONTROL: the Sun Cleric can Need Dreadmist Wraps", "actor": "cleric", "metric": "lfg_need_allowed", "item": 243779, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the Felsworn can Need Dreadmist Wraps", "actor": "felsworn", "metric": "lfg_need_allowed", "item": 243779, "equals": 1 }
+  ]
+}
