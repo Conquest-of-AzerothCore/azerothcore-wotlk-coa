@@ -283,16 +283,7 @@
     },
     {
       "action": "assert",
-      "label": "982257 is in the log",
-      "actor": "p",
-      "metric": "quest_status",
-      "quest": 982257,
-      "equals": 3,
-      "within_ms": 3000
-    },
-    {
-      "action": "assert",
-      "label": "982257 is complete",
+      "label": "982257 is in the log, complete at once",
       "actor": "p",
       "metric": "quest_status",
       "quest": 982257,
@@ -570,11 +561,11 @@
     },
     {
       "action": "assert",
-      "label": "909040 is in the log",
+      "label": "909040 is in the log, complete at once",
       "actor": "p",
       "metric": "quest_status",
       "quest": 909040,
-      "equals": 3,
+      "equals": 1,
       "within_ms": 3000
     },
     {
@@ -584,15 +575,6 @@
       "metric": "item_count",
       "item": 990900,
       "equals": 1
-    },
-    {
-      "action": "assert",
-      "label": "909040 is complete",
-      "actor": "p",
-      "metric": "quest_status",
-      "quest": 909040,
-      "equals": 1,
-      "within_ms": 3000
     },
     {
       "action": "quest_turn_in",
@@ -924,16 +906,7 @@
     },
     {
       "action": "assert",
-      "label": "255040 is in the log",
-      "actor": "p",
-      "metric": "quest_status",
-      "quest": 255040,
-      "equals": 3,
-      "within_ms": 3000
-    },
-    {
-      "action": "assert",
-      "label": "255040 is complete",
+      "label": "255040 is in the log, complete at once",
       "actor": "p",
       "metric": "quest_status",
       "quest": 255040,
