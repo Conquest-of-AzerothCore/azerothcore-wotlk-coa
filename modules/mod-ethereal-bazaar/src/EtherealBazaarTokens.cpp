@@ -17,6 +17,11 @@
  * The zero in the lower two ranges is deliberate: most kills and some quests
  * give nothing at all, so tokens stay something one notices.
  *
+ * A creature that has gone gray for the player pays nothing, so low-level
+ * content cannot be farmed for tokens. A player outside a group is paid only
+ * for a creature they hit themselves, like loot and experience, so pets left
+ * to fight alone cannot farm tokens while the owner is away.
+ *
  * A kill pays everyone the native kill credit rewards: whoever tapped the
  * creature, and every member of a tapping group in reward range, whether they
  * attacked, healed or watched. Each member rolls their own amount.
@@ -28,7 +33,9 @@
 #include "CoATestZoneBonus.h"
 #include "Configuration/Config.h"
 #include "Creature.h"
+#include "Formulas.h"
 #include "GameTime.h"
+#include "Group.h"
 #include "KillRewarder.h"
 #include "Log.h"
 #include "Map.h"
@@ -38,6 +45,7 @@
 #include "Mail.h"
 #include "Random.h"
 #include "ScriptMgr.h"
+#include "World.h"
 
 namespace
 {
@@ -133,6 +141,13 @@ public:
         // Nothing for what a player made themselves, and nothing for the
         // harmless: a totem farm should not be a token farm.
         if (killed->IsSummon() || killed->IsCritter() || killed->IsTotem())
+            return;
+
+        if (killed->GetLevel() <= Acore::XP::GetGrayLevel(player->GetLevel()))
+            return;
+
+        if (!player->GetGroup() && sWorld->getBoolConfig(CONFIG_SOLO_KILL_REQUIRES_PLAYER_HIT) &&
+            !killed->WasAttackedDirectlyBy(player->GetGUID()))
             return;
 
         // Bosses are worth a real amount, and a raid boss more than a dungeon
