@@ -118,8 +118,18 @@ class necromancer_casts : public AllSpellScript
         : AllSpellScript("necromancer_casts",
                          {ALLSPELLHOOK_ON_SPELL_CHECK_CAST, ALLSPELLHOOK_ON_BEFORE_EFFECTS, ALLSPELLHOOK_ON_CAST,
                           ALLSPELLHOOK_ON_CALC_MAX_DURATION, ALLSPELLHOOK_ON_SUCCESSFUL_INTERRUPT,
-                           ALLSPELLHOOK_ON_CALCULATED_TARGET, ALLSPELLHOOK_ON_HIT_RESULT})
+                           ALLSPELLHOOK_ON_CALCULATED_TARGET, ALLSPELLHOOK_ON_HIT_RESULT,
+                           ALLSPELLHOOK_ON_CRIT_CHANCE})
     {
+    }
+    void OnSpellCritChance(Spell* spell, Unit*, float& chance) override
+    {
+        Player* player = Owner(spell->GetCaster());
+        if (!player || player != spell->GetCaster() || spell->GetSpellInfo()->Id != 707592)
+            return;
+        if (Aura const* stacks = player->GetAura(712434))
+            if (stacks->GetStackAmount() >= stacks->GetSpellInfo()->StackAmount)
+                chance = 100.0f;
     }
     void OnSpellHitResult(Spell* spell, Unit* target, uint8 miss, uint32, uint32,
                           bool) override
