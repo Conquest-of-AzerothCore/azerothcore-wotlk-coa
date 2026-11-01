@@ -6625,6 +6625,11 @@ private:
                     aura = recipient->AddAura(spell, recipient);
                 Require(aura != nullptr, "Could not apply fixture aura");
                 aura->SetStackAmount(uint8(stacks));
+                if (aura->GetMaxDuration() <= 0)
+                {
+                    aura->SetMaxDuration(60000);
+                    aura->SetDuration(60000);
+                }
             }
         }
         else if (action == "money")
