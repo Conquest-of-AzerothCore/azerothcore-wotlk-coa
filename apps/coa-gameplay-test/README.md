@@ -856,6 +856,8 @@ no-placement bit (0x1000000 of the fourth attribute dword); up to level 10 the c
 button. `client_placing_supersedes_for` counts the superseded notices adding that spell while the Rank text of its last
 `SMSG_PATCH_SPELL` row (the number in it) was 1 or less, or before any row was sent: up to level 10 the client places
 such a spell on an empty button. `client_spell_rank_for` returns that number for the last row sent, or -1.
+`client_spell_caster_aura_for` returns the CasterAuraSpell of the last `SMSG_PATCH_SPELL` row sent for `spell`, or -1
+when none was sent; the client refuses a cast without that aura before the request reaches the server.
 `client_removals_keeping_buttons_for` counts its removed notices ending in a zero byte, which Extensions.dll
 answers without clearing the spell's action buttons. `client_spell_row_restored` returns 1 when the last two
 `SMSG_PATCH_SPELL` rows for `spell` are the same row, first with `SPELL_ATTR0_DO_NOT_DISPLAY` and then without.

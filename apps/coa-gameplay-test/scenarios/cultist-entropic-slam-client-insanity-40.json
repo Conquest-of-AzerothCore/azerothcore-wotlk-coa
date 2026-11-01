@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Cultist: the client lets Entropic Slam be cast at 40 Insanity (#7316)",
+  "contract": "Issue COA-7316: Entropic Slam (804152) drains 40 Insanity, but it could not be cast below 60. Spell.dbc (server, CoA client patch-T and Ascension live patch-T alike) gives it CasterAuraSpell 680603, the marker the server keeps on a Cultist at 60 Insanity or more (AscensionCultist.cpp: 680601/680602/680603/680604 at 20/40/60/80). AscensionCultistContracts.cpp sets the server's copy to the 40 Insanity marker 680602, but the client checks its own record first and refuses the cast without 680603. Expected: on login the server streams its Entropic Slam row with CasterAuraSpell 680602, so the client asks for 40 Insanity as the server does.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 13
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the login packets arrive",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the client's Entropic Slam row asks for the 40 Insanity marker",
+      "actor": "cultist",
+      "metric": "client_spell_caster_aura_for",
+      "spell": 804152,
+      "equals": 680602,
+      "within_ms": 5000
+    }
+  ]
+}

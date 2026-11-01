@@ -3537,6 +3537,17 @@ private:
             auto const found = placing.find(spell);
             return found == placing.end() ? 0.0 : double(found->second);
         }
+        if (metric == "client_spell_caster_aura_for")
+        {
+            constexpr std::size_t CasterAuraSpellOffset = 24 * sizeof(uint32);
+            auto const& rows = _actors.at(step.get<std::string>("actor")).clientSpellRows;
+            auto const found = rows.find(spell);
+            if (found == rows.end() || found->second[1].size() < CasterAuraSpellOffset + sizeof(uint32))
+                return -1.0;
+            uint32 aura = 0;
+            std::memcpy(&aura, found->second[1].data() + CasterAuraSpellOffset, sizeof(aura));
+            return double(aura);
+        }
         if (metric == "client_spell_rank_for")
         {
             auto const& ranks = _actors.at(step.get<std::string>("actor")).clientSpellRank;

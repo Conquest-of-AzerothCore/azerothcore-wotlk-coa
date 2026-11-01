@@ -5409,7 +5409,7 @@ private:
     if (!info)
       return;
 
-    if (info->Id == AscensionXoroth::SPELL_SACRIFICIAL_CIRCLE)
+    if (info->Id == AscensionXoroth::SPELL_SACRIFICIAL_CIRCLE || AscensionCultist::Named(info, 804152))
     {
       row.Values[SPELL_WIRE_SLOT(SPELL_CASTER_AURA_SPELL_FIELD)] = info->CasterAuraSpell;
       row.Values[SPELL_WIRE_SLOT(SPELL_EXCLUDE_CASTER_AURA_SPELL_FIELD)] = info->ExcludeCasterAuraSpell;
