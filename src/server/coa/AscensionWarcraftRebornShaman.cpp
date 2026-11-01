@@ -24,6 +24,11 @@ constexpr uint32 SHAMAN_FLAMETONGUE_WEAPON = 0x200000;
 constexpr int32 LAVA_SWEEP_FLAMETONGUE_PCT = 50;
 constexpr std::array<uint32, 3> DUAL_WIELD_SPECIALIZATION = { 1130816, 1130818, 1130819 };
 constexpr uint32 EARTHEN_GUARDIAN_MASTERY = 1134980;
+constexpr uint32 SHAMAN_LIGHTNING_BOLT = 0x1;
+constexpr uint32 SHAMAN_CHAIN_LIGHTNING = 0x2;
+constexpr uint32 LIGHTNING_OVERLOAD_BOLT = 1145284;
+constexpr uint32 LIGHTNING_OVERLOAD_CHAIN = 1145297;
+constexpr int32 LIGHTNING_OVERLOAD_PCT = 50;
 
 bool HasFlametongue(Player const* player, Item const* weapon)
 {
@@ -211,6 +216,43 @@ class spell_ascension_reborn_dual_wield_specialization : public AuraScript
             SPELL_AURA_MOD_HIT_CHANCE);
     }
 };
+
+class spell_ascension_reborn_lightning_overload : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_reborn_lightning_overload);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({ LIGHTNING_OVERLOAD_BOLT, LIGHTNING_OVERLOAD_CHAIN });
+    }
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        SpellInfo const* spellInfo = eventInfo.GetSpellInfo();
+        return spellInfo && eventInfo.GetActionTarget() && eventInfo.GetDamageInfo() && GetTarget()->IsPlayer() &&
+            (spellInfo->SpellFamilyFlags[0] & (SHAMAN_LIGHTNING_BOLT | SHAMAN_CHAIN_LIGHTNING)) &&
+            roll_chance_i(LIGHTNING_OVERLOAD_PCT);
+    }
+
+    void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        int32 damage = eventInfo.GetDamageInfo()->GetDamage();
+        if (eventInfo.GetHitMask() & PROC_EX_CRITICAL_HIT)
+            damage /= 2;
+        damage /= 2;
+        uint32 const overload = (eventInfo.GetSpellInfo()->SpellFamilyFlags[0] & SHAMAN_CHAIN_LIGHTNING) ?
+            LIGHTNING_OVERLOAD_CHAIN : LIGHTNING_OVERLOAD_BOLT;
+        GetTarget()->CastCustomSpell(overload, SPELLVALUE_BASE_POINT0, damage, eventInfo.GetActionTarget(), true, nullptr,
+            aurEff);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_ascension_reborn_lightning_overload::CheckProc);
+        OnEffectProc += AuraEffectProcFn(spell_ascension_reborn_lightning_overload::HandleProc, EFFECT_0, SPELL_AURA_DUMMY);
+    }
+};
 }
 }
 
@@ -239,4 +281,5 @@ void AddAscensionWarcraftRebornShamanScripts()
     RegisterSpellScript(spell_ascension_reborn_totemic_projection);
     RegisterSpellScript(spell_ascension_reborn_spirit_guard);
     RegisterSpellScript(spell_ascension_reborn_dual_wield_specialization);
+    RegisterSpellScript(spell_ascension_reborn_lightning_overload);
 }
