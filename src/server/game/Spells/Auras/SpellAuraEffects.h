@@ -284,6 +284,7 @@ public:
     void HandleAuraModWeaponCritPercent(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleModHitChance(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleAscensionModHitChanceAll(AuraApplication const* aurApp, uint8 mode, bool apply) const;
+    void HandleAscensionModCritChance(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleModSpellHitChance(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleModSpellCritChance(AuraApplication const* aurApp, uint8 mode, bool apply) const;
     void HandleModSpellCritChanceShool(AuraApplication const* aurApp, uint8 mode, bool apply) const;

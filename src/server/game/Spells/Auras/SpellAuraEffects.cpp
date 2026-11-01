@@ -416,7 +416,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     nullptr,                                                      //347 unknown Ascension aura
     nullptr,                                                      //348 unknown Ascension aura
     nullptr,                                                      //349 unknown Ascension aura
-    &AuraEffect::HandleNoImmediateEffect,                         //350 SPELL_AURA_ASCENSION_MOD_CRIT_CHANCE
+    &AuraEffect::HandleAscensionModCritChance,                    //350 SPELL_AURA_ASCENSION_MOD_CRIT_CHANCE
     nullptr,                                                      //351 unknown Ascension aura
     nullptr,                                                      //352 unknown Ascension aura
     nullptr,                                                      //353 unknown Ascension aura
@@ -4941,6 +4941,22 @@ void AuraEffect::HandleAscensionModHitChanceAll(AuraApplication const* aurApp, u
 {
     HandleModHitChance(aurApp, mode, apply);
     HandleModSpellHitChance(aurApp, mode, apply);
+}
+
+// Ascension's unconditional crit-chance aura (e.g. Skirmish, #10401) is read live at melee/ranged/spell
+// crit-roll time, but carried HandleNoImmediateEffect, so the displayed crit percentage never moved.
+void AuraEffect::HandleAscensionModCritChance(AuraApplication const* aurApp, uint8 mode, bool /*apply*/) const
+{
+    if (!(mode & (AURA_EFFECT_HANDLE_CHANGE_AMOUNT_MASK | AURA_EFFECT_HANDLE_STAT)))
+        return;
+
+    Player* target = aurApp->GetTarget()->ToPlayer();
+    if (!target)
+        return;
+
+    target->UpdateCritPercentage(BASE_ATTACK);
+    target->UpdateCritPercentage(OFF_ATTACK);
+    target->UpdateCritPercentage(RANGED_ATTACK);
 }
 
 void AuraEffect::HandleModSpellHitChance(AuraApplication const* aurApp, uint8 mode, bool apply) const
