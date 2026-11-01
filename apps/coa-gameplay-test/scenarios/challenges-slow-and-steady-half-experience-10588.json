@@ -1,0 +1,243 @@
+{
+  "schema": 1,
+  "name": "Slow and Steady earns half the experience of Resolute Mode (#10588)",
+  "contract": [
+    "Slow and Steady (challenge 601, aura 200755) reads: reach max level with a 0.5x experience rate. Resolute Mode (challenge 192) carries the same NO_BONUS_EXPERIENCE rule and reads x1 experience rates. Slow and Steady only dropped the bonuses, so it earned exactly what Resolute Mode earns, as reported.",
+    "Two level-20 Barbarians at x1 dynamic experience, one on each challenge, kill the same level-20 Elwynn Forest creature and turn in Raven Hill (163). The Resolute Mode character is the x1 control.",
+    "Expected: each Slow and Steady gain is half the Resolute Mode gain for the same source (ratio 0.5, within integer rounding); before the repair the ratio is 1."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "steady",
+      "race": 1,
+      "class": 12,
+      "level": 1
+    },
+    {
+      "id": "resolute",
+      "race": 1,
+      "class": 12,
+      "level": 1
+    }
+  ],
+  "creatures": [
+    {
+      "id": "steady_target",
+      "owner": "steady",
+      "entry": 2158,
+      "level": 20,
+      "health": 20,
+      "distance": 2
+    },
+    {
+      "id": "resolute_target",
+      "owner": "resolute",
+      "entry": 2158,
+      "level": 20,
+      "health": 20,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "steady",
+      "challenge": 601,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Slow and Steady starts",
+      "actor": "steady",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "start_challenge",
+      "actor": "resolute",
+      "challenge": 192,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Resolute Mode starts",
+      "actor": "resolute",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Slow and Steady applies its challenge aura",
+      "actor": "steady",
+      "metric": "aura",
+      "spell": 200755,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_level",
+      "actor": "steady",
+      "value": 20
+    },
+    {
+      "action": "set_level",
+      "actor": "resolute",
+      "value": 20
+    },
+    {
+      "action": "command",
+      "actor": "steady",
+      "command": ".xp 1"
+    },
+    {
+      "action": "command",
+      "actor": "resolute",
+      "command": ".xp 1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "resolute",
+      "metric": "xp",
+      "save_as": "resolute_kill"
+    },
+    {
+      "action": "attack",
+      "actor": "resolute",
+      "target": "resolute_target"
+    },
+    {
+      "action": "assert",
+      "actor": "resolute_target",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Resolute Mode kill awards experience",
+      "actor": "resolute",
+      "metric": "xp",
+      "relative_to": "resolute_kill",
+      "min": 100,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "CONTROL: the Resolute Mode kill gain",
+      "actor": "resolute",
+      "metric": "xp",
+      "relative_to": "resolute_kill",
+      "save_as": "resolute_kill_gain"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "resolute"
+    },
+    {
+      "action": "snapshot",
+      "actor": "steady",
+      "metric": "xp",
+      "save_as": "steady_kill"
+    },
+    {
+      "action": "attack",
+      "actor": "steady",
+      "target": "steady_target"
+    },
+    {
+      "action": "assert",
+      "actor": "steady_target",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the same kill under Slow and Steady awards half the Resolute Mode gain",
+      "actor": "steady",
+      "metric": "xp",
+      "relative_to": "steady_kill",
+      "ratio_to": "resolute_kill_gain",
+      "min": 0.49,
+      "max": 0.51,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "steady"
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "resolute",
+      "quest": 163
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "steady",
+      "quest": 163
+    },
+    {
+      "action": "snapshot",
+      "actor": "resolute",
+      "metric": "xp",
+      "save_as": "resolute_quest"
+    },
+    {
+      "action": "snapshot",
+      "actor": "steady",
+      "metric": "xp",
+      "save_as": "steady_quest"
+    },
+    {
+      "action": "reward_quest",
+      "actor": "resolute",
+      "quest": 163
+    },
+    {
+      "action": "reward_quest",
+      "actor": "steady",
+      "quest": 163
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Raven Hill under Resolute Mode awards experience",
+      "actor": "resolute",
+      "metric": "xp",
+      "relative_to": "resolute_quest",
+      "min": 100,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "CONTROL: the Resolute Mode quest gain",
+      "actor": "resolute",
+      "metric": "xp",
+      "relative_to": "resolute_quest",
+      "save_as": "resolute_quest_gain"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Raven Hill under Slow and Steady awards half the Resolute Mode gain",
+      "actor": "steady",
+      "metric": "xp",
+      "relative_to": "steady_quest",
+      "ratio_to": "resolute_quest_gain",
+      "min": 0.49,
+      "max": 0.51,
+      "within_ms": 5000
+    }
+  ]
+}
