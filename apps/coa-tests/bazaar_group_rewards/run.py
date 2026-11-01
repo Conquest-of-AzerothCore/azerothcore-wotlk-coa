@@ -57,6 +57,7 @@ bool IsUnearnedSoloKill(Player* player, Creature const* creature)
     return !player->GetGroup() && sWorld->getBoolConfig(CONFIG_SOLO_KILL_REQUIRES_PLAYER_HIT) && !creature->WasAttackedDirectlyBy(player->GetGUID());
 }
 uint32 Wuerfeln(char const*, uint32 lo, uint32) { return lo ? lo : 3; }
+uint32 ApplyDegression(Player*, Creature*, uint32 amount) { return amount; }
 void Grant(Player* player, uint32 amount, char const*) { player->tokens += amount; }
 ''' + callback + r'''
 int main()

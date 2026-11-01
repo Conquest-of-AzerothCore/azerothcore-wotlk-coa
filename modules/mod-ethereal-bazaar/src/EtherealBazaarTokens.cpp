@@ -27,14 +27,24 @@
  * A player outside a group is paid only for a creature they hit themselves,
  * like loot and experience, so pets left to fight alone cannot farm tokens
  * while the owner is away.
+ *
+ * Repeated open-world kills of the same creature entry pay less each time: a
+ * per-player, per-entry "heat" rises by one on every ordinary creature kill
+ * and recovers over time at a rate tied to that creature's own respawn
+ * delay, and the plain kill amount is multiplied by (FactorPercent/100)^heat
+ * before it is rolled. A kill whose multiplier falls under CutoffPercent
+ * pays nothing. Dungeon and raid bosses, and anything outside a world map,
+ * are unaffected; see BazaarDegressionRules.h and ApplyDegression.
  */
 
 #include "EtherealBazaar.h"
 
+#include "BazaarDegressionRules.h"
 #include "Chat.h"
 #include "CoATestZoneBonus.h"
 #include "Configuration/Config.h"
 #include "Creature.h"
+#include "DataMap.h"
 #include "Formulas.h"
 #include "GameTime.h"
 #include "Group.h"
@@ -49,6 +59,8 @@
 #include "ScriptMgr.h"
 #include "StringConvert.h"
 #include "World.h"
+
+#include <algorithm>
 
 namespace
 {
@@ -108,6 +120,83 @@ namespace
 
         uint32 const prozent = sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.BonusPercent", 100);
         return std::max<uint32>(1, amount * prozent / 100);
+    }
+
+    // Per-player, per-entry heat for the open-world kill degression. Lives on
+    // the Player object through CustomData, so it needs no global map or
+    // locking and disappears on logout; bounded and LRU-evicted so an
+    // unbounded tour of creature entries cannot grow it forever.
+    class DegressionState : public DataMap::Base
+    {
+    public:
+        std::vector<BazaarDegression::Entry> Entries;
+    };
+
+    char const* const DEGRESSION_STATE_KEY = "mod-ethereal-bazaar.tokens.degression";
+
+    bool DegressionEnabled()
+    {
+        return sConfigMgr->GetOption<bool>("EtherealBazaar.Tokens.Degression.Enable", true);
+    }
+
+    BazaarDegression::Entry& FindOrCreateDegressionEntry(std::vector<BazaarDegression::Entry>& entries,
+        uint32 entry, uint64 now, uint32 maxEntries)
+    {
+        for (BazaarDegression::Entry& candidate : entries)
+            if (candidate.key == entry)
+                return candidate;
+
+        if (maxEntries == 0)
+            maxEntries = 1;
+
+        if (entries.size() >= maxEntries)
+        {
+            std::size_t const evict = BazaarDegression::LeastRecentlyUpdatedIndex(entries);
+            entries[evict] = BazaarDegression::Entry{entry, 0.0, now};
+            return entries[evict];
+        }
+
+        entries.push_back(BazaarDegression::Entry{entry, 0.0, now});
+        return entries.back();
+    }
+
+    // Degression applies only to ordinary creature kills in the open world;
+    // dungeon/raid bosses and anything in an instance or battleground keep
+    // paying the plain roll untouched.
+    uint32 ApplyDegression(Player* player, Creature* killed, uint32 amount)
+    {
+        if (!DegressionEnabled())
+            return amount;
+
+        Map const* map = killed->GetMap();
+        if (!map || !map->IsWorldMap())
+            return amount;
+
+        uint32 const factorPercent =
+            sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.Degression.FactorPercent", BazaarDegression::DEFAULT_FACTOR_PERCENT);
+        uint32 const recoveryFactor =
+            sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.Degression.RecoveryFactor", BazaarDegression::DEFAULT_RECOVERY_FACTOR);
+        uint32 const cutoffPercent =
+            sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.Degression.CutoffPercent", BazaarDegression::DEFAULT_CUTOFF_PERCENT);
+        uint32 const maxEntries =
+            sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.Degression.MaxEntries", BazaarDegression::DEFAULT_MAX_ENTRIES);
+
+        uint64 const now = GameTime::GetGameTime().count();
+        DegressionState* state = player->CustomData.GetDefault<DegressionState>(DEGRESSION_STATE_KEY);
+        BazaarDegression::Entry& tracked =
+            FindOrCreateDegressionEntry(state->Entries, killed->GetEntry(), now, maxEntries);
+
+        uint64 const elapsed = now > tracked.lastUpdate ? now - tracked.lastUpdate : 0;
+        double const heat = BazaarDegression::DecayHeat(tracked.heat, elapsed, killed->GetRespawnDelay(), recoveryFactor);
+        double const multiplier = BazaarDegression::Multiplier(heat, factorPercent);
+
+        tracked.heat = heat + 1.0;
+        tracked.lastUpdate = now;
+
+        if (!amount || BazaarDegression::IsBelowCutoff(multiplier, cutoffPercent))
+            return 0;
+
+        return BazaarDegression::ScaledAmount(amount, multiplier, rand_norm());
     }
 
     void Grant(Player* player, uint32 amount, char const* grund)
@@ -190,7 +279,7 @@ public:
             return;
         }
 
-        Grant(player, Wuerfeln("Creature", 0, 2), "a creature");
+        Grant(player, ApplyDegression(player, killed, Wuerfeln("Creature", 0, 2)), "a creature");
     }
 };
 
