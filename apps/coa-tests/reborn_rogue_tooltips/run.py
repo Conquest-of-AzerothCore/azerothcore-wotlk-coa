@@ -132,6 +132,13 @@ struct SpellImplicitTargetInfo
     explicit SpellImplicitTargetInfo(Targets target) : Target(target) { }
     Targets GetTarget() const { return Target; }
 };
+struct SpellDurationEntry { int32 Duration[3] = {}; };
+struct SpellDurationStore
+{
+    SpellDurationEntry Entry{ { 30000, 0, 30000 } };
+    SpellDurationEntry const* LookupEntry(uint32 id) const { return id == 588 ? &Entry : nullptr; }
+};
+SpellDurationStore const sSpellDurationStore;
 enum AuraType { SPELL_AURA_NONE = 0, SPELL_AURA_DUMMY = 4, SPELL_AURA_ADD_TARGET_TRIGGER = 109 };
 enum SpellEffIndex { EFFECT_0 = 0, EFFECT_1 = 1, EFFECT_2 = 2 };
 enum SpellFamilyNames : uint32 { SPELLFAMILY_ROGUE = 8 };
@@ -151,7 +158,8 @@ struct SpellEffectInfo
     SpellImplicitTargetInfo TargetA;
 };
 struct SpellInfo { uint32 Id = 0; uint32 SpellFamilyName = SPELLFAMILY_ROGUE; flag96 SpellFamilyFlags;
-    SpellEffectInfo Effects[3]; };
+    SpellEffectInfo Effects[3]; SpellDurationEntry const* DurationEntry = nullptr;
+    int32 GetMaxDuration() const { return DurationEntry ? DurationEntry->Duration[2] : 0; } };
 namespace AscensionWarcraftReborn
 {
 constexpr uint32 REBORN_SPELL_OFFSET = 1100000;
@@ -195,6 +203,10 @@ int main()
     SpellInfo stockCloak; stockCloak.Id = 31224;
     ApplyAscensionWarcraftRebornRogueContracts(&stockCloak);
     assert(stockCloak.Effects[1].Effect == SPELL_EFFECT_NONE);
+    SpellDurationEntry second{ { 1000, 0, 1000 } };
+    SpellInfo recuperate; recuperate.Id = 2315425; recuperate.DurationEntry = &second;
+    ApplyAscensionWarcraftRebornRogueContracts(&recuperate);
+    assert(recuperate.GetMaxDuration() == 30000);
 }
 """
     compiler = shutil.which(os.environ.get("CXX", "cl.exe" if os.name == "nt" else "c++"))
@@ -210,7 +222,7 @@ int main()
         subprocess.run([compiler, *flags], cwd=out, check=True)
         ok = subprocess.run([str(exe)], cwd=out).returncode == 0
     return check(ok, "Ambush adds its flat bonus x2.75, Anesthetic Poison deals 68 to 86, Relentless Strikes rolls "
-                 "on finishing moves, and Cloak of Shadows removes harmful spells")
+                 "on finishing moves, Cloak of Shadows removes harmful spells and Recuperate lasts up to 30 sec")
 
 
 def main():
