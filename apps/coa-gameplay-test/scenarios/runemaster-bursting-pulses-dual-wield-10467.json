@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Bursting Pulses counts each Earth-engraved weapon and keeps one after removing either (#10467)",
+  "contract": [
+    "Bursting Pulses 300584: 'Each weapon enchanted by Weapon Engraving: Earth now reduces the cooldown of Primordial",
+    "Pulse by $/1000;s1 sec and increases it's damage by $s2%' (-4000 ms flat cooldown, +15% damage). Its modifiers",
+    "act through Earth Engraving 653221, the aura of the engraving's equip spell 653219. Primordial Pulse 563207 has a",
+    "20 sec cooldown: one engraved weapon gives 16 sec, two give 12 sec and two 15% damage bonuses (130% additive, 132.25%",
+    "multiplicative); replacing one weapon's Earth with Ice gives 16 sec and one 15% again, replacing both restores 20 sec."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {"id": "rm", "race": 1, "class": 32, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "learn", "actor": "rm", "spell": 1180},
+    {"action": "learn", "actor": "rm", "spell": 674},
+    {"action": "add_item", "actor": "rm", "item": 25},
+    {"action": "add_item", "actor": "rm", "item": 2092},
+    {"action": "equip", "label": "Worn Shortsword in the main hand", "actor": "rm", "item": 25, "slot": 15},
+    {"action": "equip", "label": "Worn Dagger in the off hand", "actor": "rm", "item": 2092, "slot": 16},
+    {"action": "learn", "actor": "rm", "spell": 653218},
+    {"action": "learn", "actor": "rm", "spell": 653264},
+    {"action": "learn", "actor": "rm", "spell": 563207},
+    {"action": "learn", "actor": "rm", "spell": 300584},
+    {"action": "assert", "label": "SETUP: Bursting Pulses is active", "actor": "rm", "metric": "aura",
+      "spell": 300584, "equals": 1, "within_ms": 1000},
+    {"action": "snapshot", "actor": "rm", "metric": "spell_modifier", "spell": 520111, "op": 0, "base": 100,
+      "save_as": "damage_before"},
+    {"action": "assert", "label": "CONTRACT: no engraving, 20 sec cooldown", "actor": "rm",
+      "metric": "spell_modifier", "spell": 563207, "op": 11, "base": 20000, "min": 19999.99, "max": 20000.01},
+
+    {"action": "cast", "label": "Engrave the main-hand weapon", "actor": "rm", "spell": 653218, "target_item": 25},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 653219, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "CONTRACT: one engraved weapon, 16 sec cooldown", "actor": "rm",
+      "metric": "spell_modifier", "spell": 563207, "op": 11, "base": 20000, "min": 15999.99, "max": 16000.01,
+      "within_ms": 1000},
+    {"action": "assert", "label": "CONTRACT: one engraved weapon, 15% damage", "actor": "rm",
+      "metric": "spell_modifier", "spell": 520111, "op": 0, "base": 100, "ratio_to": "damage_before",
+      "min": 1.1499, "max": 1.1501},
+
+    {"action": "wait", "label": "Global cooldown", "ms": 1600},
+    {"action": "cast", "label": "Engrave the off-hand weapon", "actor": "rm", "spell": 653218, "target_item": 2092},
+    {"action": "assert", "label": "CONTRACT: two engraved weapons, 12 sec cooldown", "actor": "rm",
+      "metric": "spell_modifier", "spell": 563207, "op": 11, "base": 20000, "min": 11999.99, "max": 12000.01,
+      "within_ms": 3000},
+    {"action": "assert", "label": "CONTRACT: two engraved weapons, two 15% damage bonuses", "actor": "rm",
+      "metric": "spell_modifier", "spell": 520111, "op": 0, "base": 100, "ratio_to": "damage_before",
+      "min": 1.2999, "max": 1.3226},
+
+    {"action": "wait", "label": "Global cooldown", "ms": 1600},
+    {"action": "cast", "label": "Replace the off-hand Earth with Ice", "actor": "rm", "spell": 653264,
+      "target_item": 2092},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 653266, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The main-hand engraving stays", "actor": "rm", "metric": "aura", "spell": 653221,
+      "equals": 1},
+    {"action": "assert", "label": "CONTRACT: one engraved weapon left, 16 sec cooldown", "actor": "rm",
+      "metric": "spell_modifier", "spell": 563207, "op": 11, "base": 20000, "min": 15999.99, "max": 16000.01},
+    {"action": "assert", "label": "CONTRACT: one engraved weapon left, 15% damage", "actor": "rm",
+      "metric": "spell_modifier", "spell": 520111, "op": 0, "base": 100, "ratio_to": "damage_before",
+      "min": 1.1499, "max": 1.1501},
+
+    {"action": "wait", "label": "Global cooldown", "ms": 1600},
+    {"action": "cast", "label": "Replace the main-hand Earth with Ice", "actor": "rm", "spell": 653264,
+      "target_item": 25},
+    {"action": "assert", "actor": "rm", "metric": "aura", "spell": 653221, "equals": 0, "within_ms": 3000},
+    {"action": "assert", "label": "CONTRACT: no engraving, 20 sec cooldown again", "actor": "rm",
+      "metric": "spell_modifier", "spell": 563207, "op": 11, "base": 20000, "min": 19999.99, "max": 20000.01}
+  ]
+}
