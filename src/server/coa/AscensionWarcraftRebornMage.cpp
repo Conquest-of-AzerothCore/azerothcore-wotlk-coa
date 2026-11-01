@@ -22,6 +22,7 @@ constexpr int32 BLAZING_SPEED_HEALTH_PCT = 5;
 constexpr std::array<uint32, 3> ARCANE_MOMENTUM = { 1144397, 1144398, 1144399 };
 constexpr std::array<uint32, 3> ARCANE_MOMENTUM_HELPER = { 1144405, 1144406, 1144407 };
 constexpr std::array<uint32, 2> ARCANE_BLAST_STACKS = { 1136032, 1136033 };
+constexpr uint32 SUMMON_WATER_ELEMENTAL_PERMANENT = 1170908;
 
 uint32 ArcaneMomentumHelper(Unit const* caster)
 {
@@ -189,6 +190,9 @@ void ApplyAscensionWarcraftRebornMageContracts(SpellInfo* spellInfo)
             periodic.ApplyAuraName == SPELL_AURA_ADD_PCT_MODIFIER && periodic.MiscValue == SPELLMOD_DOT)
             periodic.BasePoints = damage.BasePoints;
     }
+
+    if (spellInfo->Id == SUMMON_WATER_ELEMENTAL_PERMANENT && spellInfo->Effects[EFFECT_0].Effect == SPELL_EFFECT_SUMMON)
+        spellInfo->Effects[EFFECT_0].Effect = SPELL_EFFECT_SUMMON_PET;
 }
 
 void AddAscensionWarcraftRebornMageScripts()
