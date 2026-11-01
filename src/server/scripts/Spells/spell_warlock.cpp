@@ -199,8 +199,15 @@ class spell_warl_improved_demonic_tactics : public AuraScript
         amplitude = 10 * IN_MILLISECONDS;
     }
 
+    bool IsCrit(AuraEffect const* aurEff) const
+    {
+        return aurEff->GetEffIndex() == EFFECT_0 || sSpellMgr->GetSpellTwinSource(GetId()) == GetId();
+    }
+
     void CalculateAmount(AuraEffect const* aurEff, int32& amount, bool&  /*canBeRecalculated*/)
     {
+        if (!IsCrit(aurEff))
+            return;
         if (aurEff->GetEffIndex() == EFFECT_0)
             amount = CalculatePct<int32, float>(GetUnitOwner()->ToPlayer()->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + static_cast<uint8>(SPELL_SCHOOL_FROST)), GetSpellInfo()->Effects[EFFECT_0].CalcValue());
         else
@@ -209,6 +216,8 @@ class spell_warl_improved_demonic_tactics : public AuraScript
 
     void HandleEffectCalcSpellMod(AuraEffect const* aurEff, SpellModifier*& spellMod)
     {
+        if (!IsCrit(aurEff))
+            return;
         if (!spellMod)
         {
             spellMod = new SpellModifier(aurEff->GetBase());
