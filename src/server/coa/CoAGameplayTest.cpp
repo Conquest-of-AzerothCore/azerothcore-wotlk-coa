@@ -394,7 +394,8 @@ bool IsPlacementMetric(std::string const& metric)
 {
     return metric == "spawn_placement" || metric == "spawn_ground_gap" || metric == "spawn_submerged"
         || metric == "spawn_display_state" || metric == "spawn_stand_state" || metric == "spawn_clearance"
-        || metric == "spawn_headroom" || metric == "point_placement" || metric == "point_ground_gap";
+        || metric == "spawn_headroom" || metric == "spawn_distance" || metric == "point_placement"
+        || metric == "point_ground_gap";
 }
 
 double MeasurePlacement(std::string const& metric, Tree const& step)
@@ -408,6 +409,13 @@ double MeasurePlacement(std::string const& metric, Tree const& step)
         std::optional<float> const gap = CoAGameplay::GroundGap(sample);
         Require(gap.has_value(), "No ground found for the point");
         return *gap;
+    }
+
+    if (metric == "spawn_distance")
+    {
+        SpawnData const& spawn = FindSpawn(step);
+        return std::hypot(spawn.posX - step.get<float>("x"), spawn.posY - step.get<float>("y"),
+            spawn.posZ - step.get<float>("z"));
     }
 
     if (metric == "spawn_clearance" || metric == "spawn_headroom")

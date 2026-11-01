@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "The Death Trophy, Badlands and Tanaris worldforge pickups keep their corrected positions",
+  "contract": "#10507, #10520 and #10527 each shipped a *_revert.sql beside the fix in pending_db_world. The updater applies pending files in name order, so each revert ran right after its fix and restored the old spot. Each spawn now loads at the fix's position: the old positions are 0.35 yd (Death Trophy guid 6941373), 11.9 yd (Buried Chest guid 6940271) and 2.54 yd (Deadman Gauntlets guid 6941616) away from it.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "p", "race": 1, "class": 1, "level": 60 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Death Trophy loads at #10507's position",
+      "actor": "p", "metric": "spawn_distance", "guid": 6941373, "spawn_type": "gameobject",
+      "x": -11682.3, "y": 559.3, "z": 50.1606, "max": 0.01
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Badlands Buried Chest loads at #10520's position",
+      "actor": "p", "metric": "spawn_distance", "guid": 6940271, "spawn_type": "gameobject",
+      "x": -6602.9427, "y": -2639.2236, "z": 266.9942, "max": 0.01
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Tanaris Deadman Gauntlets load at #10527's position",
+      "actor": "p", "metric": "spawn_distance", "guid": 6941616, "spawn_type": "gameobject",
+      "x": -7531, "y": -3599, "z": 12.4591, "max": 0.01
+    }
+  ]
+}
