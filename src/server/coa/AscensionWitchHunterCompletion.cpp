@@ -139,6 +139,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_1].ChainTarget = info->Effects[EFFECT_0].ChainTarget;
     if (id == 804194 && info->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_MOD_ARMOR_PENETRATION_PCT)
         info->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT;
+    if (id == 807733 && info->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN)
+        info->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_SCHOOL_ABSORB;
     if (id == 707535)
     {
         info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT;

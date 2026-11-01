@@ -173,6 +173,8 @@ class aura_ascension_necromancer_event : public AuraScript
                 Cast(actor, target, 805024);
             if (melee && actor->GetEntry() == 503200 && actor->HasAura(531133))
                 Cast(actor, target, 531132);
+            if (critical && info && (info->SchoolMask & SPELL_SCHOOL_MASK_FROST) && player->HasAura(707562))
+                Cast(player, player, 712434);
             if (critical && Chance(player, 537208, 1, 1000))
                 Reduce(player, 805029, std::abs(Amount(680553)));
             if (critical && melee && Chance(player, 638403))

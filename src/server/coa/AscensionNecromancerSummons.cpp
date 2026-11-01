@@ -853,6 +853,11 @@ class spell_ascension_necromancer_summon : public SpellScript
             return;
         _summoned = true;
         Position position = GetExplTargetDest() ? GetExplTargetDest()->GetPosition() : player->GetPosition();
+        if (GetSpellInfo()->Id == 804681)
+        {
+            float const heading = player->GetAbsoluteAngle(position.GetPositionX(), position.GetPositionY());
+            position = player->GetNearPosition(3.0f, heading - player->GetOrientation());
+        }
         Summon(player, GetSpellInfo()->Id, GetExplTargetUnit(), position);
     }
     void Register() override

@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "Animate: Skeletal Smith spawns within interaction range (#10015)",
+  "contract": [
+    "Animate: Skeletal Smith 804681 summons a gossip-interactive repair vendor (creature 50261,",
+    "npc_ascension_necromancer_script::OnGossipHello gated on entry 50261) via EffectImplicitTargetA[0]",
+    "TARGET_DEST_CASTER_RANDOM with EffectRadiusIndex[0] 14 (8 yd fixed radius), a radius meant for disposable",
+    "combat pets and not clamped for this NPC's actual use case, so it could land anywhere up to 8 yd away -",
+    "farther than INTERACTION_DISTANCE (5.5 yd) - leaving the repair vendor unreachable by gossip. The fix",
+    "re-anchors the summon point to 3 yd from the caster, in the same direction the DBC's random point picked,",
+    "before AscensionNecromancerSummons.cpp's shared Summon() adds its own small per-minion offset, so the final",
+    "spawn point stays within interaction range."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "necro",
+      "race": 5,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 804681
+    },
+    {
+      "action": "cast",
+      "label": "Raise the Skeletal Smith",
+      "actor": "necro",
+      "spell": 804681
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Skeletal Smith is raised",
+      "actor": "necro",
+      "metric": "owned_creature_count",
+      "entry": 50261,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Skeletal Smith is not farther than interaction range from its owner",
+      "actor": "necro",
+      "metric": "owned_creature_count",
+      "entry": 50261,
+      "min_distance": 5.5,
+      "equals": 0
+    }
+  ]
+}
