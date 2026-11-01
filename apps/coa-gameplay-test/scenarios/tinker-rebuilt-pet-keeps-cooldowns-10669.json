@@ -1,0 +1,173 @@
+{
+  "schema": 1,
+  "name": "A rebuilt Tinker pet keeps its ability cooldowns (#10669)",
+  "contract": [
+    "Report #10669: recasting the Build spell of the Tinker's current pet resets the pet's ability cooldowns, so",
+    "Capacity Expansion (578122, RecoveryTime 60000 ms) and Crowd Controller can be chained.",
+    "Expected from Spell.dbc: Build: Clockwork Assistant 803436 only constructs the pet; it does not refresh",
+    "Capacity Expansion's 60 s cooldown. After Capacity Expansion, rebuilding the Assistant leaves the ability",
+    "unavailable (one energize only) until the 60 s have passed, after which the pet casts it again."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 530,
+    "x": 7633.86,
+    "y": -6810.22,
+    "z": 79.5987,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "clock",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Build: Clockwork Assistant",
+      "actor": "clock",
+      "spell": 803436
+    },
+    {
+      "action": "cast",
+      "label": "Build: Clockwork Assistant",
+      "actor": "clock",
+      "spell": 803436
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Clockwork Assistant is built",
+      "actor": "clock",
+      "metric": "pet_entry",
+      "equals": 60070,
+      "within_ms": 9000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Clockwork Assistant knows Capacity Expansion",
+      "actor": "clock",
+      "metric": "pet_knows_spell",
+      "spell": 578122,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_power",
+      "label": "The Tinker is out of mana",
+      "actor": "clock",
+      "value": 0
+    },
+    {
+      "action": "cast_charm",
+      "label": "Clockwork Assistant casts Capacity Expansion",
+      "actor": "clock",
+      "spell": 578122,
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "Capacity Expansion restores mana once",
+      "actor": "clock",
+      "metric": "spell_energize_count",
+      "spell": 578122,
+      "pet": true,
+      "target": "clock",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Tinker's global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Rebuild the same Clockwork Assistant",
+      "actor": "clock",
+      "spell": 803436
+    },
+    {
+      "action": "assert",
+      "label": "The rebuild is accepted",
+      "actor": "clock",
+      "metric": "cast_failure",
+      "spell": 803436,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "clock",
+      "metric": "spell_cast_count",
+      "spell": 803436,
+      "equals": 2,
+      "within_ms": 9000,
+      "label": "The second Build completes"
+    },
+    {
+      "action": "assert",
+      "actor": "clock",
+      "metric": "pet_entry",
+      "equals": 60070
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "clock",
+      "value": 0
+    },
+    {
+      "action": "cast_charm",
+      "label": "Try Capacity Expansion again right after the rebuild",
+      "actor": "clock",
+      "spell": 578122,
+      "pet": true
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the rebuild kept the 60 s cooldown, so no second restore",
+      "actor": "clock",
+      "metric": "spell_energize_count",
+      "spell": 578122,
+      "pet": true,
+      "target": "clock",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the 60 s Capacity Expansion cooldown run out",
+      "ms": 58000
+    },
+    {
+      "action": "cast_charm",
+      "label": "Control: Capacity Expansion once its cooldown has run out",
+      "actor": "clock",
+      "spell": 578122,
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "Control: the pet casts it again after 60 s",
+      "actor": "clock",
+      "metric": "spell_energize_count",
+      "spell": 578122,
+      "pet": true,
+      "target": "clock",
+      "equals": 2,
+      "within_ms": 3000
+    }
+  ]
+}

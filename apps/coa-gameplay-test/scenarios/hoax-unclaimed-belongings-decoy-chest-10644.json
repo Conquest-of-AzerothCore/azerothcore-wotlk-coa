@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Hoax Unclaimed Belongings places its decoy chest (#10644)",
+  "contract": [
+    "Report #10644: using Hoax Unclaimed Belongings (item 555005) puts the item on cooldown but places nothing.",
+    "The item casts Summon Highrisk Chest 823035: \"Summon a Highrisk Personal Belonging to fool your enemies\",",
+    "SPELL_EFFECT_TRANS_DOOR of gameobject 823035 at the chosen spot, SpellDuration 5 = 300000 ms.",
+    "Expected: one chest-looking object of entry 823035 owned by the caster, with the display (259) of the",
+    "Unclaimed Belongings chest it imitates (Ascension export gameobject 818001), lasting at most 5 minutes."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 823035
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "owned_gameobject_count",
+      "entry": 823035,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Place the Hoax Unclaimed Belongings",
+      "actor": "hero",
+      "spell": 823035,
+      "destination": {
+        "x": -8911,
+        "y": -133,
+        "z": 80.6
+      }
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the decoy chest is placed",
+      "actor": "hero",
+      "metric": "owned_gameobject_count",
+      "entry": 823035,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "It wears the Unclaimed Belongings chest model",
+      "actor": "hero",
+      "metric": "gameobject_display",
+      "entry": 823035,
+      "equals": 259
+    },
+    {
+      "action": "assert",
+      "label": "It lasts the spell's 5 minutes",
+      "actor": "hero",
+      "metric": "gameobject_remaining_ms",
+      "entry": 823035,
+      "min": 290000,
+      "max": 300000
+    }
+  ]
+}
