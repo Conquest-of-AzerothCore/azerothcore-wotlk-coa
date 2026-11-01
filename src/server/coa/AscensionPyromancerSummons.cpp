@@ -180,7 +180,9 @@ struct npc_ascension_pyromancer_summon : public ScriptedAI
         if (diveTime)
         {
             Shields(player);
-            diveTime = diveTime > diff ? diveTime - diff : 0;
+            diveTime = me->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE
+                           ? 0
+                           : (diveTime > diff ? diveTime - diff : 0);
             if (!diveTime)
                 ShowNativeModel();
         }
