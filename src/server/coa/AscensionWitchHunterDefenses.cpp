@@ -363,7 +363,9 @@ class witch_hunter_state : public UnitScript
 
     bool CanUnitAttack(Unit const* attacker, Unit const* target, SpellInfo const* spell) override
     {
-        return (spell && spell->IsAffectingArea()) || !InSmoke(attacker, target);
+        if (!spell)
+            return true;
+        return spell->IsAffectingArea() || !InSmoke(attacker, target);
     }
 
     void OnUnitUpdate(Unit* unit, uint32) override
