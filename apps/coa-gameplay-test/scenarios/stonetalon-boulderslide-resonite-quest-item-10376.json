@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Boulderslide Ravine's Gogger creatures advertise Resonite Crystal as a quest drop (COA-10376)",
+  "contract": "Issue #10376: the Gogger Rock Keeper 11915, Gogger Geomancer 11917 and Gogger Stonepounder 11918 drop Resonite Crystal 16581 for Boulderslide Ravine 6421 from their own loot, but their creature query listed no quest item, so the client never marked them. Each query now carries the crystal; the Monstrous Crawler's stock Crawler Leg is the control.",
+  "timeout_ms": 30000,
+  "location": { "map": 1, "x": -133.4, "y": 200.3, "z": 87.1, "o": 0 },
+  "players": [
+    { "id": "p", "race": 2, "class": 1, "level": 26 }
+  ],
+  "steps": [
+    { "action": "client_packet", "label": "Query Gogger Rock Keeper", "actor": "p", "opcode": 96, "consumed": false, "fields": [{ "u32": 11915 }, { "u64": 0 }] },
+    { "action": "assert", "label": "DISCRIMINATING: Gogger Rock Keeper advertises Resonite Crystal", "actor": "p", "metric": "creature_query_quest_item", "entry": 11915, "item": 16581, "equals": 1, "within_ms": 2000 },
+    { "action": "client_packet", "label": "Query Gogger Geomancer", "actor": "p", "opcode": 96, "consumed": false, "fields": [{ "u32": 11917 }, { "u64": 0 }] },
+    { "action": "assert", "label": "Gogger Geomancer advertises Resonite Crystal", "actor": "p", "metric": "creature_query_quest_item", "entry": 11917, "item": 16581, "equals": 1, "within_ms": 2000 },
+    { "action": "client_packet", "label": "Query Gogger Stonepounder", "actor": "p", "opcode": 96, "consumed": false, "fields": [{ "u32": 11918 }, { "u64": 0 }] },
+    { "action": "assert", "label": "Gogger Stonepounder advertises Resonite Crystal", "actor": "p", "metric": "creature_query_quest_item", "entry": 11918, "item": 16581, "equals": 1, "within_ms": 2000 },
+    { "action": "client_packet", "label": "Query Monstrous Crawler", "actor": "p", "opcode": 96, "consumed": false, "fields": [{ "u32": 1088 }, { "u64": 0 }] },
+    { "action": "assert", "label": "CONTROL: Monstrous Crawler keeps its stock Crawler Leg", "actor": "p", "metric": "creature_query_quest_item", "entry": 1088, "item": 6184, "equals": 1, "within_ms": 2000 }
+  ]
+}
