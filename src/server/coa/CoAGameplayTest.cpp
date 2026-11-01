@@ -6949,6 +6949,19 @@ private:
                 player->GetSession()->HandleSetDungeonDifficultyOpcode(request);
             }
         }
+        else if (action == "raid_difficulty_packet")
+        {
+            uint32 const difficulty = step.get<uint32>("value");
+            Require(difficulty < MAX_RAID_DIFFICULTY, "Invalid raid difficulty");
+            WorldPacket packet(MSG_SET_RAID_DIFFICULTY, 4);
+            packet << difficulty;
+            if (sScriptMgr->CanPacketReceive(player->GetSession(), packet))
+            {
+                WorldPackets::Instance::SetRaidDifficultyClient request(std::move(packet));
+                request.Read();
+                player->GetSession()->HandleSetRaidDifficultyOpcode(request);
+            }
+        }
         else if (action == "teleport")
         {
             uint32 map = step.get<uint32>("map");
@@ -6957,7 +6970,7 @@ private:
             float z = step.get<float>("z");
             float o = step.get<float>("o", 0.0f);
             Require(sMapStore.LookupEntry(map) != nullptr, "Unknown map to teleport to");
-            player->TeleportTo(map, x, y, z, o);
+            player->TeleportTo(map, x, y, z, o, step.get<bool>("ignore_access", false) ? TELE_TO_GM_MODE : 0);
             record.put("result", "teleport sent");
         }
         else if (action == "teleport_to_spawn")

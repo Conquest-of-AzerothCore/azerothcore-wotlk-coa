@@ -50,7 +50,8 @@ enum Spells
     SPELL_MANDOKIR_CLEAVE     = 20691,
     SPELL_SUMMON_PLAYER       = 25104,
 
-    SPELL_REVIVE              = 24341 // chained spirit
+    SPELL_REVIVE              = 24341, // chained spirit
+    SPELL_RESURRECTION        = 2118426
 };
 
 enum Events
@@ -514,8 +515,10 @@ public:
 // Ohgan
 enum OhganSpells
 {
-    SPELL_SUNDERARMOR         = 24317,
-    SPELL_THRASH              = 3391
+    SPELL_SHRED_ARMOR         = 2106616,
+    SPELL_DASH                = 2106617,
+    SPELL_THRASH              = 3391,
+    SPELL_OHGAN_FIERCE_BLOW   = 975011
 };
 
 class npc_ohgan : public CreatureScript
@@ -543,10 +546,20 @@ public:
             if (!who->IsPlayer())
                 return;
 
-            _scheduler.Schedule(6s, 12s, [this](TaskContext context)
+            _scheduler.Schedule(9s, [this](TaskContext context)
             {
-                DoCastVictim(SPELL_SUNDERARMOR);
-                context.Repeat(6s, 12s);
+                DoCastVictim(SPELL_SHRED_ARMOR);
+                context.Repeat(13s, 16s);
+            });
+            _scheduler.Schedule(0s, [this](TaskContext context)
+            {
+                DoCastSelf(SPELL_DASH);
+                context.Repeat(20s);
+            });
+            _scheduler.Schedule(6600ms, [this](TaskContext context)
+            {
+                DoCastVictim(SPELL_OHGAN_FIERCE_BLOW);
+                context.Repeat(7s, 16600ms);
             });
             _scheduler.Schedule(12s, 18s, [this](TaskContext context)
             {
@@ -639,9 +652,9 @@ public:
         {
             if (Player* target = ObjectAccessor::GetPlayer(*me, revivePlayerGUID))
             {
-                DoCast(target, SPELL_REVIVE);
+                DoCast(target, SPELL_RESURRECTION);
             }
-            me->DespawnOrUnsummon(1s);
+            me->DespawnOrUnsummon(5s);
         }
     }
 

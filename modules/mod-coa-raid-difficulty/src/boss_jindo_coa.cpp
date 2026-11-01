@@ -9,18 +9,24 @@
  *                                                 hunts them, Shadow damage every
  *                                                 5s that doubles every 10s,
  *                                                 +350% damage against undead
- *   Brain Wash Totem      first 17s, every 60s    the totem takes over a player
+ *   Brain Wash Totem      first 17s, every 60s    the totem casts Brainwash on
+ *                                                 a player: stunned and
+ *                                                 pacified while it stands
  *   Animate Bones         first 23s, every 30s    the Sacrificed Trolls in the
  *                                                 Blood Pit rise again
- *   Healing Stream Totem  first 202s, every 120s  heals him while it stands
+ *   Healing Stream Totem  first 202s, every 120s  casts Healing Stream on him:
+ *                                                 every second 1% of his missing
+ *                                                 health while it stands
  *   Friends On the Other Side  +2% damage for every shade alive
  *
  * From stock: the shade, the totems, the teleport into the pit (Banish) and
  * Hex, and the dance when the raid wipes.
  *
  * Decided here, not in the data:
- *   - the totems are stock creatures and do what they did in stock (the brain
- *     wash is a mind control, the ward heals); Ascension's cast bars start them;
+ *   - the totems are the stock creatures, summoned by Ascension's cast bars;
+ *     that the brain wash totem casts Brainwash and the ward casts Healing
+ *     Stream is read from the spells' names and targets. Both auras last
+ *     seven days in the data, so they end when their totem dies or despawns;
  *   - Hex and the teleport stay: instant casts do not show in the video, and
  *     Animate Bones only makes sense with players sent into the pit;
  *   - Seeking Shadow Bolts (in the block, never seen) is left out.
@@ -30,6 +36,8 @@
 #include "GameTime.h"
 #include "ScriptedCreature.h"
 #include "SpellAuraEffects.h"
+#include "SpellScript.h"
+#include "SpellScriptLoader.h"
 #include "TemporarySummon.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
@@ -56,7 +64,10 @@ namespace
         SPELL_DELUSIONS_OF_JINDO       = 24306,
 
         SPELL_SUMMON_BRAIN_WASH        = 2118501,
+        SPELL_BRAINWASH                = 2118502,
         SPELL_SUMMON_HEALING_STREAM    = 2118503,
+        SPELL_HEALING_STREAM           = 2118504,
+        SPELL_HEALING_STREAM_HEAL      = 2118506,
         SPELL_DELUSIONS                = 2118510,
         SPELL_DELUSIONS_VISION         = 2118511,
         SPELL_DELUSIONS_DOT            = 2118512,
@@ -75,6 +86,11 @@ namespace
         EVENT_DELUSIONS_GROW,
     };
 
+    enum Npcs
+    {
+        NPC_POWERFUL_HEALING_WARD = 14987
+    };
+
     constexpr Milliseconds DELUSIONS_DOUBLING = 10s;
 
     struct boss_jindo_coa : public BossAI
@@ -87,6 +103,7 @@ namespace
             _delusions.clear();
             _shades = 0;
             me->RemoveAurasDueToSpell(SPELL_FRIENDS_ON_THE_OTHER_SIDE);
+            ReleaseTotemAuras(true);
         }
 
         void JustEngagedWith(Unit* who) override
@@ -111,8 +128,35 @@ namespace
             {
                 summon->SetReactState(REACT_PASSIVE);
                 if (Unit* target = SelectTarget(SelectTargetMethod::Random, me->GetThreatMgr().GetThreatListSize() > 1 ? 1 : 0))
-                    summon->CastSpell(target, summon->m_spells[0], true);
+                    summon->CastSpell(target, SPELL_BRAINWASH, false);
             }
+            else if (summon->GetEntry() == NPC_POWERFUL_HEALING_WARD)
+                summon->CastSpell(me, SPELL_HEALING_STREAM, false);
+        }
+
+        // Totems do not report their despawn, so the auras are checked against their caster.
+        void ReleaseTotemAuras(bool all)
+        {
+            auto orphaned = [all](Aura const* aura)
+            {
+                Unit* totem = aura->GetCaster();
+                return all || !totem || !totem->IsAlive();
+            };
+            me->GetMap()->DoForAllPlayers([&](Player* player)
+            {
+                if (Aura* aura = player->GetAura(SPELL_BRAINWASH))
+                    if (orphaned(aura))
+                        player->RemoveAura(aura);
+            });
+            if (Aura* aura = me->GetAura(SPELL_HEALING_STREAM))
+                if (orphaned(aura))
+                    me->RemoveAura(aura);
+        }
+
+        void JustDied(Unit* killer) override
+        {
+            BossAI::JustDied(killer);
+            ReleaseTotemAuras(true);
         }
 
         // +2% damage per shade alive.
@@ -279,6 +323,7 @@ namespace
                     case EVENT_DELUSIONS_GROW:
                         GrowDelusions();
                         UpdateFriends();
+                        ReleaseTotemAuras(false);
                         events.ScheduleEvent(EVENT_DELUSIONS_GROW, 1s);
                         break;
                     default:
@@ -298,9 +343,40 @@ namespace
         uint8 _shades = 0;
         GuidSet _shadeGuids;
     };
+
+    // Healing Stream: every second its first value in percent of the target's missing health.
+    class spell_jindo_coa_healing_stream : public AuraScript
+    {
+        PrepareAuraScript(spell_jindo_coa_healing_stream);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return ValidateSpellInfo({ SPELL_HEALING_STREAM_HEAL });
+        }
+
+        void HandlePeriodic(AuraEffect const* /*aurEff*/)
+        {
+            PreventDefaultAction();
+            Unit* caster = GetCaster();
+            Unit* target = GetTarget();
+            if (!caster || target->IsFullHealth())
+                return;
+            int32 heal = int32(CalculatePct(target->GetMaxHealth() - target->GetHealth(),
+                GetSpellInfo()->Effects[EFFECT_0].CalcValue(caster)));
+            if (heal > 0)
+                caster->CastCustomSpell(target, SPELL_HEALING_STREAM_HEAL, &heal, nullptr, nullptr, true);
+        }
+
+        void Register() override
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_jindo_coa_healing_stream::HandlePeriodic, EFFECT_1,
+                SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        }
+    };
 }
 
 void AddCoaJindoScripts()
 {
     RegisterZulGurubCreatureAI(boss_jindo_coa);
+    RegisterSpellScript(spell_jindo_coa_healing_stream);
 }

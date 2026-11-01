@@ -3,36 +3,58 @@
  *
  * Kit: Ascension's block 2118400-2118428. Timings: a Bronzebeard kill on video,
  * see raid-difficulty-werkzeug/zg-video-zeitplan.json. The Berserker Charge is
- * the cleanest timer in the whole video: 25.1s, 22 times in a row.
+ * the cleanest timer in the whole video: 25.1s, 22 times in a row. Mortal
+ * Strike's repeat and Fierce Blow follow the CoA combat log of 2026-08-02.
  *
  * From stock: the start when the Vilebranch Speaker dies, the ride down, Ohgan
  * at his side, the chained spirits that revive the dead, and the gaze. Ohgan,
- * the spirits and the speaker keep their stock scripts.
+ * the spirits and the speaker keep their stock scripts, with the spells of the
+ * log.
  *
  *   Berserker Charge  first 10s, every 25s   the nearest player he can see,
  *                                            knocked down; the tank loses his
  *                                            threat, as in stock
  *   Whirlwind         1.5s and 8s after each charge, 6 yards around him
- *   Mortal Strike     first 8s,  every 10s   the tank, -25% healing, stacks 3
- *   Threatening Gaze  first 15s, every 20s   he stares at a player for 4s;
- *                                            whoever gains threat meanwhile
- *                                            is Decapitated
+ *   Mortal Strike     first 8s,  every 12s   the tank, -25% healing, stacks 3
+ *   Threatening Gaze  first 15s, every 20s   he stares at a player for 4s,
+ *                                            then Menacing Gaze for 4s: an
+ *                                            active hostile action (a spell
+ *                                            with a power cost on the global
+ *                                            cooldown) Sentences them to Die
+ *                                            and he Decapitates them
  *   Execute           the tank below 20%, every 7-14s
+ *   Fierce Blow       first 30.7-31.6s, every 22.5-44s   the tank; later and
+ *                                            rarer than on the other bosses
  *   Level Up!         +4% damage for every player who dies near him
  *   Frenzy            when Ohgan dies
+ *   Mounted           while he rides Ohgan before the pull
+ *   Bloodlord's Presence  at the pull, on enemies within 30 yards: no
+ *                     durability loss; taken off when the fight ends
  *
  * Decided here, not in the data:
  *   - Whirlwind tied to the charge: the video shows two per 25s cycle, 6-8s
  *     apart, the first right after the charge;
- *   - the gaze timer; the gaze itself is Ascension's (Threatening Gaze, then
- *     Decapitate) run on the stock rule "gain threat and die";
+ *   - the gaze timer, and the order Threatening Gaze -> Menacing Gaze ->
+ *     Sentenced to Die -> Decapitate; the rule itself is Menacing Gaze's
+ *     tooltip. These auras and Bloodlord's Presence are never logged (their
+ *     spells are flagged so), which is why the log does not show them;
+ *   - Bloodlord's Presence once at the pull; its aura lasts until removed;
+ *   - Mounted only out of combat: the log has Ohgan fighting on his own from
+ *     the first second;
+ *   - Realm of the Blood God (2118425) is left out: the realm's phase 4
+ *     content exists nowhere in the data.
  *   - the kill-streak auras (First Blood! to Legendary!) at 1, 3, 5, 7 and 10
  *     kills; they are only a counter in the data.
  */
 
 #include "CreatureScript.h"
 #include "InstanceScript.h"
+#include "PlayerScript.h"
 #include "ScriptedCreature.h"
+#include "Spell.h"
+#include "SpellAuras.h"
+#include "SpellScript.h"
+#include "SpellScriptLoader.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
 
@@ -63,7 +85,9 @@ namespace
         SPELL_BERSERKER_CHARGE  = 2118406,
         SPELL_WHIRLWIND         = 2118408,
         SPELL_DECAPITATE        = 2118410,
+        SPELL_MOUNTED           = 2118412,
         SPELL_LEAP              = 2118413,
+        SPELL_BLOODLORDS_PRESENCE = 2118415,
         SPELL_LEVEL_UP          = 2118416,
         SPELL_FIRST_BLOOD       = 2118417,
         SPELL_KILLING_SPREE     = 2118418,
@@ -71,7 +95,11 @@ namespace
         SPELL_UNSTOPPABLE       = 2118420,
         SPELL_LEGENDARY         = 2118421,
         SPELL_THREATENING_GAZE  = 2118422,
+        SPELL_MENACING_GAZE     = 2118423,
+        SPELL_SENTENCED_TO_DIE  = 2118424,
         SPELL_FRENZY            = 2106613,
+
+        SPELL_REVIVE            = 24341,
     };
 
     enum Events
@@ -82,20 +110,26 @@ namespace
         EVENT_WHIRLWIND,
         EVENT_MORTAL_STRIKE,
         EVENT_GAZE,
-        EVENT_GAZE_END,
+        EVENT_MENACING_GAZE,
         EVENT_EXECUTE,
         EVENT_CHECK_OHGAN,
+        EVENT_FIERCE_BLOW,
     };
 
     enum Misc
     {
         ACTION_REVIVE        = 2,
+        GUID_SENTENCED       = 1,
         MODEL_OHGAN_MOUNT    = 15271,
         POINT_MANDOKIR_END   = 25,
         CHAINED_SPIRIT_COUNT = 20
     };
 
     constexpr uint8 MORTAL_WOUND_STACKS = 3;
+    constexpr Milliseconds MANDOKIR_FIERCE_BLOW_FIRST_MIN = 30700ms;
+    constexpr Milliseconds MANDOKIR_FIERCE_BLOW_FIRST_MAX = 31600ms;
+    constexpr Milliseconds MANDOKIR_FIERCE_BLOW_MIN = 22500ms;
+    constexpr Milliseconds MANDOKIR_FIERCE_BLOW_MAX = 44s;
 
     Position const PosSummonChainedSpirits[CHAINED_SPIRIT_COUNT] =
     {
@@ -155,8 +189,8 @@ namespace
             _kills = 0;
             _useExecute = false;
             _gazed.Clear();
-            _gazeThreat = 0.0f;
             _reviveGUID.Clear();
+            RemovePresence();
 
             if (me->GetPositionZ() > 140.0f)
             {
@@ -173,6 +207,26 @@ namespace
             me->SetImmuneToAll(false);
             instance->SetBossState(DATA_OHGAN, NOT_STARTED);
             me->Mount(MODEL_OHGAN_MOUNT);
+            DoCastSelf(SPELL_MOUNTED, true);
+        }
+
+        void RemovePresence()
+        {
+            me->GetMap()->DoForAllPlayers([](Player* player)
+            {
+                player->RemoveAurasDueToSpell(SPELL_BLOODLORDS_PRESENCE);
+            });
+        }
+
+        void Sentence(ObjectGuid const& guid)
+        {
+            Unit* target = ObjectAccessor::GetUnit(*me, guid);
+            if (!target || !target->IsAlive())
+                return;
+            target->RemoveAurasDueToSpell(SPELL_MENACING_GAZE, me->GetGUID());
+            me->CastSpell(target, SPELL_SENTENCED_TO_DIE, true);
+            me->CastSpell(target, SPELL_LEAP, true);
+            me->CastSpell(target, SPELL_DECAPITATE, true);
         }
 
         void JustDied(Unit* /*killer*/) override
@@ -181,6 +235,7 @@ namespace
             GetCreatureListWithEntryInGrid(spirits, me, NPC_CHAINED_SPIRIT, 200.0f);
             for (Creature* spirit : spirits)
                 spirit->DespawnOrUnsummon();
+            RemovePresence();
             instance->SetBossState(DATA_MANDOKIR, DONE);
             instance->SaveToDB();
         }
@@ -192,10 +247,13 @@ namespace
             events.ScheduleEvent(EVENT_CHARGE, 10s);
             events.ScheduleEvent(EVENT_GAZE, 15s);
             events.ScheduleEvent(EVENT_CHECK_OHGAN, 1s);
+            events.ScheduleEvent(EVENT_FIERCE_BLOW, MANDOKIR_FIERCE_BLOW_FIRST_MIN, MANDOKIR_FIERCE_BLOW_FIRST_MAX);
 
             me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
             Talk(SAY_AGGRO);
             me->Dismount();
+            me->RemoveAurasDueToSpell(SPELL_MOUNTED);
+            DoCastSelf(SPELL_BLOODLORDS_PRESENCE, true);
             me->SummonCreature(NPC_OHGAN, me->GetPositionX() - 3, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 35000);
             for (Position const& pos : PosSummonChainedSpirits)
                 me->SummonCreature(NPC_CHAINED_SPIRIT, pos, TEMPSUMMON_CORPSE_DESPAWN);
@@ -234,9 +292,12 @@ namespace
             }
         }
 
-        void SetGUID(ObjectGuid const& guid, int32 /*type*/) override
+        void SetGUID(ObjectGuid const& guid, int32 type) override
         {
-            _reviveGUID = guid;
+            if (type == GUID_SENTENCED)
+                Sentence(guid);
+            else
+                _reviveGUID = guid;
         }
 
         void MovementInform(uint32 type, uint32 id) override
@@ -250,15 +311,6 @@ namespace
                     instance->SetBossState(DATA_MANDOKIR, NOT_STARTED);
                 }
             }
-        }
-
-        // What the gazed player does while he stares counts.
-        void CalculateThreat(Unit* hatedUnit, float& threat, SpellInfo const* threatSpell) override
-        {
-            if (_gazed != hatedUnit->GetGUID())
-                return;
-            if (!(threatSpell && (threatSpell->HasAura(SPELL_AURA_DAMAGE_SHIELD) || threatSpell->HasAttribute(SPELL_ATTR0_CU_NO_INITIAL_THREAT))))
-                _gazeThreat += threat;
         }
 
         void DamageDealt(Unit* doneTo, uint32& damage, DamageEffectType /*type*/, SpellSchoolMask /*school*/) override
@@ -359,7 +411,7 @@ namespace
                         break;
                     case EVENT_MORTAL_STRIKE:
                         DoCastVictim(SPELL_MORTAL_STRIKE);
-                        events.ScheduleEvent(EVENT_MORTAL_STRIKE, 10s);
+                        events.ScheduleEvent(EVENT_MORTAL_STRIKE, 12s);
                         break;
                     case EVENT_GAZE:
                         if (Unit* player = SelectTarget(SelectTargetMethod::Random, 0, 100.0f, true))
@@ -367,18 +419,14 @@ namespace
                             me->CastSpell(player, SPELL_THREATENING_GAZE, true);
                             Talk(SAY_WATCH, player);
                             _gazed = player->GetGUID();
-                            _gazeThreat = 0.0f;
-                            events.ScheduleEvent(EVENT_GAZE_END, 4s);
+                            events.ScheduleEvent(EVENT_MENACING_GAZE, 4s);
                         }
                         events.ScheduleEvent(EVENT_GAZE, 20s);
                         break;
-                    case EVENT_GAZE_END:
+                    case EVENT_MENACING_GAZE:
                         if (Unit* target = ObjectAccessor::GetUnit(*me, _gazed))
-                            if (_gazeThreat > 0.0f && target->IsAlive())
-                            {
-                                me->CastSpell(target, SPELL_LEAP, true);
-                                me->CastSpell(target, SPELL_DECAPITATE, true);
-                            }
+                            if (target->IsAlive())
+                                me->CastSpell(target, SPELL_MENACING_GAZE, true);
                         _gazed.Clear();
                         break;
                     case EVENT_EXECUTE:
@@ -393,6 +441,10 @@ namespace
                         }
                         else
                             events.ScheduleEvent(EVENT_CHECK_OHGAN, 1s);
+                        break;
+                    case EVENT_FIERCE_BLOW:
+                        DoCastVictim(SPELL_FIERCE_BLOW);
+                        events.ScheduleEvent(EVENT_FIERCE_BLOW, MANDOKIR_FIERCE_BLOW_MIN, MANDOKIR_FIERCE_BLOW_MAX);
                         break;
                     default:
                         break;
@@ -409,12 +461,51 @@ namespace
         uint8 _kills = 0;
         bool _useExecute = false;
         ObjectGuid _gazed;
-        float _gazeThreat = 0.0f;
         ObjectGuid _reviveGUID;
+    };
+
+    class mandokir_coa_menacing_gaze : public PlayerScript
+    {
+    public:
+        mandokir_coa_menacing_gaze() : PlayerScript("mandokir_coa_menacing_gaze", { PLAYERHOOK_ON_SPELL_CAST }) { }
+
+        void OnPlayerSpellCast(Player* player, Spell* spell, bool /*skipCheck*/) override
+        {
+            SpellInfo const* info = spell->GetSpellInfo();
+            if (spell->IsTriggered() || info->IsPositive() || !spell->GetPowerCost() || !info->StartRecoveryTime)
+                return;
+            Aura* gaze = player->GetAura(SPELL_MENACING_GAZE);
+            if (!gaze)
+                return;
+            if (Creature* mandokir = ObjectAccessor::GetCreature(*player, gaze->GetCasterGUID()))
+                if (mandokir->IsAIEnabled)
+                    mandokir->AI()->SetGUID(player->GetGUID(), GUID_SENTENCED);
+        }
+    };
+
+    // The Chained Spirit's Resurrection is a dummy with a cast bar; the player stands up when it finishes.
+    class spell_mandokir_coa_resurrection : public SpellScript
+    {
+        PrepareSpellScript(spell_mandokir_coa_resurrection);
+
+        void HandleDummy(SpellEffIndex /*effIndex*/)
+        {
+            if (Player* target = GetHitPlayer())
+                if (!target->IsAlive())
+                    GetCaster()->CastSpell(target, SPELL_REVIVE, true);
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_mandokir_coa_resurrection::HandleDummy, EFFECT_0,
+                SPELL_EFFECT_DUMMY);
+        }
     };
 }
 
 void AddCoaMandokirScripts()
 {
     RegisterZulGurubCreatureAI(boss_mandokir_coa);
+    RegisterSpellScript(spell_mandokir_coa_resurrection);
+    new mandokir_coa_menacing_gaze();
 }

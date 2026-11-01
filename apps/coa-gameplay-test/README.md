@@ -1022,7 +1022,10 @@ before one arrives.
 
 `dungeon_difficulty_packet` takes a player `actor` and `value` (0, 1 or 2), sends the native dungeon
 selection packet through the packet hook and typed session handler, and does not bypass its group or
-in-instance restrictions. `map_id` and `map_difficulty` observe the current map after a normal teleport.
+in-instance restrictions. `raid_difficulty_packet` does the same for raids with `value` 0-3 (3 is Ascended).
+A `teleport` step with `ignore_access: true` skips the entry checks, as the scenario `location` does, so a solo
+actor can enter a raid on the difficulty it selected outside. `map_id` and `map_difficulty` observe the current
+map after a normal teleport.
 `nearby_creature_template` requires `entry` and exactly one creature within 60 yards, then returns its
 selected difficulty template. `spawn_respawn_remaining` requires a player and a creature `spawn` (its database
 guid) and returns the seconds until the actor's map respawns that spawn, from the map's saved respawn times
