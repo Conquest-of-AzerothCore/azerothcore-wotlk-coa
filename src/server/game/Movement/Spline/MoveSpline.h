@@ -120,6 +120,7 @@ namespace Movement
         [[nodiscard]] bool IsWalking() const { return walking; }
         [[nodiscard]] bool isCyclic() const { return splineflags.cyclic; }
         [[nodiscard]] bool isFalling() const { return splineflags.falling; }
+        [[nodiscard]] bool isParabolic() const { return splineflags.parabolic; }
         [[nodiscard]] bool isBoarding() const { return splineflags.transportEnter || splineflags.transportExit; }
         [[nodiscard]] Vector3 FinalDestination() const { return Initialized() ? spline.getPoint(spline.last()) : Vector3(); }
         [[nodiscard]] Vector3 CurrentDestination() const { return Initialized() ? spline.getPoint(point_Idx + 1) : Vector3(); }
