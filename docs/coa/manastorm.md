@@ -19,7 +19,7 @@ upgrades, repair/selling and continuation; walking back into the portal also con
 next`, `.manastorm leave` and `.manastorm status` provide alternate controls.
 
 The catalog contains 61 rooms from 19 dungeon maps. Startup checks templates, height, line of sight
-and connected walking segments. The installed dataset admits 30 rooms, including one opening room.
+and connected walking segments. The installed dataset admits 31 rooms, including two opening rooms.
 Unavailable rooms are excluded. If the early pool contains one valid room, a fresh instance of that
 room is used again rather than blocking progress. Additional rooms unlock as depth increases.
 This geometric check is not a combat/pathfinding playtest of every boss.
