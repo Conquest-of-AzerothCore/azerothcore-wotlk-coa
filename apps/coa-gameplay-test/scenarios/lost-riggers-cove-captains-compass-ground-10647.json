@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Captain's Compass rests on the Lost Rigger's Cove upper floor furniture (#10647)",
+  "contract": [
+    "Report #10647: the worldforged Captain's Compass (entry 515828, guid 6941523, map 1 (-8022.3, -5201.2, 14.851))",
+    "floats in the air of the upper room in Lost Rigger's Cove instead of lying on the side desk. Its x,y come from",
+    "the worldforged map file and its z from a client sighting 10.2 yd away. The reporter stood at",
+    "(-8023.35, -5199.85, 13.12) on that floor. Expected: the pickup rests on the vmap surface below it",
+    "(ground gap within 0.3 yd), not above it."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The reporter's spot is on the upper floor",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 1,
+      "x": -8023.35,
+      "y": -5199.85,
+      "z": 13.12,
+      "min": -0.3,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Captain's Compass rests on the surface below it",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6941523,
+      "spawn_type": "gameobject",
+      "min": -0.3,
+      "max": 0.3
+    }
+  ]
+}
