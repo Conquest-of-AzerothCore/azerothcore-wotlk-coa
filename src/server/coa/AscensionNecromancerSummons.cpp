@@ -820,7 +820,9 @@ class npc_ascension_necromancer : public ScriptedAI
             }
             if (event == 9)
                 if (Unit* enemy = ObjectAccessor::GetUnit(*me, _breathTarget))
-                    Cast(me, enemy, 807339);
+                    for (Unit* blasted : Nearby(enemy, 10.0f))
+                        if (player->IsValidAttackTarget(blasted))
+                            Cast(me, blasted, 807339);
         }
         if (me->GetEntry() == 523032 && !_exploded)
             for (Unit* nearby : Nearby(me, 2.5f))
