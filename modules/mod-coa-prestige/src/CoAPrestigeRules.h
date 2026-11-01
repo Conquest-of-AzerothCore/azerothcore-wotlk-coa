@@ -322,20 +322,16 @@ namespace CoAPrestige
         uint32_t tome = 0;
     };
 
-    // Tome ids must be rows that exist in item_template: 2200034 (Soulbound Riding Tome:
-    // Apprentice Riding), 2200033 (...Journeyman Riding) and 49177 (stock Tome of Cold Weather
-    // Flight) are. Expert (34090), Artisan (34091) and Extraordinary (91774) riding have no
-    // corresponding item_template row anywhere in this checkout, so GrantRewards still drops
-    // those three silently (#10262 observation, not fixed here: no id to point them at without
-    // guessing one).
+    // The "Riding Tome: <tier> (Prestige)" items, which the CoA world package
+    // (data/coa-world) defines; data/sql holds no item_template row for them.
     constexpr RidingTome RidingTomes[] =
     {
-        { 33388, 2200034 },
-        { 33391, 2200033 },
+        { 33388, 2200037 },
+        { 33391, 1039605 },
         { 34090, 1046168 },
         { 34091, 1052731 },
         { 91774, 2179243 },
-        { 54197, 49177 },
+        { 54197, 2179244 },
     };
 
     constexpr uint32_t DailyQuestBattlegrounds = 80954; // "Prestige: Battlegrounds"
