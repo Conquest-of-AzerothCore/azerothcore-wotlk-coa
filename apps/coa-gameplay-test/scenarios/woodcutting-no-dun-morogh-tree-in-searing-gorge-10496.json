@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "No Dun Morogh Tree stands in Searing Gorge (#10496)",
+  "contract": "#10496 reported a woodcutting Dun Morogh Tree (gameobject entry 244620) at (-6937.1, -1806.2, 241.8) in Searing Gorge. Its spawn, guid 8000225 of rev_20260928_82_woodcutting_spawns.sql, survived the GatherMate replacement and lies outside the area of the Ascension GatherMate Dun Morogh Tree positions (x -6576 to -4294, y -2580 to 758), so it is removed. With the player at the reported spot no tree of that entry is within 20 yd; at the surviving spawn 8000244 at (-4233.6, -2325.3, 207.3) one is.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -6937.1,
+    "y": -1806.2,
+    "z": 243.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Dun Morogh Tree stands at the reported spot",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 244620,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -4233.6,
+      "y": -2325.3,
+      "z": 209.3
+    },
+    {
+      "action": "wait",
+      "label": "Let the grid load",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the surviving Dun Morogh Tree spawn 8000244 is counted beside the player",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 244620,
+      "min": 1,
+      "within_ms": 10000
+    }
+  ]
+}
