@@ -5482,7 +5482,8 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
         // AT APPLY
         if (apply)
         {
-            switch (GetId())
+            uint32 const killCommand = sSpellMgr->GetSpellTwinSource(GetId());
+            switch (killCommand == 34026 ? killCommand : GetId())
             {
                 case 1515:                                      // Tame beast
                     // FIX_ME: this is 2.0.12 threat effect replaced in 2.1.x by dummy aura, must be checked for correctness
@@ -5495,11 +5496,12 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
                         if (!pet)
                             break;
 
-                        target->CastSpell(target, 34027, true, nullptr, this);
+                        uint32 const ownerBuff = sSpellMgr->GetSpellTwinFor(34027, GetId());
+                        target->CastSpell(target, ownerBuff, true, nullptr, this);
 
                         // set 3 stacks and 3 charges (to make all auras not disappear at once)
-                        Aura* owner_aura = target->GetAura(34027, GetCasterGUID());
-                        Aura* pet_aura  = pet->GetAura(58914, GetCasterGUID());
+                        Aura* owner_aura = target->GetAura(ownerBuff, GetCasterGUID());
+                        Aura* pet_aura  = pet->GetAura(sSpellMgr->GetSpellTwinFor(58914, GetId()), GetCasterGUID());
                         if (owner_aura)
                         {
                             owner_aura->SetCharges(0);
