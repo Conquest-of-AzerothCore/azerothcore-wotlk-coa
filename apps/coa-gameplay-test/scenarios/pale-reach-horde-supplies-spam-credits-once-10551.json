@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Horde Intervention: a Horde Supplies crate credits once however fast it is clicked (#10551)",
+  "contract": [
+    "Quest 175150 needs 7 of 16 Horde Supplies crates (gameobject 2300709) destroyed. One use destroys a crate: one crate is one credit.",
+    "The crate's SmartAI despawns it one second after use and the goober has no auto-close, so every further click during that second credited the quest again and the same crate could be destroyed several times, as reported.",
+    "Expected: three clicks on the same crate in a row credit 1, not 3, and the crate disappears; after its 60 s respawn the same crate is usable again and credits the next use."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -6650.93, "y": 804.80, "z": 526.67, "o": 0.0 },
+  "players": [
+    { "id": "p", "race": 1, "class": 25, "level": 47 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_phase", "label": "SETUP: join the Pale Reach's normal phase", "actor": "p", "value": 1 },
+    { "action": "prepare_quest", "actor": "p", "quest": 175150, "complete": false },
+    { "action": "set_aura", "label": "SETUP: Divine Shield keeps the Frostmane camp off p", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: exactly one Horde Supplies crate is in range (9985022)", "actor": "p", "metric": "nearby_gameobject_count", "entry": 2300709, "equals": 1 },
+    { "action": "use_nearby_gameobject", "label": "Smash the crate", "actor": "p", "entry": 2300709 },
+    { "action": "use_nearby_gameobject", "label": "Click the same crate again at once", "actor": "p", "entry": 2300709 },
+    { "action": "use_nearby_gameobject", "label": "And a third time", "actor": "p", "entry": 2300709 },
+    { "action": "assert", "label": "SETUP: the first click destroys the crate", "actor": "p", "metric": "quest_objective_count", "quest": 175150, "min": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: one crate credits once", "actor": "p", "metric": "quest_objective_count", "quest": 175150, "equals": 1 },
+    { "action": "assert", "label": "the crate is gone after use", "actor": "p", "metric": "nearby_gameobject_at_client", "entry": 2300709, "equals": 0, "within_ms": 5000 },
+    { "action": "assert", "label": "it respawns per its own 60 s spawn timer", "actor": "p", "metric": "nearby_gameobject_at_client", "entry": 2300709, "equals": 1, "within_ms": 65000 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "use_nearby_gameobject", "label": "Smash the respawned crate", "actor": "p", "entry": 2300709 },
+    { "action": "assert", "label": "DISCRIMINATING: the respawned crate is usable again and credits once more", "actor": "p", "metric": "quest_objective_count", "quest": 175150, "equals": 2, "within_ms": 2000 }
+  ]
+}
