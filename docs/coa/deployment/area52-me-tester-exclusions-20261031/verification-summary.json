@@ -1,0 +1,11 @@
+{
+  "package": "area52-me-tester-exclusions-20261031",
+  "server_sha256": "d56df23b4ccf3537101b84b59bd9e650360f7896bce9e6c294b6cbe32030ece5",
+  "status_changes": false,
+  "reports": [
+    "native-r1/report.json",
+    "full-build-r1/report.json"
+  ],
+  "scope": "Per-account exclusion from temporary verified ME access; permanent ownership and Draft reward implementation preserved.",
+  "limits": "Native config/startup/grant adapters and full link/unit checks, not in-game reward certification."
+}
