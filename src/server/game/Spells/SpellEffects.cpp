@@ -4290,7 +4290,7 @@ void Spell::EffectTaunt(SpellEffIndex /*effIndex*/)
     }
 
     ThreatManager& mgr = unitTarget->GetThreatMgr();
-    if (mgr.GetCurrentVictim() == m_caster)
+    if (unitTarget->GetVictim() == m_caster)
     {
         SendCastResult(SPELL_FAILED_DONT_REPORT);
         return;
