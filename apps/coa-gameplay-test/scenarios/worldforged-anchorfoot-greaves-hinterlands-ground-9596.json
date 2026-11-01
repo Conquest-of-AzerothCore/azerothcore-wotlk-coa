@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "name": "Worldforged Anchorfoot Greaves rest on the ground in the Hinterlands (#9596)",
+  "contract": "The pickup (gameobject entry at guid 6940042, item 515692/515885) sat 2.18 yd below the stock Hinterlands terrain at its XY: spawn_ground_gap read a gap outside the normal grounded tolerance and spawn_placement reported under_ground. The fix raises position_z to the measured ground height so the gap returns to tolerance and the chest opens.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": 311.300, "y": -2730.000, "z": 93.340, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "assert", "label": "it rests on the ground, well inside the grounded tolerance", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940042, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "assert", "label": "it is grounded, not under_ground", "actor": "p", "metric": "spawn_placement", "guid": 6940042, "spawn_type": "gameobject", "tolerance": 1, "equals": 0 },
+    { "action": "assert", "label": "nothing blocks it", "actor": "p", "metric": "spawn_clearance", "guid": 6940042, "spawn_type": "gameobject", "min": 9 },
+    { "action": "assert", "label": "it has a client-visible display", "actor": "p", "metric": "spawn_display_state", "guid": 6940042, "spawn_type": "gameobject", "equals": 2 }
+  ]
+}

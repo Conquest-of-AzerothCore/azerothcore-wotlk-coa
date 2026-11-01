@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Worldforged One Ring to Flame Them All rests reachable on Un'Goro ground (#9534)",
+  "contract": "#9534 reported the pickup (gameobject entry 95934, guid 6942005, item 515383) as under the map in Un'Goro Crater. Measured against the map/vmap, the spawn sits 0.46 yd below its ground probe (well inside the normal grounded tolerance), has an obstruction-free clearance and headroom, carries a client-visible display, and opens and grants its item like any other reachable worldforged pickup. The two true duplicates at this location (guids 6942006, 6942007, misplaced to other zones) are already deleted by rev_20261024_90_worldforged_gear_misplaced_spawns.sql; this scenario is evidence that the remaining guid 6942005 needs no further correction.",
+  "timeout_ms": 90000,
+  "location": { "map": 1, "x": -7134.100, "y": -1272.500, "z": -198.349, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "assert", "label": "it rests on the ground, well inside the grounded tolerance", "actor": "p", "metric": "spawn_ground_gap", "guid": 6942005, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "assert", "label": "it is grounded", "actor": "p", "metric": "spawn_placement", "guid": 6942005, "spawn_type": "gameobject", "tolerance": 1, "equals": 0 },
+    { "action": "assert", "label": "nothing blocks it", "actor": "p", "metric": "spawn_clearance", "guid": 6942005, "spawn_type": "gameobject", "min": 9 },
+    { "action": "assert", "label": "it has a client-visible display", "actor": "p", "metric": "spawn_display_state", "guid": 6942005, "spawn_type": "gameobject", "equals": 2 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "label": "open the locked chest", "actor": "p", "spell": 3365, "target_gameobject": 95934 },
+    { "action": "wait", "label": "let the loot generate", "ms": 5500 },
+    { "action": "assert", "label": "it is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}
