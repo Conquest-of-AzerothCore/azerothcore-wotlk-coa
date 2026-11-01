@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Horde Intervention: a Horde Supplies crate destroys once, not on every click (COA-10409)",
-  "contract": "Quest 175150 needs 7 of 16 Horde Supplies crates (GO 2300709) destroyed. The crate was a pure native GOOBER with autoCloseTime and consumable both 0, so nothing stopped a single crate from being spam-clicked for the whole objective. It now carries SmartGameObjectAI with an On Use force-despawn (1 s delay, respawn per the spawn table's 60 s), mirroring the already-shipped Trogg Idol (2300633) pattern: one use credits once and removes the crate; the next life (after its own respawn) credits again.",
+  "contract": "Quest 175150 needs 7 of 16 Horde Supplies crates (GO 2300709) destroyed. The crate was a pure native GOOBER with autoCloseTime and consumable both 0, so nothing stopped a single crate from being spam-clicked for the whole objective. It now carries SmartGameObjectAI with an On Use force-despawn on the next update (respawn per the spawn table's 60 s): one use credits once and removes the crate; the next life (after its own respawn) credits again. A 1 s despawn delay kept the crate clickable, with native credit on every click, for that second.",
   "timeout_ms": 120000,
   "location": {"map": 0, "x": -6650.93, "y": 804.80, "z": 526.67, "o": 0.0},
   "players": [
@@ -17,8 +17,8 @@
     {"action": "use_nearby_gameobject", "label": "Smash the crate", "actor": "p", "entry": 2300709},
     {"action": "assert", "label": "the first use credits Horde Supplies destroyed", "actor": "p",
      "metric": "quest_objective_count", "quest": 175150, "equals": 1, "within_ms": 2000},
-    {"action": "assert", "label": "the crate is gone after use, not immortal or spam-clickable", "actor": "p",
-     "metric": "nearby_gameobject_at_client", "entry": 2300709, "equals": 0, "within_ms": 5000},
+    {"action": "assert", "label": "DISCRIMINATING: the crate is gone at once, not for 1 s", "actor": "p",
+     "metric": "nearby_gameobject_at_client", "entry": 2300709, "equals": 0, "within_ms": 500},
     {"action": "assert", "label": "it respawns per its own 60 s spawn timer", "actor": "p",
      "metric": "nearby_gameobject_at_client", "entry": 2300709, "equals": 1, "within_ms": 65000},
     {"action": "wait", "ms": 1000},
