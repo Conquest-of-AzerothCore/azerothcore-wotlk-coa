@@ -1,0 +1,205 @@
+{
+  "schema": 1,
+  "name": "Bazaar kill tokens at maximum level need a mob within five levels",
+  "contract": "At default settings a level-60 character earns tokens only from creatures whose own level is at most five below them, even though Blackrock Depths scales its creatures to the character. A level-59 character is judged on the level they are shown, which in this dungeon is their own. In one group, Fineous Darkvire 9056 (level 54, spawn guid 47631) pays the level-60 member nothing and the level-59 member 6-12; Lord Incendius 9017 (level 55, spawn guid 47733) pays both members 6-12.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "capped",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "leveling",
+      "race": 1,
+      "class": 1,
+      "level": 59
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "capped",
+      "target": "leveling"
+    },
+    {
+      "action": "set_phase",
+      "label": "capped member sees the real Blackrock Depths spawns",
+      "actor": "capped",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "leveling member sees the real Blackrock Depths spawns",
+      "actor": "leveling",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "capped member reaches Fineous Darkvire",
+      "actor": "capped",
+      "guid": 47631
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped member is in Blackrock Depths",
+      "actor": "capped",
+      "metric": "map_id",
+      "equals": 230,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "leveling member reaches Fineous Darkvire",
+      "actor": "leveling",
+      "guid": 47631
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: leveling member is in Blackrock Depths",
+      "actor": "leveling",
+      "metric": "map_id",
+      "equals": 230,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Fineous Darkvire is alive",
+      "actor": "capped",
+      "metric": "nearby_creature_count",
+      "entry": 9056,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "capped",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "capped_9056"
+    },
+    {
+      "action": "snapshot",
+      "actor": "leveling",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "leveling_9056"
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "capped",
+      "entry": 9056,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "level 59 from Fineous Darkvire",
+      "actor": "leveling",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "leveling_9056",
+      "min": 6,
+      "max": 12,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "level 60 from Fineous Darkvire",
+      "actor": "capped",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "capped_9056",
+      "equals": 0
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "capped member reaches Lord Incendius",
+      "actor": "capped",
+      "guid": 47733
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: capped member is in Blackrock Depths",
+      "actor": "capped",
+      "metric": "map_id",
+      "equals": 230,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "leveling member reaches Lord Incendius",
+      "actor": "leveling",
+      "guid": 47733
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: leveling member is in Blackrock Depths",
+      "actor": "leveling",
+      "metric": "map_id",
+      "equals": 230,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Lord Incendius is alive",
+      "actor": "capped",
+      "metric": "nearby_creature_count",
+      "entry": 9017,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "capped",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "capped_9017"
+    },
+    {
+      "action": "snapshot",
+      "actor": "leveling",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "leveling_9017"
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "capped",
+      "entry": 9017,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "level 60 from Lord Incendius",
+      "actor": "capped",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "capped_9017",
+      "min": 6,
+      "max": 12,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "level 59 from Lord Incendius",
+      "actor": "leveling",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "leveling_9017",
+      "min": 6,
+      "max": 12,
+      "within_ms": 2000
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "name": "Bazaar kill tokens below maximum level follow the level the player is shown",
+  "contract": "At default settings a levelling character earns tokens from a creature that is not grey to the level they are shown. A level-20 character with open-world scaling on kills ten Kobold Vermin 6 (level 1-2) in Northshire alone; scaling shows them near level 16, so each pays 0-2 and all ten paying zero has a chance of about 1 in 59,000.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "scaled",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_phase",
+      "label": "scaled member sees the real Northshire spawns",
+      "actor": "scaled",
+      "value": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "scaled",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "scaled_tokens"
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "scaled",
+      "guid": 79992
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "scaled",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "scaled",
+      "guid": 79993
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "scaled",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "scaled",
+      "guid": 79994
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "scaled",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "scaled",
+      "guid": 79995
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "scaled",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "scaled",
+      "guid": 79996
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "scaled",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "scaled",
+      "guid": 79998
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "scaled",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "scaled",
+      "guid": 79999
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "scaled",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "scaled",
+      "guid": 80000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "scaled",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "scaled",
+      "guid": 80001
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "scaled",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "scaled",
+      "guid": 80002
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "scaled",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "a creature scaled to the player pays",
+      "actor": "scaled",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "scaled_tokens",
+      "within_ms": 2000,
+      "min": 1
+    }
+  ]
+}

@@ -6,13 +6,13 @@
  * left is to play. The rule the server owner asked for: a little from
  * everything, more from harder content.
  *
- *   quest turned in     0 to 12
- *   creature killed     0 to 3
- *   dungeon boss       14 to 22
- *   raid boss          41 to 53
+ *   quest turned in     0 to 6
+ *   creature killed     0 to 2
+ *   dungeon boss        6 to 12
+ *   raid boss          30 to 40
  *
- * Every amount is multiplied at level 60, because a character that stops
- * levelling would otherwise stop earning.
+ * A percentage from BonusLevel on can multiply every amount; by default it
+ * is 100, so there is no bonus.
  *
  * The zero in the lower two ranges is deliberate: most kills and some quests
  * give nothing at all, so tokens stay something one notices.
@@ -20,6 +20,13 @@
  * A kill pays everyone the native kill credit rewards: whoever tapped the
  * creature, and every member of a tapping group in reward range, whether they
  * attacked, healed or watched. Each member rolls their own amount.
+ *
+ * A kill far below the player's own level pays nothing, so outlevelled mobs
+ * are not a token farm. Each member is judged on their own level; see KillPays.
+ *
+ * A player outside a group is paid only for a creature they hit themselves,
+ * like loot and experience, so pets left to fight alone cannot farm tokens
+ * while the owner is away.
  */
 
 #include "EtherealBazaar.h"
@@ -28,7 +35,9 @@
 #include "CoATestZoneBonus.h"
 #include "Configuration/Config.h"
 #include "Creature.h"
+#include "Formulas.h"
 #include "GameTime.h"
+#include "Group.h"
 #include "KillRewarder.h"
 #include "Log.h"
 #include "Map.h"
@@ -38,6 +47,8 @@
 #include "Mail.h"
 #include "Random.h"
 #include "ScriptMgr.h"
+#include "StringConvert.h"
+#include "World.h"
 
 namespace
 {
@@ -55,8 +66,37 @@ namespace
         return urand(lo, std::max(lo, hi));
     }
 
+    // The setting is a number of levels, or "grey" for the XP rule: anything grey
+    // to this player pays nothing. Creatures above the player always pay.
+    //
+    // A levelling character is judged on the level they are shown, so a world
+    // scaled to them keeps paying. At maximum level the creature's own level
+    // counts: scaling lifts every dungeon to about that level, which would let a
+    // starting dungeon pay as much as the endgame.
+    bool KillPays(Player* player, Creature const* killed)
+    {
+        uint32 const level = player->GetLevel();
+        bool const atMaxLevel = level >= sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.MaxLevel", 60);
+        std::string const setting = atMaxLevel
+            ? sConfigMgr->GetOption<std::string>("EtherealBazaar.Tokens.MaxLevelsAboveMob.AtMaxLevel", "5")
+            : sConfigMgr->GetOption<std::string>("EtherealBazaar.Tokens.MaxLevelsAboveMob.WhileLeveling", "grey");
+
+        uint32 const killedLevel = atMaxLevel ? killed->GetLevel() : killed->getLevelForTarget(player);
+        if (Optional<uint32> const levelsAbove = Acore::StringTo<uint32>(setting))
+            return killedLevel + *levelsAbove >= level;
+
+        return killedLevel > Acore::XP::GetGrayLevel(level);
+    }
+
+    // Loot and experience already require an ungrouped player to have hit the
+    // creature; tokens follow the same rule.
+    bool IsUnearnedSoloKill(Player* player, Creature const* killed)
+    {
+        return !player->GetGroup() && sWorld->getBoolConfig(CONFIG_SOLO_KILL_REQUIRES_PLAYER_HIT) &&
+            !killed->WasAttackedDirectlyBy(player->GetGUID());
+    }
+
     // The multiplier is a percentage so the config can hold a whole number.
-    // At 150 a level-60 character earns half again as much.
     uint32 ApplyLevelBonus(Player* player, uint32 amount)
     {
         if (!amount)
@@ -66,7 +106,7 @@ namespace
         if (player->GetLevel() < abLevel)
             return amount;
 
-        uint32 const prozent = sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.BonusPercent", 150);
+        uint32 const prozent = sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.BonusPercent", 100);
         return std::max<uint32>(1, amount * prozent / 100);
     }
 
@@ -121,7 +161,7 @@ public:
         if (!Enabled() || !player || !quest)
             return;
 
-        Grant(player, Wuerfeln("Quest", 0, 12), "a quest");
+        Grant(player, Wuerfeln("Quest", 0, 6), "a quest");
     }
 
     void OnPlayerRewardKillRewarder(Player* player, KillRewarder* rewarder, bool, float&) override
@@ -135,6 +175,9 @@ public:
         if (killed->IsSummon() || killed->IsCritter() || killed->IsTotem())
             return;
 
+        if (!KillPays(player, killed) || IsUnearnedSoloKill(player, killed))
+            return;
+
         // Bosses are worth a real amount, and a raid boss more than a dungeon
         // one. IsDungeonBoss covers the flagged encounters; the world bosses
         // outside an instance are deliberately left with the ordinary rate.
@@ -142,12 +185,12 @@ public:
         {
             Map const* map = killed->GetMap();
             bool const raid = map && map->IsRaid();
-            Grant(player, Wuerfeln(raid ? "RaidBoss" : "DungeonBoss", raid ? 41 : 14, raid ? 53 : 22),
+            Grant(player, Wuerfeln(raid ? "RaidBoss" : "DungeonBoss", raid ? 30 : 6, raid ? 40 : 12),
                   raid ? "a raid boss" : "a dungeon boss");
             return;
         }
 
-        Grant(player, Wuerfeln("Creature", 0, 3), "a creature");
+        Grant(player, Wuerfeln("Creature", 0, 2), "a creature");
     }
 };
 

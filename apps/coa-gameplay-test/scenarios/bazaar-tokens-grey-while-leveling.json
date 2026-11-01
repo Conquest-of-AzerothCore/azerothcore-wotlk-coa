@@ -1,0 +1,163 @@
+{
+  "schema": 1,
+  "name": "Bazaar kill tokens below maximum level are not paid for grey creatures",
+  "contract": "At default settings a levelling character earns nothing from a creature grey to the level they are shown. A level-20 character who switched open-world scaling off kills ten Kobold Vermin 6 (level 1-2) in Northshire alone, sees level 1-2, and receives nothing. The two cases are separate scenarios because a group follows its leader's scaling switch.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "authored",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "authored",
+      "value": 0
+    },
+    {
+      "action": "set_phase",
+      "label": "authored member sees the real Northshire spawns",
+      "actor": "authored",
+      "value": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "authored",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "authored_tokens"
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 79992
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 79993
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 79994
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 79995
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 79996
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 79998
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 79999
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 80000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 80001
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "authored",
+      "guid": 80002
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "authored",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "the same creatures, grey to a player without scaling, pay nothing",
+      "actor": "authored",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "authored_tokens",
+      "equals": 0
+    }
+  ]
+}
