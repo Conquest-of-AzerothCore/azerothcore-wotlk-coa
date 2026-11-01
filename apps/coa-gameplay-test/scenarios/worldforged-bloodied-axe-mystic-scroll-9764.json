@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "name": "Bloodied Axe's Mystic Scroll now exists as a real, correct item",
+  "contract": "Gameobject entry 93008 (Bloodied Axe, Duskwood guid 6960003) has one gameobject_loot_template row: item 201579 at 100% chance (modules/mod-worldforged-pickups/data/sql/db-world/2026_09_23_06_worldforged_recorded_heights.sql:324-325). item_template never had a row for 201579: every acquisition path (loot roll, the Guardian of Time vendor slot at rev_20261021_03_coa_guardian_reborn_mystic_scrolls.sql:36, direct creation) failed because the item did not exist, so the chest's loot window opened empty and stayed sparkling. #9764, duplicate #9769. The item now exists with class/subclass/Material/displayid matching Item.dbc record 201579 exactly (ClassID 0, SubclassID 6, Material 8, DisplayInfoID 138380; ObjectMgr::LoadItemTemplates enforces and had been silently overwriting a mismatch here). Note: whether this specific chest's loot *roll* additionally drops the scroll depends on the realm's own AscensionMysticEnchant OnItemRoll gate (RealmOffersMysticAltars(), CoA.ClassModel), an unrelated, pre-existing, realm-wide rule out of scope for this fix; this scenario proves the item itself is now correct and creatable, independent of that gate.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "hero", "race": 1, "class": 12, "level": 43 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "add_item", "actor": "hero", "item": 201579 },
+    { "action": "assert", "label": "DISCRIMINATING: Mystic Scroll: Brutal Execution now exists and can be granted",
+      "actor": "hero", "metric": "item_count", "item": 201579, "equals": 1 }
+  ]
+}
