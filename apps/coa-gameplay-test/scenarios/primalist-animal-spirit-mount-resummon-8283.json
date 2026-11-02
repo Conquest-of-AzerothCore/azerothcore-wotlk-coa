@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "A called animal spirit returns after its Wildwalker mounts and dismounts (#8283)",
+  "contract": [
+    "A level 18 Wildwalker reported that the pet called with Call Animal Spirit (574302) disappears after mounting",
+    "and does not come back after dismounting. Stock 3.3.5 hunter rules, which the Wildwalker pet context copies,",
+    "temporarily unsummon a current pet on mount and summon it again on dismount. Expected: the pet tamed with",
+    "Harness Animal Spirit, dismissed with Dismiss Animal Spirit (574303) and called again with 574302, is gone",
+    "while mounted and back after each of two dismounts."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {"id": "p", "race": 1, "class": 31, "level": 18}
+  ],
+  "creatures": [
+    {"id": "beast", "owner": "p", "entry": 1188, "level": 17, "health": 100000, "distance": 5}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "specialization", "actor": "p", "id": 59},
+    {"action": "learn", "actor": "p", "spell": 574301},
+    {"action": "cast", "label": "Harness the beast's spirit", "actor": "p", "spell": 574301, "target": "beast"},
+    {"action": "assert", "label": "SETUP: the beast is tamed", "actor": "p", "metric": "pet_entry", "equals": 1188,
+     "within_ms": 24000},
+    {"action": "learn", "actor": "p", "spell": 574302},
+    {"action": "learn", "actor": "p", "spell": 574303},
+    {"action": "wait", "ms": 1600},
+    {"action": "cast", "label": "Dismiss Animal Spirit", "actor": "p", "spell": 574303, "target": "p"},
+    {"action": "assert", "label": "SETUP: the spirit is dismissed", "actor": "p", "metric": "pet_entry", "equals": 0,
+     "within_ms": 3000},
+    {"action": "wait", "ms": 1600},
+    {"action": "cast", "label": "Call Animal Spirit", "actor": "p", "spell": 574302, "target": "p"},
+    {"action": "assert", "label": "SETUP: Call Animal Spirit brings the pet back", "actor": "p", "metric": "pet_entry",
+     "equals": 1188, "within_ms": 5000},
+    {"action": "learn", "actor": "p", "spell": 34091},
+    {"action": "learn", "actor": "p", "spell": 809917},
+    {"action": "wait", "ms": 1600},
+    {"action": "cast", "label": "Mount", "actor": "p", "spell": 809917},
+    {"action": "assert", "label": "SETUP: the mount cast succeeds", "actor": "p", "metric": "aura", "spell": 809917,
+     "equals": 1, "within_ms": 4500},
+    {"action": "assert", "label": "Mounting unsummons the pet", "actor": "p", "metric": "pet_entry", "equals": 0,
+     "within_ms": 1000},
+    {"action": "cancel_mount", "actor": "p"},
+    {"action": "assert", "label": "The called spirit returns after the first dismount", "actor": "p",
+     "metric": "pet_entry", "equals": 1188, "within_ms": 5000},
+    {"action": "wait", "ms": 1600},
+    {"action": "cast", "label": "Mount again", "actor": "p", "spell": 809917},
+    {"action": "assert", "label": "SETUP: the second mount cast succeeds", "actor": "p", "metric": "aura",
+     "spell": 809917, "equals": 1, "within_ms": 4500},
+    {"action": "assert", "label": "Mounting again unsummons the pet", "actor": "p", "metric": "pet_entry",
+     "equals": 0, "within_ms": 1000},
+    {"action": "cancel_mount", "actor": "p"},
+    {"action": "assert", "label": "The called spirit returns after the second dismount", "actor": "p",
+     "metric": "pet_entry", "equals": 1188, "within_ms": 5000}
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Tiraxis stands on open floor in the Undercity Auction House (#8351)",
+  "contract": [
+    "Tiraxis (900007, spawn 9000006) stood inside the wall behind Auctioneer Stockton (spawn 32063): the server vmaps",
+    "give the old spot (1586, 193, -56.79) no floor and a wall 0.17 yd away. The expected values are the vmap geometry:",
+    "Tiraxis stands on the floor, at least 1.5 yd from any wall or prop, under no roof, and apart from Stockton; the old",
+    "spot remains a point with no floor (verdict 2) as the negative control."
+  ],
+  "timeout_ms": 30000,
+  "players": [
+    {"id": "p", "race": 1, "class": 15, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The old spot inside the wall has no floor", "actor": "p", "metric": "point_placement",
+     "map": 0, "x": 1586.0, "y": 193.0, "z": -56.79, "tolerance": 0.5, "equals": 2},
+    {"action": "assert", "label": "Tiraxis is grounded", "actor": "p", "metric": "spawn_placement", "guid": 9000006,
+     "spawn_type": "creature", "tolerance": 0.5, "equals": 0},
+    {"action": "assert", "label": "Tiraxis stands within half a yard of the floor", "actor": "p",
+     "metric": "spawn_ground_gap", "guid": 9000006, "spawn_type": "creature", "min": -0.5, "max": 0.5},
+    {"action": "assert", "label": "Tiraxis is clear of the walls", "actor": "p", "metric": "spawn_clearance",
+     "guid": 9000006, "spawn_type": "creature", "min": 1.5},
+    {"action": "assert", "label": "No roof hangs over Tiraxis", "actor": "p", "metric": "spawn_headroom",
+     "guid": 9000006, "spawn_type": "creature", "min": 3},
+    {"action": "assert", "label": "Tiraxis does not stand on Auctioneer Stockton", "actor": "p",
+     "metric": "spawn_distance", "guid": 9000006, "spawn_type": "creature", "x": 1579.11, "y": 187.979,
+     "z": -56.7948, "min": 2}
+  ]
+}
