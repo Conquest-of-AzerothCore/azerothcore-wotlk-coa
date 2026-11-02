@@ -45,7 +45,7 @@ constexpr uint8 OWNER_REALM = 1;
 constexpr bool SEND_ALL_SLOTS = true;
 constexpr bool SEND_CHANGED_SLOTS = false;
 
-constexpr char const* DEFAULT_TAB_ICON = "achievement_guildperk_mobilebanking";
+constexpr char const* DEFAULT_TAB_ICON = "INV_Misc_QuestionMark";
 
 constexpr uint16 SMSG_BANK_PERMISSIONS = 0x0769;
 
