@@ -9991,6 +9991,27 @@ public:
     }
 };
 
+class AscensionCompatMirrorImageScript : public GlobalScript
+{
+public:
+    AscensionCompatMirrorImageScript()
+        : GlobalScript("AscensionCompatMirrorImageScript", {GLOBALHOOK_ON_MIRRORIMAGE_DISPLAY_ITEM}) { }
+
+    void OnMirrorImageDisplayItem(Item const* item, uint32& display) override
+    {
+        Player const* owner = item->GetOwner();
+        if (!owner || !item->IsEquipped())
+            return;
+
+        uint32 const visibleEntry = owner->GetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + item->GetSlot() * 2);
+        if (visibleEntry == item->GetEntry())
+            return;
+
+        if (ItemTemplate const* appearance = sObjectMgr->GetItemTemplate(visibleEntry))
+            display = appearance->DisplayInfoID;
+    }
+};
+
 class AscensionCompatWorldScript : public WorldScript {
 public:
   AscensionCompatWorldScript()
@@ -11195,6 +11216,7 @@ void AddAscensionCompatScripts() {
   new AscensionCompatAllSpellScript();
   new AscensionCompatUnitScript();
   new AscensionCompatChangelogScript();
+  new AscensionCompatMirrorImageScript();
   new AscensionCompatWorldScript();
   new AscensionCompatAllCreatureScript();
 }
