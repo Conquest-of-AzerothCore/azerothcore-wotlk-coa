@@ -2553,7 +2553,7 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
         }
         else if (IsClass(CLASS_WARRIOR, CLASS_CONTEXT_EQUIP_ARMOR_CLASS))
         {
-            if ((proto->HasStat(ITEM_MOD_SPELL_POWER) || proto->HasSpellPowerStat()))
+            if (!IsAscensionClass(getClass()) && (proto->HasStat(ITEM_MOD_SPELL_POWER) || proto->HasSpellPowerStat()))
             {
                 return EQUIP_ERR_CANT_DO_RIGHT_NOW;
             }
@@ -2569,7 +2569,7 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
         }
         else if (IsClass(CLASS_ROGUE, CLASS_CONTEXT_EQUIP_ARMOR_CLASS))
         {
-            if (proto->HasStat(ITEM_MOD_SPELL_POWER) || proto->HasSpellPowerStat())
+            if (!IsAscensionClass(getClass()) && (proto->HasStat(ITEM_MOD_SPELL_POWER) || proto->HasSpellPowerStat()))
             {
                 return EQUIP_ERR_CANT_DO_RIGHT_NOW;
             }

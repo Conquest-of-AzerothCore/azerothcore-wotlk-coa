@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Staff of Twin Blossoms procs Blossoming growth on direct damage and healing spells (#10712)",
+  "contract": [
+    "Staff of Twin Blossoms 515201 (item_template spellid_1 202827, on equip) never procced. Blossoming growth Dummy proc 202827 reads 'Your direct damage and healing spells have a chance to increase your haste rating by 30.': aura 42 triggering Blossoming growth 202826 (haste rating +30), DBC ProcChance 10 and ProcFlags 0, and the world had no spell_proc row, so the aura never registered a proc handler.",
+    "Expected: the loaded proc entry carries the DBC 10% chance, and a landed direct magic damage spell (Frostbolt 116) and a landed direct heal (Greater Heal 2050) each proc the equipped aura at about 10%. A periodic tick is not a proc event (the tooltip says direct). Before the repair the aura has no proc entry, so the chance lookup fails and every rate reads 0.",
+    "An unequipped control carries no proc aura."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "rm", "race": 1, "class": 32, "level": 60 },
+    { "id": "control", "race": 1, "class": 32, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "rm", "entry": 36, "level": 60, "health": 1000000, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "add_item", "actor": "rm", "item": 515201 },
+    { "action": "equip", "label": "Equip the Staff of Twin Blossoms", "actor": "rm", "item": 515201, "slot": 15 },
+    { "action": "assert", "label": "SETUP: equipping the staff applies its proc aura", "actor": "rm", "metric": "aura", "spell": 202827, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "CONTROL: an unequipped player carries no proc aura", "actor": "control", "metric": "aura", "spell": 202827, "equals": 0 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the loaded proc entry carries the DBC 10% chance",
+      "actor": "rm", "metric": "spell_proc_chance", "spell": 202827, "equals": 10
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: a landed direct damage spell procs at about 10%",
+      "actor": "rm", "metric": "aura_proc_rate", "spell": 202827, "target": "dummy",
+      "trigger_spell": 116, "type_mask": 65536, "phase_mask": 2, "spell_type_mask": 1, "hit_mask": 1,
+      "min": 5, "max": 15
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: a landed direct heal procs at about 10%",
+      "actor": "rm", "metric": "aura_proc_rate", "spell": 202827, "target": "rm",
+      "trigger_spell": 2050, "type_mask": 16384, "phase_mask": 2, "spell_type_mask": 2, "hit_mask": 1, "heal": true,
+      "min": 5, "max": 15
+    },
+    {
+      "action": "assert", "label": "CONTROL: a periodic tick is not a proc event (the tooltip says direct)",
+      "actor": "rm", "metric": "aura_proc_rate", "spell": 202827, "target": "dummy",
+      "trigger_spell": 116, "type_mask": 262144, "phase_mask": 2, "spell_type_mask": 1, "hit_mask": 1,
+      "equals": 0
+    }
+  ]
+}
