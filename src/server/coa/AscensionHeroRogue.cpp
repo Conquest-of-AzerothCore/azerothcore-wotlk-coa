@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionHeroRogue.h"
+#include "Containers.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
@@ -18,6 +19,9 @@ enum HeroRogueSpells : uint32
     GrapplingHookFollowUp = 760094,
     MassacreEnchant       = 415001
 };
+
+constexpr std::array<uint32, 8> ROLL_THE_BONES_ENHANCEMENTS = { 760082, 760083, 760084, 760085, 760086, 760087, 760088,
+    760089 };
 
 constexpr uint32 SHIV_FLAG0 = 0x20000000;
 
@@ -121,6 +125,29 @@ class spell_hero_rogue_killing_spree_massacre : public SpellScript
     }
 };
 
+class spell_ascension_roll_the_bones : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_roll_the_bones);
+
+    bool Validate(SpellInfo const*) override { return ValidateSpellInfo(ROLL_THE_BONES_ENHANCEMENTS); }
+
+    void RollEnhancement(SpellEffIndex effIndex)
+    {
+        PreventHitDefaultEffect(effIndex);
+        Unit* caster = GetCaster();
+        for (uint32 enhancement : ROLL_THE_BONES_ENHANCEMENTS)
+            caster->RemoveAurasDueToSpell(enhancement, caster->GetGUID());
+        caster->CastSpell(caster, Acore::Containers::SelectRandomContainerElement(ROLL_THE_BONES_ENHANCEMENTS),
+            TRIGGERED_FULL_MASK);
+    }
+
+    void Register() override
+    {
+        OnEffectHit += SpellEffectFn(spell_ascension_roll_the_bones::RollEnhancement, EFFECT_1,
+            SPELL_EFFECT_ASCENSION_TRIGGER_RANDOM_SPELL);
+    }
+};
+
 void ApplyAscensionHeroRogueContracts(SpellInfo* spellInfo)
 {
     uint32 const id = spellInfo->Id;
@@ -142,4 +169,5 @@ void AddSC_AscensionHeroRogue()
     RegisterSpellScript(aura_hero_rogue_crimson_tempest_bleed);
     RegisterSpellScript(aura_hero_rogue_blade_twisting);
     RegisterSpellScript(spell_hero_rogue_killing_spree_massacre);
+    RegisterSpellScript(spell_ascension_roll_the_bones);
 }
