@@ -3712,6 +3712,11 @@ private:
             GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
             return object ? object->GetObjectScale() : 0.0f;
         }
+        if (metric == "nearby_gameobject_display")
+        {
+            GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
+            return object ? object->GetDisplayId() : 0;
+        }
         if (metric == "nearby_gameobject_ground_offset")
         {
             GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);

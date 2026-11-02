@@ -121,7 +121,7 @@ METRICS = TIMELINE_METRICS | {
     'carried_item_level', 'carried_item_required_level', 'carried_item_armor', 'carried_item_scaling_level',
     'carried_item_stat',
     'nearby_gameobject_count', 'nearby_gameobject_quest_active', 'nearby_gameobject_state', 'nearby_gameobject_scale',
-    'nearby_gameobject_ground_offset',
+    'nearby_gameobject_display', 'nearby_gameobject_ground_offset',
     'nearby_creature_count', 'map_creature_count', 'map_creatures_below_floor', 'nearby_gameobject_at_client',
     'voidportal_group',
     'carried_money',
@@ -1114,7 +1114,8 @@ def validate(scenario):
             if metric in {'spellbook_offers_spell', 'spellbook_learned_alerts',
                           'spellbook_buy_succeeded', 'spellbook_buy_failed', 'cast_failure'}:
                 require('spell' in step, f'{where}: metric needs spell')
-            if metric in {'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale'}:
+            if metric in {'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale',
+                          'nearby_gameobject_display'}:
                 require('entry' in step, f'{where}: metric needs gameobject entry')
             if metric in {'quest_status', 'quest_takeable', 'quest_objective_count'}:
                 require('quest' in step, f'{where}: metric needs quest')
@@ -1190,7 +1191,7 @@ def validate(scenario):
                           'dynamic_object', 'dynamic_object_duration_ms', 'dynamic_object_height',
                           'gossip_options', 'gossip_option_text',
                           'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale',
-                          'at_homebind',
+                          'nearby_gameobject_display', 'at_homebind',
                           'spellbook_rows', 'spellbook_offers_spell', 'spellbook_covers_spell',
                           'spellbook_learned_alerts', 'spellbook_buy_succeeded', 'spellbook_buy_failed',
                           'spellbook_buys_granted', 'spellbook_unannounced_buys',
