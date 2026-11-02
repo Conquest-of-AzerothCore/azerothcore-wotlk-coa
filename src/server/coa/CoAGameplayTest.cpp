@@ -5205,6 +5205,7 @@ private:
             auto offStat = step.get_optional<uint32>("off_stat");
             auto quality = step.get_optional<uint32>("quality");
             auto belowArmorClass = step.get_optional<uint32>("below_armor_class");
+            bool const unwearable = step.get<bool>("unwearable", false);
             auto strongestAttributes = [](ItemTemplate const* proto)
             {
                 std::array<int32, ITEM_MOD_SPIRIT + 1> attributes{};
@@ -5222,10 +5223,12 @@ private:
                 return stats;
             };
             uint32 count = 0;
-            auto countItem = [pool, &count, &excluded, minRequiredLevel, maxRequiredLevel, &dominantStat, &offStat,
-                &quality, &belowArmorClass, &strongestAttributes](Item* item)
+            auto countItem = [player, pool, &count, &excluded, minRequiredLevel, maxRequiredLevel, &dominantStat,
+                &offStat, &quality, &belowArmorClass, unwearable, &strongestAttributes](Item* item)
             {
                 if (excluded && item->GetEntry() == *excluded)
+                    return;
+                if (unwearable && (!item->GetSkill() || player->GetSkillValue(item->GetSkill())))
                     return;
                 uint32 const requiredLevel = item->GetTemplate()->RequiredLevel;
                 if (requiredLevel < minRequiredLevel || requiredLevel > maxRequiredLevel)

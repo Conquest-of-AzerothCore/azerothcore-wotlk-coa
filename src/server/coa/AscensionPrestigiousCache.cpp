@@ -214,7 +214,8 @@ bool PickReward(Player* player, CachePool const& pool, AscensionCacheRewards::Re
     for (AscensionCacheRewards::Reward const& reward : pool)
     {
         ItemTemplate const* proto = sObjectMgr->GetItemTemplate(reward.itemId);
-        if (!proto || player->CanUseItem(proto) != EQUIP_ERR_OK)
+        if (!proto || player->CanUseItem(proto) != EQUIP_ERR_OK ||
+            (proto->GetSkill() && !player->GetSkillValue(proto->GetSkill())))
             continue;
         fallback.push_back(&reward);
         if (reward.statType == stat || reward.statType == 4 || reward.statType == 5)
