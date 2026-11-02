@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "Soulrot at 20 stacks deals its damage when it expires (#9362)",
+  "contract": [
+    "Soulrot 805196 makes Deathchaser 805190 damage apply debuff 804660, StackAmount 20, 15 sec (DurationIndex 8).",
+    "Its tooltip: 'At the end of the duration the enemy will take damage based on the number of stacks accrued.'",
+    "The damage is effect 1, PERIODIC_DAMAGE with amplitude 14999 ms. The report says that at 20 stacks the debuff",
+    "dissipates without dealing damage. Here Deathchaser is recast for about 9 sec so the debuff reaches 20 stacks and",
+    "keeps being refreshed past the first application; expected: no Soulrot damage while the debuff is still up,",
+    "then one damage event when it ends.",
+    "Deathchaser is DmgClass 2 (melee), so the Reaper gets melee hit and expertise rating; Soulrot is covered by spell hit."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "reaper", "race": 10, "class": 30, "level": 80, "spell_hit_rating": 10000, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "victim", "owner": "reaper", "entry": 299, "level": 80, "distance": 2, "health": 1000000 }
+  ],
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "reaper", "spell": 805196 },
+    { "action": "learn", "actor": "reaper", "spell": 805190 },
+    { "action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1 },
+    { "action": "cast", "actor": "reaper", "spell": 805190, "target": "victim" },
+    { "action": "assert", "label": "Deathchaser applied Soulrot", "actor": "victim", "metric": "aura", "spell": 804660, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1 },
+    { "action": "cast", "actor": "reaper", "spell": 805190, "target": "victim" },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1 },
+    { "action": "cast", "actor": "reaper", "spell": 805190, "target": "victim" },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1 },
+    { "action": "cast", "actor": "reaper", "spell": 805190, "target": "victim" },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1 },
+    { "action": "cast", "actor": "reaper", "spell": 805190, "target": "victim" },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1 },
+    { "action": "cast", "actor": "reaper", "spell": 805190, "target": "victim" },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_aura", "actor": "reaper", "spell": 803031, "stacks": 1 },
+    { "action": "cast", "actor": "reaper", "spell": 805190, "target": "victim" },
+    { "action": "assert", "label": "Soulrot reached its 20-stack cap", "actor": "victim", "metric": "aura_stacks", "spell": 804660, "equals": 20, "within_ms": 3000 },
+    { "action": "wait", "label": "Pass 15 sec after the first application while recent stacks keep the debuff up", "ms": 8000 },
+    { "action": "assert", "label": "The 20-stack debuff is still up", "actor": "victim", "metric": "aura", "spell": 804660, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: Soulrot has not dealt its damage before the end of its duration", "actor": "reaper", "metric": "spell_damage_count", "spell": 804660, "target": "victim", "equals": 0 },
+    { "action": "wait", "label": "Let the debuff end", "ms": 11000 },
+    { "action": "assert", "label": "Soulrot ended", "actor": "victim", "metric": "aura", "spell": 804660, "equals": 0 },
+    { "action": "assert", "label": "Soulrot dealt one damage event at the end", "actor": "reaper", "metric": "spell_damage_count", "spell": 804660, "target": "victim", "equals": 1 },
+    { "action": "assert", "label": "The damage is positive", "actor": "reaper", "metric": "spell_damage_total", "spell": 804660, "target": "victim", "min": 1 }
+  ]
+}
