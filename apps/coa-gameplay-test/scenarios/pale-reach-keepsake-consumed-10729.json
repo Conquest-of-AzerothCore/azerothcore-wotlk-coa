@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "No Parent Should Bury Their Child takes Abellon's Keepsake on turn-in (#10729)",
+  "contract": [
+    "Quest 175041 (Bury Abellon's keepsake next to the grave of Noghan Dolmen) gives Abellon's Keepsake 559876 as its",
+    "start item when accepted. Player::RewardQuest removes a quest's source items (ItemDrop) on reward; the keepsake",
+    "is buried, so it must leave the bags. Expected: one keepsake while the quest is in progress, none after the",
+    "reward, and the quest's reward item 559976 is delivered."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -7558.5, "y": 1162.21, "z": 167.6, "o": 0},
+  "players": [
+    {"id": "mourner", "race": 1, "class": 16, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the fixture settle", "ms": 2000},
+    {"action": "prepare_quest", "label": "Accept the quest", "actor": "mourner", "quest": 175041, "complete": false},
+    {"action": "assert", "label": "SETUP: the keepsake is handed out with the quest", "actor": "mourner",
+     "metric": "item_count", "item": 559876, "equals": 1},
+    {"action": "quest_complete", "label": "fixture: the keepsake is buried", "actor": "mourner", "quest": 175041},
+    {"action": "reward_quest", "label": "Turn the quest in", "actor": "mourner", "quest": 175041},
+    {"action": "assert", "label": "the quest is rewarded", "actor": "mourner", "metric": "quest_rewarded",
+     "quest": 175041, "equals": 1},
+    {"action": "assert", "label": "DISCRIMINATING: the buried keepsake left the bags", "actor": "mourner",
+     "metric": "item_count", "item": 559876, "equals": 0},
+    {"action": "assert", "label": "the reward item is delivered", "actor": "mourner", "metric": "item_count",
+     "item": 559976, "equals": 1}
+  ]
+}
