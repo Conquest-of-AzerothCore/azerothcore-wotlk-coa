@@ -144,7 +144,7 @@ METRICS = TIMELINE_METRICS | {
     'script_melee_hit_taken', 'script_melee_damage_dealt',
     'script_spell_damage_taken', 'script_periodic_damage_taken', 'script_heal_received', 'spell_effect_value',
     'block_chance', 'block_value', 'critical_block_chance', 'spell_critical_damage', 'armor_reduced_damage',
-    'aoe_damage_taken', 'reputation_gain', 'spell_immune', 'spell_effect_immune', 'melee_attack_count',
+    'aoe_damage_taken', 'reputation', 'reputation_gain', 'spell_immune', 'spell_effect_immune', 'melee_attack_count',
     'melee_attacks_taken',
     'spell_damage_count', 'spell_damage_total', 'spell_uses_armor',
     'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',
@@ -182,7 +182,7 @@ PLAYER_STAT_METRICS = {
     'script_spell_damage_taken',
     'script_periodic_damage_taken', 'script_heal_received', 'spell_effect_value',
     'block_chance', 'block_value', 'critical_block_chance', 'spell_critical_damage', 'armor_reduced_damage',
-    'aoe_damage_taken', 'reputation_gain', 'spell_immune', 'spell_effect_immune', 'melee_attack_count',
+    'aoe_damage_taken', 'reputation', 'reputation_gain', 'spell_immune', 'spell_effect_immune', 'melee_attack_count',
     'melee_attacks_taken',
     'spell_damage_count', 'spell_damage_total', 'spell_uses_armor',
     'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',
@@ -307,6 +307,7 @@ ACTIONS = {
     'give_xp': ({'actor', 'amount'}, {'actor', 'amount'}),
     'set_xp_enabled': ({'actor', 'enabled'}, {'actor', 'enabled'}),
     'set_level': ({'actor', 'value'}, {'actor', 'value'}),
+    'set_reputation': ({'actor', 'id', 'value'}, {'actor', 'id', 'value'}),
     'set_health': ({'actor', 'value'}, {'actor', 'value', 'pet', 'maximum'}),
     'set_health_pct': ({'actor', 'pct'}, {'actor', 'pct', 'entry', 'target'}),
     'reset_cooldown': ({'actor', 'spell'}, {'actor', 'spell'}),
@@ -713,6 +714,9 @@ def validate(scenario):
             number(step['copper'], f'{where}.copper', 1, 2**31 - 1, True)
         if action == 'set_level':
             number(step['value'], f'{where}.value', 1, 80, True)
+        if action == 'set_reputation':
+            number(step['id'], f'{where}.id', 1, 2**16 - 1, True)
+            number(step['value'], f'{where}.value', -42000, 42999, True)
         if action == 'level_scaling_packet':
             number(step['value'], f'{where}.value', 0, 1, True)
         if action in {'quest_accept', 'quest_turn_in'}:
@@ -811,7 +815,7 @@ def validate(scenario):
                                'stabled_pet': 3, 'wildcard_entry': 255, 'wildcard_pending_cards': 1000,
                                'wildcard_lowest_card': 7}[kind]
                     number(value, f'{where}.fields[{index}]', 0, maximum, True)
-        if 'value' in step:
+        if 'value' in step and action != 'set_reputation':
             number(step['value'], f'{where}.value', 1 if action == 'set_health' else 0, 2**31 - 1, True)
         if action == 'set_health_pct':
             require(('entry' in step) != ('target' in step), f'{where}: needs exactly one of entry or target')
@@ -1031,7 +1035,7 @@ def validate(scenario):
                 number(step.get('rating'), f'{where}.rating', 0, 24, True)
             if metric == 'aoe_damage_taken':
                 number(step.get('school'), f'{where}.school', 0, 6, True)
-            if metric == 'reputation_gain':
+            if metric in {'reputation', 'reputation_gain'}:
                 require('id' in step, f'{where}: reputation metric needs faction id')
             if metric == 'spell_modifier':
                 number(step.get('op'), f'{where}.op', 0, 31, True)
