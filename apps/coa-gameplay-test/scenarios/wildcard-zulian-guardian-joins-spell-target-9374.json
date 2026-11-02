@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Zulian Guardian tigers join the enemy their owner attacks with spells after the summon (#9374)",
+  "contract": [
+    "Zulian Guardian 285959 'Summons two prowling Zulian Guardians for $d' (Spell.dbc), Zulian Spirit Tiger 350001",
+    "driven by the Attack behaviour of the summoned-effect AI. The report says the tigers only follow their owner",
+    "like non-combat pets. Here the owner summons them with nothing selected, then selects an enemy and damages it",
+    "with a spell, Spore 572869, without meleeing. Expected: the tigers attack that enemy, as assisting summons do."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 29,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 4000000,
+      "distance": 8
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 285959
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572869
+    },
+    {
+      "action": "cast",
+      "label": "Summon the tigers with nothing selected",
+      "actor": "caster",
+      "spell": 285959
+    },
+    {
+      "action": "assert",
+      "label": "Two tigers are summoned",
+      "actor": "caster",
+      "metric": "owned_creature_count",
+      "entry": 350001,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1500
+    },
+    {
+      "action": "client_packet",
+      "label": "Select the dummy (CMSG_SET_SELECTION)",
+      "actor": "caster",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "dummy"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "cast",
+      "label": "Spore the dummy",
+      "actor": "caster",
+      "spell": 572869,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Spore lands on the dummy",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 572869,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the tigers attack the enemy their owner damages",
+      "actor": "caster",
+      "metric": "owned_creature_victim",
+      "entry": 350001,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}
