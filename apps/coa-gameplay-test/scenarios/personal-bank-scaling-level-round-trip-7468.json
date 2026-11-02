@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "name": "Personal Bank: a scaled item keeps its stored instance level across a deposit/withdraw round trip",
+  "contract": "#7468: the bank slot packet built by SendTabList (AscensionPersonalBank.cpp) only ever sent entry/count/enchant/random-property, never the per-instance scaling level NativeItemScaling keeps keyed by item GUID, so a scaled item showed its base (level 1) form while sitting in a bank tab, and withdrawing it did not resend the level either (ItemArrived/SendAllLevels are not called by MoveItemToInventory). SendTabList and WithdrawToPlayer now call a small SendItemLevel helper that resends the stored ItemLadder level addon packet whenever an item is listed in a bank tab or handed back to the player. This regression checks the server-side instance level data itself (NativeItemScaling::InstanceLevel, read through the carried_item_scaling_level metric, not the client's rendering of the bank or inventory window): the stored level, and the item level/required level it drives, must be exactly the same before the deposit and after the withdraw. Lionfur Armor (17922) is bind-on-equip, so an unequipped looted copy is not soulbound and deposits normally into either bank. It also asserts the raw UpdateObjectAddon packet (0x0578/1400, ItemLadder::BuildLevelAddon: guid, field 0, level) sent after the deposit and after the withdraw, confirming the addon itself carries the stored level rather than only the server-side NativeItemScaling state.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -9465, "y": 64, "z": 56, "o": 0 },
+  "players": [
+    { "id": "hero", "race": 10, "class": 17, "level": 8 }
+  ],
+  "creatures": [
+    { "id": "rake", "owner": "hero", "entry": 5807, "level": 10, "health": 1, "distance": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
+    { "action": "add_item", "label": "Acquire the Personal Bank", "actor": "hero", "item": 134985, "count": 1 },
+    { "action": "use_item", "label": "Place the Personal Bank vault", "actor": "hero", "item": 134985, "spell": 100702 },
+    { "action": "wait", "label": "Let the vault summon land in the world", "ms": 3000 },
+    { "action": "attack", "actor": "hero", "target": "rake" },
+    { "action": "assert", "actor": "rake", "metric": "alive", "equals": 0, "within_ms": 30000 },
+    { "action": "loot_creature", "actor": "hero", "target": "rake" },
+    { "action": "loot_slot", "actor": "hero", "item": 17922 },
+    { "action": "close_loot", "actor": "hero" },
+    {
+      "action": "assert",
+      "label": "SETUP: the looted armor is not soulbound yet (bind on equip)",
+      "actor": "hero", "metric": "item_soulbound", "item": 17922, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the looted armor stores a non-zero scaling instance level",
+      "actor": "hero", "metric": "carried_item_scaling_level", "item": 17922, "equals": 10, "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: its scaled required level",
+      "actor": "hero", "metric": "carried_item_required_level", "item": 17922, "equals": 9
+    },
+    { "action": "personal_bank_open", "label": "Open the Personal Bank", "actor": "hero", "entry": 475002 },
+    {
+      "action": "personal_bank_swap", "label": "Deposit the scaled armor",
+      "actor": "hero", "entry": 475002, "direction": "deposit", "item": 17922, "slot": 0
+    },
+    {
+      "action": "assert",
+      "label": "The deposit leaves the bags",
+      "actor": "hero", "metric": "item_count", "item": 17922, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The bank listing resent an UpdateObjectAddon level packet (0x0578)",
+      "actor": "hero", "metric": "server_packets", "opcode": 1400, "min": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "That packet's level field carries the stored instance level",
+      "actor": "hero", "metric": "server_packet_u32", "opcode": 1400, "offset": 8, "index": 1, "equals": 10
+    },
+    {
+      "action": "personal_bank_swap", "label": "Withdraw the scaled armor again",
+      "actor": "hero", "entry": 475002, "direction": "withdraw", "slot": 0
+    },
+    {
+      "action": "assert",
+      "label": "The withdrawn armor is back in the bags",
+      "actor": "hero", "metric": "item_count", "item": 17922, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The withdraw resent a second UpdateObjectAddon level packet",
+      "actor": "hero", "metric": "server_packets", "opcode": 1400, "min": 2, "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "That second packet's level field still carries the stored instance level",
+      "actor": "hero", "metric": "server_packet_u32", "opcode": 1400, "offset": 8, "index": 1, "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "The round trip keeps the stored scaling instance level",
+      "actor": "hero", "metric": "carried_item_scaling_level", "item": 17922, "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "The round trip keeps the scaled required level",
+      "actor": "hero", "metric": "carried_item_required_level", "item": 17922, "equals": 9
+    }
+  ]
+}

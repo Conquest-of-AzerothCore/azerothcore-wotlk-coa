@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "name": "Realm Bank: a soulbound item cannot be deposited, and the deposit never removes it",
+  "contract": "#7468: the Realm Bank is shared by the whole account (owner key is the account id, mod_ascension_bank_item.owner_kind=1), so it has no single character to own a soulbound item. StoreSlot (AscensionPersonalBank.cpp) wrote SetOwnerGUID(Empty) for every Realm Bank deposit, so a soulbound item deposited there could never pass Item::IsBindedNotWith on withdraw (owner Empty != withdrawing player) and answered EQUIP_ERR_DONT_OWN_THAT_ITEM, stranding the item (item_instance.owner_guid stays 0 forever). DepositToBank now refuses a soulbound deposit into a Realm Bank up front, the same rule Guild::BankMoveItemData::CanStore already uses for the guild bank (Guild.cpp:1007-1008): the item stays in the depositor's bags instead of being accepted and later stranded. The refusal also sends an explicit ChatHandler system message (the pattern this file already uses for other bank refusals, e.g. the 'already owns every tab' tab-grant message a few hundred lines down) instead of relying on the generic EQUIP_ERR_CANT_DROP_SOULBOUND client text, since the generic text alone was not considered explicit. A non-soulbound item is unaffected and still deposits and withdraws normally. The same refusal (through a shared RefuseSoulboundIntoRealmBank helper) also covers a withdraw aimed directly at a bag slot holding a soulbound item: without it, that swap path stores the soulbound destItem into the Realm Bank, bypassing the deposit check entirely.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "banker", "race": 10, "class": 17, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "add_item", "label": "Acquire the Realm Bank", "actor": "banker", "item": 1180097, "count": 1 },
+    {
+      "action": "assert",
+      "label": "The Realm Bank's spell follows its item",
+      "actor": "banker", "metric": "knows_spell", "spell": 92078, "equals": 1
+    },
+    { "action": "cast", "label": "Summon the Realm Bank vault", "actor": "banker", "spell": 92078 },
+    { "action": "wait", "label": "Let the vault summon land in the world", "ms": 3000 },
+    { "action": "add_item", "label": "Carry a soulbound item", "actor": "banker", "item": 23323, "count": 1 },
+    {
+      "action": "assert",
+      "label": "SETUP: the item is soulbound as soon as it is acquired",
+      "actor": "banker", "metric": "item_soulbound", "item": 23323, "equals": 1
+    },
+    { "action": "add_item", "label": "Carry a non-soulbound control item", "actor": "banker", "item": 2589, "count": 3 },
+    {
+      "action": "assert",
+      "label": "SETUP: the control item is not soulbound",
+      "actor": "banker", "metric": "item_soulbound", "item": 2589, "equals": 0
+    },
+    { "action": "personal_bank_open", "label": "Open the Realm Bank vault (Horde)", "actor": "banker", "entry": 80160 },
+    {
+      "action": "personal_bank_swap", "label": "Try to deposit the soulbound item",
+      "actor": "banker", "entry": 80160, "direction": "deposit", "item": 23323, "slot": 0
+    },
+    {
+      "action": "assert",
+      "label": "The refused deposit leaves the soulbound item in the bags",
+      "actor": "banker", "metric": "item_count", "item": 23323, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The player is told explicitly why, not just the generic equip-error text",
+      "actor": "banker", "metric": "system_message_contains",
+      "text": "Soulbound items cannot be stored in the Realm Bank.", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "personal_bank_swap", "label": "Deposit the non-soulbound control item",
+      "actor": "banker", "entry": 80160, "direction": "deposit", "item": 2589, "slot": 0
+    },
+    {
+      "action": "assert",
+      "label": "The control item leaves the bags",
+      "actor": "banker", "metric": "item_count", "item": 2589, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "personal_bank_swap", "label": "Withdraw the control item again",
+      "actor": "banker", "entry": 80160, "direction": "withdraw", "slot": 0
+    },
+    {
+      "action": "assert",
+      "label": "The control item returns to the bags, in full",
+      "actor": "banker", "metric": "item_count", "item": 2589, "equals": 3, "within_ms": 2000
+    },
+    {
+      "action": "personal_bank_swap", "label": "Deposit the control item again, for the swap-withdraw check",
+      "actor": "banker", "entry": 80160, "direction": "deposit", "item": 2589, "slot": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control item is in the bank again",
+      "actor": "banker", "metric": "item_count", "item": 2589, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "personal_bank_swap",
+      "label": "Try to withdraw it directly onto the bag slot holding the soulbound item (bag 0, slot 24: add_item filled slot 23 with the Realm Bank item, slot 24 with the soulbound item, slot 25 with the control item)",
+      "actor": "banker", "entry": 80160, "direction": "withdraw", "slot": 0, "inventory_slot": 24
+    },
+    {
+      "action": "assert",
+      "label": "The refused swap leaves the soulbound item in the bags, not swapped into the Realm Bank",
+      "actor": "banker", "metric": "item_count", "item": 23323, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The refused swap leaves the control item in the Realm Bank, not withdrawn",
+      "actor": "banker", "metric": "item_count", "item": 2589, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The player is told explicitly why the swap was refused too",
+      "actor": "banker", "metric": "system_message_contains",
+      "text": "Soulbound items cannot be stored in the Realm Bank.", "equals": 1, "within_ms": 2000
+    }
+  ]
+}
