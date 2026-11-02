@@ -1,0 +1,675 @@
+--- a/Interface/AddOns/Ascension_BuildCreator/BuildEditor/EditableBuildView.lua
++++ b/Interface/AddOns/Ascension_BuildCreator/BuildEditor/EditableBuildView.lua
+@@ -872,10 +872,20 @@
+ 
+ function F.ImportAssigned(view,replace)
+     if not F.Applies() or not view.Area52ArchetypeID or view.Area52FeaturedInvalid then return end
++    if view.Area52ImportCancel then view.Area52ImportCancel();view.Area52ImportCancel=nil end
++    view.Area52ImportPending=false
++    local serial=(view.Area52ImportSerial or 0)+1
++    view.Area52ImportSerial=serial
+     local id=view.Area52ArchetypeID
+-    local appearances=C_ItemSet.GetAppearances(90000+id)
+-    if not appearances or not next(appearances) then return end
+-    local assigned=F.Read("")
++    local context={view=view,id=C_BuildEditor.GetPendingBuild().ID,archetype=id,generation=view.Area52FeaturedGeneration}
++    local original={unpack(view.Area52FeaturedItems)}
++    local candidates,seen={},{}
++    local function add(item)
++        if type(item)=="number" and item>0 and not seen[item] then
++            seen[item]=true;candidates[#candidates+1]=item
++        end
++    end
++    local appearances=C_ItemSet.GetAppearances(90000+id) or {}
+     local keys={}
+     for key in pairs(appearances) do keys[#keys+1]=key end
+     table.sort(keys)
+@@ -883,23 +893,53 @@
+         local appearance=appearances[key]
+         if appearance and appearance~=0 then
+             local kind,item=C_Appearance.GetAppearanceDisplayInfo(appearance)
+-            if kind=="APPEARANCE_DISPLAY_TYPE_ITEM" then
+-                for slot=1,12 do
+-                    if assigned[slot]==0 and F.Accepts(slot,item) then assigned[slot]=item;break end
+-                end
++            if kind=="APPEARANCE_DISPLAY_TYPE_ITEM" then add(item) end
++        end
++    end
++    local bundle=C_VanityCollection.GetItem(9901000+id)
++    local bundleItems={}
++    for _,item in pairs(bundle and bundle.contentsPreview or {}) do
++        if type(item)=="number" then bundleItems[#bundleItems+1]=item end
++    end
++    table.sort(bundleItems)
++    for _,item in ipairs(bundleItems) do add(item) end
++    if #candidates==0 then F.Message("The archetype catalog has no available items. Nothing was changed.");return end
++    local function apply()
++        if view.Area52ImportSerial~=serial then return end
++        view.Area52ImportPending=false
++        if view.Area52FeaturedInvalid or not F.ValidContext(context) then return end
++        view.Area52ImportCancel=nil
++        for slot=1,14 do
++            if original[slot]~=view.Area52FeaturedItems[slot] then
++                F.Message("Archetype loading was cancelled because your selections changed.");return
+             end
+         end
+-    end
+-    local bundle=C_VanityCollection.GetItem(9901000+id)
+-    for _,item in pairs(bundle and bundle.contentsPreview or {}) do
+-        for slot=13,14 do if F.Accepts(slot,item) then assigned[slot]=item end end
+-    end
+-    for slot=1,14 do
+-        if replace or view.Area52FeaturedItems[slot]==0 then view.Area52FeaturedItems[slot]=assigned[slot] end
+-    end
+-    if view.Area52FeaturedItems[10]>0 and GetItemInventoryType(view.Area52FeaturedItems[10])==17 then view.Area52FeaturedItems[11]=0 end
+-    view.Area52FeaturedImported=id
+-    F.Refresh(view)
++        for _,item in ipairs(candidates) do
++            if not GetItemInfo(item) then
++                F.Message("Some archetype items have not loaded. Try Load archetype set again.");return
++            end
++        end
++        local assigned=F.Read("")
++        for _,item in ipairs(candidates) do
++            for slot=1,14 do
++                if assigned[slot]==0 and F.Accepts(slot,item) then assigned[slot]=item;break end
++            end
++        end
++        for slot=1,14 do
++            if replace or view.Area52FeaturedItems[slot]==0 then view.Area52FeaturedItems[slot]=assigned[slot] end
++        end
++        if view.Area52FeaturedItems[10]>0 and GetItemInventoryType(view.Area52FeaturedItems[10])==17 then view.Area52FeaturedItems[11]=0 end
++        view.Area52FeaturedImported=id
++        F.Refresh(view)
++        view:UpdatePendingBuild()
++    end
++    local missing={}
++    for _,item in ipairs(candidates) do if not GetItemInfo(item) then missing[#missing+1]=item end end
++    if #missing==0 then apply()
++    else
++        view.Area52ImportPending=true
++        view.Area52ImportCancel=ItemQueryListener:AddCancelableCallback(missing,apply)
++    end
+ end
+ 
+ function F.SlotTooltip(view,slot,button)
+@@ -2978,3 +3018,579 @@
+     [8200215]="flying",
+     [8388604]="ground",
+ }
++
++Area52FeaturedEditor.PreviewCatalog = {
++    {
++        {id=74491,name="Creature name unavailable"},
++        {id=80854,name="Creature name unavailable"},
++        {id=24747,name="Fjord Hawk"},
++        {id=6554,name="Gorishi Stinger"},
++        {id=416,name="Imp"},
++        {id=16941,name="Phasing Voidcaller"},
++        {id=1042,name="Red Whelp"},
++        {id=35189,name="Skoll"},
++        {id=1863,name="Succubus"},
++        {id=18683,name="Voidhunter Yar"},
++        {id=1860,name="Voidwalker"},
++        {id=510,name="Water Elemental"},
++    },
++    {
++        {id=15313,name="Druid of the Eclipse form"},
++        {id=15314,name="Druid of the Eclipse form"},
++        {id=41264,name="Incarnation 15605"},
++        {id=41265,name="Incarnation 15606"},
++        {id=41266,name="Incarnation 15607"},
++        {id=41267,name="Incarnation 15608"},
++        {id=41268,name="Incarnation 15609"},
++        {id=41269,name="Incarnation 15610"},
++        {id=41270,name="Incarnation 15611"},
++        {id=424731,name="Incarnation 179673"},
++        {id=424732,name="Incarnation 179674"},
++        {id=424733,name="Incarnation 179675"},
++        {id=424734,name="Incarnation 179676"},
++        {id=424735,name="Incarnation 179677"},
++        {id=424737,name="Incarnation 179678"},
++        {id=308385,name="Incarnation 261377"},
++        {id=308386,name="Incarnation 261378"},
++        {id=308387,name="Incarnation 261379"},
++        {id=308388,name="Incarnation 261380"},
++        {id=308389,name="Incarnation 261381"},
++        {id=308390,name="Incarnation 261382"},
++        {id=499780,name="Incarnation 45401"},
++        {id=499777,name="Incarnation 45403"},
++        {id=499796,name="Incarnation 47124"},
++        {id=499720,name="Incarnation 47250"},
++        {id=499719,name="Incarnation 47251"},
++        {id=90248,name="Incarnation 47522"},
++        {id=1815,name="Incarnation 47524"},
++        {id=499721,name="Incarnation 47533"},
++        {id=499718,name="Incarnation 47536"},
++        {id=599787,name="Incarnation 47537"},
++        {id=499787,name="Incarnation 47538"},
++        {id=499788,name="Incarnation 47539"},
++        {id=499786,name="Incarnation 47540"},
++        {id=499785,name="Incarnation 47541"},
++        {id=499795,name="Incarnation 47542"},
++        {id=499798,name="Incarnation 47543"},
++        {id=499799,name="Incarnation 47544"},
++        {id=499797,name="Incarnation 47545"},
++        {id=499794,name="Incarnation 47547"},
++        {id=499800,name="Incarnation 47548"},
++        {id=499793,name="Incarnation 47549"},
++        {id=499791,name="Incarnation 47550"},
++        {id=499792,name="Incarnation 47551"},
++        {id=499790,name="Incarnation 47552"},
++        {id=499789,name="Incarnation 47553"},
++        {id=499784,name="Incarnation 47554"},
++        {id=499783,name="Incarnation 47555"},
++        {id=499782,name="Incarnation 47556"},
++        {id=499779,name="Incarnation 47558"},
++        {id=499802,name="Incarnation 47560"},
++        {id=499801,name="Incarnation 47561"},
++        {id=499803,name="Incarnation 47562"},
++        {id=80655,name="Incarnation 47563"},
++        {id=173527,name="Incarnation 47569"},
++        {id=404520,name="Incarnation 47571"},
++        {id=404521,name="Incarnation 47572"},
++        {id=404522,name="Incarnation 47573"},
++        {id=404523,name="Incarnation 47574"},
++        {id=404524,name="Incarnation 47575"},
++        {id=404525,name="Incarnation 47576"},
++        {id=304276,name="Incarnation 47578"},
++        {id=81100,name="Incarnation 47580"},
++        {id=81101,name="Incarnation 47581"},
++        {id=81102,name="Incarnation 47582"},
++        {id=81104,name="Incarnation 47584"},
++        {id=81105,name="Incarnation 47585"},
++        {id=81106,name="Incarnation 47586"},
++        {id=81107,name="Incarnation 47587"},
++        {id=81108,name="Incarnation 47588"},
++        {id=81109,name="Incarnation 47589"},
++        {id=81110,name="Incarnation 47590"},
++        {id=81111,name="Incarnation 47591"},
++        {id=499733,name="Incarnation 47592"},
++        {id=499732,name="Incarnation 47593"},
++        {id=499731,name="Incarnation 47595"},
++        {id=499734,name="Incarnation 47596"},
++        {id=499735,name="Incarnation 47597"},
++        {id=499736,name="Incarnation 47598"},
++        {id=499737,name="Incarnation 47599"},
++        {id=499742,name="Incarnation 47600"},
++        {id=499743,name="Incarnation 47601"},
++        {id=499744,name="Incarnation 47602"},
++        {id=499745,name="Incarnation 47603"},
++        {id=499738,name="Incarnation 47604"},
++        {id=499739,name="Incarnation 47605"},
++        {id=499740,name="Incarnation 47606"},
++        {id=499741,name="Incarnation 47607"},
++        {id=499746,name="Incarnation 47608"},
++        {id=499747,name="Incarnation 47609"},
++        {id=499748,name="Incarnation 47610"},
++        {id=499749,name="Incarnation 47611"},
++        {id=499750,name="Incarnation 47612"},
++        {id=499751,name="Incarnation 47613"},
++        {id=499752,name="Incarnation 47614"},
++        {id=141758,name="Incarnation 47615"},
++        {id=80963,name="Incarnation 47640"},
++        {id=80650,name="Incarnation 47642"},
++        {id=499396,name="Incarnation 47647"},
++        {id=371442,name="Incarnation 47648"},
++        {id=371443,name="Incarnation 47649"},
++        {id=371444,name="Incarnation 47650"},
++        {id=1777239,name="Incarnation 47651"},
++        {id=499638,name="Incarnation 47653"},
++        {id=499639,name="Incarnation 47654"},
++        {id=499640,name="Incarnation 47655"},
++        {id=371436,name="Incarnation 47656"},
++        {id=371437,name="Incarnation 47657"},
++        {id=371438,name="Incarnation 47658"},
++        {id=371439,name="Incarnation 47659"},
++        {id=371440,name="Incarnation 47660"},
++        {id=371441,name="Incarnation 47661"},
++        {id=80882,name="Incarnation 51206"},
++        {id=421465,name="Incarnation 51207"},
++        {id=421466,name="Incarnation 51208"},
++        {id=421467,name="Incarnation 51209"},
++        {id=421468,name="Incarnation 51210"},
++        {id=322518,name="Incarnation 51211"},
++        {id=322519,name="Incarnation 51212"},
++        {id=322520,name="Incarnation 51213"},
++        {id=322521,name="Incarnation 51214"},
++        {id=322522,name="Incarnation 51215"},
++        {id=322523,name="Incarnation 51216"},
++        {id=144889,name="Incarnation 51217"},
++        {id=81103,name="Incarnation 51429"},
++        {id=67268,name="Incarnation 6004"},
++        {id=67269,name="Incarnation 6005"},
++        {id=67270,name="Incarnation 6006"},
++        {id=67271,name="Incarnation 6007"},
++        {id=67272,name="Incarnation 6008"},
++        {id=67273,name="Incarnation 6009"},
++        {id=699796,name="Incarnation 61375"},
++        {id=699797,name="Incarnation 61376"},
++        {id=699798,name="Incarnation 61377"},
++        {id=699799,name="Incarnation 61378"},
++        {id=421493,name="Incarnation 645"},
++        {id=421494,name="Incarnation 646"},
++        {id=421495,name="Incarnation 647"},
++        {id=421496,name="Incarnation 648"},
++        {id=421497,name="Incarnation 649"},
++        {id=421498,name="Incarnation 650"},
++        {id=421499,name="Incarnation 651"},
++        {id=421491,name="Incarnation 652"},
++        {id=99033,name="Incarnation: Druid of the Flames"},
++        {id=200157,name="Incarnation: Emperor Korthek"},
++        {id=5531,name="Incarnation: Fallen to Nightmare (Gray & Red)"},
++        {id=499778,name="Incarnation: Guardian of the Glade (Maroon)"},
++        {id=80881,name="Incarnation: Metamorphosis of Fel"},
++        {id=499804,name="Incarnation: Might of the Grizzlemaw (White)"},
++        {id=1816,name="Incarnation: Plague Bear (Brown)"},
++        {id=499637,name="Incarnation: Tree of Wrath (Brown)"},
++    },
++}
++Area52FeaturedEditor.IncarnationChoices = {
++    {
++        {id=822,name="Incarnation: Plague Bear (Brown)"},
++        {id=45401,name="Incarnation 45401"},
++        {id=45402,name="Incarnation: Guardian of the Glade (Maroon)"},
++        {id=45403,name="Incarnation 45403"},
++        {id=47124,name="Incarnation 47124"},
++        {id=47250,name="Incarnation 47250"},
++        {id=47251,name="Incarnation 47251"},
++        {id=47522,name="Incarnation 47522"},
++        {id=47524,name="Incarnation 47524"},
++        {id=47533,name="Incarnation 47533"},
++        {id=47536,name="Incarnation 47536"},
++        {id=47537,name="Incarnation 47537"},
++        {id=47538,name="Incarnation 47538"},
++        {id=47539,name="Incarnation 47539"},
++        {id=47540,name="Incarnation 47540"},
++        {id=47541,name="Incarnation 47541"},
++        {id=47542,name="Incarnation 47542"},
++        {id=47543,name="Incarnation 47543"},
++        {id=47544,name="Incarnation 47544"},
++        {id=47545,name="Incarnation 47545"},
++        {id=47547,name="Incarnation 47547"},
++        {id=47548,name="Incarnation 47548"},
++        {id=47549,name="Incarnation 47549"},
++        {id=47550,name="Incarnation 47550"},
++        {id=47551,name="Incarnation 47551"},
++        {id=47552,name="Incarnation 47552"},
++        {id=47553,name="Incarnation 47553"},
++        {id=47554,name="Incarnation 47554"},
++        {id=47555,name="Incarnation 47555"},
++        {id=47556,name="Incarnation 47556"},
++        {id=47557,name="Incarnation: Fallen to Nightmare (Gray & Red)"},
++        {id=47558,name="Incarnation 47558"},
++        {id=47559,name="Incarnation: Might of the Grizzlemaw (White)"},
++        {id=47560,name="Incarnation 47560"},
++        {id=47561,name="Incarnation 47561"},
++        {id=47562,name="Incarnation 47562"},
++        {id=61375,name="Incarnation 61375"},
++        {id=61376,name="Incarnation 61376"},
++        {id=61377,name="Incarnation 61377"},
++        {id=61378,name="Incarnation 61378"},
++        {id=261377,name="Incarnation 261377"},
++        {id=261378,name="Incarnation 261378"},
++        {id=261379,name="Incarnation 261379"},
++        {id=261380,name="Incarnation 261380"},
++        {id=261381,name="Incarnation 261381"},
++        {id=261382,name="Incarnation 261382"},
++    },
++    {
++        {id=645,name="Incarnation 645"},
++        {id=646,name="Incarnation 646"},
++        {id=647,name="Incarnation 647"},
++        {id=648,name="Incarnation 648"},
++        {id=649,name="Incarnation 649"},
++        {id=650,name="Incarnation 650"},
++        {id=651,name="Incarnation 651"},
++        {id=652,name="Incarnation 652"},
++        {id=6004,name="Incarnation 6004"},
++        {id=6005,name="Incarnation 6005"},
++        {id=6006,name="Incarnation 6006"},
++        {id=6007,name="Incarnation 6007"},
++        {id=6008,name="Incarnation 6008"},
++        {id=6009,name="Incarnation 6009"},
++        {id=47563,name="Incarnation 47563"},
++        {id=47565,name="Incarnation 47565"},
++        {id=47566,name="Incarnation 47566"},
++        {id=47567,name="Incarnation 47567"},
++        {id=47568,name="Incarnation 47568"},
++        {id=47569,name="Incarnation 47569"},
++        {id=47571,name="Incarnation 47571"},
++        {id=47572,name="Incarnation 47572"},
++        {id=47573,name="Incarnation 47573"},
++        {id=47574,name="Incarnation 47574"},
++        {id=47575,name="Incarnation 47575"},
++        {id=47576,name="Incarnation 47576"},
++        {id=47577,name="Incarnation: Emperor Korthek"},
++        {id=47578,name="Incarnation 47578"},
++        {id=47579,name="Incarnation: Druid of the Flames"},
++        {id=47580,name="Incarnation 47580"},
++        {id=47581,name="Incarnation 47581"},
++        {id=47582,name="Incarnation 47582"},
++        {id=47584,name="Incarnation 47584"},
++        {id=47585,name="Incarnation 47585"},
++        {id=47586,name="Incarnation 47586"},
++        {id=47587,name="Incarnation 47587"},
++        {id=47588,name="Incarnation 47588"},
++        {id=47589,name="Incarnation 47589"},
++        {id=47590,name="Incarnation 47590"},
++        {id=47591,name="Incarnation 47591"},
++        {id=47592,name="Incarnation 47592"},
++        {id=47593,name="Incarnation 47593"},
++        {id=47595,name="Incarnation 47595"},
++        {id=47596,name="Incarnation 47596"},
++        {id=47597,name="Incarnation 47597"},
++        {id=47598,name="Incarnation 47598"},
++        {id=47599,name="Incarnation 47599"},
++        {id=47600,name="Incarnation 47600"},
++        {id=47601,name="Incarnation 47601"},
++        {id=47602,name="Incarnation 47602"},
++        {id=47603,name="Incarnation 47603"},
++        {id=47604,name="Incarnation 47604"},
++        {id=47605,name="Incarnation 47605"},
++        {id=47606,name="Incarnation 47606"},
++        {id=47607,name="Incarnation 47607"},
++        {id=47608,name="Incarnation 47608"},
++        {id=47609,name="Incarnation 47609"},
++        {id=47610,name="Incarnation 47610"},
++        {id=47611,name="Incarnation 47611"},
++        {id=47612,name="Incarnation 47612"},
++        {id=47613,name="Incarnation 47613"},
++        {id=47614,name="Incarnation 47614"},
++        {id=47615,name="Incarnation 47615"},
++        {id=51429,name="Incarnation 51429"},
++    },
++    {
++        {id=15605,name="Incarnation 15605"},
++        {id=15606,name="Incarnation 15606"},
++        {id=15607,name="Incarnation 15607"},
++        {id=15608,name="Incarnation 15608"},
++        {id=15609,name="Incarnation 15609"},
++        {id=15610,name="Incarnation 15610"},
++        {id=15611,name="Incarnation 15611"},
++        {id=47640,name="Incarnation 47640"},
++        {id=47642,name="Incarnation 47642"},
++        {id=47647,name="Incarnation 47647"},
++        {id=47648,name="Incarnation 47648"},
++        {id=47649,name="Incarnation 47649"},
++        {id=47650,name="Incarnation 47650"},
++        {id=47651,name="Incarnation 47651"},
++        {id=47652,name="Incarnation: Tree of Wrath (Brown)"},
++        {id=47653,name="Incarnation 47653"},
++        {id=47654,name="Incarnation 47654"},
++        {id=47655,name="Incarnation 47655"},
++        {id=47656,name="Incarnation 47656"},
++        {id=47657,name="Incarnation 47657"},
++        {id=47658,name="Incarnation 47658"},
++        {id=47659,name="Incarnation 47659"},
++        {id=47660,name="Incarnation 47660"},
++        {id=47661,name="Incarnation 47661"},
++        {id=179673,name="Incarnation 179673"},
++        {id=179674,name="Incarnation 179674"},
++        {id=179675,name="Incarnation 179675"},
++        {id=179676,name="Incarnation 179676"},
++        {id=179677,name="Incarnation 179677"},
++        {id=179678,name="Incarnation 179678"},
++    },
++    {
++        {id=51205,name="Incarnation: Metamorphosis of Fel"},
++        {id=51206,name="Incarnation 51206"},
++        {id=51207,name="Incarnation 51207"},
++        {id=51208,name="Incarnation 51208"},
++        {id=51209,name="Incarnation 51209"},
++        {id=51210,name="Incarnation 51210"},
++        {id=51211,name="Incarnation 51211"},
++        {id=51212,name="Incarnation 51212"},
++        {id=51213,name="Incarnation 51213"},
++        {id=51214,name="Incarnation 51214"},
++        {id=51215,name="Incarnation 51215"},
++        {id=51216,name="Incarnation 51216"},
++        {id=51217,name="Incarnation 51217"},
++    },
++}
++Area52FeaturedEditor.IncarnationDefaults = {
++    [33]={"Incarnation: Fallen to Nightmare (Gray & Red)","None","None","None"},
++    [143]={"Incarnation: Guardian of the Glade (Maroon)","None","None","None"},
++    [26]={"None","None","None","Incarnation: Metamorphosis of Fel"},
++    [75]={"None","Incarnation: Emperor Korthek","None","None"},
++    [131]={"None","Incarnation: Druid of the Flames","None","None"},
++    [32]={"Incarnation: Plague Bear (Brown)","None","None","None"},
++    [34]={"Incarnation: Might of the Grizzlemaw (White)","None","None","None"},
++    [14]={"None","None","Incarnation: Tree of Wrath (Brown)","None"},
++}
++
++local F=Area52FeaturedEditor
++F.PreviewLabels={"Combat pet / pet appearance reward","Incarnation preview (matches reward after launcher update)","Character cast visual","Pet cast visual","Bear incarnation reward","Cat incarnation reward","Tree incarnation reward","Metamorphosis incarnation reward"}
++F.RewardPets={
++    {id=1042,name="Red Whelp — combat pet"},
++    {id=24747,name="Fjord Hawk — combat pet"},
++    {id=35189,name="Skoll — combat pet"},
++    {id=6554,name="Gorishi Stinger — tameable combat pet"},
++    {id=74491,name="Vanguard Sentinel — Voidwalker appearance"},
++    {id=16941,name="Phasing Voidcaller — Voidwalker appearance"},
++    {id=18683,name="Beast of Nightmare — Voidwalker appearance"},
++    {id=80854,name="Shadowseer — Succubus appearance"},
++}
++
++function F.ReadPreview(description)
++    local marker="###AREA52_FEATURED_PREVIEW\n"
++    local start=(description or ""):find(marker,1,true)
++    if not start then return {4294967295,4294967295,4294967295,4294967295},false end
++    if start>1 and description:sub(start-1,start-1)~="\n" or description:find(marker,start+#marker,true) then return nil end
++    local raw=description:sub(start+#marker):match("^[^\n]*")
++    if not raw or not raw:match("^1:[%d,]+$") then return nil end
++    local values={}
++    for token in (raw:sub(3)..","):gmatch("([^,]*),") do
++        local value=tonumber(token)
++        if not value or value<0 or value>4294967295 or #values>=4 then return nil end
++        values[#values+1]=value
++    end
++    if #values~=4 then return nil end
++    return values,true
++end
++
++function F.PreviewChoices(view,index)
++    local result={{id=4294967295,name="Archetype default"},{id=0,name="None"}}
++    if index>4 then
++        local defaults=(F.IncarnationDefaults or {})[view.Area52ArchetypeID]
++        result[1].name="Archetype default: "..(defaults and defaults[index-4] or "None")
++        for _,choice in ipairs((F.IncarnationChoices or {})[index-4] or {}) do result[#result+1]=choice end
++    elseif index==1 then
++        for _,choice in ipairs(F.RewardPets) do result[#result+1]=choice end
++    elseif index<3 then
++        for _,choice in ipairs((F.PreviewCatalog or {})[index] or {}) do result[#result+1]=choice end
++    else
++        local seen={}
++        for _,spell in ipairs(C_BuildEditor.GetPendingBuild().Spells or {}) do
++            local id=spell.Spell
++            if type(id)=="number" and id>0 and not seen[id] then
++                local name=GetSpellInfo(id)
++                if name then result[#result+1]={id=id,name=name};seen[id]=true end
++            end
++        end
++        table.sort(result,function(a,b)if a.id==4294967295 then return b.id~=4294967295 elseif b.id==4294967295 then return false elseif a.id==0 then return b.id~=0 elseif b.id==0 then return false end;return a.name==b.name and a.id<b.id or a.name<b.name end)
++    end
++    return result
++end
++
++function F.RefreshPreviewControls(view)
++    local panel=view.Area52PreviewSection
++    if not panel then return end
++    for index=1,8 do
++        local id=view.Area52PreviewEffects[index]
++        local name=id==0 and "None" or tostring(id)
++        for _,choice in ipairs(F.PreviewChoices(view,index)) do if choice.id==id then name=choice.name;break end end
++        if index>4 and id~=0 and id~=4294967295 then
++            local _,_,_,displayName=C_Appearance.GetAppearanceDisplayInfo(id)
++            if displayName and displayName~="" then name=displayName end
++        end
++        panel.Buttons[index]:SetText(F.PreviewLabels[index]..": "..name)
++    end
++end
++
++function F.OpenPreviewChoices(view,index)
++    if index==2 or not F.Applies() or view.Area52PreviewInvalid then return end
++    if index>4 then return F.OpenIncarnationPicker(view,index) end
++    local context={view=view,id=C_BuildEditor.GetPendingBuild().ID,archetype=view.Area52ArchetypeID,generation=view.Area52FeaturedGeneration}
++    local choices=F.PreviewChoices(view,index)
++    local popup=F.PreviewPopup
++    if not popup then
++        popup=CreateFrame("Frame",nil,UIParent)
++        popup:SetSize(420,390);popup:SetPoint("CENTER");popup:SetFrameStrata("DIALOG")
++        popup:SetBackdrop({bgFile="Interface\\Buttons\\WHITE8X8",edgeFile="Interface\\Tooltips\\UI-Tooltip-Border",edgeSize=16})
++        popup:SetBackdropColor(0.04,0.06,0.09,1)
++        popup.Buttons={}
++        popup.Title=popup:CreateFontString(nil,"OVERLAY","GameFontNormal")
++        popup.Title:SetPoint("TOP",0,-16)
++        for row=1,10 do
++            local button=CreateFrame("Button",nil,popup,"UIPanelButtonTemplate")
++            button:SetSize(380,26);button:SetPoint("TOP",0,-42-(row-1)*28)
++            popup.Buttons[row]=button
++        end
++        popup.Previous=CreateFrame("Button",nil,popup,"UIPanelButtonTemplate")
++        popup.Previous:SetSize(100,26);popup.Previous:SetPoint("BOTTOMLEFT",20,18);popup.Previous:SetText("Previous")
++        popup.Next=CreateFrame("Button",nil,popup,"UIPanelButtonTemplate")
++        popup.Next:SetSize(100,26);popup.Next:SetPoint("BOTTOM",0,18);popup.Next:SetText("Next")
++        popup.Cancel=CreateFrame("Button",nil,popup,"UIPanelButtonTemplate")
++        popup.Cancel:SetSize(100,26);popup.Cancel:SetPoint("BOTTOMRIGHT",-20,18);popup.Cancel:SetText("Cancel")
++        popup.Cancel:SetScript("OnClick",function()popup:Hide()end)
++        F.PreviewPopup=popup
++    end
++    local page=1
++    local function refresh()
++        popup.Title:SetText(F.PreviewLabels[index].." — "..page.."/"..math.max(1,math.ceil(#choices/10)))
++        for row,button in ipairs(popup.Buttons) do
++            local choice=choices[(page-1)*10+row]
++            button:SetShown(choice~=nil)
++            if choice then
++                button:SetText(choice.name)
++                button:SetScript("OnClick",function()
++                    popup:Hide()
++                    if not F.ValidContext(context) or view.Area52PreviewInvalid then return end
++                    view.Area52PreviewEffects[index]=choice.id
++                    F.RefreshPreviewControls(view)
++                    view:UpdatePendingBuild()
++                end)
++            end
++        end
++        popup.Previous:SetScript("OnClick",function()page=math.max(1,page-1);refresh()end)
++        popup.Next:SetScript("OnClick",function()page=math.min(math.max(1,math.ceil(#choices/10)),page+1);refresh()end)
++    end
++    refresh();popup:Show()
++end
++
++local previousBefore=F.Before
++function F.Before(view,deserialize)
++    previousBefore(view,deserialize)
++    if GetRealmName()~="Area 52 - Free-Pick" then return end
++    local build=C_BuildEditor.GetPendingBuild()
++    if deserialize or view.Area52PreviewBuild~=build.ID or not view.Area52PreviewEffects then
++        view.Area52PreviewEffects=F.ReadPreview(build.Description)
++        view.Area52PreviewInvalid=not view.Area52PreviewEffects
++        view.Area52PreviewEffects=view.Area52PreviewEffects or {0,0,0,0}
++        view.Area52PreviewEffects[2]=4294967295
++        local rewardDescription=(build.Description or ""):gsub("###AREA52_FEATURED_PREVIEW","###IGNORED_PREVIEW"):gsub("###AREA52_FEATURED_INCARNATIONS","###AREA52_FEATURED_PREVIEW")
++        local rewards=F.ReadPreview(rewardDescription)
++        if not rewards then view.Area52PreviewInvalid=true end
++        for index=1,4 do view.Area52PreviewEffects[index+4]=rewards and rewards[index] or 4294967295 end
++        view.Area52PreviewBuild=build.ID
++    end
++    if not view.Area52PreviewSection then
++        BuildViewSectionMixin.CategoryIcons.AREA52_FEATURED_PREVIEW="Interface\\Icons\\inv_misc_book_09"
++        local content=view.MainFrame.ScrollFrame.Content
++        local panel=CreateFrame("Frame",view:GetName().."Area52Preview",content,"EditableBuildViewSectionTemplate")
++        panel:SetSize(764,340);panel:SetCategory("AREA52_FEATURED_PREVIEW");panel.Area52FeaturedOnly=true
++        panel.Serialize=function()return nil end;panel.Deserialize=function()end
++        panel.Buttons={}
++        for index=1,8 do
++            local selected=index
++            local button=CreateFrame("Button",nil,panel,"UIPanelButtonTemplate")
++            button:SetSize(660,28);button:SetPoint("TOP",0,-38-(index-1)*32)
++            button:SetScript("OnClick",function()F.OpenPreviewChoices(view,selected)end)
++            if index==2 then button:Disable() end
++            if index>4 then
++                button:SetScript("OnEnter",function(self)
++                    GameTooltip:SetOwner(self,"ANCHOR_RIGHT")
++                    GameTooltip:SetText("Choose and preview the incarnation in Wardrobe. Save changes the Draft reward; the matching creation preview arrives with the next launcher catalog update.",nil,nil,nil,nil,true)
++                    GameTooltip:Show()
++                end)
++                button:SetScript("OnLeave",function()GameTooltip:Hide()end)
++            end
++            panel.Buttons[index]=button
++        end
++        view.Area52PreviewSection=panel
++        local ordered={}
++        for _,section in ipairs(content.sections) do
++            if section~=panel then
++                ordered[#ordered+1]=section
++                if section==view.Area52VanitySection then ordered[#ordered+1]=panel end
++            end
++        end
++        content.sections=ordered
++        view:HookScript("OnHide",function()if F.PreviewPopup then F.PreviewPopup:Hide()end end)
++    end
++    local panel=view.Area52PreviewSection
++    local enabled=F.Applies()
++    panel:SetShown(enabled)
++    panel:ClearAllPoints();panel:SetPoint("TOPLEFT",view.Area52VanitySection,"BOTTOMLEFT",0,-16)
++    local consumables=view.MainFrame.ScrollFrame.Content.Consumables
++    consumables:ClearAllPoints();consumables:SetPoint("TOPLEFT",enabled and panel or view.MainFrame.ScrollFrame.Content.Rotation,"BOTTOMLEFT",0,-16)
++    F.RefreshPreviewControls(view)
++end
++
++BUILDCREATOR_SECTION_AREA52_FEATURED_PREVIEW="Character Creation and Incarnation Rewards"
++local previousDescription=Area52DraftSelector.Description
++function Area52DraftSelector.Description(view,description)
++    description=(description or ""):gsub("\n*###AREA52_FEATURED_PREVIEW[^#]*","")
++    description=description:gsub("\n*###AREA52_FEATURED_INCARNATIONS[^#]*","")
++    if F.Applies() and view.Area52PreviewEffects then
++        local effects=view.Area52PreviewEffects
++        description=description.."\n\n###AREA52_FEATURED_PREVIEW\n1:"..table.concat({effects[1],4294967295,effects[3],effects[4]},",")
++        description=description.."\n\n###AREA52_FEATURED_INCARNATIONS\n1:"..table.concat({effects[5] or 4294967295,effects[6] or 4294967295,effects[7] or 4294967295,effects[8] or 4294967295},",")
++    end
++    return previousDescription(view,description)
++end
++local previousValidate=Area52CanPublishBuild
++function Area52CanPublishBuild(view)
++    if F.Applies() and view.Area52ImportPending then return false,{"Archetype items are still loading. Wait before saving."} end
++    if F.Applies() and view.Area52PreviewInvalid then return false,{"Invalid Character Creation preview settings. Reopen an intact saved build."} end
++    return previousValidate(view)
++end
++local previousReason=Area52BuildPublishReason
++function Area52BuildPublishReason(reason)
++    if reason=="PUBLISH_BUILD_INVALID_FEATURED_INCARNATIONS" then return "Choose a supported incarnation reward for each form." end
++    if reason=="PUBLISH_BUILD_INVALID_FEATURED_PREVIEW" then return "The Character Creation preview contains an invalid pet, incarnation or spell visual. Choose a supported option and save again." end
++    return previousReason(reason)
++end
++
++function F.OpenIncarnationPicker(view,index)
++    F.OpenPicker(view,0)
++    if not F.picker then return end
++    F.picker.incarnationIndex=index
++    AppearanceUI.OpenCategory("APPEARANCE_TYPE_INCARNATION",({17,18,23,31})[index-4])
++    AppearanceWardrobeFrame.Collection.SearchBox:SetText("")
++    AppearanceWardrobeFrame.Collection:RefreshCategory()
++    F.PickerBar.Text:SetText("Assign to Featured Draft: "..F.PreviewLabels[index])
++end
++
++local previousPickAppearance=F.PickAppearance
++function F.PickAppearance(appearance)
++    local context=F.picker
++    if not context or not context.incarnationIndex then return previousPickAppearance(appearance) end
++    if not F.ValidContext(context) then F.ClosePicker(false);return true end
++    for _,choice in ipairs((F.IncarnationChoices or {})[context.incarnationIndex-4] or {}) do
++        if choice.id==appearance then
++            local view=context.view
++            view.Area52PreviewEffects[context.incarnationIndex]=appearance
++            F.ClosePicker(true)
++            F.RefreshPreviewControls(view)
++            view:UpdatePendingBuild()
++            return true
++        end
++    end
++    F.Message("Choose a supported incarnation for this form category.")
++    return true
++end

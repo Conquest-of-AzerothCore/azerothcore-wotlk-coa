@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "failed_transaction_status": "aborted",
+  "failed_manifest_sha256": "b74192493f1b0c7c5b8880fa55378bafbc55ff5f2ad1f63952f74b56e69c16bc",
+  "baseline_reproduced": "private WSL PowerShell -File path inaccessible",
+  "actual_private_path_preflight": "passed through hash-checked Windows bridge",
+  "phases_mocked": [
+    "enable",
+    "verify"
+  ],
+  "unverified_zero_exit_rejected": true,
+  "source_payload_preserved": true,
+  "active_server_and_client_baselines_unchanged": true,
+  "sql_not_applied": true,
+  "worker_not_installed": true
+}
