@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "name": "Shadowfang Keep loot scales up to a level-60 looter whatever their open-world switch (#211)",
+  "contract": [
+    "#211: a level-60 character saw item level 15 loot in Shadowfang Keep while the mobs scaled to",
+    "the character's level. Shadowfang Keep is LFGDungeons.dbc id 8 (map 33), in DEFAULT_SCALING_DUNGEONS",
+    "(modules/mod-destiny-weaver/src/destiny_weaver_scaling.cpp), so creatures scale for everyone inside",
+    "and dungeon loot scales for everyone inside it whatever their or their leader's open-world switch",
+    "(LocalLevelScaling::DungeonLootScales, src/server/game/Miscellaneous/LocalLevelScaling.h). War Master",
+    "Voone 9237 drops Flightblade Throwing Axe 28972 (blue, authored item level 57, required level 55, 5",
+    "stamina, 8 attack power) at 100% as the controlled fixture; the client's item key for level 60 is",
+    "60 + 5 = 65, and its ItemStat.dbc row at 65 requires level 60. A level-60 looter with the open-world",
+    "scaling switch off must loot the axe at scaling level 65 and required level 60, not the authored",
+    "item level 57 / required level 55."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 33,
+    "x": -278.912,
+    "y": 2323.63,
+    "z": 95.8664,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "looter",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "voone",
+      "owner": "looter",
+      "entry": 9237,
+      "level": 59,
+      "health": 1,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 2000
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "looter",
+      "value": 0
+    },
+    {
+      "action": "attack",
+      "actor": "looter",
+      "target": "voone"
+    },
+    {
+      "action": "assert",
+      "actor": "voone",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "looter",
+      "target": "voone"
+    },
+    {
+      "action": "assert",
+      "label": "The corpse holds the authored Flightblade Throwing Axe",
+      "actor": "looter",
+      "metric": "loot_entry",
+      "item": 28972,
+      "equals": 28972
+    },
+    {
+      "action": "loot_slot",
+      "actor": "looter",
+      "item": 28972
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the authored item-level-57 axe scales up to the client key 65 for the level-60 looter",
+      "actor": "looter",
+      "metric": "carried_item_scaling_level",
+      "item": 28972,
+      "equals": 65,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The axe requires the row's level 60 instead of 55",
+      "actor": "looter",
+      "metric": "carried_item_required_level",
+      "item": 28972,
+      "equals": 60
+    },
+    {
+      "action": "close_loot",
+      "actor": "looter"
+    }
+  ]
+}

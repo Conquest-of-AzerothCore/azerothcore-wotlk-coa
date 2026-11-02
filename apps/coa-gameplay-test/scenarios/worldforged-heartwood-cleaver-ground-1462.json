@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Worldforged Heartwood Cleaver sits on the ground in lower Feralas, not floating (COA-1462)",
+  "contract": "The Heartwood Cleaver pickup (item 515146, GO 96102, guid 6941818) stands at the recorded Ascension find position (zone 122 Feralas, x 0.81, y 0.3967 -> world -4204.3, -187.7) but its realm-map z of 58.693 hovered 1.11 yd above the ground by the fallen log (measured with spawn_ground_gap), so the axe floated mid-air. The fix lowers it to the measured ground (z 57.587).",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -4200.0, "y": -185.0, "z": 59.0, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the axe pickup is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 96102, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup rests on the ground, not floating 1.11 yd up", "actor": "p", "metric": "spawn_ground_gap", "guid": 6941818, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 96102 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the pickup opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}
