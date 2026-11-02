@@ -411,6 +411,18 @@ void NormalizeBandageGun(SpellInfo* spellInfo)
         effect.BasePoints = 1;
 }
 
+void NormalizeStimHeal(SpellInfo* spellInfo)
+{
+    if (!spellInfo || spellInfo->Id != SPELL_STIM_HEAL || spellInfo->SpellFamilyName != uint32(CLASS_TINKER) + 6 ||
+        spellInfo->Effects[EFFECT_0].Effect != SPELL_EFFECT_HEAL ||
+        spellInfo->EquippedItemClass != ITEM_CLASS_WEAPON || spellInfo->EquippedItemSubClassMask != 173555)
+        return;
+
+    spellInfo->EquippedItemClass = -1;
+    spellInfo->EquippedItemSubClassMask = 0;
+    spellInfo->EquippedItemInventoryTypeMask = 0;
+}
+
 class AscensionTinkerAugmentationMetadata : public GlobalScript
 {
 public:
@@ -420,6 +432,7 @@ public:
     void OnLoadSpellCustomAttr(SpellInfo* spellInfo) override
     {
         NormalizeBandageGun(spellInfo);
+        NormalizeStimHeal(spellInfo);
     }
 };
 }
