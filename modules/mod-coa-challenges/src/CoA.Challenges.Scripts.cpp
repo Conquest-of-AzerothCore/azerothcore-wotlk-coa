@@ -831,14 +831,15 @@ namespace CoAChallenges
     {
         if (!player)
             return;
+        static_assert(CoAParse::LevelScalingBlockCreature == LocalLevelScaling::ChallengeBlocksCreatureScaling);
+        static_assert(CoAParse::LevelScalingBlockQuest == LocalLevelScaling::ChallengeBlocksQuestScaling);
         uint8 blocks = 0;
         if (ChallengesEnabled())
         {
             uint32 level = 0;
-            if (ActiveChallengeWithRule(player, "CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING", level))
-                blocks |= LocalLevelScaling::ChallengeBlocksCreatureScaling;
-            if (ActiveChallengeWithRule(player, "CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING", level))
-                blocks |= LocalLevelScaling::ChallengeBlocksQuestScaling;
+            for (char const* rule : CoAParse::LevelScalingRules)
+                if (ActiveChallengeWithRule(player, rule, level))
+                    blocks |= CoAParse::LevelScalingBlockBits(rule);
         }
         if (StoreLevelScalingBlocks(player->GetGUID().GetCounter(), blocks) == blocks || !player->IsInWorld())
             return;

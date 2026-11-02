@@ -170,6 +170,27 @@ namespace CoAParse
         return 0;
     }
 
+    inline constexpr uint8_t LevelScalingBlockCreature = 0x1;
+    inline constexpr uint8_t LevelScalingBlockQuest = 0x2;
+
+    inline constexpr char const* LevelScalingRules[] =
+    {
+        "CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING",
+        "CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING",
+        "CHALLENGE_RULES_TYPE_NO_PLAYER_LEVEL_SCALING",
+    };
+
+    inline uint8_t LevelScalingBlockBits(std::string const& rule)
+    {
+        if (rule == "CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING")
+            return LevelScalingBlockCreature;
+        if (rule == "CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING")
+            return LevelScalingBlockQuest;
+        if (rule == "CHALLENGE_RULES_TYPE_NO_PLAYER_LEVEL_SCALING")
+            return LevelScalingBlockCreature | LevelScalingBlockQuest;
+        return 0;
+    }
+
     // Exact membership test on a "A;B;C" list (no substring false positives).
     inline bool ListContains(std::string const& list, std::string const& value)
     {

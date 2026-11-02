@@ -1390,6 +1390,7 @@ namespace CoAChallenges
             "CHALLENGE_RULES_TYPE_HIGH_RISK_ONLY",
             "CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING",
             "CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING",
+            "CHALLENGE_RULES_TYPE_NO_PLAYER_LEVEL_SCALING",
             // NOTE: FLOOR_IS_LAVA (165 "The Floor is Lava!") is NOT modelled here:
             // its About is "Don't. Stop. Jumping." (damage while grounded), not
             // lava/fire environmental damage, and 165 is challenge-only (custom
@@ -1911,6 +1912,7 @@ namespace CoAChallenges
                 "CHALLENGE_RULES_TYPE_STRICT_CHALLENGE_RESTRICTED_TAPPING", // challenges-adventure-mode scenario
                 "CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING", // challenges-level-scaling-rules scenario
                 "CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING",    // challenges-level-scaling-rules scenario
+                "CHALLENGE_RULES_TYPE_NO_PLAYER_LEVEL_SCALING",   // challenges-level-scaling-rules scenario
             };
             std::set<std::string> const& impl = ImplementedRules();
             uint32 missing = 0;
@@ -2355,7 +2357,6 @@ namespace CoAChallenges
         // Rules intentionally not enforced server-side, each with the reason.
         static std::map<std::string, char const*> const kNotApplicable = {
             {"CHALLENGE_RULES_TYPE_NONE", "client export sentinel (empty slot)"},
-            {"CHALLENGE_RULES_TYPE_NO_PLAYER_LEVEL_SCALING", "no player level sync on this fork"},
         };
         std::set<std::string> naSeen;
         uint32 ruleCount = 0, unenforced = 0;

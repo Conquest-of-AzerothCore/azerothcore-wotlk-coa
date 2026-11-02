@@ -52,6 +52,20 @@ TEST(CoAParse, LootObjectiveTargetsItemAndGatesOnThirdValue)
     EXPECT_EQ(ObjectiveGateLevel(objectives[2]), 40u);
 }
 
+TEST(CoAParse, PlayerLevelScalingRuleBlocksCreatureAndQuestScaling)
+{
+    EXPECT_EQ(LevelScalingBlockBits("CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING"), LevelScalingBlockCreature);
+    EXPECT_EQ(LevelScalingBlockBits("CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING"), LevelScalingBlockQuest);
+    EXPECT_EQ(LevelScalingBlockBits("CHALLENGE_RULES_TYPE_NO_PLAYER_LEVEL_SCALING"),
+        LevelScalingBlockCreature | LevelScalingBlockQuest);
+    EXPECT_EQ(LevelScalingBlockBits("CHALLENGE_RULES_TYPE_NO_PORTALS"), 0u);
+
+    bool tracked = false;
+    for (char const* rule : LevelScalingRules)
+        tracked |= std::string(rule) == "CHALLENGE_RULES_TYPE_NO_PLAYER_LEVEL_SCALING";
+    EXPECT_TRUE(tracked);
+}
+
 TEST(CoAParse, ToU32IsStrict)
 {
     EXPECT_EQ(ToU32("0"), 0u);
