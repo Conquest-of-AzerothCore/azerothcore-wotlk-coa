@@ -259,6 +259,8 @@ class npc_ascension_witch_doctor : public ScriptedAI
             me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
             me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
         }
+        if (me->GetEntry() == NpcLink)
+            me->CastSpell(me, LinkTimer, true);
         if (me->GetEntry() == NpcMarionette)
             _timer = 2000;
         if (me->GetEntry() == NpcCleanse)
