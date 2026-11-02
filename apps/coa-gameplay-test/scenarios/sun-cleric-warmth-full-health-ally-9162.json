@@ -32,6 +32,10 @@
     {
       "action": "assert", "label": "Warmth applies although the heal only overheals",
       "actor": "ally", "metric": "aura", "spell": 704564, "caster": "cleric", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Illumination produces no effective healing",
+      "actor": "cleric", "metric": "spell_effective_heal_total", "spell": 500143, "target": "ally", "equals": 0
     }
   ]
 }
