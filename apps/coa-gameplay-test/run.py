@@ -82,7 +82,8 @@ METRICS = TIMELINE_METRICS | {
     'global_cooldown_ms', 'spell_charges',
     'action_button', 'action_button_packed', 'persisted_action_button', 'item_count', 'carried_item_count',
     'carried_pool_item_count', 'carried_variant_item_count', 'carried_statless_armor_count',
-    'client_knows_spell', 'client_spellbook_copies',
+    'client_knows_spell', 'client_spellbook_copies', 'initial_spells_at', 'learned_spell_at',
+    'skill_line_ability', 'skill_line_ability_at', 'skill_line_after_initial', 'skill_line_after_learned',
     'pool_variant_count', 'pool_retired_item_count', 'pool_row_count', 'pool_item_present',
     'cache_token_count', 'cache_token_stage', 'cache_token_present',
     'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item',
@@ -941,7 +942,8 @@ def validate(scenario):
                         f'{where}: quest_query_text_contains needs text')
             if metric.startswith('aura') or metric in {
                     'knows_spell', 'cooldown_ms', 'spell_cooldown_packet_ms', 'global_cooldown_ms', 'spell_charges', 'cast_remaining_ms', 'has_talent',
-                    'pet_knows_spell', 'client_knows_spell', 'client_spellbook_copies',
+                    'pet_knows_spell', 'client_knows_spell', 'client_spellbook_copies', 'learned_spell_at',
+                    'skill_line_ability', 'skill_line_ability_at', 'skill_line_after_initial', 'skill_line_after_learned',
                     'pet_aura_stacks', 'pet_aura_duration_ms', 'charm_aura_stacks', 'spell_active',
                     'dynamic_object', 'dynamic_object_duration_ms', 'dynamic_object_height', 'spell_power_cost',
                     'skill_line_for_spell',

@@ -8,6 +8,7 @@
 #include "AscensionAetherialReliquary.h"
 #include "AscensionAccountProgress.h"
 #include "AscensionClientDbcStream.h"
+#include "AscensionDisplayPatch.h"
 #include "AscensionFelsworn.h"
 #include "AscensionHighRiskPolicy.h"
 #include "AscensionRulesets.h"
@@ -4102,6 +4103,16 @@ public:
 
         std::lock_guard lock(_mutex);
         _onDemandItemRows[player->GetGUID().GetCounter()].Add(sent);
+    }
+
+    void ResendSkillLineAbilityRows(Player* player, uint32 spellId)
+    {
+        if (!ReceivesPatchRows(player))
+            return;
+
+        for (SkillLineAbilityPatchRow const& row : GetPreparedPatchRows().SkillLineAbilities)
+            if (!spellId || row[2] == spellId)
+                SendSkillLineAbilityRow(player, row);
     }
 
     void SendLearnedRecipeItemRows(Player* player, uint32 spellId)
@@ -10851,6 +10862,14 @@ class spell_ascension_stick_on_a_carrot : public AuraScript
     }
 };
 
+}
+
+namespace AscensionDisplayPatch
+{
+void ResendSkillLineAbilityRows(Player* player, uint32 spellId)
+{
+    AscensionDisplayPatchService::Instance().ResendSkillLineAbilityRows(player, spellId);
+}
 }
 
 AscensionVanityOwnership::TestOverride::TestOverride(bool unlockAll, std::string const& starterItems)
