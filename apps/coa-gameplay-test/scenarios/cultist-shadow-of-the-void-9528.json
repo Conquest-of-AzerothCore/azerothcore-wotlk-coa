@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Shadow of the Void triggers from melee attacks above 40 Insanity (#9528)",
+  "contract": [
+    "Shadow of the Void 574318: 'While above 40 Insanity, melee attacks and abilities trigger Shadow of the Void',",
+    "the 8 sec buff 300277 (+9% Shadow damage done). 574318 has a spell_proc row and aura_ascension_cultist_event,",
+    "whose check requires damage dealt, a melee attack and more than 40 stacks of Insanity 500706. Expected: a",
+    "Cultist who knows the talent and holds 50 Insanity gains 300277 within a few auto attacks on a target; a",
+    "control Cultist with the same Insanity and swings but without the talent never does."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "tester", "race": 1, "class": 25, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000},
+    {"id": "control", "race": 1, "class": 25, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "tester_target", "owner": "tester", "entry": 36, "faction": 14, "level": 60, "health": 1000000,
+     "distance": 2},
+    {"id": "control_target", "owner": "control", "entry": 36, "faction": 14, "level": 60, "health": 1000000,
+     "distance": 2}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "set_health", "actor": "tester", "value": 100000, "maximum": 100000},
+    {"action": "set_health", "actor": "control", "value": 100000, "maximum": 100000},
+    {"action": "learn", "actor": "tester", "spell": 574318},
+    {"action": "set_aura", "actor": "tester", "spell": 500706, "stacks": 50},
+    {"action": "set_aura", "actor": "control", "spell": 500706, "stacks": 50},
+    {"action": "assert", "label": "SETUP: the tester knows Shadow of the Void", "actor": "tester",
+     "metric": "knows_spell", "spell": 574318, "equals": 1},
+    {"action": "assert", "label": "SETUP: the control does not", "actor": "control", "metric": "knows_spell",
+     "spell": 574318, "equals": 0},
+    {"action": "assert", "label": "SETUP: the tester holds more than 40 Insanity", "actor": "tester",
+     "metric": "aura_stacks", "spell": 500706, "min": 41},
+    {"action": "assert", "label": "SETUP: no Shadow of the Void buff yet", "actor": "tester", "metric": "aura",
+     "spell": 300277, "equals": 0},
+    {"action": "attack", "actor": "tester", "target": "tester_target"},
+    {"action": "attack", "actor": "control", "target": "control_target"},
+    {"action": "assert", "label": "the tester's auto attacks deal damage", "actor": "tester",
+     "metric": "melee_damage_count", "min": 1, "within_ms": 6000},
+    {"action": "assert", "label": "the control's auto attacks deal damage", "actor": "control",
+     "metric": "melee_damage_count", "min": 1, "within_ms": 6000},
+    {"action": "assert", "label": "Insanity is still above 40 while swinging", "actor": "tester",
+     "metric": "aura_stacks", "spell": 500706, "min": 41},
+    {"action": "assert", "label": "DISCRIMINATING: a damaging melee attack above 40 Insanity triggers 300277",
+     "actor": "tester", "metric": "aura", "spell": 300277, "equals": 1, "within_ms": 8000},
+    {"action": "assert", "label": "the control without the talent has no Shadow of the Void", "actor": "control",
+     "metric": "aura", "spell": 300277, "equals": 0}
+  ]
+}

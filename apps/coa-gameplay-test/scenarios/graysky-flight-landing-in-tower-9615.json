@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "The Dun Kazad to Graysky flight lands inside the Graysky tower (#9615)",
+  "contract": [
+    "#9226 (rev_1792975384724126100.sql) ends route 1988 (Dun Kazad 421 to Graysky 420) at node 39825",
+    "(-7042.01, 1127.80, 328.9), on the tower floor beside Grisalda measured in game, instead of (-7050.46, 1130.10),",
+    "west of the floor, where players were dismounted in the air. Pending files apply in filename order, so the later",
+    "rev_20261018_80 route rebuild used to restore the old end point on a database built from scratch. Expected: the",
+    "flight lands at the #9226 point, within 2 yards in x of -7042.01 and so 6 yards away from the old end point."
+  ],
+  "timeout_ms": 300000,
+  "location": {"map": 0, "x": -6724.11, "y": -16.83, "z": 581.32, "o": 5.2},
+  "players": [
+    {"id": "traveler", "race": 1, "class": 16, "level": 60}
+  ],
+  "creatures": [
+    {"id": "moer", "owner": "traveler", "entry": 165622, "faction": 12}
+  ],
+  "steps": [
+    {"action": "discover_taxi_node", "actor": "traveler", "entry": 421},
+    {"action": "discover_taxi_node", "actor": "traveler", "entry": 420},
+    {"action": "set_money", "actor": "traveler", "value": 10000},
+    {
+      "action": "client_packet", "label": "Fly Dun Kazad - Graysky", "actor": "traveler", "opcode": 786,
+      "consumed": false,
+      "fields": [{"actor_guid": "moer"}, {"u32": 2}, {"u32": 421}, {"u32": 420}]
+    },
+    {"action": "assert", "label": "The flight starts", "actor": "traveler", "metric": "in_flight", "equals": 1,
+     "within_ms": 2000},
+    {"action": "assert", "label": "The route ends at Graysky", "actor": "traveler", "metric": "taxi_destination",
+     "equals": 420},
+    {"action": "assert", "label": "The flight lands", "actor": "traveler", "metric": "in_flight", "equals": 0,
+     "within_ms": 240000},
+    {"action": "assert", "label": "on Graysky's map", "actor": "traveler", "metric": "map_id", "equals": 0},
+    {"action": "assert", "label": "DISCRIMINATING: at the #9226 landing point inside the tower", "actor": "traveler",
+     "metric": "position_x", "min": -7044.01, "max": -7040.01},
+    {"action": "assert", "actor": "traveler", "metric": "position_y", "min": 1125.8, "max": 1129.8},
+    {"action": "assert", "actor": "traveler", "metric": "position_z", "min": 327.5, "max": 330.5}
+  ]
+}
