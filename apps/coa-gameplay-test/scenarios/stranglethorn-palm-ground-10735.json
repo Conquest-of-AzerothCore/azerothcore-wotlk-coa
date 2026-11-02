@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "The Stranglethorn Palm west of Nesingwary's camp stands on the ground (#10735)",
+  "contract": "GatherMate woodcutting spot guid 12010413 (Stranglethorn Palm 244638) at (-11623.18, 6.14) was imported at z 8.94, 6.9 yd under the ground the reporter stood on at (-11627.63, 5.42, 15.79), so the tree showed on tracking but could not be cut from above: too far away. The server's height query from above reads that ground at 15.82. The palm now stands on it, within reach of the reporter's spot, with open sky above it.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "p", "race": 2, "class": 12, "level": 40 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "CONTROL: the reporter stood on the ground", "actor": "p", "metric": "point_ground_gap", "map": 0, "x": -11627.63, "y": 5.418, "z": 15.79, "min": -0.5, "max": 0.5 },
+    { "action": "assert", "label": "DISCRIMINATING: the palm is within reach of the reporter's spot", "actor": "p", "metric": "spawn_distance", "guid": 12010413, "spawn_type": "gameobject", "x": -11627.63, "y": 5.418, "z": 15.79, "max": 5 },
+    { "action": "assert", "label": "DISCRIMINATING: no ground surface hangs over the palm", "actor": "p", "metric": "spawn_headroom", "guid": 12010413, "spawn_type": "gameobject", "min": 9.9 },
+    { "action": "assert", "label": "the palm rests on the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 12010413, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 }
+  ]
+}
