@@ -18,6 +18,8 @@ void ApplyContracts(SpellInfo* info)
     for (auto const& rift : FelswornRifts)
         if (info->Id == rift.spell)
             info->Effects[0].MiscValue = rift.entry;
+    if (info->Id == 805240)
+        info->AscensionTargetAuraStateOnlyPrimary = true;
     if (info->SpellFamilyName != 20)
         return;
     uint32 id = info->Id;
