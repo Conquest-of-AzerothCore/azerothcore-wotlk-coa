@@ -15,6 +15,9 @@ using namespace Acore::ChatCommands;
 namespace CoAChallenges
 {
 
+    constexpr uint32 CHALLENGE_SLOW_AND_STEADY = 601;
+    constexpr uint32 CHALLENGE_PRESTIGE_SLOW_AND_STEADY = 602;
+
     bool ChallengeAllowsRuleset(Player* player, AscensionRulesets::Ruleset ruleset)
     {
         if (ruleset == AscensionRulesets::Ruleset::PvE ||
@@ -27,6 +30,14 @@ namespace CoAChallenges
     bool UsesCoreProfessionXP(Player* player)
     {
         return player && ActiveChallenges(player->GetGUID().GetCounter()).contains(167);
+    }
+
+    bool EarnsHalfExperience(Player* player)
+    {
+        if (!player)
+            return false;
+        std::set<uint32> const active = ActiveChallenges(player->GetGUID().GetCounter());
+        return active.contains(CHALLENGE_SLOW_AND_STEADY) || active.contains(CHALLENGE_PRESTIGE_SLOW_AND_STEADY);
     }
 
     // Heal-path helpers (defined below, used by HealBlocked earlier in this TU).
@@ -1901,6 +1912,9 @@ namespace CoAChallenges
                 && xpSource == XPSOURCE_KILL && victim && victim->IsCreature()
                 && victim->GetLevel() <= player->GetLevel())
                 amount = 0;
+
+            if (amount && EarnsHalfExperience(player))
+                amount = std::max(1u, amount / 2);
 
             // Prestige experience bonus: while a prestige cycle is in progress
             // the character earns the module's configured experience (the single

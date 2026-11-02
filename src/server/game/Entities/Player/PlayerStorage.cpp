@@ -2509,11 +2509,11 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
     if (proto->Class == ITEM_CLASS_ARMOR)
     {
         // Check for shields
-        if (proto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD && !(
-            IsClass(CLASS_PALADIN, CLASS_CONTEXT_EQUIP_SHIELDS)
+        if (proto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD && !(IsAscensionClass(getClass())
+            ? HasSkill(SKILL_SHIELD)
+            : (IsClass(CLASS_PALADIN, CLASS_CONTEXT_EQUIP_SHIELDS)
             || IsClass(CLASS_WARRIOR, CLASS_CONTEXT_EQUIP_SHIELDS)
-            || IsClass(CLASS_SHAMAN, CLASS_CONTEXT_EQUIP_SHIELDS)
-            || (IsAscensionClass(getClass()) && HasSkill(SKILL_SHIELD))))
+            || IsClass(CLASS_SHAMAN, CLASS_CONTEXT_EQUIP_SHIELDS))))
         {
             return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
         }

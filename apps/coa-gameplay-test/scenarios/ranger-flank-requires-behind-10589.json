@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Ranger Flank fails in front of its target and hits from behind (#10589)",
+  "contract": [
+    "Flank 804940 (and ranks 805082-805088, 582530, 582531) reads 'Flank an enemy from behind, taking them by surprise",
+    "and dealing $s2% Weapon Damage'. The core's behind gate is SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET (0x20000), the",
+    "same rule as Backstab 53: a cast from inside the target's front arc fails with SPELL_FAILED_NOT_BEHIND (57).",
+    "The dummy is summoned facing the stealthed Ranger; a Flank from that side fails with 57 and deals no damage, and",
+    "a Flank from the opposite side, behind the dummy, is accepted and damages it."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 3.14159},
+  "players": [
+    {"id": "ranger", "race": 1, "class": 21, "level": 80, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "ranger", "entry": 299, "level": 80, "distance": 3, "health": 1000000,
+     "stationary": true}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the character settle", "ms": 4000},
+    {"action": "teleport", "label": "Face the dummy, which was summoned facing the Ranger", "actor": "ranger",
+     "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+    {"action": "learn", "actor": "ranger", "spell": 1180},
+    {"action": "add_item", "actor": "ranger", "item": 2092},
+    {"action": "equip", "actor": "ranger", "item": 2092, "slot": 15},
+    {"action": "learn", "actor": "ranger", "spell": 801345},
+    {"action": "learn", "actor": "ranger", "spell": 804940},
+    {"action": "wait", "ms": 1000},
+    {"action": "cast", "label": "Elude", "actor": "ranger", "spell": 801345},
+    {"action": "assert", "label": "SETUP: the Ranger is stealthed", "actor": "ranger", "metric": "aura",
+     "spell": 801345, "equals": 1, "within_ms": 3000},
+    {"action": "wait", "label": "Global cooldown", "ms": 1600},
+    {"action": "set_power", "actor": "ranger", "power": 2, "value": 100},
+    {"action": "cast", "label": "Flank in front of the dummy", "actor": "ranger", "spell": 804940, "target": "dummy"},
+    {"action": "assert", "label": "CONTRACT: Flank needs the Ranger behind its target", "actor": "ranger",
+     "metric": "cast_failure", "spell": 804940, "equals": 57, "within_ms": 1000},
+    {"action": "assert", "label": "CONTRACT: the front Flank deals no damage", "actor": "ranger",
+     "metric": "spell_damage_count", "spell": 804940, "target": "dummy", "equals": 0},
+    {"action": "assert", "label": "SETUP: the failed cast leaves the Ranger stealthed", "actor": "ranger",
+     "metric": "aura", "spell": 801345, "equals": 1},
+    {"action": "teleport", "label": "Step behind the dummy and face it", "actor": "ranger", "map": 0,
+     "x": -8911.41, "y": -115.853, "z": 82.3711, "o": 3.14159},
+    {"action": "wait", "ms": 1000},
+    {"action": "set_power", "actor": "ranger", "power": 2, "value": 100},
+    {"action": "cast", "label": "Flank from behind the dummy", "actor": "ranger", "spell": 804940, "target": "dummy"},
+    {"action": "assert", "label": "CONTRACT: Flank from behind is accepted", "actor": "ranger",
+     "metric": "cast_failure", "spell": 804940, "equals": 0},
+    {"action": "assert", "label": "CONTRACT: Flank from behind damages the dummy", "actor": "ranger",
+     "metric": "spell_damage_count", "spell": 804940, "target": "dummy", "min": 1, "within_ms": 3000}
+  ]
+}

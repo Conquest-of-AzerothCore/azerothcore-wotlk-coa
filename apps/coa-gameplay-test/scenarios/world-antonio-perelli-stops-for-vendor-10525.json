@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Antonio Perelli stops walking while a player opens his vendor window (#10525)",
+  "contract": [
+    "Antonio Perelli (844, Traveling Salesman, vendor) roams Elwynn Forest on SmartAI escort paths: on spawn his action list 84415 starts waypoint path 84400 from his spawn point (-9628.33, -1176.14), walking north-east towards (-9622.15, -1162.8).",
+    "Opening a vendor window calls Creature::PauseMovementForInteraction, which stops a creature for Creature.MovingStopTimeForPlayer (180000 ms) while a player interacts, as waypoint NPCs do. The pause only reached the idle motion slot, so the SmartAI escort relaunched its spline on the next update and the vendor kept walking, as reported.",
+    "Expected: after the vendor list is sent, the salesman stays put: over the next 5 seconds his distance to the buyer changes by less than half a yard and he is not moving. A second salesman nobody talks to keeps walking away from his own fixture player along the same path, at least 5 yards in the same 5 seconds. When the 180 second pause ends the salesman resumes his path."
+  ],
+  "timeout_ms": 300000,
+  "location": { "map": 0, "x": -9628.33, "y": -1176.14, "z": 39.9827, "o": 0 },
+  "players": [
+    { "id": "buyer", "race": 1, "class": 12, "level": 25 },
+    { "id": "onlooker", "race": 1, "class": 12, "level": 25 }
+  ],
+  "creatures": [
+    { "id": "antonio", "owner": "buyer", "entry": 844, "faction": 35, "level": 35, "distance": 1 },
+    { "id": "walker", "owner": "onlooker", "entry": 844, "faction": 35, "level": 35, "distance": 1 }
+  ],
+  "steps": [
+    { "action": "assert", "label": "SETUP: the salesman starts his escort path", "actor": "antonio", "metric": "moving", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "SETUP: the control salesman walks too", "actor": "walker", "metric": "moving", "equals": 1, "within_ms": 5000 },
+    { "action": "client_packet", "label": "Open the salesman's vendor window", "actor": "buyer", "opcode": 414, "fields": [{ "actor_guid": "antonio" }], "consumed": false },
+    { "action": "assert", "label": "SETUP: his shop opens", "actor": "buyer", "metric": "vendor_list_packets", "equals": 1, "within_ms": 2000 },
+    { "action": "wait", "ms": 500 },
+    { "action": "snapshot", "actor": "antonio", "metric": "distance", "target": "buyer", "save_as": "buyer_distance" },
+    { "action": "snapshot", "actor": "walker", "metric": "distance", "target": "onlooker", "save_as": "onlooker_distance" },
+    { "action": "wait", "ms": 5000 },
+    {
+      "action": "assert", "label": "CONTROL: a salesman nobody talks to keeps walking", "actor": "walker",
+      "metric": "distance", "target": "onlooker", "relative_to": "onlooker_distance", "min": 5
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the salesman stays put while his shop is open", "actor": "antonio",
+      "metric": "distance", "target": "buyer", "relative_to": "buyer_distance", "min": -0.5, "max": 0.5
+    },
+    { "action": "assert", "label": "DISCRIMINATING: the salesman is not moving", "actor": "antonio", "metric": "moving", "equals": 0 },
+    { "action": "wait", "label": "Let the interaction pause run out", "ms": 175000 },
+    { "action": "assert", "label": "The salesman resumes his path after the pause", "actor": "antonio", "metric": "distance", "target": "buyer", "relative_to": "buyer_distance", "min": 5, "within_ms": 15000 }
+  ]
+}

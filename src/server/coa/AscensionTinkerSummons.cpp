@@ -399,6 +399,15 @@ struct npc_ascension_tinker_device : ScriptedAI
             if (id == 802477)
                 Cast(me,enemy,802779);
         }
+        if (id == 802336)
+        {
+            auto allies = Allies(player,me,Radius(id));
+            allies.remove_if([](Unit* ally) { return !ally->IsPlayer(); });
+            if (info->MaxAffectedTargets && allies.size() > info->MaxAffectedTargets)
+                allies.resize(info->MaxAffectedTargets);
+            for (Unit* ally : allies)
+                Cast(me,ally,804306);
+        }
         if (id == 500601)
             player->CastSpell(me->GetPositionX(),me->GetPositionY(),me->GetPositionZ(),500753,true);
         me->DespawnOrUnsummon(100ms);

@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "name": "Gathering nodes named in #10577 rest on the ground where the Ascension GatherMate positions put them",
+  "contract": "#10577 reported gathering nodes that show on the tracking minimap but cannot be reached: a Copper Vein in Northshire Valley and trees in Duskwood. rev_20261027_60_coa_gathermate_nodes.sql placed Copper Vein 12006837 29.6 yd and twelve Duskwood Trees 15 to 227 yd above the terrain, with nothing under them but the terrain (spawn_ground_gap equal to the terrain-only gap). They are set on the terrain height read from the server .map files, so the measured gap to the ground is zero. Nodes standing on cave or building floors are not touched.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9066.4,
+    "y": -156.8,
+    "z": 85.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 7
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Copper Vein 12006837 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12006837,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Duskwood Tree 12010688 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12010688,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Duskwood Tree 12010850 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12010850,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Duskwood Tree 12010892 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12010892,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Duskwood Tree 12011177 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12011177,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Duskwood Tree 12011180 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12011180,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Duskwood Tree 12011318 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12011318,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Duskwood Tree 12011326 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12011326,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Duskwood Tree 12011328 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12011328,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Duskwood Tree 12011329 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12011329,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Duskwood Tree 12011334 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12011334,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Duskwood Tree 12011341 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12011341,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Duskwood Tree 12011344 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12011344,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}

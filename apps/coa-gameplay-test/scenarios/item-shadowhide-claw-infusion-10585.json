@@ -1,0 +1,341 @@
+{
+  "schema": 1,
+  "name": "Shadowhide Claw's infusion makes abilities deal Shadowhide Strike damage (#10585)",
+  "contract": [
+    "Using Shadowhide Claw (item 450572) applies Shadowhide Infusion (303084), a SPELL_AURA_PROC_TRIGGER_SPELL aura that triggers Shadowhide Strike (303085, Shadow school damage). Its tooltip reads: coats your weapons in shadows, causing your abilities to deal $303085m1 + 10% of spell power + 10% of attack power additional Shadow damage for 15 sec.",
+    "The aura's DBC record carries ProcFlags 0, and the world had no spell_proc row and no spell_bonus_data row, so the buff applied but never dealt damage and never showed on a damage meter, as reported.",
+    "Expected: while the infusion is up, every landed damaging ability (melee, ranged, none or magic damage class) triggers Shadowhide Strike at the DBC ProcChance of 100%; auto attacks are not abilities and periodic ticks are not ability hits.",
+    "The strike's done bonus rises by one tenth of added attack power and one tenth of added spell power. Level-27 Rangers (the trinket's item level, where the spell level penalty of this rank-22 spell is 1) with +1000 attack power and with +1000 spell power are compared with an identical plain player. Ascension's per-class damage tuning scales every done bonus, so each difference is divided by the same player's done amount for the coefficient-free sibling Shadowhide Strike 312916 (same school, damage class and family, no spell_bonus_data): the expected quotient is 100 / 1000 = 0.1. Before the repair the differences are 0.",
+    "End to end, a Ranger's Whipvine Arrow (ranged damage class) at a dummy while infused deals Shadowhide Strike damage to that dummy; a player who never used the trinket deals none."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "claw",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "ranged_hit_rating": 10000
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 21,
+      "level": 80,
+      "ranged_hit_rating": 10000
+    },
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 21,
+      "level": 27
+    },
+    {
+      "id": "ap",
+      "race": 1,
+      "class": 21,
+      "level": 27,
+      "attack_power": 1000
+    },
+    {
+      "id": "sp",
+      "race": 1,
+      "class": 21,
+      "level": 27,
+      "spell_power": 1000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "claw",
+      "entry": 16542,
+      "level": 80,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and setup settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "attack_power",
+      "save_as": "plain_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "plain_sp"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the attack power fixture adds 1000 attack power",
+      "actor": "ap",
+      "metric": "attack_power",
+      "relative_to": "plain_ap",
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the spell power fixture adds 1000 Shadow spell power",
+      "actor": "sp",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "plain_sp",
+      "equals": 1000
+    },
+    {
+      "action": "snapshot",
+      "label": "Shadowhide Strike done amount without added stats",
+      "actor": "plain",
+      "metric": "spell_damage_done",
+      "spell": 303085,
+      "target": "dummy",
+      "save_as": "strike_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Done amount of the coefficient-free sibling strike (1000 times the class tuning)",
+      "actor": "plain",
+      "metric": "spell_damage_done",
+      "spell": 312916,
+      "target": "dummy",
+      "save_as": "tuned_base"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: added attack power does not change the coefficient-free sibling",
+      "actor": "ap",
+      "metric": "spell_damage_done",
+      "spell": 312916,
+      "target": "dummy",
+      "relative_to": "tuned_base",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: added spell power does not change the coefficient-free sibling",
+      "actor": "sp",
+      "metric": "spell_damage_done",
+      "spell": 312916,
+      "target": "dummy",
+      "relative_to": "tuned_base",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: +1000 attack power adds 10% of it to the strike",
+      "actor": "ap",
+      "metric": "spell_damage_done",
+      "spell": 303085,
+      "target": "dummy",
+      "relative_to": "strike_base",
+      "ratio_to": "tuned_base",
+      "min": 0.098,
+      "max": 0.102
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: +1000 spell power adds 10% of it to the strike",
+      "actor": "sp",
+      "metric": "spell_damage_done",
+      "spell": 303085,
+      "target": "dummy",
+      "relative_to": "strike_base",
+      "ratio_to": "tuned_base",
+      "min": 0.098,
+      "max": 0.102
+    },
+    {
+      "action": "add_item",
+      "actor": "claw",
+      "item": 450572
+    },
+    {
+      "action": "equip",
+      "label": "On-use trinkets work only while equipped",
+      "actor": "claw",
+      "item": 450572,
+      "slot": 12
+    },
+    {
+      "action": "wait",
+      "label": "Equipping an on-use trinket starts its 30 second item cooldown",
+      "ms": 31000
+    },
+    {
+      "action": "use_item",
+      "actor": "claw",
+      "item": 450572,
+      "spell": 303084
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: using the trinket applies Shadowhide Infusion",
+      "actor": "claw",
+      "metric": "aura",
+      "spell": 303084,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the loaded proc entry carries the DBC 100% chance",
+      "actor": "claw",
+      "metric": "spell_proc_chance",
+      "spell": 303084,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed melee ability procs the strike",
+      "actor": "claw",
+      "metric": "aura_proc_rate",
+      "spell": 303084,
+      "target": "dummy",
+      "type_mask": 16,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "trials": 1000,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed magic ability procs the strike",
+      "actor": "claw",
+      "metric": "aura_proc_rate",
+      "spell": 303084,
+      "target": "dummy",
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "trials": 1000,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a melee auto attack is not an ability",
+      "actor": "claw",
+      "metric": "aura_proc_rate",
+      "spell": 303084,
+      "target": "dummy",
+      "type_mask": 4,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a periodic tick is not an ability hit",
+      "actor": "claw",
+      "metric": "aura_proc_rate",
+      "spell": 303084,
+      "target": "dummy",
+      "type_mask": 262144,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "claw",
+      "spell": 806342
+    },
+    {
+      "action": "set_aura",
+      "label": "Grant one stack of Advantage so Whipvine Arrow is not rejected",
+      "actor": "claw",
+      "spell": 804329,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 806342
+    },
+    {
+      "action": "set_aura",
+      "label": "Grant the control one stack of Advantage too",
+      "actor": "control",
+      "spell": 804329,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Infused Whipvine Arrow at the dummy",
+      "actor": "claw",
+      "spell": 806342,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the infused ability hit the dummy",
+      "actor": "claw",
+      "metric": "spell_damage_count",
+      "spell": 806342,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the infused ability deals Shadowhide Strike damage to the dummy",
+      "actor": "claw",
+      "metric": "spell_damage_count",
+      "spell": 303085,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Uninfused Whipvine Arrow at the dummy",
+      "actor": "control",
+      "spell": 806342,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control's ability hit the dummy",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 806342,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without the infusion no Shadowhide Strike is dealt",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 303085,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,195 @@
+{
+  "schema": 1,
+  "name": "Soulrot keeps its first 15-second duration when Deathchaser adds stacks (#10570)",
+  "contract": [
+    "Soulrot 804660 (Spell.dbc): 'Rot the soul of your target, cursing them for $d [15 sec]. At the end of the duration the enemy will take damage based on the number of stacks accrued. Each instance of damage from Deathchaser adds 1 stack, up to $u [20] stacks.'",
+    "The curse lasts 15 seconds from its first application; a stack added later counts toward the detonation but does not restart the duration.",
+    "A second Deathchaser 805190 about 6 seconds after the first adds stacks while the remaining duration stays below 10 seconds (a refresh would read about 15 seconds); the curse then ends with exactly one expiry damage event."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "victim",
+      "owner": "reaper",
+      "entry": 299,
+      "level": 80,
+      "distance": 2,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 805196
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 805190
+    },
+    {
+      "action": "set_aura",
+      "label": "Supply Deathchaser's required Soul Infusion",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Soulrot passive is active",
+      "actor": "reaper",
+      "metric": "aura",
+      "spell": 805196,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "First Deathchaser",
+      "actor": "reaper",
+      "spell": 805190,
+      "target": "victim"
+    },
+    {
+      "action": "assert",
+      "label": "First Deathchaser cast was accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 805190,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Deathchaser applied Soulrot",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 804660,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "First Deathchaser ticks added stacks",
+      "actor": "victim",
+      "metric": "aura_stacks",
+      "spell": 804660,
+      "min": 2,
+      "max": 20,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the first Deathchaser end",
+      "ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "actor": "victim",
+      "metric": "aura_stacks",
+      "spell": 804660,
+      "save_as": "first_stacks"
+    },
+    {
+      "action": "set_aura",
+      "label": "Supply Soul Infusion again",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "label": "Second Deathchaser",
+      "actor": "reaper",
+      "spell": 805190,
+      "target": "victim"
+    },
+    {
+      "action": "assert",
+      "label": "Second Deathchaser cast was accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 805190,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Second Deathchaser added stacks",
+      "actor": "victim",
+      "metric": "aura_stacks",
+      "spell": 804660,
+      "ratio_to": "first_stacks",
+      "min": 1.01,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: new stacks do not restart the 15-second duration",
+      "actor": "victim",
+      "metric": "aura_duration_ms",
+      "spell": 804660,
+      "min": 1000,
+      "max": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Soulrot has not detonated yet",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 804660,
+      "target": "victim",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Soulrot ends at its first 15-second duration",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 804660,
+      "equals": 0,
+      "within_ms": 11000
+    },
+    {
+      "action": "assert",
+      "label": "Soulrot dealt one expiry damage event",
+      "actor": "reaper",
+      "metric": "spell_damage_count",
+      "spell": 804660,
+      "target": "victim",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Soulrot expiry damage was positive",
+      "actor": "reaper",
+      "metric": "spell_damage_total",
+      "spell": 804660,
+      "target": "victim",
+      "min": 1
+    }
+  ]
+}
