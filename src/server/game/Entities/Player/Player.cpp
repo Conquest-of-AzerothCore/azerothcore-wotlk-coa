@@ -7818,7 +7818,9 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
                 uint32 WeaponSpeed = GetAttackTime(attType);
                 chance = GetPPMProcChance(WeaponSpeed, spellData.SpellPPMRate, spellInfo);
             }
-            else if (chance > 100.0f)
+            // CoA: a chance on hit without a PPM rate never procs on every hit; Ascension's custom
+            // weapons (Worldforged, Bloodforged copies) store 100 there, stock uses 101
+            else if (chance >= 100.0f)
             {
                 chance = GetWeaponProcChance();
             }
