@@ -1,0 +1,78 @@
+{
+  "schema": 1,
+  "name": "Haunt's visage wears the Reaper's transmogrified chest (#9260)",
+  "contract": [
+    "Haunt 573425 summons the visage 840000 and the Reaper casts Clone Me 45204 on it, so the client draws the",
+    "visage from SMSG_MIRRORIMAGE_DATA (opcode 1026), which the server sends for CMSG_GET_MIRRORIMAGE_DATA (1025).",
+    "Its payload is the visage GUID (two words), the creator display, two words of race/gender/class/skin/face/",
+    "hair bytes and the guild id, then eleven item display ids in the order head, shoulders, shirt, chest, ...;",
+    "the chest display is word 9. The Reaper wears Apprentice's Robe 56; ObjectMgr replaces item_template displays",
+    "with Item.dbc, where 56 is display 9651 and Neophyte's Robe 6098 is display 9683.",
+    "Appearances.dbc row 6720 is category 4 (chest) with SourceItem 6098;",
+    "CoA.UnlockLocalAppearanceCatalog collects it. Applying it changes the Reaper's visible chest to 6098, so",
+    "the copy must then report 9683 while the same visage reported 9651 before the transmog."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "reaper", "race": 1, "class": 30, "level": 80 }
+  ],
+  "steps": [
+    { "action": "add_item", "actor": "reaper", "item": 56 },
+    { "action": "equip", "actor": "reaper", "item": 56, "slot": 4 },
+    {
+      "action": "assert", "label": "SETUP: the Reaper wears Apprentice's Robe", "actor": "reaper",
+      "metric": "equipped_item", "slot": 4, "equals": 56
+    },
+    { "action": "learn", "actor": "reaper", "spell": 573425 },
+    { "action": "learn", "actor": "reaper", "spell": 800797 },
+    { "action": "cast", "label": "Haunt is only castable while stealthed", "actor": "reaper", "spell": 800797 },
+    {
+      "action": "assert", "label": "SETUP: the player is stealthed",
+      "actor": "reaper", "metric": "aura", "spell": 800797, "equals": 1, "within_ms": 3000
+    },
+    { "action": "cast", "actor": "reaper", "spell": 573425 },
+    {
+      "action": "assert", "label": "SETUP: the visage is summoned",
+      "actor": "reaper", "metric": "owned_creature_count", "entry": 840000, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "client_packet", "label": "Request the visage's mirror image without a transmog",
+      "actor": "reaper", "opcode": 1025, "consumed": false,
+      "fields": [ { "nearest_creature_guid": 840000 } ]
+    },
+    {
+      "action": "assert", "label": "SETUP: one mirror image answer arrives", "actor": "reaper",
+      "metric": "server_packets", "opcode": 1026, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTROL: without a transmog the copy wears Apprentice's Robe", "actor": "reaper",
+      "metric": "server_packet_u32", "opcode": 1026, "index": 9, "equals": 9651
+    },
+    { "action": "apply_appearances", "actor": "reaper", "selection": { "4": 6720 } },
+    {
+      "action": "assert", "label": "SETUP: the chest transmog is accepted", "actor": "reaper",
+      "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_OK", "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the Reaper shows Neophyte's Robe", "actor": "reaper",
+      "metric": "visible_item", "slot": 4, "equals": 6098
+    },
+    {
+      "action": "assert", "label": "SETUP: the Reaper still wears Apprentice's Robe", "actor": "reaper",
+      "metric": "equipped_item", "slot": 4, "equals": 56
+    },
+    {
+      "action": "client_packet", "label": "Request the same visage's mirror image after the transmog",
+      "actor": "reaper", "opcode": 1025, "consumed": false,
+      "fields": [ { "nearest_creature_guid": 840000 } ]
+    },
+    {
+      "action": "assert", "label": "SETUP: a second mirror image answer arrives", "actor": "reaper",
+      "metric": "server_packets", "opcode": 1026, "equals": 2
+    },
+    {
+      "action": "assert", "label": "The copy wears the transmogrified Neophyte's Robe", "actor": "reaper",
+      "metric": "server_packet_u32", "opcode": 1026, "index": 9, "equals": 9683
+    }
+  ]
+}
