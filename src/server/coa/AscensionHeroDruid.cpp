@@ -18,6 +18,8 @@ enum HeroDruidSpells : uint32
 };
 
 constexpr uint32 INSECT_SWARM_FLAG0 = 0x00200000;
+constexpr uint32 STARFIRE_FLAG0 = 0x4;
+constexpr uint32 ARCANE_BARRAGE_FLAG1 = 0x8000;
 constexpr float NATURES_REACH_YARDS = 5.0f;
 constexpr uint32 NATURES_REACH_TARGETS = 10;
 
@@ -98,8 +100,26 @@ class aura_hero_druid_vengeful_soul : public AuraScript
     }
 };
 
+class aura_hero_druid_starburst_barrage : public AuraScript
+{
+    PrepareAuraScript(aura_hero_druid_starburst_barrage);
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        SpellInfo const* spell = eventInfo.GetSpellInfo();
+        return spell && (spell->IsAffected(SPELLFAMILY_DRUID, flag96(STARFIRE_FLAG0, 0, 0)) ||
+            spell->IsAffected(SPELLFAMILY_MAGE, flag96(0, ARCANE_BARRAGE_FLAG1, 0)));
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_hero_druid_starburst_barrage::CheckProc);
+    }
+};
+
 void AddSC_AscensionHeroDruid()
 {
     RegisterSpellScript(aura_hero_druid_natures_reach);
     RegisterSpellScript(aura_hero_druid_vengeful_soul);
+    RegisterSpellScript(aura_hero_druid_starburst_barrage);
 }
