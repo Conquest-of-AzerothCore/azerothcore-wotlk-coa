@@ -9,6 +9,7 @@
 #include "AccountScript.h"
 #include "AscensionClientLua.h"
 #include "AscensionPersonalBank.h"
+#include "AscensionHighRisk.h"
 #include "LocalLevelScaling.h"
 #include "AscensionRulesets.h"
 
@@ -34,6 +35,14 @@ namespace CoAChallenges
         if (kind != AscensionPersonalBank::REALM || !PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_REALM_BANK"))
             return true;
         NotifyPlayer(player, "Your challenge forbids using the realm bank.");
+        return false;
+    }
+
+    bool ChallengeAllowsHighRiskLoot(Player* looter, uint32)
+    {
+        if (!PlayerHasRule(looter, "CHALLENGE_RULES_TYPE_NO_HIGH_RISK_LOOT"))
+            return true;
+        NotifyPlayer(looter, "Your challenge forbids looting the spoils of other players in High-Risk.");
         return false;
     }
 
@@ -4142,6 +4151,7 @@ void Addmod_coa_challengesScripts()
 {
     AscensionRulesets::RegisterGuard(&CoAChallenges::ChallengeAllowsRuleset);
     AscensionPersonalBank::RegisterAccessGuard(&CoAChallenges::ChallengeAllowsBankAccess);
+    HighRisk::RegisterLootGuard(&CoAChallenges::ChallengeAllowsHighRiskLoot);
     RegisterAscensionClientConfig(&CoAChallenges::AppendClientConfig);
     RegisterAscensionChallengeStateSync([](Player* player)
     {

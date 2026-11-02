@@ -1391,6 +1391,7 @@ namespace CoAChallenges
             "CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING",
             "CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING",
             "CHALLENGE_RULES_TYPE_NO_PLAYER_LEVEL_SCALING",
+            "CHALLENGE_RULES_TYPE_NO_HIGH_RISK_LOOT",
             // NOTE: FLOOR_IS_LAVA (165 "The Floor is Lava!") is NOT modelled here:
             // its About is "Don't. Stop. Jumping." (damage while grounded), not
             // lava/fire environmental damage, and 165 is challenge-only (custom
@@ -1913,6 +1914,7 @@ namespace CoAChallenges
                 "CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING", // challenges-level-scaling-rules scenario
                 "CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING",    // challenges-level-scaling-rules scenario
                 "CHALLENGE_RULES_TYPE_NO_PLAYER_LEVEL_SCALING",   // challenges-level-scaling-rules scenario
+                "CHALLENGE_RULES_TYPE_NO_HIGH_RISK_LOOT",         // challenge-no-high-risk-loot scenario
             };
             std::set<std::string> const& impl = ImplementedRules();
             uint32 missing = 0;

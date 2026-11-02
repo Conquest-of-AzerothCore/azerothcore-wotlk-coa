@@ -98,10 +98,11 @@ owners feed it.
 | rulesets (`RulesetBlocksOwner`, `AscensionRulesets.cpp`) | both, while the character carries High-Risk (1004019), or War Mode (1004119) without PvE Mode (9931032) | the open world only (not an instanceable map) |
 
 Ironman - Overwhelming Odds (71) and its twin (285) carry only the creature rule; Hardcore - Inn-Sane
-(76, 290) carries both, and also `NO_PLAYER_LEVEL_SCALING`. That rule turns off the character's whole
-Destiny Weaver choice while the trial is active, so creatures, quests and scaled loot stay at their
-authored levels. The ruleset block is what the live tooltips of the two auras
-say: "Level scaling is disabled while in High-Risk." and "Level scaling is disabled while in War
+(76, 290) carries both, and also `NO_PLAYER_LEVEL_SCALING`. That rule is mapped to both bits
+(`CoAParse::LevelScalingBlockBits`). No source gives its meaning on Ascension live, and both trials
+that carry it already set both bits through the other two rules, so the mapping changes no behavior
+today; it matters only for a challenge that carries the player rule alone. The ruleset block is what
+the live tooltips of the two auras say: "Level scaling is disabled while in High-Risk." and "Level scaling is disabled while in War
 Mode."; PvE Mode's tooltip has no such line. `CoA.Ruleset.DisableLevelScaling` (default 1) turns the
 ruleset block off.
 

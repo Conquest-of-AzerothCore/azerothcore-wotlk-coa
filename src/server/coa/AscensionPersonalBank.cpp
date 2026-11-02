@@ -1115,6 +1115,12 @@ bool HandlePacket(Player* player, WorldPacket const& packet)
         return false;
     }
 
+    if (!CanAccess(player, bank.OwnerKind == OWNER_REALM ? REALM : PERSONAL))
+    {
+        Closed(player);
+        return true;
+    }
+
     switch (packet.GetOpcode())
     {
         case CMSG_GUILD_BANK_QUERY_TAB:
@@ -1256,6 +1262,9 @@ public:
         }
 
         player->SendEquipError(EQUIP_ERR_NONE, item, nullptr);
+
+        if (!AscensionPersonalBank::CanAccess(player, kind))
+            return true;
 
         if (!AscensionPersonalBank::AddTab(player, kind))
         {
