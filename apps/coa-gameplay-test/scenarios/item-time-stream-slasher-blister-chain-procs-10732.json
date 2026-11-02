@@ -1,0 +1,324 @@
+{
+  "schema": 1,
+  "name": "Time Stream Slasher and Blister Chain on-hit procs fire (#10732)",
+  "contract": "Time Stream Slasher's proc dummies (202053, worldforged 312573/316573/320573) say \"Your melee attacks and direct damaging spells have a chance to ... cause an additional Arcane damage\" with ProcChance 7, and Blister Chain's (304158, worldforged 313273/317273/321273) say \"your attacks have a chance to blister the target\" with ProcChance 25. All eight carry DBC ProcFlags 0 and had no spell_proc row, so Aura::GetProcEffectMask found no entry and neither ever procced; the reporter saw no proc in 500+ auto attacks. Expected: each dummy loads its record's chance; a landed melee auto attack procs both at about their chance, a direct magic damage spell procs Time Stream Slasher only, and a ranged auto attack procs Blister Chain only.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Time Stream Slasher base proc dummy",
+      "actor": "caster",
+      "spell": 202053,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Time Stream Slasher top worldforged tier proc dummy",
+      "actor": "caster",
+      "spell": 320573,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Blister Chain base proc dummy",
+      "actor": "caster",
+      "spell": 304158,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Blister Chain top worldforged tier proc dummy",
+      "actor": "caster",
+      "spell": 321273,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: proc dummy 202053 is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 202053,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: proc dummy 320573 is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 320573,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: proc dummy 304158 is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 304158,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: proc dummy 321273 is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 321273,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Time Stream Slasher dummy 202053 loads the record's 7% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 202053,
+      "equals": 7
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Time Stream Slasher dummy 312573 loads the record's 7% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 312573,
+      "equals": 7
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Time Stream Slasher dummy 316573 loads the record's 7% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 316573,
+      "equals": 7
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Time Stream Slasher dummy 320573 loads the record's 7% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 320573,
+      "equals": 7
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Blister Chain dummy 304158 loads the record's 25% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 304158,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Blister Chain dummy 313273 loads the record's 25% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 313273,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Blister Chain dummy 317273 loads the record's 25% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 317273,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Blister Chain dummy 321273 loads the record's 25% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 321273,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed melee auto attack procs Time Stream Slasher 202053 at about 7%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 202053,
+      "target": "dummy",
+      "type_mask": 4,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 6,
+      "max": 8
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed direct magic damage spell procs Time Stream Slasher 202053 at about 7%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 202053,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 6,
+      "max": 8
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a ranged auto attack does not proc Time Stream Slasher 202053",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 202053,
+      "target": "dummy",
+      "type_mask": 64,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed melee auto attack procs Time Stream Slasher 320573 at about 7%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 320573,
+      "target": "dummy",
+      "type_mask": 4,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 6,
+      "max": 8
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed direct magic damage spell procs Time Stream Slasher 320573 at about 7%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 320573,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 6,
+      "max": 8
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a ranged auto attack does not proc Time Stream Slasher 320573",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 320573,
+      "target": "dummy",
+      "type_mask": 64,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed melee auto attack procs Blister Chain 304158 at about 25%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 304158,
+      "target": "dummy",
+      "type_mask": 4,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 23,
+      "max": 27
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed ranged auto attack procs Blister Chain 304158 at about 25%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 304158,
+      "target": "dummy",
+      "type_mask": 64,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 23,
+      "max": 27
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a magic damage spell does not proc Blister Chain 304158",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 304158,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed melee auto attack procs Blister Chain 321273 at about 25%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 321273,
+      "target": "dummy",
+      "type_mask": 4,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 23,
+      "max": 27
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed ranged auto attack procs Blister Chain 321273 at about 25%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 321273,
+      "target": "dummy",
+      "type_mask": 64,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 23,
+      "max": 27
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a magic damage spell does not proc Blister Chain 321273",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 321273,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    }
+  ]
+}
