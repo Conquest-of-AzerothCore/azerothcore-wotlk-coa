@@ -1,0 +1,128 @@
+{
+  "schema": 1,
+  "name": "Shrouded Stars spreads delayed magic damage over Magic Stagger's 10 s (#10652)",
+  "contract": [
+    "Report #10652: a Starcaller with Shrouded Stars died to a single 4050 Magic Stagger hit after it had done",
+    "nothing for several seconds. Shrouded Stars 704785: \"you delay $s3% of direct magical damage taken, instead",
+    "taking it over $954791d\" (effect 2 = 30, Magic Stagger 954791 lasts 10 s with a 1 s period).",
+    "Expected: after one direct magic hit, Magic Stagger deals the delayed part in about one tick per second, so",
+    "Expected: after one direct magic hit, Magic Stagger deals the delayed part in about one tick per second:",
+    "after 3.5 s at least 3 ticks landed, and the rest (about 6 of 9 equal ticks, a 40-85% share) comes later."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "sc",
+      "race": 1,
+      "class": 26,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "caster",
+      "owner": "sc",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 1000000,
+      "distance": 5,
+      "spell_hit_bonus": 100
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "sc",
+      "spell": 704785
+    },
+    {
+      "action": "assert",
+      "label": "Shrouded Stars is active",
+      "actor": "sc",
+      "metric": "aura",
+      "spell": 704785,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "A direct Arcane Blast hits the Starcaller",
+      "actor": "caster",
+      "spell": 30451,
+      "target": "sc"
+    },
+    {
+      "action": "assert",
+      "label": "Part of the hit is delayed into Magic Stagger",
+      "actor": "sc",
+      "metric": "aura",
+      "spell": 954791,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Magic Stagger pays the delayed damage every second",
+      "actor": "sc",
+      "metric": "spell_damage_count",
+      "spell": 954791,
+      "target": "sc",
+      "min": 3
+    },
+    {
+      "action": "snapshot",
+      "save_as": "paid_early",
+      "actor": "sc",
+      "metric": "spell_damage_total",
+      "spell": 954791,
+      "target": "sc"
+    },
+    {
+      "action": "assert",
+      "actor": "sc",
+      "metric": "aura",
+      "spell": 954791,
+      "equals": 0,
+      "within_ms": 9000,
+      "label": "Magic Stagger ends within its 10 s"
+    },
+    {
+      "action": "snapshot",
+      "save_as": "paid_total",
+      "actor": "sc",
+      "metric": "spell_damage_total",
+      "spell": 954791,
+      "target": "sc"
+    },
+    {
+      "action": "assert",
+      "label": "The first 3.5 s paid a share of the delayed damage, not none of it",
+      "actor": "sc",
+      "metric": "spell_damage_total",
+      "spell": 954791,
+      "target": "sc",
+      "relative_to": "paid_early",
+      "ratio_to": "paid_total",
+      "min": 0.4,
+      "max": 0.85
+    }
+  ]
+}

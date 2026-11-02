@@ -208,7 +208,7 @@ class witch_doctor_casts : public AllSpellScript
                         Copy(player, previous, LoaEchoHeal, healing / 2);
                 state.previousBrew = target->GetGUID();
             }
-            if (healing && player->HasAura(LoaBlessing))
+            if (spell->GetScriptHealingIncludingOverheal() && player->HasAura(LoaBlessing))
             {
                 uint32 blessings[] = {BlessingOne, BlessingTwo, BlessingThree, BlessingFour};
                 Cast(player, target, blessings[urand(0, 3)]);
