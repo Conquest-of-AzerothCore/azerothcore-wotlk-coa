@@ -4511,10 +4511,14 @@ private:
                 "Invalid ranged weapon subclass");
             auto const sheathState = step.get_optional<uint32>("sheath_state");
             Require(!sheathState || *sheathState < MAX_SHEATH_STATE, "Invalid sheath state");
+            auto const victimId = step.get_optional<std::string>("target");
+            Unit* const victim = victimId ? GetUnit(*victimId) : nullptr;
             return std::count_if(creatures.begin(), creatures.end(),
                 [player, spell, caster, minDistance, ownerDisplay, creatorOnly,
-                 rangedWeaponSubclass, sheathState](Creature* creature)
+                 rangedWeaponSubclass, sheathState, victim](Creature* creature)
             {
+                if (victim && creature->GetVictim() != victim)
+                    return false;
                 if (sheathState && creature->GetSheath() != SheathState(*sheathState))
                     return false;
                 if (rangedWeaponSubclass)

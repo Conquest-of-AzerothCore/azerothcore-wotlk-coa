@@ -107,6 +107,16 @@
       "target": "dummy",
       "equals": 1,
       "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: both tigers attack the enemy their owner damages",
+      "actor": "caster",
+      "metric": "owned_creature_count",
+      "entry": 350001,
+      "target": "dummy",
+      "equals": 2,
+      "within_ms": 5000
     }
   ]
 }
