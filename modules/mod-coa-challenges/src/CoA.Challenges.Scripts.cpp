@@ -3,6 +3,7 @@
 #include "CoA.Challenges.Review.h"
 #include "RBAC.h"
 #include "KillRewarder.h"
+#include "Mail.h"
 #include "Random.h"
 #include "AllCreatureScript.h"
 #include "AccountScript.h"
@@ -1063,13 +1064,25 @@ namespace CoAChallenges
             std::to_string(entry));
     }
 
-    // NO_MAIL / NO_OUTSIDE_INTERACTION (rules) forbid RECEIVING mail during the
-    // trial, mirroring OnPlayerCanSendMail for the sending side. Exempt items
-    // (store items / reward caches, same list as MarkMailTaken) are never
-    // player-to-player mail, so they stay takeable; itemEntry is 0 for money.
-    bool MailTakeForbidden(Player* player, uint32 itemEntry = 0)
+    // The Elite Warchest has no binding, so only the copy the welcome grant
+    // mails to the hero itself is exempt; one mailed by another character is not.
+    bool IsMailExemptTake(Player* player, uint32 mailId, uint32 itemEntry)
     {
-        if (player && !IsMailExemptItem(itemEntry)
+        if (!IsMailExemptItem(itemEntry))
+            return false;
+        if (itemEntry != EliteWarchestItem)
+            return true;
+        Mail const* mail = player ? player->GetMail(mailId) : nullptr;
+        return mail && mail->IsSentByPlayer() && mail->sender == player->GetGUID().GetCounter();
+    }
+
+    // NO_MAIL / NO_OUTSIDE_INTERACTION (rules) forbid RECEIVING mail during the
+    // trial, mirroring OnPlayerCanSendMail for the sending side. Exempt takes
+    // (store items / reward caches, same rule as MarkMailTaken) stay takeable;
+    // money is never exempt.
+    bool MailTakeForbidden(Player* player, bool exempt = false)
+    {
+        if (player && !exempt
             && (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_MAIL")
                 || NoOutsideInteraction(player)))
         {
@@ -1082,11 +1095,11 @@ namespace CoAChallenges
     // Mail is a facet of the OUTSIDE_INTERACTION condition: taking a non-exempt
     // item/currency (entry 0 = money) taints the character for the next trial
     // activation. Store items / reward caches are exempt.
-    void MarkMailTaken(Player* player, uint32 itemEntry)
+    void MarkMailTaken(Player* player, bool exempt)
     {
         if (!player || !ChallengesEnabled())
             return;
-        if (IsMailExemptItem(itemEntry))   // store items / reward caches: exempt
+        if (exempt)                        // store items / reward caches: exempt
             return;
         if (IsPrestiged(player))           // prestige uses the mailbox normally
             return;
@@ -2548,14 +2561,15 @@ namespace CoAChallenges
             {
                 Item* item = player ? player->GetMItem(packet.read<uint32>(12)) : nullptr;
                 uint32 itemEntry = item ? item->GetEntry() : 0;
-                if (MailTakeForbidden(player, itemEntry))
+                bool const exempt = IsMailExemptTake(player, packet.read<uint32>(8), itemEntry);
+                if (MailTakeForbidden(player, exempt))
                 {
                     if (player)
                         player->SendMailResult(packet.read<uint32>(8), MAIL_ITEM_TAKEN, MAIL_ERR_INTERNAL_ERROR);
                     return false;
                 }
                 if (player)
-                    MarkMailTaken(player, itemEntry);
+                    MarkMailTaken(player, exempt);
                 return true;
             }
             if (opcode == CMSG_MAIL_TAKE_MONEY && packet.size() >= 12)
@@ -2566,7 +2580,7 @@ namespace CoAChallenges
                         player->SendMailResult(packet.read<uint32>(8), MAIL_MONEY_TAKEN, MAIL_ERR_INTERNAL_ERROR);
                     return false;
                 }
-                MarkMailTaken(player, 0);
+                MarkMailTaken(player, false);
                 return true;
             }
 

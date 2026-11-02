@@ -6,7 +6,8 @@
     "during a trial that forbids receiving mail; the take fails with \"Your challenge forbids receiving mail.\"",
     "Expected: the warchest is a server gift, not player-to-player mail. Under Bloodbath (challenge 15, NO_MAIL) the",
     "hero reaching level 10 receives it, CMSG_MAIL_TAKE_ITEM answers MAIL_OK (0) and the warchest lands in the bags,",
-    "while a Peacebloom mailed by another character stays refused with MAIL_ERR_INTERNAL_ERROR (6)."
+    "while a Peacebloom mailed by another character stays refused with MAIL_ERR_INTERNAL_ERROR (6).",
+    "The warchest has no binding, so a copy mailed by another character is player mail and is refused the same way."
   ],
   "timeout_ms": 90000,
   "location": { "map": 0, "x": -8914, "y": -133, "z": 80.6, "o": 0 },
@@ -57,6 +58,25 @@
     { "action": "assert", "actor": "hero", "metric": "server_packet_u32", "opcode": 569, "index": 2,
       "equals": 6, "label": "The refusal is MAIL_ERR_INTERNAL_ERROR" },
     { "action": "assert", "actor": "hero", "metric": "mail_has_item", "item": 2447, "equals": 1 },
-    { "action": "assert", "actor": "hero", "metric": "item_count", "item": 2447, "equals": 0 }
+    { "action": "assert", "actor": "hero", "metric": "item_count", "item": 2447, "equals": 0 },
+
+    { "action": "add_item", "actor": "sender", "item": 2977351 },
+    { "action": "client_packet", "label": "Mail an Elite Warchest to the hero", "actor": "sender",
+      "opcode": 568, "consumed": false,
+      "fields": [
+        { "gameobject_guid": 142119 }, { "string": "Coachesthero" }, { "string": "Player warchest" },
+        { "string": "Warchest" }, { "u32": 41 }, { "u32": 0 }, { "u8": 1 }, { "u8": 0 },
+        { "item_guid": 2977351 }, { "u32": 0 }, { "u32": 0 }, { "u64": 0 }, { "u8": 0 }
+      ] },
+    { "action": "assert", "actor": "sender", "metric": "server_packet_u32", "opcode": 569, "index": 2,
+      "equals": 0, "label": "The player warchest mail is accepted" },
+    { "action": "assert", "actor": "hero", "metric": "mail_has_item", "item": 2977351, "equals": 1,
+      "within_ms": 1000 },
+    { "action": "client_packet", "label": "DISCRIMINATING: the challenge refuses a player-mailed warchest",
+      "actor": "hero", "opcode": 582, "early": false, "consumed": true,
+      "fields": [ { "gameobject_guid": 142119 }, { "mail_id": 2977351 }, { "mail_item_guid": 2977351 } ] },
+    { "action": "assert", "actor": "hero", "metric": "server_packet_u32", "opcode": 569, "index": 2,
+      "equals": 6, "label": "The player warchest refusal is MAIL_ERR_INTERNAL_ERROR" },
+    { "action": "assert", "actor": "hero", "metric": "item_count", "item": 2977351, "equals": 1 }
   ]
 }
