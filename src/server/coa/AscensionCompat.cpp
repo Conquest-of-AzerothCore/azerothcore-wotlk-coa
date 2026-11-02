@@ -413,7 +413,7 @@ constexpr uint32 APPEARANCE_CATEGORY_SHADOWHOUND = 68;
 constexpr uint32 APPEARANCE_CATEGORY_NECROMANCER_LICH_FORM = 67;
 constexpr uint32 APPEARANCE_CATEGORY_TAMED_BEAST = 33;
 constexpr uint32 APPEARANCE_CATEGORY_SUMMONED_DEMON = 34;
-constexpr uint32 TAME_BEAST_SPELL = 1515;
+constexpr uint32 TAME_CREATURE_SPELL = 13481;
 constexpr std::array<uint32, 3> CALL_PET_SPELLS = { 883, 574302, 1100883 };
 
 AscensionCollectionModels::Entry const* FindCollectionModel(uint32 creatureId);
@@ -7696,7 +7696,7 @@ private:
       }
     }
 
-    Pet* pet = player->CreateTamedPetFrom(entry, TAME_BEAST_SPELL);
+    Pet* pet = player->CreateTamedPetFrom(entry, TAME_CREATURE_SPELL);
     if (!pet)
       return "APPLY_APPEARANCES_BAD_CREATURE_ENTRY";
     uint8 const level = player->GetLevel();
