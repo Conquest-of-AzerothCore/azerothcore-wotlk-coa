@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Time Stream Slasher and Blister Chain proc on landed attacks (#10732)",
+  "contract": [
+    "Time Stream Slasher (515740) equips proc dummy 202053, its worldforged tiers 312573/316573/320573 (top tier item 1387546 equips 320573); Blister Chain (515797) equips 304158, its tiers 313273/317273/321273 (top tier item 1387570 equips 321273). Every dummy is an aura 42 trigger on the damage spell with Spell.dbc ProcFlags 0, and the world had no spell_proc row, so Aura::GetProcEffectMask found no entry and the items never procced (#10732).",
+    "The Slasher tooltips promise a chance on melee attacks and direct damaging spells (ProcChance 7); the Blister Chain tooltips promise a chance on attacks (ProcChance 25). The repair grants the Slasher dummies the landed melee auto attack and the melee, ranged, none and magic damage-class spell masks, and the Blister Chain dummies the landed melee and ranged auto attacks and the melee and ranged damage-class abilities, all for damage at the hit phase, with Chance deferred to the record.",
+    "spell_proc_chance reads the record's 7 or 25 for every dummy, and aura_proc_rate replays each equipped aura's native proc decision on a synthetic landed event. Before the repair the chance lookups fail with no proc entry and every rate reads 0, so the discriminating assertions fail rather than flake. Periodic ticks proc nothing, and a magic spell does not proc Blister Chain."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    { "id": "base", "race": 1, "class": 13, "level": 60, "allow_regeneration": false },
+    { "id": "tier", "race": 1, "class": 13, "level": 60, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "m1", "owner": "base", "entry": 36, "level": 60, "health": 1000000, "distance": 4 },
+    { "id": "m2", "owner": "tier", "entry": 36, "level": 60, "health": 1000000, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "add_item", "actor": "base", "item": 515740 },
+    { "action": "equip", "label": "Equip Time Stream Slasher", "actor": "base", "item": 515740, "slot": 15 },
+    { "action": "add_item", "actor": "base", "item": 515797 },
+    { "action": "equip", "label": "Equip Blister Chain", "actor": "base", "item": 515797, "slot": 1 },
+    { "action": "add_item", "actor": "tier", "item": 1387546 },
+    { "action": "equip", "label": "Equip the top worldforged Time Stream Slasher", "actor": "tier", "item": 1387546, "slot": 15 },
+    { "action": "add_item", "actor": "tier", "item": 1387570 },
+    { "action": "equip", "label": "Equip the top worldforged Blister Chain", "actor": "tier", "item": 1387570, "slot": 1 },
+    { "action": "assert", "label": "SETUP: Time Stream Slasher applies its proc dummy", "actor": "base", "metric": "aura", "spell": 202053, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: Blister Chain applies its proc dummy", "actor": "base", "metric": "aura", "spell": 304158, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: the top Slasher tier applies its proc dummy", "actor": "tier", "metric": "aura", "spell": 320573, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: the top Blister Chain tier applies its proc dummy", "actor": "tier", "metric": "aura", "spell": 321273, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: Slasher base dummy loads the record's 7% chance", "actor": "base", "metric": "spell_proc_chance", "spell": 202053, "equals": 7 },
+    { "action": "assert", "label": "DISCRIMINATING: Slasher dungeon/Zul'Gurub tier loads 7%", "actor": "base", "metric": "spell_proc_chance", "spell": 312573, "equals": 7 },
+    { "action": "assert", "label": "DISCRIMINATING: Slasher higher tier loads 7%", "actor": "base", "metric": "spell_proc_chance", "spell": 316573, "equals": 7 },
+    { "action": "assert", "label": "DISCRIMINATING: Slasher top tier loads 7%", "actor": "base", "metric": "spell_proc_chance", "spell": 320573, "equals": 7 },
+    { "action": "assert", "label": "DISCRIMINATING: Blister Chain base dummy loads the record's 25% chance", "actor": "base", "metric": "spell_proc_chance", "spell": 304158, "equals": 25 },
+    { "action": "assert", "label": "DISCRIMINATING: Blister Chain dungeon/Zul'Gurub tier loads 25%", "actor": "base", "metric": "spell_proc_chance", "spell": 313273, "equals": 25 },
+    { "action": "assert", "label": "DISCRIMINATING: Blister Chain higher tier loads 25%", "actor": "base", "metric": "spell_proc_chance", "spell": 317273, "equals": 25 },
+    { "action": "assert", "label": "DISCRIMINATING: Blister Chain top tier loads 25%", "actor": "base", "metric": "spell_proc_chance", "spell": 321273, "equals": 25 },
+    { "action": "assert", "label": "DISCRIMINATING: a landed melee auto attack procs the Slasher at about 7%", "actor": "base", "metric": "aura_proc_rate", "spell": 202053, "target": "m1", "type_mask": 4, "min": 5.5, "max": 8.5 },
+    { "action": "assert", "label": "DISCRIMINATING: a landed direct magic spell procs the Slasher at about 7%", "actor": "base", "metric": "aura_proc_rate", "spell": 202053, "target": "m1", "trigger_spell": 116, "type_mask": 65536, "phase_mask": 2, "spell_type_mask": 1, "hit_mask": 1, "min": 5.5, "max": 8.5 },
+    { "action": "assert", "label": "DISCRIMINATING: a landed melee auto attack procs the top Slasher tier at about 7%", "actor": "tier", "metric": "aura_proc_rate", "spell": 320573, "target": "m2", "type_mask": 4, "min": 5.5, "max": 8.5 },
+    { "action": "assert", "label": "DISCRIMINATING: a landed melee auto attack procs Blister Chain at about 25%", "actor": "base", "metric": "aura_proc_rate", "spell": 304158, "target": "m1", "type_mask": 4, "min": 23.5, "max": 26.5 },
+    { "action": "assert", "label": "DISCRIMINATING: a landed ranged auto attack procs Blister Chain at about 25%", "actor": "base", "metric": "aura_proc_rate", "spell": 304158, "target": "m1", "type_mask": 64, "min": 23.5, "max": 26.5 },
+    { "action": "assert", "label": "DISCRIMINATING: a landed melee auto attack procs the top Blister Chain tier at about 25%", "actor": "tier", "metric": "aura_proc_rate", "spell": 321273, "target": "m2", "type_mask": 4, "min": 23.5, "max": 26.5 },
+    { "action": "assert", "label": "CONTROL: a periodic tick does not proc the Slasher", "actor": "base", "metric": "aura_proc_rate", "spell": 202053, "target": "m1", "trigger_spell": 116, "type_mask": 262144, "phase_mask": 2, "spell_type_mask": 1, "hit_mask": 1, "equals": 0 },
+    { "action": "assert", "label": "CONTROL: an unlanded cast-phase spell does not proc the Slasher", "actor": "base", "metric": "aura_proc_rate", "spell": 202053, "target": "m1", "trigger_spell": 116, "type_mask": 65536, "phase_mask": 1, "spell_type_mask": 1, "hit_mask": 1, "equals": 0 },
+    { "action": "assert", "label": "CONTROL: a magic spell is not an attack for Blister Chain", "actor": "base", "metric": "aura_proc_rate", "spell": 304158, "target": "m1", "trigger_spell": 116, "type_mask": 65536, "phase_mask": 2, "spell_type_mask": 1, "hit_mask": 1, "equals": 0 }
+  ]
+}
