@@ -211,7 +211,10 @@ void ApplyContracts(SpellInfo* info)
     if (id == 500981)
         info->Effects[2].Effect = 0;
     if (id == 804371)
+    {
         info->Effects[0].MiscValue = 444914;
+        info->Attributes |= SPELL_ATTR0_NO_IMMUNITIES;
+    }
     if (id == 505224)
     {
         info->Effects[0].ApplyAuraName = SPELL_AURA_SCHOOL_ABSORB;
