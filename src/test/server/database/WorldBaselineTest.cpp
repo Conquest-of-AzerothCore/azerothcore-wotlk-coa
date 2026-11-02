@@ -214,3 +214,55 @@ TEST_F(WorldBaselineTest, RejectsMembersThatDoNotMatchTheManifestTables)
         { { "creature", Sha256(Creature) } });
     EXPECT_THROW(WorldBaseline::Extract(renamedMember, _root / "out"), UpdateException);
 }
+
+namespace
+{
+    std::string Sha1(std::string const& content)
+    {
+        return ByteArrayToHexStr(Acore::Crypto::SHA1::GetDigestOf(content));
+    }
+
+    std::string Lower(std::string value)
+    {
+        std::transform(value.begin(), value.end(), value.begin(),
+            [](unsigned char c) { return char(std::tolower(c)); });
+        return value;
+    }
+}
+
+TEST_F(WorldBaselineTest, ReportsCoveredMigrationsWhoseLedgerHashDiffersOnlyByLineEndings)
+{
+    std::filesystem::path const migrations = _root / "source" / "data" / "sql";
+    std::filesystem::create_directories(migrations);
+    std::ofstream(migrations / "crlf.sql", std::ios::binary) << "SELECT 1;\r\nSELECT 2;\r\n";
+    std::ofstream(migrations / "lf.sql", std::ios::binary) << "SELECT 3;\n";
+    std::ofstream(migrations / "edited.sql", std::ios::binary) << "SELECT 4;\r\n";
+
+    std::filesystem::path const manifest = _root / "baseline.json";
+    std::ofstream(manifest, std::ios::binary) << R"({"coveredMigrations": {)"
+        << R"("data/sql/crlf.sql": ")" << Lower(Sha1("SELECT 1;\nSELECT 2;\n")) << R"(", )"
+        << R"("data/sql/lf.sql": ")" << Lower(Sha1("SELECT 3;\n")) << R"(", )"
+        << R"("data/sql/edited.sql": ")" << Lower(Sha1("SELECT 5;\n")) << R"(", )"
+        << R"("data/sql/missing.sql": ")" << Lower(Sha1("SELECT 6;\n")) << R"("}})";
+
+    std::vector<WorldBaseline::LedgerHash> const hashes = WorldBaseline::LineEndingLedgerHashes(manifest,
+        _root / "source");
+
+#ifdef _WIN32
+    EXPECT_TRUE(hashes.empty());
+#else
+    ASSERT_EQ(hashes.size(), 1u);
+    EXPECT_EQ(hashes[0].name, "crlf.sql");
+    EXPECT_EQ(hashes[0].coveredHash, Lower(Sha1("SELECT 1;\nSELECT 2;\n")));
+    EXPECT_EQ(hashes[0].nativeHash, Sha1("SELECT 1;\r\nSELECT 2;\r\n"));
+#endif
+}
+
+TEST_F(WorldBaselineTest, RejectsACoveredMigrationOutsideTheSourceTree)
+{
+    std::filesystem::path const manifest = _root / "baseline.json";
+    std::ofstream(manifest, std::ios::binary) << R"({"coveredMigrations": {"../outside.sql": ")"
+        << Lower(Sha1("SELECT 1;\n")) << R"("}})";
+
+    EXPECT_THROW(WorldBaseline::LineEndingLedgerHashes(manifest, _root / "source"), UpdateException);
+}

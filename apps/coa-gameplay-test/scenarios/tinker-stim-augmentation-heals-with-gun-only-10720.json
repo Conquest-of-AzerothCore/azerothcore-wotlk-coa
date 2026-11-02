@@ -1,0 +1,213 @@
+{
+  "schema": 1,
+  "name": "Tinker: Stim Augmentation heals allies and feeds Stim Pack when the Tinker carries only a gun (#10720)",
+  "contract": "Stim Augmentation (653239) puts enchant 9997 on the equipped gun, whose equip spell 653240 reads 'causing your direct healing abilities to heal up to 3 nearby allies for an additional 20% of the amount healed'. Its script casts 653241 (SPELL_EFFECT_HEAL, TARGET_UNIT_TARGET_ALLY, chain 3) on each direct heal's target. Spell.dbc gives 653241 EquippedItemClass 2 with subclass mask 173555, which holds melee weapons but not guns, so a Tinker carrying only the gun the augmentation needs had every Stim heal rejected, while the same setup with the starting main-hand weapon heals. A level 60 Tinker whose starting main-hand weapon is destroyed equips only a gun, applies the augmentation and casts Zap! (681298, an instant direct heal) on a wounded grouped ally: the ally must take both the Zap! heal and a Stim heal 653241. Issue #10720. With Stim Pack (807531) learned, that Stim heal must also take 3 sec off Med Pack's (800347) running cooldown, the reporter's second symptom: its cooldown spell 653255 carries the same melee-only weapon requirement and failed the same way, so the cooldown only ran down by itself (58291 -> 55993 in 2280 ms).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 12,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "tinker",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9616.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "group",
+      "actor": "tinker",
+      "target": "ally"
+    },
+    {
+      "action": "destroy_item",
+      "label": "Remove the starting main-hand weapon",
+      "actor": "tinker",
+      "item": 431911
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no main-hand weapon",
+      "actor": "tinker",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no off-hand item",
+      "actor": "tinker",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "label": "Fixture: ranged gun",
+      "actor": "tinker",
+      "item": 450265
+    },
+    {
+      "action": "equip",
+      "label": "Equip the gun",
+      "actor": "tinker",
+      "item": 450265,
+      "slot": 17
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "equipped_item",
+      "slot": 17,
+      "equals": 450265
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 653239
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 653239
+    },
+    {
+      "action": "assert",
+      "label": "Stim Augmentation is on the gun",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 653240,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown clear",
+      "ms": 1700
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 681298
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 807531
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 800347
+    },
+    {
+      "action": "cast",
+      "label": "Put Med Pack on its cooldown",
+      "actor": "tinker",
+      "spell": 800347,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "cast_failure",
+      "spell": 800347,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown clear",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Med Pack is on its full cooldown",
+      "actor": "tinker",
+      "metric": "cooldown_ms",
+      "spell": 800347,
+      "min": 57000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1,
+      "maximum": 100000
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 681298,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "cast_failure",
+      "spell": 681298,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Zap! heals the ally",
+      "actor": "tinker",
+      "metric": "spell_effective_heal_total",
+      "spell": 681298,
+      "target": "ally",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Stim Augmentation heals the ally too",
+      "actor": "tinker",
+      "metric": "spell_heal_count",
+      "spell": 653241,
+      "target": "ally",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Stim Pack's 653255 takes 3 sec off Med Pack's cooldown",
+      "actor": "tinker",
+      "metric": "cooldown_ms",
+      "spell": 800347,
+      "max": 56000
+    }
+  ]
+}

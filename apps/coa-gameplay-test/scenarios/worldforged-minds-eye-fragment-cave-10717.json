@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Worldforged Mind's Eye Fragment stands on the Mosh'Ogg cave floor (#10717)",
+  "contract": "The realm-map pass put Worldforged Mind's Eye Fragment (entry 95752, guid 6940749) at (-12359.1, -1161.4, 1.083) in the Mosh'Ogg cave rock: worldserver vmap probes find no floor under that XY at all, only the .map terrain at 187.6 above, so it read under_ground and the reporter found it in a wall. Its catalog sighting (wiped guid 6901175) is at (-12340.8, -1158.51, 4.014), where a cave floor lies at 3.49 under a model layer at 15.1 and the terrain at 187.6. The pickup moves to that floor: it must be grounded there, clear of the cave walls, and open with Opening (3365).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -12342.8,
+    "y": -1158.51,
+    "z": 3.6,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "one Mind's Eye Fragment stands in the cave",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95752,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: it stands at the cave floor under its catalog spot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6940749,
+      "spawn_type": "gameobject",
+      "x": -12340.8,
+      "y": -1158.51,
+      "z": 3.49,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "it rests on the cave floor",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6940749,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "it is grounded",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "guid": 6940749,
+      "spawn_type": "gameobject",
+      "tolerance": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "it stands clear of the cave walls",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "guid": 6940749,
+      "spawn_type": "gameobject",
+      "min": 0.5
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 95752
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "it is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

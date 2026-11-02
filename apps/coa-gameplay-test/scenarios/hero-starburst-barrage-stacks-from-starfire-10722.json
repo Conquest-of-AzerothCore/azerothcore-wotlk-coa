@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "name": "Hero: Starburst Barrage gains a stack from each Starfire cast (#10722)",
+  "contract": "Starburst (284221) is a Hero spell; its stacks come from the Starburst Barrage passives. Spell.dbc gives the rank 284222 and the Mystic Enchant rank 979137 a PROC_TRIGGER_SPELL effect, chance 100, with family 7 class mask 4, the family mask of Starfire (8950), triggering 284220 (stack 3) and 979138 (stack 4), whose effects add 0.5 s to Starburst. Their DBC ProcFlags 16 only match melee-class spell hits while Starfire is a magic-class damage spell, so the generated proc never fired. A level 40 Hero with both passives casts Starfire at a dummy twice: each Barrage aura must gain one stack per cast. Issue #10722.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "h",
+      "race": 1,
+      "class": 10,
+      "level": 40,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "h",
+      "entry": 36,
+      "level": 40,
+      "health": 500000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "h",
+      "spell": 979137
+    },
+    {
+      "action": "learn",
+      "actor": "h",
+      "spell": 284222
+    },
+    {
+      "action": "learn",
+      "actor": "h",
+      "spell": 8950
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mystic Enchant rank is active",
+      "actor": "h",
+      "metric": "aura",
+      "spell": 979137,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Starburst Barrage rank is active",
+      "actor": "h",
+      "metric": "aura",
+      "spell": 284222,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "h",
+      "spell": 8950,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Starfire hits the dummy",
+      "actor": "h",
+      "metric": "spell_damage_count",
+      "spell": 8950,
+      "target": "d",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Mystic Enchant rank gains a stack",
+      "actor": "h",
+      "metric": "aura_stacks",
+      "spell": 979138,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Starburst Barrage rank gains a stack",
+      "actor": "h",
+      "metric": "aura_stacks",
+      "spell": 284220,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown clear",
+      "ms": 1700
+    },
+    {
+      "action": "cast",
+      "actor": "h",
+      "spell": 8950,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Starfire hits the dummy again",
+      "actor": "h",
+      "metric": "spell_damage_count",
+      "spell": 8950,
+      "target": "d",
+      "min": 2,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "the Mystic Enchant rank reaches two stacks",
+      "actor": "h",
+      "metric": "aura_stacks",
+      "spell": 979138,
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "the Starburst Barrage rank reaches two stacks",
+      "actor": "h",
+      "metric": "aura_stacks",
+      "spell": 284220,
+      "equals": 2,
+      "within_ms": 1000
+    }
+  ]
+}
