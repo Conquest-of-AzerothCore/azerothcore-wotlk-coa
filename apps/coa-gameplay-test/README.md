@@ -537,6 +537,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `give_xp` | `actor`, `amount` (1..2^31-1): grant experience through native `Player::GiveXP` without a victim, so XP hooks and level gates apply. |
 | `set_xp_enabled` | `actor`, boolean `enabled`: fixture the native XP-lock flag. |
 | `set_level` | `actor`, `value` (1..80): fixture level change through native `GiveLevel`, including level-change hooks. |
+| `set_reputation` | `actor`, `id`, `value` (-42000..42999): fixture absolute standing with faction `id` through native `ReputationMgr::SetOneFactionReputation`, without spillover; rank hooks and achievement criteria still run. |
 | `set_health`, `set_power` | `actor`, `value` within native maximums; `set_power` accepts `power` (default 0). Optional `pet: true` selects the player's current pet. |
 | `set_health_pct` | Player `actor`, `pct` (1..99) and exactly one of `entry` (nearest living creature within 100 yards) or `target` (creature fixture id): deals the missing health as direct damage from the actor through `Unit::DealDamage`, so damage-driven phase hooks fire. Refuses to raise health. Use `attack_nearby` with `kill: true` for an early exit through the normal death path. |
 | `reset_cooldown` | Player `actor`, `spell`: reset that native spell cooldown between independent cases. |
@@ -680,6 +681,7 @@ It does not execute an attack.
 (default 0), including spell school, armor bypass and bleed mechanics.
 `aoe_damage_taken` applies native area damage avoidance to 1000 damage for `school` (0..6).
 `reputation_gain` calculates a native spell reputation reward of 1000 for faction `id`, without granting it.
+`reputation` reads the actor's absolute standing with faction `id` (base standing for its race and class included).
 `spell_immune` and `spell_effect_immune` query native immunity against `spell` from `target`; the latter
 accepts `effect` (default 0). These queries submit no attack.
 `melee_attack_count` counts the actor's native melee combat packets, including extra attacks and misses.

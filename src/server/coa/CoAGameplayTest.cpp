@@ -61,6 +61,7 @@
 #include "Pet.h"
 #include "PetPackets.h"
 #include "Player.h"
+#include "ReputationMgr.h"
 #include "QuestDef.h"
 #include "QueryCallback.h"
 #include "ScriptMgr.h"
@@ -4274,6 +4275,12 @@ private:
             Require(school < MAX_SPELL_SCHOOL, "Invalid area damage school");
             return player->CalculateAOEDamageReduction(1000, 1u << school, false);
         }
+        if (metric == "reputation")
+        {
+            FactionEntry const* faction = sFactionStore.LookupEntry(step.get<uint32>("id"));
+            Require(faction != nullptr && faction->CanHaveReputation(), "Unknown reputation faction");
+            return player->GetReputationMgr().GetReputation(faction);
+        }
         if (metric == "reputation_gain")
         {
             uint32 faction = step.get<uint32>("id");
@@ -7023,6 +7030,16 @@ private:
                 player->RemovePlayerFlag(PLAYER_FLAGS_NO_XP_GAIN);
             else
                 player->SetPlayerFlag(PLAYER_FLAGS_NO_XP_GAIN);
+        }
+        else if (action == "set_reputation")
+        {
+            FactionEntry const* faction = sFactionStore.LookupEntry(step.get<uint32>("id"));
+            Require(faction != nullptr && faction->CanHaveReputation(), "Unknown reputation fixture faction");
+            int32 const standing = step.get<int32>("value");
+            Require(standing >= ReputationMgr::Reputation_Bottom && standing <= ReputationMgr::Reputation_Cap,
+                "Invalid fixture reputation");
+            player->GetReputationMgr().SetOneFactionReputation(faction, float(standing), false);
+            player->GetReputationMgr().SendStates();
         }
         else if (action == "set_level")
         {
