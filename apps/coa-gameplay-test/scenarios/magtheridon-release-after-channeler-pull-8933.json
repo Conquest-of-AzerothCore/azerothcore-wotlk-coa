@@ -1,0 +1,287 @@
+{
+  "schema": 2,
+  "name": "Magtheridon breaks free two minutes after the Hellfire Channeler pull while the Channelers live (#8933)",
+  "contract": [
+    "Magtheridon 17257 (real spawn guid 91254, map 544) is caged with UNIT_FLAG_IMMUNE_TO_PC and NOT_SELECTABLE",
+    "until his release. Pulling a Hellfire Channeler 17256 sets instance data 10 (smart_scripts 17256 id 7), which",
+    "starts the encounter and puts Magtheridon in combat with the zone. Expected, from issue #8933 and AzerothCore",
+    "PR #27600 (tested in game there: 'breaks free' at +120 s, attackable at +123 s): his self-release countdown runs",
+    "from the Channeler pull, so without killing any Channeler he becomes attackable about 123 s after the pull.",
+    "The report's failure is that the countdown never starts and he stays caged while Channelers live. The tank",
+    "enters on Channeler spawn 90978 (-55.6891, 2.17024, 0.71428; data/sql/base/db_world/creature.sql), 37 yd from",
+    "Magtheridon. set_health keeps the tank alive against the Channelers and the zone-engaged Hellfire Warders; it is",
+    "a fixture, not a damage claim. The tank's unarmed swings cannot kill a Channeler in the window; the final",
+    "assertion checks that none died, so the release came from the timer and not from the Channeler deaths."
+  ],
+  "timeout_ms": 300000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 18,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_phase",
+      "label": "tank sees the real Magtheridon's Lair spawns",
+      "actor": "tank",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "label": "tank enters the real Magtheridon's Lair on Hellfire Channeler spawn 90978",
+      "actor": "tank",
+      "map": 544,
+      "x": -55.6891,
+      "y": 2.17024,
+      "z": 0.71428,
+      "o": 0.05236,
+      "ignore_access": true
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: tank is in Magtheridon's Lair",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 544,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a real Hellfire Channeler stands next to the tank",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 17256,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the real Magtheridon spawn is in range",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 17257,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: nobody pulled the encounter before the case",
+      "actor": "tank",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: caged Magtheridon cannot be attacked before the pull",
+      "actor": "tank",
+      "metric": "nearby_creature_can_attack",
+      "entry": 17257,
+      "equals": 0
+    },
+    {
+      "action": "encounter_start",
+      "actor": "tank",
+      "boss_entry": 17257,
+      "radius": 60
+    },
+    {
+      "action": "set_health",
+      "label": "Tank survives the Channeler phase",
+      "actor": "tank",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Pull a Hellfire Channeler, which starts the encounter (smart_scripts 17256 id 7)",
+      "actor": "tank",
+      "entry": 17256
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Channeler pull puts the instance boss state IN_PROGRESS",
+      "actor": "tank",
+      "metric": "timeline_count",
+      "event": "boss_state",
+      "state": "IN_PROGRESS",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Channeler phase, 10 s after the pull",
+      "ms": 10000
+    },
+    {
+      "action": "set_health",
+      "label": "Keep the tank alive through the Channeler phase",
+      "actor": "tank",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "wait",
+      "label": "Channeler phase, 20 s after the pull",
+      "ms": 10000
+    },
+    {
+      "action": "set_health",
+      "label": "Keep the tank alive through the Channeler phase",
+      "actor": "tank",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "wait",
+      "label": "Channeler phase, 30 s after the pull",
+      "ms": 10000
+    },
+    {
+      "action": "set_health",
+      "label": "Keep the tank alive through the Channeler phase",
+      "actor": "tank",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "wait",
+      "label": "Channeler phase, 40 s after the pull",
+      "ms": 10000
+    },
+    {
+      "action": "set_health",
+      "label": "Keep the tank alive through the Channeler phase",
+      "actor": "tank",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "wait",
+      "label": "Channeler phase, 50 s after the pull",
+      "ms": 10000
+    },
+    {
+      "action": "set_health",
+      "label": "Keep the tank alive through the Channeler phase",
+      "actor": "tank",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "wait",
+      "label": "Channeler phase, 60 s after the pull",
+      "ms": 10000
+    },
+    {
+      "action": "set_health",
+      "label": "Keep the tank alive through the Channeler phase",
+      "actor": "tank",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "wait",
+      "label": "Channeler phase, 70 s after the pull",
+      "ms": 10000
+    },
+    {
+      "action": "set_health",
+      "label": "Keep the tank alive through the Channeler phase",
+      "actor": "tank",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "wait",
+      "label": "Channeler phase, 80 s after the pull",
+      "ms": 10000
+    },
+    {
+      "action": "set_health",
+      "label": "Keep the tank alive through the Channeler phase",
+      "actor": "tank",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "wait",
+      "label": "Channeler phase, 90 s after the pull",
+      "ms": 10000
+    },
+    {
+      "action": "set_health",
+      "label": "Keep the tank alive through the Channeler phase",
+      "actor": "tank",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "wait",
+      "label": "Channeler phase, 100 s after the pull",
+      "ms": 10000
+    },
+    {
+      "action": "set_health",
+      "label": "Keep the tank alive through the Channeler phase",
+      "actor": "tank",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "wait",
+      "label": "Channeler phase, about 102 s after the pull",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "About 102 s after the pull Magtheridon is still caged",
+      "actor": "tank",
+      "metric": "nearby_creature_can_attack",
+      "entry": 17257,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Channeler phase, about 112 s after the pull",
+      "ms": 10000
+    },
+    {
+      "action": "set_health",
+      "label": "Keep the tank alive up to the release",
+      "actor": "tank",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Magtheridon breaks free and becomes attackable by 135 s after the pull although every Channeler lives",
+      "actor": "tank",
+      "metric": "nearby_creature_can_attack",
+      "entry": 17257,
+      "equals": 1,
+      "within_ms": 23000
+    },
+    {
+      "action": "assert",
+      "label": "All five Hellfire Channelers were still alive at the release",
+      "actor": "tank",
+      "metric": "timeline_count",
+      "event": "death",
+      "source_entry": 17256,
+      "equals": 0
+    }
+  ]
+}
