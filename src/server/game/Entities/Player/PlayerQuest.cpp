@@ -714,6 +714,28 @@ void Player::IncompleteQuest(uint32 quest_id)
     }
 }
 
+// A quest item is of no use once its quest is handed in. A drop stack can overshoot what the quest asks for, so the
+// whole lot goes, unless the item does something on its own (starts a quest, is used or is opened) or any other
+// quest asks for or hands out the same item, as the next quest of a chain may need it.
+static bool IsDiscardableQuestItem(ItemTemplate const* proto, uint32 questId)
+{
+    if (proto->Bonding == BIND_QUEST_ITEM)
+        return true;
+
+    if (proto->Class != ITEM_CLASS_QUEST || proto->StartQuest || proto->HasFlag(ITEM_FLAG_HAS_LOOT) ||
+        std::any_of(std::begin(proto->Spells), std::end(proto->Spells),
+            [](_Spell const& spell) { return spell.SpellId != 0; }))
+        return false;
+
+    for (auto const& [otherId, other] : sObjectMgr->GetQuestTemplates())
+        if (otherId != questId &&
+            (std::find(std::begin(other->RequiredItemId), std::end(other->RequiredItemId), proto->ItemId) != std::end(other->RequiredItemId) ||
+             std::find(std::begin(other->ItemDrop), std::end(other->ItemDrop), proto->ItemId) != std::end(other->ItemDrop)))
+            return false;
+
+    return true;
+}
+
 void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, bool announce, bool isLFGReward)
 {
     //this THING should be here to protect code from quest, which cast on player far teleport as a reward
@@ -726,7 +748,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     {
         if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RequiredItemId[i]))
         {
-            if (quest->RequiredItemCount[i] > 0 && itemTemplate->Bonding == BIND_QUEST_ITEM && !quest->IsRepeatable() && !HasQuestForItem(quest->RequiredItemId[i], quest_id, true))
+            if (quest->RequiredItemCount[i] > 0 && IsDiscardableQuestItem(itemTemplate, quest_id) && !quest->IsRepeatable() && !HasQuestForItem(quest->RequiredItemId[i], quest_id, true))
                 DestroyItemCount(quest->RequiredItemId[i], 9999, true);
             else
                 DestroyItemCount(quest->RequiredItemId[i], quest->RequiredItemCount[i], true);
@@ -2455,7 +2477,7 @@ bool Player::HasQuestForItem(uint32 itemid, uint32 excludeQuestId /* 0 */, bool 
                     }
                 }
 
-                if (turnIn && q_status.ItemCount[j] >= qinfo->RequiredItemCount[j])
+                if (turnIn && itemid == qinfo->RequiredItemId[j] && q_status.ItemCount[j] >= qinfo->RequiredItemCount[j])
                 {
                     return true;
                 }
