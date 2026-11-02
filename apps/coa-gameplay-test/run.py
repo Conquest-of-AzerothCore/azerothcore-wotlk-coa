@@ -824,6 +824,8 @@ def validate(scenario):
             if 'creator_only' in step:
                 require(metric == 'owned_creature_count', f'{where}: creator_only needs owned_creature_count')
                 require(type(step['creator_only']) is bool, f'{where}: creator_only must be boolean')
+            if metric == 'owned_creature_count' and 'target' in step:
+                require(step['target'] in actor_ids, f'{where}: owned creature victim target must be a scenario unit')
             if metric in {'equipped_item', 'visible_item'}:
                 require(step['actor'] in player_ids, f'{where}: equipment metric needs a player')
                 number(step.get('slot'), f'{where}.slot', 0, 18, True)
