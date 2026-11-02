@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Conquest of Azeroth offers no glyphs and no Ancient Enchanting Altar",
+  "contract": "No Conquest of Azeroth class uses glyphs, so no glyph may be obtainable: Inscription trainers such as Margaux Parchley (30711, trainer 121) keep their ordinary recipes, Scroll of Recall (48248) among them, but no longer list glyph recipes such as 57194 or Minor Inscription Research (61288), which only discovers glyphs, and Larana Drome (28723) keeps her supplies, Light Parchment (39354) among them, but no longer sells Technique: Glyph of Eternal Water (50166). The Ancient Enchanting Altars (80148) serve Free Pick and Bronzebeard realms, so none stands at the Hillsbrad placement any more. Glyphs players already own, such as Glyph of Avenger's Shield (41101), show as poor (grey) quality.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "scribe", "race": 1, "class": 27, "level": 80 }
+  ],
+  "location": { "map": 0, "x": -9484.92, "y": -19.8784, "z": 56.9625, "o": 0 },
+  "creatures": [
+    { "id": "margaux", "owner": "scribe", "entry": 30711, "distance": 2, "faction": 35 },
+    { "id": "larana", "owner": "scribe", "entry": 28723, "distance": 3, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "scribe", "spell": 45357, "label": "Apprentice Inscription" },
+    { "action": "set_skill", "actor": "scribe", "skill": 773, "value": 450, "maximum": 450 },
+    { "action": "gossip_hello", "actor": "scribe", "target": "margaux" },
+    { "action": "gossip_select", "actor": "scribe", "option": 3, "label": "Train me!" },
+    { "action": "assert", "actor": "scribe", "metric": "trainer_list_packets", "min": 1, "within_ms": 3000,
+      "label": "Margaux opens her trainer window" },
+    { "action": "assert", "actor": "scribe", "metric": "trainer_window_state", "spell": 48248, "min": 0,
+      "label": "Scroll of Recall is still listed" },
+    { "action": "assert", "actor": "scribe", "metric": "trainer_window_state", "spell": 57194, "equals": -1,
+      "label": "no glyph recipe is listed" },
+    { "action": "assert", "actor": "scribe", "metric": "trainer_window_state", "spell": 61288, "equals": -1,
+      "label": "Minor Inscription Research is not listed" },
+    { "action": "gossip_hello", "actor": "scribe", "target": "larana" },
+    { "action": "gossip_select", "actor": "scribe", "option": 1, "label": "I want to browse your goods" },
+    { "action": "assert", "actor": "scribe", "metric": "vendor_list_packets", "min": 1, "within_ms": 3000,
+      "label": "Larana opens her shop" },
+    { "action": "assert", "actor": "scribe", "metric": "vendor_price", "item": 39354, "min": 0,
+      "label": "Larana still sells Light Parchment" },
+    { "action": "assert", "actor": "scribe", "metric": "vendor_price", "item": 50166, "equals": -1,
+      "label": "Larana no longer sells a glyph technique" },
+    { "action": "assert", "actor": "scribe", "metric": "item_quality", "item": 41101, "equals": 0,
+      "label": "an owned glyph shows as poor quality" },
+    { "action": "teleport", "actor": "scribe", "map": 0, "x": 36.2729, "y": 340.906, "z": 47.8133 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "actor": "scribe", "metric": "nearby_gameobject_count", "entry": 80148, "equals": 0,
+      "label": "no Ancient Enchanting Altar stands at its former Hillsbrad placement" }
+  ]
+}
