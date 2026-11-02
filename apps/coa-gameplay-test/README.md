@@ -899,6 +899,10 @@ submits that spell again).
 `spell_cooldown_packet_ms` requires `spell` and reads the cooldown duration from the last native
 `SMSG_SPELL_COOLDOWN` the session was sent for it, or -1 if none was observed; unlike `cooldown_ms`,
 which reads the server-side cooldown map directly, this proves the client was actually notified.
+`sent_aura_amount` requires `spell` and accepts `effect` (0..2, default 0). It reads that effect's amount from the
+last `SMSG_ASCENSION_AURA_AMOUNT` the actor's session was sent for its own aura, which feeds the `$wN` tooltip tokens,
+and fails if none was observed; the actor needs `ascension_client` set. Unlike `aura_amount`, which reads the server-side
+aura effect, this proves what the client was told.
 `pet_aura_stacks`
 requires `spell`, accepts `caster` for aura ownership, and returns zero if the pet or aura is absent.
 `pet_aura_amount` and `pet_aura_amplitude_ms` accept `effect` and read its amount or tick interval.

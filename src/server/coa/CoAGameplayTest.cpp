@@ -910,6 +910,7 @@ struct Actor
     Tree castFailures;
     std::map<uint32, uint8> castFailureReason;
     std::map<uint32, uint32> spellCooldownPacketMs;
+    std::map<uint32, std::array<int32, MAX_SPELL_EFFECTS>> sentAuraAmounts;
     uint32 bankShows = 0;
     uint32 systemMessages = 0;
     uint32 monsterChats = 0;
@@ -1252,6 +1253,23 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             response >> spell >> cooldown;
             if (unit == actor.guid)
                 actor.spellCooldownPacketMs[spell] = cooldown;
+        }
+    }
+
+    constexpr uint16 AscensionAuraAmountOpcode = 0x0673;
+    if (packet.GetOpcode() == AscensionAuraAmountOpcode)
+    {
+        WorldPacket response(packet);
+        ObjectGuid unit, caster;
+        int32 slot;
+        uint32 spell;
+        response >> unit >> slot >> caster >> spell;
+        if (unit == actor.guid && slot >= 0)
+        {
+            std::array<int32, MAX_SPELL_EFFECTS> amounts{};
+            for (int32& amount : amounts)
+                response >> amount;
+            actor.sentAuraAmounts[spell] = amounts;
         }
     }
 
@@ -4804,6 +4822,15 @@ private:
             auto const& packets = _actors.at(step.get<std::string>("actor")).spellCooldownPacketMs;
             auto const found = packets.find(spell);
             return found == packets.end() ? -1.0 : double(found->second);
+        }
+        if (metric == "sent_aura_amount")
+        {
+            auto const& sent = _actors.at(step.get<std::string>("actor")).sentAuraAmounts;
+            auto const found = sent.find(spell);
+            Require(found != sent.end(), "No native aura amount packet was observed for the spell");
+            uint32 effect = step.get<uint32>("effect", EFFECT_0);
+            Require(effect < MAX_SPELL_EFFECTS, "Invalid aura effect index");
+            return found->second[effect];
         }
         if (metric == "pet_autocast_enabled")
         {
