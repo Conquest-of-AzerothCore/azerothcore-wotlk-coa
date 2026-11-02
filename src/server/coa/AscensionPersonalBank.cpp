@@ -253,6 +253,16 @@ void SendItemLevel(Player* player, Item const* item)
         SendItemLevel(player, item->GetGUID(), NativeItemScaling::InstanceLevel(item));
 }
 
+[[nodiscard]] bool RefuseSoulboundIntoRealmBank(Player* player, OpenBank const& bank, Item* item)
+{
+    if (bank.OwnerKind != OWNER_REALM || !item->IsSoulBound())
+        return false;
+
+    player->SendEquipError(EQUIP_ERR_NONE, item, nullptr);
+    ChatHandler(player->GetSession()).SendSysMessage("Soulbound items cannot be stored in the Realm Bank.");
+    return true;
+}
+
 void SendRights(Player* player, uint8 tabs)
 {
     WorldPackets::Guild::GuildPermissionsQueryResults rights;
@@ -464,11 +474,8 @@ void DepositToBank(Player* player, OpenBank& bank, uint8 bag, uint8 slot, uint8 
         return;
     }
 
-    if (bank.OwnerKind == OWNER_REALM && source->IsSoulBound())
-    {
-        player->SendEquipError(EQUIP_ERR_CANT_DROP_SOULBOUND, source, nullptr);
+    if (RefuseSoulboundIntoRealmBank(player, bank, source))
         return;
-    }
 
     if (tab >= bank.Tabs)
         return;
@@ -654,6 +661,12 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
                 ReduceBankItem(trans, bank, tab, bankSlot, source, amount);
                 player->SaveInventoryAndGoldToDB(trans);
                 finish(ObjectGuid::Empty, 0);
+                return;
+            }
+
+            if (RefuseSoulboundIntoRealmBank(player, bank, destItem))
+            {
+                CharacterDatabase.CommitTransaction(trans);
                 return;
             }
 
