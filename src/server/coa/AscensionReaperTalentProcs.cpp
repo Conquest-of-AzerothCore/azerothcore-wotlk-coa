@@ -216,17 +216,16 @@ class aura_ascension_reaper_soulrot : public AuraScript
         caster->CastSpell(dispeller, 805089, true);
     }
 
-    void KeepFirstApplicationExpiry(AuraEffect const* detonation, AuraEffectHandleModes)
+    void DelayDetonationToNewExpiry(AuraEffect const*, AuraEffectHandleModes)
     {
-        int32 const detonationExpiry = detonation->GetPeriodicTimer() + GetMaxDuration() - detonation->GetAmplitude();
-        if (detonationExpiry > 0 && detonationExpiry < GetDuration())
-            SetDuration(detonationExpiry);
+        if (AuraEffect* detonation = GetEffect(EFFECT_1))
+            detonation->ResetPeriodic(true);
     }
 
     void Register() override
     {
         AfterDispel += AuraDispelFn(aura_ascension_reaper_soulrot::HandleDispel);
-        AfterEffectApply += AuraEffectApplyFn(aura_ascension_reaper_soulrot::KeepFirstApplicationExpiry, EFFECT_1,
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_reaper_soulrot::DelayDetonationToNewExpiry, EFFECT_1,
             SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAPPLY);
     }
 };
