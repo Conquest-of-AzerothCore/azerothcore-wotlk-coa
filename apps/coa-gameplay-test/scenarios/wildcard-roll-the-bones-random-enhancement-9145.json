@@ -1,0 +1,1428 @@
+{
+  "schema": 1,
+  "name": "Wildcard Roll the Bones grants one random enhancement per roll (#9145)",
+  "contract": [
+    "Tooltip 760080: Roll the dice of fate, providing a random lesser or great combat enhancement for $760082d.",
+    "Only one enhancement can be active at the same time.",
+    "760080 effect 1 is Ascension effect 184 (trigger random spell, EffectTriggerSpell 760082), which the core left as",
+    "EffectNULL, so the cast only played its visual. The lesser and greater enhancements are the eight Spell.dbc",
+    "records 760082-760089: Skull and Crossbones, Buried Treasure, Cutthroat Efficiency and Ruthless Precision.",
+    "Each roll must leave exactly one of the eight on the caster. The DBC gives no weights, so the pick is uniform;",
+    "80 rolls leave a given enhancement unused with probability (7/8)^80 (2e-5), so every enhancement must appear.",
+    "Roll the Bones exists only for the Hero class (10), which is why the fixture uses class 10."
+  ],
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the character settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 1",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "assert",
+      "label": "The first roll applies exactly one enhancement",
+      "actor": "hero",
+      "metric": "carried_aura_count",
+      "spells": [
+        760082,
+        760083,
+        760084,
+        760085,
+        760086,
+        760087,
+        760088,
+        760089
+      ],
+      "caster": "hero",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 2",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 3",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 4",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 5",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 6",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 7",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 8",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 9",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 10",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 11",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 12",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 13",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 14",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 15",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 16",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 17",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 18",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 19",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 20",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 21",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 22",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 23",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 24",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 25",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 26",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 27",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 28",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 29",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 30",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 31",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 32",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 33",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 34",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 35",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 36",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 37",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 38",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 39",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 40",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 41",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 42",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 43",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 44",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 45",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 46",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 47",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 48",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 49",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 50",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 51",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 52",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 53",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 54",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 55",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 56",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 57",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 58",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 59",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 60",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 61",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 62",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 63",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 64",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 65",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 66",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 67",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 68",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 69",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 70",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 71",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 72",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 73",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 74",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 75",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 76",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 77",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 78",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 79",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "cast",
+      "label": "Roll the Bones 80",
+      "actor": "hero",
+      "spell": 760080
+    },
+    {
+      "action": "wait",
+      "label": "Let the last roll land",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Roll the Bones is cast 80 times",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 760080,
+      "equals": 80
+    },
+    {
+      "action": "assert",
+      "label": "Each roll replaces the previous enhancement: exactly one is active",
+      "actor": "hero",
+      "metric": "carried_aura_count",
+      "spells": [
+        760082,
+        760083,
+        760084,
+        760085,
+        760086,
+        760087,
+        760088,
+        760089
+      ],
+      "caster": "hero",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Lesser Skull and Crossbones (760082) is among the rolls",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 760082,
+      "min": 1,
+      "max": 80
+    },
+    {
+      "action": "assert",
+      "label": "Greater Skull and Crossbones (760083) is among the rolls",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 760083,
+      "min": 1,
+      "max": 80
+    },
+    {
+      "action": "assert",
+      "label": "Lesser Buried Treasure (760084) is among the rolls",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 760084,
+      "min": 1,
+      "max": 80
+    },
+    {
+      "action": "assert",
+      "label": "Greater Buried Treasure (760085) is among the rolls",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 760085,
+      "min": 1,
+      "max": 80
+    },
+    {
+      "action": "assert",
+      "label": "Lesser Cutthroat Efficiency (760086) is among the rolls",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 760086,
+      "min": 1,
+      "max": 80
+    },
+    {
+      "action": "assert",
+      "label": "Greater Cutthroat Efficiency (760087) is among the rolls",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 760087,
+      "min": 1,
+      "max": 80
+    },
+    {
+      "action": "assert",
+      "label": "Lesser Ruthless Precision (760088) is among the rolls",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 760088,
+      "min": 1,
+      "max": 80
+    },
+    {
+      "action": "assert",
+      "label": "Greater Ruthless Precision (760089) is among the rolls",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 760089,
+      "min": 1,
+      "max": 80
+    }
+  ]
+}

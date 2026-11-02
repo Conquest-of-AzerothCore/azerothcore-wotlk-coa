@@ -48,6 +48,8 @@ struct Player : Unit
 {
     bool resting = false;
     bool inWorld = true;
+    uint32 level = 60;
+    uint32 GetLevel() const { return level; }
     Map* map = nullptr;
     uint32 questLogRefreshes = 0;
     bool IsInWorld() const { return inWorld; }
@@ -219,6 +221,19 @@ int main()
             script.Select(0);
             assert(player.auras == wanted);
         }
+    player.auras = {9931032};
+    player.level = 14;
+    info.Id = 84421;
+    assert(script.CheckCast() == SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW);
+    script.Select(0);
+    assert((player.auras == std::set<uint32>{9931032}));
+    info.Id = 84420;
+    assert(script.CheckCast() == SPELL_CAST_OK);
+    player.level = 15;
+    info.Id = 84421;
+    assert(script.CheckCast() == SPELL_CAST_OK);
+    script.Select(0);
+    assert((player.auras == std::set<uint32>{1004019}));
     auto before = player.auras;
     info.Id = 123;
     script.Select(0);
