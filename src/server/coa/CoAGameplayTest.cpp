@@ -5493,6 +5493,12 @@ private:
         if (metric == "quest_log_sent_level" || metric == "quest_log_sent_xp")
             return SentQuestLogField(player, step, metric == "quest_log_sent_level"
                 ? AscensionQuestLog::LevelField : AscensionQuestLog::RewardXPField);
+        if (metric == "quest_log_sent_level_count")
+        {
+            uint16 const slot = player->FindQuestSlot(step.get<uint32>("quest"));
+            Require(slot < MAX_QUEST_LOG_SIZE, "The quest is not in the quest log");
+            return double(SentAddonFieldUpdates(player, step, AscensionQuestLog::LevelField + slot).size());
+        }
         if (metric == "sent_average_item_level")
             return SentAddonField<float>(player, step, AverageItemLevelAddonField);
         if (metric == "sent_average_item_level_count")
