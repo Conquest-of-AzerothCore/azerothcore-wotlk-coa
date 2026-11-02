@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Worldforged Bloodscorn Ritual Kris sits on the Rage Scar Hold floor, not floating (COA-1457)",
+  "contract": "The Bloodscorn Ritual Kris pickup (item 515204, GO 96131, guid 6941461) stands at the recorded Ascension find position (zone 122 Feralas, x 0.5463, y 0.3201 -> world -3848.9, 1642.0) but its realm-map z of 146.345 hovered 1.76 yd above the cave floor (measured with spawn_ground_gap), so the dagger floated mid-air next to the furniture instead of resting. The fix lowers it to the measured floor (z 144.583).",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -3845.0, "y": 1645.0, "z": 146.5, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the dagger pickup is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 96131, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup rests on the cave floor, not floating 1.76 yd up", "actor": "p", "metric": "spawn_ground_gap", "guid": 6941461, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 96131 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the pickup opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

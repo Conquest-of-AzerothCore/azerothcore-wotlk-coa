@@ -850,6 +850,10 @@ struct Actor
     std::map<uint32, uint32> supersededFor;
     std::set<uint32> clientSpells;
     std::map<uint32, uint32> clientSpellbookCopies;
+    std::map<uint32, uint32> skillLineAbilityRows;
+    std::map<uint32, uint32> skillLineAbilityAt;
+    std::map<uint32, uint32> learnedSpellAt;
+    uint32 initialSpellsAt = 0;
     std::map<uint32, bool> clientNotable;
     std::map<uint32, uint32> loudSupersedes;
     std::map<uint32, bool> clientSpellHidden;
@@ -1492,8 +1496,17 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         actor.questOfferXP[quest] = xp;
     }
 
+    if (packet.GetOpcode() == 0x0934 && packet.size() >= 14 * sizeof(uint32))
+    {
+        uint32 const skillLine = packet.read<uint32>(sizeof(uint32));
+        uint32 const spell = packet.read<uint32>(2 * sizeof(uint32));
+        actor.skillLineAbilityRows[spell] = skillLine;
+        actor.skillLineAbilityAt[spell] = actor.packetOrdinal;
+    }
+
     if (packet.GetOpcode() == SMSG_INITIAL_SPELLS)
     {
+        actor.initialSpellsAt = actor.packetOrdinal;
         WorldPacket list(packet);
         uint8 talentSpec = 0;
         uint16 count = 0;
@@ -1563,6 +1576,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         WorldPacket announcement(packet);
         uint32 announced = 0;
         announcement >> announced;
+        actor.learnedSpellAt[announced] = actor.packetOrdinal;
         ++actor.learnedAlerts[announced];
         bool const hidden = flagged(actor.clientSpellHidden, announced);
         if (!learnFlag(actor.clientQuiet, announced, 0x40000) && !isEntry(announced) && !hidden)
@@ -3448,6 +3462,37 @@ private:
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell in metric");
         if (metric == "knows_spell")
             return player->HasSpell(spell);
+        if (metric == "level_scaling_choice")
+            return LocalLevelScaling::ScalingChoiceEnabled(player) ? 1.0 : 0.0;
+        if (metric == "skill_line_after_initial" || metric == "skill_line_after_learned")
+        {
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            auto const patch = actor.skillLineAbilityAt.find(spell);
+            if (patch == actor.skillLineAbilityAt.end())
+                return 0.0;
+            if (metric == "skill_line_after_initial")
+                return actor.initialSpellsAt && patch->second > actor.initialSpellsAt;
+            auto const learned = actor.learnedSpellAt.find(spell);
+            return learned != actor.learnedSpellAt.end() && patch->second > learned->second;
+        }
+        if (metric == "initial_spells_at")
+            return _actors.at(step.get<std::string>("actor")).initialSpellsAt;
+        if (metric == "learned_spell_at" || metric == "skill_line_ability_at" || metric == "skill_line_ability")
+        {
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            if (metric == "learned_spell_at")
+            {
+                auto const found = actor.learnedSpellAt.find(spell);
+                return found == actor.learnedSpellAt.end() ? 0.0 : double(found->second);
+            }
+            if (metric == "skill_line_ability_at")
+            {
+                auto const found = actor.skillLineAbilityAt.find(spell);
+                return found == actor.skillLineAbilityAt.end() ? 0.0 : double(found->second);
+            }
+            auto const found = actor.skillLineAbilityRows.find(spell);
+            return found == actor.skillLineAbilityRows.end() ? 0.0 : double(found->second);
+        }
         if (metric == "client_knows_spell")
             return _actors.at(step.get<std::string>("actor")).clientSpells.count(spell) ? 1.0 : 0.0;
         if (metric == "client_spellbook_copies")
