@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Conquest of Azeroth offers no glyphs and no Ancient Enchanting Altar",
-  "contract": "No Conquest of Azeroth class uses glyphs, so no glyph may be obtainable: Inscription trainers such as Margaux Parchley (30711, trainer 121) keep their ordinary recipes, Scroll of Recall (48248) among them, but no longer list glyph recipes such as 57194 or Minor Inscription Research (61288), which only discovers glyphs, and Larana Drome (28723) keeps her supplies, Light Parchment (39354) among them, but no longer sells Technique: Glyph of Eternal Water (50166). The Ancient Enchanting Altars (80148) serve Free Pick and Bronzebeard realms, so none stands at the Hillsbrad placement any more. Glyphs players already own, such as Glyph of Avenger's Shield (41101), show as poor (grey) quality.",
+  "contract": "No Conquest of Azeroth class uses glyphs, so no glyph may be obtainable: Inscription trainers such as Margaux Parchley (30711, trainer 121) keep their ordinary recipes, Scroll of Recall (48248) among them, but no longer list glyph recipes such as 57194 or Minor Inscription Research (61288), which only discovers glyphs; a glyph recipe a character already knows is refused when cast. Larana Drome (28723) keeps her supplies, Light Parchment (39354) among them, but no longer sells Technique: Glyph of Eternal Water (50166). The Ancient Enchanting Altars (80148) serve Free Pick and Bronzebeard realms, so none stands at the Hillsbrad placement any more; the check reads the spawn store, which ignores the test lane phase, against the nearby Dust-Covered Trunk spawn. Glyphs players already own, such as Glyph of Avenger's Shield (41101), show as poor (grey) quality.",
   "timeout_ms": 120000,
   "players": [
     { "id": "scribe", "race": 1, "class": 27, "level": 80 }
@@ -25,6 +25,10 @@
       "label": "no glyph recipe is listed" },
     { "action": "assert", "actor": "scribe", "metric": "trainer_window_state", "spell": 61288, "equals": -1,
       "label": "Minor Inscription Research is not listed" },
+    { "action": "learn", "actor": "scribe", "spell": 57194, "label": "a recipe learned before the glyphs left" },
+    { "action": "cast", "actor": "scribe", "spell": 57194 },
+    { "action": "assert", "actor": "scribe", "metric": "cast_failure", "spell": 57194, "equals": 107, "within_ms": 3000,
+      "label": "the known glyph recipe is refused as SPELL_FAILED_SPELL_UNAVAILABLE" },
     { "action": "gossip_hello", "actor": "scribe", "target": "larana" },
     { "action": "gossip_select", "actor": "scribe", "option": 1, "label": "I want to browse your goods" },
     { "action": "assert", "actor": "scribe", "metric": "vendor_list_packets", "min": 1, "within_ms": 3000,
@@ -37,7 +41,9 @@
       "label": "an owned glyph shows as poor quality" },
     { "action": "teleport", "actor": "scribe", "map": 0, "x": 36.2729, "y": 340.906, "z": 47.8133 },
     { "action": "wait", "ms": 3000 },
-    { "action": "assert", "actor": "scribe", "metric": "nearby_gameobject_count", "entry": 80148, "equals": 0,
+    { "action": "assert", "actor": "scribe", "metric": "spawn_active", "spawn": 6940986, "equals": 1,
+      "label": "the nearby Dust-Covered Trunk spawn is loaded" },
+    { "action": "assert", "actor": "scribe", "metric": "spawn_active", "spawn": 8001330, "equals": 0,
       "label": "no Ancient Enchanting Altar stands at its former Hillsbrad placement" }
   ]
 }
