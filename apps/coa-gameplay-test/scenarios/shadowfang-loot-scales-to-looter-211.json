@@ -54,6 +54,14 @@
       "value": 0
     },
     {
+      "action": "assert",
+      "label": "The final open-world scaling choice is off, so the 65/60 result can only come from dungeon scaling",
+      "actor": "looter",
+      "metric": "level_scaling_choice",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
       "action": "attack",
       "actor": "looter",
       "target": "voone"

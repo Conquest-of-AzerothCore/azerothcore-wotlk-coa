@@ -3461,6 +3461,8 @@ private:
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell in metric");
         if (metric == "knows_spell")
             return player->HasSpell(spell);
+        if (metric == "level_scaling_choice")
+            return LocalLevelScaling::ScalingChoiceEnabled(player) ? 1.0 : 0.0;
         if (metric == "skill_line_after_initial" || metric == "skill_line_after_learned")
         {
             Actor const& actor = _actors.at(step.get<std::string>("actor"));

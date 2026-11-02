@@ -10,9 +10,12 @@
     { "action": "assert", "actor": "felsworn", "metric": "skill_line_ability", "spell": 803645, "equals": 53, "within_ms": 5000, "label": "Unphased has its authored Infernal row" },
     { "action": "assert", "actor": "felsworn", "metric": "skill_line_for_spell", "spell": 501056, "equals": 41, "label": "Totemic Smash keeps its original server and client row" },
     { "action": "assert", "actor": "felsworn", "metric": "skill_line_after_initial", "spell": 803645, "equals": 1, "within_ms": 5000, "label": "the Infernal row follows the first initial spell list" },
+    { "action": "wait", "ms": 6000, "label": "outlast the 5s login fallback stream so only the learn resend can satisfy the ordering assertion below" },
     { "action": "learn", "actor": "felsworn", "spell": 803645, "label": "learn Unphased during the session" },
     { "action": "assert", "actor": "felsworn", "metric": "skill_line_after_learned", "spell": 803645, "equals": 1, "within_ms": 5000, "label": "the Infernal row follows the learn announcement" },
+    { "action": "assert", "actor": "felsworn", "metric": "skill_line_ability", "spell": 803645, "equals": 53, "label": "the learned resend still carries the authored Infernal row" },
     { "action": "relog", "actor": "felsworn", "label": "relog with Unphased already known" },
-    { "action": "assert", "actor": "felsworn", "metric": "skill_line_after_initial", "spell": 803645, "equals": 1, "within_ms": 5000, "label": "the Infernal row follows the relog initial spell list" }
+    { "action": "assert", "actor": "felsworn", "metric": "skill_line_after_initial", "spell": 803645, "equals": 1, "within_ms": 5000, "label": "the Infernal row follows the relog initial spell list" },
+    { "action": "assert", "actor": "felsworn", "metric": "skill_line_ability", "spell": 803645, "equals": 53, "label": "the relog stream still carries the authored Infernal row" }
   ]
 }
