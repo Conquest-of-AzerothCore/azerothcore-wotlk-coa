@@ -22,6 +22,7 @@ constexpr uint32 SPELL_TRACER_MARK = 653247;
 constexpr uint32 SPELL_TRACER_REVEAL = 653252;
 constexpr uint32 SPELL_STIM_PASSIVE = 653240;
 constexpr uint32 SPELL_STIM_HEAL = 653241;
+constexpr uint32 SPELL_STIM_PACK_COOLDOWN = 653255;
 
 struct Augmentation
 {
@@ -411,6 +412,24 @@ void NormalizeBandageGun(SpellInfo* spellInfo)
         effect.BasePoints = 1;
 }
 
+bool IsStimTriggeredSpell(SpellInfo const* spellInfo)
+{
+    return (spellInfo->Id == SPELL_STIM_HEAL && spellInfo->Effects[EFFECT_0].Effect == SPELL_EFFECT_HEAL) ||
+        (spellInfo->Id == SPELL_STIM_PACK_COOLDOWN &&
+            spellInfo->Effects[EFFECT_0].Effect == SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN);
+}
+
+void NormalizeStimWeaponRequirement(SpellInfo* spellInfo)
+{
+    if (!spellInfo || !IsStimTriggeredSpell(spellInfo) || spellInfo->SpellFamilyName != uint32(CLASS_TINKER) + 6 ||
+        spellInfo->EquippedItemClass != ITEM_CLASS_WEAPON || spellInfo->EquippedItemSubClassMask != 173555)
+        return;
+
+    spellInfo->EquippedItemClass = -1;
+    spellInfo->EquippedItemSubClassMask = 0;
+    spellInfo->EquippedItemInventoryTypeMask = 0;
+}
+
 class AscensionTinkerAugmentationMetadata : public GlobalScript
 {
 public:
@@ -420,6 +439,7 @@ public:
     void OnLoadSpellCustomAttr(SpellInfo* spellInfo) override
     {
         NormalizeBandageGun(spellInfo);
+        NormalizeStimWeaponRequirement(spellInfo);
     }
 };
 }

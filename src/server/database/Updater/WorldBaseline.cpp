@@ -16,6 +16,7 @@
 #include <fstream>
 #include <map>
 #include <set>
+#include <sstream>
 #include <zlib.h>
 
 namespace
@@ -234,20 +235,61 @@ namespace
         hash.Finalize();
         return Lowercase(ByteArrayToHexStr(hash.GetDigest()));
     }
+
+    boost::property_tree::ptree ReadManifest(std::filesystem::path const& manifest)
+    {
+        boost::property_tree::ptree tree;
+        try
+        {
+            boost::property_tree::read_json(manifest.string(), tree);
+        }
+        catch (boost::property_tree::json_parser_error const& error)
+        {
+            Fail(Acore::StringFormat("cannot read \"{}\": {}", manifest.generic_string(), error.what()));
+        }
+        return tree;
+    }
+
+    bool IsMigrationPath(std::filesystem::path const& path)
+    {
+        if (path.empty() || !path.is_relative() || path.extension() != ".sql")
+            return false;
+
+        for (std::filesystem::path const& part : path)
+            if (part == ".." || part == ".")
+                return false;
+
+        std::string const name = path.filename().string();
+        return std::all_of(name.begin(), name.end(), [](char c)
+        {
+            return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_'
+                || c == '.' || c == '-';
+        });
+    }
+
+    std::string ReadContent(std::filesystem::path const& path, std::ios::openmode mode)
+    {
+        std::ifstream stream(path, mode);
+        std::ostringstream content;
+        content << stream.rdbuf();
+        return content.str();
+    }
+
+    std::string WithoutCarriageReturns(std::string const& content)
+    {
+        std::string result;
+        result.reserve(content.size());
+        for (std::size_t i = 0; i < content.size(); ++i)
+            if (content[i] != '\r' || i + 1 == content.size() || content[i + 1] != '\n')
+                result.push_back(content[i]);
+        return result;
+    }
 }
 
 std::vector<std::filesystem::path> WorldBaseline::Extract(std::filesystem::path const& manifest,
     std::filesystem::path const& directory)
 {
-    boost::property_tree::ptree tree;
-    try
-    {
-        boost::property_tree::read_json(manifest.string(), tree);
-    }
-    catch (boost::property_tree::json_parser_error const& error)
-    {
-        Fail(Acore::StringFormat("cannot read \"{}\": {}", manifest.generic_string(), error.what()));
-    }
+    boost::property_tree::ptree const tree = ReadManifest(manifest);
 
     std::string const archiveName = tree.get<std::string>("archive", "");
     if (tree.get<int>("format", 0) != 1 || archiveName.empty()
@@ -297,4 +339,36 @@ std::vector<std::filesystem::path> WorldBaseline::Extract(std::filesystem::path 
     }
 
     return files;
+}
+
+std::vector<WorldBaseline::LedgerHash> WorldBaseline::LineEndingLedgerHashes(std::filesystem::path const& manifest,
+    std::filesystem::path const& sourceDirectory)
+{
+    boost::property_tree::ptree const tree = ReadManifest(manifest);
+
+    std::vector<LedgerHash> hashes;
+    auto const covered = tree.get_child_optional("coveredMigrations");
+    if (!covered)
+        return hashes;
+
+    for (auto const& [relative, value] : *covered)
+    {
+        std::filesystem::path const path(relative);
+        if (!IsMigrationPath(path))
+            Fail(Acore::StringFormat("covered migration \"{}\" has an invalid path", relative));
+
+        std::filesystem::path const file = sourceDirectory / path;
+        if (!std::filesystem::is_regular_file(file))
+            continue;
+
+        std::string const coveredHash = Lowercase(value.get_value<std::string>());
+        std::string const nativeHash =
+            ByteArrayToHexStr(Acore::Crypto::SHA1::GetDigestOf(ReadContent(file, std::ios::in)));
+        std::string const portableHash = Lowercase(ByteArrayToHexStr(Acore::Crypto::SHA1::GetDigestOf(
+            WithoutCarriageReturns(ReadContent(file, std::ios::in | std::ios::binary)))));
+        if (portableHash == coveredHash && Lowercase(nativeHash) != coveredHash)
+            hashes.push_back({ path.filename().string(), coveredHash, nativeHash });
+    }
+
+    return hashes;
 }
