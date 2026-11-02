@@ -12,8 +12,8 @@ namespace CoAProbeRelay
 {
 namespace
 {
-constexpr std::array<std::string_view, 11> ReadOnlyCommands =
-    {"ping", "spell", "item", "auras", "spellbook", "known", "log", "state", "ca", "frame", "errors"};
+constexpr std::array<std::string_view, 12> ReadOnlyCommands =
+    {"ping", "spell", "item", "bagitem", "auras", "spellbook", "known", "log", "state", "ca", "frame", "errors"};
 constexpr std::string_view RequestTag = "Q:";
 constexpr std::string_view ReplyTag = "R:";
 constexpr std::size_t MaxRequestIdLength = 16;
