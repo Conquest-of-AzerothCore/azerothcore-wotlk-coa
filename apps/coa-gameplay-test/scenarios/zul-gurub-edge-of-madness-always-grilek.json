@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: the Brazier of Madness summons Gri'lek without Gurubashi Mojo Madness",
+  "contract": [
+    "Live CoA sends the Brazier of Madness (180327) without a lock (AscensionDB gameobjectcache, 2026-09-04) and",
+    "its 2026-08-02 log summons Gri'lek (15082) during what the stock rotation makes Wushoolay's window. Using the",
+    "brazier without Gurubashi Mojo Madness (19931) therefore summons Gri'lek and none of the other three. The",
+    "stock 60-day rotation keeps Gri'lek's window closed 45 of 60 days; on 2026-11-02, when this case was written,",
+    "it summoned Hazza'rah (15083), as the tester reported."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -11889.0,
+      "y": -1893.0,
+      "z": 63.6,
+      "o": 0.942,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the brazier stands",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero carries no Gurubashi Mojo Madness",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 19931,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Edge of Madness boss stands here yet",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 15082,
+      "equals": 0
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Use the Brazier of Madness",
+      "actor": "hero",
+      "entry": 180327
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Gri'lek answers the brazier",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 15082,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Hazza'rah does not",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 15083,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Renataki does not",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 15084,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Wushoolay does not",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 15085,
+      "equals": 0
+    }
+  ]
+}

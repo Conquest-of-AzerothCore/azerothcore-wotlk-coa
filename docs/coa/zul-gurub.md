@@ -97,7 +97,7 @@ server Spell.dbc):
 | 11338 | Hakkari Shadowcaster | 15232 → 350383, 20741 → 350386 |
 | 11350 | Gurubashi Axe Thrower | add 2118900, 2118901, 2118905; 8269 → 340021 |
 | 11351 | Gurubashi Headhunter | 15708 → 340009 |
-| 11352 | Gurubashi Berserker | 15588 → 340080, 11130 → 340164, 8269 → 340021; add 2118910 |
+| 11352 | Gurubashi Berserker | 15588 → 340080, 11130 → 340164, 8269 → 340021; Trauma 2118910 on every Thunderclap hit |
 | 11359 | Soulflayer | 8269 → 340021 |
 | 11361, 15068 | Zulian Tiger, Zulian Guardian | no AI: add 24332 Rake, 24333 Ravage |
 | 11368 | Bloodseeker Bat | add 2106151 Vampiric Bite, 2106156 Frenzied Dive |
@@ -167,7 +167,9 @@ Left as is unless decided otherwise: quests 580290 and 580295 carry local Path t
 | Mar'li: on Ascended, Hatch Eggs repeats every 30 s in the troll phase | `boss_marli_coa.cpp` | video (DBM bar) |
 | Thekal: no false death, no zealot revival, no tiger phase at full health; tiger form when the avatar dies | `boss_thekal_coa.cpp` | log |
 | boss achievements per difficulty: Normal, Heroic, Mythic and Ascended criteria get `achievement_criteria_data` scripts that match the exact difficulty | `rev_20261025_91`, `AscensionAchievementConditions.cpp` | dbc |
-| Mandokir: Threatening Gaze 4 s, then Menacing Gaze 4 s; a hostile spell with a power cost on the global cooldown gives Sentenced to Die and Decapitate; Mounted out of combat; Bloodlord's Presence (no durability loss) at the pull | `boss_mandokir_coa.cpp` | dbc |
+| Mandokir: Threatening Gaze 4 s, then Menacing Gaze 4 s; a hostile spell with a power cost on the global cooldown gives Sentenced to Die and Decapitate; Mounted out of combat; Bloodlord's Presence (no durability loss) at the pull; one Whirlwind at 12 s and every 25 s, also without a charge | `boss_mandokir_coa.cpp` | dbc, log |
+| Gurubashi Berserker: Trauma lands with every Thunderclap hit, never as a cast of its own | `rev_20261102_93` | log |
+| Edge of Madness: the Brazier of Madness has no lock (Gurubashi Mojo Madness not needed) and always summons Gri'lek; the encounter credits Gri'lek | `rev_20261102_94` | wdb, log |
 | Jin'do: the Brain Wash Totem casts Brainwash 2118502; the Powerful Healing Ward casts Healing Stream 2118504 (1 % of missing health per second) and loses its stock heal and melee | `boss_jindo_coa.cpp`, `rev_20261025_92` | dbc, wdb (ward named "Healing Stream Totem") |
 
 Normal boss health is unchanged. Knockdown 520871 is not added: it is a player ability, and the bosses are immune
