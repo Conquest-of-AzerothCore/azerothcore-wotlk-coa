@@ -49,6 +49,7 @@
 #include "AscensionAverageItemLevel.h"
 #include "AscensionPersonalBank.h"
 #include "AscensionVanityOwnership.h"
+#include "AscensionCosmeticPetTokens.h"
 #include "AscensionCollectibleSpellData.h"
 #include "AscensionCustomClassData.h"
 #include "AscensionAuraAmounts.h"
@@ -7670,7 +7671,7 @@ private:
   }
 
 public:
-  bool CosmeticPetTokenDropsHere(uint32 itemId) const
+  bool CosmeticPetTokenAvailableHere(uint32 itemId) const
   {
     auto const token = _petTokens.find(itemId);
     if (token == _petTokens.end())
@@ -9910,7 +9911,7 @@ public:
 
     bool OnItemRoll(Player const*, LootStoreItem const* item, float& chance, Loot&, LootStore const&) override
     {
-        if (!item->reference && !AscensionCollectionService::Instance().CosmeticPetTokenDropsHere(item->itemid))
+        if (!item->reference && !AscensionCollectionService::Instance().CosmeticPetTokenAvailableHere(item->itemid))
             chance = 0.0f;
         return true;
     }
@@ -10890,6 +10891,11 @@ AscensionVanityOwnership::TestOverride::~TestOverride()
 bool AscensionVanityOwnership::OwnsItem(Player const* player, uint32 itemId)
 {
     return AscensionCollectionService::Instance().OwnsVanityItem(player, itemId);
+}
+
+bool AscensionCosmeticPetTokens::AvailableOnRealm(uint32 itemId)
+{
+    return AscensionCollectionService::Instance().CosmeticPetTokenAvailableHere(itemId);
 }
 
 bool IsAscensionPrimalistTameEligible(Player const* player)

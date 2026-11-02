@@ -52,6 +52,11 @@ enum PlayerHook
     PLAYERHOOK_ON_FORGOT_SPELL
 };
 
+enum PlayerFlags : uint32
+{
+    PLAYER_FLAGS_RESTING = 0x20
+};
+
 template <typename... Args>
 void LogSink(Args const&...) { }
 
@@ -197,6 +202,7 @@ public:
     Creature* ToCreature() { return this; }
     void InitTalentForLevel() { }
     void SavePetToDB(PetSaveMode mode) { SaveRow(Number, Type, mode); }
+    static void DeleteFromDB(uint32 number) { Db.erase(number); }
 };
 
 uint32 NextPetNumber = 1000;
@@ -211,8 +217,16 @@ public:
     std::optional<uint8> TameFailure;
     uint32 StarterCalls = 0;
     bool UnsafeStarter = false;
+    uint8 Class = 10;
+    bool InCombat = false;
+    bool Resting = false;
+    std::vector<uint32> Spells{ 883, 2641, 884, 892, 885, 893, 91602, 91651, 91631, 91652 };
 
     Player* ToPlayer() override { return this; }
+    uint8 getClass() const { return Class; }
+    bool IsInCombat() const { return InCombat; }
+    bool HasPlayerFlag(PlayerFlags) const { return Resting; }
+    bool HasSpell(uint32 spell) const { return std::find(Spells.begin(), Spells.end(), spell) != Spells.end(); }
     ObjectGuid GetGUID() const { return { 42 }; }
     PetStable& GetOrInitPetStable()
     {
@@ -516,8 +530,77 @@ void StarterGrantedWithStabledBeast()
     RequireConsistent(player, "stable and database agree after the starter grant");
 }
 
+constexpr uint32 TIER_BEAST = 1;
+constexpr uint32 TIER_DEMON = 2;
+
+bool HasStabled(Player& player, uint32 creature)
+{
+    for (auto const& pet : player.Stable->StabledPets)
+        if (pet && pet->CreatureId == creature)
+            return true;
+    return false;
+}
+
+void CosmeticPetOfAnotherKindStablesTheOutPet()
+{
+    Player& player = Reset(1);
+    Current(player, Info(1, BEAST, HUNTER_PET), true);
+    Require(!AscensionTaming::SummonCosmeticPet(&player, TIER_DEMON, HUNTER_DEMON), "a demon token is accepted");
+    Require(player.Out && player.Out->Entry == HUNTER_DEMON, "the token's demon is the pet");
+    Require(player.Stable->StabledPets[0] && player.Stable->StabledPets[0]->PetNumber == 1,
+        "the beast is stabled, not abandoned");
+    RequireConsistent(player, "stable and database agree after a cosmetic pet of another kind");
+}
+
+void CosmeticPetOfTheSameKindReplacesThePet()
+{
+    Player& player = Reset(1);
+    Current(player, Info(1, BEAST, HUNTER_PET), true);
+    Require(!AscensionTaming::SummonCosmeticPet(&player, TIER_BEAST, BEAST_2), "a beast token is accepted");
+    Require(player.Out && player.Out->Entry == BEAST_2, "the token's beast is the pet");
+    Require(!Db.contains(1) && !player.Stable->StabledPets[0], "the old beast is replaced, not stabled");
+    RequireConsistent(player, "stable and database agree after a same-kind cosmetic pet");
+}
+
+void CosmeticPetReplacesTheStoredPetOfItsKind()
+{
+    Player& player = Reset(1);
+    Current(player, Info(1, BEAST, HUNTER_PET), true);
+    Stabled(player, 0, Info(3, HUNTER_DEMON, HUNTER_PET));
+    Require(!AscensionTaming::SummonCosmeticPet(&player, TIER_DEMON, IMP), "a demon token is accepted");
+    Require(player.Out && player.Out->Entry == IMP, "the token's demon is the pet");
+    Require(!Db.contains(3) && HasStabled(player, BEAST), "the stored demon is replaced and the beast takes its slot");
+    RequireConsistent(player, "stable and database agree after replacing a stored pet");
+}
+
+void CosmeticPetNeedsAStableSlotForTheOutPet()
+{
+    Player& player = Reset(0);
+    Current(player, Info(1, BEAST, HUNTER_PET), true);
+    Require(AscensionTaming::SummonCosmeticPet(&player, TIER_DEMON, HUNTER_DEMON), "no free stable slot refuses");
+    Require(player.Out && player.Out->Number == 1, "the beast stays out");
+    Require(Saves.empty() && Updates.empty() && player.StarterCalls == 0, "a refused token writes nothing");
+    RequireConsistent(player, "a refused token leaves the stable as it was");
+}
+
+void CosmeticPetNeedsItsSpells()
+{
+    Player& player = Reset(1);
+    player.Spells = { 883, 2641 };
+    Require(AscensionTaming::SummonCosmeticPet(&player, TIER_DEMON, HUNTER_DEMON), "no Summon Demon refuses");
+    player.InCombat = true;
+    player.Spells = { 884, 892 };
+    Require(AscensionTaming::SummonCosmeticPet(&player, TIER_DEMON, HUNTER_DEMON), "combat refuses");
+    Require(player.StarterCalls == 0 && Db.empty(), "a refused token creates nothing");
+}
+
 int main()
 {
+    CosmeticPetOfAnotherKindStablesTheOutPet();
+    CosmeticPetOfTheSameKindReplacesThePet();
+    CosmeticPetReplacesTheStoredPetOfItsKind();
+    CosmeticPetNeedsAStableSlotForTheOutPet();
+    CosmeticPetNeedsItsSpells();
     WarlockDemonStaysUnslotted();
     CallDemonIgnoresWarlockDemons();
     LockedStableSlotsStayLocked();
@@ -527,6 +610,7 @@ int main()
     NothingToSummonFails();
     StarterGrantedWithStabledBeast();
     std::puts("PASS: warlock demons untouched; locked slots respected; dead and full-stable calls refused before any "
-              "change; one write per parked pet; starter grant keeps every row");
+              "change; one write per parked pet; starter grant keeps every row; cosmetic pets replace their kind and "
+              "stable the rest");
     return 0;
 }

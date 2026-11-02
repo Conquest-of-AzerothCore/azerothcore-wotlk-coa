@@ -27,6 +27,7 @@
 #include "AscensionBazaarTokenReserve.h"
 #include "AscensionDisplayPatch.h"
 #include "AscensionPooledVitality.h"
+#include "AscensionCosmeticPetTokens.h"
 #include "AscensionVanityOwnership.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
@@ -11546,6 +11547,13 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
     if (!sConditionMgr->IsObjectMeetToConditions(this, creature, conditions))
     {
         //LOG_DEBUG("condition", "BuyItemFromVendor: conditions not met for creature entry {} item {}", creature->GetEntry(), item);
+        SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
+        return false;
+    }
+
+    // Cosmetic pet tokens only sell on realm types whose classes can use them
+    if (!AscensionCosmeticPetTokens::AvailableOnRealm(item))
+    {
         SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
         return false;
     }
