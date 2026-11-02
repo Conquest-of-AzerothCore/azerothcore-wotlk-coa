@@ -59,7 +59,8 @@ uint64 AppearanceKey(uint32 display, uint32 inventoryType)
 
 bool PlaceholderName(std::string_view name)
 {
-    constexpr std::array<std::string_view, 5> prefixes = {"Monster -", "***", "zzOLD", "zzDEPRECATED", "RPGITEM"};
+    constexpr std::array<std::string_view, 6> prefixes = {"Monster -", "***", "zzOLD", "zzDEPRECATED", "RPGITEM",
+        "NPC Equipment"};
     if (std::any_of(prefixes.begin(), prefixes.end(),
             [name](std::string_view prefix) { return name.starts_with(prefix); }) ||
         name.find("[MISSING ITEM NAME]") != std::string_view::npos)
