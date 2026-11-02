@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionRulesets.h"
+#include "AscensionHighRiskPolicy.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "Config.h"
@@ -340,6 +341,8 @@ void AscensionRulesets::RegisterGuard(Guard guard)
 bool AscensionRulesets::CanApply(Player* player, Ruleset ruleset)
 {
     if (!player)
+        return false;
+    if (ruleset == Ruleset::HighRisk && player->GetLevel() < HighRisk::MinimumLevel)
         return false;
     for (Guard guard : rulesetGuards)
         if (!guard(player, ruleset))
