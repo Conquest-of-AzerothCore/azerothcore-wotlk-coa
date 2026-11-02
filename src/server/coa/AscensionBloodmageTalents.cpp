@@ -224,6 +224,21 @@ bool HasCursedForm(Player const* player, Aura const* ignored)
     return false;
 }
 
+bool IsMortalAbilityForm(uint32 form)
+{
+    return std::find(std::begin(MortalAbilityForms), std::end(MortalAbilityForms), form) !=
+        std::end(MortalAbilityForms);
+}
+
+bool HasWeaponHidingForm(Player const* player, Aura const* ignored = nullptr)
+{
+    for (uint32 form : CursedForms)
+        if (!IsMortalAbilityForm(form))
+            if (Aura const* aura = player->GetAura(form, player->GetGUID()); aura && aura != ignored)
+                return true;
+    return false;
+}
+
 bool HasCursedFormRestrictingMortalAbilities(Player const* player)
 {
     for (uint32 form : CursedForms)
@@ -454,7 +469,7 @@ public:
             SyncCursedFormRequirement(player);
             SyncDarkFrenzy(player);
         }
-        if (IsCursedForm(aura->GetId()))
+        if (IsCursedForm(aura->GetId()) && !IsMortalAbilityForm(aura->GetId()))
             UpdateCursedFormWeapons(player, true);
         if (aura->GetId() == SPELL_ETERNAL_CURSE)
         {
@@ -494,7 +509,7 @@ public:
             SyncCursedFormRequirement(player);
             SyncDarkFrenzy(player);
         }
-        if (IsCursedForm(aura->GetId()) && !HasCursedForm(player, aura))
+        if (IsCursedForm(aura->GetId()) && !HasWeaponHidingForm(player, aura))
             UpdateCursedFormWeapons(player, false);
         if (aura->GetId() == SPELL_ETERNAL_CURSE)
         {
@@ -562,7 +577,7 @@ public:
         if (!player || player->getClass() != CLASS_SON_OF_ARUGAL)
             return;
         if (std::find(std::begin(CursedFormWeaponSlots), std::end(CursedFormWeaponSlots), slot) ==
-            std::end(CursedFormWeaponSlots) || !HasCursedForm(player))
+            std::end(CursedFormWeaponSlots) || !HasWeaponHidingForm(player))
             return;
         ClearVisibleWeapon(player, slot);
     }
