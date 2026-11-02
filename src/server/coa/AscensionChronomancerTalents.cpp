@@ -152,6 +152,44 @@ class spell_ascension_unmaker_of_realities : public AuraScript
     }
 };
 
+class spell_ascension_infinite_power : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_infinite_power);
+
+    static bool DealsDamage(SpellInfo const* spellInfo)
+    {
+        for (SpellEffectInfo const& effect : spellInfo->Effects)
+            switch (effect.Effect)
+            {
+                case SPELL_EFFECT_SCHOOL_DAMAGE:
+                case SPELL_EFFECT_WEAPON_DAMAGE:
+                case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+                case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+                case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
+                    return true;
+                case SPELL_EFFECT_APPLY_AURA:
+                    if (effect.ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE ||
+                        effect.ApplyAuraName == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
+                        return true;
+                    break;
+                default:
+                    break;
+            }
+        return false;
+    }
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        SpellInfo const* procSpell = eventInfo.GetSpellInfo();
+        return procSpell && DealsDamage(procSpell);
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_ascension_infinite_power::CheckProc);
+    }
+};
+
 class spell_ascension_destabilize_time : public AuraScript
 {
     PrepareAuraScript(spell_ascension_destabilize_time);
@@ -462,6 +500,7 @@ void AddSC_AscensionChronomancerTalents()
     new chronomancer_talent_casts();
     RegisterSpellScript(spell_ascension_dimensional_divergence);
     RegisterSpellScript(spell_ascension_unmaker_of_realities);
+    RegisterSpellScript(spell_ascension_infinite_power);
     RegisterSpellScript(spell_ascension_destabilize_time);
     RegisterSpellScript(spell_ascension_timeguard);
     RegisterSpellScript(spell_ascension_the_bieko_effect);

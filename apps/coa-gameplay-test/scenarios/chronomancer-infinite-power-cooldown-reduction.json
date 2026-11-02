@@ -23,7 +23,8 @@
     "(DmgClass 3 = ranged, matching the PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS bit the fix's own SQL comment",
     "adds for wand attacks) and is the only Chronomancer-accessible direct-damage spell of the three. Fails",
     "before the fix (near-zero difference, only cast-timing skew); passes after (roughly a",
-    "10%-of-remaining-at-proc-time reduction, well beyond skew)."
+    "10%-of-remaining-at-proc-time reduction, well beyond skew). Timerend is itself a damaging cast, so its own cooldown",
+    "is cut by about 2 s as it starts, and the talented caster ends 2 s lower again than the control; the window covers both."
   ],
   "timeout_ms": 60000,
   "players": [
@@ -31,7 +32,7 @@
       "id": "control",
       "race": 1,
       "class": 22,
-      "level": 80,
+      "level": 60,
       "spell_hit_rating": 10000,
       "ranged_hit_rating": 10000
     },
@@ -39,7 +40,7 @@
       "id": "talent",
       "race": 1,
       "class": 22,
-      "level": 80,
+      "level": 60,
       "spell_hit_rating": 10000,
       "ranged_hit_rating": 10000
     }
@@ -128,7 +129,7 @@
       "actor": "talent",
       "metric": "cooldown_ms",
       "spell": 801291,
-      "min": 18000
+      "min": 15000
     },
     {
       "action": "wait",
@@ -161,7 +162,7 @@
       "metric": "cooldown_ms",
       "spell": 801291,
       "relative_to": "control_cooldown",
-      "min": -3000,
+      "min": -4500,
       "max": -500
     }
   ]
