@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Bloodlord Mandokir whirls once every 25 seconds, also without a charge",
+  "contract": [
+    "The live CoA combat log of 2026-08-02 (Normal kill) shows Mandokir's (11382) Whirlwind (2118408) first",
+    "12 s into the fight and then every 25.0-25.2 s, also in cycles where he charges nobody. The old script",
+    "whirled twice per 25 s charge cycle (1.5 s and 8 s after it), so a tank alone in melee saw two whirlwinds",
+    "by 20 s. The hero stands in melee and stops attacking, so there is no charge target and no gaze punishment."
+  ],
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub on Normal",
+      "actor": "tank",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 11382,
+      "as": "mandokir",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "label": "Engage Mandokir",
+      "actor": "tank",
+      "target": "mandokir"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mandokir fights",
+      "actor": "mandokir",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "tank"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the first Whirlwind comes about 12 s into the fight",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "entry": 11382,
+      "spell": 2118408,
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "wait",
+      "label": "Wait past the old script's second whirlwind 8 s after the charge",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: only one Whirlwind in the first 25 s cycle",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "entry": 11382,
+      "spell": 2118408,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the next Whirlwind comes 25 s after the first, with nobody charged",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "entry": 11382,
+      "spell": 2118408,
+      "min": 2,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mandokir is still fighting",
+      "actor": "mandokir",
+      "metric": "combat",
+      "equals": 1
+    }
+  ]
+}
