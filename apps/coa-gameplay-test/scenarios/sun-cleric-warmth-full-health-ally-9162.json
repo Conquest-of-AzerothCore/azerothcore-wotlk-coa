@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Warmth applies on a direct heal of a full-health ally (#9162)",
+  "contract": [
+    "Warmth 704563 is a proc-trigger passive whose tooltip reads 'Direct healing now increases the target's health by",
+    "... for $704564d.' (Spell.dbc), with no effective-healing or health-threshold qualifier: the direct heal itself",
+    "applies 704564 (MOD_INCREASE_HEALTH) to the healed target. Its sibling Faith 707077 has the same wording and",
+    "already refreshes on overheal (sun-cleric-faith-overheal-refresh). Illumination 500143 on a full-health ally is",
+    "pure overheal (effective heal 0), so it distinguishes a raw-heal gate from an effective-heal gate."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 },
+    { "id": "ally", "race": 1, "class": 20, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "cleric", "spell": 704563 },
+    { "action": "learn", "actor": "cleric", "spell": 500143 },
+    {
+      "action": "assert", "label": "SETUP: ally at full health",
+      "actor": "ally", "metric": "health_pct", "min": 99
+    },
+    {
+      "action": "assert", "label": "SETUP: no Warmth buff yet",
+      "actor": "ally", "metric": "aura", "spell": 704564, "caster": "cleric", "equals": 0
+    },
+    {
+      "action": "cast", "label": "Direct heal a full-health ally (Illumination)", "actor": "cleric", "spell": 500143,
+      "target": "ally"
+    },
+    {
+      "action": "assert", "label": "Warmth applies although the heal only overheals",
+      "actor": "ally", "metric": "aura", "spell": 704564, "caster": "cleric", "equals": 1, "within_ms": 3000
+    }
+  ]
+}
