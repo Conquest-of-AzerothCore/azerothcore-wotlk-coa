@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Sargeron Smite's top rank generates 20 Energy and repeats under Inner Demon (#7323)",
-  "contract": "Sargeron Smite rank 9 (501321) reads 'Blast an enemy for ... Shadowflame Damage and generate $521213s1 Energy', and under Inner Demon (804216) 'This spell casts an additional time free of cost.' felsworn-sargeron-smite-energy covers rank 2 only. Every rank of the 802060 chain casts Energize +20 energy (521213) on a hostile hit, and under Inner Demon copies the hit's damage to the target as 803467. With Inner Demon up, one rank 9 cast on a dummy raises Energy from 50 to 70 and lands the free 803467 hit.",
+  "contract": "Sargeron Smite rank 9 (501321) reads 'Blast an enemy for ... Shadowflame Damage and generate $521213s1 Energy', and under Inner Demon (804216) 'This spell casts an additional time free of cost.' felsworn-sargeron-smite-energy covers rank 2 only. Every rank of the 802060 chain casts Energize +20 energy (521213) on a hostile hit, and under Inner Demon copies the hit's damage to the target as 803467. With Inner Demon up, the free copy also casts 521213, as recorded Ascension logs show two 521213 energizes per copy (#10719): one rank 9 cast on a dummy raises Energy from 50 to 90 and lands the free 803467 hit.",
   "timeout_ms": 90000,
   "players": [
     { "id": "felsworn", "race": 1, "class": 14, "level": 80, "spell_hit_rating": 10000 }
@@ -19,8 +19,8 @@
     { "action": "cast", "actor": "felsworn", "spell": 501321, "target": "dummy" },
     { "action": "assert", "actor": "felsworn", "metric": "cast_failure", "spell": 501321, "equals": 0 },
     {
-      "action": "assert", "label": "The hit generates the DBC's 20 Energy",
-      "actor": "felsworn", "metric": "power", "power": 3, "equals": 70, "within_ms": 300
+      "action": "assert", "label": "The hit and its free copy each generate the DBC's 20 Energy",
+      "actor": "felsworn", "metric": "power", "power": 3, "equals": 90, "within_ms": 300
     },
     {
       "action": "assert", "label": "Inner Demon's free second cast lands",

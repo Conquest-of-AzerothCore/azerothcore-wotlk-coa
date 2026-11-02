@@ -332,7 +332,10 @@ class felsworn_casts : public AllSpellScript
         if (Named(info, 802060))
             Cast(player, player, 521213);
         if (Named(info, 802060) && spell->GetScriptValue(804216))
+        {
             Copy(player, target, 803467, damage);
+            Cast(player, player, 521213);
+        }
         if (Named(info, 801895) && spell->GetScriptValue(804216))
             CopyDot(player, target, 805748, uint64(damage) * 30 / 100);
         if (info->Id == 712399 && spell->GetScriptValue(804216))
