@@ -687,6 +687,7 @@ public:
     // Getters
     uint32 GetId() const { return m_id; }
     ObjectGuid GetLeaderGUID() const { return m_leaderGuid; }
+    uint8 GetBankTabCount() const { return _GetPurchasedTabsSize(); }
     std::string const& GetName() const { return m_name; }
     std::string const& GetMOTD() const { return m_motd; }
     std::string const& GetInfo() const { return m_info; }
@@ -706,6 +707,7 @@ public:
     void HandleSetRankInfo(WorldSession* session, uint8 rankId, std::string_view name, uint32 rights, uint32 moneyPerDay, std::array<GuildBankRightsAndSlots, GUILD_BANK_MAX_TABS> const& rightsAndSlots);
     void HandleSetRankInfo(uint8 rankId, uint32 rights = 0, std::string_view name = "", uint32 moneyPerDay = 0);
     void HandleBuyBankTab(WorldSession* session, uint8 tabId);
+    bool HandleUnlockBankTab(WorldSession* session);
     void HandleInviteMember(WorldSession* session, std::string const& name);
     void HandleAcceptMember(WorldSession* session);
     void HandleLeaveMember(WorldSession* session);
