@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Rulesets: High-Risk can be selected only from level 15 (#9174)",
+  "contract": [
+    "High-Risk penalties start at HighRisk::MinimumLevel 15, and #7014 (issue #6014) records the intent: a prestige",
+    "switches to PvE Mode at level 15, and High-Risk or War Mode can then be chosen manually in a rested area.",
+    "Selection itself had no level check, so a level 14 character could wear High-Risk 1004019. At level 14 in the",
+    "Goldshire inn (area trigger 562), casting High-Risk (PvP) 84421 the way the client does must fail and keep",
+    "PvE Mode 9931032; at level 15 the same cast applies High-Risk."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9483.25, "y": -17.99, "z": 56.96, "o": 3.8 },
+  "players": [
+    { "id": "player", "race": 1, "class": 20, "level": 14 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 3000 },
+    { "action": "learn", "actor": "player", "spell": 84420 },
+    { "action": "learn", "actor": "player", "spell": 84421 },
+    { "action": "learn", "actor": "player", "spell": 84422 },
+    { "action": "area_trigger", "label": "Enter the Goldshire inn", "actor": "player", "id": 562 },
+    {
+      "action": "assert", "label": "The inn makes the character rested", "actor": "player", "metric": "resting",
+      "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: the character starts in PvE Mode", "actor": "player", "metric": "aura",
+      "spell": 9931032, "equals": 1, "within_ms": 3000
+    },
+    { "action": "cast", "label": "Select High-Risk (PvP) at level 14", "actor": "player", "spell": 84421 },
+    {
+      "action": "assert", "label": "High-Risk is refused below level 15", "actor": "player", "metric": "cast_failure",
+      "spell": 84421, "min": 1, "within_ms": 4000
+    },
+    { "action": "wait", "label": "Allow a wrongly accepted selection to land", "ms": 2000 },
+    {
+      "action": "assert", "label": "No High-Risk aura at level 14", "actor": "player", "metric": "aura",
+      "spell": 1004019, "equals": 0
+    },
+    {
+      "action": "assert", "label": "PvE Mode is kept at level 14", "actor": "player", "metric": "aura",
+      "spell": 9931032, "equals": 1
+    },
+    { "action": "set_level", "actor": "player", "value": 15 },
+    { "action": "wait", "label": "Global cooldown", "ms": 1600 },
+    { "action": "cast", "label": "Select High-Risk (PvP) at level 15", "actor": "player", "spell": 84421 },
+    {
+      "action": "assert", "label": "High-Risk is applied at level 15", "actor": "player", "metric": "aura",
+      "spell": 1004019, "equals": 1, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "High-Risk replaced PvE Mode", "actor": "player", "metric": "aura",
+      "spell": 9931032, "equals": 0
+    }
+  ]
+}

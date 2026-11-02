@@ -94,8 +94,7 @@ class aura_ascension_sun_cleric_event : public AuraScript
             case 300336: return healing && Any(info, {800357,500143});
             case 572885: return damage && info && info->Id == 804252;
             case 806116: return damage && info && !periodic;
-            case 704563: return healing && direct;
-            case 707077: return direct && event.GetHealInfo() && event.GetHealInfo()->GetHeal();
+            case 704563: case 707077: return direct && event.GetHealInfo() && event.GetHealInfo()->GetHeal();
             case 681252: return damage && direct && info->SchoolMask == SPELL_SCHOOL_MASK_NORMAL;
             case 704934: return damage && melee;
             case 806699: case 802935: return damage && automatic && Chance(player, id);
