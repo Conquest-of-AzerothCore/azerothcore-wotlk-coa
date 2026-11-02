@@ -196,7 +196,9 @@ public:
                             if (Creature* channeler = instance->GetCreature(guid))
                                 channeler->Respawn(true);
 
-                        for (ObjectGuid const& guid : _burningAbyssalsSet)
+                        // Walk a copy: despawning erases from _burningAbyssalsSet through OnCreatureRemove.
+                        GuidSet const burningAbyssals = _burningAbyssalsSet;
+                        for (ObjectGuid const& guid : burningAbyssals)
                             if (Creature* abyssal = instance->GetCreature(guid))
                                 abyssal->DespawnOrUnsummon();
 
