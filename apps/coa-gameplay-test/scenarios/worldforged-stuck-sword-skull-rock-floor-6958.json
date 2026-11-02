@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "The Stuck Sword pickup rests on the Skull Rock floor",
+  "contract": "The Stuck Sword pickup floated 3.39 yd above the Skull Rock cave floor. It now rests on the floor. Issue #6958.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the stuck sword pickup rests on the skull rock floor",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6942196,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}
