@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "name": "Worldforged Kixxle's Experimental Potion pickup looks like a potion in the Wetlands (#8730)",
+  "contract": "The LootCollector pickup 9900022 (guid 6970053) drops Kixxle's Experimental Potion (354149) but showed a hanging corn bundle (display 1034271). It takes the bottle model 1058753 that Ascension's own record gives the namesake object 254236 'Kixxle's Experimental Potion'. The recipe pickup 9900047 beside it keeps its book model 6930.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -3194.64, "y": -2462.46, "z": 9.9, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the potion pickup is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 9900022, "equals": 1 },
+    { "action": "assert", "label": "SETUP: the recipe pickup is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 9900047, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the potion pickup shows the recorded bottle model", "actor": "p", "metric": "nearby_gameobject_display", "entry": 9900022, "equals": 1058753 },
+    { "action": "assert", "label": "the recipe pickup keeps its book model", "actor": "p", "metric": "nearby_gameobject_display", "entry": 9900047, "equals": 6930 }
+  ]
+}
