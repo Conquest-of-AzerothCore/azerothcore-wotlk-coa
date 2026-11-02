@@ -50,7 +50,8 @@ public:
         if (!player || spell->IsTriggered() || result != SPELL_CAST_OK)
             return;
         auto* info = spell->GetSpellInfo();
-        if (Any(info, {805116, 804152}) && !player->HasAura(Madness) && Count(player, Insanity) < 40)
+        if (Any(info, {805116, 804152}) && !player->HasAura(Madness) &&
+            Count(player, Insanity) < (Named(info, 804152) ? 60 : 40))
             result = SPELL_FAILED_NO_POWER;
         if (info->Id == 520345 && spell->m_targets.GetUnitTarget() == player)
             result = SPELL_FAILED_BAD_TARGETS;
