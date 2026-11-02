@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include "Define.h"
 
 class Player;
 
