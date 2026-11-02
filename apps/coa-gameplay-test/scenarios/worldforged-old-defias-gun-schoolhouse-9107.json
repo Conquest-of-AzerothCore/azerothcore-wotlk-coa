@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Worldforged Old Defias Gun stands on the Moonbrook Schoolhouse floor (#9107)",
+  "contract": "The Old Defias Gun pickup (entry 90253, guid 6940829, item 450564) was placed in game on the Moonbrook Schoolhouse floor at (-10949.214844, 1568.400391, 46.866566); LootCollector alignment then moved it 8.7 yd to (-10952.1, 1576.51, 45.975), where the only ground is terrain 1 yd below the schoolhouse floor and no model covers it. The reporter, standing on that floor at (-10948.84, 1568.33, 46.978), found nothing. Restore the in-game placement: within 1 yd of the reporter, on the floor, reachable and lootable.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -10948.84, "y": 1568.33, "z": 46.98, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 19, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup stands where the reporter looked, not 8.7 yd away on the terrain", "actor": "p", "metric": "spawn_distance", "guid": 6940829, "spawn_type": "gameobject", "x": -10948.84, "y": 1568.33, "z": 46.978, "max": 1.0 },
+    { "action": "assert", "label": "it rests on the schoolhouse floor", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940829, "spawn_type": "gameobject", "min": -0.3, "max": 0.3 },
+    { "action": "assert", "label": "it is grounded", "actor": "p", "metric": "spawn_placement", "guid": 6940829, "spawn_type": "gameobject", "tolerance": 0.3, "equals": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 0 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 90253 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "it is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}
