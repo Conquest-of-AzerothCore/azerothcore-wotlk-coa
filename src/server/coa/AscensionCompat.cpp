@@ -37,6 +37,8 @@
 #include "WorldSessionMgr.h"
 #include "AscensionCoATalentState.h"
 #include "AscensionWildcard.h"
+#include "AscensionTaming.h"
+#include "AscensionTamingData.h"
 #include "AscensionStockScriptShapes.h"
 #include "AscensionFreepick.h"
 #include "AscensionRunemasterEchoes.h"
@@ -412,10 +414,6 @@ constexpr std::size_t APPEARANCE_CATEGORY_COUNT = 69;
 constexpr uint32 APPEARANCE_CATEGORY_AMMUNITION = 32;
 constexpr uint32 APPEARANCE_CATEGORY_SHADOWHOUND = 68;
 constexpr uint32 APPEARANCE_CATEGORY_NECROMANCER_LICH_FORM = 67;
-constexpr uint32 APPEARANCE_CATEGORY_TAMED_BEAST = 33;
-constexpr uint32 APPEARANCE_CATEGORY_SUMMONED_DEMON = 34;
-constexpr uint32 TAME_CREATURE_SPELL = 13481;
-constexpr std::array<uint32, 3> CALL_PET_SPELLS = { 883, 574302, 1100883 };
 
 AscensionCollectionModels::Entry const* FindCollectionModel(uint32 creatureId);
 constexpr std::size_t MAX_APPEARANCE_SNAPSHOT_ENTRIES = 65536;
@@ -603,6 +601,18 @@ struct AppearanceInfo {
   uint32 CreatureEntry = 0;
   uint32 CreatureWeapon = 0;
   uint32 IncarnationSpell = 0;
+  uint32 TokenItem = 0;
+  std::array<bool, 5> Realms{};
+};
+
+struct CosmeticPetCategory {
+  uint32 Tier = 0;
+  uint64 ClassMask = 0;
+
+  [[nodiscard]] bool AllowsClass(uint8 classId) const
+  {
+    return (ClassMask & AscensionTaming::ClassBit(classId)) != 0;
+  }
 };
 
 constexpr uint32 INCARNATION_KIND_FORM = 1;
@@ -5848,12 +5858,6 @@ public:
         return model && sCreatureDisplayInfoStore.LookupEntry(model->DisplayId) ? model->DisplayId : 0;
     }
 
-    static uint32 ResolveSummonedDemonDisplay(uint32 creatureId)
-    {
-        auto const* model = FindCollectionModel(creatureId);
-        return model && sCreatureDisplayInfoStore.LookupEntry(model->DisplayId) ? model->DisplayId : 0;
-    }
-
   static AscensionCollectionService &Instance() {
     static AscensionCollectionService instance;
     return instance;
@@ -5874,6 +5878,8 @@ public:
     _woodworkingAppearancePatches.clear();
     _woodworkingItemAppearancePatches.clear();
     _incarnationCategories.clear();
+    _petCategories.clear();
+    _petTokens.clear();
 
     ClientDBC categories;
     if (categories.Load(GetClientDBCPath("AppearanceCategories.dbc"), 25))
@@ -5888,11 +5894,13 @@ public:
              kind == INCARNATION_KIND_HIDDEN_FORM))
           _incarnationCategories[categoryId] = IncarnationCategory{kind, record.GetUInt32(20), record.GetUInt32(21),
               classMask};
+        if (categoryId < APPEARANCE_CATEGORY_COUNT && record.GetString(1) == "APPEARANCE_TYPE_COSMETIC_PET")
+          _petCategories[categoryId] = CosmeticPetCategory{kind, classMask};
       }
 
     ClientDBC appearances;
     bool appearancesLoaded =
-        appearances.Load(GetClientDBCPath("Appearances.dbc"), 10);
+        appearances.Load(GetClientDBCPath("Appearances.dbc"), 17);
     for (uint32 row = 0; row < appearances.GetRecordCount(); ++row) {
       ClientDBC::Record record = appearances.GetRecord(row);
       uint32 appearanceId = record.GetUInt32(0);
@@ -5909,12 +5917,14 @@ public:
             displayId, record.GetUInt32(8));
       if (appearance.PrimaryCategory == APPEARANCE_CATEGORY_SHADOWHOUND)
         appearance.CreatureDisplay = ResolveShadowhoundDisplay(displayId);
-      if (appearance.PrimaryCategory == APPEARANCE_CATEGORY_TAMED_BEAST)
-        appearance.CreatureEntry = record.GetUInt32(8);
-      if (appearance.PrimaryCategory == APPEARANCE_CATEGORY_SUMMONED_DEMON)
+      if (_petCategories.contains(appearance.PrimaryCategory))
       {
         appearance.CreatureEntry = record.GetUInt32(8);
-        appearance.CreatureDisplay = ResolveSummonedDemonDisplay(appearance.CreatureEntry);
+        appearance.TokenItem = record.GetUInt32(1);
+        for (uint32 realm = 0; realm < appearance.Realms.size(); ++realm)
+          appearance.Realms[realm] = record.GetUInt32(12 + realm) != 0;
+        if (appearance.TokenItem)
+          _petTokens[appearance.TokenItem] = appearanceId;
       }
       if (_incarnationCategories.contains(appearance.PrimaryCategory) ||
           _incarnationCategories.contains(appearance.SecondaryCategory) ||
@@ -5942,6 +5952,8 @@ public:
       if (itemId && appearanceId)
         _itemAppearances[itemId] = appearanceId;
     }
+    for (auto const& [token, appearanceId] : _petTokens)
+        _itemAppearances.try_emplace(token, appearanceId);
     if (appearancesLoaded && itemAppearancesLoaded)
         LoadWoodworkingAppearances(lastItemAppearanceRecordId);
 
@@ -6654,23 +6666,6 @@ public:
         return appearance != _appearances.end() ? appearance->second.CreatureDisplay : 0;
     }
 
-    uint32 GetSummonedDemonDisplay(Player* player)
-    {
-        if (!player || (player->getClass() != CLASS_WARLOCK && player->getClass() != CLASS_HERO))
-            return 0;
-
-        auto state = GetState(player);
-        if (!state || !state->CanSeeSpellAppearances)
-            return 0;
-
-        uint32 const appearanceId = state->ActiveAppearances[APPEARANCE_CATEGORY_SUMMONED_DEMON];
-        if (!state->CollectedAppearances.contains(appearanceId))
-            return 0;
-
-        auto const appearance = _appearances.find(appearanceId);
-        return appearance != _appearances.end() ? appearance->second.CreatureDisplay : 0;
-    }
-
     uint32 FindIncarnationCategory(uint32 kind, uint32 id) const
     {
         for (auto const& [category, incarnation] : _incarnationCategories)
@@ -6767,27 +6762,6 @@ public:
             guardian->SetVirtualItem(0, weapon);
     }
 
-    void RefreshSummonedDemonGuardian(Player* player, Guardian* guardian)
-    {
-        if (!player || !guardian || guardian->GetOwnerGUID() != player->GetGUID() || guardian->getTransForm())
-            return;
-        if (player->getClass() != CLASS_WARLOCK && player->getClass() != CLASS_HERO)
-            return;
-
-        uint32 const incarnationCategory = FindIncarnationCategory(INCARNATION_KIND_CREATURE, guardian->GetEntry());
-        if (incarnationCategory && GetActiveIncarnation(player, incarnationCategory))
-            return;
-
-        Pet* pet = guardian->ToPet();
-        if (!pet || pet->getPetType() != SUMMON_PET)
-            return;
-
-        uint32 const display = GetSummonedDemonDisplay(player);
-        uint32 const target = display ? display : guardian->GetNativeDisplayId();
-        if (guardian->GetDisplayId() != target)
-            guardian->SetDisplayId(target, guardian->GetObjectScale());
-    }
-
     void RefreshIncarnations(Player* player)
     {
         if (!player || !player->IsInWorld())
@@ -6796,10 +6770,7 @@ public:
         if (player->GetShapeshiftForm() != FORM_NONE)
             player->RestoreDisplayId();
         if (Pet* pet = player->GetPet())
-        {
             RefreshIncarnationGuardian(player, pet);
-            RefreshSummonedDemonGuardian(player, pet);
-        }
         RefreshIncarnationSpell(player);
     }
 
@@ -7618,9 +7589,10 @@ private:
       }
 
       AppearanceInfo const &appearance = appearanceItr->second;
+      auto const petCategory = _petCategories.find(categoryId);
+      bool const cosmeticPet = petCategory != _petCategories.end();
       if ((categoryId <= 14 || categoryId == APPEARANCE_CATEGORY_AMMUNITION ||
-          categoryId == APPEARANCE_CATEGORY_SHADOWHOUND ||
-          categoryId == APPEARANCE_CATEGORY_SUMMONED_DEMON ||
+          categoryId == APPEARANCE_CATEGORY_SHADOWHOUND || cosmeticPet ||
           IsCosmeticCategory(categoryId) || _incarnationCategories.contains(categoryId)) &&
           appearance.PrimaryCategory != categoryId &&
           appearance.SecondaryCategory != categoryId &&
@@ -7630,7 +7602,7 @@ private:
       }
       if ((IsCosmeticCategory(categoryId) && !appearance.CosmeticSpell) ||
           (categoryId == APPEARANCE_CATEGORY_SHADOWHOUND && !appearance.CreatureDisplay) ||
-          (categoryId == APPEARANCE_CATEGORY_SUMMONED_DEMON && !appearance.CreatureDisplay) ||
+          (cosmeticPet && !appearance.CreatureEntry) ||
           (_incarnationCategories.contains(categoryId) && !appearance.CreatureDisplay &&
            !appearance.IncarnationSpell))
       {
@@ -7643,10 +7615,14 @@ private:
         SendApplyResult(player, "APPLY_APPEARANCES_NOT_AVAILABLE_FOR_CLASS");
         return;
       }
-      if (categoryId == APPEARANCE_CATEGORY_SUMMONED_DEMON &&
-          player->getClass() != CLASS_WARLOCK && player->getClass() != CLASS_HERO)
+      if (cosmeticPet && !petCategory->second.AllowsClass(player->getClass()))
       {
         SendApplyResult(player, "APPLY_APPEARANCES_NOT_AVAILABLE_FOR_CLASS");
+        return;
+      }
+      if (cosmeticPet && !RealmAllows(appearance))
+      {
+        SendApplyResult(player, "APPLY_APPEARANCES_NOT_REALM_APPROPRIATE");
         return;
       }
     }
@@ -7657,10 +7633,13 @@ private:
       return;
     }
 
-    uint32 const whistle = requested[APPEARANCE_CATEGORY_TAMED_BEAST];
-    if (whistle && whistle != state->ActiveAppearances[APPEARANCE_CATEGORY_TAMED_BEAST])
+    for (auto const& [categoryId, category] : _petCategories)
     {
-      if (char const* refused = ReplaceTamedBeast(player, _appearances.at(whistle).CreatureEntry))
+      uint32 const token = requested[categoryId];
+      if (!token || token == state->ActiveAppearances[categoryId])
+        continue;
+      if (char const* refused = AscensionTaming::SummonCosmeticPet(player, category.Tier,
+            _appearances.at(token).CreatureEntry))
       {
         SendApplyResult(player, refused);
         return;
@@ -7675,52 +7654,34 @@ private:
     SendApplyResult(player, "APPLY_APPEARANCES_OK");
   }
 
-  static char const* ReplaceTamedBeast(Player* player, uint32 entry) {
-    CreatureTemplate const* creature = sObjectMgr->GetCreatureTemplate(entry);
-    if (!creature || !creature->family)
-      return "APPLY_APPEARANCES_BAD_CREATURE_ENTRY";
-    if (player->IsInCombat())
-      return "APPLY_APPEARANCES_COSMETIC_PET_IN_COMBAT";
-    if (std::none_of(CALL_PET_SPELLS.begin(), CALL_PET_SPELLS.end(),
-          [player](uint32 spell) { return player->HasSpell(spell); }))
-      return "APPLY_APPEARANCES_PET_SUMMON_SPELL_NOT_LEARNED";
-
-    Pet* current = player->GetPet();
-    if (current && current->getPetType() != HUNTER_PET)
-      return "APPLY_APPEARANCES_PET_TYPE_NOT_FOUND";
-    if (current && !current->IsAlive() && !player->HasPlayerFlag(PLAYER_FLAGS_RESTING))
-      return "APPLY_APPEARANCES_PET_DEAD_NON_SAFE_ZONE";
-
-    if (current)
-      player->RemovePet(current, PET_SAVE_AS_DELETED);
-    else if (PetStable* stable = player->GetPetStable())
-    {
-      if (stable->CurrentPet)
-      {
-        Pet::DeleteFromDB(stable->CurrentPet->PetNumber);
-        stable->CurrentPet.reset();
-      }
-      else if (PetStable::PetInfo const* dismissed = stable->GetUnslottedHunterPet())
-      {
-        Pet::DeleteFromDB(dismissed->PetNumber);
-        stable->UnslottedPets.clear();
-      }
-    }
-
-    Pet* pet = player->CreateTamedPetFrom(entry, TAME_CREATURE_SPELL);
-    if (!pet)
-      return "APPLY_APPEARANCES_BAD_CREATURE_ENTRY";
-    uint8 const level = player->GetLevel();
-    pet->SetUInt32Value(UNIT_FIELD_LEVEL, level > 1 ? level - 1 : level);
-    pet->GetMap()->AddToMap(pet->ToCreature(), true);
-    pet->SetUInt32Value(UNIT_FIELD_LEVEL, level);
-    player->SetMinion(pet, true);
-    pet->InitTalentForLevel();
-    pet->SavePetToDB(PET_SAVE_AS_CURRENT);
-    player->PetSpellInitialize();
-    return nullptr;
+  static bool RealmAllows(AppearanceInfo const& appearance)
+  {
+    std::array<bool, 5> const gates = AscensionFreepick::RealmGates();
+    for (uint32 realm = 0; realm < gates.size(); ++realm)
+      if (gates[realm] && appearance.Realms[realm])
+        return true;
+    return false;
   }
 
+  uint64 RealmClassMask() const
+  {
+    std::string const& model = ascensionCompatConfig.GetConfigValue<std::string>(AscensionCompatConfig::CLASS_MODEL);
+    return AscensionTaming::RealmClassMask(model == "coa", model == "wcr");
+  }
+
+public:
+  bool CosmeticPetTokenDropsHere(uint32 itemId) const
+  {
+    auto const token = _petTokens.find(itemId);
+    if (token == _petTokens.end())
+      return true;
+    AppearanceInfo const& appearance = _appearances.at(token->second);
+    auto const category = _petCategories.find(appearance.PrimaryCategory);
+    return RealmAllows(appearance) && category != _petCategories.end() &&
+        (category->second.ClassMask & RealmClassMask()) != 0;
+  }
+
+private:
   void HandleSetAppearanceVisibility(Player *player, WorldPacket &packet) {
     std::shared_ptr<PlayerCollectionState> state = GetState(player);
     if (!state)
@@ -8290,6 +8251,8 @@ private:
 
   bool _clientDataLoaded = false;
   std::unordered_map<uint32, IncarnationCategory> _incarnationCategories;
+  std::map<uint32, CosmeticPetCategory> _petCategories;
+  std::unordered_map<uint32, uint32> _petTokens;
   std::unordered_map<uint32, AppearanceInfo> _appearances;
   std::unordered_map<uint32, uint32> _itemAppearances;
   std::unordered_map<uint32, std::vector<uint32>> _itemSetItems;
@@ -9274,7 +9237,6 @@ public:
     void OnPlayerAfterGuardianInitStatsForLevel(Player* player, Guardian* guardian) override
     {
         AscensionCollectionService::Instance().RefreshIncarnationGuardian(player, guardian);
-        AscensionCollectionService::Instance().RefreshSummonedDemonGuardian(player, guardian);
     }
 
     void OnPlayerTemporarySpellRemoveNotice(Player* player, uint32 spellId, bool sent) override
@@ -9940,6 +9902,19 @@ void ApplyAscensionExperienceContracts(SpellInfo* info)
             break;
     }
 }
+
+class AscensionCosmeticPetTokenLoot final : public GlobalScript
+{
+public:
+    AscensionCosmeticPetTokenLoot() : GlobalScript("AscensionCosmeticPetTokenLoot", { GLOBALHOOK_ON_ITEM_ROLL }) { }
+
+    bool OnItemRoll(Player const*, LootStoreItem const* item, float& chance, Loot&, LootStore const&) override
+    {
+        if (!item->reference && !AscensionCollectionService::Instance().CosmeticPetTokenDropsHere(item->itemid))
+            chance = 0.0f;
+        return true;
+    }
+};
 
 class AscensionCompatChangelogScript : public GlobalScript
 {
@@ -11239,6 +11214,7 @@ void AddAscensionCompatScripts() {
   new AscensionCompatGroupScript();
   new AscensionCompatAllSpellScript();
   new AscensionCompatUnitScript();
+  new AscensionCosmeticPetTokenLoot();
   new AscensionCompatChangelogScript();
   new AscensionCompatMirrorImageScript();
   new AscensionCompatWorldScript();
