@@ -1,6 +1,8 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionPersonalBank.h"
 
+#include "AscensionItemLadder.h"
+#include "AscensionNativeItemScaling.h"
 #include "Bag.h"
 #include "Chat.h"
 #include "DatabaseEnv.h"
@@ -236,6 +238,15 @@ void LogBankEvent(OpenBank const& bank, uint8 eventType, uint8 tab, Player* play
         bank.OwnerKind, bank.OwnerId, moneyEvent ? uint32(GUILD_BANK_MONEY_LOGS_TAB) : uint32(tab));
 }
 
+void SendItemLevel(Player* player, Item const* item)
+{
+    if (uint8 const level = item ? NativeItemScaling::InstanceLevel(item) : 0)
+    {
+        WorldPacket data = ItemLadder::BuildLevelAddon(item->GetGUID(), level);
+        player->SendDirectMessage(&data);
+    }
+}
+
 void SendRights(Player* player, uint8 tabs)
 {
     WorldPackets::Guild::GuildPermissionsQueryResults rights;
@@ -296,6 +307,8 @@ void SendTabList(Player* player, OpenBank const& bank, uint8 tab, bool sendAllSl
             info.Flags = item->GetInt32Value(ITEM_FIELD_FLAGS);
             info.RandomPropertiesID = item->GetItemRandomPropertyId();
             info.RandomPropertiesSeed = int32(item->GetItemSuffixFactor());
+
+            SendItemLevel(player, item);
 
             for (uint32 socketSlot = 0; socketSlot < MAX_GEM_SOCKETS; ++socketSlot)
             {
@@ -445,6 +458,12 @@ void DepositToBank(Player* player, OpenBank& bank, uint8 bag, uint8 slot, uint8 
         return;
     }
 
+    if (bank.OwnerKind == OWNER_REALM && source->IsSoulBound())
+    {
+        player->SendEquipError(EQUIP_ERR_CANT_DROP_SOULBOUND, source, nullptr);
+        return;
+    }
+
     if (tab >= bank.Tabs)
         return;
 
@@ -588,11 +607,12 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
 
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
 
-    auto finish = [&]()
+    auto finish = [&](Item const* withdrawn)
     {
         CharacterDatabase.CommitTransaction(trans);
         SendTabChanged(player, bank, tab);
         LogBankEvent(bank, GUILD_BANK_LOG_WITHDRAW_ITEM, tab, player, sourceEntry, uint16(movedAmount));
+        SendItemLevel(player, withdrawn);
     };
 
     if (split)
@@ -607,7 +627,7 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
 
         ReduceBankItem(trans, bank, tab, bankSlot, source, split);
         MoveIntoInventory(trans, player, destPos, moved);
-        finish();
+        finish(moved);
         return;
     }
 
@@ -624,7 +644,7 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
                 destItem->SetState(ITEM_CHANGED, player);
                 ReduceBankItem(trans, bank, tab, bankSlot, source, amount);
                 player->SaveInventoryAndGoldToDB(trans);
-                finish();
+                finish(nullptr);
                 return;
             }
 
@@ -650,7 +670,7 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
             RemoveFromInventory(trans, player, bag, slot, destItem);
             StoreInBank(trans, bank, tab, bankSlot, destItem);
             MoveIntoInventory(trans, player, destPos, source);
-            finish();
+            finish(source);
             return;
         }
     }
@@ -658,7 +678,7 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
     bank.Items[tab][bankSlot] = nullptr;
     StoreSlot(trans, bank, tab, bankSlot, nullptr);
     MoveIntoInventory(trans, player, destPos, source);
-    finish();
+    finish(source);
 }
 
 void MoveWithinBank(Player* player, OpenBank& bank, uint8 tab, uint8 slot, uint8 destTab, uint8 destSlot,
