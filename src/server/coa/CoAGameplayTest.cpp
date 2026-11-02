@@ -1131,7 +1131,8 @@ void ObserveExtensionPacket(Actor& actor, WorldPacket const& packet)
         packet.GetOpcode() != SMSG_RESURRECT_REQUEST &&
         packet.GetOpcode() != SMSG_CORPSE_RECLAIM_DELAY &&
         packet.GetOpcode() != SMSG_TRADE_STATUS &&
-        packet.GetOpcode() != SMSG_TOTEM_CREATED)
+        packet.GetOpcode() != SMSG_TOTEM_CREATED &&
+        packet.GetOpcode() != SMSG_MIRRORIMAGE_DATA)
         return;
 
     ++actor.extensionPackets[packet.GetOpcode()];
