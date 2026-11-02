@@ -3,9 +3,9 @@
   "name": "A chance on hit weapon without a PPM rate does not proc on every hit (#10794)",
   "contract": [
     "Report #10794: Flamefist Claw and similar weapons cast their chance on hit effect on every swing. Flamefist Claw (410179) has no spellppmRate and its proc (201134) carries DBC ProcChance 100, which Player::CastItemCombatSpell used as the chance. Stock uses 101 for the weapon-speed fallback; 321 Ascension items store 100.",
-    "Expected: without a PPM rate a ProcChance of 100 or more uses the weapon proc chance (2.5 s x 1.8 = 4.5%). Over two minutes of auto attacks (about 48 swings) that averages two procs; the old behaviour cast it on almost every landed swing."
+    "Expected: without a PPM rate a ProcChance of 100 or more uses the weapon proc chance (2.5 s x 1.8 = 4.5%). Eight minutes of auto attacks (about 190 swings) average about eight procs: at least one (zero has odds below 0.1%) and at most 20, where the old behaviour cast it on almost every landed swing."
   ],
-  "timeout_ms": 180000,
+  "timeout_ms": 600000,
   "location": {
     "map": 0,
     "x": -8917.41,
@@ -74,7 +74,7 @@
     },
     {
       "action": "wait",
-      "ms": 120000
+      "ms": 480000
     },
     {
       "action": "assert",
@@ -85,11 +85,12 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the proc fires on a few swings, not every one",
+      "label": "DISCRIMINATING: the proc fires on some swings, not every one",
       "actor": "claw",
       "metric": "spell_cast_count",
       "spell": 201134,
-      "max": 8
+      "min": 1,
+      "max": 20
     }
   ]
 }
