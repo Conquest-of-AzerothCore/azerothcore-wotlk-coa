@@ -26,7 +26,7 @@ uint32 SelectPrimalWeapon(Player* player, bool allowUnconfirmed = false)
     if (!IsAscensionPrimalistWeaponsEligible(player, allowUnconfirmed))
         return 0;
     Item* weapon = player->GetWeaponForAttack(BASE_ATTACK);
-    if (!weapon)
+    if (!weapon || weapon->IsBroken())
         return 0;
     ItemTemplate const* item = weapon->GetTemplate();
     if (item->Class != ITEM_CLASS_WEAPON)

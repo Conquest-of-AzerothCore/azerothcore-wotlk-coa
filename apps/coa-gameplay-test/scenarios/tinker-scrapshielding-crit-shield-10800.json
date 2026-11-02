@@ -114,6 +114,14 @@
       "equals": 1
     },
     {
+      "action": "snapshot",
+      "actor": "t",
+      "metric": "spell_damage_count",
+      "spell": 500549,
+      "critical": true,
+      "save_as": "crits_before_second"
+    },
+    {
       "action": "reset_cooldown",
       "actor": "t",
       "spell": 500549
@@ -133,6 +141,16 @@
       "action": "wait",
       "label": "Let the second critical Scrap Shot land",
       "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "The second Scrap Shot landed as a critical hit, so only the internal cooldown held the shield back",
+      "actor": "t",
+      "metric": "spell_damage_count",
+      "spell": 500549,
+      "critical": true,
+      "relative_to": "crits_before_second",
+      "min": 1
     },
     {
       "action": "assert",

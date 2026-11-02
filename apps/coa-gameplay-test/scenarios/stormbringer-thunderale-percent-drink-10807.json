@@ -19,35 +19,96 @@
     }
   ],
   "steps": [
-    { "action": "wait", "ms": 3000 },
-    { "action": "add_item", "actor": "storm", "item": 2000150, "count": 1, "label": "fixture: a Thunderale" },
-    { "action": "set_health", "actor": "storm", "value": 100 },
-    { "action": "set_power", "actor": "storm", "value": 0 },
-    { "action": "use_item", "actor": "storm", "item": 2000150, "spell": 804762, "label": "drink the Thunderale" },
     {
-      "action": "assert", "label": "The drink applies",
-      "actor": "storm", "metric": "aura", "spell": 804762, "equals": 1, "within_ms": 3000
+      "action": "wait",
+      "ms": 3000
     },
     {
-      "action": "assert", "label": "Effect 0 heals 6% of maximum health",
-      "actor": "storm", "metric": "aura_amount", "spell": 804762, "effect": 0, "equals": 6
+      "action": "add_item",
+      "actor": "storm",
+      "item": 2000150,
+      "count": 1,
+      "label": "fixture: a Thunderale"
     },
     {
-      "action": "assert", "label": "Effect 1 restores 6% of maximum mana",
-      "actor": "storm", "metric": "aura_amount", "spell": 804762, "effect": 1, "equals": 6
+      "action": "set_health",
+      "actor": "storm",
+      "value": 100
     },
     {
-      "action": "assert", "label": "The drink lasts 25 seconds",
-      "actor": "storm", "metric": "aura_duration_ms", "spell": 804762, "min": 22000, "max": 25000
-    },
-    { "action": "wait", "ms": 3500 },
-    {
-      "action": "assert", "label": "At least two ticks of 6% of maximum health landed",
-      "actor": "storm", "metric": "health_pct", "min": 12
+      "action": "snapshot",
+      "actor": "storm",
+      "metric": "max_power",
+      "power": 0,
+      "save_as": "max_mana"
     },
     {
-      "action": "assert", "label": "Mana is restored in proportion to its maximum, not by a flat amount",
-      "actor": "storm", "metric": "power", "min": 1
+      "action": "set_power",
+      "actor": "storm",
+      "value": 0
+    },
+    {
+      "action": "use_item",
+      "actor": "storm",
+      "item": 2000150,
+      "spell": 804762,
+      "label": "drink the Thunderale"
+    },
+    {
+      "action": "assert",
+      "label": "The drink applies",
+      "actor": "storm",
+      "metric": "aura",
+      "spell": 804762,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 heals 6% of maximum health",
+      "actor": "storm",
+      "metric": "aura_amount",
+      "spell": 804762,
+      "effect": 0,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Effect 1 restores 6% of maximum mana",
+      "actor": "storm",
+      "metric": "aura_amount",
+      "spell": 804762,
+      "effect": 1,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "The drink lasts 25 seconds",
+      "actor": "storm",
+      "metric": "aura_duration_ms",
+      "spell": 804762,
+      "min": 22000,
+      "max": 25000
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "At least two ticks of 6% of maximum health landed",
+      "actor": "storm",
+      "metric": "health_pct",
+      "min": 12
+    },
+    {
+      "action": "assert",
+      "label": "Mana is restored as a fraction of its maximum: at least two 6% ticks in 3.5 seconds",
+      "actor": "storm",
+      "metric": "power",
+      "power": 0,
+      "ratio_to": "max_mana",
+      "min": 0.1
     }
   ]
 }
