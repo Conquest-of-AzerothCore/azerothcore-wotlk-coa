@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "Cyclok's Sanity's Damp Ring lies at the bottom of the Dunemaul pond (#10738)",
+  "contract": "The Damp Ring pickup (gameobject 515771, guid 6941603) stood dry on the sand at the realm-map marker (-8359, -3047, 9.02), 4.4 yd from the reporter, who said it belongs at the bottom of the water nearby. The client's own sighting of this pickup, with the same orientation, is (-8375.14, -3059.40, 2.853) in the pond south-west of the marker, and the server reads the pond floor there at that height. The ring now lies on the pond floor under the water surface, and nothing is left on the sand.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 45 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "DISCRIMINATING: the ring is at the client's sighting", "actor": "p", "metric": "spawn_distance", "guid": 6941603, "spawn_type": "gameobject", "x": -8375.14, "y": -3059.4, "z": 2.853, "max": 0.5 },
+    { "action": "assert", "label": "DISCRIMINATING: the ring is under the pond's water surface", "actor": "p", "metric": "spawn_submerged", "guid": 6941603, "spawn_type": "gameobject", "equals": 1 },
+    { "action": "assert", "label": "the ring rests on the pond floor", "actor": "p", "metric": "spawn_ground_gap", "guid": 6941603, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "assert", "label": "CONTROL: the old marker spot is dry sand", "actor": "p", "metric": "point_ground_gap", "map": 1, "x": -8359.0, "y": -3047.0, "z": 9.022, "min": -0.5, "max": 0.5 }
+  ]
+}
