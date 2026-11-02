@@ -9904,6 +9904,7 @@ void ApplyAscensionExperienceContracts(SpellInfo* info)
             break;
         case 818059:
         {
+            int32 const professions = 4;
             SpellEffectInfo& kills = info->Effects[EFFECT_1];
             SpellEffectInfo& quests = info->Effects[EFFECT_2];
             if (kills.Effect != SPELL_EFFECT_APPLY_AREA_AURA_PARTY ||
@@ -9911,6 +9912,7 @@ void ApplyAscensionExperienceContracts(SpellInfo* info)
                 break;
             kills.BasePoints = 49;
             kills.DieSides = 1;
+            kills.MiscValue &= ~professions;
             quests.Effect = kills.Effect;
             quests.ApplyAuraName = SPELL_AURA_MOD_XP_QUEST_PCT;
             quests.BasePoints = kills.BasePoints;
