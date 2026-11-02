@@ -23,10 +23,6 @@
  *
  * A kill far below the player's own level pays nothing, so outlevelled mobs
  * are not a token farm. Each member is judged on their own level; see KillPays.
- *
- * A player outside a group is paid only for a creature they hit themselves,
- * like loot and experience, so pets left to fight alone cannot farm tokens
- * while the owner is away.
  */
 
 #include "EtherealBazaar.h"
@@ -37,7 +33,6 @@
 #include "Creature.h"
 #include "Formulas.h"
 #include "GameTime.h"
-#include "Group.h"
 #include "KillRewarder.h"
 #include "Log.h"
 #include "Map.h"
@@ -48,7 +43,6 @@
 #include "Random.h"
 #include "ScriptMgr.h"
 #include "StringConvert.h"
-#include "World.h"
 
 namespace
 {
@@ -86,14 +80,6 @@ namespace
             return killedLevel + *levelsAbove >= level;
 
         return killedLevel > Acore::XP::GetGrayLevel(level);
-    }
-
-    // Loot and experience already require an ungrouped player to have hit the
-    // creature; tokens follow the same rule.
-    bool IsUnearnedSoloKill(Player* player, Creature const* killed)
-    {
-        return !player->GetGroup() && sWorld->getBoolConfig(CONFIG_SOLO_KILL_REQUIRES_PLAYER_HIT) &&
-            !killed->WasAttackedDirectlyBy(player->GetGUID());
     }
 
     // The multiplier is a percentage so the config can hold a whole number.
@@ -175,7 +161,7 @@ public:
         if (killed->IsSummon() || killed->IsCritter() || killed->IsTotem())
             return;
 
-        if (!KillPays(player, killed) || IsUnearnedSoloKill(player, killed))
+        if (!KillPays(player, killed))
             return;
 
         // Bosses are worth a real amount, and a raid boss more than a dungeon
