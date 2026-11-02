@@ -285,6 +285,27 @@ namespace lfg
         if (sLFGMgr->GetState(group->GetLeaderGUID()) == LFG_STATE_RAIDBROWSER)
             sLFGMgr->LeaveLfg(group->GetLeaderGUID());
 
+        // The last member of a Dungeon Finder group that falls apart leaves the dungeon like every member
+        // before them, instead of staying inside without a group to teleport out with.
+        if (group->isLFGGroup())
+        {
+            uint32 const dungeonMapId = sLFGMgr->GetDungeonMapId(gguid);
+            for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+            {
+                Player* player = itr->GetSource();
+                if (!player || player->IsBeingTeleportedFar() || !player->GetMap()->IsDungeon() || player->GetMapId() != dungeonMapId)
+                    continue;
+
+                if (!player->IsAlive())
+                {
+                    player->ResurrectPlayer(0.5f);
+                    player->SpawnCorpseBones();
+                }
+
+                player->TeleportToEntryPoint();
+            }
+        }
+
         sLFGMgr->RemoveGroupData(gguid);
     }
 
