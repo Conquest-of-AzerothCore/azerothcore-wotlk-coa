@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "name": "Entropic Slam requires 60 Insanity to cast and still drains 40 (#10757)",
+  "contract": "#10757 (confirmed defect, regression from merged #10485): Entropic Slam (804152) must stay uncastable below 60 Insanity, as on Ascension live (trainer tooltips 'Requires 60 Insanity', archived for every rank) and as Spell.dbc's CasterAuraSpell 680603 (the server DBC, the CoA client patch-T and Ascension live patch-T agree per #10485's own body) requires; it still drains 40 Insanity on a successful cast. Hammer of Twilight (805116) stays castable and spends 40 at 40 Insanity, unaffected by this fix.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 13 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "cultist", "entry": 36, "level": 13, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "cultist", "spell": 804152 },
+    { "action": "learn", "actor": "cultist", "spell": 805116 },
+    {
+      "action": "assert", "label": "SETUP: no client patch row overrides Entropic Slam's CasterAuraSpell (#10485 reverted)",
+      "actor": "cultist", "metric": "client_spell_caster_aura_for", "spell": 804152, "equals": -1,
+      "within_ms": 5000
+    },
+    { "action": "set_aura", "actor": "cultist", "spell": 500706, "stacks": 40 },
+    {
+      "action": "snapshot", "actor": "dummy", "metric": "health", "save_as": "before_40"
+    },
+    { "action": "cast", "actor": "cultist", "spell": 804152, "target": "dummy" },
+    { "action": "wait", "ms": 500 },
+    {
+      "action": "assert", "label": "At 40 Insanity Entropic Slam fails: no damage",
+      "actor": "dummy", "metric": "health", "relative_to": "before_40", "equals": 0
+    },
+    {
+      "action": "assert", "label": "At 40 Insanity Entropic Slam fails: Insanity unchanged",
+      "actor": "cultist", "metric": "aura_stacks", "spell": 500706, "equals": 40
+    },
+    { "action": "set_aura", "actor": "cultist", "spell": 500706, "stacks": 59 },
+    {
+      "action": "snapshot", "actor": "dummy", "metric": "health", "save_as": "before_59"
+    },
+    { "action": "cast", "actor": "cultist", "spell": 804152, "target": "dummy" },
+    { "action": "wait", "ms": 500 },
+    {
+      "action": "assert", "label": "At 59 Insanity Entropic Slam still fails: no damage",
+      "actor": "dummy", "metric": "health", "relative_to": "before_59", "equals": 0
+    },
+    {
+      "action": "assert", "label": "At 59 Insanity Entropic Slam still fails: Insanity unchanged",
+      "actor": "cultist", "metric": "aura_stacks", "spell": 500706, "equals": 59
+    },
+    { "action": "set_aura", "actor": "cultist", "spell": 500706, "stacks": 60 },
+    {
+      "action": "snapshot", "actor": "dummy", "metric": "health", "save_as": "before_60"
+    },
+    { "action": "cast", "actor": "cultist", "spell": 804152, "target": "dummy" },
+    {
+      "action": "assert", "label": "At 60 Insanity Entropic Slam succeeds and damages the dummy",
+      "actor": "dummy", "metric": "health", "relative_to": "before_60", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "At 60 Insanity Entropic Slam drains exactly 40 Insanity, leaving 20",
+      "actor": "cultist", "metric": "aura_stacks", "spell": 500706, "equals": 20, "within_ms": 1000
+    },
+    { "action": "wait", "label": "Clear the shared GCD (StartRecoveryCategory 133, 1500 ms) left by the Entropic Slam cast", "ms": 1700 },
+    { "action": "set_aura", "actor": "cultist", "spell": 500706, "stacks": 40 },
+    {
+      "action": "snapshot", "actor": "dummy", "metric": "health", "save_as": "before_hammer"
+    },
+    { "action": "cast", "actor": "cultist", "spell": 805116, "target": "dummy" },
+    {
+      "action": "assert", "label": "Hammer of Twilight is unaffected: it still casts at 40 Insanity",
+      "actor": "dummy", "metric": "health", "relative_to": "before_hammer", "max": -1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "Hammer of Twilight still drains exactly 40 Insanity",
+      "actor": "cultist", "metric": "aura_stacks", "spell": 500706, "equals": 0, "within_ms": 1000
+    }
+  ]
+}

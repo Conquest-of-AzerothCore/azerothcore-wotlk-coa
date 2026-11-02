@@ -1,7 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionCultist.h"
 #include "AscensionCultistData.h"
-#include "AscensionClientSpellPatches.h"
 #include "DBCStores.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -79,11 +78,6 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].MiscValue = 250043;
     if (id == 806769)
         info->Effects[2].MiscValue = 250044;
-    if (Named(info, 804152))
-    {
-        info->CasterAuraSpell = 680602;
-        Ascension::ClientSpellPatches::Instance().Register(info->Id);
-    }
     if (Any(info, {805116, 804152}))
         info->AscensionIgnoreAbsorb = Named(info, 805116);
     if (Named(info, 567524))
