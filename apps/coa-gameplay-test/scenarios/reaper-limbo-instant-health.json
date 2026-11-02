@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Reaper: Limbo instantly restores 30% of maximum health",
+  "contract": "Limbo 800845 rips the Reaper out of their mortal shell and instantly restores 30% of their maximum health and Runic Power. Effect 0 carries the 30% health value as a dummy that does nothing; effect 1 (SPELL_EFFECT_ENERGIZE_PCT) already restores the Runic Power. A Reaper at 20% health casting Limbo must end at about 50% health.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 10,
+      "class": 30,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 800845
+    },
+    {
+      "action": "set_health",
+      "label": "fixture: Reaper at 2000 of 10000 health",
+      "actor": "reaper",
+      "value": 2000,
+      "maximum": 10000
+    },
+    {
+      "action": "assert",
+      "label": "fixture: health is 20%",
+      "actor": "reaper",
+      "metric": "health_pct",
+      "min": 19,
+      "max": 21
+    },
+    {
+      "action": "cast",
+      "label": "cast Limbo",
+      "actor": "reaper",
+      "spell": 800845
+    },
+    {
+      "action": "assert",
+      "label": "Limbo cast accepted",
+      "actor": "reaper",
+      "metric": "cast_failure",
+      "spell": 800845,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT Limbo instantly restores 30% of maximum health",
+      "actor": "reaper",
+      "metric": "health_pct",
+      "min": 49,
+      "max": 51,
+      "within_ms": 500
+    }
+  ]
+}
