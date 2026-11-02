@@ -6,6 +6,9 @@ CompactUnitMixin.SetUnit = function(self, unit)
     end
     local setAttribute = self.SetAttribute
     self.SetAttribute = function() end
-    setUnit(self, unit)
+    local ok, err = pcall(setUnit, self, unit)
     self.SetAttribute = setAttribute
+    if not ok then
+        error(err, 0)
+    end
 end

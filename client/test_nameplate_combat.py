@@ -46,6 +46,14 @@ class NamePlateCombatTest(unittest.TestCase):
         self.lua.execute('CompactUnitMixin.SetUnit(frame, "nameplate2")')
         self.assertEqual(self.lua.eval('frame.attributes.unit'), 'nameplate2')
 
+    def test_set_attribute_is_restored_when_combat_update_fails(self):
+        self.lua.execute('inCombat = true; frame = NewUnitFrame(true); originalSetAttribute = frame.SetAttribute')
+        self.lua.execute('frame.UpdateAll = function() error("forced update failure") end')
+        self.lua.execute('ok, err = pcall(function() CompactUnitMixin.SetUnit(frame, "nameplate1") end)')
+        self.assertFalse(self.lua.eval('ok'))
+        self.assertIn('forced update failure', self.lua.eval('err'))
+        self.assertTrue(self.lua.eval('frame.SetAttribute == originalSetAttribute'))
+
     def test_clickable_compact_frame_keeps_combat_protection(self):
         self.lua.execute('inCombat = true; frame = NewUnitFrame(false)')
         self.lua.execute('ok, err = pcall(function() CompactUnitMixin.SetUnit(frame, "raid1") end)')
