@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Zulian Guardian tigers attack the owner's target (#9374)",
+  "contract": [
+    "Zulian Guardian 285959 'Summons two prowling Zulian Guardians for $d' (Spell.dbc): a SUMMON of",
+    "Zulian Spirit Tiger 350001 with SummonProperties 1161, driven by the Attack behaviour of the summoned-effect AI.",
+    "The report says the tigers only follow their owner like non-combat pets. A caster who selects an enemy",
+    "and casts the summon without meleeing expects both tigers to attack that enemy."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 4000000,
+      "distance": 8
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 285959
+    },
+    {
+      "action": "client_packet",
+      "label": "Select the dummy (CMSG_SET_SELECTION)",
+      "actor": "caster",
+      "opcode": 317,
+      "fields": [
+        {
+          "actor_guid": "dummy"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "cast",
+      "label": "Summon the tigers with the dummy selected",
+      "actor": "caster",
+      "spell": 285959
+    },
+    {
+      "action": "assert",
+      "label": "The summon is accepted",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 285959,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Two tigers are summoned",
+      "actor": "caster",
+      "metric": "owned_creature_count",
+      "entry": 350001,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The dummy can be attacked by the tigers' side",
+      "actor": "caster",
+      "metric": "owned_creature_attackable",
+      "entry": 350001,
+      "target": "dummy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the tigers attack the selected enemy",
+      "actor": "caster",
+      "metric": "owned_creature_victim",
+      "entry": 350001,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}
