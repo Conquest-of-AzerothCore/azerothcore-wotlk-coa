@@ -137,7 +137,9 @@ class aura_ascension_venomancer_lifecycle : public AuraScript
         if (Named(GetSpellInfo(),800901) && slot > 0)
             amount = player->HasAura(706014) ? Amount(800903) : 0;
         if (Named(GetSpellInfo(),800926) && slot == 1 && player->HasAura(504356))
-            if (Aura* stacks = GetTarget()->GetAura(806454,player->GetGUID()))
+            // CalcAmount runs from the AuraEffect constructor, before the aura has an application, so GetTarget()
+            // is still null there; the owner is the unit the aura is created on.
+            if (Aura* stacks = GetUnitOwner()->GetAura(806454,player->GetGUID()))
                 AddPct(amount,stacks->GetStackAmount() * Amount(504356,1));
         if (id == 803216 && slot == 1)
             amount = int32(5 * (player->GetStat(STAT_INTELLECT) + player->GetStat(STAT_AGILITY)));
