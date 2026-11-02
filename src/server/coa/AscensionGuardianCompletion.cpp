@@ -311,6 +311,8 @@ void AscensionGuardian::ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_1].Effect = 0;
     if (id == 504145 && !info->ProcFlags)
         info->ProcCharges = 1;
+    if (id == 802873)
+        info->Effects[EFFECT_0].Effect = 0;
     if (id == 802874)
     {
         info->AttributesCu |= SPELL_ATTR0_CU_IGNORE_ARMOR;

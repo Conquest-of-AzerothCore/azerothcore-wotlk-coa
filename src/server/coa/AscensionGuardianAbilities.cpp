@@ -67,8 +67,12 @@ public:
             return false;
         }
         if (player->GetExactDist2d(&_destination) <= 3.0f)
+        {
+            player->CastSpell(_destination.GetPositionX(), _destination.GetPositionY(),
+                _destination.GetPositionZ(), 802873, true);
             player->CastSpell(_destination.GetPositionX(), _destination.GetPositionY(),
                 _destination.GetPositionZ(), 802874, true);
+        }
         return true;
     }
 
