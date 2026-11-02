@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Tinker: Stim Augmentation heals allies when the Tinker carries only a gun (#10720)",
-  "contract": "Stim Augmentation (653239) puts enchant 9997 on the equipped gun, whose equip spell 653240 reads 'causing your direct healing abilities to heal up to 3 nearby allies for an additional 20% of the amount healed'. Its script casts 653241 (SPELL_EFFECT_HEAL, TARGET_UNIT_TARGET_ALLY, chain 3) on each direct heal's target. Spell.dbc gives 653241 EquippedItemClass 2 with subclass mask 173555, which holds melee weapons but not guns, so a Tinker carrying only the gun the augmentation needs had every Stim heal rejected, while the same setup with the starting main-hand weapon heals. A level 60 Tinker whose starting main-hand weapon is destroyed equips only a gun, applies the augmentation and casts Zap! (681298, an instant direct heal) on a wounded grouped ally: the ally must take both the Zap! heal and a Stim heal 653241. Issue #10720.",
+  "name": "Tinker: Stim Augmentation heals allies and feeds Stim Pack when the Tinker carries only a gun (#10720)",
+  "contract": "Stim Augmentation (653239) puts enchant 9997 on the equipped gun, whose equip spell 653240 reads 'causing your direct healing abilities to heal up to 3 nearby allies for an additional 20% of the amount healed'. Its script casts 653241 (SPELL_EFFECT_HEAL, TARGET_UNIT_TARGET_ALLY, chain 3) on each direct heal's target. Spell.dbc gives 653241 EquippedItemClass 2 with subclass mask 173555, which holds melee weapons but not guns, so a Tinker carrying only the gun the augmentation needs had every Stim heal rejected, while the same setup with the starting main-hand weapon heals. A level 60 Tinker whose starting main-hand weapon is destroyed equips only a gun, applies the augmentation and casts Zap! (681298, an instant direct heal) on a wounded grouped ally: the ally must take both the Zap! heal and a Stim heal 653241. Issue #10720. With Stim Pack (807531) learned, that Stim heal must also take 3 sec off Med Pack's (800347) running cooldown, the reporter's second symptom: its cooldown spell 653255 carries the same melee-only weapon requirement and failed the same way, so the cooldown only ran down by itself (58291 -> 55993 in 2280 ms).",
   "timeout_ms": 60000,
   "players": [
     {
@@ -126,6 +126,43 @@
       "spell": 681298
     },
     {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 807531
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 800347
+    },
+    {
+      "action": "cast",
+      "label": "Put Med Pack on its cooldown",
+      "actor": "tinker",
+      "spell": 800347,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "cast_failure",
+      "spell": 800347,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown clear",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Med Pack is on its full cooldown",
+      "actor": "tinker",
+      "metric": "cooldown_ms",
+      "spell": 800347,
+      "min": 57000
+    },
+    {
       "action": "set_health",
       "actor": "ally",
       "value": 1,
@@ -163,6 +200,14 @@
       "target": "ally",
       "min": 1,
       "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Stim Pack's 653255 takes 3 sec off Med Pack's cooldown",
+      "actor": "tinker",
+      "metric": "cooldown_ms",
+      "spell": 800347,
+      "max": 56000
     }
   ]
 }
