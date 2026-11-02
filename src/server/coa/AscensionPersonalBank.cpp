@@ -238,13 +238,19 @@ void LogBankEvent(OpenBank const& bank, uint8 eventType, uint8 tab, Player* play
         bank.OwnerKind, bank.OwnerId, moneyEvent ? uint32(GUILD_BANK_MONEY_LOGS_TAB) : uint32(tab));
 }
 
-void SendItemLevel(Player* player, Item const* item)
+void SendItemLevel(Player* player, ObjectGuid guid, uint8 level)
 {
-    if (uint8 const level = item ? NativeItemScaling::InstanceLevel(item) : 0)
+    if (level)
     {
-        WorldPacket data = ItemLadder::BuildLevelAddon(item->GetGUID(), level);
+        WorldPacket data = ItemLadder::BuildLevelAddon(guid, level);
         player->SendDirectMessage(&data);
     }
+}
+
+void SendItemLevel(Player* player, Item const* item)
+{
+    if (item)
+        SendItemLevel(player, item->GetGUID(), NativeItemScaling::InstanceLevel(item));
 }
 
 void SendRights(Player* player, uint8 tabs)
@@ -607,12 +613,12 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
 
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
 
-    auto finish = [&](Item const* withdrawn)
+    auto finish = [&](ObjectGuid withdrawnGuid, uint8 withdrawnLevel)
     {
         CharacterDatabase.CommitTransaction(trans);
         SendTabChanged(player, bank, tab);
         LogBankEvent(bank, GUILD_BANK_LOG_WITHDRAW_ITEM, tab, player, sourceEntry, uint16(movedAmount));
-        SendItemLevel(player, withdrawn);
+        SendItemLevel(player, withdrawnGuid, withdrawnLevel);
     };
 
     if (split)
@@ -625,9 +631,12 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
             return;
         }
 
+        ObjectGuid const movedGuid = moved->GetGUID();
+        uint8 const movedLevel = NativeItemScaling::InstanceLevel(moved);
+
         ReduceBankItem(trans, bank, tab, bankSlot, source, split);
         MoveIntoInventory(trans, player, destPos, moved);
-        finish(moved);
+        finish(movedGuid, movedLevel);
         return;
     }
 
@@ -644,7 +653,7 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
                 destItem->SetState(ITEM_CHANGED, player);
                 ReduceBankItem(trans, bank, tab, bankSlot, source, amount);
                 player->SaveInventoryAndGoldToDB(trans);
-                finish(nullptr);
+                finish(ObjectGuid::Empty, 0);
                 return;
             }
 
@@ -667,18 +676,24 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
             LogBankEvent(bank, GUILD_BANK_LOG_DEPOSIT_ITEM, tab, player, destItem->GetEntry(),
                          uint16(destItem->GetCount()));
 
+            ObjectGuid const sourceGuid = source->GetGUID();
+            uint8 const sourceLevel = NativeItemScaling::InstanceLevel(source);
+
             RemoveFromInventory(trans, player, bag, slot, destItem);
             StoreInBank(trans, bank, tab, bankSlot, destItem);
             MoveIntoInventory(trans, player, destPos, source);
-            finish(source);
+            finish(sourceGuid, sourceLevel);
             return;
         }
     }
 
+    ObjectGuid const sourceGuid = source->GetGUID();
+    uint8 const sourceLevel = NativeItemScaling::InstanceLevel(source);
+
     bank.Items[tab][bankSlot] = nullptr;
     StoreSlot(trans, bank, tab, bankSlot, nullptr);
     MoveIntoInventory(trans, player, destPos, source);
-    finish(source);
+    finish(sourceGuid, sourceLevel);
 }
 
 void MoveWithinBank(Player* player, OpenBank& bank, uint8 tab, uint8 slot, uint8 destTab, uint8 destSlot,
