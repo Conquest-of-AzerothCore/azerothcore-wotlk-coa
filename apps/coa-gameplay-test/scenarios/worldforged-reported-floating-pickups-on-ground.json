@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "name": "Worldforged pickups and an ore vein reported floating or buried sit on the ground",
+  "contract": "Steel Helmet (#10627) floated 9.2 yd and Extra Crate (#10603) 0.7 yd above the server's ground (Map::GetHeight from above), Darrowshire Cloak (#10683) was 1.2 yd under it, and an Un'Goro Small Thorium Vein (#10631) floated 1.9 yd. Expected: each sits between 0.15 yd below and 0.5 yd above the ground.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": -8233.2,
+    "y": -1316.5,
+    "z": -215.65,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": -8233.2,
+      "y": -1316.5,
+      "z": -215.65
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Steel Helmet is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 96218,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Steel Helmet sits on the ground (#10627)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 96218,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": 1574.8,
+      "y": -3667.6,
+      "z": 103.53
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Darrowshire Cloak is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 90534,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Darrowshire Cloak sits on the ground (#10683)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 90534,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -7165.7,
+      "y": -3347.4,
+      "z": 245.56
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Extra Crate is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 518055,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Extra Crate sits on the ground (#10603)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 518055,
+      "min": -0.15,
+      "max": 0.5
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": -7565.65,
+      "y": -1149.59,
+      "z": -261.48
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Small Thorium Vein is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 324,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Small Thorium Vein sits on the ground (#10631)",
+      "actor": "p",
+      "metric": "nearby_gameobject_ground_offset",
+      "entry": 324,
+      "min": -0.15,
+      "max": 0.5
+    }
+  ]
+}
