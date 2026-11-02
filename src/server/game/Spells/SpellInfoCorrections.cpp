@@ -87,6 +87,20 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[EFFECT_0].Mechanic = MECHANIC_STUN;
     });
 
+    // The Recruit a Friend Blazing Hippogryph and X-53 Touring Rocket are ground
+    // mounts here: their wrappers and mount spells would otherwise refuse every
+    // cast outside a flying area, and the mount spells would grant flight.
+    ApplySpellFix({ 74854, 74855, 75957, 75972, 76154, 75973 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->AttributesEx4 &= ~SPELL_ATTR4_ONLY_FLYING_AREAS;
+        for (SpellEffectInfo& effect : spellInfo->Effects)
+            if (effect.IsAura(SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED))
+            {
+                effect.Effect = 0;
+                effect.ApplyAuraName = SPELL_AURA_NONE;
+            }
+    });
+
     // Local Guardian formations have mixed bonuses and penalties but are
     // voluntarily selected buffs. Only the main aura is a cancellation surface.
     ApplySpellFix({ 800317, 803130, 803417 }, [](SpellInfo* spellInfo)
