@@ -216,17 +216,9 @@ class aura_ascension_reaper_soulrot : public AuraScript
         caster->CastSpell(dispeller, 805089, true);
     }
 
-    void DelayDetonationToNewExpiry(AuraEffect const*, AuraEffectHandleModes)
-    {
-        if (AuraEffect* detonation = GetEffect(EFFECT_1))
-            detonation->ResetPeriodic(true);
-    }
-
     void Register() override
     {
         AfterDispel += AuraDispelFn(aura_ascension_reaper_soulrot::HandleDispel);
-        AfterEffectApply += AuraEffectApplyFn(aura_ascension_reaper_soulrot::DelayDetonationToNewExpiry, EFFECT_1,
-            SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAPPLY);
     }
 };
 
