@@ -2,7 +2,7 @@
 -- (613, 614). 611/612 require Blackfathom Ascendant 774803 (before 21), Son of Arugal 772529 (22), Cahooey the Big
 -- 610896 (29), Myrrkora Wavebind 449327 (43), Thar'zul 107028 (57) and Construct Surgeon 918530 (57); 613/614
 -- require Yil'da 255146 (44), whose template exists but who was never spawned. None of the six had a template.
--- Name, rank, type, family, display, health and mana modifiers and Thar'zul's kill credit: Ascension client creature
+-- Name, rank, type, family, display, health and mana modifiers: Ascension client creature
 -- cache (AscensionDB WDB captures, 2026-07 to 2026-09; SUB creature table, dump of 2026-10-04). All displays exist in
 -- the client CreatureDisplayInfo. No source (AscensionDB, Exiles DB, SUB creature_spawn, CoA Tavern, pfQuest and
 -- Questie addons, Descension) has a level, faction, spawn point, ability or loot for any of them, so ESTIMATED:
@@ -19,12 +19,14 @@
 -- - damage modifier: the base elite's 1.7, otherwise 2.5 in line with the Trollbane Paragons.
 -- Health: as for the Trollbane Paragons and Yil'da, the cached modifier is divided by the open-world health scaling
 -- at the creature's level (1.17 + 0.013 * level), which trial targets do not receive on Ascension.
+-- Thar'zul's cached kill credit 1005012 has no template here and is left out. Cahooey's display 321657 (TaurenMale)
+-- has no model info; it takes the tauren male values of Arnak Grimtotem's display 10243.
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
 (774803,0,0,0,0,0,'Blackfathom Ascendant',NULL,NULL,0,21,21,0,128,0,1,1.14286,1,1,20,1,0,1.7,2000,2000,1,1,2,32768,2048,0,0,7,0,4803,4803,0,0,0,55,185,'',0,1,2.772003,1,1,1,0,0,1,0,0,'',12340),
 (772529,0,0,0,0,0,'Son of Arugal',NULL,NULL,0,20,20,0,24,0,1,1.14286,1,1,20,1,0,1.7,2000,2000,1,1,1,64,2048,0,0,7,0,2529,0,100005,0,0,63,328,'SmartAI',0,1,2.237762,1,1,1,0,0,1,0,0,'',12340),
 (610896,0,0,0,0,0,'Cahooey the Big',NULL,NULL,0,29,29,0,16,0,1,1.14286,1,1,18,2,0,2.5,2000,2000,1,1,1,0,2048,0,0,7,0,10896,10896,0,0,0,43,159,'SmartAI',0,1,1.939237,1,1,1,0,0,1,0,0,'',12340),
 (449327,0,0,0,0,0,'Myrrkora Wavebind',NULL,NULL,0,43,43,0,74,0,1.1,1.14286,1,1,18,1,0,2.5,2000,2000,1,1,2,32768,2048,0,0,7,0,5337,5337,0,0,0,67,92,'SmartAI',0,1,2.024291,6,1,1,0,0,1,0,0,'',12340),
-(107028,0,0,0,1005012,0,'Thar''zul',NULL,NULL,0,57,57,0,40,0,1,1.14286,1,1,18,2,0,2.5,2000,2000,1,1,8,32768,2048,0,0,7,0,7028,7028,0,0,0,100,792,'SmartAI',0,1,2.616431,1,1,1,0,0,1,0,0,'',12340),
+(107028,0,0,0,0,0,'Thar''zul',NULL,NULL,0,57,57,0,40,0,1,1.14286,1,1,18,2,0,2.5,2000,2000,1,1,8,32768,2048,0,0,7,0,7028,7028,0,0,0,100,792,'SmartAI',0,1,2.616431,1,1,1,0,0,1,0,0,'',12340),
 (918530,0,0,0,0,0,'Construct Surgeon',NULL,NULL,0,55,55,0,21,0,0.77778,1.14286,1,1,18,1,0,2.5,2000,2000,1,1,1,0,2048,0,230,6,1,8530,8530,0,0,0,116,393,'',0,1,1.32626,1,1,1,0,0,1,-93,0,'',12340) ON DUPLICATE KEY UPDATE `difficulty_entry_1` = VALUES(`difficulty_entry_1`), `difficulty_entry_2` = VALUES(`difficulty_entry_2`), `difficulty_entry_3` = VALUES(`difficulty_entry_3`), `KillCredit1` = VALUES(`KillCredit1`), `KillCredit2` = VALUES(`KillCredit2`), `name` = VALUES(`name`), `subname` = VALUES(`subname`), `IconName` = VALUES(`IconName`), `gossip_menu_id` = VALUES(`gossip_menu_id`), `minlevel` = VALUES(`minlevel`), `maxlevel` = VALUES(`maxlevel`), `exp` = VALUES(`exp`), `faction` = VALUES(`faction`), `npcflag` = VALUES(`npcflag`), `speed_walk` = VALUES(`speed_walk`), `speed_run` = VALUES(`speed_run`), `speed_swim` = VALUES(`speed_swim`), `speed_flight` = VALUES(`speed_flight`), `detection_range` = VALUES(`detection_range`), `rank` = VALUES(`rank`), `dmgschool` = VALUES(`dmgschool`), `DamageModifier` = VALUES(`DamageModifier`), `BaseAttackTime` = VALUES(`BaseAttackTime`), `RangeAttackTime` = VALUES(`RangeAttackTime`), `BaseVariance` = VALUES(`BaseVariance`), `RangeVariance` = VALUES(`RangeVariance`), `unit_class` = VALUES(`unit_class`), `unit_flags` = VALUES(`unit_flags`), `unit_flags2` = VALUES(`unit_flags2`), `dynamicflags` = VALUES(`dynamicflags`), `family` = VALUES(`family`), `type` = VALUES(`type`), `type_flags` = VALUES(`type_flags`), `lootid` = VALUES(`lootid`), `pickpocketloot` = VALUES(`pickpocketloot`), `skinloot` = VALUES(`skinloot`), `PetSpellDataId` = VALUES(`PetSpellDataId`), `VehicleId` = VALUES(`VehicleId`), `mingold` = VALUES(`mingold`), `maxgold` = VALUES(`maxgold`), `AIName` = VALUES(`AIName`), `MovementType` = VALUES(`MovementType`), `HoverHeight` = VALUES(`HoverHeight`), `HealthModifier` = VALUES(`HealthModifier`), `ManaModifier` = VALUES(`ManaModifier`), `ArmorModifier` = VALUES(`ArmorModifier`), `ExperienceModifier` = VALUES(`ExperienceModifier`), `RacialLeader` = VALUES(`RacialLeader`), `movementId` = VALUES(`movementId`), `RegenHealth` = VALUES(`RegenHealth`), `CreatureImmunitiesId` = VALUES(`CreatureImmunitiesId`), `flags_extra` = VALUES(`flags_extra`), `ScriptName` = VALUES(`ScriptName`), `VerifiedBuild` = VALUES(`VerifiedBuild`);
 
 DELETE FROM `creature_template_model` WHERE `CreatureID` IN (774803,772529,610896,449327,107028,918530);
@@ -35,6 +37,10 @@ INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`,
 (449327,0,18396,1,1,12340),
 (107028,0,17137,1,1,12340),
 (918530,0,30881,1,1,12340);
+
+DELETE FROM `creature_model_info` WHERE `DisplayID` = 321657;
+INSERT INTO `creature_model_info` (`DisplayID`, `BoundingRadius`, `CombatReach`, `Gender`, `DisplayID_Other_Gender`, `VerifiedBuild`) VALUES
+(321657,0.9747,4.05,0,0,12340);
 
 DELETE FROM `creature_equip_template` WHERE `CreatureID` IN (774803,610896,449327,107028);
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, `VerifiedBuild`) VALUES
