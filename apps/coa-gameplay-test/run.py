@@ -1112,7 +1112,8 @@ def validate(scenario):
             if metric in {'spellbook_offers_spell', 'spellbook_learned_alerts',
                           'spellbook_buy_succeeded', 'spellbook_buy_failed', 'cast_failure'}:
                 require('spell' in step, f'{where}: metric needs spell')
-            if metric in {'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale'}:
+            if metric in {'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale',
+                          'nearby_gameobject_display'}:
                 require('entry' in step, f'{where}: metric needs gameobject entry')
             if metric in {'quest_status', 'quest_takeable', 'quest_objective_count'}:
                 require('quest' in step, f'{where}: metric needs quest')
@@ -1188,7 +1189,7 @@ def validate(scenario):
                           'dynamic_object', 'dynamic_object_duration_ms', 'dynamic_object_height',
                           'gossip_options', 'gossip_option_text',
                           'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale',
-                          'at_homebind',
+                          'nearby_gameobject_display', 'at_homebind',
                           'spellbook_rows', 'spellbook_offers_spell', 'spellbook_covers_spell',
                           'spellbook_learned_alerts', 'spellbook_buy_succeeded', 'spellbook_buy_failed',
                           'spellbook_buys_granted', 'spellbook_unannounced_buys',
