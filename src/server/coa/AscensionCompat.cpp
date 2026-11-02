@@ -8455,7 +8455,10 @@ bool HandlePersonalBankActivate(Player* player, WorldPacket const& packet)
 
     auto itr = personalBankVaults.find(banker.GetCounter());
     if (itr == personalBankVaults.end())
+    {
+        AscensionPersonalBank::Closed(player);
         return false;
+    }
 
     if (!OwnsPlacedBank(player, itr->second.Kind))
     {
