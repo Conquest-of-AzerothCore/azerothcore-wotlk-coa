@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "The server lets a Bloodmage shoot a wand in Sanguine Essence (#9437)",
+  "contract": [
+    "Sanguine Essence 680692 is 'a unique Cursed Form that does not disable Mortal Form abilities'; its effect 1 is",
+    "MOD_SHAPESHIFT form 57, whose SpellShapeshiftForm flags carry STANCE (0x1) and not",
+    "CAN_ONLY_CAST_SHAPESHIFT_SPELLS (0x400). Wand 5019 has ALLOW_WHILE_NOT_SHAPESHIFTED, so",
+    "SpellInfo::CheckShapeshift accepts it in that form. This scenario checks only the server side of #9437",
+    "('you stay in place doing nothing'): through the normal session cast handler a Bloodmage holding the Fire",
+    "Wand 5069 shoots 5019 at a target in Sanguine Essence without a cast failure and deals wand damage, as a",
+    "control Bloodmage outside the form does."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "essence", "race": 1, "class": 20, "level": 60, "spell_hit_rating": 10000},
+    {"id": "control", "race": 1, "class": 20, "level": 60, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "essence_target", "owner": "essence", "entry": 36, "level": 60, "health": 1000000, "distance": 15},
+    {"id": "control_target", "owner": "control", "entry": 36, "level": 60, "health": 1000000, "distance": 15}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "essence", "spell": 5009},
+    {"action": "learn", "actor": "control", "spell": 5009},
+    {"action": "learn", "actor": "essence", "spell": 5019},
+    {"action": "learn", "actor": "control", "spell": 5019},
+    {"action": "add_item", "actor": "essence", "item": 5069},
+    {"action": "add_item", "actor": "control", "item": 5069},
+    {"action": "equip", "actor": "essence", "item": 5069, "slot": 17},
+    {"action": "equip", "actor": "control", "item": 5069, "slot": 17},
+    {"action": "set_aura", "actor": "essence", "spell": 680692, "stacks": 1},
+    {"action": "assert", "label": "SETUP: Sanguine Essence is active", "actor": "essence", "metric": "aura",
+     "spell": 680692, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "SETUP: the control is not in Sanguine Essence", "actor": "control",
+     "metric": "aura", "spell": 680692, "equals": 0},
+    {"action": "cast", "label": "Control shoots the wand", "actor": "control", "spell": 5019,
+     "target": "control_target"},
+    {"action": "assert", "label": "CONTROL: the wand hits outside the form", "actor": "control",
+     "metric": "spell_damage_count", "spell": 5019, "min": 1, "within_ms": 6000},
+    {"action": "cast", "label": "Shoot the wand in Sanguine Essence", "actor": "essence", "spell": 5019,
+     "target": "essence_target"},
+    {"action": "assert", "label": "DISCRIMINATING: the wand hits in Sanguine Essence", "actor": "essence",
+     "metric": "spell_damage_count", "spell": 5019, "min": 1, "within_ms": 6000},
+    {"action": "assert", "label": "the server does not refuse the wand shot", "actor": "essence",
+     "metric": "cast_failure", "spell": 5019, "equals": 0}
+  ]
+}
