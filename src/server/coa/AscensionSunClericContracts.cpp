@@ -316,10 +316,6 @@ public:
         }
         value = std::clamp(value, float(INT32_MIN / 2), float(INT32_MAX / 2));
     }
-    bool idIsJustice(SpellInfo const* info)
-    {
-        return Any(info, {524857,525005,525006,525007,572849,572850,572040,572041,572042,572043,572044,572045});
-    }
     float Factor(Unit* target, Unit* caster, SpellInfo const* info)
     {
         Player* player = Owner(caster);

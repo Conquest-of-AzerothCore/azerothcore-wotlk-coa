@@ -41,6 +41,7 @@ Player* Owner(Unit const* unit);
 SunClericState& State(Player* player);
 bool Named(SpellInfo const* info, uint32 root);
 bool Any(SpellInfo const* info, std::initializer_list<uint32> roots);
+bool idIsJustice(SpellInfo const* info);
 bool Derived(SpellInfo const* info);
 bool Invocation(SpellInfo const* info);
 bool Gavel(SpellInfo const* info);
