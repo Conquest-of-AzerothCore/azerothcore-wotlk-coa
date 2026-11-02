@@ -8,6 +8,7 @@
 #include "AllCreatureScript.h"
 #include "AccountScript.h"
 #include "AscensionClientLua.h"
+#include "AscensionPersonalBank.h"
 #include "LocalLevelScaling.h"
 #include "AscensionRulesets.h"
 
@@ -25,6 +26,14 @@ namespace CoAChallenges
             !PlayerHasRule(player, "CHALLENGE_RULES_TYPE_PVE_ONLY"))
             return true;
         NotifyPlayer(player, "Your active challenge requires PvE mode.");
+        return false;
+    }
+
+    bool ChallengeAllowsBankAccess(Player* player, uint8 kind)
+    {
+        if (kind != AscensionPersonalBank::REALM || !PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_REALM_BANK"))
+            return true;
+        NotifyPlayer(player, "Your challenge forbids using the realm bank.");
         return false;
     }
 
@@ -3266,7 +3275,7 @@ namespace CoAChallenges
 
         // .coa ruletest <player> <id>
         // GM-only: activates the challenge and checks the custom rules through
-        // the real hook dispatchers (NO_GUILD_BANK / NO_MANASTORM / N/A realm).
+        // the real hook dispatchers (NO_GUILD_BANK / NO_MANASTORM / NO_REALM_BANK).
         static bool HandleCoARuleTestCommand(ChatHandler* handler, std::string playerName, uint32 challengeId)
         {
             Player* p = ObjectAccessor::FindPlayerByName(playerName);
@@ -4131,6 +4140,7 @@ namespace CoAChallenges
 void Addmod_coa_challengesScripts()
 {
     AscensionRulesets::RegisterGuard(&CoAChallenges::ChallengeAllowsRuleset);
+    AscensionPersonalBank::RegisterAccessGuard(&CoAChallenges::ChallengeAllowsBankAccess);
     RegisterAscensionClientConfig(&CoAChallenges::AppendClientConfig);
     RegisterAscensionChallengeStateSync([](Player* player)
     {

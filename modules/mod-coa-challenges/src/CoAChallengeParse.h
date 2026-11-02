@@ -116,6 +116,21 @@ namespace CoAParse
             || type == "CHALLENGE_REQUIREMENT_TYPE_TRIO";
     }
 
+    inline bool IsCountedLootObjective(std::string const& type)
+    {
+        return type == "CHALLENGE_REQUIREMENT_TYPE_LOOT_ITEM_BEFORE_LEVEL";
+    }
+
+    inline uint32_t ObjectiveTarget(Entry const& e)
+    {
+        return IsCountedLootObjective(e.type) ? e.v2 : e.v1;
+    }
+
+    inline uint32_t ObjectiveGateLevel(Entry const& e)
+    {
+        return IsCountedLootObjective(e.type) ? e.v3 : e.v2;
+    }
+
     // Client-side CHALLENGE_REQUIREMENT_TYPE_* enum order, recovered from the
     // reflection table in Extensions.dll: the static {name,len} pointer array
     // sits contiguously at file 0xB30A60 (RVA 0xB31C60) and the 0x59A criteria

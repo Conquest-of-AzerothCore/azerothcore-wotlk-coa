@@ -1497,12 +1497,13 @@ namespace CoAChallenges
             {
                 if (!IsTrackedObjective(o.type))
                     continue;
-                if (!o.v2 || o.v2 <= curLevel)
+                uint32 const objectiveGate = CoAParse::ObjectiveGateLevel(o);
+                if (!objectiveGate || objectiveGate <= curLevel)
                     continue;
                 if (IsObjectiveDone(guid, cid, o.key))
                     continue;
-                if (!gate || o.v2 < gate)
-                    gate = o.v2;
+                if (!gate || objectiveGate < gate)
+                    gate = objectiveGate;
             }
         }
         return gate;
@@ -1630,9 +1631,10 @@ namespace CoAChallenges
             uint32 level = 0;
             for (Objective const& o : GetObjectives(cid))
             {
-                if (o.type != type || o.v1 != eventValue)
+                if (o.type != type || CoAParse::ObjectiveTarget(o) != eventValue)
                     continue;
-                if (o.v2 && player->GetLevel() >= o.v2)
+                uint32 const objectiveGate = CoAParse::ObjectiveGateLevel(o);
+                if (objectiveGate && player->GetLevel() >= objectiveGate)
                     continue;
                 if (!IsObjectiveDone(guid, cid, o.key))
                 {
@@ -1694,7 +1696,8 @@ namespace CoAChallenges
             {
                 if (!IsTrackedObjective(o.type))
                     continue;
-                if (!o.v2 || player->GetLevel() < o.v2)
+                uint32 const objectiveGate = CoAParse::ObjectiveGateLevel(o);
+                if (!objectiveGate || player->GetLevel() < objectiveGate)
                     continue;
                 if (IsObjectiveDone(guid, cid, o.key))
                     continue;

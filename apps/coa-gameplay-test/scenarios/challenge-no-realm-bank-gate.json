@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "A challenge with NO_REALM_BANK refuses to open the Realm Bank vault",
+  "contract": [
+    "Hardcore (challenge 54) and 60 other challenges declare CHALLENGE_RULES_TYPE_NO_REALM_BANK, but no code enforced it: a challenger could summon the Realm Bank (item 1180097, spell 92078) and move items between the account's characters.",
+    "Expected: HandlePersonalBankActivate asks AscensionPersonalBank::CanAccess before opening a vault; the challenge guard refuses the Realm Bank kind while the rule is active and tells the player why.",
+    "Control: the same vault opens without the refusal before the challenge starts."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "add_item", "label": "Acquire the Realm Bank", "actor": "hero", "item": 1180097, "count": 1 },
+    { "action": "cast", "label": "Summon the Realm Bank vault", "actor": "hero", "spell": 92078 },
+    { "action": "wait", "label": "Let the vault summon land in the world", "ms": 3000 },
+    { "action": "personal_bank_open", "label": "Control: open the vault outside any challenge", "actor": "hero",
+      "entry": 80159 },
+    {
+      "action": "assert", "label": "Control: no challenge refusal outside a challenge",
+      "actor": "hero", "metric": "system_message_contains",
+      "text": "Your challenge forbids using the realm bank.", "equals": 0, "within_ms": 1000
+    },
+    { "action": "start_challenge", "label": "Start Hardcore (NO_REALM_BANK)", "actor": "hero",
+      "challenge": 54, "level": 1 },
+    { "action": "assert", "actor": "hero", "metric": "challenge_start_code", "equals": 0, "within_ms": 2000 },
+    { "action": "personal_bank_open", "label": "DISCRIMINATING: open the vault during Hardcore", "actor": "hero",
+      "entry": 80159 },
+    {
+      "action": "assert", "label": "The challenge refuses the Realm Bank and says why",
+      "actor": "hero", "metric": "system_message_contains",
+      "text": "Your challenge forbids using the realm bank.", "equals": 1, "within_ms": 2000
+    }
+  ]
+}
