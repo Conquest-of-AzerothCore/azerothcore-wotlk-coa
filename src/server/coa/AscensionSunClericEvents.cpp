@@ -151,15 +151,11 @@ class aura_ascension_sun_cleric_event : public AuraScript
             uint32 amount = damage ? damage : healing;
             if (id == 803489)
                 Copy(player, target, damage ? 803490 : 803816, CalculatePct(amount, Amount(id,1) * (fulfillment ? 2 : 1)));
-            bool const bounced = spell && State(player).vowSpell == spell &&
-                getMSTimeDiff(State(player).vowTime, GameTime::GetGameTimeMS().count()) < 2000;
+            bool const bounced = spell && spell->GetScriptValue(803491);
             if (id == 803491 && !bounced)
             {
                 if (spell)
-                {
-                    State(player).vowSpell = spell;
-                    State(player).vowTime = GameTime::GetGameTimeMS().count();
-                }
+                    spell->SetScriptValue(803491, 1);
                 auto nearby = damage ? Nearby(target, 10) : Allies(player, target, 10);
                 nearby.remove(target);
                 if (spell)
