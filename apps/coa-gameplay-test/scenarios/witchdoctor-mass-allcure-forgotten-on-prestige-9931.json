@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Mass Allcure Elixir is forgotten on prestige (#9931)",
+  "contract": "The talent aura 705906 makes the Witch Doctor learn Mass Allcure Elixir 706555 and replace Allcure 804049 with it. Prestige forgets the talent, so the learned 706555 and the replacement must go with it. Prestige requires the realm level cap (80).",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9483.25,
+    "y": -17.99,
+    "z": 56.96,
+    "o": 3.8
+  },
+  "players": [
+    {
+      "id": "prestiger",
+      "race": 1,
+      "class": 13,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chromie",
+      "owner": "prestiger",
+      "entry": 178081,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "prestiger",
+      "id": 4
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 705906
+    },
+    {
+      "action": "learn",
+      "actor": "prestiger",
+      "spell": 804049
+    },
+    {
+      "action": "assert",
+      "label": "SETUP talent aura",
+      "actor": "prestiger",
+      "metric": "aura",
+      "spell": 705906,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP mass allcure learned",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 706555,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "prestiger",
+      "target": "chromie"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "prestiger",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "Back to level 1",
+      "actor": "prestiger",
+      "metric": "level",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "705906 gone",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 705906,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "706555 gone",
+      "actor": "prestiger",
+      "metric": "knows_spell",
+      "spell": 706555,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Allcure is no longer replaced by Mass Allcure Elixir",
+      "actor": "prestiger",
+      "metric": "temporary_spell_replacement",
+      "spell": 804049,
+      "equals": 804049
+    }
+  ]
+}

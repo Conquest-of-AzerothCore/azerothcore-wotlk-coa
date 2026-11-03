@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Flamefist Claw procs at 2 per minute instead of on every hit (#10351)",
+  "contract": [
+    "Item 1378534 carries spell 312410 whose tooltip states 2ppm. Over 180 seconds of 2.6 s swings about 69 hits land, so 2ppm gives about 6 procs, while a proc on every hit gives about 69.",
+    "Require landed melee hits as setup and bound the Sears damage count above zero and far below the hit count."
+  ],
+  "timeout_ms": 300000,
+  "players": [
+    {
+      "id": "w",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "w",
+      "entry": 36,
+      "level": 60,
+      "health": 100000000,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_health", "actor": "w", "value": 1000000, "maximum": 1000000 },
+    { "action": "set_skill", "actor": "w", "skill": 473, "value": 300, "maximum": 300 },
+    { "action": "add_item", "actor": "w", "item": 1378534 },
+    { "action": "equip", "actor": "w", "item": 1378534, "slot": 15 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "attack", "actor": "w", "target": "d" },
+    { "action": "wait", "ms": 180000 },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "melee_damage_count",
+      "target": "d",
+      "min": 50,
+      "label": "SETUP melee hits landed"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "spell_damage_count",
+      "spell": 312410,
+      "target": "d",
+      "min": 1,
+      "max": 20,
+      "label": "Sears procs at a 2ppm rate, at least once and far below one per hit"
+    }
+  ]
+}

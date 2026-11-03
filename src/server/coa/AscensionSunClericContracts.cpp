@@ -231,6 +231,7 @@ void ApplyContracts(SpellInfo* info)
     {
         info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
         info->Effects[0].BasePoints = 9;
+        info->AttributesCu &= ~SPELL_ATTR0_CU_NEGATIVE_EFF0;
     }
     if (id == 520024 || id == 520026 || id == 807441 || id == 680630)
         for (auto& effect : info->Effects)
