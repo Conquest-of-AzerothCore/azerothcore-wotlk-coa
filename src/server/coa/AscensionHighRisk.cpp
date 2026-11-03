@@ -2,6 +2,7 @@
 
 #include "AscensionFelCommutation.h"
 #include "AscensionFelCommutationPolicy.h"
+#include "AscensionHighRisk.h"
 #include "AscensionHighRiskPolicy.h"
 #include "AscensionBloodforging.h"
 #include "AscensionRulesets.h"
@@ -29,6 +30,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <vector>
 
 namespace HighRisk
 {
@@ -68,6 +70,26 @@ std::atomic_bool enabled{false};
 std::atomic<float> gearChance{50.0f};
 std::atomic<float> resourceChance{50.0f};
 std::atomic<float> goldChance{50.0f};
+std::vector<LootGuard> lootGuards;
+
+void RegisterLootGuard(LootGuard guard)
+{
+    if (guard)
+        lootGuards.push_back(guard);
+}
+
+bool CanLoot(Player* looter, uint32 chestOwner)
+{
+    for (LootGuard guard : lootGuards)
+        if (!guard(looter, chestOwner))
+            return false;
+    return true;
+}
+
+bool LootAllowed(Player* player, Chest const& chest)
+{
+    return chest.owner == player->GetGUID().GetCounter() || CanLoot(player, chest.owner);
+}
 
 bool OpenWorld(Player const* player)
 {
@@ -247,6 +269,11 @@ void Open(Player* player, GameObject* object)
         player->SendLootRelease(object->GetGUID());
         return;
     }
+    if (!LootAllowed(player, *chest))
+    {
+        player->SendLootError(object->GetGUID(), LOOT_ERROR_DIDNT_KILL);
+        return;
+    }
     player->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
     player->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
     player->RemoveAurasByType(SPELL_AURA_FEIGN_DEATH);
@@ -270,6 +297,11 @@ void ClaimItem(Player* player, GameObject* object, uint8 slot)
     Chest* chest = Find(object);
     if (!chest)
         return;
+    if (!LootAllowed(player, *chest))
+    {
+        Close(player, object);
+        return;
+    }
     auto found = chest->items.find(slot);
     if (found == chest->items.end() || found->second.claimed)
         return;
@@ -330,6 +362,11 @@ void ClaimGold(Player* player, GameObject* object)
     Chest* chest = Find(object);
     if (!chest || !chest->gold)
         return;
+    if (!LootAllowed(player, *chest))
+    {
+        Close(player, object);
+        return;
+    }
     if (uint64(player->GetMoney()) + chest->gold > MAX_MONEY_AMOUNT)
     {
         ChatHandler(player->GetSession()).SendSysMessage("You cannot carry any more gold.");

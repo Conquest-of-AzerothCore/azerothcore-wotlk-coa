@@ -1,7 +1,7 @@
 {
  "schema": 1,
  "name": "Tank stance auras multiply threat as their client data says (2/2)",
- "contract": "Each CoA tank aura (807725-807736) carries SPELL_AURA_MOD_THREAT. With it on, a fixed 1000 Holy damage hit (QA spell 45648) must put threat x(1 + amount/100) on the target when the aura school mask includes Holy, and exactly 1000 when it does not.",
+ "contract": "Each CoA tank aura (807725-807736) carries SPELL_AURA_MOD_THREAT. With it on, a fixed 1000 Holy damage hit (QA spell 45648, spell hit capped so it cannot miss) must put threat x(1 + amount/100) on the target when the aura school mask includes Holy, and exactly 1000 when it does not, then x2 from Rate.Threat.TankStance (default 2) for a player in any of these stances.",
  "timeout_ms": 120000,
  "players": [
   {
@@ -9,7 +9,8 @@
    "race": 1,
    "class": 1,
    "level": 60,
-   "allow_regeneration": false
+   "allow_regeneration": false,
+   "spell_hit_rating": 10000
   }
  ],
  "creatures": [
@@ -121,12 +122,12 @@
   },
   {
    "action": "assert",
-   "label": "Lunar Authority 807731: threat is 2.2x the Holy damage dealt",
+   "label": "Lunar Authority 807731: threat is 4.4x the Holy damage dealt (stance x2 rate included)",
    "actor": "d807731",
    "metric": "threat_per_damage",
    "target": "tank",
-   "min": 2.15,
-   "max": 2.25,
+   "min": 4.3,
+   "max": 4.5,
    "within_ms": 3000
   },
   {
@@ -153,12 +154,12 @@
   },
   {
    "action": "assert",
-   "label": "Sol Invictus 807732: threat is 2.75x the Holy damage dealt",
+   "label": "Sol Invictus 807732: threat is 5.5x the Holy damage dealt (stance x2 rate included)",
    "actor": "d807732",
    "metric": "threat_per_damage",
    "target": "tank",
-   "min": 2.7,
-   "max": 2.8,
+   "min": 5.4,
+   "max": 5.6,
    "within_ms": 3000
   },
   {
@@ -185,12 +186,12 @@
   },
   {
    "action": "assert",
-   "label": "Night's Watch 807733: threat is 3.1x the Holy damage dealt",
+   "label": "Night's Watch 807733: threat is 6.2x the Holy damage dealt (stance x2 rate included)",
    "actor": "d807733",
    "metric": "threat_per_damage",
    "target": "tank",
-   "min": 3.05,
-   "max": 3.15,
+   "min": 6.1,
+   "max": 6.3,
    "within_ms": 3000
   },
   {
@@ -217,12 +218,12 @@
   },
   {
    "action": "assert",
-   "label": "Heart of the Mountain 807734: threat is 2.5x the Holy damage dealt",
+   "label": "Heart of the Mountain 807734: threat is 5x the Holy damage dealt (stance x2 rate included)",
    "actor": "d807734",
    "metric": "threat_per_damage",
    "target": "tank",
-   "min": 2.45,
-   "max": 2.55,
+   "min": 4.9,
+   "max": 5.1,
    "within_ms": 3000
   },
   {
@@ -249,12 +250,12 @@
   },
   {
    "action": "assert",
-   "label": "Dominion 807735: threat is 2.7x the Holy damage dealt",
+   "label": "Dominion 807735: threat is 5.4x the Holy damage dealt (stance x2 rate included)",
    "actor": "d807735",
    "metric": "threat_per_damage",
    "target": "tank",
-   "min": 2.65,
-   "max": 2.75,
+   "min": 5.3,
+   "max": 5.5,
    "within_ms": 3000
   },
   {
@@ -281,12 +282,12 @@
   },
   {
    "action": "assert",
-   "label": "Tank Stance Aura (Eternal Blood Mage) 807736: threat is 1.95x the Holy damage dealt",
+   "label": "Tank Stance Aura (Eternal Blood Mage) 807736: threat is 3.9x the Holy damage dealt (stance x2 rate included)",
    "actor": "d807736",
    "metric": "threat_per_damage",
    "target": "tank",
-   "min": 1.9,
-   "max": 2.0,
+   "min": 3.8,
+   "max": 4.0,
    "within_ms": 3000
   },
   {

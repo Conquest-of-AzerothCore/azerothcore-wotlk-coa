@@ -8,6 +8,8 @@
 #include "AllCreatureScript.h"
 #include "AccountScript.h"
 #include "AscensionClientLua.h"
+#include "AscensionPersonalBank.h"
+#include "AscensionHighRisk.h"
 #include "LocalLevelScaling.h"
 #include "AscensionRulesets.h"
 
@@ -25,6 +27,22 @@ namespace CoAChallenges
             !PlayerHasRule(player, "CHALLENGE_RULES_TYPE_PVE_ONLY"))
             return true;
         NotifyPlayer(player, "Your active challenge requires PvE mode.");
+        return false;
+    }
+
+    bool ChallengeAllowsBankAccess(Player* player, uint8 kind)
+    {
+        if (kind != AscensionPersonalBank::REALM || !PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_REALM_BANK"))
+            return true;
+        NotifyPlayer(player, "Your challenge forbids using the realm bank.");
+        return false;
+    }
+
+    bool ChallengeAllowsHighRiskLoot(Player* looter, uint32)
+    {
+        if (!PlayerHasRule(looter, "CHALLENGE_RULES_TYPE_NO_HIGH_RISK_LOOT"))
+            return true;
+        NotifyPlayer(looter, "Your challenge forbids looting the spoils of other players in High-Risk.");
         return false;
     }
 
@@ -822,14 +840,15 @@ namespace CoAChallenges
     {
         if (!player)
             return;
+        static_assert(CoAParse::LevelScalingBlockCreature == LocalLevelScaling::ChallengeBlocksCreatureScaling);
+        static_assert(CoAParse::LevelScalingBlockQuest == LocalLevelScaling::ChallengeBlocksQuestScaling);
         uint8 blocks = 0;
         if (ChallengesEnabled())
         {
             uint32 level = 0;
-            if (ActiveChallengeWithRule(player, "CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING", level))
-                blocks |= LocalLevelScaling::ChallengeBlocksCreatureScaling;
-            if (ActiveChallengeWithRule(player, "CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING", level))
-                blocks |= LocalLevelScaling::ChallengeBlocksQuestScaling;
+            for (char const* rule : CoAParse::LevelScalingRules)
+                if (ActiveChallengeWithRule(player, rule, level))
+                    blocks |= CoAParse::LevelScalingBlockBits(rule);
         }
         if (StoreLevelScalingBlocks(player->GetGUID().GetCounter(), blocks) == blocks || !player->IsInWorld())
             return;
@@ -3275,7 +3294,7 @@ namespace CoAChallenges
 
         // .coa ruletest <player> <id>
         // GM-only: activates the challenge and checks the custom rules through
-        // the real hook dispatchers (NO_GUILD_BANK / NO_MANASTORM / N/A realm).
+        // the real hook dispatchers (NO_GUILD_BANK / NO_MANASTORM / NO_REALM_BANK).
         static bool HandleCoARuleTestCommand(ChatHandler* handler, std::string playerName, uint32 challengeId)
         {
             Player* p = ObjectAccessor::FindPlayerByName(playerName);
@@ -4140,6 +4159,8 @@ namespace CoAChallenges
 void Addmod_coa_challengesScripts()
 {
     AscensionRulesets::RegisterGuard(&CoAChallenges::ChallengeAllowsRuleset);
+    AscensionPersonalBank::RegisterAccessGuard(&CoAChallenges::ChallengeAllowsBankAccess);
+    HighRisk::RegisterLootGuard(&CoAChallenges::ChallengeAllowsHighRiskLoot);
     RegisterAscensionClientConfig(&CoAChallenges::AppendClientConfig);
     RegisterAscensionChallengeStateSync([](Player* player)
     {

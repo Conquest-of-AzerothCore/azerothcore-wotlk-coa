@@ -691,6 +691,19 @@ inline uint16 GetMaxProfessionSkillStep(uint8 expansion)
     return 4 + expansion;
 }
 
+inline uint8 GetProfessionExpansion(uint32 skill)
+{
+    switch (skill)
+    {
+        case SKILL_JEWELCRAFTING:
+            return EXPANSION_THE_BURNING_CRUSADE;
+        case SKILL_INSCRIPTION:
+            return EXPANSION_WRATH_OF_THE_LICH_KING;
+        default:
+            return EXPANSION_CLASSIC;
+    }
+}
+
 bool IsPartOfSkillLine(uint32 skillId, uint32 spellId);
 
 // spell diminishing returns
