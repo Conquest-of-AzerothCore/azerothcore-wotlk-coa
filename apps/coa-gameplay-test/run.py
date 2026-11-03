@@ -153,7 +153,7 @@ METRICS = TIMELINE_METRICS | {
     'pet_melee_swings', 'pet_melee_crits', 'pet_melee_glancing', 'pet_melee_plain_count', 'pet_melee_plain_damage',
     'pet_melee_damage',
     'pet_run_speed_rate',
-    'distance', 'spawn_active', 'threat', 'threat_per_damage', 'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate', 'temporary_spell_replacement',
+    'distance', 'spawn_active', 'spawn_display', 'threat', 'threat_per_damage', 'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate', 'temporary_spell_replacement',
     'spell_family_flags',
     'creature_loot_quality_rate', 'item_loot_item_rate', 'equipped_gear_loot_rate', 'forced_loot_count',
     'quest_menu_items', 'quest_menu_has', 'player_setting', 'server_packets', 'server_packet_u8', 'server_packet_u32',
