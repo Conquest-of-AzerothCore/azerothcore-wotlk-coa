@@ -1,0 +1,1257 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Permafrost procs only from Necromancer spells (#10844, #11040)",
+  "contract": "Permafrost 704681 reads 'Gives your spells a 15% chance to grant you the Permafrost' (ProcChance 15, buff 801747). Reports #10844 and #11040 show it also rolling on mounts, professions, vanity pets and Sense Undead. Sense Undead 5502 is SPELLFAMILY_PALADIN (10) with DamageClass NONE, so 30 non-triggered casts must never cast 801747; a roll on each cast would miss all 30 only 0.76% of the time. Blight 500237 is family 29 with no cost, cooldown or global cooldown, so 60 casts must cast 801747 at least once; the chance of a false failure is 0.0058%.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "necro",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "necro",
+      "entry": 299,
+      "level": 60,
+      "distance": 12
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 704681
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 500237
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Permafrost talent is active",
+      "actor": "necro",
+      "metric": "aura",
+      "spell": 704681,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: every Sense Undead cast completed",
+      "actor": "necro",
+      "metric": "spell_cast_count",
+      "spell": 5502,
+      "min": 30
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 30 casts of a spell outside the Necromancer family never grant Permafrost",
+      "actor": "necro",
+      "metric": "spell_cast_count",
+      "spell": 801747,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 150
+    },
+    {
+      "action": "assert",
+      "label": "60 casts of a Necromancer spell at 15% grant Permafrost at least once",
+      "actor": "necro",
+      "metric": "spell_cast_count",
+      "spell": 801747,
+      "min": 1,
+      "within_ms": 2000
+    }
+  ]
+}

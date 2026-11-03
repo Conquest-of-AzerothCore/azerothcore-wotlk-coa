@@ -22,6 +22,8 @@ import time
 
 from world_cache import WorldCache, input_fingerprint, run_parallel
 
+PUBLISHED_READ_SECONDS = 2
+PUBLISHED_READ_RETRY_SECONDS = 0.01
 ROOT = Path(__file__).resolve().parents[2]
 CREATE_FLAGS = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
 IDENTIFIER = re.compile(r'[A-Za-z_][A-Za-z0-9_]*\Z')
@@ -352,6 +354,17 @@ def unique_object(pairs):
 
 def read_json(path):
     return json.loads(Path(path).read_text(encoding='utf-8-sig'), object_pairs_hook=unique_object)
+
+
+def read_published_json(path):
+    deadline = time.monotonic() + PUBLISHED_READ_SECONDS
+    while True:
+        try:
+            return read_json(path)
+        except PermissionError:
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(PUBLISHED_READ_RETRY_SECONDS)
 
 
 def validate_timeline_step(step, where, encounter_started, actor_ids):
@@ -1773,7 +1786,7 @@ def check_report(report, run_id, scenario, returncode):
 
 
 def read_ready(path, run_id):
-    ready = read_json(path)
+    ready = read_published_json(path)
     require(ready.get('run_id') == run_id and ready.get('status') == 'ready', 'Invalid readiness record')
     return ready
 
@@ -1829,7 +1842,7 @@ def run_process(command, directory, ready_path, result_path, run_id, startup_tim
                 time.sleep(0.1)
             require(result_path.exists(), f'Worldserver exited with code {process.returncode} without a result; '
                     'check the build and server log')
-            report = read_json(result_path)
+            report = read_published_json(result_path)
             if report.get('status') == 'passed':
                 require(on_ready is None or ready_at is not None, 'Startup barrier was not observed')
                 require(ready_path.exists(), 'Successful result is missing harness readiness')
