@@ -262,6 +262,8 @@ public:
                 bool linkedB = b->GetGUID() == State(player).covenant;
                 if (linkedA != linkedB)
                     return linkedA;
+                if (a->IsPlayer() != b->IsPlayer())
+                    return a->IsPlayer();
                 uint32 stacksA = a->GetAura(BlackBlood, player->GetGUID()) ? a->GetAura(BlackBlood, player->GetGUID())->GetStackAmount() : 0;
                 uint32 stacksB = b->GetAura(BlackBlood, player->GetGUID()) ? b->GetAura(BlackBlood, player->GetGUID())->GetStackAmount() : 0;
                 return stacksA != stacksB ? stacksA < stacksB : a->GetHealthPct() < b->GetHealthPct();
