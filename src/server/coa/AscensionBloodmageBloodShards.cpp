@@ -131,12 +131,26 @@ void LaunchShard(Player* player, Unit* target, ShardCoefficients coefficients, u
     SpellInfo const* shard = sSpellMgr->GetSpellInfo(SPELL_SHARD_DAMAGE);
     if (!shard || !target || !target->IsAlive())
         return;
-    player->CastSpell(target, SPELL_SHARD_MISSILE_FIRST + std::min<uint8>(slot, MAX_SHARDS - 1), TRIGGERED_FULL_MASK);
+    uint32 const missile = SPELL_SHARD_MISSILE_FIRST + std::min<uint8>(slot, MAX_SHARDS - 1);
+    player->CastSpell(target, missile, TRIGGERED_FULL_MASK);
     float amount = float(shard->Effects[EFFECT_0].CalcValue(player)) +
         player->GetTotalAttackPowerValue(BASE_ATTACK) * coefficients.AttackPower +
         float(player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)) * coefficients.SpellPower;
-    player->CastCustomSpell(SPELL_SHARD_DAMAGE, SPELLVALUE_BASE_POINT0,
-        int32(std::clamp(amount, 1.0f, float(std::numeric_limits<int32>::max() / 2))), target, TRIGGERED_FULL_MASK);
+    int32 const damage = int32(std::clamp(amount, 1.0f, float(std::numeric_limits<int32>::max() / 2)));
+    SpellInfo const* flight = sSpellMgr->GetSpellInfo(missile);
+    uint32 const travel = flight && flight->Speed > 0.0f ?
+        uint32(player->GetExactDist(target) / flight->Speed * IN_MILLISECONDS) : 0;
+    if (!travel)
+    {
+        player->CastCustomSpell(SPELL_SHARD_DAMAGE, SPELLVALUE_BASE_POINT0, damage, target, TRIGGERED_FULL_MASK);
+        return;
+    }
+    player->m_Events.AddEventAtOffset([guid = player->GetGUID(), victim = target->GetGUID(), damage]()
+    {
+        if (Player* owner = ObjectAccessor::FindPlayer(guid))
+            if (Unit* hit = ObjectAccessor::GetUnit(*owner, victim); hit && hit->IsAlive())
+                owner->CastCustomSpell(SPELL_SHARD_DAMAGE, SPELLVALUE_BASE_POINT0, damage, hit, TRIGGERED_FULL_MASK);
+    }, Milliseconds(travel));
 }
 
 bool IsEnemy(Player* player, Unit* target)

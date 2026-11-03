@@ -3,8 +3,8 @@
   "name": "Veinburst launches each Blood Shard as its own missile (#10897)",
   "contract": [
     "Veinburst 504260 expends every stored Blood Shard (count on 505366), each dealing a Blood Shard hit 504115. 504115 is instant (speed 0), so the shards only vanished from above the Bloodmage, as reported.",
-    "The client carries one missile per shard slot, Blood Shard Trigger Attack 1-8 (505357-505364, speed 30, visuals 200286-200293), whose TRIGGER_MISSILE would trigger 504115. Each spent shard now casts its slot's Trigger Attack at the target for the flight; its trigger is neutralized so the damage stays one scaled 504115 hit per shard. The shards leave one after another, 100 ms apart.",
-    "Expected with three stored shards: Trigger Attack 1, 2 and 3 are cast once each, 4 is not, and the dummy takes exactly three Blood Shard hits after the missiles land."
+    "The client carries one missile per shard slot, Blood Shard Trigger Attack 1-8 (505357-505364, speed 30, visuals 200286-200293), whose TRIGGER_MISSILE would trigger 504115. Each spent shard now casts its slot's Trigger Attack at the target for the flight; its trigger is neutralized so the damage stays one scaled 504115 hit per shard. The shards leave one after another, 100 ms apart, and each 504115 hit lands when its missile arrives (distance / missile speed).",
+    "Expected with three stored shards: Trigger Attack 1, 2 and 3 are cast once each, 4 is not, with the dummy 25 yd away no Blood Shard hit has landed when Veinburst lands and launches them, and the dummy takes exactly three Blood Shard hits after the missiles land."
   ],
   "timeout_ms": 60000,
   "location": {
@@ -29,7 +29,7 @@
       "owner": "b",
       "entry": 299,
       "level": 60,
-      "distance": 10,
+      "distance": 25,
       "health": 1000000
     }
   ],
@@ -85,6 +85,15 @@
       "target": "d",
       "min": 1,
       "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: when Veinburst lands and launches the shards, none has hit the dummy 25 yd away yet",
+      "actor": "b",
+      "metric": "spell_damage_count",
+      "spell": 504115,
+      "target": "d",
+      "equals": 0
     },
     {
       "action": "assert",
