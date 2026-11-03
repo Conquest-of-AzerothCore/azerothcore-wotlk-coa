@@ -6051,6 +6051,14 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
                         break;
                     }
                 if (!ignored)
+                    for (AuraEffect const* effect : m_caster->GetAuraEffectsByType(SPELL_AURA_ASCENSION_IGNORE_POSITIONAL))
+                        if (effect->IsAffectedOnSpell(m_spellInfo) &&
+                            (effect->GetMiscValue() != ASCENSION_IGNORE_POSITIONAL_VERSUS_MONSTERS || !target->IsPlayer()))
+                        {
+                            ignored = true;
+                            break;
+                        }
+                if (!ignored)
                     return SPELL_FAILED_NOT_BEHIND;
             }
 
