@@ -233,13 +233,13 @@ class spell_ascension_necromancer_harrowing_winds : public SpellScript
     {
         Player* player = GetCaster() ? GetCaster()->ToPlayer() : nullptr;
         Unit* target = GetHitUnit();
-        if (player && target && (GetSpellInfo()->SchoolMask & SPELL_SCHOOL_MASK_FROST))
+        if (player && target && GetHitDamage() > 0 && (GetSpellInfo()->SchoolMask & SPELL_SCHOOL_MASK_FROST))
             Soulfreeze(player, target, GetSpellInfo(), GetSpell());
     }
 
     void Register() override
     {
-        OnHit += SpellHitFn(spell_ascension_necromancer_harrowing_winds::HandleHit);
+        AfterHit += SpellHitFn(spell_ascension_necromancer_harrowing_winds::HandleHit);
     }
 };
 
