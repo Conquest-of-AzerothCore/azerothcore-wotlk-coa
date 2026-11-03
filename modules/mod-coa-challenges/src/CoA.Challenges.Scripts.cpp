@@ -2072,7 +2072,17 @@ namespace CoAChallenges
         // purchases, not buyback.
         static bool IsVendorFoodOrDrink(ItemTemplate const* proto)
         {
-            if (!proto || proto->Class != ITEM_CLASS_CONSUMABLE)
+            if (!proto)
+                return false;
+            // Vendor reagents that craft unlimited food (Mild Spices -> Spice Bread).
+            switch (proto->ItemId)
+            {
+                case 2678:
+                    return true;
+                default:
+                    break;
+            }
+            if (proto->Class != ITEM_CLASS_CONSUMABLE)
                 return false;
             for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
             {
