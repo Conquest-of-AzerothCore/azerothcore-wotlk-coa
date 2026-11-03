@@ -22,6 +22,8 @@ import time
 
 from world_cache import WorldCache, input_fingerprint, run_parallel
 
+PUBLISHED_READ_SECONDS = 2
+PUBLISHED_READ_RETRY_SECONDS = 0.01
 ROOT = Path(__file__).resolve().parents[2]
 CREATE_FLAGS = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
 IDENTIFIER = re.compile(r'[A-Za-z_][A-Za-z0-9_]*\Z')
@@ -351,6 +353,17 @@ def unique_object(pairs):
 
 def read_json(path):
     return json.loads(Path(path).read_text(encoding='utf-8-sig'), object_pairs_hook=unique_object)
+
+
+def read_published_json(path):
+    deadline = time.monotonic() + PUBLISHED_READ_SECONDS
+    while True:
+        try:
+            return read_json(path)
+        except PermissionError:
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(PUBLISHED_READ_RETRY_SECONDS)
 
 
 def validate_timeline_step(step, where, encounter_started, actor_ids):
@@ -1772,7 +1785,7 @@ def check_report(report, run_id, scenario, returncode):
 
 
 def read_ready(path, run_id):
-    ready = read_json(path)
+    ready = read_published_json(path)
     require(ready.get('run_id') == run_id and ready.get('status') == 'ready', 'Invalid readiness record')
     return ready
 
