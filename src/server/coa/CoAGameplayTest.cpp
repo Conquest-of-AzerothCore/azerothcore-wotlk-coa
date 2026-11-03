@@ -42,6 +42,7 @@
 #include "GridTerrainLoader.h"
 #include "Group.h"
 #include "GroupMgr.h"
+#include "Guild.h"
 #include "InstanceScript.h"
 #include "Item.h"
 #include "LFGMgr.h"
@@ -4519,6 +4520,8 @@ private:
             return player->GetActiveSpec();
         if (metric == "bank_bag_slots")
             return player->GetBankBagSlotCount();
+        if (metric == "guild_bank_tabs")
+            return player->GetGuild() ? player->GetGuild()->GetBankTabCount() : -1;
         if (metric == "taxi_node")
             return player->m_taxi.IsTaximaskNodeKnown(step.get<uint32>("entry"));
         if (metric == "in_flight")

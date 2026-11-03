@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Tiraxis sells the bank vouchers and the guild vault voucher opens a guild tab",
+  "contract": "The Convenience Items list of Tiraxis sells Personal Bank Tab Voucher 110002 for 7500 Bazaar Tokens (ItemExtendedCost 10404), Realm Bank Tab Voucher 1180485 for 9600 (10502), Ornate Bank Voucher 102130 for 7500 (10404) and Guild Vault Voucher 102131 for 6500 (10394). The Guild Vault Voucher unlocks the next guild bank tab only for a guild master, consumes exactly one voucher, keeps it when the guild already holds six tabs and keeps it for a member who leads no guild.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914, "y": -133, "z": 80.6, "o": 0 },
+  "players": [
+    { "id": "master", "race": 1, "class": 1, "level": 60 },
+    { "id": "member", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "tiraxis", "owner": "master", "entry": 900007, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    { "action": "gossip_hello", "actor": "master", "target": "tiraxis" },
+    { "action": "gossip_select", "actor": "master", "option": 2, "label": "Convenience Items" },
+    { "action": "assert", "label": "Personal Bank Tab Voucher costs 7500 tokens", "actor": "master", "metric": "vendor_extended_cost", "item": 110002, "equals": 10404, "within_ms": 2000 },
+    { "action": "assert", "label": "Realm Bank Tab Voucher costs 9600 tokens", "actor": "master", "metric": "vendor_extended_cost", "item": 1180485, "equals": 10502 },
+    { "action": "assert", "label": "Ornate Bank Voucher costs 7500 tokens", "actor": "master", "metric": "vendor_extended_cost", "item": 102130, "equals": 10404 },
+    { "action": "assert", "label": "Guild Vault Voucher costs 6500 tokens", "actor": "master", "metric": "vendor_extended_cost", "item": 102131, "equals": 10394 },
+
+    { "action": "assert", "label": "No guild yet", "actor": "master", "metric": "guild_bank_tabs", "equals": -1 },
+    { "action": "add_item", "actor": "master", "item": 102131, "count": 8 },
+    { "action": "use_item", "actor": "master", "item": 102131, "spell": 56685 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "Without a guild the voucher is kept", "actor": "master", "metric": "item_count", "item": 102131, "equals": 8 },
+
+    { "action": "console", "command": "guild create Harnessa \"Harness Vault\"" },
+    { "action": "wait", "ms": 1600 },
+    { "action": "assert", "label": "A new guild starts without a tab", "actor": "master", "metric": "guild_bank_tabs", "equals": 0 },
+    { "action": "use_item", "actor": "master", "item": 102131, "spell": 56685 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "The first voucher opens tab one", "actor": "master", "metric": "guild_bank_tabs", "equals": 1 },
+    { "action": "assert", "label": "Exactly one voucher is consumed", "actor": "master", "metric": "item_count", "item": 102131, "equals": 7 },
+
+    { "action": "use_item", "actor": "master", "item": 102131, "spell": 56685 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "use_item", "actor": "master", "item": 102131, "spell": 56685 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "use_item", "actor": "master", "item": 102131, "spell": 56685 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "use_item", "actor": "master", "item": 102131, "spell": 56685 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "use_item", "actor": "master", "item": 102131, "spell": 56685 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "Six vouchers open the six tabs", "actor": "master", "metric": "guild_bank_tabs", "equals": 6 },
+    { "action": "assert", "label": "Two vouchers are left", "actor": "master", "metric": "item_count", "item": 102131, "equals": 2 },
+
+    { "action": "use_item", "actor": "master", "item": 102131, "spell": 56685 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "A full guild vault keeps its voucher", "actor": "master", "metric": "item_count", "item": 102131, "equals": 2 },
+    { "action": "assert", "actor": "master", "metric": "guild_bank_tabs", "equals": 6 },
+
+    { "action": "console", "command": "guild invite Harnessb \"Harness Vault\"" },
+    { "action": "wait", "ms": 1000 },
+    { "action": "add_item", "actor": "member", "item": 102131 },
+    { "action": "use_item", "actor": "member", "item": 102131, "spell": 56685 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "A member who does not lead keeps the voucher", "actor": "member", "metric": "item_count", "item": 102131, "equals": 1 }
+  ]
+}
