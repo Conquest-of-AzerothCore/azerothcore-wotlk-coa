@@ -136,6 +136,7 @@ struct CreatureTemplate
 {
     uint32 type = 0;
     bool Tameable = true;
+    std::string Name = "Pet";
 
     bool IsTameable(bool) const { return Tameable; }
 };
@@ -193,6 +194,8 @@ public:
     bool Alive = true;
     uint32 Number = 0;
     Map PetMap;
+    std::string Name;
+    CreatureTemplate Template;
 
     uint32 GetEntry() const { return Entry; }
     PetType getPetType() const { return Type; }
@@ -201,6 +204,8 @@ public:
     Map* GetMap() { return &PetMap; }
     Creature* ToCreature() { return this; }
     void InitTalentForLevel() { }
+    void SetName(std::string const& name) { Name = name; }
+    CreatureTemplate const* GetCreatureTemplate() const { return &Template; }
     void SavePetToDB(PetSaveMode mode) { SaveRow(Number, Type, mode); }
     static void DeleteFromDB(uint32 number) { Db.erase(number); }
 };
@@ -545,7 +550,7 @@ void CosmeticPetOfAnotherKindStablesTheOutPet()
 {
     Player& player = Reset(1);
     Current(player, Info(1, BEAST, HUNTER_PET), true);
-    Require(!AscensionTaming::SummonCosmeticPet(&player, TIER_DEMON, HUNTER_DEMON), "a demon token is accepted");
+    Require(!AscensionTaming::SummonCosmeticPet(&player, TIER_DEMON, HUNTER_DEMON, false), "a demon token is accepted");
     Require(player.Out && player.Out->Entry == HUNTER_DEMON, "the token's demon is the pet");
     Require(player.Stable->StabledPets[0] && player.Stable->StabledPets[0]->PetNumber == 1,
         "the beast is stabled, not abandoned");
@@ -556,7 +561,7 @@ void CosmeticPetOfTheSameKindReplacesThePet()
 {
     Player& player = Reset(1);
     Current(player, Info(1, BEAST, HUNTER_PET), true);
-    Require(!AscensionTaming::SummonCosmeticPet(&player, TIER_BEAST, BEAST_2), "a beast token is accepted");
+    Require(!AscensionTaming::SummonCosmeticPet(&player, TIER_BEAST, BEAST_2, false), "a beast token is accepted");
     Require(player.Out && player.Out->Entry == BEAST_2, "the token's beast is the pet");
     Require(!Db.contains(1) && !player.Stable->StabledPets[0], "the old beast is replaced, not stabled");
     RequireConsistent(player, "stable and database agree after a same-kind cosmetic pet");
@@ -567,7 +572,7 @@ void CosmeticPetReplacesTheStoredPetOfItsKind()
     Player& player = Reset(1);
     Current(player, Info(1, BEAST, HUNTER_PET), true);
     Stabled(player, 0, Info(3, HUNTER_DEMON, HUNTER_PET));
-    Require(!AscensionTaming::SummonCosmeticPet(&player, TIER_DEMON, IMP), "a demon token is accepted");
+    Require(!AscensionTaming::SummonCosmeticPet(&player, TIER_DEMON, IMP, false), "a demon token is accepted");
     Require(player.Out && player.Out->Entry == IMP, "the token's demon is the pet");
     Require(!Db.contains(3) && HasStabled(player, BEAST), "the stored demon is replaced and the beast takes its slot");
     RequireConsistent(player, "stable and database agree after replacing a stored pet");
@@ -577,7 +582,7 @@ void CosmeticPetNeedsAStableSlotForTheOutPet()
 {
     Player& player = Reset(0);
     Current(player, Info(1, BEAST, HUNTER_PET), true);
-    Require(AscensionTaming::SummonCosmeticPet(&player, TIER_DEMON, HUNTER_DEMON), "no free stable slot refuses");
+    Require(AscensionTaming::SummonCosmeticPet(&player, TIER_DEMON, HUNTER_DEMON, false), "no free stable slot refuses");
     Require(player.Out && player.Out->Number == 1, "the beast stays out");
     Require(Saves.empty() && Updates.empty() && player.StarterCalls == 0, "a refused token writes nothing");
     RequireConsistent(player, "a refused token leaves the stable as it was");
@@ -587,10 +592,10 @@ void CosmeticPetNeedsItsSpells()
 {
     Player& player = Reset(1);
     player.Spells = { 883, 2641 };
-    Require(AscensionTaming::SummonCosmeticPet(&player, TIER_DEMON, HUNTER_DEMON), "no Summon Demon refuses");
+    Require(AscensionTaming::SummonCosmeticPet(&player, TIER_DEMON, HUNTER_DEMON, false), "no Summon Demon refuses");
     player.InCombat = true;
     player.Spells = { 884, 892 };
-    Require(AscensionTaming::SummonCosmeticPet(&player, TIER_DEMON, HUNTER_DEMON), "combat refuses");
+    Require(AscensionTaming::SummonCosmeticPet(&player, TIER_DEMON, HUNTER_DEMON, false), "combat refuses");
     Require(player.StarterCalls == 0 && Db.empty(), "a refused token creates nothing");
 }
 

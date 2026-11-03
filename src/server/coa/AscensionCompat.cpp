@@ -166,6 +166,8 @@ constexpr uint16 CMSG_EXTENSION_INITIALIZED = 0x0561;
 constexpr uint16 CMSG_CREATURE_QUERY_BULK = 0x061A;
 constexpr uint16 CMSG_ITEM_QUERY_BULK = 0x061B;
 constexpr uint16 CMSG_ITEM_STAT_QUERY = 0x06FF;
+constexpr uint16 SMSG_PATCH_CREATURE = 0x0567;
+constexpr uint16 SMSG_PATCH_ITEM_ADDON = 0x0569;
 constexpr uint16 SMSG_PATCH_APPEARANCES = 0x0692;
 constexpr uint16 SMSG_PATCH_ITEM_APPEARANCES = 0x0693;
 constexpr uint16 CMSG_APPLY_APPEARANCES = 0x0697;
@@ -5878,6 +5880,7 @@ public:
     _allVanityItemIds.clear();
     _woodworkingAppearancePatches.clear();
     _woodworkingItemAppearancePatches.clear();
+    _serverPetAppearancePatches.clear();
     _incarnationCategories.clear();
     _petCategories.clear();
     _petTokens.clear();
@@ -5940,6 +5943,8 @@ public:
       }
       _allAppearanceIds.push_back(appearanceId);
     }
+
+    LoadServerPetAppearances();
 
     ClientDBC itemAppearances;
     bool itemAppearancesLoaded =
@@ -6987,6 +6992,99 @@ public:
   }
 
 private:
+    void LoadServerPetAppearances()
+    {
+        _serverPetAppearancePatches.clear();
+        if (!WorldDatabase.Query("SELECT 1 FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND "
+            "TABLE_NAME = 'coa_cosmetic_pet_appearance'"))
+        {
+            LOG_WARN("coa", "coa_cosmetic_pet_appearance is missing; apply the world updates to add its appearances");
+            return;
+        }
+        QueryResult result = WorldDatabase.Query("SELECT appearance_id, token_item, creature_entry, category_id, live, "
+            "seasonal, league, ptr, development, preview_creature FROM coa_cosmetic_pet_appearance");
+        if (!result)
+            return;
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 const appearanceId = fields[0].Get<uint32>();
+            uint32 const token = fields[1].Get<uint32>();
+            uint32 const creature = fields[2].Get<uint32>();
+            uint32 const category = fields[3].Get<uint32>();
+            uint32 const preview = fields[9].Get<uint32>() ? fields[9].Get<uint32>() : creature;
+            if (!appearanceId || _appearances.contains(appearanceId) || !_petCategories.contains(category) ||
+                !sObjectMgr->GetCreatureTemplate(creature) || !sObjectMgr->GetCreatureTemplate(preview) ||
+                !sObjectMgr->GetItemTemplate(token) || _petTokens.contains(token))
+            {
+                LOG_ERROR("coa", "Skipped cosmetic pet appearance {} (token {}, creature {}, category {})",
+                    appearanceId, token, creature, category);
+                continue;
+            }
+            AppearanceInfo appearance{creature, category};
+            appearance.CreatureEntry = creature;
+            appearance.TokenItem = token;
+            std::array<uint32, 17> row{appearanceId, token, 0, preview, 0, category, 0, 0, creature, 0, 0, 100};
+            for (uint32 realm = 0; realm < appearance.Realms.size(); ++realm)
+            {
+                appearance.Realms[realm] = fields[4 + realm].Get<uint8>() != 0;
+                row[12 + realm] = appearance.Realms[realm];
+            }
+            _appearances.emplace(appearanceId, appearance);
+            _allAppearanceIds.push_back(appearanceId);
+            _petTokens[token] = appearanceId;
+            _serverPetAppearancePatches.push_back(row);
+        } while (result->NextRow());
+        LOG_INFO("coa", ">> Loaded {} server cosmetic pet appearances", _serverPetAppearancePatches.size());
+    }
+
+    bool IsServerPetAppearance(uint32 appearanceId) const
+    {
+        return std::any_of(_serverPetAppearancePatches.begin(), _serverPetAppearancePatches.end(),
+            [appearanceId](std::array<uint32, 17> const& row) { return row[0] == appearanceId; });
+    }
+
+    void SendServerPetAppearances(Player* player)
+    {
+        for (auto const& row : _serverPetAppearancePatches)
+        {
+            for (uint32 entry : { row[8], row[3] })
+            {
+                if (entry == row[3] && row[3] == row[8])
+                    continue;
+                CreatureTemplate const* creature = sObjectMgr->GetCreatureTemplate(entry);
+                CreatureModel const* model = creature->GetFirstValidModel();
+                WorldPacket known(SMSG_PATCH_CREATURE, 6 * sizeof(uint32) + creature->Name.size());
+                known << entry << uint32(0) << uint32(model ? model->CreatureDisplayID : 0) << uint32(0) << uint32(0)
+                      << uint32(0) << uint32(creature->Name.size());
+                known.append(reinterpret_cast<uint8 const*>(creature->Name.data()), creature->Name.size());
+                player->GetSession()->SendPacket(&known);
+            }
+
+            ItemTemplate const* token = sObjectMgr->GetItemTemplate(row[1]);
+            WorldPacket addon(SMSG_PATCH_ITEM_ADDON, 18 * sizeof(uint32) + token->Name1.size() + token->Description.size());
+            addon << row[1] << uint32(0) << uint32(0) << uint32(token->Quality) << uint32(0x800000) << uint32(0)
+                  << row[8];
+            for (uint32 field = 0; field < 7; ++field)
+                addon << uint32(0);
+            addon << uint32(1);
+            for (std::string const* text : { &token->Name1, &token->Description })
+            {
+                addon << uint32(text->size());
+                addon.append(reinterpret_cast<uint8 const*>(text->data()), text->size());
+            }
+            player->GetSession()->SendPacket(&addon);
+        }
+        for (auto const& row : _serverPetAppearancePatches)
+        {
+            WorldPacket packet(SMSG_PATCH_APPEARANCES, 17 * sizeof(uint32) + sizeof("APPEARANCE_DISPLAY_TYPE_CREATURE"));
+            for (uint32 field : row)
+                packet << field;
+            packet << "APPEARANCE_DISPLAY_TYPE_CREATURE";
+            player->GetSession()->SendPacket(&packet);
+        }
+    }
+
     void LoadWoodworkingAppearances(uint32 lastMappingId)
     {
         using VisualKey = std::tuple<uint32, uint32, uint32, uint32>;
@@ -7514,6 +7612,7 @@ private:
         player->SendAllSpellChargeStates();
         SendAscensionRunemasterEchoesCooldown(player);
         AscensionDisplayPatchService::Instance().SendPatchStream(player);
+        SendServerPetAppearances(player);
         LOG_DEBUG("coa", "Resent spell charge state to {} after client world entry",
                   player->GetName());
         break;
@@ -7640,7 +7739,7 @@ private:
       if (!token || token == state->ActiveAppearances[categoryId])
         continue;
       if (char const* refused = AscensionTaming::SummonCosmeticPet(player, category.Tier,
-            _appearances.at(token).CreatureEntry))
+            _appearances.at(token).CreatureEntry, IsServerPetAppearance(token)))
       {
         SendApplyResult(player, refused);
         return;
@@ -7671,6 +7770,7 @@ private:
   }
 
 public:
+
   bool CosmeticPetTokenAvailableHere(uint32 itemId) const
   {
     auto const token = _petTokens.find(itemId);
@@ -8261,6 +8361,7 @@ private:
   std::vector<uint32> _allAppearanceIds;
   std::vector<uint32> _allVanityItemIds;
     std::vector<std::array<uint32, 17>> _woodworkingAppearancePatches;
+  std::vector<std::array<uint32, 17>> _serverPetAppearancePatches;
     std::vector<std::array<uint32, 3>> _woodworkingItemAppearancePatches;
     std::mutex _woodworkingRowMutex;
     std::unordered_map<uint32, std::unordered_set<uint32>> _sentWoodworkingItems;
@@ -8609,6 +8710,15 @@ public:
                     unitDisplayId = creature->GetDisplayId();
 
                 preset = sAscensionPresets->GetPreset(guid.GetEntry(), unitDisplayId);
+            }
+            else if (guid.IsPet())
+            {
+                if (Unit const* unit = ObjectAccessor::GetUnit(*session->GetPlayer(), guid);
+                    unit && unit->IsCreature())
+                {
+                    unitDisplayId = unit->GetDisplayId();
+                    preset = sAscensionPresets->GetPreset(unit->GetEntry(), unitDisplayId);
+                }
             }
 
             if (!preset)
@@ -11172,6 +11282,17 @@ public:
   }
 };
 
+class AscensionCompatPetScript : public PetScript {
+public:
+  AscensionCompatPetScript() : PetScript("AscensionCompatPetScript", {PETHOOK_ON_PET_ADD_TO_WORLD}) {}
+
+  void OnPetAddToWorld(Pet* pet) override {
+    if (pet && ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED) &&
+        sAscensionPresets->HasPreset(pet->GetEntry()))
+      pet->SetUnitFlag2(UNIT_FLAG2_MIRROR_IMAGE);
+  }
+};
+
 void AppendConfiguredClientConfigs(AscensionClientConfig& config) {
   AppendAscensionClientConfigList(ascensionCompatConfig.GetConfigValue<std::string>(
                                       AscensionCompatConfig::CLIENT_BOOLEAN_CONFIGS),
@@ -11225,4 +11346,5 @@ void AddAscensionCompatScripts() {
   new AscensionCompatMirrorImageScript();
   new AscensionCompatWorldScript();
   new AscensionCompatAllCreatureScript();
+  new AscensionCompatPetScript();
 }

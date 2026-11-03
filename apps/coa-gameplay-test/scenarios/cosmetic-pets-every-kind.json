@@ -26,6 +26,7 @@
     {"action": "apply_appearances", "label": "Use the Subdued Mistress Summoner's Stone", "actor": "caller", "selection": {"34": 753}},
     {"action": "assert", "label": "The stone is accepted", "actor": "caller", "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_OK", "equals": 1, "within_ms": 2000},
     {"action": "assert", "label": "THE FIX: the Subdued Mistress is the pet", "actor": "caller", "metric": "pet_entry", "equals": 45906, "within_ms": 5000},
+    {"action": "assert", "label": "A client appearance's pet keeps its family's name", "actor": "caller", "metric": "pet_name_is", "text": "Man'ari Eredar (Purple)", "equals": 1},
     {"action": "assert", "label": "One pet row", "actor": "caller", "metric": "pet_rows", "equals": 1, "within_ms": 5000},
     {"action": "set_money", "actor": "caller", "value": 100000},
     {"action": "client_packet", "label": "Buy a stable slot", "actor": "caller", "opcode": 626, "fields": [{"actor_guid": "stable_master"}], "consumed": false},

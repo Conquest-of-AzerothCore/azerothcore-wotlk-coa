@@ -9,7 +9,7 @@ class Player;
 
 namespace AscensionTaming
 {
-char const* SummonCosmeticPet(Player* player, std::uint32_t tier, std::uint32_t entry);
+char const* SummonCosmeticPet(Player* player, std::uint32_t tier, std::uint32_t entry, bool creatureName = false);
 }
 
 #endif
