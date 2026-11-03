@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Account reputation respects rank-capped quests",
+  "contract": "Quests that only reward reputation up to a rank stay available only while the character's standing is below their RequiredMaxRepValue. Argent Dawn quest 9223 (Superior Armaments of Battle - Honored Amongst the Dawn) requires Honored up to 20999; once another character of the account reaches Revered, the alt receives Revered at login, 9223 is no longer offered and the Revered tier quest 9225 is.",
+  "players": [
+    {
+      "id": "main",
+      "race": 1,
+      "class": 32,
+      "level": 60
+    },
+    {
+      "id": "alt",
+      "race": 3,
+      "class": 20,
+      "level": 60,
+      "account_of": "main"
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_reputation",
+      "actor": "alt",
+      "id": 529,
+      "value": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "alt",
+      "metric": "quest_takeable",
+      "quest": 9223,
+      "equals": 1,
+      "label": "Honored alt can take the Honored tier quest"
+    },
+    {
+      "action": "assert",
+      "actor": "alt",
+      "metric": "quest_takeable",
+      "quest": 9225,
+      "equals": 0,
+      "label": "Honored alt cannot take the Revered tier quest"
+    },
+    {
+      "action": "set_reputation",
+      "actor": "main",
+      "id": 529,
+      "value": 25000
+    },
+    {
+      "action": "relog",
+      "actor": "main"
+    },
+    {
+      "action": "relog",
+      "actor": "alt"
+    },
+    {
+      "action": "assert",
+      "actor": "alt",
+      "metric": "reputation",
+      "id": 529,
+      "equals": 25000,
+      "label": "Alt receives the account's Revered Argent Dawn"
+    },
+    {
+      "action": "assert",
+      "actor": "alt",
+      "metric": "quest_takeable",
+      "quest": 9223,
+      "equals": 0,
+      "label": "Honored tier quest stops once the shared standing is Revered"
+    },
+    {
+      "action": "assert",
+      "actor": "alt",
+      "metric": "quest_takeable",
+      "quest": 9225,
+      "equals": 1,
+      "label": "Revered tier quest opens with the shared standing"
+    }
+  ]
+}

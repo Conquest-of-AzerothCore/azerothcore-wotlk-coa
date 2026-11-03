@@ -875,6 +875,10 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "SELECT c.level, COALESCE(s.data, '') FROM characters c "
         "LEFT JOIN character_settings s ON s.guid = c.guid AND s.source = ? "
         "WHERE c.account = ? AND c.guid <> ? AND c.deleteDate IS NULL", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_ACCOUNT_REPUTATIONS,
+        "SELECT c.race, c.class, r.faction, r.standing FROM character_reputation r "
+        "JOIN characters c ON c.guid = r.guid "
+        "WHERE c.account = ? AND c.guid <> ? AND c.deleteDate IS NULL", CONNECTION_SYNCH);
 
     // Instance saved data. Stores the states of gameobjects in instances to be loaded on server start
     PrepareStatement(CHAR_SELECT_INSTANCE_SAVED_DATA, "SELECT guid, state FROM instance_saved_go_state_data WHERE id = ?", CONNECTION_SYNCH);
