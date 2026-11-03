@@ -9,7 +9,8 @@ namespace AscensionQuestLog
 class QuestLogSync : public PlayerScript
 {
 public:
-    QuestLogSync() : PlayerScript("AscensionQuestLog", {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_MAP_CHANGED}) { }
+    QuestLogSync() : PlayerScript("AscensionQuestLog",
+        {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_MAP_CHANGED}) { }
 
     void OnPlayerLogin(Player* player) override
     {
