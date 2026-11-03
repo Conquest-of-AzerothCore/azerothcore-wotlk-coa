@@ -492,6 +492,11 @@ namespace
 
         void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType type, SpellSchoolMask /*school*/) override
         {
+            if (_broken)
+            {
+                damage = 0;
+                return;
+            }
             uint32 const dealt = damage;
             bool const broken = damage >= me->GetHealth();
             if (broken)

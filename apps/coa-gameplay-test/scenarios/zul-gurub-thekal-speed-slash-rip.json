@@ -140,8 +140,21 @@
     },
     {
       "action": "wait",
+      "label": "Past an 8- or 10-second channel, before the 17-second end",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Speed Slash still runs past ten seconds",
+      "actor": "thekal",
+      "metric": "aura",
+      "spell": 2118232,
+      "equals": 1
+    },
+    {
+      "action": "wait",
       "label": "Past the end of the 17-second channel",
-      "ms": 19000
+      "ms": 11000
     },
     {
       "action": "assert",

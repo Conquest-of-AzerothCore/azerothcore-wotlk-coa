@@ -190,12 +190,12 @@ namespace
 
             _drained = true;
             if (!_avatar.Drain(me))
-                DoCastSelf(SPELL_GIFT_OF_THE_BLOOD_GOD, true);
-            BecomePanther();
+                BecomePanther();
         }
 
         void BecomePanther()
         {
+            DoCastSelf(SPELL_GIFT_OF_THE_BLOOD_GOD, true);
             DoCastSelf(SPELL_ASPECT_OF_BETHEKK, true);
             DoCastSelf(SPELL_RAZOR_CLAWS, true);
             me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, EQUIP_UNEQUIP);
@@ -262,7 +262,7 @@ namespace
                 return;
 
             if (_avatar.Consumed(me))
-                DoCastSelf(SPELL_GIFT_OF_THE_BLOOD_GOD, true);
+                BecomePanther();
 
             events.Update(diff);
 

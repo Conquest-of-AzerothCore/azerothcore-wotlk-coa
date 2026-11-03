@@ -148,6 +148,27 @@
       "damage_pct": 70
     },
     {
+      "action": "snapshot",
+      "actor": "boss",
+      "metric": "health",
+      "save_as": "hakkar_after_break"
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Hit the broken heart again before the siphon's end runs",
+      "actor": "hero",
+      "entry": 92005,
+      "damage_pct": 50
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a broken heart passes no more damage to Hakkar",
+      "actor": "boss",
+      "metric": "health",
+      "relative_to": "hakkar_after_break",
+      "min": 0
+    },
+    {
       "action": "assert",
       "label": "DISCRIMINATING: breaking the heart ends the siphon at once, not after its 20 s",
       "actor": "boss",

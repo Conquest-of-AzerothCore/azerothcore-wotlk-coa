@@ -130,12 +130,36 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: her Ravage hits bleed the hero",
+      "label": "CONTROL: a Ravage hit lands",
+      "actor": "arlokk",
+      "metric": "spell_cast_count",
+      "spell": 2118331,
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "snapshot",
+      "actor": "arlokk",
+      "metric": "spell_proc_count",
+      "spell": 2118325,
+      "save_as": "razor_claws_procs"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: her Ravage hits bleed the hero, beyond the bleeds her melee procs",
+      "actor": "arlokk",
+      "metric": "spell_cast_count",
+      "spell": 2118326,
+      "relative_to": "razor_claws_procs",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero bleeds",
       "actor": "hero",
       "metric": "aura",
       "spell": 2118326,
-      "equals": 1,
-      "within_ms": 20000
+      "equals": 1
     },
     {
       "action": "assert",
