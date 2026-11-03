@@ -195,6 +195,55 @@
       "metric": "combat",
       "equals": 0,
       "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "attack",
+      "actor": "partner",
+      "target": "spectral"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Spectral Citizen fights again",
+      "actor": "spectral",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "partner"
+    },
+    {
+      "action": "client_packet",
+      "actor": "partner",
+      "opcode": 260,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 34
+        },
+        {
+          "u32": 0
+        },
+        {
+          "actor_guid": "spectral"
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "A second dance with the same Spectral Citizen does not reset it",
+      "actor": "spectral",
+      "metric": "combat",
+      "equals": 1
     }
   ]
 }
