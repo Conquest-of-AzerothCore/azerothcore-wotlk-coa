@@ -130,6 +130,7 @@ constexpr float BlobSide = 4.5f;
 constexpr float WebTouch = 1.5f;
 Position const ArenaMiddle = { 304.429f, -206.081f, 341.841f, 0.0f };
 constexpr float WebSpeed = 25.0f;
+constexpr float PitDepth = 15.0f;
 
 using CoAOtherSide::BaseSpellId;
 using CoAOtherSide::Damage3;
@@ -230,6 +231,7 @@ struct boss_coa_chimeric_embryo : public ScriptedAI
         Talk(SAY_DEATH);
         ShowBridge(true);
         _summons.DespawnAll();
+        LiftFromPit();
     }
 
     void JustSummoned(Creature* summon) override
@@ -310,12 +312,7 @@ struct boss_coa_chimeric_embryo : public ScriptedAI
                     SpawnSwirls();
                     break;
                 case EVENT_EGG_PHASE_BLOBS:
-                    for (ObjectGuid const& guid : _swirls)
-                        if (Creature* swirl = ObjectAccessor::GetCreature(*me, guid))
-                        {
-                            swirl->RemoveAurasDueToSpell(SPELL_SWIRL);
-                            swirl->CastSpell(swirl, SPELL_BLOB, true);
-                        }
+                    SendBlobsOnOrbit();
                     break;
                 case EVENT_EGG_RAIN:
                     RainEggs();
@@ -358,6 +355,21 @@ private:
         me->GetGameObjectListWithEntryInGrid(pools, GO_BLOOD_POOL, 200.0f);
         for (GameObject* pool : pools)
             pool->DespawnOrUnsummon();
+    }
+
+    void LiftFromPit()
+    {
+        me->GetMap()->DoForAllPlayers([](Player* player)
+        {
+            if (!player->IsInWorld() || player->GetPositionZ() > ArenaMiddle.GetPositionZ() - PitDepth)
+                return;
+            if (!player->IsAlive())
+            {
+                player->ResurrectPlayer(1.0f);
+                player->SpawnCorpseBones();
+            }
+            player->NearTeleportTo(ArenaMiddle.GetPositionX(), ArenaMiddle.GetPositionY(), ArenaMiddle.GetPositionZ(), FacingPlatform);
+        });
     }
 
     void ShowBridge(bool show)
@@ -588,6 +600,20 @@ private:
             if (!swirl)
                 continue;
             swirl->CastSpell(swirl, SPELL_SWIRL, true);
+            _swirls.push_back(swirl->GetGUID());
+        }
+    }
+
+    void SendBlobsOnOrbit()
+    {
+        for (ObjectGuid const& guid : _swirls)
+        {
+            Creature* swirl = ObjectAccessor::GetCreature(*me, guid);
+            if (!swirl)
+                continue;
+            swirl->RemoveAurasDueToSpell(SPELL_SWIRL);
+            swirl->CastSpell(swirl, SPELL_BLOB, true);
+            float const first = _center.GetAngle(swirl);
             Movement::PointsArray points;
             for (uint32 i = 0; i <= OrbitPoints; ++i)
             {
@@ -601,7 +627,6 @@ private:
             init.SetCyclic();
             init.SetVelocity(OrbitSpeed);
             init.Launch();
-            _swirls.push_back(swirl->GetGUID());
         }
     }
 
@@ -618,6 +643,7 @@ private:
             Creature* egg = Helper(NPC_EGG, me->GetPosition(), 0);
             if (!egg)
                 continue;
+            egg->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             egg->GetMotionMaster()->MoveJump(to, 18.0f, 12.0f);
             _eggs.push_back({ egg->GetGUID(), false });
         }

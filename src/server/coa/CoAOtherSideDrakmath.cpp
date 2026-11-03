@@ -2,6 +2,7 @@
  * Copyright (C) 2016+ AzerothCore <www.azerothcore.org>, released under GNU AGPL v3 license: https://github.com/azerothcore/azerothcore-wotlk/blob/master/LICENSE-AGPL3
  */
 
+#include "AscensionDungeonRelease.h"
 #include "CoAOtherSideDamage.h"
 #include "Creature.h"
 #include "Map.h"
@@ -11,6 +12,7 @@
 #include "Random.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
+#include "Spell.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellInfo.h"
@@ -87,6 +89,7 @@ constexpr float LevitateHeight = 3.0f;
 
 constexpr float OrbHover = 1.2f;
 constexpr int32 OrbExplosionRadiusMod = 17500;
+constexpr int32 MissileImpactRadiusMod = 21250;
 constexpr uint32 PointCenter = 1;
 constexpr uint32 DisplayInvisible = 11686;
 
@@ -186,6 +189,7 @@ struct boss_coa_drakmath : public ScriptedAI
     {
         Talk(SAY_DEATH);
         _summons.DespawnAll();
+        CoASetDungeonReleaseStart(me->GetMap(), ArenaCenter);
         _beaming = false;
         me->RemoveAurasDueToSpell(SPELL_SUBMERGED);
         me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
@@ -533,8 +537,14 @@ private:
                 ++itr;
                 continue;
             }
-            mark->CastSpell(mark->GetPositionX(), mark->GetPositionY(), mark->GetPositionZ(),
-                ByDifficulty(me, SPELL_DEATH_MISSILE_HIT, SPELL_DEATH_MISSILE_HIT_HC, SPELL_DEATH_MISSILE_HIT_MYTHIC), true, nullptr, nullptr, me->GetGUID());
+            if (SpellInfo const* hit = sSpellMgr->GetSpellInfo(ByDifficulty(me, SPELL_DEATH_MISSILE_HIT, SPELL_DEATH_MISSILE_HIT_HC, SPELL_DEATH_MISSILE_HIT_MYTHIC)))
+            {
+                SpellCastTargets targets;
+                targets.SetDst(mark->GetPositionX(), mark->GetPositionY(), mark->GetPositionZ(), mark->GetOrientation());
+                CustomSpellValues values;
+                values.AddSpellMod(SPELLVALUE_RADIUS_MOD, MissileImpactRadiusMod);
+                mark->CastSpell(targets, hit, &values, TRIGGERED_FULL_MASK, nullptr, nullptr, me->GetGUID());
+            }
             mark->RemoveAurasDueToSpell(SPELL_IMPACT_ZONE);
             mark->DespawnOrUnsummon(500ms);
             itr = _missiles.erase(itr);

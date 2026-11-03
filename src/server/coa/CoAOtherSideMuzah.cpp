@@ -2,6 +2,7 @@
  * Copyright (C) 2016+ AzerothCore <www.azerothcore.org>, released under GNU AGPL v3 license: https://github.com/azerothcore/azerothcore-wotlk/blob/master/LICENSE-AGPL3
  */
 
+#include "AscensionDungeonRelease.h"
 #include "Creature.h"
 #include "CoAOtherSideDamage.h"
 #include "GameObject.h"
@@ -91,6 +92,7 @@ enum MuzahData : uint32
 
 Position const ArenaCenter = { 100.9f, -123.9f, 224.976f, 0.0f };
 constexpr float ArenaRadius = 17.0f;
+constexpr float ArenaFloorTolerance = 3.0f;
 constexpr float ArenaSearch = 120.0f;
 constexpr float WallGap = 3.0f;
 constexpr uint32 GlaiveCastMs = 2000;
@@ -106,6 +108,7 @@ constexpr float StrikeWidth = 2.5f;
 constexpr float StrikeLength = 53.0f;
 
 constexpr float BatCrashRadius = 3.0f;
+constexpr int32 GlaiveRadiusMod = 17500;
 
 using CoAOtherSide::Damage3;
 using CoAOtherSide::Logged;
@@ -162,7 +165,8 @@ void DealSpellValue(Unit* attacker, Unit* target, uint32 spellId, int32 value)
 Position GroundAt(WorldObject const* source, float x, float y)
 {
     float const z = source->GetMap()->GetHeight(source->GetPhaseMask(), x, y, ArenaCenter.GetPositionZ() + 5.0f);
-    return { x, y, z > INVALID_HEIGHT ? z : ArenaCenter.GetPositionZ(), 0.0f };
+    bool const onFloor = z > INVALID_HEIGHT && std::fabs(z - ArenaCenter.GetPositionZ()) <= ArenaFloorTolerance;
+    return { x, y, onFloor ? z : ArenaCenter.GetPositionZ(), 0.0f };
 }
 
 Position RandomArenaPoint(WorldObject const* source, float maxRadius = ArenaRadius)
@@ -220,6 +224,7 @@ struct boss_coa_muzah : public ScriptedAI
         Talk(SAY_DEATH);
         _summons.DespawnAll();
         SetGates(GO_STATE_ACTIVE);
+        CoASetDungeonReleaseStart(me->GetMap(), ArenaCenter);
         for (bool visible : { true, false })
             for (Creature* bat : CirclingBats(visible))
                 bat->DespawnOrUnsummon(0ms, Seconds(WEEK));
@@ -637,7 +642,8 @@ struct npc_coa_muzah_glaive : public ScriptedAI
         if (_pulse <= diff)
         {
             _pulse = 700;
-            me->CastSpell(me, ByDifficulty(me, SPELL_RIPPED_BY_THE_GLAIVES, SPELL_RIPPED_BY_THE_GLAIVES_HC, SPELL_RIPPED_BY_THE_GLAIVES_MYTHIC), true);
+            me->CastCustomSpell(ByDifficulty(me, SPELL_RIPPED_BY_THE_GLAIVES, SPELL_RIPPED_BY_THE_GLAIVES_HC, SPELL_RIPPED_BY_THE_GLAIVES_MYTHIC),
+                SPELLVALUE_RADIUS_MOD, GlaiveRadiusMod, me, TRIGGERED_FULL_MASK);
         }
         else
             _pulse -= diff;
