@@ -392,7 +392,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     nullptr,                                                      //323 unknown Ascension aura
     nullptr,                                                      //324 unknown Ascension aura
     nullptr,                                                      //325 unknown Ascension aura
-    nullptr,                                                      //326 unknown Ascension aura
+    &AuraEffect::HandleNoImmediateEffect,                         //326 SPELL_AURA_ASCENSION_SUPPRESS_AVOIDANCE
     &AuraEffect::HandleAscensionModStatFromStat,                  //327 SPELL_AURA_ASCENSION_MOD_STAT_FROM_STAT
     &AuraEffect::HandleAscensionModMaxManaFromStat,               //328 SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT
     nullptr,                                                      //329 unknown Ascension aura
@@ -414,7 +414,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleModHealingDone,                            //345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT
     nullptr,                                                      //346 unknown Ascension aura
     nullptr,                                                      //347 unknown Ascension aura
-    nullptr,                                                      //348 unknown Ascension aura
+    &AuraEffect::HandleNoImmediateEffect,                         //348 SPELL_AURA_ASCENSION_DEFEND_DURING_CAST
     nullptr,                                                      //349 unknown Ascension aura
     &AuraEffect::HandleAscensionModCritChance,                    //350 SPELL_AURA_ASCENSION_MOD_CRIT_CHANCE
     nullptr,                                                      //351 unknown Ascension aura
@@ -431,7 +431,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     nullptr,                                                      //362 unknown Ascension aura
     nullptr,                                                      //363 unknown Ascension aura
     nullptr,                                                      //364 unknown Ascension aura
-    nullptr,                                                      //365 unknown Ascension aura
+    &AuraEffect::HandleNoImmediateEffect,                         //365 SPELL_AURA_ASCENSION_MOD_POWER_COST_PCT
     nullptr,                                                      //366 unknown Ascension aura
 };
 

@@ -26,6 +26,7 @@
 #include <cmath>
 #include <limits>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -80,6 +81,9 @@ struct ManastormRewardPublication
     std::vector<std::unique_ptr<Item>> Items;
     bool HasWeeklyAllowance = false;
     ManastormWeeklyCacheAllowance WeeklyAllowance;
+    bool HasCoATokens = false;
+    ManastormCoALoot::Window CoAWindow;
+    uint32 CoATokens = 0;
 };
 
 ManastormRewards& ManastormRewards::Instance()
@@ -99,9 +103,10 @@ bool ManastormRewards::Load()
     _completionRewards.clear();
     _groupRewardRanges.clear();
     _potentialRewards.clear();
+    _coaTokenRules.clear();
     _treasureKeeper = {};
 
-    if (!LoadCacheBrackets() ||
+    if (!LoadCoATokenRules() || !LoadCacheBrackets() ||
         !LoadCacheUnlockRequirements() ||
         !LoadRewardRules() ||
         !LoadGroupRewardMultipliers() ||
@@ -962,6 +967,171 @@ bool ManastormRewards::LoadTreasureKeeperRule()
     return true;
 }
 
+bool ManastormRewards::LoadCoATokenRules()
+{
+    if (!ManastormModuleConfig::CoALootModeEnabled())
+        return true;
+    if (!sObjectMgr->GetItemTemplate(ManastormCoALoot::TokenItem))
+    {
+        LOG_ERROR(LOG_FILTER, "CoA Manastorm Bazaar Token item {} is missing.", ManastormCoALoot::TokenItem);
+        return false;
+    }
+    QueryResult result = WorldDatabase.Query(
+        "SELECT mode, track, min_depth, max_depth, first_clear_tokens, repeat_tokens, "
+        "milestone_every, milestone_tokens FROM manastorm_coa_token_rewards "
+        "WHERE enabled = 1 ORDER BY priority DESC, id ASC");
+    if (!result)
+    {
+        LOG_ERROR(LOG_FILTER, "CoA Manastorm token reward rules are missing or empty.");
+        return false;
+    }
+    do
+    {
+        Field* f = result->Fetch();
+        CoATokenRule rule{f[0].Get<uint8>(), f[1].Get<uint8>(), f[2].Get<uint32>(), f[3].Get<uint32>(),
+            f[4].Get<uint32>(), f[5].Get<uint32>(), f[6].Get<uint32>(), f[7].Get<uint32>()};
+        if (rule.Mode > 4 || rule.Track > 2 || !rule.MinDepth ||
+            (rule.MaxDepth && rule.MaxDepth < rule.MinDepth) || rule.FirstClearTokens > 1000000 ||
+            rule.RepeatTokens > 1000000 || rule.MilestoneTokens > 1000000)
+        {
+            LOG_ERROR(LOG_FILTER, "Invalid CoA Manastorm token reward rule.");
+            return false;
+        }
+        _coaTokenRules.push_back(rule);
+    } while (result->NextRow());
+    return true;
+}
+
+bool ManastormRewards::IsCoALootMode(ObjectGuid::LowType characterGuid) const
+{
+    return _loaded && ManastormModuleConfig::CoALootModeEnabled() &&
+        !(GetActiveGameModeMask(characterGuid) & GAME_MODE_WILDCARD);
+}
+
+bool ManastormRewards::LoadCoATokenState(ObjectGuid::LowType characterGuid, ManastormCoATokenState& state) const
+{
+    state = {};
+    auto* select = CharacterDatabase.GetPreparedStatement(CHAR_SEL_MANASTORM_COA_TOKEN_WINDOW);
+    select->SetData(0, characterGuid);
+    PreparedQueryResult result = CharacterDatabase.Query(select);
+    if (!result)
+        return false;
+    Field* fields = result->Fetch();
+    state.Window = ManastormCoALoot::CurrentWindow(
+        {fields[0].Get<uint32>(), fields[1].Get<uint32>(), fields[2].Get<uint32>()},
+        uint32(GameTime::GetGameTime().count()));
+    state.Revision = fields[3].Get<uint64>();
+    auto* clears = CharacterDatabase.GetPreparedStatement(CHAR_SEL_MANASTORM_COA_TOKEN_CLEARS);
+    clears->SetData(0, characterGuid);
+    PreparedQueryResult rows = CharacterDatabase.Query(clears);
+    if (!rows)
+        return false;
+    do
+    {
+        Field* row = rows->Fetch();
+        if (row[2].Get<uint32>() && (!ManastormModuleConfig::CoAFirstClearResetsWithWindow() ||
+            (state.Window.Start && row[3].Get<uint32>() == state.Window.Start)))
+            state.Clears.push_back({row[0].Get<uint32>(), row[1].Get<uint32>(), row[2].Get<uint32>()});
+    } while (rows->NextRow());
+    return true;
+}
+
+bool ManastormRewards::IsCoAFirstClear(ManastormCoATokenState const& state, ManastormMode mode,
+    bool endgame, uint32 depth) const
+{
+    std::array<uint32, 3> const key{uint32(mode), TrackBit(endgame), depth};
+    return std::find(state.Clears.begin(), state.Clears.end(), key) == state.Clears.end();
+}
+
+uint32 ManastormRewards::CoATokenReward(ManastormMode mode, bool endgame, uint32 depth, bool firstClear) const
+{
+    for (CoATokenRule const& rule : _coaTokenRules)
+    {
+        if ((rule.Mode && rule.Mode != uint8(mode)) || (rule.Track && rule.Track != TrackBit(endgame)) ||
+            depth < rule.MinDepth || (rule.MaxDepth && depth > rule.MaxDepth))
+            continue;
+        if (firstClear)
+        {
+            if (!ManastormModuleConfig::CoAFirstClearEnabled())
+                return 0;
+            return SaturatingAdd(rule.FirstClearTokens,
+                rule.MilestoneEvery && depth % rule.MilestoneEvery == 0 ? rule.MilestoneTokens : 0u);
+        }
+        return ManastormModuleConfig::CoARepeatEnabled() ? rule.RepeatTokens : 0;
+    }
+    return 0;
+}
+
+bool ManastormRewards::PrepareCoATokenReward(ObjectGuid::LowType characterGuid, ManastormRun const& run,
+    CharacterDatabaseTransaction const& transaction, uint32& quantity, ManastormCoATokenState& state,
+    std::string& error) const
+{
+    if (!LoadCoATokenState(characterGuid, state))
+    {
+        error = "Unable to read CoA Manastorm token allowance.";
+        return false;
+    }
+    bool const first = IsCoAFirstClear(state, run.GetMode(), run.IsEndgame(), run.GetDepth());
+    if (!state.Window.Start)
+    {
+        state.Window.Start = uint32(GameTime::GetGameTime().count());
+        state.Window.End = uint32(std::min<uint64>(std::numeric_limits<uint32>::max(),
+            uint64(state.Window.Start) + ManastormModuleConfig::CoATokenWindowSeconds()));
+    }
+    quantity = ManastormCoALoot::Award(CoATokenReward(run.GetMode(), run.IsEndgame(), run.GetDepth(), first),
+        state.Window.Earned, ManastormModuleConfig::CoATokenCap());
+    state.Window.Earned += quantity;
+    auto* save = CharacterDatabase.GetPreparedStatement(CHAR_SAVE_MANASTORM_COA_TOKEN_WINDOW);
+    save->SetData(0, characterGuid);
+    save->SetData(1, state.Window.Start);
+    save->SetData(2, state.Window.End);
+    save->SetData(3, state.Window.Earned);
+    save->SetData(4, state.Revision);
+    transaction->Append(save);
+    auto* clear = CharacterDatabase.GetPreparedStatement(CHAR_SAVE_MANASTORM_COA_TOKEN_CLEAR);
+    clear->SetData(0, characterGuid);
+    clear->SetData(1, uint8(run.GetMode()));
+    clear->SetData(2, TrackBit(run.IsEndgame()));
+    clear->SetData(3, run.GetDepth());
+    clear->SetData(4, state.Window.Start);
+    transaction->Append(clear);
+    return true;
+}
+
+std::string ManastormRewards::CoATokenClientState(ObjectGuid::LowType characterGuid,
+    ManastormRun const* run) const
+{
+    if (!IsCoALootMode(characterGuid))
+        return "{enabled=false}";
+    ManastormCoATokenState state;
+    if (!LoadCoATokenState(characterGuid, state))
+        return "{enabled=true,unavailable=true}";
+    std::ostringstream lua;
+    uint32 bonusItem = 0;
+    Player* player = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(characterGuid));
+    if (run && run->GetBonusCacheCount() && player)
+        ResolveCacheItemEntry(run->IsEndgame(), run->GetDepth(), player->GetLevel(), bonusItem,
+            characterGuid, uint8(run->GetMode()));
+    lua << "{enabled=true,earned=" << state.Window.Earned << ",cap=" << ManastormModuleConfig::CoATokenCap()
+        << ",start=" << state.Window.Start << ",finish=" << state.Window.End
+        << ",now=" << uint32(GameTime::GetGameTime().count())
+        << ",first=" << (ManastormModuleConfig::CoAFirstClearEnabled() ? "true" : "false")
+        << ",repeatReward=" << (ManastormModuleConfig::CoARepeatEnabled() ? "true" : "false")
+        << ",perWindow=" << (ManastormModuleConfig::CoAFirstClearResetsWithWindow() ? "true" : "false")
+        << ",bonus=" << (run ? run->GetBonusCacheCount() : 0) << ",bonusItem=" << bonusItem
+        << ",mode=" << (run ? uint32(run->GetMode()) : 1)
+        << ",track=" << (run && run->IsEndgame() ? 2 : 1) << ",rules={";
+    for (CoATokenRule const& rule : _coaTokenRules)
+        lua << '{' << uint32(rule.Mode) << ',' << uint32(rule.Track) << ',' << rule.MinDepth << ','
+            << rule.MaxDepth << ',' << rule.FirstClearTokens << ',' << rule.RepeatTokens << ','
+            << rule.MilestoneEvery << ',' << rule.MilestoneTokens << "},";
+    lua << "},clears={";
+    for (auto const& key : state.Clears)
+        lua << "[\"" << key[0] << ':' << key[1] << ':' << key[2] << "\"]=true,";
+    lua << "}}";
+    return lua.str();
+}
+
 bool ManastormRewards::ValidateCharacterSchema() const
 {
     QueryResult result =
@@ -1000,6 +1170,14 @@ bool ManastormRewards::ValidateCharacterSchema() const
         "SELECT COUNT(*) FROM character_manastorm_pending_currency WHERE guid = 0"))
     {
         LOG_ERROR(LOG_FILTER, "Apply 04_manastorm_pending_currency.sql to acore_characters.");
+        return false;
+    }
+
+    if (ManastormModuleConfig::CoALootModeEnabled() &&
+        (!CharacterDatabase.Query("SELECT COUNT(*) FROM character_manastorm_coa_token_window WHERE guid = 0") ||
+         !CharacterDatabase.Query("SELECT COUNT(*) FROM character_manastorm_coa_token_clear WHERE guid = 0")))
+    {
+        LOG_ERROR(LOG_FILTER, "Apply the CoA Manastorm token character migration before enabling its loot mode.");
         return false;
     }
 
@@ -1422,10 +1600,18 @@ bool ManastormRewards::PrepareStageCompletion(
         }
         bool const firstClear = completed->Fetch()[0].Get<uint64>() == 0;
         bool const wildcard = (GetActiveGameModeMask(characterGuid) & GAME_MODE_WILDCARD) != 0;
+        bool const coaLoot = ManastormModuleConfig::CoALootModeEnabled() && !wildcard;
+        uint32 coaTokens = 0;
+        ManastormCoATokenState coaState;
+        if (coaLoot && !PrepareCoATokenReward(characterGuid, run, transaction, coaTokens, coaState, error))
+        {
+            publications.clear();
+            return false;
+        }
 
         bool wonNormalCache = false;
         uint32 nextCacheChance = state.CacheChancePct;
-        if (!PrepareNormalCacheReward(characterGuid, run.IsEndgame(), state, transaction,
+        if (!coaLoot && !PrepareNormalCacheReward(characterGuid, run.IsEndgame(), state, transaction,
             wonNormalCache, nextCacheChance, allowance, error))
         {
             publications.clear();
@@ -1653,7 +1839,7 @@ bool ManastormRewards::PrepareStageCompletion(
         deferCurrency(_bonzo.ItemEntry, bonzo);
         deferCurrency(_bedlam.ItemEntry, bedlam);
 
-        if (!appendQuantity(
+        if (!appendQuantity(ManastormCoALoot::TokenItem, coaTokens) || !appendQuantity(
                 cacheItemEntry,
                 cacheCount) ||
             !appendQuantity(
@@ -1673,7 +1859,8 @@ bool ManastormRewards::PrepareStageCompletion(
         // Preserve fractional multipliers independently for every mode and track.
         for (RewardRule const& rule : _completionRewards)
         {
-            if ((rule.WildcardOnly && !wildcard) ||
+            if ((coaLoot && rule.ItemEntry == ManastormCoALoot::TokenItem) ||
+                (rule.WildcardOnly && !wildcard) ||
                 (rule.NonWildcardOnly && wildcard) ||
                 (rule.FirstClearOnly && !firstClear) ||
                 (rule.EndgameOnly && track != TrackBit(true)))
@@ -1733,6 +1920,18 @@ bool ManastormRewards::PrepareStageCompletion(
             }
             publications[firstPublication]->HasWeeklyAllowance = true;
             publications[firstPublication]->WeeklyAllowance = allowance;
+        }
+        if (coaLoot)
+        {
+            if (firstPublication == publications.size())
+            {
+                auto notice = std::make_shared<ManastormRewardPublication>();
+                notice->CharacterGuid = characterGuid;
+                publications.push_back(std::move(notice));
+            }
+            publications[firstPublication]->HasCoATokens = true;
+            publications[firstPublication]->CoAWindow = coaState.Window;
+            publications[firstPublication]->CoATokens = coaTokens;
         }
 
         LOG_INFO(
@@ -2044,6 +2243,14 @@ void ManastormRewards::PublishCommitted(
                             publication->
                                 CharacterGuid));
 
+        if (player && publication->HasCoATokens)
+        {
+            player->SendSystemMessage(Acore::StringFormat(
+                "Manastorm Bazaar Tokens: +{}. {}/{} earned in your personal window; {} remaining. Reset: {}.",
+                publication->CoATokens, publication->CoAWindow.Earned, ManastormModuleConfig::CoATokenCap(),
+                ManastormCoALoot::Remaining(publication->CoAWindow.Earned, ManastormModuleConfig::CoATokenCap()),
+                Acore::Time::TimeToTimestampStr(Seconds(publication->CoAWindow.End))).c_str());
+        }
         if (player && publication->HasWeeklyAllowance)
         {
             ManastormWeeklyCacheAllowance const& allowance = publication->WeeklyAllowance;
@@ -2338,6 +2545,7 @@ uint32 ManastormRewards::GetActiveGameModeMask(ObjectGuid::LowType characterGuid
 std::vector<ManastormRewardVisibilityRecord>
 ManastormRewards::BuildVisibilityRecords(ObjectGuid::LowType characterGuid, bool endgame, uint32 bonusCaches) const
 {
+    bool const coaLoot = IsCoALootMode(characterGuid);
     bool const wildcard = (GetActiveGameModeMask(characterGuid) & GAME_MODE_WILDCARD) != 0;
     std::vector<
         ManastormRewardVisibilityRecord>
@@ -2347,7 +2555,7 @@ ManastormRewards::BuildVisibilityRecords(ObjectGuid::LowType characterGuid, bool
         _potentialRewards.size());
 
     ManastormWeeklyCacheAllowance allowance;
-    bool const allowanceAvailable = !endgame || LoadWeeklyCacheAllowance(characterGuid, allowance);
+    bool const allowanceAvailable = coaLoot || !endgame || LoadWeeklyCacheAllowance(characterGuid, allowance);
 
     for (PotentialReward const& reward :
         _potentialRewards)
@@ -2368,6 +2576,9 @@ ManastormRewards::BuildVisibilityRecords(ObjectGuid::LowType characterGuid, bool
                   reward.ItemEntry != 97885 && reward.ItemEntry != 97886) || wildcard)
             ? 0
             : 1;
+
+        if (coaLoot && record.ItemEntry == 97884)
+            record.Action = bonusCaches ? 0 : 1;
 
         if (record.ItemEntry == 97884 && record.Action == 0 && allowance.Enabled)
         {
@@ -2407,6 +2618,25 @@ ManastormRewards::BuildVisibilityRecords(ObjectGuid::LowType characterGuid, bool
             }
             records.push_back(record);
         }
+    }
+
+    if (coaLoot)
+    {
+        ManastormRewardVisibilityRecord token;
+        token.ItemEntry = ManastormCoALoot::TokenItem;
+        ManastormCoATokenState state;
+        bool const available = LoadCoATokenState(characterGuid, state);
+        token.MaxQuantity = ManastormModuleConfig::CoATokenCap();
+        token.EarnedQuantity = state.Window.Earned;
+        token.RemainingQuantity = available
+            ? ManastormCoALoot::Remaining(state.Window.Earned, token.MaxQuantity) : 0;
+        token.Action = token.RemainingQuantity ? 0 : 2;
+        token.WindowStart = state.Window.Start;
+        token.WindowEnd = state.Window.End;
+        token.LockEndTimestamp = token.Action == 2 ? state.Window.End : 0;
+        uint32 const now = uint32(GameTime::GetGameTime().count());
+        token.SecondsRemaining = state.Window.End > now ? state.Window.End - now : 0;
+        records.push_back(token);
     }
 
     return records;

@@ -22,6 +22,7 @@
 #include "CellImpl.h"
 #include "Containers.h"
 #include "Corpse.h"
+#include "DBCStores.h"
 #include <array>
 #include "Chat.h"
 #include "Common.h"
@@ -242,7 +243,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectRemoveAura,                               //164 SPELL_EFFECT_REMOVE_AURA
     &Spell::EffectAscensionModifyCooldown,                  //165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN
     &Spell::EffectAscensionRestoreBaseManaPct,              //166 SPELL_EFFECT_ASCENSION_RESTORE_BASE_MANA_PCT
-    &Spell::EffectNULL,                                     //167 unknown Ascension effect
+    &Spell::EffectAscensionPlayMovie,                       //167 SPELL_EFFECT_ASCENSION_PLAY_MOVIE
     &Spell::EffectAscensionPlaySpellVisualKit,              //168 SPELL_EFFECT_ASCENSION_PLAY_SPELL_VISUAL_KIT
     &Spell::EffectAscensionSpreadAura,                      //169 SPELL_EFFECT_ASCENSION_SPREAD_AURA
     &Spell::EffectAscensionSpellFanout,                     //170 SPELL_EFFECT_ASCENSION_SPREAD_AURA_2
@@ -257,7 +258,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectNULL,                                     //179 unknown Ascension effect
     &Spell::EffectNULL,                                     //180 unknown Ascension effect
     &Spell::EffectAscensionRestoreBaseHealthPct,            //181 SPELL_EFFECT_ASCENSION_RESTORE_BASE_HEALTH_PCT
-    &Spell::EffectNULL,                                     //182 unknown Ascension effect
+    &Spell::EffectAscensionFaceNearestPlayer,               //182 Ascension face nearest qualifying player
     &Spell::EffectAscensionTriggerSpellDelayed,             //183 SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED
     &Spell::EffectNULL,                                     //184 SPELL_EFFECT_ASCENSION_TRIGGER_RANDOM_SPELL
     &Spell::EffectNULL,                                     //185 unknown Ascension effect
@@ -273,7 +274,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
     &Spell::EffectAscensionResetCooldown,                   //195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN
     &Spell::EffectNULL,                                     //196 unknown Ascension effect
     &Spell::EffectAscensionModifyFamilyCooldown,            //197 SPELL_EFFECT_ASCENSION_MODIFY_FAMILY_COOLDOWN
-    &Spell::EffectNULL,                                     //198 unknown Ascension effect
+    &Spell::EffectAscensionModifyFamilyDotDuration,         //198 SPELL_EFFECT_ASCENSION_MODIFY_FAMILY_DOT_DURATION
 };
 
 void Spell::EffectNULL(SpellEffIndex /*effIndex*/)
@@ -398,6 +399,22 @@ void Spell::EffectAscensionModifyCooldown(SpellEffIndex effIndex)
     Player* player = target ? target->ToPlayer() : nullptr;
     SpellEffectInfo const& effect = m_spellInfo->Effects[effIndex];
     ModifyAscensionCooldown(player, effect.MiscValue, damage, effect.MiscValueB != 0);
+}
+
+void Spell::EffectAscensionPlayMovie(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET || !unitTarget)
+        return;
+
+    Player* player = unitTarget->ToPlayer();
+    if (!player || !player->IsInWorld())
+        return;
+
+    int32 const movieId = m_spellInfo->Effects[effIndex].MiscValue;
+    if (movieId <= 0 || !sMovieStore.LookupEntry(uint32(movieId)))
+        return;
+
+    player->SendMovieStart(uint32(movieId));
 }
 
 void Spell::EffectAscensionPlaySpellVisualKit(SpellEffIndex effIndex)
@@ -744,6 +761,34 @@ void Spell::EffectAscensionSpellFanout(SpellEffIndex effIndex)
         caster->CastSpell(target, payload, TRIGGERED_FULL_MASK, nullptr, nullptr, caster->GetGUID());
 }
 
+void Spell::EffectAscensionModifyFamilyDotDuration(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET || !unitTarget || damage < 0)
+        return;
+
+    SpellEffectInfo const& effect = m_spellInfo->Effects[effIndex];
+    if (!effect.SpellClassMask)
+        return;
+
+    ObjectGuid const owner = GetOriginalCasterGUID().IsEmpty() ? m_caster->GetGUID() : GetOriginalCasterGUID();
+    for (auto const& [id, application] : unitTarget->GetAppliedAuras())
+    {
+        Aura* aura = application->GetBase();
+        SpellInfo const* info = aura->GetSpellInfo();
+        if (aura->GetCasterGUID() != owner || aura->GetDuration() <= 0 ||
+            info->SpellFamilyName != m_spellInfo->SpellFamilyName || !(info->SpellFamilyFlags & effect.SpellClassMask))
+            continue;
+        if (!info->HasAura(SPELL_AURA_PERIODIC_DAMAGE) && !info->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT) &&
+            !info->HasAura(SPELL_AURA_PERIODIC_LEECH))
+            continue;
+        if (damage <= 1)
+            aura->RefreshDuration();
+        else
+            aura->SetDuration(int32(std::min<int64>(std::numeric_limits<int32>::max(),
+                int64(aura->GetDuration()) + damage)));
+    }
+}
+
 void Spell::EffectAscensionRefreshAura(SpellEffIndex effIndex)
 {
     if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT_TARGET)
@@ -935,6 +980,29 @@ void Spell::EffectAscensionRestoreBaseHealthPct(SpellEffIndex effIndex)
     m_damageBeforeTakenMods -= heal;
     heal = unitTarget->SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, HEAL);
     m_damage -= heal;
+}
+
+void Spell::EffectAscensionFaceNearestPlayer(SpellEffIndex effIndex)
+{
+    if (effectHandleMode != SPELL_EFFECT_HANDLE_HIT || !m_caster->IsInWorld() || damage <= 0)
+        return;
+
+    int32 const requiredAura = m_spellInfo->Effects[effIndex].MiscValue;
+    if (requiredAura < 0)
+        return;
+
+    float const range = float(damage);
+    Player* target = nullptr;
+    Acore::NearestPlayerInObjectRangeCheck nearest(m_caster, range);
+    auto check = [&](Player* player)
+    {
+        return player != m_caster && (!requiredAura || player->HasAura(uint32(requiredAura))) && nearest(player);
+    };
+    Acore::PlayerLastSearcher<decltype(check)> searcher(m_caster, target, check);
+    Cell::VisitObjects(m_caster, searcher, range);
+
+    if (target)
+        m_caster->SetFacingToObject(target);
 }
 
 void Spell::EffectAscensionTriggerSpellDelayed(SpellEffIndex effIndex)

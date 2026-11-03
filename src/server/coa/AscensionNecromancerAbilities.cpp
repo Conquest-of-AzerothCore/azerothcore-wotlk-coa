@@ -159,8 +159,7 @@ class necromancer_casts : public AllSpellScript
             result = SPELL_FAILED_CASTER_AURASTATE;
         if (Cost(player, id) > Capacity(player))
             result = SPELL_FAILED_ALREADY_HAVE_SUMMON;
-        if (Command(info) && (player->HasAura(500983) ||
-            (!Named(info, 504868) && Minions(player).empty())))
+        if (Command(info) && (player->HasAura(500983) || Minions(player).empty()))
             result = SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
         if ((id == 500443 || id == 801938) && !player->HasAura(803782) && !Diseases(player, target))
             result = SPELL_FAILED_TARGET_AURASTATE;

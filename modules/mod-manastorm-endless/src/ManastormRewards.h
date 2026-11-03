@@ -4,6 +4,7 @@
 #include "DatabaseEnv.h"
 #include "ManastormDefines.h"
 #include "ManastormReleaseStage.h"
+#include "ManastormCoALootPolicy.h"
 
 #include <array>
 #include <memory>
@@ -51,6 +52,13 @@ struct ManastormRewardVisibilityRecord
     uint32 WindowEnd = 0;
 };
 
+struct ManastormCoATokenState
+{
+    ManastormCoALoot::Window Window;
+    uint64 Revision = 0;
+    std::vector<std::array<uint32, 3>> Clears;
+};
+
 class ManastormRewards
 {
 public:
@@ -58,6 +66,11 @@ public:
 
     bool Load();
     bool IsLoaded() const { return _loaded; }
+    bool IsCoALootMode(ObjectGuid::LowType characterGuid) const;
+    bool LoadCoATokenState(ObjectGuid::LowType characterGuid, ManastormCoATokenState& state) const;
+    bool IsCoAFirstClear(ManastormCoATokenState const& state, ManastormMode mode, bool endgame, uint32 depth) const;
+    uint32 CoATokenReward(ManastormMode mode, bool endgame, uint32 depth, bool firstClear) const;
+    std::string CoATokenClientState(ObjectGuid::LowType characterGuid, ManastormRun const* run) const;
 
     bool LoadState(
         ObjectGuid::LowType characterGuid,
@@ -163,6 +176,18 @@ private:
         double Multiplier = 1.0;
     };
 
+    struct CoATokenRule
+    {
+        uint8 Mode = 0;
+        uint8 Track = 0;
+        uint32 MinDepth = 1;
+        uint32 MaxDepth = 0;
+        uint32 FirstClearTokens = 25;
+        uint32 RepeatTokens = 10;
+        uint32 MilestoneEvery = 0;
+        uint32 MilestoneTokens = 0;
+    };
+
     struct PotentialReward
     {
         uint8 DisplayOrder = 0;
@@ -200,6 +225,10 @@ private:
     uint32 GetActiveGameModeMask(ObjectGuid::LowType characterGuid) const;
 
     bool LoadCacheBrackets();
+    bool LoadCoATokenRules();
+    bool PrepareCoATokenReward(ObjectGuid::LowType characterGuid, ManastormRun const& run,
+        CharacterDatabaseTransaction const& transaction, uint32& quantity,
+        ManastormCoATokenState& state, std::string& error) const;
     bool LoadCacheUnlockRequirements();
     void LoadReleasedItemLevelCaps();
     bool LoadRewardRules();
@@ -228,6 +257,7 @@ private:
     std::vector<RewardRule> _completionRewards;
     std::vector<GroupRewardRange> _groupRewardRanges;
     std::vector<PotentialReward> _potentialRewards;
+    std::vector<CoATokenRule> _coaTokenRules;
     TreasureKeeperRule _treasureKeeper;
     bool _loaded = false;
 };
