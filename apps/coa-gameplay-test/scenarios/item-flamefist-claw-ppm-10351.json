@@ -2,10 +2,10 @@
   "schema": 1,
   "name": "Flamefist Claw procs at 2 per minute instead of on every hit (#10351)",
   "contract": [
-    "Item 1378534 carries spell 312410 whose tooltip states 2ppm. Over 90 seconds of 2.6 s swings about 35 hits land, so 2ppm gives about 3 procs, while a proc on every hit gives about 35.",
-    "Require landed melee hits as setup and bound the Sears damage count far below the hit count."
+    "Item 1378534 carries spell 312410 whose tooltip states 2ppm. Over 180 seconds of 2.6 s swings about 69 hits land, so 2ppm gives about 6 procs, while a proc on every hit gives about 69.",
+    "Require landed melee hits as setup and bound the Sears damage count above zero and far below the hit count."
   ],
-  "timeout_ms": 240000,
+  "timeout_ms": 300000,
   "players": [
     {
       "id": "w",
@@ -35,13 +35,13 @@
     { "action": "equip", "actor": "w", "item": 1378534, "slot": 15 },
     { "action": "wait", "ms": 1000 },
     { "action": "attack", "actor": "w", "target": "d" },
-    { "action": "wait", "ms": 90000 },
+    { "action": "wait", "ms": 180000 },
     {
       "action": "assert",
       "actor": "w",
       "metric": "melee_damage_count",
       "target": "d",
-      "min": 25,
+      "min": 50,
       "label": "SETUP melee hits landed"
     },
     {
@@ -50,8 +50,9 @@
       "metric": "spell_damage_count",
       "spell": 312410,
       "target": "d",
-      "max": 12,
-      "label": "Sears procs at a 2ppm rate, far below one per hit"
+      "min": 1,
+      "max": 20,
+      "label": "Sears procs at a 2ppm rate, at least once and far below one per hit"
     }
   ]
 }
