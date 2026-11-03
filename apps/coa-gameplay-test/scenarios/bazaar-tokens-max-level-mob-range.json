@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Bazaar kill tokens at maximum level need a mob within five levels",
-  "contract": "At default settings a level-60 character earns tokens only from creatures whose own level is at most five below them, even though Blackrock Depths scales its creatures to the character. A level-59 character is judged on the level they are shown, which in this dungeon is their own. In one group, Fineous Darkvire 9056 (level 54, spawn guid 47631) pays the level-60 member nothing and the level-59 member 6-12; Lord Incendius 9017 (level 55, spawn guid 47733) pays both members 6-12.",
+  "name": "Bazaar kill tokens at maximum level follow the level the player is shown",
+  "contract": "At default settings every character is judged on the level a creature is shown to them. Blackrock Depths scales its creatures to the character inside the dungeon's band, so in one group Fineous Darkvire 9056 (own level 54, spawn guid 47631) pays both the level-60 and the level-59 member 6-12, and Lord Incendius 9017 (level 55, spawn guid 47733) pays both members 6-12.",
   "timeout_ms": 90000,
   "location": {
     "map": 0,
@@ -120,7 +120,9 @@
       "metric": "item_count",
       "item": 975001,
       "relative_to": "capped_9056",
-      "equals": 0
+      "min": 6,
+      "max": 12,
+      "within_ms": 2000
     },
     {
       "action": "teleport_to_spawn",
