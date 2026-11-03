@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Witch Hunter (Black Knight) tank threat abilities generate the threat their tooltips promise",
-  "contract": "Shadow Brand 680516/680517 promises '36 High Threat Shadow Damage over 12 seconds'. Its DoT spell 680517 carries AttributesEx bit SPELL_ATTR1_NO_THREAT (confirmed by the DBC reader's own flag labels). ThreatManager::AddThreat (src/server/game/Combat/ThreatManager.cpp) returns immediately whenever 'spell->HasAttribute(SPELL_ATTR1_NO_THREAT)', before ever reading the spell_threat pctMod=2 row rev_20261026_20_coa_tank_ability_threat.sql added for entry 680517; every Shadow Brand tick must therefore add exactly zero threat despite dealing real damage, worse than the tooltip's plain damage-equal baseline, let alone its High Threat multiplier. Destroyer of Evil 680528 only extends Shadow Brand's application and is not independently audited. Chains of Darkness 680521 (taunt via helper 680522's SPELL_AURA_MOD_TAUNT effect) is already exhaustively verified by witch-hunter-chains-of-darkness.json (#1216); this file adds one confirmatory assert instead of duplicating that coverage.",
+  "contract": "Shadow Brand 680516/680517 promises '36 High Threat Shadow Damage over 12 seconds'. The DBC sets SPELL_ATTR1_NO_THREAT on its DoT spell 680517 and AscensionWitchHunterCompletion.cpp clears it at load, so ThreatManager::AddThreat reaches the spell_threat pctMod=2 row of rev_20261026_20_coa_tank_ability_threat.sql and each tick adds about 2x its damage in threat. Destroyer of Evil 680528 only extends Shadow Brand's application and is not independently audited. Chains of Darkness 680521 (taunt via helper 680522's SPELL_AURA_MOD_TAUNT effect) is already exhaustively verified by witch-hunter-chains-of-darkness.json (#1216); this file adds one confirmatory assert instead of duplicating that coverage.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -156,7 +156,7 @@
     },
     {
       "action": "assert",
-      "label": "CORRECT: Shadow Brand's tooltip ('High Threat Shadow Damage') implies the same ~2x threat_per_damage as every other spell_threat-pctMod-2 'High Threat' ability in this codebase; SPELL_ATTR1_NO_THREAT instead makes ThreatManager::AddThreat shortcut to zero before the pctMod=2 row rev_20261026_20_coa_tank_ability_threat.sql added for 680517 is ever read",
+      "label": "Shadow Brand's tooltip ('High Threat Shadow Damage') implies the same ~2x threat_per_damage as every other spell_threat-pctMod-2 'High Threat' ability in this codebase, and with SPELL_ATTR1_NO_THREAT cleared ThreatManager::AddThreat reads the pctMod=2 row rev_20261026_20_coa_tank_ability_threat.sql added for 680517",
       "actor": "brand_target",
       "metric": "threat",
       "target": "hunter",
