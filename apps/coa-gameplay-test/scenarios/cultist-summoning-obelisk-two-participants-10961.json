@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Summoning Obelisk summons with the caster and one ally (#10961)",
+  "contract": "Summoning Obelisk (spell 1200011, gameobject 194110) 'allowing you and another ally to summon party and raid members' asks for two participants: the Cultist channeling it and one ally using it. With only those two, the selected party member is summoned.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 1,
+      "class": 25,
+      "level": 43
+    },
+    {
+      "id": "a",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    },
+    {
+      "id": "t",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "c",
+      "map": 0,
+      "x": -8917.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "a",
+      "map": 0,
+      "x": -8915.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "t",
+      "map": 0,
+      "x": -8917.41,
+      "y": -55.852999999999994,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "group",
+      "actor": "c",
+      "target": "a"
+    },
+    {
+      "action": "group",
+      "actor": "c",
+      "target": "t"
+    },
+    {
+      "action": "learn",
+      "actor": "c",
+      "spell": 1200011
+    },
+    {
+      "action": "client_packet",
+      "label": "The Cultist selects the target",
+      "actor": "c",
+      "opcode": 317,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "t"
+        }
+      ]
+    },
+    {
+      "action": "cast",
+      "actor": "c",
+      "spell": 1200011
+    },
+    {
+      "action": "assert",
+      "label": "the cast is accepted",
+      "actor": "c",
+      "metric": "cast_failure",
+      "spell": 1200011,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "the obelisk stands",
+      "actor": "c",
+      "metric": "owned_gameobject_count",
+      "entry": 194110,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: the target is far away",
+      "actor": "t",
+      "metric": "distance",
+      "target": "c",
+      "min": 50
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "a",
+      "entry": 194110,
+      "owner": "c"
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "client_packet",
+      "label": "The target accepts the summon",
+      "actor": "t",
+      "opcode": 684,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "c"
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the target arrives with the caster and one ally",
+      "actor": "t",
+      "metric": "distance",
+      "target": "c",
+      "max": 5,
+      "within_ms": 5000
+    }
+  ]
+}
