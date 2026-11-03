@@ -115,7 +115,7 @@ public:
 
         player->SpawnCorpseBones();
         player->NearTeleportTo(start.GetPositionX(), start.GetPositionY(), start.GetPositionZ(), start.GetOrientation());
-        if (player->GetMap()->GetDifficulty() < DUNGEON_DIFFICULTY_EPIC)
+        if (player->GetMap()->IsNonRaidDungeon() && player->GetMap()->GetDifficulty() < DUNGEON_DIFFICULTY_EPIC)
             player->CastSpell(player, SPELL_CORPSE_RUNNER, true);
         return false;
     }
