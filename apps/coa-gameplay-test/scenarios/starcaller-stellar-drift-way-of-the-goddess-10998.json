@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "name": "Stellar Drift knocks enemies back with Way of the Goddess (#10998)",
+  "contract": [
+    "Stellar Drift 800501 puts a 3000 ms periodic trigger aura (effect 0, amplitude 3000) on the caster whose single tick at expiry casts the knockback 800500, and slows nearby enemies with 802773.",
+    "Its trigger is a knockback, so the caster's own aura counted as harmful, and the Starcaller passive Way of the Goddess 801976 ('Reduces the duration of harmful magic effects on you by 25%', SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL Magic -25) cut it to 2250 ms (captured in game for #10998). The aura expired before its 3000 ms tick, so the slow landed and the knockback never did.",
+    "Expected: effect 0 is marked positive, Way of the Goddess leaves the caster's aura at 3000 ms, and a Defias Cutpurse 3 yd away is still unmoved 1.5 s in and thrown at least 15 yd after the slow."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 26,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 94,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9214.62,
+    "y": 254.077,
+    "z": 72.5165,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800501
+    },
+    {
+      "action": "set_aura",
+      "label": "Way of the Goddess, the Starcaller passive that shortens harmful magic effects",
+      "actor": "caster",
+      "spell": 801976,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Way of the Goddess is on the caster",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 801976,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The creature stands about 3 yards ahead",
+      "actor": "caster",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "snapshot",
+      "label": "Separation before the cast",
+      "actor": "caster",
+      "metric": "distance",
+      "save_as": "before_cast",
+      "target": "dummy"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Stellar Drift",
+      "actor": "caster",
+      "spell": 800501
+    },
+    {
+      "action": "assert",
+      "label": "The 50% slow is on the creature",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 802773,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Half way through the 3 second slow",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The creature has not been pushed yet",
+      "actor": "caster",
+      "metric": "distance",
+      "target": "dummy",
+      "relative_to": "before_cast",
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: with Way of the Goddess the knockback still throws the creature at least 15 yards",
+      "actor": "caster",
+      "metric": "distance",
+      "target": "dummy",
+      "relative_to": "before_cast",
+      "min": 15,
+      "within_ms": 4500
+    }
+  ]
+}

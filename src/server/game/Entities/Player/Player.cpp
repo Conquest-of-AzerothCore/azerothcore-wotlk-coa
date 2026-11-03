@@ -2953,10 +2953,10 @@ void Player::SendInitialSpells()
             continue;
 
         if ((!itr->second->Active && !IsKeptInClientSpellbookWhenSuperseded(itr->first)) ||
-            !itr->second->IsInSpec(GetActiveSpec()))
+            !itr->second->IsInSpec(GetActiveSpec()) || IsTemporarySpellReplacementStandIn(itr->first))
             continue;
 
-        data << uint32(itr->first);
+        data << uint32(GetTemporarySpellReplacement(itr->first));
         data << uint16(0);                                  // it's not slot id
 
         ++spellCount;
