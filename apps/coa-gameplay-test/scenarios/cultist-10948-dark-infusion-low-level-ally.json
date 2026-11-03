@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Cultist: Dark Infusion can target a far lower level ally (#10948)",
+  "contract": "Spell::CheckCast marks the positive aura effect of a player-controlled, non-passive, non-channeled spell with a nonzero SpellLevel for downrank-protection scaling, and Spell::AddUnitTarget then only keeps a cross-cast target when target->GetLevel()+10 >= m_spellInfo->GetFirstRankSpell()->SpellLevel, sending SPELL_FAILED_LOWLEVEL otherwise. Dark Infusion (500721) is rank one of a spell_ranks chain whose first rank has SpellLevel 34, so any ally below level 25 was refused. Its tooltip states no target level restriction. Every infusion zeroes SpellLevel so the ability always applies to the ally.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 42 },
+    { "id": "ally", "race": 1, "class": 1, "level": 17 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "learn", "actor": "cultist", "spell": 500721 },
+    { "action": "cast", "label": "Dark Infusion on the level-17 ally", "actor": "cultist", "spell": 500721, "target": "ally" },
+    {
+      "action": "assert",
+      "label": "The cast was not refused for being too low level for the target",
+      "actor": "cultist",
+      "metric": "cast_failure",
+      "spell": 500721,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ally received the Dark Infusion aura",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 500721,
+      "caster": "cultist",
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

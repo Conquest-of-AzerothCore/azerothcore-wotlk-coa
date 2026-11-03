@@ -231,6 +231,7 @@ void ApplyContracts(SpellInfo* info)
     {
         info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
         info->Effects[0].BasePoints = 9;
+        info->AttributesCu &= ~SPELL_ATTR0_CU_NEGATIVE_EFF0;
     }
     if (id == 520024 || id == 520026 || id == 807441 || id == 680630)
         for (auto& effect : info->Effects)
@@ -315,10 +316,6 @@ public:
                             player->SpellBaseDamageBonusDone(info->GetSchoolMask()));
         }
         value = std::clamp(value, float(INT32_MIN / 2), float(INT32_MAX / 2));
-    }
-    bool idIsJustice(SpellInfo const* info)
-    {
-        return Any(info, {524857,525005,525006,525007,572849,572850,572040,572041,572042,572043,572044,572045});
     }
     float Factor(Unit* target, Unit* caster, SpellInfo const* info)
     {

@@ -31,7 +31,8 @@ def main():
         loot = subprocess.check_output(["git", "show", baseline + ":" + loot_path], cwd=ROOT).decode()
     else:
         loot = (ROOT / loot_path).read_text()
-    code = prefix + enums + (HERE / "harness.cpp").read_text() + source + aliases
+    dungeon_loot = (ROOT / "src/server/game/Loot/DungeonLoot.h").read_text()
+    code = prefix + enums + dungeon_loot + (HERE / "harness.cpp").read_text() + source + aliases
     code += method(loot, "void Loot::AddItem(") + "\n"
     code += method(loot, "bool Loot::FillLoot(") + "\n"
     code += (HERE / "cases.cpp").read_text()

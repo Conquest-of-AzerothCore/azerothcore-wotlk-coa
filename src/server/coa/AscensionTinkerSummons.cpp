@@ -183,6 +183,8 @@ void Summon(Player* player, Unit* target, uint32 spell, Position const* destinat
             position.Relocate(position.GetPositionX(),position.GetPositionY(),position.GetPositionZ() + 5,position.GetOrientation());
         if (spell == 500236)
             player->MovePositionToFirstCollision(position,1 + n * 1.5f,0);
+        if (spell == 500535 && n)
+            player->MovePositionToFirstCollision(position,1.5f,n * 2 * float(M_PI) / count);
         if (TempSummon* device = player->SummonCreature(entry,position,TEMPSUMMON_TIMED_DESPAWN,duration,0,properties))
         {
             device->SetOwnerGUID(player->GetGUID());

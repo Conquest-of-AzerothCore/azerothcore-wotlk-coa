@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Iron Deposit 12020892 stands on the cave floor measured under it (reporter on that floor at z 14.82) (#9838)",
+  "contract": "Iron Deposit 12020892 (Thousand Needles) stood on rock at z 20.17 over a cave whose floor under it is z 15.20 (#9838). The target z is the vmap ground height measured under the spawn's x, y on the worldserver data.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Iron Deposit 12020892 stands on the cave floor measured under it (reporter on that floor at z 14.82)",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 12020892,
+      "spawn_type": "gameobject",
+      "x": -5611.97,
+      "y": -1612.2,
+      "z": 15.2026,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12020892,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}

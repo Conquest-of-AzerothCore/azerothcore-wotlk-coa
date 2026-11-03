@@ -16,6 +16,7 @@
  */
 
 #include "InstanceMapScript.h"
+#include "Player.h"
 #include "scarletmonastery.h"
 #include "ScriptedCreature.h"
 #include "SpellScript.h"

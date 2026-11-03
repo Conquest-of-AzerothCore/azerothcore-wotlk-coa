@@ -11,6 +11,7 @@
 #include "AscensionDisplayPatch.h"
 #include "AscensionFelsworn.h"
 #include "AscensionHighRiskPolicy.h"
+#include "AscensionRemovedSpellActionBars.h"
 #include "AscensionRulesets.h"
 #include "AscensionItemScaling.h"
 #include "AscensionPyromancer.h"
@@ -2757,6 +2758,7 @@ public:
 
     std::unordered_set<uint32> visitedSpellIds;
     uint32 removed = 0;
+    std::set<uint32> barSpellsBefore;
     {
       std::unordered_set<uint32> talentSpells;
       for (AscensionCompatData::CoATalentEntry const& entry : AscensionCompatData::CoATalentEntries)
@@ -2767,6 +2769,7 @@ public:
       player->SendActionButtons(2);
       if (rememberBar)
         RememberBarButtons(player, previousSpecialization, talentSpells);
+      barSpellsBefore = AscensionRemovedSpellActionBars::Capture(player);
     }
     for (AscensionCompatData::CoATalentEntry const &entry :
          AscensionCompatData::CoATalentEntries) {
@@ -2794,6 +2797,7 @@ public:
 
     uint32 const restored = restoreStoredBuild ? RestoreBuilds(player, specializationId) : 0;
     uint32 granted = SynchronizeProgression(player);
+    AscensionRemovedSpellActionBars::Reconcile(player, barSpellsBefore);
     if (restoreStoredBuild)
       RestoreBarButtons(player, specializationId, previousSpecialization);
     else if (!rememberBar)
@@ -8548,6 +8552,9 @@ bool HandlePersonalBankActivate(Player* player, WorldPacket const& packet)
                  itr->second.Owner.ToString(), banker.ToString());
         return true;
     }
+
+    if (!AscensionPersonalBank::CanAccess(player, itr->second.Kind))
+        return true;
 
     SendBankPermissions(player, itr->second.Kind);
     AscensionPersonalBank::Opened(player, itr->second.Kind, banker);

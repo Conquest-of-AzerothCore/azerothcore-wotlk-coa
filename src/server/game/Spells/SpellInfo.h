@@ -361,6 +361,7 @@ public:
     bool UsesMaxManaForCost = false;
     bool AscensionIgnoreAbsorbAndResistance = false;
     bool AscensionIgnoreAbsorb = false;
+    bool AscensionTargetAuraStateOnlyPrimary = false;
     bool AscensionInheritsResolvedAmount = false;
     // Runtime-only opt-in for explicitly authored coefficients. Rank base
     // growth still uses the original SpellLevel and MaxLevel metadata.

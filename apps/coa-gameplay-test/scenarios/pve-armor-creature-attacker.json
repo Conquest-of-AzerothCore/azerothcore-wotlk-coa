@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "name": "PvE armor: a player's armor mitigates a creature's blow with the vanilla constant of the creature's level",
+  "contract": "Requires ClassicPlus.CombatRules=1 (default) and CoA.ItemScaling.Native.RebornArmor=1 with ItemAddon.dbc. Vanilla 1.12 mitigates armor / (armor + 85 x attackerLevel + 400) up to creature level 63, so a level 60 creature's blow keeps 5500 / (armor + 5500) and a level 63 creature's 5755 / (armor + 5755). The level 60 Reaper victim strips its starter gear (252 armor from 126 Agility), then wears Titanic Breastplate, Dark Iron Leggings and Helm of Domination (reborn armor 982 + 865 + 909). The attackers are two Hevram Bristol 1288 spawns at levels 60 and 63; neither has armor penetration.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mob60",
+      "owner": "v",
+      "entry": 1288,
+      "level": 60,
+      "distance": 3
+    },
+    {
+      "id": "mob63",
+      "owner": "v",
+      "entry": 1288,
+      "level": 63,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the creatures settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 750
+    },
+    {
+      "action": "destroy_item",
+      "actor": "v",
+      "item": 2000071
+    },
+    {
+      "action": "destroy_item",
+      "actor": "v",
+      "item": 2000069
+    },
+    {
+      "action": "destroy_item",
+      "actor": "v",
+      "item": 2000070
+    },
+    {
+      "action": "destroy_item",
+      "actor": "v",
+      "item": 2001095
+    },
+    {
+      "action": "assert",
+      "label": "The stripped victim keeps its 252 Agility armor",
+      "actor": "v",
+      "metric": "armor",
+      "equals": 252
+    },
+    {
+      "action": "assert",
+      "label": "A level 60 creature's 1000 blow keeps 1000 x 5500 / 5752",
+      "actor": "v",
+      "metric": "armor_reduced_damage",
+      "equals": 957,
+      "spell": 6603,
+      "target": "v",
+      "from": "mob60"
+    },
+    {
+      "action": "assert",
+      "label": "A level 63 creature's constant is 85 x 63 + 400: 1000 x 5755 / 6007",
+      "actor": "v",
+      "metric": "armor_reduced_damage",
+      "equals": 959,
+      "spell": 6603,
+      "target": "v",
+      "from": "mob63"
+    },
+    {
+      "action": "add_item",
+      "actor": "v",
+      "item": 23363,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "v",
+      "item": 23363,
+      "slot": 4
+    },
+    {
+      "action": "add_item",
+      "actor": "v",
+      "item": 17013,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "v",
+      "item": 17013,
+      "slot": 6
+    },
+    {
+      "action": "add_item",
+      "actor": "v",
+      "item": 21460,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "v",
+      "item": 21460,
+      "slot": 0
+    },
+    {
+      "action": "assert",
+      "label": "Three plate pieces add their tooltip armor 982 + 865 + 909",
+      "actor": "v",
+      "metric": "armor",
+      "equals": 3008
+    },
+    {
+      "action": "assert",
+      "label": "The level 60 creature's blow keeps 1000 x 5500 / 8508",
+      "actor": "v",
+      "metric": "armor_reduced_damage",
+      "equals": 647,
+      "spell": 6603,
+      "target": "v",
+      "from": "mob60"
+    },
+    {
+      "action": "assert",
+      "label": "The level 63 creature's blow keeps 1000 x 5755 / 8763",
+      "actor": "v",
+      "metric": "armor_reduced_damage",
+      "equals": 657,
+      "spell": 6603,
+      "target": "v",
+      "from": "mob63"
+    }
+  ]
+}

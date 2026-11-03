@@ -1471,9 +1471,18 @@ void Guild::HandleBuyBankTab(WorldSession* session, uint8 tabId)
 
     player->ModifyMoney(-int32(tabCost));
 
+    HandleUnlockBankTab(session);
+}
+
+bool Guild::HandleUnlockBankTab(WorldSession* session)
+{
+    if (_GetPurchasedTabsSize() >= GUILD_BANK_MAX_TABS)
+        return false;
+
     _CreateNewBankTab();
     _BroadcastEvent(GE_BANK_TAB_PURCHASED);
     SendPermissions(session); /// Hack to force client to update permissions
+    return true;
 }
 
 void Guild::HandleInviteMember(WorldSession* session, std::string const& name)

@@ -88,13 +88,13 @@ METRICS = TIMELINE_METRICS | {
     'cache_token_count', 'cache_token_stage', 'cache_token_present',
     'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item',
     'mail_pool_item_count', 'notifications', 'notification_contains',
-    'bank_bag_slots', 'bank_shows',
+    'bank_bag_slots', 'bank_shows', 'guild_bank_tabs',
     'system_messages',
     'system_message_contains', 'whispers_received', 'challenge_start_responses', 'challenge_start_code',
     'owned_creature_scale', 'owned_creature_visible', 'owned_creature_display', 'owned_creature_virtual_item',
     'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health',
     'unit_scale', 'combat_reach',
-    'token_count', 'item_sell_price', 'monster_chat_count', 'creature_model_scale', 'creature_model_display',
+    'token_count', 'item_sell_price', 'item_spell_ppm', 'monster_chat_count', 'creature_model_scale', 'creature_model_display',
     'taxi_node', 'in_flight', 'taxi_destination', 'stabled_pet_count', 'stable_result', 'pet_rows', 'instance_binds_listed', 'pet_entry', 'pet_aura_stacks', 'pet_aura_duration_ms', 'pet_is_banker', 'pet_display', 'pet_flags', 'pet_mirror_image', 'pet_name_is',
     'pet_native_display', 'race', 'faction', 'pet_scale', 'pet_knows_spell', 'pet_distance', 'pet_bearing',
     'pet_casting', 'pet_loading', 'pet_spell_bar_count',
@@ -201,7 +201,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'type_mask', 'hit_mask', 'spell_type_mask',
                  'phase_mask', 'trigger_spell', 'trials', 'incoming', 'heal', 'quality',
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
-                 'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'below_armor_class', 'spells',
+                 'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'below_armor_class', 'unwearable', 'spells',
                  'min_level', 'max_level', 'min_home_distance', 'spawn',
                  'guid', 'spawn_type', 'tolerance', 'map', 'z'} | TIMELINE_FIELDS
 ACTIONS = {
@@ -1071,6 +1071,8 @@ def validate(scenario):
                         number(step[option], f'{where}.{option}', 3, 6, True)
                 if 'below_armor_class' in step:
                     number(step['below_armor_class'], f'{where}.below_armor_class', 2, 4, True)
+                if 'unwearable' in step:
+                    require(isinstance(step['unwearable'], bool), f'{where}.unwearable must be a boolean')
             if metric == 'pool_variant_count':
                 require('cache' in step, f'{where}: metric needs the cache item it checks against')
             if metric == 'pool_retired_item_count':
@@ -1121,6 +1123,9 @@ def validate(scenario):
             if metric == 'whispers_received':
                 require(step.get('from') in player_ids and isinstance(step.get('text'), str)
                         and step['text'].strip(), f'{where}: metric needs a sending player and text')
+            if metric == 'armor_reduced_damage' and 'from' in step:
+                require(step['from'] in actor_ids and 'pet' not in step,
+                        f'{where}: from names the attacking player or creature, without pet')
             if metric in {'spellbook_offers_spell', 'spellbook_learned_alerts',
                           'spellbook_buy_succeeded', 'spellbook_buy_failed', 'cast_failure'}:
                 require('spell' in step, f'{where}: metric needs spell')
@@ -1186,7 +1191,8 @@ def validate(scenario):
                           'action_button', 'action_button_packed', 'persisted_action_button', 'item_count',
                           'carried_item_count', 'carried_pool_item_count', 'carried_variant_item_count',
                           'carried_statless_armor_count',
-                          'bank_bag_slots', 'taxi_node', 'in_flight', 'taxi_destination', 'stabled_pet_count',
+                          'bank_bag_slots', 'guild_bank_tabs', 'taxi_node', 'in_flight', 'taxi_destination',
+                          'stabled_pet_count',
                           'stable_result', 'pet_rows', 'instance_binds_listed', 'spell_active',
                           'cast_pushback_ms',
                           'bank_shows', 'system_messages', 'system_message_contains', 'whispers_received',

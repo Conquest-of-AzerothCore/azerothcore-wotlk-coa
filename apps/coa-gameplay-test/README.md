@@ -576,7 +576,7 @@ a previously named snapshot of the same metric; it is available on snapshots and
 
 Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`, `map_id`, `combat`, `casting`,
 `level`, `quest_objective_count` (needs `quest`, optional `index`), `knows_spell`, `has_talent`, `talent_points`, `active_talent_spec`,
-`cooldown_ms`, `spell_cooldown_packet_ms`, `item_count`, `carried_item_count`, `bank_bag_slots`, `aura`, `aura_stacks`, `aura_charges`,
+`cooldown_ms`, `spell_cooldown_packet_ms`, `item_count`, `carried_item_count`, `bank_bag_slots`, `guild_bank_tabs`, `aura`, `aura_stacks`, `aura_charges`,
 `aura_duration_ms`, `aura_amount`, `pet_entry`, `pet_aura_stacks`, `owned_creature_count`, `owned_creature_spacing`,
 `charm_entry`, `charm_aura_stacks`, `controls_self`, `private_instance`, `dynamic_object`,
 `dynamic_object_duration_ms`, `dynamic_object_height`, `distance`, `spell_proc_count`, `spell_proc_chance`,
@@ -602,7 +602,8 @@ optional `min_required_level`/`max_required_level` that keep only carried items 
 `dominant_stat` keeps items whose strongest of Agility 3, Strength 4, Intellect 5 and Spirit 6 is that stat,
 and `off_stat` keeps items that carry one of those four but whose strongest is not that stat; optional `quality`
 keeps items of that exact quality; optional `below_armor_class` (2 leather, 3 mail, 4 plate) keeps only cloth,
-leather or mail body armor of a lower armor class, cloaks excluded), `pool_variant_count`, `pool_retired_item_count`, `pool_row_count`,
+leather or mail body armor of a lower armor class, cloaks excluded; optional `unwearable: true` keeps only armor
+and weapons whose skill the player lacks), `pool_variant_count`, `pool_retired_item_count`, `pool_row_count`,
 `pool_item_present` (needs `item`; `table` `fire_lord` with `cache` 2400040 reads Cache of the Fire Lord's
 pool across every raid difficulty), and `cache_token_count`, `cache_token_stage`, `cache_token_present`
 (need `cache`, the last also `item`), which read the token table the realm loads and answer how many
@@ -675,7 +676,8 @@ optional `hand` selects main hand (0, default), off hand (1), or ranged (2).
 `spell_critical_damage` requires `spell` and `target` and calculates a critical hit from a fixed base of 1000,
 including native critical damage modifiers, without executing an attack or applying mitigation.
 `armor_reduced_damage` requires `spell` and `target` and applies native armor mitigation to a fixed base of
-1000, including the attacker's armor penetration; optional `pet: true` selects the player's current pet.
+1000, including the attacker's armor penetration; optional `pet: true` selects the player's current pet, and
+optional `from` names another attacking player or creature, so `target` can be the actor itself.
 It does not execute an attack.
 `spell_uses_armor` separately checks whether the native damage path applies armor to `spell` and `effect`
 (default 0), including spell school, armor bypass and bleed mechanics.
@@ -881,7 +883,8 @@ client draws.
 `has_talent` requires the talent rank's spell ID; passive talents are separate from the learned spellbook.
 `talent_points` measures unspent points in the active specialization. `active_talent_spec` is the active talent
 spec: 0 for the primary, 1 for the secondary.
-`bank_bag_slots` measures the player's unlocked standard bank bag slots (0..7).
+`bank_bag_slots` measures the player's unlocked standard bank bag slots (0..7). `guild_bank_tabs` measures the
+bank tabs of the player's guild (0..6), or `-1` without a guild.
 `pet_entry` measures the player's current guardian pet entry, or the entry of the companion it summoned
 (a minipet, which never occupies the guardian slot), or zero if absent; `pet_display`, `pet_scale`
 and `pet_is_banker` read the same unit, and `pet_distance` is its 2D distance from the player in yards.

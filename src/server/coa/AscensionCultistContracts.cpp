@@ -125,7 +125,10 @@ void ApplyContracts(SpellInfo* info)
     }
     for (uint32 infusion : CultistInfusions)
         if (id == infusion)
+        {
             info->AuraInterruptFlags = 0;
+            info->SpellLevel = 0;
+        }
     if (Named(info, 500714))
         info->Effects[1].Effect = SPELL_EFFECT_DUMMY;
     if (id == BlackBlood)
