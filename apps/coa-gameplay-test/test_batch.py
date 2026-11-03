@@ -1212,6 +1212,11 @@ class BatchTests(unittest.TestCase):
             self.assertEqual(batch.read_report(path)['status'], 'ready')
             denials.append(PermissionError(13, 'Permission denied'))
             self.assertEqual(run.read_ready(path, 'run')['status'], 'ready')
+            denials.append(PermissionError(13, 'Permission denied'))
+            exited = SimpleNamespace(poll=lambda: 0, returncode=0)
+            with patch.object(run, 'start_server', return_value=exited), patch.object(run, 'stop_process'):
+                report, code = run.run_process([], self.path, self.path / 'ready.json', path, 'run', 1, 1)
+            self.assertEqual((report['status'], code), ('ready', 0))
             self.assertEqual(denials, [])
 
     def test_a_lasting_access_denial_still_fails_the_report(self):

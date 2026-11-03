@@ -1841,7 +1841,7 @@ def run_process(command, directory, ready_path, result_path, run_id, startup_tim
                 time.sleep(0.1)
             require(result_path.exists(), f'Worldserver exited with code {process.returncode} without a result; '
                     'check the build and server log')
-            report = read_json(result_path)
+            report = read_published_json(result_path)
             if report.get('status') == 'passed':
                 require(on_ready is None or ready_at is not None, 'Startup barrier was not observed')
                 require(ready_path.exists(), 'Successful result is missing harness readiness')
