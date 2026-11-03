@@ -892,6 +892,7 @@ struct Actor
     uint32 vendorWindows = 0;
     uint32 vendorItems = 0;
     std::map<uint32, uint32> vendorPrice;
+    std::map<uint32, uint32> vendorSlot;
     std::map<uint32, uint32> vendorExtendedCost;
     std::map<uint32, int32> vendorStock;
     uint32 vendorPriceSum = 0;
@@ -1691,6 +1692,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         ++actor.vendorWindows;
         actor.vendorItems = rows;
         actor.vendorPrice.clear();
+        actor.vendorSlot.clear();
         actor.vendorExtendedCost.clear();
         actor.vendorStock.clear();
         actor.vendorPriceSum = 0;
@@ -1709,6 +1711,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             if (shelfItem != 0)
             {
                 actor.vendorPrice[shelfItem] = price;
+                actor.vendorSlot[shelfItem] = slot;
                 actor.vendorExtendedCost[shelfItem] = extendedCost;
                 actor.vendorStock[shelfItem] = leftInStock;
                 actor.vendorPriceSum += price;
@@ -5596,6 +5599,13 @@ private:
                             Item* item = player->GetItemByEntry(value.get_value<uint32>());
                             Require(item != nullptr, "Packet item position requires a carried item");
                             request << uint8(kind == "item_bag" ? item->GetBagSlot() : item->GetSlot());
+                        }
+                        else if (kind == "vendor_slot")
+                        {
+                            auto const& slots = _actors.at(step.get<std::string>("actor")).vendorSlot;
+                            auto const found = slots.find(value.get_value<uint32>());
+                            Require(found != slots.end(), "Packet vendor slot requires the item in the last vendor list");
+                            request << found->second;
                         }
                         else if (kind == "mail_id" || kind == "mail_item_guid")
                         {

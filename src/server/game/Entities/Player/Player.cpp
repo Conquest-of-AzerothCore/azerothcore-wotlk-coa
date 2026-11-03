@@ -11552,7 +11552,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
     }
 
     // Cosmetic pet tokens only sell on realm types whose classes can use them
-    if (!AscensionCosmeticPetTokens::AvailableOnRealm(item))
+    if (!IsGameMaster() && !AscensionCosmeticPetTokens::AvailableOnRealm(item))
     {
         SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
         return false;

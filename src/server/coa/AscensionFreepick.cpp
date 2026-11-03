@@ -361,6 +361,8 @@ bool GmSetEntry(Player* player, std::uint32_t entryId, bool learn, std::string& 
         error = "That character has no free-pick build.";
     else if (!row || !row->MaxRank())
         error = "That is not a Character Advancement entry.";
+    else if (!learn && row->Has(ROW_AUTOMATIC) && !row->AECost && !row->TECost)
+        error = "That entry is granted automatically and cannot be removed.";
     if (!error.empty())
         return false;
 
