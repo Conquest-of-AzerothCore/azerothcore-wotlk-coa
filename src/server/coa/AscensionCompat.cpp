@@ -10232,6 +10232,11 @@ public:
         return missing;
     }
 
+    static bool IsWithinSessionExpansion(Player const* player, ScrollProfession const& prof)
+    {
+        return GetProfessionExpansion(prof.skillId) <= player->GetSession()->Expansion();
+    }
+
     bool OnUse(Player* player, Item* item, SpellCastTargets const&) override
     {
         if (!player || !item)
@@ -10241,6 +10246,9 @@ public:
         for (uint32 i = 0; i < std::extent<decltype(kProfessions)>::value; ++i)
         {
             ScrollProfession const& prof = kProfessions[i];
+            if (!IsWithinSessionExpansion(player, prof))
+                continue;
+
             std::string label = prof.name;
             if (!player->HasSkill(prof.skillId))
                 label += " (not learned)";
@@ -10266,6 +10274,8 @@ public:
             return;
 
         ScrollProfession const& prof = kProfessions[action];
+        if (!IsWithinSessionExpansion(player, prof))
+            return;
 
         if (!player->HasSkill(prof.skillId))
         {
