@@ -4974,6 +4974,15 @@ private:
         }
         if (metric == "monster_chat_count")
             return double(_actors.at(step.get<std::string>("actor")).monsterChats);
+        if (metric == "item_spell_ppm")
+        {
+            uint32 item = step.get<uint32>("item");
+            uint32 slot = step.get<uint32>("slot");
+            ItemTemplate const* proto = sObjectMgr->GetItemTemplate(item);
+            Require(proto != nullptr, "Unknown item in metric");
+            Require(slot < MAX_ITEM_PROTO_SPELLS, "Item spell slot out of range");
+            return proto->Spells[slot].SpellPPMRate;
+        }
         if (metric == "item_sell_price")
         {
             uint32 item = step.get<uint32>("item");
