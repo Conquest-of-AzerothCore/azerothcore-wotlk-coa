@@ -9662,6 +9662,8 @@ public:
     AscensionCollectionService::Instance().OnVisibleItemSet(player, slot, item);
     if (player->IsInWorld() && ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
       SendAverageItemLevel(player, item ? EQUIPMENT_SLOT_END : slot);
+    if (slot == EQUIPMENT_SLOT_MAINHAND && ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
+      ReconcileAscensionPrimalistWeapon(player);
   }
 
   void OnPlayerEquip(Player *player, Item *item, uint8, uint8,

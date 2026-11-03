@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Barometric Pressure's buff tooltip amount is sent to the caster's client (#10787)",
+  "contract": [
+    "Barometric Pressure 803563 shows \"Slowing the movement speed of enemies within $a1 yds by ${-($w1)}% and",
+    "reducing their casting speed by ${-($w1)}%\" on the caster's buff, and the client reads $w1 from the",
+    "SMSG_ASCENSION_AURA_AMOUNT packet (slot 0). Effect 0 is SPELL_EFFECT_APPLY_AREA_AURA_ENEMY with aura 65 and a",
+    "base of -21, so the caster's own aura holds an amount of -20 but never applies that effect to itself; the",
+    "packet builder skipped effects the application did not carry and sent 0, so the buff read as a zero modifier.",
+    "The packet now sends the amount of enemy-area effects as well. aura_amount confirms the server-side amount of",
+    "-20 and sent_aura_amount reads what the caster's session was actually sent: -20 for effect 0 and 0 for the",
+    "unused dummy effect 1."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "storm",
+      "race": 1,
+      "class": 16,
+      "level": 60,
+      "ascension_client": true
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "storm",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "storm", "spell": 803563 },
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "cast", "actor": "storm", "spell": 803563 },
+    {
+      "action": "assert", "label": "SETUP: the buff is applied on the caster",
+      "actor": "storm", "metric": "aura", "spell": 803563, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the enemy-area effect holds its -20 amount on the caster's aura",
+      "actor": "storm", "metric": "aura_amount", "spell": 803563, "effect": 0, "equals": -20
+    },
+    {
+      "action": "assert", "label": "The client is told -20, not zero, for the $w1 token",
+      "actor": "storm", "metric": "sent_aura_amount", "spell": 803563, "effect": 0, "equals": -20, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The unused dummy effect still reads zero",
+      "actor": "storm", "metric": "sent_aura_amount", "spell": 803563, "effect": 1, "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "name": "Leaving Illidan's Guile early ends its stun (#9993)",
+  "contract": [
+    "Illidan's Guile 806109 (\"becoming immune to all physical attacks and spells for 8 sec, but during that time you cannot",
+    "attack, move or cast spells\") is the immunity aura; its effect 183 applies the restriction aura 807235, which is a stun",
+    "plus a pacify-silence and carries SPELL_ATTR0_CANT_CANCEL. Clicking the buff off (CMSG_CANCEL_AURA) removes 806109 but",
+    "nothing removed 807235, so the Felsworn left the immunity yet stayed stunned for the rest of the 8 seconds and took",
+    "damage. When 806109 ends in any way but its natural expiry the restriction aura now goes with it. A level 32 Felsworn",
+    "casts Illidan's Guile and clicks the buff off a second and a half later: both auras must be gone, the stun with them;",
+    "a control that is left alone keeps both auras until the full duration."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "early",
+      "race": 1,
+      "class": 14,
+      "level": 32
+    },
+    {
+      "id": "full",
+      "race": 1,
+      "class": 14,
+      "level": 32
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "early",
+      "spell": 806109
+    },
+    {
+      "action": "learn",
+      "actor": "full",
+      "spell": 806109
+    },
+    {
+      "action": "cast",
+      "actor": "early",
+      "spell": 806109
+    },
+    {
+      "action": "cast",
+      "actor": "full",
+      "spell": 806109
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: immune and restricted",
+      "actor": "early",
+      "metric": "aura",
+      "spell": 806109,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the restriction aura is on",
+      "actor": "early",
+      "metric": "aura",
+      "spell": 807235,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cancel_aura",
+      "label": "Click the Illidan's Guile buff off to leave early",
+      "actor": "early",
+      "spell": 806109
+    },
+    {
+      "action": "assert",
+      "label": "The immunity is gone",
+      "actor": "early",
+      "metric": "aura",
+      "spell": 806109,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the stun goes with it",
+      "actor": "early",
+      "metric": "aura",
+      "spell": 807235,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The control that stays in keeps its immunity",
+      "actor": "full",
+      "metric": "aura",
+      "spell": 806109,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The control that stays in keeps its restriction",
+      "actor": "full",
+      "metric": "aura",
+      "spell": 807235,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the full duration run out",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The control's immunity ends on its own",
+      "actor": "full",
+      "metric": "aura",
+      "spell": 806109,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The control's restriction ends on its own",
+      "actor": "full",
+      "metric": "aura",
+      "spell": 807235,
+      "equals": 0
+    }
+  ]
+}
