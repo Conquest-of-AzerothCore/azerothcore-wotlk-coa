@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Uldaman: the Discs of Norgannon bring the Lore Keeper for a player already on The Platinum Discs",
+  "contract": [
+    "Issue #5409: the Lore Keeper of Norgannon (7172) gives The Platinum Discs (2278) its credit. The discs (131474)",
+    "summoned him only on the first acceptance of the quest in an instance, so a player who carried the quest into the",
+    "dungeon found nobody to talk to. Using the discs with the quest now summons him, once: a second use does not add",
+    "another. Without the quest the discs summon nobody."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
+  "players": [
+    { "id": "carrier", "race": 1, "class": 1, "level": 45, "security": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_phase", "actor": "carrier", "value": 1 },
+    { "action": "teleport", "actor": "carrier", "map": 70, "x": 158.0, "y": 300.0, "z": -51.4 },
+    { "action": "assert", "label": "CONTROL: the player is in Uldaman", "actor": "carrier", "metric": "map_id", "equals": 70, "within_ms": 15000 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "CONTROL: no Lore Keeper stands at the discs", "actor": "carrier", "metric": "nearby_creature_count", "entry": 7172, "equals": 0 },
+    { "action": "use_nearby_gameobject", "actor": "carrier", "entry": 131474 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "CONTROL: without the quest the discs summon nobody", "actor": "carrier", "metric": "nearby_creature_count", "entry": 7172, "equals": 0 },
+    { "action": "command", "actor": "carrier", "command": ".quest add 2278" },
+    { "action": "use_nearby_gameobject", "actor": "carrier", "entry": 131474 },
+    { "action": "assert", "label": "Using the discs with the quest brings the Lore Keeper", "actor": "carrier", "metric": "nearby_creature_count", "entry": 7172, "equals": 1, "within_ms": 3000 },
+    { "action": "use_nearby_gameobject", "actor": "carrier", "entry": 131474 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "A second use adds no second Lore Keeper", "actor": "carrier", "metric": "nearby_creature_count", "entry": 7172, "equals": 1 }
+  ]
+}
