@@ -1,0 +1,590 @@
+{
+  "schema": 1,
+  "name": "PvP armor: a player's armor mitigates other players' blows as on creatures (#10463, #10462, #10479)",
+  "contract": "Requires ClassicPlus.CombatRules=1 (default) and CoA.ItemScaling.Native.RebornArmor=1 (default) with ItemAddon.dbc in the data directory. Level 60 players fight with the vanilla constant: a level 60 attacker's blow keeps 5500 / (armor + 5500) of itself, and armor penetration removes its percentage of min((armor + 5500) / 3, armor) first. A level 60 rating point is 1.1 / 4.2 % of penetration (gtOCTClassCombatRatingScalar and gtCombatRatings). Worn armor is the reborn armor the tooltip shows (ItemAddon.dbc field 43): Titanic Breastplate 982, Dark Iron Leggings 865, Helm of Domination 909. The victim strips its starter shirt, chest, legs and boots first. The Soul attacker learns the 51 rank spells of the build reported for #10463 (coa-development.org talents, spec 80); only Spectre Strength rank 2 touches armor, with 10% penetration.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "att",
+      "race": 1,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "tpl",
+      "race": 1,
+      "class": 19,
+      "level": 60
+    },
+    {
+      "id": "soul",
+      "race": 1,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "v",
+      "race": 1,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the characters settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 750
+    },
+    {
+      "action": "destroy_item",
+      "actor": "v",
+      "item": 2000071
+    },
+    {
+      "action": "destroy_item",
+      "actor": "v",
+      "item": 2000069
+    },
+    {
+      "action": "destroy_item",
+      "actor": "v",
+      "item": 2000070
+    },
+    {
+      "action": "destroy_item",
+      "actor": "v",
+      "item": 2001095
+    },
+    {
+      "action": "assert",
+      "label": "Without its starter gear the victim keeps only its Agility armor, 2 x 126",
+      "actor": "v",
+      "metric": "armor",
+      "equals": 252
+    },
+    {
+      "action": "assert",
+      "label": "A level 60 Reaper's 1000 blow loses 5.2% to 252 armor: 1000 x 5500 / 5752",
+      "actor": "att",
+      "metric": "armor_reduced_damage",
+      "equals": 957,
+      "spell": 6603,
+      "target": "v"
+    },
+    {
+      "action": "specialization",
+      "actor": "tpl",
+      "id": 23
+    },
+    {
+      "action": "specialization",
+      "actor": "soul",
+      "id": 55
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 561102
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 804053
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 805185
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 560434
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 572340
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 800845
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 707908
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 504046
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 803997
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 706790
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 707455
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 561340
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 803990
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 705441
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 804004
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 704357
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 803999
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 706786
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 705389
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 805196
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 705426
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 561099
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 705436
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 561170
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 806146
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 805718
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 570338
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 801328
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 573038
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 561342
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 500359
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 807397
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 805190
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 805258
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 705424
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 500483
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 807889
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 520056
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 805186
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 805195
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 712484
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 805203
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 680996
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 561100
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 705401
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 560917
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 807886
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 573071
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 300553
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 560927
+    },
+    {
+      "action": "learn",
+      "actor": "soul",
+      "spell": 561337
+    },
+    {
+      "action": "wait",
+      "label": "Let the specializations and talents apply",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The Fighting Templar converts half its 32 Intellect into 16 armor penetration rating",
+      "actor": "tpl",
+      "metric": "combat_rating",
+      "equals": 16,
+      "rating": 24
+    },
+    {
+      "action": "add_item",
+      "actor": "v",
+      "item": 23363,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "v",
+      "item": 23363,
+      "slot": 4
+    },
+    {
+      "action": "add_item",
+      "actor": "v",
+      "item": 17013,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "v",
+      "item": 17013,
+      "slot": 6
+    },
+    {
+      "action": "add_item",
+      "actor": "v",
+      "item": 21460,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "v",
+      "item": 21460,
+      "slot": 0
+    },
+    {
+      "action": "assert",
+      "label": "Three plate pieces add their tooltip armor 982 + 865 + 909",
+      "actor": "v",
+      "metric": "armor",
+      "equals": 3008
+    },
+    {
+      "action": "assert",
+      "label": "The Reaper's blow loses 35.3% to 3008 armor: 1000 x 5500 / 8508",
+      "actor": "att",
+      "metric": "armor_reduced_damage",
+      "equals": 647,
+      "spell": 6603,
+      "target": "v"
+    },
+    {
+      "action": "assert",
+      "label": "16 rating at level 60 ignores 4.19% of the 2836 armor the penetration cap allows: 1000 x 5500 / 8389.2",
+      "actor": "tpl",
+      "metric": "armor_reduced_damage",
+      "equals": 656,
+      "spell": 6603,
+      "target": "v"
+    },
+    {
+      "action": "assert",
+      "label": "The reported Soul build's Spectre Strength ignores 10% of that 2836: 1000 x 5500 / 8224.4",
+      "actor": "soul",
+      "metric": "armor_reduced_damage",
+      "equals": 669,
+      "spell": 6603,
+      "target": "v"
+    },
+    {
+      "action": "client_packet",
+      "label": "The client drags equipment slot 0 into backpack slot 36",
+      "actor": "v",
+      "opcode": 269,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 36
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The client drags equipment slot 4 into backpack slot 37",
+      "actor": "v",
+      "opcode": 269,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 37
+        },
+        {
+          "u8": 4
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The client drags equipment slot 6 into backpack slot 38",
+      "actor": "v",
+      "opcode": 269,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 38
+        },
+        {
+          "u8": 6
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Unequipping the plate through the client removes all its armor",
+      "actor": "v",
+      "metric": "armor",
+      "equals": 252
+    },
+    {
+      "action": "assert",
+      "label": "and the blow is back to 957",
+      "actor": "att",
+      "metric": "armor_reduced_damage",
+      "equals": 957,
+      "spell": 6603,
+      "target": "v"
+    },
+    {
+      "action": "client_packet",
+      "label": "The client auto-equips backpack slot 36",
+      "actor": "v",
+      "opcode": 266,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 255
+        },
+        {
+          "u8": 36
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The client auto-equips backpack slot 37",
+      "actor": "v",
+      "opcode": 266,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 255
+        },
+        {
+          "u8": 37
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The client auto-equips backpack slot 38",
+      "actor": "v",
+      "opcode": 266,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 255
+        },
+        {
+          "u8": 38
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Auto-equipping the plate restores its armor",
+      "actor": "v",
+      "metric": "armor",
+      "equals": 3008
+    },
+    {
+      "action": "assert",
+      "label": "and the blow is back to 647",
+      "actor": "att",
+      "metric": "armor_reduced_damage",
+      "equals": 647,
+      "spell": 6603,
+      "target": "v"
+    },
+    {
+      "action": "relog",
+      "actor": "v"
+    },
+    {
+      "action": "wait",
+      "label": "Let the relogged victim load",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "A relog loads the same armor from the saved gear",
+      "actor": "v",
+      "metric": "armor",
+      "equals": 3008
+    },
+    {
+      "action": "assert",
+      "label": "and the same mitigation",
+      "actor": "att",
+      "metric": "armor_reduced_damage",
+      "equals": 647,
+      "spell": 6603,
+      "target": "v"
+    }
+  ]
+}
