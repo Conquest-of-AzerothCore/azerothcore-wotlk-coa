@@ -113,7 +113,10 @@ bool RefuseOutsideRest(Player* player, bool wholeGroup, std::string_view action)
 
 bool RefuseFinder(Player* player, bool wholeGroup, std::string_view action)
 {
-    auto const highRisk = [](Player const* member) { return InHighRisk(member) && !member->GetSession()->IsBot(); };
+    auto const highRisk = [](Player const* member)
+    {
+        return (InHighRisk(member) || AscensionRulesets::HighRiskSuspended(member)) && !member->GetSession()->IsBot();
+    };
     Player* blocked = highRisk(player) ? player : nullptr;
     if (Group* group = wholeGroup ? player->GetGroup() : nullptr)
         for (GroupReference* member = group->GetFirstMember(); member && !blocked; member = member->next())
