@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Call Board dailies pay Bazaar Tokens: twice their Callboard Cache points",
+  "contract": "Each of the 44 Call Board dailies pays Bazaar Tokens (975001) beside its Runes of Ascension (375250): twice the quest's Callboard Cache points. A level-60 Human turning in a 25-point PvE daily (Scarlet Sweep: Magic and Might, 18034) receives 50 tokens and its 2000 runes, a 20-point PvE daily (Winterfall Purge, 17926) 40 tokens and 2000 runes, the 20-point PvP daily Duel! (80651) 40 tokens and 1000 runes, a 15-point Profession daily (Short on Supplies: Minor Mana Potion, 1005301) 30 tokens and 2000 runes, and the 15-point Dungeon Diving (81244) 30 tokens and 1500 runes. Every quest turn-in also pays the Ethereal Bazaar's random 0-6 tokens (EtherealBazaar.Tokens.Quest.Min/Max at default settings), so each turn-in adds 0-6 above the fixed amount. Paying fixed tokens is a CoA choice: no live quest paid them.",
+  "timeout_ms": 120000,
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "location": {"map": 0, "x": -8822.9, "y": 628.4, "z": 93.8, "o": 2.4},
+  "steps": [
+    {"action": "set_phase", "label": "Join the world phase the board is spawned in", "actor": "hero", "value": 1},
+    {"action": "prepare_quest", "label": "Scarlet Sweep: Magic and Might is complete", "actor": "hero", "quest": 18034},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 975001, "save_as": "tokens_before_scarlet"},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 375250, "save_as": "runes_before_scarlet"},
+    {"action": "reward_quest", "label": "Turn in Scarlet Sweep: Magic and Might", "actor": "hero", "quest": 18034},
+    {"action": "assert", "label": "The 25-point daily pays 50 Bazaar Tokens beside the 0-6 of any quest", "actor": "hero", "metric": "item_count", "item": 975001, "relative_to": "tokens_before_scarlet", "min": 50, "max": 56},
+    {"action": "assert", "label": "and still its 2000 Runes of Ascension", "actor": "hero", "metric": "item_count", "item": 375250, "relative_to": "runes_before_scarlet", "equals": 2000},
+    {"action": "prepare_quest", "label": "Winterfall Purge is complete", "actor": "hero", "quest": 17926},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 975001, "save_as": "tokens_before_winterfall"},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 375250, "save_as": "runes_before_winterfall"},
+    {"action": "reward_quest", "label": "Turn in Winterfall Purge", "actor": "hero", "quest": 17926},
+    {"action": "assert", "label": "The 20-point PvE daily pays 40 Bazaar Tokens beside the 0-6 of any quest", "actor": "hero", "metric": "item_count", "item": 975001, "relative_to": "tokens_before_winterfall", "min": 40, "max": 46},
+    {"action": "assert", "label": "and still its 2000 Runes of Ascension", "actor": "hero", "metric": "item_count", "item": 375250, "relative_to": "runes_before_winterfall", "equals": 2000},
+    {"action": "prepare_quest", "label": "Duel! is complete", "actor": "hero", "quest": 80651},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 975001, "save_as": "tokens_before_duel"},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 375250, "save_as": "runes_before_duel"},
+    {"action": "reward_quest", "label": "Turn in Duel!", "actor": "hero", "quest": 80651},
+    {"action": "assert", "label": "The PvP daily pays 40 Bazaar Tokens beside the 0-6 of any quest", "actor": "hero", "metric": "item_count", "item": 975001, "relative_to": "tokens_before_duel", "min": 40, "max": 46},
+    {"action": "assert", "label": "and still its 1000 Runes of Ascension", "actor": "hero", "metric": "item_count", "item": 375250, "relative_to": "runes_before_duel", "equals": 1000},
+    {"action": "prepare_quest", "label": "Short on Supplies: Minor Mana Potion is complete", "actor": "hero", "quest": 1005301},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 975001, "save_as": "tokens_before_profession"},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 375250, "save_as": "runes_before_profession"},
+    {"action": "reward_quest", "label": "Turn in Short on Supplies: Minor Mana Potion", "actor": "hero", "quest": 1005301},
+    {"action": "assert", "label": "The Profession daily pays 30 Bazaar Tokens beside the 0-6 of any quest", "actor": "hero", "metric": "item_count", "item": 975001, "relative_to": "tokens_before_profession", "min": 30, "max": 36},
+    {"action": "assert", "label": "and still its 2000 Runes of Ascension", "actor": "hero", "metric": "item_count", "item": 375250, "relative_to": "runes_before_profession", "equals": 2000},
+    {"action": "prepare_quest", "label": "Dungeon Diving is complete", "actor": "hero", "quest": 81244},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 975001, "save_as": "tokens_before_diving"},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 375250, "save_as": "runes_before_diving"},
+    {"action": "reward_quest", "label": "Turn in Dungeon Diving", "actor": "hero", "quest": 81244},
+    {"action": "assert", "label": "Dungeon Diving pays 30 Bazaar Tokens beside the 0-6 of any quest", "actor": "hero", "metric": "item_count", "item": 975001, "relative_to": "tokens_before_diving", "min": 30, "max": 36},
+    {"action": "assert", "label": "and still its 1500 Runes of Ascension", "actor": "hero", "metric": "item_count", "item": 375250, "relative_to": "runes_before_diving", "equals": 1500}
+  ]
+}
