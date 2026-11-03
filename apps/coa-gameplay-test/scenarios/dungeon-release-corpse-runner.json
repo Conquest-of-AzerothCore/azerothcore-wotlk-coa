@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "name": "Dungeon release: the revived player gets Corpse Runner (84015) to rejoin the group",
+  "contract": [
+    "A player who releases in a dungeon is revived at the nearest dungeon start (AscensionDungeonRelease) and must",
+    "walk back to the group. The revive applies the client spell 84015 Corpse Runner: effect 0 raises run speed by",
+    "100% (SPELL_AURA_MOD_INCREASE_SPEED, base points 99) for 60 seconds (SpellDuration). Speed auras do not stack,",
+    "the strongest one applies, so the run speed rate is exactly 2.0 even with the optional 15% run speed aura",
+    "(86000). The aura's removal conditions come from its own client AuraInterruptFlags. Maraudon Normal from",
+    "Landslide's spawn revives at the Pristine Waters start, as in maraudon-wicked-grotto-release-7004."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 349,
+    "x": 356.681,
+    "y": -185.455,
+    "z": -59.8156,
+    "o": 3.45575,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 18,
+      "level": 49
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Maraudon",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 349
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero has no Corpse Runner before dying",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 84015,
+      "equals": 0
+    },
+    {
+      "action": "die",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "The hero dies at Landslide",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "release_spirit",
+      "label": "Release the spirit inside Maraudon",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "The hero is revived",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero stands at the Pristine Waters start",
+      "actor": "hero",
+      "metric": "point_distance_2d",
+      "x": 495.702,
+      "y": 17.3372,
+      "max": 3
+    },
+    {
+      "action": "assert",
+      "label": "The revived hero has Corpse Runner",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 84015,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Effect 0 (run speed) resolves to +100%",
+      "actor": "hero",
+      "metric": "aura_amount",
+      "spell": 84015,
+      "effect": 0,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Corpse Runner lasts its client duration of 60 seconds",
+      "actor": "hero",
+      "metric": "aura_duration_ms",
+      "spell": 84015,
+      "min": 50000,
+      "max": 60000
+    },
+    {
+      "action": "assert",
+      "label": "The hero runs at twice the base speed",
+      "actor": "hero",
+      "metric": "run_speed_rate",
+      "min": 1.99,
+      "max": 2.01
+    }
+  ]
+}

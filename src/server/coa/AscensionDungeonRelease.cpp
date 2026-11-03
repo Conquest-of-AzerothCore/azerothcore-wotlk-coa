@@ -16,6 +16,7 @@ namespace
 {
 constexpr char const* PENDING_DUNGEON_RELEASE = "ascension_dungeon_release";
 constexpr float RELEASE_RESTORE_PERCENT = 0.5f;
+constexpr uint32 SPELL_CORPSE_RUNNER = 84015;
 
 struct PendingDungeonRelease : DataMap::Base { };
 
@@ -114,6 +115,7 @@ public:
 
         player->SpawnCorpseBones();
         player->NearTeleportTo(start.GetPositionX(), start.GetPositionY(), start.GetPositionZ(), start.GetOrientation());
+        player->AddAura(SPELL_CORPSE_RUNNER, player);
         return false;
     }
 };
