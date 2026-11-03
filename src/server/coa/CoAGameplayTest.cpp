@@ -893,6 +893,7 @@ struct Actor
     uint32 vendorWindows = 0;
     uint32 vendorItems = 0;
     std::map<uint32, uint32> vendorPrice;
+    std::map<uint32, uint32> vendorSlot;
     std::map<uint32, uint32> vendorExtendedCost;
     std::map<uint32, int32> vendorStock;
     uint32 vendorPriceSum = 0;
@@ -1713,6 +1714,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         ++actor.vendorWindows;
         actor.vendorItems = rows;
         actor.vendorPrice.clear();
+        actor.vendorSlot.clear();
         actor.vendorExtendedCost.clear();
         actor.vendorStock.clear();
         actor.vendorPriceSum = 0;
@@ -1731,6 +1733,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             if (shelfItem != 0)
             {
                 actor.vendorPrice[shelfItem] = price;
+                actor.vendorSlot[shelfItem] = slot;
                 actor.vendorExtendedCost[shelfItem] = extendedCost;
                 actor.vendorStock[shelfItem] = leftInStock;
                 actor.vendorPriceSum += price;
@@ -4784,6 +4787,11 @@ private:
             return double(_actors.at(step.get<std::string>("actor")).challengeStartResponses);
         if (metric == "challenge_start_code")
             return double(_actors.at(step.get<std::string>("actor")).challengeStartLastCode);
+        if (metric == "pet_name_is")
+        {
+            Pet const* pet = player->GetPet();
+            return pet && pet->GetName() == step.get<std::string>("text") ? 1.0 : 0.0;
+        }
         if (metric == "system_message_contains")
         {
             std::string const needle = step.get<std::string>("text");
@@ -4903,6 +4911,7 @@ private:
             metric == "pet_health" ||
             metric == "pet_attack_power" || metric == "pet_run_speed_rate" || metric == "pet_is_banker" ||
             metric == "pet_display" || metric == "pet_native_display" || metric == "pet_scale" ||
+            metric == "pet_flags" || metric == "pet_mirror_image" ||
             metric == "pet_knows_spell" ||
             metric == "pet_distance" || metric == "pet_bearing" || metric == "pet_spell_bar_count")
         {
@@ -4917,6 +4926,10 @@ private:
                 return pet && pet->HasNpcFlag(UNIT_NPC_FLAG_BANKER);
             if (metric == "pet_display")
                 return pet ? pet->GetDisplayId() : 0;
+            if (metric == "pet_flags")
+                return pet ? pet->GetByteValue(UNIT_FIELD_BYTES_2, 2) : 0;
+            if (metric == "pet_mirror_image")
+                return pet && pet->HasUnitFlag2(UNIT_FLAG2_MIRROR_IMAGE) ? 1 : 0;
             if (metric == "pet_native_display")
                 return pet ? pet->GetNativeDisplayId() : 0;
             if (metric == "pet_scale")
@@ -5659,6 +5672,13 @@ private:
                             Item* item = player->GetItemByEntry(value.get_value<uint32>());
                             Require(item != nullptr, "Packet item position requires a carried item");
                             request << uint8(kind == "item_bag" ? item->GetBagSlot() : item->GetSlot());
+                        }
+                        else if (kind == "vendor_slot")
+                        {
+                            auto const& slots = _actors.at(step.get<std::string>("actor")).vendorSlot;
+                            auto const found = slots.find(value.get_value<uint32>());
+                            Require(found != slots.end(), "Packet vendor slot requires the item in the last vendor list");
+                            request << found->second;
                         }
                         else if (kind == "mail_id" || kind == "mail_item_guid")
                         {
