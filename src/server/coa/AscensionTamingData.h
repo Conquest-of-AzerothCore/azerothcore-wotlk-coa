@@ -124,14 +124,6 @@ constexpr std::uint32_t CosmeticPetKind(std::uint32_t tier)
     }
 }
 
-constexpr std::uint32_t TamingChannelFor(std::uint32_t kind)
-{
-    for (TamingChannel const& channel : TAMING_CHANNELS)
-        if (channel.Kind == kind)
-            return channel.SpellId;
-    return 0;
-}
-
 constexpr std::uint64_t ClassBit(std::uint32_t classId)
 {
     return classId >= 1 && classId <= 64 ? std::uint64_t(1) << (classId - 1) : 0;

@@ -94,14 +94,13 @@ int main(int, char** argv)
         heroSpellsMatch = heroSpellsMatch && hero.Summon == record.GetUInt32(CATEGORY_SUMMON) &&
             hero.Dismiss == record.GetUInt32(CATEGORY_DISMISS);
         auto const kind = kinds.find(name);
-        kindsMatch = kindsMatch && kind != kinds.end() && CosmeticPetKind(tier) == kind->second &&
-            TamingChannelFor(kind->second);
+        kindsMatch = kindsMatch && kind != kinds.end() && CosmeticPetKind(tier) == kind->second;
         masks[name] = record.GetUInt32(CATEGORY_CLASS_MASK) |
             (std::uint64_t(record.GetUInt32(CATEGORY_CLASS_MASK + 1)) << 32);
     }
     Check(masks.size() == COSMETIC_PET_TIER_COUNT, "the client has five cosmetic pet categories");
     Check(heroSpellsMatch, "a Hero needs each category's own summon and dismiss spell (AppearanceCategories 20/21)");
-    Check(kindsMatch, "each category's tier is the creature kind it names, with a taming channel");
+    Check(kindsMatch, "each category's tier is the creature kind it names");
 
     bool summons = true, dismisses = true;
     for (std::uint32_t classId : { 3u, 9u, 10u, 31u })

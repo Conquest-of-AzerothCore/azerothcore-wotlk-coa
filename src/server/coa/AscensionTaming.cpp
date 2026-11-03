@@ -225,11 +225,13 @@ void Swap(Player* player, PetStable& stable, Pet* out, Plan const& plan)
     stable.CurrentPet = std::move(wanted);
 }
 
-Pet* CreateCurrentPet(Player* player, uint32 entry, uint32 spellId)
+Pet* CreateCurrentPet(Player* player, uint32 entry, uint32 spellId, bool creatureName = false)
 {
     Pet* pet = player->CreateTamedPetFrom(entry, spellId);
     if (!pet)
         return nullptr;
+    if (creatureName)
+        pet->SetName(pet->GetCreatureTemplate()->Name);
 
     uint8 const level = player->GetLevel();
     pet->SetUInt32Value(UNIT_FIELD_LEVEL, level > 1 ? level - 1 : level);
@@ -267,7 +269,7 @@ std::size_t FreeStableSlots(PetStable const& stable)
 }
 }
 
-char const* SummonCosmeticPet(Player* player, std::uint32_t tier, std::uint32_t entry)
+char const* SummonCosmeticPet(Player* player, std::uint32_t tier, std::uint32_t entry, bool creatureName)
 {
     std::uint32_t const kind = CosmeticPetKind(tier);
     if (!kind)
@@ -336,7 +338,8 @@ char const* SummonCosmeticPet(Player* player, std::uint32_t tier, std::uint32_t 
     if (hasCurrent && !replaceCurrent)
         ParkCurrent(player, stable, out, FreeStableSlot(stable));
 
-    return CreateCurrentPet(player, entry, TamingChannelFor(kind)) ? nullptr : "APPLY_APPEARANCES_BAD_CREATURE_ENTRY";
+    return CreateCurrentPet(player, entry, spells.Summon, creatureName) ? nullptr :
+        "APPLY_APPEARANCES_BAD_CREATURE_ENTRY";
 }
 
 class spell_ascension_family_call : public SpellScript
