@@ -5,6 +5,7 @@
 #include "AscensionDungeonRelease.h"
 #include "CoAOtherSideDamage.h"
 #include "Creature.h"
+#include "GameObject.h"
 #include "Map.h"
 #include "MotionMaster.h"
 #include "MoveSplineInit.h"
@@ -33,6 +34,8 @@ enum DrakmathData : uint32
     NPC_PILLAR = 162727,
     NPC_ORB = 162728,
     NPC_VOLZEEN = 162988,
+    GO_WEB_DOOR_WEST = 2300575,
+    GO_WEB_DOOR_EAST = 2300583,
 
     SPELL_ENCHANTED = 256839,
     SPELL_PARASITISM = 256867,
@@ -73,6 +76,7 @@ enum DrakmathData : uint32
     EVENT_BEAM_PILLAR,
     EVENT_BEAM_END,
     EVENT_DEATH_MISSILE,
+    EVENT_CLOSE_DOORS,
 };
 
 constexpr float SidePillarDistance = 10.0f;
@@ -106,6 +110,8 @@ constexpr Damage3 NecroticEmerge = { 260, 660 };
 constexpr Damage3 NecroticExplosion = { 340, 954 };
 constexpr Damage3 DeathMissile = { 250, 750 };
 constexpr uint32 MissileMarkMs = 2500;
+constexpr Seconds DoorCloseDelay = 3s;
+constexpr float DoorSearch = 80.0f;
 constexpr float MissileSpeed = 15.0f;
 
 uint32 ByDifficulty(WorldObject const* source, uint32 normal, uint32 heroic, uint32 mythic)
@@ -159,6 +165,7 @@ struct boss_coa_drakmath : public ScriptedAI
         me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
         me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
         DoCastSelf(SPELL_ENCHANTED, true);
+        SetDoors(GO_STATE_ACTIVE);
     }
 
     void JustEngagedWith(Unit* ) override
@@ -171,6 +178,7 @@ struct boss_coa_drakmath : public ScriptedAI
         _events.ScheduleEvent(EVENT_FIERCE_BLOW, 9s);
         _events.ScheduleEvent(EVENT_SINK, 15s);
         _pillarsSaid = false;
+        _events.ScheduleEvent(EVENT_CLOSE_DOORS, DoorCloseDelay);
         Talk(SAY_AGGRO);
     }
 
@@ -190,6 +198,7 @@ struct boss_coa_drakmath : public ScriptedAI
         Talk(SAY_DEATH);
         _summons.DespawnAll();
         CoASetDungeonReleaseStart(me->GetMap(), ArenaCenter);
+        SetDoors(GO_STATE_ACTIVE);
         _beaming = false;
         me->RemoveAurasDueToSpell(SPELL_SUBMERGED);
         me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
@@ -225,6 +234,9 @@ struct boss_coa_drakmath : public ScriptedAI
         {
             switch (eventId)
             {
+                case EVENT_CLOSE_DOORS:
+                    SetDoors(GO_STATE_READY);
+                    break;
                 case EVENT_PARASITISM:
                     if (Busy())
                     {
@@ -371,6 +383,17 @@ private:
             pillar->CastSpell(pillar, SPELL_PILLAR_VISUAL, true);
         }
         return pillar;
+    }
+
+    void SetDoors(GOState state)
+    {
+        for (uint32 entry : { GO_WEB_DOOR_WEST, GO_WEB_DOOR_EAST })
+        {
+            std::list<GameObject*> doors;
+            me->GetGameObjectListWithEntryInGrid(doors, entry, DoorSearch);
+            for (GameObject* door : doors)
+                door->SetGoState(state);
+        }
     }
 
     void BurstPillar(Creature* pillar)

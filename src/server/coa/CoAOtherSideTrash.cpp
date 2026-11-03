@@ -6,6 +6,7 @@
 #include "Creature.h"
 #include "Map.h"
 #include "Player.h"
+#include "Random.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellAuraEffects.h"
@@ -117,7 +118,7 @@ std::unordered_map<uint32, SpellDamage> const Damages =
     { SPELL_STING, { { 163, 431 }, { 60, 290 } } },
     { SPELL_REND_FLESH, { { 380, 355 }, { 75, 62 } } },
     { SPELL_SHIELD_BASH, { { 41, 133 }, { 0, 0 } } },
-    { SPELL_TOXIC_EXPULSION, { { 589, 1209 }, { 55, 116 } } },
+    { SPELL_TOXIC_EXPULSION, { { 800, 1209 }, { 55, 116 } } },
     { SPELL_BITING_CLOUD, { { 30, 74 }, { 0, 0 } } },
     { SPELL_FISSURE_STRIKE, { { 300, 1000 }, { 0, 0 } } },
 };
@@ -180,6 +181,13 @@ struct npc_coa_other_side_trash : public ScriptedAI
         if (!UpdateVictim())
             return;
 
+        if (_turnedAway && !me->HasUnitState(UNIT_STATE_CASTING))
+        {
+            _turnedAway = false;
+            if (Unit* victim = me->GetVictim())
+                me->SetTarget(victim->GetGUID());
+        }
+
         for (Timer& timer : _timers)
             timer.left = timer.left > diff ? timer.left - diff : 0;
 
@@ -196,6 +204,8 @@ struct npc_coa_other_side_trash : public ScriptedAI
                         DoCastVictim(ability.spell);
                         break;
                     case Aim::Self:
+                        if (ability.spell == SPELL_VENOMOUS_BREATH)
+                            TurnAway();
                         DoCastSelf(ability.spell);
                         break;
                     case Aim::Random:
@@ -214,6 +224,16 @@ struct npc_coa_other_side_trash : public ScriptedAI
     }
 
 private:
+    void TurnAway()
+    {
+        float const angle = frand(0.0f, 2.0f * float(M_PI));
+        me->StopMoving();
+        me->SetTarget(ObjectGuid::Empty);
+        me->SetOrientation(angle);
+        me->SetFacingTo(angle);
+        _turnedAway = true;
+    }
+
     bool IsWanderer() const
     {
         uint32 const entry = me->GetEntry();
@@ -226,6 +246,7 @@ private:
         uint32 left;
     };
     std::vector<Timer> _timers;
+    bool _turnedAway = false;
 };
 
 class spell_coa_other_side_trash_damage : public SpellScript

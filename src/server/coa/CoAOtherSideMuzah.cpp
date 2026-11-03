@@ -88,6 +88,7 @@ enum MuzahData : uint32
     EVENT_LANDED,
     EVENT_GLAIVE_STRIKE,
     EVENT_GLAIVE_STRIKE_SECOND,
+    EVENT_CLOSE_GATES,
 };
 
 Position const ArenaCenter = { 100.9f, -123.9f, 224.976f, 0.0f };
@@ -101,6 +102,7 @@ constexpr uint32 CobraGapMs = 2500;
 constexpr uint32 SwirlLifeMs = 2500;
 constexpr uint32 BatFallMs = 1800;
 constexpr uint32 WebCocoonMs = 4000;
+constexpr Seconds GateCloseDelay = 3s;
 
 constexpr float JumpSpeed = 30.0f;
 constexpr uint32 StrikerLifeMs = 4000;
@@ -199,7 +201,7 @@ struct boss_coa_muzah : public ScriptedAI
 
     void JustEngagedWith(Unit* ) override
     {
-        SetGates(GO_STATE_READY);
+        _events.ScheduleEvent(EVENT_CLOSE_GATES, GateCloseDelay);
         RespawnBats(1);
         _nextSay = SAY_90;
         Talk(SAY_AGGRO);
@@ -252,6 +254,9 @@ struct boss_coa_muzah : public ScriptedAI
             {
                 case EVENT_GLAIVES_LAND:
                     ThrowGlaives();
+                    break;
+                case EVENT_CLOSE_GATES:
+                    SetGates(GO_STATE_READY);
                     break;
                 case EVENT_LEAP:
                     if (_inSeries)
