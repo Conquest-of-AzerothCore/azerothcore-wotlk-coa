@@ -22,7 +22,7 @@ sys.path.insert(0, str(HERE.parent))
 from coa_talent_catalog import STUBS  # noqa: E402
 from client_data import dbc_dir  # noqa: E402
 
-CREATURES = ROOT / "data/sql/updates/pending_db_world/rev_20261102_10_coa_cosmetic_pet_creatures.sql"
+CREATURES = ROOT / "data/sql/updates/pending_db_world/rev_20261103_70_coa_cosmetic_pet_creatures.sql"
 
 MAIN = r"""
 #include "AscensionTamingData.h"
