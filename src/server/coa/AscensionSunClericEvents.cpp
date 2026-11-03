@@ -41,12 +41,6 @@ class aura_ascension_sun_cleric_event : public AuraScript
         uint32 damage = event.GetDamageInfo() ? event.GetDamageInfo()->GetDamage() : 0;
         uint32 healing = event.GetHealInfo() ? event.GetHealInfo()->GetEffectiveHeal() : 0;
         bool periodic = event.GetTypeMask() & (PROC_FLAG_DONE_PERIODIC | PROC_FLAG_TAKEN_PERIODIC);
-        // A periodic-trigger aura (Hammer of Kings 804751, Dawnfall 806118) casts its damage spell
-        // with TRIGGERED_FULL_MASK, so the resulting proc carries no PROC_FLAG_DONE_PERIODIC even
-        // though the damage is periodic. Treat those ticks as periodic so "direct" stays false and
-        // Vow of Dawn neither bounces nor grants Solar Power for them (#9784, #9787). Sunslam's own
-        // periodic weapon-damage tick (805639/807447) is deliberately excluded: #9148 requires it
-        // to fulfil the Vow on every tick.
         if (!periodic)
         {
             Spell const* proc = event.GetProcSpell();
