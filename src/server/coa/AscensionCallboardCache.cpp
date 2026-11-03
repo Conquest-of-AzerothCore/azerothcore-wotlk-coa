@@ -230,7 +230,8 @@ bool PickReward(Player* player, CallboardPool const& pool, uint32 averageItemLev
     for (AscensionCacheRewards::Reward const& reward : pool)
     {
         ItemTemplate const* proto = sObjectMgr->GetItemTemplate(reward.itemId);
-        if (proto && player->CanUseItem(proto) == EQUIP_ERR_OK)
+        if (proto && player->CanUseItem(proto) == EQUIP_ERR_OK &&
+            (!proto->GetSkill() || player->GetSkillValue(proto->GetSkill())))
             usable.push_back(&reward);
     }
     usable = AscensionSpecLoot::PreferSpecialization(player, usable,
