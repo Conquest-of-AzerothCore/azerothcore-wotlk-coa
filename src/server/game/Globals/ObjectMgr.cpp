@@ -915,6 +915,49 @@ void ObjectMgr::LoadCreatureTemplateSpells()
     LOG_INFO("server.loading", " ");
 }
 
+void ObjectMgr::LoadAscensionRaceClassStats()
+{
+    WorldDatabasePreparedStatement* statement =
+        WorldDatabase.GetPreparedStatement(WORLD_SEL_ASCENSION_RACE_CLASS_STATS);
+    PreparedQueryResult result = WorldDatabase.Query(statement);
+    if (!result)
+        return;
+
+    uint32 const maxLevel = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
+    uint32 count = 0;
+    do
+    {
+        Field* fields = result->Fetch();
+        uint8 const race = fields[0].Get<uint8>();
+        uint8 const playerClass = fields[1].Get<uint8>();
+        uint8 const level = fields[2].Get<uint8>();
+        if (race >= _playerInfo.size() || playerClass >= MAX_CLASSES || !level)
+        {
+            LOG_ERROR("sql.sql", "ascension_race_class_stats: invalid race {} class {} level {}",
+                race, playerClass, level);
+            continue;
+        }
+
+        PlayerInfo* info = _playerInfo[race][playerClass];
+        if (level > maxLevel || !info || !info->levelInfo)
+            continue;
+
+        PlayerLevelInfo& levelInfo = info->levelInfo[level - 1];
+        if (!levelInfo.stats[STAT_STRENGTH])
+            continue;
+
+        for (uint8 stat = STAT_STRENGTH; stat < MAX_STATS; ++stat)
+        {
+            int32 const adjusted = int32(levelInfo.stats[stat]) + fields[3 + stat].Get<int16>();
+            levelInfo.stats[stat] = uint32(std::max<int32>(adjusted, 0));
+        }
+
+        ++count;
+    } while (result->NextRow());
+
+    LOG_INFO("server.loading", ">> Loaded {} Ascension race and class stat adjustments", count);
+}
+
 void ObjectMgr::LoadAscensionNpcOverheadIcons()
 {
     _ascensionNpcOverheadIcons.clear();
@@ -4974,6 +5017,8 @@ void ObjectMgr::LoadPlayerInfo()
 
             ++count;
         } while (result->NextRow());
+
+        LoadAscensionRaceClassStats();
 
         // Fill gaps and check integrity
         for (int race = RACE_HUMAN; race < sRaceMgr->GetMaxRaces(); ++race)

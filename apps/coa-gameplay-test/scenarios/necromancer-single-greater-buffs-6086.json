@@ -24,8 +24,8 @@
     "must",
     "not downgrade a Greater buff. These are normally obtainable level-60 class spells initialized",
     "directly;",
-    "Mana is refilled to 1000 for each cast to isolate stacking from resource exhaustion; native level-60",
-    "Necromancer base mana 1373 makes the highest tested cost Greater Foul 69% (947). All tested",
+    "Mana is refilled to 1200 for each cast to isolate stacking from resource exhaustion; native level-60",
+    "Necromancer base mana 1648 makes the highest tested cost Greater Foul 69% (1137). All tested",
     "applications are normal casts to grouped players. Stamina, spell power, Frost resistance and",
     "live aura amounts/presence are measured. Foul and Grim Mandates share one Mandate per Necromancer",
     "on each target (#4136), so the second Necromancer's Greater Grim replaces its own Greater Foul. This",
@@ -79,7 +79,7 @@
       "actor": "first",
       "metric": "max_power",
       "power": 0,
-      "min": 1000,
+      "min": 1200,
       "label": "Caster has enough native mana capacity for the controlled buff casts"
     },
     {
@@ -147,7 +147,7 @@
       "actor": "second",
       "metric": "max_power",
       "power": 0,
-      "min": 1000,
+      "min": 1200,
       "label": "Caster has enough native mana capacity for the controlled buff casts"
     },
     {
@@ -233,7 +233,7 @@
       "action": "set_power",
       "actor": "first",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -276,7 +276,7 @@
       "action": "set_power",
       "actor": "second",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -336,7 +336,7 @@
       "action": "set_power",
       "actor": "first",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -388,7 +388,7 @@
       "action": "set_power",
       "actor": "first",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -440,7 +440,7 @@
       "action": "set_power",
       "actor": "second",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -532,7 +532,7 @@
       "action": "set_power",
       "actor": "first",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -566,7 +566,7 @@
       "action": "set_power",
       "actor": "second",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -624,7 +624,7 @@
       "action": "set_power",
       "actor": "first",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -667,7 +667,7 @@
       "action": "set_power",
       "actor": "second",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -727,7 +727,7 @@
       "action": "set_power",
       "actor": "first",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -779,7 +779,7 @@
       "action": "set_power",
       "actor": "first",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -860,7 +860,7 @@
       "action": "set_power",
       "actor": "first",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -894,7 +894,7 @@
       "action": "set_power",
       "actor": "second",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -952,7 +952,7 @@
       "action": "set_power",
       "actor": "first",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -995,7 +995,7 @@
       "action": "set_power",
       "actor": "second",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -1037,7 +1037,7 @@
       "action": "set_power",
       "actor": "first",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -1107,7 +1107,7 @@
       "action": "set_power",
       "actor": "first",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -1141,7 +1141,7 @@
       "action": "set_power",
       "actor": "second",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -1183,7 +1183,7 @@
       "action": "set_power",
       "actor": "first",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -1217,7 +1217,7 @@
       "action": "set_power",
       "actor": "second",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -1268,7 +1268,7 @@
       "action": "set_power",
       "actor": "first",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -1311,7 +1311,7 @@
       "action": "set_power",
       "actor": "first",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -1354,7 +1354,7 @@
       "action": "set_power",
       "actor": "second",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -1428,7 +1428,7 @@
       "action": "set_power",
       "actor": "first",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",
@@ -1462,7 +1462,7 @@
       "action": "set_power",
       "actor": "second",
       "power": 0,
-      "value": 1000
+      "value": 1200
     },
     {
       "action": "cast",

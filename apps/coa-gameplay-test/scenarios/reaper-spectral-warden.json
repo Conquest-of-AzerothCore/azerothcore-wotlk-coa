@@ -4,7 +4,7 @@
   "contract": [
     "Spectral Warden summons one guardian for 20 seconds and shields nearby allies.",
     "At level 80, DBC effect 1 yields 199 + 3 * (80 - 31) = 346 absorb; the tooltip adds 1.5 * caster stamina.",
-    "The caster has 110 stamina and the ally has 159; the ally receives 511 absorb from the caster."
+    "The caster has 132 stamina and the ally has 159; the ally receives 346 + 1.5 * 132 = 544 absorb from the caster."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -16,14 +16,14 @@
     { "action": "wait", "ms": 5000 },
     { "action": "learn", "actor": "reaper", "spell": 805716 },
     { "action": "set_power", "actor": "reaper", "power": 6, "value": 1000 },
-    { "action": "assert", "actor": "reaper", "metric": "stat", "stat": 2, "equals": 110 },
+    { "action": "assert", "actor": "reaper", "metric": "stat", "stat": 2, "equals": 132 },
     { "action": "assert", "actor": "ally", "metric": "stat", "stat": 2, "equals": 159 },
     { "action": "assert", "actor": "reaper", "metric": "owned_creature_count", "entry": 100481, "equals": 0 },
     { "action": "assert", "actor": "ally", "metric": "aura", "spell": 805716, "equals": 0 },
     { "action": "cast", "actor": "reaper", "spell": 805716 },
     { "action": "assert", "actor": "reaper", "metric": "cast_failure", "spell": 805716, "equals": 0 },
     { "action": "assert", "actor": "ally", "metric": "aura", "spell": 805716, "equals": 1, "within_ms": 3000 },
-    { "action": "assert", "actor": "ally", "metric": "aura_amount", "spell": 805716, "effect": 1, "equals": 511 },
+    { "action": "assert", "actor": "ally", "metric": "aura_amount", "spell": 805716, "effect": 1, "equals": 544 },
     { "action": "assert", "actor": "reaper", "metric": "owned_creature_count", "entry": 100481,
       "min": 1, "within_ms": 3000 },
     { "action": "wait", "ms": 22500 },

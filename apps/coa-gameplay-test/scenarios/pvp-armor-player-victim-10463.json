@@ -69,17 +69,17 @@
     },
     {
       "action": "assert",
-      "label": "Without its starter gear the victim keeps only its Agility armor, 2 x 126",
+      "label": "Without its starter gear the victim keeps only its Agility armor, 2 x 70",
       "actor": "v",
       "metric": "armor",
-      "equals": 252
+      "equals": 140
     },
     {
       "action": "assert",
-      "label": "A level 60 Reaper's 1000 blow loses 5.2% to 252 armor: 1000 x 5500 / 5752",
+      "label": "A level 60 Reaper's 1000 blow loses 2.5% to 140 armor: 1000 x 5500 / 5640",
       "actor": "att",
       "metric": "armor_reduced_damage",
-      "equals": 957,
+      "equals": 976,
       "spell": 6603,
       "target": "v"
     },
@@ -355,10 +355,10 @@
     },
     {
       "action": "assert",
-      "label": "The Fighting Templar converts half its 32 Intellect into 16 armor penetration rating",
+      "label": "The Fighting Templar converts half its 63 Intellect into 31 armor penetration rating",
       "actor": "tpl",
       "metric": "combat_rating",
-      "equals": 16,
+      "equals": 31,
       "rating": 24
     },
     {
@@ -402,21 +402,12 @@
       "label": "Three plate pieces add their tooltip armor 982 + 865 + 909",
       "actor": "v",
       "metric": "armor",
-      "equals": 3008
+      "equals": 2896
     },
     {
       "action": "assert",
-      "label": "The Reaper's blow loses 35.3% to 3008 armor: 1000 x 5500 / 8508",
+      "label": "The Reaper's blow loses 34.5% to 2896 armor: 1000 x 5500 / 8396",
       "actor": "att",
-      "metric": "armor_reduced_damage",
-      "equals": 647,
-      "spell": 6603,
-      "target": "v"
-    },
-    {
-      "action": "assert",
-      "label": "16 rating at level 60 ignores 4.19% of the 2836 armor the penetration cap allows: 1000 x 5500 / 8389.2",
-      "actor": "tpl",
       "metric": "armor_reduced_damage",
       "equals": 656,
       "spell": 6603,
@@ -424,10 +415,19 @@
     },
     {
       "action": "assert",
-      "label": "The reported Soul build's Spectre Strength ignores 10% of that 2836: 1000 x 5500 / 8224.4",
+      "label": "31 rating at level 60 ignores 8.12% of the 2798.7 armor the cap allows: 1000 x 5500 / 8168.8",
+      "actor": "tpl",
+      "metric": "armor_reduced_damage",
+      "equals": 674,
+      "spell": 6603,
+      "target": "v"
+    },
+    {
+      "action": "assert",
+      "label": "The reported Soul build's Spectre Strength ignores 10% of that 2798.7: 1000 x 5500 / 8116.1",
       "actor": "soul",
       "metric": "armor_reduced_damage",
-      "equals": 669,
+      "equals": 678,
       "spell": 6603,
       "target": "v"
     },
@@ -485,14 +485,14 @@
       "label": "Unequipping the plate through the client removes all its armor",
       "actor": "v",
       "metric": "armor",
-      "equals": 252
+      "equals": 140
     },
     {
       "action": "assert",
-      "label": "and the blow is back to 957",
+      "label": "and the blow is back to 976",
       "actor": "att",
       "metric": "armor_reduced_damage",
-      "equals": 957,
+      "equals": 976,
       "spell": 6603,
       "target": "v"
     },
@@ -550,14 +550,14 @@
       "label": "Auto-equipping the plate restores its armor",
       "actor": "v",
       "metric": "armor",
-      "equals": 3008
+      "equals": 2896
     },
     {
       "action": "assert",
-      "label": "and the blow is back to 647",
+      "label": "and the blow is back to 656",
       "actor": "att",
       "metric": "armor_reduced_damage",
-      "equals": 647,
+      "equals": 656,
       "spell": 6603,
       "target": "v"
     },
@@ -575,14 +575,14 @@
       "label": "A relog loads the same armor from the saved gear",
       "actor": "v",
       "metric": "armor",
-      "equals": 3008
+      "equals": 2896
     },
     {
       "action": "assert",
       "label": "and the same mitigation",
       "actor": "att",
       "metric": "armor_reduced_damage",
-      "equals": 647,
+      "equals": 656,
       "spell": 6603,
       "target": "v"
     }

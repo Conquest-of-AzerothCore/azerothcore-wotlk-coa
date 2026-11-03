@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "PvP armor: each CoA Season 1 PvP set gives its tooltip armor and mitigates a player's blow (#10463)",
-  "contract": "Requires ClassicPlus.CombatRules=1 and CoA.ItemScaling.Native.RebornArmor=1 with ItemAddon.dbc. Four level 60 Reapers strip their starter gear (252 armor from 126 Agility) and wear one six-piece set of Lieutenant Thorne's CoA PvP Gear each. Expected armor = 252 + the pieces' reborn armor (ItemAddon.dbc field 43) + equip effects + 2 x the Agility they add: Field Doctor's Satin (set 531) 744 + Field Doctor's Satin Handwraps' 'Increases armor by 250' (536254); Cutthroat's Leather (1259) 1314 + 2 x 123 Agility; Pursuer's Chain (1266) 2090 + 2 x 161 Agility; Harrowed Champion (1263) 3617. A level 60 Reaper's 1000 blow then keeps 5500 / (armor + 5500), rounded up.",
+  "contract": "Requires ClassicPlus.CombatRules=1 and CoA.ItemScaling.Native.RebornArmor=1 with ItemAddon.dbc. Four level 60 Reapers strip their starter gear (140 armor from 70 Agility) and wear one six-piece set of Lieutenant Thorne's CoA PvP Gear each. Expected armor = 140 + the pieces' reborn armor (ItemAddon.dbc field 43) + equip effects + 2 x the Agility they add: Field Doctor's Satin (set 531) 744 + Field Doctor's Satin Handwraps' 'Increases armor by 250' (536254); Cutthroat's Leather (1259) 1314 + 2 x 123 Agility; Pursuer's Chain (1266) 2090 + 2 x 161 Agility; Harrowed Champion (1263) 3617. A level 60 Reaper's 1000 blow then keeps 5500 / (armor + 5500), rounded up.",
   "timeout_ms": 120000,
   "players": [
     {
@@ -162,17 +162,17 @@
     },
     {
       "action": "assert",
-      "label": "Cloth: 252 + 744 + 250",
+      "label": "Cloth: 140 + 744 + 250",
       "actor": "cloth",
       "metric": "armor",
-      "equals": 1246
+      "equals": 1134
     },
     {
       "action": "assert",
-      "label": "Cloth: 1000 x 5500 / (1246 + 5500)",
+      "label": "Cloth: 1000 x 5500 / (1134 + 5500)",
       "actor": "att",
       "metric": "armor_reduced_damage",
-      "equals": 816,
+      "equals": 830,
       "spell": 6603,
       "target": "cloth"
     },
@@ -290,17 +290,17 @@
     },
     {
       "action": "assert",
-      "label": "Leather: 252 + 1314 + 246",
+      "label": "Leather: 140 + 1314 + 246",
       "actor": "leather",
       "metric": "armor",
-      "equals": 1812
+      "equals": 1700
     },
     {
       "action": "assert",
-      "label": "Leather: 1000 x 5500 / (1812 + 5500)",
+      "label": "Leather: 1000 x 5500 / (1700 + 5500)",
       "actor": "att",
       "metric": "armor_reduced_damage",
-      "equals": 753,
+      "equals": 764,
       "spell": 6603,
       "target": "leather"
     },
@@ -418,17 +418,17 @@
     },
     {
       "action": "assert",
-      "label": "Mail: 252 + 2090 + 322",
+      "label": "Mail: 140 + 2090 + 322",
       "actor": "mail",
       "metric": "armor",
-      "equals": 2664
+      "equals": 2552
     },
     {
       "action": "assert",
-      "label": "Mail: 1000 x 5500 / (2664 + 5500)",
+      "label": "Mail: 1000 x 5500 / (2552 + 5500)",
       "actor": "att",
       "metric": "armor_reduced_damage",
-      "equals": 674,
+      "equals": 684,
       "spell": 6603,
       "target": "mail"
     },
@@ -546,17 +546,17 @@
     },
     {
       "action": "assert",
-      "label": "Plate: 252 + 3617",
+      "label": "Plate: 140 + 3617",
       "actor": "plate",
       "metric": "armor",
-      "equals": 3869
+      "equals": 3757
     },
     {
       "action": "assert",
-      "label": "Plate: 1000 x 5500 / (3869 + 5500)",
+      "label": "Plate: 1000 x 5500 / (3757 + 5500)",
       "actor": "att",
       "metric": "armor_reduced_damage",
-      "equals": 588,
+      "equals": 595,
       "spell": 6603,
       "target": "plate"
     }

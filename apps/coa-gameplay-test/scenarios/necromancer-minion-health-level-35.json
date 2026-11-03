@@ -6,8 +6,8 @@
     "fit minion health = b x the owner's naked health + h x the minion's inherited Stamina, where the minion",
     "inherits 0.2714 x Life Force x owner Stamina (whole points), h = 10 health per Stamina (Ghoul 5) and b =",
     "0.54 for Skeletal Warriors, 0.66 for the Ghoul and 1.38 for the Abomination. A naked level-35 Undead",
-    "Necromancer has 45 Stamina and 806 naked health, so: Lesser Skeletal Warrior 555 (old formula 3185); Ghoul",
-    "592 (old formula 3185); Abomination 1472 (old formula 9055). Expected: within 5%."
+    "Necromancer has 57 Stamina; minion health keeps the legacy 806 naked health, so: Lesser Skeletal Warrior 585",
+    "(old formula 3185); Ghoul 607 (old formula 3185); Abomination 1572 (old formula 9055). Expected: within 5%."
   ],
   "timeout_ms": 90000,
   "location": {
@@ -52,8 +52,8 @@
       "actor": "warrior",
       "metric": "stat",
       "stat": 2,
-      "min": 44.5,
-      "max": 45.5
+      "min": 56.5,
+      "max": 57.5
     },
     {
       "action": "assert",
@@ -61,8 +61,8 @@
       "actor": "ghoul",
       "metric": "stat",
       "stat": 2,
-      "min": 44.5,
-      "max": 45.5
+      "min": 56.5,
+      "max": 57.5
     },
     {
       "action": "assert",
@@ -70,8 +70,8 @@
       "actor": "abom",
       "metric": "stat",
       "stat": 2,
-      "min": 44.5,
-      "max": 45.5
+      "min": 56.5,
+      "max": 57.5
     },
     {
       "action": "learn",
@@ -159,30 +159,30 @@
     },
     {
       "action": "assert",
-      "label": "The Lesser Skeletal Warrior has about 555 health",
+      "label": "The Lesser Skeletal Warrior has about 585 health",
       "actor": "warrior",
       "metric": "owned_creature_max_health",
       "entry": 50065,
-      "min": 527,
-      "max": 584
+      "min": 555,
+      "max": 615
     },
     {
       "action": "assert",
-      "label": "The Ghoul has about 592 health",
+      "label": "The Ghoul has about 607 health",
       "actor": "ghoul",
       "metric": "owned_creature_max_health",
       "entry": 50073,
-      "min": 562,
-      "max": 622
+      "min": 576,
+      "max": 638
     },
     {
       "action": "assert",
-      "label": "The Abomination has about 1472 health",
+      "label": "The Abomination has about 1572 health",
       "actor": "abom",
       "metric": "owned_creature_max_health",
       "entry": 50068,
-      "min": 1398,
-      "max": 1546
+      "min": 1493,
+      "max": 1651
     }
   ]
 }

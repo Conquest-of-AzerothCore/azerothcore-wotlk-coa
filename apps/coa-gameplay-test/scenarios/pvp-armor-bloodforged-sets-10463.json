@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "PvP armor: each Bloodforged level 60 set gives its tooltip armor and mitigates a player's blow (#10463)",
-  "contract": "Requires ClassicPlus.CombatRules=1 and CoA.ItemScaling.Native.RebornArmor=1 with ItemAddon.dbc. Four level 60 Reapers strip their starter gear (252 armor from 126 Agility) and wear one Bloodforged set each (sets 122 cloth, 121 leather, 123 mail, 124 plate, one piece per slot). Expected armor = 252 + the pieces' reborn armor (ItemAddon.dbc field 43) + 2 x the Agility they add: cloth 383; leather 741 + 2 x 57; mail 1557 + 2 x 70; plate 2758. A level 60 Reaper's 1000 blow then keeps 5500 / (armor + 5500), rounded up.",
+  "contract": "Requires ClassicPlus.CombatRules=1 and CoA.ItemScaling.Native.RebornArmor=1 with ItemAddon.dbc. Four level 60 Reapers strip their starter gear (140 armor from 70 Agility) and wear one Bloodforged set each (sets 122 cloth, 121 leather, 123 mail, 124 plate, one piece per slot). Expected armor = 140 + the pieces' reborn armor (ItemAddon.dbc field 43) + 2 x the Agility they add: cloth 383; leather 741 + 2 x 57; mail 1557 + 2 x 70; plate 2758. A level 60 Reaper's 1000 blow then keeps 5500 / (armor + 5500), rounded up.",
   "timeout_ms": 120000,
   "players": [
     {
@@ -150,17 +150,17 @@
     },
     {
       "action": "assert",
-      "label": "Cloth: 252 + 383",
+      "label": "Cloth: 140 + 383",
       "actor": "cloth",
       "metric": "armor",
-      "equals": 635
+      "equals": 523
     },
     {
       "action": "assert",
-      "label": "Cloth: 1000 x 5500 / (635 + 5500)",
+      "label": "Cloth: 1000 x 5500 / (523 + 5500)",
       "actor": "att",
       "metric": "armor_reduced_damage",
-      "equals": 897,
+      "equals": 914,
       "spell": 6603,
       "target": "cloth"
     },
@@ -266,17 +266,17 @@
     },
     {
       "action": "assert",
-      "label": "Leather: 252 + 741 + 114",
+      "label": "Leather: 140 + 741 + 114",
       "actor": "leather",
       "metric": "armor",
-      "equals": 1107
+      "equals": 995
     },
     {
       "action": "assert",
-      "label": "Leather: 1000 x 5500 / (1107 + 5500)",
+      "label": "Leather: 1000 x 5500 / (995 + 5500)",
       "actor": "att",
       "metric": "armor_reduced_damage",
-      "equals": 833,
+      "equals": 847,
       "spell": 6603,
       "target": "leather"
     },
@@ -382,17 +382,17 @@
     },
     {
       "action": "assert",
-      "label": "Mail: 252 + 1557 + 140",
+      "label": "Mail: 140 + 1557 + 140",
       "actor": "mail",
       "metric": "armor",
-      "equals": 1949
+      "equals": 1837
     },
     {
       "action": "assert",
-      "label": "Mail: 1000 x 5500 / (1949 + 5500)",
+      "label": "Mail: 1000 x 5500 / (1837 + 5500)",
       "actor": "att",
       "metric": "armor_reduced_damage",
-      "equals": 739,
+      "equals": 750,
       "spell": 6603,
       "target": "mail"
     },
@@ -498,17 +498,17 @@
     },
     {
       "action": "assert",
-      "label": "Plate: 252 + 2758",
+      "label": "Plate: 140 + 2758",
       "actor": "plate",
       "metric": "armor",
-      "equals": 3010
+      "equals": 2898
     },
     {
       "action": "assert",
-      "label": "Plate: 1000 x 5500 / (3010 + 5500)",
+      "label": "Plate: 1000 x 5500 / (2898 + 5500)",
       "actor": "att",
       "metric": "armor_reduced_damage",
-      "equals": 647,
+      "equals": 655,
       "spell": 6603,
       "target": "plate"
     }

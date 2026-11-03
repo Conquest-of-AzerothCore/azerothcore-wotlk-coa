@@ -6,8 +6,10 @@
 #include "DBCStores.h"
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 #include "Opcodes.h"
 #include "Player.h"
+#include "RaceMgr.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "Spell.h"
@@ -183,11 +185,41 @@ bool Responds(uint32 entry, uint32 command)
     }
 }
 constexpr float OwnerStaminaPerLifeForce = 0.2714f;
+uint32 LegacyStaminaGain(Classes legacyClass, uint8 level)
+{
+    for (uint8 race = RACE_HUMAN; race < sRaceMgr->GetMaxRaces(); ++race)
+    {
+        if (!sObjectMgr->GetPlayerInfo(race, legacyClass))
+            continue;
+
+        PlayerLevelInfo first;
+        PlayerLevelInfo current;
+        sObjectMgr->GetPlayerLevelInfo(race, legacyClass, 1, &first);
+        sObjectMgr->GetPlayerLevelInfo(race, legacyClass, level, &current);
+        return current.stats[STAT_STAMINA] - first.stats[STAT_STAMINA];
+    }
+
+    return 0;
+}
+uint32 LegacyBaseHealthGain(Classes legacyClass, uint8 level)
+{
+    PlayerClassLevelInfo first;
+    PlayerClassLevelInfo current;
+    sObjectMgr->GetPlayerClassLevelInfo(legacyClass, 1, &first);
+    sObjectMgr->GetPlayerClassLevelInfo(legacyClass, level, &current);
+    return current.basehealth - first.basehealth;
+}
 float NakedHealth(Player const* player)
 {
-    float stamina = player->GetCreateStat(STAT_STAMINA);
+    Classes const legacyClass = GetLegacyClassForCustomClass(Classes(player->getClass()));
+    PlayerLevelInfo firstLevel;
+    PlayerClassLevelInfo firstClassLevel;
+    sObjectMgr->GetPlayerLevelInfo(player->getRace(true), player->getClass(), 1, &firstLevel);
+    sObjectMgr->GetPlayerClassLevelInfo(player->getClass(), 1, &firstClassLevel);
+    float stamina = float(firstLevel.stats[STAT_STAMINA] + LegacyStaminaGain(legacyClass, player->GetLevel()));
+    float baseHealth = float(firstClassLevel.basehealth + LegacyBaseHealthGain(legacyClass, player->GetLevel()));
     float firstTwenty = std::min(stamina, 20.0f);
-    return player->GetCreateHealth() + firstTwenty + (stamina - firstTwenty) * 10.0f;
+    return baseHealth + firstTwenty + (stamina - firstTwenty) * 10.0f;
 }
 float HealthShare(uint32 entry, uint8 cost)
 {

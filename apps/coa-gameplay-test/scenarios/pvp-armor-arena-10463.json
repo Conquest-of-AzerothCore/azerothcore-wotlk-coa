@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "PvP armor: in a rated 1v1 arena a player's armor mitigates the opponent's blow as in the open world (#10462, #10479)",
-  "contract": "Requires ClassicPlus.CombatRules=1 and CoA.ItemScaling.Native.RebornArmor=1 with ItemAddon.dbc, and the rated 1v1 solo queue of arena-rated-solo-queue-1v1-7398 (0x05C1 bracket 5). Two level 60 Reapers strip their starter gear; the victim then wears Titanic Breastplate, Dark Iron Leggings and Helm of Domination (reborn armor 982 + 865 + 909 on 252 Agility armor). Both are matched into a rated 1v1 arena, whose map the queue picks. Inside it the victim keeps 3008 armor and a level 60 player's 1000 blow keeps 5500 / (armor + 5500), rounded up, exactly as outside.",
+  "contract": "Requires ClassicPlus.CombatRules=1 and CoA.ItemScaling.Native.RebornArmor=1 with ItemAddon.dbc, and the rated 1v1 solo queue of arena-rated-solo-queue-1v1-7398 (0x05C1 bracket 5). Two level 60 Reapers strip their starter gear; the victim then wears Titanic Breastplate, Dark Iron Leggings and Helm of Domination (reborn armor 982 + 865 + 909 on 140 Agility armor). Both are matched into a rated 1v1 arena, whose map the queue picks. Inside it the victim keeps 2896 armor and a level 60 player's 1000 blow keeps 5500 / (armor + 5500), rounded up, exactly as outside.",
   "timeout_ms": 240000,
   "players": [
     {
@@ -111,17 +111,17 @@
     },
     {
       "action": "assert",
-      "label": "Before the queue the plate victim has 252 + 982 + 865 + 909 armor",
+      "label": "Before the queue the plate victim has 140 + 982 + 865 + 909 armor",
       "actor": "v",
       "metric": "armor",
-      "equals": 3008
+      "equals": 2896
     },
     {
       "action": "assert",
-      "label": "and the naked attacker's blow keeps 1000 x 5500 / 8508",
+      "label": "and the naked attacker's blow keeps 1000 x 5500 / 8396",
       "actor": "att",
       "metric": "armor_reduced_damage",
-      "equals": 647,
+      "equals": 656,
       "spell": 6603,
       "target": "v"
     },
@@ -252,30 +252,30 @@
       "label": "Inside the arena the victim keeps its armor",
       "actor": "v",
       "metric": "armor",
-      "equals": 3008
+      "equals": 2896
     },
     {
       "action": "assert",
-      "label": "and the attacker its 252",
+      "label": "and the attacker its 140",
       "actor": "att",
       "metric": "armor",
-      "equals": 252
+      "equals": 140
     },
     {
       "action": "assert",
-      "label": "A player's blow on the plate victim keeps 1000 x 5500 / 8508 in the arena",
+      "label": "A player's blow on the plate victim keeps 1000 x 5500 / 8396 in the arena",
       "actor": "att",
       "metric": "armor_reduced_damage",
-      "equals": 647,
+      "equals": 656,
       "spell": 6603,
       "target": "v"
     },
     {
       "action": "assert",
-      "label": "and the victim's blow on the naked attacker 1000 x 5500 / 5752",
+      "label": "and the victim's blow on the naked attacker 1000 x 5500 / 5640",
       "actor": "v",
       "metric": "armor_reduced_damage",
-      "equals": 957,
+      "equals": 976,
       "spell": 6603,
       "target": "att"
     }
