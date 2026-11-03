@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Equipped gear loot never drops an NPC Equipment placeholder (#10618)",
-  "contract": "Issue #10618 reports 'NPC Equipment Left Hand - Golem Lord Argelmach (ItemID: 6618)' (2079059) dropping in Lower Blackrock Spire. No loot table references it; it comes from the equipped gear generator (CoA.EquippedGearLoot), which matches DisplayInfoID and slot of the gear a creature wears. Golem Lord Argelmach 8983 (level 57) wears item 6618 (display 5372, slot 13), and 2079059 is the only other item on that appearance, with RequiredLevel 52, so it is in band. PlaceholderName (AscensionEquippedGearLoot.cpp) lacked the 'NPC Equipment' prefix. equipped_gear_loot_rate rolls the real corpse-loot path 5000 times per assertion, so the placeholder must never appear while genuine gear still drops.",
+  "contract": "Issue #10618 reports 'NPC Equipment Left Hand - Golem Lord Argelmach (ItemID: 6618)' (2079059) dropping in Lower Blackrock Spire. No loot table references it; it comes from the equipped gear generator (CoA.EquippedGearLoot), which matches DisplayInfoID and slot of the gear a creature wears. Golem Lord Argelmach 8983 is a dungeon boss, which the generator skips before it reads item names, so the fixture is Crimson Conjuror 10419 (level 57-58, not in instance_encounters, wears item 6618: display 5372, slot 13). 2079059 is the only other item on that appearance, with RequiredLevel 52, so it is in band. PlaceholderName (AscensionEquippedGearLoot.cpp) lacked the 'NPC Equipment' prefix. equipped_gear_loot_rate rolls the real corpse-loot path 5000 times per assertion, so the placeholder must never appear. Crimson Conjuror takes a random one of four displays per spawn, and a metric run against it showed generated gear (4.62 percent of corpses) in one spawn, so the fixture is not rejected by the generator's creature gate.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -28,10 +28,10 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the NPC Equipment placeholder never drops from Golem Lord Argelmach",
+      "label": "DISCRIMINATING: the NPC Equipment placeholder never drops from the Crimson Conjuror",
       "actor": "looter",
       "metric": "equipped_gear_loot_rate",
-      "entry": 8983,
+      "entry": 10419,
       "item": 2079059,
       "min": 0,
       "max": 0
