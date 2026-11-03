@@ -464,8 +464,5 @@ DELETE FROM `creature_loot_template` WHERE `Item` = 45912;
 DELETE FROM `reference_loot_template` WHERE `Item` = 45912;
 DELETE FROM `npc_vendor` WHERE `item` IN (50166, 50167, 50168);
 
--- Ancient Enchanting Altars serve Free Pick and Bronzebeard realms, not Conquest of Azeroth.
-DELETE FROM `gameobject` WHERE `guid` BETWEEN 8001329 AND 8001335 AND `id` = 80148;
-
 -- Glyphs players already own stay in their bags but show as poor (grey) quality, so they read as obsolete.
 UPDATE `item_template` SET `Quality` = 0 WHERE `class` = 16 AND `Quality` = 1;

@@ -1,0 +1,5 @@
+## Interface: 30300
+## Title: Ancient Enchanting Altars
+## Notes: Outland map locations for Ancient Enchanting Altars.
+## Version: 1.0.0
+OutlandAltarPOIs.lua
