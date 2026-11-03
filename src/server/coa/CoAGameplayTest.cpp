@@ -4419,6 +4419,8 @@ private:
             if (metric == "armor_reduced_damage")
             {
                 Unit* attacker = step.get<bool>("pet", false) ? static_cast<Unit*>(player->GetPet()) : player;
+                if (auto const from = step.get_optional<std::string>("from"))
+                    attacker = GetUnit(*from);
                 Require(attacker != nullptr, "Armor probe needs a current pet");
                 return Unit::CalcArmorReducedDamage(attacker, target, 1000, info);
             }

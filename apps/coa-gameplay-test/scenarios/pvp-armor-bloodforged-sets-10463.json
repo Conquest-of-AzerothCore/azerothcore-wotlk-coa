@@ -1,0 +1,516 @@
+{
+  "schema": 1,
+  "name": "PvP armor: each Bloodforged level 60 set gives its tooltip armor and mitigates a player's blow (#10463)",
+  "contract": "Requires ClassicPlus.CombatRules=1 and CoA.ItemScaling.Native.RebornArmor=1 with ItemAddon.dbc. Four level 60 Reapers strip their starter gear (252 armor from 126 Agility) and wear one Bloodforged set each (sets 122 cloth, 121 leather, 123 mail, 124 plate, one piece per slot). Expected armor = 252 + the pieces' reborn armor (ItemAddon.dbc field 43) + 2 x the Agility they add: cloth 383; leather 741 + 2 x 57; mail 1557 + 2 x 70; plate 2758. A level 60 Reaper's 1000 blow then keeps 5500 / (armor + 5500), rounded up.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "att",
+      "race": 1,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "cloth",
+      "race": 1,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "leather",
+      "race": 1,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "mail",
+      "race": 1,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "plate",
+      "race": 1,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the characters settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "cloth",
+      "spell": 9078
+    },
+    {
+      "action": "learn",
+      "actor": "cloth",
+      "spell": 9077
+    },
+    {
+      "action": "learn",
+      "actor": "cloth",
+      "spell": 8737
+    },
+    {
+      "action": "learn",
+      "actor": "cloth",
+      "spell": 750
+    },
+    {
+      "action": "destroy_item",
+      "actor": "cloth",
+      "item": 2000071
+    },
+    {
+      "action": "destroy_item",
+      "actor": "cloth",
+      "item": 2000069
+    },
+    {
+      "action": "destroy_item",
+      "actor": "cloth",
+      "item": 2000070
+    },
+    {
+      "action": "destroy_item",
+      "actor": "cloth",
+      "item": 2001095
+    },
+    {
+      "action": "add_item",
+      "actor": "cloth",
+      "item": 6314626,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "cloth",
+      "item": 6314626,
+      "slot": 4
+    },
+    {
+      "action": "add_item",
+      "actor": "cloth",
+      "item": 6314632,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "cloth",
+      "item": 6314632,
+      "slot": 6
+    },
+    {
+      "action": "add_item",
+      "actor": "cloth",
+      "item": 6314633,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "cloth",
+      "item": 6314633,
+      "slot": 2
+    },
+    {
+      "action": "add_item",
+      "actor": "cloth",
+      "item": 6399387,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "cloth",
+      "item": 6399387,
+      "slot": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "cloth",
+      "item": 6399430,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "cloth",
+      "item": 6399430,
+      "slot": 9
+    },
+    {
+      "action": "assert",
+      "label": "Cloth: 252 + 383",
+      "actor": "cloth",
+      "metric": "armor",
+      "equals": 635
+    },
+    {
+      "action": "assert",
+      "label": "Cloth: 1000 x 5500 / (635 + 5500)",
+      "actor": "att",
+      "metric": "armor_reduced_damage",
+      "equals": 897,
+      "spell": 6603,
+      "target": "cloth"
+    },
+    {
+      "action": "learn",
+      "actor": "leather",
+      "spell": 9078
+    },
+    {
+      "action": "learn",
+      "actor": "leather",
+      "spell": 9077
+    },
+    {
+      "action": "learn",
+      "actor": "leather",
+      "spell": 8737
+    },
+    {
+      "action": "learn",
+      "actor": "leather",
+      "spell": 750
+    },
+    {
+      "action": "destroy_item",
+      "actor": "leather",
+      "item": 2000071
+    },
+    {
+      "action": "destroy_item",
+      "actor": "leather",
+      "item": 2000069
+    },
+    {
+      "action": "destroy_item",
+      "actor": "leather",
+      "item": 2000070
+    },
+    {
+      "action": "destroy_item",
+      "actor": "leather",
+      "item": 2001095
+    },
+    {
+      "action": "add_item",
+      "actor": "leather",
+      "item": 6314637,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "leather",
+      "item": 6314637,
+      "slot": 4
+    },
+    {
+      "action": "add_item",
+      "actor": "leather",
+      "item": 6314638,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "leather",
+      "item": 6314638,
+      "slot": 6
+    },
+    {
+      "action": "add_item",
+      "actor": "leather",
+      "item": 6314640,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "leather",
+      "item": 6314640,
+      "slot": 9
+    },
+    {
+      "action": "add_item",
+      "actor": "leather",
+      "item": 6399124,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "leather",
+      "item": 6399124,
+      "slot": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "leather",
+      "item": 6399304,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "leather",
+      "item": 6399304,
+      "slot": 2
+    },
+    {
+      "action": "assert",
+      "label": "Leather: 252 + 741 + 114",
+      "actor": "leather",
+      "metric": "armor",
+      "equals": 1107
+    },
+    {
+      "action": "assert",
+      "label": "Leather: 1000 x 5500 / (1107 + 5500)",
+      "actor": "att",
+      "metric": "armor_reduced_damage",
+      "equals": 833,
+      "spell": 6603,
+      "target": "leather"
+    },
+    {
+      "action": "learn",
+      "actor": "mail",
+      "spell": 9078
+    },
+    {
+      "action": "learn",
+      "actor": "mail",
+      "spell": 9077
+    },
+    {
+      "action": "learn",
+      "actor": "mail",
+      "spell": 8737
+    },
+    {
+      "action": "learn",
+      "actor": "mail",
+      "spell": 750
+    },
+    {
+      "action": "destroy_item",
+      "actor": "mail",
+      "item": 2000071
+    },
+    {
+      "action": "destroy_item",
+      "actor": "mail",
+      "item": 2000069
+    },
+    {
+      "action": "destroy_item",
+      "actor": "mail",
+      "item": 2000070
+    },
+    {
+      "action": "destroy_item",
+      "actor": "mail",
+      "item": 2001095
+    },
+    {
+      "action": "add_item",
+      "actor": "mail",
+      "item": 6099790,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "mail",
+      "item": 6099790,
+      "slot": 2
+    },
+    {
+      "action": "add_item",
+      "actor": "mail",
+      "item": 6314611,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "mail",
+      "item": 6314611,
+      "slot": 4
+    },
+    {
+      "action": "add_item",
+      "actor": "mail",
+      "item": 6314612,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "mail",
+      "item": 6314612,
+      "slot": 6
+    },
+    {
+      "action": "add_item",
+      "actor": "mail",
+      "item": 6314615,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "mail",
+      "item": 6314615,
+      "slot": 9
+    },
+    {
+      "action": "add_item",
+      "actor": "mail",
+      "item": 6399705,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "mail",
+      "item": 6399705,
+      "slot": 0
+    },
+    {
+      "action": "assert",
+      "label": "Mail: 252 + 1557 + 140",
+      "actor": "mail",
+      "metric": "armor",
+      "equals": 1949
+    },
+    {
+      "action": "assert",
+      "label": "Mail: 1000 x 5500 / (1949 + 5500)",
+      "actor": "att",
+      "metric": "armor_reduced_damage",
+      "equals": 739,
+      "spell": 6603,
+      "target": "mail"
+    },
+    {
+      "action": "learn",
+      "actor": "plate",
+      "spell": 9078
+    },
+    {
+      "action": "learn",
+      "actor": "plate",
+      "spell": 9077
+    },
+    {
+      "action": "learn",
+      "actor": "plate",
+      "spell": 8737
+    },
+    {
+      "action": "learn",
+      "actor": "plate",
+      "spell": 750
+    },
+    {
+      "action": "destroy_item",
+      "actor": "plate",
+      "item": 2000071
+    },
+    {
+      "action": "destroy_item",
+      "actor": "plate",
+      "item": 2000069
+    },
+    {
+      "action": "destroy_item",
+      "actor": "plate",
+      "item": 2000070
+    },
+    {
+      "action": "destroy_item",
+      "actor": "plate",
+      "item": 2001095
+    },
+    {
+      "action": "add_item",
+      "actor": "plate",
+      "item": 6198631,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "plate",
+      "item": 6198631,
+      "slot": 2
+    },
+    {
+      "action": "add_item",
+      "actor": "plate",
+      "item": 6198855,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "plate",
+      "item": 6198855,
+      "slot": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "plate",
+      "item": 6314622,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "plate",
+      "item": 6314622,
+      "slot": 9
+    },
+    {
+      "action": "add_item",
+      "actor": "plate",
+      "item": 6314623,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "plate",
+      "item": 6314623,
+      "slot": 6
+    },
+    {
+      "action": "add_item",
+      "actor": "plate",
+      "item": 6314624,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "plate",
+      "item": 6314624,
+      "slot": 4
+    },
+    {
+      "action": "assert",
+      "label": "Plate: 252 + 2758",
+      "actor": "plate",
+      "metric": "armor",
+      "equals": 3010
+    },
+    {
+      "action": "assert",
+      "label": "Plate: 1000 x 5500 / (3010 + 5500)",
+      "actor": "att",
+      "metric": "armor_reduced_damage",
+      "equals": 647,
+      "spell": 6603,
+      "target": "plate"
+    }
+  ]
+}
