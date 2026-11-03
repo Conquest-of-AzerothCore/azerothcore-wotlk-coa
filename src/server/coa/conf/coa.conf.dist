@@ -625,6 +625,45 @@ Ascension.CallboardCache.GoldMin = 5
 Ascension.CallboardCache.GoldMax = 15
 
 #
+#    CoA.CallboardContracts.Enable
+#        Description: Call Board Temporal Contracts. Every contract type listed in
+#                     ascension_callboard_contract earns DailyCompletions completions per day
+#                     begun since the weekly reset; missed days bank up until that reset. A
+#                     character can take and turn in quests of a type only while it has
+#                     completions left, and the Call Board's Complete Now button finishes the
+#                     banked ones for gold or Bazaar Tokens.
+#        Default:     1
+
+CoA.CallboardContracts.Enable = 1
+
+#
+#    CoA.CallboardContracts.DailyCompletions
+#        Description: Completions every contract type earns per day, shared by all its quests.
+#        Default:     1
+
+CoA.CallboardContracts.DailyCompletions = 1
+
+#
+#    CoA.CallboardContracts.MoneyCostMultiplier
+#    CoA.CallboardContracts.MinMoneyCost
+#        Description: Gold price of one Complete Now completion: the quest's money reward
+#                     times the multiplier, at least MinMoneyCost copper.
+#        Default:     1.0, 100000
+
+CoA.CallboardContracts.MoneyCostMultiplier = 1.0
+CoA.CallboardContracts.MinMoneyCost = 100000
+
+#
+#    CoA.CallboardContracts.TokenCostMultiplier
+#    CoA.CallboardContracts.MinTokenCost
+#        Description: Bazaar Token price of one Complete Now completion: the quest's Bazaar
+#                     Token reward times the multiplier, at least MinTokenCost tokens.
+#        Default:     2.0, 50
+
+CoA.CallboardContracts.TokenCostMultiplier = 2.0
+CoA.CallboardContracts.MinTokenCost = 50
+
+#
 #    CoA.DungeonTuning.Enable
 #        Description: Allow `.mythic damage` and `.mythic health` in 5-man dungeons. Every player can
 #                     raise or lower the damage and health of the creatures in their own instance
