@@ -65,10 +65,16 @@ struct WorldObject
 {
     virtual ~WorldObject() = default;
     virtual Creature* ToCreature() { return nullptr; }
-    bool IsCreature() { return ToCreature() != nullptr; }
+    bool IsCreature()
+    {
+        return ToCreature() != nullptr;
+    }
     Map const* FindMap() const;
 };
-struct CreatureTemplate { uint32 unit_class = 1, rank = 0; };
+struct CreatureTemplate
+{
+    uint32 unit_class = 1, rank = 0;
+};
 struct Creature : WorldObject
 {
     CreatureTemplate data;
@@ -102,10 +108,19 @@ struct Map
         auto found = creatures.find(guid);
         return found == creatures.end() ? nullptr : found->second;
     }
-    uint32 GetId() const { return 0; }
-    uint8 GetSpawnMode() const { return 0; }
+    uint32 GetId() const
+    {
+        return 0;
+    }
+    uint8 GetSpawnMode() const
+    {
+        return 0;
+    }
 } fixtureMap;
-Map const* WorldObject::FindMap() const { return &fixtureMap; }
+Map const* WorldObject::FindMap() const
+{
+    return &fixtureMap;
+}
 
 struct CreatureDisplayInfoEntry { uint32 ExtendedDisplayInfoID = 0; };
 template<class T> struct Store
@@ -183,12 +198,18 @@ struct Group
 };
 struct WorldSession
 {
-    uint32 Expansion() const { return EXPANSION_THE_BURNING_CRUSADE; }
+    uint32 Expansion() const
+    {
+        return EXPANSION_THE_BURNING_CRUSADE;
+    }
 };
 struct Player : WorldObject
 {
     WorldSession session;
-    WorldSession const* GetSession() const { return &session; }
+    WorldSession const* GetSession() const
+    {
+        return &session;
+    }
     uint64 guid = 1;
     Group* group = nullptr;
     bool near = true;
@@ -237,7 +258,9 @@ struct Loot
     std::map<uint64, uint32> PlayerQuestItems;
     void AddItem(LootStoreItem const&);
     bool FillLoot(uint32, LootStore const&, Player*, bool, bool, uint16, WorldObject*);
-    void GuaranteeOneGearDrop(LootTemplate const&) { }
+    void GuaranteeOneGearDrop(LootTemplate const&)
+    {
+    }
     void FillQuestLoot(Player* player) { PlayerQuestItems.emplace(player->GetGUID(), 1); }
     void FillNotNormalLootFor(Player* player)
     {
