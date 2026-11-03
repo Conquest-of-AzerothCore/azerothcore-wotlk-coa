@@ -6229,7 +6229,7 @@ public:
     void OnCosmeticCancelled(Player* player, uint32 spellId)
     {
         auto state = GetState(player);
-        if (!state || !state->AppliedCosmeticSpells.contains(spellId))
+        if (!state || !state->AppliedCosmeticSpells.contains(spellId) || WearsOtherForm(player))
             return;
 
         for (uint32 category = 56; category <= 58; ++category)
@@ -8207,6 +8207,11 @@ private:
     player->GetSession()->SendPacket(&packet);
   }
 
+    static bool WearsOtherForm(Player const* player)
+    {
+        return player->GetShapeshiftForm() != FORM_NONE || player->GetDisplayId() != player->GetNativeDisplayId();
+    }
+
     void RefreshCosmetics(Player* player, PlayerCollectionState& state)
     {
         std::unordered_set<uint32> desired;
@@ -8222,7 +8227,7 @@ private:
             if (!desired.contains(spell))
                 player->RemoveAurasDueToSpell(spell, player->GetGUID());
         state.AppliedCosmeticSpells = std::move(desired);
-        if (!player->IsAlive())
+        if (!player->IsAlive() || WearsOtherForm(player))
             return;
         for (uint32 spell : state.AppliedCosmeticSpells)
         {
