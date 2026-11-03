@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "Worldforged Thunder Hide Tailspike stands on the ground in Durotar (#4810)",
+  "contract": "The Thunder Hide Tailspike pickup (gameobject entry 95624, guid 6942318) was spawned about 1.5 yd below the terrain at its spawn XY and clipped through the ground; its height is lowered or raised onto the measured ground so it stays within a yard of the surface.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": 967.7, "y": -4288.2, "z": -6.1, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the Thunder Hide Tailspike is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95624, "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup stands within a yard of the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 6942318, "spawn_type": "gameobject", "min": -1, "max": 1 }
+  ]
+}

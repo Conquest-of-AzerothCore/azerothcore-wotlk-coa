@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "The Duskwood Briarthorn 12001309 rests on the ground",
+  "contract": "GatherMate Briarthorn 12001309 was imported at z 56.34, 24.7 yd above the terrain at 31.68, in a tree canopy where it could not be seen or clicked. It now sits on the terrain. Issue #10812.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Briarthorn rests on the ground",
+      "actor": "p", "metric": "spawn_ground_gap", "guid": 12001309, "spawn_type": "gameobject", "min": -0.5, "max": 0.5
+    }
+  ]
+}

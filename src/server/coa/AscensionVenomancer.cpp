@@ -406,9 +406,9 @@ void Refresh(Player* player)
     {
         bool enabled = player->HasAura(talent) || player->HasSpell(talent);
         if (enabled && !player->HasSpell(active))
-            player->learnSpell(active, true);
+            player->learnSpell(active);
         else if (!enabled)
-            player->removeSpell(active, SPEC_MASK_ALL, true);
+            player->removeSpell(active, SPEC_MASK_ALL, false);
     }
     bool widowsKiss = player->HasAura(807600);
     for (auto [root, replacement, known, enabled] : {std::tuple(800880u,504705u,widowsKiss,

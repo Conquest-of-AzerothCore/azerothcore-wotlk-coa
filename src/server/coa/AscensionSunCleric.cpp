@@ -53,6 +53,10 @@ bool Any(SpellInfo const* info, std::initializer_list<uint32> roots)
             return true;
     return false;
 }
+bool idIsJustice(SpellInfo const* info)
+{
+    return Any(info, {524857,525005,525006,525007,572849,572850,572040,572041,572042,572043,572044,572045});
+}
 bool Derived(SpellInfo const* info)
 {
     if (info)

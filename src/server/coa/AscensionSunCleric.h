@@ -34,13 +34,12 @@ struct SunClericState
     bool landingDawn = false, landingFulfillment = false;
     bool gavelHealing = false;
     bool healthyAbove80 = false;
-    Spell const* vowSpell = nullptr;
-    uint32 vowTime = 0;
 };
 Player* Owner(Unit const* unit);
 SunClericState& State(Player* player);
 bool Named(SpellInfo const* info, uint32 root);
 bool Any(SpellInfo const* info, std::initializer_list<uint32> roots);
+bool idIsJustice(SpellInfo const* info);
 bool Derived(SpellInfo const* info);
 bool Invocation(SpellInfo const* info);
 bool Gavel(SpellInfo const* info);
