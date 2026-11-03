@@ -102,7 +102,8 @@ constexpr uint32 WebCocoonMs = 4000;
 
 constexpr float JumpSpeed = 30.0f;
 constexpr uint32 StrikerLifeMs = 4000;
-constexpr float StrikeWidth = 3.0f;
+constexpr float StrikeWidth = 2.5f;
+constexpr float StrikeLength = 53.0f;
 
 constexpr float BatCrashRadius = 3.0f;
 
@@ -771,7 +772,12 @@ class spell_coa_muzah_glaive_strike : public SpellScript
     void FilterLine(std::list<WorldObject*>& targets)
     {
         Unit* caster = GetCaster();
-        targets.remove_if([caster](WorldObject* target) { return !caster->HasInLine(target, target->GetCombatReach(), StrikeWidth); });
+        targets.remove_if([caster](WorldObject* target)
+        {
+            Unit const* unit = target->ToUnit();
+            float const size = unit ? unit->GetBoundaryRadius() : 0.0f;
+            return !caster->HasInLine(target, size, StrikeWidth) || caster->GetExactDist2d(target) > StrikeLength + size;
+        });
     }
 
     void HandleHit()
