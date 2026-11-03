@@ -12,12 +12,13 @@
  * log.
  *
  *   Berserker Charge  first 10s, every 25s   the nearest player he can see,
- *                                            knocked down; the tank loses his
- *                                            threat, as in stock
+ *                                            knocked down; the tank keeps his
+ *                                            threat (the live log)
  *   Whirlwind         first 12s, every 25s   2s after the charge, also when
  *                                            he does not charge; 5 yards
  *                                            around him
- *   Mortal Strike     first 8s,  every 12s   the tank, -25% healing, stacks 3
+ *   Mortal Strike     first 8s,  every 12s   the tank in melee range, -25%
+ *                                            healing, stacks 3
  *   Threatening Gaze  first 15s, every 20s   he stares at a player for 4s,
  *                                            then Menacing Gaze for 4s: an
  *                                            active hostile action (a spell
@@ -350,6 +351,8 @@ namespace
                 return;
             if (spell->Id == SPELL_MORTAL_STRIKE)
             {
+                if (!me->IsWithinMeleeRange(tank))
+                    return;
                 me->CastSpell(tank, SPELL_MORTAL_STRIKE_HIT, true);
                 AddStack(me, tank, SPELL_MORTAL_WOUND, MORTAL_WOUND_STACKS);
             }
@@ -400,11 +403,7 @@ namespace
                             {
                                 return u->IsPlayer() && !me->IsWithinMeleeRange(u) && me->IsWithinLOSInMap(u);
                             }))
-                        {
                             DoCast(target, SPELL_BERSERKER_CHARGE);
-                            if (Unit* mainTarget = SelectTarget(SelectTargetMethod::MaxThreat, 0, 100.0f))
-                                me->GetThreatMgr().ModifyThreatByPercent(mainTarget, -100);
-                        }
                         events.ScheduleEvent(EVENT_CHARGE, 25s);
                         break;
                     case EVENT_WHIRLWIND:
@@ -412,8 +411,13 @@ namespace
                         events.ScheduleEvent(EVENT_WHIRLWIND, MANDOKIR_WHIRLWIND_INTERVAL);
                         break;
                     case EVENT_MORTAL_STRIKE:
-                        DoCastVictim(SPELL_MORTAL_STRIKE);
-                        events.ScheduleEvent(EVENT_MORTAL_STRIKE, 12s);
+                        if (me->GetVictim() && me->IsWithinMeleeRange(me->GetVictim()))
+                        {
+                            DoCastVictim(SPELL_MORTAL_STRIKE);
+                            events.ScheduleEvent(EVENT_MORTAL_STRIKE, 12s);
+                        }
+                        else
+                            events.ScheduleEvent(EVENT_MORTAL_STRIKE, 1s);
                         break;
                     case EVENT_GAZE:
                         if (Unit* player = SelectTarget(SelectTargetMethod::Random, 0, 100.0f, true))
