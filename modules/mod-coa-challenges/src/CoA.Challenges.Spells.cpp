@@ -1,6 +1,9 @@
 // mod-coa-challenges (review split): CoA.Challenges.Spells.cpp
 // Mechanical split of review-CoAChallenges.cpp; no logic changes.
 #include "CoA.Challenges.Review.h"
+#include "CellImpl.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 #include "Pet.h"
 #include "TemporarySummon.h"
 #include "AscensionRulesets.h"
@@ -166,6 +169,18 @@ namespace CoAChallenges
             if (ObjectGuid slotGuid = player->m_SummonSlot[slot])
                 if (Creature* s = ObjectAccessor::GetCreature(*player, slotGuid))
                     summons.push_back(s);
+        }
+
+        if (player->IsInWorld())
+        {
+            auto ownedSummon = [player](Creature* creature)
+            {
+                return creature->IsSummon() && GetPlayerOwner(creature) == player;
+            };
+            std::list<Creature*> wildSummons;
+            Acore::CreatureListSearcher<decltype(ownedSummon)> searcher(player, wildSummons, ownedSummon);
+            Cell::VisitObjects(player, searcher, player->GetVisibilityRange());
+            summons.insert(summons.end(), wildSummons.begin(), wildSummons.end());
         }
 
         std::sort(summons.begin(), summons.end());

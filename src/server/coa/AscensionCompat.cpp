@@ -8488,6 +8488,9 @@ bool HandlePersonalBankActivate(Player* player, WorldPacket const& packet)
         return true;
     }
 
+    if (!AscensionPersonalBank::CanAccess(player, itr->second.Kind))
+        return true;
+
     SendBankPermissions(player, itr->second.Kind);
     AscensionPersonalBank::Opened(player, itr->second.Kind, banker);
 
