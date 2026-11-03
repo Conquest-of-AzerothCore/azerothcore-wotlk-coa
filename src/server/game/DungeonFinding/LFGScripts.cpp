@@ -271,6 +271,23 @@ namespace lfg
                 }
             }
         }
+
+        // A finished dungeon's group that is down to one member leaves the dungeon with that member as well:
+        // a group of one keeps no party frame, so the client offers no way to teleport out.
+        if (state == LFG_STATE_FINISHED_DUNGEON && group && group->GetMembersCount() == 1)
+            if (GroupReference* last = group->GetFirstMember())
+                if (Player* player = last->GetSource())
+                    if (!player->IsBeingTeleportedFar() && player->GetMap()->IsDungeon()
+                        && player->GetMapId() == sLFGMgr->GetDungeonMapId(gguid))
+                    {
+                        if (!player->IsAlive())
+                        {
+                            player->ResurrectPlayer(0.5f);
+                            player->SpawnCorpseBones();
+                        }
+
+                        player->TeleportToEntryPoint();
+                    }
     }
 
     void LFGGroupScript::OnDisband(Group* group)
@@ -284,27 +301,6 @@ namespace lfg
         // pussywizard: after all necessary actions handle raid browser
         if (sLFGMgr->GetState(group->GetLeaderGUID()) == LFG_STATE_RAIDBROWSER)
             sLFGMgr->LeaveLfg(group->GetLeaderGUID());
-
-        // The last member of a Dungeon Finder group that falls apart leaves the dungeon like every member
-        // before them, instead of staying inside without a group to teleport out with.
-        if (group->isLFGGroup())
-        {
-            uint32 const dungeonMapId = sLFGMgr->GetDungeonMapId(gguid);
-            for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
-            {
-                Player* player = itr->GetSource();
-                if (!player || player->IsBeingTeleportedFar() || !player->GetMap()->IsDungeon() || player->GetMapId() != dungeonMapId)
-                    continue;
-
-                if (!player->IsAlive())
-                {
-                    player->ResurrectPlayer(0.5f);
-                    player->SpawnCorpseBones();
-                }
-
-                player->TeleportToEntryPoint();
-            }
-        }
 
         sLFGMgr->RemoveGroupData(gguid);
     }
