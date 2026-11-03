@@ -2206,6 +2206,12 @@ public:
                     Acore::StringFormat("Talent entry {} is not purchasable and cannot be granted automatically.", item.EntryId) };
         return false;
     }
+    std::vector<AscensionCoATalentState::KnownEntry> current;
+    for (AscensionCompatData::CoATalentEntry const& entry : AscensionCompatData::CoATalentEntries)
+      if (entry.ClassId == player->getClass() && (entry.AECost || entry.TECost) &&
+          (!entry.SpecId || entry.SpecId == activeSpecialization))
+        if (uint32 const rank = KnownRank(player, entry))
+          current.push_back({ entry.EntryId, rank });
     for (AscensionCoATalentState::KnownEntry const& item : priced)
     {
         AscensionCompatData::CoATalentEntry const* entry = FindTalentEntry(item.EntryId);
@@ -2223,7 +2229,9 @@ public:
                         item.EntryId, requiredId) };
                 return false;
             }
-        if (char const* learnResult = TabInvestmentShortfall(priced, *entry))
+        if (char const* learnResult = TabInvestmentShortfall(priced, *entry);
+            learnResult && !(!switching && item.Rank <= KnownRank(player, *entry) &&
+                             TabInvestmentShortfall(current, *entry)))
         {
             refusal = { "CA_UPDATE_ENTRIES_NOT_TRAVERSIBLE", learnResult, item.EntryId, item.Rank,
                 Acore::StringFormat("Talent entry {} needs more points invested in its tab first.",
