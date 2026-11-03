@@ -2,9 +2,10 @@
   "schema": 1,
   "name": "Zul'Farrak: both kinds of Shallow Grave despawn after they are opened",
   "contract": [
-    "Issue #4338: opening a Shallow Grave in Zul'Farrak summons its zombies (10247) and the grave despawns two seconds",
-    "later, so it cannot be opened again. #9104 fixed Shallow Grave 128403; Shallow Grave 128308 had a despawn row",
-    "without a target and stayed. Both now vanish after they are opened. The graves in Zul'Farrak lie close together, so the test summons one on its own."
+    "Issue #4338: opening a Shallow Grave in Zul'Farrak summons its zombies (10247). #9104 made Shallow Grave 128403",
+    "despawn after it is opened; Shallow Grave 128308 had a despawn row without a target and stayed, so it could be",
+    "opened again and again. It now despawns one minute after it is opened, which leaves time to take its loot. The",
+    "graves in Zul'Farrak lie close together, so the test summons one on its own."
   ],
   "timeout_ms": 90000,
   "location": {
@@ -58,13 +59,25 @@
       "entry": 128308
     },
     {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
       "action": "assert",
-      "label": "The opened Shallow Grave 128308 despawns",
+      "label": "The opened grave stays while its loot can be taken",
+      "actor": "digger",
+      "metric": "nearby_gameobject_state",
+      "entry": 128308,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "The opened Shallow Grave 128308 despawns within a minute",
       "actor": "digger",
       "metric": "nearby_gameobject_state",
       "entry": 128308,
       "equals": 99,
-      "within_ms": 6000
+      "within_ms": 60000
     }
   ]
 }
