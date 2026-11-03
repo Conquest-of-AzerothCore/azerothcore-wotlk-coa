@@ -82,6 +82,11 @@ bool PlaceholderName(std::string_view name)
     return false;
 }
 
+bool TaggedCopy(ItemTemplate const& item)
+{
+    return item.Description.starts_with('@');
+}
+
 bool Wearable(ItemTemplate const& item)
 {
     return item.DisplayInfoID && item.ItemLevel && item.InventoryType != INVTYPE_NON_EQUIP
@@ -91,7 +96,7 @@ bool Wearable(ItemTemplate const& item)
         && !item.HasFlag(ITEM_FLAG_DEPRECATED) && !item.HasFlag(ITEM_FLAG_CONJURED)
         && !item.StartQuest && !item.RequiredSkill && !item.RequiredSpell && !item.RandomProperty && !item.RandomSuffix
         && !item.RequiredHonorRank && !item.RequiredReputationFaction
-        && !PlaceholderName(item.Name1) && !Bloodforging::IsBloodforged(item);
+        && !PlaceholderName(item.Name1) && !Bloodforging::IsBloodforged(item) && !TaggedCopy(item);
 }
 
 uint32 GearLevel(ItemTemplate const& item)
