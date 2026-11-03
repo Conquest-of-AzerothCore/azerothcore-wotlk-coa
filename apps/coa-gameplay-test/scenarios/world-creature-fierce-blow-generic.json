@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "name": "Open world: an ordinary creature uses Fierce Blow every 6-9.5 s and it cannot be dodged",
+  "contract": [
+    "Ascension combat logs (186 logs, 38,650 Fierce Blow 975011 events) show every hostile creature that melees a player",
+    "using Fierce Blow: 206 of the 207 creatures with at least 100 swings on players. Its rhythm follows the clock, not",
+    "the swing count: 10% of the intervals are below 6.2 s, the median is 7.9 s, and the per-creature median stays near",
+    "8 s whatever the swing speed (correlation 0.11 over 145 creatures). It is never dodged, parried or missed (0 of",
+    "38,650, against 44,803 dodges of white swings), as its DBC SPELL_ATTR7_NO_ATTACK_DODGE/PARRY/MISS flags say.",
+    "Diseased Young Wolf 299 has no Fierce Blow in any kit, SmartAI or C++ script, so the generic mechanic owns its",
+    "cadence. With 150% dodge fixtured on the hero (10020 + 5277), every white swing is dodged, yet each Fierce Blow",
+    "still lands: none in the first 5 s of the fight, one within 13 s, and at least three within 35 s."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 20,
+      "level": 10,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "wolf",
+      "owner": "hero",
+      "entry": 299,
+      "level": 10,
+      "health": 1000000,
+      "reaction": 2,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 200000,
+      "maximum": 200000,
+      "label": "Configure the survival health before the wolf can attack"
+    },
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture: 100% dodge (QA Test 100% Dodge)",
+      "actor": "hero",
+      "spell": 10020,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture: dodge margin past the roll ceiling (Evasion)",
+      "actor": "hero",
+      "spell": 5277,
+      "stacks": 1
+    },
+    {
+      "action": "attack",
+      "label": "Engage the wolf",
+      "actor": "hero",
+      "target": "wolf"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the wolf fights the hero",
+      "actor": "wolf",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Stay inside the 6 s floor of the first Fierce Blow",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "No Fierce Blow during the first 5 s of the fight",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "caster": "wolf",
+      "spell": 975011,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the wolf keeps swinging at the hero",
+      "actor": "hero",
+      "metric": "melee_attacks_taken",
+      "target": "wolf",
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "The wolf uses Fierce Blow within its first window",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "caster": "wolf",
+      "spell": 975011,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The wolf repeats Fierce Blow",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "caster": "wolf",
+      "spell": 975011,
+      "min": 3,
+      "within_ms": 22000
+    },
+    {
+      "action": "assert",
+      "label": "Fierce Blow lands through 150% dodge",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "caster": "wolf",
+      "spell": 975011,
+      "min": 3,
+      "within_ms": 500
+    }
+  ]
+}
