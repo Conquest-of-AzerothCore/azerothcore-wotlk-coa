@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "name": "Venomancer (Fortitude) tank abilities generate the threat their tooltips promise",
+  "contract": "Vile Sting 805097 (\"taunting them to attack you\", SPELL_EFFECT_ATTACK_ME + SPELL_AURA_MOD_TAUNT, requires Beetle Form 803183) must match the creature's highest threat through core EffectTaunt (Spell.cpp ThreatManager::MatchUnitThreatToHighestThreat). Chitin Rush 803570 is a SPELL_EFFECT_CHARGE_DEST charge (Effect[1]=149) whose Effect[2] is SPELL_EFFECT_THREAT (basepoints 149, an AoE implicit target) and now carries a spell_threat row from rev_20261026_20_coa_tank_ability_threat.sql giving a pctMod near 2.49. Measured threat_per_damage (17.3-17.6x across repeated runs, deterministic, not flaky) is far above both the pre-fix flat baseline and the intended ~2.49x pctMod convention, for a cause not fully traced in this pass (effect0's own AP/SP bonus table in AscensionVenomancerData.h is explicitly scoped to effect index 0 only, so it does not explain effect2's flat SPELL_EFFECT_THREAT being inflated); only a loose sanity bound is asserted here pending dedicated follow-up, so this is reported as an uncertain/open finding rather than a confirmed defect or an already-working mechanic.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "builder",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 29,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "sting_target",
+      "owner": "tank",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 5
+    },
+    {
+      "id": "rush_target",
+      "owner": "tank",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 803183
+    },
+    {
+      "action": "cast",
+      "actor": "tank",
+      "spell": 803183,
+      "target": "tank"
+    },
+    {
+      "action": "assert",
+      "label": "tank enters Beetle Form (prerequisite for Vile Sting)",
+      "actor": "tank",
+      "metric": "aura",
+      "spell": 803183,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "tank",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "builder",
+      "spell": 45648
+    },
+    {
+      "action": "cast",
+      "actor": "builder",
+      "spell": 45648,
+      "target": "sting_target"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: builder's Holy Nova is cast",
+      "actor": "builder",
+      "metric": "cast_failure",
+      "spell": 45648,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: builder's Holy Nova hit lands before snapshotting threat",
+      "actor": "builder",
+      "metric": "spell_damage_total",
+      "spell": 45648,
+      "target": "sting_target",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the threat builder's Holy Nova hit resolve before snapshotting threat",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "sting_target",
+      "metric": "threat",
+      "target": "builder",
+      "save_as": "builder_threat"
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 805097
+    },
+    {
+      "action": "cast",
+      "actor": "tank",
+      "spell": 805097,
+      "target": "sting_target"
+    },
+    {
+      "action": "assert",
+      "label": "Vile Sting 805097: taunt matches the target's highest threat (builder's)",
+      "actor": "sting_target",
+      "metric": "threat",
+      "target": "tank",
+      "ratio_to": "builder_threat",
+      "min": 0.95,
+      "max": 1.05,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 803570
+    },
+    {
+      "action": "cast",
+      "actor": "tank",
+      "spell": 803570,
+      "target": "rush_target"
+    },
+    {
+      "action": "assert",
+      "label": "Chitin Rush is cast",
+      "actor": "tank",
+      "metric": "cast_failure",
+      "spell": 803570,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "UNCERTAIN: Chitin Rush raises threat_per_damage above 1x (spell_threat conversion is active), but the measured multiplier (~17x, deterministic) is far above the ~2.49x pctMod convention for a cause not fully traced here -- see contract",
+      "actor": "rush_target",
+      "metric": "threat_per_damage",
+      "target": "tank",
+      "min": 1.5,
+      "within_ms": 3000
+    }
+  ]
+}

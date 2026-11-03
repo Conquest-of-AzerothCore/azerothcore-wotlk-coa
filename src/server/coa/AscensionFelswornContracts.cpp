@@ -25,6 +25,13 @@ void ApplyContracts(SpellInfo* info)
     uint32 id = info->Id;
     if (id == MannorothFelfury)
         info->Effects[EFFECT_0].MiscValue = 6;
+    if (id == 300466)
+    {
+        info->Effects[EFFECT_0].SpellClassMask = flag96(128, 0, 2097152);
+        info->Effects[EFFECT_1].SpellClassMask = flag96(128, 0, 2097152);
+    }
+    if (id == 578317)
+        info->SpellFamilyFlags = flag96(0, 0, 2097152);
     auto dummy = [info](uint8 slot) {
         info->Effects[slot].ApplyAuraName = SPELL_AURA_DUMMY;
         info->Effects[slot].TriggerSpell = 0;

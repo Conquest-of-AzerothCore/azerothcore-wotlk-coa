@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "name": "Dungeon Finder wings of Uldaman and Gnomeregan start at the dungeon's second entrance",
+  "contract": [
+    "Issues #7686, #7814 and #7817: a Dungeon Finder group sent to an Uldaman or Gnomeregan wing was put at the front",
+    "door. Map Chamber (1005), The Stone Vault (1006) and Hall of the Crafters (1007) now start at Uldaman's rear",
+    "entrance (areatrigger 902, -214.02 383.607), Tinker's Court (1033) and Launch Bay (1004) at Gnomeregan's Train",
+    "Depot entrance (areatrigger 523, -736.51 2.71). Engineering Labs (1037) keeps the front door (-332.22 -2.28)."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "vault",
+      "race": 1,
+      "class": 1,
+      "level": 45
+    },
+    {
+      "id": "vaultmate",
+      "race": 1,
+      "class": 1,
+      "level": 45
+    },
+    {
+      "id": "chamber",
+      "race": 1,
+      "class": 1,
+      "level": 45
+    },
+    {
+      "id": "chambermate",
+      "race": 1,
+      "class": 1,
+      "level": 45
+    },
+    {
+      "id": "court",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    },
+    {
+      "id": "courtmate",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    },
+    {
+      "id": "labs",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    },
+    {
+      "id": "labsmate",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "vault",
+      "target": "vaultmate"
+    },
+    {
+      "action": "group",
+      "actor": "court",
+      "target": "courtmate"
+    },
+    {
+      "action": "group",
+      "actor": "labs",
+      "target": "labsmate"
+    },
+    {
+      "action": "group",
+      "actor": "chamber",
+      "target": "chambermate"
+    },
+    {
+      "action": "lfg_dungeon",
+      "actor": "vault",
+      "dungeon": 1006
+    },
+    {
+      "action": "lfg_dungeon",
+      "actor": "court",
+      "dungeon": 1033
+    },
+    {
+      "action": "lfg_dungeon",
+      "actor": "labs",
+      "dungeon": 1037
+    },
+    {
+      "action": "lfg_dungeon",
+      "actor": "chamber",
+      "dungeon": 1005
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "vault"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "court"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "labs"
+    },
+    {
+      "action": "lfg_teleport",
+      "actor": "chamber"
+    },
+    {
+      "action": "assert",
+      "label": "The Stone Vault group enters Uldaman",
+      "actor": "vault",
+      "metric": "map_id",
+      "equals": 70,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "The Tinker's Court group enters Gnomeregan",
+      "actor": "court",
+      "metric": "map_id",
+      "equals": 90,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Engineering Labs group enters Gnomeregan",
+      "actor": "labs",
+      "metric": "map_id",
+      "equals": 90,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "The Map Chamber group enters Uldaman",
+      "actor": "chamber",
+      "metric": "map_id",
+      "equals": 70,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "The Stone Vault starts at Uldaman's rear entrance",
+      "actor": "vault",
+      "metric": "point_distance_2d",
+      "x": -214.02,
+      "y": 383.607,
+      "max": 5
+    },
+    {
+      "action": "assert",
+      "label": "Tinker's Court starts at the Train Depot entrance",
+      "actor": "court",
+      "metric": "point_distance_2d",
+      "x": -736.51,
+      "y": 2.71,
+      "max": 5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Engineering Labs keeps the front door",
+      "actor": "labs",
+      "metric": "point_distance_2d",
+      "x": -332.22,
+      "y": -2.28,
+      "max": 5
+    },
+    {
+      "action": "assert",
+      "label": "Map Chamber starts at Uldaman's rear entrance",
+      "actor": "chamber",
+      "metric": "point_distance_2d",
+      "x": -214.02,
+      "y": 383.607,
+      "max": 5
+    }
+  ]
+}

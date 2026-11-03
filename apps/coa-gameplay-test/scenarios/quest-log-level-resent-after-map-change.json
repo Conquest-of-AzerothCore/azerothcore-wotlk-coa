@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "name": "Quest log: quest levels reach the client again after a map change",
+  "contract": "The Ascension client reads the level of each quest log slot from SMSG_UPDATE_OBJECT_ADDON field 61 + slot; without it the log shows every quest as level 0 in grey. A far teleport, such as leaving a dungeon, creates the player object again on the client and drops those fields, so the server has to send them again once the character is on the new map. Quest 7 (Kobold Camp Cleanup) is accepted in Elwynn Forest, which sends its slot level once; teleporting to Kalimdor must send it again.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 2000 },
+    { "action": "prepare_quest", "actor": "hero", "quest": 7, "complete": false },
+    { "action": "assert", "label": "Accepting the quest sends its slot level once", "actor": "hero", "metric": "quest_log_sent_level_count", "quest": 7, "equals": 1, "within_ms": 1000 },
+    { "action": "teleport", "label": "Far teleport to Kalimdor", "actor": "hero", "map": 1, "x": 2389.03, "y": -6608.37, "z": 125.192, "o": 0 },
+    { "action": "assert", "label": "The new map sends the slot level again", "actor": "hero", "metric": "quest_log_sent_level_count", "quest": 7, "min": 2, "within_ms": 3000 }
+  ]
+}
