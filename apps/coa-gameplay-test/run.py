@@ -73,7 +73,7 @@ METRICS = TIMELINE_METRICS | {
     'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'level_scaling_choice',
     'sent_average_item_level', 'sent_average_item_level_count',
     'creature_query_rank', 'creature_query_quest_item', 'quest_level', 'quest_xp',
-    'quest_log_sent_level', 'quest_log_sent_xp', 'quest_offer_sent_xp', 'quest_query_scaled', 'quest_query_reward_choice',
+    'quest_log_sent_level', 'quest_log_sent_level_count', 'quest_log_sent_xp', 'quest_offer_sent_xp', 'quest_query_scaled', 'quest_query_reward_choice',
     'quest_query_text_contains',
     'health', 'health_pct', 'max_health', 'creature_type', 'respawn_remaining', 'power', 'max_power', 'alive', 'combat', 'can_attack', 'victim', 'has_redirects', 'casting', 'level',
     'aura', 'aura_stacks', 'aura_charges', 'aura_duration_ms', 'aura_amount', 'aura_positive', 'aura_visible',
@@ -942,7 +942,7 @@ def validate(scenario):
                 require(step['actor'] in player_ids, f'{where}: team metric needs a player')
             if metric == 'lfg_dungeon_disabled':
                 number(step.get('dungeon'), f'{where}.dungeon', 1, 2**24 - 1, True)
-            if metric in {'quest_level', 'quest_xp', 'quest_log_sent_level', 'quest_log_sent_xp',
+            if metric in {'quest_level', 'quest_xp', 'quest_log_sent_level', 'quest_log_sent_level_count', 'quest_log_sent_xp',
                           'quest_offer_sent_xp', 'quest_query_scaled',
                           'quest_query_reward_choice', 'quest_query_text_contains'}:
                 require(step['actor'] in player_ids and 'quest' in step,
@@ -1242,7 +1242,7 @@ def validate(scenario):
                           'temporary_spell_replacement', 'quest_menu_items', 'quest_menu_has',
                           'player_setting', 'server_packets', 'server_packet_u8', 'server_packet_u32', 'server_packet_float',
                           'server_packet_contains',
-                          'quest_log_sent_level', 'quest_log_sent_xp', 'quest_offer_sent_xp',
+                          'quest_log_sent_level', 'quest_log_sent_level_count', 'quest_log_sent_xp', 'quest_offer_sent_xp',
                           'sent_average_item_level', 'sent_average_item_level_count',
                           'player_class', 'cached_class', 'at_login_flag',
                           'wildcard_starter_spells_known', 'action_bar_unknown_spells',

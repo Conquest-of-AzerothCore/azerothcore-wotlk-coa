@@ -934,6 +934,7 @@ struct Actor
     uint32 lastStableResult = 0;
     uint32 lfgProposalId = 0;
     std::map<uint16, uint32> extensionPackets;
+    std::map<uint32, uint32> addonFieldUpdates;
     std::map<uint16, std::vector<std::string>> extensionPayloads;
     std::map<std::pair<uint16, uint32>, std::string> selectedPacketRows;
     std::map<std::pair<uint16, uint32>, uint32> selectedPacketRowCounts;
@@ -1153,6 +1154,8 @@ void ObserveExtensionPacket(Actor& actor, WorldPacket const& packet)
         return;
 
     ++actor.extensionPackets[packet.GetOpcode()];
+    if (packet.GetOpcode() == AscensionQuestLog::UpdateObjectAddonOpcode && packet.size() == 16)
+        ++actor.addonFieldUpdates[packet.read<uint32>(8)];
     std::vector<std::string>& payloads = actor.extensionPayloads[packet.GetOpcode()];
     if (payloads.size() < MaxPayloadsPerOpcode)
         payloads.emplace_back(packet.empty() ? std::string()
@@ -5527,6 +5530,14 @@ private:
         if (metric == "quest_log_sent_level" || metric == "quest_log_sent_xp")
             return SentQuestLogField(player, step, metric == "quest_log_sent_level"
                 ? AscensionQuestLog::LevelField : AscensionQuestLog::RewardXPField);
+        if (metric == "quest_log_sent_level_count")
+        {
+            uint16 const slot = player->FindQuestSlot(step.get<uint32>("quest"));
+            Require(slot < MAX_QUEST_LOG_SIZE, "The quest is not in the quest log");
+            auto const& updates = _actors.at(step.get<std::string>("actor")).addonFieldUpdates;
+            auto const found = updates.find(AscensionQuestLog::LevelField + slot);
+            return found == updates.end() ? 0 : found->second;
+        }
         if (metric == "sent_average_item_level")
             return SentAddonField<float>(player, step, AverageItemLevelAddonField);
         if (metric == "sent_average_item_level_count")
