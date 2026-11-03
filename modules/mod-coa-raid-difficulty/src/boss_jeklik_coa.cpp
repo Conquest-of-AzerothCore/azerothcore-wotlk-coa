@@ -21,7 +21,8 @@
  *   Bat form, when the avatar dies
  *     Bat-tering Charge  first 2s, every 20s   random player, knocks back
  *                                              everyone within 10 yards
- *     Terrifying Screech first 4s, every 20s   everyone in the room
+ *     Terrifying Screech first 4s, every 20s   everyone in the room, and fears
+ *                                              everyone within 20 yards
  *     Vampirism          passive, her hits drain life
  *     Bat Riders         two, from stock, throwing liquid fire
  *
@@ -32,6 +33,8 @@
  *   - Call of Hir'eek every 60s (the video shows it once);
  *   - Terrifying Screech falls off with distance, full at her, nothing at 100
  *     yards (the tooltip says "reduced as farther", not by how much);
+ *   - its fear (2106137, "all nearby enemies") reaches 20 yards like Mass Fear:
+ *     the live logs fear part of the raid, but give no positions;
  *   - the bat riders move from the troll phase to the bat phase with the swap.
  */
 
@@ -79,6 +82,7 @@ namespace
         SPELL_SCREECH             = 2106131,
         INFO_SCREECH              = 2106132,
         SPELL_SCREECH_HIT         = 2106136,
+        SPELL_SCREECH_FEAR        = 2106137,
         SPELL_VAMPIRISM           = 2106138,
     };
 
@@ -112,6 +116,7 @@ namespace
     constexpr uint32 PATH_JEKLIK_INTRO = 145170;
     constexpr float MASS_FEAR_RANGE    = 20.0f;
     constexpr float SCREECH_RANGE      = 100.0f;
+    constexpr float SCREECH_FEAR_RANGE = 20.0f;
 
     Position const SpawnBat[6] =
     {
@@ -243,6 +248,8 @@ namespace
                     int32 const full = Info(me, INFO_SCREECH);
                     for (Player* p : PlayersWithin(me, SCREECH_RANGE))
                         Hit(me, p, SPELL_SCREECH_HIT, int32(full * (1.0f - me->GetDistance(p) / SCREECH_RANGE)), 1);
+                    for (Player* p : PlayersWithin(me, SCREECH_FEAR_RANGE))
+                        me->CastSpell(p, SPELL_SCREECH_FEAR, true);
                     break;
                 }
                 default:

@@ -386,6 +386,12 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->AttributesEx3 |= SPELL_ATTR3_DOT_STACKING_RULE;
     });
 
+    // Revive (Chained Spirit, Zul'Gurub): the dead player can accept it while the corpse reclaim delay runs
+    ApplySpellFix({ 24341 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_RES_TIMER;
+    });
+
     // Ascendance (Talisman of Ascendance trinket)
     ApplySpellFix({ 28200 }, [](SpellInfo* spellInfo)
     {

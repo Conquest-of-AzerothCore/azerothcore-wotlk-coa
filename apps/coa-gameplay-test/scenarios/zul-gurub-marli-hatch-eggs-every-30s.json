@@ -1,12 +1,13 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: on Ascended High Priestess Mar'li hatches her eggs every 30 seconds",
+  "name": "Zul'Gurub: High Priestess Mar'li hatches her eggs every 30 seconds in both forms on every difficulty",
   "contract": [
-    "The Ascended kill video (youtube 6ihbw1PKc2E, 2026-08-04) shows a DBM Hatch Eggs bar that restarts at 30 s",
-    "for as long as Mar'li (14510) stays in her troll phase. Hatch Eggs (2118115) comes 17 s into the fight on",
-    "every difficulty; only Ascended (raid difficulty 3, template 314510) repeats it every 30 s, so the Normal",
-    "copy fought for the same time casts it once. Each hero fights a Mar'li summoned in their own instance and",
-    "stays above 50 % health of hers, so neither fight leaves the troll phase."
+    "The Ascended kill video (youtube 6ihbw1PKc2E, 2026-08-04) shows a DBM Hatch Eggs bar that restarts at 30 s,",
+    "and the tester saw the same on live Normal, in her spider form as well. Hatch Eggs (2118115) comes 17 s into",
+    "the fight and every 30 s after, on Normal (template 14510) as on Ascended (raid difficulty 3, template",
+    "314510). The Normal Mar'li is wounded below half health after her first hatch, so her spider form with its",
+    "Furious Strikes (2118126 on her) must keep hatching; the Ascended one stays a troll. Each hero fights a",
+    "Mar'li summoned in their own instance."
   ],
   "timeout_ms": 180000,
   "location": {
@@ -193,8 +194,33 @@
       "within_ms": 5000
     },
     {
+      "action": "set_health_pct",
+      "label": "Wound the Normal Mar'li below half health",
+      "actor": "normal",
+      "entry": 14510,
+      "pct": 45
+    },
+    {
       "action": "assert",
-      "label": "DISCRIMINATING: on Ascended Hatch Eggs comes back at 47 s and 77 s",
+      "label": "CONTROL: the Normal Mar'li fights in her spider form",
+      "actor": "marli_normal",
+      "metric": "aura",
+      "spell": 2118125,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: her hits stack Furious Strikes on her",
+      "actor": "marli_normal",
+      "metric": "aura",
+      "spell": 2118126,
+      "equals": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: on Ascended Hatch Eggs comes back at 47 s and 77 s",
       "actor": "ascended",
       "metric": "spell_go_count",
       "entry": 14510,
@@ -204,24 +230,18 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: on Normal Mar'li hatched her eggs only once",
+      "label": "DISCRIMINATING: on Normal, in her spider form, so does it",
       "actor": "normal",
       "metric": "spell_go_count",
       "entry": 14510,
       "spell": 2118115,
-      "equals": 1
+      "min": 3,
+      "within_ms": 10000
     },
     {
       "action": "assert",
-      "label": "CONTROL: the Ascended Mar'li is still in her troll phase fight",
+      "label": "CONTROL: the Ascended Mar'li is still fighting",
       "actor": "marli_ascended",
-      "metric": "combat",
-      "equals": 1
-    },
-    {
-      "action": "assert",
-      "label": "CONTROL: the Normal Mar'li is still fighting",
-      "actor": "marli_normal",
       "metric": "combat",
       "equals": 1
     }

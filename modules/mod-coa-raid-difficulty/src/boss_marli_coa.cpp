@@ -8,13 +8,15 @@
  * (Web Spray, Burrow, Poison Shock every 45s) and Fierce Blow follow the CoA
  * combat log of 2026-08-02.
  *
+ *   Both forms
+ *     Poison Bolt Volley first 12s, every 15s   everyone, stacking poison
+ *     Hatch Eggs         first 17s, every 30s   the ten nearest eggs hatch (a DBM
+ *                                               bar in the live video of
+ *                                               2026-08-04; count: tester, live)
+ *     Fierce Blow        tank, first 6.7-17.3s, then every 6-10s
+ *
  *   Troll form
  *     Drain Life         first 6s,  every 10s   random player, interruptible
- *     Poison Bolt Volley first 12s, every 15s   everyone, stacking poison
- *     Hatch Eggs         at 17s                  the four nearest eggs hatch;
- *                                               on Ascended every 30s after
- *                                               (a DBM bar in the live video
- *                                               of 2026-08-04)
  *     Evolve             first 22s, every 60s   an egg hatches a colossal spider
  *     Infest             first 87s, every 60s   an egg hatches a festering
  *                                               spider that bursts on death
@@ -31,9 +33,6 @@
  *     Poison Shock       first 27s, every 45s   Poison Nova, 20 yards around her,
  *                                               less the farther away
  *     Furious Strikes    passive, her hits speed her up
- *
- *   Both forms
- *     Fierce Blow        tank, first 6.7-17.3s, then every 6-10s
  *
  * Decided here, not in the data:
  *   - Evolve and Infest act on an egg she hatches for it: the spawn of Evolve
@@ -124,10 +123,10 @@ namespace
     };
 
     constexpr float VOLLEY_RANGE   = 200.0f;
-    constexpr uint8 EGGS_PER_HATCH = 4;
+    constexpr uint8 EGGS_PER_HATCH = 10;
     constexpr float NOVA_RANGE     = 20.0f;
     constexpr Milliseconds BURROW_LENGTH        = 3s;
-    constexpr Milliseconds ASCENDED_HATCH_EVERY = 30s;
+    constexpr Milliseconds HATCH_EVERY          = 30s;
 
     struct boss_marli_coa : public BossAI
     {
@@ -162,8 +161,8 @@ namespace
             events.SetPhase(PHASE_TROLL);
             events.ScheduleEvent(EVENT_THRASH, 4s, 6s);
             events.ScheduleEvent(EVENT_DRAIN_LIFE, 6s, 0, PHASE_TROLL);
-            events.ScheduleEvent(EVENT_POISON_BOLT_VOLLEY, 12s, 0, PHASE_TROLL);
-            events.ScheduleEvent(EVENT_HATCH_EGGS, 17s, 0, PHASE_TROLL);
+            events.ScheduleEvent(EVENT_POISON_BOLT_VOLLEY, 12s);
+            events.ScheduleEvent(EVENT_HATCH_EGGS, 17s);
             events.ScheduleEvent(EVENT_EVOLVE, 22s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_INFEST, 87s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_FIERCE_BLOW, FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX);
@@ -336,12 +335,11 @@ namespace
                         break;
                     case EVENT_POISON_BOLT_VOLLEY:
                         DoCastSelf(SPELL_POISON_BOLT_VOLLEY);
-                        events.ScheduleEvent(EVENT_POISON_BOLT_VOLLEY, 15s, 0, PHASE_TROLL);
+                        events.ScheduleEvent(EVENT_POISON_BOLT_VOLLEY, 15s);
                         break;
                     case EVENT_HATCH_EGGS:
                         DoCastSelf(SPELL_HATCH_EGGS);
-                        if (me->GetMap()->GetSpawnMode() == RAID_DIFFICULTY_25MAN_HEROIC)
-                            events.ScheduleEvent(EVENT_HATCH_EGGS, ASCENDED_HATCH_EVERY, 0, PHASE_TROLL);
+                        events.ScheduleEvent(EVENT_HATCH_EGGS, HATCH_EVERY);
                         break;
                     case EVENT_EVOLVE:
                         if (Creature* spawn = HatchEgg())
@@ -358,7 +356,7 @@ namespace
                         events.ScheduleEvent(EVENT_ACID_SPIT, 12s, 0, PHASE_SPIDER);
                         break;
                     case EVENT_WEB_SPRAY:
-                        DoCastSelf(SPELL_WEB_SPRAY);
+                        DoCastVictim(SPELL_WEB_SPRAY);
                         events.ScheduleEvent(EVENT_CHARGE, 5s, 0, PHASE_SPIDER);
                         events.ScheduleEvent(EVENT_WEB_SPRAY, 45s, 0, PHASE_SPIDER);
                         break;

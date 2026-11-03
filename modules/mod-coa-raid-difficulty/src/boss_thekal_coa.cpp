@@ -22,10 +22,10 @@
  *     Bloodlust        first 16s, every 30s   himself or a zealot
  *
  *   Tiger form (his Aspect of Shirvallah), when the avatar dies
- *     Rending Swipe    first 4s,  every 14s   cone in front, bleeds (Rip)
+ *     Rending Swipe    first 4s,  every 14s   cone in front
  *     War Stomp        first 12s, every 40s   50 yards, knocks back
- *     Speed Slash      first 14s, every 40s   runs through the raid for 8s,
- *                                             cutting everyone he passes
+ *     Speed Slash      first 14s, every 40s   runs through the raid for 17s,
+ *                                             each cut adds a stack of Rip
  *     Shredding Claws  passive, armour down on hit
  *     Summon Tigers, frenzy every 30s and enrage at 20% from stock
  *
@@ -36,7 +36,8 @@
  *   - which spells belong to which form. The video shows all of them in one
  *     stretch below 75%; the split follows the spell names (troll priest,
  *     tiger claws);
- *   - Speed Slash ends after 8 seconds (its aura never runs out by itself);
+ *   - Speed Slash ends after 17 seconds (its aura never runs out by itself;
+ *     tester, live);
  *   - Force Punch and the stock charge are gone, the tiger kit replaces them.
  */
 
@@ -77,6 +78,7 @@ namespace
         SPELL_WAR_STOMP            = 2118227,
         SPELL_WAR_STOMP_HIT        = 2118228,
         SPELL_SPEED_SLASH          = 2118232,
+        SPELL_SPEED_SLASH_HIT      = 2118233,
         SPELL_RENDING_SWIPE        = 2118238,
         SPELL_RENDING_SWIPE_HIT    = 2118239,
         SPELL_RIP                  = 2118240,
@@ -181,7 +183,7 @@ namespace
             }).Schedule(14s, [this](TaskContext context)
             {
                 DoCastSelf(SPELL_SPEED_SLASH);
-                context.Schedule(10s, [this](TaskContext)
+                context.Schedule(17s, [this](TaskContext)
                 {
                     me->RemoveAurasDueToSpell(SPELL_SPEED_SLASH);
                 });
@@ -228,10 +230,7 @@ namespace
                     break;
                 case SPELL_RENDING_SWIPE:
                     for (Player* p : PlayersInFront(me, CLEAVE_RANGE, CLEAVE_ARC))
-                    {
                         me->CastSpell(p, SPELL_RENDING_SWIPE_HIT, true);
-                        me->CastSpell(p, SPELL_RIP, true);
-                    }
                     break;
                 case SPELL_DISRUPTING_SHOUT:
                     me->CastSpell(me, SPELL_DISRUPTING_SHOUT_HIT, true);
@@ -242,6 +241,12 @@ namespace
                 default:
                     break;
             }
+        }
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell) override
+        {
+            if (target && spell->Id == sSpellMgr->GetSpellIdForDifficulty(SPELL_SPEED_SLASH_HIT, me))
+                me->CastSpell(target, SPELL_RIP, true);
         }
 
         void EnterEvadeMode(EvadeReason why) override
