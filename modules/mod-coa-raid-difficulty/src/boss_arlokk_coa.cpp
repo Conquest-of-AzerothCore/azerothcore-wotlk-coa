@@ -32,7 +32,9 @@
  *   At 50% she drains the Avatar of Bethekk (see LoaAvatar), taking ~1% damage
  *   while it dies, then gains the Gift of the Blood God. At the same moment she
  *   takes panther form for the rest of the fight, with no return to troll form
- *   (tester, live). Her bleeds and marks end with her death.
+ *   (tester, live). Her bleeds and marks end with her death, and a player's
+ *   Razor Claws bleeds end with that player's death (the DBC keeps them
+ *   through death, so a battle-resurrected player bled out again; tester).
  *
  * Decided here, not in the data:
  *   - the panther cycle's timings (the video shows two Ravages, each after a
@@ -44,6 +46,7 @@
 
 #include "CreatureScript.h"
 #include "GameObject.h"
+#include "GlobalScript.h"
 #include "InstanceScript.h"
 #include "ScriptedCreature.h"
 #include "SpellInfo.h"
@@ -465,10 +468,24 @@ namespace
             DoCheckProc += AuraCheckProcFn(spell_arlokk_coa_razor_claws::CheckProc);
         }
     };
+
+    class ArlokkRazorClawsBleedsEndOnDeath final : public GlobalScript
+    {
+    public:
+        ArlokkRazorClawsBleedsEndOnDeath()
+            : GlobalScript("ArlokkRazorClawsBleedsEndOnDeath", { GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR }) { }
+
+        void OnLoadSpellCustomAttr(SpellInfo* info) override
+        {
+            if (std::find(RAZOR_CLAWS_BLEEDS.begin(), RAZOR_CLAWS_BLEEDS.end(), info->Id) != RAZOR_CLAWS_BLEEDS.end())
+                info->AttributesEx3 &= ~SPELL_ATTR3_ALLOW_AURA_WHILE_DEAD;
+        }
+    };
 }
 
 void AddCoaArlokkScripts()
 {
     RegisterZulGurubCreatureAI(boss_arlokk_coa);
     RegisterSpellScript(spell_arlokk_coa_razor_claws);
+    new ArlokkRazorClawsBleedsEndOnDeath();
 }

@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Arlokk's Razor Claws bleed ends when the bleeding player dies",
+  "contract": [
+    "Arlokk's Razor Claws bleeds (2118326-2118329, 10 s) carry SPELL_ATTR3_ALLOW_AURA_WHILE_DEAD in the client DBC, so",
+    "they stayed on a dead player and killed them again right after a battle resurrection (tester 2026-11-04). A",
+    "player's bleed now ends with that player's death, like other harmful auras, so nothing is left to tick once",
+    "they are resurrected."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "The hero carries Razor Claws",
+      "actor": "hero",
+      "spell": 2118326,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero bleeds",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118326,
+      "equals": 1
+    },
+    {
+      "action": "die",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is dead",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the bleed ends with the hero's death",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118326,
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}
