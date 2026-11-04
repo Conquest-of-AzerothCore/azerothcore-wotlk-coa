@@ -433,13 +433,23 @@ void GrantRewards(Player* player, Quest const* quest)
         money /= 2;
 
     if (money > 0)
+    {
         player->ModifyMoney(money);
+        player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_QUEST_REWARD, uint32(money));
+    }
 
     if (uint32 const honor = quest->CalculateHonorGain(player->GetLevel()))
         player->RewardHonor(nullptr, 0, honor);
 
     if (quest->GetRewArenaPoints())
         player->ModifyArenaPoints(quest->GetRewArenaPoints());
+
+    if (quest->IsDaily())
+    {
+        player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST, quest->GetQuestId());
+        player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY, quest->GetQuestId());
+    }
+    player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST, quest->GetQuestId());
 
     sScriptMgr->OnPlayerCompleteQuest(player, quest);
 }
