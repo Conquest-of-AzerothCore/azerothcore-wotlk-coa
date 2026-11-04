@@ -76,9 +76,11 @@ class DailyLoginTests(unittest.TestCase):
         source = (ROOT / 'src/server/coa/AscensionDailyLogin.cpp').read_text()
         self.assertLess(source.index('AsyncCommitTransaction'), source.index('mail.PublishStagedMail'))
         self.assertLess(source.index('mail.PublishStagedMail'), source.index('ShowRewardToast(player,'))
-        for guard in ('mail.DiscardItems()', 'AscensionWildcard::IsWildcardHero(player)', 'session->IsBot()',
+        for guard in ('mail.DiscardItems()', 'session->IsBot()',
                       '!current->IsInWorld()', '"Daily Login Reward"', 'HandleItemQuerySingleOpcode'):
             self.assertIn(guard, source)
+        self.assertNotIn('AscensionWildcard', source)
+        self.assertNotIn('ReadRealm()', source)
 
 
 if __name__ == '__main__':

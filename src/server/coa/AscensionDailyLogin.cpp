@@ -1,7 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionClientLua.h"
-#include "AscensionFreepick.h"
-#include "AscensionWildcard.h"
 #include "DatabaseEnv.h"
 #include "Item.h"
 #include "Log.h"
@@ -68,7 +66,7 @@ end)
     {
         WorldSession* session = player->GetSession();
         if (rewards.empty() || !session || session->IsBot() || !player->IsInWorld() ||
-            player->IsBeingTeleported() || !player->FindMap() || AscensionWildcard::IsWildcardHero(player))
+            player->IsBeingTeleported() || !player->FindMap())
             return;
 
         auto* read = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_DAILY_LOGIN);
@@ -151,8 +149,6 @@ end)
         void OnStartup() override
         {
             rewards.clear();
-            if (!AscensionFreepick::ReadRealm().ConquestOfAzeroth)
-                return;
             auto* read = WorldDatabase.GetPreparedStatement(WORLD_SEL_COA_DAILY_LOGIN_REWARDS);
             PreparedQueryResult result = WorldDatabase.Query(read);
             if (!result)

@@ -2,12 +2,12 @@
 
 ## Account-wide daily login rewards
 
-- Award 200 Bazaar Tokens by mail on an eligible CoA login, with one shared account cooldown of 24 hours in the character database.
+- Award 200 Bazaar Tokens by mail on an eligible login across all realm game modes, with one shared account cooldown of 24 hours in the character database.
 - Wait for world entry and teleport/loading readiness before processing the claim.
 - Commit the account cooldown and reward mail together, with database guards against stale or duplicate claims.
 - Show Daily Login Reward using the existing client toast, actual item icon and awarded quantity through the server Lua bridge.
 - Configure additional item rewards in the world database. Retain last claim time and lifetime claim count for future streak rewards.
-- Exclude bot sessions and Wildcard characters. Preserve account cooldowns across character changes, character deletion and restarts.
+- Exclude bot sessions. Support CoA, Wildcard, Freepick and WCR characters. Preserve account cooldowns across character changes, character deletion and restarts.
 
 ## Manastorm rewards and balance
 
@@ -16,7 +16,7 @@
 - Share a 1000-token allowance across a character's personal 24-hour reward window, with persistent accounting and partial capped payouts.
 - Display token amounts, allowance and countdown in the native reward panel. Keep bonus-cache accounting separate.
 - Reduce selected scarce material probabilities by 75% and selected late-game material probabilities by 50%, using DB-tunable retention percentages.
-- Halve the supplied difficulty-1 health curve across depths 1–2000 through a replay-guarded SQL migration.
+- Halve the supplied difficulty-1 health curve across depths 1â€“2000 through a replay-guarded SQL migration.
 
 ## Manastorm advancement and safety
 
