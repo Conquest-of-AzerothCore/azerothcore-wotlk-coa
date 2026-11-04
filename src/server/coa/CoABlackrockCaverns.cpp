@@ -289,7 +289,8 @@ int32 Rolled(Unit const* attacker, Unit const* target, float normal60, float myt
     return std::max(1, int32(Logged(attacker, target, normal60, mythic, spell) * frand(0.9f, 1.1f)));
 }
 
-void DealDamage(Unit* caster, Unit* target, uint32 spellId, uint32 value, SpellSchoolMask school = SPELL_SCHOOL_MASK_NONE)
+void DealDamage(
+    Unit* caster, Unit* target, uint32 spellId, uint32 value, SpellSchoolMask school = SPELL_SCHOOL_MASK_NONE)
 {
     SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
     if (!info || !value)
@@ -363,22 +364,32 @@ public:
                     instance->SummonCreature(NPC_RAZ, RazCagePos);
                 return;
             }
-            if (stage <= RAZ_FREED && GetBossState(DATA_CORLA) == DONE && (PlayerNear(RazCorlaPos, 35.0f) || PlayerNear(RazBridgePos, 45.0f)))
+            if (stage <= RAZ_FREED && GetBossState(DATA_CORLA) == DONE &&
+                (PlayerNear(RazCorlaPos, 35.0f) || PlayerNear(RazBridgePos, 45.0f)))
             {
                 StorePersistentData(PERSISTENT_RAZ_STAGE, RAZ_CORLA);
                 instance->SummonCreature(NPC_RAZ, RazLedgePos);
                 return;
             }
-            if (stage <= RAZ_CORLA && GetBossState(DATA_KARSH) == DONE && (PlayerNear(RazObsidiusPos, 60.0f) || PlayerNear(ObsidiusPos, 70.0f)))
+            if (stage <= RAZ_CORLA && GetBossState(DATA_KARSH) == DONE &&
+                (PlayerNear(RazObsidiusPos, 60.0f) || PlayerNear(ObsidiusPos, 70.0f)))
             {
                 StorePersistentData(PERSISTENT_RAZ_STAGE, RAZ_OBSIDIUS);
                 instance->SummonCreature(NPC_RAZ, RazObsidiusPos);
-                _freeTimer = 120;
+                ArmFreeTimer();
                 return;
             }
+            if (stage == RAZ_OBSIDIUS && !_freeArmed && !GetPersistentData(PERSISTENT_OBSIDIUS_FREED))
+                ArmFreeTimer();
             if (_freeTimer && --_freeTimer == 0 && !GetPersistentData(PERSISTENT_OBSIDIUS_FREED))
                 if (Creature* obsidius = GetCreature(DATA_OBSIDIUS))
                     obsidius->AI()->DoAction(ACTION_OBSIDIUS_FREE);
+        }
+
+        void ArmFreeTimer()
+        {
+            _freeArmed = true;
+            _freeTimer = 120;
         }
 
         bool PlayerNear(Position const& pos, float range) const
@@ -393,6 +404,7 @@ public:
     private:
         uint32 _checkTimer = 1000;
         uint32 _freeTimer = 0;
+        bool _freeArmed = false;
         bool _cageSummoned = false;
     };
 
@@ -518,11 +530,13 @@ struct boss_coa_brc_romogg : public BossAI
                     break;
                 case EVENT_CHAINS_CHECK:
                     if (!ObjectAccessor::GetCreature(*me, _chains))
-                        me->SummonCreature(NPC_CHAINS_OF_WOE, me->GetNearPosition(4.0f, 0.0f), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 20000);
+                        me->SummonCreature(NPC_CHAINS_OF_WOE, me->GetNearPosition(4.0f, 0.0f),
+                            TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 20000);
                     break;
                 case EVENT_SKULLCRACKER:
                     Talk(EMOTE_ROMOGG_SKULLCRACKER);
-                    DoCastSelf(me->GetMap()->GetDifficulty() == DUNGEON_DIFFICULTY_EPIC ? SPELL_SKULLCRACKER_MYTHIC : SPELL_SKULLCRACKER);
+                    DoCastSelf(me->GetMap()->GetDifficulty() == DUNGEON_DIFFICULTY_EPIC ? SPELL_SKULLCRACKER_MYTHIC
+                                                                                        : SPELL_SKULLCRACKER);
                     break;
                 case EVENT_FIERCE_BLOW:
                     DoCastVictim(SPELL_FIERCE_BLOW);
@@ -561,7 +575,8 @@ struct npc_coa_brc_chains_of_woe : public ScriptedAI
         for (Player* player : PlayersNear(center, 60.0f))
         {
             Position pos = me->GetNearPosition(frand(1.5f, 3.0f), frand(0.0f, 2.0f * float(M_PI)));
-            player->NearTeleportTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), player->GetOrientation());
+            player->NearTeleportTo(
+                pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), player->GetOrientation());
         }
         DoCastSelf(SPELL_CHAINS_OF_WOE_ROOT, true);
     }
@@ -870,7 +885,10 @@ struct boss_coa_brc_corla : public BossAI
             {
                 if (Aura* fear = me->AddAura(SPELL_FEAR, target))
                     fear->SetDuration(3000);
-                DealDamage(me, target, SPELL_DARK_COMMAND, uint32(Rolled(me, target, float(DarkCommandDamage.normal60), float(DarkCommandDamage.mythic), nullptr)), SPELL_SCHOOL_MASK_SHADOW);
+                DealDamage(me, target, SPELL_DARK_COMMAND,
+                    uint32(Rolled(
+                        me, target, float(DarkCommandDamage.normal60), float(DarkCommandDamage.mythic), nullptr)),
+                    SPELL_SCHOOL_MASK_SHADOW);
             }
         _darkTarget.Clear();
     }
@@ -944,7 +962,8 @@ struct boss_coa_brc_corla : public BossAI
                 if (eventId == EVENT_EVOLUTION_OOC)
                 {
                     if (!_zealots.empty())
-                        if (Creature* zealot = ObjectAccessor::GetCreature(*me, Acore::Containers::SelectRandomContainerElement(_zealots)))
+                        if (Creature* zealot = ObjectAccessor::GetCreature(
+                                *me, Acore::Containers::SelectRandomContainerElement(_zealots)))
                         {
                             me->CastStop();
                             DoCast(zealot, SPELL_CORLA_EVOLUTION);
@@ -1010,7 +1029,15 @@ private:
 
 struct npc_coa_brc_corla_zealot : public ScriptedAI
 {
-    explicit npc_coa_brc_corla_zealot(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript()) { }
+    explicit npc_coa_brc_corla_zealot(Creature* creature)
+        : ScriptedAI(creature), _instance(creature->GetInstanceScript())
+    {
+    }
+
+    enum Events : uint32
+    {
+        EVENT_FIERCE_BLOW = 1,
+    };
 
     void IsSummonedBy(WorldObject* ) override
     {
@@ -1046,32 +1073,35 @@ struct npc_coa_brc_corla_zealot : public ScriptedAI
             corla->AI()->Talk(SAY_CORLA_EVOLUTION);
             corla->AI()->Talk(EMOTE_CORLA_ZEALOT_EVOLVED);
         }
-        _fierceBlow = 7000;
+        _events.Reset();
+        _events.ScheduleEvent(EVENT_FIERCE_BLOW, 7s);
     }
 
     void UpdateAI(uint32 diff) override
     {
         if (!_evolved || !UpdateVictim())
             return;
-        if (_fierceBlow <= diff)
+        _events.Update(diff);
+        if (_events.ExecuteEvent() == EVENT_FIERCE_BLOW)
         {
             DoCastVictim(SPELL_FIERCE_BLOW);
-            _fierceBlow = 9000;
+            _events.ScheduleEvent(EVENT_FIERCE_BLOW, 9s);
         }
-        else
-            _fierceBlow -= diff;
         DoMeleeAttackIfReady();
     }
 
 private:
     InstanceScript* _instance;
+    EventMap _events;
     bool _evolved = false;
-    uint32 _fierceBlow = 7000;
 };
 
 struct npc_coa_brc_nether_beam : public ScriptedAI
 {
-    explicit npc_coa_brc_nether_beam(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript()) { }
+    explicit npc_coa_brc_nether_beam(Creature* creature)
+        : ScriptedAI(creature), _instance(creature->GetInstanceScript())
+    {
+    }
 
     void SetGUID(ObjectGuid const& guid, int32 ) override
     {
@@ -1099,7 +1129,8 @@ struct npc_coa_brc_nether_beam : public ScriptedAI
 
         Creature* zealot = ObjectAccessor::GetCreature(*me, _zealot);
         Creature* corla = _instance ? _instance->GetCreature(DATA_CORLA) : nullptr;
-        if (!zealot || !zealot->IsAlive() || zealot->GetEntry() != NPC_KNEELING_ZEALOT || !corla || !corla->IsInCombat())
+        if (!zealot || !zealot->IsAlive() || zealot->GetEntry() != NPC_KNEELING_ZEALOT || !corla ||
+            !corla->IsInCombat())
         {
             Stop();
             return;
@@ -1294,7 +1325,10 @@ struct boss_coa_brc_beauty : public BossAI
         if (Unit* target = ObjectAccessor::GetUnit(*me, _chargeTarget))
             if (target->IsAlive() && me->IsWithinMeleeRange(target, 3.0f))
             {
-                DealDamage(me, target, SPELL_BERSERKER_CHARGE, uint32(Rolled(me, target, float(BerserkerChargeDamage.normal60), float(BerserkerChargeDamage.mythic), nullptr)), SPELL_SCHOOL_MASK_NORMAL);
+                DealDamage(me, target, SPELL_BERSERKER_CHARGE,
+                    uint32(Rolled(me, target, float(BerserkerChargeDamage.normal60),
+                        float(BerserkerChargeDamage.mythic), nullptr)),
+                    SPELL_SCHOOL_MASK_NORMAL);
                 target->KnockbackFrom(me->GetPositionX(), me->GetPositionY(), 12.0f, 6.0f);
             }
         _chargeTarget.Clear();
@@ -1371,7 +1405,10 @@ public:
                     if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 100.0f, true))
                     {
                         me->CastSpell(target, SPELL_MAGMA_SPIT, true);
-                        DealDamage(me, target, SPELL_MAGMA_SPIT, uint32(Rolled(me, target, float(MagmaSpitDamage.normal60), float(MagmaSpitDamage.mythic), nullptr)), SPELL_SCHOOL_MASK_FIRE);
+                        DealDamage(me, target, SPELL_MAGMA_SPIT,
+                            uint32(Rolled(
+                                me, target, float(MagmaSpitDamage.normal60), float(MagmaSpitDamage.mythic), nullptr)),
+                            SPELL_SCHOOL_MASK_FIRE);
                     }
                     events.Repeat(7s, 9s);
                     break;
@@ -1380,7 +1417,8 @@ public:
                     {
                         _chargeTarget = target->GetGUID();
                         me->CastSpell(target, SPELL_BERSERKER_CHARGE, true);
-                        me->GetMotionMaster()->MoveCharge(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 42.0f, POINT_CHARGE);
+                        me->GetMotionMaster()->MoveCharge(target->GetPositionX(), target->GetPositionY(),
+                            target->GetPositionZ(), 42.0f, POINT_CHARGE);
                     }
                     events.Repeat(15s, 21s);
                     break;
@@ -1388,7 +1426,10 @@ public:
                     me->CastSpell(me, SPELL_FLAMEBREAK, true);
                     for (Player* player : PlayersNear(me, 10.0f))
                     {
-                        DealDamage(me, player, SPELL_FLAMEBREAK, uint32(Rolled(me, player, float(FlamebreakDamage.normal60), float(FlamebreakDamage.mythic), nullptr)), SPELL_SCHOOL_MASK_FIRE);
+                        DealDamage(me, player, SPELL_FLAMEBREAK,
+                            uint32(Rolled(
+                                me, player, float(FlamebreakDamage.normal60), float(FlamebreakDamage.mythic), nullptr)),
+                            SPELL_SCHOOL_MASK_FIRE);
                         player->KnockbackFrom(me->GetPositionX(), me->GetPositionY(), 10.0f, 7.0f);
                     }
                     events.Repeat(15s, 21s);
@@ -1404,7 +1445,9 @@ public:
 
 struct npc_coa_brc_beauty_pup : public ScriptedAI
 {
-    explicit npc_coa_brc_beauty_pup(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript()) { }
+    explicit npc_coa_brc_beauty_pup(Creature* creature) : ScriptedAI(creature), _instance(creature->GetInstanceScript())
+    {
+    }
 
     enum Events : uint32
     {
@@ -1495,7 +1538,8 @@ struct boss_coa_brc_obsidius : public BossAI
         SetBound(me, !freed);
         uint8 const count = IsHeroicOrMythic(me->GetMap()) ? 3 : 2;
         for (uint8 i = 0; i < count; ++i)
-            if (Creature* shadow = me->SummonCreature(NPC_SHADOW_OF_OBSIDIUS, ShadowOfObsidiusPos[i], TEMPSUMMON_MANUAL_DESPAWN))
+            if (Creature* shadow =
+                    me->SummonCreature(NPC_SHADOW_OF_OBSIDIUS, ShadowOfObsidiusPos[i], TEMPSUMMON_MANUAL_DESPAWN))
                 SetBound(shadow, !freed);
     }
 
@@ -1593,13 +1637,15 @@ struct boss_coa_brc_obsidius : public BossAI
                     Swap();
                     break;
                 case EVENT_TWILIGHT_CORRUPTION:
-                    if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 100.0f, true, true, -SPELL_TWILIGHT_CORRUPTION))
+                    if (Unit* target =
+                            SelectTarget(SelectTargetMethod::Random, 0, 100.0f, true, true, -SPELL_TWILIGHT_CORRUPTION))
                         if (Aura* aura = me->AddAura(SPELL_TWILIGHT_CORRUPTION, target))
                         {
                             aura->SetMaxDuration(12000);
                             aura->SetDuration(12000);
                             if (AuraEffect* effect = aura->GetEffect(EFFECT_0))
-                                effect->ChangeAmount(Rolled(me, target, float(TwilightCorruptionTick.normal60), float(TwilightCorruptionTick.mythic), nullptr));
+                                effect->ChangeAmount(Rolled(me, target, float(TwilightCorruptionTick.normal60),
+                                    float(TwilightCorruptionTick.mythic), nullptr));
                         }
                     events.Repeat(12s);
                     break;
@@ -1657,7 +1703,8 @@ private:
         Unit* shadowVictim = shadow->GetVictim();
         me->SetVisible(false);
         shadow->SetVisible(false);
-        me->NearTeleportTo(theirs.GetPositionX(), theirs.GetPositionY(), theirs.GetPositionZ(), theirs.GetOrientation());
+        me->NearTeleportTo(
+            theirs.GetPositionX(), theirs.GetPositionY(), theirs.GetPositionZ(), theirs.GetOrientation());
         shadow->NearTeleportTo(mine.GetPositionX(), mine.GetPositionY(), mine.GetPositionZ(), mine.GetOrientation());
         me->CastSpell(shadow, SPELL_TRANSFORMATION_STUN, true);
         DoResetThreatList();
@@ -1681,9 +1728,15 @@ struct npc_coa_brc_shadow_of_obsidius : public ScriptedAI
 {
     explicit npc_coa_brc_shadow_of_obsidius(Creature* creature) : ScriptedAI(creature) { }
 
+    enum Events : uint32
+    {
+        EVENT_FIERCE_BLOW = 1,
+    };
+
     void Reset() override
     {
-        _fierceBlow = 8000;
+        _events.Reset();
+        _events.ScheduleEvent(EVENT_FIERCE_BLOW, 8s);
         me->SetSpeedRate(MOVE_WALK, ShadowSpeedRate);
         me->SetSpeedRate(MOVE_RUN, ShadowSpeedRate);
         DoCastSelf(SPELL_SHADOW_OF_OBSIDIUS, true);
@@ -1719,13 +1772,12 @@ struct npc_coa_brc_shadow_of_obsidius : public ScriptedAI
         SetTether(obsidius && obsidius->IsAlive() ? obsidius->GetGUID() : ObjectGuid::Empty);
         if (!UpdateVictim())
             return;
-        if (_fierceBlow <= diff)
+        _events.Update(diff);
+        if (_events.ExecuteEvent() == EVENT_FIERCE_BLOW)
         {
             DoCastVictim(SPELL_FIERCE_BLOW);
-            _fierceBlow = 12000;
+            _events.ScheduleEvent(EVENT_FIERCE_BLOW, 12s);
         }
-        else
-            _fierceBlow -= diff;
         DoMeleeAttackIfReady();
     }
 
@@ -1744,7 +1796,7 @@ private:
         me->SetUInt32Value(UNIT_CHANNEL_SPELL, target ? uint32(SPELL_SHADOW_TETHER) : 0);
     }
 
-    uint32 _fierceBlow = 8000;
+    EventMap _events;
 };
 
 struct npc_coa_brc_quicksilver : public ScriptedAI
@@ -1887,15 +1939,16 @@ struct Ability
 
 Ability const FierceBlow = { SPELL_FIERCE_BLOW, 9000, 9000, Aim::Victim };
 
-std::unordered_map<uint32, std::vector<Ability>> const Abilities =
-{
+std::unordered_map<uint32, std::vector<Ability>> const Abilities = {
     { NPC_TWILIGHT_FLAME_CALLER, { FierceBlow } },
-    { NPC_TWILIGHT_TORTURER, { { 5011032, 7600, 16000, Aim::Random }, { 5011033, 14800, 14300, Aim::Victim }, FierceBlow } },
+    { NPC_TWILIGHT_TORTURER,
+        { { 5011032, 7600, 16000, Aim::Random }, { 5011033, 14800, 14300, Aim::Victim }, FierceBlow } },
     { NPC_TWILIGHT_SADIST, { { 5011028, 1900, 6000, Aim::Victim }, { 5011027, 3500, 5300, Aim::Victim }, FierceBlow } },
     { NPC_CRAZED_MAGE, { { 54792, 3000, 13000, Aim::Self }, FierceBlow } },
     { NPC_MAD_PRISONER, { { 5011023, 6700, 13200, Aim::Victim }, { 5011024, 7400, 13800, Aim::Victim }, FierceBlow } },
     { NPC_EVOLVED_ZEALOT, { FierceBlow } },
-    { NPC_TWILIGHT_ZEALOT, { { 5011050, 7400, 14000, Aim::Random }, { 5011045, 11900, 7400, Aim::Victim }, { 5011047, 17000, 15000, Aim::Victim }, FierceBlow } },
+    { NPC_TWILIGHT_ZEALOT, { { 5011050, 7400, 14000, Aim::Random }, { 5011045, 11900, 7400, Aim::Victim },
+                               { 5011047, 17000, 15000, Aim::Victim }, FierceBlow } },
     { 39994, { FierceBlow } },
     { 40017, { { 5011059, 9700, 8000, Aim::Victim }, FierceBlow } },
     { 40019, { { 5011055, 2600, 14300, Aim::Random }, FierceBlow } },
@@ -2029,10 +2082,14 @@ private:
                 ++itr;
                 continue;
             }
-            uint32 const pct = me->GetMap()->GetDifficulty() == DUNGEON_DIFFICULTY_EPIC ? 30 : (IsHeroicOrMythic(me->GetMap()) ? 20 : 15);
+            uint32 const pct = me->GetMap()->GetDifficulty() == DUNGEON_DIFFICULTY_EPIC
+                                   ? 30
+                                   : (IsHeroicOrMythic(me->GetMap()) ? 20 : 15);
             for (Player* player : PlayersNear(me, 200.0f))
-                if (player->GetExactDist2d(zone.pos.GetPositionX(), zone.pos.GetPositionY()) <= FireZoneRadius && std::fabs(player->GetPositionZ() - zone.pos.GetPositionZ()) < 6.0f)
-                    DealDamage(me, player, SPELL_LOBBED_FIREBALL, player->GetMaxHealth() * pct / 100, SPELL_SCHOOL_MASK_FIRE);
+                if (player->GetExactDist2d(zone.pos.GetPositionX(), zone.pos.GetPositionY()) <= FireZoneRadius &&
+                    std::fabs(player->GetPositionZ() - zone.pos.GetPositionZ()) < 6.0f)
+                    DealDamage(
+                        me, player, SPELL_LOBBED_FIREBALL, player->GetMaxHealth() * pct / 100, SPELL_SCHOOL_MASK_FIRE);
             itr = _zones.erase(itr);
         }
 
@@ -2187,7 +2244,8 @@ class spell_coa_brc_damage_aura : public AuraScript
 
     void Register() override
     {
-        DoEffectCalcAmount += AuraEffectCalcAmountFn(spell_coa_brc_damage_aura::CalcTick, EFFECT_ALL, SPELL_AURA_PERIODIC_DAMAGE);
+        DoEffectCalcAmount +=
+            AuraEffectCalcAmountFn(spell_coa_brc_damage_aura::CalcTick, EFFECT_ALL, SPELL_AURA_PERIODIC_DAMAGE);
     }
 };
 
@@ -2206,7 +2264,8 @@ class spell_coa_brc_furious_swipe : public SpellScript
         Acore::UnitListSearcher<Acore::AnyUnfriendlyUnitInObjectRangeCheck> searcher(caster, units, check);
         Cell::VisitObjects(caster, searcher, 10.0f);
         for (Unit* unit : units)
-            if (!unit->IsPlayer() && caster->HasInArc(float(M_PI) * 2.0f / 3.0f, unit) && caster->IsValidAttackTarget(unit))
+            if (!unit->IsPlayer() && caster->HasInArc(float(M_PI) * 2.0f / 3.0f, unit) &&
+                caster->IsValidAttackTarget(unit))
                 targets.push_back(unit);
         if (Unit* victim = caster->GetVictim())
             if (std::find(targets.begin(), targets.end(), victim) == targets.end())
@@ -2215,7 +2274,8 @@ class spell_coa_brc_furious_swipe : public SpellScript
 
     void Register() override
     {
-        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_coa_brc_furious_swipe::FilterTargets, EFFECT_ALL, TARGET_UNIT_CONE_ENEMY_24);
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
+            spell_coa_brc_furious_swipe::FilterTargets, EFFECT_ALL, TARGET_UNIT_CONE_ENEMY_24);
     }
 };
 
@@ -2230,12 +2290,14 @@ class spell_coa_brc_twilight_corruption : public AuraScript
             return;
         if (AuraEffect* effect = GetAura()->GetEffect(EFFECT_0))
             if (aurEff->GetTickNumber() > 1)
-                effect->SetAmount(effect->GetAmount() / int32(aurEff->GetTickNumber() - 1) * int32(aurEff->GetTickNumber()));
+                effect->SetAmount(
+                    effect->GetAmount() / int32(aurEff->GetTickNumber() - 1) * int32(aurEff->GetTickNumber()));
     }
 
     void Register() override
     {
-        OnEffectPeriodic += AuraEffectPeriodicFn(spell_coa_brc_twilight_corruption::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
+        OnEffectPeriodic += AuraEffectPeriodicFn(
+            spell_coa_brc_twilight_corruption::HandlePeriodic, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE);
     }
 };
 
@@ -2257,8 +2319,10 @@ class spell_coa_brc_superheated : public AuraScript
 
     void Register() override
     {
-        OnEffectApply += AuraEffectApplyFn(spell_coa_brc_superheated::HandleApply, EFFECT_2, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
-        OnEffectRemove += AuraEffectRemoveFn(spell_coa_brc_superheated::HandleRemove, EFFECT_2, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
+        OnEffectApply += AuraEffectApplyFn(
+            spell_coa_brc_superheated::HandleApply, EFFECT_2, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
+        OnEffectRemove += AuraEffectRemoveFn(
+            spell_coa_brc_superheated::HandleRemove, EFFECT_2, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
     }
 };
 }
