@@ -366,6 +366,7 @@ void AddSC_AscensionUpgradeKits();
 void AddSC_AscensionProfessionRanks();
 void AddSC_AscensionPrestigiousCache();
 void AddSC_AscensionCallboardCache();
+void AddSC_AscensionCallboardContracts();
 void AddSC_AscensionQuestMarkers();
 void AddSC_AscensionFireLordCache();
 void AddSC_AscensionTierTokenVendor();
@@ -662,6 +663,7 @@ void AddCoAScripts()
     AddSC_AscensionProfessionRanks();
     AddSC_AscensionPrestigiousCache();
     AddSC_AscensionCallboardCache();
+    AddSC_AscensionCallboardContracts();
     AddSC_AscensionQuestMarkers();
     AddSC_AscensionFireLordCache();
     AddSC_AscensionTierTokenVendor();
