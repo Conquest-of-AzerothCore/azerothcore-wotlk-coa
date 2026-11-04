@@ -8337,7 +8337,7 @@ private:
 
     static bool WearsOtherForm(Player const* player)
     {
-        return player->GetShapeshiftForm() != FORM_NONE || player->GetDisplayId() != player->GetNativeDisplayId();
+        return player->GetDisplayId() != player->GetNativeDisplayId();
     }
 
     void RefreshCosmetics(Player* player, PlayerCollectionState& state)
