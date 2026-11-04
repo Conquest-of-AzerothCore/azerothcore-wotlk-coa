@@ -525,6 +525,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `use_item` | `actor`, `item`, `spell`, optional `target`, `target_item` (an owned item entry, sent as the item target instead of a unit) and `destination`: normal item-use handler. |
 | `use_nearby_gameobject` | `actor`, `entry`, optional `owner` (a player id): native use request for the single gameobject of that entry within 20 yards in the actor's phase; `owner` narrows the choice to the object that player owns, so one of several nearby objects can be clicked. |
 | `spell_click_nearby` | `actor`, `entry`: native `CMSG_SPELLCLICK` on the nearest living creature of that entry within 20 yards, as the client sends on right-clicking a spell-click creature. |
+| `select` | `actor`, `target` (any actor id): native `CMSG_SET_SELECTION` on that unit, as the client sends on clicking it; meeting stones summon the selected party member. |
 | `select_nearby` | `actor`, `entry`, optional `radius` (default 40): native `CMSG_SET_SELECTION` on the nearest living creature of that entry, as the client sends on clicking it. GM commands that read `ChatHandler::getSelectedCreature()` (`.cast target`, `.cast back`, …) need this first; `attack_nearby` only sends `CMSG_ATTACKSWING` and never selects. |
 | `use_gameobject` | `actor`, `entry`: native use request for the actor's single nearby owned gameobject. |
 | `voidportal` | Player `actor`, `op` `force` with `group` and `spawn`, or `op` `roll` with `success`: put the one realm-wide Void Portal on that configured point as a point rotation does, or replace the next proximity roll; the manager is process-global, so the case runs exclusively. |
@@ -967,6 +968,7 @@ scale. Both return zero when absent and do not verify client rendering.
 one object when present; it returns the remaining lifetime with one-second precision, zero when absent,
 or -1 for an object without an expiry. Moving out of range is not proof of despawn.
 `at_homebind` checks that the player is on their homebind map and within five yards of its position.
+`summon_pending` is 1 while the player has an unanswered summon request (meeting stone, ritual or warlock summon).
 `use_gameobject` keeps normal interaction-distance and usability checks. It does not inspect a rendered UI.
 The [portable gadgets scenario](scenarios/portable-gadgets.json) checks item summons, lifetimes, portal
 teleports and expiry. It requires `mod-portablemail`; mailbox and altar client interfaces are not tested.

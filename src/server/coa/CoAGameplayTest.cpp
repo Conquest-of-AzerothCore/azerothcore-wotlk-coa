@@ -4623,6 +4623,8 @@ private:
             WorldObject* object = metric == "viewpoint_entry" ? player->GetViewpoint() : player->GetSeer();
             return object ? object->GetEntry() : 0;
         }
+        if (metric == "summon_pending")
+            return player->GetSummonExpireTimer() > GameTime::GetGameTime().count();
         if (metric == "at_homebind")
             return player->GetMapId() == player->m_homebindMapId &&
                 player->GetExactDist(player->m_homebindX, player->m_homebindY, player->m_homebindZ) <= 5.0f;
@@ -6571,6 +6573,14 @@ private:
                 if (sScriptMgr->CanPacketReceive(player->GetSession(), packet))
                     player->GetSession()->HandleLootOpcode(packet);
             }
+        }
+        else if (action == "select")
+        {
+            Unit* target = GetUnit(step.get<std::string>("target"));
+            WorldPacket packet(CMSG_SET_SELECTION, 8);
+            packet << target->GetGUID();
+            player->GetSession()->HandleSetSelectionOpcode(packet);
+            Require(player->GetTarget() == target->GetGUID(), "Selection did not take effect");
         }
         else if (action == "select_nearby")
         {
