@@ -7,6 +7,7 @@
 #include <array>
 #include <atomic>
 #include <cctype>
+#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -343,12 +344,14 @@ struct Requests
 class PendingRequests
 {
 public:
+    using Clock = std::chrono::steady_clock;
     static constexpr std::size_t MaxActivationsPerAccount = 64;
+    static constexpr std::chrono::seconds MaxAge{30};
 
-    void RequestView(std::uint32_t accountId)
+    void RequestView(std::uint32_t accountId, Clock::time_point now)
     {
         std::lock_guard lock(_mutex);
-        Requests& requests = _requests[accountId];
+        Requests& requests = EntryFor(accountId, now).requests;
         if (requests.view)
             return;
 
@@ -356,10 +359,10 @@ public:
         _pending.fetch_add(1, std::memory_order_release);
     }
 
-    bool Activate(std::uint32_t accountId, Activation activation)
+    bool Activate(std::uint32_t accountId, Activation activation, Clock::time_point now)
     {
         std::lock_guard lock(_mutex);
-        Requests& requests = _requests[accountId];
+        Requests& requests = EntryFor(accountId, now).requests;
         if (requests.activations.size() >= MaxActivationsPerAccount)
             return false;
 
@@ -368,7 +371,7 @@ public:
         return true;
     }
 
-    [[nodiscard]] Requests Take(std::uint32_t accountId)
+    [[nodiscard]] Requests Take(std::uint32_t accountId, Clock::time_point now)
     {
         if (!_pending.load(std::memory_order_acquire))
             return {};
@@ -378,17 +381,57 @@ public:
         if (found == _requests.end())
             return {};
 
-        Requests requests = std::move(found->second);
+        Entry entry = std::move(found->second);
         _requests.erase(found);
-        _pending.fetch_sub(requests.activations.size() + (requests.view ? 1 : 0), std::memory_order_release);
-        return requests;
+        _pending.fetch_sub(Count(entry.requests), std::memory_order_release);
+        return Expired(entry, now) ? Requests{} : std::move(entry.requests);
+    }
+
+    void DropExpired(Clock::time_point now)
+    {
+        if (!_pending.load(std::memory_order_acquire))
+            return;
+
+        std::lock_guard lock(_mutex);
+        for (auto entry = _requests.begin(); entry != _requests.end();)
+        {
+            if (!Expired(entry->second, now))
+            {
+                ++entry;
+                continue;
+            }
+
+            _pending.fetch_sub(Count(entry->second.requests), std::memory_order_release);
+            entry = _requests.erase(entry);
+        }
     }
 
     [[nodiscard]] std::size_t Size() const { return _pending.load(std::memory_order_acquire); }
 
 private:
+    struct Entry
+    {
+        Requests requests;
+        Clock::time_point queuedAt;
+    };
+
+    static std::size_t Count(Requests const& requests)
+    {
+        return requests.activations.size() + (requests.view ? 1 : 0);
+    }
+
+    static bool Expired(Entry const& entry, Clock::time_point now) { return now - entry.queuedAt > MaxAge; }
+
+    Entry& EntryFor(std::uint32_t accountId, Clock::time_point now)
+    {
+        auto [found, inserted] = _requests.try_emplace(accountId);
+        if (inserted)
+            found->second.queuedAt = now;
+        return found->second;
+    }
+
     std::mutex _mutex;
-    std::unordered_map<std::uint32_t, Requests> _requests;
+    std::unordered_map<std::uint32_t, Entry> _requests;
     std::atomic<std::size_t> _pending{0};
 };
 
@@ -421,6 +464,27 @@ public:
 
         auto const found = _completions.find(type);
         return found == _completions.end() ? 0 : found->second;
+    }
+
+    void Merge(WeekLedger const& stored)
+    {
+        if (stored._weekStart != _weekStart)
+            return;
+
+        for (auto const& [type, completions] : stored._completions)
+        {
+            std::uint32_t& current = _completions[type];
+            current = Saturate(std::uint64_t(current) + completions);
+        }
+    }
+
+    [[nodiscard]] std::vector<std::string> Types() const
+    {
+        std::vector<std::string> types;
+        types.reserve(_completions.size());
+        for (auto const& entry : _completions)
+            types.push_back(entry.first);
+        return types;
     }
 
     [[nodiscard]] std::int64_t WeekStartTime() const { return _weekStart; }

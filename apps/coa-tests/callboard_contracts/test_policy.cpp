@@ -225,31 +225,59 @@ void ActivationPackets()
 
 void Pending()
 {
+    PendingRequests::Clock::time_point const now{};
     PendingRequests pending;
-    assert(pending.Size() == 0 && !pending.Take(1).view);
+    assert(pending.Size() == 0 && !pending.Take(1, now).view);
 
-    pending.RequestView(1);
-    pending.RequestView(1);
+    pending.RequestView(1, now);
+    pending.RequestView(1, now);
     assert(pending.Size() == 1);
-    assert(pending.Activate(1, { "Duel", true, 0 }));
-    assert(pending.Activate(2, { "CallToArms", false, 3 }));
+    assert(pending.Activate(1, { "Duel", true, 0 }, now));
+    assert(pending.Activate(2, { "CallToArms", false, 3 }, now));
     assert(pending.Size() == 3);
 
-    Requests first = pending.Take(1);
+    Requests first = pending.Take(1, now);
     assert(first.view && first.activations.size() == 1 && first.activations[0].type == "Duel");
     assert(pending.Size() == 1);
-    assert(!pending.Take(1).view);
+    assert(!pending.Take(1, now).view);
 
-    Requests second = pending.Take(2);
+    Requests second = pending.Take(2, now);
     assert(!second.view && second.activations.size() == 1 && second.activations[0].count == 3);
     assert(pending.Size() == 0);
 
     for (std::size_t i = 0; i < PendingRequests::MaxActivationsPerAccount; ++i)
-        assert(pending.Activate(3, { "Duel", true, 0 }));
-    assert(!pending.Activate(3, { "Duel", true, 0 }));
+        assert(pending.Activate(3, { "Duel", true, 0 }, now));
+    assert(!pending.Activate(3, { "Duel", true, 0 }, now));
     assert(pending.Size() == PendingRequests::MaxActivationsPerAccount);
-    assert(pending.Take(3).activations.size() == PendingRequests::MaxActivationsPerAccount);
+    assert(pending.Take(3, now).activations.size() == PendingRequests::MaxActivationsPerAccount);
     assert(pending.Size() == 0);
+}
+
+void PendingExpiry()
+{
+    PendingRequests::Clock::time_point const queued{};
+    PendingRequests::Clock::time_point const fresh = queued + PendingRequests::MaxAge;
+    PendingRequests::Clock::time_point const stale = fresh + std::chrono::seconds(1);
+    PendingRequests pending;
+
+    pending.RequestView(1, queued);
+    assert(pending.Activate(1, { "Duel", true, 0 }, queued));
+    assert(pending.Take(1, fresh).view);
+
+    pending.RequestView(1, queued);
+    assert(pending.Activate(1, { "Duel", true, 0 }, queued));
+    Requests expired = pending.Take(1, stale);
+    assert(!expired.view && expired.activations.empty() && pending.Size() == 0);
+
+    pending.RequestView(1, queued);
+    assert(pending.Activate(1, { "Duel", true, 0 }, queued));
+    pending.RequestView(2, fresh);
+    pending.DropExpired(fresh);
+    assert(pending.Size() == 3);
+    pending.DropExpired(stale);
+    assert(pending.Size() == 1);
+    assert(!pending.Take(1, stale).view);
+    assert(pending.Take(2, stale).view && pending.Size() == 0);
 }
 
 void Ledger()
@@ -273,6 +301,37 @@ void Ledger()
     assert(days == 3);
     assert(Spare(Remaining(days, 1, ledger.Completions("Duel", 200)), 1) == 1);
 }
+
+void LedgerMerge()
+{
+    WeekLedger stored;
+    stored.Roll(100);
+    stored.Set("Duel", 3);
+    stored.Set("CallToArms", std::numeric_limits<std::uint32_t>::max());
+
+    WeekLedger live;
+    live.Roll(100);
+    assert(live.Add("Duel") == 1);
+    std::vector<std::string> const unsaved = live.Types();
+    assert(unsaved.size() == 1 && unsaved[0] == "Duel");
+    live.Add("CallToArms");
+
+    live.Merge(stored);
+    assert(live.Completions("Duel", 100) == 4);
+    assert(live.Completions("CallToArms", 100) == std::numeric_limits<std::uint32_t>::max());
+
+    WeekLedger rolled;
+    rolled.Roll(200);
+    rolled.Add("Duel");
+    rolled.Merge(stored);
+    assert(rolled.Completions("Duel", 200) == 1 && rolled.Completions("CallToArms", 200) == 0);
+
+    WeekLedger empty;
+    empty.Roll(100);
+    assert(empty.Types().empty());
+    empty.Merge(stored);
+    assert(empty.Completions("Duel", 100) == 3);
+}
 }
 
 int main()
@@ -286,7 +345,9 @@ int main()
     Activations();
     ActivationPackets();
     Pending();
+    PendingExpiry();
     Ledger();
+    LedgerMerge();
     std::cout << "callboard contracts policy checks passed\n";
     return 0;
 }

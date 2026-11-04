@@ -220,6 +220,16 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "DELETE FROM coa_build_creator_active WHERE guid = ? AND spec = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_COA_BUILD_CREATOR_ACTIVE_ALL, "DELETE FROM coa_build_creator_active WHERE guid = ?",
         CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_COA_CALLBOARD_CONTRACTS,
+        "SELECT contract_type, completions FROM character_callboard_contract WHERE guid = ? AND week_start = ?",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_REP_COA_CALLBOARD_CONTRACT,
+        "REPLACE INTO character_callboard_contract (guid, contract_type, week_start, completions) VALUES (?, ?, ?, ?)",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_COA_CALLBOARD_CONTRACT_OLD_WEEKS,
+        "DELETE FROM character_callboard_contract WHERE guid = ? AND week_start <> ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_COA_CALLBOARD_CONTRACTS, "DELETE FROM character_callboard_contract WHERE guid = ?",
+        CONNECTION_ASYNC);
 
     // Read-only safety gate for the unregistered, never-saved Create probe.
     PrepareStatement(CHAR_SEL_FRESH_CHECK_GUID_COUNT, "SELECT COUNT(*) FROM characters WHERE guid BETWEEN ? AND ?", CONNECTION_SYNCH);

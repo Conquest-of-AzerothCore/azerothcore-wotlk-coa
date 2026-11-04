@@ -20,6 +20,7 @@
 #include <atomic>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -30,6 +31,7 @@ namespace
 using namespace CallboardContracts;
 
 constexpr char LedgerKey[] = "ascension_callboard_contract_ledger";
+constexpr uint32 PruneIntervalMs = 1000;
 
 struct ContractType
 {
@@ -71,6 +73,7 @@ struct Settings
 struct LedgerData final : DataMap::Base
 {
     WeekLedger ledger;
+    bool loaded = false;
 };
 
 std::atomic<bool> enabled{false};
@@ -180,8 +183,17 @@ uint32 CompletedThisWeek(Player const* player, ContractType const& contract)
     return data ? data->ledger.Completions(contract.type, CurrentWeekStart()) : 0;
 }
 
+bool LedgerLoaded(Player const* player)
+{
+    LedgerData const* data = player->CustomData.Get<LedgerData>(LedgerKey);
+    return data && data->loaded;
+}
+
 uint32 RemainingFor(Player const* player, ContractType const& contract, Settings const& current)
 {
+    if (!LedgerLoaded(player))
+        return 0;
+
     return Remaining(CurrentDaysBegun(), current.dailyCompletions, CompletedThisWeek(player, contract));
 }
 
@@ -287,10 +299,15 @@ void SendView(Player* player)
     player->GetSession()->SendPacket(&packet);
 }
 
-void SaveCompletions(Player* player, std::string const& type, uint32 completions, int64 weekStart)
+void SaveCompletions(ObjectGuid::LowType guid, std::string const& type, uint32 completions, int64 weekStart)
 {
-    CharacterDatabase.Execute("REPLACE INTO `character_callboard_contract` (`guid`, `contract_type`, `week_start`, "
-        "`completions`) VALUES ({}, '{}', {}, {})", player->GetGUID().GetCounter(), type, weekStart, completions);
+    CharacterDatabasePreparedStatement* statement =
+        CharacterDatabase.GetPreparedStatement(CHAR_REP_COA_CALLBOARD_CONTRACT);
+    statement->SetData(0, guid);
+    statement->SetData(1, type);
+    statement->SetData(2, uint32(weekStart));
+    statement->SetData(3, completions);
+    CharacterDatabase.Execute(statement);
 }
 
 void CountCompletion(Player* player, ContractType const& contract)
@@ -298,27 +315,61 @@ void CountCompletion(Player* player, ContractType const& contract)
     int64 const weekStart = CurrentWeekStart();
     LedgerData* data = player->CustomData.GetDefault<LedgerData>(LedgerKey);
     data->ledger.Roll(weekStart);
-    SaveCompletions(player, contract.type, data->ledger.Add(contract.type), weekStart);
+    uint32 const completions = data->ledger.Add(contract.type);
+    if (data->loaded)
+        SaveCompletions(player->GetGUID().GetCounter(), contract.type, completions, weekStart);
+}
+
+void ApplyStoredLedger(Player* player, PreparedQueryResult result, int64 weekStart)
+{
+    LedgerData* data = player->CustomData.GetDefault<LedgerData>(LedgerKey);
+    if (data->loaded)
+        return;
+
+    WeekLedger stored;
+    stored.Roll(weekStart);
+    if (result)
+    {
+        do
+        {
+            Field* fields = result->Fetch();
+            stored.Set(fields[0].Get<std::string>(), fields[1].Get<uint32>());
+        } while (result->NextRow());
+    }
+
+    std::vector<std::string> const unsaved = data->ledger.Types();
+    data->ledger.Merge(stored);
+    data->loaded = true;
+
+    int64 const ledgerWeek = data->ledger.WeekStartTime();
+    for (std::string const& type : unsaved)
+        SaveCompletions(player->GetGUID().GetCounter(), type, data->ledger.Completions(type, ledgerWeek), ledgerWeek);
 }
 
 void LoadLedger(Player* player)
 {
     int64 const weekStart = CurrentWeekStart();
-    uint32 const guid = player->GetGUID().GetCounter();
-    LedgerData* data = player->CustomData.GetDefault<LedgerData>(LedgerKey);
-    data->ledger.Roll(weekStart);
-    if (QueryResult result = CharacterDatabase.Query("SELECT `contract_type`, `completions` FROM "
-        "`character_callboard_contract` WHERE `guid` = {} AND `week_start` = {}", guid, weekStart))
-    {
-        do
-        {
-            Field* fields = result->Fetch();
-            data->ledger.Set(fields[0].Get<std::string>(), fields[1].Get<uint32>());
-        } while (result->NextRow());
-    }
+    ObjectGuid const owner = player->GetGUID();
+    player->CustomData.GetDefault<LedgerData>(LedgerKey)->ledger.Roll(weekStart);
 
-    CharacterDatabase.Execute("DELETE FROM `character_callboard_contract` WHERE `guid` = {} AND `week_start` <> {}",
-        guid, weekStart);
+    CharacterDatabasePreparedStatement* cleanup =
+        CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_CALLBOARD_CONTRACT_OLD_WEEKS);
+    cleanup->SetData(0, owner.GetCounter());
+    cleanup->SetData(1, uint32(weekStart));
+    CharacterDatabase.Execute(cleanup);
+
+    CharacterDatabasePreparedStatement* select =
+        CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_CALLBOARD_CONTRACTS);
+    select->SetData(0, owner.GetCounter());
+    select->SetData(1, uint32(weekStart));
+    WorldSession* session = player->GetSession();
+    session->GetQueryProcessor().AddCallback(CharacterDatabase.AsyncQuery(select)
+        .WithPreparedCallback([session, owner, weekStart](PreparedQueryResult result)
+        {
+            Player* loaded = session->GetPlayer();
+            if (loaded && loaded->GetGUID() == owner)
+                ApplyStoredLedger(loaded, std::move(result), weekStart);
+        }));
 }
 
 void StoreReward(Player* player, Quest const* quest, uint32 rawItemId, uint32 count,
@@ -454,8 +505,12 @@ void ProcessRequests(Player* player)
     if (!session)
         return;
 
-    Requests requests = pendingRequests.Take(session->GetAccountId());
-    if (!enabled.load(std::memory_order_relaxed) || IsBot(player))
+    bool const active = enabled.load(std::memory_order_relaxed) && !IsBot(player);
+    if (active && !LedgerLoaded(player))
+        return;
+
+    Requests requests = pendingRequests.Take(session->GetAccountId(), PendingRequests::Clock::now());
+    if (!active)
         return;
 
     bool send = requests.view;
@@ -476,21 +531,39 @@ void ProcessRequests(Player* player)
         SendView(player);
 }
 
+bool AcceptsRequests(WorldSession* session)
+{
+    return session && session->GetPlayer() && enabled.load(std::memory_order_relaxed);
+}
+
 bool HandleRequestView(WorldSession* session, WorldPacket const&)
 {
-    if (session && enabled.load(std::memory_order_relaxed))
-        pendingRequests.RequestView(session->GetAccountId());
+    if (AcceptsRequests(session))
+        pendingRequests.RequestView(session->GetAccountId(), PendingRequests::Clock::now());
     return true;
 }
 
 bool HandleActivate(WorldSession* session, WorldPacket const& packet)
 {
-    if (!session || !enabled.load(std::memory_order_relaxed))
+    if (!AcceptsRequests(session))
         return true;
 
     if (std::optional<Activation> activation = ParseActivationPacket(packet))
-        pendingRequests.Activate(session->GetAccountId(), std::move(*activation));
+        pendingRequests.Activate(session->GetAccountId(), std::move(*activation), PendingRequests::Clock::now());
     return true;
+}
+
+std::optional<std::string> ExhaustedContractName(Player const* player, Quest const* quest)
+{
+    if (!enabled.load(std::memory_order_relaxed) || IsBot(player))
+        return std::nullopt;
+
+    std::shared_ptr<Catalogue const> const contracts = CurrentCatalogue();
+    ContractType const* contract = contracts->ForQuest(quest->GetQuestId());
+    if (!contract || RemainingFor(player, *contract, CurrentSettings()) > 0)
+        return std::nullopt;
+
+    return DisplayName(contract->type);
 }
 
 class ascension_callboard_contracts_player : public PlayerScript
@@ -499,7 +572,8 @@ public:
     ascension_callboard_contracts_player()
         : PlayerScript("ascension_callboard_contracts_player",
               { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_CAN_TAKE_QUEST,
-                PLAYERHOOK_CAN_REWARD_QUEST, PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST, PLAYERHOOK_ON_DELETE_FROM_DB }) { }
+                PLAYERHOOK_CAN_REWARD_QUEST, PLAYERHOOK_ON_QUEST_GIVER_CHOOSE_REWARD,
+                PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST, PLAYERHOOK_ON_DELETE_FROM_DB }) { }
 
     void OnPlayerLogin(Player* player) override
     {
@@ -510,7 +584,7 @@ public:
     void OnPlayerLogout(Player* player) override
     {
         if (WorldSession* session = player->GetSession())
-            static_cast<void>(pendingRequests.Take(session->GetAccountId()));
+            static_cast<void>(pendingRequests.Take(session->GetAccountId(), PendingRequests::Clock::now()));
     }
 
     void OnPlayerUpdate(Player* player, uint32) override
@@ -531,17 +605,17 @@ public:
 
     [[nodiscard]] bool OnPlayerCanRewardQuest(Player const* player, Quest const* quest) override
     {
-        if (!enabled.load(std::memory_order_relaxed) || IsBot(player))
-            return true;
+        return !ExhaustedContractName(player, quest);
+    }
 
-        std::shared_ptr<Catalogue const> const contracts = CurrentCatalogue();
-        ContractType const* contract = contracts->ForQuest(quest->GetQuestId());
-        if (!contract || RemainingFor(player, *contract, CurrentSettings()) > 0)
-            return true;
+    [[nodiscard]] bool OnPlayerQuestGiverChooseReward(Player* player, Object*, Quest const* quest, uint32) override
+    {
+        std::optional<std::string> const exhausted = ExhaustedContractName(player, quest);
+        if (!exhausted)
+            return false;
 
-        if (WorldSession* session = player->GetSession())
-            ChatHandler(session).PSendSysMessage("No {} completions remain this week.", DisplayName(contract->type));
-        return false;
+        ChatHandler(player->GetSession()).PSendSysMessage("No {} completions remain this week.", *exhausted);
+        return true;
     }
 
     void OnPlayerCompleteQuest(Player* player, Quest const* quest) override
@@ -561,7 +635,10 @@ public:
 
     void OnPlayerDeleteFromDB(CharacterDatabaseTransaction trans, uint32 guid) override
     {
-        trans->Append("DELETE FROM `character_callboard_contract` WHERE `guid` = {}", guid);
+        CharacterDatabasePreparedStatement* statement =
+            CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_CALLBOARD_CONTRACTS);
+        statement->SetData(0, guid);
+        trans->Append(statement);
     }
 };
 
@@ -569,7 +646,8 @@ class ascension_callboard_contracts_world : public WorldScript
 {
 public:
     ascension_callboard_contracts_world()
-        : WorldScript("ascension_callboard_contracts_world", { WORLDHOOK_ON_STARTUP, WORLDHOOK_ON_AFTER_CONFIG_LOAD })
+        : WorldScript("ascension_callboard_contracts_world",
+              { WORLDHOOK_ON_STARTUP, WORLDHOOK_ON_AFTER_CONFIG_LOAD, WORLDHOOK_ON_UPDATE })
     { }
 
     void OnStartup() override
@@ -583,6 +661,19 @@ public:
         if (reload)
             LoadCatalogue();
     }
+
+    void OnUpdate(uint32 diff) override
+    {
+        _sincePrune += diff;
+        if (_sincePrune < PruneIntervalMs)
+            return;
+
+        _sincePrune = 0;
+        pendingRequests.DropExpired(PendingRequests::Clock::now());
+    }
+
+private:
+    uint32 _sincePrune = 0;
 };
 }
 
