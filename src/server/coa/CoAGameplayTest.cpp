@@ -3306,7 +3306,7 @@ private:
         {
             uint32 hand = step.get<uint32>("hand", BASE_ATTACK);
             Require(hand < MAX_ATTACK, "Invalid attack hand");
-            return unit->getAttackTimer(WeaponAttackType(hand));
+            return std::max<int32>(0, int32(unit->getAttackTimer(WeaponAttackType(hand))));
         }
         if (metric == "attack_time_ms" || metric == "pet_attack_time_ms")
         {
@@ -3392,7 +3392,8 @@ private:
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown controlled unit aura spell");
             auto const itr = std::find_if(unit->m_Controlled.begin(), unit->m_Controlled.end(),
                 [spell](Unit const* controlled) { return controlled->IsAlive() && controlled->HasAura(spell); });
-            Require(itr != unit->m_Controlled.end(), "No living controlled unit carries the aura");
+            if (itr == unit->m_Controlled.end())
+                return std::numeric_limits<double>::quiet_NaN();
             return (*itr)->GetFloatValue(metric == "controlled_aura_min_damage" ? UNIT_FIELD_MINDAMAGE :
                 UNIT_FIELD_MAXDAMAGE);
         }
