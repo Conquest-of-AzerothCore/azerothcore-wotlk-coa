@@ -35,6 +35,16 @@ void CharacterDatabaseConnection::DoPrepareStatements()
             "PRIMARY KEY (account, challengeId, level)) "
             "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+    PrepareStatement(CHAR_SEL_COA_DAILY_LOGIN,
+        "SELECT CAST(COALESCE(MAX(next_claim_at), 0) AS UNSIGNED), "
+        "CAST(COALESCE(MAX(claim_number), 0) AS UNSIGNED), CAST(UNIX_TIMESTAMP() AS UNSIGNED) "
+        "FROM account_coa_daily_login WHERE account_id = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_CLAIM_COA_DAILY_LOGIN,
+        "INSERT INTO account_coa_daily_login (account_id, last_claim_at, next_claim_at, claim_number) "
+        "VALUES (?, ?, ?, 1) ON DUPLICATE KEY UPDATE "
+        "claim_number = IF(next_claim_at <= ? AND claim_number = ?, claim_number + 1, 0), "
+        "last_claim_at = VALUES(last_claim_at), next_claim_at = VALUES(next_claim_at)", CONNECTION_ASYNC);
+
     PrepareStatement(CHAR_SEL_RAF_DELIVERY, "SELECT mail_id FROM raf_reward_delivery WHERE claim_id = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_INS_RAF_DELIVERY, "INSERT INTO raf_reward_delivery (claim_id, account_id, guid, mail_id) VALUES (?, ?, ?, ?)", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_RAF_RECRUIT_DELIVERY,

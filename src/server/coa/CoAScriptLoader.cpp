@@ -422,6 +422,7 @@ void AddSC_AscensionRunemasterElementalTalents();
 void AddSC_AscensionRunemasterTalentProcs();
 void AddSC_AscensionRunemasterTalentMechanics();
 void AddSC_AscensionWelcomeWarchest();
+void AddSC_AscensionDailyLogin();
 void AddSC_AscensionClassBundleStore();
 void AddSC_AscensionHeirloomWeaponStore();
 void AddSC_AscensionLfgObjective();
@@ -852,6 +853,7 @@ void AddCoAScripts()
     AddSC_AscensionSummonDamage();
     AddSC_AscensionKeepersScrollZoneBuff();
     AddSC_AscensionWelcomeWarchest();
+    AddSC_AscensionDailyLogin();
     AddSC_AscensionClassBundleStore();
     AddSC_AscensionHeirloomWeaponStore();
     AddSC_AscensionLfgObjective();
