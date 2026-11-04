@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionLfgObjective.h"
 #include "GlobalScript.h"
 #include "Group.h"
 #include "LFGMgr.h"
@@ -15,6 +16,17 @@ namespace
 {
 constexpr uint16 SMSG_LFG_UPDATE_CUSTOM = 0x066D;
 
+uint32 CurrentLfgObjectiveDungeon(Player const* player)
+{
+    Map const* map = player->FindMap();
+    Group const* group = player->GetGroup();
+    if (!map || !group || !group->isLFGGroup() ||
+        !sLFGMgr->inLfgDungeonMap(group->GetGUID(), map->GetId(), map->GetDifficulty()))
+        return 0;
+
+    return sLFGMgr->GetDungeon(group->GetGUID());
+}
+
 class lfg_objective_dungeon : public PlayerScript
 {
 public:
@@ -22,20 +34,7 @@ public:
 
     void OnPlayerMapChanged(Player* player) override
     {
-        WorldSession* session = player ? player->GetSession() : nullptr;
-        if (!session)
-            return;
-
-        uint32 dungeonId = 0;
-        Map const* map = player->GetMap();
-        Group const* group = player->GetGroup();
-        if (map && group && group->isLFGGroup()
-            && sLFGMgr->inLfgDungeonMap(group->GetGUID(), map->GetId(), map->GetDifficulty()))
-            dungeonId = sLFGMgr->GetDungeon(group->GetGUID());
-
-        WorldPacket packet(SMSG_LFG_UPDATE_CUSTOM, 4);
-        packet << uint32(dungeonId);
-        session->SendPacket(&packet);
+        SendAscensionLfgObjectiveDungeon(player);
     }
 };
 
@@ -92,6 +91,17 @@ public:
         }
     }
 };
+}
+
+void SendAscensionLfgObjectiveDungeon(Player* player)
+{
+    WorldSession* session = player ? player->GetSession() : nullptr;
+    if (!session)
+        return;
+
+    WorldPacket packet(SMSG_LFG_UPDATE_CUSTOM, 4);
+    packet << uint32(CurrentLfgObjectiveDungeon(player));
+    session->SendPacket(&packet);
 }
 
 void AddSC_AscensionLfgObjective()
