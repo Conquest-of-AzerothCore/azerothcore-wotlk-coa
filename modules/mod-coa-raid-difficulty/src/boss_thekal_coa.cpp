@@ -23,9 +23,11 @@
  *
  *   Tiger form (his Aspect of Shirvallah), when the avatar dies
  *     Rending Swipe    first 4s,  every 14s   cone in front
- *     War Stomp        first 12s, every 40s   50 yards, knocks back
+ *     War Stomp        first 12s, every 40s   on the tank, 50 yards, knocks back
  *     Speed Slash      first 14s, every 40s   runs through the raid for 17s,
- *                                             each cut adds a stack of Rip
+ *                                             a new random player every 2s, no
+ *                                             melee meanwhile; each cut adds a
+ *                                             stack of Rip
  *     Shredding Claws  passive, armour down on hit
  *     Summon Tigers, frenzy every 30s and enrage at 20% from stock
  *
@@ -95,6 +97,10 @@ namespace
 
     constexpr uint32 GROUP_TROLL = 1;
     constexpr uint32 GROUP_TIGER = 2;
+    constexpr uint32 GROUP_SPEED_SLASH = 3;
+
+    constexpr Milliseconds SPEED_SLASH_RETARGET = 2s;
+    constexpr Milliseconds SPEED_SLASH_DURATION = 17s;
 
     constexpr float CLEAVE_RANGE = 10.0f;
     constexpr float CLEAVE_ARC   = float(M_PI) / 2;
@@ -178,15 +184,11 @@ namespace
                 context.Repeat(14s);
             }).Schedule(12s, [this](TaskContext context)
             {
-                DoCastSelf(SPELL_WAR_STOMP);
+                DoCastVictim(SPELL_WAR_STOMP);
                 context.Repeat(40s);
             }).Schedule(14s, [this](TaskContext context)
             {
                 DoCastSelf(SPELL_SPEED_SLASH);
-                context.Schedule(17s, [this](TaskContext)
-                {
-                    me->RemoveAurasDueToSpell(SPELL_SPEED_SLASH);
-                });
                 context.Repeat(40s);
             }).Schedule(30s, [this](TaskContext context)
             {
@@ -215,9 +217,36 @@ namespace
             DoCast(target, SPELL_BLOODLUST);
         }
 
+        void StartSpeedSlash()
+        {
+            scheduler.Schedule(0ms, GROUP_SPEED_SLASH, [this](TaskContext slash)
+            {
+                if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 0.0f, true))
+                    me->GetMotionMaster()->MoveChase(target);
+                slash.Repeat(SPEED_SLASH_RETARGET);
+            }).Schedule(SPEED_SLASH_DURATION, GROUP_SPEED_SLASH, [this](TaskContext)
+            {
+                EndSpeedSlash();
+            });
+        }
+
+        void EndSpeedSlash()
+        {
+            scheduler.CancelGroup(GROUP_SPEED_SLASH);
+            me->RemoveAurasDueToSpell(sSpellMgr->GetSpellIdForDifficulty(SPELL_SPEED_SLASH, me));
+            if (Unit* victim = me->GetVictim())
+                me->GetMotionMaster()->MoveChase(victim);
+        }
+
         void OnSpellCast(SpellInfo const* spell) override
         {
             BossAI::OnSpellCast(spell);
+
+            if (spell->Id == sSpellMgr->GetSpellIdForDifficulty(SPELL_SPEED_SLASH, me))
+            {
+                StartSpeedSlash();
+                return;
+            }
 
             switch (spell->Id)
             {
@@ -290,8 +319,14 @@ namespace
 
             scheduler.Update(diff, [this]
             {
-                DoMeleeAttackIfReady();
+                if (!Slashing())
+                    DoMeleeAttackIfReady();
             });
+        }
+
+        bool Slashing() const
+        {
+            return me->HasAura(sSpellMgr->GetSpellIdForDifficulty(SPELL_SPEED_SLASH, me));
         }
 
     private:
