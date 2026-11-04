@@ -42,6 +42,9 @@
  *   - Bloodlord's Presence once at the pull; its aura lasts until removed;
  *   - Mounted only out of combat: the log has Ohgan fighting on his own from
  *     the first second;
+ *   - Ohgan runs in from the arena entrance at the pull (tester, live,
+ *     2026-11-04); the spot, the gap in the chained spirits' ring on the
+ *     north-west side, is estimated;
  *   - Realm of the Blood God (2118425) is left out: the realm's phase 4
  *     content exists nowhere in the data.
  *   - the kill-streak auras (First Blood! to Legendary!) at 1, 3, 5, 7 and 10
@@ -164,6 +167,8 @@ namespace
         { -12197.86f, -1949.392f, 130.2745f, 0.0f }
     };
 
+    Position const PosArenaEntrance = { -12274.7f, -1913.96f, 133.34f, 5.92f };
+
     // From stock: the nearest idle chained spirit revives a fallen player.
     void RevivePlayer(Unit* victim, ObjectGuid& reviveGUID)
     {
@@ -258,7 +263,9 @@ namespace
             me->Dismount();
             me->RemoveAurasDueToSpell(SPELL_MOUNTED);
             DoCastSelf(SPELL_BLOODLORDS_PRESENCE, true);
-            me->SummonCreature(NPC_OHGAN, me->GetPositionX() - 3, me->GetPositionY(), me->GetPositionZ(), me->GetOrientation(), TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 35000);
+            Position entrance = PosArenaEntrance;
+            me->UpdateGroundPositionZ(entrance.GetPositionX(), entrance.GetPositionY(), entrance.m_positionZ);
+            me->SummonCreature(NPC_OHGAN, entrance, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 35000);
             for (Position const& pos : PosSummonChainedSpirits)
                 me->SummonCreature(NPC_CHAINED_SPIRIT, pos, TEMPSUMMON_CORPSE_DESPAWN);
             DoZoneInCombat();

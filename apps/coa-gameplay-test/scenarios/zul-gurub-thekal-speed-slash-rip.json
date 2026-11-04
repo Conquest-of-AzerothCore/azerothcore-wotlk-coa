@@ -7,7 +7,8 @@
     "Swipe does not apply Rip (tester, 2026-11-03). His passive Shredding Claws (2118225) lowers the target's",
     "armour with 2118226 on his melee hits (Pigeon's spell review: the aura had no proc data). Thekal is",
     "summoned at the entrance, away from his avatar, so he takes tiger form as soon as he drops below half health;",
-    "Rending Swipe comes 4 s later and Speed Slash 14 s later."
+    "Rending Swipe comes 4 s later, War Stomp (2118227, cast on his target; live logs 2026-11-04) 12 s later and",
+    "Speed Slash 14 s later."
   ],
   "timeout_ms": 180000,
   "location": {
@@ -129,6 +130,15 @@
       "spell": 2118240,
       "min": 2,
       "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: War Stomp lands on the tank 12 s into tiger form",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 14509,
+      "spell": 2118227,
+      "min": 1
     },
     {
       "action": "assert",

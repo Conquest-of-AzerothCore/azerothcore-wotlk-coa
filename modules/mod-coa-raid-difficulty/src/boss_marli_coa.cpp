@@ -29,7 +29,11 @@
  *     Web Spray          first 15s, every 45s   everyone within 20 yards is
  *                                               slowed, then webbed; then she
  *                                               charges a caster, as in stock
- *     Burrow             first 20.5s, every 45s under ground for 3s, untargetable
+ *     Burrow             first 20.5s, every 45s under ground for 3s, untargetable;
+ *                                               she comes up on the player
+ *                                               farthest from her and stays on
+ *                                               them for 8s, untauntable (tester,
+ *                                               live, 2026-11-04)
  *     Poison Shock       first 27s, every 45s   Poison Nova, 20 yards around her,
  *                                               less the farther away
  *     Furious Strikes    passive, her hits speed her up
@@ -40,7 +44,9 @@
  *     Poison Shock's damage where it dies;
  *   - Drain Life heals her for what each tick deals;
  *   - Poison Nova falls off evenly to nothing at 20 yards (the tooltip says
- *     reduced, not by how much).
+ *     reduced, not by how much);
+ *   - her hunted player carries Menacing Gaze from the kit while she is fixed
+ *     on them (no combat log shows it).
  */
 
 #include "CreatureScript.h"
@@ -49,6 +55,7 @@
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
 
+#include <algorithm>
 #include <list>
 
 using namespace coa_zg;
@@ -87,6 +94,7 @@ namespace
         SPELL_POISON_SHOCK        = 2118145,
         SPELL_POISON_SHOCK_HIT    = 2118146,
         SPELL_BURROW              = 2118140,
+        SPELL_MENACING_GAZE       = 2118141,
         SPELL_POISON_NOVA         = 2118150,
         SPELL_INFEST              = 2118151,
     };
@@ -113,6 +121,7 @@ namespace
         EVENT_POISON_SHOCK,
         EVENT_BURROW,
         EVENT_EMERGE,
+        EVENT_END_HUNT,
         EVENT_FIERCE_BLOW,
     };
 
@@ -126,7 +135,9 @@ namespace
     constexpr uint8 EGGS_PER_HATCH = 10;
     constexpr float NOVA_RANGE     = 20.0f;
     constexpr Milliseconds BURROW_LENGTH        = 3s;
+    constexpr Milliseconds HUNT_LENGTH          = 8s;
     constexpr Milliseconds HATCH_EVERY          = 30s;
+    constexpr float HUNT_THREAT    = 1000000.0f;
 
     struct boss_marli_coa : public BossAI
     {
@@ -140,6 +151,7 @@ namespace
             _avatar.Restore(me);
             _spider = false;
             _festering.clear();
+            EndHunt();
             Emerge();
 
             std::list<GameObject*> eggs;
@@ -170,6 +182,7 @@ namespace
 
         void JustDied(Unit* killer) override
         {
+            EndHunt();
             BossAI::JustDied(killer);
             _avatar.Release(me);
             Talk(SAY_DEATH);
@@ -278,11 +291,58 @@ namespace
             }
         }
 
+        void KilledUnit(Unit* victim) override
+        {
+            if (victim->GetGUID() == _hunted)
+            {
+                events.CancelEvent(EVENT_END_HUNT);
+                EndHunt();
+            }
+        }
+
         void Emerge()
         {
             me->RemoveAurasDueToSpell(SPELL_BURROW);
             me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_AGGRESSIVE);
+        }
+
+        void HuntFarthest()
+        {
+            Unit* prey = SelectTarget(SelectTargetMethod::MaxDistance, 0, 0.0f, true);
+            if (!prey)
+                return;
+
+            _hunted = prey->GetGUID();
+            _huntThreat = HighestThreat() * 2.0f + HUNT_THREAT;
+            me->AddAura(SPELL_MENACING_GAZE, prey);
+            me->GetThreatMgr().AddThreat(prey, _huntThreat, nullptr, true, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+            AttackStart(prey);
+            events.ScheduleEvent(EVENT_END_HUNT, HUNT_LENGTH, 0, PHASE_SPIDER);
+        }
+
+        void EndHunt()
+        {
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
+            if (Unit* prey = ObjectAccessor::GetUnit(*me, _hunted))
+            {
+                prey->RemoveAurasDueToSpell(SPELL_MENACING_GAZE, me->GetGUID());
+                if (_huntThreat > 0.0f && me->GetThreatMgr().GetThreat(prey) >= _huntThreat)
+                    me->GetThreatMgr().AddThreat(prey, -_huntThreat, nullptr, true, true);
+            }
+            _hunted.Clear();
+            _huntThreat = 0.0f;
+        }
+
+        float HighestThreat() const
+        {
+            float highest = 0.0f;
+            for (ThreatReference const* ref : me->GetThreatMgr().GetUnsortedThreatList())
+                highest = std::max(highest, ref->GetThreat());
+            return highest;
         }
 
         // The nearest egg still standing hatches a Spawn of Mar'li.
@@ -381,6 +441,10 @@ namespace
                         break;
                     case EVENT_EMERGE:
                         Emerge();
+                        HuntFarthest();
+                        break;
+                    case EVENT_END_HUNT:
+                        EndHunt();
                         break;
                 }
 
@@ -395,6 +459,8 @@ namespace
         bool _spider = false;
         LoaAvatar _avatar{ NPC_AVATAR_OF_SHADRA, SPELL_DRAIN_POWER };
         GuidSet _festering;
+        ObjectGuid _hunted;
+        float _huntThreat = 0.0f;
     };
 }
 
