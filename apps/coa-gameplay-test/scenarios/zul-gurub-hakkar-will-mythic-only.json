@@ -258,6 +258,11 @@
       "within_ms": 55000
     },
     {
+      "action": "wait",
+      "label": "Let the Normal Hakkar pass his own 45 s mark",
+      "ms": 10000
+    },
+    {
       "action": "assert",
       "label": "CONTROL: the Normal Hakkar is still fighting",
       "actor": "hakkar_normal",
