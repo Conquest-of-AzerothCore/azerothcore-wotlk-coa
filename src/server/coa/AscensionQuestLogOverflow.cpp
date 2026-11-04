@@ -254,26 +254,44 @@ local function render()
   for index = #quests + 1, #f.Rows do f.Rows[index]:Hide() end
   f.Content:SetHeight(math.max(offset, 10))
   f.Title:SetText("Extra Quests")
-  f.Summary:SetText(#quests .. " quests beyond the 25-slot log (" .. (f.Capacity or 25) .. " in total)")
+  local noun = #quests == 1 and " quest" or " quests"
+  f.Summary:SetText(#quests .. noun .. " beyond the 25-slot log (" .. (f.Capacity or 25) .. " in total)")
   f.Opener:SetText("Extra Quests (" .. #quests .. ")")
   if #quests > 0 then f.Opener:Show() else f.Opener:Hide(); f:Hide() end
+end
+
+f.Shown = f.Shown or {}
+local function notify(text)
+  local shown = f.Shown[text]
+  if not shown or GetTime() - shown > 3 then UIErrorsFrame:AddMessage(text, 1, 1, 0) end
 end
 
 local function announce(previous)
   if not previous then return end
   local known = {}
-  for _, quest in ipairs(previous) do known[quest.id] = true end
+  for _, quest in ipairs(previous) do known[quest.id] = quest end
   for _, quest in ipairs(f.Quests) do
-    if not known[quest.id] then
+    local before = known[quest.id]
+    if not before then
       DEFAULT_CHAT_FRAME:AddMessage("|cffffd200Your quest log is full: " .. quest.title ..
         " was placed in Extra Quests (/extraquests).|r")
+    else
+      for index, objective in ipairs(quest.objectives) do
+        if objective ~= before.objectives[index] then notify(objective) end
+      end
+      if quest.status == "c" and before.status ~= "c" then notify(format(ERR_QUEST_COMPLETE_S, quest.title)) end
     end
   end
 end
 
 f:UnregisterAllEvents()
 f:RegisterEvent("CHAT_MSG_ADDON")
+f:RegisterEvent("UI_INFO_MESSAGE")
 f:SetScript("OnEvent", function(self, event, prefix, message, channel, sender)
+  if event == "UI_INFO_MESSAGE" then
+    self.Shown[prefix] = GetTime()
+    return
+  end
   if prefix ~= PREFIX or channel ~= "WHISPER" or sender ~= UnitName("player") then return end
   local kind, rest = message:match("^(%u+) ?(.*)$")
   if kind == "BEGIN" then
