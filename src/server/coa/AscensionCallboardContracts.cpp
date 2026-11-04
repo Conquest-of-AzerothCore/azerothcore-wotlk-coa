@@ -64,7 +64,7 @@ struct Catalogue
 struct Settings
 {
     uint32 dailyCompletions = 1;
-    double moneyCostMultiplier = 1.0;
+    double moneyCostMultiplier = 2.0;
     uint32 minMoneyCost = 100000;
     double tokenCostMultiplier = 2.0;
     uint32 minTokenCost = 50;
@@ -104,7 +104,7 @@ void LoadSettings()
 
     Settings loaded;
     loaded.dailyCompletions = positive("CoA.CallboardContracts.DailyCompletions", 1);
-    loaded.moneyCostMultiplier = sConfigMgr->GetOption<float>("CoA.CallboardContracts.MoneyCostMultiplier", 1.0f);
+    loaded.moneyCostMultiplier = sConfigMgr->GetOption<float>("CoA.CallboardContracts.MoneyCostMultiplier", 2.0f);
     loaded.minMoneyCost = positive("CoA.CallboardContracts.MinMoneyCost", 100000);
     loaded.tokenCostMultiplier = sConfigMgr->GetOption<float>("CoA.CallboardContracts.TokenCostMultiplier", 2.0f);
     loaded.minTokenCost = positive("CoA.CallboardContracts.MinTokenCost", 50);
