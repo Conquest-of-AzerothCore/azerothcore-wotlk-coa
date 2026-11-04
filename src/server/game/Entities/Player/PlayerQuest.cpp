@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AscensionBazaarTokenCap.h"
 #include "AscensionQuestLog.h"
 #include "CreatureAI.h"
 #include "DisableMgr.h"
@@ -773,21 +774,23 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
 
     if (quest->GetRewChoiceItemsCount())
     {
-        if (uint32 itemId = LocalLevelScaling::QuestRewardItemFor(this, quest->RewardChoiceItemId[reward],
-            quest))
+        uint32 itemId = LocalLevelScaling::QuestRewardItemFor(this, quest->RewardChoiceItemId[reward], quest);
+        // Bazaar Tokens count towards the hourly limit and may pay less or nothing.
+        uint32 const count = itemId ? AscensionBazaarTokenCap::LimitReward(this, itemId, quest->RewardChoiceItemCount[reward]) : 0;
+        if (itemId && count)
         {
             ItemPosCountVec dest;
-            if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, quest->RewardChoiceItemCount[reward]) == EQUIP_ERR_OK)
+            if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, count) == EQUIP_ERR_OK)
             {
                 Item* item = StoreNewItem(dest, itemId, true);
-                SendNewItem(item, quest->RewardChoiceItemCount[reward], true, false, false, false);
+                SendNewItem(item, count, true, false, false, false);
                 LocalLevelScaling::NotifyQuestRewardItem(this, item, quest);
 
-                sScriptMgr->OnPlayerQuestRewardItem(this, item, quest->RewardChoiceItemCount[reward]);
+                sScriptMgr->OnPlayerQuestRewardItem(this, item, count);
             }
             else
             {
-                problematicItems.emplace_back(itemId, quest->RewardChoiceItemCount[reward]);
+                problematicItems.emplace_back(itemId, count);
             }
         }
     }
@@ -796,20 +799,21 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     {
         for (uint32 i = 0; i < quest->GetRewItemsCount(); ++i)
         {
-            if (uint32 itemId = LocalLevelScaling::QuestRewardItemFor(this, quest->RewardItemId[i],
-                quest))
+            uint32 itemId = LocalLevelScaling::QuestRewardItemFor(this, quest->RewardItemId[i], quest);
+            uint32 const count = itemId ? AscensionBazaarTokenCap::LimitReward(this, itemId, quest->RewardItemIdCount[i]) : 0;
+            if (itemId && count)
             {
                 ItemPosCountVec dest;
-                if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, quest->RewardItemIdCount[i]) == EQUIP_ERR_OK)
+                if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, count) == EQUIP_ERR_OK)
                 {
                     Item* item = StoreNewItem(dest, itemId, true);
-                    SendNewItem(item, quest->RewardItemIdCount[i], true, false, false, false);
+                    SendNewItem(item, count, true, false, false, false);
                     LocalLevelScaling::NotifyQuestRewardItem(this, item, quest);
 
-                    sScriptMgr->OnPlayerQuestRewardItem(this, item, quest->RewardItemIdCount[i]);
+                    sScriptMgr->OnPlayerQuestRewardItem(this, item, count);
                 }
                 else
-                    problematicItems.emplace_back(itemId, quest->RewardItemIdCount[i]);
+                    problematicItems.emplace_back(itemId, count);
             }
         }
     }

@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Bazaar Tokens: an account earns at most 1250 per hour",
+  "contract": "With CoA.BazaarTokens.HourlyCap.Amount 1250 and WindowSeconds 3600 (defaults) an account earns at most 1250 Bazaar Tokens (975001) in the hour that its first earned token opens. A level-60 Human at 1210 earned tokens turns in Scarlet Sweep: Magic and Might (18034, 50 tokens beside 2000 Runes of Ascension 375250): only the remaining 40 are paid, the runes in full, and the player is told the limit is reached. At the limit, completing and turning in Winterfall Purge (17926, 40 tokens plus the Ethereal Bazaar's 0-6 for completing it) pays no tokens and still its 2000 runes. Tokens added directly (as a GM .additem does) are not limited. Once the hour that opened 61 minutes ago has run out, Duel! (80651) pays its 40 tokens plus 0-6 again. Limiting tokens per hour is a Rexxar choice, not live Ascension behaviour.",
+  "timeout_ms": 120000,
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "location": {"map": 0, "x": -8822.9, "y": 628.4, "z": 93.8, "o": 2.4},
+  "steps": [
+    {"action": "set_phase", "label": "Join the world phase the board is spawned in", "actor": "hero", "value": 1},
+
+    {"action": "prepare_quest", "label": "Scarlet Sweep: Magic and Might is complete", "actor": "hero", "quest": 18034},
+    {"action": "console", "command": "tokencap set Harnessa 1210"},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 975001, "save_as": "tokens_before_scarlet"},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 375250, "save_as": "runes_before_scarlet"},
+    {"action": "reward_quest", "label": "Turn in Scarlet Sweep: Magic and Might at 1210 of 1250", "actor": "hero", "quest": 18034},
+    {"action": "assert", "label": "Only the 40 tokens left under the limit are paid", "actor": "hero", "metric": "item_count",
+     "item": 975001, "relative_to": "tokens_before_scarlet", "equals": 40},
+    {"action": "assert", "label": "The runes are paid in full", "actor": "hero", "metric": "item_count",
+     "item": 375250, "relative_to": "runes_before_scarlet", "equals": 2000},
+    {"action": "assert", "label": "The player is told the limit is reached", "actor": "hero",
+     "metric": "system_message_contains", "text": "You have reached the limit of 1250 Bazaar Tokens per hour", "min": 1},
+
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 975001, "save_as": "tokens_before_winterfall"},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 375250, "save_as": "runes_before_winterfall"},
+    {"action": "prepare_quest", "label": "Winterfall Purge is complete at the limit", "actor": "hero", "quest": 17926},
+    {"action": "reward_quest", "label": "Turn in Winterfall Purge at the limit", "actor": "hero", "quest": 17926},
+    {"action": "assert", "label": "Neither the completion nor the reward pays tokens at the limit", "actor": "hero",
+     "metric": "item_count", "item": 975001, "relative_to": "tokens_before_winterfall", "equals": 0},
+    {"action": "assert", "label": "and the runes are still paid", "actor": "hero", "metric": "item_count",
+     "item": 375250, "relative_to": "runes_before_winterfall", "equals": 2000},
+
+    {"action": "add_item", "label": "100 tokens added directly, as a GM does", "actor": "hero", "item": 975001, "count": 100},
+    {"action": "assert", "label": "Direct grants are not limited", "actor": "hero", "metric": "item_count",
+     "item": 975001, "relative_to": "tokens_before_winterfall", "equals": 100},
+
+    {"action": "console", "command": "tokencap set Harnessa 1250 61"},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 975001, "save_as": "tokens_before_duel"},
+    {"action": "prepare_quest", "label": "Duel! is complete after the hour ran out", "actor": "hero", "quest": 80651},
+    {"action": "reward_quest", "label": "Turn in Duel! in a new hour", "actor": "hero", "quest": 80651},
+    {"action": "assert", "label": "A new hour pays the 40 tokens plus the 0-6 for completing", "actor": "hero",
+     "metric": "item_count", "item": 975001, "relative_to": "tokens_before_duel", "min": 40, "max": 46}
+  ]
+}
