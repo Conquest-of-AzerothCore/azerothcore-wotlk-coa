@@ -1,5 +1,5 @@
 -- Setis (64600): his loot, the shrine by the Scarab Wall that takes players into his map (880), the portal back
--- he leaves when he dies, the graveyard, angel and shrine at the start of his map, and his place and health.
+-- he leaves when he dies, the graveyard and shrine at the start of his map, and his place and health.
 
 -- Loot: one roll of his nine items here; boss_setis_coa rolls one more for every four players in his map. The
 -- level 68 items drop on the normal difficulties; their Heroic World Boss versions (level 71), in loot mode 2,
@@ -60,31 +60,30 @@ WHERE `entry` = 64600 AND `difficulty` = 0;
 UPDATE `coa_world_boss_level` SET `health` = 1810000, `note` = 'per player; the normal one times the log ratio'
 WHERE `entry` = 64600 AND `difficulty` = 2;
 
--- The shrine's words and the angel's.
-DELETE FROM `npc_text` WHERE `ID` IN (64600, 64601);
+-- The shrine's words.
+DELETE FROM `npc_text` WHERE `ID` = 64600;
 INSERT INTO `npc_text` (`ID`, `text0_0`, `text0_1`) VALUES
 (64600, 'The shrine seems to notice your presence as you place your hand on its surface to attune to its power.',
-  'The shrine seems to notice your presence as you place your hand on its surface to attune to its power.'),
-(64601, 'Your spirit lingers here. I can return you to life.', 'Your spirit lingers here. I can return you to life.');
+  'The shrine seems to notice your presence as you place your hand on its surface to attune to its power.');
 
--- Setis' hologram above the shrine, and the angel at the start of his map who returns the fallen to life.
+-- Setis' hologram above the shrine; it stands still.
 INSERT INTO `creature_template` (`entry`, `name`, `subname`, `minlevel`, `maxlevel`, `faction`, `npcflag`,
   `speed_walk`, `speed_run`, `unit_class`, `unit_flags`, `type`, `type_flags`, `AIName`, `ScriptName`,
   `VerifiedBuild`) VALUES
-(64602, 'Setis', 'the Gate Watcher', 63, 63, 35, 0, 1, 1, 1, 33554434, 7, 0, '', '', 12340),
-(64603, 'Spirit of the Sands', NULL, 63, 63, 35, 1, 1, 1, 1, 768, 7, 2, '', 'npc_setis_angel_coa', 12340)
+(64602, 'Setis', 'the Gate Watcher', 63, 63, 35, 0, 1, 1, 1, 33554434, 7, 0, '', '', 12340)
 ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `subname` = VALUES(`subname`), `faction` = VALUES(`faction`),
   `npcflag` = VALUES(`npcflag`), `unit_flags` = VALUES(`unit_flags`), `type_flags` = VALUES(`type_flags`),
   `ScriptName` = VALUES(`ScriptName`);
-DELETE FROM `creature_template_model` WHERE `CreatureID` IN (64602, 64603);
+DELETE FROM `creature_template_model` WHERE `CreatureID` = 64602;
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
   `VerifiedBuild`) VALUES
-(64602, 0, 5965, 0.6, 1, 12340),
-(64603, 0, 5233, 1, 1, 12340);
-DELETE FROM `creature_template_addon` WHERE `entry` IN (64602, 64603);
-INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (64602, '22650'), (64603, '');
+(64602, 0, 5965, 0.6, 1, 12340);
+DELETE FROM `creature_template_addon` WHERE `entry` = 64602;
+INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (64602, '22650');
+DELETE FROM `creature_template_movement` WHERE `CreatureId` = 64602;
+INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flight`, `Rooted`) VALUES
+(64602, 1, 0, 0, 1);
 DELETE FROM `creature` WHERE `guid` IN (9780900, 9780901);
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
-(9780900, 64602, 1, 0, 0, 1, 1, -7864.724, 1326.674, -4.6, 5.4786, 300, 0, 0),
-(9780901, 64603, 880, 0, 0, 15, 1, -8088.0, 1658.0, 12.9, 3.1, 300, 0, 0);
+(9780900, 64602, 1, 0, 0, 1, 1, -7864.724, 1326.674, -4.6, 5.4786, 300, 0, 0);

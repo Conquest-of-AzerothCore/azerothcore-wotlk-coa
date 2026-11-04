@@ -2,9 +2,10 @@
   "schema": 1,
   "name": "Setis uses the rest of his Ascension kit, with the Meteor fireball and the marked Call Lightning",
   "contract": [
-    "boss_setis_coa casts Seeking Shadow Bolts (2119001) after 21 s; the split Meteor (2119010) after 26.4 s",
-    "instead of the generic 83360, ending in a fireball (2119011) at its target; Call Lightning after 30.5 s,",
-    "which first marks the spots (2119053) it strikes; and Massive Thunder Stomp (2119022) after 45 s. He has no",
+    "boss_setis_coa casts Seeking Shadow Bolts (2119001) after 21 s; the split Meteor (2119010) after",
+    "26.4 s instead of the generic 83360, marking its target (2119015) as the cast begins and ending in a",
+    "fireball (2119011); Call Lightning after 30.5 s, which first marks one spot per player, up to three",
+    "and one more for every ten (2119053); and Massive Thunder Stomp (2119022) after 45 s. He has no",
     "Prismatic Barrier, whose spells heal him to full."
   ],
   "timeout_ms": 150000,
@@ -71,6 +72,14 @@
     },
     {
       "action": "assert",
+      "label": "The Meteor target is marked as the cast begins",
+      "actor": "setis",
+      "metric": "spell_cast_count",
+      "spell": 2119015,
+      "min": 1
+    },
+    {
+      "action": "assert",
       "label": "CONTROL: the generic Meteor is gone",
       "actor": "setis",
       "metric": "spell_cast_count",
@@ -88,7 +97,7 @@
     },
     {
       "action": "assert",
-      "label": "Call Lightning marks where it strikes",
+      "label": "Call Lightning marks a spot for the player",
       "actor": "setis",
       "metric": "spell_cast_count",
       "spell": 2119053,

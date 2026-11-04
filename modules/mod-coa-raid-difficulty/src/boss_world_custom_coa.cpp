@@ -92,6 +92,7 @@
 #include "ScriptedGossip.h"
 #include "LootMgr.h"
 #include "Map.h"
+#include "MapMgr.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "QueryResult.h"
@@ -255,6 +256,7 @@ namespace
         SPELL_METEOR            = 2119010,
         SPELL_METEOR_MISSILE    = 2119011,
         SPELL_METEOR_IMPACT     = 2119013,
+        SPELL_METEOR_MARK       = 2119015,
         SPELL_THUNDER_STOMP     = 2119022,
         SPELL_THUNDER_STOMP_HIT = 2119023,
         SPELL_THUNDER_STOMP_INFO = 2119024,
@@ -274,10 +276,10 @@ namespace
     enum SetisTicks { TS_METEOR_LAND = 1 };
 
     constexpr float METEOR_RADIUS = 8.0f;
+    constexpr float SETIS_MELEE_REACH = 8.0f;
     constexpr uint32 GO_SETIS_EXIT = 64601;
     constexpr uint32 SETIS_MAP = 880;
     constexpr uint32 SETIS_SHRINE_TEXT = 64600;
-    constexpr uint32 SETIS_ANGEL_TEXT = 64601;
     constexpr uint32 SETIS_MIN_FLEX = 10;
     constexpr uint32 SETIS_MAX_FLEX = 40;
     constexpr uint32 ITEM_RUNE_OF_ASCENSION = 375250;
@@ -291,7 +293,8 @@ namespace
     constexpr uint16 SMSG_COA_CHECKPOINTS_ENABLED = 0x767;
     constexpr uint16 CMSG_COA_RESPAWN_AT_CHECKPOINT = 0x774;
     Position const SetisEntrance = { -8093.0f, 1663.6f, 12.9f, 0.0f };
-    Position const SetisAltarSide = { -7864.0f, 1325.0f, -7.5f, 2.88f };
+    Position const SetisShrine = { -7864.724f, 1326.674f, -7.357f, 5.4786f };
+    constexpr float SETIS_SHRINE_ARRIVAL = 20.0f;
     Position const SetisExitPortal = { -7970.9f, 1507.22f, 2.61f, 0.0f };
 
     void GiveOrMail(Player* player, uint32 item, uint32 count)
@@ -374,6 +377,7 @@ namespace
                     {
                         _meteorTarget = t->GetGUID();
                         _meteor = t->GetPosition();
+                        me->CastSpell(t, SPELL_METEOR_MARK, true);
                         DoCast(t, SPELL_METEOR);
                     }
                     events.Repeat(32s);
@@ -392,8 +396,14 @@ namespace
         void MarkLightning()
         {
             std::vector<Player*> pool = PlayersWithin(me, 100.0f);
-            uint32 const marks = 3 + uint32(pool.size()) / 10;
-            Acore::Containers::RandomResize(pool, std::min<uint32>(marks, uint32(pool.size())));
+            uint32 const marks = std::min<uint32>(3 + uint32(pool.size()) / 10, uint32(pool.size()));
+            // Ranged first: whoever stands beyond melee reach; the melee only make up what is left.
+            Acore::Containers::RandomShuffle(pool);
+            std::stable_partition(pool.begin(), pool.end(), [this](Player* p)
+            {
+                return !me->IsWithinMeleeRange(p, SETIS_MELEE_REACH);
+            });
+            pool.resize(marks);
             _marks.clear();
             for (Player* p : pool)
             {
@@ -513,6 +523,8 @@ namespace
 
         bool OnGossipHello(Player* player, GameObject* go) override
         {
+            if (!player->IsAlive())
+                return true;
             ClearGossipMenuFor(player);
             AddGossipItemFor(player, GOSSIP_ICON_BATTLE, "Challenge Setis the Gate Watcher", GOSSIP_SENDER_MAIN,
                 GOSSIP_ACTION_INFO_DEF + 1);
@@ -525,7 +537,7 @@ namespace
         bool OnGossipSelect(Player* player, GameObject* /*go*/, uint32 /*sender*/, uint32 action) override
         {
             CloseGossipMenuFor(player);
-            if (action == GOSSIP_ACTION_INFO_DEF + 1)
+            if (action == GOSSIP_ACTION_INFO_DEF + 1 && player->IsAlive())
                 player->TeleportTo(SETIS_MAP, SetisEntrance.GetPositionX(), SetisEntrance.GetPositionY(),
                     SetisEntrance.GetPositionZ(), SetisEntrance.GetOrientation());
             return true;
@@ -539,35 +551,20 @@ namespace
 
         bool OnGossipHello(Player* player, GameObject* /*go*/) override
         {
-            player->TeleportTo(1, SetisAltarSide.GetPositionX(), SetisAltarSide.GetPositionY(),
-                SetisAltarSide.GetPositionZ(), SetisAltarSide.GetOrientation());
-            return true;
-        }
-    };
-
-    class npc_setis_angel_coa : public CreatureScript
-    {
-    public:
-        npc_setis_angel_coa() : CreatureScript("npc_setis_angel_coa") { }
-
-        bool OnGossipHello(Player* player, Creature* creature) override
-        {
-            ClearGossipMenuFor(player);
-            if (player->HasPlayerFlag(PLAYER_FLAGS_GHOST))
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Return me to life.", GOSSIP_SENDER_MAIN,
-                    GOSSIP_ACTION_INFO_DEF + 1);
-            SendGossipMenuFor(player, SETIS_ANGEL_TEXT, creature->GetGUID());
-            return true;
-        }
-
-        bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action) override
-        {
-            CloseGossipMenuFor(player);
-            if (action == GOSSIP_ACTION_INFO_DEF + 1 && player->HasPlayerFlag(PLAYER_FLAGS_GHOST))
+            if (!player->IsAlive())
+                return true;
+            // Twenty yards out on the open sand, away from the crystals behind the shrine, facing it.
+            float const away = SetisShrine.GetOrientation() - float(M_PI);
+            float const x = SetisShrine.GetPositionX() + SETIS_SHRINE_ARRIVAL * std::cos(away);
+            float const y = SetisShrine.GetPositionY() + SETIS_SHRINE_ARRIVAL * std::sin(away);
+            float z = SetisShrine.GetPositionZ();
+            if (Map* silithus = sMapMgr->CreateBaseMap(1))
             {
-                player->ResurrectPlayer(1.0f, false);
-                player->SpawnCorpseBones();
+                float const ground = silithus->GetHeight(x, y, z + 20.0f);
+                if (ground > INVALID_HEIGHT)
+                    z = ground;
             }
+            player->TeleportTo(1, x, y, z + 0.5f, Position::NormalizeOrientation(away + float(M_PI)));
             return true;
         }
     };
@@ -1559,7 +1556,6 @@ void AddCoaCustomWorldBossScripts()
 {
     new coa_world_boss_level_loader();
     new custom_script<boss_setis_coa>("boss_setis_coa");
-    new npc_setis_angel_coa();
     new go_setis_altar_coa();
     new go_setis_exit_coa("go_setis_exit_coa");
     new go_setis_exit_coa("go_setis_leave_coa");
