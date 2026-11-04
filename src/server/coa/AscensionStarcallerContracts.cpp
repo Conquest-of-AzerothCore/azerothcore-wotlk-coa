@@ -110,6 +110,8 @@ void ApplyContracts(SpellInfo* info)
         dummy(0), dummy(1);
     if (id == 804378)
         dummy(1);
+    if (id == 572318)
+        info->Effects[EFFECT_0].Effect = 0;
     if (id == 801401 || id == 704232 || id == 560634)
         for (auto& e : info->Effects)
             if (e.Effect)

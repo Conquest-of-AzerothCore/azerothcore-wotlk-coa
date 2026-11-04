@@ -1,0 +1,245 @@
+{
+  "schema": 1,
+  "name": "Starfire Barrage scatters stars from a debuff absorbed to nothing",
+  "contract": "This is the regression case for the damage condition removed from the Starfire Barrage branch in AscensionStarcallerMechanics.cpp's starcaller_periodic::OnPeriodicDamageResult. The branch previously read 'player && info && info->Id == 803264 && damage'. That damage is the damageDealt AuraEffect::HandlePeriodicDamageAurasTick obtains from Unit::DealDamage, so it is the damage actually dealt after absorption. Starfire Barrage 802682 promises 'an additional Arcane damage that applies a Scattered Star every $803264T1 sec for $803264d' with no damage condition, so a tick absorbed to zero still ticked and must still apply its star. An absorb, not an immunity, is what produces a tick that lands for no damage: HandlePeriodicDamageAurasTick returns before the hook on target->IsImmunedToDamage, so immune targets correctly apply nothing and are out of scope. Power Word: Shield 48066 rank 14 is SPELL_AURA_SCHOOL_ABSORB (69) with EffectBasePoints 2229 and DieSides 1 resolving to 2230 absorbed over 30 s. 803264 'Starfire Barrage [Damage]' is SPELL_AURA_PERIODIC_DAMAGE with EffectBasePoints 49 for 50 a tick, EffectAmplitude 500 and DurationIndex 27 for 3000 ms, so six ticks total about 300 damage, plus 802682's own weapon damage effects from the Worn Shortbow; the caster is deliberately left without spell power so the whole debuff stays well inside what the shield can swallow. Fixtures: 802682 carries no TargetAuraSpell, but AscensionStarcallerAbilities.cpp's OnSpellCheckCast refuses it unless the caster holds 572319, and the aura script's Apply learns 802682 temporarily when 572319 goes up, so the set_aura fixture supplies both the permission and the knowledge. It needs a bow, gun or crossbow (EquippedItemSubClassMask 262156); custom classes are exempt from projectile ammo. The creature fixture cannot carry an aura and set_aura reaches only the player, a pet or a summoned creature, so both targets are hostile players of the opposing faction with PvP enabled, and the scenario location teleports every actor to one spot, without which player fixtures do not share line of sight and the cast is refused with SPELL_FAILED_BAD_TARGETS. The bare victim proves the debuff deals damage at all, which is what makes the shielded victim's unchanged health evidence of absorption. Only that a star was applied is asserted, not the exact count: six ticks would reach 804378's StackAmount of 4, but the tally depends on how much of the debuff has elapsed when the assertion reads it. The scenario location puts every actor on one spot, which refuses a ranged weapon attack with SPELL_FAILED_TOO_CLOSE, so each victim is relocated 12 yards out, both on the same side and four yards apart, inside Starfire Barrage's reach. Placing them on opposite sides makes the second cast fail silently, since a ranged weapon attack needs its target in front and the caster is left facing the first victim. Casting Starfire Barrage consumes the 572319 proc through the Snapshot and FinishSelected machinery in AscensionStarcallerAbilities.cpp (Select returns true for 802682), which also drops the temporary knowledge of 802682, so the fixture re-applies the proc before the second cast.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 1,
+    "x": 2269.03,
+    "y": -6608.37,
+    "z": 125.192,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "starcaller",
+      "race": 1,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "bare",
+      "race": 2,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    },
+    {
+      "id": "shielded",
+      "race": 2,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "relocate",
+      "label": "A ranged weapon attack needs the target in front and outside its dead zone",
+      "actor": "bare",
+      "dx": 12.0,
+      "dy": 4.0
+    },
+    {
+      "action": "relocate",
+      "actor": "shielded",
+      "dx": 12.0,
+      "dy": -4.0,
+      "label": "A ranged weapon attack needs the target in front and outside its dead zone"
+    },
+    {
+      "action": "pvp",
+      "actor": "starcaller",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "bare",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "shielded",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "bare",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "shielded",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "add_item",
+      "label": "Starfire Barrage needs a ranged weapon",
+      "actor": "starcaller",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "starcaller",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "set_aura",
+      "label": "The proc permits Starfire Barrage and learns it temporarily",
+      "actor": "starcaller",
+      "spell": 572319,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Starfire Barrage is known while the proc is up",
+      "actor": "starcaller",
+      "metric": "knows_spell",
+      "spell": 802682,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Only the second victim carries an absorb",
+      "actor": "shielded",
+      "spell": 48066,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the absorb is up on the shielded victim",
+      "actor": "shielded",
+      "metric": "aura",
+      "spell": 48066,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: neither victim holds a Scattered Star",
+      "actor": "bare",
+      "metric": "aura_stacks",
+      "spell": 804378,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the shielded victim holds none either",
+      "actor": "shielded",
+      "metric": "aura_stacks",
+      "spell": 804378,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "bare",
+      "metric": "health",
+      "save_as": "bare_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "shielded",
+      "metric": "health",
+      "save_as": "shielded_health"
+    },
+    {
+      "action": "cast",
+      "label": "Barrage the bare victim",
+      "actor": "starcaller",
+      "spell": 802682,
+      "target": "bare"
+    },
+    {
+      "action": "assert",
+      "label": "The debuff lands on the bare victim",
+      "actor": "bare",
+      "metric": "aura",
+      "spell": 803264,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the debuff does deal damage",
+      "actor": "bare",
+      "metric": "health",
+      "relative_to": "bare_health",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a damaging debuff scatters stars",
+      "actor": "bare",
+      "metric": "aura_stacks",
+      "spell": 804378,
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Casting Barrage consumes the proc, so re-apply it",
+      "actor": "starcaller",
+      "spell": 572319,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Starfire Barrage is known again",
+      "actor": "starcaller",
+      "metric": "knows_spell",
+      "spell": 802682,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Barrage the shielded victim",
+      "actor": "starcaller",
+      "spell": 802682,
+      "target": "shielded"
+    },
+    {
+      "action": "assert",
+      "label": "The debuff lands on the shielded victim",
+      "actor": "shielded",
+      "metric": "aura",
+      "spell": 803264,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The absorb swallows the whole debuff",
+      "actor": "shielded",
+      "metric": "health",
+      "relative_to": "shielded_health",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "A debuff absorbed to nothing still scatters stars",
+      "actor": "shielded",
+      "metric": "aura_stacks",
+      "spell": 804378,
+      "min": 1
+    }
+  ]
+}

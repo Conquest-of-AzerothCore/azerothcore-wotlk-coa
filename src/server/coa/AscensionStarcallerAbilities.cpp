@@ -415,8 +415,13 @@ class starcaller_spells : public AllSpellScript
             Reduce(player, 680703, 5000);
         if (!spell->IsTriggered() && Named(info, 801978) && player->HasAura(704739))
         {
-            if (++State(player).barrage == 3)
-                State(player).barrage = 0, Cast(player, player, 572319);
+            Cast(player, player, 572318);
+            Aura* stacks = player->GetAura(572318);
+            if (stacks && stacks->GetStackAmount() >= 3)
+            {
+                player->RemoveAurasDueToSpell(572318);
+                Cast(player, player, 572319);
+            }
         }
         if (!spell->IsTriggered())
             FinishSelected(player, spell);

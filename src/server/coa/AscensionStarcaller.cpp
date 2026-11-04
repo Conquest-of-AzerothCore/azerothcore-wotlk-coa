@@ -372,6 +372,8 @@ class starcaller_player : public PlayerScript
         {
             PayDelayedDamage(player);
             player->RemoveAurasDueToSpell(954791);
+            player->RemoveAurasDueToSpell(572319);
+            player->RemoveAurasDueToSpell(572318);
         }
     }
     void OnPlayerUpdate(Player* player, uint32 diff) override
