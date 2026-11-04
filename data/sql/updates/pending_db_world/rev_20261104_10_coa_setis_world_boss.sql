@@ -94,8 +94,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9780900, 978062, 1, 0, 0, 1, 1, -7864.724, 1326.674, -2.0, 5.4786, 300, 0, 0);
 
 -- Treasures of Azeroth, one per player of a world boss kill: a Heroic Dungeon epic, a 5% chance at a world boss
--- item, 1000 Runes of Descension (a 250 stack taken four times, as one loot row holds 255 at most) and 15
--- Raider's Commendations.
+-- item of the normal loot modes, 1000 Runes of Descension (a 250 stack taken four times, as one loot row holds
+-- 255 at most) and 15 Raider's Commendations.
 DELETE FROM `reference_loot_template` WHERE `Entry` IN (978059, 978060, 978061);
 INSERT INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`,
   `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES
@@ -109,9 +109,11 @@ INSERT INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `
 SELECT DISTINCT 978060, i.`entry`, 0, 0, 0, 1, 1, 1, 1, CONCAT('Treasures of Azeroth - World Boss - ', i.`name`)
 FROM (SELECT l.`Item` FROM `creature_loot_template` l
       WHERE l.`Entry` IN (6109, 12397, 14887, 14888, 14889, 14890, 64600) AND l.`Reference` = 0
+        AND l.`LootMode` & 1
       UNION SELECT r.`Item` FROM `creature_loot_template` l
       JOIN `reference_loot_template` r ON r.`Entry` = l.`Reference`
-      WHERE l.`Entry` IN (6109, 12397, 14887, 14888, 14889, 14890, 64600) AND l.`Reference` <> 0) x
+      WHERE l.`Entry` IN (6109, 12397, 14887, 14888, 14889, 14890, 64600) AND l.`Reference` <> 0
+        AND l.`LootMode` & 1 AND r.`LootMode` & 1) x
 JOIN `item_template` i ON i.`entry` = x.`Item`
 WHERE i.`Quality` = 4 AND i.`InventoryType` > 0;
 DELETE FROM `item_loot_template` WHERE `Entry` = 978059;

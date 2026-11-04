@@ -282,7 +282,14 @@ namespace
 
     void GiveOrMail(Player* player, uint32 item, uint32 count)
     {
-        if (!count || player->AddItem(item, count))
+        ItemPosCountVec dest;
+        uint32 noSpace = 0;
+        player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, item, count, &noSpace);
+        if (count > noSpace)
+            if (Item* stored = player->StoreNewItem(dest, item, true))
+                player->SendNewItem(stored, count - noSpace, true, false);
+        count = noSpace;
+        if (!count)
             return;
         CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
         MailDraft draft("Setis", "Your bags were full, so this part of your reward was sent by mail.");
