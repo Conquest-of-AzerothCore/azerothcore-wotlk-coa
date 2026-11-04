@@ -293,6 +293,22 @@ constexpr uint32 ASCENSION_STATIC_AURA = 803102;
 constexpr uint32 ASCENSION_THUNDER_WARD_AURA = 800098;
 constexpr uint32 ASCENSION_CHARGED_CONDUIT_AURA = 803790;
 
+// Clearing a cooldown also clears the global cooldown sweep from that action button on the client, so a reset
+// that lands mid global cooldown made the ability look ready while CheckCast still refused it.
+void ResendRemainingGlobalCooldown(Player* player, uint32 spellId)
+{
+    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
+    if (!spellInfo || !player->HasActiveSpell(spellId))
+        return;
+
+    if (uint32 remaining = player->GetGlobalCooldownMgr().GetGlobalCooldown(spellInfo))
+    {
+        WorldPacket data;
+        player->BuildCooldownPacket(data, SPELL_COOLDOWN_FLAG_NONE, spellId, remaining);
+        player->SendDirectMessage(&data);
+    }
+}
+
 void ResetAscensionCooldown(Player* player, uint32 spellId, bool resetCategory)
 {
     if (!player || !spellId)
@@ -304,6 +320,8 @@ void ResetAscensionCooldown(Player* player, uint32 spellId, bool resetCategory)
         if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId))
             if (uint32 category = spellInfo->GetCategory())
                 player->RemoveCategoryCooldown(category);
+
+    ResendRemainingGlobalCooldown(player, spellId);
 }
 
 void ModifyAscensionRankCooldown(Player* player, uint32 spellId, int32 delta, bool resetCategory)
