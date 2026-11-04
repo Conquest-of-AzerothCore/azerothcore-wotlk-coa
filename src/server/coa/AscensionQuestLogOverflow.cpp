@@ -273,8 +273,8 @@ end
 
 f:UnregisterAllEvents()
 f:RegisterEvent("CHAT_MSG_ADDON")
-f:SetScript("OnEvent", function(self, event, prefix, message)
-  if prefix ~= PREFIX then return end
+f:SetScript("OnEvent", function(self, event, prefix, message, channel, sender)
+  if prefix ~= PREFIX or channel ~= "WHISPER" or sender ~= UnitName("player") then return end
   local kind, rest = message:match("^(%u+) ?(.*)$")
   if kind == "BEGIN" then
     local _, capacity = rest:match("^(%d+) (%d+)$")

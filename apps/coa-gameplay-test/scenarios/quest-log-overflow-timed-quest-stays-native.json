@@ -2,8 +2,8 @@
   "schema": 1,
   "name": "Quest log: a timed quest takes a client slot and the overflow survives a relog",
   "contract": [
-    "The client shows quest timers only for its own slots, so a timed quest never stays in the overflow log. A Hunter's Boast (257, 15 minutes) accepted on a full client log swaps with the idlest native quest, Wanted: \"Hogger\" (5) from slot 0, which moves to the overflow log.",
-    "After a relog every quest is still in the log and the timed quest still has a client slot."
+    "The client shows quest timers only for its own slots, so a timed quest never stays in the overflow log. A Hunter's Boast (257, 15 minutes) accepted on a full client log swaps with the idlest native quest, Jitters' Growling Gut (5) from slot 0, which moves to the overflow log.",
+    "After a relog every quest is still in the log and the timed quest still has a client slot. Jitters' Growling Gut and Powder to Ironband (302) have no objectives, so both hold QUEST_STATUS_COMPLETE (1) for as long as they stay in the log."
   ],
   "timeout_ms": 90000,
   "quest_log_size": 64,
@@ -221,11 +221,11 @@
     },
     {
       "action": "assert",
-      "label": "It is still an active quest",
+      "label": "It keeps its completed status",
       "actor": "hero",
       "metric": "quest_status",
       "quest": 5,
-      "equals": 3
+      "equals": 1
     },
     {
       "action": "relog",
@@ -251,7 +251,7 @@
       "actor": "hero",
       "metric": "quest_status",
       "quest": 5,
-      "equals": 3
+      "equals": 1
     },
     {
       "action": "assert",
@@ -259,7 +259,7 @@
       "actor": "hero",
       "metric": "quest_status",
       "quest": 302,
-      "equals": 3
+      "equals": 1
     },
     {
       "action": "assert",

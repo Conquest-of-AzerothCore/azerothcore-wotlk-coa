@@ -23,6 +23,13 @@ Each chunk needs its own requirement type and requirement row:
 | Manastorm UI fixes | 24 | 16262 | `MANASTORM_UI_FIXES` |
 | Extra Quests window (quest log overflow) | 25 | 16265 | `QUEST_LOG_OVERFLOW_WINDOW` |
 
+A chunk on this route runs once and does not survive a `/reload`: the server sends each feature's
+chunk once per session and receives no signal when the client's interface reloads. Until the next
+login, the Fel Commutation window, the Manastorm UI fixes and the Extra Quests window (with its
+quest log button and `/extraquests`) are gone. Overflow quests keep their progress and can still be
+turned in; only promoting and abandoning them from the window waits for that login. The hot-patch
+route below has no such gap, because the client reruns its patches after a reload.
+
 ## Hot-patch route (clients that announce it)
 
 A client DLL that supports a dedicated channel announces it after every world entry:

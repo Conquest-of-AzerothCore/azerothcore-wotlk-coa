@@ -20,7 +20,8 @@
       "owner": "hero",
       "entry": 197,
       "level": 20,
-      "distance": 3
+      "distance": 3,
+      "faction": 12
     }
   ],
   "steps": [

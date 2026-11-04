@@ -214,6 +214,15 @@
     },
     {
       "action": "assert",
+      "label": "The window's records come from the player's own whisper, the only sender the window accepts",
+      "actor": "hero",
+      "metric": "whispers_received",
+      "from": "hero",
+      "text": "COAQLOG\tBEGIN 1 64",
+      "equals": 1
+    },
+    {
+      "action": "assert",
       "label": "The window lists Kobold Camp Cleanup",
       "actor": "hero",
       "metric": "whisper_contains",
@@ -270,11 +279,11 @@
     },
     {
       "action": "assert",
-      "label": "The client packet cannot remove an overflow quest",
+      "label": "The client packet cannot remove an overflow quest, so Jitters' Growling Gut stays complete",
       "actor": "hero",
       "metric": "quest_status",
       "quest": 5,
-      "equals": 3,
+      "equals": 1,
       "within_ms": 1000
     },
     {
