@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Wildcard Frostfall rains damaging frost stars and keeps its final Fingers of Frost (#11054)",
+  "contract": [
+    "Spell284664 triggers284665 every1000ms for8000ms. Dummy284665 carries value983375 (BasePoints983374+1), the",
+    "frost star, the same pattern as Firefall284679->983370. The star's explosion983377 hits other enemies within",
+    "5yards. At most two LOS targets per tick gives fourteen to sixteen stars with two nearby targets. A target",
+    "outside the20yard tick radius is untouched. The final periodic of effect1 grants74396 Fingers of Frost.",
+    "Before the fix the dummy was unscripted: the buff appeared and no star ever fell."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "hero", "entry": 36, "level": 60, "health": 1000000, "distance": 3, "reaction": 0, "stationary": true },
+    { "id": "nearby", "owner": "hero", "entry": 36, "level": 60, "health": 1000000, "distance": 4, "reaction": 0, "stationary": true },
+    { "id": "outside", "owner": "hero", "entry": 36, "level": 60, "health": 1000000, "distance": 25, "reaction": 0, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Harnessa" },
+    { "action": "learn", "actor": "hero", "spell": 284664 },
+    { "action": "cast", "actor": "hero", "spell": 284664, "target": "hero" },
+    { "action": "assert", "label": "SETUP: Frostfall aura applied", "actor": "hero", "metric": "aura", "spell": 284664, "equals": 1, "within_ms": 1000 },
+    { "action": "wait", "ms": 8700 },
+    { "action": "assert", "label": "Frost stars hit the first enemy", "actor": "hero", "metric": "spell_damage_count", "spell": 983375, "target": "enemy", "min": 1 },
+    { "action": "assert", "label": "Frost stars hit the second enemy", "actor": "hero", "metric": "spell_damage_count", "spell": 983375, "target": "nearby", "min": 1 },
+    { "action": "assert", "label": "Two stars per tick over eight ticks", "actor": "hero", "metric": "spell_cast_count", "spell": 983375, "min": 14, "max": 16 },
+    { "action": "assert", "label": "The star explosion splashes the neighbour", "actor": "hero", "metric": "spell_damage_count", "spell": 983377, "target": "enemy", "min": 1 },
+    { "action": "assert", "label": "No star or splash reaches the enemy outside 20 yards", "actor": "hero", "metric": "spell_damage_count", "spell": 983375, "target": "outside", "equals": 0 },
+    { "action": "assert", "label": "No splash reaches the enemy outside 20 yards", "actor": "hero", "metric": "spell_damage_count", "spell": 983377, "target": "outside", "equals": 0 },
+    { "action": "assert", "label": "The final star grants Fingers of Frost", "actor": "hero", "metric": "aura", "spell": 74396, "equals": 1 },
+    { "action": "assert", "label": "Frostfall has ended", "actor": "hero", "metric": "aura", "spell": 284664, "equals": 0 }
+  ]
+}
