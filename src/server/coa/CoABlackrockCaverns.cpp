@@ -327,6 +327,11 @@ public:
             SetBossNumber(ENCOUNTER_COUNT);
             SetPersistentDataCount(PERSISTENT_COUNT);
             LoadObjectData(CreatureData, nullptr);
+            scheduler.Schedule(1s, [this](TaskContext context)
+            {
+                AdvanceRaz();
+                context.Repeat();
+            });
         }
 
         bool SetBossState(uint32 type, EncounterState state) override
@@ -342,15 +347,8 @@ public:
             return true;
         }
 
-        void Update(uint32 diff) override
+        void AdvanceRaz()
         {
-            InstanceScript::Update(diff);
-            if (_checkTimer > diff)
-            {
-                _checkTimer -= diff;
-                return;
-            }
-            _checkTimer = 1000;
             if (instance->GetPlayers().IsEmpty())
                 return;
 
@@ -376,20 +374,28 @@ public:
             {
                 StorePersistentData(PERSISTENT_RAZ_STAGE, RAZ_OBSIDIUS);
                 instance->SummonCreature(NPC_RAZ, RazObsidiusPos);
-                ArmFreeTimer();
+                ArmObsidiusRelease();
                 return;
             }
             if (stage == RAZ_OBSIDIUS && !_freeArmed && !GetPersistentData(PERSISTENT_OBSIDIUS_FREED))
-                ArmFreeTimer();
-            if (_freeTimer && --_freeTimer == 0 && !GetPersistentData(PERSISTENT_OBSIDIUS_FREED))
-                if (Creature* obsidius = GetCreature(DATA_OBSIDIUS))
-                    obsidius->AI()->DoAction(ACTION_OBSIDIUS_FREE);
+                ArmObsidiusRelease();
         }
 
-        void ArmFreeTimer()
+        void ArmObsidiusRelease()
         {
             _freeArmed = true;
-            _freeTimer = 120;
+            scheduler.Schedule(120s, [this](TaskContext context)
+            {
+                if (GetPersistentData(PERSISTENT_OBSIDIUS_FREED))
+                    return;
+                Creature* obsidius = GetCreature(DATA_OBSIDIUS);
+                if (!obsidius || instance->GetPlayers().IsEmpty())
+                {
+                    context.Repeat(1s);
+                    return;
+                }
+                obsidius->AI()->DoAction(ACTION_OBSIDIUS_FREE);
+            });
         }
 
         bool PlayerNear(Position const& pos, float range) const
@@ -402,8 +408,6 @@ public:
         }
 
     private:
-        uint32 _checkTimer = 1000;
-        uint32 _freeTimer = 0;
         bool _freeArmed = false;
         bool _cageSummoned = false;
     };
@@ -498,6 +502,12 @@ struct boss_coa_brc_romogg : public BossAI
         }
     }
 
+    void OnSpellFailed(SpellInfo const* spell) override
+    {
+        if (spell->Id == SPELL_SKULLCRACKER || spell->Id == SPELL_SKULLCRACKER_MYTHIC)
+            me->SetReactState(REACT_AGGRESSIVE);
+    }
+
     void UpdateAI(uint32 diff) override
     {
         if (!UpdateVictim())
@@ -535,8 +545,10 @@ struct boss_coa_brc_romogg : public BossAI
                     break;
                 case EVENT_SKULLCRACKER:
                     Talk(EMOTE_ROMOGG_SKULLCRACKER);
-                    DoCastSelf(me->GetMap()->GetDifficulty() == DUNGEON_DIFFICULTY_EPIC ? SPELL_SKULLCRACKER_MYTHIC
-                                                                                        : SPELL_SKULLCRACKER);
+                    if (DoCastSelf(me->GetMap()->GetDifficulty() == DUNGEON_DIFFICULTY_EPIC
+                                       ? SPELL_SKULLCRACKER_MYTHIC
+                                       : SPELL_SKULLCRACKER) != SPELL_CAST_OK)
+                        me->SetReactState(REACT_AGGRESSIVE);
                     break;
                 case EVENT_FIERCE_BLOW:
                     DoCastVictim(SPELL_FIERCE_BLOW);
@@ -599,6 +611,7 @@ struct npc_coa_brc_raz : public ScriptedAI
         EVENT_FIERCE_BLOW,
         EVENT_RAGE,
         EVENT_LEAP_LEDGE,
+        EVENT_DRIVE,
     };
 
     void IsSummonedBy(WorldObject* ) override
@@ -721,26 +734,25 @@ struct npc_coa_brc_raz : public ScriptedAI
                         DoCastVictim(SPELL_FIERCE_BLOW);
                     _events.Repeat(18s);
                     break;
+                case EVENT_DRIVE:
+                    if (!me->IsInCombat())
+                        Drive();
+                    _events.Repeat(500ms);
+                    break;
                 default:
                     break;
             }
         }
 
-        if (me->IsInCombat())
-        {
-            if (UpdateVictim())
-                DoMeleeAttackIfReady();
-            return;
-        }
+        if (me->IsInCombat() && UpdateVictim())
+            DoMeleeAttackIfReady();
+    }
 
+private:
+    void Drive()
+    {
         if (!_active || !me->IsAlive())
             return;
-        if (_driveTimer > diff)
-        {
-            _driveTimer -= diff;
-            return;
-        }
-        _driveTimer = 500;
 
         if (Unit* target = me->SelectNearestTarget(_atObsidius ? 40.0f : 25.0f))
             if (me->IsWithinLOSInMap(target))
@@ -768,7 +780,6 @@ struct npc_coa_brc_raz : public ScriptedAI
             me->GetMotionMaster()->MovePoint(_point + 1, _path[_point]);
     }
 
-private:
     void StandAtObsidius()
     {
         me->SetReactState(REACT_PASSIVE);
@@ -788,6 +799,7 @@ private:
         if (_initialized)
             return;
         _initialized = true;
+        _events.ScheduleEvent(EVENT_DRIVE, 500ms);
         me->SetWalk(false);
         me->SetReactState(REACT_AGGRESSIVE);
         uint32 const stage = _instance ? _instance->GetPersistentData(PERSISTENT_RAZ_STAGE) : RAZ_CAGED;
@@ -819,7 +831,6 @@ private:
     std::vector<Position> _path;
     std::set<size_t> _jumps;
     uint32 _point = 0;
-    uint32 _driveTimer = 500;
     bool _initialized = false;
     bool _active = false;
     bool _walking = false;
@@ -836,7 +847,6 @@ struct boss_coa_brc_corla : public BossAI
         EVENT_DRAIN_ESSENCE,
         EVENT_FIERCE_BLOW,
         EVENT_DARK_COMMAND,
-        EVENT_DARK_COMMAND_HIT,
         EVENT_VALIDATE,
     };
 
@@ -876,6 +886,19 @@ struct boss_coa_brc_corla : public BossAI
         summons.DespawnAll();
         _zealots.clear();
         SpawnZealots();
+    }
+
+    void OnSpellCast(SpellInfo const* spell) override
+    {
+        BossAI::OnSpellCast(spell);
+        if (spell->Id == SPELL_DARK_COMMAND)
+            DarkCommandHit();
+    }
+
+    void OnSpellFailed(SpellInfo const* spell) override
+    {
+        if (spell->Id == SPELL_DARK_COMMAND)
+            _darkTarget.Clear();
     }
 
     void DarkCommandHit()
@@ -1005,16 +1028,10 @@ struct boss_coa_brc_corla : public BossAI
                 Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 100.0f, true, false);
                 if (!target)
                     target = me->GetVictim();
-                if (target)
-                {
+                if (target && me->CastSpell(target, SPELL_DARK_COMMAND, false) == SPELL_CAST_OK)
                     _darkTarget = target->GetGUID();
-                    me->CastSpell(target, SPELL_DARK_COMMAND, false);
-                    events.ScheduleEvent(EVENT_DARK_COMMAND_HIT, 2s);
-                }
                 events.Repeat(15s);
             }
-            else if (eventId == EVENT_DARK_COMMAND_HIT)
-                DarkCommandHit();
         }
 
         DoMeleeAttackIfReady();
@@ -1110,23 +1127,32 @@ struct npc_coa_brc_nether_beam : public ScriptedAI
 
     void DoAction(int32 action) override
     {
-        if (action == ACTION_BEAM_START)
+        if (action == ACTION_BEAM_START && !_active)
+        {
             _active = true;
+            _events.ScheduleEvent(EVENT_PULSE, 250ms);
+        }
     }
 
     void AttackStart(Unit* ) override { }
 
     void UpdateAI(uint32 diff) override
     {
-        if (!_active)
+        _events.Update(diff);
+        if (_events.ExecuteEvent() != EVENT_PULSE)
             return;
-        if (_tick > diff)
-        {
-            _tick -= diff;
-            return;
-        }
-        _tick = 250;
+        _events.ScheduleEvent(EVENT_PULSE, 250ms);
+        Pulse();
+    }
 
+private:
+    enum Events : uint32
+    {
+        EVENT_PULSE = 1,
+    };
+
+    void Pulse()
+    {
         Creature* zealot = ObjectAccessor::GetCreature(*me, _zealot);
         Creature* corla = _instance ? _instance->GetCreature(DATA_CORLA) : nullptr;
         if (!zealot || !zealot->IsAlive() || zealot->GetEntry() != NPC_KNEELING_ZEALOT || !corla ||
@@ -1178,7 +1204,6 @@ struct npc_coa_brc_nether_beam : public ScriptedAI
         }
     }
 
-private:
     void ClearBeam()
     {
         me->CastStop();
@@ -1191,14 +1216,15 @@ private:
     {
         ClearBeam();
         _active = false;
+        _events.Reset();
         me->DespawnOrUnsummon();
     }
 
     InstanceScript* _instance;
+    EventMap _events;
     ObjectGuid _zealot;
     ObjectGuid _current;
     bool _active = false;
-    uint32 _tick = 250;
 };
 
 struct boss_coa_brc_karsh : public BossAI
@@ -1579,6 +1605,7 @@ struct boss_coa_brc_obsidius : public BossAI
 
     void JustDied(Unit* killer) override
     {
+        Reappear();
         BossAI::JustDied(killer);
         Talk(SAY_OBSIDIUS_DEATH);
         instance->DoRemoveAurasDueToSpellOnPlayers(SPELL_TWILIGHT_CORRUPTION);
@@ -1650,10 +1677,7 @@ struct boss_coa_brc_obsidius : public BossAI
                     events.Repeat(12s);
                     break;
                 case EVENT_REAPPEAR:
-                    me->SetVisible(true);
-                    if (Creature* shadow = ObjectAccessor::GetCreature(*me, _hiddenShadow))
-                        shadow->SetVisible(true);
-                    _hiddenShadow.Clear();
+                    Reappear();
                     break;
                 default:
                     break;
@@ -1664,6 +1688,14 @@ struct boss_coa_brc_obsidius : public BossAI
     }
 
 private:
+    void Reappear()
+    {
+        me->SetVisible(true);
+        if (Creature* shadow = ObjectAccessor::GetCreature(*me, _hiddenShadow))
+            shadow->SetVisible(true);
+        _hiddenShadow.Clear();
+    }
+
     static void SetBound(Creature* creature, bool bound)
     {
         creature->SetImmuneToAll(bound);
@@ -1897,14 +1929,24 @@ struct npc_coa_brc_quest_bang : public ScriptedAI
 
     void AttackStart(Unit* ) override { }
 
+    void Reset() override
+    {
+        scheduler.CancelAll();
+        scheduler.Schedule(1s, [this](TaskContext context)
+        {
+            OfferQuest();
+            context.Repeat();
+        });
+    }
+
     void UpdateAI(uint32 diff) override
     {
-        if (_timer > diff)
-        {
-            _timer -= diff;
-            return;
-        }
-        _timer = 1000;
+        scheduler.Update(diff);
+    }
+
+private:
+    void OfferQuest()
+    {
         auto itr = QuestBangs.find(me->GetEntry());
         Quest const* quest = itr != QuestBangs.end() ? sObjectMgr->GetQuestTemplate(itr->second) : nullptr;
         if (!quest)
@@ -1917,9 +1959,6 @@ struct npc_coa_brc_quest_bang : public ScriptedAI
             player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, player->GetGUID(), true);
         }
     }
-
-private:
-    uint32 _timer = 1000;
 };
 
 enum class Aim : uint8
@@ -1962,18 +2001,38 @@ struct npc_coa_brc_trash : public ScriptedAI
 {
     explicit npc_coa_brc_trash(Creature* creature) : ScriptedAI(creature) { }
 
+    enum IdleEvents : uint32
+    {
+        EVENT_IDLE_ACTION = 1,
+        EVENT_FIRE_ZONE,
+    };
+
+    enum Groups : uint32
+    {
+        GROUP_HEAT = 1,
+    };
+
     void Reset() override
     {
-        _timers.clear();
         _enraged = false;
-        _oocTimer = urand(4000, 12000);
-        _heatTimer = urand(2000, 5000);
-        _zoneTimer = urand(500, 2000);
+        _abilities.Reset();
+        _idle.Reset();
+        _idle.ScheduleEvent(EVENT_IDLE_ACTION, Milliseconds(urand(4000, 12000)));
+        if (me->GetEntry() == NPC_TWILIGHT_FLAME_CALLER)
+            _idle.ScheduleEvent(EVENT_FIRE_ZONE, Milliseconds(urand(500, 2000)));
+        scheduler.CancelGroup(GROUP_HEAT);
+        if (me->GetEntry() == NPC_CONFLAGRATION)
+            scheduler.Schedule(Milliseconds(urand(2000, 5000)), GROUP_HEAT, [this](TaskContext context)
+            {
+                Heat();
+                context.Repeat(5s);
+            });
         auto itr = Abilities.find(me->GetEntry());
-        if (itr == Abilities.end())
+        _kit = itr != Abilities.end() ? &itr->second : nullptr;
+        if (!_kit)
             return;
-        for (Ability const& ability : itr->second)
-            _timers.push_back({ &ability, ability.firstMs + urand(0, 1500) });
+        for (uint32 i = 0; i < _kit->size(); ++i)
+            _abilities.ScheduleEvent(i + 1, Milliseconds((*_kit)[i].firstMs + urand(0, 1500)));
     }
 
     void JustEngagedWith(Unit* ) override
@@ -1994,44 +2053,33 @@ struct npc_coa_brc_trash : public ScriptedAI
 
     void UpdateAI(uint32 diff) override
     {
-        if (me->GetEntry() == NPC_CONFLAGRATION)
-            UpdateHeat(diff);
-        if (me->GetEntry() == NPC_TWILIGHT_FLAME_CALLER)
-            UpdateFireZones(diff);
+        scheduler.Update(diff);
 
         if (!me->IsInCombat())
         {
-            UpdateOutOfCombat(diff);
+            _idle.Update(diff);
+            while (uint32 eventId = _idle.ExecuteEvent())
+            {
+                if (eventId == EVENT_FIRE_ZONE)
+                    SpawnFireZone();
+                else
+                    IdleAction();
+            }
             return;
         }
 
         if (!UpdateVictim())
             return;
 
-        for (Timer& timer : _timers)
-            timer.left = timer.left > diff ? timer.left - diff : 0;
+        _abilities.Update(diff);
 
-        if (!me->HasUnitState(UNIT_STATE_CASTING))
+        if (_kit && !me->HasUnitState(UNIT_STATE_CASTING))
         {
-            for (Timer& timer : _timers)
+            while (uint32 eventId = _abilities.ExecuteEvent())
             {
-                if (timer.left)
-                    continue;
-                Ability const& ability = *timer.ability;
-                switch (ability.aim)
-                {
-                    case Aim::Victim:
-                        DoCastVictim(ability.spell);
-                        break;
-                    case Aim::Self:
-                        DoCastSelf(ability.spell);
-                        break;
-                    case Aim::Random:
-                        if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 40.0f, true))
-                            DoCast(target, ability.spell);
-                        break;
-                }
-                timer.left = ability.repeatMs;
+                Ability const& ability = (*_kit)[eventId - 1];
+                UseAbility(ability);
+                _abilities.ScheduleEvent(eventId, Milliseconds(ability.repeatMs));
                 if (me->HasUnitState(UNIT_STATE_CASTING))
                     break;
             }
@@ -2042,14 +2090,25 @@ struct npc_coa_brc_trash : public ScriptedAI
     }
 
 private:
-    void UpdateHeat(uint32 diff)
+    void UseAbility(Ability const& ability)
     {
-        if (_heatTimer > diff)
+        switch (ability.aim)
         {
-            _heatTimer -= diff;
-            return;
+            case Aim::Victim:
+                DoCastVictim(ability.spell);
+                break;
+            case Aim::Self:
+                DoCastSelf(ability.spell);
+                break;
+            case Aim::Random:
+                if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 40.0f, true))
+                    DoCast(target, ability.spell);
+                break;
         }
-        _heatTimer = 5000;
+    }
+
+    void Heat()
+    {
         std::list<Creature*> pools;
         me->GetCreatureListWithEntryInGrid(pools, NPC_QUICKSILVER, 20.0f);
         std::vector<Creature*> cooled;
@@ -2065,43 +2124,11 @@ private:
         }
     }
 
-    void UpdateFireZones(uint32 diff)
+    void SpawnFireZone()
     {
-        for (auto itr = _zones.begin(); itr != _zones.end();)
-        {
-            FireZone& zone = *itr;
-            zone.left = zone.left > diff ? zone.left - diff : 0;
-            Creature* marker = ObjectAccessor::GetCreature(*me, zone.marker);
-            if (!zone.launched && marker && zone.left <= uint32(me->GetExactDist(marker) / 40.0f * 1000.0f))
-            {
-                zone.launched = true;
-                me->CastSpell(marker, SPELL_LOBBED_FIREBALL, true);
-            }
-            if (zone.left)
-            {
-                ++itr;
-                continue;
-            }
-            uint32 const pct = me->GetMap()->GetDifficulty() == DUNGEON_DIFFICULTY_EPIC
-                                   ? 30
-                                   : (IsHeroicOrMythic(me->GetMap()) ? 20 : 15);
-            for (Player* player : PlayersNear(me, 200.0f))
-                if (player->GetExactDist2d(zone.pos.GetPositionX(), zone.pos.GetPositionY()) <= FireZoneRadius &&
-                    std::fabs(player->GetPositionZ() - zone.pos.GetPositionZ()) < 6.0f)
-                    DealDamage(
-                        me, player, SPELL_LOBBED_FIREBALL, player->GetMaxHealth() * pct / 100, SPELL_SCHOOL_MASK_FIRE);
-            itr = _zones.erase(itr);
-        }
-
-        if (me->IsInCombat() || !me->IsAlive())
-            return;
-        if (_zoneTimer > diff)
-        {
-            _zoneTimer -= diff;
-            return;
-        }
         uint32 const every = FireZoneEveryMs * FireZoneCallers;
-        _zoneTimer = urand(uint32(every * (1.0f - FireZoneJitter)), uint32(every * (1.0f + FireZoneJitter)));
+        _idle.ScheduleEvent(EVENT_FIRE_ZONE,
+            Milliseconds(urand(uint32(every * (1.0f - FireZoneJitter)), uint32(every * (1.0f + FireZoneJitter)))));
         std::list<Creature*> spots;
         me->GetCreatureListWithEntryInGrid(spots, NPC_FIRE_ZONE, 45.0f);
         spots.remove_if([](Creature* spot) { return spot->IsSummon(); });
@@ -2116,7 +2143,29 @@ private:
         ShowZone(marker, SPELL_FIRE_ZONE_RING);
         if (Creature* fill = me->SummonCreature(NPC_FIRE_ZONE_FILL, pos, TEMPSUMMON_TIMED_DESPAWN, FireZoneMs + 500))
             ShowZone(fill, SPELL_FIRE_ZONE_FILL);
-        _zones.push_back({ marker->GetGUID(), pos, FireZoneMs, false });
+        uint32 const travelMs = std::min(FireZoneMs, uint32(me->GetExactDist(marker) / 40.0f * 1000.0f));
+        ObjectGuid const markerGuid = marker->GetGUID();
+        scheduler.Schedule(Milliseconds(FireZoneMs - travelMs), [this, markerGuid](TaskContext )
+        {
+            if (Creature* target = ObjectAccessor::GetCreature(*me, markerGuid))
+                me->CastSpell(target, SPELL_LOBBED_FIREBALL, true);
+        });
+        scheduler.Schedule(Milliseconds(FireZoneMs), [this, pos](TaskContext )
+        {
+            BurnFireZone(pos);
+        });
+    }
+
+    void BurnFireZone(Position const& pos)
+    {
+        uint32 const pct = me->GetMap()->GetDifficulty() == DUNGEON_DIFFICULTY_EPIC
+                               ? 30
+                               : (IsHeroicOrMythic(me->GetMap()) ? 20 : 15);
+        for (Player* player : PlayersNear(me, 200.0f))
+            if (player->GetExactDist2d(pos.GetPositionX(), pos.GetPositionY()) <= FireZoneRadius &&
+                std::fabs(player->GetPositionZ() - pos.GetPositionZ()) < 6.0f)
+                DealDamage(
+                    me, player, SPELL_LOBBED_FIREBALL, player->GetMaxHealth() * pct / 100, SPELL_SCHOOL_MASK_FIRE);
     }
 
     static void ShowZone(Creature* marker, uint32 spellId)
@@ -2139,60 +2188,43 @@ private:
         return nullptr;
     }
 
-    void UpdateOutOfCombat(uint32 diff)
+    void IdleAction()
     {
-        if (_oocTimer > diff)
+        Milliseconds next = Milliseconds(urand(25000, 32000));
+        if (!me->HasUnitState(UNIT_STATE_CASTING) && !me->isMoving())
         {
-            _oocTimer -= diff;
-            return;
-        }
-        _oocTimer = urand(25000, 32000);
-        if (me->HasUnitState(UNIT_STATE_CASTING) || me->isMoving())
-            return;
-        switch (me->GetEntry())
-        {
-            case NPC_TWILIGHT_TORTURER:
-            case NPC_TWILIGHT_SADIST:
+            switch (me->GetEntry())
             {
-                Creature* prisoner = me->FindNearestCreature(NPC_MAD_PRISONER, 15.0f);
-                if (!prisoner)
-                    prisoner = me->FindNearestCreature(NPC_CRAZED_MAGE, 15.0f);
-                if (prisoner)
-                    DoCast(prisoner, SPELL_INFLICT_PAIN);
-                break;
+                case NPC_TWILIGHT_TORTURER:
+                case NPC_TWILIGHT_SADIST:
+                {
+                    Creature* prisoner = me->FindNearestCreature(NPC_MAD_PRISONER, 15.0f);
+                    if (!prisoner)
+                        prisoner = me->FindNearestCreature(NPC_CRAZED_MAGE, 15.0f);
+                    if (prisoner)
+                        DoCast(prisoner, SPELL_INFLICT_PAIN);
+                    break;
+                }
+                case NPC_TWILIGHT_FLAME_CALLER:
+                    next = 12s;
+                    if (!me->HasAura(SPELL_FIRE_CHANNELING))
+                        DoCastSelf(SPELL_FIRE_CHANNELING, true);
+                    break;
+                case NPC_TWILIGHT_ELEMENT_WARDEN:
+                    next = 12s;
+                    if (Creature* target = FindChannelTarget())
+                        DoCast(target, SPELL_FIRE_BEAM);
+                    break;
+                default:
+                    break;
             }
-            case NPC_TWILIGHT_FLAME_CALLER:
-                _oocTimer = 12000;
-                if (!me->HasAura(SPELL_FIRE_CHANNELING))
-                    DoCastSelf(SPELL_FIRE_CHANNELING, true);
-                break;
-            case NPC_TWILIGHT_ELEMENT_WARDEN:
-                _oocTimer = 12000;
-                if (Creature* target = FindChannelTarget())
-                    DoCast(target, SPELL_FIRE_BEAM);
-                break;
-            default:
-                break;
         }
+        _idle.ScheduleEvent(EVENT_IDLE_ACTION, next);
     }
 
-    struct Timer
-    {
-        Ability const* ability;
-        uint32 left;
-    };
-    std::vector<Timer> _timers;
-    struct FireZone
-    {
-        ObjectGuid marker;
-        Position pos;
-        uint32 left;
-        bool launched;
-    };
-    std::vector<FireZone> _zones;
-    uint32 _oocTimer = 0;
-    uint32 _heatTimer = 0;
-    uint32 _zoneTimer = 0;
+    std::vector<Ability> const* _kit = nullptr;
+    EventMap _abilities;
+    EventMap _idle;
     bool _enraged = false;
 };
 
