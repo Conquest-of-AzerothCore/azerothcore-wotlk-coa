@@ -36,6 +36,7 @@
 #include "PlayerSettings.h"
 #include "PlayerTaxi.h"
 #include "QuestDef.h"
+#include "QuestLogSlots.h"
 #include "SpellAuras.h"
 #include "SpellChargeState.h"
 #include "SpellInfo.h"
@@ -1522,39 +1523,20 @@ public:
     void ResetSeasonalQuestStatus(uint16 event_id);
 
     [[nodiscard]] uint16 FindQuestSlot(uint32 quest_id) const;
-    [[nodiscard]] uint32 GetQuestSlotQuestId(uint16 slot) const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_ID_OFFSET); }
-    [[nodiscard]] uint32 GetQuestSlotState(uint16 slot)   const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_STATE_OFFSET); }
-    [[nodiscard]] uint16 GetQuestSlotCounter(uint16 slot, uint8 counter) const { return (uint16)(GetUInt64Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_COUNTS_OFFSET) >> (counter * 16)); }
-    [[nodiscard]] uint32 GetQuestSlotTime(uint16 slot)    const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_TIME_OFFSET); }
-    void SetQuestSlot(uint16 slot, uint32 quest_id, uint32 timer = 0)
-    {
-        SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_ID_OFFSET, quest_id);
-        SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_STATE_OFFSET, 0);
-        SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_COUNTS_OFFSET, 0);
-        SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_COUNTS_OFFSET + 1, 0);
-        SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_TIME_OFFSET, timer);
-    }
-    void SetQuestSlotCounter(uint16 slot, uint8 counter, uint16 count)
-    {
-        uint64 val = GetUInt64Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_COUNTS_OFFSET);
-        val &= ~((uint64)0xFFFF << (counter * 16));
-        val |= ((uint64)count << (counter * 16));
-        SetUInt64Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_COUNTS_OFFSET, val);
-    }
-    void SetQuestSlotState(uint16 slot, uint32 state) { SetFlag(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_STATE_OFFSET, state); }
-    void RemoveQuestSlotState(uint16 slot, uint32 state) { RemoveFlag(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_STATE_OFFSET, state); }
-    void SetQuestSlotTimer(uint16 slot, uint32 timer) { SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_TIME_OFFSET, timer); }
-    void SwapQuestSlot(uint16 slot1, uint16 slot2)
-    {
-        for (int i = 0; i < MAX_QUEST_OFFSET; ++i)
-        {
-            uint32 temp1 = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + MAX_QUEST_OFFSET * slot1 + i);
-            uint32 temp2 = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + MAX_QUEST_OFFSET * slot2 + i);
-
-            SetUInt32Value(PLAYER_QUEST_LOG_1_1 + MAX_QUEST_OFFSET * slot1 + i, temp2);
-            SetUInt32Value(PLAYER_QUEST_LOG_1_1 + MAX_QUEST_OFFSET * slot2 + i, temp1);
-        }
-    }
+    [[nodiscard]] uint16 GetQuestLogCapacity() const;
+    [[nodiscard]] uint32 GetQuestSlotQuestId(uint16 slot) const { return m_questLogSlots[slot].QuestId; }
+    [[nodiscard]] uint32 GetQuestSlotState(uint16 slot)   const { return m_questLogSlots[slot].State; }
+    [[nodiscard]] uint16 GetQuestSlotCounter(uint16 slot, uint8 counter) const { return (uint16)(m_questLogSlots[slot].Counters >> (counter * 16)); }
+    [[nodiscard]] uint32 GetQuestSlotTime(uint16 slot)    const { return m_questLogSlots[slot].Time; }
+    [[nodiscard]] bool HasOverflowQuests() const { return m_questLogSlots.HasOverflow(); }
+    void SetQuestSlot(uint16 slot, uint32 quest_id, uint32 timer = 0);
+    void SetQuestSlotCounter(uint16 slot, uint8 counter, uint16 count);
+    void SetQuestSlotState(uint16 slot, uint32 state);
+    void RemoveQuestSlotState(uint16 slot, uint32 state);
+    void SetQuestSlotTimer(uint16 slot, uint32 timer);
+    void SwapQuestSlot(uint16 slot1, uint16 slot2);
+    void PromoteOverflowQuests();
+    bool PromoteQuestToNativeLog(uint32 questId);
     uint16 GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry);
     void AreaExploredOrEventHappens(uint32 questId);
     void GroupEventHappens(uint32 questId, WorldObject const* pEventObject);
@@ -2866,6 +2848,11 @@ protected:
     QuestSet m_weeklyquests;
     QuestSet m_monthlyquests;
     SeasonalEventQuestMap m_seasonalquests;
+    QuestLogSlots m_questLogSlots;
+    bool m_questLogPromotionPending = false;
+    void MirrorQuestSlot(uint16 slot);
+    uint16 MoveQuestToNativeLog(uint16 slot);
+    void PinTimedQuestsToNativeLog();
 
     ObjectGuid m_divider;
     uint32 m_ingametime;

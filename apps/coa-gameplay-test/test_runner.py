@@ -509,6 +509,65 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, error):
                 run.validate(scenario)
 
+    def test_quest_log_size_accepts_the_native_and_extended_range(self):
+        for value in (25, 40, 64):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['quest_log_size'] = value
+            self.assertIs(run.validate(scenario), scenario)
+        for value in (24, 65, '30', True):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['quest_log_size'] = value
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'quest_log_size'):
+                run.validate(scenario)
+
+    def test_quest_abandon_takes_a_quest_and_an_optional_log_slot(self):
+        for step in ({'action': 'quest_abandon', 'actor': 'caster', 'quest': 7},
+                     {'action': 'quest_abandon', 'actor': 'caster', 'quest': 7, 'slot': 63}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, step)
+            self.assertIs(run.validate(scenario), scenario)
+        for step, error in (({'action': 'quest_abandon', 'actor': 'caster', 'quest': 7, 'slot': 64}, r'\.slot'),
+                            ({'action': 'quest_abandon', 'actor': 'caster'}, 'step 0')):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, step)
+            with self.subTest(step=step), self.assertRaisesRegex(ValueError, error):
+                run.validate(scenario)
+
+    def test_quest_log_metrics_need_a_quest(self):
+        for metric in ('quest_log_slot', 'quest_log_client_slot', 'quest_log_client_count'):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, {'action': 'assert', 'actor': 'caster', 'metric': metric, 'quest': 7,
+                                         'equals': 0})
+            self.assertIs(run.validate(scenario), scenario)
+            scenario['steps'][0].pop('quest')
+            with self.subTest(metric=metric), self.assertRaisesRegex(ValueError, 'quest'):
+                run.validate(scenario)
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, {'action': 'assert', 'actor': 'caster', 'metric': 'quest_log_has_room',
+                                     'equals': 1})
+        self.assertIs(run.validate(scenario), scenario)
+
+    def test_addon_message_needs_a_prefix_without_tabs(self):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, {'action': 'addon_message', 'actor': 'caster', 'prefix': 'COAQLOG',
+                                     'text': 'LIST'})
+        self.assertIs(run.validate(scenario), scenario)
+        for prefix in ('', 'CO\tA', 7):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, {'action': 'addon_message', 'actor': 'caster', 'prefix': prefix,
+                                         'text': 'LIST'})
+            with self.subTest(prefix=prefix), self.assertRaisesRegex(ValueError, 'addon_message'):
+                run.validate(scenario)
+
+    def test_whisper_contains_needs_text(self):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, {'action': 'assert', 'actor': 'caster', 'metric': 'whisper_contains',
+                                     'text': 'COAQLOG', 'equals': 1})
+        self.assertIs(run.validate(scenario), scenario)
+        scenario['steps'][0]['text'] = ' '
+        with self.assertRaisesRegex(ValueError, 'metric needs the text'):
+            run.validate(scenario)
+
     def test_game_event_needs_an_event_id_and_a_boolean_state(self):
         for step in ({'action': 'game_event', 'event': 12, 'active': True},
                      {'action': 'game_event', 'event': 12, 'active': False}):

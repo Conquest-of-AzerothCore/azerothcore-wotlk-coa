@@ -470,6 +470,7 @@ void WorldConfig::BuildConfigCache()
     SetConfigValue<bool>(CONFIG_QUEST_IGNORE_RAID, "Quests.IgnoreRaid", false);
     SetConfigValue<bool>(CONFIG_QUEST_IGNORE_AUTO_ACCEPT, "Quests.IgnoreAutoAccept", false);
     SetConfigValue<bool>(CONFIG_QUEST_IGNORE_AUTO_COMPLETE, "Quests.IgnoreAutoComplete", false);
+    SetConfigValue<uint32>(CONFIG_QUEST_LOG_SIZE, "Quests.LogSize", NATIVE_QUEST_LOG_SIZE, ConfigValueCache::Reloadable::Yes, [](uint32 const& value) { return value >= NATIVE_QUEST_LOG_SIZE && value <= MAX_QUEST_LOG_SIZE; }, ">= 25 and <= 64");
 
     SetConfigValue<uint32>(CONFIG_RANDOM_BG_RESET_HOUR, "Battleground.Random.ResetHour", 6, ConfigValueCache::Reloadable::Yes, [](uint32 const& value) { return value <= 23; }, "<= 23");
     SetConfigValue<uint32>(CONFIG_CALENDAR_DELETE_OLD_EVENTS_HOUR, "Calendar.DeleteOldEventsHour", 6, ConfigValueCache::Reloadable::Yes, [](uint32 const& value) { return value <= 23; }, "<= 23");
