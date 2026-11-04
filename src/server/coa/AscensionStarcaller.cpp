@@ -361,11 +361,6 @@ class starcaller_player : public PlayerScript
         using namespace AscensionStarcaller;
         if (!Owner(player))
             return;
-        // Hidden SPELLMOD_RANGE passives that carry the Starcaller to 45 yd: 573711 lifts
-        // Auto Shot 35 -> 45 and is masked to Auto Shot alone, so other classes keep 35;
-        // 805527 lifts Moon Arrow, Starfire Shot, Huntress Shot, Trueshot and Starfire
-        // Barrage 30 -> 45. Both are listed in AscensionCompatData::ClassSpells, but that
-        // list is only taught when CoA.AutoProgression is set, so grant them here.
         for (uint32 spellId : {573711u, 805527u})
             if (!player->HasSpell(spellId) && sSpellMgr->GetSpellInfo(spellId))
                 player->learnSpell(spellId, false);
