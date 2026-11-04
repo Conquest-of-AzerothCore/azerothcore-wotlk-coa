@@ -344,15 +344,9 @@ class starcaller_spells : public AllSpellScript
         if (Named(info, 801972) && player->HasAura(704764))
             for (uint32 root : {801987, 575030, 801231})
                 Reduce(player, root, root == 801987 ? 3000 : 2000);
-        if (!spell->IsTriggered() && Named(info, 801978) && Chance(player, 707639))
-        {
-            Cast(player, player, 803573);
-            if (Aura* aura = player->GetAura(803573))
-            {
-                aura->SetMaxDuration(5000);
-                aura->SetDuration(5000);
-            }
-        }
+        if (!spell->IsTriggered() && Named(info, 801978) && !player->HasAura(801975) &&
+            Chance(player, 707639))
+            Cast(player, player, 807673);
         if (Named(info, 805508))
         {
             if (player->HasAura(680212))
