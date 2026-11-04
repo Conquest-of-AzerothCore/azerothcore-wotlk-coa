@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "Config.h"
 #include "Creature.h"
+#include "Item.h"
 #include "GossipDef.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -8,15 +9,18 @@
 #include "StringFormat.h"
 #include "World.h"
 #include <algorithm>
+#include <limits>
+#include <string>
 
 // A test-realm helper: one gossip option raises the player to CoA.LevelBoostNpc.Level and pays
-// CoA.LevelBoostNpc.GoldReward gold. Off unless the realm sets CoA.LevelBoostNpc.Enable = 1, so the creature does
+// CoA.LevelBoostNpc.GoldReward gold and CoA.LevelBoostNpc.RuneOfDescensionReward Runes of Descension. Off unless the realm sets CoA.LevelBoostNpc.Enable = 1, so the creature does
 // nothing on a realm that has not chosen it.
 namespace
 {
 constexpr uint32 TEXT_LEVEL_BOOST = 9990500;
 constexpr uint32 TEXT_LEVEL_BOOST_UNAVAILABLE = 9990501;
 constexpr uint32 ACTION_BOOST = 1;
+constexpr uint32 RUNE_OF_DESCENSION = 375250;
 
 bool BoostEnabled()
 {
@@ -34,6 +38,38 @@ uint32 BoostGoldReward()
 {
     // Gold, not copper; capped so the copper amount fits ModifyMoney's int32.
     return std::min<uint32>(sConfigMgr->GetOption<uint32>("CoA.LevelBoostNpc.GoldReward", 5000), 200000);
+}
+
+uint32 BoostRuneReward()
+{
+    return std::min<uint32>(sConfigMgr->GetOption<uint32>("CoA.LevelBoostNpc.RuneOfDescensionReward", 2000000),
+        uint32(std::numeric_limits<int32>::max()));
+}
+
+std::string BoostPrompt(uint8 level)
+{
+    std::string rewards;
+    if (uint32 const gold = BoostGoldReward())
+        rewards = Acore::StringFormat("{} gold", gold);
+    if (uint32 const runes = BoostRuneReward())
+        rewards += Acore::StringFormat("{}{} Runes of Descension", rewards.empty() ? "" : " and ", runes);
+    if (rewards.empty())
+        return Acore::StringFormat("Raise this character to level {}? This cannot be undone.", level);
+    return Acore::StringFormat("Raise this character to level {} and receive {}? This cannot be undone.", level, rewards);
+}
+
+// Same path as the Rune pouches (AscensionRunePouches.cpp): the runes are a currency-tab item.
+void PayRunes(Player* player, uint32 amount)
+{
+    ItemPosCountVec dest;
+    InventoryResult const space = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, RUNE_OF_DESCENSION, amount);
+    if (space != EQUIP_ERR_OK)
+    {
+        player->SendEquipError(space, nullptr, nullptr, RUNE_OF_DESCENSION);
+        return;
+    }
+    if (Item* runes = player->StoreNewItem(dest, RUNE_OF_DESCENSION, true))
+        player->SendNewItem(runes, amount, true, false, true);
 }
 
 class npc_coa_level_boost : public CreatureScript
@@ -54,11 +90,7 @@ public:
         if (player->GetLevel() < level)
             AddGossipItemFor(player, GOSSIP_ICON_TRAINER, Acore::StringFormat("Raise me to level {}", level),
                 GOSSIP_SENDER_MAIN, ACTION_BOOST,
-                BoostGoldReward()
-                    ? Acore::StringFormat("Raise this character to level {} and receive {} gold? This cannot be undone.",
-                        level, BoostGoldReward())
-                    : Acore::StringFormat("Raise this character to level {}? This cannot be undone.", level),
-                0, false);
+                BoostPrompt(level), 0, false);
         SendGossipMenuFor(player, TEXT_LEVEL_BOOST, creature->GetGUID());
         return true;
     }
@@ -80,6 +112,8 @@ public:
         player->SetUInt32Value(PLAYER_XP, 0);
         if (uint32 const gold = BoostGoldReward())
             player->ModifyMoney(int32(gold * GOLD));
+        if (uint32 const runes = BoostRuneReward())
+            PayRunes(player, runes);
         return true;
     }
 };
