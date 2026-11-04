@@ -54,8 +54,8 @@ INSERT INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`) VALUES
 UPDATE `creature` SET `position_x` = -8102.93, `position_y` = 1524.98, `position_z` = 2.65, `orientation` = 6.1819
 WHERE `guid` = 9780101 AND `id` = 64600;
 
--- His health is per player in his map (10 to 40): 975000 on normal, 39 million for 40 players.
-UPDATE `coa_world_boss_level` SET `health` = 975000, `note` = 'per player; 39 million for 40 players'
+-- His health is per player in his map (10 to 40): 400000 on normal, 10 million for 25 players, 16 for 40.
+UPDATE `coa_world_boss_level` SET `health` = 400000, `note` = 'per player; 10 million for 25 players'
 WHERE `entry` = 64600 AND `difficulty` = 0;
 UPDATE `coa_world_boss_level` SET `health` = 1810000, `note` = 'per player; the normal one times the log ratio'
 WHERE `entry` = 64600 AND `difficulty` = 2;
@@ -66,7 +66,7 @@ INSERT INTO `npc_text` (`ID`, `text0_0`, `text0_1`) VALUES
 (64600, 'The shrine seems to notice your presence as you place your hand on its surface to attune to its power.',
   'The shrine seems to notice your presence as you place your hand on its surface to attune to its power.');
 
--- Setis' hologram above the shrine; it stands still.
+-- Setis' hologram above the shrine: ghostly (22650), rooted, and frozen in place (16245).
 INSERT INTO `creature_template` (`entry`, `name`, `subname`, `minlevel`, `maxlevel`, `faction`, `npcflag`,
   `speed_walk`, `speed_run`, `unit_class`, `unit_flags`, `type`, `type_flags`, `AIName`, `ScriptName`,
   `VerifiedBuild`) VALUES
@@ -79,7 +79,7 @@ INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`,
   `VerifiedBuild`) VALUES
 (64602, 0, 5965, 0.6, 1, 12340);
 DELETE FROM `creature_template_addon` WHERE `entry` = 64602;
-INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (64602, '22650');
+INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (64602, '22650 16245');
 DELETE FROM `creature_template_movement` WHERE `CreatureId` = 64602;
 INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flight`, `Rooted`) VALUES
 (64602, 1, 0, 0, 1);
@@ -87,3 +87,32 @@ DELETE FROM `creature` WHERE `guid` IN (9780900, 9780901);
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
 (9780900, 64602, 1, 0, 0, 1, 1, -7864.724, 1326.674, -4.6, 5.4786, 300, 0, 0);
+
+-- Treasures of Azeroth, one per player of a world boss kill: a Heroic Dungeon epic, a 5% chance at a world boss
+-- item, 1000 Runes of Ascension (a 250 stack taken four times, as one loot row holds 255 at most) and 15
+-- Raider's Commendations.
+DELETE FROM `reference_loot_template` WHERE `Entry` IN (978059, 978060, 978061);
+INSERT INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`,
+  `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES
+(978061, 375250, 0, 100, 0, 1, 0, 250, 250, 'Treasures of Azeroth - 250 Runes of Ascension');
+INSERT INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`,
+  `GroupId`, `MinCount`, `MaxCount`, `Comment`)
+SELECT 978059, `entry`, 0, 0, 0, 1, 1, 1, 1, CONCAT('Treasures of Azeroth - Heroic Dungeon - ', `name`)
+FROM `item_template` WHERE `description` = '@Heroic Dungeon@' AND `Quality` = 4 AND `InventoryType` > 0;
+INSERT INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`,
+  `GroupId`, `MinCount`, `MaxCount`, `Comment`)
+SELECT DISTINCT 978060, i.`entry`, 0, 0, 0, 1, 1, 1, 1, CONCAT('Treasures of Azeroth - World Boss - ', i.`name`)
+FROM (SELECT l.`Item` FROM `creature_loot_template` l
+      WHERE l.`Entry` IN (6109, 12397, 14887, 14888, 14889, 14890, 64600) AND l.`Reference` = 0
+      UNION SELECT r.`Item` FROM `creature_loot_template` l
+      JOIN `reference_loot_template` r ON r.`Entry` = l.`Reference`
+      WHERE l.`Entry` IN (6109, 12397, 14887, 14888, 14889, 14890, 64600) AND l.`Reference` <> 0) x
+JOIN `item_template` i ON i.`entry` = x.`Item`
+WHERE i.`Quality` = 4 AND i.`InventoryType` > 0;
+DELETE FROM `item_loot_template` WHERE `Entry` = 978059;
+INSERT INTO `item_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`,
+  `MinCount`, `MaxCount`, `Comment`) VALUES
+(978059, 978059, 978059, 100, 0, 1, 0, 1, 1, 'Treasures of Azeroth - a Heroic Dungeon epic'),
+(978059, 978060, 978060, 5, 0, 1, 0, 1, 1, 'Treasures of Azeroth - 5% a world boss item'),
+(978059, 400750, 0, 100, 0, 1, 0, 15, 15, 'Treasures of Azeroth - 15 Raider''s Commendations'),
+(978059, 978061, 978061, 100, 0, 1, 0, 4, 4, 'Treasures of Azeroth - 1000 Runes of Ascension (250 x 4)');

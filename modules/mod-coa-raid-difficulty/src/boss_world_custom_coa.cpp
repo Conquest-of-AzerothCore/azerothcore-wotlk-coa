@@ -29,7 +29,8 @@
  *   Frenzy              at 30%
  *   Armageddon          at 3%         15s cast, +150% damage taken while he
  *                                     casts; if it finishes, the raid dies
- * His health is per player in his map (10 to 40). He drops one of his items for every
+ * His health is per player in his map (10 to 40), and only the Normal difficulties
+ * are open. He drops one of his items for every
  * four players, and every player gets Runes of Ascension, Bazaar Tokens and a
  * Treasures of Azeroth chest.
  * The altar by the Scarab Wall takes players into his map, and the portal he
@@ -75,6 +76,7 @@
  * Flap and Dive Bomb 40s, Call the Flock 60s.
  */
 
+#include "Chat.h"
 #include "Containers.h"
 #include "CreatureScript.h"
 #include "SpellScriptLoader.h"
@@ -416,6 +418,7 @@ namespace
         {
             if (tick != TS_METEOR_LAND)
                 return;
+            ClearMeteorMark();
             std::vector<Player*> hit = Players(me, [&](Player* p)
             {
                 return p->IsAlive() && p->GetExactDist2d(&_meteor) <= METEOR_RADIUS;
@@ -426,6 +429,15 @@ namespace
             int32 const total = Info(me, SPELL_METEOR_INFO) * raid / 10;
             for (Player* p : hit)
                 Hit(me, p, SPELL_METEOR_IMPACT, std::max<int32>(total / int32(hit.size()), 1));
+        }
+
+        void ClearMeteorMark()
+        {
+            if (Unit* target = ObjectAccessor::GetUnit(*me, _meteorTarget))
+            {
+                target->RemoveAurasDueToSpell(SPELL_METEOR_MARK, me->GetGUID());
+                target->RemoveAurasDueToSpell(SPELL_METEOR, me->GetGUID());
+            }
         }
 
         void JustDied(Unit* killer) override
@@ -537,9 +549,16 @@ namespace
         bool OnGossipSelect(Player* player, GameObject* /*go*/, uint32 /*sender*/, uint32 action) override
         {
             CloseGossipMenuFor(player);
-            if (action == GOSSIP_ACTION_INFO_DEF + 1 && player->IsAlive())
-                player->TeleportTo(SETIS_MAP, SetisEntrance.GetPositionX(), SetisEntrance.GetPositionY(),
-                    SetisEntrance.GetPositionZ(), SetisEntrance.GetOrientation());
+            if (action != GOSSIP_ACTION_INFO_DEF + 1 || !player->IsAlive())
+                return true;
+            // Only the Normal difficulties are open for now.
+            if (player->GetRaidDifficulty() > RAID_DIFFICULTY_25MAN_NORMAL)
+            {
+                ChatHandler(player->GetSession()).SendNotification("Setis only answers the Normal difficulty.");
+                return true;
+            }
+            player->TeleportTo(SETIS_MAP, SetisEntrance.GetPositionX(), SetisEntrance.GetPositionY(),
+                SetisEntrance.GetPositionZ(), SetisEntrance.GetOrientation());
             return true;
         }
     };
