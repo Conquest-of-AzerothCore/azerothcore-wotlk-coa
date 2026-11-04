@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Wand of Time always crits Undead and Demons (#10851)",
-  "contract": "Wand of Time's tooltip says \"This spell is guaranteed to critically strike against Undead and Demons\". Its ranks (520165, 520175, 520702-520707, 524960) are DmgClass 3 (ranged) Chronomancer spells (SpellFamilyName 28, SpellFamilyFlags word1 0x100000, unique to Wand of Time) and nothing forced the crit, so they crit at the normal ranged chance. Expected: against an undead and a demon target the taken crit chance is 100, against a beast it stays at the normal chance, and other ranged-class spells are unaffected.",
+  "contract": "Wand of Time's tooltip says \"This spell is guaranteed to critically strike against Undead and Demons\". Its ranks (520165, 520175, 520702-520707, 524960) are DmgClass 3 (ranged) Chronomancer spells (SpellFamilyName 28, SpellFamilyFlags word1 0x100000, unique to Wand of Time) and nothing forced the crit, so they crit at the normal ranged chance. Expected: against an undead and a demon target the taken crit chance is 100, against a beast it stays at the normal chance, and other ranged-class spells are unaffected. An undead target that cannot be critically hit (SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE at -100 or lower, here Blessed Resilience 33143) is not crit, as for Lava Burst and the Ascension guaranteed-crit auras.",
   "timeout_ms": 60000,
   "players": [
     {
@@ -138,6 +138,21 @@
       "spell": 75,
       "target": "zombie",
       "max": 50
+    },
+    {
+      "action": "cast",
+      "label": "The undead Mindless Zombie gains Blessed Resilience 33143 (attacker crit chance -1000)",
+      "actor": "zombie",
+      "spell": 33143
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Wand of Time 520175 does not crit an undead that cannot be critically hit",
+      "actor": "chrono",
+      "metric": "spell_taken_crit_chance",
+      "spell": 520175,
+      "target": "zombie",
+      "max": 0
     }
   ]
 }
