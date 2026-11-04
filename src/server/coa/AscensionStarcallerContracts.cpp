@@ -271,6 +271,10 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].RadiusEntry = info->Effects[2].RadiusEntry;
         info->Effects[2].Effect = 0;
     }
+    if (id == 563725)
+        for (uint8 slot = EFFECT_0; slot <= EFFECT_2; ++slot)
+            if (info->Effects[slot].RadiusEntry)
+                info->Effects[slot].RadiusEntry = sSpellRadiusStore.LookupEntry(232);
     for (uint32 sid : {801148, 100250, 680790, 706436})
         if (id == sid)
             info->AttributesEx3 |= SPELL_ATTR3_IGNORE_CASTER_MODIFIERS;
