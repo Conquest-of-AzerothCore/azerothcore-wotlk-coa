@@ -70,6 +70,7 @@ void AddSC_CoAOtherSideDrakmath();
 void AddSC_CoAOtherSideEmbryo();
 void AddSC_CoAOtherSideTrash();
 void AddSC_CoAVaults();
+void AddSC_CoABlackrockCaverns();
 void AddSC_CoADungeonCompletion();
 void AddSC_CoADungeonSpoils();
 void AddSC_CoADungeonTuning();
@@ -838,6 +839,7 @@ void AddCoAScripts()
     AddSC_CoAOtherSideEmbryo();
     AddSC_CoAOtherSideTrash();
     AddSC_CoAVaults();
+    AddSC_CoABlackrockCaverns();
     AddSC_CoADungeonCompletion();
     AddSC_CoADungeonSpoils();
     AddSC_CoADungeonTuning();
