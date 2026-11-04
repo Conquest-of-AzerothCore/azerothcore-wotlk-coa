@@ -1028,8 +1028,12 @@ struct boss_coa_brc_corla : public BossAI
                 Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 100.0f, true, false);
                 if (!target)
                     target = me->GetVictim();
-                if (target && me->CastSpell(target, SPELL_DARK_COMMAND, false) == SPELL_CAST_OK)
+                if (target)
+                {
                     _darkTarget = target->GetGUID();
+                    if (me->CastSpell(target, SPELL_DARK_COMMAND, false) != SPELL_CAST_OK)
+                        _darkTarget.Clear();
+                }
                 events.Repeat(15s);
             }
         }
