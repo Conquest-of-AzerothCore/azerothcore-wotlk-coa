@@ -344,11 +344,6 @@ class starcaller_spells : public AllSpellScript
         if (Named(info, 801972) && player->HasAura(704764))
             for (uint32 root : {801987, 575030, 801231})
                 Reduce(player, root, root == 801987 ? 3000 : 2000);
-        // 707639 grants Drawstring of Elune for five seconds. 807673 carries that payload in
-        // data: effects 177 and 178 apply 801975 for their own 5000 ms, and 801975 is the aura
-        // the Scattered Stars and 50 yd range checks read. Effect 177 sets rather than extends
-        // the duration, so a Drawstring already running would be cut back to five seconds; an
-        // active one therefore skips the roll instead of spending it.
         if (!spell->IsTriggered() && Named(info, 801978) && !player->HasAura(801975) &&
             Chance(player, 707639))
             Cast(player, player, 807673);
