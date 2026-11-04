@@ -9,8 +9,9 @@
 #include "World.h"
 #include <algorithm>
 
-// A test-realm helper: one gossip option raises the player to CoA.LevelBoostNpc.Level. Off unless the realm sets
-// CoA.LevelBoostNpc.Enable = 1, so the creature does nothing on a realm that has not chosen it.
+// A test-realm helper: one gossip option raises the player to CoA.LevelBoostNpc.Level and pays
+// CoA.LevelBoostNpc.GoldReward gold. Off unless the realm sets CoA.LevelBoostNpc.Enable = 1, so the creature does
+// nothing on a realm that has not chosen it.
 namespace
 {
 constexpr uint32 TEXT_LEVEL_BOOST = 9990500;
@@ -27,6 +28,12 @@ uint8 BoostLevel()
     uint32 const wanted = sConfigMgr->GetOption<uint32>("CoA.LevelBoostNpc.Level", 60);
     uint32 const cap = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
     return uint8(std::clamp<uint32>(wanted, 1, cap));
+}
+
+uint32 BoostGoldReward()
+{
+    // Gold, not copper; capped so the copper amount fits ModifyMoney's int32.
+    return std::min<uint32>(sConfigMgr->GetOption<uint32>("CoA.LevelBoostNpc.GoldReward", 5000), 200000);
 }
 
 class npc_coa_level_boost : public CreatureScript
@@ -47,7 +54,11 @@ public:
         if (player->GetLevel() < level)
             AddGossipItemFor(player, GOSSIP_ICON_TRAINER, Acore::StringFormat("Raise me to level {}", level),
                 GOSSIP_SENDER_MAIN, ACTION_BOOST,
-                Acore::StringFormat("Raise this character to level {}? This cannot be undone.", level), 0, false);
+                BoostGoldReward()
+                    ? Acore::StringFormat("Raise this character to level {} and receive {} gold? This cannot be undone.",
+                        level, BoostGoldReward())
+                    : Acore::StringFormat("Raise this character to level {}? This cannot be undone.", level),
+                0, false);
         SendGossipMenuFor(player, TEXT_LEVEL_BOOST, creature->GetGUID());
         return true;
     }
@@ -63,8 +74,12 @@ public:
             return true;
 
         player->GiveLevel(level);
-        if (player->GetLevel() == level)
-            player->SetUInt32Value(PLAYER_XP, 0);
+        if (player->GetLevel() != level)
+            return true;
+
+        player->SetUInt32Value(PLAYER_XP, 0);
+        if (uint32 const gold = BoostGoldReward())
+            player->ModifyMoney(int32(gold * GOLD));
         return true;
     }
 };

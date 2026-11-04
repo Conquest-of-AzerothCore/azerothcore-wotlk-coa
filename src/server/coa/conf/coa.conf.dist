@@ -36,9 +36,11 @@ CoA.ProbeRelay.Enable = 0
 CoA.ProbeRelay.AccountPrefix = "COALAB"
 
 # Level boost NPC (creature 9990500, script npc_coa_level_boost): its gossip raises the player to
-# CoA.LevelBoostNpc.Level (capped at MaxPlayerLevel). For test realms only. Default: 0 (the NPC offers nothing).
+# CoA.LevelBoostNpc.Level (capped at MaxPlayerLevel) and pays CoA.LevelBoostNpc.GoldReward gold (0 = none,
+# at most 200000). For test realms only. Default: 0 (the NPC offers nothing).
 CoA.LevelBoostNpc.Enable = 0
 CoA.LevelBoostNpc.Level = 60
+CoA.LevelBoostNpc.GoldReward = 5000
 
 # Log each consumed extension packet during protocol discovery.
 CoA.LogConsumedPackets = 1
