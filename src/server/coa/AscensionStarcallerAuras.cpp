@@ -70,10 +70,19 @@ class aura_ascension_starcaller_lifecycle : public AuraScript
                 player->learnSpell(801125, true);
             Replace(player, 800496, 801125);
         }
+        // Only the Starfire Barrage proc transforms the shot. 803573 is the five second
+        // Drawstring of Elune the Starfire Power talent procs, and 801975 is the Drawstring
+        // ability the Starcaller already owns, so swapping it in here replaced the Starfire
+        // Shot button with a duplicate of that cooldown.
         if (id == 572319)
+        {
+            // SetTemporarySpellReplacement only swaps when both spells are active, and
+            // Starfire Barrage has no acquisition path of its own, so learn it temporarily
+            // first exactly as Blade of the Moon does for Moonblade above.
+            if (player->GetSpellMap().find(802682) == player->GetSpellMap().end())
+                player->learnSpell(802682, true);
             Replace(player, 801978, 802682);
-        if (id == 803573)
-            Replace(player, 801978, 801975);
+        }
         if (id == 704171)
             GetAura()->SetScriptValue(704171, 5);
         if (id == 805439 && player->HasAura(680772))
@@ -130,8 +139,11 @@ class aura_ascension_starcaller_lifecycle : public AuraScript
             Replace(player, 800496, 0);
             player->removeSpell(801125, SPEC_MASK_ALL, true);
         }
-        if (id == 572319 || id == 803573)
-            Replace(player, 801978, player->HasAura(803573) ? 801975 : player->HasAura(572319) ? 802682 : 0);
+        if (id == 572319)
+        {
+            Replace(player, 801978, 0);
+            player->removeSpell(802682, SPEC_MASK_ALL, true);
+        }
         if (id == 300256)
             player->RemoveAurasDueToSpell(301328);
         if (id == 954791)

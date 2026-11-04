@@ -34,7 +34,10 @@ class starcaller_periodic : public UnitScript
     starcaller_periodic() : UnitScript("starcaller_periodic", true, {UNITHOOK_ON_PERIODIC_DAMAGE_RESULT}) {}
     void OnPeriodicDamageResult(Unit* target, Unit* caster, uint32 damage, SpellInfo const* info) override
     {
-        if (Player* player = Owner(caster); player && info && info->Id == 803264 && damage)
+        // Starfire Barrage promises a Scattered Star "every $803264T1 sec for $803264d" with
+        // no damage condition, so a tick that lands for nothing (absorb, immunity, a training
+        // dummy) must still apply its star.
+        if (Player* player = Owner(caster); player && info && info->Id == 803264)
             Stars(player, target);
     }
 };
