@@ -3302,6 +3302,12 @@ private:
             Require(school > SPELL_SCHOOL_NORMAL && school < MAX_SPELL_SCHOOL, "Invalid resistance school");
             return unit->GetResistance(SpellSchools(school));
         }
+        if (metric == "attack_timer_ms")
+        {
+            uint32 hand = step.get<uint32>("hand", BASE_ATTACK);
+            Require(hand < MAX_ATTACK, "Invalid attack hand");
+            return unit->getAttackTimer(WeaponAttackType(hand));
+        }
         if (metric == "attack_time_ms" || metric == "pet_attack_time_ms")
         {
             if (metric == "pet_attack_time_ms")
@@ -3380,6 +3386,21 @@ private:
             Creature* creature = unit->ToCreature();
             Require(creature != nullptr, "Threat metric needs a creature actor");
             return creature->GetThreatMgr().GetThreat(GetUnit(step.get<std::string>("target")));
+        }
+        if (metric == "controlled_aura_min_damage" || metric == "controlled_aura_max_damage")
+        {
+            Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown controlled unit aura spell");
+            auto const itr = std::find_if(unit->m_Controlled.begin(), unit->m_Controlled.end(),
+                [spell](Unit const* controlled) { return controlled->IsAlive() && controlled->HasAura(spell); });
+            Require(itr != unit->m_Controlled.end(), "No living controlled unit carries the aura");
+            return (*itr)->GetFloatValue(metric == "controlled_aura_min_damage" ? UNIT_FIELD_MINDAMAGE :
+                UNIT_FIELD_MAXDAMAGE);
+        }
+        if (metric == "controlled_aura_count")
+        {
+            Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown controlled unit aura spell");
+            return std::count_if(unit->m_Controlled.begin(), unit->m_Controlled.end(),
+                [spell](Unit const* controlled) { return controlled->IsAlive() && controlled->HasAura(spell); });
         }
         if (metric == "spell_cast_count")
         {
