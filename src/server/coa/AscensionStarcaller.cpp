@@ -362,12 +362,6 @@ class starcaller_player : public PlayerScript
         {
             PayDelayedDamage(player);
             player->RemoveAurasDueToSpell(954791);
-            // Neither Starfire Barrage aura may outlive the session. 572319 is saved to
-            // character_aura but the temporary knowledge of 802682 it relies on is not, and
-            // the replacement notice is only sent while the player is in world, so a saved
-            // proc strands the action bar on a spell the character no longer knows. Removing
-            // it here restores the Starfire Shot button before SaveToDB runs; 572318 is the
-            // stack tracker and should not survive either.
             player->RemoveAurasDueToSpell(572319);
             player->RemoveAurasDueToSpell(572318);
         }
