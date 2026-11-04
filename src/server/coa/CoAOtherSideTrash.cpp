@@ -5,6 +5,7 @@
 #include "CoAOtherSideDamage.h"
 #include "Creature.h"
 #include "Map.h"
+#include "MotionMaster.h"
 #include "Player.h"
 #include "Random.h"
 #include "ScriptMgr.h"
@@ -188,11 +189,23 @@ struct npc_coa_other_side_trash : public ScriptedAI
         if (!UpdateVictim())
             return;
 
-        if (_turnedAway && !me->HasUnitState(UNIT_STATE_CASTING))
+        if (_turnedAway)
         {
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+            {
+                if (me->GetOrientation() != _breathFacing)
+                {
+                    me->SetOrientation(_breathFacing);
+                    me->SetFacingTo(_breathFacing);
+                }
+                return;
+            }
             _turnedAway = false;
             if (Unit* victim = me->GetVictim())
+            {
                 me->SetTarget(victim->GetGUID());
+                me->GetMotionMaster()->MoveChase(victim);
+            }
         }
 
         for (Timer& timer : _timers)
@@ -233,11 +246,13 @@ struct npc_coa_other_side_trash : public ScriptedAI
 private:
     void TurnAway()
     {
-        float const angle = frand(0.0f, 2.0f * float(M_PI));
+        _breathFacing = frand(0.0f, 2.0f * float(M_PI));
+        me->GetMotionMaster()->Clear();
+        me->GetMotionMaster()->MoveIdle();
         me->StopMoving();
         me->SetTarget(ObjectGuid::Empty);
-        me->SetOrientation(angle);
-        me->SetFacingTo(angle);
+        me->SetOrientation(_breathFacing);
+        me->SetFacingTo(_breathFacing);
         _turnedAway = true;
     }
 
@@ -254,6 +269,7 @@ private:
     };
     std::vector<Timer> _timers;
     bool _turnedAway = false;
+    float _breathFacing = 0.0f;
 };
 
 struct npc_coa_other_side_venom_trap : public ScriptedAI
