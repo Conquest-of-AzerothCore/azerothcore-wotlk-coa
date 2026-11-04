@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "talent-removal-with-legacy-gated-entry",
+  "contract": [
+    "Characters that bought a gated CharacterAdvancement entry before the tab-investment gates were",
+    "enforced keep that entry with too little invested below it. Every talent change uploads the whole",
+    "build, so the old entry must not block other changes: a gated entry that was already short and",
+    "does not rise in rank passes the gate. The Reaper learns entry 5495 (spell 572340, TabAEInvestment 9)",
+    "with nothing invested, as an old build had it. Buying entry 6708 (spell 706790) and removing it",
+    "again with a right click (paying the usual unlearn price) both work, and 5495 stays known."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "reaper",
+      "race": 1,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_money", "actor": "reaper", "value": 1000000 },
+    { "action": "learn", "actor": "reaper", "spell": 572340 },
+    {
+      "action": "assert", "actor": "reaper", "metric": "knows_spell", "spell": 572340, "equals": 1,
+      "label": "The old build has the gated entry with nothing invested below it"
+    },
+    { "action": "advancement_rank", "actor": "reaper", "entry": 6708, "rank": 1 },
+    {
+      "action": "assert", "actor": "reaper", "metric": "knows_spell", "spell": 706790, "equals": 1,
+      "label": "Buying another talent is not blocked by the old gated entry"
+    },
+    { "action": "advancement_rank", "actor": "reaper", "entry": 6708, "rank": 0 },
+    {
+      "action": "assert", "actor": "reaper", "metric": "knows_spell", "spell": 706790, "equals": 0,
+      "label": "Removing the talent again works"
+    },
+    {
+      "action": "assert", "actor": "reaper", "metric": "knows_spell", "spell": 572340, "equals": 1,
+      "label": "The old gated entry stays known"
+    }
+  ]
+}
