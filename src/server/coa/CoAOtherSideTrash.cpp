@@ -7,6 +7,7 @@
 #include "CoAOtherSideDamage.h"
 #include "CommandScript.h"
 #include "Creature.h"
+#include "DatabaseEnv.h"
 #include "GameTime.h"
 #include "Map.h"
 #include "MotionMaster.h"
@@ -23,6 +24,7 @@
 #include <algorithm>
 #include <atomic>
 #include <cmath>
+#include <iterator>
 #include <list>
 #include <mutex>
 #include <unordered_map>
@@ -145,12 +147,36 @@ constexpr uint32 TrapRankMs = 5000;
 constexpr float TrapFlightReach = 30.0f;
 constexpr float TrapLevelGap = 2.0f;
 constexpr float TrapObjectScale = 1.2f;
+
+struct BreathKit
+{
+    uint32 kit;
+    char const* name;
+};
+
+BreathKit const BreathKits[] =
+{
+    { 2373, "Acid Breath (acid liquid)" },
+    { 6416, "Noxious Breath (acid cloud)" },
+    { 6962, "Fel Flames (fel flame breath)" },
+    { 20749, "Rotting Breath (jade dragon breath)" },
+    { 20921, "Carrion Swarm (pestilence decay breath)" },
+    { 2386, "Infest (podling poison spray)" },
+    { 2219, "Expunge (Maldraxxus anima breath)" },
+    { 7300, "Chaos Breath (acid breath)" },
+    { 164027, "Flame Breath (fel breath)" },
+    { 1979, "Missile Swarm (noxious ash breath)" },
+    { 200019, "Nature Breath (fast acid cloud)" },
+    { 1789, "Venom Bolt (poison breath state)" },
+};
+std::atomic<uint32> BreathKitIndex = 0;
 constexpr uint32 NPC_VENOM_TRAP = 162975;
 constexpr uint32 SpawnMaskAllDifficulties = 7;
 constexpr float TrapCommandReach = 10.0f;
 constexpr float TrapListReach = 600.0f;
 constexpr float ToxicExpulsionReach = 100.0f;
-constexpr float TrapReach = 11.0f;
+constexpr float TrapReach = 13.0f;
+constexpr float TrapMouthOffset = 2.5f;
 constexpr float TrapHalfAngle = float(M_PI) / 12.0f;
 
 uint8 DifficultyBit(Map const* map)
@@ -295,7 +321,7 @@ bool InTrapBreath(Creature const* trap, Player const* player)
     float const facing = trap->GetHomePosition().GetOrientation();
     return player->IsAlive() && !player->IsGameMaster() && trap->GetExactDist(player) <= TrapReach
         && std::fabs(Position::NormalizeOrientation(trap->GetAngle(player) - facing + float(M_PI)) - float(M_PI)) <= TrapHalfAngle
-        && trap->IsWithinLOSInMap(player);
+        && player->IsWithinLOS(trap->GetPositionX() + TrapMouthOffset * std::cos(facing), trap->GetPositionY() + TrapMouthOffset * std::sin(facing), trap->GetPositionZ());
 }
 
 std::mutex TrapLastHitLock;
@@ -356,13 +382,7 @@ struct npc_coa_other_side_venom_trap : public ScriptedAI
         if (breathing && !_breathing)
         {
             me->SetFacingTo(me->GetHomePosition().GetOrientation());
-            me->CastSpell(me, SPELL_TRAP_BREATH_VISUAL, TRIGGERED_FULL_MASK);
             _tickIn = 0;
-        }
-        else if (!breathing && _breathing)
-        {
-            me->InterruptNonMeleeSpells(false);
-            me->RemoveAurasDueToSpell(SPELL_TRAP_BREATH_VISUAL);
         }
         _breathing = breathing;
         if (!_breathing)
@@ -374,6 +394,7 @@ struct npc_coa_other_side_venom_trap : public ScriptedAI
             return;
         }
         _tickIn = TrapTickMs;
+        me->SendPlaySpellVisual(BreathKits[BreathKitIndex.load()].kit);
         for (auto const& ref : me->GetMap()->GetPlayers())
             if (Player* player = ref.GetSource())
                 if (InTrapBreath(me, player))
@@ -553,6 +574,10 @@ public:
             { "fire", HandleFire, SEC_GAMEMASTER, Console::No },
             { "timing", HandleTiming, SEC_GAMEMASTER, Console::No },
             { "list", HandleList, SEC_GAMEMASTER, Console::No },
+            { "visual", HandleVisual, SEC_GAMEMASTER, Console::No },
+            { "nudge", HandleNudge, SEC_GAMEMASTER, Console::No },
+            { "turn", HandleTurn, SEC_GAMEMASTER, Console::No },
+            { "face", HandleFace, SEC_GAMEMASTER, Console::No },
         };
         static ChatCommandTable roadCommands =
         {
@@ -617,7 +642,7 @@ public:
             return false;
         }
         trap->SetFacingTo(trap->GetHomePosition().GetOrientation());
-        trap->CastSpell(trap, SPELL_TRAP_BREATH_VISUAL, TRIGGERED_FULL_MASK);
+        trap->SendPlaySpellVisual(BreathKits[BreathKitIndex.load()].kit);
         bool const inside = InTrapBreath(trap, player);
         if (inside)
             TrapBreathDamage(trap, player);
@@ -636,6 +661,97 @@ public:
         if (pauseMs)
             TrapPauseMs = *pauseMs;
         handler->PSendSysMessage("Each statue breathes {} ms, then the next one up; {} ms pause after the top. Until the next restart.", TrapActiveMs.load(), TrapPauseMs.load());
+        return true;
+    }
+
+    static bool HandleVisual(ChatHandler* handler, Optional<uint32> number)
+    {
+        uint32 const count = uint32(std::size(BreathKits));
+        if (!number)
+        {
+            for (uint32 i = 0; i < count; ++i)
+                handler->PSendSysMessage("{}{}: {} (kit {})", i == BreathKitIndex.load() ? "> " : "  ", i + 1, BreathKits[i].name, BreathKits[i].kit);
+            return true;
+        }
+        if (*number < 1 || *number > count)
+        {
+            handler->SendErrorMessage("Choose 1 to {}.", count);
+            return false;
+        }
+        BreathKitIndex = *number - 1;
+        handler->PSendSysMessage("Traps now breathe {}: {} (kit {}).", *number, BreathKits[*number - 1].name, BreathKits[*number - 1].kit);
+        return true;
+    }
+
+    static Creature* NearestPlacedTrap(ChatHandler* handler)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+        Creature* trap = handler->getSelectedCreature();
+        if (!trap || trap->GetEntry() != NPC_VENOM_TRAP)
+        {
+            trap = nullptr;
+            std::list<Creature*> traps;
+            player->GetCreatureListWithEntryInGrid(traps, NPC_VENOM_TRAP, TrapCommandReach);
+            for (Creature* candidate : traps)
+                if (candidate->GetSpawnId() && (!trap || player->GetExactDist(candidate) < player->GetExactDist(trap)))
+                    trap = candidate;
+        }
+        if (!trap || !trap->GetSpawnId() || !sObjectMgr->GetCreatureData(trap->GetSpawnId()))
+        {
+            handler->SendErrorMessage("No placed trap within {:.0f} yards.", TrapCommandReach);
+            return nullptr;
+        }
+        return trap;
+    }
+
+    static void MoveTrap(ChatHandler* handler, Creature* trap, float x, float y, float z, float o)
+    {
+        o = Position::NormalizeOrientation(o);
+        CreatureData* data = const_cast<CreatureData*>(sObjectMgr->GetCreatureData(trap->GetSpawnId()));
+        data->posX = x;
+        data->posY = y;
+        data->posZ = z;
+        data->orientation = o;
+        trap->SetHomePosition(x, y, z, o);
+        trap->NearTeleportTo(x, y, z, o);
+        WorldDatabasePreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_CREATURE_POSITION);
+        stmt->SetData(0, x);
+        stmt->SetData(1, y);
+        stmt->SetData(2, z);
+        stmt->SetData(3, o);
+        stmt->SetData(4, trap->GetSpawnId());
+        WorldDatabase.Execute(stmt);
+        handler->PSendSysMessage("Trap {} now at {:.2f} {:.2f} {:.2f}, facing {:.3f}.", trap->GetSpawnId(), x, y, z, o);
+    }
+
+    static bool HandleNudge(ChatHandler* handler, float yards)
+    {
+        Creature* trap = NearestPlacedTrap(handler);
+        if (!trap)
+            return false;
+        Position const home = trap->GetHomePosition();
+        float const o = home.GetOrientation();
+        MoveTrap(handler, trap, home.GetPositionX() + yards * std::cos(o), home.GetPositionY() + yards * std::sin(o), home.GetPositionZ(), o);
+        return true;
+    }
+
+    static bool HandleTurn(ChatHandler* handler, float degrees)
+    {
+        Creature* trap = NearestPlacedTrap(handler);
+        if (!trap)
+            return false;
+        Position const home = trap->GetHomePosition();
+        MoveTrap(handler, trap, home.GetPositionX(), home.GetPositionY(), home.GetPositionZ(), home.GetOrientation() + degrees * float(M_PI) / 180.0f);
+        return true;
+    }
+
+    static bool HandleFace(ChatHandler* handler)
+    {
+        Creature* trap = NearestPlacedTrap(handler);
+        if (!trap)
+            return false;
+        Position const home = trap->GetHomePosition();
+        MoveTrap(handler, trap, home.GetPositionX(), home.GetPositionY(), home.GetPositionZ(), handler->GetSession()->GetPlayer()->GetOrientation());
         return true;
     }
 
