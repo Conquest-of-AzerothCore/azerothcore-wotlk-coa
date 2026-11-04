@@ -137,10 +137,6 @@ class starcaller_spells : public AllSpellScript
             result = SPELL_FAILED_CASTER_AURASTATE;
         if ((id == 801125 && !player->HasAura(802681)) || (id == 802682 && !player->HasAura(572319)))
             result = SPELL_FAILED_CASTER_AURASTATE;
-        // Starfire Shot spends a Scattered Star, so it needs one to begin. Its authored
-        // TargetAuraSpell is cleared in ApplyContracts because the engine repeats this check
-        // when the cast completes, by which point the shot's own consume may have taken the
-        // last star and aborted a cast that started legally.
         if (strict && Named(spell->GetSpellInfo(), 801978))
             if (Unit* target = spell->m_targets.GetUnitTarget(); !target || !target->HasAura(804378))
                 result = SPELL_FAILED_TARGET_AURASTATE;

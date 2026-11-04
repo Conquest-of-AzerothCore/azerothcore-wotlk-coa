@@ -254,11 +254,6 @@ void ApplyContracts(SpellInfo* info)
     }
     if (id == 561122)
         info->DurationEntry = sSpellDurationStore.LookupEntry(1);
-    // Starfire Shot's own hit starts the consume chain that eats the Scattered Star it
-    // requires, and Spell::_cast repeats CheckCast when the cast completes, so a shot that
-    // began legally could abort with SPELL_FAILED_TARGET_AURASTATE because of its own
-    // predecessor. Drop the authored TargetAuraSpell and enforce the star at cast start only,
-    // in AscensionStarcallerAbilities.cpp's OnSpellCheckCast.
     if (Named(info, 801978))
         info->TargetAuraSpell = 0;
     if (id == 680213 || id == 300256)
