@@ -29,6 +29,8 @@
  *   Frenzy              at 30%
  *   Armageddon          at 3%         15s cast, +150% damage taken while he
  *                                     casts; if it finishes, the raid dies
+ * He drops two of his items for every ten players in his map: 2 for 10, 5 for 25,
+ * 8 for 40 and more.
  * The altar by the Scarab Wall takes players into his map, and the portal he
  * leaves behind takes them back to it.
  *
@@ -80,6 +82,7 @@
 #include "DatabaseEnv.h"
 #include "Field.h"
 #include "Log.h"
+#include "LootMgr.h"
 #include "Map.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
@@ -90,6 +93,7 @@
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
+#include "SetisLoot.h"
 #include "zg_coa_common.h"
 
 #include <algorithm>
@@ -266,8 +270,10 @@ namespace
     constexpr uint32 GO_SETIS_ALTAR = 64600;
     constexpr uint32 GO_SETIS_EXIT = 64601;
     constexpr uint32 SETIS_MAP = 880;
+    constexpr uint8 SETIS_NORMAL_GROUP = 1;
+    constexpr uint8 SETIS_HEROIC_GROUP = 2;
     Position const SetisEntrance = { -8093.0f, 1663.6f, 12.9f, 0.0f };
-    Position const SetisAltarSide = { -7948.0f, 1268.0f, -2.0f, 0.0f };
+    Position const SetisAltarSide = { -7864.0f, 1325.0f, -7.5f, 2.88f };
 
     struct boss_setis_coa : public custom_world_boss_coa
     {
@@ -360,6 +366,15 @@ namespace
         void JustDied(Unit* killer) override
         {
             custom_world_boss_coa::JustDied(killer);
+            if (LootTemplate const* loot = LootTemplates_Creature.GetLootFor(me->GetCreatureTemplate()->lootid))
+            {
+                uint32 const raid = uint32(PlayersWithin(me, 200.0f).size());
+                uint32 const items = coa_setis::LootItems(raid);
+                uint8 const group = me->GetMap()->IsHeroic() ? SETIS_HEROIC_GROUP : SETIS_NORMAL_GROUP;
+                Player const* looter = me->GetLootRecipient();
+                for (uint32 i = coa_setis::MinItems; i < items; ++i)
+                    loot->Process(me->loot, LootTemplates_Creature, me->GetLootMode(), looter, group);
+            }
             me->SummonGameObject(GO_SETIS_EXIT, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(),
                 me->GetOrientation(), 0, 0, 0, 0, 600, true, GO_SUMMON_TIMED_DESPAWN);
         }

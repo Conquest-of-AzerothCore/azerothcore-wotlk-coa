@@ -41,7 +41,7 @@ DELETE FROM `gameobject` WHERE `guid` = 9780102;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`) VALUES
-(9780102, 64600, 1, 0, 0, 1, 1, -7944.0, 1270.0, -3.0, 0, 0, 0, 0, 1, 300, 100, 1);
+(9780102, 64600, 1, 0, 0, 1, 1, -7860.22, 1329.18, -7.52, 2.88, 0, 0, 0.9914, 0.1305, 300, 100, 1);
 
 -- Players who die in his map rise at its start.
 DELETE FROM `game_graveyard` WHERE `ID` = 6099;

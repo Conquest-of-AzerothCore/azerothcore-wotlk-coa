@@ -8,36 +8,138 @@
     "back to Silithus (map 1)."
   ],
   "timeout_ms": 180000,
-  "location": {"map": 1, "x": -7944.0, "y": 1272.0, "z": -2.0},
+  "location": {
+    "map": 1,
+    "x": -7862.0,
+    "y": 1327.0,
+    "z": -7.5
+  },
   "players": [
-    {"id": "raider", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000}
+    {
+      "id": "raider",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
   ],
   "steps": [
-    {"action": "wait", "ms": 2000},
-    {"action": "set_health", "actor": "raider", "value": 50000000, "maximum": 50000000},
-    {"action": "assert", "label": "The altar stands by the Scarab Wall", "actor": "raider",
-     "metric": "spawn_active", "spawn": 9780102, "equals": 1, "within_ms": 3000},
-    {"action": "summon_gameobject", "actor": "raider", "entry": 64600, "distance": 2},
-    {"action": "use_gameobject", "actor": "raider", "entry": 64600},
-    {"action": "assert", "label": "The altar takes the player into Setis' map", "actor": "raider",
-     "metric": "map_id", "equals": 880, "within_ms": 8000},
-    {"action": "assert", "label": "CONTROL: the map is on the normal difficulty", "actor": "raider",
-     "metric": "map_difficulty", "equals": 0},
-    {"action": "summon", "actor": "raider", "entry": 64600, "as": "setis", "distance": 4},
-    {"action": "wait", "ms": 500},
-    {"action": "attack_nearby", "actor": "raider", "entry": 64600, "kill": true},
-    {"action": "assert", "label": "Setis dies", "actor": "setis", "metric": "alive", "equals": 0,
-     "within_ms": 20000},
-    {"action": "loot_creature", "actor": "raider", "target": "setis"},
-    {"action": "assert", "label": "Two epic items on his corpse", "actor": "raider", "metric": "loot_count",
-     "quality": 4, "equals": 2},
-    {"action": "assert", "label": "They are his normal items (item level 68)", "actor": "raider",
-     "metric": "loot_gear_item_level", "equals": 68},
-    {"action": "close_loot", "actor": "raider"},
-    {"action": "assert", "label": "He leaves a portal back", "actor": "raider",
-     "metric": "nearby_gameobject_count", "entry": 64601, "min": 1, "within_ms": 3000},
-    {"action": "use_nearby_gameobject", "actor": "raider", "entry": 64601},
-    {"action": "assert", "label": "The portal takes the player back to Silithus", "actor": "raider",
-     "metric": "map_id", "equals": 1, "within_ms": 8000}
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "raider",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "assert",
+      "label": "The altar stands by the Scarab Wall",
+      "actor": "raider",
+      "metric": "spawn_active",
+      "spawn": 9780102,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "raider",
+      "entry": 64600,
+      "distance": 2
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "raider",
+      "entry": 64600
+    },
+    {
+      "action": "assert",
+      "label": "The altar takes the player into Setis' map",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 880,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the map is on the normal difficulty",
+      "actor": "raider",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "raider",
+      "entry": 64600,
+      "as": "setis",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64600,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Setis dies",
+      "actor": "setis",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 20000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "raider",
+      "target": "setis"
+    },
+    {
+      "action": "assert",
+      "label": "Two epic items on his corpse",
+      "actor": "raider",
+      "metric": "loot_count",
+      "quality": 4,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "They are his normal items (item level 68)",
+      "actor": "raider",
+      "metric": "loot_gear_item_level",
+      "equals": 68
+    },
+    {
+      "action": "close_loot",
+      "actor": "raider"
+    },
+    {
+      "action": "assert",
+      "label": "He leaves a portal back",
+      "actor": "raider",
+      "metric": "nearby_gameobject_count",
+      "entry": 64601,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "raider",
+      "entry": 64601
+    },
+    {
+      "action": "assert",
+      "label": "The portal takes the player back to Silithus",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 1,
+      "within_ms": 8000
+    }
   ]
 }
