@@ -58,7 +58,19 @@ Window& WindowRef(uint32 accountId)
     return windows.emplace(accountId, window).first->second;
 }
 
-void Save(uint32 accountId, Window const& window)
+void SaveIfNewer(uint32 accountId, Window const& window)
+{
+    CharacterDatabase.Execute(
+        "INSERT INTO `account_bazaar_token_hourly_cap` (`account`, `window_start`, `earned`) VALUES ({}, {}, {}) AS `claimed` "
+        "ON DUPLICATE KEY UPDATE "
+        "`earned` = IF(`claimed`.`window_start` > `account_bazaar_token_hourly_cap`.`window_start` OR "
+        "(`claimed`.`window_start` = `account_bazaar_token_hourly_cap`.`window_start` AND "
+        "`claimed`.`earned` > `account_bazaar_token_hourly_cap`.`earned`), `claimed`.`earned`, `account_bazaar_token_hourly_cap`.`earned`), "
+        "`window_start` = GREATEST(`account_bazaar_token_hourly_cap`.`window_start`, `claimed`.`window_start`)",
+        accountId, window.start, window.earned);
+}
+
+void Overwrite(uint32 accountId, Window const& window)
 {
     CharacterDatabase.Execute(
         "REPLACE INTO `account_bazaar_token_hourly_cap` (`account`, `window_start`, `earned`) VALUES ({}, {}, {})",
@@ -103,7 +115,7 @@ uint32 AscensionBazaarTokenCap::Claim(Player* player, uint32 count)
         if (allowed)
         {
             window.earned += allowed;
-            Save(accountId, window);
+            SaveIfNewer(accountId, window);
         }
 
         if (window.earned >= cap && (allowed || now >= window.lastNotice + CAPPED_REMINDER_INTERVAL_SECONDS))
@@ -149,7 +161,7 @@ void AscensionBazaarTokenCap::Set(uint32 accountId, uint32 earned, uint32 second
     std::lock_guard<std::mutex> guard(capLock);
     Window& window = WindowRef(accountId);
     window = Window{ now - std::min(secondsAgo, now), earned, 0 };
-    Save(accountId, window);
+    Overwrite(accountId, window);
 }
 
 class AscensionBazaarTokenCapCommands final : public CommandScript
