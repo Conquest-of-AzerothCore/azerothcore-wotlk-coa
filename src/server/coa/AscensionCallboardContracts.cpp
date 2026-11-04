@@ -488,7 +488,7 @@ bool HandleActivate(WorldSession* session, WorldPacket const& packet)
     if (!session || !enabled.load(std::memory_order_relaxed))
         return true;
 
-    if (std::optional<Activation> activation = ParseActivation(packet.contents(), packet.size()))
+    if (std::optional<Activation> activation = ParseActivationPacket(packet))
         pendingRequests.Activate(session->GetAccountId(), std::move(*activation));
     return true;
 }

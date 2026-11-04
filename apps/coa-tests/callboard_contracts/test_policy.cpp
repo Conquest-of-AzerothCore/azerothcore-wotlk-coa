@@ -2,10 +2,26 @@
 #include <cassert>
 #include <cstring>
 #include <iostream>
+#include <stdexcept>
 
 namespace
 {
 using namespace CallboardContracts;
+
+struct ByteBufferLikePacket
+{
+    std::vector<std::uint8_t> bytes;
+
+    bool empty() const { return bytes.empty(); }
+    std::size_t size() const { return bytes.size(); }
+
+    std::uint8_t const* contents() const
+    {
+        if (bytes.empty())
+            throw std::runtime_error("empty buffer has no contents");
+        return bytes.data();
+    }
+};
 
 std::uint32_t U32At(std::vector<std::uint8_t> const& bytes, std::size_t& at)
 {
@@ -198,6 +214,15 @@ void Activations()
     assert(!ParseActivation(huge.data(), huge.size()));
 }
 
+void ActivationPackets()
+{
+    assert(!ParseActivationPacket(ByteBufferLikePacket{}));
+
+    ByteBufferLikePacket const packet{ ActivationBytes("Duel", 0, 2) };
+    std::optional<Activation> const parsed = ParseActivationPacket(packet);
+    assert(parsed && parsed->type == "Duel" && !parsed->payWithGold && parsed->Completions() == 2);
+}
+
 void Pending()
 {
     PendingRequests pending;
@@ -259,6 +284,7 @@ int main()
     Names();
     View();
     Activations();
+    ActivationPackets();
     Pending();
     Ledger();
     std::cout << "callboard contracts policy checks passed\n";

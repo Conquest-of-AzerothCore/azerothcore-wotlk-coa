@@ -325,6 +325,15 @@ inline std::optional<Activation> ParseActivation(std::uint8_t const* data, std::
     return activation;
 }
 
+template <typename Packet>
+std::optional<Activation> ParseActivationPacket(Packet const& packet)
+{
+    if (packet.empty())
+        return std::nullopt;
+
+    return ParseActivation(packet.contents(), packet.size());
+}
+
 struct Requests
 {
     bool view = false;
