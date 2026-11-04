@@ -32,11 +32,12 @@ SELECT `Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `Gro
 FROM `creature_loot_template` WHERE `Entry` = 64600 AND `GroupId` IN (1, 2);
 
 -- The altar by the Scarab Wall and the portal back.
-DELETE FROM `gameobject_template` WHERE `entry` IN (64600, 64601);
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
   `size`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
 (64600, 10, 2490, 'Altar of Setis', '', '', '', 1, '', 'go_setis_altar_coa', 12340),
-(64601, 10, 3931, 'Portal to the Scarab Wall', '', '', '', 1, '', 'go_setis_exit_coa', 12340);
+(64601, 10, 3931, 'Portal to the Scarab Wall', '', '', '', 1, '', 'go_setis_exit_coa', 12340)
+ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`),
+  `size` = VALUES(`size`), `ScriptName` = VALUES(`ScriptName`);
 DELETE FROM `gameobject` WHERE `guid` = 9780102;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,

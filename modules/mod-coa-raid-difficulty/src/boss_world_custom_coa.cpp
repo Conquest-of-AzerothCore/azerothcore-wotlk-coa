@@ -368,7 +368,7 @@ namespace
             custom_world_boss_coa::JustDied(killer);
             if (LootTemplate const* loot = LootTemplates_Creature.GetLootFor(me->GetCreatureTemplate()->lootid))
             {
-                uint32 const raid = uint32(PlayersWithin(me, 200.0f).size());
+                uint32 const raid = me->GetMap()->GetPlayersCountExceptGMs();
                 uint32 const items = coa_setis::LootItems(raid);
                 uint8 const group = me->GetMap()->IsHeroic() ? SETIS_HEROIC_GROUP : SETIS_NORMAL_GROUP;
                 Player const* looter = me->GetLootRecipient();
