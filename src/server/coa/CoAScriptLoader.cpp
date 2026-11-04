@@ -371,6 +371,7 @@ void AddSC_AscensionCallboardContracts();
 void AddSC_AscensionQuestMarkers();
 void AddSC_AscensionFireLordCache();
 void AddSC_AscensionTierTokenVendor();
+void AddSC_CoALevelBoostNpc();
 void AddSC_AscensionFeatherOfAncients();
 void AddSC_AscensionVultureCultQuests();
 void AddSC_AscensionCaravanCarts();
@@ -668,6 +669,7 @@ void AddCoAScripts()
     AddSC_AscensionQuestMarkers();
     AddSC_AscensionFireLordCache();
     AddSC_AscensionTierTokenVendor();
+    AddSC_CoALevelBoostNpc();
     AddSC_AscensionFeatherOfAncients();
     AddSC_AscensionVultureCultQuests();
     AddSC_AscensionCaravanCarts();
