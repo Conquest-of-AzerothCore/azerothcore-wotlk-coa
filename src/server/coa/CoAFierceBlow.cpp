@@ -28,6 +28,7 @@ namespace
 
     bool Enabled = true;
     std::unordered_set<uint32> SelfScheduledEntries;
+    std::unordered_set<ObjectGuid::LowType> SelfScheduledSpawns;
     thread_local bool CastingGenericFierceBlow = false;
 
     constexpr Milliseconds ENGAGEMENT_GAP = 1s;
@@ -54,7 +55,8 @@ namespace
     bool CanReceiveFierceBlow(Creature const* me)
     {
         return !me->IsCharmedOwnedByPlayerOrPlayer() && !me->IsTotem() && !me->IsTrigger()
-            && !SelfScheduledEntries.contains(me->GetEntry());
+            && !SelfScheduledEntries.contains(me->GetEntry())
+            && !(me->GetSpawnId() && SelfScheduledSpawns.contains(me->GetSpawnId()));
     }
 
     bool HasPendingFierceBlow(Unit const* caster)
@@ -66,22 +68,33 @@ namespace
     void LoadSelfScheduledEntries()
     {
         SelfScheduledEntries.clear();
+        SelfScheduledSpawns.clear();
         QueryResult result = WorldDatabase.Query(
             "SELECT entryorguid FROM smart_scripts WHERE source_type = 0 AND entryorguid > 0 "
             "AND action_type IN (11, 218) AND action_param1 = {0} "
-            "UNION SELECT c.id FROM smart_scripts s JOIN creature c ON c.guid = -s.entryorguid "
-            "WHERE s.source_type = 0 AND s.entryorguid < 0 AND s.action_type IN (11, 218) AND s.action_param1 = {0} "
             "UNION SELECT entryorguid DIV 100 FROM smart_scripts WHERE source_type = 9 "
             "AND action_type IN (11, 218) AND action_param1 = {0} "
-            "UNION SELECT entry FROM coa_dungeon_boss_kit WHERE spell = {0}", SPELL_FIERCE_BLOW);
+            "UNION SELECT entry FROM coa_dungeon_boss_kit WHERE spell = {0} "
+            "UNION SELECT entry FROM coa_boss_schedule "
+            "WHERE spell_d0 = {0} OR spell_d1 = {0} OR spell_d2 = {0} OR spell_d3 = {0}", SPELL_FIERCE_BLOW);
         if (result)
         {
             do
                 SelfScheduledEntries.insert(result->Fetch()[0].Get<uint32>());
             while (result->NextRow());
         }
-        LOG_INFO("server.loading", ">> Loaded {} creature entries that schedule their own Fierce Blow",
-            SelfScheduledEntries.size());
+        result = WorldDatabase.Query(
+            "SELECT DISTINCT c.guid FROM creature c JOIN smart_scripts s ON c.guid = -s.entryorguid "
+            "WHERE s.source_type = 0 AND s.entryorguid < 0 AND s.action_type IN (11, 218) AND s.action_param1 = {}",
+            SPELL_FIERCE_BLOW);
+        if (result)
+        {
+            do
+                SelfScheduledSpawns.insert(result->Fetch()[0].Get<ObjectGuid::LowType>());
+            while (result->NextRow());
+        }
+        LOG_INFO("server.loading", ">> Loaded {} creature entries and {} spawns that schedule their own Fierce Blow",
+            SelfScheduledEntries.size(), SelfScheduledSpawns.size());
     }
 }
 
@@ -119,7 +132,7 @@ public:
         if (state->selfScheduled)
             return;
         Milliseconds now = GameTime::GetGameTimeMS();
-        if (now - state->lastUpdate > ENGAGEMENT_GAP)
+        if (now - state->lastUpdate > Milliseconds(diff) + ENGAGEMENT_GAP)
             state->timer = FirstFierceBlowDelay(me);
         state->lastUpdate = now;
 

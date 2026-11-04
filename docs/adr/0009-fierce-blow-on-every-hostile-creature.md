@@ -49,12 +49,14 @@ Option 3, in `src/server/coa/CoAFierceBlow.cpp`, behind `CoA.FierceBlow.Enable` 
 
 - **Scheduler.** An `AllCreatureScript` update hook gives a creature in combat with a player or a player's unit one
   untriggered Fierce Blow 6-9.5 s after the engagement, and again 6-9.5 s after each one. The blow takes the place
-  of the next melee swing.
+  of the next melee swing. An engagement is a gap of more than 1 s beyond the update's own diff since the last
+  eligible update, so slow server ticks do not restart the timer.
 - **Skipped creatures.** Totems, triggers and player-controlled creatures never get it, and neither do creatures
   that are already casting or out of melee range. A creature that already has a melee spell queued is skipped too.
 - **Ownership.** A creature has one owner for its Fierce Blow:
-  - At startup the entries that cast 975011 from SmartAI (actions 11 and 218, by entry, by spawn guid or through
-    timed action lists) or from `coa_dungeon_boss_kit` are loaded as self-scheduled. The scheduler skips them.
+  - At startup the entries that cast 975011 from SmartAI (actions 11 and 218, by entry or through timed action
+    lists), `coa_dungeon_boss_kit` or `coa_boss_schedule` are loaded as self-scheduled. SmartAI rows keyed by a
+    spawn guid exclude only that spawn, not its whole template. The scheduler skips them.
   - An `AllSpellScript::CanPrepare` hook marks any creature that prepares a Fierce Blow outside the scheduler as
     self-scheduled, so C++ scripts take over the first time they cast one.
   - If the scheduler's blow is still pending at that moment, the script's blow is refused. One blow lands and
