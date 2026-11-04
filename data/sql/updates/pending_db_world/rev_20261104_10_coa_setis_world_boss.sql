@@ -32,7 +32,6 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 (64600, 6001, 0, 1, 0, 3, 0, 1, 1, 'Setis - Recipe: Potion of Lightning Reflexes');
 
 -- The shrine by the Scarab Wall (Ascension's 380138, with its ritual altar model) and the portal back.
-DELETE FROM `gameobject_template` WHERE `entry` = 64600;
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
   `size`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
 (380138, 10, 4076, 'Shrine of Setis', '', '', '', 3, '', 'go_setis_altar_coa', 12340),
@@ -48,10 +47,10 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 (9780900, 64604, 880, 0, 0, 15, 1, -8098.0, 1668.0, 12.9, 0, 0, 0, 0, 1, 300, 100, 1);
 
 -- Players who die in his map rise at its start: WorldSafeLocs.dbc 6080 "Setis Graveyard".
-DELETE FROM `game_graveyard` WHERE `ID` IN (6080, 6099);
+DELETE FROM `game_graveyard` WHERE `ID` = 6080;
 INSERT INTO `game_graveyard` (`ID`, `Map`, `x`, `y`, `z`, `Comment`) VALUES
 (6080, 880, -8092.98, 1663.63, 12.94, 'Setis Graveyard');
-DELETE FROM `graveyard_zone` WHERE `ID` IN (6080, 6099);
+DELETE FROM `graveyard_zone` WHERE `ID` = 6080 AND `GhostZone` = 10235;
 INSERT INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`) VALUES
 (6080, 10235, 0, 'The Scarab Wall (Setis boss map)');
 
@@ -116,6 +115,8 @@ FROM (SELECT l.`Item` FROM `creature_loot_template` l
         AND l.`LootMode` & 1 AND r.`LootMode` & 1) x
 JOIN `item_template` i ON i.`entry` = x.`Item`
 WHERE i.`Quality` = 4 AND i.`InventoryType` > 0;
+-- A 250 stack of runes must fit one loot slot.
+UPDATE `item_template` SET `stackable` = 250 WHERE `entry` = 375250 AND `stackable` BETWEEN 0 AND 249;
 DELETE FROM `item_loot_template` WHERE `Entry` = 978059;
 INSERT INTO `item_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`,
   `MinCount`, `MaxCount`, `Comment`) VALUES

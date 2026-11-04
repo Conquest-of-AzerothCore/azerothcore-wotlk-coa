@@ -54,20 +54,21 @@
     },
     {
       "action": "assert",
+      "label": "Its target is marked while he casts",
+      "actor": "tank",
+      "metric": "aura",
+      "spell": 2119015,
+      "min": 1,
+      "within_ms": 32000
+    },
+    {
+      "action": "assert",
       "label": "Meteor is the live 83360",
       "actor": "setis",
       "metric": "spell_cast_count",
       "spell": 83360,
       "min": 1,
       "within_ms": 45000
-    },
-    {
-      "action": "assert",
-      "label": "Its target is marked while he casts",
-      "actor": "setis",
-      "metric": "spell_cast_count",
-      "spell": 2119015,
-      "min": 1
     },
     {
       "action": "assert",
