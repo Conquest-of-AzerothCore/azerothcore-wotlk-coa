@@ -60,6 +60,7 @@ enum TrashData : uint32
     SPELL_BROOD_STATE = 257201,
     SPELL_BITING_CLOUD = 257202,
     SPELL_TOXIC_EXPULSION = 257203,
+    SPELL_VENOM_TRAP = 256923,
 };
 
 enum class Aim : uint8
@@ -126,6 +127,12 @@ std::unordered_map<uint32, SpellDamage> const Damages =
 constexpr float FissureLength = 20.0f;
 constexpr float FissureHalfWidth = 2.0f;
 constexpr float BroodRange = 30.0f;
+constexpr uint32 TrapCycleMs = 6000;
+constexpr uint32 TrapFlightGapMs = 2000;
+constexpr float TrapReach = 35.0f;
+constexpr float TrapHalfAngle = float(M_PI) / 15.0f;
+constexpr float SecondFlightZ = 295.0f;
+constexpr float ThirdFlightZ = 330.0f;
 
 uint8 DifficultyBit(Map const* map)
 {
@@ -249,6 +256,46 @@ private:
     bool _turnedAway = false;
 };
 
+struct npc_coa_other_side_venom_trap : public ScriptedAI
+{
+    explicit npc_coa_other_side_venom_trap(Creature* creature) : ScriptedAI(creature) { }
+
+    void Reset() override
+    {
+        me->SetReactState(REACT_PASSIVE);
+        uint32 const flight = me->GetPositionZ() < SecondFlightZ ? 0 : (me->GetPositionZ() < ThirdFlightZ ? 1 : 2);
+        _timer = flight * TrapFlightGapMs;
+    }
+
+    void AttackStart(Unit* ) override { }
+    void MoveInLineOfSight(Unit* ) override { }
+
+    void UpdateAI(uint32 diff) override
+    {
+        if (_timer > diff)
+        {
+            _timer -= diff;
+            return;
+        }
+        _timer = TrapCycleMs;
+        float const facing = me->GetHomePosition().GetOrientation();
+        me->SetOrientation(facing);
+        for (auto const& ref : me->GetMap()->GetPlayers())
+        {
+            Player* player = ref.GetSource();
+            if (!player || !player->IsAlive() || player->IsGameMaster() || me->GetExactDist(player) > TrapReach
+                || std::fabs(Position::NormalizeOrientation(me->GetAngle(player) - facing + float(M_PI)) - float(M_PI)) > TrapHalfAngle
+                || !me->IsWithinLOSInMap(player))
+                continue;
+            me->CastSpell(player, SPELL_VENOM_TRAP, true);
+            break;
+        }
+    }
+
+private:
+    uint32 _timer = 0;
+};
+
 class spell_coa_other_side_trash_damage : public SpellScript
 {
     PrepareSpellScript(spell_coa_other_side_trash_damage);
@@ -349,6 +396,7 @@ class spell_coa_other_side_brood_empowerment : public SpellScript
 void AddSC_CoAOtherSideTrash()
 {
     RegisterCreatureAI(npc_coa_other_side_trash);
+    RegisterCreatureAI(npc_coa_other_side_venom_trap);
     RegisterSpellAndAuraScriptPair(spell_coa_other_side_trash_damage, spell_coa_other_side_trash_damage_aura);
     RegisterSpellScript(spell_coa_other_side_fissure_strike);
     RegisterSpellScript(spell_coa_other_side_brood_empowerment);
