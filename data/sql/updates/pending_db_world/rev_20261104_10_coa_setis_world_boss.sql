@@ -59,10 +59,10 @@ INSERT INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`) VALUES
 UPDATE `creature` SET `position_x` = -8102.93, `position_y` = 1524.98, `position_z` = 2.65, `orientation` = 6.1819
 WHERE `guid` = 9780101 AND `id` = 64600;
 
--- His health is per player in his map (10 to 40): 400000 on normal, 10 million for 25 players, 16 for 40.
-UPDATE `coa_world_boss_level` SET `health` = 400000, `note` = 'per player; 10 million for 25 players'
+-- His health is per player in his map (10 to 40): 470000 on normal, the lower bound of the live kills.
+UPDATE `coa_world_boss_level` SET `health` = 470000, `note` = 'per player; the lower bound of the live kills'
 WHERE `entry` = 64600 AND `difficulty` = 0;
-UPDATE `coa_world_boss_level` SET `health` = 742800, `note` = 'per player; the normal one times the log ratio 1.857'
+UPDATE `coa_world_boss_level` SET `health` = 872790, `note` = 'per player; the normal one times the log ratio 1.857'
 WHERE `entry` = 64600 AND `difficulty` = 2;
 
 -- The shrine's words.
@@ -91,7 +91,7 @@ INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Fligh
 DELETE FROM `creature` WHERE `guid` IN (9780900, 9780901);
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
-(9780900, 978062, 1, 0, 0, 1, 1, -7864.724, 1326.674, -4.6, 5.4786, 300, 0, 0);
+(9780900, 978062, 1, 0, 0, 1, 1, -7864.724, 1326.674, -2.0, 5.4786, 300, 0, 0);
 
 -- Treasures of Azeroth, one per player of a world boss kill: a Heroic Dungeon epic, a 5% chance at a world boss
 -- item, 1000 Runes of Descension (a 250 stack taken four times, as one loot row holds 255 at most) and 15

@@ -2,10 +2,11 @@
   "schema": 1,
   "name": "Setis casts his live kit: the 4 s Meteor and the marked Call Lightning, and nothing no live kill shows",
   "contract": [
-    "boss_setis_coa casts Meteor 83360 after 26.4 s, as the live kills show; Call Lightning after 30.5 s, which",
-    "first marks one spot per player, up to three and one more for every ten (2119053). He casts none of the",
-    "spells no live kill shows: Seeking Shadow Bolts (2119001), the split Meteor (2119010) or Massive Thunder",
-    "Stomp (2119022), and he has no Prismatic Barrier, whose spells heal him to full."
+    "boss_setis_coa casts Meteor 83360 after 26.4 s at a target he marks (2119015), as the live kills",
+    "show; Call Lightning after 30.5 s, which first marks one spot per player, up to three and one more",
+    "for every ten (2119053). He casts none of the spells no live kill shows: Seeking Shadow Bolts",
+    "(2119001), the split Meteor (2119010) or Massive Thunder Stomp (2119022), and he has no Prismatic",
+    "Barrier, whose spells heal him to full."
   ],
   "timeout_ms": 150000,
   "location": {
@@ -59,6 +60,14 @@
       "spell": 83360,
       "min": 1,
       "within_ms": 45000
+    },
+    {
+      "action": "assert",
+      "label": "Its target is marked while he casts",
+      "actor": "setis",
+      "metric": "spell_cast_count",
+      "spell": 2119015,
+      "min": 1
     },
     {
       "action": "assert",

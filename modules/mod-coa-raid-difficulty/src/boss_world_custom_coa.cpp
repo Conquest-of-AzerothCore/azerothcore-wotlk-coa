@@ -15,7 +15,7 @@
  *   Fierce Blow         every 8.8s    tank
  *   Shadow Storm        every 13.6s   shadow bolts at everyone 25-45 yards out
  *   War Stomp           every 32s     around him, knocked back
- *   Meteor              every 32s     4s cast at a player, fire on the ground
+ *   Meteor              every 32s     4s cast at a marked player, fire on the ground
  *   Call Lightning      every 35.1s   marks three spots, one more for every ten
  *                                     players, then a 4s cast strikes them and
  *                                     electrifies the ground for 20s
@@ -246,6 +246,7 @@ namespace
         SPELL_FIRE_REFLECT      = 1002118,
         SPELL_FRENZY            = 1002120,
         SPELL_METEOR            = 83360,
+        SPELL_METEOR_MARK       = 2119015,
         SPELL_CALL_LIGHTNING    = 2119052,
         SPELL_LIGHTNING_MARK    = 2119053,
         SPELL_LIGHTNING_STRIKE  = 2119054,
@@ -354,7 +355,11 @@ namespace
                 case ES_STOMP:     DoCastSelf(SPELL_WAR_STOMP);      events.Repeat(32s);     break;
                 case ES_METEOR:
                     if (Unit* t = RandomPlayer())
+                    {
+                        _meteorTarget = t->GetGUID();
+                        me->CastSpell(t, SPELL_METEOR_MARK, true);
                         DoCast(t, SPELL_METEOR);
+                    }
                     events.Repeat(32s);
                     break;
                 case ES_LIGHTNING:
@@ -420,6 +425,9 @@ namespace
             }
             else if (spell->Id == SPELL_ARMAGEDDON)
                 DoCastAOE(SPELL_ARMAGEDDON_BLAST, true);
+            else if (spell->Id == SPELL_METEOR)
+                if (Unit* target = ObjectAccessor::GetUnit(*me, _meteorTarget))
+                    target->RemoveAurasDueToSpell(SPELL_METEOR_MARK, me->GetGUID());
         }
 
         void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType type, SpellSchoolMask school) override
@@ -443,6 +451,7 @@ namespace
         bool _frenzy = false;
         bool _armageddon = false;
         std::vector<Position> _marks;
+        ObjectGuid _meteorTarget;
     };
 
     class go_setis_altar_coa : public GameObjectScript
