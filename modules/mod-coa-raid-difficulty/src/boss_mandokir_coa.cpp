@@ -14,9 +14,9 @@
  *   Berserker Charge  first 10s, every 25s   the nearest player he can see,
  *                                            knocked down; the tank keeps his
  *                                            threat (the live log)
- *   Whirlwind         first 12s, every 25s   2s after the charge, also when
- *                                            he does not charge; 5 yards
- *                                            around him
+ *   Whirlwind         as the charge lands     at once, 5 yards around him;
+ *                                            in the charge's place when no
+ *                                            one stands out of melee
  *   Mortal Strike     first 8s,  every 12s   the tank in melee range, -25%
  *                                            healing, stacks 3
  *   Threatening Gaze  first 15s, every 20s   he stares at a player for 4s,
@@ -45,6 +45,10 @@
  *   - Ohgan runs in from the arena entrance at the pull (tester, live,
  *     2026-11-04); the spot, the gap in the chained spirits' ring on the
  *     north-west side, is estimated;
+ *   - the order Mortal Strike -> Mortal Strike -> Berserker Charge ->
+ *     Whirlwind on landing (tester, live video, 2026-11-04; the log of
+ *     2026-08-02 starts each Whirlwind as the charge lands); a Mortal Strike
+ *     due during the Whirlwind follows when it ends;
  *   - Realm of the Blood God (2118425) is left out: the realm's phase 4
  *     content exists nowhere in the data.
  *   - the kill-streak auras (First Blood! to Legendary!) at 1, 3, 5, 7 and 10
@@ -110,7 +114,7 @@ namespace
     {
         EVENT_CHECK_START = 1,
         EVENT_STARTED,
-        EVENT_CHARGE,
+        EVENT_BERSERKER_CHARGE,
         EVENT_WHIRLWIND,
         EVENT_MORTAL_STRIKE,
         EVENT_GAZE,
@@ -130,8 +134,8 @@ namespace
     };
 
     constexpr uint8 MORTAL_WOUND_STACKS = 3;
-    constexpr Milliseconds MANDOKIR_WHIRLWIND_FIRST = 12s;
-    constexpr Milliseconds MANDOKIR_WHIRLWIND_INTERVAL = 25s;
+    constexpr Milliseconds MANDOKIR_CHARGE_INTERVAL = 25s;
+    constexpr Milliseconds MANDOKIR_CHARGE_LANDING_FALLBACK = 4s;
     constexpr Milliseconds MANDOKIR_FIERCE_BLOW_FIRST_MIN = 30700ms;
     constexpr Milliseconds MANDOKIR_FIERCE_BLOW_FIRST_MAX = 31600ms;
     constexpr Milliseconds MANDOKIR_FIERCE_BLOW_MIN = 22500ms;
@@ -196,6 +200,7 @@ namespace
             BossAI::Reset();
             _kills = 0;
             _useExecute = false;
+            _whirlwindOnLanding = false;
             _gazed.Clear();
             _reviveGUID.Clear();
             RemovePresence();
@@ -252,8 +257,7 @@ namespace
         {
             _JustEngagedWith();
             events.ScheduleEvent(EVENT_MORTAL_STRIKE, 8s);
-            events.ScheduleEvent(EVENT_CHARGE, 10s);
-            events.ScheduleEvent(EVENT_WHIRLWIND, MANDOKIR_WHIRLWIND_FIRST);
+            events.ScheduleEvent(EVENT_BERSERKER_CHARGE, 10s);
             events.ScheduleEvent(EVENT_GAZE, 15s);
             events.ScheduleEvent(EVENT_CHECK_OHGAN, 1s);
             events.ScheduleEvent(EVENT_FIERCE_BLOW, MANDOKIR_FIERCE_BLOW_FIRST_MIN, MANDOKIR_FIERCE_BLOW_FIRST_MAX);
@@ -313,6 +317,14 @@ namespace
 
         void MovementInform(uint32 type, uint32 id) override
         {
+            if (type == POINT_MOTION_TYPE && (id == ::EVENT_CHARGE || id == EVENT_CHARGE_PREPATH) && _whirlwindOnLanding)
+            {
+                _whirlwindOnLanding = false;
+                events.CancelEvent(EVENT_WHIRLWIND);
+                DoCastSelf(SPELL_WHIRLWIND);
+                return;
+            }
+
             if (type == WAYPOINT_MOTION_TYPE)
             {
                 me->SetWalk(false);
@@ -405,17 +417,23 @@ namespace
             {
                 switch (eventId)
                 {
-                    case EVENT_CHARGE:
+                    case EVENT_BERSERKER_CHARGE:
                         if (Unit* target = SelectTarget(SelectTargetMethod::MinDistance, 0, [this](Unit const* u)
                             {
                                 return u->IsPlayer() && !me->IsWithinMeleeRange(u) && me->IsWithinLOSInMap(u);
                             }))
+                        {
+                            _whirlwindOnLanding = true;
                             DoCast(target, SPELL_BERSERKER_CHARGE);
-                        events.ScheduleEvent(EVENT_CHARGE, 25s);
+                            events.ScheduleEvent(EVENT_WHIRLWIND, MANDOKIR_CHARGE_LANDING_FALLBACK);
+                        }
+                        else
+                            DoCastSelf(SPELL_WHIRLWIND);
+                        events.ScheduleEvent(EVENT_BERSERKER_CHARGE, MANDOKIR_CHARGE_INTERVAL);
                         break;
                     case EVENT_WHIRLWIND:
+                        _whirlwindOnLanding = false;
                         DoCastSelf(SPELL_WHIRLWIND);
-                        events.ScheduleEvent(EVENT_WHIRLWIND, MANDOKIR_WHIRLWIND_INTERVAL);
                         break;
                     case EVENT_MORTAL_STRIKE:
                         if (me->GetVictim() && me->IsWithinMeleeRange(me->GetVictim()))
@@ -473,6 +491,7 @@ namespace
     private:
         uint8 _kills = 0;
         bool _useExecute = false;
+        bool _whirlwindOnLanding = false;
         ObjectGuid _gazed;
         ObjectGuid _reviveGUID;
     };

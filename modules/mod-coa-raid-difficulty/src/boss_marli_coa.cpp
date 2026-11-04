@@ -10,9 +10,11 @@
  *
  *   Both forms
  *     Poison Bolt Volley first 12s, every 15s   everyone, stacking poison
- *     Hatch Eggs         first 17s, every 30s   the ten nearest eggs hatch (a DBM
- *                                               bar in the live video of
- *                                               2026-08-04; count: tester, live)
+ *     Hatch Eggs         first 17s, every 30s   the ten eggs nearest the players
+ *                                               hatch 10s later, one spider each
+ *                                               (a DBM bar in the live video of
+ *                                               2026-08-04; count and delay:
+ *                                               tester, live, 2026-11-04)
  *     Fierce Blow        tank, first 6.7-17.3s, then every 6-10s
  *
  *   Troll form
@@ -56,7 +58,9 @@
 #include "zg_coa_common.h"
 
 #include <algorithm>
+#include <limits>
 #include <list>
+#include <vector>
 
 using namespace coa_zg;
 
@@ -113,6 +117,7 @@ namespace
         EVENT_DRAIN_LIFE,
         EVENT_POISON_BOLT_VOLLEY,
         EVENT_HATCH_EGGS,
+        EVENT_OPEN_EGGS,
         EVENT_EVOLVE,
         EVENT_INFEST,
         EVENT_ACID_SPIT,
@@ -137,6 +142,8 @@ namespace
     constexpr Milliseconds BURROW_LENGTH        = 3s;
     constexpr Milliseconds HUNT_LENGTH          = 8s;
     constexpr Milliseconds HATCH_EVERY          = 30s;
+    constexpr Milliseconds HATCH_DELAY          = 10s;
+    constexpr float EGG_SEARCH_RANGE = 100.0f;
     constexpr float HUNT_THREAT    = 1000000.0f;
 
     struct boss_marli_coa : public BossAI
@@ -151,6 +158,8 @@ namespace
             _avatar.Restore(me);
             _spider = false;
             _festering.clear();
+            _usedEggs.clear();
+            _hatchingEggs.clear();
             EndHunt();
             Emerge();
 
@@ -227,8 +236,7 @@ namespace
                     break;
                 case SPELL_HATCH_EGGS:
                     Talk(SAY_SPIDER_SPAWN);
-                    for (uint8 i = 0; i < EGGS_PER_HATCH; ++i)
-                        HatchEgg();
+                    ClaimEggsNearPlayers();
                     break;
                 case SPELL_ACID_SPIT:
                     if (Unit* tank = me->GetVictim())
@@ -345,20 +353,77 @@ namespace
             return highest;
         }
 
-        // The nearest egg still standing hatches a Spawn of Mar'li.
-        Creature* HatchEgg()
+        std::vector<GameObject*> FreeEggs()
         {
             std::list<GameObject*> eggs;
-            me->GetGameObjectListWithEntryInGrid(eggs, GO_SPIDER_EGGS, 100.0f);
-            GameObject* nearest = nullptr;
+            me->GetGameObjectListWithEntryInGrid(eggs, GO_SPIDER_EGGS, EGG_SEARCH_RANGE);
+            std::vector<GameObject*> free;
             for (GameObject* egg : eggs)
-                if (egg->isSpawned() && (!nearest || me->GetDistance(egg) < me->GetDistance(nearest)))
+                if (egg->isSpawned() && !_usedEggs.count(egg->GetGUID()))
+                    free.push_back(egg);
+            return free;
+        }
+
+        // Hatch Eggs marks the eggs nearest the raid; each hatches one spider after HATCH_DELAY.
+        void ClaimEggsNearPlayers()
+        {
+            std::vector<Player*> const players = PlayersWithin(me, EGG_SEARCH_RANGE);
+            if (players.empty())
+                return;
+
+            auto distanceToRaid = [&players](GameObject const* egg)
+            {
+                float nearest = std::numeric_limits<float>::max();
+                for (Player const* p : players)
+                    nearest = std::min(nearest, egg->GetDistance(p));
+                return nearest;
+            };
+
+            std::vector<GameObject*> eggs = FreeEggs();
+            std::sort(eggs.begin(), eggs.end(), [&](GameObject const* a, GameObject const* b)
+            {
+                return distanceToRaid(a) < distanceToRaid(b);
+            });
+            if (eggs.size() > EGGS_PER_HATCH)
+                eggs.resize(EGGS_PER_HATCH);
+            if (eggs.empty())
+                return;
+
+            for (GameObject* egg : eggs)
+            {
+                _usedEggs.insert(egg->GetGUID());
+                _hatchingEggs.push_back(egg->GetGUID());
+            }
+            events.ScheduleEvent(EVENT_OPEN_EGGS, HATCH_DELAY);
+        }
+
+        void OpenClaimedEggs()
+        {
+            for (ObjectGuid const& guid : _hatchingEggs)
+                if (GameObject* egg = ObjectAccessor::GetGameObject(*me, guid))
+                    if (egg->isSpawned())
+                        HatchEgg(egg);
+            _hatchingEggs.clear();
+        }
+
+        // Evolve and Infest hatch the nearest free egg at once.
+        Creature* HatchNearestEgg()
+        {
+            GameObject* nearest = nullptr;
+            for (GameObject* egg : FreeEggs())
+                if (!nearest || me->GetDistance(egg) < me->GetDistance(nearest))
                     nearest = egg;
             if (!nearest)
                 return nullptr;
 
-            Creature* spawn = me->SummonCreature(NPC_SPAWN_OF_MARLI, nearest->GetPosition(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
-            nearest->SetLootState(GO_JUST_DEACTIVATED);
+            _usedEggs.insert(nearest->GetGUID());
+            return HatchEgg(nearest);
+        }
+
+        Creature* HatchEgg(GameObject* egg)
+        {
+            Creature* spawn = me->SummonCreature(NPC_SPAWN_OF_MARLI, egg->GetPosition(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+            egg->SetLootState(GO_JUST_DEACTIVATED);
             if (spawn)
                 spawn->SetInCombatWithZone();
             return spawn;
@@ -401,13 +466,16 @@ namespace
                         DoCastSelf(SPELL_HATCH_EGGS);
                         events.ScheduleEvent(EVENT_HATCH_EGGS, HATCH_EVERY);
                         break;
+                    case EVENT_OPEN_EGGS:
+                        OpenClaimedEggs();
+                        break;
                     case EVENT_EVOLVE:
-                        if (Creature* spawn = HatchEgg())
+                        if (Creature* spawn = HatchNearestEgg())
                             DoCast(spawn, SPELL_EVOLVE);
                         events.ScheduleEvent(EVENT_EVOLVE, 60s, 0, PHASE_TROLL);
                         break;
                     case EVENT_INFEST:
-                        if (Creature* spawn = HatchEgg())
+                        if (Creature* spawn = HatchNearestEgg())
                             DoCast(spawn, SPELL_INFEST);
                         events.ScheduleEvent(EVENT_INFEST, 60s, 0, PHASE_TROLL);
                         break;
@@ -459,6 +527,8 @@ namespace
         bool _spider = false;
         LoaAvatar _avatar{ NPC_AVATAR_OF_SHADRA, SPELL_DRAIN_POWER };
         GuidSet _festering;
+        GuidSet _usedEggs;
+        GuidVector _hatchingEggs;
         ObjectGuid _hunted;
         float _huntThreat = 0.0f;
     };
