@@ -400,7 +400,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     nullptr,                                                      //331 unknown Ascension aura
     nullptr,                                                      //332 unknown Ascension aura
     &AuraEffect::HandleAscensionModHitChanceAll,                  //333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT
-    nullptr,                                                      //334 unknown Ascension aura
+    nullptr,                                                      //334 SPELL_AURA_ASCENSION_IGNORE_POSITIONAL in Spell::CheckCast
     nullptr,                                                      //335 unknown Ascension aura
     nullptr,                                                      //336 unknown Ascension aura
     &AuraEffect::HandleNoImmediateEffect,                         //337 SPELL_AURA_ASCENSION_OVERRIDE_SPELL

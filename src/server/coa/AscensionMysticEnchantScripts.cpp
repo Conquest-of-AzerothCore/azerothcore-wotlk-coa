@@ -752,6 +752,116 @@ class spell_ascension_mystic_apply_corruption : public AuraScript
     }
 };
 
+constexpr uint32 SPELL_MURDER_RUSH_BUFF = 1180881;
+constexpr int32 MURDER_RUSH_SPRINT_MS = 5000;
+constexpr std::array<uint32, 3> REBORN_SPRINT_RANKS = { 1111305, 1108696, 1102983 };
+
+Aura* FindRebornSprint(Unit* unit)
+{
+    for (uint32 rank : REBORN_SPRINT_RANKS)
+        if (Aura* sprint = unit->GetAura(rank))
+            return sprint;
+    return nullptr;
+}
+
+class spell_ascension_mystic_murder_rush : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_mystic_murder_rush);
+
+    void HandleProc(AuraEffect const* effect, ProcEventInfo&)
+    {
+        PreventDefaultAction();
+        Unit* target = GetTarget();
+        if (FindRebornSprint(target))
+        {
+            target->CastSpell(target, SPELL_MURDER_RUSH_BUFF, true, nullptr, effect);
+            return;
+        }
+        Player* player = target->ToPlayer();
+        uint32 rank = REBORN_SPRINT_RANKS.back();
+        for (uint32 known : REBORN_SPRINT_RANKS)
+            if (player && player->HasSpell(known))
+            {
+                rank = known;
+                break;
+            }
+        target->CastSpell(target, rank, true, nullptr, effect);
+        if (Aura* sprint = FindRebornSprint(target))
+        {
+            sprint->SetMaxDuration(MURDER_RUSH_SPRINT_MS);
+            sprint->SetDuration(MURDER_RUSH_SPRINT_MS);
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(spell_ascension_mystic_murder_rush::HandleProc, EFFECT_0,
+            SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
+class spell_ascension_mystic_murder_rush_refresh : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_mystic_murder_rush_refresh);
+
+    void RefreshSprint()
+    {
+        if (Unit* target = GetHitUnit())
+            if (Aura* sprint = FindRebornSprint(target))
+                sprint->RefreshDuration();
+    }
+
+    void Register() override
+    {
+        AfterHit += SpellHitFn(spell_ascension_mystic_murder_rush_refresh::RefreshSprint);
+    }
+};
+
+constexpr uint32 SPELL_RUSH_OF_BLOOD_AMBUSH = 1587051;
+constexpr uint32 SPELL_RUSH_OF_BLOOD_ENERGY = 1587057;
+
+class spell_ascension_mystic_rush_of_blood : public AuraScript
+{
+    PrepareAuraScript(spell_ascension_mystic_rush_of_blood);
+
+    uint32 _hemorrhages = 0;
+
+    bool CheckProc(ProcEventInfo& eventInfo)
+    {
+        Spell const* spell = eventInfo.GetProcSpell();
+        return spell && eventInfo.GetSpellInfo() && !spell->IsTriggered() && eventInfo.GetActor() == GetTarget();
+    }
+
+    void HandleProc(AuraEffect const* effect, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+        Unit* target = GetTarget();
+        SpellInfo const* spell = eventInfo.GetSpellInfo();
+        if (effect->IsAffectedOnSpell(spell))
+        {
+            if (++_hemorrhages == 2)
+                target->CastSpell(target, SPELL_RUSH_OF_BLOOD_AMBUSH, true, nullptr, effect);
+            else if (_hemorrhages >= 3)
+            {
+                target->CastSpell(target, SPELL_RUSH_OF_BLOOD_ENERGY, true, nullptr, effect);
+                _hemorrhages = 0;
+            }
+            return;
+        }
+        _hemorrhages = 0;
+        if (Aura* ambush = target->GetAura(SPELL_RUSH_OF_BLOOD_AMBUSH))
+            if (AuraEffect const* free = ambush->GetEffect(EFFECT_0); free && free->IsAffectedOnSpell(spell))
+                ambush->Remove();
+    }
+
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(spell_ascension_mystic_rush_of_blood::CheckProc);
+        OnEffectProc += AuraEffectProcFn(spell_ascension_mystic_rush_of_blood::HandleProc, EFFECT_0,
+            SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
 class spell_ascension_mystic_widowmaker : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mystic_widowmaker);
@@ -1015,4 +1125,7 @@ void AddSC_AscensionMysticEnchantScripts()
     RegisterSpellScript(spell_ascension_mystic_widowmaker);
     RegisterSpellScript(spell_ascension_mystic_cryotherapist);
     RegisterSpellScript(spell_ascension_mystic_mana_state);
+    RegisterSpellScript(spell_ascension_mystic_murder_rush);
+    RegisterSpellScript(spell_ascension_mystic_murder_rush_refresh);
+    RegisterSpellScript(spell_ascension_mystic_rush_of_blood);
 }

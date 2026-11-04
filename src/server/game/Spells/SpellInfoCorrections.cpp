@@ -433,6 +433,16 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Stances = 1 << (FORM_TREE - 1);
     });
 
+    // Murder Rush's damage aura: the client's effect 1 names the aura and its 10% but no effect type, so the
+    // aura that Murder Rush keeps up while Sprint is active was never applied.
+    ApplySpellFix({ 1180881 }, [](SpellInfo* spellInfo)
+    {
+        if (spellInfo->Effects[EFFECT_1].Effect != 0 ||
+            spellInfo->Effects[EFFECT_1].ApplyAuraName != SPELL_AURA_ADD_PCT_MODIFIER)
+            return;
+        spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AURA;
+    });
+
     // Elemental Oath
     ApplySpellFix({ 51466, 51470 }, [](SpellInfo* spellInfo)
     {
