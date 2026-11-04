@@ -763,7 +763,7 @@ class spell_coa_volzeen_colossal_smash : public SpellScript
         Unit* target = GetHitUnit();
         Unit* caster = GetCaster();
         if (target && caster && caster->GetEntry() == NPC_VOLZEEN)
-            SetHitDamage(int32(Unscaled(caster, target, float(target->CountPctFromMaxHealth(12.0f)), GetSpellInfo())));
+            SetHitDamage(int32(Unscaled(caster, target, float(target->CountPctFromMaxHealth(float(ByDifficulty(caster, 30, 35, 45)))), GetSpellInfo())));
     }
 
     void Register() override
