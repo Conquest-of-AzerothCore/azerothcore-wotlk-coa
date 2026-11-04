@@ -1,8 +1,9 @@
--- Setis (64600): his loot, the altar by the Scarab Wall that takes players into his map (880), the portal back
--- he leaves when he dies, the graveyard at the start of his map, and the Prismatic Barrier school auras.
+-- Setis (64600): his loot, the shrine by the Scarab Wall that takes players into his map (880), the portal back
+-- he leaves when he dies, the graveyard, angel and shrine at the start of his map, and his place and health.
 
--- Loot: two of his nine items (two rolls of the same group). The level 68 items drop on the normal
--- difficulties (10 and 25 normal); their Heroic World Boss versions (level 71) are set up for the heroic ones.
+-- Loot: one roll of his nine items here; boss_setis_coa rolls one more for every four players in his map. The
+-- level 68 items drop on the normal difficulties; their Heroic World Boss versions (level 71), in loot mode 2,
+-- only on the heroic ones.
 UPDATE `creature_template` SET `lootid` = 64600 WHERE `entry` = 64600;
 DELETE FROM `creature_loot_template` WHERE `Entry` = 64600;
 INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`,
@@ -25,24 +26,21 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 (64600, 317244, 0, 0, 0, 2, 2, 1, 1, 'Setis (heroic) - Staff of the Gate Warden'),
 (64600, 317356, 0, 0, 0, 2, 2, 1, 1, 'Setis (heroic) - Waistguard of the Shifting Sands'),
 (64600, 317334, 0, 0, 0, 2, 2, 1, 1, 'Setis (heroic) - Wristguards of the Shifting Sands');
-INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`,
-  `GroupId`, `MinCount`, `MaxCount`, `Comment`)
-SELECT `Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId` + 2, `MinCount`,
-  `MaxCount`, CONCAT(`Comment`, ' (second item)')
-FROM `creature_loot_template` WHERE `Entry` = 64600 AND `GroupId` IN (1, 2);
 
 -- The altar by the Scarab Wall and the portal back.
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
   `size`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
-(64600, 10, 2490, 'Altar of Setis', '', '', '', 1, '', 'go_setis_altar_coa', 12340),
-(64601, 10, 3931, 'Portal to the Scarab Wall', '', '', '', 1, '', 'go_setis_exit_coa', 12340)
+(64600, 10, 2490, 'Shrine of Setis', '', '', '', 2, '', 'go_setis_altar_coa', 12340),
+(64601, 10, 4396, 'Portal to the Scarab Wall', '', '', '', 1.5, '', 'go_setis_exit_coa', 12340),
+(64604, 10, 2490, 'Shrine of Setis', '', '', '', 2, '', 'go_setis_leave_coa', 12340)
 ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`),
   `size` = VALUES(`size`), `ScriptName` = VALUES(`ScriptName`);
-DELETE FROM `gameobject` WHERE `guid` = 9780102;
+DELETE FROM `gameobject` WHERE `guid` IN (9780102, 9780900);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`) VALUES
-(9780102, 64600, 1, 0, 0, 1, 1, -7860.22, 1329.18, -7.52, 2.88, 0, 0, 0.9914, 0.1305, 300, 100, 1);
+(9780102, 64600, 1, 0, 0, 1, 1, -7864.724, 1326.674, -7.357, 5.4786, 0, 0, 0.3915, -0.9202, 300, 100, 1),
+(9780900, 64604, 880, 0, 0, 15, 1, -8098.0, 1668.0, 12.9, 0, 0, 0, 0, 1, 300, 100, 1);
 
 -- Players who die in his map rise at its start.
 DELETE FROM `game_graveyard` WHERE `ID` = 6099;
@@ -52,11 +50,41 @@ DELETE FROM `graveyard_zone` WHERE `ID` = 6099;
 INSERT INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`) VALUES
 (6099, 10235, 0, 'The Scarab Wall (Setis boss map)');
 
-DELETE FROM `spell_script_names` WHERE `ScriptName` = 'spell_setis_prismatic_barrier_coa';
-INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
-(2119031, 'spell_setis_prismatic_barrier_coa'),
-(2119032, 'spell_setis_prismatic_barrier_coa'),
-(2119033, 'spell_setis_prismatic_barrier_coa'),
-(2119034, 'spell_setis_prismatic_barrier_coa'),
-(2119035, 'spell_setis_prismatic_barrier_coa'),
-(2119036, 'spell_setis_prismatic_barrier_coa');
+-- Setis stands at the end of the Scarab Wall road, facing the raid as it comes in.
+UPDATE `creature` SET `position_x` = -8102.93, `position_y` = 1524.98, `position_z` = 2.65, `orientation` = 6.1819
+WHERE `guid` = 9780101 AND `id` = 64600;
+
+-- His health is per player in his map (10 to 40): 975000 on normal, 39 million for 40 players.
+UPDATE `coa_world_boss_level` SET `health` = 975000, `note` = 'per player; 39 million for 40 players'
+WHERE `entry` = 64600 AND `difficulty` = 0;
+UPDATE `coa_world_boss_level` SET `health` = 1810000, `note` = 'per player; the normal one times the log ratio'
+WHERE `entry` = 64600 AND `difficulty` = 2;
+
+-- The shrine's words and the angel's.
+DELETE FROM `npc_text` WHERE `ID` IN (64600, 64601);
+INSERT INTO `npc_text` (`ID`, `text0_0`, `text0_1`) VALUES
+(64600, 'The shrine seems to notice your presence as you place your hand on its surface to attune to its power.',
+  'The shrine seems to notice your presence as you place your hand on its surface to attune to its power.'),
+(64601, 'Your spirit lingers here. I can return you to life.', 'Your spirit lingers here. I can return you to life.');
+
+-- Setis' hologram above the shrine, and the angel at the start of his map who returns the fallen to life.
+INSERT INTO `creature_template` (`entry`, `name`, `subname`, `minlevel`, `maxlevel`, `faction`, `npcflag`,
+  `speed_walk`, `speed_run`, `unit_class`, `unit_flags`, `type`, `type_flags`, `AIName`, `ScriptName`,
+  `VerifiedBuild`) VALUES
+(64602, 'Setis', 'the Gate Watcher', 63, 63, 35, 0, 1, 1, 1, 33554434, 7, 0, '', '', 12340),
+(64603, 'Spirit of the Sands', NULL, 63, 63, 35, 1, 1, 1, 1, 768, 7, 2, '', 'npc_setis_angel_coa', 12340)
+ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `subname` = VALUES(`subname`), `faction` = VALUES(`faction`),
+  `npcflag` = VALUES(`npcflag`), `unit_flags` = VALUES(`unit_flags`), `type_flags` = VALUES(`type_flags`),
+  `ScriptName` = VALUES(`ScriptName`);
+DELETE FROM `creature_template_model` WHERE `CreatureID` IN (64602, 64603);
+INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
+  `VerifiedBuild`) VALUES
+(64602, 0, 5965, 0.6, 1, 12340),
+(64603, 0, 5233, 1, 1, 12340);
+DELETE FROM `creature_template_addon` WHERE `entry` IN (64602, 64603);
+INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (64602, '22650'), (64603, '');
+DELETE FROM `creature` WHERE `guid` IN (9780900, 9780901);
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
+  `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
+(9780900, 64602, 1, 0, 0, 1, 1, -7864.724, 1326.674, -4.6, 5.4786, 300, 0, 0),
+(9780901, 64603, 880, 0, 0, 15, 1, -8088.0, 1658.0, 12.9, 3.1, 300, 0, 0);

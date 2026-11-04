@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Setis' map: Last Checkpoint, the angel and the shrine out",
+  "contract": [
+    "In Setis' map (880) the server turns Ascension's checkpoints on (SMSG 0x767, u8 1), so the death dialog shows",
+    "Last Checkpoint. Its request (CMSG 0x774, u8 1) brings a dead player's body back to the entrance, where they",
+    "can release. The Spirit of the Sands (64603) returns a ghost to life without resurrection sickness, and the",
+    "Shrine of Setis at the entrance (64604) takes the player back to Silithus (map 1)."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 880, "x": -8093.0, "y": 1663.6, "z": 12.9},
+  "players": [
+    {"id": "raider", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 2000},
+    {"action": "assert", "label": "Checkpoints are on in his map", "actor": "raider", "metric": "server_packet_u8",
+     "opcode": 1895, "offset": 0, "equals": 1, "within_ms": 3000},
+    {"action": "teleport", "actor": "raider", "map": 880, "x": -7980.0, "y": 1510.0, "z": 2.6},
+    {"action": "wait", "ms": 1000},
+    {"action": "die", "actor": "raider"},
+    {"action": "client_packet", "label": "Last Checkpoint", "actor": "raider", "opcode": 1908,
+     "fields": [{"u8": 1}]},
+    {"action": "assert", "label": "The body is back at the entrance", "actor": "raider", "metric": "position_x",
+     "min": -8100, "max": -8086, "within_ms": 3000},
+    {"action": "assert", "label": "and still dead, ready to release", "actor": "raider", "metric": "alive",
+     "equals": 0},
+    {"action": "release_spirit", "actor": "raider"},
+    {"action": "summon", "actor": "raider", "entry": 64603, "as": "angel", "distance": 3},
+    {"action": "wait", "ms": 500},
+    {"action": "gossip_hello", "actor": "raider", "target": "angel"},
+    {"action": "gossip_select", "actor": "raider", "option": 0, "label": "Return me to life."},
+    {"action": "assert", "label": "The angel returns the ghost to life", "actor": "raider", "metric": "alive",
+     "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "without resurrection sickness", "actor": "raider", "metric": "aura",
+     "spell": 15007, "equals": 0},
+    {"action": "summon_gameobject", "actor": "raider", "entry": 64604, "distance": 2},
+    {"action": "use_gameobject", "actor": "raider", "entry": 64604},
+    {"action": "assert", "label": "The shrine at the entrance takes the player back to Silithus",
+     "actor": "raider", "metric": "map_id", "equals": 1, "within_ms": 8000}
+  ]
+}

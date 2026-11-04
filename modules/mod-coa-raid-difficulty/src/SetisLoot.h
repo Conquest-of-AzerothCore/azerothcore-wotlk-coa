@@ -6,13 +6,12 @@
 
 namespace coa_setis
 {
-    constexpr std::uint32_t MinItems = 2;
-    constexpr std::uint32_t MaxItems = 8;
+    constexpr std::uint32_t MinItems = 1;
 
-    // Two items for every ten players in his map, to the nearest: 2 for 10, 5 for 25, 8 for 40 and more.
+    // One item for every four players in his map, rounded down, and never none.
     constexpr std::uint32_t LootItems(std::uint32_t players)
     {
-        return std::clamp<std::uint32_t>((players + 2) / 5, MinItems, MaxItems);
+        return std::max<std::uint32_t>(players / 4, MinItems);
     }
 }
 

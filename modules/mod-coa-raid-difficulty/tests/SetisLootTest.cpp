@@ -2,18 +2,16 @@
 
 #include "gtest/gtest.h"
 
-TEST(SetisLoot, TwoItemsForEveryTenPlayers)
+TEST(SetisLoot, OneItemForEveryFourPlayersRoundedDown)
 {
     EXPECT_EQ(coa_setis::LootItems(10), 2u);
-    EXPECT_EQ(coa_setis::LootItems(25), 5u);
-    EXPECT_EQ(coa_setis::LootItems(40), 8u);
-    EXPECT_EQ(coa_setis::LootItems(13), 3u);
-    EXPECT_EQ(coa_setis::LootItems(20), 4u);
+    EXPECT_EQ(coa_setis::LootItems(23), 5u);
+    EXPECT_EQ(coa_setis::LootItems(25), 6u);
+    EXPECT_EQ(coa_setis::LootItems(40), 10u);
 }
 
-TEST(SetisLoot, NeverFewerThanTwoNorMoreThanEight)
+TEST(SetisLoot, NeverNone)
 {
-    EXPECT_EQ(coa_setis::LootItems(0), 2u);
-    EXPECT_EQ(coa_setis::LootItems(1), 2u);
-    EXPECT_EQ(coa_setis::LootItems(60), 8u);
+    EXPECT_EQ(coa_setis::LootItems(0), 1u);
+    EXPECT_EQ(coa_setis::LootItems(3), 1u);
 }

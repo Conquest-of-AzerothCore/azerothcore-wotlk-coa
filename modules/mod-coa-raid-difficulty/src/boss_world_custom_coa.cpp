@@ -11,26 +11,27 @@
  *
  * Setis (the log shows a kit between his old spells and his new block; the new
  * block's Seeking Shadow Bolts, Prismatic Barrier, split Meteor and Massive
- * Thunder Stomp never fired in it, so their timers are designed)
+ * Thunder Stomp never fired in it, so their timers are designed; Prismatic
+ * Barrier is left out, as he shows no aura on Ascension)
  *   Plague              every 5.1s    a random player
  *   Fierce Blow         every 8.8s    tank
  *   Shadow Storm        every 13.6s   shadow bolts at everyone 25-45 yards out
  *   Seeking Shadow Bolts every 21s    a shadow bolt at every player
  *   War Stomp           every 32s     around him, knocked back
- *   Meteor              every 32s     cast at a player; it lands 3s later and
+ *   Meteor              every 32s     cast at a player, then a fireball at them;
  *                                     its damage, which grows with the raid,
  *                                     is split between everyone in the impact
- *   Call Lightning      every 35.1s   4s cast, then a strike under every player
- *                                     that electrifies the ground for 20s
+ *   Call Lightning      every 35.1s   marks three spots, one more for every ten
+ *                                     players, then a 4s cast strikes them and
+ *                                     electrifies the ground for 20s
  *   Massive Thunder Stomp every 45s   the tank, then everyone, less further out,
  *                                     knocked back with slower attacks
- *   Prismatic Barrier   from 50%      absorbs one magic school, shifting every
- *                                     15s, and sends part of it back
  *   Frenzy              at 30%
  *   Armageddon          at 3%         15s cast, +150% damage taken while he
  *                                     casts; if it finishes, the raid dies
- * He drops two of his items for every ten players in his map: 2 for 10, 5 for 25,
- * 8 for 40 and more.
+ * His health is per player in his map (10 to 40). He drops one of his items for every
+ * four players, and every player gets Runes of Ascension, Bazaar Tokens and a
+ * Treasures of Azeroth chest.
  * The altar by the Scarab Wall takes players into his map, and the portal he
  * leaves behind takes them back to it.
  *
@@ -82,6 +83,13 @@
 #include "DatabaseEnv.h"
 #include "Field.h"
 #include "Log.h"
+#include "Item.h"
+#include "ServerScript.h"
+#include "PlayerScript.h"
+#include "WorldSession.h"
+#include "WorldPacket.h"
+#include "Mail.h"
+#include "ScriptedGossip.h"
 #include "LootMgr.h"
 #include "Map.h"
 #include "ObjectAccessor.h"
@@ -97,6 +105,9 @@
 #include "zg_coa_common.h"
 
 #include <algorithm>
+#include <unordered_set>
+#include <mutex>
+#include <atomic>
 #include <array>
 #include <cmath>
 #include <map>
@@ -242,17 +253,15 @@ namespace
         SPELL_SEEKING_BOLT      = 2119002,
         SPELL_METEOR_INFO       = 2119006,
         SPELL_METEOR            = 2119010,
+        SPELL_METEOR_MISSILE    = 2119011,
         SPELL_METEOR_IMPACT     = 2119013,
         SPELL_THUNDER_STOMP     = 2119022,
         SPELL_THUNDER_STOMP_HIT = 2119023,
         SPELL_THUNDER_STOMP_INFO = 2119024,
         SPELL_THUNDER_STOMP_DAMAGE = 2119028,
         SPELL_THUNDER_STOMP_KNOCK = 2119029,
-        SPELL_PRISMATIC_BARRIER = 2119030,
-        SPELL_PRISMATIC_FIRST   = 2119031,
-        SPELL_PRISMATIC_RESONANCE = 2119037,
-        SPELL_PRISMATIC_SHIFT   = 2119038,
         SPELL_CALL_LIGHTNING    = 2119052,
+        SPELL_LIGHTNING_MARK    = 2119053,
         SPELL_LIGHTNING_STRIKE  = 2119054,
         SPELL_ARMAGEDDON        = 2119050,
         SPELL_ARMAGEDDON_BLAST  = 2119051,
@@ -262,18 +271,43 @@ namespace
     {
         ES_PLAGUE = 1, ES_FIERCE, ES_STORM, ES_STOMP, ES_METEOR, ES_LIGHTNING, ES_BOLTS, ES_THUNDER
     };
-    enum SetisTicks { TS_METEOR_LAND = 1, TS_PRISM_SHIFT };
+    enum SetisTicks { TS_METEOR_LAND = 1 };
 
-    constexpr uint8 PRISMATIC_SCHOOLS = 6;
-    constexpr uint32 PRISMATIC_RESONANCE_PCT = 20;
     constexpr float METEOR_RADIUS = 8.0f;
-    constexpr uint32 GO_SETIS_ALTAR = 64600;
     constexpr uint32 GO_SETIS_EXIT = 64601;
     constexpr uint32 SETIS_MAP = 880;
+    constexpr uint32 SETIS_SHRINE_TEXT = 64600;
+    constexpr uint32 SETIS_ANGEL_TEXT = 64601;
+    constexpr uint32 SETIS_MIN_FLEX = 10;
+    constexpr uint32 SETIS_MAX_FLEX = 40;
+    constexpr uint32 ITEM_RUNE_OF_ASCENSION = 375250;
+    constexpr uint32 ITEM_BAZAAR_TOKEN = 975001;
+    constexpr uint32 ITEM_TREASURES_OF_AZEROTH = 978059;
+    constexpr uint32 SETIS_RUNES = 250;
+    constexpr uint32 SETIS_TOKENS_MIN = 100;
+    constexpr uint32 SETIS_TOKENS_MAX = 150;
     constexpr uint8 SETIS_NORMAL_GROUP = 1;
     constexpr uint8 SETIS_HEROIC_GROUP = 2;
+    constexpr uint16 SMSG_COA_CHECKPOINTS_ENABLED = 0x767;
+    constexpr uint16 CMSG_COA_RESPAWN_AT_CHECKPOINT = 0x774;
     Position const SetisEntrance = { -8093.0f, 1663.6f, 12.9f, 0.0f };
     Position const SetisAltarSide = { -7864.0f, 1325.0f, -7.5f, 2.88f };
+    Position const SetisExitPortal = { -7970.9f, 1507.22f, 2.61f, 0.0f };
+
+    void GiveOrMail(Player* player, uint32 item, uint32 count)
+    {
+        if (!count || player->AddItem(item, count))
+            return;
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+        MailDraft draft("Setis", "Your bags were full, so this part of your reward was sent by mail.");
+        if (Item* mailed = Item::CreateItem(item, count, player))
+        {
+            mailed->SaveToDB(trans);
+            draft.AddItem(mailed);
+        }
+        draft.SendMailTo(trans, MailReceiver(player), MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_GM));
+        CharacterDatabase.CommitTransaction(trans);
+    }
 
     struct boss_setis_coa : public custom_world_boss_coa
     {
@@ -282,14 +316,33 @@ namespace
         void Reset() override
         {
             custom_world_boss_coa::Reset();
-            _frenzy = _armageddon = _prism = false;
+            _frenzy = _armageddon = false;
+            _marks.clear();
             me->SetLootMode(me->GetMap()->IsHeroic() ? LOOT_MODE_HARD_MODE_1 : LOOT_MODE_DEFAULT);
-            _school = PRISMATIC_SCHOOLS;
-            for (uint8 i = 0; i < PRISMATIC_SCHOOLS; ++i)
-                me->RemoveAurasDueToSpell(SPELL_PRISMATIC_FIRST + i);
-            me->RemoveAurasDueToSpell(SPELL_PRISMATIC_BARRIER);
+            ApplyFlexHealth();
             // Reflected Firebolts in the log: fire (and arcane) comes back.
             DoCastSelf(SPELL_FIRE_REFLECT, true);
+        }
+
+        void JustEngagedWith(Unit* who) override
+        {
+            ApplyFlexHealth();
+            custom_world_boss_coa::JustEngagedWith(who);
+        }
+
+        void ApplyFlexHealth()
+        {
+            Level const* lv = LevelOf(me);
+            if (!lv || !lv->health)
+                return;
+            uint32 const players = std::clamp<uint32>(me->GetMap()->GetPlayersCountExceptGMs(), SETIS_MIN_FLEX,
+                SETIS_MAX_FLEX);
+            float const pct = me->GetHealthPct();
+            uint32 const health = lv->health * players;
+            me->SetCreateHealth(health);
+            me->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(health));
+            me->UpdateMaxHealth();
+            me->SetHealth(std::max<uint32>(uint32(me->GetMaxHealth() * pct / 100.0f), 1));
         }
 
         void Schedule() override
@@ -319,12 +372,14 @@ namespace
                 case ES_METEOR:
                     if (Unit* t = RandomPlayer())
                     {
+                        _meteorTarget = t->GetGUID();
                         _meteor = t->GetPosition();
                         DoCast(t, SPELL_METEOR);
                     }
                     events.Repeat(32s);
                     break;
                 case ES_LIGHTNING:
+                    MarkLightning();
                     if (Unit* t = RandomPlayer())
                         DoCast(t, SPELL_CALL_LIGHTNING);
                     events.Repeat(35100ms);
@@ -334,57 +389,67 @@ namespace
             }
         }
 
+        void MarkLightning()
+        {
+            std::vector<Player*> pool = PlayersWithin(me, 100.0f);
+            uint32 const marks = 3 + uint32(pool.size()) / 10;
+            Acore::Containers::RandomResize(pool, std::min<uint32>(marks, uint32(pool.size())));
+            _marks.clear();
+            for (Player* p : pool)
+            {
+                _marks.push_back(p->GetPosition());
+                CastAt(p->GetPosition(), SPELL_LIGHTNING_MARK);
+            }
+        }
+
         void Tick(uint32 tick) override
         {
-            if (tick == TS_METEOR_LAND)
+            if (tick != TS_METEOR_LAND)
+                return;
+            std::vector<Player*> hit = Players(me, [&](Player* p)
             {
-                std::vector<Player*> hit = Players(me, [&](Player* p)
-                {
-                    return p->IsAlive() && p->GetExactDist2d(&_meteor) <= METEOR_RADIUS;
-                });
-                if (hit.empty())
-                    return;
-                int32 const raid = int32(std::max<size_t>(PlayersWithin(me, 200.0f).size(), 1));
-                int32 const total = Info(me, SPELL_METEOR_INFO) * raid / 10;
-                for (Player* p : hit)
-                    Hit(me, p, SPELL_METEOR_IMPACT, std::max<int32>(total / int32(hit.size()), 1));
-            }
-            else if (tick == TS_PRISM_SHIFT)
-            {
-                if (!me->HasAura(SPELL_PRISMATIC_BARRIER))
-                    DoCastSelf(SPELL_PRISMATIC_BARRIER, true);
-                if (_school < PRISMATIC_SCHOOLS)
-                    me->RemoveAurasDueToSpell(SPELL_PRISMATIC_FIRST + _school);
-                uint8 next = uint8(urand(0, PRISMATIC_SCHOOLS - 2));
-                _school = next >= _school ? next + 1 : next;
-                DoCastSelf(SPELL_PRISMATIC_SHIFT, true);
-                me->AddAura(SPELL_PRISMATIC_FIRST + _school, me);
-                _clock.ScheduleEvent(TS_PRISM_SHIFT, 15s);
-            }
+                return p->IsAlive() && p->GetExactDist2d(&_meteor) <= METEOR_RADIUS;
+            });
+            if (hit.empty())
+                return;
+            int32 const raid = int32(std::max<size_t>(PlayersWithin(me, 200.0f).size(), 1));
+            int32 const total = Info(me, SPELL_METEOR_INFO) * raid / 10;
+            for (Player* p : hit)
+                Hit(me, p, SPELL_METEOR_IMPACT, std::max<int32>(total / int32(hit.size()), 1));
         }
 
         void JustDied(Unit* killer) override
         {
             custom_world_boss_coa::JustDied(killer);
+            uint32 const raid = me->GetMap()->GetPlayersCountExceptGMs();
             if (LootTemplate const* loot = LootTemplates_Creature.GetLootFor(me->GetCreatureTemplate()->lootid))
             {
-                uint32 const raid = me->GetMap()->GetPlayersCountExceptGMs();
-                uint32 const items = coa_setis::LootItems(raid);
                 uint8 const group = me->GetMap()->IsHeroic() ? SETIS_HEROIC_GROUP : SETIS_NORMAL_GROUP;
                 Player const* looter = me->GetLootRecipient();
-                for (uint32 i = coa_setis::MinItems; i < items; ++i)
+                for (uint32 i = coa_setis::MinItems; i < coa_setis::LootItems(raid); ++i)
                     loot->Process(me->loot, LootTemplates_Creature, me->GetLootMode(), looter, group);
             }
-            me->SummonGameObject(GO_SETIS_EXIT, me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(),
-                me->GetOrientation(), 0, 0, 0, 0, 600, true, GO_SUMMON_TIMED_DESPAWN);
+            me->GetMap()->DoForAllPlayers([](Player* player)
+            {
+                if (player->IsGameMaster())
+                    return;
+                GiveOrMail(player, ITEM_RUNE_OF_ASCENSION, SETIS_RUNES);
+                GiveOrMail(player, ITEM_BAZAAR_TOKEN, urand(SETIS_TOKENS_MIN, SETIS_TOKENS_MAX));
+                GiveOrMail(player, ITEM_TREASURES_OF_AZEROTH, 1);
+            });
+            if (me->GetMapId() == SETIS_MAP)
+                me->SummonGameObject(GO_SETIS_EXIT, SetisExitPortal.GetPositionX(), SetisExitPortal.GetPositionY(),
+                    SetisExitPortal.GetPositionZ(), SetisExitPortal.GetOrientation(), 0, 0, 0, 0, 600, true,
+                    GO_SUMMON_TIMED_DESPAWN);
         }
 
         void OnSpellCast(SpellInfo const* spell) override
         {
             if (spell->Id == SPELL_CALL_LIGHTNING)
             {
-                for (Player* p : PlayersWithin(me, 100.0f))
-                    CastAt(p->GetPosition(), SPELL_LIGHTNING_STRIKE);
+                for (Position const& mark : _marks)
+                    CastAt(mark, SPELL_LIGHTNING_STRIKE);
+                _marks.clear();
             }
             else if (spell->Id == SPELL_ARMAGEDDON)
                 DoCastAOE(SPELL_ARMAGEDDON_BLAST, true);
@@ -394,7 +459,14 @@ namespace
                     me->CastSpell(p, SPELL_SEEKING_BOLT, true);
             }
             else if (spell->Id == SPELL_METEOR)
-                _clock.ScheduleEvent(TS_METEOR_LAND, 3s);
+            {
+                if (Unit* target = ObjectAccessor::GetUnit(*me, _meteorTarget))
+                {
+                    _meteor = target->GetPosition();
+                    me->CastSpell(target, SPELL_METEOR_MISSILE, true);
+                }
+                _clock.ScheduleEvent(TS_METEOR_LAND, 1500ms);
+            }
             else if (spell->Id == SPELL_THUNDER_STOMP)
             {
                 if (Unit* tank = me->GetVictim())
@@ -412,11 +484,6 @@ namespace
         void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType type, SpellSchoolMask school) override
         {
             custom_world_boss_coa::DamageTaken(attacker, damage, type, school);
-            if (!_prism && me->HealthBelowPctDamaged(50, damage))
-            {
-                _prism = true;
-                _clock.ScheduleEvent(TS_PRISM_SHIFT, 0ms);
-            }
             if (!_frenzy && me->HealthBelowPctDamaged(30, damage))
             {
                 _frenzy = true;
@@ -434,27 +501,9 @@ namespace
     private:
         bool _frenzy = false;
         bool _armageddon = false;
-        bool _prism = false;
-        uint8 _school = PRISMATIC_SCHOOLS;
+        ObjectGuid _meteorTarget;
         Position _meteor;
-    };
-
-    class spell_setis_prismatic_barrier_coa : public AuraScript
-    {
-        PrepareAuraScript(spell_setis_prismatic_barrier_coa);
-
-        void AfterAbsorb(AuraEffect* /*aurEff*/, DamageInfo& dmgInfo, uint32& absorbAmount)
-        {
-            Unit* owner = GetTarget();
-            Unit* attacker = dmgInfo.GetAttacker();
-            if (owner && attacker && attacker != owner && absorbAmount)
-                Hit(owner, attacker, SPELL_PRISMATIC_RESONANCE, int32(absorbAmount * PRISMATIC_RESONANCE_PCT / 100));
-        }
-
-        void Register() override
-        {
-            AfterEffectAbsorb += AuraEffectAbsorbFn(spell_setis_prismatic_barrier_coa::AfterAbsorb, EFFECT_0);
-        }
+        std::vector<Position> _marks;
     };
 
     class go_setis_altar_coa : public GameObjectScript
@@ -462,10 +511,23 @@ namespace
     public:
         go_setis_altar_coa() : GameObjectScript("go_setis_altar_coa") { }
 
-        bool OnGossipHello(Player* player, GameObject* /*go*/) override
+        bool OnGossipHello(Player* player, GameObject* go) override
         {
-            player->TeleportTo(SETIS_MAP, SetisEntrance.GetPositionX(), SetisEntrance.GetPositionY(),
-                SetisEntrance.GetPositionZ(), SetisEntrance.GetOrientation());
+            ClearGossipMenuFor(player);
+            AddGossipItemFor(player, GOSSIP_ICON_BATTLE, "Challenge Setis the Gate Watcher", GOSSIP_SENDER_MAIN,
+                GOSSIP_ACTION_INFO_DEF + 1);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Take your hands off the shrine.", GOSSIP_SENDER_MAIN,
+                GOSSIP_ACTION_INFO_DEF + 2);
+            SendGossipMenuFor(player, SETIS_SHRINE_TEXT, go->GetGUID());
+            return true;
+        }
+
+        bool OnGossipSelect(Player* player, GameObject* /*go*/, uint32 /*sender*/, uint32 action) override
+        {
+            CloseGossipMenuFor(player);
+            if (action == GOSSIP_ACTION_INFO_DEF + 1)
+                player->TeleportTo(SETIS_MAP, SetisEntrance.GetPositionX(), SetisEntrance.GetPositionY(),
+                    SetisEntrance.GetPositionZ(), SetisEntrance.GetOrientation());
             return true;
         }
     };
@@ -473,13 +535,96 @@ namespace
     class go_setis_exit_coa : public GameObjectScript
     {
     public:
-        go_setis_exit_coa() : GameObjectScript("go_setis_exit_coa") { }
+        explicit go_setis_exit_coa(char const* name) : GameObjectScript(name) { }
 
         bool OnGossipHello(Player* player, GameObject* /*go*/) override
         {
             player->TeleportTo(1, SetisAltarSide.GetPositionX(), SetisAltarSide.GetPositionY(),
                 SetisAltarSide.GetPositionZ(), SetisAltarSide.GetOrientation());
             return true;
+        }
+    };
+
+    class npc_setis_angel_coa : public CreatureScript
+    {
+    public:
+        npc_setis_angel_coa() : CreatureScript("npc_setis_angel_coa") { }
+
+        bool OnGossipHello(Player* player, Creature* creature) override
+        {
+            ClearGossipMenuFor(player);
+            if (player->HasPlayerFlag(PLAYER_FLAGS_GHOST))
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Return me to life.", GOSSIP_SENDER_MAIN,
+                    GOSSIP_ACTION_INFO_DEF + 1);
+            SendGossipMenuFor(player, SETIS_ANGEL_TEXT, creature->GetGUID());
+            return true;
+        }
+
+        bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action) override
+        {
+            CloseGossipMenuFor(player);
+            if (action == GOSSIP_ACTION_INFO_DEF + 1 && player->HasPlayerFlag(PLAYER_FLAGS_GHOST))
+            {
+                player->ResurrectPlayer(1.0f, false);
+                player->SpawnCorpseBones();
+            }
+            return true;
+        }
+    };
+
+    // Ascension's death dialog offers "Last Checkpoint" in a raid whose checkpoints are on (SMSG 0x767, u8);
+    // the button sends CMSG 0x774 (u8 1). In Setis' map it carries the body back to the entrance.
+    std::mutex g_checkpointLock;
+    std::unordered_set<uint32> g_checkpointRequests;
+    std::atomic<uint32> g_checkpointCount{0};
+
+    class setis_checkpoint_packets : public ServerScript
+    {
+    public:
+        setis_checkpoint_packets()
+            : ServerScript("setis_checkpoint_packets", {SERVERHOOK_CAN_PACKET_RECEIVE_EARLY}) { }
+
+        [[nodiscard]] bool CanPacketReceiveEarly(WorldSession* session, WorldPacket const& packet) override
+        {
+            if (packet.GetOpcode() != CMSG_COA_RESPAWN_AT_CHECKPOINT)
+                return true;
+            if (session)
+            {
+                std::lock_guard lock(g_checkpointLock);
+                if (g_checkpointRequests.insert(session->GetAccountId()).second)
+                    ++g_checkpointCount;
+            }
+            return false;
+        }
+    };
+
+    class setis_checkpoint_players : public PlayerScript
+    {
+    public:
+        setis_checkpoint_players()
+            : PlayerScript("setis_checkpoint_players", {PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_MAP_CHANGED}) { }
+
+        void OnPlayerMapChanged(Player* player) override
+        {
+            WorldPacket packet(SMSG_COA_CHECKPOINTS_ENABLED, 1);
+            packet << uint8(player->GetMapId() == SETIS_MAP ? 1 : 0);
+            player->SendDirectMessage(&packet);
+        }
+
+        void OnPlayerUpdate(Player* player, uint32 /*diff*/) override
+        {
+            if (!g_checkpointCount.load(std::memory_order_relaxed))
+                return;
+            {
+                std::lock_guard lock(g_checkpointLock);
+                if (!g_checkpointRequests.erase(player->GetSession()->GetAccountId()))
+                    return;
+                --g_checkpointCount;
+            }
+            if (player->GetMapId() != SETIS_MAP || player->IsAlive() || player->HasPlayerFlag(PLAYER_FLAGS_GHOST))
+                return;
+            player->NearTeleportTo(SetisEntrance.GetPositionX(), SetisEntrance.GetPositionY(),
+                SetisEntrance.GetPositionZ(), SetisEntrance.GetOrientation());
         }
     };
 
@@ -1414,9 +1559,12 @@ void AddCoaCustomWorldBossScripts()
 {
     new coa_world_boss_level_loader();
     new custom_script<boss_setis_coa>("boss_setis_coa");
-    RegisterSpellScript(spell_setis_prismatic_barrier_coa);
+    new npc_setis_angel_coa();
     new go_setis_altar_coa();
-    new go_setis_exit_coa();
+    new go_setis_exit_coa("go_setis_exit_coa");
+    new go_setis_exit_coa("go_setis_leave_coa");
+    new setis_checkpoint_packets();
+    new setis_checkpoint_players();
     new custom_script<boss_snowgrave_coa>("boss_snowgrave_coa");
     new custom_script<boss_soggoth_coa>("boss_soggoth_coa");
     new custom_script<npc_psychophage_coa>("npc_psychophage_coa");
