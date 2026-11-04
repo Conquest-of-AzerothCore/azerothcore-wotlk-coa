@@ -40,6 +40,7 @@
 #include "Log.h"
 #include "MapMgr.h"
 #include <limits>
+#include <set>
 #include "MiscPackets.h"
 #include "MoveSpline.h"
 #include "ObjectAccessor.h"
@@ -309,6 +310,29 @@ void ResendRemainingGlobalCooldown(Player* player, uint32 spellId)
     }
 }
 
+// Effects usually name the first rank, but the cleared button holds the rank the player owns, and a category reset
+// clears every spell in that category.
+void ResendRemainingGlobalCooldowns(Player* player, uint32 spellId, uint32 category)
+{
+    std::set<uint32> clearedSpells;
+    for (uint32 rankId = sSpellMgr->GetFirstSpellInChain(spellId); rankId;
+        rankId = sSpellMgr->GetNextSpellInChain(rankId))
+        clearedSpells.insert(rankId);
+
+    clearedSpells.insert(spellId);
+
+    if (category)
+    {
+        SpellCategoryStore::const_iterator categorySpells = sSpellsByCategoryStore.find(category);
+        if (categorySpells != sSpellsByCategoryStore.end())
+            for (std::pair<bool, uint32> const& categorySpell : categorySpells->second)
+                clearedSpells.insert(categorySpell.second);
+    }
+
+    for (uint32 clearedSpellId : clearedSpells)
+        ResendRemainingGlobalCooldown(player, clearedSpellId);
+}
+
 void ResetAscensionCooldown(Player* player, uint32 spellId, bool resetCategory)
 {
     if (!player || !spellId)
@@ -316,12 +340,13 @@ void ResetAscensionCooldown(Player* player, uint32 spellId, bool resetCategory)
 
     player->RemoveSpellCooldown(spellId, true);
 
+    uint32 category = 0;
     if (resetCategory)
         if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId))
-            if (uint32 category = spellInfo->GetCategory())
+            if ((category = spellInfo->GetCategory()))
                 player->RemoveCategoryCooldown(category);
 
-    ResendRemainingGlobalCooldown(player, spellId);
+    ResendRemainingGlobalCooldowns(player, spellId, category);
 }
 
 void ModifyAscensionRankCooldown(Player* player, uint32 spellId, int32 delta, bool resetCategory)

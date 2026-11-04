@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Electrocutioner's reset keeps Electrocute's remaining global cooldown on the client",
-  "contract": "Electrocutioner (804592) resets Electrocute through SPELL_EFFECT_ASCENSION_RESET_COOLDOWN (195), which ends in Player::RemoveSpellCooldown and SMSG_CLEAR_COOLDOWN. The client clears that action button's cooldown sweep including the global cooldown, so a reset landing mid global cooldown made Electrocute look ready while Spell::CheckCast still refused it (reported with Arm of Thorim's 0.97 s cast inside its 1.5 s global cooldown). Electrocute (801844) is an instant direct-damage spell (CastingTimeIndex 1, Speed 0) with StartRecoveryCategory 133 and StartRecoveryTime 1500, so its own hit lands in the same update that starts its global cooldown, and at full Static (100 stacks of 803102) the Electrocutioner passive (500068) procs on 25% of hits. After each reset the server must send SMSG_SPELL_COOLDOWN for Electrocute with the remaining global cooldown, at most 1500 ms. The target is set to 3000 health (below 35% of entry 36's level 20 health) so every cast is allowed, and reset_cooldown clears the 6 s category cooldown between casts. 24 casts make a missed proc very unlikely (0.75^24, about 0.1%). Before the fix no cooldown packet carried a value in that range for 801844.",
+  "name": "Electrocutioner's reset keeps the owned Electrocute rank's remaining global cooldown on the client",
+  "contract": "Electrocutioner (804592) resets Electrocute through SPELL_EFFECT_ASCENSION_RESET_COOLDOWN (195), which ends in Player::RemoveSpellCooldown and SMSG_CLEAR_COOLDOWN. The client clears that action button's cooldown sweep including the global cooldown, so a reset landing mid global cooldown made Electrocute look ready while Spell::CheckCast still refused it (reported with Arm of Thorim's 0.97 s cast inside its 1.5 s global cooldown). Electrocute (801844) is an instant direct-damage spell (CastingTimeIndex 1, Speed 0) with StartRecoveryCategory 133 and StartRecoveryTime 1500, so its own hit lands in the same update that starts its global cooldown, and at full Static (100 stacks of 803102) the Electrocutioner passive (500068) procs on 25% of hits. Electrocutioner's reset names the first rank (801844), but the action button holds the rank the player owns, and resetting category 978 clears every rank. The actor learns ranks 1 to 3 like a level 18 player, so 801844 is no longer active and Electrocute is cast as rank 3 (501422). After each reset the server must send SMSG_SPELL_COOLDOWN for 501422 with the remaining global cooldown, at most 1500 ms. The target is set to 3000 health (below 35% of entry 36's level 20 health) so every cast is allowed, and reset_cooldown clears the 6 s category cooldown between casts. 24 casts make a missed proc very unlikely (0.75^24, about 0.1%). Before the fix the remaining global cooldown was re-sent only for the inactive first rank, so no cooldown packet carried a value in that range for 501422.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -38,6 +38,16 @@
       "spell": 801844
     },
     {
+      "action": "learn",
+      "actor": "s",
+      "spell": 501421
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 501422
+    },
+    {
       "action": "set_health",
       "actor": "e",
       "value": 3000
@@ -51,12 +61,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -77,12 +87,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -103,12 +113,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -129,12 +139,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -155,12 +165,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -181,12 +191,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -207,12 +217,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -233,12 +243,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -259,12 +269,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -285,12 +295,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -311,12 +321,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -337,12 +347,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -363,12 +373,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -389,12 +399,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -415,12 +425,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -441,12 +451,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -467,12 +477,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -493,12 +503,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -519,12 +529,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -545,12 +555,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -571,12 +581,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -597,12 +607,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -623,12 +633,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -649,12 +659,12 @@
     {
       "action": "reset_cooldown",
       "actor": "s",
-      "spell": 801844
+      "spell": 501422
     },
     {
       "action": "cast",
       "actor": "s",
-      "spell": 801844,
+      "spell": 501422,
       "target": "e"
     },
     {
@@ -674,7 +684,7 @@
       "label": "The reset re-sent the remaining global cooldown for Electrocute's button",
       "actor": "s",
       "metric": "spell_cooldown_packet_ms",
-      "spell": 801844,
+      "spell": 501422,
       "min": 1,
       "max": 1500
     }
