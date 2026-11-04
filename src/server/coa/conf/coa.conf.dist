@@ -645,6 +645,16 @@ CoA.DungeonTuning.Enable = 1
 CoA.DungeonNormal.Enable = 1
 
 #
+#    CoA.FierceBlow.Enable
+#        Description: Ascension's Fierce Blow (975011) on every hostile creature fighting a player or a
+#                     player's unit: one every 6-9.5 s, taking the place of its next melee swing. It
+#                     cannot be dodged, parried or missed. Creatures that already schedule their own
+#                     Fierce Blow (boss kits, SmartAI, C++ scripts) keep their own timing.
+#        Default:     1
+
+CoA.FierceBlow.Enable = 1
+
+#
 #    CoA.DungeonNormal.RepeatFactor
 #        Description: How much longer a boss kit spell takes to come back on Normal (1.1 = 10% longer).
 #        Default:     1.1
