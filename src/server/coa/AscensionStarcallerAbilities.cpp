@@ -243,9 +243,6 @@ class starcaller_spells : public AllSpellScript
         State(player).event = true;
         if (player != target && !player->IsFriendlyTo(target))
         {
-            // 503584 promises the haste outright for an Astral Flare landing, with no
-            // damage condition, and a flare that lands for nothing (absorb, immunity, a
-            // training dummy) still landed. A miss is already filtered above.
             if (id == 800507 && player->HasAura(503584))
                 Cast(player, player, 503585);
             if (Any(info, {680220, 801127, 800497, 680703}))
