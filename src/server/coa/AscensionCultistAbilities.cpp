@@ -190,6 +190,8 @@ public:
             if (player->HasAura(680570))
                 Cast(player, player, 680571);
         }
+        if (id == 500723)
+            Cast(player, player, 500717);
         if (id == 806175)
             StartDash(player);
         if (id == 805114 && player->HasAura(707429) && spell->GetScriptValue(Insanity) >= 80)
@@ -217,7 +219,7 @@ public:
                 Copy(player, player, 707185, CalculatePct(healing, Amount(704884)));
             State(player).event = old;
         }
-        if (Named(info, 520333) && healing && player->HasAura(706188))
+        if (Named(info, 520333) && (healing || target == player) && player->HasAura(706188))
             Cast(player, target, 807344);
         if (Any(info, {808043, 808044, 808045, 808050, 808051, 808052}) && player->HasAura(704880) && (damage || healing))
         {
@@ -262,6 +264,8 @@ public:
                 bool linkedB = b->GetGUID() == State(player).covenant;
                 if (linkedA != linkedB)
                     return linkedA;
+                if (a->IsPlayer() != b->IsPlayer())
+                    return a->IsPlayer();
                 uint32 stacksA = a->GetAura(BlackBlood, player->GetGUID()) ? a->GetAura(BlackBlood, player->GetGUID())->GetStackAmount() : 0;
                 uint32 stacksB = b->GetAura(BlackBlood, player->GetGUID()) ? b->GetAura(BlackBlood, player->GetGUID())->GetStackAmount() : 0;
                 return stacksA != stacksB ? stacksA < stacksB : a->GetHealthPct() < b->GetHealthPct();
@@ -285,8 +289,6 @@ public:
                 existing = std::max(0, shield->GetAmount());
             Copy(player, player, 850002, existing + CalculatePct(damage, Amount(704889)));
         }
-        if (id == 500717)
-            Cast(player, player, 500723);
         if (id == 560109 && player->HasAura(525049))
             for (Unit* enemy : Nearby(target, Radius(560943)))
                 if (player->IsValidAttackTarget(enemy))

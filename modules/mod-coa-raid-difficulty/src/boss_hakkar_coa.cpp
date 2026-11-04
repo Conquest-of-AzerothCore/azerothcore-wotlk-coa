@@ -13,16 +13,17 @@
  *                                             for it. A player with poisoned
  *                                             blood hurts him instead. While he
  *                                             drains, his Heart is exposed:
- *                                             damage to it goes to him, and 10%
- *                                             of his health dealt through it ends
- *                                             the siphon early.
+ *                                             damage to it goes to him as well,
+ *                                             and breaking it ends the siphon
+ *                                             early (live logs: the heart's last
+ *                                             hit ends the siphon).
  *   Corrupted Blood    first 25s, every 30s   everyone: stacking Plague damage
  *                                             that heals him; when it ends, a
  *                                             Pool of Corrupted Blood stays
  *   Will of Hakkar     first 45s, every 45s   a player feels it for 5s, then is
  *                                             his for 15s
  *   Blood Scythe       first 10s, every 15s   cone in front, -10% armour, stacks 10
- *   Sons of Hakkar     first 45s, every 60s   two join; where one dies its blood
+ *   Sons of Hakkar     first 45s, every 60s   one joins; where it dies its blood
  *                                             pools and poisons those inside
  *   Aspects            one for each High Priest still alive, +25% damage and
  *                      -10% damage taken each: at the pull he drains the Avatar
@@ -33,10 +34,10 @@
  *   Berserk            at 10 minutes
  *
  * Decided here, not in the data:
- *   - the siphon's length, the heart's 10% and where the heart appears;
+ *   - the siphon's length and where the heart appears;
  *   - the DBM bar "Pet Wind Serpent" (every 60s) is read as the wave of Sons of
  *     Hakkar: the siphon mechanic needs poisoned blood, and the data says it
- *     comes from a Son of Hakkar. Two per wave;
+ *     comes from a Son of Hakkar. One per wave (tester, live);
  *   - the Aspects are Ascension's buffs instead of the stock aspect spells;
  *   - the avatars stand in a ring 10 yards around him (nothing in the data says
  *     where; his Drain Power has no range limit);
@@ -128,11 +129,10 @@ namespace
 
     enum Actions
     {
-        ACTION_HEART_DAMAGE = 1
+        ACTION_HEART_BROKEN = 1
     };
 
     constexpr Milliseconds SIPHON_LENGTH = 20s;
-    constexpr uint32 HEART_BREAK_PCT     = 10;
     constexpr float SCYTHE_RANGE         = 20.0f;
     constexpr float SCYTHE_ARC           = float(M_PI) / 2;
     constexpr float POOL_RADIUS          = 5.0f;
@@ -177,6 +177,7 @@ namespace
         void Reset() override
         {
             _Reset();
+            me->RemoveAllDynObjects();
             ApplyHakkarPowerStacks();
             for (PriestLoa& loa : _loas)
             {
@@ -184,7 +185,6 @@ namespace
                 me->RemoveAurasDueToSpell(loa.aspect);
             }
             _siphoning = false;
-            _heartDamage = 0;
             _pools.clear();
             _clock.Reset();
         }
@@ -239,6 +239,7 @@ namespace
             for (PriestLoa& loa : _loas)
                 loa.avatar.Despawn(me);
             ClearWill();
+            me->RemoveAllDynObjects();
             BossAI::EnterEvadeMode(why);
             Talk(SAY_EVADE);
         }
@@ -248,6 +249,7 @@ namespace
             for (PriestLoa& loa : _loas)
                 loa.avatar.Despawn(me);
             ClearWill();
+            me->RemoveAllDynObjects();
             BossAI::JustDied(killer);
             GrantRunes();
         }
@@ -275,17 +277,12 @@ namespace
             }
         }
 
-        // The heart reports what it took.
-        void SetData(uint32 type, uint32 value) override
+        void SetData(uint32 type, uint32 /*value*/) override
         {
-            if (type != ACTION_HEART_DAMAGE || !_siphoning)
+            if (type != ACTION_HEART_BROKEN || !_siphoning)
                 return;
-            _heartDamage += value;
-            if (_heartDamage >= me->CountPctFromMaxHealth(HEART_BREAK_PCT))
-            {
-                _clock.CancelEvent(EVENT_SIPHON_END);
-                _clock.ScheduleEvent(EVENT_SIPHON_END, 0ms);
-            }
+            _clock.CancelEvent(EVENT_SIPHON_END);
+            _clock.ScheduleEvent(EVENT_SIPHON_END, 0ms);
         }
 
         bool PoisonedBlood(Player* p)
@@ -308,7 +305,6 @@ namespace
                 case SPELL_BLOOD_SIPHON:
                 {
                     _siphoning = true;
-                    _heartDamage = 0;
                     Position pos = me->GetNearPosition(12.0f, 0.0f);
                     if (Creature* heart = me->SummonCreature(NPC_HEART_OF_HAKKAR, pos, TEMPSUMMON_MANUAL_DESPAWN))
                     {
@@ -446,12 +442,9 @@ namespace
                         events.ScheduleEvent(EVENT_BLOOD_SCYTHE, 15s);
                         break;
                     case EVENT_SONS:
-                        for (uint8 i = 0; i < 2; ++i)
-                        {
-                            Position pos = me->GetRandomNearPosition(25.0f);
-                            if (Creature* son = me->SummonCreature(NPC_SON_OF_HAKKAR, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
-                                son->SetInCombatWithZone();
-                        }
+                        if (Creature* son = me->SummonCreature(NPC_SON_OF_HAKKAR, me->GetRandomNearPosition(25.0f),
+                            TEMPSUMMON_CORPSE_TIMED_DESPAWN, 30000))
+                            son->SetInCombatWithZone();
                         events.ScheduleEvent(EVENT_SONS, 60s);
                         break;
                     case EVENT_BERSERK:
@@ -483,13 +476,12 @@ namespace
         }};
         EventMap _clock;
         bool _siphoning = false;
-        uint32 _heartDamage = 0;
         ObjectGuid _heart;
         ObjectGuid _willTarget;
         GuidVector _pools;
     };
 
-    // The Heart of Hakkar: whatever hits it hits Hakkar.
+    // The Heart of Hakkar: whatever hits it hits Hakkar too, and breaking it ends the siphon.
     struct npc_heart_of_hakkar_coa : public ScriptedAI
     {
         npc_heart_of_hakkar_coa(Creature* creature) : ScriptedAI(creature)
@@ -500,19 +492,33 @@ namespace
 
         void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType type, SpellSchoolMask /*school*/) override
         {
+            if (_broken)
+            {
+                damage = 0;
+                return;
+            }
             uint32 const dealt = damage;
-            damage = 0;
+            bool const broken = damage >= me->GetHealth();
+            if (broken)
+                damage = me->GetHealth() > 1 ? me->GetHealth() - 1 : 0;
             if (!dealt || !attacker)
                 return;
-            InstanceScript* instance = me->GetInstanceScript();
-            Creature* hakkar = instance ? instance->GetCreature(DATA_HAKKAR) : nullptr;
+            TempSummon* summon = me->ToTempSummon();
+            Creature* hakkar = summon ? summon->GetSummonerCreatureBase() : nullptr;
             if (!hakkar || !hakkar->IsAlive())
                 return;
             Unit::DealDamage(attacker, hakkar, dealt, nullptr, type, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
-            hakkar->AI()->SetData(ACTION_HEART_DAMAGE, dealt);
+            if (broken && !_broken)
+            {
+                _broken = true;
+                hakkar->AI()->SetData(ACTION_HEART_BROKEN, 0);
+            }
         }
 
         void UpdateAI(uint32 /*diff*/) override { }
+
+    private:
+        bool _broken = false;
     };
 
     // Corrupted Blood heals Hakkar for what it deals, and leaves a pool when it ends.

@@ -668,6 +668,84 @@ class aura_wildcard_trauma_care : public AuraScript
         OnEffectProc += AuraEffectProcFn(aura_wildcard_trauma_care::Proc, EFFECT_0, SPELL_AURA_DUMMY);
     }
 };
+class aura_wildcard_relentless_reflexes : public AuraScript
+{
+    PrepareAuraScript(aura_wildcard_relentless_reflexes);
+    static constexpr uint32 REFLEXES = 276306;
+    bool Validate(SpellInfo const*) override { return ValidateSpellInfo({REFLEXES}); }
+    bool Check(ProcEventInfo& event)
+    {
+        Unit* owner = GetTarget();
+        Spell const* spell = event.GetProcSpell();
+        return owner && owner->IsPlayer() && event.GetActor() == owner && spell && !spell->IsTriggered() &&
+            spell->GetSpellInfo()->NeedsComboPoints() && (event.GetSpellPhaseMask() & PROC_SPELL_PHASE_FINISH);
+    }
+    void Proc(AuraEffect const* effect, ProcEventInfo&)
+    {
+        PreventDefaultAction();
+        Unit* owner = GetTarget();
+        Aura* reflexes = owner->GetAura(REFLEXES, owner->GetGUID());
+        int32 const remaining = reflexes ? reflexes->GetDuration() : 0;
+        owner->CastSpell(owner, REFLEXES, true, nullptr, effect);
+        if (reflexes && owner->GetAura(REFLEXES, owner->GetGUID()) == reflexes)
+            reflexes->SetDuration(remaining);
+    }
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_wildcard_relentless_reflexes::Check);
+        OnEffectProc += AuraEffectProcFn(aura_wildcard_relentless_reflexes::Proc, EFFECT_0, SPELL_AURA_DUMMY);
+    }
+};
+class aura_wildcard_path_of_duality : public AuraScript
+{
+    PrepareAuraScript(aura_wildcard_path_of_duality);
+    static constexpr uint32 STRENGTH_TO_ATTACK_POWER = 820056;
+    static constexpr uint32 AGILITY_TO_ATTACK_POWER = 820057;
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({ STRENGTH_TO_ATTACK_POWER, AGILITY_TO_ATTACK_POWER });
+    }
+    void Period(AuraEffect const* effect, bool& periodic, int32& interval)
+    {
+        periodic = true;
+        interval = effect->GetSpellInfo()->Effects[effect->GetEffIndex()].Amplitude;
+    }
+    void Convert()
+    {
+        Unit* owner = GetUnitOwner();
+        bool const strength = owner->GetStat(STAT_STRENGTH) >= owner->GetStat(STAT_AGILITY);
+        uint32 const kept = strength ? STRENGTH_TO_ATTACK_POWER : AGILITY_TO_ATTACK_POWER;
+        owner->RemoveAurasDueToSpell(strength ? AGILITY_TO_ATTACK_POWER : STRENGTH_TO_ATTACK_POWER);
+        if (Aura* helper = owner->GetAura(kept, owner->GetGUID()))
+            helper->RefreshDuration();
+        else
+            owner->CastSpell(owner, kept, true);
+    }
+    void Apply(AuraEffect const*, AuraEffectHandleModes)
+    {
+        Convert();
+    }
+    void Tick(AuraEffect const*)
+    {
+        PreventDefaultAction();
+        Convert();
+    }
+    void Remove(AuraEffect const*, AuraEffectHandleModes)
+    {
+        GetUnitOwner()->RemoveAurasDueToSpell(STRENGTH_TO_ATTACK_POWER);
+        GetUnitOwner()->RemoveAurasDueToSpell(AGILITY_TO_ATTACK_POWER);
+    }
+    void Register() override
+    {
+        DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(aura_wildcard_path_of_duality::Period, EFFECT_2,
+            SPELL_AURA_DUMMY);
+        OnEffectPeriodic += AuraEffectPeriodicFn(aura_wildcard_path_of_duality::Tick, EFFECT_2, SPELL_AURA_DUMMY);
+        AfterEffectApply += AuraEffectApplyFn(aura_wildcard_path_of_duality::Apply, EFFECT_2, SPELL_AURA_DUMMY,
+            AURA_EFFECT_HANDLE_REAL);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_wildcard_path_of_duality::Remove, EFFECT_2, SPELL_AURA_DUMMY,
+            AURA_EFFECT_HANDLE_REAL);
+    }
+};
 class aura_wildcard_raging_momentum : public AuraScript
 {
     PrepareAuraScript(aura_wildcard_raging_momentum);
@@ -1275,6 +1353,8 @@ void AddSC_AscensionWildcardReconstruction()
     new wildcard_trauma_care_snapshot();
     RegisterSpellScript(aura_wildcard_trauma_care);
     RegisterSpellScript(aura_wildcard_raging_momentum);
+    RegisterSpellScript(aura_wildcard_path_of_duality);
+    RegisterSpellScript(aura_wildcard_relentless_reflexes);
     RegisterSpellScript(aura_wildcard_arcane_thunder);
     new wildcard_arcane_thunder_channel();
     RegisterSpellScript(aura_wildcard_flame_ascendance);

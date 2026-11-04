@@ -103,7 +103,7 @@ class aura_ascension_sun_cleric_event : public AuraScript
             case 582832: return damage && melee && critical;
             case 805647: return damage && info && info->Id == 800691 && Chance(player,id);
             case 300349: return healing && critical && Chance(player,id,1000);
-            case 806058: return damage && Named(info,520359) && Chance(player,id);
+            case 806058: return damage && (Named(info,520359) || idIsJustice(info)) && Chance(player,id);
             case 301266: return damage && ((Named(info,500154) && player->HasAura(Sunrise)) ||
                 (Named(info,806477) && player->HasAura(Sunset)));
             case 680643: return damage && automatic && State(player).firstAttacks.insert(event.GetActionTarget()->GetGUID()).second;
@@ -151,15 +151,11 @@ class aura_ascension_sun_cleric_event : public AuraScript
             uint32 amount = damage ? damage : healing;
             if (id == 803489)
                 Copy(player, target, damage ? 803490 : 803816, CalculatePct(amount, Amount(id,1) * (fulfillment ? 2 : 1)));
-            bool const bounced = spell && State(player).vowSpell == spell &&
-                getMSTimeDiff(State(player).vowTime, GameTime::GetGameTimeMS().count()) < 2000;
+            bool const bounced = spell && spell->GetScriptValue(803491);
             if (id == 803491 && !bounced)
             {
                 if (spell)
-                {
-                    State(player).vowSpell = spell;
-                    State(player).vowTime = GameTime::GetGameTimeMS().count();
-                }
+                    spell->SetScriptValue(803491, 1);
                 auto nearby = damage ? Nearby(target, 10) : Allies(player, target, 10);
                 nearby.remove(target);
                 if (spell)

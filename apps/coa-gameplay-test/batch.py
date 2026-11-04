@@ -237,7 +237,7 @@ def admissible(attempts, lanes):
 
 def read_report(path):
     try:
-        return run.read_json(path)
+        return run.read_published_json(path)
     except (OSError, ValueError) as error:
         return error
 

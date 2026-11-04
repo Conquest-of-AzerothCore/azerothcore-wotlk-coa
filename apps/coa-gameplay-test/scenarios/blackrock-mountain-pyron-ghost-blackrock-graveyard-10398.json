@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Burning Steppes: a ghost released at Overmaster Pyron's spawn reaches the Blackrock graveyard (#10398)",
+  "contract": "A player who dies at Overmaster Pyron's spawn (-7230.64,-880.765,166.042), inside the Blackrock Mountain CoA zones 10114/10115, releases at the nearest Blackrock graveyard 1469 (-7923.56,-1353.23,134.079) like stock zone 25, instead of the default Westfall graveyard 4. Death and spirit release use the native handlers.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -7230.64,
+    "y": -880.765,
+    "z": 166.042,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 52
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "die",
+      "actor": "cleric"
+    },
+    {
+      "action": "release_spirit",
+      "actor": "cleric"
+    },
+    {
+      "action": "assert",
+      "label": "The released player is a ghost",
+      "actor": "cleric",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ghost lands at the stock zone graveyard, not Westfall",
+      "actor": "cleric",
+      "metric": "position_x",
+      "min": -7953.56,
+      "max": -7893.56,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "cleric",
+      "metric": "position_y",
+      "min": -1383.23,
+      "max": -1323.23
+    }
+  ]
+}

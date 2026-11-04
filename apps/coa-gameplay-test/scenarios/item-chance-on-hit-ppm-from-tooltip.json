@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "name": "Item chance-on-hit procs use the ppm rate their tooltip states",
+  "contract": [
+    "Chance-on-hit item spells whose tooltip states '(N ppm)' were stored with spellppmRate 0. The core then ignores the stated rate: a spell with ProcChance 100 fires on every damaging hit and one with ProcChance 101 falls back to weapon delay * 1.8 percent. The data fix copies each spell's stated ppm into spellppmRate.",
+    "Sludge Hammer 1379518 (delay 2600) carries spell 313142 with ProcChance 100 and tooltip 1ppm. Over 300 seconds of 2.6 s swings about 115 hits land, so 1ppm (4.3 percent per hit) gives about 5 procs, while a proc on every hit gives about 115.",
+    "Ghost Buster 5ppm and Cursed Ritual Carver 3ppm (ProcChance 101), Searsteel Claymore 0.7ppm (ProcChance 100) and the three Carapace Cracker tiers 2.2/2.4/2.6ppm are asserted from the stored rate, which was 0 before the fix. Glaive of the Pit 28774 keeps its existing 1.6 rate."
+  ],
+  "timeout_ms": 420000,
+  "players": [
+    {
+      "id": "w",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "w",
+      "entry": 36,
+      "level": 60,
+      "health": 100000000,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "item_spell_ppm",
+      "item": 1378515,
+      "slot": 0,
+      "min": 4.99,
+      "max": 5.01,
+      "label": "Ghost Buster (ProcChance 101) stores its stated 5ppm"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "item_spell_ppm",
+      "item": 1378413,
+      "slot": 0,
+      "min": 2.99,
+      "max": 3.01,
+      "label": "Cursed Ritual Carver (ProcChance 101) stores its stated 3ppm"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "item_spell_ppm",
+      "item": 1378578,
+      "slot": 0,
+      "min": 0.69,
+      "max": 0.71,
+      "label": "Searsteel Claymore (ProcChance 100) stores its stated 0.7ppm"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "item_spell_ppm",
+      "item": 1379366,
+      "slot": 0,
+      "min": 2.19,
+      "max": 2.21,
+      "label": "Carapace Cracker lowest tier stores 2.2ppm"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "item_spell_ppm",
+      "item": 1383366,
+      "slot": 0,
+      "min": 2.39,
+      "max": 2.41,
+      "label": "Carapace Cracker middle tier stores 2.4ppm"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "item_spell_ppm",
+      "item": 1387366,
+      "slot": 0,
+      "min": 2.59,
+      "max": 2.61,
+      "label": "Carapace Cracker highest tier stores 2.6ppm"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "item_spell_ppm",
+      "item": 1379518,
+      "slot": 0,
+      "min": 0.99,
+      "max": 1.01,
+      "label": "Sludge Hammer stores its stated 1ppm"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "item_spell_ppm",
+      "item": 28774,
+      "slot": 0,
+      "min": 1.59,
+      "max": 1.61,
+      "label": "Glaive of the Pit keeps its existing 1.6 rate"
+    },
+    {
+      "action": "set_health",
+      "actor": "w",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "set_skill",
+      "actor": "w",
+      "skill": 54,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "w",
+      "item": 1379518
+    },
+    {
+      "action": "equip",
+      "actor": "w",
+      "item": 1379518,
+      "slot": 15
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "w",
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 300000
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "melee_damage_count",
+      "target": "d",
+      "min": 80,
+      "label": "SETUP melee hits landed"
+    },
+    {
+      "action": "assert",
+      "actor": "w",
+      "metric": "spell_damage_count",
+      "spell": 313142,
+      "target": "d",
+      "min": 1,
+      "max": 30,
+      "label": "Slimeburst procs at a 1ppm rate, at least once and far below one per hit"
+    }
+  ]
+}

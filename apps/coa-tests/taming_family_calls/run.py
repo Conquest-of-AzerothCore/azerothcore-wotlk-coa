@@ -39,6 +39,10 @@ def main():
         block = save[save.index('CHAR_DEL_CHAR_PET_BY_SLOT'):save.index('trans->Append(stmt);', save.index('CHAR_DEL_CHAR_PET_BY_SLOT'))]
         assert 'stmt->SetData(3, uint8(HUNTER_PET));' in block, 'the hunter pet delete must bind the hunter pet type'
 
+    tested = taming[taming.index('namespace AscensionTaming'):]
+    tested = tested[:tested.index('uint32 FamilyPetStatsEntry(')] + tested[tested.index('bool IsHunterPetOfKind('):]
+    tested = tested[:tested.index('class AscensionTamingPet final')] + '}\n'
+
     harness = (HERE / 'harness.cpp').read_text(encoding='utf-8')
     for marker, text in [
         ('PET_DEFINES', pet_defines[pet_defines.index('enum PetType : uint8'):pet_defines.index('enum HappinessState')]),
@@ -46,7 +50,7 @@ def main():
         ('TAME_FAILURE', method(shared, 'enum PetTameFailure') + ';'),
         ('DELETE_FILTER', f'constexpr bool DeleteFiltersPetType = {"true" if filters_type else "false"};'),
         ('TAMING_DATA', data[data.index('namespace AscensionTaming'):data.rindex('#endif')]),
-        ('TAMING', taming[taming.index('namespace AscensionTaming'):]),
+        ('TAMING', tested),
     ]:
         harness = harness.replace('// ACTUAL_' + marker, text)
 

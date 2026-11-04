@@ -36,6 +36,14 @@ bool Derived(SpellInfo const* info)
         return false;
     }
 }
+void Soulfreeze(Player* player, Unit* target, SpellInfo const* info, Spell const* cast)
+{
+    Aura const* dot = target->GetAura(info->Id, player->GetGUID());
+    bool frozen = target->HasAuraState(AURA_STATE_FROZEN) || player->HasAura(801747) ||
+                  (cast && cast->GetScriptValue(801747)) || (dot && dot->GetScriptValue(801747));
+    if (frozen && Chance(player, 572023))
+        Cast(player, target, 801724);
+}
 void LeechArmy(Player* player, uint32 damage, int32 percent)
 {
     auto minions = Minions(player);
@@ -134,12 +142,7 @@ class aura_ascension_necromancer_event : public AuraScript
             {
                 if (Chance(player, 531135))
                     Cast(player, target, 706732);
-                Spell const* cast = event.GetProcSpell();
-                Aura const* dot = info ? target->GetAura(info->Id, player->GetGUID()) : nullptr;
-                bool frozen = target->HasAuraState(AURA_STATE_FROZEN) || player->HasAura(801747) ||
-                              (cast && cast->GetScriptValue(801747)) || (dot && dot->GetScriptValue(801747));
-                if (frozen && Chance(player, 572023))
-                    Cast(player, target, 801724);
+                Soulfreeze(player, target, info, event.GetProcSpell());
                 if (critical)
                 {
                     if (player->HasAura(707562))
@@ -219,6 +222,24 @@ class aura_ascension_necromancer_event : public AuraScript
     {
         DoCheckProc += AuraCheckProcFn(aura_ascension_necromancer_event::Check);
         OnProc += AuraProcFn(aura_ascension_necromancer_event::Proc);
+    }
+};
+
+class spell_ascension_necromancer_harrowing_winds : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_necromancer_harrowing_winds);
+
+    void HandleHit()
+    {
+        Player* player = GetCaster() ? GetCaster()->ToPlayer() : nullptr;
+        Unit* target = GetHitUnit();
+        if (player && target && GetHitDamage() > 0 && (GetSpellInfo()->SchoolMask & SPELL_SCHOOL_MASK_FROST))
+            Soulfreeze(player, target, GetSpellInfo(), GetSpell());
+    }
+
+    void Register() override
+    {
+        AfterHit += SpellHitFn(spell_ascension_necromancer_harrowing_winds::HandleHit);
     }
 };
 
@@ -343,6 +364,7 @@ class necromancer_defense : public UnitScript
 void AddAscensionNecromancerEventScripts()
 {
     RegisterSpellScript(aura_ascension_necromancer_event);
+    RegisterSpellScript(spell_ascension_necromancer_harrowing_winds);
     RegisterSpellScript(aura_ascension_necromancer_ghoul_mastery);
     RegisterSpellScript(aura_ascension_necromancer_overwhelming_force);
     new necromancer_defense();

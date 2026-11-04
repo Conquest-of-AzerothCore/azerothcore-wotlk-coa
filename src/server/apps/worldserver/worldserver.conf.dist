@@ -2208,6 +2208,14 @@ Rate.Talent = 1
 Rate.Talent.Pet = 1
 
 #
+#    Rate.Threat.TankStance
+#        Description: Threat multiplier for players in a CoA tank stance (spells 807725-807736),
+#                     on top of the stance's own threat bonus. Temporary tuning, 1 disables it.
+#        Default:     2
+
+Rate.Threat.TankStance = 2
+
+#
 #    Rate.Health
 #    Rate.Mana
 #    Rate.Rage.Income

@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Releasing in a Normal or Heroic dungeon gives Corpse Runner until the next fight, not on Mythic",
+  "contract": [
+    "A player who releases their spirit in a dungeon is revived at the dungeon start (AscensionDungeonRelease). On",
+    "Normal and Heroic they also get Ascension's Corpse Runner 84015 (+100% movement and swim speed for 60 sec) for",
+    "the run back; it ends as soon as they enter combat. Mythic (map difficulty 2, which Mythic+ keystones require)",
+    "gives no Corpse Runner."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
+  "players": [
+    { "id": "normal", "race": 1, "class": 1, "level": 60 },
+    { "id": "mythic", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "ascension_dungeon_difficulty_packet", "actor": "mythic", "value": 2 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "teleport", "actor": "normal", "map": 36, "x": -16.4, "y": -383.07, "z": 61.78 },
+    { "action": "teleport", "actor": "mythic", "map": 36, "x": -16.4, "y": -383.07, "z": 61.78 },
+    { "action": "assert", "label": "CONTROL: normal is in a Normal Deadmines", "actor": "normal", "metric": "map_difficulty",
+      "equals": 0, "within_ms": 15000 },
+    { "action": "assert", "label": "CONTROL: mythic is in a Mythic Deadmines", "actor": "mythic", "metric": "map_difficulty",
+      "equals": 2, "within_ms": 15000 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "die", "actor": "normal" },
+    { "action": "die", "actor": "mythic" },
+    { "action": "release_spirit", "actor": "normal" },
+    { "action": "release_spirit", "actor": "mythic" },
+    { "action": "assert", "label": "normal is revived in the dungeon", "actor": "normal", "metric": "alive", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "mythic is revived in the dungeon", "actor": "mythic", "metric": "alive", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "CONTROL: normal stays in Deadmines", "actor": "normal", "metric": "map_id", "equals": 36 },
+    { "action": "assert", "label": "Releasing on Normal gives Corpse Runner", "actor": "normal", "metric": "aura", "spell": 84015,
+      "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Corpse Runner doubles the run speed", "actor": "normal", "metric": "run_speed_rate",
+      "min": 1.999, "max": 2.001 },
+    { "action": "assert", "label": "Releasing on Mythic gives no Corpse Runner", "actor": "mythic", "metric": "aura", "spell": 84015,
+      "equals": 0 },
+    { "action": "summon", "actor": "normal", "as": "pirate", "entry": 657, "distance": 3 },
+    { "action": "attack", "actor": "normal", "target": "pirate" },
+    { "action": "assert", "label": "CONTROL: normal is in combat", "actor": "normal", "metric": "combat", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "Entering combat ends Corpse Runner", "actor": "normal", "metric": "aura", "spell": 84015,
+      "equals": 0, "within_ms": 1000 }
+  ]
+}

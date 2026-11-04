@@ -63,10 +63,10 @@ namespace
     // The setting is a number of levels, or "grey" for the XP rule: anything grey
     // to this player pays nothing. Creatures above the player always pay.
     //
-    // A levelling character is judged on the level they are shown, so a world
-    // scaled to them keeps paying. At maximum level the creature's own level
-    // counts: scaling lifts every dungeon to about that level, which would let a
-    // starting dungeon pay as much as the endgame.
+    // Every character is judged on the level they are shown: a creature scaled
+    // to them has that level's health and armor, so it pays like one. A scaled
+    // dungeon holds its creatures inside the dungeon's band, so a low dungeon
+    // stays below a maximum-level character.
     bool KillPays(Player* player, Creature const* killed)
     {
         uint32 const level = player->GetLevel();
@@ -75,7 +75,7 @@ namespace
             ? sConfigMgr->GetOption<std::string>("EtherealBazaar.Tokens.MaxLevelsAboveMob.AtMaxLevel", "5")
             : sConfigMgr->GetOption<std::string>("EtherealBazaar.Tokens.MaxLevelsAboveMob.WhileLeveling", "grey");
 
-        uint32 const killedLevel = atMaxLevel ? killed->GetLevel() : killed->getLevelForTarget(player);
+        uint32 const killedLevel = killed->getLevelForTarget(player);
         if (Optional<uint32> const levelsAbove = Acore::StringTo<uint32>(setting))
             return killedLevel + *levelsAbove >= level;
 

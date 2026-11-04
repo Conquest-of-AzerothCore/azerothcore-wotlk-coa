@@ -51,9 +51,40 @@ def write(path, value):
     os.replace(temporary, path)
 
 
+def lock_file(stream):
+    if os.name != 'nt':
+        import fcntl
+        fcntl.flock(stream, fcntl.LOCK_EX)
+        return
+    import msvcrt
+    while True:
+        try:
+            stream.seek(0)
+            msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1)
+            return
+        except OSError:
+            time.sleep(0.001)
+
+
+def unlock_file(stream):
+    if os.name == 'nt':
+        import msvcrt
+        stream.seek(0)
+        msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
+
+
+def append_line(path, line):
+    with open(f'{path}.lock', 'ab') as lock:
+        lock_file(lock)
+        try:
+            with open(path, 'a') as stream:
+                stream.write(line + '\n')
+        finally:
+            unlock_file(lock)
+
+
 def log(name, value):
-    with open(Path(__file__).with_name(name), 'a') as stream:
-        stream.write(json.dumps(value) + '\n')
+    append_line(Path(__file__).with_name(name), json.dumps(value))
 
 
 def listen():
@@ -79,7 +110,7 @@ def read_case(sequence):
     path = Path(cases) / f'case-{sequence:06d}.json'
     if not path.exists():
         return None
-    case = json.loads(path.read_text())
+    case = run.read_published_json(path)
     if case['schema'] != 1 or case['batch_id'] != run_id or case['sequence'] != sequence:
         sys.exit(5)
     if case.get('stop'):
@@ -171,8 +202,7 @@ simulated = clock == 'simulated'
 start_hour = int(config['CoAGameplayTest.StartHour'])
 realm = {'hour': start_hour}
 starts = Path(__file__).with_name('starts.log')
-with open(starts, 'a') as stream:
-    stream.write(f"{'queue' if cases else 'single'} {os.getpid()}\n")
+append_line(starts, f"{'queue' if cases else 'single'} {os.getpid()}")
 log('clocks.log', {'mode': 'queue' if cases else 'single',
                    **{name: config[f'CoAGameplayTest.{name}'] for name in run.CLOCK_SETTINGS}})
 log('databases.log', {'mode': 'queue' if cases else 'single', **{key: config[key] for key in DATABASE_KEYS}})
@@ -208,7 +238,7 @@ write(config['CoAGameplayTest.ReadyFile'], ready)
 if start:
     while not Path(start).exists():
         time.sleep(0.01)
-    if json.loads(Path(start).read_text())['run_id'] != run_id:
+    if run.read_published_json(start)['run_id'] != run_id:
         sys.exit(7)
 if not cases:
     scenario = json.loads(Path(config['CoAGameplayTest.ScenarioFile']).read_text())
@@ -316,7 +346,8 @@ SHIPPED_EXCLUSIVE = {'bloodforged-high-risk-drop', 'coa-prestige-chromie-spawns'
                      'vanilla-dungeons-normal', 'vanilla-dungeons-heroic', 'vanilla-dungeons-mythic',
                      'vanilla-dungeons-health', 'mythic-plus-keystone-run', 'mythic-plus-client-data-at-login',
                      'test-zone-bonus-command', 'test-zone-bonus-westfall', 'void-portal-capture',
-                     'path-to-ascension-arena-solo-queue-tutorial', 'molten-core-lucifron-encounter',
+                     'path-to-ascension-arena-solo-queue-tutorial', 'pvp-armor-arena-10463',
+                     'molten-core-lucifron-encounter',
                      'battleground-spirit-guide-queue-follows-range',
                      'battleground-spirit-guide-client-queue-request-10146',
                      'mercenary-battleground-team-faction', 'mercenary-war-mode-battleground',
@@ -1164,6 +1195,36 @@ class BatchTests(unittest.TestCase):
         self.assertIn('REQUEUED exploratory:lane-crash-2 ', output)
         self.assertIn('REQUEUED lane-crash ', output)
         self.assertNotIn('could not be queued again', json.dumps(result))
+
+    def test_files_published_by_rename_survive_a_transient_access_denial(self):
+        path = self.path / 'published.json'
+        self.write(path, {'run_id': 'run', 'status': 'ready'})
+        read_json = run.read_json
+        denials = []
+
+        def denied_while_renaming(target):
+            if denials:
+                raise denials.pop()
+            return read_json(target)
+
+        with patch.object(run, 'read_json', denied_while_renaming):
+            denials.append(PermissionError(13, 'Permission denied'))
+            self.assertEqual(batch.read_report(path)['status'], 'ready')
+            denials.append(PermissionError(13, 'Permission denied'))
+            self.assertEqual(run.read_ready(path, 'run')['status'], 'ready')
+            denials.append(PermissionError(13, 'Permission denied'))
+            exited = SimpleNamespace(poll=lambda: 0, returncode=0)
+            with patch.object(run, 'start_server', return_value=exited), patch.object(run, 'stop_process'):
+                report, code = run.run_process([], self.path, self.path / 'ready.json', path, 'run', 1, 1)
+            self.assertEqual((report['status'], code), ('ready', 0))
+            self.assertEqual(denials, [])
+
+    def test_a_lasting_access_denial_still_fails_the_report(self):
+        path = self.path / 'published.json'
+        self.write(path, {'status': 'passed'})
+        with patch.object(run, 'read_json', side_effect=PermissionError(13, 'Permission denied')), \
+                patch.object(run, 'PUBLISHED_READ_SECONDS', 0):
+            self.assertIsInstance(batch.read_report(path), PermissionError)
 
     def test_only_bare_harness_shutdown_results_count_as_cut_short(self):
         for message in batch.SHUTDOWN_MESSAGES:

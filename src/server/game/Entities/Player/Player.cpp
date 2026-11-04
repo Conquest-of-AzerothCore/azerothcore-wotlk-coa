@@ -27,6 +27,7 @@
 #include "AscensionBazaarTokenReserve.h"
 #include "AscensionDisplayPatch.h"
 #include "AscensionPooledVitality.h"
+#include "AscensionCosmeticPetTokens.h"
 #include "AscensionVanityOwnership.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
@@ -2953,10 +2954,10 @@ void Player::SendInitialSpells()
             continue;
 
         if ((!itr->second->Active && !IsKeptInClientSpellbookWhenSuperseded(itr->first)) ||
-            !itr->second->IsInSpec(GetActiveSpec()))
+            !itr->second->IsInSpec(GetActiveSpec()) || IsTemporarySpellReplacementStandIn(itr->first))
             continue;
 
-        data << uint32(itr->first);
+        data << uint32(GetTemporarySpellReplacement(itr->first));
         data << uint16(0);                                  // it's not slot id
 
         ++spellCount;
@@ -7818,7 +7819,9 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
                 uint32 WeaponSpeed = GetAttackTime(attType);
                 chance = GetPPMProcChance(WeaponSpeed, spellData.SpellPPMRate, spellInfo);
             }
-            else if (chance > 100.0f)
+            // CoA: a chance on hit without a PPM rate never procs on every hit; Ascension's custom
+            // weapons (Worldforged, Bloodforged copies) store 100 there, stock uses 101
+            else if (chance >= 100.0f)
             {
                 chance = GetWeaponProcChance();
             }
@@ -11550,6 +11553,13 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
         return false;
     }
 
+    // Cosmetic pet tokens only sell on realm types whose classes can use them
+    if (!IsGameMaster() && !AscensionCosmeticPetTokens::AvailableOnRealm(item))
+    {
+        SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
+        return false;
+    }
+
     VendorItemData const* vItems = GetSession()->GetCurrentVendor() ? sObjectMgr->GetNpcVendorItemList(GetSession()->GetCurrentVendor()) : creature->GetVendorItems();
     if (!vItems || vItems->Empty())
     {
@@ -13448,7 +13458,8 @@ bool Player::HasItemFitToSpellRequirements(SpellInfo const* spellInfo, Item cons
                     bool hasWeaponInSlot = false;
                     for (uint8 i = EQUIPMENT_SLOT_MAINHAND; i < EQUIPMENT_SLOT_TABARD; ++i)
                         if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-                            if (item != ignoreItem && item->IsFitToSpellRequirements(spellInfo))
+                            if (item != ignoreItem && (!ignoreItem || CanUseAttackType(GetAttackBySlot(i))) &&
+                                item->IsFitToSpellRequirements(spellInfo))
                             {
                                 hasWeaponInSlot = true;
                                 break;

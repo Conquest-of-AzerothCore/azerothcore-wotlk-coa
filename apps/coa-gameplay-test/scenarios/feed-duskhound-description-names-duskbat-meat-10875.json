@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Feed Duskhound's description names Tender Duskbat Meat and Edwin's Darkhound (#10875)",
+  "contract": "Spell 355164 is cast by item 354652 (Tender Duskbat Meat). The client's own Spell.dbc description reads 'Break off a piece of Tender Dragonhawk Meat and offer it to Edwin's Duskhound.', naming an item and a creature that do not exist in the data: the item is Tender Duskbat Meat and the creature (entry 449251, subname Edwin's Pet, quest A Darkhound's Treat) is a Darkhound. AscensionCompat streams coa_client_spell_description to every client as SMSG_PATCH_SPELL (opcode 2346) at login, so the corrected sentence is published there. Row 500639 (Runeshroud) is the control that the stream is captured.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    { "id": "g", "race": 1, "class": 18, "level": 13 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the login spell patch stream settle", "ms": 7000 },
+    {
+      "action": "assert", "label": "CONTROL: the shared description table still streams row 500639, so the patch stream is being captured",
+      "actor": "g", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 500639, "text": "Requires Runeshroud", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "CONTROL: this table publishes a row for 355164, so the absence check below cannot pass vacuously",
+      "actor": "g", "metric": "server_packets",
+      "opcode": 2346, "row": 355164, "min": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "THE FIX: the description no longer names Dragonhawk Meat",
+      "actor": "g", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 355164, "text": "Dragonhawk", "equals": 0
+    },
+    {
+      "action": "assert", "label": "THE FIX: the description names Tender Duskbat Meat",
+      "actor": "g", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 355164, "text": "Tender Duskbat Meat", "equals": 1
+    },
+    {
+      "action": "assert", "label": "THE FIX: the description names Edwin's Darkhound",
+      "actor": "g", "metric": "server_packet_contains",
+      "opcode": 2346, "row": 355164, "text": "Edwin's Darkhound", "equals": 1
+    }
+  ]
+}

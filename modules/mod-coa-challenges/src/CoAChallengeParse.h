@@ -116,6 +116,21 @@ namespace CoAParse
             || type == "CHALLENGE_REQUIREMENT_TYPE_TRIO";
     }
 
+    inline bool IsCountedLootObjective(std::string const& type)
+    {
+        return type == "CHALLENGE_REQUIREMENT_TYPE_LOOT_ITEM_BEFORE_LEVEL";
+    }
+
+    inline uint32_t ObjectiveTarget(Entry const& e)
+    {
+        return IsCountedLootObjective(e.type) ? e.v2 : e.v1;
+    }
+
+    inline uint32_t ObjectiveGateLevel(Entry const& e)
+    {
+        return IsCountedLootObjective(e.type) ? e.v3 : e.v2;
+    }
+
     // Client-side CHALLENGE_REQUIREMENT_TYPE_* enum order, recovered from the
     // reflection table in Extensions.dll: the static {name,len} pointer array
     // sits contiguously at file 0xB30A60 (RVA 0xB31C60) and the 0x59A criteria
@@ -152,6 +167,27 @@ namespace CoAParse
         for (uint32_t i = 0; i < sizeof(kTypes) / sizeof(kTypes[0]); ++i)
             if (type == kTypes[i])
                 return i;
+        return 0;
+    }
+
+    inline constexpr uint8_t LevelScalingBlockCreature = 0x1;
+    inline constexpr uint8_t LevelScalingBlockQuest = 0x2;
+
+    inline constexpr char const* LevelScalingRules[] =
+    {
+        "CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING",
+        "CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING",
+        "CHALLENGE_RULES_TYPE_NO_PLAYER_LEVEL_SCALING",
+    };
+
+    inline uint8_t LevelScalingBlockBits(std::string const& rule)
+    {
+        if (rule == "CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING")
+            return LevelScalingBlockCreature;
+        if (rule == "CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING")
+            return LevelScalingBlockQuest;
+        if (rule == "CHALLENGE_RULES_TYPE_NO_PLAYER_LEVEL_SCALING")
+            return LevelScalingBlockCreature | LevelScalingBlockQuest;
         return 0;
     }
 

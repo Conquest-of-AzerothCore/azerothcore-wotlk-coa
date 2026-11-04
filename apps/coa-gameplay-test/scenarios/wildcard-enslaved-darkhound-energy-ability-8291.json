@@ -1,0 +1,218 @@
+{
+  "schema": 1,
+  "name": "Wildcard Hero's enslaved Darkhound uses its energy abilities, also when loaded from the database (#8291)",
+  "contract": [
+    "Enslave Demon 890 teaches Summon Demon 884, whose starter demon is Decrepit Darkhound 1547 (family 105). Its",
+    "kit (SkillLine 2 'Pet - Darkhound') costs energy: Infected Wound 80138 costs 20 energy and deals 140% weapon",
+    "damage. #9368 sets a tamed non-beast's power type from its kit in OnInitStatsForLevel, so the demon must have a",
+    "full energy bar and land Infected Wound through native autocast, before and after a relog reloads it from the",
+    "database. The Summoner's Stone appearance part of the report is cosmetic and not covered here.",
+    "The demon is then dismissed and called again, which loads it from the database, and must still have energy and land Infected Wound. A relog is not used: the harness turns Wildcard on with the console toggle, which the login recompute drops (mask 0), so after a relog the owner is no longer a Wildcard Hero and the loaded pet has no type.",
+    "Pet::LoadPetFromDB loads the spell book in a query-holder callback after the pet is already in the world, so the kit-known assert waits for it (within_ms); asserted in the summon tick it reads 0."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "name": "Enslaver",
+      "race": 1,
+      "class": 10,
+      "level": 20,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "p",
+      "entry": 36,
+      "level": 20,
+      "health": 1000000,
+      "distance": 6
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Enslaver"
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 890
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 884,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 884
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "pet_entry",
+      "equals": 1547,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The demon has an energy bar",
+      "actor": "p",
+      "metric": "pet_max_power",
+      "power": 3,
+      "min": 100,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The energy bar starts full",
+      "actor": "p",
+      "metric": "pet_power",
+      "power": 3,
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "pet_knows_spell",
+      "spell": 80138,
+      "equals": 1
+    },
+    {
+      "action": "pet_autocast",
+      "actor": "p",
+      "spell": 80138,
+      "enabled": true
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "enemy",
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "Infected Wound is paid from energy and lands",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 80138,
+      "pet": true,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "p"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "p",
+      "spell": 892
+    },
+    {
+      "action": "cast",
+      "label": "Dismiss Demon saves the demon",
+      "actor": "p",
+      "spell": 892
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: dismissed",
+      "actor": "p",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "p",
+      "spell": 884
+    },
+    {
+      "action": "cast",
+      "label": "Summon Demon loads the saved demon from the database",
+      "actor": "p",
+      "spell": 884
+    },
+    {
+      "action": "assert",
+      "label": "The saved demon is back",
+      "actor": "p",
+      "metric": "pet_entry",
+      "equals": 1547,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The loaded demon keeps its energy bar",
+      "actor": "p",
+      "metric": "pet_max_power",
+      "power": 3,
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "The loaded demon has energy to spend",
+      "actor": "p",
+      "metric": "pet_power",
+      "power": 3,
+      "min": 20,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The loaded demon still knows Infected Wound",
+      "actor": "p",
+      "metric": "pet_knows_spell",
+      "spell": 80138,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 80138,
+      "pet": true,
+      "target": "enemy",
+      "save_as": "after_load"
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "enemy",
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "The loaded demon lands Infected Wound from its energy",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 80138,
+      "pet": true,
+      "target": "enemy",
+      "relative_to": "after_load",
+      "min": 1,
+      "within_ms": 15000
+    }
+  ]
+}

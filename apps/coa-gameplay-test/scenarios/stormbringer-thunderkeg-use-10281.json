@@ -1,21 +1,101 @@
 {
   "schema": 1,
-  "name": "Using the Thunderkeg gives 5 Thunderale (#10281)",
-  "contract": "Conjure Thunderkeg (807849) places Thunderkeg, gameobject 195002 (GAMEOBJECT_TYPE_SPELLCASTER). Its tooltip: 'Players in your party or raid may interact with it to receive $807850s1 tankards of Thunderale.' Data0 was 0, so using it did nothing. Data0 is now 807850 (Conjure Thunderale: CREATE_ITEM 2000150 Weak Thunder Ale, 5) and Data2 (party only) is 1.",
+  "name": "Using the Thunderkeg gives 5 Thunderale of the clicker's rank (#10281, #10880)",
+  "contract": "Conjure Thunderkeg (807849) places Thunderkeg, gameobject 195002 (GAMEOBJECT_TYPE_SPELLCASTER). Its tooltip: 'Players in your party or raid may interact with it to receive $807850s1 tankards of Thunderale.' Data0 is 807850 (Conjure Thunderale: CREATE_ITEM, 5 items) and Data2 (party only) is 1. The item follows the ranked Conjure Thunder Ale ladder (804763 -> 2000150, 808068 -> 2000400, 808069 -> 2000401 at level 22, 808073 -> 2000405 at level 60): a script on 807850 gives the highest rank whose required level the clicker has reached, instead of the fixed rank 1 Weak Thunder Ale (#10880). Level 60 receives Cask-Strength Thunder Ale (2000405); after dropping to level 30 the same keg gives 2000401 (rank at level 22).",
   "timeout_ms": 60000,
   "players": [
-    { "id": "s", "race": 1, "class": 16, "level": 60 }
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 60
+    }
   ],
   "steps": [
-    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
-    { "action": "learn", "actor": "s", "spell": 807849 },
-    { "action": "cast", "actor": "s", "spell": 807849, "target": "s" },
-    { "action": "assert", "label": "SETUP: the Thunderkeg is placed", "actor": "s",
-      "metric": "owned_gameobject_count", "entry": 195002, "equals": 1, "within_ms": 5000 },
-    { "action": "assert", "label": "BASELINE: no Thunderale yet", "actor": "s",
-      "metric": "item_count", "item": 2000150, "equals": 0 },
-    { "action": "use_nearby_gameobject", "label": "Use the Thunderkeg", "actor": "s", "entry": 195002 },
-    { "action": "assert", "label": "FIX: using the keg gives 5 Thunderale", "actor": "s",
-      "metric": "item_count", "item": 2000150, "equals": 5, "within_ms": 5000 }
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 807849
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 807849,
+      "target": "s"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Thunderkeg is placed",
+      "actor": "s",
+      "metric": "owned_gameobject_count",
+      "entry": 195002,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: no Thunderale yet",
+      "actor": "s",
+      "metric": "item_count",
+      "item": 2000405,
+      "equals": 0
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Use the Thunderkeg",
+      "actor": "s",
+      "entry": 195002
+    },
+    {
+      "action": "assert",
+      "label": "FIX: a level 60 clicker gets 5 Cask-Strength Thunder Ale",
+      "actor": "s",
+      "metric": "item_count",
+      "item": 2000405,
+      "equals": 5,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "FIX: no fixed rank 1 Weak Thunder Ale at level 60",
+      "actor": "s",
+      "metric": "item_count",
+      "item": 2000150,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "label": "Drop to level 30",
+      "actor": "s",
+      "value": 30
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Use the Thunderkeg at level 30",
+      "actor": "s",
+      "entry": 195002
+    },
+    {
+      "action": "assert",
+      "label": "FIX: a level 30 clicker gets the level 22 rank, 5 Thunder Ale",
+      "actor": "s",
+      "metric": "item_count",
+      "item": 2000401,
+      "equals": 5,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the higher rank count is unchanged",
+      "actor": "s",
+      "metric": "item_count",
+      "item": 2000405,
+      "equals": 5
+    }
   ]
 }

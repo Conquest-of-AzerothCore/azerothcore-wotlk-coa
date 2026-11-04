@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "name": "Rusty Shiv survives the hits it accumulates and pays out at expiry (#10767)",
+  "contract": [
+    "Rusty Shiv 561315 reads \"Stab an enemy with a rusty shiv, accumulating 20% of all damage you deal to them over the next",
+    "duration and dealing damage at the end of the duration for the total amount.\" Its aura script (accumulate, then pay",
+    "681459 at expiry) refuses to attach unless the spell's effect 1 has been reshaped from a school absorb into a dummy and",
+    "SPELL_ATTR3_DOT_STACKING_RULE is set. The load-time contract only reshaped the effect when MiscValueB was 10, and the",
+    "current Spell.dbc carries 20, so the script never attached: effect 1 stayed an absorb of zero, which the first hit",
+    "removed, and the Ranger saw the shiv vanish the moment Wild Strike landed with nothing paid. A level 40 Ranger in",
+    "stealth with a dagger stabs a dummy with Rusty Shiv, then hits it with Wild Strike 501724: the aura must outlast the",
+    "hit, and when it expires the target must have taken the accumulated damage from Rusty Shiv Damage 681459."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "r",
+      "race": 1,
+      "class": 21,
+      "level": 40,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "r",
+      "entry": 36,
+      "level": 40,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 561315
+    },
+    {
+      "action": "learn",
+      "actor": "r",
+      "spell": 501724
+    },
+    {
+      "action": "add_item",
+      "actor": "r",
+      "item": 2092,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "r",
+      "item": 2092,
+      "slot": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "r",
+      "spell": 1784,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "r",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Stab the dummy from stealth",
+      "actor": "r",
+      "spell": 561315,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Rusty Shiv is on the dummy",
+      "actor": "r",
+      "metric": "cast_failure",
+      "spell": 561315,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 561315,
+      "caster": "r",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "r",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Land Wild Strike on the stabbed dummy",
+      "actor": "r",
+      "spell": 501724,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Wild Strike hit",
+      "actor": "r",
+      "metric": "spell_damage_count",
+      "spell": 501724,
+      "target": "d",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Rusty Shiv outlasts the hit it accumulates",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 561315,
+      "caster": "r",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Nothing is paid before the shiv expires",
+      "actor": "r",
+      "metric": "spell_damage_total",
+      "spell": 681459,
+      "target": "d",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let Rusty Shiv run out",
+      "ms": 9500
+    },
+    {
+      "action": "assert",
+      "label": "Rusty Shiv has expired",
+      "actor": "d",
+      "metric": "aura",
+      "spell": 561315,
+      "caster": "r",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: expiry paid the accumulated damage",
+      "actor": "r",
+      "metric": "spell_damage_total",
+      "spell": 681459,
+      "target": "d",
+      "min": 1
+    }
+  ]
+}

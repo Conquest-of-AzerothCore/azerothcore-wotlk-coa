@@ -157,6 +157,7 @@ namespace
         {
             BossAI::JustDied(killer);
             ReleaseTotemAuras(true);
+            DespawnShades();
         }
 
         // +2% damage per shade alive.

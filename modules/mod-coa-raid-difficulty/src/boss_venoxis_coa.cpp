@@ -91,6 +91,7 @@ namespace
 
     enum Npcs
     {
+        NPC_VENOXIS           = 14507,
         NPC_RAZZASHI_COBRA    = 11373,
         NPC_PARASITIC_SERPENT = 14884,
         NPC_WORLD_TRIGGER     = 12999,
@@ -123,6 +124,7 @@ namespace
     constexpr float SPIT_RANGE       = 60.0f;
     constexpr float SPIT_ARC         = float(M_PI) / 2;
     constexpr float CORPSE_RANGE     = 80.0f;
+    constexpr float VENOXIS_RANGE    = 200.0f;
 
     struct boss_venoxis_coa : public BossAI
     {
@@ -132,6 +134,7 @@ namespace
         {
             BossAI::Reset();
             me->RemoveAllAuras();
+            me->RemoveAllDynObjects();
             _avatar.Restore(me);
             _snake = false;
             _frenzied = false;
@@ -158,6 +161,7 @@ namespace
             Talk(SAY_DEATH);
             _avatar.Release(me);
             me->RemoveAllAuras();
+            me->RemoveAllDynObjects();
         }
 
         void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType type, SpellSchoolMask school) override
@@ -215,12 +219,15 @@ namespace
                     }
                     break;
                 case SPELL_VENOM_SPIT:
+                {
+                    uint32 const poison = sSpellMgr->GetSpellIdForDifficulty(SPELL_VIRULENT_POISON, me);
                     for (Player* p : PlayersInFront(me, SPIT_RANGE, SPIT_ARC))
                     {
                         me->CastSpell(p, SPELL_VENOM_SPIT_HIT, true);
-                        AddStack(me, p, SPELL_VIRULENT_POISON);
+                        AddStack(me, p, poison);
                     }
                     break;
+                }
                 case SPELL_PARASITIC_POISON:
                     if (Unit* target = ObjectAccessor::GetUnit(*me, _target))
                         me->CastSpell(target, SPELL_PARASITIC_POISON_DOT, true);
@@ -404,10 +411,38 @@ namespace
             AfterEffectRemove += AuraEffectRemoveFn(spell_venoxis_coa_parasitic_poison::AfterRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
         }
     };
+
+    // Poisonous Fangs of his snakes: their hits add Virulent Poison on behalf of
+    // Venoxis while he fights, so it stacks with his own; otherwise the snake's.
+    class spell_venoxis_coa_snake_fangs : public AuraScript
+    {
+        PrepareAuraScript(spell_venoxis_coa_snake_fangs);
+
+        void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+            Unit* snake = GetTarget();
+            Unit* victim = eventInfo.GetActionTarget();
+            if (!victim || victim == snake || !victim->IsAlive())
+                return;
+
+            Unit* source = snake;
+            if (Creature* venoxis = snake->FindNearestCreature(NPC_VENOXIS, VENOXIS_RANGE))
+                if (venoxis->IsInCombat())
+                    source = venoxis;
+            AddStack(source, victim, sSpellMgr->GetSpellIdForDifficulty(SPELL_VIRULENT_POISON, source));
+        }
+
+        void Register() override
+        {
+            OnEffectProc += AuraEffectProcFn(spell_venoxis_coa_snake_fangs::HandleProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+        }
+    };
 }
 
 void AddCoaVenoxisScripts()
 {
     RegisterZulGurubCreatureAI(boss_venoxis_coa);
     RegisterSpellScript(spell_venoxis_coa_parasitic_poison);
+    RegisterSpellScript(spell_venoxis_coa_snake_fangs);
 }

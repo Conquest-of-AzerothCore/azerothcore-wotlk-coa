@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "name": "Shadow Siphon heals 5% of maximum health per disease (#10945)",
+  "contract": "Shadow Siphon (913222) is a Death Strike clone: its tooltip heals the caster for $F% of maximum health for each of the caster's diseases on the target, with Effect 0 DamageMultiplier 5. The heal is the spell_dk_death_strike dummy-effect script, which was bound only to the Death Strike rank chain, so the clones healed nothing. With Frost Fever (55095) and Blood Plague (55078) on the target the heal is 2 * 5% of 10000 maximum health = 1000.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "p",
+      "entry": 36,
+      "level": 80,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 913222
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 55095
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 55078
+    },
+    {
+      "action": "cast",
+      "label": "Frost Fever on the target",
+      "actor": "p",
+      "spell": 55095,
+      "target": "target"
+    },
+    {
+      "action": "cast",
+      "label": "Blood Plague on the target",
+      "actor": "p",
+      "spell": 55078,
+      "target": "target"
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 1000,
+      "maximum": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Both of the caster's diseases are on the target",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 55095,
+      "caster": "p",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Blood Plague is on the target",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 55078,
+      "caster": "p",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Shadow Siphon",
+      "actor": "p",
+      "spell": 913222,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: two diseases heal 2 * 5% of 10000 maximum health",
+      "actor": "p",
+      "metric": "health",
+      "min": 1950,
+      "max": 2050,
+      "within_ms": 3000
+    }
+  ]
+}

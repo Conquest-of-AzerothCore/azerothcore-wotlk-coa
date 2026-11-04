@@ -341,8 +341,8 @@ class templar_casts : public AllSpellScript
                 for (Unit* enemy : Nearby(player, 15.0f))
                     if (player->IsValidAttackTarget(enemy) && !enemy->HasAura(520694, player->GetGUID()))
                     {
-                        Cast(player, enemy, 520694);
                         Cast(player, enemy, 520695);
+                        Cast(player, enemy, 520694);
                     }
             }
     }

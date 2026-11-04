@@ -59,7 +59,8 @@ uint64 AppearanceKey(uint32 display, uint32 inventoryType)
 
 bool PlaceholderName(std::string_view name)
 {
-    constexpr std::array<std::string_view, 5> prefixes = {"Monster -", "***", "zzOLD", "zzDEPRECATED", "RPGITEM"};
+    constexpr std::array<std::string_view, 6> prefixes = {"Monster -", "***", "zzOLD", "zzDEPRECATED", "RPGITEM",
+        "NPC Equipment"};
     if (std::any_of(prefixes.begin(), prefixes.end(),
             [name](std::string_view prefix) { return name.starts_with(prefix); }) ||
         name.find("[MISSING ITEM NAME]") != std::string_view::npos)
@@ -82,6 +83,11 @@ bool PlaceholderName(std::string_view name)
     return false;
 }
 
+bool TaggedCopy(ItemTemplate const& item)
+{
+    return item.Description.starts_with('@');
+}
+
 bool Wearable(ItemTemplate const& item)
 {
     return item.DisplayInfoID && item.ItemLevel && item.InventoryType != INVTYPE_NON_EQUIP
@@ -91,7 +97,7 @@ bool Wearable(ItemTemplate const& item)
         && !item.HasFlag(ITEM_FLAG_DEPRECATED) && !item.HasFlag(ITEM_FLAG_CONJURED)
         && !item.StartQuest && !item.RequiredSkill && !item.RequiredSpell && !item.RandomProperty && !item.RandomSuffix
         && !item.RequiredHonorRank && !item.RequiredReputationFaction
-        && !PlaceholderName(item.Name1) && !Bloodforging::IsBloodforged(item);
+        && !PlaceholderName(item.Name1) && !Bloodforging::IsBloodforged(item) && !TaggedCopy(item);
 }
 
 uint32 GearLevel(ItemTemplate const& item)

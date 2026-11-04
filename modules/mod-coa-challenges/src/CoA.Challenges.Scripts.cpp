@@ -8,6 +8,8 @@
 #include "AllCreatureScript.h"
 #include "AccountScript.h"
 #include "AscensionClientLua.h"
+#include "AscensionPersonalBank.h"
+#include "AscensionHighRisk.h"
 #include "LocalLevelScaling.h"
 #include "AscensionRulesets.h"
 
@@ -25,6 +27,22 @@ namespace CoAChallenges
             !PlayerHasRule(player, "CHALLENGE_RULES_TYPE_PVE_ONLY"))
             return true;
         NotifyPlayer(player, "Your active challenge requires PvE mode.");
+        return false;
+    }
+
+    bool ChallengeAllowsBankAccess(Player* player, uint8 kind)
+    {
+        if (kind != AscensionPersonalBank::REALM || !PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_REALM_BANK"))
+            return true;
+        NotifyPlayer(player, "Your challenge forbids using the realm bank.");
+        return false;
+    }
+
+    bool ChallengeAllowsHighRiskLoot(Player* looter, uint32)
+    {
+        if (!PlayerHasRule(looter, "CHALLENGE_RULES_TYPE_NO_HIGH_RISK_LOOT"))
+            return true;
+        NotifyPlayer(looter, "Your challenge forbids looting the spoils of other players in High-Risk.");
         return false;
     }
 
@@ -822,14 +840,15 @@ namespace CoAChallenges
     {
         if (!player)
             return;
+        static_assert(CoAParse::LevelScalingBlockCreature == LocalLevelScaling::ChallengeBlocksCreatureScaling);
+        static_assert(CoAParse::LevelScalingBlockQuest == LocalLevelScaling::ChallengeBlocksQuestScaling);
         uint8 blocks = 0;
         if (ChallengesEnabled())
         {
             uint32 level = 0;
-            if (ActiveChallengeWithRule(player, "CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING", level))
-                blocks |= LocalLevelScaling::ChallengeBlocksCreatureScaling;
-            if (ActiveChallengeWithRule(player, "CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING", level))
-                blocks |= LocalLevelScaling::ChallengeBlocksQuestScaling;
+            for (char const* rule : CoAParse::LevelScalingRules)
+                if (ActiveChallengeWithRule(player, rule, level))
+                    blocks |= CoAParse::LevelScalingBlockBits(rule);
         }
         if (StoreLevelScalingBlocks(player->GetGUID().GetCounter(), blocks) == blocks || !player->IsInWorld())
             return;
@@ -1075,16 +1094,15 @@ namespace CoAChallenges
             std::to_string(entry));
     }
 
-    // The Elite Warchest has no binding, so only the copy the welcome grant
-    // mails to the hero itself is exempt; one mailed by another character is not.
+    // Only the server mails a character to itself (the client cannot): the welcome
+    // Elite Warchest and the part of its contents that did not fit in the bags.
+    // The warchest has no binding, so a copy mailed by another character is not exempt.
     bool IsMailExemptTake(Player* player, uint32 mailId, uint32 itemEntry)
     {
-        if (!IsMailExemptItem(itemEntry))
-            return false;
-        if (itemEntry != EliteWarchestItem)
-            return true;
         Mail const* mail = player ? player->GetMail(mailId) : nullptr;
-        return mail && mail->IsSentByPlayer() && mail->sender == player->GetGUID().GetCounter();
+        if (mail && mail->IsSentByPlayer() && mail->sender == player->GetGUID().GetCounter())
+            return true;
+        return itemEntry != EliteWarchestItem && IsMailExemptItem(itemEntry);
     }
 
     // NO_MAIL / NO_OUTSIDE_INTERACTION (rules) forbid RECEIVING mail during the
@@ -2072,7 +2090,17 @@ namespace CoAChallenges
         // purchases, not buyback.
         static bool IsVendorFoodOrDrink(ItemTemplate const* proto)
         {
-            if (!proto || proto->Class != ITEM_CLASS_CONSUMABLE)
+            if (!proto)
+                return false;
+            // Vendor reagents that craft unlimited food (Mild Spices -> Spice Bread).
+            switch (proto->ItemId)
+            {
+                case 2678:
+                    return true;
+                default:
+                    break;
+            }
+            if (proto->Class != ITEM_CLASS_CONSUMABLE)
                 return false;
             for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
             {
@@ -3266,7 +3294,7 @@ namespace CoAChallenges
 
         // .coa ruletest <player> <id>
         // GM-only: activates the challenge and checks the custom rules through
-        // the real hook dispatchers (NO_GUILD_BANK / NO_MANASTORM / N/A realm).
+        // the real hook dispatchers (NO_GUILD_BANK / NO_MANASTORM / NO_REALM_BANK).
         static bool HandleCoARuleTestCommand(ChatHandler* handler, std::string playerName, uint32 challengeId)
         {
             Player* p = ObjectAccessor::FindPlayerByName(playerName);
@@ -4131,6 +4159,8 @@ namespace CoAChallenges
 void Addmod_coa_challengesScripts()
 {
     AscensionRulesets::RegisterGuard(&CoAChallenges::ChallengeAllowsRuleset);
+    AscensionPersonalBank::RegisterAccessGuard(&CoAChallenges::ChallengeAllowsBankAccess);
+    HighRisk::RegisterLootGuard(&CoAChallenges::ChallengeAllowsHighRiskLoot);
     RegisterAscensionClientConfig(&CoAChallenges::AppendClientConfig);
     RegisterAscensionChallengeStateSync([](Player* player)
     {

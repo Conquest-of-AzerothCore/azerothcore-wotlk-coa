@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "The Contraband Magician Rod pickup rests on the ground",
+  "contract": "The Contraband Magician Rod pickup floated 1.12 yd above the terrain. It now rests on the ground. Issue #7706.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the contraband magician rod pickup rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6940267,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}

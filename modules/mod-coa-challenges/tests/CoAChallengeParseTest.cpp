@@ -36,6 +36,36 @@ TEST(CoAParse, SplitKeepEmptyPreservesSlots)
     EXPECT_EQ(out[1], "5");
 }
 
+TEST(CoAParse, LootObjectiveTargetsItemAndGatesOnThirdValue)
+{
+    std::vector<Entry> objectives = ParseEntries(
+        "CHALLENGE_REQUIREMENT_TYPE_LOOT_ITEM_BEFORE_LEVEL:1/6294/15;"
+        "CHALLENGE_REQUIREMENT_TYPE_KILL_CREATURE_BEFORE_LEVEL:639/21/0;"
+        "CHALLENGE_REQUIREMENT_TYPE_COMPLETE_QUEST_BEFORE_LEVEL:208/40/0");
+    ASSERT_EQ(objectives.size(), 3u);
+
+    EXPECT_EQ(ObjectiveTarget(objectives[0]), 6294u);
+    EXPECT_EQ(ObjectiveGateLevel(objectives[0]), 15u);
+    EXPECT_EQ(ObjectiveTarget(objectives[1]), 639u);
+    EXPECT_EQ(ObjectiveGateLevel(objectives[1]), 21u);
+    EXPECT_EQ(ObjectiveTarget(objectives[2]), 208u);
+    EXPECT_EQ(ObjectiveGateLevel(objectives[2]), 40u);
+}
+
+TEST(CoAParse, PlayerLevelScalingRuleBlocksCreatureAndQuestScaling)
+{
+    EXPECT_EQ(LevelScalingBlockBits("CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING"), LevelScalingBlockCreature);
+    EXPECT_EQ(LevelScalingBlockBits("CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING"), LevelScalingBlockQuest);
+    EXPECT_EQ(LevelScalingBlockBits("CHALLENGE_RULES_TYPE_NO_PLAYER_LEVEL_SCALING"),
+        LevelScalingBlockCreature | LevelScalingBlockQuest);
+    EXPECT_EQ(LevelScalingBlockBits("CHALLENGE_RULES_TYPE_NO_PORTALS"), 0u);
+
+    bool tracked = false;
+    for (char const* rule : LevelScalingRules)
+        tracked |= std::string(rule) == "CHALLENGE_RULES_TYPE_NO_PLAYER_LEVEL_SCALING";
+    EXPECT_TRUE(tracked);
+}
+
 TEST(CoAParse, ToU32IsStrict)
 {
     EXPECT_EQ(ToU32("0"), 0u);

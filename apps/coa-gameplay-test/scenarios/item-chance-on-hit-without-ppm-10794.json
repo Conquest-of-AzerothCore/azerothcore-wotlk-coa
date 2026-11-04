@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "name": "A chance on hit weapon without a PPM rate does not proc on every hit (#10794)",
+  "contract": [
+    "Report #10794: Flamefist Claw and similar weapons cast their chance on hit effect on every swing. Flamefist Claw (410179) has no spellppmRate and its proc (201134) carries DBC ProcChance 100, which Player::CastItemCombatSpell used as the chance. Stock uses 101 for the weapon-speed fallback; 321 Ascension items store 100.",
+    "Expected: without a PPM rate a ProcChance of 100 or more uses the weapon proc chance (2.5 s x 1.8 = 4.5%). Eight minutes of auto attacks (about 190 swings) average about eight procs: at least one (zero has odds below 0.1%) and at most 20, where the old behaviour cast it on almost every landed swing."
+  ],
+  "timeout_ms": 600000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "claw",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "m1",
+      "owner": "claw",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "claw",
+      "spell": 15590
+    },
+    {
+      "action": "set_skill",
+      "actor": "claw",
+      "skill": 473,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "claw",
+      "item": 410179
+    },
+    {
+      "action": "equip",
+      "actor": "claw",
+      "item": 410179,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the claw swings every 2.5 s",
+      "actor": "claw",
+      "metric": "attack_time_ms",
+      "equals": 2500,
+      "within_ms": 2000
+    },
+    {
+      "action": "attack",
+      "actor": "claw",
+      "target": "m1"
+    },
+    {
+      "action": "wait",
+      "ms": 480000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the swings landed",
+      "actor": "m1",
+      "metric": "health",
+      "max": 999000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the proc fires on some swings, not every one",
+      "actor": "claw",
+      "metric": "spell_cast_count",
+      "spell": 201134,
+      "min": 1,
+      "max": 20
+    }
+  ]
+}

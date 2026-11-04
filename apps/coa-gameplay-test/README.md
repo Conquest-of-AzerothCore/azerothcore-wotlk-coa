@@ -576,7 +576,7 @@ a previously named snapshot of the same metric; it is available on snapshots and
 
 Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`, `map_id`, `combat`, `casting`,
 `level`, `quest_objective_count` (needs `quest`, optional `index`), `knows_spell`, `has_talent`, `talent_points`, `active_talent_spec`,
-`cooldown_ms`, `spell_cooldown_packet_ms`, `item_count`, `carried_item_count`, `bank_bag_slots`, `aura`, `aura_stacks`, `aura_charges`,
+`cooldown_ms`, `spell_cooldown_packet_ms`, `item_count`, `carried_item_count`, `bank_bag_slots`, `guild_bank_tabs`, `aura`, `aura_stacks`, `aura_charges`,
 `aura_duration_ms`, `aura_amount`, `pet_entry`, `pet_aura_stacks`, `owned_creature_count`, `owned_creature_spacing`,
 `charm_entry`, `charm_aura_stacks`, `controls_self`, `private_instance`, `dynamic_object`,
 `dynamic_object_duration_ms`, `dynamic_object_height`, `distance`, `spell_proc_count`, `spell_proc_chance`,
@@ -602,7 +602,8 @@ optional `min_required_level`/`max_required_level` that keep only carried items 
 `dominant_stat` keeps items whose strongest of Agility 3, Strength 4, Intellect 5 and Spirit 6 is that stat,
 and `off_stat` keeps items that carry one of those four but whose strongest is not that stat; optional `quality`
 keeps items of that exact quality; optional `below_armor_class` (2 leather, 3 mail, 4 plate) keeps only cloth,
-leather or mail body armor of a lower armor class, cloaks excluded), `pool_variant_count`, `pool_retired_item_count`, `pool_row_count`,
+leather or mail body armor of a lower armor class, cloaks excluded; optional `unwearable: true` keeps only armor
+and weapons whose skill the player lacks), `pool_variant_count`, `pool_retired_item_count`, `pool_row_count`,
 `pool_item_present` (needs `item`; `table` `fire_lord` with `cache` 2400040 reads Cache of the Fire Lord's
 pool across every raid difficulty), and `cache_token_count`, `cache_token_stage`, `cache_token_present`
 (need `cache`, the last also `item`), which read the token table the realm loads and answer how many
@@ -655,7 +656,8 @@ skill line for that spell.
 `rating` (0..24, native `CombatRating`) and reads the rating value. `stat` requires `stat` (0..4), `resistance`
 requires `school` (1..6); `armor`, `attack_power`, `ranged_attack_power`, the hasted `attack_time_ms` (optional
 `hand`, 0..2) and `run_speed_rate` read the unit's current totals. `pet_attack_time_ms` uses the same hand
-selection for a player's current pet and requires that pet to exist. `aura_amplitude_ms` reads an aura effect's
+selection for a player's current pet and requires that pet to exist. `attack_timer_ms` (optional `hand`, 0..2)
+reads the time left until that hand's next swing (0 when ready). `aura_amplitude_ms` reads an aura effect's
 periodic interval.
 `block_chance` reads the player's percentage field; `block_value` reads native shield block value;
 `critical_block_chance` reads the total modifier used by the native critical block roll.
@@ -675,7 +677,8 @@ optional `hand` selects main hand (0, default), off hand (1), or ranged (2).
 `spell_critical_damage` requires `spell` and `target` and calculates a critical hit from a fixed base of 1000,
 including native critical damage modifiers, without executing an attack or applying mitigation.
 `armor_reduced_damage` requires `spell` and `target` and applies native armor mitigation to a fixed base of
-1000, including the attacker's armor penetration; optional `pet: true` selects the player's current pet.
+1000, including the attacker's armor penetration; optional `pet: true` selects the player's current pet, and
+optional `from` names another attacking player or creature, so `target` can be the actor itself.
 It does not execute an attack.
 `spell_uses_armor` separately checks whether the native damage path applies armor to `spell` and `effect`
 (default 0), including spell school, armor bypass and bleed mechanics.
@@ -881,7 +884,8 @@ client draws.
 `has_talent` requires the talent rank's spell ID; passive talents are separate from the learned spellbook.
 `talent_points` measures unspent points in the active specialization. `active_talent_spec` is the active talent
 spec: 0 for the primary, 1 for the secondary.
-`bank_bag_slots` measures the player's unlocked standard bank bag slots (0..7).
+`bank_bag_slots` measures the player's unlocked standard bank bag slots (0..7). `guild_bank_tabs` measures the
+bank tabs of the player's guild (0..6), or `-1` without a guild.
 `pet_entry` measures the player's current guardian pet entry, or the entry of the companion it summoned
 (a minipet, which never occupies the guardian slot), or zero if absent; `pet_display`, `pet_scale`
 and `pet_is_banker` read the same unit, and `pet_distance` is its 2D distance from the player in yards.
@@ -899,6 +903,10 @@ submits that spell again).
 `spell_cooldown_packet_ms` requires `spell` and reads the cooldown duration from the last native
 `SMSG_SPELL_COOLDOWN` the session was sent for it, or -1 if none was observed; unlike `cooldown_ms`,
 which reads the server-side cooldown map directly, this proves the client was actually notified.
+`sent_aura_amount` requires `spell` and accepts `effect` (0..2, default 0). It reads that effect's amount from the
+last `SMSG_ASCENSION_AURA_AMOUNT` the actor's session was sent for its own aura, which feeds the `$wN` tooltip tokens,
+and fails if none was observed; the actor needs `ascension_client` set. Unlike `aura_amount`, which reads the server-side
+aura effect, this proves what the client was told.
 `pet_aura_stacks`
 requires `spell`, accepts `caster` for aura ownership, and returns zero if the pet or aura is absent.
 `pet_aura_amount` and `pet_aura_amplitude_ms` accept `effect` and read its amount or tick interval.
@@ -921,6 +929,10 @@ Player commands retain normal permission and gameplay checks; verify their effec
 `owned_creature_count` requires a player and `entry`. It counts living creatures of that entry owned, created or summoned by
 the player, in the same phase and within 100 yards, including summons outside the guardian-pet slot.
 `creator_only: true` restricts that count to creatures whose native creator GUID is the player.
+`controlled_aura_count` requires `spell` and counts the actor's living controlled units (pets, guardians and
+minions of any entry) that carry that aura. `controlled_aura_min_damage` and `controlled_aura_max_damage` return
+the main-hand `UNIT_FIELD_MINDAMAGE`/`UNIT_FIELD_MAXDAMAGE` of the first such unit: the range its melee swing
+rolls in before armor, critical strikes and the victim's modifiers.
 This observes creator metadata; it does not establish a rendered owner title.
 An optional `spell` restricts the count to creatures with that aura; `caster` can select its aura owner. `min_distance` keeps creatures at least that many yards from the player (2D), and `owner_display: true` those wearing the player's display.
 `ranged_weapon_subclass` (0..20) restricts the count to creatures carrying a weapon of that item subclass

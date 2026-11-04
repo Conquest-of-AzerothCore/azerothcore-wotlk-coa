@@ -4058,6 +4058,11 @@ void Spell::_cast(bool skipCheck)
         }
     }
 
+    // Path of Duality: "Spell casts no longer reset your next auto attack"; weapon abilities keep the reset
+    if (resetAttackTimers && m_caster->HasAura(820054) && m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE &&
+        m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_RANGED)
+        resetAttackTimers = false;
+
     // CAST -> HIT -> FINISH ordering: fire CAST before handle_immediate so an aura
     // applied during HIT (e.g. Arcane Potency from Clearcasting) isn't consumed by
     // the same cast. Triggered spells skip this so periodic ticks (Blizzard etc.)
@@ -6050,6 +6055,14 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
                         ignored = true;
                         break;
                     }
+                if (!ignored)
+                    for (AuraEffect const* effect : m_caster->GetAuraEffectsByType(SPELL_AURA_ASCENSION_IGNORE_POSITIONAL))
+                        if (effect->IsAffectedOnSpell(m_spellInfo) &&
+                            (effect->GetMiscValue() != ASCENSION_IGNORE_POSITIONAL_VERSUS_MONSTERS || !target->IsPlayer()))
+                        {
+                            ignored = true;
+                            break;
+                        }
                 if (!ignored)
                     return SPELL_FAILED_NOT_BEHIND;
             }
