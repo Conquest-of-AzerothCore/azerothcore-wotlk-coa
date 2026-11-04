@@ -254,6 +254,8 @@ void ApplyContracts(SpellInfo* info)
     }
     if (id == 561122)
         info->DurationEntry = sSpellDurationStore.LookupEntry(1);
+    if (Named(info, 801978))
+        info->TargetAuraSpell = 0;
     if (id == 680213 || id == 300256)
     {
         info->Effects[0].ApplyAuraName = SPELL_AURA_PERIODIC_DUMMY;
