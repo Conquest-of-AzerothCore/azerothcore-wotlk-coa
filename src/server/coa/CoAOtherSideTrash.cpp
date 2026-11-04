@@ -7,6 +7,7 @@
 #include "CoAOtherSideDamage.h"
 #include "CommandScript.h"
 #include "Creature.h"
+#include "GameTime.h"
 #include "Map.h"
 #include "MotionMaster.h"
 #include "ObjectMgr.h"
@@ -23,6 +24,7 @@
 #include <atomic>
 #include <cmath>
 #include <list>
+#include <mutex>
 #include <unordered_map>
 #include <vector>
 
@@ -69,6 +71,7 @@ enum TrashData : uint32
     SPELL_BITING_CLOUD = 257202,
     SPELL_TOXIC_EXPULSION = 257203,
     SPELL_VENOM_TRAP = 256923,
+    SPELL_TRAP_BREATH_VISUAL = 256907,
 };
 
 enum class Aim : uint8
@@ -135,17 +138,20 @@ std::unordered_map<uint32, SpellDamage> const Damages =
 constexpr float FissureLength = 20.0f;
 constexpr float FissureHalfWidth = 2.0f;
 constexpr float BroodRange = 30.0f;
-std::atomic<uint32> TrapCycleMs = 6000;
-std::atomic<uint32> TrapFlightGapMs = 2000;
+std::atomic<uint32> TrapActiveMs = 1500;
+std::atomic<uint32> TrapPauseMs = 6000;
+constexpr uint32 TrapTickMs = 500;
+constexpr uint32 TrapRankMs = 5000;
+constexpr float TrapFlightReach = 30.0f;
+constexpr float TrapLevelGap = 2.0f;
+constexpr float TrapObjectScale = 1.2f;
 constexpr uint32 NPC_VENOM_TRAP = 162975;
 constexpr uint32 SpawnMaskAllDifficulties = 7;
 constexpr float TrapCommandReach = 10.0f;
 constexpr float TrapListReach = 600.0f;
 constexpr float ToxicExpulsionReach = 100.0f;
-constexpr float TrapReach = 35.0f;
-constexpr float TrapHalfAngle = float(M_PI) / 15.0f;
-constexpr float SecondFlightZ = 295.0f;
-constexpr float ThirdFlightZ = 330.0f;
+constexpr float TrapReach = 11.0f;
+constexpr float TrapHalfAngle = float(M_PI) / 12.0f;
 
 uint8 DifficultyBit(Map const* map)
 {
@@ -284,6 +290,40 @@ private:
     float _breathFacing = 0.0f;
 };
 
+bool InTrapBreath(Creature const* trap, Player const* player)
+{
+    float const facing = trap->GetHomePosition().GetOrientation();
+    return player->IsAlive() && !player->IsGameMaster() && trap->GetExactDist(player) <= TrapReach
+        && std::fabs(Position::NormalizeOrientation(trap->GetAngle(player) - facing + float(M_PI)) - float(M_PI)) <= TrapHalfAngle
+        && trap->IsWithinLOSInMap(player);
+}
+
+std::mutex TrapLastHitLock;
+std::unordered_map<ObjectGuid, uint32> TrapLastHit;
+
+void TrapBreathDamage(Creature* trap, Player* player)
+{
+    uint32 const now = uint32(GameTime::GetGameTimeMS().count());
+    {
+        std::lock_guard lock(TrapLastHitLock);
+        auto const last = TrapLastHit.find(player->GetGUID());
+        if (last != TrapLastHit.end() && now - last->second < TrapTickMs / 2)
+            return;
+        TrapLastHit[player->GetGUID()] = now;
+    }
+    SpellInfo const* venom = sSpellMgr->GetSpellInfo(SPELL_VENOM_TRAP);
+    if (!venom || player->IsImmunedToDamage(trap, venom))
+        return;
+    int32 const base = std::max(0, venom->Effects[EFFECT_0].CalcValue(trap));
+    uint32 const done = trap->SpellDamageBonusDone(player, venom, uint32(base), SPELL_DIRECT_DAMAGE, EFFECT_0);
+    uint32 const taken = player->SpellDamageBonusTaken(trap, venom, done, SPELL_DIRECT_DAMAGE);
+    SpellNonMeleeDamage damage(trap, player, venom, venom->GetSchoolMask());
+    trap->CalculateSpellDamageTaken(&damage, int32(taken), venom);
+    Unit::DealDamageMods(player, damage.damage, &damage.absorb);
+    trap->DealSpellDamage(&damage, true);
+    trap->SendSpellNonMeleeDamageLog(&damage);
+}
+
 struct npc_coa_other_side_venom_trap : public ScriptedAI
 {
     explicit npc_coa_other_side_venom_trap(Creature* creature) : ScriptedAI(creature) { }
@@ -291,8 +331,9 @@ struct npc_coa_other_side_venom_trap : public ScriptedAI
     void Reset() override
     {
         me->SetReactState(REACT_PASSIVE);
-        uint32 const flight = me->GetPositionZ() < SecondFlightZ ? 0 : (me->GetPositionZ() < ThirdFlightZ ? 1 : 2);
-        _timer = flight * TrapFlightGapMs.load();
+        me->SetObjectScale(TrapObjectScale);
+        _rankIn = 0;
+        _breathing = false;
     }
 
     void AttackStart(Unit* ) override { }
@@ -300,28 +341,85 @@ struct npc_coa_other_side_venom_trap : public ScriptedAI
 
     void UpdateAI(uint32 diff) override
     {
-        if (_timer > diff)
+        if (_rankIn <= diff)
         {
-            _timer -= diff;
+            Rank();
+            _rankIn = TrapRankMs;
+        }
+        else
+            _rankIn -= diff;
+
+        uint32 const active = TrapActiveMs.load();
+        uint32 const cycle = _levels * active + TrapPauseMs.load();
+        uint32 const now = uint32(GameTime::GetGameTimeMS().count() % cycle);
+        bool const breathing = now >= _level * active && now < (_level + 1) * active;
+        if (breathing && !_breathing)
+        {
+            me->SetFacingTo(me->GetHomePosition().GetOrientation());
+            me->CastSpell(me, SPELL_TRAP_BREATH_VISUAL, TRIGGERED_FULL_MASK);
+            _tickIn = 0;
+        }
+        else if (!breathing && _breathing)
+        {
+            me->InterruptNonMeleeSpells(false);
+            me->RemoveAurasDueToSpell(SPELL_TRAP_BREATH_VISUAL);
+        }
+        _breathing = breathing;
+        if (!_breathing)
+            return;
+
+        if (_tickIn > diff)
+        {
+            _tickIn -= diff;
             return;
         }
-        _timer = TrapCycleMs.load();
-        float const facing = me->GetHomePosition().GetOrientation();
-        me->SetOrientation(facing);
+        _tickIn = TrapTickMs;
         for (auto const& ref : me->GetMap()->GetPlayers())
-        {
-            Player* player = ref.GetSource();
-            if (!player || !player->IsAlive() || player->IsGameMaster() || me->GetExactDist(player) > TrapReach
-                || std::fabs(Position::NormalizeOrientation(me->GetAngle(player) - facing + float(M_PI)) - float(M_PI)) > TrapHalfAngle
-                || !me->IsWithinLOSInMap(player))
-                continue;
-            me->CastSpell(player, SPELL_VENOM_TRAP, true);
-            break;
-        }
+            if (Player* player = ref.GetSource())
+                if (InTrapBreath(me, player))
+                    TrapBreathDamage(me, player);
     }
 
 private:
-    uint32 _timer = 0;
+    void Rank()
+    {
+        std::list<Creature*> traps;
+        me->GetCreatureListWithEntryInGrid(traps, me->GetEntry(), TrapFlightReach);
+        std::vector<float> heights;
+        for (Creature* trap : traps)
+        {
+            float const z = trap->GetHomePosition().GetPositionZ();
+            if (std::none_of(heights.begin(), heights.end(), [z](float h) { return std::fabs(h - z) < TrapLevelGap; }))
+                heights.push_back(z);
+        }
+        float const own = me->GetHomePosition().GetPositionZ();
+        if (std::none_of(heights.begin(), heights.end(), [own](float h) { return std::fabs(h - own) < TrapLevelGap; }))
+            heights.push_back(own);
+        _levels = uint32(heights.size());
+        _level = uint32(std::count_if(heights.begin(), heights.end(), [own](float h) { return h < own - TrapLevelGap; }));
+    }
+
+    uint32 _rankIn = 0;
+    uint32 _tickIn = 0;
+    uint32 _level = 0;
+    uint32 _levels = 1;
+    bool _breathing = false;
+};
+
+class spell_coa_other_side_trap_breath_visual : public AuraScript
+{
+    PrepareAuraScript(spell_coa_other_side_trap_breath_visual);
+
+    void SkipTrapTick(AuraEffect const* )
+    {
+        if (GetCaster() && GetCaster()->GetEntry() == NPC_VENOM_TRAP)
+            PreventDefaultAction();
+    }
+
+    void Register() override
+    {
+        OnEffectPeriodic += AuraEffectPeriodicFn(spell_coa_other_side_trap_breath_visual::SkipTrapTick, EFFECT_1, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+    }
 };
 
 class spell_coa_other_side_trash_damage : public SpellScript
@@ -518,23 +616,26 @@ public:
             handler->SendErrorMessage("No trap nearby.");
             return false;
         }
-        trap->SetFacingToObject(player);
-        SpellCastResult const result = trap->CastSpell(player, SPELL_VENOM_TRAP, true);
-        handler->PSendSysMessage("Trap {} at {:.1f} yards cast Venom Trap at you (result {}).", trap->GetSpawnId(), trap->GetExactDist(player), uint32(result));
+        trap->SetFacingTo(trap->GetHomePosition().GetOrientation());
+        trap->CastSpell(trap, SPELL_TRAP_BREATH_VISUAL, TRIGGERED_FULL_MASK);
+        bool const inside = InTrapBreath(trap, player);
+        if (inside)
+            TrapBreathDamage(trap, player);
+        handler->PSendSysMessage("Trap {} at {:.1f} yards breathes; you are {} its breath.", trap->GetSpawnId(), trap->GetExactDist(player), inside ? "inside" : "outside");
         return true;
     }
 
-    static bool HandleTiming(ChatHandler* handler, uint32 cycleMs, Optional<uint32> flightGapMs)
+    static bool HandleTiming(ChatHandler* handler, uint32 activeMs, Optional<uint32> pauseMs)
     {
-        if (cycleMs < 500)
+        if (activeMs < TrapTickMs)
         {
-            handler->SendErrorMessage("The cycle must be at least 500 ms.");
+            handler->SendErrorMessage("Each breath must last at least {} ms.", TrapTickMs);
             return false;
         }
-        TrapCycleMs = cycleMs;
-        if (flightGapMs)
-            TrapFlightGapMs = *flightGapMs;
-        handler->PSendSysMessage("Traps fire every {} ms, flights {} ms apart, until the next restart.", TrapCycleMs.load(), TrapFlightGapMs.load());
+        TrapActiveMs = activeMs;
+        if (pauseMs)
+            TrapPauseMs = *pauseMs;
+        handler->PSendSysMessage("Each statue breathes {} ms, then the next one up; {} ms pause after the top. Until the next restart.", TrapActiveMs.load(), TrapPauseMs.load());
         return true;
     }
 
@@ -545,7 +646,7 @@ public:
         for (Creature* trap : traps)
             handler->PSendSysMessage("Trap {}: {:.2f} {:.2f} {:.2f}, facing {:.3f}", trap->GetSpawnId(),
                 trap->GetPositionX(), trap->GetPositionY(), trap->GetPositionZ(), trap->GetHomePosition().GetOrientation());
-        handler->PSendSysMessage("{} traps; they fire every {} ms, flights {} ms apart.", traps.size(), TrapCycleMs.load(), TrapFlightGapMs.load());
+        handler->PSendSysMessage("{} traps; each breathes {} ms, {} ms pause after the top.", traps.size(), TrapActiveMs.load(), TrapPauseMs.load());
         return true;
     }
 };
@@ -554,6 +655,7 @@ void AddSC_CoAOtherSideTrash()
 {
     RegisterCreatureAI(npc_coa_other_side_trash);
     RegisterCreatureAI(npc_coa_other_side_venom_trap);
+    RegisterSpellScript(spell_coa_other_side_trap_breath_visual);
     RegisterSpellAndAuraScriptPair(spell_coa_other_side_trash_damage, spell_coa_other_side_trash_damage_aura);
     RegisterSpellScript(spell_coa_other_side_fissure_strike);
     RegisterSpellScript(spell_coa_other_side_brood_empowerment);
