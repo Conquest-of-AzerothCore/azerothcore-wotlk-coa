@@ -6730,7 +6730,12 @@ private:
         }
         else if (action == "binder_activate")
         {
-            Unit* innkeeper = GetUnit(step.get<std::string>("target"));
+            Unit* innkeeper = nullptr;
+            if (auto target = step.get_optional<std::string>("target"))
+                innkeeper = GetUnit(*target);
+            else
+                innkeeper = GetOwnedCreature(GetPlayer(step.get<std::string>("owner")), step.get<uint32>("entry"));
+            Require(innkeeper != nullptr, "That actor has no creature of that entry out");
             if (!innkeeper->IsWithinDistInMap(player, INTERACTION_DISTANCE))
                 player->UpdatePosition(innkeeper->GetPositionX(), innkeeper->GetPositionY(),
                                        innkeeper->GetPositionZ(), player->GetOrientation(), true);

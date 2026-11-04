@@ -514,7 +514,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `banker_activate` | `actor`, optional `target`, or optional `owner` + `entry`: native banker click (`CMSG_BANKER_ACTIVATE`); defaults to the actor's summoned companion, and `owner` aims it at a companion another actor summoned, walking up to it first. |
 | `personal_bank_open` | `actor`, bank object `entry`: native Personal Bank open (`CMSG_GUILD_BANKER_ACTIVATE`) on the nearest vault of that entry within 20 yards. |
 | `personal_bank_swap` | `actor`, vault `entry`, `direction` `deposit` or `withdraw`, optional bank `slot` (default 0) and split `count` (0 moves the stack); `deposit` needs `item`, the first carried item of that entry. Withdrawals optionally take backpack `inventory_slot` (23-38), otherwise use automatic storage. Sends native `CMSG_GUILD_BANK_SWAP_ITEMS` into or out of the open Personal Bank. |
-| `binder_activate` | `actor`, innkeeper `target`: native "make this inn your home" confirmation (`CMSG_BINDER_ACTIVATE`), walking up to the innkeeper first. |
+| `binder_activate` | `actor`, innkeeper `target` (or `owner` + `entry` for a creature that actor has out): native "make this inn your home" confirmation (`CMSG_BINDER_ACTIVATE`), walking up to the innkeeper first. |
 | `destroy_item` | `actor`, `item`: native `CMSG_DESTROYITEM` of the first carried item of that entry, as the player deleting it. |
 | `area_trigger` | `actor`, `id`: native area-trigger packet, as the client sends on walking into one; inn triggers are what set the rested flag. |
 | `gossip_select` | `actor`, zero-based `option`: select from the current menu through the session handler. |

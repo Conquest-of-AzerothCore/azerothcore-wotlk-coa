@@ -262,7 +262,7 @@ ACTIONS = {
     'personal_bank_open': ({'actor', 'entry'}, {'actor', 'entry'}),
     'personal_bank_swap': ({'actor', 'entry', 'direction'},
                            {'actor', 'entry', 'direction', 'item', 'slot', 'count', 'inventory_slot'}),
-    'binder_activate': ({'actor', 'target'}, {'actor', 'target'}),
+    'binder_activate': ({'actor'}, {'actor', 'target', 'owner', 'entry'}),
     'destroy_item': ({'actor', 'item'}, {'actor', 'item'}),
     'start_challenge': ({'actor', 'challenge', 'level'}, {'actor', 'challenge', 'level'}),
     'stop_challenge': ({'actor', 'challenge'}, {'actor', 'challenge'}),
