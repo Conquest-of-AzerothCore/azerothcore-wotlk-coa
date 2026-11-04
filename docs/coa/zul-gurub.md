@@ -219,8 +219,9 @@ to it in the log.
     - Mandokir's Whirlwind "feels short": its 3 s cast and 6 s spin match the DBC and the live log, and a scenario
       checks the full 6 s.
     - Frenzy 2106613 at 65 % attack speed on Normal and Heroic, with extra damage on Mythic and Ascended: the
-      server DBC, the client DBC and the Exiles DB all give 30 % haste and 30 % more damage taken, with no tier
-      variant. A change needs a source.
+      server DBC, the client DBC, the Exiles DB and the SUB dump all give 30 % haste and 30 % more damage taken,
+      with no tier variant. In the live log of 2026-08-02 his median swing drops from 2.47 s to 1.80 s under
+      Frenzy, about 1.4 times faster, not the 1.65 of 65 %. Kept at 30 % (user decision, 2026-11-04).
     - Gri'lek: the tester's video shows 3.5 million health with 11 players, about 318k per player, against our
       108,341 per player (about 1.19 million at 11). This awaits the video and a decision.
     - Jin'do's shades taking no area damage may come from one class's ability; the tester retests it.
