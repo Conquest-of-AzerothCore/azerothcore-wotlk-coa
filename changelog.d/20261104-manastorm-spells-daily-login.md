@@ -20,6 +20,11 @@
 
 ## Manastorm advancement and safety
 
+- Add per-member creature views for grouped Manastorm through Destiny Weaver. Members fight their own level while sharing one server health pool with the existing depth and group multipliers.
+- Keep Solo on its existing scaling path. Retain grouped-run views through individual departures, and limit the integration to registered Manastorm instances and their members.
+- Extend existing personal health, armor, damage, combat-level, pet-owner, threat and cross-player healing paths to grouped stages, including private raid-map segments and objective bosses.
+- Normalize direct and periodic percentage-health damage against the personal view, compensating incoming health-percentage attacks for the ordinary level conversion.
+
 - Reset player and active-pet cooldowns once per advancement destination.
 - Preserve eligible pets and guardians for first arrivals, followers and automatic transfers.
 - Revive dead advancing members, clear debuffs, restore eligible lost buffs, refresh eligible buff durations and fill health/mana on arrival.
@@ -45,3 +50,5 @@
 ## Verification status
 
 Focused daily-login SQL-model/wiring tests and incremental source checks passed. The draft retains three unresolved earlier combined-candidate source-suite failures. Compilation, C++ harness execution, native worldserver regressions, effective MySQL migration results and client presentation require verification. Reconstructed Mode 1 external-addon token display remains pending. Streak reward policies remain future work.
+
+Grouped personal scaling passed six source/model tests and four incremental source checks. It requires Destiny Weaver scaling enabled and retains existing challenge restrictions. Mixed-level native combat, percentage-damage interactions and client rendering still require verification.

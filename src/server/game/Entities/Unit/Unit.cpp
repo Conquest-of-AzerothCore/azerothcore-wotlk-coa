@@ -161,6 +161,31 @@ static double PoolFactor(Unit const* source, Creature const* creature)
     return double(std::max<uint32>(creature->GetMaxHealth(), 1)) / double(viewMaxHealth);
 }
 
+uint32 LocalLevelScaling::PersonalDamageHealthFor(Unit const* source, Unit const* target)
+{
+    if (!target)
+        return 0;
+    uint32 const health = target->GetMaxHealth();
+    if (!source)
+        return health;
+    if (Creature const* creature = target->ToCreature())
+        if (Player const* viewer = source->GetCharmerOrOwnerPlayerOrPlayerItself())
+            if (PersonalInstanceScalingFor(target->FindMap(), viewer))
+                if (uint32 const view = ViewMaxHealthFor(viewer, creature))
+                    return view;
+    if (Creature const* creature = source->ToCreature())
+        if (Player const* viewer = target->GetCharmerOrOwnerPlayerOrPlayerItself())
+            if (PersonalInstanceScalingFor(source->FindMap(), viewer))
+                if (CreatureViewDamageResolver const owner = CreatureViewDamageOwner.load(std::memory_order_relaxed))
+                {
+                    double const factor = owner(viewer, creature);
+                    if (factor > 0.0)
+                        return uint32(std::clamp(double(health) / factor, 1.0,
+                            double(std::numeric_limits<uint32>::max())));
+                }
+    return health;
+}
+
 float LocalLevelScaling::PoolThreatFor(Unit const* source, Unit const* threatOwner, float threat)
 {
     if (threat == 0.0f || !source || !threatOwner || source == threatOwner)

@@ -105,6 +105,7 @@ public:
         Unit* victim,
         uint32& damage);
     bool IsPlayerProtectedDuringTransition(Player const* player) const;
+    bool HasPersonalLevelScaling(Map const* map, Player const* viewer);
 
     void OnMeleeDamage(
         Unit* attacker,

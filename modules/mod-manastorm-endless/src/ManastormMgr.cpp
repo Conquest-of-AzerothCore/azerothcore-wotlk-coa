@@ -7064,6 +7064,16 @@ bool ManastormMgr::TrySpawnTrashHeart(
         true);
 }
 
+bool ManastormMgr::HasPersonalLevelScaling(Map const* map, Player const* viewer)
+{
+    if (!map || !map->IsScriptedPrivateInstance())
+        return false;
+    ManastormRun* run = GetRunForStage(map->GetId(), map->GetInstanceId());
+    if (!run || run->GetMode() == ManastormMode::Solo)
+        return false;
+    return !viewer || (viewer->FindMap() == map && GetRunFor(viewer) == run);
+}
+
 bool ManastormMgr::IsPlayerProtectedDuringTransition(Player const* player) const
 {
     ManastormRun const* run = GetRunFor(player);

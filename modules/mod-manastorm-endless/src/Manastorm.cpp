@@ -17,6 +17,7 @@
 #include "QuestDef.h"
 #include "ScriptMgr.h"
 #include "PlayerScript.h"
+#include "LocalLevelScaling.h"
 #include "DatabaseEnv.h"
 #include <algorithm>
 #include <limits>
@@ -406,6 +407,11 @@ public:
 
     void OnStartup() override
     {
+        LocalLevelScaling::PersonalInstanceScalingOwner.store([](Map const* map, Player const* viewer)
+        {
+            return ManastormModuleConfig::Enabled() &&
+                ManastormMgr::Instance().HasPersonalLevelScaling(map, viewer);
+        }, std::memory_order_relaxed);
         ManastormModuleConfig::LogConfiguration();
 
         if (!ManastormModuleConfig::Enabled())
@@ -429,6 +435,11 @@ public:
                 "Apply the world SQL before using `.manastorm start`.");
         }
     }
+    void OnShutdown() override
+    {
+        LocalLevelScaling::PersonalInstanceScalingOwner.store(nullptr, std::memory_order_relaxed);
+    }
+
     void OnUpdate(uint32 diff) override
     {
         if (!ManastormModuleConfig::Enabled())
