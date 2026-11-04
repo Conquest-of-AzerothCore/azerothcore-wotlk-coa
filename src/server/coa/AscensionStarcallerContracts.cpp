@@ -271,6 +271,14 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].RadiusEntry = info->Effects[2].RadiusEntry;
         info->Effects[2].Effect = 0;
     }
+    // Arrow of the Goddess is a self-cast frontal cone: its reach is the effect radius
+    // (index 23, 40 yd), not RangeIndex, so SPELLMOD_RANGE cannot move it. Match the 45 yd
+    // the Starcaller's other ranged abilities reach. Cone target selection is server side,
+    // so the client needs no matching row.
+    if (id == 563725)
+        for (uint8 slot = EFFECT_0; slot <= EFFECT_2; ++slot)
+            if (info->Effects[slot].RadiusEntry)
+                info->Effects[slot].RadiusEntry = sSpellRadiusStore.LookupEntry(232);
     for (uint32 sid : {801148, 100250, 680790, 706436})
         if (id == sid)
             info->AttributesEx3 |= SPELL_ATTR3_IGNORE_CASTER_MODIFIERS;
