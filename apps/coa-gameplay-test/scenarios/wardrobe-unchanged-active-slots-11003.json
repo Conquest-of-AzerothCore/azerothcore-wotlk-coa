@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "name": "Wardrobe validates only changed slots, so an active set does not block other transmogs (#11003, #8897)",
+  "contract": [
+    "Extensions.dll ApplyPendingAppearances validates only the categories the player changed, then sends the",
+    "whole pending array in CMSG_APPLY_APPEARANCES (0x0697); unchanged slots carry the current active appearance.",
+    "The server must not reject a request because an unchanged, already active slot fails a check that a new",
+    "selection would fail. Appearances.dbc row 17650 is the Hexflame Coven item set (category 55); its pieces",
+    "3162-3174 all have categories (1, 0, 0) and ExpandItemSetAppearance stores them by InventoryType in slots",
+    "1-11, so shoulder appearance 3163 is active in category 2. Resending that array with a new thrown",
+    "appearance 12001 (category 12) must be accepted, not answered with APPLY_APPEARANCES_INVALID_CATEGORY.",
+    "A relog reads character_appearance back through SMSG_APPEARANCE_ACTIVE_INFO (opcode 1690; word category+1)",
+    "to show the new slot was saved and the set pieces kept. CoA.UnlockLocalAppearanceCatalog collects every",
+    "appearance, so the reports' uncollected active slots cannot be fixtured; they take the same unchanged path."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wearer", "race": 1, "class": 12, "level": 20 }
+  ],
+  "steps": [
+    { "action": "apply_appearances", "actor": "wearer", "selection": { "55": 17650 } },
+    {
+      "action": "assert", "label": "The set selection is accepted", "actor": "wearer",
+      "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_OK", "equals": 1
+    },
+    {
+      "action": "snapshot", "actor": "wearer", "metric": "server_packets", "opcode": 1688,
+      "save_as": "before_weapon"
+    },
+    {
+      "action": "apply_appearances", "actor": "wearer",
+      "selection": {
+        "1": 3162, "2": 3163, "3": 3164, "4": 3165, "7": 3170, "8": 3174, "9": 3168, "10": 3169, "11": 3171,
+        "12": 12001, "55": 17650
+      }
+    },
+    {
+      "action": "assert", "label": "The weapon request receives one response", "actor": "wearer",
+      "metric": "server_packets", "opcode": 1688, "relative_to": "before_weapon", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Unchanged set slots do not reject the new weapon appearance", "actor": "wearer",
+      "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_OK", "equals": 1
+    },
+    { "action": "relog", "label": "Reload the saved active appearances", "actor": "wearer" },
+    {
+      "action": "assert", "label": "The thrown appearance is saved in category 12", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 13, "equals": 12001
+    },
+    {
+      "action": "assert", "label": "The set shoulders stay in category 2", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 3, "equals": 3163
+    },
+    {
+      "action": "assert", "label": "The set selection stays in category 55", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 56, "equals": 17650
+    }
+  ]
+}
