@@ -19,8 +19,7 @@ using namespace Acore::ChatCommands;
 
 namespace
 {
-// A player who keeps earning while capped is reminded at most this often.
-constexpr uint32 NOTICE_INTERVAL_SECONDS = 300;
+constexpr uint32 CAPPED_REMINDER_INTERVAL_SECONDS = 300;
 
 struct Window
 {
@@ -107,8 +106,7 @@ uint32 AscensionBazaarTokenCap::Claim(Player* player, uint32 count)
             Save(accountId, window);
         }
 
-        // Tell the player when the limit is reached, then remind them now and then while rewards are lost.
-        if (window.earned >= cap && (allowed || now >= window.lastNotice + NOTICE_INTERVAL_SECONDS))
+        if (window.earned >= cap && (allowed || now >= window.lastNotice + CAPPED_REMINDER_INTERVAL_SECONDS))
         {
             window.lastNotice = now;
             minutesLeft = MinutesLeft(window, now);
@@ -188,7 +186,6 @@ public:
 
     static bool HandleReset(ChatHandler* handler, Optional<PlayerIdentifier> target)
     {
-        // A window that ended long ago: the account's next token opens a new hour.
         return Change(handler, target, 0, std::numeric_limits<uint32>::max());
     }
 
