@@ -9,23 +9,16 @@
  * from coa_world_boss_level; the damage factor is the log's hits over the base
  * values of the spells Ascension cast (the same ids on both kills).
  *
- * Setis (the log shows a kit between his old spells and his new block; the new
- * block's Seeking Shadow Bolts, Prismatic Barrier, split Meteor and Massive
- * Thunder Stomp never fired in it, so their timers are designed; Prismatic
- * Barrier is left out, as he shows no aura on Ascension)
+ * Setis (his kit as seven live kills show it; the spells of his new block that
+ * no live kill shows are left out)
  *   Plague              every 5.1s    a random player
  *   Fierce Blow         every 8.8s    tank
  *   Shadow Storm        every 13.6s   shadow bolts at everyone 25-45 yards out
- *   Seeking Shadow Bolts every 21s    a shadow bolt at every player
  *   War Stomp           every 32s     around him, knocked back
- *   Meteor              every 32s     cast at a player, then a fireball at them;
- *                                     its damage, which grows with the raid,
- *                                     is split between everyone in the impact
+ *   Meteor              every 32s     4s cast at a player, fire on the ground
  *   Call Lightning      every 35.1s   marks three spots, one more for every ten
  *                                     players, then a 4s cast strikes them and
  *                                     electrifies the ground for 20s
- *   Massive Thunder Stomp every 45s   the tank, then everyone, less further out,
- *                                     knocked back with slower attacks
  *   Frenzy              at 30%
  *   Armageddon          at 3%         15s cast, +150% damage taken while he
  *                                     casts; if it finishes, the raid dies
@@ -252,18 +245,7 @@ namespace
         SPELL_WAR_STOMP         = 1002213,
         SPELL_FIRE_REFLECT      = 1002118,
         SPELL_FRENZY            = 1002120,
-        SPELL_SEEKING_BOLTS     = 2119001,
-        SPELL_SEEKING_BOLT      = 2119002,
-        SPELL_METEOR_INFO       = 2119006,
-        SPELL_METEOR            = 2119010,
-        SPELL_METEOR_MISSILE    = 2119011,
-        SPELL_METEOR_IMPACT     = 2119013,
-        SPELL_METEOR_MARK       = 2119015,
-        SPELL_THUNDER_STOMP     = 2119022,
-        SPELL_THUNDER_STOMP_HIT = 2119023,
-        SPELL_THUNDER_STOMP_INFO = 2119024,
-        SPELL_THUNDER_STOMP_DAMAGE = 2119028,
-        SPELL_THUNDER_STOMP_KNOCK = 2119029,
+        SPELL_METEOR            = 83360,
         SPELL_CALL_LIGHTNING    = 2119052,
         SPELL_LIGHTNING_MARK    = 2119053,
         SPELL_LIGHTNING_STRIKE  = 2119054,
@@ -273,11 +255,9 @@ namespace
 
     enum SetisEvents
     {
-        ES_PLAGUE = 1, ES_FIERCE, ES_STORM, ES_STOMP, ES_METEOR, ES_LIGHTNING, ES_BOLTS, ES_THUNDER
+        ES_PLAGUE = 1, ES_FIERCE, ES_STORM, ES_STOMP, ES_METEOR, ES_LIGHTNING
     };
-    enum SetisTicks { TS_METEOR_LAND = 1 };
 
-    constexpr float METEOR_RADIUS = 8.0f;
     constexpr float SETIS_MELEE_REACH = 8.0f;
     constexpr uint32 GO_SETIS_EXIT = 64601;
     constexpr uint32 SETIS_MAP = 880;
@@ -358,8 +338,6 @@ namespace
             events.ScheduleEvent(ES_STOMP, 16300ms);
             events.ScheduleEvent(ES_METEOR, 26400ms);
             events.ScheduleEvent(ES_LIGHTNING, 30500ms);
-            events.ScheduleEvent(ES_BOLTS, 21s);
-            events.ScheduleEvent(ES_THUNDER, 45s);
         }
 
         void Execute(uint32 eventId) override
@@ -376,12 +354,7 @@ namespace
                 case ES_STOMP:     DoCastSelf(SPELL_WAR_STOMP);      events.Repeat(32s);     break;
                 case ES_METEOR:
                     if (Unit* t = RandomPlayer())
-                    {
-                        _meteorTarget = t->GetGUID();
-                        _meteor = t->GetPosition();
-                        me->CastSpell(t, SPELL_METEOR_MARK, true);
                         DoCast(t, SPELL_METEOR);
-                    }
                     events.Repeat(32s);
                     break;
                 case ES_LIGHTNING:
@@ -390,8 +363,6 @@ namespace
                         DoCast(t, SPELL_CALL_LIGHTNING);
                     events.Repeat(35100ms);
                     break;
-                case ES_BOLTS:     DoCastSelf(SPELL_SEEKING_BOLTS);  events.Repeat(21s); break;
-                case ES_THUNDER:   DoCastVictim(SPELL_THUNDER_STOMP); events.Repeat(45s); break;
             }
         }
 
@@ -411,32 +382,6 @@ namespace
             {
                 _marks.push_back(p->GetPosition());
                 CastAt(p->GetPosition(), SPELL_LIGHTNING_MARK);
-            }
-        }
-
-        void Tick(uint32 tick) override
-        {
-            if (tick != TS_METEOR_LAND)
-                return;
-            ClearMeteorMark();
-            std::vector<Player*> hit = Players(me, [&](Player* p)
-            {
-                return p->IsAlive() && p->GetExactDist2d(&_meteor) <= METEOR_RADIUS;
-            });
-            if (hit.empty())
-                return;
-            int32 const raid = int32(std::max<size_t>(PlayersWithin(me, 200.0f).size(), 1));
-            int32 const total = Info(me, SPELL_METEOR_INFO) * raid / 10;
-            for (Player* p : hit)
-                Hit(me, p, SPELL_METEOR_IMPACT, std::max<int32>(total / int32(hit.size()), 1));
-        }
-
-        void ClearMeteorMark()
-        {
-            if (Unit* target = ObjectAccessor::GetUnit(*me, _meteorTarget))
-            {
-                target->RemoveAurasDueToSpell(SPELL_METEOR_MARK, me->GetGUID());
-                target->RemoveAurasDueToSpell(SPELL_METEOR, me->GetGUID());
             }
         }
 
@@ -475,32 +420,6 @@ namespace
             }
             else if (spell->Id == SPELL_ARMAGEDDON)
                 DoCastAOE(SPELL_ARMAGEDDON_BLAST, true);
-            else if (spell->Id == SPELL_SEEKING_BOLTS)
-            {
-                for (Player* p : PlayersWithin(me, 100.0f))
-                    me->CastSpell(p, SPELL_SEEKING_BOLT, true);
-            }
-            else if (spell->Id == SPELL_METEOR)
-            {
-                if (Unit* target = ObjectAccessor::GetUnit(*me, _meteorTarget))
-                {
-                    _meteor = target->GetPosition();
-                    me->CastSpell(target, SPELL_METEOR_MISSILE, true);
-                }
-                _clock.ScheduleEvent(TS_METEOR_LAND, 1500ms);
-            }
-            else if (spell->Id == SPELL_THUNDER_STOMP)
-            {
-                if (Unit* tank = me->GetVictim())
-                    me->CastSpell(tank, SPELL_THUNDER_STOMP_HIT, true);
-                int32 const base = Info(me, SPELL_THUNDER_STOMP_INFO);
-                for (Player* p : PlayersWithin(me, 100.0f))
-                {
-                    float const falloff = std::clamp(1.0f - me->GetDistance(p) / 50.0f, 0.2f, 1.0f);
-                    Hit(me, p, SPELL_THUNDER_STOMP_DAMAGE, int32(base * falloff));
-                    me->CastSpell(p, SPELL_THUNDER_STOMP_KNOCK, true);
-                }
-            }
         }
 
         void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType type, SpellSchoolMask school) override
@@ -523,8 +442,6 @@ namespace
     private:
         bool _frenzy = false;
         bool _armageddon = false;
-        ObjectGuid _meteorTarget;
-        Position _meteor;
         std::vector<Position> _marks;
     };
 
@@ -538,7 +455,7 @@ namespace
             if (!player->IsAlive())
                 return true;
             ClearGossipMenuFor(player);
-            AddGossipItemFor(player, GOSSIP_ICON_BATTLE, "Challenge Setis the Gate Watcher", GOSSIP_SENDER_MAIN,
+            AddGossipItemFor(player, GOSSIP_ICON_BATTLE, "Challenge Setis the Gate Warden", GOSSIP_SENDER_MAIN,
                 GOSSIP_ACTION_INFO_DEF + 1);
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Take your hands off the shrine.", GOSSIP_SENDER_MAIN,
                 GOSSIP_ACTION_INFO_DEF + 2);

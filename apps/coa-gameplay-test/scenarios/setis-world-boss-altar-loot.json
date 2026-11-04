@@ -3,7 +3,7 @@
   "name": "Setis: the shrine takes the raid to his map, he pays every player and leaves a portal back",
   "contract": [
     "rev_20261104_10_coa_setis_world_boss spawns the Shrine of Setis (64600) by the Scarab Wall. On a",
-    "heroic raid difficulty it refuses; on a Normal one its gossip 'Challenge Setis the Gate Watcher'",
+    "heroic raid difficulty it refuses; on a Normal one its gossip 'Challenge Setis the Gate Warden'",
     "takes the player to Setis' map (880). Setis (64600) has 400000 health per player, counted from 10 to",
     "40, so 4000000 for one player. For a single player he drops one epic item of item level 68 (one for",
     "every four players, never none), and every player gets 250 Runes of Ascension (375250), 100 to 150",
@@ -59,13 +59,13 @@
     {
       "action": "summon_gameobject",
       "actor": "raider",
-      "entry": 64600,
+      "entry": 380138,
       "distance": 2
     },
     {
       "action": "use_gameobject",
       "actor": "raider",
-      "entry": 64600
+      "entry": 380138
     },
     {
       "action": "gossip_select",
@@ -95,13 +95,13 @@
     {
       "action": "use_gameobject",
       "actor": "raider",
-      "entry": 64600
+      "entry": 380138
     },
     {
       "action": "gossip_select",
       "actor": "raider",
       "option": 0,
-      "label": "Challenge Setis the Gate Watcher"
+      "label": "Challenge Setis the Gate Warden"
     },
     {
       "action": "assert",

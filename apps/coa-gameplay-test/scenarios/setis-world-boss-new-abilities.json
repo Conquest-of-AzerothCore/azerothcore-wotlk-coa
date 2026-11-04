@@ -1,12 +1,11 @@
 {
   "schema": 1,
-  "name": "Setis uses the rest of his Ascension kit, with the Meteor fireball and the marked Call Lightning",
+  "name": "Setis casts his live kit: the 4 s Meteor and the marked Call Lightning, and nothing no live kill shows",
   "contract": [
-    "boss_setis_coa casts Seeking Shadow Bolts (2119001) after 21 s; the split Meteor (2119010) after",
-    "26.4 s instead of the generic 83360, marking its target (2119015) as the cast begins and ending in a",
-    "fireball (2119011); Call Lightning after 30.5 s, which first marks one spot per player, up to three",
-    "and one more for every ten (2119053); and Massive Thunder Stomp (2119022) after 45 s. He has no",
-    "Prismatic Barrier, whose spells heal him to full."
+    "boss_setis_coa casts Meteor 83360 after 26.4 s, as the live kills show; Call Lightning after 30.5 s, which",
+    "first marks one spot per player, up to three and one more for every ten (2119053). He casts none of the",
+    "spells no live kill shows: Seeking Shadow Bolts (2119001), the split Meteor (2119010) or Massive Thunder",
+    "Stomp (2119022), and he has no Prismatic Barrier, whose spells heal him to full."
   ],
   "timeout_ms": 150000,
   "location": {
@@ -54,46 +53,12 @@
     },
     {
       "action": "assert",
-      "label": "Seeking Shadow Bolts",
-      "actor": "setis",
-      "metric": "spell_cast_count",
-      "spell": 2119001,
-      "min": 1,
-      "within_ms": 25000
-    },
-    {
-      "action": "assert",
-      "label": "The split Meteor replaces the generic one",
-      "actor": "setis",
-      "metric": "spell_cast_count",
-      "spell": 2119010,
-      "min": 1,
-      "within_ms": 12000
-    },
-    {
-      "action": "assert",
-      "label": "The Meteor target is marked as the cast begins",
-      "actor": "setis",
-      "metric": "spell_cast_count",
-      "spell": 2119015,
-      "min": 1
-    },
-    {
-      "action": "assert",
-      "label": "CONTROL: the generic Meteor is gone",
+      "label": "Meteor is the live 83360",
       "actor": "setis",
       "metric": "spell_cast_count",
       "spell": 83360,
-      "equals": 0
-    },
-    {
-      "action": "assert",
-      "label": "The Meteor ends in a fireball",
-      "actor": "setis",
-      "metric": "spell_cast_count",
-      "spell": 2119011,
       "min": 1,
-      "within_ms": 8000
+      "within_ms": 45000
     },
     {
       "action": "assert",
@@ -105,13 +70,32 @@
       "within_ms": 10000
     },
     {
+      "action": "wait",
+      "ms": 20000
+    },
+    {
       "action": "assert",
-      "label": "Massive Thunder Stomp",
+      "label": "CONTROL: no Seeking Shadow Bolts",
+      "actor": "setis",
+      "metric": "spell_cast_count",
+      "spell": 2119001,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no split Meteor",
+      "actor": "setis",
+      "metric": "spell_cast_count",
+      "spell": 2119010,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Massive Thunder Stomp",
       "actor": "setis",
       "metric": "spell_cast_count",
       "spell": 2119022,
-      "min": 1,
-      "within_ms": 25000
+      "equals": 0
     },
     {
       "action": "assert",
