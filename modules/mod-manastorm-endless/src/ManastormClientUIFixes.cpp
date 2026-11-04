@@ -76,7 +76,7 @@ if not queue.CoAOriginalUpdateRewards then
                 break
             end
         end
-        quantity = math.min(quantity, remaining)
+        quantity = math.min(quantity + (data.bonusTokens or 0), remaining)
         if regular.itemID ~= 975001 or self.CoATokenQuantity ~= quantity then
             regular:SetItem(975001, quantity)
             self.CoATokenQuantity = quantity

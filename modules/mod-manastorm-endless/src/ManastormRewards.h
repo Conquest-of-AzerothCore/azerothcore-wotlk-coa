@@ -8,6 +8,7 @@
 
 #include <array>
 #include <memory>
+#include <map>
 #include <string>
 #include <vector>
 #include <utility>
@@ -66,6 +67,10 @@ public:
 
     bool Load();
     bool IsLoaded() const { return _loaded; }
+    bool AwardCoAGreedyReward(Player* player, ManastormRun const& run, uint64 objectGuid,
+        uint8 quality, uint32 gold, std::string& error) const;
+    uint32 CoAEncounterTokens(uint8 source, uint8 quality) const;
+    bool IsCoAMaterialCache(uint32 entry) const;
     bool IsCoALootMode(ObjectGuid::LowType characterGuid) const;
     bool LoadCoATokenState(ObjectGuid::LowType characterGuid, ManastormCoATokenState& state) const;
     bool IsCoAFirstClear(ManastormCoATokenState const& state, ManastormMode mode, bool endgame, uint32 depth) const;
@@ -226,9 +231,11 @@ private:
 
     bool LoadCacheBrackets();
     bool LoadCoATokenRules();
+    void AppendCoAAllowance(ObjectGuid::LowType guid, uint32 requested,
+        CharacterDatabaseTransaction const& transaction, ManastormCoATokenState& state, uint32& quantity) const;
     bool PrepareCoATokenReward(ObjectGuid::LowType characterGuid, ManastormRun const& run,
         CharacterDatabaseTransaction const& transaction, uint32& quantity,
-        ManastormCoATokenState& state, std::string& error) const;
+        ManastormCoATokenState& state, std::string& error, uint32 extraTokens = 0) const;
     bool LoadCacheUnlockRequirements();
     void LoadReleasedItemLevelCaps();
     bool LoadRewardRules();
@@ -258,6 +265,7 @@ private:
     std::vector<GroupRewardRange> _groupRewardRanges;
     std::vector<PotentialReward> _potentialRewards;
     std::vector<CoATokenRule> _coaTokenRules;
+    std::map<std::pair<uint8, uint8>, uint32> _coaEncounterTokens;
     TreasureKeeperRule _treasureKeeper;
     bool _loaded = false;
 };

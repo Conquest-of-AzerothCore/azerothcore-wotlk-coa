@@ -11,6 +11,11 @@
 
 ## Manastorm rewards and balance
 
+- In CoA loot mode, replace Greedy Demon gear with 25/50/100 Bazaar Tokens for uncommon/rare/epic loot, preserving its 28/92/93-gold payouts.
+- Convert Treasure Keeper gear-cache bonuses to 50 tokens per cache by default. Preserve cache 1478051 when assigned its material-cache script.
+- Share the existing 1000-token personal allowance across stage completions and encounter rewards. Continue awarding Greedy gold when the token allowance is exhausted.
+- Add DB-configurable encounter token rewards and durable Greedy loot receipts. Use existing inventory delivery with mail overflow for tokens, and include direct gold persistence in the guarded transaction.
+
 - Add an opt-in CoA loot mode replacing regular caches with Bazaar Tokens.
 - Default to 25 tokens for first clears and 10 for repeats. Track first clears per character, depth, party mode and normal/endgame track.
 - Share a 1000-token allowance across a character's personal 24-hour reward window, with persistent accounting and partial capped payouts.

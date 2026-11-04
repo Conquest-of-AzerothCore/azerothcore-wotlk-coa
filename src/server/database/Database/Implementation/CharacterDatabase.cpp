@@ -944,6 +944,8 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "SELECT COUNT(*) FROM character_manastorm_completed_depth WHERE guid = ? AND mode = ? AND track = ? AND depth = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_MANASTORM_COMPLETION_REWARD, "SELECT remainder_bp, earned FROM character_manastorm_completion_reward_state WHERE guid = ? AND mode = ? AND track = ? AND reward_key = ? LIMIT 1", CONNECTION_SYNCH);
     PrepareStatement(CHAR_REP_MANASTORM_COMPLETION_REWARD, "INSERT INTO character_manastorm_completion_reward_state (guid, mode, track, reward_key, remainder_bp, earned) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE remainder_bp = VALUES(remainder_bp), earned = VALUES(earned)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_INS_MANASTORM_COA_ENCOUNTER,
+        "INSERT INTO character_manastorm_coa_encounter (receipt, guid) VALUES (?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_MANASTORM_COA_TOKEN_WINDOW,
         "SELECT CAST(COALESCE(MAX(window_start), 0) AS UNSIGNED), "
         "CAST(COALESCE(MAX(window_end), 0) AS UNSIGNED), "
