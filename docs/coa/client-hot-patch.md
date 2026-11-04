@@ -1,8 +1,8 @@
 # Server-sent interface Lua
 
-Some features send interface Lua to the client at login: the Manastorm UI fixes
-(`Manastorm.ClientUIFixes`) and the Fel Commutation window. Both build an
-`AscensionClientLuaChunk` and call `RunAscensionClientLua`
+Some features send interface Lua to the client: the Manastorm UI fixes and the Fel Commutation
+window at login (`Manastorm.ClientUIFixes`), and the Extra Quests window once a quest goes past the
+25-slot log (`Quests.LogSize`). Each builds an `AscensionClientLuaChunk` and calls `RunAscensionClientLua`
 (`src/server/coa/AscensionClientLua.{h,cpp}`), which picks one of two routes per client.
 
 ## Formatter route (every client)
@@ -21,6 +21,7 @@ Each chunk needs its own requirement type and requirement row:
 |---|---|---|---|
 | Fel Commutation window | 23 | 16263 | `FEL_COMMUTATION_WINDOW` |
 | Manastorm UI fixes | 24 | 16262 | `MANASTORM_UI_FIXES` |
+| Extra Quests window (quest log overflow) | 25 | 16265 | `QUEST_LOG_OVERFLOW_WINDOW` |
 
 ## Hot-patch route (clients that announce it)
 

@@ -623,6 +623,8 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
         PlayerTalkClass->SendQuestQueryResponse(quest);
 
     SetQuestSlot(log_slot, quest_id, qtime);
+    if (qtime)
+        log_slot = std::min<uint16>(MoveQuestToNativeLog(log_slot), log_slot);
     AscensionQuestLog::SendSlot(this, log_slot);
 
     m_QuestStatusSave[quest_id] = true;
@@ -1937,11 +1939,134 @@ void Player::AdjustQuestReqItemCount(Quest const* quest, QuestStatusData& questS
 
 uint16 Player::FindQuestSlot(uint32 quest_id) const
 {
-    for (uint16 i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
-        if (GetQuestSlotQuestId(i) == quest_id)
-            return i;
+    return m_questLogSlots.Find(quest_id, quest_id ? MAX_QUEST_LOG_SIZE : GetQuestLogCapacity());
+}
 
-    return MAX_QUEST_LOG_SIZE;
+uint16 Player::GetQuestLogCapacity() const
+{
+    return static_cast<uint16>(std::clamp<uint32>(sWorld->getIntConfig(CONFIG_QUEST_LOG_SIZE),
+        NATIVE_QUEST_LOG_SIZE, MAX_QUEST_LOG_SIZE));
+}
+
+void Player::MirrorQuestSlot(uint16 slot)
+{
+    if (slot >= NATIVE_QUEST_LOG_SIZE)
+        return;
+
+    QuestLogSlot const& entry = m_questLogSlots[slot];
+    uint16 const field = PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET;
+    SetUInt32Value(field + QUEST_ID_OFFSET, entry.QuestId);
+    SetUInt32Value(field + QUEST_STATE_OFFSET, entry.State);
+    SetUInt64Value(field + QUEST_COUNTS_OFFSET, entry.Counters);
+    SetUInt32Value(field + QUEST_TIME_OFFSET, entry.Time);
+
+    if (!entry.QuestId && m_questLogSlots.HasOverflow())
+        m_questLogPromotionPending = true;
+}
+
+void Player::SetQuestSlot(uint16 slot, uint32 quest_id, uint32 timer)
+{
+    QuestLogSlot& entry = m_questLogSlots[slot];
+    entry = QuestLogSlot{ quest_id, 0, 0, timer, static_cast<uint64>(GameTime::GetGameTimeMS().count()) };
+    MirrorQuestSlot(slot);
+}
+
+void Player::SetQuestSlotCounter(uint16 slot, uint8 counter, uint16 count)
+{
+    QuestLogSlot& entry = m_questLogSlots[slot];
+    entry.Counters &= ~(uint64(0xFFFF) << (counter * 16));
+    entry.Counters |= uint64(count) << (counter * 16);
+    entry.LastProgress = static_cast<uint64>(GameTime::GetGameTimeMS().count());
+    MirrorQuestSlot(slot);
+}
+
+void Player::SetQuestSlotState(uint16 slot, uint32 state)
+{
+    QuestLogSlot& entry = m_questLogSlots[slot];
+    entry.State |= state;
+    entry.LastProgress = static_cast<uint64>(GameTime::GetGameTimeMS().count());
+    MirrorQuestSlot(slot);
+}
+
+void Player::RemoveQuestSlotState(uint16 slot, uint32 state)
+{
+    QuestLogSlot& entry = m_questLogSlots[slot];
+    entry.State &= ~state;
+    entry.LastProgress = static_cast<uint64>(GameTime::GetGameTimeMS().count());
+    MirrorQuestSlot(slot);
+}
+
+void Player::SetQuestSlotTimer(uint16 slot, uint32 timer)
+{
+    m_questLogSlots[slot].Time = timer;
+    MirrorQuestSlot(slot);
+}
+
+void Player::SwapQuestSlot(uint16 slot1, uint16 slot2)
+{
+    std::swap(m_questLogSlots[slot1], m_questLogSlots[slot2]);
+    MirrorQuestSlot(slot1);
+    MirrorQuestSlot(slot2);
+}
+
+namespace
+{
+    bool IsQuestPinnedToNativeLog(uint32 questId)
+    {
+        Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
+        return quest && quest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED);
+    }
+}
+
+uint16 Player::MoveQuestToNativeLog(uint16 slot)
+{
+    if (slot < NATIVE_QUEST_LOG_SIZE)
+        return slot;
+
+    uint16 target = m_questLogSlots.Find(0, NATIVE_QUEST_LOG_SIZE);
+    if (target == MAX_QUEST_LOG_SIZE)
+        target = m_questLogSlots.IdlestNative(IsQuestPinnedToNativeLog);
+
+    if (target == MAX_QUEST_LOG_SIZE)
+        return MAX_QUEST_LOG_SIZE;
+
+    SwapQuestSlot(slot, target);
+    m_questLogSlots[target].LastProgress = static_cast<uint64>(GameTime::GetGameTimeMS().count());
+    return target;
+}
+
+void Player::PinTimedQuestsToNativeLog()
+{
+    for (uint16 slot = NATIVE_QUEST_LOG_SIZE; slot < MAX_QUEST_LOG_SIZE; ++slot)
+        if (IsQuestPinnedToNativeLog(m_questLogSlots[slot].QuestId))
+            MoveQuestToNativeLog(slot);
+}
+
+void Player::PromoteOverflowQuests()
+{
+    m_questLogPromotionPending = false;
+    while (std::optional<QuestLogMove> const move = m_questLogSlots.NextPromotion())
+    {
+        SwapQuestSlot(move->From, move->To);
+        AscensionQuestLog::SendSlot(this, move->To);
+    }
+}
+
+bool Player::PromoteQuestToNativeLog(uint32 questId)
+{
+    if (!questId)
+        return false;
+
+    uint16 const slot = m_questLogSlots.Find(questId, MAX_QUEST_LOG_SIZE);
+    if (slot < NATIVE_QUEST_LOG_SIZE || slot == MAX_QUEST_LOG_SIZE)
+        return false;
+
+    uint16 const target = MoveQuestToNativeLog(slot);
+    if (target == MAX_QUEST_LOG_SIZE)
+        return false;
+
+    AscensionQuestLog::SendSlot(this, target);
+    return true;
 }
 
 void Player::AreaExploredOrEventHappens(uint32 questId)

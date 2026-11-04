@@ -30,6 +30,8 @@ IDENTIFIER = re.compile(r'[A-Za-z_][A-Za-z0-9_]*\Z')
 ACTOR_ID = re.compile(r'[a-z][a-z0-9_]{0,31}\Z')
 LOCAL_HOSTS = {'127.0.0.1', 'localhost', '::1'}
 HOURS_PER_DAY = 24
+NATIVE_QUEST_LOG_SIZE = 25
+MAX_QUEST_LOG_SIZE = 64
 MINUTES_PER_HOUR = 60
 MINUTES_PER_DAY = HOURS_PER_DAY * MINUTES_PER_HOUR
 TIMELINE_METRICS = {'timeline_count', 'timeline_first_ms', 'timeline_interval_min_ms', 'timeline_interval_max_ms',
@@ -92,7 +94,8 @@ METRICS = TIMELINE_METRICS | {
     'mail_pool_item_count', 'notifications', 'notification_contains',
     'bank_bag_slots', 'bank_shows', 'guild_bank_tabs',
     'system_messages',
-    'system_message_contains', 'whispers_received', 'challenge_start_responses', 'challenge_start_code',
+    'system_message_contains', 'whispers_received', 'whisper_contains', 'challenge_start_responses',
+    'challenge_start_code',
     'owned_creature_scale', 'owned_creature_visible', 'owned_creature_display', 'owned_creature_virtual_item',
     'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health',
     'unit_scale', 'combat_reach',
@@ -134,6 +137,7 @@ METRICS = TIMELINE_METRICS | {
     'spell_hit_bonus_taken', 'rooted', 'stunned', 'spell_cast_count', 'spell_go_count', 'cast_failure',
     'stealth_detection', 'can_detect',
     'quest_status', 'quest_takeable', 'quest_objective_count', 'dialog_status',
+    'quest_log_slot', 'quest_log_client_slot', 'quest_log_client_count', 'quest_log_has_room',
     'ball_offer_count', 'ball_offers_quest',
     'ball_carried_count', 'ball_carried_quest', 'ball_turn_in_count', 'ball_turn_in_quest',
     'gossip_text',
@@ -229,6 +233,7 @@ ACTIONS = {
     'placement_audit': ({'map'}, {'map', 'zone', 'tolerance', 'gameobject_types'}),
     'command': ({'actor', 'command'}, {'actor', 'command', 'rejected'}),
     'whisper': ({'actor', 'to', 'text'}, {'actor', 'to', 'text', 'language'}),
+    'addon_message': ({'actor', 'prefix', 'text'}, {'actor', 'prefix', 'text'}),
     'wait': ({'ms'}, {'ms'}),
     'snapshot': ({'actor', 'metric', 'save_as'}, METRIC_FIELDS | {'save_as'}),
     'assert': ({'actor', 'metric'}, METRIC_FIELDS | {'equals', 'min', 'max', 'within_ms'}),
@@ -324,6 +329,7 @@ ACTIONS = {
     'quest_open': ({'actor', 'quest', 'entry'}, {'actor', 'quest', 'entry'}),
     'quest_click': ({'actor', 'quest', 'entry'}, {'actor', 'quest', 'entry'}),
     'quest_complete': ({'actor', 'quest'}, {'actor', 'quest'}),
+    'quest_abandon': ({'actor', 'quest'}, {'actor', 'quest', 'slot'}),
     'quest_turn_in': ({'actor', 'quest'}, {'actor', 'quest', 'entry', 'gameobject', 'reward'}),
 }
 
@@ -460,7 +466,7 @@ def validate_raid_role(player):
 def validate(scenario):
     keys(scenario, {'schema', 'name', 'players', 'steps'},
          {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour',
-          'creature_scaling', 'vanity_ownership', 'two_side'}, 'scenario')
+          'creature_scaling', 'vanity_ownership', 'two_side', 'quest_log_size'}, 'scenario')
     schema = scenario['schema']
     require(type(schema) is int and schema in MAX_PLAYERS, 'Unsupported scenario schema')
     require(isinstance(scenario['name'], str) and scenario['name'].strip(), 'Scenario needs a name')
@@ -481,6 +487,8 @@ def validate(scenario):
         keys(two_side, set(), {'trade', 'mail'}, 'two_side')
         for name, value in two_side.items():
             require(type(value) is bool, f'two_side.{name} must be boolean')
+    if 'quest_log_size' in scenario:
+        number(scenario['quest_log_size'], 'quest_log_size', NATIVE_QUEST_LOG_SIZE, MAX_QUEST_LOG_SIZE, True)
     players = scenario['players']
     creatures = scenario.get('creatures', [])
     require(isinstance(players, list) and 1 <= len(players) <= MAX_PLAYERS[schema],
@@ -583,6 +591,9 @@ def validate(scenario):
                     f'{where}: whisper needs a target and text')
             if 'language' in step:
                 number(step['language'], f'{where}.language', 0, 2**32 - 1, True)
+        if action == 'addon_message':
+            require(isinstance(step['prefix'], str) and step['prefix'].strip() and '\t' not in step['prefix']
+                    and isinstance(step['text'], str), f'{where}: addon_message needs a prefix without tabs and text')
         if action == 'summon':
             require(isinstance(step['as'], str) and step['as'] not in actor_ids, f'{where}: duplicate summon id')
             actor_ids.add(step['as'])
@@ -630,7 +641,7 @@ def validate(scenario):
                 number(step[key], f'{where}.{key}', 1, 2**31 - 1, True)
         for key, maximum in (('rank', 4), ('effect', 2), ('slot', 22),('power', 6), ('choice', 5),
                              ('reward', 5), ('option', 2**32 - 1)):
-            if key in step:
+            if key in step and not (key == 'slot' and action == 'quest_abandon'):
                 number(step[key], f'{where}.{key}', 0, maximum, True)
         if 'stacks' in step:
             number(step['stacks'], f'{where}.stacks', 0, 255, True)
@@ -735,6 +746,8 @@ def validate(scenario):
             number(step['value'], f'{where}.value', -42000, 42999, True)
         if action == 'level_scaling_packet':
             number(step['value'], f'{where}.value', 0, 1, True)
+        if action == 'quest_abandon' and 'slot' in step:
+            number(step['slot'], f'{where}.slot', 0, MAX_QUEST_LOG_SIZE - 1, True)
         if action in {'quest_accept', 'quest_turn_in'}:
             require(('entry' in step) != ('gameobject' in step), f'{where}: quest giver needs an entry or a gameobject')
             if 'gameobject' in step:
@@ -1135,7 +1148,7 @@ def validate(scenario):
                 require(step.get('target') in actor_ids, f'{where}: metric needs the attacking unit')
             if metric == 'owned_creature_victim':
                 require(step.get('target') in actor_ids, f'{where}: metric needs the expected victim')
-            if metric == 'system_message_contains':
+            if metric in {'system_message_contains', 'whisper_contains'}:
                 require(isinstance(step.get('text'), str) and step['text'].strip(),
                         f'{where}: metric needs the text to look for')
             if metric == 'whispers_received':
@@ -1150,7 +1163,8 @@ def validate(scenario):
             if metric in {'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale',
                           'nearby_gameobject_display'}:
                 require('entry' in step, f'{where}: metric needs gameobject entry')
-            if metric in {'quest_status', 'quest_takeable', 'quest_objective_count'}:
+            if metric in {'quest_status', 'quest_takeable', 'quest_objective_count', 'quest_log_slot',
+                          'quest_log_client_slot', 'quest_log_client_count'}:
                 require('quest' in step, f'{where}: metric needs quest')
             if metric == 'dialog_status':
                 require('entry' in step, f'{where}: metric needs creature entry')
@@ -1214,6 +1228,7 @@ def validate(scenario):
                           'stable_result', 'pet_rows', 'instance_binds_listed', 'spell_active',
                           'cast_pushback_ms',
                           'bank_shows', 'system_messages', 'system_message_contains', 'whispers_received',
+                          'whisper_contains',
                           'challenge_start_responses', 'challenge_start_code', 'owned_creature_scale', 'cast_failure',
                           'owned_creature_weapon_damage_min', 'owned_creature_spell_hit_chance',
                           'owned_creature_attackable', 'owned_creature_victim', 'owned_creature_virtual_item',
@@ -1254,6 +1269,7 @@ def validate(scenario):
                           'carried_item_scaling_level', 'carried_item_stat',
                           'has_title',
                           'quest_status', 'quest_takeable', 'quest_objective_count', 'dialog_status',
+                          'quest_log_slot', 'quest_log_client_slot', 'quest_log_client_count', 'quest_log_has_room',
                           'ball_offer_count', 'ball_offers_quest',
                           'ball_carried_count', 'ball_carried_quest',
                           'ball_turn_in_count', 'ball_turn_in_quest',

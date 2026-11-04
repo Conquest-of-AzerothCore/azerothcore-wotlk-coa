@@ -1012,6 +1012,7 @@ public:                                                 // opcodes handlers
     void HandleQuestgiverCancel(WorldPacket& recvData);
     void HandleQuestLogSwapQuest(WorldPackets::Quest::QuestLogSwapQuest& packet);
     void HandleQuestLogRemoveQuest(WorldPackets::Quest::QuestLogRemoveQuest& packet);
+    void AbandonQuestLogSlot(uint16 slot);
     void HandleQuestConfirmAccept(WorldPackets::Quest::QuestConfirmAcceptClient& packet);
     void HandleQuestgiverCompleteQuest(WorldPacket& recvData);
     void HandleQuestgiverQuestAutoLaunch(WorldPackets::Quest::QuestGiverQuestAutoLaunch& packet);

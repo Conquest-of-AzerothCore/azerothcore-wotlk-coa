@@ -61,6 +61,7 @@
 #include "Opcodes.h"
 #include "Pet.h"
 #include "PetPackets.h"
+#include "QuestPackets.h"
 #include "Player.h"
 #include "ReputationMgr.h"
 #include "QuestDef.h"
@@ -584,6 +585,26 @@ private:
     }
 
     std::map<ServerConfigs, bool> _original;
+};
+
+class QuestLogSizeConfig
+{
+public:
+    explicit QuestLogSizeConfig(uint32 size) : _original(sWorld->getIntConfig(CONFIG_QUEST_LOG_SIZE))
+    {
+        sWorld->setIntConfig(CONFIG_QUEST_LOG_SIZE, size);
+    }
+
+    QuestLogSizeConfig(QuestLogSizeConfig const&) = delete;
+    QuestLogSizeConfig& operator=(QuestLogSizeConfig const&) = delete;
+
+    ~QuestLogSizeConfig()
+    {
+        sWorld->setIntConfig(CONFIG_QUEST_LOG_SIZE, _original);
+    }
+
+private:
+    uint32 _original;
 };
 
 struct CaseAccounts
@@ -1806,6 +1827,12 @@ public:
         }
         if (auto twoSide = _scenario.get_child_optional("two_side"))
             _twoSide.emplace(*twoSide);
+        if (auto questLogSize = _scenario.get_optional<uint32>("quest_log_size"))
+        {
+            Require(*questLogSize >= NATIVE_QUEST_LOG_SIZE && *questLogSize <= MAX_QUEST_LOG_SIZE,
+                "Invalid quest log size");
+            _questLogSize.emplace(*questLogSize);
+        }
         _report.put("schema", 1);
         _report.put("run_id", _runId);
         _report.put("scenario", _scenario.get<std::string>("name"));
@@ -2730,7 +2757,7 @@ private:
     double SentQuestLogField(Player const* player, Tree const& step, uint32 firstField) const
     {
         uint16 const slot = player->FindQuestSlot(step.get<uint32>("quest"));
-        Require(slot < MAX_QUEST_LOG_SIZE, "The quest is not in the quest log");
+        Require(slot < NATIVE_QUEST_LOG_SIZE, "The quest is not in the quest log");
         return SentAddonField<uint32>(player, step, firstField + slot);
     }
 
@@ -4829,6 +4856,13 @@ private:
             return double(std::count_if(whispers.begin(), whispers.end(), [&](auto const& whisper)
                 { return whisper.first == from && whisper.second == text; }));
         }
+        if (metric == "whisper_contains")
+        {
+            std::string const needle = step.get<std::string>("text");
+            auto const& whispers = _actors.at(step.get<std::string>("actor")).whispers;
+            return std::any_of(whispers.begin(), whispers.end(), [&needle](auto const& whisper)
+                { return whisper.second.find(needle) != std::string::npos; }) ? 1.0 : 0.0;
+        }
         if (metric == "notifications")
             return double(_actors.at(step.get<std::string>("actor")).notifications);
         if (metric == "notification_contains")
@@ -5422,6 +5456,31 @@ private:
             return metric == "quest_status" ? double(player->GetQuestStatus(quest))
                 : double(player->CanTakeQuest(questTemplate, false));
         }
+        if (metric == "quest_log_slot")
+        {
+            uint16 const slot = player->FindQuestSlot(step.get<uint32>("quest"));
+            return slot < MAX_QUEST_LOG_SIZE ? double(slot) : -1.0;
+        }
+        if (metric == "quest_log_client_slot" || metric == "quest_log_client_count")
+        {
+            uint32 const quest = step.get<uint32>("quest");
+            for (uint16 slot = 0; slot < NATIVE_QUEST_LOG_SIZE; ++slot)
+            {
+                uint16 const field = PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET;
+                if (player->GetUInt32Value(field + QUEST_ID_OFFSET) != quest)
+                    continue;
+
+                if (metric == "quest_log_client_slot")
+                    return double(slot);
+
+                uint32 const index = step.get<uint32>("index", 0);
+                Require(index < QUEST_OBJECTIVES_COUNT, "Invalid quest objective index");
+                return double(uint16(player->GetUInt64Value(field + QUEST_COUNTS_OFFSET) >> (index * 16)));
+            }
+            return -1.0;
+        }
+        if (metric == "quest_log_has_room")
+            return double(player->SatisfyQuestLog(false));
         if (metric == "quest_objective_count")
         {
             uint16 slot = player->FindQuestSlot(step.get<uint32>("quest"));
@@ -5603,7 +5662,7 @@ private:
         if (metric == "quest_log_sent_level_count")
         {
             uint16 const slot = player->FindQuestSlot(step.get<uint32>("quest"));
-            Require(slot < MAX_QUEST_LOG_SIZE, "The quest is not in the quest log");
+            Require(slot < NATIVE_QUEST_LOG_SIZE, "The quest is not in the quest log");
             auto const& updates = _actors.at(step.get<std::string>("actor")).addonFieldUpdates;
             auto const found = updates.find(AscensionQuestLog::LevelField + slot);
             return found == updates.end() ? 0 : found->second;
@@ -6417,6 +6476,14 @@ private:
                 << step.get<std::string>("to") << step.get<std::string>("text");
             player->GetSession()->HandleMessagechatOpcode(packet);
             record.put("result", "whisper sent; verify delivery with assertions");
+        }
+        else if (action == "addon_message")
+        {
+            WorldPacket packet(CMSG_MESSAGECHAT, 64);
+            packet << uint32(CHAT_MSG_WHISPER) << uint32(LANG_ADDON) << player->GetName()
+                << step.get<std::string>("prefix") + "\t" + step.get<std::string>("text");
+            player->GetSession()->HandleMessagechatOpcode(packet);
+            record.put("result", "addon message sent to self");
         }
         else if (action == "release_spirit")
         {
@@ -7397,6 +7464,17 @@ private:
             player->CompleteQuest(quest);
             record.put("result", "quest marked complete as a fixture");
         }
+        else if (action == "quest_abandon")
+        {
+            uint16 const slot = step.get<uint16>("slot", player->FindQuestSlot(step.get<uint32>("quest")));
+            Require(slot < MAX_QUEST_LOG_SIZE, "The quest is not in the quest log");
+            WorldPacket packet(CMSG_QUESTLOG_REMOVE_QUEST, 1);
+            packet << uint8(slot);
+            WorldPackets::Quest::QuestLogRemoveQuest request(std::move(packet));
+            request.Read();
+            player->GetSession()->HandleQuestLogRemoveQuest(request);
+            record.put("slot", slot);
+        }
         else
             throw std::runtime_error("Unknown action: " + action);
     }
@@ -7501,6 +7579,7 @@ private:
     std::optional<CreatureScaling::TestOverride> _creatureScaling;
     std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
     std::optional<TwoSideConfig> _twoSide;
+    std::optional<QuestLogSizeConfig> _questLogSize;
     GameEventStates _gameEvents;
     std::optional<PlacementAuditTotals> _placementAudit;
 };
