@@ -60,7 +60,7 @@ Measured health per player is net damage taken in the log divided by the group s
 | 14515 Arlokk | 497,928 | 367,800 | Claw Storm 20 → 55 s | — |
 | 11382 Mandokir | 622,364 | 510,568 | Mortal Strike 10 → 12 s | — |
 | 14834 Hakkar | 647,307 | 582,793 | Blood Scythe 12 → 15 s, Blood Siphon 90 → 59.5 s first, 79.5 s repeat | 2118607 Pool of Corrupted Blood |
-| 15082 Gri'lek | 108,341 | above 133k (not killed at 11) | Ground Slam 13 → 24 s first, 25 s repeat | — |
+| 15082 Gri'lek | 318,182 (tester video, `rev_20261104_05`) | above 133k (not killed at 11); 3.5 million at 11 in the tester's video | Ground Slam 13 → 24 s first, 25 s repeat | — |
 | 11380 Jin'do, 15114 Gahz'ranka, 15083-15085 | — | no log | unknown | unknown |
 
 All bosses and adds: Fierce Blow 975011 and Knockdown 520871 are cast live and absent on the server (Molten Core
@@ -181,9 +181,10 @@ Left as is unless decided otherwise: quests 580290 and 580295 carry local Path t
 | Jeklik starts on the ground below her cave (-12273.9, -1407.77, 132.223), where stock landed her, and fights as a troll from the pull without the bat-form descent | `rev_20261104_04`, `boss_jeklik_coa.cpp` | tester and live videos 2026-11-04 |
 | Jeklik's Bat-tering Charge 2106125 reaches only players out of melee within 25 yards (stock Jeklik's Charge, 8-25 yd); the DBC's 100 yd let her charge ranged players and healers at 30 yd and more | `boss_jeklik_coa.cpp` | tester 2026-11-04, vanilla 22911 |
 | Mandokir: Mortal Strike, Mortal Strike, Berserker Charge, and Whirlwind begun as the charge lands, not on its own timer about a second later; a Mortal Strike due during the Whirlwind follows when it ends | `boss_mandokir_coa.cpp` | tester video 2026-11-04, live log 2026-08-02 |
+| Gri'lek 15082 has 318,182 health per player on Normal (458,182, 598,182 and 738,182 above), from the tester's video of 3.5 million at 11 players; it was 108,341, about 1.19 million at 11 | `rev_20261104_05` | tester video 2026-11-04, user decision |
 | Ohgan (14988 and its tiers) uses display 215271, model 15271 at a client scale of 2, with its own model info (bounding radius 0.7, combat reach 3); he runs in from the arena entrance when Mandokir is pulled instead of appearing at his side | `rev_20261104_03`, `boss_mandokir_coa.cpp` | wdb, dbc, tester 2026-11-04, user decision |
 
-Normal boss health is unchanged. Knockdown 520871 is not added: it is a player ability, and the bosses are immune
+Normal boss health is unchanged except Gri'lek's. Knockdown 520871 is not added: it is a player ability, and the bosses are immune
 to it in the log.
 
 ## 8. Still open
@@ -210,7 +211,7 @@ to it in the log.
     Ohgan, Jin'do's Seeking Shadow Bolts 2118550-2118556 and Rise 2118561, Hakkar's Dormant Heart 2118651, Animate
     Blood 2118640/2118641, Rain of Blood 2118642 and the meteor split 2118646.
 13. Tester questions of 2026-11-04 that await a decision: Sons of Hakkar loot, Jinxed Hoodoo removing Will of Hakkar, the shades' area
-    damage, Mandokir's items and Gri'lek's scaling. Decided without a change here: the Blood Orb is skipped, and
+    damage and Mandokir's items. Decided without a change here: the Blood Orb is skipped, and
     the battle resurrection limit gets its own change. Estimated: Jeklik's facing on the ground, and the 100 yd
     reach of Mar'li's egg search.
 14. Checked only in game: the number and paths of the risen trolls, the totem positions, and Claw Storm leaving no
@@ -222,6 +223,4 @@ to it in the log.
       server DBC, the client DBC, the Exiles DB and the SUB dump all give 30 % haste and 30 % more damage taken,
       with no tier variant. In the live log of 2026-08-02 his median swing drops from 2.47 s to 1.80 s under
       Frenzy, about 1.4 times faster, not the 1.65 of 65 %. Kept at 30 % (user decision, 2026-11-04).
-    - Gri'lek: the tester's video shows 3.5 million health with 11 players, about 318k per player, against our
-      108,341 per player (about 1.19 million at 11). This awaits the video and a decision.
     - Jin'do's shades taking no area damage may come from one class's ability; the tester retests it.
