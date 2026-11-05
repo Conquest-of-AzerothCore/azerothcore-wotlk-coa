@@ -47,6 +47,7 @@
 #include "Creature.h"
 #include "DBCStores.h"
 #include "Group.h"
+#include "LFGMgr.h"
 #include "LocalLevelScaling.h"
 #include "Log.h"
 #include "Map.h"
@@ -239,11 +240,20 @@ namespace
                !map->IsScriptedPrivateInstance() && map->IsRegularDifficulty() && DungeonBandFor(map);
     }
 
+    /// A scaled dungeon scales for a Dungeon Finder group in the dungeon it was sent to, as on Ascension. A
+    /// character who walks in through the entrance meets its authored creatures, whatever their switch says.
+    bool FinderRun(Player const* player, Map const* map)
+    {
+        Group const* group = player ? player->GetGroup() : nullptr;
+        return map && group && group->isLFGGroup() &&
+               sLFGMgr->inLfgDungeonMap(group->GetGUID(), map->GetId(), map->GetDifficulty());
+    }
+
     /// Installed as the core's resolver, so the loot a scaled dungeon drops follows the same rule as its
     /// creatures.
     bool InScaledDungeonForCore(Player const* player)
     {
-        return player && ScaledDungeon(player->FindMap());
+        return player && ScaledDungeon(player->FindMap()) && FinderRun(player, player->FindMap());
     }
 
     /// One row of `creature_classlevelstats`: everything the core builds a creature of a given level
@@ -323,7 +333,8 @@ namespace
     ///
     /// There is no realm switch in front of the list: whether a character scales in the open world is
     /// their own choice (`ScalingChoiceEnabled`), and the module's switch only decides whether that
-    /// choice is consulted. A scaled dungeon does not ask the choice at all (`ViewFor`).
+    /// choice is consulted. A scaled dungeon does not ask the choice at all: it scales for a Dungeon
+    /// Finder group only (`FinderRun`).
     bool ViewableCreature(Creature const* creature)
     {
         if (!creature)
@@ -412,11 +423,13 @@ namespace
             return false;
 
         // The Weaver's switch is open world scaling, as its menu and its messages say. A scaled dungeon
-        // scales for everyone inside it: the finder admits a group well below its authored level, and
-        // a level-60 leader whose open world switch is off must not hold the rest of the party to
-        // creatures twenty levels above them.
+        // scales for a Dungeon Finder group, whatever the members' switches: the finder admits a group well
+        // below its authored level, and a level-60 leader whose open world switch is off must not hold the
+        // rest of the party to creatures twenty levels above them. Walked into, it keeps its authored levels.
         Map const* map = creature->GetMap();
         if (!map->IsDungeon() && !LocalLevelScaling::ScalingChoiceEnabled(viewer))
+            return false;
+        if (map->IsDungeon() && !FinderRun(viewer, map))
             return false;
 
         uint8 const own = creature->GetLevel();
@@ -538,7 +551,7 @@ namespace
             return 1.0;
 
         Map const* map = to->FindMap();
-        if (from->FindMap() != map || !ScaledDungeon(map))
+        if (from->FindMap() != map || !ScaledDungeon(map) || !FinderRun(from, map) || !FinderRun(to, map))
             return 1.0;
 
         // A character held to the authored creatures by a challenge fights blows of the authored size.

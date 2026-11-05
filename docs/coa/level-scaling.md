@@ -53,10 +53,12 @@ authored level. The band is the `TargetLevelMin`-`MaxLevel` of the dungeon's `LF
 merged per map; entries with placeholder levels (100/100 for Wailing Caverns, Gnomeregan and Uldaman)
 use 15-59.
 
-A scaled dungeon does not consult the Destiny Weaver's switch, which is open-world scaling, as its menu
-row and its messages say. Every character inside sees their own version, whatever their own choice or
-their leader's: a level-60 leader with the switch off would otherwise hold a level-20 party to Maraudon's
-level-45 creatures. Only a challenge rule (`ScalingBlocksFor`) keeps a character on the authored
+A scaled dungeon scales for a Dungeon Finder group in the dungeon the finder sent it to, as on Ascension, and
+does not consult the Destiny Weaver's switch, which is open-world scaling, as its menu row and its messages
+say. Every member of that group sees their own version, whatever their own choice or their leader's: a
+level-60 leader with the switch off would otherwise hold a level-20 party to Maraudon's level-45 creatures.
+A character who walks in through the entrance, alone or with a group of their own, meets the authored
+dungeon, switch on or off. A challenge rule (`ScalingBlocksFor`) also keeps a character on the authored
 dungeon.
 
 #### Where a creature scales
@@ -173,7 +175,7 @@ already changed it, takes the ratio of its place in the real range.
 ### Groups: the leader sets the switch, never the level
 
 While a character is grouped, `DestinyWeaver::LevelScalingEnabled` answers with the **leader's**
-switch — on, or off, for every member, in the open world and for quests; a scaled dungeon ignores it. It answers with nothing else of the leader's, and that is
+switch — on, or off, for every member, in the open world and for quests; a Dungeon Finder run of a scaled dungeon ignores it. It answers with nothing else of the leader's, and that is
 load-bearing rather than incidental:
 
 - the level a creature is shown at is `ScaleCreatureLevelForViewer(original, viewer->GetLevel(), offset)` —
@@ -276,8 +278,8 @@ exception: it is dispatched to every registered unit script.
 Not scaled, deliberately, and matching the reference implementation: the creature's **resistance values**
 (template-based and level-independent there too; only the level terms above follow the view) and **loot
 tables**, which are one corpse shared by everyone who tagged it. Scaling gear on that corpse takes the level
-of whoever loots it or wins the roll, a master looter's pick the receiver's. Inside a scaled dungeon loot
-scales for everyone, whatever their own or their leader's switch, up or down: the item takes the
+of whoever loots it or wins the roll, a master looter's pick the receiver's. In a Dungeon Finder run of a scaled
+dungeon loot scales for everyone, whatever their own or their leader's switch, up or down: the item takes the
 looter's level, with that ladder row's stats, armor and required level, as the corpse and roll frame
 preview it. Elsewhere, scaling gear from loot or a quest reward scales only for a
 character whose scaling is on, by the same answer the creature view asks (their choice, or their leader's

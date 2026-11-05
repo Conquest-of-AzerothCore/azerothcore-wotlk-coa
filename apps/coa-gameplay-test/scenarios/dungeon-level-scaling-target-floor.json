@@ -7,7 +7,8 @@
     "The band's floor is LFGDungeons.dbc TargetLevelMin, not the finder's MinLevel: Maraudon (map 349, entries 26,",
     "272 and 273) has MinLevel 35 and TargetLevelMin 20, so a level-26 character sees a level-45 creature at 26",
     "instead of 35, and a level-15 character sees it at the floor of 20. The Destiny Weaver's switch is open world",
-    "scaling, so turning it off leaves the dungeon view in place. Black Riding Wolf 5194 is the fixture."
+    "scaling, so turning it off leaves the dungeon view in place. Black Riding Wolf 5194 is the fixture.",
+    "The characters run the dungeon as a Dungeon Finder group, the only way a dungeon scales."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -19,17 +20,73 @@
     "ignore_access": true
   },
   "players": [
-    { "id": "mid", "race": 1, "class": 1, "level": 26 },
-    { "id": "low", "race": 1, "class": 1, "level": 15 }
+    {
+      "id": "mid",
+      "race": 1,
+      "class": 1,
+      "level": 26
+    },
+    {
+      "id": "low",
+      "race": 1,
+      "class": 1,
+      "level": 15
+    },
+    {
+      "id": "finder",
+      "race": 1,
+      "class": 1,
+      "level": 26
+    }
   ],
   "creatures": [
-    { "id": "mid_target", "owner": "mid", "entry": 5194, "level": 45, "distance": 8 },
-    { "id": "low_target", "owner": "low", "entry": 5194, "level": 45, "distance": 8 }
+    {
+      "id": "mid_target",
+      "owner": "mid",
+      "entry": 5194,
+      "level": 45,
+      "distance": 8
+    },
+    {
+      "id": "low_target",
+      "owner": "low",
+      "entry": 5194,
+      "level": 45,
+      "distance": 8
+    }
   ],
   "steps": [
-    { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
-    { "action": "level_scaling_packet", "actor": "mid", "value": 1 },
-    { "action": "level_scaling_packet", "actor": "low", "value": 1 },
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 2000
+    },
+    {
+      "action": "group",
+      "actor": "mid",
+      "target": "finder"
+    },
+    {
+      "action": "group",
+      "actor": "mid",
+      "target": "low"
+    },
+    {
+      "action": "lfg_dungeon",
+      "label": "The characters run the dungeon through the Dungeon Finder",
+      "actor": "mid",
+      "dungeon": 26
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "mid",
+      "value": 1
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "low",
+      "value": 1
+    },
     {
       "action": "assert",
       "label": "A level-26 character sees the Maraudon creature at its own level",
@@ -57,7 +114,11 @@
       "equals": 20,
       "within_ms": 2000
     },
-    { "action": "level_scaling_packet", "actor": "mid", "value": 0 },
+    {
+      "action": "level_scaling_packet",
+      "actor": "mid",
+      "value": 0
+    },
     {
       "action": "assert",
       "label": "Open world scaling off keeps the dungeon view",

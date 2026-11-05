@@ -11,7 +11,8 @@
     "18; ItemStat.dbc's row for item 28972 at level 18 (parsed directly: RequiredLevel field, stat type 7",
     "(stamina) and 38 (attack power)) carries required level 17, 1 stamina and 1 attack power. Native item",
     "scaling (CoA.ItemScaling.Native, default on) must assign that level-18 ladder row to the looted axe instead",
-    "of leaving it at its authored item level 57 / required level 55, which a level-16 character could not equip."
+    "of leaving it at its authored item level 57 / required level 55, which a level-16 character could not equip.",
+    "The characters run the dungeon as a Dungeon Finder group, the only way a dungeon scales."
   ],
   "timeout_ms": 90000,
   "location": {
@@ -23,16 +24,63 @@
     "ignore_access": true
   },
   "players": [
-    { "id": "looter", "race": 1, "class": 12, "level": 16 }
+    {
+      "id": "looter",
+      "race": 1,
+      "class": 12,
+      "level": 16
+    },
+    {
+      "id": "finder",
+      "race": 1,
+      "class": 1,
+      "level": 16
+    }
   ],
   "creatures": [
-    { "id": "voone", "owner": "looter", "entry": 9237, "level": 59, "health": 1, "distance": 2 }
+    {
+      "id": "voone",
+      "owner": "looter",
+      "entry": 9237,
+      "level": 59,
+      "health": 1,
+      "distance": 2
+    }
   ],
   "steps": [
-    { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
-    { "action": "attack", "actor": "looter", "target": "voone" },
-    { "action": "assert", "actor": "voone", "metric": "alive", "equals": 0, "within_ms": 30000 },
-    { "action": "loot_creature", "actor": "looter", "target": "voone" },
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 2000
+    },
+    {
+      "action": "group",
+      "actor": "looter",
+      "target": "finder"
+    },
+    {
+      "action": "lfg_dungeon",
+      "label": "The characters run the dungeon through the Dungeon Finder",
+      "actor": "looter",
+      "dungeon": 14
+    },
+    {
+      "action": "attack",
+      "actor": "looter",
+      "target": "voone"
+    },
+    {
+      "action": "assert",
+      "actor": "voone",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "looter",
+      "target": "voone"
+    },
     {
       "action": "assert",
       "label": "The corpse holds the authored Flightblade Throwing Axe",
@@ -41,7 +89,13 @@
       "item": 28972,
       "equals": 28972
     },
-    { "action": "loot_slot", "actor": "looter", "item": 28972 },
+    {
+      "action": "loot_roll",
+      "label": "The looter rolls Need on the item, as a finder group rolls for it",
+      "actor": "looter",
+      "item": 28972,
+      "vote": 1
+    },
     {
       "action": "assert",
       "label": "DISCRIMINATING: the item-level-57 axe scales down to the client key 18 for the looter's level 16",
@@ -77,6 +131,9 @@
       "stat": 38,
       "equals": 1
     },
-    { "action": "close_loot", "actor": "looter" }
+    {
+      "action": "close_loot",
+      "actor": "looter"
+    }
   ]
 }

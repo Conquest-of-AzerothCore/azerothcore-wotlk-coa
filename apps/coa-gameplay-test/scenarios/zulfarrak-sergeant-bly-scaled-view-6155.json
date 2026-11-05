@@ -7,7 +7,8 @@
     "ViewableCreature kept the authored level for any creature with an npcflag, so a level-39 character saw the rest of",
     "the crew at 39 and Bly at 45. Gossip alone is not a service: a gossip creature that is hostile or neutral now scales",
     "like its crew (Raven 7605 has no npcflag and is the control). Friendly gossip creatures keep their level through",
-    "the reaction check."
+    "the reaction check.",
+    "The characters run the dungeon as a Dungeon Finder group, the only way a dungeon scales."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -19,16 +20,64 @@
     "ignore_access": true
   },
   "players": [
-    { "id": "pyro", "race": 1, "class": 1, "level": 39 }
+    {
+      "id": "pyro",
+      "race": 1,
+      "class": 1,
+      "level": 39
+    },
+    {
+      "id": "finder",
+      "race": 1,
+      "class": 1,
+      "level": 39
+    }
   ],
   "creatures": [
-    { "id": "raven", "owner": "pyro", "entry": 7605, "level": 44, "distance": 6 },
-    { "id": "bly", "owner": "pyro", "entry": 7604, "level": 45, "distance": 8 },
-    { "id": "weegli", "owner": "pyro", "entry": 7607, "level": 43, "distance": 10 }
+    {
+      "id": "raven",
+      "owner": "pyro",
+      "entry": 7605,
+      "level": 44,
+      "distance": 6
+    },
+    {
+      "id": "bly",
+      "owner": "pyro",
+      "entry": 7604,
+      "level": 45,
+      "distance": 8
+    },
+    {
+      "id": "weegli",
+      "owner": "pyro",
+      "entry": 7607,
+      "level": 43,
+      "distance": 10
+    }
   ],
   "steps": [
-    { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
-    { "action": "level_scaling_packet", "actor": "pyro", "value": 1 },
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 2000
+    },
+    {
+      "action": "group",
+      "actor": "pyro",
+      "target": "finder"
+    },
+    {
+      "action": "lfg_dungeon",
+      "label": "The characters run the dungeon through the Dungeon Finder",
+      "actor": "pyro",
+      "dungeon": 24
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "pyro",
+      "value": 1
+    },
     {
       "action": "assert",
       "label": "SETUP: Raven, without an npcflag, is seen at the character's level",

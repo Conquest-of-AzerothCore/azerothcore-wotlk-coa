@@ -12,7 +12,8 @@
     "skins the corpse the client shows as skinnable, Skinning 45 is refused with SPELL_FAILED_LOW_CASTLEVEL (49) as",
     "the client's red line says, and with open world scaling off the dungeon keeps the level-15 view, so 85 skins",
     "the third corpse. Black Riding Wolf 5194 is a beast with skinning table 100001 and no creature loot or money,",
-    "so its corpse becomes skinnable as soon as it dies."
+    "so its corpse becomes skinnable as soon as it dies.",
+    "The characters run the dungeon as a Dungeon Finder group, the only way a dungeon scales."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -31,6 +32,12 @@
       "level": 15,
       "melee_hit_rating": 10000,
       "expertise_rating": 10000
+    },
+    {
+      "id": "finder",
+      "race": 1,
+      "class": 1,
+      "level": 15
     }
   ],
   "creatures": [
@@ -64,6 +71,17 @@
       "action": "wait",
       "label": "Let spawn AI settle",
       "ms": 2000
+    },
+    {
+      "action": "group",
+      "actor": "ranger",
+      "target": "finder"
+    },
+    {
+      "action": "lfg_dungeon",
+      "label": "The characters run the dungeon through the Dungeon Finder",
+      "actor": "ranger",
+      "dungeon": 12
     },
     {
       "action": "learn",

@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "A dungeon walked into keeps its authored levels; a Dungeon Finder group sees it scaled",
+  "contract": [
+    "Issues #11184, #11109 and #11272: as on Ascension, a scaled dungeon scales only for a Dungeon Finder group in the",
+    "dungeon the finder sent it to. A level-26 character who walks into Maraudon meets its level-45 creatures, with",
+    "open world scaling on or off, while a level-26 character of a finder group for Maraudon sees them at 26."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 349, "x": 1019.69, "y": -458.31, "z": -43.43, "o": 0.31, "ignore_access": true },
+  "players": [
+    { "id": "walker", "race": 1, "class": 1, "level": 26 },
+    { "id": "runner", "race": 1, "class": 1, "level": 26 },
+    { "id": "finder", "race": 1, "class": 1, "level": 26 }
+  ],
+  "creatures": [
+    { "id": "walker_target", "owner": "walker", "entry": 5194, "level": 45, "distance": 8 },
+    { "id": "runner_target", "owner": "runner", "entry": 5194, "level": 45, "distance": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
+    { "action": "group", "actor": "runner", "target": "finder" },
+    { "action": "lfg_dungeon", "label": "The runner's group runs Maraudon through the Dungeon Finder", "actor": "runner", "dungeon": 26 },
+    { "action": "level_scaling_packet", "actor": "walker", "value": 1 },
+    { "action": "level_scaling_packet", "actor": "runner", "value": 1 },
+    { "action": "assert", "label": "CONTROL: the finder group's character sees the creature at its own level", "actor": "runner", "metric": "view_level", "target": "runner_target", "equals": 26, "within_ms": 2000 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "With scaling on, the character who walked in sees the authored level 45", "actor": "walker", "metric": "view_level", "target": "walker_target", "equals": 45 },
+    { "action": "level_scaling_packet", "actor": "walker", "value": 0 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "With scaling off, too", "actor": "walker", "metric": "view_level", "target": "walker_target", "equals": 45 }
+  ]
+}

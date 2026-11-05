@@ -11,7 +11,8 @@
     "stamina, 8 attack power) at 100% as the controlled fixture; the client's item key for level 60 is",
     "60 + 5 = 65, and its ItemStat.dbc row at 65 requires level 60. A level-60 looter with the open-world",
     "scaling switch off must loot the axe at scaling level 65 and required level 60, not the authored",
-    "item level 57 / required level 55."
+    "item level 57 / required level 55.",
+    "The characters run the dungeon as a Dungeon Finder group, the only way a dungeon scales."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -30,6 +31,12 @@
       "level": 60,
       "melee_hit_rating": 10000,
       "expertise_rating": 10000
+    },
+    {
+      "id": "finder",
+      "race": 1,
+      "class": 1,
+      "level": 60
     }
   ],
   "creatures": [
@@ -47,6 +54,17 @@
       "action": "wait",
       "label": "Let spawn AI settle",
       "ms": 2000
+    },
+    {
+      "action": "group",
+      "actor": "looter",
+      "target": "finder"
+    },
+    {
+      "action": "lfg_dungeon",
+      "label": "The characters run the dungeon through the Dungeon Finder",
+      "actor": "looter",
+      "dungeon": 8
     },
     {
       "action": "level_scaling_packet",
@@ -87,9 +105,11 @@
       "equals": 28972
     },
     {
-      "action": "loot_slot",
+      "action": "loot_roll",
+      "label": "The looter rolls Need on the item, as a finder group rolls for it",
       "actor": "looter",
-      "item": 28972
+      "item": 28972,
+      "vote": 1
     },
     {
       "action": "assert",
