@@ -437,6 +437,31 @@ verdicts per status and per spell, and lists the known modifiers, the probe aura
 the runs that did not pass. `verdicts.json` keeps every verdict with its interval, detail and explanation (schema 1)
 for `diff`. When the run holds stack verdicts, `compare` also writes `levers.md`.
 
+### A full class run
+
+`--stack` selects only the stack, so a class takes two manifests. From this directory, with `W` the worktree:
+
+```sh
+python3 -B conformance.py generate --class 19 --out $W/.cache/conformance/templar
+python3 -B conformance.py generate --class 19 --stack --out $W/.cache/conformance/templar/stack
+coa-verify --worktree $W --ram --stages gameplay --scenario $W/.cache/conformance/templar/scenarios/*.json
+coa-verify --worktree $W --ram --stages gameplay --scenario $W/.cache/conformance/templar/stack/scenarios/*.json
+python3 -B conformance.py compare --manifest $W/.cache/conformance/templar/manifest.json \
+  --results $W/.cache/verify-all/STAMP --out OUT
+python3 -B conformance.py compare --manifest $W/.cache/conformance/templar/stack/manifest.json \
+  --results $W/.cache/verify-all/STACK_STAMP --out OUT/stack
+```
+
+Add `build` to `--stages` when the server sources changed since the last build. The runs end `INCOMPLETE`: a
+selection of exploratory files leaves the gameplay stage `unavailable` even when every scenario passes; the
+gameplay line of the run gives the passed and failed counts. `compare` reads one stamp, so the scenarios of one
+manifest go in one call. Keep the outputs outside Git (`.agents/plans/class-conformance/<class>/`).
+
+The Templar pilot of 2026-11-05 (270 spell scenarios and 40 stack passes, simulated clock, 15 lanes) took 93 s for
+the spell scenarios in one call and 42 s for the stack; the outputs are `report.md`, `alerts.tsv`, `verdicts.json`
+and `levers.md`. To check a run's reproducibility, run the same manifest twice and `diff` the two outputs: a
+significant change between two runs of the same build is a defect of the tool.
+
 ### Impact report
 
 ```sh

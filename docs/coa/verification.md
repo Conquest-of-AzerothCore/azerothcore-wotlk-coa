@@ -221,6 +221,19 @@ python -B tools/verify_all.py --stages gameplay --scenario /path/to/audit-zone.j
 The file is exploratory, so the run ends `INCOMPLETE` even when the audit passes, and it never blocks a PR. The
 report is the `placement_audit` step record in `gameplay/exploratory/<key>/result.json` of the output directory.
 
+### Class tooltip conformance
+
+`apps/coa-gameplay-test/conformance/` generates exploratory scenarios that check a class's spells, procs and talent
+stack against their client tooltips, and judges a run with `conformance.py compare`
+([README](../../apps/coa-gameplay-test/conformance/README.md), method in
+[ADR 0011](../adr/0011-class-tooltip-conformance.md)). The scenarios run as exploratory files, so the run ends
+`INCOMPLETE` even when they pass; the verdicts come from `compare`, not from the stage result. Its unit tests are the
+`conformance` suite of the source stage.
+
+```sh
+python -B tools/verify_all.py --stages gameplay --scenario .cache/conformance/templar/scenarios/*.json
+```
+
 ## Results and exit codes
 
 Output defaults to a new `.cache/verify-all/<UTC YYYYmmdd-HHMMSS>/` directory (with a `-2`, `-3` suffix when
