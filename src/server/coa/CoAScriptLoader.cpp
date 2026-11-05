@@ -321,6 +321,7 @@ void AddSC_AscensionPrimalistHeavyHanded();
 void AddSC_AscensionPrimalistTremor();
 void AddSC_AscensionPrimalistPulverize();
 void AddSC_AscensionShadowfuryShadowCrash();
+void AddSC_AscensionGreaterClassBuffs();
 void AddSC_AscensionPrimalistStoneTosser();
 void AddSC_AscensionPrimalistVitality();
 void AddSC_AscensionPrimalistMagmatism();
@@ -619,6 +620,7 @@ void AddCoAScripts()
     AddSC_AscensionPrimalistTremor();
     AddSC_AscensionPrimalistPulverize();
     AddSC_AscensionShadowfuryShadowCrash();
+    AddSC_AscensionGreaterClassBuffs();
     AddSC_AscensionPrimalistStoneTosser();
     AddSC_AscensionPrimalistVitality();
     AddSC_AscensionPrimalistMagmatism();
