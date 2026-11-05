@@ -9,7 +9,7 @@ import re
 from statistics import fmean
 from typing import Callable, Mapping, Protocol
 
-from hits import UNMODELLED, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model
+from hits import MEAN_HALF_WIDTH, UNMODELLED, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model
 from procs import AMBIGUOUS_TOOLTIP, CAST, PROC_CHECK, chance_of, wilson_interval
 from profile import DBC_DIR, caster_stats_from, known_aura_label, probe_aura_label
 from stack import (ADDS, MEASURED, MELEE_SOURCE, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE, TALENT_DELTA,
@@ -603,16 +603,38 @@ def per_hit_means(runs: list[Run], labels: dict) -> tuple[list[float], list[str]
     return means, empty, unusable
 
 
-def composition_readings(model: dict) -> list[tuple[str, float, str]]:
+def known_percents(manifest: dict, model: dict, runs: list[Run]) -> tuple[list[tuple[str, float]], str | None]:
+    found = []
+    for row in manifest.get('known_modifiers', []):
+        if row['applies_to'] != 'damage' or not row['school_mask'] & model['school_mask']:
+            continue
+        present = [run.values.get(known_aura_label(row['spell_id']), 0) > 0 for run in runs]
+        if all(present):
+            found.append((f'known aura {row["spell_id"]} effect {row["effect_index"]} aura {row["aura"]}',
+                          float(row['percent'])))
+        elif any(present):
+            return [], (f'known aura {row["spell_id"]} is present in {sum(present)} of {len(present)} passes, so the '
+                        f'configurations differ by more than the talent')
+    return found, None
+
+
+def composition_readings(model: dict, known: list[tuple[str, float]]) -> list[tuple[str, float, str]]:
     bonus = model['bonus_pct']
-    readings = [(MULTIPLIES, bonus, 'the bonus scales the per-hit damage of the previous configuration')]
-    earlier = model.get('earlier_bonuses') or []
-    if earlier:
-        stacked = sum(item['bonus_pct'] for item in earlier)
-        names = ', '.join(f'{item["token"]} {item["bonus_pct"]:g}% of {item["talent"]}' for item in earlier)
+    readings = [(MULTIPLIES, bonus, 'the bonus scales the per-hit damage of the previous configuration, known '
+                                    'modifiers and earlier bonuses included')]
+    others = known + [(f'{item["token"]} of {item["talent"]}', item['bonus_pct'])
+                      for item in model.get('earlier_bonuses') or []]
+    if others:
+        stacked = sum(percent for _, percent in others)
+        names = ', '.join(f'{name} {percent:+g}%' for name, percent in others)
         readings.append((ADDS, 100 * bonus / (100 + stacked),
-                         f'the bonus adds to the earlier bonuses {names}: 100 x {bonus:g} / (100 + {stacked:g})'))
+                         f'the bonus adds to the other percents of the hit, {names}: 100 x {bonus:g} / (100 '
+                         f'{stacked:+g})'))
     return readings
+
+
+def passes_needed(passes: int, relative_half: float) -> int:
+    return math.ceil(passes * (relative_half / MEAN_HALF_WIDTH) ** 2)
 
 
 def judge_talent_delta(manifest: dict, parts: list[ProcPart], config_runs: dict[str, dict[str, Run]],
@@ -659,9 +681,22 @@ def judge_talent_delta(manifest: dict, parts: list[ProcPart], config_runs: dict[
     if abs(shown - model['bonus_pct']) > FLOAT_EPSILON:
         return replace(base, measured=measured, expected=shown,
                        explanation=f'{model["token"]} shows {shown:g}%, generated as {model["bonus_pct"]:g}%')
+    known, mixed = known_percents(manifest, model, current_runs + baseline_runs)
+    if mixed:
+        return replace(base, status='unmodelled', measured=measured, explanation=mixed)
     delta, low, high = ratio_interval(current, baseline)
+    half = (high - low) / 2
+    relative = half / (100 + model['bonus_pct'])
+    if relative > MEAN_HALF_WIDTH + FLOAT_EPSILON:
+        needed = passes_needed(min(len(current), len(baseline)), relative)
+        return replace(base, status='insufficient_trials', measured=delta, expected=model['bonus_pct'], low=low,
+                       high=high, explanation=f'half-width {half:.3g} points is {relative:.2%} of the expected ratio '
+                                              f'{1 + model["bonus_pct"] / 100:g}, above the {MEAN_HALF_WIDTH:.0%} '
+                                              f'bound of hit means; about {needed} passes per configuration would '
+                                              f'meet it (observed variance, same t quantile); per-hit means of '
+                                              f'{source}: {listed(current)} against {listed(baseline)}{failures}')
     judged = [(name, expected, 'ok' if low - FLOAT_EPSILON <= expected <= high + FLOAT_EPSILON else 'alert', why)
-              for name, expected, why in composition_readings(model)]
+              for name, expected, why in composition_readings(model, known)]
     statuses = {status for _, _, status, _ in judged}
     status = judged[0][2] if len(statuses) == 1 else 'ambiguous_tooltip'
     lead = 'the composition readings disagree; ' if len(statuses) > 1 else ''
@@ -670,8 +705,8 @@ def judge_talent_delta(manifest: dict, parts: list[ProcPart], config_runs: dict[
     return replace(base, status=status, measured=delta, expected=judged[0][1], low=low, high=high,
                    explanation=f'{lead}{readings}; per-hit means of {source} in {len(current)} and {len(baseline)} '
                                f'passes: {listed(current)} against {listed(baseline)}; 99% Welch interval of the '
-                               f'ratio of the means; known modifiers are independent factors of every hit in both '
-                               f'configurations; {expectation.rule}{failures}')
+                               f'ratio of the means, half-width {relative:.2%} of the expected ratio; '
+                               f'{expectation.rule}{failures}')
 
 
 def judge_stack(manifest: dict, stack_parts: dict[str, list[ProcPart]], tooltips: TooltipSource,
@@ -861,6 +896,21 @@ def amount(value: float | None, digits: int = 1) -> str:
     return '' if value is None else f'{value:.{digits}f}'
 
 
+def change_decision(before: Verdict | None, after: Verdict) -> tuple[str, str]:
+    if before is None:
+        return '', ''
+    if before.status != MEASURED or after.status != MEASURED:
+        return '', f'no: DPS {before.status} then {after.status}'
+    delta, low, high = ratio_interval(after.detail['per_pass'], before.detail['per_pass'])
+    relative = (high - low) / 2 / (100 + delta)
+    span = f'{low:.2f} to {high:.2f}'
+    if low <= 0 <= high:
+        return span, 'no: the interval holds 0'
+    if relative > MEAN_HALF_WIDTH + FLOAT_EPSILON:
+        return span, f'no: half-width {relative:.2%} of the ratio, above {MEAN_HALF_WIDTH:.0%}'
+    return span, 'yes'
+
+
 def stack_runs(manifest: dict, runs: dict[str, Run]) -> dict[str, Run]:
     keys = {entry['key'] for entry in manifest['scenarios'] if entry['kind'] == 'stack'}
     return {key: run for key, run in runs.items() if key in keys}
@@ -886,8 +936,8 @@ def lever_lines(manifest: dict, manifest_path: Path, results_dir: Path, runs: di
              '- Interval: 99% Student t interval of the mean of the passes; a talent delta is the ratio of the mean '
              'non-critical, unblocked hits of its source against the previous configuration, with a Welch interval.',
              '', '## Configurations', '',
-             '| config | talents added | passes | DPS | 99% interval | change | change % | tooltip bonus % | status |',
-             '|---|---|---|---|---|---|---|---|---|']
+             '| config | talents added | passes | DPS | 99% interval | change | change % | change 99% interval | '
+             'decisive | tooltip bonus % | status |', '|---|---|---|---|---|---|---|---|---|---|---|']
     previous = None
     for lever in found:
         verdict = by_config[lever.config]
@@ -895,9 +945,10 @@ def lever_lines(manifest: dict, manifest_path: Path, results_dir: Path, runs: di
                   if previous and previous.dps_mean is not None and lever.dps_mean is not None else None)
         talents = ', '.join(str(talent) for talent in verdict.detail.get('talents', [])) or 'none'
         interval = f'{amount(lever.dps_low)} to {amount(lever.dps_high)}' if lever.dps_low is not None else ''
+        span, decisive = change_decision(by_config[previous.config] if previous else None, verdict)
         lines.append(f'| {lever.config} | {talents} | {len(verdict.detail.get("per_pass", []))} | '
                      f'{amount(lever.dps_mean)} | {interval} | {amount(change)} | {amount(lever.delta_pct, 2)} | '
-                     f'{amount(lever.tooltip_delta_pct, 2)} | {verdict.status} |')
+                     f'{span} | {decisive} | {amount(lever.tooltip_delta_pct, 2)} | {verdict.status} |')
         previous = lever
     names = ['melee' if source == MELEE_SOURCE else str(source) for source in sources]
     lines += ['', '## Damage per second by source', '',

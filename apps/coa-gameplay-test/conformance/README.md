@@ -344,25 +344,35 @@ expectation comes from the entry:
 
 Interactions are not absorbed. A change of the same source by another talent the configuration adds makes the delta
 `unmodelled`; a change by an earlier talent whose amount is not a stated percent makes it `ambiguous_tooltip`, since
-no text says how the two combine. Earlier talents with a stated percent on the same source give two readings, judged
-like the proc readings: `multiplies` (the bonus scales the damage of the previous configuration) and `adds` (the bonus
-adds to the earlier percents, 100 × b / (100 + Σ earlier)); disagreeing readings are `ambiguous_tooltip` with both.
-The known auras (887007) act on both configurations as independent factors of every hit, as in the hit models, and
-cancel in the ratio. The integer steps of a hit (truncation after a modifier, armor) are not modelled here: each moves
-a hit by under one point, about 0.1% of the 1014 measured Argent Blade hit. The bonus is read again with the measured
-stats: a changed value is an alert. Fewer passes than generated in either configuration
-are `insufficient_trials`; no hit of the source in either configuration is `unmeasured`.
+no text says how the two combine. Neither the tooltip nor the DBC says how the bonus composes with the other percents
+of the hit: the damage modifiers of the known auras that apply to the source's school (887007 effect 0, aura 341,
+-20%; aura 341 and aura 108 are different mechanisms, not a stated composition) and the stated percents of earlier
+talents on the same source (rulings R12, R14). When there are any, the delta has two readings, judged like the proc
+readings: `multiplies` (the bonus scales the damage of the previous configuration, the other percents included, so they
+cancel in the ratio) and `adds` (the bonus adds to the other percents, 100 × b / (100 + Σ others)). Agreeing readings
+give their verdict; disagreeing readings are `ambiguous_tooltip` with both expected values and the measurement, until
+the owner rules (ADR 0011). A known aura present in some passes only makes the delta `unmodelled`. The integer steps
+of a hit (truncation after a modifier, armor) are not modelled here: each moves a hit by under one point, about 0.1%
+of the 1014 measured Argent Blade hit. The bonus is read again with the measured stats: a changed value is an alert.
+Fewer passes than generated in either configuration are `insufficient_trials`; no hit of the source in either
+configuration is `unmeasured`. An interval whose half-width exceeds 1% of the expected ratio 1 + b/100, the bound of
+the hit means (`MEAN_HALF_WIDTH`), is `insufficient_trials` even when it holds the bonus; the explanation gives the
+half-width and the passes that would meet the bound, the current passes times (half-width / 1%)², from the observed
+variance at the same t quantile.
 
 `levers(verdicts)` gives one `Lever` per configuration in stack order: the DPS mean and interval, its change in percent
 from the previous configuration, the DPS of each source and the tooltip bonus of the configuration's single judged
 talent delta (`None` otherwise). `levers.md` holds the configurations, the DPS per source and its change, the talent
-deltas, the known and probe auras with the runs that measured them, and every pass value.
+deltas, the known and probe auras with the runs that measured them, and every pass value. A configuration's DPS change
+is marked decisive only when the 99% Welch interval of the ratio of its passes to the previous configuration's
+excludes 0 and its half-width is at most 1% of the ratio; otherwise the column says why it is not, and the percent is
+no result.
 
 Measured on 2026-11-05 on the worktree server, which does not yet hold PR #11297 (Argent Blade's flat bonus after its
 percent), with 5 passes per configuration (stamp `20261105-204050`, simulated clock, gameplay stage 32.5 s for 40
 passes of 1.3 s each):
 
-| Config | DPS | 99% interval | Change | Argent Blade | Scourgebane 801832 | Retribution 525028 | Scarlet Hammer |
+| Config | DPS | 99% interval | Change (not decisive) | Argent Blade | Scourgebane | Retribution | Scarlet Hammer |
 |---|---|---|---|---|---|---|---|
 | c0 | 298.1 | 289.6 to 306.5 | | 202.8 | 76.2 | 0 | 0 |
 | c1 | 333.2 | 328.8 to 337.6 | +11.8% | 244.0 | 70.2 | 0 | 0 |
@@ -374,9 +384,12 @@ passes of 1.3 s each):
 | c7 | 1027.2 | 664.5 to 1389.9 | +10.8% | 669.8 | 230.3 | 79.9 | 28.2 |
 
 The auto attacks dealt 19.0 per second in every configuration and nothing was unattributed. Paladin Training raised
-the Argent Blade hit by 20.27% (99% interval 19.51 to 21.03) against its $s1 of 20: `ok`; a run of c0 and c1 alone
-(stamp `20261105-203950`) gave 20.00% (19.22 to 20.78). From c3 on, the procs spread the passes of a configuration
-(c5: 615 to 1031 per second), and 5 passes leave intervals too wide to separate one configuration from the next.
+the Argent Blade hit by 20.27% (99% interval 19.51 to 21.03, half-width 0.64% of the ratio) against its $s1 of 20:
+`multiplies` (20%) is `ok` and `adds` with 887007's -20% (25%) an alert, so the verdict is `ambiguous_tooltip`; a run
+of c0 and c1 alone (stamp `20261105-203950`) gave 20.00% (19.22 to 20.78), the same verdict. No DPS change is
+decisive: the intervals of c1 to c4 exclude 0 but their half-widths are 2.58%, 2.03%, 16.31% and 18.41% of the
+ratio, and the intervals of c5 to c7 hold 0. The procs spread the passes of a configuration (c5: 615 to 1031 per
+second).
 
 ## Generate and compare
 

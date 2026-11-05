@@ -255,7 +255,8 @@ def talent_expectations(class_file: dict, index: int, passes: int) -> list[Expec
         earlier_bonuses = [{'talent': other['talent'], 'token': other['token'], 'bonus_pct': found['bonus_pct']}
                            for other, found in before]
         expect(bonus['rule'], bonus['effect'], bonus_pct=bonus['bonus_pct'], effect=bonus['effect'],
-               composition=RATIO, earlier_bonuses=earlier_bonuses)
+               composition=RATIO, earlier_bonuses=earlier_bonuses,
+               school_mask=records_of(class_file).field('Spell', source, 'SchoolMask'))
     return expectations
 
 

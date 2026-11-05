@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 
-from compare import STATUSES, Verdict, alert_rows, compare, write_levers
+from compare import STATUSES, Verdict, alert_rows, change_decision, compare, write_levers
 from profile import DBC_DIR
 from stack import (MEASURED, STACK_DPS, STACK_SOURCE, TALENT_DELTA, Lever, levers, mean_interval, ratio_interval,
                    stack_scenarios, student_t_quantile)
@@ -38,6 +38,11 @@ ROTATION_MS = 120000
 PLAIN = {'total': f'stack source {ARGENT_BLADE} plain total', 'count': f'stack source {ARGENT_BLADE} plain count'}
 HEALTH = {'health_start': 'stack target health start', 'health_end': 'stack target health end'}
 SOURCE_LABELS = {'total': f'stack source {ARGENT_BLADE} total', 'count': f'stack source {ARGENT_BLADE} count'}
+WITHOUT_TUNING = {'known_aura 887007': '0'}
+BASE_MEANS = [100.0, 100.2, 99.8, 100.1, 99.9]
+PALADIN_MEANS = [120.0, 120.2, 119.8, 120.1, 119.9]
+WIDE_BASE_MEANS = [100.0, 101.0, 99.0, 100.5, 99.5]
+WIDE_PALADIN_MEANS = [120.0, 121.0, 119.0, 120.5, 119.5]
 
 
 def learned(scenario):
@@ -69,7 +74,7 @@ def delta_expectation(passes=5, bonus=20.0, earlier=()):
     return Expectation(DELTA_LABEL, TALENT_DELTA, PALADIN_TRAINING, PALADIN_TRAINING, 0, '$s1',
                        'ratio: per-hit damage', {'config': PALADIN, 'baseline': BASE, 'index': 1, 'passes': passes,
                                                  'source': ARGENT_BLADE, 'bonus_pct': bonus, 'token': '$s1',
-                                                 'effect': 0, 'composition': 'ratio',
+                                                 'effect': 0, 'composition': 'ratio', 'school_mask': 1,
                                                  'earlier_bonuses': list(earlier), 'measurements': PLAIN})
 
 
@@ -121,24 +126,25 @@ class StackCompareTest(unittest.TestCase):
     def tearDown(self):
         self.workspace.close()
 
-    def add_config(self, config, index, means, delta=None, hits=40, lost=60000.0, failures=None):
+    def add_config(self, config, index, means, delta=None, hits=40, lost=60000.0, failures=None, extra=()):
         for number, mean in enumerate(means):
             expectations = [dps_expectation(config, index), source_expectation(config, index)]
             if delta is not None:
                 expectations.append(delta)
             key = f'conformance-templar-stack-{config}-pass-{number + 1}'
-            self.workspace.scenario(key, 'stack', expectations, steps=pass_steps(hits, mean, lost))
+            steps = pass_steps(hits, mean, lost) + (list(extra) if number == 0 else [])
+            self.workspace.scenario(key, 'stack', expectations, steps=steps)
             if failures:
                 self.workspace.cast_failures[key] = failures
 
-    def verdicts(self, reader=None):
-        manifest, results = self.workspace.manifest()
+    def verdicts(self, reader=None, base=None):
+        manifest, results = self.workspace.manifest(**(base or {}))
         return {verdict.label: verdict for verdict in compare(manifest, results, tooltips=reader or bonus_reader())}
 
     def test_measured_delta_whose_interval_holds_the_tooltip_bonus_is_ok(self):
-        self.add_config(BASE, 0, [100.0, 101.0, 99.0, 100.5, 99.5])
-        self.add_config(PALADIN, 1, [120.0, 121.0, 119.0, 120.5, 119.5], delta_expectation())
-        verdict = self.verdicts()[DELTA_LABEL]
+        self.add_config(BASE, 0, BASE_MEANS)
+        self.add_config(PALADIN, 1, PALADIN_MEANS, delta_expectation())
+        verdict = self.verdicts(base=WITHOUT_TUNING)[DELTA_LABEL]
         self.assertEqual(verdict.status, 'ok')
         self.assertAlmostEqual(verdict.measured, 20.0)
         self.assertEqual(verdict.expected, 20.0)
@@ -146,10 +152,41 @@ class StackCompareTest(unittest.TestCase):
         self.assertGreater(verdict.high, 20.0)
         self.assertIn('5 and 5 passes', verdict.explanation)
 
-    def test_measured_delta_outside_its_interval_is_an_alert(self):
-        self.add_config(BASE, 0, [100.0, 101.0, 99.0, 100.5, 99.5])
-        self.add_config(PALADIN, 1, [150.0, 151.0, 149.0, 150.5, 149.5], delta_expectation())
-        self.assertEqual(self.verdicts()[DELTA_LABEL].status, 'alert')
+    def test_measured_delta_outside_its_interval_is_an_alert_under_every_reading(self):
+        self.add_config(BASE, 0, BASE_MEANS)
+        self.add_config(PALADIN, 1, [150.0, 150.2, 149.8, 150.1, 149.9], delta_expectation())
+        verdict = self.verdicts()[DELTA_LABEL]
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('adds', verdict.explanation)
+
+    def test_interval_wider_than_the_hit_mean_bound_is_insufficient_even_holding_the_bonus(self):
+        self.add_config(BASE, 0, WIDE_BASE_MEANS)
+        self.add_config(PALADIN, 1, WIDE_PALADIN_MEANS, delta_expectation())
+        verdict = self.verdicts(base=WITHOUT_TUNING)[DELTA_LABEL]
+        self.assertEqual(verdict.status, 'insufficient_trials')
+        self.assertLess(verdict.low, 20.0)
+        self.assertGreater(verdict.high, 20.0)
+        self.assertGreater((verdict.high - verdict.low) / 2 / 120, 0.01)
+        self.assertIn('above the 1% bound', verdict.explanation)
+        self.assertIn('passes per configuration would meet it', verdict.explanation)
+
+    def test_known_modifier_readings_that_disagree_are_an_ambiguous_tooltip(self):
+        self.add_config(BASE, 0, BASE_MEANS)
+        self.add_config(PALADIN, 1, PALADIN_MEANS, delta_expectation())
+        verdict = self.verdicts()[DELTA_LABEL]
+        self.assertEqual(verdict.status, 'ambiguous_tooltip')
+        self.assertAlmostEqual(verdict.measured, 20.0, places=1)
+        self.assertIn('multiplies', verdict.explanation)
+        self.assertIn('known aura 887007 effect 0 aura 341 -20%', verdict.explanation)
+        self.assertIn('expected 25%: alert', verdict.explanation)
+        self.assertIn('expected 20%: ok', verdict.explanation)
+
+    def test_known_aura_present_in_some_passes_only_is_unmodelled(self):
+        self.add_config(BASE, 0, BASE_MEANS, extra=[assert_step('known_aura 887007', '0')])
+        self.add_config(PALADIN, 1, PALADIN_MEANS, delta_expectation())
+        verdict = self.verdicts()[DELTA_LABEL]
+        self.assertEqual(verdict.status, 'unmodelled')
+        self.assertIn('present in 9 of 10 passes', verdict.explanation)
 
     def test_missing_pass_is_insufficient_even_on_the_exact_bonus(self):
         self.add_config(BASE, 0, [100.0, 101.0, 99.0, 100.5])
@@ -175,10 +212,10 @@ class StackCompareTest(unittest.TestCase):
 
     def test_composition_readings_that_disagree_are_an_ambiguous_tooltip(self):
         earlier = [{'talent': 1, 'token': '$s1', 'bonus_pct': 20.0}]
-        self.add_config(BASE, 0, [100.0, 100.2, 99.8, 100.1, 99.9])
+        self.add_config(BASE, 0, BASE_MEANS)
         self.add_config(PALADIN, 1, [110.0, 110.2, 109.8, 110.1, 109.9], delta_expectation(bonus=10.0,
                                                                                           earlier=earlier))
-        verdict = self.verdicts(bonus_reader(value=10.0))[DELTA_LABEL]
+        verdict = self.verdicts(bonus_reader(value=10.0), base=WITHOUT_TUNING)[DELTA_LABEL]
         self.assertEqual(verdict.status, 'ambiguous_tooltip')
         self.assertIn('multiplies', verdict.explanation)
         self.assertIn('adds', verdict.explanation)
@@ -217,9 +254,9 @@ class StackCompareTest(unittest.TestCase):
         self.assertEqual(verdict.detail['config'], DIVINE)
 
     def test_levers_follow_the_configurations_with_their_tooltip_bonus(self):
-        self.add_config(BASE, 0, [100.0, 101.0, 99.0, 100.5, 99.5], lost=60000.0)
-        self.add_config(PALADIN, 1, [120.0, 121.0, 119.0, 120.5, 119.5], delta_expectation(), lost=72000.0)
-        result = levers(list(self.verdicts().values()))
+        self.add_config(BASE, 0, BASE_MEANS, lost=60000.0)
+        self.add_config(PALADIN, 1, PALADIN_MEANS, delta_expectation(), lost=72000.0)
+        result = levers(list(self.verdicts(base=WITHOUT_TUNING).values()))
         self.assertEqual([lever.config for lever in result], [BASE, PALADIN])
         base, paladin = result
         self.assertIsInstance(base, Lever)
@@ -231,8 +268,8 @@ class StackCompareTest(unittest.TestCase):
         self.assertIn(ARGENT_BLADE, paladin.sources)
 
     def test_levers_file_lists_configurations_deltas_and_known_modifiers(self):
-        self.add_config(BASE, 0, [100.0, 101.0, 99.0, 100.5, 99.5])
-        self.add_config(PALADIN, 1, [120.0, 121.0, 119.0, 120.5, 119.5], delta_expectation(), lost=72000.0)
+        self.add_config(BASE, 0, BASE_MEANS)
+        self.add_config(PALADIN, 1, PALADIN_MEANS, delta_expectation(), lost=72000.0)
         manifest, results = self.workspace.manifest()
         verdicts = compare(manifest, results, tooltips=bonus_reader())
         path = write_levers(manifest, results, verdicts, self.workspace.root / 'report')
@@ -242,6 +279,40 @@ class StackCompareTest(unittest.TestCase):
         self.assertIn('887007', text)
         self.assertIn('10 of 10 runs', text)
 
+
+    def test_levers_file_marks_a_dps_change_decisive_only_with_a_narrow_interval_away_from_zero(self):
+        self.add_config(BASE, 0, BASE_MEANS)
+        self.add_config(PALADIN, 1, PALADIN_MEANS, delta_expectation(), lost=72000.0)
+        manifest, results = self.workspace.manifest()
+        path = write_levers(manifest, results, compare(manifest, results, tooltips=bonus_reader()),
+                            self.workspace.root / 'report')
+        self.assertIn('| 20.00 to 20.00 | yes |', path.read_text(encoding='utf-8'))
+
+
+class ChangeDecisionTest(unittest.TestCase):
+    @staticmethod
+    def dps(values, status=MEASURED):
+        return Verdict('dps', status, sum(values) / len(values), None, None, None, '', check=STACK_DPS,
+                       detail={'config': 'c', 'index': 0, 'per_pass': values})
+
+    def test_change_whose_interval_holds_zero_is_not_decisive(self):
+        span, decisive = change_decision(self.dps([500.0, 620.0, 480.0, 560.0, 540.0]),
+                                         self.dps([520.0, 640.0, 470.0, 600.0, 530.0]))
+        self.assertTrue(span)
+        self.assertEqual(decisive, 'no: the interval holds 0')
+
+    def test_change_with_a_half_width_above_the_bound_is_not_decisive(self):
+        span, decisive = change_decision(self.dps([500.0, 505.0, 495.0, 502.0, 498.0]),
+                                         self.dps([600.0, 640.0, 570.0, 610.0, 590.0]))
+        self.assertTrue(decisive.startswith('no: half-width'))
+
+    def test_narrow_change_away_from_zero_is_decisive(self):
+        self.assertEqual(change_decision(self.dps([500.0, 501.0, 499.0]), self.dps([600.0, 601.0, 599.0]))[1], 'yes')
+
+    def test_change_of_an_unmeasured_configuration_is_not_decisive(self):
+        decisive = change_decision(self.dps([500.0] * 3), self.dps([600.0] * 2, 'insufficient_trials'))[1]
+        self.assertEqual(decisive, 'no: DPS measured then insufficient_trials')
+        self.assertEqual(change_decision(None, self.dps([500.0] * 3)), ('', ''))
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class StackScenarioTest(unittest.TestCase):
