@@ -5,7 +5,6 @@
  */
 
 #include "AccountMgr.h"
-#include "AccountScript.h"
 #include "AscensionAetherialReliquary.h"
 #include "AscensionAccountProgress.h"
 #include "AscensionClientDbcStream.h"
@@ -4086,11 +4085,6 @@ public:
     _sentSwapEntries.erase(guid);
   }
 
-  void OnAccountLogin(uint32 accountId) {
-    std::lock_guard lock(_mutex);
-    _spellVisualAccounts.erase(accountId);
-  }
-
   void OnPlayerLogout(Player *player) {
     uint32 const guid = player->GetGUID().GetCounter();
     PatchRowTally onDemand;
@@ -4263,14 +4257,15 @@ public:
       _sentSwapEntries.erase(guid);
     }
     PreparedPatchRows const &rows = GetPreparedPatchRows();
-    bool sendSpellVisuals = false;
     {
       std::lock_guard lock(_mutex);
       if (!_streamedPlayers.insert(guid).second)
         return;
       _fallbackTimers.erase(guid);
-      sendSpellVisuals = _spellVisualAccounts.insert(player->GetSession()->GetAccountId()).second;
     }
+    WorldSession* session = player->GetSession();
+    bool const sendSpellVisuals = !session->HasAscensionSpellVisualRows();
+    session->SetAscensionSpellVisualRows();
 
     std::vector<ItemPatchRow> itemRows;
     std::unordered_set<uint32> itemIds = CollectOwnedItemIds(player);
@@ -5880,7 +5875,6 @@ private:
 
   std::mutex _mutex;
   std::unordered_set<uint32> _streamedPlayers;
-  std::unordered_set<uint32> _spellVisualAccounts;
   std::unordered_map<uint32, std::unordered_set<uint32>> _sentItemRows;
   std::unordered_map<uint32, std::unordered_set<uint32>> _sentItemSpellRows;
   std::unordered_map<uint32, PatchRowTally> _onDemandItemRows;
@@ -10210,16 +10204,6 @@ public:
     }
 };
 
-class AscensionCompatAccountScript : public AccountScript {
-public:
-  AscensionCompatAccountScript()
-      : AccountScript("AscensionCompatAccountScript", {ACCOUNTHOOK_ON_ACCOUNT_LOGIN}) {}
-
-  void OnAccountLogin(uint32 accountId) override {
-    AscensionDisplayPatchService::Instance().OnAccountLogin(accountId);
-  }
-};
-
 class AscensionCompatWorldScript : public WorldScript {
 public:
   AscensionCompatWorldScript()
@@ -11461,7 +11445,6 @@ void AddAscensionCompatScripts() {
   new AscensionCompatChangelogScript();
   new AscensionCompatMirrorImageScript();
   new AscensionCompatWorldScript();
-  new AscensionCompatAccountScript();
   new AscensionCompatAllCreatureScript();
   new AscensionCompatPetScript();
 }
