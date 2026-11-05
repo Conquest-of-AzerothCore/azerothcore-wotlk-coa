@@ -862,7 +862,9 @@ Optional `race` seeds the saved character's race through `CHAR_UPD_CHAR_RACE` an
 before login, retaining saved pet data. This fixtures the post-service state; it does not submit a race/faction
 service request or perform that service's spell, quest, faction, language or appearance conversions.
 Optional `offline_seconds` moves the saved logout time that far back, so the login handler treats the character
-as offline for that long (real-time item durations, rest). `item_duration` requires `item` and reads the
+as offline for that long (real-time item durations, rest). `reconnect` takes `actor` and hands the character, still in the world, to a new session through the native reconnect handler (`HandlePlayerLoginToCharInWorld`), as a client restarted before its character logged out would. No login hook runs; packets recorded on the actor accumulate across both sessions.
+
+`item_duration` requires `item` and reads the
 remaining duration in seconds of the first carried copy of that item.
 `race` reads the loaded unit's current race. `faction` reads its server faction template, which clients may be
 sent differently (`sent_faction`). `pet_native_display` reads the guardian's native display,
