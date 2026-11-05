@@ -104,7 +104,6 @@ namespace
 
         amount = TestZoneBonus::Apply(player, TestZoneBonus::Reward::BazaarTokens, ApplyLevelBonus(player, amount));
 
-        // The account's hourly limit (CoA.BazaarTokens.HourlyCap.*) comes last, so it caps what is actually paid.
         amount = AscensionBazaarTokenCap::Claim(player, amount);
         if (!amount)
             return;

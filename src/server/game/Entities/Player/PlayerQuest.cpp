@@ -775,7 +775,6 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     if (quest->GetRewChoiceItemsCount())
     {
         uint32 itemId = LocalLevelScaling::QuestRewardItemFor(this, quest->RewardChoiceItemId[reward], quest);
-        // Bazaar Tokens count towards the hourly limit and may pay less or nothing.
         uint32 const count = itemId ? AscensionBazaarTokenCap::LimitReward(this, itemId, quest->RewardChoiceItemCount[reward]) : 0;
         if (itemId && count)
         {
