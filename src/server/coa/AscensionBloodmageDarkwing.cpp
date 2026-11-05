@@ -119,9 +119,8 @@ struct ShadowBatAI : public ScriptedAI
         if (!target || !target->IsAlive() || !me->IsValidAttackTarget(target))
             return false;
 
-        me->CastSpell(target, SPELL_BAT_BITE, false);
-        bitten = true;
-        return true;
+        bitten = me->CastSpell(target, SPELL_BAT_BITE, false) == SPELL_CAST_OK;
+        return bitten;
     }
 
     void UpdateAI(uint32 diff) override
