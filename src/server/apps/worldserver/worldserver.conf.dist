@@ -2208,6 +2208,15 @@ Rate.Talent = 1
 Rate.Talent.Pet = 1
 
 #
+#    Rate.Threat.Healing
+#        Description: Threat a heal generates, as a share of the health it restores, split among the
+#                     creatures fighting its target (a paladin's heal half of it). Stock WotLK is 0.5;
+#                     CoA lowers it so a healer does not pull a group off its tank.
+#        Default:     0.25
+
+Rate.Threat.Healing = 0.25
+
+#
 #    Rate.Threat.TankStance
 #        Description: Threat multiplier for players in a CoA tank stance (spells 807725-807736),
 #                     on top of the stance's own threat bonus. Temporary tuning, 1 disables it.

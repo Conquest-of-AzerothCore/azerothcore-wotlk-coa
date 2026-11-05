@@ -42,6 +42,7 @@
 #include "Unit.h"
 #include "Util.h"
 #include "Vehicle.h"
+#include "World.h"
 #include "WorldPacket.h"
 
 /// @todo: this import is not necessary for compilation and marked as unused by the IDE
@@ -6986,7 +6987,7 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
 
     if (caster)
     {
-        float threat = float(gain) * 0.5f;
+        float threat = float(gain) * sWorld->getRate(RATE_THREAT_HEALING);
         if (caster->IsClass(CLASS_PALADIN))
             threat *= 0.5f;
         target->GetThreatMgr().ForwardThreatForAssistingMe(caster, threat, GetSpellInfo());
