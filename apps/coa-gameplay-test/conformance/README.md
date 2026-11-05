@@ -17,6 +17,9 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
 - `hits.py`: `hit_scenario(class_file, spell, casts)` and `melee_scenario(class_file, swings)` return the hit scenario
   of a spell's highest rank and the auto-attack scenario, with their `Expectation` lists; `expected_hit` and
   `casts_needed` give the expected mean, its sigma and the number of casts.
+- `compare.py`: `compare(manifest, results_dir)` judges a run against the manifest and returns `Verdict(label, status,
+  measured, expected, low, high, explanation)`; `write_outputs` writes `alerts.tsv` and `report.md`.
+- `conformance.py`: the command line, `generate` and `compare`.
 - `classes/<name>.json`: one class file per class (`classes/templar.json`).
 
 ## Spell set of a class
@@ -177,6 +180,78 @@ tooltip value, a periodic duration that is unreadable). Its scenario learns the 
 parts of the tooltip the reader could not evaluate become `hit_mean` expectations whose rule starts with
 `unreadable: `, without a measurement. Not modelled: talent or proc modifiers, critical strikes, spell power
 coefficients the tooltip does not show, and costs that are a percentage of base mana (no `set_power`).
+
+## Generate and compare
+
+```sh
+cd apps/coa-gameplay-test/conformance
+python3 -B conformance.py generate --class 19 --out DIR [--spell ID ...]
+coa-verify --ram --stages gameplay --scenario DIR/scenarios/*.json
+python3 -B conformance.py compare --manifest DIR/manifest.json --results .cache/verify-all/STAMP [--out OUT]
+```
+
+`generate` writes one no-combat scenario per rank, the hit scenario of each spell's highest rank and, without
+`--spell`, the melee scenario, into `DIR/scenarios/`, and `DIR/manifest.json`. `--spell` takes a class spell id or
+a rank id. A hit expectation that is entirely `unmodelled` gets no scenario file. A file holds
+`json.dumps(scenario, indent=2)` and a newline, the bytes the runner writes and hashes as `scenario_sha256`
+(`batch.py` `write_case`), and is named after its exploratory key (`batch.py` `exploratory_key`), for example
+`conformance-templar-value-807268`. The manifest keeps the class file, the DBC directory, the known modifiers read
+from `Spell.dbc` and, per scenario, its key, file, SHA-256, spell, rank, the tooltip tokens read at generation and
+its `Expectation` list.
+
+`compare` reads `STAMP/gameplay/exploratory/<key>/result.json`, or the result folder whose recorded hash is the
+manifest hash when no folder has the key. The recorded hash is `scenario_sha256` of the folder's `summary.json`
+(or the hash of its `scenario.json`). A result whose hash differs from the manifest stops the comparison with an
+error and no verdict. A scenario without a result has no verdict and is listed in the report. The harness writes
+every `actual` as a string; it is converted to a number, and a value that is not one is an error. `alerts.tsv`
+(default: the manifest directory) has one row per verdict that is not `ok`; `report.md` counts the verdicts per
+status and per spell, and lists the known modifiers, the probe auras, the scenarios without a result and the runs
+that did not pass.
+
+### Verdicts
+
+| Status | Given to |
+|---|---|
+| `ok` | a measurement within its rule below |
+| `alert` | a measurement outside its rule, a missing measurement, or tokens that changed since generation |
+| `unreadable` | an expectation whose rule starts with `unreadable: ` |
+| `unmodelled` | an `unmodelled` check, a `unmodelled: ` or `unmeasurable: ` rule, a hit model left unmodelled |
+| `ambiguous_tooltip` | a signed tooltip value whose sign differs from the measured value |
+| `insufficient_trials` | a hit mean with fewer usable hits than its `minimum_hits` (ruling R9) |
+
+The tooltip of each rank is read again with the `CasterStats` measured by the run's base steps. If its tokens differ
+from the tokens read at generation, every token check of the rank is an alert; so is a token whose text differs
+from the expectation. A token's value includes its caster stat terms: Argent Blade 807268 measured
+`spell_effect_value` 568 where `${$AP*0.4725+$sph*1.35+$m1+0}` reads 568.89 with 313 attack power (stamp
+`20261105-191313`); the server can add such terms through `ScriptMgr::ModifySpellEffectBaseValue`, which
+`SpellEffectInfo::CalcValue` calls.
+
+- Deterministic values (`effect_value`, `aura_amount`, `power_cost`): `|measured - expected| <= max(1, 0.5 % of
+  expected)`. A `power_cost` is divided by the display divisor of its rule. A `$/N;` token expects N times the value
+  it shows.
+- Sign: the client shows `$sN`, `$mN` and `$MN` (with or without `$/N;`) unsigned, so for these tokens the
+  magnitude of the measured value is compared (`-50` measured for `$s1` shown as 50 is `ok`). Expressions and
+  `$<name>` variables keep their sign; a measured value of the opposite sign is `ambiguous_tooltip`, never compared
+  by magnitude.
+- Time (`cooldown_ms`, `aura_duration_ms`, ruling R8): `expected - W <= measured <= expected`. W bounds the game
+  time elapsed between the cast step and the measuring step: for every step after the cast up to the measurement,
+  its `elapsed_ms` plus the run's `max_step_ms`. `CoAGameplayTest::Tick` runs one step per world update
+  (`Progress` calls `RunStep` once), a step's `elapsed_ms` is the game time from its start to its completion, and
+  `max_step_ms` is the largest update diff of the run (`docs/coa/verification.md`, fidelity limits: at most 25 ms
+  in a wait, 10 ms while polling). Measured on 2026-11-05 (stamp `20261105-181206`): cooldowns 6, 12 and 18 ms
+  below the record two, four and six steps after the cast, durations 12 and 15 ms below; W was 50 to 150 ms.
+- Hit means (`hit_mean`, `melee_mean`): `measured_hit_model` recomputes the model from the run's stats, known auras
+  and target; the measured mean of the non-critical, non-blocked hits must lie in `mean ± 2.576 x sigma / sqrt(n)`,
+  n the usable hits. `tooltip_mean` is shown in the explanation only.
+- `known_aura`: the aura must be measured on the character.
+
+The report lists each known aura's modifier effects with `EffectBasePoints`, `EffectRealPointsPerLevel`, the
+value at the class level and the runs that measured the aura; a hit model applies a modifier only in a run that
+measured its aura.
+
+Not judged: a plain `$mN` or `$MN` of an effect that rolls (`EffectDieSides` above 1) is compared with its own
+value, so a roll above it is an alert. The Templar has none: its seven rolled tokens are caster stat expressions
+(scan of the 221 ranks, 2026-11-05).
 
 ## Run
 
