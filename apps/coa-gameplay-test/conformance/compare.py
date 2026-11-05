@@ -407,28 +407,61 @@ def judge_hit(base: Verdict, class_file: dict, expectation: Expectation, run: Ru
 ProcPart = tuple[dict, Run, Expectation]
 
 
+RateJudgement = tuple[str, float | None, float | None, str]
+
+
+def rate_judgement(procs: float, trials: float, minimum: int, expected: float) -> RateJudgement:
+    if procs < 0:
+        return 'alert', None, None, 'fewer events than the trigger casts they exclude'
+    if trials <= 0:
+        return 'unmeasured', None, None, 'no trial'
+    if procs > trials:
+        return 'alert', None, None, 'more procs than trials'
+    if trials < minimum:
+        return 'insufficient_trials', None, None, f'fewer than the {minimum} trials the rate needs'
+    low, high = wilson_interval(procs, trials)
+    status = 'ok' if low - FLOAT_EPSILON <= expected <= high + FLOAT_EPSILON else 'alert'
+    return status, low, high, f'rate {procs / trials:.4f}, Wilson 99% interval [{low:.4f}, {high:.4f}]'
+
+
+def proc_readings(model: dict) -> list[dict]:
+    return model.get('readings') or [{'name': 'triggering hits only', 'labels': [model['measurements']['trials']]}]
+
+
+def player_casts(model: dict, run: Run, trigger: int) -> float:
+    return model['part_attempts'] - len(failure_reasons(run, trigger)) if model.get('exclude_trigger_casts') else 0.0
+
+
 def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -> Verdict:
     first_entry, first_run, expectation = parts[0]
     model = expectation.model
     base = Verdict(expectation.label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
                    expectation.rank_id, expectation.check)
     labels = model['measurements']
+    readings = proc_readings(model)
+    event_labels = model.get('event_labels') or [labels['events']]
+    wanted = [labels['aura']] + list(dict.fromkeys(
+        event_labels + [label for reading in readings for label in reading['labels']]))
     trigger = model['trigger']['spell'] if model['trigger']['action'] == CAST else 0
-    trials = events = 0.0
+    totals = dict.fromkeys(wanted[1:], 0.0)
+    events = 0.0
     counted, without_aura, unmeasured, reasons = [], [], [], []
     for _, run, _ in parts:
         if trigger:
             reasons += failure_reasons(run, trigger)
-        values = [run.values.get(labels[name]) for name in ('aura', 'trials', 'events')]
+        values = [run.values.get(label) for label in wanted]
         if None in values:
             unmeasured.append(f'{run.key} ({run.status}: {run.message})')
         elif values[0] <= 0:
             without_aura.append(run.key)
         else:
             counted.append(run.key)
-            trials += values[1]
-            events += values[2]
+            for label, value in zip(wanted[1:], values[1:]):
+                totals[label] += value
+            events -= player_casts(model, run, trigger)
+    events += sum(totals[label] for label in event_labels)
     procs = events / model['events_per_proc']
+    trials = totals[labels['trials']]
     notes = f'{len(counted)} of {model["parts"]} parts'
     if without_aura:
         notes += f'; aura {expectation.spell_id} absent in {", ".join(without_aura)}'
@@ -439,7 +472,8 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
     measured = procs / trials if trials > 0 else None
     if trials <= 0:
         status = 'alert' if unmeasured and not (without_aura or reasons) else 'unmeasured'
-        return replace(base, status=status, measured=measured, explanation=f'no usable trial ({notes})')
+        return replace(base, status=status, measured=measured,
+                       explanation=f'no usable trial: no triggering hit was measured ({notes})')
     try:
         caster = caster_stats_from(first_run.values, manifest['level'])
     except KeyError as error:
@@ -452,18 +486,24 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
         return replace(base, measured=measured, expected=chance / 100,
                        explanation=f'{expectation.displayed} shows {chance:g}%, generated as {model["chance_pct"]:g}%')
     expected = chance / 100
-    counts = f'{procs:g} procs in {trials:g} trials ({notes})'
-    if trials < model['minimum_trials']:
-        return replace(base, status='insufficient_trials', measured=measured, expected=expected,
-                       explanation=f'{counts}, fewer than the {model["minimum_trials"]} trials the rate needs')
-    if procs > trials:
-        return replace(base, measured=measured, expected=expected, explanation=f'{counts}: more procs than trials')
-    low, high = wilson_interval(procs, trials)
-    status = 'ok' if low - FLOAT_EPSILON <= expected <= high + FLOAT_EPSILON else 'alert'
-    return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
-                   explanation=f'{counts}; {expectation.displayed} shows {chance:g}%; {expectation.rule}; '
-                               f'{model["event_metric"]} of {model["proc_spell"]} per '
-                               f'{model["events_per_proc"]} event(s) is one proc')
+    judged = []
+    for reading in readings:
+        excluded = events if reading.get('minus_events') else 0.0
+        reading_trials = sum(totals[label] for label in reading['labels']) - excluded
+        status, low, high, why = rate_judgement(procs, reading_trials, model['minimum_trials'], expected)
+        judged.append((status, procs / reading_trials if reading_trials > 0 else None, low, high,
+                       f'{reading["name"]}: {procs:g} procs in {reading_trials:g} trials, {why}: {status}'))
+    statuses = {status for status, *_ in judged}
+    status, rate, low, high, _ = judged[0]
+    if len(statuses) > 1:
+        status, low, high = 'ambiguous_tooltip', None, None
+    readings_text = '; '.join(text for *_, text in judged)
+    lead = 'the readings of the trials disagree; ' if len(statuses) > 1 else ''
+    minus = f' minus the completed player casts of {trigger}' if model.get('exclude_trigger_casts') else ''
+    return replace(base, status=status, measured=rate, expected=expected, low=low, high=high,
+                   explanation=f'{lead}{readings_text} ({notes}); {expectation.displayed} shows {chance:g}%; '
+                               f'{expectation.rule}; events: {" + ".join(event_labels)}{minus}, '
+                               f'{model["events_per_proc"]} per proc')
 
 
 def judge(manifest: dict, entry: dict, run: Run | None, expectation: Expectation, tokens: Tokens | None,

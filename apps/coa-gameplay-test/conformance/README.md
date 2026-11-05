@@ -198,7 +198,11 @@ A `procs` entry of the class file describes one proc aura:
 | `trigger_text` | the words of the tooltip that name the trigger |
 | `proc_spell`, `proc_spell_source` | the spell each proc casts, and where that id comes from |
 | `event_metric` | `spell_cast_count` or `spell_damage_count`, the metric of `proc_spell` |
-| `events_per_proc` | the events of that metric in one proc |
+| `extra_event_terms` | further `{"metric", "spell"}` counts added to the events |
+| `events_exclude_trigger_casts` | the events count the trigger's own casts, so the completed player casts are removed |
+| `events_per_proc` | the events in one proc |
+| `trial_readings` | readings of the trials, `{"name", "adds", "minus_events"}`, when the text allows several |
+| `handler` | the code that rolls a proc without a `spell_proc` or `spell_script_names` row |
 | `dbc` | `ProcChance`, `ProcFlags`, `ProcCharges` of the aura and of the spell of the chance token |
 | `spell_proc` | the `spell_proc` row of each spell, `{}` without one |
 | `internal_cooldown_ms` | the `spell_proc` `Cooldown`, the internal cooldown between procs |
@@ -207,6 +211,12 @@ A `procs` entry of the class file describes one proc aura:
 The trigger comes from the tooltip text only. When the text does not say what triggers the proc, the entry is
 `ambiguous_tooltip` and never gets a chosen trigger. An entry whose observable the harness cannot separate is
 `unmodelled` with its reason. Both have no scenario and are never `ok`.
+
+When the text leaves open which events are trials, `trial_readings` lists each reading: the triggering hits plus the
+counts in `adds`, less the events when `minus_events` is true. No reading is chosen: the comparison judges each one,
+gives their common verdict when they agree and `ambiguous_tooltip` with every reading's numbers when they do not, so
+that the owner can rule. "Direct damage dealt" (Scourgebane) reads as the auto attacks only, or as every direct
+damage event, its own strikes 801832 included (Effect 2 and 31, DmgClass 1).
 
 `trials_needed(p)` is `ceil(2.576^2 x p (1 - p) / 0.025^2)`, the trials that put the half width of the 99% interval
 of the rate at 2.5 points: 1699 for 20%, 956 for 10%. The scenario performs `ceil(1.5 x trials_needed)` attempts
@@ -220,22 +230,25 @@ scenario limit with the 60 s margin of the hit scenarios. Each part learns the a
   `max(StartRecoveryTime, cast time, internal_cooldown_ms) + 500 ms`; a trial is a damage event of the trigger rank
   on `dummy` (`spell_damage_count`, `spell_cast_count` beside it), so a failed cast is no trial (ruling R11).
 
-Each part then measures `event_metric` of `proc_spell` and the aura on the character. The `proc_rate` expectation of
-every part has the same label, `<aura> proc_rate`; the comparison sums the trials and the events of the parts whose
-run measured the aura, and divides the events by `events_per_proc`. The chance is the tooltip token read again with the
-measured stats. Fewer trials than `trials_needed` are `insufficient_trials`, even at the exact rate; no usable trial
-(failed casts, aura absent) is `unmeasured`; otherwise the verdict is `ok` when the chance lies in the Wilson
-interval (z = 2.576) of procs over trials, and `alert` outside it or with more procs than trials.
+Each part then measures the event counts, the counts its readings add, and the aura on the character. The `proc_rate`
+expectation of every part has the same label, `<aura> proc_rate`; the comparison sums the trials and the events of the
+parts whose run measured the aura, removes from the events the player casts that completed (`part_attempts` less the
+failed casts of the trigger) when they include them, and divides the events by `events_per_proc`. The chance is the
+tooltip token read again with the measured stats. Fewer trials than `trials_needed` are `insufficient_trials`, even at
+the exact rate; no usable trial (failed casts, aura absent) is `unmeasured`; otherwise the verdict is `ok` when the
+chance lies in the Wilson interval (z = 2.576) of procs over trials, and `alert` outside it, with more procs than
+trials, or with fewer events than the player casts. The trial count is the operative condition: an `ok` may carry a half
+width above 2.5 points when the measured rate is closer to one half than the chance.
 
 The Templar entries cite the client DBC and the `spell_proc` and `spell_script_names` rows of `acore_world` in the
 in-RAM test database, read on 2026-11-05 (`SELECT * FROM spell_proc WHERE SpellId IN (...)`):
 
 | Aura | Chance | Trigger | Proc spell | Entry |
 |---|---|---|---|---|
-| Scourgebane 92111 | `$520007h` 20% | attack ("Direct damage dealt") | 801832, tooltip `$801832s2` | scenario |
+| Scourgebane 92111 | `$520007h` 20% | attack ("Direct damage dealt") | 801832, tooltip `$801832s2` | 2 readings |
 | Warrior of Dawn 560648 | `$h` 10% | attack ("Melee damage dealt") | 561156, tooltip `$561156s1` | scenario |
 | Retribution 707391 | `$h` 20% | attack ("Melee damage dealt") | 525028 (2 per proc), `EffectTriggerSpell` | scenario |
-| Light's Echo 520017, 520883 | `$h` 10%, 20% | Argent Blade | no spell names the extra strike | `unmodelled` |
+| Light's Echo 520017, 520883 | `$h` 10%, 20% | cast of Argent Blade 807268 | 804929 or 807268 casts | 2 readings |
 | Paladin Training 504808 | `$h` 8% | "Triggering Zealotry" | | `ambiguous_tooltip` |
 | Blade Sermon 572548, 572554 | `$h` 5%, 10% | Zealotry | | `ambiguous_tooltip` |
 | Transcendent Guardian 804571 | `$h` 40% | a charge to an ally | | `unmodelled` |
@@ -244,11 +257,27 @@ in-RAM test database, read on 2026-11-05 (`SELECT * FROM spell_proc WHERE SpellI
 with `ProcFlags` 1048575 and `Cooldown` 0, and none for the other auras; the four are scripted by
 `aura_ascension_templar_event`, whose checks for them (`AscensionTemplarEvents.cpp:58-73`) keep no cooldown of
 their own, so no entry with a scenario has an internal cooldown. The Light's Echo, Paladin Training, Blade Sermon
-and Transcendent Guardian auras have neither a `spell_proc` nor a `spell_script_names` row.
+and Transcendent Guardian auras have neither a `spell_proc` nor a `spell_script_names` row, yet the code rolls each
+of them (`handler`), so none is known to stay at 0%. Light's Echo recasts the rank cast, triggered, after a damaging
+hit (`AscensionTemplarAbilities.cpp:296-300`), while its aura's `EffectTriggerSpell[0]` is the first rank 804929:
+the events are the casts of both ranks less the completed player casts, which counts the extra strike whichever rank
+it uses. Its readings are the player casts only, or every Argent Blade strike, extra strikes included.
 
-Scourgebane, measured on 2026-11-05 (stamp `20261105-195549`, simulated clock): 13 parts of 197 swings, each
-500.7 s of game time in 3.6 s of real time, the gameplay stage 30.9 s. 484 procs in 2561 trials, rate 0.189,
-Wilson interval 0.170 to 0.210 around the tooltip 20%: `ok`.
+Measured on 2026-11-05 (stamp `20261105-201416`, simulated clock, gameplay stage 35.7 s for 26 parts, no failed
+cast):
+
+| Aura | Parts | Reading | Procs in trials | Wilson 99% | Reading verdict | Verdict |
+|---|---|---|---|---|---|---|
+| Scourgebane 92111 | 13 | auto attacks only | 525 in 2554 | 0.186 to 0.227 | `ok` | `ambiguous_tooltip` |
+| | | every direct damage event | 525 in 3079 | 0.154 to 0.189 | `alert` | |
+| Light's Echo 520017 | 5 | player casts only | 173 in 1435 | 0.100 to 0.145 | `alert` | `ambiguous_tooltip` |
+| | | every Argent Blade strike | 173 in 1608 | 0.089 to 0.129 | `ok` | |
+| Light's Echo 520883 | 8 | player casts only | 519 in 2552 | 0.184 to 0.225 | `ok` | `ambiguous_tooltip` |
+| | | every Argent Blade strike | 519 in 3071 | 0.152 to 0.187 | `alert` | |
+
+Scourgebane parts made 196 or 197 swings, Light's Echo parts 287 and 319 player casts. Every extra Argent Blade
+strike was a cast of 807268; 804929 was never cast. A Scourgebane part takes 500.7 s of game time in 3.8 to 4.7 s of
+real time, a Light's Echo part 443 to 491 s in 3.2 to 4.3 s.
 
 ## Generate and compare
 

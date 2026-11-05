@@ -24,6 +24,12 @@
       "proc_spell": 801832,
       "proc_spell_source": "tooltip tokens $801832s2 and $801832m1",
       "events_per_proc": 1,
+      "trial_readings": [
+        {"name": "auto attacks only",
+         "adds": []},
+        {"name": "every direct damage event, Scourgebane strikes included",
+         "adds": [{"metric": "spell_damage_count", "spell": 801832}]}
+      ],
       "dbc": {
         "92111": {"ProcChance": 100, "ProcFlags": 0, "ProcCharges": 0},
         "520007": {"ProcChance": 20, "ProcFlags": 0, "ProcCharges": 0}
@@ -78,24 +84,56 @@
       "name": "Light's Echo",
       "tooltip": "|cffffffffArgent Blade|r now has a $h% chance to strike an additional time.",
       "chance_token": "$h",
-      "status": "unmodelled",
-      "reason": "no spell names the extra strike; the aura triggers Argent Blade 804929, not the cast rank 807268",
+      "trigger": {"action": "cast", "spell": 807268},
+      "trigger_text": "Argent Blade",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 804929,
+      "extra_event_terms": [{"metric": "spell_cast_count", "spell": 807268}],
+      "events_exclude_trigger_casts": true,
+      "proc_spell_source": "Argent Blade casts beyond the player casts: EffectTriggerSpell[0] 804929, cast rank",
+      "events_per_proc": 1,
+      "trial_readings": [
+        {"name": "player casts only",
+         "adds": [{"metric": "spell_damage_count", "spell": 804929}],
+         "minus_events": true},
+        {"name": "every Argent Blade strike, additional strikes included",
+         "adds": [{"metric": "spell_damage_count", "spell": 804929}],
+         "minus_events": false}
+      ],
+      "handler": "AscensionTemplarAbilities.cpp:296-300 recasts the cast rank, triggered, after a damaging hit",
       "dbc": {
         "520017": {"ProcChance": 10, "ProcFlags": 0, "ProcCharges": 0}
       },
-      "spell_proc": {}
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
     },
     {
       "aura": 520883,
       "name": "Light's Echo",
       "tooltip": "|cffffffffArgent Blade|r now has a $h% chance to strike an additional time.",
       "chance_token": "$h",
-      "status": "unmodelled",
-      "reason": "no spell names the extra strike; the aura triggers Argent Blade 804929, not the cast rank 807268",
+      "trigger": {"action": "cast", "spell": 807268},
+      "trigger_text": "Argent Blade",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 804929,
+      "extra_event_terms": [{"metric": "spell_cast_count", "spell": 807268}],
+      "events_exclude_trigger_casts": true,
+      "proc_spell_source": "Argent Blade casts beyond the player casts: EffectTriggerSpell[0] 804929, cast rank",
+      "events_per_proc": 1,
+      "trial_readings": [
+        {"name": "player casts only",
+         "adds": [{"metric": "spell_damage_count", "spell": 804929}],
+         "minus_events": true},
+        {"name": "every Argent Blade strike, additional strikes included",
+         "adds": [{"metric": "spell_damage_count", "spell": 804929}],
+         "minus_events": false}
+      ],
+      "handler": "AscensionTemplarAbilities.cpp:296-300 recasts the cast rank, triggered, after a damaging hit",
       "dbc": {
         "520883": {"ProcChance": 20, "ProcFlags": 0, "ProcCharges": 0}
       },
-      "spell_proc": {}
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
     },
     {
       "aura": 504808,
@@ -104,6 +142,7 @@
       "chance_token": "$h",
       "status": "ambiguous_tooltip",
       "reason": "the tooltip does not say what triggers Zealotry, so neither a cast nor an attack follows from it",
+      "handler": "AscensionTemplarAbilities.cpp:277-286 rolls it on a damaging hit of the Zealotry strike 801450",
       "dbc": {
         "504808": {"ProcChance": 8, "ProcFlags": 0, "ProcCharges": 0}
       },
@@ -116,6 +155,7 @@
       "chance_token": "$h",
       "status": "ambiguous_tooltip",
       "reason": "the tooltip does not say what triggers Zealotry, so neither a cast nor an attack follows from it",
+      "handler": "AscensionTemplar.cpp:214-223 (Zealotry) rolls its ProcChance to cast the strike 801450 again",
       "dbc": {
         "572548": {"ProcChance": 5, "ProcFlags": 0, "ProcCharges": 0}
       },
@@ -128,6 +168,7 @@
       "chance_token": "$h",
       "status": "ambiguous_tooltip",
       "reason": "the tooltip does not say what triggers Zealotry, so neither a cast nor an attack follows from it",
+      "handler": "AscensionTemplar.cpp:214-223 (Zealotry) rolls its ProcChance to cast the strike 801450 again",
       "dbc": {
         "572554": {"ProcChance": 10, "ProcFlags": 0, "ProcCharges": 0}
       },
@@ -140,6 +181,7 @@
       "chance_token": "$h",
       "status": "unmodelled",
       "reason": "the trigger is a charge to an ally; proc scenarios cast at the hostile dummy only",
+      "handler": "AscensionTemplarAbilities.cpp:220-224 restores a charge on 40% (hardcoded) of casts at an ally",
       "dbc": {
         "804571": {"ProcChance": 40, "ProcFlags": 0, "ProcCharges": 0}
       },

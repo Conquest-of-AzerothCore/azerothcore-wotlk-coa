@@ -35,6 +35,13 @@ PROC_KEY = 'conformance-templar-proc-92111-part-1'
 SECOND_KEY = 'conformance-templar-proc-92111-part-2'
 LABELS = {'trials': '92111 proc trials', 'events': '92111 proc events', 'attempts': '92111 proc attempts',
           'aura': '92111 proc aura'}
+STRIKE_TRIALS = '92111 proc trials spell_damage_count 801832'
+READINGS = [{'name': 'auto attacks only', 'labels': [LABELS['trials']]},
+            {'name': 'every direct damage event', 'labels': [LABELS['trials'], STRIKE_TRIALS]}]
+LIGHTS_ECHO = (520017, 520883)
+ARGENT_BLADE_FIRST_RANK = 804929
+SCRIPTED_IN_CODE = {504808, 520017, 520883, 572548, 572554, 804571}
+HANDLER = re.compile(r'^Ascension\w+\.cpp:\d+-\d+ ')
 TOKEN_SPELL = re.compile(r'\$(\d*)[hH]$')
 
 
@@ -42,11 +49,14 @@ def templar_proc(aura):
     return next(entry for entry in CLASS_FILE['procs'] if entry['aura'] == aura)
 
 
-def proc_model(minimum=1699, parts=1, trigger=None, events_per_proc=1):
-    return {'part': 0, 'parts': parts, 'chance_pct': 20.0, 'minimum_trials': minimum, 'scheduled_attempts': 2549,
+def proc_model(minimum=1699, parts=1, trigger=None, events_per_proc=1, readings=None):
+    model = {'part': 0, 'parts': parts, 'chance_pct': 20.0, 'minimum_trials': minimum, 'scheduled_attempts': 2549,
             'part_attempts': 2549, 'attempt_ms': 2500, 'trigger': trigger or {'action': 'attack', 'spell': 0},
             'proc_spell': SCOURGEBANE_STRIKE, 'event_metric': 'spell_cast_count',
             'events_per_proc': events_per_proc, 'measurements': LABELS}
+    if readings:
+        model['readings'] = readings
+    return model
 
 
 def proc_expectation(**model):
@@ -54,9 +64,16 @@ def proc_expectation(**model):
                        'Wilson 99% interval of the proc rate', proc_model(**model))
 
 
-def proc_steps(trials, events, aura=1):
-    return [assert_step(LABELS['aura'], str(aura)), assert_step(LABELS['trials'], str(trials)),
-            assert_step(LABELS['events'], str(events)), assert_step(LABELS['attempts'], str(trials))]
+def proc_steps(trials, events, aura=1, strikes=None):
+    steps = [assert_step(LABELS['aura'], str(aura)), assert_step(LABELS['trials'], str(trials)),
+             assert_step(LABELS['events'], str(events)), assert_step(LABELS['attempts'], str(trials))]
+    if strikes is not None:
+        steps.append(assert_step(STRIKE_TRIALS, str(strikes)))
+    return steps
+
+
+def casts_of(scenario):
+    return [step for step in scenario['steps'] if step['action'] == 'cast']
 
 
 def chance_reader(value=20.0, text=CHANCE_TOKEN):
@@ -169,6 +186,53 @@ class ProcCompareTest(unittest.TestCase):
         self.workspace.scenario(PROC_KEY, 'proc', [proc_expectation(minimum=10)], steps=proc_steps(10, 11))
         self.assertEqual(self.verdict().status, 'alert')
 
+    def test_more_procs_than_trials_is_an_alert_even_below_the_minimum(self):
+        self.workspace.scenario(PROC_KEY, 'proc', [proc_expectation()], steps=proc_steps(10, 11))
+        self.assertEqual(self.verdict().status, 'alert')
+
+    def test_readings_that_disagree_are_an_ambiguous_tooltip_showing_each(self):
+        self.workspace.scenario(PROC_KEY, 'proc', [proc_expectation(readings=READINGS)],
+                                steps=proc_steps(1699, 340, strikes=340))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ambiguous_tooltip')
+        low, high = wilson_interval(340, 2039)
+        self.assertLess(high, 0.20)
+        self.assertIn('auto attacks only: 340 procs in 1699 trials', verdict.explanation)
+        self.assertIn(f'every direct damage event: 340 procs in 2039 trials, rate {340 / 2039:.4f}, '
+                      f'Wilson 99% interval [{low:.4f}, {high:.4f}]: alert', verdict.explanation)
+        self.assertIn(': ok', verdict.explanation)
+
+    def test_readings_that_agree_give_their_common_verdict(self):
+        self.workspace.scenario(PROC_KEY, 'proc', [proc_expectation(readings=READINGS)],
+                                steps=proc_steps(1699, 380, strikes=20))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual((verdict.low, verdict.high), wilson_interval(380, 1699))
+        self.assertIn('every direct damage event: 380 procs in 1719 trials', verdict.explanation)
+
+    def test_events_beyond_the_completed_player_casts_are_the_procs(self):
+        trigger = {'action': 'cast', 'spell': ARGENT_BLADE_MAX_RANK}
+        extra = f'92111 proc events spell_cast_count {ARGENT_BLADE_MAX_RANK}'
+        model = proc_model(trigger=trigger, readings=[
+            {'name': 'player casts only', 'labels': [LABELS['trials']], 'minus_events': True},
+            {'name': 'every strike', 'labels': [LABELS['trials']], 'minus_events': False}])
+        model.update({'part_attempts': 1700, 'exclude_trigger_casts': True,
+                      'event_labels': [LABELS['events'], extra]})
+        expectation = Expectation(PROC_LABEL, PROC_CHECK, SCOURGEBANE, SCOURGEBANE, None, CHANCE_TOKEN, 'rule', model)
+        steps = proc_steps(2039, 0) + [assert_step(extra, '2039')]
+        self.workspace.scenario(PROC_KEY, 'proc', [expectation], steps=steps)
+        self.workspace.cast_failures[PROC_KEY] = [{'spell': str(ARGENT_BLADE_MAX_RANK), 'reason': '22'}]
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ambiguous_tooltip')
+        self.assertIn('player casts only: 340 procs in 1699 trials', verdict.explanation)
+        self.assertIn('every strike: 340 procs in 2039 trials', verdict.explanation)
+        self.assertIn(f'minus the completed player casts of {ARGENT_BLADE_MAX_RANK}', verdict.explanation)
+
+    def test_readings_that_agree_on_an_alert_stay_an_alert(self):
+        self.workspace.scenario(PROC_KEY, 'proc', [proc_expectation(readings=READINGS)],
+                                steps=proc_steps(1699, 0, strikes=0))
+        self.assertEqual(self.verdict().status, 'alert')
+
     def test_ambiguous_and_unmodelled_entries_are_never_ok(self):
         for status in ('ambiguous_tooltip', 'unmodelled'):
             entry = {'aura': 572548, 'name': 'Blade Sermon', 'chance_token': '$h', 'status': status,
@@ -218,12 +282,38 @@ class ProcScenarioTest(unittest.TestCase):
             self.assertEqual(measured['92111 proc events']['metric'], 'spell_cast_count')
             self.assertEqual(measured['92111 proc events']['spell'], SCOURGEBANE_STRIKE)
             self.assertEqual(measured['92111 proc aura']['metric'], 'aura')
+            self.assertEqual((measured[STRIKE_TRIALS]['metric'], measured[STRIKE_TRIALS]['spell'],
+                              measured[STRIKE_TRIALS]['target']), ('spell_damage_count', SCOURGEBANE_STRIKE, 'dummy'))
             self.assertIn({'action': 'learn', 'actor': 'caster', 'spell': SCOURGEBANE}, scenario['steps'])
             [expectation] = expectations
             self.assertEqual((expectation.label, expectation.check, expectation.displayed),
                              (PROC_LABEL, PROC_CHECK, CHANCE_TOKEN))
             self.assertEqual((expectation.model['part'], expectation.model['parts']), (part, plan.parts))
             self.assertEqual(expectation.model['minimum_trials'], 1699)
+            self.assertEqual([reading['labels'] for reading in expectation.model['readings']],
+                             [[LABELS['trials']], [LABELS['trials'], STRIKE_TRIALS]])
+
+    def test_lights_echo_casts_argent_blade_and_counts_the_strikes_of_its_first_rank(self):
+        for aura, chance in zip(LIGHTS_ECHO, (10.0, 20.0)):
+            with self.subTest(aura=aura):
+                entry = templar_proc(aura)
+                plan = proc_plan(CLASS_FILE, entry)
+                self.assertEqual((plan.chance_pct, plan.needed), (chance, trials_needed(chance / 100)))
+                scenario, [expectation] = proc_scenario(CLASS_FILE, entry)
+                run.validate(scenario)
+                casts = {step['spell'] for step in casts_of(scenario)}
+                self.assertEqual(casts, {ARGENT_BLADE_MAX_RANK})
+                measured = {step['label']: step for step in scenario['steps'] if step['action'] == 'assert'}
+                self.assertEqual((measured[f'{aura} proc events']['metric'], measured[f'{aura} proc events']['spell']),
+                                 ('spell_cast_count', ARGENT_BLADE_FIRST_RANK))
+                cast_rank_events = measured[f'{aura} proc events spell_cast_count {ARGENT_BLADE_MAX_RANK}']
+                self.assertEqual(cast_rank_events['spell'], ARGENT_BLADE_MAX_RANK)
+                self.assertEqual(measured[f'{aura} proc trials']['spell'], ARGENT_BLADE_MAX_RANK)
+                self.assertTrue(expectation.model['exclude_trigger_casts'])
+                self.assertEqual(expectation.model['part_attempts'], len(casts_of(scenario)))
+                self.assertEqual([reading['minus_events'] for reading in expectation.model['readings']],
+                                 [True, False])
+                self.assertIn('handler: AscensionTemplarAbilities.cpp:296-300', expectation.rule)
 
     def test_fewer_attempts_than_the_trials_are_refused(self):
         entry = templar_proc(SCOURGEBANE)
@@ -268,6 +358,14 @@ class TemplarProcEntriesTest(unittest.TestCase):
 
     def spell(self, spell_id, field):
         return self.records.field('Spell', spell_id, field)
+
+    def test_entries_handled_in_code_cite_the_handler_in_their_rule(self):
+        for entry in CLASS_FILE['procs']:
+            with self.subTest(aura=entry['aura']):
+                self.assertEqual(bool(entry.get('handler')), entry['aura'] in SCRIPTED_IN_CODE)
+                if entry.get('status'):
+                    self.assertRegex(entry['handler'], HANDLER)
+                    self.assertIn('handler: ' + entry['handler'], proc_status_expectation(entry).rule)
 
     def test_source_list_is_covered(self):
         auras = {entry['aura'] for entry in CLASS_FILE['procs']}
