@@ -79,6 +79,7 @@ void AddSC_CoADungeonTuning();
 void AddSC_CoAGuardLevel();
 void AddSC_CoATestZoneBonus();
 void AddSC_AscensionBazaarTokenCap();
+void AddSC_AscensionBazaarTokenCapQuestRewards();
 void AddSC_CoADungeonBossSpells();
 void AddSC_AscensionProfessionSpellAffect();
 void AddSC_AscensionPerforatingShots();
@@ -861,6 +862,7 @@ void AddCoAScripts()
     AddSC_CoAGuardLevel();
     AddSC_CoATestZoneBonus();
     AddSC_AscensionBazaarTokenCap();
+    AddSC_AscensionBazaarTokenCapQuestRewards();
     AddSC_CoADungeonBossSpells();
     AddSC_AscensionProfessionSpellAffect();
     AddSC_AscensionPerforatingShots();

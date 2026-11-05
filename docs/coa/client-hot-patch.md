@@ -22,6 +22,7 @@ Each chunk needs its own requirement type and requirement row:
 | Fel Commutation window | 23 | 16263 | `FEL_COMMUTATION_WINDOW` |
 | Manastorm UI fixes | 24 | 16262 | `MANASTORM_UI_FIXES` |
 | Extra Quests window (quest log overflow) | 25 | 16265 | `QUEST_LOG_OVERFLOW_WINDOW` |
+| Bazaar Token cap quest rewards | 26 | 16266 | `BAZAAR_TOKEN_CAP_QUEST_REWARDS` |
 
 A chunk on this route runs once and does not survive a `/reload`: the server sends each feature's
 chunk once per session and receives no signal when the client's interface reloads. Until the next
