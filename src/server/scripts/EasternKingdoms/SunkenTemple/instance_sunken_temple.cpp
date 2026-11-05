@@ -59,6 +59,17 @@ namespace
     };
 
     constexpr uint32 AllEranikusWardensKilled = (1u << EranikusWardens.size()) - 1;
+    constexpr uint32 EranikusWardenBit(uint32 entry)
+    {
+        for (std::size_t i = 0; i < EranikusWardens.size(); ++i)
+            if (EranikusWardens[i].entry == entry)
+                return 1u << i;
+        return 0;
+    }
+
+    // On Ascension the four dragons of the Sanctum appear only once the Avatar of Hakkar and Jammal'an are dead.
+    constexpr uint32 SanctumDragonsReleased =
+        EranikusWardenBit(NPC_AVATAR_OF_HAKKAR) | EranikusWardenBit(NPC_JAMMAL_AN_THE_PROPHET);
     constexpr float EranikusSlumberNoticeRange = 40.0f;
     constexpr float EranikusSlumberNoticeResetRange = 70.0f;
     Position const ShadeOfHakkarSummonPosition = { -466.795f, 272.863f, -90.447f, 1.57f };
@@ -95,6 +106,22 @@ public:
                     _shadeOfEranikusGUID = creature->GetGUID();
                     if (!IsEranikusAwake())
                         creature->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+                    break;
+                case NPC_MORPHAZ:
+                case NPC_WEAVER:
+                case NPC_DREAMSCYTHE:
+                case NPC_HAZZAS:
+                    _sanctumDragonGUIDs.push_back(creature->GetGUID());
+                    if (!AreSanctumDragonsReleased())
+                    {
+                        HideSanctumDragon(creature);
+                        // SmartAI::JustRespawned makes the creature visible again on its first update.
+                        creature->m_Events.AddEventAtOffset([this, creature]
+                        {
+                            if (!AreSanctumDragonsReleased())
+                                HideSanctumDragon(creature);
+                        }, 1ms);
+                    }
                     break;
             }
 
@@ -134,6 +161,31 @@ public:
                 nearestFlame->AI()->GossipHello(players.begin()->GetSource(), false);
         }
 
+        bool AreSanctumDragonsReleased() const
+        {
+            return (_eranikusWardensKilled & SanctumDragonsReleased) == SanctumDragonsReleased;
+        }
+
+        static void HideSanctumDragon(Creature* dragon)
+        {
+            dragon->SetVisible(false);
+            dragon->SetReactState(REACT_PASSIVE);
+            dragon->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        void ReleaseSanctumDragons()
+        {
+            for (ObjectGuid const& guid : _sanctumDragonGUIDs)
+            {
+                if (Creature* dragon = instance->GetCreature(guid))
+                {
+                    dragon->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+                    dragon->SetReactState(REACT_AGGRESSIVE);
+                    dragon->SetVisible(true);
+                }
+            }
+        }
+
         bool IsEranikusAwake() const
         {
             return _eranikusWardensKilled == AllEranikusWardensKilled;
@@ -141,9 +193,13 @@ public:
 
         void OnEranikusWardenDeath(uint32 entry)
         {
+            bool const dragonsWereReleased = AreSanctumDragonsReleased();
             for (std::size_t i = 0; i < EranikusWardens.size(); ++i)
                 if (EranikusWardens[i].entry == entry)
                     _eranikusWardensKilled |= 1u << i;
+
+            if (!dragonsWereReleased && AreSanctumDragonsReleased())
+                ReleaseSanctumDragons();
 
             if (IsEranikusAwake())
                 if (Creature* eranikus = instance->GetCreature(_shadeOfEranikusGUID))
@@ -356,6 +412,7 @@ public:
         GuidVector _eternalFlameGUIDs;
         ObjectGuid _jammalanGUID;
         ObjectGuid _shadeOfEranikusGUID;
+        GuidVector _sanctumDragonGUIDs;
         GuidList _dragonkinList;
         EventMap _events;
     };
