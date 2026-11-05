@@ -132,6 +132,9 @@ uint32 AscensionBazaarTokenCap::Claim(Player* player, uint32 count)
             "You have reached the limit of {} Bazaar Tokens per hour. You can earn Bazaar Tokens again in {} min.",
             cap, std::max<uint32>(1, minutesLeft));
 
+    if (allowed || notify)
+        SendClientState(player);
+
     return allowed;
 }
 
@@ -163,6 +166,23 @@ void AscensionBazaarTokenCap::Set(uint32 accountId, uint32 earned, uint32 second
     Window& window = WindowRef(accountId);
     window = Window{ now - std::min(secondsAgo, now), earned, 0 };
     Overwrite(accountId, window);
+}
+
+bool AscensionBazaarTokenCap::GetOpenWindow(uint32 accountId, uint32& remaining, uint32& secondsLeft)
+{
+    uint32 const cap = GetCap();
+    if (!cap)
+        return false;
+
+    uint32 const now = Now();
+    std::lock_guard<std::mutex> guard(capLock);
+    Window const& window = WindowRef(accountId);
+    if (Expired(window, now))
+        return false;
+
+    remaining = cap - std::min(window.earned, cap);
+    secondsLeft = window.start + WindowSeconds() - now;
+    return true;
 }
 
 class AscensionBazaarTokenCapCommands final : public CommandScript
@@ -223,6 +243,8 @@ private:
         }
 
         AscensionBazaarTokenCap::Set(accountId, earned, secondsAgo);
+        if (target->IsConnected())
+            AscensionBazaarTokenCap::SendClientState(target->GetConnectedPlayer());
         handler->PSendSysMessage("{} (account {}): {}", target->GetName(), accountId,
             AscensionBazaarTokenCap::Describe(accountId));
         return true;
