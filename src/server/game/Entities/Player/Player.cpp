@@ -11918,6 +11918,15 @@ void Player::ModifySpellCooldown(uint32 spellId, int32 cooldown)
 
     itr->second.end += cooldown;
 
+    if (cooldown > 0)
+    {
+        uint32 const now = GameTime::GetGameTimeMS().count();
+        WorldPacket data;
+        BuildCooldownPacket(data, SPELL_COOLDOWN_FLAG_NONE, spellId, itr->second.end > now ? itr->second.end - now : 0);
+        SendDirectMessage(&data);
+        return;
+    }
+
     WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
     data << uint32(spellId);            // Spell ID
     data << GetGUID();                  // Player GUID
