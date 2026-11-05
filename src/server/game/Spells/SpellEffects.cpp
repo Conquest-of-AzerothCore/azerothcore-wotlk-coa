@@ -4653,6 +4653,12 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
 
     weaponDamagePercentMod *= m_scriptWeaponDamageMultiplier;
 
+    if (m_spellInfo->AscensionFlatAfterWeaponPercent)
+    {
+        ApplyPct(weaponDamage, weaponDamagePercentMod);
+        weaponDamagePercentMod = 100.0f;
+    }
+
     // Sequence is important
     for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)
     {
