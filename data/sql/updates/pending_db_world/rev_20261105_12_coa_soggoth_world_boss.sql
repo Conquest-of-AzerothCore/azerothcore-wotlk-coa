@@ -1,0 +1,62 @@
+-- The Will of Soggoth (64605) in his boss map (883, Master's Gastric Pit), the way Setis is fought: a shrine in the
+-- open world takes players in (Normal only), the portal he leaves where he falls and the shrine at the entrance take
+-- them back, and players who die in his map rise at its start. He has no item table yet: every player still gets
+-- the Runes of Ascension, Bazaar Tokens and Treasures of Azeroth chest.
+
+-- His health is per player in his map (10 to 40): each kill's pool over its 21 players.
+UPDATE `coa_world_boss_level` SET `health` = 695765, `note` = 'per player; kill 00:28, 21 players'
+WHERE `entry` = 64605 AND `difficulty` = 0;
+UPDATE `coa_world_boss_level` SET `health` = 1016749, `note` = 'per player; kill 00:44, 21 players'
+WHERE `entry` = 64605 AND `difficulty` = 2;
+
+-- The shrine in the open world (by the Shrine of Setis until Ascension's spot is known), the portal out and the
+-- shrine at the entrance of his map.
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
+  `size`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
+(978077, 10, 4076, 'Shrine of Soggoth', '', '', '', 3, '', 'go_soggoth_altar_coa', 12340),
+(978078, 10, 4396, 'Portal out of the Gastric Pit', '', '', '', 1.5, '', 'go_soggoth_exit_coa', 12340),
+(978079, 10, 4076, 'Shrine of Soggoth', '', '', '', 3, '', 'go_soggoth_leave_coa', 12340)
+ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`),
+  `size` = VALUES(`size`), `ScriptName` = VALUES(`ScriptName`);
+DELETE FROM `gameobject` WHERE `guid` IN (9780916, 9780917);
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
+  `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
+  `animprogress`, `state`) VALUES
+(9780916, 978077, 1, 0, 0, 1, 1, -7852.7, 1326.7, -7.357, 5.4786, 0, 0, 0.3915, -0.9202, 300, 100, 1),
+(9780917, 978079, 883, 10238, 10238, 15, 1, 4405.5, 264.3, 78.02, 0, 0, 0, 0, 1, 300, 100, 1);
+
+-- Players who die in his map rise at its start: WorldSafeLocs.dbc 6083 "Soggoth Graveyard".
+DELETE FROM `game_graveyard` WHERE `ID` = 6083;
+INSERT INTO `game_graveyard` (`ID`, `Map`, `x`, `y`, `z`, `Comment`) VALUES
+(6083, 883, 4410.54, 269.283, 78.0196, 'Soggoth Graveyard');
+DELETE FROM `graveyard_zone` WHERE `ID` = 6083 AND `GhostZone` = 10238;
+INSERT INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`) VALUES
+(6083, 10238, 0, 'Master''s Gastric Pit (The Will of Soggoth boss map)');
+
+-- The shrine's words.
+DELETE FROM `npc_text` WHERE `ID` = 978077;
+INSERT INTO `npc_text` (`ID`, `text0_0`, `text0_1`) VALUES
+(978077, 'The shrine seems to notice your presence as you place your hand on its surface to attune to its power.',
+  'The shrine seems to notice your presence as you place your hand on its surface to attune to its power.');
+
+-- His hologram above the shrine: ghostly (22650), rooted, and frozen in place (16245).
+INSERT INTO `creature_template` (`entry`, `name`, `subname`, `minlevel`, `maxlevel`, `faction`, `npcflag`,
+  `speed_walk`, `speed_run`, `unit_class`, `unit_flags`, `type`, `type_flags`, `AIName`, `ScriptName`,
+  `VerifiedBuild`) VALUES
+(978077, 'The Will of Soggoth', '', 63, 63, 35, 0, 1, 1, 1, 33554434, 10, 0, '', '', 12340)
+ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `subname` = VALUES(`subname`), `faction` = VALUES(`faction`),
+  `npcflag` = VALUES(`npcflag`), `unit_flags` = VALUES(`unit_flags`), `type_flags` = VALUES(`type_flags`),
+  `ScriptName` = VALUES(`ScriptName`);
+DELETE FROM `creature_template_model` WHERE `CreatureID` = 978077;
+INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
+  `VerifiedBuild`) VALUES
+(978077, 0, 28844, 0.5, 1, 12340);
+DELETE FROM `creature_template_addon` WHERE `entry` = 978077;
+INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (978077, '22650 16245');
+DELETE FROM `creature_template_movement` WHERE `CreatureId` = 978077;
+INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flight`, `Rooted`) VALUES
+(978077, 1, 0, 0, 1);
+DELETE FROM `creature` WHERE `guid` = 9780916;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
+  `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
+(9780916, 978077, 1, 0, 0, 1, 1, -7852.7, 1326.7, -2.0, 5.4786, 300, 0, 0);

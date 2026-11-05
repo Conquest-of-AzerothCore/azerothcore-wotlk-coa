@@ -49,6 +49,8 @@
  *   Visions of Ny'alotha every 45s    4s cast: everyone, then after 6s a void
  *                                     explosion under each of them
  *   Fierce Blow         every 7.8s    tank
+ * His health is per player in his map (10 to 40), and only the Normal difficulties
+ * are open; his shrine, rewards and portal out are boss_soggoth_instance_coa.cpp.
  *
  * Atal'zul, the Soulreaver, with Zul'rogg (map 890; two kills in the log of
  * 25.08.2026, same spell damage on both, see the level table for health)
@@ -162,6 +164,25 @@ namespace
         me->SetFullHealth();
     }
 
+    // Health per player in the boss' map, counted from 10 to 40, keeping his health percentage.
+    constexpr uint32 FLEX_MIN_PLAYERS = 10;
+    constexpr uint32 FLEX_MAX_PLAYERS = 40;
+
+    void ApplyFlexHealth(Creature* me)
+    {
+        Level const* lv = LevelOf(me);
+        if (!lv || !lv->health)
+            return;
+        uint32 const players = std::clamp<uint32>(me->GetMap()->GetPlayersCountExceptGMs(), FLEX_MIN_PLAYERS,
+            FLEX_MAX_PLAYERS);
+        float const pct = me->GetHealthPct();
+        uint32 const health = lv->health * players;
+        me->SetCreateHealth(health);
+        me->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(health));
+        me->UpdateMaxHealth();
+        me->SetHealth(std::max<uint32>(uint32(me->GetMaxHealth() * pct / 100.0f), 1));
+    }
+
     class coa_world_boss_level_loader : public WorldScript
     {
     public:
@@ -263,8 +284,6 @@ namespace
     constexpr uint32 GO_SETIS_EXIT = 64601;
     constexpr uint32 SETIS_MAP = 880;
     constexpr uint32 SETIS_SHRINE_TEXT = 64600;
-    constexpr uint32 SETIS_MIN_FLEX = 10;
-    constexpr uint32 SETIS_MAX_FLEX = 40;
     constexpr uint32 ITEM_RUNE_OF_ASCENSION = 375250;
     constexpr uint32 ITEM_BAZAAR_TOKEN = 975001;
     constexpr uint32 ITEM_TREASURES_OF_AZEROTH = 978059;
@@ -312,30 +331,15 @@ namespace
             _frenzy = _armageddon = false;
             _marks.clear();
             me->SetLootMode(me->GetMap()->IsHeroic() ? LOOT_MODE_HARD_MODE_1 : LOOT_MODE_DEFAULT);
-            ApplyFlexHealth();
+            ApplyFlexHealth(me);
             // Reflected Firebolts in the log: fire (and arcane) comes back.
             DoCastSelf(SPELL_FIRE_REFLECT, true);
         }
 
         void JustEngagedWith(Unit* who) override
         {
-            ApplyFlexHealth();
+            ApplyFlexHealth(me);
             custom_world_boss_coa::JustEngagedWith(who);
-        }
-
-        void ApplyFlexHealth()
-        {
-            Level const* lv = LevelOf(me);
-            if (!lv || !lv->health)
-                return;
-            uint32 const players = std::clamp<uint32>(me->GetMap()->GetPlayersCountExceptGMs(), SETIS_MIN_FLEX,
-                SETIS_MAX_FLEX);
-            float const pct = me->GetHealthPct();
-            uint32 const health = lv->health * players;
-            me->SetCreateHealth(health);
-            me->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(health));
-            me->UpdateMaxHealth();
-            me->SetHealth(std::max<uint32>(uint32(me->GetMaxHealth() * pct / 100.0f), 1));
         }
 
         void Schedule() override
@@ -842,6 +846,13 @@ namespace
             custom_world_boss_coa::Reset();
             _summons.DespawnAll();
             _tears.clear();
+            ApplyFlexHealth(me);
+        }
+
+        void JustEngagedWith(Unit* who) override
+        {
+            ApplyFlexHealth(me);
+            custom_world_boss_coa::JustEngagedWith(who);
         }
 
         void JustDied(Unit* /*killer*/) override { _summons.DespawnAll(); }
@@ -1506,6 +1517,8 @@ namespace
 
 void AddCoaCustomWorldBossScripts()
 {
+    void AddCoaSoggothInstanceScripts();
+    AddCoaSoggothInstanceScripts();
     new coa_world_boss_level_loader();
     new custom_script<boss_setis_coa>("boss_setis_coa");
     new go_setis_altar_coa();
