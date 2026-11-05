@@ -4012,6 +4012,12 @@ private:
             Require(creature != nullptr, "Creature attack metric needs a living nearby creature");
             return player->IsValidAttackTarget(creature) ? 1 : 0;
         }
+        if (metric == "nearby_creature_at_client")
+        {
+            Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f, true);
+            Require(creature != nullptr, "Creature client visibility metric needs a living nearby creature");
+            return player->HaveAtClient(creature) ? 1 : 0;
+        }
         if (metric == "nearby_creature_mount_display")
         {
             Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f, true);
