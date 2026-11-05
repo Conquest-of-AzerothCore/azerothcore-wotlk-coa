@@ -2930,6 +2930,12 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS); // 5yd
     });
 
+    // Summon Robot (quest 9433 A Dip in the Moonwell): the 50 yd random spot can be up the hill behind the control panel
+    ApplySpellFix({ 30009 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
+    });
+
     // Impaled (Lord Marrowgar)
     ApplySpellFix({ 69065 }, [](SpellInfo* spellInfo)
     {
