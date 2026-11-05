@@ -15,8 +15,10 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "BossControlTargeting.h"
 #include "CreatureScript.h"
 #include "ScriptedCreature.h"
+#include "SpellMgr.h"
 #include "TaskScheduler.h"
 #include "blackrock_spire.h"
 
@@ -112,7 +114,7 @@ struct boss_mor_grayhoof : public BossAI
                 spell = Acore::Containers::SelectRandomContainerElement(faerieSpells);
                 if (spell == SPELL_SLEEP)
                 {
-                    if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 50.f, true))
+                    if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, BossControlTargetSelector(me, sSpellMgr->GetSpellInfo(SPELL_SLEEP), 50.f, true, true, 0)))
                     {
                         me->CastSpell(target, SPELL_SLEEP);
 
