@@ -160,6 +160,8 @@ METRICS = TIMELINE_METRICS | {
     'pet_aura_amount', 'pet_aura_amplitude_ms', 'pet_max_health', 'pet_health', 'pet_attack_power',
     'pet_melee_swings', 'pet_melee_crits', 'pet_melee_glancing', 'pet_melee_plain_count', 'pet_melee_plain_damage',
     'pet_melee_damage',
+    'owned_creature_damage_total', 'owned_creature_damage_count', 'owned_creature_attack_count',
+    'owned_creature_heal_count', 'owned_creature_heal_total', 'owned_creature_effective_heal_total',
     'pet_run_speed_rate',
     'distance', 'spawn_active', 'spawn_display', 'threat', 'threat_per_damage',
     'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate', 'temporary_spell_replacement',
@@ -200,6 +202,8 @@ PLAYER_STAT_METRICS = {
     'pet_attack_power',
     'pet_melee_swings', 'pet_melee_crits', 'pet_melee_glancing', 'pet_melee_plain_count', 'pet_melee_plain_damage',
     'pet_melee_damage',
+    'owned_creature_damage_total', 'owned_creature_damage_count', 'owned_creature_attack_count',
+    'owned_creature_heal_count', 'owned_creature_heal_total', 'owned_creature_effective_heal_total',
     'pet_run_speed_rate',
 }
 METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item', 'entry', 'button',
@@ -1145,6 +1149,11 @@ def validate(scenario):
                           'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_victim',
                           'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health'}:
                 require('entry' in step, f'{where}: metric needs creature entry')
+            if metric in {'owned_creature_damage_total', 'owned_creature_damage_count',
+                          'owned_creature_attack_count', 'owned_creature_heal_count',
+                          'owned_creature_heal_total', 'owned_creature_effective_heal_total'}:
+                require('entry' in step, f'{where}: metric needs creature entry')
+                number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
             if metric == 'owned_creature_attackable':
                 require(step.get('target') in actor_ids, f'{where}: metric needs the attacking unit')
             if metric == 'owned_creature_victim':

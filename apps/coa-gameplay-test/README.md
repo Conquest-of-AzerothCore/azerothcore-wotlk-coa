@@ -698,6 +698,25 @@ and `pet_melee_damage` read the melee combat packets the player actor received f
 of the remaining hits that dealt damage, and the summed damage of every swing. Snapshot them around a fight;
 `ratio_to` a plain-count snapshot gives an average plain hit.
 These observations do not test delivery to a network client.
+`owned_creature_damage_total`, `owned_creature_damage_count` and `owned_creature_attack_count` require `entry` and
+combine, for creatures of that entry, the same melee combat packets `pet_melee_*` reads with the actor's already
+recorded `spell_damage_count`/`spell_damage_total` events (both direct and periodic, including its own critical
+filter semantics, but without a `target`, `caster`, `pet` or `critical` filter): `owned_creature_damage_total` sums
+melee and spell damage together, `owned_creature_damage_count` sums the melee hit count (crits, glancing blows and
+plain hits; misses are excluded) with the spell damage event count, and `owned_creature_attack_count` sums every
+melee swing (hits and misses) with the spell damage event count, so a single swing or cast from a creature that
+never repeats it is observable even once. Unlike `spell_damage_count`/`spell_damage_total` with `entry`, these three
+metrics never resolve a live creature: they only filter the actor's already-recorded events by the attacking or
+casting GUID's entry, so a summon, guardian or totem a player does not strictly own by `GetOwnerGUID` (a temporary
+summon whose `SummonerGUID` or `CreatorGUID` the player holds instead) is observable, and remains observable after
+it despawns or dies. As with `pet_melee_*`, this trades a precise ownership check for the actor's own observation:
+scope each scenario to one creature of that entry near the observing actor. Snapshot them around a fight; use
+`relative_to` for the delta and `ratio_to` a `pet_melee_swings`/`pet_melee_damage` delta of the same fight to cross-check
+melee-only aggregation, as [the regression scenario](scenarios/coa-owned-creature-damage-metric-honored-ancestor.json)
+does for the Honored Ancestor guardian pet.
+`owned_creature_heal_count`, `owned_creature_heal_total` and `owned_creature_effective_heal_total` require `entry`
+and apply the same entry resolution to the actor's recorded `spell_heal_*` events: they count the healing events cast
+by creatures of that entry, or sum their healing including or excluding overhealing, whoever the healed unit is.
 `spell_damage_count` and `spell_damage_total` require `spell` and count positive direct or periodic spell
 damage events, or sum their post-mitigation damage, from the actor's native combat packets. Optional `target`
 filters the victim, `pet: true` selects the actor's current pet as caster, `caster` selects another actor such
