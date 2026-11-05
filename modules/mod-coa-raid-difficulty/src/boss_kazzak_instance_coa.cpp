@@ -1,0 +1,20 @@
+#include "ScriptMgr.h"
+#include "WorldBossInstance.h"
+
+namespace
+{
+    // The Shrine of Lord Kazzak in the Tainted Scar; his map (882) starts at its graveyard (WorldSafeLocs 6082).
+    coa_world_boss_instance::Config const Kazzak = {
+        "Lord Kazzak", 12397, 882,
+        { -12569.814f, -2373.242f, 53.649f, 2.5682f },
+        9780137, 0,
+        { -11665.856f, -2371.7654f, 0.5489f, 0.6004f },
+        978074,
+    };
+}
+
+void AddCoaKazzakInstanceScripts()
+{
+    coa_world_boss_instance::AddScripts("go_kazzak_altar_coa", "go_kazzak_exit_coa", "go_kazzak_leave_coa",
+        "kazzak_instance_death_coa", Kazzak);
+}
