@@ -6,5 +6,6 @@
 class Player;
 
 void SendAscensionLfgObjectiveDungeon(Player* player);
+void RefreshAscensionLfgObjectiveDungeon(Player* player);
 
 #endif
