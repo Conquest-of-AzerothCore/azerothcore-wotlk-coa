@@ -416,6 +416,7 @@ constexpr std::array<std::pair<uint32, uint32>, 1> REAPER_ONE_SOUL_CONSUMERS =
 
 constexpr std::size_t APPEARANCE_CATEGORY_COUNT = 69;
 constexpr uint32 APPEARANCE_CATEGORY_AMMUNITION = 32;
+constexpr uint32 APPEARANCE_CATEGORY_ITEM_SET = 55;
 constexpr uint32 APPEARANCE_CATEGORY_SHADOWHOUND = 68;
 constexpr uint32 APPEARANCE_CATEGORY_NECROMANCER_LICH_FORM = 67;
 
@@ -7752,7 +7753,7 @@ private:
 
     for (uint32 categoryId = 1; categoryId < requested.size(); ++categoryId) {
       uint32 appearanceId = requested[categoryId];
-      if (!appearanceId)
+      if (!appearanceId || appearanceId == state->ActiveAppearances[categoryId])
         continue;
 
       if (!state->CollectedAppearances.contains(appearanceId))
@@ -7807,10 +7808,23 @@ private:
       }
     }
 
-    if (requested[55] && !ExpandItemSetAppearance(requested, requested[55]))
+    uint32 const activeItemSet = state->ActiveAppearances[APPEARANCE_CATEGORY_ITEM_SET];
+    uint32 const requestedItemSet = requested[APPEARANCE_CATEGORY_ITEM_SET];
+    if (requestedItemSet != activeItemSet)
     {
-      SendApplyResult(player, "APPLY_APPEARANCES_INVALID_SELECTION");
-      return;
+      if (activeItemSet)
+      {
+        std::array<uint32, APPEARANCE_CATEGORY_COUNT> activeItemSetPieces{};
+        ExpandItemSetAppearance(activeItemSetPieces, activeItemSet);
+        for (uint32 categoryId = 1; categoryId < requested.size(); ++categoryId)
+          if (activeItemSetPieces[categoryId] && requested[categoryId] == activeItemSetPieces[categoryId])
+            requested[categoryId] = 0;
+      }
+      if (requestedItemSet && !ExpandItemSetAppearance(requested, requestedItemSet))
+      {
+        SendApplyResult(player, "APPLY_APPEARANCES_INVALID_SELECTION");
+        return;
+      }
     }
 
     for (auto const& [categoryId, category] : _petCategories)
@@ -7832,6 +7846,7 @@ private:
     RefreshVisibleItems(player);
     RefreshIncarnations(player);
     SendApplyResult(player, "APPLY_APPEARANCES_OK");
+    SendActiveAppearances(player, *state);
   }
 
   static bool RealmAllows(AppearanceInfo const& appearance)
