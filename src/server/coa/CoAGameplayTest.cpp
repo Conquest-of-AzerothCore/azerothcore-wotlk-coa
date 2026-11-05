@@ -6639,6 +6639,17 @@ private:
                     player->GetSession()->HandleLootOpcode(packet);
             }
         }
+        else if (action == "minion_kill")
+        {
+            Creature* minion = GetOwnedCreature(player, step.get<uint32>("minion"));
+            Require(minion != nullptr, "Minion kill needs a living owned creature of that entry");
+            Unit* victim = GetUnit(step.get<std::string>("target"));
+            Require(victim->IsAlive(), "Minion kill target is already dead");
+            Unit::DealDamage(minion, victim, victim->GetMaxHealth() * 100u, nullptr, DIRECT_DAMAGE,
+                SPELL_SCHOOL_MASK_NORMAL);
+            Require(!victim->IsAlive(), "Minion killing blow did not kill, health left " +
+                std::to_string(victim->GetHealth()));
+        }
         else if (action == "select_nearby")
         {
             float const radius = step.get<float>("radius", 40.0f);
