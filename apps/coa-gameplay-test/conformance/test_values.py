@@ -29,6 +29,9 @@ ARGENT_BLADE_TOOLTIP_TOKENS = {
 }
 ARGENT_BLADE_UNREADABLE = '${$801832m1*$<scalingbp>+$sph*0.25+$AP*0.25}'
 HOLY_CONSTITUTION = 706323
+RIGHTEOUS_UPHEAVAL = 501562
+RIGHTEOUS_UPHEAVAL_MAX_RANK = 572027
+OATH_CHAIN = 704576
 SPELL_POWER_SCHOOLS = 6
 STAT_COUNT = 5
 SETTLE_MS = 5000
@@ -175,6 +178,18 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         self.assertNotIn('cast', {step['action'] for step in scenario['steps']})
         self.assertNotIn('creatures', scenario)
         self.assertFalse({'power_cost', 'cooldown_ms'} & {item.check for item in expectations})
+
+    def test_cast_is_preceded_by_the_caster_aura_the_spell_record_requires(self):
+        scenario, _ = self.build(RIGHTEOUS_UPHEAVAL, RIGHTEOUS_UPHEAVAL_MAX_RANK)
+        run.validate(scenario)
+        actions = [step['action'] for step in scenario['steps']]
+        cast = actions.index('cast')
+        self.assertEqual(scenario['steps'][cast - 1],
+                         {'action': 'set_aura', 'actor': 'caster', 'spell': OATH_CHAIN, 'stacks': 1})
+
+    def test_spell_without_a_required_caster_aura_sets_no_aura(self):
+        scenario, _ = self.build(ARGENT_BLADE, ARGENT_BLADE_RANK_2)
+        self.assertNotIn('set_aura', {step['action'] for step in scenario['steps']})
 
     def test_rank_outside_the_spell_is_refused(self):
         with self.assertRaises(ValueError):

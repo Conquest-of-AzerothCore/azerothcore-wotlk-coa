@@ -125,8 +125,12 @@ stats, since the value depends on them. The scenario learns the rank, then measu
 
 The cast, when a cooldown or an aura is measured, targets the fixture creature `dummy` (entry 36) when an active
 effect has an enemy target (implicit targets 2, 6, 15, 16, 24) and the caster otherwise; an aura whose target is the
-caster is read on the caster. A cost in a power other than mana is set to its cost before the cast. Two diagnostic
-measurements ride along without an `Expectation`: `<rank> cast_failure` and `<rank> aura_present`.
+caster is read on the caster. A cost in a power other than mana is set to its cost before the cast. A rank whose
+record names a `CasterAuraSpell` gets that aura as a one-stack fixture (`set_aura`) right before the cast: without it
+the server refuses the cast with `SPELL_FAILED_CASTER_AURASTATE` (22, `Spell.cpp:5930`). Templar: Oath Chain 704576
+for Righteous Upheaval, Blade of Faith, Righteous Tempest and Reckoning; Recently Parried or Dodged 681170, a dummy
+aura, for Sacred Swing. Two diagnostic measurements ride along without an `Expectation`: `<rank> cast_failure` and
+`<rank> aura_present`.
 The remaining aura duration is read in the cast step's own tick: measured 12 to 15 ms below the record on instants.
 `cooldown_ms` is the remaining cooldown, measured 6 ms below the record right after the cast.
 
@@ -143,7 +147,8 @@ token, an aura of a passive or cast-time spell). Only `unmeasurable` expectation
 reference stats, the known auras and the reference target. `casts` is the number of casts the mean needs; the scenario
 performs `scheduled_casts(casts)`, `ceil(casts x 1.5)`, so that the hits excluded from the mean (critical, blocked)
 rarely leave fewer usable hits (ruling R9). It learns the rank, measures the target, then repeats: `set_power` to the
-cost (when the cost is a plain `ManaCost`), `reset_cooldown`, `cast`, and a wait of
+cost (when the cost is a plain `ManaCost`), `reset_cooldown`, the `CasterAuraSpell` fixture of the record (see
+above), `cast`, and a wait of
 `max(StartRecoveryTime, cast time, duration of a periodic aura) + 500 ms`; a 3 s drain precedes the measurements.
 
 | `kind` | Effects | Hit before modifiers |

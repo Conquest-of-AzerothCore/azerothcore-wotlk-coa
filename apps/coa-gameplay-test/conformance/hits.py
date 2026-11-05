@@ -11,7 +11,7 @@ from profile import (CASTER, DBC_DIR, SETTLE_MS, base_steps, caster_stats_from, 
                      player_fixture)
 from tooltip import CasterStats, Readout, Records, Unreadable, read_tooltip
 from values import (CAST_MARGIN_MS, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, EFFECTS, TARGET, UNREADABLE,
-                    Expectation, RankFacts, dataset, facts_of)
+                    Expectation, RankFacts, dataset, facts_of, required_aura_steps)
 
 HIT_CHECKS = ('hit_mean', 'melee_mean', 'unmodelled')
 UNMODELLED = 'unmodelled: '
@@ -458,6 +458,7 @@ def cast_steps(facts: RankFacts, rank_id: int, hostile: bool, interval_ms: int, 
             steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
                           'value': facts.mana_cost})
         steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': rank_id})
+        steps += required_aura_steps(facts)
         cast = {'action': 'cast', 'actor': CASTER, 'spell': rank_id}
         if hostile:
             cast['target'] = TARGET

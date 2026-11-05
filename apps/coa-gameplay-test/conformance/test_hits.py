@@ -34,6 +34,9 @@ ARGENT_BLADE_FLAT = 421 + 0.4725 * REFERENCE_ATTACK_POWER
 ARGENT_BLADE_ENERGY_COST = 50
 ENERGY = 3
 CLASS_TUNING_AURA = 887007
+RIGHTEOUS_UPHEAVAL = 501562
+RIGHTEOUS_UPHEAVAL_MAX_RANK = 572027
+OATH_CHAIN = 704576
 PVE_DAMAGE_DONE_PCT = 341
 HEALING_DONE_PCT = 136
 CLASS_TUNING_PERCENT_AT_60 = -20
@@ -227,6 +230,17 @@ class HitScenarioTest(unittest.TestCase):
                                                     'spell': ARGENT_BLADE_MAX_RANK})
                 self.assertEqual(steps[index - 2], {'action': 'set_power', 'actor': 'caster', 'power': ENERGY,
                                                     'value': ARGENT_BLADE_ENERGY_COST})
+
+    def test_every_cast_is_preceded_by_the_caster_aura_the_spell_record_requires(self):
+        scenario, _ = hit_scenario(self.templar, self.spells[RIGHTEOUS_UPHEAVAL], 2)
+        run.validate(scenario)
+        steps = scenario['steps']
+        casts_at = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        self.assertEqual(len(casts_at), 3)
+        for index in casts_at:
+            self.assertEqual(steps[index]['spell'], RIGHTEOUS_UPHEAVAL_MAX_RANK)
+            self.assertEqual(steps[index - 1], {'action': 'set_aura', 'actor': 'caster', 'spell': OATH_CHAIN,
+                                                'stacks': 1})
 
     def test_every_hit_measurement_excludes_critical_and_blocked_hits(self):
         scenario, expectations = hit_scenario(self.templar, self.argent_blade, 2)

@@ -50,6 +50,7 @@ class RankFacts:
     mana_cost_percentage: int
     recast_ms: int
     cast_time_ms: int
+    caster_aura_spell: int
 
 
 @lru_cache(maxsize=None)
@@ -79,7 +80,8 @@ def facts_of(records: Records, rank_id: int) -> RankFacts:
         mana_cost_per_level=spell('ManaCostPerlevel'),
         mana_cost_percentage=spell('ManaCostPercentage'),
         recast_ms=max(spell('RecoveryTime'), spell('CategoryRecoveryTime')),
-        cast_time_ms=max(cast_time, 0))
+        cast_time_ms=max(cast_time, 0),
+        caster_aura_spell=spell('CasterAuraSpell'))
 
 
 def structure_stats(level: int) -> CasterStats:
@@ -99,6 +101,12 @@ def aura_carrier(facts: RankFacts, effect: int) -> dict:
     if facts.target_a[effect] in SELF_TARGETS or not is_hostile(facts):
         return {'actor': CASTER, 'caster': CASTER}
     return {'actor': TARGET, 'caster': CASTER}
+
+
+def required_aura_steps(facts: RankFacts) -> list[dict]:
+    if not facts.caster_aura_spell:
+        return []
+    return [{'action': 'set_aura', 'actor': CASTER, 'spell': facts.caster_aura_spell, 'stacks': 1}]
 
 
 def first_aura_effect(facts: RankFacts) -> int | None:
@@ -198,6 +206,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
         cast = {'action': 'cast', 'actor': CASTER, 'spell': rank_id}
         if is_hostile(facts):
             cast['target'] = TARGET
+        cast_steps += required_aura_steps(facts)
         cast_steps.append(cast)
         if facts.cast_time_ms:
             cast_steps.append({'action': 'wait', 'label': 'cast time', 'ms': facts.cast_time_ms + CAST_MARGIN_MS})
