@@ -300,11 +300,6 @@ void DealLogged(Unit* caster, Player* target, uint32 spellId, Damage3 const& val
     caster->SendSpellNonMeleeDamageLog(&damage);
 }
 
-void RestoreModelAtNativeScale(Creature* me)
-{
-    me->SetDisplayId(me->GetNativeDisplayId(), me->GetNativeObjectScale());
-}
-
 void SetEngageable(Creature* me, bool engageable, bool keepCombat = false)
 {
     if (engageable)
@@ -828,7 +823,7 @@ struct boss_coa_vaults_darkandle : public ScriptedAI
             return;
         }
         _introStarted = false;
-        RestoreModelAtNativeScale(me);
+        me->RestoreDisplayId();
         SetEngageable(me, false);
         me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
     }
@@ -1350,7 +1345,7 @@ private:
                         helper->DespawnOrUnsummon();
                 break;
             case EVENT_DEC_SEAL_RING:
-                RestoreModelAtNativeScale(me);
+                me->RestoreDisplayId();
                 me->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
                 KeepAura(me, SPELL_SHADOWY_RING_INNER);
                 break;

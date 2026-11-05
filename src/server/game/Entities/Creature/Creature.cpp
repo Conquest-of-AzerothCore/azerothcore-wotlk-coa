@@ -3784,6 +3784,8 @@ void Creature::UpdateMovementFlags()
 
 float Creature::GetNativeObjectScale() const
 {
+    if (CreatureModel const* model = GetCreatureTemplate()->GetModelWithDisplayId(GetNativeDisplayId()))
+        return model->DisplayScale;
     return ObjectMgr::ChooseDisplayId(GetCreatureTemplate())->DisplayScale;
 }
 
