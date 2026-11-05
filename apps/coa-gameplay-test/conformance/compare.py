@@ -14,7 +14,8 @@ from tooltip import CasterStats, Readout, Records, Tooltip, Unreadable
 from values import UNMEASURABLE, UNREADABLE, Expectation, dataset
 
 STATUSES = ('ok', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials', 'unmeasured')
-CAST_DEPENDENT_CHECKS = frozenset({'cooldown_ms', 'aura_amount', 'aura_duration_ms', 'hit_mean'})
+CAST_DEPENDENT_CHECKS = frozenset({'cooldown_ms', 'aura_amount', 'aura_duration_ms'})
+NO_CAST_FAILURE = 0
 CAST_RESULTS_HEADER = Path(__file__).resolve().parents[3] / 'src/server/shared/SharedDefines.h'
 CAST_RESULT_ENUM = re.compile(r'enum SpellCastResult\b[^{]*\{(?P<body>[^}]*)\}')
 CAST_RESULT_ENTRY = re.compile(r'^\s*(?P<name>SPELL_\w+)\s*=\s*(?P<code>\d+)', re.MULTILINE)
@@ -188,15 +189,24 @@ def cast_result_names(header: Path = CAST_RESULTS_HEADER) -> dict[int, str]:
     return {int(entry.group('code')): entry.group('name') for entry in CAST_RESULT_ENTRY.finditer(enum.group('body'))}
 
 
+def failure_reasons(run: Run, rank_id: int) -> list[int]:
+    return [reason for reason in run.cast_failures.get(rank_id, []) if reason != NO_CAST_FAILURE]
+
+
+def cast_result_name(reason: int) -> str:
+    return f'{cast_result_names().get(reason, "SpellCastResult")} ({reason})'
+
+
 def failed_cast(run: Run, rank_id: int) -> str | None:
-    reasons = list(run.cast_failures.get(rank_id, []))
-    step = run.values.get(f'{rank_id} cast_failure')
-    if step:
-        reasons.append(int(step))
-    if not reasons:
-        return None
-    names = cast_result_names()
-    return ', '.join(f'{names.get(reason, "SpellCastResult")} ({reason})' for reason in dict.fromkeys(reasons))
+    reasons = failure_reasons(run, rank_id)
+    step = int(run.values.get(f'{rank_id} cast_failure', NO_CAST_FAILURE))
+    if step != NO_CAST_FAILURE:
+        reasons.append(step)
+    return ', '.join(cast_result_name(reason) for reason in dict.fromkeys(reasons)) or None
+
+
+def describe_failures(reasons: list[int]) -> str:
+    return ', '.join(f'{count} x {cast_result_name(reason)}' for reason, count in Counter(reasons).items())
 
 
 def load_runs(manifest: dict, results_dir: Path) -> tuple[dict[str, Run], list[str]]:
@@ -312,19 +322,25 @@ def judge_roll(base: Verdict, expectation: Expectation, measured: float, tokens:
                                f'each bound widened by max({ABSOLUTE_TOLERANCE:g}, {RELATIVE_TOLERANCE:.1%})')
 
 
-def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: float, tokens: Tokens,
-                tooltips: TooltipSource) -> Verdict:
+def token_drift(expectation: Expectation, tokens: Tokens | None) -> str | None:
+    if tokens is None:
+        return f'no tooltip reading for {expectation.label!r}'
     if tokens.error:
-        return replace(base, measured=measured, explanation=tokens.error)
+        return tokens.error
     ordinal = ORDINAL.search(expectation.label)
     values = tokens.readout.values
     if not ordinal or int(ordinal.group(1)) >= len(values):
-        return replace(base, measured=measured, explanation=f'no tooltip token for {expectation.label!r}')
+        return f'no tooltip token for {expectation.label!r}'
     index = int(ordinal.group(1))
-    token = values[index]
-    if token.text != expectation.displayed:
-        return replace(base, measured=measured,
-                       explanation=f'token #{index} reads {token.text!r}, generated as {expectation.displayed!r}')
+    if values[index].text != expectation.displayed:
+        return f'token #{index} reads {values[index].text!r}, generated as {expectation.displayed!r}'
+    return None
+
+
+def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: float, tokens: Tokens,
+                tooltips: TooltipSource) -> Verdict:
+    index = int(ORDINAL.search(expectation.label).group(1))
+    token = tokens.readout.values[index]
     if expectation.check == 'aura_duration_ms':
         return judge_time(base, run, measured, token.value, f'{token.text} read with the measured stats')
     if expectation.effect_index is not None:
@@ -358,9 +374,14 @@ def judge_hit(base: Verdict, class_file: dict, expectation: Expectation, run: Ru
         return replace(base, explanation=f'no hit measurements {labels} in {run.key} ({run.status}: {run.message})')
     mean = total / count if count > 0 else None
     minimum = model['minimum_hits']
+    reasons = failure_reasons(run, expectation.rank_id)
+    failures = f'; failed casts: {describe_failures(reasons)}' if reasons else ''
+    if count <= 0 and reasons:
+        return replace(base, status='unmeasured', measured=mean,
+                       explanation=f'no usable hit{failures}')
     if count < minimum:
         return replace(base, status='insufficient_trials', measured=mean,
-                       explanation=f'{count:g} usable hits, fewer than the {minimum} the mean needs')
+                       explanation=f'{count:g} usable hits, fewer than the {minimum} the mean needs{failures}')
     try:
         expected = hit_model(class_file, expectation, run.values)
     except Unmodelled as error:
@@ -379,7 +400,7 @@ def judge_hit(base: Verdict, class_file: dict, expectation: Expectation, run: Ru
                    explanation=f'{count:g} usable hits; {expected.kind} model mean {expected.mean:.3f} sigma '
                                f'{expected.sigma:.3f} from the measured stats and target, 99% interval of the mean; '
                                f'tooltip mean {expected.tooltip_mean:.2f} (display only); modifiers '
-                               f'{describe_modifiers(expected.modifiers)}')
+                               f'{describe_modifiers(expected.modifiers)}{failures}')
 
 
 def judge(manifest: dict, entry: dict, run: Run | None, expectation: Expectation, tokens: Tokens | None,
@@ -394,6 +415,10 @@ def judge(manifest: dict, entry: dict, run: Run | None, expectation: Expectation
         return replace(base, status='unreadable', measured=measured, explanation=rule)
     if run is None:
         return replace(base, explanation=f'{entry["key"]} has no scenario to measure {check}')
+    if check in TOKEN_CHECKS and rule.startswith(READ_RULE):
+        drift = token_drift(expectation, tokens)
+        if drift:
+            return replace(base, measured=measured, explanation=drift)
     failure = failed_cast(run, expectation.rank_id) if check in CAST_DEPENDENT_CHECKS else None
     if failure:
         return replace(base, status='unmeasured', measured=measured, explanation=f'cast failed: {failure}')

@@ -255,6 +255,31 @@ class CompareTest(unittest.TestCase):
                          ['ok', 'ok', 'unmeasured', 'unmeasured', 'unmeasured'])
         self.assertEqual(verdicts['1001 cooldown_ms'].explanation, 'cast failed: SPELL_FAILED_CASTER_AURASTATE (22)')
 
+    def cooldown_after_failure(self, key_failures, tokens=('$s1',), step_failure='0'):
+        token = Displayed('$s1', 50.0, 0, 'flat')
+        entries = [expectation('1001 aura_amount e0 #0', 'aura_amount', '$s1', 'read flat', 0),
+                   expectation('1001 cooldown_ms', 'cooldown_ms', '5000', 'max(RecoveryTime, CategoryRecoveryTime)')]
+        steps = [plain_step('cast'), assert_step('1001 cast_failure', step_failure),
+                 assert_step('1001 aura_amount e0 #0', '50'), assert_step('1001 cooldown_ms', '4994')]
+        if key_failures:
+            self.fail_casts(VALUE_KEY, *key_failures)
+        return self.value_run(entries, list(tokens), steps, constant_reader(token))
+
+    def test_failed_cast_never_masks_tooltip_token_drift(self):
+        verdicts = self.cooldown_after_failure(None, ('$s1', '$s2'), '22')
+        self.assertEqual(verdicts['1001 aura_amount e0 #0'].status, 'alert')
+        self.assertIn('tokens', verdicts['1001 aura_amount e0 #0'].explanation)
+        self.assertEqual(verdicts['1001 cooldown_ms'].status, 'unmeasured')
+
+    def test_recorded_reason_zero_is_not_a_failed_cast(self):
+        verdicts = self.cooldown_after_failure((RANK, '0'))
+        self.assertEqual([verdicts[label].status for label in ('1001 aura_amount e0 #0', '1001 cooldown_ms')],
+                         ['ok', 'ok'])
+
+    def test_failed_cast_of_another_rank_leaves_the_value_checks_judged(self):
+        verdicts = self.cooldown_after_failure((RANK + 1, '22'))
+        self.assertEqual(verdicts['1001 cooldown_ms'].status, 'ok')
+
     def test_aura_duration_reads_the_duration_token_again(self):
         label = '1001 aura_duration_ms #0'
         steps = [plain_step('cast'), assert_step('1001 cast_failure', '0'), assert_step('1001 aura_present', '1'),
@@ -343,12 +368,35 @@ class CompareTest(unittest.TestCase):
         self.assertEqual((verdict.status, verdict.measured), ('alert', 1018.5))
         self.assertIn('746.33', verdict.explanation)
 
-    def test_failed_casts_leave_the_hit_mean_unmeasured(self):
-        self.workspace.cast_failures[HIT_KEY] = [{'cast_count': '1', 'spell': str(RANK), 'reason': '22',
-                                                  'actor': 'caster'}]
+    def fail_casts(self, key, spell, *reasons):
+        self.workspace.cast_failures[key] = [{'cast_count': str(count), 'spell': str(spell), 'reason': reason,
+                                              'actor': 'caster'} for count, reason in enumerate(reasons, start=1)]
+
+    def test_hit_mean_without_any_usable_hit_after_failed_casts_is_unmeasured(self):
+        self.fail_casts(HIT_KEY, RANK, '22', '22')
         verdict = self.hit_verdict('0', '0')
         self.assertEqual(verdict.status, 'unmeasured')
-        self.assertEqual(verdict.explanation, 'cast failed: SPELL_FAILED_CASTER_AURASTATE (22)')
+        self.assertEqual(verdict.explanation, 'no usable hit; failed casts: 2 x SPELL_FAILED_CASTER_AURASTATE (22)')
+
+    def test_hit_mean_after_a_failed_cast_is_judged_on_the_usable_hits(self):
+        self.fail_casts(HIT_KEY, RANK, '22')
+        verdict = self.hit_verdict('4074', '4')
+        self.assertEqual((verdict.status, verdict.measured), ('alert', 1018.5))
+        self.assertIn('failed casts: 1 x SPELL_FAILED_CASTER_AURASTATE (22)', verdict.explanation)
+
+    def test_failed_casts_that_leave_too_few_hits_are_insufficient_trials_naming_them(self):
+        self.fail_casts(HIT_KEY, RANK, '22', '22', '22')
+        verdict = self.hit_verdict('543', '1')
+        self.assertEqual(verdict.status, 'insufficient_trials')
+        self.assertIn('failed casts: 3 x SPELL_FAILED_CASTER_AURASTATE (22)', verdict.explanation)
+
+    def test_failed_cast_of_another_spell_or_rank_leaves_the_hit_mean_judged(self):
+        for other in (9999, RANK + 1):
+            self.fresh()
+            self.fail_casts(HIT_KEY, other, '22')
+            verdict = self.hit_verdict('2172', '4')
+            self.assertEqual(verdict.status, 'ok')
+            self.assertNotIn('failed', verdict.explanation)
 
     def test_fewer_usable_hits_than_the_minimum_are_insufficient_trials(self):
         self.assertEqual(self.hit_verdict('543', '1').status, 'insufficient_trials')

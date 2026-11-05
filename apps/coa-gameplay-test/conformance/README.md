@@ -218,7 +218,7 @@ that did not pass.
 | `unmodelled` | an `unmodelled` check, a `unmodelled: ` or `unmeasurable: ` rule, a hit model left unmodelled |
 | `ambiguous_tooltip` | a signed tooltip value whose sign differs from the measured value |
 | `insufficient_trials` | a hit mean with fewer usable hits than its `minimum_hits` (ruling R9) |
-| `unmeasured` | a check that depends on a cast the run recorded as failed (ruling R11) |
+| `unmeasured` | a check after a failed single cast, a hit mean with no usable hit after failed casts (R11) |
 
 The tooltip of each rank is read again with the `CasterStats` measured by the run's base steps. If its tokens differ
 from the tokens read at generation, every token check of the rank is an alert; so is a token whose text differs
@@ -258,10 +258,14 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
 - Failed casts (ruling R11): the harness records each `SMSG_CAST_FAILED` or `SMSG_PET_CAST_FAILED` an actor
   receives as `{spell, reason}` in the result's `cast_failures` list and keeps the last reason per spell for the
   `cast_failure` metric (`CoAGameplayTest.cpp:1288-1299`, `:2010-2019`, `:5016-5020`; a new cast clears it, `:7176`).
-  When either names the measured rank with a reason other than 0, its `cooldown_ms`, `aura_amount`,
-  `aura_duration_ms` and `hit_mean` checks are `unmeasured`, with `cast failed: <name> (<code>)`, the name read from
-  `enum SpellCastResult` in `src/server/shared/SharedDefines.h` (22 is `SPELL_FAILED_CASTER_AURASTATE`). Effect
-  values and the power cost, measured before the cast, stay judged.
+  A reason of 0 is ignored: it is `SPELL_FAILED_SUCCESS` (`src/server/shared/SharedDefines.h:1048`). When either
+  names the measured rank of a no-combat scenario, which casts it once, its `cooldown_ms`, `aura_amount` and
+  `aura_duration_ms` checks are `unmeasured`, with `cast failed: <name> (<code>)`, the name read from
+  `enum SpellCastResult` in `SharedDefines.h` (22 is `SPELL_FAILED_CASTER_AURASTATE`, line 1070). Effect values and
+  the power cost, measured before the cast, stay judged, and a token drift of the rank stays an alert. A hit
+  scenario casts its rank many times: a failed cast only produces no hit, so the mean is judged on the usable hits
+  as above, and the explanation lists the failed casts per reason (`failed casts: 2 x <name> (<code>)`); fewer
+  usable hits than `minimum_hits` is `insufficient_trials`, and no usable hit after failed casts is `unmeasured`.
 
 The report lists each known aura's modifier effects with `EffectBasePoints`, `EffectRealPointsPerLevel`, the
 value at the class level and the runs that measured the aura; a hit model applies a modifier only in a run that
