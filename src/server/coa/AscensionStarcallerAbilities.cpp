@@ -161,10 +161,15 @@ class starcaller_spells : public AllSpellScript
         Snapshot(player, spell);
         if (IsLunarEclipseActivation(spell))
         {
+            bool const wasFull = Count(player, 802985) >= MaxPhase(player);
             if (Aura* phase = player->GetAura(802985))
                 phase->ModStackAmount(-int32(LunarPhaseThreshold));
             if (Count(player, 802985) < LunarPhaseThreshold)
                 player->RemoveAurasDueToSpell(704519);
+            if (wasFull)
+                if (Aura* driver = player->GetAura(524781))
+                    if (AuraEffect* tick = driver->GetEffect(EFFECT_0))
+                        tick->SetPeriodicTimer(tick->GetAmplitude());
         }
         if (Named(info, 801132) && player->HasAura(520482))
             ExtraTargets(player, spell, 1);
