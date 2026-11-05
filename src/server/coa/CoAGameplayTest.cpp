@@ -6657,8 +6657,9 @@ private:
             Require(minion != nullptr, "Minion kill needs a living owned creature of that entry");
             Unit* victim = GetUnit(step.get<std::string>("target"));
             Require(victim->IsAlive(), "Minion kill target is already dead");
-            Unit::DealDamage(minion, victim, victim->GetMaxHealth() * 100u, nullptr, DIRECT_DAMAGE,
-                SPELL_SCHOOL_MASK_NORMAL);
+            uint32 const killingDamage = uint32(std::min<uint64>(uint64(victim->GetMaxHealth()) * 100u,
+                std::numeric_limits<uint32>::max()));
+            Unit::DealDamage(minion, victim, killingDamage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL);
             Require(!victim->IsAlive(), "Minion killing blow did not kill, health left " +
                 std::to_string(victim->GetHealth()));
         }
