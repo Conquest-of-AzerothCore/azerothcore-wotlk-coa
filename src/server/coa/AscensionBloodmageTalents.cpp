@@ -102,7 +102,8 @@ enum BloodmageTalentSpells : uint32
     SPELL_INFUSE_UNLEASH = 681404,
     SPELL_DARK_FRENZY = 704644,
     SPELL_DARK_FRENZY_GCD = 804845,
-    SPELL_CRIMSON_SCION_INSTANT = 806425
+    SPELL_CRIMSON_SCION_INSTANT = 806425,
+    SPELL_SATURATING_SUTURES_COST = 504137
 };
 
 constexpr uint32 NPC_BLOOD_ORB = 315303;
@@ -1688,18 +1689,18 @@ class spell_ascension_bloodmage_sanguine_mend : public SpellScript
 
     bool Validate(SpellInfo const*) override
     {
-        return ValidateSpellInfo({SPELL_CRIMSON_SCION_INSTANT});
+        return ValidateSpellInfo({SPELL_CRIMSON_SCION_INSTANT, SPELL_SATURATING_SUTURES_COST});
     }
 
-    void ConsumeCrimsonScion()
+    void ConsumeMendBuffs()
     {
-        if (GetCaster()->HasAura(SPELL_CRIMSON_SCION_INSTANT))
-            GetCaster()->RemoveAurasDueToSpell(SPELL_CRIMSON_SCION_INSTANT);
+        GetCaster()->RemoveAurasDueToSpell(SPELL_CRIMSON_SCION_INSTANT);
+        GetCaster()->RemoveAurasDueToSpell(SPELL_SATURATING_SUTURES_COST);
     }
 
     void Register() override
     {
-        AfterCast += SpellCastFn(spell_ascension_bloodmage_sanguine_mend::ConsumeCrimsonScion);
+        AfterCast += SpellCastFn(spell_ascension_bloodmage_sanguine_mend::ConsumeMendBuffs);
     }
 };
 }
