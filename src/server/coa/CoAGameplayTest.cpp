@@ -840,6 +840,7 @@ struct SpellHealEvent
     uint32 heal = 0;
     uint32 overheal = 0;
     bool critical = false;
+    uint32 casterEntry = 0;
 };
 
 struct SpellEnergizeEvent
@@ -1074,7 +1075,7 @@ void ObserveSpellDamage(Actor& actor, WorldPacket const& packet, Player* player)
     }
 }
 
-void ObserveSpellHealing(Actor& actor, WorldPacket const& packet)
+void ObserveSpellHealing(Actor& actor, WorldPacket const& packet, Player* player)
 {
     if (packet.GetOpcode() != SMSG_SPELLHEALLOG && packet.GetOpcode() != SMSG_PERIODICAURALOG)
         return;
@@ -1097,7 +1098,10 @@ void ObserveSpellHealing(Actor& actor, WorldPacket const& packet)
     event.critical = critical != 0;
     Require(event.overheal <= event.heal, "Native overhealing exceeds healing");
     if (event.heal)
+    {
+        event.casterEntry = ResolveLiveEntry(player, event.caster);
         actor.spellHeals.push_back(event);
+    }
 }
 
 void ObserveSpellEnergize(Actor& actor, WorldPacket const& packet)
@@ -1259,7 +1263,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
     Player* observer = actor.session ? actor.session->GetPlayer() : nullptr;
     ObserveSpellCasts(actor, packet);
     ObserveSpellDamage(actor, packet, observer);
-    ObserveSpellHealing(actor, packet);
+    ObserveSpellHealing(actor, packet, observer);
     ObserveSpellEnergize(actor, packet);
     if (packet.GetOpcode() == SMSG_SPELL_DELAYED)
     {
@@ -4359,6 +4363,17 @@ private:
             if (metric == "owned_creature_damage_count")
                 return meleeHits + spellHits;
             return meleeSwings + spellHits;
+        }
+        if (metric == "owned_creature_heal_count" || metric == "owned_creature_heal_total" ||
+            metric == "owned_creature_effective_heal_total")
+        {
+            uint32 const entry = step.get<uint32>("entry");
+            uint64 value = 0;
+            for (SpellHealEvent const& event : _actors.at(step.get<std::string>("actor")).spellHeals)
+                if (event.casterEntry == entry)
+                    value += metric == "owned_creature_heal_count" ? 1 :
+                        event.heal - (metric == "owned_creature_effective_heal_total" ? event.overheal : 0);
+            return double(value);
         }
         if (metric == "spell_heal_count" || metric == "spell_heal_total" || metric == "spell_effective_heal_total")
         {

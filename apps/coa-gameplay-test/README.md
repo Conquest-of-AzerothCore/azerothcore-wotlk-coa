@@ -714,6 +714,9 @@ scope each scenario to one creature of that entry near the observing actor. Snap
 `relative_to` for the delta and `ratio_to` a `pet_melee_swings`/`pet_melee_damage` delta of the same fight to cross-check
 melee-only aggregation, as [the regression scenario](scenarios/coa-owned-creature-damage-metric-honored-ancestor.json)
 does for the Honored Ancestor guardian pet.
+`owned_creature_heal_count`, `owned_creature_heal_total` and `owned_creature_effective_heal_total` require `entry`
+and apply the same entry resolution to the actor's recorded `spell_heal_*` events: they count the healing events cast
+by creatures of that entry, or sum their healing including or excluding overhealing, whoever the healed unit is.
 `spell_damage_count` and `spell_damage_total` require `spell` and count positive direct or periodic spell
 damage events, or sum their post-mitigation damage, from the actor's native combat packets. Optional `target`
 filters the victim, `pet: true` selects the actor's current pet as caster, `caster` selects another actor such

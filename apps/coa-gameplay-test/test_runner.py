@@ -1103,8 +1103,10 @@ class RunnerTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 run.validate(invalid)
 
-    def test_owned_creature_damage_metrics_need_an_entry(self):
-        for metric in ('owned_creature_damage_total', 'owned_creature_damage_count', 'owned_creature_attack_count'):
+    def test_owned_creature_metrics_need_an_entry(self):
+        for metric in ('owned_creature_damage_total', 'owned_creature_damage_count', 'owned_creature_attack_count',
+                       'owned_creature_heal_count', 'owned_creature_heal_total',
+                       'owned_creature_effective_heal_total'):
             scenario = copy.deepcopy(self.scenario)
             scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': metric,
                                        'entry': 50069, 'min': 0})
