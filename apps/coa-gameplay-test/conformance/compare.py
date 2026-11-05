@@ -1,5 +1,5 @@
 from collections import Counter
-from dataclasses import dataclass, field, replace
+from dataclasses import asdict, dataclass, field, replace
 from functools import lru_cache
 import hashlib
 import json
@@ -42,6 +42,8 @@ ALERT_COLUMNS = ('scenario', 'spell_id', 'rank_id', 'label', 'check', 'status', 
 ALERTS_FILE = 'alerts.tsv'
 REPORT_FILE = 'report.md'
 LEVERS_FILE = 'levers.md'
+VERDICTS_FILE = 'verdicts.json'
+VERDICTS_SCHEMA = 1
 
 HitModelSource = Callable[[dict, Expectation, Mapping[str, float]], HitModel]
 
@@ -889,7 +891,29 @@ def write_outputs(manifest_path: Path, results_dir: Path, verdicts: list[Verdict
     alerts.write_text('\n'.join(alert_rows(verdicts)) + '\n', encoding='utf-8')
     report.write_text('\n'.join(report_lines(manifest, Path(manifest_path), Path(results_dir), runs, missing,
                                              verdicts)), encoding='utf-8')
+    write_verdicts(manifest, Path(manifest_path), Path(results_dir), verdicts, out_dir)
     return alerts, report
+
+
+def write_verdicts(manifest: dict, manifest_path: Path, results_dir: Path, verdicts: list[Verdict],
+                   out_dir: Path) -> Path:
+    document = {'schema': VERDICTS_SCHEMA, 'class_id': manifest['class_id'], 'class_name': manifest['class_name'],
+                'level': manifest['level'], 'manifest': str(manifest_path), 'results': str(results_dir),
+                'verdicts': [asdict(verdict) for verdict in verdicts]}
+    path = Path(out_dir) / VERDICTS_FILE
+    path.write_text(json.dumps(document, indent=2) + '\n', encoding='utf-8')
+    return path
+
+
+def read_verdicts(directory: Path) -> tuple[dict, list[Verdict]]:
+    path = Path(directory) / VERDICTS_FILE
+    if not path.is_file():
+        raise ValueError(f'{path} does not exist; run conformance.py compare with this version to write it')
+    document = json.loads(path.read_text(encoding='utf-8'))
+    if document.get('schema') != VERDICTS_SCHEMA:
+        raise ValueError(f'{path} has schema {document.get("schema")!r}, expected {VERDICTS_SCHEMA}')
+    header = {key: value for key, value in document.items() if key != 'verdicts'}
+    return header, [Verdict(**data) for data in document['verdicts']]
 
 
 def amount(value: float | None, digits: int = 1) -> str:

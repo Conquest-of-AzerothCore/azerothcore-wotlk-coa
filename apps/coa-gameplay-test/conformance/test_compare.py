@@ -7,7 +7,7 @@ import sys
 import tempfile
 import unittest
 
-from compare import DbcTooltips, ScenarioDrift, compare, measured_values, write_outputs
+from compare import DbcTooltips, ScenarioDrift, compare, measured_values, read_verdicts, write_outputs
 from hits import HitModel, Modifier
 from profile import CLASSES_DIR, DBC_DIR
 from tooltip import CasterStats, Displayed, Readout
@@ -324,6 +324,10 @@ class CompareTest(unittest.TestCase):
         alerts = (out / 'alerts.tsv').read_text(encoding='utf-8').splitlines()
         self.assertEqual(len(alerts), 2)
         self.assertIn('unreadable', alerts[1])
+        header, stored = read_verdicts(out)
+        self.assertEqual(stored, verdicts)
+        self.assertEqual((header['class_id'], header['class_name'], header['level']),
+                         (CLASS_FILE['class_id'], CLASS_FILE['name'], CLASS_FILE['level']))
 
     def test_scenario_hash_mismatch_is_an_error_without_verdicts(self):
         label = '1001 effect_value e0 #0'

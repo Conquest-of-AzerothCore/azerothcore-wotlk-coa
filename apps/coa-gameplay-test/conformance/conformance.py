@@ -7,8 +7,9 @@ import re
 import sys
 
 from classes import ClassSpell, class_spells
-from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, ScenarioDrift, evaluate, write_levers,
-                     write_outputs)
+from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_FILE, ScenarioDrift, evaluate,
+                     write_levers, write_outputs)
+from diff import IMPACT_FILE, diff_directories, write_impact
 from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, hit_scenario, melee_scenario, records_of,
                   reference_hit_model, reference_melee_model)
 from procs import proc_entries, proc_plan, proc_scenario, proc_status_expectation, proc_unmodelled_expectation
@@ -25,6 +26,7 @@ SCENARIO_DIR = 'scenarios'
 MANIFEST_FILE = 'manifest.json'
 KEY_SEPARATORS = re.compile(r'[^a-z0-9]+')
 DRIFT_EXIT = 2
+DIFF_EXIT = 3
 
 
 def scenario_key(*parts) -> str:
@@ -198,9 +200,28 @@ def compare_command(args) -> int:
     counts = {status: sum(verdict.status == status for verdict in comparison.verdicts) for status in STATUSES}
     print(' '.join(f'{status}={count}' for status, count in counts.items()))
     print(f'{len(comparison.runs)} scenarios with a result, {len(comparison.missing)} without')
-    print(f'{alerts}\n{report}')
+    print(f'{alerts}\n{report}\n{out / VERDICTS_FILE}')
     if any(verdict.check in STACK_CHECKS for verdict in comparison.verdicts):
         print(write_levers(args.manifest, args.results, comparison.verdicts, out))
+    return 0
+
+
+def spell_ids(text: str) -> set[int]:
+    return {int(part) for part in text.split(',') if part.strip()}
+
+
+def diff_command(args) -> int:
+    try:
+        changes = diff_directories(args.before, args.after, args.intended)
+    except ValueError as error:
+        print(f'No impact report: {error}', file=sys.stderr)
+        return DIFF_EXIT
+    path = write_impact(changes, args.intended, args.before, args.after, args.out or args.after)
+    listed = [change for change in changes if change.listed]
+    unintended = [change for change in listed if not change.intended]
+    print(f'{len(changes)} changes, {len(listed)} listed, {len(unintended)} unintended and listed, '
+          f'{sum(change.significant for change in changes)} significant')
+    print(path)
     return 0
 
 
@@ -222,8 +243,15 @@ def main(argv=None) -> int:
     comparing.add_argument('--manifest', type=Path, required=True)
     comparing.add_argument('--results', type=Path, required=True, help='a .cache/verify-all/<STAMP> directory')
     comparing.add_argument('--out', type=Path, help='output directory, the manifest directory by default')
+    diffing = commands.add_parser('diff', help=f'write {IMPACT_FILE}: what moved between two compare outputs')
+    diffing.add_argument('--before', type=Path, required=True, help=f'a compare output directory ({VERDICTS_FILE})')
+    diffing.add_argument('--after', type=Path, required=True, help='a compare output directory')
+    diffing.add_argument('--intended', type=spell_ids, default=set(),
+                         help='comma-separated spell or rank ids the change is meant to move')
+    diffing.add_argument('--out', type=Path, help='output directory, the after directory by default')
     args = parser.parse_args(argv)
-    return generate_command(args) if args.command == 'generate' else compare_command(args)
+    handlers = {'generate': generate_command, 'compare': compare_command, 'diff': diff_command}
+    return handlers[args.command](args)
 
 
 if __name__ == '__main__':

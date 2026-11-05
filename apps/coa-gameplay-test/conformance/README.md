@@ -21,12 +21,14 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
   and its `Expectation`; `proc_plan` sizes the parts, `trials_needed(p)` gives the trials a chance `p` needs and
   `wilson_interval(procs, trials)` the 99% Wilson interval of a rate.
 - `compare.py`: `compare(manifest, results_dir)` judges a run against the manifest and returns `Verdict(label, status,
-  measured, expected, low, high, explanation)`; `write_outputs` writes `alerts.tsv` and `report.md`.
+  measured, expected, low, high, explanation)`; `write_outputs` writes `alerts.tsv`, `report.md` and `verdicts.json`.
+- `diff.py`: `diff(before, after, intended)` returns the `Change` of every verdict that moved between two compare
+  outputs, and `write_impact` writes `impact.md` (see [Impact report](#impact-report)).
 - `stack.py`: `stack_scenarios(class_file, passes=5)` returns the passes of every cumulative talent configuration of
   the class file with their `Expectation` lists; `levers(verdicts)` turns the stack verdicts into one `Lever(config,
   dps_mean, dps_low, dps_high, delta_pct, sources, tooltip_delta_pct)` per configuration; `mean_interval`,
   `ratio_interval` and `student_t_quantile` give the 99% intervals of the passes.
-- `conformance.py`: the command line, `generate` and `compare`.
+- `conformance.py`: the command line, `generate`, `compare` and `diff`.
 - `classes/<name>.json`: one class file per class (`classes/templar.json`).
 
 ## Spell set of a class
@@ -419,7 +421,33 @@ error and no verdict. A scenario without a result has no verdict and is listed i
 every `actual` as a string; it is converted to a number, and a value that is not one is an error. `alerts.tsv`
 (default: the manifest directory) has one row per verdict that is neither `ok` nor `measured`; `report.md` counts the
 verdicts per status and per spell, and lists the known modifiers, the probe auras, the scenarios without a result and
-the runs that did not pass. When the run holds stack verdicts, `compare` also writes `levers.md`.
+the runs that did not pass. `verdicts.json` keeps every verdict with its interval, detail and explanation (schema 1)
+for `diff`. When the run holds stack verdicts, `compare` also writes `levers.md`.
+
+### Impact report
+
+```sh
+python3 -B conformance.py diff --before OUT_A --after OUT_B [--intended 804929,807268] [--out DIR]
+```
+
+`diff` reads the `verdicts.json` of two compare outputs of the same class (an output written before it existed must be
+compared again) and writes `impact.md` (default: the `--after` directory). A verdict is identified by its label, check
+and scenario; a label on one side only is `added` or `removed`. `--intended` takes spell or rank ids: a change is
+`intended` when its spell or rank is in the set, and never for the verdicts without a spell (stack DPS). A change is
+**significant** when the two measured values differ by more than the root of the sum of the squares of the half-widths
+of their own 99% intervals, taken on the sides that face each other (so a Wilson interval keeps its asymmetry):
+
+| Check | Interval of the measured value |
+|---|---|
+| `hit_mean`, `melee_mean` | `measured` plus or minus the half-width of the verdict (`Z` x sigma / sqrt(hits)) |
+| `proc_rate`, stack DPS and source, talent delta | the `low` and `high` of the verdict |
+| every other check | none: significant when the difference exceeds `max(1, 0.5% of expected)`, the tolerance of the comparison (cooldowns: the larger timing window) |
+
+A side without a measured value or, for the first two rows, without an interval is never significant. `impact.md`
+lists, with the unintended changes first, the significant changes, every status change and the added and removed
+labels; the moves inside the intervals with an unchanged status come last. Stamp 20261105-191313 compared twice gives no
+change; stamps 20261105-203950 (configurations c0 and c1) and 20261105-204050 (all eight) give nine moves inside the
+intervals, no significant change and 40 added verdicts.
 
 ### Verdicts
 
