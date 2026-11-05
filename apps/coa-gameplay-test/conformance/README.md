@@ -154,9 +154,17 @@ above), `cast`, and a wait of
 | `kind` | Effects | Hit before modifiers |
 |---|---|---|
 | `weapon` | 31 percent, 17/58/121 flat | roll times the percent, truncated, plus the floored flats (ADR 0010) |
-| `school` | 2 | the floored tooltip value of each effect, or each integer from `$mN` to `$MN` |
+| `school` | 2 | the floored tooltip value of each effect, or each integer from `$mN` to `$MN`, or each roll (below) |
 | `heal` | 10 | as `school`, on the caster, without mitigation |
 | `periodic_damage`, `periodic_heal` | 6, aura 3 or 8 | one tick; `hits_per_cast` is `Duration / EffectAmplitude` |
+
+A `school`, `heal` or periodic effect whose `EffectDieSides` is above 1 and whose tooltip shows one token (Righteous
+Upheaval: `${$m1+0+$AP*0.45+$SP*0.45}`, `EffectBasePoints` 658, `EffectDieSides` 224 at rank 572027) is read again with
+each roll `EffectBasePoints + 1` .. `EffectBasePoints + EffectDieSides` in place of its points, as the comparison of
+rolled effect values does: the server adds one `irand(1, EffectDieSides)` to the points of every hit
+(`SpellEffectInfo::CalcValue`), so each roll is one equally likely hit and `tooltip_mean` is their mean. Such a spread
+can need more casts than one scenario holds: a model whose waits do not fit the 600 s scenario limit with its 60 s
+margin is `unmodelled` with the time it would wait (Righteous Upheaval: 335 casts needed, 503 scheduled, 762.5 s).
 
 The weapon roll is `urand(floor(min + AP / 14 x speed), floor(max + AP / 14 x speed))` (`Unit::CalculateDamage`),
 with the normalized speed when an effect is 121 and the weapon speed otherwise. `tooltip_mean` is the same sum without

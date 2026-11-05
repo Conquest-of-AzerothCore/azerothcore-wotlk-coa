@@ -36,6 +36,9 @@ ENERGY = 3
 CLASS_TUNING_AURA = 887007
 RIGHTEOUS_UPHEAVAL = 501562
 RIGHTEOUS_UPHEAVAL_MAX_RANK = 572027
+RIGHTEOUS_UPHEAVAL_BASE_POINTS = 658
+RIGHTEOUS_UPHEAVAL_DIE_SIDES = 224
+RIGHTEOUS_UPHEAVAL_AP_COEFFICIENT = 0.45
 OATH_CHAIN = 704576
 PVE_DAMAGE_DONE_PCT = 341
 HEALING_DONE_PCT = 136
@@ -147,6 +150,15 @@ class ExpectedHitTest(unittest.TestCase):
         self.assertAlmostEqual(model.mean, mean, places=9)
         self.assertAlmostEqual(model.sigma, sigma, places=9)
 
+    def test_rolled_effect_spreads_the_hit_over_the_tooltip_value_of_every_roll(self):
+        readout = Readout(values=[Displayed('${$m1+0}', 10.0, 0, 'flat')], unreadable=[])
+        model = expected_hit(readout, [SCHOOL_DAMAGE, 0, 0], caster(), None, NO_MITIGATION,
+                             rolls={0: (10.0, 11.0, 12.5)})
+        mean, sigma = moments([10, 11, 12])
+        self.assertAlmostEqual(model.mean, mean, places=9)
+        self.assertAlmostEqual(model.sigma, sigma, places=9)
+        self.assertAlmostEqual(model.tooltip_mean, (10.0 + 11.0 + 12.5) / 3, places=9)
+
     def test_heal_uses_the_healing_modifier_only(self):
         readout = Readout(values=[Displayed('$s1', 501.0, 0, 'flat')], unreadable=[])
         model = expected_hit(readout, [HEAL, 0, 0], caster(), None, NO_MITIGATION,
@@ -211,6 +223,17 @@ class HitScenarioTest(unittest.TestCase):
         self.assertAlmostEqual(model.mean, moments([541, 542, 543, 544, 546])[0], places=9)
         self.assertEqual([(modifier.spell_id, modifier.effect_index, modifier.percent)
                           for modifier in model.modifiers], [(CLASS_TUNING_AURA, 0, CLASS_TUNING_PERCENT_AT_60)])
+
+    def test_righteous_upheaval_rolls_its_die_before_the_attack_power_term(self):
+        model = reference_hit_model(self.templar, RIGHTEOUS_UPHEAVAL_MAX_RANK)
+        bonus = RIGHTEOUS_UPHEAVAL_AP_COEFFICIENT * REFERENCE_ATTACK_POWER
+        values = [RIGHTEOUS_UPHEAVAL_BASE_POINTS + roll + bonus for roll in range(1, RIGHTEOUS_UPHEAVAL_DIE_SIDES + 1)]
+        kept = expected_mitigation(PHYSICAL, REFERENCE_TARGET, 60).mean
+        hits = [math.ceil((math.floor(value) * 80 // 100) * kept) for value in values]
+        mean, sigma = moments(hits)
+        self.assertAlmostEqual(model.tooltip_mean, sum(values) / len(values), places=6)
+        self.assertAlmostEqual(model.mean, mean, places=6)
+        self.assertAlmostEqual(model.sigma, sigma, places=6)
 
     def test_argent_blade_scenario_schedules_the_needed_casts_and_resets_cooldown_and_energy_each_time(self):
         casts = casts_needed(reference_hit_model(self.templar, ARGENT_BLADE_MAX_RANK))

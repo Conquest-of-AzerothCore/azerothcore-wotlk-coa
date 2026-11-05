@@ -121,6 +121,20 @@ class Records:
         return None
 
 
+class ForcedPoints(Records):
+    def __init__(self, dbc, spell_id: int, effect: int, value: int):
+        super().__init__(dbc)
+        self.forced = (spell_id, effect)
+        self.value = value
+
+    def points(self, spell_id: int, effect: int, upper: bool) -> float:
+        if (spell_id, effect) != self.forced:
+            return super().points(spell_id, effect, upper)
+        if self.field('Spell', spell_id, f'EffectRealPointsPerLevel[{effect}]') != 0:
+            raise Unreadable(f'EffectRealPointsPerLevel[{effect}] of spell {spell_id}')
+        return float(self.value)
+
+
 class Tooltip:
     def __init__(self, records: Records, spell_id: int, caster: CasterStats):
         self.records = records

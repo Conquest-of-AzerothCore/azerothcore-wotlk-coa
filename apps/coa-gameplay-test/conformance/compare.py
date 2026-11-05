@@ -14,7 +14,7 @@ from procs import AMBIGUOUS_TOOLTIP, CAST, PROC_CHECK, chance_of, wilson_interva
 from profile import DBC_DIR, caster_stats_from, known_aura_label, probe_aura_label
 from stack import (ADDS, MEASURED, MELEE_SOURCE, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE, TALENT_DELTA,
                    levers, mean_interval, ratio_interval)
-from tooltip import CasterStats, Readout, Records, Tooltip, Unreadable
+from tooltip import CasterStats, ForcedPoints, Readout, Records, Tooltip
 from values import UNMEASURABLE, UNREADABLE, Expectation, dataset
 
 STATUSES = ('ok', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials', 'unmeasured',
@@ -83,20 +83,6 @@ class TooltipSource(Protocol):
     def read(self, rank_id: int, caster: CasterStats, forced: tuple[int, int, int] | None = None) -> Readout: ...
 
     def effect_points(self, spell_id: int, effect: int) -> tuple[int, int]: ...
-
-
-class ForcedPoints(Records):
-    def __init__(self, dbc, spell_id: int, effect: int, value: int):
-        super().__init__(dbc)
-        self.forced = (spell_id, effect)
-        self.value = value
-
-    def points(self, spell_id: int, effect: int, upper: bool) -> float:
-        if (spell_id, effect) != self.forced:
-            return super().points(spell_id, effect, upper)
-        if self.field('Spell', spell_id, f'EffectRealPointsPerLevel[{effect}]') != 0:
-            raise Unreadable(f'EffectRealPointsPerLevel[{effect}] of spell {spell_id}')
-        return float(self.value)
 
 
 class DbcTooltips:

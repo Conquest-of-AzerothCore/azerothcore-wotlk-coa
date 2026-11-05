@@ -9,7 +9,7 @@ from classes import ClassSpell
 from mitigation import PHYSICAL_SCHOOL_MASK, REFERENCE_TARGET, MitigationModel, TargetProfile, expected_mitigation
 from profile import (CASTER, DBC_DIR, SETTLE_MS, base_steps, caster_stats_from, known_aura_label, measurement,
                      player_fixture)
-from tooltip import CasterStats, Readout, Records, Unreadable, read_tooltip
+from tooltip import CasterStats, ForcedPoints, Readout, Records, Tooltip, Unreadable, read_tooltip
 from values import (CAST_MARGIN_MS, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, EFFECTS, TARGET, UNREADABLE,
                     Expectation, RankFacts, dataset, facts_of, required_aura_steps)
 
@@ -202,16 +202,47 @@ def weapon_hit(readout: Readout, effects: Sequence[int], caster: CasterStats,
     return distribution, tooltip_mean, ordered(readout, texts)
 
 
-def effect_hit(readout: Readout, indexes: list[int]) -> tuple[Distribution, float, list[str]]:
+def rolled_hit(values: Sequence[float]) -> Distribution:
+    return mapped({index: 1.0 / len(values) for index in range(len(values))},
+                  lambda index: math.floor(values[index]))
+
+
+def effect_hit(readout: Readout, indexes: list[int],
+               rolls: Mapping[int, Sequence[float]]) -> tuple[Distribution, float, list[str]]:
     distribution: Distribution = {0: 1.0}
     tooltip_mean = 0.0
     texts: list[str] = []
     for index in indexes:
         low, high, shown = value_range(readout, index)
-        distribution = summed(distribution, effect_roll(low, high))
-        tooltip_mean += (low + high) / 2
+        if index in rolls:
+            distribution = summed(distribution, rolled_hit(rolls[index]))
+            tooltip_mean += sum(rolls[index]) / len(rolls[index])
+        else:
+            distribution = summed(distribution, effect_roll(low, high))
+            tooltip_mean += (low + high) / 2
         texts += shown
     return distribution, tooltip_mean, ordered(readout, texts)
+
+
+def rolled_values(records: Records, rank_id: int, caster: CasterStats, readout: Readout,
+                  indexes: Sequence[int]) -> dict[int, tuple[float, ...]]:
+    rolls = {}
+    for effect in indexes:
+        sides = records.field('Spell', rank_id, f'EffectDieSides[{effect}]')
+        shown = [value for value in readout.values if value.effect_index == effect]
+        if sides <= 1 or len(shown) != 1:
+            continue
+        base = records.field('Spell', rank_id, f'EffectBasePoints[{effect}]')
+        values = []
+        for roll in range(1, sides + 1):
+            forced = ForcedPoints(records.dbc, rank_id, effect, base + roll)
+            reread = Tooltip(forced, rank_id, caster).read(records.field('Spell', rank_id, 'Description[enUS]'))
+            same = [value for value in reread.values if value.text == shown[0].text]
+            if len(same) != 1:
+                raise Unmodelled(f'{shown[0].text} is unreadable with roll {roll} of effect {effect}')
+            values.append(same[0].value)
+        rolls[effect] = tuple(values)
+    return rolls
 
 
 def ordered(readout: Readout, texts: list[str]) -> list[str]:
@@ -244,13 +275,13 @@ def mitigated(distribution: Distribution, mitigation: MitigationModel) -> Distri
 
 def expected_hit(readout: Readout, spell_effects: Sequence[int], caster: CasterStats, weapon: WeaponProfile | None,
                  mitigation: MitigationModel, *, aura_names: Sequence[int] = (), modifiers: Sequence[Modifier] = (),
-                 ticks: int = 1) -> HitModel:
+                 ticks: int = 1, rolls: Mapping[int, Sequence[float]] | None = None) -> HitModel:
     names = tuple(aura_names) or (0,) * len(spell_effects)
     kind, indexes = hit_kind(spell_effects, names)
     if kind == 'weapon':
         distribution, tooltip_mean, texts = weapon_hit(readout, spell_effects, caster, weapon)
     else:
-        distribution, tooltip_mean, texts = effect_hit(readout, indexes)
+        distribution, tooltip_mean, texts = effect_hit(readout, indexes, rolls or {})
     used = applicable(modifiers, kind)
     mean, sigma = moments(mitigated(done(distribution, used), mitigation))
     return HitModel(kind=kind, mean=mean, sigma=sigma, tooltip_mean=tooltip_mean,
@@ -366,8 +397,9 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
     mitigation = NO_MITIGATION if kind in HEAL_KINDS else mitigation_for(school_mask, target, caster.level)
     readout = read_tooltip(records.dbc, rank_id, caster)
     modifiers = for_school(aura_modifiers(records, auras, class_file['level']), school_mask)
+    rolls = {} if kind == 'weapon' else rolled_values(records, rank_id, caster, readout, indexes)
     model = expected_hit(readout, facts.effects, caster, weapon_profile(class_file), mitigation,
-                         aura_names=facts.aura_names, modifiers=modifiers, ticks=ticks)
+                         aura_names=facts.aura_names, modifiers=modifiers, ticks=ticks, rolls=rolls)
     return RankHit(model, readout, facts, school_mask, indexes, duration)
 
 
