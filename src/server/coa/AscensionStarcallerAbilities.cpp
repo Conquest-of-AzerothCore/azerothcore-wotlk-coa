@@ -65,6 +65,13 @@ void Snapshot(Player* player, Spell* spell)
                 spell->SetScriptValue(id, aura->GetScriptValue(800386));
             }
 }
+void SpendLunarPhase(Player* player)
+{
+    if (Aura* phase = player->GetAura(802985))
+        phase->ModStackAmount(-int32(LunarPhaseThreshold));
+    if (Count(player, 802985) < LunarPhaseThreshold)
+        player->RemoveAurasDueToSpell(704519);
+}
 void FinishSelected(Player* player, Spell* spell)
 {
     for (uint32 id : selected)
@@ -159,13 +166,6 @@ class starcaller_spells : public AllSpellScript
         if (!player || info->SpellFamilyName != 32)
             return;
         Snapshot(player, spell);
-        if (IsLunarEclipseActivation(spell))
-        {
-            if (Aura* phase = player->GetAura(802985))
-                phase->ModStackAmount(-int32(LunarPhaseThreshold));
-            if (Count(player, 802985) < LunarPhaseThreshold)
-                player->RemoveAurasDueToSpell(704519);
-        }
         if (Named(info, 801132) && player->HasAura(520482))
             ExtraTargets(player, spell, 1);
         if (Named(info, 680220) && player->HasAura(520481))
@@ -342,6 +342,10 @@ class starcaller_spells : public AllSpellScript
         if (!player || info->SpellFamilyName != 32)
             return;
         uint32 id = info->Id;
+        if (!spell->IsTriggered())
+            if (uint64 generation = spell->GetScriptValue(800386))
+                if (Aura* eclipse = player->GetAura(800386); eclipse && eclipse->GetScriptValue(800386) == generation)
+                    SpendLunarPhase(player);
         if (Named(info, 680220))
             MarkedHeal(player);
         if (Named(info, 801972) && player->HasAura(704764))
