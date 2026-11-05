@@ -186,8 +186,9 @@ struct TrapTilt
 TrapTilt const TrapTilts[] =
 {
     { 0, 0, 0.0f, 0.0f, 0.0f, "flat, no carrier" },
-    { 9937001, 0, -1.0f, 0.8f, -0.75f, "43 degrees down (vehicle 827, seat 0)" },
-    { 9937002, 2, -0.24f, 0.12f, -0.873f, "50 degrees down (vehicle 375, seat 2)" },
+    { 9937001, 3, -0.3f, 0.1f, -0.785f, "45 degrees down (vehicle 249, seat 3)" },
+    { 9937002, 1, -0.25f, 0.75f, -0.9f, "52 degrees down (vehicle 808, seat 1)" },
+    { 9937003, 0, 0.25f, 0.65f, -0.611f, "35 degrees down (vehicle 522, seat 0)" },
 };
 std::atomic<uint32> TrapTiltIndex = 1;
 constexpr uint32 NPC_VENOM_TRAP = 162975;
