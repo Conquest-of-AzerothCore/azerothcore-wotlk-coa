@@ -44,7 +44,9 @@ the method decisions and why.
 - Tooltip reading rules follow the stock 3.3.5a client parser (wowdecomp, evidence rather than authority). Whatever
   the reader cannot evaluate (conditionals, markup, unknown tokens, a `$<name>` the spell does not define) is
   `unreadable` with the entry verbatim, never guessed and never `ok`.
-- "X% Weapon Damage plus Y" adds Y after the percent (ADR 0010); the hit model applies that order.
+- "X% Weapon Damage plus Y" reads as Y added after the percent, for every spell. This record makes it the reading
+  rule; it comes from the plan and ADR 0010, which applies that order on the server for the Argent Blade chain only
+  and leaves every other spell in DBC order until it has its own evidence.
 - `$sN`, `$mN` and `$MN` are shown unsigned while the record is signed: the expected value takes the sign of the
   points shown. Expressions keep their sign; a measured value of the opposite sign is `ambiguous_tooltip`.
 - Values that scale with level (`EffectRealPointsPerLevel`, `DurationPerLevel`) stay unreadable with the field
@@ -52,9 +54,10 @@ the method decisions and why.
   character level, and the scenarios do not measure that skill (wowdecomp `Spell_C_GetSpellLevel`). No level rule
   is invented.
 - A rolled effect (`EffectDieSides` above 1) is judged against the range of the token over every roll, and only
-  when the token is monotone in the roll. In a hit model each roll is one equally likely hit, since the server adds
-  one `irand(1, EffectDieSides)` to the points of every hit; a model that reads the shown value alone gives a false
-  alert.
+  when the token is monotone in the roll. In a hit model each roll is one equally likely direct hit, since the
+  server adds one `irand(1, EffectDieSides)` to the points of every direct hit; a model that reads the shown value
+  alone gives a false alert. A rolled periodic amount is drawn once per aura and shared by its ticks
+  (`AuraEffect::CalculateAmount`), so its hit is `unmodelled` until the model judges it per cast.
 
 ### Measurement
 
@@ -127,6 +130,8 @@ same build list nothing. Pilot results stay outside Git (`.agents/plans/class-co
   values, effects of several models, and spells whose effect needs state the scenarios do not build. Those are listed
   by status and reason, never counted as conformant.
 - A full class run takes a few minutes of real time on the simulated clock, without a server build.
+- A spell whose flat weapon effect precedes its percent in the DBC (Sacred Swing first) is an alert under this
+  reading until its own evidence decides between the reading and the server order (ADR 0010).
 - An alert is a lead for the owner, not a defect: it is triaged by hand, and a fix gets its own regression.
 - An owner ruling on an open question below adds a reading rule here (a new ADR superseding this one) and turns
   the matching `ambiguous_tooltip` verdicts into `ok` or `alert`.

@@ -172,6 +172,20 @@ class ExpectedHitTest(unittest.TestCase):
                              aura_names=(PERIODIC_DAMAGE, 0, 0), ticks=5, modifiers=(tuning(),))
         self.assertEqual((model.kind, model.mean, model.hits_per_cast), ('periodic_damage', 40.0, 5))
 
+    def test_rolled_periodic_amount_is_unmodelled_since_its_ticks_share_one_roll(self):
+        readout = Readout(values=[Displayed('${$m1+0}', 10.0, 0, 'flat')], unreadable=[])
+        with self.assertRaises(Unmodelled) as raised:
+            expected_hit(readout, [APPLY_AURA, 0, 0], caster(), None, NO_MITIGATION,
+                         aura_names=(PERIODIC_DAMAGE, 0, 0), ticks=5, rolls={0: (10.0, 11.0, 12.0)})
+        self.assertIn('once per aura', raised.exception.reason)
+
+    def test_spread_periodic_amount_is_unmodelled_since_its_ticks_share_one_roll(self):
+        readout = Readout(values=[Displayed('$m1', 10.0, 0, 'flat'), Displayed('$M1', 14.0, 0, 'flat')],
+                          unreadable=[])
+        with self.assertRaises(Unmodelled):
+            expected_hit(readout, [APPLY_AURA, 0, 0], caster(), None, NO_MITIGATION,
+                         aura_names=(PERIODIC_DAMAGE, 0, 0), ticks=5)
+
     def test_effects_outside_every_model_are_unmodelled(self):
         cases = {
             'dummy only': (Readout([Displayed('$s1', 10.0, 0, 'flat')], []), [DUMMY, 0, 0], ()),

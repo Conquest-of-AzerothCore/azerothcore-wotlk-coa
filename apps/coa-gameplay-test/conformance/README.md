@@ -158,11 +158,14 @@ above), `cast`, and a wait of
 | `heal` | 10 | as `school`, on the caster, without mitigation |
 | `periodic_damage`, `periodic_heal` | 6, aura 3 or 8 | one tick; `hits_per_cast` is `Duration / EffectAmplitude` |
 
-A `school`, `heal` or periodic effect whose `EffectDieSides` is above 1 and whose tooltip shows one token (Righteous
-Upheaval: `${$m1+0+$AP*0.45+$SP*0.45}`, `EffectBasePoints` 658, `EffectDieSides` 224 at rank 572027) is read again with
-each roll `EffectBasePoints + 1` .. `EffectBasePoints + EffectDieSides` in place of its points, as the comparison of
-rolled effect values does: the server adds one `irand(1, EffectDieSides)` to the points of every hit
-(`SpellEffectInfo::CalcValue`), so each roll is one equally likely hit and `tooltip_mean` is their mean. Such a spread
+A `school` or `heal` effect whose `EffectDieSides` is above 1 and whose tooltip shows one token (Righteous Upheaval:
+`${$m1+0+$AP*0.45+$SP*0.45}`, `EffectBasePoints` 658, `EffectDieSides` 224 at rank 572027) is read again with each
+roll `EffectBasePoints + 1` .. `EffectBasePoints + EffectDieSides` in place of its points, as the comparison of rolled
+effect values does: the server adds one `irand(1, EffectDieSides)` to the points of every direct hit
+(`SpellEffectInfo::CalcValue`), so each roll is one equally likely hit and `tooltip_mean` is their mean. A periodic
+effect whose amount rolls (one token or `$mN` to `$MN`) is `unmodelled`: `AuraEffect::CalculateAmount` rolls it once
+when the aura is applied and every tick reuses it, so the ticks of a cast are not independent hits and an interval
+over ticks would be too narrow. Such a spread
 can need more casts than one scenario holds: a model whose waits do not fit the 600 s scenario limit with its 60 s
 margin is `unmodelled` with the time it would wait (Righteous Upheaval: 335 casts needed, 503 scheduled, 762.5 s).
 

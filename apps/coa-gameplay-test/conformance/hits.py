@@ -282,6 +282,9 @@ def expected_hit(readout: Readout, spell_effects: Sequence[int], caster: CasterS
         distribution, tooltip_mean, texts = weapon_hit(readout, spell_effects, caster, weapon)
     else:
         distribution, tooltip_mean, texts = effect_hit(readout, indexes, rolls or {})
+        if kind in PERIODIC_KINDS.values() and len(distribution) > 1:
+            raise Unmodelled('a periodic amount is rolled once per aura (AuraEffect::CalculateAmount) and its ticks '
+                             'share it, so its ticks are not independent hits')
     used = applicable(modifiers, kind)
     mean, sigma = moments(mitigated(done(distribution, used), mitigation))
     return HitModel(kind=kind, mean=mean, sigma=sigma, tooltip_mean=tooltip_mean,
