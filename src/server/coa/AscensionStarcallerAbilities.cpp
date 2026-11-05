@@ -15,7 +15,10 @@
 namespace
 {
 using namespace AscensionStarcaller;
-constexpr uint32 selected[] = {800386, 680821, 503780, 561046, 801243, 707425, 504630, 504631, 680713, 802681, 572319};
+constexpr uint32 StarfireBarrageFlurryVisual = 993772;
+constexpr uint32 StarfireBarrageFlurryShots = 7;
+constexpr uint32 StarfireBarrageFlurryMs = 1000;
+constexpr uint32 selected[] ={800386, 680821, 503780, 561046, 801243, 707425, 504630, 504631, 680713, 802681, 572319};
 bool IsLunarEclipseActivation(Spell const* spell)
 {
     constexpr uint32 allowedFlags = TRIGGERED_IGNORE_CAST_IN_PROGRESS | TRIGGERED_CAST_DIRECTLY;
@@ -342,6 +345,18 @@ class starcaller_spells : public AllSpellScript
         if (!player || info->SpellFamilyName != 32)
             return;
         uint32 id = info->Id;
+        if (id == 802682)
+            if (Unit* barrageTarget = spell->m_targets.GetUnitTarget())
+                for (uint32 shot = 0; shot < StarfireBarrageFlurryShots; ++shot)
+                    player->m_Events.AddEventAtOffset(
+                        [guid = player->GetGUID(), victim = barrageTarget->GetGUID()]()
+                        {
+                            Player* owner = ObjectAccessor::FindPlayer(guid);
+                            Unit* hit = owner ? ObjectAccessor::GetUnit(*owner, victim) : nullptr;
+                            if (owner && hit && hit->IsAlive())
+                                owner->CastSpell(hit, StarfireBarrageFlurryVisual, TRIGGERED_FULL_MASK);
+                        },
+                        Milliseconds(shot * StarfireBarrageFlurryMs / (StarfireBarrageFlurryShots - 1)));
         if (Named(info, 680220))
             MarkedHeal(player);
         if (Named(info, 801972) && player->HasAura(704764))
