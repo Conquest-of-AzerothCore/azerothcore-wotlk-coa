@@ -443,11 +443,14 @@ of their own 99% intervals, taken on the sides that face each other (so a Wilson
 | `proc_rate`, stack DPS and source, talent delta | the `low` and `high` of the verdict |
 | every other check | none: significant when the difference exceeds `max(1, 0.5% of expected)`, the tolerance of the comparison (cooldowns: the larger timing window) |
 
-A side without a measured value or, for the first two rows, without an interval is never significant. `impact.md`
-lists, with the unintended changes first, the significant changes, every status change and the added and removed
-labels; the moves inside the intervals with an unchanged status come last. Stamp 20261105-191313 compared twice gives no
+A side without a measured value is never significant. When the values differ and an interval check (the first two rows)
+has no interval on a side, the change is `not judged`: not significant, and listed like a significant one, never as
+moved inside the intervals. `impact.md`
+lists, with the unintended changes first, the significant and not judged changes, every status change and the added and
+removed labels; the moves inside the intervals with an unchanged status come last. Stamp 20261105-191313 compared twice gives no
 change; stamps 20261105-203950 (configurations c0 and c1) and 20261105-204050 (all eight) give nine moves inside the
-intervals, no significant change and 40 added verdicts.
+intervals, no significant change and 40 added verdicts (the report then opens with its warning: when more than half of
+the verdicts of a side have no counterpart, the keys probably changed or the runs cover other scenarios).
 
 ### Verdicts
 

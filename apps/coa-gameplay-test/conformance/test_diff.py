@@ -129,10 +129,24 @@ class DiffTests(unittest.TestCase):
         self.assertTrue(change.listed)
         self.assertIsNone(change.delta_pct)
 
-    def test_interval_check_without_an_interval_is_not_significant(self):
+    def test_move_without_an_interval_is_not_judged_and_listed(self):
         before = hit('h', 1, 540.0, 3.0)
         after = Verdict('h', 'ok', 900.0, 543.2, None, None, '', 's', 1, 1, HIT)
-        self.assertFalse(only(diff([before], [after], set())).significant)
+        change = only(diff([before], [after], set()))
+        self.assertFalse(change.significant)
+        self.assertFalse(change.judged)
+        self.assertTrue(change.listed)
+        self.assertIn('not judged', change.rule)
+
+    def test_same_value_without_an_interval_is_judged(self):
+        before = Verdict('h', 'ok', 900.0, 543.2, None, None, '', 's', 1, 1, HIT)
+        after = Verdict('h', 'alert', 900.0, 543.2, None, None, '', 's', 1, 1, HIT)
+        change = only(diff([before], [after], set()))
+        self.assertTrue(change.judged)
+
+    def test_deterministic_moves_are_always_judged(self):
+        change = only(diff([value('v', 1, 50.0, 50.0)], [value('v', 1, 50.5, 50.0)], set()))
+        self.assertTrue(change.judged)
 
     def test_labels_on_one_side_are_added_and_removed(self):
         before = [value('gone', 1, 5.0, 5.0), value('both', 2, 5.0, 5.0)]
@@ -205,6 +219,41 @@ class CommandTests(unittest.TestCase):
         self.assertLess(intended, text.index('807268 hit_mean'))
         self.assertLess(text.index('807268 hit_mean'), quiet)
         self.assertGreater(text.index('| quiet |'), quiet)
+
+    def test_unjudged_move_is_listed_outside_the_quiet_section(self):
+        before = self.compare_output('before', [hit('807268 hit_mean', ARGENT_BLADE, 540.0, 3.0),
+                                                hit('other hit_mean', 5, 540.0, 3.0), value('quiet', 7, 10.0, 10.0)])
+        after = self.compare_output('after', [
+            Verdict('807268 hit_mean', 'ok', 900.0, 543.2, None, None, '', 's', ARGENT_BLADE, ARGENT_BLADE, HIT),
+            Verdict('other hit_mean', 'ok', 900.0, 543.2, None, None, '', 's', 5, 5, HIT),
+            value('quiet', 7, 10.3, 10.0)])
+        self.assertEqual(main(['diff', '--before', str(before), '--after', str(after), '--intended', '807268']), 0)
+        text = (after / IMPACT_FILE).read_text(encoding='utf-8')
+        unintended, intended, quiet = (text.index(f'## {name}') for name in
+                                       ('Unintended changes', 'Intended changes', 'Moved inside the intervals'))
+        self.assertTrue(unintended < text.index('| other hit_mean |') < intended)
+        self.assertTrue(intended < text.index('| 807268 hit_mean |') < quiet)
+        self.assertGreater(text.index('| quiet |'), quiet)
+        self.assertNotIn('inside intervals | ', text[:quiet])
+        self.assertIn('| not judged |', text)
+        self.assertIn('| of which not judged (no interval) | 2 |', text)
+
+    def test_most_keys_unmatched_opens_with_a_warning(self):
+        before = self.compare_output('before', [value('a', 1, 5.0, 5.0), value('b', 1, 5.0, 5.0),
+                                                value('c', 1, 5.0, 5.0)])
+        after = self.compare_output('after', [value('a', 1, 5.0, 5.0), value('x', 1, 5.0, 5.0),
+                                              value('y', 1, 5.0, 5.0)])
+        self.assertEqual(main(['diff', '--before', str(before), '--after', str(after)]), 0)
+        text = (after / IMPACT_FILE).read_text(encoding='utf-8')
+        self.assertIn('Warning: 2 of 3 verdicts before and 2 of 3 after have no counterpart', text)
+        self.assertLess(text.index('Warning'), text.index('- Before:'))
+
+    def test_few_unmatched_keys_give_no_warning(self):
+        before = self.compare_output('before', [value('a', 1, 5.0, 5.0), value('b', 1, 5.0, 5.0)])
+        after = self.compare_output('after', [value('a', 1, 5.0, 5.0), value('b', 1, 5.0, 5.0),
+                                              value('c', 1, 5.0, 5.0)])
+        self.assertEqual(main(['diff', '--before', str(before), '--after', str(after)]), 0)
+        self.assertNotIn('Warning', (after / IMPACT_FILE).read_text(encoding='utf-8'))
 
     def test_diff_command_writes_to_the_requested_directory(self):
         before = self.compare_output('before', [value('v', 1, 5.0, 5.0)])

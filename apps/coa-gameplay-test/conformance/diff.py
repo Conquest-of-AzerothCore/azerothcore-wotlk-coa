@@ -11,6 +11,7 @@ IMPACT_FILE = 'impact.md'
 TIME_CHECK = 'cooldown_ms'
 INTERVAL_CHECKS = HIT_CHECKS | STACK_CHECKS | {PROC_CHECK}
 MOVED, ADDED, REMOVED = 'moved', 'added', 'removed'
+NOT_JUDGED = 'not judged: no interval on a side'
 
 
 @dataclass(frozen=True)
@@ -27,6 +28,7 @@ class Change:
     status_after: str | None = None
     rule: str = ''
     scenario: str = ''
+    judged: bool = True
 
     @property
     def status_changed(self) -> bool:
@@ -34,7 +36,7 @@ class Change:
 
     @property
     def listed(self) -> bool:
-        return self.significant or self.status_changed or self.kind != MOVED
+        return self.significant or self.status_changed or self.kind != MOVED or not self.judged
 
 
 Interval = tuple[float, float]
@@ -80,21 +82,21 @@ def tolerance(before: Verdict, after: Verdict) -> float:
     return ABSOLUTE_TOLERANCE
 
 
-def significance(before: Verdict, after: Verdict) -> tuple[bool, str]:
+def significance(before: Verdict, after: Verdict) -> tuple[bool, bool, str]:
     if before.measured is None or after.measured is None:
-        return False, 'no measured value on a side'
+        return False, True, 'no measured value on a side'
     difference = after.measured - before.measured
     if before.check in INTERVAL_CHECKS:
         reaches = (reach(before), reach(after))
         if None in reaches:
-            return False, 'no interval on a side'
+            return False, difference == 0, NOT_JUDGED if difference else 'no interval on a side, same value'
         facing = (reaches[0][1], reaches[1][0]) if difference > 0 else (reaches[0][0], reaches[1][1])
         needed = math.hypot(*facing)
-        return (abs(difference) > needed + FLOAT_EPSILON,
+        return (abs(difference) > needed + FLOAT_EPSILON, True,
                 f'difference {difference:+.6g} against {needed:.6g}, the root of the squared facing half-widths of the '
                 f'two 99% intervals ({facing[0]:.6g}, {facing[1]:.6g})')
     needed = tolerance(before, after)
-    return (abs(difference) > needed + FLOAT_EPSILON,
+    return (abs(difference) > needed + FLOAT_EPSILON, True,
             f'difference {difference:+.6g} against the deterministic tolerance {needed:.6g}')
 
 
@@ -122,11 +124,11 @@ def diff(before: list[Verdict], after: list[Verdict], intended: set[int]) -> lis
                                   is_intended(first, intended), REMOVED, first.status, None, 'label only before',
                                   first.scenario))
         elif first.measured != second.measured or first.status != second.status:
-            significant, rule = significance(first, second)
+            significant, judged, rule = significance(first, second)
             changes.append(Change(second.label, second.spell_id, first.measured, second.measured,
                                   relative_change(first.measured, second.measured), significant,
                                   is_intended(second, intended), MOVED, first.status, second.status, rule,
-                                  second.scenario))
+                                  second.scenario, judged))
     return changes
 
 
@@ -140,7 +142,9 @@ def percent(value: float | None) -> str:
 
 def row(change: Change) -> str:
     states = f'{change.status_before or "-"} to {change.status_after or "-"}'
-    kind = change.kind if change.kind != MOVED else ('significant' if change.significant else 'inside intervals')
+    kind = change.kind
+    if kind == MOVED:
+        kind = 'significant' if change.significant else 'inside intervals' if change.judged else 'not judged'
     return (f'| {change.label} | {change.scenario} | {change.spell_id} | {number(change.before)} | '
             f'{number(change.after)} | {percent(change.delta_pct)} | {states} | {kind} | {change.rule} |')
 
@@ -153,26 +157,40 @@ def table(changes: list[Change]) -> list[str]:
     return header + [row(change) for change in ordered]
 
 
+def blind_warning(kinds: Counter, sizes: tuple[int, int]) -> list[str]:
+    removed, added = kinds[REMOVED], kinds[ADDED]
+    if removed * 2 <= sizes[0] and added * 2 <= sizes[1]:
+        return []
+    return [f'**Warning: {removed} of {sizes[0]} verdicts before and {added} of {sizes[1]} after have no counterpart '
+            f'(more than half of a side). The verdict keys (label, check, scenario) probably changed format, or the '
+            f'runs cover different scenarios: the comparison is blind to most verdicts.**', '']
+
+
 def impact_lines(changes: list[Change], intended: set[int], before_header: dict, after_header: dict,
-                 before_dir: Path, after_dir: Path) -> list[str]:
+                 before_dir: Path, after_dir: Path, sizes: tuple[int, int]) -> list[str]:
     noteworthy = [change for change in changes if change.listed]
     quiet = [change for change in changes if not change.listed]
+    unjudged = sum(not change.judged for change in changes)
     unintended = [change for change in noteworthy if not change.intended]
     wanted = [change for change in noteworthy if change.intended]
     kinds = Counter(change.kind for change in changes)
     lines = [f'# Conformance impact: {after_header["class_name"]} (class {after_header["class_id"]})', '',
+             *blind_warning(kinds, sizes),
              f'- Before: `{before_dir}` (manifest `{before_header["manifest"]}`)',
              f'- After: `{after_dir}` (manifest `{after_header["manifest"]}`)',
              f'- Intended spells: {", ".join(map(str, sorted(intended))) or "none"}',
              '- Significant: the measured values differ by more than the root of the squared facing half-widths of '
              'their own 99% intervals (hit and melee means, proc rates, stack passes, talent deltas), or by more than '
              'the deterministic tolerance of the comparison (max(1, 0.5% of expected); the cooldown window for '
-             'cooldowns) for the other checks. A side without an interval or a measured value is never significant.',
-             '- Listed: significant changes, every status change, and labels present on one side only (a verdict is '
-             'identified by its label, check and scenario). A label is '
+             'cooldowns) for the other checks. A side without an interval or a measured value is never significant; '
+             'when the values differ and an interval check has no interval on a side, the change is `not judged` '
+             'and listed.',
+             '- Listed: significant changes, not judged changes, every status change, and labels present on one '
+             'side only (a verdict is identified by its label, check and scenario). A label is '
              'intended when its spell or rank is in the intended set; labels with spell 0 (stack DPS) never are.',
              '', '## Summary', '', '| | count |', '|---|---|',
              f'| unintended, listed | {len(unintended)} |', f'| intended, listed | {len(wanted)} |',
+             f'| of which not judged (no interval) | {unjudged} |',
              f'| moved inside the intervals, same status | {len(quiet)} |', f'| added labels | {kinds[ADDED]} |',
              f'| removed labels | {kinds[REMOVED]} |']
     lines += ['', '## Unintended changes', '']
@@ -185,13 +203,13 @@ def impact_lines(changes: list[Change], intended: set[int], before_header: dict,
 
 
 def write_impact(changes: list[Change], intended: set[int], before_dir: Path, after_dir: Path, out_dir: Path) -> Path:
-    before_header, _ = read_verdicts(before_dir)
-    after_header, _ = read_verdicts(after_dir)
+    before_header, before = read_verdicts(before_dir)
+    after_header, after = read_verdicts(after_dir)
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     path = out_dir / IMPACT_FILE
     path.write_text('\n'.join(impact_lines(changes, intended, before_header, after_header, Path(before_dir),
-                                           Path(after_dir))), encoding='utf-8')
+                                           Path(after_dir), (len(before), len(after)))), encoding='utf-8')
     return path
 
 
