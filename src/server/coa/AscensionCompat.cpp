@@ -62,6 +62,7 @@
 #include "AscensionBarbarianScaling.h"
 #include "AscensionCustomResourceData.h"
 #include "AscensionFreshCharacterCheck.h"
+#include "AscensionLfgObjective.h"
 #include "AscensionLiveBaselineData.h"
 #include "AscensionRacialAbilities.h"
 #include "AscensionPrimalistEarthquake.h"
@@ -7697,6 +7698,7 @@ private:
         SendAscensionRunemasterEchoesCooldown(player);
         AscensionDisplayPatchService::Instance().SendPatchStream(player);
         SendServerPetAppearances(player);
+        RefreshAscensionLfgObjectiveDungeon(player);
         LOG_DEBUG("coa", "Resent spell charge state to {} after client world entry",
                   player->GetName());
         break;
