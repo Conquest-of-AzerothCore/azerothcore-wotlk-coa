@@ -56,13 +56,6 @@
       "value": 0
     },
     {
-      "action": "set_power",
-      "label": "Refill mana: both casts cost a share of the class base mana",
-      "actor": "primalist",
-      "power": 0,
-      "value": 3500
-    },
-    {
       "action": "snapshot",
       "actor": "primalist",
       "metric": "spell_energize_total",
@@ -116,13 +109,6 @@
       "actor": "primalist",
       "power": 1,
       "value": 0
-    },
-    {
-      "action": "set_power",
-      "label": "Refill mana: both casts cost a share of the class base mana",
-      "actor": "primalist",
-      "power": 0,
-      "value": 3500
     },
     {
       "action": "snapshot",
@@ -185,13 +171,6 @@
       "value": 0
     },
     {
-      "action": "set_power",
-      "label": "Refill mana: both casts cost a share of the class base mana",
-      "actor": "primalist",
-      "power": 0,
-      "value": 3500
-    },
-    {
       "action": "snapshot",
       "actor": "primalist",
       "metric": "spell_energize_total",
@@ -245,13 +224,6 @@
       "actor": "primalist",
       "power": 1,
       "value": 0
-    },
-    {
-      "action": "set_power",
-      "label": "Refill mana: both casts cost a share of the class base mana",
-      "actor": "primalist",
-      "power": 0,
-      "value": 3500
     },
     {
       "action": "snapshot",
@@ -314,13 +286,6 @@
       "value": 0
     },
     {
-      "action": "set_power",
-      "label": "Refill mana: both casts cost a share of the class base mana",
-      "actor": "primalist",
-      "power": 0,
-      "value": 3500
-    },
-    {
       "action": "snapshot",
       "actor": "primalist",
       "metric": "spell_energize_total",
@@ -374,13 +339,6 @@
       "actor": "primalist",
       "power": 1,
       "value": 0
-    },
-    {
-      "action": "set_power",
-      "label": "Refill mana: both casts cost a share of the class base mana",
-      "actor": "primalist",
-      "power": 0,
-      "value": 3500
     },
     {
       "action": "snapshot",

@@ -78,7 +78,7 @@
       "label": "SETUP: the level-80 Bloodmage has at least 80 melee AP",
       "actor": "bloodmage",
       "metric": "attack_power",
-      "equals": 332
+      "equals": 309
     },
     {
       "action": "set_aura",
@@ -93,7 +93,7 @@
       "metric": "aura_amount",
       "spell": 556233,
       "effect": 0,
-      "equals": -51
+      "equals": -46
     },
     {
       "action": "set_aura",
@@ -189,7 +189,7 @@
       "metric": "aura_amount",
       "spell": 556233,
       "effect": 0,
-      "equals": -51
+      "equals": -46
     }
   ]
 }

@@ -4961,7 +4961,7 @@ void ObjectMgr::LoadPlayerInfo()
 
         } while (raceStatsResult->NextRow());
 
-        bool const ascensionClassStats = sConfigMgr->GetOption<bool>("CoA.ClassLevelSixtyStats.Enable", true);
+        bool const ascensionClassStats = sConfigMgr->GetOption<bool>("CoA.ClassLevelSixtyStats.Enable", false);
         //                                                 0      1       2         3        4         5        6       7        8
         QueryResult result = WorldDatabase.Query(ascensionClassStats
             ? "SELECT s.Class, s.Level, COALESCE(a.Strength, s.Strength), COALESCE(a.Agility, s.Agility), "

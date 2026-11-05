@@ -5,7 +5,7 @@
     "Active Boons copy to the current pet at half strength; Hawk preserves fractional healing and Lion uses the",
     "authored six-second pet dispel interval.",
     "Owner and pet keep separate native five-second Hawk timers. Observe the owner's first actual heal before",
-    "judging its exact 106-point amount; seeing the pet's first 35-point heal does not prove the owner has ticked.",
+    "judging its exact 82-point amount; seeing the pet's first 34-point heal does not prove the owner has ticked.",
     "Keep both original heal amounts and all Boon lifetime, stacking, health, movement and dispel assertions."
   ],
   "timeout_ms": 120000,
@@ -328,24 +328,24 @@
       "action": "assert",
       "actor": "primalist",
       "metric": "pet_max_health",
-      "equals": 7024
+      "equals": 6928
     },
     {
       "action": "assert",
       "actor": "primalist",
       "metric": "max_health",
-      "equals": 10631
+      "equals": 8288
     },
     {
       "action": "set_health",
       "actor": "primalist",
       "pet": true,
-      "value": 7024
+      "value": 6928
     },
     {
       "action": "set_health",
       "actor": "primalist",
-      "value": 10631
+      "value": 8288
     },
     {
       "action": "set_power",
@@ -412,7 +412,7 @@
       "target": "primalist",
       "target_pet": true,
       "pet": true,
-      "equals": 35
+      "equals": 34
     },
     {
       "action": "snapshot",
@@ -438,7 +438,7 @@
       "metric": "spell_heal_total",
       "spell": 997800,
       "target": "primalist",
-      "equals": 106
+      "equals": 82
     },
     {
       "action": "assert",

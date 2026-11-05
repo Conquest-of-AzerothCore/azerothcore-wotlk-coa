@@ -92,12 +92,12 @@
     },
     {
       "action": "assert",
-      "label": "Rank 1 dodge chance rises ~3.25 points in-game (flat +3 aura plus the extra 8% Agility's own dodge contribution)",
+      "label": "Rank 1 dodge chance rises ~3.31 points in-game (flat +3 aura plus the extra 8% Agility's own dodge contribution)",
       "actor": "rank_one",
       "metric": "dodge_chance",
       "relative_to": "dodge",
-      "min": 3.24,
-      "max": 3.26
+      "min": 3.3,
+      "max": 3.33
     },
     {
       "action": "assert",

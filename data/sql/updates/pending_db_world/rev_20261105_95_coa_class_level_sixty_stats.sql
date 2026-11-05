@@ -2,8 +2,8 @@
 -- (realmDataCoa, source "coa-text", stamina and base health multiplied by 1.2), verified by the project 2026-11-03.
 -- Levels 2-59 stretch each fallback class's curve between the class's level-one row and its level-60 target;
 -- levels 61-80 keep the fallback gains above 60. Level one stays as calibrated in rev_20260903_01.
--- The curve goes to ascension_class_stats and player_class_stats keeps the stock rows, so
--- CoA.ClassLevelSixtyStats.Enable = 0 in coa.conf restores the previous stats on a restart.
+-- The curve goes to ascension_class_stats and player_class_stats keeps the stock rows;
+-- the server uses it only with CoA.ClassLevelSixtyStats.Enable = 1 in coa.conf (default 0), applied on a restart.
 CREATE TABLE IF NOT EXISTS `ascension_class_stats` (
   `Class` tinyint unsigned NOT NULL,
   `Level` tinyint unsigned NOT NULL,
@@ -375,7 +375,7 @@ SELECT `p`.`Class`, `p`.`Level`,
 FROM `_coa_level_sixty_progress` AS `p`
 INNER JOIN `_coa_level_sixty_class` AS `t` ON `t`.`Class` = `p`.`Class`;
 
-DELETE FROM `ascension_class_stats` WHERE `Class` BETWEEN 12 AND 32;
+DELETE FROM `ascension_class_stats` WHERE `Class` BETWEEN 12 AND 32 AND `Level` BETWEEN 2 AND 80;
 INSERT INTO `ascension_class_stats` (`Class`, `Level`, `BaseHP`, `BaseMana`,
     `Strength`, `Agility`, `Stamina`, `Intellect`, `Spirit`)
 SELECT `curve`.`Class`, `curve`.`Level`, `curve`.`BaseHP`, `curve`.`BaseMana`,
@@ -412,7 +412,8 @@ INNER JOIN `_coa_level_sixty_class` AS `c` ON `c`.`Class` = `p`.`Class`
 INNER JOIN `_coa_level_sixty_class_curve` AS `k` ON `k`.`Class` = `p`.`Class` AND `k`.`Level` = `p`.`Level`
 INNER JOIN `player_race_stats` AS `r` ON `r`.`Race` = `t`.`Race`;
 
-DELETE FROM `ascension_race_class_stats` WHERE `Class` BETWEEN 12 AND 32;
+DELETE FROM `ascension_race_class_stats` WHERE `Level` BETWEEN 2 AND 80
+    AND (`Race`, `Class`) IN (SELECT `Race`, `Class` FROM `_coa_level_sixty_race_class`);
 INSERT INTO `ascension_race_class_stats` (`Race`, `Class`, `Level`,
     `Strength`, `Agility`, `Stamina`, `Intellect`, `Spirit`)
 SELECT `Race`, `Class`, `Level`, `Strength`, `Agility`, `Stamina`, `Intellect`, `Spirit`

@@ -179,13 +179,18 @@ class ClassLevelSixtyStatsTests(unittest.TestCase):
         self.query("INSERT INTO player_class_stats VALUES (12,81,9999,0,500,500,500,500,500), "
                    "(33,2,123,456,20,21,22,23,24);")
         self.apply()
-        self.query("INSERT INTO ascension_race_class_stats VALUES (2,1,60,1,2,3,4,5);")
+        self.assertEqual(self.class_rows()[12, 81], (9999, 0, 500, 500, 500, 500, 500))
+        self.query("INSERT INTO ascension_class_stats VALUES (12,81,8888,0,400,400,400,400,400);")
+        self.query("INSERT INTO ascension_race_class_stats VALUES (2,1,60,1,2,3,4,5), (2,12,81,1,1,1,1,1), "
+                   "(9,12,60,2,2,2,2,2);")
         classes, adjustments = self.class_rows(), self.adjustment_rows()
-        self.assertEqual(classes[12, 81], (9999, 0, 500, 500, 500, 500, 500))
+        self.assertEqual(classes[12, 81], (8888, 0, 400, 400, 400, 400, 400))
         self.assertEqual(classes[33, 2], (123, 456, 20, 21, 22, 23, 24))
         self.apply()
         self.assertEqual(classes, self.class_rows())
         self.assertEqual(adjustments, self.adjustment_rows())
+        self.assertEqual(adjustments[2, 12, 81], (1, 1, 1, 1, 1))
+        self.assertEqual(adjustments[9, 12, 60], (2, 2, 2, 2, 2))
         self.assertGreater(MIGRATION.name, PROGRESSION.name)
 
 

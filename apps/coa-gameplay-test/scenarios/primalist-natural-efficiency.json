@@ -36,7 +36,7 @@
       "action": "assert",
       "actor": "primalist",
       "metric": "max_health",
-      "equals": 10631
+      "equals": 8288
     },
     {
       "action": "pvp",
@@ -154,7 +154,7 @@
       "actor": "primalist",
       "metric": "spell_heal_total",
       "spell": 707806,
-      "equals": 425
+      "equals": 331
     },
     {
       "action": "set_health",
@@ -190,7 +190,7 @@
       "actor": "primalist",
       "metric": "spell_heal_total",
       "spell": 707806,
-      "equals": 850
+      "equals": 662
     },
     {
       "action": "set_aura",
@@ -232,7 +232,7 @@
       "actor": "primalist",
       "metric": "spell_heal_total",
       "spell": 707806,
-      "equals": 1275
+      "equals": 993
     },
     {
       "action": "set_aura",
@@ -274,7 +274,7 @@
       "actor": "primalist",
       "metric": "spell_heal_total",
       "spell": 707806,
-      "equals": 1700
+      "equals": 1324
     },
     {
       "action": "set_aura",

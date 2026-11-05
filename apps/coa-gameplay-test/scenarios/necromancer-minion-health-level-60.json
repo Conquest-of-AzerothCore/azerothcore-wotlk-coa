@@ -6,10 +6,10 @@
     "fit minion health = b x the owner's naked health + h x the minion's inherited Stamina, where the minion",
     "inherits 0.2714 x Life Force x owner Stamina (whole points), h = 10 health per Stamina (Ghoul 5) and b =",
     "0.54 for Skeletal Warriors, 0.66 for the Ghoul and 1.38 for the Abomination. A naked level-60 Undead",
-    "Necromancer has 93 Stamina; minions inherit from the legacy 68 Stamina and keep the legacy 1956 naked",
-    "health, so: Lesser Skeletal Warrior 1236 (old formula 5254); Ghoul 1381 (old formula 5254); Abomination",
-    "3249 (old formula 15262). Expected: within 5%. Power Word: Fortitude (+115 Stamina) on the owner raises the",
-    "inherited Stamina by 31 for the Warrior and 93 for the Abomination: 310 and 930 health."
+    "Necromancer has 68 Stamina and 1956 naked health, so: Lesser Skeletal Warrior 1236 (old formula 5254); Ghoul",
+    "1381 (old formula 5254); Abomination 3249 (old formula 15262). Expected: within 5%. Power Word: Fortitude",
+    "(+115 Stamina) on the owner raises the inherited Stamina by 31 for the Warrior and 93 for the Abomination:",
+    "310 and 930 health."
   ],
   "timeout_ms": 90000,
   "location": {
@@ -66,8 +66,8 @@
       "actor": "warrior",
       "metric": "stat",
       "stat": 2,
-      "min": 92.5,
-      "max": 93.5
+      "min": 67.5,
+      "max": 68.5
     },
     {
       "action": "assert",
@@ -75,8 +75,8 @@
       "actor": "ghoul",
       "metric": "stat",
       "stat": 2,
-      "min": 92.5,
-      "max": 93.5
+      "min": 67.5,
+      "max": 68.5
     },
     {
       "action": "assert",
@@ -84,8 +84,8 @@
       "actor": "abom",
       "metric": "stat",
       "stat": 2,
-      "min": 92.5,
-      "max": 93.5
+      "min": 67.5,
+      "max": 68.5
     },
     {
       "action": "assert",
@@ -93,8 +93,8 @@
       "actor": "warrior_fort",
       "metric": "stat",
       "stat": 2,
-      "min": 92.5,
-      "max": 93.5
+      "min": 67.5,
+      "max": 68.5
     },
     {
       "action": "assert",
@@ -102,8 +102,8 @@
       "actor": "abom_fort",
       "metric": "stat",
       "stat": 2,
-      "min": 92.5,
-      "max": 93.5
+      "min": 67.5,
+      "max": 68.5
     },
     {
       "action": "learn",
@@ -137,8 +137,8 @@
       "actor": "warrior_fort",
       "metric": "stat",
       "stat": 2,
-      "min": 207.5,
-      "max": 208.5
+      "min": 182.5,
+      "max": 183.5
     },
     {
       "action": "learn",
@@ -172,8 +172,8 @@
       "actor": "abom_fort",
       "metric": "stat",
       "stat": 2,
-      "min": 207.5,
-      "max": 208.5
+      "min": 182.5,
+      "max": 183.5
     },
     {
       "action": "learn",

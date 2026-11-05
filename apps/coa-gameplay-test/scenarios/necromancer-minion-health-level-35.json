@@ -6,9 +6,8 @@
     "fit minion health = b x the owner's naked health + h x the minion's inherited Stamina, where the minion",
     "inherits 0.2714 x Life Force x owner Stamina (whole points), h = 10 health per Stamina (Ghoul 5) and b =",
     "0.54 for Skeletal Warriors, 0.66 for the Ghoul and 1.38 for the Abomination. A naked level-35 Undead",
-    "Necromancer has 57 Stamina; minions inherit from the legacy 45 Stamina and keep the legacy 806 naked health,",
-    "so: Lesser Skeletal Warrior 555 (old formula 3185); Ghoul 592 (old formula 3185); Abomination 1472 (old",
-    "formula 9055). Expected: within 5%."
+    "Necromancer has 45 Stamina and 806 naked health, so: Lesser Skeletal Warrior 555 (old formula 3185); Ghoul",
+    "592 (old formula 3185); Abomination 1472 (old formula 9055). Expected: within 5%."
   ],
   "timeout_ms": 90000,
   "location": {
@@ -53,8 +52,8 @@
       "actor": "warrior",
       "metric": "stat",
       "stat": 2,
-      "min": 56.5,
-      "max": 57.5
+      "min": 44.5,
+      "max": 45.5
     },
     {
       "action": "assert",
@@ -62,8 +61,8 @@
       "actor": "ghoul",
       "metric": "stat",
       "stat": 2,
-      "min": 56.5,
-      "max": 57.5
+      "min": 44.5,
+      "max": 45.5
     },
     {
       "action": "assert",
@@ -71,8 +70,8 @@
       "actor": "abom",
       "metric": "stat",
       "stat": 2,
-      "min": 56.5,
-      "max": 57.5
+      "min": 44.5,
+      "max": 45.5
     },
     {
       "action": "learn",
