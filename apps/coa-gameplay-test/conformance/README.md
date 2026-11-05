@@ -383,7 +383,8 @@ from the previous configuration, the DPS of each source and the tooltip bonus of
 talent delta (`None` otherwise). `levers.md` holds the configurations, the DPS per source and its change, the talent
 deltas, the known and probe auras with the runs that measured them, and every pass value. A configuration's DPS change
 is marked decisive only when the 99% Welch interval of the ratio of its passes to the previous configuration's
-excludes 0 and its half-width is at most 1% of the ratio; otherwise the column says why it is not, and the percent is
+excludes 0 and its half-width is at most 1% of the ratio; otherwise the column says why it is not (a configuration
+whose DPS mean is not above 0 has no ratio and is never decisive), and the percent is
 no result.
 
 Measured on 2026-11-05 on the worktree server, which does not yet hold PR #11297 (Argent Blade's flat bonus after its
@@ -414,7 +415,7 @@ second).
 ```sh
 cd apps/coa-gameplay-test/conformance
 python3 -B conformance.py generate --class 19 --out DIR [--spell ID ...] [--proc AURA ...] [--stack [--passes N]]
-coa-verify --ram --stages gameplay --scenario DIR/scenarios/*.json
+python -B ../../../tools/verify_all.py --stages gameplay --scenario DIR/scenarios/*.json
 python3 -B conformance.py compare --manifest DIR/manifest.json --results .cache/verify-all/STAMP [--out OUT]
 ```
 
@@ -447,8 +448,8 @@ for `diff`. When the run holds stack verdicts, `compare` also writes `levers.md`
 ```sh
 python3 -B conformance.py generate --class 19 --out $W/.cache/conformance/templar
 python3 -B conformance.py generate --class 19 --stack --out $W/.cache/conformance/templar/stack
-coa-verify --worktree $W --ram --stages gameplay --scenario $W/.cache/conformance/templar/scenarios/*.json
-coa-verify --worktree $W --ram --stages gameplay --scenario $W/.cache/conformance/templar/stack/scenarios/*.json
+python -B $W/tools/verify_all.py --stages gameplay --scenario $W/.cache/conformance/templar/scenarios/*.json
+python -B $W/tools/verify_all.py --stages gameplay --scenario $W/.cache/conformance/templar/stack/scenarios/*.json
 python3 -B conformance.py compare --manifest $W/.cache/conformance/templar/manifest.json \
   --results $W/.cache/verify-all/STAMP --out OUT
 python3 -B conformance.py compare --manifest $W/.cache/conformance/templar/stack/manifest.json \
@@ -537,8 +538,9 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   `CalcValue` draws of that effect at the same stats differ by at most that much.
 - Time (`cooldown_ms`, `aura_duration_ms`, ruling R8): `expected - W <= measured <= expected`. W bounds the game
   time elapsed between the cast step and the measuring step: for every step after the cast up to the measurement,
-  its `elapsed_ms` plus the run's `max_step_ms`. `CoAGameplayTest::Tick` runs one step per world update
-  (`Progress` calls `RunStep` once), a step's `elapsed_ms` is the game time from its start to its completion, and
+  its `elapsed_ms` plus the run's `max_step_ms`; the `cast time` wait of a cast-time spell counts only its 500 ms
+  margin plus `max_step_ms`, because the cooldown or aura starts when the cast completes. `CoAGameplayTest::Tick`
+  runs one step per world update (`Progress` calls `RunStep` once), a step's `elapsed_ms` is the game time from its start to its completion, and
   `max_step_ms` is the largest update diff of the run (`docs/coa/verification.md`, fidelity limits: at most 25 ms
   in a wait, 10 ms while polling). Measured on 2026-11-05 (stamp `20261105-181206`): cooldowns 6, 12 and 18 ms
   below the record two, four and six steps after the cast, durations 12 and 15 ms below; W was 50 to 150 ms.
@@ -567,7 +569,7 @@ measured its aura.
 Tests run through `verify_all` only; the `conformance` suite of `tools/check_source.py` lists them.
 
 ```sh
-coa-verify --ram --stages source --base origin/main
+python -B tools/verify_all.py --stages source --base origin/main
 ```
 
 The tests that read the client DBC set are skipped when `/srv/coa/server-data/dbc` does not exist; the fixture tests

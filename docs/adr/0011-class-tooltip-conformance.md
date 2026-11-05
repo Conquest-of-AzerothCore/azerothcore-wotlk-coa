@@ -31,9 +31,9 @@ times the integer truncations of the hit (about 0.995). Tooltips do not show 887
 ## Decision
 
 The package `apps/coa-gameplay-test/conformance/` generates, per class, the scenarios and their expectations,
-runs them through `tools/verify_all.py` only (`coa-verify --ram --stages gameplay --scenario ...`), and judges the
-results with `compare.py`, the single judge of every check kind. Its README is the full reference; this record keeps
-the method decisions and why.
+runs them through `tools/verify_all.py` only (`python -B tools/verify_all.py --stages gameplay --scenario ...`), and
+judges the results with `compare.py`, the single judge of every check kind. Its README is the full reference; this
+record keeps the method decisions and why.
 
 ### Expected values
 
