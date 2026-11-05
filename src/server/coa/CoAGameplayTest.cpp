@@ -829,6 +829,7 @@ struct SpellDamageEvent
     uint32 spell = 0;
     uint32 damage = 0;
     bool critical = false;
+    uint32 casterEntry = 0;
 };
 
 struct SpellHealEvent
@@ -858,6 +859,7 @@ struct MeleeOutcomes
     uint32 plain = 0;
     uint64 plainDamage = 0;
     uint64 damage = 0;
+    uint32 attackerEntry = 0;
 };
 
 struct Actor
@@ -1004,6 +1006,16 @@ struct Target
     ObjectGuid guid;
 };
 
+uint32 ResolveLiveEntry(Player* player, ObjectGuid const& guid)
+{
+    if (!guid)
+        return 0;
+    if (player)
+        if (Unit* unit = ObjectAccessor::GetUnit(*player, guid))
+            return unit->GetEntry();
+    return guid.GetEntry();
+}
+
 void ObserveSpellCasts(Actor& actor, WorldPacket const& packet)
 {
     if (packet.GetOpcode() != SMSG_SPELL_GO)
@@ -1017,7 +1029,7 @@ void ObserveSpellCasts(Actor& actor, WorldPacket const& packet)
     actor.spellCasts.push_back(event);
 }
 
-void ObserveSpellDamage(Actor& actor, WorldPacket const& packet)
+void ObserveSpellDamage(Actor& actor, WorldPacket const& packet, Player* player)
 {
     if (packet.GetOpcode() != SMSG_SPELLNONMELEEDAMAGELOG && packet.GetOpcode() != SMSG_PERIODICAURALOG)
         return;
@@ -1056,7 +1068,10 @@ void ObserveSpellDamage(Actor& actor, WorldPacket const& packet)
         event.critical = critical != 0;
     }
     if (event.damage)
+    {
+        event.casterEntry = ResolveLiveEntry(player, event.caster);
         actor.spellDamage.push_back(event);
+    }
 }
 
 void ObserveSpellHealing(Actor& actor, WorldPacket const& packet)
@@ -1241,8 +1256,9 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
     constexpr std::size_t LfgProposalIdOffset = sizeof(uint32) + sizeof(uint8);
     if (packet.GetOpcode() == SMSG_LFG_PROPOSAL_UPDATE && packet.size() >= LfgProposalIdOffset + sizeof(uint32))
         actor.lfgProposalId = packet.read<uint32>(LfgProposalIdOffset);
+    Player* observer = actor.session ? actor.session->GetPlayer() : nullptr;
     ObserveSpellCasts(actor, packet);
-    ObserveSpellDamage(actor, packet);
+    ObserveSpellDamage(actor, packet, observer);
     ObserveSpellHealing(actor, packet);
     ObserveSpellEnergize(actor, packet);
     if (packet.GetOpcode() == SMSG_SPELL_DELAYED)
@@ -1401,6 +1417,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         if (victim == actor.guid)
             ++actor.meleeAttacksTakenFrom[attacker];
         MeleeOutcomes& outcome = actor.meleeOutcomesByAttacker[attacker];
+        outcome.attackerEntry = ResolveLiveEntry(observer, attacker);
         ++outcome.swings;
         outcome.damage += damage;
         if (hitInfo & HITINFO_CRITICALHIT)
@@ -4313,6 +4330,35 @@ private:
                     (!target || event.target == target) && (!critical || event.critical == *critical))
                     value += metric == "spell_damage_count" ? 1 : event.damage;
             return double(value);
+        }
+        if (metric == "owned_creature_damage_total" || metric == "owned_creature_damage_count" ||
+            metric == "owned_creature_attack_count")
+        {
+            uint32 const entry = step.get<uint32>("entry");
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            uint64 meleeDamage = 0;
+            uint32 meleeHits = 0;
+            uint32 meleeSwings = 0;
+            for (auto const& [attacker, outcome] : actor.meleeOutcomesByAttacker)
+                if (outcome.attackerEntry == entry)
+                {
+                    meleeDamage += outcome.damage;
+                    meleeHits += outcome.crits + outcome.glancing + outcome.plain;
+                    meleeSwings += outcome.swings;
+                }
+            uint64 spellDamageSum = 0;
+            uint32 spellHits = 0;
+            for (SpellDamageEvent const& event : actor.spellDamage)
+                if (event.casterEntry == entry)
+                {
+                    spellDamageSum += event.damage;
+                    ++spellHits;
+                }
+            if (metric == "owned_creature_damage_total")
+                return double(meleeDamage + spellDamageSum);
+            if (metric == "owned_creature_damage_count")
+                return meleeHits + spellHits;
+            return meleeSwings + spellHits;
         }
         if (metric == "spell_heal_count" || metric == "spell_heal_total" || metric == "spell_effective_heal_total")
         {
