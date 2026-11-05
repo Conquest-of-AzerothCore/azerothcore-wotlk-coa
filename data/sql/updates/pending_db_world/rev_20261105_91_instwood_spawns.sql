@@ -11,7 +11,7 @@ ROW(9998506, 2300328, 1199, 0, 0, 1, 1, 2900.83, -448.898, 98.4267, 3.31823, 0, 
 ROW(9998507, 2300328, 1199, 0, 0, 1, 1, 2900.47, -446.858, 98.4267, 3.31823, 0, 0, 0.996103, -0.0882031, 300, 0, 1, '', NULL)
 ) AS `s` WHERE DATABASE() = 'coa_world';
 
-DELETE FROM `creature` WHERE `guid` BETWEEN 9999833 AND 9999840 AND `id` IN (9780012, 9990200, 9990220, 9990300, 9990320, 9990340, 9990400, 9990500) AND DATABASE() = 'coa_world';
+DELETE FROM `creature` WHERE (`guid`, `id`) IN ((9999833, 9990500), (9999834, 9990400), (9999835, 9990300), (9999836, 9990320), (9999837, 9990340), (9999838, 9990200), (9999839, 9990220), (9999840, 9780012)) AND DATABASE() = 'coa_world';
 INSERT IGNORE INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`)
 SELECT `s`.* FROM (VALUES
 ROW(9999833, 9990500, 1199, 0, 0, 1, 1, 0, 2917.27, -454.477, 98.4266, 2.30503, 300, 0, 0, 9300, 0, 0, 0, 0, 0, '', NULL, 0),
