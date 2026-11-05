@@ -22,8 +22,8 @@ INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`,
 UPDATE `creature` SET `id` = 64604 WHERE `guid` = 9780100 AND `id` IN (12397, 64604);
 
 UPDATE `creature_template` SET `lootid` = 12397 WHERE `entry` = 12397;
-DELETE FROM `creature_loot_template` WHERE `Entry` = 12397 AND `Item` IN (17111, 17112, 17113, 18204, 18543, 18544, 18546,
-  19133, 19134, 19135, 1615011);
+DELETE FROM `creature_loot_template` WHERE `Entry` = 12397 AND `Item` IN (17111, 17112, 17113, 18204,
+  18543, 18544, 18546, 19133, 19134, 19135, 1615011);
 INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`,
   `MinCount`, `MaxCount`, `Comment`) VALUES
 (12397, 17111, 0, 0, 0, 1, 1, 1, 1, 'Lord Kazzak - Blazefury Medallion'),
