@@ -10,6 +10,7 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "ThreatManager.h"
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -66,7 +67,8 @@ enum BloodmageSecondarySpells : uint32
     SPELL_RUNNING_WILD = 800175,
     SPELL_RUNNING_WILD_JOURNEYMAN = 520575,
     SPELL_BITE_WOUND = 706654,
-    SPELL_BITE_WOUND_PERCENT = 532612
+    SPELL_BITE_WOUND_PERCENT = 532612,
+    SPELL_CALL_OF_THE_DARKWING = 801958
 };
 
 constexpr uint32 TORTURE_MINIMUM_THIRST_STACKS = 9;
@@ -848,9 +850,41 @@ class aura_ascension_bloodmage_shadow_colony : public AuraScript
         return target && target->IsPlayer();
     }
 
+    void CallTheDarkwing(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+    {
+        PreventDefaultAction();
+
+        Unit* ally = GetTarget();
+        Unit* enemy = eventInfo.GetActor();
+        if (!ally || !enemy)
+            return;
+
+        ally->CastSpell(enemy, SPELL_CALL_OF_THE_DARKWING, TRIGGERED_FULL_MASK, nullptr, aurEff, ally->GetGUID());
+        RedirectThreat(aurEff, ally, enemy);
+    }
+
+    void RedirectThreat(AuraEffect const* aurEff, Unit* ally, Unit* enemy)
+    {
+        Unit* bloodmage = ObjectAccessor::GetUnit(*ally, aurEff->GetCasterGUID());
+        if (!bloodmage || bloodmage == ally || !bloodmage->IsAlive() || !enemy->IsValidAttackTarget(bloodmage))
+            return;
+
+        if (ally->GetHealthPct() >= bloodmage->GetHealthPct())
+            return;
+
+        float const amount = enemy->GetThreatMgr().GetThreat(ally) * 0.5f;
+        if (amount <= 0.0f)
+            return;
+
+        enemy->GetThreatMgr().ModifyThreatByPercent(ally, -50);
+        enemy->GetThreatMgr().AddThreat(bloodmage, amount, GetSpellInfo(), true, true);
+    }
+
     void Register() override
     {
         DoCheckAreaTarget += AuraCheckAreaTargetFn(aura_ascension_bloodmage_shadow_colony::Check);
+        OnEffectProc += AuraEffectProcFn(aura_ascension_bloodmage_shadow_colony::CallTheDarkwing, EFFECT_0,
+            SPELL_AURA_PROC_TRIGGER_SPELL);
     }
 };
 }

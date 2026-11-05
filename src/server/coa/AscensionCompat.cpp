@@ -60,6 +60,7 @@
 #include "AscensionClassTuning.h"
 #include "AscensionBarbarian.h"
 #include "AscensionBarbarianScaling.h"
+#include "AscensionBloodmageDarkwing.h"
 #include "AscensionCustomResourceData.h"
 #include "AscensionFreshCharacterCheck.h"
 #include "AscensionLfgObjective.h"
@@ -259,9 +260,9 @@ constexpr uint16 CMSG_QUERY_DELETED_ITEM_RECOVERY = 0x05E2;
 constexpr uint16 CMSG_RECOVER_DELETED_ITEM = 0x05E4;
 constexpr uint16 CMSG_CLAIM_TUTORIAL_REWARD = 0x06A8;
 
-constexpr std::array<uint16, 9> MODULE_EXTENSION_OPCODES = {
+constexpr std::array<uint16, 10> MODULE_EXTENSION_OPCODES = {
     0x0682, 0x0684,
-    0x05DA, 0x05DC,
+    0x05DA, 0x05DC, 0x0774,
     CMSG_QUERY_VENDORED_ITEM_RECOVERY, CMSG_RECOVER_VENDORED_ITEM,
     CMSG_QUERY_DELETED_ITEM_RECOVERY, CMSG_RECOVER_DELETED_ITEM, CMSG_CLAIM_TUTORIAL_REWARD};
 
@@ -9920,6 +9921,7 @@ public:
         {
             PrepareAscensionClassMechanicsCast(spell);
             PrepareAscensionBarbarianScaling(spell);
+            PrepareAscensionBloodmageBatBite(spell);
         }
     }
 
