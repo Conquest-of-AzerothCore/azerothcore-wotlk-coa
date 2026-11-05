@@ -32,6 +32,8 @@ OUTMANEUVER_DURATION_MS = 8000
 OUTMANEUVER_STACK_AMOUNT = 20
 OUTMANEUVER_BASE_POINTS_3 = 29
 VEILED_IN_DARKNESS = 524854
+HOLY_CONSTITUTION = 706323
+HOLY_CONSTITUTION_BASE_POINTS_2 = 29
 VEILED_IN_DARKNESS_RADIUS_YARDS = 100.0
 SCOURGEBANE_STRIKE = 801832
 
@@ -130,7 +132,12 @@ class ClientDbcTooltipTest(unittest.TestCase):
         self.assertEqual(displayed(readout, '$557326d'),
                          Displayed('$557326d', OUTMANEUVER_DURATION_MS, None, 'duration_ms'))
         self.assertEqual(displayed(readout, '$s3'), Displayed('$s3', OUTMANEUVER_BASE_POINTS_3 + 1, 2, 'percent'))
-        self.assertEqual(readout.unreadable, ['${$557328m1+$AP*.55}'])
+        self.assertEqual(readout.unreadable, ['${$557328m1+$AP*.55} [EffectRealPointsPerLevel[0] of spell 557328]'])
+
+    def test_level_scaled_points_are_unreadable_with_the_field_named(self):
+        readout = self.read(HOLY_CONSTITUTION)
+        self.assertEqual(readout.values, [Displayed('$s2', HOLY_CONSTITUTION_BASE_POINTS_2 + 1, 1, 'percent')])
+        self.assertEqual(readout.unreadable, ['${$m1+0} [EffectRealPointsPerLevel[0] of spell 706323]'])
 
     def test_radius(self):
         readout = self.read(VEILED_IN_DARKNESS)
@@ -237,7 +244,8 @@ class FixtureTooltipTest(unittest.TestCase):
     def test_level_scaled_points_and_durations_are_unreadable(self):
         readout = read_tooltip(self.dbc, 11, FIXTURE_CASTER)
         self.assertEqual(readout.values, [])
-        self.assertEqual(readout.unreadable, ['$s1', '$d'])
+        self.assertEqual(readout.unreadable, ['$s1 [EffectRealPointsPerLevel[0] of spell 11]',
+                                              '$d [DurationPerLevel of spell 11]'])
 
     def test_unsupported_patterns_are_reported_verbatim(self):
         readout = read_tooltip(self.dbc, 12, FIXTURE_CASTER)

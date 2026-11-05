@@ -28,7 +28,9 @@ PLURAL_OR_GENDER = 'lLgG'
 
 
 class Unreadable(Exception):
-    pass
+    def __init__(self, reason: str = ''):
+        super().__init__(reason)
+        self.reason = reason
 
 
 @dataclass(frozen=True)
@@ -58,6 +60,7 @@ class Readout:
 class Variable:
     value: float | None
     effect_index: int | None
+    reason: str = ''
 
 
 class Records:
@@ -81,7 +84,7 @@ class Records:
 
     def points(self, spell_id: int, effect: int, upper: bool) -> float:
         if self.field('Spell', spell_id, f'EffectRealPointsPerLevel[{effect}]') != 0:
-            raise Unreadable
+            raise Unreadable(f'EffectRealPointsPerLevel[{effect}] of spell {spell_id}')
         base = self.field('Spell', spell_id, f'EffectBasePoints[{effect}]')
         return float(base + self.field('Spell', spell_id, f'EffectDieSides[{effect}]') if upper else base + 1)
 
@@ -93,7 +96,7 @@ class Records:
     def duration_ms(self, spell_id: int) -> float:
         index = self.field('Spell', spell_id, 'DurationIndex')
         if self.field('SpellDuration', index, 'DurationPerLevel') != 0:
-            raise Unreadable
+            raise Unreadable(f'DurationPerLevel of spell {spell_id}')
         duration = min(self.field('SpellDuration', index, 'Duration'),
                        self.field('SpellDuration', index, 'MaxDuration'))
         if duration <= 0:
@@ -138,14 +141,14 @@ class Tooltip:
                 if not body:
                     raise Unreadable
                 self.variables[definition.group(1)] = Variable(*self.evaluate(body.group(1)))
-            except Unreadable:
-                self.variables[definition.group(1)] = Variable(None, None)
+            except Unreadable as error:
+                self.variables[definition.group(1)] = Variable(None, None, error.reason)
         return self.variables
 
     def variable(self, name: str) -> Variable:
         variable = self.variables.get(name)
         if variable is None or variable.value is None:
-            raise Unreadable
+            raise Unreadable(variable.reason if variable else '')
         return variable
 
     def evaluate(self, expression: str) -> tuple[float, int | None]:
@@ -222,10 +225,10 @@ class Tooltip:
             character = description[position]
             if character == '$':
                 end, value = self.token(description, position)
-                if value is None:
-                    unreadable.append(description[position:end])
-                else:
+                if isinstance(value, Displayed):
                     values.append(value)
+                else:
+                    unreadable.append(unreadable_entry(description[position:end], value))
                 position = end
             elif character == '|':
                 color = COLOR_CODE.match(description, position)
@@ -243,7 +246,7 @@ class Tooltip:
                 position += 1
         return Readout(values, unreadable)
 
-    def token(self, text: str, start: int) -> tuple[int, Displayed | None]:
+    def token(self, text: str, start: int) -> tuple[int, Displayed | Unreadable | None]:
         position = start + 1
         following = text[position:position + 1]
         if following == '?':
@@ -254,7 +257,7 @@ class Tooltip:
             return self.variable_token(text, start)
         return self.spell_token(text, start)
 
-    def expression_token(self, text: str, start: int) -> tuple[int, Displayed | None]:
+    def expression_token(self, text: str, start: int) -> tuple[int, Displayed | Unreadable | None]:
         close = text.find('}', start)
         if close < 0:
             return len(text), None
@@ -264,22 +267,22 @@ class Tooltip:
             end = suffix.end()
         try:
             value, effect_index = self.evaluate(text[start + 2:close])
-        except Unreadable:
-            return end, None
+        except Unreadable as error:
+            return end, error
         return end, Displayed(text[start:end], value, effect_index, percent_or_flat(text, end))
 
-    def variable_token(self, text: str, start: int) -> tuple[int, Displayed | None]:
+    def variable_token(self, text: str, start: int) -> tuple[int, Displayed | Unreadable | None]:
         match = NAMED_VARIABLE.match(text, start + 1)
         if not match:
             return start + 2, None
         try:
             variable = self.variable(match.group(1))
-        except Unreadable:
-            return match.end(), None
+        except Unreadable as error:
+            return match.end(), error
         return match.end(), Displayed(text[start:match.end()], variable.value, variable.effect_index,
                                       percent_or_flat(text, match.end()))
 
-    def spell_token(self, text: str, start: int) -> tuple[int, Displayed | None]:
+    def spell_token(self, text: str, start: int) -> tuple[int, Displayed | Unreadable | None]:
         position = start + 1
         scaled = SCALED_TOKEN.match(text, position)
         if scaled:
@@ -294,8 +297,8 @@ class Tooltip:
             return (semicolon + 1 if semicolon >= 0 else len(text)), None
         try:
             value = self.spell_token_value(match, scaled, text, end)
-        except Unreadable:
-            return end, None
+        except Unreadable as error:
+            return end, error
         return end, Displayed(text[start:end], *value)
 
     def spell_token_value(self, match, scaled, text: str, end: int) -> tuple[float, int | None, str]:
@@ -388,6 +391,10 @@ class ExpressionParser:
                 self.effect_index = effect_index
             return value
         raise Unreadable
+
+
+def unreadable_entry(text: str, error: Unreadable | None) -> str:
+    return f'{text} [{error.reason}]' if error is not None and error.reason else text
 
 
 def percent_or_flat(text: str, end: int) -> str:

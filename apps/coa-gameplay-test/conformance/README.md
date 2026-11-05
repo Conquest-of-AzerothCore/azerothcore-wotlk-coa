@@ -53,6 +53,12 @@ escapes, other tokens (`$t`, `$o`, `$x`, `$S`, `$l`, `$g`...), expression functi
 zero), spread values (`EffectDieSides` not 1 for `$sN`), missing records, non-positive durations, a `$<name>` that
 the described spell's `SpellDescriptionVariableID` does not define, and a stat or school missing from `CasterStats`.
 
+A level-scaled entry names its field, for example `${$m1+0} [EffectRealPointsPerLevel[0] of spell 706323]`. The
+client does not scale by the character level: `Spell_C_GetSpellLevel` divides by 5 the rank that
+`CGPlayer_C::GetSpellRank` returns. That rank is the player's skill value in the spell's `SkillLineAbility` skill
+line (or weapon skill), capped at 5 × `MaxLevel`, and 0 when the spell has no ability row. `CasterStats` holds no
+skill values, so these values stay unreadable.
+
 ## Run
 
 Tests run through `verify_all` only; the `conformance` suite of `tools/check_source.py` lists them.
