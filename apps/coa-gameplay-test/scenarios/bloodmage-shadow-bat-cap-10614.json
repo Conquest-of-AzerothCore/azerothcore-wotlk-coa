@@ -1,0 +1,123 @@
+{
+  "schema": 1,
+  "name": "Call of the Darkwing never leaves more than 10 live Shadow Bats per owner (#10614)",
+  "contract": [
+    "PR #10883 added a Shadow Bat cap but was reverted by #10884 for an unrelated Venomancer crash, leaving",
+    "the tree with no live cap on creature 50069 (Shadow Bat) a Bloodmage can own: repeated Call of the",
+    "Darkwing casts/procs under a large pull (#10614) can accumulate far beyond what live Ascension ever",
+    "shows. Live combat logs (2026-07-13, coa-log-history) record at most 10 Shadow Bats alive on one",
+    "Bloodmage simultaneously. CapShadowBats (AscensionBloodmageDarkwing.cpp, same approach as #10883) now",
+    "unsummons the oldest bat (by creature GUID counter) whenever a new one would push the owner's live count",
+    "past 10, applied in OnPlayerAfterGuardianInitStatsForLevel before any class check so it covers both",
+    "801958 and 802578.",
+    "802578 (BasePoints 5, DieSides 1) always summons exactly 6 bats and has no cooldown, so two casts (12",
+    "attempted bats) and a third (18) exercise the cap repeatedly under direct player control, without relying",
+    "on proc chance.",
+    "Discriminating metric: owned_creature_count for entry 50069 never exceeds 10, including immediately after",
+    "each oversubscribing cast."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 802578
+    },
+    {
+      "action": "attack",
+      "actor": "bloodmage",
+      "target": "dummy"
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "First Call of the Darkwing (Grim Omen variant): 6 bats",
+      "actor": "bloodmage",
+      "spell": 802578,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "After 6 attempted bats: at most the cap",
+      "actor": "bloodmage",
+      "metric": "owned_creature_count",
+      "entry": 50069,
+      "min": 1,
+      "max": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Second Call of the Darkwing: 6 more bats, 12 attempted total",
+      "actor": "bloodmage",
+      "spell": 802578,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: after 12 attempted bats, still capped at 10",
+      "actor": "bloodmage",
+      "metric": "owned_creature_count",
+      "entry": 50069,
+      "min": 10,
+      "max": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "bloodmage",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Third Call of the Darkwing: 6 more bats, 18 attempted total",
+      "actor": "bloodmage",
+      "spell": 802578,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: after 18 attempted bats, still capped at 10",
+      "actor": "bloodmage",
+      "metric": "owned_creature_count",
+      "entry": 50069,
+      "min": 10,
+      "max": 10,
+      "within_ms": 3000
+    }
+  ]
+}
