@@ -7,6 +7,8 @@
 #include "CoAOtherSideDamage.h"
 #include "CommandScript.h"
 #include "Creature.h"
+#include "TemporarySummon.h"
+#include "Vehicle.h"
 #include "DatabaseEnv.h"
 #include "GameTime.h"
 #include "Map.h"
@@ -169,15 +171,34 @@ BreathKit const BreathKits[] =
     { 200019, "Nature Breath (fast acid cloud)" },
     { 1789, "Venom Bolt (poison breath state)" },
 };
-std::atomic<uint32> BreathKitIndex = 0;
+std::atomic<uint32> BreathKitIndex = 2;
+
+struct TrapTilt
+{
+    uint32 carrier;
+    int8 seat;
+    float seatX;
+    float seatZ;
+    float pitch;
+    char const* name;
+};
+
+TrapTilt const TrapTilts[] =
+{
+    { 0, 0, 0.0f, 0.0f, 0.0f, "flat, no carrier" },
+    { 9937001, 0, -1.0f, 0.8f, -0.75f, "43 degrees down (vehicle 827, seat 0)" },
+    { 9937002, 2, -0.24f, 0.12f, -0.873f, "50 degrees down (vehicle 375, seat 2)" },
+};
+std::atomic<uint32> TrapTiltIndex = 1;
 constexpr uint32 NPC_VENOM_TRAP = 162975;
 constexpr uint32 SpawnMaskAllDifficulties = 7;
 constexpr float TrapCommandReach = 10.0f;
 constexpr float TrapListReach = 600.0f;
 constexpr float ToxicExpulsionReach = 100.0f;
-constexpr float TrapReach = 13.0f;
-constexpr float TrapMouthOffset = 2.5f;
-constexpr float TrapHalfAngle = float(M_PI) / 12.0f;
+constexpr float TrapReach = 14.0f;
+constexpr float TrapMouthOffset = 1.5f;
+constexpr float TrapChestHeight = 1.0f;
+constexpr float TrapHalfAngle = float(M_PI) / 9.0f;
 
 uint8 DifficultyBit(Map const* map)
 {
@@ -316,12 +337,36 @@ private:
     float _breathFacing = 0.0f;
 };
 
+struct BreathCheck
+{
+    float distance;
+    float offDegrees;
+    bool sight;
+    bool inside;
+};
+
+BreathCheck CheckTrapBreath(Creature const* trap, Player const* player)
+{
+    Position const mouth = trap->GetHomePosition();
+    float const yaw = mouth.GetOrientation();
+    float const pitch = TrapTilts[TrapTiltIndex.load()].pitch;
+    float const dirX = std::cos(pitch) * std::cos(yaw);
+    float const dirY = std::cos(pitch) * std::sin(yaw);
+    float const dirZ = std::sin(pitch);
+    float const dx = player->GetPositionX() - mouth.GetPositionX();
+    float const dy = player->GetPositionY() - mouth.GetPositionY();
+    float const dz = player->GetPositionZ() + TrapChestHeight - mouth.GetPositionZ();
+    float const distance = std::sqrt(dx * dx + dy * dy + dz * dz);
+    float const cosine = distance > 0.01f ? (dx * dirX + dy * dirY + dz * dirZ) / distance : 1.0f;
+    float const off = std::acos(std::clamp(cosine, -1.0f, 1.0f));
+    bool const sight = player->IsWithinLOS(mouth.GetPositionX() + TrapMouthOffset * dirX, mouth.GetPositionY() + TrapMouthOffset * dirY,
+        mouth.GetPositionZ() + TrapMouthOffset * dirZ, VMAP::ModelIgnoreFlags::M2);
+    return { distance, off * 180.0f / float(M_PI), sight, distance <= TrapReach && off <= TrapHalfAngle && sight };
+}
+
 bool InTrapBreath(Creature const* trap, Player const* player)
 {
-    float const facing = trap->GetHomePosition().GetOrientation();
-    return player->IsAlive() && !player->IsGameMaster() && trap->GetExactDist(player) <= TrapReach
-        && std::fabs(Position::NormalizeOrientation(trap->GetAngle(player) - facing + float(M_PI)) - float(M_PI)) <= TrapHalfAngle
-        && player->IsWithinLOS(trap->GetPositionX() + TrapMouthOffset * std::cos(facing), trap->GetPositionY() + TrapMouthOffset * std::sin(facing), trap->GetPositionZ());
+    return player->IsAlive() && !player->IsGameMaster() && CheckTrapBreath(trap, player).inside;
 }
 
 std::mutex TrapLastHitLock;
@@ -360,6 +405,16 @@ struct npc_coa_other_side_venom_trap : public ScriptedAI
         me->SetObjectScale(TrapObjectScale);
         _rankIn = 0;
         _breathing = false;
+        _mountedTilt = UINT32_MAX;
+    }
+
+    void Remount()
+    {
+        Dismount();
+        Position const home = me->GetHomePosition();
+        me->NearTeleportTo(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ(), home.GetOrientation());
+        _mountedTilt = UINT32_MAX;
+        _rankIn = 0;
     }
 
     void AttackStart(Unit* ) override { }
@@ -370,6 +425,7 @@ struct npc_coa_other_side_venom_trap : public ScriptedAI
         if (_rankIn <= diff)
         {
             Rank();
+            Mount();
             _rankIn = TrapRankMs;
         }
         else
@@ -381,7 +437,8 @@ struct npc_coa_other_side_venom_trap : public ScriptedAI
         bool const breathing = now >= _level * active && now < (_level + 1) * active;
         if (breathing && !_breathing)
         {
-            me->SetFacingTo(me->GetHomePosition().GetOrientation());
+            if (!me->GetVehicle())
+                me->SetFacingTo(me->GetHomePosition().GetOrientation());
             _tickIn = 0;
         }
         _breathing = breathing;
@@ -402,6 +459,39 @@ struct npc_coa_other_side_venom_trap : public ScriptedAI
     }
 
 private:
+    void Mount()
+    {
+        uint32 const tilt = TrapTiltIndex.load();
+        Creature* carrier = ObjectAccessor::GetCreature(*me, _carrier);
+        if (tilt == _mountedTilt && (!TrapTilts[tilt].carrier || (carrier && me->GetVehicleBase() == carrier)))
+            return;
+        Dismount();
+        _mountedTilt = tilt;
+        TrapTilt const& setup = TrapTilts[tilt];
+        if (!setup.carrier)
+            return;
+        Position const home = me->GetHomePosition();
+        float const o = home.GetOrientation();
+        carrier = me->SummonCreature(setup.carrier, home.GetPositionX() - setup.seatX * std::cos(o), home.GetPositionY() - setup.seatX * std::sin(o),
+            home.GetPositionZ() - setup.seatZ, o, TEMPSUMMON_MANUAL_DESPAWN);
+        if (!carrier)
+            return;
+        carrier->SetReactState(REACT_PASSIVE);
+        carrier->SetDisableGravity(true);
+        carrier->SetControlled(true, UNIT_STATE_ROOT);
+        _carrier = carrier->GetGUID();
+        me->EnterVehicle(carrier, setup.seat);
+    }
+
+    void Dismount()
+    {
+        if (me->GetVehicle())
+            me->ExitVehicle();
+        if (Creature* carrier = ObjectAccessor::GetCreature(*me, _carrier))
+            carrier->DespawnOrUnsummon();
+        _carrier.Clear();
+    }
+
     void Rank()
     {
         std::list<Creature*> traps;
@@ -424,6 +514,8 @@ private:
     uint32 _tickIn = 0;
     uint32 _level = 0;
     uint32 _levels = 1;
+    uint32 _mountedTilt = UINT32_MAX;
+    ObjectGuid _carrier;
     bool _breathing = false;
 };
 
@@ -578,6 +670,8 @@ public:
             { "nudge", HandleNudge, SEC_GAMEMASTER, Console::No },
             { "turn", HandleTurn, SEC_GAMEMASTER, Console::No },
             { "face", HandleFace, SEC_GAMEMASTER, Console::No },
+            { "tilt", HandleTilt, SEC_GAMEMASTER, Console::No },
+            { "lift", HandleLift, SEC_GAMEMASTER, Console::No },
         };
         static ChatCommandTable roadCommands =
         {
@@ -643,10 +737,12 @@ public:
         }
         trap->SetFacingTo(trap->GetHomePosition().GetOrientation());
         trap->SendPlaySpellVisual(BreathKits[BreathKitIndex.load()].kit);
-        bool const inside = InTrapBreath(trap, player);
-        if (inside)
+        BreathCheck const check = CheckTrapBreath(trap, player);
+        if (check.inside && !player->IsGameMaster())
             TrapBreathDamage(trap, player);
-        handler->PSendSysMessage("Trap {} at {:.1f} yards breathes; you are {} its breath.", trap->GetSpawnId(), trap->GetExactDist(player), inside ? "inside" : "outside");
+        handler->PSendSysMessage("Trap {}: {:.1f} yd from the mouth (max {:.0f}), {:.0f} degrees off the breath (max {:.0f}), sight {}; you are {}{}.",
+            trap->GetSpawnId(), check.distance, TrapReach, check.offDegrees, TrapHalfAngle * 180.0f / float(M_PI), check.sight ? "yes" : "no",
+            check.inside ? "inside" : "outside", player->IsGameMaster() ? " (GM mode: no damage)" : "");
         return true;
     }
 
@@ -713,7 +809,10 @@ public:
         data->posZ = z;
         data->orientation = o;
         trap->SetHomePosition(x, y, z, o);
-        trap->NearTeleportTo(x, y, z, o);
+        if (npc_coa_other_side_venom_trap* ai = dynamic_cast<npc_coa_other_side_venom_trap*>(trap->AI()))
+            ai->Remount();
+        else
+            trap->NearTeleportTo(x, y, z, o);
         WorldDatabasePreparedStatement* stmt = WorldDatabase.GetPreparedStatement(WORLD_UPD_CREATURE_POSITION);
         stmt->SetData(0, x);
         stmt->SetData(1, y);
@@ -722,6 +821,35 @@ public:
         stmt->SetData(4, trap->GetSpawnId());
         WorldDatabase.Execute(stmt);
         handler->PSendSysMessage("Trap {} now at {:.2f} {:.2f} {:.2f}, facing {:.3f}.", trap->GetSpawnId(), x, y, z, o);
+    }
+
+    static bool HandleTilt(ChatHandler* handler, Optional<uint32> number)
+    {
+        uint32 const count = uint32(std::size(TrapTilts));
+        if (!number)
+        {
+            for (uint32 i = 0; i < count; ++i)
+                handler->PSendSysMessage("{}{}: {}", i == TrapTiltIndex.load() ? "> " : "  ", i, TrapTilts[i].name);
+            return true;
+        }
+        if (*number >= count)
+        {
+            handler->SendErrorMessage("Choose 0 to {}.", count - 1);
+            return false;
+        }
+        TrapTiltIndex = *number;
+        handler->PSendSysMessage("Traps switch to {} within 5 seconds.", TrapTilts[*number].name);
+        return true;
+    }
+
+    static bool HandleLift(ChatHandler* handler, float yards)
+    {
+        Creature* trap = NearestPlacedTrap(handler);
+        if (!trap)
+            return false;
+        Position const home = trap->GetHomePosition();
+        MoveTrap(handler, trap, home.GetPositionX(), home.GetPositionY(), home.GetPositionZ() + yards, home.GetOrientation());
+        return true;
     }
 
     static bool HandleNudge(ChatHandler* handler, float yards)
