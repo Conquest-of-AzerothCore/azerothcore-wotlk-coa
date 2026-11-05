@@ -829,6 +829,7 @@ struct SpellDamageEvent
     uint32 spell = 0;
     uint32 damage = 0;
     bool critical = false;
+    bool blocked = false;
     uint32 casterEntry = 0;
 };
 
@@ -1056,10 +1057,11 @@ void ObserveSpellDamage(Actor& actor, WorldPacket const& packet, Player* player)
         response.read_skip<uint32>();
         response.read_skip<uint8>();
         response.read_skip<uint8>();
-        response.read_skip<uint32>();
+        uint32 blocked;
         uint32 hitInfo;
-        response >> hitInfo;
+        response >> blocked >> hitInfo;
         event.critical = (hitInfo & SPELL_HIT_TYPE_CRIT) != 0;
+        event.blocked = blocked != 0;
     }
     else
     {
@@ -4373,10 +4375,12 @@ private:
             if (auto id = step.get_optional<std::string>("target"))
                 target = GetUnit(*id)->GetGUID();
             auto critical = step.get_optional<bool>("critical");
+            auto blocked = step.get_optional<bool>("blocked");
             uint64 value = 0;
             for (SpellDamageEvent const& event : _actors.at(step.get<std::string>("actor")).spellDamage)
                 if (caster && event.caster == caster && event.spell == spell &&
-                    (!target || event.target == target) && (!critical || event.critical == *critical))
+                    (!target || event.target == target) && (!critical || event.critical == *critical) &&
+                    (!blocked || event.blocked == *blocked))
                     value += metric == "spell_damage_count" ? 1 : event.damage;
             return double(value);
         }

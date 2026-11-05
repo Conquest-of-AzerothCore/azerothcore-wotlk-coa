@@ -1131,6 +1131,24 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(ValueError):
                 run.validate(invalid)
 
+    def test_spell_damage_blocked_filter(self):
+        for metric in ('spell_damage_count', 'spell_damage_total'):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': metric, 'spell': 116,
+                                      'target': 'target', 'critical': False, 'blocked': False, 'min': 0})
+            with self.subTest(metric=metric):
+                self.assertIs(run.validate(scenario), scenario)
+            invalid = copy.deepcopy(scenario)
+            invalid['steps'][-1]['blocked'] = 'false'
+            with self.subTest(metric=metric, blocked='false'), self.assertRaises(ValueError):
+                run.validate(invalid)
+        for metric, change in (('spell_heal_count', {'blocked': False}), ('spell_damage_count', {'glancing': False})):
+            invalid = copy.deepcopy(self.scenario)
+            invalid['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': metric, 'spell': 116,
+                                     'target': 'target', 'min': 0, **change})
+            with self.subTest(metric=metric, change=change), self.assertRaises(ValueError):
+                run.validate(invalid)
+
     def test_owned_creature_metrics_need_an_entry(self):
         for metric in ('owned_creature_damage_total', 'owned_creature_damage_count', 'owned_creature_attack_count',
                        'owned_creature_heal_count', 'owned_creature_heal_total',

@@ -17,6 +17,7 @@ HIT_CHECKS = ('hit_mean', 'melee_mean', 'unmodelled')
 UNMODELLED = 'unmodelled: '
 Z_99 = 2.576
 MEAN_HALF_WIDTH = 0.01
+EXCLUDED_OUTCOME_MARGIN = Fraction(3, 2)
 ATTACK_POWER_PER_DPS = 14.0
 SCHOOL_DAMAGE = 2
 APPLY_AURA = 6
@@ -277,6 +278,10 @@ def casts_needed(model: HitModel) -> int:
     return math.ceil(hits / model.hits_per_cast)
 
 
+def scheduled_casts(needed: int) -> int:
+    return math.ceil(needed * EXCLUDED_OUTCOME_MARGIN)
+
+
 def effect_points(records: Records, spell_id: int, effect: int, level: int) -> int:
     def spell(name: str):
         return records.field('Spell', spell_id, name)
@@ -424,11 +429,13 @@ def target_steps(school_mask: int) -> tuple[list[dict], dict[str, str]]:
     return steps, labels
 
 
-def model_record(model: HitModel, school_mask: int, weapon: WeaponProfile | None, labels: dict[str, str]) -> dict:
+def model_record(model: HitModel, school_mask: int, weapon: WeaponProfile | None, labels: dict[str, str],
+                 needed: int) -> dict:
     return {'kind': model.kind, 'school_mask': school_mask, 'weapon': asdict(weapon) if weapon else None,
             'modifiers': [asdict(modifier) for modifier in model.modifiers], 'hits_per_cast': model.hits_per_cast,
             'reference': {'mean': model.mean, 'sigma': model.sigma, 'tooltip_mean': model.tooltip_mean,
                           'casts_needed': casts_needed(model) if model.mean > 0 else None},
+            'minimum_hits': needed * model.hits_per_cast, 'scheduled_casts': scheduled_casts(needed),
             'measurements': labels}
 
 
@@ -482,16 +489,21 @@ def hit_scenario(class_file: dict, spell: ClassSpell, casts: int) -> tuple[dict,
         steps = learn + steps
     start_recovery = records_of(class_file).field('Spell', rank_id, 'StartRecoveryTime')
     interval = max(start_recovery, facts.cast_time_ms, hit.duration_ms) + CAST_MARGIN_MS
-    steps += cast_steps(facts, rank_id, hostile, interval, casts)
+    performed = scheduled_casts(casts)
+    steps += cast_steps(facts, rank_id, hostile, interval, performed)
     steps.append({'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS})
     family = 'spell_damage' if hostile else 'spell_heal'
+    unblocked = {'blocked': False} if hostile else {}
     receiver = TARGET if hostile else CASTER
     labels.update({'total': f'{label} total', 'count': f'{label} count'})
     for part in ('total', 'count'):
         steps.append(measurement(labels[part], CASTER, f'{family}_{part}', spell=rank_id, target=receiver,
-                                 critical=False))
+                                 critical=False, **unblocked))
     steps.append(measurement(f'{rank_id} critical_hits', CASTER, f'{family}_count', spell=rank_id, target=receiver,
                              critical=True))
+    if hostile:
+        steps.append(measurement(f'{rank_id} blocked_hits', CASTER, f'{family}_count', spell=rank_id,
+                                 target=receiver, blocked=True))
     steps.append(measurement(f'{rank_id} cast_count', CASTER, 'spell_cast_count', spell=rank_id))
     scenario = scenario_shell(class_file, name, contract, steps)
     if hostile:
@@ -500,11 +512,11 @@ def hit_scenario(class_file: dict, spell: ClassSpell, casts: int) -> tuple[dict,
     order = ', percent of the roll before the flat bonus (ADR 0010)' if model.kind == 'weapon' else ''
     expectations = [Expectation(label, 'hit_mean', spell.spell_id, rank_id, hit.indexes[0],
                                 ' | '.join(model.displayed), f'{model.kind} hit{order}, integer steps modelled',
-                                model_record(model, hit.school_mask, weapon, labels))]
+                                model_record(model, hit.school_mask, weapon, labels, casts))]
     for ordinal, entry in enumerate(hit.readout.unreadable):
         expectations.append(Expectation(f'{label} unreadable #{ordinal}', 'hit_mean', spell.spell_id, rank_id, None,
                                         entry, UNREADABLE + entry))
-    return timed(scenario, SETTLE_MS + casts * interval + DRAIN_MS), expectations
+    return timed(scenario, SETTLE_MS + performed * interval + DRAIN_MS), expectations
 
 
 def melee_scenario(class_file: dict, swings: int) -> tuple[dict, list[Expectation]]:
@@ -519,7 +531,7 @@ def melee_scenario(class_file: dict, swings: int) -> tuple[dict, list[Expectatio
         return timed(scenario_shell(class_file, name, contract, []), SETTLE_MS), [unmodelled]
     weapon = weapon_profile(class_file)
     steps, labels = target_steps(PHYSICAL_SCHOOL_MASK)
-    swing_ms = swings * weapon.speed_ms
+    swing_ms = scheduled_casts(swings) * weapon.speed_ms
     steps += [{'action': 'attack', 'actor': CASTER, 'target': TARGET},
               {'action': 'wait', 'label': 'swings', 'ms': swing_ms},
               {'action': 'stop_attack', 'actor': CASTER}]
@@ -535,5 +547,5 @@ def melee_scenario(class_file: dict, swings: int) -> tuple[dict, list[Expectatio
     scenario['creatures'] = [creature_fixture(class_file)]
     expectation = Expectation(MELEE_LABEL, 'melee_mean', 0, 0, None, f'weapon {weapon.item}',
                               'melee hit at weapon speed, integer steps modelled',
-                              model_record(model, PHYSICAL_SCHOOL_MASK, weapon, labels))
+                              model_record(model, PHYSICAL_SCHOOL_MASK, weapon, labels, swings))
     return timed(scenario, SETTLE_MS + swing_ms), [expectation]

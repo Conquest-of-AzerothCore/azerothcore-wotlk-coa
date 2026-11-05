@@ -127,8 +127,10 @@ token, an aura of a passive or cast-time spell). Only `unmeasurable` expectation
 ## Max-rank hit scenarios
 
 `hit_scenario(class_file, spell, casts)` models the spell's highest rank from its effects, its tooltip read with the
-reference stats, the known auras and the reference target. It learns the rank, measures the target, then repeats
-`casts` times: `set_power` to the cost (when the cost is a plain `ManaCost`), `reset_cooldown`, `cast`, and a wait of
+reference stats, the known auras and the reference target. `casts` is the number of casts the mean needs; the scenario
+performs `scheduled_casts(casts)`, `ceil(casts x 1.5)`, so that the hits excluded from the mean (critical, blocked)
+rarely leave fewer usable hits (ruling R9). It learns the rank, measures the target, then repeats: `set_power` to the
+cost (when the cost is a plain `ManaCost`), `reset_cooldown`, `cast`, and a wait of
 `max(StartRecoveryTime, cast time, duration of a periodic aura) + 500 ms`; a 3 s drain precedes the measurements.
 
 | `kind` | Effects | Hit before modifiers |
@@ -151,20 +153,23 @@ Each server integer step is then applied to every possible hit, never as a toler
 2. armor, `ceil(hit x kept)` (`Unit::CalcArmorReducedDamage`), or each partial-resist step `i` with its share,
    `hit - floor(hit x i / 10)` (`Unit::CalcAbsorbResist`), from `expected_mitigation` and its `resist_shares`.
 
-`mean` and `sigma` are the mean and standard deviation of the resulting distribution. `casts_needed(model)` is the
-Global Constraints rule: `ceil((2.576 x sigma / (0.01 x mean))^2)` hits, at least one, divided by `hits_per_cast`.
+`mean` and `sigma` are the mean and standard deviation of the resulting distribution; the comparison judges the
+measured mean against `mean`, and `tooltip_mean` is shown beside it. `casts_needed(model)` is the Global Constraints
+rule: `ceil((2.576 x sigma / (0.01 x mean))^2)` hits, at least one, divided by `hits_per_cast`.
 
 The `hit_mean` expectation carries `model`: the kind, school mask, weapon, modifiers, reference mean, sigma and casts,
-and the labels of its measurements: `<label> total` and `<label> count` (`spell_damage_*` on `dummy` or
-`spell_heal_*` on the caster, `critical: false`), `target armor`, `target view_level` and `target resistance <school>`.
+`minimum_hits` (the needed casts times `hits_per_cast`: fewer usable hits are insufficient trials), `scheduled_casts`,
+and the labels of its measurements: `<label> total` and `<label> count` (`spell_damage_*` on `dummy` with
+`critical: false` and `blocked: false`, or `spell_heal_*` on the caster with `critical: false`), `target armor`,
+`target view_level` and `target resistance <school>`.
 `measured_hit_model(class_file, expectation, measured)` recomputes the model from a run's labelled values (caster
 stats, known auras, armor, view level and resistances), since creature 36 spawns with armor 528 or 562. Two
-diagnostics ride along: `<rank> critical_hits` and `<rank> cast_count`.
+diagnostics ride along: `<rank> critical_hits`, `<rank> blocked_hits` (damage only) and `<rank> cast_count`.
 
-`melee_scenario(class_file, swings)` attacks `dummy` for `swings` weapon swings and measures the plain main-hand hits
-(`melee_damage_total` and `melee_damage_count` with `critical`, `glancing` and `blocked` false) under `melee
-melee_mean`, beside the swing, critical, glancing and blocked counts. Its model is the weapon roll at weapon speed with
-the same modifier and armor steps.
+`melee_scenario(class_file, swings)` attacks `dummy` for `ceil(swings x 1.5)` weapon swings and measures the plain
+main-hand hits (`melee_damage_total` and `melee_damage_count` with `critical`, `glancing` and `blocked` false) under
+`melee melee_mean`, beside the swing, critical, glancing and blocked counts; `minimum_hits` is `swings`. Its model is
+the weapon roll at weapon speed with the same modifier and armor steps.
 
 A spell that fits no model is never dropped: its expectation has `check` `unmodelled` and a `rule` that starts with
 `unmodelled: ` (a passive spell, no damage or healing effect, effects of several models, an effect without a readable

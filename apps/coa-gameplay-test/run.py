@@ -176,6 +176,7 @@ METRICS = TIMELINE_METRICS | {
     'wildcard_roll_cards_used', 'wildcard_bonus_pack_progress',
 }
 MELEE_OUTCOME_METRICS = {'melee_damage_count', 'melee_damage_total'}
+SPELL_DAMAGE_METRICS = {'spell_damage_count', 'spell_damage_total'}
 PLAYER_STAT_METRICS = {
     'mana_regen', 'mana_regen_interrupted', 'resting',
     'sent_mana_regen', 'sent_mana_regen_interrupted',
@@ -1024,7 +1025,8 @@ def validate(scenario):
                 require('spell' in step, f'{where}: metric needs spell')
             for key in ('glancing', 'blocked'):
                 if key in step:
-                    require(metric in MELEE_OUTCOME_METRICS, f'{where}: {key} only filters melee damage events')
+                    require(metric in MELEE_OUTCOME_METRICS or (key == 'blocked' and metric in SPELL_DAMAGE_METRICS),
+                            f'{where}: {key} only filters melee or spell damage events')
                     require(type(step[key]) is bool, f'{where}: {key} must be boolean')
             for key in ('pet', 'critical'):
                 if key in step:

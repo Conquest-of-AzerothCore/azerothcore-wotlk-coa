@@ -7,7 +7,7 @@ import unittest
 from classes import class_spells
 from hits import (HIT_CHECKS, HitModel, Modifier, Unmodelled, WeaponProfile, casts_needed, expected_hit,
                   hit_scenario, measured_hit_model, melee_scenario, reference_hit_model, reference_melee_model,
-                  weapon_profile)
+                  scheduled_casts, weapon_profile)
 from mitigation import REFERENCE_TARGET, MitigationModel, TargetProfile, expected_mitigation
 from profile import CLASSES_DIR, load_class_file
 from tooltip import CasterStats, Displayed, Readout
@@ -185,6 +185,11 @@ class CastsNeededTest(unittest.TestCase):
     def test_a_constant_hit_still_needs_one_cast(self):
         self.assertEqual(casts_needed(HitModel(kind='heal', mean=400.0, sigma=0.0, tooltip_mean=500.0)), 1)
 
+    def test_scenarios_schedule_half_again_the_needed_casts_for_excluded_outcomes(self):
+        for needed, scheduled in ((1, 2), (2, 3), (3, 5), (42, 63)):
+            self.assertEqual(scheduled_casts(needed), math.ceil(needed * 1.5))
+            self.assertEqual(scheduled_casts(needed), scheduled)
+
     def test_a_non_positive_mean_is_refused(self):
         with self.assertRaises(ValueError):
             casts_needed(HitModel(kind='school', mean=0.0, sigma=1.0, tooltip_mean=0.0))
@@ -204,14 +209,17 @@ class HitScenarioTest(unittest.TestCase):
         self.assertEqual([(modifier.spell_id, modifier.effect_index, modifier.percent)
                           for modifier in model.modifiers], [(CLASS_TUNING_AURA, 0, CLASS_TUNING_PERCENT_AT_60)])
 
-    def test_argent_blade_scenario_casts_casts_needed_times_and_resets_cooldown_and_energy_each_time(self):
+    def test_argent_blade_scenario_schedules_the_needed_casts_and_resets_cooldown_and_energy_each_time(self):
         casts = casts_needed(reference_hit_model(self.templar, ARGENT_BLADE_MAX_RANK))
         for count in (casts, 3):
-            scenario, _ = hit_scenario(self.templar, self.argent_blade, count)
+            scenario, expectations = hit_scenario(self.templar, self.argent_blade, count)
             self.assertIs(run.validate(scenario), scenario)
             steps = scenario['steps']
             casts_at = [index for index, step in enumerate(steps) if step['action'] == 'cast']
-            self.assertEqual(len(casts_at), count)
+            self.assertEqual(len(casts_at), math.ceil(count * 1.5))
+            hit = next(expectation for expectation in expectations if expectation.model)
+            self.assertEqual((hit.model['minimum_hits'], hit.model['scheduled_casts']),
+                             (count, math.ceil(count * 1.5)))
             for index in casts_at:
                 self.assertEqual(steps[index], {'action': 'cast', 'actor': 'caster', 'spell': ARGENT_BLADE_MAX_RANK,
                                                 'target': 'dummy'})
@@ -220,7 +228,7 @@ class HitScenarioTest(unittest.TestCase):
                 self.assertEqual(steps[index - 2], {'action': 'set_power', 'actor': 'caster', 'power': ENERGY,
                                                     'value': ARGENT_BLADE_ENERGY_COST})
 
-    def test_every_hit_measurement_excludes_critical_hits(self):
+    def test_every_hit_measurement_excludes_critical_and_blocked_hits(self):
         scenario, expectations = hit_scenario(self.templar, self.argent_blade, 2)
         hit = next(expectation for expectation in expectations if expectation.check == 'hit_mean'
                    and not expectation.rule.startswith(UNREADABLE))
@@ -229,6 +237,7 @@ class HitScenarioTest(unittest.TestCase):
         self.assertEqual({step['label'] for step in measured}, {hit.label + ' total', hit.label + ' count'})
         for step in measured:
             self.assertIs(step['critical'], False)
+            self.assertIs(step['blocked'], False)
             self.assertEqual((step['metric'] in ('spell_damage_total', 'spell_damage_count'), step['target']),
                              (True, 'dummy'))
 
@@ -272,9 +281,10 @@ class HitScenarioTest(unittest.TestCase):
         self.assertIs(run.validate(scenario), scenario)
         self.assertEqual(steps_with(scenario, action='attack'), [{'action': 'attack', 'actor': 'caster',
                                                                   'target': 'dummy'}])
-        self.assertTrue(steps_with(scenario, action='wait', ms=swings * WALKING_STICK_DELAY_MS))
+        self.assertTrue(steps_with(scenario, action='wait', ms=math.ceil(swings * 1.5) * WALKING_STICK_DELAY_MS))
         melee = [expectation for expectation in expectations if expectation.check == 'melee_mean']
         self.assertEqual(len(melee), 1)
+        self.assertEqual(melee[0].model['minimum_hits'], swings)
         measured = [step for step in scenario['steps']
                     if step['action'] == 'assert' and step['label'].startswith(melee[0].label + ' ')]
         self.assertEqual(len(measured), 2)
