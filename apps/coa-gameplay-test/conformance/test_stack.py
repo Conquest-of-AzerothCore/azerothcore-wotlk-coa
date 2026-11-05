@@ -288,6 +288,17 @@ class StackCompareTest(unittest.TestCase):
                             self.workspace.root / 'report')
         self.assertIn('| 20.00 to 20.00 | yes |', path.read_text(encoding='utf-8'))
 
+    def test_levers_file_keeps_the_row_of_a_configuration_without_damage(self):
+        self.add_config(BASE, 0, BASE_MEANS, lost=0.0)
+        self.add_config(PALADIN, 1, PALADIN_MEANS, delta_expectation(), lost=72000.0)
+        manifest, results = self.workspace.manifest()
+        path = write_levers(manifest, results, compare(manifest, results, tooltips=bonus_reader()),
+                            self.workspace.root / 'report')
+        text = path.read_text(encoding='utf-8')
+        self.assertIn(f'| {BASE} |', text)
+        self.assertIn(f'| {PALADIN} |', text)
+        self.assertIn('no: DPS mean is not above 0 on a side', text)
+
 
 class ChangeDecisionTest(unittest.TestCase):
     @staticmethod
@@ -308,6 +319,13 @@ class ChangeDecisionTest(unittest.TestCase):
 
     def test_narrow_change_away_from_zero_is_decisive(self):
         self.assertEqual(change_decision(self.dps([500.0, 501.0, 499.0]), self.dps([600.0, 601.0, 599.0]))[1], 'yes')
+
+    def test_change_against_a_configuration_without_damage_is_not_decisive(self):
+        zero = self.dps([0.0] * 5)
+        expected = 'no: DPS mean is not above 0 on a side'
+        self.assertEqual(change_decision(zero, self.dps([600.0, 601.0, 599.0])), ('', expected))
+        self.assertEqual(change_decision(self.dps([600.0, 601.0, 599.0]), zero), ('', expected))
+        self.assertEqual(change_decision(zero, zero), ('', expected))
 
     def test_change_of_an_unmeasured_configuration_is_not_decisive(self):
         decisive = change_decision(self.dps([500.0] * 3), self.dps([600.0] * 2, 'insufficient_trials'))[1]

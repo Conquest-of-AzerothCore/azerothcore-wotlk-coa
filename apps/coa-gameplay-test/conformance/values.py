@@ -18,6 +18,7 @@ SELF_TARGETS = frozenset({0, 1})
 POWER_DISPLAY_DIVISOR = {0: 1, 1: 10, 2: 1, 3: 1, 4: 1000, 5: 1, 6: 10}
 MANA = 0
 CAST_MARGIN_MS = 500
+CAST_WAIT_LABEL = 'cast time'
 UNREADABLE = 'unreadable: '
 UNMEASURABLE = 'unmeasurable: '
 OWN_DURATION = re.compile(r'\$(\d*)[dD]')
@@ -209,7 +210,8 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
         cast_steps += required_aura_steps(facts)
         cast_steps.append(cast)
         if facts.cast_time_ms:
-            cast_steps.append({'action': 'wait', 'label': 'cast time', 'ms': facts.cast_time_ms + CAST_MARGIN_MS})
+            cast_steps.append({'action': 'wait', 'label': CAST_WAIT_LABEL,
+                               'ms': facts.cast_time_ms + CAST_MARGIN_MS})
         cast_steps.append(measurement(f'{rank_id} cast_failure', CASTER, 'cast_failure', spell=rank_id))
         if any(step['metric'].startswith('aura_') for step in after_cast):
             effect = first_aura_effect(facts) or 0

@@ -15,7 +15,7 @@ from profile import DBC_DIR, caster_stats_from, known_aura_label, probe_aura_lab
 from stack import (ADDS, MEASURED, MELEE_SOURCE, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE, TALENT_DELTA,
                    levers, mean_interval, ratio_interval)
 from tooltip import CasterStats, ForcedPoints, Readout, Records, Tooltip, Unreadable
-from values import EFFECTS, UNMEASURABLE, UNREADABLE, Expectation, dataset
+from values import CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECTS, UNMEASURABLE, UNREADABLE, Expectation, dataset
 
 STATUSES = ('ok', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials', 'unmeasured',
             MEASURED)
@@ -263,7 +263,8 @@ def elapsed_bound(run: Run, label: str) -> float | None:
     if position is None or run.max_step_ms is None:
         return None
     cast = max((index for index in range(position) if run.steps[index].get('action') == 'cast'), default=position)
-    return sum(number(step.get('elapsed_ms', 0), 'elapsed_ms') + run.max_step_ms
+    return sum(CAST_MARGIN_MS + run.max_step_ms if step.get('label') == CAST_WAIT_LABEL
+               else number(step.get('elapsed_ms', 0), 'elapsed_ms') + run.max_step_ms
                for step in run.steps[cast + 1:position + 1])
 
 
@@ -941,6 +942,8 @@ def change_decision(before: Verdict | None, after: Verdict) -> tuple[str, str]:
         return '', ''
     if before.status != MEASURED or after.status != MEASURED:
         return '', f'no: DPS {before.status} then {after.status}'
+    if min(fmean(before.detail['per_pass']), fmean(after.detail['per_pass'])) <= 0:
+        return '', 'no: DPS mean is not above 0 on a side'
     delta, low, high = ratio_interval(after.detail['per_pass'], before.detail['per_pass'])
     relative = (high - low) / 2 / (100 + delta)
     span = f'{low:.2f} to {high:.2f}'

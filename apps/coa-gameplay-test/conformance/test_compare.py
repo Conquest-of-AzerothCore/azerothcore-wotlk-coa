@@ -253,6 +253,22 @@ class CompareTest(unittest.TestCase):
         self.assertEqual(cooldown('5001').status, 'alert')
         self.assertEqual(cooldown('4949').status, 'alert')
 
+    def test_cooldown_window_of_a_cast_time_spell_starts_when_the_cast_completes(self):
+        label = '1001 cooldown_ms'
+        cast_wait = {'action': 'wait', 'label': 'cast time', 'status': 'completed', 'elapsed_ms': '2500'}
+        steps = [plain_step('cast'), cast_wait, assert_step('1001 cast_failure', '0')]
+
+        def cooldown(actual):
+            self.fresh()
+            verdicts = self.value_run([expectation(label, 'cooldown_ms', '5000', 'max(RecoveryTime, '
+                                                   'CategoryRecoveryTime)')], [],
+                                      steps + [assert_step(label, actual)], constant_reader())
+            return verdicts[label]
+
+        within = cooldown('4430')
+        self.assertEqual((within.status, within.low, within.high), ('ok', 4425.0, 5000.0))
+        self.assertEqual(cooldown('4000').status, 'alert')
+
     def test_failed_cast_leaves_the_checks_after_it_unmeasured_and_judges_the_values_before_it(self):
         token = Displayed('$s1', 50.0, 0, 'flat')
         entries = [expectation('1001 effect_value e0 #0', 'effect_value', '$s1', 'read flat', 0),
