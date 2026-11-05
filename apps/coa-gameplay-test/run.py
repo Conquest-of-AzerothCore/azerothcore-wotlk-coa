@@ -105,8 +105,8 @@ METRICS = TIMELINE_METRICS | {
     'pet_casting', 'pet_loading', 'pet_spell_bar_count',
     'controlled_aura_count', 'controlled_aura_min_damage', 'controlled_aura_max_damage',
     'owned_creature_count', 'owned_creature_spacing', 'owned_creature_weapon_damage_min',
-    'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_victim',
-    'charm_entry', 'charm_aura_stacks', 'controls_self', 'viewpoint_entry', 'seer_entry', 'private_instance',
+    'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_sent_faction', 'owned_creature_victim',
+    'charm_entry', 'charm_distance', 'charm_aura_stacks', 'controls_self', 'viewpoint_entry', 'seer_entry', 'private_instance',
     'dynamic_object', 'dynamic_object_duration_ms', 'dynamic_object_height', 'gossip_options', 'gossip_option_text',
     'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale', 'at_homebind', 'summon_pending',
     'spellbook_rows', 'spellbook_offers_spell', 'spellbook_covers_spell', 'spellbook_learned_alerts',
@@ -1154,7 +1154,7 @@ def validate(scenario):
                     number(step['sheath_state'], f'{where}.sheath_state', 0, 2, True)
             if metric in {'owned_creature_scale', 'owned_creature_visible', 'owned_creature_display',
                           'owned_creature_virtual_item', 'owned_creature_spacing', 'owned_creature_weapon_damage_min',
-                          'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_victim',
+                          'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_sent_faction', 'owned_creature_victim',
                           'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health'}:
                 require('entry' in step, f'{where}: metric needs creature entry')
             if metric in {'owned_creature_damage_total', 'owned_creature_damage_count',
@@ -1164,6 +1164,8 @@ def validate(scenario):
                 number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
             if metric == 'owned_creature_attackable':
                 require(step.get('target') in actor_ids, f'{where}: metric needs the attacking unit')
+            if metric == 'owned_creature_sent_faction':
+                require(step.get('target') in player_ids, f'{where}: metric needs the viewing player')
             if metric == 'owned_creature_victim':
                 require(step.get('target') in actor_ids, f'{where}: metric needs the expected victim')
             if metric in {'system_message_contains', 'whisper_contains'}:
@@ -1249,11 +1251,11 @@ def validate(scenario):
                           'whisper_contains',
                           'challenge_start_responses', 'challenge_start_code', 'owned_creature_scale', 'cast_failure',
                           'owned_creature_weapon_damage_min', 'owned_creature_spell_hit_chance',
-                          'owned_creature_attackable', 'owned_creature_victim', 'owned_creature_virtual_item',
+                          'owned_creature_attackable', 'owned_creature_sent_faction', 'owned_creature_victim', 'owned_creature_virtual_item',
                           'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health',
                           'pet_entry', 'pet_aura_stacks', 'pet_is_banker', 'pet_display', 'pet_flags', 'pet_mirror_image', 'pet_name_is', 'pet_native_display', 'pet_scale',
                           'pet_knows_spell', 'pet_distance', 'pet_bearing', 'pet_casting', 'pet_loading',
-                          'owned_creature_count', 'owned_creature_spacing', 'charm_entry',
+                          'owned_creature_count', 'owned_creature_spacing', 'charm_entry', 'charm_distance',
                           'charm_aura_stacks', 'controls_self', 'private_instance',
                           'dynamic_object', 'dynamic_object_duration_ms', 'dynamic_object_height',
                           'gossip_options', 'gossip_option_text',

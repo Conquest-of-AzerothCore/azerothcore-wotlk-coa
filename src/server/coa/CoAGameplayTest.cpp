@@ -4769,6 +4769,11 @@ private:
             }
             return object ? object->GetDuration() : 0;
         }
+        if (metric == "charm_distance")
+        {
+            Unit* charm = player->GetCharm();
+            return charm ? player->GetExactDist2d(charm) : -1.0f;
+        }
         if (metric == "charm_entry" || metric == "charm_aura_stacks")
         {
             Unit* charm = player->GetCharm();
@@ -4881,6 +4886,16 @@ private:
             Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
             Require(creature != nullptr, "Attack observation needs a present owned creature");
             return GetUnit(step.get<std::string>("target"))->IsValidAttackTarget(creature);
+        }
+        if (metric == "owned_creature_sent_faction")
+        {
+            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            Require(creature != nullptr, "Sent faction observation needs a present owned creature");
+            Actor& viewer = _actors.at(step.get<std::string>("target"));
+            auto itr = viewer.unitValues.find(creature->GetGUID().GetRawValue());
+            if (itr == viewer.unitValues.end() || !itr->second.count(UNIT_FIELD_FACTIONTEMPLATE))
+                return 0;
+            return itr->second.at(UNIT_FIELD_FACTIONTEMPLATE);
         }
         if (metric == "owned_creature_victim")
         {
