@@ -22,14 +22,15 @@
 #include "Define.h"
 #include <string_view>
 
-// .gm mod chat / .gm cm chat. The 3.3.5a client only renders the GM/DEV/AFK/DND chat tags,
+// .gm mod chat / .gm cm chat / .gm admin chat. The 3.3.5a client only renders the GM/DEV/AFK/DND chat tags,
 // so the server prefixes the staff member's chat text instead; the CoAModBadge addon turns
 // the prefix into a badge. Kept in Object::CustomData so Player.h stays untouched.
 enum class StaffChatTag : uint8
 {
     None,
     Moderator,
-    CommunityManager
+    CommunityManager,
+    Administrator
 };
 
 struct StaffChatTagData : public DataMap::Base
@@ -43,6 +44,7 @@ inline constexpr std::string_view STAFF_CHAT_PREFIXES[] =
 {
     "|cff33bbff<MOD>|r ",
     "|cff33bbff<CM>|r ",
+    "|cff33bbff<ADMIN>|r ",
 };
 
 inline std::string_view GetStaffChatPrefix(StaffChatTag tag)
@@ -51,6 +53,7 @@ inline std::string_view GetStaffChatPrefix(StaffChatTag tag)
     {
         case StaffChatTag::Moderator:        return STAFF_CHAT_PREFIXES[0];
         case StaffChatTag::CommunityManager: return STAFF_CHAT_PREFIXES[1];
+        case StaffChatTag::Administrator:    return STAFF_CHAT_PREFIXES[2];
         default:                             return {};
     }
 }

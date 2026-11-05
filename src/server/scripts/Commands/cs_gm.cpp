@@ -48,10 +48,16 @@ public:
             { "chat",      HandleGMCmChatCommand,     rbac::RBAC_PERM_COMMAND_GM_CM_CHAT,  Console::No  }
         };
 
+        static ChatCommandTable gmAdminCommandTable =
+        {
+            { "chat",      HandleGMAdminChatCommand,  rbac::RBAC_PERM_COMMAND_GM_ADMIN_CHAT, Console::No  }
+        };
+
         static ChatCommandTable gmCommandTable =
         {
             { "mod",       gmModCommandTable                                                       },
             { "cm",        gmCmCommandTable                                                        },
+            { "admin",     gmAdminCommandTable                                                     },
             { "chat",      HandleGMChatCommand,       rbac::RBAC_PERM_COMMAND_GM_CHAT,    Console::No  },
             { "fly",       HandleGMFlyCommand,        rbac::RBAC_PERM_COMMAND_GM_FLY,     Console::No  },
             { "ingame",    HandleGMListIngameCommand, rbac::RBAC_PERM_COMMAND_GM_INGAME,  Console::Yes },
@@ -68,7 +74,7 @@ public:
         return commandTable;
     }
 
-    // .gm mod chat / .gm cm chat: one staff tag at a time, turning one on replaces the other.
+    // .gm mod chat / .gm cm chat / .gm admin chat: one staff tag at a time, turning one on replaces the other.
     static bool HandleStaffChatTag(ChatHandler* handler, Optional<bool> enableArg, StaffChatTag tag, char const* name)
     {
         Player* player = handler->GetSession()->GetPlayer();
@@ -98,6 +104,11 @@ public:
     static bool HandleGMCmChatCommand(ChatHandler* handler, Optional<bool> enableArg)
     {
         return HandleStaffChatTag(handler, enableArg, StaffChatTag::CommunityManager, "Community Manager");
+    }
+
+    static bool HandleGMAdminChatCommand(ChatHandler* handler, Optional<bool> enableArg)
+    {
+        return HandleStaffChatTag(handler, enableArg, StaffChatTag::Administrator, "Administrator");
     }
 
     // Enables or disables the staff badge

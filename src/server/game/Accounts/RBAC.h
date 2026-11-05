@@ -715,6 +715,7 @@ enum RBACPermissions
     // 1004-1008 reserved for .lock / .unlock (feat/account-lock-command)
     RBAC_PERM_COMMAND_GM_MOD_CHAT                            = 1009,
     RBAC_PERM_COMMAND_GM_CM_CHAT                             = 1010,
+    RBAC_PERM_COMMAND_GM_ADMIN_CHAT                          = 1011,
     RBAC_PERM_MAX
 };
 
