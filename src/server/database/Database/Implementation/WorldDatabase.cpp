@@ -25,6 +25,9 @@ void WorldDatabaseConnection::DoPrepareStatements()
 
     PrepareStatement(WORLD_SEL_ASCENSION_NPC_OVERHEAD_ICONS,
         "SELECT creature_entry, spell_id FROM ascension_npc_overhead_icons WHERE enabled = 1", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_SEL_ASCENSION_RACE_CLASS_STATS,
+        "SELECT Race, Class, Level, Strength, Agility, Stamina, Intellect, Spirit FROM ascension_race_class_stats",
+        CONNECTION_SYNCH);
 
     PrepareStatement(WORLD_SEL_ASCENSION_QUEST_MARKER_STYLES,
         "SELECT m.CreatureEntry, m.QuestId, m.Style, m.Priority FROM ascension_quest_marker_style m "

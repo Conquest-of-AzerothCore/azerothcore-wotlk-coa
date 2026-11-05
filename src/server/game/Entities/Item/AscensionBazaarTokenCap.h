@@ -20,6 +20,10 @@ uint32 LimitReward(Player* player, uint32 itemId, uint32 count);
 std::string Describe(uint32 accountId);
 
 void Set(uint32 accountId, uint32 earned, uint32 secondsAgo);
+
+bool GetOpenWindow(uint32 accountId, uint32& remaining, uint32& secondsLeft);
+
+void SendClientState(Player* player);
 }
 
 #endif

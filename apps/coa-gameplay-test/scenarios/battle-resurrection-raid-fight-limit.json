@@ -1,0 +1,360 @@
+{
+  "schema": 1,
+  "name": "Battle resurrections: two per raid boss fight, refused after the last, restored by the next pull",
+  "contract": [
+    "Tester (ZG feedback, 2026-11-04): in-combat resurrections such as the Pyromancer's and Necromancer's are",
+    "limited per fight, two up to a 15-player raid and three in a 25-player raid, with yellow text at the top of",
+    "the screen. A resurrection cast in combat during a raid boss fight uses a charge and every player in the",
+    "instance is told how many are left. With none left the cast is refused. A resurrection cast in combat",
+    "outside a boss fight is free, and the next pull starts with full charges. A boss pulled while another boss",
+    "fight goes on joins that fight and restores no charges. Druid Rebirth (20484) stands in",
+    "for the class battle resurrections, which share its resurrection effect."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "healer",
+      "race": 4,
+      "class": 11,
+      "level": 60,
+      "security": 2
+    },
+    {
+      "id": "fallen",
+      "race": 4,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "second",
+      "race": 4,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "group",
+      "label": "Group the players so all enter the same instance",
+      "actor": "healer",
+      "target": "fallen"
+    },
+    {
+      "action": "group",
+      "actor": "healer",
+      "target": "second"
+    },
+    {
+      "action": "teleport",
+      "actor": "healer",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the healer create the instance first",
+      "ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "fallen",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "second",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: all three players share the instance",
+      "actor": "second",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "set_health",
+      "actor": "healer",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "command",
+      "label": "No mana cost, so the casts differ only in their charges",
+      "actor": "healer",
+      "command": ".cheat power on"
+    },
+    {
+      "action": "command",
+      "label": "No cooldown",
+      "actor": "healer",
+      "command": ".cheat cooldown on"
+    },
+    {
+      "action": "command",
+      "label": "No cast time, so the cobra's hits cannot push the cast back",
+      "actor": "healer",
+      "command": ".cheat casttime on"
+    },
+    {
+      "action": "learn",
+      "actor": "healer",
+      "spell": 20484
+    },
+    {
+      "action": "die",
+      "label": "The others die before the pull, so the cobra can only fight the healer",
+      "actor": "fallen"
+    },
+    {
+      "action": "die",
+      "actor": "second"
+    },
+    {
+      "action": "summon",
+      "actor": "healer",
+      "entry": 11373,
+      "as": "cobra",
+      "distance": 6
+    },
+    {
+      "action": "attack",
+      "label": "Pull a cobra to put the healer in combat",
+      "actor": "healer",
+      "target": "cobra"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the healer fights",
+      "actor": "healer",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "label": "Keep the cobra alive so the healer stays in combat",
+      "actor": "healer"
+    },
+    {
+      "action": "cast",
+      "label": "Rebirth in combat with no boss fight",
+      "actor": "healer",
+      "spell": 20484,
+      "target": "fallen"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: still in combat when Rebirth went out",
+      "actor": "healer",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: outside a boss fight Rebirth uses no charge",
+      "actor": "healer",
+      "metric": "notification_contains",
+      "text": "used a battle resurrection",
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "Gahz'ranka's fight starts",
+      "actor": "healer",
+      "command": ".instance setbossstate 8 1"
+    },
+    {
+      "action": "cast",
+      "actor": "healer",
+      "spell": 20484,
+      "target": "fallen"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the first Rebirth of the fight uses one of two charges",
+      "actor": "healer",
+      "metric": "notification_contains",
+      "text": "used a battle resurrection: 1 of 2 left.",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The other players in the instance see it too",
+      "actor": "second",
+      "metric": "notification_contains",
+      "text": "used a battle resurrection: 1 of 2 left.",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "healer",
+      "spell": 20484,
+      "target": "second"
+    },
+    {
+      "action": "assert",
+      "label": "The second Rebirth uses the last charge",
+      "actor": "healer",
+      "metric": "notification_contains",
+      "text": "used a battle resurrection: 0 of 2 left.",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "second",
+      "metric": "notifications",
+      "save_as": "second_notices_before_refusal"
+    },
+    {
+      "action": "cast",
+      "actor": "healer",
+      "spell": 20484,
+      "target": "fallen"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a third Rebirth in the same fight is refused",
+      "actor": "healer",
+      "metric": "cast_failure",
+      "spell": 20484,
+      "equals": 27,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The healer is told why",
+      "actor": "healer",
+      "metric": "notification_contains",
+      "text": "No battle resurrections left.",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the refused cast announced nothing",
+      "actor": "second",
+      "metric": "notifications",
+      "relative_to": "second_notices_before_refusal",
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "The fight is lost",
+      "actor": "healer",
+      "command": ".instance setbossstate 8 2"
+    },
+    {
+      "action": "command",
+      "label": "The boss is pulled again",
+      "actor": "healer",
+      "command": ".instance setbossstate 8 1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "second",
+      "metric": "notifications",
+      "save_as": "second_notices_before_repull"
+    },
+    {
+      "action": "cast",
+      "actor": "healer",
+      "spell": 20484,
+      "target": "second"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the next pull starts with charges again, so the Rebirth is announced, not refused",
+      "actor": "second",
+      "metric": "notifications",
+      "relative_to": "second_notices_before_repull",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "command",
+      "label": "Jin'do is pulled while Gahz'ranka's fight goes on",
+      "actor": "healer",
+      "command": ".instance setbossstate 7 1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "second",
+      "metric": "notifications",
+      "save_as": "second_notices_second_boss"
+    },
+    {
+      "action": "cast",
+      "actor": "healer",
+      "spell": 20484,
+      "target": "fallen"
+    },
+    {
+      "action": "assert",
+      "label": "The Rebirth uses the fight's last charge",
+      "actor": "second",
+      "metric": "notifications",
+      "relative_to": "second_notices_second_boss",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "healer",
+      "spell": 20484,
+      "target": "second"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a boss pulled into a running fight restores no charges, so the next Rebirth is refused",
+      "actor": "second",
+      "metric": "notifications",
+      "relative_to": "second_notices_second_boss",
+      "equals": 1
+    }
+  ]
+}
