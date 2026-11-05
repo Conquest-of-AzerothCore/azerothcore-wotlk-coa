@@ -14,8 +14,9 @@ Reincarnation, which only resurrect their owner (`SPELL_EFFECT_SELF_RESURRECT`),
 combat are not counted either.
 
 - **Raids, every difficulty:** a boss fight starts with 2 charges when 15 or fewer players (game masters excluded) are in
-  the instance at the pull, 3 when 16 or more. The charges are reset whenever an encounter enters `IN_PROGRESS`, so a
-  wipe and the next pull start full. They apply only while an encounter is in progress.
+  the instance at the pull, 3 when 16 or more. The charges are reset whenever an encounter enters `IN_PROGRESS` while no
+  other encounter is in progress, so a wipe and the next pull start full, but a second boss pulled into a running fight
+  shares its charges. They apply only while an encounter is in progress.
 - **Mythic+:** starting a keystone gives the run one charge for the whole run, in and out of boss fights.
 
 A charge is used when the spell is cast, even if the target declines the resurrection. Every player in the instance then

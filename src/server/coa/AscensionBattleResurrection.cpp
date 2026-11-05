@@ -58,6 +58,11 @@ public:
         if (newState != IN_PROGRESS || oldState == IN_PROGRESS || !instance->IsRaid())
             return;
 
+        InstanceMap* instanceMap = instance->ToInstanceMap();
+        InstanceScript* script = instanceMap ? instanceMap->GetInstanceScript() : nullptr;
+        if (script && script->IsEncounterInProgress())
+            return;
+
         InstanceBudget* state = instance->CustomData.GetDefault<InstanceBudget>(BudgetKey);
         if (!state->mythicPlus)
             state->budget.Start(RaidCharges(instance->GetPlayersCountExceptGMs()));
