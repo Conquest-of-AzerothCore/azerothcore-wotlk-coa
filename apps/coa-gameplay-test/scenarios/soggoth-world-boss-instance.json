@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "The Will of Soggoth: the shrine takes the raid to his map (Normal only), he pays every player and leaves a portal back",
   "contract": [
-    "The shrine of The Will of Soggoth (978077) by the Shrine of Setis refuses a heroic raid difficulty and on a Normal one",
+    "The shrine of The Will of Soggoth (978077) in Darkshore refuses a heroic raid difficulty and on a Normal one",
     "takes the player to his map (883). His health is per player in his map, counted from 10 to 40,",
     "so 6957650 for one player. Every player gets 250 Runes of Ascension (375250), 100 to 150 Bazaar Tokens (975001) and a",
     "Treasures of Azeroth chest (978059). The portal out (978078) opens where he falls and takes the player back."
@@ -10,9 +10,9 @@
   "timeout_ms": 180000,
   "location": {
     "map": 1,
-    "x": -7855.0,
-    "y": 1330.0,
-    "z": -7.3
+    "x": 4414.0,
+    "y": 272.0,
+    "z": 61.0
   },
   "players": [
     {
@@ -37,7 +37,7 @@
     },
     {
       "action": "assert",
-      "label": "The shrine stands by the Shrine of Setis",
+      "label": "The shrine stands in Darkshore",
       "actor": "raider",
       "metric": "spawn_active",
       "spawn": 9780916,

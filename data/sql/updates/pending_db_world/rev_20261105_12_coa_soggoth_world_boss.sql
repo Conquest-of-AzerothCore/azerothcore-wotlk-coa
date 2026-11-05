@@ -1,7 +1,28 @@
 -- The Will of Soggoth (64605) in his boss map (883, Master's Gastric Pit), the way Setis is fought: a shrine in the
 -- open world takes players in (Normal only), the portal he leaves where he falls and the shrine at the entrance take
--- them back, and players who die in his map rise at its start. He has no item table yet: every player still gets
--- the Runes of Ascension, Bazaar Tokens and Treasures of Azeroth chest.
+-- them back, and players who die in his map rise at its start.
+
+-- Loot: one roll of his eleven items (item level 68, as the quick guide shows them); soggoth_instance_death_coa rolls
+-- one more for every four players in his map.
+UPDATE `creature_template` SET `lootid` = 64605 WHERE `entry` = 64605;
+DELETE FROM `creature_loot_template` WHERE `Entry` = 64605;
+INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`,
+  `MinCount`, `MaxCount`, `Comment`) VALUES
+(64605, 11274, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Breastplate of the Void''s Fury'),
+(64605, 11271, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Eles''finel'),
+(64605, 11328, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Guidance of the Old Gods'),
+(64605, 11327, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Shroud of Soothing Twilight'),
+(64605, 11275, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - The Darkened Gaze'),
+(64605, 11431, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - The Deceiving Refraction'),
+(64605, 11326, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - The Dreaming Eternity'),
+(64605, 11277, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Thorn of Aydreath'),
+(64605, 11276, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Treads of Twilight Shadow'),
+(64605, 11272, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Twilight Faceguard'),
+(64605, 11273, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Visage of Aydreath');
+
+-- He waits down in the pit, below the ledge his map starts on, so players do not land on top of him.
+UPDATE `creature` SET `position_x` = 4460.0, `position_y` = 269.3, `position_z` = 31.48, `orientation` = 3.1416
+WHERE `guid` = 9780102 AND `id` = 64605;
 
 -- His health is per player in his map (10 to 40): each kill's pool over its 21 players.
 UPDATE `coa_world_boss_level` SET `health` = 695765, `note` = 'per player; kill 00:28, 21 players'
@@ -9,8 +30,8 @@ WHERE `entry` = 64605 AND `difficulty` = 0;
 UPDATE `coa_world_boss_level` SET `health` = 1016749, `note` = 'per player; kill 00:44, 21 players'
 WHERE `entry` = 64605 AND `difficulty` = 2;
 
--- The shrine in the open world (by the Shrine of Setis until Ascension's spot is known), the portal out and the
--- shrine at the entrance of his map.
+-- The shrine in Darkshore (as the quick guide shows it; height measured), the portal out and the shrine at the
+-- entrance of his map.
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
   `size`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
 (978077, 10, 4076, 'Shrine of Soggoth', '', '', '', 3, '', 'go_soggoth_altar_coa', 12340),
@@ -22,7 +43,7 @@ DELETE FROM `gameobject` WHERE `guid` IN (9780916, 9780917);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`) VALUES
-(9780916, 978077, 1, 0, 0, 1, 1, -7852.7, 1326.7, -7.357, 5.4786, 0, 0, 0.3915, -0.9202, 300, 100, 1),
+(9780916, 978077, 1, 0, 0, 1, 1, 4410.5, 269.3, 60.53, 0, 0, 0, 0, 1, 300, 100, 1),
 (9780917, 978079, 883, 10238, 10238, 15, 1, 4405.5, 264.3, 78.02, 0, 0, 0, 0, 1, 300, 100, 1);
 
 -- Players who die in his map rise at its start: WorldSafeLocs.dbc 6083 "Soggoth Graveyard".
@@ -59,7 +80,7 @@ INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Fligh
 DELETE FROM `creature` WHERE `guid` = 9780916;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
-(9780916, 978077, 1, 0, 0, 1, 1, -7852.7, 1326.7, -2.0, 5.4786, 300, 0, 0);
+(9780916, 978077, 1, 0, 0, 1, 1, 4410.5, 269.3, 65.5, 0, 300, 0, 0);
 
 -- The other world boss maps' graveyards (WorldSafeLocs.dbc 6084-6090), so players who die in any of them rise at
 -- its start.
