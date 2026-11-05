@@ -8,6 +8,8 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
 - `mitigation.py`: expected armor and partial-resist mitigation of a target.
 - `classes.py`: `class_spells(dbc_dir, class_id, progression_header, level=60)` lists a CoA class's spells as
   `ClassSpell(spell_id, name, ranks, max_rank, required_level, passive)`.
+- `tooltip.py`: `read_tooltip(dbc, spell_id, caster)` evaluates a spell's `Description[enUS]` with the caster's
+  measured `CasterStats` and returns `Readout(values, unreadable)`.
 
 ## Spell set of a class
 
@@ -19,6 +21,37 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
   (`{ClassId, FirstSpellId, SpellId, RequiredLevel}`); `max_rank` is the last rank whose required level is at most
   `level`. `required_level` is the `CharacterAdvancement` required level of the entry that holds the spell.
 - `passive` is attribute bit 0x40 of the `Spell.dbc` record.
+
+## Tooltip reading
+
+The rules follow the stock 3.3.5a client parser (wowdecomp `WoW/Source/Ui/QuestTextParser.cpp` and `MathState.cpp`,
+evidence rather than authority). Each value is `Displayed(text, value, effect_index, kind)`: `text` is the token as
+written in the DBC, `value` the number before any player modifier.
+
+| Token | Value | Kind |
+|---|---|---|
+| `$sN`, `$<id>sN` | `EffectBasePoints + 1`, unsigned, only if `EffectDieSides` is 1 | `percent` before `%`, or `flat` |
+| `$mN`, `$MN` (with `<id>`) | `EffectBasePoints + 1`, `EffectBasePoints + EffectDieSides`, unsigned | as `$sN` |
+| `$/N;` then `$sN`/`$mN`/`$MN` | divided by N; `$/1000;` followed by `sec` stays in ms | `duration_ms` or as `$sN` |
+| `$d`, `$<id>d` | `SpellDuration` `Duration`, capped by `MaxDuration` | `duration_ms` |
+| `$h`, `$<id>h` | `ProcChance` | `chance_pct` |
+| `$u`, `$i` (with `<id>`) | `StackAmount`, `MaxAffectedTargets` | `count` |
+| `$aN` (with `<id>`) | `SpellRadius` radius of effect N | `flat` |
+| `${...}` | `+ - * /`, parentheses and the variables below | as `$sN` |
+| `$<name>` | a `SpellDescriptionVariables` formula of the described spell | as `$sN` |
+
+Inside `${...}`: `$mN`/`$MN` (signed), `$h $u $i`, `$d` in seconds, `$aN`, each with an optional spell id; `$AP`,
+`$RAP`, `$PL`; `$SP` is the lowest spell power of schools 1 to 6, `$sph $spfi $spn $spfr $sps $spa` one school each;
+`$STR $AGI $STA $INT $SPI` the effective stats 0 to 4; `$<name>` a variable defined earlier.
+`effect_index` is the effect of the first `$sN`/`$mN`/`$MN` of the spell itself in the token (for `$<name>`, in its
+formula), otherwise `None`. The client reads `$D $H $U $I $AN` as their lowercase forms, and so does the reader.
+Color codes `|c........` and `|r` are removed, in either case.
+
+Everything else goes to `unreadable` verbatim and is never guessed: `$?` conditionals, `@...@` markup, other `|`
+escapes, other tokens (`$t`, `$o`, `$x`, `$S`, `$l`, `$g`...), expression functions and variables such as `$BH`,
+`$ppl1` or lowercase `$ap`, points that scale with level (`EffectRealPointsPerLevel` or `DurationPerLevel` not
+zero), spread values (`EffectDieSides` not 1 for `$sN`), missing records, non-positive durations, a `$<name>` that
+the described spell's `SpellDescriptionVariableID` does not define, and a stat or school missing from `CasterStats`.
 
 ## Run
 

@@ -1,0 +1,261 @@
+from pathlib import Path
+import struct
+import tempfile
+import unittest
+
+from tooltip import CasterStats, DataSet, Displayed, read_tooltip
+import schemas
+
+DBC_DIR = Path('/srv/coa/server-data/dbc')
+
+SCHOOLS = range(7)
+HOLY, FIRE, NATURE, FROST, SHADOW, ARCANE = 1, 2, 3, 4, 5, 6
+LEVEL_60_TEMPLAR = CasterStats(level=60, ap=313.0, rap=0.0, sp_by_school={school: 0.0 for school in SCHOOLS},
+                               stats={stat: 0.0 for stat in range(5)})
+
+ARGENT_BLADE = 807268
+ARGENT_BLADE_BASE_POINTS = (420, 214)
+SCOURGEBANE_PASSIVE = 92111
+SCOURGEBANE_PROC_AURA_CHANCE = 20
+SCOURGEBANE_DAMAGE_BASE_POINTS = (261, 49)
+SCALINGBP_TERMS = (0.0267291844060354, 0.0048541098014737, 0.0001859597762293)
+HOLY_COMBATANT = 500011
+HOLY_COMBATANT_EXTENSION_BASE_POINTS = 999
+RETRIBUTION = 707391
+RETRIBUTION_PROC_CHANCE = 20
+RETRIBUTION_BASE_POINTS = 29
+HEXBREAK = 806240
+STUDIOUS = 705657
+STUDIOUS_BASE_POINTS = -16
+OUTMANEUVER = 557325
+OUTMANEUVER_DURATION_MS = 8000
+OUTMANEUVER_STACK_AMOUNT = 20
+OUTMANEUVER_BASE_POINTS_3 = 29
+VEILED_IN_DARKNESS = 524854
+VEILED_IN_DARKNESS_RADIUS_YARDS = 100.0
+SCOURGEBANE_STRIKE = 801832
+
+
+def displayed(readout, text):
+    matches = [value for value in readout.values if value.text == text]
+    if len(matches) != 1:
+        raise AssertionError(f'{text!r} read {len(matches)} times in {readout}')
+    return matches[0]
+
+
+def scalingbp(level):
+    constant, linear, quadratic = SCALINGBP_TERMS
+    return constant + linear * level + quadratic * level * level
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class ClientDbcTooltipTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.dbc = DataSet(DBC_DIR)
+
+    def read(self, spell_id, caster=LEVEL_60_TEMPLAR):
+        return read_tooltip(self.dbc, spell_id, caster)
+
+    def test_argent_blade_weapon_percent_and_flat_bonus(self):
+        readout = self.read(ARGENT_BLADE)
+        weapon_points, flat_points = ARGENT_BLADE_BASE_POINTS
+        self.assertEqual(displayed(readout, '$s2'), Displayed('$s2', flat_points + 1, 1, 'percent'))
+        bonus = displayed(readout, '${$AP*0.4725+$sph*1.35+$m1+0}')
+        self.assertAlmostEqual(bonus.value, 313 * 0.4725 + 0 * 1.35 + weapon_points + 1, places=9)
+        self.assertAlmostEqual(bonus.value, 568.9, delta=0.01)
+        self.assertEqual((bonus.effect_index, bonus.kind), (0, 'flat'))
+
+    def test_argent_blade_without_description_variables_cannot_read_scalingbp(self):
+        readout = self.read(ARGENT_BLADE)
+        self.assertEqual(readout.unreadable, ['${$801832m1*$<scalingbp>+$sph*0.25+$AP*0.25}'])
+
+    def test_scourgebane_proc_chance_and_scaled_damage(self):
+        readout = self.read(SCOURGEBANE_PASSIVE)
+        self.assertEqual(displayed(readout, '$520007h'),
+                         Displayed('$520007h', SCOURGEBANE_PROC_AURA_CHANCE, None, 'chance_pct'))
+        damage_points, weapon_points = SCOURGEBANE_DAMAGE_BASE_POINTS
+        self.assertEqual(displayed(readout, '$801832s2'), Displayed('$801832s2', weapon_points + 1, None, 'percent'))
+        damage = displayed(readout, '${$801832m1*$<scalingbp>+$SP*.25+$AP*.25}')
+        self.assertAlmostEqual(scalingbp(60), 0.9874, delta=0.00005)
+        self.assertAlmostEqual(damage.value, (damage_points + 1) * scalingbp(60) + 313 * 0.25, places=6)
+        self.assertAlmostEqual(damage.value, 262 * 0.9874 + 78.25, delta=0.02)
+        self.assertEqual((damage.effect_index, damage.kind), (None, 'flat'))
+        self.assertEqual(readout.unreadable, [])
+
+    def test_scalingbp_follows_the_caster_level(self):
+        caster = CasterStats(level=40, ap=0.0, rap=0.0, sp_by_school={school: 0.0 for school in SCHOOLS}, stats={})
+        damage = displayed(self.read(SCOURGEBANE_PASSIVE, caster), '${$801832m1*$<scalingbp>+$SP*.25+$AP*.25}')
+        self.assertAlmostEqual(damage.value, (SCOURGEBANE_DAMAGE_BASE_POINTS[0] + 1) * scalingbp(40), places=6)
+
+    def test_sp_is_the_lowest_school_spell_power(self):
+        powers = {0: 0.0, HOLY: 120.0, FIRE: 80.0, NATURE: 95.0, FROST: 110.0, SHADOW: 100.0, ARCANE: 90.0}
+        caster = CasterStats(level=60, ap=313.0, rap=0.0, sp_by_school=powers, stats={})
+        damage = displayed(self.read(SCOURGEBANE_PASSIVE, caster), '${$801832m1*$<scalingbp>+$SP*.25+$AP*.25}')
+        expected = (SCOURGEBANE_DAMAGE_BASE_POINTS[0] + 1) * scalingbp(60) + powers[FIRE] * 0.25 + 313 * 0.25
+        self.assertAlmostEqual(damage.value, expected, places=6)
+
+    def test_missing_school_spell_power_is_unreadable(self):
+        caster = CasterStats(level=60, ap=313.0, rap=0.0, sp_by_school={HOLY: 0.0}, stats={})
+        readout = self.read(SCOURGEBANE_PASSIVE, caster)
+        self.assertIn('${$801832m1*$<scalingbp>+$SP*.25+$AP*.25}', readout.unreadable)
+        self.assertNotIn('${$801832m1*$<scalingbp>+$SP*.25+$AP*.25}', [value.text for value in readout.values])
+
+    def test_holy_combatant_division_reads_seconds(self):
+        readout = self.read(HOLY_COMBATANT)
+        self.assertEqual(readout.values, [Displayed('$/1000;500014s1', HOLY_COMBATANT_EXTENSION_BASE_POINTS + 1, None,
+                                                    'duration_ms')])
+        self.assertEqual(readout.unreadable, [])
+
+    def test_retribution_proc_chance_and_percent(self):
+        readout = self.read(RETRIBUTION)
+        self.assertEqual(readout.values, [Displayed('$h', RETRIBUTION_PROC_CHANCE, None, 'chance_pct'),
+                                          Displayed('$s1', RETRIBUTION_BASE_POINTS + 1, 0, 'percent')])
+        self.assertEqual(readout.unreadable, [])
+
+    def test_known_spell_conditional_is_unreadable_and_the_rest_is_read(self):
+        readout = self.read(HEXBREAK)
+        self.assertEqual(readout.values, [Displayed('$s1', 1, 0, 'flat')])
+        self.assertEqual(readout.unreadable, ['$?s572870[s][]'])
+
+    def test_conditional_keeps_its_color_codes_verbatim_and_negative_points_display_unsigned(self):
+        readout = self.read(STUDIOUS)
+        self.assertEqual(readout.unreadable, ['$?s92098[|cffffffffBrine|r][|cffffffffShock|r]'])
+        self.assertEqual(readout.values, [Displayed('$s1', abs(STUDIOUS_BASE_POINTS + 1), 0, 'percent')])
+
+    def test_durations_stacks_and_level_scaled_points(self):
+        readout = self.read(OUTMANEUVER)
+        self.assertEqual(displayed(readout, '$d'), Displayed('$d', OUTMANEUVER_DURATION_MS, None, 'duration_ms'))
+        self.assertEqual(displayed(readout, '$u'), Displayed('$u', OUTMANEUVER_STACK_AMOUNT, None, 'count'))
+        self.assertEqual(displayed(readout, '$557326d'),
+                         Displayed('$557326d', OUTMANEUVER_DURATION_MS, None, 'duration_ms'))
+        self.assertEqual(displayed(readout, '$s3'), Displayed('$s3', OUTMANEUVER_BASE_POINTS_3 + 1, 2, 'percent'))
+        self.assertEqual(readout.unreadable, ['${$557328m1+$AP*.55}'])
+
+    def test_radius(self):
+        readout = self.read(VEILED_IN_DARKNESS)
+        self.assertEqual(displayed(readout, '$a1'), Displayed('$a1', VEILED_IN_DARKNESS_RADIUS_YARDS, None, 'flat'))
+        self.assertEqual(readout.unreadable, [])
+
+    def test_until_cancelled_duration_is_unreadable(self):
+        readout = self.read(SCOURGEBANE_STRIKE)
+        self.assertEqual(readout.unreadable, ['$d'])
+        self.assertEqual(displayed(readout, '$i'), Displayed('$i', 0, None, 'count'))
+
+
+SPELL_RECORD_BYTES = 936
+SMALL_RECORD_BYTES = 16
+
+
+def wdbc(rows, fields, size, strings):
+    return struct.pack('<4s4I', b'WDBC', len(rows), fields, size, len(strings)) + b''.join(rows) + strings
+
+
+class StringBlock:
+    def __init__(self):
+        self.data = b'\0'
+
+    def add(self, text):
+        offset = len(self.data)
+        self.data += text.encode() + b'\0'
+        return offset
+
+
+def write_fixture(directory: Path, spells: dict[int, dict], variables: dict[int, str]):
+    offsets = {column.name: column.offset for column in schemas.registry()['Spell'].columns}
+    strings = StringBlock()
+    rows = []
+    for spell_id, fields in spells.items():
+        row = bytearray(SPELL_RECORD_BYTES)
+        struct.pack_into('<I', row, offsets['Id'], spell_id)
+        for name, value in fields.items():
+            if name == 'Description[enUS]':
+                struct.pack_into('<I', row, offsets[name], strings.add(value))
+            elif name.startswith('EffectRealPointsPerLevel'):
+                struct.pack_into('<f', row, offsets[name], value)
+            else:
+                struct.pack_into('<i', row, offsets[name], value)
+        rows.append(bytes(row))
+    (directory / 'Spell.dbc').write_bytes(wdbc(rows, 234, SPELL_RECORD_BYTES, strings.data))
+    durations = [struct.pack('<4i', 1, 6000, 0, 6000), struct.pack('<4i', 2, 1000, 100, 9000)]
+    (directory / 'SpellDuration.dbc').write_bytes(wdbc(durations, 4, SMALL_RECORD_BYTES, b'\0'))
+    radii = [struct.pack('<I3f', 7, 8.0, 0.0, 8.0)]
+    (directory / 'SpellRadius.dbc').write_bytes(wdbc(radii, 4, SMALL_RECORD_BYTES, b'\0'))
+    variable_strings = StringBlock()
+    variable_rows = [struct.pack('<2I', identity, variable_strings.add(text)) for identity, text in variables.items()]
+    (directory / 'SpellDescriptionVariables.dbc').write_bytes(wdbc(variable_rows, 2, 8, variable_strings.data))
+
+
+FIXTURE_SPELLS = {
+    10: {'Description[enUS]': 'Strikes for ${$m1+$SP*0.5+$STA*2}, then $s2% of it over $d to $i targets within $a1 '
+                              'yds, up to $u stacks, $h% chance; |cff00ff00$<bonus>|r and $M1 more.',
+         'EffectBasePoints[0]': 99, 'EffectDieSides[0]': 1, 'EffectBasePoints[1]': 24, 'EffectDieSides[1]': 1,
+         'EffectRadiusIndex[0]': 7, 'DurationIndex': 1, 'MaxAffectedTargets': 3, 'StackAmount': 5,
+         'ProcChance': 35, 'SpellDescriptionVariableID': 1},
+    11: {'Description[enUS]': 'Grows by $s1 per level for $d.', 'EffectBasePoints[0]': 9, 'EffectDieSides[0]': 1,
+         'EffectRealPointsPerLevel[0]': 1.5, 'DurationIndex': 2},
+    12: {'Description[enUS]': 'Hits for $s1 and ${$s1*2}, ${$AP^2}, ${$ap*2}, ${$BH*1}, $t1 sec, $lpoint:points; '
+                              '|TInterface\\Icons\\X:0|t @ext:Scales with Spirit:ext@ and $<odd> with $<missing>.',
+         'EffectBasePoints[0]': 4, 'EffectDieSides[0]': 3, 'SpellDescriptionVariableID': 2},
+    13: {'Description[enUS]': 'Echo of $10s2%, $10m1 and $99d.'},
+}
+FIXTURE_VARIABLES = {
+    1: '$bonus=${$m1*2+$PL}\r\n',
+    2: '$odd=$?s100[${1}][${2}]\r\n',
+}
+FIXTURE_CASTER = CasterStats(level=60, ap=200.0, rap=0.0,
+                             sp_by_school={0: 0.0, HOLY: 40.0, FIRE: 30.0, NATURE: 50.0, FROST: 60.0, SHADOW: 70.0,
+                                           ARCANE: 80.0},
+                             stats={0: 10.0, 1: 20.0, 2: 15.0, 3: 30.0, 4: 40.0})
+
+
+class FixtureTooltipTest(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        directory = Path(self.temp.name)
+        write_fixture(directory, FIXTURE_SPELLS, FIXTURE_VARIABLES)
+        self.dbc = DataSet(directory)
+
+    def tearDown(self):
+        self.temp.cleanup()
+
+    def test_every_listed_token_is_read_from_the_records(self):
+        readout = read_tooltip(self.dbc, 10, FIXTURE_CASTER)
+        self.assertEqual(readout.values, [
+            Displayed('${$m1+$SP*0.5+$STA*2}', 100 + 30 * 0.5 + 15 * 2, 0, 'flat'),
+            Displayed('$s2', 25, 1, 'percent'),
+            Displayed('$d', 6000, None, 'duration_ms'),
+            Displayed('$i', 3, None, 'count'),
+            Displayed('$a1', 8.0, None, 'flat'),
+            Displayed('$u', 5, None, 'count'),
+            Displayed('$h', 35, None, 'chance_pct'),
+            Displayed('$<bonus>', 100 * 2 + 60, 0, 'flat'),
+            Displayed('$M1', 100, 0, 'flat'),
+        ])
+        self.assertEqual(readout.unreadable, [])
+
+    def test_level_scaled_points_and_durations_are_unreadable(self):
+        readout = read_tooltip(self.dbc, 11, FIXTURE_CASTER)
+        self.assertEqual(readout.values, [])
+        self.assertEqual(readout.unreadable, ['$s1', '$d'])
+
+    def test_unsupported_patterns_are_reported_verbatim(self):
+        readout = read_tooltip(self.dbc, 12, FIXTURE_CASTER)
+        self.assertEqual(readout.values, [])
+        self.assertEqual(readout.unreadable, [
+            '$s1', '${$s1*2}', '${$AP^2}', '${$ap*2}', '${$BH*1}', '$t1', '$lpoint:points;',
+            '|TInterface\\Icons\\X:0|t', '@ext:Scales with Spirit:ext@', '$<odd>', '$<missing>'])
+
+    def test_references_to_other_spells_have_no_effect_index(self):
+        readout = read_tooltip(self.dbc, 13, FIXTURE_CASTER)
+        self.assertEqual(readout.values, [Displayed('$10s2', 25, None, 'percent'),
+                                          Displayed('$10m1', 100, None, 'flat')])
+        self.assertEqual(readout.unreadable, ['$99d'])
+
+    def test_unknown_spell_is_rejected(self):
+        with self.assertRaises(ValueError):
+            read_tooltip(self.dbc, 404, FIXTURE_CASTER)
+
+
+if __name__ == '__main__':
+    unittest.main()
