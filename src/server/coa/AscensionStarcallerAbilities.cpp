@@ -313,19 +313,19 @@ class starcaller_spells : public AllSpellScript
                         aura->Remove();
                 }
         }
+        if (spell->GetScriptHealingIncludingOverheal() && Named(info, 575039) && player->HasAura(704741))
+        {
+            uint32 remaining = 5;
+            for (Unit* enemy : Nearby(target, 15))
+                if (player->IsValidAttackTarget(enemy))
+                {
+                    Stars(player, enemy);
+                    if (!--remaining)
+                        break;
+                }
+        }
         if (healing)
         {
-            if (Named(info, 575039) && player->HasAura(704741))
-            {
-                uint32 remaining = 5;
-                for (Unit* enemy : Nearby(target, 15))
-                    if (player->IsValidAttackTarget(enemy))
-                    {
-                        Stars(player, enemy);
-                        if (!--remaining)
-                            break;
-                    }
-            }
             if (Any(info, {801990, 574328}) && (player->HasAura(800504) || player->HasAura(803554)))
                 Cast(player, target, 574154);
             if (Any(info, {801990, 574328}) && player->HasAura(300237))
