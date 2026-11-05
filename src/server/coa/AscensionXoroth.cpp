@@ -68,9 +68,20 @@ void Replace(Player* player, uint32 root, uint32 replacement)
             if (player->HasActiveSpell(id) && Named(sSpellMgr->GetSpellInfo(id), replacement) &&
                 sSpellMgr->GetSpellRank(id) > sSpellMgr->GetSpellRank(replacement))
                 replacement = id;
+    bool barChanged = false;
     for (auto const& pair : player->GetSpellMap())
         if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), root))
+        {
             player->SetTemporarySpellReplacement(pair.first, replacement);
+            if (!replacement || player->GetTemporarySpellReplacement(pair.first) != replacement)
+                continue;
+            for (uint8 button = 0; button < MAX_ACTION_BUTTONS; ++button)
+                if (ActionButton const* action = player->GetActionButton(button);
+                    action && action->GetType() == ACTION_BUTTON_SPELL && action->GetAction() == pair.first)
+                    barChanged = player->addActionButton(button, replacement, ACTION_BUTTON_SPELL) || barChanged;
+        }
+    if (barChanged)
+        player->SendInitialActionButtons();
 }
 
 bool Spender(SpellInfo const* info)
