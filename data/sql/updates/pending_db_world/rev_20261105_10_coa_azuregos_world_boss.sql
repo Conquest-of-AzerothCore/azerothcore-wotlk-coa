@@ -20,9 +20,10 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 (6109, 18704, 0, 10, 0, 1, 0, 1, 1, 'Azuregos - Mature Blue Dragon Sinew'),
 (6109, 11938, 0, 100, 0, 1, 0, 1, 1, 'Azuregos - Sack of Gems');
 
--- His map had no instance_template row, so the server refused every teleport there.
+-- His map had no instance_template row, so the server refused every teleport there. It belongs to Kalimdor, as
+-- Setis' 880 does.
 DELETE FROM `instance_template` WHERE `map` = 881;
-INSERT INTO `instance_template` (`map`, `parent`, `script`, `allowMount`) VALUES (881, 0, '', 0);
+INSERT INTO `instance_template` (`map`, `parent`, `script`, `allowMount`) VALUES (881, 1, '', 0);
 
 -- He moves into his map, ahead of its graveyard.
 UPDATE `creature` SET `map` = 881, `zoneId` = 10236, `areaId` = 10236, `spawnMask` = 15,
@@ -46,7 +47,7 @@ DELETE FROM `gameobject` WHERE `guid` IN (9780910, 9780911);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`) VALUES
-(9780910, 978070, 1, 0, 0, 1, 1, 2622.22, -5977.93, 100.76, 4.2121, 0, 0, 0.8607, -0.5091, 300, 100, 1),
+(9780910, 978070, 1, 0, 0, 1, 1, 2622.22, -5977.93, 100.76, 4.2121, 0, 0, 0.860139, -0.510059, 300, 100, 1),
 (9780911, 978072, 881, 0, 0, 15, 1, 2953.0, -4886.0, 241.06, 0, 0, 0, 0, 1, 300, 100, 1);
 
 -- Players who die in his map rise at its start: WorldSafeLocs.dbc 6081 "Azuregos Graveyard".

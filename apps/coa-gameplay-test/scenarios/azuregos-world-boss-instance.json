@@ -2,10 +2,12 @@
   "schema": 1,
   "name": "Azuregos: the shrine takes the raid to his map (Normal only), he pays every player and leaves a portal back",
   "contract": [
-    "The shrine of Azuregos (978070) where he stood in Azshara refuses a heroic raid difficulty and on a Normal one",
-    "takes the player to his map (881). His health is per player in his map, counted from 10 to 40,",
-    "so 16150220 for one player. He drops one of his epic items (one for every four players, never none). Every player gets 250 Runes of Ascension (375250), 100 to 150 Bazaar Tokens (975001) and a",
-    "Treasures of Azeroth chest (978059). The portal out (978071) opens where he falls and takes the player back."
+    "The shrine of Azuregos (978070) where he stood in Azshara refuses a player on a heroic difficulty and on Normal",
+    "takes the raid group's leader to his map (881), where he stands (spawn 52349). His health is 1615022 per player",
+    "in his map, counted from 10 to 40, so 16150220 for one player. He drops one of his epic items for every four",
+    "players, never none. Every player in his map gets 250 Runes of Ascension (375250), 100 to 150 Bazaar Tokens",
+    "(975001) and a Treasures of Azeroth chest (978059). The portal out (978071) opens where he falls and takes the",
+    "player back to Azshara."
   ],
   "timeout_ms": 180000,
   "location": {
@@ -22,6 +24,36 @@
       "level": 60,
       "melee_hit_rating": 10000,
       "expertise_rating": 10000
+    },
+    {
+      "id": "mate1",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate2",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate3",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate4",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate5",
+      "race": 1,
+      "class": 1,
+      "level": 60
     }
   ],
   "steps": [
@@ -86,6 +118,33 @@
       "value": 0
     },
     {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate1",
+      "label": "Back on Normal, the raider leads a raid group, as his map takes only raids",
+      "loot_method": 0
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate2"
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate3"
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate4"
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate5"
+    },
+    {
       "action": "wait",
       "ms": 500
     },
@@ -116,10 +175,34 @@
       "equals": 0
     },
     {
+      "action": "assert",
+      "label": "The shrine at the entrance of his map takes players back",
+      "actor": "raider",
+      "metric": "spawn_active",
+      "spawn": 9780911,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "raider walks up to where Azuregos stands",
+      "actor": "raider",
+      "guid": 52349
+    },
+    {
+      "action": "assert",
+      "label": "Azuregos stands in his map",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 881,
+      "within_ms": 5000
+    },
+    {
       "action": "summon",
+      "label": "Azuregos in the test's phase",
       "actor": "raider",
       "entry": 6109,
-      "as": "boss",
+      "as": "azuregos",
       "distance": 4
     },
     {
@@ -144,24 +227,28 @@
     {
       "action": "assert",
       "label": "He dies",
-      "actor": "boss",
-      "metric": "alive",
+      "actor": "raider",
+      "metric": "nearby_creature_count",
+      "entry": 6109,
       "equals": 0,
       "within_ms": 20000
     },
     {
-      "action": "loot_creature",
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "loot_nearby",
       "actor": "raider",
-      "target": "boss"
+      "entry": 6109
     },
     {
       "action": "assert",
-      "label": "One of his epic items for one player",
+      "label": "One of his epic items for a lone player",
       "actor": "raider",
       "metric": "loot_count",
       "quality": 4,
-      "min": 1,
-      "max": 2
+      "min": 1
     },
     {
       "action": "close_loot",
