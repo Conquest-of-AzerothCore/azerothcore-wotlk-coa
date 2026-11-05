@@ -45,6 +45,16 @@ class SourceSelectionTests(unittest.TestCase):
         self.assertIn('gameplay', result['checks'])
         self.assertIn(['apps/coa-gameplay-test/test_world_cache.py'], check_source.SUITES['gameplay']['commands'])
 
+    def test_conformance_dependencies_select_the_conformance_suite(self):
+        paths = ['apps/coa-gameplay-test/conformance/compare.py', 'apps/coa-gameplay-test/run.py',
+                 'apps/coa-gameplay-test/batch.py', 'apps/coa-gameplay-test/catalog.py',
+                 'apps/coa-gameplay-test/verification.py', 'apps/coa-gameplay-test/world_cache.py',
+                 'apps/coa-dbc/inspect_dbc.py', 'src/server/coa/AscensionSpellProgressionData.h',
+                 'src/server/shared/SharedDefines.h']
+        for path in paths:
+            with self.subTest(path=path):
+                self.assertIn('conformance', check_source.select([path])['checks'])
+
     def test_new_or_deleted_module_sources_require_registration_check(self):
         for path in ['src/server/coa/AscensionExample.cpp',
                      'src/server/coa/nested/Example.cpp']:

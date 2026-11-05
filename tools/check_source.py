@@ -70,7 +70,9 @@ SUITES = {
                      [GAMEPLAY + 'catalog.py', '--check']],
     },
     'conformance': {
-        'paths': [CONFORMANCE + '*'],
+        'paths': [CONFORMANCE + '*', GAMEPLAY + 'run.py', GAMEPLAY + 'batch.py', GAMEPLAY + 'catalog.py',
+                  GAMEPLAY + 'verification.py', GAMEPLAY + 'world_cache.py', DBC + '*.py',
+                  COA + 'AscensionSpellProgressionData.h', 'src/server/shared/SharedDefines.h'],
         'commands': [[CONFORMANCE + 'test_mitigation.py'], [CONFORMANCE + 'test_classes.py'],
                      [CONFORMANCE + 'test_tooltip.py'], [CONFORMANCE + 'test_values.py'],
                      [CONFORMANCE + 'test_hits.py'], [CONFORMANCE + 'test_compare.py'],
