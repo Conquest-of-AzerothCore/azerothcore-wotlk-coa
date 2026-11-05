@@ -62,6 +62,21 @@ if not CoABazaarTokenCapQuestRewards then
     end
   end
 
+  local function redrawQuestRewards()
+    local choice = QuestInfoFrame.itemChoice
+    if not pcall(QuestInfo_ShowRewards) then
+      return
+    end
+    if choice and choice > 0 then
+      for index = 1, MAX_NUM_ITEMS do
+        local button = _G["QuestInfoItem" .. index]
+        if button and button:IsShown() and button.type == "choice" and button:GetID() == choice then
+          QuestInfoItem_OnClick(button)
+        end
+      end
+    end
+  end
+
   local function limitTokenAmounts(template)
     local remaining = remainingNow()
     if not remaining or type(template) ~= "table" or type(template.RewardItems) ~= "table"
@@ -105,6 +120,7 @@ if not CoABazaarTokenCapQuestRewards then
     if prefix ~= PREFIX or sender ~= UnitName("player") then
       return
     end
+    local before = remainingNow()
     local remaining, seconds = message:match("^(%d+) (%d+)$")
     if remaining then
       state.remaining = tonumber(remaining)
@@ -113,6 +129,10 @@ if not CoABazaarTokenCapQuestRewards then
       state.remaining = nil
     end
     if QuestInfoFrame:IsVisible() then
+      local after = remainingNow()
+      if before and (not after or after > before) then
+        redrawQuestRewards()
+      end
       adjustTokenRewards()
     end
     refreshCallBoard()
