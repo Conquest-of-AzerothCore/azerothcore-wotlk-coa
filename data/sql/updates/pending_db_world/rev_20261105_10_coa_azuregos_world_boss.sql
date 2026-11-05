@@ -11,6 +11,7 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 (6109, 18202, 0, 0, 0, 1, 1, 1, 1, 'Azuregos - Eskhandar''s Left Claw'),
 (6109, 18208, 0, 0, 0, 1, 1, 1, 1, 'Azuregos - Drape of Benediction'),
 (6109, 18541, 0, 0, 0, 1, 1, 1, 1, 'Azuregos - Puissant Cape'),
+(6109, 18542, 0, 0, 0, 1, 1, 1, 1, 'Azuregos - Typhoon'),
 (6109, 18545, 0, 0, 0, 1, 1, 1, 1, 'Azuregos - Leggings of Arcane Supremacy'),
 (6109, 18547, 0, 0, 0, 1, 1, 1, 1, 'Azuregos - Unmelting Ice Girdle'),
 (6109, 19130, 0, 0, 0, 1, 1, 1, 1, 'Azuregos - Cold Snap'),
@@ -25,7 +26,7 @@ INSERT INTO `instance_template` (`map`, `parent`, `script`, `allowMount`) VALUES
 
 -- He moves into his map, ahead of its graveyard.
 UPDATE `creature` SET `map` = 881, `zoneId` = 10236, `areaId` = 10236, `spawnMask` = 15,
-  `position_x` = 2890.0, `position_y` = -4950.0, `position_z` = 241.06, `orientation` = 0.86
+  `position_x` = 2890.0, `position_y` = -4950.0, `position_z` = 258.41, `orientation` = 0.86
 WHERE `guid` = 52349 AND `id` = 6109;
 
 -- His health is per player in his map (10 to 40): the Ascension kill's pool over its 24 players.
