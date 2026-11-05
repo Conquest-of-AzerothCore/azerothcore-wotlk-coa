@@ -3869,6 +3869,21 @@ void Player::removeSpell(uint32 spell_id, uint8 removeSpecMask, bool onlyTempora
         if (onlyTemporary)
             sScriptMgr->OnPlayerTemporarySpellRemoveNotice(this, spell_id, true);
     }
+
+    // A forgotten spell left on the bar stays clickable until the next login drops it there.
+    if (!onlyTemporary && removeSpecMask == SPEC_MASK_ALL && IsInWorld() && !HasSpell(spell_id))
+    {
+        bool barChanged = false;
+        for (uint8 button = 0; button < MAX_ACTION_BUTTONS; ++button)
+            if (ActionButton const* action = GetActionButton(button);
+                action && action->GetType() == ACTION_BUTTON_SPELL && action->GetAction() == spell_id)
+            {
+                removeActionButton(button);
+                barChanged = true;
+            }
+        if (barChanged)
+            SendInitialActionButtons();
+    }
 }
 
 void Player::CastRidingMount(uint32 spellId)
