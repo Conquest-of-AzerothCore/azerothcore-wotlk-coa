@@ -10,6 +10,7 @@ from classes import ClassSpell, class_spells
 from compare import ALERTS_FILE, REPORT_FILE, STATUSES, ScenarioDrift, evaluate, write_outputs
 from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, hit_scenario, melee_scenario, records_of,
                   reference_hit_model, reference_melee_model)
+from procs import proc_entries, proc_plan, proc_scenario, proc_status_expectation, proc_unmodelled_expectation
 from profile import DBC_DIR, load_class_file
 from tooltip import read_tooltip
 from values import Expectation, dataset, structure_stats, value_scenario
@@ -35,7 +36,7 @@ class ManifestWriter:
         self.entries: list[dict] = []
 
     def add(self, key: str, kind: str, spell: ClassSpell | None, rank_id: int, expectations: list[Expectation],
-            scenario: dict | None = None, tokens: list[str] = ()):
+            scenario: dict | None = None, tokens: list[str] = (), name: str | None = None):
         if any(entry['key'] == key for entry in self.entries):
             raise ValueError(f'Duplicate scenario key {key}')
         file, sha = None, None
@@ -45,7 +46,8 @@ class ManifestWriter:
             (self.out / file).write_text(text, encoding='utf-8')
             sha = hashlib.sha256(text.encode('utf-8')).hexdigest()
         self.entries.append({'key': key, 'file': file, 'sha256': sha, 'kind': kind,
-                             'spell_id': spell.spell_id if spell else 0, 'spell_name': spell.name if spell else kind,
+                             'spell_id': spell.spell_id if spell else rank_id,
+                             'spell_name': spell.name if spell else name or kind,
                              'rank_id': rank_id, 'tokens': list(tokens),
                              'expectations': [asdict(expectation) for expectation in expectations]})
 
@@ -96,6 +98,24 @@ def add_melee(writer: ManifestWriter):
     writer.add(scenario_key(class_file['name'], 'melee'), 'melee', None, 0, expectations, scenario)
 
 
+def add_proc(writer: ManifestWriter, entry: dict):
+    class_file = writer.class_file
+    aura, name = entry['aura'], entry['name']
+    key = scenario_key(class_file['name'], 'proc', aura)
+    if entry.get('status'):
+        writer.add(key, 'proc', None, aura, [proc_status_expectation(entry)], name=name)
+        return
+    try:
+        plan = proc_plan(class_file, entry)
+    except Unmodelled as error:
+        writer.add(key, 'proc', None, aura, [proc_unmodelled_expectation(entry, error.reason)], name=name)
+        return
+    for part in range(plan.parts):
+        scenario, expectations = proc_scenario(class_file, entry, part)
+        writer.add(scenario_key(class_file['name'], 'proc', aura, 'part', part + 1), 'proc', None, aura,
+                   expectations, scenario, name=name)
+
+
 def known_modifiers(class_file: dict) -> list[dict]:
     records = records_of(class_file)
     return [{**asdict(modifier),
@@ -116,7 +136,7 @@ def selected_spells(class_file: dict, dbc_dir: Path, spell_ids: list[int] | None
     return chosen
 
 
-def generate(class_id: int, out: Path, spells: list[int] | None = None) -> Path:
+def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: list[int] | None = None) -> Path:
     class_file = load_class_file(class_id)
     dbc_dir = Path(class_file.get('dbc_dir', DBC_DIR))
     out = Path(out)
@@ -125,10 +145,15 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None) -> Path:
         raise ValueError(f'{scenario_dir} already holds scenarios; generate into a new directory')
     scenario_dir.mkdir(parents=True, exist_ok=True)
     writer = ManifestWriter(class_file, out)
-    for spell in selected_spells(class_file, dbc_dir, spells):
-        add_values(writer, spell, dbc_dir)
-        add_hit(writer, spell)
-    if spells is None:
+    everything = spells is None and procs is None
+    chosen_procs = proc_entries(class_file, procs) if everything or procs is not None else []
+    if everything or spells is not None:
+        for spell in selected_spells(class_file, dbc_dir, spells):
+            add_values(writer, spell, dbc_dir)
+            add_hit(writer, spell)
+    for entry in chosen_procs:
+        add_proc(writer, entry)
+    if everything:
         add_melee(writer)
     manifest = {'schema': 1, 'class_id': class_file['class_id'], 'class_name': class_file['name'],
                 'level': class_file['level'], 'dbc_dir': str(dbc_dir), 'class_file': class_file,
@@ -139,7 +164,7 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None) -> Path:
 
 
 def generate_command(args) -> int:
-    path = generate(args.class_id, args.out, args.spell)
+    path = generate(args.class_id, args.out, args.spell, args.proc)
     manifest = json.loads(path.read_text(encoding='utf-8'))
     written = sum(1 for entry in manifest['scenarios'] if entry['file'])
     print(f'{path}: {written} scenarios in {path.parent / SCENARIO_DIR}, '
@@ -170,6 +195,8 @@ def main(argv=None) -> int:
     generating.add_argument('--out', type=Path, required=True)
     generating.add_argument('--spell', type=int, action='append',
                             help='a class spell id or rank id; repeat to select several spells')
+    generating.add_argument('--proc', type=int, action='append',
+                            help='the aura of a proc entry of the class file; repeat to select several procs')
     comparing = commands.add_parser('compare', help=f'judge a verify_all stamp, write {ALERTS_FILE} and {REPORT_FILE}')
     comparing.add_argument('--manifest', type=Path, required=True)
     comparing.add_argument('--results', type=Path, required=True, help='a .cache/verify-all/<STAMP> directory')

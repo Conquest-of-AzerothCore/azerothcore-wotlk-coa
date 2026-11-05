@@ -12,7 +12,140 @@
                       "stat 0": 81, "stat 1": 132, "stat 2": 79, "stat 3": 32, "stat 4": 50},
   "known_auras": [887007],
   "probe_auras": [92111],
-  "procs": [],
+  "procs": [
+    {
+      "aura": 92111,
+      "name": "Scourgebane",
+      "tooltip": "|cFF66DDFFLevel 10 Passive|r\r\nDirect damage dealt now has a $520007h% chance to strike an enemy with |cffffffffScourgebane|r, dealing an additional $801832s2% Weapon damage plus ${$801832m1*$<scalingbp>+$SP*.25+$AP*.25} Holyflame Damage.\r\n\r\nThis is guaranteed to critically strike against Undead enemies.",
+      "chance_token": "$520007h",
+      "trigger": {"action": "attack", "spell": 0},
+      "trigger_text": "Direct damage dealt",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 801832,
+      "proc_spell_source": "tooltip tokens $801832s2 and $801832m1",
+      "events_per_proc": 1,
+      "dbc": {
+        "92111": {"ProcChance": 100, "ProcFlags": 0, "ProcCharges": 0},
+        "520007": {"ProcChance": 20, "ProcFlags": 0, "ProcCharges": 0}
+      },
+      "spell_proc": {
+        "92111": {"ProcFlags": 1048575, "Chance": 100, "ProcsPerMinute": 0, "Cooldown": 0, "Charges": 0},
+        "520007": {"ProcFlags": 1048575, "Chance": 0, "ProcsPerMinute": 0, "Cooldown": 0, "Charges": 0}
+      },
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 560648,
+      "name": "Warrior of Dawn",
+      "tooltip": "Melee damage dealt now has a $h% chance to reset the cooldown and reduce the Energy cost of your next |cFFFFFFFFArgent Blade|r by $561156s1%.",
+      "chance_token": "$h",
+      "trigger": {"action": "attack", "spell": 0},
+      "trigger_text": "Melee damage dealt",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 561156,
+      "proc_spell_source": "tooltip token $561156s1",
+      "events_per_proc": 1,
+      "dbc": {
+        "560648": {"ProcChance": 10, "ProcFlags": 0, "ProcCharges": 0}
+      },
+      "spell_proc": {
+        "560648": {"ProcFlags": 1048575, "Chance": 0, "ProcsPerMinute": 0, "Cooldown": 0, "Charges": 0}
+      },
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 707391,
+      "name": "Retribution",
+      "tooltip": "Melee damage dealt now has a $h% chance to strike 2 additional times for $s1% of the damage dealt as Holy Damage.",
+      "chance_token": "$h",
+      "trigger": {"action": "attack", "spell": 0},
+      "trigger_text": "Melee damage dealt",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 525028,
+      "proc_spell_source": "EffectTriggerSpell[0..2] of 707391: 525028 Retribution, SchoolMask 2 (Holy)",
+      "events_per_proc": 2,
+      "dbc": {
+        "707391": {"ProcChance": 20, "ProcFlags": 0, "ProcCharges": 0},
+        "525028": {"ProcChance": 0, "ProcFlags": 0, "ProcCharges": 0}
+      },
+      "spell_proc": {
+        "707391": {"ProcFlags": 1048575, "Chance": 0, "ProcsPerMinute": 0, "Cooldown": 0, "Charges": 0}
+      },
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 520017,
+      "name": "Light's Echo",
+      "tooltip": "|cffffffffArgent Blade|r now has a $h% chance to strike an additional time.",
+      "chance_token": "$h",
+      "status": "unmodelled",
+      "reason": "no spell names the extra strike; the aura triggers Argent Blade 804929, not the cast rank 807268",
+      "dbc": {
+        "520017": {"ProcChance": 10, "ProcFlags": 0, "ProcCharges": 0}
+      },
+      "spell_proc": {}
+    },
+    {
+      "aura": 520883,
+      "name": "Light's Echo",
+      "tooltip": "|cffffffffArgent Blade|r now has a $h% chance to strike an additional time.",
+      "chance_token": "$h",
+      "status": "unmodelled",
+      "reason": "no spell names the extra strike; the aura triggers Argent Blade 804929, not the cast rank 807268",
+      "dbc": {
+        "520883": {"ProcChance": 20, "ProcFlags": 0, "ProcCharges": 0}
+      },
+      "spell_proc": {}
+    },
+    {
+      "aura": 504808,
+      "name": "Paladin Training",
+      "tooltip": "Triggering |cffffffffZealotry|r now has an $h% chance to grant you an additional auto attack on your next strike.@s:801450:0@",
+      "chance_token": "$h",
+      "status": "ambiguous_tooltip",
+      "reason": "the tooltip does not say what triggers Zealotry, so neither a cast nor an attack follows from it",
+      "dbc": {
+        "504808": {"ProcChance": 8, "ProcFlags": 0, "ProcCharges": 0}
+      },
+      "spell_proc": {}
+    },
+    {
+      "aura": 572548,
+      "name": "Blade Sermon",
+      "tooltip": "Increases the Weapon Damage dealt by |cFFFFFFFFZealotry|r by $s1% and gives it a $h% chance to trigger twice.",
+      "chance_token": "$h",
+      "status": "ambiguous_tooltip",
+      "reason": "the tooltip does not say what triggers Zealotry, so neither a cast nor an attack follows from it",
+      "dbc": {
+        "572548": {"ProcChance": 5, "ProcFlags": 0, "ProcCharges": 0}
+      },
+      "spell_proc": {}
+    },
+    {
+      "aura": 572554,
+      "name": "Blade Sermon",
+      "tooltip": "Increases the Weapon Damage dealt by |cFFFFFFFFZealotry|r by $s1% and gives it a $h% chance to trigger twice.",
+      "chance_token": "$h",
+      "status": "ambiguous_tooltip",
+      "reason": "the tooltip does not say what triggers Zealotry, so neither a cast nor an attack follows from it",
+      "dbc": {
+        "572554": {"ProcChance": 10, "ProcFlags": 0, "ProcCharges": 0}
+      },
+      "spell_proc": {}
+    },
+    {
+      "aura": 804571,
+      "name": "Transcendent Guardian",
+      "tooltip": "Charging to an ally with |cffffffffTemple Guardian|r now has a $h% chance to refresh a charge.",
+      "chance_token": "$h",
+      "status": "unmodelled",
+      "reason": "the trigger is a charge to an ally; proc scenarios cast at the hostile dummy only",
+      "dbc": {
+        "804571": {"ProcChance": 40, "ProcFlags": 0, "ProcCharges": 0}
+      },
+      "spell_proc": {}
+    }
+  ],
   "talent_modifiers": [],
   "rotation": [],
   "stack": []

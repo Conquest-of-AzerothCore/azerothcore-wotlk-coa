@@ -17,6 +17,9 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
 - `hits.py`: `hit_scenario(class_file, spell, casts)` and `melee_scenario(class_file, swings)` return the hit scenario
   of a spell's highest rank and the auto-attack scenario, with their `Expectation` lists; `expected_hit` and
   `casts_needed` give the expected mean, its sigma and the number of casts.
+- `procs.py`: `proc_scenario(class_file, entry, part)` returns one part of the proc-rate scenario of a `procs` entry
+  and its `Expectation`; `proc_plan` sizes the parts, `trials_needed(p)` gives the trials a chance `p` needs and
+  `wilson_interval(procs, trials)` the 99% Wilson interval of a rate.
 - `compare.py`: `compare(manifest, results_dir)` judges a run against the manifest and returns `Verdict(label, status,
   measured, expected, low, high, explanation)`; `write_outputs` writes `alerts.tsv` and `report.md`.
 - `conformance.py`: the command line, `generate` and `compare`.
@@ -74,8 +77,9 @@ skill values, so these values stay unreadable.
 
 `classes/<name>.json` holds `class_id`, `name`, `race`, `level`, `weapon` (`item`, equipment `slot`, 15 is the main
 hand), `ratings` (fixture hit and expertise ratings, so that an aura or hit is never lost to a miss; they do not change
-a tooltip value), `reference_stats`, `known_auras`, `probe_auras` and the sections `procs`, `talent_modifiers`,
-`rotation`, `stack` that later tasks fill. The Templar reference is a human with the Walking Stick (item 2495).
+a tooltip value), `reference_stats`, `known_auras`, `probe_auras`, `procs` (see [Proc rates](#proc-rates)) and the
+sections `talent_modifiers`, `rotation`, `stack` that later tasks fill. The Templar reference is a human with the
+Walking Stick (item 2495).
 
 `weapon` also freezes the `item_template` row of the weapon: `min_damage` (`dmg_min1`), `max_damage` (`dmg_max1`),
 `speed_ms` (`delay`), `inventory_type` and `normalized_speed`, the speed `Unit::GetAPMultiplier` uses for normalized
@@ -181,23 +185,89 @@ parts of the tooltip the reader could not evaluate become `hit_mean` expectation
 `unreadable: `, without a measurement. Not modelled: talent or proc modifiers, critical strikes, spell power
 coefficients the tooltip does not show, and costs that are a percentage of base mana (no `set_power`).
 
+## Proc rates
+
+A `procs` entry of the class file describes one proc aura:
+
+| Field | Content |
+|---|---|
+| `aura`, `name` | the proc aura and its `SpellName[enUS]` |
+| `tooltip` | its `Description[enUS]`, copied verbatim from the client DBC |
+| `chance_token` | the `$h` or `$<id>h` token of the tooltip that shows the chance |
+| `trigger` | `{"action": "attack", "spell": 0}` for auto attacks, `{"action": "cast", "spell": <rank>}` for a cast |
+| `trigger_text` | the words of the tooltip that name the trigger |
+| `proc_spell`, `proc_spell_source` | the spell each proc casts, and where that id comes from |
+| `event_metric` | `spell_cast_count` or `spell_damage_count`, the metric of `proc_spell` |
+| `events_per_proc` | the events of that metric in one proc |
+| `dbc` | `ProcChance`, `ProcFlags`, `ProcCharges` of the aura and of the spell of the chance token |
+| `spell_proc` | the `spell_proc` row of each spell, `{}` without one |
+| `internal_cooldown_ms` | the `spell_proc` `Cooldown`, the internal cooldown between procs |
+| `status`, `reason` | `ambiguous_tooltip` or `unmodelled` for an entry without a scenario, and why |
+
+The trigger comes from the tooltip text only. When the text does not say what triggers the proc, the entry is
+`ambiguous_tooltip` and never gets a chosen trigger. An entry whose observable the harness cannot separate is
+`unmodelled` with its reason. Both have no scenario and are never `ok`.
+
+`trials_needed(p)` is `ceil(2.576^2 x p (1 - p) / 0.025^2)`, the trials that put the half width of the 99% interval
+of the rate at 2.5 points: 1699 for 20%, 956 for 10%. The scenario performs `ceil(1.5 x trials_needed)` attempts
+(ruling R9), refuses fewer attempts than `trials_needed`, and splits them over parts whose wait fits the 600 s
+scenario limit with the 60 s margin of the hit scenarios. Each part learns the aura, then:
+
+- for `attack`: attacks `dummy` for its attempts times the weapon speed; a trial is a main-hand melee hit that deals
+  damage (`melee_damage_count` with `hand` 0, `melee_attack_count` beside it). A miss, dodge or parry deals none and
+  is not a trial. An internal cooldown makes the entry `unmodelled`: auto attacks cannot be spaced beyond it.
+- for `cast`: learns the trigger rank and casts it at `dummy` as the hit scenarios do, one cast every
+  `max(StartRecoveryTime, cast time, internal_cooldown_ms) + 500 ms`; a trial is a damage event of the trigger rank
+  on `dummy` (`spell_damage_count`, `spell_cast_count` beside it), so a failed cast is no trial (ruling R11).
+
+Each part then measures `event_metric` of `proc_spell` and the aura on the character. The `proc_rate` expectation of
+every part has the same label, `<aura> proc_rate`; the comparison sums the trials and the events of the parts whose
+run measured the aura, and divides the events by `events_per_proc`. The chance is the tooltip token read again with the
+measured stats. Fewer trials than `trials_needed` are `insufficient_trials`, even at the exact rate; no usable trial
+(failed casts, aura absent) is `unmeasured`; otherwise the verdict is `ok` when the chance lies in the Wilson
+interval (z = 2.576) of procs over trials, and `alert` outside it or with more procs than trials.
+
+The Templar entries cite the client DBC and the `spell_proc` and `spell_script_names` rows of `acore_world` in the
+in-RAM test database, read on 2026-11-05 (`SELECT * FROM spell_proc WHERE SpellId IN (...)`):
+
+| Aura | Chance | Trigger | Proc spell | Entry |
+|---|---|---|---|---|
+| Scourgebane 92111 | `$520007h` 20% | attack ("Direct damage dealt") | 801832, tooltip `$801832s2` | scenario |
+| Warrior of Dawn 560648 | `$h` 10% | attack ("Melee damage dealt") | 561156, tooltip `$561156s1` | scenario |
+| Retribution 707391 | `$h` 20% | attack ("Melee damage dealt") | 525028 (2 per proc), `EffectTriggerSpell` | scenario |
+| Light's Echo 520017, 520883 | `$h` 10%, 20% | Argent Blade | no spell names the extra strike | `unmodelled` |
+| Paladin Training 504808 | `$h` 8% | "Triggering Zealotry" | | `ambiguous_tooltip` |
+| Blade Sermon 572548, 572554 | `$h` 5%, 10% | Zealotry | | `ambiguous_tooltip` |
+| Transcendent Guardian 804571 | `$h` 40% | a charge to an ally | | `unmodelled` |
+
+`spell_proc` has rows for 92111 (Chance 100), 520007, 560648 and 707391 (Chance 0, so the DBC `ProcChance`), all
+with `ProcFlags` 1048575 and `Cooldown` 0, and none for the other auras; the four are scripted by
+`aura_ascension_templar_event`, whose checks for them (`AscensionTemplarEvents.cpp:58-73`) keep no cooldown of
+their own, so no entry with a scenario has an internal cooldown. The Light's Echo, Paladin Training, Blade Sermon
+and Transcendent Guardian auras have neither a `spell_proc` nor a `spell_script_names` row.
+
+Scourgebane, measured on 2026-11-05 (stamp `20261105-195549`, simulated clock): 13 parts of 197 swings, each
+500.7 s of game time in 3.6 s of real time, the gameplay stage 30.9 s. 484 procs in 2561 trials, rate 0.189,
+Wilson interval 0.170 to 0.210 around the tooltip 20%: `ok`.
+
 ## Generate and compare
 
 ```sh
 cd apps/coa-gameplay-test/conformance
-python3 -B conformance.py generate --class 19 --out DIR [--spell ID ...]
+python3 -B conformance.py generate --class 19 --out DIR [--spell ID ...] [--proc AURA ...]
 coa-verify --ram --stages gameplay --scenario DIR/scenarios/*.json
 python3 -B conformance.py compare --manifest DIR/manifest.json --results .cache/verify-all/STAMP [--out OUT]
 ```
 
-`generate` writes one no-combat scenario per rank, the hit scenario of each spell's highest rank and, without
-`--spell`, the melee scenario, into `DIR/scenarios/`, and `DIR/manifest.json`. `--spell` takes a class spell id or
-a rank id. A hit expectation that is entirely `unmodelled` gets no scenario file. A file holds
-`json.dumps(scenario, indent=2)` and a newline, the bytes the runner writes and hashes as `scenario_sha256`
-(`batch.py` `write_case`), and is named after its exploratory key (`batch.py` `exploratory_key`), for example
-`conformance-templar-value-807268`. The manifest keeps the class file, the DBC directory, the known modifiers read
-from `Spell.dbc` and, per scenario, its key, file, SHA-256, spell, rank, the tooltip tokens read at generation and
-its `Expectation` list.
+`generate` writes one no-combat scenario per rank, the hit scenario of each spell's highest rank, the parts of each
+proc entry and, without `--spell` or `--proc`, the melee scenario, into `DIR/scenarios/`, and `DIR/manifest.json`.
+`--spell` takes a class spell id or a rank id, `--proc` the aura of a proc entry; either one selects only what it
+names. A proc part is named `conformance-<class>-proc-<aura>-part-<n>`. A hit expectation that is entirely
+`unmodelled` gets no scenario file. A file holds `json.dumps(scenario, indent=2)` and a newline, the bytes the
+runner writes and hashes as `scenario_sha256` (`batch.py` `write_case`), and is named after its exploratory key
+(`batch.py` `exploratory_key`), for example `conformance-templar-value-807268`. The manifest keeps the class file,
+the DBC directory, the known modifiers read from `Spell.dbc` and, per scenario, its key, file, SHA-256, spell, rank,
+the tooltip tokens read at generation and its `Expectation` list.
 
 `compare` reads `STAMP/gameplay/exploratory/<key>/result.json`, or the result folder whose recorded hash is the
 manifest hash when no folder has the key. The recorded hash is `scenario_sha256` of the folder's `summary.json`
@@ -216,9 +286,9 @@ that did not pass.
 | `alert` | a measurement outside its rule, a missing measurement, or tokens that changed since generation |
 | `unreadable` | an expectation whose rule starts with `unreadable: ` |
 | `unmodelled` | an `unmodelled` check, a `unmodelled: ` or `unmeasurable: ` rule, a hit model left unmodelled |
-| `ambiguous_tooltip` | a signed tooltip value whose sign differs from the measured value |
-| `insufficient_trials` | a hit mean with fewer usable hits than its `minimum_hits` (ruling R9) |
-| `unmeasured` | a check after a failed single cast, a hit mean with no usable hit after failed casts (R11) |
+| `ambiguous_tooltip` | a signed value whose sign differs from the measured value, a proc of unstated trigger |
+| `insufficient_trials` | a hit mean below its `minimum_hits`, a proc rate below `trials_needed` trials (R9) |
+| `unmeasured` | a check after a failed single cast, a hit mean or proc rate with no usable hit or trial (R11) |
 
 The tooltip of each rank is read again with the `CasterStats` measured by the run's base steps. If its tokens differ
 from the tokens read at generation, every token check of the rank is an alert; so is a token whose text differs

@@ -9,6 +9,7 @@ import re
 from typing import Callable, Mapping, Protocol
 
 from hits import UNMODELLED, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model
+from procs import AMBIGUOUS_TOOLTIP, CAST, PROC_CHECK, chance_of, wilson_interval
 from profile import DBC_DIR, caster_stats_from, known_aura_label, probe_aura_label
 from tooltip import CasterStats, Readout, Records, Tooltip, Unreadable
 from values import UNMEASURABLE, UNREADABLE, Expectation, dataset
@@ -403,6 +404,68 @@ def judge_hit(base: Verdict, class_file: dict, expectation: Expectation, run: Ru
                                f'{describe_modifiers(expected.modifiers)}{failures}')
 
 
+ProcPart = tuple[dict, Run, Expectation]
+
+
+def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -> Verdict:
+    first_entry, first_run, expectation = parts[0]
+    model = expectation.model
+    base = Verdict(expectation.label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
+                   expectation.rank_id, expectation.check)
+    labels = model['measurements']
+    trigger = model['trigger']['spell'] if model['trigger']['action'] == CAST else 0
+    trials = events = 0.0
+    counted, without_aura, unmeasured, reasons = [], [], [], []
+    for _, run, _ in parts:
+        if trigger:
+            reasons += failure_reasons(run, trigger)
+        values = [run.values.get(labels[name]) for name in ('aura', 'trials', 'events')]
+        if None in values:
+            unmeasured.append(f'{run.key} ({run.status}: {run.message})')
+        elif values[0] <= 0:
+            without_aura.append(run.key)
+        else:
+            counted.append(run.key)
+            trials += values[1]
+            events += values[2]
+    procs = events / model['events_per_proc']
+    notes = f'{len(counted)} of {model["parts"]} parts'
+    if without_aura:
+        notes += f'; aura {expectation.spell_id} absent in {", ".join(without_aura)}'
+    if unmeasured:
+        notes += f'; no proc measurements in {", ".join(unmeasured)}'
+    if reasons:
+        notes += f'; failed casts: {describe_failures(reasons)}'
+    measured = procs / trials if trials > 0 else None
+    if trials <= 0:
+        status = 'alert' if unmeasured and not (without_aura or reasons) else 'unmeasured'
+        return replace(base, status=status, measured=measured, explanation=f'no usable trial ({notes})')
+    try:
+        caster = caster_stats_from(first_run.values, manifest['level'])
+    except KeyError as error:
+        return replace(base, measured=measured, explanation=f'base measurement {error} is missing from {first_run.key}')
+    chance = chance_of(tooltips.read(expectation.rank_id, caster).values, expectation.displayed)
+    if chance is None:
+        return replace(base, measured=measured, explanation=f'the tooltip of {expectation.rank_id} no longer shows '
+                                                            f'the chance token {expectation.displayed}')
+    if abs(chance - model['chance_pct']) > FLOAT_EPSILON:
+        return replace(base, measured=measured, expected=chance / 100,
+                       explanation=f'{expectation.displayed} shows {chance:g}%, generated as {model["chance_pct"]:g}%')
+    expected = chance / 100
+    counts = f'{procs:g} procs in {trials:g} trials ({notes})'
+    if trials < model['minimum_trials']:
+        return replace(base, status='insufficient_trials', measured=measured, expected=expected,
+                       explanation=f'{counts}, fewer than the {model["minimum_trials"]} trials the rate needs')
+    if procs > trials:
+        return replace(base, measured=measured, expected=expected, explanation=f'{counts}: more procs than trials')
+    low, high = wilson_interval(procs, trials)
+    status = 'ok' if low - FLOAT_EPSILON <= expected <= high + FLOAT_EPSILON else 'alert'
+    return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
+                   explanation=f'{counts}; {expectation.displayed} shows {chance:g}%; {expectation.rule}; '
+                               f'{model["event_metric"]} of {model["proc_spell"]} per '
+                               f'{model["events_per_proc"]} event(s) is one proc')
+
+
 def judge(manifest: dict, entry: dict, run: Run | None, expectation: Expectation, tokens: Tokens | None,
           tooltips: TooltipSource, hit_model: HitModelSource) -> Verdict:
     base = Verdict(expectation.label, 'alert', None, None, None, None, '', entry['key'], expectation.spell_id,
@@ -413,6 +476,8 @@ def judge(manifest: dict, entry: dict, run: Run | None, expectation: Expectation
         return replace(base, status='unmodelled', measured=measured, explanation=rule)
     if rule.startswith(UNREADABLE):
         return replace(base, status='unreadable', measured=measured, explanation=rule)
+    if rule.startswith(AMBIGUOUS_TOOLTIP):
+        return replace(base, status='ambiguous_tooltip', measured=measured, explanation=rule)
     if run is None:
         return replace(base, explanation=f'{entry["key"]} has no scenario to measure {check}')
     if check in TOKEN_CHECKS and rule.startswith(READ_RULE):
@@ -451,13 +516,19 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
     tooltips = tooltips or DbcTooltips(manifest.get('dbc_dir', DBC_DIR))
     hit_model = hit_model or measured_hit_model
     verdicts = []
+    proc_parts: dict[str, list[ProcPart]] = {}
     for entry in manifest['scenarios']:
         run = runs.get(entry['key'])
         if entry.get('file') and run is None:
             continue
         tokens = read_tokens(manifest['level'], entry, run, tooltips) if run and entry['kind'] == 'value' else None
-        verdicts += [judge(manifest, entry, run, Expectation(**data), tokens, tooltips, hit_model)
-                     for data in entry['expectations']]
+        for data in entry['expectations']:
+            expectation = Expectation(**data)
+            if expectation.check == PROC_CHECK and run is not None:
+                proc_parts.setdefault(expectation.label, []).append((entry, run, expectation))
+            else:
+                verdicts.append(judge(manifest, entry, run, expectation, tokens, tooltips, hit_model))
+    verdicts += [judge_proc(manifest, parts, tooltips) for parts in proc_parts.values()]
     return Comparison(manifest, runs, missing, verdicts)
 
 

@@ -44,7 +44,7 @@ class ClassFileTest(unittest.TestCase):
         self.assertEqual(templar['weapon']['item'], WALKING_STICK)
         self.assertEqual(templar['known_auras'], [CLASS_TUNING_AURA])
         self.assertEqual(templar['probe_auras'], [SCOURGEBANE])
-        for section in ('procs', 'talent_modifiers', 'rotation', 'stack'):
+        for section in ('talent_modifiers', 'rotation', 'stack'):
             self.assertEqual(templar[section], [])
 
     def test_every_class_file_names_its_class(self):
