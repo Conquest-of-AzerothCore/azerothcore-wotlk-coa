@@ -182,7 +182,15 @@ class stormbringer_talent_casts : public AllSpellScript
 {
 public:
     stormbringer_talent_casts() : AllSpellScript("stormbringer_talent_casts",
-        {ALLSPELLHOOK_ON_CAST, ALLSPELLHOOK_ON_HIT_RESULT}) { }
+        {ALLSPELLHOOK_ON_BEFORE_EFFECTS, ALLSPELLHOOK_ON_CAST, ALLSPELLHOOK_ON_HIT_RESULT}) { }
+
+    void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
+    {
+        Player* player = caster ? caster->ToPlayer() : nullptr;
+        if (player && player->getClass() == CLASS_STORMBRINGER && !spell->IsTriggered() &&
+            sSpellMgr->GetFirstSpellInChain(info->Id) == SPELL_ELECTROCUTE)
+            player->RemoveAurasDueToSpell(SPELL_ELECTROCUTIONER);
+    }
 
     void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* info, bool) override
     {

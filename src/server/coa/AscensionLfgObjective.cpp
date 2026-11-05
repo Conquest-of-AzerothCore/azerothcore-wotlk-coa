@@ -1,9 +1,11 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionLfgObjective.h"
 #include "GlobalScript.h"
 #include "Group.h"
 #include "LFGMgr.h"
 #include "Map.h"
+#include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -14,6 +16,38 @@
 namespace
 {
 constexpr uint16 SMSG_LFG_UPDATE_CUSTOM = 0x066D;
+constexpr Milliseconds LfgObjectiveSettleDelay = 3s;
+
+uint32 CurrentLfgObjectiveDungeon(Player const* player)
+{
+    Map const* map = player->FindMap();
+    Group const* group = player->GetGroup();
+    if (!map || !group || !group->isLFGGroup() ||
+        !sLFGMgr->inLfgDungeonMap(group->GetGUID(), map->GetId(), map->GetDifficulty()))
+        return 0;
+
+    return sLFGMgr->GetDungeon(group->GetGUID());
+}
+
+void SendObjectiveDungeon(Player* player, uint32 dungeonId)
+{
+    WorldSession* session = player ? player->GetSession() : nullptr;
+    if (!session)
+        return;
+
+    WorldPacket packet(SMSG_LFG_UPDATE_CUSTOM, 4);
+    packet << uint32(dungeonId);
+    session->SendPacket(&packet);
+}
+
+void ReannounceObjectiveDungeon(Player* player)
+{
+    uint32 const dungeonId = CurrentLfgObjectiveDungeon(player);
+    if (dungeonId)
+        SendObjectiveDungeon(player, 0);
+
+    SendObjectiveDungeon(player, dungeonId);
+}
 
 class lfg_objective_dungeon : public PlayerScript
 {
@@ -22,20 +56,7 @@ public:
 
     void OnPlayerMapChanged(Player* player) override
     {
-        WorldSession* session = player ? player->GetSession() : nullptr;
-        if (!session)
-            return;
-
-        uint32 dungeonId = 0;
-        Map const* map = player->GetMap();
-        Group const* group = player->GetGroup();
-        if (map && group && group->isLFGGroup()
-            && sLFGMgr->inLfgDungeonMap(group->GetGUID(), map->GetId(), map->GetDifficulty()))
-            dungeonId = sLFGMgr->GetDungeon(group->GetGUID());
-
-        WorldPacket packet(SMSG_LFG_UPDATE_CUSTOM, 4);
-        packet << uint32(dungeonId);
-        session->SendPacket(&packet);
+        SendAscensionLfgObjectiveDungeon(player);
     }
 };
 
@@ -92,6 +113,29 @@ public:
         }
     }
 };
+}
+
+void SendAscensionLfgObjectiveDungeon(Player* player)
+{
+    if (player)
+        SendObjectiveDungeon(player, CurrentLfgObjectiveDungeon(player));
+}
+
+void RefreshAscensionLfgObjectiveDungeon(Player* player)
+{
+    if (!player)
+        return;
+
+    ReannounceObjectiveDungeon(player);
+    if (!CurrentLfgObjectiveDungeon(player))
+        return;
+
+    player->m_Events.AddEventAtOffset([guid = player->GetGUID()]()
+    {
+        Player* player = ObjectAccessor::FindPlayer(guid);
+        if (player && player->IsInWorld())
+            ReannounceObjectiveDungeon(player);
+    }, LfgObjectiveSettleDelay);
 }
 
 void AddSC_AscensionLfgObjective()

@@ -1,0 +1,165 @@
+{
+  "schema": 1,
+  "name": "Explorer's Last Wish procs when its wearer takes damage (#11218)",
+  "contract": [
+    "Explorer's Last Wish (515755) equips proc dummy 202046 and its worldforged tiers 312563/316563/320563 (top tier item 1387556 equips 320563). Every dummy is an aura 42 trigger on Explorer's Health Buffer with Spell.dbc ProcFlags 0, and the world had no spell_proc row, so Aura::GetProcEffectMask found no entry and the ring never procced (#11218).",
+    "The tooltips promise a chance to gain the health buffer whenever you take damage (ProcChance 3). The repair grants PROC_FLAG_TAKEN_DAMAGE with Chance deferred to the record.",
+    "spell_proc_chance reads the record's 3 for every dummy and aura_proc_rate replays each equipped aura's native proc decision on a synthetic incoming melee hit. Before the repair the chance lookups fail with no proc entry and every rate reads 0, so the discriminating assertions fail rather than flake. Dealing damage is not taking it."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "base",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "tier",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "m1",
+      "owner": "base",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4
+    },
+    {
+      "id": "m2",
+      "owner": "tier",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "base",
+      "item": 515755
+    },
+    {
+      "action": "equip",
+      "label": "Equip Explorer's Last Wish",
+      "actor": "base",
+      "item": 515755,
+      "slot": 10
+    },
+    {
+      "action": "add_item",
+      "actor": "tier",
+      "item": 1387556
+    },
+    {
+      "action": "equip",
+      "label": "Equip the top worldforged Explorer's Last Wish",
+      "actor": "tier",
+      "item": 1387556,
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Explorer's Last Wish applies its proc dummy",
+      "actor": "base",
+      "metric": "aura",
+      "spell": 202046,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the top tier applies its proc dummy",
+      "actor": "tier",
+      "metric": "aura",
+      "spell": 320563,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dummy 202046 loads the record's 3% chance",
+      "actor": "base",
+      "metric": "spell_proc_chance",
+      "spell": 202046,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dummy 312563 loads the record's 3% chance",
+      "actor": "base",
+      "metric": "spell_proc_chance",
+      "spell": 312563,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dummy 316563 loads the record's 3% chance",
+      "actor": "base",
+      "metric": "spell_proc_chance",
+      "spell": 316563,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dummy 320563 loads the record's 3% chance",
+      "actor": "base",
+      "metric": "spell_proc_chance",
+      "spell": 320563,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: taking a melee hit procs Explorer's Last Wish at about 3%",
+      "actor": "base",
+      "metric": "aura_proc_rate",
+      "spell": 202046,
+      "target": "m1",
+      "incoming": true,
+      "type_mask": 1048584,
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: taking a melee hit procs the top tier at about 3%",
+      "actor": "tier",
+      "metric": "aura_proc_rate",
+      "spell": 320563,
+      "target": "m2",
+      "incoming": true,
+      "type_mask": 1048584,
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: dealing damage is not taking damage",
+      "actor": "base",
+      "metric": "aura_proc_rate",
+      "spell": 202046,
+      "target": "m1",
+      "type_mask": 4,
+      "equals": 0
+    }
+  ]
+}

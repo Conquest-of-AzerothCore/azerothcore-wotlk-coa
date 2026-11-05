@@ -1,0 +1,245 @@
+{
+  "schema": 1,
+  "name": "Setis: the shrine takes the raid to his map, he pays every player and leaves a portal back",
+  "contract": [
+    "rev_20261104_10_coa_setis_world_boss spawns the Shrine of Setis (64600) by the Scarab Wall. On a",
+    "heroic raid difficulty it refuses; on a Normal one its gossip 'Challenge Setis the Gate Warden'",
+    "takes the player to Setis' map (880). Setis (64600) has 470000 health per player, counted from 10 to",
+    "40, so 4700000 for one player. For a single player he drops one epic item of item level 68 (one for",
+    "every four players, never none), and every player gets 250 Runes of Ascension (375250), 100 to 150",
+    "Bazaar Tokens (975001) and a Treasures of Azeroth chest (978059). The Portal to the Scarab Wall",
+    "(64601) appears at its fixed spot at the end of the road (-7970.9, 1507.22) and takes the player",
+    "back to Silithus (map 1). His loot always holds the Idol of the Old Gods (1005032)."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": -7867.0,
+    "y": 1329.0,
+    "z": -7.3
+  },
+  "players": [
+    {
+      "id": "raider",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "raider",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "assert",
+      "label": "The shrine stands by the Scarab Wall",
+      "actor": "raider",
+      "metric": "spawn_active",
+      "spawn": 9780102,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "raider",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "raider",
+      "entry": 380138,
+      "distance": 2
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "raider",
+      "entry": 380138
+    },
+    {
+      "action": "gossip_select",
+      "actor": "raider",
+      "option": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "On a heroic difficulty the shrine refuses",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 1
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "raider",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "raider",
+      "entry": 380138
+    },
+    {
+      "action": "gossip_select",
+      "actor": "raider",
+      "option": 0,
+      "label": "Challenge Setis the Gate Warden"
+    },
+    {
+      "action": "assert",
+      "label": "The shrine takes the player into Setis' map",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 880,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the map is on the normal difficulty",
+      "actor": "raider",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "raider",
+      "entry": 64600,
+      "as": "setis",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "His health is ten players' worth for a lone player",
+      "actor": "raider",
+      "metric": "nearby_creature_max_health",
+      "entry": 64600,
+      "equals": 4700000,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64600,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Setis dies",
+      "actor": "setis",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 20000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "raider",
+      "target": "setis"
+    },
+    {
+      "action": "assert",
+      "label": "One epic item for one player",
+      "actor": "raider",
+      "metric": "loot_count",
+      "quality": 4,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "His normal item (item level 68)",
+      "actor": "raider",
+      "metric": "loot_gear_item_level",
+      "equals": 68
+    },
+    {
+      "action": "assert",
+      "label": "The Idol of the Old Gods always drops",
+      "actor": "raider",
+      "metric": "loot_offered_item_count",
+      "item": 1005032,
+      "equals": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "raider"
+    },
+    {
+      "action": "assert",
+      "label": "250 Runes of Ascension",
+      "actor": "raider",
+      "metric": "item_count",
+      "item": 375250,
+      "equals": 250,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "100 to 150 Bazaar Tokens",
+      "actor": "raider",
+      "metric": "item_count",
+      "item": 975001,
+      "min": 100,
+      "max": 152
+    },
+    {
+      "action": "assert",
+      "label": "A Treasures of Azeroth chest",
+      "actor": "raider",
+      "metric": "item_count",
+      "item": 978059,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "raider",
+      "map": 880,
+      "x": -7966.0,
+      "y": 1507.0,
+      "z": 2.6
+    },
+    {
+      "action": "assert",
+      "label": "The portal stands at its fixed spot at the end of the road",
+      "actor": "raider",
+      "metric": "nearby_gameobject_count",
+      "entry": 64601,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "raider",
+      "entry": 64601
+    },
+    {
+      "action": "assert",
+      "label": "The portal takes the player back to Silithus",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 1,
+      "within_ms": 8000
+    }
+  ]
+}

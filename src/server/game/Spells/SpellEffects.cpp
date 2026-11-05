@@ -40,6 +40,7 @@
 #include "Log.h"
 #include "MapMgr.h"
 #include <limits>
+#include <set>
 #include "MiscPackets.h"
 #include "MoveSpline.h"
 #include "ObjectAccessor.h"
@@ -293,6 +294,55 @@ constexpr uint32 ASCENSION_STATIC_AURA = 803102;
 constexpr uint32 ASCENSION_THUNDER_WARD_AURA = 800098;
 constexpr uint32 ASCENSION_CHARGED_CONDUIT_AURA = 803790;
 
+// Clearing a cooldown also clears the global cooldown sweep from that action button on the client, so a reset
+// that lands mid global cooldown made the ability look ready while CheckCast still refused it.
+void ResendRemainingGlobalCooldown(Player* player, uint32 spellId)
+{
+    SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
+    if (!spellInfo || !player->HasActiveSpell(spellId) || player->HasSpellCooldown(spellId))
+        return;
+
+    if (uint32 remaining = player->GetGlobalCooldownMgr().GetGlobalCooldown(spellInfo))
+    {
+        WorldPacket data;
+        player->BuildCooldownPacket(data, SPELL_COOLDOWN_FLAG_NONE, spellId, remaining);
+        player->SendDirectMessage(&data);
+    }
+}
+
+// Effects usually name the first rank, but the cleared button holds the rank the player owns, and a category reset
+// clears every spell in that category.
+void ResendRemainingGlobalCooldowns(Player* player, uint32 spellId, uint32 category)
+{
+    std::set<uint32> clearedSpells;
+    for (uint32 rankId = sSpellMgr->GetFirstSpellInChain(spellId); rankId;
+        rankId = sSpellMgr->GetNextSpellInChain(rankId))
+        clearedSpells.insert(rankId);
+
+    clearedSpells.insert(spellId);
+
+    if (category)
+    {
+        SpellCategoryStore::const_iterator categorySpells = sSpellsByCategoryStore.find(category);
+        if (categorySpells != sSpellsByCategoryStore.end())
+            for (std::pair<bool, uint32> const& categorySpell : categorySpells->second)
+                clearedSpells.insert(categorySpell.second);
+    }
+
+    // An instant spell starts its global cooldown only after its own effects ran, so a reset from its own hit must
+    // wait for the next update to see it.
+    ObjectGuid const playerGuid = player->GetGUID();
+    player->m_Events.AddEventAtOffset([playerGuid, clearedSpells]()
+    {
+        Player* target = ObjectAccessor::FindPlayer(playerGuid);
+        if (!target)
+            return;
+
+        for (uint32 clearedSpellId : clearedSpells)
+            ResendRemainingGlobalCooldown(target, clearedSpellId);
+    }, 0ms);
+}
+
 void ResetAscensionCooldown(Player* player, uint32 spellId, bool resetCategory)
 {
     if (!player || !spellId)
@@ -300,10 +350,13 @@ void ResetAscensionCooldown(Player* player, uint32 spellId, bool resetCategory)
 
     player->RemoveSpellCooldown(spellId, true);
 
+    uint32 category = 0;
     if (resetCategory)
         if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId))
-            if (uint32 category = spellInfo->GetCategory())
+            if ((category = spellInfo->GetCategory()))
                 player->RemoveCategoryCooldown(category);
+
+    ResendRemainingGlobalCooldowns(player, spellId, category);
 }
 
 void ModifyAscensionRankCooldown(Player* player, uint32 spellId, int32 delta, bool resetCategory)
@@ -4599,6 +4652,12 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
     }
 
     weaponDamagePercentMod *= m_scriptWeaponDamageMultiplier;
+
+    if (m_spellInfo->AscensionFlatAfterWeaponPercent)
+    {
+        ApplyPct(weaponDamage, weaponDamagePercentMod);
+        weaponDamagePercentMod = 100.0f;
+    }
 
     // Sequence is important
     for (int j = 0; j < MAX_SPELL_EFFECTS; ++j)

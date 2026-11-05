@@ -342,6 +342,7 @@ public: /* PlayerScript */
     void OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource);
     uint8 GetMaxAllowedLevel(Player* player);
     bool OnPlayerHasNoBonusExperience(Player* player);
+    bool OnPlayerHoldsTankOrHealerRole(Player const* player);
     void OnPlayerHonorableKillingBlow(Player* killer, Player* victim);
     bool OnPlayerReputationChange(Player* player, uint32 factionID, int32& standing, bool incremental);
     void OnPlayerReputationRankChange(Player* player, uint32 factionID, ReputationRank newRank, ReputationRank oldRank, bool increased);

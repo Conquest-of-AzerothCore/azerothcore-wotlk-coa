@@ -60,8 +60,10 @@
 #include "AscensionClassTuning.h"
 #include "AscensionBarbarian.h"
 #include "AscensionBarbarianScaling.h"
+#include "AscensionBloodmageDarkwing.h"
 #include "AscensionCustomResourceData.h"
 #include "AscensionFreshCharacterCheck.h"
+#include "AscensionLfgObjective.h"
 #include "AscensionLiveBaselineData.h"
 #include "AscensionRacialAbilities.h"
 #include "AscensionPrimalistEarthquake.h"
@@ -258,9 +260,9 @@ constexpr uint16 CMSG_QUERY_DELETED_ITEM_RECOVERY = 0x05E2;
 constexpr uint16 CMSG_RECOVER_DELETED_ITEM = 0x05E4;
 constexpr uint16 CMSG_CLAIM_TUTORIAL_REWARD = 0x06A8;
 
-constexpr std::array<uint16, 9> MODULE_EXTENSION_OPCODES = {
+constexpr std::array<uint16, 10> MODULE_EXTENSION_OPCODES = {
     0x0682, 0x0684,
-    0x05DA, 0x05DC,
+    0x05DA, 0x05DC, 0x0774,
     CMSG_QUERY_VENDORED_ITEM_RECOVERY, CMSG_RECOVER_VENDORED_ITEM,
     CMSG_QUERY_DELETED_ITEM_RECOVERY, CMSG_RECOVER_DELETED_ITEM, CMSG_CLAIM_TUTORIAL_REWARD};
 
@@ -416,6 +418,7 @@ constexpr std::array<std::pair<uint32, uint32>, 1> REAPER_ONE_SOUL_CONSUMERS =
 
 constexpr std::size_t APPEARANCE_CATEGORY_COUNT = 69;
 constexpr uint32 APPEARANCE_CATEGORY_AMMUNITION = 32;
+constexpr uint32 APPEARANCE_CATEGORY_ITEM_SET = 55;
 constexpr uint32 APPEARANCE_CATEGORY_SHADOWHOUND = 68;
 constexpr uint32 APPEARANCE_CATEGORY_NECROMANCER_LICH_FORM = 67;
 
@@ -3435,6 +3438,9 @@ public:
 
             if (rule.ClassId == CLASS_STORMBRINGER && rule.ResourceSpellId == SPELL_STORMBRINGER_STATIC &&
                 player->HasAura(SPELL_STORMBRINGER_CHARGED_CONDUIT))
+                break;
+
+            if (rule.ClassId == CLASS_DEMON_HUNTER && player->CanCastDuringChannel(spellInfo))
                 break;
 
             if (rule.PreserveCostAuraSpellId &&
@@ -7693,6 +7699,7 @@ private:
         SendAscensionRunemasterEchoesCooldown(player);
         AscensionDisplayPatchService::Instance().SendPatchStream(player);
         SendServerPetAppearances(player);
+        RefreshAscensionLfgObjectiveDungeon(player);
         LOG_DEBUG("coa", "Resent spell charge state to {} after client world entry",
                   player->GetName());
         break;
@@ -7752,7 +7759,7 @@ private:
 
     for (uint32 categoryId = 1; categoryId < requested.size(); ++categoryId) {
       uint32 appearanceId = requested[categoryId];
-      if (!appearanceId)
+      if (!appearanceId || appearanceId == state->ActiveAppearances[categoryId])
         continue;
 
       if (!state->CollectedAppearances.contains(appearanceId))
@@ -7807,10 +7814,23 @@ private:
       }
     }
 
-    if (requested[55] && !ExpandItemSetAppearance(requested, requested[55]))
+    uint32 const activeItemSet = state->ActiveAppearances[APPEARANCE_CATEGORY_ITEM_SET];
+    uint32 const requestedItemSet = requested[APPEARANCE_CATEGORY_ITEM_SET];
+    if (requestedItemSet != activeItemSet)
     {
-      SendApplyResult(player, "APPLY_APPEARANCES_INVALID_SELECTION");
-      return;
+      if (activeItemSet)
+      {
+        std::array<uint32, APPEARANCE_CATEGORY_COUNT> activeItemSetPieces{};
+        ExpandItemSetAppearance(activeItemSetPieces, activeItemSet);
+        for (uint32 categoryId = 1; categoryId < requested.size(); ++categoryId)
+          if (activeItemSetPieces[categoryId] && requested[categoryId] == activeItemSetPieces[categoryId])
+            requested[categoryId] = 0;
+      }
+      if (requestedItemSet && !ExpandItemSetAppearance(requested, requestedItemSet))
+      {
+        SendApplyResult(player, "APPLY_APPEARANCES_INVALID_SELECTION");
+        return;
+      }
     }
 
     for (auto const& [categoryId, category] : _petCategories)
@@ -7832,6 +7852,7 @@ private:
     RefreshVisibleItems(player);
     RefreshIncarnations(player);
     SendApplyResult(player, "APPLY_APPEARANCES_OK");
+    SendActiveAppearances(player, *state);
   }
 
   static bool RealmAllows(AppearanceInfo const& appearance)
@@ -9900,6 +9921,7 @@ public:
         {
             PrepareAscensionClassMechanicsCast(spell);
             PrepareAscensionBarbarianScaling(spell);
+            PrepareAscensionBloodmageBatBite(spell);
         }
     }
 

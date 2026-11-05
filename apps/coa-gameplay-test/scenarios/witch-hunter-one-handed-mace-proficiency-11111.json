@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Witch Hunter: keeps One-Handed Maces across login (#11111)",
+  "contract": "The Witch Hunter class-quest reward Torch of Hope (717002) is a one-handed mace. A Witch Hunter knows One-Handed Maces (198), equips the Torch, and keeps it through the proficiency sync. That sync runs on login and whenever a proficiency is forgotten; both read the same class baseline, which lacked 198, so before the fix the sync stripped it. Forgetting 198 runs the sync at once, so the scenario checks it right after the forget and again after a relog.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "hunter", "race": 1, "class": 15, "level": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "a Witch Hunter knows One-Handed Maces", "actor": "hunter",
+      "metric": "knows_spell", "spell": 198, "equals": 1 },
+    { "action": "add_item", "actor": "hunter", "item": 717002 },
+    { "action": "equip", "label": "the Witch Hunter equips Torch of Hope", "actor": "hunter", "item": 717002, "slot": 15 },
+    { "action": "assert", "label": "the Torch of Hope is in the main hand", "actor": "hunter",
+      "metric": "equipped_item", "slot": 15, "equals": 717002, "within_ms": 2000 },
+    { "action": "unlearn", "label": "forget One-Handed Maces", "actor": "hunter", "spell": 198 },
+    { "action": "assert", "label": "the forget-spell sync puts One-Handed Maces back", "actor": "hunter",
+      "metric": "knows_spell", "spell": 198, "equals": 1, "within_ms": 5000 },
+    { "action": "relog", "actor": "hunter" },
+    { "action": "assert", "label": "One-Handed Maces comes back on login", "actor": "hunter",
+      "metric": "knows_spell", "spell": 198, "equals": 1, "within_ms": 10000 }
+  ]
+}

@@ -514,7 +514,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `banker_activate` | `actor`, optional `target`, or optional `owner` + `entry`: native banker click (`CMSG_BANKER_ACTIVATE`); defaults to the actor's summoned companion, and `owner` aims it at a companion another actor summoned, walking up to it first. |
 | `personal_bank_open` | `actor`, bank object `entry`: native Personal Bank open (`CMSG_GUILD_BANKER_ACTIVATE`) on the nearest vault of that entry within 20 yards. |
 | `personal_bank_swap` | `actor`, vault `entry`, `direction` `deposit` or `withdraw`, optional bank `slot` (default 0) and split `count` (0 moves the stack); `deposit` needs `item`, the first carried item of that entry. Withdrawals optionally take backpack `inventory_slot` (23-38), otherwise use automatic storage. Sends native `CMSG_GUILD_BANK_SWAP_ITEMS` into or out of the open Personal Bank. |
-| `binder_activate` | `actor`, innkeeper `target`: native "make this inn your home" confirmation (`CMSG_BINDER_ACTIVATE`), walking up to the innkeeper first. |
+| `binder_activate` | `actor`, innkeeper `target` (or `owner` + `entry` for a creature that actor has out): native "make this inn your home" confirmation (`CMSG_BINDER_ACTIVATE`), walking up to the innkeeper first. |
 | `destroy_item` | `actor`, `item`: native `CMSG_DESTROYITEM` of the first carried item of that entry, as the player deleting it. |
 | `area_trigger` | `actor`, `id`: native area-trigger packet, as the client sends on walking into one; inn triggers are what set the rested flag. |
 | `gossip_select` | `actor`, zero-based `option`: select from the current menu through the session handler. |
@@ -525,6 +525,8 @@ assert stable maximums and final levels when testing damage coefficients.
 | `use_item` | `actor`, `item`, `spell`, optional `target`, `target_item` (an owned item entry, sent as the item target instead of a unit) and `destination`: normal item-use handler. |
 | `use_nearby_gameobject` | `actor`, `entry`, optional `owner` (a player id): native use request for the single gameobject of that entry within 20 yards in the actor's phase; `owner` narrows the choice to the object that player owns, so one of several nearby objects can be clicked. |
 | `spell_click_nearby` | `actor`, `entry`: native `CMSG_SPELLCLICK` on the nearest living creature of that entry within 20 yards, as the client sends on right-clicking a spell-click creature. |
+| `select` | `actor`, `target` (any actor id): native `CMSG_SET_SELECTION` on that unit, as the client sends on clicking it; meeting stones summon the selected party member. |
+| `minion_kill` | Player `actor`, `minion` (creature entry), `target` (creature fixture or `summon` id): the actor's living owned creature of that entry deals the target's whole health in direct damage through `Unit::DealDamage`, so the kill credits the minion as the killer. |
 | `select_nearby` | `actor`, `entry`, optional `radius` (default 40): native `CMSG_SET_SELECTION` on the nearest living creature of that entry, as the client sends on clicking it. GM commands that read `ChatHandler::getSelectedCreature()` (`.cast target`, `.cast back`, …) need this first; `attack_nearby` only sends `CMSG_ATTACKSWING` and never selects. |
 | `use_gameobject` | `actor`, `entry`: native use request for the actor's single nearby owned gameobject. |
 | `voidportal` | Player `actor`, `op` `force` with `group` and `spawn`, or `op` `roll` with `success`: put the one realm-wide Void Portal on that configured point as a point rotation does, or replace the next proximity roll; the manager is process-global, so the case runs exclusively. |
@@ -576,7 +578,7 @@ a previously named snapshot of the same metric; it is available on snapshots and
 
 Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`, `map_id`, `combat`, `casting`,
 `level`, `quest_objective_count` (needs `quest`, optional `index`), `knows_spell`, `has_talent`, `talent_points`, `active_talent_spec`,
-`cooldown_ms`, `spell_cooldown_packet_ms`, `item_count`, `carried_item_count`, `bank_bag_slots`, `guild_bank_tabs`, `aura`, `aura_stacks`, `aura_charges`,
+`cooldown_ms`, `spell_cooldown_packet_ms`, `item_loot_releases`, `item_count`, `carried_item_count`, `bank_bag_slots`, `guild_bank_tabs`, `aura`, `aura_stacks`, `aura_charges`,
 `aura_duration_ms`, `aura_amount`, `pet_entry`, `pet_aura_stacks`, `owned_creature_count`, `owned_creature_spacing`,
 `charm_entry`, `charm_aura_stacks`, `controls_self`, `private_instance`, `dynamic_object`,
 `dynamic_object_duration_ms`, `dynamic_object_height`, `distance`, `spell_proc_count`, `spell_proc_chance`,
@@ -698,6 +700,25 @@ and `pet_melee_damage` read the melee combat packets the player actor received f
 of the remaining hits that dealt damage, and the summed damage of every swing. Snapshot them around a fight;
 `ratio_to` a plain-count snapshot gives an average plain hit.
 These observations do not test delivery to a network client.
+`owned_creature_damage_total`, `owned_creature_damage_count` and `owned_creature_attack_count` require `entry` and
+combine, for creatures of that entry, the same melee combat packets `pet_melee_*` reads with the actor's already
+recorded `spell_damage_count`/`spell_damage_total` events (both direct and periodic, including its own critical
+filter semantics, but without a `target`, `caster`, `pet` or `critical` filter): `owned_creature_damage_total` sums
+melee and spell damage together, `owned_creature_damage_count` sums the melee hit count (crits, glancing blows and
+plain hits; misses are excluded) with the spell damage event count, and `owned_creature_attack_count` sums every
+melee swing (hits and misses) with the spell damage event count, so a single swing or cast from a creature that
+never repeats it is observable even once. Unlike `spell_damage_count`/`spell_damage_total` with `entry`, these three
+metrics never resolve a live creature: they only filter the actor's already-recorded events by the attacking or
+casting GUID's entry, so a summon, guardian or totem a player does not strictly own by `GetOwnerGUID` (a temporary
+summon whose `SummonerGUID` or `CreatorGUID` the player holds instead) is observable, and remains observable after
+it despawns or dies. As with `pet_melee_*`, this trades a precise ownership check for the actor's own observation:
+scope each scenario to one creature of that entry near the observing actor. Snapshot them around a fight; use
+`relative_to` for the delta and `ratio_to` a `pet_melee_swings`/`pet_melee_damage` delta of the same fight to cross-check
+melee-only aggregation, as [the regression scenario](scenarios/coa-owned-creature-damage-metric-honored-ancestor.json)
+does for the Honored Ancestor guardian pet.
+`owned_creature_heal_count`, `owned_creature_heal_total` and `owned_creature_effective_heal_total` require `entry`
+and apply the same entry resolution to the actor's recorded `spell_heal_*` events: they count the healing events cast
+by creatures of that entry, or sum their healing including or excluding overhealing, whoever the healed unit is.
 `spell_damage_count` and `spell_damage_total` require `spell` and count positive direct or periodic spell
 damage events, or sum their post-mitigation damage, from the actor's native combat packets. Optional `target`
 filters the victim, `pet: true` selects the actor's current pet as caster, `caster` selects another actor such
@@ -903,6 +924,8 @@ submits that spell again).
 `spell_cooldown_packet_ms` requires `spell` and reads the cooldown duration from the last native
 `SMSG_SPELL_COOLDOWN` the session was sent for it, or -1 if none was observed; unlike `cooldown_ms`,
 which reads the server-side cooldown map directly, this proves the client was actually notified.
+`item_loot_releases` counts the `SMSG_LOOT_RELEASE_RESPONSE` packets the actor's session was sent for an item, which
+is how a custom item opening tells the client to leave the looting state it entered on `CMSG_OPEN_ITEM`.
 `sent_aura_amount` requires `spell` and accepts `effect` (0..2, default 0). It reads that effect's amount from the
 last `SMSG_ASCENSION_AURA_AMOUNT` the actor's session was sent for its own aura, which feeds the `$wN` tooltip tokens,
 and fails if none was observed; the actor needs `ascension_client` set. Unlike `aura_amount`, which reads the server-side
@@ -967,6 +990,7 @@ scale. Both return zero when absent and do not verify client rendering.
 one object when present; it returns the remaining lifetime with one-second precision, zero when absent,
 or -1 for an object without an expiry. Moving out of range is not proof of despawn.
 `at_homebind` checks that the player is on their homebind map and within five yards of its position.
+`summon_pending` is 1 while the player has an unanswered summon request (meeting stone, ritual or warlock summon).
 `use_gameobject` keeps normal interaction-distance and usability checks. It does not inspect a rendered UI.
 The [portable gadgets scenario](scenarios/portable-gadgets.json) checks item summons, lifetimes, portal
 teleports and expiry. It requires `mod-portablemail`; mailbox and altar client interfaces are not tested.
@@ -1297,7 +1321,9 @@ real early receive hook and session queue; follow it with a wait before teleport
 requires an entry and reads the nearest living matching creature within 60 yards; `nearby_creature_health_pct`
 reads that creature's current health as a percentage of its maximum, so a real spawn such as a raid boss can be
 checked undamaged before its encounter. `nearby_creature_can_attack` returns 1 when the native
-`IsValidAttackTarget` lets the actor attack that creature, otherwise 0. `nearby_creature_mount_display` reads
+`IsValidAttackTarget` lets the actor attack that creature, otherwise 0. `nearby_creature_at_client` returns 1 while
+that creature is in the actor's client-visible set, as the player would see it, otherwise 0; a creature hidden with
+`SetVisible(false)` stays 0 for a non-GM player. `nearby_creature_mount_display` reads
 that creature's mount display id (0 when on foot) and `nearby_creature_display` its current display id.
 `nearby_creature_aura_count` requires `spell` and counts the
 living creatures of the entry within 60 yards that carry that aura.
