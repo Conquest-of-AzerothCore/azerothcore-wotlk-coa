@@ -5,8 +5,8 @@
 
 INSERT INTO `creature_template` (`entry`, `name`, `subname`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`,
   `speed_walk`, `speed_run`, `rank`, `unit_class`, `type`, `lootid`, `HealthModifier`, `DamageModifier`,
-  `ArmorModifier`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
-(978080, 'Kaldros Depthbreaker', '', 63, 63, 0, 14, 0, 1, 1.14286, 3, 1, 1, 978080, 100, 20, 1, 617299839, 1,
+  `ArmorModifier`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
+(978080, 'Kaldros Depthbreaker', '', 63, 63, 0, 14, 0, 1, 1.14286, 3, 1, 1, 978080, 100, 20, 1, 1,
   'boss_kaldros_coa', 12340)
 ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `rank` = VALUES(`rank`), `lootid` = VALUES(`lootid`),
   `ScriptName` = VALUES(`ScriptName`);
