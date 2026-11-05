@@ -504,8 +504,12 @@ public:
 
     bool OnPlayerBeforeOpenItem(Player* player, Item* item) override
     {
-        if (!item || !OpenCallboardCache(player, item))
+        if (!item)
             return true;
+        ObjectGuid const cache = item->GetGUID();
+        if (!OpenCallboardCache(player, item))
+            return true;
+        player->SendLootRelease(cache);
         return false;
     }
 };

@@ -933,6 +933,7 @@ struct Actor
     Tree castFailures;
     std::map<uint32, uint8> castFailureReason;
     std::map<uint32, uint32> spellCooldownPacketMs;
+    uint32 itemLootReleases = 0;
     std::map<uint32, std::array<int32, MAX_SPELL_EFFECTS>> sentAuraAmounts;
     uint32 bankShows = 0;
     uint32 systemMessages = 0;
@@ -1280,6 +1281,15 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             if (unit == actor.guid)
                 actor.spellCooldownPacketMs[spell] = cooldown;
         }
+    }
+
+    if (packet.GetOpcode() == SMSG_LOOT_RELEASE_RESPONSE && packet.size() >= sizeof(uint64))
+    {
+        ObjectGuid released;
+        WorldPacket response(packet);
+        response >> released;
+        if (released.IsItem())
+            ++actor.itemLootReleases;
     }
 
     constexpr uint16 AscensionAuraAmountOpcode = 0x0673;
@@ -4913,6 +4923,8 @@ private:
             auto const found = packets.find(spell);
             return found == packets.end() ? -1.0 : double(found->second);
         }
+        if (metric == "item_loot_releases")
+            return _actors.at(step.get<std::string>("actor")).itemLootReleases;
         if (metric == "sent_aura_amount")
         {
             auto const& sent = _actors.at(step.get<std::string>("actor")).sentAuraAmounts;
