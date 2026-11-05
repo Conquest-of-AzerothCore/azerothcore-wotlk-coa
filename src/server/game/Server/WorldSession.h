@@ -521,6 +521,9 @@ public:
     // (loopback or CoA.AllowRemoteClients, and CoA.Enable).
     bool IsAscensionCompatEnabled() const { return _ascensionCompatEnabled; }
     void SetAscensionCompatEnabled(bool enabled) { _ascensionCompatEnabled = enabled; }
+    // The client behind this connection holds the streamed spell visual and sound rows.
+    bool HasAscensionSpellVisualRows() const { return _ascensionSpellVisualRows; }
+    void SetAscensionSpellVisualRows() { _ascensionSpellVisualRows = true; }
     void SetPlayer(Player* player);
     uint8 Expansion() const { return m_expansion; }
 
@@ -1357,6 +1360,7 @@ private:
     std::function<void(WorldPacket const&)> _socketlessPacketObserver;
     std::string m_Address;
     bool _ascensionCompatEnabled = false;
+    bool _ascensionSpellVisualRows = false;
 
     AccountTypes _security;
     bool _skipQueue;
