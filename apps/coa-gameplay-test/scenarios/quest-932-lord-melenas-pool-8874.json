@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Lord Melenas is up at Fel Rock and comes back after a kill (#8874)",
-  "contract": "Twisted Hatred 932 asks for Melenas' Head 5221, which Lord Melenas 2038 drops at 100% for players on the quest. Melenas has three Fel Rock spawns (49818, 49819, 49850) in pool 387 with max_limit 1, so exactly one of them is up at a time, and each respawns 120 s after a kill at a pool-chosen spot. The player stands at a Fel Rock grell spawn (48025) that is within 50 yards of all three spots. Expected: one Melenas is up, killing and looting him completes the quest, and one Melenas is up again within three minutes.",
+  "contract": "Twisted Hatred 932 asks for Melenas' Head 5221, which Lord Melenas 2038 drops at 100% for players on the quest. Melenas has three Fel Rock spawns (49818, 49819, 49850) in pool 387 with max_limit 1, so exactly one of them is up at a time, and each respawns 120 s after a kill at a pool-chosen spot. The player stands at a Fel Rock grell spawn (48025) that is within 50 yards of all three spots. Expected: one Melenas is up, killing and looting him completes the quest, and exactly one Melenas is up again within three minutes, at whichever spot the pool picks.",
   "timeout_ms": 300000,
   "location": { "map": 1, "x": 10110.4, "y": 1156.79, "z": 1313.28, "o": 0 },
   "players": [
@@ -49,8 +49,8 @@
       "quest": 932, "equals": 1, "within_ms": 2000
     },
     {
-      "action": "assert", "label": "One Lord Melenas is up again after the pool respawn", "actor": "hero",
-      "metric": "nearby_creature_count", "entry": 2038, "equals": 1, "within_ms": 180000
+      "action": "assert", "label": "One Lord Melenas is up again at a pool spot after the respawn", "actor": "hero",
+      "metric": "map_creature_count", "entry": 2038, "equals": 1, "within_ms": 180000
     }
   ]
 }
