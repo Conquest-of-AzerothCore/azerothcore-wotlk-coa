@@ -3,9 +3,10 @@
 
 namespace
 {
-    // The shrine stands where he stood in Azshara; his map (881) starts at its graveyard (WorldSafeLocs 6081).
+    // The shrine stands by him in Azshara. In his map (881) Ascension's 64601 fights; it starts at its graveyard
+    // (WorldSafeLocs 6081).
     coa_world_boss_instance::Config const Azuregos = {
-        "Azuregos", 6109, 881,
+        "Azuregos", 64601, 881,
         { 2948.83f, -4882.32f, 241.06f, 0.0f },
         978070, 1,
         { 2622.22f, -5977.93f, 100.76f, 4.2121f },
