@@ -200,6 +200,7 @@ Position const RazLedgePos = { 406.1927f, 906.0121f, 163.4926f, 4.310963f };
 Position const RazObsidiusPos = { 308.9653f, 635.8195f, 64.79769f, 4.555309f };
 Position const RazBridgePos = { 400.9f, 821.1f, 106.5f };
 Position const ObsidiusPos = { 331.7f, 554.5f, 66.1f };
+Position const RazObsidiusStandPos = { 330.5491f, 559.3794f, 66.00645f, 4.945502f };
 
 std::array<Position, 12> const RazPathRomogg =
 { {
@@ -701,12 +702,11 @@ struct npc_coa_brc_raz : public ScriptedAI
                     break;
                 case EVENT_JUMP_OBSIDIUS:
                     Talk(SAY_RAZ_SMASH);
-                    if (Creature* obsidius = _instance ? _instance->GetCreature(DATA_OBSIDIUS) : nullptr)
+                    if (_instance && _instance->GetCreature(DATA_OBSIDIUS))
                     {
-                        Position pos = obsidius->GetNearPosition(5.0f, obsidius->GetRelativeAngle(me));
-                        _path = { pos };
+                        _path = { RazObsidiusStandPos };
                         _atObsidius = true;
-                        me->GetMotionMaster()->MoveJump(pos, 18.0f, 30.0f, POINT_RAZ_OBSIDIUS_JUMP);
+                        me->GetMotionMaster()->MoveJump(RazObsidiusStandPos, 18.0f, 30.0f, POINT_RAZ_OBSIDIUS_JUMP);
                     }
                     else
                         _events.ScheduleEvent(EVENT_DIE, 4s);
