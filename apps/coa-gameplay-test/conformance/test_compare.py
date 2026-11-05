@@ -7,10 +7,10 @@ import sys
 import tempfile
 import unittest
 
-from compare import ScenarioDrift, compare, measured_values, write_outputs
+from compare import DbcTooltips, ScenarioDrift, compare, measured_values, write_outputs
 from hits import HitModel, Modifier
 from profile import CLASSES_DIR, DBC_DIR
-from tooltip import Displayed, Readout
+from tooltip import CasterStats, Displayed, Readout
 from values import Expectation
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -18,6 +18,8 @@ import batch
 
 CLASS_FILE = json.loads((CLASSES_DIR / 'templar.json').read_text(encoding='utf-8'))
 RANK = 1001
+FIXED_POINTS = (0, 1)
+RIGHTEOUS_UPHEAVAL = 501562
 SPELL = 1000
 VALUE_KEY = 'conformance-templar-value-1001'
 HIT_KEY = 'conformance-templar-hit-1001'
@@ -92,8 +94,21 @@ class Workspace:
         return path, results
 
 
-def constant_reader(*values):
-    return lambda rank_id, caster: Readout(list(values), [])
+class FakeTooltips:
+    def __init__(self, tokens, points=None):
+        self.tokens = tokens
+        self.points = points or {}
+
+    def read(self, rank_id, caster, forced=None):
+        values = self.tokens(caster, forced) if callable(self.tokens) else list(self.tokens)
+        return Readout(values, [])
+
+    def effect_points(self, spell_id, effect):
+        return self.points.get((spell_id, effect), FIXED_POINTS)
+
+
+def constant_reader(*values, points=None):
+    return FakeTooltips(values, points)
 
 
 def reference_hit(class_file, expectation, measured):
@@ -114,16 +129,16 @@ class CompareTest(unittest.TestCase):
 
     def verdicts(self, reader=None, hit_model=reference_hit, **base_overrides):
         manifest, results = self.workspace.manifest(**base_overrides)
-        return compare(manifest, results, reader=reader, hit_model=hit_model)
+        return compare(manifest, results, tooltips=reader, hit_model=hit_model)
 
     def value_run(self, expectations, tokens, steps, reader):
         self.workspace.scenario(VALUE_KEY, 'value', expectations, tokens, steps)
         return {verdict.label: verdict for verdict in self.verdicts(reader)}
 
-    def effect_verdict(self, actual, token=Displayed('${$m1*1.1}', 568.9, 0, 'flat')):
+    def effect_verdict(self, actual, token=Displayed('${$m1*1.1}', 568.9, 0, 'flat'), reader=None):
         label = '1001 effect_value e0 #0'
         verdicts = self.value_run([expectation(label, 'effect_value', token.text, 'read flat', 0)], [token.text],
-                                  [assert_step(label, actual)], constant_reader(token))
+                                  [assert_step(label, actual)], reader or constant_reader(token))
         return verdicts[label]
 
     def test_deterministic_effect_within_the_rounding_tolerance_is_ok(self):
@@ -141,10 +156,44 @@ class CompareTest(unittest.TestCase):
         self.fresh()
         self.assertEqual(self.effect_verdict('9949', token).status, 'alert')
 
-    def test_unsigned_token_compares_the_magnitude_of_a_negative_effect(self):
-        verdict = self.effect_verdict('-50', Displayed('$s1', 50.0, 0, 'percent'))
+    def test_unsigned_token_takes_the_sign_of_its_dbc_points(self):
+        token = Displayed('$s1', 50.0, 0, 'percent')
+        verdict = self.effect_verdict('-50', token, constant_reader(token, points={(RANK, 0): (-51, 1)}))
+        self.assertEqual((verdict.status, verdict.expected), ('ok', -50.0))
+
+    def test_unsigned_token_of_the_opposite_sign_to_its_dbc_points_is_an_alert(self):
+        token = Displayed('$s1', 50.0, 0, 'percent')
+        verdict = self.effect_verdict('-50', token, constant_reader(token, points={(RANK, 0): (49, 1)}))
+        self.assertEqual((verdict.status, verdict.expected), ('alert', 50.0))
+
+    def test_unsigned_token_of_another_spell_takes_the_sign_of_that_spell(self):
+        token = Displayed('$/10;2002s1', 5.0, None, 'flat')
+        verdict = self.effect_verdict('-50', token, constant_reader(token, points={(2002, 0): (-51, 1)}))
+        self.assertEqual((verdict.status, verdict.expected), ('ok', -50.0))
+
+    def rolled_verdict(self, actual, value_of_roll):
+        text = '${$m1+0+$AP*0.45}'
+
+        def tokens(caster, forced):
+            roll = forced[2] if forced else 100
+            return [Displayed(text, value_of_roll(roll) + caster.ap * 0.45, 0, 'flat')]
+
+        return self.effect_verdict(actual, Displayed(text, 0.0, 0, 'flat'),
+                                   FakeTooltips(tokens, {(RANK, 0): (99, 10)}))
+
+    def test_rolled_effect_inside_the_propagated_roll_interval_is_ok(self):
+        verdict = self.rolled_verdict('248', lambda roll: roll)
         self.assertEqual(verdict.status, 'ok')
-        self.assertIn('magnitude', verdict.explanation)
+        self.assertAlmostEqual(verdict.low, 100 + 313 * 0.45 - max(1, 0.005 * (100 + 313 * 0.45)))
+        self.assertAlmostEqual(verdict.high, 109 + 313 * 0.45 + max(1, 0.005 * (109 + 313 * 0.45)))
+
+    def test_rolled_effect_outside_the_propagated_roll_interval_is_an_alert(self):
+        self.assertEqual(self.rolled_verdict('255', lambda roll: roll).status, 'alert')
+
+    def test_rolled_effect_in_a_non_monotone_expression_is_unmodelled(self):
+        verdict = self.rolled_verdict('248', lambda roll: (roll - 104) ** 2)
+        self.assertEqual(verdict.status, 'unmodelled')
+        self.assertIn('monotone', verdict.explanation)
 
     def test_signed_expression_of_the_opposite_sign_is_an_ambiguous_tooltip(self):
         self.assertEqual(self.effect_verdict('-100', Displayed('${$m1*2}', 100.0, 0, 'flat')).status,
@@ -157,9 +206,7 @@ class CompareTest(unittest.TestCase):
         label = '1001 effect_value e0 #0'
         text = '${$AP*0.4725+$sph*1.35+$m1+0}'
 
-        def reader(rank_id, caster):
-            return Readout([Displayed(text, 421 + caster.ap * 0.4725, 0, 'flat')], [])
-
+        reader = FakeTooltips(lambda caster, forced: [Displayed(text, 421 + caster.ap * 0.4725, 0, 'flat')])
         verdicts = self.value_run([expectation(label, 'effect_value', text, 'read flat', 0)], [text],
                                   [assert_step(label, '568')], reader)
         self.assertEqual(verdicts[label].status, 'ok')
@@ -222,7 +269,7 @@ class CompareTest(unittest.TestCase):
         entries = [expectation('1001 effect_value #0', 'effect_value', '$?s1[a][b]', 'unreadable: $?s1[a][b]')]
         self.workspace.scenario(VALUE_KEY, 'value', entries, [], [])
         manifest, results = self.workspace.manifest()
-        verdicts = compare(manifest, results, reader=constant_reader(), hit_model=reference_hit)
+        verdicts = compare(manifest, results, tooltips=constant_reader(), hit_model=reference_hit)
         out = self.workspace.root / 'report'
         write_outputs(manifest, results, verdicts, out)
         report = (out / 'report.md').read_text(encoding='utf-8')
@@ -240,7 +287,7 @@ class CompareTest(unittest.TestCase):
                                 ['$s1'], [assert_step(label, '50')], recorded_hash='0' * 64)
         manifest, results = self.workspace.manifest()
         with self.assertRaises(ScenarioDrift):
-            compare(manifest, results, reader=constant_reader(token), hit_model=reference_hit)
+            compare(manifest, results, tooltips=constant_reader(token), hit_model=reference_hit)
 
     def test_result_in_another_folder_is_found_by_its_scenario_hash(self):
         label = '1001 effect_value e0 #0'
@@ -300,6 +347,17 @@ class MeasuredValuesTest(unittest.TestCase):
     def test_non_numeric_actual_is_an_error(self):
         with self.assertRaises(ValueError):
             measured_values({'steps': [assert_step('attack_power', 'n/a')]})
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class DbcTooltipsTest(unittest.TestCase):
+    def test_forced_roll_replaces_the_rolled_points_of_righteous_upheaval_in_its_expression(self):
+        tooltips = DbcTooltips(DBC_DIR)
+        caster = CasterStats(level=60, ap=100.0, rap=0.0, sp_by_school={school: 0.0 for school in range(1, 7)},
+                             stats={stat: 0.0 for stat in range(5)})
+        self.assertEqual(tooltips.effect_points(RIGHTEOUS_UPHEAVAL, 0), (71, 32))
+        self.assertEqual(tooltips.read(RIGHTEOUS_UPHEAVAL, caster).values[0].value, 72 + 45)
+        self.assertEqual(tooltips.read(RIGHTEOUS_UPHEAVAL, caster, (RIGHTEOUS_UPHEAVAL, 0, 7)).values[0].value, 7 + 45)
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')

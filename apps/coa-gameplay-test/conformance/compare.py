@@ -5,11 +5,11 @@ import json
 import math
 from pathlib import Path
 import re
-from typing import Callable, Mapping
+from typing import Callable, Mapping, Protocol
 
 from hits import UNMODELLED, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model
 from profile import DBC_DIR, caster_stats_from, known_aura_label, probe_aura_label
-from tooltip import CasterStats, Readout, read_tooltip
+from tooltip import CasterStats, Readout, Records, Tooltip, Unreadable
 from values import UNMEASURABLE, UNREADABLE, Expectation, dataset
 
 STATUSES = ('ok', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials')
@@ -21,7 +21,8 @@ HIT_CHECKS = frozenset({'hit_mean', 'melee_mean'})
 READ_RULE = 'read '
 ORDINAL = re.compile(r'#(\d+)$')
 DIVIDED_TOKEN = re.compile(r'\$/(\d+);')
-UNSIGNED_TOKEN = re.compile(r'\$(?:/\d+;)?\d*[smM][1-3]')
+PLAIN_TOKEN = re.compile(r'\$(?:/\d+;)?(?P<spell>\d*)(?P<letter>[smM])(?P<digit>[1-3])')
+FIXED_DIE_SIDES = (0, 1)
 COST_DIVISOR = re.compile(r'ManaCost divisor (\d+)')
 EXPLORATORY = ('gameplay', 'exploratory')
 ALERT_COLUMNS = ('scenario', 'spell_id', 'rank_id', 'label', 'check', 'status', 'measured', 'expected', 'low', 'high',
@@ -29,7 +30,6 @@ ALERT_COLUMNS = ('scenario', 'spell_id', 'rank_id', 'label', 'check', 'status', 
 ALERTS_FILE = 'alerts.tsv'
 REPORT_FILE = 'report.md'
 
-Reader = Callable[[int, CasterStats], Readout]
 HitModelSource = Callable[[dict, Expectation, Mapping[str, float]], HitModel]
 
 
@@ -62,9 +62,44 @@ class Run:
     max_step_ms: float | None
 
 
+class TooltipSource(Protocol):
+    def read(self, rank_id: int, caster: CasterStats, forced: tuple[int, int, int] | None = None) -> Readout: ...
+
+    def effect_points(self, spell_id: int, effect: int) -> tuple[int, int]: ...
+
+
+class ForcedPoints(Records):
+    def __init__(self, dbc, spell_id: int, effect: int, value: int):
+        super().__init__(dbc)
+        self.forced = (spell_id, effect)
+        self.value = value
+
+    def points(self, spell_id: int, effect: int, upper: bool) -> float:
+        if (spell_id, effect) != self.forced:
+            return super().points(spell_id, effect, upper)
+        if self.field('Spell', spell_id, f'EffectRealPointsPerLevel[{effect}]') != 0:
+            raise Unreadable(f'EffectRealPointsPerLevel[{effect}] of spell {spell_id}')
+        return float(self.value)
+
+
+class DbcTooltips:
+    def __init__(self, dbc_dir: Path):
+        self.dbc = dataset(Path(dbc_dir))
+        self.records = Records(self.dbc)
+
+    def read(self, rank_id: int, caster: CasterStats, forced: tuple[int, int, int] | None = None) -> Readout:
+        records = self.records if forced is None else ForcedPoints(self.dbc, *forced)
+        return Tooltip(records, rank_id, caster).read(records.field('Spell', rank_id, 'Description[enUS]'))
+
+    def effect_points(self, spell_id: int, effect: int) -> tuple[int, int]:
+        return (self.records.field('Spell', spell_id, f'EffectBasePoints[{effect}]'),
+                self.records.field('Spell', spell_id, f'EffectDieSides[{effect}]'))
+
+
 @dataclass(frozen=True)
 class Tokens:
     readout: Readout | None
+    caster: CasterStats | None = None
     error: str = ''
 
 
@@ -148,26 +183,25 @@ def load_runs(manifest: dict, results_dir: Path) -> tuple[dict[str, Run], list[s
     return runs, missing
 
 
-def dbc_reader(manifest: dict) -> Reader:
-    dbc = dataset(Path(manifest.get('dbc_dir', DBC_DIR)))
-    return lambda rank_id, caster: read_tooltip(dbc, rank_id, caster)
-
-
-def read_tokens(level: int, entry: dict, run: Run, reader: Reader) -> Tokens:
+def read_tokens(level: int, entry: dict, run: Run, tooltips: TooltipSource) -> Tokens:
     try:
         caster = caster_stats_from(run.values, level)
     except KeyError as error:
-        return Tokens(None, f'base measurement {error} is missing from {run.key}')
-    readout = reader(entry['rank_id'], caster)
+        return Tokens(None, error=f'base measurement {error} is missing from {run.key}')
+    readout = tooltips.read(entry['rank_id'], caster)
     texts = [value.text for value in readout.values]
     if texts != entry['tokens']:
-        return Tokens(None, f'tooltip tokens read with the measured stats {texts} differ from the generated '
-                            f'tokens {entry["tokens"]}')
-    return Tokens(readout)
+        return Tokens(None, error=f'tooltip tokens read with the measured stats {texts} differ from the generated '
+                                  f'tokens {entry["tokens"]}')
+    return Tokens(readout, caster)
+
+
+def margin_of(expected: float) -> float:
+    return max(ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE * abs(expected))
 
 
 def deterministic(base: Verdict, measured: float, judged: float, expected: float, why: str) -> Verdict:
-    margin = max(ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE * abs(expected))
+    margin = margin_of(expected)
     low, high = expected - margin, expected + margin
     status = 'ok' if low - FLOAT_EPSILON <= judged <= high + FLOAT_EPSILON else 'alert'
     return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
@@ -201,7 +235,49 @@ def token_divisor(text: str) -> int:
     return int(divided.group(1)) if divided else 1
 
 
-def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: float, tokens: Tokens) -> Verdict:
+def plain_sign(points: int) -> int:
+    return -1 if points < 0 else 1
+
+
+def displayed_points(tooltips: TooltipSource, plain: re.Match, rank_id: int) -> int:
+    base_points, die_sides = tooltips.effect_points(int(plain.group('spell') or rank_id), int(plain.group('digit')) - 1)
+    return base_points + (die_sides if plain.group('letter') == 'M' else 1)
+
+
+def roll_range(base_points: int, die_sides: int) -> range:
+    low, high = sorted((base_points + 1, base_points + die_sides))
+    return range(low, high + 1)
+
+
+def judge_roll(base: Verdict, expectation: Expectation, measured: float, tokens: Tokens, tooltips: TooltipSource,
+               index: int, rolls: range) -> Verdict:
+    token = tokens.readout.values[index]
+    plain = PLAIN_TOKEN.fullmatch(token.text)
+    effect = expectation.effect_index
+    values = []
+    for roll in rolls:
+        readout = tooltips.read(expectation.rank_id, tokens.caster, (expectation.rank_id, effect, roll))
+        if index >= len(readout.values) or readout.values[index].text != token.text:
+            return replace(base, status='unmodelled', measured=measured,
+                           explanation=f'{token.text} is unreadable with roll {roll} of effect {effect}')
+        value = readout.values[index].value * token_divisor(token.text)
+        values.append(value * plain_sign(roll) if plain else value)
+    steps = [after - before for before, after in zip(values, values[1:])]
+    if not (all(step >= -FLOAT_EPSILON for step in steps) or all(step <= FLOAT_EPSILON for step in steps)):
+        return replace(base, status='unmodelled', measured=measured,
+                       explanation=f'{token.text} is not monotone in the roll {rolls.start}..{rolls.stop - 1} of '
+                                   f'effect {effect}')
+    least, most = min(values), max(values)
+    low, high = least - margin_of(least), most + margin_of(most)
+    status = 'ok' if low - FLOAT_EPSILON <= measured <= high + FLOAT_EPSILON else 'alert'
+    return replace(base, status=status, measured=measured, expected=(least + most) / 2, low=low, high=high,
+                   explanation=f'{token.text} over the roll {rolls.start}..{rolls.stop - 1} of effect {effect} '
+                               f'(spell_effect_value is one SpellEffectInfo::CalcValue roll): {least:g} to {most:g}, '
+                               f'each bound widened by max({ABSOLUTE_TOLERANCE:g}, {RELATIVE_TOLERANCE:.1%})')
+
+
+def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: float, tokens: Tokens,
+                tooltips: TooltipSource) -> Verdict:
     if tokens.error:
         return replace(base, measured=measured, explanation=tokens.error)
     ordinal = ORDINAL.search(expectation.label)
@@ -215,10 +291,17 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
                        explanation=f'token #{index} reads {token.text!r}, generated as {expectation.displayed!r}')
     if expectation.check == 'aura_duration_ms':
         return judge_time(base, run, measured, token.value, f'{token.text} read with the measured stats')
+    if expectation.effect_index is not None:
+        base_points, die_sides = tooltips.effect_points(expectation.rank_id, expectation.effect_index)
+        if die_sides not in FIXED_DIE_SIDES:
+            return judge_roll(base, expectation, measured, tokens, tooltips, index, roll_range(base_points, die_sides))
     expected = token.value * token_divisor(token.text)
-    if UNSIGNED_TOKEN.fullmatch(token.text):
-        return deterministic(base, measured, abs(measured), expected,
-                             f'{token.text} is shown unsigned, so the magnitude of the measured value is compared')
+    plain = PLAIN_TOKEN.fullmatch(token.text)
+    if plain:
+        points = displayed_points(tooltips, plain, expectation.rank_id)
+        return deterministic(base, measured, measured, expected * plain_sign(points),
+                             f'{token.text} is shown unsigned; the expected value takes the sign of its Spell.dbc '
+                             f'points {points}')
     if measured * expected < 0:
         return replace(base, status='ambiguous_tooltip', measured=measured, expected=expected,
                        explanation=f'{token.text} evaluates to {expected:g}, the measured value has the opposite sign')
@@ -264,7 +347,7 @@ def judge_hit(base: Verdict, class_file: dict, expectation: Expectation, run: Ru
 
 
 def judge(manifest: dict, entry: dict, run: Run | None, expectation: Expectation, tokens: Tokens | None,
-          hit_model: HitModelSource) -> Verdict:
+          tooltips: TooltipSource, hit_model: HitModelSource) -> Verdict:
     base = Verdict(expectation.label, 'alert', None, None, None, None, '', entry['key'], expectation.spell_id,
                    expectation.rank_id, expectation.check)
     rule, check = expectation.rule, expectation.check
@@ -293,30 +376,30 @@ def judge(manifest: dict, entry: dict, run: Run | None, expectation: Expectation
     if check == 'cooldown_ms':
         return judge_time(base, run, measured, float(expectation.displayed), rule)
     if check in TOKEN_CHECKS and rule.startswith(READ_RULE):
-        return judge_token(base, expectation, run, measured, tokens)
+        return judge_token(base, expectation, run, measured, tokens, tooltips)
     return replace(base, measured=measured, explanation=f'no comparison for check {check!r} with rule {rule!r}')
 
 
-def evaluate(manifest_path: Path, results_dir: Path, *, reader: Reader | None = None,
+def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource | None = None,
              hit_model: HitModelSource | None = None) -> Comparison:
     manifest = json.loads(Path(manifest_path).read_text(encoding='utf-8'))
     runs, missing = load_runs(manifest, Path(results_dir))
-    reader = reader or dbc_reader(manifest)
+    tooltips = tooltips or DbcTooltips(manifest.get('dbc_dir', DBC_DIR))
     hit_model = hit_model or measured_hit_model
     verdicts = []
     for entry in manifest['scenarios']:
         run = runs.get(entry['key'])
         if entry.get('file') and run is None:
             continue
-        tokens = read_tokens(manifest['level'], entry, run, reader) if run and entry['kind'] == 'value' else None
-        verdicts += [judge(manifest, entry, run, Expectation(**data), tokens, hit_model)
+        tokens = read_tokens(manifest['level'], entry, run, tooltips) if run and entry['kind'] == 'value' else None
+        verdicts += [judge(manifest, entry, run, Expectation(**data), tokens, tooltips, hit_model)
                      for data in entry['expectations']]
     return Comparison(manifest, runs, missing, verdicts)
 
 
-def compare(manifest: Path, results_dir: Path, *, reader: Reader | None = None,
+def compare(manifest: Path, results_dir: Path, *, tooltips: TooltipSource | None = None,
             hit_model: HitModelSource | None = None) -> list[Verdict]:
-    return evaluate(manifest, results_dir, reader=reader, hit_model=hit_model).verdicts
+    return evaluate(manifest, results_dir, tooltips=tooltips, hit_model=hit_model).verdicts
 
 
 def cell(value) -> str:

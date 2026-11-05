@@ -229,10 +229,20 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
 - Deterministic values (`effect_value`, `aura_amount`, `power_cost`): `|measured - expected| <= max(1, 0.5 % of
   expected)`. A `power_cost` is divided by the display divisor of its rule. A `$/N;` token expects N times the value
   it shows.
-- Sign: the client shows `$sN`, `$mN` and `$MN` (with or without `$/N;`) unsigned, so for these tokens the
-  magnitude of the measured value is compared (`-50` measured for `$s1` shown as 50 is `ok`). Expressions and
-  `$<name>` variables keep their sign; a measured value of the opposite sign is `ambiguous_tooltip`, never compared
-  by magnitude.
+- Sign: the client shows `$sN`, `$mN` and `$MN` (with or without `$/N;` or a spell id) unsigned, while the
+  `Spell.dbc` record is signed. The expected value of such a token takes the sign of the points it shows
+  (`EffectBasePoints + 1`, or `+ EffectDieSides` for `$MN`) of the named spell, and signed values are compared:
+  `-50` measured for `$s1` shown as 50 is `ok` when the record is -51 and an alert when it is 49. Expressions and
+  `$<name>` variables keep their sign; a measured value of the opposite sign is `ambiguous_tooltip`.
+- Rolled effects (`effect_value`, `aura_amount` of an effect whose `EffectDieSides` is neither 0 nor 1):
+  `spell_effect_value` returns `info->Effects[effect].CalcValue(caster)` (`CoAGameplayTest.cpp:4674`), and
+  `SpellEffectInfo::CalcValue` (`SpellInfo.cpp:474`) adds one `irand(1, EffectDieSides)` roll (or
+  `irand(EffectDieSides, 1)`) to `EffectBasePoints` before the caster stat terms of
+  `ScriptMgr::ModifySpellEffectBaseValue`; 0 adds nothing and 1 adds 1. The token is read again with each roll
+  `EffectBasePoints + 1` .. `EffectBasePoints + EffectDieSides` in place of the effect's points (`ForcedPoints`);
+  if the values are monotone in the roll, the measured value must lie between the lowest and the highest, each bound
+  widened by the deterministic tolerance; otherwise the verdict is `unmodelled`. The Templar has seven such tokens,
+  `${$m1+0+$AP*0.45+$SP*0.45}` of ranks 501562 to 501566, 572021 and 572027 (`EffectDieSides` 32 to 224).
 - Time (`cooldown_ms`, `aura_duration_ms`, ruling R8): `expected - W <= measured <= expected`. W bounds the game
   time elapsed between the cast step and the measuring step: for every step after the cast up to the measurement,
   its `elapsed_ms` plus the run's `max_step_ms`. `CoAGameplayTest::Tick` runs one step per world update
@@ -248,10 +258,6 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
 The report lists each known aura's modifier effects with `EffectBasePoints`, `EffectRealPointsPerLevel`, the
 value at the class level and the runs that measured the aura; a hit model applies a modifier only in a run that
 measured its aura.
-
-Not judged: a plain `$mN` or `$MN` of an effect that rolls (`EffectDieSides` above 1) is compared with its own
-value, so a roll above it is an alert. The Templar has none: its seven rolled tokens are caster stat expressions
-(scan of the 221 ranks, 2026-11-05).
 
 ## Run
 
