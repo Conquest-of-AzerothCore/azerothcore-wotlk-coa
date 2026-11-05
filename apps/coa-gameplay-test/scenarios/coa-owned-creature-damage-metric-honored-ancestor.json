@@ -53,6 +53,18 @@
     {"action": "wait", "label": "Let the Ancestor swing a few times", "ms": 15000},
     {"action": "stop_attack", "actor": "barbarian"},
     {
+      "action": "client_packet", "label": "Native pet Follow command (ACT_COMMAND << 24 | COMMAND_FOLLOW) ends the Ancestor's attack",
+      "actor": "barbarian", "opcode": 373, "consumed": false,
+      "fields": [{"pet_guid": "barbarian"}, {"u32": 117440513}, {"u64": 0}]
+    },
+    {"action": "wait", "label": "Let a swing already in flight land", "ms": 2500},
+    {"action": "snapshot", "actor": "barbarian", "metric": "pet_melee_swings", "save_as": "swings_stopped"},
+    {"action": "wait", "label": "Observe a full swing interval with the Ancestor following", "ms": 3000},
+    {
+      "action": "assert", "label": "SETUP: the Ancestor no longer swings, so the snapshots below cannot race a swing",
+      "actor": "barbarian", "metric": "pet_melee_swings", "relative_to": "swings_stopped", "equals": 0
+    },
+    {
       "action": "assert", "label": "SETUP: the Ancestor swung at least a few times",
       "actor": "barbarian", "metric": "pet_melee_swings", "relative_to": "swings0", "min": 3
     },
