@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Eight Lunar Phase stacks give exactly two Lunar Eclipses, not three",
+  "contract": [
+    "Lunar Eclipse 800386 needs four Lunar Phase stacks to activate and spends them when a Lunar spell consumes",
+    "the Eclipse. Spending them on activation let a Starcaller with Bright Moon (stack cap 8) activate, cast,",
+    "activate again, cast, and then activate a third time, because the Eclipse that was active held none of the",
+    "stacks. Expected: with eight stacks, two Eclipse-and-consume cycles succeed, each spending four stacks, and",
+    "a third activation is refused with no stacks left."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "star", "race": 1, "class": 26, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "star", "spell": 800386 },
+    { "action": "learn", "label": "Bright Moon raises the Lunar Phase cap to eight", "actor": "star", "spell": 801226 },
+    { "action": "learn", "label": "Moonwell Splash consumes the Eclipse", "actor": "star", "spell": 800370 },
+    { "action": "set_aura", "actor": "star", "spell": 802985, "stacks": 8 },
+    { "action": "set_aura", "actor": "star", "spell": 704519, "stacks": 1 },
+    { "action": "cast", "label": "First Lunar Eclipse", "actor": "star", "spell": 800386 },
+    { "action": "assert", "label": "First Eclipse is active", "actor": "star", "metric": "aura", "spell": 800386, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "Activation keeps all eight stacks", "actor": "star", "metric": "aura_stacks", "spell": 802985, "equals": 8 },
+    { "action": "set_health", "actor": "star", "value": 100 },
+    { "action": "cast", "label": "First Moonwell Splash consumes the Eclipse", "actor": "star", "spell": 800370 },
+    { "action": "assert", "label": "First Eclipse is consumed", "actor": "star", "metric": "aura", "spell": 800386, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "Four stacks were spent, four remain (one passive gain may add a fifth)", "actor": "star", "metric": "aura_stacks", "spell": 802985, "min": 4, "max": 5, "within_ms": 1000 },
+    { "action": "reset_cooldown", "actor": "star", "spell": 800386 },
+    { "action": "reset_cooldown", "actor": "star", "spell": 800370 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "cast", "label": "Second Lunar Eclipse", "actor": "star", "spell": 800386 },
+    { "action": "assert", "label": "Second Eclipse is active", "actor": "star", "metric": "aura", "spell": 800386, "equals": 1, "within_ms": 1000 },
+    { "action": "set_health", "actor": "star", "value": 100 },
+    { "action": "cast", "label": "Second Moonwell Splash consumes the Eclipse", "actor": "star", "spell": 800370 },
+    { "action": "assert", "label": "Second Eclipse is consumed", "actor": "star", "metric": "aura", "spell": 800386, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "The remaining four stacks were spent (one passive gain may leave a single stack)", "actor": "star", "metric": "aura_stacks", "spell": 802985, "max": 1, "within_ms": 1000 },
+    { "action": "reset_cooldown", "actor": "star", "spell": 800386 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "cast", "label": "DISCRIMINATING: a third Eclipse has no stacks to activate with", "actor": "star", "spell": 800386 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "No third Eclipse", "actor": "star", "metric": "aura", "spell": 800386, "equals": 0 }
+  ]
+}
