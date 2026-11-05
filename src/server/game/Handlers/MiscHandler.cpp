@@ -1677,7 +1677,7 @@ void WorldSession::HandleCancelMountAuraOpcode(WorldPacket& /*recv_data*/)
         return;
 
     // The client sends this with every cast while mounted; these combat mounts are left through their auras.
-    if (_player->IsInTinkerMechsuit() ||
+    if (_player->IsInTinkerMechsuit() || _player->IsOnDivineSteed() ||
         (_player->getClass() == CLASS_STARCALLER && !_player->IsInFlight() &&
             _player->GetMountID() == 9991 && _player->HasAura(704772, _player->GetGUID())))
         return;

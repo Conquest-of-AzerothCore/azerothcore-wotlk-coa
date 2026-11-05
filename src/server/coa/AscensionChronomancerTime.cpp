@@ -57,6 +57,7 @@ enum TimeSpells : uint32
     RapidAcceleration = 570149,
     RapidAccelerationHeal = 804500,
     SingularityCoreTrigger = 804437,
+    SingularityCore = 804438,
     SpellRangeThirtyYards = 4
 };
 
@@ -442,6 +443,26 @@ void ApplyTimeContracts(SpellInfo* info)
     }
 }
 
+class spell_ascension_time_is_a_circle : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_time_is_a_circle);
+
+    void ExtendSingularityCore(SpellEffIndex)
+    {
+        Unit* caster = GetCaster();
+        if (!Chronomancer(caster))
+            return;
+        if (Aura* core = caster->GetAuraOfRankedSpell(SingularityCore, caster->GetGUID()))
+            core->SetDuration(core->GetDuration() + GetEffectValue());
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_ascension_time_is_a_circle::ExtendSingularityCore,
+            EFFECT_0, SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION);
+    }
+};
+
 class chronomancer_time_contracts : public GlobalScript
 {
 public:
@@ -461,4 +482,5 @@ void AddSC_AscensionChronomancerTime()
     new chronomancer_time_contracts();
     RegisterSpellScript(aura_ascension_timeline_tether);
     RegisterSpellScript(aura_ascension_borrowed_time);
+    RegisterSpellScript(spell_ascension_time_is_a_circle);
 }

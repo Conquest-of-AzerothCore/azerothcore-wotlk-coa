@@ -1924,6 +1924,7 @@ public:
     // Mount methods
     [[nodiscard]] bool IsMounted() const { return HasUnitFlag(UNIT_FLAG_MOUNT); }
     [[nodiscard]] uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID); }
+    [[nodiscard]] bool IsOnDivineSteed() const;
     void Mount(uint32 mount, uint32 vehicleId = 0, uint32 creatureEntry = 0);
     void Dismount();
     [[nodiscard]] bool IsInDisallowedMountForm() const;

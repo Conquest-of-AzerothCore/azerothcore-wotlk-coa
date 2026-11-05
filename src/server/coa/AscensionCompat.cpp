@@ -3438,6 +3438,9 @@ public:
                 player->HasAura(SPELL_STORMBRINGER_CHARGED_CONDUIT))
                 break;
 
+            if (rule.ClassId == CLASS_DEMON_HUNTER && player->CanCastDuringChannel(spellInfo))
+                break;
+
             if (rule.PreserveCostAuraSpellId &&
                 player->HasAura(rule.PreserveCostAuraSpellId) &&
                 rule.PreserveCostChancePercent &&

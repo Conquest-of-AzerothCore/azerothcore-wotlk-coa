@@ -525,6 +525,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `use_item` | `actor`, `item`, `spell`, optional `target`, `target_item` (an owned item entry, sent as the item target instead of a unit) and `destination`: normal item-use handler. |
 | `use_nearby_gameobject` | `actor`, `entry`, optional `owner` (a player id): native use request for the single gameobject of that entry within 20 yards in the actor's phase; `owner` narrows the choice to the object that player owns, so one of several nearby objects can be clicked. |
 | `spell_click_nearby` | `actor`, `entry`: native `CMSG_SPELLCLICK` on the nearest living creature of that entry within 20 yards, as the client sends on right-clicking a spell-click creature. |
+| `minion_kill` | Player `actor`, `minion` (creature entry), `target` (creature fixture or `summon` id): the actor's living owned creature of that entry deals the target's whole health in direct damage through `Unit::DealDamage`, so the kill credits the minion as the killer. |
 | `select_nearby` | `actor`, `entry`, optional `radius` (default 40): native `CMSG_SET_SELECTION` on the nearest living creature of that entry, as the client sends on clicking it. GM commands that read `ChatHandler::getSelectedCreature()` (`.cast target`, `.cast back`, …) need this first; `attack_nearby` only sends `CMSG_ATTACKSWING` and never selects. |
 | `use_gameobject` | `actor`, `entry`: native use request for the actor's single nearby owned gameobject. |
 | `voidportal` | Player `actor`, `op` `force` with `group` and `spawn`, or `op` `roll` with `success`: put the one realm-wide Void Portal on that configured point as a point rotation does, or replace the next proximity roll; the manager is process-global, so the case runs exclusively. |
@@ -576,7 +577,7 @@ a previously named snapshot of the same metric; it is available on snapshots and
 
 Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`, `map_id`, `combat`, `casting`,
 `level`, `quest_objective_count` (needs `quest`, optional `index`), `knows_spell`, `has_talent`, `talent_points`, `active_talent_spec`,
-`cooldown_ms`, `spell_cooldown_packet_ms`, `item_count`, `carried_item_count`, `bank_bag_slots`, `guild_bank_tabs`, `aura`, `aura_stacks`, `aura_charges`,
+`cooldown_ms`, `spell_cooldown_packet_ms`, `item_loot_releases`, `item_count`, `carried_item_count`, `bank_bag_slots`, `guild_bank_tabs`, `aura`, `aura_stacks`, `aura_charges`,
 `aura_duration_ms`, `aura_amount`, `pet_entry`, `pet_aura_stacks`, `owned_creature_count`, `owned_creature_spacing`,
 `charm_entry`, `charm_aura_stacks`, `controls_self`, `private_instance`, `dynamic_object`,
 `dynamic_object_duration_ms`, `dynamic_object_height`, `distance`, `spell_proc_count`, `spell_proc_chance`,
@@ -922,6 +923,8 @@ submits that spell again).
 `spell_cooldown_packet_ms` requires `spell` and reads the cooldown duration from the last native
 `SMSG_SPELL_COOLDOWN` the session was sent for it, or -1 if none was observed; unlike `cooldown_ms`,
 which reads the server-side cooldown map directly, this proves the client was actually notified.
+`item_loot_releases` counts the `SMSG_LOOT_RELEASE_RESPONSE` packets the actor's session was sent for an item, which
+is how a custom item opening tells the client to leave the looting state it entered on `CMSG_OPEN_ITEM`.
 `sent_aura_amount` requires `spell` and accepts `effect` (0..2, default 0). It reads that effect's amount from the
 last `SMSG_ASCENSION_AURA_AMOUNT` the actor's session was sent for its own aura, which feeds the `$wN` tooltip tokens,
 and fails if none was observed; the actor needs `ascension_client` set. Unlike `aura_amount`, which reads the server-side

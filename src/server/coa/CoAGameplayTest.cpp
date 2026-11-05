@@ -936,6 +936,7 @@ struct Actor
     Tree castFailures;
     std::map<uint32, uint8> castFailureReason;
     std::map<uint32, uint32> spellCooldownPacketMs;
+    uint32 itemLootReleases = 0;
     std::map<uint32, std::array<int32, MAX_SPELL_EFFECTS>> sentAuraAmounts;
     uint32 bankShows = 0;
     uint32 systemMessages = 0;
@@ -1300,6 +1301,15 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             if (unit == actor.guid)
                 actor.spellCooldownPacketMs[spell] = cooldown;
         }
+    }
+
+    if (packet.GetOpcode() == SMSG_LOOT_RELEASE_RESPONSE && packet.size() >= sizeof(uint64))
+    {
+        ObjectGuid released;
+        WorldPacket response(packet);
+        response >> released;
+        if (released.IsItem())
+            ++actor.itemLootReleases;
     }
 
     constexpr uint16 AscensionAuraAmountOpcode = 0x0673;
@@ -4980,6 +4990,8 @@ private:
             auto const found = packets.find(spell);
             return found == packets.end() ? -1.0 : double(found->second);
         }
+        if (metric == "item_loot_releases")
+            return _actors.at(step.get<std::string>("actor")).itemLootReleases;
         if (metric == "sent_aura_amount")
         {
             auto const& sent = _actors.at(step.get<std::string>("actor")).sentAuraAmounts;
@@ -6705,6 +6717,18 @@ private:
                 if (sScriptMgr->CanPacketReceive(player->GetSession(), packet))
                     player->GetSession()->HandleLootOpcode(packet);
             }
+        }
+        else if (action == "minion_kill")
+        {
+            Creature* minion = GetOwnedCreature(player, step.get<uint32>("minion"));
+            Require(minion != nullptr, "Minion kill needs a living owned creature of that entry");
+            Unit* victim = GetUnit(step.get<std::string>("target"));
+            Require(victim->IsAlive(), "Minion kill target is already dead");
+            uint32 const killingDamage = uint32(std::min<uint64>(uint64(victim->GetMaxHealth()) * 100u,
+                std::numeric_limits<uint32>::max()));
+            Unit::DealDamage(minion, victim, killingDamage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL);
+            Require(!victim->IsAlive(), "Minion killing blow did not kill, health left " +
+                std::to_string(victim->GetHealth()));
         }
         else if (action == "select_nearby")
         {

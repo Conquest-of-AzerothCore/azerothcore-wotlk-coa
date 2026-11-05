@@ -42,7 +42,8 @@ enum ChronomancerSecondarySpells : uint32
     SPELL_SHIFTING_CHAOS_BLAST = 801269,
     SPELL_GRAVITY_BOMB_EXPLOSION = 801282,
     SPELL_TEMPORAL_ANOMALY = 806315,
-    SPELL_TEMPORAL_ANOMALY_HEAL = 807799
+    SPELL_TEMPORAL_ANOMALY_HEAL = 807799,
+    SPELL_INFINITE_SHIELD_HEAL = 520458
 };
 
 constexpr uint32 ChronomancerSpellFamily = 28;
@@ -222,6 +223,26 @@ class aura_ascension_desynchronization : public AuraScript
     {
         AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_desynchronization::End,
             EFFECT_0, SPELL_AURA_MOD_DISARM, AURA_EFFECT_HANDLE_REAL);
+    }
+};
+
+class aura_ascension_infinite_shield : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_infinite_shield);
+
+    bool Validate(SpellInfo const*) override { return ValidateSpellInfo({SPELL_INFINITE_SHIELD_HEAL}); }
+
+    void Heal(AuraEffect const* effect, ProcEventInfo&)
+    {
+        PreventDefaultAction();
+        if (Unit* caster = GetCaster())
+            caster->CastSpell(GetTarget(), SPELL_INFINITE_SHIELD_HEAL, true, nullptr, effect);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(aura_ascension_infinite_shield::Heal,
+            EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
     }
 };
 
@@ -526,6 +547,7 @@ void AddSC_AscensionChronomancerSecondary()
     new chronomancer_secondary_metadata();
     RegisterSpellScript(spell_ascension_melt_copy);
     RegisterSpellScript(aura_ascension_desynchronization);
+    RegisterSpellScript(aura_ascension_infinite_shield);
     RegisterSpellScript(aura_ascension_ahead_of_the_game);
     RegisterSpellScript(aura_ascension_ripple_release);
     RegisterSpellScript(aura_ascension_echo_duration);

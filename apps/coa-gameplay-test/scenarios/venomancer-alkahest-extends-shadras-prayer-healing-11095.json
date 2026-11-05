@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Alkahest keeps Shadra's Prayer healing past its original duration (#11095)",
+  "contract": [
+    "Alkahest (504718) tooltip: extends the duration of Shadra's Prayer on its target by 9 sec (effect 1, EffectBasePoints 8999, EffectMiscValue 800870, the first rank of Shadra's Prayer). The spell is bound to spell_ascension_venomancer_ability, which turns the effect into a dummy and calls AscensionVenomancer::ExtendOwned.",
+    "Shadra's Prayer rank 10 (502947) has DurationIndex 106 (24 s) and a 3000 ms periodic heal, so the periodic effect is allowed GetMaxDuration() / amplitude = 8 ticks. Extending only the remaining duration, with MaxDuration unchanged whenever the remaining time plus 9 s stays under 24 s, kept the aura alive but stopped its ticks at 24 s, as reported in #11095.",
+    "Expected: Alkahest cast at about 20 s adds 9 s, so the aura lasts until about 33 s and the periodic heal ticks at about 27 s and 30 s. The ticks are counted from just after the original 24 s expiry until 31 s after the Prayer was applied. A control Venomancer who casts the same Prayer at the same moment without Alkahest gets none in that window."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "alkahest",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "alkahest",
+      "spell": 502947
+    },
+    {
+      "action": "learn",
+      "actor": "alkahest",
+      "spell": 504718
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 502947
+    },
+    {
+      "action": "cast",
+      "label": "Shadra's Prayer on the Alkahest Venomancer",
+      "actor": "alkahest",
+      "spell": 502947
+    },
+    {
+      "action": "cast",
+      "label": "Shadra's Prayer on the control",
+      "actor": "control",
+      "spell": 502947
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Alkahest Venomancer has Shadra's Prayer",
+      "actor": "alkahest",
+      "metric": "aura",
+      "spell": 502947,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control has Shadra's Prayer",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 502947,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Reach about 20 s into the 24 s Prayer",
+      "ms": 19000
+    },
+    {
+      "action": "cast",
+      "label": "Alkahest adds 9 s to Shadra's Prayer",
+      "actor": "alkahest",
+      "spell": 504718
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Alkahest cast was accepted",
+      "actor": "alkahest",
+      "metric": "cast_failure",
+      "spell": 504718,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control's Prayer expires at its original 24 s",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 502947,
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Let the control's last tick pass",
+      "ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "actor": "alkahest",
+      "metric": "spell_heal_count",
+      "spell": 502947,
+      "save_as": "alkahest_ticks"
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_heal_count",
+      "spell": 502947,
+      "save_as": "control_ticks"
+    },
+    {
+      "action": "wait",
+      "label": "Cover the extension window",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the extended Prayer still ticks after its original expiry",
+      "actor": "alkahest",
+      "metric": "spell_heal_count",
+      "spell": 502947,
+      "relative_to": "alkahest_ticks",
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Alkahest the Prayer no longer ticks",
+      "actor": "control",
+      "metric": "spell_heal_count",
+      "spell": 502947,
+      "relative_to": "control_ticks",
+      "equals": 0
+    }
+  ]
+}
