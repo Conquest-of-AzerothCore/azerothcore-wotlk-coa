@@ -404,6 +404,7 @@ void AddSC_AscensionPersonalBank();
 void AddSC_AscensionWisdomball();
 void AddSC_AscensionBloodmageTalents();
 void AddSC_AscensionBloodmageVitality();
+void AddSC_AscensionBattleResurrection();
 void AddSC_AscensionBloodmageProcs();
 void AddSC_AscensionTierSetHarvest();
 void AddSC_AscensionReaperReflexes();
@@ -704,6 +705,7 @@ void AddCoAScripts()
     AddSC_AscensionWisdomball();
     AddSC_AscensionBloodmageTalents();
     AddSC_AscensionBloodmageVitality();
+    AddSC_AscensionBattleResurrection();
     AddSC_AscensionBloodmageProcs();
     AddSC_AscensionTierSetHarvest();
     AddSC_AscensionReaperReflexes();

@@ -65,6 +65,7 @@
 #include "SpellInfo.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include "AscensionBattleResurrection.h"
 #include "AscensionCompatOpcodes.h"
 #include "AscensionDungeonRelease.h"
 #include "AscensionSpecLoot.h"
@@ -1109,6 +1110,7 @@ namespace
         run.affixes = Data::Instance().GetAffixes(run.rotation, key->level);
         run.state = STATE_COUNTDOWN;
         run.countdownMs = COUNTDOWN_MS;
+        Ascension::BattleResurrection::StartMythicPlusRun(map);
         ScaleForces(map->GetId(), uint32(map->GetDifficulty()), run);
 
         // The key loses a level now and gets its real new level at the end.
