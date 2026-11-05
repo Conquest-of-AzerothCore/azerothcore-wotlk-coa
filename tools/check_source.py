@@ -17,6 +17,7 @@ from check_change_boundaries import ROOT, changed_paths
 
 
 GAMEPLAY = 'apps/coa-gameplay-test/'
+CONFORMANCE = GAMEPLAY + 'conformance/'
 DBC = 'apps/coa-dbc/'
 MECHANICS = 'apps/coa-mechanics/'
 COA = 'src/server/coa/'
@@ -67,6 +68,10 @@ SUITES = {
         'commands': [[GAMEPLAY + 'test_runner.py'], [GAMEPLAY + 'test_world_cache.py'],
                      [GAMEPLAY + 'test_verification.py'], [GAMEPLAY + 'test_batch.py'],
                      [GAMEPLAY + 'catalog.py', '--check']],
+    },
+    'conformance': {
+        'paths': [CONFORMANCE + '*'],
+        'commands': [[CONFORMANCE + 'test_mitigation.py']],
     },
     'world-content': {
         'paths': [CONTENT + '*.py'],
