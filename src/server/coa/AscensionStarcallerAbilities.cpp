@@ -81,6 +81,13 @@ void FireBarrageFlurry(Player* player, Unit* target)
             },
             Milliseconds(shot * StarfireBarrageFlurryMs / (StarfireBarrageFlurryShots - 1)));
 }
+void SpendLunarPhase(Player* player)
+{
+    if (Aura* phase = player->GetAura(802985))
+        phase->ModStackAmount(-int32(LunarPhaseThreshold));
+    if (Count(player, 802985) < LunarPhaseThreshold)
+        player->RemoveAurasDueToSpell(704519);
+}
 void FinishSelected(Player* player, Spell* spell)
 {
     for (uint32 id : selected)
@@ -175,13 +182,10 @@ class starcaller_spells : public AllSpellScript
         if (!player || info->SpellFamilyName != 32)
             return;
         Snapshot(player, spell);
-        if (IsLunarEclipseActivation(spell))
-        {
-            if (Aura* phase = player->GetAura(802985))
-                phase->ModStackAmount(-int32(LunarPhaseThreshold));
-            if (Count(player, 802985) < LunarPhaseThreshold)
-                player->RemoveAurasDueToSpell(704519);
-        }
+        if (!spell->IsTriggered())
+            if (uint64 generation = spell->GetScriptValue(800386))
+                if (Aura* eclipse = player->GetAura(800386); eclipse && eclipse->GetScriptValue(800386) == generation)
+                    SpendLunarPhase(player);
         if (Named(info, 801132) && player->HasAura(520482))
             ExtraTargets(player, spell, 1);
         if (Named(info, 680220) && player->HasAura(520481))
@@ -331,19 +335,19 @@ class starcaller_spells : public AllSpellScript
                         aura->Remove();
                 }
         }
+        if (spell->GetScriptHealingIncludingOverheal() && Named(info, 575039) && player->HasAura(704741))
+        {
+            uint32 remaining = 5;
+            for (Unit* enemy : Nearby(target, 15))
+                if (player->IsValidAttackTarget(enemy))
+                {
+                    Stars(player, enemy);
+                    if (!--remaining)
+                        break;
+                }
+        }
         if (healing)
         {
-            if (Named(info, 575039) && player->HasAura(704741))
-            {
-                uint32 remaining = 5;
-                for (Unit* enemy : Nearby(target, 15))
-                    if (player->IsValidAttackTarget(enemy))
-                    {
-                        Stars(player, enemy);
-                        if (!--remaining)
-                            break;
-                    }
-            }
             if (Any(info, {801990, 574328}) && (player->HasAura(800504) || player->HasAura(803554)))
                 Cast(player, target, 574154);
             if (Any(info, {801990, 574328}) && player->HasAura(300237))

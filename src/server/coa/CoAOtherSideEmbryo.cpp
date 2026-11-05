@@ -86,6 +86,7 @@ enum EmbryoData : uint32
     EVENT_EGG_HATCH,
     EVENT_SPIDERS_RUN,
     EVENT_LAND,
+    EVENT_EGG_PHASE_AGAIN,
 };
 
 enum class Phase : uint8
@@ -104,12 +105,14 @@ constexpr uint32 HatchMs = 51000;
 constexpr uint32 SpidersRunMs = 52000;
 constexpr uint32 LandMs = 53000;
 constexpr uint32 RitualChannelMs = 30000;
+constexpr Seconds SecondIntermissionAfter = 60s;
+constexpr uint8 MaxIntermissions = 2;
 
 constexpr float FacingPlatform = 1.16f;
 constexpr float HoverHeight = 4.0f;
 constexpr float CircleRadius = 10.0f;
 constexpr float OrbitRadius = 14.5f;
-constexpr float OrbitSpeed = 5.0f;
+constexpr float OrbitSpeed = 3.75f;
 constexpr uint32 OrbitPoints = 24;
 constexpr float EggTouch = 1.3f;
 constexpr uint32 SpidersPerEgg = 1;
@@ -124,12 +127,16 @@ constexpr uint32 WebTrackMs = 3000;
 constexpr uint32 WebHoldMs = 1000;
 constexpr float BlobKnockSpeedXY = 10.0f;
 constexpr float BlobKnockSpeedZ = 6.0f;
+constexpr float WebKnockSpeedXY = 8.0f;
+constexpr float WebKnockSpeedZ = 4.0f;
 constexpr float BlobBehind = 4.5f;
 constexpr float BlobAhead = 6.5f;
 constexpr float BlobSide = 4.5f;
 constexpr float WebTouch = 1.5f;
 Position const ArenaMiddle = { 304.429f, -206.081f, 341.841f, 0.0f };
 constexpr float WebSpeed = 25.0f;
+constexpr float PitDepth = 15.0f;
+constexpr float PitReach = 40.0f;
 
 using CoAOtherSide::BaseSpellId;
 using CoAOtherSide::Damage3;
@@ -164,6 +171,7 @@ struct boss_coa_chimeric_embryo : public ScriptedAI
         _webs.clear();
         _phase = Phase::Ground;
         _eggPhasePending = false;
+        _intermissions = 0;
         me->SetDisableGravity(false);
         me->SetReactState(REACT_AGGRESSIVE);
         me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
@@ -214,7 +222,7 @@ struct boss_coa_chimeric_embryo : public ScriptedAI
 
     void DamageTaken(Unit* , uint32& damage, DamageEffectType , SpellSchoolMask ) override
     {
-        if (_phase == Phase::Ground && !_eggPhasePending && me->HealthBelowPctDamaged(50, damage))
+        if (_phase == Phase::Ground && !_intermissions && !_eggPhasePending && me->HealthBelowPctDamaged(50, damage))
             _eggPhasePending = true;
     }
 
@@ -230,6 +238,7 @@ struct boss_coa_chimeric_embryo : public ScriptedAI
         Talk(SAY_DEATH);
         ShowBridge(true);
         _summons.DespawnAll();
+        LiftFromPit();
     }
 
     void JustSummoned(Creature* summon) override
@@ -310,12 +319,7 @@ struct boss_coa_chimeric_embryo : public ScriptedAI
                     SpawnSwirls();
                     break;
                 case EVENT_EGG_PHASE_BLOBS:
-                    for (ObjectGuid const& guid : _swirls)
-                        if (Creature* swirl = ObjectAccessor::GetCreature(*me, guid))
-                        {
-                            swirl->RemoveAurasDueToSpell(SPELL_SWIRL);
-                            swirl->CastSpell(swirl, SPELL_BLOB, true);
-                        }
+                    SendBlobsOnOrbit();
                     break;
                 case EVENT_EGG_RAIN:
                     RainEggs();
@@ -335,6 +339,9 @@ struct boss_coa_chimeric_embryo : public ScriptedAI
                     break;
                 case EVENT_LAND:
                     Land();
+                    break;
+                case EVENT_EGG_PHASE_AGAIN:
+                    _eggPhasePending = true;
                     break;
                 default:
                     break;
@@ -358,6 +365,23 @@ private:
         me->GetGameObjectListWithEntryInGrid(pools, GO_BLOOD_POOL, 200.0f);
         for (GameObject* pool : pools)
             pool->DespawnOrUnsummon();
+    }
+
+    void LiftFromPit()
+    {
+        me->GetMap()->DoForAllPlayers([](Player* player)
+        {
+            if (!player->IsInWorld() || player->GetPositionZ() > ArenaMiddle.GetPositionZ() - PitDepth
+                || player->GetExactDist2d(&ArenaMiddle) > PitReach)
+                return;
+            if (!player->IsAlive())
+            {
+                player->ResurrectPlayer(1.0f);
+                player->SpawnCorpseBones();
+            }
+            player->NearTeleportTo(ArenaMiddle.GetPositionX(), ArenaMiddle.GetPositionY(),
+                ArenaMiddle.GetPositionZ(), FacingPlatform);
+        });
     }
 
     void ShowBridge(bool show)
@@ -546,9 +570,12 @@ private:
     {
         _eggPhasePending = false;
         _phase = Phase::Eggs;
+        ++_intermissions;
         _ritualRecast = false;
         _events.CancelEvent(EVENT_SPIKES);
         _events.CancelEvent(EVENT_FIERCE_BLOW);
+        _events.CancelEvent(EVENT_WEB_LINES);
+        _events.CancelEvent(EVENT_POISON_BOLT);
         me->InterruptNonMeleeSpells(false);
         me->AttackStop();
         me->SetReactState(REACT_PASSIVE);
@@ -588,10 +615,24 @@ private:
             if (!swirl)
                 continue;
             swirl->CastSpell(swirl, SPELL_SWIRL, true);
+            _swirls.push_back(swirl->GetGUID());
+        }
+    }
+
+    void SendBlobsOnOrbit()
+    {
+        for (ObjectGuid const& guid : _swirls)
+        {
+            Creature* swirl = ObjectAccessor::GetCreature(*me, guid);
+            if (!swirl)
+                continue;
+            swirl->RemoveAurasDueToSpell(SPELL_SWIRL);
+            swirl->CastSpell(swirl, SPELL_BLOB, true);
+            float const first = _center.GetAngle(swirl);
             Movement::PointsArray points;
             for (uint32 i = 0; i <= OrbitPoints; ++i)
             {
-                float const angle = first + 2.0f * float(M_PI) * float(i) / float(OrbitPoints);
+                float const angle = first - 2.0f * float(M_PI) * float(i) / float(OrbitPoints);
                 Position const p = GroundAt(_center.GetPositionX() + OrbitRadius * std::cos(angle), _center.GetPositionY() + OrbitRadius * std::sin(angle));
                 points.emplace_back(p.GetPositionX(), p.GetPositionY(), p.GetPositionZ() + 0.2f);
             }
@@ -601,7 +642,6 @@ private:
             init.SetCyclic();
             init.SetVelocity(OrbitSpeed);
             init.Launch();
-            _swirls.push_back(swirl->GetGUID());
         }
     }
 
@@ -618,6 +658,7 @@ private:
             Creature* egg = Helper(NPC_EGG, me->GetPosition(), 0);
             if (!egg)
                 continue;
+            egg->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
             egg->GetMotionMaster()->MoveJump(to, 18.0f, 12.0f);
             _eggs.push_back({ egg->GetGUID(), false });
         }
@@ -741,6 +782,8 @@ private:
         _events.ScheduleEvent(EVENT_WEB_LINES, 3s);
         _events.ScheduleEvent(EVENT_POISON_BOLT, 8s);
         _events.ScheduleEvent(EVENT_FIERCE_BLOW, 10s);
+        if (_intermissions < MaxIntermissions)
+            _events.ScheduleEvent(EVENT_EGG_PHASE_AGAIN, SecondIntermissionAfter);
     }
 
     struct PendingSpike
@@ -778,6 +821,7 @@ private:
     uint32 _eggCheck = 0;
     bool _eggPhasePending = false;
     bool _ritualRecast = false;
+    uint8 _intermissions = 0;
 };
 
 class spell_coa_embryo_spikes : public SpellScript
@@ -863,12 +907,20 @@ class spell_coa_embryo_runover : public SpellScript
 
     void HandleKnockBack(SpellEffIndex effIndex)
     {
-        if (BaseSpellId(GetSpellInfo()->Id) != SPELL_POISON_WAVE)
-            return;
         PreventHitDefaultEffect(effIndex);
-        if (Unit* caster = GetCaster())
-            if (Unit* target = GetHitUnit())
-                target->KnockbackFrom(caster->GetPositionX(), caster->GetPositionY(), BlobKnockSpeedXY, BlobKnockSpeedZ);
+        Unit* caster = GetCaster();
+        Unit* target = GetHitUnit();
+        if (!caster || !target)
+            return;
+        if (BaseSpellId(GetSpellInfo()->Id) == SPELL_POISON_WAVE)
+        {
+            target->KnockbackFrom(caster->GetPositionX(), caster->GetPositionY(), BlobKnockSpeedXY, BlobKnockSpeedZ);
+            return;
+        }
+        float const side = std::sin(caster->GetRelativeAngle(target)) >= 0.0f ? 1.0f : -1.0f;
+        float const away = caster->GetOrientation() + side * float(M_PI) / 2.0f;
+        target->KnockbackFrom(target->GetPositionX() - std::cos(away), target->GetPositionY() - std::sin(away),
+            WebKnockSpeedXY, WebKnockSpeedZ);
     }
 
     void Register() override

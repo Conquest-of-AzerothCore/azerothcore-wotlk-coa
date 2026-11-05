@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "Shrouded Stars keeps paying Magic Stagger every second while magic hits keep arriving",
+  "contract": [
+    "Shrouded Stars 704785: \"you delay $s3% of direct magical damage taken, instead taking it over $954791d\".",
+    "Magic Stagger 954791 lasts 10 s with a 1 s period, so it has 10 ticks. DelayDamage refreshed it with",
+    "Aura::SetDuration, which leaves the aura effect's tick counter alone: after 10 ticks since the first hit it",
+    "never ticked again while later hits kept refreshing the duration, the delayed damage piled up unpaid, and",
+    "it was all dealt in one hit when the aura finally ended. Aura::RefreshDuration resets the counter.",
+    "Expected: with a direct magic hit every 2.5 s for 15 s, Magic Stagger still ticks about once a second",
+    "(more than the 10 ticks one application can hold), and the Starcaller is alive at the end."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "sc",
+      "race": 1,
+      "class": 26,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "caster",
+      "owner": "sc",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 1000000,
+      "distance": 5,
+      "spell_hit_bonus": 100
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "set_health", "label": "Enough health that the test cannot end by death", "actor": "sc", "maximum": 1000000, "value": 1000000 },
+    { "action": "learn", "actor": "sc", "spell": 704785 },
+    { "action": "assert", "label": "SETUP: Shrouded Stars is active", "actor": "sc", "metric": "aura", "spell": 704785, "equals": 1, "within_ms": 2000 },
+    { "action": "cast", "label": "Hit 1", "actor": "caster", "spell": 30451, "target": "sc" },
+    { "action": "wait", "ms": 2500 },
+    { "action": "cast", "label": "Hit 2", "actor": "caster", "spell": 30451, "target": "sc" },
+    { "action": "wait", "ms": 2500 },
+    { "action": "cast", "label": "Hit 3", "actor": "caster", "spell": 30451, "target": "sc" },
+    { "action": "wait", "ms": 2500 },
+    { "action": "cast", "label": "Hit 4", "actor": "caster", "spell": 30451, "target": "sc" },
+    { "action": "wait", "ms": 2500 },
+    { "action": "cast", "label": "Hit 5", "actor": "caster", "spell": 30451, "target": "sc" },
+    { "action": "wait", "ms": 2500 },
+    { "action": "cast", "label": "Hit 6", "actor": "caster", "spell": 30451, "target": "sc" },
+    { "action": "wait", "ms": 1500 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: more than one application's 10 ticks landed, so ticking never stalled",
+      "actor": "sc",
+      "metric": "spell_damage_count",
+      "spell": 954791,
+      "target": "sc",
+      "min": 13
+    },
+    {
+      "action": "assert",
+      "label": "Magic Stagger is still active after the hits",
+      "actor": "sc",
+      "metric": "aura",
+      "spell": 954791,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Magic Stagger ends within its 10 s once the hits stop",
+      "actor": "sc",
+      "metric": "aura",
+      "spell": 954791,
+      "equals": 0,
+      "within_ms": 12000
+    },
+    { "action": "assert", "label": "The Starcaller is alive", "actor": "sc", "metric": "alive", "equals": 1 }
+  ]
+}
