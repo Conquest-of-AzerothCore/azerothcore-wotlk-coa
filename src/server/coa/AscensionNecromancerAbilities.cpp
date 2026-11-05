@@ -266,7 +266,7 @@ class necromancer_casts : public AllSpellScript
             Ready(player, 801747, 2);
         if (Chance(player, 92122))
             Cast(player, player, 707421);
-        if (player->HasAura(704723))
+        if (info->SpellFamilyName == 29 && player->HasAura(704723))
             Cast(player, player, 707133);
         if (Command(info))
         {
