@@ -101,6 +101,10 @@ do not gain a second caster coefficient, crit, target modifier or armor pass. Ex
 rows accompany these source paths. Additional-target bases are corrected, and Consecration ranks gain
 one through four jumps beyond the primary target. Changed target selectors rebuild their explicit masks.
 
+Argent Blade's flat value and its attack/spell power terms are added after its 215% weapon damage, as its
+tooltip says ("plus"), instead of being multiplied by it
+([ADR 0010](../adr/0010-argent-blade-flat-bonus-after-weapon-percent.md)).
+
 Sacred Resistance applies its native 15% armor buff once per completed, non-triggered Reckoning cast,
 including every rank. Armor of Faith triggers only when the caster's Staffguard shield is exhausted
 by damage; expiry, cancellation and dispelling a shield with capacity remaining do not trigger it.
