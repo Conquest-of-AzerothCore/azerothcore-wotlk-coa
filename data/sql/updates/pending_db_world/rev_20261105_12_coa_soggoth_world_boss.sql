@@ -60,3 +60,24 @@ DELETE FROM `creature` WHERE `guid` = 9780916;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
 (9780916, 978077, 1, 0, 0, 1, 1, -7852.7, 1326.7, -2.0, 5.4786, 300, 0, 0);
+
+-- The other world boss maps' graveyards (WorldSafeLocs.dbc 6084-6090), so players who die in any of them rise at
+-- its start.
+DELETE FROM `game_graveyard` WHERE `ID` BETWEEN 6084 AND 6090;
+INSERT INTO `game_graveyard` (`ID`, `Map`, `x`, `y`, `z`, `Comment`) VALUES
+(6084, 884, -4751.12, 2466.51, -82.4105, 'Depthbreaker''s Hollow Boss map Graveyard'),
+(6085, 885, 3270.86, -3730.45, 125.108, 'Bough Shadow Boss map Graveyard'),
+(6086, 886, -2855.81, 1784.38, 29.9513, 'Dream Bough Boss map Graveyard'),
+(6087, 887, 699.752, -4090.8, 100.715, 'Seradane Boss map Graveyard'),
+(6088, 888, -10401.3, -377.872, 48.5314, 'Twilight Grove Boss map Graveyard'),
+(6089, 889, 4741.1, -4934.99, 695.783, 'Frostgiantnbossmap Boss map Graveyard'),
+(6090, 890, 3353.02, -4844.59, 167.439, 'Atalzulbossmap Boss map Graveyard');
+DELETE FROM `graveyard_zone` WHERE `ID` BETWEEN 6084 AND 6090;
+INSERT INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`) VALUES
+(6084, 10240, 0, 'Depthbreaker''s Hollow boss map'),
+(6085, 10271, 0, 'Bough Shadow (Emeriss boss map)'),
+(6086, 10272, 0, 'Dream Bough (Taerar boss map)'),
+(6087, 10273, 0, 'Seradane (Ysondre boss map)'),
+(6088, 10274, 0, 'Twilight Grove (Lethon boss map)'),
+(6089, 10280, 0, 'Snowgrave''s Cavern (Korrim Snowgrave boss map)'),
+(6090, 10281, 0, 'Zul''Mashar (Atal''zul boss map)');

@@ -526,7 +526,7 @@ namespace
     };
 
     // Ascension's death dialog offers "Last Checkpoint" in a raid whose checkpoints are on (SMSG 0x767, u8);
-    // the button sends CMSG 0x774 (u8 1). In Setis' map it carries the body back to the entrance.
+    // the button sends CMSG 0x774 (u8 1). In every world boss map it carries the body back to the entrance.
     std::mutex g_checkpointLock;
     std::unordered_set<uint32> g_checkpointRequests;
     std::atomic<uint32> g_checkpointCount{0};
@@ -551,6 +551,22 @@ namespace
         }
     };
 
+    // Every world boss map Ascension built has its own graveyard (WorldSafeLocs 6080-6090): Last Checkpoint carries
+    // a dead player's body there.
+    std::map<uint32, Position> const WorldBossCheckpoints = {
+        { 880, { -8093.0f, 1663.6f, 12.9f, 0.0f } },
+        { 881, { 2948.83f, -4882.32f, 241.06f, 0.0f } },
+        { 882, { -12569.7f, -2373.38f, 53.65f, 0.0f } },
+        { 883, { 4410.54f, 269.28f, 78.02f, 0.0f } },
+        { 884, { -4751.12f, 2466.51f, -82.41f, 0.0f } },
+        { 885, { 3270.86f, -3730.45f, 125.11f, 0.0f } },
+        { 886, { -2855.81f, 1784.38f, 29.95f, 0.0f } },
+        { 887, { 699.75f, -4090.8f, 100.71f, 0.0f } },
+        { 888, { -10401.3f, -377.87f, 48.53f, 0.0f } },
+        { 889, { 4741.1f, -4934.99f, 695.78f, 0.0f } },
+        { 890, { 3353.02f, -4844.59f, 167.44f, 0.0f } },
+    };
+
     class setis_checkpoint_players : public PlayerScript
     {
     public:
@@ -560,7 +576,7 @@ namespace
         void OnPlayerMapChanged(Player* player) override
         {
             WorldPacket packet(SMSG_COA_CHECKPOINTS_ENABLED, 1);
-            packet << uint8(player->GetMapId() == SETIS_MAP ? 1 : 0);
+            packet << uint8(WorldBossCheckpoints.count(player->GetMapId()) ? 1 : 0);
             player->SendDirectMessage(&packet);
         }
 
@@ -574,10 +590,12 @@ namespace
                     return;
                 --g_checkpointCount;
             }
-            if (player->GetMapId() != SETIS_MAP || player->IsAlive() || player->HasPlayerFlag(PLAYER_FLAGS_GHOST))
+            auto const checkpoint = WorldBossCheckpoints.find(player->GetMapId());
+            if (checkpoint == WorldBossCheckpoints.end() || player->IsAlive()
+                || player->HasPlayerFlag(PLAYER_FLAGS_GHOST))
                 return;
-            player->NearTeleportTo(SetisEntrance.GetPositionX(), SetisEntrance.GetPositionY(),
-                SetisEntrance.GetPositionZ(), SetisEntrance.GetOrientation());
+            Position const& at = checkpoint->second;
+            player->NearTeleportTo(at.GetPositionX(), at.GetPositionY(), at.GetPositionZ(), at.GetOrientation());
         }
     };
 
