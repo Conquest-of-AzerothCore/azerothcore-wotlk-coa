@@ -20,6 +20,7 @@
 #include "AscensionPooledVitality.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
+#include "BossControlTargeting.h"
 #include "CharmInfo.h"
 #include "CellImpl.h"
 #include "Common.h"
@@ -9012,6 +9013,10 @@ void Spell::CallScriptAfterHitHandlers()
 
 void Spell::CallScriptObjectAreaTargetSelectHandlers(std::list<WorldObject*>& targets, SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
 {
+    // Vanilla dungeon boss sleep and mind control never reach a tank or healer (BossControlTargeting.h).
+    if (BossControl::Applies(m_caster, m_spellInfo) && BossControl::SparesAreaTargets(m_spellInfo))
+        targets.remove_if([this](WorldObject* target) { return BossControl::Forbids(m_caster, target->ToUnit(), m_spellInfo); });
+
     for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
     {
         (*scritr)->_PrepareScriptCall(SPELL_SCRIPT_HOOK_OBJECT_AREA_TARGET_SELECT);

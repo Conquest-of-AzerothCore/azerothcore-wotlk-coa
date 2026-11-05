@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Shadowfang Keep: Archmage Arugal still curses a healer",
+  "contract": [
+    "Archmage Arugal 4275 is the Shadowfang Keep (map 33, expansion 0) encounter boss. His Ascension kit casts Curse",
+    "of Arugal 2102679 (charm) at a random player in event phase 1 (event 9001, first after 10.2-12.2 s, then every",
+    "25-27 s; the kit's aggro event sets phase 1). His original Arugal's Curse 7621 shares phase 1, but his evades",
+    "reset it first. On Ascension his curses still take tanks and healers, so he is exempt from the vanilla dungeon",
+    "boss control rule (BossControlTargeting.h). With only a Vanguard 21 tank and a Fleshweaver 25 healer, the healer",
+    "is the only non-top-threat player and must still be cursed. The fight is on a Shadow Port 7586 landing point",
+    "(spell_target_position), within 30 yd of his spawn and his other port points but one. The players are level 26",
+    "humans, matching the boss, so its spells land at their normal hit chance. They group in Stormwind and teleport",
+    "into one instance, where the boss is summoned at its own stats; player health fixtures keep everyone alive",
+    "through the window."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 0, "x": -8914, "y": -133, "z": 80.6},
+  "players": [
+    {"id": "tank", "race": 1, "class": 18, "level": 26, "allow_regeneration": false},
+    {"id": "healer", "race": 1, "class": 20, "level": 26, "allow_regeneration": false}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the characters finish logging in", "ms": 3000},
+    {"action": "group", "label": "healer joins tank's group", "actor": "tank", "target": "healer"},
+    {"action": "specialization", "label": "tank takes specialization 21", "actor": "tank", "id": 21},
+    {"action": "specialization", "label": "healer takes specialization 25", "actor": "healer", "id": 25},
+    { "action": "teleport", "label": "tank enters the dungeon", "actor": "tank", "map": 33, "x": -84.99, "y": 2151.01,
+      "z": 155.62, "o": 1.11623 },
+    { "action": "assert", "label": "CONTROL: tank is inside the dungeon", "actor": "tank", "metric": "map_id",
+      "equals": 33, "within_ms": 10000 },
+    { "action": "teleport", "label": "healer enters the dungeon", "actor": "healer", "map": 33, "x": -84.99,
+      "y": 2151.01, "z": 155.62, "o": 1.11623 },
+    { "action": "assert", "label": "CONTROL: healer is inside the dungeon", "actor": "healer", "metric": "map_id",
+      "equals": 33, "within_ms": 10000 },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_health", "actor": "tank", "value": 100000000, "maximum": 100000000},
+    {"action": "set_health", "actor": "healer", "value": 100000000, "maximum": 100000000},
+    { "action": "summon", "label": "Summon the boss in the group's instance", "actor": "tank", "entry": 4275,
+      "as": "arugal", "distance": 3 },
+    {"action": "wait", "label": "Let the boss's spawn events settle", "ms": 6000},
+    {"action": "encounter_start", "actor": "tank", "boss_entry": 4275, "radius": 6},
+    {"action": "attack", "label": "The tank engages first and keeps top threat", "actor": "tank", "target": "arugal"},
+    { "action": "assert", "label": "CONTROL: Arugal is in combat", "actor": "arugal", "metric": "combat", "equals": 1,
+      "within_ms": 10000 },
+    {"action": "wait", "label": "The tank builds a threat lead", "ms": 3000},
+    {"action": "attack", "label": "The healer joins the threat list", "actor": "healer", "target": "arugal"},
+    {"action": "wait", "ms": 1500},
+    {"action": "stop_attack", "actor": "healer"},
+    { "action": "assert", "label": "Arugal still curses the healer", "actor": "tank", "metric": "timeline_count",
+      "event": "aura_applied", "spell": 2102679, "source_entry": 4275, "target_actors": ["healer"], "min": 1,
+      "within_ms": 40000 }
+  ]
+}

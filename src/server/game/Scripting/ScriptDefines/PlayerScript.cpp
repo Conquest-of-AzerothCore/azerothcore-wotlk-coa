@@ -169,6 +169,12 @@ bool ScriptMgr::OnPlayerHasNoBonusExperience(Player* player)
     return suppress;
 }
 
+bool ScriptMgr::OnPlayerHoldsTankOrHealerRole(Player const* player)
+{
+    CALL_ENABLED_BOOLEAN_HOOKS_WITH_DEFAULT_FALSE(PlayerScript, PLAYERHOOK_ON_HOLDS_TANK_OR_HEALER_ROLE,
+        script->OnPlayerHoldsTankOrHealerRole(player));
+}
+
 void ScriptMgr::OnPlayerHonorableKillingBlow(Player* killer, Player* victim)
 {
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_HONORABLE_KILLING_BLOW, script->OnPlayerHonorableKillingBlow(killer, victim));
