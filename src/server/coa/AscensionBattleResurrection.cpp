@@ -55,7 +55,7 @@ public:
 
     void OnBeforeSetBossState(uint32, EncounterState newState, EncounterState oldState, Map* instance) override
     {
-        if (newState != IN_PROGRESS || oldState == IN_PROGRESS || oldState == TO_BE_DECIDED || !instance->IsRaid())
+        if (newState != IN_PROGRESS || oldState == IN_PROGRESS || !instance->IsRaid())
             return;
 
         InstanceBudget* state = instance->CustomData.GetDefault<InstanceBudget>(BudgetKey);

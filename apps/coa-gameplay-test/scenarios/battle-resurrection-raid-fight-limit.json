@@ -130,6 +130,15 @@
       "spell": 20484
     },
     {
+      "action": "die",
+      "label": "The others die before the pull, so the cobra can only fight the healer",
+      "actor": "fallen"
+    },
+    {
+      "action": "die",
+      "actor": "second"
+    },
+    {
       "action": "summon",
       "actor": "healer",
       "entry": 11373,
@@ -154,14 +163,6 @@
       "action": "stop_attack",
       "label": "Keep the cobra alive so the healer stays in combat",
       "actor": "healer"
-    },
-    {
-      "action": "die",
-      "actor": "fallen"
-    },
-    {
-      "action": "die",
-      "actor": "second"
     },
     {
       "action": "cast",
@@ -235,6 +236,12 @@
       "within_ms": 3000
     },
     {
+      "action": "snapshot",
+      "actor": "second",
+      "metric": "notifications",
+      "save_as": "second_notices_before_refusal"
+    },
+    {
       "action": "cast",
       "actor": "healer",
       "spell": 20484,
@@ -259,12 +266,16 @@
       "within_ms": 3000
     },
     {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
       "action": "assert",
       "label": "CONTROL: the refused cast announced nothing",
       "actor": "second",
-      "metric": "notification_contains",
-      "text": "used a battle resurrection",
-      "equals": 2
+      "metric": "notifications",
+      "relative_to": "second_notices_before_refusal",
+      "equals": 0
     },
     {
       "action": "command",
@@ -279,6 +290,12 @@
       "command": ".instance setbossstate 8 1"
     },
     {
+      "action": "snapshot",
+      "actor": "second",
+      "metric": "notifications",
+      "save_as": "second_notices_before_repull"
+    },
+    {
       "action": "cast",
       "actor": "healer",
       "spell": 20484,
@@ -286,11 +303,11 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the next pull starts with two charges again",
-      "actor": "healer",
-      "metric": "notification_contains",
-      "text": "used a battle resurrection: 1 of 2 left.",
-      "equals": 2,
+      "label": "DISCRIMINATING: the next pull starts with charges again, so the Rebirth is announced, not refused",
+      "actor": "second",
+      "metric": "notifications",
+      "relative_to": "second_notices_before_repull",
+      "equals": 1,
       "within_ms": 3000
     }
   ]
