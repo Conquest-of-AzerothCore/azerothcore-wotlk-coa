@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "Sunken Temple: the Sanctum dragons appear only after the Avatar of Hakkar and Jammal'an die",
+  "contract": [
+    "On Ascension the four Sanctum dragons (Morphaz 5719, Weaver 5720, Dreamscythe 5721, Hazzas 5722) appear only once",
+    "the Avatar of Hakkar 8443 and Jammal'an the Prophet 5710 are dead. instance_sunken_temple hides the dragons",
+    "(invisible, passive, not selectable and immune to players) until both of those Eranikus wardens are killed, then",
+    "releases them. The hero stands beside Weaver's spawn (creature guid 239021, -458.84/127.7/-90.75);",
+    "nearby_creature_can_attack uses Player::IsValidAttackTarget, so it reports 0 while the dragon is held back and 1",
+    "once it is released. The Avatar and Jammal'an are summoned in the hero's instance and cast Suicide (7) on",
+    "themselves; any death of those entries counts as a warden kill. The hero is a level 60 human with a health",
+    "fixture, so the released dragons cannot kill them. Weaver and Dreamscythe spawn in phase 2 and their SmartAI",
+    "moves them to phase 1 on load, so the hero joins phases 1 and 2 to see the real spawns wherever they are; a",
+    "scenario in the normal world phase runs exclusively."
+  ],
+  "timeout_ms": 150000,
+  "location": {"map": 0, "x": -8914, "y": -133, "z": 80.6},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60, "allow_regeneration": false}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the character finish logging in", "ms": 3000},
+    { "action": "teleport", "label": "The hero enters Sunken Temple beside Weaver and Dreamscythe", "actor": "hero",
+      "map": 109, "x": -456.0, "y": 132.0, "z": -90.8, "o": 0 },
+    { "action": "assert", "label": "CONTROL: the hero is inside Sunken Temple", "actor": "hero", "metric": "map_id",
+      "equals": 109, "within_ms": 10000 },
+    { "action": "set_phase", "label": "The hero sees the normal world phase and phase 2, where the real dragons spawn",
+      "actor": "hero", "value": 3 },
+    {"action": "wait", "ms": 1500},
+    {"action": "set_health", "actor": "hero", "value": 100000000, "maximum": 100000000},
+    { "action": "assert", "label": "CONTROL: Weaver's spawn is loaded beside the hero", "actor": "hero",
+      "metric": "nearby_creature_count", "entry": 5720, "min": 1 },
+    { "action": "assert", "label": "Weaver cannot be attacked while the Avatar of Hakkar and Jammal'an live",
+      "actor": "hero", "metric": "nearby_creature_can_attack", "entry": 5720, "equals": 0 },
+    { "action": "summon", "label": "Summon the Avatar of Hakkar in the instance", "actor": "hero", "entry": 8443,
+      "as": "avatar", "distance": 4 },
+    {"action": "cast", "label": "the Avatar of Hakkar casts Suicide (7) on itself", "actor": "avatar", "spell": 7},
+    { "action": "assert", "label": "CONTROL: the Avatar of Hakkar dies", "actor": "avatar", "metric": "alive",
+      "equals": 0, "within_ms": 10000 },
+    {"action": "wait", "ms": 1000},
+    { "action": "assert", "label": "Weaver still cannot be attacked while Jammal'an lives", "actor": "hero",
+      "metric": "nearby_creature_can_attack", "entry": 5720, "equals": 0 },
+    { "action": "summon", "label": "Summon Jammal'an the Prophet in the instance", "actor": "hero", "entry": 5710,
+      "as": "jammalan", "distance": 4 },
+    {"action": "cast", "label": "Jammal'an casts Suicide (7) on itself", "actor": "jammalan", "spell": 7},
+    { "action": "assert", "label": "CONTROL: Jammal'an dies", "actor": "jammalan", "metric": "alive", "equals": 0,
+      "within_ms": 10000 },
+    { "action": "assert", "label": "Weaver can be attacked once the Avatar of Hakkar and Jammal'an are dead",
+      "actor": "hero", "metric": "nearby_creature_can_attack", "entry": 5720, "equals": 1, "within_ms": 5000 }
+  ]
+}
