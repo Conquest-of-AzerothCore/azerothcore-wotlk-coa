@@ -20,6 +20,7 @@
 #include "AbstractFollower.h"
 #include "AreaDefines.h"
 #include "ArenaSpectator.h"
+#include "AscensionResilientConstitution.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
@@ -16726,14 +16727,9 @@ void Unit::ApplyResilience(Unit const* victim, float* crit, int32* damage, bool 
     if (!target)
         return;
 
-    // Damage callers have already required player-controlled outgoing damage. The unknown baseline is a
-    // local ten-percent policy; the additional twenty-percent critical reduction is explicit client data.
-    if (damage && *damage > 0 && victim->HasAura(552011))
-    {
-        *damage = int32(int64(*damage) * 90 / 100);
-        if (isCrit)
-            *damage = int32(int64(*damage) * 80 / 100);
-    }
+    // Damage callers have already required player-controlled outgoing damage.
+    if (damage && *damage > 0 && target->HasAura(ResilientConstitution::Aura))
+        *damage = ResilientConstitution::Reduce(*damage, isCrit, target != victim);
 
     switch (type)
     {

@@ -123,6 +123,14 @@ CoA.MonsterResistance.PerLevel = 1.0
 CoA.MonsterResistance.PerPercent = 5.0
 CoA.MonsterResistance.MaxReductionPct = 75.0
 
+# Resilient Constitution (spell 552011), the class passive that lowers damage from players and their pets.
+# DamageReductionPct lowers every hit; CriticalReductionPct lowers critical hits again on top of it, so 50 and 20
+# leave 50% of a normal hit and 40% of a critical one. A player's pet gets PetSharePct percent of both reductions
+# through its owner's aura. Values are percentages from 0 to 100; higher values are capped at 100.
+CoA.ResilientConstitution.DamageReductionPct = 50
+CoA.ResilientConstitution.CriticalReductionPct = 20
+CoA.ResilientConstitution.PetSharePct = 85
+
 # Wardrobe, outfits, vanity and mount/companion collections for characters played by bots.
 # 0 - never: bot sessions skip the collections (default).
 # 1 - only characters of player accounts played as bots (alts), never random bot accounts:
