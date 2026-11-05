@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 import re
@@ -34,6 +34,7 @@ class Expectation:
     effect_index: int | None
     displayed: str
     rule: str
+    model: dict | None = field(default=None, hash=False)
 
 
 @dataclass(frozen=True)

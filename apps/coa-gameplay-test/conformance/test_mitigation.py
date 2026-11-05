@@ -31,6 +31,12 @@ class TargetMitigationTest(unittest.TestCase):
         model = expected_mitigation(HOLY, REFERENCE_TARGET, caster_level=60)
         self.assertAlmostEqual(model.variance, variance, places=9)
 
+    def test_magic_mitigation_keeps_the_partial_resist_shares_and_armor_has_none(self):
+        holy = expected_mitigation(HOLY, REFERENCE_TARGET, caster_level=60)
+        for step, share in enumerate((0.20, 0.45, 0.30, 0.05, 0, 0, 0, 0, 0, 0, 0)):
+            self.assertAlmostEqual(holy.resist_shares[step], share, places=9)
+        self.assertEqual(expected_mitigation(PHYSICAL, REFERENCE_TARGET, caster_level=60).resist_shares, ())
+
     def test_armor_mitigation_level_60(self):
         target = TargetProfile(entry=36, level=60, armor=528, resistances={})
         model = expected_mitigation(PHYSICAL, target, caster_level=60)

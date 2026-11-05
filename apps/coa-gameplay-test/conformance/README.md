@@ -14,6 +14,9 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
   with. Its name shadows the standard library `profile`: run the package from its own directory.
 - `values.py`: `value_scenario(class_file, spell, rank_id)` returns the no-combat scenario of one rank and its
   `Expectation` list.
+- `hits.py`: `hit_scenario(class_file, spell, casts)` and `melee_scenario(class_file, swings)` return the hit scenario
+  of a spell's highest rank and the auto-attack scenario, with their `Expectation` lists; `expected_hit` and
+  `casts_needed` give the expected mean, its sigma and the number of casts.
 - `classes/<name>.json`: one class file per class (`classes/templar.json`).
 
 ## Spell set of a class
@@ -68,8 +71,17 @@ skill values, so these values stay unreadable.
 
 `classes/<name>.json` holds `class_id`, `name`, `race`, `level`, `weapon` (`item`, equipment `slot`, 15 is the main
 hand), `ratings` (fixture hit and expertise ratings, so that an aura or hit is never lost to a miss; they do not change
-a tooltip value), `known_auras`, `probe_auras` and the sections `procs`, `talent_modifiers`, `rotation`, `stack` that
-later tasks fill. The Templar reference is a human with the Walking Stick (item 2495).
+a tooltip value), `reference_stats`, `known_auras`, `probe_auras` and the sections `procs`, `talent_modifiers`,
+`rotation`, `stack` that later tasks fill. The Templar reference is a human with the Walking Stick (item 2495).
+
+`weapon` also freezes the `item_template` row of the weapon: `min_damage` (`dmg_min1`), `max_damage` (`dmg_max1`),
+`speed_ms` (`delay`), `inventory_type` and `normalized_speed`, the speed `Unit::GetAPMultiplier` uses for normalized
+weapon damage (3.3 for a two-handed weapon, inventory type 17). Walking Stick, read on 2026-11-05 from `acore_world`
+in the in-RAM test database with `SELECT dmg_min1, dmg_max1, delay, InventoryType FROM item_template WHERE entry =
+2495`: 6.5625, 10.9375, 2500, 17. With 313 attack power, 6.5625 + 313 / 14 x 2.5 = 62.455 is the measured
+`weapon_damage_min`. `reference_stats` holds the `base_steps` values measured on the naked reference character (Templar:
+2026-11-05, `.cache/verify-all/20261105-181206`); they size the scenarios, and the comparison uses the values measured
+in the run.
 
 `base_steps` waits 5 s, adds and equips the weapon, then measures with the extreme bounds of an exploratory
 measurement (the judgement is made by the comparison, never by the scenario): `attack_power`,
@@ -111,6 +123,55 @@ beside it, which is not the token's own effect), `unreadable: tooltip without va
 `unreadable: ManaCostPercentage ...` or `unreadable: ManaCostPerlevel ...` for a cost the DBC alone does not give, and
 `unmeasurable: <reason>` for a readable token with no no-combat metric (other spell's effect, radius, stack or chance
 token, an aura of a passive or cast-time spell). Only `unmeasurable` expectations may lack a measurement step.
+
+## Max-rank hit scenarios
+
+`hit_scenario(class_file, spell, casts)` models the spell's highest rank from its effects, its tooltip read with the
+reference stats, the known auras and the reference target. It learns the rank, measures the target, then repeats
+`casts` times: `set_power` to the cost (when the cost is a plain `ManaCost`), `reset_cooldown`, `cast`, and a wait of
+`max(StartRecoveryTime, cast time, duration of a periodic aura) + 500 ms`; a 3 s drain precedes the measurements.
+
+| `kind` | Effects | Hit before modifiers |
+|---|---|---|
+| `weapon` | 31 percent, 17/58/121 flat | roll times the percent, truncated, plus the floored flats (ADR 0010) |
+| `school` | 2 | the floored tooltip value of each effect, or each integer from `$mN` to `$MN` |
+| `heal` | 10 | as `school`, on the caster, without mitigation |
+| `periodic_damage`, `periodic_heal` | 6, aura 3 or 8 | one tick; `hits_per_cast` is `Duration / EffectAmplitude` |
+
+The weapon roll is `urand(floor(min + AP / 14 x speed), floor(max + AP / 14 x speed))` (`Unit::CalculateDamage`),
+with the normalized speed when an effect is 121 and the weapon speed otherwise. `tooltip_mean` is the same sum without
+integer steps: for Argent Blade 807268, 2.15 x ((min + max) / 2 + AP / 14 x 3.3) + (421 + 0.4725 x AP).
+Each server integer step is then applied to every possible hit, never as a tolerance:
+
+1. a known aura's modifier, `floor(hit x (100 + percent) / 100)` (`Unit::SpellDamageBonusDone`,
+   `Unit::MeleeDamageBonusDone`, `Unit::SpellHealingBonusDone`): aura 341 for damage of its `EffectMiscValue`
+   schools, aura 136 for healing, with the amount `SpellEffectInfo::CalcValue` gives at the class level (887007:
+   -1 + int(50 x -0.4) + 1 = -20). Only the known auras whose `known_aura` measurement is 1 count, and the model lists
+   them (`Modifier`) by spell and effect;
+2. armor, `ceil(hit x kept)` (`Unit::CalcArmorReducedDamage`), or each partial-resist step `i` with its share,
+   `hit - floor(hit x i / 10)` (`Unit::CalcAbsorbResist`), from `expected_mitigation` and its `resist_shares`.
+
+`mean` and `sigma` are the mean and standard deviation of the resulting distribution. `casts_needed(model)` is the
+Global Constraints rule: `ceil((2.576 x sigma / (0.01 x mean))^2)` hits, at least one, divided by `hits_per_cast`.
+
+The `hit_mean` expectation carries `model`: the kind, school mask, weapon, modifiers, reference mean, sigma and casts,
+and the labels of its measurements: `<label> total` and `<label> count` (`spell_damage_*` on `dummy` or
+`spell_heal_*` on the caster, `critical: false`), `target armor`, `target view_level` and `target resistance <school>`.
+`measured_hit_model(class_file, expectation, measured)` recomputes the model from a run's labelled values (caster
+stats, known auras, armor, view level and resistances), since creature 36 spawns with armor 528 or 562. Two
+diagnostics ride along: `<rank> critical_hits` and `<rank> cast_count`.
+
+`melee_scenario(class_file, swings)` attacks `dummy` for `swings` weapon swings and measures the plain main-hand hits
+(`melee_damage_total` and `melee_damage_count` with `critical`, `glancing` and `blocked` false) under `melee
+melee_mean`, beside the swing, critical, glancing and blocked counts. Its model is the weapon roll at weapon speed with
+the same modifier and armor steps.
+
+A spell that fits no model is never dropped: its expectation has `check` `unmodelled` and a `rule` that starts with
+`unmodelled: ` (a passive spell, no damage or healing effect, effects of several models, an effect without a readable
+tooltip value, a periodic duration that is unreadable). Its scenario learns the rank and has no hit measurement. The
+parts of the tooltip the reader could not evaluate become `hit_mean` expectations whose rule starts with
+`unreadable: `, without a measurement. Not modelled: talent or proc modifiers, critical strikes, spell power
+coefficients the tooltip does not show, and costs that are a percentage of base mana (no `set_power`).
 
 ## Run
 

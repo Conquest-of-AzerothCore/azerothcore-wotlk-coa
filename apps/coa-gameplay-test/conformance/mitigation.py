@@ -24,6 +24,7 @@ class TargetProfile:
 class MitigationModel:
     mean: float
     variance: float
+    resist_shares: tuple[float, ...] = ()
 
 
 REFERENCE_TARGET = TargetProfile(entry=36, level=60, armor=528, resistances={})
@@ -67,4 +68,5 @@ def expected_mitigation(school: int, target: TargetProfile, caster_level: int, p
     shares = partial_resist_shares(average_resist(school, target, penetration))
     resisted = sum(share * step / 10 for step, share in enumerate(shares))
     resisted_square = sum(share * (step / 10) ** 2 for step, share in enumerate(shares))
-    return MitigationModel(mean=1.0 - resisted, variance=max(0.0, resisted_square - resisted ** 2))
+    return MitigationModel(mean=1.0 - resisted, variance=max(0.0, resisted_square - resisted ** 2),
+                           resist_shares=tuple(shares))
