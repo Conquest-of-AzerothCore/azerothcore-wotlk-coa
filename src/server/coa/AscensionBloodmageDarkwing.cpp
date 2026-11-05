@@ -74,6 +74,7 @@ class bloodmage_darkwing_bat : public PlayerScript
             return;
 
         CapShadowBats(player, guardian);
+        guardian->SetReactState(REACT_PASSIVE);
 
         if (player->getClass() != CLASS_SON_OF_ARUGAL)
             return;
@@ -85,7 +86,6 @@ class bloodmage_darkwing_bat : public PlayerScript
         guardian->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, damage * 1.5f);
         guardian->SetStatFlatModifier(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(stats->AttackPower));
         guardian->UpdateAllStats();
-        guardian->SetReactState(REACT_PASSIVE);
     }
 };
 
@@ -188,8 +188,11 @@ void PrepareAscensionBloodmageBatBite(Spell* spell)
         return;
 
     Unit* owner = caster->GetOwner();
-    Player* player = owner ? owner->ToPlayer() : nullptr;
-    if (!player || player->getClass() != CLASS_SON_OF_ARUGAL)
+    if (!owner)
+        return;
+
+    Player* source = owner->ToPlayer();
+    if (!source)
         return;
 
     SpellEffectInfo const& effect = info->Effects[EFFECT_0];
@@ -197,8 +200,8 @@ void PrepareAscensionBloodmageBatBite(Spell* spell)
         sSpellMgr->GetSpellBonusData(info->Id))
         return;
 
-    double const bonus = player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) * BAT_BITE_SPELL_POWER_COEFFICIENT +
-        player->GetTotalAttackPowerValue(BASE_ATTACK) * BAT_BITE_ATTACK_POWER_COEFFICIENT;
+    double const bonus = source->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW) * BAT_BITE_SPELL_POWER_COEFFICIENT +
+        source->GetTotalAttackPowerValue(BASE_ATTACK) * BAT_BITE_ATTACK_POWER_COEFFICIENT;
     if (!std::isfinite(bonus) || bonus < 0)
         return;
 
