@@ -27,6 +27,7 @@
 #include "AscensionBazaarTokenReserve.h"
 #include "AscensionDisplayPatch.h"
 #include "AscensionPooledVitality.h"
+#include "AscensionCosmeticPetTokens.h"
 #include "AscensionVanityOwnership.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
@@ -2953,10 +2954,10 @@ void Player::SendInitialSpells()
             continue;
 
         if ((!itr->second->Active && !IsKeptInClientSpellbookWhenSuperseded(itr->first)) ||
-            !itr->second->IsInSpec(GetActiveSpec()))
+            !itr->second->IsInSpec(GetActiveSpec()) || IsTemporarySpellReplacementStandIn(itr->first))
             continue;
 
-        data << uint32(itr->first);
+        data << uint32(GetTemporarySpellReplacement(itr->first));
         data << uint16(0);                                  // it's not slot id
 
         ++spellCount;
@@ -11548,6 +11549,13 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
     if (!sConditionMgr->IsObjectMeetToConditions(this, creature, conditions))
     {
         //LOG_DEBUG("condition", "BuyItemFromVendor: conditions not met for creature entry {} item {}", creature->GetEntry(), item);
+        SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
+        return false;
+    }
+
+    // Cosmetic pet tokens only sell on realm types whose classes can use them
+    if (!IsGameMaster() && !AscensionCosmeticPetTokens::AvailableOnRealm(item))
+    {
         SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
         return false;
     }

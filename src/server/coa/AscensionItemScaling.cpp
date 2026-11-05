@@ -440,6 +440,12 @@ uint32 CreatureViewerLift(Player const* player, Creature const* creature)
     return LootLift(creature->GetLevel(), LocalLevelScaling::ViewLevelFor(player, creature));
 }
 
+bool ScaledDownFor(Player const* player, Creature const* creature)
+{
+    uint8 const view = LocalLevelScaling::ViewLevelFor(player, creature);
+    return view && view < creature->GetLevel();
+}
+
 uint32 ChestViewerLift(Player const* player, uint32 itemLevel)
 {
     if (!LocalLevelScaling::ScalingChoiceEnabled(player) ||
@@ -535,6 +541,12 @@ public:
                 [creature](Player const* viewer) { return CreatureViewerLift(viewer, creature); });
             if (lift)
                 LiftLootItems(*loot, [lift](ItemTemplate const&) { return lift; });
+            else if (ScaledDownFor(owner, creature))
+                LiftLootItems(*loot, [owner, creature, personal](ItemTemplate const& proto)
+                {
+                    return LooterLift(owner, creature, personal,
+                        [&proto](Player const* viewer) { return ChestViewerLift(viewer, proto.ItemLevel); });
+                });
         }
         else if (&store == &LootTemplates_Gameobject)
         {

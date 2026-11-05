@@ -64,8 +64,15 @@ dungeon.
 | scope | rule |
 |---|---|
 | open world | the maps in `DestinyWeaver.Scaling.WorldMaps` (default `0 1`) |
-| dungeons | regular difficulty of the default dungeon finder entries (1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402 401), plus any entry `DestinyWeaver.Scaling.DungeonIds` or `DestinyWeaver.Scaling.DungeonBands` adds |
+| dungeons | regular difficulty of the dungeon finder entries listed below |
 | never | raids, battlegrounds, arenas, scripted private instances, Heroic/Mythic dungeons |
+
+Scaled dungeon finder entries:
+
+- the defaults: 1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276
+  601 402 401 45
+- any entry `DestinyWeaver.Scaling.DungeonIds` adds
+- any entry `DestinyWeaver.Scaling.DungeonBands` gives a band
 
 A creature on a scaled map still keeps its authored level when it is a pet, guardian, totem, trigger,
 critter, non-combat pet, world boss, has an owner or charmer, has `unit_class` 0, serves (any

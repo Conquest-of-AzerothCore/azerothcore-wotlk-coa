@@ -53,7 +53,8 @@ class Workspace:
         self.build = self.root / 'build'
         self.client = self.base / 'mysql-client'
         self.tools = self.base / 'bin'
-        self.conf = self.base / 'dist' / 'etc'
+        self.prefix = self.base / 'dist'
+        self.conf = self.build / 'src/server/apps/configs' if verify_all.WINDOWS else self.prefix / 'etc'
         self.dbc = self.base / 'data' / 'dbc'
         self.worldserver = program(self.build / 'src/server/apps', 'worldserver')
         for name in ('mysql', 'mysqldump', 'mysql_config'):
@@ -69,7 +70,7 @@ class Workspace:
         self.environment = {'PATH': str(self.tools)}
 
     def configure(self, testing='ON'):
-        write(self.build / 'CMakeCache.txt', f'CMAKE_INSTALL_PREFIX:PATH={self.conf.parent.as_posix()}\n'
+        write(self.build / 'CMakeCache.txt', f'CMAKE_INSTALL_PREFIX:PATH={self.prefix.as_posix()}\n'
               f'BUILD_TESTING:BOOL={testing}\nMYSQL_CONFIG:FILEPATH={(self.client / "mysql_config").as_posix()}\n'
               'CMAKE_GENERATOR:INTERNAL=Ninja\n')
         write(self.build / 'build.ninja')
@@ -843,12 +844,12 @@ class GameplayTests(WorkspaceTest):
         self.assertEqual(verify_all.gameplay_prerequisites(context.settings, context.environment), ([], []))
 
     def test_module_configs_already_in_the_server_modules_directory_make_gameplay_unavailable(self):
-        workspace = self.workspace()
-        write(workspace.conf / 'modules' / 'mod_ascension_compat.conf', 'Enabled = 1\n')
-        write(workspace.conf / 'modules' / 'spellbook.conf.dist')
-        separate = workspace.base / 'module-configs'
-        separate.mkdir()
         with patch.object(verify_all, 'WINDOWS', False):
+            workspace = self.workspace()
+            write(workspace.conf / 'modules' / 'mod_ascension_compat.conf', 'Enabled = 1\n')
+            write(workspace.conf / 'modules' / 'spellbook.conf.dist')
+            separate = workspace.base / 'module-configs'
+            separate.mkdir()
             shared = workspace.context()
             _, problems = verify_all.gameplay_prerequisites(shared.settings, shared.environment)
             self.assertEqual(problems, [
@@ -1004,7 +1005,8 @@ class GameplayTests(WorkspaceTest):
         workspace = self.workspace()
         selection = [f'scenario-{index:05d}-' + 'x' * 40 for index in range(800)]
         small, large = workspace.context(scenarios=selection[:10]), workspace.context(scenarios=selection)
-        verify_all.check_command_length(large)
+        with patch.object(verify_all, 'WINDOWS', False):
+            verify_all.check_command_length(large)
         with patch.object(verify_all, 'WINDOWS', True):
             verify_all.check_command_length(small)
             with self.assertRaisesRegex(ValueError, '800 scenarios exceeds the Windows command-line limit'):

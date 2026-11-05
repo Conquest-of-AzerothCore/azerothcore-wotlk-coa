@@ -219,7 +219,7 @@ public:
                 Copy(player, player, 707185, CalculatePct(healing, Amount(704884)));
             State(player).event = old;
         }
-        if (Named(info, 520333) && healing && player->HasAura(706188))
+        if (Named(info, 520333) && (healing || target == player) && player->HasAura(706188))
             Cast(player, target, 807344);
         if (Any(info, {808043, 808044, 808045, 808050, 808051, 808052}) && player->HasAura(704880) && (damage || healing))
         {

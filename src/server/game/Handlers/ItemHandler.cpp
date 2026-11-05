@@ -16,6 +16,7 @@
  */
 
 #include "AscensionItemRecovery.h"
+#include "AscensionCosmeticPetTokens.h"
 #include "AscensionVanityOwnership.h"
 #include "Common.h"
 #include "Item.h"
@@ -944,6 +945,12 @@ void WorldSession::SendListInventory(ObjectGuid vendorGuid, uint32 vendorEntry)
 
                 // Vanity items the account already owns are delivered from its collection, not sold again
                 if (!_player->IsGameMaster() && AscensionVanityOwnership::OwnsItem(_player, item->item))
+                {
+                    continue;
+                }
+
+                // Cosmetic pet tokens only sell on realm types whose classes can use them
+                if (!_player->IsGameMaster() && !AscensionCosmeticPetTokens::AvailableOnRealm(item->item))
                 {
                     continue;
                 }

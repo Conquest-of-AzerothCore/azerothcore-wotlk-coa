@@ -262,11 +262,11 @@ class necromancer_casts : public AllSpellScript
         consume(707176, Lichfrost(info) || Family(info, 2, 8192));
         consume(807856, Lichfrost(info));
         consume(572777, Command(info));
-        if (Chance(player, 704681))
+        if (info->SpellFamilyName == 29 && Chance(player, 704681))
             Ready(player, 801747, 2);
         if (Chance(player, 92122))
             Cast(player, player, 707421);
-        if (player->HasAura(704723))
+        if (info->SpellFamilyName == 29 && player->HasAura(704723))
             Cast(player, player, 707133);
         if (Command(info))
         {

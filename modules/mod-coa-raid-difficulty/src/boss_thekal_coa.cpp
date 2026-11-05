@@ -22,10 +22,12 @@
  *     Bloodlust        first 16s, every 30s   himself or a zealot
  *
  *   Tiger form (his Aspect of Shirvallah), when the avatar dies
- *     Rending Swipe    first 4s,  every 14s   cone in front, bleeds (Rip)
- *     War Stomp        first 12s, every 40s   50 yards, knocks back
- *     Speed Slash      first 14s, every 40s   runs through the raid for 8s,
- *                                             cutting everyone he passes
+ *     Rending Swipe    first 4s,  every 14s   cone in front
+ *     War Stomp        first 12s, every 40s   on the tank, 50 yards, knocks back
+ *     Speed Slash      first 14s, every 40s   runs through the raid for 17s,
+ *                                             a new random player every 2s, no
+ *                                             melee meanwhile; each cut adds a
+ *                                             stack of Rip
  *     Shredding Claws  passive, armour down on hit
  *     Summon Tigers, frenzy every 30s and enrage at 20% from stock
  *
@@ -36,7 +38,8 @@
  *   - which spells belong to which form. The video shows all of them in one
  *     stretch below 75%; the split follows the spell names (troll priest,
  *     tiger claws);
- *   - Speed Slash ends after 8 seconds (its aura never runs out by itself);
+ *   - Speed Slash ends after 17 seconds (its aura never runs out by itself;
+ *     tester, live);
  *   - Force Punch and the stock charge are gone, the tiger kit replaces them.
  */
 
@@ -77,6 +80,7 @@ namespace
         SPELL_WAR_STOMP            = 2118227,
         SPELL_WAR_STOMP_HIT        = 2118228,
         SPELL_SPEED_SLASH          = 2118232,
+        SPELL_SPEED_SLASH_HIT      = 2118233,
         SPELL_RENDING_SWIPE        = 2118238,
         SPELL_RENDING_SWIPE_HIT    = 2118239,
         SPELL_RIP                  = 2118240,
@@ -93,6 +97,10 @@ namespace
 
     constexpr uint32 GROUP_TROLL = 1;
     constexpr uint32 GROUP_TIGER = 2;
+    constexpr uint32 GROUP_SPEED_SLASH = 3;
+
+    constexpr Milliseconds SPEED_SLASH_RETARGET = 2s;
+    constexpr Milliseconds SPEED_SLASH_DURATION = 17s;
 
     constexpr float CLEAVE_RANGE = 10.0f;
     constexpr float CLEAVE_ARC   = float(M_PI) / 2;
@@ -176,15 +184,11 @@ namespace
                 context.Repeat(14s);
             }).Schedule(12s, [this](TaskContext context)
             {
-                DoCastSelf(SPELL_WAR_STOMP);
+                DoCastVictim(SPELL_WAR_STOMP);
                 context.Repeat(40s);
             }).Schedule(14s, [this](TaskContext context)
             {
                 DoCastSelf(SPELL_SPEED_SLASH);
-                context.Schedule(10s, [this](TaskContext)
-                {
-                    me->RemoveAurasDueToSpell(SPELL_SPEED_SLASH);
-                });
                 context.Repeat(40s);
             }).Schedule(30s, [this](TaskContext context)
             {
@@ -213,9 +217,36 @@ namespace
             DoCast(target, SPELL_BLOODLUST);
         }
 
+        void StartSpeedSlash()
+        {
+            scheduler.Schedule(0ms, GROUP_SPEED_SLASH, [this](TaskContext slash)
+            {
+                if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 0.0f, true))
+                    me->GetMotionMaster()->MoveChase(target);
+                slash.Repeat(SPEED_SLASH_RETARGET);
+            }).Schedule(SPEED_SLASH_DURATION, GROUP_SPEED_SLASH, [this](TaskContext)
+            {
+                EndSpeedSlash();
+            });
+        }
+
+        void EndSpeedSlash()
+        {
+            scheduler.CancelGroup(GROUP_SPEED_SLASH);
+            me->RemoveAurasDueToSpell(sSpellMgr->GetSpellIdForDifficulty(SPELL_SPEED_SLASH, me));
+            if (Unit* victim = me->GetVictim())
+                me->GetMotionMaster()->MoveChase(victim);
+        }
+
         void OnSpellCast(SpellInfo const* spell) override
         {
             BossAI::OnSpellCast(spell);
+
+            if (spell->Id == sSpellMgr->GetSpellIdForDifficulty(SPELL_SPEED_SLASH, me))
+            {
+                StartSpeedSlash();
+                return;
+            }
 
             switch (spell->Id)
             {
@@ -228,10 +259,7 @@ namespace
                     break;
                 case SPELL_RENDING_SWIPE:
                     for (Player* p : PlayersInFront(me, CLEAVE_RANGE, CLEAVE_ARC))
-                    {
                         me->CastSpell(p, SPELL_RENDING_SWIPE_HIT, true);
-                        me->CastSpell(p, SPELL_RIP, true);
-                    }
                     break;
                 case SPELL_DISRUPTING_SHOUT:
                     me->CastSpell(me, SPELL_DISRUPTING_SHOUT_HIT, true);
@@ -242,6 +270,12 @@ namespace
                 default:
                     break;
             }
+        }
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell) override
+        {
+            if (target && spell->Id == sSpellMgr->GetSpellIdForDifficulty(SPELL_SPEED_SLASH_HIT, me))
+                me->CastSpell(target, SPELL_RIP, true);
         }
 
         void EnterEvadeMode(EvadeReason why) override
@@ -285,8 +319,14 @@ namespace
 
             scheduler.Update(diff, [this]
             {
-                DoMeleeAttackIfReady();
+                if (!Slashing())
+                    DoMeleeAttackIfReady();
             });
+        }
+
+        bool Slashing() const
+        {
+            return me->HasAura(sSpellMgr->GetSpellIdForDifficulty(SPELL_SPEED_SLASH, me));
         }
 
     private:

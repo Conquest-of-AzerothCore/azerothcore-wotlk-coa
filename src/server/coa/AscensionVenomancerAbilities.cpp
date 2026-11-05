@@ -328,7 +328,7 @@ class spell_ascension_venomancer_ability : public SpellScript
                 aura->SetDuration(Amount(704235,2));
         }
         if (Named(GetSpellInfo(),504342))
-            ExtendOwned(player,target,800870,Amount(id,1));
+            ExtendOwned(player,target,800870,Amount(id,1),true);
         if (id == 680767)
             for (Unit* ally : Allies(player,player,Radius(id)))
                 for (uint32 root : {800901,800899})

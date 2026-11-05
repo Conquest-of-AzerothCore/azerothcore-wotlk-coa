@@ -1,0 +1,266 @@
+{
+  "schema": 1,
+  "name": "Brimstone Bludgeon replaces Sever in the spellbook instead of adding a row (#11004)",
+  "contract": [
+    "Brimstone Bludgeon 800710 transforms Sever (ranks from 500904) into 520005. Knight of Xoroth learned 520005 as a permanent spell and then swapped Sever into it, so the client got SMSG_LEARNED_SPELL 520005 (its own row) plus SMSG_SUPERCEDED_SPELL Sever->520005 (the Sever row), two Brimstone Bludgeons, as captured in game for #11004.",
+    "520005 was also saved to the character, so every login listed Sever and Brimstone Bludgeon side by side and both could be cast; dropping the talent then turned the Bludgeon row back into a second Sever.",
+    "Expected: the talent teaches 520005 as a temporary stand-in like the other classes' replacements, so the spellbook holds one Brimstone Bludgeon and no Sever, also after a login, and dropping the talent leaves one Sever."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "k",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "k",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "k",
+      "item": 629951
+    },
+    {
+      "action": "equip",
+      "actor": "k",
+      "item": 629951,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 500904
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 501499
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 501500
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 501501
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 501502
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 501503
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 501504
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 501505
+    },
+    {
+      "action": "learn",
+      "label": "Brimstone Bludgeon talent",
+      "actor": "k",
+      "spell": 800710
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the talent grants Brimstone Bludgeon",
+      "actor": "k",
+      "metric": "knows_spell",
+      "spell": 520005,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the talent refresh run",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the spellbook holds one Brimstone Bludgeon, not a second row for the learned spell",
+      "actor": "k",
+      "metric": "client_spellbook_copies",
+      "spell": 520005,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Sever rank 500904 is not left in the spellbook",
+      "actor": "k",
+      "metric": "client_knows_spell",
+      "spell": 500904,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Sever rank 501499 is not left in the spellbook",
+      "actor": "k",
+      "metric": "client_knows_spell",
+      "spell": 501499,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Sever rank 501500 is not left in the spellbook",
+      "actor": "k",
+      "metric": "client_knows_spell",
+      "spell": 501500,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Sever rank 501501 is not left in the spellbook",
+      "actor": "k",
+      "metric": "client_knows_spell",
+      "spell": 501501,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Sever rank 501502 is not left in the spellbook",
+      "actor": "k",
+      "metric": "client_knows_spell",
+      "spell": 501502,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Sever rank 501503 is not left in the spellbook",
+      "actor": "k",
+      "metric": "client_knows_spell",
+      "spell": 501503,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Sever rank 501504 is not left in the spellbook",
+      "actor": "k",
+      "metric": "client_knows_spell",
+      "spell": 501504,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Sever rank 501505 is not left in the spellbook",
+      "actor": "k",
+      "metric": "client_knows_spell",
+      "spell": 501505,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Cast the highest Sever rank",
+      "actor": "k",
+      "spell": 501505,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Sever still casts as Brimstone Bludgeon",
+      "actor": "k",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and the spellbook still holds it once",
+      "actor": "k",
+      "metric": "client_spellbook_copies",
+      "spell": 520005,
+      "equals": 1
+    },
+    {
+      "action": "relog",
+      "label": "Log in again",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "label": "Let the talent refresh run",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: after a login the spellbook still holds one Brimstone Bludgeon",
+      "actor": "k",
+      "metric": "client_spellbook_copies",
+      "spell": 520005,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and no Sever beside it",
+      "actor": "k",
+      "metric": "client_knows_spell",
+      "spell": 501505,
+      "equals": 0
+    },
+    {
+      "action": "unlearn",
+      "label": "Drop the talent",
+      "actor": "k",
+      "spell": 800710,
+      "all_specs": true
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent Sever is back once",
+      "actor": "k",
+      "metric": "client_spellbook_copies",
+      "spell": 501505,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and Brimstone Bludgeon is gone",
+      "actor": "k",
+      "metric": "client_knows_spell",
+      "spell": 520005,
+      "equals": 0
+    }
+  ]
+}

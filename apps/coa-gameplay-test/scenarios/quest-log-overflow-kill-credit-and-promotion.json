@@ -1,0 +1,306 @@
+{
+  "schema": 1,
+  "name": "Quest log: an overflow quest counts kills and moves into a freed client slot",
+  "contract": [
+    "An overflow quest is a normal quest on the server: Kobold Camp Cleanup (7) counts Kobold Vermin (6) kills while it has no client slot. When a native quest is abandoned, the overflow quest moves into the freed client slot with its progress, and the client receives the slot and its quest level."
+  ],
+  "timeout_ms": 90000,
+  "quest_log_size": 64,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "creatures": [
+    {
+      "id": "kobold",
+      "owner": "hero",
+      "entry": 6,
+      "level": 1,
+      "distance": 5,
+      "faction": 14
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 5",
+      "actor": "hero",
+      "quest": 5,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 12",
+      "actor": "hero",
+      "quest": 12,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 13",
+      "actor": "hero",
+      "quest": 13,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 14",
+      "actor": "hero",
+      "quest": 14,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 35",
+      "actor": "hero",
+      "quest": 35,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 37",
+      "actor": "hero",
+      "quest": 37,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 39",
+      "actor": "hero",
+      "quest": 39,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 40",
+      "actor": "hero",
+      "quest": 40,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 52",
+      "actor": "hero",
+      "quest": 52,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 85",
+      "actor": "hero",
+      "quest": 85,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 109",
+      "actor": "hero",
+      "quest": 109,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 111",
+      "actor": "hero",
+      "quest": 111,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 152",
+      "actor": "hero",
+      "quest": 152,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 163",
+      "actor": "hero",
+      "quest": 163,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 170",
+      "actor": "hero",
+      "quest": 170,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 182",
+      "actor": "hero",
+      "quest": 182,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 183",
+      "actor": "hero",
+      "quest": 183,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 217",
+      "actor": "hero",
+      "quest": 217,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 224",
+      "actor": "hero",
+      "quest": 224,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 237",
+      "actor": "hero",
+      "quest": 237,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 239",
+      "actor": "hero",
+      "quest": 239,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 250",
+      "actor": "hero",
+      "quest": 250,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 255",
+      "actor": "hero",
+      "quest": 255,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 263",
+      "actor": "hero",
+      "quest": 263,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 302",
+      "actor": "hero",
+      "quest": 302,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Kobold Camp Cleanup goes to the overflow log",
+      "actor": "hero",
+      "quest": 7,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "Kobold Camp Cleanup is in the first overflow slot",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 7,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "Kobold Camp Cleanup has no client slot",
+      "actor": "hero",
+      "metric": "quest_log_client_slot",
+      "quest": 7,
+      "equals": -1
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill a Kobold Vermin",
+      "actor": "hero",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "The overflow quest counts the kill",
+      "actor": "hero",
+      "metric": "quest_objective_count",
+      "quest": 7,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The kill does not give it a client slot",
+      "actor": "hero",
+      "metric": "quest_log_client_slot",
+      "quest": 7,
+      "equals": -1
+    },
+    {
+      "action": "quest_abandon",
+      "label": "Abandon The People's Militia (12) from client slot 1",
+      "actor": "hero",
+      "quest": 12
+    },
+    {
+      "action": "assert",
+      "label": "The overflow quest moves into the freed client slot",
+      "actor": "hero",
+      "metric": "quest_log_client_slot",
+      "quest": 7,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The client slot carries the kill",
+      "actor": "hero",
+      "metric": "quest_log_client_count",
+      "quest": 7,
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The server keeps the kill",
+      "actor": "hero",
+      "metric": "quest_objective_count",
+      "quest": 7,
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The client receives the slot's quest level",
+      "actor": "hero",
+      "metric": "quest_log_sent_level_count",
+      "quest": 7,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "The server slot is the client slot",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 7,
+      "equals": 1
+    }
+  ]
+}

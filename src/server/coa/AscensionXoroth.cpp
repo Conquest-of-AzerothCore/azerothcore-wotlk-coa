@@ -221,11 +221,11 @@ void Refresh(Player* player)
     }
     Replace(player, 800340, player->HasAura(706502) && player->HasAura(712294) ? 504581 : 0);
     if (player->HasAura(800710) && !player->HasSpell(520005))
-        player->learnSpell(520005);
+        player->learnSpellWithoutAnnouncement(520005);
     if (!player->HasAura(800710) && player->HasSpell(520005))
     {
         Replace(player, 500904, 0);
-        player->removeSpell(520005, SPEC_MASK_ALL, false);
+        player->removeSpell(520005, SPEC_MASK_ALL, true);
     }
     for (auto const& replacement : {std::array<uint32, 3>{800710, 500904, 520005},
                                     {570727, 801059, 802581},

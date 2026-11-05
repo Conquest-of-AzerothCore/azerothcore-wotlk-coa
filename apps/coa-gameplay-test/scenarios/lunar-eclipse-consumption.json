@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Issue 208: Lunar Eclipse spends phase stacks",
-  "contract": "Activating Lunar Eclipse consumes four Lunar Phase stacks. Moonwell Splash consumes Eclipse; it cannot be reactivated without four new stacks.",
+  "name": "Issue 208: Lunar Eclipse spends its four phase stacks when the Eclipse is consumed",
+  "contract": "Lunar Eclipse needs four Lunar Phase stacks to activate, but activating it keeps them. The four stacks are spent when a Lunar spell such as Moonwell Splash consumes the Eclipse; spending them on activation allowed a third back-to-back Eclipse out of eight stacks. After the Eclipse is consumed it cannot be reactivated without four new stacks.",
   "players": [
     {
       "id": "star",
@@ -52,10 +52,11 @@
     },
     {
       "action": "assert",
+      "label": "Activation keeps the four Lunar Phase stacks",
       "actor": "star",
-      "metric": "aura",
+      "metric": "aura_stacks",
       "spell": 802985,
-      "equals": 0
+      "equals": 4
     },
     {
       "action": "set_health",
@@ -80,6 +81,15 @@
       "metric": "aura",
       "spell": 800386,
       "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Consuming the Eclipse spent the four stacks",
+      "actor": "star",
+      "metric": "aura",
+      "spell": 802985,
+      "equals": 0,
+      "within_ms": 1000
     },
     {
       "action": "wait",

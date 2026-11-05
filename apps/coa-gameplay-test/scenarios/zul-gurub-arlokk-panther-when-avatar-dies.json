@@ -1,0 +1,146 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: High Priestess Arlokk takes panther form when her drained Avatar of Bethekk dies",
+  "contract": [
+    "At half health each High Priest drains the Loa Avatar in its temple to death, and its second kit starts the",
+    "moment the avatar dies (CoA log of 2026-08-02: ~1% damage taken for 3-4 seconds). Arlokk (14515) gains the",
+    "Gift of the Blood God (2118324) and the panther form (Aspect of Bethekk 2118323) together, when the Avatar of",
+    "Bethekk (666988, spawn 9999801) dies, not while she still drains it. The hero joins phase 1 at her temple, so",
+    "Arlokk, summoned there, finds the instance's own avatar."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 309,
+    "x": -11558.0,
+    "y": -1628.0,
+    "z": 41.3,
+    "o": 3.14,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "set_phase",
+      "label": "See the instance's own spawns",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Avatar of Bethekk stands in her temple",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 666988,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14515,
+      "as": "arlokk",
+      "distance": 4
+    },
+    {
+      "action": "attack",
+      "label": "Pull Arlokk",
+      "actor": "hero",
+      "target": "arlokk"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arlokk fights",
+      "actor": "arlokk",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound Arlokk below half health",
+      "actor": "hero",
+      "entry": 14515,
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: while she drains the avatar she is still a troll",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118323,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and has no Gift yet",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118324,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the drain kills the Avatar of Bethekk",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 666988,
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: when the avatar dies she takes panther form",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118323,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: together with the Gift of the Blood God",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118324,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and still fights",
+      "actor": "arlokk",
+      "metric": "combat",
+      "equals": 1
+    }
+  ]
+}

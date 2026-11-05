@@ -1,0 +1,305 @@
+{
+  "schema": 1,
+  "name": "Wildcard Imposing Combo makes Divine Storm spend combo points for Imposing Divinity (#10361)",
+  "contract": [
+    "Imposing Combo 285598 reads 'Empowers these abilities to now consume combo points, ... granting you a buff for 2 seconds plus an additional 2 seconds per combo point: Divine Storm increases your armor by $285603s1%'.",
+    "Helper 285599 (Divine Storm class mask, family 10 flags[1] 0x20000) procs Imposing Divinity 285603 (MOD_RESISTANCE_PCT armor 24+1 = 25%, SpellDuration 2000..12000 ms) and Clear Combo Points 283170. Nothing applied the helper, it had no spell_proc row and 283170 was a bare dummy, so Divine Storm neither spent points nor buffed.",
+    "Expected with two combo points: Divine Storm grants Imposing Divinity for 2 s + 2 x 2 s = 6 s at 25% armor and leaves no combo points.",
+    "The buff procs once per cast on a successful hit against the enemy holding the combo points: a single-target Stormstrike on another enemy neither grants Imposing Storm nor spends those points (Divine Storm is an area attack and also hits the combo target, so it cannot show this)."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hero",
+      "name": "Wildimpose",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "other",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 4,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Wildimpose"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Hero plays Wildcard",
+      "actor": "hero",
+      "metric": "game_mode_mask",
+      "min": 64
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 1752
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 53385
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 285598
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Imposing Combo passive is up",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 285598,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The Divine Storm helper rides on the passive",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 285599,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Sinister Strike 1",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Sinister Strike 2",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: two combo points",
+      "actor": "hero",
+      "metric": "combo_points",
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown pass",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Divine Storm",
+      "actor": "hero",
+      "spell": 53385,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Divine Storm is accepted",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 53385,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Divine Storm grants Imposing Divinity",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 285603,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Imposing Divinity raises armor by the DBC 25%",
+      "actor": "hero",
+      "metric": "aura_amount",
+      "spell": 285603,
+      "effect": 0,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: two points give 2 s + 2 x 2 s",
+      "actor": "hero",
+      "metric": "aura_duration_ms",
+      "spell": 285603,
+      "min": 5000,
+      "max": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the combo points are spent",
+      "actor": "hero",
+      "metric": "combo_points",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Past the buff and the cooldown",
+      "ms": 11000
+    },
+    {
+      "action": "learn",
+      "label": "Stormstrike, a single-target Imposing Combo ability",
+      "actor": "hero",
+      "spell": 17364
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Stormstrike helper rides on the passive",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 285601,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "A combo point on the first enemy",
+      "actor": "hero",
+      "spell": 1752,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one combo point",
+      "actor": "hero",
+      "metric": "combo_points",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Stormstrike the other enemy",
+      "actor": "hero",
+      "spell": 17364,
+      "target": "other"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Stormstrike hits the other enemy",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 32175,
+      "target": "other",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Imposing Storm from a hit on a target without the combo points",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 285605,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the first enemy's combo point is kept",
+      "actor": "hero",
+      "metric": "combo_points",
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "label": "Past Stormstrike's cooldown",
+      "ms": 8500
+    },
+    {
+      "action": "cast",
+      "label": "Stormstrike the enemy with the combo point",
+      "actor": "hero",
+      "spell": 17364,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Imposing Storm from a hit on the combo target",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 285605,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the combo point is spent",
+      "actor": "hero",
+      "metric": "combo_points",
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

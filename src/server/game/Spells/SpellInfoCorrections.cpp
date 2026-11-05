@@ -386,6 +386,12 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->AttributesEx3 |= SPELL_ATTR3_DOT_STACKING_RULE;
     });
 
+    // Revive (Chained Spirit, Zul'Gurub): the dead player can accept it while the corpse reclaim delay runs
+    ApplySpellFix({ 24341 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->AttributesEx3 |= SPELL_ATTR3_NO_RES_TIMER;
+    });
+
     // Ascendance (Talisman of Ascendance trinket)
     ApplySpellFix({ 28200 }, [](SpellInfo* spellInfo)
     {
@@ -425,6 +431,16 @@ void SpellMgr::LoadSpellInfoCorrections()
     ApplySpellFix({ 48422 }, [](SpellInfo* spellInfo)
     {
         spellInfo->Stances = 1 << (FORM_TREE - 1);
+    });
+
+    // Murder Rush's damage aura: the client's effect 1 names the aura and its 10% but no effect type, so the
+    // aura that Murder Rush keeps up while Sprint is active was never applied.
+    ApplySpellFix({ 1180881 }, [](SpellInfo* spellInfo)
+    {
+        if (spellInfo->Effects[EFFECT_1].Effect != 0 ||
+            spellInfo->Effects[EFFECT_1].ApplyAuraName != SPELL_AURA_ADD_PCT_MODIFIER)
+            return;
+        spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_APPLY_AURA;
     });
 
     // Elemental Oath

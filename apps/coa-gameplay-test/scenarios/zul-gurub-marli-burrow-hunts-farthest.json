@@ -1,0 +1,254 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: High Priestess Mar'li comes up from her Burrow on the player farthest from her",
+  "contract": [
+    "The tester of 2026-11-04 (live): when Mar'li comes up from Burrow (2118140) she goes for the player farthest",
+    "from her, not a random one, and stays fixed on them for 8 s. In her spider form Burrow is cast 20.5 s after the",
+    "change (2 s cast, 3 s under ground, CoA combat log of 2026-08-02). The tank holds her with the most threat, some",
+    "2.7 million after the wound that halves her health, as a long fight builds; the archer, who hit her once, stands",
+    "about 30 yards away. After the Burrow she must attack the archer, who carries Menacing Gaze (2118141) while",
+    "hunted, for the whole 8 s however much threat the tank holds, and return to the tank once they are over."
+  ],
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "archer",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "archer",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "group",
+      "label": "Both heroes share one Zul'Gurub instance",
+      "actor": "tank",
+      "target": "archer"
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "archer",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let both transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 14510,
+      "as": "marli",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "label": "The tank engages Mar'li",
+      "actor": "tank",
+      "target": "marli"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li fights",
+      "actor": "marli",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "label": "The tank builds threat",
+      "ms": 4000
+    },
+    {
+      "action": "attack",
+      "label": "The archer hits her too",
+      "actor": "archer",
+      "target": "marli"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "archer"
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound Mar'li below half health",
+      "actor": "tank",
+      "entry": 14510,
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li fights in her spider form",
+      "actor": "marli",
+      "metric": "aura",
+      "spell": 2118125,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "relocate",
+      "label": "The archer steps back about 15 yards",
+      "actor": "archer",
+      "dx": -10.15,
+      "dy": -12.955,
+      "dz": -0.665
+    },
+    {
+      "action": "relocate",
+      "label": "and about 15 more",
+      "actor": "archer",
+      "dx": -10.15,
+      "dy": -12.955,
+      "dz": -0.665
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the archer is the one farther from her",
+      "actor": "archer",
+      "metric": "distance",
+      "target": "marli",
+      "min": 20
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank holds her before she burrows",
+      "actor": "marli",
+      "metric": "victim",
+      "target": "tank",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li burrows 20.5 s into her spider form",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118140,
+      "min": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: she comes up gazing at the farthest player",
+      "actor": "archer",
+      "metric": "aura",
+      "spell": 2118141,
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and attacks the archer, not the tank with more threat",
+      "actor": "marli",
+      "metric": "victim",
+      "target": "archer",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank carries no gaze",
+      "actor": "tank",
+      "metric": "aura",
+      "spell": 2118141,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Six of the 8 s pass",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: she is still on the archer",
+      "actor": "marli",
+      "metric": "victim",
+      "target": "archer",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: who still carries the gaze",
+      "actor": "archer",
+      "metric": "aura",
+      "spell": 2118141,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the gaze ends after 8 s",
+      "actor": "archer",
+      "metric": "aura",
+      "spell": 2118141,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and she returns to the tank",
+      "actor": "marli",
+      "metric": "victim",
+      "target": "tank",
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

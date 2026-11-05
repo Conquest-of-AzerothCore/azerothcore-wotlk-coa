@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Starfire Shot completes when its Scattered Star is consumed mid-cast",
+  "contract": "Starfire Shot 801978 carries TargetAuraSpell 804378, so the engine requires a Scattered Star on the target. Spell::_cast repeats CheckCast(false) when the cast completes (Spell.cpp), and that reaches SpellInfo::CheckTarget, which returns SPELL_FAILED_TARGET_AURASTATE when TargetAuraSpell is set and the target no longer holds the aura. Starfire Shot's own hit starts the consume chain, 572315 to StartConsume to 804716, whose 500 ms ticks drain the target's remaining stars, so a shot fired while a previous shot's consume is still running can lose its star during its own 2500 ms cast and abort on completion, a cast the player started legally and had no way to protect. Nothing in the ability text asks for the star to persist through the cast: Starfire Shot reads 'Consumes Scattered Stars', which describes spending one, and the requirement's purpose is to gate starting the cast. The fork already softens the sibling check, SpellInfo::CheckTarget testing TargetAuraState only for primary targets under AscensionTargetAuraStateOnlyPrimary, which is precedent for the engine repeat being too strict for CoA. The fix clears the authored TargetAuraSpell for every Starfire Shot rank in AscensionStarcaller::ApplyContracts and enforces the star once, at cast start, in AscensionStarcallerAbilities.cpp's OnSpellCheckCast under its strict flag, which ScriptMgr::OnSpellCheckCast receives from CheckCast: true from Spell::prepare and false from the completion repeat. Fixture: rather than race the consume, the star is placed with set_aura and removed with set_aura mid-cast, which is the same observable condition and is deterministic. set_aura reaches only a player, a pet or a summoned creature, so the target is a hostile player of the opposing faction with PvP enabled; the scenario location teleports both actors to one spot and the victim is relocated 12 yards out, since a ranged weapon attack needs its target in front and outside its dead zone. The star is removed one second into the 2500 ms cast, so the shot began legally and finishes with no star present. spell_cast_count counts completed casts, so one means the shot survived and zero means it aborted. The assertion that the requirement still gates starting a cast is left to the engine's own behaviour and is not covered here.",
+  "timeout_ms": 90000,
+  "location": { "map": 1, "x": 2269.03, "y": -6608.37, "z": 125.192, "o": 0 },
+  "players": [
+    { "id": "starcaller", "race": 1, "class": 26, "level": 80, "spell_hit_rating": 10000, "ranged_hit_rating": 10000, "allow_regeneration": false },
+    { "id": "victim", "race": 2, "class": 1, "level": 80, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "relocate", "label": "A ranged weapon attack needs room in front", "actor": "victim", "dx": 12.0 },
+    { "action": "pvp", "actor": "starcaller", "enabled": true },
+    { "action": "pvp", "actor": "victim", "enabled": true },
+    { "action": "set_health", "actor": "victim", "maximum": 1000000, "value": 1000000 },
+    { "action": "add_item", "label": "Starfire Shot needs a ranged weapon", "actor": "starcaller", "item": 2504 },
+    { "action": "equip", "actor": "starcaller", "item": 2504, "slot": 17 },
+    { "action": "learn", "actor": "starcaller", "spell": 801978 },
+    { "action": "set_aura", "label": "The target carries the star the shot will spend",
+      "actor": "victim", "spell": 804378, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: the star is on the target",
+      "actor": "victim", "metric": "aura_stacks", "spell": 804378, "equals": 1 },
+    { "action": "assert", "label": "SETUP: no Starfire Shot has completed yet",
+      "actor": "starcaller", "metric": "spell_cast_count", "spell": 801978, "equals": 0 },
+    { "action": "cast", "label": "Begin a Starfire Shot, which takes 2500 ms",
+      "actor": "starcaller", "spell": 801978, "target": "victim" },
+    { "action": "wait", "label": "One second into the cast", "ms": 1000 },
+    { "action": "set_aura", "label": "The star is consumed while the shot is still in the air",
+      "actor": "victim", "spell": 804378, "stacks": 0 },
+    { "action": "assert", "label": "SETUP: the star is gone mid-cast",
+      "actor": "victim", "metric": "aura_stacks", "spell": 804378, "equals": 0 },
+    { "action": "wait", "label": "Past the end of the cast", "ms": 4000 },
+    { "action": "assert", "label": "The shot still completes",
+      "actor": "starcaller", "metric": "spell_cast_count", "spell": 801978, "equals": 1 }
+  ]
+}

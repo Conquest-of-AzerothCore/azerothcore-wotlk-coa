@@ -525,6 +525,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `use_item` | `actor`, `item`, `spell`, optional `target`, `target_item` (an owned item entry, sent as the item target instead of a unit) and `destination`: normal item-use handler. |
 | `use_nearby_gameobject` | `actor`, `entry`, optional `owner` (a player id): native use request for the single gameobject of that entry within 20 yards in the actor's phase; `owner` narrows the choice to the object that player owns, so one of several nearby objects can be clicked. |
 | `spell_click_nearby` | `actor`, `entry`: native `CMSG_SPELLCLICK` on the nearest living creature of that entry within 20 yards, as the client sends on right-clicking a spell-click creature. |
+| `minion_kill` | Player `actor`, `minion` (creature entry), `target` (creature fixture or `summon` id): the actor's living owned creature of that entry deals the target's whole health in direct damage through `Unit::DealDamage`, so the kill credits the minion as the killer. |
 | `select_nearby` | `actor`, `entry`, optional `radius` (default 40): native `CMSG_SET_SELECTION` on the nearest living creature of that entry, as the client sends on clicking it. GM commands that read `ChatHandler::getSelectedCreature()` (`.cast target`, `.cast back`, …) need this first; `attack_nearby` only sends `CMSG_ATTACKSWING` and never selects. |
 | `use_gameobject` | `actor`, `entry`: native use request for the actor's single nearby owned gameobject. |
 | `voidportal` | Player `actor`, `op` `force` with `group` and `spawn`, or `op` `roll` with `success`: put the one realm-wide Void Portal on that configured point as a point rotation does, or replace the next proximity roll; the manager is process-global, so the case runs exclusively. |
@@ -576,7 +577,7 @@ a previously named snapshot of the same metric; it is available on snapshots and
 
 Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`, `map_id`, `combat`, `casting`,
 `level`, `quest_objective_count` (needs `quest`, optional `index`), `knows_spell`, `has_talent`, `talent_points`, `active_talent_spec`,
-`cooldown_ms`, `spell_cooldown_packet_ms`, `item_count`, `carried_item_count`, `bank_bag_slots`, `guild_bank_tabs`, `aura`, `aura_stacks`, `aura_charges`,
+`cooldown_ms`, `spell_cooldown_packet_ms`, `item_loot_releases`, `item_count`, `carried_item_count`, `bank_bag_slots`, `guild_bank_tabs`, `aura`, `aura_stacks`, `aura_charges`,
 `aura_duration_ms`, `aura_amount`, `pet_entry`, `pet_aura_stacks`, `owned_creature_count`, `owned_creature_spacing`,
 `charm_entry`, `charm_aura_stacks`, `controls_self`, `private_instance`, `dynamic_object`,
 `dynamic_object_duration_ms`, `dynamic_object_height`, `distance`, `spell_proc_count`, `spell_proc_chance`,
@@ -656,7 +657,8 @@ skill line for that spell.
 `rating` (0..24, native `CombatRating`) and reads the rating value. `stat` requires `stat` (0..4), `resistance`
 requires `school` (1..6); `armor`, `attack_power`, `ranged_attack_power`, the hasted `attack_time_ms` (optional
 `hand`, 0..2) and `run_speed_rate` read the unit's current totals. `pet_attack_time_ms` uses the same hand
-selection for a player's current pet and requires that pet to exist. `aura_amplitude_ms` reads an aura effect's
+selection for a player's current pet and requires that pet to exist. `attack_timer_ms` (optional `hand`, 0..2)
+reads the time left until that hand's next swing (0 when ready). `aura_amplitude_ms` reads an aura effect's
 periodic interval.
 `block_chance` reads the player's percentage field; `block_value` reads native shield block value;
 `critical_block_chance` reads the total modifier used by the native critical block roll.
@@ -697,6 +699,25 @@ and `pet_melee_damage` read the melee combat packets the player actor received f
 of the remaining hits that dealt damage, and the summed damage of every swing. Snapshot them around a fight;
 `ratio_to` a plain-count snapshot gives an average plain hit.
 These observations do not test delivery to a network client.
+`owned_creature_damage_total`, `owned_creature_damage_count` and `owned_creature_attack_count` require `entry` and
+combine, for creatures of that entry, the same melee combat packets `pet_melee_*` reads with the actor's already
+recorded `spell_damage_count`/`spell_damage_total` events (both direct and periodic, including its own critical
+filter semantics, but without a `target`, `caster`, `pet` or `critical` filter): `owned_creature_damage_total` sums
+melee and spell damage together, `owned_creature_damage_count` sums the melee hit count (crits, glancing blows and
+plain hits; misses are excluded) with the spell damage event count, and `owned_creature_attack_count` sums every
+melee swing (hits and misses) with the spell damage event count, so a single swing or cast from a creature that
+never repeats it is observable even once. Unlike `spell_damage_count`/`spell_damage_total` with `entry`, these three
+metrics never resolve a live creature: they only filter the actor's already-recorded events by the attacking or
+casting GUID's entry, so a summon, guardian or totem a player does not strictly own by `GetOwnerGUID` (a temporary
+summon whose `SummonerGUID` or `CreatorGUID` the player holds instead) is observable, and remains observable after
+it despawns or dies. As with `pet_melee_*`, this trades a precise ownership check for the actor's own observation:
+scope each scenario to one creature of that entry near the observing actor. Snapshot them around a fight; use
+`relative_to` for the delta and `ratio_to` a `pet_melee_swings`/`pet_melee_damage` delta of the same fight to cross-check
+melee-only aggregation, as [the regression scenario](scenarios/coa-owned-creature-damage-metric-honored-ancestor.json)
+does for the Honored Ancestor guardian pet.
+`owned_creature_heal_count`, `owned_creature_heal_total` and `owned_creature_effective_heal_total` require `entry`
+and apply the same entry resolution to the actor's recorded `spell_heal_*` events: they count the healing events cast
+by creatures of that entry, or sum their healing including or excluding overhealing, whoever the healed unit is.
 `spell_damage_count` and `spell_damage_total` require `spell` and count positive direct or periodic spell
 damage events, or sum their post-mitigation damage, from the actor's native combat packets. Optional `target`
 filters the victim, `pet: true` selects the actor's current pet as caster, `caster` selects another actor such
@@ -902,6 +923,12 @@ submits that spell again).
 `spell_cooldown_packet_ms` requires `spell` and reads the cooldown duration from the last native
 `SMSG_SPELL_COOLDOWN` the session was sent for it, or -1 if none was observed; unlike `cooldown_ms`,
 which reads the server-side cooldown map directly, this proves the client was actually notified.
+`item_loot_releases` counts the `SMSG_LOOT_RELEASE_RESPONSE` packets the actor's session was sent for an item, which
+is how a custom item opening tells the client to leave the looting state it entered on `CMSG_OPEN_ITEM`.
+`sent_aura_amount` requires `spell` and accepts `effect` (0..2, default 0). It reads that effect's amount from the
+last `SMSG_ASCENSION_AURA_AMOUNT` the actor's session was sent for its own aura, which feeds the `$wN` tooltip tokens,
+and fails if none was observed; the actor needs `ascension_client` set. Unlike `aura_amount`, which reads the server-side
+aura effect, this proves what the client was told.
 `pet_aura_stacks`
 requires `spell`, accepts `caster` for aura ownership, and returns zero if the pet or aura is absent.
 `pet_aura_amount` and `pet_aura_amplitude_ms` accept `effect` and read its amount or tick interval.
@@ -924,6 +951,10 @@ Player commands retain normal permission and gameplay checks; verify their effec
 `owned_creature_count` requires a player and `entry`. It counts living creatures of that entry owned, created or summoned by
 the player, in the same phase and within 100 yards, including summons outside the guardian-pet slot.
 `creator_only: true` restricts that count to creatures whose native creator GUID is the player.
+`controlled_aura_count` requires `spell` and counts the actor's living controlled units (pets, guardians and
+minions of any entry) that carry that aura. `controlled_aura_min_damage` and `controlled_aura_max_damage` return
+the main-hand `UNIT_FIELD_MINDAMAGE`/`UNIT_FIELD_MAXDAMAGE` of the first such unit: the range its melee swing
+rolls in before armor, critical strikes and the victim's modifiers.
 This observes creator metadata; it does not establish a rendered owner title.
 An optional `spell` restricts the count to creatures with that aura; `caster` can select its aura owner. `min_distance` keeps creatures at least that many yards from the player (2D), and `owner_display: true` those wearing the player's display.
 `ranged_weapon_subclass` (0..20) restricts the count to creatures carrying a weapon of that item subclass
@@ -1288,7 +1319,9 @@ real early receive hook and session queue; follow it with a wait before teleport
 requires an entry and reads the nearest living matching creature within 60 yards; `nearby_creature_health_pct`
 reads that creature's current health as a percentage of its maximum, so a real spawn such as a raid boss can be
 checked undamaged before its encounter. `nearby_creature_can_attack` returns 1 when the native
-`IsValidAttackTarget` lets the actor attack that creature, otherwise 0. `nearby_creature_mount_display` reads
+`IsValidAttackTarget` lets the actor attack that creature, otherwise 0. `nearby_creature_at_client` returns 1 while
+that creature is in the actor's client-visible set, as the player would see it, otherwise 0; a creature hidden with
+`SetVisible(false)` stays 0 for a non-GM player. `nearby_creature_mount_display` reads
 that creature's mount display id (0 when on foot) and `nearby_creature_display` its current display id.
 `nearby_creature_aura_count` requires `spell` and counts the
 living creatures of the entry within 60 yards that carry that aura.

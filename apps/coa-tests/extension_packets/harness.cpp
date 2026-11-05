@@ -436,6 +436,7 @@ public:
     void ProcessCompanionLoot(Player*, uint32, bool = false) { }
     std::shared_ptr<PlayerCollectionState> GetState(Player*) { return State; }
     void RefreshCosmetics(Player*, PlayerCollectionState&) { }
+    void SendServerPetAppearances(Player*) { }
 
     // ACTUAL_SEND_REALM_INFO
     // ACTUAL_SEND_GAME_MODE_STATE

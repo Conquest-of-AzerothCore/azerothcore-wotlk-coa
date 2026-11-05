@@ -7,7 +7,7 @@
  * bat form at 50% (in the video at 50%, 147s into the fight). Mass Fear, Greater
  * Heal, Call of Hir'eek and Fierce Blow follow the CoA combat log of 2026-08-02.
  *
- *   Troll form, from landing
+ *   Troll form, from the pull, on the ground (tester and live videos, 2026-11-04)
  *     Mind Flay         first 4s,  every 14s   on the tank, interruptible
  *     Mass Fear         first 12s, every 44s   everyone within 20 yards
  *     Shadow Word: Pain first 15s, every 27s   random player
@@ -19,9 +19,10 @@
  *   while it dies; then the Gift of the Blood God and her bat form.
  *
  *   Bat form, when the avatar dies
- *     Bat-tering Charge  first 2s, every 20s   random player, knocks back
- *                                              everyone within 10 yards
- *     Terrifying Screech first 4s, every 20s   everyone in the room
+ *     Bat-tering Charge  first 2s, every 20s   random player out of melee and within 25
+ *                                              yards, knocks back everyone within 10 yards
+ *     Terrifying Screech first 4s, every 20s   everyone in the room, and fears
+ *                                              everyone within 20 yards
  *     Vampirism          passive, her hits drain life
  *     Bat Riders         two, from stock, throwing liquid fire
  *
@@ -32,11 +33,14 @@
  *   - Call of Hir'eek every 60s (the video shows it once);
  *   - Terrifying Screech falls off with distance, full at her, nothing at 100
  *     yards (the tooltip says "reduced as farther", not by how much);
+ *   - its fear (2106137, "all nearby enemies") reaches 20 yards like Mass Fear:
+ *     the live logs fear part of the raid, but give no positions;
  *   - the bat riders move from the troll phase to the bat phase with the swap.
+ *   - Bat-tering Charge has 100 yards in the DBC; players at 30 yards and more are out of
+ *     reach on live (tester, 2026-11-04), so it takes the 25 yards of stock Jeklik's Charge.
  */
 
 #include "CreatureScript.h"
-#include "MoveSplineInit.h"
 #include "ScriptedCreature.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
@@ -57,7 +61,6 @@ namespace
     enum Spells
     {
         SPELL_GREEN_CHANNELING    = 13540,
-        SPELL_BAT_FORM            = 23966,
 
         INFO_MIND_FLAY            = 2106101,
         SPELL_MIND_FLAY           = 2106105,
@@ -79,6 +82,7 @@ namespace
         SPELL_SCREECH             = 2106131,
         INFO_SCREECH              = 2106132,
         SPELL_SCREECH_HIT         = 2106136,
+        SPELL_SCREECH_FEAR        = 2106137,
         SPELL_VAMPIRISM           = 2106138,
     };
 
@@ -109,9 +113,10 @@ namespace
         PHASE_BAT   = 2
     };
 
-    constexpr uint32 PATH_JEKLIK_INTRO = 145170;
     constexpr float MASS_FEAR_RANGE    = 20.0f;
     constexpr float SCREECH_RANGE      = 100.0f;
+    constexpr float SCREECH_FEAR_RANGE = 20.0f;
+    constexpr float BATTERING_CHARGE_MAX_RANGE = 25.0f;
 
     Position const SpawnBat[6] =
     {
@@ -123,7 +128,7 @@ namespace
         { -12293.6220f, -1380.2640f, 144.8304f, 5.483f }
     };
     Position const SpawnBatRider = { -12301.689f, -1371.2921f, 145.09244f, 0.0f };
-    Position const JeklikCaveHomePosition = { -12291.9f, -1380.08f, 144.902f, 2.28638f };
+    Position const JeklikGroundHomePosition = { -12273.9f, -1407.77f, 132.223f, 2.28638f };
 
     struct boss_jeklik_coa : public BossAI
     {
@@ -132,10 +137,10 @@ namespace
         void Reset() override
         {
             BossAI::Reset();
-            me->SetHomePosition(JeklikCaveHomePosition);
+            me->SetHomePosition(JeklikGroundHomePosition);
             me->SetDisableGravity(false);
-            me->SetReactState(REACT_PASSIVE);
-            me->SetCombatMovement(false);
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->SetCombatMovement(true);
             me->RemoveAurasDueToSpell(SPELL_ASPECT_OF_HIREEK);
             me->RemoveAurasDueToSpell(SPELL_VAMPIRISM);
             me->RemoveAurasDueToSpell(SPELL_GIFT_OF_THE_BLOOD_GOD);
@@ -145,27 +150,17 @@ namespace
             DoCastSelf(SPELL_GREEN_CHANNELING, true);
         }
 
-        // From stock: she flies down from her cave in bat form.
         void JustEngagedWith(Unit* who) override
         {
             BossAI::JustEngagedWith(who);
             Talk(SAY_AGGRO);
             DoZoneInCombat();
             me->RemoveAurasDueToSpell(SPELL_GREEN_CHANNELING);
-            me->SetDisableGravity(true);
-            DoCastSelf(SPELL_BAT_FORM, true);
-            me->GetMotionMaster()->MoveWaypoint(PATH_JEKLIK_INTRO, false);
+            StartTrollPhase();
         }
 
-        void PathEndReached(uint32 pathId) override
+        void StartTrollPhase()
         {
-            BossAI::PathEndReached(pathId);
-            me->RemoveAurasDueToSpell(SPELL_BAT_FORM);
-            me->SetDisableGravity(false);
-            me->SetCombatMovement(true);
-            me->SetReactState(REACT_AGGRESSIVE);
-            _avatar.Restore(me);
-
             events.SetPhase(PHASE_TROLL);
             events.ScheduleEvent(EVENT_MIND_FLAY, 4s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_MASS_FEAR, 12s, 0, PHASE_TROLL);
@@ -243,6 +238,8 @@ namespace
                     int32 const full = Info(me, INFO_SCREECH);
                     for (Player* p : PlayersWithin(me, SCREECH_RANGE))
                         Hit(me, p, SPELL_SCREECH_HIT, int32(full * (1.0f - me->GetDistance(p) / SCREECH_RANGE)), 1);
+                    for (Player* p : PlayersWithin(me, SCREECH_FEAR_RANGE))
+                        me->CastSpell(p, SPELL_SCREECH_FEAR, true);
                     break;
                 }
                 default:
@@ -325,7 +322,10 @@ namespace
                         events.ScheduleEvent(EVENT_GREATER_HEAL, 46s, 0, PHASE_TROLL);
                         break;
                     case EVENT_BATTERING_CHARGE:
-                        if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, [this](Unit* u) { return u->IsPlayer() && !me->IsWithinMeleeRange(u); }))
+                        if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, [this](Unit* u)
+                            {
+                                return u->IsPlayer() && !me->IsWithinMeleeRange(u) && me->IsWithinDist(u, BATTERING_CHARGE_MAX_RANGE);
+                            }))
                             DoCast(target, SPELL_BATTERING_CHARGE);
                         events.ScheduleEvent(EVENT_BATTERING_CHARGE, 20s, 0, PHASE_BAT);
                         break;
