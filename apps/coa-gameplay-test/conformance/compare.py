@@ -6,15 +6,20 @@ import json
 import math
 from pathlib import Path
 import re
+from statistics import fmean
 from typing import Callable, Mapping, Protocol
 
 from hits import UNMODELLED, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model
 from procs import AMBIGUOUS_TOOLTIP, CAST, PROC_CHECK, chance_of, wilson_interval
 from profile import DBC_DIR, caster_stats_from, known_aura_label, probe_aura_label
+from stack import (ADDS, MEASURED, MELEE_SOURCE, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE, TALENT_DELTA,
+                   levers, mean_interval, ratio_interval)
 from tooltip import CasterStats, Readout, Records, Tooltip, Unreadable
 from values import UNMEASURABLE, UNREADABLE, Expectation, dataset
 
-STATUSES = ('ok', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials', 'unmeasured')
+STATUSES = ('ok', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials', 'unmeasured',
+            MEASURED)
+NOT_ALERTS = frozenset({'ok', MEASURED})
 CAST_DEPENDENT_CHECKS = frozenset({'cooldown_ms', 'aura_amount', 'aura_duration_ms'})
 NO_CAST_FAILURE = 0
 CAST_RESULTS_HEADER = Path(__file__).resolve().parents[3] / 'src/server/shared/SharedDefines.h'
@@ -36,6 +41,7 @@ ALERT_COLUMNS = ('scenario', 'spell_id', 'rank_id', 'label', 'check', 'status', 
                  'deviation', 'explanation')
 ALERTS_FILE = 'alerts.tsv'
 REPORT_FILE = 'report.md'
+LEVERS_FILE = 'levers.md'
 
 HitModelSource = Callable[[dict, Expectation, Mapping[str, float]], HitModel]
 
@@ -57,6 +63,7 @@ class Verdict:
     spell_id: int = 0
     rank_id: int = 0
     check: str = ''
+    detail: dict | None = field(default=None, hash=False)
 
 
 @dataclass(frozen=True)
@@ -506,6 +513,191 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
                                f'{model["events_per_proc"]} per proc')
 
 
+DETAIL_KEYS = ('config', 'baseline', 'index', 'passes', 'source', 'talents')
+
+
+def stack_detail(model: dict | None, values: list[float] | None = None) -> dict:
+    detail = {key: (model or {})[key] for key in DETAIL_KEYS if key in (model or {})}
+    if values is not None:
+        detail['per_pass'] = values
+    return detail
+
+
+def failures_note(runs: list[Run], spells: set[int] | None = None) -> str:
+    by_spell: dict[int, list[int]] = {}
+    for run in runs:
+        for spell, reasons in run.cast_failures.items():
+            if spells is None or spell in spells:
+                by_spell.setdefault(spell, []).extend(reason for reason in reasons if reason != NO_CAST_FAILURE)
+    parts = [f'{spell}: {describe_failures(reasons)}' for spell, reasons in sorted(by_spell.items()) if reasons]
+    return f'; failed casts {"; ".join(parts)}' if parts else ''
+
+
+def listed(values: list[float]) -> str:
+    return ', '.join(f'{value:.6g}' for value in values)
+
+
+def unusable_run(run: Run) -> str:
+    return f'{run.key} ({run.status}: {run.message})'
+
+
+def measured_stack_verdict(base: Verdict, model: dict, values: list[float], unusable: list[str], why: str) -> Verdict:
+    passes = model['passes']
+    detail = stack_detail(model, values)
+    notes = f'{len(values)} of {passes} passes' + (f'; not usable: {", ".join(unusable)}' if unusable else '')
+    if not values:
+        return replace(base, detail=detail, explanation=f'no usable pass ({notes}); {why}')
+    if len(values) < passes:
+        return replace(base, status='insufficient_trials', measured=fmean(values), detail=detail,
+                       explanation=f'{notes}, fewer than the {passes} the interval needs: {listed(values)}; {why}')
+    mean, low, high = mean_interval(values)
+    return replace(base, status=MEASURED, measured=mean, low=low, high=high, detail=detail,
+                   explanation=f'{notes}: {listed(values)}; 99% Student t interval of the mean of the passes; {why}')
+
+
+def judge_stack_dps(base: Verdict, parts: list[ProcPart]) -> Verdict:
+    expectation = parts[0][2]
+    model = expectation.model
+    labels, seconds = model['measurements'], model['rotation_ms'] / 1000
+    values, unusable = [], []
+    for _, run, _ in parts:
+        start, end = run.values.get(labels['health_start']), run.values.get(labels['health_end'])
+        if start is None or end is None:
+            unusable.append(unusable_run(run))
+        else:
+            values.append((start - end) / seconds)
+    return measured_stack_verdict(base, model, values, unusable,
+                                  expectation.rule + failures_note([run for _, run, _ in parts]))
+
+
+def judge_stack_source(base: Verdict, parts: list[ProcPart]) -> Verdict:
+    expectation = parts[0][2]
+    model = expectation.model
+    labels, seconds, source = model['measurements'], model['rotation_ms'] / 1000, model['source']
+    values, counts, unusable = [], [], []
+    for _, run, _ in parts:
+        total, count = run.values.get(labels['total']), run.values.get(labels['count'])
+        if total is None or count is None:
+            unusable.append(unusable_run(run))
+        else:
+            values.append(total / seconds)
+            counts.append(count)
+    failures = failures_note([run for _, run, _ in parts], {source}) if source != MELEE_SOURCE else ''
+    if values and not any(counts) and failures:
+        return replace(base, status='unmeasured', measured=0.0, detail=stack_detail(model, values),
+                       explanation=f'no hit of {source} in {len(values)} passes{failures}')
+    return measured_stack_verdict(base, model, values, unusable,
+                                  f'{expectation.rule}; hits per pass: {listed(counts)}{failures}')
+
+
+def per_hit_means(runs: list[Run], labels: dict) -> tuple[list[float], list[str], list[str]]:
+    means, empty, unusable = [], [], []
+    for run in runs:
+        total, count = run.values.get(labels['total']), run.values.get(labels['count'])
+        if total is None or count is None:
+            unusable.append(unusable_run(run))
+        elif count <= 0:
+            empty.append(run.key)
+        else:
+            means.append(total / count)
+    return means, empty, unusable
+
+
+def composition_readings(model: dict) -> list[tuple[str, float, str]]:
+    bonus = model['bonus_pct']
+    readings = [(MULTIPLIES, bonus, 'the bonus scales the per-hit damage of the previous configuration')]
+    earlier = model.get('earlier_bonuses') or []
+    if earlier:
+        stacked = sum(item['bonus_pct'] for item in earlier)
+        names = ', '.join(f'{item["token"]} {item["bonus_pct"]:g}% of {item["talent"]}' for item in earlier)
+        readings.append((ADDS, 100 * bonus / (100 + stacked),
+                         f'the bonus adds to the earlier bonuses {names}: 100 x {bonus:g} / (100 + {stacked:g})'))
+    return readings
+
+
+def judge_talent_delta(manifest: dict, parts: list[ProcPart], config_runs: dict[str, dict[str, Run]],
+                       tooltips: TooltipSource) -> Verdict:
+    entry, _, expectation = parts[0]
+    model = expectation.model
+    base = Verdict(expectation.label, 'alert', None, None, None, None, '', entry['key'], expectation.spell_id,
+                   expectation.rank_id, expectation.check, stack_detail(model))
+    source, passes = model['source'], model['passes']
+    current_runs = list(config_runs.get(model['config'], {}).values())
+    baseline_runs = list(config_runs.get(model['baseline'], {}).values())
+    current, current_empty, current_unusable = per_hit_means(current_runs, model['measurements'])
+    baseline, baseline_empty, baseline_unusable = per_hit_means(baseline_runs, model['measurements'])
+    failures = failures_note(current_runs + baseline_runs, {source})
+    notes = []
+    for name, means, empty, unusable in ((model['config'], current, current_empty, current_unusable),
+                                         (model['baseline'], baseline, baseline_empty, baseline_unusable)):
+        note = f'{name}: {len(means)} of {passes} passes'
+        if empty:
+            note += f', no hit of {source} in {", ".join(empty)}'
+        if unusable:
+            note += f', not usable: {", ".join(unusable)}'
+        notes.append(note)
+    notes_text = '; '.join(notes)
+    if (not current and current_empty) or (not baseline and baseline_empty):
+        return replace(base, status='unmeasured',
+                       explanation=f'no non-critical, unblocked hit of {source} ({notes_text}){failures}')
+    if not current or not baseline:
+        return replace(base, explanation=f'no per-hit measurement of {source} ({notes_text})')
+    measured = (fmean(current) / fmean(baseline) - 1) * 100
+    if len(current) < passes or len(baseline) < passes:
+        return replace(base, status='insufficient_trials', measured=measured,
+                       explanation=f'{notes_text}, fewer than the {passes} passes the interval needs{failures}')
+    try:
+        caster = caster_stats_from(current_runs[0].values, manifest['level'])
+    except KeyError as error:
+        return replace(base, measured=measured, explanation=f'base measurement {error} is missing from '
+                                                            f'{current_runs[0].key}')
+    shown = next((value.value for value in tooltips.read(expectation.rank_id, caster).values
+                  if value.text == model['token']), None)
+    if shown is None:
+        return replace(base, measured=measured, explanation=f'the tooltip of {expectation.rank_id} no longer shows '
+                                                            f'{model["token"]}')
+    if abs(shown - model['bonus_pct']) > FLOAT_EPSILON:
+        return replace(base, measured=measured, expected=shown,
+                       explanation=f'{model["token"]} shows {shown:g}%, generated as {model["bonus_pct"]:g}%')
+    delta, low, high = ratio_interval(current, baseline)
+    judged = [(name, expected, 'ok' if low - FLOAT_EPSILON <= expected <= high + FLOAT_EPSILON else 'alert', why)
+              for name, expected, why in composition_readings(model)]
+    statuses = {status for _, _, status, _ in judged}
+    status = judged[0][2] if len(statuses) == 1 else 'ambiguous_tooltip'
+    lead = 'the composition readings disagree; ' if len(statuses) > 1 else ''
+    readings = '; '.join(f'{name} ({why}): expected {expected:.4g}%: {status}'
+                         for name, expected, status, why in judged)
+    return replace(base, status=status, measured=delta, expected=judged[0][1], low=low, high=high,
+                   explanation=f'{lead}{readings}; per-hit means of {source} in {len(current)} and {len(baseline)} '
+                               f'passes: {listed(current)} against {listed(baseline)}; 99% Welch interval of the '
+                               f'ratio of the means; known modifiers are independent factors of every hit in both '
+                               f'configurations; {expectation.rule}{failures}')
+
+
+def judge_stack(manifest: dict, stack_parts: dict[str, list[ProcPart]], tooltips: TooltipSource,
+                hit_model: HitModelSource) -> list[Verdict]:
+    config_runs: dict[str, dict[str, Run]] = {}
+    for parts in stack_parts.values():
+        for entry, run, expectation in parts:
+            if expectation.check == STACK_DPS:
+                config_runs.setdefault(expectation.model['config'], {})[entry['key']] = run
+    verdicts = []
+    for parts in stack_parts.values():
+        entry, run, expectation = parts[0]
+        base = Verdict(expectation.label, 'alert', None, None, None, None, '', entry['key'], expectation.spell_id,
+                       expectation.rank_id, expectation.check)
+        if expectation.rule.startswith((UNMODELLED, UNREADABLE, AMBIGUOUS_TOOLTIP)):
+            verdict = judge(manifest, entry, run, expectation, None, tooltips, hit_model)
+            verdicts.append(replace(verdict, detail=stack_detail(expectation.model)))
+        elif expectation.check == STACK_DPS:
+            verdicts.append(judge_stack_dps(base, parts))
+        elif expectation.check == STACK_SOURCE:
+            verdicts.append(judge_stack_source(base, parts))
+        else:
+            verdicts.append(judge_talent_delta(manifest, parts, config_runs, tooltips))
+    return verdicts
+
+
 def judge(manifest: dict, entry: dict, run: Run | None, expectation: Expectation, tokens: Tokens | None,
           tooltips: TooltipSource, hit_model: HitModelSource) -> Verdict:
     base = Verdict(expectation.label, 'alert', None, None, None, None, '', entry['key'], expectation.spell_id,
@@ -557,6 +749,7 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
     hit_model = hit_model or measured_hit_model
     verdicts = []
     proc_parts: dict[str, list[ProcPart]] = {}
+    stack_parts: dict[str, list[ProcPart]] = {}
     for entry in manifest['scenarios']:
         run = runs.get(entry['key'])
         if entry.get('file') and run is None:
@@ -566,9 +759,12 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
             expectation = Expectation(**data)
             if expectation.check == PROC_CHECK and run is not None:
                 proc_parts.setdefault(expectation.label, []).append((entry, run, expectation))
+            elif expectation.check in STACK_CHECKS and run is not None:
+                stack_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             else:
                 verdicts.append(judge(manifest, entry, run, expectation, tokens, tooltips, hit_model))
     verdicts += [judge_proc(manifest, parts, tooltips) for parts in proc_parts.values()]
+    verdicts += judge_stack(manifest, stack_parts, tooltips, hit_model)
     return Comparison(manifest, runs, missing, verdicts)
 
 
@@ -589,7 +785,7 @@ def alert_rows(verdicts: list[Verdict]) -> list[str]:
     rows = ['\t'.join(ALERT_COLUMNS)]
     for verdict in sorted(verdicts, key=lambda verdict: (verdict.spell_id, verdict.rank_id, verdict.label,
                                                          verdict.scenario)):
-        if verdict.status == 'ok':
+        if verdict.status in NOT_ALERTS:
             continue
         deviation = (verdict.measured - verdict.expected
                      if verdict.measured is not None and verdict.expected is not None else None)
@@ -659,3 +855,93 @@ def write_outputs(manifest_path: Path, results_dir: Path, verdicts: list[Verdict
     report.write_text('\n'.join(report_lines(manifest, Path(manifest_path), Path(results_dir), runs, missing,
                                              verdicts)), encoding='utf-8')
     return alerts, report
+
+
+def amount(value: float | None, digits: int = 1) -> str:
+    return '' if value is None else f'{value:.{digits}f}'
+
+
+def stack_runs(manifest: dict, runs: dict[str, Run]) -> dict[str, Run]:
+    keys = {entry['key'] for entry in manifest['scenarios'] if entry['kind'] == 'stack'}
+    return {key: run for key, run in runs.items() if key in keys}
+
+
+def lever_lines(manifest: dict, manifest_path: Path, results_dir: Path, runs: dict[str, Run],
+                verdicts: list[Verdict]) -> list[str]:
+    class_file = manifest['class_file']
+    rotation = class_file.get('rotation', {})
+    sources = rotation.get('sources', []) + [MELEE_SOURCE]
+    found = levers(verdicts)
+    by_config = {verdict.detail['config']: verdict for verdict in verdicts
+                 if verdict.check == STACK_DPS and verdict.detail}
+    deltas = sorted((verdict for verdict in verdicts if verdict.check == TALENT_DELTA and verdict.detail),
+                    key=lambda verdict: (verdict.detail['index'], verdict.spell_id))
+    cycle = ', '.join(f'{step["action"]} {step.get("spell", step.get("ms", ""))}' for step in rotation.get('cycle', []))
+    seconds = rotation['cycles'] * sum(step['ms'] for step in rotation['cycle'] if step['action'] == 'wait') / 1000
+    lines = [f'# Lever map: {manifest["class_name"]} (class {manifest["class_id"]})', '',
+             f'- Manifest: `{manifest_path}`', f'- Results: `{results_dir}`',
+             f'- Rotation ({rotation.get("source", "class file")}): {rotation["cycles"]} cycles of [{cycle}], '
+             f'auto attack {"on" if rotation.get("auto_attack") else "off"}, drain {rotation["drain_ms"]} ms; '
+             f'damage per second of rotation ({seconds:g} s); the configurations add talents cumulatively.',
+             '- Interval: 99% Student t interval of the mean of the passes; a talent delta is the ratio of the mean '
+             'non-critical, unblocked hits of its source against the previous configuration, with a Welch interval.',
+             '', '## Configurations', '',
+             '| config | talents added | passes | DPS | 99% interval | change | change % | tooltip bonus % | status |',
+             '|---|---|---|---|---|---|---|---|---|']
+    previous = None
+    for lever in found:
+        verdict = by_config[lever.config]
+        change = (lever.dps_mean - previous.dps_mean
+                  if previous and previous.dps_mean is not None and lever.dps_mean is not None else None)
+        talents = ', '.join(str(talent) for talent in verdict.detail.get('talents', [])) or 'none'
+        interval = f'{amount(lever.dps_low)} to {amount(lever.dps_high)}' if lever.dps_low is not None else ''
+        lines.append(f'| {lever.config} | {talents} | {len(verdict.detail.get("per_pass", []))} | '
+                     f'{amount(lever.dps_mean)} | {interval} | {amount(change)} | {amount(lever.delta_pct, 2)} | '
+                     f'{amount(lever.tooltip_delta_pct, 2)} | {verdict.status} |')
+        previous = lever
+    names = ['melee' if source == MELEE_SOURCE else str(source) for source in sources]
+    lines += ['', '## Damage per second by source', '',
+              '| config | ' + ' | '.join(names) + ' | unattributed |', '|---|' + '---|' * (len(names) + 1)]
+    for lever in found:
+        cells = [amount(lever.sources.get(source)) for source in sources]
+        rest = (lever.dps_mean - sum(lever.sources.values())) if lever.dps_mean is not None else None
+        lines.append(f'| {lever.config} | ' + ' | '.join(cells) + f' | {amount(rest)} |')
+    lines += ['', '## Change by source against the previous configuration', '',
+              '| config | ' + ' | '.join(names) + ' |', '|---|' + '---|' * len(names)]
+    for before, after in zip(found, found[1:]):
+        cells = [amount(after.sources[source] - before.sources[source])
+                 if source in after.sources and source in before.sources else '' for source in sources]
+        lines.append(f'| {after.config} | ' + ' | '.join(cells) + ' |')
+    lines += ['', '## Talent deltas', '', 'Measured change of the per-hit damage of the source, in percent.', '',
+              '| config | talent | source | measured % | 99% interval | tooltip % | status | explanation |',
+              '|---|---|---|---|---|---|---|---|']
+    for verdict in deltas:
+        interval = f'{amount(verdict.low, 2)} to {amount(verdict.high, 2)}' if verdict.low is not None else ''
+        lines.append(f'| {verdict.detail["config"]} | {verdict.spell_id} | {verdict.detail.get("source", "")} | '
+                     f'{amount(verdict.measured, 2)} | {interval} | {amount(verdict.expected, 2)} | {verdict.status} | '
+                     f'{cell(verdict.explanation)} |')
+    measured_runs = stack_runs(manifest, runs)
+    lines += ['', '## Known modifiers', '', 'Measured on the character in the stack runs; values from Spell.dbc.', '',
+              '| aura | effect | aura type | value | measured present |', '|---|---|---|---|---|']
+    for aura in class_file.get('known_auras', []):
+        rows = [row for row in manifest.get('known_modifiers', []) if row['spell_id'] == aura]
+        present = presence(measured_runs, known_aura_label(aura))
+        lines += [f'| {aura} | {row["effect_index"]} | {row["aura"]} | {row["percent"]:+d}% | {present} |'
+                  for row in rows] or [f'| {aura} | | | | {present} |']
+    for aura in class_file.get('probe_auras', []):
+        lines.append(f'| {aura} (probe) | | | | {presence(measured_runs, probe_aura_label(aura))} |')
+    lines += ['', '## Passes', '']
+    lines += [f'- {verdict.label}: {verdict.status}: {verdict.explanation}' for verdict in verdicts
+              if verdict.check in (STACK_DPS, STACK_SOURCE)]
+    return lines + ['']
+
+
+def write_levers(manifest_path: Path, results_dir: Path, verdicts: list[Verdict], out_dir: Path) -> Path:
+    manifest = json.loads(Path(manifest_path).read_text(encoding='utf-8'))
+    runs, _ = load_runs(manifest, Path(results_dir))
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    path = out_dir / LEVERS_FILE
+    path.write_text('\n'.join(lever_lines(manifest, Path(manifest_path), Path(results_dir), runs, verdicts)),
+                    encoding='utf-8')
+    return path

@@ -22,6 +22,10 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
   `wilson_interval(procs, trials)` the 99% Wilson interval of a rate.
 - `compare.py`: `compare(manifest, results_dir)` judges a run against the manifest and returns `Verdict(label, status,
   measured, expected, low, high, explanation)`; `write_outputs` writes `alerts.tsv` and `report.md`.
+- `stack.py`: `stack_scenarios(class_file, passes=5)` returns the passes of every cumulative talent configuration of
+  the class file with their `Expectation` lists; `levers(verdicts)` turns the stack verdicts into one `Lever(config,
+  dps_mean, dps_low, dps_high, delta_pct, sources, tooltip_delta_pct)` per configuration; `mean_interval`,
+  `ratio_interval` and `student_t_quantile` give the 99% intervals of the passes.
 - `conformance.py`: the command line, `generate` and `compare`.
 - `classes/<name>.json`: one class file per class (`classes/templar.json`).
 
@@ -77,9 +81,9 @@ skill values, so these values stay unreadable.
 
 `classes/<name>.json` holds `class_id`, `name`, `race`, `level`, `weapon` (`item`, equipment `slot`, 15 is the main
 hand), `ratings` (fixture hit and expertise ratings, so that an aura or hit is never lost to a miss; they do not change
-a tooltip value), `reference_stats`, `known_auras`, `probe_auras`, `procs` (see [Proc rates](#proc-rates)) and the
-sections `talent_modifiers`, `rotation`, `stack` that later tasks fill. The Templar reference is a human with the
-Walking Stick (item 2495).
+a tooltip value), `reference_stats`, `known_auras`, `probe_auras`, `procs` (see [Proc rates](#proc-rates)) and
+`talent_modifiers`, `rotation`, `stack` (see [Talent stack](#talent-stack-lever-map)). The Templar reference is a
+human with the Walking Stick (item 2495).
 
 `weapon` also freezes the `item_template` row of the weapon: `min_damage` (`dmg_min1`), `max_damage` (`dmg_max1`),
 `speed_ms` (`delay`), `inventory_type` and `normalized_speed`, the speed `Unit::GetAPMultiplier` uses for normalized
@@ -279,19 +283,116 @@ Scourgebane parts made 196 or 197 swings, Light's Echo parts 287 and 319 player 
 strike was a cast of 807268; 804929 was never cast. A Scourgebane part takes 500.7 s of game time in 3.8 to 4.7 s of
 real time, a Light's Echo part 443 to 491 s in 3.2 to 4.3 s.
 
+## Talent stack (lever map)
+
+The class file's `rotation` is a fixed sequence, `stack` the configurations that add talents to it one group at a time,
+and `talent_modifiers` the talents whose tooltip states a change of one damage source:
+
+| Field | Content |
+|---|---|
+| `rotation.learn` | the spells every configuration learns (Templar: Argent Blade 807268, Scourgebane 92111) |
+| `rotation.set_power`, `auto_attack` | the power set before the rotation, and auto attacks from its start to its end |
+| `rotation.cycle`, `cycles` | the steps of one cycle (a cast at `dummy`, a wait) and their repetitions |
+| `rotation.drain_ms` | the wait after the last cycle, before the measurements |
+| `rotation.sources`, `cast_sources` | the spells whose damage is measured, and those whose casts are counted |
+| `stack[].name`, `talents` | a configuration and the talents it adds to every earlier one |
+| `talent_modifiers` | `talent`, `name`, `tooltip`, `token`, `source` and its `source_text`; see below |
+
+The Templar rotation, configurations and talents are those of the measurements of 2026-11-05
+(`.agents/plans/class-spell-audit/stacking-scenarios/c0_base.json` to `c7_scarlet.json`): 120 cycles of a cast of Argent
+Blade and a 1000 ms wait under auto attack, 100 Energy at the start, a 3000 ms drain, and the configurations c0 (no
+talent), c1 Paladin Training 520009, c2 Divine Strikes 705255, c3 Light's Echo 520017 and 520883, c4 Warrior of Dawn
+560648 and Scourge-Defense Training 520608, c5 Retribution 707391, c6 Legacy of the Silver Hand 806522 and Pure Focus
+705253 and 707852, c7 Scarlet Training 301065, Scarlet Secrets 520812 and Martial Training 806525. The scenarios use
+the package's base steps (weapon equipped and stats measured before the learns), so the steps come in a different
+order from the files of 2026-11-05.
+
+`stack_scenarios` writes `passes` scenarios per configuration, each named `... <config> pass <n> of <passes>`, that
+learn the rotation spells and every talent of the configuration and the earlier ones, measure the health of `dummy`,
+run the rotation, measure its health again after the drain, then per source the damage and hit count on `dummy` of
+every hit and of the non-critical, unblocked hits (`spell_damage_*`, `melee_damage_*` for the auto attacks), and the
+casts of the cast sources. Fewer than 2 passes give no interval and are refused. Each pass carries:
+
+- `stack <config> dps` (`stack_dps`): the health the target lost per second of rotation (120 s), so that a source
+  missing from `sources` still counts; the difference with the sum of the sources is shown as unattributed.
+- `stack <config> source <spell>` (`stack_source`, 0 for the auto attacks): the damage of the source per second.
+- `stack <config> talent_delta <talent> <source>` (`talent_delta`) for each `talent_modifiers` entry of a talent
+  the configuration adds.
+
+The comparison groups the passes of a configuration. `stack_dps` and `stack_source` are `measured`: the mean of the
+passes and its 99% Student t interval (n − 1 degrees of freedom; with 5 passes the quantile is 4.604, not 2.576).
+Missing passes are `insufficient_trials`; a source without a hit in any pass after failed casts of it is `unmeasured`
+(R11). The rotation presses Argent Blade every second against its 5 s cooldown: in c0 and c1, 96 of its 120 casts per
+pass fail with `SPELL_FAILED_NOT_READY` (67). The explanation counts the failed casts per spell and reason.
+
+A `talent_delta` is the change of the mean non-critical, unblocked hit of the source between the configuration and
+the previous one, in percent: the ratio of the means of the per-pass hit means, with a 99% interval from the Welch
+degrees of freedom and the variance of each mean (delta method). Failed casts lower the hits, not the hit mean. The
+expectation comes from the entry:
+
+- `status` (`unmodelled`, `ambiguous_tooltip`) and `reason`: a talent whose change of the source has no fixed amount
+  (Divine Strikes: stacks over time; Scourge-Defense Training: the casts after a Warrior of Dawn proc; Martial Training:
+  Scarlet Hammer appears only with it) or whose text is unclear (Legacy of the Silver Hand: critical damage of the
+  whole hit or of its bonus). Such a delta is never `ok`.
+- otherwise `claim` (the words of the tooltip) and `dbc` (the effect fields, checked against the client DBC by the
+  tests) cite the effect of the talent whose `EffectSpellClassMask` (three words per effect) meets the
+  `SpellFamilyFlags` of the source, in the same `SpellFamilyName`; the `token`, read with `read_tooltip`, must be that
+  effect's value. The rule is `ratio` only for aura 108 (`SPELL_AURA_ADD_PCT_MODIFIER`) with misc 0
+  (`SPELLMOD_DAMAGE`): the tooltip "Increases the damage of <source> by $s1%" and a percent modifier of the spell's
+  damage give an expected ratio of hits of 1 + $s1/100. Another aura (Martial Training: aura 107, a flat modifier)
+  or a token of another effect is `unmodelled`.
+
+Interactions are not absorbed. A change of the same source by another talent the configuration adds makes the delta
+`unmodelled`; a change by an earlier talent whose amount is not a stated percent makes it `ambiguous_tooltip`, since
+no text says how the two combine. Earlier talents with a stated percent on the same source give two readings, judged
+like the proc readings: `multiplies` (the bonus scales the damage of the previous configuration) and `adds` (the bonus
+adds to the earlier percents, 100 × b / (100 + Σ earlier)); disagreeing readings are `ambiguous_tooltip` with both.
+The known auras (887007) act on both configurations as independent factors of every hit, as in the hit models, and
+cancel in the ratio. The integer steps of a hit (truncation after a modifier, armor) are not modelled here: each moves
+a hit by under one point, about 0.1% of the 1014 measured Argent Blade hit. The bonus is read again with the measured
+stats: a changed value is an alert. Fewer passes than generated in either configuration
+are `insufficient_trials`; no hit of the source in either configuration is `unmeasured`.
+
+`levers(verdicts)` gives one `Lever` per configuration in stack order: the DPS mean and interval, its change in percent
+from the previous configuration, the DPS of each source and the tooltip bonus of the configuration's single judged
+talent delta (`None` otherwise). `levers.md` holds the configurations, the DPS per source and its change, the talent
+deltas, the known and probe auras with the runs that measured them, and every pass value.
+
+Measured on 2026-11-05 on the worktree server, which does not yet hold PR #11297 (Argent Blade's flat bonus after its
+percent), with 5 passes per configuration (stamp `20261105-204050`, simulated clock, gameplay stage 32.5 s for 40
+passes of 1.3 s each):
+
+| Config | DPS | 99% interval | Change | Argent Blade | Scourgebane 801832 | Retribution 525028 | Scarlet Hammer |
+|---|---|---|---|---|---|---|---|
+| c0 | 298.1 | 289.6 to 306.5 | | 202.8 | 76.2 | 0 | 0 |
+| c1 | 333.2 | 328.8 to 337.6 | +11.8% | 244.0 | 70.2 | 0 | 0 |
+| c2 | 436.0 | 426.3 to 445.8 | +30.9% | 346.2 | 70.8 | 0 | 0 |
+| c3 | 538.8 | 449.6 to 628.0 | +23.6% | 435.4 | 84.4 | 0 | 0 |
+| c4 | 701.2 | 568.6 to 833.8 | +30.1% | 587.2 | 95.0 | 0 | 0 |
+| c5 | 776.0 | 426.8 to 1125.1 | +10.7% | 605.9 | 90.6 | 60.4 | 0 |
+| c6 | 926.7 | 575.8 to 1277.7 | +19.4% | 672.1 | 169.3 | 66.4 | 0 |
+| c7 | 1027.2 | 664.5 to 1389.9 | +10.8% | 669.8 | 230.3 | 79.9 | 28.2 |
+
+The auto attacks dealt 19.0 per second in every configuration and nothing was unattributed. Paladin Training raised
+the Argent Blade hit by 20.27% (99% interval 19.51 to 21.03) against its $s1 of 20: `ok`; a run of c0 and c1 alone
+(stamp `20261105-203950`) gave 20.00% (19.22 to 20.78). From c3 on, the procs spread the passes of a configuration
+(c5: 615 to 1031 per second), and 5 passes leave intervals too wide to separate one configuration from the next.
+
 ## Generate and compare
 
 ```sh
 cd apps/coa-gameplay-test/conformance
-python3 -B conformance.py generate --class 19 --out DIR [--spell ID ...] [--proc AURA ...]
+python3 -B conformance.py generate --class 19 --out DIR [--spell ID ...] [--proc AURA ...] [--stack [--passes N]]
 coa-verify --ram --stages gameplay --scenario DIR/scenarios/*.json
 python3 -B conformance.py compare --manifest DIR/manifest.json --results .cache/verify-all/STAMP [--out OUT]
 ```
 
 `generate` writes one no-combat scenario per rank, the hit scenario of each spell's highest rank, the parts of each
 proc entry and, without `--spell` or `--proc`, the melee scenario, into `DIR/scenarios/`, and `DIR/manifest.json`.
-`--spell` takes a class spell id or a rank id, `--proc` the aura of a proc entry; either one selects only what it
-names. A proc part is named `conformance-<class>-proc-<aura>-part-<n>`. A hit expectation that is entirely
+`--spell` takes a class spell id or a rank id, `--proc` the aura of a proc entry, `--stack` the passes of the talent
+stack (`--passes`, 5 by default); each selects only what it names. A proc part is named
+`conformance-<class>-proc-<aura>-part-<n>`, a stack pass
+`conformance-<class>-stack-<config>-pass-<n>`. A hit expectation that is entirely
 `unmodelled` gets no scenario file. A file holds `json.dumps(scenario, indent=2)` and a newline, the bytes the
 runner writes and hashes as `scenario_sha256` (`batch.py` `write_case`), and is named after its exploratory key
 (`batch.py` `exploratory_key`), for example `conformance-templar-value-807268`. The manifest keeps the class file,
@@ -303,9 +404,9 @@ manifest hash when no folder has the key. The recorded hash is `scenario_sha256`
 (or the hash of its `scenario.json`). A result whose hash differs from the manifest stops the comparison with an
 error and no verdict. A scenario without a result has no verdict and is listed in the report. The harness writes
 every `actual` as a string; it is converted to a number, and a value that is not one is an error. `alerts.tsv`
-(default: the manifest directory) has one row per verdict that is not `ok`; `report.md` counts the verdicts per
-status and per spell, and lists the known modifiers, the probe auras, the scenarios without a result and the runs
-that did not pass.
+(default: the manifest directory) has one row per verdict that is neither `ok` nor `measured`; `report.md` counts the
+verdicts per status and per spell, and lists the known modifiers, the probe auras, the scenarios without a result and
+the runs that did not pass. When the run holds stack verdicts, `compare` also writes `levers.md`.
 
 ### Verdicts
 
@@ -315,9 +416,10 @@ that did not pass.
 | `alert` | a measurement outside its rule, a missing measurement, or tokens that changed since generation |
 | `unreadable` | an expectation whose rule starts with `unreadable: ` |
 | `unmodelled` | an `unmodelled` check, a `unmodelled: ` or `unmeasurable: ` rule, a hit model left unmodelled |
-| `ambiguous_tooltip` | a signed value whose sign differs from the measured value, a proc of unstated trigger |
-| `insufficient_trials` | a hit mean below its `minimum_hits`, a proc rate below `trials_needed` trials (R9) |
-| `unmeasured` | a check after a failed single cast, a hit mean or proc rate with no usable hit or trial (R11) |
+| `ambiguous_tooltip` | a sign opposite to the measured value, a proc of unstated trigger, disagreeing talent readings |
+| `insufficient_trials` | a hit mean below `minimum_hits`, a proc rate below `trials_needed` (R9), a missing pass |
+| `unmeasured` | a check after a failed single cast; a hit mean, proc rate or talent delta without usable hit (R11) |
+| `measured` | a stack DPS or source damage that no tooltip value judges; never an alert |
 
 The tooltip of each rank is read again with the `CasterStats` measured by the run's base steps. If its tokens differ
 from the tokens read at generation, every token check of the rank is an alert; so is a token whose text differs

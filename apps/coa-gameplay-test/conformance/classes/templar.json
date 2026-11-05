@@ -188,7 +188,78 @@
       "spell_proc": {}
     }
   ],
-  "talent_modifiers": [],
-  "rotation": [],
-  "stack": []
+  "talent_modifiers": [
+    {
+      "talent": 520009,
+      "name": "Paladin Training",
+      "tooltip": "Increases the damage and reduces the Energy cost of |cffffffffRighteous Lunge|r and |cFFFFFFFFArgent Blade|r by $s1%.",
+      "token": "$s1",
+      "source": 807268,
+      "source_text": "Argent Blade",
+      "claim": "Increases the damage ... of Argent Blade by $s1%",
+      "dbc": {"effect": 0, "Effect": 6, "EffectApplyAuraName": 108, "EffectMiscValue": 0, "EffectBasePoints": 19,
+              "EffectSpellClassMask": [8, 0, 32], "source_SpellFamilyFlags": [0, 0, 32]}
+    },
+    {
+      "talent": 705255,
+      "name": "Divine Strikes",
+      "tooltip": "Damage dealt by |cffffffffScourgebane|r now increases the damage of |cffffffffArgent Blade|r by $803372s2% for $803372d, stacking $803372u times.",
+      "token": "$803372s2",
+      "source": 807268,
+      "source_text": "Argent Blade",
+      "status": "unmodelled",
+      "reason": "the bonus is $803372s2% per stack of a buff that Scourgebane damage refreshes, and the stacks held by each Argent Blade hit over the rotation are not given by the tooltip"
+    },
+    {
+      "talent": 520608,
+      "name": "Scourge-Defense Training",
+      "tooltip": "|cffffffffWarrior of Dawn|r now also increases the damage and critical strike chance of your next |cffffffffArgent Blade|r by $s1%.",
+      "token": "$s1",
+      "source": 807268,
+      "source_text": "Argent Blade",
+      "status": "unmodelled",
+      "reason": "the bonus applies to the Argent Blade casts that follow a Warrior of Dawn proc, whose share of the casts the tooltip does not give"
+    },
+    {
+      "talent": 806522,
+      "name": "Legacy of the Silver Hand",
+      "tooltip": "Casting |cffffffffArgent Blade|r or |cffffffffScarlet Hammer|r now guarantees your next 2 instances of damage dealt by |cffffffffScourgebane|r to critically strike.\r\n\r\nIncreases the critical damage of |cffffffffScourgebane|r by $s2%.",
+      "token": "$s2",
+      "source": 801832,
+      "source_text": "Scourgebane",
+      "status": "ambiguous_tooltip",
+      "reason": "'Increases the critical damage of Scourgebane by $s2%' does not say whether the percent applies to the whole critical hit or to its critical bonus"
+    },
+    {
+      "talent": 806525,
+      "name": "Martial Training",
+      "tooltip": "|cFF66DDFFLevel 50 Passive|r\r\nYour |cFFFFFFFFChastise|r and |cffffffffScarlet Hammer|r now deals an additional $s1% Weapon Damage.",
+      "token": "$s1",
+      "source": 807035,
+      "source_text": "Scarlet Hammer",
+      "status": "unmodelled",
+      "reason": "the rotation casts Scarlet Hammer only once Scarlet Training is learned in the same configuration, so no earlier configuration measures it without the talent"
+    }
+  ],
+  "rotation": {
+    "source": ".agents/plans/class-spell-audit/stacking-scenarios/c0_base.json to c7_scarlet.json, 2026-11-05",
+    "learn": [807268, 92111],
+    "set_power": {"power": 3, "value": 100},
+    "auto_attack": true,
+    "cycle": [{"action": "cast", "spell": 807268, "target": "dummy"}, {"action": "wait", "label": "tick", "ms": 1000}],
+    "cycles": 120,
+    "drain_ms": 3000,
+    "sources": [807268, 807035, 801832, 525028],
+    "cast_sources": [807268, 807035]
+  },
+  "stack": [
+    {"name": "c0_base", "talents": []},
+    {"name": "c1_paladin_training", "talents": [520009]},
+    {"name": "c2_divine_strikes", "talents": [705255]},
+    {"name": "c3_lights_echo", "talents": [520017, 520883]},
+    {"name": "c4_warrior_of_dawn", "talents": [560648, 520608]},
+    {"name": "c5_retribution", "talents": [707391]},
+    {"name": "c6_legacy_purefocus", "talents": [806522, 705253, 707852]},
+    {"name": "c7_scarlet", "talents": [301065, 520812, 806525]}
+  ]
 }

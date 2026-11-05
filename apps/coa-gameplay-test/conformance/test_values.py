@@ -45,7 +45,7 @@ class ClassFileTest(unittest.TestCase):
         self.assertEqual(templar['known_auras'], [CLASS_TUNING_AURA])
         self.assertEqual(templar['probe_auras'], [SCOURGEBANE])
         for section in ('talent_modifiers', 'rotation', 'stack'):
-            self.assertEqual(templar[section], [])
+            self.assertTrue(templar[section])
 
     def test_every_class_file_names_its_class(self):
         files = sorted(CLASSES_DIR.glob('*.json'))

@@ -74,7 +74,7 @@ SUITES = {
         'commands': [[CONFORMANCE + 'test_mitigation.py'], [CONFORMANCE + 'test_classes.py'],
                      [CONFORMANCE + 'test_tooltip.py'], [CONFORMANCE + 'test_values.py'],
                      [CONFORMANCE + 'test_hits.py'], [CONFORMANCE + 'test_compare.py'],
-                     [CONFORMANCE + 'test_procs.py']],
+                     [CONFORMANCE + 'test_procs.py'], [CONFORMANCE + 'test_stack.py']],
     },
     'world-content': {
         'paths': [CONTENT + '*.py'],

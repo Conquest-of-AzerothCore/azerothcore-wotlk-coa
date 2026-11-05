@@ -7,11 +7,13 @@ import re
 import sys
 
 from classes import ClassSpell, class_spells
-from compare import ALERTS_FILE, REPORT_FILE, STATUSES, ScenarioDrift, evaluate, write_outputs
+from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, ScenarioDrift, evaluate, write_levers,
+                     write_outputs)
 from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, hit_scenario, melee_scenario, records_of,
                   reference_hit_model, reference_melee_model)
 from procs import proc_entries, proc_plan, proc_scenario, proc_status_expectation, proc_unmodelled_expectation
 from profile import DBC_DIR, load_class_file
+from stack import PASSES, STACK_CHECKS, STACK_DPS, STACK_KIND, stack_scenarios
 from tooltip import read_tooltip
 from values import Expectation, dataset, structure_stats, value_scenario
 
@@ -116,6 +118,16 @@ def add_proc(writer: ManifestWriter, entry: dict):
                    expectations, scenario, name=name)
 
 
+def add_stack(writer: ManifestWriter, passes: int):
+    class_file = writer.class_file
+    numbers: dict[str, int] = {}
+    for scenario, expectations in stack_scenarios(class_file, passes):
+        config = next(expectation.model for expectation in expectations if expectation.check == STACK_DPS)['config']
+        numbers[config] = numbers.get(config, 0) + 1
+        writer.add(scenario_key(class_file['name'], STACK_KIND, config, 'pass', numbers[config]), STACK_KIND, None, 0,
+                   expectations, scenario, name=config)
+
+
 def known_modifiers(class_file: dict) -> list[dict]:
     records = records_of(class_file)
     return [{**asdict(modifier),
@@ -136,7 +148,8 @@ def selected_spells(class_file: dict, dbc_dir: Path, spell_ids: list[int] | None
     return chosen
 
 
-def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: list[int] | None = None) -> Path:
+def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: list[int] | None = None,
+             stack: bool = False, passes: int = PASSES) -> Path:
     class_file = load_class_file(class_id)
     dbc_dir = Path(class_file.get('dbc_dir', DBC_DIR))
     out = Path(out)
@@ -145,7 +158,7 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
         raise ValueError(f'{scenario_dir} already holds scenarios; generate into a new directory')
     scenario_dir.mkdir(parents=True, exist_ok=True)
     writer = ManifestWriter(class_file, out)
-    everything = spells is None and procs is None
+    everything = spells is None and procs is None and not stack
     chosen_procs = proc_entries(class_file, procs) if everything or procs is not None else []
     if everything or spells is not None:
         for spell in selected_spells(class_file, dbc_dir, spells):
@@ -153,6 +166,8 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
             add_hit(writer, spell)
     for entry in chosen_procs:
         add_proc(writer, entry)
+    if stack:
+        add_stack(writer, passes)
     if everything:
         add_melee(writer)
     manifest = {'schema': 1, 'class_id': class_file['class_id'], 'class_name': class_file['name'],
@@ -164,7 +179,7 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
 
 
 def generate_command(args) -> int:
-    path = generate(args.class_id, args.out, args.spell, args.proc)
+    path = generate(args.class_id, args.out, args.spell, args.proc, args.stack, args.passes)
     manifest = json.loads(path.read_text(encoding='utf-8'))
     written = sum(1 for entry in manifest['scenarios'] if entry['file'])
     print(f'{path}: {written} scenarios in {path.parent / SCENARIO_DIR}, '
@@ -184,6 +199,8 @@ def compare_command(args) -> int:
     print(' '.join(f'{status}={count}' for status, count in counts.items()))
     print(f'{len(comparison.runs)} scenarios with a result, {len(comparison.missing)} without')
     print(f'{alerts}\n{report}')
+    if any(verdict.check in STACK_CHECKS for verdict in comparison.verdicts):
+        print(write_levers(args.manifest, args.results, comparison.verdicts, out))
     return 0
 
 
@@ -197,7 +214,11 @@ def main(argv=None) -> int:
                             help='a class spell id or rank id; repeat to select several spells')
     generating.add_argument('--proc', type=int, action='append',
                             help='the aura of a proc entry of the class file; repeat to select several procs')
-    comparing = commands.add_parser('compare', help=f'judge a verify_all stamp, write {ALERTS_FILE} and {REPORT_FILE}')
+    generating.add_argument('--stack', action='store_true',
+                            help='the passes of every stack configuration of the class file, cumulative talents')
+    generating.add_argument('--passes', type=int, default=PASSES, help=f'passes per stack configuration ({PASSES})')
+    comparing = commands.add_parser('compare', help=f'judge a verify_all stamp, write {ALERTS_FILE}, {REPORT_FILE} '
+                                                    f'and, for stack runs, {LEVERS_FILE}')
     comparing.add_argument('--manifest', type=Path, required=True)
     comparing.add_argument('--results', type=Path, required=True, help='a .cache/verify-all/<STAMP> directory')
     comparing.add_argument('--out', type=Path, help='output directory, the manifest directory by default')
