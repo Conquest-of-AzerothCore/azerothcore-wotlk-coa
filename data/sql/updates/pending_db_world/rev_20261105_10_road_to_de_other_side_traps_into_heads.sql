@@ -1,0 +1,19 @@
+-- Road's statue traps sit 2 yards further back, inside the statue heads.
+UPDATE `creature` SET `position_x` = 417.06, `position_y` = 53.74 WHERE `guid` = 9370601 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 430.38, `position_y` = 47.53 WHERE `guid` = 9370602 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 413.21, `position_y` = 44.79 WHERE `guid` = 9370603 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 426.04, `position_y` = 38.81 WHERE `guid` = 9370604 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 408.69, `position_y` = 35.13 WHERE `guid` = 9370605 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 421.51, `position_y` = 29.15 WHERE `guid` = 9370606 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 368.77, `position_y` = -51.44 WHERE `guid` = 9370607 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 380.85, `position_y` = -57.08 WHERE `guid` = 9370608 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 365.00, `position_y` = -59.19 WHERE `guid` = 9370609 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 377.34, `position_y` = -64.94 WHERE `guid` = 9370610 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 360.88, `position_y` = -67.25 WHERE `guid` = 9370611 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 373.81, `position_y` = -73.29 WHERE `guid` = 9370612 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 319.94, `position_y` = -152.72 WHERE `guid` = 9370613 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 334.19, `position_y` = -159.32 WHERE `guid` = 9370614 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 315.83, `position_y` = -161.86 WHERE `guid` = 9370615 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 330.29, `position_y` = -168.60 WHERE `guid` = 9370616 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 310.87, `position_y` = -171.06 WHERE `guid` = 9370617 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 326.44, `position_y` = -178.32 WHERE `guid` = 9370618 AND `id` = 162975;

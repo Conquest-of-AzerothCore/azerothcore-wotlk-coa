@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "PTR realm NPCs open their category menus",
+  "contract": "Creatures 9990200, 9990220, 9990300, 9990320, 9990340 and 9990400 (rev_20261104_91_ptr_realm_npcs.sql) each answer gossip with one option per vendor list: 18, 18, 9, 11, 7 and 11 options.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 60 }
+  ],
+  "location": { "map": 0, "x": -9484.92, "y": -19.8784, "z": 56.9625, "o": 0 },
+  "creatures": [
+    { "id": "a", "owner": "p", "entry": 9990200, "distance": 2, "faction": 35 },
+    { "id": "b", "owner": "p", "entry": 9990220, "distance": 2, "faction": 35 },
+    { "id": "c", "owner": "p", "entry": 9990300, "distance": 2, "faction": 35 },
+    { "id": "d", "owner": "p", "entry": 9990320, "distance": 2, "faction": 35 },
+    { "id": "e", "owner": "p", "entry": 9990340, "distance": 2, "faction": 35 },
+    { "id": "f", "owner": "p", "entry": 9990400, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "gossip_hello", "actor": "p", "target": "a" },
+    { "action": "assert", "actor": "p", "metric": "gossip_options", "equals": 18, "label": "9990200 has 18 lists" },
+    { "action": "gossip_hello", "actor": "p", "target": "b" },
+    { "action": "assert", "actor": "p", "metric": "gossip_options", "equals": 18, "label": "9990220 has 18 lists" },
+    { "action": "gossip_hello", "actor": "p", "target": "c" },
+    { "action": "assert", "actor": "p", "metric": "gossip_options", "equals": 9, "label": "9990300 has 9 lists" },
+    { "action": "gossip_hello", "actor": "p", "target": "d" },
+    { "action": "assert", "actor": "p", "metric": "gossip_options", "equals": 11, "label": "9990320 has 11 lists" },
+    { "action": "gossip_hello", "actor": "p", "target": "e" },
+    { "action": "assert", "actor": "p", "metric": "gossip_options", "equals": 7, "label": "9990340 has 7 lists" },
+    { "action": "gossip_hello", "actor": "p", "target": "f" },
+    { "action": "assert", "actor": "p", "metric": "gossip_options", "equals": 11, "label": "9990400 has 11 lists" }
+  ]
+}
