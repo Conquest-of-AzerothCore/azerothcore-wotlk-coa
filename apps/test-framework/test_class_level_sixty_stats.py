@@ -16,7 +16,7 @@ import test_enchantment_migrations as isolated_mysql
 ROOT = Path(__file__).resolve().parents[2]
 PENDING = ROOT / "data/sql/updates/pending_db_world"
 PROGRESSION = PENDING / "rev_20260912_00_custom_class_stat_progression.sql"
-MIGRATION = PENDING / "rev_20261103_91_coa_class_level_sixty_stats.sql"
+MIGRATION = PENDING / "rev_20261105_95_coa_class_level_sixty_stats.sql"
 TABLES = ("player_class_stats", "player_race_stats", "ascension_custom_class")
 RACES = (1, 2, 3, 4, 5, 6, 7, 8, 10, 11)
 ZERO_MANA_CLASSES = (12, 14, 17, 18, 19, 20, 21, 30)
