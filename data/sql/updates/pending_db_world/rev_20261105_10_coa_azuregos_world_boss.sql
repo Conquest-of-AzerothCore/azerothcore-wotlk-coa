@@ -1,26 +1,18 @@
 -- Azuregos in the boss map Ascension built for him (881, "Azuregos (PvE)"), the way Setis is fought: the
--- shrine where he stood in Azshara takes players in, the portal he leaves where he falls and the shrine at the
+-- shrine where he stands in Azshara takes players in, the portal he leaves where he falls and the shrine at the
 -- entrance take them back, and players who die in his map rise at its start.
 
 -- Ascension fights him in his map as his own entry, 64601 "Azuregos" (kill credit 6109, his spells and model), the
 -- way Setis is 64600; the open-world 6109 stays where he is. Same loot table: one roll of his items here, and
 -- azuregos_instance_death_coa rolls one more for every four players in his map.
-INSERT INTO `creature_template` (`entry`, `name`, `subname`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`,
-  `speed_walk`, `speed_run`, `scale`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`,
-  `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `type`,
-  `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`,
-  `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`,
-  `RacialLeader`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `spell_school_immune_mask`, `flags_extra`,
-  `ScriptName`, `VerifiedBuild`, `KillCredit1`)
-SELECT 64601, `name`, `subname`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`,
-  `scale`, 3, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`,
-  `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `type`, `type_flags`, 6109, `pickpocketloot`,
-  `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, '', `MovementType`, `HoverHeight`, 3200,
-  `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`,
-  `mechanic_immune_mask`, `spell_school_immune_mask`, `flags_extra`, 'boss_azuregos_coa', 12340, 6109
-FROM `creature_template` WHERE `entry` = 6109
-ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `rank` = 3, `lootid` = 6109, `KillCredit1` = 6109,
-  `HealthModifier` = 3200, `ScriptName` = 'boss_azuregos_coa';
+DROP TEMPORARY TABLE IF EXISTS `coa_azuregos_tmp`;
+CREATE TEMPORARY TABLE `coa_azuregos_tmp` SELECT * FROM `creature_template` WHERE `entry` = 6109;
+UPDATE `coa_azuregos_tmp` SET `entry` = 64601, `rank` = 3, `lootid` = 6109, `KillCredit1` = 6109,
+  `HealthModifier` = 3200, `AIName` = '', `ScriptName` = 'boss_azuregos_coa';
+INSERT INTO `creature_template` SELECT * FROM `coa_azuregos_tmp`
+ON DUPLICATE KEY UPDATE `rank` = 3, `lootid` = 6109, `KillCredit1` = 6109, `HealthModifier` = 3200,
+  `ScriptName` = 'boss_azuregos_coa';
+DROP TEMPORARY TABLE `coa_azuregos_tmp`;
 DELETE FROM `creature_template_model` WHERE `CreatureID` = 64601;
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
   `VerifiedBuild`) VALUES
