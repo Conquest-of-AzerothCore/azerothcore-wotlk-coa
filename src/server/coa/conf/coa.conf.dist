@@ -35,6 +35,11 @@ CoA.MapClass10ToWarrior = 1
 CoA.ProbeRelay.Enable = 0
 CoA.ProbeRelay.AccountPrefix = "COALAB"
 
+CoA.LevelBoostNpc.Enable = 0
+CoA.LevelBoostNpc.Level = 60
+CoA.LevelBoostNpc.GoldReward = 5000
+CoA.LevelBoostNpc.RuneOfDescensionReward = 2000000
+
 # Log each consumed extension packet during protocol discovery.
 CoA.LogConsumedPackets = 1
 
