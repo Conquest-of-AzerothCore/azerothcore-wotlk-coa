@@ -78,8 +78,8 @@ measurement (the judgement is made by the comparison, never by the scenario): `a
 level)` rebuilds the `CasterStats` that `read_tooltip` needs from those labelled values.
 
 A naked level-60 Templar knows no class spell and carries one class aura: measured on 2026-11-05 on the worldserver of
-the worktree, `knows_spell` is 0 for all 221 spell ids of the class and `aura` is 1 only for the class tuning aura 887007
-(887043/887044/887045, the spec auras, and the passive Scourgebane 92111 read 0). `known_auras` therefore lists 887007
+the worktree, `knows_spell` is 0 for all 221 spell ids of the class and `aura` is 1 only for the class tuning aura
+887007 (887043/887044/887045, the spec auras, and the passive Scourgebane 92111 read 0). `known_auras` therefore lists 887007
 only; Scourgebane is in `probe_auras`, which is measured and reported but never explains a deviation.
 
 ## No-combat scenario of a rank
