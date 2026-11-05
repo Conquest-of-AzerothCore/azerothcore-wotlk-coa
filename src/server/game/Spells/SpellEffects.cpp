@@ -299,7 +299,7 @@ constexpr uint32 ASCENSION_CHARGED_CONDUIT_AURA = 803790;
 void ResendRemainingGlobalCooldown(Player* player, uint32 spellId)
 {
     SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId);
-    if (!spellInfo || !player->HasActiveSpell(spellId))
+    if (!spellInfo || !player->HasActiveSpell(spellId) || player->HasSpellCooldown(spellId))
         return;
 
     if (uint32 remaining = player->GetGlobalCooldownMgr().GetGlobalCooldown(spellInfo))
@@ -329,8 +329,13 @@ void ResendRemainingGlobalCooldowns(Player* player, uint32 spellId, uint32 categ
                 clearedSpells.insert(categorySpell.second);
     }
 
-    for (uint32 clearedSpellId : clearedSpells)
-        ResendRemainingGlobalCooldown(player, clearedSpellId);
+    // An instant spell starts its global cooldown only after its own effects ran, so a reset from its own hit must
+    // wait for the next update to see it.
+    player->m_Events.AddEventAtOffset([player, clearedSpells]()
+    {
+        for (uint32 clearedSpellId : clearedSpells)
+            ResendRemainingGlobalCooldown(player, clearedSpellId);
+    }, 0ms);
 }
 
 void ResetAscensionCooldown(Player* player, uint32 spellId, bool resetCategory)
