@@ -49,8 +49,9 @@ CoA.BazaarTokens.WarchestRealmBound = 1
 # pays the rest up to the limit, then nothing until the window has run out; the next token opens a new window.
 # Counted: Ethereal Bazaar kill, boss and quest tokens and quest reward items. Never limited: the Elite Warchest,
 # the Groot Coin exchange, Recruit-a-Friend rewards, GM commands and tokens moved between players.
-# Players see their progress with .tokencap. HourlyCap.Amount 0 turns the limit off.
-CoA.BazaarTokens.HourlyCap.Amount = 1250
+# Players see their progress with .tokencap. HourlyCap.Amount 0 (default) turns the limit off; 1250 is the
+# limit planned for Rexxar after testing on the PTR realm.
+CoA.BazaarTokens.HourlyCap.Amount = 0
 CoA.BazaarTokens.HourlyCap.WindowSeconds = 3600
 
 # Ascension character screen: enable/disable (activate/deactivate) and the

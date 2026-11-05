@@ -92,7 +92,7 @@ uint32 MinutesLeft(Window const& window, uint32 now)
 
 uint32 AscensionBazaarTokenCap::GetCap()
 {
-    return sConfigMgr->GetOption<uint32>("CoA.BazaarTokens.HourlyCap.Amount", 1250);
+    return sConfigMgr->GetOption<uint32>("CoA.BazaarTokens.HourlyCap.Amount", 0);
 }
 
 uint32 AscensionBazaarTokenCap::Claim(Player* player, uint32 count)
