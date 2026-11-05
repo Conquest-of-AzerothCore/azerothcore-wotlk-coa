@@ -663,6 +663,12 @@ def validate(scenario):
         for key in ('race_mask', 'class_mask'):
             if key in step:
                 number(step[key], f'{where}.{key}', 0, 2**32 - 1, True)
+        if action == 'binder_activate':
+            require(('target' in step) != ('owner' in step) and ('owner' in step) == ('entry' in step),
+                    f'{where}: binder_activate needs a target, or an owner and an entry')
+            if 'owner' in step:
+                require(step['owner'] in player_ids, f'{where}: binder owner needs a player')
+                number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
         if action == 'use_nearby_gameobject' and 'owner' in step:
             require(step['owner'] in player_ids, f'{where}: nearby gameobject owner needs a player')
         if action == 'voidportal':
