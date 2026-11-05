@@ -60,6 +60,7 @@
 #include "AscensionClassTuning.h"
 #include "AscensionBarbarian.h"
 #include "AscensionBarbarianScaling.h"
+#include "AscensionBloodmageDarkwing.h"
 #include "AscensionCustomResourceData.h"
 #include "AscensionFreshCharacterCheck.h"
 #include "AscensionLiveBaselineData.h"
@@ -9918,6 +9919,7 @@ public:
         {
             PrepareAscensionClassMechanicsCast(spell);
             PrepareAscensionBarbarianScaling(spell);
+            PrepareAscensionBloodmageBatBite(spell);
         }
     }
 
