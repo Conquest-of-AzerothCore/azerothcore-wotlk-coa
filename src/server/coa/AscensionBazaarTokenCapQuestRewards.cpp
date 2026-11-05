@@ -62,6 +62,43 @@ if not CoABazaarTokenCapQuestRewards then
     end
   end
 
+  local function limitTokenAmounts(template)
+    local remaining = remainingNow()
+    if not remaining or type(template) ~= "table" or type(template.RewardItems) ~= "table"
+      or type(template.RewardAmount) ~= "table" then
+      return template
+    end
+    local limited = {}
+    for key, value in pairs(template) do
+      limited[key] = value
+    end
+    limited.RewardAmount = {}
+    for index, amount in pairs(template.RewardAmount) do
+      if template.RewardItems[index] == TOKEN_ITEM and type(amount) == "number" then
+        limited.RewardAmount[index] = math.min(amount, remaining)
+      else
+        limited.RewardAmount[index] = amount
+      end
+    end
+    return limited
+  end
+
+  if type(GetQuestTemplate) == "function" then
+    local getQuestTemplate = GetQuestTemplate
+    GetQuestTemplate = function(...)
+      return limitTokenAmounts(getQuestTemplate(...))
+    end
+  end
+
+  local function refreshCallBoard()
+    if CallBoardUI and CallBoardUI.questRewards then
+      CallBoardUI.questRewards = {}
+      if CallBoardUI:IsShown() and CallBoardUI.LoadRewards then
+        pcall(CallBoardUI.LoadRewards, CallBoardUI)
+      end
+    end
+  end
+
   local events = CreateFrame("Frame")
   events:RegisterEvent("CHAT_MSG_ADDON")
   events:SetScript("OnEvent", function(_, _, prefix, message, _, sender)
@@ -78,6 +115,7 @@ if not CoABazaarTokenCapQuestRewards then
     if QuestInfoFrame:IsVisible() then
       adjustTokenRewards()
     end
+    refreshCallBoard()
   end)
 
   hooksecurefunc("QuestInfo_Display", adjustTokenRewards)
