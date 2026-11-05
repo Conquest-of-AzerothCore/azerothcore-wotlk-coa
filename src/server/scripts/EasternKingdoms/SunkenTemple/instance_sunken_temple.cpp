@@ -113,7 +113,15 @@ public:
                 case NPC_HAZZAS:
                     _sanctumDragonGUIDs.push_back(creature->GetGUID());
                     if (!AreSanctumDragonsReleased())
+                    {
                         HideSanctumDragon(creature);
+                        // SmartAI::JustRespawned makes the creature visible again on its first update.
+                        creature->m_Events.AddEventAtOffset([this, creature]
+                        {
+                            if (!AreSanctumDragonsReleased())
+                                HideSanctumDragon(creature);
+                        }, 1ms);
+                    }
                     break;
             }
 
