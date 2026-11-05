@@ -968,6 +968,13 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "SELECT COUNT(*) FROM account_friend_migration WHERE account = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_INS_ACCOUNT_FRIEND_MIGRATION,
         "INSERT INTO account_friend_migration (account) VALUES (?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_BAZAAR_TOKEN_HOURLY_CAP, "SELECT window_start, earned FROM account_bazaar_token_hourly_cap WHERE account = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_BAZAAR_TOKEN_HOURLY_CAP_IF_NEWER,
+        "INSERT INTO account_bazaar_token_hourly_cap (account, window_start, earned) VALUES (?, ?, ?) AS claimed "
+        "ON DUPLICATE KEY UPDATE earned = IF(claimed.window_start > account_bazaar_token_hourly_cap.window_start OR "
+        "(claimed.window_start = account_bazaar_token_hourly_cap.window_start AND claimed.earned > account_bazaar_token_hourly_cap.earned), "
+        "claimed.earned, account_bazaar_token_hourly_cap.earned), window_start = GREATEST(account_bazaar_token_hourly_cap.window_start, claimed.window_start)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_REP_BAZAAR_TOKEN_HOURLY_CAP, "REPLACE INTO account_bazaar_token_hourly_cap (account, window_start, earned) VALUES (?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_ACCOUNT_FRIEND_LEGACY,
         "SELECT t.account, t.guid AS original_guid, t.name, s.note, s.guid AS owner_guid, s.flags "
         "FROM character_social s JOIN characters o ON o.guid=s.guid JOIN characters t ON t.guid=s.friend "

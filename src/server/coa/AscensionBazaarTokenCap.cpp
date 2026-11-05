@@ -48,33 +48,34 @@ Window& WindowRef(uint32 accountId)
         return itr->second;
 
     Window window;
-    if (QueryResult result = CharacterDatabase.Query(
-            "SELECT `window_start`, `earned` FROM `account_bazaar_token_hourly_cap` WHERE `account` = {}", accountId))
+    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_BAZAAR_TOKEN_HOURLY_CAP);
+    stmt->SetData(0, accountId);
+    if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
     {
-        window.start = result->Fetch()[0].Get<uint32>();
-        window.earned = result->Fetch()[1].Get<uint32>();
+        window.start = (*result)[0].Get<uint32>();
+        window.earned = (*result)[1].Get<uint32>();
     }
 
     return windows.emplace(accountId, window).first->second;
 }
 
+void Write(CharacterDatabaseStatements statement, uint32 accountId, Window const& window)
+{
+    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(statement);
+    stmt->SetData(0, accountId);
+    stmt->SetData(1, window.start);
+    stmt->SetData(2, window.earned);
+    CharacterDatabase.Execute(stmt);
+}
+
 void SaveIfNewer(uint32 accountId, Window const& window)
 {
-    CharacterDatabase.Execute(
-        "INSERT INTO `account_bazaar_token_hourly_cap` (`account`, `window_start`, `earned`) VALUES ({}, {}, {}) AS `claimed` "
-        "ON DUPLICATE KEY UPDATE "
-        "`earned` = IF(`claimed`.`window_start` > `account_bazaar_token_hourly_cap`.`window_start` OR "
-        "(`claimed`.`window_start` = `account_bazaar_token_hourly_cap`.`window_start` AND "
-        "`claimed`.`earned` > `account_bazaar_token_hourly_cap`.`earned`), `claimed`.`earned`, `account_bazaar_token_hourly_cap`.`earned`), "
-        "`window_start` = GREATEST(`account_bazaar_token_hourly_cap`.`window_start`, `claimed`.`window_start`)",
-        accountId, window.start, window.earned);
+    Write(CHAR_INS_BAZAAR_TOKEN_HOURLY_CAP_IF_NEWER, accountId, window);
 }
 
 void Overwrite(uint32 accountId, Window const& window)
 {
-    CharacterDatabase.Execute(
-        "REPLACE INTO `account_bazaar_token_hourly_cap` (`account`, `window_start`, `earned`) VALUES ({}, {}, {})",
-        accountId, window.start, window.earned);
+    Write(CHAR_REP_BAZAAR_TOKEN_HOURLY_CAP, accountId, window);
 }
 
 bool Expired(Window const& window, uint32 now)
