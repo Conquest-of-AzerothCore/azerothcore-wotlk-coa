@@ -68,6 +68,19 @@ void Snapshot(Player* player, Spell* spell)
                 spell->SetScriptValue(id, aura->GetScriptValue(800386));
             }
 }
+void FireBarrageFlurry(Player* player, Unit* target)
+{
+    for (uint32 shot = 0; shot < StarfireBarrageFlurryShots; ++shot)
+        player->m_Events.AddEventAtOffset(
+            [guid = player->GetGUID(), victim = target->GetGUID()]()
+            {
+                Player* owner = ObjectAccessor::FindPlayer(guid);
+                Unit* hit = owner ? ObjectAccessor::GetUnit(*owner, victim) : nullptr;
+                if (owner && hit && hit->IsAlive())
+                    owner->CastSpell(hit, StarfireBarrageFlurryVisual, TRIGGERED_FULL_MASK);
+            },
+            Milliseconds(shot * StarfireBarrageFlurryMs / (StarfireBarrageFlurryShots - 1)));
+}
 void FinishSelected(Player* player, Spell* spell)
 {
     for (uint32 id : selected)
@@ -249,6 +262,8 @@ class starcaller_spells : public AllSpellScript
         State(player).event = true;
         if (player != target && !player->IsFriendlyTo(target))
         {
+            if (id == 802682)
+                FireBarrageFlurry(player, target);
             if (id == 800507 && player->HasAura(503584))
                 Cast(player, player, 503585);
             if (Any(info, {680220, 801127, 800497, 680703}))
@@ -345,18 +360,6 @@ class starcaller_spells : public AllSpellScript
         if (!player || info->SpellFamilyName != 32)
             return;
         uint32 id = info->Id;
-        if (id == 802682)
-            if (Unit* barrageTarget = spell->m_targets.GetUnitTarget())
-                for (uint32 shot = 0; shot < StarfireBarrageFlurryShots; ++shot)
-                    player->m_Events.AddEventAtOffset(
-                        [guid = player->GetGUID(), victim = barrageTarget->GetGUID()]()
-                        {
-                            Player* owner = ObjectAccessor::FindPlayer(guid);
-                            Unit* hit = owner ? ObjectAccessor::GetUnit(*owner, victim) : nullptr;
-                            if (owner && hit && hit->IsAlive())
-                                owner->CastSpell(hit, StarfireBarrageFlurryVisual, TRIGGERED_FULL_MASK);
-                        },
-                        Milliseconds(shot * StarfireBarrageFlurryMs / (StarfireBarrageFlurryShots - 1)));
         if (Named(info, 680220))
             MarkedHeal(player);
         if (Named(info, 801972) && player->HasAura(704764))

@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Starfire Barrage casts seven damage-free flurry arrows when it hits",
+  "contract": [
+    "Starfire Barrage 802682 follows its hit with seven visual-only arrows of the Rapid Fire arrow spell 993772,",
+    "which ApplyContracts reduces to a dummy effect on one enemy target. They start from the Barrage hit handler, so",
+    "they only fly when Barrage landed, and they must not add damage of their own.",
+    "Expected: one landed Barrage is followed by exactly seven casts of 993772, and 993772 deals no damage."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "starcaller", "race": 4, "class": 26, "level": 80, "spell_hit_rating": 10000, "ranged_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "starcaller", "entry": 36, "level": 80, "health": 10000000, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "add_item", "label": "Starfire Barrage needs a ranged weapon", "actor": "starcaller", "item": 2504 },
+    { "action": "equip", "actor": "starcaller", "item": 2504, "slot": 17 },
+    { "action": "set_aura", "label": "The proc permits Starfire Barrage and learns it temporarily", "actor": "starcaller", "spell": 572319, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: Starfire Barrage is known while the proc is up", "actor": "starcaller", "metric": "knows_spell", "spell": 802682, "equals": 1, "within_ms": 3000 },
+    { "action": "cast", "label": "Starfire Barrage hits the target", "actor": "starcaller", "spell": 802682, "target": "target" },
+    { "action": "wait", "label": "Let the cast finish, then the seven arrows spread over one second", "ms": 6000 },
+    { "action": "assert", "label": "SETUP: Starfire Barrage was cast", "actor": "starcaller", "metric": "spell_cast_count", "spell": 802682, "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: exactly seven flurry arrows were cast", "actor": "starcaller", "metric": "spell_cast_count", "spell": 993772, "equals": 7 },
+    { "action": "assert", "label": "The flurry arrows deal no damage", "actor": "starcaller", "metric": "spell_damage_total", "spell": 993772, "target": "target", "equals": 0 }
+  ]
+}
