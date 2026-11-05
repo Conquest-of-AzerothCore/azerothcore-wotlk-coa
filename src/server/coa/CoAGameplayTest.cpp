@@ -6971,6 +6971,20 @@ private:
             packet << innkeeper->GetGUID();
             player->GetSession()->HandleBinderActivateOpcode(packet);
         }
+        else if (action == "system_mail")
+        {
+            std::string const kind = step.get<std::string>("kind");
+            Require(kind == "postmaster" || kind == "reward", "system_mail kind must be postmaster or reward");
+            Item* item = Item::CreateItem(step.get<uint32>("item"), 1, player);
+            Require(item != nullptr, "system_mail could not create the item");
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+            item->SaveToDB(trans);
+            MailSender const sender = kind == "postmaster" ? MailSender(MAIL_CREATURE, 34337)
+                                                           : MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_GM);
+            MailDraft("System mail", "Sent by the gameplay test.").AddItem(item)
+                .SendMailTo(trans, MailReceiver(player, player->GetGUID().GetCounter()), sender);
+            CharacterDatabase.CommitTransaction(trans);
+        }
         else if (action == "destroy_item")
         {
             Item* item = player->GetItemByEntry(step.get<uint32>("item"));

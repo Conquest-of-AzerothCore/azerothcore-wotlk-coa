@@ -1094,13 +1094,21 @@ namespace CoAChallenges
             std::to_string(entry));
     }
 
+    constexpr uint32 PostmasterEntry = 34337;
+
     // Only the server mails a character to itself (the client cannot): the welcome
     // Elite Warchest and the part of its contents that did not fit in the bags.
+    // Two server senders are exempt as well: the Postmaster (items returned to the
+    // character) and the sender-less GM-stationery mail of Recruit-A-Friend rewards.
     // The warchest has no binding, so a copy mailed by another character is not exempt.
     bool IsMailExemptTake(Player* player, uint32 mailId, uint32 itemEntry)
     {
         Mail const* mail = player ? player->GetMail(mailId) : nullptr;
         if (mail && mail->IsSentByPlayer() && mail->sender == player->GetGUID().GetCounter())
+            return true;
+        if (mail && mail->messageType == MAIL_CREATURE && mail->sender == PostmasterEntry)
+            return true;
+        if (mail && mail->IsSentByPlayer() && mail->sender == 0 && mail->stationery == MAIL_STATIONERY_GM)
             return true;
         return itemEntry != EliteWarchestItem && IsMailExemptItem(itemEntry);
     }
