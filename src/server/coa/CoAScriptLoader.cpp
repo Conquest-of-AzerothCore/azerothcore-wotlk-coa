@@ -38,6 +38,7 @@ void AddSC_AscensionBloodforged();
 void AddSC_AscensionBloodforging();
 void AddAscensionEquippedGearLootScripts();
 void AddSC_AscensionPvpPower();
+void AddSC_AscensionResilientConstitution();
 void AddSC_AscensionPowerTooltips();
 void AddSC_AscensionPvePower();
 void AddSC_AscensionItemPower();
@@ -823,6 +824,7 @@ void AddCoAScripts()
     AddSC_AscensionBloodforging();
     AddAscensionEquippedGearLootScripts();
     AddSC_AscensionPvpPower();
+    AddSC_AscensionResilientConstitution();
     AddSC_AscensionPowerTooltips();
     AddSC_AscensionPvePower();
     AddSC_AscensionItemPower();
