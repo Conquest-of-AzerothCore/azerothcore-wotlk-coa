@@ -12,9 +12,6 @@
 #include <limits>
 #include <string>
 
-// A test-realm helper: one gossip option raises the player to CoA.LevelBoostNpc.Level and pays
-// CoA.LevelBoostNpc.GoldReward gold and CoA.LevelBoostNpc.RuneOfDescensionReward Runes of Descension. Off unless the realm sets CoA.LevelBoostNpc.Enable = 1, so the creature does
-// nothing on a realm that has not chosen it.
 namespace
 {
 constexpr uint32 TEXT_LEVEL_BOOST = 9990500;
@@ -36,7 +33,6 @@ uint8 BoostLevel()
 
 uint32 BoostGoldReward()
 {
-    // Gold, not copper; capped so the copper amount fits ModifyMoney's int32.
     return std::min<uint32>(sConfigMgr->GetOption<uint32>("CoA.LevelBoostNpc.GoldReward", 5000), 200000);
 }
 
@@ -58,7 +54,6 @@ std::string BoostPrompt(uint8 level)
     return Acore::StringFormat("Raise this character to level {} and receive {}? This cannot be undone.", level, rewards);
 }
 
-// Same path as the Rune pouches (AscensionRunePouches.cpp): the runes are a currency-tab item.
 void PayRunes(Player* player, uint32 amount)
 {
     ItemPosCountVec dest;
@@ -95,7 +90,7 @@ public:
         return true;
     }
 
-    bool OnGossipSelect(Player* player, Creature* /*creature*/, uint32 /*sender*/, uint32 action) override
+    bool OnGossipSelect(Player* player, Creature*, uint32, uint32 action) override
     {
         CloseGossipMenuFor(player);
         if (action != ACTION_BOOST || !BoostEnabled())
