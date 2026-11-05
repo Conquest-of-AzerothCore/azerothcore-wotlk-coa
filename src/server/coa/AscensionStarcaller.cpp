@@ -104,7 +104,7 @@ bool DelayDamage(Player* player, uint32 amount)
     if (!aura)
         return false;
     State(player).stagger += amount;
-    aura->SetDuration(aura->GetMaxDuration());
+    aura->RefreshDuration();
     return true;
 }
 void PayDelayedDamage(Player* player, uint32 ticks)
