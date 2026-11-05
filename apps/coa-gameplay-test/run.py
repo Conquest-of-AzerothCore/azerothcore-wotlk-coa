@@ -250,7 +250,7 @@ ACTIONS = {
     'attack': ({'actor', 'target'}, {'actor', 'target', 'pet'}),
     'pvp': ({'actor', 'enabled'}, {'actor', 'enabled'}),
     'group': ({'actor', 'target'}, {'actor', 'target', 'loot_method', 'master_looter'}),
-    'lfg_dungeon': ({'actor', 'dungeon'}, {'actor', 'dungeon'}),
+    'lfg_dungeon': ({'actor', 'dungeon'}, {'actor', 'dungeon', 'loot_method'}),
     'lfg_teleport': ({'actor'}, {'actor', 'out'}),
     'lfg_join': ({'actor', 'dungeons', 'roles'}, {'actor', 'dungeons', 'roles'}),
     'lfg_set_roles': ({'actor', 'roles'}, {'actor', 'roles'}),
@@ -704,6 +704,8 @@ def validate(scenario):
             require(step['target'] in player_ids, f'{where}: master loot needs a player recipient')
         if action == 'lfg_dungeon':
             number(step['dungeon'], f'{where}.dungeon', 1, 2**24 - 1, True)
+            if 'loot_method' in step:
+                number(step['loot_method'], f'{where}.loot_method', 0, 4, True)
         if action == 'encounter_credit':
             number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
         if action == 'encounter_start':

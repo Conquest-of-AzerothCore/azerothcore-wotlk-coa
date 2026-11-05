@@ -38,7 +38,7 @@
     { "action": "level_scaling_packet", "actor": "member", "value": 1 },
     { "action": "group", "actor": "leader", "target": "member", "loot_method": 0 },
     { "action": "lfg_dungeon", "label": "The group is a Dungeon Finder group assigned Maraudon", "actor": "leader",
-      "dungeon": 26 },
+      "dungeon": 26, "loot_method": 0 },
     { "action": "wait", "label": "Let the group's switch reach the member", "ms": 1000 },
     {
       "action": "assert",

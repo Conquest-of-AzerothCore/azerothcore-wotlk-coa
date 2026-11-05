@@ -64,7 +64,8 @@
       "action": "lfg_dungeon",
       "label": "The group is a Dungeon Finder group assigned Shadowfang Keep",
       "actor": "looter",
-      "dungeon": 8
+      "dungeon": 8,
+      "loot_method": 0
     },
     {
       "action": "level_scaling_packet",

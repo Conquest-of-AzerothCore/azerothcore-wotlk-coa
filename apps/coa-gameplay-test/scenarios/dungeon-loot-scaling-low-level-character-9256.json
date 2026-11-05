@@ -33,7 +33,7 @@
     { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
     { "action": "group", "actor": "looter", "target": "mate", "loot_method": 0 },
     { "action": "lfg_dungeon", "label": "The group is a Dungeon Finder group assigned Gnomeregan", "actor": "looter",
-      "dungeon": 14 },
+      "dungeon": 14, "loot_method": 0 },
     { "action": "attack", "actor": "looter", "target": "voone" },
     { "action": "assert", "actor": "voone", "metric": "alive", "equals": 0, "within_ms": 30000 },
     { "action": "loot_creature", "actor": "looter", "target": "voone" },
