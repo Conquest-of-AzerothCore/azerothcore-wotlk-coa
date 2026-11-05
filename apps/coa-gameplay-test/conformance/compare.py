@@ -1,5 +1,6 @@
 from collections import Counter
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
+from functools import lru_cache
 import hashlib
 import json
 import math
@@ -12,7 +13,11 @@ from profile import DBC_DIR, caster_stats_from, known_aura_label, probe_aura_lab
 from tooltip import CasterStats, Readout, Records, Tooltip, Unreadable
 from values import UNMEASURABLE, UNREADABLE, Expectation, dataset
 
-STATUSES = ('ok', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials')
+STATUSES = ('ok', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials', 'unmeasured')
+CAST_DEPENDENT_CHECKS = frozenset({'cooldown_ms', 'aura_amount', 'aura_duration_ms', 'hit_mean'})
+CAST_RESULTS_HEADER = Path(__file__).resolve().parents[3] / 'src/server/shared/SharedDefines.h'
+CAST_RESULT_ENUM = re.compile(r'enum SpellCastResult\b[^{]*\{(?P<body>[^}]*)\}')
+CAST_RESULT_ENTRY = re.compile(r'^\s*(?P<name>SPELL_\w+)\s*=\s*(?P<code>\d+)', re.MULTILINE)
 ABSOLUTE_TOLERANCE = 1.0
 RELATIVE_TOLERANCE = 0.005
 FLOAT_EPSILON = 1e-9
@@ -60,6 +65,7 @@ class Run:
     values: dict[str, float]
     steps: list[dict]
     max_step_ms: float | None
+    cast_failures: dict[int, list[int]] = field(default_factory=dict)
 
 
 class TooltipSource(Protocol):
@@ -160,7 +166,37 @@ def load_run(results_dir: Path, entry: dict, by_hash: Mapping[str, Path]) -> Run
     result = json.loads(result_path.read_text(encoding='utf-8'))
     max_step = result.get('max_step_ms')
     return Run(entry['key'], result.get('status', ''), result.get('message') or '', measured_values(result),
-               result.get('steps', []), None if max_step is None else number(max_step, 'max_step_ms'))
+               result.get('steps', []), None if max_step is None else number(max_step, 'max_step_ms'),
+               cast_failures(result))
+
+
+def cast_failures(result: dict) -> dict[int, list[int]]:
+    failures: dict[int, list[int]] = {}
+    for failure in result.get('cast_failures', []):
+        failures.setdefault(int(number(failure['spell'], 'cast_failures.spell')), []).append(
+            int(number(failure['reason'], 'cast_failures.reason')))
+    return failures
+
+
+@lru_cache(maxsize=None)
+def cast_result_names(header: Path = CAST_RESULTS_HEADER) -> dict[int, str]:
+    if not header.is_file():
+        return {}
+    enum = CAST_RESULT_ENUM.search(header.read_text(encoding='utf-8'))
+    if not enum:
+        return {}
+    return {int(entry.group('code')): entry.group('name') for entry in CAST_RESULT_ENTRY.finditer(enum.group('body'))}
+
+
+def failed_cast(run: Run, rank_id: int) -> str | None:
+    reasons = list(run.cast_failures.get(rank_id, []))
+    step = run.values.get(f'{rank_id} cast_failure')
+    if step:
+        reasons.append(int(step))
+    if not reasons:
+        return None
+    names = cast_result_names()
+    return ', '.join(f'{names.get(reason, "SpellCastResult")} ({reason})' for reason in dict.fromkeys(reasons))
 
 
 def load_runs(manifest: dict, results_dir: Path) -> tuple[dict[str, Run], list[str]]:
@@ -358,6 +394,9 @@ def judge(manifest: dict, entry: dict, run: Run | None, expectation: Expectation
         return replace(base, status='unreadable', measured=measured, explanation=rule)
     if run is None:
         return replace(base, explanation=f'{entry["key"]} has no scenario to measure {check}')
+    failure = failed_cast(run, expectation.rank_id) if check in CAST_DEPENDENT_CHECKS else None
+    if failure:
+        return replace(base, status='unmeasured', measured=measured, explanation=f'cast failed: {failure}')
     if check in HIT_CHECKS:
         return judge_hit(base, manifest['class_file'], expectation, run, hit_model)
     if measured is None:

@@ -218,6 +218,7 @@ that did not pass.
 | `unmodelled` | an `unmodelled` check, a `unmodelled: ` or `unmeasurable: ` rule, a hit model left unmodelled |
 | `ambiguous_tooltip` | a signed tooltip value whose sign differs from the measured value |
 | `insufficient_trials` | a hit mean with fewer usable hits than its `minimum_hits` (ruling R9) |
+| `unmeasured` | a check that depends on a cast the run recorded as failed (ruling R11) |
 
 The tooltip of each rank is read again with the `CasterStats` measured by the run's base steps. If its tokens differ
 from the tokens read at generation, every token check of the rank is an alert; so is a token whose text differs
@@ -254,6 +255,13 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   and target; the measured mean of the non-critical, non-blocked hits must lie in `mean ± 2.576 x sigma / sqrt(n)`,
   n the usable hits. `tooltip_mean` is shown in the explanation only.
 - `known_aura`: the aura must be measured on the character.
+- Failed casts (ruling R11): the harness records each `SMSG_CAST_FAILED` or `SMSG_PET_CAST_FAILED` an actor
+  receives as `{spell, reason}` in the result's `cast_failures` list and keeps the last reason per spell for the
+  `cast_failure` metric (`CoAGameplayTest.cpp:1288-1299`, `:2010-2019`, `:5016-5020`; a new cast clears it, `:7176`).
+  When either names the measured rank with a reason other than 0, its `cooldown_ms`, `aura_amount`,
+  `aura_duration_ms` and `hit_mean` checks are `unmeasured`, with `cast failed: <name> (<code>)`, the name read from
+  `enum SpellCastResult` in `src/server/shared/SharedDefines.h` (22 is `SPELL_FAILED_CASTER_AURASTATE`). Effect
+  values and the power cost, measured before the cast, stay judged.
 
 The report lists each known aura's modifier effects with `EffectBasePoints`, `EffectRealPointsPerLevel`, the
 value at the class level and the runs that measured the aura; a hit model applies a modifier only in a run that

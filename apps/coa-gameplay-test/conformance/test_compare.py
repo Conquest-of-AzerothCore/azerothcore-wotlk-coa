@@ -56,6 +56,7 @@ class Workspace:
         self.root = Path(tempfile.mkdtemp(prefix='conformance-compare-'))
         self.scenarios = []
         self.runs = {}
+        self.cast_failures = {}
 
     def close(self):
         shutil.rmtree(self.root, ignore_errors=True)
@@ -89,6 +90,8 @@ class Workspace:
             every = [{'index': str(index), **step} for index, step in enumerate(base + steps)]
             result = {'schema': '1', 'scenario': key, 'status': 'passed', 'message': 'All assertions passed',
                       'max_step_ms': '25', 'steps': every}
+            if key in self.cast_failures:
+                result['cast_failures'] = self.cast_failures[key]
             (directory / 'result.json').write_text(json.dumps(result), encoding='utf-8')
             (directory / 'summary.json').write_text(json.dumps({'scenario_sha256': recorded_hash}), encoding='utf-8')
         return path, results
@@ -235,6 +238,23 @@ class CompareTest(unittest.TestCase):
         self.assertEqual(cooldown('5001').status, 'alert')
         self.assertEqual(cooldown('4949').status, 'alert')
 
+    def test_failed_cast_leaves_the_checks_after_it_unmeasured_and_judges_the_values_before_it(self):
+        token = Displayed('$s1', 50.0, 0, 'flat')
+        entries = [expectation('1001 effect_value e0 #0', 'effect_value', '$s1', 'read flat', 0),
+                   expectation('1001 power_cost', 'power_cost', '20', 'ManaCost divisor 1'),
+                   expectation('1001 aura_amount e0 #0', 'aura_amount', '$s1', 'read flat', 0),
+                   expectation('1001 aura_duration_ms #1', 'aura_duration_ms', '$d', 'read duration_ms'),
+                   expectation('1001 cooldown_ms', 'cooldown_ms', '20000', 'max(RecoveryTime, CategoryRecoveryTime)')]
+        steps = [assert_step('1001 effect_value e0 #0', '50'), assert_step('1001 power_cost', '20'),
+                 plain_step('cast'), assert_step('1001 cast_failure', '22'),
+                 assert_step('1001 aura_amount e0 #0', '0'), assert_step('1001 aura_duration_ms #1', '0'),
+                 assert_step('1001 cooldown_ms', '0')]
+        reader = constant_reader(token, Displayed('$d', 20000.0, None, 'duration_ms'))
+        verdicts = self.value_run(entries, ['$s1', '$d'], steps, reader)
+        self.assertEqual([verdicts[entry.label].status for entry in entries],
+                         ['ok', 'ok', 'unmeasured', 'unmeasured', 'unmeasured'])
+        self.assertEqual(verdicts['1001 cooldown_ms'].explanation, 'cast failed: SPELL_FAILED_CASTER_AURASTATE (22)')
+
     def test_aura_duration_reads_the_duration_token_again(self):
         label = '1001 aura_duration_ms #0'
         steps = [plain_step('cast'), assert_step('1001 cast_failure', '0'), assert_step('1001 aura_present', '1'),
@@ -274,7 +294,7 @@ class CompareTest(unittest.TestCase):
         write_outputs(manifest, results, verdicts, out)
         report = (out / 'report.md').read_text(encoding='utf-8')
         self.assertIn('| unreadable | 1 |', report)
-        self.assertRegex(report, r'\| 1000 \| Test Strike \| 0 \| 0 \| 1 \| 0 \| 0 \| 0 \|')
+        self.assertRegex(report, r'\| 1000 \| Test Strike \| 0 \| 0 \| 1 \| 0 \| 0 \| 0 \| 0 \|')
         self.assertIn('887007', report)
         alerts = (out / 'alerts.tsv').read_text(encoding='utf-8').splitlines()
         self.assertEqual(len(alerts), 2)
@@ -322,6 +342,13 @@ class CompareTest(unittest.TestCase):
         verdict = self.hit_verdict('4074', '4')
         self.assertEqual((verdict.status, verdict.measured), ('alert', 1018.5))
         self.assertIn('746.33', verdict.explanation)
+
+    def test_failed_casts_leave_the_hit_mean_unmeasured(self):
+        self.workspace.cast_failures[HIT_KEY] = [{'cast_count': '1', 'spell': str(RANK), 'reason': '22',
+                                                  'actor': 'caster'}]
+        verdict = self.hit_verdict('0', '0')
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertEqual(verdict.explanation, 'cast failed: SPELL_FAILED_CASTER_AURASTATE (22)')
 
     def test_fewer_usable_hits_than_the_minimum_are_insufficient_trials(self):
         self.assertEqual(self.hit_verdict('543', '1').status, 'insufficient_trials')
