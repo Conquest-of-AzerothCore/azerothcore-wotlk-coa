@@ -361,7 +361,10 @@ void AssignLevel(Player* owner, Item* item, uint32 key)
 
 bool LootScalesFor(Player const* player)
 {
-    return LocalLevelScaling::DungeonLootScales(player) || ScalingChosenBy(player);
+    if (LocalLevelScaling::DungeonLootScales(player))
+        return true;
+    return LocalLevelScaling::DungeonScalingFor(player) != LocalLevelScaling::DungeonScaling::WalkedIn &&
+        ScalingChosenBy(player);
 }
 
 void AssignDropLevel(Player* looter, Item* item, uint32 base = 0)

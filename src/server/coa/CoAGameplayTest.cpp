@@ -6367,6 +6367,9 @@ private:
             group->ConvertToLFG();
             group->SetDungeonDifficulty(Difficulty(dungeon->difficulty));
             sLFGMgr->SetDungeon(group->GetGUID(), dungeon->Entry());
+            for (GroupReference* member = group->GetFirstMember(); member; member = member->next())
+                if (Player* memberPlayer = member->GetSource())
+                    LocalLevelScaling::NotifyScalingChanged(memberPlayer);
         }
         else if (action == "lfg_teleport")
         {
