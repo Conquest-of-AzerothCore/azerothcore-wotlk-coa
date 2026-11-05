@@ -647,7 +647,8 @@ struct npc_coa_muzah_glaive : public ScriptedAI
         if (_pulse <= diff)
         {
             _pulse = 700;
-            me->CastCustomSpell(ByDifficulty(me, SPELL_RIPPED_BY_THE_GLAIVES, SPELL_RIPPED_BY_THE_GLAIVES_HC, SPELL_RIPPED_BY_THE_GLAIVES_MYTHIC),
+            me->CastCustomSpell(ByDifficulty(me, SPELL_RIPPED_BY_THE_GLAIVES, SPELL_RIPPED_BY_THE_GLAIVES_HC,
+                SPELL_RIPPED_BY_THE_GLAIVES_MYTHIC),
                 SPELLVALUE_RADIUS_MOD, GlaiveRadiusMod, me, TRIGGERED_FULL_MASK);
         }
         else
@@ -787,7 +788,8 @@ class spell_coa_muzah_glaive_strike : public SpellScript
         {
             Unit const* unit = target->ToUnit();
             float const size = unit ? unit->GetBoundaryRadius() : 0.0f;
-            return !caster->HasInLine(target, size, StrikeWidth) || caster->GetExactDist2d(target) > StrikeLength + size;
+            return !caster->HasInLine(target, size, StrikeWidth)
+                || caster->GetExactDist2d(target) > StrikeLength + size;
         });
     }
 

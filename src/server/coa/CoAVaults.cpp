@@ -2032,7 +2032,8 @@ class spell_coa_vaults_voidflare : public SpellScript
 
     void Register() override
     {
-        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_coa_vaults_voidflare::FilterReach, EFFECT_ALL, TARGET_UNIT_CONE_ENEMY_24);
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_coa_vaults_voidflare::FilterReach,
+            EFFECT_ALL, TARGET_UNIT_CONE_ENEMY_24);
     }
 };
 
@@ -2047,13 +2048,15 @@ class spell_coa_vaults_spectral_strike : public SpellScript
         {
             Unit const* unit = target->ToUnit();
             float const size = unit ? unit->GetBoundaryRadius() : 0.0f;
-            return !caster->HasInLine(target, size, SpectralStrikeWidth) || caster->GetExactDist2d(target) > SpectralStrikeLength + size;
+            return !caster->HasInLine(target, size, SpectralStrikeWidth)
+                || caster->GetExactDist2d(target) > SpectralStrikeLength + size;
         });
     }
 
     void Register() override
     {
-        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_coa_vaults_spectral_strike::FilterLine, EFFECT_ALL, TARGET_UNIT_CONE_ENEMY_24);
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_coa_vaults_spectral_strike::FilterLine,
+            EFFECT_ALL, TARGET_UNIT_CONE_ENEMY_24);
     }
 };
 

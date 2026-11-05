@@ -3,7 +3,10 @@
 -- Heroic and Mythic as in the vanilla dungeons: the core's Normal-to-Heroic factor 2.33 on the Normal log at level 60,
 -- Mythic = Heroic * 1.3 (DungeonHealth::Resolve). Bosses land at 280k/364k (vanilla median 377k/490k), elite trash
 -- around 42k/55k (47k/61k); the Mythic log of 2026-08-05 (Muzah 877k) predates Ascension's balancing patches.
-DELETE FROM `coa_dungeon_health` WHERE `map_id` = 937;
+DELETE FROM `coa_dungeon_health` WHERE `map_id` = 937 AND `difficulty` IN (1, 2) AND `creature_entry` IN (
+    162711, 162715, 162716, 162743, 162765, 162766, 162767, 162769,
+    162770, 162773, 162775, 162776, 162780, 162782, 162783, 162784,
+    162785, 162979, 162980, 162981, 162982, 162983, 162988);
 INSERT INTO `coa_dungeon_health` (`map_id`, `difficulty`, `creature_entry`, `max_health`, `evidence`, `source`) VALUES
 (937, 1, 162711, 279600, 'model', 'Normal log at 60 * 2.33; Muzah, the Shadow Hunter'),
 (937, 2, 162711, 363480, 'model', 'Heroic * 1.3; Muzah, the Shadow Hunter'),

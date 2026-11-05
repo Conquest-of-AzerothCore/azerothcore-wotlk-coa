@@ -136,6 +136,7 @@ constexpr float WebTouch = 1.5f;
 Position const ArenaMiddle = { 304.429f, -206.081f, 341.841f, 0.0f };
 constexpr float WebSpeed = 25.0f;
 constexpr float PitDepth = 15.0f;
+constexpr float PitReach = 40.0f;
 
 using CoAOtherSide::BaseSpellId;
 using CoAOtherSide::Damage3;
@@ -370,14 +371,16 @@ private:
     {
         me->GetMap()->DoForAllPlayers([](Player* player)
         {
-            if (!player->IsInWorld() || player->GetPositionZ() > ArenaMiddle.GetPositionZ() - PitDepth)
+            if (!player->IsInWorld() || player->GetPositionZ() > ArenaMiddle.GetPositionZ() - PitDepth
+                || player->GetExactDist2d(&ArenaMiddle) > PitReach)
                 return;
             if (!player->IsAlive())
             {
                 player->ResurrectPlayer(1.0f);
                 player->SpawnCorpseBones();
             }
-            player->NearTeleportTo(ArenaMiddle.GetPositionX(), ArenaMiddle.GetPositionY(), ArenaMiddle.GetPositionZ(), FacingPlatform);
+            player->NearTeleportTo(ArenaMiddle.GetPositionX(), ArenaMiddle.GetPositionY(),
+                ArenaMiddle.GetPositionZ(), FacingPlatform);
         });
     }
 
@@ -916,7 +919,8 @@ class spell_coa_embryo_runover : public SpellScript
         }
         float const side = std::sin(caster->GetRelativeAngle(target)) >= 0.0f ? 1.0f : -1.0f;
         float const away = caster->GetOrientation() + side * float(M_PI) / 2.0f;
-        target->KnockbackFrom(target->GetPositionX() - std::cos(away), target->GetPositionY() - std::sin(away), WebKnockSpeedXY, WebKnockSpeedZ);
+        target->KnockbackFrom(target->GetPositionX() - std::cos(away), target->GetPositionY() - std::sin(away),
+            WebKnockSpeedXY, WebKnockSpeedZ);
     }
 
     void Register() override

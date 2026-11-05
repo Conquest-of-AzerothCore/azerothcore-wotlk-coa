@@ -560,10 +560,12 @@ private:
                 ++itr;
                 continue;
             }
-            if (SpellInfo const* hit = sSpellMgr->GetSpellInfo(ByDifficulty(me, SPELL_DEATH_MISSILE_HIT, SPELL_DEATH_MISSILE_HIT_HC, SPELL_DEATH_MISSILE_HIT_MYTHIC)))
+            if (SpellInfo const* hit = sSpellMgr->GetSpellInfo(ByDifficulty(me, SPELL_DEATH_MISSILE_HIT,
+                SPELL_DEATH_MISSILE_HIT_HC, SPELL_DEATH_MISSILE_HIT_MYTHIC)))
             {
                 SpellCastTargets targets;
-                targets.SetDst(mark->GetPositionX(), mark->GetPositionY(), mark->GetPositionZ(), mark->GetOrientation());
+                targets.SetDst(mark->GetPositionX(), mark->GetPositionY(), mark->GetPositionZ(),
+                    mark->GetOrientation());
                 CustomSpellValues values;
                 values.AddSpellMod(SPELLVALUE_RADIUS_MOD, MissileImpactRadiusMod);
                 mark->CastSpell(targets, hit, &values, TRIGGERED_FULL_MASK, nullptr, nullptr, me->GetGUID());
@@ -763,7 +765,8 @@ class spell_coa_volzeen_colossal_smash : public SpellScript
         Unit* target = GetHitUnit();
         Unit* caster = GetCaster();
         if (target && caster && caster->GetEntry() == NPC_VOLZEEN)
-            SetHitDamage(int32(Unscaled(caster, target, float(target->CountPctFromMaxHealth(float(ByDifficulty(caster, 30, 35, 45)))), GetSpellInfo())));
+            SetHitDamage(int32(Unscaled(caster, target,
+                float(target->CountPctFromMaxHealth(float(ByDifficulty(caster, 30, 35, 45)))), GetSpellInfo())));
     }
 
     void Register() override
