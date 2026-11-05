@@ -123,6 +123,13 @@ CoA.MonsterResistance.PerLevel = 1.0
 CoA.MonsterResistance.PerPercent = 5.0
 CoA.MonsterResistance.MaxReductionPct = 75.0
 
+# Level stats of the Ascension classes 12-32: level-60 base stats, base health and base mana from coa.bisbeard.com
+# with the race adjustments (ascension_class_stats, ascension_race_class_stats). Necromancer minions keep their
+# health either way. Restart to apply.
+# 1 - enabled (default).
+# 0 - the previous player_class_stats curve without race adjustments.
+CoA.ClassLevelSixtyStats.Enable = 1
+
 # Resilient Constitution (spell 552011), the class passive that lowers damage from players and their pets.
 # DamageReductionPct lowers every hit; CriticalReductionPct lowers critical hits again on top of it, so 50 and 20
 # leave 50% of a normal hit and 40% of a critical one. A player's pet gets PetSharePct percent of both reductions

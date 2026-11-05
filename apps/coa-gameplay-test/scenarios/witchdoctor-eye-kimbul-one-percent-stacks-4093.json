@@ -43,7 +43,7 @@
       "spell": 133,
       "target": "target",
       "relative_to": "crit",
-      "equals": 0
+      "min": -0.01, "max": 0.01
     },
     {
       "action": "learn",
@@ -74,7 +74,7 @@
       "spell": 133,
       "target": "target",
       "relative_to": "crit",
-      "equals": 1
+      "min": 0.99, "max": 1.01
     },
     {
       "action": "wait",
@@ -104,7 +104,7 @@
       "spell": 133,
       "target": "target",
       "relative_to": "crit",
-      "equals": 2
+      "min": 1.99, "max": 2.01
     },
     {
       "action": "wait",
@@ -134,7 +134,7 @@
       "spell": 133,
       "target": "target",
       "relative_to": "crit",
-      "equals": 3
+      "min": 2.99, "max": 3.01
     },
     {
       "action": "wait",
@@ -164,7 +164,7 @@
       "spell": 133,
       "target": "target",
       "relative_to": "crit",
-      "equals": 4
+      "min": 3.99, "max": 4.01
     },
     {
       "action": "wait",
@@ -194,7 +194,7 @@
       "spell": 133,
       "target": "target",
       "relative_to": "crit",
-      "equals": 5
+      "min": 4.99, "max": 5.01
     },
     {
       "action": "wait",
@@ -208,7 +208,7 @@
       "spell": 133,
       "target": "other",
       "relative_to": "crit",
-      "equals": 0
+      "min": -0.01, "max": 0.01
     }
   ],
   "creatures": [

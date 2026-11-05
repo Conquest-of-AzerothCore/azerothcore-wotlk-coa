@@ -4961,8 +4961,14 @@ void ObjectMgr::LoadPlayerInfo()
 
         } while (raceStatsResult->NextRow());
 
+        bool const ascensionClassStats = sConfigMgr->GetOption<bool>("CoA.ClassLevelSixtyStats.Enable", true);
         //                                                 0      1       2         3        4         5        6       7        8
-        QueryResult result = WorldDatabase.Query("SELECT Class, Level, Strength, Agility, Stamina, Intellect, Spirit, BaseHP, BaseMana FROM player_class_stats");
+        QueryResult result = WorldDatabase.Query(ascensionClassStats
+            ? "SELECT s.Class, s.Level, COALESCE(a.Strength, s.Strength), COALESCE(a.Agility, s.Agility), "
+              "COALESCE(a.Stamina, s.Stamina), COALESCE(a.Intellect, s.Intellect), COALESCE(a.Spirit, s.Spirit), "
+              "COALESCE(a.BaseHP, s.BaseHP), COALESCE(a.BaseMana, s.BaseMana) FROM player_class_stats s "
+              "LEFT JOIN ascension_class_stats a ON a.Class = s.Class AND a.Level = s.Level"
+            : "SELECT Class, Level, Strength, Agility, Stamina, Intellect, Spirit, BaseHP, BaseMana FROM player_class_stats");
 
         if (!result)
         {
@@ -5023,7 +5029,8 @@ void ObjectMgr::LoadPlayerInfo()
             ++count;
         } while (result->NextRow());
 
-        LoadAscensionRaceClassStats();
+        if (ascensionClassStats)
+            LoadAscensionRaceClassStats();
 
         // Fill gaps and check integrity
         for (int race = RACE_HUMAN; race < sRaceMgr->GetMaxRaces(); ++race)

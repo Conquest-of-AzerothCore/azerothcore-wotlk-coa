@@ -75,7 +75,7 @@ class ClassLevelSixtyStatsTests(unittest.TestCase):
         return self.database.query(sql, database="level_sixty_test")
 
     def setUp(self):
-        self.query("DROP TABLE IF EXISTS `ascension_race_class_stats`;")
+        self.query("DROP TABLE IF EXISTS `ascension_race_class_stats`; DROP TABLE IF EXISTS `ascension_class_stats`;")
         for table in TABLES:
             self.query(f"DROP TABLE IF EXISTS `{table}`; "
                        f"CREATE TABLE `{table}` LIKE `level_sixty_seed`.`{table}`; "
@@ -84,10 +84,20 @@ class ClassLevelSixtyStatsTests(unittest.TestCase):
     def apply(self):
         self.query(MIGRATION.read_text(encoding="utf-8"))
 
-    def class_rows(self):
-        return {(int(row[0]), int(row[1])): tuple(map(int, row[2:])) for row in self.query(
+    def rows_by_class_level(self, sql):
+        return {(int(row[0]), int(row[1])): tuple(map(int, row[2:])) for row in self.query(sql)}
+
+    def stock_rows(self):
+        return self.rows_by_class_level(
             "SELECT Class, Level, BaseHP, BaseMana, Strength, Agility, Stamina, Intellect, Spirit "
-            "FROM player_class_stats ORDER BY Class, Level;")}
+            "FROM player_class_stats;")
+
+    def class_rows(self):
+        return self.rows_by_class_level(
+            "SELECT s.Class, s.Level, COALESCE(a.BaseHP, s.BaseHP), COALESCE(a.BaseMana, s.BaseMana), "
+            "COALESCE(a.Strength, s.Strength), COALESCE(a.Agility, s.Agility), COALESCE(a.Stamina, s.Stamina), "
+            "COALESCE(a.Intellect, s.Intellect), COALESCE(a.Spirit, s.Spirit) FROM player_class_stats s "
+            "LEFT JOIN ascension_class_stats a ON a.Class = s.Class AND a.Level = s.Level;")
 
     def race_rows(self):
         return {int(row[0]): tuple(map(int, row[1:])) for row in self.query(
@@ -117,10 +127,12 @@ class ClassLevelSixtyStatsTests(unittest.TestCase):
             self.assertEqual(actual, expected, (race, custom))
 
     def test_level_one_and_stock_classes_are_unchanged(self):
-        before = self.class_rows()
+        before = self.stock_rows()
         self.apply()
+        self.assertEqual(before, self.stock_rows())
         after = self.class_rows()
         self.assertEqual(before.keys(), after.keys())
+        self.assertNotEqual(before[12, 60], after[12, 60])
         for key in before:
             if key[0] < 12 or key[1] == 1:
                 self.assertEqual(before[key], after[key], key)

@@ -2,6 +2,22 @@
 -- (realmDataCoa, source "coa-text", stamina and base health multiplied by 1.2), verified by the project 2026-11-03.
 -- Levels 2-59 stretch each fallback class's curve between the class's level-one row and its level-60 target;
 -- levels 61-80 keep the fallback gains above 60. Level one stays as calibrated in rev_20260903_01.
+-- The curve goes to ascension_class_stats and player_class_stats keeps the stock rows, so
+-- CoA.ClassLevelSixtyStats.Enable = 0 in coa.conf restores the previous stats on a restart.
+CREATE TABLE IF NOT EXISTS `ascension_class_stats` (
+  `Class` tinyint unsigned NOT NULL,
+  `Level` tinyint unsigned NOT NULL,
+  `BaseHP` int unsigned NOT NULL DEFAULT '1',
+  `BaseMana` int unsigned NOT NULL DEFAULT '1',
+  `Strength` int unsigned NOT NULL DEFAULT '0',
+  `Agility` int unsigned NOT NULL DEFAULT '0',
+  `Stamina` int unsigned NOT NULL DEFAULT '0',
+  `Intellect` int unsigned NOT NULL DEFAULT '0',
+  `Spirit` int unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`Class`, `Level`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT='Ascension class level stats used instead of player_class_stats while CoA.ClassLevelSixtyStats.Enable is 1.';
+
 CREATE TABLE IF NOT EXISTS `ascension_race_class_stats` (
   `Race` tinyint unsigned NOT NULL,
   `Class` tinyint unsigned NOT NULL,
@@ -359,15 +375,13 @@ SELECT `p`.`Class`, `p`.`Level`,
 FROM `_coa_level_sixty_progress` AS `p`
 INNER JOIN `_coa_level_sixty_class` AS `t` ON `t`.`Class` = `p`.`Class`;
 
-UPDATE `player_class_stats` AS `stats`, `_coa_level_sixty_class_curve` AS `curve` SET
-    `stats`.`BaseHP` = `curve`.`BaseHP`,
-    `stats`.`BaseMana` = `curve`.`BaseMana`,
-    `stats`.`Strength` = `curve`.`Strength`,
-    `stats`.`Agility` = `curve`.`Agility`,
-    `stats`.`Stamina` = `curve`.`Stamina`,
-    `stats`.`Intellect` = `curve`.`Intellect`,
-    `stats`.`Spirit` = `curve`.`Spirit`
-WHERE `stats`.`Class` = `curve`.`Class` AND `stats`.`Level` = `curve`.`Level`;
+DELETE FROM `ascension_class_stats` WHERE `Class` BETWEEN 12 AND 32;
+INSERT INTO `ascension_class_stats` (`Class`, `Level`, `BaseHP`, `BaseMana`,
+    `Strength`, `Agility`, `Stamina`, `Intellect`, `Spirit`)
+SELECT `curve`.`Class`, `curve`.`Level`, `curve`.`BaseHP`, `curve`.`BaseMana`,
+    `curve`.`Strength`, `curve`.`Agility`, `curve`.`Stamina`, `curve`.`Intellect`, `curve`.`Spirit`
+FROM `_coa_level_sixty_class_curve` AS `curve`
+INNER JOIN `player_class_stats` AS `stats` ON `stats`.`Class` = `curve`.`Class` AND `stats`.`Level` = `curve`.`Level`;
 
 DROP TEMPORARY TABLE IF EXISTS `_coa_level_sixty_race_curve`;
 CREATE TEMPORARY TABLE `_coa_level_sixty_race_curve` ENGINE=InnoDB AS
