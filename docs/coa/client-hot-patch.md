@@ -1,8 +1,8 @@
 # Server-sent interface Lua
 
-Some features send interface Lua to the client at login: the Manastorm UI fixes
-(`Manastorm.ClientUIFixes`) and the Fel Commutation window. Both build an
-`AscensionClientLuaChunk` and call `RunAscensionClientLua`
+Some features send interface Lua to the client: the Manastorm UI fixes and the Fel Commutation
+window at login (`Manastorm.ClientUIFixes`), and the Extra Quests window once a quest goes past the
+25-slot log (`Quests.LogSize`). Each builds an `AscensionClientLuaChunk` and calls `RunAscensionClientLua`
 (`src/server/coa/AscensionClientLua.{h,cpp}`), which picks one of two routes per client.
 
 ## Formatter route (every client)
@@ -21,6 +21,14 @@ Each chunk needs its own requirement type and requirement row:
 |---|---|---|---|
 | Fel Commutation window | 23 | 16263 | `FEL_COMMUTATION_WINDOW` |
 | Manastorm UI fixes | 24 | 16262 | `MANASTORM_UI_FIXES` |
+| Extra Quests window (quest log overflow) | 25 | 16265 | `QUEST_LOG_OVERFLOW_WINDOW` |
+
+A chunk on this route runs once and does not survive a `/reload`: the server sends each feature's
+chunk once per session and receives no signal when the client's interface reloads. Until the next
+login, the Fel Commutation window, the Manastorm UI fixes and the Extra Quests window (with its
+quest log button and `/extraquests`) are gone. Overflow quests keep their progress and can still be
+turned in; only promoting and abandoning them from the window waits for that login. The hot-patch
+route below has no such gap, because the client reruns its patches after a reload.
 
 ## Hot-patch route (clients that announce it)
 

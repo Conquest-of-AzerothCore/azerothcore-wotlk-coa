@@ -140,6 +140,9 @@ void Player::Update(uint32 p_time)
         LoginDatabase.Execute(stmt);
     }
 
+    if (m_questLogPromotionPending && IsInWorld())
+        PromoteOverflowQuests();
+
     if (!m_timedquests.empty())
     {
         QuestSet::iterator iter = m_timedquests.begin();

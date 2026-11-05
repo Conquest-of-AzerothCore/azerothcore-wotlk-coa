@@ -3086,6 +3086,17 @@ Quests.IgnoreAutoAccept = 0
 Quests.IgnoreAutoComplete = 0
 
 #
+#    Quests.LogSize
+#        Description: Number of quests a character can hold. The client shows the first 25 in its quest log;
+#                     further quests are kept by the server and listed by the server-sent Extra Quests window.
+#                     A kill, item or exploration update on such a quest counts as normal. Abandoning or turning
+#                     in a quest from the client log moves the next extra quest into the freed slot.
+#        Default:     25 - (Client quest log only)
+#        Range:       25-64
+
+Quests.LogSize = 25
+
+#
 #    Rate.RewardQuestMoney
 #        Description: Allows to tweak the amount of money rewarded by quests (does not affect RewardBonusMoney).
 #        Default:     1

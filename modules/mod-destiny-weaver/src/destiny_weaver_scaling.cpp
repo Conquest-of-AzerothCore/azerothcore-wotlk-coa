@@ -103,12 +103,14 @@ namespace
     /// The dungeon finder entries whose dungeons scale: the classic five-player dungeons the client's own
     /// scaling list names, plus Blackrock Depths, Lower and Upper Blackrock Spire, Dire Maul, Stratholme
     /// and Scholomance, the classic dungeons the client list leaves out.
-    constexpr char DEFAULT_SCALING_DUNGEONS[] = "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402 401";
+    constexpr char DEFAULT_SCALING_DUNGEONS[] =
+        "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 "
+        "163 164 165 272 273 274 276 601 402 401 45";
 
     /// Finder entries whose band is set here instead of read from LFGDungeons.dbc, as `entry:low-high`:
     /// Vaults of the Inquisition and Road to De Other Side scale with the character like the classic dungeons
     /// (15-59), while their finder rows admit 10-59.
-    constexpr char DEFAULT_SCALING_BANDS[] = "401:15-59 402:15-59";
+    constexpr char DEFAULT_SCALING_BANDS[] = "401:15-59 402:15-59 45:35-59";
 
     /// Where a view can exist at all: the open-world maps, and the classic dungeons with the band their
     /// creatures are held inside. Built on every config load and at startup, and published whole, so a

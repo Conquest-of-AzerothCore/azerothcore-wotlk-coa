@@ -27,6 +27,7 @@
 
 #include "EtherealBazaar.h"
 
+#include "AscensionBazaarTokenCap.h"
 #include "Chat.h"
 #include "CoATestZoneBonus.h"
 #include "Configuration/Config.h"
@@ -102,6 +103,8 @@ namespace
             return;
 
         amount = TestZoneBonus::Apply(player, TestZoneBonus::Reward::BazaarTokens, ApplyLevelBonus(player, amount));
+
+        amount = AscensionBazaarTokenCap::Claim(player, amount);
         if (!amount)
             return;
 

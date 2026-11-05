@@ -18875,6 +18875,14 @@ void Unit::SetShapeshiftForm(ShapeshiftForm form)
     sScriptMgr->OnUnitSetShapeshiftForm((Unit*)this, form);
 }
 
+bool Unit::IsOnDivineSteed() const
+{
+    Aura const* divineCharge = GetAura(527272);
+    Unit const* divineCaster = divineCharge ? divineCharge->GetCaster() : nullptr;
+    return divineCaster && divineCaster->IsPlayer() && divineCaster->getClass() == CLASS_MONK &&
+        GetMountID() == 14584 && !IsInFlight();
+}
+
 bool Unit::IsInDisallowedMountForm() const
 {
     if (SpellInfo const* transformSpellInfo = sSpellMgr->GetSpellInfo(getTransForm()))

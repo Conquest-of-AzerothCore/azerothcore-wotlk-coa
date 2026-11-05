@@ -20,6 +20,7 @@
 #include "AscensionPooledVitality.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
+#include "BossControlTargeting.h"
 #include "CharmInfo.h"
 #include "CellImpl.h"
 #include "Common.h"
@@ -6180,10 +6181,7 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
     }
 
     // Divine Charge explicitly permits its recipients to cast on the finite steed.
-    Aura const* divineCharge = m_caster->GetAura(527272);
-    Unit const* divineCaster = divineCharge ? divineCharge->GetCaster() : nullptr;
-    bool divineSteed = divineCaster && divineCaster->IsPlayer() && divineCaster->getClass() == CLASS_MONK &&
-        m_caster->GetMountID() == 14584 && !m_caster->IsInFlight();
+    bool divineSteed = m_caster->IsOnDivineSteed();
     bool tinkerMechsuitConsumable = m_CastItem && m_CastItem->GetTemplate()->Class == ITEM_CLASS_CONSUMABLE;
     bool tinkerMechsuit = m_caster->IsPlayer() && m_caster->getClass() == CLASS_TINKER &&
         (m_spellInfo->SpellFamilyName == 34 || tinkerMechsuitConsumable) && !m_caster->IsInFlight() &&
@@ -9012,6 +9010,10 @@ void Spell::CallScriptAfterHitHandlers()
 
 void Spell::CallScriptObjectAreaTargetSelectHandlers(std::list<WorldObject*>& targets, SpellEffIndex effIndex, SpellImplicitTargetInfo const& targetType)
 {
+    // Vanilla dungeon boss sleep and mind control never reach a tank or healer (BossControlTargeting.h).
+    if (BossControl::Applies(m_caster, m_spellInfo) && BossControl::SparesAreaTargets(m_spellInfo))
+        targets.remove_if([this](WorldObject* target) { return BossControl::Forbids(m_caster, target->ToUnit(), m_spellInfo); });
+
     for (std::list<SpellScript*>::iterator scritr = m_loadedScripts.begin(); scritr != m_loadedScripts.end(); ++scritr)
     {
         (*scritr)->_PrepareScriptCall(SPELL_SCRIPT_HOOK_OBJECT_AREA_TARGET_SELECT);

@@ -19,8 +19,9 @@
  *
  *   Snake form, when the avatar dies
  *     Toxic Bombardement  first 1s,  every 15s   toxic cloud at a random player
- *     Parasitic Poison    first 3s,  every 15s   random player; dispelled, a
- *                                                Parasitic Serpent breaks out
+ *     Parasitic Poison    first 3s,  every 15s   random player; when it ends or
+ *                                                is dispelled, three Parasitic
+ *                                                Serpents break out
  *     Venom Spit          first 5s,  every 10s   everyone in front, stacks
  *                                                Virulent Poison
  *     Corpse Explosion    first 17s, every 40s   every snake corpse nearby
@@ -121,6 +122,7 @@ namespace
     constexpr float HOLY_NOVA_RANGE  = 15.0f;
     constexpr float WRATH_JUMP_RANGE = 10.0f;
     constexpr uint8 WRATH_JUMPS      = 4;
+    constexpr uint8 PARASITIC_SERPENTS = 3;
     constexpr float SPIT_RANGE       = 60.0f;
     constexpr float SPIT_ARC         = float(M_PI) / 2;
     constexpr float CORPSE_RANGE     = 80.0f;
@@ -387,23 +389,27 @@ namespace
         GuidSet _burst;
     };
 
-    // Parasitic Poison: removed by any means before it runs out, a Parasitic
-    // Serpent breaks out of the target.
+    // Parasitic Poison: when it ends, run out or removed, three Parasitic
+    // Serpents break out of the target (live log: three per poison).
     class spell_venoxis_coa_parasitic_poison : public AuraScript
     {
         PrepareAuraScript(spell_venoxis_coa_parasitic_poison);
 
         void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
-            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
-                return;
             Unit* target = GetTarget();
             Unit* caster = GetCaster();
             if (!target || !caster || !caster->IsAlive())
                 return;
-            if (Creature* boss = caster->ToCreature())
-                if (Creature* serpent = boss->SummonCreature(NPC_PARASITIC_SERPENT, target->GetPosition(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000))
+            Creature* boss = caster->ToCreature();
+            if (!boss)
+                return;
+            for (uint8 i = 0; i < PARASITIC_SERPENTS; ++i)
+            {
+                Position const spot = target->GetNearPosition(2.0f, float(2 * M_PI) * i / PARASITIC_SERPENTS);
+                if (Creature* serpent = boss->SummonCreature(NPC_PARASITIC_SERPENT, spot, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000))
                     serpent->AI()->AttackStart(target);
+            }
         }
 
         void Register() override

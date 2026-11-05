@@ -1,0 +1,330 @@
+{
+  "schema": 1,
+  "name": "Bazaar Tokens: an account earns at most 1250 per hour",
+  "contract": "Requires CoA.BazaarTokens.HourlyCap.Amount = 1250 in the source config (the default 0 turns the limit off); with WindowSeconds 3600 (default) an account earns at most 1250 Bazaar Tokens (975001) in the hour its first earned token opens. A level-60 Human at 1210 earned tokens turns in Scarlet Sweep: Magic and Might (18034, a Call Board daily paying 50 tokens and 2000 Runes of Ascension 375250): only the remaining 40 tokens are paid, the runes in full, and the player is told the limit is reached. At the limit, eight ordinary quests pay none of the Ethereal Bazaar's 0-6 tokens each (EtherealBazaar.Tokens.Quest.Min/Max defaults). Tokens added directly (as a GM .additem does) are not limited. Once the hour that opened 61 minutes ago has run out, eight more ordinary quests pay 0-6 each again: at least 1 in total (all eight paying 0 has probability 7^-8). Only one Call Board daily is used, because CoA.CallboardContracts.DailyCompletions allows one per day. Limiting tokens per hour is a Rexxar choice, not live Ascension behaviour.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8822.9,
+    "y": 628.4,
+    "z": 93.8,
+    "o": 2.4
+  },
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join the world phase the board is spawned in",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Scarlet Sweep: Magic and Might is complete",
+      "actor": "hero",
+      "quest": 18034
+    },
+    {
+      "action": "console",
+      "command": "tokencap set Harnessa 1210"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "tokens_before_scarlet"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 375250,
+      "save_as": "runes_before_scarlet"
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in Scarlet Sweep: Magic and Might at 1210 of 1250",
+      "actor": "hero",
+      "quest": 18034
+    },
+    {
+      "action": "assert",
+      "label": "Only the 40 tokens left under the limit are paid",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "tokens_before_scarlet",
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "label": "The runes are paid in full",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 375250,
+      "relative_to": "runes_before_scarlet",
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The player is told the limit is reached",
+      "actor": "hero",
+      "metric": "system_message_contains",
+      "text": "You have reached the limit of 1250 Bazaar Tokens per hour",
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "tokens_at_limit"
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Quest 212 is complete at the limit",
+      "actor": "hero",
+      "quest": 212
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in quest 212 at the limit",
+      "actor": "hero",
+      "quest": 212
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Quest 543 is complete at the limit",
+      "actor": "hero",
+      "quest": 543
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in quest 543 at the limit",
+      "actor": "hero",
+      "quest": 543
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Quest 1110 is complete at the limit",
+      "actor": "hero",
+      "quest": 1110
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in quest 1110 at the limit",
+      "actor": "hero",
+      "quest": 1110
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Quest 1175 is complete at the limit",
+      "actor": "hero",
+      "quest": 1175
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in quest 1175 at the limit",
+      "actor": "hero",
+      "quest": 1175
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Quest 1284 is complete at the limit",
+      "actor": "hero",
+      "quest": 1284
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in quest 1284 at the limit",
+      "actor": "hero",
+      "quest": 1284
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Quest 1360 is complete at the limit",
+      "actor": "hero",
+      "quest": 1360
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in quest 1360 at the limit",
+      "actor": "hero",
+      "quest": 1360
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Quest 1389 is complete at the limit",
+      "actor": "hero",
+      "quest": 1389
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in quest 1389 at the limit",
+      "actor": "hero",
+      "quest": 1389
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Quest 2769 is complete at the limit",
+      "actor": "hero",
+      "quest": 2769
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in quest 2769 at the limit",
+      "actor": "hero",
+      "quest": 2769
+    },
+    {
+      "action": "assert",
+      "label": "Eight quests at the limit pay none of their 0-6 Ethereal Bazaar tokens",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "tokens_at_limit",
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "label": "100 tokens added directly, as a GM does",
+      "actor": "hero",
+      "item": 975001,
+      "count": 100
+    },
+    {
+      "action": "assert",
+      "label": "Direct grants are not limited",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "tokens_at_limit",
+      "equals": 100
+    },
+    {
+      "action": "console",
+      "command": "tokencap set Harnessa 1250 61"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "tokens_new_hour"
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Quest 2781 is complete in a new hour",
+      "actor": "hero",
+      "quest": 2781
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in quest 2781 in a new hour",
+      "actor": "hero",
+      "quest": 2781
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Quest 2864 is complete in a new hour",
+      "actor": "hero",
+      "quest": 2864
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in quest 2864 in a new hour",
+      "actor": "hero",
+      "quest": 2864
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Quest 2865 is complete in a new hour",
+      "actor": "hero",
+      "quest": 2865
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in quest 2865 in a new hour",
+      "actor": "hero",
+      "quest": 2865
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Quest 2872 is complete in a new hour",
+      "actor": "hero",
+      "quest": 2872
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in quest 2872 in a new hour",
+      "actor": "hero",
+      "quest": 2872
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Quest 2875 is complete in a new hour",
+      "actor": "hero",
+      "quest": 2875
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in quest 2875 in a new hour",
+      "actor": "hero",
+      "quest": 2875
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Quest 2877 is complete in a new hour",
+      "actor": "hero",
+      "quest": 2877
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in quest 2877 in a new hour",
+      "actor": "hero",
+      "quest": 2877
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Quest 2924 is complete in a new hour",
+      "actor": "hero",
+      "quest": 2924
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in quest 2924 in a new hour",
+      "actor": "hero",
+      "quest": 2924
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Quest 2982 is complete in a new hour",
+      "actor": "hero",
+      "quest": 2982
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in quest 2982 in a new hour",
+      "actor": "hero",
+      "quest": 2982
+    },
+    {
+      "action": "assert",
+      "label": "Once the hour has run out, eight quests pay their 0-6 tokens again",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "tokens_new_hour",
+      "min": 1,
+      "max": 48
+    }
+  ]
+}

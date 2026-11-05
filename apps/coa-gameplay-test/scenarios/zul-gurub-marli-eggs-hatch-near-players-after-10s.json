@@ -1,0 +1,193 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: High Priestess Mar'li's Hatch Eggs opens the eggs near the raid 10 seconds later, one spider each",
+  "contract": [
+    "The tester confirmed on 2026-11-04 that on live each Hatch Eggs (2118115) picks the eggs near the players and",
+    "they hatch about 10 s later. Each egg (179985) hatches one Spawn of Mar'li (15041). Two heroes stand",
+    "back to back and each places one egg 3 yards in front of them; the world's eggs share phase 1 and the",
+    "lane has its own phase, so Mar'li sees only these two. When she casts Hatch Eggs 17 s into the fight no",
+    "spider appears at once or 7 s later, and two spiders appear by 13 s: one per egg, not ten on the nearest."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "other",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "other",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "group",
+      "label": "Both heroes share one Zul'Gurub instance",
+      "actor": "tank",
+      "target": "other"
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the heroes settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank is in Zul'Gurub",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "teleport",
+      "label": "The other hero faces the opposite way",
+      "actor": "other",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 1.675,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "summon_gameobject",
+      "label": "The tank places an egg in front of them",
+      "actor": "tank",
+      "entry": 179985,
+      "distance": 3,
+      "duration_s": 0
+    },
+    {
+      "action": "summon_gameobject",
+      "label": "The other hero places an egg in front of them",
+      "actor": "other",
+      "entry": 179985,
+      "distance": 3,
+      "duration_s": 0
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 14510,
+      "as": "marli",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "label": "Engage High Priestess Mar'li",
+      "actor": "tank",
+      "target": "marli"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li fights",
+      "actor": "marli",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "tank"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no spider before Hatch Eggs",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li casts Hatch Eggs at 17 s",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118115,
+      "min": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no egg hatches as she casts",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no egg has hatched 7 s later",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: both eggs hatch about 10 s after the cast, one spider each",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "equals": 2,
+      "within_ms": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "No further spider hatches from the same eggs",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "equals": 2
+    }
+  ]
+}

@@ -60,7 +60,7 @@ Measured health per player is net damage taken in the log divided by the group s
 | 14515 Arlokk | 497,928 | 367,800 | Claw Storm 20 → 55 s | — |
 | 11382 Mandokir | 622,364 | 510,568 | Mortal Strike 10 → 12 s | — |
 | 14834 Hakkar | 647,307 | 582,793 | Blood Scythe 12 → 15 s, Blood Siphon 90 → 59.5 s first, 79.5 s repeat | 2118607 Pool of Corrupted Blood |
-| 15082 Gri'lek | 108,341 | above 133k (not killed at 11) | Ground Slam 13 → 24 s first, 25 s repeat | — |
+| 15082 Gri'lek | 318,182 (tester video, `rev_20261104_05`) | above 133k (not killed at 11); 3.5 million at 11 in the tester's video | Ground Slam 13 → 24 s first, 25 s repeat | — |
 | 11380 Jin'do, 15114 Gahz'ranka, 15083-15085 | — | no log | unknown | unknown |
 
 All bosses and adds: Fierce Blow 975011 and Knockdown 520871 are cast live and absent on the server (Molten Core
@@ -83,9 +83,10 @@ Archive-only boss points (approval needed):
 
 - Heart of Hakkar: the log has 92005 (wdb rank 3, model 28887, HM 17.55); the script uses 9780022
   (`boss_hakkar_coa.cpp`), an id that is "Netherstorm Fel Quests" in sub.
-- Ohgan rank 1 / display 215271, Spawn of Mar'li display 959, Powerful Healing Ward named "Healing Stream Totem"
-  (wdb).
-- Exiles-only spells never cast in the log: 2106125 Bat-tering Charge, Venoxis 2118081, 2118085, 2118045.
+- Ohgan rank 1, Spawn of Mar'li display 959, Powerful Healing Ward named "Healing Stream Totem" (wdb). Ohgan's
+  display 215271 is applied (section 7).
+- Exiles-only spells never cast in the logs: Venoxis 2118081, 2118085, 2118045. Jeklik casts 2106125 Bat-tering
+  Charge every 20 s in `2026-08-02-19.50.33`.
 
 ## 5. Trash and spawns
 
@@ -141,7 +142,7 @@ kill in the Normal video gives each player 175 Runes of Ascension and 2 Raider's
 runes, 6 commendations and Dungeon Spoils. 2500 exceeds a loot row's 8-bit count, so Hakkar's script hands those
 runes to every player who tapped him. The variants take the Normal amounts. Dungeon Spoils on Hakkar: 2021814 on
 Normal (video) and Ascended (as Ragnaros), Heroic 1202039 and Mythic 1027965 (sub). The Hakkar kill shows no Cache
-of the Blood God; the cache 1400023 stays by decision.
+of the Blood God, so Normal Hakkar drops none (user decision 2026-11-04); the higher tiers keep theirs.
 
 Archive-only loot (approval needed): Battleweaver pieces as boss drops (sub only), 0 %-chance CoA pieces on bosses
 and 43 trash greens, Edge 12504, Gahz'ranka 12503 and 1022739.
@@ -154,7 +155,7 @@ Left as is unless decided otherwise: quests 580290 and 580295 carry local Path t
 |---|---|---|
 | Heart of Hakkar is 92005 (rank 3, model 28887, HM 17.55, MM 1.755, faction 28); 9780022 stays an unused template | `rev_20261025_80`, `boss_hakkar_coa.cpp` | log, wdb |
 | rank 1 on 11360, 11368, 11387-11391, 14826 (not trigger 14758); ManaModifier corrections; 14826 display 27651; guid 51391 → 11338 | `rev_20261025_81` | wdb, sub |
-| Hakkar Normal: 1400023 Cache of the Blood God 100 %, 97725 Offering Key 100 %; 13 boss sigils 1 %; Edge of Madness blood items 100 % | `rev_20261025_82` | wdb, exiles, sub |
+| Hakkar Normal: 97725 Offering Key 100 %, Cache of the Blood God 1400023 100 %; 13 boss sigils 1 %; Edge of Madness blood items 100 % | `rev_20261025_82` | wdb, exiles, sub |
 | access rows for difficulties 0-3 at level 60; every map-309 spawn on `spawnMask` 15 | `rev_20261025_83` | dbc |
 | Heroic, Mythic and Ascended templates for 61 families at +100000/+200000/+300000, health and melee damage ×1.44/×1.88/×2.32, `coa_boss_flex` hp_d1..d3 on the same ladder | `rev_20261025_84` | wdb (Hakkar, Mar'li, Arlokk, Bloodseeker Bat), Molten Core precedent |
 | own loot ids for 39 boss variants, 642 rows; Hakkar caches 1400039 / 2400039 / 2500039; no Battleweaver pieces | `rev_20261025_85` | sub |
@@ -164,17 +165,26 @@ Left as is unless decided otherwise: quests 580290 and 580295 carry local Path t
 | trash kits from the log; Fierce Blow 975011 and Berserking 1126297; SmartAI on 11361, 11387, 14880, 15068 | `rev_20261025_88` | log |
 | boss timers from the log, Mar'li's Burrow and Poison Nova, Fierce Blow on bosses and adds; zealot, Ohgan, Chained Spirit, Bat Rider, Spawn of Mar'li and Zulian Prowler kits | `modules/mod-coa-raid-difficulty/src/*_coa.cpp`, stock `ZulGurub/*.cpp`, `rev_20261025_89` | log |
 | Loa Avatars 666988-666992 (faction 35, level 63): each avatar is a passive spawn in its priest's temple (guids 9999801-9999805), respawned at every reset and pull if a past pull drained it; at 50 % the priest drains it with Drain Power (-99 % damage taken) until it dies, then gains the Gift of the Blood God and its second kit; Hakkar drains the avatar of every living priest at the pull and gains that Aspect when it dies | `rev_20261025_90`, `zg_coa_common.h` (`LoaAvatar`), the five priests, `boss_hakkar_coa.cpp` | wdb, log, dbc, video |
-| Mar'li: the ten nearest eggs hatch at 17 s and every 30 s, in both forms and on every difficulty; Poison Bolt Volley in both forms | `boss_marli_coa.cpp` | video (DBM bar), tester |
+| Mar'li: Hatch Eggs at 17 s and every 30 s, in both forms and on every difficulty; Poison Bolt Volley in both forms | `boss_marli_coa.cpp` | video (DBM bar), tester |
 | Thekal: no false death, no zealot revival, no tiger phase at full health; tiger form when the avatar dies; Rip comes only from Speed Slash cuts, and Speed Slash ends after 17 s | `boss_thekal_coa.cpp` | log, tester |
 | boss achievements per difficulty: Normal, Heroic, Mythic and Ascended criteria get `achievement_criteria_data` scripts that match the exact difficulty | `rev_20261025_91`, `AscensionAchievementConditions.cpp` | dbc |
-| Mandokir: Threatening Gaze 4 s, then Menacing Gaze 4 s; a hostile spell with a power cost on the global cooldown gives Sentenced to Die and Decapitate; Mounted out of combat; Bloodlord's Presence (no durability loss) at the pull; one Whirlwind at 12 s and every 25 s, also without a charge | `boss_mandokir_coa.cpp` | dbc, log |
+| Mandokir: Threatening Gaze 4 s, then Menacing Gaze 4 s; a hostile spell with a power cost on the global cooldown gives Sentenced to Die and Decapitate; Mounted out of combat; Bloodlord's Presence (no durability loss) at the pull; Whirlwind as each Berserker Charge lands, in the charge's place when nobody is out of melee (see the 2026-11-04 row) | `boss_mandokir_coa.cpp` | dbc, log |
 | Gurubashi Berserker: Trauma lands with every Thunderclap hit, never as a cast of its own | `rev_20261102_93` | log |
 | Edge of Madness: the Brazier of Madness has no lock (Gurubashi Mojo Madness not needed) and always summons Gri'lek; the encounter credits Gri'lek | `rev_20261102_94` | wdb, log |
 | Jin'do: the Brain Wash Totem casts Brainwash 2118502; the Powerful Healing Ward casts Healing Stream 2118504 (1 % of missing health per second) and loses its stock heal and melee | `boss_jindo_coa.cpp`, `rev_20261025_92` | dbc, wdb (ward named "Healing Stream Totem") |
-| tester feedback of 2026-11-03 with Pigeon's spell review: Poisonous Fangs, Furious Strikes, Shredding Claws and Razor Claws proc on melee hits, the snakes' Fangs stack Venoxis's own Virulent Poison while he fights; Gri'lek's Trauma has difficulty spells; Venoxis's and Hakkar's pools vanish on reset and death; Hakkar summons one Son per wave; Jin'do's shades despawn on his death and Banish lands on the pit floor; Mandokir's Mortal Strike needs melee range and his charge keeps threat; the Chained Spirit's resurrection leaves no resurrection timer; Bat Riders can be stunned and die by their Unstable Concoction; Arlokk takes panther form at 50 % for the rest of the fight (no vanish); Spawn of Mar'li and Zulian Prowlers are elite, Parasitic Serpents level 60 | `rev_20261103_91`, the boss scripts, `boss_jeklik.cpp`, `SpellInfoCorrections.cpp` | tester, live log, dbc |
+| tester feedback of 2026-11-03 with Pigeon's spell review: Poisonous Fangs, Furious Strikes, Shredding Claws and Razor Claws proc on melee hits, the snakes' Fangs stack Venoxis's own Virulent Poison while he fights; Gri'lek's Trauma has difficulty spells; Venoxis's and Hakkar's pools vanish on reset and death; Hakkar summons one Son per wave; Jin'do's shades despawn on his death and Banish lands on the pit floor; Mandokir's Mortal Strike needs melee range and his charge keeps threat; the Chained Spirit's resurrection leaves no resurrection timer; Bat Riders can be stunned and die by their Unstable Concoction; Arlokk takes panther form at 50 % for the rest of the fight; Spawn of Mar'li and Zulian Prowlers are elite, Parasitic Serpents level 60 | `rev_20261103_91`, the boss scripts, `boss_jeklik.cpp`, `SpellInfoCorrections.cpp` | tester, live log, dbc |
 | tester answers checked against the live logs of 2025-12 to 2026-08: Jeklik's Terrifying Screech fears (2106137) everyone within 20 yards; Mar'li's Web Spray is cast at her victim, so its 20-yard webs land; the Heart of Hakkar takes the damage it passes to Hakkar, and the siphon ends when it breaks | `boss_jeklik_coa.cpp`, `boss_marli_coa.cpp`, `boss_hakkar_coa.cpp` | tester, live log, dbc |
+| tester feedback of 2026-11-04 checked against the live logs: Thekal's War Stomp 2118227 hits his target 12 s into tiger form and every 40 s, Speed Slash picks a new target every 2 s; three Parasitic Serpents 14884 break out when Venoxis's Parasitic Poison 2118041 ends or is dispelled; Arlokk vanishes (2118312) when she becomes a panther, Shadowsteps to a Ravage 11 s later and every 55 s, Claw Storm 18 s and Vanish 26 s after each Ravage, Claw Storm does not apply Razor Claws, and her bleeds end with her death or with the bleeding player's death (the DBC keeps Razor Claws 2118326-2118329 through death, so a battle-resurrected player bled out again); Jin'do casts no Hex or Banish, his totems lose one health per hit (Brain Wash Totem 5, ward 15 or 25 above Normal), three Brain Wash Totems (five above Normal) at 16 s, the ward at 21 s and Animate Bones at 23 s, each on a 60/60/30 s cycle, the Blood Pit starts empty and the risen trolls use Fierce Blow; Will of Hakkar only on Mythic and Ascended, at 45 s; the heart floats 8 yd up with model 428001 at scale 2; a Son of Hakkar leaves its pool only where it dies; overlapping Pools of Corrupted Blood hurt like one; Ohgan's abilities start whoever pulls him | the boss scripts, stock `boss_mandokir.cpp`, `rev_20261104_00`, `rev_20261104_01` | tester, live log, dbc |
+| Mar'li comes up from Burrow on the player farthest from her and stays on them for 8 s, untauntable, whatever threat the tank holds; the hunted player carries Menacing Gaze 2118141 meanwhile | `boss_marli_coa.cpp` | tester 2026-11-04, user decision |
+| the Cache of the Blood God (1400023, 1400039, 2400039, 2500039) opens into one of Hakkar's own items for its tier, never the Heart: each has the loot flag, the `item_coa_dungeon_spoils` opener and Hakkar's 14 items in one equal-chance group; before, none had loot | `rev_20261104_00` | tester 2026-11-04 |
+| Mar'li's Hatch Eggs marks the ten free eggs nearest the players, and each hatches one Spawn of Mar'li 10 s later; Evolve and Infest take the nearest free egg at once | `boss_marli_coa.cpp` | tester 2026-11-04 |
+| Jeklik starts on the ground below her cave (-12273.9, -1407.77, 132.223), where stock landed her, and fights as a troll from the pull without the bat-form descent | `rev_20261104_04`, `boss_jeklik_coa.cpp` | tester and live videos 2026-11-04 |
+| Jeklik's Bat-tering Charge 2106125 reaches only players out of melee within 25 yards (stock Jeklik's Charge, 8-25 yd); the DBC's 100 yd let her charge ranged players and healers at 30 yd and more | `boss_jeklik_coa.cpp` | tester 2026-11-04, vanilla 22911 |
+| Mandokir: Mortal Strike, Mortal Strike, Berserker Charge, and Whirlwind begun as the charge lands, not on its own timer about a second later; a Mortal Strike due during the Whirlwind follows when it ends | `boss_mandokir_coa.cpp` | tester video 2026-11-04, live log 2026-08-02 |
+| Gri'lek 15082 has 318,182 health per player on Normal (458,182, 598,182 and 738,182 above), from the tester's video of 3.5 million at 11 players; it was 108,341, about 1.19 million at 11 | `rev_20261104_05` | tester video 2026-11-04, user decision |
+| Ohgan (14988 and its tiers) uses display 215271, model 15271 at a client scale of 2, with its own model info (bounding radius 0.7, combat reach 3); he runs in from the arena entrance when Mandokir is pulled instead of appearing at his side | `rev_20261104_03`, `boss_mandokir_coa.cpp` | wdb, dbc, tester 2026-11-04, user decision |
 
-Normal boss health is unchanged. Knockdown 520871 is not added: it is a player ability, and the bosses are immune
+Normal boss health is unchanged except Gri'lek's. Knockdown 520871 is not added: it is a player ability, and the bosses are immune
 to it in the log.
 
 ## 8. Still open
@@ -190,12 +200,27 @@ to it in the log.
 7. DamageModifier follows the health ladder as in Molten Core; no log measures variant melee damage.
 8. The logs carry no timings for trash abilities and Berserking: the Molten Core windows are used.
 9. Archive-only spawn swaps other than 51391, the sub-only Hakkari Priest and the possible stacked duplicates.
-10. Mar'li's Burrow lasts an estimated 3 s; Storm Shield stays on Lor'Khan, although the log mostly shows it on Zath;
-    2118267 "Storm Shield - Extra" and Shred's Razor Claws part are not scripted.
+10. Mar'li's Burrow lasts an estimated 3 s, and the gaze aura on her hunted player is chosen here (no log shows
+    it); Storm Shield stays on Lor'Khan, although the log mostly shows it on Zath; 2118267 "Storm Shield - Extra" and Shred's Razor Claws part are not scripted.
 11. Estimated, not in any data: the avatars' level 63, faction 35 and position (the temple spots, a 10 yd
-    ring around Hakkar); the order drain → death → Gift and Aspect; Mandokir's gaze order and Bloodlord's Presence once
+    ring around Hakkar); Ohgan's arena entrance (-12274.7, -1913.96), the gap in the chained spirits' ring on
+    the north-west side; the order drain → death → Gift and Aspect; Mandokir's gaze order and Bloodlord's Presence once
     at the pull; which totem casts which spell; exact-difficulty achievement credit (no credit for a lower
     difficulty).
 12. Left out for lack of data: Realm of the Blood God 2118425 (its phase 4 content is missing), Mounted 2118411 on
     Ohgan, Jin'do's Seeking Shadow Bolts 2118550-2118556 and Rise 2118561, Hakkar's Dormant Heart 2118651, Animate
     Blood 2118640/2118641, Rain of Blood 2118642 and the meteor split 2118646.
+13. Tester questions of 2026-11-04 that await a decision: Sons of Hakkar loot, Jinxed Hoodoo removing Will of Hakkar, the shades' area
+    damage and Mandokir's items. Decided without a change here: the Blood Orb is skipped, and
+    the battle resurrection limit gets its own change. Estimated: Jeklik's facing on the ground, and the 100 yd
+    reach of Mar'li's egg search.
+14. Checked only in game: the number and paths of the risen trolls, the totem positions, and Claw Storm leaving no
+    bleed.
+15. Tester remarks of 2026-11-04 without a change:
+    - Mandokir's Whirlwind "feels short": its 3 s cast and 6 s spin match the DBC and the live log, and a scenario
+      checks the full 6 s.
+    - Frenzy 2106613 at 65 % attack speed on Normal and Heroic, with extra damage on Mythic and Ascended: the
+      server DBC, the client DBC, the Exiles DB and the SUB dump all give 30 % haste and 30 % more damage taken,
+      with no tier variant. In the live log of 2026-08-02 his median swing drops from 2.47 s to 1.80 s under
+      Frenzy, about 1.4 times faster, not the 1.65 of 65 %. Kept at 30 % (user decision, 2026-11-04).
+    - Jin'do's shades taking no area damage may come from one class's ability; the tester retests it.

@@ -21,7 +21,8 @@
  *                                             that heals him; when it ends, a
  *                                             Pool of Corrupted Blood stays
  *   Will of Hakkar     first 45s, every 45s   a player feels it for 5s, then is
- *                                             his for 15s
+ *                                             his for 15s; Mythic and Ascended
+ *                                             only (tester, live)
  *   Blood Scythe       first 10s, every 15s   cone in front, -10% armour, stacks 10
  *   Sons of Hakkar     first 45s, every 60s   one joins; where it dies its blood
  *                                             pools and poisons those inside
@@ -44,6 +45,7 @@
  *   - Animate Blood and Rain of Blood are left out (the
  *     Orb of Corrupted Blood exists nowhere in the data).
  * The Heart is creature 92005, as in the log: the stock one (15069) despawns itself.
+ * It appears inside his chest, 8 yards above him (tester, live).
  */
 
 #include "CreatureScript.h"
@@ -138,6 +140,8 @@ namespace
     constexpr float POOL_RADIUS          = 5.0f;
     constexpr uint8 SCYTHE_STACKS        = 10;
     constexpr float AVATAR_RING          = 10.0f;
+    constexpr float HEART_HEIGHT         = 8.0f;
+    constexpr uint8 WILL_OF_HAKKAR_MIN_SPAWN_MODE = 2;
 
     // The launch-day Normal kill (youtube c7iqfz04PmI) gives each player 2500 Runes of Ascension in one loot slot,
     // more than a loot row's 8-bit count holds, so they are handed out at his death instead.
@@ -198,7 +202,8 @@ namespace
 
             events.ScheduleEvent(EVENT_BLOOD_SCYTHE, 10s);
             events.ScheduleEvent(EVENT_CORRUPTED_BLOOD, 25s);
-            events.ScheduleEvent(EVENT_WILL_OF_HAKKAR, 45s);
+            if (me->GetMap()->GetSpawnMode() >= WILL_OF_HAKKAR_MIN_SPAWN_MODE)
+                events.ScheduleEvent(EVENT_WILL_OF_HAKKAR, 45s);
             events.ScheduleEvent(EVENT_SONS, 45s);
             events.ScheduleEvent(EVENT_BLOOD_SIPHON, 59500ms);
             events.ScheduleEvent(EVENT_FIERCE_BLOW, FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX);
@@ -305,7 +310,8 @@ namespace
                 case SPELL_BLOOD_SIPHON:
                 {
                     _siphoning = true;
-                    Position pos = me->GetNearPosition(12.0f, 0.0f);
+                    Position pos = me->GetPosition();
+                    pos.m_positionZ += HEART_HEIGHT;
                     if (Creature* heart = me->SummonCreature(NPC_HEART_OF_HAKKAR, pos, TEMPSUMMON_MANUAL_DESPAWN))
                     {
                         heart->AddAura(SPELL_HEART_EXPOSED, heart);
@@ -488,6 +494,7 @@ namespace
         {
             me->SetReactState(REACT_PASSIVE);
             me->SetControlled(true, UNIT_STATE_ROOT);
+            me->SetDisableGravity(true);
         }
 
         void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType type, SpellSchoolMask /*school*/) override

@@ -35,6 +35,11 @@ CoA.MapClass10ToWarrior = 1
 CoA.ProbeRelay.Enable = 0
 CoA.ProbeRelay.AccountPrefix = "COALAB"
 
+CoA.LevelBoostNpc.Enable = 0
+CoA.LevelBoostNpc.Level = 60
+CoA.LevelBoostNpc.GoldReward = 5000
+CoA.LevelBoostNpc.RuneOfDescensionReward = 2000000
+
 # Log each consumed extension packet during protocol discovery.
 CoA.LogConsumedPackets = 1
 
@@ -43,6 +48,9 @@ CoA.LogConsumedPackets = 1
 # another account, auctioned or put in a guild bank while the account keeps at least the reserve. Mail between
 # the account's own characters is free. Farmed tokens above the reserve stay tradeable.
 CoA.BazaarTokens.WarchestRealmBound = 1
+
+CoA.BazaarTokens.HourlyCap.Amount = 0
+CoA.BazaarTokens.HourlyCap.WindowSeconds = 3600
 
 # Ascension character screen: enable/disable (activate/deactivate) and the
 # per-account character list sort order.

@@ -61,6 +61,7 @@
 #include "Opcodes.h"
 #include "Pet.h"
 #include "PetPackets.h"
+#include "QuestPackets.h"
 #include "Player.h"
 #include "ReputationMgr.h"
 #include "QuestDef.h"
@@ -586,6 +587,26 @@ private:
     std::map<ServerConfigs, bool> _original;
 };
 
+class QuestLogSizeConfig
+{
+public:
+    explicit QuestLogSizeConfig(uint32 size) : _original(sWorld->getIntConfig(CONFIG_QUEST_LOG_SIZE))
+    {
+        sWorld->setIntConfig(CONFIG_QUEST_LOG_SIZE, size);
+    }
+
+    QuestLogSizeConfig(QuestLogSizeConfig const&) = delete;
+    QuestLogSizeConfig& operator=(QuestLogSizeConfig const&) = delete;
+
+    ~QuestLogSizeConfig()
+    {
+        sWorld->setIntConfig(CONFIG_QUEST_LOG_SIZE, _original);
+    }
+
+private:
+    uint32 _original;
+};
+
 struct CaseAccounts
 {
     std::vector<std::string> accounts;
@@ -808,6 +829,7 @@ struct SpellDamageEvent
     uint32 spell = 0;
     uint32 damage = 0;
     bool critical = false;
+    uint32 casterEntry = 0;
 };
 
 struct SpellHealEvent
@@ -818,6 +840,7 @@ struct SpellHealEvent
     uint32 heal = 0;
     uint32 overheal = 0;
     bool critical = false;
+    uint32 casterEntry = 0;
 };
 
 struct SpellEnergizeEvent
@@ -837,6 +860,7 @@ struct MeleeOutcomes
     uint32 plain = 0;
     uint64 plainDamage = 0;
     uint64 damage = 0;
+    uint32 attackerEntry = 0;
 };
 
 struct Actor
@@ -912,6 +936,7 @@ struct Actor
     Tree castFailures;
     std::map<uint32, uint8> castFailureReason;
     std::map<uint32, uint32> spellCooldownPacketMs;
+    uint32 itemLootReleases = 0;
     std::map<uint32, std::array<int32, MAX_SPELL_EFFECTS>> sentAuraAmounts;
     uint32 bankShows = 0;
     uint32 systemMessages = 0;
@@ -983,6 +1008,16 @@ struct Target
     ObjectGuid guid;
 };
 
+uint32 ResolveLiveEntry(Player* player, ObjectGuid const& guid)
+{
+    if (!guid)
+        return 0;
+    if (player)
+        if (Unit* unit = ObjectAccessor::GetUnit(*player, guid))
+            return unit->GetEntry();
+    return guid.GetEntry();
+}
+
 void ObserveSpellCasts(Actor& actor, WorldPacket const& packet)
 {
     if (packet.GetOpcode() != SMSG_SPELL_GO)
@@ -996,7 +1031,7 @@ void ObserveSpellCasts(Actor& actor, WorldPacket const& packet)
     actor.spellCasts.push_back(event);
 }
 
-void ObserveSpellDamage(Actor& actor, WorldPacket const& packet)
+void ObserveSpellDamage(Actor& actor, WorldPacket const& packet, Player* player)
 {
     if (packet.GetOpcode() != SMSG_SPELLNONMELEEDAMAGELOG && packet.GetOpcode() != SMSG_PERIODICAURALOG)
         return;
@@ -1035,10 +1070,13 @@ void ObserveSpellDamage(Actor& actor, WorldPacket const& packet)
         event.critical = critical != 0;
     }
     if (event.damage)
+    {
+        event.casterEntry = ResolveLiveEntry(player, event.caster);
         actor.spellDamage.push_back(event);
+    }
 }
 
-void ObserveSpellHealing(Actor& actor, WorldPacket const& packet)
+void ObserveSpellHealing(Actor& actor, WorldPacket const& packet, Player* player)
 {
     if (packet.GetOpcode() != SMSG_SPELLHEALLOG && packet.GetOpcode() != SMSG_PERIODICAURALOG)
         return;
@@ -1061,7 +1099,10 @@ void ObserveSpellHealing(Actor& actor, WorldPacket const& packet)
     event.critical = critical != 0;
     Require(event.overheal <= event.heal, "Native overhealing exceeds healing");
     if (event.heal)
+    {
+        event.casterEntry = ResolveLiveEntry(player, event.caster);
         actor.spellHeals.push_back(event);
+    }
 }
 
 void ObserveSpellEnergize(Actor& actor, WorldPacket const& packet)
@@ -1220,9 +1261,10 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
     constexpr std::size_t LfgProposalIdOffset = sizeof(uint32) + sizeof(uint8);
     if (packet.GetOpcode() == SMSG_LFG_PROPOSAL_UPDATE && packet.size() >= LfgProposalIdOffset + sizeof(uint32))
         actor.lfgProposalId = packet.read<uint32>(LfgProposalIdOffset);
+    Player* observer = actor.session ? actor.session->GetPlayer() : nullptr;
     ObserveSpellCasts(actor, packet);
-    ObserveSpellDamage(actor, packet);
-    ObserveSpellHealing(actor, packet);
+    ObserveSpellDamage(actor, packet, observer);
+    ObserveSpellHealing(actor, packet, observer);
     ObserveSpellEnergize(actor, packet);
     if (packet.GetOpcode() == SMSG_SPELL_DELAYED)
     {
@@ -1259,6 +1301,15 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             if (unit == actor.guid)
                 actor.spellCooldownPacketMs[spell] = cooldown;
         }
+    }
+
+    if (packet.GetOpcode() == SMSG_LOOT_RELEASE_RESPONSE && packet.size() >= sizeof(uint64))
+    {
+        ObjectGuid released;
+        WorldPacket response(packet);
+        response >> released;
+        if (released.IsItem())
+            ++actor.itemLootReleases;
     }
 
     constexpr uint16 AscensionAuraAmountOpcode = 0x0673;
@@ -1380,6 +1431,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         if (victim == actor.guid)
             ++actor.meleeAttacksTakenFrom[attacker];
         MeleeOutcomes& outcome = actor.meleeOutcomesByAttacker[attacker];
+        outcome.attackerEntry = ResolveLiveEntry(observer, attacker);
         ++outcome.swings;
         outcome.damage += damage;
         if (hitInfo & HITINFO_CRITICALHIT)
@@ -1806,6 +1858,12 @@ public:
         }
         if (auto twoSide = _scenario.get_child_optional("two_side"))
             _twoSide.emplace(*twoSide);
+        if (auto questLogSize = _scenario.get_optional<uint32>("quest_log_size"))
+        {
+            Require(*questLogSize >= NATIVE_QUEST_LOG_SIZE && *questLogSize <= MAX_QUEST_LOG_SIZE,
+                "Invalid quest log size");
+            _questLogSize.emplace(*questLogSize);
+        }
         _report.put("schema", 1);
         _report.put("run_id", _runId);
         _report.put("scenario", _scenario.get<std::string>("name"));
@@ -2730,7 +2788,7 @@ private:
     double SentQuestLogField(Player const* player, Tree const& step, uint32 firstField) const
     {
         uint16 const slot = player->FindQuestSlot(step.get<uint32>("quest"));
-        Require(slot < MAX_QUEST_LOG_SIZE, "The quest is not in the quest log");
+        Require(slot < NATIVE_QUEST_LOG_SIZE, "The quest is not in the quest log");
         return SentAddonField<uint32>(player, step, firstField + slot);
     }
 
@@ -3985,6 +4043,12 @@ private:
             Require(creature != nullptr, "Creature attack metric needs a living nearby creature");
             return player->IsValidAttackTarget(creature) ? 1 : 0;
         }
+        if (metric == "nearby_creature_at_client")
+        {
+            Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f, true);
+            Require(creature != nullptr, "Creature client visibility metric needs a living nearby creature");
+            return player->HaveAtClient(creature) ? 1 : 0;
+        }
         if (metric == "nearby_creature_mount_display")
         {
             Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f, true);
@@ -4285,6 +4349,46 @@ private:
                 if (caster && event.caster == caster && event.spell == spell &&
                     (!target || event.target == target) && (!critical || event.critical == *critical))
                     value += metric == "spell_damage_count" ? 1 : event.damage;
+            return double(value);
+        }
+        if (metric == "owned_creature_damage_total" || metric == "owned_creature_damage_count" ||
+            metric == "owned_creature_attack_count")
+        {
+            uint32 const entry = step.get<uint32>("entry");
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            uint64 meleeDamage = 0;
+            uint32 meleeHits = 0;
+            uint32 meleeSwings = 0;
+            for (auto const& [attacker, outcome] : actor.meleeOutcomesByAttacker)
+                if (outcome.attackerEntry == entry)
+                {
+                    meleeDamage += outcome.damage;
+                    meleeHits += outcome.crits + outcome.glancing + outcome.plain;
+                    meleeSwings += outcome.swings;
+                }
+            uint64 spellDamageSum = 0;
+            uint32 spellHits = 0;
+            for (SpellDamageEvent const& event : actor.spellDamage)
+                if (event.casterEntry == entry)
+                {
+                    spellDamageSum += event.damage;
+                    ++spellHits;
+                }
+            if (metric == "owned_creature_damage_total")
+                return double(meleeDamage + spellDamageSum);
+            if (metric == "owned_creature_damage_count")
+                return meleeHits + spellHits;
+            return meleeSwings + spellHits;
+        }
+        if (metric == "owned_creature_heal_count" || metric == "owned_creature_heal_total" ||
+            metric == "owned_creature_effective_heal_total")
+        {
+            uint32 const entry = step.get<uint32>("entry");
+            uint64 value = 0;
+            for (SpellHealEvent const& event : _actors.at(step.get<std::string>("actor")).spellHeals)
+                if (event.casterEntry == entry)
+                    value += metric == "owned_creature_heal_count" ? 1 :
+                        event.heal - (metric == "owned_creature_effective_heal_total" ? event.overheal : 0);
             return double(value);
         }
         if (metric == "spell_heal_count" || metric == "spell_heal_total" || metric == "spell_effective_heal_total")
@@ -4831,6 +4935,13 @@ private:
             return double(std::count_if(whispers.begin(), whispers.end(), [&](auto const& whisper)
                 { return whisper.first == from && whisper.second == text; }));
         }
+        if (metric == "whisper_contains")
+        {
+            std::string const needle = step.get<std::string>("text");
+            auto const& whispers = _actors.at(step.get<std::string>("actor")).whispers;
+            return std::any_of(whispers.begin(), whispers.end(), [&needle](auto const& whisper)
+                { return whisper.second.find(needle) != std::string::npos; }) ? 1.0 : 0.0;
+        }
         if (metric == "notifications")
             return double(_actors.at(step.get<std::string>("actor")).notifications);
         if (metric == "notification_contains")
@@ -4881,6 +4992,8 @@ private:
             auto const found = packets.find(spell);
             return found == packets.end() ? -1.0 : double(found->second);
         }
+        if (metric == "item_loot_releases")
+            return _actors.at(step.get<std::string>("actor")).itemLootReleases;
         if (metric == "sent_aura_amount")
         {
             auto const& sent = _actors.at(step.get<std::string>("actor")).sentAuraAmounts;
@@ -5424,6 +5537,31 @@ private:
             return metric == "quest_status" ? double(player->GetQuestStatus(quest))
                 : double(player->CanTakeQuest(questTemplate, false));
         }
+        if (metric == "quest_log_slot")
+        {
+            uint16 const slot = player->FindQuestSlot(step.get<uint32>("quest"));
+            return slot < MAX_QUEST_LOG_SIZE ? double(slot) : -1.0;
+        }
+        if (metric == "quest_log_client_slot" || metric == "quest_log_client_count")
+        {
+            uint32 const quest = step.get<uint32>("quest");
+            for (uint16 slot = 0; slot < NATIVE_QUEST_LOG_SIZE; ++slot)
+            {
+                uint16 const field = PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET;
+                if (player->GetUInt32Value(field + QUEST_ID_OFFSET) != quest)
+                    continue;
+
+                if (metric == "quest_log_client_slot")
+                    return double(slot);
+
+                uint32 const index = step.get<uint32>("index", 0);
+                Require(index < QUEST_OBJECTIVES_COUNT, "Invalid quest objective index");
+                return double(uint16(player->GetUInt64Value(field + QUEST_COUNTS_OFFSET) >> (index * 16)));
+            }
+            return -1.0;
+        }
+        if (metric == "quest_log_has_room")
+            return double(player->SatisfyQuestLog(false));
         if (metric == "quest_objective_count")
         {
             uint16 slot = player->FindQuestSlot(step.get<uint32>("quest"));
@@ -5605,7 +5743,7 @@ private:
         if (metric == "quest_log_sent_level_count")
         {
             uint16 const slot = player->FindQuestSlot(step.get<uint32>("quest"));
-            Require(slot < MAX_QUEST_LOG_SIZE, "The quest is not in the quest log");
+            Require(slot < NATIVE_QUEST_LOG_SIZE, "The quest is not in the quest log");
             auto const& updates = _actors.at(step.get<std::string>("actor")).addonFieldUpdates;
             auto const found = updates.find(AscensionQuestLog::LevelField + slot);
             return found == updates.end() ? 0 : found->second;
@@ -6420,6 +6558,14 @@ private:
             player->GetSession()->HandleMessagechatOpcode(packet);
             record.put("result", "whisper sent; verify delivery with assertions");
         }
+        else if (action == "addon_message")
+        {
+            WorldPacket packet(CMSG_MESSAGECHAT, 64);
+            packet << uint32(CHAT_MSG_WHISPER) << uint32(LANG_ADDON) << player->GetName()
+                << step.get<std::string>("prefix") + "\t" + step.get<std::string>("text");
+            player->GetSession()->HandleMessagechatOpcode(packet);
+            record.put("result", "addon message sent to self");
+        }
         else if (action == "release_spirit")
         {
             Require(!player->IsAlive() && !player->HasPlayerFlag(PLAYER_FLAGS_GHOST),
@@ -6581,6 +6727,18 @@ private:
             packet << target->GetGUID();
             player->GetSession()->HandleSetSelectionOpcode(packet);
             Require(player->GetTarget() == target->GetGUID(), "Selection did not take effect");
+        }
+        else if (action == "minion_kill")
+        {
+            Creature* minion = GetOwnedCreature(player, step.get<uint32>("minion"));
+            Require(minion != nullptr, "Minion kill needs a living owned creature of that entry");
+            Unit* victim = GetUnit(step.get<std::string>("target"));
+            Require(victim->IsAlive(), "Minion kill target is already dead");
+            uint32 const killingDamage = uint32(std::min<uint64>(uint64(victim->GetMaxHealth()) * 100u,
+                std::numeric_limits<uint32>::max()));
+            Unit::DealDamage(minion, victim, killingDamage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL);
+            Require(!victim->IsAlive(), "Minion killing blow did not kill, health left " +
+                std::to_string(victim->GetHealth()));
         }
         else if (action == "select_nearby")
         {
@@ -7412,6 +7570,17 @@ private:
             player->CompleteQuest(quest);
             record.put("result", "quest marked complete as a fixture");
         }
+        else if (action == "quest_abandon")
+        {
+            uint16 const slot = step.get<uint16>("slot", player->FindQuestSlot(step.get<uint32>("quest")));
+            Require(slot < MAX_QUEST_LOG_SIZE, "The quest is not in the quest log");
+            WorldPacket packet(CMSG_QUESTLOG_REMOVE_QUEST, 1);
+            packet << uint8(slot);
+            WorldPackets::Quest::QuestLogRemoveQuest request(std::move(packet));
+            request.Read();
+            player->GetSession()->HandleQuestLogRemoveQuest(request);
+            record.put("slot", slot);
+        }
         else
             throw std::runtime_error("Unknown action: " + action);
     }
@@ -7516,6 +7685,7 @@ private:
     std::optional<CreatureScaling::TestOverride> _creatureScaling;
     std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
     std::optional<TwoSideConfig> _twoSide;
+    std::optional<QuestLogSizeConfig> _questLogSize;
     GameEventStates _gameEvents;
     std::optional<PlacementAuditTotals> _placementAudit;
 };
