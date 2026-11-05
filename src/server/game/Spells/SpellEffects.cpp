@@ -331,10 +331,15 @@ void ResendRemainingGlobalCooldowns(Player* player, uint32 spellId, uint32 categ
 
     // An instant spell starts its global cooldown only after its own effects ran, so a reset from its own hit must
     // wait for the next update to see it.
-    player->m_Events.AddEventAtOffset([player, clearedSpells]()
+    ObjectGuid const playerGuid = player->GetGUID();
+    player->m_Events.AddEventAtOffset([playerGuid, clearedSpells]()
     {
+        Player* target = ObjectAccessor::FindPlayer(playerGuid);
+        if (!target)
+            return;
+
         for (uint32 clearedSpellId : clearedSpells)
-            ResendRemainingGlobalCooldown(player, clearedSpellId);
+            ResendRemainingGlobalCooldown(target, clearedSpellId);
     }, 0ms);
 }
 
