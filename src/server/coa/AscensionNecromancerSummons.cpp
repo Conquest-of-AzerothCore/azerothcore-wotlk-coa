@@ -209,14 +209,26 @@ uint32 LegacyBaseHealthGain(Classes legacyClass, uint8 level)
     sObjectMgr->GetPlayerClassLevelInfo(legacyClass, level, &current);
     return current.basehealth - first.basehealth;
 }
+float LegacyNakedStamina(Player const* player)
+{
+    PlayerLevelInfo firstLevel;
+    sObjectMgr->GetPlayerLevelInfo(player->getRace(true), player->getClass(), 1, &firstLevel);
+    Classes const legacyClass = GetLegacyClassForCustomClass(Classes(player->getClass()));
+    return float(firstLevel.stats[STAT_STAMINA] + LegacyStaminaGain(legacyClass, player->GetLevel()));
+}
+float LegacyOwnerStamina(Player const* player)
+{
+    float const legacyBaseDelta = LegacyNakedStamina(player) - player->GetCreateStat(STAT_STAMINA);
+    float const multiplier = player->GetPctModifierValue(UNIT_MOD_STAT_STAMINA, BASE_PCT) *
+                             player->GetPctModifierValue(UNIT_MOD_STAT_STAMINA, TOTAL_PCT);
+    return std::max(0.0f, player->GetStat(STAT_STAMINA) + legacyBaseDelta * multiplier);
+}
 float NakedHealth(Player const* player)
 {
     Classes const legacyClass = GetLegacyClassForCustomClass(Classes(player->getClass()));
-    PlayerLevelInfo firstLevel;
     PlayerClassLevelInfo firstClassLevel;
-    sObjectMgr->GetPlayerLevelInfo(player->getRace(true), player->getClass(), 1, &firstLevel);
     sObjectMgr->GetPlayerClassLevelInfo(player->getClass(), 1, &firstClassLevel);
-    float stamina = float(firstLevel.stats[STAT_STAMINA] + LegacyStaminaGain(legacyClass, player->GetLevel()));
+    float stamina = LegacyNakedStamina(player);
     float baseHealth = float(firstClassLevel.basehealth + LegacyBaseHealthGain(legacyClass, player->GetLevel()));
     float firstTwenty = std::min(stamina, 20.0f);
     return baseHealth + firstTwenty + (stamina - firstTwenty) * 10.0f;
@@ -270,7 +282,7 @@ void Scale(Player* player, Creature* minion, uint8 cost, float& inheritedSpeed)
     float healthFraction = minion->GetHealthPct() / 100.0f;
     float manaFraction =
         minion->GetMaxPower(POWER_MANA) ? float(minion->GetPower(POWER_MANA)) / minion->GetMaxPower(POWER_MANA) : 1.0f;
-    float stamina = player->GetStat(STAT_STAMINA) * OwnerStaminaPerLifeForce * cost;
+    float stamina = LegacyOwnerStamina(player) * OwnerStaminaPerLifeForce * cost;
     float intellect = player->GetStat(STAT_INTELLECT);
     float spellPower = float(std::max(player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FROST),
                                       player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)));

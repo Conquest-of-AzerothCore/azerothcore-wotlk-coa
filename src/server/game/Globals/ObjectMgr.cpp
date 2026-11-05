@@ -938,13 +938,18 @@ void ObjectMgr::LoadAscensionRaceClassStats()
             continue;
         }
 
-        PlayerInfo* info = _playerInfo[race][playerClass];
-        if (level > maxLevel || !info || !info->levelInfo)
+        if (level > maxLevel)
             continue;
 
-        PlayerLevelInfo& levelInfo = info->levelInfo[level - 1];
-        if (!levelInfo.stats[STAT_STRENGTH])
+        PlayerInfo* info = _playerInfo[race][playerClass];
+        if (!info || !info->levelInfo || !info->levelInfo[level - 1].stats[STAT_STRENGTH])
+        {
+            LOG_ERROR("sql.sql", "ascension_race_class_stats: race {} class {} level {} has no base stats",
+                race, playerClass, level);
             continue;
+        }
+
+        PlayerLevelInfo& levelInfo = info->levelInfo[level - 1];
 
         for (uint8 stat = STAT_STRENGTH; stat < MAX_STATS; ++stat)
         {
