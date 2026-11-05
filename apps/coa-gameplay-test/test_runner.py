@@ -1111,6 +1111,26 @@ class RunnerTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 run.validate(invalid)
 
+    def test_melee_damage_outcome_filters(self):
+        for metric in ('melee_damage_count', 'melee_damage_total'):
+            step = {'action': 'assert', 'actor': 'caster', 'metric': metric, 'hand': 0, 'critical': False,
+                    'glancing': False, 'blocked': False, 'min': 0}
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append(step)
+            with self.subTest(metric=metric):
+                self.assertIs(run.validate(scenario), scenario)
+            for change in ({'critical': 'false'}, {'glancing': 0}, {'blocked': None}):
+                invalid = copy.deepcopy(scenario)
+                invalid['steps'][-1].update(change)
+                with self.subTest(metric=metric, change=change), self.assertRaises(ValueError):
+                    run.validate(invalid)
+        for key in ('glancing', 'blocked'):
+            invalid = copy.deepcopy(self.scenario)
+            invalid['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'melee_attack_count',
+                                     key: False, 'min': 0})
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                run.validate(invalid)
+
     def test_owned_creature_metrics_need_an_entry(self):
         for metric in ('owned_creature_damage_total', 'owned_creature_damage_count', 'owned_creature_attack_count',
                        'owned_creature_heal_count', 'owned_creature_heal_total',

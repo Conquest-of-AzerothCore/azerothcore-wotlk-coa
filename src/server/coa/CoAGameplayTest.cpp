@@ -852,6 +852,13 @@ struct SpellEnergizeEvent
     uint32 amount = 0;
 };
 
+struct MeleeHitEvent
+{
+    uint8 hand = BASE_ATTACK;
+    uint32 hitInfo = 0;
+    uint32 damage = 0;
+};
+
 struct MeleeOutcomes
 {
     uint32 swings = 0;
@@ -928,6 +935,7 @@ struct Actor
     std::map<ObjectGuid, MeleeOutcomes> meleeOutcomesByAttacker;
     std::array<uint32, 2> meleeDamageByHand{};
     std::array<uint64, 2> meleeDamageTotalByHand{};
+    std::vector<MeleeHitEvent> meleeHits;
     uint64 castPushbackMs = 0;
     std::vector<SpellCastEvent> spellCasts;
     std::vector<SpellDamageEvent> spellDamage;
@@ -1426,6 +1434,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             {
                 ++actor.meleeDamageByHand[hand];
                 actor.meleeDamageTotalByHand[hand] += damage;
+                actor.meleeHits.push_back({ hand, hitInfo, damage });
             }
         }
         if (victim == actor.guid)
@@ -4307,6 +4316,26 @@ private:
             metric == "melee_damage_total")
         {
             Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            auto const critical = step.get_optional<bool>("critical");
+            auto const glancing = step.get_optional<bool>("glancing");
+            auto const blocked = step.get_optional<bool>("blocked");
+            if (critical || glancing || blocked)
+            {
+                Require(metric != "melee_attack_count", "Melee outcome filters select damaging hits only");
+                auto const hand = step.get_optional<uint32>("hand");
+                Require(!hand || *hand < 2, "Melee hand must be main hand or off hand");
+                auto const matches = [](boost::optional<bool> const& wanted, uint32 hitInfo, uint32 flag)
+                {
+                    return !wanted || ((hitInfo & flag) != 0) == *wanted;
+                };
+                uint64 value = 0;
+                for (MeleeHitEvent const& hit : actor.meleeHits)
+                    if ((!hand || hit.hand == *hand) && matches(critical, hit.hitInfo, HITINFO_CRITICALHIT) &&
+                        matches(glancing, hit.hitInfo, HITINFO_GLANCING) &&
+                        matches(blocked, hit.hitInfo, HITINFO_BLOCK))
+                        value += metric == "melee_damage_count" ? 1 : hit.damage;
+                return double(value);
+            }
             if (metric == "melee_damage_total")
             {
                 if (auto hand = step.get_optional<uint32>("hand"))
