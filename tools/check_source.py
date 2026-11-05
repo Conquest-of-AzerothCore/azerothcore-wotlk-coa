@@ -71,7 +71,7 @@ SUITES = {
     },
     'conformance': {
         'paths': [CONFORMANCE + '*'],
-        'commands': [[CONFORMANCE + 'test_mitigation.py']],
+        'commands': [[CONFORMANCE + 'test_mitigation.py'], [CONFORMANCE + 'test_classes.py']],
     },
     'world-content': {
         'paths': [CONTENT + '*.py'],
