@@ -454,14 +454,16 @@ of their own 99% intervals, taken on the sides that face each other (so a Wilson
 |---|---|
 | `hit_mean`, `melee_mean` | `measured` plus or minus the half-width of the verdict (`Z` x sigma / sqrt(hits)) |
 | `proc_rate`, stack DPS and source, talent delta | the `low` and `high` of the verdict |
-| every other check | none: significant when the difference exceeds `max(1, 0.5% of expected)`, the tolerance of the comparison (cooldowns: the larger timing window) |
+| every other check | none: significant when the difference exceeds `max(1, 0.5% of expected)`, the tolerance of the comparison (cooldowns: the larger timing window), plus the larger `roll_spread` of the two sides for a rolled effect |
 
 A side without a measured value is never significant. When the values differ and an interval check (the first two rows)
 has no interval on a side, the change is `not judged`: not significant, and listed like a significant one, never as
 moved inside the intervals. `impact.md`
 lists, with the unintended changes first, the significant and not judged changes, every status change and the added and
 removed labels; the moves inside the intervals with an unchanged status come last. Stamp 20261105-191313 compared twice gives no
-change; stamps 20261105-203950 (configurations c0 and c1) and 20261105-204050 (all eight) give nine moves inside the
+change; two runs of the 270 Templar scenarios on the same build (stamps 20261105-213612 with 20261105-213753, and
+20261105-214020) give no significant change, while without the roll spread the 26 rolled effect values were listed as
+significant; stamps 20261105-203950 (configurations c0 and c1) and 20261105-204050 (all eight) give nine moves inside the
 intervals, no significant change and 40 added verdicts (the report then opens with its warning: when more than half of
 the verdicts of a side have no counterpart, the keys probably changed or the runs cover other scenarios).
 
@@ -502,6 +504,9 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   if the values are monotone in the roll, the measured value must lie between the lowest and the highest, each bound
   widened by the deterministic tolerance; otherwise the verdict is `unmodelled`. The Templar has seven such tokens,
   `${$m1+0+$AP*0.45+$SP*0.45}` of ranks 501562 to 501566, 572021 and 572027 (`EffectDieSides` 32 to 224).
+  Every `effect_value` and `aura_amount` verdict whose measured effect rolls (the token's effect, or the first
+  active effect for an unreadable value) keeps `roll_spread`, `abs(EffectDieSides) - 1`, in its `detail`: two
+  `CalcValue` draws of that effect at the same stats differ by at most that much.
 - Time (`cooldown_ms`, `aura_duration_ms`, ruling R8): `expected - W <= measured <= expected`. W bounds the game
   time elapsed between the cast step and the measuring step: for every step after the cast up to the measurement,
   its `elapsed_ms` plus the run's `max_step_ms`. `CoAGameplayTest::Tick` runs one step per world update

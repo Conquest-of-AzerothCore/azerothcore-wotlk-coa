@@ -109,6 +109,9 @@ class FakeTooltips:
     def effect_points(self, spell_id, effect):
         return self.points.get((spell_id, effect), FIXED_POINTS)
 
+    def first_effect(self, rank_id):
+        return 0
+
 
 def constant_reader(*values, points=None):
     return FakeTooltips(values, points)
@@ -192,6 +195,18 @@ class CompareTest(unittest.TestCase):
 
     def test_rolled_effect_outside_the_propagated_roll_interval_is_an_alert(self):
         self.assertEqual(self.rolled_verdict('255', lambda roll: roll).status, 'alert')
+
+    def test_rolled_effect_value_carries_the_spread_of_its_roll(self):
+        self.assertEqual(self.rolled_verdict('248', lambda roll: roll).detail, {'roll_spread': 9})
+
+    def test_unreadable_value_of_a_rolled_first_effect_carries_the_spread_of_its_roll(self):
+        label = '1001 effect_value #1'
+        verdicts = self.value_run([expectation(label, 'effect_value', '$x1', 'unreadable: $x1')], [],
+                                  [assert_step(label, '173')], constant_reader(points={(RANK, 0): (99, 10)}))
+        self.assertEqual((verdicts[label].status, verdicts[label].detail), ('unreadable', {'roll_spread': 9}))
+
+    def test_fixed_effect_value_has_no_roll_spread(self):
+        self.assertIsNone(self.effect_verdict('568').detail)
 
     def test_rolled_effect_in_a_non_monotone_expression_is_unmodelled(self):
         verdict = self.rolled_verdict('248', lambda roll: (roll - 104) ** 2)

@@ -3,7 +3,8 @@ from dataclasses import dataclass
 import math
 from pathlib import Path
 
-from compare import (ABSOLUTE_TOLERANCE, FLOAT_EPSILON, HIT_CHECKS, Verdict, margin_of, read_verdicts)
+from compare import (ABSOLUTE_TOLERANCE, FLOAT_EPSILON, HIT_CHECKS, ROLL_SPREAD, Verdict, margin_of,
+                     read_verdicts)
 from procs import PROC_CHECK
 from stack import STACK_CHECKS
 
@@ -96,8 +97,10 @@ def significance(before: Verdict, after: Verdict) -> tuple[bool, bool, str]:
                 f'difference {difference:+.6g} against {needed:.6g}, the root of the squared facing half-widths of the '
                 f'two 99% intervals ({facing[0]:.6g}, {facing[1]:.6g})')
     needed = tolerance(before, after)
-    return (abs(difference) > needed + FLOAT_EPSILON, True,
-            f'difference {difference:+.6g} against the deterministic tolerance {needed:.6g}')
+    spread = max((verdict.detail or {}).get(ROLL_SPREAD, 0) for verdict in (before, after))
+    rolled = f' plus the roll spread {spread:g}' if spread else ''
+    return (abs(difference) > needed + spread + FLOAT_EPSILON, True,
+            f'difference {difference:+.6g} against the deterministic tolerance {needed:.6g}{rolled}')
 
 
 def relative_change(before: float | None, after: float | None) -> float | None:

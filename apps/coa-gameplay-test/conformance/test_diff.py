@@ -1,3 +1,4 @@
+from dataclasses import replace
 import json
 from pathlib import Path
 import shutil
@@ -107,6 +108,14 @@ class DiffTests(unittest.TestCase):
                                    set())).significant)
         self.assertTrue(only(diff([value('v', 1, 1000.0, 1000.0)], [value('v', 1, 1006.0, 1000.0)],
                                   set())).significant)
+
+    def test_rolled_values_move_within_the_spread_of_their_roll(self):
+        def rolled(measured):
+            return replace(value('v', 1, measured, 960.0), detail={'roll_spread': 223})
+
+        self.assertFalse(only(diff([rolled(997.0)], [rolled(924.0)], set())).significant)
+        self.assertTrue(only(diff([rolled(997.0)], [rolled(1230.0)], set())).significant)
+        self.assertIn('roll spread 223', only(diff([rolled(997.0)], [rolled(924.0)], set())).rule)
 
     def test_cooldown_moves_inside_the_timing_window_are_noise(self):
         before = cooldown('c', 1, 7940.0, 8000.0, 120.0)

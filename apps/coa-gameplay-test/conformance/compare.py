@@ -14,8 +14,8 @@ from procs import AMBIGUOUS_TOOLTIP, CAST, PROC_CHECK, chance_of, wilson_interva
 from profile import DBC_DIR, caster_stats_from, known_aura_label, probe_aura_label
 from stack import (ADDS, MEASURED, MELEE_SOURCE, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE, TALENT_DELTA,
                    levers, mean_interval, ratio_interval)
-from tooltip import CasterStats, ForcedPoints, Readout, Records, Tooltip
-from values import UNMEASURABLE, UNREADABLE, Expectation, dataset
+from tooltip import CasterStats, ForcedPoints, Readout, Records, Tooltip, Unreadable
+from values import EFFECTS, UNMEASURABLE, UNREADABLE, Expectation, dataset
 
 STATUSES = ('ok', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials', 'unmeasured',
             MEASURED)
@@ -29,6 +29,8 @@ ABSOLUTE_TOLERANCE = 1.0
 RELATIVE_TOLERANCE = 0.005
 FLOAT_EPSILON = 1e-9
 TOKEN_CHECKS = frozenset({'effect_value', 'aura_amount', 'aura_duration_ms'})
+ROLLED_CHECKS = frozenset({'effect_value', 'aura_amount'})
+ROLL_SPREAD = 'roll_spread'
 HIT_CHECKS = frozenset({'hit_mean', 'melee_mean'})
 READ_RULE = 'read '
 ORDINAL = re.compile(r'#(\d+)$')
@@ -84,6 +86,8 @@ class TooltipSource(Protocol):
 
     def effect_points(self, spell_id: int, effect: int) -> tuple[int, int]: ...
 
+    def first_effect(self, rank_id: int) -> int | None: ...
+
 
 class DbcTooltips:
     def __init__(self, dbc_dir: Path):
@@ -97,6 +101,9 @@ class DbcTooltips:
     def effect_points(self, spell_id: int, effect: int) -> tuple[int, int]:
         return (self.records.field('Spell', spell_id, f'EffectBasePoints[{effect}]'),
                 self.records.field('Spell', spell_id, f'EffectDieSides[{effect}]'))
+
+    def first_effect(self, rank_id: int) -> int | None:
+        return next((effect for effect in EFFECTS if self.records.field('Spell', rank_id, f'Effect[{effect}]')), None)
 
 
 @dataclass(frozen=True)
@@ -721,8 +728,31 @@ def judge_stack(manifest: dict, stack_parts: dict[str, list[ProcPart]], tooltips
     return verdicts
 
 
+def roll_spread(expectation: Expectation, tooltips: TooltipSource) -> int:
+    try:
+        effect = expectation.effect_index
+        if effect is None:
+            effect = tooltips.first_effect(expectation.rank_id)
+        if effect is None:
+            return 0
+        return max(0, abs(tooltips.effect_points(expectation.rank_id, effect)[1]) - 1)
+    except Unreadable:
+        return 0
+
+
 def judge(manifest: dict, entry: dict, run: Run | None, expectation: Expectation, tokens: Tokens | None,
           tooltips: TooltipSource, hit_model: HitModelSource) -> Verdict:
+    verdict = judge_expectation(manifest, entry, run, expectation, tokens, tooltips, hit_model)
+    if expectation.check not in ROLLED_CHECKS or verdict.measured is None:
+        return verdict
+    spread = roll_spread(expectation, tooltips)
+    if not spread:
+        return verdict
+    return replace(verdict, detail={**(verdict.detail or {}), ROLL_SPREAD: spread})
+
+
+def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation: Expectation,
+                      tokens: Tokens | None, tooltips: TooltipSource, hit_model: HitModelSource) -> Verdict:
     base = Verdict(expectation.label, 'alert', None, None, None, None, '', entry['key'], expectation.spell_id,
                    expectation.rank_id, expectation.check)
     rule, check = expectation.rule, expectation.check
