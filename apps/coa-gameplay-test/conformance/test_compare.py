@@ -1,9 +1,10 @@
-from dataclasses import asdict
+from dataclasses import asdict, replace
 import hashlib
 import json
 import math
 from pathlib import Path
 import shutil
+from statistics import fmean, pstdev
 import sys
 import tempfile
 import unittest
@@ -14,7 +15,7 @@ from hits import HitModel, Modifier
 from profile import CLASSES_DIR, DBC_DIR
 from classes import class_spells
 from tooltip import CasterStats, Displayed, Readout, read_tooltip
-from values import Expectation, structure_stats, value_scenario
+from values import Expectation, mean_samples, sample_labels, structure_stats, value_scenario
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import batch
@@ -22,6 +23,7 @@ import batch
 CLASS_FILE = json.loads((CLASSES_DIR / 'templar.json').read_text(encoding='utf-8'))
 RANK = 1001
 FIXED_POINTS = (0, 1)
+ROLLS = range(100, 110)
 RIGHTEOUS_UPHEAVAL = 501562
 SPELL = 1000
 HEADER = Path(__file__).resolve().parents[3] / 'src/server/coa/AscensionSpellProgressionData.h'
@@ -129,6 +131,11 @@ class FakeTooltips:
         return 0
 
 
+def rolled_reads_needed():
+    values = [roll + 313 * 0.45 for roll in ROLLS]
+    return values, mean_samples(values)
+
+
 def constant_reader(*values, points=None):
     return FakeTooltips(values, points)
 
@@ -201,28 +208,50 @@ class CompareTest(unittest.TestCase):
         verdicts = self.value_run([item], ['$s2'], [assert_step(label, '-50')], reader)
         self.assertEqual((verdicts[label].status, verdicts[label].expected), ('ok', -50.0))
 
-    def rolled_verdict(self, actual, value_of_roll):
+    def rolled_verdict(self, reads, value_of_roll=lambda roll: roll, samples=None):
         text = '${$m1+0+$AP*0.45}'
+        label = '1001 effect_value e0 #0'
 
         def tokens(caster, forced):
             roll = forced[2] if forced else 100
             return [Displayed(text, value_of_roll(roll) + caster.ap * 0.45, 0, 'flat')]
 
-        return self.effect_verdict(actual, Displayed(text, 0.0, 0, 'flat'),
-                                   FakeTooltips(tokens, {(RANK, 0): (99, 10)}))
+        labels = sample_labels(label, samples or len(reads))
+        item = expectation(label, 'effect_value', text, 'read flat', 0, {'samples': samples or len(reads)})
+        steps = [assert_step(name, str(read)) for name, read in zip(labels, reads)]
+        return self.value_run([item], [text], steps, FakeTooltips(tokens, {(RANK, 0): (99, 10)}))[label]
 
-    def test_rolled_effect_inside_the_propagated_roll_interval_is_ok(self):
-        verdict = self.rolled_verdict('248', lambda roll: roll)
+    def test_reads_of_a_rolled_effect_follow_the_hit_mean_rule(self):
+        values, needed = rolled_reads_needed()
+        self.assertEqual(needed, math.ceil((2.576 * pstdev(values) / (0.01 * fmean(values))) ** 2))
+        self.assertEqual(needed, 10)
+
+    def test_uniform_reads_of_a_rolled_effect_at_the_needed_count_are_ok(self):
+        values, needed = rolled_reads_needed()
+        verdict = self.rolled_verdict([math.trunc(values[index % len(values)]) for index in range(needed)])
+        half = 2.576 * pstdev(values) / math.sqrt(needed)
         self.assertEqual(verdict.status, 'ok')
-        self.assertAlmostEqual(verdict.low, 100 + 313 * 0.45 - max(1, 0.005 * (100 + 313 * 0.45)))
-        self.assertAlmostEqual(verdict.high, 109 + 313 * 0.45 + max(1, 0.005 * (109 + 313 * 0.45)))
+        self.assertAlmostEqual(verdict.low, fmean(values) - half - 1)
+        self.assertAlmostEqual(verdict.high, fmean(values) + half)
 
-    def test_rolled_effect_outside_the_propagated_roll_interval_is_an_alert(self):
-        self.assertEqual(self.rolled_verdict('255', lambda roll: roll).status, 'alert')
+    def test_an_offset_of_half_the_roll_spread_is_an_alert_at_the_needed_count(self):
+        values, needed = rolled_reads_needed()
+        offset = (max(values) - min(values)) / 2
+        reads = [math.trunc(values[index % len(values)] + offset) for index in range(needed)]
+        self.assertEqual(self.rolled_verdict(reads).status, 'alert')
+
+    def test_one_read_of_a_rolled_effect_inside_its_roll_range_is_measured(self):
+        verdict = self.rolled_verdict([248])
+        self.assertEqual(verdict.status, 'measured')
+        self.assertIn('needs 10 reads', verdict.explanation)
+
+    def test_reads_missing_from_the_run_leave_a_rolled_effect_measured(self):
+        _, needed = rolled_reads_needed()
+        self.assertEqual(self.rolled_verdict([245] * (needed - 1), samples=needed).status, 'measured')
 
     def test_rolled_effect_value_carries_the_spread_of_its_roll(self):
-        self.assertEqual(self.rolled_verdict('248', lambda roll: roll).detail,
-                         {'roll_spread': 9, 'scope': EFFECT_VALUE_SCOPE})
+        self.assertEqual(self.rolled_verdict([248]).detail,
+                         {'reads': 1, 'reads_needed': 10, 'roll_spread': 9, 'scope': EFFECT_VALUE_SCOPE})
 
     def test_unreadable_value_of_a_rolled_first_effect_carries_the_spread_of_its_roll(self):
         label = '1001 effect_value #1'
@@ -234,7 +263,7 @@ class CompareTest(unittest.TestCase):
         self.assertEqual(self.effect_verdict('568').detail, {'scope': EFFECT_VALUE_SCOPE})
 
     def test_rolled_effect_in_a_non_monotone_expression_is_unmodelled(self):
-        verdict = self.rolled_verdict('248', lambda roll: (roll - 104) ** 2)
+        verdict = self.rolled_verdict([248], lambda roll: (roll - 104) ** 2)
         self.assertEqual(verdict.status, 'unmodelled')
         self.assertIn('monotone', verdict.explanation)
 
@@ -253,13 +282,19 @@ class CompareTest(unittest.TestCase):
             return [Displayed(text, forced[2] if forced else 100, None, 'flat', 2002)]
 
         reader = FakeTooltips(tokens, {(2002, 0): (99, 10)})
-        item = expectation(label, 'effect_value', text, 'read flat', model={'effect_spell': 2002, 'effect': 0})
-        verdicts = self.value_run([item], [text], [assert_step(label, '105')], reader)
+        needed = mean_samples(list(ROLLS))
+        item = expectation(label, 'effect_value', text, 'read flat',
+                           model={'effect_spell': 2002, 'effect': 0, 'samples': needed})
+        uniform = [assert_step(name, str(ROLLS[index % len(ROLLS)]))
+                   for index, name in enumerate(sample_labels(label, needed))]
+        verdicts = self.value_run([item], [text], uniform, reader)
         self.assertEqual((verdicts[label].status, verdicts[label].detail),
-                         ('ok', {'roll_spread': 9, 'scope': EFFECT_VALUE_SCOPE}))
+                         ('ok', {'reads': needed, 'reads_needed': needed, 'roll_spread': 9,
+                                 'scope': EFFECT_VALUE_SCOPE}))
         self.assertEqual(forced_spells, {2002})
         self.fresh()
-        verdicts = self.value_run([item], [text], [assert_step(label, '125')], reader)
+        shifted = [assert_step(name, '125') for name in sample_labels(label, needed)]
+        verdicts = self.value_run([item], [text], shifted, reader)
         self.assertEqual(verdicts[label].status, 'alert')
 
     def test_divided_token_expects_the_undivided_effect_points(self):
@@ -640,6 +675,21 @@ class PassiveDeltaTest(unittest.TestCase):
         self.assertEqual((verdicts[interdict.label].status, verdicts[restraint.label].status), ('alert', 'measured'))
         verdicts = self.passive_run(PATIENCE, {interdict: ('1000', '3000'), restraint: ('1000', '1000')}, token)
         self.assertEqual(verdicts[interdict.label].status, 'ok')
+
+    def test_mask_spell_beside_an_unmodelled_named_target_is_unmodelled(self):
+        named = passive_expectation(HOLY_UPHEAVAL, 0, 'spell_effect_value', 'add', '$s1', 10.0, ZEALOTRY, True,
+                                    True, fields={'effect': 0})
+        rule = f'unmodelled: target {ZEALOTRY} has no effect 0'
+        named = replace(named, check='unmodelled', rule=rule,
+                        model={**named.model, 'before_label': None, 'after_label': None})
+        masked = passive_expectation(HOLY_UPHEAVAL, 0, 'spell_effect_value', 'add', '$s1', 10.0, RECKONING, False,
+                                     True, fields={'effect': 0})
+        verdicts = self.passive_run(HOLY_UPHEAVAL, {named: (None, None), masked: ('100', '110')},
+                                    [Displayed('$s1', 10.0, 0, 'flat')],
+                                    fields={(ZEALOTRY, 'SpellName[enUS]'): 'Zealotry'})
+        self.assertEqual(verdicts[named.label].status, 'unmodelled')
+        self.assertEqual(verdicts[masked.label].status, 'unmodelled')
+        self.assertIn(f'Zealotry {ZEALOTRY} ({rule})', verdicts[masked.label].explanation)
 
     def test_named_mask_spell_matches_an_outside_named_spell(self):
         outside, inside = (

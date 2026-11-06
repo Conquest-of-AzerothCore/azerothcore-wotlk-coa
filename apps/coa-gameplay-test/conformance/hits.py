@@ -11,15 +11,13 @@ from profile import (CASTER, DBC_DIR, SETTLE_MS, base_steps, caster_stats_from, 
                      player_fixture, unfit_reason)
 from tooltip import (MIXED_PERIOD, OVER_TICKS, CasterStats, ForcedPoints, Readout, Records, Tooltip, Unreadable,
                      mixed_period_reason, period_reading, read_tooltip)
-from values import (CAST_MARGIN_MS, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, EFFECT_TOKEN, EFFECTS, TARGET,
-                    UNREADABLE, Expectation, RankFacts, armed_for, dataset, equip_requirement, facts_of,
-                    required_aura_steps)
+from values import (CAST_MARGIN_MS, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, EFFECT_TOKEN, EFFECTS,
+                    MEAN_HALF_WIDTH, TARGET, UNREADABLE, Z_99, Expectation, RankFacts, armed_for, dataset,
+                    equip_requirement, facts_of, required_aura_steps)
 
 HIT_CHECKS = ('hit_mean', 'melee_mean', 'unmodelled')
 UNMODELLED = 'unmodelled: '
 NEVER_CAST = 'passive spell is never cast'
-Z_99 = 2.576
-MEAN_HALF_WIDTH = 0.01
 EXCLUDED_OUTCOME_MARGIN = Fraction(3, 2)
 ATTACK_POWER_PER_DPS = 14.0
 SCHOOL_DAMAGE = 2

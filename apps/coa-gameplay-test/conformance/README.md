@@ -248,6 +248,15 @@ stats, since the value depends on them. The scenario learns the rank, then measu
 | `aura_duration_ms` | `aura_duration_ms` after the cast | the `$d` token of the rank, for an instant spell that applies an aura |
 | `known_aura` | `aura` before any learn | the class file; the aura's own tooltip gives its modifier |
 
+A rolled effect (`EffectDieSides` neither 0 nor 1) of an own or foreign `effect_value` is read k times: the step
+`<label>` and its copies `<label> sample <n>` for n = 1 .. k - 1, each one `CalcValue` roll. k is the hit-mean count
+`ceil((Z x sigma / (1% x |mean|))^2)`, Z 2.576, with the mean and the population sigma of the token read once per
+roll (`ForcedPoints`) at the structure stats, and is kept as `model['samples']`. The copies must fit in what the
+other steps leave of the harness's 10000-step limit (`MAX_SCENARIO_STEPS`, `run.py` `validate`) and in 1800 reads
+(`READ_BUDGET_MS` 45 s, half the 90 s default `timeout_ms`, at `READ_STEP_MS` 25 ms, the largest step of the
+simulated clock; the harness runs one step per world update); otherwise the effect is read once and its verdict is
+`measured`. Templar: 51 rolled tokens, 2 to 1716 reads (Vindication 501589 102, Reckoning 572741 366).
+
 A token without an id names the spell whose tooltip holds it: for a token of an expanded `@s:` tooltip that is the
 referenced spell, so its `$sN`, `$u` and `$d` are checked as tokens of another spell (Zealotry 92108 `$s2` is
 `effect_value` of 801450 effect 1; Glory 801481 checks its own `$d` as `aura_duration_ms` and the `$d` of Downfall
@@ -1007,11 +1016,11 @@ on one side only and the class spells present on one side only.
 | `ok` | a measurement within its rule below |
 | `alert` | a measurement outside its rule, a missing measurement, or tokens that changed since generation |
 | `unreadable` | an expectation whose rule starts with `unreadable: ` |
-| `unmodelled` | an `unmodelled` check, a `unmodelled: ` or `unmeasurable: ` rule, a hit model left unmodelled |
+| `unmodelled` | an `unmodelled` check, a `unmodelled: ` or `unmeasurable: ` rule, a hit model left unmodelled, a mask spell beside named targets that are all unmodelled |
 | `ambiguous_tooltip` | a sign opposite to the measured value, a proc of unstated trigger, disagreeing talent or passive readings, a named spell outside the class mask while a mask spell moves |
 | `insufficient_trials` | a hit mean below `minimum_hits`, a proc rate below `trials_needed` (R9), a missing pass |
 | `unmeasured` | a check after a failed single cast; a hit mean, proc rate or talent delta without usable hit (R11); a passive whose aura is absent after `learn`; damage against an aura state the scenario does not establish; a passive delta that cannot move (a multiplying relation on a before value of 0, a `stat` change below 1, `parry_chance` on a character that cannot parry) |
-| `measured` | a stack DPS or source damage that no tooltip value judges, a passive plan with `judged` false, a mask spell the tooltip does not name, a namesake of a named spell that moves, two effects on one quantity whose relations do not combine; never an alert |
+| `measured` | a stack DPS or source damage that no tooltip value judges, a passive plan with `judged` false, a mask spell the tooltip does not name, a namesake of a named spell that moves, two effects on one quantity whose relations do not combine, rolled reads fewer than the mean needs; never an alert |
 
 The tooltip of each rank is read again with the `CasterStats` measured by the run's base steps. If its tokens differ
 from the tokens read at generation, every token check of the rank is an alert; so is a token whose text differs
@@ -1037,9 +1046,17 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   `irand(EffectDieSides, 1)`) to `EffectBasePoints` before the caster stat terms of
   `ScriptMgr::ModifySpellEffectBaseValue`; 0 adds nothing and 1 adds 1. The token is read again with each roll
   `EffectBasePoints + 1` .. `EffectBasePoints + EffectDieSides` in place of the effect's points (`ForcedPoints`);
-  if the values are monotone in the roll, the measured value must lie between the lowest and the highest, each bound
-  widened by the deterministic tolerance; otherwise the verdict is `unmodelled`. The Templar has seven such tokens,
-  `${$m1+0+$AP*0.45+$SP*0.45}` of ranks 501562 to 501566, 572021 and 572027 (`EffectDieSides` 32 to 224).
+  values that are not monotone in the roll give `unmodelled`. Otherwise the reads are judged by the hit-mean rule:
+  the rolls are equally likely, so the expected mean and sigma are the mean and population sigma of the per-roll
+  values, re-read with the measured stats; with n reads (`detail['reads']`) the mean of the reads must lie in
+  expected mean ± 2.576 x sigma / sqrt(n), widened by 1 toward zero because `CalcValue` returns `int32(value)`
+  (`SpellInfo.cpp:587`, a truncation). Fewer reads than the count the mean needs at the measured stats
+  (`detail['reads_needed']`), or a mean of 0, give `measured`. A single read inside the roll range proves nothing
+  about a constant offset smaller than the range: the fix round of the phase-2 Templar run found six such `ok`
+  verdicts (Reckoning 572741, 748507, 805421; Vindication 501589, 501590, 501592), whose server value adds a
+  per-level part the expected value omits. An `aura_amount` of a rolled effect has one read (one cast) and is
+  therefore `measured` unless one read is enough. The Templar has rolled tokens on Righteous Upheaval, Vindication,
+  Reckoning, Chastise, Benediction, Titanstrike and others (`EffectDieSides` 3 to 224).
   Every `effect_value` and `aura_amount` verdict whose measured effect rolls (the token's effect, or the first
   active effect for an unreadable value) keeps `roll_spread`, `abs(EffectDieSides) - 1`, in its `detail`: two
   `CalcValue` draws of that effect at the same stats differ by at most that much.
@@ -1099,7 +1116,9 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   of Tenacity 801461: `$/1000;s1` reads 30000 ms, points −30000, expected −30000 ± 150; 1000 → −29000 is `ok`, 1000 →
   −28800 an alert. Solemn Soldier 572555: 2500 → 2272.73 ms is `ok`, 2500 → 2250 an alert.
   Spell modifier targets (D5, ADR 0017): a mask spell the tooltip does not name, beside named targets of the same
-  effect and metric, is `measured`; with no named target (category targets) the mask spells are judged. A named spell
+  effect and metric, is `measured`; beside named targets that are all `unmodelled` for that effect and metric (a
+  named spell without the consumer's effect: `target <id> has no effect <n>`) it is `unmodelled`, the reason naming
+  them; with no named target at all (category targets) the mask spells are judged. A named spell
   outside the mask is `ok` when its own delta is the expected one; otherwise `measured` when a named spell of the
   same name shows the expected non-zero delta (a namesake the modifier does not reach: Legacy of the Silver Hand on
   Scourgebane 92111 beside 801832), `ambiguous_tooltip` when another mask spell of the same effect and metric, named

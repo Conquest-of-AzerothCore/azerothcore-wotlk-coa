@@ -1,13 +1,16 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from functools import lru_cache
+import math
 from pathlib import Path
 import re
+from statistics import fmean, pstdev
+from typing import Sequence
 
 from classes import PASSIVE_ATTRIBUTE, ClassSpell, DataSet
 from profile import (CASTER, DBC_DIR, EQUIP_FIELDS, armed, base_steps, character_of, known_aura_label, measurement,
                      player_fixture, skill_target)
-from tooltip import (MIXED_PERIOD, OVER_TICKS, TICKING_AURAS, CasterStats, Displayed, Records, Unreadable,
-                     mixed_period_reason, period_reading, read_tooltip)
+from tooltip import (MIXED_PERIOD, OVER_TICKS, TICKING_AURAS, CasterStats, Displayed, ForcedPoints, Records, Tooltip,
+                     Unreadable, mixed_period_reason, period_reading, read_tooltip)
 
 CHECKS = ('effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'spell_duration', 'power_cost',
           'cooldown_ms', 'known_aura')
@@ -29,6 +32,14 @@ EFFECT_KINDS = ('flat', 'percent', 'duration_ms')
 EFFECT_TOKEN = re.compile(r'\$(?:/\d+;)?(?P<spell>\d*)[sSmM](?P<digit>[1-3])')
 STACKS_TOKEN = re.compile(r'\$(?P<spell>\d*)[uU]')
 LEVEL_PLACEHOLDER_STAT = 1.0
+Z_99 = 2.576
+MEAN_HALF_WIDTH = 0.01
+MAX_SCENARIO_STEPS = 10000
+DEFAULT_TIMEOUT_MS = 90000
+READ_STEP_MS = 25
+READ_BUDGET_MS = DEFAULT_TIMEOUT_MS // 2
+FIXED_DIE_SIDES = (0, 1)
+SAMPLE_SUFFIX = ' sample '
 
 
 @dataclass(frozen=True)
@@ -129,6 +140,41 @@ def first_aura_effect(facts: RankFacts) -> int | None:
     return next((effect for effect in EFFECTS if facts.effects[effect] and facts.aura_names[effect]), None)
 
 
+def roll_range(base_points: int, die_sides: int) -> range:
+    low, high = sorted((base_points + 1, base_points + die_sides))
+    return range(low, high + 1)
+
+
+def sample_labels(label: str, samples: int) -> list[str]:
+    return [label] + [f'{label}{SAMPLE_SUFFIX}{index}' for index in range(1, samples)]
+
+
+def mean_samples(values: Sequence[float]) -> int | None:
+    mean = fmean(values)
+    if abs(mean) < 1e-9:
+        return None
+    return max(1, math.ceil((Z_99 * pstdev(values) / (MEAN_HALF_WIDTH * abs(mean))) ** 2))
+
+
+def rolled_samples(dbc: DataSet, records: Records, rank_id: int, caster: CasterStats, ordinal: int, text: str,
+                   spell_id: int, effect: int) -> int | None:
+    base_points = records.field('Spell', spell_id, f'EffectBasePoints[{effect}]')
+    die_sides = records.field('Spell', spell_id, f'EffectDieSides[{effect}]')
+    if die_sides in FIXED_DIE_SIDES:
+        return None
+    description = records.field('Spell', rank_id, 'Description[enUS]')
+    values = []
+    for roll in roll_range(base_points, die_sides):
+        try:
+            readout = Tooltip(ForcedPoints(dbc, spell_id, effect, roll), rank_id, caster).read(description)
+        except Unreadable:
+            return 1
+        if ordinal >= len(readout.values) or readout.values[ordinal].text != text:
+            return 1
+        values.append(readout.values[ordinal].value)
+    return mean_samples(values) or 1
+
+
 def token_spell(digits: str, rank_id: int, shown: Displayed) -> int:
     return int(digits) if digits else shown.spell_id or rank_id
 
@@ -192,6 +238,21 @@ def power_cost_expectation(label: str, spell_id: int, rank_id: int, facts: RankF
     return Expectation(label, 'power_cost', spell_id, rank_id, None, displayed, rule)
 
 
+def sampled_reads(measured: list[dict], rolled: dict[str, int], budget: int) -> tuple[list[dict], dict[str, int]]:
+    steps, samples = [], {}
+    for step in measured:
+        steps.append(step)
+        wanted = rolled.get(step['label'])
+        if wanted is None:
+            continue
+        if wanted - 1 > budget:
+            wanted = 1
+        budget -= wanted - 1
+        samples[step['label']] = wanted
+        steps += [{**step, 'label': label} for label in sample_labels(step['label'], wanted)[1:]]
+    return steps, samples
+
+
 def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[dict, list[Expectation]]:
     if rank_id not in spell.ranks:
         raise ValueError(f'Spell {rank_id} is not a rank of {spell.spell_id}')
@@ -206,6 +267,12 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
     expectations: list[Expectation] = []
     cast_wanted = False
     first_effect = next((effect for effect in EFFECTS if facts.effects[effect]), None)
+    rolled: dict[str, int] = {}
+
+    def sample_rolled(label: str, ordinal: int, text: str, spell_id: int, effect: int):
+        samples = rolled_samples(dbc, records, rank_id, caster, ordinal, text, spell_id, effect)
+        if samples is not None:
+            rolled[label] = samples
 
     def effect_measurement(label: str, effect: int) -> dict:
         return measurement(label, CASTER, 'spell_effect_value', spell=rank_id, effect=effect)
@@ -226,6 +293,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
             label = f'{rank_id} effect_value e{effect} #{ordinal}'
             measured.append(effect_measurement(label, effect))
             expect(label, 'effect_value', effect, shown.text, f'read {shown.kind}')
+            sample_rolled(label, ordinal, shown.text, rank_id, effect)
             if facts.aura_names[effect] and not facts.passive:
                 aura_label = f'{rank_id} aura_amount e{effect} #{ordinal}'
                 after_cast.append(aura_measurement(aura_label, 'aura_amount', effect, effect=effect))
@@ -250,6 +318,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
             measured.append(measurement(label, CASTER, 'spell_effect_value', spell=foreign['effect_spell'],
                                         effect=foreign['effect']))
             expect(label, 'effect_value', None, shown.text, f'read {shown.kind}', foreign)
+            sample_rolled(label, ordinal, shown.text, foreign['effect_spell'], foreign['effect'])
             continue
         if unmeasurable:
             expect(f'{rank_id} effect_value #{ordinal}', 'effect_value', None, shown.text, UNMEASURABLE + unmeasurable)
@@ -312,13 +381,18 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
     for aura in class_file.get('known_auras', []):
         expectations.append(Expectation(
             known_aura_label(aura), 'known_aura', aura, aura, None, str(aura), 'reference profile aura'))
+    learn = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
+    budget = min(MAX_SCENARIO_STEPS - len(learn) - len(measured) - len(cast_steps) - len(after_cast),
+                 READ_BUDGET_MS // READ_STEP_MS)
+    sampled, samples = sampled_reads(measured, rolled, budget)
+    expectations = [replace(item, model={**(item.model or {}), 'samples': samples[item.label]})
+                    if item.check == 'effect_value' and item.label in samples else item for item in expectations]
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spell.name} {rank_id}',
         'contract': 'No-combat check of the effect values, cost, cooldown and aura of one rank against its tooltip.',
         'players': [player_fixture(class_file)],
-        'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
-        + measured + cast_steps + after_cast}
+        'steps': learn + sampled + cast_steps + after_cast}
     if is_hostile(facts) and cast_wanted:
         scenario['creatures'] = [{'id': TARGET, 'owner': CASTER, 'entry': DUMMY_ENTRY, 'level': class_file['level'],
                                   'health': DUMMY_HEALTH, 'distance': DUMMY_DISTANCE}]

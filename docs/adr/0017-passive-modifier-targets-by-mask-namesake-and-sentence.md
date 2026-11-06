@@ -54,11 +54,16 @@ one, none was a server defect:
   Argent Blade ... guarantees") are not detected as such: no rule tells a condition from a target reliably. Those
   outside the mask stay `ambiguous_tooltip` (Templar's Might names the spells Condemn's debuff boosts) and go to
   the player question list; D3 removes the ones in another sentence.
+- D8. A mask spell the tooltip does not name is `measured` beside named targets of the same effect and metric
+  (ADR 0012 D5). When every such named target is `unmodelled` for that metric (a named spell without the consumer's
+  effect: `target <id> has no effect <n>`), the mask spell is `unmodelled` too, its reason naming them: judging it
+  as a category target would accept an `ok` on a spell the tooltip does not name. Category judging applies only
+  when the tooltip names no target at all.
 
 ## Consequences
 
-- The 2026-11-06 Templar run keeps no tool-made modifier-target alert: 69 of the 71 such alerts become `ok` on the helper
-  spells, `ambiguous_tooltip` on consumers, `measured` on namesakes, or leave the target list.
+- The 2026-11-06 Templar run keeps no tool-made modifier-target alert: 69 of the 71 such alerts become `ok` on the
+  helper spells, `ambiguous_tooltip` on consumers, `measured` on namesakes, or leave the target list.
 - Helper spells that D1 makes targets are judged: Righteous Tempest 570200 to 570205 and 805410 (+30% from Argent
   Knight, +25% from Focused), Righteous Upheaval 807764 (+100%), Benediction 801409 (+15000 ms) read `ok`. Each was
   checked against its mask and the tooltip number.

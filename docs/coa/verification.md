@@ -228,9 +228,10 @@ passive triggers, procs and talent stack against their client tooltips, and judg
 ([README](../../apps/coa-gameplay-test/conformance/README.md), method in
 [ADR 0011](../adr/0011-class-tooltip-conformance.md), passives in
 [ADR 0012](../adr/0012-passive-conformance-by-with-and-without-measurement.md), their modifier targets in
-[ADR 0017](../adr/0017-passive-modifier-targets-by-mask-namesake-and-sentence.md)). The scenarios run as exploratory files, so the run ends
-`INCOMPLETE` even when they pass; the verdicts come from `compare`, not from the stage result. Its unit tests are the
-`conformance` suite of the source stage. `compare` writes `alerts.tsv`, `report.md`, `verdicts.json`, `questions.md`
+[ADR 0017](../adr/0017-passive-modifier-targets-by-mask-namesake-and-sentence.md), rolled values in
+[ADR 0018](../adr/0018-rolled-tooltip-values-judged-on-the-mean-of-repeated-reads.md)). The scenarios run as exploratory
+files, so the run ends `INCOMPLETE` even when they pass; the verdicts come from `compare`, not from the stage result.
+Its unit tests are the `conformance` suite of the source stage. `compare` writes `alerts.tsv`, `report.md`, `verdicts.json`, `questions.md`
 (the checks that only players on live can settle, in English and in what a player sees) and, for stack runs,
 `levers.md`. `conformance.py diff` compares two outputs verdict by verdict (`impact.md`), and `conformance.py coverage
 --before OUT_A --after OUT_B` writes `coverage.md`: verdicts per status and the class spells, passives and actives

@@ -4,12 +4,14 @@ import struct
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 from classes import class_spells
 from profile import CLASSES_DIR, armed, base_steps, caster_stats_from, load_class_file, skill_label, unfit_reason
 from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, write_fixture
 from tooltip import CasterStats, DataSet, Records, read_tooltip
-from values import CHECKS, UNMEASURABLE, UNREADABLE, Expectation, foreign_effect, periodic_reason, value_scenario
+from values import (CHECKS, UNMEASURABLE, UNREADABLE, Expectation, foreign_effect, periodic_reason, sample_labels,
+                    value_scenario)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -23,6 +25,8 @@ FROSTMANE_CLUB = 2259
 MACES_SKILL_LINE = 54
 VINDICATION = 801446
 VINDICATION_RANKS = (801446, 501589, 501590, 501591, 501592, 501593, 573324)
+VINDICATION_RANK_2 = 501589
+VINDICATION_ROLLED_LABEL = '501589 effect_value e0 #0'
 ONE_HAND_MASK = 41105
 TWO_HAND_MASK = 1378
 TWO_HAND_INVENTORY_MASK = 131072
@@ -302,6 +306,25 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
                 self.assertIn(skill_label(MACES_SKILL_LINE), measured_labels(scenario))
         scenario, _ = self.build(RIGHTEOUS_UPHEAVAL, RIGHTEOUS_UPHEAVAL_MAX_RANK)
         self.assertEqual([step['item'] for step in scenario['steps'] if step['action'] == 'equip'], [WALKING_STICK])
+
+    def test_rolled_effect_value_is_read_as_often_as_its_mean_needs(self):
+        scenario, expectations = self.build(VINDICATION, VINDICATION_RANK_2)
+        run.validate(scenario)
+        item = next(item for item in expectations if item.label == VINDICATION_ROLLED_LABEL)
+        samples = item.model['samples']
+        self.assertGreater(samples, 1)
+        reads = [step for step in scenario['steps'] if step.get('label') in sample_labels(item.label, samples)]
+        self.assertEqual([step['label'] for step in reads], sample_labels(item.label, samples))
+        self.assertEqual({(step['metric'], step['spell'], step['effect']) for step in reads},
+                         {('spell_effect_value', VINDICATION_RANK_2, 0)})
+
+    def test_rolled_effect_value_whose_reads_exceed_the_step_limit_is_read_once(self):
+        with mock.patch('values.MAX_SCENARIO_STEPS', 60):
+            scenario, expectations = self.build(VINDICATION, VINDICATION_RANK_2)
+        item = next(item for item in expectations if item.label == VINDICATION_ROLLED_LABEL)
+        self.assertEqual(item.model['samples'], 1)
+        self.assertEqual([step['label'] for step in scenario['steps'] if step.get('label', '').startswith(item.label)],
+                         [item.label])
 
     def test_spell_without_a_required_caster_aura_sets_no_aura(self):
         scenario, _ = self.build(ARGENT_BLADE, ARGENT_BLADE_RANK_2)

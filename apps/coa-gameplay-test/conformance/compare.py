@@ -6,7 +6,7 @@ import json
 import math
 from pathlib import Path
 import re
-from statistics import fmean
+from statistics import fmean, pstdev
 from typing import Callable, Mapping, Protocol
 
 from hits import (HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS, WEAPON_PERCENT_DAMAGE, Z_99,
@@ -20,7 +20,8 @@ from stack import (ADDS, MEASURED, MELEE_SOURCE, MULTIPLIES, STACK_CHECKS, STACK
                    levers, mean_interval, ratio_interval)
 from tooltip import CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, Unreadable
 from triggers import EVENT_TOLERANCE, TRIGGER_CHECK
-from values import CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECTS, UNMEASURABLE, UNREADABLE, Expectation, dataset
+from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECTS, FIXED_DIE_SIDES, UNMEASURABLE, UNREADABLE, Expectation,
+                    dataset, mean_samples, roll_range, sample_labels)
 
 STATUSES = ('ok', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials', 'unmeasured',
             MEASURED)
@@ -41,7 +42,7 @@ READ_RULE = 'read '
 ORDINAL = re.compile(r'#(\d+)$')
 DIVIDED_TOKEN = re.compile(r'\$/(\d+);')
 PLAIN_TOKEN = re.compile(r'\$(?:/\d+;)?(?P<spell>\d*)(?P<letter>[sSmM])(?P<digit>[1-3])')
-FIXED_DIE_SIDES = (0, 1)
+TRUNCATED_READ = 1.0
 COST_DIVISOR = re.compile(r'ManaCost divisor (\d+)')
 EXPLORATORY = ('gameplay', 'exploratory')
 ALERT_COLUMNS = ('scenario', 'spell_id', 'rank_id', 'label', 'check', 'status', 'measured', 'expected', 'low', 'high',
@@ -346,11 +347,6 @@ def displayed_points(tooltips: TooltipSource, plain: re.Match, spell_id: int) ->
     return base_points + (die_sides if plain.group('letter') == 'M' else 1)
 
 
-def roll_range(base_points: int, die_sides: int) -> range:
-    low, high = sorted((base_points + 1, base_points + die_sides))
-    return range(low, high + 1)
-
-
 def token_effect(expectation: Expectation) -> tuple[int, int] | None:
     model = expectation.model or {}
     if 'effect' in model:
@@ -360,8 +356,8 @@ def token_effect(expectation: Expectation) -> tuple[int, int] | None:
     return None
 
 
-def judge_roll(base: Verdict, expectation: Expectation, measured: float, tokens: Tokens, tooltips: TooltipSource,
-               index: int, rolls: range) -> Verdict:
+def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: float, tokens: Tokens,
+               tooltips: TooltipSource, index: int, rolls: range) -> Verdict:
     token = tokens.readout.values[index]
     plain = PLAIN_TOKEN.fullmatch(token.text)
     spell_id, effect = token_effect(expectation)
@@ -378,13 +374,29 @@ def judge_roll(base: Verdict, expectation: Expectation, measured: float, tokens:
         return replace(base, status='unmodelled', measured=measured,
                        explanation=f'{token.text} is not monotone in the roll {rolls.start}..{rolls.stop - 1} of '
                                    f'effect {effect}')
-    least, most = min(values), max(values)
-    low, high = least - margin_of(least), most + margin_of(most)
-    status = 'ok' if low - FLOAT_EPSILON <= measured <= high + FLOAT_EPSILON else 'alert'
-    return replace(base, status=status, measured=measured, expected=(least + most) / 2, low=low, high=high,
-                   explanation=f'{token.text} over the roll {rolls.start}..{rolls.stop - 1} of effect {effect} '
-                               f'(spell_effect_value is one SpellEffectInfo::CalcValue roll): {least:g} to {most:g}, '
-                               f'each bound widened by max({ABSOLUTE_TOLERANCE:g}, {RELATIVE_TOLERANCE:.1%})')
+    labels = sample_labels(base.label, (expectation.model or {}).get('samples', 1))
+    reads = [run.values[label] for label in labels if label in run.values]
+    mean, expected, sigma = fmean(reads), fmean(values), pstdev(values)
+    needed = mean_samples(values)
+    roll = (f'{token.text} over the roll {rolls.start}..{rolls.stop - 1} of effect {effect}: {min(values):g} to '
+            f'{max(values):g}, uniform mean {expected:.3f} sigma {sigma:.3f}; {len(reads)} spell_effect_value reads '
+            f'(each one SpellEffectInfo::CalcValue roll), mean {mean:.3f}')
+    detail = {'reads': len(reads), 'reads_needed': needed}
+    if needed is None:
+        return replace(base, status=MEASURED, measured=mean, expected=expected, detail=detail,
+                       explanation=f'{roll}; a mean of 0 has no half-width of {MEAN_HALF_WIDTH:.0%}')
+    if len(reads) < needed:
+        return replace(base, status=MEASURED, measured=mean, expected=expected, detail=detail,
+                       explanation=f'{roll}; a half-width of {MEAN_HALF_WIDTH:.0%} of the mean at 99% needs '
+                                   f'{needed} reads, more than the scenario holds')
+    half = Z_99 * sigma / math.sqrt(len(reads))
+    low = expected - half - (TRUNCATED_READ if expected > 0 else 0)
+    high = expected + half + (TRUNCATED_READ if expected < 0 else 0)
+    status = 'ok' if low - FLOAT_EPSILON <= mean <= high + FLOAT_EPSILON else 'alert'
+    return replace(base, status=status, measured=mean, expected=expected, low=low, high=high, detail=detail,
+                   explanation=f'{roll}; 99% interval of the mean, expected mean +- Z x sigma / sqrt(reads) '
+                               f'{half:.3f}, widened by {TRUNCATED_READ:g} toward zero for the int32 truncation of '
+                               f'CalcValue')
 
 
 def token_drift(expectation: Expectation, tokens: Tokens | None) -> str | None:
@@ -418,7 +430,8 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
     if effect is not None:
         base_points, die_sides = tooltips.effect_points(*effect)
         if die_sides not in FIXED_DIE_SIDES:
-            return judge_roll(base, expectation, measured, tokens, tooltips, index, roll_range(base_points, die_sides))
+            return judge_roll(base, expectation, run, measured, tokens, tooltips, index,
+                              roll_range(base_points, die_sides))
     expected = undivided(token)
     plain = PLAIN_TOKEN.fullmatch(token.text)
     if plain:
@@ -1287,6 +1300,12 @@ def target_group(entry: dict, model: dict) -> list[dict]:
             if data['check'] == PASSIVE_DELTA and data['model'] and same_group(model, data['model'])]
 
 
+def unmodelled_named_targets(entry: dict, model: dict) -> list[tuple[dict, str]]:
+    return [(data['model'], data['rule']) for data in entry['expectations']
+            if data['check'] == 'unmodelled' and data['model'] and data['model'].get('named')
+            and same_group(model, data['model'])]
+
+
 def interval_verdict(base: Verdict, metric: str, delta: float, judged: list[tuple[DeltaReading, str]],
                      context: str) -> Verdict:
     reading, status = judged[0]
@@ -1408,6 +1427,12 @@ def judge_modifier_target(base: Verdict, manifest: dict, entry: dict, run: Run, 
         return replace(base, status=MEASURED, measured=delta, expected=judged[0][0].delta,
                        explanation=f'{context}; {name} is in the class mask but the tooltip names other spells: '
                                    f'reported, not judged')
+    unmodelled = unmodelled_named_targets(entry, model)
+    if not model['named'] and unmodelled:
+        named = ', '.join(f'{target_name(tooltips, other["target"])} ({rule})' for other, rule in unmodelled)
+        return replace(base, status='unmodelled', measured=delta, expected=judged[0][0].delta,
+                       explanation=f'{context}; {name} is in the class mask but the tooltip names {named}, '
+                                   f'unmodelled for this quantity: not judged')
     reading, status = judged[0]
     if status == 'ok' or model['in_mask']:
         return interval_verdict(base, model['metric'], delta, judged, context)
