@@ -1,11 +1,12 @@
 import json
 from pathlib import Path
+import struct
 import sys
 import tempfile
 import unittest
 
 from classes import class_spells
-from profile import CLASSES_DIR, base_steps, caster_stats_from, load_class_file
+from profile import CLASSES_DIR, base_steps, caster_stats_from, load_class_file, skill_label
 from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, write_fixture
 from tooltip import CasterStats, DataSet, Records, read_tooltip
 from values import CHECKS, UNMEASURABLE, UNREADABLE, Expectation, foreign_effect, value_scenario
@@ -49,6 +50,12 @@ SACRED_OATH = 712346
 GLORY = 801481
 DOWNFALL = 801482
 REDEMPTION = 801483
+HUMAN = 1
+STAFF_SUBCLASS = 10
+ITEM_RECORD = struct.Struct('<3i')
+TEMPLAR_SKILL_LINES = (70, 71, 72, 136)
+LEVEL_60_SKILL = 300
+HOLY_CONSTITUTION_BASE_POINTS, HOLY_CONSTITUTION_PER_LEVEL, HOLY_CONSTITUTION_BASE_LEVEL = 4, 1.5, 28
 
 
 def measured_labels(scenario):
@@ -63,6 +70,15 @@ class ClassFileTest(unittest.TestCase):
         self.assertEqual(templar['probe_auras'], [SCOURGEBANE])
         for section in ('talent_modifiers', 'rotation', 'stack'):
             self.assertTrue(templar[section])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_templar_weapon_subclass_is_the_item_record_subclass(self):
+        table = DataSet(DBC_DIR).load('Item')[0]
+        records = {item: (item_class, subclass) for item, item_class, subclass
+                   in (ITEM_RECORD.unpack_from(table.record(row)) for row in range(table.rows))}
+        templar = load_class_file(TEMPLAR_CLASS_ID)
+        self.assertEqual(records[WALKING_STICK], (2, templar['weapon']['subclass']))
+        self.assertEqual(templar['weapon']['subclass'], STAFF_SUBCLASS)
 
     def test_every_class_file_names_its_class(self):
         files = sorted(CLASSES_DIR.glob('*.json'))
@@ -106,17 +122,33 @@ class BaseStepsTest(unittest.TestCase):
             self.assertLessEqual(step['min'], -10**9)
             self.assertGreaterEqual(step['max'], 10**9)
 
+    def test_base_steps_measure_skills(self):
+        lines = []
+        for position, step in enumerate(self.steps):
+            if step['action'] == 'set_skill':
+                self.assertEqual((step['actor'], step['value'], step['maximum']), ('caster', LEVEL_60_SKILL,
+                                                                                    LEVEL_60_SKILL))
+                measured = self.steps[position + 1]
+                self.assertEqual((measured['label'], measured['metric'], measured['skill']),
+                                 (skill_label(step['skill']), 'skill_value', step['skill']))
+                lines.append(step['skill'])
+        self.assertEqual(tuple(lines), TEMPLAR_SKILL_LINES)
+
     def test_caster_stats_are_rebuilt_from_labelled_measurements(self):
         measured = {'attack_power': 313.0, 'ranged_attack_power': 7.0, 'weapon_damage_min': 9.0}
         measured.update({f'spell_power {school}': float(school) for school in range(1, SPELL_POWER_SCHOOLS + 1)})
         measured.update({f'stat {stat}': 10.0 + stat for stat in range(STAT_COUNT)})
-        self.assertEqual(caster_stats_from(measured, 60), CasterStats(
+        measured.update({skill_label(line): 295.0 for line in TEMPLAR_SKILL_LINES[:3]})
+        self.assertEqual(caster_stats_from(measured, load_class_file(TEMPLAR_CLASS_ID)), CasterStats(
             level=60, ap=313.0, rap=7.0, sp_by_school={school: float(school) for school in range(1, 7)},
-            stats={stat: 10.0 + stat for stat in range(STAT_COUNT)}))
+            stats={stat: 10.0 + stat for stat in range(STAT_COUNT)},
+            skills=dict.fromkeys(TEMPLAR_SKILL_LINES[:3], 295.0), weapon_subclass=STAFF_SUBCLASS, race=HUMAN,
+            class_id=TEMPLAR_CLASS_ID))
 
     def test_class_file_without_weapon_or_auras_yields_only_measurements(self):
         steps = base_steps({'class_id': 1, 'race': 1, 'level': 60})
         self.assertNotIn('equip', {step['action'] for step in steps})
+        self.assertNotIn('set_skill', {step['action'] for step in steps})
         self.assertNotIn('aura', {step.get('metric') for step in steps})
 
 
@@ -209,12 +241,17 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.build(ARGENT_BLADE, SCOURGEBANE)
 
-    def test_level_scaled_tooltip_is_unreadable_but_still_measured(self):
+    def test_level_scaled_tooltip_is_read_through_the_skill_rank(self):
         scenario, expectations = self.build(HOLY_CONSTITUTION, HOLY_CONSTITUTION)
-        unreadable = [item for item in expectations if item.rule.startswith(UNREADABLE)]
-        self.assertTrue(unreadable)
-        for item in unreadable:
-            self.assertEqual(item.check, 'effect_value')
+        self.assertFalse([item for item in expectations if item.rule.startswith(UNREADABLE)])
+        item = next(item for item in expectations if item.displayed == '${$m1+0}')
+        self.assertEqual((item.check, item.effect_index, item.rule), ('effect_value', 0, 'read flat'))
+        readout = read_tooltip(DataSet(DBC_DIR), HOLY_CONSTITUTION, caster_stats_from(
+            {**self.class_file['reference_stats'], **{skill_label(line): float(LEVEL_60_SKILL)
+                                                      for line in TEMPLAR_SKILL_LINES}}, self.class_file))
+        level_points = HOLY_CONSTITUTION_PER_LEVEL * (60 - HOLY_CONSTITUTION_BASE_LEVEL)
+        self.assertEqual(next(value.value for value in readout.values if value.text == '${$m1+0}'),
+                         HOLY_CONSTITUTION_BASE_POINTS + 1 + level_points)
 
     def steps_of(self, scenario, label):
         return [step for step in scenario['steps'] if step.get('label') == label]

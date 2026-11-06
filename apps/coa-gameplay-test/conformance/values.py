@@ -4,7 +4,8 @@ from pathlib import Path
 import re
 
 from classes import PASSIVE_ATTRIBUTE, ClassSpell, DataSet
-from profile import (CASTER, DBC_DIR, base_steps, known_aura_label, measurement, player_fixture)
+from profile import (CASTER, DBC_DIR, base_steps, character_of, known_aura_label, measurement, player_fixture,
+                     skill_target)
 from tooltip import CasterStats, Displayed, Records, Unreadable, read_tooltip
 
 CHECKS = ('effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'spell_duration', 'power_cost',
@@ -88,11 +89,13 @@ def facts_of(records: Records, rank_id: int) -> RankFacts:
         caster_aura_spell=spell('CasterAuraSpell'))
 
 
-def structure_stats(level: int) -> CasterStats:
+def structure_stats(class_file: dict) -> CasterStats:
+    skills = {line: float(skill_target(class_file)) for line in class_file.get('skill_lines', [])}
     return CasterStats(
-        level=level, ap=LEVEL_PLACEHOLDER_STAT, rap=LEVEL_PLACEHOLDER_STAT,
+        ap=LEVEL_PLACEHOLDER_STAT, rap=LEVEL_PLACEHOLDER_STAT,
         sp_by_school={school: LEVEL_PLACEHOLDER_STAT for school in range(1, 7)},
-        stats={stat: LEVEL_PLACEHOLDER_STAT for stat in range(5)})
+        stats={stat: LEVEL_PLACEHOLDER_STAT for stat in range(5)},
+        **character_of(class_file, skills))
 
 
 def is_hostile(facts: RankFacts) -> bool:
@@ -170,7 +173,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
     dbc = dataset(Path(class_file.get('dbc_dir', DBC_DIR)))
     records = Records(dbc)
     facts = facts_of(records, rank_id)
-    readout = read_tooltip(dbc, rank_id, structure_stats(class_file['level']))
+    readout = read_tooltip(dbc, rank_id, structure_stats(class_file))
     measured: list[dict] = []
     after_cast: list[dict] = []
     expectations: list[Expectation] = []

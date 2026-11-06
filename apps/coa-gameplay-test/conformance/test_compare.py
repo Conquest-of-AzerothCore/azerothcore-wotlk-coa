@@ -37,7 +37,10 @@ HIT_LABELS = {'armor': 'target armor', 'view_level': 'target view_level', 'total
 BASE_ACTUALS = {'attack_power': '313', 'ranged_attack_power': '182', 'spell_power 1': '0', 'spell_power 2': '0',
                 'spell_power 3': '0', 'spell_power 4': '0', 'spell_power 5': '0', 'spell_power 6': '0',
                 'stat 0': '81', 'stat 1': '132', 'stat 2': '79', 'stat 3': '32', 'stat 4': '50',
-                'weapon_damage_min': '62.455360412597656', 'known_aura 887007': '1', 'probe_aura 92111': '0'}
+                'weapon_damage_min': '62.455360412597656', 'known_aura 887007': '1', 'probe_aura 92111': '0',
+                'skill 70': '300', 'skill 71': '300', 'skill 72': '300', 'skill 136': '300'}
+STAFFGUARD, STAFFGUARD_TOKEN = 705295, '${$706583m1+$STA*.3}'
+STAFFGUARD_HEALTH_AT_RANK_ZERO, STAFFGUARD_HEALTH_AT_LEVEL_60 = 125, 305
 
 
 def expectation(label, check, displayed, rule, effect=None, model=None):
@@ -764,7 +767,7 @@ class GeneratedTokenTest(unittest.TestCase):
         spell = self.spells[spell_id]
         scenario, expectations = value_scenario(CLASS_FILE, spell, spell_id)
         item = next(item for item in expectations if item.displayed == displayed)
-        tokens = [value.text for value in read_tooltip(self.tooltips.dbc, spell_id, structure_stats(60)).values]
+        tokens = [value.text for value in read_tooltip(self.tooltips.dbc, spell_id, structure_stats(CLASS_FILE)).values]
         self.workspace.scenario(f'conformance-templar-value-{spell_id}', 'value', expectations, tokens,
                                 [assert_step(item.label, actual)], spell=spell_id, name=spell.name, rank=spell_id)
         manifest, results = self.workspace.manifest()
@@ -780,6 +783,13 @@ class GeneratedTokenTest(unittest.TestCase):
         verdict = self.judged(SCOURGEBANE, '$801832s2', '50')
         self.assertEqual((verdict.status, verdict.expected), ('ok', 50.0))
         self.assertEqual(self.judged(SCOURGEBANE, '$801832s2', '5').status, 'alert')
+
+    def test_foreign_level_scaled_token_is_judged_at_the_rank_of_its_own_spell(self):
+        stamina = float(BASE_ACTUALS['stat 2'])
+        verdict = self.judged(STAFFGUARD, STAFFGUARD_TOKEN, str(STAFFGUARD_HEALTH_AT_RANK_ZERO + 0.3 * stamina))
+        self.assertEqual((verdict.status, verdict.expected), ('ok', STAFFGUARD_HEALTH_AT_RANK_ZERO + 0.3 * stamina))
+        self.assertEqual(self.judged(STAFFGUARD, STAFFGUARD_TOKEN,
+                                     str(STAFFGUARD_HEALTH_AT_LEVEL_60 + 0.3 * stamina)).status, 'alert')
 
     def test_foreign_stack_token_is_judged_exactly(self):
         verdict = self.judged(IRON_PENANCE, '$523713u', '10')

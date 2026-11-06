@@ -1,9 +1,11 @@
+from dataclasses import replace
 from pathlib import Path
 import struct
 import tempfile
 import unittest
 
-from tooltip import MAX_EXPANSION_DEPTH, CasterStats, DataSet, Displayed, Records, Tooltip, read_tooltip
+from tooltip import (MAX_EXPANSION_DEPTH, CasterStats, DataSet, Displayed, ForcedPoints, Records, Tooltip,
+                     client_spell_level, read_tooltip, weapon_skill_spells)
 import schemas
 
 DBC_DIR = Path('/srv/coa/server-data/dbc')
@@ -31,6 +33,7 @@ OUTMANEUVER = 557325
 OUTMANEUVER_DURATION_MS = 8000
 OUTMANEUVER_STACK_AMOUNT = 20
 OUTMANEUVER_BASE_POINTS_3 = 29
+DECOY_STRIKE_BASE_POINTS = 850
 VEILED_IN_DARKNESS = 524854
 HOLY_CONSTITUTION = 706323
 HOLY_CONSTITUTION_BASE_POINTS_2 = 29
@@ -46,6 +49,27 @@ GLORY = 801481
 DOWNFALL = 801482
 REDEMPTION = 801483
 DOWNFALL_DURATION_MS = 5000
+HUMAN, TEMPLAR = 1, 19
+STAFF_SUBCLASS = 10
+STAVES = 227
+STAVES_LINE = 136
+TEMPLAR_LINES = (70, 71, 72)
+LEVEL_60_SKILL = 300
+SKILLED_TEMPLAR = replace(LEVEL_60_TEMPLAR, skills=dict.fromkeys(TEMPLAR_LINES + (STAVES_LINE,), LEVEL_60_SKILL),
+                          race=HUMAN, class_id=TEMPLAR)
+DIVINE_FORCE = 807805
+DIVINE_FORCE_BASE_POINTS_3, DIVINE_FORCE_PER_LEVEL_3, DIVINE_FORCE_BASE_LEVEL = 376, 1.125, 58
+RECKONING = 572741
+RECKONING_BASE_POINTS, RECKONING_PER_LEVEL, RECKONING_BASE_LEVEL = 165, 3.376800060272217, 56
+STAFFGUARD = 705295
+STAFFGUARD_HEALTH = 706583
+STAFFGUARD_HEALTH_BASE_POINTS = 124
+UNTAINTED = 705298
+UNTAINTED_EFFECT = 705299
+UNTAINTED_EFFECT_BASE_POINTS = -11
+CHAKRA_OF_LIGHT = 803844
+CHAKRA_OF_LIGHT_BASE_POINTS = 49
+ARMOR_OF_FAITH = 804930
 
 
 def displayed(readout, text):
@@ -137,7 +161,7 @@ class ClientDbcTooltipTest(unittest.TestCase):
         self.assertEqual(readout.unreadable, ['$?s92098[|cffffffffBrine|r][|cffffffffShock|r]'])
         self.assertEqual(readout.values, [Displayed('$s1', abs(STUDIOUS_BASE_POINTS + 1), 0, 'percent', STUDIOUS)])
 
-    def test_durations_stacks_and_level_scaled_points(self):
+    def test_durations_stacks_and_level_scaled_points_of_a_spell_without_an_ability_row(self):
         readout = self.read(OUTMANEUVER)
         self.assertEqual(displayed(readout, '$d'), Displayed('$d', OUTMANEUVER_DURATION_MS, None, 'duration_ms'))
         self.assertEqual(displayed(readout, '$u'), Displayed('$u', OUTMANEUVER_STACK_AMOUNT, None, 'count'))
@@ -145,13 +169,73 @@ class ClientDbcTooltipTest(unittest.TestCase):
                          Displayed('$557326d', OUTMANEUVER_DURATION_MS, None, 'duration_ms'))
         self.assertEqual(displayed(readout, '$s3'), Displayed('$s3', OUTMANEUVER_BASE_POINTS_3 + 1, 2, 'percent',
                                                                OUTMANEUVER))
-        self.assertEqual(readout.unreadable, ['${$557328m1+$AP*.55} [EffectRealPointsPerLevel[0] of spell 557328]'])
+        self.assertEqual(displayed(readout, '${$557328m1+$AP*.55}').value,
+                         DECOY_STRIKE_BASE_POINTS + 1 + 0.55 * LEVEL_60_TEMPLAR.ap)
+        self.assertEqual(readout.unreadable, [])
 
-    def test_level_scaled_points_are_unreadable_with_the_field_named(self):
+    def test_level_scaled_points_without_the_character_name_the_field_and_the_cause(self):
         readout = self.read(HOLY_CONSTITUTION)
         self.assertEqual(readout.values, [Displayed('$s2', HOLY_CONSTITUTION_BASE_POINTS_2 + 1, 1, 'percent',
                                                     HOLY_CONSTITUTION)])
-        self.assertEqual(readout.unreadable, ['${$m1+0} [EffectRealPointsPerLevel[0] of spell 706323]'])
+        self.assertEqual(readout.unreadable, ['${$m1+0} [EffectRealPointsPerLevel[0] of spell 706323: the race and '
+                                              'class of the character are unknown]'])
+
+    def test_weapon_skill_table(self):
+        records = Records(self.dbc)
+        self.assertEqual(weapon_skill_spells(records)[STAFF_SUBCLASS], STAVES)
+        self.assertEqual([ability.line for ability in records.abilities(STAVES)], [STAVES_LINE])
+
+    def test_own_level_scaled_token(self):
+        readout = self.read(DIVINE_FORCE, SKILLED_TEMPLAR)
+        value = displayed(readout, '${$m3+0+$SP*1+$AP*.55}')
+        self.assertEqual(value.value, DIVINE_FORCE_BASE_POINTS_3 + 1
+                         + DIVINE_FORCE_PER_LEVEL_3 * (LEVEL_60_SKILL // 5 - DIVINE_FORCE_BASE_LEVEL) + 0.55 * 313)
+        self.assertEqual((value.effect_index, value.spell_id), (2, DIVINE_FORCE))
+
+    def test_unmeasured_skill_keeps_the_token_unreadable(self):
+        readout = self.read(DIVINE_FORCE, replace(SKILLED_TEMPLAR, skills={}))
+        self.assertEqual(readout.unreadable, ['${$m3+0+$SP*1+$AP*.55} [EffectRealPointsPerLevel[2] of spell 807805: '
+                                              'skill 72 is not measured]'])
+
+    def test_unknown_race_and_class_keep_the_token_unreadable(self):
+        readout = self.read(DIVINE_FORCE, replace(SKILLED_TEMPLAR, race=None, class_id=None))
+        self.assertEqual(readout.unreadable, ['${$m3+0+$SP*1+$AP*.55} [EffectRealPointsPerLevel[2] of spell 807805: '
+                                              'the race and class of the character are unknown]'])
+
+    def test_weapon_skill_path(self):
+        token = '${$m1+0+$AP*0.175+$STA*0.5}'
+        stamina = SKILLED_TEMPLAR.stats[2]
+        with_staff = self.read(RECKONING, replace(SKILLED_TEMPLAR, weapon_subclass=STAFF_SUBCLASS))
+        self.assertEqual(displayed(with_staff, token).value, RECKONING_BASE_POINTS + 1 + 0.175 * 313 + 0.5 * stamina)
+        self.assertEqual(client_spell_level(Records(self.dbc), RECKONING,
+                                            replace(SKILLED_TEMPLAR, weapon_subclass=STAFF_SUBCLASS)), 0)
+        unarmed = self.read(RECKONING, SKILLED_TEMPLAR)
+        self.assertEqual(displayed(unarmed, token).value,
+                         RECKONING_BASE_POINTS + 1 + RECKONING_PER_LEVEL * (60 - RECKONING_BASE_LEVEL)
+                         + 0.175 * 313 + 0.5 * stamina)
+
+    def test_forced_roll_of_a_level_scaled_effect_adds_the_level_part(self):
+        forced = ForcedPoints(self.dbc, RECKONING, 0, RECKONING_BASE_POINTS + 49)
+        description = forced.field('Spell', RECKONING, 'Description[enUS]')
+        readout = Tooltip(forced, RECKONING, SKILLED_TEMPLAR).read(description)
+        self.assertEqual(displayed(readout, '${$m1+0+$AP*0.175+$STA*0.5}').value,
+                         RECKONING_BASE_POINTS + 49 + RECKONING_PER_LEVEL * (60 - RECKONING_BASE_LEVEL) + 0.175 * 313)
+
+    def test_foreign_level_scaled_spell_reads_its_own_rank(self):
+        stamina = SKILLED_TEMPLAR.stats[2]
+        staffguard = displayed(self.read(STAFFGUARD, SKILLED_TEMPLAR), f'${{${STAFFGUARD_HEALTH}m1+$STA*.3}}')
+        self.assertEqual(staffguard.value, STAFFGUARD_HEALTH_BASE_POINTS + 1 + 0.3 * stamina)
+        self.assertEqual(staffguard.spell_id, STAFFGUARD_HEALTH)
+        untainted = displayed(self.read(UNTAINTED, SKILLED_TEMPLAR), f'${{${UNTAINTED_EFFECT}m1+$STA*0.1}}')
+        self.assertEqual(untainted.value, UNTAINTED_EFFECT_BASE_POINTS + 1 + 0.1 * stamina)
+
+    def test_no_ability_row_means_rank_zero(self):
+        readout = self.read(CHAKRA_OF_LIGHT, SKILLED_TEMPLAR)
+        self.assertEqual(displayed(readout, '${$m1+$SP*0.35}').value, CHAKRA_OF_LIGHT_BASE_POINTS + 1)
+
+    def test_ppl_stays_unreadable(self):
+        readout = self.read(ARMOR_OF_FAITH, SKILLED_TEMPLAR)
+        self.assertIn('${$801546m1+$801546ppl1+$AP*0.2+$sph*0.5}', readout.unreadable)
 
     def test_radius(self):
         readout = self.read(VEILED_IN_DARKNESS)
@@ -239,6 +323,7 @@ def write_fixture(directory: Path, spells: dict[int, dict], variables: dict[int,
     variable_strings = StringBlock()
     variable_rows = [struct.pack('<2I', identity, variable_strings.add(text)) for identity, text in variables.items()]
     (directory / 'SpellDescriptionVariables.dbc').write_bytes(wdbc(variable_rows, 2, 8, variable_strings.data))
+    (directory / 'SkillLineAbility.dbc').write_bytes(wdbc([], 14, 56, b'\0'))
 
 
 FIXTURE_SPELLS = {
@@ -300,11 +385,10 @@ class FixtureTooltipTest(unittest.TestCase):
         ])
         self.assertEqual(readout.unreadable, [])
 
-    def test_level_scaled_points_and_durations_are_unreadable(self):
+    def test_level_scaled_points_without_an_ability_row_read_rank_zero_and_scaled_durations_stay_unreadable(self):
         readout = read_tooltip(self.dbc, 11, FIXTURE_CASTER)
-        self.assertEqual(readout.values, [])
-        self.assertEqual(readout.unreadable, ['$s1 [EffectRealPointsPerLevel[0] of spell 11]',
-                                              '$d [DurationPerLevel of spell 11]'])
+        self.assertEqual(readout.values, [Displayed('$s1', 10, 0, 'flat', 11)])
+        self.assertEqual(readout.unreadable, ['$d [DurationPerLevel of spell 11]'])
 
     def test_unsupported_patterns_are_reported_verbatim(self):
         readout = read_tooltip(self.dbc, 12, FIXTURE_CASTER)

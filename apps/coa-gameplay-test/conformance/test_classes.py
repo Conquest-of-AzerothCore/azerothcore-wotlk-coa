@@ -3,7 +3,8 @@ import struct
 import tempfile
 import unittest
 
-from classes import ClassSpell, DataSet, advancement_levels, class_spells
+from classes import ClassSpell, DataSet, advancement_levels, class_skill_lines, class_spells
+from profile import load_class_file
 import schemas
 
 DBC_DIR = Path('/srv/coa/server-data/dbc')
@@ -15,6 +16,8 @@ TEMPLAR_SPELL_IDS_WITH_RANKS = 221
 SHARED_CLASS_TYPE = 12
 ARGENT_BLADE = 804929
 ARGENT_BLADE_RANKS = (804929, 807263, 807264, 807265, 807266, 807267, 807268)
+STAFF_SUBCLASS = 10
+TEMPLAR_SKILL_LINES = [70, 71, 72, 136]
 
 SPELL_RECORD_BYTES = 936
 ADVANCEMENT_RECORD_BYTES = 692
@@ -137,6 +140,11 @@ class ClientDbcClassSpellTest(unittest.TestCase):
         for class_id in (12, TEMPLAR_CLASS_ID, 32):
             listed = {spell.spell_id for spell in class_spells(DBC_DIR, class_id, HEADER)}
             self.assertFalse(listed & shared, class_id)
+
+    def test_skill_lines_are_the_ability_lines_of_the_class_spells_and_the_weapon(self):
+        self.assertEqual(class_skill_lines(DBC_DIR, self.templar, STAFF_SUBCLASS), TEMPLAR_SKILL_LINES)
+        self.assertEqual(class_skill_lines(DBC_DIR, self.templar, None), TEMPLAR_SKILL_LINES[:3])
+        self.assertEqual(load_class_file(TEMPLAR_CLASS_ID)['skill_lines'], TEMPLAR_SKILL_LINES)
 
     def test_passive_flag_is_present_for_some_but_not_all_spells(self):
         passives = [spell for spell in self.templar if spell.passive]

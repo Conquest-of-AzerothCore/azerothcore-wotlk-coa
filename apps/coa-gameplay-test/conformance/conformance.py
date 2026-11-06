@@ -67,7 +67,7 @@ def add_values(writer: ManifestWriter, spell: ClassSpell, dbc_dir: Path):
     class_file = writer.class_file
     for rank_id in spell.ranks:
         scenario, expectations = value_scenario(class_file, spell, rank_id)
-        readout = read_tooltip(dataset(dbc_dir), rank_id, structure_stats(class_file['level']))
+        readout = read_tooltip(dataset(dbc_dir), rank_id, structure_stats(class_file))
         writer.add(scenario_key(class_file['name'], 'value', rank_id), 'value', spell, rank_id, expectations,
                    scenario, [value.text for value in readout.values])
 

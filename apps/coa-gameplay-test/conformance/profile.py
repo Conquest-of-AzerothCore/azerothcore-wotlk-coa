@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Mapping
 
-from tooltip import CasterStats
+from tooltip import SKILL_PER_LEVEL, CasterStats
 
 CLASSES_DIR = Path(__file__).resolve().parent / 'classes'
 DBC_DIR = Path('/srv/coa/server-data/dbc')
@@ -25,6 +25,10 @@ def spell_power_label(school: int) -> str:
 
 def stat_label(stat: int) -> str:
     return f'stat {stat}'
+
+
+def skill_label(line: int) -> str:
+    return f'skill {line}'
 
 
 def known_aura_label(spell_id: int) -> str:
@@ -55,6 +59,10 @@ def base_steps(class_file: dict) -> list[dict]:
         steps.append({'action': 'add_item', 'actor': CASTER, 'item': weapon['item']})
         steps.append({'action': 'equip', 'actor': CASTER, 'item': weapon['item'],
                       'slot': weapon.get('slot', EQUIPMENT_SLOT_MAIN_HAND)})
+    for line in class_file.get('skill_lines', []):
+        steps.append({'action': 'set_skill', 'actor': CASTER, 'skill': line, 'value': skill_target(class_file),
+                      'maximum': skill_target(class_file)})
+        steps.append(measurement(skill_label(line), CASTER, 'skill_value', skill=line))
     steps.append(measurement('attack_power', CASTER, 'attack_power'))
     steps.append(measurement('ranged_attack_power', CASTER, 'ranged_attack_power'))
     for school in SPELL_POWER_SCHOOLS:
@@ -69,10 +77,26 @@ def base_steps(class_file: dict) -> list[dict]:
     return steps
 
 
-def caster_stats_from(measured: Mapping[str, float], level: int) -> CasterStats:
+def skill_target(class_file: dict) -> int:
+    return SKILL_PER_LEVEL * class_file['level']
+
+
+def weapon_subclass(class_file: dict) -> int | None:
+    weapon = class_file.get('weapon')
+    return weapon['subclass'] if weapon else None
+
+
+def character_of(class_file: dict, skills: dict[int, float]) -> dict:
+    return {'level': class_file['level'], 'skills': skills, 'weapon_subclass': weapon_subclass(class_file),
+            'race': class_file.get('race'), 'class_id': class_file.get('class_id')}
+
+
+def caster_stats_from(measured: Mapping[str, float], class_file: dict) -> CasterStats:
+    skills = {line: measured[skill_label(line)] for line in class_file.get('skill_lines', [])
+              if skill_label(line) in measured}
     return CasterStats(
-        level=level,
         ap=measured['attack_power'],
         rap=measured['ranged_attack_power'],
         sp_by_school={school: measured[spell_power_label(school)] for school in SPELL_POWER_SCHOOLS},
-        stats={stat: measured[stat_label(stat)] for stat in STATS})
+        stats={stat: measured[stat_label(stat)] for stat in STATS},
+        **character_of(class_file, skills))

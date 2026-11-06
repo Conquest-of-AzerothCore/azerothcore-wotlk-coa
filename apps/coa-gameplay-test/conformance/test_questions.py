@@ -6,9 +6,9 @@ import tempfile
 import unittest
 
 from compare import (DbcTooltips, Verdict, compare, comparison_word, hit_count, hit_spread, tooltip_value_question,
-                     write_outputs)
+                     unreadable_question, write_outputs)
 from procs import PROC_CHECK, added_trials_label, proc_measurements, proc_status_expectation, wilson_interval
-from profile import DBC_DIR
+from profile import DBC_DIR, caster_stats_from
 from questions import (DATA_ISSUE, QUESTIONS_FILE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE,
                        questions, write_questions)
 from test_compare import CLASS_FILE, FakeTooltips, Workspace, assert_step, expectation
@@ -27,6 +27,8 @@ ARGENT_BLADE = 807268
 SILVERHAND_INCANTATION = 801465
 HEAVENS_FINEST = 806516
 HEAVENS_FINEST_STACK = 805390
+ARMOR_OF_FAITH = 804930
+ARMOR_OF_FAITH_ENTRY = '${$801546m1+$801546ppl1+$AP*0.2+$sph*0.5}'
 SCHEDULED = 273
 LIGHTS_ECHO = (520017, 520883)
 Z_99 = 2.576
@@ -364,6 +366,15 @@ class ClientTooltipTest(unittest.TestCase):
         finally:
             workspace.close()
         self.assertEqual([spell for spell, _ in item.spells], list(BLADE_SERMON))
+
+    def test_per_level_token_read_with_measured_skills_becomes_a_tooltip_value_question(self):
+        tooltips = DbcTooltips(DBC_DIR)
+        measured = {**CLASS_FILE['reference_stats'], **{f'skill {line}': 300.0 for line in CLASS_FILE['skill_lines']}}
+        readout = tooltips.read(ARMOR_OF_FAITH, caster_stats_from(measured, CLASS_FILE))
+        self.assertIn(ARMOR_OF_FAITH_ENTRY, readout.unreadable)
+        question = unreadable_question(tooltips, ARMOR_OF_FAITH, 'Armor of Faith', 60, ARMOR_OF_FAITH_ENTRY)
+        self.assertEqual(question['kind'], TOOLTIP_VALUE)
+        self.assertIn('$801546ppl1', question['question'])
 
     def test_class_file_questions_quote_client_numbers(self):
         tooltips = DbcTooltips(DBC_DIR)

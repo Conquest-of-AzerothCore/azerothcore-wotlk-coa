@@ -5,8 +5,8 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'coa-dbc'))
 from inspect_dbc import DataSet
+from tooltip import PASSIVE_ATTRIBUTE, Records, weapon_skill_spells
 
-PASSIVE_ATTRIBUTE = 0x40
 CHARACTER_LEVEL = 60
 RANK_SLOTS = 5
 PROGRESSION_HEADER = Path(__file__).resolve().parents[3] / 'src/server/coa/AscensionSpellProgressionData.h'
@@ -82,3 +82,12 @@ def class_spells(dbc_dir: Path, class_id: int, progression_header: Path,
             required_level=levels[spell_id],
             passive=bool(spells[spell_id]['Attributes'] & PASSIVE_ATTRIBUTE)))
     return result
+
+
+def class_skill_lines(dbc_dir: Path, spells: list[ClassSpell], weapon_subclass: int | None) -> list[int]:
+    records = Records(DataSet(dbc_dir))
+    ranked = {rank for spell in spells for rank in spell.ranks}
+    weapon_spell = weapon_skill_spells(records).get(weapon_subclass) if weapon_subclass is not None else None
+    if weapon_spell:
+        ranked.add(weapon_spell)
+    return sorted({ability.line for spell_id in ranked for ability in records.abilities(spell_id)})

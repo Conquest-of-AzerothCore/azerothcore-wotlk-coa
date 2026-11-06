@@ -481,7 +481,7 @@ def passive_effects(class_file: dict, spell: ClassSpell) -> list[PassiveEffect]:
     records = Records(dbc)
     rank_id = spell.max_rank
     text = cleaned_tooltip(records.field('Spell', rank_id, 'Description[enUS]'))
-    values = read_tooltip(dbc, rank_id, structure_stats(class_file['level'])).values
+    values = read_tooltip(dbc, rank_id, structure_stats(class_file)).values
     effects = [effect for effect in EFFECTS if records.field('Spell', rank_id, f'Effect[{effect}]')]
     return [classify(class_file, records, spell.spell_id, rank_id, effect, effects, text, values)
             for effect in effects]

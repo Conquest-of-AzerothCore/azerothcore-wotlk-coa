@@ -7,7 +7,8 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
 
 - `mitigation.py`: expected armor and partial-resist mitigation of a target.
 - `classes.py`: `class_spells(dbc_dir, class_id, progression_header, level=60)` lists a CoA class's spells as
-  `ClassSpell(spell_id, name, ranks, max_rank, required_level, passive)`.
+  `ClassSpell(spell_id, name, ranks, max_rank, required_level, passive)`; `class_skill_lines(dbc_dir, spells,
+  weapon_subclass)` lists the `SkillLineAbility` lines of their ranks and of the weapon's skill spell.
 - `tooltip.py`: `read_tooltip(dbc, spell_id, caster)` evaluates a spell's `Description[enUS]` with the caster's
   measured `CasterStats` and returns `Readout(values, unreadable)`.
 - `profile.py`: the reference character of a class file and `base_steps(class_file)`, the steps every scenario starts
@@ -93,20 +94,44 @@ Sacred Oath 712346 is then a tooltip without value.
 
 Everything else goes to `unreadable` verbatim and is never guessed: `$?` conditionals, other `@...@` markup, other `|`
 escapes, other tokens (`$t`, `$o`, `$x`, `$l`, `$g`...), expression functions and variables such as `$BH`,
-`$ppl1` or lowercase `$ap`, points that scale with level (`EffectRealPointsPerLevel` or `DurationPerLevel` not
-zero), spread values (`EffectDieSides` not 1 for `$sN`), missing records, non-positive durations, a `$<name>` that
+`$ppl1` or lowercase `$ap`, durations that scale with level (`DurationPerLevel` not zero), points that scale with
+level when the skill rank cannot be read (see below), spread values (`EffectDieSides` not 1 for `$sN`), missing records, non-positive durations, a `$<name>` that
 the described spell's `SpellDescriptionVariableID` does not define, and a stat or school missing from `CasterStats`.
 
-A level-scaled entry names its field, for example `${$m1+0} [EffectRealPointsPerLevel[0] of spell 706323]`. The
-client does not scale by the character level: `Spell_C_GetSpellLevel` divides by 5 the rank that
-`CGPlayer_C::GetSpellRank` returns. That rank is the player's skill value in the spell's `SkillLineAbility` skill
-line (or weapon skill), capped at 5 × `MaxLevel`, and 0 when the spell has no ability row. `CasterStats` holds no
-skill values, so these values stay unreadable.
+### Level-scaled points
+
+Points with a non-zero `EffectRealPointsPerLevel` read `EffectBasePoints + 1 + EffectRealPointsPerLevel ×
+max(0, level − BaseLevel)` (`BaseLevel` subtracted only when positive), as the CoA client binaries compute them
+([ADR 0014](../../../docs/adr/0014-level-scaled-tooltip-values-use-the-skill-rank.md), superseding ruling R6 of
+ADR 0011). The level is not the character level. `client_spell_level(records, spell_id, caster)` is the skill rank
+divided by 5 (integer), and the rank is computed as follows:
+
+- `rank_spell`: a spell with `EquippedItemClass` 2 takes its rank from the weapon-skill spell of the equipped
+  weapon (`CasterStats.weapon_subclass`), when the subclass is in its mask and `Targets & 0x10`,
+  `AttributesEx2 & 0x8000000` and `Effect[0]` 25 do not exclude it. `weapon_skill_spells(records)` is the client's
+  subclass → spell table (Staves: 10 → 227).
+- `ability_line`: the `SkillLineAbility` line of that spell for the character's `race` and `class_id`. A row
+  counts when `CharBaseInfo` holds the pair, a `SkillRaceClassInfo` row of its line allows it, and the row's
+  `RaceMask`/`ClassMask` (inverted by `ExcludeRace`/`ExcludeClass`) allow it. Without a row the rank is 0. Staves
+  227 allows only classes 10, 25, 26 and 29, so a Templar's staff spells (Reckoning) read rank 0.
+- the rank is `CasterStats.skills[line]`, capped at 5 × `MaxLevel` of the spell it comes from.
+
+Each point is read at the level of the spell it belongs to: the CoA `Extensions.dll` sets the described spell's
+level to 0. Staffguard 705295 thus shows `$706583m1` at the rank of 706583, which has no ability row: 125. The
+exception is a `$<id>sN` text token whose spell has `AttributesEx2 & 0x1000000`: it uses the character level,
+capped at a positive `MaxLevel`.
+
+The entry stays unreadable and names its field and the cause in three cases: the skill line is not measured
+(`${$m3+0+$SP*1+$AP*.55} [EffectRealPointsPerLevel[2] of spell 807805: skill 72 is not measured]`), the race or
+class is unknown, or several ability lines match. `$<id>pplN` stays unreadable and goes to the player question list
+as a `tooltip_value` question. The client adds a temporary skill bonus to the rank; `skill_value` reads the pure
+value, and no metric reads that bonus.
 
 ## Reference character
 
 `classes/<name>.json` holds `class_id`, `name`, `race`, `level`, `weapon` (`item`, equipment `slot`, 15 is the main
-hand), `ratings` (fixture hit and expertise ratings, so that an aura or hit is never lost to a miss; they do not change
+hand, `subclass` from `Item.dbc`: 10, a staff, for the Walking Stick), `skill_lines` (`class_skill_lines` of the class
+spells and the weapon: Templar 70, 71, 72 and 136), `ratings` (fixture hit and expertise ratings, so that an aura or hit is never lost to a miss; they do not change
 a tooltip value), `reference_stats`, `known_auras`, `probe_auras`, `procs` (see [Proc rates](#proc-rates)) and
 `talent_modifiers`, `rotation`, `stack` (see [Talent stack](#talent-stack-lever-map)). The Templar reference is a
 human with the Walking Stick (item 2495).
@@ -117,14 +142,18 @@ weapon damage (3.3 for a two-handed weapon, inventory type 17). Walking Stick, r
 in the in-RAM test database with `SELECT dmg_min1, dmg_max1, delay, InventoryType FROM item_template WHERE entry =
 2495`: 6.5625, 10.9375, 2500, 17. With 313 attack power, 6.5625 + 313 / 14 x 2.5 = 62.455 is the measured
 `weapon_damage_min`. `reference_stats` holds the `base_steps` values measured on the naked reference character (Templar:
-2026-11-05, `.cache/verify-all/20261105-181206`); they size the scenarios, and the comparison uses the values measured
-in the run.
+2026-11-05, `.cache/verify-all/20261105-181206`; the skills on 2026-11-06, `.cache/verify-all/20261106-122106` and
+`20261106-122142`: `skill_value` 300 on lines 70, 71, 72 and 136 after `set_skill` 300/300); they size the scenarios,
+and the comparison uses the values measured in the run.
 
-`base_steps` waits 5 s, adds and equips the weapon, then measures with the extreme bounds of an exploratory
-measurement (the judgement is made by the comparison, never by the scenario): `attack_power`,
+`base_steps` waits 5 s, adds and equips the weapon, sets each line of `skill_lines` to 5 × level with `set_skill`
+(value and maximum: 300 at level 60, owner answer Q4) and measures it back with `skill_value` (label `skill
+<line>`), then measures with the extreme bounds of an exploratory measurement (the judgement is made by the
+comparison, never by the scenario): `attack_power`,
 `ranged_attack_power`, `spell_power 1`..`6`, `stat 0`..`4`, `weapon_damage_min`, and one `aura` per entry of
 `known_auras` (label `known_aura <id>`) and of `probe_auras` (label `probe_aura <id>`). `caster_stats_from(measured,
-level)` rebuilds the `CasterStats` that `read_tooltip` needs from those labelled values.
+class_file)` rebuilds the `CasterStats` that `read_tooltip` needs from those labelled values, the class file's level,
+race, class and weapon subclass, and the measured skills.
 
 A naked level-60 Templar knows no class spell and carries one class aura: measured on 2026-11-05 on the worldserver of
 the worktree, `knows_spell` is 0 for all 221 spell ids of the class and `aura` is 1 only for the class tuning aura

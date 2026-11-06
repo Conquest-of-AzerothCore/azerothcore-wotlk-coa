@@ -1,4 +1,4 @@
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 import re
 import struct
@@ -15,6 +15,22 @@ SINGLE_VALUE_LETTERS = 'sS'
 SECONDS_DIVISOR = 1000
 MAX_EXPANSION_DEPTH = 3
 VARIABLE_RECORD = struct.Struct('<2I')
+ABILITY_RECORD = struct.Struct('<7I')
+ABILITY_LAYOUT = (14, 56)
+RACE_CLASS_RECORD = struct.Struct('<4I')
+RACE_CLASS_LAYOUT = (8, 32)
+CHARACTER_BASE_RECORD = struct.Struct('<2B')
+CHARACTER_BASE_LAYOUT = (2, 2)
+ITEM_SUBCLASS_RECORD = struct.Struct('<2i')
+ITEM_SUBCLASS_LAYOUT = (44, 176)
+ALL_MASK_BITS = 0xFFFFFFFF
+PASSIVE_ATTRIBUTE = 0x40
+WEAPON_ITEM_CLASS = 2
+RANK_FROM_OWN_SPELL_TARGETS = 0x10
+RANK_FROM_OWN_SPELL_ATTRIBUTE_EX2 = 0x8000000
+WEAPON_EFFECT = 25
+CHARACTER_LEVEL_ATTRIBUTE_EX2 = 0x1000000
+SKILL_PER_LEVEL = 5
 
 COLOR_CODE = re.compile(r'\|[cC][0-9a-fA-F]{8}|\|[rR]')
 EXTENSION_MARKUP = re.compile(r'@+[^@]*@?')
@@ -45,6 +61,19 @@ class CasterStats:
     rap: float
     sp_by_school: dict[int, float]
     stats: dict[int, float]
+    skills: dict[int, float] = field(default_factory=dict)
+    weapon_subclass: int | None = None
+    race: int | None = None
+    class_id: int | None = None
+
+
+@dataclass(frozen=True)
+class Ability:
+    line: int
+    race_mask: int
+    class_mask: int
+    exclude_race: int
+    exclude_class: int
 
 
 @dataclass(frozen=True)
@@ -74,6 +103,9 @@ class Records:
     def __init__(self, dbc: DataSet):
         self.dbc = dbc
         self.columns = {}
+        self.raw = {}
+        self.ability_index = None
+        self.weapon_skills = None
 
     def field(self, table_name: str, identity: int, name: str):
         table, schema, index, _ = self.dbc.load(table_name)
@@ -89,16 +121,55 @@ class Records:
     def has_spell(self, spell_id: int) -> bool:
         return spell_id in self.dbc.load('Spell')[2]
 
-    def points(self, spell_id: int, effect: int, upper: bool) -> float:
-        if self.field('Spell', spell_id, f'EffectRealPointsPerLevel[{effect}]') != 0:
+    def per_level(self, spell_id: int, effect: int) -> float:
+        return self.field('Spell', spell_id, f'EffectRealPointsPerLevel[{effect}]')
+
+    def points(self, spell_id: int, effect: int, upper: bool, level: int | None = None) -> float:
+        per_level = self.per_level(spell_id, effect)
+        if per_level != 0 and level is None:
             raise Unreadable(f'EffectRealPointsPerLevel[{effect}] of spell {spell_id}')
         base = self.field('Spell', spell_id, f'EffectBasePoints[{effect}]')
-        return float(base + self.field('Spell', spell_id, f'EffectDieSides[{effect}]') if upper else base + 1)
+        points = base + self.field('Spell', spell_id, f'EffectDieSides[{effect}]') if upper else base + 1
+        if not per_level:
+            return float(points)
+        return float(points + per_level * self.levels_above_base(spell_id, level))
 
-    def single_value(self, spell_id: int, effect: int) -> float:
+    def levels_above_base(self, spell_id: int, level: int) -> int:
+        base_level = self.field('Spell', spell_id, 'BaseLevel')
+        return max(0, level - base_level if base_level > 0 else level)
+
+    def single_value(self, spell_id: int, effect: int, level: int | None = None) -> float:
         if self.field('Spell', spell_id, f'EffectDieSides[{effect}]') != 1:
             raise Unreadable
-        return self.points(spell_id, effect, upper=False)
+        return self.points(spell_id, effect, upper=False, level=level)
+
+    def raw_records(self, table_name: str, layout: tuple[int, int], record: struct.Struct) -> list[tuple]:
+        if table_name not in self.raw:
+            table = self.dbc.load(table_name)[0]
+            if (table.fields, table.record_size) != layout:
+                raise ValueError(f'{table.name}: unsupported layout {table.fields}/{table.record_size}')
+            self.raw[table_name] = [record.unpack_from(table.record(row)) for row in range(table.rows)]
+        return self.raw[table_name]
+
+    def abilities(self, spell_id: int) -> list[Ability]:
+        if self.ability_index is None:
+            self.ability_index = {}
+            for _, line, spell, *masks in self.raw_records('SkillLineAbility', ABILITY_LAYOUT, ABILITY_RECORD):
+                self.ability_index.setdefault(spell, []).append(Ability(line, *masks))
+        return self.ability_index.get(spell_id, [])
+
+    def race_class_info(self, line: int) -> list[tuple[int, int]]:
+        return [(race_mask, class_mask) for _, skill, race_mask, class_mask
+                in self.raw_records('SkillRaceClassInfo', RACE_CLASS_LAYOUT, RACE_CLASS_RECORD) if skill == line]
+
+    def has_character_base(self, race: int, class_id: int) -> bool:
+        return (race, class_id) in self.raw_records('CharBaseInfo', CHARACTER_BASE_LAYOUT, CHARACTER_BASE_RECORD)
+
+    def weapon_subclass_count(self) -> int:
+        subclasses = [subclass for item_class, subclass
+                      in self.raw_records('ItemSubClass', ITEM_SUBCLASS_LAYOUT, ITEM_SUBCLASS_RECORD)
+                      if item_class == WEAPON_ITEM_CLASS]
+        return max(subclasses) + 1 if subclasses else 0
 
     def duration_ms(self, spell_id: int) -> float:
         index = self.field('Spell', spell_id, 'DurationIndex')
@@ -128,18 +199,94 @@ class Records:
         return None
 
 
+def mask_matches(value: int, mask: int, exclude: int) -> bool:
+    mask = mask ^ ALL_MASK_BITS if exclude else mask
+    return not mask or bool((1 << (value - 1)) & mask)
+
+
+def ability_line(records: Records, spell_id: int, race: int, class_id: int) -> int | None:
+    if not records.has_character_base(race, class_id):
+        return None
+    lines = {ability.line for ability in records.abilities(spell_id)
+             if mask_matches(race, ability.race_mask, ability.exclude_race)
+             and mask_matches(class_id, ability.class_mask, ability.exclude_class)
+             and any(mask_matches(race, race_mask, 0) and mask_matches(class_id, class_mask, 0)
+                     for race_mask, class_mask in records.race_class_info(ability.line))}
+    if len(lines) > 1:
+        raise Unreadable(f'spell {spell_id} has SkillLineAbility rows on lines {sorted(lines)}')
+    return next(iter(lines), None)
+
+
+def weapon_skill_spells(records: Records) -> dict[int, int]:
+    if records.weapon_skills is None:
+        count = records.weapon_subclass_count()
+        table, schema, index, _ = records.dbc.load('Spell')
+        columns = {column.name: column for column in schema.columns}
+        spells = {}
+        for spell_id, row in sorted(index.items(), key=lambda item: item[1], reverse=True):
+            if not records.dbc.value(table, row, columns['Attributes'])[0] & PASSIVE_ATTRIBUTE:
+                continue
+            if records.dbc.value(table, row, columns['EquippedItemClass'])[0] != WEAPON_ITEM_CLASS:
+                continue
+            mask = records.dbc.value(table, row, columns['EquippedItemSubClassMask'])[0] & ALL_MASK_BITS
+            if mask and not mask & (mask - 1) and mask.bit_length() - 1 < count:
+                spells[mask.bit_length() - 1] = spell_id
+        records.weapon_skills = spells
+    return records.weapon_skills
+
+
+def rank_spell(records: Records, spell_id: int, weapon_subclass: int | None) -> int:
+    if weapon_subclass is None:
+        return spell_id
+    spell = {name: records.field('Spell', spell_id, name) for name in (
+        'Targets', 'AttributesEx2', 'Effect[0]', 'EquippedItemClass', 'EquippedItemSubClassMask')}
+    if (spell['Targets'] & RANK_FROM_OWN_SPELL_TARGETS or spell['AttributesEx2'] & RANK_FROM_OWN_SPELL_ATTRIBUTE_EX2
+            or spell['Effect[0]'] == WEAPON_EFFECT or spell['EquippedItemClass'] != WEAPON_ITEM_CLASS
+            or not spell['EquippedItemSubClassMask']):
+        return spell_id
+    weapon_spell = weapon_skill_spells(records).get(weapon_subclass)
+    if not weapon_spell or not (1 << weapon_subclass) & spell['EquippedItemSubClassMask']:
+        return spell_id
+    return weapon_spell
+
+
+def spell_rank(records: Records, spell_id: int, caster: CasterStats) -> int:
+    ranked = rank_spell(records, spell_id, caster.weapon_subclass)
+    if not records.has_spell(ranked) or not records.abilities(ranked):
+        return 0
+    if caster.race is None or caster.class_id is None:
+        raise Unreadable('the race and class of the character are unknown')
+    line = ability_line(records, ranked, caster.race, caster.class_id)
+    if line is None:
+        return 0
+    if line not in caster.skills:
+        raise Unreadable(f'skill {line} is not measured')
+    rank = int(caster.skills[line])
+    max_level = records.field('Spell', ranked, 'MaxLevel')
+    if max_level > 0 and rank >= SKILL_PER_LEVEL * max_level:
+        rank = SKILL_PER_LEVEL * max_level
+    return max(rank, 0)
+
+
+def client_spell_level(records: Records, spell_id: int, caster: CasterStats) -> int:
+    return spell_rank(records, spell_id, caster) // SKILL_PER_LEVEL
+
+
 class ForcedPoints(Records):
     def __init__(self, dbc, spell_id: int, effect: int, value: int):
         super().__init__(dbc)
         self.forced = (spell_id, effect)
         self.value = value
 
-    def points(self, spell_id: int, effect: int, upper: bool) -> float:
+    def points(self, spell_id: int, effect: int, upper: bool, level: int | None = None) -> float:
         if (spell_id, effect) != self.forced:
-            return super().points(spell_id, effect, upper)
-        if self.field('Spell', spell_id, f'EffectRealPointsPerLevel[{effect}]') != 0:
+            return super().points(spell_id, effect, upper, level)
+        per_level = self.per_level(spell_id, effect)
+        if per_level != 0 and level is None:
             raise Unreadable(f'EffectRealPointsPerLevel[{effect}] of spell {spell_id}')
-        return float(self.value)
+        if not per_level:
+            return float(self.value)
+        return float(self.value + per_level * self.levels_above_base(spell_id, level))
 
 
 class Tooltip:
@@ -194,6 +341,24 @@ class Tooltip:
             raise Unreadable
         return spell_id
 
+    def effect_points(self, spell_id: int, effect: int, upper: bool, single: bool = False,
+                      named: bool = False) -> float:
+        level = None
+        if self.records.per_level(spell_id, effect) != 0:
+            try:
+                level = self.points_level(spell_id, named)
+            except Unreadable as error:
+                raise Unreadable(f'EffectRealPointsPerLevel[{effect}] of spell {spell_id}: {error.reason}') from None
+        if single:
+            return self.records.single_value(spell_id, effect, level)
+        return self.records.points(spell_id, effect, upper, level)
+
+    def points_level(self, spell_id: int, named: bool) -> int:
+        if named and self.records.field('Spell', spell_id, 'AttributesEx2') & CHARACTER_LEVEL_ATTRIBUTE_EX2:
+            max_level = self.records.field('Spell', spell_id, 'MaxLevel')
+            return max_level if 0 < max_level <= self.caster.level else self.caster.level
+        return client_spell_level(self.records, spell_id, self.caster)
+
     def own_effect(self, spell_id: int, effect: int) -> int | None:
         return effect if spell_id == self.spell_id else None
 
@@ -223,7 +388,7 @@ class Tooltip:
             effect = int(name[1]) - 1
             if name[0] in 'aA':
                 return self.records.radius(spell_id, effect), None, None
-            return (self.records.points(spell_id, effect, upper=name[0] == 'M'), self.own_effect(spell_id, effect),
+            return (self.effect_points(spell_id, effect, upper=name[0] == 'M'), self.own_effect(spell_id, effect),
                     spell_id)
         if name in ('h', 'H', 'u', 'U', 'i', 'I', 'd', 'D'):
             spell_id = self.spell_reference(digits)
@@ -353,8 +518,8 @@ class Tooltip:
         spell_id = self.spell_reference(match.group('spell'))
         if letter in POINTS_LETTERS and digit and digit in EFFECT_DIGITS:
             effect = int(digit) - 1
-            points = abs(self.records.single_value(spell_id, effect) if letter in SINGLE_VALUE_LETTERS
-                         else self.records.points(spell_id, effect, upper=letter == 'M'))
+            points = abs(self.effect_points(spell_id, effect, upper=letter == 'M',
+                                            single=letter in SINGLE_VALUE_LETTERS, named=bool(match.group('spell'))))
             effect_index = self.own_effect(spell_id, effect)
             if not scaled:
                 return points, effect_index, percent_or_flat(text, end), spell_id

@@ -267,9 +267,9 @@ def load_runs(manifest: dict, results_dir: Path) -> tuple[dict[str, Run], list[s
     return runs, missing
 
 
-def read_tokens(level: int, entry: dict, run: Run, tooltips: TooltipSource) -> Tokens:
+def read_tokens(class_file: dict, entry: dict, run: Run, tooltips: TooltipSource) -> Tokens:
     try:
-        caster = caster_stats_from(run.values, level)
+        caster = caster_stats_from(run.values, class_file)
     except KeyError as error:
         return Tokens(None, error=f'base measurement {error} is missing from {run.key}')
     readout = tooltips.read(entry['rank_id'], caster)
@@ -546,7 +546,7 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
         return replace(base, status=status, measured=measured,
                        explanation=f'no usable trial: no triggering hit was measured ({notes})')
     try:
-        caster = caster_stats_from(first_run.values, manifest['level'])
+        caster = caster_stats_from(first_run.values, manifest['class_file'])
     except KeyError as error:
         return replace(base, measured=measured, explanation=f'base measurement {error} is missing from {first_run.key}')
     chance = chance_of(tooltips.read(expectation.rank_id, caster).values, expectation.displayed)
@@ -932,7 +932,7 @@ def judge_talent_delta(manifest: dict, parts: list[ProcPart], config_runs: dict[
         return replace(base, status='insufficient_trials', measured=measured,
                        explanation=f'{notes_text}, fewer than the {passes} passes the interval needs{failures}')
     try:
-        caster = caster_stats_from(current_runs[0].values, manifest['level'])
+        caster = caster_stats_from(current_runs[0].values, manifest['class_file'])
     except KeyError as error:
         return replace(base, measured=measured, explanation=f'base measurement {error} is missing from '
                                                             f'{current_runs[0].key}')
@@ -1409,7 +1409,7 @@ def passive_verdict(manifest: dict, entry: dict, run: Run | None, expectation: E
                        explanation=f'{moved}; aura {VERSUS_AURA_STATE} applies against a target in aura state '
                                    f'{state}, which the scenario neither establishes nor measures on the dummy')
     try:
-        caster = caster_stats_from(run.values, manifest['level'])
+        caster = caster_stats_from(run.values, manifest['class_file'])
     except KeyError as error:
         return replace(base, measured=delta, explanation=f'base measurement {error} is missing from {run.key}')
     token = next((value for value in tooltips.read(rank_id, caster).values if value.text == expectation.displayed),
@@ -1519,7 +1519,7 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
         run = runs.get(entry['key'])
         if entry.get('file') and run is None:
             continue
-        tokens = read_tokens(manifest['level'], entry, run, tooltips) if run and entry['kind'] == 'value' else None
+        tokens = read_tokens(manifest['class_file'], entry, run, tooltips) if run and entry['kind'] == 'value' else None
         for data in entry['expectations']:
             expectation = Expectation(**data)
             if expectation.check == PROC_CHECK and run is not None:

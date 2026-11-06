@@ -407,7 +407,7 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
 
 
 def reference_caster(class_file: dict) -> CasterStats:
-    return caster_stats_from(class_file['reference_stats'], class_file['level'])
+    return caster_stats_from(class_file['reference_stats'], class_file)
 
 
 def reference_hit_model(class_file: dict, rank_id: int) -> HitModel:
@@ -436,7 +436,7 @@ def magic_schools(school_mask: int) -> list[int]:
 
 def measured_hit_model(class_file: dict, expectation: Expectation, measured: Mapping[str, float]) -> HitModel:
     labels = expectation.model['measurements']
-    caster = caster_stats_from(measured, class_file['level'])
+    caster = caster_stats_from(measured, class_file)
     target = REFERENCE_TARGET
     if ARMOR_LABEL in labels.values():
         target = TargetProfile(
