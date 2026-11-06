@@ -70,6 +70,13 @@ UNTAINTED_EFFECT_BASE_POINTS = -11
 CHAKRA_OF_LIGHT = 803844
 CHAKRA_OF_LIGHT_BASE_POINTS = 49
 ARMOR_OF_FAITH = 804930
+RIGHTEOUS_TEMPEST = 807274
+RIGHTEOUS_TEMPEST_PERIOD_MS = 1000
+BLADE_OF_FAITH = 803880
+BLADE_OF_FAITH_PERIOD_MS = 3000
+BLADE_OF_FAITH_DURATION_S = 30
+BLADE_OF_FAITH_TOTAL = '${($d*1000/$T1)*($m1+0+$SP*.2+$AP*0.1)}'
+BLADE_OF_FAITH_BASE_POINTS, BLADE_OF_FAITH_PER_LEVEL, BLADE_OF_FAITH_BASE_LEVEL = 205, 1.125, 58
 
 
 def displayed(readout, text):
@@ -237,6 +244,20 @@ class ClientDbcTooltipTest(unittest.TestCase):
         readout = self.read(ARMOR_OF_FAITH, SKILLED_TEMPLAR)
         self.assertIn('${$801546m1+$801546ppl1+$AP*0.2+$sph*0.5}', readout.unreadable)
 
+    def test_amplitude_tokens(self):
+        tempest = self.read(RIGHTEOUS_TEMPEST, SKILLED_TEMPLAR)
+        self.assertEqual(displayed(tempest, '$t1'),
+                         Displayed('$t1', RIGHTEOUS_TEMPEST_PERIOD_MS, None, 'duration_ms'))
+        self.assertNotIn('$t1', tempest.unreadable)
+        blade = Tooltip(Records(self.dbc), BLADE_OF_FAITH, SKILLED_TEMPLAR)
+        self.assertEqual(blade.evaluate('$T1'), (BLADE_OF_FAITH_PERIOD_MS, None, None))
+        points = (BLADE_OF_FAITH_BASE_POINTS + 1
+                  + BLADE_OF_FAITH_PER_LEVEL * (LEVEL_60_SKILL // 5 - BLADE_OF_FAITH_BASE_LEVEL))
+        ticks = BLADE_OF_FAITH_DURATION_S * 1000 / BLADE_OF_FAITH_PERIOD_MS
+        total = displayed(self.read(BLADE_OF_FAITH, SKILLED_TEMPLAR), BLADE_OF_FAITH_TOTAL)
+        self.assertEqual((total.effect_index, total.kind, total.spell_id), (0, 'flat', BLADE_OF_FAITH))
+        self.assertAlmostEqual(total.value, ticks * (points + 0.1 * SKILLED_TEMPLAR.ap), places=9)
+
     def test_radius(self):
         readout = self.read(VEILED_IN_DARKNESS)
         self.assertEqual(displayed(readout, '$a1'), Displayed('$a1', VEILED_IN_DARKNESS_RADIUS_YARDS, None, 'flat'))
@@ -349,6 +370,10 @@ FIXTURE_SPELLS = {
     33: {'Description[enUS]': 'Deep $s1.@s:34:0@', 'EffectBasePoints[0]': 32, 'EffectDieSides[0]': 1},
     34: {'Description[enUS]': 'Too deep $s1.', 'EffectBasePoints[0]': 33, 'EffectDieSides[0]': 1},
     801450: {'Description[enUS]': 'Deals $s2%.', 'EffectBasePoints[1]': 79, 'EffectDieSides[1]': 1},
+    40: {'Description[enUS]': 'Every $t2 sec for ${$d*1000/$T2} ticks.', 'EffectAmplitude[1]': 2000,
+         'DurationIndex': 1},
+    41: {'Description[enUS]': 'Every $t1 sec, ${$T1}.', 'EffectAmplitude[0]': 2000, 'ProcFlags': 1},
+    42: {'Description[enUS]': 'Every $t1 sec, ${$T1}.', 'EffectAmplitude[0]': 2000, 'AttributesEx5': 0x2000},
 }
 FIXTURE_VARIABLES = {
     1: '$bonus=${$m1*2+$PL}\r\n',
@@ -396,6 +421,21 @@ class FixtureTooltipTest(unittest.TestCase):
         self.assertEqual(readout.unreadable, [
             '$s1', '${$s1*2}', '${$AP^2}', '${$ap*2}', '${$BH*1}', '$t1', '$lpoint:points;',
             '|TInterface\\Icons\\X:0|t', '@ext:Scales with Spirit:ext@', '$<odd>', '$<missing>'])
+
+    def test_amplitude_of_the_named_effect_in_text_and_in_expressions(self):
+        readout = read_tooltip(self.dbc, 40, FIXTURE_CASTER)
+        self.assertEqual(readout.values, [Displayed('$t2', 2000, None, 'duration_ms'),
+                                          Displayed('${$d*1000/$T2}', 3, None, 'flat')])
+
+    def test_the_first_proc_flag_reads_a_five_second_period(self):
+        readout = read_tooltip(self.dbc, 41, FIXTURE_CASTER)
+        self.assertEqual([value.value for value in readout.values], [5000, 5000])
+
+    def test_a_period_the_client_hastes_is_unreadable(self):
+        readout = read_tooltip(self.dbc, 42, FIXTURE_CASTER)
+        self.assertEqual(readout.values, [])
+        reason = ' [AttributesEx5 0x2000 of spell 42: the client hastes the period]'
+        self.assertEqual(readout.unreadable, ['$t1' + reason, '${$T1}' + reason])
 
     def test_references_to_other_spells_have_no_effect_index(self):
         readout = read_tooltip(self.dbc, 13, FIXTURE_CASTER)

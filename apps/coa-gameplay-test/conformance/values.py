@@ -6,7 +6,8 @@ import re
 from classes import PASSIVE_ATTRIBUTE, ClassSpell, DataSet
 from profile import (CASTER, DBC_DIR, EQUIP_FIELDS, armed, base_steps, character_of, known_aura_label, measurement,
                      player_fixture, skill_target)
-from tooltip import CasterStats, Displayed, Records, Unreadable, read_tooltip
+from tooltip import (MIXED_PERIOD, OVER_TICKS, CasterStats, Displayed, Records, Unreadable, period_reading,
+                     read_tooltip)
 
 CHECKS = ('effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'spell_duration', 'power_cost',
           'cooldown_ms', 'known_aura')
@@ -161,6 +162,22 @@ def foreign_duration(rank_id: int, shown: Displayed) -> int | None:
     return foreign_counter(OWN_DURATION, rank_id, shown)
 
 
+def periodic_reason(records: Records, rank_id: int, caster: CasterStats, facts: RankFacts, shown: Displayed) -> str:
+    effect = shown.effect_index
+    if not facts.aura_names[effect] or records.field('Spell', rank_id, f'EffectAmplitude[{effect}]') <= 0:
+        return ''
+    try:
+        reading = period_reading(records, rank_id, caster, shown, effect)
+    except Unreadable as error:
+        return error.reason
+    if reading == OVER_TICKS:
+        return f'a total over the ticks of periodic effect {effect}; the hit scenario judges one tick'
+    if reading == MIXED_PERIOD:
+        return (f'{shown.text} changes with the duration or the period of effect {effect} without being a total over '
+                f'its ticks')
+    return ''
+
+
 def power_cost_expectation(label: str, spell_id: int, rank_id: int, facts: RankFacts) -> Expectation:
     divisor = POWER_DISPLAY_DIVISOR.get(facts.power_type, 1)
     if facts.mana_cost_per_level:
@@ -182,7 +199,8 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
     records = Records(dbc)
     class_file = armed_for(class_file, records, rank_id)
     facts = facts_of(records, rank_id)
-    readout = read_tooltip(dbc, rank_id, structure_stats(class_file))
+    caster = structure_stats(class_file)
+    readout = read_tooltip(dbc, rank_id, caster)
     measured: list[dict] = []
     after_cast: list[dict] = []
     expectations: list[Expectation] = []
@@ -200,6 +218,10 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
 
     for ordinal, shown in enumerate(readout.values):
         effect = shown.effect_index
+        periodic = periodic_reason(records, rank_id, caster, facts, shown) if effect is not None else ''
+        if periodic:
+            expect(f'{rank_id} effect_value #{ordinal}', 'effect_value', effect, shown.text, UNMEASURABLE + periodic)
+            continue
         if shown.kind in EFFECT_KINDS and effect is not None and facts.effects[effect]:
             label = f'{rank_id} effect_value e{effect} #{ordinal}'
             measured.append(effect_measurement(label, effect))

@@ -1,4 +1,4 @@
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from fractions import Fraction
 import math
 from pathlib import Path
@@ -9,9 +9,11 @@ from classes import ClassSpell
 from mitigation import PHYSICAL_SCHOOL_MASK, REFERENCE_TARGET, MitigationModel, TargetProfile, expected_mitigation
 from profile import (CASTER, DBC_DIR, SETTLE_MS, base_steps, caster_stats_from, known_aura_label, measurement,
                      player_fixture, unfit_reason)
-from tooltip import CasterStats, ForcedPoints, Readout, Records, Tooltip, Unreadable, read_tooltip
-from values import (CAST_MARGIN_MS, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, EFFECTS, TARGET, UNREADABLE,
-                    Expectation, RankFacts, armed_for, dataset, equip_requirement, facts_of, required_aura_steps)
+from tooltip import (MIXED_PERIOD, OVER_TICKS, CasterStats, ForcedPoints, Readout, Records, Tooltip, Unreadable,
+                     period_reading, read_tooltip)
+from values import (CAST_MARGIN_MS, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, EFFECT_TOKEN, EFFECTS, TARGET,
+                    UNREADABLE, Expectation, RankFacts, armed_for, dataset, equip_requirement, facts_of,
+                    required_aura_steps)
 
 HIT_CHECKS = ('hit_mean', 'melee_mean', 'unmodelled')
 UNMODELLED = 'unmodelled: '
@@ -28,7 +30,11 @@ WEAPON_DAMAGE = 58
 NORMALIZED_WEAPON_DMG = 121
 WEAPON_FLAT_EFFECTS = frozenset({WEAPON_DAMAGE_NOSCHOOL, WEAPON_DAMAGE, NORMALIZED_WEAPON_DMG})
 WEAPON_EFFECTS = WEAPON_FLAT_EFFECTS | {WEAPON_PERCENT_DAMAGE}
+PERIODIC_TRIGGER_SPELL = 23
 PERIODIC_KINDS = {3: 'periodic_damage', 8: 'periodic_heal'}
+TRIGGERED_WEAPON = 'triggered_weapon'
+WEAPON_KINDS = frozenset({'weapon', TRIGGERED_WEAPON})
+TICKING_KINDS = frozenset(PERIODIC_KINDS.values()) | {TRIGGERED_WEAPON}
 HEAL_KINDS = frozenset({'heal', 'periodic_heal'})
 MODIFIER_AURAS = {341: 'damage', 136: 'heal'}
 MAGIC_SCHOOLS = range(1, 7)
@@ -80,6 +86,13 @@ class HitModel:
     displayed: tuple[str, ...] = ()
 
 
+@dataclass(frozen=True)
+class Triggered:
+    spell_id: int
+    effects: tuple[int, ...]
+    aura_names: tuple[int, ...]
+
+
 Distribution = dict[int, float]
 
 
@@ -121,9 +134,12 @@ def weapon_profile(class_file: dict) -> WeaponProfile | None:
                          speed_ms=weapon['speed_ms'], normalized_speed=weapon['normalized_speed'])
 
 
-def hit_kind(effects: Sequence[int], aura_names: Sequence[int]) -> tuple[str, list[int]]:
+def hit_kind(effects: Sequence[int], aura_names: Sequence[int],
+             triggered: Mapping[int, Triggered] | None = None) -> tuple[str, list[int]]:
+    triggered = triggered or {}
     kinds: dict[str, list[int]] = {}
     for index, effect in enumerate(effects):
+        trigger = triggered.get(index)
         if effect in WEAPON_EFFECTS:
             kinds.setdefault('weapon', []).append(index)
         elif effect == SCHOOL_DAMAGE:
@@ -132,12 +148,15 @@ def hit_kind(effects: Sequence[int], aura_names: Sequence[int]) -> tuple[str, li
             kinds.setdefault('heal', []).append(index)
         elif effect == APPLY_AURA and aura_names[index] in PERIODIC_KINDS:
             kinds.setdefault(PERIODIC_KINDS[aura_names[index]], []).append(index)
+        elif (effect == APPLY_AURA and aura_names[index] == PERIODIC_TRIGGER_SPELL and trigger
+              and WEAPON_EFFECTS.intersection(trigger.effects)):
+            kinds.setdefault(TRIGGERED_WEAPON, []).append(index)
     if not kinds:
         raise Unmodelled(f'no damage or healing effect among effects {list(effects)}')
     if len(kinds) > 1:
         raise Unmodelled(f'effects of several hit models: {sorted(kinds)}')
     kind, indexes = next(iter(kinds.items()))
-    if kind in PERIODIC_KINDS.values() and len(indexes) > 1:
+    if kind in TICKING_KINDS and len(indexes) > 1:
         raise Unmodelled(f'several periodic effects: {indexes}')
     return kind, indexes
 
@@ -201,6 +220,26 @@ def weapon_hit(readout: Readout, effects: Sequence[int], caster: CasterStats,
     distribution = mapped(roll, lambda damage: math.floor(damage * percent) + flat_floor)
     tooltip_mean = float(percent) * ((weapon.min_damage + weapon.max_damage) / 2 + bonus) + flat
     return distribution, tooltip_mean, ordered(readout, texts)
+
+
+def triggered_readout(readout: Readout, spell_id: int) -> Readout:
+    values = []
+    for value in readout.values:
+        token = EFFECT_TOKEN.search(value.text)
+        if value.spell_id == spell_id and token:
+            values.append(replace(value, effect_index=int(token.group('digit')) - 1))
+    return Readout(values, readout.unreadable)
+
+
+def triggered_hit(readout: Readout, trigger: Triggered, caster: CasterStats,
+                  weapon: WeaponProfile | None) -> tuple[Distribution, float, list[str]]:
+    try:
+        kind, _ = hit_kind(trigger.effects, trigger.aura_names)
+    except Unmodelled as error:
+        raise Unmodelled(f'triggered spell {trigger.spell_id}: {error.reason}') from error
+    if kind != 'weapon':
+        raise Unmodelled(f'triggered spell {trigger.spell_id} is a {kind} hit, not weapon damage')
+    return weapon_hit(triggered_readout(readout, trigger.spell_id), trigger.effects, caster, weapon)
 
 
 def rolled_hit(values: Sequence[float]) -> Distribution:
@@ -276,11 +315,14 @@ def mitigated(distribution: Distribution, mitigation: MitigationModel) -> Distri
 
 def expected_hit(readout: Readout, spell_effects: Sequence[int], caster: CasterStats, weapon: WeaponProfile | None,
                  mitigation: MitigationModel, *, aura_names: Sequence[int] = (), modifiers: Sequence[Modifier] = (),
-                 ticks: int = 1, rolls: Mapping[int, Sequence[float]] | None = None) -> HitModel:
+                 ticks: int = 1, rolls: Mapping[int, Sequence[float]] | None = None,
+                 triggered: Mapping[int, Triggered] | None = None) -> HitModel:
     names = tuple(aura_names) or (0,) * len(spell_effects)
-    kind, indexes = hit_kind(spell_effects, names)
+    kind, indexes = hit_kind(spell_effects, names, triggered)
     if kind == 'weapon':
         distribution, tooltip_mean, texts = weapon_hit(readout, spell_effects, caster, weapon)
+    elif kind == TRIGGERED_WEAPON:
+        distribution, tooltip_mean, texts = triggered_hit(readout, triggered[indexes[0]], caster, weapon)
     else:
         distribution, tooltip_mean, texts = effect_hit(readout, indexes, rolls or {})
         if kind in PERIODIC_KINDS.values() and len(distribution) > 1:
@@ -289,7 +331,7 @@ def expected_hit(readout: Readout, spell_effects: Sequence[int], caster: CasterS
     used = applicable(modifiers, kind)
     mean, sigma = moments(mitigated(done(distribution, used), mitigation))
     return HitModel(kind=kind, mean=mean, sigma=sigma, tooltip_mean=tooltip_mean,
-                    hits_per_cast=ticks if kind in PERIODIC_KINDS.values() else 1, modifiers=used,
+                    hits_per_cast=ticks if kind in TICKING_KINDS else 1, modifiers=used,
                     displayed=tuple(texts))
 
 
@@ -376,6 +418,38 @@ class RankHit:
     school_mask: int
     indexes: list[int]
     duration_ms: int
+    hit_spell: int
+
+
+def triggered_spells(records: Records, rank_id: int, facts: RankFacts) -> dict[int, Triggered]:
+    triggered = {}
+    for effect in EFFECTS:
+        if facts.effects[effect] != APPLY_AURA or facts.aura_names[effect] != PERIODIC_TRIGGER_SPELL:
+            continue
+        spell_id = records.field('Spell', rank_id, f'EffectTriggerSpell[{effect}]')
+        if spell_id and records.has_spell(spell_id):
+            trigger = facts_of(records, spell_id)
+            triggered[effect] = Triggered(spell_id, trigger.effects, trigger.aura_names)
+    return triggered
+
+
+def periodic_tick_readout(records: Records, rank_id: int, caster: CasterStats, readout: Readout,
+                          effect: int) -> Readout:
+    values = []
+    for value in readout.values:
+        if value.effect_index == effect:
+            try:
+                reading = period_reading(records, rank_id, caster, value, effect)
+                if reading == OVER_TICKS:
+                    value = replace(value, value=value.value * records.amplitude_ms(rank_id, effect)
+                                    / records.duration_ms(rank_id))
+            except Unreadable as error:
+                raise Unmodelled(error.reason or f'{value.text} is unreadable with a scaled period') from error
+            if reading == MIXED_PERIOD:
+                raise Unmodelled(f'{value.text} changes with the duration or the period of effect {effect} without '
+                                 f'being a total over its ticks')
+        values.append(value)
+    return Readout(values, readout.unreadable)
 
 
 def periodic_ticks(records: Records, rank_id: int, effect: int) -> tuple[int, int]:
@@ -398,16 +472,22 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
     unfit = unfit_reason(class_file.get('weapon'), equip_requirement(records, rank_id))
     if unfit:
         raise Unmodelled(unfit)
-    kind, indexes = hit_kind(facts.effects, facts.aura_names)
-    school_mask = records.field('Spell', rank_id, 'SchoolMask')
-    ticks, duration = periodic_ticks(records, rank_id, indexes[0]) if kind in PERIODIC_KINDS.values() else (1, 0)
+    triggered = triggered_spells(records, rank_id, facts)
+    kind, indexes = hit_kind(facts.effects, facts.aura_names, triggered)
+    hit_spell = triggered[indexes[0]].spell_id if kind == TRIGGERED_WEAPON else rank_id
+    school_mask = records.field('Spell', hit_spell, 'SchoolMask')
+    ticks, duration = periodic_ticks(records, rank_id, indexes[0]) if kind in TICKING_KINDS else (1, 0)
     mitigation = NO_MITIGATION if kind in HEAL_KINDS else mitigation_for(school_mask, target, caster.level)
     readout = read_tooltip(records.dbc, rank_id, caster)
+    shown = readout
+    if kind in PERIODIC_KINDS.values():
+        shown = periodic_tick_readout(records, rank_id, caster, readout, indexes[0])
     modifiers = for_school(aura_modifiers(records, auras, class_file['level']), school_mask)
-    rolls = {} if kind == 'weapon' else rolled_values(records, rank_id, caster, readout, indexes)
-    model = expected_hit(readout, facts.effects, caster, weapon_profile(class_file), mitigation,
-                         aura_names=facts.aura_names, modifiers=modifiers, ticks=ticks, rolls=rolls)
-    return RankHit(model, readout, facts, school_mask, indexes, duration)
+    rolls = {} if kind in WEAPON_KINDS else rolled_values(records, rank_id, caster, shown, indexes)
+    model = expected_hit(shown, facts.effects, caster, weapon_profile(class_file), mitigation,
+                         aura_names=facts.aura_names, modifiers=modifiers, ticks=ticks, rolls=rolls,
+                         triggered=triggered)
+    return RankHit(model, readout, facts, school_mask, indexes, duration, hit_spell)
 
 
 def reference_caster(class_file: dict) -> CasterStats:
@@ -518,18 +598,18 @@ def part_casts(performed: int, interval_ms: int) -> list[int]:
     return [performed // parts + (part < performed % parts) for part in range(parts)]
 
 
-def hit_measurements(rank_id: int, label: str, hostile: bool, labels: dict[str, str]) -> list[dict]:
+def hit_measurements(rank_id: int, hit_spell: int, hostile: bool, labels: dict[str, str]) -> list[dict]:
     family = 'spell_damage' if hostile else 'spell_heal'
     unblocked = {'blocked': False} if hostile else {}
     receiver = TARGET if hostile else CASTER
     steps = [{'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}]
     for part in ('total', 'count'):
-        steps.append(measurement(labels[part], CASTER, f'{family}_{part}', spell=rank_id, target=receiver,
+        steps.append(measurement(labels[part], CASTER, f'{family}_{part}', spell=hit_spell, target=receiver,
                                  critical=False, **unblocked))
-    steps.append(measurement(f'{rank_id} critical_hits', CASTER, f'{family}_count', spell=rank_id, target=receiver,
-                             critical=True))
+    steps.append(measurement(f'{rank_id} critical_hits', CASTER, f'{family}_count', spell=hit_spell,
+                             target=receiver, critical=True))
     if hostile:
-        steps.append(measurement(f'{rank_id} blocked_hits', CASTER, f'{family}_count', spell=rank_id,
+        steps.append(measurement(f'{rank_id} blocked_hits', CASTER, f'{family}_count', spell=hit_spell,
                                  target=receiver, blocked=True))
     steps.append(measurement(f'{rank_id} cast_count', CASTER, 'spell_cast_count', spell=rank_id))
     return steps
@@ -565,17 +645,19 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int) -> list[tuple[dic
     hostile = model.kind not in HEAL_KINDS
     target, labels = target_steps(hit.school_mask) if hostile else ([], {})
     labels.update({'total': f'{label} total', 'count': f'{label} count'})
-    weapon = weapon_profile(armed_file) if model.kind == 'weapon' else None
-    order = ', percent of the roll before the flat bonus (ADR 0010)' if model.kind == 'weapon' else ''
-    rule = f'{model.kind} hit{order}, integer steps modelled{weapon_note(class_file, armed_file, records, rank_id)}'
-    record = model_record(model, hit.school_mask, weapon, labels, casts)
+    weapon = weapon_profile(armed_file) if model.kind in WEAPON_KINDS else None
+    order = ', percent of the roll before the flat bonus (ADR 0010)' if model.kind in WEAPON_KINDS else ''
+    source = f' of triggered spell {hit.hit_spell} per tick' if hit.hit_spell != rank_id else ''
+    rule = (f'{model.kind} hit{source}{order}, integer steps modelled'
+            f'{weapon_note(class_file, armed_file, records, rank_id)}')
+    record = {**model_record(model, hit.school_mask, weapon, labels, casts), 'hit_spell': hit.hit_spell}
     unreadable = [Expectation(f'{label} unreadable #{ordinal}', 'hit_mean', spell.spell_id, rank_id, None, entry,
                               UNREADABLE + entry) for ordinal, entry in enumerate(hit.readout.unreadable)]
     parts = []
     for part, performed in enumerate(shares):
         steps = (learn + [dict(step) for step in target]
                  + cast_steps(hit.facts, rank_id, hostile, interval, performed)
-                 + hit_measurements(rank_id, label, hostile, labels))
+                 + hit_measurements(rank_id, hit.hit_spell, hostile, labels))
         titled = name if len(shares) == 1 else f'{name} part {part + 1} of {len(shares)}'
         scenario = scenario_shell(armed_file, titled, contract, steps)
         if hostile:

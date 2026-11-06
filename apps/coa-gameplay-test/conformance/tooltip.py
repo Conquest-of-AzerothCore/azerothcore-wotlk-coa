@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field, replace
+import math
 from pathlib import Path
 import re
 import struct
@@ -31,6 +32,14 @@ RANK_FROM_OWN_SPELL_ATTRIBUTE_EX2 = 0x8000000
 WEAPON_EFFECT = 25
 CHARACTER_LEVEL_ATTRIBUTE_EX2 = 0x1000000
 SKILL_PER_LEVEL = 5
+AMPLITUDE_LETTERS = 'tT'
+FIRST_PROC_FLAG = 1
+FIRST_PROC_FLAG_PERIOD_MS = 5000
+HASTED_PERIOD_ATTRIBUTE_EX5 = 0x2000
+PER_TICK = 'tick'
+OVER_TICKS = 'total'
+MIXED_PERIOD = 'mixed'
+PERIOD_PROBE_FACTOR = 2
 
 COLOR_CODE = re.compile(r'\|[cC][0-9a-fA-F]{8}|\|[rR]')
 EXTENSION_MARKUP = re.compile(r'@+[^@]*@?')
@@ -181,6 +190,16 @@ class Records:
             raise Unreadable
         return float(duration)
 
+    def amplitude_ms(self, spell_id: int, effect: int) -> float:
+        if self.field('Spell', spell_id, 'ProcFlags') & FIRST_PROC_FLAG:
+            return float(FIRST_PROC_FLAG_PERIOD_MS)
+        if self.field('Spell', spell_id, 'AttributesEx5') & HASTED_PERIOD_ATTRIBUTE_EX5:
+            raise Unreadable(f'AttributesEx5 0x2000 of spell {spell_id}: the client hastes the period')
+        amplitude = self.field('Spell', spell_id, f'EffectAmplitude[{effect}]')
+        if amplitude <= 0:
+            raise Unreadable
+        return float(amplitude)
+
     def radius(self, spell_id: int, effect: int) -> float:
         index = self.field('Spell', spell_id, f'EffectRadiusIndex[{effect}]')
         return float(self.field('SpellRadius', index, 'RadiusMin'))
@@ -289,6 +308,22 @@ class ForcedPoints(Records):
         return float(self.value + per_level * self.levels_above_base(spell_id, level))
 
 
+class ScaledPeriod(Records):
+    def __init__(self, dbc, spell_id: int, effect: int, duration_factor: int, amplitude_factor: int):
+        super().__init__(dbc)
+        self.period = (spell_id, effect)
+        self.duration_factor = duration_factor
+        self.amplitude_factor = amplitude_factor
+
+    def duration_ms(self, spell_id: int) -> float:
+        duration = super().duration_ms(spell_id)
+        return duration * self.duration_factor if spell_id == self.period[0] else duration
+
+    def amplitude_ms(self, spell_id: int, effect: int) -> float:
+        amplitude = super().amplitude_ms(spell_id, effect)
+        return amplitude * self.amplitude_factor if (spell_id, effect) == self.period else amplitude
+
+
 class Tooltip:
     def __init__(self, records: Records, spell_id: int, caster: CasterStats, expanding: tuple[int, ...] = ()):
         self.records = records
@@ -383,11 +418,13 @@ class Tooltip:
         raise Unreadable
 
     def math_variable(self, digits: str, name: str) -> tuple[float, int | None, int | None]:
-        if len(name) == 2 and name[0] in 'mMaA' and name[1] in EFFECT_DIGITS:
+        if len(name) == 2 and name[0] in 'mMaA' + AMPLITUDE_LETTERS and name[1] in EFFECT_DIGITS:
             spell_id = self.spell_reference(digits)
             effect = int(name[1]) - 1
             if name[0] in 'aA':
                 return self.records.radius(spell_id, effect), None, None
+            if name[0] in AMPLITUDE_LETTERS:
+                return self.records.amplitude_ms(spell_id, effect), None, None
             return (self.effect_points(spell_id, effect, upper=name[0] == 'M'), self.own_effect(spell_id, effect),
                     spell_id)
         if name in ('h', 'H', 'u', 'U', 'i', 'I', 'd', 'D'):
@@ -533,6 +570,8 @@ class Tooltip:
             raise Unreadable
         if letter in 'aA' and digit and digit in EFFECT_DIGITS:
             return self.records.radius(spell_id, int(digit) - 1), None, 'flat', None
+        if letter in AMPLITUDE_LETTERS and digit and digit in EFFECT_DIGITS:
+            return self.records.amplitude_ms(spell_id, int(digit) - 1), None, 'duration_ms', None
         if digit:
             raise Unreadable
         if letter in 'hH':
@@ -642,6 +681,23 @@ def conditional_end(text: str, start: int) -> int:
     false_start = text.find('[', true_end)
     false_end = text.find(']', false_start) if false_start >= 0 else -1
     return false_end + 1 if false_end >= 0 else len(text)
+
+
+def period_reading(records: Records, spell_id: int, caster: CasterStats, shown: Displayed, effect: int) -> str:
+    def reread(duration_factor: int, amplitude_factor: int) -> float:
+        scaled = ScaledPeriod(records.dbc, spell_id, effect, duration_factor, amplitude_factor)
+        values = Tooltip(scaled, spell_id, caster).read(shown.text).values
+        if len(values) != 1:
+            raise Unreadable(f'{shown.text} is unreadable with a scaled duration or period')
+        return values[0].value
+
+    longer, slower = reread(PERIOD_PROBE_FACTOR, 1), reread(1, PERIOD_PROBE_FACTOR)
+    if math.isclose(longer, shown.value) and math.isclose(slower, shown.value):
+        return PER_TICK
+    if (math.isclose(longer, shown.value * PERIOD_PROBE_FACTOR)
+            and math.isclose(slower, shown.value / PERIOD_PROBE_FACTOR)):
+        return OVER_TICKS
+    return MIXED_PERIOD
 
 
 def read_tooltip(dbc: DataSet, spell_id: int, caster: CasterStats) -> Readout:

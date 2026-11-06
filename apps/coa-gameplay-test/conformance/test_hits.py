@@ -7,8 +7,8 @@ import unittest
 from classes import class_spells
 from hits import (HIT_CHECKS, MAX_SCENARIO_MS, HitModel, Modifier, Unmodelled, WeaponProfile, casts_needed,
                   expected_hit, hit_parts, hit_scenario, measured_hit_model, melee_scenario, records_of,
-                  reference_caster, reference_hit_model, reference_melee_model, rolled_values, scheduled_casts,
-                  weapon_profile)
+                  periodic_tick_readout, reference_caster, reference_hit_model, reference_melee_model,
+                  rolled_values, scheduled_casts, weapon_profile)
 from mitigation import REFERENCE_TARGET, MitigationModel, TargetProfile, expected_mitigation
 from profile import CLASSES_DIR, load_class_file
 from tooltip import CasterStats, Displayed, Readout, read_tooltip, weapon_skill_spells
@@ -61,6 +61,16 @@ VINDICATION = 801446
 VINDICATION_MAX_RANK = 573324
 VINDICATION_SUBCLASS_MASK = 41105
 STAFF_SUBCLASS = 10
+RIGHTEOUS_TEMPEST = 805409
+RIGHTEOUS_TEMPEST_MAX_RANK = 807274
+RIGHTEOUS_TEMPEST_STRIKE = 570205
+RIGHTEOUS_TEMPEST_STRIKE_FLAT = 154
+RIGHTEOUS_TEMPEST_TICKS = 5
+BLADE_OF_FAITH = 803872
+BLADE_OF_FAITH_MAX_RANK = 803880
+BLADE_OF_FAITH_TOTAL = '${($d*1000/$T1)*($m1+0+$SP*.2+$AP*0.1)}'
+BLADE_OF_FAITH_PERIOD_MS = 3000
+BLADE_OF_FAITH_DURATION_MS = 30000
 PVE_DAMAGE_DONE_PCT = 341
 HEALING_DONE_PCT = 136
 CLASS_TUNING_PERCENT_AT_60 = -20
@@ -472,6 +482,56 @@ class HitScenarioTest(unittest.TestCase):
         self.assertEqual([(expectation.check, expectation.rule) for expectation in expectations],
                          [('unmodelled', f'unmodelled: EquippedItemSubClassMask {VINDICATION_SUBCLASS_MASK} excludes '
                                          f'the reference weapon subclass {STAFF_SUBCLASS}')])
+
+    def test_periodic_total_is_divided_into_ticks(self):
+        readout = read_tooltip(records_of(self.templar).dbc, BLADE_OF_FAITH_MAX_RANK, reference_caster(self.templar))
+        total, = [value for value in readout.values if value.text == BLADE_OF_FAITH_TOTAL]
+        model = reference_hit_model(self.templar, BLADE_OF_FAITH_MAX_RANK)
+        self.assertEqual((model.kind, model.hits_per_cast), ('periodic_damage', 10))
+        self.assertAlmostEqual(model.tooltip_mean, total.value * BLADE_OF_FAITH_PERIOD_MS / BLADE_OF_FAITH_DURATION_MS,
+                               places=9)
+        self.assertEqual(model.displayed, (BLADE_OF_FAITH_TOTAL,))
+        scenario, expectations = hit_scenario(self.templar, self.spells[BLADE_OF_FAITH], 1)
+        run.validate(scenario)
+        hit = hit_expectation(expectations)
+        self.assertEqual((hit.check, hit.effect_index, hit.model['kind']), ('hit_mean', 0, 'periodic_damage'))
+        self.assertTrue(steps_with(scenario, metric='spell_damage_total', spell=BLADE_OF_FAITH_MAX_RANK))
+
+    def test_a_periodic_token_that_is_neither_a_total_nor_one_tick_is_unmodelled(self):
+        readout = Readout(values=[Displayed('${($d*1000/$T1)+1}', 11, 0, 'flat', BLADE_OF_FAITH_MAX_RANK)],
+                          unreadable=[])
+        with self.assertRaises(Unmodelled):
+            periodic_tick_readout(records_of(self.templar), BLADE_OF_FAITH_MAX_RANK, reference_caster(self.templar),
+                                  readout, 0)
+
+    def test_righteous_tempest_model(self):
+        caster = reference_caster(self.templar)
+        weapon = walking_stick()
+        bonus = caster.ap / 14 * TWO_HANDED_NORMALIZED_SPEED
+        model = reference_hit_model(self.templar, RIGHTEOUS_TEMPEST_MAX_RANK)
+        self.assertEqual((model.kind, model.hits_per_cast), ('triggered_weapon', RIGHTEOUS_TEMPEST_TICKS))
+        self.assertAlmostEqual(model.tooltip_mean,
+                               (weapon.min_damage + weapon.max_damage) / 2 + bonus + RIGHTEOUS_TEMPEST_STRIKE_FLAT,
+                               places=9)
+        self.assertEqual(model.displayed, ('$570205s2', '${$570205m1+$SP*0.3}'))
+        rolls = range(math.floor(weapon.min_damage + bonus), math.floor(weapon.max_damage + bonus) + 1)
+        kept = expected_mitigation(PHYSICAL, REFERENCE_TARGET, 60).mean
+        tuned = 100 + CLASS_TUNING_PERCENT_AT_60
+        hits = [math.ceil((roll + RIGHTEOUS_TEMPEST_STRIKE_FLAT) * tuned // 100 * kept) for roll in rolls]
+        self.assertAlmostEqual(model.mean, moments(hits)[0], places=9)
+        scenario, expectations = hit_scenario(self.templar, self.spells[RIGHTEOUS_TEMPEST], 1)
+        run.validate(scenario)
+        hit = hit_expectation(expectations)
+        self.assertEqual((hit.check, hit.rank_id, hit.effect_index), ('hit_mean', RIGHTEOUS_TEMPEST_MAX_RANK, 0))
+        self.assertEqual((hit.model['kind'], hit.model['hit_spell']), ('triggered_weapon', RIGHTEOUS_TEMPEST_STRIKE))
+        self.assertIn('ADR 0010', hit.rule)
+        for metric in ('spell_damage_total', 'spell_damage_count'):
+            self.assertTrue(steps_with(scenario, metric=metric, spell=RIGHTEOUS_TEMPEST_STRIKE, critical=False))
+            self.assertFalse(steps_with(scenario, metric=metric, spell=RIGHTEOUS_TEMPEST_MAX_RANK))
+        self.assertTrue(steps_with(scenario, metric='spell_cast_count', spell=RIGHTEOUS_TEMPEST_MAX_RANK))
+        self.assertEqual(hit.model['minimum_hits'], RIGHTEOUS_TEMPEST_TICKS)
+        self.assertAlmostEqual(measured_hit_model(self.templar, hit, measured_reference(self.templar, hit)).mean,
+                               model.mean, places=9)
 
     def test_every_templar_max_rank_has_a_valid_scenario_and_a_hit_or_unmodelled_expectation(self):
         checks = {}

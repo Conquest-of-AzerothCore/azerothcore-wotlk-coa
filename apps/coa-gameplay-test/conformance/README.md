@@ -68,19 +68,27 @@ token as written in the DBC, `value` the number before any player modifier.
 | `$mN`, `$MN` (with `<id>`) | `EffectBasePoints + 1`, `EffectBasePoints + EffectDieSides`, unsigned | as `$sN` |
 | `$/N;` then `$sN`/`$SN`/`$mN`/`$MN` | divided by N; `$/1000;` followed by `sec` stays in ms | `duration_ms` or as `$sN` |
 | `$d`, `$<id>d` | `SpellDuration` `Duration`, capped by `MaxDuration` | `duration_ms` |
+| `$tN`, `$TN`, `$<id>tN` | the period of effect N (below), in ms; the client shows seconds | `duration_ms` |
 | `$h`, `$<id>h` | `ProcChance` | `chance_pct` |
 | `$u`, `$i` (with `<id>`) | `StackAmount`, `MaxAffectedTargets` | `count` |
 | `$aN` (with `<id>`) | `SpellRadius` radius of effect N | `flat` |
 | `${...}` | `+ - * /`, parentheses and the variables below | as `$sN` |
 | `$<name>` | a `SpellDescriptionVariables` formula of the described spell | as `$sN` |
 
-Inside `${...}`: `$mN`/`$MN` (signed), `$h $u $i`, `$d` in seconds, `$aN`, each with an optional spell id; `$AP`,
-`$RAP`, `$PL`; `$SP` is the lowest spell power of schools 1 to 6, `$sph $spfi $spn $spfr $sps $spa` one school each;
-`$STR $AGI $STA $INT $SPI` the effective stats 0 to 4; `$<name>` a variable defined earlier.
+Inside `${...}`: `$mN`/`$MN` (signed), `$h $u $i`, `$d` in seconds, `$aN`, `$tN`/`$TN` the period in ms, each with
+an optional spell id; `$AP`, `$RAP`, `$PL`; `$SP` is the lowest spell power of schools 1 to 6, `$sph $spfi $spn $spfr
+$sps $spa` one school each; `$STR $AGI $STA $INT $SPI` the effective stats 0 to 4; `$<name>` a variable defined
+earlier.
 `effect_index` is the effect of the first `$sN`/`$mN`/`$MN` of the spell itself in the token (for `$<name>`, in its
 formula), otherwise `None`. `spell_id` is the spell of the first `$sN`/`$mN`/`$MN` of the token, the described spell
-or another one, and `None` for a token without one (`$h`, `$d`, `$u`, `$i`, `$aN`). The client reads `$D $H $U $I
-$AN $SN` as their lowercase forms (`$S` as `$s`: `QuestTextParser.cpp:829-834`), and so does the reader.
+or another one, and `None` for a token without one (`$h`, `$d`, `$tN`, `$u`, `$i`, `$aN`). The client reads `$D $H
+$U $I $AN $SN` as their lowercase forms (`$S` as `$s`: `QuestTextParser.cpp:829-834`), and so does the reader.
+The period of effect N is `EffectAmplitude[N-1]`, or 5000 ms when `ProcFlags & 1` (`QuestTextParser.cpp:977-1001`
+for the text, `MathState.cpp:594-615` for expressions; the field is `m_effectAuraPeriod`, `SpellRec.h:78`). It is
+unreadable when `AttributesEx5 & 0x2000`: the client hastes the text form by the player's cast speed (unless
+`AttributesEx3 & 0x20000000`), and the reader, which has no haste measurement, refuses both forms. A period of 0 is
+unreadable. `$tN` has `effect_index` and `spell_id` `None`, like `$d`. Righteous Tempest 807274 reads `$t1` as 1000
+ms; inside Blade of Faith 803880's `${($d*1000/$T1)*(...)}`, `$T1` is 3000.
 Color codes `|c........` and `|r` are removed, in either case.
 
 `@s:<id>:<flags>@` with `flags` 0 or more expands to the tooltip of spell `<id>`, read by a nested reader of that spell
@@ -94,7 +102,7 @@ the nesting is deeper than `MAX_EXPANSION_DEPTH` (3) expansions. A referenced to
 Sacred Oath 712346 is then a tooltip without value.
 
 Everything else goes to `unreadable` verbatim and is never guessed: `$?` conditionals, other `@...@` markup, other `|`
-escapes, other tokens (`$t`, `$o`, `$x`, `$l`, `$g`...), expression functions and variables such as `$BH`,
+escapes, other tokens (`$o`, `$x`, `$l`, `$g`...), expression functions and variables such as `$BH`,
 `$ppl1` or lowercase `$ap`, durations that scale with level (`DurationPerLevel` not zero), points that scale with
 level when the skill rank cannot be read (see below), spread values (`EffectDieSides` not 1 for `$sN`), missing records,
 non-positive durations, a `$<name>` that the described spell's `SpellDescriptionVariableID` does not define, and a stat
@@ -417,6 +425,24 @@ above), `cast`, and a wait of
 | `school` | 2 | the floored tooltip value of each effect, or each integer from `$mN` to `$MN`, or each roll (below) |
 | `heal` | 10 | as `school`, on the caster, without mitigation |
 | `periodic_damage`, `periodic_heal` | 6, aura 3 or 8 | one tick; `hits_per_cast` is `Duration / EffectAmplitude` |
+| `triggered_weapon` | 6, aura 23 whose `EffectTriggerSpell` is a `weapon` hit | the `weapon` hit of the triggered spell, per tick; `hits_per_cast` is `Duration / EffectAmplitude` |
+
+A periodic effect's token is a total when it grows with `$d` and shrinks with that effect's `$TN` in proportion
+(design D15): `period_reading(records, spell_id, caster, shown, effect)` reads the token again with the rank's
+duration doubled, then with the effect's period doubled (`ScaledPeriod`), and returns `total` when the value doubles,
+then halves, `tick` when it does not change, and `mixed` otherwise. `periodic_tick_readout` divides a total into one
+tick, `total x period / duration`: Blade of Faith 803880's `${($d*1000/$T1)*($m1+0+$SP*.2+$AP*0.1)}` is ten ticks,
+and its tick is the total x 3000 / 30000. A `mixed` token (`${($d*1000/$T1)+1}`) is `unmodelled`. In the
+no-combat scenario such a total or `mixed` token is `unmeasurable` (`a total over the ticks of periodic effect <n>;
+the hit scenario judges one tick`): `spell_effect_value` and `aura_amount` are one tick.
+
+A `triggered_weapon` effect reads the tokens of the described spell's tooltip that belong to the triggered spell, each
+on the effect of its first `$<id>sN`/`$<id>mN`, and models them as a `weapon` hit of the triggered spell's effects,
+with the same ADR 0010 order. The triggered spell's school gives the mitigation and the modifiers, and its damage is
+measured: `hit_spell` in the model (the rank itself for the other kinds) names the spell of `spell_damage_*`,
+`critical_hits` and `blocked_hits`; `cast_count` stays the rank. Righteous Tempest 807274: aura 23 every 1000 ms for
+5000 ms triggers 570205 (effects 121 and 31); its tooltip shows `$570205s2`% (100) Weapon Damage plus
+`${$570205m1+$SP*0.3}` (154), five hits per cast.
 
 A `school` or `heal` effect whose `EffectDieSides` is above 1 and whose tooltip shows one token (Righteous Upheaval:
 `${$m1+0+$AP*0.45+$SP*0.45}`, `EffectBasePoints` 658, `EffectDieSides` 224 at rank 572027) is read again with each

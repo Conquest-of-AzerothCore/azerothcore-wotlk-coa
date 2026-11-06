@@ -58,6 +58,9 @@ SACRED_OATH = 712346
 GLORY = 801481
 DOWNFALL = 801482
 REDEMPTION = 801483
+BLADE_OF_FAITH = 803872
+BLADE_OF_FAITH_MAX_RANK = 803880
+BLADE_OF_FAITH_TOTAL = '${($d*1000/$T1)*($m1+0+$SP*.2+$AP*0.1)}'
 HUMAN = 1
 STAFF_SUBCLASS = 10
 ITEM_RECORD = struct.Struct('<3i')
@@ -325,6 +328,13 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         self.assertEqual((item.check, item.effect_index, item.rule), ('effect_value', 0, 'read duration_ms'))
         step, = self.steps_of(scenario, item.label)
         self.assertEqual((step['metric'], step['spell'], step['effect']), ('spell_effect_value', LIBERTY, 0))
+
+    def test_periodic_total_is_left_to_the_hit_scenario(self):
+        scenario, expectations = self.build(BLADE_OF_FAITH, BLADE_OF_FAITH_MAX_RANK)
+        item, = [item for item in expectations if item.displayed == BLADE_OF_FAITH_TOTAL]
+        reason = 'a total over the ticks of periodic effect 0; the hit scenario judges one tick'
+        self.assertEqual((item.check, item.rule), ('effect_value', UNMEASURABLE + reason))
+        self.assertFalse(self.steps_of(scenario, item.label))
 
     def test_foreign_value_token(self):
         scenario, expectations = self.build(SCOURGEBANE, SCOURGEBANE)
