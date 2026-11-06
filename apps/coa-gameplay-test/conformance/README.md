@@ -965,6 +965,15 @@ width, the Divine Force hit (400 then 402, `ok` on both, sigma 0). Rolled `effec
 one read: those whose server value adds a per-level part the expected value omits switched between `ok` and `alert`
 with the roll, so six of them were false `ok` verdicts (ADR 0018 replaces the rule).
 
+Final-review round of the same day (ADR 0018, ADR 0017 D8, `melee_crit_chance_refreshed`): the same 491 scenarios,
+now with 2 to 1716 reads per rolled token (stamps 20261106-175907 and 20261106-180224, 85.6 s and 84.4 s, 491
+passed), give 1756 verdicts: ok 1268, alert 39, unreadable 72, unmodelled 240, ambiguous_tooltip 30, unmeasured 15,
+measured 92. The 14 new alerts are rolled values that one read had passed: 10 server values that add a per-level part
+the expected value omits (every Vindication rank, Reckoning 805421, 748505 to 748507 and 572739 to 572741), 4 whose
+server value truncates a per-level part the expected value keeps (Chastise 801165, 503136 and 503137, Benediction
+803373). Two runs list 6 changes, none significant: the truncation cases Chastise 801165 and Benediction 803374, whose
+means sit on the lower bound, the Blade of Faith hit mean at the edge of its interval, and 3 proc rates without one.
+
 ### Impact report
 
 ```sh
