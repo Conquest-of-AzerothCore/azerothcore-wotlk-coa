@@ -15,6 +15,10 @@
   source checks, build, unit tests, Python test scripts, `apps/coa-tests` harnesses and gameplay scenarios. Do not
   run `check_source.py`, `ctest`, test scripts, harnesses, `run.py run` or `batch.py` yourself; where a guide
   names one, use the matching selection (`--stages harness --harness <name>`, `--stages source`).
+- The one exception is proof that `verify_all.py` cannot run: Ghost e2e tests (real sessions) and client checks
+  (rendered UI) run as `.agents/skills/coa-development/references/guide-tooling.md` describes, only when a
+  gameplay scenario cannot observe the behavior. They add to the `verify_all.py` stages the change requires and
+  never replace them; report them separately, with the tested server commit.
 - Verify the tests the change adds or modifies: pair `--stages` with a focus filter
   (`--scenario`/`--spell`/`--quest`/`--query`, `--harness`) and include `build` whenever sources changed. Before a
   PR, also run `python -B tools/verify_all.py --stages source --base origin/main`. Run every stage

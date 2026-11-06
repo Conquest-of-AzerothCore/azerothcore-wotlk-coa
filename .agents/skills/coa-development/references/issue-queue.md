@@ -241,8 +241,10 @@ Complete this loop for the issue or justified group before beginning the next in
 4. Recheck ownership, complete reopening history and relevant base changes. Apply the reopening exclusion
    before publication. Integrate material base changes without rewriting published history and revalidate
    affected behavior with `verify_all.py`. Push the tested branch explicitly, for example
-   `git push --set-upstream origin HEAD:refs/heads/<issue-branch>`. Verify the remote head equals the tested
-   local head. A failed push leaves the fix pending; inspect remote state before retrying uncertain writes.
+   `git push --set-upstream origin HEAD:refs/heads/<issue-branch>`. Without push access to `origin`, push to the
+   contributor's personal fork instead (`git push --set-upstream <fork-remote> HEAD:refs/heads/<issue-branch>`);
+   the base stays `origin/main` and the PR still targets the CoA repository. Verify the remote head equals the
+   tested local head. A failed push leaves the fix pending; inspect remote state before retrying uncertain writes.
 5. Prepare the PR title/body from the final diff and actual tests, following `pull_request_template.md`, retaining
    its testing footer and accurate AI disclosure. Include issue/commit/test mapping and a separate `Fixes #123`
    entry for each issue fully resolved that passes the reopening check. Report the `verify_all.py` status and
@@ -251,7 +253,8 @@ Complete this loop for the issue or justified group before beginning the next in
    source checks, server startup, and in-game testing. Fill the AI disclosure (agent, models,
    subagent models, superpowers use) as [pr-description](pr-description.md) describes.
 6. Search for an existing PR with this repository/head/base before creating one; reuse it on resumed runs.
-   Otherwise open the PR immediately with explicit repository, head, and `--base main`. With `gh pr create`,
+   Otherwise open the PR immediately with explicit repository, head, and `--base main`; a fork branch is the
+   head `<fork-owner>:<issue-branch>` (`gh pr create -R <owner/repo> --head <fork-owner>:<issue-branch>`). With `gh pr create`,
    use `--title` and `--body-file` with an exact multiline temporary file. Verify URL/head/base/published SHA.
    Do not wait for the remaining queue before opening this tested fix's PR. In topic batch mode, finish and
    verify the current batch first, then open its PR before starting the next batch.

@@ -59,13 +59,16 @@ new evidence removes its blocker. A user-specified order or a demonstrated depen
 
 `auto` replaces routine questions with recorded decisions. Write each one as it is taken to
 `.agents/plans/<batch>/decisions.md`: the question that would have been asked, the option chosen, the reason, and
-whether it is reversible. Summarize the file in the final report and link relevant entries from the PR body.
+whether it is reversible. The file is gitignored: summarize it in the final report and copy the relevant entries
+into the PR body.
 
 - Interpretation of missing server logic, or a change against an explicit maintainer decision: change nothing,
   classify as needing a maintainer decision, list it in the PR as examined but not fixed.
-- A value only a community snapshot provides: use it only when exactly one calibrated source gives it and the
-  installed DBC, DB and code lack it; name source and snapshot date in the commit and PR. Otherwise treat it as
-  an interpretation question.
+- A value only a community snapshot provides: use it only when exactly one calibrated source gives it, the
+  installed DBC, DB and code lack it, and the user has approved the choice (`.agents/rules/general.md`); name
+  source and snapshot date in the commit and PR. Without approval, mark the issue blocked, record the question
+  for the final report and continue the batch. With no single calibrated source, treat it as an interpretation
+  question.
 - Anything else: take the option you would recommend, or the most conservative one.
 
 Hard stops end the run with a report instead of waiting mid-run: a red preflight that cannot be fixed, a resource
