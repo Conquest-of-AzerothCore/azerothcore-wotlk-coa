@@ -204,6 +204,12 @@ struct instance_blackrock_spire : public InstanceScript
             case NPC_CHROMATIC_ELITE_GUARD:
                 AddMinion(creature);
                 break;
+            case NPC_BURNING_FELGUARD:
+                if (BurningFelguard && BurningFelguard != creature->GetGUID())
+                    creature->DespawnOrUnsummon(1ms);
+                else
+                    BurningFelguard = creature->GetGUID();
+                break;
         }
     }
 
@@ -664,6 +670,7 @@ struct instance_blackrock_spire : public InstanceScript
 protected:
     EventMap Events;
     ObjectGuid HighlordOmokk;
+    ObjectGuid BurningFelguard;
     ObjectGuid ShadowHunterVoshgajin;
     ObjectGuid WarMasterVoone;
     ObjectGuid MotherSmolderweb;
