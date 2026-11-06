@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Oozelings from Devouring Oozes hit with Ascension's 0.5 damage modifier (#11314)",
+  "contract": "Issue #11314. Oozeling 8257 swarms the player when a Devouring Ooze dies during Slimed and Primed for Battle. It used the stock 2.4 damage modifier, about five times Ascension's 0.5 (Ascension's Summoned Oozeling hits for 22-66). A summoned Oozeling's main-hand minimum damage is now in Ascension's range instead of above 100.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -6593.79,
+    "y": -1754.75,
+    "z": -271.594,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "summon",
+      "actor": "p",
+      "as": "ooze",
+      "entry": 8257
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the Oozeling's minimum melee damage is in Ascension's range",
+      "actor": "ooze",
+      "metric": "weapon_damage_min",
+      "min": 10,
+      "max": 35
+    }
+  ]
+}

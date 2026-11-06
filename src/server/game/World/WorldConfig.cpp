@@ -102,6 +102,10 @@ void WorldConfig::BuildConfigCache()
         ConfigValueCache::Reloadable::Yes, validXPRate, "finite and >= 0");
     SetConfigValue<float>(RATE_XP_PROFESSION_INSCRIPTION, "Rate.XP.Profession.Inscription", 2.88f,
         ConfigValueCache::Reloadable::Yes, validXPRate, "finite and >= 0");
+    SetConfigValue<float>(RATE_XP_PROFESSION_WOODCUTTING, "Rate.XP.Profession.Woodcutting", 0.33f,
+        ConfigValueCache::Reloadable::Yes, validXPRate, "finite and >= 0");
+    SetConfigValue<float>(RATE_XP_PROFESSION_WOODWORKING, "Rate.XP.Profession.Woodworking", 1.0f,
+        ConfigValueCache::Reloadable::Yes, validXPRate, "finite and >= 0");
     SetConfigValue<float>(RATE_XP_KILL, "Rate.XP.Kill", 1.0909091f);
     SetConfigValue<float>(RATE_XP_KILL_TBC, "Rate.XP.Kill.TBC", 1.0909091f);
     SetConfigValue<float>(RATE_XP_KILL_WOTLK, "Rate.XP.Kill.WotLK", 0.90909094f);

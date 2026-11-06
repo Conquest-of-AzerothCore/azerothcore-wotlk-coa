@@ -107,7 +107,7 @@ def expected_rates(scale):
         expected[f'RATE_XP_{key}'] = f'RATE_XP_{key}'
     for suffix in ('GRAY GREEN YELLOW ORANGE MINING HERBALISM DISENCHANTING SKINNING FISHING '
                    'BLACKSMITHING JEWELCRAFTING ALCHEMY ENCHANTING LEATHERWORKING FIRST_AID '
-                   'COOKING ENGINEERING TAILORING LOCKPICKING INSCRIPTION').split():
+                   'COOKING ENGINEERING TAILORING LOCKPICKING INSCRIPTION WOODCUTTING WOODWORKING').split():
         expected[f'RATE_XP_PROFESSION_{suffix}_MODIFIER'] = f'RATE_XP_PROFESSION_{suffix}'
     return {key: scale * (names.index(setting) + 0.25) for key, setting in expected.items()}
 
