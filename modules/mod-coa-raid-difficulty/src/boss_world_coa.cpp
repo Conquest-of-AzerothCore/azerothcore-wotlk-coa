@@ -521,6 +521,8 @@ void CoaApplyWorldHealth(Creature* creature)
 
 void AddCoaWorldBossScripts()
 {
+    void AddCoaAzuregosInstanceScripts();
+    AddCoaAzuregosInstanceScripts();
     new coa_world_boss_loader();
     new boss_azuregos_coa_script();
     new boss_kazzak_coa_script();
