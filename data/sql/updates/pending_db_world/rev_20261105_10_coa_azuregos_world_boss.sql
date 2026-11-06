@@ -100,3 +100,11 @@ DELETE FROM `creature` WHERE `guid` = 9780910;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
 (9780910, 280139, 1, 0, 0, 1, 1, 2622.22, -5977.93, 106.0, 4.2121, 300, 0, 0);
+
+-- The Treasures of Azeroth chest every world boss gives (978059) has a 5% roll at any world boss item (978060):
+-- his items join that pool.
+INSERT IGNORE INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`,
+  `GroupId`, `MinCount`, `MaxCount`, `Comment`)
+SELECT 978060, l.`Item`, 0, 0, 0, 1, 1, 1, 1, CONCAT('Treasures of Azeroth - World Boss - ', i.`name`)
+FROM `creature_loot_template` l JOIN `item_template` i ON i.`entry` = l.`Item`
+WHERE l.`Entry` = 6109 AND l.`GroupId` = 1 AND l.`Reference` = 0 AND i.`Quality` = 4;
