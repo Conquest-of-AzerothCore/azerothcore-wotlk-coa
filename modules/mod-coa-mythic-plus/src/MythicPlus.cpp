@@ -2331,7 +2331,11 @@ public:
             return true;
         player->CastSpell(player, SPELL_MYTHICAL_BLESSING, true);
         for (Player* target : BoonTargets(player))
-            target->AddItem(BOONS[urand(0, BOONS.size() - 1)], 1);
+        {
+            uint32 const boon = BOONS[urand(0, BOONS.size() - 1)];
+            if (!target->AddItem(boon, 1))
+                target->SendItemRetrievalMail(boon, 1);
+        }
         creature->DespawnOrUnsummon(0ms, 7 * 24h);
         return true;
     }

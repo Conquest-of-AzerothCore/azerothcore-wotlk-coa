@@ -247,6 +247,72 @@
     },
     {
       "action": "assert",
+      "label": "the clicker's new item is a Mythical Boon",
+      "actor": "hero",
+      "metric": "item_count",
+      "items": [
+        2104920,
+        2104921,
+        2104922,
+        2104923,
+        2104925,
+        2104926,
+        2104927,
+        2104928,
+        2104929,
+        2104930,
+        2104931,
+        2104932,
+        2104935
+      ],
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "so is the ally's",
+      "actor": "ally",
+      "metric": "item_count",
+      "items": [
+        2104920,
+        2104921,
+        2104922,
+        2104923,
+        2104925,
+        2104926,
+        2104927,
+        2104928,
+        2104929,
+        2104930,
+        2104931,
+        2104932,
+        2104935
+      ],
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the member beyond 50 yards carries no Mythical Boon",
+      "actor": "far",
+      "metric": "item_count",
+      "items": [
+        2104920,
+        2104921,
+        2104922,
+        2104923,
+        2104925,
+        2104926,
+        2104927,
+        2104928,
+        2104929,
+        2104930,
+        2104931,
+        2104932,
+        2104935
+      ],
+      "equals": 0
+    },
+    {
+      "action": "assert",
       "label": "picking it up applies no boon to the clicker",
       "actor": "hero",
       "metric": "carried_aura_count",

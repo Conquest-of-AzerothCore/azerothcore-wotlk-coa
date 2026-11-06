@@ -611,7 +611,8 @@ and weapons whose skill the player lacks), `pool_variant_count`, `pool_retired_i
 pool across every raid difficulty), and `cache_token_count`, `cache_token_stage`, `cache_token_present`
 (need `cache`, the last also `item`), which read the token table the realm loads and answer how many
 tier tokens a cache may pay, the highest tier among them, and whether one named token is among them.
-Boolean metrics use 0/1. Spell/aura metrics require `spell`; `item_count` requires `item`.
+Boolean metrics use 0/1. Spell/aura metrics require `spell`; `item_count` requires `item`, or `items` to sum the
+counts of several entries.
 `spell_family_flags` reads one word of the effective server spell's family flags; `index` is 0..2 (default 0).
 `stunned` reads the unit's native stun state, including changes caused by aura removal.
 `carried_item_count` sums the stack counts of equipped items (bags included), the backpack and the bags' contents.
