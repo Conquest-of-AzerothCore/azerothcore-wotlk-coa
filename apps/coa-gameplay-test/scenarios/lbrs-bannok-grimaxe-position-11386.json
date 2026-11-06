@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "Bannok Grimaxe stands where the reporter placed him (#11386)",
+  "contract": "#11386: Bannok Grimaxe (9596, spawn 45843) stood at (-26.69, -428.56, -18.935) in Lower Blackrock Spire, in the middle of the camp, 50 yards from the back of the encampment where the reporter stood at (-73.99575, -411.50689, -18.934994), a position the tester confirmed. His stored spawn must be within half a yard of that point and on the ground there.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the reporter's point is on the ground",
+      "actor": "p",
+      "metric": "point_placement",
+      "map": 229,
+      "x": -73.995750427246,
+      "y": -411.50689697266,
+      "z": -18.934993743896,
+      "tolerance": 1.0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bannok Grimaxe 45843 is at the reporter's point",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 45843,
+      "spawn_type": "creature",
+      "x": -73.995750427246,
+      "y": -411.50689697266,
+      "z": -18.934993743896,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Bannok Grimaxe 45843 stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 45843,
+      "spawn_type": "creature",
+      "min": -1.0,
+      "max": 1.0
+    }
+  ]
+}
