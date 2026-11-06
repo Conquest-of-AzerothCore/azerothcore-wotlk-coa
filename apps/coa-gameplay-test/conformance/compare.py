@@ -504,6 +504,21 @@ def player_casts(model: dict, run: Run, trigger: int) -> float:
     return model['part_attempts'] - len(failure_reasons(run, trigger)) if model.get('exclude_trigger_casts') else 0.0
 
 
+def refund_offset(model: dict, run: Run) -> float:
+    pool = model.get('charge_pool')
+    if not pool:
+        return 0.0
+    return run.values[model['measurements']['attempts']] - run.values[pool] * model['part_attempts']
+
+
+def event_text(model: dict, event_labels: list[str], trigger: int) -> str:
+    if model.get('charge_pool'):
+        return (f'charges of {model["proc_spell"]} left after each cast from a restored pool, plus the completed '
+                f'casts, less the pool times the casts')
+    minus = f' minus the completed player casts of {trigger}' if model.get('exclude_trigger_casts') else ''
+    return f'{" + ".join(event_labels)}{minus}'
+
+
 def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -> Verdict:
     first_entry, first_run, expectation = parts[0]
     model = expectation.model
@@ -512,8 +527,10 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
     labels = model['measurements']
     readings = proc_readings(model)
     event_labels = model.get('event_labels') or [labels['events']]
+    refunds = [model['charge_pool'], labels['attempts']] if model.get('charge_pool') else []
     wanted = [labels['aura']] + list(dict.fromkeys(
-        event_labels + [label for reading in readings for label in reading['labels']]))
+        event_labels + [labels['trials']] + [label for reading in readings for label in reading['labels']]
+        + refunds))
     trigger = model['trigger']['spell'] if model['trigger']['action'] == CAST else 0
     totals = dict.fromkeys(wanted[1:], 0.0)
     events = 0.0
@@ -531,6 +548,7 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
             for label, value in zip(wanted[1:], values[1:]):
                 totals[label] += value
             events -= player_casts(model, run, trigger)
+            events += refund_offset(model, run)
     events += sum(totals[label] for label in event_labels)
     procs = events / model['events_per_proc']
     trials = totals[labels['trials']]
@@ -575,10 +593,9 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
                                             tooltips)}
     readings_text = '; '.join(text for *_, text, _ in judged)
     lead = 'the readings of the trials disagree; ' if len(statuses) > 1 else ''
-    minus = f' minus the completed player casts of {trigger}' if model.get('exclude_trigger_casts') else ''
     return replace(base, status=status, measured=rate, expected=expected, low=low, high=high, detail=detail,
                    explanation=f'{lead}{readings_text} ({notes}); {expectation.displayed} shows {chance:g}%; '
-                               f'{expectation.rule}; events: {" + ".join(event_labels)}{minus}, '
+                               f'{expectation.rule}; events: {event_text(model, event_labels, trigger)}, '
                                f'{model["events_per_proc"]} per proc')
 
 

@@ -458,14 +458,17 @@ A `procs` entry of the class file describes one proc aura:
 | `aura`, `name` | the proc aura and its `SpellName[enUS]` |
 | `tooltip` | its `Description[enUS]`, copied verbatim from the client DBC |
 | `chance_token` | the `$h` or `$<id>h` token of the tooltip that shows the chance |
-| `trigger` | `{"action": "attack", "spell": 0}` for auto attacks, `{"action": "cast", "spell": <rank>}` for a cast |
+| `trigger` | `{"action": "attack", "spell": 0}` for auto attacks, `{"action": "cast", "spell": <rank>}` for a cast at |
+| | `dummy`, with `"target": "ally"` for a cast at a second player |
 | `trigger_text` | the words of the tooltip that name the trigger |
 | `proc_spell`, `proc_spell_source` | the spell each proc casts, and where that id comes from |
-| `event_metric` | `spell_cast_count` or `spell_damage_count`, the metric of `proc_spell` |
+| `event_metric` | `spell_cast_count` or `spell_damage_count`, the metric of `proc_spell`; `spell_charges` when a proc |
+| | refreshes a charge of the trigger rank (`proc_spell`) instead of casting a spell |
 | `extra_event_terms` | further `{"metric", "spell"}` counts added to the events |
 | `events_exclude_trigger_casts` | the events count the trigger's own casts, so the completed player casts are removed |
 | `events_per_proc` | the events in one proc |
-| `trial_readings` | readings of the trials, `{"name", "meaning", "adds", "minus_events"}`, if the text allows several |
+| `trial_readings` | readings of the trials, `{"name", "meaning", "adds", "minus_events", "trials_metric"}`, if the |
+| | text allows several; `"trials_metric": "spell_cast_count"` counts the completed trigger casts as the trials |
 | `readings_question` | an observation that tells the readings apart without counting, for `questions.md` |
 | `handler` | the code that rolls a proc without a `spell_proc` or `spell_script_names` row |
 | `dbc` | `ProcChance`, `ProcFlags`, `ProcCharges` of the aura and of the spell of the chance token |
@@ -494,7 +497,17 @@ scenario limit with the 60 s margin of the hit scenarios. Each part learns the a
   is not a trial. An internal cooldown makes the entry `unmodelled`: auto attacks cannot be spaced beyond it.
 - for `cast`: learns the trigger rank and casts it at `dummy` as the hit scenarios do, one cast every
   `max(StartRecoveryTime, cast time, internal_cooldown_ms) + 500 ms`; a trial is a damage event of the trigger rank
-  on `dummy` (`spell_damage_count`, `spell_cast_count` beside it), so a failed cast is no trial (ruling R11).
+  on `dummy` (`spell_damage_count`, `spell_cast_count` beside it), so a failed cast is no trial (ruling R11). A
+  trigger with periodic damage (aura 3) is cast at most every two ticks (`2 x EffectAmplitude + 500 ms`): a recast
+  restarts its tick timer (Blade of Faith, stamp `20261106-130708`: 2058 ticks for 2044 casts 3.5 s apart), so
+  only a spacing beyond one tick lets a reading that counts ticks and one that counts casts tell their trials apart.
+- for a `cast` at `ally`: the scenario adds a second player `ally` and no creature; before each cast the caster is
+  moved 10 yards away with `relocate`, since a charge ends next to its target and Temple Guardian needs 5 to 30
+  yards; a trial is a completed cast (`spell_cast_count`).
+- for `spell_charges`: the part restores the charges of the trigger rank and measures the pool, restores them
+  again before each cast and measures the charges left after it. A cast leaves the pool less one, or the whole pool
+  when it refreshed a charge, and a failed cast leaves the whole pool, so the procs of a part are the summed charges
+  plus the completed casts less the pool times the casts.
 
 Each part then measures the event counts, the counts its readings add, and the aura on the character. The `proc_rate`
 expectation of every part has the same label, `<aura> proc_rate`; the comparison sums the trials and the events of the
@@ -517,14 +530,23 @@ in-RAM test database, read on 2026-11-05 (`SELECT * FROM spell_proc WHERE SpellI
 | Light's Echo 520017, 520883 | `$h` 10%, 20% | cast of Argent Blade 807268 | 804929 or 807268 casts | 2 readings |
 | Paladin Training 504808 | `$h` 8% | "Triggering Zealotry" | | `ambiguous_tooltip` |
 | Blade Sermon 572548, 572554 | `$h` 5%, 10% | Zealotry | | `ambiguous_tooltip` |
-| Transcendent Guardian 804571 | `$h` 40% | a charge to an ally | | `unmodelled` |
+| Condemnation 706325 | `$h` 15% | cast of Blade of Faith 803880 | 801450, `@s:801450:0@` | 2 readings |
+| Transcendent Guardian 804571 | `$h` 40% | Temple Guardian 803792 at an ally | its refreshed charge | scenario |
 
 `spell_proc` has rows for 92111 (Chance 100), 520007, 560648 and 707391 (Chance 0, so the DBC `ProcChance`), all
 with `ProcFlags` 1048575 and `Cooldown` 0, and none for the other auras; the four are scripted by
 `aura_ascension_templar_event`, whose checks for them (`AscensionTemplarEvents.cpp:58-73`) keep no cooldown of
 their own, so no entry with a scenario has an internal cooldown. The Light's Echo, Paladin Training, Blade Sermon
 and Transcendent Guardian auras have neither a `spell_proc` nor a `spell_script_names` row, yet the code rolls each
-of them (`handler`), so none is known to stay at 0%. Light's Echo recasts the rank cast, triggered, after a damaging
+of them (`handler`), so none is known to stay at 0%. Condemnation 706325 has a `spell_proc` row (Chance 0, so the
+DBC `ProcChance` 15) and the same script, read on 2026-11-06; its check (`AscensionTemplarEvents.cpp:81-83`) accepts
+damage of Condemn, Holy Cleave or Blade of Faith within melee range, periodic damage included, and casts Zealotry
+801450 (`AscensionTemplarEvents.cpp:121-123`). Only Blade of Faith is in the class set; its damage is periodic only,
+so the readings are each cast and each damage tick. Transcendent Guardian refreshes the charge of the cast rank on
+40% of the casts at another unit (`AscensionTemplarAbilities.cpp:220-224`) and casts nothing; owner ruling 3 of
+ADR 0011 (any target other than the caster) stays open, since the scenario casts at an ally only. Temple Guardian is
+outside the CharacterAdvancement class set and is cast by live Templars (owner answer Q3); the scenario learns
+803792 directly. Light's Echo recasts the rank cast, triggered, after a damaging
 hit (`AscensionTemplarAbilities.cpp:296-300`), while its aura's `EffectTriggerSpell[0]` is the first rank 804929:
 the events are the casts of both ranks less the completed player casts, which counts the extra strike whichever rank
 it uses. Its readings are the player casts only, or every Argent Blade strike, extra strikes included.
@@ -544,6 +566,15 @@ cast):
 Scourgebane parts made 196 or 197 swings, Light's Echo parts 287 and 319 player casts. Every extra Argent Blade
 strike was a cast of 807268; 804929 was never cast. A Scourgebane part takes 500.7 s of game time in 3.8 to 4.7 s of
 real time, a Light's Echo part 443 to 491 s in 3.2 to 4.3 s.
+
+Measured on 2026-11-06 (stamps `20261106-130841`, 26 Condemnation parts in 36.2 s, and `20261106-130708`, 11
+Transcendent Guardian parts, simulated clock, no failed cast):
+
+| Aura | Parts | Reading | Procs in trials | Wilson 99% | Reading verdict | Verdict |
+|---|---|---|---|---|---|---|
+| Condemnation 706325 | 26 | each cast | 622 in 2054 | 0.277 to 0.330 | `alert` | `ambiguous_tooltip` |
+| | | each damage tick | 622 in 4134 | 0.137 to 0.165 | `ok` | |
+| Transcendent Guardian 804571 | 11 | casts at the ally | 1509 in 3828 | 0.374 to 0.415 | `ok` | `ok` |
 
 ## Trigger entries
 

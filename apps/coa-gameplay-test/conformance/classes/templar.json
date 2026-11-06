@@ -147,6 +147,34 @@
       "internal_cooldown_ms": 0
     },
     {
+      "aura": 706325,
+      "name": "Condemnation",
+      "tooltip": "Dealing damage with |cffffffffCondemn|r, |cFFFFFFFFHoly Cleave|r, or |cFFFFFFFFBlade of Faith|r now has a $h% chance to trigger |cffffffffZealotry|r if you are within melee range of your target.@s:801450:0@",
+      "chance_token": "$h",
+      "trigger": {"action": "cast", "spell": 803880},
+      "trigger_text": "Blade of Faith",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 801450,
+      "proc_spell_source": "tooltip reference @s:801450:0@ and EffectTriggerSpell[0] of 706325: Zealotry 801450",
+      "events_per_proc": 1,
+      "trial_readings": [
+        {"name": "each cast",
+         "meaning": "each Blade of Faith cast rolls the chance once, however many times it deals damage",
+         "trials_metric": "spell_cast_count"},
+        {"name": "each damage tick",
+         "meaning": "every damage tick of Blade of Faith rolls the chance, so one cast can trigger Zealotry several times",
+         "adds": []}
+      ],
+      "readings_question": "cast Blade of Faith once at a single target dummy within melee range and wait the 30 sec of its damage: does Zealotry ever hit more than once during that one Blade of Faith?",
+      "dbc": {
+        "706325": {"ProcChance": 15, "ProcFlags": 0, "ProcCharges": 0}
+      },
+      "spell_proc": {
+        "706325": {"ProcFlags": 1048575, "Chance": 0, "ProcsPerMinute": 0, "Cooldown": 0, "Charges": 0}
+      },
+      "internal_cooldown_ms": 0
+    },
+    {
       "aura": 504808,
       "name": "Paladin Training",
       "tooltip": "Triggering |cffffffffZealotry|r now has an $h% chance to grant you an additional auto attack on your next strike.@s:801450:0@",
@@ -193,13 +221,23 @@
       "name": "Transcendent Guardian",
       "tooltip": "Charging to an ally with |cffffffffTemple Guardian|r now has a $h% chance to refresh a charge.",
       "chance_token": "$h",
-      "status": "unmodelled",
-      "reason": "the trigger is a charge to an ally; proc scenarios cast at the hostile dummy only",
+      "trigger": {"action": "cast", "spell": 803792, "target": "ally"},
+      "trigger_text": "Charging to an ally",
+      "event_metric": "spell_charges",
+      "proc_spell": 803792,
+      "proc_spell_source": "the refreshed charge of the cast rank: RestoreSpellCharge of the cast spell, no proc cast",
+      "events_per_proc": 1,
+      "trial_readings": [
+        {"name": "casts at the ally",
+         "meaning": "each Temple Guardian charge at an ally rolls the chance once",
+         "trials_metric": "spell_cast_count"}
+      ],
       "handler": "AscensionTemplarAbilities.cpp:220-224 restores a charge on 40% (hardcoded) of casts at an ally",
       "dbc": {
         "804571": {"ProcChance": 40, "ProcFlags": 0, "ProcCharges": 0}
       },
-      "spell_proc": {}
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
     }
   ],
   "triggers": [

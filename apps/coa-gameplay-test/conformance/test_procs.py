@@ -12,7 +12,8 @@ import unittest
 
 from compare import STATUSES
 from hits import EXCLUDED_OUTCOME_MARGIN, MAX_SCENARIO_MS, Unmodelled
-from procs import PROC_CHECK, proc_plan, proc_scenario, proc_status_expectation, trials_needed, wilson_interval
+from procs import (PART_BUDGET_MS, PROC_CHECK, proc_plan, proc_scenario, proc_status_expectation, trials_needed,
+                   wilson_interval)
 from profile import DBC_DIR
 from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader
 from tooltip import Displayed, Records
@@ -41,6 +42,18 @@ READINGS = [{'name': 'auto attacks only', 'labels': [LABELS['trials']]},
 LIGHTS_ECHO = (520017, 520883)
 ARGENT_BLADE_FIRST_RANK = 804929
 SCRIPTED_IN_CODE = {504808, 520017, 520883, 572548, 572554, 804571}
+CONDEMNATION = 706325
+BLADE_OF_FAITH = 803880
+BLADE_OF_FAITH_TICK_MS = 3000
+OATH_CHAIN = 704576
+ZEALOTRY_STRIKE = 801450
+TRANSCENDENT_GUARDIAN = 804571
+TEMPLE_GUARDIAN = 803792
+GUARDIAN_LABEL = '804571 proc_rate'
+GUARDIAN_KEY = 'conformance-templar-proc-804571-part-1'
+GUARDIAN_LABELS = {'trials': '804571 proc trials', 'events': '804571 proc events', 'attempts': '804571 proc attempts',
+                   'aura': '804571 proc aura'}
+CHARGE_POOL = '804571 proc charge pool'
 HANDLER = re.compile(r'^Ascension\w+\.cpp:\d+-\d+ ')
 TOKEN_SPELL = re.compile(r'\$(\d*)[hH]$')
 
@@ -70,6 +83,30 @@ def proc_steps(trials, events, aura=1, strikes=None):
     if strikes is not None:
         steps.append(assert_step(STRIKE_TRIALS, str(strikes)))
     return steps
+
+
+def charge_label(attempt):
+    return f'804571 proc charges {attempt}'
+
+
+def guardian_expectation(attempts):
+    model = {'part': 0, 'parts': 1, 'chance_pct': 40.0, 'minimum_trials': attempts - 1, 'scheduled_attempts': attempts,
+             'part_attempts': attempts, 'attempt_ms': 1500,
+             'trigger': {'action': 'cast', 'spell': TEMPLE_GUARDIAN, 'target': 'ally'},
+             'proc_spell': TEMPLE_GUARDIAN, 'event_metric': 'spell_charges', 'events_per_proc': 1,
+             'measurements': GUARDIAN_LABELS, 'charge_pool': CHARGE_POOL,
+             'event_labels': [charge_label(attempt) for attempt in range(1, attempts + 1)],
+             'readings': [{'name': 'casts at the ally', 'labels': [GUARDIAN_LABELS['attempts']],
+                           'minus_events': False}]}
+    return Expectation(GUARDIAN_LABEL, PROC_CHECK, TRANSCENDENT_GUARDIAN, TRANSCENDENT_GUARDIAN, None, '$h', 'rule',
+                       model)
+
+
+def guardian_steps(charges, completed, pool=3):
+    steps = [assert_step(GUARDIAN_LABELS['aura'], '1'), assert_step(CHARGE_POOL, str(pool)),
+             assert_step(GUARDIAN_LABELS['trials'], str(completed)),
+             assert_step(GUARDIAN_LABELS['attempts'], str(completed))]
+    return steps + [assert_step(charge_label(attempt), str(left)) for attempt, left in enumerate(charges, 1)]
 
 
 def casts_of(scenario):
@@ -255,6 +292,34 @@ class ProcCompareTest(unittest.TestCase):
                                          'rank_id': 572548, 'tokens': [],
                                          'expectations': [asdict(expectation)]})
 
+    def test_charges_left_after_each_cast_give_the_refunded_charges(self):
+        charges = [3] * 4 + [2] * 6
+        self.workspace.scenario(GUARDIAN_KEY, 'proc', [guardian_expectation(10)], steps=guardian_steps(charges, 10),
+                                spell=TRANSCENDENT_GUARDIAN, rank=TRANSCENDENT_GUARDIAN)
+        verdict = self.verdict(chance_reader(40.0, '$h'))
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 4 / 10)
+        self.assertIn('casts at the ally: 4 procs in 10 trials', verdict.explanation)
+        self.assertIn(f'charges of {TEMPLE_GUARDIAN} left after each cast', verdict.explanation)
+        self.assertNotIn(charge_label(2), verdict.explanation)
+
+    def test_a_failed_cast_keeps_its_restored_charges_without_a_proc(self):
+        charges = [3] * 4 + [2] * 5 + [3]
+        self.workspace.scenario(GUARDIAN_KEY, 'proc', [guardian_expectation(10)], steps=guardian_steps(charges, 9),
+                                spell=TRANSCENDENT_GUARDIAN, rank=TRANSCENDENT_GUARDIAN)
+        self.workspace.cast_failures[GUARDIAN_KEY] = [{'spell': str(TEMPLE_GUARDIAN), 'reason': '67'}]
+        verdict = self.verdict(chance_reader(40.0, '$h'))
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 4 / 9)
+        self.assertIn('SPELL_FAILED_NOT_READY (67)', verdict.explanation)
+
+    def test_no_refunded_charge_in_many_casts_is_an_alert(self):
+        self.workspace.scenario(GUARDIAN_KEY, 'proc', [guardian_expectation(40)], steps=guardian_steps([2] * 40, 40),
+                                spell=TRANSCENDENT_GUARDIAN, rank=TRANSCENDENT_GUARDIAN)
+        verdict = self.verdict(chance_reader(40.0, '$h'))
+        self.assertEqual(verdict.status, 'alert')
+        self.assertAlmostEqual(verdict.measured, 0.0)
+
     def test_statuses_include_every_proc_verdict(self):
         for status in ('ok', 'alert', 'ambiguous_tooltip', 'unmodelled', 'insufficient_trials', 'unmeasured'):
             self.assertIn(status, STATUSES)
@@ -315,6 +380,75 @@ class ProcScenarioTest(unittest.TestCase):
                                  [True, False])
                 self.assertIn('handler: AscensionTemplarAbilities.cpp:296-300', expectation.rule)
 
+    def test_condemnation_entry(self):
+        entry = templar_proc(CONDEMNATION)
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': BLADE_OF_FAITH})
+        self.assertEqual((entry['proc_spell'], entry['event_metric']), (ZEALOTRY_STRIKE, 'spell_cast_count'))
+        self.assertEqual([(reading['name'], reading.get('trials_metric')) for reading in entry['trial_readings']],
+                         [('each cast', 'spell_cast_count'), ('each damage tick', None)])
+        self.assertTrue(entry['readings_question'])
+        self.assertEqual(trials_needed(0.15), 1354)
+        plan = proc_plan(CLASS_FILE, entry)
+        self.assertEqual((plan.chance_pct, plan.needed), (15.0, 1354))
+        self.assertGreater(plan.attempt_ms, 2 * BLADE_OF_FAITH_TICK_MS)
+        self.assertGreaterEqual(plan.parts * plan.per_part, plan.scheduled)
+        for part in range(plan.parts):
+            scenario, [expectation] = proc_scenario(CLASS_FILE, entry, part)
+            run.validate(scenario)
+            self.assertLessEqual(scenario['timeout_ms'], MAX_SCENARIO_MS)
+            steps = scenario['steps']
+            casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+            self.assertEqual(len(casts), plan.per_part)
+            for index in casts:
+                self.assertEqual(steps[index], {'action': 'cast', 'actor': 'caster', 'spell': BLADE_OF_FAITH,
+                                                'target': 'dummy'})
+                self.assertIn({'action': 'set_aura', 'actor': 'caster', 'spell': OATH_CHAIN, 'stacks': 1},
+                              steps[index - 3:index])
+            measured = {step['label']: step for step in steps if step['action'] == 'assert'}
+            self.assertEqual((measured['706325 proc events']['metric'], measured['706325 proc events']['spell']),
+                             ('spell_cast_count', ZEALOTRY_STRIKE))
+            trials = measured['706325 proc trials']
+            self.assertEqual((trials['metric'], trials['spell'], trials['target']),
+                             ('spell_damage_count', BLADE_OF_FAITH, 'dummy'))
+            self.assertEqual((measured['706325 proc attempts']['metric'], measured['706325 proc attempts']['spell']),
+                             ('spell_cast_count', BLADE_OF_FAITH))
+            self.assertEqual([reading['labels'] for reading in expectation.model['readings']],
+                             [['706325 proc attempts'], ['706325 proc trials']])
+
+    def test_ally_trigger_scenario(self):
+        entry = templar_proc(TRANSCENDENT_GUARDIAN)
+        self.assertNotIn('status', entry)
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': TEMPLE_GUARDIAN, 'target': 'ally'})
+        self.assertEqual(trials_needed(0.40), 2549)
+        plan = proc_plan(CLASS_FILE, entry)
+        self.assertEqual((plan.chance_pct, plan.needed), (40.0, 2549))
+        self.assertGreater(plan.parts, 1)
+        self.assertGreaterEqual(plan.parts * plan.per_part, plan.scheduled)
+        self.assertLessEqual(plan.per_part * plan.attempt_ms, PART_BUDGET_MS)
+        for part in range(plan.parts):
+            scenario, [expectation] = proc_scenario(CLASS_FILE, entry, part)
+            run.validate(scenario)
+            self.assertLessEqual(scenario['timeout_ms'], MAX_SCENARIO_MS)
+            self.assertEqual([player['id'] for player in scenario['players']], ['caster', 'ally'])
+            self.assertNotIn('creatures', scenario)
+            steps = scenario['steps']
+            casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+            self.assertEqual(len(casts), plan.per_part)
+            for index in casts:
+                self.assertEqual(steps[index], {'action': 'cast', 'actor': 'caster', 'spell': TEMPLE_GUARDIAN,
+                                                'target': 'ally'})
+                before = [step['action'] for step in steps[index - 5:index]]
+                self.assertIn('restore_charges', before)
+                self.assertIn('relocate', before)
+                self.assertEqual(steps[index + 2]['metric'], 'spell_charges')
+            measured = {step['label']: step for step in steps if step['action'] == 'assert'}
+            self.assertEqual(measured['804571 proc charge pool']['metric'], 'spell_charges')
+            self.assertEqual((measured['804571 proc trials']['metric'], measured['804571 proc trials']['spell']),
+                             ('spell_cast_count', TEMPLE_GUARDIAN))
+            self.assertEqual(expectation.model['event_labels'],
+                             [charge_label(attempt) for attempt in range(1, plan.per_part + 1)])
+            self.assertEqual(expectation.model['charge_pool'], '804571 proc charge pool')
+
     def test_fewer_attempts_than_the_trials_are_refused(self):
         entry = templar_proc(SCOURGEBANE)
         with self.assertRaises(ValueError):
@@ -369,7 +503,7 @@ class TemplarProcEntriesTest(unittest.TestCase):
 
     def test_source_list_is_covered(self):
         auras = {entry['aura'] for entry in CLASS_FILE['procs']}
-        self.assertTrue({92111, 560648, 520017, 520883, 707391, 504808, 572548, 572554, 804571} <= auras)
+        self.assertTrue({92111, 560648, 520017, 520883, 707391, 504808, 572548, 572554, 706325, 804571} <= auras)
 
     def test_every_entry_cites_its_dbc_tooltip_and_proc_fields(self):
         for entry in CLASS_FILE['procs']:
@@ -393,7 +527,7 @@ class TemplarProcEntriesTest(unittest.TestCase):
                     continue
                 self.assertIn(entry['trigger']['action'], ('cast', 'attack'))
                 self.assertIn(entry['trigger_text'], entry['tooltip'])
-                self.assertIn(entry['event_metric'], ('spell_cast_count', 'spell_damage_count'))
+                self.assertIn(entry['event_metric'], ('spell_cast_count', 'spell_damage_count', 'spell_charges'))
                 self.assertTrue(self.spell(entry['proc_spell'], 'SpellName[enUS]'))
                 self.assertEqual(entry['internal_cooldown_ms'], 0)
 
