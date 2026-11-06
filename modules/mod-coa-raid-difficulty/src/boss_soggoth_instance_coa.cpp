@@ -3,12 +3,12 @@
 
 namespace
 {
-    // His map (883) starts at its graveyard (WorldSafeLocs 6083). The shrine stands in Darkshore.
+    // His map (883) starts at its graveyard (WorldSafeLocs 6083). The shrine stands in Darkshore, by the Master's Glaive.
     coa_world_boss_instance::Config const Soggoth = {
         "The Will of Soggoth", 64605, 883,
         { 4410.54f, 269.28f, 78.02f, 0.0f },
         978077, 1,
-        { 4410.5f, 269.3f, 60.53f, 0.0f },
+        { 4544.0f, 410.0f, 33.74f, 0.0f },
         978078,
     };
 }

@@ -18,23 +18,26 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 (64605, 11277, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Thorn of Aydreath'),
 (64605, 11276, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Treads of Twilight Shadow'),
 (64605, 11272, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Twilight Faceguard'),
-(64605, 11273, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Visage of Aydreath');
+(64605, 11273, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Visage of Aydreath'),
+(64605, 1978059, 0, 100, 0, 1, 0, 1, 1, 'The Will of Soggoth - Treasures of Azeroth');
 
--- He waits down in the pit, below the ledge his map starts on, so players do not land on top of him.
-UPDATE `creature` SET `position_x` = 4460.0, `position_y` = 269.3, `position_z` = 31.48, `orientation` = 3.1416
+-- He waits in the middle of the pit (WorldMapArea 2037), below the ledge his map starts on, so players do not land
+-- on top of him; floor height measured.
+UPDATE `creature` SET `position_x` = 4530.0, `position_y` = 250.0, `position_z` = 31.48, `orientation` = 3.1416
 WHERE `guid` = 9780102 AND `id` = 64605;
 
--- His health is per player in his map (10 to 40): each kill's pool over its 21 players.
-UPDATE `coa_world_boss_level` SET `health` = 695765, `note` = 'per player; kill 00:28, 21 players'
+-- His health is per player in his map (10 to 40). The CoA logs of Normal kills end at 20.14M with 38 players and
+-- 20.91M with 40, about 523,000 a player; only Normal is open, so the heroic row stays as it is.
+UPDATE `coa_world_boss_level` SET `health` = 523000, `note` = 'per player; Normal kill logs, 40 players 20.91M'
 WHERE `entry` = 64605 AND `difficulty` = 0;
-UPDATE `coa_world_boss_level` SET `health` = 1016749, `note` = 'per player; kill 00:44, 21 players'
-WHERE `entry` = 64605 AND `difficulty` = 2;
+-- His model, as Creature.dbc gives it (FacelessOne, green).
+UPDATE `creature_template_model` SET `CreatureDisplayID` = 228465, `DisplayScale` = 1 WHERE `CreatureID` = 64605;
 
--- The shrine in Darkshore (as the quick guide shows it; height measured), the portal out and the shrine at the
--- entrance of his map.
+-- Ascension's Shrine of Soggoth (280144) in Darkshore by the Master's Glaive, where his cultists wake him (quests
+-- 1006500, 100076; height measured), the portal out and the shrine at the entrance of his map.
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
   `size`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
-(978077, 10, 4076, 'Shrine of Soggoth', '', '', '', 3, '', 'go_soggoth_altar_coa', 12340),
+(280144, 10, 4076, 'Shrine of Soggoth', '', '', '', 3, '', 'go_soggoth_altar_coa', 12340),
 (978078, 10, 4396, 'Portal out of the Gastric Pit', '', '', '', 1.5, '', 'go_soggoth_exit_coa', 12340),
 (978079, 10, 4076, 'Shrine of Soggoth', '', '', '', 3, '', 'go_soggoth_leave_coa', 12340)
 ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`),
@@ -43,7 +46,7 @@ DELETE FROM `gameobject` WHERE `guid` IN (9780916, 9780917);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`) VALUES
-(9780916, 978077, 1, 0, 0, 1, 1, 4410.5, 269.3, 60.53, 0, 0, 0, 0, 1, 300, 100, 1),
+(9780916, 280144, 1, 148, 449, 1, 1, 4544.0, 410.0, 33.74, 0, 0, 0, 0, 1, 300, 100, 1),
 (9780917, 978079, 883, 10238, 10238, 15, 1, 4405.5, 264.3, 78.02, 0, 0, 0, 0, 1, 300, 100, 1);
 
 -- Players who die in his map rise at its start: WorldSafeLocs.dbc 6083 "Soggoth Graveyard".
@@ -71,16 +74,16 @@ ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `subname` = VALUES(`subname`), 
 DELETE FROM `creature_template_model` WHERE `CreatureID` = 978077;
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
   `VerifiedBuild`) VALUES
-(978077, 0, 28844, 0.5, 1, 12340);
+(978077, 0, 228465, 0.06, 1, 12340);
 DELETE FROM `creature_template_addon` WHERE `entry` = 978077;
 INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (978077, '22650 16245');
 DELETE FROM `creature_template_movement` WHERE `CreatureId` = 978077;
 INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flight`, `Rooted`) VALUES
 (978077, 1, 0, 0, 1);
-DELETE FROM `creature` WHERE `guid` = 9780916;
+DELETE FROM `creature` WHERE `guid` = 9780918;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
-(9780916, 978077, 1, 0, 0, 1, 1, 4410.5, 269.3, 65.5, 0, 300, 0, 0);
+(9780918, 978077, 1, 148, 449, 1, 1, 4544.0, 410.0, 38.7, 0, 300, 0, 0);
 
 -- The other world boss maps' graveyards (WorldSafeLocs.dbc 6084-6090), so players who die in any of them rise at
 -- its start.

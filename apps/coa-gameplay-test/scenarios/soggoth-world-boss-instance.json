@@ -2,17 +2,17 @@
   "schema": 1,
   "name": "The Will of Soggoth: the shrine takes the raid to his map (Normal only), he pays every player and leaves a portal back",
   "contract": [
-    "The shrine of The Will of Soggoth (978077) in Darkshore refuses a heroic raid difficulty and on a Normal one",
+    "The shrine of The Will of Soggoth (280144) in Darkshore refuses a heroic raid difficulty and on a Normal one",
     "takes the player to his map (883). His health is per player in his map, counted from 10 to 40,",
-    "so 6957650 for one player. Every player gets 250 Runes of Ascension (375250), 100 to 150 Bazaar Tokens (975001) and a",
+    "so 5230000 for one player. Every player gets 250 Runes of Ascension (375250), 100 to 150 Bazaar Tokens (975001) and a",
     "Treasures of Azeroth chest (978059). The portal out (978078) opens where he falls and takes the player back."
   ],
   "timeout_ms": 180000,
   "location": {
     "map": 1,
-    "x": 4414.0,
-    "y": 272.0,
-    "z": 61.0
+    "x": 4547.0,
+    "y": 413.0,
+    "z": 34.0
   },
   "players": [
     {
@@ -56,13 +56,13 @@
     {
       "action": "summon_gameobject",
       "actor": "raider",
-      "entry": 978077,
+      "entry": 280144,
       "distance": 2
     },
     {
       "action": "use_gameobject",
       "actor": "raider",
-      "entry": 978077
+      "entry": 280144
     },
     {
       "action": "gossip_select",
@@ -92,7 +92,7 @@
     {
       "action": "use_gameobject",
       "actor": "raider",
-      "entry": 978077
+      "entry": 280144
     },
     {
       "action": "gossip_select",
@@ -132,7 +132,7 @@
       "actor": "raider",
       "metric": "nearby_creature_max_health",
       "entry": 64605,
-      "equals": 6957650,
+      "equals": 5230000,
       "within_ms": 3000
     },
     {
@@ -165,7 +165,7 @@
       "metric": "item_count",
       "item": 975001,
       "min": 100,
-      "max": 152
+      "max": 150
     },
     {
       "action": "assert",
