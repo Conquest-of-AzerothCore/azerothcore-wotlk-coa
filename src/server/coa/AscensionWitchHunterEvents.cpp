@@ -163,6 +163,7 @@ class aura_ascension_witch_hunter_event : public AuraScript
                 return outgoing && Direct(event) && info && player->IsTwoHandUsed() && event.GetProcSpell() &&
                        event.GetProcSpell()->TryMarkScriptEventHandled(29);
             case 680528:
+                return outgoing && Direct(event) && (Dawn(info) || RavenHillDawn(info));
             case 680504:
             case 680530:
             case 806188:
