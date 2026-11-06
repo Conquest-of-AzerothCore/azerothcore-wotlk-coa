@@ -28,12 +28,11 @@ have it.
   `BaseLevel` of the base spell. A listed spell already in the set, listed twice, or missing from `Spell.dbc`, is an
   error.
 - D2. The class file's `extra_spells` entries are `{"spell", "name", "citation"}`: the base spell id, its name, and
-  the citation of one Ascension combat log event (`~/Projects/coa-log-history/data/logs`) where a player casts a
-  rank of it or holds its aura: date, time, logged spell id and name, "Ascension combat log, private archive". The
-  archive is private, so committed files carry no raw line and no character name. The player must also cast a
-  `CharacterAdvancement` active of the class in the logs, so that the event shows the class using it (class is not
-  in the log). Spells without such an event stay out and the package README lists them as not confirmed (ledger
-  rulings R23 and R25).
+  the citation of one Ascension combat log event of the owner's private Ascension combat log archive where a player
+  casts a rank of it or holds its aura: date, time, logged spell id and name, "Ascension combat log, private
+  archive". The archive is private, so committed files carry no raw line and no character name. The player must
+  also cast a `CharacterAdvancement` active of the class in the logs, so that the event shows the class using it
+  (class is not in the log). Spells without such an event stay out and the package README lists them as not confirmed.
 - D3. Only `generate` reads `extra_spells`. Passive reference spells (`active_class_ranks`) keep the
   `CharacterAdvancement` set.
 

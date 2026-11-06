@@ -66,9 +66,10 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
 ### Extra class spells
 
 A class file's `extra_spells` entry is `{"spell", "name", "citation"}`: the base spell id, its name and the citation of
-one Ascension combat log event (`~/Projects/coa-log-history/data/logs`) where a player casts a rank of it or holds its
-aura (ruling R23). The log archive is private: the citation is `<date> <time>, spell <logged id> <name>, Ascension
-combat log, private archive`, without character names or raw lines (ruling R25); the full lines stay in the gitignored
+one Ascension combat log event of the owner's private Ascension combat log archive where a player casts a rank of it
+or holds its aura ([ADR 0016](../../../docs/adr/0016-conformance-class-spells-beyond-character-advancement.md) D2).
+The citation is `<date> <time>, spell <logged id> <name>, Ascension combat log, private archive`, without character
+names or raw lines, because the archive is private; the full lines stay in the gitignored
 `.agents/plans/class-conformance-2/templar/extra-spells-evidence.md`. The log does not store a class, so the event
 must come from a player who also casts a `CharacterAdvancement` active of the class in those logs.
 `test_classes.py` checks the citation form, that the logged spell has the entry's name and is a rank of its chain
@@ -176,7 +177,8 @@ value, and no metric reads that bonus.
 Known divergence: the reader reads the client DBC, which is what players' tooltips show unless the client is
 patched. The server can override a description: `rev_20261029_240_templar_untainted_tooltip.sql` gives Untainted
 705298 `${-$705299m1+$STA*0.1}` through `coa_client_spell_description`, while the client DBC reads
-`${$705299m1+$STA*0.1}` (ruling R19).
+`${$705299m1+$STA*0.1}`; the comparison follows the client DBC
+([ADR 0014](../../../docs/adr/0014-level-scaled-tooltip-values-use-the-skill-rank.md)).
 
 ## Reference character
 
@@ -200,20 +202,21 @@ in the in-RAM test database with `SELECT dmg_min1, dmg_max1, delay, InventoryTyp
 and the comparison uses the values measured in the run.
 
 `alternate_weapons` lists other reference weapons with the same fields plus `skill_line`, the `SkillLineAbility` line of
-the weapon-skill spell of their subclass (owner answer Q9, ruling R6). A rank whose `EquippedItemClass` is 2 and whose
-`EquippedItemSubClassMask` or `EquippedItemInventoryTypeMask` excludes `weapon` (`unfit_reason`, the checks of
-`Item::IsFitToSpellRequirements`) takes the first alternate weapon that fits: `armed(class_file, requirement)` returns
-the class file with that weapon, its skill line added to `skill_lines` and `skill <line>` added to `reference_stats` at
-5 × level. The value scenario, its generated tokens, the hit scenario and the comparison of that rank use it; the hit
-rule names it (`reference weapon 2259 (EquippedItemSubClassMask 41105 excludes the reference weapon subclass 10)`).
-Without a fitting weapon the hit is `unmodelled` with that reason. The Templar one-hand weapon is the Frostmane Club
-(item 2259), a white one-handed mace of item level 6 and required level 3 like the Walking Stick, without stats or
-spells, read on 2026-11-06 from `acore_world` in the in-RAM test database with `SELECT class, subclass, Quality,
-dmg_min1, dmg_max1, delay, InventoryType, RequiredLevel, ItemLevel FROM item_template WHERE entry = 2259`: 2, 4, 1,
-3.45, 5.75, 2000, 21, 3, 6; `Item.dbc` gives subclass 4, inside the mask 41105 of Vindication 573324 and Righteous
-Upheaval 501562, its normalized speed is 2.4 (`Unit::GetAPMultiplier`, a one-hand weapon that is not a dagger), and
-the Maces skill spell 198 is on line 54. One-Handed Maces (skill 54, spell 198) is a Templar proficiency in
-`AscensionLiveBaselineData.h` (`Proficiencies`) and `AscensionCustomClassData.h` (`ClassProficiencies`).
+the weapon-skill spell of their subclass (owner answer Q9: a second, one-handed reference weapon). A rank whose
+`EquippedItemClass` is 2 and whose `EquippedItemSubClassMask` or `EquippedItemInventoryTypeMask` excludes `weapon`
+(`unfit_reason`, the checks of `Item::IsFitToSpellRequirements`) takes the first alternate weapon that fits:
+`armed(class_file, requirement)` returns the class file with that weapon, its skill line added to `skill_lines` and
+`skill <line>` added to `reference_stats` at 5 × level. The value scenario, its generated tokens, the hit scenario and
+the comparison of that rank use it; the hit rule names it (`reference weapon 2259 (EquippedItemSubClassMask 41105
+excludes the reference weapon subclass 10)`). Without a fitting weapon the hit is `unmodelled` with that reason. The
+Templar one-hand weapon is the Frostmane Club (item 2259), a white one-handed mace of item level 6 and required level 3
+like the Walking Stick, without stats or spells, read on 2026-11-06 from `acore_world` in the in-RAM test database with
+`SELECT class, subclass, Quality, dmg_min1, dmg_max1, delay, InventoryType, RequiredLevel, ItemLevel FROM item_template
+WHERE entry = 2259`: 2, 4, 1, 3.45, 5.75, 2000, 21, 3, 6; `Item.dbc` gives subclass 4, inside the mask 41105 of
+Vindication 573324 and Righteous Upheaval 501562, its normalized speed is 2.4 (`Unit::GetAPMultiplier`, a one-hand
+weapon that is not a dagger), and the Maces skill spell 198 is on line 54. One-Handed Maces (skill 54, spell 198) is a
+Templar proficiency in `AscensionLiveBaselineData.h` (`Proficiencies`) and `AscensionCustomClassData.h`
+(`ClassProficiencies`).
 
 `base_steps` waits 5 s, adds and equips the weapon, sets each line of `skill_lines` to 5 × level with `set_skill`
 (value and maximum: 300 at level 60, owner answer Q4) and measures it back with `skill_value` (label `skill
@@ -226,8 +229,8 @@ race, class and weapon subclass, and the measured skills.
 
 A naked level-60 Templar knows no class spell and carries one class aura: measured on 2026-11-05 on the worldserver of
 the worktree, `knows_spell` is 0 for all 221 spell ids of the class and `aura` is 1 only for the class tuning aura
-887007 (887043/887044/887045, the spec auras, and the passive Scourgebane 92111 read 0). `known_auras` therefore lists 887007
-only; Scourgebane is in `probe_auras`, which is measured and reported but never explains a deviation.
+887007 (887043/887044/887045, the spec auras, and the passive Scourgebane 92111 read 0). `known_auras` therefore lists
+887007 only; Scourgebane is in `probe_auras`, which is measured and reported but never explains a deviation.
 
 ## No-combat scenario of a rank
 
@@ -609,7 +612,7 @@ scenario limit with the 60 s margin of the hit scenarios. Each part learns the a
   is not a trial. An internal cooldown makes the entry `unmodelled`: auto attacks cannot be spaced beyond it.
 - for `cast`: learns the trigger rank and casts it at `dummy` as the hit scenarios do, one cast every
   `max(StartRecoveryTime, cast time, internal_cooldown_ms) + 500 ms`; a trial is a damage event of the trigger rank
-  on `dummy` (`spell_damage_count`, `spell_cast_count` beside it), so a failed cast is no trial (ruling R11). A
+  on `dummy` (`spell_damage_count`, `spell_cast_count` beside it), so a failed cast is no trial (ADR 0011 R11). A
   trigger with periodic damage (aura 3) is cast at most every two ticks (`2 x EffectAmplitude + 500 ms`): a recast
   restarts its tick timer (Blade of Faith, stamp `20261106-130708`: 2058 ticks for 2044 casts 3.5 s apart), so
   only a spacing beyond one tick lets a reading that counts ticks and one that counts casts tell their trials apart.
@@ -707,7 +710,7 @@ A `triggers` entry of the class file is a passive whose tooltip says that someth
 | `observe_metric` | `spell_cast_count` or `spell_energize_count` of `observe_spell` |
 | `per_trigger`, `per_trigger_text` | the events per trial, 1 or 0.5 for "Every 2nd", and the words that state it |
 | `status`, `reason` | `unmodelled` or `ambiguous_tooltip` for an entry without a scenario, and why |
-| `question` | the question for players when the entry's verdict is an `alert` the server code explains (ruling R14) |
+| `question` | the question for players when the entry's verdict is an `alert` the server code explains: a server finding goes to the player question list, not into a verdict change |
 
 `aura_proc_rate` is not a judge of these entries: their passives have `ProcFlags` 0 and are scripted (design D10).
 The observed spell is the passive's `EffectTriggerSpell[n]` (`observe_source` `EffectTriggerSpell[n] of <aura>`)
@@ -905,9 +908,10 @@ error and no verdict. A scenario without a result has no verdict and is listed i
 every `actual` as a string; it is converted to a number, and a value that is not one is an error. `alerts.tsv`
 (default: the manifest directory) has one row per verdict that is neither `ok` nor `measured`; `report.md` counts the
 verdicts per status, per spell and, for passive scenarios, per measurement family ("Passives"), and lists the known
-modifiers, the probe auras, the scenarios without a result and the runs that did not pass. `verdicts.json` keeps every verdict with its interval, detail and explanation (schema 1)
-for `diff`. `questions.md` lists the checks that players on live must settle (see
-[Player question list](#player-question-list)). When the run holds stack verdicts, `compare` also writes `levers.md`.
+modifiers, the probe auras, the scenarios without a result and the runs that did not pass. `verdicts.json` keeps every
+verdict with its interval, detail and explanation (schema 1) for `diff`. `questions.md` lists the checks that players on
+live must settle (see [Player question list](#player-question-list)). When the run holds stack verdicts, `compare` also
+writes `levers.md`.
 
 ### A full class run
 
@@ -984,12 +988,12 @@ A side without a measured value is never significant. When the values differ and
 has no interval on a side, the change is `not judged`: not significant, and listed like a significant one, never as
 moved inside the intervals. `impact.md`
 lists, with the unintended changes first, the significant and not judged changes, every status change and the added and
-removed labels; the moves inside the intervals with an unchanged status come last. Stamp 20261105-191313 compared twice gives no
-change; two runs of the 270 Templar scenarios on the same build (stamps 20261105-213612 with 20261105-213753, and
-20261105-214020) give no significant change, while without the roll spread the 26 rolled effect values were listed as
-significant; stamps 20261105-203950 (configurations c0 and c1) and 20261105-204050 (all eight) give nine moves inside the
-intervals, no significant change and 40 added verdicts (the report then opens with its warning: when more than half of
-the verdicts of a side have no counterpart, the keys probably changed or the runs cover other scenarios).
+removed labels; the moves inside the intervals with an unchanged status come last. Stamp 20261105-191313 compared twice
+gives no change; two runs of the 270 Templar scenarios on the same build (stamps 20261105-213612 with 20261105-213753,
+and 20261105-214020) give no significant change, while without the roll spread the 26 rolled effect values were listed
+as significant; stamps 20261105-203950 (configurations c0 and c1) and 20261105-204050 (all eight) give nine moves inside
+the intervals, no significant change and 40 added verdicts (the report then opens with its warning: when more than half
+of the verdicts of a side have no counterpart, the keys probably changed or the runs cover other scenarios).
 
 ### Coverage comparison
 
@@ -1064,10 +1068,11 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   time elapsed between the cast step and the measuring step: for every step after the cast up to the measurement,
   its `elapsed_ms` plus the run's `max_step_ms`; the `cast time` wait of a cast-time spell counts only its 500 ms
   margin plus `max_step_ms`, because the cooldown or aura starts when the cast completes. `CoAGameplayTest::Tick`
-  runs one step per world update (`Progress` calls `RunStep` once), a step's `elapsed_ms` is the game time from its start to its completion, and
-  `max_step_ms` is the largest update diff of the run (`docs/coa/verification.md`, fidelity limits: at most 25 ms
-  in a wait, 10 ms while polling). Measured on 2026-11-05 (stamp `20261105-181206`): cooldowns 6, 12 and 18 ms
-  below the record two, four and six steps after the cast, durations 12 and 15 ms below; W was 50 to 150 ms.
+  runs one step per world update (`Progress` calls `RunStep` once), a step's `elapsed_ms` is the game time from its
+  start to its completion, and `max_step_ms` is the largest update diff of the run (`docs/coa/verification.md`, fidelity
+  limits: at most 25 ms in a wait, 10 ms while polling). Measured on 2026-11-05 (stamp `20261105-181206`): cooldowns 6,
+  12 and 18 ms below the record two, four and six steps after the cast, durations 12 and 15 ms below; W was 50 to 150
+  ms.
 - Hit means (`hit_mean`, `melee_mean`): `measured_hit_model` recomputes the model from the run's stats, known auras
   and target; the measured mean of the non-critical, non-blocked hits must lie in `mean ± 2.576 x sigma / sqrt(n)`,
   n the usable hits. `tooltip_mean` is shown in the explanation only. The parts of a hit (same label) give one
@@ -1094,9 +1099,10 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   effect of aura 303 (damage against a target in aura state `EffectMiscValue`, Pious Sweep 520034 effect 0, state
   23) is `unmeasured`, since the scenario neither establishes nor measures that state on the dummy. The tooltip is
   then read again with the measured base stats; a token text absent from that reading is an alert. The token value
-  (times N for `$/N;`, except a `$/1000;sN sec` token of kind `duration_ms`, which the reader gives in ms) takes the sign of the effect's own points (`copysign`, own or shared token); for points
-  that scale with level, the sign rule of the token checks above. With v that signed value, the expected delta per
-  relation (readings, as R12/R14: agreeing readings give their status, disagreeing ones `ambiguous_tooltip`):
+  (times N for `$/N;`, except a `$/1000;sN sec` token of kind `duration_ms`, which the reader gives in ms) takes the
+  sign of the effect's own points (`copysign`, own or shared token); for points that scale with level, the sign rule of
+  the token checks above. With v that signed value, the expected delta per relation (readings, as R12/R14: agreeing
+  readings give their status, disagreeing ones `ambiguous_tooltip`):
 
   | Relation | Expected delta |
   |---|---|
@@ -1164,7 +1170,7 @@ Kinds, what gives them and what they ask:
   evidence (owner answer Q6); the number the live tooltip shows, with the player's attack and spell power.
 - `data_issue`: an `unreadable` value or hit whose entry holds a `$<name>` variable while the spell's
   `SpellDescriptionVariableID` is 0 (owner answer Q8); what the live tooltip shows in its place.
-- `server_behaviour`: an `alert` of a proc or trigger entry that has a class-file `question` (ruling R14); whether
+- `server_behaviour`: an `alert` of a proc or trigger entry that has a class-file `question`; whether
   live does what our server does.
 
 Every readings question also carries `conditions`, what our test did in player terms: the level, what was learned,

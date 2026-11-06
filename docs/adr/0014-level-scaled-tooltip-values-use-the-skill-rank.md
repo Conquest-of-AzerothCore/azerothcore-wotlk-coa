@@ -82,15 +82,16 @@ revision 8.
 
 ## Considered options
 
-1. Keep level-scaled values unreadable (ADR 0011 R6). Rejected: 28 entries stay unchecked, and R5 now gives the
-   scenarios measured skills.
+1. Keep level-scaled values unreadable (ADR 0011 R6). Rejected: 28 entries stay unchecked, and the base steps now
+   give the scenarios measured skills (Decision).
 2. The stock rule as the design first quoted it: the described spell's level for foreign spells, with no race and
    class filter. Rejected: the installed binaries contradict it. It reads Staffguard 706583 at the level of
    705295, which gives 305, while the CoA client shows 125. The server's applied amount also starts from 125:
    `AscensionTemplarAuras.cpp:60-63` sets it to 125 + 0.3 × Stamina + 0.25 × (dodge + parry rating). The 305 is
    `SpellEffectInfo::CalcValue`, read before that script.
-3. The installed-binary rule (findings above). Chosen (controller ruling R17). If it is wrong, the affected
-   checks (Reckoning, Staffguard, Untainted, Scarlet Hammer) alert rather than pass.
+3. The installed-binary rule (findings above). Chosen: the installed client binaries outrank the decompiled text
+   when they disagree. If it is wrong, the affected checks (Reckoning, Staffguard, Untainted, Scarlet Hammer) alert
+   rather than pass.
 
 ## Decision
 
@@ -104,10 +105,11 @@ revision 8.
   token whose spell has `AttributesEx2 & 0x1000000`: it uses the character level, capped at a positive `MaxLevel`.
 - A level-scaled entry stays unreadable, naming its field and the cause, in three cases: its skill line is not
   measured, the race or class is unknown, or several ability lines match. `$<id>pplN` stays unreadable and becomes
-  a `tooltip_value` player question (ADR 0011 rulings R3/Q6).
+  a `tooltip_value` player question: the number the live tooltip shows, with the player's attack and spell power
+  (owner answer Q6).
 - The base steps set every line in the class file's `skill_lines` to 5 × level with `set_skill`, then measure it
-  back with `skill_value` (owner answer Q4, ruling R5). The tooltip uses the measured value. `skill_lines` holds the
-  `SkillLineAbility` lines of the class spells plus the reference weapon's line (`class_skill_lines`).
+  back with `skill_value` (owner answer Q4: 300 at level 60). The tooltip uses the measured value. `skill_lines`
+  holds the `SkillLineAbility` lines of the class spells plus the reference weapon's line (`class_skill_lines`).
 
 ## Consequences
 
@@ -119,12 +121,12 @@ revision 8.
   572741 and Staffguard 705295 tooltips on a level-60 Templar with the Walking Stick: 166 + 0.175 × AP + 0.5 × STA
   and 125 + 0.3 × STA expected. The binaries are the CoA client release, not proven identical to Ascension live.
 - `spell_effect_value` reads `SpellEffectInfo::CalcValue`, before aura scripts. Every `effect_value` verdict
-  states this in `detail['scope']`: "CalcValue before aura scripts (CalcAmount hooks not covered)" (ruling R18). An
+  states this in `detail['scope']`: "CalcValue before aura scripts (CalcAmount hooks not covered)". An
   amount set by an AuraScript `CalcAmount` hook is not covered, so a passing value can still differ from the applied
   aura. The 28 newly judged level-scaled `effect_value` checks of the Templar (on 28 ranks) are among the 377
   `effect_value` checks the note covers. The probe's Staffguard alert (305 against 148.7) is such an artifact: it is
   not a server defect, and an `aura_amount` check on a present aura is the remedy.
-- Known divergence (ruling R19): the reader reads the client DBC, which is what players' tooltips show unless the
+- Known divergence, kept: the reader reads the client DBC, which is what players' tooltips show unless the
   client is patched. The server overrides Untainted 705298's description
   (`rev_20261029_240_templar_untainted_tooltip.sql`, `coa_client_spell_description`) to `${-$705299m1+$STA*0.1}`.
   The client DBC reads `${$705299m1+$STA*0.1}`.

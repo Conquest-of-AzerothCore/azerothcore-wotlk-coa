@@ -45,8 +45,8 @@ def templar_trigger(aura):
 def trigger_model(per_trigger=0.5, part=0, parts=1, baseline=BASELINE_ATTEMPTS, attempts=SCHEDULED):
     return {'part': part, 'parts': parts, 'scheduled_attempts': SCHEDULED, 'part_attempts': attempts,
             'baseline_attempts': baseline, 'minimum_trials': TRIGGER_TRIALS, 'per_trigger': per_trigger,
-            'trigger': {'action': 'cast', 'spell': ARGENT_BLADE, 'target': 'dummy'}, 'observe_spell': OATH_OF_RETRIBUTION,
-            'observe_metric': 'spell_cast_count', 'trial_metric': 'spell_cast_count', 'measurements': LABELS}
+            'trigger': {'action': 'cast', 'spell': ARGENT_BLADE, 'target': 'dummy'},
+            'observe_spell': OATH_OF_RETRIBUTION, 'observe_metric': 'spell_cast_count', 'trial_metric': 'spell_cast_count', 'measurements': LABELS}
 
 
 def trigger_expectation(**model):
