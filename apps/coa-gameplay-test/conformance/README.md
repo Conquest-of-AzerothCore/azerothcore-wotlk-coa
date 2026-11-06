@@ -889,9 +889,20 @@ triggers that proc), `expected`, `status` and, as they apply, `delta`, `measured
 `rate`, `low` and `high` (the 99% Wilson interval), `unit`. A proc reading predicts procs per trigger of the first
 reading (the trigger the player performs): with `d` the extra trials per proc that the reading counts, measured as
 (its trials - the first reading's trials) / procs, a chance `p` gives `p / (1 - d p)` (Scourgebane: 20% and 25% of auto
-attacks; Light's Echo 520017: 10% and 11.1% of casts). `observations` is the count of the player's triggers for which,
-whichever reading is true, its 99% interval excludes the other: `ceil(2.576^2 max(q(1 - q)) / (q1 - q2)^2)` over each
-pair (498 auto attacks for 20% against 25%, 5309 casts for 10% against 11.1%). In `compare.py`,
+attacks; Light's Echo 520017: 10% and 11.1% of casts). `observations` is the count at which the 99% ranges of the
+readings no longer overlap, the largest over each pair. For proc rates, in the player's triggers:
+`n = ceil((2.576 (s1 + s2) / (q2 - q1))^2)` with `s = sqrt(q (1 - q))` (1842 auto attacks for 20% against 25%, 20282
+casts for 10% against 11.1%). For hits, the readings are ratios `r` of two averages of `n` hits each (with and
+without the bonus, or critical against normal), whose relative spread is `c sqrt(2 / n)`, `c` the hit's standard
+deviation over its mean: `n = ceil(2 (2.576 c (r1 + r2) / (r2 - r1))^2)` hits each way, at least 1. `hit_spread`
+gives `c` from the client data of the measured spell: each school damage or heal effect rolls `EffectBasePoints` + 1
+to `EffectBasePoints` + `EffectDieSides` (variance `(EffectDieSides^2 - 1) / 12`), and weapon effects roll the class
+file weapon from `min_damage` to `max_damage` times their percent (variance `(percent (max - min))^2 / 12`), plus
+their flat points. The mean leaves out the attack power, spell power and per-level parts of the hit, so `c` and the
+count are upper bounds (Serendipity on Reckoning, 49 roll values on a mean of at least 190: at most about 5588 hits
+each way); a weapon count holds for the test weapon only, and a fixed amount needs about 1 hit. The `adds` meaning
+says whether the bonus then counts for more or less than `multiplies`, from the two numbers (more for Serendipity and
+Paladin Training, whose other modifier 887007 is -20%). In `compare.py`,
 `tooltip_value_question(spell_name, level, entry, description)` builds the `tooltip_value` detail of an entry with a
 `$<id>pplN` token, for any judge that reports one, and `data_issue_question(spell_name, entry, description)` the
 `data_issue` detail; `unreadable_question` chooses between them for the `unreadable: ` rules of value and hit

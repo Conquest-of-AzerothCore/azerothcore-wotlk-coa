@@ -5,7 +5,8 @@ import shutil
 import tempfile
 import unittest
 
-from compare import DbcTooltips, Verdict, compare, tooltip_value_question, write_outputs
+from compare import (DbcTooltips, Verdict, compare, comparison_word, hit_count, hit_spread, tooltip_value_question,
+                     write_outputs)
 from procs import PROC_CHECK, added_trials_label, proc_measurements, proc_status_expectation, wilson_interval
 from profile import DBC_DIR
 from questions import (DATA_ISSUE, QUESTIONS_FILE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE,
@@ -53,8 +54,8 @@ def class_fields():
     return fields
 
 
-def reader(*values, fields=None):
-    return FakeTooltips(values, fields={**class_fields(), **(fields or {})})
+def reader(*values, fields=None, points=None):
+    return FakeTooltips(values, points, fields={**class_fields(), **(fields or {})})
 
 
 def chance_reader():
@@ -62,7 +63,7 @@ def chance_reader():
 
 
 def observations(low, high):
-    return math.ceil(Z_99 ** 2 * max(low * (1 - low), high * (1 - high)) / (high - low) ** 2)
+    return math.ceil((Z_99 * (math.sqrt(low * (1 - low)) + math.sqrt(high * (1 - high))) / (high - low)) ** 2)
 
 
 def lights_echo_expectation(aura):
@@ -167,11 +168,11 @@ class QuestionTest(unittest.TestCase):
         self.assertIn('learned only Scourgebane and auto attacked a target dummy without using any ability',
                       conditions)
         self.assertIn('525 Scourgebane procs in 2554 auto attacks that hit, 20.56%', conditions)
-        self.assertEqual(item.observations, ((SCOURGEBANE, f'About {observations(0.2, 0.25)} auto attacks that hit '
-                                                           'tell 20.0% from 25.0% apart: whichever reading is true, '
-                                                           'the 99% interval of the counted rate then excludes the '
-                                                           'other.'),))
-        self.assertEqual(observations(0.2, 0.25), 498)
+        self.assertEqual(item.observations, ((SCOURGEBANE, f'About {observations(0.2, 0.25)} auto attacks that hit: '
+                                                           'at that count the 99% ranges of the readings (20.0% and '
+                                                           '25.0%) no longer overlap.'),))
+        self.assertEqual(observations(0.2, 0.25), 1842)
+        self.assertIn('Otherwise, count Scourgebane procs per auto attack that hits under', item.question)
 
     def test_text_question_uses_the_class_file(self):
         self.status_entry(PALADIN_TRAINING_PROC)
@@ -200,7 +201,7 @@ class QuestionTest(unittest.TestCase):
                       'test server 20.56%: does not match the test server', entry)
         self.assertTrue(any(line.startswith('How we tested: Our test: the level 60 test character learned only '
                                             'Scourgebane') for line in entry))
-        self.assertTrue(any(line.startswith('Observations needed: About 498 auto attacks that hit') for line in entry))
+        self.assertTrue(any(line.startswith('Observations needed: About 1842 auto attacks that hit') for line in entry))
         self.assertTrue(any(line.startswith('Question: With Scourgebane learned') for line in entry))
         self.assertNotIn('Never asked?', '\n'.join(lines))
         self.assertTrue(all(line.isascii() for line in lines))
@@ -230,6 +231,23 @@ class QuestionTest(unittest.TestCase):
         self.assertEqual(sum(line.startswith("## Light's Echo") for line in lines), 1)
         self.assertTrue(any(line.startswith('- 520883 player casts only') for line in lines))
         self.assertIn('How we tested:', lines)
+
+    def test_comparison_word_follows_the_numbers(self):
+        self.assertEqual([comparison_word(3.75, 3.0), comparison_word(2.5, 3.0), comparison_word(3.0, 3.0)],
+                         ['more', 'less', 'the same'])
+
+    def test_fixed_amount_needs_few_hits(self):
+        tooltips = reader(fields={(1001, 'Effect[0]'): 2}, points={(1001, 0): (99, 1)})
+        spread = hit_spread(tooltips, CLASS_FILE, 1001)
+        self.assertEqual((spread.sigma, spread.mean), (0.0, 100.0))
+        needed, text = hit_count(spread, [1.03, 1.0375], 'hits')
+        self.assertEqual(needed, 1)
+        self.assertIn('the client data gives a fixed amount', text)
+
+    def test_empty_tooltips_keep_their_own_entries(self):
+        verdicts = [Verdict(f'{spell} proc_rate', 'ambiguous_tooltip', None, None, None, None, 'unclear', 'key', spell,
+                            spell, PROC_CHECK) for spell in (1, 2)]
+        self.assertEqual([item.spells for item in questions(verdicts, reader())], [((1, '1'),), ((2, '2'),)])
 
     def test_undefined_variable_is_a_data_issue(self):
         verdict, = self.unreadable_verdicts(ARGENT_BLADE, 'Argent Blade', ARGENT_BLADE_ENTRY, reader())
@@ -266,7 +284,8 @@ class QuestionTest(unittest.TestCase):
         item, = questions(verdicts, reader())
         self.assertEqual((item.kind, item.question, item.measured),
                          (SERVER_BEHAVIOUR, templar_trigger(HEAVENS_FINEST)['question'], 150.0))
-        self.assertEqual(item.readings[0]['expects'], "273 casts of Heaven's Finest (805390) for 273 Argent Blade hits")
+        self.assertEqual(item.readings[0]['expects'],
+                         "273 applications of Heaven's Finest (805390) for 273 Argent Blade hits")
         write_outputs(manifest, results, verdicts, self.out, tooltips=reader())
         lines = (self.out / QUESTIONS_FILE).read_text(encoding='utf-8').splitlines()
         self.assertLess(lines.index('# Server behaviour to confirm'), lines.index("## Heaven's Finest (806516)"))
@@ -290,16 +309,27 @@ class QuestionTest(unittest.TestCase):
                                         steps=pass_steps(40, mean))
         tooltips = reader(Displayed('$s1', 20.0, 0, 'percent'),
                           fields={(520009, 'SpellName[enUS]'): 'Paladin Training',
-                                  (520009, 'Description[enUS]'): 'Increases the damage of Argent Blade by $s1%.'})
+                                  (520009, 'Description[enUS]'): 'Increases the damage of Argent Blade by $s1%.',
+                                  (ARGENT_BLADE, 'Effect[0]'): 121, (ARGENT_BLADE, 'Effect[1]'): 31},
+                          points={(ARGENT_BLADE, 0): (420, 1), (ARGENT_BLADE, 1): (214, 1)})
         verdict = next(verdict for verdict in self.verdicts(tooltips) if verdict.check == 'talent_delta')
         self.assertEqual(verdict.status, 'ambiguous_tooltip')
         self.assertEqual(verdict.detail['config'], PALADIN)
         item, = questions([verdict], tooltips)
         self.assertEqual([(reading['name'], reading['expected'], reading['status']) for reading in item.readings],
                          [('multiplies', 20.0, 'ok'), ('adds', 25.0, 'alert')])
-        self.assertIn('Argent Blade', item.question)
-        self.assertIn('20% or by 25%', item.question)
+        weapon = CLASS_FILE['weapon']
+        low, high = weapon['min_damage'], weapon['max_damage']
+        variation = (2.15 * (high - low) / math.sqrt(12)) / (2.15 * (low + high) / 2 + 421)
+        hits = math.ceil(2 * (Z_99 * variation * (1.2 + 1.25) / 0.05) ** 2)
+        self.assertIn(f'is a non-critical, unblocked Argent Blade hit 20% or 25% larger than without it? Record {hits} '
+                      f'non-critical, unblocked Argent Blade hits on the same target dummy without Paladin Training',
+                      item.question)
+        (_, observed), = item.observations
+        self.assertIn(f'About {hits} non-critical, unblocked Argent Blade hits each way', observed)
+        self.assertIn(f'with a weapon of {low:g} to {high:g} damage', observed)
         self.assertIn('CoA Aura - Templar Class 887007 (-20% damage)', item.readings[1]['meaning'])
+        self.assertIn('so it counts for more: the hit grows by 25% instead of 20%', item.readings[1]['meaning'])
         self.assertEqual(item.readings[1]['expects'], 'the Argent Blade hit +25%')
         (_, conditions), = item.conditions
         self.assertIn('Other percent modifiers of that hit on the test character: CoA Aura - Templar Class 887007 '

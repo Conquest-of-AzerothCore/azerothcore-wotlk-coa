@@ -1,6 +1,7 @@
 from dataclasses import asdict
 import hashlib
 import json
+import math
 from pathlib import Path
 import shutil
 import sys
@@ -484,7 +485,8 @@ class PassiveDeltaTest(unittest.TestCase):
     def tearDown(self):
         self.workspace.close()
 
-    def passive_run(self, rank, measured, tokens, aura='1', fields=None, name='Passive', **base_overrides):
+    def passive_run(self, rank, measured, tokens, aura='1', fields=None, name='Passive', points=None,
+                    **base_overrides):
         self.workspace.close()
         self.workspace = Workspace()
         steps = [step for entry, (before, after) in measured.items() if before is not None
@@ -493,7 +495,7 @@ class PassiveDeltaTest(unittest.TestCase):
         self.workspace.scenario(f'conformance-templar-passive-{rank}', 'passive', list(measured), [], steps,
                                 spell=rank, name=name, rank=rank)
         manifest, results = self.workspace.manifest(**base_overrides)
-        reader = FakeTooltips(tokens, fields={**SPELL_NAMES, **(fields or {})})
+        reader = FakeTooltips(tokens, points, fields={**SPELL_NAMES, **(fields or {})})
         return {verdict.label: verdict for verdict in compare(manifest, results, tooltips=reader,
                                                               hit_model=reference_hit)}
 
@@ -583,16 +585,27 @@ class PassiveDeltaTest(unittest.TestCase):
     def test_composition_with_known_modifier(self):
         entry = passive_expectation(SERENDIPITY, 0, 'spell_damage_done', 'composition', '$s1', 3.0, RECKONING,
                                     fields={'target': 'dummy'})
-        verdict = self.single(entry, '800', '824', [Displayed('$s1', 3.0, 0, 'percent')], name='Serendipity')
+        verdict = self.single(entry, '800', '824', [Displayed('$s1', 3.0, 0, 'percent')], name='Serendipity',
+                              fields={(RECKONING, 'Effect[0]'): 2}, points={(RECKONING, 0): (165, 49)})
         self.assertEqual(verdict.status, 'ambiguous_tooltip')
         readings = verdict.detail['question']['readings']
+        variation = math.sqrt((49 ** 2 - 1) / 12) / (165 + 25)
+        hits = math.ceil(2 * (2.576 * variation * (1.03 + 1.0375) / 0.0075) ** 2)
+        question = verdict.detail['question']
+        self.assertTrue(question['question'].startswith(
+            f'With Serendipity learned, is a hit of Reckoning +3% or +3.75% larger than without it? Record {hits} '
+            f'non-critical hits of Reckoning on the same target dummy without Serendipity and {hits} with it'))
+        self.assertTrue(question['observations'].startswith(
+            f'About {hits} non-critical hits each way: at that count the 99% ranges of the readings no longer '
+            f'overlap (the client data rolls the hit over 49 values'))
+        self.assertIn('so it counts for more: +3.75% instead of +3%', readings[1]['meaning'])
+        self.assertEqual(readings[1]['expects'], '+3.75% larger')
         self.assertEqual([(reading['name'], reading['status']) for reading in readings],
                          [('multiplies', 'ok'), ('adds', 'alert')])
         self.assertAlmostEqual(readings[0]['expected'], 824.0)
         self.assertAlmostEqual(readings[1]['expected'], 830.0)
         self.assertIn('887007 (-20% damage)', readings[1]['meaning'])
         self.assertIn('887007 (-20% damage)', verdict.detail['question']['conditions'])
-        self.assertEqual(readings[1]['expects'], '+3.75% (800 to 830 spell_damage_done)')
 
     def test_composition_without_the_known_aura_has_one_reading(self):
         entry = passive_expectation(SERENDIPITY, 0, 'spell_damage_done', 'composition', '$s1', 3.0, RECKONING,

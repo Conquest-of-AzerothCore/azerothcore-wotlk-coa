@@ -95,7 +95,8 @@ def questions(verdicts: list['Verdict'], tooltips: 'TooltipSource') -> list[Ques
             continue
         spell = spell_of(verdict)
         tooltip = description(tooltips, spell)
-        group = grouped.setdefault((tooltip, found['kind']), {'spells': {}, 'questions': [], 'readings': [],
+        key = (tooltip, found['kind']) if tooltip else (tooltip, found['kind'], spell)
+        group = grouped.setdefault(key, {'spells': {}, 'questions': [], 'readings': [],
                                                               'measured': [], 'conditions': [], 'observations': [],
                                                               'labels': []})
         group['spells'].setdefault(spell, spell_name(tooltips, spell))
@@ -110,7 +111,7 @@ def questions(verdicts: list['Verdict'], tooltips: 'TooltipSource') -> list[Ques
     return [Question(tooltip, tuple(sorted(group['spells'].items())), kind, '\n'.join(group['questions']),
                      tuple(group['readings']), group['measured'][0] if len(group['measured']) == 1 else None,
                      tuple(group['labels']), tuple(group['conditions']), tuple(group['observations']))
-            for (tooltip, kind), group in grouped.items()]
+            for (tooltip, kind, *_), group in grouped.items()]
 
 
 def fixed_values(tooltips: 'TooltipSource', spell_id: int) -> list[str]:
