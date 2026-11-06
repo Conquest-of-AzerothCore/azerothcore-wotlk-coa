@@ -1,0 +1,339 @@
+{
+  "schema": 1,
+  "name": "Black Market Artisan Supplies vendors stand on the ground and sell their recipes",
+  "contract": [
+    "The 22 Black Market vendors with a known position stand on the ground at their points.",
+    "Krenic 970040 opens a shop with his one recorded recipe, Fused Clear-Cut Chops 967336, at 10 gold."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -2118.68,
+    "y": -2026.28,
+    "z": 6.5,
+    "o": 3.14159
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "krenic",
+      "owner": "p",
+      "entry": 970040,
+      "faction": 35,
+      "level": 60,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask Krenic for his wares",
+      "actor": "p",
+      "opcode": 414,
+      "fields": [
+        {
+          "actor_guid": "krenic"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "His shop opens",
+      "actor": "p",
+      "metric": "vendor_list_packets",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: he sells one recipe",
+      "actor": "p",
+      "metric": "vendor_items",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Recipe: Fused Clear-Cut Chops for 10 gold",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 967336,
+      "equals": 100000
+    },
+    {
+      "action": "assert",
+      "label": "Vastrasz (970000, Wetlands) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": -4341.57,
+      "y": -3321.42,
+      "z": 231.64,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Vuye Pathfinder (970001, UngoroCrater) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 1,
+      "x": -7809.1,
+      "y": -2129.54,
+      "z": -238.84,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Simwenthi Boldaxe (970005, Stranglethorn) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": -11619.77,
+      "y": -63.4,
+      "z": 11.26,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Thanelam Fullstone (970006, SearingGorge) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": -6837.55,
+      "y": -1167.04,
+      "z": 241.24,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Apprentice Frieda (970007, Alterac) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": -100.47,
+      "y": 223.48,
+      "z": 55.15,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Nahiossi (970013, Barrens) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 1,
+      "x": -1819.54,
+      "y": -2454.13,
+      "z": 91.67,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Seterin the Slothful (970015, WesternPlaguelands) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": 2913.17,
+      "y": -1522.85,
+      "z": 146.34,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Grovewarden Wetheas (970017, Moonglade) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 1,
+      "x": 7921.57,
+      "y": -2636.55,
+      "z": 475.19,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Dazi (970018, UngoroCrater) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 1,
+      "x": -6107.85,
+      "y": -1140.8,
+      "z": -186.62,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Cilkeck Gadgetspring (970019, Aszhara) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 1,
+      "x": 2264.29,
+      "y": -5573.71,
+      "z": 21.15,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Zidormi (970022, WesternPlaguelands) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": 1450.37,
+      "y": -1280.39,
+      "z": 63.02,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Lydries Frostwind (970023, Winterspring) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 1,
+      "x": 8017.1,
+      "y": -3759.5,
+      "z": 718.02,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Xaarmu (970024, Winterspring) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 1,
+      "x": 5447.08,
+      "y": -4987.8,
+      "z": 907.34,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Oumorn Marbletale (970027, Silithus) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 1,
+      "x": -8022.45,
+      "y": 1087.79,
+      "z": 4.73,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Flette (970029, Barrens) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 1,
+      "x": -971.79,
+      "y": -3715.57,
+      "z": 5.89,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Rixka (970030, Dustwallow) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 1,
+      "x": -4629.65,
+      "y": -3169.97,
+      "z": 34.81,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Chumani Earthtalon (970031, Felwood) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 1,
+      "x": 4013.7,
+      "y": -1299.61,
+      "z": 254.22,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Cowardly Minion of Weavil (970034, Dustwallow) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 1,
+      "x": -2638.5,
+      "y": -5069.78,
+      "z": 21.64,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Assistant Lulitte (970036, StonetalonMountains) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 1,
+      "x": 875.12,
+      "y": 364.62,
+      "z": 23.19,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Shola (970038, Ashenvale) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 1,
+      "x": 1955.77,
+      "y": -2365.03,
+      "z": 93.11,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Aelsendra (970039, Badlands) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": -6787.64,
+      "y": -3620.94,
+      "z": 244.03,
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Krenic (970040, Arathi) stands on the ground",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": -2120.68,
+      "y": -2026.28,
+      "z": 6.24,
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}
