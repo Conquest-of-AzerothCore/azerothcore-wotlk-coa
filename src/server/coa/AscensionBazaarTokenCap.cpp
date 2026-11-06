@@ -41,22 +41,31 @@ uint32 WindowSeconds()
     return std::max<uint32>(1, sConfigMgr->GetOption<uint32>("CoA.BazaarTokens.HourlyCap.WindowSeconds", 3600));
 }
 
-Window& WindowRef(uint32 accountId)
+CharacterDatabasePreparedStatement* SelectWindow(uint32 accountId)
+{
+    auto* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_BAZAAR_TOKEN_HOURLY_CAP);
+    stmt->SetData(0, accountId);
+    return stmt;
+}
+
+Window ReadWindow(PreparedQueryResult const& result)
+{
+    if (!result)
+        return {};
+
+    return {uint32((*result)[0].Get<uint64>()), uint32((*result)[1].Get<uint64>()), 0};
+}
+
+Window& WindowRef(uint32 accountId, std::unique_lock<std::mutex>& lock)
 {
     auto itr = windows.find(accountId);
     if (itr != windows.end())
         return itr->second;
 
-    Window window;
-    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_BAZAAR_TOKEN_HOURLY_CAP);
-    stmt->SetData(0, accountId);
-    if (PreparedQueryResult result = CharacterDatabase.Query(stmt))
-    {
-        window.start = (*result)[0].Get<uint32>();
-        window.earned = (*result)[1].Get<uint32>();
-    }
-
-    return windows.emplace(accountId, window).first->second;
+    lock.unlock();
+    Window const window = ReadWindow(CharacterDatabase.Query(SelectWindow(accountId)));
+    lock.lock();
+    return windows.try_emplace(accountId, window).first->second;
 }
 
 void Write(CharacterDatabaseStatements statement, uint32 accountId, Window const& window)
@@ -95,6 +104,27 @@ uint32 AscensionBazaarTokenCap::GetCap()
     return sConfigMgr->GetOption<uint32>("CoA.BazaarTokens.HourlyCap.Amount", 0);
 }
 
+void AscensionBazaarTokenCap::WarmAccount(Player* player)
+{
+    WorldSession* session = player->GetSession();
+    uint32 const accountId = session->GetAccountId();
+    {
+        std::lock_guard<std::mutex> lock(capLock);
+        if (windows.contains(accountId))
+            return;
+    }
+
+    session->GetQueryProcessor().AddCallback(CharacterDatabase.AsyncQuery(SelectWindow(accountId))
+        .WithPreparedCallback([accountId](PreparedQueryResult result)
+        {
+            if (!result)
+                return;
+
+            std::lock_guard<std::mutex> lock(capLock);
+            windows.try_emplace(accountId, ReadWindow(result));
+        }));
+}
+
 uint32 AscensionBazaarTokenCap::Claim(Player* player, uint32 count)
 {
     uint32 const cap = GetCap();
@@ -107,8 +137,8 @@ uint32 AscensionBazaarTokenCap::Claim(Player* player, uint32 count)
     uint32 minutesLeft = 0;
     bool notify = false;
     {
-        std::lock_guard<std::mutex> guard(capLock);
-        Window& window = WindowRef(accountId);
+        std::unique_lock<std::mutex> guard(capLock);
+        Window& window = WindowRef(accountId, guard);
         if (Expired(window, now))
             window = Window{ now, 0, 0 };
 
@@ -150,8 +180,8 @@ std::string AscensionBazaarTokenCap::Describe(uint32 accountId)
         return "Bazaar Tokens have no hourly limit.";
 
     uint32 const now = Now();
-    std::lock_guard<std::mutex> guard(capLock);
-    Window const& window = WindowRef(accountId);
+    std::unique_lock<std::mutex> guard(capLock);
+    Window const& window = WindowRef(accountId, guard);
     if (Expired(window, now))
         return Acore::StringFormat("Bazaar Tokens this hour: 0 of {}. The hour starts with the next token earned.", cap);
 
@@ -162,8 +192,8 @@ std::string AscensionBazaarTokenCap::Describe(uint32 accountId)
 void AscensionBazaarTokenCap::Set(uint32 accountId, uint32 earned, uint32 secondsAgo)
 {
     uint32 const now = Now();
-    std::lock_guard<std::mutex> guard(capLock);
-    Window& window = WindowRef(accountId);
+    std::unique_lock<std::mutex> guard(capLock);
+    Window& window = WindowRef(accountId, guard);
     window = Window{ now - std::min(secondsAgo, now), earned, 0 };
     Overwrite(accountId, window);
 }
@@ -175,8 +205,8 @@ bool AscensionBazaarTokenCap::GetOpenWindow(uint32 accountId, uint32& remaining,
         return false;
 
     uint32 const now = Now();
-    std::lock_guard<std::mutex> guard(capLock);
-    Window const& window = WindowRef(accountId);
+    std::unique_lock<std::mutex> guard(capLock);
+    Window const& window = WindowRef(accountId, guard);
     if (Expired(window, now))
         return false;
 

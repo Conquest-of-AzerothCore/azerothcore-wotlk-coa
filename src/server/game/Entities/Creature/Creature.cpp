@@ -3442,6 +3442,13 @@ uint8 Creature::GetLootSkillLevelFor(Player const* looter) const
 
 uint8 Creature::getLevelForTarget(WorldObject const* target) const
 {
+    if (target)
+        if (Unit const* opponent = target->ToUnit())
+            if (Player const* viewer = opponent->GetCharmerOrOwnerPlayerOrPlayerItself())
+                if (LocalLevelScaling::PersonalInstanceScalingFor(FindMap(), viewer))
+                    if (uint8 const view = LocalLevelScaling::ViewLevelFor(viewer, this))
+                        return view;
+
     if (!isWorldBoss() || !target || !target->ToUnit())
     {
         // A character with open-world scaling on fights *their* version of this creature, and the
