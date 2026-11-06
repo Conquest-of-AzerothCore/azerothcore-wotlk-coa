@@ -610,9 +610,9 @@ Ascension.PrestigiousCache.TbcStages = 0
 #                     client lists Heroic and Mythic difficulties only once they are released.
 #                     Callboard Caches follow the same stages: only released caches are
 #                     earned, and a generic Callboard Cache resolves to a released tier.
-#                     Bloodforged world drops of a raid's gear wait until the stage after
-#                     that raid, so a raid's gear drops only inside it while it is the newest
-#                     released stage.
+#                     Bloodforged world drops of a raid's gear wait until the realm first
+#                     defeats that raid's final boss, Heroic Bloodforged copies until the first
+#                     kill on Heroic difficulty or higher, whatever the stage is.
 #                     Applied on .reload config; the client's difficulty list on next login.
 #        Default:     4
 
@@ -620,11 +620,12 @@ Ascension.CallboardCache.ReleaseStage = 4
 
 #
 #    Ascension.RaidRelease.AutoAdvance
-#        Description: Open the next raid when the realm defeats the final boss of the newest
-#                     released one: Hakkar (Zul'Gurub), Ragnaros (Molten Core), Onyxia,
-#                     Nefarian (Blackwing Lair) and C'Thun (Ahn'Qiraj). The defeated stage is
-#                     kept in the characters database and announced to the realm; the release
-#                     stage is the higher of it plus one and Ascension.CallboardCache.ReleaseStage.
+#        Description: Open the next raid when the realm first defeats a raid's final boss:
+#                     Hakkar opens Molten Core, Ragnaros Onyxia's Lair, Onyxia Blackwing Lair,
+#                     Nefarian Ahn'Qiraj and C'Thun Naxxramas. Every first kill and first Heroic
+#                     kill is kept in the characters database (world states 20121-20127) and
+#                     announced to the realm whether or not this is on; the release stage is the
+#                     higher of the stage opened by kills and Ascension.CallboardCache.ReleaseStage.
 #                     Kills by Game Masters do not count.
 #        Default:     0
 

@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionBloodforgedPolicy.h"
+#include "AscensionRaidGearData.h"
 #include "AscensionRaidReleasePolicy.h"
 #include "ConditionMgr.h"
 #include "Config.h"
@@ -34,13 +35,19 @@ namespace Bloodforged
 constexpr uint32 HighRiskAura = 1004019;
 using Pools = std::array<std::array<std::vector<uint32>, 3>, 61>;
 
+struct HeldGear
+{
+    uint32 mapId;
+    bool heroic;
+};
+
 struct Settings
 {
     std::array<Rates, 5> rates = DefaultRates;
     Pools pools;
-    std::unordered_map<uint32, uint32> raidStages;
+    std::unordered_map<uint32, HeldGear> raidGear;
     std::array<std::unique_ptr<LootTemplate>, 61> templates;
-    uint32 releasedStage = 0;
+    uint32 defeatVersion = 0;
     bool enabled = false;
 };
 
@@ -88,7 +95,12 @@ bool EligiblePlayer(Player const* player, Creature const* creature)
         && creature->GetLevel() > Acore::XP::GetGrayLevel(player->GetLevel());
 }
 
-void CollectLoot(LootStore const& store, uint32 lootId, uint32 stage, std::unordered_map<uint32, uint32>& raid,
+uint32 RaidMap(uint32 mapId)
+{
+    return RaidRelease::RaidLootStage(mapId) ? mapId : 0;
+}
+
+void CollectLoot(LootStore const& store, uint32 lootId, uint32 mapId, std::unordered_map<uint32, uint32>& raid,
     std::unordered_set<uint32>& outside)
 {
     LootTemplate const* loot = lootId ? store.GetLootFor(lootId) : nullptr;
@@ -98,57 +110,58 @@ void CollectLoot(LootStore const& store, uint32 lootId, uint32 stage, std::unord
     loot->CollectItems(items);
     for (LootStoreItem const* item : items)
     {
-        if (!stage)
-        {
+        if (!mapId)
             outside.insert(item->itemid);
-            continue;
-        }
-        auto [it, added] = raid.emplace(item->itemid, stage);
-        if (!added)
-            it->second = std::min(it->second, stage);
+        else
+            raid.emplace(item->itemid, mapId);
     }
 }
 
-std::unordered_map<uint32, uint32> RaidItemStages()
+std::unordered_map<uint32, uint32> RaidItemMaps()
 {
     std::set<std::pair<uint32, uint32>> creatureLoot, chestLoot;
     for (auto const& [spawnId, data] : sObjectMgr->GetAllCreatureData())
         if (CreatureTemplate const* creature = sObjectMgr->GetCreatureTemplate(data.id))
-            creatureLoot.emplace(RaidRelease::RaidLootStage(data.mapid), creature->lootid);
+            creatureLoot.emplace(RaidMap(data.mapid), creature->lootid);
     for (RaidSpawn const& spawn : ScriptedRaidCreatures)
         if (CreatureTemplate const* creature = sObjectMgr->GetCreatureTemplate(spawn.entry))
-            creatureLoot.emplace(RaidRelease::RaidLootStage(spawn.mapId), creature->lootid);
+            creatureLoot.emplace(spawn.mapId, creature->lootid);
     for (auto const& [spawnId, data] : sObjectMgr->GetAllGOData())
         if (GameObjectTemplate const* chest = sObjectMgr->GetGameObjectTemplate(data.id))
-            chestLoot.emplace(RaidRelease::RaidLootStage(data.mapid), chest->GetLootId());
+            chestLoot.emplace(RaidMap(data.mapid), chest->GetLootId());
     for (RaidSpawn const& spawn : ScriptedRaidChests)
         if (GameObjectTemplate const* chest = sObjectMgr->GetGameObjectTemplate(spawn.entry))
-            chestLoot.emplace(RaidRelease::RaidLootStage(spawn.mapId), chest->GetLootId());
+            chestLoot.emplace(spawn.mapId, chest->GetLootId());
 
     std::unordered_map<uint32, uint32> raid;
     std::unordered_set<uint32> outside;
-    for (auto const& [stage, lootId] : creatureLoot)
-        CollectLoot(LootTemplates_Creature, lootId, stage, raid, outside);
-    for (auto const& [stage, lootId] : chestLoot)
-        CollectLoot(LootTemplates_Gameobject, lootId, stage, raid, outside);
+    for (auto const& [mapId, lootId] : creatureLoot)
+        CollectLoot(LootTemplates_Creature, lootId, mapId, raid, outside);
+    for (auto const& [mapId, lootId] : chestLoot)
+        CollectLoot(LootTemplates_Gameobject, lootId, mapId, raid, outside);
     std::erase_if(raid, [&outside](auto const& item) { return outside.contains(item.first); });
+    for (RaidRelease::RaidGear const& gear : RaidRelease::RaidGearItems)
+        raid[gear.item] = gear.mapId;
     return raid;
 }
 
-uint32 RaidStage(uint32 entry, std::unordered_map<uint32, uint32> const& raidItems)
+bool FindHeldGear(uint32 entry, std::unordered_map<uint32, uint32> const& raidItems, HeldGear& held)
 {
     uint32 const base = entry % 100000;
     ItemTemplate const* item = sObjectMgr->GetItemTemplate(entry);
     ItemTemplate const* baseItem = base != entry ? sObjectMgr->GetItemTemplate(base) : nullptr;
     if (!item || !baseItem || item->Name1 != "Bloodforged " + baseItem->Name1)
-        return 0;
+        return false;
     auto it = raidItems.find(base);
-    return it == raidItems.end() ? 0 : it->second;
+    if (it == raidItems.end())
+        return false;
+    held = { it->second, entry / 100000 == 63 };
+    return true;
 }
 
-void BuildTemplates(Settings& next, uint32 releasedStage)
+void BuildTemplates(Settings& next, uint32 defeatVersion)
 {
-    next.releasedStage = releasedStage;
+    next.defeatVersion = defeatVersion;
     for (unsigned level = 15; level <= 60; ++level)
     {
         auto entriesForLevel = std::make_unique<LootTemplate>();
@@ -158,8 +171,9 @@ void BuildTemplates(Settings& next, uint32 releasedStage)
             std::vector<uint32> pool;
             for (uint32 entry : next.pools[level][index])
             {
-                auto it = next.raidStages.find(entry);
-                if (it == next.raidStages.end() || RaidRelease::IsRaidGearReleased(it->second, releasedStage))
+                auto it = next.raidGear.find(entry);
+                if (it == next.raidGear.end() || RaidRelease::IsBloodforgedReleased(
+                    RaidRelease::RaidDefeatLevel(it->second.mapId), it->second.heroic))
                     pool.push_back(entry);
             }
             if (!rate || pool.empty())
@@ -179,20 +193,20 @@ void BuildTemplates(Settings& next, uint32 releasedStage)
 std::shared_ptr<Settings const> CurrentSettings()
 {
     auto current = std::atomic_load(&settings);
-    uint32 const releasedStage = RaidRelease::ReleasedStage();
-    if (!current || !current->enabled || current->releasedStage == releasedStage)
+    uint32 const defeatVersion = RaidRelease::DefeatVersion();
+    if (!current || !current->enabled || current->defeatVersion == defeatVersion)
         return current;
 
     std::lock_guard<std::mutex> guard(rebuildLock);
     current = std::atomic_load(&settings);
-    if (!current->enabled || current->releasedStage == releasedStage)
+    if (!current->enabled || current->defeatVersion == defeatVersion)
         return current;
     auto next = std::make_shared<Settings>();
     next->rates = current->rates;
     next->pools = current->pools;
-    next->raidStages = current->raidStages;
+    next->raidGear = current->raidGear;
     next->enabled = true;
-    BuildTemplates(*next, releasedStage);
+    BuildTemplates(*next, defeatVersion);
     std::shared_ptr<Settings const> rebuilt = std::move(next);
     std::atomic_store(&settings, rebuilt);
     return rebuilt;
@@ -301,16 +315,16 @@ private:
                 LOG_ERROR("server.loading", "Bloodforged disabled: green/blue pool missing at level {}", level);
                 return;
             }
-        std::unordered_map<uint32, uint32> const raidItems = RaidItemStages();
+        std::unordered_map<uint32, uint32> const raidItems = RaidItemMaps();
         for (uint32 entry : entries)
-            if (uint32 stage = RaidStage(entry, raidItems))
-                next->raidStages.emplace(entry, stage);
+            if (HeldGear held; FindHeldGear(entry, raidItems, held))
+                next->raidGear.emplace(entry, held);
         next->pools = std::move(pools);
-        BuildTemplates(*next, RaidRelease::ReleasedStage());
+        BuildTemplates(*next, RaidRelease::DefeatVersion());
         next->enabled = true;
         std::atomic_store(&settings, std::shared_ptr<Settings const>(next));
         LOG_INFO("server.loading", "Bloodforged world drops ready: {} verified catalogue entries, {} raid items held "
-            "until their raid is defeated", entries.size(), next->raidStages.size());
+            "until their raid is defeated", entries.size(), next->raidGear.size());
     }
 };
 

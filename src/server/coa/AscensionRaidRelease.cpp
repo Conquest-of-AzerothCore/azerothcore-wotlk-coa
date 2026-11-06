@@ -8,6 +8,7 @@
 #include "DBCStructure.h"
 #include "Language.h"
 #include "Log.h"
+#include "Map.h"
 #include "Player.h"
 #include "PlayerScript.h"
 #include "ScriptMgr.h"
@@ -17,20 +18,28 @@
 
 namespace
 {
-constexpr uint32 WorldStateDefeatedStage = 20120;
-
 uint32 g_configuredStage = RaidRelease::StageMoltenCore;
 std::atomic<uint32> g_raidReleaseStage = RaidRelease::StageMoltenCore;
+std::atomic<uint32> g_defeatVersion = 0;
 bool g_autoAdvance = false;
 
-uint32 DefeatedStage()
+uint32 StoredDefeatLevel(RaidRelease::FinalBoss const& boss)
 {
-    return uint32(sWorldState->getWorldState(WorldStateDefeatedStage));
+    return uint32(sWorldState->getWorldState(boss.worldState));
+}
+
+uint32 UnlockedStage()
+{
+    uint32 unlocked = 0;
+    for (RaidRelease::FinalBoss const& boss : RaidRelease::FinalBosses)
+        if (boss.opensStage > unlocked && StoredDefeatLevel(boss) != RaidRelease::DefeatedNever)
+            unlocked = boss.opensStage;
+    return unlocked;
 }
 
 void RefreshReleasedStage()
 {
-    g_raidReleaseStage = g_autoAdvance ? RaidRelease::EffectiveStage(g_configuredStage, DefeatedStage())
+    g_raidReleaseStage = g_autoAdvance ? RaidRelease::EffectiveStage(g_configuredStage, UnlockedStage())
         : g_configuredStage;
 }
 
@@ -40,13 +49,28 @@ void LoadRaidReleaseStage()
         RaidRelease::StageMoltenCore);
     g_autoAdvance = sConfigMgr->GetOption<bool>("Ascension.RaidRelease.AutoAdvance", false);
     RefreshReleasedStage();
+    ++g_defeatVersion;
 }
 
-char const* RaidName(uint32 stage)
+char const* RaidName(uint32 mapId)
+{
+    switch (mapId)
+    {
+        case RaidRelease::MapZulGurub: return "Zul'Gurub";
+        case RaidRelease::MapMoltenCore: return "Molten Core";
+        case RaidRelease::MapOnyxiasLair: return "Onyxia's Lair";
+        case RaidRelease::MapBlackwingLair: return "Blackwing Lair";
+        case RaidRelease::MapRuinsOfAhnQiraj: return "Ruins of Ahn'Qiraj";
+        case RaidRelease::MapTempleOfAhnQiraj: return "Temple of Ahn'Qiraj";
+        case RaidRelease::MapNaxxramas: return "Naxxramas";
+        default: return "";
+    }
+}
+
+char const* StageName(uint32 stage)
 {
     switch (stage)
     {
-        case RaidRelease::StageZulGurub: return "Zul'Gurub";
         case RaidRelease::StageMoltenCore: return "Molten Core";
         case RaidRelease::StageOnyxiasLair: return "Onyxia's Lair";
         case RaidRelease::StageBlackwingLair: return "Blackwing Lair";
@@ -58,24 +82,33 @@ char const* RaidName(uint32 stage)
 
 void RecordFinalBossKill(Player* killer, Creature* killed)
 {
-    if (!g_autoAdvance || !killer || !killed || killer->IsGameMaster())
+    if (!killer || !killed || killer->IsGameMaster() || !killed->GetMap())
         return;
-    uint32 const defeated = DefeatedStage();
-    if (!RaidRelease::AdvancesStage(killed->GetEntry(), g_raidReleaseStage, defeated))
+    RaidRelease::FinalBoss const* boss = RaidRelease::FindFinalBoss(killed->GetEntry());
+    if (!boss || boss->mapId != killed->GetMapId())
         return;
 
-    uint32 const stage = RaidRelease::DefeatedStage(killed->GetEntry());
-    uint32 const previous = g_raidReleaseStage;
-    sWorldState->setWorldState(WorldStateDefeatedStage, stage);
+    uint32 const previous = StoredDefeatLevel(*boss);
+    uint32 const level = RaidRelease::DefeatLevel(uint32(killed->GetMap()->GetSpawnMode()));
+    if (level <= previous)
+        return;
+
+    uint32 const previousStage = g_raidReleaseStage;
+    sWorldState->setWorldState(boss->worldState, level);
     RefreshReleasedStage();
-    LOG_INFO("scripts", "Raid release: {} defeated by {}'s group, release stage {} -> {}",
-        RaidName(stage), killer->GetName(), previous, g_raidReleaseStage.load());
+    ++g_defeatVersion;
+    LOG_INFO("scripts", "Raid release: {} first defeated at level {} by {}'s group, release stage {} -> {}",
+        RaidName(boss->mapId), level, killer->GetName(), previousStage, g_raidReleaseStage.load());
 
-    if (g_raidReleaseStage > previous)
-        ChatHandler(nullptr).SendWorldText("|cffff8000{} has been defeated! {} is now open.|r", RaidName(stage),
-            RaidName(g_raidReleaseStage.load()));
-    else
-        ChatHandler(nullptr).SendWorldText("|cffff8000{} has been defeated!|r", RaidName(stage));
+    if (previous == RaidRelease::DefeatedNever && g_raidReleaseStage > previousStage)
+        ChatHandler(nullptr).SendWorldText("|cffff8000{} has been defeated for the first time! {} is now open.|r",
+            RaidName(boss->mapId), StageName(g_raidReleaseStage.load()));
+    else if (previous == RaidRelease::DefeatedNever)
+        ChatHandler(nullptr).SendWorldText("|cffff8000{} has been defeated for the first time!|r",
+            RaidName(boss->mapId));
+    if (level == RaidRelease::DefeatedHeroic)
+        ChatHandler(nullptr).SendWorldText("|cffff8000{} has been defeated on Heroic difficulty for the first time!|r",
+            RaidName(boss->mapId));
 }
 
 class ascension_raid_release_config : public WorldScript
@@ -136,6 +169,17 @@ public:
 std::uint32_t RaidRelease::ReleasedStage()
 {
     return g_raidReleaseStage;
+}
+
+std::uint32_t RaidRelease::RaidDefeatLevel(std::uint32_t mapId)
+{
+    FinalBoss const* boss = FinalBossOfMap(mapId);
+    return boss ? StoredDefeatLevel(*boss) : DefeatedNever;
+}
+
+std::uint32_t RaidRelease::DefeatVersion()
+{
+    return g_defeatVersion;
 }
 
 void AddSC_AscensionRaidRelease()

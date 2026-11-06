@@ -101,30 +101,36 @@ int main()
     uint32 const dungeons[] = {{{dungeons}}};
     Hook hook;
     static_assert(RaidRelease::AllReleased == 8);
-    static_assert(RaidRelease::DefeatedStage(14834) == RaidRelease::StageZulGurub);
-    static_assert(RaidRelease::DefeatedStage(11502) == RaidRelease::StageMoltenCore);
-    static_assert(RaidRelease::DefeatedStage(10184) == RaidRelease::StageOnyxiasLair);
-    static_assert(RaidRelease::DefeatedStage(11583) == RaidRelease::StageBlackwingLair);
-    static_assert(RaidRelease::DefeatedStage(15727) == RaidRelease::StageAhnQiraj);
-    static_assert(RaidRelease::DefeatedStage(15339) == 0 && RaidRelease::DefeatedStage(15990) == 0);
+    static_assert(RaidRelease::FindFinalBoss(14834)->mapId == 309);
+    static_assert(RaidRelease::FindFinalBoss(14834)->opensStage == RaidRelease::StageMoltenCore);
+    static_assert(RaidRelease::FindFinalBoss(11502)->opensStage == RaidRelease::StageOnyxiasLair);
+    static_assert(RaidRelease::FindFinalBoss(10184)->opensStage == RaidRelease::StageBlackwingLair);
+    static_assert(RaidRelease::FindFinalBoss(11583)->opensStage == RaidRelease::StageAhnQiraj);
+    static_assert(RaidRelease::FindFinalBoss(15339)->mapId == 509 && !RaidRelease::FindFinalBoss(15339)->opensStage);
+    static_assert(RaidRelease::FindFinalBoss(15727)->opensStage == RaidRelease::StageNaxxramas);
+    static_assert(RaidRelease::FindFinalBoss(15990)->mapId == 533);
+    static_assert(!RaidRelease::FindFinalBoss(15589) && !RaidRelease::FinalBossOfMap(36));
+    static_assert(RaidRelease::FinalBossOfMap(531)->creatureEntry == 15727);
+    for (RaidRelease::FinalBoss const& boss : RaidRelease::FinalBosses)
+        for (RaidRelease::FinalBoss const& other : RaidRelease::FinalBosses)
+            assert(&boss == &other || (boss.worldState != other.worldState && boss.mapId != other.mapId));
+    static_assert(RaidRelease::DefeatLevel(0) == RaidRelease::DefeatedNormal);
+    static_assert(RaidRelease::DefeatLevel(1) == RaidRelease::DefeatedHeroic);
+    static_assert(RaidRelease::DefeatLevel(3) == RaidRelease::DefeatedHeroic);
+    static_assert(!RaidRelease::IsBloodforgedReleased(RaidRelease::DefeatedNever, false));
+    static_assert(!RaidRelease::IsBloodforgedReleased(RaidRelease::DefeatedNever, true));
+    static_assert(RaidRelease::IsBloodforgedReleased(RaidRelease::DefeatedNormal, false));
+    static_assert(!RaidRelease::IsBloodforgedReleased(RaidRelease::DefeatedNormal, true));
+    static_assert(RaidRelease::IsBloodforgedReleased(RaidRelease::DefeatedHeroic, false));
+    static_assert(RaidRelease::IsBloodforgedReleased(RaidRelease::DefeatedHeroic, true));
     static_assert(RaidRelease::EffectiveStage(RaidRelease::StageHeroicDungeons, 0) == RaidRelease::StageHeroicDungeons);
-    static_assert(RaidRelease::EffectiveStage(RaidRelease::StageZulGurub, RaidRelease::StageZulGurub)
+    static_assert(RaidRelease::EffectiveStage(RaidRelease::StageZulGurub, RaidRelease::StageMoltenCore)
         == RaidRelease::StageMoltenCore);
-    static_assert(RaidRelease::EffectiveStage(RaidRelease::StageBlackwingLair, RaidRelease::StageZulGurub)
+    static_assert(RaidRelease::EffectiveStage(RaidRelease::StageBlackwingLair, RaidRelease::StageMoltenCore)
         == RaidRelease::StageBlackwingLair);
-    static_assert(RaidRelease::EffectiveStage(0, RaidRelease::StageAhnQiraj) == RaidRelease::StageNaxxramas);
-    static_assert(!RaidRelease::AdvancesStage(14834, RaidRelease::StageHeroicDungeons, 0));
-    static_assert(RaidRelease::AdvancesStage(14834, RaidRelease::StageZulGurub, 0));
-    static_assert(!RaidRelease::AdvancesStage(14834, RaidRelease::StageMoltenCore, RaidRelease::StageZulGurub));
-    static_assert(!RaidRelease::AdvancesStage(11502, RaidRelease::StageZulGurub, 0));
-    static_assert(RaidRelease::AdvancesStage(10184, RaidRelease::StageBlackwingLair, RaidRelease::StageZulGurub));
     static_assert(RaidRelease::RaidLootStage(309) == RaidRelease::StageZulGurub);
     static_assert(RaidRelease::RaidLootStage(533) == RaidRelease::StageNaxxramas);
     static_assert(RaidRelease::RaidLootStage(36) == 0);
-    for (uint32 raidStage = RaidRelease::StageZulGurub; raidStage <= RaidRelease::AllReleased; ++raidStage)
-        for (uint32 stage = 0; stage <= 10; ++stage)
-            assert(RaidRelease::IsRaidGearReleased(raidStage, stage) == (raidStage < stage));
-    assert(RaidRelease::IsRaidGearReleased(0, 0));
     for (uint32 stage = 0; stage <= 10; ++stage)
     {{
         g_raidReleaseStage = stage;
@@ -185,6 +191,11 @@ def main():
     assert '"Ascension.RaidRelease.AutoAdvance"' in source
     assert 'PLAYERHOOK_ON_CREATURE_KILL' in source and 'PLAYERHOOK_ON_CREATURE_KILLED_BY_PET' in source
     assert 'killer->IsGameMaster()' in source
+    assert 'GetSpawnMode()' in source
+    gear = (ROOT / 'src/server/coa/AscensionRaidGearData.h').read_text(encoding='utf-8')
+    for item, map_id in ((19866, 309), (17076, 409), (18549, 249), (19366, 469), (21392, 509), (21242, 531),
+                         (22812, 533)):
+        assert f'{{ {item}, {map_id} }}' in gear, item
     assert 'Ascension.RaidLock' not in config
     with tempfile.TemporaryDirectory(prefix='coa-raid-release-') as directory:
         out = Path(directory)
@@ -195,8 +206,8 @@ def main():
     print('PASS: Heroic and Mythic dungeon difficulties and the Classic raids open in release-stage order (Zul\'Gurub '
           'before Molten Core), each stage keeps the earlier ones open, closed content refuses entry and login with '
           '"Instance is closed", normal dungeons, Wrath Naxxramas and other maps stay open, the default opens up to '
-          'Molten Core, a final boss kill opens the next raid only while its raid is the newest released one, and a '
-          'raid\'s gear is released outside it from the following stage on')
+          'Molten Core, a final boss kill opens the next raid, and a raid\'s Bloodforged gear waits for its first kill '
+          'and its Heroic Bloodforged gear for its first Heroic kill')
 
 
 if __name__ == '__main__':
