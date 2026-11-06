@@ -1649,6 +1649,7 @@ private:
     PlayerClassInfo* _playerClassInfo[MAX_CLASSES];
 
     void BuildPlayerLevelInfo(uint8 race, uint8 class_, uint8 level, PlayerLevelInfo* plinfo) const;
+    void LoadAscensionRaceClassStats();
 
     std::vector<std::vector<PlayerInfo*>> _playerInfo;
 
