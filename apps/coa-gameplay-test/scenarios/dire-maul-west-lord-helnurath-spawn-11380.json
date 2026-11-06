@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Dire Maul West has Lord Hel'nurath and his two Dread Guards at the circle before Immol'thar",
+  "contract": [
+    "On Ascension Lord Hel'nurath (14506) stands with two Dread Guards (14483) at the summoning circle by the Arcane",
+    "Torrent, before Immol'thar. Each of them exists once there in a Dire Maul West instance."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
+  "players": [
+    { "id": "player", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_phase", "actor": "player", "value": 1 },
+    { "action": "teleport", "actor": "player", "map": 429, "x": -40.0, "y": 700.0, "z": -24.4, "o": 0.0 },
+    { "action": "assert", "label": "CONTROL: player is in Dire Maul", "actor": "player", "metric": "map_id", "equals": 429,
+      "within_ms": 15000 },
+    { "action": "assert", "label": "CONTROL: the Arcane Torrent stands nearby", "actor": "player", "metric": "nearby_creature_count",
+      "entry": 14399, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "Lord Hel'nurath stands at the circle", "actor": "player", "metric": "nearby_creature_count",
+      "entry": 14506, "equals": 1 },
+    { "action": "assert", "label": "Two Dread Guards stand with him", "actor": "player", "metric": "nearby_creature_count",
+      "entry": 14483, "equals": 2 }
+  ]
+}
