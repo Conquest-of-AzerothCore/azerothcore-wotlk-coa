@@ -20,9 +20,9 @@
   ],
   "steps": [
     {"action": "wait", "ms": 2000},
-    {"action": "set_aura", "actor": "hero", "owned_entry": 116, "spell": 80046, "stacks": 1},
-    {"action": "set_aura", "actor": "hero", "owned_entry": 94, "spell": 80046, "stacks": 1},
-    {"action": "set_aura", "actor": "hero", "owned_entry": 38, "spell": 80046, "stacks": 1},
+    {"action": "set_aura", "actor": "hero", "target": "first", "spell": 80046, "stacks": 1},
+    {"action": "set_aura", "actor": "hero", "target": "second", "spell": 80046, "stacks": 1},
+    {"action": "set_aura", "actor": "hero", "target": "lone", "spell": 80046, "stacks": 1},
     {"action": "wait", "ms": 3000},
     {"action": "assert", "label": "CONTROL: the lone enemy carries the Horde affix", "actor": "lone", "metric": "aura",
      "spell": 80046, "equals": 1},
