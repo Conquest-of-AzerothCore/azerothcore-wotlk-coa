@@ -5196,6 +5196,17 @@ private:
         }
         if (metric == "item_count")
         {
+            if (auto items = step.get_child_optional("items"))
+            {
+                uint32 total = 0;
+                for (auto const& [key, entry] : *items)
+                {
+                    uint32 const item = entry.get_value<uint32>();
+                    Require(sObjectMgr->GetItemTemplate(item) != nullptr, "Unknown item in metric");
+                    total += player->GetItemCount(item);
+                }
+                return total;
+            }
             uint32 item = step.get<uint32>("item");
             Require(sObjectMgr->GetItemTemplate(item) != nullptr, "Unknown item in metric");
             return player->GetItemCount(item);
