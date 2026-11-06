@@ -36,6 +36,8 @@ AMPLITUDE_LETTERS = 'tT'
 FIRST_PROC_FLAG = 1
 FIRST_PROC_FLAG_PERIOD_MS = 5000
 HASTED_PERIOD_ATTRIBUTE_EX5 = 0x2000
+UNHASTED_PERIOD_ATTRIBUTE_EX3 = 0x20000000
+TICKING_AURAS = frozenset({3, 8, 20, 21, 23, 24, 48, 53, 62, 64, 89, 162, 226, 227})
 PER_TICK = 'tick'
 OVER_TICKS = 'total'
 MIXED_PERIOD = 'mixed'
@@ -190,14 +192,16 @@ class Records:
             raise Unreadable
         return float(duration)
 
-    def amplitude_ms(self, spell_id: int, effect: int) -> float:
+    def amplitude_ms(self, spell_id: int, effect: int, shown_as_text: bool = False) -> float:
         if self.field('Spell', spell_id, 'ProcFlags') & FIRST_PROC_FLAG:
             return float(FIRST_PROC_FLAG_PERIOD_MS)
-        if self.field('Spell', spell_id, 'AttributesEx5') & HASTED_PERIOD_ATTRIBUTE_EX5:
-            raise Unreadable(f'AttributesEx5 0x2000 of spell {spell_id}: the client hastes the period')
+        if (shown_as_text and self.field('Spell', spell_id, 'AttributesEx5') & HASTED_PERIOD_ATTRIBUTE_EX5
+                and not self.field('Spell', spell_id, 'AttributesEx3') & UNHASTED_PERIOD_ATTRIBUTE_EX3):
+            raise Unreadable(f'AttributesEx5 0x2000 of spell {spell_id}: the client hastes the shown period by the '
+                             f'cast speed, which is not measured')
         amplitude = self.field('Spell', spell_id, f'EffectAmplitude[{effect}]')
         if amplitude <= 0:
-            raise Unreadable
+            raise Unreadable(f'EffectAmplitude[{effect}] {amplitude} of spell {spell_id}')
         return float(amplitude)
 
     def radius(self, spell_id: int, effect: int) -> float:
@@ -319,8 +323,8 @@ class ScaledPeriod(Records):
         duration = super().duration_ms(spell_id)
         return duration * self.duration_factor if spell_id == self.period[0] else duration
 
-    def amplitude_ms(self, spell_id: int, effect: int) -> float:
-        amplitude = super().amplitude_ms(spell_id, effect)
+    def amplitude_ms(self, spell_id: int, effect: int, shown_as_text: bool = False) -> float:
+        amplitude = super().amplitude_ms(spell_id, effect, shown_as_text)
         return amplitude * self.amplitude_factor if (spell_id, effect) == self.period else amplitude
 
 
@@ -571,7 +575,8 @@ class Tooltip:
         if letter in 'aA' and digit and digit in EFFECT_DIGITS:
             return self.records.radius(spell_id, int(digit) - 1), None, 'flat', None
         if letter in AMPLITUDE_LETTERS and digit and digit in EFFECT_DIGITS:
-            return self.records.amplitude_ms(spell_id, int(digit) - 1), None, 'duration_ms', None
+            amplitude = self.records.amplitude_ms(spell_id, int(digit) - 1, shown_as_text=True)
+            return amplitude, None, 'duration_ms', None
         if digit:
             raise Unreadable
         if letter in 'hH':
@@ -691,13 +696,16 @@ def period_reading(records: Records, spell_id: int, caster: CasterStats, shown: 
             raise Unreadable(f'{shown.text} is unreadable with a scaled duration or period')
         return values[0].value
 
-    longer, slower = reread(PERIOD_PROBE_FACTOR, 1), reread(1, PERIOD_PROBE_FACTOR)
-    if math.isclose(longer, shown.value) and math.isclose(slower, shown.value):
+    alone, longer, slower = reread(1, 1), reread(PERIOD_PROBE_FACTOR, 1), reread(1, PERIOD_PROBE_FACTOR)
+    if math.isclose(longer, alone) and math.isclose(slower, alone):
         return PER_TICK
-    if (math.isclose(longer, shown.value * PERIOD_PROBE_FACTOR)
-            and math.isclose(slower, shown.value / PERIOD_PROBE_FACTOR)):
+    if math.isclose(longer, alone * PERIOD_PROBE_FACTOR) and math.isclose(slower, alone / PERIOD_PROBE_FACTOR):
         return OVER_TICKS
     return MIXED_PERIOD
+
+
+def mixed_period_reason(text: str, effect: int) -> str:
+    return f'{text} changes with the duration or the period of effect {effect} without being a total over its ticks'
 
 
 def read_tooltip(dbc: DataSet, spell_id: int, caster: CasterStats) -> Readout:

@@ -4,8 +4,8 @@ import struct
 import tempfile
 import unittest
 
-from tooltip import (MAX_EXPANSION_DEPTH, CasterStats, DataSet, Displayed, ForcedPoints, Records, Tooltip,
-                     client_spell_level, read_tooltip, weapon_skill_spells)
+from tooltip import (MAX_EXPANSION_DEPTH, PER_TICK, CasterStats, DataSet, Displayed, ForcedPoints, Records, Tooltip,
+                     client_spell_level, period_reading, read_tooltip, weapon_skill_spells)
 import schemas
 
 DBC_DIR = Path('/srv/coa/server-data/dbc')
@@ -374,6 +374,13 @@ FIXTURE_SPELLS = {
          'DurationIndex': 1},
     41: {'Description[enUS]': 'Every $t1 sec, ${$T1}.', 'EffectAmplitude[0]': 2000, 'ProcFlags': 1},
     42: {'Description[enUS]': 'Every $t1 sec, ${$T1}.', 'EffectAmplitude[0]': 2000, 'AttributesEx5': 0x2000},
+    43: {'Description[enUS]': 'Acts over a $/1000;s1 sec shorter period.', 'Effect[0]': 6,
+         'EffectApplyAuraName[0]': 107, 'EffectAmplitude[0]': 1500, 'EffectBasePoints[0]': -1001,
+         'EffectDieSides[0]': 1},
+    44: {'Description[enUS]': 'Burns for $/1000;s1 sec, every $t1 sec.', 'Effect[0]': 6, 'EffectApplyAuraName[0]': 3,
+         'EffectAmplitude[0]': 1000, 'EffectBasePoints[0]': 1999, 'EffectDieSides[0]': 1, 'DurationIndex': 1},
+    45: {'Description[enUS]': 'Every $t1 sec.', 'EffectAmplitude[0]': 2000, 'AttributesEx5': 0x2000,
+         'AttributesEx3': 0x20000000},
 }
 FIXTURE_VARIABLES = {
     1: '$bonus=${$m1*2+$PL}\r\n',
@@ -419,7 +426,8 @@ class FixtureTooltipTest(unittest.TestCase):
         readout = read_tooltip(self.dbc, 12, FIXTURE_CASTER)
         self.assertEqual(readout.values, [])
         self.assertEqual(readout.unreadable, [
-            '$s1', '${$s1*2}', '${$AP^2}', '${$ap*2}', '${$BH*1}', '$t1', '$lpoint:points;',
+            '$s1', '${$s1*2}', '${$AP^2}', '${$ap*2}', '${$BH*1}', '$t1 [EffectAmplitude[0] 0 of spell 12]',
+            '$lpoint:points;',
             '|TInterface\\Icons\\X:0|t', '@ext:Scales with Spirit:ext@', '$<odd>', '$<missing>'])
 
     def test_amplitude_of_the_named_effect_in_text_and_in_expressions(self):
@@ -431,11 +439,21 @@ class FixtureTooltipTest(unittest.TestCase):
         readout = read_tooltip(self.dbc, 41, FIXTURE_CASTER)
         self.assertEqual([value.value for value in readout.values], [5000, 5000])
 
-    def test_a_period_the_client_hastes_is_unreadable(self):
+    def test_only_the_shown_period_the_client_hastes_is_unreadable(self):
         readout = read_tooltip(self.dbc, 42, FIXTURE_CASTER)
-        self.assertEqual(readout.values, [])
-        reason = ' [AttributesEx5 0x2000 of spell 42: the client hastes the period]'
-        self.assertEqual(readout.unreadable, ['$t1' + reason, '${$T1}' + reason])
+        self.assertEqual(readout.values, [Displayed('${$T1}', 2000, None, 'flat')])
+        self.assertEqual(readout.unreadable, ['$t1 [AttributesEx5 0x2000 of spell 42: the client hastes the shown '
+                                              'period by the cast speed, which is not measured]'])
+
+    def test_the_haste_exemption_keeps_the_shown_period_readable(self):
+        readout = read_tooltip(self.dbc, 45, FIXTURE_CASTER)
+        self.assertEqual(readout.values, [Displayed('$t1', 2000, None, 'duration_ms')])
+
+    def test_a_token_read_with_its_following_text_is_one_tick(self):
+        readout = read_tooltip(self.dbc, 44, FIXTURE_CASTER)
+        seconds = readout.values[0]
+        self.assertEqual(seconds, Displayed('$/1000;s1', 2000, 0, 'duration_ms', 44))
+        self.assertEqual(period_reading(Records(self.dbc), 44, FIXTURE_CASTER, seconds, 0), PER_TICK)
 
     def test_references_to_other_spells_have_no_effect_index(self):
         readout = read_tooltip(self.dbc, 13, FIXTURE_CASTER)

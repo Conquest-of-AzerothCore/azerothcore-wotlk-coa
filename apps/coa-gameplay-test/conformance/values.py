@@ -6,8 +6,8 @@ import re
 from classes import PASSIVE_ATTRIBUTE, ClassSpell, DataSet
 from profile import (CASTER, DBC_DIR, EQUIP_FIELDS, armed, base_steps, character_of, known_aura_label, measurement,
                      player_fixture, skill_target)
-from tooltip import (MIXED_PERIOD, OVER_TICKS, CasterStats, Displayed, Records, Unreadable, period_reading,
-                     read_tooltip)
+from tooltip import (MIXED_PERIOD, OVER_TICKS, TICKING_AURAS, CasterStats, Displayed, Records, Unreadable,
+                     mixed_period_reason, period_reading, read_tooltip)
 
 CHECKS = ('effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'spell_duration', 'power_cost',
           'cooldown_ms', 'known_aura')
@@ -162,9 +162,10 @@ def foreign_duration(rank_id: int, shown: Displayed) -> int | None:
     return foreign_counter(OWN_DURATION, rank_id, shown)
 
 
-def periodic_reason(records: Records, rank_id: int, caster: CasterStats, facts: RankFacts, shown: Displayed) -> str:
+def periodic_reason(records: Records, rank_id: int, caster: CasterStats, shown: Displayed) -> str:
     effect = shown.effect_index
-    if not facts.aura_names[effect] or records.field('Spell', rank_id, f'EffectAmplitude[{effect}]') <= 0:
+    aura = records.field('Spell', rank_id, f'EffectApplyAuraName[{effect}]')
+    if aura not in TICKING_AURAS or records.field('Spell', rank_id, f'EffectAmplitude[{effect}]') <= 0:
         return ''
     try:
         reading = period_reading(records, rank_id, caster, shown, effect)
@@ -173,8 +174,7 @@ def periodic_reason(records: Records, rank_id: int, caster: CasterStats, facts: 
     if reading == OVER_TICKS:
         return f'a total over the ticks of periodic effect {effect}; the hit scenario judges one tick'
     if reading == MIXED_PERIOD:
-        return (f'{shown.text} changes with the duration or the period of effect {effect} without being a total over '
-                f'its ticks')
+        return mixed_period_reason(shown.text, effect)
     return ''
 
 
@@ -218,7 +218,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
 
     for ordinal, shown in enumerate(readout.values):
         effect = shown.effect_index
-        periodic = periodic_reason(records, rank_id, caster, facts, shown) if effect is not None else ''
+        periodic = periodic_reason(records, rank_id, caster, shown) if effect is not None else ''
         if periodic:
             expect(f'{rank_id} effect_value #{ordinal}', 'effect_value', effect, shown.text, UNMEASURABLE + periodic)
             continue

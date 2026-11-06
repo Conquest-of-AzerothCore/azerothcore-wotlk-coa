@@ -9,7 +9,7 @@ from classes import class_spells
 from profile import CLASSES_DIR, armed, base_steps, caster_stats_from, load_class_file, skill_label, unfit_reason
 from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, write_fixture
 from tooltip import CasterStats, DataSet, Records, read_tooltip
-from values import CHECKS, UNMEASURABLE, UNREADABLE, Expectation, foreign_effect, value_scenario
+from values import CHECKS, UNMEASURABLE, UNREADABLE, Expectation, foreign_effect, periodic_reason, value_scenario
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -58,9 +58,13 @@ SACRED_OATH = 712346
 GLORY = 801481
 DOWNFALL = 801482
 REDEMPTION = 801483
+RIGHTEOUS_TEMPEST = 805409
+RIGHTEOUS_TEMPEST_MAX_RANK = 807274
 BLADE_OF_FAITH = 803872
 BLADE_OF_FAITH_MAX_RANK = 803880
 BLADE_OF_FAITH_TOTAL = '${($d*1000/$T1)*($m1+0+$SP*.2+$AP*0.1)}'
+NON_PERIODIC_AURA_WITH_AMPLITUDE = 43
+PERIODIC_AURA_WITH_SECONDS = 44
 HUMAN = 1
 STAFF_SUBCLASS = 10
 ITEM_RECORD = struct.Struct('<3i')
@@ -336,6 +340,13 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         self.assertEqual((item.check, item.rule), ('effect_value', UNMEASURABLE + reason))
         self.assertFalse(self.steps_of(scenario, item.label))
 
+    def test_own_period_token_has_no_no_combat_metric(self):
+        scenario, expectations = self.build(RIGHTEOUS_TEMPEST, RIGHTEOUS_TEMPEST_MAX_RANK)
+        item, = [item for item in expectations if item.displayed == '$t1']
+        self.assertEqual((item.check, item.effect_index, item.rule),
+                         ('effect_value', None, UNMEASURABLE + 'duration_ms token without a no-combat metric'))
+        self.assertFalse(self.steps_of(scenario, item.label))
+
     def test_foreign_value_token(self):
         scenario, expectations = self.build(SCOURGEBANE, SCOURGEBANE)
         run.validate(scenario)
@@ -430,6 +441,16 @@ class ForeignEffectFixtureTest(unittest.TestCase):
             shown = read_tooltip(dbc, 13, FIXTURE_CASTER).values[0]
             self.assertEqual((shown.text, shown.spell_id), ('$10s2', 10))
             self.assertEqual(foreign_effect(Records(dbc), 13, shown), (None, 'effect 1 of spell 10 does not exist'))
+
+    def test_seconds_of_an_aura_with_an_amplitude_stay_a_judged_value(self):
+        with tempfile.TemporaryDirectory() as temp:
+            write_fixture(Path(temp), FIXTURE_SPELLS, FIXTURE_VARIABLES)
+            records = Records(DataSet(Path(temp)))
+            for spell_id in (NON_PERIODIC_AURA_WITH_AMPLITUDE, PERIODIC_AURA_WITH_SECONDS):
+                with self.subTest(spell=spell_id):
+                    shown = read_tooltip(records.dbc, spell_id, FIXTURE_CASTER).values[0]
+                    self.assertEqual((shown.text, shown.effect_index, shown.kind), ('$/1000;s1', 0, 'duration_ms'))
+                    self.assertEqual(periodic_reason(records, spell_id, FIXTURE_CASTER, shown), '')
 
 
 if __name__ == '__main__':

@@ -85,10 +85,13 @@ or another one, and `None` for a token without one (`$h`, `$d`, `$tN`, `$u`, `$i
 $U $I $AN $SN` as their lowercase forms (`$S` as `$s`: `QuestTextParser.cpp:829-834`), and so does the reader.
 The period of effect N is `EffectAmplitude[N-1]`, or 5000 ms when `ProcFlags & 1` (`QuestTextParser.cpp:977-1001`
 for the text, `MathState.cpp:594-615` for expressions; the field is `m_effectAuraPeriod`, `SpellRec.h:78`). It is
-unreadable when `AttributesEx5 & 0x2000`: the client hastes the text form by the player's cast speed (unless
-`AttributesEx3 & 0x20000000`), and the reader, which has no haste measurement, refuses both forms. A period of 0 is
-unreadable. `$tN` has `effect_index` and `spell_id` `None`, like `$d`. Righteous Tempest 807274 reads `$t1` as 1000
-ms; inside Blade of Faith 803880's `${($d*1000/$T1)*(...)}`, `$T1` is 3000.
+unreadable in the text form when `AttributesEx5 & 0x2000` and not `AttributesEx3 & 0x20000000`: the client hastes
+that shown period by the player's cast speed, which no metric reads; the expression form is never hasted
+(`MathState.cpp`). A period of 0 is unreadable (`EffectAmplitude[N] 0 of spell S`). The client also applies the
+player's period modifiers (`Spell_C_ModifySpellValue(..., 19)`); the reader gives the value before them. `$tN` has
+`effect_index` and `spell_id` `None`, like `$d`, so the no-combat scenario leaves it `unmeasurable: duration_ms token
+without a no-combat metric`. Righteous Tempest 807274 reads `$t1` as 1000 ms; inside Blade of Faith 803880's
+`${($d*1000/$T1)*(...)}`, `$T1` is 3000.
 Color codes `|c........` and `|r` are removed, in either case.
 
 `@s:<id>:<flags>@` with `flags` 0 or more expands to the tooltip of spell `<id>`, read by a nested reader of that spell
@@ -428,13 +431,18 @@ above), `cast`, and a wait of
 | `triggered_weapon` | 6, aura 23 whose `EffectTriggerSpell` is a `weapon` hit | the `weapon` hit of the triggered spell, per tick; `hits_per_cast` is `Duration / EffectAmplitude` |
 
 A periodic effect's token is a total when it grows with `$d` and shrinks with that effect's `$TN` in proportion
-(design D15): `period_reading(records, spell_id, caster, shown, effect)` reads the token again with the rank's
-duration doubled, then with the effect's period doubled (`ScaledPeriod`), and returns `total` when the value doubles,
-then halves, `tick` when it does not change, and `mixed` otherwise. `periodic_tick_readout` divides a total into one
+(design D15): `period_reading(records, spell_id, caster, shown, effect)` reads the token text alone, then again with
+the rank's duration doubled, then with the effect's period doubled (`ScaledPeriod`), and returns `total` when the
+value doubles, then halves, `tick` when it does not change, and `mixed` otherwise. The three reads share the same
+context (the token alone), so a token whose value depends on the text after it (`$/1000;s1 sec` is ms only before
+`sec`) is compared with itself. `periodic_tick_readout` divides a total into one
 tick, `total x period / duration`: Blade of Faith 803880's `${($d*1000/$T1)*($m1+0+$SP*.2+$AP*0.1)}` is ten ticks,
 and its tick is the total x 3000 / 30000. A `mixed` token (`${($d*1000/$T1)+1}`) is `unmodelled`. In the
 no-combat scenario such a total or `mixed` token is `unmeasurable` (`a total over the ticks of periodic effect <n>;
-the hit scenario judges one tick`): `spell_effect_value` and `aura_amount` are one tick.
+the hit scenario judges one tick`): `spell_effect_value` and `aura_amount` are one tick. Only effects that tick are
+read this way: an aura the server makes periodic (`AuraEffect::CalculatePeriodic`, `SpellAuraEffects.cpp:682-702`:
+3, 8, 20, 21, 23, 24, 48, 53, 62, 64, 89, 162, 226, 227) with a positive `EffectAmplitude`. Rapid 680323 (aura 107,
+amplitude 1500) keeps its `$/1000;s1` as an `effect_value` in ms.
 
 A `triggered_weapon` effect reads the tokens of the described spell's tooltip that belong to the triggered spell, each
 on the effect of its first `$<id>sN`/`$<id>mN`, and models them as a `weapon` hit of the triggered spell's effects,
@@ -442,7 +450,10 @@ with the same ADR 0010 order. The triggered spell's school gives the mitigation 
 measured: `hit_spell` in the model (the rank itself for the other kinds) names the spell of `spell_damage_*`,
 `critical_hits` and `blocked_hits`; `cast_count` stays the rank. Righteous Tempest 807274: aura 23 every 1000 ms for
 5000 ms triggers 570205 (effects 121 and 31); its tooltip shows `$570205s2`% (100) Weapon Damage plus
-`${$570205m1+$SP*0.3}` (154), five hits per cast.
+`${$570205m1+$SP*0.3}` (154), five hits per cast. Known limits: the tokens of the triggered spell are not given the
+total reading (a `${$<id>m1*$d/$t1}` there would be modelled as one tick, an alert); and `hits_per_cast` ignores the
+extra tick on apply of `AttributesEx5 & 0x200` (`SPELL_ATTR5_EXTRA_INITIAL_PERIOD`): Righteous Tempest lands 6 hits
+per cast, so it schedules more casts than needed, while the judged mean is unaffected.
 
 A `school` or `heal` effect whose `EffectDieSides` is above 1 and whose tooltip shows one token (Righteous Upheaval:
 `${$m1+0+$AP*0.45+$SP*0.45}`, `EffectBasePoints` 658, `EffectDieSides` 224 at rank 572027) is read again with each

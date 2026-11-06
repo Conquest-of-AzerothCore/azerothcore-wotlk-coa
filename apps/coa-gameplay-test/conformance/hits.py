@@ -10,7 +10,7 @@ from mitigation import PHYSICAL_SCHOOL_MASK, REFERENCE_TARGET, MitigationModel, 
 from profile import (CASTER, DBC_DIR, SETTLE_MS, base_steps, caster_stats_from, known_aura_label, measurement,
                      player_fixture, unfit_reason)
 from tooltip import (MIXED_PERIOD, OVER_TICKS, CasterStats, ForcedPoints, Readout, Records, Tooltip, Unreadable,
-                     period_reading, read_tooltip)
+                     mixed_period_reason, period_reading, read_tooltip)
 from values import (CAST_MARGIN_MS, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, EFFECT_TOKEN, EFFECTS, TARGET,
                     UNREADABLE, Expectation, RankFacts, armed_for, dataset, equip_requirement, facts_of,
                     required_aura_steps)
@@ -446,8 +446,7 @@ def periodic_tick_readout(records: Records, rank_id: int, caster: CasterStats, r
             except Unreadable as error:
                 raise Unmodelled(error.reason or f'{value.text} is unreadable with a scaled period') from error
             if reading == MIXED_PERIOD:
-                raise Unmodelled(f'{value.text} changes with the duration or the period of effect {effect} without '
-                                 f'being a total over its ticks')
+                raise Unmodelled(mixed_period_reason(value.text, effect))
         values.append(value)
     return Readout(values, readout.unreadable)
 
