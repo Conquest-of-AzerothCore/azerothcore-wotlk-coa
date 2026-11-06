@@ -290,6 +290,11 @@ void ScriptMgr::OnPlayerSave(Player* player)
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_SAVE, script->OnPlayerSave(player));
 }
 
+void ScriptMgr::OnPlayerSaveInventory(Player* player, CharacterDatabaseTransaction trans)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_SAVE_INVENTORY, script->OnPlayerSaveInventory(player, trans));
+}
+
 void ScriptMgr::OnPlayerDelete(ObjectGuid guid, uint32 accountId)
 {
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_DELETE, script->OnPlayerDelete(guid, accountId));

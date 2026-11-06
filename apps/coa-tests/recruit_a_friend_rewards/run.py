@@ -177,6 +177,13 @@ def main():
           'Same-IP invitation is blocked before prompting the recipient')
     check(accept.index('CanLinkRecruitmentAddresses') < accept.index('LOGIN_UPD_RAF_RECRUITER'),
           'Address policy is rechecked before persisting the link')
+    update = method('src/server/game/Handlers/ReferAFriendHandler.cpp', 'void WorldSession::UpdateRecruitAFriendRewards(')
+    check('bool const linked = recruiterId || isRecruiter;' in update and
+          '(!force || !linked) && now < _rafRewardsNextUpdate' in update and
+          '(linked ? LinkedRewardInterval : UnlinkedRecoveryInterval)' in update,
+          'Unlinked account saves respect recovery backoff while linked accounts can checkpoint progress')
+    check(update.rstrip().endswith('RecoverRecruitAFriendRewards();\n    RecoverRecruitAFriendRewards(true);\n}'),
+          'Both reward classes still get recovery after the last link is removed')
     recovery = method('src/server/game/Handlers/ReferAFriendHandler.cpp', 'void WorldSession::DeliverRecruitAFriendRewards(')
     mail_rows = method('src/server/game/Mails/Mail.cpp', 'StagedMail MailDraft::AppendMailRows(')
     new_item = method('src/server/game/Entities/Item/Item.cpp', 'void Item::SaveToDB(')

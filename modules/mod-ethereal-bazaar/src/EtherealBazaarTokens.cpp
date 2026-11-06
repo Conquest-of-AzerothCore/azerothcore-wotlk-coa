@@ -31,6 +31,7 @@
 #include "CoATestZoneBonus.h"
 #include "Configuration/Config.h"
 #include "Creature.h"
+#include "DataMap.h"
 #include "Formulas.h"
 #include "KillRewarder.h"
 #include "Map.h"
@@ -48,11 +49,12 @@
 #include <atomic>
 #include <limits>
 #include <memory>
+#include <string>
 #include <utility>
 
 namespace
 {
-    constexpr char PendingTokensKey[] = "ethereal_bazaar_pending_tokens";
+    std::string const PendingTokensKey = "ethereal_bazaar_pending_tokens";
     constexpr uint32 KillPayoutMinimumMs = 1000;
     constexpr uint32 KillPayoutSpreadMs = 1000;
 
@@ -81,7 +83,7 @@ namespace
 
     std::atomic<std::shared_ptr<TokenSettings const>> Settings{std::make_shared<TokenSettings>()};
 
-    struct PendingTokens
+    struct PendingTokens final : DataMap::Base
     {
         uint32 Amount = 0;
         bool Scheduled = false;

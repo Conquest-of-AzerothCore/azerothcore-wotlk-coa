@@ -10,6 +10,14 @@
 - Batch and stagger ordinary kill payouts per character across one to two seconds. Flush pending tokens before quest and boss payouts and on logout.
 - Keep reward rates, eligibility and the hourly cap. Store tokens in bags and send only overflow through in-game mail.
 - Cache payout settings on config load, skip creature scaling checks for zero-token rolls and prefetch cold account cap state asynchronously at login when the cap is enabled.
+- Fix the player-owned batch state declaration and reuse its lookup key.
+
+## Realm performance and inventory reliability
+
+- Stagger RAF reward checks and poll unlinked accounts roughly every 15 minutes after login. Retain periodic recovery of rewards queued before unlinking and normal progress checkpoints for recruits.
+- Move XP Hotspot timers to player-owned state so ordinary updates skip the shared lock until the next refresh. Retain the pre-reward location check for kills.
+- Persist Bloodforging through the normal inventory save path so the converted item and jar use can be saved together. Remove the synchronous spell-handler save that terminated the server on failure.
+- Requeue failed Worldforged pickup saves with the inventory transaction while retaining the in-session claim guard. Keep the immediate transaction on the normal path.
 
 ## Account-wide daily login rewards
 
@@ -69,4 +77,4 @@ Focused daily-login SQL-model/wiring tests and incremental source checks passed.
 
 Grouped personal scaling passed six source/model tests and four incremental source checks. It requires Destiny Weaver scaling enabled and retains existing challenge restrictions. Mixed-level native combat, percentage-damage interactions and client rendering still require verification.
 
-The same-IP RAF work passed 32 offline SQL-model and source checks in Integration. Bazaar payout changes passed C++ style and whitespace checks. The auth migration, updated C++ build, native behavior and high-population performance remain unverified.
+The RAF work passed 34 offline SQL-model and source checks in Integration. The Worldforged persistence harness passed rollback, retry and inventory save wiring checks. Bazaar payout and realm changes passed C++ style and whitespace checks. The auth migration, updated C++ build, native behavior and high-population performance remain unverified.

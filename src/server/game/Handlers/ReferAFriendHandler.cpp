@@ -49,6 +49,9 @@ namespace
     constexpr uint32 AcceptRecruitment = 1;
     constexpr uint32 DeclineRecruitment = 2;
     constexpr time_t ProposalLifetime = 60;
+    constexpr time_t LinkedRewardInterval = 60;
+    constexpr time_t UnlinkedRecoveryInterval = 15 * 60;
+    constexpr uint32 RewardSpread = 17;
 
     bool CanLinkRecruitmentAddresses(WorldSession& inviter, WorldSession& recipient)
     {
@@ -184,7 +187,6 @@ void WorldSession::ClearRecruitAFriendRequests()
     _rafGrantExpiry = 0;
     _rafInviter.Clear();
     _rafInviteExpiry = 0;
-    _rafRewardsNextUpdate = 0;
     _rafSummoner.Clear();
 }
 
@@ -417,9 +419,11 @@ void WorldSession::UpdateRecruitAFriendRewards(bool force)
     if (IsBot() || !_player || !_player->IsInWorld())
         return;
     time_t const now = GameTime::GetGameTime().count();
-    if (!force && now < _rafRewardsNextUpdate)
+    bool const linked = recruiterId || isRecruiter;
+    if ((!force || !linked) && now < _rafRewardsNextUpdate)
         return;
-    _rafRewardsNextUpdate = now + 60;
+    _rafRewardsNextUpdate = now + (linked ? LinkedRewardInterval : UnlinkedRecoveryInterval) +
+        GetAccountId() % RewardSpread;
     if (recruiterId)
     {
         if (!_rafRewardSession)

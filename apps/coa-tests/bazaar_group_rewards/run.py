@@ -24,6 +24,7 @@ def main():
 #include <cstdint>
 #include <functional>
 #include <limits>
+#include <string>
 #include <utility>
 using uint32 = std::uint32_t;
 struct Map { bool raid = false; bool IsRaid() const { return raid; } };
@@ -41,14 +42,14 @@ struct Creature
 };
 struct Unit { Creature* creature; Creature* ToCreature() { return creature; } };
 struct PendingTokens { uint32 Amount = 0; bool Scheduled = false; };
-constexpr char PendingTokensKey[] = "tokens";
+std::string const PendingTokensKey = "tokens";
 constexpr uint32 KillPayoutMinimumMs = 1000;
 constexpr uint32 KillPayoutSpreadMs = 1000;
 struct PlayerData
 {
     PendingTokens pending;
-    template<class T> T* Get(char const*) { return &pending; }
-    template<class T> T* GetDefault(char const*) { return &pending; }
+    template<class T> T* Get(std::string const&) { return &pending; }
+    template<class T> T* GetDefault(std::string const&) { return &pending; }
 };
 using Milliseconds = int;
 struct Events
