@@ -1,10 +1,10 @@
 {
   "schema": 1,
-  "name": "Mythical Boon: picking it up buffs every player within 50 yards in line of sight (#8455)",
+  "name": "Mythical Boon: picking it up puts a boon item in the bags of every player within 50 yards in line of sight (#8455, #11381)",
   "contract": [
-    "#8455: a Mythical Boon (80215) put one boon item in the clicker's bags. Picking it up now grants the random boon",
-    "at once to every player within 50 yards in line of sight of the clicker, with Mythical Blessing's (2104919) Holy",
-    "Nova visual; a group member farther away gets nothing."
+    "#8455: the boon reaches every player within 50 yards in line of sight of the clicker, with Mythical Blessing's",
+    "(2104919) Holy Nova visual. #11381: it does not buff them at once; each of them gets one random Mythical Boon item",
+    "in their bags to use when they choose. A group member farther away gets nothing."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -177,6 +177,24 @@
       "min": 60
     },
     {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "carried_item_count",
+      "save_as": "hero_items"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "carried_item_count",
+      "save_as": "ally_items"
+    },
+    {
+      "action": "snapshot",
+      "actor": "far",
+      "metric": "carried_item_count",
+      "save_as": "far_items"
+    },
+    {
       "action": "summon",
       "actor": "hero",
       "entry": 80215,
@@ -204,7 +222,98 @@
     },
     {
       "action": "assert",
-      "label": "the clicker gets the boon at once",
+      "label": "the clicker gets one boon item",
+      "actor": "hero",
+      "metric": "carried_item_count",
+      "relative_to": "hero_items",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "the ally in line of sight gets one boon item",
+      "actor": "ally",
+      "metric": "carried_item_count",
+      "relative_to": "ally_items",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "a member beyond 50 yards gets none",
+      "actor": "far",
+      "metric": "carried_item_count",
+      "relative_to": "far_items",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the clicker's new item is a Mythical Boon",
+      "actor": "hero",
+      "metric": "item_count",
+      "items": [
+        2104920,
+        2104921,
+        2104922,
+        2104923,
+        2104925,
+        2104926,
+        2104927,
+        2104928,
+        2104929,
+        2104930,
+        2104931,
+        2104932,
+        2104935
+      ],
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "so is the ally's",
+      "actor": "ally",
+      "metric": "item_count",
+      "items": [
+        2104920,
+        2104921,
+        2104922,
+        2104923,
+        2104925,
+        2104926,
+        2104927,
+        2104928,
+        2104929,
+        2104930,
+        2104931,
+        2104932,
+        2104935
+      ],
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the member beyond 50 yards carries no Mythical Boon",
+      "actor": "far",
+      "metric": "item_count",
+      "items": [
+        2104920,
+        2104921,
+        2104922,
+        2104923,
+        2104925,
+        2104926,
+        2104927,
+        2104928,
+        2104929,
+        2104930,
+        2104931,
+        2104932,
+        2104935
+      ],
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "picking it up applies no boon to the clicker",
       "actor": "hero",
       "metric": "carried_aura_count",
       "spells": [
@@ -223,35 +332,12 @@
         1102825
       ],
       "caster": "hero",
-      "equals": 1
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "the ally in line of sight gets the same boon",
+      "label": "nor to the ally",
       "actor": "ally",
-      "metric": "carried_aura_count",
-      "spells": [
-        2104920,
-        2104921,
-        2104922,
-        2104923,
-        2104925,
-        2104926,
-        2104927,
-        2104928,
-        2104929,
-        2104930,
-        2104931,
-        2104932,
-        1102825
-      ],
-      "caster": "hero",
-      "equals": 1
-    },
-    {
-      "action": "assert",
-      "label": "a member beyond 50 yards does not",
-      "actor": "far",
       "metric": "carried_aura_count",
       "spells": [
         2104920,

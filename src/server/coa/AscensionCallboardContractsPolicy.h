@@ -3,6 +3,7 @@
 #ifndef COA_ASCENSION_CALLBOARD_CONTRACTS_POLICY_H
 #define COA_ASCENSION_CALLBOARD_CONTRACTS_POLICY_H
 
+#include "AscensionRaidReleasePolicy.h"
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -108,6 +109,30 @@ inline bool IsValidTypeName(std::string_view name)
 {
     return !name.empty() && name.size() <= MaxTypeNameLength && std::all_of(name.begin(), name.end(),
         [](char c) { return std::isalnum(static_cast<unsigned char>(c)) != 0; });
+}
+
+struct StagedContract
+{
+    std::string_view type;
+    std::uint32_t stage;
+};
+
+constexpr std::array<StagedContract, 2> StagedContracts = {{
+    { "VanillaHeroicDungeonCrawling", RaidRelease::StageHeroicDungeons },
+    { "VanillaMythicDungeonCrawling", RaidRelease::StageMythicDungeons },
+}};
+
+[[nodiscard]] constexpr std::uint32_t RequiredReleaseStage(std::string_view type)
+{
+    for (StagedContract const& staged : StagedContracts)
+        if (staged.type == type)
+            return staged.stage;
+    return 0;
+}
+
+[[nodiscard]] constexpr bool IsContractReleased(std::string_view type, std::uint32_t releasedStage)
+{
+    return RequiredReleaseStage(type) <= releasedStage;
 }
 
 inline std::string DisplayName(std::string_view type)

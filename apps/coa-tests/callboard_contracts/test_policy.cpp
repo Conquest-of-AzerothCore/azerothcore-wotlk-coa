@@ -107,6 +107,16 @@ void Names()
     assert(!IsValidTypeName("Kill 1"));
     assert(!IsValidTypeName(std::string(MaxTypeNameLength + 1, 'A')));
 
+    static_assert(RequiredReleaseStage("VanillaHeroicDungeonCrawling") == RaidRelease::StageHeroicDungeons);
+    static_assert(RequiredReleaseStage("VanillaMythicDungeonCrawling") == RaidRelease::StageMythicDungeons);
+    assert(RequiredReleaseStage("VanillaNormalDungeonCrawling") == 0);
+    assert(!IsContractReleased("VanillaHeroicDungeonCrawling", 0));
+    assert(IsContractReleased("VanillaHeroicDungeonCrawling", RaidRelease::StageHeroicDungeons));
+    assert(!IsContractReleased("VanillaMythicDungeonCrawling", RaidRelease::StageHeroicDungeons));
+    assert(IsContractReleased("VanillaMythicDungeonCrawling", RaidRelease::StageMythicDungeons));
+    assert(IsContractReleased("VanillaMythicDungeonCrawling", RaidRelease::AllReleased));
+    assert(IsContractReleased("VanillaNormalDungeonCrawling", 0));
+
     assert(ContentTypes.size() == 5);
     for (char const* key : { "PvE", "PvP", "Profession", "HighRisk", "Misc" })
         assert(IsContentType(key));
