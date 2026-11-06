@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "A heal generates a quarter of the health it restores as threat",
+  "contract": [
+    "Issue #11173: healers pulled groups off their tanks. A heal generates threat on every creature fighting its",
+    "target, split among them; stock WotLK gives half the restored health, CoA a quarter (Rate.Threat.Healing 0.25),",
+    "before the healer's own threat modifiers (the fixture priest carries +12.5%). One creature fights the tank, so",
+    "the regained health is about four times the priest's threat (3.56 with +12.5%); stock would give about 1.8."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "priest",
+      "race": 1,
+      "class": 5,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "tank",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "tank",
+      "target": "priest"
+    },
+    {
+      "action": "learn",
+      "actor": "priest",
+      "spell": 2050
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 1000,
+      "maximum": 100000
+    },
+    {
+      "action": "attack",
+      "actor": "tank",
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the dummy fights the tank",
+      "actor": "dummy",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "tank"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the priest has no threat yet",
+      "actor": "dummy",
+      "metric": "threat",
+      "target": "priest",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "tank",
+      "metric": "health",
+      "save_as": "before"
+    },
+    {
+      "action": "cast",
+      "actor": "priest",
+      "spell": 2050,
+      "target": "tank"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Lesser Heal is cast",
+      "actor": "priest",
+      "metric": "cast_failure",
+      "spell": 2050,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "metric": "threat",
+      "target": "priest",
+      "save_as": "threat"
+    },
+    {
+      "action": "assert",
+      "label": "The priest gained threat from the heal",
+      "actor": "dummy",
+      "metric": "threat",
+      "target": "priest",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The tank regained about four times the priest's threat, not stock's two",
+      "actor": "tank",
+      "metric": "health",
+      "relative_to": "before",
+      "ratio_to": "threat",
+      "min": 3.4,
+      "max": 4.1
+    }
+  ]
+}
