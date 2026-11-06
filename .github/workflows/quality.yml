@@ -39,4 +39,20 @@ jobs:
           python -B apps/coa-tests/client_compat/run.py
           python -B apps/coa-tests/core_integration/run.py
       - run: python -B tools/check_repository.py
-      - run: git diff --check HEAD^ HEAD
+      - name: Check whitespace across the change
+        env:
+          CHECK_WHITESPACE_BASE: ${{ github.event_name == 'push' && github.event.before || '' }}
+        run: |
+          base="$CHECK_WHITESPACE_BASE"
+          if [[ "$base" =~ ^0+$ ]]; then
+            base=$(git hash-object -t tree /dev/null)
+          elif [ -z "$base" ]; then
+            if git rev-parse --verify HEAD^ >/dev/null 2>&1; then
+              base=HEAD^
+            else
+              base=$(git hash-object -t tree /dev/null)
+            fi
+          elif ! git cat-file -e "$base^{commit}"; then
+            git fetch --no-tags --depth=1 origin "$base"
+          fi
+          git diff --check "$base" HEAD
