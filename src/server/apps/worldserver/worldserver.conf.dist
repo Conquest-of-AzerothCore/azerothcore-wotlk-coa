@@ -2598,7 +2598,7 @@ Rate.XP.Global = 0.9295
 #        Skill/difficulty defaults come from PR #4128; BaseFraction is a local policy (1/50 of a level).
 #        Set Profession to 0 to disable ordinary profession awards. All rates reload with .reload config.
 #        Profession-only challenges retain their separate per-skill-up formula and group sharing;
-#        those awards also use Global and dynamic XP. Woodcutting/woodworking have no core action path here.
+#        those awards also use Global and dynamic XP.
 #        Smelting is a Mining craft and uses Rate.XP.Profession.Smelting instead of the Mining rate, so
 #        ore pays once when mined; 0 (default) gives smelting no XP.
 Rate.XP.Profession = 0.2
@@ -2624,6 +2624,8 @@ Rate.XP.Profession.Engineering = 3.6
 Rate.XP.Profession.Tailoring = 1.66
 Rate.XP.Profession.Lockpicking = 0
 Rate.XP.Profession.Inscription = 2.88
+Rate.XP.Profession.Woodcutting = 0.33
+Rate.XP.Profession.Woodworking = 1
 
 Rate.XP.Kill            = 1.0909091
 Rate.XP.Kill.TBC        = 1.0909091

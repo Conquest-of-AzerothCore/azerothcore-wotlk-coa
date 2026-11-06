@@ -743,7 +743,7 @@ def validate(scenario):
             number(step['maximum'], f'{where}.maximum', 1, 450, True)
             number(step['value'], f'{where}.value', 0, step['maximum'], True)
         if action == 'gather_skill':
-            require(step['skill'] in {182, 186, 393, 633, 773, 755}, f'{where}: unsupported gathering skill')
+            require(step['skill'] in {182, 186, 393, 633, 732, 773, 755}, f'{where}: unsupported gathering skill')
             number(step['required'], f'{where}.required', 0, 450, True)
         if action == 'give_xp':
             number(step['amount'], f'{where}.amount', 1, 2**31 - 1, True)
