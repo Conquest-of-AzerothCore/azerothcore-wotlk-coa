@@ -1,6 +1,6 @@
 {
     "schema":  1,
-    "name":  "Random Classic Dungeon Mythic: the completion gives Dungeon Spoils (Mythic) and the final boss a Mark of Triumph",
+    "name":  "Random Classic Dungeon Mythic: the completion gives Dungeon Spoils (Mythic) and the final boss gives no Mark of Triumph",
     "contract":  "A level 60 group finishes a Random Classic Dungeon Mythic (2258) from the Dungeon Finder. The reward quest gives every member Dungeon Spoils (Mythic) (1027965), while the Mythic final boss gives no Mark of Triumph (1414502, Heroic only since #11384). Using the spoils uses them up and puts one or two epic Mythic dungeon items from them in the bags.",
     "timeout_ms":  180000,
     "location":  {
