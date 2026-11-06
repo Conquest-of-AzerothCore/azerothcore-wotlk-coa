@@ -37,6 +37,9 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 (12397, 19134, 0, 0, 0, 1, 1, 1, 1, 'Lord Kazzak - Flayed Doomguard Belt'),
 (12397, 19135, 0, 0, 0, 1, 1, 1, 1, 'Lord Kazzak - Blacklight Bracer'),
 (12397, 1615011, 0, 100, 0, 1, 0, 1, 1, 'Lord Kazzak - Treasures of Azeroth');
+-- His world-drop references keep their own single roll, in group 2, so they never take the place of his item.
+UPDATE `creature_loot_template` SET `GroupId` = 2 WHERE `Entry` = 12397 AND `Reference` BETWEEN 24016 AND 24053
+  AND `GroupId` = 1;
 
 -- His health is per player in his map (10 to 40): Ascension's boss-map logs (64604) end at 17.62M with 35-37
 -- players and 17.95M with 38, about 476,000 a player.
