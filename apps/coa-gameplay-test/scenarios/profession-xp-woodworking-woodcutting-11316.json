@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Woodworking crafts and Woodcutting gathers award profession XP (#11316)",
-  "contract": "Issue #11316. The live Ascension CoA config carries Woodworking (1.0) and Woodcutting (0.33) profession XP modifiers, but the core only mapped the other professions, so both awarded nothing. Every profession award shares floor(next-level XP * BaseFraction * Rate.XP.Profession * profession * difficulty * Rate.XP.Global), so the scenario compares each award with a yellow Mining gather (2.11) in the same run and holds for any Rate.XP.Profession: a yellow Forestwood Upgrade Kit craft gives about 1.0/2.11 = 0.474 of it (172/364 at the repack's 0.4, 86/182 at the shipped 0.2) and a yellow Woodcutting gather about 0.33/2.11 = 0.154 (56/364, 28/182). Lockpicking, whose captured modifier is 0, still awards none.",
+  "contract": "Issue #11316. The live Ascension CoA config carries Woodworking (1.0) and Woodcutting (0.33) profession XP modifiers, but the core only mapped the other professions, so both awarded nothing. Every profession award shares floor(next-level XP * BaseFraction * Rate.XP.Profession * profession * difficulty * Rate.XP.Global), so the scenario compares each award with a yellow Mining gather (2.11) in the same run, so it holds for both the shipped Rate.XP.Profession 0.2 and the repack's 0.4 (much lower rates round the small awards too coarsely for the ratio): a yellow Forestwood Upgrade Kit craft gives about 1.0/2.11 = 0.474 of it (172/364 at the repack's 0.4, 86/182 at the shipped 0.2) and a yellow Woodcutting gather about 0.33/2.11 = 0.154 (56/364, 28/182). Lockpicking, whose captured modifier is 0, still awards none.",
   "timeout_ms": 90000,
   "location": {
     "map": 0,
