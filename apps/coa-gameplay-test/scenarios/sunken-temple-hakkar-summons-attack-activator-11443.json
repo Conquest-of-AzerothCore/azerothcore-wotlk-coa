@@ -9,7 +9,7 @@
     "while the event runs. The starter stands at the altar; a second player of the group stands next to the first",
     "Bloodkeeper's summon point, so a closest-player pick would take the bystander. Health fixtures keep both alive.",
     "Both players join world phase 1, where the altar and the event's creatures are.",
-    "A Bloodkeeper that the bystander pulls on spawn still turns to the starter: its melee and spells go there."
+    "A Bloodkeeper that the bystander pulls on spawn still turns to the starter: its Shadow Bolt 12471, cast at its victim, goes there. Its Corruption picks a random enemy and may still take the bystander."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -146,7 +146,7 @@
     },
     {
       "action": "assert",
-      "label": "A Hakkari Bloodkeeper casts at the starter",
+      "label": "A Hakkari Bloodkeeper aims its Shadow Bolt at the starter",
       "actor": "starter",
       "metric": "timeline_count",
       "event": "cast",
@@ -155,11 +155,12 @@
         "starter"
       ],
       "min": 1,
-      "within_ms": 25000
+      "within_ms": 25000,
+      "spell": 12471
     },
     {
       "action": "assert",
-      "label": "No Hakkari Bloodkeeper casts at the bystander",
+      "label": "No Hakkari Bloodkeeper aims its Shadow Bolt at the bystander",
       "actor": "starter",
       "metric": "timeline_count",
       "event": "cast",
@@ -167,7 +168,8 @@
       "equals": 0,
       "target_actors": [
         "bystander"
-      ]
+      ],
+      "spell": 12471
     },
     {
       "action": "assert",
