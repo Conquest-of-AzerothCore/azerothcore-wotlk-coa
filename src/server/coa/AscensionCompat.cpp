@@ -4081,8 +4081,8 @@ public:
       return;
 
     uint32 const guid = player->GetGUID().GetCounter();
+    player->GetSession()->SetAscensionPatchStreamGuid(0);
     std::lock_guard lock(_mutex);
-    _streamedPlayers.erase(guid);
     _sentItemRows.erase(guid);
     _sentItemSpellRows.erase(guid);
     _onDemandItemRows.erase(guid);
@@ -4095,8 +4095,9 @@ public:
     uint32 const guid = player->GetGUID().GetCounter();
     PatchRowTally onDemand;
     {
+      if (WorldSession* session = player->GetSession())
+        session->SetAscensionPatchStreamGuid(0);
       std::lock_guard lock(_mutex);
-      _streamedPlayers.erase(guid);
       _sentItemRows.erase(guid);
       _sentItemSpellRows.erase(guid);
       _fallbackTimers.erase(guid);
@@ -4265,8 +4266,11 @@ public:
     PreparedPatchRows const &rows = GetPreparedPatchRows();
     {
       std::lock_guard lock(_mutex);
-      if (!_streamedPlayers.insert(guid).second)
+      if (player->GetSession()->GetAscensionPatchStreamGuid() == guid)
         return;
+      player->GetSession()->SetAscensionPatchStreamGuid(guid);
+      _sentItemRows.erase(guid);
+      _sentItemSpellRows.erase(guid);
       _fallbackTimers.erase(guid);
     }
     WorldSession* session = player->GetSession();
@@ -5880,7 +5884,6 @@ private:
   }
 
   std::mutex _mutex;
-  std::unordered_set<uint32> _streamedPlayers;
   std::unordered_map<uint32, std::unordered_set<uint32>> _sentItemRows;
   std::unordered_map<uint32, std::unordered_set<uint32>> _sentItemSpellRows;
   std::unordered_map<uint32, PatchRowTally> _onDemandItemRows;

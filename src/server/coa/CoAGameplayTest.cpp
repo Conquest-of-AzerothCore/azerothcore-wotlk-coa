@@ -2532,6 +2532,24 @@ private:
 
     static void OpenSession(Actor& actor)
     {
+        CreateSession(actor);
+        WorldPacket create(CMSG_CHAR_CREATE, 32);
+        uint32 race = actor.definition.get<uint32>("race");
+        uint32 playerClass = actor.definition.get<uint32>("class");
+        uint32 gender = actor.definition.get<uint32>("gender", GENDER_MALE);
+        Require(race > 0 && race <= 255 && playerClass > 0 && playerClass <= 255,
+            "Race/class must fit the character creation packet");
+        Require(gender == GENDER_MALE || gender == GENDER_FEMALE, "Gender must be 0 (male) or 1 (female)");
+        create << actor.definition.get<std::string>("name", actor.name) << uint8(race) << uint8(playerClass)
+               << uint8(gender);
+        for (uint8 i = 0; i < 6; ++i)
+            create << uint8(0);
+        actor.session->HandleCharCreateOpcode(create);
+        Reach(actor, ActorStage::Creating);
+    }
+
+    static void CreateSession(Actor& actor)
+    {
         uint32 const expansion = actor.definition.get<uint32>("expansion", EXPANSION_WRATH_OF_THE_LICH_KING);
         Require(expansion <= EXPANSION_WRATH_OF_THE_LICH_KING, "Player expansion must be 0..2");
         uint32 const security = actor.definition.get<uint32>("security", uint32(SEC_PLAYER));
@@ -2554,19 +2572,6 @@ private:
             }
         });
         actor.session->InitializeSession();
-        WorldPacket create(CMSG_CHAR_CREATE, 32);
-        uint32 race = actor.definition.get<uint32>("race");
-        uint32 playerClass = actor.definition.get<uint32>("class");
-        uint32 gender = actor.definition.get<uint32>("gender", GENDER_MALE);
-        Require(race > 0 && race <= 255 && playerClass > 0 && playerClass <= 255,
-            "Race/class must fit the character creation packet");
-        Require(gender == GENDER_MALE || gender == GENDER_FEMALE, "Gender must be 0 (male) or 1 (female)");
-        create << actor.definition.get<std::string>("name", actor.name) << uint8(race) << uint8(playerClass)
-               << uint8(gender);
-        for (uint8 i = 0; i < 6; ++i)
-            create << uint8(0);
-        actor.session->HandleCharCreateOpcode(create);
-        Reach(actor, ActorStage::Creating);
     }
 
     static uint32 RaidSpell(Tree const& value)
@@ -7041,6 +7046,18 @@ private:
             WorldPacket packet(CMSG_CANCEL_AURA, 4);
             packet << spell;
             player->GetSession()->HandleCancelAuraOpcode(packet);
+        }
+        else if (action == "reconnect")
+        {
+            Actor& actor = _actors.at(step.get<std::string>("actor"));
+            std::unique_ptr<WorldSession> previous = std::move(actor.session);
+            CreateSession(actor);
+            previous->SetPlayer(nullptr);
+            actor.session->SetPlayer(player);
+            player->SetSession(actor.session.get());
+            delete player->PlayerTalkClass;
+            player->PlayerTalkClass = new PlayerMenu(actor.session.get());
+            actor.session->HandlePlayerLoginToCharInWorld(player);
         }
         else if (action == "cancel_mount")
         {
