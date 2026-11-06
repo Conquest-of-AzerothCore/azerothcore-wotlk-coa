@@ -12,11 +12,12 @@ constexpr std::uint32_t MapOnyxiasLair = 249;
 constexpr std::uint32_t MapBlackwingLair = 469;
 constexpr std::uint32_t MapRuinsOfAhnQiraj = 509;
 constexpr std::uint32_t MapTempleOfAhnQiraj = 531;
+constexpr std::uint32_t MapNaxxramas = 533;
 
 constexpr std::uint32_t StageHeroicDungeons = 1;
 constexpr std::uint32_t StageMythicDungeons = 2;
-constexpr std::uint32_t StageMoltenCore = 3;
-constexpr std::uint32_t StageZulGurub = 4;
+constexpr std::uint32_t StageZulGurub = 3;
+constexpr std::uint32_t StageMoltenCore = 4;
 constexpr std::uint32_t StageOnyxiasLair = 5;
 constexpr std::uint32_t StageBlackwingLair = 6;
 constexpr std::uint32_t StageAhnQiraj = 7;
@@ -33,8 +34,8 @@ struct RaidStage
 };
 
 constexpr std::array<RaidStage, 6> RaidStages = {{
-    { MapMoltenCore, StageMoltenCore },
     { MapZulGurub, StageZulGurub },
+    { MapMoltenCore, StageMoltenCore },
     { MapOnyxiasLair, StageOnyxiasLair },
     { MapBlackwingLair, StageBlackwingLair },
     { MapRuinsOfAhnQiraj, StageAhnQiraj },
@@ -56,6 +57,65 @@ constexpr bool IsDungeonDifficultyReleased(std::uint32_t difficulty, std::uint32
     if (difficulty >= DungeonDifficultyMythic)
         return StageMythicDungeons <= releasedStage;
     return true;
+}
+
+constexpr std::array<RaidStage, 7> RaidLootStages = {{
+    { MapZulGurub, StageZulGurub },
+    { MapMoltenCore, StageMoltenCore },
+    { MapOnyxiasLair, StageOnyxiasLair },
+    { MapBlackwingLair, StageBlackwingLair },
+    { MapRuinsOfAhnQiraj, StageAhnQiraj },
+    { MapTempleOfAhnQiraj, StageAhnQiraj },
+    { MapNaxxramas, StageNaxxramas }
+}};
+
+constexpr std::uint32_t RaidLootStage(std::uint32_t mapId)
+{
+    for (RaidStage const& raid : RaidLootStages)
+        if (raid.mapId == mapId)
+            return raid.stage;
+    return 0;
+}
+
+struct FinalBoss
+{
+    std::uint32_t creatureEntry;
+    std::uint32_t stage;
+};
+
+constexpr std::array<FinalBoss, 5> FinalBosses = {{
+    { 14834, StageZulGurub },
+    { 11502, StageMoltenCore },
+    { 10184, StageOnyxiasLair },
+    { 11583, StageBlackwingLair },
+    { 15727, StageAhnQiraj }
+}};
+
+constexpr std::uint32_t DefeatedStage(std::uint32_t creatureEntry)
+{
+    for (FinalBoss const& boss : FinalBosses)
+        if (boss.creatureEntry == creatureEntry)
+            return boss.stage;
+    return 0;
+}
+
+constexpr std::uint32_t EffectiveStage(std::uint32_t configuredStage, std::uint32_t defeatedStage)
+{
+    if (defeatedStage < StageZulGurub)
+        return configuredStage;
+    std::uint32_t const unlocked = defeatedStage < AllReleased ? defeatedStage + 1 : AllReleased;
+    return unlocked > configuredStage ? unlocked : configuredStage;
+}
+
+constexpr bool AdvancesStage(std::uint32_t creatureEntry, std::uint32_t releasedStage, std::uint32_t defeatedStage)
+{
+    std::uint32_t const stage = DefeatedStage(creatureEntry);
+    return stage && stage <= releasedStage && stage > defeatedStage;
+}
+
+constexpr bool IsRaidGearReleased(std::uint32_t raidStage, std::uint32_t releasedStage)
+{
+    return !raidStage || raidStage < releasedStage;
 }
 
 [[nodiscard]] std::uint32_t ReleasedStage();

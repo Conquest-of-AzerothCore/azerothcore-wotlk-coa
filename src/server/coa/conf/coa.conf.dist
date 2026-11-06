@@ -572,6 +572,15 @@ Ascension.PrestigiousCache.SecondTokenChancePercent = 5
 Ascension.PrestigiousCache.ClassicStages = 8
 
 #
+#    Ascension.PrestigiousCache.PreviousStageOnly
+#        Description: Hold Classic Prestigious Caches and their tier tokens one release stage
+#                     below Ascension.CallboardCache.ReleaseStage, so a raid's cache is paid
+#                     only once the stage after it is released.
+#        Default:     0
+
+Ascension.PrestigiousCache.PreviousStageOnly = 0
+
+#
 #    Ascension.PrestigiousCache.TbcStages
 #        Description: How many of the Burning Crusade Prestigious Caches are released, 0-9,
 #                     in the order 1297310 held for Karazhan, Gruul's Lair, Magtheridon's
@@ -589,8 +598,8 @@ Ascension.PrestigiousCache.TbcStages = 0
 #                     0 - normal dungeons only
 #                     1 - Heroic Dungeons
 #                     2 - Mythic Dungeons
-#                     3 - Molten Core
-#                     4 - Zul'Gurub
+#                     3 - Zul'Gurub
+#                     4 - Molten Core
 #                     5 - Onyxia's Lair
 #                     6 - Blackwing Lair
 #                     7 - Ruins of Ahn'Qiraj and Temple of Ahn'Qiraj
@@ -601,10 +610,25 @@ Ascension.PrestigiousCache.TbcStages = 0
 #                     client lists Heroic and Mythic difficulties only once they are released.
 #                     Callboard Caches follow the same stages: only released caches are
 #                     earned, and a generic Callboard Cache resolves to a released tier.
+#                     Bloodforged world drops of a raid's gear wait until the stage after
+#                     that raid, so a raid's gear drops only inside it while it is the newest
+#                     released stage.
 #                     Applied on .reload config; the client's difficulty list on next login.
-#        Default:     3
+#        Default:     4
 
-Ascension.CallboardCache.ReleaseStage = 3
+Ascension.CallboardCache.ReleaseStage = 4
+
+#
+#    Ascension.RaidRelease.AutoAdvance
+#        Description: Open the next raid when the realm defeats the final boss of the newest
+#                     released one: Hakkar (Zul'Gurub), Ragnaros (Molten Core), Onyxia,
+#                     Nefarian (Blackwing Lair) and C'Thun (Ahn'Qiraj). The defeated stage is
+#                     kept in the characters database and announced to the realm; the release
+#                     stage is the higher of it plus one and Ascension.CallboardCache.ReleaseStage.
+#                     Kills by Game Masters do not count.
+#        Default:     0
+
+Ascension.RaidRelease.AutoAdvance = 0
 
 #
 #    Ascension.CallboardCache.PreviousStageOnly

@@ -49,6 +49,7 @@ struct CacheConfig
     uint8 releasedTokenStage = 12;
     uint8 classicStages = 8;
     uint8 tbcStages = 0;
+    bool previousStageOnly = false;
 };
 
 CacheConfig g_config;
@@ -75,9 +76,15 @@ uint32 ClassicStage(uint32 cacheItemId)
     }
 }
 
-bool IsCacheReleased(uint32 cacheItemId, CacheConfig const& config)
+uint32 ReleasedStage(CacheConfig const& config)
 {
     uint32 const released = RaidRelease::ReleasedStage();
+    return config.previousStageOnly && released > 0 ? released - 1 : released;
+}
+
+bool IsCacheReleased(uint32 cacheItemId, CacheConfig const& config)
+{
+    uint32 const released = ReleasedStage(config);
     for (std::size_t index = 0; index < ClassicLadder.size(); ++index)
         if (ClassicLadder[index] == cacheItemId)
             return index < config.classicStages && ClassicStage(cacheItemId) <= released;
@@ -88,7 +95,7 @@ bool IsCacheReleased(uint32 cacheItemId, CacheConfig const& config)
     return false;
 }
 
-bool IsTokenReleased(uint8 tokenStage, uint32 cacheItemId)
+bool IsTokenReleased(uint8 tokenStage, uint32 cacheItemId, CacheConfig const& config)
 {
     uint32 stage = 0;
     switch (tokenStage)
@@ -100,7 +107,7 @@ bool IsTokenReleased(uint8 tokenStage, uint32 cacheItemId)
         case 6: stage = RaidRelease::StageNaxxramas; break;
         default: return tokenStage >= 8 && sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) >= 70;
     }
-    return stage <= RaidRelease::ReleasedStage();
+    return stage <= ReleasedStage(config);
 }
 
 void LoadPrestigiousCachePools()
@@ -116,6 +123,7 @@ void LoadPrestigiousCachePools()
         sConfigMgr->GetOption<uint32>("Ascension.PrestigiousCache.ClassicStages", 8), ClassicLadder.size()));
     config.tbcStages = uint8(std::min<uint32>(
         sConfigMgr->GetOption<uint32>("Ascension.PrestigiousCache.TbcStages", 0), TbcLadder.size()));
+    config.previousStageOnly = sConfigMgr->GetOption<bool>("Ascension.PrestigiousCache.PreviousStageOnly", false);
 
     std::unordered_map<uint32, CachePool> pools;
     if (QueryResult result = WorldDatabase.Query(
@@ -246,7 +254,7 @@ bool PickToken(Player* player, uint32 cacheItemId, CacheConfig const& config,
 
         for (ContentToken const& token : it->second)
         {
-            if (token.stage > config.releasedTokenStage || !IsTokenReleased(token.stage, cacheItemId))
+            if (token.stage > config.releasedTokenStage || !IsTokenReleased(token.stage, cacheItemId, config))
                 continue;
 
             ItemTemplate const* proto = sObjectMgr->GetItemTemplate(token.itemId);

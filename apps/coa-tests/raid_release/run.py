@@ -9,10 +9,10 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 method = runpy.run_path(str(HERE.parent / 'client_compat/run.py'))['method']
 
-EXPECTED_STAGES = {409: 3, 309: 4, 249: 5, 469: 6, 509: 7, 531: 7, 533: 8}
+EXPECTED_STAGES = {309: 3, 409: 4, 249: 5, 469: 6, 509: 7, 531: 7}
 DIFFICULTY_STAGES = {0: 0, 1: 1, 2: 2}
-UNGATED_MAPS = (0, 1, 36, 229, 230, 532, 535, 603, 880, 951)
-UNGATED_RAIDS = (532, 535, 603)
+UNGATED_MAPS = (0, 1, 36, 229, 230, 532, 533, 535, 603, 880, 951)
+UNGATED_RAIDS = (532, 533, 535, 603)
 DUNGEONS = (36, 229, 230)
 
 
@@ -101,6 +101,30 @@ int main()
     uint32 const dungeons[] = {{{dungeons}}};
     Hook hook;
     static_assert(RaidRelease::AllReleased == 8);
+    static_assert(RaidRelease::DefeatedStage(14834) == RaidRelease::StageZulGurub);
+    static_assert(RaidRelease::DefeatedStage(11502) == RaidRelease::StageMoltenCore);
+    static_assert(RaidRelease::DefeatedStage(10184) == RaidRelease::StageOnyxiasLair);
+    static_assert(RaidRelease::DefeatedStage(11583) == RaidRelease::StageBlackwingLair);
+    static_assert(RaidRelease::DefeatedStage(15727) == RaidRelease::StageAhnQiraj);
+    static_assert(RaidRelease::DefeatedStage(15339) == 0 && RaidRelease::DefeatedStage(15990) == 0);
+    static_assert(RaidRelease::EffectiveStage(RaidRelease::StageHeroicDungeons, 0) == RaidRelease::StageHeroicDungeons);
+    static_assert(RaidRelease::EffectiveStage(RaidRelease::StageZulGurub, RaidRelease::StageZulGurub)
+        == RaidRelease::StageMoltenCore);
+    static_assert(RaidRelease::EffectiveStage(RaidRelease::StageBlackwingLair, RaidRelease::StageZulGurub)
+        == RaidRelease::StageBlackwingLair);
+    static_assert(RaidRelease::EffectiveStage(0, RaidRelease::StageAhnQiraj) == RaidRelease::StageNaxxramas);
+    static_assert(!RaidRelease::AdvancesStage(14834, RaidRelease::StageHeroicDungeons, 0));
+    static_assert(RaidRelease::AdvancesStage(14834, RaidRelease::StageZulGurub, 0));
+    static_assert(!RaidRelease::AdvancesStage(14834, RaidRelease::StageMoltenCore, RaidRelease::StageZulGurub));
+    static_assert(!RaidRelease::AdvancesStage(11502, RaidRelease::StageZulGurub, 0));
+    static_assert(RaidRelease::AdvancesStage(10184, RaidRelease::StageBlackwingLair, RaidRelease::StageZulGurub));
+    static_assert(RaidRelease::RaidLootStage(309) == RaidRelease::StageZulGurub);
+    static_assert(RaidRelease::RaidLootStage(533) == RaidRelease::StageNaxxramas);
+    static_assert(RaidRelease::RaidLootStage(36) == 0);
+    for (uint32 raidStage = RaidRelease::StageZulGurub; raidStage <= RaidRelease::AllReleased; ++raidStage)
+        for (uint32 stage = 0; stage <= 10; ++stage)
+            assert(RaidRelease::IsRaidGearReleased(raidStage, stage) == (raidStage < stage));
+    assert(RaidRelease::IsRaidGearReleased(0, 0));
     for (uint32 stage = 0; stage <= 10; ++stage)
     {{
         g_raidReleaseStage = stage;
@@ -122,9 +146,9 @@ int main()
             }}
     }}
 
-    g_raidReleaseStage = RaidRelease::StageMoltenCore;
-    assert(Enter(hook, 409, DUNGEON_DIFFICULTY_NORMAL));
-    assert(!Enter(hook, 309, DUNGEON_DIFFICULTY_NORMAL));
+    g_raidReleaseStage = RaidRelease::StageZulGurub;
+    assert(Enter(hook, 309, DUNGEON_DIFFICULTY_NORMAL));
+    assert(!Enter(hook, 409, DUNGEON_DIFFICULTY_NORMAL));
     assert(!Enter(hook, 249, DUNGEON_DIFFICULTY_NORMAL));
     assert(Enter(hook, 36, DUNGEON_DIFFICULTY_HEROIC));
     assert(Enter(hook, 36, DUNGEON_DIFFICULTY_EPIC));
@@ -151,11 +175,16 @@ def main():
     source = (ROOT / 'src/server/coa/AscensionRaidRelease.cpp').read_text(encoding='utf-8')
     loader = (ROOT / 'src/server/coa/CoAScriptLoader.cpp').read_text(encoding='utf-8')
     config = (ROOT / 'src/server/coa/conf/coa.conf.dist').read_text(encoding='utf-8')
-    assert '{ PLAYERHOOK_CAN_ENTER_MAP }' in source
+    assert '{ PLAYERHOOK_CAN_ENTER_MAP, PLAYERHOOK_ON_CREATURE_KILL,' in source
     assert '"Ascension.CallboardCache.ReleaseStage"' in source
     assert 'WORLDHOOK_ON_STARTUP, WORLDHOOK_ON_AFTER_CONFIG_LOAD' in source
     assert loader.count('AddSC_AscensionRaidRelease()') == 2
-    assert '\nAscension.CallboardCache.ReleaseStage = 3\n' in config
+    assert '\nAscension.CallboardCache.ReleaseStage = 4\n' in config
+    assert '\nAscension.RaidRelease.AutoAdvance = 0\n' in config
+    assert '\nAscension.PrestigiousCache.PreviousStageOnly = 0\n' in config
+    assert '"Ascension.RaidRelease.AutoAdvance"' in source
+    assert 'PLAYERHOOK_ON_CREATURE_KILL' in source and 'PLAYERHOOK_ON_CREATURE_KILLED_BY_PET' in source
+    assert 'killer->IsGameMaster()' in source
     assert 'Ascension.RaidLock' not in config
     with tempfile.TemporaryDirectory(prefix='coa-raid-release-') as directory:
         out = Path(directory)
@@ -163,9 +192,11 @@ def main():
         cpp.write_text(harness(source), encoding='utf-8')
         subprocess.run(command(cpp, exe), cwd=out, check=True, timeout=60)
         subprocess.run([str(exe)], cwd=out, check=True, timeout=15)
-    print('PASS: Heroic and Mythic dungeon difficulties and the Classic raids open in release-stage order, each '
-          'stage keeps the earlier ones open, closed content refuses entry and login with "Instance is closed", '
-          'normal dungeons and other maps stay open, and the default opens up to Molten Core')
+    print('PASS: Heroic and Mythic dungeon difficulties and the Classic raids open in release-stage order (Zul\'Gurub '
+          'before Molten Core), each stage keeps the earlier ones open, closed content refuses entry and login with '
+          '"Instance is closed", normal dungeons, Wrath Naxxramas and other maps stay open, the default opens up to '
+          'Molten Core, a final boss kill opens the next raid only while its raid is the newest released one, and a '
+          'raid\'s gear is released outside it from the following stage on')
 
 
 if __name__ == '__main__':

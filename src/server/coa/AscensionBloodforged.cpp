@@ -1,10 +1,12 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionBloodforgedPolicy.h"
+#include "AscensionRaidReleasePolicy.h"
 #include "ConditionMgr.h"
 #include "Config.h"
 #include "Creature.h"
 #include "Formulas.h"
+#include "GameObject.h"
 #include "Group.h"
 #include "DatabaseEnv.h"
 #include "Log.h"
@@ -20,8 +22,11 @@
 #include <atomic>
 #include <cmath>
 #include <memory>
+#include <mutex>
 #include <set>
 #include <sstream>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace Bloodforged
@@ -32,11 +37,31 @@ using Pools = std::array<std::array<std::vector<uint32>, 3>, 61>;
 struct Settings
 {
     std::array<Rates, 5> rates = DefaultRates;
+    Pools pools;
+    std::unordered_map<uint32, uint32> raidStages;
     std::array<std::unique_ptr<LootTemplate>, 61> templates;
+    uint32 releasedStage = 0;
     bool enabled = false;
 };
 
 std::shared_ptr<Settings const> settings;
+std::mutex rebuildLock;
+
+struct RaidSpawn
+{
+    uint32 entry;
+    uint32 mapId;
+};
+
+constexpr std::array<RaidSpawn, 7> ScriptedRaidCreatures = {{
+    { 11502, RaidRelease::MapMoltenCore }, { 11583, RaidRelease::MapBlackwingLair },
+    { 15082, RaidRelease::MapZulGurub }, { 15083, RaidRelease::MapZulGurub }, { 15084, RaidRelease::MapZulGurub },
+    { 15085, RaidRelease::MapZulGurub }, { 15114, RaidRelease::MapZulGurub }
+}};
+
+constexpr std::array<RaidSpawn, 2> ScriptedRaidChests = {{
+    { 179703, RaidRelease::MapMoltenCore }, { 181366, RaidRelease::MapNaxxramas }
+}};
 
 Condition riskCondition = []
 {
@@ -61,6 +86,116 @@ bool EligiblePlayer(Player const* player, Creature const* creature)
         && player->GetLevel() >= 15 && player->HasAura(HighRiskAura)
         && player->IsAtLootRewardDistance(creature)
         && creature->GetLevel() > Acore::XP::GetGrayLevel(player->GetLevel());
+}
+
+void CollectLoot(LootStore const& store, uint32 lootId, uint32 stage, std::unordered_map<uint32, uint32>& raid,
+    std::unordered_set<uint32>& outside)
+{
+    LootTemplate const* loot = lootId ? store.GetLootFor(lootId) : nullptr;
+    if (!loot)
+        return;
+    std::vector<LootStoreItem const*> items;
+    loot->CollectItems(items);
+    for (LootStoreItem const* item : items)
+    {
+        if (!stage)
+        {
+            outside.insert(item->itemid);
+            continue;
+        }
+        auto [it, added] = raid.emplace(item->itemid, stage);
+        if (!added)
+            it->second = std::min(it->second, stage);
+    }
+}
+
+std::unordered_map<uint32, uint32> RaidItemStages()
+{
+    std::set<std::pair<uint32, uint32>> creatureLoot, chestLoot;
+    for (auto const& [spawnId, data] : sObjectMgr->GetAllCreatureData())
+        if (CreatureTemplate const* creature = sObjectMgr->GetCreatureTemplate(data.id))
+            creatureLoot.emplace(RaidRelease::RaidLootStage(data.mapid), creature->lootid);
+    for (RaidSpawn const& spawn : ScriptedRaidCreatures)
+        if (CreatureTemplate const* creature = sObjectMgr->GetCreatureTemplate(spawn.entry))
+            creatureLoot.emplace(RaidRelease::RaidLootStage(spawn.mapId), creature->lootid);
+    for (auto const& [spawnId, data] : sObjectMgr->GetAllGOData())
+        if (GameObjectTemplate const* chest = sObjectMgr->GetGameObjectTemplate(data.id))
+            chestLoot.emplace(RaidRelease::RaidLootStage(data.mapid), chest->GetLootId());
+    for (RaidSpawn const& spawn : ScriptedRaidChests)
+        if (GameObjectTemplate const* chest = sObjectMgr->GetGameObjectTemplate(spawn.entry))
+            chestLoot.emplace(RaidRelease::RaidLootStage(spawn.mapId), chest->GetLootId());
+
+    std::unordered_map<uint32, uint32> raid;
+    std::unordered_set<uint32> outside;
+    for (auto const& [stage, lootId] : creatureLoot)
+        CollectLoot(LootTemplates_Creature, lootId, stage, raid, outside);
+    for (auto const& [stage, lootId] : chestLoot)
+        CollectLoot(LootTemplates_Gameobject, lootId, stage, raid, outside);
+    std::erase_if(raid, [&outside](auto const& item) { return outside.contains(item.first); });
+    return raid;
+}
+
+uint32 RaidStage(uint32 entry, std::unordered_map<uint32, uint32> const& raidItems)
+{
+    uint32 const base = entry % 100000;
+    ItemTemplate const* item = sObjectMgr->GetItemTemplate(entry);
+    ItemTemplate const* baseItem = base != entry ? sObjectMgr->GetItemTemplate(base) : nullptr;
+    if (!item || !baseItem || item->Name1 != "Bloodforged " + baseItem->Name1)
+        return 0;
+    auto it = raidItems.find(base);
+    return it == raidItems.end() ? 0 : it->second;
+}
+
+void BuildTemplates(Settings& next, uint32 releasedStage)
+{
+    next.releasedStage = releasedStage;
+    for (unsigned level = 15; level <= 60; ++level)
+    {
+        auto entriesForLevel = std::make_unique<LootTemplate>();
+        for (unsigned index = 0; index < 3; ++index)
+        {
+            unsigned rate = next.rates[Band(level)][index];
+            std::vector<uint32> pool;
+            for (uint32 entry : next.pools[level][index])
+            {
+                auto it = next.raidStages.find(entry);
+                if (it == next.raidStages.end() || RaidRelease::IsRaidGearReleased(it->second, releasedStage))
+                    pool.push_back(entry);
+            }
+            if (!rate || pool.empty())
+                continue;
+            for (uint32 entry : pool)
+            {
+                auto* item = new LootStoreItem(entry, 0, EntryChance(rate, pool.size()), false,
+                    LOOT_MODE_DEFAULT, index + 1, 1, 1);
+                item->conditions = { &riskCondition, &levelCondition };
+                entriesForLevel->AddEntry(item);
+            }
+        }
+        next.templates[level] = std::move(entriesForLevel);
+    }
+}
+
+std::shared_ptr<Settings const> CurrentSettings()
+{
+    auto current = std::atomic_load(&settings);
+    uint32 const releasedStage = RaidRelease::ReleasedStage();
+    if (!current || !current->enabled || current->releasedStage == releasedStage)
+        return current;
+
+    std::lock_guard<std::mutex> guard(rebuildLock);
+    current = std::atomic_load(&settings);
+    if (!current->enabled || current->releasedStage == releasedStage)
+        return current;
+    auto next = std::make_shared<Settings>();
+    next->rates = current->rates;
+    next->pools = current->pools;
+    next->raidStages = current->raidStages;
+    next->enabled = true;
+    BuildTemplates(*next, releasedStage);
+    std::shared_ptr<Settings const> rebuilt = std::move(next);
+    std::atomic_store(&settings, rebuilt);
+    return rebuilt;
 }
 
 class Configuration : public WorldScript
@@ -166,28 +301,16 @@ private:
                 LOG_ERROR("server.loading", "Bloodforged disabled: green/blue pool missing at level {}", level);
                 return;
             }
-        for (unsigned level = 15; level <= 60; ++level)
-        {
-            auto entriesForLevel = std::make_unique<LootTemplate>();
-            for (unsigned index = 0; index < 3; ++index)
-            {
-                unsigned rate = next->rates[Band(level)][index];
-                auto const& pool = pools[level][index];
-                if (!rate || pool.empty())
-                    continue;
-                for (uint32 entry : pool)
-                {
-                    auto* item = new LootStoreItem(entry, 0, EntryChance(rate, pool.size()), false,
-                        LOOT_MODE_DEFAULT, index + 1, 1, 1);
-                    item->conditions = { &riskCondition, &levelCondition };
-                    entriesForLevel->AddEntry(item);
-                }
-            }
-            next->templates[level] = std::move(entriesForLevel);
-        }
+        std::unordered_map<uint32, uint32> const raidItems = RaidItemStages();
+        for (uint32 entry : entries)
+            if (uint32 stage = RaidStage(entry, raidItems))
+                next->raidStages.emplace(entry, stage);
+        next->pools = std::move(pools);
+        BuildTemplates(*next, RaidRelease::ReleasedStage());
         next->enabled = true;
         std::atomic_store(&settings, std::shared_ptr<Settings const>(next));
-        LOG_INFO("server.loading", "Bloodforged world drops ready: {} verified catalogue entries", entries.size());
+        LOG_INFO("server.loading", "Bloodforged world drops ready: {} verified catalogue entries, {} raid items held "
+            "until their raid is defeated", entries.size(), next->raidStages.size());
     }
 };
 
@@ -199,7 +322,7 @@ public:
     void OnAfterLootTemplateProcess(Loot* loot, LootTemplate const*, LootStore const& store,
         Player* owner, bool personal, bool, uint16 lootMode) override
     {
-        auto current = std::atomic_load(&settings);
+        auto current = CurrentSettings();
         if (!current || !current->enabled || !owner || !loot || personal
             || &store != &LootTemplates_Creature || !(lootMode & LOOT_MODE_DEFAULT)
             || !owner->GetMap() || owner->GetMap()->Instanceable())
