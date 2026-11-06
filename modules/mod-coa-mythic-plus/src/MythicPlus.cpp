@@ -973,6 +973,7 @@ namespace
         creature->SetReactState(REACT_PASSIVE);
         creature->SetUnitFlag(UNIT_FLAG_PACIFIED);
         creature->SetUnitFlag(UNIT_FLAG_SILENCED);
+        creature->SetHomePosition(creature->GetPosition());
         creature->InterruptNonMeleeSpells(true);
         creature->AttackStop();
         creature->CombatStop(true);
@@ -1484,6 +1485,24 @@ public:
             if (run->Active())
                 ApplyCreatureAffixes(creature, *run);
         }
+    }
+
+    void OnAllCreatureUpdate(Creature* creature, uint32 /*diff*/) override
+    {
+        if (!creature->HasUnitFlag(UNIT_FLAG_PACIFIED) || !creature->HasReactState(REACT_PASSIVE)
+            || creature->HasUnitState(UNIT_STATE_ROOT) || creature->IsInEvadeMode() || !creature->IsAlive())
+            return;
+        Map* map = creature->FindMap();
+        if (!map || !map->IsDungeon())
+            return;
+        std::lock_guard<std::recursive_mutex> guard(g_lock);
+        if (!RefusesToFight(creature))
+            return;
+        creature->SetHomePosition(creature->GetPosition());
+        creature->GetMotionMaster()->Clear();
+        creature->GetMotionMaster()->MoveIdle();
+        creature->StopMoving();
+        creature->SetControlled(true, UNIT_STATE_ROOT);
     }
 
     // Summons and creatures spawned during a run get the week's affixes too.
