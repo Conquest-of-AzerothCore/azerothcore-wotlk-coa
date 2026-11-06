@@ -141,6 +141,13 @@ class RunnerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             run.validate(scenario)
 
+    def test_lfg_dungeon_takes_an_optional_loot_method(self):
+        step = {'action': 'lfg_dungeon', 'actor': 'caster', 'dungeon': 26}
+        self.assert_step_validates(step)
+        self.assert_step_validates({**step, 'loot_method': 0})
+        for change in ({'loot_method': 5}, {'loot_method': '0'}, {'dungeon': 0}):
+            self.assert_step_rejected({**step, **change})
+
     def test_nearby_creature_can_attack_needs_a_player_and_entry(self):
         step = {'action': 'assert', 'actor': 'caster', 'metric': 'nearby_creature_can_attack', 'entry': 24484,
                 'equals': 0}

@@ -37,6 +37,8 @@
     { "action": "wait", "ms": 1000 },
     { "action": "group", "actor": "healer", "target": "ally" },
     { "action": "group", "actor": "healer", "target": "tank" },
+    { "action": "lfg_dungeon", "label": "The group is a Dungeon Finder group assigned Deadmines", "actor": "healer",
+      "dungeon": 6 },
     { "action": "wait", "ms": 500 },
     { "action": "learn", "actor": "healer", "spell": 501199 },
     { "action": "assert", "label": "CONTROL: the healer can pay four casts from a 300-mana refill", "actor": "healer", "metric": "max_power", "power": 0, "min": 300 },
