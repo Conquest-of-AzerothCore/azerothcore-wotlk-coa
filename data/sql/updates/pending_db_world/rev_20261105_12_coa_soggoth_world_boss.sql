@@ -18,8 +18,7 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 (64605, 11277, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Thorn of Aydreath'),
 (64605, 11276, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Treads of Twilight Shadow'),
 (64605, 11272, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Twilight Faceguard'),
-(64605, 11273, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Visage of Aydreath'),
-(64605, 1978059, 0, 100, 0, 1, 0, 1, 1, 'The Will of Soggoth - Treasures of Azeroth');
+(64605, 11273, 0, 0, 0, 1, 1, 1, 1, 'The Will of Soggoth - Visage of Aydreath');
 
 -- He waits in the middle of the pit (WorldMapArea 2037), below the ledge his map starts on, so players do not land
 -- on top of him; floor height measured.
@@ -105,3 +104,11 @@ INSERT INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`) VALUES
 (6088, 10274, 0, 'Twilight Grove (Lethon boss map)'),
 (6089, 10280, 0, 'Snowgrave''s Cavern (Korrim Snowgrave boss map)'),
 (6090, 10281, 0, 'Zul''Mashar (Atal''zul boss map)');
+
+-- The Treasures of Azeroth chest every world boss gives (978059) has a 5% roll at any world boss item (978060):
+-- his items join that pool.
+INSERT IGNORE INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`,
+  `GroupId`, `MinCount`, `MaxCount`, `Comment`)
+SELECT 978060, l.`Item`, 0, 0, 0, 1, 1, 1, 1, CONCAT('Treasures of Azeroth - World Boss - ', i.`name`)
+FROM `creature_loot_template` l JOIN `item_template` i ON i.`entry` = l.`Item`
+WHERE l.`Entry` = 64605 AND l.`GroupId` = 1 AND l.`Reference` = 0 AND i.`Quality` = 4;
