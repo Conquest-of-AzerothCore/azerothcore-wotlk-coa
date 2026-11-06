@@ -31,7 +31,8 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
   measured, expected, low, high, explanation)`; `write_outputs` writes `alerts.tsv`, `report.md`, `verdicts.json` and
   `questions.md`.
 - `questions.py`: `questions(verdicts, tooltips)` turns the verdicts that carry a question into one `Question(tooltip,
-  spells, kind, question, readings, measured, labels)` per tooltip and question, and `write_questions(items, out_dir)`
+  spells, kind, question, readings, measured, labels, conditions, observations)` per tooltip and kind, and
+  `write_questions(items, out_dir)`
   writes `questions.md` (see [Player question list](#player-question-list)).
 - `diff.py`: `diff(before, after, intended)` returns the `Change` of every verdict that moved between two compare
   outputs, and `write_impact` writes `impact.md` (see [Impact report](#impact-report)).
@@ -392,7 +393,8 @@ A `procs` entry of the class file describes one proc aura:
 | `extra_event_terms` | further `{"metric", "spell"}` counts added to the events |
 | `events_exclude_trigger_casts` | the events count the trigger's own casts, so the completed player casts are removed |
 | `events_per_proc` | the events in one proc |
-| `trial_readings` | readings of the trials, `{"name", "adds", "minus_events"}`, when the text allows several |
+| `trial_readings` | readings of the trials, `{"name", "meaning", "adds", "minus_events"}`, if the text allows several |
+| `readings_question` | an observation that tells the readings apart without counting, for `questions.md` |
 | `handler` | the code that rolls a proc without a `spell_proc` or `spell_script_names` row |
 | `dbc` | `ProcChance`, `ProcFlags`, `ProcCharges` of the aura and of the spell of the chance token |
 | `spell_proc` | the `spell_proc` row of each spell, `{}` without one |
@@ -876,8 +878,20 @@ Kinds, what gives them and what they ask:
 - `server_behaviour`: an `alert` of a proc or trigger entry that has a class-file `question` (ruling R14); whether
   live does what our server does.
 
-Readings carry `name`, `expected`, `status` and, as they apply, `delta`, `measured` (the test server value),
-`procs`, `trials`, `rate`, `low` and `high` (the 99% Wilson interval), `unit`. In `compare.py`,
+Every readings question also carries `conditions`, what our test did in player terms: the level, what was learned,
+what was cast or attacked and how, the counts, and the other percent modifiers measured on the character (known auras
+such as 887007 by name and percent, earlier talents of the stack) when the expected number depends on them. Readings
+carry `name`, `meaning` (one plain sentence: `multiplies` multiplies the whole value after every other modifier, `adds`
+is added to the named other percent modifiers, `whole` applies to the whole critical hit, `bonus` only to the extra
+damage of a critical strike; proc readings take the class file's `meaning`), `expects` and `measured_text` in what a
+player sees (the percent change of a hit, a critical hit as a percent of a normal hit, the share of the player's
+triggers that proc), `expected`, `status` and, as they apply, `delta`, `measured`, `predicted`, `procs`, `trials`,
+`rate`, `low` and `high` (the 99% Wilson interval), `unit`. A proc reading predicts procs per trigger of the first
+reading (the trigger the player performs): with `d` the extra trials per proc that the reading counts, measured as
+(its trials - the first reading's trials) / procs, a chance `p` gives `p / (1 - d p)` (Scourgebane: 20% and 25% of auto
+attacks; Light's Echo 520017: 10% and 11.1% of casts). `observations` is the count of the player's triggers for which,
+whichever reading is true, its 99% interval excludes the other: `ceil(2.576^2 max(q(1 - q)) / (q1 - q2)^2)` over each
+pair (498 auto attacks for 20% against 25%, 5309 casts for 10% against 11.1%). In `compare.py`,
 `tooltip_value_question(spell_name, level, entry, description)` builds the `tooltip_value` detail of an entry with a
 `$<id>pplN` token, for any judge that reports one, and `data_issue_question(spell_name, entry, description)` the
 `data_issue` detail; `unreadable_question` chooses between them for the `unreadable: ` rules of value and hit
@@ -885,21 +899,24 @@ scenarios. The sentence of the tooltip that holds the entry is quoted with `___`
 whose `SpellDescriptionVariableID` is not 0 but does not define the name stays `unreadable` without a question: the
 tooltip source gives no access to the definitions.
 
-Verdicts with the same cleaned tooltip, kind, question, readings and measurement make one `Question`, which lists
-every spell id and check label (Blade Sermon 572548 and 572554; the seven Argent Blade ranks 804929 to 807268, whose
-`$<scalingbp>` has no definition). `questions.md` has a `# Tooltips` section (kinds `readings`, `text`,
-`tooltip_value`, `data_issue`, then any other kind) and a `# Server behaviour to confirm` section. Each entry is
+Verdicts with the same cleaned tooltip and kind make one `Question`, which lists every spell id and check label, its
+distinct questions, and each reading, condition and observation tagged with its spell (Blade Sermon 572548 and 572554;
+Light's Echo 520017 and 520883, one entry with the readings of each rank; the seven Argent Blade ranks 804929 to
+807268, whose `$<scalingbp>` has no definition). `measured` is kept only when all the entry's verdicts agree.
+`questions.md` has a `# Tooltips` section (kinds `readings`, `text`, `tooltip_value`, `data_issue`, then any other
+kind) and a `# Server behaviour to confirm` section. Each entry is
 `## <name> (<ids>)`, the tooltip in a quote block (color codes removed, `$` tokens kept, `@s:<id>:<flags>@` shown as
 "followed by the tooltip of spell <id>"), the token values that are the same at any level and stats (read with two
-opposite `CasterStats`), one line per reading, a line starting `Question:` and the check labels.
+opposite `CasterStats`), "How we tested", one line per reading (prefixed by its spell id when the entry has several
+spells), "Observations needed", one line starting `Question:` per distinct question and the check labels.
 
 Produced on 2026-11-06 from the existing probe stamps (manifests generated again with the class file of this change,
-same scenario hashes): triggers `20261106-093404` give the two server questions (Fervent Castigation 707606,
-expected 273 against 0; Heaven's Finest 806516, 273 against 150), passives `20261106-085206` the Serendipity and
-Chivalric readings, procs `20261105-201416` the Scourgebane and both Light's Echo readings and the Paladin Training
-and Blade Sermon text questions, the stack `20261105-204050` Paladin Training (20% against 25%, measured 20.27%) and
-Legacy of the Silver Hand, and the value and hit scenarios of `20261105-214020` the six `ppl` questions and the
-Argent Blade data issue.
+same scenario hashes): triggers `20261106-093404` give the two server questions (Fervent Castigation 707606, expected
+273 against 0; Heaven's Finest 806516, 273 against 150), passives `20261106-085206` the Serendipity and Chivalric
+readings, procs `20261105-201416` the Scourgebane readings, one Light's Echo entry with both ranks' readings and the
+Paladin Training and Blade Sermon text questions, the stack `20261105-204050` Paladin Training (20% against 25%,
+measured 20.27%) and Legacy of the Silver Hand, and the value and hit scenarios of `20261105-214020` the six `ppl`
+questions and the Argent Blade data issue.
 
 ## Run
 

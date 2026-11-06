@@ -26,10 +26,13 @@
       "events_per_proc": 1,
       "trial_readings": [
         {"name": "auto attacks only",
+         "meaning": "only your auto attack hits roll the chance here; a Scourgebane strike cannot trigger another Scourgebane",
          "adds": []},
         {"name": "every direct damage event, Scourgebane strikes included",
+         "meaning": "every direct damage hit rolls the chance, Scourgebane strikes too, so one Scourgebane can trigger another",
          "adds": [{"metric": "spell_damage_count", "spell": 801832}]}
       ],
+      "readings_question": "auto attack a single target dummy without using any ability: does Scourgebane ever proc twice between two of your auto attacks (one Scourgebane strike triggering another)? And do your abilities, such as Argent Blade, trigger Scourgebane too?",
       "dbc": {
         "92111": {"ProcChance": 100, "ProcFlags": 0, "ProcCharges": 0},
         "520007": {"ProcChance": 20, "ProcFlags": 0, "ProcCharges": 0}
@@ -94,12 +97,15 @@
       "events_per_proc": 1,
       "trial_readings": [
         {"name": "player casts only",
+         "meaning": "only the Argent Blade casts you press roll the chance; an additional strike cannot trigger another",
          "adds": [{"metric": "spell_damage_count", "spell": 804929}],
          "minus_events": true},
         {"name": "every Argent Blade strike, additional strikes included",
+         "meaning": "every Argent Blade strike rolls the chance, so an additional strike can trigger another",
          "adds": [{"metric": "spell_damage_count", "spell": 804929}],
          "minus_events": false}
       ],
+      "readings_question": "cast Argent Blade at a single target dummy: after one cast, do you ever see two or more additional Argent Blade strikes (an additional strike triggering another)?",
       "handler": "AscensionTemplarAbilities.cpp:296-300 recasts the cast rank, triggered, after a damaging hit",
       "dbc": {
         "520017": {"ProcChance": 10, "ProcFlags": 0, "ProcCharges": 0}
@@ -122,12 +128,15 @@
       "events_per_proc": 1,
       "trial_readings": [
         {"name": "player casts only",
+         "meaning": "only the Argent Blade casts you press roll the chance; an additional strike cannot trigger another",
          "adds": [{"metric": "spell_damage_count", "spell": 804929}],
          "minus_events": true},
         {"name": "every Argent Blade strike, additional strikes included",
+         "meaning": "every Argent Blade strike rolls the chance, so an additional strike can trigger another",
          "adds": [{"metric": "spell_damage_count", "spell": 804929}],
          "minus_events": false}
       ],
+      "readings_question": "cast Argent Blade at a single target dummy: after one cast, do you ever see two or more additional Argent Blade strikes (an additional strike triggering another)?",
       "handler": "AscensionTemplarAbilities.cpp:296-300 recasts the cast rank, triggered, after a damaging hit",
       "dbc": {
         "520883": {"ProcChance": 20, "ProcFlags": 0, "ProcCharges": 0}

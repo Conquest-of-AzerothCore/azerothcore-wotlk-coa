@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-import json
 from pathlib import Path
 import re
 from typing import TYPE_CHECKING
@@ -45,6 +44,8 @@ class Question:
     readings: tuple[dict, ...]
     measured: float | None
     labels: tuple[str, ...]
+    conditions: tuple[tuple[int, str], ...] = ()
+    observations: tuple[tuple[int, str], ...] = ()
 
 
 def cleaned(text) -> str:
@@ -67,8 +68,23 @@ def spell_of(verdict: 'Verdict') -> int:
 
 
 def spell_name(tooltips: 'TooltipSource', spell_id: int) -> str:
-    name = tooltips.spell_field(spell_id, 'SpellName[enUS]')
+    try:
+        name = tooltips.spell_field(spell_id, 'SpellName[enUS]')
+    except Unreadable:
+        return str(spell_id)
     return name if isinstance(name, str) and name else str(spell_id)
+
+
+def description(tooltips: 'TooltipSource', spell_id: int) -> str:
+    try:
+        return cleaned(tooltips.spell_field(spell_id, 'Description[enUS]'))
+    except Unreadable:
+        return ''
+
+
+def added(items: list, item) -> None:
+    if item not in items:
+        items.append(item)
 
 
 def questions(verdicts: list['Verdict'], tooltips: 'TooltipSource') -> list[Question]:
@@ -78,19 +94,23 @@ def questions(verdicts: list['Verdict'], tooltips: 'TooltipSource') -> list[Ques
         if found is None:
             continue
         spell = spell_of(verdict)
-        tooltip = cleaned(tooltips.spell_field(spell, 'Description[enUS]'))
-        readings = tuple(found.get('readings') or ())
-        measured = found.get('measured')
-        key = (tooltip, found['kind'], found['question'], json.dumps(readings, sort_keys=True), measured)
-        group = grouped.setdefault(key, {'question': Question(tooltip, (), found['kind'], found['question'], readings,
-                                                              measured, ()),
-                                         'spells': {}, 'labels': []})
+        tooltip = description(tooltips, spell)
+        group = grouped.setdefault((tooltip, found['kind']), {'spells': {}, 'questions': [], 'readings': [],
+                                                              'measured': [], 'conditions': [], 'observations': [],
+                                                              'labels': []})
         group['spells'].setdefault(spell, spell_name(tooltips, spell))
-        if verdict.label not in group['labels']:
-            group['labels'].append(verdict.label)
-    return [Question(group['question'].tooltip, tuple(sorted(group['spells'].items())), group['question'].kind,
-                     group['question'].question, group['question'].readings, group['question'].measured,
-                     tuple(group['labels'])) for group in grouped.values()]
+        added(group['questions'], found['question'])
+        for reading in found.get('readings') or ():
+            added(group['readings'], {**reading, 'spell': spell})
+        added(group['measured'], found.get('measured'))
+        for name in ('conditions', 'observations'):
+            if found.get(name):
+                added(group[name], (spell, found[name]))
+        added(group['labels'], verdict.label)
+    return [Question(tooltip, tuple(sorted(group['spells'].items())), kind, '\n'.join(group['questions']),
+                     tuple(group['readings']), group['measured'][0] if len(group['measured']) == 1 else None,
+                     tuple(group['labels']), tuple(group['conditions']), tuple(group['observations']))
+            for (tooltip, kind), group in grouped.items()]
 
 
 def fixed_values(tooltips: 'TooltipSource', spell_id: int) -> list[str]:
@@ -112,8 +132,15 @@ def number(value: float | None, digits: str = 'g') -> str:
     return 'none' if value is None else format(value, digits)
 
 
-def reading_line(reading: dict) -> str:
-    if 'trials' in reading and 'procs' in reading:
+def reading_line(reading: dict, prefix: str = '') -> str:
+    head = f'- {prefix}{reading["name"]}'
+    if reading.get('meaning'):
+        head += f' ({reading["meaning"]})'
+    if 'expects' in reading:
+        text = f'expects {reading["expects"]}'
+        if reading.get('measured_text'):
+            text += f', test server {reading["measured_text"]}'
+    elif 'trials' in reading and 'procs' in reading:
         if reading.get('rate') is None:
             text = f'{number(reading["procs"])} procs in {number(reading["trials"])} trials, no rate'
         else:
@@ -131,7 +158,15 @@ def reading_line(reading: dict) -> str:
     status = reading.get('status')
     if status:
         text += f': {STATUS_TEXT.get(status, status)}'
-    return f'- {reading["name"]}: {text}'
+    return f'{head}: {text}'
+
+
+def spell_lines(title: str, items: tuple[tuple[int, str], ...], several: bool) -> list[str]:
+    if not items:
+        return []
+    if not several:
+        return ['', f'{title}: ' + ' '.join(text for _, text in items)]
+    return ['', f'{title}:'] + [f'- {spell}: {text}' for spell, text in items]
 
 
 def entry_lines(item: Question, tooltips: 'TooltipSource | None') -> list[str]:
@@ -149,9 +184,15 @@ def entry_lines(item: Question, tooltips: 'TooltipSource | None') -> list[str]:
         if values:
             lines += ['', 'Tooltip numbers from the client data, the same at any level and stats:']
             lines += [f'- {", ".join(map(str, spells))}: {shown_values}' for shown_values, spells in values.items()]
+    several = len(item.spells) > 1
+    lines += spell_lines('How we tested', item.conditions, several)
     if item.readings:
-        lines += ['', 'Readings:'] + [reading_line(reading) for reading in item.readings]
-    lines += ['', f'Question: {item.question}', '', f'Checks: {", ".join(f"`{label}`" for label in item.labels)}', '']
+        lines += ['', 'Readings:'] + [reading_line(reading, f'{reading["spell"]} ' if several and 'spell' in reading
+                                                   else '') for reading in item.readings]
+    lines += spell_lines('Observations needed', item.observations, several)
+    lines += ['']
+    lines += [f'Question: {question}' for question in item.question.split('\n')]
+    lines += ['', f'Checks: {", ".join(f"`{label}`" for label in item.labels)}', '']
     return lines
 
 

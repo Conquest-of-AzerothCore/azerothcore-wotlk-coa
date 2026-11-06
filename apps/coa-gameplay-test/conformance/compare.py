@@ -63,6 +63,12 @@ PER_LEVEL_TOKEN = re.compile(r'\$\d*ppl\d')
 DESCRIPTION_VARIABLE = re.compile(r'\$<\w+>')
 SENTENCE_END = re.compile(r'[.!?](?=\s|$|[$@])|\n')
 BLANK = '___'
+RELATION_MEANINGS = {MULTIPLIES: 'the bonus multiplies the whole value, after every other modifier',
+                     'whole': 'the percent applies to the whole critical hit',
+                     'bonus': 'the percent applies only to the extra damage that a critical strike adds on top of a '
+                              'normal hit'}
+TRIAL_WORDS = {'spell_cast_count': 'casts of {spell}', 'spell_damage_count': '{spell} hits',
+               'melee_attack_count': 'auto attacks', 'melee_damage_count': 'auto attacks that hit'}
 AURA_REQUIREMENTS = ('EquippedItemClass', 'Stances', 'CasterAuraSpell')
 MODIFIER_KINDS = {'spell_damage_done': 'damage', 'spell_healing_done': 'heal'}
 QUESTION_SUBJECTS = {'spell_critical_damage': 'a critical hit of {spell}', 'spell_damage_done': 'a hit of {spell}',
@@ -549,19 +555,60 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
                                f'{model["events_per_proc"]} per proc')
 
 
+def observations_needed(rates: list[float]) -> int | None:
+    needed = [math.ceil(Z_99 ** 2 * max(low * (1 - low), high * (1 - high)) / (high - low) ** 2)
+              for index, low in enumerate(rates) for high in rates[index + 1:] if abs(high - low) > FLOAT_EPSILON]
+    return max(needed) if needed else None
+
+
+def percent_interval(low: float | None, high: float | None) -> str:
+    return f' (99% interval {low:.2%} to {high:.2%})' if low is not None and high is not None else ''
+
+
 def proc_question(manifest: dict, scenario: dict, expectation: Expectation, readings: list[dict], judged: list,
                   procs: float, chance: float, tooltips: TooltipSource) -> dict:
     entry = class_entry(manifest, expectation)
+    model = expectation.model
     name = entry.get('name') or scenario['spell_name']
-    choices = ', or of '.join(reading['name'] for reading in readings)
-    question = (f'With {name} learned, the tooltip gives a {chance:g}% chance on '
-                f'"{entry.get("trigger_text", expectation.displayed)}". On live, count the '
-                f'{spell_name(tooltips, expectation.model["proc_spell"])} procs in a combat log: are they about '
-                f'{chance:g}% of {choices}?')
-    rows = [{'name': reading['name'], 'procs': procs, 'trials': trials, 'rate': rate, 'low': low, 'high': high,
-             'expected': chance / 100, 'status': status}
-            for reading, (status, rate, low, high, _, trials) in zip(readings, judged)]
-    return question_detail(READINGS_QUESTION, question, rows, procs)
+    meanings = {reading['name']: reading.get('meaning', '') for reading in entry.get('trial_readings', [])}
+    trigger = model['trigger']
+    if trigger['action'] == CAST:
+        trigger_name = spell_name(tooltips, trigger['spell'])
+        unit = f'casts of {trigger_name}'
+        done = (f'learned only {name} and {trigger_name} ({trigger["spell"]}) and cast it at a target dummy every '
+                f'{model["attempt_ms"] / 1000:g} sec, its cooldown reset before each cast, using nothing else')
+    else:
+        unit = 'auto attacks that hit'
+        done = f'learned only {name} and auto attacked a target dummy without using any ability'
+    base_trials = judged[0][5]
+    chance_rate = chance / 100
+    predicted = []
+    for *_, trials in judged:
+        extra = (trials - base_trials) / procs if procs else 0.0
+        predicted.append(chance_rate / (1 - extra * chance_rate) if extra * chance_rate < 1 else None)
+    counted = procs / base_trials if base_trials > 0 else None
+    conditions = (f'Our test: the level {manifest["level"]} test character {done}. It counted {procs:g} {name} '
+                  f'procs in {base_trials:g} {unit}')
+    conditions += (f', {counted:.2%}{percent_interval(judged[0][2], judged[0][3])}.' if counted is not None
+                   else '.')
+    rates = [rate for rate in predicted if rate is not None]
+    needed = observations_needed(rates)
+    observations = (f'About {needed} {unit} tell {" from ".join(f"{rate:.1%}" for rate in rates)} apart: whichever '
+                    f'reading is true, the 99% interval of the counted rate then excludes the other.'
+                    if needed else '')
+    asked_first = entry.get('readings_question') or f'count the {name} procs'
+    question = (f'With {name} learned, {asked_first} Or count {name} procs per {unit} under the conditions of our '
+                f'test: which reading below do your counts match?')
+    rows = [{'name': reading['name'], 'meaning': meanings.get(reading['name'], ''),
+             'expects': f'{rate:.1%} of {unit} give a {name} proc' if rate is not None else 'no rate',
+             'measured_text': f'{counted:.2%}' if counted is not None else '', 'predicted': rate, 'procs': procs,
+             'trials': trials, 'rate': reading_rate, 'low': low, 'high': high, 'expected': chance / 100,
+             'status': status}
+            for reading, rate, (status, reading_rate, low, high, _, trials) in zip(readings, predicted, judged)]
+    return question_detail(READINGS_QUESTION, question, rows, procs, conditions=conditions,
+                           observations=observations)
+
+
 
 
 def trigger_counts(run: Run, labels: dict, with_baseline: bool) -> tuple[float, float, float, float] | None:
@@ -730,8 +777,7 @@ def known_percents(manifest: dict, model: dict, runs: list[Run]) -> tuple[list[t
             continue
         present = [run.values.get(known_aura_label(row['spell_id']), 0) > 0 for run in runs]
         if all(present):
-            found.append((f'known aura {row["spell_id"]} effect {row["effect_index"]} aura {row["aura"]}',
-                          float(row['percent'])))
+            found.append((known_label(row), float(row['percent'])))
         elif any(present):
             return [], (f'known aura {row["spell_id"]} is present in {sum(present)} of {len(present)} passes, so the '
                         f'configurations differ by more than the talent')
@@ -824,7 +870,7 @@ def judge_talent_delta(manifest: dict, parts: list[ProcPart], config_runs: dict[
                          for name, expected, status, why in judged)
     detail = base.detail
     if len(statuses) > 1:
-        detail = {**base.detail, 'question': talent_question(manifest, expectation, judged, delta, tooltips)}
+        detail = {**base.detail, 'question': talent_question(manifest, expectation, judged, delta, known, tooltips)}
     return replace(base, status=status, measured=delta, expected=judged[0][1], low=low, high=high, detail=detail,
                    explanation=f'{lead}{readings}; per-hit means of {source} in {len(current)} and {len(baseline)} '
                                f'passes: {listed(current)} against {listed(baseline)}; 99% Welch interval of the '
@@ -832,16 +878,47 @@ def judge_talent_delta(manifest: dict, parts: list[ProcPart], config_runs: dict[
                                f'{expectation.rule}{failures}')
 
 
+def known_label(row: dict) -> str:
+    return f'known aura {row["spell_id"]} effect {row["effect_index"]} aura {row["aura"]}'
+
+
+def modifier_text(tooltips: TooltipSource, row: dict) -> str:
+    return f'{spell_name(tooltips, row["spell_id"])} {row["spell_id"]} ({row["percent"]:+d}% {row["applies_to"]})'
+
+
 def talent_question(manifest: dict, expectation: Expectation, judged: list, delta: float,
-                    tooltips: TooltipSource) -> dict:
+                    known: list[tuple[str, float]], tooltips: TooltipSource) -> dict:
+    model = expectation.model
     talent = class_entry(manifest, expectation).get('name') or spell_name(tooltips, expectation.spell_id)
+    source = spell_name(tooltips, model['source'])
+    rows = {known_label(row): row for row in manifest.get('known_modifiers', [])}
+    others = [modifier_text(tooltips, rows[label]) if label in rows else f'{label} ({percent:+g}%)'
+              for label, percent in known]
+    others += [f'{spell_name(tooltips, item["talent"])} {item["talent"]} ({item["bonus_pct"]:+g}% damage of {source})'
+               for item in model.get('earlier_bonuses') or []]
+    class_file = manifest['class_file']
+    earlier = [spell for config in class_file.get('stack', [])[:model['index']] for spell in config['talents']]
+    learned = list(class_file.get('rotation', {}).get('learn', [])) + earlier
+    named = ', '.join(f'{spell_name(tooltips, spell)} {spell}' for spell in learned) or 'no talent'
+    conditions = (f'Our test: the level {manifest["level"]} test character, with {named} learned, ran the same '
+                  f'rotation on a target dummy {model["passes"]} times, then {model["passes"]} times with {talent} '
+                  f'also learned, and compared the average non-critical, unblocked {source} hit. Other percent '
+                  f'modifiers of that hit on the test character: {", ".join(others) or "none"}.')
+    stacked = sum(percent for _, percent in known) + sum(item['bonus_pct'] for item in model.get('earlier_bonuses')
+                                                         or [])
+    meanings = {MULTIPLIES: RELATION_MEANINGS[MULTIPLIES],
+                ADDS: (f'the bonus is added to the other percent modifiers of the hit ({", ".join(others)}), so the '
+                       f'hit grows by {model["bonus_pct"]:g} / (100 {stacked:+g})')}
     changes = ' or by '.join(f'{expected:.4g}%' for _, expected, _, _ in judged)
-    question = (f'With {talent} learned, does a non-critical, unblocked hit of '
-                f'{spell_name(tooltips, expectation.model["source"])} grow by {changes} against the same hit without '
-                f'it?')
-    readings = [{'name': name, 'expected': expected, 'measured': delta, 'status': status, 'unit': '%'}
-                for name, expected, status, _ in judged]
-    return question_detail(READINGS_QUESTION, question, readings, delta)
+    question = (f'With {talent} learned, does a non-critical, unblocked {source} hit on a target dummy grow by '
+                f'{changes} against the same hit without it? Compare the average of many such hits in a combat log, '
+                f'with the other modifiers of our test.')
+    readings = [{'name': name, 'meaning': meanings.get(name, why), 'expects': f'the {source} hit {expected:+.4g}%',
+                 'measured_text': f'{delta:+.4g}%', 'expected': expected, 'measured': delta, 'status': status,
+                 'unit': '%'} for name, expected, status, why in judged]
+    return question_detail(READINGS_QUESTION, question, readings, delta, conditions=conditions)
+
+
 
 
 def judge_stack(manifest: dict, stack_parts: dict[str, list[ProcPart]], tooltips: TooltipSource,
@@ -888,8 +965,14 @@ def delta_status(metric: str, measured: float, expected: float) -> str:
     return 'ok' if abs(measured - expected) <= delta_margin(metric, expected) + FLOAT_EPSILON else 'alert'
 
 
-def question_detail(kind: str, question: str, readings: list[dict], measured: float | None) -> dict:
-    return {'kind': kind, 'question': question, 'readings': readings, 'measured': measured}
+def question_detail(kind: str, question: str, readings: list[dict], measured: float | None, *, conditions: str = '',
+                    observations: str = '') -> dict:
+    detail = {'kind': kind, 'question': question, 'readings': readings, 'measured': measured}
+    if conditions:
+        detail['conditions'] = conditions
+    if observations:
+        detail['observations'] = observations
+    return detail
 
 
 def class_entry(manifest: dict, expectation: Expectation) -> dict:
@@ -956,14 +1039,24 @@ def unreadable_question(tooltips: TooltipSource, rank_id: int, spell_name: str, 
     return None
 
 
-def server_question(manifest: dict, expectation: Expectation, verdict: Verdict) -> Verdict:
+def server_question(manifest: dict, expectation: Expectation, verdict: Verdict, tooltips: TooltipSource) -> Verdict:
     entry = class_entry(manifest, expectation)
     if verdict.status != 'alert' or not entry.get('question'):
         return verdict
-    readings = [{'name': 'as the tooltip says', 'expected': verdict.expected, 'measured': verdict.measured,
-                 'status': 'alert'}]
+    reading = {'name': 'as the tooltip says', 'expected': verdict.expected, 'measured': verdict.measured,
+               'status': 'alert'}
+    model = expectation.model or {}
+    if 'observe_spell' in model and verdict.expected is not None and verdict.measured is not None:
+        observed = f'casts of {spell_name(tooltips, model["observe_spell"])} ({model["observe_spell"]})'
+        trial = TRIAL_WORDS.get(model['trial_metric'], model['trial_metric']).format(
+            spell=spell_name(tooltips, model['trigger']['spell']))
+        trials = verdict.expected / model['per_trigger'] if model['per_trigger'] else 0
+        reading.update(expects=f'{verdict.expected:g} {observed} for {trials:g} {trial}',
+                       measured_text=f'{verdict.measured:g} {observed}')
     return replace(verdict, detail={**(verdict.detail or {}), 'question': question_detail(
-        SERVER_BEHAVIOUR, entry['question'], readings, verdict.measured)})
+        SERVER_BEHAVIOUR, entry['question'], [reading], verdict.measured)})
+
+
 
 
 def missing_measurement(run: Run, label: str) -> str:
@@ -986,13 +1079,19 @@ def signed_token(token: Displayed, points: float | None, tooltips: TooltipSource
     return value, f'{token.text} reads {token.value:g}'
 
 
-def present_modifiers(manifest: dict, model: dict, run: Run, tooltips: TooltipSource) -> list[tuple[str, float]]:
+def present_rows(manifest: dict, model: dict, run: Run, tooltips: TooltipSource) -> list[dict]:
     kind = MODIFIER_KINDS.get(model['metric'])
     school = tooltips.spell_field(model['target'], 'SchoolMask')
-    return [(f'known aura {row["spell_id"]} effect {row["effect_index"]} aura {row["aura"]} {row["percent"]:+d}%',
-             float(row['percent'])) for row in manifest.get('known_modifiers', [])
+    return [row for row in manifest.get('known_modifiers', [])
             if row['applies_to'] == kind and row['school_mask'] & school
             and run.values.get(known_aura_label(row['spell_id']), 0) > 0]
+
+
+def present_modifiers(manifest: dict, model: dict, run: Run, tooltips: TooltipSource) -> list[tuple[str, float]]:
+    return [(f'{known_label(row)} {row["percent"]:+d}%', float(row['percent']))
+            for row in present_rows(manifest, model, run, tooltips)]
+
+
 
 
 def delta_readings(manifest: dict, run: Run, model: dict, before: float, value: float,
@@ -1060,23 +1159,52 @@ def change(before: float, delta: float) -> str:
     return f'{100 * delta / before:+.4g}%' if before else f'{delta:+.6g}'
 
 
-def judge_readings(base: Verdict, entry: dict, model: dict, judged: list[tuple[DeltaReading, str]], before: float,
-                   delta: float, context: str, tooltips: TooltipSource) -> Verdict:
+def passive_reading(model: dict, reading: DeltaReading, before: float, delta: float, others: str) -> dict:
+    after = before + reading.delta
+    if model['metric'] == 'spell_critical_damage':
+        expects = f'a critical hit deals {after / 10:.4g}% of a normal hit'
+        measured = f'{(before + delta) / 10:.4g}%'
+    else:
+        expects = f'{change(before, reading.delta)} ({before:g} to {after:g} {model["metric"]})'
+        measured = f'{change(before, delta)} ({before + delta:g})'
+    meaning = RELATION_MEANINGS.get(reading.name, reading.why)
+    if reading.name == ADDS:
+        meaning = f'the bonus is added to the other percent modifiers ({others}), so it counts for less'
+    return {'name': reading.name, 'meaning': meaning, 'expects': expects, 'measured_text': measured}
+
+
+def judge_readings(base: Verdict, manifest: dict, entry: dict, run: Run, model: dict,
+                   judged: list[tuple[DeltaReading, str]], before: float, delta: float, context: str,
+                   tooltips: TooltipSource) -> Verdict:
     statuses = {status for _, status in judged}
     if len(statuses) == 1:
         return interval_verdict(base, model['metric'], delta, judged, context)
     spell = (tooltips.spell_field(model['target'], 'SpellName[enUS]') if model['target'] is not None
              else model['metric'])
     subject = QUESTION_SUBJECTS.get(model['metric'], model['metric']).format(spell=spell)
-    changes = ' or by '.join(change(before, reading.delta) for reading, _ in judged)
-    question = f'With {entry["spell_name"]} learned, does {subject} change by {changes}?'
-    readings = [{'name': reading.name, 'expected': before + reading.delta, 'delta': reading.delta, 'status': status,
-                 'measured': before + delta} for reading, status in judged]
+    if model['metric'] == 'spell_critical_damage':
+        options = ' or '.join(f'{(before + reading.delta) / 10:.4g}%' for reading, _ in judged)
+        question = (f'With {entry["spell_name"]} learned, does {subject} on a target dummy deal {options} of a '
+                    f'normal hit ({before / 10:.4g}% without it)? Compare critical and normal hits in a combat log.')
+    else:
+        changes = ' or by '.join(change(before, reading.delta) for reading, _ in judged)
+        question = f'With {entry["spell_name"]} learned, does {subject} change by {changes}?'
+    others = ''
+    conditions = (f'Our test: the level {manifest["level"]} test character learned only {entry["spell_name"]} and '
+                  f'measured {subject} on a target dummy before and after the learn.')
+    if model['metric'] in MODIFIER_KINDS and model['target'] is not None:
+        others = ', '.join(modifier_text(tooltips, row) for row in present_rows(manifest, model, run, tooltips))
+        conditions += f' Other percent modifiers of that value on the test character: {others or "none"}.'
+    readings = [{**passive_reading(model, reading, before, delta, others), 'expected': before + reading.delta,
+                 'delta': reading.delta, 'status': status, 'measured': before + delta} for reading, status in judged]
     text = '; '.join(f'{reading.name} ({reading.why}): expected delta {reading.delta:+.6g}: {status}'
                      for reading, status in judged)
     return replace(base, status='ambiguous_tooltip', measured=delta, expected=judged[0][0].delta,
                    explanation=f'the readings disagree; {context}; {text}',
-                   detail={'question': question_detail(READINGS_QUESTION, question, readings, before + delta)})
+                   detail={'question': question_detail(READINGS_QUESTION, question, readings, before + delta,
+                                                       conditions=conditions)})
+
+
 
 
 def mask_matches(manifest: dict, run: Run, entry: dict, model: dict, value: float,
@@ -1182,7 +1310,7 @@ def passive_verdict(manifest: dict, entry: dict, run: Run | None, expectation: E
     if model['named'] is not None:
         return judge_modifier_target(base, manifest, entry, run, model, value, before, delta, judged, context,
                                      tooltips)
-    return judge_readings(base, entry, model, judged, before, delta, context, tooltips)
+    return judge_readings(base, manifest, entry, run, model, judged, before, delta, context, tooltips)
 
 
 def roll_spread(expectation: Expectation, tooltips: TooltipSource) -> int:
@@ -1283,9 +1411,10 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                 trigger_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             else:
                 verdicts.append(judge(manifest, entry, run, expectation, tokens, tooltips, hit_model))
-    verdicts += [server_question(manifest, parts[0][2], judge_proc(manifest, parts, tooltips))
+    verdicts += [server_question(manifest, parts[0][2], judge_proc(manifest, parts, tooltips), tooltips)
                  for parts in proc_parts.values()]
-    verdicts += [server_question(manifest, parts[0][2], judge_trigger(parts)) for parts in trigger_parts.values()]
+    verdicts += [server_question(manifest, parts[0][2], judge_trigger(parts), tooltips)
+                 for parts in trigger_parts.values()]
     verdicts += judge_stack(manifest, stack_parts, tooltips, hit_model)
     return Comparison(manifest, runs, missing, verdicts)
 

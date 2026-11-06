@@ -576,6 +576,9 @@ class PassiveDeltaTest(unittest.TestCase):
         self.assertEqual([(item['name'], item['expected'], item['status']) for item in question['readings']],
                          [('whole', 2300.0, 'ok'), ('bonus', 2150.0, 'alert')])
         self.assertIn('Reckoning', question['question'])
+        self.assertIn('deal 230% or 215% of a normal hit (200% without it)', question['question'])
+        self.assertIn('learned only Chivalric', question['conditions'])
+        self.assertIn('extra damage', question['readings'][1]['meaning'])
 
     def test_composition_with_known_modifier(self):
         entry = passive_expectation(SERENDIPITY, 0, 'spell_damage_done', 'composition', '$s1', 3.0, RECKONING,
@@ -587,6 +590,9 @@ class PassiveDeltaTest(unittest.TestCase):
                          [('multiplies', 'ok'), ('adds', 'alert')])
         self.assertAlmostEqual(readings[0]['expected'], 824.0)
         self.assertAlmostEqual(readings[1]['expected'], 830.0)
+        self.assertIn('887007 (-20% damage)', readings[1]['meaning'])
+        self.assertIn('887007 (-20% damage)', verdict.detail['question']['conditions'])
+        self.assertEqual(readings[1]['expects'], '+3.75% (800 to 830 spell_damage_done)')
 
     def test_composition_without_the_known_aura_has_one_reading(self):
         entry = passive_expectation(SERENDIPITY, 0, 'spell_damage_done', 'composition', '$s1', 3.0, RECKONING,

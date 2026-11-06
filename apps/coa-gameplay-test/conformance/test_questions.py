@@ -1,11 +1,12 @@
 from dataclasses import asdict
+import math
 from pathlib import Path
 import shutil
 import tempfile
 import unittest
 
 from compare import DbcTooltips, Verdict, compare, tooltip_value_question, write_outputs
-from procs import proc_status_expectation, wilson_interval
+from procs import PROC_CHECK, added_trials_label, proc_measurements, proc_status_expectation, wilson_interval
 from profile import DBC_DIR
 from questions import (DATA_ISSUE, QUESTIONS_FILE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE,
                        questions, write_questions)
@@ -26,6 +27,8 @@ SILVERHAND_INCANTATION = 801465
 HEAVENS_FINEST = 806516
 HEAVENS_FINEST_STACK = 805390
 SCHEDULED = 273
+LIGHTS_ECHO = (520017, 520883)
+Z_99 = 2.576
 ARGENT_BLADE_TEXT = ('Crush an enemy with argent fervor, dealing $s2% Weapon Damage plus '
                      '${$AP*0.4725+$sph*1.35+$m1+0}, healing you equal to the damage dealt, and unleashes '
                      '|cffffffffScourgebane|r, dealing ${$801832m1*$<scalingbp>+$sph*0.25+$AP*0.25} Holy damage.')
@@ -44,7 +47,9 @@ def class_fields():
                    (ARGENT_BLADE, 'Description[enUS]'): ARGENT_BLADE_TEXT,
                    (SILVERHAND_INCANTATION, 'SpellName[enUS]'): 'Silverhand Incantation',
                    (SILVERHAND_INCANTATION, 'Description[enUS]'): SILVERHAND_TEXT,
-                   (801832, 'SpellName[enUS]'): 'Scourgebane'})
+                   (801832, 'SpellName[enUS]'): 'Scourgebane',
+                   (887007, 'SpellName[enUS]'): 'CoA Aura - Templar Class',
+                   (HEAVENS_FINEST_STACK, 'SpellName[enUS]'): "Heaven's Finest"})
     return fields
 
 
@@ -54,6 +59,29 @@ def reader(*values, fields=None):
 
 def chance_reader():
     return reader(Displayed('$520007h', 20.0, None, 'chance_pct'))
+
+
+def observations(low, high):
+    return math.ceil(Z_99 ** 2 * max(low * (1 - low), high * (1 - high)) / (high - low) ** 2)
+
+
+def lights_echo_expectation(aura):
+    labels = proc_measurements(aura)
+    strikes = added_trials_label(aura, {'metric': 'spell_damage_count', 'spell': 804929})
+    model = {'part': 0, 'parts': 1, 'chance_pct': 10.0, 'minimum_trials': 1000, 'scheduled_attempts': 2000,
+             'part_attempts': 2000, 'attempt_ms': 5500, 'trigger': {'action': 'cast', 'spell': ARGENT_BLADE},
+             'proc_spell': 804929, 'event_metric': 'spell_damage_count', 'events_per_proc': 1, 'measurements': labels,
+             'readings': [{'name': 'player casts only', 'labels': [labels['trials']], 'minus_events': False},
+                          {'name': 'every Argent Blade strike, additional strikes included',
+                           'labels': [labels['trials'], strikes], 'minus_events': False}]}
+    return Expectation(f'{aura} proc_rate', PROC_CHECK, aura, aura, None, '$h', 'Wilson rule', model), strikes
+
+
+def lights_echo_steps(aura, strikes_label, casts, procs):
+    labels = proc_measurements(aura)
+    return [assert_step(labels['aura'], '1'), assert_step(labels['trials'], str(casts)),
+            assert_step(labels['events'], str(procs)), assert_step(labels['attempts'], str(casts)),
+            assert_step(strikes_label, str(procs))]
 
 
 def heavens_finest_expectation():
@@ -131,9 +159,19 @@ class QuestionTest(unittest.TestCase):
             self.assertEqual((reading['procs'], reading['trials'], reading['status']), (525.0, trials, status))
             self.assertAlmostEqual(reading['rate'], 525 / trials)
             self.assertEqual((reading['low'], reading['high']), wilson_interval(525, trials))
-        self.assertIn('20%', item.question)
-        self.assertIn('Direct damage dealt', item.question)
+        self.assertEqual([reading['predicted'] for reading in item.readings], [0.2, 0.25])
+        self.assertIn('Scourgebane ever proc twice between two of your auto attacks', item.question)
         self.assertEqual(item.labels, ('92111 proc_rate',))
+        (spell, conditions), = item.conditions
+        self.assertEqual(spell, SCOURGEBANE)
+        self.assertIn('learned only Scourgebane and auto attacked a target dummy without using any ability',
+                      conditions)
+        self.assertIn('525 Scourgebane procs in 2554 auto attacks that hit, 20.56%', conditions)
+        self.assertEqual(item.observations, ((SCOURGEBANE, f'About {observations(0.2, 0.25)} auto attacks that hit '
+                                                           'tell 20.0% from 25.0% apart: whichever reading is true, '
+                                                           'the 99% interval of the counted rate then excludes the '
+                                                           'other.'),))
+        self.assertEqual(observations(0.2, 0.25), 498)
 
     def test_text_question_uses_the_class_file(self):
         self.status_entry(PALADIN_TRAINING_PROC)
@@ -155,12 +193,43 @@ class QuestionTest(unittest.TestCase):
         self.assertIn('> Direct damage dealt now has a $520007h% chance to strike an enemy with Scourgebane, dealing '
                       'an additional $801832s2% Weapon damage plus ${$801832m1*$<scalingbp>+$SP*.25+$AP*.25} '
                       'Holyflame Damage.', entry)
-        self.assertTrue(any(line.startswith('- auto attacks only: 525 procs in 2554 trials') for line in entry))
-        self.assertTrue(any(line.startswith('- every direct damage event: 525 procs in 3079 trials')
-                            for line in entry))
+        self.assertIn('- auto attacks only (only your auto attack hits roll the chance here; a Scourgebane strike '
+                      'cannot trigger another Scourgebane): expects 20.0% of auto attacks that hit give a Scourgebane '
+                      'proc, test server 20.56%: matches the test server', entry)
+        self.assertIn('- every direct damage event: expects 25.0% of auto attacks that hit give a Scourgebane proc, '
+                      'test server 20.56%: does not match the test server', entry)
+        self.assertTrue(any(line.startswith('How we tested: Our test: the level 60 test character learned only '
+                                            'Scourgebane') for line in entry))
+        self.assertTrue(any(line.startswith('Observations needed: About 498 auto attacks that hit') for line in entry))
         self.assertTrue(any(line.startswith('Question: With Scourgebane learned') for line in entry))
         self.assertNotIn('Never asked?', '\n'.join(lines))
         self.assertTrue(all(line.isascii() for line in lines))
+
+    def test_ranks_with_one_tooltip_share_an_entry_with_their_own_readings(self):
+        tooltip = '|cffffffffArgent Blade|r now has a $h% chance to strike an additional time.'
+        fields = {(aura, name): value for aura in LIGHTS_ECHO
+                  for name, value in (('SpellName[enUS]', "Light's Echo"), ('Description[enUS]', tooltip))}
+        for aura, casts, procs in ((LIGHTS_ECHO[0], 10000, 1000), (LIGHTS_ECHO[1], 12000, 1200)):
+            expectation, strikes = lights_echo_expectation(aura)
+            self.workspace.scenario(f'conformance-templar-proc-{aura}-part-1', 'proc', [expectation],
+                                    steps=lights_echo_steps(aura, strikes, casts, procs), spell=aura,
+                                    name="Light's Echo", rank=aura)
+        tooltips = reader(Displayed('$h', 10.0, None, 'chance_pct'), fields=fields)
+        verdicts = self.verdicts(tooltips)
+        self.assertEqual([verdict.status for verdict in verdicts], ['ambiguous_tooltip'] * 2)
+        item, = questions(verdicts, tooltips)
+        self.assertEqual([spell for spell, _ in item.spells], list(LIGHTS_ECHO))
+        self.assertEqual([(reading['spell'], reading['trials']) for reading in item.readings],
+                         [(520017, 10000), (520017, 11000), (520883, 12000), (520883, 13200)])
+        self.assertEqual([spell for spell, _ in item.conditions], list(LIGHTS_ECHO))
+        self.assertIn('cast it at a target dummy every 5.5 sec', item.conditions[0][1])
+        self.assertIn(f'About {observations(0.1, 0.1 / 0.9)} casts of Argent Blade', item.observations[0][1])
+        self.assertEqual(len(item.question.split('\n')), 1)
+        path = write_questions([item], self.out)
+        lines = path.read_text(encoding='utf-8').splitlines()
+        self.assertEqual(sum(line.startswith("## Light's Echo") for line in lines), 1)
+        self.assertTrue(any(line.startswith('- 520883 player casts only') for line in lines))
+        self.assertIn('How we tested:', lines)
 
     def test_undefined_variable_is_a_data_issue(self):
         verdict, = self.unreadable_verdicts(ARGENT_BLADE, 'Argent Blade', ARGENT_BLADE_ENTRY, reader())
@@ -197,6 +266,7 @@ class QuestionTest(unittest.TestCase):
         item, = questions(verdicts, reader())
         self.assertEqual((item.kind, item.question, item.measured),
                          (SERVER_BEHAVIOUR, templar_trigger(HEAVENS_FINEST)['question'], 150.0))
+        self.assertEqual(item.readings[0]['expects'], "273 casts of Heaven's Finest (805390) for 273 Argent Blade hits")
         write_outputs(manifest, results, verdicts, self.out, tooltips=reader())
         lines = (self.out / QUESTIONS_FILE).read_text(encoding='utf-8').splitlines()
         self.assertLess(lines.index('# Server behaviour to confirm'), lines.index("## Heaven's Finest (806516)"))
@@ -229,6 +299,11 @@ class QuestionTest(unittest.TestCase):
                          [('multiplies', 20.0, 'ok'), ('adds', 25.0, 'alert')])
         self.assertIn('Argent Blade', item.question)
         self.assertIn('20% or by 25%', item.question)
+        self.assertIn('CoA Aura - Templar Class 887007 (-20% damage)', item.readings[1]['meaning'])
+        self.assertEqual(item.readings[1]['expects'], 'the Argent Blade hit +25%')
+        (_, conditions), = item.conditions
+        self.assertIn('Other percent modifiers of that hit on the test character: CoA Aura - Templar Class 887007 '
+                      '(-20% damage)', conditions)
 
     def test_opposite_sign_asks_whether_the_value_raises_or_lowers(self):
         label = '1001 effect_value e0 #0'
