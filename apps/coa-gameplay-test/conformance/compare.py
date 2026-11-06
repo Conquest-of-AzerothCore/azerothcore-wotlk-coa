@@ -13,6 +13,8 @@ from hits import MEAN_HALF_WIDTH, UNMODELLED, Z_99, HitModel, Modifier, Unmodell
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE
 from procs import AMBIGUOUS_TOOLTIP, CAST, PROC_CHECK, chance_of, wilson_interval
 from profile import DBC_DIR, caster_stats_from, known_aura_label, probe_aura_label
+from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE, asked, cleaned,
+                       questions, spell_name, write_questions)
 from stack import (ADDS, MEASURED, MELEE_SOURCE, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE, TALENT_DELTA,
                    levers, mean_interval, ratio_interval)
 from tooltip import CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, Unreadable
@@ -55,8 +57,12 @@ FRACTIONAL_FLOOR = 0.01
 CRITICAL_DAMAGE_BASE = 1000
 DURATION_KIND = 'duration_ms'
 PASSIVE_METRIC = 'metric'
-READINGS_QUESTION = 'readings'
-TEXT_QUESTION = 'text'
+CLASS_ENTRIES = {PROC_CHECK: ('procs', 'aura'), TRIGGER_CHECK: ('triggers', 'aura'),
+                 TALENT_DELTA: ('talent_modifiers', 'talent')}
+PER_LEVEL_TOKEN = re.compile(r'\$\d*ppl\d')
+DESCRIPTION_VARIABLE = re.compile(r'\$<\w+>')
+SENTENCE_END = re.compile(r'[.!?](?=\s|$|[$@])|\n')
+BLANK = '___'
 AURA_REQUIREMENTS = ('EquippedItemClass', 'Stances', 'CasterAuraSpell')
 MODIFIER_KINDS = {'spell_damage_done': 'damage', 'spell_healing_done': 'heal'}
 QUESTION_SUBJECTS = {'spell_critical_damage': 'a critical hit of {spell}', 'spell_damage_done': 'a hit of {spell}',
@@ -362,7 +368,7 @@ def token_drift(expectation: Expectation, tokens: Tokens | None) -> str | None:
 
 
 def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: float, tokens: Tokens,
-                tooltips: TooltipSource) -> Verdict:
+                tooltips: TooltipSource, name: str) -> Verdict:
     index = int(ORDINAL.search(expectation.label).group(1))
     token = tokens.readout.values[index]
     if expectation.check == 'aura_duration_ms':
@@ -380,8 +386,18 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
                              f'points {points}')
     if measured * expected < 0:
         return replace(base, status='ambiguous_tooltip', measured=measured, expected=expected,
-                       explanation=f'{token.text} evaluates to {expected:g}, the measured value has the opposite sign')
+                       explanation=f'{token.text} evaluates to {expected:g}, the measured value has the opposite sign',
+                       detail={'question': sign_question(base, name, token.text, measured, expected)})
     return deterministic(base, measured, measured, expected, f'{token.text} read with the measured stats')
+
+
+def sign_question(base: Verdict, name: str, text: str, measured: float, expected: float) -> dict:
+    opposite = deterministic(base, measured, measured, -expected, '').status
+    question = (f'The {name} tooltip shows {text} as {expected:g}, but our test server applies {measured:g}, the '
+                f'opposite sign. On live, does this number add to or take away from what the tooltip describes?')
+    readings = [{'name': 'the sign the tooltip shows', 'expected': expected, 'measured': measured, 'status': 'alert'},
+                {'name': 'the opposite sign', 'expected': -expected, 'measured': measured, 'status': opposite}]
+    return question_detail(READINGS_QUESTION, question, readings, measured)
 
 
 def describe_modifiers(modifiers: tuple[Modifier, ...]) -> str:
@@ -515,18 +531,37 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
         reading_trials = sum(totals[label] for label in reading['labels']) - excluded
         status, low, high, why = rate_judgement(procs, reading_trials, model['minimum_trials'], expected)
         judged.append((status, procs / reading_trials if reading_trials > 0 else None, low, high,
-                       f'{reading["name"]}: {procs:g} procs in {reading_trials:g} trials, {why}: {status}'))
+                       f'{reading["name"]}: {procs:g} procs in {reading_trials:g} trials, {why}: {status}',
+                       reading_trials))
     statuses = {status for status, *_ in judged}
-    status, rate, low, high, _ = judged[0]
+    status, rate, low, high, *_ = judged[0]
+    detail = None
     if len(statuses) > 1:
         status, low, high = 'ambiguous_tooltip', None, None
-    readings_text = '; '.join(text for *_, text in judged)
+        detail = {'question': proc_question(manifest, first_entry, expectation, readings, judged, procs, chance,
+                                            tooltips)}
+    readings_text = '; '.join(text for *_, text, _ in judged)
     lead = 'the readings of the trials disagree; ' if len(statuses) > 1 else ''
     minus = f' minus the completed player casts of {trigger}' if model.get('exclude_trigger_casts') else ''
-    return replace(base, status=status, measured=rate, expected=expected, low=low, high=high,
+    return replace(base, status=status, measured=rate, expected=expected, low=low, high=high, detail=detail,
                    explanation=f'{lead}{readings_text} ({notes}); {expectation.displayed} shows {chance:g}%; '
                                f'{expectation.rule}; events: {" + ".join(event_labels)}{minus}, '
                                f'{model["events_per_proc"]} per proc')
+
+
+def proc_question(manifest: dict, scenario: dict, expectation: Expectation, readings: list[dict], judged: list,
+                  procs: float, chance: float, tooltips: TooltipSource) -> dict:
+    entry = class_entry(manifest, expectation)
+    name = entry.get('name') or scenario['spell_name']
+    choices = ', or of '.join(reading['name'] for reading in readings)
+    question = (f'With {name} learned, the tooltip gives a {chance:g}% chance on '
+                f'"{entry.get("trigger_text", expectation.displayed)}". On live, count the '
+                f'{spell_name(tooltips, expectation.model["proc_spell"])} procs in a combat log: are they about '
+                f'{chance:g}% of {choices}?')
+    rows = [{'name': reading['name'], 'procs': procs, 'trials': trials, 'rate': rate, 'low': low, 'high': high,
+             'expected': chance / 100, 'status': status}
+            for reading, (status, rate, low, high, _, trials) in zip(readings, judged)]
+    return question_detail(READINGS_QUESTION, question, rows, procs)
 
 
 def trigger_counts(run: Run, labels: dict, with_baseline: bool) -> tuple[float, float, float, float] | None:
@@ -787,11 +822,26 @@ def judge_talent_delta(manifest: dict, parts: list[ProcPart], config_runs: dict[
     lead = 'the composition readings disagree; ' if len(statuses) > 1 else ''
     readings = '; '.join(f'{name} ({why}): expected {expected:.4g}%: {status}'
                          for name, expected, status, why in judged)
-    return replace(base, status=status, measured=delta, expected=judged[0][1], low=low, high=high,
+    detail = base.detail
+    if len(statuses) > 1:
+        detail = {**base.detail, 'question': talent_question(manifest, expectation, judged, delta, tooltips)}
+    return replace(base, status=status, measured=delta, expected=judged[0][1], low=low, high=high, detail=detail,
                    explanation=f'{lead}{readings}; per-hit means of {source} in {len(current)} and {len(baseline)} '
                                f'passes: {listed(current)} against {listed(baseline)}; 99% Welch interval of the '
                                f'ratio of the means, half-width {relative:.2%} of the expected ratio; '
                                f'{expectation.rule}{failures}')
+
+
+def talent_question(manifest: dict, expectation: Expectation, judged: list, delta: float,
+                    tooltips: TooltipSource) -> dict:
+    talent = class_entry(manifest, expectation).get('name') or spell_name(tooltips, expectation.spell_id)
+    changes = ' or by '.join(f'{expected:.4g}%' for _, expected, _, _ in judged)
+    question = (f'With {talent} learned, does a non-critical, unblocked hit of '
+                f'{spell_name(tooltips, expectation.model["source"])} grow by {changes} against the same hit without '
+                f'it?')
+    readings = [{'name': name, 'expected': expected, 'measured': delta, 'status': status, 'unit': '%'}
+                for name, expected, status, _ in judged]
+    return question_detail(READINGS_QUESTION, question, readings, delta)
 
 
 def judge_stack(manifest: dict, stack_parts: dict[str, list[ProcPart]], tooltips: TooltipSource,
@@ -808,7 +858,7 @@ def judge_stack(manifest: dict, stack_parts: dict[str, list[ProcPart]], tooltips
                        expectation.rank_id, expectation.check)
         if expectation.rule.startswith((UNMODELLED, UNREADABLE, AMBIGUOUS_TOOLTIP)):
             verdict = judge(manifest, entry, run, expectation, None, tooltips, hit_model)
-            verdicts.append(replace(verdict, detail=stack_detail(expectation.model)))
+            verdicts.append(replace(verdict, detail={**(verdict.detail or {}), **stack_detail(expectation.model)}))
         elif expectation.check == STACK_DPS:
             verdicts.append(judge_stack_dps(base, parts))
         elif expectation.check == STACK_SOURCE:
@@ -840,6 +890,80 @@ def delta_status(metric: str, measured: float, expected: float) -> str:
 
 def question_detail(kind: str, question: str, readings: list[dict], measured: float | None) -> dict:
     return {'kind': kind, 'question': question, 'readings': readings, 'measured': measured}
+
+
+def class_entry(manifest: dict, expectation: Expectation) -> dict:
+    section = CLASS_ENTRIES.get(expectation.check)
+    if section is None:
+        return {}
+    name, key = section
+    source = (expectation.model or {}).get('source')
+    return next((entry for entry in manifest['class_file'].get(name, []) if entry[key] == expectation.spell_id
+                 and (expectation.check != TALENT_DELTA or entry['source'] == source)), {})
+
+
+def entry_token(entry: str, description: str) -> str:
+    if entry in description or ' [' not in entry:
+        return entry
+    return entry.rsplit(' [', 1)[0]
+
+
+def sentence_with_blank(description: str, token: str) -> str:
+    text = cleaned(description)
+    position = text.find(token)
+    if position < 0:
+        return token
+    starts = [match.end() for match in SENTENCE_END.finditer(text, 0, position)]
+    end = SENTENCE_END.search(text, position + len(token))
+    return (text[starts[-1] if starts else 0:position] + BLANK
+            + text[position + len(token):end.end() if end else len(text)]).strip()
+
+
+def tooltip_value_question(spell_name: str, level: int, entry: str, description: str) -> dict:
+    token = entry_token(entry, cleaned(description))
+    per_level = ', '.join(dict.fromkeys(PER_LEVEL_TOKEN.findall(token)))
+    question = (f'The {spell_name} tooltip shows a number in "{sentence_with_blank(description, token)}" that '
+                f'depends on {per_level}, a per-level value that the client data alone does not give. On live, at '
+                f'level {level}, what number does the tooltip show in place of {BLANK}? Please give your attack power '
+                f'and spell power with it.')
+    return question_detail(TOOLTIP_VALUE, question, [], None)
+
+
+def data_issue_question(spell_name: str, entry: str, description: str) -> dict:
+    token = entry_token(entry, cleaned(description))
+    variables = ', '.join(dict.fromkeys(DESCRIPTION_VARIABLE.findall(token)))
+    question = (f'The {spell_name} tooltip uses {variables} in "{sentence_with_blank(description, token)}", but the '
+                f'client data of this spell defines no description variable (SpellDescriptionVariableID 0), so the '
+                f'number cannot be computed from it. On live, what does the tooltip show in place of {BLANK} (a '
+                f'number, 0, nothing or the raw text)? Please give your level, attack power and spell power with it.')
+    return question_detail(DATA_ISSUE, question, [], None)
+
+
+def unreadable_question(tooltips: TooltipSource, rank_id: int, spell_name: str, level: int, entry: str) -> dict | None:
+    per_level = PER_LEVEL_TOKEN.search(entry)
+    undefined = DESCRIPTION_VARIABLE.search(entry)
+    if not per_level and not undefined:
+        return None
+    try:
+        description = tooltips.spell_field(rank_id, 'Description[enUS]')
+        description = description if isinstance(description, str) else ''
+        if per_level:
+            return tooltip_value_question(spell_name, level, entry, description)
+        if not tooltips.spell_field(rank_id, 'SpellDescriptionVariableID'):
+            return data_issue_question(spell_name, entry, description)
+    except Unreadable:
+        return None
+    return None
+
+
+def server_question(manifest: dict, expectation: Expectation, verdict: Verdict) -> Verdict:
+    entry = class_entry(manifest, expectation)
+    if verdict.status != 'alert' or not entry.get('question'):
+        return verdict
+    readings = [{'name': 'as the tooltip says', 'expected': verdict.expected, 'measured': verdict.measured,
+                 'status': 'alert'}]
+    return replace(verdict, detail={**(verdict.detail or {}), 'question': question_detail(
+        SERVER_BEHAVIOUR, entry['question'], readings, verdict.measured)})
 
 
 def missing_measurement(run: Run, label: str) -> str:
@@ -1093,9 +1217,14 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
     if check == 'unmodelled' or rule.startswith(UNMODELLED) or rule.startswith(UNMEASURABLE):
         return replace(base, status='unmodelled', measured=measured, explanation=rule)
     if rule.startswith(UNREADABLE):
-        return replace(base, status='unreadable', measured=measured, explanation=rule)
+        found = unreadable_question(tooltips, expectation.rank_id, entry['spell_name'], manifest['level'],
+                                    rule[len(UNREADABLE):])
+        return replace(base, status='unreadable', measured=measured, explanation=rule,
+                       detail={'question': found} if found else None)
     if rule.startswith(AMBIGUOUS_TOOLTIP):
-        return replace(base, status='ambiguous_tooltip', measured=measured, explanation=rule)
+        text = class_entry(manifest, expectation).get('question') or rule[len(AMBIGUOUS_TOOLTIP):]
+        return replace(base, status='ambiguous_tooltip', measured=measured, explanation=rule,
+                       detail={'question': question_detail(TEXT_QUESTION, text, [], None)})
     if check == PASSIVE_DELTA:
         return judge_passive(manifest, entry, run, expectation, tooltips)
     if run is None:
@@ -1125,7 +1254,7 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
     if check == 'cooldown_ms':
         return judge_time(base, run, measured, float(expectation.displayed), rule)
     if check in TOKEN_CHECKS and rule.startswith(READ_RULE):
-        return judge_token(base, expectation, run, measured, tokens, tooltips)
+        return judge_token(base, expectation, run, measured, tokens, tooltips, entry['spell_name'])
     return replace(base, measured=measured, explanation=f'no comparison for check {check!r} with rule {rule!r}')
 
 
@@ -1154,8 +1283,9 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                 trigger_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             else:
                 verdicts.append(judge(manifest, entry, run, expectation, tokens, tooltips, hit_model))
-    verdicts += [judge_proc(manifest, parts, tooltips) for parts in proc_parts.values()]
-    verdicts += [judge_trigger(parts) for parts in trigger_parts.values()]
+    verdicts += [server_question(manifest, parts[0][2], judge_proc(manifest, parts, tooltips))
+                 for parts in proc_parts.values()]
+    verdicts += [server_question(manifest, parts[0][2], judge_trigger(parts)) for parts in trigger_parts.values()]
     verdicts += judge_stack(manifest, stack_parts, tooltips, hit_model)
     return Comparison(manifest, runs, missing, verdicts)
 
@@ -1256,7 +1386,8 @@ def report_lines(manifest: dict, manifest_path: Path, results_dir: Path, runs: d
     return lines + ['']
 
 
-def write_outputs(manifest_path: Path, results_dir: Path, verdicts: list[Verdict], out_dir: Path) -> tuple[Path, Path]:
+def write_outputs(manifest_path: Path, results_dir: Path, verdicts: list[Verdict], out_dir: Path, *,
+                  tooltips: TooltipSource | None = None) -> tuple[Path, Path]:
     manifest = json.loads(Path(manifest_path).read_text(encoding='utf-8'))
     runs, missing = load_runs(manifest, Path(results_dir))
     out_dir = Path(out_dir)
@@ -1266,6 +1397,9 @@ def write_outputs(manifest_path: Path, results_dir: Path, verdicts: list[Verdict
     report.write_text('\n'.join(report_lines(manifest, Path(manifest_path), Path(results_dir), runs, missing,
                                              verdicts)), encoding='utf-8')
     write_verdicts(manifest, Path(manifest_path), Path(results_dir), verdicts, out_dir)
+    asked_verdicts = [verdict for verdict in verdicts if asked(verdict)]
+    source = tooltips or (DbcTooltips(manifest.get('dbc_dir', DBC_DIR)) if asked_verdicts else None)
+    write_questions(questions(asked_verdicts, source) if asked_verdicts else [], out_dir, source)
     return alerts, report
 
 

@@ -143,6 +143,7 @@
       "status": "ambiguous_tooltip",
       "reason": "the tooltip does not say what triggers Zealotry, so neither a cast nor an attack follows from it",
       "handler": "AscensionTemplarAbilities.cpp:277-286 rolls it on a damaging hit of the Zealotry strike 801450",
+      "question": "Zealotry's own tooltip (801450) only says that it deals 80% off-hand Weapon Damage as Holy Damage. On live, what makes Zealotry hit: in the combat log, which of your attacks or abilities comes right before each Zealotry hit? With Paladin Training learned (8% chance), do about 8 in 100 Zealotry hits give you an additional auto attack on your next strike?",
       "dbc": {
         "504808": {"ProcChance": 8, "ProcFlags": 0, "ProcCharges": 0}
       },
@@ -156,6 +157,7 @@
       "status": "ambiguous_tooltip",
       "reason": "the tooltip does not say what triggers Zealotry, so neither a cast nor an attack follows from it",
       "handler": "AscensionTemplar.cpp:214-223 (Zealotry) rolls its ProcChance to cast the strike 801450 again",
+      "question": "Zealotry's own tooltip (801450) only says that it deals 80% off-hand Weapon Damage as Holy Damage. On live, what makes Zealotry hit: in the combat log, which of your attacks or abilities comes right before each Zealotry hit? With Blade Sermon learned (a 5% or a 10% chance, depending on which Blade Sermon you have), how often does Zealotry hit twice instead of once?",
       "dbc": {
         "572548": {"ProcChance": 5, "ProcFlags": 0, "ProcCharges": 0}
       },
@@ -169,6 +171,7 @@
       "status": "ambiguous_tooltip",
       "reason": "the tooltip does not say what triggers Zealotry, so neither a cast nor an attack follows from it",
       "handler": "AscensionTemplar.cpp:214-223 (Zealotry) rolls its ProcChance to cast the strike 801450 again",
+      "question": "Zealotry's own tooltip (801450) only says that it deals 80% off-hand Weapon Damage as Holy Damage. On live, what makes Zealotry hit: in the combat log, which of your attacks or abilities comes right before each Zealotry hit? With Blade Sermon learned (a 5% or a 10% chance, depending on which Blade Sermon you have), how often does Zealotry hit twice instead of once?",
       "dbc": {
         "572554": {"ProcChance": 10, "ProcFlags": 0, "ProcCharges": 0}
       },
@@ -276,7 +279,8 @@
       "observe_source": "EffectTriggerSpell[0] of 707606",
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
-      "per_trigger_text": "now grants you Oath: Retribution"
+      "per_trigger_text": "now grants you Oath: Retribution",
+      "question": "Fervent Castigation says that casting Righteous Upheaval or Blade of Faith grants you Oath: Retribution and starts your Oath Chain. On our test server the cast grants nothing at once: Oath: Retribution appears only when your next Oath starts a new Oath Chain. On live, cast Righteous Upheaval with no Oath Chain up: do Oath: Retribution and Oath Chain appear on your buff bar right after the cast, or only when you next gain an Oath?"
     },
     {
       "aura": 806273,
@@ -318,7 +322,8 @@
       "observe_source": "EffectTriggerSpell[1] of 806516",
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
-      "per_trigger_text": "now grant Heaven's Finest"
+      "per_trigger_text": "now grant Heaven's Finest",
+      "question": "Heaven's Finest says that damaging abilities grant Heaven's Finest for 12 sec, stacking 6 times, and the tooltip of the Heaven's Finest buff (805390) says that at 6 stacks it increases your Energy regeneration by 100% for 8 sec. On our test server the 6th stack removes Heaven's Finest and gives you The Finest of Heaven for 8 sec, and damaging abilities give no Heaven's Finest stack while The Finest of Heaven lasts. On live, watch your buffs while you use damaging abilities: when Heaven's Finest reaches 6 stacks, do the stacks disappear, and does a new stack come only after The Finest of Heaven ends?"
     },
     {
       "aura": 803158,
@@ -388,7 +393,8 @@
       "source": 801832,
       "source_text": "Scourgebane",
       "status": "ambiguous_tooltip",
-      "reason": "'Increases the critical damage of Scourgebane by $s2%' does not say whether the percent applies to the whole critical hit or to its critical bonus"
+      "reason": "'Increases the critical damage of Scourgebane by $s2%' does not say whether the percent applies to the whole critical hit or to its critical bonus",
+      "question": "With Legacy of the Silver Hand learned, the tooltip raises the critical damage of Scourgebane by 25%. On live, compare critical Scourgebane hits in the combat log without and with the talent: does the whole critical hit get 25% larger, or only the extra damage that the critical strike adds on top of a normal hit?"
     },
     {
       "talent": 806525,

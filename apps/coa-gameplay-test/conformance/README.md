@@ -28,7 +28,11 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
   its `Expectation`; `trigger_plan` sizes the parts and `trigger_entries(class_file, auras)` selects the entries (see
   [Trigger entries](#trigger-entries)).
 - `compare.py`: `compare(manifest, results_dir)` judges a run against the manifest and returns `Verdict(label, status,
-  measured, expected, low, high, explanation)`; `write_outputs` writes `alerts.tsv`, `report.md` and `verdicts.json`.
+  measured, expected, low, high, explanation)`; `write_outputs` writes `alerts.tsv`, `report.md`, `verdicts.json` and
+  `questions.md`.
+- `questions.py`: `questions(verdicts, tooltips)` turns the verdicts that carry a question into one `Question(tooltip,
+  spells, kind, question, readings, measured, labels)` per tooltip and question, and `write_questions(items, out_dir)`
+  writes `questions.md` (see [Player question list](#player-question-list)).
 - `diff.py`: `diff(before, after, intended)` returns the `Change` of every verdict that moved between two compare
   outputs, and `write_impact` writes `impact.md` (see [Impact report](#impact-report)).
 - `stack.py`: `stack_scenarios(class_file, passes=5)` returns the passes of every cumulative talent configuration of
@@ -394,6 +398,7 @@ A `procs` entry of the class file describes one proc aura:
 | `spell_proc` | the `spell_proc` row of each spell, `{}` without one |
 | `internal_cooldown_ms` | the `spell_proc` `Cooldown`, the internal cooldown between procs |
 | `status`, `reason` | `ambiguous_tooltip` or `unmodelled` for an entry without a scenario, and why |
+| `question` | the question for players of an `ambiguous_tooltip` entry ([questions](#player-question-list)) |
 
 The trigger comes from the tooltip text only. When the text does not say what triggers the proc, the entry is
 `ambiguous_tooltip` and never gets a chosen trigger. An entry whose observable the harness cannot separate is
@@ -485,6 +490,7 @@ A `triggers` entry of the class file is a passive whose tooltip says that someth
 | `observe_metric` | `spell_cast_count` or `spell_energize_count` of `observe_spell` |
 | `per_trigger`, `per_trigger_text` | the events per trial, 1 or 0.5 for "Every 2nd", and the words that state it |
 | `status`, `reason` | `unmodelled` or `ambiguous_tooltip` for an entry without a scenario, and why |
+| `question` | the question for players when the entry's verdict is an `alert` the server code explains (ruling R14) |
 
 `aura_proc_rate` is not a judge of these entries: their passives have `ProcFlags` 0 and are scripted (design D10).
 The observed spell is the passive's `EffectTriggerSpell[n]` (`observe_source` `EffectTriggerSpell[n] of <aura>`)
@@ -539,6 +545,8 @@ cast, 20 baseline trials and no baseline event in each entry): nine entries are 
   Heaven 806517 and is removed (`AscensionTemplarAuras.cpp:134-138`), and no stack is granted while 806517 (8 s) is
   up (`AscensionTemplarEvents.cpp:208-214`); the text, its `@s:805390:0@` reference included, does not say so.
 
+Both entries carry a `question`, so their alerts go to the "Server behaviour to confirm" section of `questions.md`.
+
 ## Talent stack (lever map)
 
 The class file's `rotation` is a fixed sequence, `stack` the configurations that add talents to it one group at a time,
@@ -552,7 +560,7 @@ and `talent_modifiers` the talents whose tooltip states a change of one damage s
 | `rotation.drain_ms` | the wait after the last cycle, before the measurements |
 | `rotation.sources`, `cast_sources` | the spells whose damage is measured, and those whose casts are counted |
 | `stack[].name`, `talents` | a configuration and the talents it adds to every earlier one |
-| `talent_modifiers` | `talent`, `name`, `tooltip`, `token`, `source` and its `source_text`; see below |
+| `talent_modifiers` | `talent`, `name`, `tooltip`, `token`, `source` and its `source_text`, `question`; see below |
 
 The Templar rotation, configurations and talents are those of the measurements of 2026-11-05
 (`.agents/plans/class-spell-audit/stacking-scenarios/c0_base.json` to `c7_scarlet.json`): 120 cycles of a cast of Argent
@@ -589,7 +597,7 @@ expectation comes from the entry:
 - `status` (`unmodelled`, `ambiguous_tooltip`) and `reason`: a talent whose change of the source has no fixed amount
   (Divine Strikes: stacks over time; Scourge-Defense Training: the casts after a Warrior of Dawn proc; Martial Training:
   Scarlet Hammer appears only with it) or whose text is unclear (Legacy of the Silver Hand: critical damage of the
-  whole hit or of its bonus). Such a delta is never `ok`.
+  whole hit or of its bonus). Such a delta is never `ok`; an `ambiguous_tooltip` entry has a `question` for players.
 - otherwise `claim` (the words of the tooltip) and `dbc` (the effect fields, checked against the client DBC by the
   tests) cite the effect of the talent whose `EffectSpellClassMask` (three words per effect) meets the
   `SpellFamilyFlags` of the source, in the same `SpellFamilyName`; the `token`, read with `read_tooltip`, must be that
@@ -681,7 +689,8 @@ every `actual` as a string; it is converted to a number, and a value that is not
 (default: the manifest directory) has one row per verdict that is neither `ok` nor `measured`; `report.md` counts the
 verdicts per status, per spell and, for passive scenarios, per measurement family ("Passives"), and lists the known
 modifiers, the probe auras, the scenarios without a result and the runs that did not pass. `verdicts.json` keeps every verdict with its interval, detail and explanation (schema 1)
-for `diff`. When the run holds stack verdicts, `compare` also writes `levers.md`.
+for `diff`. `questions.md` lists the checks that players on live must settle (see
+[Player question list](#player-question-list)). When the run holds stack verdicts, `compare` also writes `levers.md`.
 
 ### A full class run
 
@@ -835,7 +844,7 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   (Patience 712678 names Interdict 560116, its mask matches Sacred Restraint 102208).
   An `ambiguous_tooltip` passive verdict keeps `detail['question']` = `question_detail(kind, question, readings,
   measured)`: `kind` `readings` (disagreeing readings) or `text` (named spell outside the mask), the question in
-  observable terms ("With Chivalric learned, does a critical hit of Reckoning change by +15% or by +7.5%?"), per
+  observable terms ("With Chivalric learned, does a critical hit of Reckoning change by +15% or by +5%?"), per
   reading its `name`, `expected` (the after value), `delta`, `status` and `measured` (the after value of that
   reading's spell), and `measured`, the after value of the verdict's own measurement. The verdict's `measured`,
   `expected`, `low` and `high` are deltas, and every passive verdict keeps its metric in `detail['metric']`.
@@ -843,6 +852,54 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
 The report lists each known aura's modifier effects with `EffectBasePoints`, `EffectRealPointsPerLevel`, the
 value at the class level and the runs that measured the aura; a hit model applies a modifier only in a run that
 measured its aura.
+
+### Player question list
+
+`questions.md` is what the owner posts to players of the class on live, so it is English and self-contained, and
+each question asks for something a player sees: tooltip numbers, buff stacks, combat log lines, damage. A verdict
+asks a question when its `detail['question']` is `question_detail(kind, question, readings, measured)`; an
+`ambiguous_tooltip` verdict without one asks its explanation (kind `text`). An `ok` verdict never asks one, whatever
+its detail.
+
+Kinds, what gives them and what they ask:
+
+- `readings`: disagreeing readings of a passive delta, of a proc rate (`judge_proc`) or of a talent delta
+  (`judge_talent_delta`), and a token value whose measured sign is the opposite of the tooltip's (`judge_token`); the
+  change or rate each reading expects, from the tooltip numbers.
+- `text`: a named spell outside the class mask (passives), a class-file entry whose `status` is `ambiguous_tooltip`
+  (`procs`, `talent_modifiers`) or a generated `ambiguous_tooltip` rule; the entry's `question`, else the rule's
+  reason.
+- `tooltip_value`: an `unreadable` value or hit whose entry holds a `$<id>pplN` token, a per-level value without client
+  evidence (owner answer Q6); the number the live tooltip shows, with the player's attack and spell power.
+- `data_issue`: an `unreadable` value or hit whose entry holds a `$<name>` variable while the spell's
+  `SpellDescriptionVariableID` is 0 (owner answer Q8); what the live tooltip shows in its place.
+- `server_behaviour`: an `alert` of a proc or trigger entry that has a class-file `question` (ruling R14); whether
+  live does what our server does.
+
+Readings carry `name`, `expected`, `status` and, as they apply, `delta`, `measured` (the test server value),
+`procs`, `trials`, `rate`, `low` and `high` (the 99% Wilson interval), `unit`. In `compare.py`,
+`tooltip_value_question(spell_name, level, entry, description)` builds the `tooltip_value` detail of an entry with a
+`$<id>pplN` token, for any judge that reports one, and `data_issue_question(spell_name, entry, description)` the
+`data_issue` detail; `unreadable_question` chooses between them for the `unreadable: ` rules of value and hit
+scenarios. The sentence of the tooltip that holds the entry is quoted with `___` in its place. A `$<name>` of a spell
+whose `SpellDescriptionVariableID` is not 0 but does not define the name stays `unreadable` without a question: the
+tooltip source gives no access to the definitions.
+
+Verdicts with the same cleaned tooltip, kind, question, readings and measurement make one `Question`, which lists
+every spell id and check label (Blade Sermon 572548 and 572554; the seven Argent Blade ranks 804929 to 807268, whose
+`$<scalingbp>` has no definition). `questions.md` has a `# Tooltips` section (kinds `readings`, `text`,
+`tooltip_value`, `data_issue`, then any other kind) and a `# Server behaviour to confirm` section. Each entry is
+`## <name> (<ids>)`, the tooltip in a quote block (color codes removed, `$` tokens kept, `@s:<id>:<flags>@` shown as
+"followed by the tooltip of spell <id>"), the token values that are the same at any level and stats (read with two
+opposite `CasterStats`), one line per reading, a line starting `Question:` and the check labels.
+
+Produced on 2026-11-06 from the existing probe stamps (manifests generated again with the class file of this change,
+same scenario hashes): triggers `20261106-093404` give the two server questions (Fervent Castigation 707606,
+expected 273 against 0; Heaven's Finest 806516, 273 against 150), passives `20261106-085206` the Serendipity and
+Chivalric readings, procs `20261105-201416` the Scourgebane and both Light's Echo readings and the Paladin Training
+and Blade Sermon text questions, the stack `20261105-204050` Paladin Training (20% against 25%, measured 20.27%) and
+Legacy of the Silver Hand, and the value and hit scenarios of `20261105-214020` the six `ppl` questions and the
+Argent Blade data issue.
 
 ## Run
 

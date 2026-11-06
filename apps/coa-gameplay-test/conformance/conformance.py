@@ -15,6 +15,7 @@ from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, hit_scen
                   reference_hit_model, reference_melee_model)
 from procs import proc_entries, proc_plan, proc_scenario, proc_status_expectation, proc_unmodelled_expectation
 from profile import DBC_DIR, load_class_file
+from questions import QUESTIONS_FILE
 from stack import PASSES, STACK_CHECKS, STACK_DPS, STACK_KIND, stack_scenarios
 from tooltip import read_tooltip
 from triggers import (trigger_entries, trigger_plan, trigger_scenario, trigger_status_expectation,
@@ -248,7 +249,7 @@ def compare_command(args) -> int:
     counts = {status: sum(verdict.status == status for verdict in comparison.verdicts) for status in STATUSES}
     print(' '.join(f'{status}={count}' for status, count in counts.items()))
     print(f'{len(comparison.runs)} scenarios with a result, {len(comparison.missing)} without')
-    print(f'{alerts}\n{report}\n{out / VERDICTS_FILE}')
+    print(f'{alerts}\n{report}\n{out / VERDICTS_FILE}\n{out / QUESTIONS_FILE}')
     if any(verdict.check in STACK_CHECKS for verdict in comparison.verdicts):
         print(write_levers(args.manifest, args.results, comparison.verdicts, out))
     return 0
@@ -290,8 +291,9 @@ def main(argv=None) -> int:
     generating.add_argument('--stack', action='store_true',
                             help='the passes of every stack configuration of the class file, cumulative talents')
     generating.add_argument('--passes', type=int, default=PASSES, help=f'passes per stack configuration ({PASSES})')
-    comparing = commands.add_parser('compare', help=f'judge a verify_all stamp, write {ALERTS_FILE}, {REPORT_FILE} '
-                                                    f'and, for stack runs, {LEVERS_FILE}')
+    comparing = commands.add_parser('compare', help=f'judge a verify_all stamp, write {ALERTS_FILE}, {REPORT_FILE}, '
+                                                    f'{VERDICTS_FILE}, {QUESTIONS_FILE} and, for stack runs, '
+                                                    f'{LEVERS_FILE}')
     comparing.add_argument('--manifest', type=Path, required=True)
     comparing.add_argument('--results', type=Path, required=True, help='a .cache/verify-all/<STAMP> directory')
     comparing.add_argument('--out', type=Path, help='output directory, the manifest directory by default')

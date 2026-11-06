@@ -229,7 +229,9 @@ passive triggers, procs and talent stack against their client tooltips, and judg
 [ADR 0011](../adr/0011-class-tooltip-conformance.md), passives in
 [ADR 0012](../adr/0012-passive-conformance-by-with-and-without-measurement.md)). The scenarios run as exploratory files, so the run ends
 `INCOMPLETE` even when they pass; the verdicts come from `compare`, not from the stage result. Its unit tests are the
-`conformance` suite of the source stage.
+`conformance` suite of the source stage. `compare` writes `alerts.tsv`, `report.md`, `verdicts.json`, `questions.md`
+(the checks that only players on live can settle, in English and in what a player sees) and, for stack runs,
+`levers.md`.
 
 ```sh
 python -B tools/verify_all.py --stages gameplay --scenario .cache/conformance/templar/scenarios/*.json
