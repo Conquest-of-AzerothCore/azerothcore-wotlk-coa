@@ -4,7 +4,7 @@ import struct
 import tempfile
 import unittest
 
-from classes import ClassSpell, class_spells, table_rows
+from classes import PROGRESSION_HEADER as HEADER, ClassSpell, class_spells, table_rows
 from passives import (FAMILIES, MAX_SPELLMOD, PHRASES, MetricPlan, PassiveTarget, family_of, named_targets,
                       passive_effects, stat_after_token)
 from profile import load_class_file
@@ -13,7 +13,6 @@ from values import dataset
 import schemas
 
 DBC_DIR = Path('/srv/coa/server-data/dbc')
-HEADER = Path(__file__).resolve().parents[3] / 'src/server/coa/AscensionSpellProgressionData.h'
 
 TEMPLAR_CLASS_ID = 19
 TEMPLAR_PASSIVES = 145
@@ -39,6 +38,12 @@ STURDY = 681009
 BLESSED_PADDING = 301311
 CALL_OF_THE_MONASTERY = 560550
 LIGHTS_CHOSEN = 301310
+BLESSED_STRIKES = 704180
+CHAKRA_OF_LIGHT = (803159, 803844)
+DEEP_SECRETS = 705263
+FINESSE = 705271
+MAGIC_SCHOOLS = [1, 2, 3, 4, 5, 6]
+NO_NAMED_TARGET = 'unmodelled: the tooltip names none of the spells the class mask affects ('
 
 SPELL_RECORD_BYTES = 936
 SPELL_FIELDS = 234
@@ -153,7 +158,8 @@ class TemplarPassiveTest(unittest.TestCase):
         self.assertEqual(target_ids(effect, True, True), {ARGENT_BLADE_AT_60, RIGHTEOUS_LUNGE_AT_60})
         self.assertIn(HOLY_MASTER, target_ids(effect, False, True))
         plan = plan_named(effect, 'spell_modifier')
-        self.assertEqual((plan.fields['op'], plan.fields['base'], plan.relation), (0, 1000, 'spell_mod_pct'))
+        self.assertEqual((plan.fields['op'], plan.fields['base'], plan.relation, plan.judged),
+                         (0, 1000, 'spell_mod_pct', True))
         self.assertEqual(effect.reason, '')
 
     def test_named_targets_without_the_mask(self):
@@ -161,6 +167,17 @@ class TemplarPassiveTest(unittest.TestCase):
         targets = named_targets(records, TEMPLAR_FAMILY_NAME, 'Righteous Lunge and Argent Blade', LEVEL)
         self.assertEqual({target.spell_id for target in targets}, {ARGENT_BLADE_AT_60, RIGHTEOUS_LUNGE_AT_60})
         self.assertTrue(all(isinstance(target, PassiveTarget) and target.named for target in targets))
+
+    def test_spell_name_inside_a_longer_proper_noun_is_not_named(self):
+        blessed_strikes = effect_of(self.effects(BLESSED_STRIKES), 0)
+        self.assertNotIn('Oath', {target.name for target in blessed_strikes.targets if target.named})
+        self.assertFalse(any(target.named for target in blessed_strikes.targets))
+        self.assertTrue(blessed_strikes.reason.startswith(NO_NAMED_TARGET))
+        for chakra in CHAKRA_OF_LIGHT:
+            effect = effect_of(self.effects(chakra), 1)
+            self.assertFalse(any(target.named for target in effect.targets))
+            self.assertTrue(effect.reason.startswith(NO_NAMED_TARGET), effect.reason)
+        self.assertTrue(effect_of(self.effects(DEEP_SECRETS), 0).reason.startswith(NO_NAMED_TARGET))
 
     def test_named_target_outside_the_mask_is_kept(self):
         effect = effect_of(self.effects(PATIENCE), 0)
@@ -216,6 +233,22 @@ class TemplarPassiveTest(unittest.TestCase):
         self.assertEqual((crit.fields, crit.relation), ({'school': 1}, 'add'))
         expertise = plan_named(effect_of(effects, 1), 'expertise')
         self.assertEqual(expertise.relation, 'add')
+
+    def test_generic_crit_phrase_judges_melee_and_measures_spell_crit(self):
+        effect = effect_of(self.effects(FINESSE), 0)
+        melee = plan_named(effect, 'melee_crit_chance')
+        self.assertEqual((melee.relation, melee.judged), ('add', True))
+        spell_crit = [plan for plan in effect.plans if plan.metric == 'spell_crit_chance']
+        self.assertEqual([plan.fields['school'] for plan in spell_crit], MAGIC_SCHOOLS)
+        self.assertFalse(any(plan.judged for plan in spell_crit))
+        self.assertEqual(effect.reason, '')
+
+    def test_effect_carries_its_signed_points_beside_a_shared_token(self):
+        effects = self.effects(PALADIN_TRAINING)
+        cost = effect_of(effects, 1)
+        self.assertEqual((cost.token.text, cost.token.value, cost.token.effect_index), ('$s1', 20.0, 0))
+        self.assertEqual(cost.points, -20.0)
+        self.assertEqual(effect_of(effects, 0).points, 20.0)
 
     def test_rating_mask_gives_one_plan_per_rating(self):
         effect = effect_of(self.effects(LIGHTS_CHOSEN), 1)

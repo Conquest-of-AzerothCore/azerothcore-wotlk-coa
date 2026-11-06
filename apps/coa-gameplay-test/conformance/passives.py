@@ -24,7 +24,7 @@ MAGIC_SCHOOLS = range(1, 7)
 SCHOOLS = range(7)
 
 FAMILIES = {
-    **dict.fromkeys((107, 108), 'P1'),
+    **dict.fromkeys((ADD_FLAT_MODIFIER, ADD_PCT_MODIFIER), 'P1'),
     **dict.fromkeys((29, 31, 47, 49, 132, 133, 137, 138, 142, 166, 167, 174, 220, 237, 240, 290, 327, 333), 'P2'),
     **dict.fromkeys((59, 79, 118, 122, 136, 163, 286, 303), 'P3'),
     **dict.fromkeys((87, 229, 283), 'P4'),
@@ -95,6 +95,7 @@ PHRASES: dict[str, tuple[str, ...]] = {
 
 SHAREABLE_TOKEN = re.compile(r'\$(?:/\d+;)?s[1-3]')
 CATEGORY_WORD = re.compile(r'[A-Z][a-z]{3,}\b')
+PROPER_NOUN_CONTINUATION = re.compile(r' [A-Z]')
 LINE_BREAKS = re.compile(r'\s+')
 
 
@@ -104,6 +105,7 @@ class MetricPlan:
     fields: dict = field(hash=False)
     relation: str
     source: str | None = None
+    judged: bool = True
 
 
 @dataclass(frozen=True)
@@ -126,6 +128,7 @@ class PassiveEffect:
     plans: tuple[MetricPlan, ...]
     targets: tuple[PassiveTarget, ...]
     reason: str
+    points: float | None = None
 
 
 class NotModelled(Exception):
@@ -205,7 +208,8 @@ def named_targets(records: Records, family_name: int, text: str, level: int) -> 
         if name not in text:
             continue
         free = [match.span() for match in pattern.finditer(text)
-                if not any(start < match.end() and match.start() < end for start, end in claimed)]
+                if not PROPER_NOUN_CONTINUATION.match(text, match.end())
+                and not any(start < match.end() and match.start() < end for start, end in claimed)]
         if free:
             claimed += free
             targets += [PassiveTarget(spell_id, name, True, False)
@@ -311,7 +315,9 @@ def crit_plans(text: str) -> list[tuple[MetricPlan, str]]:
         quantity = f'{name} {CRIT_CHANCE}'
         if names_phrase(text, quantity):
             return [(MetricPlan('spell_crit_chance', {'school': school}, 'add'), quantity)]
-    return [(MetricPlan('melee_crit_chance', {}, 'add'), CRIT_CHANCE)]
+    return [(MetricPlan('melee_crit_chance', {}, 'add'), CRIT_CHANCE)] + [
+        (MetricPlan('spell_crit_chance', {'school': school}, 'add', judged=False), CRIT_CHANCE)
+        for school in MAGIC_SCHOOLS]
 
 
 def power_plans(misc: int) -> list[tuple[MetricPlan, str]]:
@@ -403,13 +409,20 @@ def effect_plans(aura: int, misc: int, text: str, token: Displayed) -> tuple[Met
     return tuple(plan for plan, _ in plans)
 
 
-def passive_override(class_file: dict, rank_id: int, effect: int) -> dict | None:
+def passive_override(class_file: dict, spell_ids: set[int], effect: int) -> dict | None:
     return next((entry for entry in class_file.get('passive_targets', [])
-                 if entry['spell'] == rank_id and entry['effect'] == effect), None)
+                 if entry['spell'] in spell_ids and entry['effect'] == effect), None)
 
 
-def classify(class_file: dict, records: Records, rank_id: int, effect: int, effects: list[int], text: str,
-             values: list[Displayed]) -> PassiveEffect:
+def signed_points(records: Records, rank_id: int, effect: int) -> float | None:
+    try:
+        return records.points(rank_id, effect, upper=False)
+    except Unreadable:
+        return None
+
+
+def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, effect: int, effects: list[int],
+             text: str, values: list[Displayed]) -> PassiveEffect:
     def spell(name: str):
         return records.field('Spell', rank_id, name)
 
@@ -423,7 +436,7 @@ def classify(class_file: dict, records: Records, rank_id: int, effect: int, effe
     reason = ''
     if family == 'P1':
         targets, reason = modifier_targets(records, rank_id, effect, text, class_file['level'],
-                                           passive_override(class_file, rank_id, effect))
+                                           passive_override(class_file, {spell_id, rank_id}, effect))
     try:
         if family == UNKNOWN:
             raise NotModelled(f'aura {aura} has no passive measurement' if aura
@@ -442,7 +455,8 @@ def classify(class_file: dict, records: Records, rank_id: int, effect: int, effe
             plans = effect_plans(aura, misc, text, token)
     except NotModelled as error:
         plans, reason = (), UNMODELLED + str(error)
-    return PassiveEffect(rank_id, effect, aura, misc, misc_b, family, token, plans, targets, reason)
+    return PassiveEffect(rank_id, effect, aura, misc, misc_b, family, token, plans, targets, reason,
+                         signed_points(records, rank_id, effect))
 
 
 def passive_effects(class_file: dict, spell: ClassSpell) -> list[PassiveEffect]:
@@ -452,4 +466,5 @@ def passive_effects(class_file: dict, spell: ClassSpell) -> list[PassiveEffect]:
     text = cleaned_tooltip(records.field('Spell', rank_id, 'Description[enUS]'))
     values = read_tooltip(dbc, rank_id, structure_stats(class_file['level'])).values
     effects = [effect for effect in EFFECTS if records.field('Spell', rank_id, f'Effect[{effect}]')]
-    return [classify(class_file, records, rank_id, effect, effects, text, values) for effect in effects]
+    return [classify(class_file, records, spell.spell_id, rank_id, effect, effects, text, values)
+            for effect in effects]

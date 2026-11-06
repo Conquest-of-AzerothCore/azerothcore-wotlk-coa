@@ -146,7 +146,8 @@ token, an aura of a passive or cast-time spell). Only `unmeasurable` expectation
 ## Passive effects
 
 `passive_effects(class_file, spell)` classifies every effect of a passive's rank at the class level as
-`PassiveEffect(spell_id, effect, aura, misc, misc_b, family, token, plans, targets, reason)`. It measures nothing:
+`PassiveEffect(spell_id, effect, aura, misc, misc_b, family, token, plans, targets, reason, points)`. It measures
+nothing:
 the scenarios and the judging build on it. `reason` is empty for a modelled effect and starts with `unmodelled: `
 otherwise; an unmodelled effect has no `plans`.
 
@@ -169,13 +170,15 @@ the effect). An effect without one takes a sibling effect's plain `$sN` (or `$/N
 same displayed points (`|EffectBasePoints + 1|`, single-valued): Sturdy 681009 effect 1 (Energy) shares `$s1` of
 effect 0 (health), and Paladin Training 520009 effect 1 (cost, −20) shares `$s1` (+20) of effect 0, since the tooltip
 says "Increases the damage and reduces the Energy cost ... by $s1%". `token.effect_index` then names the sibling.
+A token's `value` is unsigned; `points` is the effect's own signed `EffectBasePoints + 1` (`None` when its points
+scale with level), so the expected value is `token.value` with the sign of `points` (520009 effect 1: −20).
 Otherwise: `unmodelled: no own token and no sibling token with equal points` (Graceful Fighter 705303 effect 2 has 0
 points beside 20 and 20). On Templar, 18 effects share a token; 16 of them are modelled (Courage's two aura 31
 effects stay unmodelled).
 
-Each `MetricPlan(metric, fields, relation, source)` names a harness metric, its fields (the scenario adds `spell`
-where the metric needs one), the relation of the delta to the token and, for `share`, the base-step label of the
-source (`stat <n>` or `attack_power`):
+Each `MetricPlan(metric, fields, relation, source, judged)` names a harness metric, its fields (the scenario adds
+`spell` where the metric needs one), the relation of the delta to the token, for `share` the base-step label of the
+source (`stat <n>` or `attack_power`), and whether the delta is judged (`judged` false: reported as `measured`):
 
 | Aura | Plans | Relation |
 |---|---|---|
@@ -183,7 +186,7 @@ source (`stat <n>` or `attack_power`):
 | 29 / 137 | `stat {stat}`, all five for misc −1 | `add` / `scale` |
 | 133, 132, 166, 167 | `max_health`, `max_power {power}`, `attack_power`, `ranged_attack_power` | `scale` |
 | 240, 47, 49 | `expertise`, `parry_chance`, `dodge_chance` | `add` |
-| 290 | `spell_crit_chance {school}` when the tooltip says "<School> critical strike chance", else `melee_crit_chance` | `add` |
+| 290 | `spell_crit_chance {school}` when the tooltip says "<School> critical strike chance"; else `melee_crit_chance` plus `spell_crit_chance {school}` for schools 1 to 6 with `judged` false (D6) | `add` |
 | 333 | `melee_hit_chance` and `spell_hit_chance` | `add` |
 | 138 | `attack_time_ms {hand: 0}` | `haste` |
 | 220 | `combat_rating {rating}`, one per bit of the misc mask | `share` |
@@ -207,17 +210,20 @@ table without a plan (31, 87, 283, 286: `aura <n> has no passive measurement`).
 
 1. Named: every `Spell.dbc` record of the passive's `SpellFamilyName` whose `SpellName[enUS]` appears in the tooltip
    (color codes removed, whole words, longest names first, overlapping matches skipped: "Oath: Condemn" before
-   "Condemn"). A named spell resolves to its rank at the class level through the chains of
+   "Condemn"). A match followed by a space and a capitalised word is part of a longer proper noun and does not
+   count: the spell "Oath" is not named by "Oath Breakers" (Blessed Strikes 704180, Chakra of Light 803159). A named spell resolves to its rank at the class level through the chains of
    `AscensionSpellProgressionData.h` (Righteous Lunge → 570233, Argent Blade → 807268), else to every record of
    that name. `named_targets(records, family_name, text, level)` returns them.
 2. Category: when nothing is named and the first capitalised word (four letters or more) of every name the class
    mask matches is in the tooltip ("Libram spells": Libram of Tenacity, Libram of Zeal, ...), the mask's spells are
    the targets.
-3. Class file `passive_targets` overrides both: `{"spell", "effect", "targets": [ids], "tooltip_words": "..."}`; the
-   quoted words must be in the tooltip, else `ValueError`.
+3. Class file `passive_targets` overrides both: `{"spell", "effect", "targets": [ids], "tooltip_words": "..."}`
+   (`spell` is the passive's spell id or its rank at the class level); the quoted words must be in the tooltip,
+   else `ValueError`.
 4. Otherwise `unmodelled: the tooltip names none of the spells the class mask affects (<names>)`. Templar: Deep
-   Secrets 705263 and Mark of Aggramar 804928 say "Testaments" while their masks also match Ascetic and Mortal
-   Abdication.
+   Secrets 705263, Mark of Aggramar 804928 and Chakra of Light 803159/803844 say "Testaments" while their masks
+   also match Ascetic and Mortal Abdication; Blessed Strikes 704180 says "Oath Breakers" while its mask matches
+   Benediction, Blade of Faith, ... (no name starts with "Oath"). These need a `passive_targets` entry.
 
 `PassiveTarget(spell_id, name, named, in_mask)`: `in_mask` is whether the record's `SpellFamilyFlags` meet the
 effect's `EffectSpellClassMask`. Mask spells that are not named are listed too (`named` false, one rank per name),
