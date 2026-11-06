@@ -1136,7 +1136,8 @@ public:
 
             uint32 replacement = 0;
             Aura const* aura = entry.RequiresAura ? player->GetAura(entry.ParentSpellId, player->GetGUID()) : nullptr;
-            bool const parentOwned = entry.RequiresAura ? aura && !aura->IsRemoved() :
+            bool const parentOwned = entry.RequiresAura ?
+                aura && !aura->IsRemoved() && aura->GetStackAmount() >= entry.MinAuraStacks :
                 player->HasSpell(entry.ParentSpellId);
             bool const allowed = (!entry.SpecId || specializationId == entry.SpecId) && parentOwned;
             for (auto const& rank : entry.Ranks)
