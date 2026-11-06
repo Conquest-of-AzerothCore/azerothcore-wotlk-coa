@@ -429,6 +429,8 @@ public:
         if (info->Id == SPELL_THIRST_FOR_BLOOD &&
             info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_DUMMY && info->Effects[EFFECT_0].Amplitude)
             info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_PERIODIC_DUMMY;
+        if (info->Id == SPELL_ACCURSED_FORM)
+            info->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_MOUNT;
     }
 };
 
