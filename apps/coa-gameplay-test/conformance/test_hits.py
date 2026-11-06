@@ -5,12 +5,13 @@ import sys
 import unittest
 
 from classes import class_spells
-from hits import (HIT_CHECKS, HitModel, Modifier, Unmodelled, WeaponProfile, casts_needed, expected_hit,
-                  hit_scenario, measured_hit_model, melee_scenario, reference_hit_model, reference_melee_model,
-                  scheduled_casts, weapon_profile)
+from hits import (HIT_CHECKS, MAX_SCENARIO_MS, HitModel, Modifier, Unmodelled, WeaponProfile, casts_needed,
+                  expected_hit, hit_parts, hit_scenario, measured_hit_model, melee_scenario, records_of,
+                  reference_caster, reference_hit_model, reference_melee_model, rolled_values, scheduled_casts,
+                  weapon_profile)
 from mitigation import REFERENCE_TARGET, MitigationModel, TargetProfile, expected_mitigation
 from profile import CLASSES_DIR, load_class_file
-from tooltip import CasterStats, Displayed, Readout
+from tooltip import CasterStats, Displayed, Readout, read_tooltip, weapon_skill_spells
 from values import UNREADABLE
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -26,6 +27,11 @@ WALKING_STICK_MAX = 10.9375
 WALKING_STICK_DELAY_MS = 2500
 TWO_HANDED_NORMALIZED_SPEED = 3.3
 REFERENCE_ATTACK_POWER = 313
+REFERENCE_STAMINA = 79
+FROSTMANE_CLUB = 2259
+ONE_HANDED_MACE_SUBCLASS = 4
+MACES_SKILL_LINE = 54
+ONE_HANDED_NORMALIZED_SPEED = 2.4
 ARGENT_BLADE = 804929
 ARGENT_BLADE_MAX_RANK = 807268
 ARGENT_BLADE_EFFECTS = [121, 31, 64]
@@ -39,7 +45,22 @@ RIGHTEOUS_UPHEAVAL_MAX_RANK = 572027
 RIGHTEOUS_UPHEAVAL_BASE_POINTS = 658
 RIGHTEOUS_UPHEAVAL_DIE_SIDES = 224
 RIGHTEOUS_UPHEAVAL_AP_COEFFICIENT = 0.45
+RIGHTEOUS_UPHEAVAL_CASTS_NEEDED = 335
+RIGHTEOUS_UPHEAVAL_SCHEDULED = 503
 OATH_CHAIN = 704576
+DIVINE_FORCE = 806153
+DIVINE_FORCE_MAX_RANK = 807805
+DIVINE_FORCE_SKILL_LINE = 72
+RECKONING = 805421
+RECKONING_MAX_RANK = 572741
+RECKONING_BASE_POINTS = 165
+RECKONING_DIE_SIDES = 49
+RECKONING_CASTS_NEEDED = 722
+RECKONING_PARTS = 4
+VINDICATION = 801446
+VINDICATION_MAX_RANK = 573324
+VINDICATION_SUBCLASS_MASK = 41105
+STAFF_SUBCLASS = 10
 PVE_DAMAGE_DONE_PCT = 341
 HEALING_DONE_PCT = 136
 CLASS_TUNING_PERCENT_AT_60 = -20
@@ -84,6 +105,21 @@ def steps_with(scenario, **fields):
     return [step for step in scenario['steps'] if all(step.get(key) == value for key, value in fields.items())]
 
 
+def hit_expectation(expectations):
+    return next(expectation for expectation in expectations
+                if expectation.check in ('hit_mean', 'unmodelled') and not expectation.rule.startswith(UNREADABLE))
+
+
+def measured_reference(class_file, expectation, armor=528):
+    labels = expectation.model['measurements']
+    measured = {**class_file['reference_stats'], labels['armor']: armor, labels['view_level']: 60,
+                f'known_aura {CLASS_TUNING_AURA}': 1}
+    for label in labels.values():
+        if label.startswith('target resistance'):
+            measured[label] = 0
+    return measured
+
+
 class WeaponProfileTest(unittest.TestCase):
     def test_templar_file_freezes_the_walking_stick_item_template_row(self):
         self.assertEqual(walking_stick(), WeaponProfile(item=WALKING_STICK, min_damage=WALKING_STICK_MIN,
@@ -93,6 +129,19 @@ class WeaponProfileTest(unittest.TestCase):
 
     def test_class_without_weapon_has_no_profile(self):
         self.assertIsNone(weapon_profile({'class_id': 0}))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_templar_one_hand_weapon_is_a_one_handed_mace_on_the_maces_skill_line(self):
+        templar = load_class_file(TEMPLAR_CLASS_ID)
+        self.assertEqual([weapon['item'] for weapon in templar['alternate_weapons']], [FROSTMANE_CLUB])
+        club = templar['alternate_weapons'][0]
+        self.assertEqual((club['subclass'], club['skill_line'], club['normalized_speed']),
+                         (ONE_HANDED_MACE_SUBCLASS, MACES_SKILL_LINE, ONE_HANDED_NORMALIZED_SPEED))
+        self.assertTrue(VINDICATION_SUBCLASS_MASK & 1 << club['subclass'])
+        self.assertFalse(VINDICATION_SUBCLASS_MASK & 1 << templar['weapon']['subclass'])
+        records = records_of(templar)
+        mace_skill = weapon_skill_spells(records)[club['subclass']]
+        self.assertEqual([ability.line for ability in records.abilities(mace_skill)], [club['skill_line']])
 
 
 class ExpectedHitTest(unittest.TestCase):
@@ -342,6 +391,87 @@ class HitScenarioTest(unittest.TestCase):
         for step in measured:
             self.assertEqual((step['critical'], step['glancing'], step['blocked'], step['hand']),
                              (False, False, False, 0))
+
+    def test_upheaval_splits_into_parts(self):
+        casts = casts_needed(reference_hit_model(self.templar, RIGHTEOUS_UPHEAVAL_MAX_RANK))
+        self.assertEqual(casts, RIGHTEOUS_UPHEAVAL_CASTS_NEEDED)
+        parts = hit_parts(self.templar, self.spells[RIGHTEOUS_UPHEAVAL], casts)
+        self.assertEqual(len(parts), 2)
+        cast_counts = [len(steps_with(scenario, action='cast')) for scenario, _ in parts]
+        self.assertEqual(sum(cast_counts), RIGHTEOUS_UPHEAVAL_SCHEDULED)
+        hits = [hit_expectation(expectations) for _, expectations in parts]
+        self.assertEqual({hit.label for hit in hits}, {f'{RIGHTEOUS_UPHEAVAL_MAX_RANK} hit_mean'})
+        self.assertEqual([(hit.model['part'], hit.model['parts'], hit.model['part_casts']) for hit in hits],
+                         [(0, 2, cast_counts[0]), (1, 2, cast_counts[1])])
+        for scenario, _ in parts:
+            self.assertIs(run.validate(scenario), scenario)
+            self.assertLessEqual(scenario['timeout_ms'], MAX_SCENARIO_MS)
+        for hit in hits:
+            self.assertEqual((hit.model['minimum_hits'], hit.model['scheduled_casts']),
+                             (RIGHTEOUS_UPHEAVAL_CASTS_NEEDED, RIGHTEOUS_UPHEAVAL_SCHEDULED))
+        self.assertEqual(len({scenario['name'] for scenario, _ in parts}), 2)
+
+    def test_a_hit_that_fits_one_scenario_is_one_part(self):
+        parts = hit_parts(self.templar, self.argent_blade, 3)
+        self.assertEqual(len(parts), 1)
+        self.assertEqual(hit_expectation(parts[0][1]).model['parts'], 1)
+        self.assertEqual(hit_scenario(self.templar, self.argent_blade, 3), parts[0])
+
+    def test_divine_force_is_modelled(self):
+        scenario, expectations = hit_scenario(self.templar, self.spells[DIVINE_FORCE], 1)
+        hit = hit_expectation(expectations)
+        self.assertEqual((hit.check, hit.rank_id, hit.effect_index, hit.model['kind']),
+                         ('hit_mean', DIVINE_FORCE_MAX_RANK, 2, 'school'))
+        self.assertTrue(steps_with(scenario, action='set_skill', skill=DIVINE_FORCE_SKILL_LINE))
+        self.assertTrue(steps_with(scenario, label=f'skill {DIVINE_FORCE_SKILL_LINE}', metric='skill_value'))
+        measured = measured_reference(self.templar, hit)
+        self.assertEqual(measured_hit_model(self.templar, hit, measured).kind, 'school')
+        del measured[f'skill {DIVINE_FORCE_SKILL_LINE}']
+        with self.assertRaises(Unmodelled):
+            measured_hit_model(self.templar, hit, measured)
+
+    def test_reckoning_is_modelled(self):
+        caster = reference_caster(self.templar)
+        records = records_of(self.templar)
+        readout = read_tooltip(records.dbc, RECKONING_MAX_RANK, caster)
+        bonus = 0.175 * REFERENCE_ATTACK_POWER + 0.5 * REFERENCE_STAMINA
+        values = [RECKONING_BASE_POINTS + roll + bonus for roll in range(1, RECKONING_DIE_SIDES + 1)]
+        rolls = rolled_values(records, RECKONING_MAX_RANK, caster, readout, [0])
+        self.assertEqual(len(rolls[0]), RECKONING_DIE_SIDES)
+        for value, expected in zip(rolls[0], values):
+            self.assertAlmostEqual(value, expected, places=6)
+        model = reference_hit_model(self.templar, RECKONING_MAX_RANK)
+        self.assertEqual(model.kind, 'school')
+        self.assertAlmostEqual(model.tooltip_mean, sum(values) / len(values), places=6)
+        self.assertEqual(casts_needed(model), RECKONING_CASTS_NEEDED)
+        parts = hit_parts(self.templar, self.spells[RECKONING], RECKONING_CASTS_NEEDED)
+        self.assertEqual(len(parts), RECKONING_PARTS)
+        self.assertEqual(sum(len(steps_with(scenario, action='cast')) for scenario, _ in parts),
+                         scheduled_casts(RECKONING_CASTS_NEEDED))
+        for scenario, expectations in parts:
+            self.assertEqual(hit_expectation(expectations).check, 'hit_mean')
+            self.assertLessEqual(scenario['timeout_ms'], MAX_SCENARIO_MS)
+
+    def test_vindication_equips_the_one_hand_weapon(self):
+        scenario, expectations = hit_scenario(self.templar, self.spells[VINDICATION], 1)
+        run.validate(scenario)
+        self.assertEqual(steps_with(scenario, action='equip'),
+                         [{'action': 'equip', 'actor': 'caster', 'item': FROSTMANE_CLUB, 'slot': 15}])
+        self.assertEqual([step['item'] for step in steps_with(scenario, action='add_item')], [FROSTMANE_CLUB])
+        self.assertTrue(steps_with(scenario, action='set_skill', skill=MACES_SKILL_LINE))
+        hit = hit_expectation(expectations)
+        self.assertEqual((hit.check, hit.rank_id, hit.model['kind']), ('hit_mean', VINDICATION_MAX_RANK, 'school'))
+        self.assertIn(f'reference weapon {FROSTMANE_CLUB}', hit.rule)
+        measured = {**measured_reference(self.templar, hit), f'skill {MACES_SKILL_LINE}': 300}
+        self.assertAlmostEqual(measured_hit_model(self.templar, hit, measured).mean,
+                               reference_hit_model(self.templar, VINDICATION_MAX_RANK).mean, places=9)
+
+    def test_vindication_without_a_fitting_weapon_is_unmodelled(self):
+        staff_only = {key: value for key, value in self.templar.items() if key != 'alternate_weapons'}
+        scenario, expectations = hit_scenario(staff_only, self.spells[VINDICATION], 1)
+        self.assertEqual([(expectation.check, expectation.rule) for expectation in expectations],
+                         [('unmodelled', f'unmodelled: EquippedItemSubClassMask {VINDICATION_SUBCLASS_MASK} excludes '
+                                         f'the reference weapon subclass {STAFF_SUBCLASS}')])
 
     def test_every_templar_max_rank_has_a_valid_scenario_and_a_hit_or_unmodelled_expectation(self):
         checks = {}

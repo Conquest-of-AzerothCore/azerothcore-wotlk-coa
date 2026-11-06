@@ -8,10 +8,10 @@ from typing import Mapping, Sequence
 from classes import ClassSpell
 from mitigation import PHYSICAL_SCHOOL_MASK, REFERENCE_TARGET, MitigationModel, TargetProfile, expected_mitigation
 from profile import (CASTER, DBC_DIR, SETTLE_MS, base_steps, caster_stats_from, known_aura_label, measurement,
-                     player_fixture)
+                     player_fixture, unfit_reason)
 from tooltip import CasterStats, ForcedPoints, Readout, Records, Tooltip, Unreadable, read_tooltip
 from values import (CAST_MARGIN_MS, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, EFFECTS, TARGET, UNREADABLE,
-                    Expectation, RankFacts, dataset, facts_of, required_aura_steps)
+                    Expectation, RankFacts, armed_for, dataset, equip_requirement, facts_of, required_aura_steps)
 
 HIT_CHECKS = ('hit_mean', 'melee_mean', 'unmodelled')
 UNMODELLED = 'unmodelled: '
@@ -36,6 +36,7 @@ NO_MITIGATION = MitigationModel(mean=1.0, variance=0.0)
 DRAIN_MS = 3000
 MAX_SCENARIO_MS = 600000
 TIMEOUT_MARGIN_MS = 60000
+PART_BUDGET_MS = MAX_SCENARIO_MS - TIMEOUT_MARGIN_MS - SETTLE_MS - DRAIN_MS
 MAIN_HAND = 0
 MELEE_LABEL = 'melee melee_mean'
 ARMOR_LABEL = 'target armor'
@@ -394,6 +395,9 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
     facts = facts_of(records, rank_id)
     if facts.passive:
         raise Unmodelled('passive spell is never cast')
+    unfit = unfit_reason(class_file.get('weapon'), equip_requirement(records, rank_id))
+    if unfit:
+        raise Unmodelled(unfit)
     kind, indexes = hit_kind(facts.effects, facts.aura_names)
     school_mask = records.field('Spell', rank_id, 'SchoolMask')
     ticks, duration = periodic_ticks(records, rank_id, indexes[0]) if kind in PERIODIC_KINDS.values() else (1, 0)
@@ -411,6 +415,7 @@ def reference_caster(class_file: dict) -> CasterStats:
 
 
 def reference_hit_model(class_file: dict, rank_id: int) -> HitModel:
+    class_file = armed_for(class_file, records_of(class_file), rank_id)
     return rank_hit(class_file, rank_id, reference_caster(class_file), REFERENCE_TARGET,
                     class_file.get('known_auras', [])).model
 
@@ -436,6 +441,8 @@ def magic_schools(school_mask: int) -> list[int]:
 
 def measured_hit_model(class_file: dict, expectation: Expectation, measured: Mapping[str, float]) -> HitModel:
     labels = expectation.model['measurements']
+    if expectation.model['kind'] != 'melee':
+        class_file = armed_for(class_file, records_of(class_file), expectation.rank_id)
     caster = caster_stats_from(measured, class_file)
     target = REFERENCE_TARGET
     if ARMOR_LABEL in labels.values():
@@ -503,36 +510,19 @@ def cast_steps(facts: RankFacts, rank_id: int, hostile: bool, interval_ms: int, 
     return steps
 
 
-def hit_scenario(class_file: dict, spell: ClassSpell, casts: int) -> tuple[dict, list[Expectation]]:
-    if casts < 1:
-        raise ValueError(f'{spell.name} needs at least one cast, not {casts}')
-    rank_id = spell.max_rank
-    label = f'{rank_id} hit_mean'
-    name = f'Conformance hit {class_file["name"]} {spell.name} {rank_id}'
-    contract = 'Mean non-critical hit of the highest rank against its tooltip, its known modifiers and mitigation.'
-    learn = [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
-    try:
-        hit = rank_hit(class_file, rank_id, reference_caster(class_file), REFERENCE_TARGET,
-                       class_file.get('known_auras', []))
-    except Unmodelled as error:
-        unmodelled = Expectation(label, 'unmodelled', spell.spell_id, rank_id, None, '', UNMODELLED + error.reason)
-        return timed(scenario_shell(class_file, name, contract, learn), SETTLE_MS), [unmodelled]
-    model, facts = hit.model, hit.facts
-    hostile = model.kind not in HEAL_KINDS
-    steps = list(learn)
-    labels: dict[str, str] = {}
-    if hostile:
-        steps, labels = target_steps(hit.school_mask)
-        steps = learn + steps
-    start_recovery = records_of(class_file).field('Spell', rank_id, 'StartRecoveryTime')
-    interval = max(start_recovery, facts.cast_time_ms, hit.duration_ms) + CAST_MARGIN_MS
-    performed = scheduled_casts(casts)
-    steps += cast_steps(facts, rank_id, hostile, interval, performed)
-    steps.append({'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS})
+def part_casts(performed: int, interval_ms: int) -> list[int]:
+    capacity = PART_BUDGET_MS // interval_ms
+    if capacity < 1:
+        raise Unmodelled(f'one cast of {interval_ms} ms exceeds the scenario budget of {PART_BUDGET_MS} ms')
+    parts = math.ceil(performed / capacity)
+    return [performed // parts + (part < performed % parts) for part in range(parts)]
+
+
+def hit_measurements(rank_id: int, label: str, hostile: bool, labels: dict[str, str]) -> list[dict]:
     family = 'spell_damage' if hostile else 'spell_heal'
     unblocked = {'blocked': False} if hostile else {}
     receiver = TARGET if hostile else CASTER
-    labels.update({'total': f'{label} total', 'count': f'{label} count'})
+    steps = [{'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}]
     for part in ('total', 'count'):
         steps.append(measurement(labels[part], CASTER, f'{family}_{part}', spell=rank_id, target=receiver,
                                  critical=False, **unblocked))
@@ -542,18 +532,67 @@ def hit_scenario(class_file: dict, spell: ClassSpell, casts: int) -> tuple[dict,
         steps.append(measurement(f'{rank_id} blocked_hits', CASTER, f'{family}_count', spell=rank_id,
                                  target=receiver, blocked=True))
     steps.append(measurement(f'{rank_id} cast_count', CASTER, 'spell_cast_count', spell=rank_id))
-    scenario = scenario_shell(class_file, name, contract, steps)
-    if hostile:
-        scenario['creatures'] = [creature_fixture(class_file)]
-    weapon = weapon_profile(class_file) if model.kind == 'weapon' else None
+    return steps
+
+
+def weapon_note(class_file: dict, armed_file: dict, records: Records, rank_id: int) -> str:
+    if armed_file is class_file:
+        return ''
+    reason = unfit_reason(class_file.get('weapon'), equip_requirement(records, rank_id))
+    return f'; reference weapon {armed_file["weapon"]["item"]} ({reason})'
+
+
+def hit_parts(class_file: dict, spell: ClassSpell, casts: int) -> list[tuple[dict, list[Expectation]]]:
+    if casts < 1:
+        raise ValueError(f'{spell.name} needs at least one cast, not {casts}')
+    rank_id = spell.max_rank
+    label = f'{rank_id} hit_mean'
+    name = f'Conformance hit {class_file["name"]} {spell.name} {rank_id}'
+    contract = 'Mean non-critical hit of the highest rank against its tooltip, its known modifiers and mitigation.'
+    learn = [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
+    records = records_of(class_file)
+    armed_file = armed_for(class_file, records, rank_id)
+    try:
+        hit = rank_hit(armed_file, rank_id, reference_caster(armed_file), REFERENCE_TARGET,
+                       armed_file.get('known_auras', []))
+        start_recovery = records.field('Spell', rank_id, 'StartRecoveryTime')
+        interval = max(start_recovery, hit.facts.cast_time_ms, hit.duration_ms) + CAST_MARGIN_MS
+        shares = part_casts(scheduled_casts(casts), interval)
+    except Unmodelled as error:
+        unmodelled = Expectation(label, 'unmodelled', spell.spell_id, rank_id, None, '', UNMODELLED + error.reason)
+        return [(timed(scenario_shell(armed_file, name, contract, learn), SETTLE_MS), [unmodelled])]
+    model = hit.model
+    hostile = model.kind not in HEAL_KINDS
+    target, labels = target_steps(hit.school_mask) if hostile else ([], {})
+    labels.update({'total': f'{label} total', 'count': f'{label} count'})
+    weapon = weapon_profile(armed_file) if model.kind == 'weapon' else None
     order = ', percent of the roll before the flat bonus (ADR 0010)' if model.kind == 'weapon' else ''
-    expectations = [Expectation(label, 'hit_mean', spell.spell_id, rank_id, hit.indexes[0],
-                                ' | '.join(model.displayed), f'{model.kind} hit{order}, integer steps modelled',
-                                model_record(model, hit.school_mask, weapon, labels, casts))]
-    for ordinal, entry in enumerate(hit.readout.unreadable):
-        expectations.append(Expectation(f'{label} unreadable #{ordinal}', 'hit_mean', spell.spell_id, rank_id, None,
-                                        entry, UNREADABLE + entry))
-    return timed(scenario, SETTLE_MS + performed * interval + DRAIN_MS), expectations
+    rule = f'{model.kind} hit{order}, integer steps modelled{weapon_note(class_file, armed_file, records, rank_id)}'
+    record = model_record(model, hit.school_mask, weapon, labels, casts)
+    unreadable = [Expectation(f'{label} unreadable #{ordinal}', 'hit_mean', spell.spell_id, rank_id, None, entry,
+                              UNREADABLE + entry) for ordinal, entry in enumerate(hit.readout.unreadable)]
+    parts = []
+    for part, performed in enumerate(shares):
+        steps = (learn + [dict(step) for step in target]
+                 + cast_steps(hit.facts, rank_id, hostile, interval, performed)
+                 + hit_measurements(rank_id, label, hostile, labels))
+        titled = name if len(shares) == 1 else f'{name} part {part + 1} of {len(shares)}'
+        scenario = scenario_shell(armed_file, titled, contract, steps)
+        if hostile:
+            scenario['creatures'] = [creature_fixture(armed_file)]
+        expectation = Expectation(label, 'hit_mean', spell.spell_id, rank_id, hit.indexes[0],
+                                  ' | '.join(model.displayed), rule,
+                                  {**record, 'part': part, 'parts': len(shares), 'part_casts': performed})
+        parts.append((timed(scenario, SETTLE_MS + performed * interval + DRAIN_MS),
+                       [expectation] + (unreadable if part == 0 else [])))
+    return parts
+
+
+def hit_scenario(class_file: dict, spell: ClassSpell, casts: int) -> tuple[dict, list[Expectation]]:
+    parts = hit_parts(class_file, spell, casts)
+    if len(parts) > 1:
+        raise ValueError(f'{spell.name} needs {len(parts)} scenarios for {casts} casts; use hit_parts')
+    return parts[0]
 
 
 def melee_scenario(class_file: dict, swings: int) -> tuple[dict, list[Expectation]]:

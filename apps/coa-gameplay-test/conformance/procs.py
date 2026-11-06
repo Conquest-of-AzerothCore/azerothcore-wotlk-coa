@@ -2,9 +2,8 @@ from dataclasses import dataclass
 import math
 from typing import Sequence
 
-from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, MAX_SCENARIO_MS, TIMEOUT_MARGIN_MS, UNMODELLED, Z_99,
-                  Unmodelled, cast_steps, creature_fixture, records_of, reference_caster, scenario_shell, timed,
-                  weapon_profile)
+from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, PART_BUDGET_MS, UNMODELLED, Z_99, Unmodelled,
+                  cast_steps, creature_fixture, records_of, reference_caster, scenario_shell, timed, weapon_profile)
 from profile import CASTER, SETTLE_MS, measurement, player_fixture
 from tooltip import read_tooltip
 from values import CAST_MARGIN_MS, EFFECTS, TARGET, Expectation, RankFacts, facts_of, is_hostile
@@ -26,7 +25,6 @@ PERIODIC_DAMAGE_AURA = 3
 TICKS_PER_ATTEMPT = 2
 CHARGE_OFFSET_YD = 10
 TRIGGERING_HITS = 'triggering hits only'
-PART_BUDGET_MS = MAX_SCENARIO_MS - TIMEOUT_MARGIN_MS - SETTLE_MS - DRAIN_MS
 WILSON_RULE = f'Wilson {Z_99:g} (99%) interval of the proc rate holds the tooltip chance'
 
 

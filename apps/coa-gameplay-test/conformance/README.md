@@ -19,9 +19,10 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
   token, its metric plans and, for a spell modifier, its targets (see [Passive effects](#passive-effects));
   `passive_scenario(class_file, spell)` returns its with/without scenario, or `None` when no effect is measured, and
   its `Expectation` list (see [Passive scenario](#passive-scenario)).
-- `hits.py`: `hit_scenario(class_file, spell, casts)` and `melee_scenario(class_file, swings)` return the hit scenario
-  of a spell's highest rank and the auto-attack scenario, with their `Expectation` lists; `expected_hit` and
-  `casts_needed` give the expected mean, its sigma and the number of casts.
+- `hits.py`: `hit_parts(class_file, spell, casts)` returns the parts of the hit scenario of a spell's highest rank
+  (`hit_scenario` the only part of a hit that fits one scenario) and `melee_scenario(class_file, swings)` the
+  auto-attack scenario, with their `Expectation` lists; `expected_hit` and `casts_needed` give the expected mean, its
+  sigma and the number of casts.
 - `procs.py`: `proc_scenario(class_file, entry, part)` returns one part of the proc-rate scenario of a `procs` entry
   and its `Expectation`; `proc_plan` sizes the parts, `trials_needed(p)` gives the trials a chance `p` needs and
   `wilson_interval(procs, trials)` the 99% Wilson interval of a rate.
@@ -140,7 +141,8 @@ hand, `subclass` from `Item.dbc`: 10, a staff, for the Walking Stick), `skill_li
 spells and the weapon: Templar 70, 71, 72 and 136), `ratings` (fixture hit and expertise ratings, so that an aura or hit
 is never lost to a miss; they do not change a tooltip value), `reference_stats`, `known_auras`, `probe_auras`, `procs`
 (see [Proc rates](#proc-rates)) and `talent_modifiers`, `rotation`, `stack`
-(see [Talent stack](#talent-stack-lever-map)). The Templar reference is a human with the Walking Stick (item 2495).
+(see [Talent stack](#talent-stack-lever-map)), and `alternate_weapons`. The Templar reference is a human with the
+Walking Stick (item 2495).
 
 `weapon` also freezes the `item_template` row of the weapon: `min_damage` (`dmg_min1`), `max_damage` (`dmg_max1`),
 `speed_ms` (`delay`), `inventory_type` and `normalized_speed`, the speed `Unit::GetAPMultiplier` uses for normalized
@@ -151,6 +153,22 @@ in the in-RAM test database with `SELECT dmg_min1, dmg_max1, delay, InventoryTyp
 2026-11-05, `.cache/verify-all/20261105-181206`; the skills on 2026-11-06, `.cache/verify-all/20261106-122106` and
 `20261106-122142`: `skill_value` 300 on lines 70, 71, 72 and 136 after `set_skill` 300/300); they size the scenarios,
 and the comparison uses the values measured in the run.
+
+`alternate_weapons` lists other reference weapons with the same fields plus `skill_line`, the `SkillLineAbility` line of
+the weapon-skill spell of their subclass (owner answer Q9, ruling R6). A rank whose `EquippedItemClass` is 2 and whose
+`EquippedItemSubClassMask` or `EquippedItemInventoryTypeMask` excludes `weapon` (`unfit_reason`, the checks of
+`Item::IsFitToSpellRequirements`) takes the first alternate weapon that fits: `armed(class_file, requirement)` returns
+the class file with that weapon, its skill line added to `skill_lines` and `skill <line>` added to `reference_stats` at
+5 × level. The value scenario, its generated tokens, the hit scenario and the comparison of that rank use it; the hit
+rule names it (`reference weapon 2259 (EquippedItemSubClassMask 41105 excludes the reference weapon subclass 10)`).
+Without a fitting weapon the hit is `unmodelled` with that reason. The Templar one-hand weapon is the Frostmane Club
+(item 2259), a white one-handed mace of item level 6 and required level 3 like the Walking Stick, without stats or
+spells, read on 2026-11-06 from `acore_world` in the in-RAM test database with `SELECT class, subclass, Quality,
+dmg_min1, dmg_max1, delay, InventoryType, RequiredLevel, ItemLevel FROM item_template WHERE entry = 2259`: 2, 4, 1,
+3.45, 5.75, 2000, 21, 3, 6; `Item.dbc` gives subclass 4, inside the mask 41105 of Vindication 573324 and Righteous
+Upheaval 501562, its normalized speed is 2.4 (`Unit::GetAPMultiplier`, a one-hand weapon that is not a dagger), and
+the Maces skill spell 198 is on line 54. One-Handed Maces (skill 54, spell 198) is a Templar proficiency in
+`AscensionLiveBaselineData.h` (`Proficiencies`) and `AscensionCustomClassData.h` (`ClassProficiencies`).
 
 `base_steps` waits 5 s, adds and equips the weapon, sets each line of `skill_lines` to 5 × level with `set_skill`
 (value and maximum: 300 at level 60, owner answer Q4) and measures it back with `skill_value` (label `skill
@@ -385,7 +403,7 @@ mask spell, `measured` 0).
 
 ## Max-rank hit scenarios
 
-`hit_scenario(class_file, spell, casts)` models the spell's highest rank from its effects, its tooltip read with the
+`hit_parts(class_file, spell, casts)` models the spell's highest rank from its effects, its tooltip read with the
 reference stats, the known auras and the reference target. `casts` is the number of casts the mean needs; the scenario
 performs `scheduled_casts(casts)`, `ceil(casts x 1.5)`, so that the hits excluded from the mean (critical, blocked)
 rarely leave fewer usable hits (ruling R9). It learns the rank, measures the target, then repeats: `set_power` to the
@@ -408,8 +426,13 @@ effect values does: the server adds one `irand(1, EffectDieSides)` to the points
 effect whose amount rolls (one token or `$mN` to `$MN`) is `unmodelled`: `AuraEffect::CalculateAmount` rolls it once
 when the aura is applied and every tick reuses it, so the ticks of a cast are not independent hits and an interval
 over ticks would be too narrow. Such a spread
-can need more casts than one scenario holds: a model whose waits do not fit the 600 s scenario limit with its 60 s
-margin is `unmodelled` with the time it would wait (Righteous Upheaval: 335 casts needed, 503 scheduled, 762.5 s).
+can need more casts than one scenario holds: the scheduled casts are split as evenly as possible into the fewest parts
+whose casts fit `PART_BUDGET_MS` (532 s: the 600 s scenario limit less the 60 s margin, the 5 s settle and the 3 s
+drain; design D16), each part a full scenario with the same measurement labels, named `... part <n> of <parts>` and
+keyed `conformance-<class>-hit-<rank>-part-<n>`; a hit that fits one scenario keeps the key
+`conformance-<class>-hit-<rank>`. Righteous Upheaval 572027 needs 335 casts, schedules 503 of 1.5 s, in 2 parts of 252
+and 251; Reckoning 572741 needs 722, schedules 1083 of 1.75 s, in 4 parts of 271, 271, 271 and 270. A single cast
+longer than the budget is `unmodelled`.
 
 The weapon roll is `urand(floor(min + AP / 14 x speed), floor(max + AP / 14 x speed))` (`Unit::CalculateDamage`),
 with the normalized speed when an effect is 121 and the weapon speed otherwise. `tooltip_mean` is the same sum without
@@ -430,6 +453,7 @@ rule: `ceil((2.576 x sigma / (0.01 x mean))^2)` hits, at least one, divided by `
 
 The `hit_mean` expectation carries `model`: the kind, school mask, weapon, modifiers, reference mean, sigma and casts,
 `minimum_hits` (the needed casts times `hits_per_cast`: fewer usable hits are insufficient trials), `scheduled_casts`,
+`part` (from 0), `parts` and `part_casts` (the casts of this part; every part repeats the totals above),
 and the labels of its measurements: `<label> total` and `<label> count` (`spell_damage_*` on `dummy` with
 `critical: false` and `blocked: false`, or `spell_heal_*` on the caster with `critical: false`), `target armor`,
 `target view_level` and `target resistance <school>`.
@@ -905,7 +929,11 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   below the record two, four and six steps after the cast, durations 12 and 15 ms below; W was 50 to 150 ms.
 - Hit means (`hit_mean`, `melee_mean`): `measured_hit_model` recomputes the model from the run's stats, known auras
   and target; the measured mean of the non-critical, non-blocked hits must lie in `mean ± 2.576 x sigma / sqrt(n)`,
-  n the usable hits. `tooltip_mean` is shown in the explanation only.
+  n the usable hits. `tooltip_mean` is shown in the explanation only. The parts of a hit (same label) give one
+  verdict, on the first part's key: totals and counts are summed over the parts with a result, the model is recomputed
+  per part (the dummy's armor can differ) and pooled, `mean = sum(n_i x mean_i) / n` and half-width
+  `2.576 x sqrt(sum(n_i x sigma_i^2)) / n`, and the explanation says how many parts counted (`1 of 2 parts`); a
+  missing part leaves its hits out, so the sum can fall below `minimum_hits`.
 - `known_aura`: the aura must be measured on the character.
 - Failed casts (ruling R11): the harness records each `SMSG_CAST_FAILED` or `SMSG_PET_CAST_FAILED` an actor
   receives as `{spell, reason}` in the result's `cast_failures` list and keeps the last reason per spell for the

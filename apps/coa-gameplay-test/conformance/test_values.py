@@ -6,7 +6,7 @@ import tempfile
 import unittest
 
 from classes import class_spells
-from profile import CLASSES_DIR, base_steps, caster_stats_from, load_class_file, skill_label
+from profile import CLASSES_DIR, armed, base_steps, caster_stats_from, load_class_file, skill_label, unfit_reason
 from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, write_fixture
 from tooltip import CasterStats, DataSet, Records, read_tooltip
 from values import CHECKS, UNMEASURABLE, UNREADABLE, Expectation, foreign_effect, value_scenario
@@ -19,6 +19,14 @@ HEADER = Path(__file__).resolve().parents[3] / 'src/server/coa/AscensionSpellPro
 
 TEMPLAR_CLASS_ID = 19
 WALKING_STICK = 2495
+FROSTMANE_CLUB = 2259
+MACES_SKILL_LINE = 54
+VINDICATION = 801446
+VINDICATION_RANKS = (801446, 501589, 501590, 501591, 501592, 501593, 573324)
+ONE_HAND_MASK = 41105
+TWO_HAND_MASK = 1378
+TWO_HAND_INVENTORY_MASK = 131072
+MAIN_HAND_INVENTORY_MASK = 1 << 21
 SCOURGEBANE = 92111
 CLASS_TUNING_AURA = 887007
 ARGENT_BLADE = 804929
@@ -89,6 +97,49 @@ class ClassFileTest(unittest.TestCase):
     def test_unknown_class_is_refused(self):
         with self.assertRaises(ValueError):
             load_class_file(0)
+
+
+def requirement(item_class=2, subclasses=0, inventory_types=0):
+    return {'EquippedItemClass': item_class, 'EquippedItemSubClassMask': subclasses,
+            'EquippedItemInventoryTypeMask': inventory_types}
+
+
+class ArmedTest(unittest.TestCase):
+    def setUp(self):
+        self.templar = load_class_file(TEMPLAR_CLASS_ID)
+
+    def test_a_spell_the_main_weapon_fits_keeps_the_class_file(self):
+        for fitting in (requirement(-1, ONE_HAND_MASK), requirement(2, TWO_HAND_MASK, TWO_HAND_INVENTORY_MASK),
+                        requirement(2, 0), requirement(4, 1 << 6)):
+            with self.subTest(requirement=fitting):
+                self.assertIs(armed(self.templar, fitting), self.templar)
+
+    def test_a_spell_the_main_weapon_does_not_fit_takes_the_first_fitting_alternate_and_its_skill(self):
+        one_hand = armed(self.templar, requirement(2, ONE_HAND_MASK))
+        self.assertEqual(one_hand['weapon'], self.templar['alternate_weapons'][0])
+        self.assertEqual(one_hand['skill_lines'], list(TEMPLAR_SKILL_LINES) + [MACES_SKILL_LINE])
+        self.assertEqual(one_hand['reference_stats'][skill_label(MACES_SKILL_LINE)], LEVEL_60_SKILL)
+        self.assertIs(armed(one_hand, requirement(2, ONE_HAND_MASK)), one_hand)
+        self.assertEqual(armed(self.templar, requirement(2, 0, MAIN_HAND_INVENTORY_MASK))['weapon']['item'],
+                         FROSTMANE_CLUB)
+
+    def test_no_fitting_weapon_keeps_the_class_file_and_names_the_excluding_field(self):
+        dagger_only = requirement(2, 1 << 15)
+        self.assertIs(armed(self.templar, dagger_only), self.templar)
+        self.assertEqual(unfit_reason(self.templar['weapon'], dagger_only),
+                         'EquippedItemSubClassMask 32768 excludes the reference weapon subclass 10')
+        self.assertEqual(unfit_reason(self.templar['weapon'], requirement(2, 0, MAIN_HAND_INVENTORY_MASK)),
+                         'EquippedItemInventoryTypeMask 2097152 excludes the reference weapon inventory type 17')
+        self.assertEqual(unfit_reason(None, dagger_only), 'EquippedItemClass 2 needs a reference weapon')
+        self.assertIsNone(unfit_reason(self.templar['weapon'], requirement(-1, 1 << 15)))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_alternate_weapon_subclass_is_the_item_record_subclass(self):
+        table = DataSet(DBC_DIR).load('Item')[0]
+        records = {item: (item_class, subclass) for item, item_class, subclass
+                   in (ITEM_RECORD.unpack_from(table.record(row)) for row in range(table.rows))}
+        for weapon in self.templar['alternate_weapons']:
+            self.assertEqual(records[weapon['item']], (2, weapon['subclass']))
 
 
 class BaseStepsTest(unittest.TestCase):
@@ -232,6 +283,18 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         cast = actions.index('cast')
         self.assertEqual(scenario['steps'][cast - 1],
                          {'action': 'set_aura', 'actor': 'caster', 'spell': OATH_CHAIN, 'stacks': 1})
+
+    def test_every_vindication_rank_and_upheaval_rank_one_equip_the_one_hand_weapon(self):
+        cases = [(VINDICATION, rank) for rank in VINDICATION_RANKS] + [(RIGHTEOUS_UPHEAVAL, RIGHTEOUS_UPHEAVAL)]
+        for spell_id, rank_id in cases:
+            with self.subTest(rank=rank_id):
+                scenario, _ = self.build(spell_id, rank_id)
+                run.validate(scenario)
+                equipped = [step['item'] for step in scenario['steps'] if step['action'] == 'equip']
+                self.assertEqual(equipped, [FROSTMANE_CLUB])
+                self.assertIn(skill_label(MACES_SKILL_LINE), measured_labels(scenario))
+        scenario, _ = self.build(RIGHTEOUS_UPHEAVAL, RIGHTEOUS_UPHEAVAL_MAX_RANK)
+        self.assertEqual([step['item'] for step in scenario['steps'] if step['action'] == 'equip'], [WALKING_STICK])
 
     def test_spell_without_a_required_caster_aura_sets_no_aura(self):
         scenario, _ = self.build(ARGENT_BLADE, ARGENT_BLADE_RANK_2)

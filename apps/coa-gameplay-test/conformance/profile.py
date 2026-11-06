@@ -12,6 +12,10 @@ SPELL_POWER_SCHOOLS = range(1, 7)
 STATS = range(5)
 CASTER = 'caster'
 EQUIPMENT_SLOT_MAIN_HAND = 15
+WEAPON_ITEM_CLASS = 2
+INVTYPE_WEAPON = 13
+ONE_HAND_SLOT_TYPES = (1 << 21) | (1 << 22)
+EQUIP_FIELDS = ('EquippedItemClass', 'EquippedItemSubClassMask', 'EquippedItemInventoryTypeMask')
 
 
 def measurement(label: str, actor: str, metric: str, **fields) -> dict:
@@ -79,6 +83,37 @@ def base_steps(class_file: dict) -> list[dict]:
 
 def skill_target(class_file: dict) -> int:
     return SKILL_PER_LEVEL * class_file['level']
+
+
+def unfit_reason(weapon: dict | None, requirement: Mapping[str, int]) -> str | None:
+    if requirement['EquippedItemClass'] != WEAPON_ITEM_CLASS:
+        return None
+    if weapon is None:
+        return f'EquippedItemClass {WEAPON_ITEM_CLASS} needs a reference weapon'
+    subclasses = requirement['EquippedItemSubClassMask']
+    if subclasses and not subclasses & 1 << weapon['subclass']:
+        return f'EquippedItemSubClassMask {subclasses} excludes the reference weapon subclass {weapon["subclass"]}'
+    types = requirement['EquippedItemInventoryTypeMask']
+    if (types and not types & 1 << weapon['inventory_type']
+            and not (weapon['inventory_type'] == INVTYPE_WEAPON and types & ONE_HAND_SLOT_TYPES)):
+        return (f'EquippedItemInventoryTypeMask {types} excludes the reference weapon inventory type '
+                f'{weapon["inventory_type"]}')
+    return None
+
+
+def armed(class_file: dict, requirement: Mapping[str, int]) -> dict:
+    if unfit_reason(class_file.get('weapon'), requirement) is None:
+        return class_file
+    weapon = next((weapon for weapon in class_file.get('alternate_weapons', [])
+                   if unfit_reason(weapon, requirement) is None), None)
+    if weapon is None:
+        return class_file
+    lines = list(class_file.get('skill_lines', []))
+    stats = dict(class_file['reference_stats'])
+    if weapon['skill_line'] not in lines:
+        lines.append(weapon['skill_line'])
+        stats[skill_label(weapon['skill_line'])] = skill_target(class_file)
+    return {**class_file, 'weapon': weapon, 'skill_lines': lines, 'reference_stats': stats}
 
 
 def weapon_subclass(class_file: dict) -> int | None:

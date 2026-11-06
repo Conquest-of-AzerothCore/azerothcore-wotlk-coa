@@ -5,6 +5,10 @@
   "level": 60,
   "weapon": {"item": 2495, "slot": 15, "subclass": 10, "min_damage": 6.5625, "max_damage": 10.9375,
              "speed_ms": 2500, "inventory_type": 17, "normalized_speed": 3.3},
+  "alternate_weapons": [
+    {"item": 2259, "slot": 15, "subclass": 4, "min_damage": 3.45, "max_damage": 5.75, "speed_ms": 2000,
+     "inventory_type": 21, "normalized_speed": 2.4, "skill_line": 54}
+  ],
   "skill_lines": [70, 71, 72, 136],
   "ratings": {"spell_hit_rating": 10000, "melee_hit_rating": 10000, "expertise_rating": 10000},
   "reference_stats": {"attack_power": 313, "ranged_attack_power": 182,

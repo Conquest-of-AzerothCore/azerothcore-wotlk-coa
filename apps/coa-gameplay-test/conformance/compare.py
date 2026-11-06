@@ -13,7 +13,7 @@ from hits import (HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_
                   HitModel, Modifier, Unmodelled, measured_hit_model)
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE
 from procs import AMBIGUOUS_TOOLTIP, CAST, PROC_CHECK, chance_of, wilson_interval
-from profile import DBC_DIR, caster_stats_from, known_aura_label, probe_aura_label
+from profile import DBC_DIR, EQUIP_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label
 from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE, asked, cleaned,
                        questions, spell_name, write_questions)
 from stack import (ADDS, MEASURED, MELEE_SOURCE, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE, TALENT_DELTA,
@@ -269,6 +269,7 @@ def load_runs(manifest: dict, results_dir: Path) -> tuple[dict[str, Run], list[s
 
 
 def read_tokens(class_file: dict, entry: dict, run: Run, tooltips: TooltipSource) -> Tokens:
+    class_file = armed(class_file, {name: tooltips.spell_field(entry['rank_id'], name) for name in EQUIP_FIELDS})
     try:
         caster = caster_stats_from(run.values, class_file)
     except KeyError as error:
@@ -438,45 +439,62 @@ def describe_modifiers(modifiers: tuple[Modifier, ...]) -> str:
                      f'{modifier.percent:+d}%' for modifier in modifiers) or 'none'
 
 
-def judge_hit(base: Verdict, class_file: dict, expectation: Expectation, run: Run,
-              hit_model: HitModelSource) -> Verdict:
+ProcPart = tuple[dict, Run, Expectation]
+
+
+def judge_hit(base: Verdict, class_file: dict, parts: list[ProcPart], hit_model: HitModelSource) -> Verdict:
+    expectation = parts[0][2]
     model = expectation.model or {}
     labels = model.get('measurements', {})
-    total, count = run.values.get(labels.get('total')), run.values.get(labels.get('count'))
-    if total is None or count is None:
-        return replace(base, explanation=f'no hit measurements {labels} in {run.key} ({run.status}: {run.message})')
+    total, count, reasons, judged, missing = 0.0, 0.0, [], [], []
+    for _, run, part in parts:
+        reasons += failure_reasons(run, expectation.rank_id)
+        part_total, part_count = run.values.get(labels.get('total')), run.values.get(labels.get('count'))
+        if part_total is None or part_count is None:
+            missing.append(f'{run.key} ({run.status}: {run.message})')
+            continue
+        total += part_total
+        count += part_count
+        judged.append((run, part, part_count))
+    if not judged:
+        return replace(base, explanation=f'no hit measurements {labels} in {", ".join(missing)}')
     mean = total / count if count > 0 else None
     minimum = model['minimum_hits']
-    reasons = failure_reasons(run, expectation.rank_id)
     failures = f'; failed casts: {describe_failures(reasons)}' if reasons else ''
+    notes = f'; {len(judged)} of {model["parts"]} parts' if model.get('parts', 1) > 1 else ''
+    if missing:
+        notes += f'; no hit measurements in {", ".join(missing)}'
     if count <= 0 and reasons:
-        return replace(base, status='unmeasured', measured=mean,
-                       explanation=f'no usable hit{failures}')
+        return replace(base, status='unmeasured', measured=mean, explanation=f'no usable hit{notes}{failures}')
     if count < minimum:
         return replace(base, status='insufficient_trials', measured=mean,
-                       explanation=f'{count:g} usable hits, fewer than the {minimum} the mean needs{failures}')
-    try:
-        expected = hit_model(class_file, expectation, run.values)
-    except Unmodelled as error:
-        return replace(base, status='unmodelled', measured=mean, explanation=UNMODELLED + error.reason)
-    except KeyError as error:
-        return replace(base, measured=mean, explanation=f'measurement {error} is missing from {run.key}')
-    shown = ' | '.join(expected.displayed)
-    if shown != expectation.displayed:
-        return replace(base, measured=mean, expected=expected.mean,
-                       explanation=f'hit tokens with the measured stats {shown!r} differ from the generated '
-                                   f'{expectation.displayed!r}')
-    half = Z_99 * expected.sigma / math.sqrt(count)
-    low, high = expected.mean - half, expected.mean + half
+                       explanation=f'{count:g} usable hits, fewer than the {minimum} the mean needs{notes}{failures}')
+    models = []
+    for run, part, part_count in judged:
+        try:
+            expected = hit_model(class_file, part, run.values)
+        except Unmodelled as error:
+            return replace(base, status='unmodelled', measured=mean, explanation=UNMODELLED + error.reason)
+        except KeyError as error:
+            return replace(base, measured=mean, explanation=f'measurement {error} is missing from {run.key}')
+        shown = ' | '.join(expected.displayed)
+        if shown != expectation.displayed:
+            return replace(base, measured=mean, expected=expected.mean,
+                           explanation=f'hit tokens with the measured stats {shown!r} differ from the generated '
+                                       f'{expectation.displayed!r}')
+        models.append((expected, part_count))
+    expected_mean = sum(part_count * expected.mean for expected, part_count in models) / count
+    variance = sum(part_count * expected.sigma ** 2 for expected, part_count in models) / count
+    half = Z_99 * math.sqrt(variance / count)
+    low, high = expected_mean - half, expected_mean + half
     status = 'ok' if low - FLOAT_EPSILON <= mean <= high + FLOAT_EPSILON else 'alert'
-    return replace(base, status=status, measured=mean, expected=expected.mean, low=low, high=high,
-                   explanation=f'{count:g} usable hits; {expected.kind} model mean {expected.mean:.3f} sigma '
-                               f'{expected.sigma:.3f} from the measured stats and target, 99% interval of the mean; '
-                               f'tooltip mean {expected.tooltip_mean:.2f} (display only); modifiers '
-                               f'{describe_modifiers(expected.modifiers)}{failures}')
-
-
-ProcPart = tuple[dict, Run, Expectation]
+    first = models[0][0]
+    modifiers = ' or '.join(dict.fromkeys(describe_modifiers(expected.modifiers) for expected, _ in models))
+    return replace(base, status=status, measured=mean, expected=expected_mean, low=low, high=high,
+                   explanation=f'{count:g} usable hits; {first.kind} model mean {expected_mean:.3f} sigma '
+                               f'{math.sqrt(variance):.3f} from the measured stats and target, 99% interval of the '
+                               f'mean; tooltip mean {first.tooltip_mean:.2f} (display only); modifiers '
+                               f'{modifiers}{notes}{failures}')
 
 
 RateJudgement = tuple[str, float | None, float | None, str]
@@ -1502,7 +1520,7 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
     if failure:
         return replace(base, status='unmeasured', measured=measured, explanation=f'cast failed: {failure}')
     if check in HIT_CHECKS:
-        return judge_hit(base, manifest['class_file'], expectation, run, hit_model)
+        return judge_hit(base, manifest['class_file'], [(entry, run, expectation)], hit_model)
     if measured is None:
         return replace(base, explanation=f'no measurement {expectation.label!r} in {run.key} '
                                          f'({run.status}: {run.message})')
@@ -1536,6 +1554,8 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
     proc_parts: dict[str, list[ProcPart]] = {}
     stack_parts: dict[str, list[ProcPart]] = {}
     trigger_parts: dict[str, list[ProcPart]] = {}
+    hit_parts: dict[str, list[ProcPart]] = {}
+    hit_slots: dict[str, int] = {}
     for entry in manifest['scenarios']:
         run = runs.get(entry['key'])
         if entry.get('file') and run is None:
@@ -1549,8 +1569,18 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                 stack_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             elif expectation.check == TRIGGER_CHECK and run is not None:
                 trigger_parts.setdefault(expectation.label, []).append((entry, run, expectation))
+            elif expectation.check in HIT_CHECKS and expectation.model and run is not None:
+                if expectation.label not in hit_slots:
+                    hit_slots[expectation.label] = len(verdicts)
+                    verdicts.append(None)
+                hit_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             else:
                 verdicts.append(judge(manifest, entry, run, expectation, tokens, tooltips, hit_model))
+    for label, parts in hit_parts.items():
+        first_entry, _, expectation = parts[0]
+        base = Verdict(label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
+                       expectation.rank_id, expectation.check)
+        verdicts[hit_slots[label]] = judge_hit(base, manifest['class_file'], parts, hit_model)
     verdicts += [server_question(manifest, parts[0][2], judge_proc(manifest, parts, tooltips), tooltips)
                  for parts in proc_parts.values()]
     verdicts += [server_question(manifest, parts[0][2], judge_trigger(parts), tooltips)

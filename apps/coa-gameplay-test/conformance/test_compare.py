@@ -481,6 +481,48 @@ class CompareTest(unittest.TestCase):
     def test_fewer_usable_hits_than_the_minimum_are_insufficient_trials(self):
         self.assertEqual(self.hit_verdict('543', '1').status, 'insufficient_trials')
 
+    def hit_part(self, part, total, count, armor='528', steps=True):
+        label = '1001 hit_mean'
+        record = {**hit_model_record(4), 'part': part, 'parts': 2}
+        entry = expectation(label, 'hit_mean', '$s2 | ${$AP*0.4725+$sph*1.35+$m1+0}', 'weapon hit', 0, record)
+        measured = [assert_step('target armor', armor), assert_step('target view_level', '60'),
+                    assert_step(HIT_LABELS['total'], total), assert_step(HIT_LABELS['count'], count)]
+        self.workspace.scenario(f'{HIT_KEY}-part-{part + 1}', 'hit', [entry], [], measured if steps else None)
+
+    def hit_verdicts(self, hit_model=reference_hit):
+        return [verdict for verdict in self.verdicts(hit_model=hit_model) if verdict.label == '1001 hit_mean']
+
+    def test_parts_are_summed(self):
+        self.hit_part(0, '1086', '2')
+        self.hit_part(1, '1086', '2')
+        verdicts = self.hit_verdicts()
+        self.assertEqual(len(verdicts), 1)
+        verdict = verdicts[0]
+        self.assertEqual((verdict.status, verdict.measured, verdict.scenario), ('ok', 543.0, HIT_KEY + '-part-1'))
+        self.assertAlmostEqual(verdict.high - verdict.expected, 2.576 * 1.72 / 2)
+        self.assertIn('4 usable hits', verdict.explanation)
+        self.assertIn('2 of 2 parts', verdict.explanation)
+
+    def test_parts_pool_the_model_of_each_part(self):
+        def by_armor(class_file, entry, measured):
+            mean = 543.2 if measured['target armor'] == 528 else 540.0
+            return HitModel(kind='weapon', mean=mean, sigma=1.72, tooltip_mean=746.33, modifiers=(CLASS_TUNING,),
+                            displayed=('$s2', '${$AP*0.4725+$sph*1.35+$m1+0}'))
+
+        self.hit_part(0, '1086', '2', armor='528')
+        self.hit_part(1, '1080', '2', armor='562')
+        verdict, = self.hit_verdicts(by_armor)
+        self.assertAlmostEqual(verdict.expected, (2 * 543.2 + 2 * 540.0) / 4)
+        self.assertAlmostEqual(verdict.high - verdict.expected, 2.576 * math.sqrt(4 * 1.72 ** 2) / 4)
+        self.assertEqual((verdict.status, verdict.measured), ('ok', 541.5))
+
+    def test_a_part_without_result_leaves_too_few_hits(self):
+        self.hit_part(0, '1086', '2')
+        self.hit_part(1, '1086', '2', steps=False)
+        verdict, = self.hit_verdicts()
+        self.assertEqual(verdict.status, 'insufficient_trials')
+        self.assertIn('1 of 2 parts', verdict.explanation)
+
     def test_changed_hit_tokens_are_an_alert(self):
         def other_tokens(class_file, entry, measured):
             return HitModel(kind='weapon', mean=543.2, sigma=1.72, tooltip_mean=746.33, displayed=('$s2',))
@@ -834,6 +876,22 @@ class GenerateTest(unittest.TestCase):
             self.assertEqual(kinds, {'value', 'hit'})
             self.assertEqual([(modifier['spell_id'], modifier['aura'], modifier['percent'])
                               for modifier in manifest['known_modifiers']], [(887007, 341, -20), (887007, 136, -20)])
+        finally:
+            shutil.rmtree(out)
+
+    def test_long_hit_is_written_in_parts_that_share_its_label(self):
+        from conformance import generate
+        out = Path(tempfile.mkdtemp(prefix='conformance-generate-'))
+        try:
+            manifest = json.loads(generate(CLASS_FILE['class_id'], out, spells=[RIGHTEOUS_UPHEAVAL]).read_text(
+                encoding='utf-8'))
+            hits = [entry for entry in manifest['scenarios'] if entry['kind'] == 'hit']
+            self.assertEqual([entry['key'] for entry in hits],
+                             ['conformance-templar-hit-572027-part-1', 'conformance-templar-hit-572027-part-2'])
+            for entry in hits:
+                self.assertTrue(entry['file'])
+                self.assertIn('572027 hit_mean', [item['label'] for item in entry['expectations']
+                                                  if item['check'] == 'hit_mean'])
         finally:
             shutil.rmtree(out)
 

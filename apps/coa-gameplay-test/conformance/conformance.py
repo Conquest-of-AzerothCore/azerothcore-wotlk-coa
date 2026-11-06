@@ -11,7 +11,7 @@ from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_F
                      write_levers, write_outputs)
 from diff import IMPACT_FILE, diff_directories, write_impact
 from passives import passive_scenario
-from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, hit_scenario, melee_scenario, records_of,
+from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, hit_parts, melee_scenario, records_of,
                   reference_hit_model, reference_melee_model)
 from procs import proc_entries, proc_plan, proc_scenario, proc_status_expectation, proc_unmodelled_expectation
 from profile import DBC_DIR, load_class_file
@@ -20,7 +20,7 @@ from stack import PASSES, STACK_CHECKS, STACK_DPS, STACK_KIND, stack_scenarios
 from tooltip import read_tooltip
 from triggers import (trigger_entries, trigger_plan, trigger_scenario, trigger_status_expectation,
                       trigger_unmodelled_expectation)
-from values import Expectation, dataset, structure_stats, value_scenario
+from values import Expectation, armed_for, dataset, structure_stats, value_scenario
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -67,7 +67,8 @@ def add_values(writer: ManifestWriter, spell: ClassSpell, dbc_dir: Path):
     class_file = writer.class_file
     for rank_id in spell.ranks:
         scenario, expectations = value_scenario(class_file, spell, rank_id)
-        readout = read_tooltip(dataset(dbc_dir), rank_id, structure_stats(class_file))
+        armed_file = armed_for(class_file, records_of(class_file), rank_id)
+        readout = read_tooltip(dataset(dbc_dir), rank_id, structure_stats(armed_file))
         writer.add(scenario_key(class_file['name'], 'value', rank_id), 'value', spell, rank_id, expectations,
                    scenario, [value.text for value in readout.values])
 
@@ -84,13 +85,19 @@ def add_hit(writer: ManifestWriter, spell: ClassSpell):
         writer.add(key, 'hit', spell, spell.max_rank, unmodelled(label, spell, str(error)))
         return
     try:
-        scenario, expectations = hit_scenario(class_file, spell, casts)
+        parts = hit_parts(class_file, spell, casts)
     except ValueError as error:
         writer.add(key, 'hit', spell, spell.max_rank, unmodelled(label, spell, str(error)))
         return
-    if all(expectation.check == 'unmodelled' for expectation in expectations):
-        scenario = None
-    writer.add(key, 'hit', spell, spell.max_rank, expectations, scenario)
+    if len(parts) == 1:
+        scenario, expectations = parts[0]
+        if all(expectation.check == 'unmodelled' for expectation in expectations):
+            scenario = None
+        writer.add(key, 'hit', spell, spell.max_rank, expectations, scenario)
+        return
+    for part, (scenario, expectations) in enumerate(parts, start=1):
+        writer.add(scenario_key(class_file['name'], 'hit', spell.max_rank, 'part', part), 'hit', spell,
+                   spell.max_rank, expectations, scenario)
 
 
 def add_passive(writer: ManifestWriter, spell: ClassSpell):

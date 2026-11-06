@@ -4,8 +4,8 @@ from pathlib import Path
 import re
 
 from classes import PASSIVE_ATTRIBUTE, ClassSpell, DataSet
-from profile import (CASTER, DBC_DIR, base_steps, character_of, known_aura_label, measurement, player_fixture,
-                     skill_target)
+from profile import (CASTER, DBC_DIR, EQUIP_FIELDS, armed, base_steps, character_of, known_aura_label, measurement,
+                     player_fixture, skill_target)
 from tooltip import CasterStats, Displayed, Records, Unreadable, read_tooltip
 
 CHECKS = ('effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'spell_duration', 'power_cost',
@@ -87,6 +87,14 @@ def facts_of(records: Records, rank_id: int) -> RankFacts:
         recast_ms=max(spell('RecoveryTime'), spell('CategoryRecoveryTime')),
         cast_time_ms=max(cast_time, 0),
         caster_aura_spell=spell('CasterAuraSpell'))
+
+
+def equip_requirement(records: Records, rank_id: int) -> dict[str, int]:
+    return {name: records.field('Spell', rank_id, name) for name in EQUIP_FIELDS}
+
+
+def armed_for(class_file: dict, records: Records, rank_id: int) -> dict:
+    return armed(class_file, equip_requirement(records, rank_id))
 
 
 def structure_stats(class_file: dict) -> CasterStats:
@@ -172,6 +180,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
         raise ValueError(f'Spell {rank_id} is not a rank of {spell.spell_id}')
     dbc = dataset(Path(class_file.get('dbc_dir', DBC_DIR)))
     records = Records(dbc)
+    class_file = armed_for(class_file, records, rank_id)
     facts = facts_of(records, rank_id)
     readout = read_tooltip(dbc, rank_id, structure_stats(class_file))
     measured: list[dict] = []
