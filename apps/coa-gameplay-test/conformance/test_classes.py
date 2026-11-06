@@ -1,9 +1,10 @@
 from pathlib import Path
+import re
 import struct
 import tempfile
 import unittest
 
-from classes import ClassSpell, DataSet, advancement_levels, class_skill_lines, class_spells
+from classes import ClassSpell, DataSet, advancement_levels, class_skill_lines, class_spells, table_rows
 from profile import load_class_file
 import schemas
 
@@ -16,6 +17,8 @@ TEMPLAR_SPELL_IDS_WITH_RANKS = 221
 SHARED_CLASS_TYPE = 12
 ARGENT_BLADE = 804929
 ARGENT_BLADE_RANKS = (804929, 807263, 807264, 807265, 807266, 807267, 807268)
+RIGHTEOUS_LUNGE = 801443
+HOLY_CLEAVE = 801445
 STAFF_SUBCLASS = 10
 TEMPLAR_SKILL_LINES = [70, 71, 72, 136]
 
@@ -23,6 +26,10 @@ SPELL_RECORD_BYTES = 936
 ADVANCEMENT_RECORD_BYTES = 692
 CLASS_TYPE_RECORD_BYTES = 92
 PASSIVE = 0x40
+CITATION = re.compile(r'^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d\.\d{3}, spell (\d+) (.+), '
+                      r'Ascension combat log, private archive$')
+TEMPLE_GUARDIAN = 801165
+TEMPLE_GUARDIAN_RANK_6 = 803796
 
 
 def wdbc(rows, fields, size, strings):
@@ -39,10 +46,11 @@ def write_fixture(directory: Path, header: Path):
         name_offset[spell_id] = len(strings)
         strings += name.encode() + b'\0'
 
-    def spell(spell_id, attributes):
+    def spell(spell_id, attributes, base_level=0):
         row = bytearray(SPELL_RECORD_BYTES)
         struct.pack_into('<I', row, offsets['Spell']['Id'], spell_id)
         struct.pack_into('<I', row, offsets['Spell']['Attributes'], attributes)
+        struct.pack_into('<I', row, offsets['Spell']['BaseLevel'], base_level)
         struct.pack_into('<I', row, offsets['Spell']['SpellName[enUS]'], name_offset[spell_id])
         return bytes(row)
 
@@ -62,7 +70,7 @@ def write_fixture(directory: Path, header: Path):
         struct.pack_into('<I', row, offsets['CharacterAdvancementClassTypes']['CustomClass'], custom)
         return bytes(row)
 
-    spells = [spell(100, 0), spell(101, 0), spell(200, PASSIVE), spell(300, 0), spell(400, 0), spell(500, 0)]
+    spells = [spell(100, 0), spell(101, 0), spell(200, PASSIVE), spell(300, 0), spell(400, 0, 7), spell(500, 0)]
     advancements = [advancement(1, 5, 10, 100, 101), advancement(2, 5, 20, 200), advancement(3, 6, 30, 300),
                     advancement(4, 7, 40, 400), advancement(5, 8, 50, 500)]
     class_types = [class_type(5, 19, 1), class_type(6, 19, 0), class_type(7, 20, 1), class_type(8, 10, 0)]
@@ -110,6 +118,24 @@ class FixtureClassSpellTest(unittest.TestCase):
                          [200, 201, 201, 202, 202, 203])
         self.assertEqual(by_level[60][100], 100)
 
+    def test_extra_spells_join_with_their_progression_ranks_and_base_level(self):
+        spells = {spell.spell_id: spell for spell in class_spells(self.directory, 19, self.header,
+                                                                  extra_spells=(400,))}
+        self.assertEqual(sorted(spells), [100, 101, 200, 400])
+        self.assertEqual(spells[400], ClassSpell(400, 'Epsilon', (400,), 400, 7, False))
+
+    def test_extra_spell_already_in_the_set_is_rejected(self):
+        with self.assertRaises(ValueError):
+            class_spells(self.directory, 19, self.header, extra_spells=(200,))
+
+    def test_extra_spell_listed_twice_is_rejected(self):
+        with self.assertRaises(ValueError):
+            class_spells(self.directory, 19, self.header, extra_spells=(400, 400))
+
+    def test_extra_spell_missing_from_the_spell_records_is_rejected(self):
+        with self.assertRaises(ValueError):
+            class_spells(self.directory, 19, self.header, extra_spells=(999,))
+
     def test_fields_come_from_the_dbc_records(self):
         spells = {spell.spell_id: spell for spell in class_spells(self.directory, 19, self.header)}
         self.assertEqual(spells[200], ClassSpell(200, 'Gamma', (200, 201, 202, 203), 202, 20, True))
@@ -145,6 +171,36 @@ class ClientDbcClassSpellTest(unittest.TestCase):
         self.assertEqual(class_skill_lines(DBC_DIR, self.templar, STAFF_SUBCLASS), TEMPLAR_SKILL_LINES)
         self.assertEqual(class_skill_lines(DBC_DIR, self.templar, None), TEMPLAR_SKILL_LINES[:3])
         self.assertEqual(load_class_file(TEMPLAR_CLASS_ID)['skill_lines'], TEMPLAR_SKILL_LINES)
+
+    def test_extra_spells_join_the_set(self):
+        extended = {spell.spell_id: spell for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER,
+                                                                    extra_spells=(RIGHTEOUS_LUNGE, HOLY_CLEAVE))}
+        self.assertEqual(extended[RIGHTEOUS_LUNGE].max_rank, 570233)
+        self.assertEqual(len(extended[RIGHTEOUS_LUNGE].ranks), 8)
+        self.assertEqual(extended[HOLY_CLEAVE].max_rank, 573049)
+        self.assertEqual(len(extended[HOLY_CLEAVE].ranks), 9)
+        self.assertEqual(len(extended), TEMPLAR_SPELL_IDS + 2)
+        self.assertEqual(len(self.templar), TEMPLAR_SPELL_IDS)
+        self.assertFalse({RIGHTEOUS_LUNGE, HOLY_CLEAVE} & {spell.spell_id for spell in self.templar})
+
+    def test_templar_extra_spells_cite_a_logged_rank_of_their_chain(self):
+        entries = load_class_file(TEMPLAR_CLASS_ID)['extra_spells']
+        extended = {spell.spell_id: spell for spell in class_spells(
+            DBC_DIR, TEMPLAR_CLASS_ID, HEADER, extra_spells=[entry['spell'] for entry in entries])}
+        records = {identity: fields for identity, fields in table_rows(DataSet(DBC_DIR), 'Spell',
+                                                                       ['SpellName[enUS]', 'Rank[enUS]'])}
+        outside_chain = {}
+        for entry in entries:
+            citation = CITATION.match(entry['citation'])
+            self.assertIsNotNone(citation, entry['spell'])
+            logged_id, logged_name = int(citation.group(1)), citation.group(2)
+            self.assertEqual({records[entry['spell']]['SpellName[enUS]'], records[logged_id]['SpellName[enUS]'],
+                              logged_name}, {entry['name']}, entry['spell'])
+            if logged_id not in extended[entry['spell']].ranks:
+                outside_chain[entry['spell']] = logged_id
+        self.assertEqual(outside_chain, {TEMPLE_GUARDIAN: TEMPLE_GUARDIAN_RANK_6})
+        self.assertEqual(records[TEMPLE_GUARDIAN_RANK_6]['Rank[enUS]'], 'Rank 6')
+        self.assertEqual(len(extended), TEMPLAR_SPELL_IDS + len(entries))
 
     def test_passive_flag_is_present_for_some_but_not_all_spells(self):
         passives = [spell for spell in self.templar if spell.passive]

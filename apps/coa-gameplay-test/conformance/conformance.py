@@ -174,7 +174,8 @@ def known_modifiers(class_file: dict) -> list[dict]:
 
 
 def selected_spells(class_file: dict, dbc_dir: Path, spell_ids: list[int] | None) -> list[ClassSpell]:
-    spells = class_spells(dbc_dir, class_file['class_id'], PROGRESSION_HEADER, class_file['level'])
+    spells = class_spells(dbc_dir, class_file['class_id'], PROGRESSION_HEADER, class_file['level'],
+                          [entry['spell'] for entry in class_file.get('extra_spells', [])])
     if spell_ids is None:
         return spells
     chosen = [spell for spell in spells if spell.spell_id in spell_ids or set(spell.ranks) & set(spell_ids)]

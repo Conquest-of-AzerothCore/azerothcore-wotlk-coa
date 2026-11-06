@@ -1,7 +1,9 @@
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 import re
 import sys
+from typing import Sequence
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'coa-dbc'))
 from inspect_dbc import DataSet
@@ -60,14 +62,23 @@ def advancement_levels(dataset: DataSet, types: set[int]) -> dict[int, int]:
     return levels
 
 
-def class_spells(dbc_dir: Path, class_id: int, progression_header: Path,
-                 level: int = CHARACTER_LEVEL) -> list[ClassSpell]:
+def class_spells(dbc_dir: Path, class_id: int, progression_header: Path, level: int = CHARACTER_LEVEL,
+                 extra_spells: Sequence[int] = ()) -> list[ClassSpell]:
     dataset = DataSet(dbc_dir)
     levels = advancement_levels(dataset, class_type_ids(dataset, class_id))
+    repeated = sorted(spell_id for spell_id, count in Counter(extra_spells).items() if count > 1)
+    if repeated:
+        raise ValueError(f'Extra spells {repeated} are listed more than once')
+    duplicated = sorted(set(extra_spells) & set(levels))
+    if duplicated:
+        raise ValueError(f'Extra spells {duplicated} are already CharacterAdvancement class spells')
     chains = progression_chains(progression_header, class_id)
-    spells = {identity: fields for identity, fields in table_rows(dataset, 'Spell', ['SpellName[enUS]', 'Attributes'])
-              if identity in levels}
-    missing = sorted(set(levels) - set(spells))
+    wanted = set(levels) | set(extra_spells)
+    spells = {identity: fields
+              for identity, fields in table_rows(dataset, 'Spell', ['SpellName[enUS]', 'Attributes', 'BaseLevel'])
+              if identity in wanted}
+    levels.update({spell_id: spells[spell_id]['BaseLevel'] for spell_id in extra_spells if spell_id in spells})
+    missing = sorted(wanted - set(spells))
     if missing:
         raise ValueError(f'Spell.dbc lacks class spells {missing}')
     result = []

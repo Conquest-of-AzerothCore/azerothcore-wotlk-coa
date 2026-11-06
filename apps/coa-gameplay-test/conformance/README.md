@@ -55,6 +55,36 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
   (`{ClassId, FirstSpellId, SpellId, RequiredLevel}`); `max_rank` is the last rank whose required level is at most
   `level`. `required_level` is the `CharacterAdvancement` required level of the entry that holds the spell.
 - `passive` is attribute bit 0x40 of the `Spell.dbc` record.
+- `class_spells(..., extra_spells=())` adds base spells that `CharacterAdvancement` lacks (ADR 0016), with ranks
+  from the same header and `required_level` the `Spell.dbc` `BaseLevel` of the base spell. A listed spell already in
+  the set, listed twice or missing from `Spell.dbc` is an error. `generate` passes the class file's `extra_spells`;
+  passive reference spells keep the `CharacterAdvancement` set.
+
+### Extra class spells
+
+A class file's `extra_spells` entry is `{"spell", "name", "citation"}`: the base spell id, its name and the citation of
+one Ascension combat log event (`~/Projects/coa-log-history/data/logs`) where a player casts a rank of it or holds its
+aura (ruling R23). The log archive is private: the citation is `<date> <time>, spell <logged id> <name>, Ascension
+combat log, private archive`, without character names or raw lines (ruling R25); the full lines stay in the gitignored
+`.agents/plans/class-conformance-2/templar/extra-spells-evidence.md`. The log does not store a class, so the event
+must come from a player who also casts a `CharacterAdvancement` active of the class in those logs.
+`test_classes.py` checks the citation form, that the logged spell has the entry's name and is a rank of its chain
+(Temple Guardian excepted, below), and that no spell is listed twice.
+
+The candidates are the 34 Templar entries of `AscensionCompatData::ClassSpells`
+(`src/server/coa/AscensionCustomClassData.h`, ClassId 19), none of them in `CharacterAdvancement`. Searched on
+2026-11-06 by spell id, every rank of the progression header, and by name. 22 are confirmed and listed in
+`classes/templar.json`: Righteous Lunge, Chastise, Gift of Zeal, Benediction, Libram of Consecration, Condemn,
+Tranquil Circle, Harmonic Disposition, Testament of Faith, Holy Cleave, Beckon, Rebuke, Light's Hope, Spiritual
+Ascension (a resurrection by its rank 500758), Tithe, Temple Guardian, Testament of Resolve, Libram of Grace,
+Titanstrike, Crusader's Presence, Righteous Custodian and Shoot (a ranged hit; it needs a ranged weapon, so its hit
+is `unmodelled`). Temple Guardian is logged at Rank 6 803796 (`Spell.dbc` `Rank[enUS]`, level 60), while the header
+chains 801165 to Rank 2 803792 only, so the run judges Rank 2.
+
+Not confirmed, left out: Dodge 81, Block 107, Dual Wield 674, Auto Attack 6603, Resilient Constitution 552011,
+Divine Stand 807729, Detect Evil 562226, Gift of Fervor 572629, Shackle The Unrepentant 560963, Greater Gift of Fervor
+572630 and Greater Gift of Zeal 680306 (no log line), and Throw 2764 (cast only by players who cast no Templar
+active).
 
 ## Tooltip reading
 
@@ -152,7 +182,8 @@ hand, `subclass` from `Item.dbc`: 10, a staff, for the Walking Stick), `skill_li
 spells and the weapon: Templar 70, 71, 72 and 136), `ratings` (fixture hit and expertise ratings, so that an aura or hit
 is never lost to a miss; they do not change a tooltip value), `reference_stats`, `known_auras`, `probe_auras`, `procs`
 (see [Proc rates](#proc-rates)) and `talent_modifiers`, `rotation`, `stack`
-(see [Talent stack](#talent-stack-lever-map)), and `alternate_weapons`. The Templar reference is a human with the
+(see [Talent stack](#talent-stack-lever-map)), `alternate_weapons` and `extra_spells`
+(see [Extra class spells](#extra-class-spells)). The Templar reference is a human with the
 Walking Stick (item 2495).
 
 `weapon` also freezes the `item_template` row of the weapon: `min_damage` (`dmg_min1`), `max_damage` (`dmg_max1`),
