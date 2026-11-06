@@ -945,6 +945,8 @@ def validate(scenario):
             validate_placement_metric(step, where, player_ids)
             require(metric not in PLACEMENT_AUDIT_METRICS or placement_audited,
                     f'{where}: placement audit metric needs an earlier placement_audit')
+            require('entries' not in step or metric == 'map_creature_count',
+                    f'{where}: entries only applies to map creature counts')
             if metric == 'map_creature_count':
                 require(step['actor'] in player_ids, f'{where}: creature count needs a player')
                 if 'entry' in step:
