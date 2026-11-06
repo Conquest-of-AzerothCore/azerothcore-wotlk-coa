@@ -1,5 +1,6 @@
 -- Kaldros Depthbreaker (978080), Ascension's world boss of Depthbreaker's Hollow (map 884, as the quick guide shows
--- the fight), built the way Setis is: a shrine under the sea off Sardor Isle (Feralas) takes players in (Normal only), the portal he
+-- the fight), built the way Setis is: a shrine under the sea off Sardor Isle (Feralas) takes players in
+-- (Normal only), the portal he
 -- leaves where he falls and the shrine at the entrance take them back, and players who die there rise at its start.
 -- No log: his kit is his spell block (boss_kaldros_coa), his health is designed per player in his map (10 to 40).
 
@@ -90,3 +91,11 @@ INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (978081, '22650 
 DELETE FROM `creature_template_movement` WHERE `CreatureId` = 978081;
 INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flight`, `Rooted`) VALUES
 (978081, 1, 0, 0, 1);
+
+-- The Treasures of Azeroth chest every world boss gives (978059) has a 5% roll at any world boss item (978060):
+-- his items join that pool.
+INSERT IGNORE INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`,
+  `GroupId`, `MinCount`, `MaxCount`, `Comment`)
+SELECT 978060, l.`Item`, 0, 0, 0, 1, 1, 1, 1, CONCAT('Treasures of Azeroth - World Boss - ', i.`name`)
+FROM `creature_loot_template` l JOIN `item_template` i ON i.`entry` = l.`Item`
+WHERE l.`Entry` = 978080 AND l.`GroupId` = 1 AND l.`Reference` = 0 AND i.`Quality` = 4;
