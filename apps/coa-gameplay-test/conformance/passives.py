@@ -3,11 +3,12 @@ from functools import lru_cache
 from pathlib import Path
 import re
 
-from classes import PROGRESSION_HEADER, PROGRESSION_ROW, ClassSpell, table_rows
-from profile import CASTER, DBC_DIR, stat_label
+from classes import PROGRESSION_HEADER, PROGRESSION_ROW, ClassSpell, class_spells, table_rows
+from hits import creature_fixture
+from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture, stat_label
 from stack import class_mask, family_flags
 from tooltip import COLOR_CODE, Displayed, Records, Unreadable, read_tooltip
-from values import EFFECTS, TARGET, dataset, structure_stats
+from values import EFFECTS, TARGET, Expectation, dataset, facts_of, structure_stats
 
 UNMODELLED = 'unmodelled: '
 UNKNOWN = 'unknown'
@@ -22,6 +23,22 @@ ALL_STATS = -1
 PHYSICAL_SCHOOL_MASK = 1
 MAGIC_SCHOOLS = range(1, 7)
 SCHOOLS = range(7)
+ALL_SCHOOLS_MASK = 127
+SCHOOL_DAMAGE_EFFECT = 2
+HEAL_EFFECT = 10
+VERSUS_AURA_STATE = 303
+DAMAGE_DONE_PERCENT = 79
+PASSIVE_DELTA = 'passive_delta'
+BEFORE = 'before'
+AFTER = 'after'
+SPELL_METRICS = frozenset({'spell_modifier', 'spell_power_cost', 'spell_cast_time_ms', 'spell_max_range',
+                           'spell_max_stacks', 'spell_effect_value', 'spell_done_crit_chance', 'spell_damage_done',
+                           'spell_critical_damage', 'spell_healing_done', 'spell_healing_taken'})
+SCHOOL_DAMAGE = 'a school damage effect'
+HEALING = 'a heal effect'
+PLAIN_COST = 'a plain cost'
+REFERENCE_KINDS = {'spell_damage_done': SCHOOL_DAMAGE, 'spell_critical_damage': SCHOOL_DAMAGE,
+                   'spell_healing_done': HEALING, 'spell_healing_taken': HEALING, 'spell_power_cost': PLAIN_COST}
 
 FAMILIES = {
     **dict.fromkeys((ADD_FLAT_MODIFIER, ADD_PCT_MODIFIER), 'P1'),
@@ -468,3 +485,134 @@ def passive_effects(class_file: dict, spell: ClassSpell) -> list[PassiveEffect]:
     effects = [effect for effect in EFFECTS if records.field('Spell', rank_id, f'Effect[{effect}]')]
     return [classify(class_file, records, spell.spell_id, rank_id, effect, effects, text, values)
             for effect in effects]
+
+
+@dataclass(frozen=True)
+class Probe:
+    label: str
+    metric: str
+    fields: dict = field(hash=False)
+    target: int | None
+    named: bool | None
+    in_mask: bool | None
+    reason: str = ''
+
+
+@lru_cache(maxsize=None)
+def active_class_ranks(dbc_dir: Path, class_id: int, level: int) -> tuple[int, ...]:
+    return tuple(spell.max_rank for spell in class_spells(dbc_dir, class_id, PROGRESSION_HEADER, level)
+                 if not spell.passive)
+
+
+def serves(records: Records, rank_id: int, kind: str) -> bool:
+    facts = facts_of(records, rank_id)
+    if kind == PLAIN_COST:
+        return facts.mana_cost > 0 and not facts.mana_cost_per_level and not facts.mana_cost_percentage
+    return (SCHOOL_DAMAGE_EFFECT if kind == SCHOOL_DAMAGE else HEAL_EFFECT) in facts.effects
+
+
+def reference_school_mask(effect: PassiveEffect) -> int:
+    if effect.aura == VERSUS_AURA_STATE:
+        return ALL_SCHOOLS_MASK
+    if effect.aura == DAMAGE_DONE_PERCENT:
+        return effect.misc & ~PHYSICAL_SCHOOL_MASK
+    return effect.misc or ALL_SCHOOLS_MASK
+
+
+def reference_spell(class_file: dict, records: Records, metric: str, school_mask: int) -> int:
+    kind = REFERENCE_KINDS[metric]
+    dbc_dir = Path(class_file.get('dbc_dir', DBC_DIR))
+    for rank_id in active_class_ranks(dbc_dir, class_file['class_id'], class_file['level']):
+        if records.field('Spell', rank_id, 'SchoolMask') & school_mask and serves(records, rank_id, kind):
+            return rank_id
+    raise NotModelled(f'no active class spell with {kind} in school mask {school_mask}')
+
+
+def probe_label(rank_id: int, effect: int, metric: str, qualifiers) -> str:
+    return ' '.join(str(part) for part in (rank_id, f'e{effect}', metric, *qualifiers))
+
+
+def plan_probes(class_file: dict, records: Records, effect: PassiveEffect, plan: MetricPlan) -> list[Probe]:
+    def probe(spell_id: int | None, named: bool | None = None, in_mask: bool | None = None,
+              reason: str = '') -> Probe:
+        fields = dict(plan.fields) if spell_id is None else {**plan.fields, 'spell': spell_id}
+        qualifiers = ([spell_id] if spell_id is not None
+                      else [value for key, value in plan.fields.items() if key != 'target'])
+        return Probe(probe_label(effect.spell_id, effect.effect, plan.metric, qualifiers), plan.metric, fields,
+                     spell_id, named, in_mask, reason)
+
+    if plan.metric not in SPELL_METRICS:
+        return [probe(None)]
+    if effect.family == 'P1':
+        probes = []
+        for target in effect.targets:
+            reason = ''
+            if plan.metric == 'spell_effect_value' and not records.field(
+                    'Spell', target.spell_id, f'Effect[{plan.fields["effect"]}]'):
+                reason = UNMODELLED + f'target {target.spell_id} has no effect {plan.fields["effect"]}'
+            probes.append(probe(target.spell_id, target.named, target.in_mask, reason))
+        return probes
+    try:
+        return [probe(reference_spell(class_file, records, plan.metric, reference_school_mask(effect)))]
+    except NotModelled as error:
+        return [probe(None, reason=UNMODELLED + str(error))]
+
+
+def effect_model(effect: PassiveEffect) -> dict:
+    return {'family': effect.family, 'effect': effect.effect, 'aura': effect.aura, 'misc': effect.misc}
+
+
+def probe_model(effect: PassiveEffect, plan: MetricPlan, probe: Probe, aura_label: str) -> dict:
+    measured = not probe.reason
+    return {'family': effect.family, 'effect': effect.effect, 'metric': plan.metric, 'fields': probe.fields,
+            'relation': plan.relation, 'source_label': plan.source,
+            'before_label': f'{probe.label} {BEFORE}' if measured else None,
+            'after_label': f'{probe.label} {AFTER}' if measured else None,
+            'target': probe.target, 'named': probe.named, 'in_mask': probe.in_mask, 'points': effect.points,
+            'judged': plan.judged, 'aura_label': aura_label}
+
+
+def passive_scenario(class_file: dict, spell: ClassSpell) -> tuple[dict | None, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    rank_id = spell.max_rank
+    aura_label = f'{rank_id} aura_present'
+    probes: list[Probe] = []
+    expectations: list[Expectation] = []
+
+    def expect(label: str, check: str, effect: PassiveEffect, rule: str, model: dict):
+        expectations.append(Expectation(label, check, spell.spell_id, rank_id, effect.effect,
+                                        effect.token.text if effect.token else '', rule, model))
+
+    for effect in passive_effects(class_file, spell):
+        if not effect.plans:
+            expect(f'{rank_id} e{effect.effect}', 'unmodelled', effect, effect.reason, effect_model(effect))
+            continue
+        for plan in effect.plans:
+            for probe in plan_probes(class_file, records, effect, plan):
+                model = probe_model(effect, plan, probe, aura_label)
+                if probe.reason:
+                    expect(probe.label, 'unmodelled', effect, probe.reason, model)
+                    continue
+                probes.append(probe)
+                expect(probe.label, PASSIVE_DELTA, effect, plan.relation, model)
+    labels = [expectation.label for expectation in expectations]
+    if len(set(labels)) != len(labels):
+        raise ValueError(f'Passive {rank_id} gives duplicate labels')
+    if not probes:
+        return None, expectations
+
+    def measured(moment: str) -> list[dict]:
+        return [measurement(f'{probe.label} {moment}', CASTER, probe.metric, **probe.fields) for probe in probes]
+
+    learning = [{'action': 'learn', 'actor': CASTER, 'spell': rank_id},
+                measurement(aura_label, CASTER, 'aura', spell=rank_id)]
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spell.name} {rank_id} passive',
+        'contract': 'No-combat with/without check: the quantities a passive changes, measured before and after '
+                    'it is learned.',
+        'players': [player_fixture(class_file)],
+        'steps': base_steps(class_file) + measured(BEFORE) + learning + measured(AFTER)}
+    if any(probe.fields.get('target') == TARGET for probe in probes):
+        scenario['creatures'] = [creature_fixture(class_file)]
+    return scenario, expectations

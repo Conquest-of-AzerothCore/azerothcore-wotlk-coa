@@ -10,6 +10,7 @@ from classes import PROGRESSION_HEADER, ClassSpell, class_spells
 from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_FILE, ScenarioDrift, evaluate,
                      write_levers, write_outputs)
 from diff import IMPACT_FILE, diff_directories, write_impact
+from passives import passive_scenario
 from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, hit_scenario, melee_scenario, records_of,
                   reference_hit_model, reference_melee_model)
 from procs import proc_entries, proc_plan, proc_scenario, proc_status_expectation, proc_unmodelled_expectation
@@ -89,6 +90,12 @@ def add_hit(writer: ManifestWriter, spell: ClassSpell):
     writer.add(key, 'hit', spell, spell.max_rank, expectations, scenario)
 
 
+def add_passive(writer: ManifestWriter, spell: ClassSpell):
+    scenario, expectations = passive_scenario(writer.class_file, spell)
+    writer.add(scenario_key(writer.class_file['name'], 'passive', spell.max_rank), 'passive', spell, spell.max_rank,
+               expectations, scenario)
+
+
 def add_melee(writer: ManifestWriter):
     class_file = writer.class_file
     try:
@@ -149,8 +156,16 @@ def selected_spells(class_file: dict, dbc_dir: Path, spell_ids: list[int] | None
     return chosen
 
 
+def selected_passives(class_file: dict, dbc_dir: Path, spell_ids: list[int]) -> list[ClassSpell]:
+    chosen = selected_spells(class_file, dbc_dir, spell_ids)
+    active = sorted(spell.spell_id for spell in chosen if not spell.passive)
+    if active:
+        raise ValueError(f'Spells {active} are not passive')
+    return chosen
+
+
 def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: list[int] | None = None,
-             stack: bool = False, passes: int = PASSES) -> Path:
+             stack: bool = False, passes: int = PASSES, passives: list[int] | None = None) -> Path:
     class_file = load_class_file(class_id)
     dbc_dir = Path(class_file.get('dbc_dir', DBC_DIR))
     out = Path(out)
@@ -159,12 +174,21 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
         raise ValueError(f'{scenario_dir} already holds scenarios; generate into a new directory')
     scenario_dir.mkdir(parents=True, exist_ok=True)
     writer = ManifestWriter(class_file, out)
-    everything = spells is None and procs is None and not stack
+    everything = spells is None and procs is None and passives is None and not stack
     chosen_procs = proc_entries(class_file, procs) if everything or procs is not None else []
+    chosen_passives = selected_passives(class_file, dbc_dir, passives) if passives is not None else []
+    generated_passives: set[int] = set()
     if everything or spells is not None:
         for spell in selected_spells(class_file, dbc_dir, spells):
             add_values(writer, spell, dbc_dir)
-            add_hit(writer, spell)
+            if spell.passive:
+                add_passive(writer, spell)
+                generated_passives.add(spell.spell_id)
+            else:
+                add_hit(writer, spell)
+    for spell in chosen_passives:
+        if spell.spell_id not in generated_passives:
+            add_passive(writer, spell)
     for entry in chosen_procs:
         add_proc(writer, entry)
     if stack:
@@ -180,7 +204,7 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
 
 
 def generate_command(args) -> int:
-    path = generate(args.class_id, args.out, args.spell, args.proc, args.stack, args.passes)
+    path = generate(args.class_id, args.out, args.spell, args.proc, args.stack, args.passes, args.passive)
     manifest = json.loads(path.read_text(encoding='utf-8'))
     written = sum(1 for entry in manifest['scenarios'] if entry['file'])
     print(f'{path}: {written} scenarios in {path.parent / SCENARIO_DIR}, '
@@ -232,6 +256,8 @@ def main(argv=None) -> int:
     generating.add_argument('--out', type=Path, required=True)
     generating.add_argument('--spell', type=int, action='append',
                             help='a class spell id or rank id; repeat to select several spells')
+    generating.add_argument('--passive', type=int, action='append',
+                            help='a passive class spell id or rank id: its with/without scenario only; repeatable')
     generating.add_argument('--proc', type=int, action='append',
                             help='the aura of a proc entry of the class file; repeat to select several procs')
     generating.add_argument('--stack', action='store_true',

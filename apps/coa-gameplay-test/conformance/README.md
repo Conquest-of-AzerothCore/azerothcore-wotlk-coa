@@ -15,7 +15,9 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
 - `values.py`: `value_scenario(class_file, spell, rank_id)` returns the no-combat scenario of one rank and its
   `Expectation` list.
 - `passives.py`: `passive_effects(class_file, spell)` classifies each effect of a passive into a family, its expected
-  token, its metric plans and, for a spell modifier, its targets (see [Passive effects](#passive-effects)).
+  token, its metric plans and, for a spell modifier, its targets (see [Passive effects](#passive-effects));
+  `passive_scenario(class_file, spell)` returns its with/without scenario, or `None` when no effect is measured, and
+  its `Expectation` list (see [Passive scenario](#passive-scenario)).
 - `hits.py`: `hit_scenario(class_file, spell, casts)` and `melee_scenario(class_file, swings)` return the hit scenario
   of a spell's highest rank and the auto-attack scenario, with their `Expectation` lists; `expected_hit` and
   `casts_needed` give the expected mean, its sigma and the number of casts.
@@ -240,6 +242,53 @@ power, its tooltip says "attack power"). For `share`, `stat_after_token(text, to
 power" written after `<token>% of (your)`; the source comes from the tooltip, not from `EffectMiscValueB`, so a
 mismatch shows as an alert when judged. No such words: `unmodelled: the tooltip names no stat or attack power after
 <token>% of`.
+
+### Passive scenario
+
+ADR 0012 records the method. `passive_scenario(class_file, spell)` measures every plan of every modelled effect of
+the passive's rank at the class level (`spell.max_rank`) twice in one no-combat scenario:
+
+1. `base_steps(class_file)` (fixtures, stats, known and probe auras);
+2. each measurement labelled `<passive> e<n> <metric> <target> before`;
+3. `learn` the passive, then `aura` of the passive labelled `<passive> aura_present` (diagnostic);
+4. the same measurements labelled `<passive> e<n> <metric> <target> after`.
+
+`<target>` is the spell the metric is asked about, else the values of the plan's fields other than `target`
+(`706431 e0 stat 0 before`, `705303 e0 combat_rating 3 after`, `561346 e1 expertise before`). A spell modifier and
+its consumer metric (`spell_power_cost`, `spell_effect_value`, `spell_done_crit_chance`, ...) are measured on every
+target of the effect, named or mask-only. A spell-bound metric without targets (`spell_damage_done`,
+`spell_critical_damage`, `spell_healing_done`, `spell_healing_taken`, `spell_power_cost` of aura 72) is measured on a
+reference spell: the first active class spell, at its rank for the class level, whose `SchoolMask` meets the effect's
+mask (`EffectMiscValue`; its magic part for aura 79; every school for aura 303, whose misc value is an aura state)
+and that has a school damage effect (2) for damage, a heal effect (10) for healing, or a plain cost (`ManaCost` above
+0, no per-level or percentage cost) for the cost. Templar: Reckoning 572741 for Serendipity 300929 and Chivalric
+705272, Crusader's Brand 300513 for the cost of Serendipity. The scenario adds the dummy creature when a measurement
+targets it.
+
+Expectations, one per measured pair: label `<passive> e<n> <metric> <target>`, check `passive_delta`, `displayed` the
+token text, `rule` the plan's relation, and `model` with `family`, `effect`, `metric`, `fields` (the step's fields,
+`spell` included), `relation`, `source_label` (the base-step label of a `share` source), `before_label`,
+`after_label`, `target` (the spell measured, else `None`), `named` and `in_mask` (spell modifier targets, else
+`None`), `points` (the effect's own signed points), `judged` and `aura_label`. Not measured, check `unmodelled`:
+
+- an effect without plans: one expectation labelled `<passive> e<n>` with the effect's reason (Condemnation 704175
+  effect 1, op 40: no step is generated);
+- a target without the effect a `spell_effect_value` consumer reads: `unmodelled: target <id> has no effect <n>`
+  (the harness would stop the scenario);
+- a reference spell missing: `unmodelled: no active class spell with a heal effect in school mask <mask>` (Templar
+  has no heal spell: Sacred Style 705278 and Fortified Body 300515 are unmodelled).
+
+On Templar the 145 passives give 66 scenarios and 79 entries without one; 355 `passive_delta` and 145 `unmodelled`
+expectations.
+
+Probe of 2026-11-06 (`--passive` 706431 705266 520009 705303 561346 572555, simulated clock, every scenario
+passed): `aura_present` was 1 in the step right after `learn` for all six, and the stats had moved by the next step.
+Before → after: Pious 706431 stats 81/132/79/32/50 → 85/138/82/33/52; Liberty 705266 `spell_modifier` op 11 on the
+five Librams 1000 → −29000; Paladin Training 520009 op 0 1000 → 1200, op 14 1000 → 800, `spell_power_cost` 40 → 32
+(Righteous Lunge 570233) and 50 → 40 (Argent Blade 807268), 0 → 0 for Holy Master 504810 (no cost); Graceful
+Fighter 705303 parry rating 0 → 26 and dodge rating 0 → 6; Aggramar's Rage 561346 expertise 4000 → 4010 while Holy
+`spell_crit_chance` stayed 2.8592 → 2.8592; Solemn Soldier 572555 `attack_time_ms` 2500 → 2272.73 and expertise
+4000 → 4010. Task 3 judges these deltas; none is judged here.
 
 ## Max-rank hit scenarios
 
@@ -514,16 +563,19 @@ second).
 
 ```sh
 cd apps/coa-gameplay-test/conformance
-python3 -B conformance.py generate --class 19 --out DIR [--spell ID ...] [--proc AURA ...] [--stack [--passes N]]
+python3 -B conformance.py generate --class 19 --out DIR [--spell ID ...] [--passive ID ...] [--proc AURA ...] \
+  [--stack [--passes N]]
 python -B ../../../tools/verify_all.py --stages gameplay --scenario DIR/scenarios/*.json
 python3 -B conformance.py compare --manifest DIR/manifest.json --results .cache/verify-all/STAMP [--out OUT]
 ```
 
-`generate` writes one no-combat scenario per rank, the hit scenario of each spell's highest rank, the parts of each
-proc entry and, without `--spell` or `--proc`, the melee scenario, into `DIR/scenarios/`, and `DIR/manifest.json`.
-`--spell` takes a class spell id or a rank id, `--proc` the aura of a proc entry, `--stack` the passes of the talent
-stack (`--passes`, 5 by default); each selects only what it names. A proc part is named
-`conformance-<class>-proc-<aura>-part-<n>`, a stack pass
+`generate` writes one no-combat scenario per rank, the hit scenario of each active spell's highest rank, the
+with/without scenario of each passive (kind `passive`, no `hit` entry), the parts of each proc entry and, without
+`--spell`, `--passive` or `--proc`, the melee scenario, into `DIR/scenarios/`, and `DIR/manifest.json`. `--spell`
+takes a class spell id or a rank id, `--passive` a passive class spell id or rank id (its passive scenario only; an
+active spell is an error), `--proc` the aura of a proc entry, `--stack` the passes of the talent stack (`--passes`, 5
+by default); each selects only what it names. A passive scenario is named `conformance-<class>-passive-<rank>`, a
+proc part `conformance-<class>-proc-<aura>-part-<n>`, a stack pass
 `conformance-<class>-stack-<config>-pass-<n>`. A hit expectation that is entirely
 `unmodelled` gets no scenario file. A file holds `json.dumps(scenario, indent=2)` and a newline, the bytes the
 runner writes and hashes as `scenario_sha256` (`batch.py` `write_case`), and is named after its exploratory key

@@ -1,16 +1,22 @@
 from collections import Counter
+import json
 from pathlib import Path
+import shutil
 import struct
+import sys
 import tempfile
 import unittest
 
 from classes import PROGRESSION_HEADER as HEADER, ClassSpell, class_spells, table_rows
-from passives import (FAMILIES, MAX_SPELLMOD, PHRASES, MetricPlan, PassiveTarget, family_of, named_targets,
-                      passive_effects, stat_after_token)
+from passives import (FAMILIES, MAX_SPELLMOD, PASSIVE_DELTA, PHRASES, MetricPlan, PassiveTarget, family_of,
+                      named_targets, passive_effects, passive_scenario, stat_after_token)
 from profile import load_class_file
 from tooltip import Records
-from values import dataset
+from values import TARGET, dataset
 import schemas
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+import run
 
 DBC_DIR = Path('/srv/coa/server-data/dbc')
 
@@ -42,6 +48,21 @@ BLESSED_STRIKES = 704180
 CHAKRA_OF_LIGHT = (803159, 803844)
 DEEP_SECRETS = 705263
 FINESSE = 705271
+PIOUS = 706431
+SERENDIPITY = 300929
+SACRED_STYLE = 705278
+RECKONING_AT_60 = 572741
+CRUSADERS_BRAND = 300513
+MARTIAL_TRAINING = 806525
+SCARLET_HAMMER = (500752, 807035)
+CHASTISE = 503141
+UPHEAVE = 520442
+STAT_COUNT = 5
+LIBERTY_OP = 11
+SPELL_MODIFIER_BASE = 1000
+CONDEMNATION_OP = 40
+MODEL_KEYS = {'family', 'effect', 'metric', 'fields', 'relation', 'source_label', 'before_label', 'after_label',
+              'target', 'named', 'in_mask', 'points', 'judged', 'aura_label'}
 MAGIC_SCHOOLS = [1, 2, 3, 4, 5, 6]
 NO_NAMED_TARGET = 'unmodelled: the tooltip names none of the spells the class mask affects ('
 
@@ -276,6 +297,161 @@ class TemplarPassiveTest(unittest.TestCase):
                     for effect in passive_effects(class_file, spell):
                         self.assertTrue(effect.reason == '' or effect.reason.startswith('unmodelled: '),
                                         (class_id, spell.spell_id, effect.effect, effect.reason))
+
+
+def labelled(steps: list[dict], suffix: str) -> list[dict]:
+    return [step for step in steps if step.get('label', '').endswith(suffix)]
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class PassiveScenarioTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.class_file = load_class_file(TEMPLAR_CLASS_ID)
+
+    def scenario(self, spell_id: int):
+        return passive_scenario(self.class_file, templar_passive(spell_id))
+
+    def test_passive_scenario_measures_before_and_after_learn(self):
+        scenario, expectations = self.scenario(PIOUS)
+        steps = scenario['steps']
+        learn = steps.index({'action': 'learn', 'actor': 'caster', 'spell': PIOUS})
+        aura = steps[learn + 1]
+        self.assertEqual((aura['label'], aura['metric'], aura['spell']), (f'{PIOUS} aura_present', 'aura', PIOUS))
+        before = [step for step in steps[:learn] if step.get('label', '').endswith(' before')]
+        after = [step for step in steps[learn + 2:] if step.get('label', '').endswith(' after')]
+        self.assertEqual([(step['metric'], step['stat']) for step in before],
+                         [('stat', stat) for stat in range(STAT_COUNT)])
+        self.assertEqual([step['label'] for step in before], [f'{PIOUS} e0 stat {stat} before' for stat in range(5)])
+        self.assertEqual([step['label'].removesuffix(' after') for step in after],
+                         [step['label'].removesuffix(' before') for step in before])
+        self.assertEqual(len(steps), learn + 2 + len(after))
+        self.assertIs(run.validate(scenario), scenario)
+        self.assertEqual([expectation.check for expectation in expectations], [PASSIVE_DELTA] * STAT_COUNT)
+        model = expectations[0].model
+        self.assertEqual(set(model), MODEL_KEYS)
+        self.assertEqual((model['before_label'], model['after_label'], model['aura_label']),
+                         (f'{PIOUS} e0 stat 0 before', f'{PIOUS} e0 stat 0 after', f'{PIOUS} aura_present'))
+        self.assertEqual((model['family'], model['metric'], model['relation'], model['points'], model['judged']),
+                         ('P2', 'stat', 'scale', 5.0, True))
+        self.assertEqual(expectations[0].label, f'{PIOUS} e0 stat 0')
+        self.assertEqual(expectations[0].displayed, '$s1')
+
+    def test_spell_modifier_steps(self):
+        scenario, expectations = self.scenario(LIBERTY)
+        targets = {target.spell_id for target in effect_of(self.effects(LIBERTY), 0).targets}
+        for suffix in (' before', ' after'):
+            modifiers = [step for step in labelled(scenario['steps'], suffix) if step['metric'] == 'spell_modifier']
+            self.assertEqual(sorted(step['spell'] for step in modifiers), sorted(targets))
+            self.assertTrue(all((step['op'], step['base']) == (LIBERTY_OP, SPELL_MODIFIER_BASE)
+                                for step in modifiers))
+        model = next(expectation.model for expectation in expectations if expectation.model['target'] == LIBRAMS[0])
+        self.assertEqual((model['named'], model['in_mask'], model['relation']), (False, True, 'spell_mod_flat'))
+        self.assertEqual(model['before_label'], f'{LIBERTY} e0 spell_modifier {LIBRAMS[0]} before')
+        run.validate(scenario)
+
+    def test_no_step_for_unmodelled_effects(self):
+        scenario, expectations = self.scenario(CONDEMNATION)
+        self.assertFalse([step for step in scenario['steps']
+                          if step.get('metric') == 'spell_modifier' and step['op'] == CONDEMNATION_OP])
+        effect_1 = [expectation for expectation in expectations if expectation.effect_index == 1]
+        self.assertEqual([expectation.check for expectation in effect_1], ['unmodelled'])
+        self.assertEqual(effect_1[0].rule, 'unmodelled: SpellModOp 40 is not below MAX_SPELLMOD 32')
+        run.validate(scenario)
+
+    def test_effect_value_consumer_skips_targets_without_the_effect(self):
+        scenario, expectations = self.scenario(MARTIAL_TRAINING)
+        records = Records(dataset(DBC_DIR))
+        values = [step for step in scenario['steps'] if step.get('metric') == 'spell_effect_value']
+        self.assertTrue(values)
+        for step in values:
+            self.assertTrue(records.field('Spell', step['spell'], f'Effect[{step["effect"]}]'), step)
+        skipped = [expectation for expectation in expectations if expectation.check == 'unmodelled'
+                   and expectation.model and expectation.model['metric'] == 'spell_effect_value']
+        for expectation in skipped:
+            self.assertFalse(records.field('Spell', expectation.model['target'],
+                                           f'Effect[{expectation.model["fields"]["effect"]}]'))
+            self.assertTrue(expectation.rule.startswith('unmodelled: target '), expectation.rule)
+
+    def test_spell_metrics_use_an_active_class_spell_of_the_school(self):
+        scenario, expectations = self.scenario(SERENDIPITY)
+        damage = next(step for step in scenario['steps'] if step.get('metric') == 'spell_damage_done')
+        self.assertEqual((damage['spell'], damage['target']), (RECKONING_AT_60, TARGET))
+        cost = next(step for step in scenario['steps'] if step.get('metric') == 'spell_power_cost')
+        self.assertEqual(cost['spell'], CRUSADERS_BRAND)
+        self.assertEqual([creature['id'] for creature in scenario['creatures']], [TARGET])
+        self.assertIn(f'{SERENDIPITY} e0 spell_damage_done {RECKONING_AT_60}',
+                      [expectation.label for expectation in expectations])
+        run.validate(scenario)
+
+    def test_healing_without_a_class_heal_spell_is_unmodelled(self):
+        scenario, expectations = self.scenario(SACRED_STYLE)
+        self.assertIsNone(scenario)
+        self.assertEqual({expectation.check for expectation in expectations}, {'unmodelled'})
+        self.assertTrue(all(expectation.rule.startswith('unmodelled: no active class spell with a heal effect')
+                            for expectation in expectations))
+
+    def test_dummy_target_brings_the_dummy(self):
+        scenario, _ = self.scenario(UPHEAVE)
+        crit = [step for step in scenario['steps'] if step.get('metric') == 'spell_done_crit_chance']
+        self.assertTrue(crit and all(step['target'] == TARGET for step in crit))
+        self.assertEqual([creature['id'] for creature in scenario['creatures']], [TARGET])
+
+    def test_every_templar_passive_scenario_validates(self):
+        passives = [spell for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER) if spell.passive]
+        records = Records(dataset(DBC_DIR))
+        for spell in passives:
+            scenario, expectations = passive_scenario(self.class_file, spell)
+            self.assertEqual(len({expectation.label for expectation in expectations}), len(expectations), spell)
+            if scenario is None:
+                self.assertTrue(all(expectation.check == 'unmodelled' for expectation in expectations), spell)
+                continue
+            run.validate(scenario)
+            for step in scenario['steps']:
+                if step.get('metric') == 'spell_modifier':
+                    self.assertLess(step['op'], MAX_SPELLMOD)
+                if step.get('metric') == 'spell_effect_value':
+                    self.assertTrue(records.field('Spell', step['spell'], f'Effect[{step["effect"]}]'), step)
+            labels = {step.get('label') for step in scenario['steps']}
+            for expectation in expectations:
+                if expectation.check == PASSIVE_DELTA:
+                    self.assertIn(expectation.model['before_label'], labels)
+                    self.assertIn(expectation.model['after_label'], labels)
+
+    def effects(self, spell_id: int):
+        return passive_effects(self.class_file, templar_passive(spell_id))
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class GeneratePassiveTest(unittest.TestCase):
+    def setUp(self):
+        self.out = Path(tempfile.mkdtemp(prefix='conformance-passive-'))
+
+    def tearDown(self):
+        shutil.rmtree(self.out)
+
+    def test_passives_lose_the_hit_placeholder(self):
+        from conformance import generate
+        manifest = json.loads(generate(TEMPLAR_CLASS_ID, self.out, spells=[PIOUS]).read_text(encoding='utf-8'))
+        kinds = [entry['kind'] for entry in manifest['scenarios'] if entry['spell_id'] == PIOUS]
+        self.assertNotIn('hit', kinds)
+        self.assertEqual(kinds.count('passive'), 1)
+        entry = next(entry for entry in manifest['scenarios'] if entry['kind'] == 'passive')
+        self.assertEqual(entry['key'], f'conformance-templar-passive-{PIOUS}')
+        self.assertTrue((self.out / entry['file']).is_file())
+
+    def test_passive_flag_generates_only_passive_scenarios(self):
+        from conformance import main
+        self.assertEqual(main(['generate', '--class', str(TEMPLAR_CLASS_ID), '--out', str(self.out),
+                               '--passive', str(PIOUS), '--passive', str(LIBERTY)]), 0)
+        manifest = json.loads((self.out / 'manifest.json').read_text(encoding='utf-8'))
+        self.assertEqual(sorted((entry['kind'], entry['spell_id']) for entry in manifest['scenarios']),
+                         [('passive', LIBERTY), ('passive', PIOUS)])
+
+    def test_passive_flag_refuses_an_active_spell(self):
+        from conformance import generate
+        with self.assertRaises(ValueError):
+            generate(TEMPLAR_CLASS_ID, self.out, passives=[RECKONING_AT_60])
 
 
 if __name__ == '__main__':
