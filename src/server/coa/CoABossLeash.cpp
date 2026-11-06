@@ -117,7 +117,7 @@ class CoABossLeashCheck final : public AllCreatureScript
 public:
     CoABossLeashCheck() : AllCreatureScript("CoABossLeashCheck") { }
 
-    void OnAllCreatureUpdate(Creature* creature, uint32 /*diff*/) override
+    void OnAllCreatureUpdate(Creature* creature, uint32) override
     {
         if (!creature->IsInCombat() || creature->IsInEvadeMode() || !creature->IsAlive() || !LeashedOnMap(creature->GetMap()))
             return;
