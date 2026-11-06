@@ -1,0 +1,228 @@
+{
+  "schema": 1,
+  "name": "Lower Blackrock Spire rares load once per difficulty (#11387, #11383)",
+  "contract": [
+    "#11387: Xot'hot the Burning (10263) spawned twice on Mythic. rev_20261007_97 placed Mythic-only copies (spawnMask 4) of four rares and rev_20261009_50 later placed all-difficulty copies (spawnMask 7) at the same spots without removing them, so Mythic loaded two rows at one position.",
+    "Xot'hot and Razmorg the Decapitator (9218, whose stock row is 93 yards from the placed one) must read one living creature within 60 yards of their placed spot on Normal and Mythic.",
+    "Wizz'Magg (9217) and Chop'gog (9219) also keep their stock rows 43521 and 43523 within 60 yards of the placed ones, so each reads two on every difficulty; on Mythic it must not read more than two, which is what the Mythic-only copy added."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "normal",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "set_phase",
+      "actor": "normal",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "mythic",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 229,
+      "x": -11.4631,
+      "y": -381.701,
+      "z": 49.1622
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: normal is in a Normal Lower Blackrock Spire",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Xot'hot the Burning is loaded once at his spot on Normal",
+      "actor": "normal",
+      "metric": "nearby_creature_count",
+      "entry": 10263,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 229,
+      "x": -54.5744,
+      "y": -325.952,
+      "z": 43.0746
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: normal is in a Normal Lower Blackrock Spire",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Razmorg the Decapitator is loaded once at his spot on Normal",
+      "actor": "normal",
+      "metric": "nearby_creature_count",
+      "entry": 9218,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 229,
+      "x": -11.4631,
+      "y": -381.701,
+      "z": 49.1622
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: mythic is in a Mythic Lower Blackrock Spire",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Xot'hot the Burning is loaded once at his spot on Mythic",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 10263,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 229,
+      "x": -54.5744,
+      "y": -325.952,
+      "z": 43.0746
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: mythic is in a Mythic Lower Blackrock Spire",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Razmorg the Decapitator is loaded once at his spot on Mythic",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 9218,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 229,
+      "x": -37.6842,
+      "y": -379.083,
+      "z": 31.6183
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: mythic is in a Mythic Lower Blackrock Spire",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Wizz'Magg the Magus has no Mythic-only copy beside his other rows on Mythic",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 9217,
+      "max": 2,
+      "within_ms": 5000,
+      "min": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 229,
+      "x": -37.1626,
+      "y": -428.256,
+      "z": 31.7916
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: mythic is in a Mythic Lower Blackrock Spire",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Chop'gog the Butcher has no Mythic-only copy beside his other rows on Mythic",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 9219,
+      "max": 2,
+      "within_ms": 5000,
+      "min": 1
+    }
+  ]
+}
