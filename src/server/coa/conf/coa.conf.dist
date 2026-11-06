@@ -444,9 +444,9 @@ RatedSoloArena.Title.Gladiator = 2600
 #                         Sergeant's and Captain's)
 #                     2 - Phase 2 as well: Lieutenant Thorne 48053, Captain Korgash 49053 and both
 #                         Vik "Angry" Smalls (CoA PvP Gear, Legionnaire's, Centurion's and the Legacy lists)
-#        Default:     2
+#        Default:     1
 
-Ascension.PvPVendors.ReleaseStage = 2
+Ascension.PvPVendors.ReleaseStage = 1
 
 #    HighRisk.FelCommutation.Enable
 #        Description: Fel Commutation. A High-Risk character switches it on and picks the equipment slots to

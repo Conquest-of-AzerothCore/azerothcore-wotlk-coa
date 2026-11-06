@@ -5,10 +5,16 @@ using PvPVendorRelease::IsEventReleased;
 using PvPVendorRelease::PhaseOneVendorsEvent;
 using PvPVendorRelease::PhaseTwoVendorsEvent;
 
-TEST(PvPVendorRelease, DefaultStageShowsBothPhases)
+TEST(PvPVendorRelease, DefaultStageShowsOnlyPhaseOne)
 {
     EXPECT_TRUE(IsEventReleased(PhaseOneVendorsEvent, PvPVendorRelease::DefaultStage));
-    EXPECT_TRUE(IsEventReleased(PhaseTwoVendorsEvent, PvPVendorRelease::DefaultStage));
+    EXPECT_FALSE(IsEventReleased(PhaseTwoVendorsEvent, PvPVendorRelease::DefaultStage));
+}
+
+TEST(PvPVendorRelease, PhaseTwoStageShowsBothPhases)
+{
+    EXPECT_TRUE(IsEventReleased(PhaseOneVendorsEvent, PvPVendorRelease::StagePhaseTwo));
+    EXPECT_TRUE(IsEventReleased(PhaseTwoVendorsEvent, PvPVendorRelease::StagePhaseTwo));
 }
 
 TEST(PvPVendorRelease, PhaseOneStageHoldsBackPhaseTwoVendors)

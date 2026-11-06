@@ -8,7 +8,7 @@ namespace PvPVendorRelease
 {
 constexpr std::uint32_t StagePhaseOne = 1;
 constexpr std::uint32_t StagePhaseTwo = 2;
-constexpr std::uint32_t DefaultStage = StagePhaseTwo;
+constexpr std::uint32_t DefaultStage = StagePhaseOne;
 
 constexpr std::uint16_t PhaseOneVendorsEvent = 197;
 constexpr std::uint16_t PhaseTwoVendorsEvent = 198;
