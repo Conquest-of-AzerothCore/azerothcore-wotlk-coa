@@ -1,12 +1,8 @@
----
-name: coa-gameplay-test
-description: >-
-  Design CoA worldserver scenarios and verify them through tools/verify_all.py to test spells, talents, items and
-  server-side effects. Use for requested gameplay/runtime validation; source-only edits and rendered client/UI
-  testing have separate scopes.
----
+# Gameplay scenarios
 
-# CoA gameplay test
+Design CoA worldserver scenarios and verify them through `tools/verify_all.py` to test spells, talents, items and
+server-side effects. Source-only edits and rendered client/UI testing have separate scopes
+([guide-tooling](guide-tooling.md) covers the client).
 
 Use the gameplay harness in `C:/Ascension/azerothcore-wotlk-coa`, or the user's explicitly selected CoA checkout.
 Read that checkout's `AGENTS.md`, `apps/coa-gameplay-test/README.md` and `docs/coa/verification.md` before the

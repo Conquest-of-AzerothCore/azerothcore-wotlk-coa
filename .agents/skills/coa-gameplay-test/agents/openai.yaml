@@ -1,4 +1,0 @@
-interface:
-  display_name: "CoA Gameplay Test"
-  short_description: "Run isolated server gameplay scenarios"
-  default_prompt: "Use $coa-gameplay-test to verify the requested mechanic in an isolated worldserver."

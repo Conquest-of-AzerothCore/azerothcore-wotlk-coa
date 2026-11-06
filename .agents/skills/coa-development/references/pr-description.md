@@ -1,11 +1,4 @@
----
-name: generate-pr-description
-description: Generate the PR title and description from the current branch changes, following the repo's PR template.
-metadata:
-  version: "1.0"
----
-
-# Generate PR description
+# PR description
 
 Produce a copy-pasteable PR title and body for the current changes, based on the repo's
 `pull_request_template.md`. Output text only — never create the PR, push, or run any
@@ -18,8 +11,7 @@ prose. If not available, fetch it from its [remote source](https://github.com/ea
 
 "The changes" is the union of:
 
-- committed branch work: `git diff <master-ref>...HEAD`, where `<master-ref>` is `origin/master` —
-  or `upstream/master` when the checkout is a fork with an `upstream` remote;
+- committed branch work: `git diff origin/main...HEAD` (`origin` is the CoA fork; PRs target its `main`);
 - staged and unstaged changes;
 - the branch's commit messages (context only).
 
@@ -38,7 +30,7 @@ carry, contradictory information. Missing fill-in facts are never a reason to as
 ## Title
 
 `type(Scope/Subscope): short description` — imperative, max 50 chars. Types: `feat`, `fix`,
-`refactor`, `style`, `docs`, `test`, `chore`; scopes: `Core`, `Scripts`, `DB`. Copy subscope naming
+`refactor`, `style`, `docs`, `test`, `chore`; scopes: `CoA`, `Core`, `Scripts`, `DB`. Copy subscope naming
 from recent commits touching the same areas (`git log --oneline -- <paths>`).
 
 ## Body
@@ -50,8 +42,17 @@ Fill in `pull_request_template.md` (repo root):
 - Describe what the changes do and why.
 - "Changes Proposed" checkboxes, from diff paths: `src/server/scripts/` → Scripts; `data/sql/` →
   Database; other `src/` → Core.
-- AI disclosure checkbox: always tick it; name the agent/model running this skill and state
-  whether AI produced the changes themselves or only this description, per the conversation.
+- AI disclosure checkbox: always tick it and state whether AI produced the changes themselves or only
+  this description, per the conversation. Fill "Tools/models used:" with these lines, every one present:
+  - `Agent: <tool and version, e.g. Claude Code, Codex CLI>`
+  - `Model: <exact model ID of the main session, e.g. claude-opus-5-5>`
+  - `Subagents: <exact model ID of each subagent model that worked on the change>` or `none`
+  - `superpowers: used (<process skills applied, e.g. brainstorming, systematic-debugging>)`, or
+    `superpowers: not used (contributor declined installation)`, or
+    `superpowers: not used (unavailable: <reason>)` (see `.agents/rules/workflow.md`)
+
+  Take model IDs from the session itself and from the subagents actually dispatched; write `unknown` for one
+  that cannot be determined, never a guess. Work spread over several sessions lists each distinct model.
 - Issues Addressed, SOURCE, Tests Performed, How to Test, Known Issues/TODO: stated facts only
   (see above).
 
