@@ -295,7 +295,7 @@ class TemplarPassiveTest(unittest.TestCase):
 
     def test_generic_crit_phrase_judges_melee_and_measures_spell_crit(self):
         effect = effect_of(self.effects(FINESSE), 0)
-        melee = plan_named(effect, 'melee_crit_chance')
+        melee = plan_named(effect, 'melee_crit_chance_refreshed')
         self.assertEqual((melee.relation, melee.judged), ('add', True))
         spell_crit = [plan for plan in effect.plans if plan.metric == 'spell_crit_chance']
         self.assertEqual([plan.fields['school'] for plan in spell_crit], MAGIC_SCHOOLS)

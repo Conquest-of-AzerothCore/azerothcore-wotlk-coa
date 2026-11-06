@@ -54,8 +54,9 @@ VERDICTS_SCHEMA = 1
 SPELL_DURATION_SCOPE = ('base duration after the player\'s SPELLMOD_DURATION modifiers, before script hooks: a '
                         'ScriptMgr::OnCalcMaxDuration change is not covered')
 EFFECT_VALUE_SCOPE = 'CalcValue before aura scripts (CalcAmount hooks not covered)'
-PERCENT_POINT_METRICS = frozenset({'melee_crit_chance', 'spell_crit_chance', 'melee_hit_chance', 'spell_hit_chance',
-                                   'parry_chance', 'dodge_chance', 'spell_done_crit_chance'})
+PERCENT_POINT_METRICS = frozenset({'melee_crit_chance', 'melee_crit_chance_refreshed', 'spell_crit_chance',
+                                   'melee_hit_chance', 'spell_hit_chance', 'parry_chance', 'dodge_chance',
+                                   'spell_done_crit_chance'})
 FRACTIONAL_METRICS = PERCENT_POINT_METRICS | {'weapon_damage_min'}
 FRACTIONAL_FLOOR = 0.01
 CRITICAL_DAMAGE_BASE = 1000

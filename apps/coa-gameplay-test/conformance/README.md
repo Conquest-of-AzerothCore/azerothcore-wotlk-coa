@@ -331,7 +331,7 @@ source (`stat <n>` or `attack_power`), and whether the delta is judged (`judged`
 | 29 / 137 | `stat {stat}`, all five for misc −1 | `add` / `scale` |
 | 133, 132, 166, 167 | `max_health`, `max_power {power}`, `attack_power`, `ranged_attack_power` | `scale` |
 | 240, 47, 49 | `expertise`, `parry_chance`, `dodge_chance` | `add` |
-| 290 | `spell_crit_chance {school}` when the tooltip says "<School> critical strike chance"; else `melee_crit_chance` plus `spell_crit_chance {school}` for schools 1 to 6 with `judged` false (D6) | `add` |
+| 290 | `spell_crit_chance {school}` when the tooltip says "<School> critical strike chance"; else `melee_crit_chance_refreshed` plus `spell_crit_chance {school}` for schools 1 to 6 with `judged` false (D6) | `add` |
 | 333 | `melee_hit_chance` and `spell_hit_chance` | `add` |
 | 138 | `attack_time_ms {hand: 0}` | `haste` |
 | 220 | `combat_rating {rating}`, one per bit of the misc mask | `share` |
@@ -940,15 +940,17 @@ their intervals or had none.
 
 Fix round of the same day (ADR 0017, commit after `7780decbc7`): the 77 alerts of that run that were not server
 findings were tool defects and are fixed: modifier targets (ADR 0017), two effects on one metric (judged together),
-the `melee_crit_chance` field, which the harness read stale (0 before the learn on a reference character whose
-field was last computed before its weapon was equipped; the metric now calls `Player::UpdateCritPercentage` before
-the read), `parry_chance` on a character that cannot parry, and the duration clamp of `spell_modifier`. The
+the melee crit field, which `melee_crit_chance` reads stale (0 before the learn on a reference character whose
+field was last computed before its weapon was equipped; passive scenarios now read `melee_crit_chance_refreshed`,
+which calls `Player::UpdateCritPercentage` before the read, and `melee_crit_chance` stays the plain read that other
+scenarios assert on), `parry_chance` on a character that cannot parry, and the duration clamp of `spell_modifier`. The
 regenerated manifest (491 scenarios, stamps 20261106-162551 and 20261106-163218, 82.6 s each) gives 1756 verdicts:
 ok 1282, alert 25, unreadable 72, unmodelled 240, ambiguous_tooltip 30, unmeasured 15, measured 92. Two runs differ
-on 13 listed verdicts; the significant ones are the Righteous Lunge hit mean (an alert on both runs, its model
+on 12 listed verdicts; the significant ones are the Righteous Lunge hit mean (an alert on both runs, its model
 sigma does not describe the server's hits) and, before `diff` used the deterministic tolerance for intervals of no
-width, the Divine Force hit (400 then 402, `ok` on both, sigma 0). Rolled `effect_value` verdicts whose server value
-adds a per-level part the expected value omits switch between `ok` and `alert` with the roll.
+width, the Divine Force hit (400 then 402, `ok` on both, sigma 0). Rolled `effect_value` verdicts were still judged on
+one read: those whose server value adds a per-level part the expected value omits switched between `ok` and `alert`
+with the roll, so six of them were false `ok` verdicts (ADR 0018 replaces the rule).
 
 ### Impact report
 
@@ -1089,9 +1091,10 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   | `composition` | `multiplies`: before x v / 100; `adds`, when a known modifier of the metric's kind (`damage`, `heal`) and school is measured on the character: before x v / (100 + the sum of their percents) |
 
   Tolerance on the delta (D3): `delta_margin(metric, expected)` is `max(0.01, 0.5% of |expected|)` for the
-  percentage-point metrics `PERCENT_POINT_METRICS` (`melee_crit_chance`, `spell_crit_chance`, `melee_hit_chance`,
-  `spell_hit_chance`, `parry_chance`, `dodge_chance`, and `spell_done_crit_chance`, the crit chance a spell modifier
-  of op 7 changes) and for `weapon_damage_min`, a float field whose 3% delta is
+  percentage-point metrics `PERCENT_POINT_METRICS` (`melee_crit_chance`, `melee_crit_chance_refreshed`,
+  `spell_crit_chance`, `melee_hit_chance`, `spell_hit_chance`, `parry_chance`, `dodge_chance`, and
+  `spell_done_crit_chance`, the crit chance a spell modifier of op 7 changes) and for `weapon_damage_min`, a float
+  field whose 3% delta is
   about 1.9 (a 1-point floor would accept 1.4% to 4.6%), else `max(1, 0.5% of |expected|)`. Liberty 705266 on Libram
   of Tenacity 801461: `$/1000;s1` reads 30000 ms, points −30000, expected −30000 ± 150; 1000 → −29000 is `ok`, 1000 →
   −28800 an alert. Solemn Soldier 572555: 2500 → 2272.73 ms is `ok`, 2500 → 2250 an alert.

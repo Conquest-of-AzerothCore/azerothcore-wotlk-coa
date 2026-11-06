@@ -82,6 +82,7 @@ RATING_NAMES = {1: 'defense rating', 2: 'dodge rating', 3: 'parry rating', 4: 'b
                 **dict.fromkeys((5, 6, 7), 'hit rating'), **dict.fromkeys((8, 9, 10), 'critical strike rating'),
                 **dict.fromkeys((17, 18, 19), 'haste rating'), 23: 'expertise rating', 24: 'armor penetration'}
 CRIT_CHANCE = 'critical strike chance'
+MELEE_CRIT_CHANCE = 'melee_crit_chance_refreshed'
 SPELL_POWER = 'spell power'
 
 PHRASES: dict[str, tuple[str, ...]] = {
@@ -364,7 +365,7 @@ def crit_plans(text: str) -> list[tuple[MetricPlan, str]]:
         quantity = f'{name} {CRIT_CHANCE}'
         if names_phrase(text, quantity):
             return [(MetricPlan('spell_crit_chance', {'school': school}, 'add'), quantity)]
-    return [(MetricPlan('melee_crit_chance', {}, 'add'), CRIT_CHANCE)] + [
+    return [(MetricPlan(MELEE_CRIT_CHANCE, {}, 'add'), CRIT_CHANCE)] + [
         (MetricPlan('spell_crit_chance', {'school': school}, 'add', judged=False), CRIT_CHANCE)
         for school in MAGIC_SCHOOLS]
 

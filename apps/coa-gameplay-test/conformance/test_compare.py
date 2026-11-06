@@ -857,13 +857,13 @@ class QuestionDetailTest(unittest.TestCase):
                          {'kind': 'readings', 'question': 'Which?', 'readings': readings, 'measured': 2300.0})
 
     def test_percent_point_metrics_take_the_hundredth_floor(self):
-        self.assertEqual(delta_margin('melee_crit_chance', 1.0), 0.01)
+        self.assertEqual(delta_margin('melee_crit_chance_refreshed', 1.0), 0.01)
         self.assertEqual(delta_margin('attack_time_ms', 1.0), 1.0)
         self.assertEqual(delta_margin('weapon_damage_min', 1.87), 0.01)
         self.assertEqual(delta_margin('spell_modifier', -30000.0), 150.0)
-        self.assertEqual(PERCENT_POINT_METRICS, frozenset({'melee_crit_chance', 'spell_crit_chance',
-                                                           'melee_hit_chance', 'spell_hit_chance', 'parry_chance',
-                                                           'dodge_chance', 'spell_done_crit_chance'}))
+        self.assertEqual(PERCENT_POINT_METRICS, frozenset({'melee_crit_chance', 'melee_crit_chance_refreshed',
+                                                           'spell_crit_chance', 'melee_hit_chance', 'spell_hit_chance',
+                                                           'parry_chance', 'dodge_chance', 'spell_done_crit_chance'}))
 
 
 class MeasuredValuesTest(unittest.TestCase):

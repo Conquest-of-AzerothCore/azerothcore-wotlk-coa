@@ -654,10 +654,12 @@ effects.
 for it (the client spellbook tab the spell's own row places it under), or `-1` when no row carries a nonzero
 skill line for that spell.
 `spell_crit_chance` optionally accepts `school` (0..6, default Shadow). `melee_crit_chance`, `dodge_chance` and
-`parry_chance` read the player's percentage fields; `expertise` reads main-hand expertise; `combat_rating` requires
-`rating` (0..24, native `CombatRating`) and reads the rating value. `stat` requires `stat` (0..4), `resistance`
-requires `school` (1..6); `armor`, `attack_power`, `ranged_attack_power`, the hasted `attack_time_ms` (optional
-`hand`, 0..2) and `run_speed_rate` read the unit's current totals. `pet_attack_time_ms` uses the same hand
+`parry_chance` read the player's percentage fields. `melee_crit_chance_refreshed` first calls
+`Player::UpdateCritPercentage(BASE_ATTACK)`, the computation a stat update runs, and then reads the field: the query
+therefore writes `PLAYER_CRIT_PERCENTAGE`, which later melee crit rolls read. `expertise` reads main-hand
+expertise; `combat_rating` requires `rating` (0..24, native `CombatRating`) and reads the rating value. `stat` requires
+`stat` (0..4), `resistance` requires `school` (1..6); `armor`, `attack_power`, `ranged_attack_power`, the hasted
+`attack_time_ms` (optional `hand`, 0..2) and `run_speed_rate` read the unit's current totals. `pet_attack_time_ms` uses the same hand
 selection for a player's current pet and requires that pet to exist. `attack_timer_ms` (optional `hand`, 0..2)
 reads the time left until that hand's next swing (0 when ready). `aura_amplitude_ms` reads an aura effect's
 periodic interval.
