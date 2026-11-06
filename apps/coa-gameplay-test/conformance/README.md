@@ -648,7 +648,7 @@ of their own 99% intervals, taken on the sides that face each other (so a Wilson
 |---|---|
 | `hit_mean`, `melee_mean` | `measured` plus or minus the half-width of the verdict (`Z` x sigma / sqrt(hits)) |
 | `proc_rate`, stack DPS and source, talent delta | the `low` and `high` of the verdict |
-| every other check | none: significant when the difference exceeds `max(1, 0.5% of expected)`, the tolerance of the comparison (cooldowns: the larger timing window), plus the larger `roll_spread` of the two sides for a rolled effect |
+| every other check | none: significant when the difference exceeds `max(1, 0.5% of expected)`, the tolerance of the comparison (cooldowns: the larger timing window; a `passive_delta` verdict: `delta_margin` of the metric in its `detail['metric']`, so a 0.5-point crit change is significant), plus the larger `roll_spread` of the two sides for a rolled effect |
 
 A side without a measured value is never significant. When the values differ and an interval check (the first two rows)
 has no interval on a side, the change is `not judged`: not significant, and listed like a significant one, never as
@@ -746,9 +746,10 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
 
   Tolerance on the delta (D3): `delta_margin(metric, expected)` is `max(0.01, 0.5% of |expected|)` for the
   percentage-point metrics `PERCENT_POINT_METRICS` (`melee_crit_chance`, `spell_crit_chance`, `melee_hit_chance`,
-  `spell_hit_chance`, `parry_chance`, `dodge_chance`) and for `weapon_damage_min`, a float field whose 3% delta is
+  `spell_hit_chance`, `parry_chance`, `dodge_chance`, and `spell_done_crit_chance`, the crit chance a spell modifier
+  of op 7 changes) and for `weapon_damage_min`, a float field whose 3% delta is
   about 1.9 (a 1-point floor would accept 1.4% to 4.6%), else `max(1, 0.5% of |expected|)`. Liberty 705266 on Libram
-  of Tenacity 801461: `$/1000;s1` reads 30, points −30000, expected −30000 ± 150; 1000 → −29000 is `ok`, 1000 →
+  of Tenacity 801461: `$/1000;s1` reads 30000 ms, points −30000, expected −30000 ± 150; 1000 → −29000 is `ok`, 1000 →
   −28800 an alert. Solemn Soldier 572555: 2500 → 2272.73 ms is `ok`, 2500 → 2250 an alert.
   Spell modifier targets (D5): a mask spell the tooltip does not name, beside named targets of the same effect and
   metric, is `measured`; with no named target (category targets) the mask spells are judged. A named spell outside
@@ -760,7 +761,7 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   observable terms ("With Chivalric learned, does a critical hit of Reckoning change by +15% or by +7.5%?"), per
   reading its `name`, `expected` (the after value), `delta`, `status` and `measured` (the after value of that
   reading's spell), and `measured`, the after value of the verdict's own measurement. The verdict's `measured`,
-  `expected`, `low` and `high` are deltas.
+  `expected`, `low` and `high` are deltas, and every passive verdict keeps its metric in `detail['metric']`.
 
 The report lists each known aura's modifier effects with `EffectBasePoints`, `EffectRealPointsPerLevel`, the
 value at the class level and the runs that measured the aura; a hit model applies a modifier only in a run that

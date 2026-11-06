@@ -523,13 +523,20 @@ class PassiveDeltaTest(unittest.TestCase):
         self.assertAlmostEqual(within.high - within.expected, 0.03)
         self.assertEqual(self.single(entry, '2.8592', '7.8592', token).status, 'alert')
 
+    def test_crit_chance_consumer_has_no_one_point_floor(self):
+        entry = passive_expectation(705284, 0, 'spell_done_crit_chance', 'add', '$s1', 6.0, RECKONING, named=True,
+                                    in_mask=True, fields={'target': 'dummy'})
+        token = [Displayed('$s1', 6.0, 0, 'percent')]
+        self.assertEqual(self.single(entry, '5', '11', token).status, 'ok')
+        self.assertEqual(self.single(entry, '5', '10', token).status, 'alert')
+
     def test_haste_divides(self):
         entry = passive_expectation(SOLEMN_SOLDIER, 0, 'attack_time_ms', 'haste', '$s1', 10.0, fields={'hand': 0})
         token = [Displayed('$s1', 10.0, 0, 'percent')]
         divided = self.single(entry, '2500', '2272.73', token)
         self.assertEqual(divided.status, 'ok')
         self.assertAlmostEqual(divided.expected, 2500 / 1.1 - 2500)
-        self.assertIsNone(divided.detail)
+        self.assertEqual(divided.detail, {'metric': 'attack_time_ms'})
         self.assertEqual(self.single(entry, '2500', '2250', token).status, 'alert')
 
     def test_named_target_outside_the_mask(self):
@@ -586,7 +593,7 @@ class PassiveDeltaTest(unittest.TestCase):
                                     fields={'target': 'dummy'})
         verdict = self.single(entry, '1000', '1030', [Displayed('$s1', 3.0, 0, 'percent')],
                               **{'known_aura 887007': '0'})
-        self.assertEqual((verdict.status, verdict.detail), ('ok', None))
+        self.assertEqual((verdict.status, verdict.detail), ('ok', {'metric': 'spell_damage_done'}))
 
     def test_share_uses_the_measured_source(self):
         entry = passive_expectation(GRACEFUL_FIGHTER, 0, 'combat_rating', 'share', '$s1', 20.0,
@@ -661,7 +668,7 @@ class QuestionDetailTest(unittest.TestCase):
         self.assertEqual(delta_margin('spell_modifier', -30000.0), 150.0)
         self.assertEqual(PERCENT_POINT_METRICS, frozenset({'melee_crit_chance', 'spell_crit_chance',
                                                            'melee_hit_chance', 'spell_hit_chance', 'parry_chance',
-                                                           'dodge_chance'}))
+                                                           'dodge_chance', 'spell_done_crit_chance'}))
 
 
 class MeasuredValuesTest(unittest.TestCase):

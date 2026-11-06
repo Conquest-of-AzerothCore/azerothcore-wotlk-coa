@@ -48,11 +48,12 @@ LEVERS_FILE = 'levers.md'
 VERDICTS_FILE = 'verdicts.json'
 VERDICTS_SCHEMA = 1
 PERCENT_POINT_METRICS = frozenset({'melee_crit_chance', 'spell_crit_chance', 'melee_hit_chance', 'spell_hit_chance',
-                                   'parry_chance', 'dodge_chance'})
+                                   'parry_chance', 'dodge_chance', 'spell_done_crit_chance'})
 FRACTIONAL_METRICS = PERCENT_POINT_METRICS | {'weapon_damage_min'}
 FRACTIONAL_FLOOR = 0.01
 CRITICAL_DAMAGE_BASE = 1000
 DURATION_KIND = 'duration_ms'
+PASSIVE_METRIC = 'metric'
 READINGS_QUESTION = 'readings'
 TEXT_QUESTION = 'text'
 AURA_REQUIREMENTS = ('EquippedItemClass', 'Stances', 'CasterAuraSpell')
@@ -932,6 +933,12 @@ def judge_modifier_target(base: Verdict, manifest: dict, entry: dict, run: Run, 
 
 def judge_passive(manifest: dict, entry: dict, run: Run | None, expectation: Expectation,
                   tooltips: TooltipSource) -> Verdict:
+    verdict = passive_verdict(manifest, entry, run, expectation, tooltips)
+    return replace(verdict, detail={**(verdict.detail or {}), PASSIVE_METRIC: expectation.model['metric']})
+
+
+def passive_verdict(manifest: dict, entry: dict, run: Run | None, expectation: Expectation,
+                    tooltips: TooltipSource) -> Verdict:
     model = expectation.model
     rank_id = expectation.rank_id
     base = Verdict(expectation.label, 'alert', None, None, None, None, '', entry['key'], expectation.spell_id,

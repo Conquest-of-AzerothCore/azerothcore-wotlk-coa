@@ -5,7 +5,7 @@ import shutil
 import tempfile
 import unittest
 
-from compare import VERDICTS_FILE, Verdict, read_verdicts, write_verdicts
+from compare import VERDICTS_FILE, Verdict, delta_margin, read_verdicts, write_verdicts
 from conformance import DIFF_EXIT, main
 from diff import ADDED, IMPACT_FILE, REMOVED, diff
 from procs import PROC_CHECK
@@ -40,6 +40,12 @@ def value(label, spell, measured, expected, status='ok'):
 def cooldown(label, spell, measured, expected, window):
     return Verdict(label, 'ok', measured, expected, expected - window, expected, '', 's', spell, spell,
                    'cooldown_ms')
+
+
+def passive(label, measured, expected, metric):
+    margin = delta_margin(metric, expected)
+    return Verdict(label, 'ok', measured, expected, expected - margin, expected + margin, '', 's', 561346, 561346,
+                   'passive_delta', {'metric': metric})
 
 
 def only(changes):
@@ -116,6 +122,18 @@ class DiffTests(unittest.TestCase):
         self.assertFalse(only(diff([rolled(997.0)], [rolled(924.0)], set())).significant)
         self.assertTrue(only(diff([rolled(997.0)], [rolled(1230.0)], set())).significant)
         self.assertIn('roll spread 223', only(diff([rolled(997.0)], [rolled(924.0)], set())).rule)
+
+    def test_percent_point_passive_change_of_half_a_point_is_significant(self):
+        label = '561346 e0 spell_crit_chance 1'
+        change = only(diff([passive(label, 6.0, 6.0, 'spell_crit_chance')],
+                           [passive(label, 5.5, 6.0, 'spell_crit_chance')], set()))
+        self.assertTrue(change.significant)
+
+    def test_integer_passive_change_inside_the_one_point_floor_is_noise(self):
+        label = '561346 e1 expertise'
+        change = only(diff([passive(label, 10.0, 10.0, 'expertise')], [passive(label, 10.5, 10.0, 'expertise')],
+                           set()))
+        self.assertFalse(change.significant)
 
     def test_cooldown_moves_inside_the_timing_window_are_noise(self):
         before = cooldown('c', 1, 7940.0, 8000.0, 120.0)

@@ -3,8 +3,9 @@ from dataclasses import dataclass
 import math
 from pathlib import Path
 
-from compare import (ABSOLUTE_TOLERANCE, FLOAT_EPSILON, HIT_CHECKS, ROLL_SPREAD, Verdict, margin_of,
-                     read_verdicts)
+from compare import (ABSOLUTE_TOLERANCE, FLOAT_EPSILON, HIT_CHECKS, PASSIVE_METRIC, ROLL_SPREAD, Verdict, delta_margin,
+                     margin_of, read_verdicts)
+from passives import PASSIVE_DELTA
 from procs import PROC_CHECK
 from stack import STACK_CHECKS
 
@@ -77,10 +78,16 @@ def tolerance(before: Verdict, after: Verdict) -> float:
                    if verdict.low is not None and verdict.high is not None]
         if windows:
             return max(windows)
+    metric = passive_metric(before, after)
     for reference in (after.expected, before.expected, before.measured):
         if reference is not None:
-            return margin_of(reference)
-    return ABSOLUTE_TOLERANCE
+            return delta_margin(metric, reference) if metric else margin_of(reference)
+    return delta_margin(metric, 0.0) if metric else ABSOLUTE_TOLERANCE
+
+
+def passive_metric(before: Verdict, after: Verdict) -> str | None:
+    return next(((verdict.detail or {}).get(PASSIVE_METRIC) for verdict in (after, before)
+                 if verdict.check == PASSIVE_DELTA and (verdict.detail or {}).get(PASSIVE_METRIC)), None)
 
 
 def significance(before: Verdict, after: Verdict) -> tuple[bool, bool, str]:
