@@ -8,9 +8,11 @@
 -- honor block of patch-M by slot, the item level 68 Challenger's 34100 honor (2966) and the Sergeant's and
 -- Captain's sets the arena point rows of the phase 2 Legacy Captain's lists, without a rating requirement.
 -- Sergeant's and Captain's take one gossip list each because a vendor list holds at most 150 items.
--- Displays 666667, 666668, 666682 and 666683 are not in the client or server CreatureDisplayInfo.dbc, so Thorne
--- uses Lieutenant Jackspring's 12921, Korgash Stone Guard Zarg's 12676, Hadwin Captain O'Neal's 12918 and
--- Krogash an Orgrimmar Grunt's 4259. No phase 1 spawn point is recorded for the Alliance vendors and the
+-- Displays 666667, 666668, 666682 and 666683 are not in the client or server CreatureDisplayInfo.dbc. The stand-ins
+-- are vanilla rank quartermasters of the same role whose displays no Stormwind or Orgrimmar spawn uses, so each
+-- restored vendor looks different from the phase 2 Thorne (12921) and Korgash (12676): Thorne 48051 Sergeant Major
+-- Clate's 12925, 48052 Master Sergeant Biggins' 12669, Korgash 49050 First Sergeant Hola'mahi's 12677, 49051
+-- Sergeant Ba'sha's 12681, Hadwin Captain O'Neal's 12918 and Krogash an Orgrimmar Grunt's 4259. No phase 1 spawn point is recorded for the Alliance vendors and the
 -- db.exil.es Orgrimmar pins are coarse, so the vendors stand on open hall floor near the phase 2 vendors:
 -- along the west side of Champion's Hall and north of Vik "Angry" Smalls in the Hall of Legends.
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
@@ -22,11 +24,11 @@ INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entr
 (666683, 0, 0, 0, 0, 0, 'Warbringer Krogash', NULL, NULL, 9966683, 63, 63, 0, 1074, 129, 1, 1.14286, 1, 1, 18, 0, 0, 1, 2000, 2000, 1, 1, 1, 768, 2048, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, '', 0, 1, 1.38, 1, 1, 1, 0, 0, 1, 0, 0, '', 12340) ON DUPLICATE KEY UPDATE `difficulty_entry_1` = VALUES(`difficulty_entry_1`), `difficulty_entry_2` = VALUES(`difficulty_entry_2`), `difficulty_entry_3` = VALUES(`difficulty_entry_3`), `KillCredit1` = VALUES(`KillCredit1`), `KillCredit2` = VALUES(`KillCredit2`), `name` = VALUES(`name`), `subname` = VALUES(`subname`), `IconName` = VALUES(`IconName`), `gossip_menu_id` = VALUES(`gossip_menu_id`), `minlevel` = VALUES(`minlevel`), `maxlevel` = VALUES(`maxlevel`), `exp` = VALUES(`exp`), `faction` = VALUES(`faction`), `npcflag` = VALUES(`npcflag`), `speed_walk` = VALUES(`speed_walk`), `speed_run` = VALUES(`speed_run`), `speed_swim` = VALUES(`speed_swim`), `speed_flight` = VALUES(`speed_flight`), `detection_range` = VALUES(`detection_range`), `rank` = VALUES(`rank`), `dmgschool` = VALUES(`dmgschool`), `DamageModifier` = VALUES(`DamageModifier`), `BaseAttackTime` = VALUES(`BaseAttackTime`), `RangeAttackTime` = VALUES(`RangeAttackTime`), `BaseVariance` = VALUES(`BaseVariance`), `RangeVariance` = VALUES(`RangeVariance`), `unit_class` = VALUES(`unit_class`), `unit_flags` = VALUES(`unit_flags`), `unit_flags2` = VALUES(`unit_flags2`), `dynamicflags` = VALUES(`dynamicflags`), `family` = VALUES(`family`), `type` = VALUES(`type`), `type_flags` = VALUES(`type_flags`), `lootid` = VALUES(`lootid`), `pickpocketloot` = VALUES(`pickpocketloot`), `skinloot` = VALUES(`skinloot`), `PetSpellDataId` = VALUES(`PetSpellDataId`), `VehicleId` = VALUES(`VehicleId`), `mingold` = VALUES(`mingold`), `maxgold` = VALUES(`maxgold`), `AIName` = VALUES(`AIName`), `MovementType` = VALUES(`MovementType`), `HoverHeight` = VALUES(`HoverHeight`), `HealthModifier` = VALUES(`HealthModifier`), `ManaModifier` = VALUES(`ManaModifier`), `ArmorModifier` = VALUES(`ArmorModifier`), `ExperienceModifier` = VALUES(`ExperienceModifier`), `RacialLeader` = VALUES(`RacialLeader`), `movementId` = VALUES(`movementId`), `RegenHealth` = VALUES(`RegenHealth`), `CreatureImmunitiesId` = VALUES(`CreatureImmunitiesId`), `flags_extra` = VALUES(`flags_extra`), `ScriptName` = VALUES(`ScriptName`), `VerifiedBuild` = VALUES(`VerifiedBuild`);
 DELETE FROM `creature_template_model` WHERE `CreatureID` IN (48051, 48052, 666682, 49050, 49051, 666683);
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`) VALUES
-(48051, 0, 12921, 1, 1, NULL),
-(48052, 0, 12921, 1, 1, NULL),
+(48051, 0, 12925, 1, 1, NULL),
+(48052, 0, 12669, 1, 1, NULL),
 (666682, 0, 12918, 1, 1, NULL),
-(49050, 0, 12676, 1, 1, NULL),
-(49051, 0, 12676, 1, 1, NULL),
+(49050, 0, 12677, 1, 1, NULL),
+(49051, 0, 12681, 1, 1, NULL),
 (666683, 0, 4259, 1, 1, NULL);
 
 DELETE FROM `creature` WHERE `guid` IN (9948051, 9948052, 9966682, 9949050, 9949051, 9966683) OR `id` IN (48051, 48052, 666682, 49050, 49051, 666683);
