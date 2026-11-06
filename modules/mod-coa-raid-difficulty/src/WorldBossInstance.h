@@ -21,7 +21,7 @@
 // A world boss fought in the boss map Ascension built for him, the way Setis is: a shrine in the open world takes
 // players in (Normal only), his health is per player in his map, he drops one of his items for every four players,
 // every player gets Runes of Ascension, Bazaar Tokens and a Treasures of Azeroth chest, and the portal he leaves
-// behind where he falls (or the shrine at the entrance) takes them back out.
+// behind (where he falls, or at its fixed spot) or the shrine at the entrance takes them back out.
 namespace coa_world_boss_instance
 {
     constexpr uint32 ITEM_RUNE_OF_ASCENSION = 375250;
@@ -44,6 +44,7 @@ namespace coa_world_boss_instance
         uint32 worldMap;
         Position shrine;
         uint32 exitPortal;
+        Position exitPortalAt;      // its fixed spot; left at 0, the portal opens where he falls
     };
 
     inline void GiveOrMail(Player* player, std::string const& sender, uint32 item, uint32 count)
@@ -163,10 +164,10 @@ namespace coa_world_boss_instance
                 GiveOrMail(player, sender, ITEM_BAZAAR_TOKEN, urand(TOKENS_MIN, TOKENS_MAX));
                 GiveOrMail(player, sender, ITEM_TREASURES_OF_AZEROTH, 1);
             });
-            // The portal out opens where he falls.
-            boss->SummonGameObject(_config.exitPortal, boss->GetPositionX(), boss->GetPositionY(),
-                boss->GetPositionZ(), boss->GetOrientation(), 0, 0, 0, 0, PORTAL_SECONDS, true,
-                GO_SUMMON_TIMED_DESPAWN);
+            Position const& at = _config.exitPortalAt.GetPositionX() != 0.0f ? _config.exitPortalAt
+                : static_cast<Position const&>(*boss);
+            boss->SummonGameObject(_config.exitPortal, at.GetPositionX(), at.GetPositionY(), at.GetPositionZ(),
+                at.GetOrientation(), 0, 0, 0, 0, PORTAL_SECONDS, true, GO_SUMMON_TIMED_DESPAWN);
         }
 
     private:

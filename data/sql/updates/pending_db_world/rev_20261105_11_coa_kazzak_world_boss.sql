@@ -6,7 +6,7 @@
 -- the way Setis is 64600; it shares 12397's loot. Of that loot only his ten world boss items change: one equal roll
 -- of them (the quick guide's list) in group 1, and kazzak_instance_death_coa rolls one more for every four players.
 -- His other rows (runes, felcloth, references, recipes, Summoner's Stone) stay as they are, and every kill gives a
--- Treasures of Azeroth (1615011), as on live.
+-- the Treasures of Azeroth chest every world boss gives (978059, by kazzak_instance_death_coa).
 DROP TEMPORARY TABLE IF EXISTS `coa_kazzak_tmp`;
 CREATE TEMPORARY TABLE `coa_kazzak_tmp` SELECT * FROM `creature_template` WHERE `entry` = 12397;
 UPDATE `coa_kazzak_tmp` SET `entry` = 64604, `lootid` = 12397, `KillCredit1` = 12397, `HealthModifier` = 3200,
@@ -18,7 +18,13 @@ DROP TEMPORARY TABLE `coa_kazzak_tmp`;
 DELETE FROM `creature_template_model` WHERE `CreatureID` = 64604;
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
   `VerifiedBuild`) VALUES
-(64604, 0, 12449, 1.5, 1, 12340);
+(64604, 0, 12449, 2, 1, 12340);
+-- His sword, as Ascension shows him.
+DELETE FROM `creature_equip_template` WHERE `CreatureID` = 64604;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, `VerifiedBuild`)
+SELECT 64604, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, `VerifiedBuild` FROM `creature_equip_template`
+WHERE `CreatureID` = 12397;
+UPDATE `creature` SET `equipment_id` = 1 WHERE `guid` = 9780100;
 UPDATE `creature` SET `id` = 64604 WHERE `guid` = 9780100 AND `id` IN (12397, 64604);
 
 UPDATE `creature_template` SET `lootid` = 12397 WHERE `entry` = 12397;
@@ -35,8 +41,7 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 (12397, 18546, 0, 0, 0, 1, 1, 1, 1, 'Lord Kazzak - Infernal Headcage'),
 (12397, 19133, 0, 0, 0, 1, 1, 1, 1, 'Lord Kazzak - Fel Infused Leggings'),
 (12397, 19134, 0, 0, 0, 1, 1, 1, 1, 'Lord Kazzak - Flayed Doomguard Belt'),
-(12397, 19135, 0, 0, 0, 1, 1, 1, 1, 'Lord Kazzak - Blacklight Bracer'),
-(12397, 1615011, 0, 100, 0, 1, 0, 1, 1, 'Lord Kazzak - Treasures of Azeroth');
+(12397, 19135, 0, 0, 0, 1, 1, 1, 1, 'Lord Kazzak - Blacklight Bracer');
 -- His world-drop references keep their own single roll, in group 2, so they never take the place of his item.
 UPDATE `creature_loot_template` SET `GroupId` = 2 WHERE `Entry` = 12397 AND `Reference` BETWEEN 24016 AND 24053
   AND `GroupId` = 1;
@@ -97,3 +102,14 @@ DELETE FROM `creature` WHERE `guid` = 9780914;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
 (9780914, 978074, 0, 4, 73, 1, 1, -11665.856, -2371.7654, 5.5, 0.6004, 300, 0, 0);
+
+-- The shrine faces the road, the other way round.
+UPDATE `gameobject` SET `orientation` = 3.742, `rotation2` = 0.955276, `rotation3` = -0.295715 WHERE `guid` = 9780137;
+
+-- The Treasures of Azeroth chest every world boss gives (978059) has a 5% roll at any world boss item (978060):
+-- his items join that pool.
+INSERT IGNORE INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`,
+  `GroupId`, `MinCount`, `MaxCount`, `Comment`)
+SELECT 978060, l.`Item`, 0, 0, 0, 1, 1, 1, 1, CONCAT('Treasures of Azeroth - World Boss - ', i.`name`)
+FROM `creature_loot_template` l JOIN `item_template` i ON i.`entry` = l.`Item`
+WHERE l.`Entry` = 12397 AND l.`GroupId` = 1 AND l.`Reference` = 0 AND i.`Quality` = 4;
