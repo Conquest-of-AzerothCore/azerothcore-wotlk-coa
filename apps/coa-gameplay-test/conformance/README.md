@@ -57,14 +57,14 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
 ## Tooltip reading
 
 The rules follow the stock 3.3.5a client parser (wowdecomp `WoW/Source/Ui/QuestTextParser.cpp` and `MathState.cpp`,
-evidence rather than authority). Each value is `Displayed(text, value, effect_index, kind)`: `text` is the token as
-written in the DBC, `value` the number before any player modifier.
+evidence rather than authority). Each value is `Displayed(text, value, effect_index, kind, spell_id)`: `text` is the
+token as written in the DBC, `value` the number before any player modifier.
 
 | Token | Value | Kind |
 |---|---|---|
-| `$sN`, `$<id>sN` | `EffectBasePoints + 1`, unsigned, only if `EffectDieSides` is 1 | `percent` before `%`, or `flat` |
+| `$sN`, `$<id>sN`, `$SN` | `EffectBasePoints + 1`, unsigned, only if `EffectDieSides` is 1 | `percent` before `%`, or `flat` |
 | `$mN`, `$MN` (with `<id>`) | `EffectBasePoints + 1`, `EffectBasePoints + EffectDieSides`, unsigned | as `$sN` |
-| `$/N;` then `$sN`/`$mN`/`$MN` | divided by N; `$/1000;` followed by `sec` stays in ms | `duration_ms` or as `$sN` |
+| `$/N;` then `$sN`/`$SN`/`$mN`/`$MN` | divided by N; `$/1000;` followed by `sec` stays in ms | `duration_ms` or as `$sN` |
 | `$d`, `$<id>d` | `SpellDuration` `Duration`, capped by `MaxDuration` | `duration_ms` |
 | `$h`, `$<id>h` | `ProcChance` | `chance_pct` |
 | `$u`, `$i` (with `<id>`) | `StackAmount`, `MaxAffectedTargets` | `count` |
@@ -76,11 +76,13 @@ Inside `${...}`: `$mN`/`$MN` (signed), `$h $u $i`, `$d` in seconds, `$aN`, each 
 `$RAP`, `$PL`; `$SP` is the lowest spell power of schools 1 to 6, `$sph $spfi $spn $spfr $sps $spa` one school each;
 `$STR $AGI $STA $INT $SPI` the effective stats 0 to 4; `$<name>` a variable defined earlier.
 `effect_index` is the effect of the first `$sN`/`$mN`/`$MN` of the spell itself in the token (for `$<name>`, in its
-formula), otherwise `None`. The client reads `$D $H $U $I $AN` as their lowercase forms, and so does the reader.
+formula), otherwise `None`. `spell_id` is the spell of the first `$sN`/`$mN`/`$MN` of the token, the described spell
+or another one, and `None` for a token without one (`$h`, `$d`, `$u`, `$i`, `$aN`). The client reads `$D $H $U $I
+$AN $SN` as their lowercase forms (`$S` as `$s`: `QuestTextParser.cpp:829-834`), and so does the reader.
 Color codes `|c........` and `|r` are removed, in either case.
 
 Everything else goes to `unreadable` verbatim and is never guessed: `$?` conditionals, `@...@` markup, other `|`
-escapes, other tokens (`$t`, `$o`, `$x`, `$S`, `$l`, `$g`...), expression functions and variables such as `$BH`,
+escapes, other tokens (`$t`, `$o`, `$x`, `$l`, `$g`...), expression functions and variables such as `$BH`,
 `$ppl1` or lowercase `$ap`, points that scale with level (`EffectRealPointsPerLevel` or `DurationPerLevel` not
 zero), spread values (`EffectDieSides` not 1 for `$sN`), missing records, non-positive durations, a `$<name>` that
 the described spell's `SpellDescriptionVariableID` does not define, and a stat or school missing from `CasterStats`.
@@ -129,6 +131,8 @@ stats, since the value depends on them. The scenario learns the rank, then measu
 | `check` | Measurement | Expected from |
 |---|---|---|
 | `effect_value` | `spell_effect_value` of the token's effect | the tooltip token (`rule` `read <kind>`) |
+| `effect_value` of another spell | `spell_effect_value` of the effect of the token's first `$<id>sN`/`$<id>mN`, `model` `{'effect_spell': id, 'effect': n}` | the tooltip token, label `<rank> effect_value <id>e<n> #<ordinal>` |
+| `max_stacks` | `spell_max_stacks` of spell `<id>` of a `$<id>u` token, `model` `{'effect_spell': id}` | `StackAmount` of that spell, compared exactly |
 | `power_cost` | `spell_power_cost` before any cast | `ManaCost` divided by the client display divisor of the power type (1, 10 rage and runic power, 1000 happiness) |
 | `cooldown_ms` | `cooldown_ms` right after the cast | `max(RecoveryTime, CategoryRecoveryTime)`, as the client tooltip |
 | `aura_amount` | `aura_amount` of the effect after the cast | the same tooltip token as `effect_value`, for an effect that applies an aura |
@@ -150,8 +154,12 @@ A value that cannot be compared is never dropped; its `rule` starts with a stabl
 `unreadable: <entry>` for a part the reader could not evaluate (the scenario measures the spell's first active effect
 beside it, which is not the token's own effect), `unreadable: tooltip without value` for an empty readout,
 `unreadable: ManaCostPercentage ...` or `unreadable: ManaCostPerlevel ...` for a cost the DBC alone does not give, and
-`unmeasurable: <reason>` for a readable token with no no-combat metric (other spell's effect, radius, stack or chance
-token, an aura of a passive or cast-time spell). Only `unmeasurable` expectations may lack a measurement step.
+`unmeasurable: <reason>` for a readable token with no no-combat metric (radius, the rank's own stack token, a chance
+token, `$d` of another spell, an aura of a passive or cast-time spell, another spell's effect that `Spell.dbc` does
+not define, which `spell_effect_value` refuses). Only `unmeasurable` expectations may lack a measurement step.
+`$<id>h` stays `unmeasurable: chance_pct token ...`: `spell_proc_chance` needs a `spell_proc` row of that spell, so
+no step reads it. A `$/1000;sN sec` token (own or of another spell) is an `effect_value` in ms: Liberty 705266
+`$/1000;s1` expects −30000.
 
 ## Passive effects
 
@@ -771,7 +779,9 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
 
 - Deterministic values (`effect_value`, `aura_amount`, `power_cost`): `|measured - expected| <= max(1, 0.5 % of
   expected)`. A `power_cost` is divided by the display divisor of its rule. A `$/N;` token expects N times the value
-  it shows.
+  it shows, except a `$/1000;sN sec` token of kind `duration_ms`, which the reader already gives in ms. A token of
+  another spell reads its points, sign and rolls from that spell's effect (`model`).
+- Counts (`max_stacks`): `measured == expected`, no tolerance.
 - Sign: the client shows `$sN`, `$mN` and `$MN` (with or without `$/N;` or a spell id) unsigned, while the
   `Spell.dbc` record is signed. The expected value of such a token takes the sign of the points it shows
   (`EffectBasePoints + 1`, or `+ EffectDieSides` for `$MN`) of the named spell, and signed values are compared:

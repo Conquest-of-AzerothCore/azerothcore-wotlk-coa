@@ -33,14 +33,14 @@ CAST_RESULT_ENTRY = re.compile(r'^\s*(?P<name>SPELL_\w+)\s*=\s*(?P<code>\d+)', r
 ABSOLUTE_TOLERANCE = 1.0
 RELATIVE_TOLERANCE = 0.005
 FLOAT_EPSILON = 1e-9
-TOKEN_CHECKS = frozenset({'effect_value', 'aura_amount', 'aura_duration_ms'})
+TOKEN_CHECKS = frozenset({'effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks'})
 ROLLED_CHECKS = frozenset({'effect_value', 'aura_amount'})
 ROLL_SPREAD = 'roll_spread'
 HIT_CHECKS = frozenset({'hit_mean', 'melee_mean'})
 READ_RULE = 'read '
 ORDINAL = re.compile(r'#(\d+)$')
 DIVIDED_TOKEN = re.compile(r'\$/(\d+);')
-PLAIN_TOKEN = re.compile(r'\$(?:/\d+;)?(?P<spell>\d*)(?P<letter>[smM])(?P<digit>[1-3])')
+PLAIN_TOKEN = re.compile(r'\$(?:/\d+;)?(?P<spell>\d*)(?P<letter>[sSmM])(?P<digit>[1-3])')
 FIXED_DIE_SIDES = (0, 1)
 COST_DIVISOR = re.compile(r'ManaCost divisor (\d+)')
 EXPLORATORY = ('gameplay', 'exploratory')
@@ -291,6 +291,12 @@ def deterministic(base: Verdict, measured: float, judged: float, expected: float
                                f'{RELATIVE_TOLERANCE:.1%} of expected)')
 
 
+def exact(base: Verdict, measured: float, expected: float, why: str) -> Verdict:
+    status = 'ok' if abs(measured - expected) <= FLOAT_EPSILON else 'alert'
+    return replace(base, status=status, measured=measured, expected=expected, low=expected, high=expected,
+                   explanation=f'{why}; a count is compared exactly')
+
+
 def elapsed_bound(run: Run, label: str) -> float | None:
     position = next((index for index, step in enumerate(run.steps) if step.get('label') == label), None)
     if position is None or run.max_step_ms is None:
@@ -332,18 +338,27 @@ def roll_range(base_points: int, die_sides: int) -> range:
     return range(low, high + 1)
 
 
+def token_effect(expectation: Expectation) -> tuple[int, int] | None:
+    model = expectation.model or {}
+    if 'effect' in model:
+        return model['effect_spell'], model['effect']
+    if expectation.effect_index is not None:
+        return expectation.rank_id, expectation.effect_index
+    return None
+
+
 def judge_roll(base: Verdict, expectation: Expectation, measured: float, tokens: Tokens, tooltips: TooltipSource,
                index: int, rolls: range) -> Verdict:
     token = tokens.readout.values[index]
     plain = PLAIN_TOKEN.fullmatch(token.text)
-    effect = expectation.effect_index
+    spell_id, effect = token_effect(expectation)
     values = []
     for roll in rolls:
-        readout = tooltips.read(expectation.rank_id, tokens.caster, (expectation.rank_id, effect, roll))
+        readout = tooltips.read(expectation.rank_id, tokens.caster, (spell_id, effect, roll))
         if index >= len(readout.values) or readout.values[index].text != token.text:
             return replace(base, status='unmodelled', measured=measured,
                            explanation=f'{token.text} is unreadable with roll {roll} of effect {effect}')
-        value = readout.values[index].value * token_divisor(token.text)
+        value = undivided(readout.values[index])
         values.append(value * plain_sign(roll) if plain else value)
     steps = [after - before for before, after in zip(values, values[1:])]
     if not (all(step >= -FLOAT_EPSILON for step in steps) or all(step <= FLOAT_EPSILON for step in steps)):
@@ -380,11 +395,14 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
     token = tokens.readout.values[index]
     if expectation.check == 'aura_duration_ms':
         return judge_time(base, run, measured, token.value, f'{token.text} read with the measured stats')
-    if expectation.effect_index is not None:
-        base_points, die_sides = tooltips.effect_points(expectation.rank_id, expectation.effect_index)
+    if expectation.check == 'max_stacks':
+        return exact(base, measured, token.value, f'{token.text} read from StackAmount')
+    effect = token_effect(expectation)
+    if effect is not None:
+        base_points, die_sides = tooltips.effect_points(*effect)
         if die_sides not in FIXED_DIE_SIDES:
             return judge_roll(base, expectation, measured, tokens, tooltips, index, roll_range(base_points, die_sides))
-    expected = token.value * token_divisor(token.text)
+    expected = undivided(token)
     plain = PLAIN_TOKEN.fullmatch(token.text)
     if plain:
         points = displayed_points(tooltips, plain, expectation.rank_id)
@@ -1408,12 +1426,13 @@ def passive_verdict(manifest: dict, entry: dict, run: Run | None, expectation: E
 
 def roll_spread(expectation: Expectation, tooltips: TooltipSource) -> int:
     try:
-        effect = expectation.effect_index
+        effect = token_effect(expectation)
         if effect is None:
-            effect = tooltips.first_effect(expectation.rank_id)
+            first = tooltips.first_effect(expectation.rank_id)
+            effect = None if first is None else (expectation.rank_id, first)
         if effect is None:
             return 0
-        return max(0, abs(tooltips.effect_points(expectation.rank_id, effect)[1]) - 1)
+        return max(0, abs(tooltips.effect_points(*effect)[1]) - 1)
     except Unreadable:
         return 0
 

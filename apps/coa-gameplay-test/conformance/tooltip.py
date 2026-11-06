@@ -10,6 +10,8 @@ from inspect_dbc import DataSet
 SPELL_POWER_SCHOOLS = {'sph': 1, 'spfi': 2, 'spn': 3, 'spfr': 4, 'sps': 5, 'spa': 6}
 EFFECTIVE_STATS = {'STR': 0, 'AGI': 1, 'STA': 2, 'INT': 3, 'SPI': 4}
 EFFECT_DIGITS = '123'
+POINTS_LETTERS = 'sSmM'
+SINGLE_VALUE_LETTERS = 'sS'
 SECONDS_DIVISOR = 1000
 VARIABLE_RECORD = struct.Struct('<2I')
 
@@ -48,6 +50,7 @@ class Displayed:
     value: float
     effect_index: int | None
     kind: str
+    spell_id: int | None = None
 
 
 @dataclass(frozen=True)
@@ -60,6 +63,7 @@ class Readout:
 class Variable:
     value: float | None
     effect_index: int | None
+    spell_id: int | None = None
     reason: str = ''
 
 
@@ -156,7 +160,7 @@ class Tooltip:
                     raise Unreadable
                 self.variables[definition.group(1)] = Variable(*self.evaluate(body.group(1)))
             except Unreadable as error:
-                self.variables[definition.group(1)] = Variable(None, None, error.reason)
+                self.variables[definition.group(1)] = Variable(None, None, reason=error.reason)
         return self.variables
 
     def variable(self, name: str) -> Variable:
@@ -165,7 +169,7 @@ class Tooltip:
             raise Unreadable(variable.reason if variable else '')
         return variable
 
-    def evaluate(self, expression: str) -> tuple[float, int | None]:
+    def evaluate(self, expression: str) -> tuple[float, int | None, int | None]:
         tokens = []
         position = 0
         while expression[position:].strip():
@@ -178,7 +182,7 @@ class Tooltip:
         value = parser.sum()
         if parser.position != len(tokens):
             raise Unreadable
-        return value, parser.effect_index
+        return value, parser.effect_index, parser.spell_id
 
     def spell_reference(self, digits: str) -> int:
         spell_id = int(digits) if digits else self.spell_id
@@ -209,19 +213,20 @@ class Tooltip:
             return self.caster.stats[EFFECTIVE_STATS[name]]
         raise Unreadable
 
-    def math_variable(self, digits: str, name: str) -> tuple[float, int | None]:
+    def math_variable(self, digits: str, name: str) -> tuple[float, int | None, int | None]:
         if len(name) == 2 and name[0] in 'mMaA' and name[1] in EFFECT_DIGITS:
             spell_id = self.spell_reference(digits)
             effect = int(name[1]) - 1
             if name[0] in 'aA':
-                return self.records.radius(spell_id, effect), None
-            return self.records.points(spell_id, effect, upper=name[0] == 'M'), self.own_effect(spell_id, effect)
+                return self.records.radius(spell_id, effect), None, None
+            return (self.records.points(spell_id, effect, upper=name[0] == 'M'), self.own_effect(spell_id, effect),
+                    spell_id)
         if name in ('h', 'H', 'u', 'U', 'i', 'I', 'd', 'D'):
             spell_id = self.spell_reference(digits)
-            return self.spell_counter(spell_id, name.lower()), None
+            return self.spell_counter(spell_id, name.lower()), None, None
         if digits:
             raise Unreadable
-        return self.caster_value(name), None
+        return self.caster_value(name), None, None
 
     def spell_counter(self, spell_id: int, letter: str) -> float:
         if letter == 'h':
@@ -280,10 +285,10 @@ class Tooltip:
         if suffix:
             end = suffix.end()
         try:
-            value, effect_index = self.evaluate(text[start + 2:close])
+            value, effect_index, spell_id = self.evaluate(text[start + 2:close])
         except Unreadable as error:
             return end, error
-        return end, Displayed(text[start:end], value, effect_index, percent_or_flat(text, end))
+        return end, Displayed(text[start:end], value, effect_index, percent_or_flat(text, end), spell_id)
 
     def variable_token(self, text: str, start: int) -> tuple[int, Displayed | Unreadable | None]:
         match = NAMED_VARIABLE.match(text, start + 1)
@@ -294,7 +299,7 @@ class Tooltip:
         except Unreadable as error:
             return match.end(), error
         return match.end(), Displayed(text[start:match.end()], variable.value, variable.effect_index,
-                                      percent_or_flat(text, match.end()))
+                                      percent_or_flat(text, match.end()), variable.spell_id)
 
     def spell_token(self, text: str, start: int) -> tuple[int, Displayed | Unreadable | None]:
         position = start + 1
@@ -315,34 +320,34 @@ class Tooltip:
             return end, error
         return end, Displayed(text[start:end], *value)
 
-    def spell_token_value(self, match, scaled, text: str, end: int) -> tuple[float, int | None, str]:
+    def spell_token_value(self, match, scaled, text: str, end: int) -> tuple[float, int | None, str, int | None]:
         letter, digit = match.group('letter'), match.group('digit')
         spell_id = self.spell_reference(match.group('spell'))
-        if letter in 'smM' and digit and digit in EFFECT_DIGITS:
+        if letter in POINTS_LETTERS and digit and digit in EFFECT_DIGITS:
             effect = int(digit) - 1
-            points = abs(self.records.single_value(spell_id, effect) if letter == 's'
+            points = abs(self.records.single_value(spell_id, effect) if letter in SINGLE_VALUE_LETTERS
                          else self.records.points(spell_id, effect, upper=letter == 'M'))
             effect_index = self.own_effect(spell_id, effect)
             if not scaled:
-                return points, effect_index, percent_or_flat(text, end)
+                return points, effect_index, percent_or_flat(text, end), spell_id
             factor = int(scaled.group('factor'))
             if scaled.group('operator') != '/' or factor == 0:
                 raise Unreadable
             if factor == SECONDS_DIVISOR and SECONDS_UNIT.match(text, end):
-                return points, effect_index, 'duration_ms'
-            return points / factor, effect_index, percent_or_flat(text, end)
+                return points, effect_index, 'duration_ms', spell_id
+            return points / factor, effect_index, percent_or_flat(text, end), spell_id
         if scaled:
             raise Unreadable
         if letter in 'aA' and digit and digit in EFFECT_DIGITS:
-            return self.records.radius(spell_id, int(digit) - 1), None, 'flat'
+            return self.records.radius(spell_id, int(digit) - 1), None, 'flat', None
         if digit:
             raise Unreadable
         if letter in 'hH':
-            return self.spell_counter(spell_id, 'h'), None, 'chance_pct'
+            return self.spell_counter(spell_id, 'h'), None, 'chance_pct', None
         if letter in 'dD':
-            return self.records.duration_ms(spell_id), None, 'duration_ms'
+            return self.records.duration_ms(spell_id), None, 'duration_ms', None
         if letter in 'uUiI':
-            return self.spell_counter(spell_id, letter.lower()), None, 'count'
+            return self.spell_counter(spell_id, letter.lower()), None, 'count', None
         raise Unreadable
 
 
@@ -352,6 +357,7 @@ class ExpressionParser:
         self.tokens = tokens
         self.position = 0
         self.effect_index = None
+        self.spell_id = None
 
     def peek(self) -> str | None:
         if self.position < len(self.tokens):
@@ -400,9 +406,11 @@ class ExpressionParser:
         if token.group('variable'):
             return self.tooltip.variable(token.group('variable')).value
         if token.group('name'):
-            value, effect_index = self.tooltip.math_variable(token.group('spell'), token.group('name'))
+            value, effect_index, spell_id = self.tooltip.math_variable(token.group('spell'), token.group('name'))
             if self.effect_index is None:
                 self.effect_index = effect_index
+            if self.spell_id is None:
+                self.spell_id = spell_id
             return value
         raise Unreadable
 

@@ -1,12 +1,14 @@
 import json
 from pathlib import Path
 import sys
+import tempfile
 import unittest
 
 from classes import class_spells
 from profile import CLASSES_DIR, base_steps, caster_stats_from, load_class_file
-from tooltip import CasterStats
-from values import CHECKS, UNMEASURABLE, UNREADABLE, Expectation, value_scenario
+from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, write_fixture
+from tooltip import CasterStats, DataSet, Records, read_tooltip
+from values import CHECKS, UNMEASURABLE, UNREADABLE, Expectation, foreign_effect, value_scenario
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -35,6 +37,10 @@ OATH_CHAIN = 704576
 SPELL_POWER_SCHOOLS = 6
 STAT_COUNT = 5
 SETTLE_MS = 5000
+LIBERTY = 705266
+SCOURGEBANE_STRIKE = 801832
+IRON_PENANCE = 523712
+IRON_PENANCE_DEBUFF = 523713
 
 
 def measured_labels(scenario):
@@ -202,6 +208,57 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         for item in unreadable:
             self.assertEqual(item.check, 'effect_value')
 
+    def steps_of(self, scenario, label):
+        return [step for step in scenario['steps'] if step.get('label') == label]
+
+    def test_own_seconds_token_is_measured_on_its_effect(self):
+        scenario, expectations = self.build(LIBERTY, LIBERTY)
+        item = next(item for item in expectations if item.displayed == '$/1000;s1')
+        self.assertEqual((item.check, item.effect_index, item.rule), ('effect_value', 0, 'read duration_ms'))
+        step, = self.steps_of(scenario, item.label)
+        self.assertEqual((step['metric'], step['spell'], step['effect']), ('spell_effect_value', LIBERTY, 0))
+
+    def test_foreign_value_token(self):
+        scenario, expectations = self.build(SCOURGEBANE, SCOURGEBANE)
+        run.validate(scenario)
+        item = next(item for item in expectations if item.displayed == '$801832s2')
+        self.assertEqual((item.check, item.effect_index, item.rule), ('effect_value', None, 'read percent'))
+        self.assertEqual(item.model, {'effect_spell': SCOURGEBANE_STRIKE, 'effect': 1})
+        step, = self.steps_of(scenario, item.label)
+        self.assertEqual((step['metric'], step['spell'], step['effect'], step['actor']),
+                         ('spell_effect_value', SCOURGEBANE_STRIKE, 1, 'caster'))
+
+    def test_foreign_expression_is_measured_on_its_first_effect_token(self):
+        scenario, expectations = self.build(SCOURGEBANE, SCOURGEBANE)
+        item = next(item for item in expectations if item.displayed.startswith('${$801832m1'))
+        self.assertEqual((item.rule, item.model), ('read flat', {'effect_spell': SCOURGEBANE_STRIKE, 'effect': 0}))
+        step, = self.steps_of(scenario, item.label)
+        self.assertEqual((step['spell'], step['effect']), (SCOURGEBANE_STRIKE, 0))
+
+    def test_foreign_stack_token(self):
+        scenario, expectations = self.build(IRON_PENANCE, IRON_PENANCE)
+        run.validate(scenario)
+        item = next(item for item in expectations if item.displayed == '$523713u')
+        self.assertEqual((item.check, item.rule, item.model),
+                         ('max_stacks', 'read count', {'effect_spell': IRON_PENANCE_DEBUFF}))
+        step, = self.steps_of(scenario, item.label)
+        self.assertEqual((step['metric'], step['spell'], step['actor']),
+                         ('spell_max_stacks', IRON_PENANCE_DEBUFF, 'caster'))
+
+    def test_foreign_duration_stays_unmeasurable(self):
+        scenario, expectations = self.build(IRON_PENANCE, IRON_PENANCE)
+        item = next(item for item in expectations if item.displayed == '$523713d')
+        self.assertTrue(item.rule.startswith(UNMEASURABLE + 'duration_ms token'), item.rule)
+        self.assertFalse(self.steps_of(scenario, item.label))
+
+    def test_foreign_chance_stays_unmeasurable(self):
+        scenario, expectations = self.build(SCOURGEBANE, SCOURGEBANE)
+        item = next(item for item in expectations if item.displayed == '$520007h')
+        self.assertTrue(item.rule.startswith(UNMEASURABLE + 'chance_pct token'), item.rule)
+        self.assertFalse(self.steps_of(scenario, item.label))
+        self.assertNotIn('spell_proc_chance', {step.get('metric') for step in scenario['steps']})
+        self.assertNotIn('set_aura', {step['action'] for step in scenario['steps']})
+
     def test_every_templar_rank_has_a_valid_scenario_and_no_dropped_expectation(self):
         for spell in self.spells.values():
             for rank_id in spell.ranks:
@@ -218,6 +275,16 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
                         self.assertTrue(item.rule.startswith((UNREADABLE, UNMEASURABLE)), (rank_id, item))
                     step_labels = [step.get('label') for step in scenario['steps']]
                     self.assertLessEqual(step_labels.count(item.label), 1, (rank_id, item.label))
+
+
+class ForeignEffectFixtureTest(unittest.TestCase):
+    def test_effect_that_the_referenced_record_does_not_define_is_never_measured(self):
+        with tempfile.TemporaryDirectory() as temp:
+            write_fixture(Path(temp), FIXTURE_SPELLS, FIXTURE_VARIABLES)
+            dbc = DataSet(Path(temp))
+            shown = read_tooltip(dbc, 13, FIXTURE_CASTER).values[0]
+            self.assertEqual((shown.text, shown.spell_id), ('$10s2', 10))
+            self.assertEqual(foreign_effect(Records(dbc), 13, shown), (None, 'effect 1 of spell 10 does not exist'))
 
 
 if __name__ == '__main__':

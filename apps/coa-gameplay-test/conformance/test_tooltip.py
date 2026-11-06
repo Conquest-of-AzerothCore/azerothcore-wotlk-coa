@@ -3,7 +3,7 @@ import struct
 import tempfile
 import unittest
 
-from tooltip import CasterStats, DataSet, Displayed, read_tooltip
+from tooltip import CasterStats, DataSet, Displayed, Records, Tooltip, read_tooltip
 import schemas
 
 DBC_DIR = Path('/srv/coa/server-data/dbc')
@@ -36,6 +36,9 @@ HOLY_CONSTITUTION = 706323
 HOLY_CONSTITUTION_BASE_POINTS_2 = 29
 VEILED_IN_DARKNESS_RADIUS_YARDS = 100.0
 SCOURGEBANE_STRIKE = 801832
+INTERDICT_EXTENSION = 500014
+HOLY_LIGHT = 706449
+HOLY_LIGHT_CAST_TIME_POINTS = 1500
 
 
 def displayed(readout, text):
@@ -62,7 +65,8 @@ class ClientDbcTooltipTest(unittest.TestCase):
     def test_argent_blade_weapon_percent_and_flat_bonus(self):
         readout = self.read(ARGENT_BLADE)
         weapon_points, flat_points = ARGENT_BLADE_BASE_POINTS
-        self.assertEqual(displayed(readout, '$s2'), Displayed('$s2', flat_points + 1, 1, 'percent'))
+        self.assertEqual(displayed(readout, '$s2'), Displayed('$s2', flat_points + 1, 1, 'percent',
+                                                                 ARGENT_BLADE))
         bonus = displayed(readout, '${$AP*0.4725+$sph*1.35+$m1+0}')
         self.assertAlmostEqual(bonus.value, 313 * 0.4725 + 0 * 1.35 + weapon_points + 1, places=9)
         self.assertAlmostEqual(bonus.value, 568.9, delta=0.01)
@@ -77,7 +81,8 @@ class ClientDbcTooltipTest(unittest.TestCase):
         self.assertEqual(displayed(readout, '$520007h'),
                          Displayed('$520007h', SCOURGEBANE_PROC_AURA_CHANCE, None, 'chance_pct'))
         damage_points, weapon_points = SCOURGEBANE_DAMAGE_BASE_POINTS
-        self.assertEqual(displayed(readout, '$801832s2'), Displayed('$801832s2', weapon_points + 1, None, 'percent'))
+        self.assertEqual(displayed(readout, '$801832s2'), Displayed('$801832s2', weapon_points + 1, None, 'percent',
+                                                                           SCOURGEBANE_STRIKE))
         damage = displayed(readout, '${$801832m1*$<scalingbp>+$SP*.25+$AP*.25}')
         self.assertAlmostEqual(scalingbp(60), 0.9874, delta=0.00005)
         self.assertAlmostEqual(damage.value, (damage_points + 1) * scalingbp(60) + 313 * 0.25, places=6)
@@ -106,24 +111,24 @@ class ClientDbcTooltipTest(unittest.TestCase):
     def test_holy_combatant_division_reads_seconds(self):
         readout = self.read(HOLY_COMBATANT)
         self.assertEqual(readout.values, [Displayed('$/1000;500014s1', HOLY_COMBATANT_EXTENSION_BASE_POINTS + 1, None,
-                                                    'duration_ms')])
+                                                    'duration_ms', INTERDICT_EXTENSION)])
         self.assertEqual(readout.unreadable, [])
 
     def test_retribution_proc_chance_and_percent(self):
         readout = self.read(RETRIBUTION)
         self.assertEqual(readout.values, [Displayed('$h', RETRIBUTION_PROC_CHANCE, None, 'chance_pct'),
-                                          Displayed('$s1', RETRIBUTION_BASE_POINTS + 1, 0, 'percent')])
+                                          Displayed('$s1', RETRIBUTION_BASE_POINTS + 1, 0, 'percent', RETRIBUTION)])
         self.assertEqual(readout.unreadable, [])
 
     def test_known_spell_conditional_is_unreadable_and_the_rest_is_read(self):
         readout = self.read(HEXBREAK)
-        self.assertEqual(readout.values, [Displayed('$s1', 1, 0, 'flat')])
+        self.assertEqual(readout.values, [Displayed('$s1', 1, 0, 'flat', HEXBREAK)])
         self.assertEqual(readout.unreadable, ['$?s572870[s][]'])
 
     def test_conditional_keeps_its_color_codes_verbatim_and_negative_points_display_unsigned(self):
         readout = self.read(STUDIOUS)
         self.assertEqual(readout.unreadable, ['$?s92098[|cffffffffBrine|r][|cffffffffShock|r]'])
-        self.assertEqual(readout.values, [Displayed('$s1', abs(STUDIOUS_BASE_POINTS + 1), 0, 'percent')])
+        self.assertEqual(readout.values, [Displayed('$s1', abs(STUDIOUS_BASE_POINTS + 1), 0, 'percent', STUDIOUS)])
 
     def test_durations_stacks_and_level_scaled_points(self):
         readout = self.read(OUTMANEUVER)
@@ -131,18 +136,39 @@ class ClientDbcTooltipTest(unittest.TestCase):
         self.assertEqual(displayed(readout, '$u'), Displayed('$u', OUTMANEUVER_STACK_AMOUNT, None, 'count'))
         self.assertEqual(displayed(readout, '$557326d'),
                          Displayed('$557326d', OUTMANEUVER_DURATION_MS, None, 'duration_ms'))
-        self.assertEqual(displayed(readout, '$s3'), Displayed('$s3', OUTMANEUVER_BASE_POINTS_3 + 1, 2, 'percent'))
+        self.assertEqual(displayed(readout, '$s3'), Displayed('$s3', OUTMANEUVER_BASE_POINTS_3 + 1, 2, 'percent',
+                                                               OUTMANEUVER))
         self.assertEqual(readout.unreadable, ['${$557328m1+$AP*.55} [EffectRealPointsPerLevel[0] of spell 557328]'])
 
     def test_level_scaled_points_are_unreadable_with_the_field_named(self):
         readout = self.read(HOLY_CONSTITUTION)
-        self.assertEqual(readout.values, [Displayed('$s2', HOLY_CONSTITUTION_BASE_POINTS_2 + 1, 1, 'percent')])
+        self.assertEqual(readout.values, [Displayed('$s2', HOLY_CONSTITUTION_BASE_POINTS_2 + 1, 1, 'percent',
+                                                    HOLY_CONSTITUTION)])
         self.assertEqual(readout.unreadable, ['${$m1+0} [EffectRealPointsPerLevel[0] of spell 706323]'])
 
     def test_radius(self):
         readout = self.read(VEILED_IN_DARKNESS)
         self.assertEqual(displayed(readout, '$a1'), Displayed('$a1', VEILED_IN_DARKNESS_RADIUS_YARDS, None, 'flat'))
         self.assertEqual(readout.unreadable, [])
+
+    def test_foreign_value_token_names_its_spell(self):
+        token = displayed(self.read(SCOURGEBANE_PASSIVE), '$801832s2')
+        self.assertEqual((token.spell_id, token.effect_index), (SCOURGEBANE_STRIKE, None))
+        expression = displayed(self.read(SCOURGEBANE_PASSIVE), '${$801832m1*$<scalingbp>+$SP*.25+$AP*.25}')
+        self.assertEqual((expression.spell_id, expression.effect_index), (SCOURGEBANE_STRIKE, None))
+
+    def test_tokens_without_an_effect_name_no_spell(self):
+        readout = self.read(SCOURGEBANE_PASSIVE)
+        self.assertIsNone(displayed(readout, '$520007h').spell_id)
+
+    def test_uppercase_s(self):
+        tooltip = Tooltip(Records(self.dbc), HOLY_LIGHT, LEVEL_60_TEMPLAR)
+        upper, lower = tooltip.read('$/1000;S1 sec and $/1000;s1 sec').values
+        self.assertEqual((upper.text, lower.text), ('$/1000;S1', '$/1000;s1'))
+        self.assertEqual((upper.value, upper.effect_index, upper.kind, upper.spell_id),
+                         (lower.value, lower.effect_index, lower.kind, lower.spell_id))
+        self.assertEqual(upper.value, HOLY_LIGHT_CAST_TIME_POINTS)
+        self.assertEqual(self.read(HOLY_LIGHT).unreadable, [])
 
     def test_until_cancelled_duration_is_unreadable(self):
         readout = self.read(SCOURGEBANE_STRIKE)
@@ -229,15 +255,15 @@ class FixtureTooltipTest(unittest.TestCase):
     def test_every_listed_token_is_read_from_the_records(self):
         readout = read_tooltip(self.dbc, 10, FIXTURE_CASTER)
         self.assertEqual(readout.values, [
-            Displayed('${$m1+$SP*0.5+$STA*2}', 100 + 30 * 0.5 + 15 * 2, 0, 'flat'),
-            Displayed('$s2', 25, 1, 'percent'),
+            Displayed('${$m1+$SP*0.5+$STA*2}', 100 + 30 * 0.5 + 15 * 2, 0, 'flat', 10),
+            Displayed('$s2', 25, 1, 'percent', 10),
             Displayed('$d', 6000, None, 'duration_ms'),
             Displayed('$i', 3, None, 'count'),
             Displayed('$a1', 8.0, None, 'flat'),
             Displayed('$u', 5, None, 'count'),
             Displayed('$h', 35, None, 'chance_pct'),
-            Displayed('$<bonus>', 100 * 2 + 60, 0, 'flat'),
-            Displayed('$M1', 100, 0, 'flat'),
+            Displayed('$<bonus>', 100 * 2 + 60, 0, 'flat', 10),
+            Displayed('$M1', 100, 0, 'flat', 10),
         ])
         self.assertEqual(readout.unreadable, [])
 
@@ -256,8 +282,8 @@ class FixtureTooltipTest(unittest.TestCase):
 
     def test_references_to_other_spells_have_no_effect_index(self):
         readout = read_tooltip(self.dbc, 13, FIXTURE_CASTER)
-        self.assertEqual(readout.values, [Displayed('$10s2', 25, None, 'percent'),
-                                          Displayed('$10m1', 100, None, 'flat')])
+        self.assertEqual(readout.values, [Displayed('$10s2', 25, None, 'percent', 10),
+                                          Displayed('$10m1', 100, None, 'flat', 10)])
         self.assertEqual(readout.unreadable, ['$99d'])
 
     def test_unknown_spell_is_rejected(self):

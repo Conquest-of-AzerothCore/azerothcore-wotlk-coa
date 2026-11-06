@@ -12,8 +12,9 @@ from compare import (PERCENT_POINT_METRICS, DbcTooltips, ScenarioDrift, compare,
                      question_detail, read_verdicts, write_outputs)
 from hits import HitModel, Modifier
 from profile import CLASSES_DIR, DBC_DIR
-from tooltip import CasterStats, Displayed, Readout
-from values import Expectation
+from classes import class_spells
+from tooltip import CasterStats, Displayed, Readout, read_tooltip
+from values import Expectation, structure_stats, value_scenario
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import batch
@@ -23,6 +24,9 @@ RANK = 1001
 FIXED_POINTS = (0, 1)
 RIGHTEOUS_UPHEAVAL = 501562
 SPELL = 1000
+HEADER = Path(__file__).resolve().parents[3] / 'src/server/coa/AscensionSpellProgressionData.h'
+SCOURGEBANE = 92111
+IRON_PENANCE = 523712
 VALUE_KEY = 'conformance-templar-value-1001'
 HIT_KEY = 'conformance-templar-hit-1001'
 CLASS_TUNING = Modifier(spell_id=887007, effect_index=0, aura=341, percent=-20, applies_to='damage', school_mask=127)
@@ -223,6 +227,25 @@ class CompareTest(unittest.TestCase):
     def test_signed_expression_of_the_opposite_sign_is_an_ambiguous_tooltip(self):
         self.assertEqual(self.effect_verdict('-100', Displayed('${$m1*2}', 100.0, 0, 'flat')).status,
                          'ambiguous_tooltip')
+
+    def test_foreign_rolled_effect_is_read_with_the_rolls_of_the_referenced_spell(self):
+        label = '1001 effect_value 2002e0 #0'
+        text = '${$2002m1+0}'
+        forced_spells = set()
+
+        def tokens(caster, forced):
+            if forced:
+                forced_spells.add(forced[0])
+            return [Displayed(text, forced[2] if forced else 100, None, 'flat', 2002)]
+
+        reader = FakeTooltips(tokens, {(2002, 0): (99, 10)})
+        item = expectation(label, 'effect_value', text, 'read flat', model={'effect_spell': 2002, 'effect': 0})
+        verdicts = self.value_run([item], [text], [assert_step(label, '105')], reader)
+        self.assertEqual((verdicts[label].status, verdicts[label].detail), ('ok', {'roll_spread': 9}))
+        self.assertEqual(forced_spells, {2002})
+        self.fresh()
+        verdicts = self.value_run([item], [text], [assert_step(label, '125')], reader)
+        self.assertEqual(verdicts[label].status, 'alert')
 
     def test_divided_token_expects_the_undivided_effect_points(self):
         self.assertEqual(self.effect_verdict('50', Displayed('$/10;s1', 5.0, 0, 'flat')).status, 'ok')
@@ -710,6 +733,48 @@ class DbcTooltipsTest(unittest.TestCase):
         self.assertEqual(tooltips.effect_points(RIGHTEOUS_UPHEAVAL, 0), (71, 32))
         self.assertEqual(tooltips.read(RIGHTEOUS_UPHEAVAL, caster).values[0].value, 72 + 45)
         self.assertEqual(tooltips.read(RIGHTEOUS_UPHEAVAL, caster, (RIGHTEOUS_UPHEAVAL, 0, 7)).values[0].value, 7 + 45)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class GeneratedTokenTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.spells = {spell.spell_id: spell for spell in class_spells(DBC_DIR, CLASS_FILE['class_id'], HEADER)}
+        cls.tooltips = DbcTooltips(DBC_DIR)
+
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def judged(self, spell_id, displayed, actual):
+        self.workspace.close()
+        self.workspace = Workspace()
+        spell = self.spells[spell_id]
+        scenario, expectations = value_scenario(CLASS_FILE, spell, spell_id)
+        item = next(item for item in expectations if item.displayed == displayed)
+        tokens = [value.text for value in read_tooltip(self.tooltips.dbc, spell_id, structure_stats(60)).values]
+        self.workspace.scenario(f'conformance-templar-value-{spell_id}', 'value', expectations, tokens,
+                                [assert_step(item.label, actual)], spell=spell_id, name=spell.name, rank=spell_id)
+        manifest, results = self.workspace.manifest()
+        verdicts = compare(manifest, results, tooltips=self.tooltips, hit_model=reference_hit)
+        return next(verdict for verdict in verdicts if verdict.label == item.label)
+
+    def test_own_seconds_token_is_judged_in_ms(self):
+        verdict = self.judged(LIBERTY, '$/1000;s1', '-30000')
+        self.assertEqual((verdict.status, verdict.expected), ('ok', -30000.0))
+        self.assertEqual(self.judged(LIBERTY, '$/1000;s1', '-30').status, 'alert')
+
+    def test_foreign_value_token_is_judged_against_the_referenced_spell(self):
+        verdict = self.judged(SCOURGEBANE, '$801832s2', '50')
+        self.assertEqual((verdict.status, verdict.expected), ('ok', 50.0))
+        self.assertEqual(self.judged(SCOURGEBANE, '$801832s2', '5').status, 'alert')
+
+    def test_foreign_stack_token_is_judged_exactly(self):
+        verdict = self.judged(IRON_PENANCE, '$523713u', '10')
+        self.assertEqual((verdict.status, verdict.expected, verdict.low, verdict.high), ('ok', 10.0, 10.0, 10.0))
+        self.assertEqual(self.judged(IRON_PENANCE, '$523713u', '11').status, 'alert')
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
