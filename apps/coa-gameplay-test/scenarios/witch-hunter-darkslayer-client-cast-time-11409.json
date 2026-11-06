@@ -1,0 +1,140 @@
+{
+  "schema": 1,
+  "name": "Witch Hunter: Darkslayer's client tooltip shows the ranged-slot cast time the server uses (#11409)",
+  "contract": [
+    "Darkslayer 804179 and its ranks 680256-680262 and 681203 are ranged-slot spells (SPELL_ATTR0_USES_RANGED_SLOT 0x2, Attributes 65554)",
+    "with CastingTimeIndex 16 (1500 ms) for rank 1, 5 (2000 ms) for rank 2 and 19 (2500 ms) for ranks 3 to 9. SpellInfo::CalcCastTime adds the",
+    "500 ms ranged preparation, so the server casts them in 2000, 2500 and 3000 ms before haste while the client's SpellCastTimes rows keep",
+    "1500, 2000 and 2500 ms; the report saw every rank cast 0.5 s longer than its tooltip. The client patch stream now publishes a Spell.dbc",
+    "row for every rank whose CastingTimeIndex points at the row with the server's time. The server's own cast time is unchanged. Stock Hunter",
+    "Steady Shot 34120 is not registered and receives no cast-time row."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and the client patch stream settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 804179
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 680256
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 680257
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 681203
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the client receives 2000 ms for Darkslayer rank 1 (804179)",
+      "actor": "wh",
+      "metric": "client_cast_time_ms",
+      "spell": 804179,
+      "equals": 2000,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the client receives 2500 ms for Darkslayer rank 2 (680256)",
+      "actor": "wh",
+      "metric": "client_cast_time_ms",
+      "spell": 680256,
+      "equals": 2500,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the client receives 3000 ms for Darkslayer rank 3 (680257)",
+      "actor": "wh",
+      "metric": "client_cast_time_ms",
+      "spell": 680257,
+      "equals": 3000,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the client receives 3000 ms for Darkslayer rank 9 (681203)",
+      "actor": "wh",
+      "metric": "client_cast_time_ms",
+      "spell": 681203,
+      "equals": 3000,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The streamed row keeps the Darkslayer rank 1 attributes",
+      "actor": "wh",
+      "metric": "client_attributes",
+      "spell": 804179,
+      "equals": 65554
+    },
+    {
+      "action": "assert",
+      "label": "The streamed row keeps the Darkslayer rank 2 attributes",
+      "actor": "wh",
+      "metric": "client_attributes",
+      "spell": 680256,
+      "equals": 65554
+    },
+    {
+      "action": "assert",
+      "label": "The streamed row keeps the Darkslayer rank 3 attributes",
+      "actor": "wh",
+      "metric": "client_attributes",
+      "spell": 680257,
+      "equals": 65554
+    },
+    {
+      "action": "assert",
+      "label": "The streamed row keeps the Darkslayer rank 9 attributes",
+      "actor": "wh",
+      "metric": "client_attributes",
+      "spell": 681203,
+      "equals": 65554
+    },
+    {
+      "action": "assert",
+      "label": "The server still casts Darkslayer rank 1 in 1500 + 500 ms",
+      "actor": "wh",
+      "metric": "spell_cast_time_ms",
+      "spell": 804179,
+      "equals": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The server still casts Darkslayer rank 9 in 2500 + 500 ms",
+      "actor": "wh",
+      "metric": "spell_cast_time_ms",
+      "spell": 681203,
+      "equals": 3000
+    },
+    {
+      "action": "assert",
+      "label": "An unregistered stock ranged shot receives no cast-time row",
+      "actor": "wh",
+      "metric": "client_cast_time_ms",
+      "spell": 34120,
+      "equals": -1
+    }
+  ]
+}

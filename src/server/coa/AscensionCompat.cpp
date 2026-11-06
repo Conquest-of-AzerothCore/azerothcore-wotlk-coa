@@ -1138,7 +1138,8 @@ public:
 
             uint32 replacement = 0;
             Aura const* aura = entry.RequiresAura ? player->GetAura(entry.ParentSpellId, player->GetGUID()) : nullptr;
-            bool const parentOwned = entry.RequiresAura ? aura && !aura->IsRemoved() :
+            bool const parentOwned = entry.RequiresAura ?
+                aura && !aura->IsRemoved() && aura->GetStackAmount() >= entry.MinAuraStacks :
                 player->HasSpell(entry.ParentSpellId);
             bool const allowed = (!entry.SpecId || specializationId == entry.SpecId) && parentOwned;
             for (auto const& rank : entry.Ranks)
@@ -4489,9 +4490,10 @@ private:
   static constexpr uint32 SPELL_EFFECT_TARGETS_FIELD = 86;
   static constexpr uint32 SPELL_EFFECT_TARGETS_B_FIELD = 89;
   static constexpr uint32 SPELL_FAMILY_NAME_FIELD = 208;
-  static constexpr std::array<uint32, 19> RANGED_PREPARATION_CLIENT_SPELLS = {
+  static constexpr std::array<uint32, 28> RANGED_PREPARATION_CLIENT_SPELLS = {
       504582, 572343, 572344, 572345, 572383, 680902, 680903, 680904, 680905, 806288,
-      572614, 804136, 806876, 806877, 806878, 806879, 806880, 806881, 524870};
+      572614, 804136, 806876, 806877, 806878, 806879, 806880, 806881, 524870, 804179,
+      680256, 680257, 680258, 680259, 680260, 680261, 680262, 681203};
   static constexpr uint32 SPELL_LEVEL_FIELD = 39;
   static constexpr uint32 SPELL_VISUAL_FIELD = 131;
   static constexpr uint32 VAULT_CLIENT_SPELL = 500085;

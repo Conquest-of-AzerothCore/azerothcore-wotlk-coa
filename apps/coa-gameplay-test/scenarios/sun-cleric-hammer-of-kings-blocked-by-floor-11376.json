@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Hammer of Kings does not hit an enemy on the floor above (#11376)",
+  "contract": "Hammer of Kings 804751 is a self aura whose periodic trigger 804752 damages enemies within 8 yards of the caster. 804751 carries SPELL_ATTR2_IGNORE_LINE_OF_SIGHT and the triggered spell inherits it from the aura, so the pulse ignored the stone floor of the Fenris Keep landing and hit an enemy standing on the chamber floor above it, 5.2 yards away in 3D (spawn 18271 has 4.6 yards of vmap ceiling over it). An enemy on the chamber floor receives no pulse while the caster stands on the landing, line of sight being blocked as an ordinary Smite shows, and the same enemy receives it once the caster stands on the chamber floor beside it.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": 998.6,
+    "y": 682.4,
+    "z": 75.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "above",
+      "owner": "cleric",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 804751
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 585
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the enemy stands on the chamber floor above the landing",
+      "actor": "above",
+      "metric": "position_z",
+      "min": 74.5,
+      "max": 76.5
+    },
+    {
+      "action": "teleport",
+      "label": "The caster steps down to the landing under the chamber floor",
+      "actor": "cleric",
+      "map": 0,
+      "x": 998.6,
+      "y": 682.4,
+      "z": 69.9
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the caster stands on the landing",
+      "actor": "cleric",
+      "metric": "position_z",
+      "min": 69,
+      "max": 71
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 585,
+      "target": "above"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the floor blocks line of sight, so an ordinary Smite is refused",
+      "actor": "cleric",
+      "metric": "cast_failure",
+      "spell": 585,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: that Smite dealt no damage",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 585,
+      "target": "above",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 804751
+    },
+    {
+      "action": "assert",
+      "label": "Hammer of Kings is active on the landing",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 804751,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 9000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Hammer pulse reaches the enemy through the floor",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 804752,
+      "target": "above",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "cleric",
+      "spell": 804751,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "cleric",
+      "spell": 804751
+    },
+    {
+      "action": "teleport",
+      "label": "The caster climbs to the chamber floor beside the enemy",
+      "actor": "cleric",
+      "map": 0,
+      "x": 998.6,
+      "y": 682.4,
+      "z": 75.0
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 804751
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the same Hammer pulses hit the enemy on the same floor",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 804752,
+      "target": "above",
+      "min": 1,
+      "within_ms": 9000
+    }
+  ]
+}

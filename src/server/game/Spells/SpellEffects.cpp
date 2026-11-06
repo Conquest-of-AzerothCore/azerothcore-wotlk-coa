@@ -5943,7 +5943,8 @@ void Spell::EffectCharge(SpellEffIndex /*effIndex*/)
             // charge changes fall time
             player->SetFallInformation(GameTime::GetGameTime().count(), m_caster->GetPositionZ());
 
-            if (!m_spellInfo->HasAttribute(SPELL_ATTR0_CANCELS_AUTO_ATTACK_COMBAT) && !m_spellInfo->IsPositive() && m_caster->GetTarget() == unitTarget->GetGUID())
+            if (!m_spellInfo->HasAttribute(SPELL_ATTR0_CANCELS_AUTO_ATTACK_COMBAT) && !m_spellInfo->IsPositive() &&
+                m_caster->GetTarget() == unitTarget->GetGUID() && m_caster->IsValidAttackTarget(unitTarget))
             {
                 targetGUID = unitTarget->GetGUID();
             }
