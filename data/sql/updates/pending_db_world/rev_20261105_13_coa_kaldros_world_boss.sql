@@ -1,5 +1,5 @@
 -- Kaldros Depthbreaker (978080), Ascension's world boss of Depthbreaker's Hollow (map 884, as the quick guide shows
--- the fight), built the way Setis is: a shrine on the Feralas coast takes players in (Normal only), the portal he
+-- the fight), built the way Setis is: a shrine under the sea off Sardor Isle (Feralas) takes players in (Normal only), the portal he
 -- leaves where he falls and the shrine at the entrance take them back, and players who die there rise at its start.
 -- No log: his kit is his spell block (boss_kaldros_coa), his health is designed per player in his map (10 to 40).
 
@@ -43,7 +43,7 @@ DELETE FROM `creature` WHERE `guid` IN (9780920, 9780921);
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
 (9780920, 978080, 884, 10240, 10240, 1, 1, -4730.0, 2466.5, -82.41, 3.1416, 604800, 0, 0),
-(9780921, 978081, 1, 0, 0, 1, 1, -4300.0, 2360.0, 4.2, 0, 300, 0, 0);
+(9780921, 978081, 1, 0, 0, 1, 1, -4748.838, 2697.8623, -147.7, 3.9223, 300, 0, 0);
 
 -- The shrine on the Feralas coast, the portal out and the shrine at the entrance of the hollow.
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
@@ -57,7 +57,7 @@ DELETE FROM `gameobject` WHERE `guid` IN (9780920, 9780921);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`) VALUES
-(9780920, 978080, 1, 0, 0, 1, 1, -4300.0, 2360.0, -0.84, 0, 0, 0, 0, 1, 300, 100, 1),
+(9780920, 978080, 1, 0, 0, 1, 1, -4748.838, 2697.8623, -152.733, 3.9223, 0, 0, 0.924772, -0.380521, 300, 100, 1),
 (9780921, 978082, 884, 10240, 10240, 1, 1, -4746.0, 2462.0, -82.41, 0, 0, 0, 0, 1, 300, 100, 1);
 
 -- Players who die there rise at its start: WorldSafeLocs.dbc 6084 "Depthbreaker's Hollow Boss map Graveyard".
