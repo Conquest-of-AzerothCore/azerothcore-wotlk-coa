@@ -219,3 +219,107 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (970041, 1, 967372, 0, 0, 0),
 (970042, 0, 967348, 0, 0, 0),
 (970042, 1, 967357, 0, 0, 0);
+
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 30 AND `SourceGroup` = 0 AND `SourceEntry` BETWEEN 970000 AND 970042;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(30, 0, 970000, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Vastrasz - visible only in High-Risk'),
+(30, 0, 970001, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Vuye Pathfinder - visible only in High-Risk'),
+(30, 0, 970002, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Zelegosa - visible only in High-Risk'),
+(30, 0, 970003, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Ariyya Scorpidsting - visible only in High-Risk'),
+(30, 0, 970004, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Abydion - visible only in High-Risk'),
+(30, 0, 970005, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Simwenthi Boldaxe - visible only in High-Risk'),
+(30, 0, 970006, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Thanelam Fullstone - visible only in High-Risk'),
+(30, 0, 970007, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Apprentice Frieda - visible only in High-Risk'),
+(30, 0, 970008, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Bloodmage Kalilis - visible only in High-Risk'),
+(30, 0, 970009, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Volkmar Velor - visible only in High-Risk'),
+(30, 0, 970010, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Sankle Greasebolt - visible only in High-Risk'),
+(30, 0, 970011, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Makovei - visible only in High-Risk'),
+(30, 0, 970012, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Solidan - visible only in High-Risk'),
+(30, 0, 970013, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Nahiossi - visible only in High-Risk'),
+(30, 0, 970014, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Jevaxle - visible only in High-Risk'),
+(30, 0, 970015, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Seterin the Slothful - visible only in High-Risk'),
+(30, 0, 970016, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Lionus the Sly - visible only in High-Risk'),
+(30, 0, 970017, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Grovewarden Wetheas - visible only in High-Risk'),
+(30, 0, 970018, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Dazi - visible only in High-Risk'),
+(30, 0, 970019, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Cilkeck Gadgetspring - visible only in High-Risk'),
+(30, 0, 970020, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Rraj''esh - visible only in High-Risk'),
+(30, 0, 970021, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Kuixa - visible only in High-Risk'),
+(30, 0, 970022, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Zidormi - visible only in High-Risk'),
+(30, 0, 970023, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Lydries Frostwind - visible only in High-Risk'),
+(30, 0, 970024, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Xaarmu - visible only in High-Risk'),
+(30, 0, 970025, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Nishkix - visible only in High-Risk'),
+(30, 0, 970026, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Fylaesia - visible only in High-Risk'),
+(30, 0, 970027, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Oumorn Marbletale - visible only in High-Risk'),
+(30, 0, 970028, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Squire Leilani - visible only in High-Risk'),
+(30, 0, 970029, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Flette - visible only in High-Risk'),
+(30, 0, 970030, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Rixka - visible only in High-Risk'),
+(30, 0, 970031, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Chumani Earthtalon - visible only in High-Risk'),
+(30, 0, 970032, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Crewman Sevly - visible only in High-Risk'),
+(30, 0, 970033, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Mytaliath - visible only in High-Risk'),
+(30, 0, 970034, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Cowardly Minion of Weavil - visible only in High-Risk'),
+(30, 0, 970035, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Nildat Sharpmine - visible only in High-Risk'),
+(30, 0, 970036, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Assistant Lulitte - visible only in High-Risk'),
+(30, 0, 970037, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Kargam Shindigger - visible only in High-Risk'),
+(30, 0, 970038, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Shola - visible only in High-Risk'),
+(30, 0, 970039, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Aelsendra - visible only in High-Risk'),
+(30, 0, 970040, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Krenic - visible only in High-Risk'),
+(30, 0, 970041, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Kalyn - visible only in High-Risk'),
+(30, 0, 970042, 0, 0, 1, 0, 1004019, 0, 0, 0, 0, 0, '', 'Mevezius - visible only in High-Risk');
+
+DELETE FROM `pool_template` WHERE `entry` = 970000;
+INSERT INTO `pool_template` (`entry`, `max_limit`, `description`) VALUES
+(970000, 3, 'Blackmarket Artisan Supplies');
+
+DELETE FROM `pool_creature` WHERE `pool_entry` = 970000 OR `guid` BETWEEN 9700000 AND 9700042;
+INSERT INTO `pool_creature` (`guid`, `pool_entry`, `chance`, `description`) VALUES
+(9700000, 970000, 0, 'Vastrasz'),
+(9700001, 970000, 0, 'Vuye Pathfinder'),
+(9700002, 970000, 0, 'Zelegosa'),
+(9700003, 970000, 0, 'Ariyya Scorpidsting'),
+(9700004, 970000, 0, 'Abydion'),
+(9700005, 970000, 0, 'Simwenthi Boldaxe'),
+(9700006, 970000, 0, 'Thanelam Fullstone'),
+(9700007, 970000, 0, 'Apprentice Frieda'),
+(9700008, 970000, 0, 'Bloodmage Kalilis'),
+(9700009, 970000, 0, 'Volkmar Velor'),
+(9700010, 970000, 0, 'Sankle Greasebolt'),
+(9700011, 970000, 0, 'Makovei'),
+(9700012, 970000, 0, 'Solidan'),
+(9700013, 970000, 0, 'Nahiossi'),
+(9700014, 970000, 0, 'Jevaxle'),
+(9700015, 970000, 0, 'Seterin the Slothful'),
+(9700016, 970000, 0, 'Lionus the Sly'),
+(9700017, 970000, 0, 'Grovewarden Wetheas'),
+(9700018, 970000, 0, 'Dazi'),
+(9700019, 970000, 0, 'Cilkeck Gadgetspring'),
+(9700020, 970000, 0, 'Rraj''esh'),
+(9700021, 970000, 0, 'Kuixa'),
+(9700022, 970000, 0, 'Zidormi'),
+(9700023, 970000, 0, 'Lydries Frostwind'),
+(9700024, 970000, 0, 'Xaarmu'),
+(9700025, 970000, 0, 'Nishkix'),
+(9700026, 970000, 0, 'Fylaesia'),
+(9700027, 970000, 0, 'Oumorn Marbletale'),
+(9700028, 970000, 0, 'Squire Leilani'),
+(9700029, 970000, 0, 'Flette'),
+(9700030, 970000, 0, 'Rixka'),
+(9700031, 970000, 0, 'Chumani Earthtalon'),
+(9700032, 970000, 0, 'Crewman Sevly'),
+(9700033, 970000, 0, 'Mytaliath'),
+(9700034, 970000, 0, 'Cowardly Minion of Weavil'),
+(9700035, 970000, 0, 'Nildat Sharpmine'),
+(9700036, 970000, 0, 'Assistant Lulitte'),
+(9700037, 970000, 0, 'Kargam Shindigger'),
+(9700038, 970000, 0, 'Shola'),
+(9700039, 970000, 0, 'Aelsendra'),
+(9700040, 970000, 0, 'Krenic'),
+(9700041, 970000, 0, 'Kalyn'),
+(9700042, 970000, 0, 'Mevezius');
+
+DELETE FROM `game_event` WHERE `eventEntry` = 196;
+INSERT INTO `game_event` (`eventEntry`, `start_time`, `end_time`, `occurence`, `length`, `holiday`, `holidayStage`, `description`, `world_event`, `announce`) VALUES
+(196, '2026-01-01 00:00:00', '2037-12-31 23:59:59', 60, 59, 0, 0, 'Blackmarket Artisan Supplies rotation', 0, 0);
+
+DELETE FROM `game_event_pool` WHERE `eventEntry` = 196 OR `pool_entry` = 970000;
+INSERT INTO `game_event_pool` (`eventEntry`, `pool_entry`) VALUES
+(196, 970000);
