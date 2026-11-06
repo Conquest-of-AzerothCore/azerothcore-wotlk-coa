@@ -434,6 +434,20 @@ RatedSoloArena.Title.Rival = 2000
 RatedSoloArena.Title.Duelist = 2300
 RatedSoloArena.Title.Gladiator = 2600
 
+#    Ascension.PvPVendors.ReleaseStage
+#        Description: The newest PvP Season 1 vendor phase the realm has released, 0-2. Each phase's
+#                     vendors stand in Champion's Hall and the Hall of Legends only once it is released,
+#                     and earlier phases stay. Changes apply on .reload config.
+#                     0 - No Season 1 PvP vendors
+#                     1 - Phase 1: Lieutenant Thorne 48051/48052, Quartermaster Hadwin, Captain Korgash
+#                         49050/49051 and Warbringer Krogash (Corporal's, Grunt's, Challenger's,
+#                         Sergeant's and Captain's)
+#                     2 - Phase 2 as well: Lieutenant Thorne 48053, Captain Korgash 49053 and both
+#                         Vik "Angry" Smalls (CoA PvP Gear, Legionnaire's, Centurion's and the Legacy lists)
+#        Default:     2
+
+Ascension.PvPVendors.ReleaseStage = 2
+
 #    HighRisk.FelCommutation.Enable
 #        Description: Fel Commutation. A High-Risk character switches it on and picks the equipment slots to
 #                     insure in the window at the Fel Commutation Portal (object 8000053). While on, items in
