@@ -69,6 +69,21 @@ public:
             }
         }
 
+        void OnUnitDeath(Unit* unit) override
+        {
+            if (unit->GetEntry() != NPC_HYDROSPAWN)
+                return;
+
+            if (_eastWingProgress == EAST_WING_ZEVRIM_DEAD)
+                _eastWingProgress = EAST_WING_IRONBARK_FREED;
+            else if (_eastWingProgress == 0)
+                _eastWingProgress = EAST_WING_HYDROSPAWN_DEAD;
+            else
+                return;
+
+            SaveToDB();
+        }
+
         void OnGameObjectCreate(GameObject* gameobject) override
         {
             switch (gameobject->GetEntry())
@@ -94,6 +109,10 @@ public:
             switch (type)
             {
                 case TYPE_EAST_WING_PROGRESS:
+                    // Zevrim Thornhoof's death reports progress 1, but Old Ironbark opens the way to Alzzin only once
+                    // Hydrospawn is dead too: until then the progress remembers which of the two has fallen.
+                    if (data == EAST_WING_IRONBARK_FREED && _eastWingProgress != EAST_WING_HYDROSPAWN_DEAD)
+                        data = _eastWingProgress == 0 ? EAST_WING_ZEVRIM_DEAD : _eastWingProgress;
                     _eastWingProgress = data;
                     break;
                 case TYPE_WEST_WING_PROGRESS:
