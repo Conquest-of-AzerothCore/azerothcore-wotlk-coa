@@ -268,8 +268,6 @@ public:
     void CheckLootRefs(LootStore const& lootstore, uint32 Id, LootIdSet* ref_set) const;
     bool addConditionItem(Condition* cond);
     [[nodiscard]] bool isReference(uint32 id) const;
-    // Every item entry this template can drop, references followed (the pool of a boss's guaranteed drop)
-    void CollectItems(std::vector<LootStoreItem const*>& out, uint8 depth = 0) const;
 
 private:
     LootStoreItemList Entries;                          // not grouped only
@@ -327,7 +325,6 @@ struct Loot
     uint32 gold;
     uint32 unlootedCount{0};
     bool sharedQuestLoot{false};
-    uint8 dungeonDifficulty{0};
     ObjectGuid roundRobinPlayer;        // GUID of the player having the Round-Robin ownership for the loot. If 0, round robin owner has released.
     ObjectGuid lootOwnerGUID;
     LootType loot_type{LOOT_NONE};      // required for achievement system
@@ -372,7 +369,6 @@ struct Loot
         roundRobinPlayer.Clear();
         i_LootValidatorRefMgr.clearReferences();
         loot_type = LOOT_NONE;
-        dungeonDifficulty = 0;
     }
 
     [[nodiscard]] bool empty() const { return items.empty() && gold == 0; }
@@ -386,8 +382,6 @@ struct Loot
 
     void generateMoneyLoot(uint32 minAmount, uint32 maxAmount);
     bool FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError = false, uint16 lootMode = LOOT_MODE_DEFAULT, WorldObject* lootSource = nullptr);
-    // Heroic/Mythic vanilla dungeon bosses: exactly one piece of gear from the boss's own pool
-    void GuaranteeOneGearDrop(LootTemplate const& tab);
 
     // Inserts the item into the loot (called by LootTemplate processors)
     void AddItem(LootStoreItem const& item);
@@ -453,11 +447,8 @@ void LoadLootTemplates_Reference();
 
 void LoadLootTemplates_Player();
 
-void LoadDungeonLootVariants();
-
 inline void LoadLootTables()
 {
-    LoadDungeonLootVariants();
     LoadLootTemplates_Creature();
     LoadLootTemplates_Fishing();
     LoadLootTemplates_Gameobject();
