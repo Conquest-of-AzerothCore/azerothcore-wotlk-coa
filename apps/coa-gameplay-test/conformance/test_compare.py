@@ -28,6 +28,7 @@ HEADER = Path(__file__).resolve().parents[3] / 'src/server/coa/AscensionSpellPro
 SCOURGEBANE = 92111
 IRON_PENANCE = 523712
 KEEPING_THE_OATH = 92109
+ZEALOTRY_PASSIVE = 92108
 VALUE_KEY = 'conformance-templar-value-1001'
 HIT_KEY = 'conformance-templar-hit-1001'
 CLASS_TUNING = Modifier(spell_id=887007, effect_index=0, aura=341, percent=-20, applies_to='damage', school_mask=127)
@@ -188,6 +189,14 @@ class CompareTest(unittest.TestCase):
         token = Displayed('$/10;2002s1', 5.0, None, 'flat')
         verdict = self.effect_verdict('-50', token, constant_reader(token, points={(2002, 0): (-51, 1)}))
         self.assertEqual((verdict.status, verdict.expected), ('ok', -50.0))
+
+    def test_expanded_unsigned_token_takes_the_sign_of_the_referenced_spell(self):
+        label = '1001 effect_value 2002e1 #0'
+        token = Displayed('$s2', 50.0, None, 'percent', 2002)
+        reader = constant_reader(token, points={(2002, 1): (-51, 1), (RANK, 1): (49, 1)})
+        item = expectation(label, 'effect_value', '$s2', 'read percent', model={'effect_spell': 2002, 'effect': 1})
+        verdicts = self.value_run([item], ['$s2'], [assert_step(label, '-50')], reader)
+        self.assertEqual((verdicts[label].status, verdicts[label].expected), ('ok', -50.0))
 
     def rolled_verdict(self, actual, value_of_roll):
         text = '${$m1+0+$AP*0.45}'
@@ -776,6 +785,11 @@ class GeneratedTokenTest(unittest.TestCase):
         verdict = self.judged(IRON_PENANCE, '$523713u', '10')
         self.assertEqual((verdict.status, verdict.expected, verdict.low, verdict.high), ('ok', 10.0, 10.0, 10.0))
         self.assertEqual(self.judged(IRON_PENANCE, '$523713u', '11').status, 'alert')
+
+    def test_expanded_token_is_judged_against_the_referenced_spell(self):
+        verdict = self.judged(ZEALOTRY_PASSIVE, '$s2', '80')
+        self.assertEqual((verdict.status, verdict.expected), ('ok', 80.0))
+        self.assertEqual(self.judged(ZEALOTRY_PASSIVE, '$s2', '8').status, 'alert')
 
     def test_foreign_duration_token_is_judged_against_the_referenced_duration(self):
         verdict = self.judged(KEEPING_THE_OATH, '$803237d', '8000')

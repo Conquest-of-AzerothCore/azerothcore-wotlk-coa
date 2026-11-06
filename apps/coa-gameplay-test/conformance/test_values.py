@@ -43,6 +43,12 @@ IRON_PENANCE = 523712
 IRON_PENANCE_DEBUFF = 523713
 KEEPING_THE_OATH = 92109
 KEEPING_THE_OATH_AURA = 803237
+ZEALOTRY_PASSIVE = 92108
+ZEALOTRY = 801450
+SACRED_OATH = 712346
+GLORY = 801481
+DOWNFALL = 801482
+REDEMPTION = 801483
 
 
 def measured_labels(scenario):
@@ -264,6 +270,29 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         self.assertFalse(self.steps_of(scenario, item.label))
         self.assertNotIn('spell_proc_chance', {step.get('metric') for step in scenario['steps']})
         self.assertNotIn('set_aura', {step['action'] for step in scenario['steps']})
+
+    def test_expanded_token_is_measured_on_the_referenced_spell(self):
+        scenario, expectations = self.build(ZEALOTRY_PASSIVE, ZEALOTRY_PASSIVE)
+        run.validate(scenario)
+        item = next(item for item in expectations if item.displayed == '$s2')
+        self.assertEqual((item.check, item.effect_index, item.rule, item.model),
+                         ('effect_value', None, 'read percent', {'effect_spell': ZEALOTRY, 'effect': 1}))
+        step, = self.steps_of(scenario, item.label)
+        self.assertEqual((step['metric'], step['spell'], step['effect']), ('spell_effect_value', ZEALOTRY, 1))
+        self.assertFalse([item for item in expectations if item.rule.startswith(UNREADABLE)])
+
+    def test_expanded_durations_are_measured_on_the_referenced_spells(self):
+        scenario, expectations = self.build(GLORY, GLORY)
+        run.validate(scenario)
+        durations = [(item.check, item.model) for item in expectations if item.displayed == '$d']
+        self.assertEqual(durations, [('aura_duration_ms', None), ('spell_duration', {'effect_spell': DOWNFALL}),
+                                     ('spell_duration', {'effect_spell': REDEMPTION})])
+
+    def test_expansion_without_token(self):
+        scenario, expectations = self.build(SACRED_OATH, SACRED_OATH)
+        run.validate(scenario)
+        unreadable = [item.rule for item in expectations if item.rule.startswith(UNREADABLE)]
+        self.assertEqual(unreadable, [UNREADABLE + 'tooltip without value'])
 
     def test_every_templar_rank_has_a_valid_scenario_and_no_dropped_expectation(self):
         for spell in self.spells.values():

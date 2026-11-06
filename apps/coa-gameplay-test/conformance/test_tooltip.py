@@ -3,7 +3,7 @@ import struct
 import tempfile
 import unittest
 
-from tooltip import CasterStats, DataSet, Displayed, Records, Tooltip, read_tooltip
+from tooltip import MAX_EXPANSION_DEPTH, CasterStats, DataSet, Displayed, Records, Tooltip, read_tooltip
 import schemas
 
 DBC_DIR = Path('/srv/coa/server-data/dbc')
@@ -39,6 +39,13 @@ SCOURGEBANE_STRIKE = 801832
 INTERDICT_EXTENSION = 500014
 HOLY_LIGHT = 706449
 HOLY_LIGHT_CAST_TIME_POINTS = 1500
+ZEALOTRY_PASSIVE = 92108
+ZEALOTRY = 801450
+ZEALOTRY_WEAPON_BASE_POINTS = 79
+GLORY = 801481
+DOWNFALL = 801482
+REDEMPTION = 801483
+DOWNFALL_DURATION_MS = 5000
 
 
 def displayed(readout, text):
@@ -170,6 +177,21 @@ class ClientDbcTooltipTest(unittest.TestCase):
         self.assertEqual(upper.value, HOLY_LIGHT_CAST_TIME_POINTS)
         self.assertEqual(self.read(HOLY_LIGHT).unreadable, [])
 
+    def test_spell_markup_expands(self):
+        readout = self.read(ZEALOTRY_PASSIVE)
+        self.assertEqual(readout.values, [Displayed('$s2', ZEALOTRY_WEAPON_BASE_POINTS + 1, None, 'percent',
+                                                    ZEALOTRY)])
+        self.assertEqual(readout.unreadable, [])
+
+    def test_expanded_tokens_name_the_referenced_spell_after_the_own_tokens(self):
+        readout = self.read(GLORY)
+        self.assertEqual([(value.text, value.effect_index, value.spell_id) for value in readout.values], [
+            ('$s1', 0, GLORY), ('$d', None, None),
+            ('$s1', None, DOWNFALL), ('$d', None, DOWNFALL),
+            ('$s1', None, REDEMPTION), ('$s3', None, REDEMPTION), ('$d', None, REDEMPTION)])
+        self.assertEqual(readout.values[3].value, DOWNFALL_DURATION_MS)
+        self.assertEqual(readout.unreadable, [])
+
     def test_until_cancelled_duration_is_unreadable(self):
         readout = self.read(SCOURGEBANE_STRIKE)
         self.assertEqual(readout.unreadable, ['$d'])
@@ -231,6 +253,17 @@ FIXTURE_SPELLS = {
                               '|TInterface\\Icons\\X:0|t @ext:Scales with Spirit:ext@ and $<odd> with $<missing>.',
          'EffectBasePoints[0]': 4, 'EffectDieSides[0]': 3, 'SpellDescriptionVariableID': 2},
     13: {'Description[enUS]': 'Echo of $10s2%, $10m1 and $99d.'},
+    14: {'Description[enUS]': 'Shown with shift only.@s:801450:-4@'},
+    15: {'Description[enUS]': 'Names a missing spell.@s:404:0@'},
+    20: {'Description[enUS]': 'Opens with $s1.@s:21:0@', 'EffectBasePoints[0]': 1, 'EffectDieSides[0]': 1},
+    21: {'Description[enUS]': 'Echoes $s1 and $d.@s:20:0@', 'EffectBasePoints[0]': 2, 'EffectDieSides[0]': 1,
+         'DurationIndex': 1},
+    30: {'Description[enUS]': '@s:31:0@'},
+    31: {'Description[enUS]': '@s:32:0@'},
+    32: {'Description[enUS]': '@s:33:0@'},
+    33: {'Description[enUS]': 'Deep $s1.@s:34:0@', 'EffectBasePoints[0]': 32, 'EffectDieSides[0]': 1},
+    34: {'Description[enUS]': 'Too deep $s1.', 'EffectBasePoints[0]': 33, 'EffectDieSides[0]': 1},
+    801450: {'Description[enUS]': 'Deals $s2%.', 'EffectBasePoints[1]': 79, 'EffectDieSides[1]': 1},
 }
 FIXTURE_VARIABLES = {
     1: '$bonus=${$m1*2+$PL}\r\n',
@@ -285,6 +318,27 @@ class FixtureTooltipTest(unittest.TestCase):
         self.assertEqual(readout.values, [Displayed('$10s2', 25, None, 'percent', 10),
                                           Displayed('$10m1', 100, None, 'flat', 10)])
         self.assertEqual(readout.unreadable, ['$99d'])
+
+    def test_negative_flags_stay_unreadable(self):
+        readout = read_tooltip(self.dbc, 14, FIXTURE_CASTER)
+        self.assertEqual(readout.values, [])
+        self.assertEqual(readout.unreadable, ['@s:801450:-4@ [negative flags select a shift or partial rendering]'])
+
+    def test_markup_naming_a_missing_spell_is_unreadable(self):
+        readout = read_tooltip(self.dbc, 15, FIXTURE_CASTER)
+        self.assertEqual(readout.unreadable, ['@s:404:0@ [spell 404 is not in Spell.dbc]'])
+
+    def test_expansion_cycle(self):
+        readout = read_tooltip(self.dbc, 20, FIXTURE_CASTER)
+        self.assertEqual(readout.values, [Displayed('$s1', 2, 0, 'flat', 20), Displayed('$s1', 3, None, 'flat', 21),
+                                          Displayed('$d', 6000, None, 'duration_ms', 21)])
+        self.assertEqual(readout.unreadable, ['@s:20:0@ [expansion cycle 20 -> 21 -> 20]'])
+
+    def test_expansion_deeper_than_the_limit_is_unreadable(self):
+        self.assertEqual(MAX_EXPANSION_DEPTH, 3)
+        readout = read_tooltip(self.dbc, 30, FIXTURE_CASTER)
+        self.assertEqual(readout.values, [Displayed('$s1', 33, None, 'flat', 33)])
+        self.assertEqual(readout.unreadable, ['@s:34:0@ [nesting deeper than 3 expansions]'])
 
     def test_unknown_spell_is_rejected(self):
         with self.assertRaises(ValueError):

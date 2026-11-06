@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 import re
 import struct
@@ -13,10 +13,13 @@ EFFECT_DIGITS = '123'
 POINTS_LETTERS = 'sSmM'
 SINGLE_VALUE_LETTERS = 'sS'
 SECONDS_DIVISOR = 1000
+MAX_EXPANSION_DEPTH = 3
 VARIABLE_RECORD = struct.Struct('<2I')
 
 COLOR_CODE = re.compile(r'\|[cC][0-9a-fA-F]{8}|\|[rR]')
 EXTENSION_MARKUP = re.compile(r'@+[^@]*@?')
+SPELL_MARKUP = re.compile(r'@s:(?P<spell>\d+):(?P<flags>-?\d+)@')
+TOKEN_SPELL = re.compile(r'\$(\d+)')
 SPELL_TOKEN = re.compile(r'(?P<spell>\d*)(?P<letter>[A-Za-z])(?P<digit>[1-9]?)')
 SCALED_TOKEN = re.compile(r'(?P<operator>[/*])(?P<factor>\d+);')
 FORMAT_SUFFIX = re.compile(r'\.[1-9]')
@@ -140,10 +143,11 @@ class ForcedPoints(Records):
 
 
 class Tooltip:
-    def __init__(self, records: Records, spell_id: int, caster: CasterStats):
+    def __init__(self, records: Records, spell_id: int, caster: CasterStats, expanding: tuple[int, ...] = ()):
         self.records = records
         self.spell_id = spell_id
         self.caster = caster
+        self.expanding = expanding + (spell_id,)
         self.variables = self.read_variables()
 
     def read_variables(self) -> dict[str, Variable]:
@@ -258,12 +262,36 @@ class Tooltip:
                     unreadable.append(description[position:end])
                     position = end
             elif character == '@':
+                markup = SPELL_MARKUP.match(description, position)
+                if markup:
+                    expanded = self.expansion(markup)
+                    values += expanded.values
+                    unreadable += expanded.unreadable
+                    position = markup.end()
+                    continue
                 end = EXTENSION_MARKUP.match(description, position).end()
                 unreadable.append(description[position:end])
                 position = end
             else:
                 position += 1
         return Readout(values, unreadable)
+
+    def expansion(self, markup: re.Match) -> Readout:
+        spell_id = int(markup.group('spell'))
+        try:
+            if int(markup.group('flags')) < 0:
+                raise Unreadable('negative flags select a shift or partial rendering')
+            if not self.records.has_spell(spell_id):
+                raise Unreadable(f'spell {spell_id} is not in Spell.dbc')
+            if spell_id in self.expanding:
+                raise Unreadable('expansion cycle ' + ' -> '.join(map(str, self.expanding + (spell_id,))))
+            if len(self.expanding) > MAX_EXPANSION_DEPTH:
+                raise Unreadable(f'nesting deeper than {MAX_EXPANSION_DEPTH} expansions')
+        except Unreadable as error:
+            return Readout([], [unreadable_entry(markup.group(0), error)])
+        nested = Tooltip(self.records, spell_id, self.caster, self.expanding)
+        readout = nested.read(self.records.field('Spell', spell_id, 'Description[enUS]'))
+        return Readout([referenced(value, spell_id) for value in readout.values], readout.unreadable)
 
     def token(self, text: str, start: int) -> tuple[int, Displayed | Unreadable | None]:
         position = start + 1
@@ -413,6 +441,15 @@ class ExpressionParser:
                 self.spell_id = spell_id
             return value
         raise Unreadable
+
+
+def referenced(value: Displayed, spell_id: int) -> Displayed:
+    if value.spell_id is None:
+        named = TOKEN_SPELL.match(value.text)
+        spell_id = int(named.group(1)) if named else spell_id
+    else:
+        spell_id = value.spell_id
+    return replace(value, effect_index=None, spell_id=spell_id)
 
 
 def unreadable_entry(text: str, error: Unreadable | None) -> str:

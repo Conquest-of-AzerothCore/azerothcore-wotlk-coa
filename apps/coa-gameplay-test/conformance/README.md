@@ -81,7 +81,17 @@ or another one, and `None` for a token without one (`$h`, `$d`, `$u`, `$i`, `$aN
 $AN $SN` as their lowercase forms (`$S` as `$s`: `QuestTextParser.cpp:829-834`), and so does the reader.
 Color codes `|c........` and `|r` are removed, in either case.
 
-Everything else goes to `unreadable` verbatim and is never guessed: `$?` conditionals, `@...@` markup, other `|`
+`@s:<id>:<flags>@` with `flags` 0 or more expands to the tooltip of spell `<id>`, read by a nested reader of that spell
+([ADR 0013](../../../docs/adr/0013-conformance-expands-spell-markup.md)). The header line the client draws before it
+(icon and spell name) holds no number. The expanded tokens join `values` at the markup's place, with their own
+`text`, `effect_index` `None` and `spell_id` the spell they read: the referenced spell for its own tokens and for
+`$d $h $u $i $aN` without an id, the named spell otherwise. Zealotry 92108 thus shows `$s2` 80 of 801450. Their
+unreadable parts join `unreadable`. A markup stays unreadable, with its reason, when its flags are negative (the
+shift-reveal and partial renderings), when the spell is missing from the DBC set, when it closes a cycle, and when
+the nesting is deeper than `MAX_EXPANSION_DEPTH` (3) expansions. A referenced tooltip without a token adds nothing:
+Sacred Oath 712346 is then a tooltip without value.
+
+Everything else goes to `unreadable` verbatim and is never guessed: `$?` conditionals, other `@...@` markup, other `|`
 escapes, other tokens (`$t`, `$o`, `$x`, `$l`, `$g`...), expression functions and variables such as `$BH`,
 `$ppl1` or lowercase `$ap`, points that scale with level (`EffectRealPointsPerLevel` or `DurationPerLevel` not
 zero), spread values (`EffectDieSides` not 1 for `$sN`), missing records, non-positive durations, a `$<name>` that
@@ -139,6 +149,12 @@ stats, since the value depends on them. The scenario learns the rank, then measu
 | `aura_amount` | `aura_amount` of the effect after the cast | the same tooltip token as `effect_value`, for an effect that applies an aura |
 | `aura_duration_ms` | `aura_duration_ms` after the cast | the `$d` token of the rank, for an instant spell that applies an aura |
 | `known_aura` | `aura` before any learn | the class file; the aura's own tooltip gives its modifier |
+
+A token without an id names the spell whose tooltip holds it: for a token of an expanded `@s:` tooltip that is the
+referenced spell, so its `$sN`, `$u` and `$d` are checked as tokens of another spell (Zealotry 92108 `$s2` is
+`effect_value` of 801450 effect 1; Glory 801481 checks its own `$d` as `aura_duration_ms` and the `$d` of Downfall
+801482 and Redemption 801483 as `spell_duration`). The sign of an unsigned expanded token comes from the referenced
+spell's points.
 
 The cast, when a cooldown or an aura is measured, targets the fixture creature `dummy` (entry 36) when an active
 effect has an enemy target (implicit targets 2, 6, 15, 16, 24) and the caster otherwise; an aura whose target is the

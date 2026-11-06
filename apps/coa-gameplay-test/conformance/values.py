@@ -25,7 +25,7 @@ UNMEASURABLE = 'unmeasurable: '
 OWN_DURATION = re.compile(r'\$(\d*)[dD]')
 EFFECT_KINDS = ('flat', 'percent', 'duration_ms')
 EFFECT_TOKEN = re.compile(r'\$(?:/\d+;)?(?P<spell>\d*)[sSmM](?P<digit>[1-3])')
-FOREIGN_STACKS = re.compile(r'\$(?P<spell>\d+)[uU]')
+STACKS_TOKEN = re.compile(r'\$(?P<spell>\d*)[uU]')
 LEVEL_PLACEHOLDER_STAT = 1.0
 
 
@@ -117,11 +117,15 @@ def first_aura_effect(facts: RankFacts) -> int | None:
     return next((effect for effect in EFFECTS if facts.effects[effect] and facts.aura_names[effect]), None)
 
 
+def token_spell(digits: str, rank_id: int, shown: Displayed) -> int:
+    return int(digits) if digits else shown.spell_id or rank_id
+
+
 def foreign_effect(records: Records, rank_id: int, shown: Displayed) -> tuple[dict | None, str]:
     if shown.effect_index is not None or shown.spell_id in (None, rank_id) or shown.kind not in EFFECT_KINDS:
         return None, ''
     token = next((match for match in EFFECT_TOKEN.finditer(shown.text)
-                  if int(match.group('spell') or rank_id) == shown.spell_id), None)
+                  if token_spell(match.group('spell'), rank_id, shown) == shown.spell_id), None)
     if token is None:
         return None, f'{shown.kind} token of spell {shown.spell_id} without a readable effect'
     effect = int(token.group('digit')) - 1
@@ -130,18 +134,20 @@ def foreign_effect(records: Records, rank_id: int, shown: Displayed) -> tuple[di
     return {'effect_spell': shown.spell_id, 'effect': effect}, ''
 
 
-def foreign_stacks(rank_id: int, shown: Displayed) -> int | None:
-    match = FOREIGN_STACKS.fullmatch(shown.text)
-    if match is None or int(match.group('spell')) == rank_id:
+def foreign_counter(pattern: re.Pattern, rank_id: int, shown: Displayed) -> int | None:
+    match = pattern.fullmatch(shown.text)
+    if match is None:
         return None
-    return int(match.group('spell'))
+    spell_id = token_spell(match.group(1), rank_id, shown)
+    return None if spell_id == rank_id else spell_id
+
+
+def foreign_stacks(rank_id: int, shown: Displayed) -> int | None:
+    return foreign_counter(STACKS_TOKEN, rank_id, shown)
 
 
 def foreign_duration(rank_id: int, shown: Displayed) -> int | None:
-    match = OWN_DURATION.fullmatch(shown.text)
-    if match is None or match.group(1) in ('', str(rank_id)):
-        return None
-    return int(match.group(1))
+    return foreign_counter(OWN_DURATION, rank_id, shown)
 
 
 def power_cost_expectation(label: str, spell_id: int, rank_id: int, facts: RankFacts) -> Expectation:
@@ -192,16 +198,6 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
                 expect(aura_label, 'aura_amount', effect, shown.text, f'read {shown.kind}')
                 cast_wanted = True
             continue
-        foreign, unmeasurable = foreign_effect(records, rank_id, shown)
-        if foreign:
-            label = f'{rank_id} effect_value {foreign["effect_spell"]}e{foreign["effect"]} #{ordinal}'
-            measured.append(measurement(label, CASTER, 'spell_effect_value', spell=foreign['effect_spell'],
-                                        effect=foreign['effect']))
-            expect(label, 'effect_value', None, shown.text, f'read {shown.kind}', foreign)
-            continue
-        if unmeasurable:
-            expect(f'{rank_id} effect_value #{ordinal}', 'effect_value', None, shown.text, UNMEASURABLE + unmeasurable)
-            continue
         stacks_spell = foreign_stacks(rank_id, shown)
         if stacks_spell:
             label = f'{rank_id} max_stacks {stacks_spell} #{ordinal}'
@@ -213,6 +209,16 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
             label = f'{rank_id} spell_duration {duration_spell} #{ordinal}'
             measured.append(measurement(label, CASTER, 'spell_duration_ms', spell=duration_spell))
             expect(label, 'spell_duration', None, shown.text, f'read {shown.kind}', {'effect_spell': duration_spell})
+            continue
+        foreign, unmeasurable = foreign_effect(records, rank_id, shown)
+        if foreign:
+            label = f'{rank_id} effect_value {foreign["effect_spell"]}e{foreign["effect"]} #{ordinal}'
+            measured.append(measurement(label, CASTER, 'spell_effect_value', spell=foreign['effect_spell'],
+                                        effect=foreign['effect']))
+            expect(label, 'effect_value', None, shown.text, f'read {shown.kind}', foreign)
+            continue
+        if unmeasurable:
+            expect(f'{rank_id} effect_value #{ordinal}', 'effect_value', None, shown.text, UNMEASURABLE + unmeasurable)
             continue
         own_duration = OWN_DURATION.fullmatch(shown.text)
         aura_effect = first_aura_effect(facts)

@@ -330,8 +330,9 @@ def plain_sign(points: int) -> int:
     return -1 if points < 0 else 1
 
 
-def displayed_points(tooltips: TooltipSource, plain: re.Match, rank_id: int) -> int:
-    base_points, die_sides = tooltips.effect_points(int(plain.group('spell') or rank_id), int(plain.group('digit')) - 1)
+def displayed_points(tooltips: TooltipSource, plain: re.Match, spell_id: int) -> int:
+    effect = int(plain.group('digit')) - 1
+    base_points, die_sides = tooltips.effect_points(int(plain.group('spell') or spell_id), effect)
     return base_points + (die_sides if plain.group('letter') == 'M' else 1)
 
 
@@ -411,7 +412,7 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
     expected = undivided(token)
     plain = PLAIN_TOKEN.fullmatch(token.text)
     if plain:
-        points = displayed_points(tooltips, plain, expectation.rank_id)
+        points = displayed_points(tooltips, plain, token.spell_id or expectation.rank_id)
         return deterministic(base, measured, measured, expected * plain_sign(points),
                              f'{token.text} is shown unsigned; the expected value takes the sign of its Spell.dbc '
                              f'points {points}')
