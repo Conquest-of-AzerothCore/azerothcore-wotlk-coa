@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Dire Maul East: the Conservatory Door stays shut until Ironbark the Redeemed opens it after Hydrospawn and Zevrim Thornhoof die (#11379)",
-  "contract": "#11379 (playtest): with Hydrospawn (13280) killed before Zevrim Thornhoof (11490) the Conservatory Door (176907) opened by itself, because the east wing progress used 4 for 'only Hydrospawn is dead' and the door's SmartAI opens on 2, 3 and 4. The door now stays shut after Hydrospawn's death and after Zevrim's, and Ironbark the Redeemed (14241) is hidden until both are dead. Then his gossip offers to open the door; after the option he walks to the door, opens it and dies. The watcher joins world phase 1, where the door is spawned; the fight and Ironbark run in the scenario's phase, and the door's own SmartAI opens it from the instance data.",
+  "contract": "#11379 (playtest): with Hydrospawn (13280) killed before Zevrim Thornhoof (11490) the Conservatory Door (176907) opened by itself, because the east wing progress used 4 for 'only Hydrospawn is dead' and the door's SmartAI opens on 2, 3 and 4. The door now stays shut after Hydrospawn's death and after Zevrim's, and Ironbark the Redeemed (14241) is hidden until both are dead. Then his gossip offers to open the door; after the option he walks to the door, opens it and dies. The watcher joins world phase 1, where the door is spawned; the fight and Ironbark run in the scenario's phase, and the door's own SmartAI opens it from the instance data. Its SmartAI sets the door to state 2 (open, alternative) and 1 is shut.",
   "timeout_ms": 180000,
   "location": {
     "map": 0,
@@ -243,7 +243,7 @@
       "actor": "watcher",
       "metric": "nearby_gameobject_state",
       "entry": 176907,
-      "equals": 0,
+      "equals": 2,
       "within_ms": 90000
     },
     {
