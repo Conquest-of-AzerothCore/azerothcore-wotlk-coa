@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "PTR character copy: .ptr copy duplicates the player's own character once",
+  "contract": "A player copies their own character from the source realm's characters schema with .ptr copy <name> (src/server/coa/CoAPtrCharacterCopy.cpp, PlayerDump). The copy is a new character on the same account that carries the inventory; a name already taken here is renamed at login. A character keeps at most one live copy, and a player cannot copy a character of another account or an unknown name. ptr_character_copy uses this realm's own schema as the source.",
+  "timeout_ms": 60000,
+  "ptr_character_copy": true,
+  "players": [
+    { "id": "a", "race": 1, "class": 1, "level": 10 },
+    { "id": "b", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "add_item", "actor": "a", "item": 2589, "count": 7 },
+    { "action": "relog", "actor": "a" },
+    { "action": "assert", "label": "The source account starts with one character", "actor": "a",
+      "metric": "account_character_count", "equals": 1 },
+
+    { "action": "command", "label": "Copy the character", "actor": "a", "command": ".ptr copy Harnessa" },
+    { "action": "assert", "label": "DISCRIMINATING: the copy is a second character on the same account", "actor": "a",
+      "metric": "account_character_count", "equals": 2 },
+    { "action": "assert", "label": "DISCRIMINATING: the copy carries the inventory", "actor": "a",
+      "metric": "account_other_item_count", "item": 2589, "equals": 7 },
+    { "action": "assert", "label": "The taken name is renamed at login", "actor": "a",
+      "metric": "system_message_contains", "text": "choose a new one at login", "equals": 1 },
+
+    { "action": "command", "label": "A second copy of the same character is refused", "actor": "a",
+      "command": ".ptr copy Harnessa", "rejected": true },
+    { "action": "assert", "label": "The refused copy adds no character", "actor": "a",
+      "metric": "account_character_count", "equals": 2 },
+
+    { "action": "command", "label": "Another account cannot copy the character", "actor": "b",
+      "command": ".ptr copy Harnessa", "rejected": true },
+    { "action": "assert", "label": "The other account gains no character", "actor": "b",
+      "metric": "account_character_count", "equals": 1 },
+
+    { "action": "command", "label": "An unknown name is refused", "actor": "a",
+      "command": ".ptr copy Nosuchhero", "rejected": true },
+    { "action": "assert", "label": "The unknown name adds no character", "actor": "a",
+      "metric": "account_character_count", "equals": 2 }
+  ]
+}

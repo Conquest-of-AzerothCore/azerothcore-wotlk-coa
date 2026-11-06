@@ -26,6 +26,7 @@
 #include "Chat.h"
 #include "ClientDBC.h"
 #include "CoACreatureScaling.h"
+#include "CoAPtrCharacterCopy.h"
 #include "Config.h"
 #include "Creature.h"
 #include "CreatureAI.h"
@@ -1850,6 +1851,8 @@ public:
         Require(_timeout > 0 && _timeout <= MaximumTimeoutMs(_schema), "Invalid scenario timeout");
         if (_scenario.get<bool>("creature_scaling", false))
             _creatureScaling.emplace();
+        if (_scenario.get<bool>("ptr_character_copy", false))
+            _ptrCharacterCopy.emplace();
         if (auto ownership = _scenario.get_child_optional("vanity_ownership"))
         {
             std::string starterItems;
@@ -5375,6 +5378,21 @@ private:
             Require(title != nullptr, "has_title needs a title from CharTitles.dbc");
             return player->HasTitle(title) ? 1.0 : 0.0;
         }
+        if (metric == "account_character_count")
+        {
+            QueryResult result = CharacterDatabase.Query("SELECT COUNT(*) FROM characters WHERE account = {}",
+                player->GetSession()->GetAccountId());
+            return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
+        }
+        if (metric == "account_other_item_count")
+        {
+            QueryResult result = CharacterDatabase.Query(
+                "SELECT CAST(COALESCE(SUM(i.count), 0) AS UNSIGNED) FROM item_instance i "
+                "JOIN characters c ON c.guid = i.owner_guid "
+                "WHERE c.account = {} AND c.guid <> {} AND i.itemEntry = {}",
+                player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), step.get<uint32>("item"));
+            return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
+        }
         if (metric == "mail_count" || metric == "mail_item_count" || metric == "mail_has_item")
         {
             uint32 mails = 0, items = 0;
@@ -7750,6 +7768,7 @@ private:
     std::optional<Target> _encounterBoss;
     QueryCallbackProcessor _queries;
     std::optional<CreatureScaling::TestOverride> _creatureScaling;
+    std::optional<PtrCharacterCopy::TestOverride> _ptrCharacterCopy;
     std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
     std::optional<TwoSideConfig> _twoSide;
     std::optional<QuestLogSizeConfig> _questLogSize;

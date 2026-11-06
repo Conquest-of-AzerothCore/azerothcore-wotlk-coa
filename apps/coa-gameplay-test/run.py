@@ -91,6 +91,7 @@ METRICS = TIMELINE_METRICS | {
     'pool_variant_count', 'pool_retired_item_count', 'pool_row_count', 'pool_item_present',
     'cache_token_count', 'cache_token_stage', 'cache_token_present',
     'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item',
+    'account_character_count', 'account_other_item_count',
     'mail_pool_item_count', 'notifications', 'notification_contains',
     'bank_bag_slots', 'bank_shows', 'guild_bank_tabs',
     'system_messages',
@@ -474,7 +475,8 @@ def validate_raid_role(player):
 def validate(scenario):
     keys(scenario, {'schema', 'name', 'players', 'steps'},
          {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour',
-          'creature_scaling', 'vanity_ownership', 'two_side', 'quest_log_size'}, 'scenario')
+          'creature_scaling', 'ptr_character_copy', 'vanity_ownership', 'two_side', 'quest_log_size'},
+         'scenario')
     schema = scenario['schema']
     require(type(schema) is int and schema in MAX_PLAYERS, 'Unsupported scenario schema')
     require(isinstance(scenario['name'], str) and scenario['name'].strip(), 'Scenario needs a name')
@@ -482,6 +484,7 @@ def validate(scenario):
     if 'hour' in scenario:
         number(scenario['hour'], 'hour', 0, HOURS_PER_DAY - 1, True)
     require(type(scenario.get('creature_scaling', False)) is bool, 'creature_scaling must be boolean')
+    require(type(scenario.get('ptr_character_copy', False)) is bool, 'ptr_character_copy must be boolean')
     if 'vanity_ownership' in scenario:
         ownership = scenario['vanity_ownership']
         keys(ownership, {'unlock_all'}, {'unlock_all', 'starter_items'}, 'vanity_ownership')
@@ -1143,7 +1146,7 @@ def validate(scenario):
                 require('cache' in step, f'{where}: metric needs the cache item it checks against')
             if metric == 'cache_token_present':
                 require('item' in step, f'{where}: metric needs the token to look for')
-            if metric in ('mail_has_item',):
+            if metric in ('mail_has_item', 'account_other_item_count'):
                 require('item' in step, f'{where}: metric needs the item to look for')
             if metric == 'mail_pool_item_count':
                 require('cache' in step, f'{where}: metric needs the cache item it checks against')

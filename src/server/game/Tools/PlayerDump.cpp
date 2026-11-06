@@ -25,6 +25,8 @@
 #include "Player.h"
 #include "StringConvert.h"
 #include "World.h"
+#include <algorithm>
+#include <cctype>
 #include <fstream>
 #include <sstream>
 
@@ -81,8 +83,10 @@ BaseTable const BaseTables[] =
 
 struct DumpTable
 {
-    char const* Name;
+    std::string Name;
     DumpTableType Type;
+    std::vector<std::string> ItemGuidColumns = {};
+    std::string CharacterGuidColumn = {};
 };
 
 DumpTable const DumpTables[] =
@@ -120,7 +124,8 @@ DumpTable const DumpTables[] =
     { "character_gifts",                DTT_ITEM_GIFT    }  // must be after item_instance
 };
 
-uint32 const DUMP_TABLE_COUNT = std::extent<decltype(DumpTables)>::value;
+std::vector<DumpTable> RegisteredDumpTables;
+std::vector<DumpTable> ActiveDumpTables;
 
 // helper class to dump sql queries to a printable string
 class StringTransaction
@@ -148,6 +153,7 @@ private:
 struct TableField
 {
     std::string FieldName;
+    std::string MissingSourceValue;
 
     GuidType FieldGuidType = GUID_TYPE_ACCOUNT;
     bool IsDependentField = false;
@@ -250,11 +256,63 @@ inline void AssertBaseTable(BaseTable const& baseTable)
     ASSERT(columnItr != itr->TableFields.end());
 }
 
+inline std::string GetMissingSourceValue(Field const* column)
+{
+    std::string const type = column[1].Get<std::string>();
+    std::string const extra = column[5].Get<std::string>();
+    if (column[4].IsNull())
+    {
+        if (column[2].Get<std::string>() == "YES" || extra.find("auto_increment") != std::string::npos)
+            return "NULL";
+
+        if (type.starts_with("date") || type.starts_with("timestamp"))
+            return "CURRENT_TIMESTAMP";
+
+        if (type.starts_with("time"))
+            return "'00:00:00'";
+
+        for (char const* textType : { "char", "text", "blob", "binary", "enum", "set" })
+            if (type.find(textType) != std::string::npos)
+                return "''";
+
+        return "0";
+    }
+
+    std::string value = column[4].Get<std::string>();
+    if (extra.find("DEFAULT_GENERATED") != std::string::npos)
+        return "(" + value + ")";
+
+    CharacterDatabase.EscapeString(value);
+    return "'" + value + "'";
+}
+
+void PlayerDump::RegisterCharacterTable(std::string const& tableName, std::vector<std::string> const& itemGuidColumns)
+{
+    RegisteredDumpTables.push_back({ tableName, DTT_CHAR_TABLE, itemGuidColumns });
+}
+
+void PlayerDump::RegisterItemTable(std::string const& tableName, std::string const& itemGuidColumn,
+    std::string const& characterGuidColumn)
+{
+    RegisteredDumpTables.push_back({ tableName, DTT_ITEM_TABLE, { itemGuidColumn }, characterGuidColumn });
+}
+
 void PlayerDump::InitializeTables()
 {
     uint32 oldMSTime = getMSTime();
 
-    for (DumpTable const& dumpTable : DumpTables)
+    ActiveDumpTables.assign(std::begin(DumpTables), std::end(DumpTables));
+    for (DumpTable const& registeredTable : RegisteredDumpTables)
+    {
+        if (CharacterDatabase.Query("SELECT 1 FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() "
+            "AND TABLE_NAME = '{}'", registeredTable.Name))
+            ActiveDumpTables.push_back(registeredTable);
+        else
+            LOG_WARN("server.loading", "PlayerDump: registered table `{}` does not exist and will not be dumped",
+                registeredTable.Name);
+    }
+
+    for (DumpTable const& dumpTable : ActiveDumpTables)
     {
         TableStruct t;
         t.TableName = dumpTable.Name;
@@ -271,6 +329,7 @@ void PlayerDump::InitializeTables()
 
             TableField f;
             f.FieldName = columnName;
+            f.MissingSourceValue = GetMissingSourceValue(result->Fetch());
 
             bool toUpperResult = Utf8ToUpperOnlyLatin(columnName);
             ASSERT(toUpperResult);
@@ -294,6 +353,8 @@ void PlayerDump::InitializeTables()
             MarkWhereField(t, "guid");
 
             MarkDependentColumn(t, "guid", GUID_TYPE_CHAR);
+            for (std::string const& itemGuidColumn : dumpTable.ItemGuidColumns)
+                MarkDependentColumn(t, itemGuidColumn, GUID_TYPE_ITEM);
             break;
         case DTT_EQSET_TABLE:
             MarkWhereField(t, "guid");
@@ -351,6 +412,13 @@ void PlayerDump::InitializeTables()
 
             MarkDependentColumn(t, "guid", GUID_TYPE_PET);
             break;
+        case DTT_ITEM_TABLE:
+            MarkWhereField(t, dumpTable.ItemGuidColumns.front());
+
+            MarkDependentColumn(t, dumpTable.ItemGuidColumns.front(), GUID_TYPE_ITEM);
+            if (!dumpTable.CharacterGuidColumn.empty())
+                MarkDependentColumn(t, dumpTable.CharacterGuidColumn, GUID_TYPE_CHAR);
+            break;
         default:
             LOG_FATAL("server.loading", "Wrong dump table type {}, probably added a new table type without updating code", uint32(dumpTable.Type));
             ABORT();
@@ -373,7 +441,7 @@ void PlayerDump::InitializeTables()
     for (BaseTable const& baseTable : BaseTables)
         AssertBaseTable(baseTable);
 
-    ASSERT(CharacterTables.size() == DUMP_TABLE_COUNT);
+    ASSERT(CharacterTables.size() == ActiveDumpTables.size());
 
     LOG_INFO("server.loading", ">> Initialized Tables For PlayerDump in {} ms.", GetMSTimeDiffToNow(oldMSTime));
     LOG_INFO("server.loading", " ");
@@ -539,11 +607,12 @@ inline void AppendTableDump(StringTransaction& trans, TableStruct const& tableSt
 
         for (uint32 i = 0; i < fieldSize;)
         {
-            std::string cString = fields[i].Get<std::string>();
+            bool const isNull = fields[i].IsNull();
+            std::string cString = isNull ? std::string() : fields[i].Get<std::string>();
             ++i;
 
             // null pointer -> we have null
-            if (cString.empty())
+            if (isNull)
                 ss << "'NULL'";
             else
             {
@@ -588,6 +657,70 @@ inline std::string GenerateWhereStr(std::string const& field, SetType<T, Rest...
     return whereStr.str();
 }
 
+inline std::string ToLowerTableKey(std::string name)
+{
+    std::transform(name.begin(), name.end(), name.begin(), [](unsigned char c) { return char(std::tolower(c)); });
+    return name;
+}
+
+inline bool IsPlainSchemaName(std::string const& schema)
+{
+    return !schema.empty() && std::all_of(schema.begin(), schema.end(), [](unsigned char c)
+    {
+        return std::isalnum(c) || c == '_' || c == '$';
+    });
+}
+
+bool PlayerDumpWriter::LoadSourceColumns()
+{
+    _sourceColumns.clear();
+    if (!IsPlainSchemaName(_sourceSchema))
+        return false;
+
+    QueryResult result = CharacterDatabase.Query("SELECT TABLE_NAME, COLUMN_NAME FROM information_schema.COLUMNS "
+        "WHERE TABLE_SCHEMA = '{}'", _sourceSchema);
+    if (!result)
+        return false;
+
+    do
+    {
+        Field* fields = result->Fetch();
+        _sourceColumns[ToLowerTableKey(fields[0].Get<std::string>())]
+            .insert(ToLowerTableKey(fields[1].Get<std::string>()));
+    } while (result->NextRow());
+
+    return true;
+}
+
+std::string PlayerDumpWriter::SourceTable(std::string const& tableName) const
+{
+    if (_sourceSchema.empty())
+        return tableName;
+
+    return Acore::StringFormat("`{}`.`{}`", _sourceSchema, tableName);
+}
+
+std::string PlayerDumpWriter::SelectList(TableStruct const& tableStruct) const
+{
+    if (_sourceSchema.empty())
+        return "*";
+
+    std::unordered_set<std::string> const& sourceColumns = _sourceColumns.at(ToLowerTableKey(tableStruct.TableName));
+    std::string selectList;
+    for (TableField const& field : tableStruct.TableFields)
+    {
+        if (!selectList.empty())
+            selectList += ", ";
+
+        if (sourceColumns.contains(ToLowerTableKey(field.FieldName)))
+            selectList += Acore::StringFormat("`{}`", field.FieldName);
+        else
+            selectList += field.MissingSourceValue;
+    }
+
+    return selectList;
+}
+
 // Writing - High-level functions
 void PlayerDumpWriter::PopulateGuids(ObjectGuid::LowType guid)
 {
@@ -605,7 +738,8 @@ void PlayerDumpWriter::PopulateGuids(ObjectGuid::LowType guid)
         }
 
         std::string whereStr = GenerateWhereStr(baseTable.PlayerGuid, guid);
-        QueryResult result = CharacterDatabase.Query("SELECT {} FROM {} WHERE {}", baseTable.PrimaryKey, baseTable.TableName, whereStr);
+        QueryResult result = CharacterDatabase.Query("SELECT {} FROM {} WHERE {}", baseTable.PrimaryKey,
+            SourceTable(baseTable.TableName), whereStr);
         if (!result)
             continue;
 
@@ -666,13 +800,25 @@ bool PlayerDumpWriter::AppendTable(StringTransaction& trans, ObjectGuid::LowType
 
         whereStr = GenerateWhereStr(tableStruct.WhereFieldName, _itemSets);
         break;
+    case DTT_ITEM_TABLE:
+        if (_items.empty())
+            return true;
+
+        whereStr = GenerateWhereStr(tableStruct.WhereFieldName, _items);
+        if (!dumpTable.CharacterGuidColumn.empty())
+            whereStr += " AND " + GenerateWhereStr(dumpTable.CharacterGuidColumn, guid);
+        break;
     default:
         // not set case, get single guid string
         whereStr = GenerateWhereStr(tableStruct.WhereFieldName, guid);
         break;
     }
 
-    QueryResult result = CharacterDatabase.Query("SELECT * FROM {} WHERE {}", dumpTable.Name, whereStr);
+    if (!_sourceSchema.empty() && !_sourceColumns.contains(ToLowerTableKey(dumpTable.Name)))
+        return dumpTable.Type != DTT_CHARACTER;
+
+    QueryResult result = CharacterDatabase.Query("SELECT {} FROM {} WHERE {}", SelectList(tableStruct),
+        SourceTable(dumpTable.Name), whereStr);
     switch (dumpTable.Type)
     {
     case DTT_CHARACTER:
@@ -701,10 +847,13 @@ bool PlayerDumpWriter::GetDump(ObjectGuid::LowType guid, std::string& dump)
 
     StringTransaction trans;
 
+    if (!_sourceSchema.empty() && !LoadSourceColumns())
+        return false;
+
     // collect guids
     PopulateGuids(guid);
-    for (uint32 i = 0; i < DUMP_TABLE_COUNT; ++i)
-        if (!AppendTable(trans, guid, CharacterTables[i], DumpTables[i]))
+    for (std::size_t i = 0; i < ActiveDumpTables.size(); ++i)
+        if (!AppendTable(trans, guid, CharacterTables[i], ActiveDumpTables[i]))
             return false;
 
     dump += trans.GetBuffer();
@@ -764,7 +913,7 @@ inline void FixNULLfields(std::string& line)
 DumpReturn PlayerDumpReader::LoadDump(std::istream& input, uint32 account, std::string name, ObjectGuid::LowType guid)
 {
     uint32 charcount = AccountMgr::GetCharactersCount(account);
-    if (charcount >= 10)
+    if (charcount >= sWorld->getIntConfig(CONFIG_CHARACTERS_PER_REALM))
         return DUMP_TOO_MANY_CHARS;
 
     std::string newguid, chraccount;
@@ -849,17 +998,17 @@ DumpReturn PlayerDumpReader::LoadDump(std::istream& input, uint32 account, std::
         }
 
         DumpTableType type = DTT_CHARACTER;
-        uint32 i;
-        for (i = 0; i < DUMP_TABLE_COUNT; ++i)
+        std::size_t i;
+        for (i = 0; i < ActiveDumpTables.size(); ++i)
         {
-            if (tn == DumpTables[i].Name)
+            if (tn == ActiveDumpTables[i].Name)
             {
-                type = DumpTables[i].Type;
+                type = ActiveDumpTables[i].Type;
                 break;
             }
         }
 
-        if (i == DUMP_TABLE_COUNT)
+        if (i == ActiveDumpTables.size())
         {
             LOG_ERROR("misc", "LoadPlayerDump: (line {}) Unknown table: `{}`!", lineNumber, tn);
             return DUMP_FILE_BROKEN;
@@ -936,6 +1085,8 @@ DumpReturn PlayerDumpReader::LoadDump(std::istream& input, uint32 account, std::
             }
             else if (!ChangeColumn(ts, line, "name", name)) // characters.name
                 return DUMP_FILE_BROKEN;
+            if (!ChangeColumn(ts, line, "online", "0"))
+                return DUMP_FILE_BROKEN;
             break;
         }
         default:
@@ -950,7 +1101,20 @@ DumpReturn PlayerDumpReader::LoadDump(std::istream& input, uint32 account, std::
     if (input.fail() && !input.eof())
         return DUMP_FILE_BROKEN;
 
-    CharacterDatabase.CommitTransaction(trans);
+    if (_directCommit)
+    {
+        CharacterDatabase.DirectCommitTransaction(trans);
+
+        CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHECK_GUID);
+        stmt->SetData(0, guid);
+        if (!CharacterDatabase.Query(stmt))
+            return DUMP_FILE_BROKEN;
+    }
+    else
+        CharacterDatabase.CommitTransaction(trans);
+
+    _loadedGuid = guid;
+    _loadedName = name;
 
     // in case of name conflict player has to rename at login anyway
     sCharacterCache->AddCharacterCacheEntry(ObjectGuid(HighGuid::Player, guid), account, name, gender, race, playerClass, level);
