@@ -472,8 +472,28 @@ bool Open(Player* player, Item* cache)
     return true;
 }
 
+void RemoveUnclaimed()
+{
+    for (auto it = events.begin(); it != events.end();)
+    {
+        Event& event = it->second;
+        if (!VisibleMarker(event))
+        {
+            ++it;
+            continue;
+        }
+        if (Map* map = sMapMgr->FindBaseNonInstanceMap(event.map))
+            RemoveObjects(map, event);
+        Save(event, nullptr, true);
+        BroadcastMarker(Acore::StringFormat("D;{}", event.id));
+        BroadcastPin(event, false);
+        it = events.erase(it);
+    }
+}
+
 void Begin(uint32 seconds, Position const& point)
 {
+    RemoveUnclaimed();
     Event event;
     event.id = nextId++;
     event.position = point;
@@ -908,21 +928,7 @@ public:
     static bool Cancel(ChatHandler* handler)
     {
         std::lock_guard lock(mutex);
-        for (auto it = events.begin(); it != events.end();)
-        {
-            Event& event = it->second;
-            if (!VisibleMarker(event))
-            {
-                ++it;
-                continue;
-            }
-            if (Map* map = sMapMgr->FindBaseNonInstanceMap(event.map))
-                RemoveObjects(map, event);
-            Save(event, nullptr, true);
-            BroadcastMarker(Acore::StringFormat("D;{}", event.id));
-            BroadcastPin(event, false);
-            it = events.erase(it);
-        }
+        RemoveUnclaimed();
         handler->SendSysMessage("Unclaimed Crow's Cache test events cancelled. Carried and dropped caches are preserved.");
         return true;
     }
