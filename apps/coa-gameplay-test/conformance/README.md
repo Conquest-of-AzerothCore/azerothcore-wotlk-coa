@@ -361,9 +361,17 @@ table without a plan (31, 87, 283, 286: `aura <n> has no passive measurement`).
 1. Named: every `Spell.dbc` record of the passive's `SpellFamilyName` whose `SpellName[enUS]` appears in the tooltip
    (color codes removed, whole words, longest names first, overlapping matches skipped: "Oath: Condemn" before
    "Condemn"). A match followed by a space and a capitalised word is part of a longer proper noun and does not
-   count: the spell "Oath" is not named by "Oath Breakers" (Blessed Strikes 704180, Chakra of Light 803159). A named spell resolves to its rank at the class level through the chains of
-   `AscensionSpellProgressionData.h` (Righteous Lunge → 570233, Argent Blade → 807268), else to every record of
-   that name. `named_targets(records, family_name, text, level)` returns them.
+   count: the spell "Oath" is not named by "Oath Breakers" (Blessed Strikes 704180, Chakra of Light 803159). Names
+   are read in the sentence that holds the effect's token when the token sits in one sentence that names a spell,
+   else in the whole tooltip (ADR 0017 D3: Legacy of the Silver Hand's `$s2` sentence names Scourgebane only). A
+   named spell whose records meet this effect's mask has those records as targets, resolved to the ranks the class
+   level reaches, records outside a chain all kept (ADR 0017 D1: Pure Focus 705253 on Scourgebane 520007, not
+   92111, 801832, 801861 or 804916; Argent Knight 300512 on Righteous Tempest 570200 to 570205 and 805410, not the
+   aura 807274). A named spell with no record in this mask but one in a sibling spell-modifier effect's mask is that
+   effect's target only (D2: Grace of Aman'thul's effect 1 takes Sacred Swing, not Righteous Lunge). Otherwise a
+   named spell resolves to its rank at the class level through the chains of `AscensionSpellProgressionData.h`
+   (Righteous Lunge → 570233, Argent Blade → 807268), else to every record of that name, outside the mask.
+   `named_targets(records, family_name, text, level, in_mask, sibling_mask)` returns them.
 2. Category: when nothing is named and the first capitalised word (four letters or more) of every name the class
    mask matches is in the tooltip ("Libram spells": Libram of Tenacity, Libram of Zeal, ...), the mask's spells are
    the targets.
@@ -376,9 +384,9 @@ table without a plan (31, 87, 283, 286: `aura <n> has no passive measurement`).
    Benediction, Blade of Faith, ... (no name starts with "Oath"). These need a `passive_targets` entry.
 
 `PassiveTarget(spell_id, name, named, in_mask)`: `in_mask` is whether the record's `SpellFamilyFlags` meet the
-effect's `EffectSpellClassMask`. Mask spells that are not named are listed too (`named` false, one rank per name),
-so a disagreement stays visible: Patience 712678 names Interdict 560116 (outside the mask) while its mask matches
-only Sacred Restraint 102208.
+effect's `EffectSpellClassMask`. Mask spells whose name is not matched are listed too (`named` false, one rank per
+name, selected by id), so a disagreement stays visible: Patience 712678 names Interdict 560116 (outside the mask)
+while its mask matches only Sacred Restraint 102208.
 
 ### Phrase check
 
@@ -930,24 +938,17 @@ does not describe the server's hits) and two `passive_delta` deltas of a rolled 
 and after reads are two separate rolls; the other 11 are rolled values and ambiguous proc rates that moved inside
 their intervals or had none.
 
-Known limits seen in that run, each giving alerts that are not server findings:
-
-- A named target outside the class mask (D5): 71 of the 103 alerts. The tooltip name also belongs to other spells
-  (a passive, a proc aura or a helper spell of the same name: Scourgebane 92111, 520007, 801861, 804916 next to
-  801832); one tooltip names the spells of several effects, each effect touching only its own (Grace of Aman'thul,
-  Martial Training, Focused); the named spell is a condition or a consumer of the modified spell (Templar's Might
-  modifies Condemn, which raises the damage of the spells it names); or the mask covers a helper spell of the same
-  name that the scenario does not measure (Righteous Tempest 570200 to 570205, Benediction 801409, Righteous
-  Upheaval 807764).
-- Two effects of one passive moving the same metric are judged one by one against the combined delta (Call of the
-  Monastery: two 5% attack power effects measure 313 to 345.08, 1.05 x 1.05; Paragon: 10 Stamina plus 10% of 132
-  Agility measure 79 to 102).
-- `melee_crit_chance` and `parry_chance` read 0 before the learn, a stale field: Finesse 705271 reads 0 then 9.146
-  for its 2 points, 707851 0 then 11.146 for its 4, Judicator 0 then 8 for its 3 parry points. The learn refreshes
-  `PLAYER_CRIT_PERCENTAGE` and `PLAYER_PARRY_PERCENTAGE`; the base steps before it (`set_skill` among them) leave them
-  as they were (inferred from these readings, not traced in the server).
-- `spell_modifier` of a duration or cast time starts from base 1000 and the server clamps the result at 0
-  (`Player::ApplySpellMod`), so a reduction larger than 1000 ms reads -1000 (Sacred Candle, Sacred Restraint).
+Fix round of the same day (ADR 0017, commit after `7780decbc7`): the 77 alerts of that run that were not server
+findings were tool defects and are fixed: modifier targets (ADR 0017), two effects on one metric (judged together),
+the `melee_crit_chance` field, which the harness read stale (0 before the learn on a reference character whose
+field was last computed before its weapon was equipped; the metric now calls `Player::UpdateCritPercentage` before
+the read), `parry_chance` on a character that cannot parry, and the duration clamp of `spell_modifier`. The
+regenerated manifest (491 scenarios, stamps 20261106-162551 and 20261106-163218, 82.6 s each) gives 1756 verdicts:
+ok 1282, alert 25, unreadable 72, unmodelled 240, ambiguous_tooltip 30, unmeasured 15, measured 92. Two runs differ
+on 13 listed verdicts; the significant ones are the Righteous Lunge hit mean (an alert on both runs, its model
+sigma does not describe the server's hits) and, before `diff` used the deterministic tolerance for intervals of no
+width, the Divine Force hit (400 then 402, `ok` on both, sigma 0). Rolled `effect_value` verdicts whose server value
+adds a per-level part the expected value omits switch between `ok` and `alert` with the roll.
 
 ### Impact report
 
@@ -1007,8 +1008,8 @@ on one side only and the class spells present on one side only.
 | `unmodelled` | an `unmodelled` check, a `unmodelled: ` or `unmeasurable: ` rule, a hit model left unmodelled |
 | `ambiguous_tooltip` | a sign opposite to the measured value, a proc of unstated trigger, disagreeing talent or passive readings, a named spell outside the class mask while a mask spell moves |
 | `insufficient_trials` | a hit mean below `minimum_hits`, a proc rate below `trials_needed` (R9), a missing pass |
-| `unmeasured` | a check after a failed single cast; a hit mean, proc rate or talent delta without usable hit (R11); a passive whose aura is absent after `learn`; damage against an aura state the scenario does not establish |
-| `measured` | a stack DPS or source damage that no tooltip value judges, a passive plan with `judged` false, a mask spell the tooltip does not name; never an alert |
+| `unmeasured` | a check after a failed single cast; a hit mean, proc rate or talent delta without usable hit (R11); a passive whose aura is absent after `learn`; damage against an aura state the scenario does not establish; a passive delta that cannot move (a multiplying relation on a before value of 0, a `stat` change below 1, `parry_chance` on a character that cannot parry) |
+| `measured` | a stack DPS or source damage that no tooltip value judges, a passive plan with `judged` false, a mask spell the tooltip does not name, a namesake of a named spell that moves, two effects on one quantity whose relations do not combine; never an alert |
 
 The tooltip of each rank is read again with the `CasterStats` measured by the run's base steps. If its tokens differ
 from the tokens read at generation, every token check of the rank is an alert; so is a token whose text differs
@@ -1094,11 +1095,22 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   about 1.9 (a 1-point floor would accept 1.4% to 4.6%), else `max(1, 0.5% of |expected|)`. Liberty 705266 on Libram
   of Tenacity 801461: `$/1000;s1` reads 30000 ms, points −30000, expected −30000 ± 150; 1000 → −29000 is `ok`, 1000 →
   −28800 an alert. Solemn Soldier 572555: 2500 → 2272.73 ms is `ok`, 2500 → 2250 an alert.
-  Spell modifier targets (D5): a mask spell the tooltip does not name, beside named targets of the same effect and
-  metric, is `measured`; with no named target (category targets) the mask spells are judged. A named spell outside
-  the mask is `ok` when its own delta is the expected one; otherwise `ambiguous_tooltip` when a mask spell of the
-  same effect and metric shows the expected delta ("the tooltip names X, the modifier applies to Y"), else an alert
-  (Patience 712678 names Interdict 560116, its mask matches Sacred Restraint 102208).
+  Spell modifier targets (D5, ADR 0017): a mask spell the tooltip does not name, beside named targets of the same
+  effect and metric, is `measured`; with no named target (category targets) the mask spells are judged. A named spell
+  outside the mask is `ok` when its own delta is the expected one; otherwise `measured` when a named spell of the
+  same name shows the expected non-zero delta (a namesake the modifier does not reach: Legacy of the Silver Hand on
+  Scourgebane 92111 beside 801832), `ambiguous_tooltip` when another mask spell of the same effect and metric, named
+  or not, shows it ("the tooltip names X, the modifier applies to Y": Templar's Might names the spells its Condemn
+  debuff boosts), else an alert (Patience 712678 names Interdict 560116, its mask matches Sacred Restraint 102208).
+  A measured delta of 0 against a non-zero expected delta is never `ok` (the 1-point floor does not apply to it).
+  Not judged, `unmeasured` with the reason: a relation that multiplies a before value of 0 (`spell_mod_pct`,
+  `scale`, `ratio`, `composition`, `crit_damage`); `parry_chance` 0 before the learn (the reference character cannot
+  parry, and a parry aura enables parry when applied, `AuraEffect::HandleAuraModParryPercent`); a `stat` delta below
+  1 (the server truncates stats to integers, `Unit::UpdateStats` `SetStat(stat, int32(value))`). Two judged effects
+  of one passive on the same metric and fields (no target) are judged together: the product of their factors when
+  both scale (Call of the Monastery: 313 x 1.05 x 1.05), the sum of their deltas when they add or share (Paragon:
+  10 + 10% of 132 Agility), else `measured`. A `spell_modifier` of a flat duration or cast-time reduction starts
+  from 1000 plus the reduction, since the server clamps those at 0 (`Player::ApplySpellMod`).
   An `ambiguous_tooltip` passive verdict keeps `detail['question']` = `question_detail(kind, question, readings,
   measured)`: `kind` `readings` (disagreeing readings) or `text` (named spell outside the mask), the question in
   observable terms ("With Chivalric learned, does a critical hit of Reckoning change by +15% or by +5%?"), per

@@ -66,6 +66,15 @@ class DiffTests(unittest.TestCase):
         self.assertEqual((change.before, change.after), (543.0, 545.0))
         self.assertAlmostEqual(change.delta_pct, 2 / 543 * 100)
 
+    def test_hit_means_without_spread_use_the_deterministic_tolerance(self):
+        change = only(diff([hit('a', 807805, 400.0, 0.0, expected=400.0)],
+                           [hit('a', 807805, 402.0, 0.0, expected=402.0)], set()))
+        self.assertFalse(change.significant)
+        self.assertIn('no width', change.rule)
+        moved = only(diff([hit('a', 807805, 400.0, 0.0, expected=400.0)],
+                          [hit('a', 807805, 410.0, 0.0, expected=410.0)], set()))
+        self.assertTrue(moved.significant)
+
     def test_intervals_that_overlap_can_still_differ(self):
         before, after = passes('s', STACK_DPS, 0, 100.0, 3.0), passes('s', STACK_DPS, 0, 105.0, 3.0)
         self.assertTrue(only(diff([before], [after], set())).significant)

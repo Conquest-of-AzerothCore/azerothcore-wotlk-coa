@@ -57,6 +57,15 @@ MARTIAL_TRAINING = 806525
 SCARLET_HAMMER = (500752, 807035)
 CHASTISE = 503141
 UPHEAVE = 520442
+PURE_FOCUS = 705253
+SCOURGEBANE_IN_MASK = 520007
+ARGENT_KNIGHT = 300512
+RIGHTEOUS_TEMPEST = 807274
+RIGHTEOUS_TEMPEST_HELPERS = (570200, 570201, 570202, 570203, 570204, 570205, 805410)
+GRACE_OF_AMANTHUL = 301059
+SACRED_SWING_AT_60 = 572769
+SACRED_CANDLE = 300501
+CONDEMN_AT_60 = 567539
 STAT_COUNT = 5
 LIBERTY_OP = 11
 SPELL_MODIFIER_BASE = 1000
@@ -206,6 +215,35 @@ class TemplarPassiveTest(unittest.TestCase):
         self.assertIn(SACRED_RESTRAINT, target_ids(effect, False, True))
         self.assertEqual(effect.reason, '')
 
+    def test_in_mask_namesakes_are_the_targets_of_a_named_spell(self):
+        effect = effect_of(self.effects(PURE_FOCUS), 0)
+        self.assertEqual({target.spell_id for target in effect.targets if target.named}, {SCOURGEBANE_IN_MASK})
+        self.assertEqual(target_ids(effect, True, True), {SCOURGEBANE_IN_MASK})
+
+    def test_same_name_mask_helpers_are_measured(self):
+        effect = effect_of(self.effects(ARGENT_KNIGHT), 0)
+        self.assertEqual(target_ids(effect, True, True), set(RIGHTEOUS_TEMPEST_HELPERS))
+        self.assertNotIn(RIGHTEOUS_TEMPEST, {target.spell_id for target in effect.targets})
+
+    def test_condemn_belongs_to_the_effect_whose_mask_holds_it(self):
+        effects = passive_effects(self.class_file, templar_passive(CONDEMNATION))
+        self.assertFalse(any(target.named for target in effect_of(effects, 0).targets))
+        self.assertTrue(effect_of(effects, 0).reason.startswith(NO_NAMED_TARGET))
+        self.assertEqual(target_ids(effect_of(effects, 1), True, True), {CONDEMN_AT_60})
+
+    def test_a_spell_in_a_sibling_mask_belongs_to_the_sibling_effect(self):
+        effects = self.effects(GRACE_OF_AMANTHUL)
+        self.assertIn(RIGHTEOUS_LUNGE_AT_60, target_ids(effect_of(effects, 0), True, True))
+        sacred_swing = effect_of(effects, 1)
+        self.assertNotIn(RIGHTEOUS_LUNGE_AT_60, {target.spell_id for target in sacred_swing.targets})
+        self.assertIn(SACRED_SWING_AT_60, target_ids(sacred_swing, True, True))
+
+    def test_duration_reduction_starts_above_the_zero_clamp(self):
+        effect = effect_of(self.effects(SACRED_CANDLE), 1)
+        self.assertEqual(plan_named(effect, 'spell_modifier').fields, {'op': 1, 'base': SPELL_MODIFIER_BASE + 30000})
+        cooldown = effect_of(self.effects(SACRED_CANDLE), 0)
+        self.assertEqual(plan_named(cooldown, 'spell_modifier').fields['base'], SPELL_MODIFIER_BASE)
+
     def test_category_targets(self):
         effect = effect_of(self.effects(LIBERTY), 0)
         self.assertEqual(effect.token.text, '$/1000;s1')
@@ -351,7 +389,10 @@ class PassiveScenarioTest(unittest.TestCase):
         run.validate(scenario)
 
     def test_no_step_for_unmodelled_effects(self):
-        scenario, expectations = self.scenario(CONDEMNATION)
+        class_file = dict(self.class_file, passive_targets=[
+            {'spell': CONDEMNATION, 'effect': 0, 'targets': [OATH_CONDEMN],
+             'tooltip_words': 'critical strike chance gained through Condemn'}])
+        scenario, expectations = passive_scenario(class_file, templar_passive(CONDEMNATION))
         self.assertFalse([step for step in scenario['steps']
                           if step.get('metric') == 'spell_modifier' and step['op'] == CONDEMNATION_OP])
         effect_1 = [expectation for expectation in expectations if expectation.effect_index == 1]

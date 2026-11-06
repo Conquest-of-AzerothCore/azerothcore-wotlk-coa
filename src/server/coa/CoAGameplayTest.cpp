@@ -4257,7 +4257,10 @@ private:
             return player->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + school);
         }
         if (metric == "melee_crit_chance")
+        {
+            player->UpdateCritPercentage(BASE_ATTACK);
             return player->GetFloatValue(PLAYER_CRIT_PERCENTAGE);
+        }
         if (metric == "ranged_taken_crit_chance")
             return player->GetUnitCriticalChance(RANGED_ATTACK, GetUnit(step.get<std::string>("target")));
         if (metric == "dodge_chance")

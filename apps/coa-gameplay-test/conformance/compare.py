@@ -61,6 +61,13 @@ FRACTIONAL_FLOOR = 0.01
 CRITICAL_DAMAGE_BASE = 1000
 DURATION_KIND = 'duration_ms'
 PASSIVE_METRIC = 'metric'
+PARRY_CHANCE = 'parry_chance'
+NO_PARRY_BEFORE = ('parry_chance 0 before the learn: the reference character cannot parry (Player::CanParry false) '
+                   'and a parry aura enables parry when applied (AuraEffect::HandleAuraModParryPercent), so the delta '
+                   'holds the base parry chance as well as the bonus')
+MULTIPLYING_RELATIONS = frozenset({'spell_mod_pct', 'scale', 'ratio', 'composition', 'crit_damage'})
+ADDITIVE_RELATIONS = frozenset({'add', 'share'})
+TRUNCATED_METRICS = frozenset({'stat'})
 CLASS_ENTRIES = {PROC_CHECK: ('procs', 'aura'), TRIGGER_CHECK: ('triggers', 'aura'),
                  TALENT_DELTA: ('talent_modifiers', 'talent')}
 PER_LEVEL_TOKEN = re.compile(r'\$\d*ppl\d')
@@ -1101,6 +1108,8 @@ def delta_margin(metric: str, expected: float) -> float:
 
 
 def delta_status(metric: str, measured: float, expected: float) -> str:
+    if abs(measured) <= FLOAT_EPSILON < abs(expected):
+        return 'alert'
     return 'ok' if abs(measured - expected) <= delta_margin(metric, expected) + FLOAT_EPSILON else 'alert'
 
 
@@ -1363,15 +1372,29 @@ def judge_readings(base: Verdict, manifest: dict, entry: dict, run: Run, model: 
 
 def mask_matches(manifest: dict, run: Run, entry: dict, model: dict, value: float,
                  tooltips: TooltipSource) -> list[tuple[dict, float, float, DeltaReading]]:
+    return expected_movers(manifest, run, entry, model, value, tooltips, lambda other: other['in_mask'])
+
+
+def namesake_matches(manifest: dict, run: Run, entry: dict, model: dict, value: float,
+                     tooltips: TooltipSource) -> list[tuple[dict, float, float, DeltaReading]]:
+    name = tooltips.spell_field(model['target'], 'SpellName[enUS]')
+    return expected_movers(manifest, run, entry, model, value, tooltips,
+                           lambda other: other['named'] and tooltips.spell_field(other['target'],
+                                                                                 'SpellName[enUS]') == name)
+
+
+def expected_movers(manifest: dict, run: Run, entry: dict, model: dict, value: float, tooltips: TooltipSource,
+                    accepted: Callable[[dict], bool]) -> list[tuple[dict, float, float, DeltaReading]]:
     matches = []
     for other in target_group(entry, model):
-        if other['named'] or not other['in_mask']:
+        if other['target'] == model['target'] or not accepted(other):
             continue
         before, after = run.values.get(other['before_label']), run.values.get(other['after_label'])
         if before is None or after is None:
             continue
         readings = delta_readings(manifest, run, other, before, value, tooltips)
-        if readings and delta_status(other['metric'], after - before, readings[0].delta) == 'ok':
+        if (readings and abs(readings[0].delta) > FLOAT_EPSILON
+                and delta_status(other['metric'], after - before, readings[0].delta) == 'ok'):
             matches.append((other, before, after - before, readings[0]))
     return matches
 
@@ -1387,6 +1410,12 @@ def judge_modifier_target(base: Verdict, manifest: dict, entry: dict, run: Run, 
     reading, status = judged[0]
     if status == 'ok' or model['in_mask']:
         return interval_verdict(base, model['metric'], delta, judged, context)
+    namesakes = namesake_matches(manifest, run, entry, model, value, tooltips)
+    if namesakes:
+        others = ', '.join(target_name(tooltips, other['target']) for other, *_ in namesakes)
+        return replace(base, status=MEASURED, measured=delta, expected=reading.delta,
+                       explanation=f'{context}; {name} shares its name with {others}, which shows the expected '
+                                   f'delta: a namesake the modifier does not reach, reported, not judged')
     matches = mask_matches(manifest, run, entry, model, value, tooltips)
     if not matches:
         verdict = interval_verdict(base, model['metric'], delta, judged, context)
@@ -1438,6 +1467,13 @@ def passive_verdict(manifest: dict, entry: dict, run: Run | None, expectation: E
     if not model['judged']:
         return replace(base, status=MEASURED, measured=delta,
                        explanation=f'{moved}; reported, not judged: the tooltip does not single out this quantity')
+    if model['metric'] == PARRY_CHANCE and before == 0:
+        return replace(base, status='unmeasured', measured=delta,
+                       explanation=f'{moved}; {NO_PARRY_BEFORE}')
+    if model['relation'] in MULTIPLYING_RELATIONS and before == 0:
+        return replace(base, status='unmeasured', measured=delta,
+                       explanation=f'{moved}; relation {model["relation"]} multiplies the before value 0, so every '
+                                   f'bonus gives a delta of 0')
     effect = model['effect']
     if tooltips.spell_field(rank_id, f'EffectApplyAuraName[{effect}]') == VERSUS_AURA_STATE:
         state = tooltips.spell_field(rank_id, f'EffectMiscValue[{effect}]')
@@ -1459,12 +1495,68 @@ def passive_verdict(manifest: dict, entry: dict, run: Run | None, expectation: E
     readings = delta_readings(manifest, run, model, before, value, tooltips)
     if not readings:
         return replace(base, measured=delta, explanation=f'no comparison for relation {model["relation"]!r}')
-    judged = [(reading, delta_status(model['metric'], delta, reading.delta)) for reading in readings]
     context = f'{moved}; {sign}, expected {value:+g}'
+    if model['metric'] in TRUNCATED_METRICS and all(abs(reading.delta) < 1 for reading in readings):
+        return replace(base, status='unmeasured', measured=delta, expected=readings[0].delta,
+                       explanation=f'{context}; the expected delta {readings[0].delta:+.6g} is below the 1-point '
+                                   f'resolution of {model["metric"]}, which the server truncates to an integer')
+    partners = effect_partners(entry, expectation)
+    if partners and model['named'] is None:
+        return judge_combined(base, manifest, run, model, partners, readings, before, delta, context,
+                              tooltips.read(rank_id, caster).values, tooltips, rank_id)
+    judged = [(reading, delta_status(model['metric'], delta, reading.delta)) for reading in readings]
     if model['named'] is not None:
         return judge_modifier_target(base, manifest, entry, run, model, value, before, delta, judged, context,
                                      tooltips)
     return judge_readings(base, manifest, entry, run, model, judged, before, delta, context, tooltips)
+
+
+def effect_partners(entry: dict, expectation: Expectation) -> list[dict]:
+    model = expectation.model
+    return [data for data in entry['expectations']
+            if data['check'] == PASSIVE_DELTA and data['model'] and data['model']['judged']
+            and data['model']['named'] is None and data['model']['effect'] != model['effect']
+            and data['model']['metric'] == model['metric'] and data['model']['fields'] == model['fields']]
+
+
+def combined_delta(relations: set[str], deltas: list[float], before: float) -> float | None:
+    if relations == {'scale'}:
+        return before * math.prod(1 + delta / before for delta in deltas) - before
+    if relations <= ADDITIVE_RELATIONS:
+        return sum(deltas)
+    return None
+
+
+def judge_combined(base: Verdict, manifest: dict, run: Run, model: dict, partners: list[dict],
+                   readings: list[DeltaReading], before: float, delta: float, context: str, values: list[Displayed],
+                   tooltips: TooltipSource, rank_id: int) -> Verdict:
+    effects = ', '.join(str(data['model']['effect']) for data in partners)
+    own = f'{context}; the delta also holds effect {effects} of the same passive on the same quantity'
+    unjudged = replace(base, status=MEASURED, measured=delta,
+                       explanation=f'{own}; reported, not judged: no single reading of the combined effects')
+    if len(readings) != 1:
+        return unjudged
+    deltas, relations = [readings[0].delta], {model['relation']}
+    for data in partners:
+        token = next((value for value in values if value.text == data['displayed']), None)
+        source = data['model']['source_label']
+        if token is None or (data['model']['relation'] == 'share' and source not in run.values):
+            return unjudged
+        value, _ = signed_token(token, data['model']['points'], tooltips, rank_id)
+        partner = delta_readings(manifest, run, data['model'], before, value, tooltips)
+        if len(partner) != 1:
+            return unjudged
+        deltas.append(partner[0].delta)
+        relations.add(data['model']['relation'])
+    combined = combined_delta(relations, deltas, before)
+    if combined is None:
+        return replace(base, status=MEASURED, measured=delta,
+                       explanation=f'{own}; reported, not judged: relations {", ".join(sorted(relations))} do not '
+                                   f'combine without an order')
+    reading = DeltaReading('combined', combined,
+                           'product of the scale factors' if relations == {'scale'} else 'sum of the deltas')
+    return interval_verdict(base, model['metric'], delta, [(reading, delta_status(model['metric'], delta, combined))],
+                            own)
 
 
 def roll_spread(expectation: Expectation, tooltips: TooltipSource) -> int:

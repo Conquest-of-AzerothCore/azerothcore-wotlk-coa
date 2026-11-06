@@ -100,6 +100,11 @@ def significance(before: Verdict, after: Verdict) -> tuple[bool, bool, str]:
             return False, difference == 0, NOT_JUDGED if difference else 'no interval on a side, same value'
         facing = (reaches[0][1], reaches[1][0]) if difference > 0 else (reaches[0][0], reaches[1][1])
         needed = math.hypot(*facing)
+        if needed <= FLOAT_EPSILON:
+            needed = tolerance(before, after)
+            return (abs(difference) > needed + FLOAT_EPSILON, True,
+                    f'difference {difference:+.6g} against the deterministic tolerance {needed:.6g}: both 99% '
+                    f'intervals have no width')
         return (abs(difference) > needed + FLOAT_EPSILON, True,
                 f'difference {difference:+.6g} against {needed:.6g}, the root of the squared facing half-widths of the '
                 f'two 99% intervals ({facing[0]:.6g}, {facing[1]:.6g})')

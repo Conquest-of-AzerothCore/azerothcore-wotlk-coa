@@ -554,6 +554,10 @@ def delta_steps(entry, before, after):
 LIBERTY, AGGRAMARS_RAGE, SOLEMN_SOLDIER, PATIENCE, PIOUS = 705266, 561346, 572555, 712678, 706431
 CHIVALRIC, SERENDIPITY, GRACEFUL_FIGHTER, PIOUS_SWEEP, PALADIN_TRAINING = 705272, 300929, 705303, 520034, 520009
 LIBRAM_OF_TENACITY, RECKONING, INTERDICT, SACRED_RESTRAINT = 801461, 572741, 560116, 102208
+SCOURGEBANE_PASSIVE, HOLY_EDGE, SCARLET_HAMMER = 92111, 707853, 807035
+HOLY_UPHEAVAL, ZEALOTRY, JUDICATOR, CALL_OF_THE_MONASTERY, PARAGON = 572547, 500008, 706359, 560550, 706357
+BELLS_OF_LIGHT, ZEALOTRY_PASSIVE = 801204, 92108
+LEGACY, SCOURGEBANE_DAMAGE, TEMPLARS_MIGHT, RIGHTEOUS_LUNGE, CONDEMN = 806522, 801832, 705291, 570233, 567539
 SPELL_NAMES = {(RECKONING, 'SpellName[enUS]'): 'Reckoning', (INTERDICT, 'SpellName[enUS]'): 'Interdict',
                (SACRED_RESTRAINT, 'SpellName[enUS]'): 'Sacred Restraint', (RECKONING, 'SchoolMask'): 2}
 
@@ -636,6 +640,98 @@ class PassiveDeltaTest(unittest.TestCase):
         self.assertEqual((verdicts[interdict.label].status, verdicts[restraint.label].status), ('alert', 'measured'))
         verdicts = self.passive_run(PATIENCE, {interdict: ('1000', '3000'), restraint: ('1000', '1000')}, token)
         self.assertEqual(verdicts[interdict.label].status, 'ok')
+
+    def test_named_mask_spell_matches_an_outside_named_spell(self):
+        outside, inside = (
+            passive_expectation(TEMPLARS_MIGHT, 0, 'spell_modifier', 'spell_mod_flat', '$s1', 6.0, target, True,
+                                in_mask, fields={'op': 12, 'base': 1000})
+            for target, in_mask in ((RIGHTEOUS_LUNGE, False), (CONDEMN, True)))
+        names = {(RIGHTEOUS_LUNGE, 'SpellName[enUS]'): 'Righteous Lunge', (CONDEMN, 'SpellName[enUS]'): 'Condemn'}
+        token = [Displayed('$s1', 6.0, 0, 'percent')]
+        verdicts = self.passive_run(TEMPLARS_MIGHT, {outside: ('1000', '1000'), inside: ('1000', '1006')}, token,
+                                    name="Templar's Might", fields=names)
+        self.assertEqual(verdicts[inside.label].status, 'ok')
+        self.assertEqual(verdicts[outside.label].status, 'ambiguous_tooltip')
+
+    def test_namesake_of_a_moving_spell_is_measured(self):
+        moving, namesake = (
+            passive_expectation(LEGACY, 1, 'spell_modifier', 'spell_mod_pct', '$s2', 25.0, target, True, False,
+                                fields={'op': 15, 'base': 1000})
+            for target in (SCOURGEBANE_DAMAGE, SCOURGEBANE_PASSIVE))
+        names = {(SCOURGEBANE_DAMAGE, 'SpellName[enUS]'): 'Scourgebane',
+                 (SCOURGEBANE_PASSIVE, 'SpellName[enUS]'): 'Scourgebane'}
+        verdicts = self.passive_run(LEGACY, {moving: ('1000', '1250'), namesake: ('1000', '1000')},
+                                    [Displayed('$s2', 25.0, 1, 'percent')], fields=names)
+        self.assertEqual(verdicts[moving.label].status, 'ok')
+        self.assertEqual(verdicts[namesake.label].status, 'measured')
+        self.assertIn('namesake', verdicts[namesake.label].explanation)
+
+    def test_change_below_the_resolution_of_a_truncated_stat_is_unmeasured(self):
+        entry = passive_expectation(BELLS_OF_LIGHT, 2, 'stat', 'scale', '$s1', 3.0, fields={'stat': 3})
+        verdict = self.single(entry, '32', '32', [Displayed('$s1', 3.0, 0, 'percent')])
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('truncates', verdict.explanation)
+        self.assertEqual(self.single(entry, '132', '135', [Displayed('$s1', 3.0, 0, 'percent')]).status, 'ok')
+
+    def test_a_namesake_without_a_change_shows_nothing(self):
+        moving, still = (
+            passive_expectation(HOLY_UPHEAVAL, 0, 'spell_effect_value', 'scale', '$s1', 100.0, target, True, False,
+                                fields={'effect': 0})
+            for target in (ZEALOTRY, ZEALOTRY_PASSIVE))
+        names = {(ZEALOTRY, 'SpellName[enUS]'): 'Zealotry', (ZEALOTRY_PASSIVE, 'SpellName[enUS]'): 'Zealotry'}
+        verdicts = self.passive_run(HOLY_UPHEAVAL, {moving: ('0', '0'), still: ('10', '10')},
+                                    [Displayed('$s1', 100.0, 0, 'percent')], fields=names)
+        self.assertEqual(verdicts[moving.label].status, 'unmeasured')
+        self.assertEqual(verdicts[still.label].status, 'alert')
+
+    def test_zero_delta_is_never_ok(self):
+        entry = passive_expectation(HOLY_EDGE, 0, 'spell_modifier', 'spell_mod_flat', '$s1', 1.0, SCARLET_HAMMER,
+                                    named=True, in_mask=True, fields={'op': 17, 'base': 1000})
+        token = [Displayed('$s1', 1.0, 0, 'flat')]
+        self.assertEqual(self.single(entry, '1000', '1000', token).status, 'alert')
+        self.assertEqual(self.single(entry, '1000', '1001', token).status, 'ok')
+
+    def test_zero_delta_outside_the_mask_is_never_ok(self):
+        outside = passive_expectation(HOLY_EDGE, 0, 'spell_modifier', 'spell_mod_flat', '$s1', 1.0, SCOURGEBANE_PASSIVE,
+                                      named=True, in_mask=False, fields={'op': 17, 'base': 1000})
+        verdict = self.single(outside, '1000', '1000', [Displayed('$s1', 1.0, 0, 'flat')])
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_scale_of_a_zero_before_value_is_unmeasured(self):
+        entry = passive_expectation(HOLY_UPHEAVAL, 0, 'spell_effect_value', 'scale', '$s1', 100.0, ZEALOTRY,
+                                    named=True, in_mask=True, fields={'effect': 0})
+        verdict = self.single(entry, '0', '0', [Displayed('$s1', 100.0, 0, 'percent')])
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('multiplies the before value 0', verdict.explanation)
+
+    def test_parry_without_parry_before_the_learn_is_unmeasured(self):
+        entry = passive_expectation(JUDICATOR, 0, 'parry_chance', 'add', '$s1', 3.0)
+        verdict = self.single(entry, '0', '8', [Displayed('$s1', 3.0, 0, 'percent')])
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('cannot parry', verdict.explanation)
+        self.assertEqual(self.single(entry, '5', '8', [Displayed('$s1', 3.0, 0, 'percent')]).status, 'ok')
+
+    def test_two_scale_effects_on_one_quantity_are_judged_together(self):
+        party, own = (passive_expectation(CALL_OF_THE_MONASTERY, effect, 'attack_power', 'scale', '$s1', 5.0)
+                      for effect in (0, 2))
+        token = [Displayed('$s1', 5.0, 0, 'percent')]
+        verdicts = self.passive_run(CALL_OF_THE_MONASTERY, {party: ('313', '345.0825'), own: ('313', '345.0825')},
+                                    token)
+        for entry in (party, own):
+            self.assertEqual(verdicts[entry.label].status, 'ok')
+            self.assertAlmostEqual(verdicts[entry.label].expected, 313 * 1.05 * 1.05 - 313)
+            self.assertIn('also holds effect', verdicts[entry.label].explanation)
+        verdicts = self.passive_run(CALL_OF_THE_MONASTERY, {party: ('313', '328.65'), own: ('313', '328.65')}, token)
+        self.assertEqual({verdicts[entry.label].status for entry in (party, own)}, {'alert'})
+
+    def test_add_and_share_effects_on_one_quantity_sum(self):
+        flat = passive_expectation(PARAGON, 0, 'stat', 'add', '$s1', 10.0, fields={'stat': 2})
+        share = passive_expectation(PARAGON, 1, 'stat', 'share', '$s1', 10.0, source_label='stat 1',
+                                    fields={'stat': 2})
+        verdicts = self.passive_run(PARAGON, {flat: ('79', '102'), share: ('79', '102')},
+                                    [Displayed('$s1', 10.0, 0, 'percent')])
+        for entry in (flat, share):
+            self.assertEqual((verdicts[entry.label].status, verdicts[entry.label].expected), ('ok', 23.2))
 
     def test_absent_passive_aura_is_unmeasured(self):
         entries = [passive_expectation(PIOUS, 0, 'stat', 'scale', '$s1', 5.0, fields={'stat': stat})

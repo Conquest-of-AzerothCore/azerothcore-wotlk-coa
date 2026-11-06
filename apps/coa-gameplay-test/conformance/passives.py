@@ -18,6 +18,7 @@ ADD_FLAT_MODIFIER = 107
 ADD_PCT_MODIFIER = 108
 MAX_SPELLMOD = 32
 SPELL_MODIFIER_BASE = 1000
+CLAMPED_AT_ZERO_OPS = frozenset({1, 10})
 COMBAT_RATINGS = 25
 ALL_STATS = -1
 PHYSICAL_SCHOOL_MASK = 1
@@ -113,6 +114,7 @@ PHRASES: dict[str, tuple[str, ...]] = {
 SHAREABLE_TOKEN = re.compile(r'\$(?:/\d+;)?s[1-3]')
 CATEGORY_WORD = re.compile(r'[A-Z][a-z]{3,}\b')
 PROPER_NOUN_CONTINUATION = re.compile(r' [A-Z]')
+SENTENCE_BREAK = re.compile(r'(?<=[.!?])\s+')
 LINE_BREAKS = re.compile(r'\s+')
 
 
@@ -218,7 +220,15 @@ def name_patterns(records_dbc, family_name: int) -> tuple[tuple[str, frozenset[i
                  for name in sorted(names, key=lambda candidate: (-len(candidate), candidate)))
 
 
-def named_targets(records: Records, family_name: int, text: str, level: int) -> list[PassiveTarget]:
+def reached_ranks(spell_ids: set[int], level: int) -> set[int]:
+    ranks = progression_ranks(PROGRESSION_HEADER)
+    chained = {spell for spell in spell_ids if spell in ranks}
+    reached = set(class_level_ranks(chained, level)) if chained else set()
+    return (reached | (spell_ids - chained)) & spell_ids
+
+
+def named_targets(records: Records, family_name: int, text: str, level: int, in_mask: frozenset[int] = frozenset(),
+                  sibling_mask: frozenset[int] = frozenset()) -> list[PassiveTarget]:
     claimed: list[tuple[int, int]] = []
     targets = []
     for name, spell_ids, pattern in name_patterns(records.dbc, family_name):
@@ -227,9 +237,14 @@ def named_targets(records: Records, family_name: int, text: str, level: int) -> 
         free = [match.span() for match in pattern.finditer(text)
                 if not PROPER_NOUN_CONTINUATION.match(text, match.end())
                 and not any(start < match.end() and match.start() < end for start, end in claimed)]
-        if free:
-            claimed += free
-            targets += [PassiveTarget(spell_id, name, True, False)
+        if not free:
+            continue
+        claimed += free
+        masked = reached_ranks(set(spell_ids) & in_mask, level)
+        if masked:
+            targets += [PassiveTarget(spell_id, name, True, True) for spell_id in sorted(masked)]
+        elif not spell_ids & sibling_mask:
+            targets += [PassiveTarget(spell_id, name, True, spell_id in in_mask)
                         for spell_id in class_level_ranks(set(spell_ids), level)]
     return targets
 
@@ -251,25 +266,42 @@ def category_holds(names: list[str], text: str) -> bool:
     return bool(names) and all(first_word_in_tooltip(name) for name in names)
 
 
+def token_sentence(text: str, token: str | None) -> str:
+    holding = [sentence for sentence in SENTENCE_BREAK.split(text) if token and token in sentence]
+    return holding[0] if len(holding) == 1 else text
+
+
+def mask_spells(spells: dict[int, tuple[str, tuple[int, ...]]], mask: list[int]) -> frozenset[int]:
+    return frozenset(identity for identity, (_, flags) in spells.items()
+                     if any(word & flag for word, flag in zip(mask, flags)))
+
+
 def modifier_targets(records: Records, rank_id: int, effect: int, text: str, level: int,
-                     override: dict | None) -> tuple[tuple[PassiveTarget, ...], str]:
+                     override: dict | None, siblings: tuple[int, ...] = (),
+                     token: str | None = None) -> tuple[tuple[PassiveTarget, ...], str]:
     family_name = records.field('Spell', rank_id, 'SpellFamilyName')
     spells = family_spells(records.dbc, family_name)
-    mask = class_mask(records, rank_id, effect)
-    in_mask = {identity for identity, (_, flags) in spells.items()
-               if any(word & flag for word, flag in zip(mask, flags))}
-    named = (overridden_targets(records, override, text) if override
-             else named_targets(records, family_name, text, level))
-    named = [replace(target, in_mask=target.spell_id in in_mask) for target in named]
-    named_names = {target.name for target in named}
-    mask_names = spells_by_name({identity: spells[identity] for identity in in_mask})
+    in_mask = mask_spells(spells, class_mask(records, rank_id, effect))
+    sibling_mask = frozenset().union(*(mask_spells(spells, class_mask(records, rank_id, sibling))
+                                       for sibling in siblings)) - in_mask
+    if override:
+        named = [replace(target, in_mask=target.spell_id in in_mask)
+                 for target in overridden_targets(records, override, text)]
+    else:
+        named = (named_targets(records, family_name, token_sentence(text, token), level, in_mask, sibling_mask)
+                 or named_targets(records, family_name, text, level, in_mask, sibling_mask))
+    names = spells_by_name(spells)
+    claimed = {identity for target in named for identity in names.get(target.name, ())}
+    claimed |= {target.spell_id for target in named}
+    mask_names = spells_by_name({identity: spells[identity] for identity in in_mask - claimed})
     mask_only = [PassiveTarget(spell_id, name, False, True) for name in sorted(mask_names)
-                 if name not in named_names for spell_id in class_level_ranks(mask_names[name], level)]
+                 for spell_id in class_level_ranks(mask_names[name], level)]
     targets = tuple(named + mask_only)
-    if named or category_holds(sorted(mask_names), text):
+    all_mask_names = sorted(spells_by_name({identity: spells[identity] for identity in in_mask}))
+    if named or category_holds(all_mask_names, text):
         return targets, ''
     return targets, (UNMODELLED + 'the tooltip names none of the spells the class mask affects '
-                     f'({", ".join(sorted(mask_names))})')
+                     f'({", ".join(all_mask_names)})')
 
 
 def own_token(values: list[Displayed], effect: int) -> Displayed | None:
@@ -397,10 +429,16 @@ def aura_plans(aura: int, misc: int, text: str) -> list[tuple[MetricPlan, str]]:
     raise NotModelled(f'aura {aura} has no passive measurement')
 
 
-def modifier_plans(aura: int, op: int) -> tuple[MetricPlan, ...]:
+def modifier_base(aura: int, op: int, points: float | None) -> int:
+    if aura == ADD_FLAT_MODIFIER and op in CLAMPED_AT_ZERO_OPS and points is not None:
+        return SPELL_MODIFIER_BASE + int(abs(points))
+    return SPELL_MODIFIER_BASE
+
+
+def modifier_plans(aura: int, op: int, points: float | None = None) -> tuple[MetricPlan, ...]:
     relation, consumer_relation = (('spell_mod_flat', 'add') if aura == ADD_FLAT_MODIFIER
                                    else ('spell_mod_pct', 'scale'))
-    plans = [MetricPlan('spell_modifier', {'op': op, 'base': SPELL_MODIFIER_BASE}, relation)]
+    plans = [MetricPlan('spell_modifier', {'op': op, 'base': modifier_base(aura, op, points)}, relation)]
     if op in SPELL_MODIFIER_CONSUMERS:
         metric, fields = SPELL_MODIFIER_CONSUMERS[op]
         plans.append(MetricPlan(metric, dict(fields), consumer_relation))
@@ -452,8 +490,11 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
     plans: tuple[MetricPlan, ...] = ()
     reason = ''
     if family == 'P1':
+        siblings = tuple(sibling for sibling in effects if sibling != effect
+                         and family_of(spell(f'Effect[{sibling}]'), spell(f'EffectApplyAuraName[{sibling}]')) == 'P1')
         targets, reason = modifier_targets(records, rank_id, effect, text, class_file['level'],
-                                           passive_override(class_file, {spell_id, rank_id}, effect))
+                                           passive_override(class_file, {spell_id, rank_id}, effect), siblings,
+                                           token.text if token else None)
     try:
         if family == UNKNOWN:
             raise NotModelled(f'aura {aura} has no passive measurement' if aura
@@ -467,7 +508,7 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
         if token is None:
             raise NotModelled('no own token and no sibling token with equal points')
         if family == 'P1':
-            plans = () if reason else modifier_plans(aura, misc)
+            plans = () if reason else modifier_plans(aura, misc, signed_points(records, rank_id, effect))
         else:
             plans = effect_plans(aura, misc, text, token)
     except NotModelled as error:
