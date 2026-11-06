@@ -1490,7 +1490,10 @@ public:
     void OnAllCreatureUpdate(Creature* creature, uint32 /*diff*/) override
     {
         if (!creature->HasUnitFlag(UNIT_FLAG_PACIFIED) || !creature->HasReactState(REACT_PASSIVE)
-            || creature->HasUnitState(UNIT_STATE_ROOT) || creature->IsInEvadeMode() || !creature->IsAlive())
+            || creature->IsInEvadeMode() || !creature->IsAlive())
+            return;
+        bool const unattacked = creature->IsInCombat() && creature->getAttackers().empty();
+        if (creature->HasUnitState(UNIT_STATE_ROOT) && !unattacked)
             return;
         Map* map = creature->FindMap();
         if (!map || !map->IsDungeon())
@@ -1498,6 +1501,12 @@ public:
         std::lock_guard<std::recursive_mutex> guard(g_lock);
         if (!RefusesToFight(creature))
             return;
+        if (unattacked)
+        {
+            creature->CombatStop(true);
+            creature->GetThreatMgr().ClearAllThreat();
+            return;
+        }
         creature->SetHomePosition(creature->GetPosition());
         creature->GetMotionMaster()->Clear();
         creature->GetMotionMaster()->MoveIdle();
