@@ -124,6 +124,7 @@ namespace
         me->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(health));
         me->UpdateMaxHealth();
         me->SetHealth(std::max<uint32>(1, uint32(me->GetMaxHealth() * pct / 100.0f)));
+        me->ResetPlayerDamageReq();
     }
 
     class coa_world_boss_loader : public WorldScript

@@ -22,6 +22,36 @@
       "level": 60,
       "melee_hit_rating": 10000,
       "expertise_rating": 10000
+    },
+    {
+      "id": "mate1",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate2",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate3",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate4",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate5",
+      "race": 1,
+      "class": 1,
+      "level": 60
     }
   ],
   "steps": [
@@ -86,6 +116,33 @@
       "value": 0
     },
     {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate1",
+      "label": "Back on Normal, the raider leads a raid group, so his kill is not an unearned solo kill",
+      "loot_method": 0
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate2"
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate3"
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate4"
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate5"
+    },
+    {
       "action": "wait",
       "ms": 500
     },
@@ -139,16 +196,6 @@
       "action": "attack_nearby",
       "actor": "raider",
       "entry": 64604,
-      "label": "The raider hits him first, so a solo kill earns his loot"
-    },
-    {
-      "action": "wait",
-      "ms": 4000
-    },
-    {
-      "action": "attack_nearby",
-      "actor": "raider",
-      "entry": 64604,
       "kill": true
     },
     {
@@ -160,9 +207,13 @@
       "within_ms": 20000
     },
     {
-      "action": "loot_creature",
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "loot_nearby",
       "actor": "raider",
-      "target": "boss"
+      "entry": 64604
     },
     {
       "action": "assert",
