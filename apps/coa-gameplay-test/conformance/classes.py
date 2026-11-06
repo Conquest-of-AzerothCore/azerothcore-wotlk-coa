@@ -9,6 +9,7 @@ from inspect_dbc import DataSet
 PASSIVE_ATTRIBUTE = 0x40
 CHARACTER_LEVEL = 60
 RANK_SLOTS = 5
+PROGRESSION_HEADER = Path(__file__).resolve().parents[3] / 'src/server/coa/AscensionSpellProgressionData.h'
 PROGRESSION_ROW = re.compile(r'^\s*\{\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\s*\},?\s*$', re.MULTILINE)
 
 

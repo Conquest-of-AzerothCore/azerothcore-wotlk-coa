@@ -14,6 +14,8 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
   with. Its name shadows the standard library `profile`: run the package from its own directory.
 - `values.py`: `value_scenario(class_file, spell, rank_id)` returns the no-combat scenario of one rank and its
   `Expectation` list.
+- `passives.py`: `passive_effects(class_file, spell)` classifies each effect of a passive into a family, its expected
+  token, its metric plans and, for a spell modifier, its targets (see [Passive effects](#passive-effects)).
 - `hits.py`: `hit_scenario(class_file, spell, casts)` and `melee_scenario(class_file, swings)` return the hit scenario
   of a spell's highest rank and the auto-attack scenario, with their `Expectation` lists; `expected_hit` and
   `casts_needed` give the expected mean, its sigma and the number of casts.
@@ -140,6 +142,98 @@ beside it, which is not the token's own effect), `unreadable: tooltip without va
 `unreadable: ManaCostPercentage ...` or `unreadable: ManaCostPerlevel ...` for a cost the DBC alone does not give, and
 `unmeasurable: <reason>` for a readable token with no no-combat metric (other spell's effect, radius, stack or chance
 token, an aura of a passive or cast-time spell). Only `unmeasurable` expectations may lack a measurement step.
+
+## Passive effects
+
+`passive_effects(class_file, spell)` classifies every effect of a passive's rank at the class level as
+`PassiveEffect(spell_id, effect, aura, misc, misc_b, family, token, plans, targets, reason)`. It measures nothing:
+the scenarios and the judging build on it. `reason` is empty for a modelled effect and starts with `unmodelled: `
+otherwise; an unmodelled effect has no `plans`.
+
+Family by `(Effect, EffectApplyAuraName)` (`FAMILIES`, `family_of`): effect 3 (dummy) is `P6` whatever its aura;
+otherwise the aura decides, and an aura absent from the table is `unknown` (`unmodelled: aura <n> has no passive
+measurement`, or `unmodelled: effect <n> applies no aura` for aura 0).
+
+| Family | Auras | Templar effects |
+|---|---|---|
+| `P1` spell modifier | 107, 108 | 71 |
+| `P2` stat sheet | 29, 31, 47, 49, 132, 133, 137, 138, 142, 166, 167, 174, 220, 237, 240, 290, 327, 333 | 51 |
+| `P3` done / received | 59, 79, 118, 122, 136, 163, 286, 303 | 9 |
+| `P4` taken | 87, 229, 283 | 4 |
+| `P5` proc / trigger | 23, 42, 231, 354 | 76 |
+| `P6` scripted / crowd control | 4, 112, 178, 232, effect 3 | 21 |
+| `P7` power | 72, 110 | 2 |
+
+The expected value is the effect's own token (the first token of the passive's own tooltip whose `effect_index` is
+the effect). An effect without one takes a sibling effect's plain `$sN` (or `$/N;sN`) token when both effects have the
+same displayed points (`|EffectBasePoints + 1|`, single-valued): Sturdy 681009 effect 1 (Energy) shares `$s1` of
+effect 0 (health), and Paladin Training 520009 effect 1 (cost, −20) shares `$s1` (+20) of effect 0, since the tooltip
+says "Increases the damage and reduces the Energy cost ... by $s1%". `token.effect_index` then names the sibling.
+Otherwise: `unmodelled: no own token and no sibling token with equal points` (Graceful Fighter 705303 effect 2 has 0
+points beside 20 and 20). On Templar, 18 effects share a token; 16 of them are modelled (Courage's two aura 31
+effects stay unmodelled).
+
+Each `MetricPlan(metric, fields, relation, source)` names a harness metric, its fields (the scenario adds `spell`
+where the metric needs one), the relation of the delta to the token and, for `share`, the base-step label of the
+source (`stat <n>` or `attack_power`):
+
+| Aura | Plans | Relation |
+|---|---|---|
+| 107 / 108 | `spell_modifier {op, base: 1000}` per target; consumer of the op: 14 `spell_power_cost`, 10 `spell_cast_time_ms`, 5 `spell_max_range`, 31 `spell_max_stacks`, 3/12/23 `spell_effect_value {effect: 0/1/2}`, 7 `spell_done_crit_chance {target: dummy}` | `spell_mod_flat` / `spell_mod_pct`; consumer `add` / `scale` |
+| 29 / 137 | `stat {stat}`, all five for misc −1 | `add` / `scale` |
+| 133, 132, 166, 167 | `max_health`, `max_power {power}`, `attack_power`, `ranged_attack_power` | `scale` |
+| 240, 47, 49 | `expertise`, `parry_chance`, `dodge_chance` | `add` |
+| 290 | `spell_crit_chance {school}` when the tooltip says "<School> critical strike chance", else `melee_crit_chance` | `add` |
+| 333 | `melee_hit_chance` and `spell_hit_chance` | `add` |
+| 138 | `attack_time_ms {hand: 0}` | `haste` |
+| 220 | `combat_rating {rating}`, one per bit of the misc mask | `share` |
+| 174 / 237 | `spell_power {school}`, one per magic school of the misc mask | `share` |
+| 327 | `stat {stat}` | `share` |
+| 79 | `spell_damage_done` (magic schools in the mask) and `melee_damage_done` (physical), `{target: dummy}` | `composition` |
+| 136 | `spell_healing_done {target: caster}` | `composition` |
+| 118 | `spell_healing_taken {target: caster}` | `ratio` |
+| 163 | `spell_critical_damage {target: dummy}` | `crit_damage` |
+| 303 | `spell_damage_done {target: dummy}` | `ratio` |
+| 229 | `aoe_damage_taken {school}`, one per school of the mask | `ratio` |
+| 72 | `spell_power_cost` | `scale` |
+
+Unmodelled by rule: `P5` (`proc or trigger effect without a trigger entry`), `P6` (`scripted or crowd-control
+effect`), 142 (`mail armor is out of scope`, owner ruling), 59 (`damage versus a creature type is level-scaled`),
+122 (`no off-hand weapon damage metric`), 110 (`no energy regeneration metric`), a spell modifier op of 32 or more
+(`SpellModOp <op> is not below MAX_SPELLMOD 32`: `spell_modifier` requires `op < MAX_SPELLMOD`), and the auras of the
+table without a plan (31, 87, 283, 286: `aura <n> has no passive measurement`).
+
+### Targets of a spell modifier
+
+1. Named: every `Spell.dbc` record of the passive's `SpellFamilyName` whose `SpellName[enUS]` appears in the tooltip
+   (color codes removed, whole words, longest names first, overlapping matches skipped: "Oath: Condemn" before
+   "Condemn"). A named spell resolves to its rank at the class level through the chains of
+   `AscensionSpellProgressionData.h` (Righteous Lunge → 570233, Argent Blade → 807268), else to every record of
+   that name. `named_targets(records, family_name, text, level)` returns them.
+2. Category: when nothing is named and the first capitalised word (four letters or more) of every name the class
+   mask matches is in the tooltip ("Libram spells": Libram of Tenacity, Libram of Zeal, ...), the mask's spells are
+   the targets.
+3. Class file `passive_targets` overrides both: `{"spell", "effect", "targets": [ids], "tooltip_words": "..."}`; the
+   quoted words must be in the tooltip, else `ValueError`.
+4. Otherwise `unmodelled: the tooltip names none of the spells the class mask affects (<names>)`. Templar: Deep
+   Secrets 705263 and Mark of Aggramar 804928 say "Testaments" while their masks also match Ascetic and Mortal
+   Abdication.
+
+`PassiveTarget(spell_id, name, named, in_mask)`: `in_mask` is whether the record's `SpellFamilyFlags` meet the
+effect's `EffectSpellClassMask`. Mask spells that are not named are listed too (`named` false, one rank per name),
+so a disagreement stays visible: Patience 712678 names Interdict 560116 (outside the mask) while its mask matches
+only Sacred Restraint 102208.
+
+### Phrase check
+
+Every plan outside `P1` has a quantity, and the tooltip must contain one of its `PHRASES` (case-insensitive):
+"parry rating", "Holy critical strike chance", "chance to hit", "maximum health", "Energy", "melee haste",
+"expertise", "attack power", "spell power", "Holy spell damage", "damage taken from area of effect", "cost", ...
+Missing: `unmodelled: the tooltip does not name <quantity>` (Call of the Monastery 560550 effect 1 is ranged attack
+power, its tooltip says "attack power"). For `share`, `stat_after_token(text, token)` reads the stat or "attack
+power" written after `<token>% of (your)`; the source comes from the tooltip, not from `EffectMiscValueB`, so a
+mismatch shows as an alert when judged. No such words: `unmodelled: the tooltip names no stat or attack power after
+<token>% of`.
 
 ## Max-rank hit scenarios
 

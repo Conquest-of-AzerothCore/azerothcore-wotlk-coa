@@ -6,7 +6,7 @@ from pathlib import Path
 import re
 import sys
 
-from classes import ClassSpell, class_spells
+from classes import PROGRESSION_HEADER, ClassSpell, class_spells
 from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_FILE, ScenarioDrift, evaluate,
                      write_levers, write_outputs)
 from diff import IMPACT_FILE, diff_directories, write_impact
@@ -21,7 +21,6 @@ from values import Expectation, dataset, structure_stats, value_scenario
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
 
-PROGRESSION_HEADER = Path(__file__).resolve().parents[3] / 'src/server/coa/AscensionSpellProgressionData.h'
 SCENARIO_DIR = 'scenarios'
 MANIFEST_FILE = 'manifest.json'
 KEY_SEPARATORS = re.compile(r'[^a-z0-9]+')
