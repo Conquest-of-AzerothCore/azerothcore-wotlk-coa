@@ -8,8 +8,8 @@ import sys
 import tempfile
 import unittest
 
-from compare import (PERCENT_POINT_METRICS, DbcTooltips, ScenarioDrift, compare, delta_margin, measured_values,
-                     question_detail, read_verdicts, write_outputs)
+from compare import (EFFECT_VALUE_SCOPE, PERCENT_POINT_METRICS, DbcTooltips, ScenarioDrift, compare, delta_margin,
+                     measured_values, question_detail, read_verdicts, write_outputs)
 from hits import HitModel, Modifier
 from profile import CLASSES_DIR, DBC_DIR
 from classes import class_spells
@@ -221,7 +221,8 @@ class CompareTest(unittest.TestCase):
         self.assertEqual(self.rolled_verdict('255', lambda roll: roll).status, 'alert')
 
     def test_rolled_effect_value_carries_the_spread_of_its_roll(self):
-        self.assertEqual(self.rolled_verdict('248', lambda roll: roll).detail, {'roll_spread': 9})
+        self.assertEqual(self.rolled_verdict('248', lambda roll: roll).detail,
+                         {'roll_spread': 9, 'scope': EFFECT_VALUE_SCOPE})
 
     def test_unreadable_value_of_a_rolled_first_effect_carries_the_spread_of_its_roll(self):
         label = '1001 effect_value #1'
@@ -230,7 +231,7 @@ class CompareTest(unittest.TestCase):
         self.assertEqual((verdicts[label].status, verdicts[label].detail), ('unreadable', {'roll_spread': 9}))
 
     def test_fixed_effect_value_has_no_roll_spread(self):
-        self.assertIsNone(self.effect_verdict('568').detail)
+        self.assertEqual(self.effect_verdict('568').detail, {'scope': EFFECT_VALUE_SCOPE})
 
     def test_rolled_effect_in_a_non_monotone_expression_is_unmodelled(self):
         verdict = self.rolled_verdict('248', lambda roll: (roll - 104) ** 2)
@@ -254,7 +255,8 @@ class CompareTest(unittest.TestCase):
         reader = FakeTooltips(tokens, {(2002, 0): (99, 10)})
         item = expectation(label, 'effect_value', text, 'read flat', model={'effect_spell': 2002, 'effect': 0})
         verdicts = self.value_run([item], [text], [assert_step(label, '105')], reader)
-        self.assertEqual((verdicts[label].status, verdicts[label].detail), ('ok', {'roll_spread': 9}))
+        self.assertEqual((verdicts[label].status, verdicts[label].detail),
+                         ('ok', {'roll_spread': 9, 'scope': EFFECT_VALUE_SCOPE}))
         self.assertEqual(forced_spells, {2002})
         self.fresh()
         verdicts = self.value_run([item], [text], [assert_step(label, '125')], reader)
@@ -788,6 +790,7 @@ class GeneratedTokenTest(unittest.TestCase):
         stamina = float(BASE_ACTUALS['stat 2'])
         verdict = self.judged(STAFFGUARD, STAFFGUARD_TOKEN, str(STAFFGUARD_HEALTH_AT_RANK_ZERO + 0.3 * stamina))
         self.assertEqual((verdict.status, verdict.expected), ('ok', STAFFGUARD_HEALTH_AT_RANK_ZERO + 0.3 * stamina))
+        self.assertEqual(verdict.detail['scope'], EFFECT_VALUE_SCOPE)
         self.assertEqual(self.judged(STAFFGUARD, STAFFGUARD_TOKEN,
                                      str(STAFFGUARD_HEALTH_AT_LEVEL_60 + 0.3 * stamina)).status, 'alert')
 

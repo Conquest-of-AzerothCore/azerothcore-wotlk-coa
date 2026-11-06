@@ -95,8 +95,9 @@ Sacred Oath 712346 is then a tooltip without value.
 Everything else goes to `unreadable` verbatim and is never guessed: `$?` conditionals, other `@...@` markup, other `|`
 escapes, other tokens (`$t`, `$o`, `$x`, `$l`, `$g`...), expression functions and variables such as `$BH`,
 `$ppl1` or lowercase `$ap`, durations that scale with level (`DurationPerLevel` not zero), points that scale with
-level when the skill rank cannot be read (see below), spread values (`EffectDieSides` not 1 for `$sN`), missing records, non-positive durations, a `$<name>` that
-the described spell's `SpellDescriptionVariableID` does not define, and a stat or school missing from `CasterStats`.
+level when the skill rank cannot be read (see below), spread values (`EffectDieSides` not 1 for `$sN`), missing records,
+non-positive durations, a `$<name>` that the described spell's `SpellDescriptionVariableID` does not define, and a stat
+or school missing from `CasterStats`.
 
 ### Level-scaled points
 
@@ -127,14 +128,19 @@ class is unknown, or several ability lines match. `$<id>pplN` stays unreadable a
 as a `tooltip_value` question. The client adds a temporary skill bonus to the rank; `skill_value` reads the pure
 value, and no metric reads that bonus.
 
+Known divergence: the reader reads the client DBC, which is what players' tooltips show unless the client is
+patched. The server can override a description: `rev_20261029_240_templar_untainted_tooltip.sql` gives Untainted
+705298 `${-$705299m1+$STA*0.1}` through `coa_client_spell_description`, while the client DBC reads
+`${$705299m1+$STA*0.1}` (ruling R19).
+
 ## Reference character
 
 `classes/<name>.json` holds `class_id`, `name`, `race`, `level`, `weapon` (`item`, equipment `slot`, 15 is the main
 hand, `subclass` from `Item.dbc`: 10, a staff, for the Walking Stick), `skill_lines` (`class_skill_lines` of the class
-spells and the weapon: Templar 70, 71, 72 and 136), `ratings` (fixture hit and expertise ratings, so that an aura or hit is never lost to a miss; they do not change
-a tooltip value), `reference_stats`, `known_auras`, `probe_auras`, `procs` (see [Proc rates](#proc-rates)) and
-`talent_modifiers`, `rotation`, `stack` (see [Talent stack](#talent-stack-lever-map)). The Templar reference is a
-human with the Walking Stick (item 2495).
+spells and the weapon: Templar 70, 71, 72 and 136), `ratings` (fixture hit and expertise ratings, so that an aura or hit
+is never lost to a miss; they do not change a tooltip value), `reference_stats`, `known_auras`, `probe_auras`, `procs`
+(see [Proc rates](#proc-rates)) and `talent_modifiers`, `rotation`, `stack`
+(see [Talent stack](#talent-stack-lever-map)). The Templar reference is a human with the Walking Stick (item 2495).
 
 `weapon` also freezes the `item_template` row of the weapon: `min_damage` (`dmg_min1`), `max_damage` (`dmg_max1`),
 `speed_ms` (`delay`), `inventory_type` and `normalized_speed`, the speed `Unit::GetAPMultiplier` uses for normalized
@@ -212,6 +218,12 @@ spell in metric`). `spell_duration_ms` is the base duration after the player's s
 hooks: every `spell_duration` verdict carries that limit in `detail['scope']`.
 Known limit: a duration that a `ScriptMgr::OnCalcMaxDuration` script changes (`Aura::CalcMaxDuration`,
 `SpellAuras.cpp:815`) is not covered, so such a spell needs a cast-based `aura_duration_ms` check instead.
+`spell_effect_value` is `SpellEffectInfo::CalcValue`, before aura scripts: every `effect_value` verdict carries
+`detail['scope']` "CalcValue before aura scripts (CalcAmount hooks not covered)". Known limit: an amount that an
+AuraScript `CalcAmount` hook sets is not covered, so a passing value can still differ from the applied aura, and a
+failing one can be an artifact of the metric. An `aura_amount` check on a present aura is the remedy. Staffguard
+706583: `AscensionTemplarAuras.cpp:60-63` sets the applied amount to 125 + 0.3 × Stamina + 0.25 × (dodge + parry
+rating), the 125 base the client shows, while CalcValue gives 305.
 
 ## Passive effects
 

@@ -53,6 +53,7 @@ VERDICTS_FILE = 'verdicts.json'
 VERDICTS_SCHEMA = 1
 SPELL_DURATION_SCOPE = ('base duration after the player\'s SPELLMOD_DURATION modifiers, before script hooks: a '
                         'ScriptMgr::OnCalcMaxDuration change is not covered')
+EFFECT_VALUE_SCOPE = 'CalcValue before aura scripts (CalcAmount hooks not covered)'
 PERCENT_POINT_METRICS = frozenset({'melee_crit_chance', 'spell_crit_chance', 'melee_hit_chance', 'spell_hit_chance',
                                    'parry_chance', 'dodge_chance', 'spell_done_crit_chance'})
 FRACTIONAL_METRICS = PERCENT_POINT_METRICS | {'weapon_damage_min'}
@@ -1501,7 +1502,10 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
     if check == 'cooldown_ms':
         return judge_time(base, run, measured, float(expectation.displayed), rule)
     if check in TOKEN_CHECKS and rule.startswith(READ_RULE):
-        return judge_token(base, expectation, run, measured, tokens, tooltips, entry['spell_name'])
+        verdict = judge_token(base, expectation, run, measured, tokens, tooltips, entry['spell_name'])
+        if check == 'effect_value':
+            return replace(verdict, detail={**(verdict.detail or {}), 'scope': EFFECT_VALUE_SCOPE})
+        return verdict
     return replace(base, measured=measured, explanation=f'no comparison for check {check!r} with rule {rule!r}')
 
 

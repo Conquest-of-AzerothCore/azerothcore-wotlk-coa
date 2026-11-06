@@ -56,16 +56,16 @@ revision 8.
   spell tooltip caller passes `spellLevel` 0 (`UIUtil/Tooltip.cpp:3311, 5816, 6073, 6112, 6778, 6868, 6879`).
 - `Extensions.dll` (sha256 `a9ced4ae63c0fe118703039bafd9ae0e5194ec2e9c9620e47a10e3c79e08e52c`) holds at VA
   0x10287D70 the bytes `81 3c 24 e4 ab 57 00 75 03 33 c0 c3 a1 14 40 69 10 ff e0`. That is
-  `cmp dword [esp], 0x57ABE4; jne; xor eax, eax; ret; mov eax, [0x10694014]; jmp eax`. At VA 0x10287376 the DLL
+  `cmp dword [esp], 0x57ABE4; jne; xor eax, eax; ret; mov eax, [0x10694014]; jmp eax`. At VA 0x10287F75 the DLL
   installs it as a detour of 0x7FF070: `68 70 7d 28 10 6a 07 68 70 f0 7f 00 e8 ...`, that is
   `push 0x10287D70; push 7; push 0x7FF070; call`. The DLL reconstruction
   (github.com/firstoni-dev/ascension-extensions-reconstruction, `src/Ascension/AscInitHooks.cpp:25, 275-280, 326`)
   describes the same hook: "0x7FF070 -> sub_10a77160 returns 0 when called from 0x57ABE4".
 - What follows: a spell tooltip is parsed with the described spell's level at 0. Each point read then takes the
-  level of the spell it reads, through the fallback in `Spell_C_GetMinMaxPoints`, whose call comes from 0x7FF770 and
-  is not hooked. Own tokens are unaffected. A foreign spell is read at its own rank, not at the described spell's
-  level. The DLL renders `@s:` markup through the same 0x57ABC0 (`AscSpellText.cpp:82, 670`), so expanded spells
-  are read at their own rank too.
+  level of the spell it reads, through the fallback in `Spell_C_GetMinMaxPoints`. That call is at 0x7FF7C3
+  (return address 0x7FF7C8), so it is not hooked. Own tokens are unaffected. A foreign spell is read at its own
+  rank, not at the described spell's level. The DLL renders `@s:` markup through the same 0x57ABC0
+  (`AscSpellText.cpp:82, 670`), so expanded spells are read at their own rank too.
 
 ### Data that matters for the Templar (`/srv/coa/server-data/dbc`)
 
@@ -85,11 +85,12 @@ revision 8.
 1. Keep level-scaled values unreadable (ADR 0011 R6). Rejected: 28 entries stay unchecked, and R5 now gives the
    scenarios measured skills.
 2. The stock rule as the design first quoted it: the described spell's level for foreign spells, with no race and
-   class filter. Rejected: the installed binaries contradict it. It reads Staffguard as 305, which is what the
-   server applies at level 60, while the CoA client shows 125. That would be a false `ok`.
-3. The installed-binary rule (findings above). Chosen (controller ruling R17). If it is wrong, alerts appear on
-   Reckoning, Staffguard, Untainted and Scarlet Hammer, and the owner can dismiss them. It never produces a
-   false `ok`.
+   class filter. Rejected: the installed binaries contradict it. It reads Staffguard 706583 at the level of
+   705295, which gives 305, while the CoA client shows 125. The server's applied amount also starts from 125:
+   `AscensionTemplarAuras.cpp:60-63` sets it to 125 + 0.3 × Stamina + 0.25 × (dodge + parry rating). The 305 is
+   `SpellEffectInfo::CalcValue`, read before that script.
+3. The installed-binary rule (findings above). Chosen (controller ruling R17). If it is wrong, the affected
+   checks (Reckoning, Staffguard, Untainted, Scarlet Hammer) alert rather than pass.
 
 ## Decision
 
@@ -117,4 +118,14 @@ revision 8.
 - Not yet confirmed in a live client. The confirming follow-up is a `coa-client-check` that reads the Reckoning
   572741 and Staffguard 705295 tooltips on a level-60 Templar with the Walking Stick: 166 + 0.175 × AP + 0.5 × STA
   and 125 + 0.3 × STA expected. The binaries are the CoA client release, not proven identical to Ascension live.
+- `spell_effect_value` reads `SpellEffectInfo::CalcValue`, before aura scripts. Every `effect_value` verdict
+  states this in `detail['scope']`: "CalcValue before aura scripts (CalcAmount hooks not covered)" (ruling R18). An
+  amount set by an AuraScript `CalcAmount` hook is not covered, so a passing value can still differ from the applied
+  aura. The 28 newly judged level-scaled `effect_value` checks of the Templar (on 28 ranks) are among the 377
+  `effect_value` checks the note covers. The probe's Staffguard alert (305 against 148.7) is such an artifact: it is
+  not a server defect, and an `aura_amount` check on a present aura is the remedy.
+- Known divergence (ruling R19): the reader reads the client DBC, which is what players' tooltips show unless the
+  client is patched. The server overrides Untainted 705298's description
+  (`rev_20261029_240_templar_untainted_tooltip.sql`, `coa_client_spell_description`) to `${-$705299m1+$STA*0.1}`.
+  The client DBC reads `${$705299m1+$STA*0.1}`.
 - ADR 0011 is not edited. This ADR supersedes its ruling R6 only.
