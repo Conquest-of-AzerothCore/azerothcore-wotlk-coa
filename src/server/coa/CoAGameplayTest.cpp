@@ -4110,6 +4110,20 @@ private:
             time_t const respawn = player->GetMap()->GetCreatureRespawnTime(step.get<uint32>("spawn"));
             return std::max<time_t>(0, respawn - GameTime::GetGameTime().count());
         }
+        if (metric == "nearest_creature_distance")
+        {
+            std::list<Creature*> creatures;
+            player->GetCreatureListWithEntryInGrid(creatures, step.get<uint32>("entry"), 60.0f);
+            float nearest = -1.0f;
+            for (Creature* creature : creatures)
+                if (creature->IsInWorld() && creature->IsAlive() && player->InSamePhase(creature))
+                {
+                    float const distance = player->GetExactDist2d(creature);
+                    if (nearest < 0.0f || distance < nearest)
+                        nearest = distance;
+                }
+            return nearest;
+        }
         if (metric == "nearby_creature_count")
         {
             std::list<Creature*> creatures;
