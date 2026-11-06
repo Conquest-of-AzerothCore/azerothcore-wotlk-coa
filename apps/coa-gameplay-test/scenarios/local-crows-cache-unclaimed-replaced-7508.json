@@ -1,7 +1,13 @@
 {
   "schema": 1,
   "name": "Crow's Cache: the next cache removes an unclaimed one (#7508)",
-  "contract": "An unclaimed Crow's Cache chest stays only until the next cache begins. Starting a second cache at the same Barrens spot removes the first, already available chest, so the event list holds only the new warning there and exactly one chest stands at the spot instead of two stacked. Event ids are process-global, so the event list is read by phase and position rather than by id. Carried and dropped caches keep their own expiry and are not covered here. Requires CrowsCache.Enable=1.",
+  "contract": [
+    "An unclaimed Crow's Cache chest stays only until the next cache begins. Starting a second cache at the same",
+    "Barrens spot removes the first, already available chest, so the event list holds only the new warning there",
+    "and exactly one chest stands at the spot instead of two stacked. Event ids are process-global, so the event",
+    "list is read by phase and position rather than by id. Carried and dropped caches keep their own expiry and are",
+    "not covered here. Requires CrowsCache.Enable=1."
+  ],
   "players": [
     {
       "id": "owner",
