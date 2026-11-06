@@ -465,6 +465,15 @@ void SendPreviewFlag(Player* player)
     player->SendDirectMessage(&data);
 }
 
+void SendClientState(Player* player)
+{
+    if (!enabled.load(std::memory_order_relaxed) || !player)
+        return;
+
+    SendPreviewFlag(player);
+    SendAllLevels(player);
+}
+
 PendingStatQueries pendingStatQueries;
 
 void SendStatReply(WorldSession* session, uint32 itemId, uint32 level, ItemTemplate const* proto, bool stock)
@@ -621,15 +630,16 @@ class Acquisition : public PlayerScript
 public:
     Acquisition() : PlayerScript("NativeItemScalingAcquisition", { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LOOT_ITEM,
         PLAYERHOOK_ON_GROUP_ROLL_REWARD_ITEM, PLAYERHOOK_ON_QUEST_REWARD_ITEM, PLAYERHOOK_ON_STORE_NEW_ITEM,
-        PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT }) { }
+        PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_MAP_CHANGED }) { }
 
     void OnPlayerLogin(Player* player) override
     {
-        if (!enabled.load(std::memory_order_relaxed))
-            return;
+        SendClientState(player);
+    }
 
-        SendPreviewFlag(player);
-        SendAllLevels(player);
+    void OnPlayerMapChanged(Player* player) override
+    {
+        SendClientState(player);
     }
 
     void OnPlayerUpdate(Player* player, uint32) override
