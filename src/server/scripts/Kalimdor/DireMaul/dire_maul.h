@@ -37,13 +37,11 @@ enum DataTypes
 };
 
 // TYPE_EAST_WING_PROGRESS: 1 frees Ironbark (Zevrim Thornhoof and Hydrospawn dead), 2 opens Alzzin's door; 3 and 4
-// remember that only Zevrim or only Hydrospawn has fallen so far.
+// belong to Alzzin's fight, and the Conservatory Door opens on 2, 3 and 4 (SmartAI).
 enum DireMaulEastWingProgress
 {
     EAST_WING_IRONBARK_FREED        = 1,
-    EAST_WING_DOOR_OPEN             = 2,
-    EAST_WING_ZEVRIM_DEAD           = 3,
-    EAST_WING_HYDROSPAWN_DEAD       = 4
+    EAST_WING_DOOR_OPEN             = 2
 };
 
 enum GoIds

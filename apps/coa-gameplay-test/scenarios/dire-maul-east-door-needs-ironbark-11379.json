@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "name": "Dire Maul East: the Conservatory Door stays shut until Ironbark the Redeemed opens it after Hydrospawn and Zevrim Thornhoof die (#11379)",
+  "contract": "#11379 (playtest): with Hydrospawn (13280) killed before Zevrim Thornhoof (11490) the Conservatory Door (176907) opened by itself, because the east wing progress used 4 for 'only Hydrospawn is dead' and the door's SmartAI opens on 2, 3 and 4. The door now stays shut after Hydrospawn's death and after Zevrim's, and Ironbark the Redeemed (14241) is hidden until both are dead. Then his gossip offers to open the door; after the option he walks to the door, opens it and dies.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 429,
+    "x": -70.0,
+    "y": -276.0,
+    "z": -57.7,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "watcher",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "zevrim",
+      "owner": "hero",
+      "entry": 11490,
+      "level": 60,
+      "health": 2000,
+      "distance": 3,
+      "reaction": 2
+    },
+    {
+      "id": "redeemed",
+      "owner": "hero",
+      "entry": 14241,
+      "level": 60,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    { "action": "set_health", "actor": "hero", "value": 100000, "maximum": 100000 },
+    { "action": "teleport", "actor": "watcher", "map": 429, "x": 118.0, "y": -279.0, "z": -55.9, "ignore_access": true },
+    { "action": "wait", "ms": 4000 },
+    { "action": "assert", "label": "CONTROL: the watcher stands at the closed Conservatory Door", "actor": "watcher", "metric": "nearby_gameobject_state", "entry": 176907, "equals": 1 },
+    { "action": "assert", "label": "Ironbark the Redeemed is hidden before Hydrospawn and Zevrim Thornhoof die", "actor": "hero", "metric": "can_detect", "target": "redeemed", "equals": 0 },
+    { "action": "summon", "actor": "hero", "as": "hydrospawn", "entry": 13280, "distance": 3 },
+    { "action": "attack", "actor": "hero", "target": "hydrospawn" },
+    { "action": "assert", "label": "CONTROL: Hydrospawn fights the hero", "actor": "hydrospawn", "metric": "combat", "equals": 1, "within_ms": 10000 },
+    { "action": "set_health", "actor": "hydrospawn", "value": 1 },
+    { "action": "assert", "label": "CONTROL: Hydrospawn dies", "actor": "hydrospawn", "metric": "alive", "equals": 0, "within_ms": 30000 },
+    { "action": "wait", "ms": 8000 },
+    { "action": "assert", "label": "The Conservatory Door stays shut after Hydrospawn dies", "actor": "watcher", "metric": "nearby_gameobject_state", "entry": 176907, "equals": 1 },
+    { "action": "assert", "label": "Ironbark the Redeemed stays hidden while Zevrim Thornhoof lives", "actor": "hero", "metric": "can_detect", "target": "redeemed", "equals": 0 },
+    { "action": "attack", "actor": "hero", "target": "zevrim" },
+    { "action": "assert", "label": "CONTROL: Zevrim Thornhoof fights the hero", "actor": "zevrim", "metric": "combat", "equals": 1, "within_ms": 10000 },
+    { "action": "set_health", "actor": "zevrim", "value": 1 },
+    { "action": "assert", "label": "CONTROL: Zevrim Thornhoof dies", "actor": "zevrim", "metric": "alive", "equals": 0, "within_ms": 30000 },
+    { "action": "wait", "ms": 8000 },
+    { "action": "assert", "label": "The Conservatory Door stays shut after Zevrim Thornhoof dies too", "actor": "watcher", "metric": "nearby_gameobject_state", "entry": 176907, "equals": 1 },
+    { "action": "assert", "label": "Ironbark the Redeemed is visible after Hydrospawn and Zevrim Thornhoof die", "actor": "hero", "metric": "can_detect", "target": "redeemed", "equals": 1, "within_ms": 10000 },
+    { "action": "gossip_hello", "actor": "hero", "target": "redeemed" },
+    { "action": "assert", "label": "Ironbark the Redeemed offers to open the door", "actor": "hero", "metric": "gossip_options", "min": 1 },
+    { "action": "gossip_select", "actor": "hero", "option": 0 },
+    { "action": "assert", "label": "Ironbark the Redeemed walks to the door and opens it", "actor": "watcher", "metric": "nearby_gameobject_state", "entry": 176907, "equals": 0, "within_ms": 90000 },
+    { "action": "assert", "label": "Ironbark the Redeemed dies after opening the door", "actor": "redeemed", "metric": "alive", "equals": 0, "within_ms": 15000 }
+  ]
+}
