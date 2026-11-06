@@ -490,7 +490,7 @@ def validate(scenario):
             number(item, 'vanity_ownership.starter_items', 1, 2**32 - 1, True)
     if 'two_side' in scenario:
         two_side = scenario['two_side']
-        keys(two_side, set(), {'trade', 'mail'}, 'two_side')
+        keys(two_side, set(), {'trade', 'mail', 'group'}, 'two_side')
         for name, value in two_side.items():
             require(type(value) is bool, f'two_side.{name} must be boolean')
     if 'quest_log_size' in scenario:

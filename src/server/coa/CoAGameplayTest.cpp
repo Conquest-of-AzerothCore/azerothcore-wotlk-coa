@@ -566,6 +566,8 @@ public:
     {
         Set(CONFIG_ALLOW_TWO_SIDE_TRADE, settings.get<bool>("trade", false));
         Set(CONFIG_ALLOW_TWO_SIDE_INTERACTION_MAIL, settings.get<bool>("mail", false));
+        if (auto group = settings.get_optional<bool>("group"))
+            Set(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP, *group);
     }
 
     TwoSideConfig(TwoSideConfig const&) = delete;

@@ -69,6 +69,18 @@
     },
     {
       "action": "assert",
+      "label": "Drowned Diver's Ring (6970038) is in the cave under the crag",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6970038,
+      "spawn_type": "gameobject",
+      "x": -4953.4,
+      "y": -2295.7,
+      "z": -64.55,
+      "max": 1
+    },
+    {
+      "action": "assert",
       "label": "Scuba Slayer's Blade (6970042) rests on the cave floor",
       "actor": "p",
       "metric": "spawn_ground_gap",
@@ -107,6 +119,18 @@
     },
     {
       "action": "assert",
+      "label": "Scuba Slayer's Blade (6970042) is in the cave under the crag",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6970042,
+      "spawn_type": "gameobject",
+      "x": -4954.3,
+      "y": -2296.4,
+      "z": -64.55,
+      "max": 1
+    },
+    {
+      "action": "assert",
       "label": "Drowned Diver's Helm (6970037) rests on the cave floor",
       "actor": "p",
       "metric": "spawn_ground_gap",
@@ -142,6 +166,18 @@
       "guid": 6970037,
       "spawn_type": "gameobject",
       "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "Drowned Diver's Helm (6970037) is in the cave under the crag",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6970037,
+      "spawn_type": "gameobject",
+      "x": -4953.3,
+      "y": -2297.0,
+      "z": -64.55,
+      "max": 1
     }
   ]
 }

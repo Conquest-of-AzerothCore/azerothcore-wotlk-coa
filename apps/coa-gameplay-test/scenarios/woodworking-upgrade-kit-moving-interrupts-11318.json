@@ -120,6 +120,14 @@
       "metric": "item_count",
       "item": 8210230,
       "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the interrupted craft keeps its fiber",
+      "actor": "mover",
+      "metric": "item_count",
+      "item": 1006603,
+      "equals": 2
     }
   ]
 }

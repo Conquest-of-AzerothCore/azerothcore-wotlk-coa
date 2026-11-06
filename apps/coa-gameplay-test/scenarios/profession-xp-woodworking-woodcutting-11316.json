@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Woodworking crafts and Woodcutting gathers award profession XP (#11316)",
-  "contract": "Issue #11316. The live Ascension CoA config carries Woodworking (1.0) and Woodcutting (0.33) profession XP modifiers, but the core only mapped the other professions, so both awarded nothing. At level 20 (23,200 XP to level) with the repack's Rate.XP.Profession 0.4 and Rate.XP.Global 0.9295, a yellow Forestwood Upgrade Kit craft awards floor(23200 * 0.02 * 0.4 * 1.0 * 0.9295) = 172 XP and a yellow Woodcutting gather 56 XP. Lockpicking, whose captured modifier is 0, still awards none.",
+  "contract": "Issue #11316. The live Ascension CoA config carries Woodworking (1.0) and Woodcutting (0.33) profession XP modifiers, but the core only mapped the other professions, so both awarded nothing. Every profession award shares floor(next-level XP * BaseFraction * Rate.XP.Profession * profession * difficulty * Rate.XP.Global), so the scenario compares each award with a yellow Mining gather (2.11) in the same run and holds for any Rate.XP.Profession: a yellow Forestwood Upgrade Kit craft gives about 1.0/2.11 = 0.474 of it (172/364 at the repack's 0.4, 86/182 at the shipped 0.2) and a yellow Woodcutting gather about 0.33/2.11 = 0.154 (56/364, 28/182). Lockpicking, whose captured modifier is 0, still awards none.",
   "timeout_ms": 90000,
   "location": {
     "map": 0,
@@ -29,6 +29,41 @@
       "actor": "p",
       "metric": "next_level_xp",
       "equals": 23200
+    },
+    {
+      "action": "set_skill",
+      "actor": "p",
+      "skill": 186,
+      "value": 26,
+      "maximum": 75
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "xp",
+      "save_as": "mine_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "p",
+      "skill": 186,
+      "required": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Reference: a yellow Mining gather at the 2.11 modifier",
+      "actor": "p",
+      "metric": "xp",
+      "relative_to": "mine_before",
+      "save_as": "mining_xp"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mining reference awards XP",
+      "actor": "p",
+      "metric": "xp",
+      "relative_to": "mine_before",
+      "min": 1
     },
     {
       "action": "set_skill",
@@ -84,12 +119,13 @@
     },
     {
       "action": "assert",
-      "label": "CONTRACT: a yellow Woodworking craft awards XP at the 1.0 modifier",
+      "label": "CONTRACT: a yellow Woodworking craft awards 1.0/2.11 of the Mining reference",
       "actor": "p",
       "metric": "xp",
       "relative_to": "craft_before",
-      "min": 171,
-      "max": 173
+      "min": 0.46,
+      "max": 0.49,
+      "ratio_to": "mining_xp"
     },
     {
       "action": "set_skill",
@@ -112,12 +148,13 @@
     },
     {
       "action": "assert",
-      "label": "CONTRACT: a yellow Woodcutting gather awards XP at the 0.33 modifier",
+      "label": "CONTRACT: a yellow Woodcutting gather awards 0.33/2.11 of the Mining reference",
       "actor": "p",
       "metric": "xp",
       "relative_to": "wood_before",
-      "min": 55,
-      "max": 57
+      "min": 0.145,
+      "max": 0.165,
+      "ratio_to": "mining_xp"
     },
     {
       "action": "set_skill",
