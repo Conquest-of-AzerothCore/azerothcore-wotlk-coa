@@ -65,6 +65,7 @@ void AddSC_CoAStatisticQuery();
 void AddSC_CoABossProbe();
 void AddSC_CoADungeonSpellDamage();
 void AddSC_CoAGameObjectScale();
+void AddSC_CoABossLeash();
 void AddSC_CoACreatureScaling();
 void AddSC_CoADungeonBossKit();
 void AddSC_CoAFierceBlow();
@@ -858,6 +859,7 @@ void AddCoAScripts()
     AddSC_CoABossProbe();
     AddSC_CoADungeonSpellDamage();
     AddSC_CoAGameObjectScale();
+    AddSC_CoABossLeash();
     AddSC_CoACreatureScaling();
     AddSC_CoADungeonBossKit();
     AddSC_CoAFierceBlow();
