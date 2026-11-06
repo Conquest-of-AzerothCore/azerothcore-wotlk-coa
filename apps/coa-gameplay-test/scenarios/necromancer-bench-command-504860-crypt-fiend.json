@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "name": "BENCH: Command: Crypt Fiend (504860) kill gives the necromancer experience with no swing",
+  "contract": "SoloKill.RequirePlayerHit (#10365, default 1): an ungrouped player gets experience from a creature only if they 'hit' it (Creature::AddDirectPlayerAttacker). This bench proves whether Command: Crypt Fiend (504860), which orders the Animate: Crypt Fiend minion (50323, raised with the free Animate 801941, cost 0 Life Force) at a creature, registers as that hit. The necromancer never swings or casts a harmful spell at the target; only the Command order is used.",
+  "timeout_ms": 600000,
+  "players": [
+    {
+      "id": "n",
+      "race": 1,
+      "class": 23,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "n",
+      "entry": 36,
+      "level": 60,
+      "health": 300,
+      "distance": 25
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 801941 },
+    { "action": "learn", "actor": "n", "spell": 504860 },
+    { "action": "reset_cooldown", "actor": "n", "spell": 801941 },
+    { "action": "cast", "actor": "n", "spell": 801941, "label": "n: Animate: Crypt Fiend" },
+    {
+      "action": "assert",
+      "label": "SETUP: Crypt Fiend minion present",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50323,
+      "min": 1,
+      "within_ms": 5000
+    },
+    { "action": "wait", "ms": 2000 },
+    { "action": "snapshot", "actor": "n", "metric": "xp", "save_as": "xp0" },
+    { "action": "snapshot", "actor": "n", "metric": "melee_attack_count", "save_as": "swings0" },
+    { "action": "set_power", "actor": "n", "power": 6, "value": 1000 },
+    { "action": "reset_cooldown", "actor": "n", "spell": 504860 },
+    {
+      "action": "cast",
+      "actor": "n",
+      "spell": 504860,
+      "target": "target",
+      "label": "n: Command: Crypt Fiend on the creature"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Command cast went off",
+      "actor": "n",
+      "metric": "spell_go_count",
+      "spell": 504860,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the creature dies",
+      "actor": "target",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 120000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the necromancer never swung",
+      "actor": "n",
+      "metric": "melee_attack_count",
+      "relative_to": "swings0",
+      "equals": 0
+    },
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert",
+      "label": "BENCH: the Crypt Fiend's commanded kill gives the necromancer experience",
+      "actor": "n",
+      "metric": "xp",
+      "relative_to": "xp0",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "BENCH: the necromancer's level is unchanged",
+      "actor": "n",
+      "metric": "level",
+      "equals": 60
+    }
+  ]
+}

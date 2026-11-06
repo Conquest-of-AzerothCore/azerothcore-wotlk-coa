@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "Necromancer bench: Command: Ghouls lets a commanded kill give experience with no swing",
+  "contract": "SoloKill.RequirePlayerHit (#10365) gives an ungrouped player experience from a creature only if the player registered a hit on it. Order() (AscensionNecromancerSummons.cpp:405) drives the minion but may not register that hit. Raise: Ghoul 500971 (cost 1 Life Force, no Life Force talent needed) summons creature 50073; Command: Ghouls 504021 is plain trainer-learnable (SkillLineAbility 23148, no talent gate). The Necromancer raises one Ghoul, orders Command: Ghouls at a creature, never swings, and the Ghoul alone kills it. This bench checks whether the necromancer still gains experience from that kill.",
+  "timeout_ms": 180000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    {
+      "id": "n",
+      "race": 1,
+      "class": 23,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "target", "owner": "n", "entry": 36, "level": 60, "health": 300, "distance": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 500971 },
+    { "action": "learn", "actor": "n", "spell": 504021 },
+    { "action": "set_power", "actor": "n", "power": 0, "value": 500 },
+    { "action": "cast", "label": "Raise a Ghoul", "actor": "n", "spell": 500971 },
+    {
+      "action": "assert", "label": "SETUP: one Ghoul is raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50073, "min": 1, "within_ms": 8000
+    },
+    { "action": "wait", "label": "Let the Ghoul take its formation place and the global cooldown pass", "ms": 2000 },
+    { "action": "snapshot", "actor": "n", "metric": "xp", "save_as": "xp0" },
+    { "action": "snapshot", "actor": "n", "metric": "melee_attack_count", "save_as": "swings0" },
+    { "action": "set_power", "actor": "n", "power": 6, "value": 1000 },
+    { "action": "reset_cooldown", "actor": "n", "spell": 504021 },
+    {
+      "action": "select_nearby",
+      "label": "Select the creature so Order() finds it through GetTarget() (504021's own effect targets the caster)",
+      "actor": "n", "entry": 36
+    },
+    {
+      "action": "cast", "label": "Command: Ghouls on the creature", "actor": "n", "spell": 504021, "target": "target"
+    },
+    {
+      "action": "assert", "label": "SETUP: the Command cast went through", "actor": "n",
+      "metric": "spell_go_count", "spell": 504021, "min": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the Ghoul kills the creature", "actor": "target",
+      "metric": "alive", "equals": 0, "within_ms": 120000
+    },
+    {
+      "action": "assert", "label": "SETUP: the necromancer never swung", "actor": "n",
+      "metric": "melee_attack_count", "relative_to": "swings0", "equals": 0
+    },
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert", "label": "BENCH: the commanded kill gives experience", "actor": "n",
+      "metric": "xp", "relative_to": "xp0", "min": 1, "within_ms": 3000
+    },
+    { "action": "assert", "label": "BENCH: the experience did not cross a level", "actor": "n", "metric": "level", "equals": 60 }
+  ]
+}

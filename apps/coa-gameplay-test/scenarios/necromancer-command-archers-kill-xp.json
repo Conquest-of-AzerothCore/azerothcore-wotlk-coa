@@ -1,0 +1,539 @@
+{
+  "schema": 1,
+  "name": "A Command on a creature makes the necromancer's Skeletal Archers' kill count, with level scaling on and off",
+  "contract": "SoloKill.RequirePlayerHit (default 1): an ungrouped player gets experience from a creature only if they hit it themselves. A Command order to the necromancer's minions counts as that hit. A level-60 necromancer raises three Skeletal Archers 50076 with Animate 805040 and kills a first creature with a melee swing (experience). Then Command: Skeletal Archers 504319 on a second creature 35 yards away lets the archers kill it without another swing, and the necromancer still gets experience. A third creature the archers kill with no Command gives nothing. The same sequence runs for a necromancer with level scaling on and one with it off.",
+  "timeout_ms": 600000,
+  "players": [
+    {
+      "id": "scaled",
+      "race": 1,
+      "class": 23,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "plain",
+      "race": 1,
+      "class": 23,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "a1",
+      "owner": "scaled",
+      "entry": 36,
+      "level": 60,
+      "health": 3000,
+      "distance": 3
+    },
+    {
+      "id": "b1",
+      "owner": "scaled",
+      "entry": 36,
+      "level": 60,
+      "health": 300,
+      "distance": 35
+    },
+    {
+      "id": "c1",
+      "owner": "scaled",
+      "entry": 36,
+      "level": 60,
+      "health": 300,
+      "distance": 35
+    },
+    {
+      "id": "a2",
+      "owner": "plain",
+      "entry": 36,
+      "level": 60,
+      "health": 3000,
+      "distance": 3
+    },
+    {
+      "id": "b2",
+      "owner": "plain",
+      "entry": 36,
+      "level": 60,
+      "health": 300,
+      "distance": 35
+    },
+    {
+      "id": "c2",
+      "owner": "plain",
+      "entry": 36,
+      "level": 60,
+      "health": 300,
+      "distance": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "scaled",
+      "spell": 805040
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 805040
+    },
+    {
+      "action": "learn",
+      "actor": "scaled",
+      "spell": 504319
+    },
+    {
+      "action": "learn",
+      "actor": "plain",
+      "spell": 504319
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "plain",
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "scaled",
+      "metric": "xp",
+      "save_as": "scaled_xp0"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "scaled",
+      "spell": 805040
+    },
+    {
+      "action": "cast",
+      "actor": "scaled",
+      "spell": 805040,
+      "label": "scaled: Animate Skeletal Archers"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP scaled: archers present",
+      "actor": "scaled",
+      "metric": "owned_creature_count",
+      "entry": 50076,
+      "min": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "attack",
+      "actor": "scaled",
+      "target": "a1",
+      "label": "scaled: the necromancer attacks the first creature"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP scaled: the first creature dies",
+      "actor": "a1",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP scaled: the necromancer swung at the first creature",
+      "actor": "scaled",
+      "metric": "melee_attack_count",
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL scaled: the first kill gives experience",
+      "actor": "scaled",
+      "metric": "xp",
+      "relative_to": "scaled_xp0",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "scaled"
+    },
+    {
+      "action": "snapshot",
+      "actor": "scaled",
+      "metric": "xp",
+      "save_as": "scaled_xp1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "scaled",
+      "metric": "melee_attack_count",
+      "save_as": "scaled_swings1"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "scaled",
+      "spell": 805040
+    },
+    {
+      "action": "cast",
+      "actor": "scaled",
+      "spell": 805040,
+      "label": "scaled: Animate Skeletal Archers"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP scaled: archers present",
+      "actor": "scaled",
+      "metric": "owned_creature_count",
+      "entry": 50076,
+      "min": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "scaled",
+      "spell": 504319
+    },
+    {
+      "action": "set_power",
+      "actor": "scaled",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "scaled",
+      "spell": 504319,
+      "target": "b1",
+      "label": "scaled: Command: Skeletal Archers on the second creature"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP scaled: the archers kill the second creature",
+      "actor": "b1",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP scaled: the necromancer swung no more",
+      "actor": "scaled",
+      "metric": "melee_attack_count",
+      "relative_to": "scaled_swings1",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING scaled: the commanded kill gives experience",
+      "actor": "scaled",
+      "metric": "xp",
+      "relative_to": "scaled_xp1",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "scaled",
+      "metric": "xp",
+      "save_as": "scaled_xp2"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "scaled",
+      "spell": 805040
+    },
+    {
+      "action": "cast",
+      "actor": "scaled",
+      "spell": 805040,
+      "label": "scaled: Animate Skeletal Archers"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP scaled: archers present",
+      "actor": "scaled",
+      "metric": "owned_creature_count",
+      "entry": 50076,
+      "min": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "attack",
+      "actor": "scaled",
+      "target": "c1",
+      "label": "scaled: target the third creature"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "scaled"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP scaled: the archers kill the third creature",
+      "actor": "c1",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP scaled: the necromancer swung no more",
+      "actor": "scaled",
+      "metric": "melee_attack_count",
+      "relative_to": "scaled_swings1",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "scaled: archers acting without a Command still earn nothing",
+      "actor": "scaled",
+      "metric": "xp",
+      "relative_to": "scaled_xp2",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "xp",
+      "save_as": "plain_xp0"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "plain",
+      "spell": 805040
+    },
+    {
+      "action": "cast",
+      "actor": "plain",
+      "spell": 805040,
+      "label": "plain: Animate Skeletal Archers"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP plain: archers present",
+      "actor": "plain",
+      "metric": "owned_creature_count",
+      "entry": 50076,
+      "min": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "attack",
+      "actor": "plain",
+      "target": "a2",
+      "label": "plain: the necromancer attacks the first creature"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP plain: the first creature dies",
+      "actor": "a2",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP plain: the necromancer swung at the first creature",
+      "actor": "plain",
+      "metric": "melee_attack_count",
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL plain: the first kill gives experience",
+      "actor": "plain",
+      "metric": "xp",
+      "relative_to": "plain_xp0",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "plain"
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "xp",
+      "save_as": "plain_xp1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "melee_attack_count",
+      "save_as": "plain_swings1"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "plain",
+      "spell": 805040
+    },
+    {
+      "action": "cast",
+      "actor": "plain",
+      "spell": 805040,
+      "label": "plain: Animate Skeletal Archers"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP plain: archers present",
+      "actor": "plain",
+      "metric": "owned_creature_count",
+      "entry": 50076,
+      "min": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "plain",
+      "spell": 504319
+    },
+    {
+      "action": "set_power",
+      "actor": "plain",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "plain",
+      "spell": 504319,
+      "target": "b2",
+      "label": "plain: Command: Skeletal Archers on the second creature"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP plain: the archers kill the second creature",
+      "actor": "b2",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP plain: the necromancer swung no more",
+      "actor": "plain",
+      "metric": "melee_attack_count",
+      "relative_to": "plain_swings1",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING plain: the commanded kill gives experience",
+      "actor": "plain",
+      "metric": "xp",
+      "relative_to": "plain_xp1",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "xp",
+      "save_as": "plain_xp2"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "plain",
+      "spell": 805040
+    },
+    {
+      "action": "cast",
+      "actor": "plain",
+      "spell": 805040,
+      "label": "plain: Animate Skeletal Archers"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP plain: archers present",
+      "actor": "plain",
+      "metric": "owned_creature_count",
+      "entry": 50076,
+      "min": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "attack",
+      "actor": "plain",
+      "target": "c2",
+      "label": "plain: target the third creature"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "plain"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP plain: the archers kill the third creature",
+      "actor": "c2",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP plain: the necromancer swung no more",
+      "actor": "plain",
+      "metric": "melee_attack_count",
+      "relative_to": "plain_swings1",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "plain: archers acting without a Command still earn nothing",
+      "actor": "plain",
+      "metric": "xp",
+      "relative_to": "plain_xp2",
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}
