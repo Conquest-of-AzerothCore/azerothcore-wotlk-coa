@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Early landing on a direct flight keeps the route to its destination",
+  "contract": "During a flight the original action bar's leave button calls TaxiRequestEarlyLanding(), which Extensions.dll sends as the empty CMSG_TAXI_REQUEST_EARLY_LANDING (0x05F2), and the client disables the button without waiting for a reply. Retail's early landing ends the flight at the next discovered flight point on its route and drops the rest, unless that point is already the destination. The Gadgetzan - Freewind Post flight (TaxiPath 310, 430 copper) is one leg with no flight point between them. Expected: asked to land early, the flight keeps Freewind Post as its destination, stays in the air, lands at Freewind Post and pays nothing beyond the one leg.",
+  "timeout_ms": 300000,
+  "location": { "map": 1, "x": -7048.89, "y": -3780.36, "z": 10.19, "o": 0 },
+  "players": [
+    { "id": "traveler", "race": 2, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "wind_rider_master", "owner": "traveler", "entry": 7824, "faction": 29 }
+  ],
+  "steps": [
+    { "action": "discover_taxi_node", "actor": "traveler", "entry": 40 },
+    { "action": "discover_taxi_node", "actor": "traveler", "entry": 30 },
+    { "action": "set_money", "actor": "traveler", "value": 10000 },
+    { "action": "snapshot", "actor": "traveler", "metric": "carried_money", "save_as": "before_departure" },
+    {
+      "action": "client_packet", "label": "Fly Gadgetzan - Freewind Post", "actor": "traveler",
+      "opcode": 786, "consumed": false,
+      "fields": [
+        { "actor_guid": "wind_rider_master" }, { "u32": 2 }, { "u32": 40 }, { "u32": 30 }
+      ]
+    },
+    {
+      "action": "assert", "label": "The flight starts", "actor": "traveler", "metric": "in_flight", "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The route ends at Freewind Post", "actor": "traveler",
+      "metric": "taxi_destination", "equals": 30
+    },
+    {
+      "action": "assert", "label": "The one leg is paid at departure", "actor": "traveler",
+      "metric": "carried_money", "relative_to": "before_departure", "min": -430, "max": -1
+    },
+    { "action": "snapshot", "actor": "traveler", "metric": "carried_money", "save_as": "after_departure" },
+    { "action": "wait", "label": "Fly for a while", "ms": 5000 },
+    {
+      "action": "client_packet", "label": "Ask to land early", "actor": "traveler", "opcode": 1522,
+      "consumed": false
+    },
+    {
+      "action": "assert", "label": "The route still ends at Freewind Post", "actor": "traveler",
+      "metric": "taxi_destination", "equals": 30
+    },
+    {
+      "action": "assert", "label": "The traveler keeps flying", "actor": "traveler", "metric": "in_flight",
+      "equals": 1
+    },
+    {
+      "action": "assert", "label": "The flight lands", "actor": "traveler", "metric": "in_flight", "equals": 0,
+      "within_ms": 240000
+    },
+    {
+      "action": "assert", "label": "It lands at the Freewind Post flight point", "actor": "traveler",
+      "metric": "position_x", "min": -5427.71, "max": -5387.71
+    },
+    { "action": "assert", "actor": "traveler", "metric": "position_y", "min": -2434.3, "max": -2394.3 },
+    {
+      "action": "assert", "label": "Nothing more is paid", "actor": "traveler",
+      "metric": "carried_money", "relative_to": "after_departure", "equals": 0
+    }
+  ]
+}

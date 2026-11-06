@@ -1,0 +1,188 @@
+{
+  "schema": 1,
+  "name": "Wildcard Hero Frostchaser is usable after every target dodge, not just the first (#6327)",
+  "contract": [
+    "Frostchaser 907700 ('Only usable after the target dodges') has CasterAuraState 24, Ascension's target-dodged",
+    "state that Unit::ProcDamageAndSpellFor sets for any player attacker on a dodge and clears after the reactive",
+    "timer. A Wildcard Hero with ample rage must be refused before any dodge (SPELL_FAILED_CASTER_AURASTATE 22),",
+    "then strike after a dodge, and strike again after a later dodge once its 5 s cooldown is over.",
+    "The target carries QA Test 100% Dodge 10020 so that every native swing is dodged; Frostchaser itself has",
+    "The target gets QA Test 100% Dodge 10020 through the GM '.aura' command on the selected fixture creature (set_aura owned_entry needs a spell-summoned owned creature), so every native swing is dodged; Frostchaser itself has SPELL_ATTR0_NO_ACTIVE_DEFENSE and cannot be dodged.",
+    "The hero has melee hit rating so a Frostchaser hit cannot miss: the first rerun's third cast sent no SMSG_CAST_FAILED (so the target-dodged state 24 check passed) yet dealt no damage, which a yellow-hit miss explains. The spell_go_count asserts separate 'the cast went off' from 'it landed'."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "name": "Wildfrost",
+      "race": 1,
+      "class": 10,
+      "level": 20,
+      "allow_regeneration": false,
+      "security": 2,
+      "melee_hit_rating": 100000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 20,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Wildfrost"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "game_mode_mask",
+      "min": 64
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 907700
+    },
+    {
+      "action": "select_nearby",
+      "actor": "hero",
+      "entry": 36,
+      "radius": 10
+    },
+    {
+      "action": "command",
+      "actor": "hero",
+      "command": ".aura 10020"
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 907700,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Before any dodge Frostchaser is refused on the caster aura state",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 907700,
+      "equals": 22,
+      "within_ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "hero",
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "melee_attack_count",
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 907700,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DIAG: Frostchaser cast 2 goes off (not queued or refused)",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 907700,
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "After a dodge the first Frostchaser strikes",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 907700,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "label": "Frostchaser and its category share a 5 s cooldown",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "melee_attack_count",
+      "target": "dummy",
+      "min": 3,
+      "within_ms": 6000
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 907700,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "DIAG: Frostchaser cast 3 goes off (not queued or refused)",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 907700,
+      "min": 2,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "A later dodge makes Frostchaser usable again",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 907700,
+      "target": "dummy",
+      "min": 2,
+      "within_ms": 1500
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    }
+  ]
+}

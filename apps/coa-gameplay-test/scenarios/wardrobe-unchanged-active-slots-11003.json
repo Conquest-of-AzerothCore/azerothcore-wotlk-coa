@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "name": "Wardrobe validates only changed slots, so an active set does not block other transmogs (#11003, #8897)",
+  "contract": [
+    "Extensions.dll ApplyPendingAppearances validates only the categories the player changed, then sends the",
+    "whole pending array in CMSG_APPLY_APPEARANCES (0x0697); unchanged slots carry the current active appearance.",
+    "APPLY_APPEARANCES_OK makes the client's current array its pending one, and SMSG_APPEARANCE_ACTIVE_INFO",
+    "(opcode 1690; word category+1) replaces both with the server's array. Appearances.dbc row 17650 is the",
+    "Hexflame Coven item set (category 55); its pieces 3162-3174 all have categories (1, 0, 0) and",
+    "ExpandItemSetAppearance stores them by InventoryType in slots 1-11, so shoulder appearance 3163 is active in",
+    "category 2. The server must send that expanded array after the apply, accept it back unchanged with a new",
+    "thrown appearance 12001 (category 12) instead of APPLY_APPEARANCES_INVALID_CATEGORY, keep shoulder 35",
+    "(category 2) chosen over a piece while the set stays selected instead of expanding the set again, and clear",
+    "the set's unchanged pieces, but not the player's own choices, when the set is removed. A relog reads",
+    "character_appearance back. CoA.UnlockLocalAppearanceCatalog collects every appearance, so the reports'",
+    "uncollected active slots cannot be fixtured; they take the same unchanged-slot path. Each save is an",
+    "asynchronous character transaction; the waits let one commit before the next, because the simulated-clock",
+    "harness runs several character database workers that do not keep their order."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wearer", "race": 1, "class": 12, "level": 20 }
+  ],
+  "steps": [
+    { "action": "apply_appearances", "actor": "wearer", "selection": { "55": 17650 } },
+    {
+      "action": "assert", "label": "The set selection is accepted", "actor": "wearer",
+      "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_OK", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The client is told the set shoulders are active in category 2", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 3, "equals": 3163
+    },
+    { "action": "wait", "label": "Let the saved appearances commit before the next write", "ms": 1000 },
+    {
+      "action": "snapshot", "actor": "wearer", "metric": "server_packets", "opcode": 1688,
+      "save_as": "before_weapon"
+    },
+    {
+      "action": "apply_appearances", "actor": "wearer",
+      "selection": {
+        "1": 3162, "2": 3163, "3": 3164, "4": 3165, "7": 3170, "8": 3174, "9": 3168, "10": 3169, "11": 3171,
+        "12": 12001, "55": 17650
+      }
+    },
+    {
+      "action": "assert", "label": "The weapon request receives one response", "actor": "wearer",
+      "metric": "server_packets", "opcode": 1688, "relative_to": "before_weapon", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Unchanged set slots do not reject the new weapon appearance", "actor": "wearer",
+      "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_OK", "equals": 1
+    },
+    { "action": "wait", "label": "Let the saved appearances commit before the next write", "ms": 1000 },
+    {
+      "action": "apply_appearances", "actor": "wearer",
+      "selection": {
+        "1": 3162, "2": 35, "3": 3164, "4": 3165, "7": 3170, "8": 3174, "9": 3168, "10": 3169, "11": 3171,
+        "12": 12001, "55": 17650
+      }
+    },
+    {
+      "action": "assert", "label": "Changing a set slot is accepted", "actor": "wearer",
+      "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_OK", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The client is told shoulders 35 are active in category 2", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 3, "equals": 35
+    },
+    { "action": "wait", "label": "Let the saved appearances commit before the relog", "ms": 1000 },
+    { "action": "relog", "label": "Reload the saved active appearances", "actor": "wearer" },
+    {
+      "action": "assert", "label": "The chosen shoulders replace the set piece in category 2", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 3, "equals": 35
+    },
+    {
+      "action": "assert", "label": "The set head piece stays in category 1", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 2, "equals": 3162
+    },
+    {
+      "action": "assert", "label": "The thrown appearance is saved in category 12", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 13, "equals": 12001
+    },
+    {
+      "action": "assert", "label": "The set selection stays in category 55", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 56, "equals": 17650
+    },
+    {
+      "action": "apply_appearances", "actor": "wearer",
+      "selection": {
+        "1": 3162, "2": 35, "3": 3164, "4": 3165, "7": 3170, "8": 3174, "9": 3168, "10": 3169, "11": 3171,
+        "12": 12001
+      }
+    },
+    {
+      "action": "assert", "label": "Removing the set is accepted", "actor": "wearer",
+      "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_OK", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Removing the set clears its head piece", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 2, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Removing the set keeps the chosen shoulders", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 3, "equals": 35
+    },
+    {
+      "action": "assert", "label": "Removing the set keeps the thrown appearance", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 13, "equals": 12001
+    },
+    {
+      "action": "assert", "label": "The set selection is cleared", "actor": "wearer",
+      "metric": "server_packet_u32", "opcode": 1690, "index": 56, "equals": 0
+    }
+  ]
+}

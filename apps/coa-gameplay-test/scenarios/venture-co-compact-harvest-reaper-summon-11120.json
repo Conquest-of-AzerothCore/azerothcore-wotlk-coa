@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Compact Harvest Reaper 7979 summons creature 267600 (#11120)",
+  "contract": "Spell 7979 'Compact Harvest Reaper' (cast by Venture Co. Machine Smith, Tinkerer and Engineer Whirleygig) has one SPELL_EFFECT_SUMMON naming creature 267600. That entry had no creature_template row, so Creature::Create refused it and the cast succeeded with nothing appearing. The stock summon 4078 names creature 2676, the Compact Harvest Reaper the new row clones. The cast must be accepted and, once its cast time has passed, the caster must own a living creature of entry 267600.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 12, "level": 30 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "caster", "spell": 7979 },
+    { "action": "assert", "label": "SETUP: no harvester before the cast", "actor": "caster",
+      "metric": "owned_creature_count", "entry": 267600, "equals": 0 },
+    { "action": "cast", "actor": "caster", "spell": 7979 },
+    { "action": "assert", "actor": "caster", "metric": "cast_failure", "spell": 7979, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: the summoned Compact Harvest Reaper appears", "actor": "caster",
+      "metric": "owned_creature_count", "entry": 267600, "min": 1, "within_ms": 6000 }
+  ]
+}

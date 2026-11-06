@@ -745,12 +745,12 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
         tab = &emptyTemplate;
     }
 
-    sScriptMgr->OnAfterLootTemplateProcess(this, tab, store, lootOwner, personal, noEmptyError, lootMode);
-
     if (dungeonDifficulty && &store == &LootTemplates_Creature && lootSource && lootSource->IsCreature())
         if (Creature const* boss = lootSource->ToCreature();
             boss->IsDungeonBoss() || boss->GetCreatureTemplate()->rank == CREATURE_ELITE_WORLDBOSS)
             GuaranteeOneGearDrop(*tab);
+
+    sScriptMgr->OnAfterLootTemplateProcess(this, tab, store, lootOwner, personal, noEmptyError, lootMode);
 
     // Setting access rights for group loot case
     Group* group = lootOwner->GetGroup();

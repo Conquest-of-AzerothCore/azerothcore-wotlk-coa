@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "A weapon's chance-on-hit spell grants no runic power (#10796 guard)",
+  "contract": "Report #10796 says item chance-on-hit spells (Cobalt Crusher, Axe of the Deep Woods) grant rage or runic power as if they were melee hits, a defect of the original Bronzebeard release that Ascension later removed. On this server the proc is cast by Player::CastItemCombatSpell with the item as cast item, so Spell::TakePower returns before any rune or runic-power handling, and its SCHOOL_DAMAGE effect (DmgClass 1, magic) is dealt as SPELL_DIRECT_DAMAGE, which Unit::DealDamage never rewards with attacker rage (only DIRECT_DAMAGE weapon swings). A level-60 Death Knight cannot be created by the harness (CharacterCreating.MinLevelForHeroicCharacter = 55 needs a level-55 character on the account), so a WildCard Hero that has learned Blood Strike 45902 carries the runic power pool; its white swings give no runic power, so any runic power seen while swinging could only come from the proc. Cobalt Crusher 7730 (Frost Blast 18204, 1.875 PPM, mean 5.6 procs in 180 s, P(no proc) about 0.4%) is swung at a dummy; the case asserts the proc fired and runic power is still zero, then a Blood Strike control shows the pool does fill.",
+  "timeout_ms": 300000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "m1",
+      "owner": "p",
+      "entry": 36,
+      "level": 60,
+      "health": 5000000,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Harnessa" },
+    { "action": "learn", "actor": "p", "spell": 199 },
+    { "action": "set_skill", "actor": "p", "skill": 160, "value": 300, "maximum": 300 },
+    { "action": "learn", "actor": "p", "spell": 45902 },
+    { "action": "add_item", "actor": "p", "item": 7730 },
+    { "action": "equip", "actor": "p", "item": 7730, "slot": 15 },
+    { "action": "assert", "label": "SETUP: the Crusher swings every 3.2 s", "actor": "p", "metric": "attack_time_ms", "equals": 3200, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: the Hero has a runic power pool", "actor": "p", "metric": "max_power", "power": 6, "min": 1000, "within_ms": 2000 },
+    { "action": "set_power", "actor": "p", "power": 6, "value": 0 },
+    { "action": "attack", "actor": "p", "target": "m1" },
+    { "action": "wait", "ms": 180000 },
+    { "action": "assert", "label": "SETUP: Frost Blast procced from the weapon", "actor": "p", "metric": "spell_cast_count", "spell": 18204, "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the procs granted no runic power", "actor": "p", "metric": "power", "power": 6, "equals": 0 },
+    { "action": "cast", "label": "CONTROL: a rune strike fills the same pool", "actor": "p", "spell": 45902, "target": "m1" },
+    { "action": "assert", "actor": "p", "metric": "spell_damage_count", "spell": 45902, "target": "m1", "min": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTROL: runic power is measurable here", "actor": "p", "metric": "power", "power": 6, "min": 1, "within_ms": 2000 }
+  ]
+}

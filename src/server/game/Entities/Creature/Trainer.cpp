@@ -54,26 +54,13 @@ namespace
         return RankTrainerHeroOf ? RankTrainerHeroOf(player) : IsWildcardHero(player);
     }
 
-    uint8 ProfessionExpansion(uint32 skill)
-    {
-        switch (skill)
-        {
-            case SKILL_JEWELCRAFTING:
-                return EXPANSION_THE_BURNING_CRUSADE;
-            case SKILL_INSCRIPTION:
-                return EXPANSION_WRATH_OF_THE_LICH_KING;
-            default:
-                return EXPANSION_CLASSIC;
-        }
-    }
-
     bool TeachesProfessionBeyondExpansion(SpellInfo const* spellInfo, uint8 expansion)
     {
         for (SpellEffectInfo const& spellEffectInfo : spellInfo->GetEffects())
             if ((spellEffectInfo.IsEffect(SPELL_EFFECT_SKILL_STEP) || spellEffectInfo.IsEffect(SPELL_EFFECT_SKILL))
                 && IsProfessionSkill(spellEffectInfo.MiscValue)
                 && (spellEffectInfo.CalcValue() > GetMaxProfessionSkillStep(expansion)
-                    || ProfessionExpansion(spellEffectInfo.MiscValue) > expansion))
+                    || GetProfessionExpansion(spellEffectInfo.MiscValue) > expansion))
                 return true;
 
         return false;
@@ -302,7 +289,7 @@ namespace Trainer
 
         // check expansion requirement of professions, their ranks and their recipes
         uint8 const expansion = player->GetSession()->Expansion();
-        if (ProfessionExpansion(trainerSpell->ReqSkillLine) > expansion
+        if (GetProfessionExpansion(trainerSpell->ReqSkillLine) > expansion
             || RecipeExpansion(trainerSpell->SpellId) > expansion)
             return SpellState::Unavailable;
 

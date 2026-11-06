@@ -1,0 +1,108 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Diabolical stacks only from Necromancer spells (#11122)",
+  "contract": "Diabolical 704723 reads 'Casting spells now grants you 1 stack of Diabolical' and its buff is 707133. Report #11122 shows a stack granted when summoning a mount. Sense Undead 5502 is SPELLFAMILY_PALADIN (10) with DamageClass NONE and stands in for a mount, a profession or any other non-Necromancer non-triggered cast, as in necromancer-permafrost-class-spells-only-10844. A cast of it must leave 707133 at zero stacks; Blight 500237 is family 29 with no cost, cooldown or global cooldown and must still grant exactly one stack.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "necro",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "necro",
+      "entry": 299,
+      "level": 60,
+      "distance": 12
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 704723
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 500237
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Diabolical talent is active",
+      "actor": "necro",
+      "metric": "aura",
+      "spell": 704723,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 5502
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Sense Undead cast completed",
+      "actor": "necro",
+      "metric": "spell_cast_count",
+      "spell": 5502,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a cast outside the Necromancer family grants no Diabolical stack",
+      "actor": "necro",
+      "metric": "aura_stacks",
+      "spell": 707133,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "dummy",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a Necromancer spell grants one Diabolical stack",
+      "actor": "necro",
+      "metric": "aura_stacks",
+      "spell": 707133,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

@@ -1,0 +1,192 @@
+{
+  "schema": 1,
+  "name": "Starfire Barrage arrives on the third Starfire Shot, with a visible tracker",
+  "contract": "Starfire Barrage 704739 'Starfire Barrage [Passive]' (SPELL_ATTR0_PASSIVE|DO_NOT_DISPLAY|DO_NOT_LOG, SpellFamilyName 32) reads 'Every 3rd Starfire Shot transforms your next Starfire Shot into Starfire Barrage.' Its single effect is SPELL_AURA_PROC_TRIGGER_SPELL (42) on 572318, but 704739 is listed in StarcallerDrivers, so AscensionStarcaller::ApplyContracts turns every aura 42 effect into SPELL_AURA_DUMMY and zeroes ProcFlags: the count is script driven. 572318 'Starfire Barrage [Stacks]' is the tracker the client can see, with StackAmount 3 and DurationIndex 3 (60000 ms). Its effect 0 is SPELL_EFFECT_TRIGGER_SPELL (64) on 572319, which fires on every application rather than on the third, so ApplyContracts clears that effect (info->Effects[EFFECT_0].Effect = 0) and leaves effect 1, a plain SPELL_AURA_DUMMY, to carry the visible aura. The third stack is then what casts 572319 'Starfire Barrage [Proc]' (DurationIndex 8, 15000 ms) and removes the tracker, in AscensionStarcallerAbilities.cpp's AllSpellScript::OnSpellCast, which ScriptMgr invokes once per cast from Spell::_cast. Named(info, 801978) matches by rank chain (sSpellMgr->GetFirstSpellInChain), so every Starfire Shot rank counts and the separate Arcane damage component 801977 does not. Fixtures: Starfire Shot requires a bow, gun or crossbow (EquippedItemSubClassMask 262156), hence the Worn Shortbow 2504; custom classes are exempt from projectile ammo (UsesProjectileAmmo in Spell::CheckItems), so none is needed. It also carries TargetAuraSpell 804378, so it only casts on a target already holding Scattered Stars, as its own tooltip implies by consuming them, and without one the cast is refused with SPELL_FAILED_TARGET_AURASTATE. Huntress Shot 680220 is cast before each shot to supply that star, because Stars(player, target) runs for it in OnSpellHitResult; it is not a Starfire Shot rank, so it never advances the tracker. Starcall would also supply one but carries CategoryRecoveryTime 12000 in category 753, longer than this scenario's cycle, while Huntress Shot has no cooldown, no power cost and uses the bow already equipped. Each shot also starts the consume chain 572315 to 804716, whose 500 ms ticks drain the remaining stars and then remove it, which is why a fresh Starcall precedes every shot. This scenario asserts the count and the handover only. That 572319 then swaps the Starfire Shot button for 802682 is covered by its own scenario and is not asserted here. Waits are sized from the authored cast times: SpellCastTimes row 19 gives Starfire Shot 2500 ms and row 5 gives Huntress Shot 2000 ms, so a wait equal to the cast time races Spell::_cast and the tracker has not been applied yet when the assertion reads it. Huntress Shot and Starfire Shot are ranged weapon attacks that can miss, so the caster carries ranged_hit_rating as well as spell_hit_rating: without it a missed Huntress Shot supplies no star and the next shot is refused with SPELL_FAILED_TARGET_AURASTATE.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "starcaller",
+      "race": 4,
+      "class": 26,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "starcaller",
+      "entry": 36,
+      "level": 80,
+      "health": 10000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "label": "Starfire Shot needs a ranged weapon",
+      "actor": "starcaller",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "starcaller",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "learn",
+      "actor": "starcaller",
+      "spell": 801978
+    },
+    {
+      "action": "learn",
+      "label": "Huntress Shot supplies the Scattered Star each shot needs",
+      "actor": "starcaller",
+      "spell": 680220
+    },
+    {
+      "action": "learn",
+      "actor": "starcaller",
+      "spell": 704739
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the talent's passive is applied",
+      "actor": "starcaller",
+      "metric": "aura",
+      "spell": 704739,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no tracker before the first shot",
+      "actor": "starcaller",
+      "metric": "aura_stacks",
+      "spell": 572318,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Huntress Shot marks the target",
+      "actor": "starcaller",
+      "spell": 680220,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "First Starfire Shot",
+      "actor": "starcaller",
+      "spell": 801978,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The first shot shows one stack",
+      "actor": "starcaller",
+      "metric": "aura_stacks",
+      "spell": 572318,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The first stack does not hand out the proc",
+      "actor": "starcaller",
+      "metric": "aura",
+      "spell": 572319,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Huntress Shot marks the target again",
+      "actor": "starcaller",
+      "spell": 680220,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Second Starfire Shot",
+      "actor": "starcaller",
+      "spell": 801978,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The second shot shows two stacks",
+      "actor": "starcaller",
+      "metric": "aura_stacks",
+      "spell": 572318,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "The second stack does not hand out the proc either",
+      "actor": "starcaller",
+      "metric": "aura",
+      "spell": 572319,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Huntress Shot marks the target once more",
+      "actor": "starcaller",
+      "spell": 680220,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Third Starfire Shot",
+      "actor": "starcaller",
+      "spell": 801978,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The third shot hands out Starfire Barrage",
+      "actor": "starcaller",
+      "metric": "aura",
+      "spell": 572319,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The tracker is cleared when the proc arrives",
+      "actor": "starcaller",
+      "metric": "aura_stacks",
+      "spell": 572318,
+      "equals": 0
+    }
+  ]
+}

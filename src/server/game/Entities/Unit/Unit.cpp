@@ -20,6 +20,7 @@
 #include "AbstractFollower.h"
 #include "AreaDefines.h"
 #include "ArenaSpectator.h"
+#include "AscensionResilientConstitution.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
@@ -10203,6 +10204,9 @@ int32 Unit::SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
         if (HasAura(84866))
             DoneAdvertisedBenefit = int32(std::clamp<int64>(int64(DoneAdvertisedBenefit) * 2,
                 std::numeric_limits<int32>::min(), std::numeric_limits<int32>::max()));
+        else if (HasAura(820054))
+            DoneAdvertisedBenefit = int32(std::clamp<int64>(int64(DoneAdvertisedBenefit) * 7 / 4,
+                std::numeric_limits<int32>::min(), std::numeric_limits<int32>::max()));
     }
     return DoneAdvertisedBenefit;
 }
@@ -10490,6 +10494,11 @@ float Unit::SpellTakenCritChance(Unit const* caster, SpellInfo const* spellProto
             [[fallthrough]]; /// @todo: Not sure whether the fallthrough was a mistake (forgetting a break) or intended. This should be double-checked.
         case SPELL_DAMAGE_CLASS_RANGED:
             {
+                if (spellProto->SpellFamilyName == 28 && (spellProto->SpellFamilyFlags[1] & 0x00100000) &&
+                    (GetCreatureTypeMask() & CREATURE_TYPEMASK_DEMON_OR_UNDEAD) &&
+                    GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE) > -100)
+                    return 100.0f;
+
                 // flat aura mods
                 if (attackType == RANGED_ATTACK)
                     crit_chance += GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_CHANCE);
@@ -11049,6 +11058,9 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
         AdvertisedBenefit += int32(CalculatePct(GetTotalAttackPowerValue(BASE_ATTACK), GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_HEALING_OF_ATTACK_POWER, schoolMask)));
         if (HasAura(84866))
             AdvertisedBenefit = int32(std::clamp<int64>(int64(AdvertisedBenefit) * 2,
+                std::numeric_limits<int32>::min(), std::numeric_limits<int32>::max()));
+        else if (HasAura(820054))
+            AdvertisedBenefit = int32(std::clamp<int64>(int64(AdvertisedBenefit) * 7 / 4,
                 std::numeric_limits<int32>::min(), std::numeric_limits<int32>::max()));
     }
     return AdvertisedBenefit;
@@ -16761,14 +16773,9 @@ void Unit::ApplyResilience(Unit const* victim, float* crit, int32* damage, bool 
     if (!target)
         return;
 
-    // Damage callers have already required player-controlled outgoing damage. The unknown baseline is a
-    // local ten-percent policy; the additional twenty-percent critical reduction is explicit client data.
-    if (damage && *damage > 0 && victim->HasAura(552011))
-    {
-        *damage = int32(int64(*damage) * 90 / 100);
-        if (isCrit)
-            *damage = int32(int64(*damage) * 80 / 100);
-    }
+    // Damage callers have already required player-controlled outgoing damage.
+    if (damage && *damage > 0 && target->HasAura(ResilientConstitution::Aura))
+        *damage = ResilientConstitution::Reduce(*damage, isCrit, target != victim);
 
     switch (type)
     {
@@ -18576,7 +18583,7 @@ void Unit::PatchValuesUpdate(ByteBuffer& valuesUpdateBuf, BuildValuesCachePosPoi
     // UNIT_FIELD_BYTES_2
     if (posPointers.UnitFieldBytes2Pos >= 0)
     {
-        if (IsControlledByPlayer() && target != this && sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP) && IsInRaidWith(target))
+        if ((IsControlledByPlayer() || HasUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED)) && target != this && sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP) && IsInRaidWith(target))
         {
             FactionTemplateEntry const* ft1 = GetFactionTemplateEntry();
             FactionTemplateEntry const* ft2 = target->GetFactionTemplateEntry();
@@ -18594,7 +18601,7 @@ void Unit::PatchValuesUpdate(ByteBuffer& valuesUpdateBuf, BuildValuesCachePosPoi
     // UNIT_FIELD_FACTIONTEMPLATE
     if (posPointers.UnitFieldFactionTemplatePos >= 0)
     {
-        if (IsControlledByPlayer() && target != this && sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP) && IsInRaidWith(target))
+        if ((IsControlledByPlayer() || HasUnitFlag(UNIT_FLAG_PLAYER_CONTROLLED)) && target != this && sWorld->getBoolConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP) && IsInRaidWith(target))
         {
             FactionTemplateEntry const* ft1 = GetFactionTemplateEntry();
             FactionTemplateEntry const* ft2 = target->GetFactionTemplateEntry();
@@ -18908,6 +18915,14 @@ void Unit::SetShapeshiftForm(ShapeshiftForm form)
 {
     SetByteValue(UNIT_FIELD_BYTES_2, 3, form);
     sScriptMgr->OnUnitSetShapeshiftForm((Unit*)this, form);
+}
+
+bool Unit::IsOnDivineSteed() const
+{
+    Aura const* divineCharge = GetAura(527272);
+    Unit const* divineCaster = divineCharge ? divineCharge->GetCaster() : nullptr;
+    return divineCaster && divineCaster->IsPlayer() && divineCaster->getClass() == CLASS_MONK &&
+        GetMountID() == 14584 && !IsInFlight();
 }
 
 bool Unit::IsInDisallowedMountForm() const

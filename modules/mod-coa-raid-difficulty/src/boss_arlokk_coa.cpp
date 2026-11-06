@@ -5,8 +5,7 @@
  * see raid-difficulty-werkzeug/zg-video-zeitplan.json. Claw Storm's repeat and
  * Fierce Blow follow the CoA combat log of 2026-08-02.
  *
- * From stock: the prowlers streaming in from both sides, her vanish after 30
- * seconds, the panther phase and the return to troll form, the gong and the
+ * From stock: the prowlers streaming in from both sides, the gong and the
  * despawn when the raid wipes.
  *
  *   Troll form
@@ -16,34 +15,48 @@
  *                                               jumps to another player
  *     Kidney Shot        first 15s, every 30s   the tank, 4s stun
  *
- *   Panther form (her Aspect of Bethekk)
- *     Claw Storm         first 5s,  every 55s   spins for 8s, 5 yards around her
- *     Ravage             first 10s, every 15s   the tank, pinned and mauled
- *     Shadowstep         first 12s, every 15s   behind a random player
- *     Razor Claws        passive, her hits bleed
+ *   Panther form (her Aspect of Bethekk), a 55s cycle
+ *     Mark and Vanish    at the change          she marks a player and vanishes
+ *                                               for 10s (tester, live)
+ *     Shadowstep, Ravage 11s after the change,  behind a random player, then
+ *                        every 55s              pins and mauls that player
+ *     Shadowstep,        18s after each Ravage  behind a random player, then
+ *     Claw Storm                                spins for 8s, 5 yards around her
+ *     Vanish             26s after each Ravage  10s out of sight
+ *     Razor Claws        passive, her melee hits and Ravage bleed; Claw Storm
+ *                        does not (tester, live)
  *
  *   Both forms
  *     Fierce Blow        first 6.7-17.3s, every 6-10s   on the tank
  *
  *   At 50% she drains the Avatar of Bethekk (see LoaAvatar), taking ~1% damage
- *   while it dies, then gains the Gift of the Blood God. Her panther form keeps
- *   its own timer: in the CoA log her Razor Claws came almost a minute before
- *   the drain.
+ *   while it dies, then gains the Gift of the Blood God. At the same moment she
+ *   takes panther form for the rest of the fight, with no return to troll form
+ *   (tester, live). Her bleeds and marks end with her death, and a player's
+ *   Razor Claws bleeds end with that player's death (the DBC keeps them
+ *   through death, so a battle-resurrected player bled out again; tester).
  *
  * Decided here, not in the data:
- *   - Claw Storm's first cast, Ravage and Shadowstep timers (each appears once or twice in
- *     the video); Kidney Shot's first cast;
+ *   - the panther cycle's timings (the video shows two Ravages, each after a
+ *     Shadowstep) and that Ravage hits the player she stepped behind; Kidney
+ *     Shot's first cast;
  *   - the mark lasts until it is removed and does not stack; prowlers within
  *     40 yards of the marked player turn on them every 2 seconds.
  */
 
 #include "CreatureScript.h"
 #include "GameObject.h"
+#include "GlobalScript.h"
 #include "InstanceScript.h"
 #include "ScriptedCreature.h"
+#include "SpellInfo.h"
+#include "SpellScript.h"
+#include "SpellScriptLoader.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
 
+#include <algorithm>
+#include <array>
 #include <list>
 
 using namespace coa_zg;
@@ -60,9 +73,6 @@ namespace
     enum Spells
     {
         SPELL_SUMMON_PROWLER     = 24246,
-        SPELL_VANISH_VISUAL      = 24222,
-        SPELL_VANISH             = 24223,
-        SPELL_SUPER_INVIS        = 24235,
 
         INFO_SHADOW_WORD_PAIN    = 2118301,
         SPELL_SHADOW_WORD_PAIN   = 2118305,
@@ -71,11 +81,14 @@ namespace
         SPELL_SHADOWSTEP         = 2118308,
         SPELL_MARK_OF_ARLOKK     = 2118310,
         SPELL_MARK_OF_ARLOKK_AURA = 2118311,
+        SPELL_VANISH             = 2118312,
         SPELL_DRAIN_POWER        = 2118322,
         SPELL_ASPECT_OF_BETHEKK  = 2118323,
         SPELL_GIFT_OF_THE_BLOOD_GOD = 2118324,
         SPELL_RAZOR_CLAWS        = 2118325,
+        SPELL_RAZOR_CLAWS_BLEED  = 2118326,
         SPELL_RAVAGE             = 2118330,
+        SPELL_RAVAGE_HIT         = 2118331,
         SPELL_CLAW_STORM         = 2118336,
     };
 
@@ -86,14 +99,12 @@ namespace
         EVENT_MARK_OF_ARLOKK,
         EVENT_MARK_CHECK,
         EVENT_SUMMON_PROWLERS,
-        EVENT_TRANSFORM,
         EVENT_VANISH,
-        EVENT_VANISH_2,
-        EVENT_VISIBLE,
-        EVENT_CLAW_STORM,
+        EVENT_REAPPEAR,
+        EVENT_STEP_TO_RAVAGE,
+        EVENT_STEP_TO_CLAW_STORM,
         EVENT_RAVAGE,
-        EVENT_SHADOWSTEP,
-        EVENT_TRANSFORM_BACK,
+        EVENT_CLAW_STORM,
         EVENT_FIERCE_BLOW,
     };
 
@@ -108,6 +119,17 @@ namespace
     constexpr uint32 WEAPON_DAGGER       = 10616;
     constexpr uint8 MAX_PROWLERS_PER_SIDE = 15;
     constexpr float MARK_PULL_RANGE      = 40.0f;
+    constexpr float SHADOWSTEP_RANGE     = 40.0f;
+
+    constexpr Milliseconds VANISH_STEALTH          = 10s;
+    constexpr Milliseconds FIRST_PANTHER_STEP      = 11s;
+    constexpr Milliseconds CLAW_STORM_AFTER_RAVAGE = 18s;
+    constexpr Milliseconds VANISH_AFTER_RAVAGE     = 26s;
+    constexpr Milliseconds PANTHER_CYCLE           = 55s;
+    constexpr Milliseconds STEP_LANDING            = 250ms;
+
+    constexpr std::array<uint32, 4> RAZOR_CLAWS_BLEEDS = { 2118326, 2118327, 2118328, 2118329 };
+    constexpr std::array<uint32, 4> CLAW_STORM_HITS    = { 2118337, 2118338, 2118339, 2118340 };
 
     Position const PosMoveOnSpawn = { -11561.9f, -1627.868f, 41.29941f, 0.0f };
 
@@ -123,6 +145,8 @@ namespace
             _marking = false;
             _drained = false;
             _avatar.Restore(me);
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->RemoveAurasDueToSpell(SPELL_VANISH);
             me->RemoveAurasDueToSpell(SPELL_GIFT_OF_THE_BLOOD_GOD);
             me->RemoveAurasDueToSpell(SPELL_ASPECT_OF_BETHEKK);
             me->RemoveAurasDueToSpell(SPELL_RAZOR_CLAWS);
@@ -139,6 +163,11 @@ namespace
             _avatar.Release(me);
             Talk(SAY_DEATH);
             ClearMarks();
+            me->GetMap()->DoForAllPlayers([](Player* p)
+            {
+                for (uint32 bleed : RAZOR_CLAWS_BLEEDS)
+                    p->RemoveAurasDueToSpell(bleed);
+            });
         }
 
         void JustEngagedWith(Unit* /*who*/) override
@@ -148,7 +177,8 @@ namespace
             _avatar.Restore(me);
 
             events.SetPhase(PHASE_ONE);
-            ScheduleTroll(2s);
+            events.ScheduleEvent(EVENT_SHADOW_WORD_PAIN, 2s, 0, PHASE_ONE);
+            events.ScheduleEvent(EVENT_KIDNEY_SHOT, 15s, 0, PHASE_ONE);
             events.ScheduleEvent(EVENT_SUMMON_PROWLERS, 6s, 0, PHASE_ALL);
             events.ScheduleEvent(EVENT_MARK_OF_ARLOKK, 10s, 0, PHASE_ALL);
             events.ScheduleEvent(EVENT_FIERCE_BLOW, FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX, 0, PHASE_ALL);
@@ -167,13 +197,6 @@ namespace
                 else if (sideB < 5)
                     _sideB[sideB++] = trigger->GetGUID();
             }
-        }
-
-        void ScheduleTroll(Milliseconds swp)
-        {
-            events.ScheduleEvent(EVENT_SHADOW_WORD_PAIN, swp, 0, PHASE_ONE);
-            events.ScheduleEvent(EVENT_KIDNEY_SHOT, 15s, 0, PHASE_ONE);
-            events.ScheduleEvent(EVENT_TRANSFORM, 30s, 0, PHASE_ONE);
         }
 
         void JustReachedHome() override
@@ -203,7 +226,55 @@ namespace
 
             _drained = true;
             if (!_avatar.Drain(me))
-                DoCastSelf(SPELL_GIFT_OF_THE_BLOOD_GOD, true);
+                BecomePanther();
+        }
+
+        void BecomePanther()
+        {
+            DoCastSelf(SPELL_GIFT_OF_THE_BLOOD_GOD, true);
+            DoCastSelf(SPELL_ASPECT_OF_BETHEKK, true);
+            DoCastSelf(SPELL_RAZOR_CLAWS, true);
+            me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, EQUIP_UNEQUIP);
+            me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, EQUIP_UNEQUIP);
+            events.SetPhase(PHASE_TWO);
+            _marking = true;
+            Mark();
+            events.ScheduleEvent(EVENT_VANISH, 0ms, 0, PHASE_TWO);
+            events.ScheduleEvent(EVENT_STEP_TO_RAVAGE, FIRST_PANTHER_STEP, 0, PHASE_TWO);
+        }
+
+        void Vanish()
+        {
+            me->AttackStop();
+            me->SetReactState(REACT_PASSIVE);
+            events.ScheduleEvent(EVENT_REAPPEAR, VANISH_STEALTH, 0, PHASE_TWO);
+        }
+
+        void Reappear()
+        {
+            events.CancelEvent(EVENT_REAPPEAR);
+            if (!me->HasReactState(REACT_PASSIVE))
+                return;
+            me->RemoveAurasDueToSpell(SPELL_VANISH);
+            me->SetReactState(REACT_AGGRESSIVE);
+            if (Unit* target = SelectTarget(SelectTargetMethod::MaxThreat, 0))
+                AttackStart(target);
+        }
+
+        void StepBehindRandomPlayer(uint32 followUp)
+        {
+            Reappear();
+            _afterStep = followUp;
+            if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, SHADOWSTEP_RANGE, true))
+            {
+                _stepTarget = target->GetGUID();
+                DoCast(target, SPELL_SHADOWSTEP);
+            }
+            else
+            {
+                _stepTarget = me->GetVictim() ? me->GetVictim()->GetGUID() : ObjectGuid::Empty;
+                events.ScheduleEvent(followUp, 0ms, 0, PHASE_TWO);
+            }
         }
 
         // A prowler died on side 1 or 2.
@@ -227,6 +298,20 @@ namespace
                 me->AddAura(SPELL_MARK_OF_ARLOKK_AURA, target);
                 Talk(SAY_FEAST_PROWLER, target);
             }
+            else if (spell->Id == SPELL_VANISH)
+                Vanish();
+            else if (spell->Id == SPELL_SHADOWSTEP)
+            {
+                if (Unit* stepTarget = ObjectAccessor::GetUnit(*me, _stepTarget))
+                    AttackStart(stepTarget);
+                events.ScheduleEvent(_afterStep, STEP_LANDING, 0, PHASE_TWO);
+            }
+        }
+
+        void SpellHitTarget(Unit* target, SpellInfo const* spell) override
+        {
+            if (target && spell->Id == SPELL_RAVAGE_HIT)
+                me->CastSpell(target, SPELL_RAZOR_CLAWS_BLEED, true);
         }
 
         Player* Marked()
@@ -243,6 +328,7 @@ namespace
 
         void Mark()
         {
+            ClearMarks();
             if (Unit* target = SelectTarget(SelectTargetMethod::Random, 1, 100.0f, true))
             {
                 _target = target->GetGUID();
@@ -256,7 +342,7 @@ namespace
                 return;
 
             if (_avatar.Consumed(me))
-                DoCastSelf(SPELL_GIFT_OF_THE_BLOOD_GOD, true);
+                BecomePanther();
 
             events.Update(diff);
 
@@ -315,67 +401,29 @@ namespace
                             }
                         events.ScheduleEvent(EVENT_SUMMON_PROWLERS, 6s, 0, PHASE_ALL);
                         break;
-                    case EVENT_TRANSFORM:
-                        DoCastSelf(SPELL_ASPECT_OF_BETHEKK, true);
-                        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, EQUIP_UNEQUIP);
-                        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, EQUIP_UNEQUIP);
-                        me->AttackStop();
-                        DoResetThreatList();
-                        me->SetReactState(REACT_PASSIVE);
-                        me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                        DoCastSelf(SPELL_VANISH_VISUAL);
-                        DoCastSelf(SPELL_VANISH);
-                        events.ScheduleEvent(EVENT_VANISH, 1s, 0, PHASE_ONE);
-                        break;
                     case EVENT_VANISH:
-                        DoCastSelf(SPELL_SUPER_INVIS);
-                        me->SetWalk(false);
-                        me->GetMotionMaster()->MovePoint(0, frand(-11551.0f, -11508.0f), frand(-1638.0f, -1617.0f), me->GetPositionZ());
-                        events.ScheduleEvent(EVENT_VANISH_2, 9s, 0, PHASE_ONE);
-                        break;
-                    case EVENT_VANISH_2:
                         DoCastSelf(SPELL_VANISH);
-                        DoCastSelf(SPELL_SUPER_INVIS);
-                        events.ScheduleEvent(EVENT_VISIBLE, 41s, 47s, 0, PHASE_ONE);
                         break;
-                    case EVENT_VISIBLE:
-                        me->SetReactState(REACT_AGGRESSIVE);
-                        me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                        if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0))
-                            AttackStart(target);
-                        me->RemoveAurasDueToSpell(SPELL_SUPER_INVIS);
-                        me->RemoveAurasDueToSpell(SPELL_VANISH);
-                        DoCastSelf(SPELL_RAZOR_CLAWS, true);
-                        events.SetPhase(PHASE_TWO);
-                        events.ScheduleEvent(EVENT_CLAW_STORM, 5s, 0, PHASE_TWO);
-                        events.ScheduleEvent(EVENT_RAVAGE, 10s, 0, PHASE_TWO);
-                        events.ScheduleEvent(EVENT_SHADOWSTEP, 12s, 0, PHASE_TWO);
-                        events.ScheduleEvent(EVENT_TRANSFORM_BACK, 30s, 40s, 0, PHASE_TWO);
+                    case EVENT_REAPPEAR:
+                        Reappear();
+                        break;
+                    case EVENT_STEP_TO_RAVAGE:
+                        StepBehindRandomPlayer(EVENT_RAVAGE);
+                        events.ScheduleEvent(EVENT_STEP_TO_CLAW_STORM, CLAW_STORM_AFTER_RAVAGE, 0, PHASE_TWO);
+                        events.ScheduleEvent(EVENT_VANISH, VANISH_AFTER_RAVAGE, 0, PHASE_TWO);
+                        events.ScheduleEvent(EVENT_STEP_TO_RAVAGE, PANTHER_CYCLE, 0, PHASE_TWO);
+                        break;
+                    case EVENT_STEP_TO_CLAW_STORM:
+                        StepBehindRandomPlayer(EVENT_CLAW_STORM);
+                        break;
+                    case EVENT_RAVAGE:
+                        if (Unit* target = ObjectAccessor::GetUnit(*me, _stepTarget); target && target->IsAlive())
+                            DoCast(target, SPELL_RAVAGE, true);
+                        else
+                            DoCastVictim(SPELL_RAVAGE, true);
                         break;
                     case EVENT_CLAW_STORM:
                         DoCastSelf(SPELL_CLAW_STORM);
-                        events.ScheduleEvent(EVENT_CLAW_STORM, 55s, 0, PHASE_TWO);
-                        break;
-                    case EVENT_RAVAGE:
-                        DoCastVictim(SPELL_RAVAGE, true);
-                        events.ScheduleEvent(EVENT_RAVAGE, 15s, 0, PHASE_TWO);
-                        break;
-                    case EVENT_SHADOWSTEP:
-                        if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 40.0f, true))
-                        {
-                            DoCast(target, SPELL_SHADOWSTEP);
-                            AttackStart(target);
-                        }
-                        events.ScheduleEvent(EVENT_SHADOWSTEP, 15s, 0, PHASE_TWO);
-                        break;
-                    case EVENT_TRANSFORM_BACK:
-                        me->RemoveAurasDueToSpell(SPELL_ASPECT_OF_BETHEKK);
-                        me->RemoveAurasDueToSpell(SPELL_RAZOR_CLAWS);
-                        DoCastSelf(SPELL_VANISH_VISUAL);
-                        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 0, WEAPON_DAGGER);
-                        me->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1, WEAPON_DAGGER);
-                        events.SetPhase(PHASE_ONE);
-                        ScheduleTroll(4s);
                         break;
                     case EVENT_FIERCE_BLOW:
                         DoCastVictim(SPELL_FIERCE_BLOW);
@@ -401,10 +449,43 @@ namespace
         ObjectGuid _sideA[5];
         ObjectGuid _sideB[5];
         ObjectGuid _target;
+        ObjectGuid _stepTarget;
+        uint32 _afterStep = EVENT_RAVAGE;
+    };
+
+    class spell_arlokk_coa_razor_claws : public AuraScript
+    {
+        PrepareAuraScript(spell_arlokk_coa_razor_claws);
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            SpellInfo const* spell = eventInfo.GetSpellInfo();
+            return !spell || std::find(CLAW_STORM_HITS.begin(), CLAW_STORM_HITS.end(), spell->Id) == CLAW_STORM_HITS.end();
+        }
+
+        void Register() override
+        {
+            DoCheckProc += AuraCheckProcFn(spell_arlokk_coa_razor_claws::CheckProc);
+        }
+    };
+
+    class ArlokkRazorClawsBleedsEndOnDeath final : public GlobalScript
+    {
+    public:
+        ArlokkRazorClawsBleedsEndOnDeath()
+            : GlobalScript("ArlokkRazorClawsBleedsEndOnDeath", { GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR }) { }
+
+        void OnLoadSpellCustomAttr(SpellInfo* info) override
+        {
+            if (std::find(RAZOR_CLAWS_BLEEDS.begin(), RAZOR_CLAWS_BLEEDS.end(), info->Id) != RAZOR_CLAWS_BLEEDS.end())
+                info->AttributesEx3 &= ~SPELL_ATTR3_ALLOW_AURA_WHILE_DEAD;
+        }
     };
 }
 
 void AddCoaArlokkScripts()
 {
     RegisterZulGurubCreatureAI(boss_arlokk_coa);
+    RegisterSpellScript(spell_arlokk_coa_razor_claws);
+    new ArlokkRazorClawsBleedsEndOnDeath();
 }

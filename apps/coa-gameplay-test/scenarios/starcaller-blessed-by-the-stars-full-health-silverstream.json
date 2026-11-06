@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "name": "Blessed By The Stars scatters stars from a Silverstream heal on a full-health ally",
+  "contract": [
+    "Blessed By The Stars 704741: \"casting Silverstream now applies Scattered Stars on up to 5 enemies around",
+    "each target healed\". The Silverstream branch of OnSpellHitResult tested the effective heal, which is 0 for",
+    "a target at full health, so a heal that landed but healed nothing scattered no stars. It now tests the heal",
+    "including overheal (Spell::GetScriptHealingIncludingOverheal).",
+    "Uses rank 5 (575051), the last rank in the spell_ranks chain that the talent test (Named 575039) matches.",
+    "Control: without the talent, a Silverstream on the same full-health ally leaves no Scattered Stars on the",
+    "enemy next to it. With the talent, the same cast puts Scattered Stars on that enemy."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "sc", "race": 1, "class": 26, "level": 80, "allow_regeneration": false },
+    { "id": "ally", "race": 1, "class": 1, "level": 80, "allow_regeneration": false }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "sc",
+      "entry": 36,
+      "faction": 14,
+      "level": 80,
+      "health": 10000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "label": "Learn Silverstream rank 5", "actor": "sc", "spell": 575051 },
+    { "action": "assert", "label": "SETUP: Silverstream is known", "actor": "sc", "metric": "knows_spell", "spell": 575051, "equals": 1 },
+    { "action": "snapshot", "actor": "ally", "metric": "max_health", "save_as": "ally_max" },
+    {
+      "action": "assert",
+      "label": "SETUP: the ally is at full health, so any heal on them is all overheal",
+      "actor": "ally",
+      "metric": "health",
+      "ratio_to": "ally_max",
+      "min": 0.999,
+      "max": 1.001
+    },
+    { "action": "cast", "label": "CONTROL: Silverstream on the full-health ally, no talent", "actor": "sc", "spell": 575051, "target": "ally" },
+    { "action": "assert", "label": "SETUP: the cast was accepted", "actor": "sc", "metric": "cast_failure", "spell": 575051, "equals": 0 },
+    { "action": "wait", "ms": 3000 },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Blessed By The Stars the enemy has no Scattered Stars",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 804378,
+      "equals": 0
+    },
+    { "action": "learn", "actor": "sc", "spell": 704741 },
+    { "action": "assert", "label": "SETUP: Blessed By The Stars is active", "actor": "sc", "metric": "aura", "spell": 704741, "equals": 1, "within_ms": 2000 },
+    { "action": "reset_cooldown", "actor": "sc", "spell": 575051 },
+    { "action": "cast", "label": "Silverstream on the full-health ally, with the talent", "actor": "sc", "spell": 575051, "target": "ally" },
+    { "action": "assert", "label": "SETUP: the cast was accepted", "actor": "sc", "metric": "cast_failure", "spell": 575051, "equals": 0 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the enemy beside the overhealed ally carries Scattered Stars",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 804378,
+      "min": 1,
+      "within_ms": 5000
+    }
+  ]
+}

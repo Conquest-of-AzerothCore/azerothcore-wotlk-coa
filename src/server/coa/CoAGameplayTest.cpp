@@ -61,6 +61,7 @@
 #include "Opcodes.h"
 #include "Pet.h"
 #include "PetPackets.h"
+#include "QuestPackets.h"
 #include "Player.h"
 #include "ReputationMgr.h"
 #include "QuestDef.h"
@@ -565,6 +566,8 @@ public:
     {
         Set(CONFIG_ALLOW_TWO_SIDE_TRADE, settings.get<bool>("trade", false));
         Set(CONFIG_ALLOW_TWO_SIDE_INTERACTION_MAIL, settings.get<bool>("mail", false));
+        if (auto group = settings.get_optional<bool>("group"))
+            Set(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP, *group);
     }
 
     TwoSideConfig(TwoSideConfig const&) = delete;
@@ -584,6 +587,26 @@ private:
     }
 
     std::map<ServerConfigs, bool> _original;
+};
+
+class QuestLogSizeConfig
+{
+public:
+    explicit QuestLogSizeConfig(uint32 size) : _original(sWorld->getIntConfig(CONFIG_QUEST_LOG_SIZE))
+    {
+        sWorld->setIntConfig(CONFIG_QUEST_LOG_SIZE, size);
+    }
+
+    QuestLogSizeConfig(QuestLogSizeConfig const&) = delete;
+    QuestLogSizeConfig& operator=(QuestLogSizeConfig const&) = delete;
+
+    ~QuestLogSizeConfig()
+    {
+        sWorld->setIntConfig(CONFIG_QUEST_LOG_SIZE, _original);
+    }
+
+private:
+    uint32 _original;
 };
 
 struct CaseAccounts
@@ -808,6 +831,7 @@ struct SpellDamageEvent
     uint32 spell = 0;
     uint32 damage = 0;
     bool critical = false;
+    uint32 casterEntry = 0;
 };
 
 struct SpellHealEvent
@@ -818,6 +842,7 @@ struct SpellHealEvent
     uint32 heal = 0;
     uint32 overheal = 0;
     bool critical = false;
+    uint32 casterEntry = 0;
 };
 
 struct SpellEnergizeEvent
@@ -837,6 +862,7 @@ struct MeleeOutcomes
     uint32 plain = 0;
     uint64 plainDamage = 0;
     uint64 damage = 0;
+    uint32 attackerEntry = 0;
 };
 
 struct Actor
@@ -893,6 +919,7 @@ struct Actor
     uint32 vendorWindows = 0;
     uint32 vendorItems = 0;
     std::map<uint32, uint32> vendorPrice;
+    std::map<uint32, uint32> vendorSlot;
     std::map<uint32, uint32> vendorExtendedCost;
     std::map<uint32, int32> vendorStock;
     uint32 vendorPriceSum = 0;
@@ -911,6 +938,8 @@ struct Actor
     Tree castFailures;
     std::map<uint32, uint8> castFailureReason;
     std::map<uint32, uint32> spellCooldownPacketMs;
+    uint32 itemLootReleases = 0;
+    std::map<uint32, std::array<int32, MAX_SPELL_EFFECTS>> sentAuraAmounts;
     uint32 bankShows = 0;
     uint32 systemMessages = 0;
     uint32 monsterChats = 0;
@@ -934,6 +963,7 @@ struct Actor
     uint32 lastStableResult = 0;
     uint32 lfgProposalId = 0;
     std::map<uint16, uint32> extensionPackets;
+    std::map<uint32, uint32> addonFieldUpdates;
     std::map<uint16, std::vector<std::string>> extensionPayloads;
     std::map<std::pair<uint16, uint32>, std::string> selectedPacketRows;
     std::map<std::pair<uint16, uint32>, uint32> selectedPacketRowCounts;
@@ -980,6 +1010,16 @@ struct Target
     ObjectGuid guid;
 };
 
+uint32 ResolveLiveEntry(Player* player, ObjectGuid const& guid)
+{
+    if (!guid)
+        return 0;
+    if (player)
+        if (Unit* unit = ObjectAccessor::GetUnit(*player, guid))
+            return unit->GetEntry();
+    return guid.GetEntry();
+}
+
 void ObserveSpellCasts(Actor& actor, WorldPacket const& packet)
 {
     if (packet.GetOpcode() != SMSG_SPELL_GO)
@@ -993,7 +1033,7 @@ void ObserveSpellCasts(Actor& actor, WorldPacket const& packet)
     actor.spellCasts.push_back(event);
 }
 
-void ObserveSpellDamage(Actor& actor, WorldPacket const& packet)
+void ObserveSpellDamage(Actor& actor, WorldPacket const& packet, Player* player)
 {
     if (packet.GetOpcode() != SMSG_SPELLNONMELEEDAMAGELOG && packet.GetOpcode() != SMSG_PERIODICAURALOG)
         return;
@@ -1032,10 +1072,13 @@ void ObserveSpellDamage(Actor& actor, WorldPacket const& packet)
         event.critical = critical != 0;
     }
     if (event.damage)
+    {
+        event.casterEntry = ResolveLiveEntry(player, event.caster);
         actor.spellDamage.push_back(event);
+    }
 }
 
-void ObserveSpellHealing(Actor& actor, WorldPacket const& packet)
+void ObserveSpellHealing(Actor& actor, WorldPacket const& packet, Player* player)
 {
     if (packet.GetOpcode() != SMSG_SPELLHEALLOG && packet.GetOpcode() != SMSG_PERIODICAURALOG)
         return;
@@ -1058,7 +1101,10 @@ void ObserveSpellHealing(Actor& actor, WorldPacket const& packet)
     event.critical = critical != 0;
     Require(event.overheal <= event.heal, "Native overhealing exceeds healing");
     if (event.heal)
+    {
+        event.casterEntry = ResolveLiveEntry(player, event.caster);
         actor.spellHeals.push_back(event);
+    }
 }
 
 void ObserveSpellEnergize(Actor& actor, WorldPacket const& packet)
@@ -1153,6 +1199,8 @@ void ObserveExtensionPacket(Actor& actor, WorldPacket const& packet)
         return;
 
     ++actor.extensionPackets[packet.GetOpcode()];
+    if (packet.GetOpcode() == AscensionQuestLog::UpdateObjectAddonOpcode && packet.size() == 16)
+        ++actor.addonFieldUpdates[packet.read<uint32>(8)];
     std::vector<std::string>& payloads = actor.extensionPayloads[packet.GetOpcode()];
     if (payloads.size() < MaxPayloadsPerOpcode)
         payloads.emplace_back(packet.empty() ? std::string()
@@ -1215,9 +1263,10 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
     constexpr std::size_t LfgProposalIdOffset = sizeof(uint32) + sizeof(uint8);
     if (packet.GetOpcode() == SMSG_LFG_PROPOSAL_UPDATE && packet.size() >= LfgProposalIdOffset + sizeof(uint32))
         actor.lfgProposalId = packet.read<uint32>(LfgProposalIdOffset);
+    Player* observer = actor.session ? actor.session->GetPlayer() : nullptr;
     ObserveSpellCasts(actor, packet);
-    ObserveSpellDamage(actor, packet);
-    ObserveSpellHealing(actor, packet);
+    ObserveSpellDamage(actor, packet, observer);
+    ObserveSpellHealing(actor, packet, observer);
     ObserveSpellEnergize(actor, packet);
     if (packet.GetOpcode() == SMSG_SPELL_DELAYED)
     {
@@ -1253,6 +1302,32 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             response >> spell >> cooldown;
             if (unit == actor.guid)
                 actor.spellCooldownPacketMs[spell] = cooldown;
+        }
+    }
+
+    if (packet.GetOpcode() == SMSG_LOOT_RELEASE_RESPONSE && packet.size() >= sizeof(uint64))
+    {
+        ObjectGuid released;
+        WorldPacket response(packet);
+        response >> released;
+        if (released.IsItem())
+            ++actor.itemLootReleases;
+    }
+
+    constexpr uint16 AscensionAuraAmountOpcode = 0x0673;
+    if (packet.GetOpcode() == AscensionAuraAmountOpcode)
+    {
+        WorldPacket response(packet);
+        ObjectGuid unit, caster;
+        int32 slot;
+        uint32 spell;
+        response >> unit >> slot >> caster >> spell;
+        if (unit == actor.guid && slot >= 0)
+        {
+            std::array<int32, MAX_SPELL_EFFECTS> amounts{};
+            for (int32& amount : amounts)
+                response >> amount;
+            actor.sentAuraAmounts[spell] = amounts;
         }
     }
 
@@ -1358,6 +1433,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         if (victim == actor.guid)
             ++actor.meleeAttacksTakenFrom[attacker];
         MeleeOutcomes& outcome = actor.meleeOutcomesByAttacker[attacker];
+        outcome.attackerEntry = ResolveLiveEntry(observer, attacker);
         ++outcome.swings;
         outcome.damage += damage;
         if (hitInfo & HITINFO_CRITICALHIT)
@@ -1692,6 +1768,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         ++actor.vendorWindows;
         actor.vendorItems = rows;
         actor.vendorPrice.clear();
+        actor.vendorSlot.clear();
         actor.vendorExtendedCost.clear();
         actor.vendorStock.clear();
         actor.vendorPriceSum = 0;
@@ -1710,6 +1787,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             if (shelfItem != 0)
             {
                 actor.vendorPrice[shelfItem] = price;
+                actor.vendorSlot[shelfItem] = slot;
                 actor.vendorExtendedCost[shelfItem] = extendedCost;
                 actor.vendorStock[shelfItem] = leftInStock;
                 actor.vendorPriceSum += price;
@@ -1782,6 +1860,12 @@ public:
         }
         if (auto twoSide = _scenario.get_child_optional("two_side"))
             _twoSide.emplace(*twoSide);
+        if (auto questLogSize = _scenario.get_optional<uint32>("quest_log_size"))
+        {
+            Require(*questLogSize >= NATIVE_QUEST_LOG_SIZE && *questLogSize <= MAX_QUEST_LOG_SIZE,
+                "Invalid quest log size");
+            _questLogSize.emplace(*questLogSize);
+        }
         _report.put("schema", 1);
         _report.put("run_id", _runId);
         _report.put("scenario", _scenario.get<std::string>("name"));
@@ -2450,6 +2534,24 @@ private:
 
     static void OpenSession(Actor& actor)
     {
+        CreateSession(actor);
+        WorldPacket create(CMSG_CHAR_CREATE, 32);
+        uint32 race = actor.definition.get<uint32>("race");
+        uint32 playerClass = actor.definition.get<uint32>("class");
+        uint32 gender = actor.definition.get<uint32>("gender", GENDER_MALE);
+        Require(race > 0 && race <= 255 && playerClass > 0 && playerClass <= 255,
+            "Race/class must fit the character creation packet");
+        Require(gender == GENDER_MALE || gender == GENDER_FEMALE, "Gender must be 0 (male) or 1 (female)");
+        create << actor.definition.get<std::string>("name", actor.name) << uint8(race) << uint8(playerClass)
+               << uint8(gender);
+        for (uint8 i = 0; i < 6; ++i)
+            create << uint8(0);
+        actor.session->HandleCharCreateOpcode(create);
+        Reach(actor, ActorStage::Creating);
+    }
+
+    static void CreateSession(Actor& actor)
+    {
         uint32 const expansion = actor.definition.get<uint32>("expansion", EXPANSION_WRATH_OF_THE_LICH_KING);
         Require(expansion <= EXPANSION_WRATH_OF_THE_LICH_KING, "Player expansion must be 0..2");
         uint32 const security = actor.definition.get<uint32>("security", uint32(SEC_PLAYER));
@@ -2472,19 +2574,6 @@ private:
             }
         });
         actor.session->InitializeSession();
-        WorldPacket create(CMSG_CHAR_CREATE, 32);
-        uint32 race = actor.definition.get<uint32>("race");
-        uint32 playerClass = actor.definition.get<uint32>("class");
-        uint32 gender = actor.definition.get<uint32>("gender", GENDER_MALE);
-        Require(race > 0 && race <= 255 && playerClass > 0 && playerClass <= 255,
-            "Race/class must fit the character creation packet");
-        Require(gender == GENDER_MALE || gender == GENDER_FEMALE, "Gender must be 0 (male) or 1 (female)");
-        create << actor.definition.get<std::string>("name", actor.name) << uint8(race) << uint8(playerClass)
-               << uint8(gender);
-        for (uint8 i = 0; i < 6; ++i)
-            create << uint8(0);
-        actor.session->HandleCharCreateOpcode(create);
-        Reach(actor, ActorStage::Creating);
     }
 
     static uint32 RaidSpell(Tree const& value)
@@ -2706,7 +2795,7 @@ private:
     double SentQuestLogField(Player const* player, Tree const& step, uint32 firstField) const
     {
         uint16 const slot = player->FindQuestSlot(step.get<uint32>("quest"));
-        Require(slot < MAX_QUEST_LOG_SIZE, "The quest is not in the quest log");
+        Require(slot < NATIVE_QUEST_LOG_SIZE, "The quest is not in the quest log");
         return SentAddonField<uint32>(player, step, firstField + slot);
     }
 
@@ -3325,6 +3414,12 @@ private:
             Require(school > SPELL_SCHOOL_NORMAL && school < MAX_SPELL_SCHOOL, "Invalid resistance school");
             return unit->GetResistance(SpellSchools(school));
         }
+        if (metric == "attack_timer_ms")
+        {
+            uint32 hand = step.get<uint32>("hand", BASE_ATTACK);
+            Require(hand < MAX_ATTACK, "Invalid attack hand");
+            return std::max<int32>(0, int32(unit->getAttackTimer(WeaponAttackType(hand))));
+        }
         if (metric == "attack_time_ms" || metric == "pet_attack_time_ms")
         {
             if (metric == "pet_attack_time_ms")
@@ -3403,6 +3498,22 @@ private:
             Creature* creature = unit->ToCreature();
             Require(creature != nullptr, "Threat metric needs a creature actor");
             return creature->GetThreatMgr().GetThreat(GetUnit(step.get<std::string>("target")));
+        }
+        if (metric == "controlled_aura_min_damage" || metric == "controlled_aura_max_damage")
+        {
+            Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown controlled unit aura spell");
+            auto const itr = std::find_if(unit->m_Controlled.begin(), unit->m_Controlled.end(),
+                [spell](Unit const* controlled) { return controlled->IsAlive() && controlled->HasAura(spell); });
+            if (itr == unit->m_Controlled.end())
+                return std::numeric_limits<double>::quiet_NaN();
+            return (*itr)->GetFloatValue(metric == "controlled_aura_min_damage" ? UNIT_FIELD_MINDAMAGE :
+                UNIT_FIELD_MAXDAMAGE);
+        }
+        if (metric == "controlled_aura_count")
+        {
+            Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown controlled unit aura spell");
+            return std::count_if(unit->m_Controlled.begin(), unit->m_Controlled.end(),
+                [spell](Unit const* controlled) { return controlled->IsAlive() && controlled->HasAura(spell); });
         }
         if (metric == "spell_cast_count")
         {
@@ -3799,6 +3910,14 @@ private:
             return _actors.at(step.get<std::string>("actor")).lootReceived;
         if (metric == "voidportal_group")
             return double(Ascension::VoidPortal::ActiveGroupForTest());
+        if (metric == "spawn_display")
+        {
+            auto range = player->GetMap()->GetGameObjectBySpawnIdStore().equal_range(step.get<uint32>("spawn"));
+            for (auto itr = range.first; itr != range.second; ++itr)
+                if (itr->second->IsInWorld())
+                    return itr->second->GetDisplayId();
+            return -1.0;
+        }
         if (metric == "spawn_active")
         {
             auto range = player->GetMap()->GetGameObjectBySpawnIdStore().equal_range(step.get<uint32>("spawn"));
@@ -3978,6 +4097,12 @@ private:
             Require(creature != nullptr, "Creature attack metric needs a living nearby creature");
             return player->IsValidAttackTarget(creature) ? 1 : 0;
         }
+        if (metric == "nearby_creature_at_client")
+        {
+            Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f, true);
+            Require(creature != nullptr, "Creature client visibility metric needs a living nearby creature");
+            return player->HaveAtClient(creature) ? 1 : 0;
+        }
         if (metric == "nearby_creature_mount_display")
         {
             Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f, true);
@@ -4009,6 +4134,16 @@ private:
             if (itr == actor.unitValues.end() || !itr->second.count(UNIT_NPC_FLAGS))
                 return -1;
             return (itr->second.at(UNIT_NPC_FLAGS) & UNIT_NPC_FLAG_SPELLCLICK) ? 1 : 0;
+        }
+        if (metric == "nearby_creature_sent_gossip")
+        {
+            Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f, true);
+            Require(creature != nullptr, "Sent gossip metric needs a living nearby creature");
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            auto itr = actor.unitValues.find(creature->GetGUID().GetRawValue());
+            if (itr == actor.unitValues.end() || !itr->second.count(UNIT_NPC_FLAGS))
+                return -1;
+            return (itr->second.at(UNIT_NPC_FLAGS) & UNIT_NPC_FLAG_GOSSIP) ? 1 : 0;
         }
         if (metric == "nearby_creature_template")
         {
@@ -4268,6 +4403,46 @@ private:
                 if (caster && event.caster == caster && event.spell == spell &&
                     (!target || event.target == target) && (!critical || event.critical == *critical))
                     value += metric == "spell_damage_count" ? 1 : event.damage;
+            return double(value);
+        }
+        if (metric == "owned_creature_damage_total" || metric == "owned_creature_damage_count" ||
+            metric == "owned_creature_attack_count")
+        {
+            uint32 const entry = step.get<uint32>("entry");
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            uint64 meleeDamage = 0;
+            uint32 meleeHits = 0;
+            uint32 meleeSwings = 0;
+            for (auto const& [attacker, outcome] : actor.meleeOutcomesByAttacker)
+                if (outcome.attackerEntry == entry)
+                {
+                    meleeDamage += outcome.damage;
+                    meleeHits += outcome.crits + outcome.glancing + outcome.plain;
+                    meleeSwings += outcome.swings;
+                }
+            uint64 spellDamageSum = 0;
+            uint32 spellHits = 0;
+            for (SpellDamageEvent const& event : actor.spellDamage)
+                if (event.casterEntry == entry)
+                {
+                    spellDamageSum += event.damage;
+                    ++spellHits;
+                }
+            if (metric == "owned_creature_damage_total")
+                return double(meleeDamage + spellDamageSum);
+            if (metric == "owned_creature_damage_count")
+                return meleeHits + spellHits;
+            return meleeSwings + spellHits;
+        }
+        if (metric == "owned_creature_heal_count" || metric == "owned_creature_heal_total" ||
+            metric == "owned_creature_effective_heal_total")
+        {
+            uint32 const entry = step.get<uint32>("entry");
+            uint64 value = 0;
+            for (SpellHealEvent const& event : _actors.at(step.get<std::string>("actor")).spellHeals)
+                if (event.casterEntry == entry)
+                    value += metric == "owned_creature_heal_count" ? 1 :
+                        event.heal - (metric == "owned_creature_effective_heal_total" ? event.overheal : 0);
             return double(value);
         }
         if (metric == "spell_heal_count" || metric == "spell_heal_total" || metric == "spell_effective_heal_total")
@@ -4606,6 +4781,8 @@ private:
             WorldObject* object = metric == "viewpoint_entry" ? player->GetViewpoint() : player->GetSeer();
             return object ? object->GetEntry() : 0;
         }
+        if (metric == "summon_pending")
+            return player->GetSummonExpireTimer() > GameTime::GetGameTime().count();
         if (metric == "at_homebind")
             return player->GetMapId() == player->m_homebindMapId &&
                 player->GetExactDist(player->m_homebindX, player->m_homebindY, player->m_homebindZ) <= 5.0f;
@@ -4645,6 +4822,11 @@ private:
                     object->GetPositionX(), object->GetPositionY(), MAX_HEIGHT);
             }
             return object ? object->GetDuration() : 0;
+        }
+        if (metric == "charm_distance")
+        {
+            Unit* charm = player->GetCharm();
+            return charm ? player->GetExactDist2d(charm) : -1.0f;
         }
         if (metric == "charm_entry" || metric == "charm_aura_stacks")
         {
@@ -4759,6 +4941,16 @@ private:
             Require(creature != nullptr, "Attack observation needs a present owned creature");
             return GetUnit(step.get<std::string>("target"))->IsValidAttackTarget(creature);
         }
+        if (metric == "owned_creature_sent_faction")
+        {
+            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            Require(creature != nullptr, "Sent faction observation needs a present owned creature");
+            Actor& viewer = _actors.at(step.get<std::string>("target"));
+            auto itr = viewer.unitValues.find(creature->GetGUID().GetRawValue());
+            if (itr == viewer.unitValues.end() || !itr->second.count(UNIT_FIELD_FACTIONTEMPLATE))
+                return 0;
+            return itr->second.at(UNIT_FIELD_FACTIONTEMPLATE);
+        }
         if (metric == "owned_creature_victim")
         {
             Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
@@ -4792,6 +4984,11 @@ private:
             return double(_actors.at(step.get<std::string>("actor")).challengeStartResponses);
         if (metric == "challenge_start_code")
             return double(_actors.at(step.get<std::string>("actor")).challengeStartLastCode);
+        if (metric == "pet_name_is")
+        {
+            Pet const* pet = player->GetPet();
+            return pet && pet->GetName() == step.get<std::string>("text") ? 1.0 : 0.0;
+        }
         if (metric == "system_message_contains")
         {
             std::string const needle = step.get<std::string>("text");
@@ -4806,6 +5003,13 @@ private:
             auto const& whispers = _actors.at(step.get<std::string>("actor")).whispers;
             return double(std::count_if(whispers.begin(), whispers.end(), [&](auto const& whisper)
                 { return whisper.first == from && whisper.second == text; }));
+        }
+        if (metric == "whisper_contains")
+        {
+            std::string const needle = step.get<std::string>("text");
+            auto const& whispers = _actors.at(step.get<std::string>("actor")).whispers;
+            return std::any_of(whispers.begin(), whispers.end(), [&needle](auto const& whisper)
+                { return whisper.second.find(needle) != std::string::npos; }) ? 1.0 : 0.0;
         }
         if (metric == "notifications")
             return double(_actors.at(step.get<std::string>("actor")).notifications);
@@ -4857,6 +5061,17 @@ private:
             auto const found = packets.find(spell);
             return found == packets.end() ? -1.0 : double(found->second);
         }
+        if (metric == "item_loot_releases")
+            return _actors.at(step.get<std::string>("actor")).itemLootReleases;
+        if (metric == "sent_aura_amount")
+        {
+            auto const& sent = _actors.at(step.get<std::string>("actor")).sentAuraAmounts;
+            auto const found = sent.find(spell);
+            Require(found != sent.end(), "No native aura amount packet was observed for the spell");
+            uint32 effect = step.get<uint32>("effect", EFFECT_0);
+            Require(effect < MAX_SPELL_EFFECTS, "Invalid aura effect index");
+            return found->second[effect];
+        }
         if (metric == "pet_autocast_enabled")
         {
             Pet* pet = player->GetPet();
@@ -4902,6 +5117,7 @@ private:
             metric == "pet_health" ||
             metric == "pet_attack_power" || metric == "pet_run_speed_rate" || metric == "pet_is_banker" ||
             metric == "pet_display" || metric == "pet_native_display" || metric == "pet_scale" ||
+            metric == "pet_flags" || metric == "pet_mirror_image" ||
             metric == "pet_knows_spell" ||
             metric == "pet_distance" || metric == "pet_bearing" || metric == "pet_spell_bar_count")
         {
@@ -4916,6 +5132,10 @@ private:
                 return pet && pet->HasNpcFlag(UNIT_NPC_FLAG_BANKER);
             if (metric == "pet_display")
                 return pet ? pet->GetDisplayId() : 0;
+            if (metric == "pet_flags")
+                return pet ? pet->GetByteValue(UNIT_FIELD_BYTES_2, 2) : 0;
+            if (metric == "pet_mirror_image")
+                return pet && pet->HasUnitFlag2(UNIT_FLAG2_MIRROR_IMAGE) ? 1 : 0;
             if (metric == "pet_native_display")
                 return pet ? pet->GetNativeDisplayId() : 0;
             if (metric == "pet_scale")
@@ -5386,6 +5606,31 @@ private:
             return metric == "quest_status" ? double(player->GetQuestStatus(quest))
                 : double(player->CanTakeQuest(questTemplate, false));
         }
+        if (metric == "quest_log_slot")
+        {
+            uint16 const slot = player->FindQuestSlot(step.get<uint32>("quest"));
+            return slot < MAX_QUEST_LOG_SIZE ? double(slot) : -1.0;
+        }
+        if (metric == "quest_log_client_slot" || metric == "quest_log_client_count")
+        {
+            uint32 const quest = step.get<uint32>("quest");
+            for (uint16 slot = 0; slot < NATIVE_QUEST_LOG_SIZE; ++slot)
+            {
+                uint16 const field = PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET;
+                if (player->GetUInt32Value(field + QUEST_ID_OFFSET) != quest)
+                    continue;
+
+                if (metric == "quest_log_client_slot")
+                    return double(slot);
+
+                uint32 const index = step.get<uint32>("index", 0);
+                Require(index < QUEST_OBJECTIVES_COUNT, "Invalid quest objective index");
+                return double(uint16(player->GetUInt64Value(field + QUEST_COUNTS_OFFSET) >> (index * 16)));
+            }
+            return -1.0;
+        }
+        if (metric == "quest_log_has_room")
+            return double(player->SatisfyQuestLog(false));
         if (metric == "quest_objective_count")
         {
             uint16 slot = player->FindQuestSlot(step.get<uint32>("quest"));
@@ -5564,6 +5809,14 @@ private:
         if (metric == "quest_log_sent_level" || metric == "quest_log_sent_xp")
             return SentQuestLogField(player, step, metric == "quest_log_sent_level"
                 ? AscensionQuestLog::LevelField : AscensionQuestLog::RewardXPField);
+        if (metric == "quest_log_sent_level_count")
+        {
+            uint16 const slot = player->FindQuestSlot(step.get<uint32>("quest"));
+            Require(slot < NATIVE_QUEST_LOG_SIZE, "The quest is not in the quest log");
+            auto const& updates = _actors.at(step.get<std::string>("actor")).addonFieldUpdates;
+            auto const found = updates.find(AscensionQuestLog::LevelField + slot);
+            return found == updates.end() ? 0 : found->second;
+        }
         if (metric == "sent_average_item_level")
             return SentAddonField<float>(player, step, AverageItemLevelAddonField);
         if (metric == "sent_average_item_level_count")
@@ -5650,6 +5903,13 @@ private:
                             Item* item = player->GetItemByEntry(value.get_value<uint32>());
                             Require(item != nullptr, "Packet item position requires a carried item");
                             request << uint8(kind == "item_bag" ? item->GetBagSlot() : item->GetSlot());
+                        }
+                        else if (kind == "vendor_slot")
+                        {
+                            auto const& slots = _actors.at(step.get<std::string>("actor")).vendorSlot;
+                            auto const found = slots.find(value.get_value<uint32>());
+                            Require(found != slots.end(), "Packet vendor slot requires the item in the last vendor list");
+                            request << found->second;
                         }
                         else if (kind == "mail_id" || kind == "mail_item_guid")
                         {
@@ -6264,6 +6524,14 @@ private:
             group->ConvertToLFG();
             group->SetDungeonDifficulty(Difficulty(dungeon->difficulty));
             sLFGMgr->SetDungeon(group->GetGUID(), dungeon->Entry());
+            if (auto method = step.get_optional<uint32>("loot_method"))
+            {
+                group->SetLootMethod(LootMethod(*method));
+                group->SendUpdate();
+            }
+            for (GroupReference* member = group->GetFirstMember(); member; member = member->next())
+                if (Player* memberPlayer = member->GetSource())
+                    LocalLevelScaling::NotifyScalingChanged(memberPlayer);
         }
         else if (action == "lfg_teleport")
         {
@@ -6373,6 +6641,14 @@ private:
                 << step.get<std::string>("to") << step.get<std::string>("text");
             player->GetSession()->HandleMessagechatOpcode(packet);
             record.put("result", "whisper sent; verify delivery with assertions");
+        }
+        else if (action == "addon_message")
+        {
+            WorldPacket packet(CMSG_MESSAGECHAT, 64);
+            packet << uint32(CHAT_MSG_WHISPER) << uint32(LANG_ADDON) << player->GetName()
+                << step.get<std::string>("prefix") + "\t" + step.get<std::string>("text");
+            player->GetSession()->HandleMessagechatOpcode(packet);
+            record.put("result", "addon message sent to self");
         }
         else if (action == "release_spirit")
         {
@@ -6527,6 +6803,26 @@ private:
                 if (sScriptMgr->CanPacketReceive(player->GetSession(), packet))
                     player->GetSession()->HandleLootOpcode(packet);
             }
+        }
+        else if (action == "select")
+        {
+            Unit* target = GetUnit(step.get<std::string>("target"));
+            WorldPacket packet(CMSG_SET_SELECTION, 8);
+            packet << target->GetGUID();
+            player->GetSession()->HandleSetSelectionOpcode(packet);
+            Require(player->GetTarget() == target->GetGUID(), "Selection did not take effect");
+        }
+        else if (action == "minion_kill")
+        {
+            Creature* minion = GetOwnedCreature(player, step.get<uint32>("minion"));
+            Require(minion != nullptr, "Minion kill needs a living owned creature of that entry");
+            Unit* victim = GetUnit(step.get<std::string>("target"));
+            Require(victim->IsAlive(), "Minion kill target is already dead");
+            uint32 const killingDamage = uint32(std::min<uint64>(uint64(victim->GetMaxHealth()) * 100u,
+                std::numeric_limits<uint32>::max()));
+            Unit::DealDamage(minion, victim, killingDamage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL);
+            Require(!victim->IsAlive(), "Minion killing blow did not kill, health left " +
+                std::to_string(victim->GetHealth()));
         }
         else if (action == "select_nearby")
         {
@@ -6686,7 +6982,12 @@ private:
         }
         else if (action == "binder_activate")
         {
-            Unit* innkeeper = GetUnit(step.get<std::string>("target"));
+            Unit* innkeeper = nullptr;
+            if (auto target = step.get_optional<std::string>("target"))
+                innkeeper = GetUnit(*target);
+            else
+                innkeeper = GetOwnedCreature(GetPlayer(step.get<std::string>("owner")), step.get<uint32>("entry"));
+            Require(innkeeper != nullptr, "That actor has no creature of that entry out");
             if (!innkeeper->IsWithinDistInMap(player, INTERACTION_DISTANCE))
                 player->UpdatePosition(innkeeper->GetPositionX(), innkeeper->GetPositionY(),
                                        innkeeper->GetPositionZ(), player->GetOrientation(), true);
@@ -6816,6 +7117,18 @@ private:
             WorldPacket packet(CMSG_CANCEL_AURA, 4);
             packet << spell;
             player->GetSession()->HandleCancelAuraOpcode(packet);
+        }
+        else if (action == "reconnect")
+        {
+            Actor& actor = _actors.at(step.get<std::string>("actor"));
+            std::unique_ptr<WorldSession> previous = std::move(actor.session);
+            CreateSession(actor);
+            previous->SetPlayer(nullptr);
+            actor.session->SetPlayer(player);
+            player->SetSession(actor.session.get());
+            delete player->PlayerTalkClass;
+            player->PlayerTalkClass = new PlayerMenu(actor.session.get());
+            actor.session->HandlePlayerLoginToCharInWorld(player);
         }
         else if (action == "cancel_mount")
         {
@@ -7360,6 +7673,17 @@ private:
             player->CompleteQuest(quest);
             record.put("result", "quest marked complete as a fixture");
         }
+        else if (action == "quest_abandon")
+        {
+            uint16 const slot = step.get<uint16>("slot", player->FindQuestSlot(step.get<uint32>("quest")));
+            Require(slot < MAX_QUEST_LOG_SIZE, "The quest is not in the quest log");
+            WorldPacket packet(CMSG_QUESTLOG_REMOVE_QUEST, 1);
+            packet << uint8(slot);
+            WorldPackets::Quest::QuestLogRemoveQuest request(std::move(packet));
+            request.Read();
+            player->GetSession()->HandleQuestLogRemoveQuest(request);
+            record.put("slot", slot);
+        }
         else
             throw std::runtime_error("Unknown action: " + action);
     }
@@ -7464,6 +7788,7 @@ private:
     std::optional<CreatureScaling::TestOverride> _creatureScaling;
     std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
     std::optional<TwoSideConfig> _twoSide;
+    std::optional<QuestLogSizeConfig> _questLogSize;
     GameEventStates _gameEvents;
     std::optional<PlacementAuditTotals> _placementAudit;
 };

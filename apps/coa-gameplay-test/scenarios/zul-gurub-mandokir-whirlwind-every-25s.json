@@ -1,11 +1,12 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: Bloodlord Mandokir whirls once every 25 seconds, also without a charge",
+  "name": "Zul'Gurub: Bloodlord Mandokir whirls once every 25 seconds, in the charge's place when nobody is out of melee",
   "contract": [
-    "The live CoA combat log of 2026-08-02 (Normal kill) shows Mandokir's (11382) Whirlwind (2118408) first",
-    "12 s into the fight and then every 25.0-25.2 s, also in cycles where he charges nobody. The old script",
-    "whirled twice per 25 s charge cycle (1.5 s and 8 s after it), so a tank alone in melee saw two whirlwinds",
-    "by 20 s. The hero stands in melee and stops attacking, so there is no charge target and no gaze punishment."
+    "The live CoA combat log of 2026-08-02 (Normal kill) shows Mandokir's (11382) Whirlwind (2118408) every",
+    "25.0-25.2 s, also in cycles where he charges nobody; with a charge target it begins as the charge lands",
+    "(tester, 2026-11-04). With nobody out of melee he whirls in the charge's place, 10 s into the fight, so its",
+    "3 s cast ends by 14.5 s; the timer of the previous script began it at 12 s. An older script whirled twice per",
+    "25 s cycle. The hero stands in melee and stops attacking, so there is no charge target and no gaze punishment."
   ],
   "timeout_ms": 150000,
   "location": {
@@ -88,17 +89,17 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: the first Whirlwind comes about 12 s into the fight",
+      "label": "DISCRIMINATING: the first Whirlwind begins in the charge's place, 10 s into the fight",
       "actor": "tank",
       "metric": "spell_go_count",
       "entry": 11382,
       "spell": 2118408,
       "min": 1,
-      "within_ms": 20000
+      "within_ms": 14500
     },
     {
       "action": "wait",
-      "label": "Wait past the old script's second whirlwind 8 s after the charge",
+      "label": "Wait past the older script's second whirlwind 8 s after the charge",
       "ms": 10000
     },
     {

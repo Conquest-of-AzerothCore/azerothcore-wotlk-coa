@@ -1,0 +1,140 @@
+{
+  "schema": 1,
+  "name": "Azerothian Schmorgus Board places its board, feeds the user and grants the matching Well Fed (#10895)",
+  "contract": [
+    "Item 100626 casts 966448, whose SPELL_EFFECT_TRANS_DOOR places gameobject 100626. The template was missing, so the item was spent and nothing appeared, as reported.",
+    "The CoA client cache describes 100626 as a spellcaster (type 22) casting Refreshment 966449: Food 966450, Drink 34291, and after 10 seconds Well Fed 966452.",
+    "Refreshment reads 'gain either 966453 Spell Power or 966454 Attack Power, depending on your current stats'. 966452 only carries a SPELL_EFFECT_DUMMY, so without a handler no buff was applied.",
+    "Expected: the caster places a board and gets Food on using it; after 10 seconds of Refreshment the player with more spell power gets 966453 and the one with more attack power (casting Refreshment 966449 directly, so there is one board to use) gets 966454, never the other."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "spell_power": 2000
+    },
+    {
+      "id": "fighter",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "attack_power": 2000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 966448
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 966448,
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the caster's board is placed",
+      "actor": "caster",
+      "metric": "owned_gameobject_count",
+      "entry": 100626,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "No Food before using the board",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 966450,
+      "equals": 0
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "The caster uses a board",
+      "actor": "caster",
+      "entry": 100626
+    },
+    {
+      "action": "learn",
+      "actor": "fighter",
+      "spell": 966449
+    },
+    {
+      "action": "cast",
+      "label": "The fighter eats Refreshment",
+      "actor": "fighter",
+      "spell": 966449,
+      "target": "fighter"
+    },
+    {
+      "action": "assert",
+      "label": "Using the board applies Food to the caster",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 966450,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Refreshment applies Food to the fighter",
+      "actor": "fighter",
+      "metric": "aura",
+      "spell": 966450,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "No Well Fed before 10 seconds of eating",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 966453,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the caster becomes Well Fed with Spell Power",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 966453,
+      "equals": 1,
+      "within_ms": 13000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the fighter becomes Well Fed with Attack Power",
+      "actor": "fighter",
+      "metric": "aura",
+      "spell": 966454,
+      "equals": 1,
+      "within_ms": 13000
+    },
+    {
+      "action": "assert",
+      "label": "The caster does not get the Attack Power buff",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 966454,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The fighter does not get the Spell Power buff",
+      "actor": "fighter",
+      "metric": "aura",
+      "spell": 966453,
+      "equals": 0
+    }
+  ]
+}

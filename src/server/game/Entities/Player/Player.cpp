@@ -27,6 +27,7 @@
 #include "AscensionBazaarTokenReserve.h"
 #include "AscensionDisplayPatch.h"
 #include "AscensionPooledVitality.h"
+#include "AscensionCosmeticPetTokens.h"
 #include "AscensionVanityOwnership.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
@@ -2953,10 +2954,10 @@ void Player::SendInitialSpells()
             continue;
 
         if ((!itr->second->Active && !IsKeptInClientSpellbookWhenSuperseded(itr->first)) ||
-            !itr->second->IsInSpec(GetActiveSpec()))
+            !itr->second->IsInSpec(GetActiveSpec()) || IsTemporarySpellReplacementStandIn(itr->first))
             continue;
 
-        data << uint32(itr->first);
+        data << uint32(GetTemporarySpellReplacement(itr->first));
         data << uint16(0);                                  // it's not slot id
 
         ++spellCount;
@@ -3867,6 +3868,21 @@ void Player::removeSpell(uint32 spell_id, uint8 removeSpecMask, bool onlyTempora
         SendLearnPacket(spell_id, false, onlyTemporary && IsTemporarySpellReplacementStandIn(spell_id));
         if (onlyTemporary)
             sScriptMgr->OnPlayerTemporarySpellRemoveNotice(this, spell_id, true);
+    }
+
+    // A forgotten spell left on the bar stays clickable until the next login drops it there.
+    if (!onlyTemporary && removeSpecMask == SPEC_MASK_ALL && IsInWorld() && !HasSpell(spell_id))
+    {
+        bool barChanged = false;
+        for (uint8 button = 0; button < MAX_ACTION_BUTTONS; ++button)
+            if (ActionButton const* action = GetActionButton(button);
+                action && action->GetType() == ACTION_BUTTON_SPELL && action->GetAction() == spell_id)
+            {
+                removeActionButton(button);
+                barChanged = true;
+            }
+        if (barChanged)
+            SendInitialActionButtons();
     }
 }
 
@@ -11552,6 +11568,13 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
         return false;
     }
 
+    // Cosmetic pet tokens only sell on realm types whose classes can use them
+    if (!IsGameMaster() && !AscensionCosmeticPetTokens::AvailableOnRealm(item))
+    {
+        SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
+        return false;
+    }
+
     VendorItemData const* vItems = GetSession()->GetCurrentVendor() ? sObjectMgr->GetNpcVendorItemList(GetSession()->GetCurrentVendor()) : creature->GetVendorItems();
     if (!vItems || vItems->Empty())
     {
@@ -11909,6 +11932,15 @@ void Player::ModifySpellCooldown(uint32 spellId, int32 cooldown)
         return;
 
     itr->second.end += cooldown;
+
+    if (cooldown > 0)
+    {
+        uint32 const now = GameTime::GetGameTimeMS().count();
+        WorldPacket data;
+        BuildCooldownPacket(data, SPELL_COOLDOWN_FLAG_NONE, spellId, itr->second.end > now ? itr->second.end - now : 0);
+        SendDirectMessage(&data);
+        return;
+    }
 
     WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
     data << uint32(spellId);            // Spell ID

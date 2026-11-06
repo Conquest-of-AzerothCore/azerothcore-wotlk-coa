@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "name": "owned_creature_damage_total/attack_count observe the Honored Ancestor's own melee swings",
+  "contract": [
+    "Regression for the gameplay harness itself: spell_damage_count/total only accept a player's own GUID, pet",
+    "GUID or a currently-present owned creature (GetOwnedCreature, which needs the creature alive at query time",
+    "and only recognizes GetOwnerGUID ownership). A player-summoned guardian, totem or temporary pet that deals",
+    "melee swing damage was unobservable through that family (melee swings are excluded by design) and through",
+    "pet_melee_* only as melee alone, never combined with any spell damage the same summon might also deal.",
+    "owned_creature_damage_total, owned_creature_damage_count and owned_creature_attack_count fill that gap: they",
+    "sum the actor's already-recorded melee outcomes and spell damage events for creatures of a given entry,",
+    "purely from historical combat-log packets the actor's session received, without resolving a live creature",
+    "pointer. Honored Ancestor 51265 (AscensionBarbarian::Ancestor, ascension_summon_level_damage) is a Barbarian",
+    "guardian pet (a Pet-type object: its own GUID encodes a pet number, not its creature entry, unlike a plain",
+    "temporary summon), which lets this scenario cross-check the new metric's live-entry resolution and melee",
+    "aggregation against the established pet_melee_swings/pet_melee_damage metrics: both families must report the",
+    "same swing count and total damage for the same fight (a miss contributes to the swing count but not to the",
+    "landed-hit count, so owned_creature_damage_count is bounded by, not equal to, the swing count)."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "barbarian", "race": 11, "class": 12, "level": 30}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "barbarian", "entry": 36, "level": 30, "health": 1000000, "distance": 10}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000},
+    {
+      "action": "specialization", "actor": "barbarian", "id": 3,
+      "label": "AscensionTaughtAbilityData.h gates Ancestor's Call on the Ancestry specialization 3"
+    },
+    {"action": "wait", "ms": 1000},
+    {"action": "learn", "actor": "barbarian", "spell": 804729, "label": "Learn the Ancestry talent that teaches Ancestor's Call"},
+    {
+      "action": "assert", "label": "SETUP: the talent teaches Ancestor's Call", "actor": "barbarian",
+      "metric": "knows_spell", "spell": 804834, "equals": 1, "within_ms": 3000
+    },
+    {"action": "assert", "label": "SETUP: no Honored Ancestor yet", "actor": "barbarian", "metric": "owned_creature_count", "entry": 51265, "equals": 0},
+    {"action": "cast", "actor": "barbarian", "spell": 804834, "label": "Call the Honored Ancestor"},
+    {
+      "action": "assert", "label": "SETUP: Ancestor's Call summons the Honored Ancestor", "actor": "barbarian",
+      "metric": "owned_creature_count", "entry": 51265, "equals": 1, "within_ms": 3000
+    },
+    {"action": "assert", "label": "SETUP: it occupies the pet slot, where AscensionBarbarian::Ancestor looks", "actor": "barbarian", "metric": "pet_entry", "equals": 51265},
+    {"action": "snapshot", "actor": "barbarian", "metric": "owned_creature_attack_count", "entry": 51265, "save_as": "attacks0"},
+    {"action": "snapshot", "actor": "barbarian", "metric": "owned_creature_damage_count", "entry": 51265, "save_as": "hits0"},
+    {"action": "snapshot", "actor": "barbarian", "metric": "owned_creature_damage_total", "entry": 51265, "save_as": "damage0"},
+    {"action": "snapshot", "actor": "barbarian", "metric": "pet_melee_swings", "save_as": "swings0"},
+    {"action": "snapshot", "actor": "barbarian", "metric": "pet_melee_damage", "save_as": "melee0"},
+    {"action": "attack", "label": "Send the Honored Ancestor at the dummy", "actor": "barbarian", "target": "dummy", "pet": true},
+    {"action": "wait", "label": "Let the Ancestor swing a few times", "ms": 15000},
+    {"action": "stop_attack", "actor": "barbarian"},
+    {
+      "action": "client_packet", "label": "Native pet Follow command (ACT_COMMAND << 24 | COMMAND_FOLLOW) ends the Ancestor's attack",
+      "actor": "barbarian", "opcode": 373, "consumed": false,
+      "fields": [{"pet_guid": "barbarian"}, {"u32": 117440513}, {"u64": 0}]
+    },
+    {"action": "wait", "label": "Let a swing already in flight land", "ms": 2500},
+    {"action": "snapshot", "actor": "barbarian", "metric": "pet_melee_swings", "save_as": "swings_stopped"},
+    {"action": "wait", "label": "Observe a full swing interval with the Ancestor following", "ms": 3000},
+    {
+      "action": "assert", "label": "SETUP: the Ancestor no longer swings, so the snapshots below cannot race a swing",
+      "actor": "barbarian", "metric": "pet_melee_swings", "relative_to": "swings_stopped", "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: the Ancestor swung at least a few times",
+      "actor": "barbarian", "metric": "pet_melee_swings", "relative_to": "swings0", "min": 3
+    },
+    {"action": "snapshot", "actor": "barbarian", "metric": "pet_melee_swings", "relative_to": "swings0", "save_as": "swings_delta"},
+    {"action": "snapshot", "actor": "barbarian", "metric": "pet_melee_damage", "relative_to": "melee0", "save_as": "melee_delta"},
+    {
+      "action": "assert", "label": "owned_creature_attack_count counts the same swings as pet_melee_swings",
+      "actor": "barbarian", "metric": "owned_creature_attack_count", "entry": 51265, "relative_to": "attacks0",
+      "ratio_to": "swings_delta", "equals": 1
+    },
+    {
+      "action": "assert", "label": "owned_creature_damage_count lands at most once per swing and at least once",
+      "actor": "barbarian", "metric": "owned_creature_damage_count", "entry": 51265, "relative_to": "hits0",
+      "ratio_to": "swings_delta", "max": 1
+    },
+    {
+      "action": "assert", "label": "owned_creature_damage_count is not trivially zero",
+      "actor": "barbarian", "metric": "owned_creature_damage_count", "entry": 51265, "relative_to": "hits0", "min": 1
+    },
+    {
+      "action": "assert", "label": "owned_creature_damage_total sums the same melee damage as pet_melee_damage",
+      "actor": "barbarian", "metric": "owned_creature_damage_total", "entry": 51265, "relative_to": "damage0",
+      "ratio_to": "melee_delta", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The combined metric is not trivially zero",
+      "actor": "barbarian", "metric": "owned_creature_damage_total", "entry": 51265, "relative_to": "damage0", "min": 1
+    }
+  ]
+}

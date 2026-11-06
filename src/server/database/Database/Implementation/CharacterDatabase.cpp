@@ -230,6 +230,16 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "DELETE FROM coa_build_creator_active WHERE guid = ? AND spec = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_COA_BUILD_CREATOR_ACTIVE_ALL, "DELETE FROM coa_build_creator_active WHERE guid = ?",
         CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_COA_CALLBOARD_CONTRACTS,
+        "SELECT contract_type, completions FROM character_callboard_contract WHERE guid = ? AND week_start = ?",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_REP_COA_CALLBOARD_CONTRACT,
+        "REPLACE INTO character_callboard_contract (guid, contract_type, week_start, completions) VALUES (?, ?, ?, ?)",
+        CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_COA_CALLBOARD_CONTRACT_OLD_WEEKS,
+        "DELETE FROM character_callboard_contract WHERE guid = ? AND week_start <> ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_COA_CALLBOARD_CONTRACTS, "DELETE FROM character_callboard_contract WHERE guid = ?",
+        CONNECTION_ASYNC);
 
     // Read-only safety gate for the unregistered, never-saved Create probe.
     PrepareStatement(CHAR_SEL_FRESH_CHECK_GUID_COUNT, "SELECT COUNT(*) FROM characters WHERE guid BETWEEN ? AND ?", CONNECTION_SYNCH);
@@ -992,6 +1002,13 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "SELECT COUNT(*) FROM account_friend_migration WHERE account = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_INS_ACCOUNT_FRIEND_MIGRATION,
         "INSERT INTO account_friend_migration (account) VALUES (?)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_BAZAAR_TOKEN_HOURLY_CAP, "SELECT window_start, earned FROM account_bazaar_token_hourly_cap WHERE account = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_BAZAAR_TOKEN_HOURLY_CAP_IF_NEWER,
+        "INSERT INTO account_bazaar_token_hourly_cap (account, window_start, earned) VALUES (?, ?, ?) AS claimed "
+        "ON DUPLICATE KEY UPDATE earned = IF(claimed.window_start > account_bazaar_token_hourly_cap.window_start OR "
+        "(claimed.window_start = account_bazaar_token_hourly_cap.window_start AND claimed.earned > account_bazaar_token_hourly_cap.earned), "
+        "claimed.earned, account_bazaar_token_hourly_cap.earned), window_start = GREATEST(account_bazaar_token_hourly_cap.window_start, claimed.window_start)", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_REP_BAZAAR_TOKEN_HOURLY_CAP, "REPLACE INTO account_bazaar_token_hourly_cap (account, window_start, earned) VALUES (?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_ACCOUNT_FRIEND_LEGACY,
         "SELECT t.account, t.guid AS original_guid, t.name, s.note, s.guid AS owner_guid, s.flags "
         "FROM character_social s JOIN characters o ON o.guid=s.guid JOIN characters t ON t.guid=s.friend "

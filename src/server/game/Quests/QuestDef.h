@@ -30,7 +30,9 @@ class Player;
 
 class ObjectMgr;
 
-#define MAX_QUEST_LOG_SIZE 25
+// The 3.3.5a client and its update fields hold 25 quests; the server keeps further slots of its own
+#define NATIVE_QUEST_LOG_SIZE 25
+#define MAX_QUEST_LOG_SIZE 64
 
 #define QUEST_OBJECTIVES_COUNT 4
 #define QUEST_ITEM_OBJECTIVES_COUNT 6

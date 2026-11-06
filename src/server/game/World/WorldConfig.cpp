@@ -102,6 +102,10 @@ void WorldConfig::BuildConfigCache()
         ConfigValueCache::Reloadable::Yes, validXPRate, "finite and >= 0");
     SetConfigValue<float>(RATE_XP_PROFESSION_INSCRIPTION, "Rate.XP.Profession.Inscription", 2.88f,
         ConfigValueCache::Reloadable::Yes, validXPRate, "finite and >= 0");
+    SetConfigValue<float>(RATE_XP_PROFESSION_WOODCUTTING, "Rate.XP.Profession.Woodcutting", 0.33f,
+        ConfigValueCache::Reloadable::Yes, validXPRate, "finite and >= 0");
+    SetConfigValue<float>(RATE_XP_PROFESSION_WOODWORKING, "Rate.XP.Profession.Woodworking", 1.0f,
+        ConfigValueCache::Reloadable::Yes, validXPRate, "finite and >= 0");
     SetConfigValue<float>(RATE_XP_KILL, "Rate.XP.Kill", 1.0909091f);
     SetConfigValue<float>(RATE_XP_KILL_TBC, "Rate.XP.Kill.TBC", 1.0909091f);
     SetConfigValue<float>(RATE_XP_KILL_WOTLK, "Rate.XP.Kill.WotLK", 0.90909094f);
@@ -184,6 +188,7 @@ void WorldConfig::BuildConfigCache()
 
     SetConfigValue<float>(RATE_TALENT, "Rate.Talent", 1.0f, ConfigValueCache::Reloadable::Yes, [](float const& value) { return value >= 0.0f; }, ">= 0");
     SetConfigValue<float>(RATE_TALENT_PET, "Rate.Talent.Pet", 1.0f, ConfigValueCache::Reloadable::Yes, [](float const& value) { return value >= 0.0f; }, ">= 0");
+    SetConfigValue<float>(RATE_THREAT_TANK_STANCE, "Rate.Threat.TankStance", 2.0f, ConfigValueCache::Reloadable::Yes, [](float const& value) { return std::isfinite(value) && value > 0.0f; }, "finite and > 0");
     // Controls Player movespeed rate.
     SetConfigValue<float>(RATE_MOVESPEED_PLAYER, "Rate.MoveSpeed.Player", 1.0f, ConfigValueCache::Reloadable::Yes, [](float const& value) { return value >= 0.0f; }, ">= 0");
 
@@ -469,6 +474,7 @@ void WorldConfig::BuildConfigCache()
     SetConfigValue<bool>(CONFIG_QUEST_IGNORE_RAID, "Quests.IgnoreRaid", false);
     SetConfigValue<bool>(CONFIG_QUEST_IGNORE_AUTO_ACCEPT, "Quests.IgnoreAutoAccept", false);
     SetConfigValue<bool>(CONFIG_QUEST_IGNORE_AUTO_COMPLETE, "Quests.IgnoreAutoComplete", false);
+    SetConfigValue<uint32>(CONFIG_QUEST_LOG_SIZE, "Quests.LogSize", NATIVE_QUEST_LOG_SIZE, ConfigValueCache::Reloadable::Yes, [](uint32 const& value) { return value >= NATIVE_QUEST_LOG_SIZE && value <= MAX_QUEST_LOG_SIZE; }, ">= 25 and <= 64");
 
     SetConfigValue<uint32>(CONFIG_RANDOM_BG_RESET_HOUR, "Battleground.Random.ResetHour", 6, ConfigValueCache::Reloadable::Yes, [](uint32 const& value) { return value <= 23; }, "<= 23");
     SetConfigValue<uint32>(CONFIG_CALENDAR_DELETE_OLD_EVENTS_HOUR, "Calendar.DeleteOldEventsHour", 6, ConfigValueCache::Reloadable::Yes, [](uint32 const& value) { return value <= 23; }, "<= 23");

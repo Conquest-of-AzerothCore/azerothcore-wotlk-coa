@@ -363,6 +363,7 @@ public:
     bool AscensionIgnoreAbsorb = false;
     bool AscensionTargetAuraStateOnlyPrimary = false;
     bool AscensionInheritsResolvedAmount = false;
+    bool AscensionFlatAfterWeaponPercent = false;
     // Runtime-only opt-in for explicitly authored coefficients. Rank base
     // growth still uses the original SpellLevel and MaxLevel metadata.
     bool IgnoreSpellLevelPenalty = false;

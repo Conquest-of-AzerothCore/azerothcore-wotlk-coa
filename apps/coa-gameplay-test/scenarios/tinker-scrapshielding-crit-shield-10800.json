@@ -1,0 +1,164 @@
+{
+  "schema": 1,
+  "name": "Scrapshielding grants a visible absorb shield on the Tinker's own critical hit, once per 10 sec (#10800)",
+  "contract": [
+    "Scrapshielding 806627 reads \"Your critical strikes now grant you a shield that absorbs ${$806628m1+$806628ppl1+$AP*.15+$SP*.6}",
+    "damage. Can occur only once every 10 seconds.\" The handler in AscensionTinkerEvents.cpp casts Scrapshield 806628 on the",
+    "Tinker when the Tinker itself lands a critical damaging or healing hit and the 10 sec internal cooldown is clear. A",
+    "level 60 Tinker with every critical rating pushed to the cap learns the talent and casts Scrap Shot 500549 at a dummy:",
+    "Scrapshield must appear on the Tinker as a visible positive aura carrying an absorb amount. A second critical Scrap",
+    "Shot three seconds later falls inside the internal cooldown and must not grant another."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 60,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "ranged_crit_rating": 10000,
+      "spell_crit_rating": 10000,
+      "melee_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "t",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 500549
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 806627
+    },
+    {
+      "action": "assert",
+      "label": "The Tinker carries Scrapshielding",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 806627,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "No shield before the first critical hit",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 806628,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500549,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "The critical Scrap Shot grants Scrapshield",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 806628,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The shield is a visible buff",
+      "actor": "t",
+      "metric": "aura_visible",
+      "spell": 806628,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The shield is a positive aura",
+      "actor": "t",
+      "metric": "aura_positive",
+      "spell": 806628,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The shield carries an absorb amount",
+      "actor": "t",
+      "metric": "aura_amount",
+      "spell": 806628,
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "label": "One shield has been granted",
+      "actor": "t",
+      "metric": "spell_cast_count",
+      "spell": 806628,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "t",
+      "metric": "spell_damage_count",
+      "spell": 500549,
+      "critical": true,
+      "save_as": "crits_before_second"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 500549
+    },
+    {
+      "action": "wait",
+      "label": "Stay inside the 10 sec internal cooldown",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 500549,
+      "target": "d"
+    },
+    {
+      "action": "wait",
+      "label": "Let the second critical Scrap Shot land",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "The second Scrap Shot landed as a critical hit, so only the internal cooldown held the shield back",
+      "actor": "t",
+      "metric": "spell_damage_count",
+      "spell": 500549,
+      "critical": true,
+      "relative_to": "crits_before_second",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The internal cooldown holds back a second shield",
+      "actor": "t",
+      "metric": "spell_cast_count",
+      "spell": 806628,
+      "equals": 1
+    }
+  ]
+}

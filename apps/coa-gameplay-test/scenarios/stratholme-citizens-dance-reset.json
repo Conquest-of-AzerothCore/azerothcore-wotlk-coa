@@ -1,0 +1,249 @@
+{
+  "schema": 1,
+  "name": "Stratholme: dancing with a fighting Ghostly or Spectral Citizen resets it once",
+  "contract": [
+    "Issues #9896 and #10636: on Ascension a Ghostly Citizen (10385) or Spectral Citizen (10384) that a player was",
+    "fighting reset when the player danced with it (CMSG_TEXT_EMOTE 34 targeting it), once per citizen. A second dance",
+    "in a later fight does nothing. Out of combat they keep answering /dance with a dance."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "dancer",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "partner",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "dancer",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "summon",
+      "actor": "dancer",
+      "as": "ghostly",
+      "entry": 10385,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "dancer",
+      "target": "ghostly"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Ghostly Citizen fights",
+      "actor": "ghostly",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "dancer"
+    },
+    {
+      "action": "client_packet",
+      "actor": "dancer",
+      "opcode": 260,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 34
+        },
+        {
+          "u32": 0
+        },
+        {
+          "actor_guid": "ghostly"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Dancing resets the fighting Ghostly Citizen",
+      "actor": "ghostly",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "attack",
+      "actor": "dancer",
+      "target": "ghostly"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Ghostly Citizen fights again",
+      "actor": "ghostly",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "dancer"
+    },
+    {
+      "action": "client_packet",
+      "actor": "dancer",
+      "opcode": 260,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 34
+        },
+        {
+          "u32": 0
+        },
+        {
+          "actor_guid": "ghostly"
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "A second dance with the same citizen does not reset it",
+      "actor": "ghostly",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "summon",
+      "actor": "partner",
+      "as": "spectral",
+      "entry": 10384,
+      "distance": 3
+    },
+    {
+      "action": "set_health",
+      "actor": "partner",
+      "value": 1000000,
+      "maximum": 1000000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "attack",
+      "actor": "partner",
+      "target": "spectral"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Spectral Citizen fights",
+      "actor": "spectral",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "actor": "partner",
+      "opcode": 260,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 34
+        },
+        {
+          "u32": 0
+        },
+        {
+          "actor_guid": "spectral"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "Dancing resets the fighting Spectral Citizen",
+      "actor": "spectral",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "attack",
+      "actor": "partner",
+      "target": "spectral"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Spectral Citizen fights again",
+      "actor": "spectral",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "partner"
+    },
+    {
+      "action": "client_packet",
+      "actor": "partner",
+      "opcode": 260,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 34
+        },
+        {
+          "u32": 0
+        },
+        {
+          "actor_guid": "spectral"
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "A second dance with the same Spectral Citizen does not reset it",
+      "actor": "spectral",
+      "metric": "combat",
+      "equals": 1
+    }
+  ]
+}

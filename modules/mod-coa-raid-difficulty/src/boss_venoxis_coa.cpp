@@ -19,8 +19,9 @@
  *
  *   Snake form, when the avatar dies
  *     Toxic Bombardement  first 1s,  every 15s   toxic cloud at a random player
- *     Parasitic Poison    first 3s,  every 15s   random player; dispelled, a
- *                                                Parasitic Serpent breaks out
+ *     Parasitic Poison    first 3s,  every 15s   random player; when it ends or
+ *                                                is dispelled, three Parasitic
+ *                                                Serpents break out
  *     Venom Spit          first 5s,  every 10s   everyone in front, stacks
  *                                                Virulent Poison
  *     Corpse Explosion    first 17s, every 40s   every snake corpse nearby
@@ -91,6 +92,7 @@ namespace
 
     enum Npcs
     {
+        NPC_VENOXIS           = 14507,
         NPC_RAZZASHI_COBRA    = 11373,
         NPC_PARASITIC_SERPENT = 14884,
         NPC_WORLD_TRIGGER     = 12999,
@@ -120,9 +122,11 @@ namespace
     constexpr float HOLY_NOVA_RANGE  = 15.0f;
     constexpr float WRATH_JUMP_RANGE = 10.0f;
     constexpr uint8 WRATH_JUMPS      = 4;
+    constexpr uint8 PARASITIC_SERPENTS = 3;
     constexpr float SPIT_RANGE       = 60.0f;
     constexpr float SPIT_ARC         = float(M_PI) / 2;
     constexpr float CORPSE_RANGE     = 80.0f;
+    constexpr float VENOXIS_RANGE    = 200.0f;
 
     struct boss_venoxis_coa : public BossAI
     {
@@ -132,6 +136,7 @@ namespace
         {
             BossAI::Reset();
             me->RemoveAllAuras();
+            me->RemoveAllDynObjects();
             _avatar.Restore(me);
             _snake = false;
             _frenzied = false;
@@ -158,6 +163,7 @@ namespace
             Talk(SAY_DEATH);
             _avatar.Release(me);
             me->RemoveAllAuras();
+            me->RemoveAllDynObjects();
         }
 
         void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType type, SpellSchoolMask school) override
@@ -215,12 +221,15 @@ namespace
                     }
                     break;
                 case SPELL_VENOM_SPIT:
+                {
+                    uint32 const poison = sSpellMgr->GetSpellIdForDifficulty(SPELL_VIRULENT_POISON, me);
                     for (Player* p : PlayersInFront(me, SPIT_RANGE, SPIT_ARC))
                     {
                         me->CastSpell(p, SPELL_VENOM_SPIT_HIT, true);
-                        AddStack(me, p, SPELL_VIRULENT_POISON);
+                        AddStack(me, p, poison);
                     }
                     break;
+                }
                 case SPELL_PARASITIC_POISON:
                     if (Unit* target = ObjectAccessor::GetUnit(*me, _target))
                         me->CastSpell(target, SPELL_PARASITIC_POISON_DOT, true);
@@ -380,28 +389,59 @@ namespace
         GuidSet _burst;
     };
 
-    // Parasitic Poison: removed by any means before it runs out, a Parasitic
-    // Serpent breaks out of the target.
+    // Parasitic Poison: when it ends, run out or removed, three Parasitic
+    // Serpents break out of the target (live log: three per poison).
     class spell_venoxis_coa_parasitic_poison : public AuraScript
     {
         PrepareAuraScript(spell_venoxis_coa_parasitic_poison);
 
         void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
-            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
-                return;
             Unit* target = GetTarget();
             Unit* caster = GetCaster();
             if (!target || !caster || !caster->IsAlive())
                 return;
-            if (Creature* boss = caster->ToCreature())
-                if (Creature* serpent = boss->SummonCreature(NPC_PARASITIC_SERPENT, target->GetPosition(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000))
+            Creature* boss = caster->ToCreature();
+            if (!boss)
+                return;
+            for (uint8 i = 0; i < PARASITIC_SERPENTS; ++i)
+            {
+                Position const spot = target->GetNearPosition(2.0f, float(2 * M_PI) * i / PARASITIC_SERPENTS);
+                if (Creature* serpent = boss->SummonCreature(NPC_PARASITIC_SERPENT, spot, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000))
                     serpent->AI()->AttackStart(target);
+            }
         }
 
         void Register() override
         {
             AfterEffectRemove += AuraEffectRemoveFn(spell_venoxis_coa_parasitic_poison::AfterRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    // Poisonous Fangs of his snakes: their hits add Virulent Poison on behalf of
+    // Venoxis while he fights, so it stacks with his own; otherwise the snake's.
+    class spell_venoxis_coa_snake_fangs : public AuraScript
+    {
+        PrepareAuraScript(spell_venoxis_coa_snake_fangs);
+
+        void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+            Unit* snake = GetTarget();
+            Unit* victim = eventInfo.GetActionTarget();
+            if (!victim || victim == snake || !victim->IsAlive())
+                return;
+
+            Unit* source = snake;
+            if (Creature* venoxis = snake->FindNearestCreature(NPC_VENOXIS, VENOXIS_RANGE))
+                if (venoxis->IsInCombat())
+                    source = venoxis;
+            AddStack(source, victim, sSpellMgr->GetSpellIdForDifficulty(SPELL_VIRULENT_POISON, source));
+        }
+
+        void Register() override
+        {
+            OnEffectProc += AuraEffectProcFn(spell_venoxis_coa_snake_fangs::HandleProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
         }
     };
 }
@@ -410,4 +450,5 @@ void AddCoaVenoxisScripts()
 {
     RegisterZulGurubCreatureAI(boss_venoxis_coa);
     RegisterSpellScript(spell_venoxis_coa_parasitic_poison);
+    RegisterSpellScript(spell_venoxis_coa_snake_fangs);
 }

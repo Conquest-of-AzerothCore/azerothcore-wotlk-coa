@@ -8,13 +8,17 @@
  * (Web Spray, Burrow, Poison Shock every 45s) and Fierce Blow follow the CoA
  * combat log of 2026-08-02.
  *
+ *   Both forms
+ *     Poison Bolt Volley first 12s, every 15s   everyone, stacking poison
+ *     Hatch Eggs         first 17s, every 30s   the ten eggs nearest the players
+ *                                               hatch 10s later, one spider each
+ *                                               (a DBM bar in the live video of
+ *                                               2026-08-04; count and delay:
+ *                                               tester, live, 2026-11-04)
+ *     Fierce Blow        tank, first 6.7-17.3s, then every 6-10s
+ *
  *   Troll form
  *     Drain Life         first 6s,  every 10s   random player, interruptible
- *     Poison Bolt Volley first 12s, every 15s   everyone, stacking poison
- *     Hatch Eggs         at 17s                  the four nearest eggs hatch;
- *                                               on Ascended every 30s after
- *                                               (a DBM bar in the live video
- *                                               of 2026-08-04)
  *     Evolve             first 22s, every 60s   an egg hatches a colossal spider
  *     Infest             first 87s, every 60s   an egg hatches a festering
  *                                               spider that bursts on death
@@ -27,13 +31,14 @@
  *     Web Spray          first 15s, every 45s   everyone within 20 yards is
  *                                               slowed, then webbed; then she
  *                                               charges a caster, as in stock
- *     Burrow             first 20.5s, every 45s under ground for 3s, untargetable
+ *     Burrow             first 20.5s, every 45s under ground for 3s, untargetable;
+ *                                               she comes up on the player
+ *                                               farthest from her and stays on
+ *                                               them for 8s, untauntable (tester,
+ *                                               live, 2026-11-04)
  *     Poison Shock       first 27s, every 45s   Poison Nova, 20 yards around her,
  *                                               less the farther away
  *     Furious Strikes    passive, her hits speed her up
- *
- *   Both forms
- *     Fierce Blow        tank, first 6.7-17.3s, then every 6-10s
  *
  * Decided here, not in the data:
  *   - Evolve and Infest act on an egg she hatches for it: the spawn of Evolve
@@ -41,7 +46,9 @@
  *     Poison Shock's damage where it dies;
  *   - Drain Life heals her for what each tick deals;
  *   - Poison Nova falls off evenly to nothing at 20 yards (the tooltip says
- *     reduced, not by how much).
+ *     reduced, not by how much);
+ *   - her hunted player carries Menacing Gaze from the kit while she is fixed
+ *     on them (no combat log shows it).
  */
 
 #include "CreatureScript.h"
@@ -50,7 +57,10 @@
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
 
+#include <algorithm>
+#include <limits>
 #include <list>
+#include <vector>
 
 using namespace coa_zg;
 
@@ -88,6 +98,7 @@ namespace
         SPELL_POISON_SHOCK        = 2118145,
         SPELL_POISON_SHOCK_HIT    = 2118146,
         SPELL_BURROW              = 2118140,
+        SPELL_MENACING_GAZE       = 2118141,
         SPELL_POISON_NOVA         = 2118150,
         SPELL_INFEST              = 2118151,
     };
@@ -106,6 +117,7 @@ namespace
         EVENT_DRAIN_LIFE,
         EVENT_POISON_BOLT_VOLLEY,
         EVENT_HATCH_EGGS,
+        EVENT_OPEN_EGGS,
         EVENT_EVOLVE,
         EVENT_INFEST,
         EVENT_ACID_SPIT,
@@ -114,6 +126,7 @@ namespace
         EVENT_POISON_SHOCK,
         EVENT_BURROW,
         EVENT_EMERGE,
+        EVENT_END_HUNT,
         EVENT_FIERCE_BLOW,
     };
 
@@ -124,10 +137,14 @@ namespace
     };
 
     constexpr float VOLLEY_RANGE   = 200.0f;
-    constexpr uint8 EGGS_PER_HATCH = 4;
+    constexpr uint8 EGGS_PER_HATCH = 10;
     constexpr float NOVA_RANGE     = 20.0f;
     constexpr Milliseconds BURROW_LENGTH        = 3s;
-    constexpr Milliseconds ASCENDED_HATCH_EVERY = 30s;
+    constexpr Milliseconds HUNT_LENGTH          = 8s;
+    constexpr Milliseconds HATCH_EVERY          = 30s;
+    constexpr Milliseconds HATCH_DELAY          = 10s;
+    constexpr float EGG_SEARCH_RANGE = 100.0f;
+    constexpr float HUNT_THREAT    = 1000000.0f;
 
     struct boss_marli_coa : public BossAI
     {
@@ -141,6 +158,9 @@ namespace
             _avatar.Restore(me);
             _spider = false;
             _festering.clear();
+            _usedEggs.clear();
+            _hatchingEggs.clear();
+            EndHunt();
             Emerge();
 
             std::list<GameObject*> eggs;
@@ -162,8 +182,8 @@ namespace
             events.SetPhase(PHASE_TROLL);
             events.ScheduleEvent(EVENT_THRASH, 4s, 6s);
             events.ScheduleEvent(EVENT_DRAIN_LIFE, 6s, 0, PHASE_TROLL);
-            events.ScheduleEvent(EVENT_POISON_BOLT_VOLLEY, 12s, 0, PHASE_TROLL);
-            events.ScheduleEvent(EVENT_HATCH_EGGS, 17s, 0, PHASE_TROLL);
+            events.ScheduleEvent(EVENT_POISON_BOLT_VOLLEY, 12s);
+            events.ScheduleEvent(EVENT_HATCH_EGGS, 17s);
             events.ScheduleEvent(EVENT_EVOLVE, 22s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_INFEST, 87s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_FIERCE_BLOW, FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX);
@@ -171,6 +191,7 @@ namespace
 
         void JustDied(Unit* killer) override
         {
+            EndHunt();
             BossAI::JustDied(killer);
             _avatar.Release(me);
             Talk(SAY_DEATH);
@@ -215,8 +236,7 @@ namespace
                     break;
                 case SPELL_HATCH_EGGS:
                     Talk(SAY_SPIDER_SPAWN);
-                    for (uint8 i = 0; i < EGGS_PER_HATCH; ++i)
-                        HatchEgg();
+                    ClaimEggsNearPlayers();
                     break;
                 case SPELL_ACID_SPIT:
                     if (Unit* tank = me->GetVictim())
@@ -279,6 +299,15 @@ namespace
             }
         }
 
+        void KilledUnit(Unit* victim) override
+        {
+            if (victim->GetGUID() == _hunted)
+            {
+                events.CancelEvent(EVENT_END_HUNT);
+                EndHunt();
+            }
+        }
+
         void Emerge()
         {
             me->RemoveAurasDueToSpell(SPELL_BURROW);
@@ -286,20 +315,115 @@ namespace
             me->SetReactState(REACT_AGGRESSIVE);
         }
 
-        // The nearest egg still standing hatches a Spawn of Mar'li.
-        Creature* HatchEgg()
+        void HuntFarthest()
+        {
+            Unit* prey = SelectTarget(SelectTargetMethod::MaxDistance, 0, 0.0f, true);
+            if (!prey)
+                return;
+
+            _hunted = prey->GetGUID();
+            _huntThreat = HighestThreat() * 2.0f + HUNT_THREAT;
+            me->AddAura(SPELL_MENACING_GAZE, prey);
+            me->GetThreatMgr().AddThreat(prey, _huntThreat, nullptr, true, true);
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+            AttackStart(prey);
+            events.ScheduleEvent(EVENT_END_HUNT, HUNT_LENGTH, 0, PHASE_SPIDER);
+        }
+
+        void EndHunt()
+        {
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
+            me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
+            if (Unit* prey = ObjectAccessor::GetUnit(*me, _hunted))
+            {
+                prey->RemoveAurasDueToSpell(SPELL_MENACING_GAZE, me->GetGUID());
+                if (_huntThreat > 0.0f && me->GetThreatMgr().GetThreat(prey) >= _huntThreat)
+                    me->GetThreatMgr().AddThreat(prey, -_huntThreat, nullptr, true, true);
+            }
+            _hunted.Clear();
+            _huntThreat = 0.0f;
+        }
+
+        float HighestThreat() const
+        {
+            float highest = 0.0f;
+            for (ThreatReference const* ref : me->GetThreatMgr().GetUnsortedThreatList())
+                highest = std::max(highest, ref->GetThreat());
+            return highest;
+        }
+
+        std::vector<GameObject*> FreeEggs()
         {
             std::list<GameObject*> eggs;
-            me->GetGameObjectListWithEntryInGrid(eggs, GO_SPIDER_EGGS, 100.0f);
-            GameObject* nearest = nullptr;
+            me->GetGameObjectListWithEntryInGrid(eggs, GO_SPIDER_EGGS, EGG_SEARCH_RANGE);
+            std::vector<GameObject*> free;
             for (GameObject* egg : eggs)
-                if (egg->isSpawned() && (!nearest || me->GetDistance(egg) < me->GetDistance(nearest)))
+                if (egg->isSpawned() && !_usedEggs.count(egg->GetGUID()))
+                    free.push_back(egg);
+            return free;
+        }
+
+        // Hatch Eggs marks the eggs nearest the raid; each hatches one spider after HATCH_DELAY.
+        void ClaimEggsNearPlayers()
+        {
+            std::vector<Player*> const players = PlayersWithin(me, EGG_SEARCH_RANGE);
+            if (players.empty())
+                return;
+
+            auto distanceToRaid = [&players](GameObject const* egg)
+            {
+                float nearest = std::numeric_limits<float>::max();
+                for (Player const* p : players)
+                    nearest = std::min(nearest, egg->GetDistance(p));
+                return nearest;
+            };
+
+            std::vector<GameObject*> eggs = FreeEggs();
+            std::sort(eggs.begin(), eggs.end(), [&](GameObject const* a, GameObject const* b)
+            {
+                return distanceToRaid(a) < distanceToRaid(b);
+            });
+            if (eggs.size() > EGGS_PER_HATCH)
+                eggs.resize(EGGS_PER_HATCH);
+            if (eggs.empty())
+                return;
+
+            for (GameObject* egg : eggs)
+            {
+                _usedEggs.insert(egg->GetGUID());
+                _hatchingEggs.push_back(egg->GetGUID());
+            }
+            events.ScheduleEvent(EVENT_OPEN_EGGS, HATCH_DELAY);
+        }
+
+        void OpenClaimedEggs()
+        {
+            for (ObjectGuid const& guid : _hatchingEggs)
+                if (GameObject* egg = ObjectAccessor::GetGameObject(*me, guid))
+                    if (egg->isSpawned())
+                        HatchEgg(egg);
+            _hatchingEggs.clear();
+        }
+
+        // Evolve and Infest hatch the nearest free egg at once.
+        Creature* HatchNearestEgg()
+        {
+            GameObject* nearest = nullptr;
+            for (GameObject* egg : FreeEggs())
+                if (!nearest || me->GetDistance(egg) < me->GetDistance(nearest))
                     nearest = egg;
             if (!nearest)
                 return nullptr;
 
-            Creature* spawn = me->SummonCreature(NPC_SPAWN_OF_MARLI, nearest->GetPosition(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
-            nearest->SetLootState(GO_JUST_DEACTIVATED);
+            _usedEggs.insert(nearest->GetGUID());
+            return HatchEgg(nearest);
+        }
+
+        Creature* HatchEgg(GameObject* egg)
+        {
+            Creature* spawn = me->SummonCreature(NPC_SPAWN_OF_MARLI, egg->GetPosition(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 60000);
+            egg->SetLootState(GO_JUST_DEACTIVATED);
             if (spawn)
                 spawn->SetInCombatWithZone();
             return spawn;
@@ -336,20 +460,22 @@ namespace
                         break;
                     case EVENT_POISON_BOLT_VOLLEY:
                         DoCastSelf(SPELL_POISON_BOLT_VOLLEY);
-                        events.ScheduleEvent(EVENT_POISON_BOLT_VOLLEY, 15s, 0, PHASE_TROLL);
+                        events.ScheduleEvent(EVENT_POISON_BOLT_VOLLEY, 15s);
                         break;
                     case EVENT_HATCH_EGGS:
                         DoCastSelf(SPELL_HATCH_EGGS);
-                        if (me->GetMap()->GetSpawnMode() == RAID_DIFFICULTY_25MAN_HEROIC)
-                            events.ScheduleEvent(EVENT_HATCH_EGGS, ASCENDED_HATCH_EVERY, 0, PHASE_TROLL);
+                        events.ScheduleEvent(EVENT_HATCH_EGGS, HATCH_EVERY);
+                        break;
+                    case EVENT_OPEN_EGGS:
+                        OpenClaimedEggs();
                         break;
                     case EVENT_EVOLVE:
-                        if (Creature* spawn = HatchEgg())
+                        if (Creature* spawn = HatchNearestEgg())
                             DoCast(spawn, SPELL_EVOLVE);
                         events.ScheduleEvent(EVENT_EVOLVE, 60s, 0, PHASE_TROLL);
                         break;
                     case EVENT_INFEST:
-                        if (Creature* spawn = HatchEgg())
+                        if (Creature* spawn = HatchNearestEgg())
                             DoCast(spawn, SPELL_INFEST);
                         events.ScheduleEvent(EVENT_INFEST, 60s, 0, PHASE_TROLL);
                         break;
@@ -358,7 +484,7 @@ namespace
                         events.ScheduleEvent(EVENT_ACID_SPIT, 12s, 0, PHASE_SPIDER);
                         break;
                     case EVENT_WEB_SPRAY:
-                        DoCastSelf(SPELL_WEB_SPRAY);
+                        DoCastVictim(SPELL_WEB_SPRAY);
                         events.ScheduleEvent(EVENT_CHARGE, 5s, 0, PHASE_SPIDER);
                         events.ScheduleEvent(EVENT_WEB_SPRAY, 45s, 0, PHASE_SPIDER);
                         break;
@@ -383,6 +509,10 @@ namespace
                         break;
                     case EVENT_EMERGE:
                         Emerge();
+                        HuntFarthest();
+                        break;
+                    case EVENT_END_HUNT:
+                        EndHunt();
                         break;
                 }
 
@@ -397,6 +527,10 @@ namespace
         bool _spider = false;
         LoaAvatar _avatar{ NPC_AVATAR_OF_SHADRA, SPELL_DRAIN_POWER };
         GuidSet _festering;
+        GuidSet _usedEggs;
+        GuidVector _hatchingEggs;
+        ObjectGuid _hunted;
+        float _huntThreat = 0.0f;
     };
 }
 

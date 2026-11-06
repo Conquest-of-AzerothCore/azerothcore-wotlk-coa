@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Call Board Temporal Contracts: Complete Now counts toward daily-quest achievements",
+  "contract": "A Temporal Contract completed with Complete Now (CMSG 0x55B) credits the daily-quest achievement criteria as a turned-in daily does. A level-60 Human starts the week with at least one completion of each contract type, so buying one completion of five different types for gold earns 5 Daily Quests Complete (973).",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8822.9,
+    "y": 628.4,
+    "z": 93.8,
+    "o": 2.4
+  },
+  "steps": [
+    {"action": "money", "actor": "hero", "copper": 1000000},
+    {"action": "assert", "label": "5 Daily Quests Complete is not earned yet", "actor": "hero", "metric": "has_achievement", "achievement": 973, "equals": 0},
+    {"action": "client_packet", "label": "Complete Now Duel! for gold", "actor": "hero", "opcode": 1371, "fields": [{"u32": 4}, {"u8": 68}, {"u8": 117}, {"u8": 101}, {"u8": 108}, {"u8": 1}, {"u32": 1}]},
+    {"action": "client_packet", "label": "Complete Now a first Vanilla zone daily for gold", "actor": "hero", "opcode": 1371, "fields": [{"u32": 25}, {"u8": 79}, {"u8": 112}, {"u8": 101}, {"u8": 110}, {"u8": 87}, {"u8": 111}, {"u8": 114}, {"u8": 108}, {"u8": 100}, {"u8": 86}, {"u8": 97}, {"u8": 110}, {"u8": 105}, {"u8": 108}, {"u8": 108}, {"u8": 97}, {"u8": 90}, {"u8": 111}, {"u8": 110}, {"u8": 101}, {"u8": 75}, {"u8": 105}, {"u8": 108}, {"u8": 108}, {"u8": 49}, {"u8": 1}, {"u32": 1}]},
+    {"action": "client_packet", "label": "Complete Now a second Vanilla zone daily for gold", "actor": "hero", "opcode": 1371, "fields": [{"u32": 25}, {"u8": 79}, {"u8": 112}, {"u8": 101}, {"u8": 110}, {"u8": 87}, {"u8": 111}, {"u8": 114}, {"u8": 108}, {"u8": 100}, {"u8": 86}, {"u8": 97}, {"u8": 110}, {"u8": 105}, {"u8": 108}, {"u8": 108}, {"u8": 97}, {"u8": 90}, {"u8": 111}, {"u8": 110}, {"u8": 101}, {"u8": 75}, {"u8": 105}, {"u8": 108}, {"u8": 108}, {"u8": 50}, {"u8": 1}, {"u32": 1}]},
+    {"action": "client_packet", "label": "Complete Now a third Vanilla zone daily for gold", "actor": "hero", "opcode": 1371, "fields": [{"u32": 25}, {"u8": 79}, {"u8": 112}, {"u8": 101}, {"u8": 110}, {"u8": 87}, {"u8": 111}, {"u8": 114}, {"u8": 108}, {"u8": 100}, {"u8": 86}, {"u8": 97}, {"u8": 110}, {"u8": 105}, {"u8": 108}, {"u8": 108}, {"u8": 97}, {"u8": 90}, {"u8": 111}, {"u8": 110}, {"u8": 101}, {"u8": 75}, {"u8": 105}, {"u8": 108}, {"u8": 108}, {"u8": 51}, {"u8": 1}, {"u32": 1}]},
+    {"action": "client_packet", "label": "Complete Now Dungeon Diving for gold", "actor": "hero", "opcode": 1371, "fields": [{"u32": 28}, {"u8": 86}, {"u8": 97}, {"u8": 110}, {"u8": 105}, {"u8": 108}, {"u8": 108}, {"u8": 97}, {"u8": 78}, {"u8": 111}, {"u8": 114}, {"u8": 109}, {"u8": 97}, {"u8": 108}, {"u8": 68}, {"u8": 117}, {"u8": 110}, {"u8": 103}, {"u8": 101}, {"u8": 111}, {"u8": 110}, {"u8": 67}, {"u8": 114}, {"u8": 97}, {"u8": 119}, {"u8": 108}, {"u8": 105}, {"u8": 110}, {"u8": 103}, {"u8": 1}, {"u32": 1}]},
+    {"action": "assert", "label": "Five gold-bought contract completions count as five daily quests", "actor": "hero", "metric": "has_achievement", "achievement": 973, "equals": 1, "within_ms": 10000}
+  ]
+}

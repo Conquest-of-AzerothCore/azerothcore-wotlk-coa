@@ -16,6 +16,7 @@ namespace
 {
 constexpr char const* PENDING_DUNGEON_RELEASE = "ascension_dungeon_release";
 constexpr float RELEASE_RESTORE_PERCENT = 0.5f;
+constexpr uint32 SPELL_CORPSE_RUNNER = 84015;
 
 struct PendingDungeonRelease : DataMap::Base { };
 
@@ -88,7 +89,7 @@ class ascension_dungeon_release_player : public PlayerScript
 public:
     ascension_dungeon_release_player()
         : PlayerScript("ascension_dungeon_release_player",
-            {PLAYERHOOK_ON_PLAYER_RELEASED_GHOST, PLAYERHOOK_CAN_REPOP_AT_GRAVEYARD}) { }
+            {PLAYERHOOK_ON_PLAYER_RELEASED_GHOST, PLAYERHOOK_CAN_REPOP_AT_GRAVEYARD, PLAYERHOOK_ON_PLAYER_ENTER_COMBAT}) { }
 
     void OnPlayerReleasedGhost(Player* player) override
     {
@@ -114,7 +115,14 @@ public:
 
         player->SpawnCorpseBones();
         player->NearTeleportTo(start.GetPositionX(), start.GetPositionY(), start.GetPositionZ(), start.GetOrientation());
+        if (player->GetMap()->IsNonRaidDungeon() && player->GetMap()->GetDifficulty() < DUNGEON_DIFFICULTY_EPIC)
+            player->CastSpell(player, SPELL_CORPSE_RUNNER, true);
         return false;
+    }
+
+    void OnPlayerEnterCombat(Player* player, Unit*) override
+    {
+        player->RemoveAurasDueToSpell(SPELL_CORPSE_RUNNER);
     }
 };
 

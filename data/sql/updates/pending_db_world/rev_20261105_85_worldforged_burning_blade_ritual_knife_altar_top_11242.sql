@@ -1,0 +1,3 @@
+-- Worldforged Burning Blade Ritual Knife (pickup 6941515, Desolace) lay under the Lavaaltar model, 2.3 yd below its underside, 6.8 yd from the reporter standing on the altar top at the map position the loot guides give (#11242). Move it to the reporter's standing point (-1687.937, 1979.45, 65.313), which the server measures as ground.
+UPDATE `gameobject` SET `position_x` = -1687.937, `position_y` = 1979.45, `position_z` = 65.313
+WHERE `guid` = 6941515 AND `id` = 254285 AND `map` = 1 AND `position_z` BETWEEN 60.329 AND 60.349 AND `position_x` BETWEEN -1683.410 AND -1683.390 AND `position_y` BETWEEN 1980.090 AND 1980.110;

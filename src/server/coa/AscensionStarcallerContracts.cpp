@@ -11,6 +11,16 @@ namespace AscensionStarcaller
 {
 void ApplyContracts(SpellInfo* info)
 {
+    if (info && info->Id == 993772)
+    {
+        info->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
+        info->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+        info->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo();
+        info->Effects[EFFECT_0].RadiusEntry = nullptr;
+        info->Effects[EFFECT_1].Effect = 0;
+        info->Effects[EFFECT_2].Effect = 0;
+        info->_InitializeExplicitTargetMask();
+    }
     if (!info || info->SpellFamilyName != 32)
         return;
     uint32 id = info->Id;
@@ -110,6 +120,8 @@ void ApplyContracts(SpellInfo* info)
         dummy(0), dummy(1);
     if (id == 804378)
         dummy(1);
+    if (id == 572318)
+        info->Effects[EFFECT_0].Effect = 0;
     if (id == 801401 || id == 704232 || id == 560634)
         for (auto& e : info->Effects)
             if (e.Effect)
@@ -254,6 +266,8 @@ void ApplyContracts(SpellInfo* info)
     }
     if (id == 561122)
         info->DurationEntry = sSpellDurationStore.LookupEntry(1);
+    if (Named(info, 801978))
+        info->TargetAuraSpell = 0;
     if (id == 680213 || id == 300256)
     {
         info->Effects[0].ApplyAuraName = SPELL_AURA_PERIODIC_DUMMY;
@@ -271,6 +285,10 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].RadiusEntry = info->Effects[2].RadiusEntry;
         info->Effects[2].Effect = 0;
     }
+    if (id == 563725)
+        for (uint8 slot = EFFECT_0; slot <= EFFECT_2; ++slot)
+            if (info->Effects[slot].RadiusEntry)
+                info->Effects[slot].RadiusEntry = sSpellRadiusStore.LookupEntry(232);
     for (uint32 sid : {801148, 100250, 680790, 706436})
         if (id == sid)
             info->AttributesEx3 |= SPELL_ATTR3_IGNORE_CASTER_MODIFIERS;

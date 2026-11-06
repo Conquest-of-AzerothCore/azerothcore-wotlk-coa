@@ -26,6 +26,7 @@
 #include <limits>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace
 {
@@ -1035,6 +1036,22 @@ void HandleWithdrawAllowanceQuery(Player* player, OpenBank&, WorldPacket const& 
 
 namespace AscensionPersonalBank
 {
+static std::vector<AccessGuard> accessGuards;
+
+void RegisterAccessGuard(AccessGuard guard)
+{
+    if (guard)
+        accessGuards.push_back(guard);
+}
+
+bool CanAccess(Player* player, uint8 kind)
+{
+    for (AccessGuard guard : accessGuards)
+        if (!guard(player, kind))
+            return false;
+    return true;
+}
+
 void SendKindHint(Player* player, uint8 kind)
 {
     WorldPacket packet(SMSG_BANK_PERMISSIONS, 2);
@@ -1096,6 +1113,12 @@ bool HandlePacket(Player* player, WorldPacket const& packet)
                  player->GetName());
         Closed(player);
         return false;
+    }
+
+    if (!CanAccess(player, bank.OwnerKind == OWNER_REALM ? REALM : PERSONAL))
+    {
+        Closed(player);
+        return true;
     }
 
     switch (packet.GetOpcode())
@@ -1239,6 +1262,9 @@ public:
         }
 
         player->SendEquipError(EQUIP_ERR_NONE, item, nullptr);
+
+        if (!AscensionPersonalBank::CanAccess(player, kind))
+            return true;
 
         if (!AscensionPersonalBank::AddTab(player, kind))
         {

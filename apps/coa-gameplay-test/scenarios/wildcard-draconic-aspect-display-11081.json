@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Wildcard Draconic Aspect shows the dracthyr form, not the pig fallback (#11081)",
+  "contract": [
+    "Draconic Aspect 280600 transforms into creature 379386 (SPELL_AURA_TRANSFORM). The database had no such creature, so the transform used the missing-template pig display 16358.",
+    "The form creature now carries the Pyromancer Draconic Aspect display 142067. Casting (3 s) shows 142067, and the native display returns when the aura ends."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {"id": "hero", "race": 1, "class": 10, "level": 60, "spell_hit_rating": 10000, "allow_regeneration": false}
+  ],
+  "creatures": [],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Harnessa"},
+    {"action": "learn", "actor": "hero", "spell": 280600},
+    {"action": "snapshot", "actor": "hero", "metric": "display_id", "save_as": "normal"},
+    {"action": "cast", "actor": "hero", "spell": 280600, "target": "hero"},
+    {"action": "assert", "label": "SETUP: Draconic Aspect is active", "actor": "hero", "metric": "aura", "spell": 280600, "equals": 1, "within_ms": 4500},
+    {"action": "assert", "label": "THE FIX (#11081): the dracthyr display, not the pig", "actor": "hero", "metric": "display_id", "equals": 142067},
+    {"action": "cancel_aura", "actor": "hero", "spell": 280600},
+    {"action": "assert", "label": "the native display returns", "actor": "hero", "metric": "display_id", "relative_to": "normal", "equals": 0, "within_ms": 1000}
+  ]
+}

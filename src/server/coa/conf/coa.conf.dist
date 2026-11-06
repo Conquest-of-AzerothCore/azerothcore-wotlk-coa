@@ -35,6 +35,11 @@ CoA.MapClass10ToWarrior = 1
 CoA.ProbeRelay.Enable = 0
 CoA.ProbeRelay.AccountPrefix = "COALAB"
 
+CoA.LevelBoostNpc.Enable = 0
+CoA.LevelBoostNpc.Level = 60
+CoA.LevelBoostNpc.GoldReward = 5000
+CoA.LevelBoostNpc.RuneOfDescensionReward = 2000000
+
 # Log each consumed extension packet during protocol discovery.
 CoA.LogConsumedPackets = 1
 
@@ -43,6 +48,9 @@ CoA.LogConsumedPackets = 1
 # another account, auctioned or put in a guild bank while the account keeps at least the reserve. Mail between
 # the account's own characters is free. Farmed tokens above the reserve stay tradeable.
 CoA.BazaarTokens.WarchestRealmBound = 1
+
+CoA.BazaarTokens.HourlyCap.Amount = 0
+CoA.BazaarTokens.HourlyCap.WindowSeconds = 3600
 
 # Ascension character screen: enable/disable (activate/deactivate) and the
 # per-account character list sort order.
@@ -114,6 +122,21 @@ CoA.MonsterResistance.Enable = 1
 CoA.MonsterResistance.PerLevel = 1.0
 CoA.MonsterResistance.PerPercent = 5.0
 CoA.MonsterResistance.MaxReductionPct = 75.0
+
+# Level stats of the Ascension classes 12-32: level-60 base stats, base health and base mana from coa.bisbeard.com
+# with the race adjustments (ascension_class_stats, ascension_race_class_stats). Necromancer minions keep their
+# health either way. Restart to apply.
+# 1 - enabled.
+# 0 - the previous player_class_stats curve without race adjustments (default).
+CoA.ClassLevelSixtyStats.Enable = 0
+
+# Resilient Constitution (spell 552011), the class passive that lowers damage from players and their pets.
+# DamageReductionPct lowers every hit; CriticalReductionPct lowers critical hits again on top of it, so 50 and 20
+# leave 50% of a normal hit and 40% of a critical one. A player's pet gets PetSharePct percent of both reductions
+# through its owner's aura. Values are percentages from 0 to 100; higher values are capped at 100.
+CoA.ResilientConstitution.DamageReductionPct = 50
+CoA.ResilientConstitution.CriticalReductionPct = 20
+CoA.ResilientConstitution.PetSharePct = 85
 
 # Wardrobe, outfits, vanity and mount/companion collections for characters played by bots.
 # 0 - never: bot sessions skip the collections (default).
@@ -625,6 +648,45 @@ Ascension.CallboardCache.GoldMin = 5
 Ascension.CallboardCache.GoldMax = 15
 
 #
+#    CoA.CallboardContracts.Enable
+#        Description: Call Board Temporal Contracts. Every contract type listed in
+#                     ascension_callboard_contract earns DailyCompletions completions per day
+#                     begun since the weekly reset; missed days bank up until that reset. A
+#                     character can take and turn in quests of a type only while it has
+#                     completions left, and the Call Board's Complete Now button finishes the
+#                     banked ones for gold or Bazaar Tokens.
+#        Default:     1
+
+CoA.CallboardContracts.Enable = 1
+
+#
+#    CoA.CallboardContracts.DailyCompletions
+#        Description: Completions every contract type earns per day, shared by all its quests.
+#        Default:     1
+
+CoA.CallboardContracts.DailyCompletions = 1
+
+#
+#    CoA.CallboardContracts.MoneyCostMultiplier
+#    CoA.CallboardContracts.MinMoneyCost
+#        Description: Gold price of one Complete Now completion: the quest's money reward
+#                     times the multiplier, at least MinMoneyCost copper.
+#        Default:     2.0, 100000
+
+CoA.CallboardContracts.MoneyCostMultiplier = 2.0
+CoA.CallboardContracts.MinMoneyCost = 100000
+
+#
+#    CoA.CallboardContracts.TokenCostMultiplier
+#    CoA.CallboardContracts.MinTokenCost
+#        Description: Bazaar Token price of one Complete Now completion: the quest's Bazaar
+#                     Token reward times the multiplier, at least MinTokenCost tokens.
+#        Default:     2.0, 50
+
+CoA.CallboardContracts.TokenCostMultiplier = 2.0
+CoA.CallboardContracts.MinTokenCost = 50
+
+#
 #    CoA.DungeonTuning.Enable
 #        Description: Allow `.mythic damage` and `.mythic health` in 5-man dungeons. Every player can
 #                     raise or lower the damage and health of the creatures in their own instance
@@ -643,6 +705,16 @@ CoA.DungeonTuning.Enable = 1
 #        Default:     1
 
 CoA.DungeonNormal.Enable = 1
+
+#
+#    CoA.FierceBlow.Enable
+#        Description: Ascension's Fierce Blow (975011) on every hostile creature fighting a player or a
+#                     player's unit: one every 6-9.5 s, taking the place of its next melee swing. It
+#                     cannot be dodged, parried or missed. Creatures that already schedule their own
+#                     Fierce Blow (boss kits, SmartAI, C++ scripts) keep their own timing.
+#        Default:     1
+
+CoA.FierceBlow.Enable = 1
 
 #
 #    CoA.DungeonNormal.RepeatFactor

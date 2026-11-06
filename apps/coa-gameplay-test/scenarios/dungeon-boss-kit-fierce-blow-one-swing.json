@@ -8,10 +8,11 @@
     "fix stores 0 so the spell's own 100% applies. Omokk pacifies himself (19951) so no auto attack, Knock Away",
     "(prevention type 2) or other melee lands, while the triggered kit cast still goes through. Each landed",
     "Fierce Blow then takes his weapon roll, between weapon_damage_min and at most 1.5 times that, reduced by",
-    "at most 10% by the hero's armor (600 or less against 5415 at level 59). No CoA hook changes the hit",
-    "(damage-taken controls stay at 1000). One landed cast is therefore 0.9-1.5 weapon minimums, while a",
-    "200% cast is at least 1.8. Each of the first two casts may miss or be dodged, but at least one lands;",
-    "both arrive before Omokk's 20 s Frenzy."
+    "at most 10% by the hero's armor (600 or less against 5415 at level 59). No damage-taken modifier changes",
+    "the hit, and CoADungeonNormal scales it by 0.512 in Normal dungeons (coa_dungeon_normal_spell_damage,",
+    "#9635). The 40% max-health cap stays far above it with 1,000,000 health. One landed cast is therefore",
+    "0.46-0.77 weapon minimums, while a 200% cast is at least 0.92. Each of the first two casts may miss or be",
+    "dodged, but at least one lands; both arrive before Omokk's 20 s Frenzy."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -100,12 +101,12 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: no CoA damage hook scales Fierce Blow on the hero",
+      "label": "CONTROL: the Normal-dungeon hook scales Fierce Blow by 0.512",
       "actor": "hero",
       "metric": "script_spell_damage_taken",
       "spell": 975011,
       "target": "boss",
-      "equals": 1000
+      "equals": 512
     },
     {
       "action": "snapshot",
@@ -160,7 +161,7 @@
       "metric": "health",
       "relative_to": "before_first",
       "ratio_to": "weapon_min",
-      "min": -1.6,
+      "min": -0.85,
       "max": 0
     },
     {
@@ -186,7 +187,7 @@
       "metric": "health",
       "relative_to": "before_second",
       "ratio_to": "weapon_min",
-      "min": -1.6,
+      "min": -0.85,
       "max": 0
     },
     {
@@ -196,7 +197,7 @@
       "metric": "health",
       "relative_to": "before_first",
       "ratio_to": "weapon_min",
-      "max": -0.85
+      "max": -0.4
     },
     {
       "action": "assert",
