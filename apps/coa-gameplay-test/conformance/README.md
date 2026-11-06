@@ -194,13 +194,18 @@ source (`stat <n>` or `attack_power`), and whether the delta is judged (`judged`
 | 220 | `combat_rating {rating}`, one per bit of the misc mask | `share` |
 | 174 / 237 | `spell_power {school}`, one per magic school of the misc mask | `share` |
 | 327 | `stat {stat}` | `share` |
-| 79 | `spell_damage_done` (magic schools in the mask) and `melee_damage_done` (physical), `{target: dummy}` | `composition` |
+| 79 | `spell_damage_done {target: dummy}` (magic schools in the mask); physical: `weapon_damage_min {hand: 0}` | `composition`; physical `ratio` |
 | 136 | `spell_healing_done {target: caster}` | `composition` |
 | 118 | `spell_healing_taken {target: caster}` | `ratio` |
 | 163 | `spell_critical_damage {target: dummy}` | `crit_damage` |
 | 303 | `spell_damage_done {target: dummy}` | `ratio` |
 | 229 | `aoe_damage_taken {school}`, one per school of the mask | `ratio` |
 | 72 | `spell_power_cost` | `scale` |
+
+The physical part of aura 79 enters the weapon damage (`Unit::UpdateDamagePctDoneMods`, `TOTAL_PCT` of the hand's
+damage modifier), and `Unit::MeleeDamageBonusDone` skips aura 79 for a physical school mask (`Unit.cpp:11419`):
+`melee_damage_done` stayed 800 → 800 with Serendipity 300929 learned, so the physical part is measured on
+`weapon_damage_min` (`UNIT_FIELD_MINDAMAGE`, the character sheet's minimum damage).
 
 Unmodelled by rule: `P5` (`proc or trigger effect without a trigger entry`), `P6` (`scripted or crowd-control
 effect`), 142 (`mail armor is out of scope`, owner ruling), 59 (`damage versus a creature type is level-scaled`),
@@ -288,7 +293,15 @@ five Librams 1000 → −29000; Paladin Training 520009 op 0 1000 → 1200, op 1
 (Righteous Lunge 570233) and 50 → 40 (Argent Blade 807268), 0 → 0 for Holy Master 504810 (no cost); Graceful
 Fighter 705303 parry rating 0 → 26 and dodge rating 0 → 6; Aggramar's Rage 561346 expertise 4000 → 4010 while Holy
 `spell_crit_chance` stayed 2.8592 → 2.8592; Solemn Soldier 572555 `attack_time_ms` 2500 → 2272.73 and expertise
-4000 → 4010. Task 3 judges these deltas; none is judged here.
+4000 → 4010. `compare` judges these deltas (Verdicts, passive deltas).
+
+Judged probe of 2026-11-06 (`--passive` 300929 705272 561346 705266 712678 572555, stamp 20261106-085206, six
+scenarios passed): `ok` for Liberty on its five Librams (1000 → −29000), Solemn Soldier haste (2500 → 2272.73) and
+both expertise effects (+10), Serendipity's cost (20 → 19 on Crusader's Brand) and weapon damage (+3%);
+`ambiguous_tooltip` for Serendipity on Reckoning (800 → 824: `multiplies` against `adds` 830) and Chivalric
+(1500 → 1725: `whole` against `bonus` 1575); alerts for Aggramar's Rage Holy `spell_crit_chance` (2.8592 →
+2.8592, expected +6) and Patience on Interdict (spell modifier 1000 → 1000 for both effects; Sacred Restraint, the
+mask spell, `measured` 0).
 
 ## Max-rank hit scenarios
 
@@ -589,8 +602,8 @@ manifest hash when no folder has the key. The recorded hash is `scenario_sha256`
 error and no verdict. A scenario without a result has no verdict and is listed in the report. The harness writes
 every `actual` as a string; it is converted to a number, and a value that is not one is an error. `alerts.tsv`
 (default: the manifest directory) has one row per verdict that is neither `ok` nor `measured`; `report.md` counts the
-verdicts per status and per spell, and lists the known modifiers, the probe auras, the scenarios without a result and
-the runs that did not pass. `verdicts.json` keeps every verdict with its interval, detail and explanation (schema 1)
+verdicts per status, per spell and, for passive scenarios, per measurement family ("Passives"), and lists the known
+modifiers, the probe auras, the scenarios without a result and the runs that did not pass. `verdicts.json` keeps every verdict with its interval, detail and explanation (schema 1)
 for `diff`. When the run holds stack verdicts, `compare` also writes `levers.md`.
 
 ### A full class run
@@ -656,10 +669,10 @@ the verdicts of a side have no counterpart, the keys probably changed or the run
 | `alert` | a measurement outside its rule, a missing measurement, or tokens that changed since generation |
 | `unreadable` | an expectation whose rule starts with `unreadable: ` |
 | `unmodelled` | an `unmodelled` check, a `unmodelled: ` or `unmeasurable: ` rule, a hit model left unmodelled |
-| `ambiguous_tooltip` | a sign opposite to the measured value, a proc of unstated trigger, disagreeing talent readings |
+| `ambiguous_tooltip` | a sign opposite to the measured value, a proc of unstated trigger, disagreeing talent or passive readings, a named spell outside the class mask while a mask spell moves |
 | `insufficient_trials` | a hit mean below `minimum_hits`, a proc rate below `trials_needed` (R9), a missing pass |
-| `unmeasured` | a check after a failed single cast; a hit mean, proc rate or talent delta without usable hit (R11) |
-| `measured` | a stack DPS or source damage that no tooltip value judges; never an alert |
+| `unmeasured` | a check after a failed single cast; a hit mean, proc rate or talent delta without usable hit (R11); a passive whose aura is absent after `learn`; damage against an aura state the scenario does not establish |
+| `measured` | a stack DPS or source damage that no tooltip value judges, a passive plan with `judged` false, a mask spell the tooltip does not name; never an alert |
 
 The tooltip of each rank is read again with the `CasterStats` measured by the run's base steps. If its tokens differ
 from the tokens read at generation, every token check of the rank is an alert; so is a token whose text differs
@@ -711,6 +724,43 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   scenario casts its rank many times: a failed cast only produces no hit, so the mean is judged on the usable hits
   as above, and the explanation lists the failed casts per reason (`failed casts: 2 x <name> (<code>)`); fewer
   usable hits than `minimum_hits` is `insufficient_trials`, and no usable hit after failed casts is `unmeasured`.
+- Passive deltas (`passive_delta`, `judge_passive`): the judged quantity is `delta = after - before`. In order:
+  `<passive> aura_present` 0 makes every check of the passive `unmeasured: passive aura <id> absent after learn`
+  with its `EquippedItemClass`, `Stances` and `CasterAuraSpell`; a missing before or after value is an alert (a
+  plan with `judged` false: `unmeasured`); a plan with `judged` false is `measured`, never `ok` or alert; an
+  effect of aura 303 (damage against a target in aura state `EffectMiscValue`, Pious Sweep 520034 effect 0, state
+  23) is `unmeasured`, since the scenario neither establishes nor measures that state on the dummy. The tooltip is
+  then read again with the measured base stats; a token text absent from that reading is an alert. The token value
+  (times N for `$/N;`, except a `$/1000;sN sec` token of kind `duration_ms`, which the reader gives in ms) takes the sign of the effect's own points (`copysign`, own or shared token); for points
+  that scale with level, the sign rule of the token checks above. With v that signed value, the expected delta per
+  relation (readings, as R12/R14: agreeing readings give their status, disagreeing ones `ambiguous_tooltip`):
+
+  | Relation | Expected delta |
+  |---|---|
+  | `spell_mod_flat`, `add` | v |
+  | `spell_mod_pct`, `scale`, `ratio` | before x v / 100 |
+  | `share` | source x v / 100, source the base-step value of `source_label`, measured before the learn |
+  | `haste` | `divides`: before / (1 + v / 100) - before (one reading, owner answer Q5) |
+  | `crit_damage` | `whole`: before x v / 100; `bonus`: (before - 1000) x v / 100, 1000 the metric's fixed base |
+  | `composition` | `multiplies`: before x v / 100; `adds`, when a known modifier of the metric's kind (`damage`, `heal`) and school is measured on the character: before x v / (100 + the sum of their percents) |
+
+  Tolerance on the delta (D3): `delta_margin(metric, expected)` is `max(0.01, 0.5% of |expected|)` for the
+  percentage-point metrics `PERCENT_POINT_METRICS` (`melee_crit_chance`, `spell_crit_chance`, `melee_hit_chance`,
+  `spell_hit_chance`, `parry_chance`, `dodge_chance`) and for `weapon_damage_min`, a float field whose 3% delta is
+  about 1.9 (a 1-point floor would accept 1.4% to 4.6%), else `max(1, 0.5% of |expected|)`. Liberty 705266 on Libram
+  of Tenacity 801461: `$/1000;s1` reads 30, points −30000, expected −30000 ± 150; 1000 → −29000 is `ok`, 1000 →
+  −28800 an alert. Solemn Soldier 572555: 2500 → 2272.73 ms is `ok`, 2500 → 2250 an alert.
+  Spell modifier targets (D5): a mask spell the tooltip does not name, beside named targets of the same effect and
+  metric, is `measured`; with no named target (category targets) the mask spells are judged. A named spell outside
+  the mask is `ok` when its own delta is the expected one; otherwise `ambiguous_tooltip` when a mask spell of the
+  same effect and metric shows the expected delta ("the tooltip names X, the modifier applies to Y"), else an alert
+  (Patience 712678 names Interdict 560116, its mask matches Sacred Restraint 102208).
+  An `ambiguous_tooltip` passive verdict keeps `detail['question']` = `question_detail(kind, question, readings,
+  measured)`: `kind` `readings` (disagreeing readings) or `text` (named spell outside the mask), the question in
+  observable terms ("With Chivalric learned, does a critical hit of Reckoning change by +15% or by +7.5%?"), per
+  reading its `name`, `expected` (the after value), `delta`, `status` and `measured` (the after value of that
+  reading's spell), and `measured`, the after value of the verdict's own measurement. The verdict's `measured`,
+  `expected`, `low` and `high` are deltas.
 
 The report lists each known aura's modifier effects with `EffectBasePoints`, `EffectRealPointsPerLevel`, the
 value at the class level and the runs that measured the aura; a hit model applies a modifier only in a run that

@@ -348,7 +348,7 @@ def damage_done_plans(misc: int) -> list[tuple[MetricPlan, str]]:
     if misc & ~PHYSICAL_SCHOOL_MASK:
         plans.append((MetricPlan('spell_damage_done', {'target': TARGET}, 'composition'), 'damage dealt'))
     if misc & PHYSICAL_SCHOOL_MASK:
-        plans.append((MetricPlan('melee_damage_done', {'target': TARGET}, 'composition'), 'damage dealt'))
+        plans.append((MetricPlan('weapon_damage_min', {'hand': 0}, 'ratio'), 'damage dealt'))
     return plans
 
 

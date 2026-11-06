@@ -7,7 +7,8 @@ import sys
 import tempfile
 import unittest
 
-from compare import DbcTooltips, ScenarioDrift, compare, measured_values, read_verdicts, write_outputs
+from compare import (PERCENT_POINT_METRICS, DbcTooltips, ScenarioDrift, compare, delta_margin, measured_values,
+                     question_detail, read_verdicts, write_outputs)
 from hits import HitModel, Modifier
 from profile import CLASSES_DIR, DBC_DIR
 from tooltip import CasterStats, Displayed, Readout
@@ -61,13 +62,14 @@ class Workspace:
     def close(self):
         shutil.rmtree(self.root, ignore_errors=True)
 
-    def scenario(self, key, kind, expectations, tokens=(), steps=(), recorded_hash=None):
+    def scenario(self, key, kind, expectations, tokens=(), steps=(), recorded_hash=None, spell=SPELL,
+                 name='Test Strike', rank=RANK):
         path = self.root / 'out' / 'scenarios' / f'{key}.json'
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps({'name': key}, indent=2) + '\n', encoding='utf-8')
         sha = hashlib.sha256(path.read_bytes()).hexdigest()
         self.scenarios.append({'key': key, 'file': f'scenarios/{key}.json', 'sha256': sha, 'kind': kind,
-                               'spell_id': SPELL, 'spell_name': 'Test Strike', 'rank_id': RANK,
+                               'spell_id': spell, 'spell_name': name, 'rank_id': rank,
                                'tokens': list(tokens), 'expectations': [asdict(entry) for entry in expectations]})
         if steps is not None:
             self.runs[key] = (list(steps), recorded_hash or sha)
@@ -98,9 +100,13 @@ class Workspace:
 
 
 class FakeTooltips:
-    def __init__(self, tokens, points=None):
+    def __init__(self, tokens, points=None, fields=None):
         self.tokens = tokens
         self.points = points or {}
+        self.fields = fields or {}
+
+    def spell_field(self, spell_id, name):
+        return self.fields.get((spell_id, name), 0)
 
     def read(self, rank_id, caster, forced=None):
         values = self.tokens(caster, forced) if callable(self.tokens) else list(self.tokens)
@@ -446,6 +452,216 @@ class CompareTest(unittest.TestCase):
         self.workspace.scenario(HIT_KEY, 'hit', [entry], [], steps)
         verdict = {verdict.label: verdict for verdict in self.verdicts(hit_model=other_tokens)}[label]
         self.assertEqual(verdict.status, 'alert')
+
+
+def passive_expectation(rank, effect, metric, relation, displayed, points, target=None, named=None, in_mask=None,
+                        source_label=None, judged=True, fields=None):
+    qualifier = target if target is not None else ' '.join(str(value) for value in (fields or {}).values())
+    label = ' '.join(str(part) for part in (rank, f'e{effect}', metric, qualifier) if part != '')
+    model = {'family': 'P1' if named is not None else 'P2', 'effect': effect, 'metric': metric,
+             'fields': {**(fields or {}), **({'spell': target} if target else {})}, 'relation': relation,
+             'source_label': source_label, 'before_label': f'{label} before', 'after_label': f'{label} after',
+             'target': target, 'named': named, 'in_mask': in_mask, 'points': points, 'judged': judged,
+             'aura_label': f'{rank} aura_present'}
+    return Expectation(label, 'passive_delta', rank, rank, effect, displayed, relation, model)
+
+
+def delta_steps(entry, before, after):
+    return [assert_step(entry.model['before_label'], before), assert_step(entry.model['after_label'], after)]
+
+
+LIBERTY, AGGRAMARS_RAGE, SOLEMN_SOLDIER, PATIENCE, PIOUS = 705266, 561346, 572555, 712678, 706431
+CHIVALRIC, SERENDIPITY, GRACEFUL_FIGHTER, PIOUS_SWEEP, PALADIN_TRAINING = 705272, 300929, 705303, 520034, 520009
+LIBRAM_OF_TENACITY, RECKONING, INTERDICT, SACRED_RESTRAINT = 801461, 572741, 560116, 102208
+SPELL_NAMES = {(RECKONING, 'SpellName[enUS]'): 'Reckoning', (INTERDICT, 'SpellName[enUS]'): 'Interdict',
+               (SACRED_RESTRAINT, 'SpellName[enUS]'): 'Sacred Restraint', (RECKONING, 'SchoolMask'): 2}
+
+
+class PassiveDeltaTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def passive_run(self, rank, measured, tokens, aura='1', fields=None, name='Passive', **base_overrides):
+        self.workspace.close()
+        self.workspace = Workspace()
+        steps = [step for entry, (before, after) in measured.items() if before is not None
+                 for step in delta_steps(entry, before, after)]
+        steps.insert(len(steps) // 2, assert_step(f'{rank} aura_present', aura))
+        self.workspace.scenario(f'conformance-templar-passive-{rank}', 'passive', list(measured), [], steps,
+                                spell=rank, name=name, rank=rank)
+        manifest, results = self.workspace.manifest(**base_overrides)
+        reader = FakeTooltips(tokens, fields={**SPELL_NAMES, **(fields or {})})
+        return {verdict.label: verdict for verdict in compare(manifest, results, tooltips=reader,
+                                                              hit_model=reference_hit)}
+
+    def single(self, entry, before, after, tokens, **options):
+        return self.passive_run(entry.rank_id, {entry: (before, after)}, tokens, **options)[entry.label]
+
+    def test_flat_modifier_delta(self):
+        entry = passive_expectation(LIBERTY, 0, 'spell_modifier', 'spell_mod_flat', '$/1000;s1', -30000.0,
+                                    LIBRAM_OF_TENACITY, named=False, in_mask=True, fields={'op': 11, 'base': 1000})
+        token = [Displayed('$/1000;s1', 30000.0, 0, 'duration_ms')]
+        within = self.single(entry, '1000', '-29000', token)
+        self.assertEqual((within.status, within.measured, within.expected), ('ok', -30000.0, -30000.0))
+        self.assertAlmostEqual(within.high - within.expected, 150.0)
+        self.assertEqual(self.single(entry, '1000', '-28800', token).status, 'alert')
+
+    def test_divided_token_outside_a_duration_expects_the_undivided_points(self):
+        entry = passive_expectation(AGGRAMARS_RAGE, 1, 'expertise', 'add', '$/10;s2', 10.0)
+        verdict = self.single(entry, '4000', '4010', [Displayed('$/10;s2', 1.0, 1, 'flat')])
+        self.assertEqual((verdict.status, verdict.expected), ('ok', 10.0))
+
+    def test_percent_point_delta_has_no_one_point_floor(self):
+        entry = passive_expectation(AGGRAMARS_RAGE, 0, 'spell_crit_chance', 'add', '$s1', 6.0,
+                                    fields={'school': 1})
+        token = [Displayed('$s1', 6.0, 0, 'percent')]
+        within = self.single(entry, '2.8592', '8.8592', token)
+        self.assertEqual(within.status, 'ok')
+        self.assertAlmostEqual(within.high - within.expected, 0.03)
+        self.assertEqual(self.single(entry, '2.8592', '7.8592', token).status, 'alert')
+
+    def test_haste_divides(self):
+        entry = passive_expectation(SOLEMN_SOLDIER, 0, 'attack_time_ms', 'haste', '$s1', 10.0, fields={'hand': 0})
+        token = [Displayed('$s1', 10.0, 0, 'percent')]
+        divided = self.single(entry, '2500', '2272.73', token)
+        self.assertEqual(divided.status, 'ok')
+        self.assertAlmostEqual(divided.expected, 2500 / 1.1 - 2500)
+        self.assertIsNone(divided.detail)
+        self.assertEqual(self.single(entry, '2500', '2250', token).status, 'alert')
+
+    def test_named_target_outside_the_mask(self):
+        interdict, restraint = (
+            passive_expectation(PATIENCE, 0, 'spell_modifier', 'spell_mod_flat', '$/1000;s1', 2000.0, target, named,
+                                in_mask, fields={'op': 1, 'base': 1000})
+            for target, named, in_mask in ((INTERDICT, True, False), (SACRED_RESTRAINT, False, True)))
+        token = [Displayed('$/1000;s1', 2000.0, 0, 'duration_ms')]
+        verdicts = self.passive_run(PATIENCE, {interdict: ('1000', '1000'), restraint: ('1000', '3000')}, token,
+                                    name='Patience')
+        self.assertEqual(verdicts[interdict.label].status, 'ambiguous_tooltip')
+        self.assertEqual(verdicts[interdict.label].detail['question']['kind'], 'text')
+        self.assertEqual(verdicts[restraint.label].status, 'measured')
+        verdicts = self.passive_run(PATIENCE, {interdict: ('1000', '1000'), restraint: ('1000', '1000')}, token)
+        self.assertEqual((verdicts[interdict.label].status, verdicts[restraint.label].status), ('alert', 'measured'))
+        verdicts = self.passive_run(PATIENCE, {interdict: ('1000', '3000'), restraint: ('1000', '1000')}, token)
+        self.assertEqual(verdicts[interdict.label].status, 'ok')
+
+    def test_absent_passive_aura_is_unmeasured(self):
+        entries = [passive_expectation(PIOUS, 0, 'stat', 'scale', '$s1', 5.0, fields={'stat': stat})
+                   for stat in range(5)]
+        fields = {(PIOUS, 'EquippedItemClass'): -1, (PIOUS, 'Stances'): 0, (PIOUS, 'CasterAuraSpell'): 0}
+        verdicts = self.passive_run(PIOUS, {entry: ('81', '81') for entry in entries},
+                                    [Displayed('$s1', 5.0, 0, 'percent')], aura='0', fields=fields)
+        self.assertEqual({verdicts[entry.label].status for entry in entries}, {'unmeasured'})
+        for entry in entries:
+            self.assertIn('passive aura 706431 absent after learn', verdicts[entry.label].explanation)
+            self.assertIn('EquippedItemClass -1', verdicts[entry.label].explanation)
+
+    def test_crit_damage_readings(self):
+        entry = passive_expectation(CHIVALRIC, 0, 'spell_critical_damage', 'crit_damage', '$s1', 15.0, RECKONING,
+                                    fields={'target': 'dummy'})
+        verdict = self.single(entry, '2000', '2300', [Displayed('$s1', 15.0, 0, 'percent')], name='Chivalric')
+        self.assertEqual(verdict.status, 'ambiguous_tooltip')
+        question = verdict.detail['question']
+        self.assertEqual((question['kind'], question['measured']), ('readings', 2300.0))
+        self.assertEqual([(item['name'], item['expected'], item['status']) for item in question['readings']],
+                         [('whole', 2300.0, 'ok'), ('bonus', 2150.0, 'alert')])
+        self.assertIn('Reckoning', question['question'])
+
+    def test_composition_with_known_modifier(self):
+        entry = passive_expectation(SERENDIPITY, 0, 'spell_damage_done', 'composition', '$s1', 3.0, RECKONING,
+                                    fields={'target': 'dummy'})
+        verdict = self.single(entry, '800', '824', [Displayed('$s1', 3.0, 0, 'percent')], name='Serendipity')
+        self.assertEqual(verdict.status, 'ambiguous_tooltip')
+        readings = verdict.detail['question']['readings']
+        self.assertEqual([(reading['name'], reading['status']) for reading in readings],
+                         [('multiplies', 'ok'), ('adds', 'alert')])
+        self.assertAlmostEqual(readings[0]['expected'], 824.0)
+        self.assertAlmostEqual(readings[1]['expected'], 830.0)
+
+    def test_composition_without_the_known_aura_has_one_reading(self):
+        entry = passive_expectation(SERENDIPITY, 0, 'spell_damage_done', 'composition', '$s1', 3.0, RECKONING,
+                                    fields={'target': 'dummy'})
+        verdict = self.single(entry, '1000', '1030', [Displayed('$s1', 3.0, 0, 'percent')],
+                              **{'known_aura 887007': '0'})
+        self.assertEqual((verdict.status, verdict.detail), ('ok', None))
+
+    def test_share_uses_the_measured_source(self):
+        entry = passive_expectation(GRACEFUL_FIGHTER, 0, 'combat_rating', 'share', '$s1', 20.0,
+                                    source_label='stat 1', fields={'rating': 3})
+        token = [Displayed('$s1', 20.0, 0, 'percent')]
+        verdict = self.single(entry, '0', '26', token)
+        self.assertEqual((verdict.status, verdict.expected), ('ok', 26.4))
+        moved = self.single(entry, '0', '26', token, **{'stat 1': '150'})
+        self.assertEqual((moved.status, moved.expected), ('alert', 30.0))
+
+    def test_shared_token_takes_the_sign_of_the_effect_points(self):
+        entry = passive_expectation(PALADIN_TRAINING, 1, 'spell_power_cost', 'scale', '$s1', -20.0, 570233,
+                                    named=True, in_mask=True)
+        verdict = self.single(entry, '40', '32', [Displayed('$s1', 20.0, 0, 'percent')])
+        self.assertEqual((verdict.status, verdict.expected), ('ok', -8.0))
+
+    def test_unjudged_plan_is_measured(self):
+        entry = passive_expectation(AGGRAMARS_RAGE, 0, 'spell_crit_chance', 'add', '$s1', 6.0, judged=False,
+                                    fields={'school': 2})
+        verdict = self.single(entry, '2.8592', '2.8592', [Displayed('$s1', 6.0, 0, 'percent')])
+        self.assertEqual((verdict.status, verdict.measured), ('measured', 0.0))
+
+    def test_damage_versus_an_aura_state_the_scenario_does_not_establish_is_unmeasured(self):
+        entry = passive_expectation(PIOUS_SWEEP, 0, 'spell_damage_done', 'ratio', '$s1', 25.0, 572027,
+                                    fields={'target': 'dummy'})
+        fields = {(PIOUS_SWEEP, 'EffectApplyAuraName[0]'): 303, (PIOUS_SWEEP, 'EffectMiscValue[0]'): 23}
+        verdict = self.single(entry, '800', '800', [Displayed('$s1', 25.0, 0, 'percent')], fields=fields)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('aura state 23', verdict.explanation)
+
+    def test_token_missing_from_the_measured_reading_is_an_alert(self):
+        entry = passive_expectation(SOLEMN_SOLDIER, 0, 'attack_time_ms', 'haste', '$s1', 10.0, fields={'hand': 0})
+        verdict = self.single(entry, '2500', '2272.73', [Displayed('$s2', 10.0, 1, 'flat')])
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('$s1', verdict.explanation)
+
+    def test_missing_after_measurement_is_an_alert(self):
+        entry = passive_expectation(SOLEMN_SOLDIER, 0, 'attack_time_ms', 'haste', '$s1', 10.0, fields={'hand': 0})
+        verdicts = self.passive_run(SOLEMN_SOLDIER, {entry: (None, None)}, [Displayed('$s1', 10.0, 0, 'percent')])
+        self.assertEqual(verdicts[entry.label].status, 'alert')
+
+    def test_report_counts_passive_verdicts_per_family(self):
+        entry = passive_expectation(SOLEMN_SOLDIER, 0, 'attack_time_ms', 'haste', '$s1', 10.0, fields={'hand': 0})
+        unmodelled = Expectation(f'{SOLEMN_SOLDIER} e2', 'unmodelled', SOLEMN_SOLDIER, SOLEMN_SOLDIER, 2, '',
+                                 'unmodelled: scripted or crowd-control effect', {'family': 'P6', 'effect': 2})
+        self.workspace.scenario('conformance-templar-passive-572555', 'passive', [entry, unmodelled], [],
+                                [assert_step(entry.model['before_label'], '2500'),
+                                 assert_step(entry.model['aura_label'], '1'),
+                                 assert_step(entry.model['after_label'], '2272.73')],
+                                spell=SOLEMN_SOLDIER, name='Solemn Soldier', rank=SOLEMN_SOLDIER)
+        manifest, results = self.workspace.manifest()
+        verdicts = compare(manifest, results, tooltips=FakeTooltips([Displayed('$s1', 10.0, 0, 'percent')]),
+                           hit_model=reference_hit)
+        out = self.workspace.root / 'report'
+        write_outputs(manifest, results, verdicts, out)
+        report = (out / 'report.md').read_text(encoding='utf-8')
+        self.assertIn('## Passives', report)
+        self.assertRegex(report, r'\| P2 \| 1 \| 0 \| 0 \| 0 \| 0 \| 0 \| 0 \| 0 \|')
+        self.assertRegex(report, r'\| P6 \| 0 \| 0 \| 0 \| 1 \| 0 \| 0 \| 0 \| 0 \|')
+
+
+class QuestionDetailTest(unittest.TestCase):
+    def test_question_detail_keeps_the_readings_and_the_measurement(self):
+        readings = [{'name': 'whole', 'expected': 2300.0, 'status': 'ok'}]
+        self.assertEqual(question_detail('readings', 'Which?', readings, 2300.0),
+                         {'kind': 'readings', 'question': 'Which?', 'readings': readings, 'measured': 2300.0})
+
+    def test_percent_point_metrics_take_the_hundredth_floor(self):
+        self.assertEqual(delta_margin('melee_crit_chance', 1.0), 0.01)
+        self.assertEqual(delta_margin('attack_time_ms', 1.0), 1.0)
+        self.assertEqual(delta_margin('weapon_damage_min', 1.87), 0.01)
+        self.assertEqual(delta_margin('spell_modifier', -30000.0), 150.0)
+        self.assertEqual(PERCENT_POINT_METRICS, frozenset({'melee_crit_chance', 'spell_crit_chance',
+                                                           'melee_hit_chance', 'spell_hit_chance', 'parry_chance',
+                                                           'dodge_chance'}))
 
 
 class MeasuredValuesTest(unittest.TestCase):

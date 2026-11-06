@@ -10,11 +10,12 @@ from statistics import fmean
 from typing import Callable, Mapping, Protocol
 
 from hits import MEAN_HALF_WIDTH, UNMODELLED, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model
+from passives import PASSIVE_DELTA, VERSUS_AURA_STATE
 from procs import AMBIGUOUS_TOOLTIP, CAST, PROC_CHECK, chance_of, wilson_interval
 from profile import DBC_DIR, caster_stats_from, known_aura_label, probe_aura_label
 from stack import (ADDS, MEASURED, MELEE_SOURCE, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE, TALENT_DELTA,
                    levers, mean_interval, ratio_interval)
-from tooltip import CasterStats, ForcedPoints, Readout, Records, Tooltip, Unreadable
+from tooltip import CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, Unreadable
 from values import CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECTS, UNMEASURABLE, UNREADABLE, Expectation, dataset
 
 STATUSES = ('ok', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials', 'unmeasured',
@@ -46,6 +47,18 @@ REPORT_FILE = 'report.md'
 LEVERS_FILE = 'levers.md'
 VERDICTS_FILE = 'verdicts.json'
 VERDICTS_SCHEMA = 1
+PERCENT_POINT_METRICS = frozenset({'melee_crit_chance', 'spell_crit_chance', 'melee_hit_chance', 'spell_hit_chance',
+                                   'parry_chance', 'dodge_chance'})
+FRACTIONAL_METRICS = PERCENT_POINT_METRICS | {'weapon_damage_min'}
+FRACTIONAL_FLOOR = 0.01
+CRITICAL_DAMAGE_BASE = 1000
+DURATION_KIND = 'duration_ms'
+READINGS_QUESTION = 'readings'
+TEXT_QUESTION = 'text'
+AURA_REQUIREMENTS = ('EquippedItemClass', 'Stances', 'CasterAuraSpell')
+MODIFIER_KINDS = {'spell_damage_done': 'damage', 'spell_healing_done': 'heal'}
+QUESTION_SUBJECTS = {'spell_critical_damage': 'a critical hit of {spell}', 'spell_damage_done': 'a hit of {spell}',
+                     'spell_healing_done': 'a heal of {spell}'}
 
 HitModelSource = Callable[[dict, Expectation, Mapping[str, float]], HitModel]
 
@@ -88,6 +101,8 @@ class TooltipSource(Protocol):
 
     def first_effect(self, rank_id: int) -> int | None: ...
 
+    def spell_field(self, spell_id: int, name: str): ...
+
 
 class DbcTooltips:
     def __init__(self, dbc_dir: Path):
@@ -104,6 +119,9 @@ class DbcTooltips:
 
     def first_effect(self, rank_id: int) -> int | None:
         return next((effect for effect in EFFECTS if self.records.field('Spell', rank_id, f'Effect[{effect}]')), None)
+
+    def spell_field(self, spell_id: int, name: str):
+        return self.records.field('Spell', spell_id, name)
 
 
 @dataclass(frozen=True)
@@ -729,6 +747,243 @@ def judge_stack(manifest: dict, stack_parts: dict[str, list[ProcPart]], tooltips
     return verdicts
 
 
+@dataclass(frozen=True)
+class DeltaReading:
+    name: str
+    delta: float
+    why: str
+
+
+def delta_floor(metric: str) -> float:
+    return FRACTIONAL_FLOOR if metric in FRACTIONAL_METRICS else ABSOLUTE_TOLERANCE
+
+
+def delta_margin(metric: str, expected: float) -> float:
+    floor = delta_floor(metric)
+    return max(floor, RELATIVE_TOLERANCE * abs(expected))
+
+
+def delta_status(metric: str, measured: float, expected: float) -> str:
+    return 'ok' if abs(measured - expected) <= delta_margin(metric, expected) + FLOAT_EPSILON else 'alert'
+
+
+def question_detail(kind: str, question: str, readings: list[dict], measured: float | None) -> dict:
+    return {'kind': kind, 'question': question, 'readings': readings, 'measured': measured}
+
+
+def missing_measurement(run: Run, label: str) -> str:
+    return f'no measurement {label!r} in {run.key} ({run.status}: {run.message})'
+
+
+def undivided(token: Displayed) -> float:
+    return token.value if token.kind == DURATION_KIND else token.value * token_divisor(token.text)
+
+
+def signed_token(token: Displayed, points: float | None, tooltips: TooltipSource, rank_id: int) -> tuple[float, str]:
+    value = undivided(token)
+    if points is not None:
+        return (math.copysign(value, points),
+                f'{token.text} reads {token.value:g}, signed by the effect points {points:g}')
+    plain = PLAIN_TOKEN.fullmatch(token.text)
+    if plain:
+        shown = displayed_points(tooltips, plain, rank_id)
+        return value * plain_sign(shown), f'{token.text} reads {token.value:g}, signed by its Spell.dbc points {shown}'
+    return value, f'{token.text} reads {token.value:g}'
+
+
+def present_modifiers(manifest: dict, model: dict, run: Run, tooltips: TooltipSource) -> list[tuple[str, float]]:
+    kind = MODIFIER_KINDS.get(model['metric'])
+    school = tooltips.spell_field(model['target'], 'SchoolMask')
+    return [(f'known aura {row["spell_id"]} effect {row["effect_index"]} aura {row["aura"]} {row["percent"]:+d}%',
+             float(row['percent'])) for row in manifest.get('known_modifiers', [])
+            if row['applies_to'] == kind and row['school_mask'] & school
+            and run.values.get(known_aura_label(row['spell_id']), 0) > 0]
+
+
+def delta_readings(manifest: dict, run: Run, model: dict, before: float, value: float,
+                   tooltips: TooltipSource) -> list[DeltaReading]:
+    relation = model['relation']
+    if relation in ('spell_mod_flat', 'add'):
+        return [DeltaReading(relation, value, f'delta {value:+g}')]
+    if relation in ('spell_mod_pct', 'scale', 'ratio'):
+        return [DeltaReading(relation, before * value / 100, f'delta = before x {value:+g}%')]
+    if relation == 'share':
+        source = run.values[model['source_label']]
+        return [DeltaReading(relation, source * value / 100,
+                             f'delta = {model["source_label"]} {source:g} measured before the learn x {value:+g}%')]
+    if relation == 'haste':
+        return [DeltaReading('divides', before * 100 / (100 + value) - before, f'after = before / (1 {value:+g}%)')]
+    if relation == 'crit_damage':
+        return [DeltaReading('whole', before * value / 100, f'the whole critical hit x (1 {value:+g}%)'),
+                DeltaReading('bonus', (before - CRITICAL_DAMAGE_BASE) * value / 100,
+                             f'the critical bonus above the fixed base {CRITICAL_DAMAGE_BASE} x (1 {value:+g}%)')]
+    if relation == 'composition':
+        readings = [DeltaReading(MULTIPLIES, before * value / 100,
+                                 'the bonus multiplies the value, known modifiers included')]
+        known = present_modifiers(manifest, model, run, tooltips)
+        if known:
+            stacked = sum(percent for _, percent in known)
+            names = ', '.join(name for name, _ in known)
+            readings.append(DeltaReading(ADDS, before * value / (100 + stacked),
+                                         f'the bonus adds to the percents of {names}: before x {value:g} / (100 '
+                                         f'{stacked:+g})'))
+        return readings
+    return []
+
+
+def target_name(tooltips: TooltipSource, spell_id: int) -> str:
+    return f'{tooltips.spell_field(spell_id, "SpellName[enUS]")} {spell_id}'
+
+
+def same_group(model: dict, other: dict) -> bool:
+    def without_spell(fields: dict) -> dict:
+        return {key: value for key, value in fields.items() if key != 'spell'}
+
+    return ((other['effect'], other['metric'], without_spell(other['fields']))
+            == (model['effect'], model['metric'], without_spell(model['fields'])))
+
+
+def target_group(entry: dict, model: dict) -> list[dict]:
+    return [data['model'] for data in entry['expectations']
+            if data['check'] == PASSIVE_DELTA and data['model'] and same_group(model, data['model'])]
+
+
+def interval_verdict(base: Verdict, metric: str, delta: float, judged: list[tuple[DeltaReading, str]],
+                     context: str) -> Verdict:
+    reading, status = judged[0]
+    margin = delta_margin(metric, reading.delta)
+    floor = delta_floor(metric)
+    readings = '; '.join(f'{item.name} ({item.why}): expected delta {item.delta:+.6g}: {item_status}'
+                         for item, item_status in judged)
+    return replace(base, status=status, measured=delta, expected=reading.delta, low=reading.delta - margin,
+                   high=reading.delta + margin,
+                   explanation=f'{context}; {readings}; |delta - expected| <= max({floor:g}, '
+                               f'{RELATIVE_TOLERANCE:.1%} of expected)')
+
+
+def change(before: float, delta: float) -> str:
+    return f'{100 * delta / before:+.4g}%' if before else f'{delta:+.6g}'
+
+
+def judge_readings(base: Verdict, entry: dict, model: dict, judged: list[tuple[DeltaReading, str]], before: float,
+                   delta: float, context: str, tooltips: TooltipSource) -> Verdict:
+    statuses = {status for _, status in judged}
+    if len(statuses) == 1:
+        return interval_verdict(base, model['metric'], delta, judged, context)
+    spell = (tooltips.spell_field(model['target'], 'SpellName[enUS]') if model['target'] is not None
+             else model['metric'])
+    subject = QUESTION_SUBJECTS.get(model['metric'], model['metric']).format(spell=spell)
+    changes = ' or by '.join(change(before, reading.delta) for reading, _ in judged)
+    question = f'With {entry["spell_name"]} learned, does {subject} change by {changes}?'
+    readings = [{'name': reading.name, 'expected': before + reading.delta, 'delta': reading.delta, 'status': status,
+                 'measured': before + delta} for reading, status in judged]
+    text = '; '.join(f'{reading.name} ({reading.why}): expected delta {reading.delta:+.6g}: {status}'
+                     for reading, status in judged)
+    return replace(base, status='ambiguous_tooltip', measured=delta, expected=judged[0][0].delta,
+                   explanation=f'the readings disagree; {context}; {text}',
+                   detail={'question': question_detail(READINGS_QUESTION, question, readings, before + delta)})
+
+
+def mask_matches(manifest: dict, run: Run, entry: dict, model: dict, value: float,
+                 tooltips: TooltipSource) -> list[tuple[dict, float, float, DeltaReading]]:
+    matches = []
+    for other in target_group(entry, model):
+        if other['named'] or not other['in_mask']:
+            continue
+        before, after = run.values.get(other['before_label']), run.values.get(other['after_label'])
+        if before is None or after is None:
+            continue
+        readings = delta_readings(manifest, run, other, before, value, tooltips)
+        if readings and delta_status(other['metric'], after - before, readings[0].delta) == 'ok':
+            matches.append((other, before, after - before, readings[0]))
+    return matches
+
+
+def judge_modifier_target(base: Verdict, manifest: dict, entry: dict, run: Run, model: dict, value: float,
+                          before: float, delta: float, judged: list[tuple[DeltaReading, str]], context: str,
+                          tooltips: TooltipSource) -> Verdict:
+    name = target_name(tooltips, model['target'])
+    if not model['named'] and any(other['named'] for other in target_group(entry, model)):
+        return replace(base, status=MEASURED, measured=delta, expected=judged[0][0].delta,
+                       explanation=f'{context}; {name} is in the class mask but the tooltip names other spells: '
+                                   f'reported, not judged')
+    reading, status = judged[0]
+    if status == 'ok' or model['in_mask']:
+        return interval_verdict(base, model['metric'], delta, judged, context)
+    matches = mask_matches(manifest, run, entry, model, value, tooltips)
+    if not matches:
+        verdict = interval_verdict(base, model['metric'], delta, judged, context)
+        return replace(verdict, explanation=f'{verdict.explanation}; {name} is named outside the class mask and no '
+                                            f'mask spell shows the expected delta')
+    others = ', '.join(target_name(tooltips, other['target']) for other, *_ in matches)
+    question = (f'{entry["spell_name"]} names {name}, but its modifier changed {model["metric"]} of {others} by '
+                f'{reading.delta:+g} and of {name} by {delta:+g} here: with {entry["spell_name"]} learned on live, '
+                f'does {name} change as the tooltip says?')
+    readings = [{'name': name, 'expected': before + reading.delta, 'delta': reading.delta, 'status': status,
+                 'measured': before + delta}]
+    readings += [{'name': target_name(tooltips, other['target']), 'expected': other_before + other_reading.delta,
+                  'delta': other_reading.delta, 'status': 'ok', 'measured': other_before + other_delta}
+                 for other, other_before, other_delta, other_reading in matches]
+    return replace(base, status='ambiguous_tooltip', measured=delta, expected=reading.delta,
+                   explanation=f'the tooltip names {name}, the modifier applies to {others}; {context}; '
+                               f'{reading.name}: expected delta {reading.delta:+.6g}',
+                   detail={'question': question_detail(TEXT_QUESTION, question, readings, before + delta)})
+
+
+def judge_passive(manifest: dict, entry: dict, run: Run | None, expectation: Expectation,
+                  tooltips: TooltipSource) -> Verdict:
+    model = expectation.model
+    rank_id = expectation.rank_id
+    base = Verdict(expectation.label, 'alert', None, None, None, None, '', entry['key'], expectation.spell_id,
+                   rank_id, expectation.check)
+    if run is None:
+        return replace(base, explanation=f'{entry["key"]} has no scenario to measure {expectation.check}')
+    aura = run.values.get(model['aura_label'])
+    if aura is None:
+        return replace(base, explanation=missing_measurement(run, model['aura_label']))
+    if aura <= 0:
+        requirements = ', '.join(f'{name} {tooltips.spell_field(rank_id, name)}' for name in AURA_REQUIREMENTS)
+        return replace(base, status='unmeasured', explanation=f'passive aura {rank_id} absent after learn '
+                                                              f'({requirements})')
+    before, after = run.values.get(model['before_label']), run.values.get(model['after_label'])
+    if before is None or after is None:
+        label = model['before_label'] if before is None else model['after_label']
+        return replace(base, status='alert' if model['judged'] else 'unmeasured',
+                       explanation=missing_measurement(run, label))
+    delta = after - before
+    moved = f'{model["metric"]} {before:g} before and {after:g} after the learn, delta {delta:+g}'
+    if not model['judged']:
+        return replace(base, status=MEASURED, measured=delta,
+                       explanation=f'{moved}; reported, not judged: the tooltip does not single out this quantity')
+    effect = model['effect']
+    if tooltips.spell_field(rank_id, f'EffectApplyAuraName[{effect}]') == VERSUS_AURA_STATE:
+        state = tooltips.spell_field(rank_id, f'EffectMiscValue[{effect}]')
+        return replace(base, status='unmeasured', measured=delta,
+                       explanation=f'{moved}; aura {VERSUS_AURA_STATE} applies against a target in aura state '
+                                   f'{state}, which the scenario neither establishes nor measures on the dummy')
+    try:
+        caster = caster_stats_from(run.values, manifest['level'])
+    except KeyError as error:
+        return replace(base, measured=delta, explanation=f'base measurement {error} is missing from {run.key}')
+    token = next((value for value in tooltips.read(rank_id, caster).values if value.text == expectation.displayed),
+                 None)
+    if token is None:
+        return replace(base, measured=delta, explanation=f'{expectation.displayed} is no token of the tooltip of '
+                                                         f'{rank_id} read with the measured stats')
+    value, sign = signed_token(token, model['points'], tooltips, rank_id)
+    if model['relation'] == 'share' and model['source_label'] not in run.values:
+        return replace(base, measured=delta, explanation=missing_measurement(run, model['source_label']))
+    readings = delta_readings(manifest, run, model, before, value, tooltips)
+    if not readings:
+        return replace(base, measured=delta, explanation=f'no comparison for relation {model["relation"]!r}')
+    judged = [(reading, delta_status(model['metric'], delta, reading.delta)) for reading in readings]
+    context = f'{moved}; {sign}, expected {value:+g}'
+    if model['named'] is not None:
+        return judge_modifier_target(base, manifest, entry, run, model, value, before, delta, judged, context,
+                                     tooltips)
+    return judge_readings(base, entry, model, judged, before, delta, context, tooltips)
+
+
 def roll_spread(expectation: Expectation, tooltips: TooltipSource) -> int:
     try:
         effect = expectation.effect_index
@@ -764,6 +1019,8 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
         return replace(base, status='unreadable', measured=measured, explanation=rule)
     if rule.startswith(AMBIGUOUS_TOOLTIP):
         return replace(base, status='ambiguous_tooltip', measured=measured, explanation=rule)
+    if check == PASSIVE_DELTA:
+        return judge_passive(manifest, entry, run, expectation, tooltips)
     if run is None:
         return replace(base, explanation=f'{entry["key"]} has no scenario to measure {check}')
     if check in TOKEN_CHECKS and rule.startswith(READ_RULE):
@@ -854,6 +1111,24 @@ def presence(runs: dict[str, Run], label: str) -> str:
     return f'{sum(value > 0 for value in measured)} of {len(measured)} runs'
 
 
+def passive_lines(manifest: dict, verdicts: list[Verdict]) -> list[str]:
+    families = {(entry['key'], data['label']): (data['model'] or {}).get('family', '')
+                for entry in manifest['scenarios'] if entry['kind'] == 'passive' for data in entry['expectations']}
+    by_family: dict[str, Counter] = {}
+    for verdict in verdicts:
+        family = families.get((verdict.scenario, verdict.label))
+        if family is not None:
+            by_family.setdefault(family, Counter())[verdict.status] += 1
+    if not by_family:
+        return []
+    lines = ['', '## Passives', '', 'Verdicts of the passive effects by measurement family.', '',
+             '| family | ' + ' | '.join(STATUSES) + ' |', '|---|' + '---|' * len(STATUSES)]
+    for family in sorted(by_family):
+        counts = ' | '.join(str(by_family[family].get(status, 0)) for status in STATUSES)
+        lines.append(f'| {family} | {counts} |')
+    return lines
+
+
 def report_lines(manifest: dict, manifest_path: Path, results_dir: Path, runs: dict[str, Run], missing: list[str],
                  verdicts: list[Verdict]) -> list[str]:
     statuses = Counter(verdict.status for verdict in verdicts)
@@ -891,6 +1166,7 @@ def report_lines(manifest: dict, manifest_path: Path, results_dir: Path, runs: d
     for spell_id in sorted(by_spell):
         counts = ' | '.join(str(by_spell[spell_id].get(status, 0)) for status in STATUSES)
         lines.append(f'| {spell_id} | {names.get(spell_id, "")} | {counts} |')
+    lines += passive_lines(manifest, verdicts)
     if missing:
         lines += ['', '## Scenarios without a result', ''] + [f'- `{key}`' for key in missing]
     if failed:

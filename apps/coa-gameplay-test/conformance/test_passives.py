@@ -384,6 +384,13 @@ class PassiveScenarioTest(unittest.TestCase):
                       [expectation.label for expectation in expectations])
         run.validate(scenario)
 
+    def test_physical_damage_done_is_measured_on_the_weapon_damage(self):
+        _, expectations = self.scenario(SERENDIPITY)
+        physical = next(entry for entry in expectations if entry.model.get('metric') == 'weapon_damage_min')
+        self.assertEqual((physical.label, physical.model['fields'], physical.model['relation']),
+                         (f'{SERENDIPITY} e0 weapon_damage_min 0', {'hand': 0}, 'ratio'))
+        self.assertNotIn('melee_damage_done', [entry.model.get('metric') for entry in expectations])
+
     def test_healing_without_a_class_heal_spell_is_unmodelled(self):
         scenario, expectations = self.scenario(SACRED_STYLE)
         self.assertIsNone(scenario)
