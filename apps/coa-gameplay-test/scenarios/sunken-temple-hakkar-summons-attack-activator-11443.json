@@ -7,7 +7,8 @@
     "-510.1, 287.4). #11443: the Bloodkeepers attacked the closest player and the Suppressors walked to the Shade, so",
     "the player who started the event was not their target. Every creature the event summons now engages that player",
     "while the event runs. The starter stands at the altar; a second player of the group stands next to the first",
-    "Bloodkeeper's summon point, so a closest-player pick would take the bystander. Health fixtures keep both alive."
+    "Bloodkeeper's summon point, so a closest-player pick would take the bystander. Health fixtures keep both alive.",
+    "Both players join world phase 1, where the altar and the event's creatures are."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -79,6 +80,18 @@
       "metric": "map_id",
       "equals": 109,
       "within_ms": 10000
+    },
+    {
+      "action": "set_phase",
+      "label": "starter joins world phase 1, where the altar is spawned",
+      "actor": "starter",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "bystander joins world phase 1",
+      "actor": "bystander",
+      "value": 1
     },
     {
       "action": "wait",
