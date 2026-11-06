@@ -89,7 +89,7 @@ INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`,
 (970041, 0, 19957, 1, 1, 0),
 (970042, 0, 1513, 1, 1, 0);
 
-DELETE FROM `creature` WHERE `guid` BETWEEN 9700000 AND 9700042 OR `id` BETWEEN 970000 AND 970042;
+DELETE FROM `creature` WHERE `guid` BETWEEN 9700000 AND 9700042;
 INSERT INTO `creature` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
 (9700000, 970000, 0, 1, 1, -4336.058, -3317.288, 232.184, 0, 300, 0, 0),
 (9700001, 970001, 1, 1, 1, -7835.986, -2119.183, -254.680, 0, 300, 0, 0),
