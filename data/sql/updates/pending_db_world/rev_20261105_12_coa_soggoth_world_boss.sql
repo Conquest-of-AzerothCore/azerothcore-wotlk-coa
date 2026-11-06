@@ -34,7 +34,7 @@ WHERE `entry` = 64605 AND `difficulty` = 0;
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 228465, `DisplayScale` = 1 WHERE `CreatureID` = 64605;
 
 -- Ascension's Shrine of Soggoth (280144) in Darkshore by the Master's Glaive, where his cultists wake him (quests
--- 1006500, 100076; height measured), the portal out and the shrine at the entrance of his map.
+-- 1006500, 100076; spot taken in game), the portal out and the shrine at the entrance of his map.
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
   `size`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
 (280144, 10, 4076, 'Shrine of Soggoth', '', '', '', 3, '', 'go_soggoth_altar_coa', 12340),
@@ -46,7 +46,7 @@ DELETE FROM `gameobject` WHERE `guid` IN (9780916, 9780917);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`) VALUES
-(9780916, 280144, 1, 148, 449, 1, 1, 4544.0, 410.0, 33.74, 0, 0, 0, 0, 1, 300, 100, 1),
+(9780916, 280144, 1, 148, 449, 1, 1, 4548.8184, 343.0483, 48.7305, 6.0221, 0, 0, 0.130197, -0.991488, 300, 100, 1),
 (9780917, 978079, 883, 10238, 10238, 15, 1, 4405.5, 264.3, 78.02, 0, 0, 0, 0, 1, 300, 100, 1);
 
 -- Players who die in his map rise at its start: WorldSafeLocs.dbc 6083 "Soggoth Graveyard".
@@ -83,7 +83,7 @@ INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Fligh
 DELETE FROM `creature` WHERE `guid` = 9780918;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
-(9780918, 978077, 1, 148, 449, 1, 1, 4544.0, 410.0, 38.7, 0, 300, 0, 0);
+(9780918, 978077, 1, 148, 449, 1, 1, 4548.8184, 343.0483, 53.7, 6.0221, 300, 0, 0);
 
 -- The other world boss maps' graveyards (WorldSafeLocs.dbc 6084-6090), so players who die in any of them rise at
 -- its start.
