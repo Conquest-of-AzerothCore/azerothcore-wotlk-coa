@@ -163,7 +163,10 @@ no step reads it. A `$/1000;sN sec` token (own or of another spell) is an `effec
 `$/1000;s1` expects −30000. A `$<id>d` token of another spell is a `spell_duration`, read without a cast: Keeping
 the Oath 92109 `$803237d` expects 8000. The reader leaves a token of a spell missing from the DBC set unreadable,
 so a step names only spells of that set; a spell the server's store lacks still fails its scenario (`Unknown
-spell in metric`).
+spell in metric`). `spell_duration_ms` is the base duration after the player's spell modifiers, before script
+hooks: every `spell_duration` verdict carries that limit in `detail['scope']`.
+Known limit: a duration that a `ScriptMgr::OnCalcMaxDuration` script changes (`Aura::CalcMaxDuration`,
+`SpellAuras.cpp:815`) is not covered, so such a spell needs a cast-based `aura_duration_ms` check instead.
 
 ## Passive effects
 
@@ -781,10 +784,11 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
 `20261105-191313`); the server can add such terms through `ScriptMgr::ModifySpellEffectBaseValue`, which
 `SpellEffectInfo::CalcValue` calls.
 
-- Deterministic values (`effect_value`, `aura_amount`, `power_cost`, `spell_duration`): `|measured - expected| <= max(1, 0.5 % of
-  expected)`. A `power_cost` is divided by the display divisor of its rule. A `$/N;` token expects N times the value
-  it shows, except a `$/1000;sN sec` token of kind `duration_ms`, which the reader already gives in ms. A token of
-  another spell reads its points, sign and rolls from that spell's effect (`model`).
+- Deterministic values (`effect_value`, `aura_amount`, `power_cost`, `spell_duration`):
+  `|measured - expected| <= max(1, 0.5 % of expected)`. A `power_cost` is divided by the display divisor of its
+  rule. A `$/N;` token expects N times the value it shows, except a `$/1000;sN sec` token of kind `duration_ms`,
+  which the reader already gives in ms. A token of another spell reads its points, sign and rolls from that
+  spell's effect (`model`).
 - Counts (`max_stacks`): `measured == expected`, no tolerance.
 - Sign: the client shows `$sN`, `$mN` and `$MN` (with or without `$/N;` or a spell id) unsigned, while the
   `Spell.dbc` record is signed. The expected value of such a token takes the sign of the points it shows

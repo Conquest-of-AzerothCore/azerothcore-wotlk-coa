@@ -780,6 +780,10 @@ class GeneratedTokenTest(unittest.TestCase):
     def test_foreign_duration_token_is_judged_against_the_referenced_duration(self):
         verdict = self.judged(KEEPING_THE_OATH, '$803237d', '8000')
         self.assertEqual((verdict.check, verdict.status, verdict.expected), ('spell_duration', 'ok', 8000.0))
+        self.assertIn('before script hooks', verdict.detail['scope'])
+        self.assertIn('OnCalcMaxDuration', verdict.detail['scope'])
+        self.assertEqual(self.judged(KEEPING_THE_OATH, '$803237d', '8040').status, 'ok')
+        self.assertEqual(self.judged(KEEPING_THE_OATH, '$803237d', '8041').status, 'alert')
         self.assertEqual(self.judged(KEEPING_THE_OATH, '$803237d', '9000').status, 'alert')
 
 

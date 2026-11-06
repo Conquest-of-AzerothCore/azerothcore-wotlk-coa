@@ -51,6 +51,8 @@ REPORT_FILE = 'report.md'
 LEVERS_FILE = 'levers.md'
 VERDICTS_FILE = 'verdicts.json'
 VERDICTS_SCHEMA = 1
+SPELL_DURATION_SCOPE = ('base duration after the player\'s SPELLMOD_DURATION modifiers, before script hooks: a '
+                        'ScriptMgr::OnCalcMaxDuration change is not covered')
 PERCENT_POINT_METRICS = frozenset({'melee_crit_chance', 'spell_crit_chance', 'melee_hit_chance', 'spell_hit_chance',
                                    'parry_chance', 'dodge_chance', 'spell_done_crit_chance'})
 FRACTIONAL_METRICS = PERCENT_POINT_METRICS | {'weapon_damage_min'}
@@ -398,8 +400,9 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
     if expectation.check == 'max_stacks':
         return exact(base, measured, token.value, f'{token.text} read from StackAmount')
     if expectation.check == 'spell_duration':
-        return deterministic(base, measured, measured, token.value,
-                             f'{token.text} read from SpellDuration, measured with the player\'s duration modifiers')
+        verdict = deterministic(base, measured, measured, token.value,
+                                f'{token.text} read from SpellDuration against the {SPELL_DURATION_SCOPE}')
+        return replace(verdict, detail={**(verdict.detail or {}), 'scope': SPELL_DURATION_SCOPE})
     effect = token_effect(expectation)
     if effect is not None:
         base_points, die_sides = tooltips.effect_points(*effect)

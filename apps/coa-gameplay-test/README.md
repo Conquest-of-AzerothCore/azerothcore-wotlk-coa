@@ -783,8 +783,9 @@ Spell queries require `spell` and submit nothing: `spell_modifier` applies the p
 `op` (`SpellModOp`) to the number `base`; `spell_effect_value` (optional `effect`) returns the effect's value as the
 player would cast it, including module base-value hooks; `spell_cast_time_ms`, `spell_max_range` and
 `spell_max_stacks` return the modified native values; `spell_duration_ms` returns `Unit::CalcSpellDuration` after
-the player's `SPELLMOD_DURATION` modifiers, as an aura the player creates gets (`Aura::CalcMaxDuration`), a
-permanent -1 unmodified; `spell_healing_done` requires `target` and optional
+the player's `SPELLMOD_DURATION` modifiers, a permanent -1 unmodified: the base duration before script hooks.
+`ScriptMgr::OnCalcMaxDuration` hooks and the target-side `Unit::ModSpellDuration` are not applied, so it can
+differ from the aura a cast creates; `spell_healing_done` requires `target` and optional
 `effect`, with a fixed base of 1000. `spell_healing_done` and `spell_damage_done` accept `periodic: true`
 to query the native periodic coefficient path instead of direct healing/damage.
 `spell_effect_value` and `spell_damage_done` accept `pet: true` to calculate using the player's current pet.
