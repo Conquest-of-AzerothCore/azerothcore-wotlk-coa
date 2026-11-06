@@ -215,7 +215,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'phase_mask', 'trigger_spell', 'trials', 'incoming', 'heal', 'quality',
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'below_armor_class', 'unwearable', 'spells',
-                 'min_level', 'max_level', 'min_home_distance', 'spawn',
+                 'min_level', 'max_level', 'min_home_distance', 'spawn', 'entries',
                  'guid', 'spawn_type', 'tolerance', 'map', 'z'} | TIMELINE_FIELDS
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
@@ -949,6 +949,12 @@ def validate(scenario):
                 require(step['actor'] in player_ids, f'{where}: creature count needs a player')
                 if 'entry' in step:
                     number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
+                if 'entries' in step:
+                    require('entry' not in step, f'{where}: give entry or entries, not both')
+                    require(isinstance(step['entries'], list) and step['entries'],
+                            f'{where}.entries must be a non-empty list')
+                    for index, entry in enumerate(step['entries']):
+                        number(entry, f'{where}.entries[{index}]', 1, 2**32 - 1, True)
             if metric == 'map_creatures_below_floor':
                 require(step['actor'] in player_ids, f'{where}: floor check needs a player')
             if metric == 'nearby_creature_count':
