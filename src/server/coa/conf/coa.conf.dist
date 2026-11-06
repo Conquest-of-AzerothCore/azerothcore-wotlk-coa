@@ -523,14 +523,15 @@ Bloodforged.Enable = 0
 #    Bloodforged.Rates55
 #        Description: Base percent per eligible corpse for the level band starting at that level, as
 #                     three values: uncommon, rare, epic. One roll per quality, spread evenly across
-#                     that quality's pool, before the Rate.Drop.Item.* multipliers.
-#        Default:     "4.50 0.50 0.00", "4.00 1.00 0.00", "3.80 1.40 0.15", "3.60 1.80 0.25", "3.40 2.20 0.40"
+#                     that quality's pool, before the Rate.Drop.Item.* multipliers. Uncommon 0 drops
+#                     no green Bloodforged items; otherwise each value must exceed the next.
+#        Default:     "0.00 0.50 0.00", "0.00 1.00 0.00", "0.00 1.40 0.15", "0.00 1.80 0.25", "0.00 2.20 0.40"
 
-Bloodforged.Rates15 = "4.50 0.50 0.00"
-Bloodforged.Rates25 = "4.00 1.00 0.00"
-Bloodforged.Rates35 = "3.80 1.40 0.15"
-Bloodforged.Rates45 = "3.60 1.80 0.25"
-Bloodforged.Rates55 = "3.40 2.20 0.40"
+Bloodforged.Rates15 = "0.00 0.50 0.00"
+Bloodforged.Rates25 = "0.00 1.00 0.00"
+Bloodforged.Rates35 = "0.00 1.40 0.15"
+Bloodforged.Rates45 = "0.00 1.80 0.25"
+Bloodforged.Rates55 = "0.00 2.20 0.40"
 
 #
 #    Ascension.PrestigiousCache.ReleaseStage
