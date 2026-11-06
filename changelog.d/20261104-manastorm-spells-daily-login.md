@@ -1,5 +1,16 @@
 # CoA daily login rewards, Manastorm improvements and Ascension spell restoration
 
+## Recruit-a-Friend abuse prevention
+
+- Reject same-IP account links at invitation and acceptance, including equivalent IPv4 and IPv4-mapped IPv6 addresses.
+- Cancel existing links with matching recorded login IPs through an auth migration. Clear the affected recruit's qualification progress and preserve existing reward receipts.
+
+## Bazaar Token payout performance
+
+- Batch and stagger ordinary kill payouts per character across one to two seconds. Flush pending tokens before quest and boss payouts and on logout.
+- Keep reward rates, eligibility and the hourly cap. Store tokens in bags and send only overflow through in-game mail.
+- Cache payout settings on config load, skip creature scaling checks for zero-token rolls and prefetch cold account cap state asynchronously at login when the cap is enabled.
+
 ## Account-wide daily login rewards
 
 - Award 200 Bazaar Tokens by mail on an eligible login across all realm game modes, with one shared account cooldown of 24 hours in the character database.
@@ -57,3 +68,5 @@
 Focused daily-login SQL-model/wiring tests and incremental source checks passed. The draft retains three unresolved earlier combined-candidate source-suite failures. Compilation, C++ harness execution, native worldserver regressions, effective MySQL migration results and client presentation require verification. Reconstructed Mode 1 external-addon token display remains pending. Streak reward policies remain future work.
 
 Grouped personal scaling passed six source/model tests and four incremental source checks. It requires Destiny Weaver scaling enabled and retains existing challenge restrictions. Mixed-level native combat, percentage-damage interactions and client rendering still require verification.
+
+The same-IP RAF work passed 32 offline SQL-model and source checks in Integration. Bazaar payout changes passed C++ style and whitespace checks. The auth migration, updated C++ build, native behavior and high-population performance remain unverified.

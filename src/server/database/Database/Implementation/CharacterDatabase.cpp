@@ -1002,7 +1002,9 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "SELECT COUNT(*) FROM account_friend_migration WHERE account = ?", CONNECTION_SYNCH);
     PrepareStatement(CHAR_INS_ACCOUNT_FRIEND_MIGRATION,
         "INSERT INTO account_friend_migration (account) VALUES (?)", CONNECTION_SYNCH);
-    PrepareStatement(CHAR_SEL_BAZAAR_TOKEN_HOURLY_CAP, "SELECT window_start, earned FROM account_bazaar_token_hourly_cap WHERE account = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_BAZAAR_TOKEN_HOURLY_CAP,
+        "SELECT CAST(COALESCE(MAX(window_start), 0) AS UNSIGNED), CAST(COALESCE(MAX(earned), 0) AS UNSIGNED) "
+        "FROM account_bazaar_token_hourly_cap WHERE account = ?", CONNECTION_BOTH);
     PrepareStatement(CHAR_INS_BAZAAR_TOKEN_HOURLY_CAP_IF_NEWER,
         "INSERT INTO account_bazaar_token_hourly_cap (account, window_start, earned) VALUES (?, ?, ?) AS claimed "
         "ON DUPLICATE KEY UPDATE earned = IF(claimed.window_start > account_bazaar_token_hourly_cap.window_start OR "

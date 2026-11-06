@@ -15,6 +15,7 @@
 
 class Creature;
 class ManastormRun;
+class Player;
 
 struct ManastormRewardPublication;
 
