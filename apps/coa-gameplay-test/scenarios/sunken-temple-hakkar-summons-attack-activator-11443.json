@@ -5,10 +5,11 @@
     "Using the Hakkar Worship Altar 2310500 summons the Shade of Hakkar 8440, whose SmartAI summons Hakkari",
     "Bloodkeepers 8438 (first after 15 s at -434.5, 288.3) and Nightmare Suppressors 8497 (first after 10 s at",
     "-510.1, 287.4). #11443: the Bloodkeepers attacked the closest player and the Suppressors walked to the Shade, so",
-    "the player who started the event was not their target. Every creature the event summons now engages that player",
+    "the player who started the event was not their target. Every creature the event summons now fixates on that player",
     "while the event runs. The starter stands at the altar; a second player of the group stands next to the first",
     "Bloodkeeper's summon point, so a closest-player pick would take the bystander. Health fixtures keep both alive.",
-    "Both players join world phase 1, where the altar and the event's creatures are."
+    "Both players join world phase 1, where the altar and the event's creatures are.",
+    "A Bloodkeeper that the bystander pulls on spawn still turns to the starter: its melee and spells go there."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -145,10 +146,10 @@
     },
     {
       "action": "assert",
-      "label": "A Hakkari Bloodkeeper engages the starter",
+      "label": "A Hakkari Bloodkeeper casts at the starter",
       "actor": "starter",
       "metric": "timeline_count",
-      "event": "enter_combat",
+      "event": "cast",
       "source_entry": 8438,
       "target_actors": [
         "starter"
@@ -158,15 +159,15 @@
     },
     {
       "action": "assert",
-      "label": "No Hakkari Bloodkeeper engages the bystander first",
+      "label": "No Hakkari Bloodkeeper casts at the bystander",
       "actor": "starter",
       "metric": "timeline_count",
-      "event": "enter_combat",
+      "event": "cast",
       "source_entry": 8438,
-      "exclude_target_actors": [
-        "starter"
-      ],
-      "equals": 0
+      "equals": 0,
+      "target_actors": [
+        "bystander"
+      ]
     },
     {
       "action": "assert",
