@@ -856,6 +856,22 @@ class spell_blackrock_spire_call_of_vaelastrasz : public SpellScript
     }
 };
 
+class spell_blackrock_spire_voshgajin_hex : public SpellScript
+{
+    PrepareSpellScript(spell_blackrock_spire_voshgajin_hex);
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        if (Unit* victim = GetCaster()->GetVictim())
+            targets.remove(victim);
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_blackrock_spire_voshgajin_hex::FilterTargets, EFFECT_ALL, TARGET_UNIT_DEST_AREA_ENEMY);
+    }
+};
+
 enum Spells
 {
     // Vaelastrasz the Red
@@ -1053,5 +1069,6 @@ void AddSC_instance_blackrock_spire()
     new near_scarshield_infiltrator();
     new at_scarshield_infiltrator();
     RegisterSpellScript(spell_blackrock_spire_call_of_vaelastrasz);
+    RegisterSpellScript(spell_blackrock_spire_voshgajin_hex);
     RegisterBlackrockSpireCreatureAI(npc_vaelastrasz_the_red);
 }
