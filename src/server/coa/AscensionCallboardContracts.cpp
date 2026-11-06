@@ -215,6 +215,9 @@ uint32 SpareFor(Player const* player, Catalogue const& contracts, ContractType c
 
 Quest const* ChooseQuest(Player* player, ContractType const& contract)
 {
+    if (!IsContractReleased(contract.type, RaidRelease::ReleasedStage()))
+        return nullptr;
+
     for (uint32 const questId : contract.quests)
         if (Quest const* quest = sObjectMgr->GetQuestTemplate(questId))
             if (player->SatisfyQuestClass(quest, false) && player->SatisfyQuestRace(quest, false)
