@@ -36,6 +36,16 @@ enum DataTypes
     ALL_PYLONS_OFF                  = 0x1F
 };
 
+// TYPE_EAST_WING_PROGRESS: 1 frees Ironbark (Zevrim Thornhoof and Hydrospawn dead), 2 opens Alzzin's door; 3 and 4
+// remember that only Zevrim or only Hydrospawn has fallen so far.
+enum DireMaulEastWingProgress
+{
+    EAST_WING_IRONBARK_FREED        = 1,
+    EAST_WING_DOOR_OPEN             = 2,
+    EAST_WING_ZEVRIM_DEAD           = 3,
+    EAST_WING_HYDROSPAWN_DEAD       = 4
+};
+
 enum GoIds
 {
     GO_DIRE_MAUL_FORCE_FIELD        = 179503,
@@ -45,7 +55,8 @@ enum GoIds
 enum NpcIds
 {
     NPC_IMMOL_THAR                  = 11496,
-    NPC_HIGHBORNE_SUMMONER          = 11466
+    NPC_HIGHBORNE_SUMMONER          = 11466,
+    NPC_HYDROSPAWN                  = 13280
 };
 
 template <class AI, class T>
