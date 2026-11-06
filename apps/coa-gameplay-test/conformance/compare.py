@@ -33,7 +33,7 @@ CAST_RESULT_ENTRY = re.compile(r'^\s*(?P<name>SPELL_\w+)\s*=\s*(?P<code>\d+)', r
 ABSOLUTE_TOLERANCE = 1.0
 RELATIVE_TOLERANCE = 0.005
 FLOAT_EPSILON = 1e-9
-TOKEN_CHECKS = frozenset({'effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks'})
+TOKEN_CHECKS = frozenset({'effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'spell_duration'})
 ROLLED_CHECKS = frozenset({'effect_value', 'aura_amount'})
 ROLL_SPREAD = 'roll_spread'
 HIT_CHECKS = frozenset({'hit_mean', 'melee_mean'})
@@ -397,6 +397,9 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
         return judge_time(base, run, measured, token.value, f'{token.text} read with the measured stats')
     if expectation.check == 'max_stacks':
         return exact(base, measured, token.value, f'{token.text} read from StackAmount')
+    if expectation.check == 'spell_duration':
+        return deterministic(base, measured, measured, token.value,
+                             f'{token.text} read from SpellDuration, measured with the player\'s duration modifiers')
     effect = token_effect(expectation)
     if effect is not None:
         base_points, die_sides = tooltips.effect_points(*effect)

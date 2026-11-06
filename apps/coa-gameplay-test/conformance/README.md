@@ -133,6 +133,7 @@ stats, since the value depends on them. The scenario learns the rank, then measu
 | `effect_value` | `spell_effect_value` of the token's effect | the tooltip token (`rule` `read <kind>`) |
 | `effect_value` of another spell | `spell_effect_value` of the effect of the token's first `$<id>sN`/`$<id>mN`, `model` `{'effect_spell': id, 'effect': n}` | the tooltip token, label `<rank> effect_value <id>e<n> #<ordinal>` |
 | `max_stacks` | `spell_max_stacks` of spell `<id>` of a `$<id>u` token, `model` `{'effect_spell': id}` | `StackAmount` of that spell, compared exactly |
+| `spell_duration` | `spell_duration_ms` of spell `<id>` of a `$<id>d` token, `model` `{'effect_spell': id}`, label `<rank> spell_duration <id> #<ordinal>` | the token: `Duration` of that spell, capped by `MaxDuration` |
 | `power_cost` | `spell_power_cost` before any cast | `ManaCost` divided by the client display divisor of the power type (1, 10 rage and runic power, 1000 happiness) |
 | `cooldown_ms` | `cooldown_ms` right after the cast | `max(RecoveryTime, CategoryRecoveryTime)`, as the client tooltip |
 | `aura_amount` | `aura_amount` of the effect after the cast | the same tooltip token as `effect_value`, for an effect that applies an aura |
@@ -155,11 +156,14 @@ A value that cannot be compared is never dropped; its `rule` starts with a stabl
 beside it, which is not the token's own effect), `unreadable: tooltip without value` for an empty readout,
 `unreadable: ManaCostPercentage ...` or `unreadable: ManaCostPerlevel ...` for a cost the DBC alone does not give, and
 `unmeasurable: <reason>` for a readable token with no no-combat metric (radius, the rank's own stack token, a chance
-token, `$d` of another spell, an aura of a passive or cast-time spell, another spell's effect that `Spell.dbc` does
-not define, which `spell_effect_value` refuses). Only `unmeasurable` expectations may lack a measurement step.
+token, an aura of a passive or cast-time spell, another spell's effect that `Spell.dbc` does not define, which
+`spell_effect_value` refuses). Only `unmeasurable` expectations may lack a measurement step.
 `$<id>h` stays `unmeasurable: chance_pct token ...`: `spell_proc_chance` needs a `spell_proc` row of that spell, so
 no step reads it. A `$/1000;sN sec` token (own or of another spell) is an `effect_value` in ms: Liberty 705266
-`$/1000;s1` expects −30000.
+`$/1000;s1` expects −30000. A `$<id>d` token of another spell is a `spell_duration`, read without a cast: Keeping
+the Oath 92109 `$803237d` expects 8000. The reader leaves a token of a spell missing from the DBC set unreadable,
+so a step names only spells of that set; a spell the server's store lacks still fails its scenario (`Unknown
+spell in metric`).
 
 ## Passive effects
 
@@ -777,7 +781,7 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
 `20261105-191313`); the server can add such terms through `ScriptMgr::ModifySpellEffectBaseValue`, which
 `SpellEffectInfo::CalcValue` calls.
 
-- Deterministic values (`effect_value`, `aura_amount`, `power_cost`): `|measured - expected| <= max(1, 0.5 % of
+- Deterministic values (`effect_value`, `aura_amount`, `power_cost`, `spell_duration`): `|measured - expected| <= max(1, 0.5 % of
   expected)`. A `power_cost` is divided by the display divisor of its rule. A `$/N;` token expects N times the value
   it shows, except a `$/1000;sN sec` token of kind `duration_ms`, which the reader already gives in ms. A token of
   another spell reads its points, sign and rolls from that spell's effect (`model`).

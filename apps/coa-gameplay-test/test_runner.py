@@ -977,6 +977,14 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(change=change), self.assertRaises(ValueError):
                 run.validate(scenario)
 
+    def test_spell_duration_metric_requires_a_spell(self):
+        self.scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'spell_duration_ms',
+                                       'spell': 116, 'equals': 9000})
+        self.assertIs(run.validate(self.scenario), self.scenario)
+        del self.scenario['steps'][-1]['spell']
+        with self.assertRaisesRegex(ValueError, 'metric needs spell'):
+            run.validate(self.scenario)
+
     def test_pet_aura_amount_needs_spell(self):
         self.scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'pet_aura_amount',
                                        'spell': 500939, 'effect': 1, 'equals': 5})

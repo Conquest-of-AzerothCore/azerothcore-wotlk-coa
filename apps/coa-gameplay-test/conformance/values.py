@@ -7,7 +7,8 @@ from classes import PASSIVE_ATTRIBUTE, ClassSpell, DataSet
 from profile import (CASTER, DBC_DIR, base_steps, known_aura_label, measurement, player_fixture)
 from tooltip import CasterStats, Displayed, Records, Unreadable, read_tooltip
 
-CHECKS = ('effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'power_cost', 'cooldown_ms', 'known_aura')
+CHECKS = ('effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'spell_duration', 'power_cost',
+          'cooldown_ms', 'known_aura')
 TARGET = 'dummy'
 DUMMY_ENTRY = 36
 DUMMY_HEALTH = 50000000
@@ -136,6 +137,13 @@ def foreign_stacks(rank_id: int, shown: Displayed) -> int | None:
     return int(match.group('spell'))
 
 
+def foreign_duration(rank_id: int, shown: Displayed) -> int | None:
+    match = OWN_DURATION.fullmatch(shown.text)
+    if match is None or match.group(1) in ('', str(rank_id)):
+        return None
+    return int(match.group(1))
+
+
 def power_cost_expectation(label: str, spell_id: int, rank_id: int, facts: RankFacts) -> Expectation:
     divisor = POWER_DISPLAY_DIVISOR.get(facts.power_type, 1)
     if facts.mana_cost_per_level:
@@ -199,6 +207,12 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
             label = f'{rank_id} max_stacks {stacks_spell} #{ordinal}'
             measured.append(measurement(label, CASTER, 'spell_max_stacks', spell=stacks_spell))
             expect(label, 'max_stacks', None, shown.text, f'read {shown.kind}', {'effect_spell': stacks_spell})
+            continue
+        duration_spell = foreign_duration(rank_id, shown)
+        if duration_spell:
+            label = f'{rank_id} spell_duration {duration_spell} #{ordinal}'
+            measured.append(measurement(label, CASTER, 'spell_duration_ms', spell=duration_spell))
+            expect(label, 'spell_duration', None, shown.text, f'read {shown.kind}', {'effect_spell': duration_spell})
             continue
         own_duration = OWN_DURATION.fullmatch(shown.text)
         aura_effect = first_aura_effect(facts)

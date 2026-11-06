@@ -27,6 +27,7 @@ SPELL = 1000
 HEADER = Path(__file__).resolve().parents[3] / 'src/server/coa/AscensionSpellProgressionData.h'
 SCOURGEBANE = 92111
 IRON_PENANCE = 523712
+KEEPING_THE_OATH = 92109
 VALUE_KEY = 'conformance-templar-value-1001'
 HIT_KEY = 'conformance-templar-hit-1001'
 CLASS_TUNING = Modifier(spell_id=887007, effect_index=0, aura=341, percent=-20, applies_to='damage', school_mask=127)
@@ -775,6 +776,11 @@ class GeneratedTokenTest(unittest.TestCase):
         verdict = self.judged(IRON_PENANCE, '$523713u', '10')
         self.assertEqual((verdict.status, verdict.expected, verdict.low, verdict.high), ('ok', 10.0, 10.0, 10.0))
         self.assertEqual(self.judged(IRON_PENANCE, '$523713u', '11').status, 'alert')
+
+    def test_foreign_duration_token_is_judged_against_the_referenced_duration(self):
+        verdict = self.judged(KEEPING_THE_OATH, '$803237d', '8000')
+        self.assertEqual((verdict.check, verdict.status, verdict.expected), ('spell_duration', 'ok', 8000.0))
+        self.assertEqual(self.judged(KEEPING_THE_OATH, '$803237d', '9000').status, 'alert')
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')

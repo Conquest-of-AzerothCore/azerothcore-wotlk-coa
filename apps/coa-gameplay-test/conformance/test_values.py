@@ -41,6 +41,8 @@ LIBERTY = 705266
 SCOURGEBANE_STRIKE = 801832
 IRON_PENANCE = 523712
 IRON_PENANCE_DEBUFF = 523713
+KEEPING_THE_OATH = 92109
+KEEPING_THE_OATH_AURA = 803237
 
 
 def measured_labels(scenario):
@@ -245,11 +247,15 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         self.assertEqual((step['metric'], step['spell'], step['actor']),
                          ('spell_max_stacks', IRON_PENANCE_DEBUFF, 'caster'))
 
-    def test_foreign_duration_stays_unmeasurable(self):
-        scenario, expectations = self.build(IRON_PENANCE, IRON_PENANCE)
-        item = next(item for item in expectations if item.displayed == '$523713d')
-        self.assertTrue(item.rule.startswith(UNMEASURABLE + 'duration_ms token'), item.rule)
-        self.assertFalse(self.steps_of(scenario, item.label))
+    def test_foreign_duration_token(self):
+        scenario, expectations = self.build(KEEPING_THE_OATH, KEEPING_THE_OATH)
+        run.validate(scenario)
+        item = next(item for item in expectations if item.displayed == '$803237d')
+        self.assertEqual((item.check, item.effect_index, item.rule, item.model),
+                         ('spell_duration', None, 'read duration_ms', {'effect_spell': KEEPING_THE_OATH_AURA}))
+        step, = self.steps_of(scenario, item.label)
+        self.assertEqual((step['metric'], step['spell'], step['actor']),
+                         ('spell_duration_ms', KEEPING_THE_OATH_AURA, 'caster'))
 
     def test_foreign_chance_stays_unmeasurable(self):
         scenario, expectations = self.build(SCOURGEBANE, SCOURGEBANE)

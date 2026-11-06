@@ -4628,8 +4628,8 @@ private:
             return player->MeleeDamageBonusDone(target, 1000, BASE_ATTACK, info, info->GetSchoolMask());
         }
         if (metric == "spell_modifier" || metric == "spell_cast_time_ms" || metric == "spell_max_range"
-            || metric == "spell_max_stacks" || metric == "spell_healing_done" || metric == "spell_effect_value"
-            || metric == "spell_family_flags")
+            || metric == "spell_max_stacks" || metric == "spell_duration_ms" || metric == "spell_healing_done"
+            || metric == "spell_effect_value" || metric == "spell_family_flags")
         {
             SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
             Require(info != nullptr, "Unknown spell in metric");
@@ -4679,6 +4679,13 @@ private:
                 return info->GetMaxRange(info->IsPositive(), player);
             if (metric == "spell_max_stacks")
                 return info->CalcMaxAuraStacks(player);
+            if (metric == "spell_duration_ms")
+            {
+                int32 duration = player->CalcSpellDuration(info);
+                if (duration != -1)
+                    player->ApplySpellMod(spell, SPELLMOD_DURATION, duration);
+                return duration;
+            }
             if (metric == "spell_healing_done")
                 return player->SpellHealingBonusDone(GetUnit(step.get<std::string>("target")), info, 1000,
                     step.get<bool>("periodic", false) ? DOT : HEAL,
