@@ -17,6 +17,7 @@ from values import (CAST_MARGIN_MS, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, E
 
 HIT_CHECKS = ('hit_mean', 'melee_mean', 'unmodelled')
 UNMODELLED = 'unmodelled: '
+NEVER_CAST = 'passive spell is never cast'
 Z_99 = 2.576
 MEAN_HALF_WIDTH = 0.01
 EXCLUDED_OUTCOME_MARGIN = Fraction(3, 2)
@@ -467,7 +468,7 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
     records = records_of(class_file)
     facts = facts_of(records, rank_id)
     if facts.passive:
-        raise Unmodelled('passive spell is never cast')
+        raise Unmodelled(NEVER_CAST)
     unfit = unfit_reason(class_file.get('weapon'), equip_requirement(records, rank_id))
     if unfit:
         raise Unmodelled(unfit)

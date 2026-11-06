@@ -9,6 +9,7 @@ import sys
 from classes import PROGRESSION_HEADER, ClassSpell, class_spells
 from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_FILE, ScenarioDrift, evaluate,
                      write_levers, write_outputs)
+from coverage import COVERAGE_FILE, write_coverage
 from diff import IMPACT_FILE, diff_directories, write_impact
 from passives import passive_scenario
 from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, hit_parts, melee_scenario, records_of,
@@ -282,6 +283,16 @@ def diff_command(args) -> int:
     return 0
 
 
+def coverage_command(args) -> int:
+    try:
+        path = write_coverage(args.before, args.after, args.out or args.after)
+    except ValueError as error:
+        print(f'No coverage report: {error}', file=sys.stderr)
+        return DIFF_EXIT
+    print(path)
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description='Generate class conformance scenarios and compare their results.')
     commands = parser.add_subparsers(dest='command', required=True)
@@ -311,8 +322,14 @@ def main(argv=None) -> int:
     diffing.add_argument('--intended', type=spell_ids, default=set(),
                          help='comma-separated spell or rank ids the change is meant to move')
     diffing.add_argument('--out', type=Path, help='output directory, the after directory by default')
+    covering = commands.add_parser('coverage', help=f'write {COVERAGE_FILE}: spells, passives and actives judged in '
+                                                    f'two compare outputs')
+    covering.add_argument('--before', type=Path, required=True, help=f'a compare output directory ({VERDICTS_FILE})')
+    covering.add_argument('--after', type=Path, required=True, help='a compare output directory')
+    covering.add_argument('--out', type=Path, help='output directory, the after directory by default')
     args = parser.parse_args(argv)
-    handlers = {'generate': generate_command, 'compare': compare_command, 'diff': diff_command}
+    handlers = {'generate': generate_command, 'compare': compare_command, 'diff': diff_command,
+                'coverage': coverage_command}
     return handlers[args.command](args)
 
 

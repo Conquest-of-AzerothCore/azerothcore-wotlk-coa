@@ -42,7 +42,10 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
   the class file with their `Expectation` lists; `levers(verdicts)` turns the stack verdicts into one `Lever(config,
   dps_mean, dps_low, dps_high, delta_pct, sources, tooltip_delta_pct)` per configuration; `mean_interval`,
   `ratio_interval` and `student_t_quantile` give the 99% intervals of the passes.
-- `conformance.py`: the command line, `generate`, `compare` and `diff`.
+- `coverage.py`: `coverage(header, verdicts)` counts the verdicts per status and the class spells, passives and actives
+  that a compare output judges (`Coverage`), and `write_coverage` writes `coverage.md` for two outputs (see
+  [Coverage comparison](#coverage-comparison)).
+- `conformance.py`: the command line, `generate`, `compare`, `diff` and `coverage`.
 - `classes/<name>.json`: one class file per class (`classes/templar.json`).
 
 ## Spell set of a class
@@ -914,6 +917,38 @@ the spell scenarios in one call and 42 s for the stack; the outputs are `report.
 and `levers.md`. To check a run's reproducibility, run the same manifest twice and `diff` the two outputs: a
 significant change between two runs of the same build is a defect of the tool.
 
+The phase-2 Templar run of 2026-11-06 (`generate --class 19`: 610 entries, 492 scenarios: 303 value, 66 passive,
+83 proc parts, 27 hit parts, 12 trigger parts, melee; 118 entries without a scenario) took 83 s in one call
+(stamps 20261106-153135 and 20261106-153725, simulated clock, 15 lanes, 492 passed), then `compare`, `coverage`
+against the phase-1 output and `diff` between the two runs. Outputs outside Git in
+`.agents/plans/class-conformance-2/templar/`: `report.md`, `alerts.tsv`, `verdicts.json`, `questions.md`,
+`coverage.md`, `impact.md`. Results: 1801 verdicts (ok 1261, alert 103, unreadable 72, unmodelled 242,
+ambiguous_tooltip 24, unmeasured 9, measured 90); class spells judged 180 of 194 (phase 1: 102 of 172), passives with
+a judged behaviour check 79 of 145 (3), actives with a judged hit model 13 of 49 (2). The second run lists 15 changes,
+4 of them significant: two hit means that are alerts on both runs (Sacred Swing, Righteous Lunge: their model sigma
+does not describe the server's hits) and two `passive_delta` deltas of a rolled `spell_effect_value`, where the before
+and after reads are two separate rolls; the other 11 are rolled values and ambiguous proc rates that moved inside
+their intervals or had none.
+
+Known limits seen in that run, each giving alerts that are not server findings:
+
+- A named target outside the class mask (D5): 71 of the 103 alerts. The tooltip name also belongs to other spells
+  (a passive, a proc aura or a helper spell of the same name: Scourgebane 92111, 520007, 801861, 804916 next to
+  801832); one tooltip names the spells of several effects, each effect touching only its own (Grace of Aman'thul,
+  Martial Training, Focused); the named spell is a condition or a consumer of the modified spell (Templar's Might
+  modifies Condemn, which raises the damage of the spells it names); or the mask covers a helper spell of the same
+  name that the scenario does not measure (Righteous Tempest 570200 to 570205, Benediction 801409, Righteous
+  Upheaval 807764).
+- Two effects of one passive moving the same metric are judged one by one against the combined delta (Call of the
+  Monastery: two 5% attack power effects measure 313 to 345.08, 1.05 x 1.05; Paragon: 10 Stamina plus 10% of 132
+  Agility measure 79 to 102).
+- `melee_crit_chance` and `parry_chance` read 0 before the learn, a stale field: Finesse 705271 reads 0 then 9.146
+  for its 2 points, 707851 0 then 11.146 for its 4, Judicator 0 then 8 for its 3 parry points. The learn refreshes
+  `PLAYER_CRIT_PERCENTAGE` and `PLAYER_PARRY_PERCENTAGE`; the base steps before it (`set_skill` among them) leave them
+  as they were (inferred from these readings, not traced in the server).
+- `spell_modifier` of a duration or cast time starts from base 1000 and the server clamps the result at 0
+  (`Player::ApplySpellMod`), so a reduction larger than 1000 ms reads -1000 (Sacred Candle, Sacred Restraint).
+
 ### Impact report
 
 ```sh
@@ -943,6 +978,24 @@ change; two runs of the 270 Templar scenarios on the same build (stamps 20261105
 significant; stamps 20261105-203950 (configurations c0 and c1) and 20261105-204050 (all eight) give nine moves inside the
 intervals, no significant change and 40 added verdicts (the report then opens with its warning: when more than half of
 the verdicts of a side have no counterpart, the keys probably changed or the runs cover other scenarios).
+
+### Coverage comparison
+
+```sh
+python3 -B conformance.py coverage --before OUT_A --after OUT_B [--out DIR]
+```
+
+`coverage` reads the `verdicts.json` of two compare outputs of the same class (another class is an error, exit 3)
+and writes `coverage.md` (default: the `--after` directory): the verdicts per status, and the class spells, passives
+and actives judged on each side, with the differences. The phase-1 placeholders, a `hit_mean` label with the rule
+`unmodelled: passive spell is never cast`, are left out of every count (design D8: phase 2 gives each passive effect
+its own verdict instead). A class spell is a spell id with a verdict in a value, hit or passive scenario
+(`conformance-<class>-value-`, `-hit-`, `-passive-`) or with a placeholder; a passive is the spell of a passive
+scenario or of a placeholder; an active is any other class spell. A spell is judged when one of its verdicts other
+than `known_aura` is `ok` or `alert` (a proc or trigger verdict counts for its aura when that aura is a class spell).
+A passive has a behaviour check when one of its `passive_delta`, `proc_rate` or `trigger_count` verdicts is `ok` or
+`alert`; an active has a hit model when one of its `hit_mean` verdicts is. `coverage.md` also lists the spells judged
+on one side only and the class spells present on one side only.
 
 ### Verdicts
 

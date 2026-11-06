@@ -231,10 +231,12 @@ passive triggers, procs and talent stack against their client tooltips, and judg
 `INCOMPLETE` even when they pass; the verdicts come from `compare`, not from the stage result. Its unit tests are the
 `conformance` suite of the source stage. `compare` writes `alerts.tsv`, `report.md`, `verdicts.json`, `questions.md`
 (the checks that only players on live can settle, in English and in what a player sees) and, for stack runs,
-`levers.md`.
+`levers.md`. `conformance.py diff` compares two outputs verdict by verdict (`impact.md`), and `conformance.py coverage
+--before OUT_A --after OUT_B` writes `coverage.md`: verdicts per status and the class spells, passives and actives
+judged on each side.
 
 ```sh
-python -B tools/verify_all.py --stages gameplay --scenario .cache/conformance/templar/scenarios/*.json
+python -B tools/verify_all.py --stages gameplay --scenario .cache/conformance/templar-2/scenarios/*.json
 ```
 
 ## Results and exit codes
