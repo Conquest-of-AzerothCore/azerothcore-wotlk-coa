@@ -2936,6 +2936,13 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
     });
 
+    // Woodworking upgrade kits ship without the interrupt flags every other recipe has, so moving does not stop a Create All queue
+    ApplySpellFix({ 1015015, 1015016, 1015017, 1015018, 1015019 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->InterruptFlags = SPELL_INTERRUPT_FLAG_MOVEMENT | SPELL_INTERRUPT_FLAG_PUSH_BACK
+            | SPELL_INTERRUPT_FLAG_UNK3 | SPELL_INTERRUPT_FLAG_INTERRUPT;
+    });
+
     // Impaled (Lord Marrowgar)
     ApplySpellFix({ 69065 }, [](SpellInfo* spellInfo)
     {
