@@ -139,6 +139,16 @@
       "action": "attack_nearby",
       "actor": "raider",
       "entry": 64604,
+      "label": "The raider hits him first, so a solo kill earns his loot"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64604,
       "kill": true
     },
     {
