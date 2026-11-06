@@ -71,24 +71,33 @@ def trigger_spell(entry: dict) -> int:
     return entry['trigger']['spell'] if entry['trigger']['action'] == CAST else 0
 
 
+def swing_interval(class_file: dict, cooldown: int = 0) -> int:
+    weapon = weapon_profile(class_file)
+    if weapon is None:
+        raise Unmodelled('auto attacks need the weapon stats of the class file')
+    if cooldown:
+        raise Unmodelled(f'auto attacks cannot be spaced beyond the internal cooldown of {cooldown} ms')
+    return weapon.speed_ms
+
+
+def cast_interval(class_file: dict, spell: int, cooldown: int = 0) -> int:
+    records = records_of(class_file)
+    facts = facts_of(records, spell)
+    start_recovery = records.field('Spell', spell, 'StartRecoveryTime')
+    return max(start_recovery, facts.cast_time_ms, cooldown) + CAST_MARGIN_MS
+
+
 def attempt_interval(class_file: dict, entry: dict) -> int:
     trigger = entry['trigger']
     cooldown = entry.get('internal_cooldown_ms', 0)
     if trigger['action'] == ATTACK:
-        weapon = weapon_profile(class_file)
-        if weapon is None:
-            raise Unmodelled('auto attacks need the weapon stats of the class file')
-        if cooldown:
-            raise Unmodelled(f'auto attacks cannot be spaced beyond the internal cooldown of {cooldown} ms')
-        return weapon.speed_ms
+        return swing_interval(class_file, cooldown)
     if trigger['action'] != CAST:
         raise ValueError(f'Unknown trigger action {trigger["action"]!r} of proc {entry["aura"]}')
-    records = records_of(class_file)
-    facts = facts_of(records, trigger['spell'])
+    facts = facts_of(records_of(class_file), trigger['spell'])
     if facts.passive or not is_hostile(facts):
         raise Unmodelled(f'trigger spell {trigger["spell"]} is not cast at an enemy')
-    start_recovery = records.field('Spell', trigger['spell'], 'StartRecoveryTime')
-    return max(start_recovery, facts.cast_time_ms, cooldown) + CAST_MARGIN_MS
+    return cast_interval(class_file, trigger['spell'], cooldown)
 
 
 def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> ProcPlan:

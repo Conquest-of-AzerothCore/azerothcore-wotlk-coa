@@ -223,8 +223,8 @@ report is the `placement_audit` step record in `gameplay/exploratory/<key>/resul
 
 ### Class tooltip conformance
 
-`apps/coa-gameplay-test/conformance/` generates exploratory scenarios that check a class's spells, passives, procs
-and talent stack against their client tooltips, and judges a run with `conformance.py compare`
+`apps/coa-gameplay-test/conformance/` generates exploratory scenarios that check a class's spells, passives,
+passive triggers, procs and talent stack against their client tooltips, and judges a run with `conformance.py compare`
 ([README](../../apps/coa-gameplay-test/conformance/README.md), method in
 [ADR 0011](../adr/0011-class-tooltip-conformance.md), passives in
 [ADR 0012](../adr/0012-passive-conformance-by-with-and-without-measurement.md)). The scenarios run as exploratory files, so the run ends

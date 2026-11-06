@@ -17,6 +17,8 @@ from procs import proc_entries, proc_plan, proc_scenario, proc_status_expectatio
 from profile import DBC_DIR, load_class_file
 from stack import PASSES, STACK_CHECKS, STACK_DPS, STACK_KIND, stack_scenarios
 from tooltip import read_tooltip
+from triggers import (trigger_entries, trigger_plan, trigger_scenario, trigger_status_expectation,
+                      trigger_unmodelled_expectation)
 from values import Expectation, dataset, structure_stats, value_scenario
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -126,6 +128,24 @@ def add_proc(writer: ManifestWriter, entry: dict):
                    expectations, scenario, name=name)
 
 
+def add_trigger(writer: ManifestWriter, entry: dict):
+    class_file = writer.class_file
+    aura, name = entry['aura'], entry['name']
+    key = scenario_key(class_file['name'], 'trigger', aura)
+    if entry.get('status'):
+        writer.add(key, 'trigger', None, aura, [trigger_status_expectation(entry)], name=name)
+        return
+    try:
+        plan = trigger_plan(class_file, entry)
+    except Unmodelled as error:
+        writer.add(key, 'trigger', None, aura, [trigger_unmodelled_expectation(entry, error.reason)], name=name)
+        return
+    for part in range(len(plan.part_attempts)):
+        scenario, expectations = trigger_scenario(class_file, entry, part)
+        writer.add(scenario_key(class_file['name'], 'trigger', aura, 'part', part + 1), 'trigger', None, aura,
+                   expectations, scenario, name=name)
+
+
 def add_stack(writer: ManifestWriter, passes: int):
     class_file = writer.class_file
     numbers: dict[str, int] = {}
@@ -165,7 +185,8 @@ def selected_passives(class_file: dict, dbc_dir: Path, spell_ids: list[int]) -> 
 
 
 def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: list[int] | None = None,
-             stack: bool = False, passes: int = PASSES, passives: list[int] | None = None) -> Path:
+             stack: bool = False, passes: int = PASSES, passives: list[int] | None = None,
+             triggers: list[int] | None = None) -> Path:
     class_file = load_class_file(class_id)
     dbc_dir = Path(class_file.get('dbc_dir', DBC_DIR))
     out = Path(out)
@@ -174,8 +195,9 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
         raise ValueError(f'{scenario_dir} already holds scenarios; generate into a new directory')
     scenario_dir.mkdir(parents=True, exist_ok=True)
     writer = ManifestWriter(class_file, out)
-    everything = spells is None and procs is None and passives is None and not stack
+    everything = spells is None and procs is None and passives is None and triggers is None and not stack
     chosen_procs = proc_entries(class_file, procs) if everything or procs is not None else []
+    chosen_triggers = trigger_entries(class_file, triggers) if everything or triggers is not None else []
     chosen_passives = selected_passives(class_file, dbc_dir, passives) if passives is not None else []
     generated_passives: set[int] = set()
     if everything or spells is not None:
@@ -191,6 +213,8 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
             add_passive(writer, spell)
     for entry in chosen_procs:
         add_proc(writer, entry)
+    for entry in chosen_triggers:
+        add_trigger(writer, entry)
     if stack:
         add_stack(writer, passes)
     if everything:
@@ -204,7 +228,8 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
 
 
 def generate_command(args) -> int:
-    path = generate(args.class_id, args.out, args.spell, args.proc, args.stack, args.passes, args.passive)
+    path = generate(args.class_id, args.out, args.spell, args.proc, args.stack, args.passes, args.passive,
+                    args.trigger)
     manifest = json.loads(path.read_text(encoding='utf-8'))
     written = sum(1 for entry in manifest['scenarios'] if entry['file'])
     print(f'{path}: {written} scenarios in {path.parent / SCENARIO_DIR}, '
@@ -260,6 +285,8 @@ def main(argv=None) -> int:
                             help='a passive class spell id or rank id: its with/without scenario only; repeatable')
     generating.add_argument('--proc', type=int, action='append',
                             help='the aura of a proc entry of the class file; repeat to select several procs')
+    generating.add_argument('--trigger', type=int, action='append',
+                            help='the aura of a trigger entry of the class file; repeat to select several triggers')
     generating.add_argument('--stack', action='store_true',
                             help='the passes of every stack configuration of the class file, cumulative talents')
     generating.add_argument('--passes', type=int, default=PASSES, help=f'passes per stack configuration ({PASSES})')

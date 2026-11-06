@@ -486,14 +486,15 @@ def scenario_shell(class_file: dict, name: str, contract: str, steps: list[dict]
             'steps': base_steps(class_file) + steps}
 
 
-def cast_steps(facts: RankFacts, rank_id: int, hostile: bool, interval_ms: int, casts: int) -> list[dict]:
+def cast_steps(facts: RankFacts, rank_id: int, hostile: bool, interval_ms: int, casts: int,
+               fixtures: Sequence[dict] = ()) -> list[dict]:
     steps = []
     for _ in range(casts):
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
             steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
                           'value': facts.mana_cost})
         steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': rank_id})
-        steps += required_aura_steps(facts)
+        steps += required_aura_steps(facts) + [dict(fixture) for fixture in fixtures]
         cast = {'action': 'cast', 'actor': CASTER, 'spell': rank_id}
         if hostile:
             cast['target'] = TARGET

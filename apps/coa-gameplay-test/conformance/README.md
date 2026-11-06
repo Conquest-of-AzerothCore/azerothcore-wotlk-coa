@@ -24,6 +24,9 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
 - `procs.py`: `proc_scenario(class_file, entry, part)` returns one part of the proc-rate scenario of a `procs` entry
   and its `Expectation`; `proc_plan` sizes the parts, `trials_needed(p)` gives the trials a chance `p` needs and
   `wilson_interval(procs, trials)` the 99% Wilson interval of a rate.
+- `triggers.py`: `trigger_scenario(class_file, entry, part)` returns one part of the scenario of a `triggers` entry and
+  its `Expectation`; `trigger_plan` sizes the parts and `trigger_entries(class_file, auras)` selects the entries (see
+  [Trigger entries](#trigger-entries)).
 - `compare.py`: `compare(manifest, results_dir)` judges a run against the manifest and returns `Verdict(label, status,
   measured, expected, low, high, explanation)`; `write_outputs` writes `alerts.tsv`, `report.md` and `verdicts.json`.
 - `diff.py`: `diff(before, after, intended)` returns the `Change` of every verdict that moved between two compare
@@ -463,6 +466,79 @@ Scourgebane parts made 196 or 197 swings, Light's Echo parts 287 and 319 player 
 strike was a cast of 807268; 804929 was never cast. A Scourgebane part takes 500.7 s of game time in 3.8 to 4.7 s of
 real time, a Light's Echo part 443 to 491 s in 3.2 to 4.3 s.
 
+## Trigger entries
+
+A `triggers` entry of the class file is a passive whose tooltip says that something always happens on a trigger
+("Casting Sacred Swing now grants you Staffguard"): a proc entry whose chance is 100%, without a chance token.
+
+| Field | Content |
+|---|---|
+| `aura`, `name` | the passive and its `SpellName[enUS]` |
+| `tooltip` | its `Description[enUS]`, copied verbatim from the client DBC |
+| `trigger` | `{"action": "cast", "spell": <rank>, "target": "self"/"dummy"}` or `{"action": "attack", "spell": 0}` |
+| `trigger_text` | the words of the cleaned tooltip that name the trigger |
+| `trigger_spell_text` | for a cast, the words of the rank's name or cleaned tooltip that make it such a trigger |
+| `trial_metric` | one trial: `spell_cast_count`, `spell_damage_count`, `melee_attack_count`, `melee_damage_count` |
+| `observe_spell`, `observe_source` | the spell a trigger casts, from `EffectTriggerSpell[n]` or tooltip `@s:<id>:0@` |
+| `observe_note` | with a tooltip reference, why the text's spell is observed instead of an `EffectTriggerSpell` |
+| `attempt_auras` | `{"spell", "stacks", "source"}` set before every cast, `source` quoting the tooltip behind it |
+| `observe_metric` | `spell_cast_count` or `spell_energize_count` of `observe_spell` |
+| `per_trigger`, `per_trigger_text` | the events per trial, 1 or 0.5 for "Every 2nd", and the words that state it |
+| `status`, `reason` | `unmodelled` or `ambiguous_tooltip` for an entry without a scenario, and why |
+
+`aura_proc_rate` is not a judge of these entries: their passives have `ProcFlags` 0 and are scripted (design D10).
+The observed spell is the passive's `EffectTriggerSpell[n]` (`observe_source` `EffectTriggerSpell[n] of <aura>`)
+unless the text names another spell through an `@s:` reference; then the entry observes the named spell
+(`tooltip reference @s:<id>:0@ of <aura>`) and says why in `observe_note`. An `attempt_auras` fixture keeps a
+condition stated by another tooltip from blocking the claim, for example a cap on stacks.
+A trigger is cast as the hit scenarios cast: before each cast the power is set to the cost, the cooldown is reset and
+the `CasterAuraSpell` fixture is applied (Sacred Swing 681170, Righteous Upheaval 704576), one cast every
+`max(StartRecoveryTime, cast time) + 500 ms`; a `self` trigger is cast without a target. An `attack` trigger attacks
+`dummy` for the attempts times the weapon speed.
+
+`TRIGGER_TRIALS` is 182, the smallest N with 0.975^N <= 0.01: a trigger that fires 2.5 points under 100% of the time
+misses at least once in 182 trials with 99% probability. The scenario learns the trigger rank, makes
+`BASELINE_ATTEMPTS` (20, a choice, not derived) attempts and measures the trials and the events, learns the passive,
+makes 273 attempts (`ceil(1.5 x 182)`, ruling R9) and measures the trials, the events and the passive's aura. Parts
+split the attempts so that each wait fits the 600 s limit with the 60 s margin; only the first part holds the
+baseline. The `trigger_count` expectation of every part has the label `<aura> trigger_count`; the comparison sums the
+trials and the events after the learn of the parts whose run measured the aura. Any event in the baseline is an
+`alert`; no usable trial is `unmeasured`; fewer than 182 trials are `insufficient_trials`; otherwise
+`|events - trials x per_trigger| <= 1` is `ok` and anything else `alert`. A baseline without a trial never gives
+`ok`: its verdict is `unmeasured`.
+
+The Templar entries quote their trigger words from the cleaned DBC tooltips:
+
+| Passive | Trigger | Trials | Observed | Per trial |
+|---|---|---|---|---|
+| Scarlet Secrets 520812 | "Every 2nd cast of Argent Blade", 807268 at `dummy` | casts | 804924 casts (`@s:`) | 0.5 |
+| Sanctify 705274 | "Your Libram spells", Libram of Tenacity 801461, `self` | casts | 705275 casts | 1 |
+| Blessing of Eonar 705290 | "Using Libram spells", 801461, `self` | casts | 520537 casts | 1 |
+| Staffguard 705295 | "Casting Sacred Swing", 572769 at `dummy` | casts | 706583 casts | 1 |
+| Conviction 712677 | "Casting Sacred Swing", 572769 at `dummy` | casts | 712679 casts | 1 |
+| Fervent Castigation 707606 | "Casting Righteous Upheaval", 572027 at `dummy` | casts | 804924 casts | 1 |
+| Mending Ward 806273 | "Oath Breakers", 572027 ("a dominating Oath Breaker") | casts | 806353 casts | 1 |
+| Unbroken Creed 804932 | "Damaging abilities", 807268 at `dummy` | damage events | 807648 casts | 1 |
+| Heaven's Finest 806516 | "Damaging abilities", 807268 at `dummy` | damage events | 805390 casts | 1 |
+| Chakra of Power 803158 | "Melee attacks", auto attack | swings | 804181 energizes | 1 |
+| Way of the Monk 805420 | "Damage dealt by Sacred Swing", 572769 at `dummy` | damage events | 572052 casts | 1 |
+
+Scarlet Secrets' `EffectTriggerSpell[0]` is 520926, a dummy aura its text does not name; the server never cast it in
+273 Argent Blade casts (stamp `20261106-092819`), while the text grants Oath: Retribution 804924. Oath Chain 704576
+caps the Oaths ("Once 10 stacks are reached you are unable to build more Oaths."): with the chain kept, 100 of 273
+casts granted the Oath (stamp `20261106-093118`), so the entry removes the chain before every attempt.
+
+Measured on 2026-11-06 (stamp `20261106-093404`, simulated clock, gameplay stage 29.8 s for 12 parts, no failed
+cast, 20 baseline trials and no baseline event in each entry): nine entries are `ok` with 273 events in 273 trials
+(Scarlet Secrets 136 in 273, expected 136.5). Two are `alert`, both explained by server code:
+
+- Fervent Castigation 707606: 0 casts of 804924 in 273 Righteous Upheaval casts. The cast only sets a flag
+  (`AscensionTemplarAbilities.cpp:178-179`); the Oath is granted when a later Oath starts a new chain
+  (`AscensionTemplar.cpp:177-181`), not on the cast as the text says.
+- Heaven's Finest 806516: 150 casts of 805390 in 273 Argent Blade hits. At 6 stacks the aura casts The Finest of
+  Heaven 806517 and is removed (`AscensionTemplarAuras.cpp:134-138`), and no stack is granted while 806517 (8 s) is
+  up (`AscensionTemplarEvents.cpp:208-214`); the text, its `@s:805390:0@` reference included, does not say so.
+
 ## Talent stack (lever map)
 
 The class file's `rotation` is a fixed sequence, `stack` the configurations that add talents to it one group at a time,
@@ -577,19 +653,20 @@ second).
 ```sh
 cd apps/coa-gameplay-test/conformance
 python3 -B conformance.py generate --class 19 --out DIR [--spell ID ...] [--passive ID ...] [--proc AURA ...] \
-  [--stack [--passes N]]
+  [--trigger AURA ...] [--stack [--passes N]]
 python -B ../../../tools/verify_all.py --stages gameplay --scenario DIR/scenarios/*.json
 python3 -B conformance.py compare --manifest DIR/manifest.json --results .cache/verify-all/STAMP [--out OUT]
 ```
 
 `generate` writes one no-combat scenario per rank, the hit scenario of each active spell's highest rank, the
-with/without scenario of each passive (kind `passive`, no `hit` entry), the parts of each proc entry and, without
-`--spell`, `--passive` or `--proc`, the melee scenario, into `DIR/scenarios/`, and `DIR/manifest.json`. `--spell`
-takes a class spell id or a rank id, `--passive` a passive class spell id or rank id (its passive scenario only; an
-active spell is an error), `--proc` the aura of a proc entry, `--stack` the passes of the talent stack (`--passes`, 5
-by default); each selects only what it names. A passive scenario is named `conformance-<class>-passive-<rank>`, a
-proc part `conformance-<class>-proc-<aura>-part-<n>`, a stack pass
-`conformance-<class>-stack-<config>-pass-<n>`. A hit expectation that is entirely
+with/without scenario of each passive (kind `passive`, no `hit` entry), the parts of each proc and trigger entry
+and, without `--spell`, `--passive`, `--proc` or `--trigger`, the melee scenario, into `DIR/scenarios/`, and
+`DIR/manifest.json`. `--spell` takes a class spell id or a rank id, `--passive` a passive class spell id or rank id
+(its passive scenario only; an active spell is an error), `--proc` the aura of a proc entry, `--trigger` the aura of
+a trigger entry, `--stack` the passes of the talent stack (`--passes`, 5 by default); each selects only what it
+names. A passive scenario is named `conformance-<class>-passive-<rank>`, a proc part
+`conformance-<class>-proc-<aura>-part-<n>`, a trigger part `conformance-<class>-trigger-<aura>-part-<n>`, a stack
+pass `conformance-<class>-stack-<config>-pass-<n>`. A hit expectation that is entirely
 `unmodelled` gets no scenario file. A file holds `json.dumps(scenario, indent=2)` and a newline, the bytes the
 runner writes and hashes as `scenario_sha256` (`batch.py` `write_case`), and is named after its exploratory key
 (`batch.py` `exploratory_key`), for example `conformance-templar-value-807268`. The manifest keeps the class file,

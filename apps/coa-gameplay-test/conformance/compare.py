@@ -16,6 +16,7 @@ from profile import DBC_DIR, caster_stats_from, known_aura_label, probe_aura_lab
 from stack import (ADDS, MEASURED, MELEE_SOURCE, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE, TALENT_DELTA,
                    levers, mean_interval, ratio_interval)
 from tooltip import CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, Unreadable
+from triggers import EVENT_TOLERANCE, TRIGGER_CHECK
 from values import CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECTS, UNMEASURABLE, UNREADABLE, Expectation, dataset
 
 STATUSES = ('ok', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials', 'unmeasured',
@@ -526,6 +527,75 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
                    explanation=f'{lead}{readings_text} ({notes}); {expectation.displayed} shows {chance:g}%; '
                                f'{expectation.rule}; events: {" + ".join(event_labels)}{minus}, '
                                f'{model["events_per_proc"]} per proc')
+
+
+def trigger_counts(run: Run, labels: dict, with_baseline: bool) -> tuple[float, float, float, float] | None:
+    names = ('baseline_trials', 'without', 'trials', 'events') if with_baseline else ('trials', 'events')
+    values = [run.values.get(labels[name]) for name in names]
+    if None in values:
+        return None
+    return tuple(values) if with_baseline else (0.0, 0.0, *values)
+
+
+def judge_trigger(parts: list[ProcPart]) -> Verdict:
+    first_entry, _, expectation = parts[0]
+    model = expectation.model
+    base = Verdict(expectation.label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
+                   expectation.rank_id, expectation.check)
+    labels = model['measurements']
+    trigger = model['trigger']['spell'] if model['trigger']['action'] == CAST else 0
+    observed = f'{model["observe_metric"]} of {model["observe_spell"]}'
+    trials = events = 0.0
+    baseline: tuple[float, float] | None = None
+    counted, without_aura, unmeasured, reasons = [], [], [], []
+    for _, run, part in parts:
+        if trigger:
+            reasons += failure_reasons(run, trigger)
+        with_baseline = part.model['baseline_attempts'] > 0
+        found = trigger_counts(run, labels, with_baseline)
+        aura = run.values.get(labels['aura'])
+        if found is None or aura is None:
+            unmeasured.append(f'{run.key} ({run.status}: {run.message})')
+            continue
+        baseline_trials, without, total_trials, total_events = found
+        if with_baseline:
+            baseline = (baseline_trials, without)
+        if aura <= 0:
+            without_aura.append(run.key)
+            continue
+        counted.append(run.key)
+        trials += total_trials - baseline_trials
+        events += total_events - without
+    notes = f'{len(counted)} of {model["parts"]} parts'
+    if without_aura:
+        notes += f'; aura {expectation.spell_id} absent in {", ".join(without_aura)}'
+    if unmeasured:
+        notes += f'; no trigger measurements in {", ".join(unmeasured)}'
+    if reasons:
+        notes += f'; failed casts: {describe_failures(reasons)}'
+    if baseline is not None and baseline[1] > 0:
+        return replace(base, measured=baseline[1], expected=0.0, low=0.0, high=0.0,
+                       explanation=f'{observed} occurred {baseline[1]:g} times in {baseline[0]:g} baseline trials '
+                                   f'without the passive ({notes})')
+    if trials <= 0:
+        status = 'alert' if unmeasured and not (without_aura or reasons) else 'unmeasured'
+        return replace(base, status=status, explanation=f'no usable trial with the passive learned ({notes})')
+    expected = trials * model['per_trigger']
+    low, high = expected - EVENT_TOLERANCE, expected + EVENT_TOLERANCE
+    counts = (f'{events:g} events ({observed}) in {trials:g} trials ({model["trial_metric"]}), '
+              f'{model["per_trigger"]:g} per trigger expects {expected:g}')
+    judged = replace(base, measured=events, expected=expected, low=low, high=high)
+    if trials < model['minimum_trials']:
+        return replace(judged, status='insufficient_trials',
+                       explanation=f'{counts}; fewer than the {model["minimum_trials"]} trials the check needs '
+                                   f'({notes})')
+    status = 'ok' if low - FLOAT_EPSILON <= events <= high + FLOAT_EPSILON else 'alert'
+    if status == 'ok' and (baseline is None or baseline[0] <= 0):
+        return replace(judged, status='unmeasured',
+                       explanation=f'{counts}; the baseline without the passive has no trial, so the events are not '
+                                   f'tied to the passive ({notes})')
+    return replace(judged, status=status, explanation=f'{counts}; no event in {baseline[0]:g} baseline trials '
+                                                      f'without the passive; {expectation.rule} ({notes})')
 
 
 DETAIL_KEYS = ('config', 'baseline', 'index', 'passes', 'source', 'talents')
@@ -1068,6 +1138,7 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
     verdicts = []
     proc_parts: dict[str, list[ProcPart]] = {}
     stack_parts: dict[str, list[ProcPart]] = {}
+    trigger_parts: dict[str, list[ProcPart]] = {}
     for entry in manifest['scenarios']:
         run = runs.get(entry['key'])
         if entry.get('file') and run is None:
@@ -1079,9 +1150,12 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                 proc_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             elif expectation.check in STACK_CHECKS and run is not None:
                 stack_parts.setdefault(expectation.label, []).append((entry, run, expectation))
+            elif expectation.check == TRIGGER_CHECK and run is not None:
+                trigger_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             else:
                 verdicts.append(judge(manifest, entry, run, expectation, tokens, tooltips, hit_model))
     verdicts += [judge_proc(manifest, parts, tooltips) for parts in proc_parts.values()]
+    verdicts += [judge_trigger(parts) for parts in trigger_parts.values()]
     verdicts += judge_stack(manifest, stack_parts, tooltips, hit_model)
     return Comparison(manifest, runs, missing, verdicts)
 
