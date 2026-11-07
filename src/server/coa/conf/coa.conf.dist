@@ -525,14 +525,29 @@ Bloodforged.Enable = 0
 #                     three values: uncommon, rare, epic. One roll per quality, spread evenly across
 #                     that quality's pool, before the Rate.Drop.Item.* multipliers. Uncommon is 0:
 #                     Bloodforged drops are rare or epic only. A non-zero uncommon rate must be
-#                     above the rare one.
-#        Default:     "0.00 0.50 0.00", "0.00 1.00 0.00", "0.00 1.40 0.15", "0.00 1.80 0.25", "0.00 2.20 0.40"
+#                     above the rare one. Elite mobs use Bloodforged.EliteEpicPercent for epics instead.
+#        Default:     "0.00 0.50 0.00", "0.00 1.00 0.00", "0.00 1.40 0.15", "0.00 1.80 0.25", "0.00 2.20 1.00"
 
 Bloodforged.Rates15 = "0.00 0.50 0.00"
 Bloodforged.Rates25 = "0.00 1.00 0.00"
 Bloodforged.Rates35 = "0.00 1.40 0.15"
 Bloodforged.Rates45 = "0.00 1.80 0.25"
-Bloodforged.Rates55 = "0.00 2.20 0.40"
+Bloodforged.Rates55 = "0.00 2.20 1.00"
+
+#    Bloodforged.EliteEpicPercent
+#        Description: Percent chance for an elite mob (and an open-world boss) to drop one epic
+#                     Bloodforged item that is not raid gear, within the stage cap, before the
+#                     Rate.Drop.Item.Epic multiplier. Comes on top of its rare (blue) roll.
+#        Default:     15
+
+Bloodforged.EliteEpicPercent = 15
+
+#    Bloodforged.EliteHeroicUpgradePercent
+#        Description: Percent chance that the epic from Bloodforged.EliteEpicPercent is a Heroic
+#                     Bloodforged item instead, never raid gear, within the stage cap.
+#        Default:     1
+
+Bloodforged.EliteHeroicUpgradePercent = 1
 
 #    Bloodforged.BlueMaxItemLevel
 #        Description: Highest item level of a rare (blue) Bloodforged item that drops, in every
@@ -565,7 +580,7 @@ Bloodforged.Level60EndgameZonesOnly = 1
 #                     Bloodforged item instead of the normal roll. The two values
 #                     are the percent chance that the Bloodforged item, and the Heroic
 #                     Bloodforged item, is raid gear of a released raid. Other mobs never drop
-#                     raid gear or Heroic Bloodforged.
+#                     raid gear.
 #        Default:     "15 5", "25 10"
 
 Bloodforged.RareRaidItemPercent = "15 5"

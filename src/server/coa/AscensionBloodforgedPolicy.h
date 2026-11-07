@@ -10,7 +10,10 @@ namespace Bloodforged
 {
 using Rates = std::array<unsigned, 3>;
 constexpr std::array<Rates, 5> DefaultRates = {{{0, 50, 0}, {0, 100, 0},
-    {0, 140, 15}, {0, 180, 25}, {0, 220, 40}}};
+    {0, 140, 15}, {0, 180, 25}, {0, 220, 100}}};
+
+constexpr unsigned DefaultEliteEpicPercent = 15;
+constexpr unsigned DefaultEliteHeroicUpgradePercent = 1;
 
 constexpr unsigned DefaultBlueMaxItemLevel = 57;
 constexpr std::array<unsigned, 9> DefaultEpicMaxItemLevelByStage = {61, 61, 64, 65, 70, 70, 70, 70, 70};

@@ -59,6 +59,7 @@ struct LevelPools
     std::array<std::vector<uint32>, 3> normal;
     std::vector<uint32> heroic;
     std::unique_ptr<LootTemplate> loot;
+    std::unique_ptr<LootTemplate> eliteLoot;
 };
 
 struct Options
@@ -70,6 +71,8 @@ struct Options
     RareDrop rare = DefaultRare;
     RareDrop rareElite = DefaultRareElite;
     unsigned respawnMinLevel = DefaultEndgameRespawnMinLevel;
+    unsigned eliteEpicPercent = DefaultEliteEpicPercent;
+    unsigned eliteHeroicUpgradePercent = DefaultEliteHeroicUpgradePercent;
 };
 
 struct Settings
@@ -129,6 +132,11 @@ bool EligiblePlayer(Player const* player, Creature const* creature)
 bool IsRare(uint32 rank)
 {
     return rank == CREATURE_ELITE_RARE || rank == CREATURE_ELITE_RAREELITE;
+}
+
+bool IsElite(uint32 rank)
+{
+    return rank == CREATURE_ELITE_ELITE || rank == CREATURE_ELITE_WORLDBOSS;
 }
 
 uint32 RaidMap(uint32 mapId)
@@ -268,17 +276,23 @@ bool BuildPools(Settings& next, uint32 stage)
                 return false;
             }
             pools.loot = std::make_unique<LootTemplate>();
+            pools.eliteLoot = std::make_unique<LootTemplate>();
             for (unsigned index = 0; index < 3; ++index)
             {
                 std::vector<uint32> const& pool = pools.normal[index];
                 if (!rates[index] || pool.empty())
                     continue;
-                for (uint32 entry : pool)
+                for (LootTemplate* loot : { pools.loot.get(), pools.eliteLoot.get() })
                 {
-                    auto* item = new LootStoreItem(entry, 0, EntryChance(rates[index], pool.size()), false,
-                        LOOT_MODE_DEFAULT, index + 1, 1, 1);
-                    item->conditions = { &riskCondition, &levelCondition };
-                    pools.loot->AddEntry(item);
+                    if (index == 2 && loot == pools.eliteLoot.get())
+                        continue;
+                    for (uint32 entry : pool)
+                    {
+                        auto* item = new LootStoreItem(entry, 0, EntryChance(rates[index], pool.size()), false,
+                            LOOT_MODE_DEFAULT, index + 1, 1, 1);
+                        item->conditions = { &riskCondition, &levelCondition };
+                        loot->AddEntry(item);
+                    }
                 }
             }
         }
@@ -393,8 +407,13 @@ private:
         options.level60EndgameOnly = sConfigMgr->GetOption<bool>("Bloodforged.Level60EndgameZonesOnly", true);
         options.respawnMinLevel = sConfigMgr->GetOption<uint32>("Bloodforged.EndgameRareRespawnMinLevel",
             DefaultEndgameRespawnMinLevel);
+        options.eliteEpicPercent = sConfigMgr->GetOption<uint32>("Bloodforged.EliteEpicPercent",
+            DefaultEliteEpicPercent);
+        options.eliteHeroicUpgradePercent = sConfigMgr->GetOption<uint32>("Bloodforged.EliteHeroicUpgradePercent",
+            DefaultEliteHeroicUpgradePercent);
         if (!ReadNumbers("Bloodforged.EpicMaxItemLevelByStage", options.epicCaps)
-            || !ReadRareDrop("Rare", options.rare) || !ReadRareDrop("RareElite", options.rareElite))
+            || !ReadRareDrop("Rare", options.rare) || !ReadRareDrop("RareElite", options.rareElite)
+            || options.eliteEpicPercent > 100 || options.eliteHeroicUpgradePercent > 100)
         {
             LOG_ERROR("server.loading", "Bloodforged disabled: invalid item level caps or rare mob settings");
             return;
@@ -511,6 +530,18 @@ public:
         bool const endgame = IsEndgameZone(creature->GetZoneId());
         LevelPools const& pools = current->pools[targetLevel][endgame];
         uint32 const rank = creature->GetCreatureTemplate()->rank;
+        if (IsElite(rank))
+        {
+            pools.eliteLoot->Process(*loot, store, lootMode, eligibleOwner);
+            Options const& options = current->options;
+            if (pools.normal[2].empty()
+                || !roll_chance_f(float(options.eliteEpicPercent) * sWorld->getRate(RATE_DROP_ITEM_EPIC)))
+                return;
+            bool const upgrade = !pools.heroic.empty() && roll_chance_i(int(options.eliteHeroicUpgradePercent));
+            AddRareMobItem(*loot, Acore::Containers::SelectRandomContainerElement(upgrade ? pools.heroic
+                : pools.normal[2]));
+            return;
+        }
         if (!IsRare(rank))
         {
             pools.loot->Process(*loot, store, lootMode, eligibleOwner);

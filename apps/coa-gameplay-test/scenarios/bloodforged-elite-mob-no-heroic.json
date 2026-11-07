@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Bloodforged elite mob never drops Heroic Bloodforged",
-  "contract": "Requires Bloodforged.Enable = 1, PvpPower.Enable = 1, Bloodforged.Rates55 = \"0.00 99.99 0.00\", Rate.Drop.Item.Uncommon, .Rare and .Epic = 1 and the catalogue SQL with its Heroic Bloodforged entries. A level 60 High-Risk character kills a natural Scarlet Paladin (elite, level 55-56) in Western Plaguelands; the guaranteed rare roll gives exactly one Bloodforged item and it is never a Heroic Bloodforged copy.",
+  "name": "Bloodforged elite mob drops a rare and a non-Heroic epic",
+  "contract": "Requires Bloodforged.Enable = 1, PvpPower.Enable = 1, Bloodforged.Rates55 = \"0.00 99.99 0.00\", Bloodforged.EliteEpicPercent = 100, Bloodforged.EliteHeroicUpgradePercent = 0, Rate.Drop.Item.Uncommon, .Rare and .Epic = 1 and the catalogue SQL with its Heroic Bloodforged entries. A level 60 High-Risk character kills a natural Scarlet Paladin (elite, level 55-56) in Western Plaguelands and finds exactly two Bloodforged items: the guaranteed rare roll and the elite epic, which is a normal (not Heroic) epic copy.",
   "players": [
     {
       "id": "h",
@@ -75,6 +75,14 @@
       "action": "assert",
       "actor": "h",
       "metric": "loot_bloodforged",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "loot_bloodforged",
+      "heroic": false,
+      "quality": 4,
       "equals": 1
     },
     {
