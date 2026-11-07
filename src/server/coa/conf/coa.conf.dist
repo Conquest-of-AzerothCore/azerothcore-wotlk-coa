@@ -564,12 +564,14 @@ Bloodforged.EliteEpicPercent = 15
 
 Bloodforged.EliteHeroicUpgradePercent = 2.5
 
-#    Bloodforged.BlueMaxItemLevel
-#        Description: Highest item level of a rare (blue) Bloodforged item that drops, in every
-#                     release stage.
-#        Default:     57
+#    Bloodforged.BlueMaxItemLevelByStage
+#        Description: Highest item level of a rare (blue) Bloodforged item that drops, one value per
+#                     release stage 0-8 (Ascension.CallboardCache.ReleaseStage). The lowest allowed
+#                     value is 57, the lowest item level of the level 60 blue items: a lower value is
+#                     raised to 57 and logged. Raid gear of released raids is not limited by it.
+#        Default:     "57 57 57 57 57 57 57 57 57"
 
-Bloodforged.BlueMaxItemLevel = 57
+Bloodforged.BlueMaxItemLevelByStage = "57 57 57 57 57 57 57 57 57"
 
 #    Bloodforged.EpicMaxItemLevelByStage
 #        Description: Highest item level of an epic Bloodforged item that drops, one value per
@@ -594,12 +596,26 @@ Bloodforged.Level60EndgameZonesOnly = 1
 #                     item (rare quality when no epic fits the player's level) and one Heroic
 #                     Bloodforged item instead of the normal roll. The two values
 #                     are the percent chance that the Bloodforged item, and the Heroic
-#                     Bloodforged item, is raid gear of a released raid. Other mobs never drop
-#                     raid gear.
+#                     Bloodforged item, is epic raid gear of a released raid. Blue raid gear
+#                     comes only from Bloodforged.ExtraBluePercent.
 #        Default:     "15 5", "25 10"
 
 Bloodforged.RareRaidItemPercent = "15 5"
 Bloodforged.RareEliteRaidItemPercent = "25 10"
+
+#    Bloodforged.ExtraBluePercent
+#    Bloodforged.ExtraBlueRaidItemPercent
+#        Description: Rare mobs, rare elite mobs and the High-Risk elites in
+#                     Bloodforged.HighRiskEliteEntries have a Bloodforged.ExtraBluePercent chance to
+#                     drop one more rare (blue) Bloodforged item on top of their other drops. That
+#                     blue item is blue raid gear of a released raid with a
+#                     Bloodforged.ExtraBlueRaidItemPercent chance, when such a raid has blue items;
+#                     otherwise it comes from the normal blue pool. Not scaled by any drop rate
+#                     multiplier. 0 turns it off.
+#        Default:     50, 50
+
+Bloodforged.ExtraBluePercent = 50
+Bloodforged.ExtraBlueRaidItemPercent = 50
 
 #    Bloodforged.EndgameRareRespawnMinutes
 #    Bloodforged.EndgameRareEliteRespawnMinutes
@@ -831,9 +847,9 @@ Ascension.PrestigiousCache.TbcStages = 0
 #                     Applied on .reload config; the client's difficulty list on next login.
 #                     .raidphase set <0-8> overrides this value in the characters database
 #                     until .raidphase clear; .raidphase shows the stage.
-#        Default:     4
+#        Default:     3
 
-Ascension.CallboardCache.ReleaseStage = 4
+Ascension.CallboardCache.ReleaseStage = 3
 
 #
 #    Ascension.CallboardCache.PreviousStageOnly
@@ -970,6 +986,15 @@ CoA.DungeonNormal.TargetHitCapPct = 40
 #        Default:     15
 
 CoA.TestZoneBonus.AnnounceIntervalMinutes = 15
+
+#
+#    CrowsCache.Enable
+#        Description: The Crow's Cache High-Risk PvP event. A cache starts only from Mythic Dungeons
+#                     (Ascension.CallboardCache.ReleaseStage 2) and only while at least three Heroic
+#                     Bloodforged rewards are released, so it also needs Bloodforged.Enable = 1. Until
+#                     then the automatic schedule skips its turns and .crows start is refused.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
 
 CrowsCache.Enable = 0
 CrowsCache.IntervalSeconds = 10800

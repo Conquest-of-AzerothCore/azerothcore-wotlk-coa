@@ -17,6 +17,8 @@
 #include "StringFormat.h"
 #include "GameTime.h"
 #include "GameObject.h"
+#include "Bag.h"
+#include "Item.h"
 #include "Group.h"
 #include "DatabaseEnv.h"
 #include "Log.h"
@@ -64,6 +66,7 @@ struct RaidGearEntry
     uint32 mapId;
     uint32 requiredLevel;
     bool heroic;
+    uint32 quality;
 };
 
 struct LevelPools
@@ -77,7 +80,7 @@ struct LevelPools
 struct Options
 {
     std::array<Rates, 5> rates = DefaultRates;
-    unsigned blueCap = DefaultBlueMaxItemLevel;
+    std::array<unsigned, 9> blueCaps = DefaultBlueMaxItemLevelByStage;
     std::array<unsigned, 9> epicCaps = DefaultEpicMaxItemLevelByStage;
     bool level60EndgameOnly = true;
     RareDrop rare = DefaultRare;
@@ -89,6 +92,8 @@ struct Options
     unsigned eliteEpicPercent = DefaultEliteEpicPercent;
     float eliteHeroicUpgradePercent = DefaultEliteHeroicUpgradePercent;
     float highRiskEliteExtraKeyPercent = DefaultHighRiskEliteExtraKeyPercent;
+    unsigned extraBluePercent = DefaultExtraBluePercent;
+    unsigned extraBlueRaidItemPercent = DefaultExtraBlueRaidItemPercent;
     unsigned endgameRareMinRequiredLevel = DefaultEndgameRareMinRequiredLevel;
     HiddenCacheChances rareHiddenCache = DefaultRareHiddenCache;
     HiddenCacheChances epicHiddenCache = DefaultEpicHiddenCache;
@@ -254,7 +259,7 @@ std::vector<RaidGearEntry> LoadRaidGear(std::unordered_map<uint32, uint32> const
             || item.HasFlag(ITEM_FLAG_MULTI_DROP) || item.StartQuest || RequiresReputation(entry, &item))
             continue;
         if (uint32 mapId = RaidMapOf(entry, &item, raidItems))
-            gear.push_back({ entry, mapId, item.RequiredLevel, IsHeroicCopy(&item) });
+            gear.push_back({ entry, mapId, item.RequiredLevel, IsHeroicCopy(&item), item.Quality });
     }
     std::sort(gear.begin(), gear.end(), [](RaidGearEntry const& a, RaidGearEntry const& b) { return a.entry < b.entry; });
     return gear;
@@ -265,6 +270,7 @@ bool BuildPools(Settings& next, uint32 stage)
     next.stage = stage;
     Options const& options = next.options;
     unsigned const epicCap = options.epicCaps[std::min<std::size_t>(stage, options.epicCaps.size() - 1)];
+    unsigned const blueCap = options.blueCaps[std::min<std::size_t>(stage, options.blueCaps.size() - 1)];
     for (unsigned level = 15; level <= 60; ++level)
         for (unsigned endgame = 0; endgame < 2; ++endgame)
         {
@@ -272,7 +278,7 @@ bool BuildPools(Settings& next, uint32 stage)
             for (CatalogueEntry const& item : next.catalogue)
             {
                 if (!EligibleItem(item.requiredLevel, item.itemLevel, level)
-                    || !WithinItemLevelCap(item.quality, item.itemLevel, options.blueCap, epicCap)
+                    || !WithinItemLevelCap(item.quality, item.itemLevel, blueCap, epicCap)
                     || !AllowedInZone(item.requiredLevel, endgame, options.level60EndgameOnly))
                     continue;
                 if (item.heroic)
@@ -455,7 +461,6 @@ private:
                 return;
             }
         }
-        options.blueCap = sConfigMgr->GetOption<uint32>("Bloodforged.BlueMaxItemLevel", DefaultBlueMaxItemLevel);
         {
             std::istringstream input(sConfigMgr->GetOption<std::string>("Bloodforged.HighRiskEliteEntries", DefaultHighRiskEliteEntries));
             for (uint32 entry; input >> entry;)
@@ -477,7 +482,12 @@ private:
             DefaultEliteHeroicUpgradePercent);
         options.highRiskEliteExtraKeyPercent = sConfigMgr->GetOption<float>(
             "Bloodforged.HighRiskEliteExtraKeyPercent", DefaultHighRiskEliteExtraKeyPercent);
+        options.extraBluePercent = sConfigMgr->GetOption<uint32>("Bloodforged.ExtraBluePercent",
+            DefaultExtraBluePercent);
+        options.extraBlueRaidItemPercent = sConfigMgr->GetOption<uint32>("Bloodforged.ExtraBlueRaidItemPercent",
+            DefaultExtraBlueRaidItemPercent);
         if (!ReadNumbers("Bloodforged.EpicMaxItemLevelByStage", options.epicCaps)
+            || !ReadNumbers("Bloodforged.BlueMaxItemLevelByStage", options.blueCaps)
             || !ReadRareDrop("Rare", options.rare) || !ReadRareDrop("RareElite", options.rareElite)
             || !ReadHiddenCache("Bloodforged.RareHiddenCachePercent", options.rareHiddenCache)
             || !ReadHiddenCache("Bloodforged.EpicHiddenCachePercent", options.epicHiddenCache)
@@ -490,11 +500,19 @@ private:
                 [](float percent) { return !(percent >= 0.0f) || percent > 100.0f; })
             || options.eliteEpicPercent > 100 || !(options.eliteHeroicUpgradePercent >= 0.0f)
             || !(options.highRiskEliteExtraKeyPercent >= 0.0f) || options.highRiskEliteExtraKeyPercent > 100.0f
+            || options.extraBluePercent > 100 || options.extraBlueRaidItemPercent > 100
             || options.eliteHeroicUpgradePercent > 100.0f)
         {
             LOG_ERROR("server.loading", "Bloodforged disabled: invalid item level caps or rare mob settings");
             return;
         }
+        for (unsigned& cap : options.blueCaps)
+            if (cap < MinimumBlueMaxItemLevel)
+            {
+                LOG_WARN("server.loading", "Bloodforged.BlueMaxItemLevelByStage value {} raised to {}", cap,
+                    MinimumBlueMaxItemLevel);
+                cap = RaisedBlueCap(cap);
+            }
         if (!ReadDropRate("Bloodforged.DropRate.Rare", options.rareRate)
             || !ReadDropRate("Bloodforged.DropRate.Epic", options.epicRate)
             || !ReadDropRate("Bloodforged.DropRate.SilverMarkOfWar", options.silverMarkRate)
@@ -557,13 +575,14 @@ private:
 };
 
 uint32 PickRaidGear(Settings const& current, bool heroic, unsigned level, bool endgame, unsigned minRequiredLevel,
-    unsigned percent)
+    unsigned percent, uint32 quality = 0)
 {
     if (!roll_chance_i(int(percent)))
         return 0;
     std::vector<uint32> candidates;
     for (RaidGearEntry const& gear : current.raidGear)
-        if (gear.heroic == heroic && RaidRelease::RaidLootStage(gear.mapId) <= current.stage
+        if (gear.heroic == heroic && (!quality || gear.quality == quality)
+            && RaidRelease::RaidLootStage(gear.mapId) <= current.stage
             && gear.requiredLevel <= level && gear.requiredLevel >= minRequiredLevel
             && AllowedInZone(gear.requiredLevel, endgame, current.options.level60EndgameOnly))
             candidates.push_back(gear.entry);
@@ -594,6 +613,16 @@ void AddRareMobItem(Loot& loot, uint32 entry, uint32 count = 1)
     LootStoreItem item(entry, 0, 100.0f, false, LOOT_MODE_DEFAULT, 0, int32(count), uint8(count));
     item.conditions = { &riskCondition, &levelCondition };
     loot.AddItem(item);
+}
+
+void AddExtraBlue(Loot& loot, Settings const& current, unsigned level, bool endgame, unsigned minRequiredLevel,
+    LevelPools const& pools)
+{
+    if (!roll_chance_i(int(current.options.extraBluePercent)))
+        return;
+    uint32 const raid = PickRaidGear(current, false, level, endgame, minRequiredLevel,
+        current.options.extraBlueRaidItemPercent, ITEM_QUALITY_RARE);
+    AddRareMobItem(loot, raid ? raid : PickFrom(pools.normal[1], minRequiredLevel));
 }
 
 void AddMarks(Loot& loot, MarkDrop const& marks, Options const& options)
@@ -694,6 +723,7 @@ public:
         if (highRiskElite && !IsRare(rank))
         {
             pools.eliteLoot->Process(*loot, store, lootMode, eligibleOwner);
+            AddExtraBlue(*loot, *current, targetLevel, endgame, 0, pools);
             if (pools.normal[2].empty()
                 || !roll_chance_f(ScaledPercent(float(options.eliteEpicPercent), options.epicRate)))
                 return;
@@ -712,10 +742,13 @@ public:
         unsigned const minRequiredLevel = endgame ? current->options.endgameRareMinRequiredLevel : 0;
         unsigned const rareLevel = endgame && minRequiredLevel ? 60 : targetLevel;
         LevelPools const& rarePools = current->pools[rareLevel][endgame];
-        uint32 normal = PickRaidGear(*current, false, rareLevel, endgame, minRequiredLevel, drop.raidPercent);
+        uint32 normal = PickRaidGear(*current, false, rareLevel, endgame, minRequiredLevel, drop.raidPercent,
+            ITEM_QUALITY_EPIC);
         AddRareMobItem(*loot, normal ? normal : PickBestQuality(rarePools, minRequiredLevel));
-        uint32 heroic = PickRaidGear(*current, true, rareLevel, endgame, minRequiredLevel, drop.heroicRaidPercent);
+        uint32 heroic = PickRaidGear(*current, true, rareLevel, endgame, minRequiredLevel, drop.heroicRaidPercent,
+            ITEM_QUALITY_EPIC);
         AddRareMobItem(*loot, heroic ? heroic : PickFrom(rarePools.heroic, minRequiredLevel));
+        AddExtraBlue(*loot, *current, rareLevel, endgame, minRequiredLevel, rarePools);
     }
 };
 
@@ -777,6 +810,39 @@ private:
             return;
         creature->SetRespawnTime(delay + uint32(remaining - creature->GetRespawnDelay()));
         creature->SaveRespawnTime();
+    }
+};
+
+class EphemeralKeyOrder : public PlayerScript
+{
+public:
+    EphemeralKeyOrder() : PlayerScript("BloodforgedEphemeralKeyOrder", { PLAYERHOOK_CAN_CAST_ITEM_USE_SPELL }) { }
+
+    bool OnPlayerCanCastItemUseSpell(Player* player, Item* item, SpellCastTargets const&, uint8, uint32) override
+    {
+        if (std::find(EphemeralKeys.begin(), EphemeralKeys.end(), item->GetEntry()) == EphemeralKeys.end())
+            return true;
+        Item* shortest = item;
+        auto consider = [item, &shortest](Item* other)
+        {
+            if (other && other->GetEntry() == item->GetEntry() && other->GetUInt32Value(ITEM_FIELD_DURATION)
+                && other->GetUInt32Value(ITEM_FIELD_DURATION) < shortest->GetUInt32Value(ITEM_FIELD_DURATION))
+                shortest = other;
+        };
+        for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
+            consider(player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot));
+        for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag)
+            if (Bag* container = player->GetBagByPos(bag))
+                for (uint32 slot = 0; slot < container->GetBagSize(); ++slot)
+                    consider(container->GetItemByPos(slot));
+        if (shortest == item)
+            return true;
+        uint32 const used = item->GetUInt32Value(ITEM_FIELD_DURATION);
+        item->SetUInt32Value(ITEM_FIELD_DURATION, shortest->GetUInt32Value(ITEM_FIELD_DURATION));
+        shortest->SetUInt32Value(ITEM_FIELD_DURATION, used);
+        item->SetState(ITEM_CHANGED, player);
+        shortest->SetState(ITEM_CHANGED, player);
+        return true;
     }
 };
 
@@ -988,5 +1054,6 @@ void AddSC_AscensionBloodforged()
     new Bloodforged::WorldDrops();
     new Bloodforged::EndgameRareRespawn();
     new Bloodforged::NativeRates();
+    new Bloodforged::EphemeralKeyOrder();
     new Bloodforged::HiddenCacheCommands();
 }

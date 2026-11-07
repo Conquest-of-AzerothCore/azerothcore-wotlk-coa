@@ -15,7 +15,13 @@ constexpr std::array<Rates, 5> DefaultRates = {{{0, 50, 0}, {0, 100, 0},
 constexpr unsigned DefaultEliteEpicPercent = 15;
 constexpr float DefaultEliteHeroicUpgradePercent = 2.5f;
 
-constexpr unsigned DefaultBlueMaxItemLevel = 57;
+constexpr unsigned MinimumBlueMaxItemLevel = 57;
+constexpr std::array<unsigned, 9> DefaultBlueMaxItemLevelByStage = {57, 57, 57, 57, 57, 57, 57, 57, 57};
+
+constexpr unsigned RaisedBlueCap(unsigned itemLevel)
+{
+    return itemLevel < MinimumBlueMaxItemLevel ? MinimumBlueMaxItemLevel : itemLevel;
+}
 constexpr std::array<unsigned, 9> DefaultEpicMaxItemLevelByStage = {61, 61, 64, 65, 70, 70, 70, 70, 70};
 
 constexpr std::array<std::uint32_t, 8> EndgameZones = {28, 139, 46, 4, 16, 618, 490, 1377};
@@ -46,6 +52,7 @@ constexpr char const* DefaultHighRiskEliteEntries = "918530 918547 918550 918555
 constexpr unsigned DefaultEndgameRareMinRequiredLevel = 60;
 constexpr std::array<std::uint32_t, 3> HiddenCacheLoot = {9670, 9671, 9672};
 constexpr std::uint32_t EphemeralKey = 967680;
+constexpr std::array<std::uint32_t, 3> EphemeralKeys = {967680, 967681, 967682};
 constexpr std::uint32_t SilverMarkOfWar = 1201002;
 constexpr std::uint32_t GoldenMarkOfWar = 1201003;
 
@@ -75,6 +82,8 @@ constexpr MarkDrop RareEliteMobMarks = {2, 10.0f, 0, 50.0f};
 constexpr std::array<MarkDrop, 3> HiddenCacheMarks = {{{1, 10.0f, 0, 0.0f}, {1, 60.0f, 0, 20.0f}, {2, 50.0f, 1, 20.0f}}};
 constexpr std::array<float, 4> DefaultEphemeralKeyPercent = {3.0f, 40.0f, 75.0f, 100.0f};
 constexpr float DefaultHighRiskEliteExtraKeyPercent = 5.0f;
+constexpr unsigned DefaultExtraBluePercent = 50;
+constexpr unsigned DefaultExtraBlueRaidItemPercent = 50;
 
 struct HiddenCacheChances
 {

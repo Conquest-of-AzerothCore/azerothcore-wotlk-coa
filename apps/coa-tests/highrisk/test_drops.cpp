@@ -52,12 +52,14 @@ int main()
     assert(ValidRates({0, 50, 0}));
     assert(!ValidRates({0, 50, 50}));
     assert(!ValidRates({40, 50, 0}));
-    assert(DefaultBlueMaxItemLevel == 57);
+    assert(DefaultBlueMaxItemLevelByStage[0] == 57 && DefaultBlueMaxItemLevelByStage[8] == 57);
+    assert(RaisedBlueCap(56) == 57 && RaisedBlueCap(57) == 57 && RaisedBlueCap(60) == 60);
     assert(DefaultEndgameRareMinRequiredLevel == 60);
     assert(DefaultEndgameEliteHighRiskRespawnMinutes[0] == 10 && DefaultEndgameEliteHighRiskRespawnMinutes[1] == 15);
     assert(DefaultHighRiskEliteRespawnMinutes[0] == 45 && DefaultHighRiskEliteRespawnMinutes[1] == 60);
     assert(DefaultEphemeralKeyPercent[0] == 3.0f && DefaultEphemeralKeyPercent[1] == 40.0f);
     assert(DefaultHighRiskEliteExtraKeyPercent == 5.0f);
+    assert(DefaultExtraBluePercent == 50 && DefaultExtraBlueRaidItemPercent == 50);
     assert(DefaultEphemeralKeyPercent[2] == 75.0f && DefaultEphemeralKeyPercent[3] == 100.0f);
     assert(NormalMobMarks.silver == 0 && NormalMobMarks.extraSilverPercent == 1.0f && NormalMobMarks.extraGoldPercent == 0.0f);
     assert(EliteMobMarks.extraSilverPercent == 8.0f && EliteMobMarks.extraGoldPercent == 0.5f);
