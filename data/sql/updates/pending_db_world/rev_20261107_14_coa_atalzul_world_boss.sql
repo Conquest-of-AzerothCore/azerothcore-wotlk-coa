@@ -96,3 +96,8 @@ WHERE `guid` = 9780109;
 -- Atal'zul and Zul'rogg are undead: both look ghostly (22650), as on Ascension.
 DELETE FROM `creature_template_addon` WHERE `entry` IN (67532, 67533);
 INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (67532, '22650'), (67533, '22650');
+
+-- Their models (DevModels gallery): Atal'zul the troll lich (79329), also for his hologram; Zul'rogg the dire troll
+-- (79411).
+UPDATE `creature_template_model` SET `CreatureDisplayID` = 79329 WHERE `CreatureID` IN (67532, 978090);
+UPDATE `creature_template_model` SET `CreatureDisplayID` = 79411 WHERE `CreatureID` = 67533;
