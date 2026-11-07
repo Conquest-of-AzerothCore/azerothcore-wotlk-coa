@@ -99,3 +99,10 @@ INSERT IGNORE INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Cha
 SELECT 978060, l.`Item`, 0, 0, 0, 1, 1, 1, 1, CONCAT('Treasures of Azeroth - World Boss - ', i.`name`)
 FROM `creature_loot_template` l JOIN `item_template` i ON i.`entry` = l.`Item`
 WHERE l.`Entry` = 978080 AND l.`GroupId` = 1 AND l.`Reference` = 0 AND i.`Quality` = 4;
+
+-- His model: the sea giant with a trident (DevModels gallery, display 66810), for him and his hologram.
+UPDATE `creature_template_model` SET `CreatureDisplayID` = 66810 WHERE `CreatureID` IN (978080, 978081);
+DELETE FROM `creature_equip_template` WHERE `CreatureID` = 978080;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, `VerifiedBuild`) VALUES
+(978080, 1, 37461, 0, 0, 12340);
+UPDATE `creature` SET `equipment_id` = 1 WHERE `guid` = 9780920;
