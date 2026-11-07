@@ -189,6 +189,8 @@ class aura_ascension_cultist_event : public AuraScript
                                  .1f * player->GetTotalAttackPowerValue(BASE_ATTACK);
                     flat *= .5f;
                     Copy(player, ally, 500748, CalculatePct(damage, Amount(id)) + uint32(std::max(0.0f, flat)));
+                    if (player->HasAura(300286))
+                        Cast(player, ally, 301982);
                 }
                 break;
             case 525065: Cast(player, target, 525066); break;
