@@ -458,24 +458,11 @@ uint32 PickRaidGear(Settings const& current, bool heroic, unsigned level, bool e
     return candidates.empty() ? 0 : Acore::Containers::SelectRandomContainerElement(candidates);
 }
 
-uint32 PickNormal(Settings const& current, LevelPools const& pools, unsigned level)
+uint32 PickBestQuality(LevelPools const& pools)
 {
-    Rates const& rates = current.options.rates[Band(level)];
-    unsigned total = 0;
-    for (unsigned index = 0; index < 3; ++index)
+    for (unsigned index = 3; index-- > 0;)
         if (!pools.normal[index].empty())
-            total += rates[index];
-    if (!total)
-        return 0;
-    unsigned roll = urand(1, total);
-    for (unsigned index = 0; index < 3; ++index)
-    {
-        if (pools.normal[index].empty())
-            continue;
-        if (roll <= rates[index])
             return Acore::Containers::SelectRandomContainerElement(pools.normal[index]);
-        roll -= rates[index];
-    }
     return 0;
 }
 
@@ -532,7 +519,7 @@ public:
 
         RareDrop const& drop = rank == CREATURE_ELITE_RARE ? current->options.rare : current->options.rareElite;
         uint32 normal = PickRaidGear(*current, false, targetLevel, endgame, drop.raidPercent);
-        AddRareMobItem(*loot, normal ? normal : PickNormal(*current, pools, targetLevel));
+        AddRareMobItem(*loot, normal ? normal : PickBestQuality(pools));
         uint32 heroic = PickRaidGear(*current, true, targetLevel, endgame, drop.heroicRaidPercent);
         if (!heroic && !pools.heroic.empty())
             heroic = Acore::Containers::SelectRandomContainerElement(pools.heroic);

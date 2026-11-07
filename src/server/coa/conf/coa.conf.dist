@@ -560,8 +560,9 @@ Bloodforged.Level60EndgameZonesOnly = 1
 
 #    Bloodforged.RareRaidItemPercent
 #    Bloodforged.RareEliteRaidItemPercent
-#        Description: Rare (rank 4) and rare elite (rank 2) mobs always drop one Bloodforged item
-#                     and one Heroic Bloodforged item instead of the normal roll. The two values
+#        Description: Rare (rank 4) and rare elite (rank 2) mobs always drop one epic Bloodforged
+#                     item (rare quality when no epic fits the player's level) and one Heroic
+#                     Bloodforged item instead of the normal roll. The two values
 #                     are the percent chance that the Bloodforged item, and the Heroic
 #                     Bloodforged item, is raid gear of a released raid. Other mobs never drop
 #                     raid gear or Heroic Bloodforged.

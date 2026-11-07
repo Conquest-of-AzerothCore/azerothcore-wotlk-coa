@@ -1246,7 +1246,7 @@ def validate(scenario):
                 require(metric == 'loot_bloodforged' and isinstance(step['heroic'], bool),
                         f'{where}.heroic must be a boolean on loot_bloodforged')
             if 'quality' in step:
-                require(metric in {'loot_count', 'loot_entry', 'loot_required_level', 'loot_item_level',
+                require(metric in {'loot_count', 'loot_entry', 'loot_required_level', 'loot_item_level', 'loot_bloodforged',
                                    'carried_pool_item_count'},
                         f'{where}: quality applies only to loot items and carried cache rewards')
                 number(step['quality'], f'{where}.quality', 0, 7, True)
