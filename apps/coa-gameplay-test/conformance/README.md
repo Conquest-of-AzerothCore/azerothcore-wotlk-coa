@@ -763,7 +763,8 @@ A `triggers` entry of the class file is a passive whose tooltip says that someth
 | `caster_health_pct` | the caster's own health percent set before every cast, for a trigger the server code gates on an effective self-heal (`GetHealInfo()->GetEffectiveHeal()`), which is 0 at full health |
 | `restore_charges` | for a cast trigger, restores the trigger rank's native charges before every attempt (needed when the rank is also a charge-counting `procs` entry's trigger) |
 | `internal_cooldown_ms` | spaces scheduled attempts at least this many ms apart, on top of the trigger rank's own cast time and recovery, for a trigger the server code gates on an internal cooldown |
-| `observe_metric` | `spell_cast_count` or `spell_energize_count` of `observe_spell` |
+| `observe_metric` | `spell_cast_count`, `spell_energize_count` or `aura_apply_count` of `observe_spell` |
+| `observe_actor` | `"caster"` (default) or `"target"`: which actor's `observe_metric` is measured, for a trigger whose effect lands on the target rather than the caster (`Unit::AddAura`, not a `CastSpell`) |
 | `per_trigger`, `per_trigger_text` | the events per trial, 1 or 0.5 for "Every 2nd", and the words that state it |
 | `trial_attempts_factor`, `trial_attempts_reason` | multiplies the scheduled attempts (default 1, unchanged); a cited reason, for a trigger whose own cast sometimes executes as a different spell id and so is not counted as a trial of itself |
 | `status`, `reason` | `unmodelled` or `ambiguous_tooltip` for an entry without a scenario, and why |
@@ -790,6 +791,12 @@ charge pool is restored before every cast (`"restore_charges"` fixture), needed 
 the harness's scheduled attempt rate rather than its native recharge rate. With `internal_cooldown_ms` set, each
 attempt is spaced at least that long apart (`max(StartRecoveryTime, cast time, internal_cooldown_ms) + 500 ms`),
 for a trigger the server code gates behind its own internal cooldown rather than the trigger rank's.
+
+`aura_apply_count` counts a target's `AuraApplyCounter` (`CoAGameplayTest.cpp`), a static `(unit, spell)` map
+recorded from `UnitScript::OnAuraApply`, the generic engine hook `Unit::_ApplyAura` calls after every aura
+application, including one made by `Unit::AddAura` (which never builds a `Spell` object, so `ProcCounter`'s
+`OnSpellCast`-based metrics never see it). It is for an effect applied this way rather than through `CastSpell`;
+`observe_actor: "target"` then measures it on the hostile `dummy` fixture instead of the caster.
 
 `TRIGGER_TRIALS` is 182, the smallest N with 0.975^N <= 0.01: a trigger that fires 2.5 points under 100% of the time
 misses at least once in 182 trials with 99% probability. The scenario learns the trigger rank, makes

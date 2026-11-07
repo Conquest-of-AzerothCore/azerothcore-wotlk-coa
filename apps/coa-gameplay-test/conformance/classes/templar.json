@@ -645,6 +645,21 @@
       "per_trigger": 1,
       "per_trigger_text": "now reduces your Physical damage taken",
       "internal_cooldown_ms": 15000
+    },
+    {
+      "aura": 705255,
+      "name": "Divine Strikes",
+      "tooltip": "Damage dealt by |cffffffffScourgebane|r now increases the damage of |cffffffffArgent Blade|r by $803372s2% for $803372d, stacking $803372u times.",
+      "trigger": {"action": "cast", "spell": 503141, "target": "dummy"},
+      "trigger_text": "Damage dealt by Scourgebane",
+      "trigger_spell_text": "Chastise",
+      "trial_metric": "spell_cast_count",
+      "observe_spell": 803372,
+      "observe_source": "EffectTriggerSpell[0] of 705255",
+      "observe_metric": "aura_apply_count",
+      "observe_actor": "target",
+      "per_trigger": 1,
+      "per_trigger_text": "now increases the damage"
     }
   ],
   "talent_modifiers": [

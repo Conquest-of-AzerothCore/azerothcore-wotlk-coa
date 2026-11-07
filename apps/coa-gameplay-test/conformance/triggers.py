@@ -17,7 +17,8 @@ EVENT_TOLERANCE = 1
 SELF = 'self'
 ALLY_HEALTH_MAX = 10000
 TRIGGER_TARGETS = frozenset({SELF, TARGET, ALLY})
-OBSERVE_METRICS = frozenset({'spell_cast_count', 'spell_energize_count'})
+OBSERVE_METRICS = frozenset({'spell_cast_count', 'spell_energize_count', 'aura_apply_count'})
+OBSERVE_ACTORS = {CASTER: CASTER, 'target': TARGET}
 MELEE_COUNTS = frozenset({'melee_attack_count', 'melee_damage_count'})
 TRIAL_METRICS = {CAST: frozenset({'spell_cast_count', 'spell_damage_count'}), ATTACK: MELEE_COUNTS}
 TRIGGER_RULE = (f'|events - trials x per_trigger| <= {EVENT_TOLERANCE} over at least {TRIGGER_TRIALS} trials, '
@@ -54,6 +55,8 @@ def checked_entry(entry: dict) -> dict:
         raise ValueError(f'Trigger {aura} casts at {trigger.get("target")!r}, not one of {sorted(TRIGGER_TARGETS)}')
     if entry['observe_metric'] not in OBSERVE_METRICS:
         raise ValueError(f'Unknown observe metric {entry["observe_metric"]!r} of trigger {aura}')
+    if entry.get('observe_actor', CASTER) not in OBSERVE_ACTORS:
+        raise ValueError(f'Unknown observe actor {entry.get("observe_actor")!r} of trigger {aura}')
     if not 0 < entry['per_trigger'] <= 1:
         raise ValueError(f'Trigger {aura} has {entry["per_trigger"]} events per trigger')
     if entry.get('attempt_auras') and trigger['action'] != CAST:
@@ -100,11 +103,15 @@ def trial_spell(entry: dict) -> int:
     return entry['trigger']['spell'] if entry['trigger']['action'] == CAST else 0
 
 
-def count_step(label: str, metric: str, spell: int) -> dict:
+def observe_actor(entry: dict) -> str:
+    return OBSERVE_ACTORS[entry.get('observe_actor', CASTER)]
+
+
+def count_step(label: str, metric: str, spell: int, actor: str = CASTER) -> dict:
     if metric in MELEE_COUNTS:
         return measurement(label, CASTER, metric, hand=MAIN_HAND)
     fields = {'target': TARGET} if metric == 'spell_damage_count' else {}
-    return measurement(label, CASTER, metric, spell=spell, **fields)
+    return measurement(label, actor, metric, spell=spell, **fields)
 
 
 def health_step(actor: str, pct: int) -> dict:
@@ -141,7 +148,7 @@ def attempt_steps(class_file: dict, entry: dict, plan: TriggerPlan, attempts: in
 
 def counts(entry: dict, trials_label: str, events_label: str) -> list[dict]:
     return [count_step(trials_label, entry['trial_metric'], trial_spell(entry)),
-            count_step(events_label, entry['observe_metric'], entry['observe_spell'])]
+            count_step(events_label, entry['observe_metric'], entry['observe_spell'], observe_actor(entry))]
 
 
 def trigger_rule(entry: dict) -> str:
@@ -159,9 +166,10 @@ def trigger_rule(entry: dict) -> str:
         fixtures += f'; attempts spaced at least {cooldown} ms apart (internal cooldown)'
     factor = entry.get('trial_attempts_factor', 1)
     scaled = f'; scheduled attempts x{factor:g} ({entry["trial_attempts_reason"]})' if factor != 1 else ''
-    return (f'{TRIGGER_RULE}; trials: {trials}; events: {entry["observe_metric"]} of {entry["observe_spell"]} '
-            f'({entry["observe_source"]}); {entry["per_trigger"]:g} per trigger ("{entry["per_trigger_text"]}")'
-            f'{fixtures}{scaled}')
+    on_target = ' on the target' if entry.get('observe_actor') == 'target' else ''
+    return (f'{TRIGGER_RULE}; trials: {trials}; events: {entry["observe_metric"]} of {entry["observe_spell"]}'
+            f'{on_target} ({entry["observe_source"]}); {entry["per_trigger"]:g} per trigger '
+            f'("{entry["per_trigger_text"]}"){fixtures}{scaled}')
 
 
 def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict, list[Expectation]]:
@@ -195,6 +203,7 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
              'baseline_attempts': baseline, 'attempt_ms': plan.attempt_ms, 'minimum_trials': TRIGGER_TRIALS,
              'per_trigger': entry['per_trigger'], 'trigger': dict(trigger), 'trial_metric': entry['trial_metric'],
              'observe_spell': entry['observe_spell'], 'observe_metric': entry['observe_metric'],
+             'observe_actor': entry.get('observe_actor', CASTER),
              'attempt_auras': [dict(aura) for aura in entry.get('attempt_auras', [])],
              'caster_health_pct': entry.get('caster_health_pct'), 'ally_health_pct': entry.get('ally_health_pct'),
              'restore_charges': entry.get('restore_charges', False),

@@ -25,7 +25,7 @@ import batch
 import run
 
 TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 804932, 806516, 803158, 805420, 680891,
-                    803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298}
+                    803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298, 705255}
 IMPROVED_SCARLET_HAMMER = 301254
 SCARLET_HAMMER = 807035
 DETERMINED = 705256
@@ -36,6 +36,8 @@ LIBRAM_OF_CONSECRATION = 801441
 DUTY_CALLS = 705286
 RIGHTEOUS_LUNGE = 570233
 UNTAINTED = 705298
+DIVINE_STRIKES = 705255
+SCOURGEBANE = 801832
 SCARLET_SECRETS = 520812
 STAFFGUARD = 705295
 CHAKRA_OF_POWER = 803158
@@ -467,6 +469,26 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         for index in casts:
             self.assertIn({'action': 'set_health', 'actor': 'caster', 'value': 5000, 'maximum': 10000},
                           steps[index - 4:index])
+
+    def test_divine_strikes_entry_uses_an_aura_apply_observe(self):
+        entry = templar_trigger(DIVINE_STRIKES)
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': CHASTISE, 'target': 'dummy'})
+        self.assertEqual(entry['observe_metric'], 'aura_apply_count')
+        self.assertEqual(entry['observe_actor'], 'target')
+        self.assertEqual(entry['observe_spell'], 803372)
+        scenario, [expectation] = trigger_scenario(CLASS_FILE, entry)
+        labels = trigger_measurements(DIVINE_STRIKES)
+        measured = {step['label']: step for step in scenario['steps'] if step['action'] == 'assert'}
+        self.assertEqual(measured[labels['events']]['actor'], 'dummy')
+        self.assertEqual(measured[labels['events']]['metric'], 'aura_apply_count')
+        self.assertIn('on the target', expectation.rule)
+        self.assertEqual(expectation.model['observe_actor'], 'target')
+
+    def test_unknown_observe_actor_is_refused(self):
+        entry = copy.deepcopy(templar_trigger(DIVINE_STRIKES))
+        entry['observe_actor'] = 'ally'
+        with self.assertRaises(ValueError):
+            trigger_plan(CLASS_FILE, entry)
 
     def test_caster_health_pct_needs_a_cast_trigger(self):
         entry = copy.deepcopy(templar_trigger(UNTAINTED))

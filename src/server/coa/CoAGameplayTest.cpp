@@ -672,6 +672,40 @@ bool ProcCounter::_enabled = false;
 std::map<std::pair<ObjectGuid, uint32>, uint32> ProcCounter::_counts;
 std::map<std::pair<ObjectGuid, uint32>, uint32> ProcCounter::_casts;
 
+class AuraApplyCounter
+{
+public:
+    static void Begin()
+    {
+        _counts.clear();
+        _enabled = true;
+    }
+
+    static void Record(ObjectGuid unit, uint32 spell)
+    {
+        if (_enabled)
+            ++_counts[{ unit, spell }];
+    }
+
+    static uint32 Count(ObjectGuid unit, uint32 spell)
+    {
+        auto itr = _counts.find({ unit, spell });
+        return itr == _counts.end() ? 0 : itr->second;
+    }
+
+    static void Forget(std::set<ObjectGuid> const& units)
+    {
+        std::erase_if(_counts, [&units](auto const& entry) { return units.contains(entry.first.first); });
+    }
+
+private:
+    static bool _enabled;
+    static std::map<std::pair<ObjectGuid, uint32>, uint32> _counts;
+};
+
+bool AuraApplyCounter::_enabled = false;
+std::map<std::pair<ObjectGuid, uint32>, uint32> AuraApplyCounter::_counts;
+
 constexpr float DefaultEncounterRadius = 100.0f;
 constexpr float MaximumEncounterRadius = 200.0f;
 
@@ -2254,6 +2288,7 @@ public:
             units.insert(actor.guid);
         }
         ProcCounter::Forget(units);
+        AuraApplyCounter::Forget(units);
         return ungrouped;
     }
 
@@ -3481,6 +3516,11 @@ private:
         {
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell in metric");
             return ProcCounter::Count(unit->GetGUID(), spell);
+        }
+        if (metric == "aura_apply_count")
+        {
+            Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell in metric");
+            return AuraApplyCounter::Count(unit->GetGUID(), spell);
         }
         if (metric == "owned_creature_spell_proc_count")
         {
@@ -7788,6 +7828,7 @@ public:
         _enabled = true;
         _started = Clock::now();
         ProcCounter::Begin();
+        AuraApplyCounter::Begin();
         _caseDirectory = sConfigMgr->GetOption<std::string>("CoAGameplayTest.CaseDirectory", "", false);
         if (_caseDirectory.empty())
             StartSingle();
@@ -8485,7 +8526,10 @@ public:
 
     void OnAuraApply(Unit* unit, Aura* aura) override
     {
-        if (!TimelineRecorder::Active() || !unit || !aura)
+        if (!unit || !aura)
+            return;
+        AuraApplyCounter::Record(unit->GetGUID(), aura->GetId());
+        if (!TimelineRecorder::Active())
             return;
         TimelineRecorder::Record(unit, { 0, CoAGameplay::TimelineEventKind::AuraApplied, aura->GetCasterGUID(),
             unit->GetGUID(), CreatureEntry(aura->GetCaster()), aura->GetId(), aura->GetStackAmount() });
