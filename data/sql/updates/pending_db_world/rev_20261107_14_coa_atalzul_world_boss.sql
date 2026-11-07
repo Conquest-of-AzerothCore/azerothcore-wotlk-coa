@@ -92,3 +92,7 @@ UPDATE `creature` SET `position_x` = 3328.0198, `position_y` = -4888.4087, `posi
 WHERE `guid` = 9780108;
 UPDATE `creature` SET `position_x` = 3377.5986, `position_y` = -4873.0796, `position_z` = 159.2516
 WHERE `guid` = 9780109;
+
+-- Atal'zul and Zul'rogg are undead: both look ghostly (22650), as on Ascension.
+DELETE FROM `creature_template_addon` WHERE `entry` IN (67532, 67533);
+INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (67532, '22650'), (67533, '22650');
