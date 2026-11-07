@@ -15,7 +15,8 @@ from diff import IMPACT_FILE, diff_directories, write_impact
 from passives import passive_scenario
 from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, hit_parts, melee_scenario, records_of,
                   reference_hit_model, reference_melee_model)
-from procs import proc_entries, proc_plan, proc_scenario, proc_status_expectation, proc_unmodelled_expectation
+from procs import (proc_entries, proc_plan, proc_scenario, proc_status_expectation, proc_unmodelled_expectation,
+                   shares_aura)
 from profile import DBC_DIR, load_class_file
 from questions import QUESTIONS_FILE
 from stack import PASSES, STACK_CHECKS, STACK_DPS, STACK_KIND, stack_scenarios
@@ -130,7 +131,8 @@ def add_melee(writer: ManifestWriter):
 def add_proc(writer: ManifestWriter, entry: dict):
     class_file = writer.class_file
     aura, name = entry['aura'], entry['name']
-    key = scenario_key(class_file['name'], 'proc', aura)
+    key_parts = (aura, entry['proc_spell']) if shares_aura(class_file, entry) else (aura,)
+    key = scenario_key(class_file['name'], 'proc', *key_parts)
     if entry.get('status'):
         writer.add(key, 'proc', None, aura, [proc_status_expectation(entry)], name=name)
         return
@@ -141,7 +143,7 @@ def add_proc(writer: ManifestWriter, entry: dict):
         return
     for part in range(plan.parts):
         scenario, expectations = proc_scenario(class_file, entry, part)
-        writer.add(scenario_key(class_file['name'], 'proc', aura, 'part', part + 1), 'proc', None, aura,
+        writer.add(scenario_key(class_file['name'], 'proc', *key_parts, 'part', part + 1), 'proc', None, aura,
                    expectations, scenario, name=name)
 
 

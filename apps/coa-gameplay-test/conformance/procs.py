@@ -51,12 +51,16 @@ def wilson_interval(events: float, trials: float) -> tuple[float, float]:
     return centre - half, centre + half
 
 
-def proc_label(aura: int) -> str:
-    return f'{aura} proc_rate'
+def proc_label(aura: int, proc_spell: int | None = None) -> str:
+    return f'{aura} proc_rate' if proc_spell is None else f'{aura} proc_rate {proc_spell}'
 
 
 def proc_measurements(aura: int) -> dict[str, str]:
     return {part: f'{aura} proc {part}' for part in ('trials', 'events', 'attempts', 'aura')}
+
+
+def shares_aura(class_file: dict, entry: dict) -> bool:
+    return sum(1 for other in class_file.get('procs', []) if other['aura'] == entry['aura']) > 1
 
 
 def chance_of(values: Sequence, token: str) -> float | None:
@@ -308,7 +312,8 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
                           for reading in trial_readings(entry)]}
     if counts_charges(entry):
         model['charge_pool'] = charge_pool_label(aura)
-    expectation = Expectation(proc_label(aura), PROC_CHECK, aura, aura, None, entry['chance_token'],
+    label = proc_label(aura, entry['proc_spell']) if shares_aura(class_file, entry) else proc_label(aura)
+    expectation = Expectation(label, PROC_CHECK, aura, aura, None, entry['chance_token'],
                               f'{WILSON_RULE}; {trial_rule(entry)}{handler_note(entry)}', model)
     return timed(scenario, SETTLE_MS + plan.per_part * plan.attempt_ms + DRAIN_MS), [expectation]
 

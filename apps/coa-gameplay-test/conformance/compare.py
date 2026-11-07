@@ -1145,8 +1145,12 @@ def class_entry(manifest: dict, expectation: Expectation) -> dict:
         return {}
     name, key = section
     source = (expectation.model or {}).get('source')
-    return next((entry for entry in manifest['class_file'].get(name, []) if entry[key] == expectation.spell_id
-                 and (expectation.check != TALENT_DELTA or entry['source'] == source)), {})
+    candidates = [entry for entry in manifest['class_file'].get(name, []) if entry[key] == expectation.spell_id
+                 and (expectation.check != TALENT_DELTA or entry['source'] == source)]
+    if len(candidates) > 1 and expectation.check == PROC_CHECK:
+        proc_spell = (expectation.model or {}).get('proc_spell')
+        candidates = [entry for entry in candidates if entry.get('proc_spell') == proc_spell] or candidates
+    return candidates[0] if candidates else {}
 
 
 def entry_token(entry: str, description: str) -> str:
