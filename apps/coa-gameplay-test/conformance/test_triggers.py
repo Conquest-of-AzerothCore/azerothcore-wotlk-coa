@@ -494,21 +494,26 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             trigger_plan(CLASS_FILE, entry)
 
-    def test_disciplined_blows_and_lights_guidance_reset_health_before_every_benediction(self):
-        for aura in (DISCIPLINED_BLOWS, LIGHTS_GUIDANCE):
-            with self.subTest(aura=aura):
-                entry = templar_trigger(aura)
-                self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': 578276, 'target': 'self'})
-                self.assertEqual(entry['caster_health_pct'], 50)
-                scenario, [expectation] = trigger_scenario(CLASS_FILE, entry)
-                steps = scenario['steps']
-                casts = [index for index, step in enumerate(steps)
-                        if step['action'] == 'cast' and step['spell'] == 578276]
-                self.assertTrue(casts)
-                for index in casts:
-                    self.assertIn({'action': 'set_health', 'actor': 'caster', 'value': 5000, 'maximum': 10000},
-                                 steps[index - 2:index])
-                self.assertIn('the caster health set to 50% of max', expectation.rule)
+    def test_lights_guidance_resets_health_before_every_benediction(self):
+        entry = templar_trigger(LIGHTS_GUIDANCE)
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': 578276, 'target': 'self'})
+        self.assertEqual(entry['caster_health_pct'], 50)
+        scenario, [expectation] = trigger_scenario(CLASS_FILE, entry)
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps)
+                if step['action'] == 'cast' and step['spell'] == 578276]
+        self.assertTrue(casts)
+        for index in casts:
+            self.assertIn({'action': 'set_health', 'actor': 'caster', 'value': 5000, 'maximum': 10000},
+                         steps[index - 2:index])
+        self.assertIn('the caster health set to 50% of max', expectation.rule)
+
+    def test_disciplined_blows_stays_unmodelled_on_the_measured_double_count(self):
+        entry = templar_trigger(DISCIPLINED_BLOWS)
+        self.assertEqual(entry['status'], 'unmodelled')
+        self.assertIn('546 casts of 680398 for 273 Benediction casts', entry['reason'])
+        with self.assertRaises(ValueError):
+            trigger_plan(CLASS_FILE, entry)
 
     def test_devotion_of_khazgoroth_cites_its_native_proc_flags(self):
         entry = templar_trigger(DEVOTION_OF_KHAZGOROTH)
