@@ -6,7 +6,7 @@ import unittest
 
 from classes import class_spells
 from hits import (HIT_CHECKS, MAX_SCENARIO_MS, HitModel, Modifier, Unmodelled, WeaponProfile, casts_needed,
-                  expected_hit, hit_parts, hit_scenario, measured_hit_model, melee_scenario, records_of,
+                  expected_hit, hit_kind, hit_parts, hit_scenario, measured_hit_model, melee_scenario, records_of,
                   periodic_tick_readout, reference_caster, reference_hit_model, reference_melee_model,
                   rolled_values, scheduled_casts, weapon_profile)
 from mitigation import REFERENCE_TARGET, MitigationModel, TargetProfile, expected_mitigation
@@ -81,8 +81,12 @@ HOLY = 2
 SCHOOL_DAMAGE = 2
 HEAL = 10
 APPLY_AURA = 6
+WEAPON_PERCENT_DAMAGE = 31
 PERIODIC_DAMAGE = 3
 DUMMY = 3
+TEMPLE_GUARDIAN = 801165
+TEMPLE_GUARDIAN_LIVE_RANK = 803792
+CHASTISE_MAX_RANK = 503141
 Z_99 = 2.576
 
 
@@ -260,6 +264,18 @@ class ExpectedHitTest(unittest.TestCase):
                              NO_MITIGATION)
             self.assertTrue(raised.exception.reason)
 
+    def test_chastise_prefers_the_token_bearing_kind(self):
+        readout = Readout(values=[Displayed('${$m1+0+$sph*0.6+$AP*0.45}', 478.85, 0, 'flat')], unreadable=[])
+        kind, indexes = hit_kind([SCHOOL_DAMAGE, 0, WEAPON_PERCENT_DAMAGE], (0, 0, 0), readout=readout)
+        self.assertEqual((kind, indexes), ('school', [0]))
+
+    def test_several_token_bearing_kinds_still_raises(self):
+        readout = Readout(values=[Displayed('$s1', 10.0, 0, 'flat'), Displayed('$s3', 50.0, 2, 'percent')],
+                          unreadable=[])
+        with self.assertRaises(Unmodelled) as raised:
+            hit_kind([SCHOOL_DAMAGE, 0, WEAPON_PERCENT_DAMAGE], (0, 0, 0), readout=readout)
+        self.assertIn('effects of several hit models', raised.exception.reason)
+
 
 class CastsNeededTest(unittest.TestCase):
     def test_half_width_of_one_percent_at_99_percent_confidence(self):
@@ -426,6 +442,24 @@ class HitScenarioTest(unittest.TestCase):
         self.assertEqual(len(parts), 1)
         self.assertEqual(hit_expectation(parts[0][1]).model['parts'], 1)
         self.assertEqual(hit_scenario(self.templar, self.argent_blade, 3), parts[0])
+
+    def test_temple_guardian_shares_the_heal_token(self):
+        for rank_id in (TEMPLE_GUARDIAN, TEMPLE_GUARDIAN_LIVE_RANK):
+            with self.subTest(rank_id=rank_id):
+                model = reference_hit_model(self.templar, rank_id)
+                records = records_of(self.templar)
+                caster = reference_caster(self.templar)
+                readout = read_tooltip(records.dbc, rank_id, caster)
+                own = next(value for value in readout.values if value.effect_index == 1)
+                sides = records.field('Spell', rank_id, 'EffectDieSides[1]')
+                base = records.field('Spell', rank_id, 'EffectBasePoints[1]')
+                rolls = rolled_values(records, rank_id, caster, readout, [1])[1]
+                self.assertEqual(len(rolls), sides)
+                self.assertAlmostEqual(model.tooltip_mean, 2 * (sum(rolls) / len(rolls)), places=6)
+                self.assertEqual(model.kind, 'heal')
+                self.assertEqual(records.field('Spell', rank_id, 'EffectBasePoints[2]'), base)
+                self.assertEqual(records.field('Spell', rank_id, 'EffectDieSides[2]'), sides)
+                self.assertTrue(own.text.startswith('${$m2'))
 
     def test_divine_force_is_modelled(self):
         scenario, expectations = hit_scenario(self.templar, self.spells[DIVINE_FORCE], 1)

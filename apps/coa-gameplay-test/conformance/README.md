@@ -484,6 +484,18 @@ above), `cast`, and a wait of
 | `periodic_damage`, `periodic_heal` | 6, aura 3 or 8 | one tick; `hits_per_cast` is `Duration / EffectAmplitude` |
 | `triggered_weapon` | 6, aura 23 whose `EffectTriggerSpell` is a `weapon` hit | the `weapon` hit of the triggered spell, per tick; `hits_per_cast` is `Duration / EffectAmplitude` |
 
+`hit_kind` can face an effect without its own token, or several effects whose types belong to different kinds.
+Temple Guardian 801165/803792 charges an ally and heals both it and the caster for the same amount
+(`Effect[1]`/`Effect[2]` both `HEAL`, equal `EffectBasePoints`/`EffectDieSides`), but `Description[enUS]` carries one
+`$m2` token on effect 1 only. For a `heal` kind, an effect with no own token whose `Effect`/`EffectBasePoints`/
+`EffectDieSides` exactly match a sibling effect's (`matching_sibling`) borrows that sibling's reading and roll, so
+both effects contribute the same expected value; this is conservative on purpose (`SHARED_TOKEN_KINDS`), since
+`shown_values`/`value_range`/`fixed_value` stay pure functions of their own effect for every other kind and for
+rolled/periodic reads. Chastise 503141 has a `school` effect with a readable token (`$m1`) and a `WEAPON_PERCENT_DAMAGE`
+effect gated by an unparsed `$?s` conditional with no token of its own; `hit_kind` resolves several candidate kinds to
+one by keeping only the kinds that have an own token on one of their effects (`readout.values`), and raises `effects of
+several hit models` as before when more than one kind still has one (or none does).
+
 A periodic effect's token is a total when it grows with `$d` and shrinks with that effect's `$TN` in proportion
 (design D15): `period_reading(records, spell_id, caster, shown, effect)` reads the token text alone, then again with
 the rank's duration doubled, then with the effect's period doubled (`ScaledPeriod`), and returns `total` when the

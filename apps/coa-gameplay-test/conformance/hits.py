@@ -135,7 +135,8 @@ def weapon_profile(class_file: dict) -> WeaponProfile | None:
 
 
 def hit_kind(effects: Sequence[int], aura_names: Sequence[int],
-             triggered: Mapping[int, Triggered] | None = None) -> tuple[str, list[int]]:
+             triggered: Mapping[int, Triggered] | None = None,
+             readout: Readout | None = None) -> tuple[str, list[int]]:
     triggered = triggered or {}
     kinds: dict[str, list[int]] = {}
     for index, effect in enumerate(effects):
@@ -154,7 +155,16 @@ def hit_kind(effects: Sequence[int], aura_names: Sequence[int],
     if not kinds:
         raise Unmodelled(f'{NO_HIT_EFFECT} among effects {list(effects)}')
     if len(kinds) > 1:
-        raise Unmodelled(f'effects of several hit models: {sorted(kinds)}')
+        tokened = kinds
+        if readout is not None:
+            own_tokens = {value.effect_index for value in readout.values}
+            filtered = {name: indexes for name, indexes in kinds.items()
+                       if own_tokens.intersection(indexes)}
+            if len(filtered) == 1:
+                tokened = filtered
+        if len(tokened) > 1:
+            raise Unmodelled(f'effects of several hit models: {sorted(kinds)}')
+        kinds = tokened
     kind, indexes = next(iter(kinds.items()))
     if kind in TICKING_KINDS and len(indexes) > 1:
         raise Unmodelled(f'several periodic effects: {indexes}')
@@ -247,16 +257,40 @@ def rolled_hit(values: Sequence[float]) -> Distribution:
                   lambda index: math.floor(values[index]))
 
 
-def effect_hit(readout: Readout, indexes: list[int],
-               rolls: Mapping[int, Sequence[float]]) -> tuple[Distribution, float, list[str]]:
+SHARED_TOKEN_KINDS = frozenset({'heal'})
+
+
+def matching_sibling(records: Records, rank_id: int, index: int) -> int | None:
+    kind = records.field('Spell', rank_id, f'Effect[{index}]')
+    base = records.field('Spell', rank_id, f'EffectBasePoints[{index}]')
+    sides = records.field('Spell', rank_id, f'EffectDieSides[{index}]')
+    for sibling in EFFECTS:
+        if sibling == index:
+            continue
+        if (records.field('Spell', rank_id, f'Effect[{sibling}]') == kind
+                and records.field('Spell', rank_id, f'EffectBasePoints[{sibling}]') == base
+                and records.field('Spell', rank_id, f'EffectDieSides[{sibling}]') == sides):
+            return sibling
+    return None
+
+
+def effect_hit(readout: Readout, indexes: list[int], rolls: Mapping[int, Sequence[float]], *, kind: str = '',
+              records: Records | None = None, rank_id: int = 0) -> tuple[Distribution, float, list[str]]:
     distribution: Distribution = {0: 1.0}
     tooltip_mean = 0.0
     texts: list[str] = []
     for index in indexes:
-        low, high, shown = value_range(readout, index)
-        if index in rolls:
-            distribution = summed(distribution, rolled_hit(rolls[index]))
-            tooltip_mean += sum(rolls[index]) / len(rolls[index])
+        source = index
+        has_own = any(value.effect_index == index for value in readout.values)
+        if not has_own and kind in SHARED_TOKEN_KINDS and records is not None:
+            sibling = matching_sibling(records, rank_id, index)
+            if sibling is not None:
+                source = sibling
+        low, high, shown = value_range(readout, source)
+        key = index if index in rolls else source if source in rolls else None
+        if key is not None:
+            distribution = summed(distribution, rolled_hit(rolls[key]))
+            tooltip_mean += sum(rolls[key]) / len(rolls[key])
         else:
             distribution = summed(distribution, effect_roll(low, high))
             tooltip_mean += (low + high) / 2
@@ -316,15 +350,17 @@ def mitigated(distribution: Distribution, mitigation: MitigationModel) -> Distri
 def expected_hit(readout: Readout, spell_effects: Sequence[int], caster: CasterStats, weapon: WeaponProfile | None,
                  mitigation: MitigationModel, *, aura_names: Sequence[int] = (), modifiers: Sequence[Modifier] = (),
                  ticks: int = 1, rolls: Mapping[int, Sequence[float]] | None = None,
-                 triggered: Mapping[int, Triggered] | None = None) -> HitModel:
+                 triggered: Mapping[int, Triggered] | None = None, records: Records | None = None,
+                 rank_id: int = 0) -> HitModel:
     names = tuple(aura_names) or (0,) * len(spell_effects)
-    kind, indexes = hit_kind(spell_effects, names, triggered)
+    kind, indexes = hit_kind(spell_effects, names, triggered, readout)
     if kind == 'weapon':
         distribution, tooltip_mean, texts = weapon_hit(readout, spell_effects, caster, weapon)
     elif kind == TRIGGERED_WEAPON:
         distribution, tooltip_mean, texts = triggered_hit(readout, triggered[indexes[0]], caster, weapon)
     else:
-        distribution, tooltip_mean, texts = effect_hit(readout, indexes, rolls or {})
+        distribution, tooltip_mean, texts = effect_hit(readout, indexes, rolls or {}, kind=kind, records=records,
+                                                        rank_id=rank_id)
         if kind in PERIODIC_KINDS.values() and len(distribution) > 1:
             raise Unmodelled('a periodic amount is rolled once per aura (AuraEffect::CalculateAmount) and its ticks '
                              'share it, so its ticks are not independent hits')
@@ -472,12 +508,12 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
     if unfit:
         raise Unmodelled(unfit)
     triggered = triggered_spells(records, rank_id, facts)
-    kind, indexes = hit_kind(facts.effects, facts.aura_names, triggered)
+    readout = read_tooltip(records.dbc, rank_id, caster)
+    kind, indexes = hit_kind(facts.effects, facts.aura_names, triggered, readout)
     hit_spell = triggered[indexes[0]].spell_id if kind == TRIGGERED_WEAPON else rank_id
     school_mask = records.field('Spell', hit_spell, 'SchoolMask')
     ticks, duration = periodic_ticks(records, rank_id, indexes[0]) if kind in TICKING_KINDS else (1, 0)
     mitigation = NO_MITIGATION if kind in HEAL_KINDS else mitigation_for(school_mask, target, caster.level)
-    readout = read_tooltip(records.dbc, rank_id, caster)
     shown = readout
     if kind in PERIODIC_KINDS.values():
         shown = periodic_tick_readout(records, rank_id, caster, readout, indexes[0])
@@ -485,7 +521,7 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
     rolls = {} if kind in WEAPON_KINDS else rolled_values(records, rank_id, caster, shown, indexes)
     model = expected_hit(shown, facts.effects, caster, weapon_profile(class_file), mitigation,
                          aura_names=facts.aura_names, modifiers=modifiers, ticks=ticks, rolls=rolls,
-                         triggered=triggered)
+                         triggered=triggered, records=records, rank_id=rank_id)
     return RankHit(model, readout, facts, school_mask, indexes, duration, hit_spell)
 
 
