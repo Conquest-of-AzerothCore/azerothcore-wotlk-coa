@@ -740,8 +740,8 @@ void TestWorldEntryResend()
     uint32 const charges = player.ChargeSnapshots;
     uint32 const echoes = player.EchoSnapshots;
     std::size_t const addonLists = session.Sent.size();
-    WorldPacket poll(0x0745, 0);
-    Check(!Receive(session, poll), "other extension notices stay consumed");
+    WorldPacket notice(0x0749, 0);
+    Check(!Receive(session, notice), "unclaimed extension notices stay consumed");
     service.OnPlayerUpdate(&player, 1);
     Check(player.ChargeSnapshots == charges && player.EchoSnapshots == echoes && session.Sent.size() == addonLists,
         "other extension notices resend nothing");

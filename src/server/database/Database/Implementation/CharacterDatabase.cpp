@@ -994,6 +994,71 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_CLAIM_MANASTORM_FLOOR_XP,
         "UPDATE character_manastorm_pending_experience SET base_xp = base_xp - ? WHERE guid = ?", CONNECTION_ASYNC);
 #endif
+    PrepareStatement(CHAR_SEL_PLAYER_POLLS,
+        "SELECT "
+        "q.id,q.question_type,q.allow_change,q.min_level,q.state,q.expires_at,q.title,q.question_text,"
+        "q.feedback_prompt,q.context_text,q.wire_04,q.wire_50,q.wire_54,q.wire_a8,v.choice_id,v.feedback,"
+        "v.request_token,c.id,c.choice_text "
+        "FROM coa_player_poll q LEFT JOIN coa_player_poll_vote v ON v.question_id=q.id AND v.account_id=? "
+        "LEFT JOIN coa_player_poll_choice c ON c.question_id=q.id WHERE q.state=1 AND (q.expires_at=0 OR "
+        "q.expires_at>UNIX_TIMESTAMP()) AND q.min_level<=? AND q.wire_04 IS NOT NULL AND q.wire_50 IS NOT "
+        "NULL AND q.wire_54 IS NOT NULL AND q.wire_a8 IS NOT NULL ORDER BY q.id,c.id LIMIT 31", CONNECTION_ASYNC);
+
+    PrepareStatement(CHAR_SEL_PLAYER_POLL,
+        "SELECT "
+        "q.id,q.question_type,q.allow_change,q.min_level,q.state,q.expires_at,q.title,q.question_text,"
+        "q.feedback_prompt,q.context_text,q.wire_04,q.wire_50,q.wire_54,q.wire_a8,v.choice_id,v.feedback,"
+        "v.request_token,c.id,c.choice_text "
+        "FROM coa_player_poll q LEFT JOIN coa_player_poll_vote v ON v.question_id=q.id AND v.account_id=? "
+        "LEFT JOIN coa_player_poll_choice c ON c.question_id=q.id WHERE q.id=? ORDER BY c.id", CONNECTION_BOTH);
+
+    PrepareStatement(CHAR_SAVE_PLAYER_POLL_VOTE,
+        "INSERT INTO coa_player_poll_vote "
+        "(question_id,account_id,character_guid,choice_id,feedback,can_change,request_token,submitted_at,updated_at) "
+        "SELECT q.id,?,?,NULLIF(?,0),?,q.allow_change,?,UNIX_TIMESTAMP(),UNIX_TIMESTAMP() FROM "
+        "coa_player_poll q LEFT JOIN coa_player_poll_choice c ON c.question_id=q.id AND c.id=? WHERE q.id=? "
+        "AND q.state=1 AND (q.expires_at=0 OR q.expires_at>UNIX_TIMESTAMP()) AND q.min_level<=? AND "
+        "q.wire_04 IS NOT NULL AND q.wire_50 IS NOT NULL AND q.wire_54 IS NOT NULL AND q.wire_a8 IS NOT NULL "
+        "AND ((?<>0 AND c.id IS NOT NULL) OR (?=0 AND q.question_type=4 AND OCTET_LENGTH(?)>0)) ON DUPLICATE "
+        "KEY UPDATE request_token=IF(can_change=1 AND (NOT(choice_id<=>VALUES(choice_id)) OR "
+        "BINARY feedback<>BINARY VALUES(feedback)),VALUES(request_token),request_token), "
+        "updated_at=IF(request_token=VALUES(request_token),VALUES(updated_at),updated_at), "
+        "character_guid=IF(request_token=VALUES(request_token),VALUES(character_guid),character_guid), "
+        "choice_id=IF(request_token=VALUES(request_token),VALUES(choice_id),choice_id), "
+        "feedback=IF(request_token=VALUES(request_token),VALUES(feedback),feedback)", CONNECTION_ASYNC);
+
+    PrepareStatement(CHAR_INS_PLAYER_POLL,
+        "INSERT IGNORE INTO coa_player_poll "
+        "(id,question_type,allow_change,min_level,title,question_text,feedback_prompt,context_text) VALUES "
+        "(?,?,?,?,?,?,?,?)", CONNECTION_SYNCH);
+
+    PrepareStatement(CHAR_INS_PLAYER_POLL_CHOICE,
+        "INSERT IGNORE INTO coa_player_poll_choice (id,choice_text,question_id) SELECT ?,?,q.id FROM "
+        "coa_player_poll q WHERE q.id=? AND q.state=0 AND (SELECT COUNT(*) FROM coa_player_poll_choice c "
+        "WHERE c.question_id=q.id)<10", CONNECTION_SYNCH);
+
+    PrepareStatement(CHAR_PUBLISH_PLAYER_POLL,
+        "UPDATE coa_player_poll SET state=1,expires_at=?,published_at=UNIX_TIMESTAMP() WHERE id=? AND "
+        "state=0 AND (SELECT n FROM (SELECT COUNT(*) AS n FROM coa_player_poll WHERE state=1 AND "
+        "(expires_at=0 OR expires_at>UNIX_TIMESTAMP())) AS active_polls)<3", CONNECTION_SYNCH);
+
+    PrepareStatement(CHAR_CLOSE_PLAYER_POLL,
+        "UPDATE coa_player_poll SET state=2,closed_at=UNIX_TIMESTAMP() WHERE id=? AND state<>2", CONNECTION_SYNCH);
+
+    PrepareStatement(CHAR_LIST_PLAYER_POLLS,
+        "SELECT q.id,q.title,q.state,q.question_type,q.min_level,q.expires_at,COUNT(v.account_id),(q.wire_04 "
+        "IS NOT NULL AND q.wire_50 IS NOT NULL AND q.wire_54 IS NOT NULL AND q.wire_a8 IS NOT NULL) FROM "
+        "coa_player_poll q LEFT JOIN coa_player_poll_vote v ON v.question_id=q.id GROUP BY q.id ORDER BY "
+        "q.id DESC LIMIT 50", CONNECTION_SYNCH);
+
+    PrepareStatement(CHAR_PLAYER_POLL_RESULTS,
+        "SELECT COALESCE(choice_id,0),COUNT(*) FROM coa_player_poll_vote WHERE question_id=? GROUP BY "
+        "choice_id ORDER BY choice_id", CONNECTION_SYNCH);
+
+    PrepareStatement(CHAR_PLAYER_POLL_COMMENTS,
+        "SELECT account_id,feedback FROM coa_player_poll_vote WHERE question_id=? AND feedback<>'' ORDER BY "
+        "updated_at DESC,account_id LIMIT 20", CONNECTION_SYNCH);
+
 }
 
 CharacterDatabaseConnection::CharacterDatabaseConnection(MySQLConnectionInfo& connInfo) : MySQLConnection(connInfo)
