@@ -88,6 +88,7 @@ struct Options
     std::unordered_set<uint32> highRiskElites;
     unsigned eliteEpicPercent = DefaultEliteEpicPercent;
     float eliteHeroicUpgradePercent = DefaultEliteHeroicUpgradePercent;
+    float highRiskEliteExtraKeyPercent = DefaultHighRiskEliteExtraKeyPercent;
     unsigned endgameRareMinRequiredLevel = DefaultEndgameRareMinRequiredLevel;
     HiddenCacheChances rareHiddenCache = DefaultRareHiddenCache;
     HiddenCacheChances epicHiddenCache = DefaultEpicHiddenCache;
@@ -474,6 +475,8 @@ private:
             "Bloodforged.EndgameRareMinRequiredLevel", DefaultEndgameRareMinRequiredLevel));
         options.eliteHeroicUpgradePercent = sConfigMgr->GetOption<float>("Bloodforged.EliteHeroicUpgradePercent",
             DefaultEliteHeroicUpgradePercent);
+        options.highRiskEliteExtraKeyPercent = sConfigMgr->GetOption<float>(
+            "Bloodforged.HighRiskEliteExtraKeyPercent", DefaultHighRiskEliteExtraKeyPercent);
         if (!ReadNumbers("Bloodforged.EpicMaxItemLevelByStage", options.epicCaps)
             || !ReadRareDrop("Rare", options.rare) || !ReadRareDrop("RareElite", options.rareElite)
             || !ReadHiddenCache("Bloodforged.RareHiddenCachePercent", options.rareHiddenCache)
@@ -486,6 +489,7 @@ private:
             || std::any_of(options.ephemeralKeyPercent.begin(), options.ephemeralKeyPercent.end(),
                 [](float percent) { return !(percent >= 0.0f) || percent > 100.0f; })
             || options.eliteEpicPercent > 100 || !(options.eliteHeroicUpgradePercent >= 0.0f)
+            || !(options.highRiskEliteExtraKeyPercent >= 0.0f) || options.highRiskEliteExtraKeyPercent > 100.0f
             || options.eliteHeroicUpgradePercent > 100.0f)
         {
             LOG_ERROR("server.loading", "Bloodforged disabled: invalid item level caps or rare mob settings");
@@ -679,9 +683,11 @@ public:
         LevelPools const& pools = current->pools[targetLevel][endgame];
         uint32 const rank = creature->GetCreatureTemplate()->rank;
         bool const highRiskElite = current->options.highRiskElites.contains(creature->GetEntry());
-        if (roll_chance_f(current->options.ephemeralKeyPercent[rank == CREATURE_ELITE_RAREELITE ? 3
-            : rank == CREATURE_ELITE_RARE ? 2 : highRiskElite ? 1 : 0]))
-            AddRareMobItem(*loot, EphemeralKey);
+        uint32 keys = roll_chance_f(current->options.ephemeralKeyPercent[rank == CREATURE_ELITE_RAREELITE ? 3
+            : rank == CREATURE_ELITE_RARE ? 2 : highRiskElite ? 1 : 0]) ? 1 : 0;
+        if (highRiskElite && !IsRare(rank) && roll_chance_f(current->options.highRiskEliteExtraKeyPercent))
+            ++keys;
+        AddRareMobItem(*loot, EphemeralKey, keys);
         Options const& options = current->options;
         AddMarks(*loot, options.mobMarks[rank == CREATURE_ELITE_RAREELITE ? 3 : rank == CREATURE_ELITE_RARE ? 2
             : highRiskElite ? 1 : 0], options);

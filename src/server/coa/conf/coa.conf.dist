@@ -677,9 +677,18 @@ Bloodforged.EpicHiddenCachePercent = "5 15"
 #                     them, as four values: normal (and every other elite), High-Risk elite
 #                     (Bloodforged.HighRiskEliteEntries), rare, rare elite.
 #                     Decimals allowed. Not scaled by any drop rate multiplier.
-#        Default:     "3 15 75 100"
+#        Default:     "3 40 75 100"
 
-Bloodforged.EphemeralKeyPercent = "3 15 75 100"
+Bloodforged.EphemeralKeyPercent = "3 40 75 100"
+
+#    Bloodforged.HighRiskEliteExtraKeyPercent
+#        Description: Percent chance for one more Ephemeral Key from a High-Risk elite
+#                     (Bloodforged.HighRiskEliteEntries), rolled on its own next to the High-Risk elite
+#                     value of Bloodforged.EphemeralKeyPercent, so such a kill can give 0, 1 or 2 keys.
+#                     Decimals allowed. Not scaled by any drop rate multiplier.
+#        Default:     5
+
+Bloodforged.HighRiskEliteExtraKeyPercent = 5
 
 #    Bloodforged.DropRate.Rare
 #    Bloodforged.DropRate.Epic

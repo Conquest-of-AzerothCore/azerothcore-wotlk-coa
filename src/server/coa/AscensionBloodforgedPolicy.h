@@ -73,7 +73,8 @@ constexpr MarkDrop EliteMobMarks = {0, 8.0f, 0, 0.5f};
 constexpr MarkDrop RareMobMarks = {1, 10.0f, 0, 10.0f};
 constexpr MarkDrop RareEliteMobMarks = {2, 10.0f, 0, 50.0f};
 constexpr std::array<MarkDrop, 3> HiddenCacheMarks = {{{1, 10.0f, 0, 0.0f}, {1, 60.0f, 0, 20.0f}, {2, 50.0f, 1, 20.0f}}};
-constexpr std::array<float, 4> DefaultEphemeralKeyPercent = {3.0f, 15.0f, 75.0f, 100.0f};
+constexpr std::array<float, 4> DefaultEphemeralKeyPercent = {3.0f, 40.0f, 75.0f, 100.0f};
+constexpr float DefaultHighRiskEliteExtraKeyPercent = 5.0f;
 
 struct HiddenCacheChances
 {
