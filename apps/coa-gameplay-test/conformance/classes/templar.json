@@ -857,7 +857,10 @@
       "target_aura": 803237,
       "debt_aura": 803149,
       "breaker_spell": 48123,
-      "striker_entry": 36
+      "striker_entry": 36,
+      "mechanism_file": "AscensionTemplar.cpp",
+      "override_file": "AscensionTemplarContracts.cpp",
+      "reduce_function": "ReduceDebt"
     }
   ]
 }

@@ -6,7 +6,7 @@ from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, UNMODELLED, Unmo
                   records_of, scenario_shell, timed)
 from procs import ATTACK, CAST, ENTRY_STATUSES, PART_BUDGET_MS, cast_interval, swing_interval
 from profile import CASTER, SETTLE_MS, measurement, player_fixture
-from values import ALLY, CHARGE_OFFSET_YD, TARGET, Expectation, facts_of
+from values import ALLY, CHARGE_OFFSET_YD, TARGET, Expectation, facts_of, fixture_health_step
 
 TRIGGER_CHECK = 'trigger_count'
 MISSED_TRIGGER_RATE = 0.025
@@ -15,7 +15,6 @@ TRIGGER_TRIALS = math.ceil(math.log(FALSE_OK_RISK) / math.log(1 - MISSED_TRIGGER
 BASELINE_ATTEMPTS = 20
 EVENT_TOLERANCE = 1
 SELF = 'self'
-ALLY_HEALTH_MAX = 10000
 TRIGGER_TARGETS = frozenset({SELF, TARGET, ALLY})
 OBSERVE_METRICS = frozenset({'spell_cast_count', 'spell_energize_count', 'aura_apply_count'})
 OBSERVE_ACTORS = {CASTER: CASTER, 'target': TARGET}
@@ -114,11 +113,6 @@ def count_step(label: str, metric: str, spell: int, actor: str = CASTER) -> dict
     return measurement(label, actor, metric, spell=spell, **fields)
 
 
-def health_step(actor: str, pct: int) -> dict:
-    value = (pct * ALLY_HEALTH_MAX) // 100
-    return {'action': 'set_health', 'actor': actor, 'value': value, 'maximum': ALLY_HEALTH_MAX}
-
-
 def attempt_fixtures(entry: dict) -> list[dict]:
     fixtures = [{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}] \
         if entry['trigger'].get('target') == ALLY else []
@@ -127,9 +121,9 @@ def attempt_fixtures(entry: dict) -> list[dict]:
     fixtures += [{'action': 'set_aura', 'actor': CASTER, 'spell': aura['spell'], 'stacks': aura['stacks']}
                 for aura in entry.get('attempt_auras', [])]
     if entry.get('caster_health_pct') is not None:
-        fixtures.append(health_step(CASTER, entry['caster_health_pct']))
+        fixtures.append(fixture_health_step(CASTER, entry['caster_health_pct']))
     if entry.get('ally_health_pct') is not None:
-        fixtures.append(health_step(ALLY, entry['ally_health_pct']))
+        fixtures.append(fixture_health_step(ALLY, entry['ally_health_pct']))
     return fixtures
 
 

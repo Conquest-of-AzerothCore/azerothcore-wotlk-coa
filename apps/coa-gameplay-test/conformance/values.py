@@ -166,6 +166,14 @@ def required_target_health_steps(facts: RankFacts, target: str = TARGET) -> list
             {'action': 'wait', 'ms': TARGET_HEALTH_WAIT_MS}]
 
 
+FIXTURE_MAX_HEALTH = 10000
+
+
+def fixture_health_step(actor: str, pct: int) -> dict:
+    value = (pct * FIXTURE_MAX_HEALTH) // 100
+    return {'action': 'set_health', 'actor': actor, 'value': value, 'maximum': FIXTURE_MAX_HEALTH}
+
+
 def first_aura_effect(facts: RankFacts) -> int | None:
     return next((effect for effect in EFFECTS if facts.effects[effect] and facts.aura_names[effect]), None)
 

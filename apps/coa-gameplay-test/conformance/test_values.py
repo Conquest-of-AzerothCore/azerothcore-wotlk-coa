@@ -12,9 +12,9 @@ from profile import (CASTER, CLASSES_DIR, armed, base_steps, caster_stats_from, 
                     unfit_reason)
 from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, write_fixture
 from tooltip import CasterStats, DataSet, Records, read_tooltip
-from values import (AURA_STATE_HEALTHLESS_35_PERCENT, CHECKS, TARGET, UNMEASURABLE, UNREADABLE, Expectation,
-                    Unmodelled, facts_of, foreign_effect, periodic_reason, required_target_health_steps,
-                    sample_labels, value_scenario)
+from values import (AURA_STATE_HEALTHLESS_35_PERCENT, CHECKS, FIXTURE_MAX_HEALTH, TARGET, UNMEASURABLE, UNREADABLE,
+                    Expectation, Unmodelled, facts_of, fixture_health_step, foreign_effect, periodic_reason,
+                    required_target_health_steps, sample_labels, value_scenario)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -508,6 +508,16 @@ class RequiredTargetHealthStepsTest(unittest.TestCase):
         with self.assertRaises(Unmodelled) as raised:
             required_target_health_steps(facts)
         self.assertIn('target aura state 99 has no scenario fixture', raised.exception.reason)
+
+
+class FixtureHealthStepTest(unittest.TestCase):
+    def test_sets_health_to_a_percentage_of_the_shared_fixture_maximum(self):
+        self.assertEqual(fixture_health_step('ally', 50),
+                         {'action': 'set_health', 'actor': 'ally', 'value': FIXTURE_MAX_HEALTH // 2,
+                          'maximum': FIXTURE_MAX_HEALTH})
+
+    def test_the_actor_is_used_verbatim(self):
+        self.assertEqual(fixture_health_step(CASTER, 100)['actor'], CASTER)
 
 
 if __name__ == '__main__':

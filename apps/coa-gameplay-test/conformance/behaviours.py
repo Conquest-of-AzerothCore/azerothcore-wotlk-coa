@@ -6,8 +6,8 @@ from hits import MAIN_HAND, aura_modifiers, creature_fixture
 from procs import swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import COLOR_CODE, Records
-from values import (CAST_MARGIN_MS, Expectation, TARGET, dataset, facts_of, required_aura_steps,
-                    required_target_health_steps)
+from values import (CAST_MARGIN_MS, Expectation, TARGET, dataset, facts_of, fixture_health_step,
+                    required_aura_steps, required_target_health_steps)
 
 BEHAVIOUR_COUNT = 'behaviour_count'
 BEHAVIOUR_RATIO = 'behaviour_ratio'
@@ -310,9 +310,6 @@ def leech_ratio_spec(entry: dict) -> LeechRatioSpec:
                           entry['expected_before'], entry['expected_after'])
 
 
-HEALTH_RATIO_MAX_HEALTH = 10000
-
-
 @dataclass(frozen=True)
 class HealthRatioSpec:
     spell: int
@@ -326,11 +323,6 @@ def health_ratio_label(spec: HealthRatioSpec, health_pct: int, moment: str) -> s
     return f'{spec.spell} {health_pct} script_spell_damage_taken {moment}'
 
 
-def health_ratio_set_health_step(health_pct: int) -> dict:
-    value = (health_pct * HEALTH_RATIO_MAX_HEALTH) // 100
-    return {'action': 'set_health', 'actor': CASTER, 'value': value, 'maximum': HEALTH_RATIO_MAX_HEALTH}
-
-
 def health_threshold_ratio_scenario(class_file: dict, spec: HealthRatioSpec) -> tuple[dict, list[Expectation]]:
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'ratio', spec.quote, spec.levels[0][1])
@@ -338,7 +330,7 @@ def health_threshold_ratio_scenario(class_file: dict, spec: HealthRatioSpec) -> 
     def measure(moment: str) -> list[dict]:
         steps = []
         for health_pct, _ in spec.levels:
-            steps.append(health_ratio_set_health_step(health_pct))
+            steps.append(fixture_health_step(CASTER, health_pct))
             steps.append(measurement(health_ratio_label(spec, health_pct, moment), CASTER,
                                       'script_spell_damage_taken', spell=spec.probe_spell, target=TARGET))
         return steps
@@ -627,6 +619,9 @@ class DurationSpec:
     debt_aura: int
     breaker_spell: int
     striker_entry: int
+    mechanism_file: str
+    override_file: str
+    reduce_function: str
 
 
 def duration_label(spec: DurationSpec, moment: str) -> str:
@@ -676,13 +671,13 @@ def duration_scenario(class_file: dict, spec: DurationSpec) -> tuple[dict, list[
         'contract': f'A striker (creature entry {spec.striker_entry}) casts {spec.breaker_spell} directly at the '
                     f'caster, who carries {spec.debt_aura} (the real "delay 40% of direct damage taken" shield), '
                     f'so the real damage-absorb hook applies a nonzero debt to {spec.target_aura} and resets its '
-                    f'duration to its DBC maximum (`AscensionTemplar.cpp` `Delay`), rather than `set_aura`-ing '
+                    f'duration to its DBC maximum (`{spec.mechanism_file}` `Delay`), rather than `set_aura`-ing '
                     f'{spec.target_aura} directly: a stacks-only fixture leaves its debt amount at 0 (the '
-                    f'SPELL_AURA_PERIODIC_DUMMY `BasePoints -1` override in `AscensionTemplarContracts.cpp`), and '
-                    f'a zero debt makes `ReduceDebt`\'s own `reduction >= amount` branch remove the aura outright '
-                    f'on the very first crit regardless of whether Sacred Oath\'s duration claim holds, which '
-                    f'would misjudge every run as `alert` for the wrong reason (confirmed by an exploratory '
-                    f'`coa-verify --ram` run of the `set_aura`-only shape). A single forced melee crit '
+                    f'SPELL_AURA_PERIODIC_DUMMY `BasePoints -1` override in `{spec.override_file}`), and '
+                    f'a zero debt makes `{spec.reduce_function}`\'s own `reduction >= amount` branch remove the '
+                    f'aura outright on the very first crit regardless of whether {spec.name}\'s duration claim '
+                    f'holds, which would misjudge every run as `alert` for the wrong reason (confirmed by an '
+                    f'exploratory `coa-verify --ram` run of the `set_aura`-only shape). A single forced melee crit '
                     f'({FORCED_CRIT_RATING} melee_crit_rating on the scenario\'s own player fixture, not the class '
                     f'file\'s shared ratings) against a plain dummy then reads {spec.target_aura}\'s '
                     f'aura_duration_ms before and after a {CAST_SETTLE_MS} ms wait: starting an attack lands its '
@@ -705,7 +700,8 @@ def duration_scenario(class_file: dict, spec: DurationSpec) -> tuple[dict, list[
 
 def duration_spec(entry: dict) -> DurationSpec:
     return DurationSpec(entry['spell'], entry['name'], entry['quote'], entry['expected_ms'], entry['target_aura'],
-                        entry['debt_aura'], entry['breaker_spell'], entry['striker_entry'])
+                        entry['debt_aura'], entry['breaker_spell'], entry['striker_entry'],
+                        entry['mechanism_file'], entry['override_file'], entry['reduce_function'])
 
 
 def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
