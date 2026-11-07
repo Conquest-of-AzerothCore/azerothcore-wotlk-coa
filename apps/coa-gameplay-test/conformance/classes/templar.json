@@ -540,5 +540,27 @@
     {"name": "c5_retribution", "talents": [707391]},
     {"name": "c6_legacy_purefocus", "talents": [806522, 705253, 707852]},
     {"name": "c7_scarlet", "talents": [301065, 520812, 806525]}
+  ],
+  "behaviours": [
+    {
+      "spell": 525024, "name": "Scarlet Judicator", "kind": "count",
+      "quote": "strikes 2 additional enemies near the primary target", "expected": 2,
+      "target_rank": 807805,
+      "radius": 10.0,
+      "radius_reason": "Divine Force 807805 DmgClass 2 (SPELL_DAMAGE_CLASS_MELEE, apps/coa-dbc record); its school-damage effect 2 targets TARGET_UNIT_TARGET_ENEMY, routed through Spell::SelectImplicitTargetObjectTargets, which always calls SelectImplicitChainTargets (src/server/game/Spells/Spell.cpp:1905-1920); Spell::SearchChainTargets uses a 10y jump radius for SPELL_DAMAGE_CLASS_MELEE when no per-spell JumpDistance override exists (Spell.cpp:2200-2213); Scarlet Judicator's own effect 0 is ADD_FLAT_MODIFIER on SPELLMOD_JUMP_TARGETS (op 17, EffectMiscValue[0]=17), which SelectImplicitChainTargets applies to Divine Force's ChainTarget via Player::ApplySpellMod (Spell.cpp:1921-1923)."
+    },
+    {
+      "spell": 712437, "name": "Justice", "kind": "count",
+      "quote": "strikes 1 additional nearby target", "expected": 1,
+      "target_rank": 560116,
+      "radius": 8.0,
+      "metric": "aura",
+      "radius_reason": "scripted hook templar_casts::OnSpellBeforeEffects (src/server/coa/AscensionTemplarAbilities.cpp:95-102): casting Interdict 560116 with Justice 712437 known adds exactly one unit from Nearby(primary, 8.0f) as an extra target via AddUnitTargetForScript; the DBC's own effect 1 (PROC_TRIGGER_SPELL -> 712364, Sacred Oath's trigger) does not implement this sentence and is not used here. Interdict's own effect is SPELL_AURA_MOD_SILENCE (no school-damage effect), so the metric is the silence aura's presence on each dummy (aura 560116, caster CASTER), not spell_damage_count."
+    },
+    {
+      "spell": 705268, "name": "Final Prayer", "kind": "ratio",
+      "quote": "Doubles the healing done to you", "expected": 2.0,
+      "targets": [[801478, "Testament of Faith"]]
+    }
   ]
 }

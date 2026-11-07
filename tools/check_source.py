@@ -78,6 +78,7 @@ SUITES = {
                      [CONFORMANCE + 'test_hits.py'], [CONFORMANCE + 'test_compare.py'],
                      [CONFORMANCE + 'test_procs.py'], [CONFORMANCE + 'test_stack.py'],
                      [CONFORMANCE + 'test_diff.py'], [CONFORMANCE + 'test_passives.py'],
+                     [CONFORMANCE + 'test_behaviours.py'],
                      [CONFORMANCE + 'test_triggers.py'], [CONFORMANCE + 'test_questions.py'],
                      [CONFORMANCE + 'test_coverage.py']],
     },

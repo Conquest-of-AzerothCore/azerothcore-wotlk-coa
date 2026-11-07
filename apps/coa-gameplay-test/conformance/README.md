@@ -779,6 +779,80 @@ cast, 20 baseline trials and no baseline event in each entry): nine entries are 
 
 Both entries carry a `question`, so their alerts go to the "Server behaviour to confirm" section of `questions.md`.
 
+## Behaviour scenarios
+
+A `behaviours` entry of the class file is a passive whose tooltip states a behaviour in **prose**, with no `$`
+token: "2 additional enemies," "an additional copy," "doubles the healing," "always triggers," "refreshes the
+duration." Phase 2's design explicitly parked these as a non-goal of the token method (ADR 0011). This section
+crosses that line on purpose, for a bounded, named list of spells, and never becomes a general prose parser.
+
+The expected value is still DBC-derived: it is the literal number or count written in `Description[enUS]`, quoted
+verbatim in the scenario's `rule`, never invented or rounded to "look right." Every `Expectation` built from a
+`behaviours` entry uses a check name distinct from `effect_value`/`aura_amount`/`passive_delta`, so a reader of
+`verdicts.json` can always tell a prose-sourced result from a token-sourced one, even though both ultimately
+produce the same status vocabulary (`ok`, `alert`, `unmodelled`, `measured`, `ambiguous_tooltip`,
+`insufficient_trials`, `unmeasured`; no new status is invented):
+
+| Check | Claim |
+|---|---|
+| `behaviour_count` | a count ("N additional targets," "an additional copy" = +1, summon counts) |
+| `behaviour_ratio` | a ratio ("doubles the healing" = x2, "twice the damage" = x2) |
+| `behaviour_duration` | a duration refresh or reduction |
+| `behaviour_trigger` | a scripted "always fires" claim not reachable through `triggers.py`'s native `EffectTriggerSpell` path |
+
+Every `Expectation.rule` of these checks starts with the literal prefix `prose: ` followed by the quoted
+`Description[enUS]` fragment that states the number, e.g.
+`prose: "strikes 2 additional enemies near the primary target" (525024)`. This is the one thing that must never be
+skipped: it is what keeps a behaviour `ok` honestly distinguishable from a token `ok` if anyone audits later.
+
+| Field | Content |
+|---|---|
+| `spell`, `name` | the passive and its `SpellName[enUS]` |
+| `kind` | `count`, `ratio`, `duration` or `trigger`: which scenario builder and judge rule apply |
+| `quote` | the exact prose fragment of `Description[enUS]`, checked to be a substring at generation time |
+| `expected` | the number, ratio or duration the quote states |
+| kind-specific fields | `count`: `target_rank` (the active spell cast), `radius` and `radius_reason` (the source citation that grounds the fixture placement, never a guessed distance), `metric` (`spell_damage_count`, the default, for a spell with a school-damage effect, or `aura` for a spell whose own effect is not damage, such as a silence); `ratio`: `targets`, a list of `[rank_id, name]` pairs |
+
+`behaviours.py`'s `behaviour_scenario(class_file, entry)` dispatches on `kind` to a scenario builder shaped like
+`passives.passive_scenario` (base steps, measure "before," `learn`, measure "after"), with a kind-specific measure
+step instead of a stat-sheet read. `conformance.py generate --behaviour <spell>` selects one or more entries by
+spell id; with no filter, every class behaviour entry is generated.
+
+### Target-count scenarios (`behaviour_count`)
+
+The scenario places `expected + 1` creature fixtures (one "primary," `expected` "extra") along the caster's fixed
+spawn axis, the primary at 3 yards and the extras spread within `radius` yards of the primary (the harness places
+every creature fixture at `owner position + (distance, 0, 0)`, `CoAGameplayTest.cpp` `CreateTargets`, so creatures
+at different `distance` values share the same line). It casts the entry's `target_rank` at the primary `repeats`
+times (5, "ever hit at least once" per dummy rather than a single-cast snapshot, since neither this package nor a
+probe established that the harness's AoE or chain targeting hits every dummy in range on one cast), measures
+`spell_damage_count {spell, target}` per dummy (or, for an entry whose `metric` is `aura`, `aura {spell, caster}`
+read on the dummy itself, for a target spell whose own effect is not a school-damage hit), learns the passive,
+repeats the casts and the measurement. The
+judge (`compare.behaviour_count_verdict`) counts, among the extra dummies only, how many were hit before the learn
+and how many were newly hit after (`after - before > 0`); `ok` when `|after_count - before_count - expected| <=
+max(1, 0.5% of expected)` (the same deterministic tolerance as every other check in this package); `unmeasured`
+when an extra dummy was already hit before the learn, since the delta cannot then be isolated.
+
+### Healing-ratio scenarios (`behaviour_ratio`)
+
+The scenario casts every named target spell at the caster, measures `spell_healing_done {spell, target: caster}`
+for each, learns the passive, repeats the casts and the measurement. The judge
+(`compare.behaviour_ratio_verdict`) computes `after / before` per named spell; `ok` when `|ratio - expected| <=
+max(1, 0.5% of expected)`; `unmeasured` when the before measurement is 0 or less, since a ratio needs a positive
+baseline.
+
+### Templar entries
+
+| Passive | Kind | Quote | Expected | Mechanism |
+|---|---|---|---|---|
+| Scarlet Judicator 525024 | count | "strikes 2 additional enemies near the primary target" | 2 | Divine Force 807805's school-damage effect (`TARGET_UNIT_TARGET_ENEMY`, `DmgClass` 2/melee) always routes through `Spell::SelectImplicitChainTargets` (`Spell.cpp:1905-1923`), which applies Scarlet Judicator's `SPELLMOD_JUMP_TARGETS` flat modifier to `ChainTarget` and searches a 10-yard jump radius for a melee spell with no `JumpDistance` override (`Spell.cpp:2200-2213`) |
+| Justice 712437 | count | "strikes 1 additional nearby target" | 1 | scripted hook `templar_casts::OnSpellBeforeEffects` (`AscensionTemplarAbilities.cpp:95-102`): casting Interdict 560116 with Justice known adds exactly one unit from `Nearby(primary, 8.0f)`; the DBC's own effect 1 (`PROC_TRIGGER_SPELL` to 712364, Sacred Oath's own trigger) does not implement this sentence at all and is not used |
+| Final Prayer 705268 | ratio | "Doubles the healing done to you" | 2.0 | one named target, Testament of Faith 801478 (a direct heal); Testament of Fortitude 500678 is a periodic self-heal (`PERIODIC_TRIGGER_SPELL_WITH_VALUE` -> 500690) that needs a tick-based measurement this round did not build, so it is not in `targets` yet |
+
+The 10-yard and 8-yard fixture radii above are both read from server source, never guessed, per each entry's own
+`radius_reason`.
+
 ## Talent stack (lever map)
 
 The class file's `rotation` is a fixed sequence, `stack` the configurations that add talents to it one group at a time,

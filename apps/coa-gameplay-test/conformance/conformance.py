@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 import sys
 
+from behaviours import behaviour_entries, behaviour_scenario
 from classes import PROGRESSION_HEADER, ClassSpell, class_spells
 from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_FILE, ScenarioDrift, evaluate,
                      write_levers, write_outputs)
@@ -107,6 +108,13 @@ def add_passive(writer: ManifestWriter, spell: ClassSpell):
                expectations, scenario)
 
 
+def add_behaviour(writer: ManifestWriter, entry: dict):
+    class_file = writer.class_file
+    scenario, expectations = behaviour_scenario(class_file, entry)
+    writer.add(scenario_key(class_file['name'], 'behaviour', entry['spell']), 'behaviour', None, entry['spell'],
+               expectations, scenario, name=entry['name'])
+
+
 def add_melee(writer: ManifestWriter):
     class_file = writer.class_file
     try:
@@ -196,7 +204,7 @@ def selected_passives(class_file: dict, dbc_dir: Path, spell_ids: list[int]) -> 
 
 def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: list[int] | None = None,
              stack: bool = False, passes: int = PASSES, passives: list[int] | None = None,
-             triggers: list[int] | None = None) -> Path:
+             triggers: list[int] | None = None, behaviours: list[int] | None = None) -> Path:
     class_file = load_class_file(class_id)
     dbc_dir = Path(class_file.get('dbc_dir', DBC_DIR))
     out = Path(out)
@@ -205,10 +213,12 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
         raise ValueError(f'{scenario_dir} already holds scenarios; generate into a new directory')
     scenario_dir.mkdir(parents=True, exist_ok=True)
     writer = ManifestWriter(class_file, out)
-    everything = spells is None and procs is None and passives is None and triggers is None and not stack
+    everything = (spells is None and procs is None and passives is None and triggers is None and behaviours is None
+                 and not stack)
     chosen_procs = proc_entries(class_file, procs) if everything or procs is not None else []
     chosen_triggers = trigger_entries(class_file, triggers) if everything or triggers is not None else []
     chosen_passives = selected_passives(class_file, dbc_dir, passives) if passives is not None else []
+    chosen_behaviours = behaviour_entries(class_file, behaviours) if everything or behaviours is not None else []
     generated_passives: set[int] = set()
     if everything or spells is not None:
         for spell in selected_spells(class_file, dbc_dir, spells):
@@ -225,6 +235,8 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
         add_proc(writer, entry)
     for entry in chosen_triggers:
         add_trigger(writer, entry)
+    for entry in chosen_behaviours:
+        add_behaviour(writer, entry)
     if stack:
         add_stack(writer, passes)
     if everything:
@@ -239,7 +251,7 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
 
 def generate_command(args) -> int:
     path = generate(args.class_id, args.out, args.spell, args.proc, args.stack, args.passes, args.passive,
-                    args.trigger)
+                    args.trigger, args.behaviour)
     manifest = json.loads(path.read_text(encoding='utf-8'))
     written = sum(1 for entry in manifest['scenarios'] if entry['file'])
     print(f'{path}: {written} scenarios in {path.parent / SCENARIO_DIR}, '
@@ -307,6 +319,8 @@ def main(argv=None) -> int:
                             help='the aura of a proc entry of the class file; repeat to select several procs')
     generating.add_argument('--trigger', type=int, action='append',
                             help='the aura of a trigger entry of the class file; repeat to select several triggers')
+    generating.add_argument('--behaviour', type=int, action='append',
+                            help='the spell of a behaviour entry of the class file; repeat to select several')
     generating.add_argument('--stack', action='store_true',
                             help='the passes of every stack configuration of the class file, cumulative talents')
     generating.add_argument('--passes', type=int, default=PASSES, help=f'passes per stack configuration ({PASSES})')

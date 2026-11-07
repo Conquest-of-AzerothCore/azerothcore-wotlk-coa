@@ -9,6 +9,7 @@ import re
 from statistics import fmean, pstdev
 from typing import Callable, Mapping, Protocol
 
+from behaviours import BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_RATIO
 from hits import (HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS, WEAPON_PERCENT_DAMAGE, Z_99,
                   HitModel, Modifier, Unmodelled, measured_hit_model)
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE
@@ -1462,6 +1463,54 @@ def judge_modifier_target(base: Verdict, manifest: dict, entry: dict, run: Run, 
                    detail={'question': question_detail(TEXT_QUESTION, question, readings, before + delta)})
 
 
+def behaviour_count_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    before_hit, after_hit = [], []
+    for before_label, after_label in model['dummy_labels']:
+        before = run.values.get(before_label)
+        after = run.values.get(after_label)
+        if before is None or after is None:
+            label = before_label if before is None else after_label
+            return replace(base, explanation=missing_measurement(run, label))
+        before_hit.append(before > 0)
+        after_hit.append(after - before > 0)
+    measured_before, measured_after = sum(before_hit), sum(after_hit)
+    if measured_before:
+        return replace(base, status='unmeasured', measured=float(measured_after - measured_before),
+                       explanation=f'{measured_before} of {len(before_hit)} additional dummies were already hit '
+                                   f'before the passive was learned; the delta cannot be isolated')
+    delta = measured_after - measured_before
+    return deterministic(base, float(delta), float(delta), float(model['expected']),
+                         f'{measured_before} of {len(before_hit)} additional dummies hit before the learn, '
+                         f'{measured_after} after')
+
+
+def behaviour_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    before = run.values.get(model['before_label'])
+    after = run.values.get(model['after_label'])
+    if before is None or after is None:
+        return replace(base, explanation=missing_measurement(run, model['before_label'] if before is None
+                                                              else model['after_label']))
+    if before <= 0:
+        return replace(base, status='unmeasured', measured=after,
+                       explanation=f'{model["before_label"]} measured {before:g} before the learn; a ratio needs '
+                                   f'a positive baseline')
+    ratio = after / before
+    return deterministic(base, ratio, ratio, float(model['expected']),
+                         f'{model["target_name"]} healed {before:g} before and {after:g} after the learn, '
+                         f'ratio {ratio:g}')
+
+
+def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
+    if run is None:
+        return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
+    model = expectation.model
+    if expectation.check == BEHAVIOUR_COUNT:
+        return behaviour_count_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_RATIO:
+        return behaviour_ratio_verdict(base, run, model)
+    return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
+
+
 def judge_passive(manifest: dict, entry: dict, run: Run | None, expectation: Expectation,
                   tooltips: TooltipSource) -> Verdict:
     verdict = passive_verdict(manifest, entry, run, expectation, tooltips)
@@ -1628,6 +1677,8 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
                        detail={'question': question_detail(TEXT_QUESTION, text, [], None)})
     if check == PASSIVE_DELTA:
         return judge_passive(manifest, entry, run, expectation, tooltips)
+    if check in BEHAVIOUR_CHECKS:
+        return judge_behaviour(base, run, expectation)
     if run is None:
         return replace(base, explanation=f'{entry["key"]} has no scenario to measure {check}')
     if check in TOKEN_CHECKS and rule.startswith(READ_RULE):

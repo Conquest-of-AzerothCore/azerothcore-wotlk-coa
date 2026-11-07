@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import re
 
+from behaviours import BEHAVIOUR_CHECKS as PROSE_BEHAVIOUR_CHECKS
 from compare import STATUSES, Verdict, read_verdicts
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
 from passives import PASSIVE_DELTA
@@ -11,7 +12,7 @@ from triggers import TRIGGER_CHECK
 COVERAGE_FILE = 'coverage.md'
 JUDGED = frozenset({'ok', 'alert'})
 CHARACTER_CHECKS = frozenset({'known_aura'})
-BEHAVIOUR_CHECKS = frozenset({PASSIVE_DELTA, PROC_CHECK, TRIGGER_CHECK})
+BEHAVIOUR_CHECKS = frozenset({PASSIVE_DELTA, PROC_CHECK, TRIGGER_CHECK, *PROSE_BEHAVIOUR_CHECKS})
 HIT_CHECK = 'hit_mean'
 SPELL_KINDS = ('value', 'hit', 'passive')
 PASSIVE_KIND = 'passive'
