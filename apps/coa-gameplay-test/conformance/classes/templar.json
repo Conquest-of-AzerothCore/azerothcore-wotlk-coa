@@ -288,6 +288,48 @@
       },
       "spell_proc": {},
       "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 560835,
+      "name": "Lightkeeper",
+      "tooltip": "Periodic damage dealt by |cffffffffCondemn|r now has a $h% chance to increase your parry chance by $561016s1% for $561016d, stacking $561016u times.\r\n\r\nPeriodic damage dealt by |cffffffffCondemn|r also has a $h% chance to burst, dealing ${$561277m1*$<scalingbp>+$AP*.22} Holy damage to up to $561277i1 enemies within $561277a1 yds of the target.",
+      "chance_token": "$h",
+      "trigger": {"action": "cast", "spell": 804906},
+      "trigger_text": "Periodic damage dealt by",
+      "proc_spell": 561016,
+      "proc_spell_source": "EffectTriggerSpell[0] of 560835",
+      "event_metric": "spell_cast_count",
+      "trial_readings": [
+        {"name": "each cast", "meaning": "a trial for every Condemn cast", "trials_metric": "spell_cast_count"},
+        {"name": "each damage tick", "meaning": "a trial for every periodic damage tick of Condemn"}
+      ],
+      "readings_question": "On live, with Lightkeeper learned (a 15% chance), does the parry chance buff appear about once every 6-7 Condemn casts, or about once every 6-7 periodic damage ticks of Condemn?",
+      "dbc": {
+        "560835": {"ProcChance": 15, "ProcFlags": 262144, "ProcCharges": 0}
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 560835,
+      "name": "Lightkeeper",
+      "tooltip": "Periodic damage dealt by |cffffffffCondemn|r now has a $h% chance to increase your parry chance by $561016s1% for $561016d, stacking $561016u times.\r\n\r\nPeriodic damage dealt by |cffffffffCondemn|r also has a $h% chance to burst, dealing ${$561277m1*$<scalingbp>+$AP*.22} Holy damage to up to $561277i1 enemies within $561277a1 yds of the target.",
+      "chance_token": "$h",
+      "trigger": {"action": "cast", "spell": 804906},
+      "trigger_text": "Periodic damage dealt by",
+      "proc_spell": 561277,
+      "proc_spell_source": "EffectTriggerSpell[1] of 560835",
+      "event_metric": "spell_damage_count",
+      "trial_readings": [
+        {"name": "each cast", "meaning": "a trial for every Condemn cast", "trials_metric": "spell_cast_count"},
+        {"name": "each damage tick", "meaning": "a trial for every periodic damage tick of Condemn"}
+      ],
+      "readings_question": "On live, with Lightkeeper learned (a 15% chance), does the Holy burst appear about once every 6-7 Condemn casts, or about once every 6-7 periodic damage ticks of Condemn?",
+      "dbc": {
+        "560835": {"ProcChance": 15, "ProcFlags": 262144, "ProcCharges": 0}
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
     }
   ],
   "triggers": [
@@ -464,6 +506,68 @@
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
       "per_trigger_text": "now always triggers Scourgebane"
+    },
+    {
+      "aura": 803844,
+      "name": "Chakra of Light",
+      "tooltip": "Reduces the cooldown of |cffffffffTestaments|r by $/1000;s2 sec and |cffffffffOath Breakers|r now heal allies around the target for ${$m1+$SP*0.35}.",
+      "trigger": {"action": "cast", "spell": 572027, "target": "dummy"},
+      "trigger_text": "Oath Breakers",
+      "trigger_spell_text": "a dominating Oath Breaker",
+      "trial_metric": "spell_cast_count",
+      "observe_spell": 803160,
+      "observe_source": "EffectTriggerSpell[0] of 803844",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now heal allies around the target"
+    },
+    {
+      "aura": 803159,
+      "name": "Chakra of Light",
+      "tooltip": "Reduces the cooldown of |cffffffffTestaments|r by $/1000;s2 sec and |cffffffffOath Breakers|r now heal allies around the target for ${$m1+$SP*0.35}.",
+      "trigger": {"action": "cast", "spell": 572027, "target": "dummy"},
+      "trigger_text": "Oath Breakers",
+      "trigger_spell_text": "a dominating Oath Breaker",
+      "trial_metric": "spell_cast_count",
+      "observe_spell": 803160,
+      "observe_source": "EffectTriggerSpell[0] of 803159",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now heal allies around the target"
+    },
+    {
+      "aura": 301065,
+      "name": "Scarlet Training",
+      "tooltip": "|cFF66DDFFLevel 30 Passive|r\r\nCasting |cffffffffArgent Blade|r while |cffffffffWarrior of Dawn|r is active now transforms your next |cffffffffArgent Blade|r into |cffffffffScarlet Hammer|r.@s:807035:0@",
+      "trigger": {"action": "cast", "spell": 807268, "target": "dummy"},
+      "trigger_text": "Casting Argent Blade",
+      "trigger_spell_text": "Argent Blade",
+      "trial_metric": "spell_cast_count",
+      "attempt_auras": [
+        {"spell": 561156, "stacks": 1, "source": "Warrior of Dawn 561156: while Warrior of Dawn is active"}
+      ],
+      "observe_spell": 301172,
+      "observe_source": "EffectTriggerSpell[0] of 301065",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now transforms your next Argent Blade into Scarlet Hammer",
+      "trial_attempts_factor": 2,
+      "trial_attempts_reason": "about half of a scheduled Argent Blade 807268 cast executes as Scarlet Hammer 807035 instead once the transform is up, so it is not counted as an 807268 trial; measured 137 trials and 137 events (ratio 1.0) in 273 scheduled attempts, stamp 20261107-182830"
+    },
+    {
+      "aura": 801457,
+      "name": "Binding Scripture",
+      "tooltip": "Healing an ally now redirects $705309s1% of their damage taken to you and reduces your damage taken by $707307s1% for $705309d, stacking $705309u times.\r\n\r\n@ext: Healing yourself does not trigger this effect.:ext@\r\n",
+      "trigger": {"action": "cast", "spell": 801478, "target": "ally"},
+      "trigger_text": "Healing an ally",
+      "trigger_spell_text": "Testament of Faith",
+      "trial_metric": "spell_cast_count",
+      "ally_health_pct": 50,
+      "observe_spell": 705309,
+      "observe_source": "EffectTriggerSpell[0] of 801457",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now redirects $705309s1% of their damage taken to you"
     }
   ],
   "talent_modifiers": [

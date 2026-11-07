@@ -16,17 +16,30 @@ from profile import DBC_DIR
 from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader
 from tooltip import Records
 from triggers import (BASELINE_ATTEMPTS, TRIGGER_CHECK, TRIGGER_TRIALS, trigger_entries, trigger_label,
-                      trigger_measurements, trigger_plan, trigger_scenario, trigger_status_expectation)
+                      trigger_measurements, trigger_plan, trigger_rule, trigger_scenario,
+                      trigger_status_expectation)
 from values import Expectation, dataset
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import batch
 import run
 
-TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 804932, 806516, 803158, 805420, 680891}
+TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 804932, 806516, 803158, 805420, 680891,
+                    803844, 803159, 301065, 801457}
 SCARLET_SECRETS = 520812
 STAFFGUARD = 705295
 CHAKRA_OF_POWER = 803158
+CHAKRA_OF_LIGHT_R1 = 803844
+CHAKRA_OF_LIGHT_R2 = 803159
+SCARLET_TRAINING = 301065
+BINDING_SCRIPTURE = 801457
+OATH_BREAKER_CAST = 572027
+RIGHTEOUS_UPHEAVAL_HEAL = 803160
+WARRIOR_OF_DAWN = 561156
+SCARLET_CRUSADER = 301172
+ARGENT_BLADE_RANK = 807268
+TESTAMENT_OF_FAITH = 801478
+DAMAGE_REDIRECT = 705309
 SACRED_SWING = 572769
 ARGENT_BLADE = 807268
 LIBRAM_OF_TENACITY = 801461
@@ -208,7 +221,10 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                 with self.subTest(aura=entry['aura'], fixture=aura['spell']):
                     name, quote = aura['source'].split(f' {aura["spell"]}: ', 1)
                     self.assertEqual(name, self.spell(aura['spell'], 'SpellName[enUS]'))
-                    self.assertIn(quote, cleaned_tooltip(self.spell(aura['spell'], 'Description[enUS]')))
+                    fixture_description = self.spell(aura['spell'], 'Description[enUS]')
+                    source_tooltip = cleaned_tooltip(fixture_description) if fixture_description \
+                        else cleaned_tooltip(entry['tooltip'])
+                    self.assertIn(quote, source_tooltip)
 
     def test_cast_triggers_name_the_words_that_make_the_spell_a_trigger(self):
         for entry in trigger_entries(CLASS_FILE):
@@ -218,7 +234,7 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                     self.assertIn(entry['trial_metric'], ('melee_attack_count', 'melee_damage_count'))
                     continue
                 self.assertEqual(trigger['action'], 'cast')
-                self.assertIn(trigger['target'], ('self', 'dummy'))
+                self.assertIn(trigger['target'], ('self', 'dummy', 'ally'))
                 spell = trigger['spell']
                 own_text = self.spell(spell, 'SpellName[enUS]') + ' ' + cleaned_tooltip(
                     self.spell(spell, 'Description[enUS]'))
@@ -238,7 +254,7 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                     self.assertTrue(trigger_status_expectation(entry).rule.startswith(entry['status']))
                     continue
                 plan = trigger_plan(CLASS_FILE, entry)
-                self.assertEqual(sum(plan.part_attempts), SCHEDULED)
+                self.assertEqual(sum(plan.part_attempts), SCHEDULED * entry.get('trial_attempts_factor', 1))
                 for part in range(len(plan.part_attempts)):
                     scenario, _ = trigger_scenario(CLASS_FILE, entry, part)
                     run.validate(scenario)
@@ -288,6 +304,84 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
     def test_unknown_aura_is_refused(self):
         with self.assertRaises(ValueError):
             trigger_entries(CLASS_FILE, [1])
+
+    def test_chakra_of_light_ranks_share_the_breaker_trigger_with_mending_ward(self):
+        mending_ward = templar_trigger(806273)
+        for aura in (CHAKRA_OF_LIGHT_R1, CHAKRA_OF_LIGHT_R2):
+            with self.subTest(aura=aura):
+                entry = templar_trigger(aura)
+                self.assertEqual(entry['trigger'], mending_ward['trigger'])
+                self.assertEqual(entry['trigger']['spell'], OATH_BREAKER_CAST)
+                self.assertEqual(entry['observe_spell'], RIGHTEOUS_UPHEAVAL_HEAL)
+
+    def test_scarlet_training_forces_warrior_of_dawn(self):
+        entry = templar_trigger(SCARLET_TRAINING)
+        [aura] = entry['attempt_auras']
+        self.assertEqual(aura['spell'], WARRIOR_OF_DAWN)
+        stack_amount = self.spell(WARRIOR_OF_DAWN, 'StackAmount')
+        self.assertLessEqual(aura['stacks'], max(stack_amount, 1))
+        self.assertEqual(entry['observe_spell'], SCARLET_CRUSADER)
+        self.assertEqual(entry['trigger']['spell'], ARGENT_BLADE_RANK)
+
+    def test_scarlet_training_doubles_its_scheduled_attempts(self):
+        entry = templar_trigger(SCARLET_TRAINING)
+        self.assertEqual(entry['trial_attempts_factor'], 2)
+        self.assertTrue(entry['trial_attempts_reason'])
+        plain = templar_trigger(STAFFGUARD)
+        plan = trigger_plan(CLASS_FILE, entry)
+        plain_plan = trigger_plan(CLASS_FILE, plain)
+        self.assertEqual(plan.scheduled, plain_plan.scheduled * 2)
+        self.assertIn(f'scheduled attempts x2 ({entry["trial_attempts_reason"]})', trigger_rule(entry))
+
+    def test_trial_attempts_factor_below_one_is_refused(self):
+        entry = copy.deepcopy(templar_trigger(STAFFGUARD))
+        entry['trial_attempts_factor'] = 0.5
+        with self.assertRaises(ValueError):
+            trigger_plan(CLASS_FILE, entry)
+
+    def test_trial_attempts_factor_needs_a_reason(self):
+        entry = copy.deepcopy(templar_trigger(STAFFGUARD))
+        entry['trial_attempts_factor'] = 2
+        with self.assertRaises(ValueError):
+            trigger_plan(CLASS_FILE, entry)
+
+    def test_binding_scripture_groups_the_ally_once_and_lowers_her_health_before_every_heal(self):
+        entry = templar_trigger(BINDING_SCRIPTURE)
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': TESTAMENT_OF_FAITH, 'target': 'ally'})
+        self.assertEqual(entry['observe_spell'], DAMAGE_REDIRECT)
+        scenario, [expectation] = trigger_scenario(CLASS_FILE, entry)
+        steps = scenario['steps']
+        groups = [step for step in steps if step['action'] == 'group']
+        self.assertEqual(groups, [{'action': 'group', 'actor': 'caster', 'target': 'ally'}])
+        self.assertEqual([player['id'] for player in scenario['players']], ['caster', 'ally'])
+        self.assertNotIn('creatures', scenario)
+        casts = [index for index, step in enumerate(steps)
+                if step['action'] == 'cast' and step['spell'] == TESTAMENT_OF_FAITH]
+        self.assertTrue(casts)
+        for index in casts:
+            self.assertIn({'action': 'set_health', 'actor': 'ally', 'value': 5000, 'maximum': 10000},
+                          steps[index - 2:index])
+            self.assertEqual(steps[index]['target'], 'ally')
+        self.assertIn('before each attempt the ally health set to 50% of max', expectation.rule)
+
+    def test_ally_target_requires_a_cast_trigger(self):
+        entry = copy.deepcopy(templar_trigger(BINDING_SCRIPTURE))
+        entry['trigger'] = {'action': 'attack', 'spell': 0}
+        entry['trial_metric'] = 'melee_attack_count'
+        with self.assertRaises(ValueError):
+            trigger_plan(CLASS_FILE, entry)
+
+    def test_ally_trigger_baseline_runs_before_the_learn_without_the_passive(self):
+        entry = templar_trigger(BINDING_SCRIPTURE)
+        scenario, _ = trigger_scenario(CLASS_FILE, entry)
+        steps = scenario['steps']
+        learn_aura = steps.index({'action': 'learn', 'actor': 'caster', 'spell': BINDING_SCRIPTURE})
+        casts_before = [step for step in steps[:learn_aura]
+                        if step['action'] == 'cast' and step['spell'] == TESTAMENT_OF_FAITH]
+        self.assertEqual(len(casts_before), BASELINE_ATTEMPTS)
+        labels = trigger_measurements(BINDING_SCRIPTURE)
+        baseline_step = next(step for step in steps if step.get('label') == labels['without'])
+        self.assertLess(steps.index(baseline_step), learn_aura)
 
     def test_status_entry_has_no_plan(self):
         entry = copy.deepcopy(templar_trigger(STAFFGUARD))

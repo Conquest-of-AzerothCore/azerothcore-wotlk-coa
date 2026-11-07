@@ -619,6 +619,13 @@ The trigger comes from the tooltip text only. When the text does not say what tr
 `ambiguous_tooltip` and never gets a chosen trigger. An entry whose observable the harness cannot separate is
 `unmodelled` with its reason. Both have no scenario and are never `ok`.
 
+An aura with two independent chance rolls on the same trigger (two `EffectTriggerSpell` entries, each its own
+`proc_spell`) gets two `procs` entries sharing one `aura`: one per `proc_spell`, each with the full tooltip and its
+own half's `chance_token`, `trigger_text`, `trial_readings` and `dbc`. `proc_label`/`scenario_key` disambiguate by
+`(aura, proc_spell)` only when `shares_aura` finds more than one entry for that aura, so a single-`proc_spell` aura's
+label and scenario keys are unchanged. `extra_event_terms` is for a trigger that fires more than one countable event
+per proc of the *same* roll; it never folds two independently-chanced effects into one entry.
+
 When the text leaves open which events are trials, `trial_readings` lists each reading: the triggering hits plus the
 counts in `adds`, less the events when `minus_events` is true. No reading is chosen: the comparison judges each one,
 gives their common verdict when they agree and `ambiguous_tooltip` with every reading's numbers when they do not, so
@@ -670,6 +677,8 @@ in-RAM test database, read on 2026-11-05 (`SELECT * FROM spell_proc WHERE SpellI
 | Blade Sermon 572548, 572554 | `$h` 5%, 10% | Zealotry | | `ambiguous_tooltip` |
 | Condemnation 706325 | `$h` 15% | cast of Blade of Faith 803880 | 801450, `@s:801450:0@` | 2 readings |
 | Transcendent Guardian 804571 | `$h` 40% | Temple Guardian 803792 at an ally | its refreshed charge | scenario |
+| Lightkeeper (parry) 560835 | `$h` 15% | periodic damage of Condemn 804906 | 561016, `EffectTriggerSpell[0]` | 2 readings |
+| Lightkeeper (burst) 560835 | `$h` 15% | periodic damage of Condemn 804906 | 561277 (damage), `EffectTriggerSpell[1]` | 2 readings |
 
 `spell_proc` has rows for 92111 (Chance 100), 520007, 560648 and 707391 (Chance 0, so the DBC `ProcChance`), all
 with `ProcFlags` 1048575 and `Cooldown` 0, and none for the other auras; the four are scripted by
@@ -714,6 +723,26 @@ Transcendent Guardian parts, simulated clock, no failed cast):
 | | | each damage tick | 622 in 4134 | 0.137 to 0.165 | `ok` | |
 | Transcendent Guardian 804571 | 11 | casts at the ally | 1509 in 3828 | 0.374 to 0.415 | `ok` | `ok` |
 
+Lightkeeper 560835 is absent from both `TemplarEvents` and `TemplarCastDrivers` (grepped `src/server/coa/*.cpp` for
+`560835`): it is the one Templar proc entry of the nine that is a plain, native `ProcFlags`/`ProcChance`/
+`EffectTriggerSpell` proc with no scripted override. Its two `EffectTriggerSpell` slots each roll their own 15%
+independently on the same periodic tick of Condemn 804906; no `spell_proc` row exists for it, so `spell_proc` is
+`{}` for both entries, like the other auras with no row.
+
+Measured on 2026-11-07 (stamp `20261107-184729`, simulated clock, no failed cast, 26 parts each):
+
+| Aura | Parts | Reading | Procs in trials | Wilson 99% | Reading verdict | Verdict |
+|---|---|---|---|---|---|---|
+| Lightkeeper (parry) 560835 | 26 | each cast | 695 in 2054 | 0.312 to 0.366 | `alert` | `ambiguous_tooltip` |
+| | | each damage tick | 695 in 4472 | 0.142 to 0.170 | `ok` | |
+| Lightkeeper (burst) 560835 | 26 | each cast | 668 in 2054 | 0.299 to 0.352 | `alert` | `ambiguous_tooltip` |
+| | | each damage tick | 668 in 4472 | 0.136 to 0.164 | `ok` | |
+
+Both readings disagree the same way Condemnation 706325 does: counting each Condemn cast as one trial roughly
+doubles the apparent rate (Condemn ticks about twice per cast at this attempt spacing), while counting each
+periodic damage tick holds the tooltip's 15% within the Wilson interval. Both carry `readings_question` and go to
+`questions.md`.
+
 ## Trigger entries
 
 A `triggers` entry of the class file is a passive whose tooltip says that something always happens on a trigger
@@ -723,15 +752,17 @@ A `triggers` entry of the class file is a passive whose tooltip says that someth
 |---|---|
 | `aura`, `name` | the passive and its `SpellName[enUS]` |
 | `tooltip` | its `Description[enUS]`, copied verbatim from the client DBC |
-| `trigger` | `{"action": "cast", "spell": <rank>, "target": "self"/"dummy"}` or `{"action": "attack", "spell": 0}` |
+| `trigger` | `{"action": "cast", "spell": <rank>, "target": "self"/"dummy"/"ally"}` or `{"action": "attack", "spell": 0}` |
 | `trigger_text` | the words of the cleaned tooltip that name the trigger |
 | `trigger_spell_text` | for a cast, the words of the rank's name or cleaned tooltip that make it such a trigger |
 | `trial_metric` | one trial: `spell_cast_count`, `spell_damage_count`, `melee_attack_count`, `melee_damage_count` |
 | `observe_spell`, `observe_source` | the spell a trigger casts, from `EffectTriggerSpell[n]` or tooltip `@s:<id>:0@` |
 | `observe_note` | with a tooltip reference, why the text's spell is observed instead of an `EffectTriggerSpell` |
 | `attempt_auras` | `{"spell", "stacks", "source"}` set before every cast, `source` quoting the tooltip behind it |
+| `ally_health_pct` | for a `target: "ally"` cast, the ally's health percent set before every cast so the heal is effective |
 | `observe_metric` | `spell_cast_count` or `spell_energize_count` of `observe_spell` |
 | `per_trigger`, `per_trigger_text` | the events per trial, 1 or 0.5 for "Every 2nd", and the words that state it |
+| `trial_attempts_factor`, `trial_attempts_reason` | multiplies the scheduled attempts (default 1, unchanged); a cited reason, for a trigger whose own cast sometimes executes as a different spell id and so is not counted as a trial of itself |
 | `status`, `reason` | `unmodelled` or `ambiguous_tooltip` for an entry without a scenario, and why |
 | `question` | the question for players when the entry's verdict is an `alert` the server code explains: a server finding goes to the player question list, not into a verdict change |
 
@@ -743,7 +774,10 @@ condition stated by another tooltip from blocking the claim, for example a cap o
 A trigger is cast as the hit scenarios cast: before each cast the power is set to the cost, the cooldown is reset and
 the `CasterAuraSpell` fixture is applied (Sacred Swing 681170, Righteous Upheaval 704576), one cast every
 `max(StartRecoveryTime, cast time) + 500 ms`; a `self` trigger is cast without a target. An `attack` trigger attacks
-`dummy` for the attempts times the weapon speed.
+`dummy` for the attempts times the weapon speed. A `target: "ally"` trigger adds a second player `ally`, groups the
+caster with it once before the first cast (`{"action": "group", "actor": "caster", "target": "ally"}`, a raid group
+so `Unit::IsInRaidWith` holds), and, with `ally_health_pct` set, lowers the ally's health to that percent of a
+10000 fixed maximum before every cast so a heal lands an effective, non-zero amount.
 
 `TRIGGER_TRIALS` is 182, the smallest N with 0.975^N <= 0.01: a trigger that fires 2.5 points under 100% of the time
 misses at least once in 182 trials with 99% probability. The scenario learns the trigger rank, makes
@@ -771,6 +805,28 @@ The Templar entries quote their trigger words from the cleaned DBC tooltips:
 | Heaven's Finest 806516 | "Damaging abilities", 807268 at `dummy` | damage events | 805390 casts | 1 |
 | Chakra of Power 803158 | "Melee attacks", auto attack | swings | 804181 energizes | 1 |
 | Way of the Monk 805420 | "Damage dealt by Sacred Swing", 572769 at `dummy` | damage events | 572052 casts | 1 |
+| Chakra of Light 803844, 803159 | "Oath Breakers", 572027 ("a dominating Oath Breaker") | casts | 803160 casts | 1 |
+| Scarlet Training 301065 | "Casting Argent Blade", 807268 at `dummy` | casts | 301172 casts | 1 |
+| Binding Scripture 801457 | "Healing an ally", Testament of Faith 801478 at `ally` | casts | 705309 casts | 1 |
+
+Chakra of Light's two ranks share Mending Ward's 806273 `Breaker()` condition and its 572027 fixture (same
+`AscensionTemplarAbilities.cpp:192-198`): both are in `TemplarCastDrivers`, so the DBC's own `EffectTriggerSpell[0]`
+803160 never fires natively (routed to `SPELL_AURA_DUMMY`, same P3-R8 pattern as Mending Ward); the scripted hook
+casts it unconditionally on every Oath Breaker cast, once for the solo caster. Scarlet Training is also in
+`TemplarCastDrivers` (its own `EffectTriggerSpell[0]` 301172 likewise decorative); the real condition
+(`AscensionTemplarAbilities.cpp:232-235`) is casting Argent Blade 804929-family while a `GetScriptValue(704576)`
+set by Warrior of Dawn 561156's apply hook (`AscensionTemplarAuras.cpp:114-120`) is non-zero, which the harness's
+`set_aura` fixture (`attempt_auras`) satisfies by applying 561156 fresh before every cast. Once the transform fires,
+the next scheduled Argent Blade 807268 cast executes as Scarlet Hammer 807035 instead (`SetTemporarySpellReplacement`)
+and is not counted as an 807268 trial, roughly halving the usable trials per scheduled attempt; `trial_attempts_factor`
+2 schedules 546 attempts so enough stay valid. Binding Scripture is in `TemplarEvents`; its condition
+(`AscensionTemplarEvents.cpp:77-78`) is an effective heal (`GetEffectiveHeal()` non-zero) on a raid member other than
+the caster, with no roll (matches `ProcChance` 100): the scenario groups the caster with the `ally` player once and
+sets the ally to 50% of a 10000 fixed health before every Testament of Faith 801478 cast, so every heal is effective.
+
+Measured on 2026-11-07 (stamp `20261107-184729`, simulated clock, gameplay stage 57.0 s for 10 parts, no failed
+cast, 20 baseline trials and no baseline event in each entry): all four entries are `ok` with 273 events in 273
+trials.
 
 Scarlet Secrets' `EffectTriggerSpell[0]` is 520926, a dummy aura its text does not name; the server never cast it in
 273 Argent Blade casts (stamp `20261106-092819`), while the text grants Oath: Retribution 804924. Oath Chain 704576

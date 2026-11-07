@@ -10,10 +10,10 @@ import sys
 import tempfile
 import unittest
 
-from compare import STATUSES
+from compare import STATUSES, class_entry
 from hits import EXCLUDED_OUTCOME_MARGIN, MAX_SCENARIO_MS, Unmodelled
-from procs import (PART_BUDGET_MS, PROC_CHECK, proc_plan, proc_scenario, proc_status_expectation, trials_needed,
-                   wilson_interval)
+from procs import (PART_BUDGET_MS, PROC_CHECK, proc_label, proc_plan, proc_scenario, proc_status_expectation,
+                   shares_aura, trials_needed, wilson_interval)
 from profile import DBC_DIR
 from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader
 from tooltip import Displayed, Records
@@ -56,6 +56,10 @@ GUARDIAN_LABELS = {'trials': '804571 proc trials', 'events': '804571 proc events
 CHARGE_POOL = '804571 proc charge pool'
 HANDLER = re.compile(r'^Ascension\w+\.cpp:\d+-\d+ ')
 TOKEN_SPELL = re.compile(r'\$(\d*)[hH]$')
+LIGHTKEEPER = 560835
+LIGHTKEEPER_PARRY = 561016
+LIGHTKEEPER_BURST = 561277
+CONDEMN = 804906
 
 
 def templar_proc(aura):
@@ -530,6 +534,51 @@ class TemplarProcEntriesTest(unittest.TestCase):
                 self.assertIn(entry['event_metric'], ('spell_cast_count', 'spell_damage_count', 'spell_charges'))
                 self.assertTrue(self.spell(entry['proc_spell'], 'SpellName[enUS]'))
                 self.assertEqual(entry['internal_cooldown_ms'], 0)
+
+    def test_lightkeeper_entries_share_the_aura_and_the_periodic_condemn_trigger(self):
+        entries = [entry for entry in CLASS_FILE['procs'] if entry['aura'] == LIGHTKEEPER]
+        self.assertEqual(len(entries), 2)
+        self.assertEqual({entry['proc_spell'] for entry in entries}, {LIGHTKEEPER_PARRY, LIGHTKEEPER_BURST})
+        for entry in entries:
+            with self.subTest(proc_spell=entry['proc_spell']):
+                self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': CONDEMN})
+                self.assertTrue(shares_aura(CLASS_FILE, entry))
+
+    def test_proc_label_disambiguates_lightkeeper_by_proc_spell(self):
+        parry, burst = (next(entry for entry in CLASS_FILE['procs']
+                             if entry['aura'] == LIGHTKEEPER and entry['proc_spell'] == proc_spell)
+                       for proc_spell in (LIGHTKEEPER_PARRY, LIGHTKEEPER_BURST))
+        [parry_expectation] = proc_scenario(CLASS_FILE, parry)[1]
+        [burst_expectation] = proc_scenario(CLASS_FILE, burst)[1]
+        self.assertNotEqual(parry_expectation.label, burst_expectation.label)
+        self.assertEqual(parry_expectation.label, proc_label(LIGHTKEEPER, LIGHTKEEPER_PARRY))
+        self.assertEqual(burst_expectation.label, proc_label(LIGHTKEEPER, LIGHTKEEPER_BURST))
+
+    def test_proc_label_is_unchanged_for_a_single_proc_spell_aura(self):
+        entry = templar_proc(SCOURGEBANE)
+        self.assertFalse(shares_aura(CLASS_FILE, entry))
+        [expectation] = proc_scenario(CLASS_FILE, entry)[1]
+        self.assertEqual(expectation.label, PROC_LABEL)
+
+    def test_class_entry_resolves_the_lightkeeper_entry_by_proc_spell(self):
+        burst = next(entry for entry in CLASS_FILE['procs']
+                    if entry['aura'] == LIGHTKEEPER and entry['proc_spell'] == LIGHTKEEPER_BURST)
+        [expectation] = proc_scenario(CLASS_FILE, burst)[1]
+        manifest = {'class_file': CLASS_FILE}
+        self.assertEqual(class_entry(manifest, expectation)['proc_spell'], LIGHTKEEPER_BURST)
+
+    def test_lightkeeper_scenario_keys_do_not_collide(self):
+        from conformance import generate
+        out = Path(tempfile.mkdtemp(prefix='conformance-lightkeeper-'))
+        try:
+            manifest_path = generate(CLASS_FILE['class_id'], out, procs=[LIGHTKEEPER])
+            manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+            keys = [entry['key'] for entry in manifest['scenarios']]
+            self.assertEqual(len(keys), len(set(keys)))
+            self.assertTrue(any(str(LIGHTKEEPER_PARRY) in key for key in keys))
+            self.assertTrue(any(str(LIGHTKEEPER_BURST) in key for key in keys))
+        finally:
+            shutil.rmtree(out)
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
