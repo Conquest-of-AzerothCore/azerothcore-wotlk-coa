@@ -568,6 +568,66 @@
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
       "per_trigger_text": "now redirects $705309s1% of their damage taken to you"
+    },
+    {
+      "aura": 301254,
+      "name": "Improved Scarlet Hammer",
+      "tooltip": "|cFF66DDFFLevel 40 Passive|r\r\nCasting |cffffffffScarlet Hammer|r now generates $521240s1 Energy.",
+      "trigger": {"action": "cast", "spell": 807035, "target": "dummy"},
+      "trigger_text": "Casting Scarlet Hammer",
+      "trigger_spell_text": "Scarlet Hammer",
+      "trial_metric": "spell_cast_count",
+      "observe_spell": 521240,
+      "observe_source": "EffectTriggerSpell[0] of 301254",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now generates"
+    },
+    {
+      "aura": 705256,
+      "name": "Determined",
+      "tooltip": "Your |cffffffffTemple Guardian|r now makes your next ability within $681136d free of cost.",
+      "trigger": {"action": "cast", "spell": 803792, "target": "ally"},
+      "trigger_text": "Your Temple Guardian",
+      "trigger_spell_text": "Temple Guardian",
+      "trial_metric": "spell_cast_count",
+      "restore_charges": true,
+      "observe_spell": 681136,
+      "observe_source": "EffectTriggerSpell[0] of 705256",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now makes your next ability"
+    },
+    {
+      "aura": 705259,
+      "name": "Faith Guard",
+      "tooltip": "While a |cffffffffLibram|r is active, your |cffffffffChastise|r will now unleash a line of holy power, dealing ${$706466m1*$<scalingbp>+$AP*.25} High Threat Holy damage.",
+      "trigger": {"action": "cast", "spell": 503141, "target": "dummy"},
+      "trigger_text": "your Chastise will now unleash",
+      "trigger_spell_text": "Chastise",
+      "trial_metric": "spell_cast_count",
+      "attempt_auras": [
+        {"spell": 801441, "stacks": 1, "source": "Libram of Consecration 801441: Read from your Libram of Consecration"}
+      ],
+      "observe_spell": 706466,
+      "observe_source": "EffectTriggerSpell[0] of 705259",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "will now unleash"
+    },
+    {
+      "aura": 705286,
+      "name": "Duty Calls",
+      "tooltip": "Casting abilities that grant an |cffffffffOath|r now increases your damage dealt and movement speed by $560834s1% for $560834d, stacking $560834u times.",
+      "trigger": {"action": "cast", "spell": 570233, "target": "dummy"},
+      "trigger_text": "Casting abilities that grant an Oath",
+      "trigger_spell_text": "Righteous Lunge",
+      "trial_metric": "spell_cast_count",
+      "observe_spell": 560834,
+      "observe_source": "EffectTriggerSpell[0] of 705286",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now increases your damage dealt and movement speed"
     }
   ],
   "talent_modifiers": [

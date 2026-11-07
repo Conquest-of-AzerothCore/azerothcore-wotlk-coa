@@ -6,7 +6,7 @@ from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, UNMODELLED, Unmo
                   records_of, scenario_shell, timed)
 from procs import ATTACK, CAST, ENTRY_STATUSES, PART_BUDGET_MS, cast_interval, swing_interval
 from profile import CASTER, SETTLE_MS, measurement, player_fixture
-from values import ALLY, TARGET, Expectation, facts_of
+from values import ALLY, CHARGE_OFFSET_YD, TARGET, Expectation, facts_of
 
 TRIGGER_CHECK = 'trigger_count'
 MISSED_TRIGGER_RATE = 0.025
@@ -60,6 +60,8 @@ def checked_entry(entry: dict) -> dict:
         raise ValueError(f'Trigger {aura} sets attempt auras without a cast before which to set them')
     if entry.get('ally_health_pct') is not None and trigger.get('target') != ALLY:
         raise ValueError(f'Trigger {aura} sets the ally health without a cast at an ally')
+    if entry.get('restore_charges') and trigger['action'] != CAST:
+        raise ValueError(f'Trigger {aura} restores charges without a cast to restore them before')
     factor = entry.get('trial_attempts_factor', 1)
     if factor < 1:
         raise ValueError(f'Trigger {aura} has a trial attempts factor below 1')
@@ -108,7 +110,11 @@ def ally_health_step(pct: int) -> dict:
 
 
 def attempt_fixtures(entry: dict) -> list[dict]:
-    fixtures = [{'action': 'set_aura', 'actor': CASTER, 'spell': aura['spell'], 'stacks': aura['stacks']}
+    fixtures = [{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}] \
+        if entry['trigger'].get('target') == ALLY else []
+    if entry.get('restore_charges'):
+        fixtures.append({'action': 'restore_charges', 'actor': CASTER, 'spell': entry['trigger']['spell']})
+    fixtures += [{'action': 'set_aura', 'actor': CASTER, 'spell': aura['spell'], 'stacks': aura['stacks']}
                 for aura in entry.get('attempt_auras', [])]
     if entry.get('ally_health_pct') is not None:
         fixtures.append(ally_health_step(entry['ally_health_pct']))
@@ -139,6 +145,8 @@ def trigger_rule(entry: dict) -> str:
                        for aura in entry.get('attempt_auras', []))
     if entry.get('ally_health_pct') is not None:
         fixtures += f'; before each attempt the ally health set to {entry["ally_health_pct"]}% of max'
+    if entry.get('restore_charges'):
+        fixtures += f'; before each attempt the charges of {entry["trigger"]["spell"]} are restored'
     factor = entry.get('trial_attempts_factor', 1)
     scaled = f'; scheduled attempts x{factor:g} ({entry["trial_attempts_reason"]})' if factor != 1 else ''
     return (f'{TRIGGER_RULE}; trials: {trials}; events: {entry["observe_metric"]} of {entry["observe_spell"]} '
@@ -178,7 +186,7 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
              'per_trigger': entry['per_trigger'], 'trigger': dict(trigger), 'trial_metric': entry['trial_metric'],
              'observe_spell': entry['observe_spell'], 'observe_metric': entry['observe_metric'],
              'attempt_auras': [dict(aura) for aura in entry.get('attempt_auras', [])],
-             'ally_health_pct': entry.get('ally_health_pct'),
+             'ally_health_pct': entry.get('ally_health_pct'), 'restore_charges': entry.get('restore_charges', False),
              'trial_attempts_factor': entry.get('trial_attempts_factor', 1), 'measurements': labels}
     expectation = Expectation(trigger_label(aura), TRIGGER_CHECK, aura, aura, None, entry['trigger_text'],
                               trigger_rule(entry), model)

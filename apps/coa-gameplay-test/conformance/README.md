@@ -760,6 +760,7 @@ A `triggers` entry of the class file is a passive whose tooltip says that someth
 | `observe_note` | with a tooltip reference, why the text's spell is observed instead of an `EffectTriggerSpell` |
 | `attempt_auras` | `{"spell", "stacks", "source"}` set before every cast, `source` quoting the tooltip behind it |
 | `ally_health_pct` | for a `target: "ally"` cast, the ally's health percent set before every cast so the heal is effective |
+| `restore_charges` | for a cast trigger, restores the trigger rank's native charges before every attempt (needed when the rank is also a charge-counting `procs` entry's trigger) |
 | `observe_metric` | `spell_cast_count` or `spell_energize_count` of `observe_spell` |
 | `per_trigger`, `per_trigger_text` | the events per trial, 1 or 0.5 for "Every 2nd", and the words that state it |
 | `trial_attempts_factor`, `trial_attempts_reason` | multiplies the scheduled attempts (default 1, unchanged); a cited reason, for a trigger whose own cast sometimes executes as a different spell id and so is not counted as a trial of itself |
@@ -776,8 +777,12 @@ the `CasterAuraSpell` fixture is applied (Sacred Swing 681170, Righteous Upheava
 `max(StartRecoveryTime, cast time) + 500 ms`; a `self` trigger is cast without a target. An `attack` trigger attacks
 `dummy` for the attempts times the weapon speed. A `target: "ally"` trigger adds a second player `ally`, groups the
 caster with it once before the first cast (`{"action": "group", "actor": "caster", "target": "ally"}`, a raid group
-so `Unit::IsInRaidWith` holds), and, with `ally_health_pct` set, lowers the ally's health to that percent of a
-10000 fixed maximum before every cast so a heal lands an effective, non-zero amount.
+so `Unit::IsInRaidWith` holds), relocates the caster `CHARGE_OFFSET_YD` away before every cast at the ally (the
+same fixture `hits.py`'s ally-targeted hit scenarios use, needed so a charge-type rank is not already in its
+minimum range), and, with `ally_health_pct` set, lowers the ally's health to that percent of a 10000 fixed maximum
+before every cast so a heal lands an effective, non-zero amount. With `restore_charges` set, the trigger rank's
+charge pool is restored before every cast (`"restore_charges"` fixture), needed for a charge-limited rank cast at
+the harness's scheduled attempt rate rather than its native recharge rate.
 
 `TRIGGER_TRIALS` is 182, the smallest N with 0.975^N <= 0.01: a trigger that fires 2.5 points under 100% of the time
 misses at least once in 182 trials with 99% probability. The scenario learns the trigger rank, makes

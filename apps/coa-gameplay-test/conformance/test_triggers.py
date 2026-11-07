@@ -25,7 +25,16 @@ import batch
 import run
 
 TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 804932, 806516, 803158, 805420, 680891,
-                    803844, 803159, 301065, 801457}
+                    803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286}
+IMPROVED_SCARLET_HAMMER = 301254
+SCARLET_HAMMER = 807035
+DETERMINED = 705256
+TEMPLE_GUARDIAN = 803792
+FAITH_GUARD = 705259
+CHASTISE = 503141
+LIBRAM_OF_CONSECRATION = 801441
+DUTY_CALLS = 705286
+RIGHTEOUS_LUNGE = 570233
 SCARLET_SECRETS = 520812
 STAFFGUARD = 705295
 CHAKRA_OF_POWER = 803158
@@ -382,6 +391,52 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         labels = trigger_measurements(BINDING_SCRIPTURE)
         baseline_step = next(step for step in steps if step.get('label') == labels['without'])
         self.assertLess(steps.index(baseline_step), learn_aura)
+
+    def test_improved_scarlet_hammer_observes_its_own_trigger_spell(self):
+        entry = templar_trigger(IMPROVED_SCARLET_HAMMER)
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': SCARLET_HAMMER, 'target': 'dummy'})
+        self.assertEqual(entry['observe_spell'], 521240)
+        self.assertEqual(self.spell(IMPROVED_SCARLET_HAMMER, 'EffectTriggerSpell[0]'), entry['observe_spell'])
+
+    def test_determined_triggers_on_a_temple_guardian_charge_at_an_ally(self):
+        entry = templar_trigger(DETERMINED)
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': TEMPLE_GUARDIAN, 'target': 'ally'})
+        self.assertEqual(entry['observe_spell'], 681136)
+        self.assertTrue(entry['restore_charges'])
+        scenario, [expectation] = trigger_scenario(CLASS_FILE, entry)
+        self.assertIn('ally', [player['id'] for player in scenario['players']])
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps)
+                if step['action'] == 'cast' and step['spell'] == TEMPLE_GUARDIAN]
+        self.assertTrue(casts)
+        for index in casts:
+            before = steps[index - 3:index]
+            self.assertIn({'action': 'relocate', 'actor': 'caster', 'dx': 10}, before)
+            self.assertIn({'action': 'restore_charges', 'actor': 'caster', 'spell': TEMPLE_GUARDIAN}, before)
+        self.assertIn(f'the charges of {TEMPLE_GUARDIAN} are restored', expectation.rule)
+
+    def test_restore_charges_needs_a_cast_trigger(self):
+        entry = copy.deepcopy(templar_trigger(DETERMINED))
+        entry['trigger'] = {'action': 'attack', 'spell': 0}
+        entry['trial_metric'] = 'melee_attack_count'
+        with self.assertRaises(ValueError):
+            trigger_plan(CLASS_FILE, entry)
+
+    def test_faith_guard_sets_a_libram_attempt_aura(self):
+        entry = templar_trigger(FAITH_GUARD)
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': CHASTISE, 'target': 'dummy'})
+        librams = {801441, 803890, 803891, 803892, 803893, 801461, 801463, 801466, 805423}
+        [aura] = entry['attempt_auras']
+        self.assertIn(aura['spell'], librams)
+        self.assertEqual(aura['spell'], LIBRAM_OF_CONSECRATION)
+        self.assertEqual(entry['observe_spell'], 706466)
+
+    def test_duty_calls_trigger_spell_matches_family_mask(self):
+        entry = templar_trigger(DUTY_CALLS)
+        self.assertEqual(entry['trigger']['spell'], RIGHTEOUS_LUNGE)
+        self.assertEqual(self.spell(RIGHTEOUS_LUNGE, 'SpellFamilyName'), 25)
+        self.assertTrue(self.spell(RIGHTEOUS_LUNGE, 'SpellFamilyFlags[2]') & 1)
+        self.assertEqual(entry['observe_spell'], 560834)
 
     def test_status_entry_has_no_plan(self):
         entry = copy.deepcopy(templar_trigger(STAFFGUARD))
