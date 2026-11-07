@@ -799,6 +799,7 @@ produce the same status vocabulary (`ok`, `alert`, `unmodelled`, `measured`, `am
 | `behaviour_ratio` | a ratio ("doubles the healing" = x2, "twice the damage" = x2) |
 | `behaviour_duration` | a duration refresh or reduction |
 | `behaviour_trigger` | a scripted "always fires" claim not reachable through `triggers.py`'s native `EffectTriggerSpell` path |
+| `behaviour_metric_delta` | a passive whose change is read through a harness metric already used elsewhere in the scenario (`owned_creature_count`, `aura_amount`, ...) around a named active spell, judged by exact equality rather than a tolerance band |
 
 Every `Expectation.rule` of these checks starts with the literal prefix `prose: ` followed by the quoted
 `Description[enUS]` fragment that states the number, e.g.
@@ -808,10 +809,10 @@ skipped: it is what keeps a behaviour `ok` honestly distinguishable from a token
 | Field | Content |
 |---|---|
 | `spell`, `name` | the passive and its `SpellName[enUS]` |
-| `kind` | `count`, `ratio`, `duration`, `trigger` or `spread`: which scenario builder and judge rule apply |
+| `kind` | `count`, `ratio`, `duration`, `trigger`, `spread` or `metric_delta`: which scenario builder and judge rule apply |
 | `quote` | the exact prose fragment of `Description[enUS]`, checked to be a substring at generation time |
 | `expected` | the number, ratio or duration the quote states |
-| kind-specific fields | `count`: `target_rank` (the active spell cast), `radius` and `radius_reason` (the source citation that grounds the fixture placement, never a guessed distance), `metric` (`spell_damage_count`, the default, for a spell with a school-damage effect, or `aura` for a spell whose own effect is not damage, such as a silence); `ratio`: `targets`, a list of `[rank_id, name]` pairs; `spread`: `seed_spell` (cast on the primary dummy to install the aura the passive must copy), `aura_spell` (the aura id measured on every extra dummy), `target_rank` (the active whose damage triggers the copy), `radius`/`radius_reason`; `trigger`: `shield_aura` (the absorb aura that must be fully consumed), `trigger_spell` (the spell the break casts), `breaker_spell` (a spell of the absorb's own school that the striker casts directly at the caster to deplete it deterministically), `striker_entry` (a creature template entry to cast it from), `break_timeout_ms` (how long to wait for the aura to clear once the breaker spell lands, default 3000) |
+| kind-specific fields | `count`: `target_rank` (the active spell cast), `radius` and `radius_reason` (the source citation that grounds the fixture placement, never a guessed distance), `metric` (`spell_damage_count`, the default, for a spell with a school-damage effect, or `aura` for a spell whose own effect is not damage, such as a silence); `ratio`: `targets`, a list of `[rank_id, name]` pairs; `spread`: `seed_spell` (cast on the primary dummy to install the aura the passive must copy), `aura_spell` (the aura id measured on every extra dummy), `target_rank` (the active whose damage triggers the copy), `radius`/`radius_reason`; `trigger`: `shield_aura` (the absorb aura that must be fully consumed), `trigger_spell` (the spell the break casts), `breaker_spell` (a spell of the absorb's own school that the striker casts directly at the caster to deplete it deterministically), `striker_entry` (a creature template entry to cast it from), `break_timeout_ms` (how long to wait for the aura to clear once the breaker spell lands, default 3000); `metric_delta`: `trigger_spell` (the active spell cast to create the measurable state, learned once up front since it is not otherwise granted to the reference character), `metric`/`fields` (the harness metric and its query fields, e.g. `owned_creature_count`/`{"entry": ...}` or `aura_amount`/`{"spell": ..., "effect": ...}`), `before_expected` (the DBC-derived baseline value asserted on the "before" measurement), `wait_ms` (settle time after the cast before measuring, default 3000), `expire_ms` (wait after the learn before the second cast, long enough for the first cast's effect to fully expire so it cannot contaminate the second measurement, default 20500) |
 
 `behaviours.py`'s `behaviour_scenario(class_file, entry)` dispatches on `kind` to a scenario builder shaped like
 `passives.passive_scenario` (base steps, measure "before," `learn`, measure "after"), with a kind-specific measure
@@ -897,6 +898,25 @@ passive known); `alert` when `without_delta > 0` (the damage fires even without 
 tooltip's gating) **or** `with_delta == 0` (the passive is known but the break never casts the trigger spell -
 the absent-effect case this check exists to catch, since a zero effect must never read as `ok`).
 
+### Metric-delta scenarios (`behaviour_metric_delta`)
+
+Some prose passives change a quantity none of the shapes above fit: not a count of targets hit, not a healing
+ratio, not a scripted "always fires" trigger, but a plain before/after read of a metric the harness already
+exposes for other purposes (how many of a summon creature entry the caster owns, the computed amount of an
+aura effect, ...). `metric_delta_scenario` learns `trigger_spell` once up front (the active spell a reference
+character this deep in a talent chain is not otherwise granted, the same reason `aura_spread_scenario` learns
+its own actives explicitly), casts it, waits `wait_ms`, measures `metric` with `fields` ("before"), `learn`s
+the passive, waits `expire_ms` (long enough for the first cast's effect to fully expire, so a still-alive
+summon or a still-ticking aura from the "before" phase cannot leak into the "after" reading), casts
+`trigger_spell` again and measures again ("after"). The judge (`compare.behaviour_metric_delta_verdict`) checks
+both reads by exact equality, not the shared tolerance-margin scale the other behaviour judges use: `ok` only
+when `before == before_expected` **and** `after == expected`; `alert` otherwise, including when `before` alone
+is wrong (an implementation that gets the delta right from a wrong baseline is still caught) and when `after`
+is off by as little as one unit, since the shared margin's floor of 1 absolute unit would otherwise mask the
+exact failure this check exists to catch (a modifier of +1 silently not applying). Exact equality is sound here
+specifically because both metrics are deterministic integer reads taken with no combat in flight, unlike the
+live combat-roll pipeline behind `melee_damage_taken`/`spell_damage_taken`, which does need a tolerance band.
+
 ### Templar entries
 
 | Passive | Kind | Quote | Expected | Mechanism |
@@ -906,6 +926,8 @@ the absent-effect case this check exists to catch, since a zero effect must neve
 | Final Prayer 705268 | ratio | "Doubles the healing done to you" | 2.0 | one named target, Testament of Faith 801478 (a direct heal); Testament of Fortitude 500678 is a periodic self-heal (`PERIODIC_TRIGGER_SPELL_WITH_VALUE` -> 500690) that needs a tick-based measurement this round did not build, so it is not in `targets` yet |
 | Holy Tempest 301339 | spread | "spreads Condemn on affected enemies to a nearby enemy" | 1 | `AscensionTemplarAbilities.cpp:294-295` (`OnSpellHitResult`): on a confirmed hit of Righteous Tempest's periodic damage (ranks `805410`/`570200..570205`) with the passive known, `AscensionTemplar.cpp:224-257` (`SpreadCondemn`) copies the Condemn aura already present on the hit target onto the first valid, non-already-afflicted, line-of-sight enemy within `Nearby(target, 10.0f)` - a hardcoded radius, not read from any DBC field |
 | Armor of Faith 804930 | trigger | "Whenever the absorption shield from Staffguard breaks, inflict" | 1 | `AscensionTemplarAuras.cpp:213-216` (`aura_ascension_templar_lifecycle::Remove`): when Staffguard 706583's absorb effect is fully depleted (`GetAmount() <= 0`) by `AURA_REMOVE_BY_ENEMY_SPELL` (an enemy's own damage, not an expiry or manual cancel) while the player is alive and knows 804930, it casts Armor of Faith's damage spell 801546 on the player, whose own nearby-enemy Holy damage effect then lands; the amount stays the pre-existing `$801546ppl1` player question (`questions.md:368-374`), unchanged by this entry. Staffguard's absorb is Holy-only (`SchoolMask` 2), so the scenario's striker casts Smite 48123 (`breaker_spell`) directly at the caster rather than swinging at it |
+| Tyr's Guard 560649 | metric_delta | "now summons an additional copy of yourself" | 3 | a plain stock `SPELLMOD_EFFECT1` aura (effect 2 of 560649, `EffectSpellClassMask[6]` matching Testament of Hope 1397742's family flags): the engine's own `Player::ApplySpellMod`/`SpellInfo::CalcValue` path adds 1 to Testament of Hope's summon effect's base points (1 -> 2, `CalcValue` 2 -> 3) with no CoA-specific code involved; `owned_creature_count` of the copy entry 50250 is the metric, before (2, no 560649) and after (3, 560649 learned) |
+| Spiritual Abdicator 803219 | metric_delta | "reduces damage taken by an additional 5% per copy" | -15 | `AscensionTemplarContracts.cpp:278-281` (`templar_scaling::ModifySpellEffectBaseValue`): when the copy's owner (the Templar) has aura 803219, the copy's own owner-area aura 704409 effect 1 (`MOD_DAMAGE_PERCENT_TAKEN`, base `CalcValue` -10, confirmed by the existing Testament of Hope regression scenario) is overridden to -15 at load, the "additional 5%" the tooltip states on top of 704409's own 10%; 803219's own effect 0 is a pure marker (`dummy()` rewrites its `ApplyAuraName` to `SPELL_AURA_DUMMY` at load, no gameplay value of its own); `aura_amount` of spell 704409 effect 1 is the metric, before (-10, no 803219) and after (-15, 803219 learned) |
 
 The 10-yard and 8-yard fixture radii above are both read from server source, never guessed, per each entry's own
 `radius_reason`.

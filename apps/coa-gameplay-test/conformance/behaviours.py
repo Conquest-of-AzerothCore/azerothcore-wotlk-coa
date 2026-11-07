@@ -11,8 +11,9 @@ BEHAVIOUR_COUNT = 'behaviour_count'
 BEHAVIOUR_RATIO = 'behaviour_ratio'
 BEHAVIOUR_DURATION = 'behaviour_duration'
 BEHAVIOUR_TRIGGER = 'behaviour_trigger'
-BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_TRIGGER)
-KINDS = ('count', 'ratio', 'duration', 'trigger')
+BEHAVIOUR_METRIC_DELTA = 'behaviour_metric_delta'
+BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_TRIGGER, BEHAVIOUR_METRIC_DELTA)
+KINDS = ('count', 'ratio', 'duration', 'trigger', 'metric_delta')
 PROSE = 'prose: '
 BEFORE = 'before'
 AFTER = 'after'
@@ -364,6 +365,74 @@ def shield_break_trigger_spec(entry: dict) -> ShieldBreakTriggerSpec:
                                   entry['striker_entry'], entry.get('break_timeout_ms', DEFAULT_BREAK_TIMEOUT_MS))
 
 
+DEFAULT_METRIC_DELTA_WAIT_MS = 3000
+DEFAULT_METRIC_DELTA_EXPIRE_MS = 20500
+
+
+@dataclass(frozen=True)
+class MetricDeltaSpec:
+    spell: int
+    name: str
+    quote: str
+    expected: float
+    trigger_spell: int
+    metric: str
+    fields: dict
+    before_expected: float
+    wait_ms: int = DEFAULT_METRIC_DELTA_WAIT_MS
+    expire_ms: int = DEFAULT_METRIC_DELTA_EXPIRE_MS
+
+
+def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
+    return f'{spec.spell} {spec.metric} {moment}'
+
+
+def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
+    facts = facts_of(records, spec.trigger_spell)
+
+    def cast_steps() -> list[dict]:
+        steps = []
+        if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
+                         'value': facts.mana_cost})
+        steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
+        steps += required_aura_steps(facts)
+        steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': CASTER})
+        steps.append({'action': 'wait', 'ms': spec.wait_ms})
+        return steps
+
+    before_label = metric_delta_label(spec, BEFORE)
+    after_label = metric_delta_label(spec, AFTER)
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour metric delta',
+        'contract': f'No-combat with/without check: {spec.metric} {spec.fields} around a cast of {spec.trigger_spell},'
+                    f' measured before and after the passive is learned, waiting {spec.expire_ms} ms between phases '
+                    f'for the first cast\'s effect to fully expire before the second cast.',
+        'players': [player_fixture(class_file)],
+        'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] +
+                 cast_steps() + [measurement(before_label, CASTER, spec.metric, **spec.fields)] +
+                 [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] +
+                 [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}] +
+                 cast_steps() + [measurement(after_label, CASTER, spec.metric, **spec.fields)]}
+    label = f'{spec.spell} behaviour_metric_delta'
+    model = {'kind': 'metric_delta', 'before_label': before_label, 'after_label': after_label,
+             'expected': spec.expected, 'before_expected': spec.before_expected, 'metric': spec.metric,
+             'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_METRIC_DELTA, spec.spell, spec.trigger_spell, None,
+                              str(spec.expected), prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
+    return MetricDeltaSpec(entry['spell'], entry['name'], entry['quote'], entry['expected'], entry['trigger_spell'],
+                           entry['metric'], entry['fields'], entry['before_expected'],
+                           entry.get('wait_ms', DEFAULT_METRIC_DELTA_WAIT_MS),
+                           entry.get('expire_ms', DEFAULT_METRIC_DELTA_EXPIRE_MS))
+
+
 def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
     if entry['kind'] == 'count':
         return target_count_scenario(class_file, target_count_spec(entry))
@@ -373,6 +442,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return aura_spread_scenario(class_file, aura_spread_spec(entry))
     if entry['kind'] == 'trigger':
         return shield_break_trigger_scenario(class_file, shield_break_trigger_spec(entry))
+    if entry['kind'] == 'metric_delta':
+        return metric_delta_scenario(class_file, metric_delta_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 
