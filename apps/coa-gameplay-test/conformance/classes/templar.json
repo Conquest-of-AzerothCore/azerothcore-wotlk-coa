@@ -605,6 +605,11 @@
       "spell": 801202, "name": "Battlepriest", "kind": "health_ratio",
       "quote": "take 20% reduced Magic damage", "probe_spell": 133,
       "levels": [[90, 0.8], [50, 1.0], [10, 0.8]]
+    },
+    {
+      "spell": 300607, "name": "Titanfall", "kind": "leech_ratio",
+      "quote": "now heals you for twice the damage dealt",
+      "target_rank": 806835, "expected_before": 1.0, "expected_after": 2.0
     }
   ]
 }

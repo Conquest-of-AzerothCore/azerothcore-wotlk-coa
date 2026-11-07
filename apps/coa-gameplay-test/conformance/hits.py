@@ -12,8 +12,9 @@ from profile import (CASTER, DBC_DIR, SETTLE_MS, base_steps, caster_stats_from, 
 from tooltip import (MIXED_PERIOD, OVER_TICKS, CasterStats, ForcedPoints, Readout, Records, Tooltip, Unreadable,
                      mixed_period_reason, period_reading, read_tooltip)
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, EFFECT_TOKEN,
-                    EFFECTS, MEAN_HALF_WIDTH, TARGET, UNREADABLE, Z_99, Expectation, RankFacts, armed_for, dataset,
-                    equip_requirement, facts_of, required_aura_steps, targets_ally)
+                    EFFECTS, MEAN_HALF_WIDTH, TARGET, UNREADABLE, Z_99, Expectation, RankFacts, Unmodelled, armed_for,
+                    dataset, equip_requirement, facts_of, required_aura_steps, required_target_health_steps,
+                    targets_ally)
 
 HIT_CHECKS = ('hit_mean', 'melee_mean', 'unmodelled')
 UNMODELLED = 'unmodelled: '
@@ -24,6 +25,7 @@ ATTACK_POWER_PER_DPS = 14.0
 SCHOOL_DAMAGE = 2
 APPLY_AURA = 6
 HEAL = 10
+HEALTH_LEECH = 9
 WEAPON_DAMAGE_NOSCHOOL = 17
 WEAPON_PERCENT_DAMAGE = 31
 WEAPON_DAMAGE = 58
@@ -48,12 +50,6 @@ MELEE_LABEL = 'melee melee_mean'
 ARMOR_LABEL = 'target armor'
 VIEW_LEVEL_LABEL = 'target view_level'
 FLOAT32 = struct.Struct('<f')
-
-
-class Unmodelled(Exception):
-    def __init__(self, reason: str):
-        super().__init__(reason)
-        self.reason = reason
 
 
 @dataclass(frozen=True)
@@ -145,6 +141,8 @@ def hit_kind(effects: Sequence[int], aura_names: Sequence[int],
             kinds.setdefault('weapon', []).append(index)
         elif effect == SCHOOL_DAMAGE:
             kinds.setdefault('school', []).append(index)
+        elif effect == HEALTH_LEECH:
+            kinds.setdefault('leech', []).append(index)
         elif effect == HEAL:
             kinds.setdefault('heal', []).append(index)
         elif effect == APPLY_AURA and aura_names[index] in PERIODIC_KINDS:
@@ -695,6 +693,7 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int) -> list[tuple[dic
     parts = []
     for part, performed in enumerate(shares):
         steps = (learn + [dict(step) for step in target]
+                 + required_target_health_steps(hit.facts)
                  + cast_steps(hit.facts, rank_id, cast_target, interval, performed, cast_fixtures)
                  + hit_measurements(rank_id, hit.hit_spell, hostile, labels, ally))
         titled = name if len(shares) == 1 else f'{name} part {part + 1} of {len(shares)}'

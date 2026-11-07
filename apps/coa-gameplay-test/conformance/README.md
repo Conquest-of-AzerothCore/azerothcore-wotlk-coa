@@ -280,6 +280,12 @@ aura, for Sacred Swing. Two diagnostic measurements ride along without an `Expec
 `<rank> aura_present`.
 The remaining aura duration is read in the cast step's own tick: measured 12 to 15 ms below the record on instants.
 `cooldown_ms` is the remaining cooldown, measured 6 ms below the record right after the cast.
+A rank whose record names a `TargetAuraState` gets a health fixture on its hostile target before the cast
+(`required_target_health_steps`, `values.py`): `AURA_STATE_HEALTHLESS_35_PERCENT` (13) sets the target to 30% of its
+max health, strictly below the 35% gate and above any lower-threshold check that might also apply, then waits 1000
+ms for `Unit::Update` to recompute the derived aura state flag. Without the wait the cast can still see the stale
+flag and fail `SPELL_FAILED_TARGET_AURASTATE` (111). An unmapped `TargetAuraState` is `unmodelled: target aura state
+<n> has no scenario fixture`, never silently skipped. Templar: Titanstrike 806521/806834/806835.
 
 A value that cannot be compared is never dropped; its `rule` starts with a stable prefix:
 `unreadable: <entry>` for a part the reader could not evaluate (the scenario measures the spell's first active effect
@@ -484,6 +490,7 @@ above), `cast`, and a wait of
 |---|---|---|
 | `weapon` | 31 percent, 17/58/121 flat | roll times the percent, truncated, plus the floored flats (ADR 0010) |
 | `school` | 2 | the floored tooltip value of each effect, or each integer from `$mN` to `$MN`, or each roll (below) |
+| `leech` | 9 (`SPELL_EFFECT_HEALTH_LEECH`) | as `school`: the same `SpellDamageBonusDone`/`Taken` path, with mitigation and damage modifiers |
 | `heal` | 10 | as `school`, on the caster, without mitigation |
 | `periodic_damage`, `periodic_heal` | 6, aura 3 or 8 | one tick; `hits_per_cast` is `Duration / EffectAmplitude` |
 | `triggered_weapon` | 6, aura 23 whose `EffectTriggerSpell` is a `weapon` hit | the `weapon` hit of the triggered spell, per tick; `hits_per_cast` is `Duration / EffectAmplitude` |
@@ -525,7 +532,7 @@ total reading (a `${$<id>m1*$d/$t1}` there would be modelled as one tick, an ale
 extra tick on apply of `AttributesEx5 & 0x200` (`SPELL_ATTR5_EXTRA_INITIAL_PERIOD`): Righteous Tempest lands 6 hits
 per cast, so it schedules more casts than needed, while the judged mean is unaffected.
 
-A `school` or `heal` effect whose `EffectDieSides` is above 1 and whose tooltip shows one token (Righteous Upheaval:
+A `school`, `leech` or `heal` effect whose `EffectDieSides` is above 1 and whose tooltip shows one token (Righteous Upheaval:
 `${$m1+0+$AP*0.45+$SP*0.45}`, `EffectBasePoints` 658, `EffectDieSides` 224 at rank 572027) is read again with each
 roll `EffectBasePoints + 1` .. `EffectBasePoints + EffectDieSides` in place of its points, as the comparison of rolled
 effect values does: the server adds one `irand(1, EffectDieSides)` to the points of every direct hit
@@ -947,6 +954,37 @@ A `levels` entry with `expected_ratio` of exactly `1.0` (the mid-health case whe
 what proves the gate itself is being tested, not just the reduction: a scenario that only measured the reduced
 levels could not tell "the ratio is right" apart from "the ratio applies unconditionally."
 
+### Leech-ratio scenarios (`behaviour_ratio`, `kind: "leech_ratio"`)
+
+`healing_ratio_scenario`'s no-combat probe (`spell_healing_done`) never reaches `SpellEffectInfo::CalcValueMultiplier`,
+the pipeline a `SPELLMOD_VALUE_MULTIPLIER` passive modifies, and its cast always targets the caster, which a hostile,
+health-gated rank (Titanstrike) would refuse outright. `leech_ratio_scenario` instead casts the rank for real, once
+before the passive is learned and once after, each at its own dummy (`set_health_pct` cannot raise health back up,
+so the same dummy could not take a second cast once the fixture or the first cast's leech has already lowered it),
+and measures the real `spell_damage_total` and `spell_heal_total` (`HealBySpell` always heals the caster, regardless
+of the cast's target) of that one cast. Both effects of a `SPELL_EFFECT_HEALTH_LEECH` spell share the same random
+roll (the heal is computed from the resolved, already-mitigated `damageInfo.damage`), so their ratio is exactly
+deterministic once two measurement effects specific to this metric are accounted for:
+
+- `spell_heal_total` sums every matching heal event since the scenario started, not since the last measurement, so
+  the "after" phase's reading also carries the "before" phase's heal (the two casts heal the same caster with the
+  same spell id). `leech_ratio_verdict` (`compare.py`) subtracts a `heal_baseline_label` (the "before" phase's own
+  heal label; `null` for the "before" phase itself, which is naturally the first heal of the scenario) before
+  computing the ratio.
+- `Spell.cpp`'s health-leech handling computes the heal from `damageInfo.damage`, which already carries the
+  reference character's own damage-done percent modifiers (`known_auras`, aura 341), then applies the healing-done
+  percent modifiers of the same auras again on top (aura 136, through `SpellHealingBonusDone`/`Taken`) before
+  calling `HealBySpell`. The two percents do not cancel against the recorded damage total, so the ratio the scenario
+  can actually measure is `healMultiplier x heal_done_factor`, not `healMultiplier` alone.
+  `leech_heal_modifier_factor` folds every known `heal`-side `Modifier` (`hits.aura_modifiers`) into the spec's
+  `expected_before`/`expected_after` at scenario-build time, the same way `rank_hit` folds known auras into a
+  `hit_mean` model, so the expected value stays DBC-plus-known-modifier derived, never invented.
+
+`leech_ratio_verdict` reuses `behaviour_ratio_verdict`'s delta-on-the-damage-scale judging (`compare.py`):
+`ok` when `|actual_heal - damage| <= max(1, 0.5% of damage x (expected - 1))`, `alert` otherwise, including a
+measured 0 against a nonzero expected delta. Templar: Titanfall 300607 against Titanstrike 806835, expected 1.0
+(no Titanfall) and 2.0 ("twice the damage dealt") before the known-modifier factor.
+
 ### Templar entries
 
 | Passive | Kind | Quote | Expected | Mechanism |
@@ -959,6 +997,7 @@ levels could not tell "the ratio is right" apart from "the ratio applies uncondi
 | Tyr's Guard 560649 | metric_delta | "now summons an additional copy of yourself" | 3 | a plain stock `SPELLMOD_EFFECT1` aura (effect 2 of 560649, `EffectSpellClassMask[6]` matching Testament of Hope 1397742's family flags): the engine's own `Player::ApplySpellMod`/`SpellInfo::CalcValue` path adds 1 to Testament of Hope's summon effect's base points (1 -> 2, `CalcValue` 2 -> 3) with no CoA-specific code involved; `owned_creature_count` of the copy entry 50250 is the metric, before (2, no 560649) and after (3, 560649 learned) |
 | Spiritual Abdicator 803219 | metric_delta | "reduces damage taken by an additional 5% per copy" | -15 | `AscensionTemplarContracts.cpp:278-281` (`templar_scaling::ModifySpellEffectBaseValue`): when the copy's owner (the Templar) has aura 803219, the copy's own owner-area aura 704409 effect 1 (`MOD_DAMAGE_PERCENT_TAKEN`, base `CalcValue` -10, confirmed by the existing Testament of Hope regression scenario) is overridden to -15 at load, the "additional 5%" the tooltip states on top of 704409's own 10%; 803219's own effect 0 is a pure marker (`dummy()` rewrites its `ApplyAuraName` to `SPELL_AURA_DUMMY` at load, no gameplay value of its own); `aura_amount` of spell 704409 effect 1 is the metric, before (-10, no 803219) and after (-15, 803219 learned) |
 | Battlepriest 801202 | health_ratio | "take 20% reduced Magic damage" | 0.8 at 90%/10% health, 1.0 at 50% | the DBC's own mechanism (a periodic trigger casting a conditional `MOD_DAMAGE_PERCENT_TAKEN` aura, `CasterAuraState`-gated on `AURA_STATE_HEALTHLESS_20_PERCENT`/`ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT`) is `dummy()`-nulled at load (`AscensionTemplarContracts.cpp:151-154`); the real implementation is a direct multiplier in `templar_scaling::Mitigation` (`AscensionTemplarContracts.cpp:242-255`), `factor *= .8f` when the school is magic and the player both knows 801202 and is strictly above 80% or strictly below 20% health (`Unit::HealthAbovePct`/`HealthBelowPct`), called from `ModifySpellDamageTaken`/`ModifyPeriodicDamageAurasTick`/`ModifyMeleeDamage`'s hooks; `script_spell_damage_taken` with `probe_spell` Fireball 133 (magic school, no `TemplarCopies` attribute exemption) exercises the same `ModifySpellDamageTaken` hook the real pipeline uses |
+| Titanfall 300607 | leech_ratio | "now heals you for twice the damage dealt" | 1.0 before, 2.0 after (before the known-modifier factor) | a plain data-driven `SPELLMOD_VALUE_MULTIPLIER` (`EffectMiscValue` 27) `ADD_PCT_MODIFIER` passive on Titanstrike's family mask (`EffectSpellClassMask` bit 4, `SpellFamilyName` 25), `EffectBasePoints` 99 (+100%); Titanstrike's own `SPELL_EFFECT_HEALTH_LEECH` effect has `ValueMultiplier` 1.0, run through the generic `Player::ApplySpellMod(SPELLMOD_VALUE_MULTIPLIER)` pipeline (`SpellInfo::CalcValueMultiplier`, `Spell.cpp:2929`) with no CoA-specific code involved; Titanstrike also requires its target below 35% health (`TargetAuraState` 13, `AURA_STATE_HEALTHLESS_35_PERCENT`, a flag `Unit::Update` recomputes every tick from current health, not a settable aura) |
 
 The 10-yard and 8-yard fixture radii above are both read from server source, never guessed, per each entry's own
 `radius_reason`.

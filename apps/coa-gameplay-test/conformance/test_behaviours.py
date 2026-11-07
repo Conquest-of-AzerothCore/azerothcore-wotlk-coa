@@ -5,10 +5,11 @@ import unittest
 from behaviours import (BEHAVIOUR_COUNT, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER,
                         HealingRatioTarget, aura_spread_scenario, aura_spread_spec, behaviour_entries,
                         behaviour_entry, behaviour_scenario, health_ratio_spec, health_threshold_ratio_scenario,
-                        healing_ratio_scenario, healing_ratio_spec, metric_delta_scenario,
-                        metric_delta_spec, shield_break_trigger_scenario, shield_break_trigger_spec,
-                        target_count_scenario, target_count_spec)
+                        healing_ratio_scenario, healing_ratio_spec, leech_heal_modifier_factor, leech_ratio_scenario,
+                        leech_ratio_spec, metric_delta_scenario, metric_delta_spec, shield_break_trigger_scenario,
+                        shield_break_trigger_spec, target_count_scenario, target_count_spec)
 from compare import Verdict, judge_behaviour
+from hits import aura_modifiers
 from profile import DBC_DIR, load_class_file
 from tooltip import Records
 from values import Expectation, dataset
@@ -38,6 +39,8 @@ TESTAMENT_OF_HOPE_COPY_ENTRY = 50250
 TESTAMENT_OF_HOPE_AURA = 704409
 BATTLEPRIEST = 801202
 FIREBALL = 133
+TITANFALL = 300607
+TITANSTRIKE_MAX_RANK = 806835
 
 
 def scarlet_judicator_entry() -> dict:
@@ -70,6 +73,10 @@ def spiritual_abdicator_entry() -> dict:
 
 def battlepriest_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == BATTLEPRIEST)
+
+
+def titanfall_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == TITANFALL)
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -170,7 +177,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 8)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 9)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -345,6 +352,121 @@ class HealthRatioScenarioTests(unittest.TestCase):
             self.assertEqual(step['spell'], FIREBALL)
             self.assertEqual(step['target'], 'dummy')
             self.assertEqual(step['actor'], 'caster')
+
+
+class LeechRatioScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_expectations(self):
+        spec = leech_ratio_spec(titanfall_entry())
+        scenario, expectations = leech_ratio_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 2)
+        for expectation in expectations:
+            self.assertEqual(expectation.check, BEHAVIOUR_RATIO)
+            self.assertEqual(expectation.rank_id, TITANSTRIKE_MAX_RANK)
+            self.assertEqual(expectation.model['kind'], 'leech_ratio')
+        before = next(item for item in expectations if item.label.endswith('leech_ratio before'))
+        after = next(item for item in expectations if item.label.endswith('leech_ratio after'))
+        heal_factor = leech_heal_modifier_factor(RECORDS, CLASS_FILE)
+        self.assertAlmostEqual(before.model['expected'], 1.0 * heal_factor, places=9)
+        self.assertAlmostEqual(after.model['expected'], 2.0 * heal_factor, places=9)
+
+    def test_known_healing_done_modifiers_are_folded_into_the_expected_ratio(self):
+        heal_factor = leech_heal_modifier_factor(RECORDS, CLASS_FILE)
+        heal_modifiers = [modifier for modifier in aura_modifiers(RECORDS, CLASS_FILE['known_auras'],
+                                                                  CLASS_FILE['level'])
+                         if modifier.applies_to == 'heal']
+        self.assertTrue(heal_modifiers)
+        expected_factor = 1.0
+        for modifier in heal_modifiers:
+            expected_factor *= (100 + modifier.percent) / 100
+        self.assertAlmostEqual(heal_factor, expected_factor, places=9)
+        self.assertNotEqual(heal_factor, 1.0)
+
+    def test_scenario_uses_two_separate_dummies_since_leeched_health_cannot_be_raised_back(self):
+        spec = leech_ratio_spec(titanfall_entry())
+        scenario, _ = leech_ratio_scenario(CLASS_FILE, spec)
+        creature_ids = {creature['id'] for creature in scenario['creatures']}
+        self.assertEqual(len(creature_ids), 2)
+        set_health_steps = [step for step in scenario['steps'] if step.get('action') == 'set_health_pct']
+        self.assertEqual(len(set_health_steps), 2)
+        self.assertEqual({step['target'] for step in set_health_steps}, creature_ids)
+        self.assertEqual({step['pct'] for step in set_health_steps}, {30})
+
+    def test_learn_titanfall_comes_between_the_two_casts(self):
+        spec = leech_ratio_spec(titanfall_entry())
+        scenario, _ = leech_ratio_scenario(CLASS_FILE, spec)
+        actions = [(step.get('action'), step.get('spell')) for step in scenario['steps']]
+        learn_titanfall = actions.index(('learn', TITANFALL))
+        casts = [index for index, (action, _) in enumerate(actions) if action == 'cast']
+        self.assertEqual(len(casts), 2)
+        self.assertLess(casts[0], learn_titanfall)
+        self.assertGreater(casts[1], learn_titanfall)
+
+    def test_measures_real_damage_and_heal_of_the_same_cast(self):
+        spec = leech_ratio_spec(titanfall_entry())
+        scenario, expectations = leech_ratio_scenario(CLASS_FILE, spec)
+        steps_by_label = {step['label']: step for step in scenario['steps'] if step.get('action') == 'assert'}
+        for expectation in expectations:
+            damage_step = steps_by_label[expectation.model['damage_label']]
+            heal_step = steps_by_label[expectation.model['heal_label']]
+            self.assertEqual(damage_step['metric'], 'spell_damage_total')
+            self.assertEqual(damage_step['spell'], TITANSTRIKE_MAX_RANK)
+            self.assertEqual(heal_step['metric'], 'spell_heal_total')
+            self.assertEqual(heal_step['target'], 'caster')
+
+    def test_the_after_phase_baselines_its_cumulative_heal_total_on_the_before_phase(self):
+        spec = leech_ratio_spec(titanfall_entry())
+        _, expectations = leech_ratio_scenario(CLASS_FILE, spec)
+        before = next(item for item in expectations if item.label.endswith('leech_ratio before'))
+        after = next(item for item in expectations if item.label.endswith('leech_ratio after'))
+        self.assertIsNone(before.model['heal_baseline_label'])
+        self.assertEqual(after.model['heal_baseline_label'], before.model['heal_label'])
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, titanfall_entry())
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 2)
+        self.assertTrue(all(expectation.check == BEHAVIOUR_RATIO for expectation in expectations))
+
+
+class JudgeLeechRatioTests(unittest.TestCase):
+    def expectation(self, label_suffix, expected, heal_baseline_label=None):
+        model = {'kind': 'leech_ratio', 'damage_label': 'damage', 'heal_label': 'heal',
+                 'heal_baseline_label': heal_baseline_label, 'expected': expected,
+                 'quote': 'now heals you for twice the damage dealt', 'target_name': f'Titanfall ({label_suffix})'}
+        return Expectation(f'label {label_suffix}', BEHAVIOUR_RATIO, TITANFALL, TITANSTRIKE_MAX_RANK, None,
+                           str(expected), 'prose: "now heals you for twice the damage dealt" (300607)', model)
+
+    def test_titanfall_absent_doubling_reads_as_alert_not_a_false_ok(self):
+        expectation = self.expectation('after', 2.0)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'damage': 100.0, 'heal': 100.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_titanfall_working_doubling_is_ok(self):
+        expectation = self.expectation('after', 2.0)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'damage': 100.0, 'heal': 200.0}), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_titanstrike_without_titanfall_matches_the_1_to_1_ratio(self):
+        expectation = self.expectation('before', 1.0)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'damage': 100.0, 'heal': 100.0}), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_the_cumulative_heal_total_is_baselined_before_the_ratio_is_judged(self):
+        expectation = self.expectation('after', 2.0, heal_baseline_label='baseline')
+        verdict = judge_behaviour(base_verdict(expectation),
+                                  FakeRun({'damage': 100.0, 'heal': 300.0, 'baseline': 100.0}), expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 2.0)
+
+    def test_an_unbaselined_cumulative_heal_total_would_misreport_the_ratio(self):
+        expectation = self.expectation('after', 2.0, heal_baseline_label='baseline')
+        contaminated = Expectation(expectation.label, expectation.check, expectation.spell_id, expectation.rank_id,
+                                   expectation.effect_index, expectation.displayed, expectation.rule,
+                                   {**expectation.model, 'heal_baseline_label': None})
+        verdict = judge_behaviour(base_verdict(contaminated),
+                                  FakeRun({'damage': 100.0, 'heal': 300.0, 'baseline': 100.0}), contaminated)
+        self.assertEqual(verdict.status, 'alert')
 
 
 class ShieldBreakTriggerScenarioTests(unittest.TestCase):

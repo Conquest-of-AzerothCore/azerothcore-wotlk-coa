@@ -1,3 +1,4 @@
+from dataclasses import replace
 import json
 from pathlib import Path
 import struct
@@ -7,11 +8,13 @@ import unittest
 from unittest import mock
 
 from classes import class_spells
-from profile import CLASSES_DIR, armed, base_steps, caster_stats_from, load_class_file, skill_label, unfit_reason
+from profile import (CASTER, CLASSES_DIR, armed, base_steps, caster_stats_from, load_class_file, skill_label,
+                    unfit_reason)
 from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, write_fixture
 from tooltip import CasterStats, DataSet, Records, read_tooltip
-from values import (CHECKS, UNMEASURABLE, UNREADABLE, Expectation, foreign_effect, periodic_reason, sample_labels,
-                    value_scenario)
+from values import (AURA_STATE_HEALTHLESS_35_PERCENT, CHECKS, TARGET, UNMEASURABLE, UNREADABLE, Expectation,
+                    Unmodelled, facts_of, foreign_effect, periodic_reason, required_target_health_steps,
+                    sample_labels, value_scenario)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -75,6 +78,7 @@ ITEM_RECORD = struct.Struct('<3i')
 TEMPLAR_SKILL_LINES = (70, 71, 72, 136)
 LEVEL_60_SKILL = 300
 HOLY_CONSTITUTION_BASE_POINTS, HOLY_CONSTITUTION_PER_LEVEL, HOLY_CONSTITUTION_BASE_LEVEL = 4, 1.5, 28
+TITANSTRIKE_MAX_RANK = 806835
 
 
 def measured_labels(scenario):
@@ -474,6 +478,36 @@ class ForeignEffectFixtureTest(unittest.TestCase):
                     shown = read_tooltip(records.dbc, spell_id, FIXTURE_CASTER).values[0]
                     self.assertEqual((shown.text, shown.effect_index, shown.kind), ('$/1000;s1', 0, 'duration_ms'))
                     self.assertEqual(periodic_reason(records, spell_id, FIXTURE_CASTER, shown), '')
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class RequiredTargetHealthStepsTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.records = Records(DataSet(DBC_DIR))
+
+    def test_a_spell_without_a_target_aura_state_needs_no_fixture(self):
+        facts = facts_of(self.records, VINDICATION_RANK_2)
+        self.assertEqual(facts.target_aura_state, 0)
+        self.assertEqual(required_target_health_steps(facts), [])
+
+    def test_titanstrike_establishes_the_healthless_35_percent_fixture(self):
+        facts = facts_of(self.records, TITANSTRIKE_MAX_RANK)
+        self.assertEqual(facts.target_aura_state, AURA_STATE_HEALTHLESS_35_PERCENT)
+        self.assertEqual(required_target_health_steps(facts),
+                         [{'action': 'set_health_pct', 'actor': CASTER, 'target': TARGET, 'pct': 30},
+                          {'action': 'wait', 'ms': 1000}])
+
+    def test_a_different_target_id_is_used_verbatim(self):
+        facts = facts_of(self.records, TITANSTRIKE_MAX_RANK)
+        steps = required_target_health_steps(facts, 'leech_before')
+        self.assertEqual(steps[0]['target'], 'leech_before')
+
+    def test_an_unmapped_aura_state_raises_unmodelled_instead_of_a_silent_skip(self):
+        facts = replace(facts_of(self.records, TITANSTRIKE_MAX_RANK), target_aura_state=99)
+        with self.assertRaises(Unmodelled) as raised:
+            required_target_health_steps(facts)
+        self.assertIn('target aura state 99 has no scenario fixture', raised.exception.reason)
 
 
 if __name__ == '__main__':

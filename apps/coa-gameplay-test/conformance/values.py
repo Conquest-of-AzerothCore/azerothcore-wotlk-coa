@@ -43,6 +43,15 @@ READ_STEP_MS = 25
 READ_BUDGET_MS = DEFAULT_TIMEOUT_MS // 2
 FIXED_DIE_SIDES = (0, 1)
 SAMPLE_SUFFIX = ' sample '
+AURA_STATE_HEALTHLESS_35_PERCENT = 13
+TARGET_HEALTH_FIXTURES = {AURA_STATE_HEALTHLESS_35_PERCENT: 30}
+TARGET_HEALTH_WAIT_MS = 1000
+
+
+class Unmodelled(Exception):
+    def __init__(self, reason: str):
+        super().__init__(reason)
+        self.reason = reason
 
 
 @dataclass(frozen=True)
@@ -71,6 +80,7 @@ class RankFacts:
     recast_ms: int
     cast_time_ms: int
     caster_aura_spell: int
+    target_aura_state: int
 
 
 @lru_cache(maxsize=None)
@@ -101,7 +111,8 @@ def facts_of(records: Records, rank_id: int) -> RankFacts:
         mana_cost_percentage=spell('ManaCostPercentage'),
         recast_ms=max(spell('RecoveryTime'), spell('CategoryRecoveryTime')),
         cast_time_ms=max(cast_time, 0),
-        caster_aura_spell=spell('CasterAuraSpell'))
+        caster_aura_spell=spell('CasterAuraSpell'),
+        target_aura_state=spell('TargetAuraState'))
 
 
 def equip_requirement(records: Records, rank_id: int) -> dict[str, int]:
@@ -143,6 +154,16 @@ def required_aura_steps(facts: RankFacts) -> list[dict]:
     if not facts.caster_aura_spell:
         return []
     return [{'action': 'set_aura', 'actor': CASTER, 'spell': facts.caster_aura_spell, 'stacks': 1}]
+
+
+def required_target_health_steps(facts: RankFacts, target: str = TARGET) -> list[dict]:
+    if not facts.target_aura_state:
+        return []
+    if facts.target_aura_state not in TARGET_HEALTH_FIXTURES:
+        raise Unmodelled(f'target aura state {facts.target_aura_state} has no scenario fixture')
+    pct = TARGET_HEALTH_FIXTURES[facts.target_aura_state]
+    return [{'action': 'set_health_pct', 'actor': CASTER, 'target': target, 'pct': pct},
+            {'action': 'wait', 'ms': TARGET_HEALTH_WAIT_MS}]
 
 
 def first_aura_effect(facts: RankFacts) -> int | None:
@@ -377,6 +398,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
         cast = {'action': 'cast', 'actor': CASTER, 'spell': rank_id}
         if is_hostile(facts):
             cast['target'] = TARGET
+            cast_steps += required_target_health_steps(facts)
         cast_steps += required_aura_steps(facts)
         cast_steps.append(cast)
         if facts.cast_time_ms:

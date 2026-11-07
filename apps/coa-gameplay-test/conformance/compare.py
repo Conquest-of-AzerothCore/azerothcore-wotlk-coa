@@ -1515,6 +1515,35 @@ def behaviour_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
                                f'alert')
 
 
+def behaviour_leech_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    damage = run.values.get(model['damage_label'])
+    heal = run.values.get(model['heal_label'])
+    baseline_label = model.get('heal_baseline_label')
+    baseline = run.values.get(baseline_label) if baseline_label else 0.0
+    missing = next((label for label, value in ((model['damage_label'], damage), (model['heal_label'], heal),
+                                               (baseline_label, baseline)) if label and value is None), None)
+    if missing:
+        return replace(base, explanation=missing_measurement(run, missing))
+    if damage <= 0:
+        return replace(base, status='unmeasured', measured=heal,
+                       explanation=f'{model["damage_label"]} measured {damage:g}; a ratio needs a positive damage '
+                                   f'amount')
+    actual_heal = heal - baseline
+    ratio = actual_heal / damage
+    expected_ratio = float(model['expected'])
+    delta = actual_heal - damage
+    expected_delta = damage * (expected_ratio - 1.0)
+    status = delta_status(BEHAVIOUR_RATIO, delta, expected_delta)
+    margin_ratio = delta_margin(BEHAVIOUR_RATIO, expected_delta) / damage
+    return replace(base, status=status, measured=ratio, expected=expected_ratio, low=expected_ratio - margin_ratio,
+                   high=expected_ratio + margin_ratio,
+                   explanation=f'{model["target_name"]} dealt {damage:g} and healed {actual_heal:g} ({heal:g} total '
+                               f'minus a {baseline:g} baseline), ratio {ratio:g}; measured delta {delta:+g} against '
+                               f'expected delta {expected_delta:+g} of {model["damage_label"]}, judged on the '
+                               f'healing scale, not the ratio scale, and a measured 0 against a nonzero expected '
+                               f'delta is always an alert')
+
+
 def behaviour_trigger_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     labels = (model['without_before_label'], model['without_after_label'],
              model['with_before_label'], model['with_after_label'])
@@ -1562,6 +1591,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
     if expectation.check == BEHAVIOUR_COUNT:
         return behaviour_count_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_RATIO:
+        if model.get('kind') == 'leech_ratio':
+            return behaviour_leech_ratio_verdict(base, run, model)
         return behaviour_ratio_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_TRIGGER:
         return behaviour_trigger_verdict(base, run, model)

@@ -2,10 +2,11 @@ from dataclasses import dataclass
 from pathlib import Path
 import re
 
-from hits import creature_fixture
+from hits import aura_modifiers, creature_fixture
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import COLOR_CODE, Records
-from values import CAST_MARGIN_MS, Expectation, TARGET, dataset, facts_of, required_aura_steps
+from values import (CAST_MARGIN_MS, Expectation, TARGET, dataset, facts_of, required_aura_steps,
+                    required_target_health_steps)
 
 BEHAVIOUR_COUNT = 'behaviour_count'
 BEHAVIOUR_RATIO = 'behaviour_ratio'
@@ -214,6 +215,97 @@ def healing_ratio_scenario(class_file: dict, spec: HealingRatioSpec) -> tuple[di
                                         target.spell, None, str(spec.expected), prose_rule(entry.quote, spec.spell),
                                         model))
     return scenario, expectations
+
+
+LEECH_RATIO_DAMAGE = 'damage'
+LEECH_RATIO_HEAL = 'heal'
+
+
+@dataclass(frozen=True)
+class LeechRatioSpec:
+    spell: int
+    name: str
+    quote: str
+    target_rank: int
+    expected_before: float
+    expected_after: float
+
+
+def leech_ratio_dummy_id(phase: str) -> str:
+    return f'leech_{phase}'
+
+
+def leech_ratio_label(spec: LeechRatioSpec, part: str, phase: str) -> str:
+    return f'{spec.target_rank} {part} {phase}'
+
+
+def leech_ratio_phase_steps(class_file: dict, facts, spec: LeechRatioSpec, phase: str) -> list[dict]:
+    dummy_id = leech_ratio_dummy_id(phase)
+    steps = []
+    if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+        steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost})
+    steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.target_rank})
+    steps += required_aura_steps(facts)
+    steps += required_target_health_steps(facts, dummy_id)
+    steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.target_rank, 'target': dummy_id})
+    steps.append({'action': 'wait', 'ms': facts.cast_time_ms + CAST_MARGIN_MS})
+    steps.append(measurement(leech_ratio_label(spec, LEECH_RATIO_DAMAGE, phase), CASTER, 'spell_damage_total',
+                             spell=spec.target_rank, target=dummy_id))
+    steps.append(measurement(leech_ratio_label(spec, LEECH_RATIO_HEAL, phase), CASTER, 'spell_heal_total',
+                             spell=spec.target_rank, target=CASTER))
+    return steps
+
+
+def leech_heal_modifier_factor(records: Records, class_file: dict) -> float:
+    factor = 1.0
+    for modifier in aura_modifiers(records, class_file.get('known_auras', []), class_file['level']):
+        if modifier.applies_to == 'heal':
+            factor *= (100 + modifier.percent) / 100
+    return factor
+
+
+def leech_ratio_scenario(class_file: dict, spec: LeechRatioSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'ratio', spec.quote, spec.expected_after)
+    facts = facts_of(records, spec.target_rank)
+    before_dummy = dict(creature_fixture(class_file)) | {'id': leech_ratio_dummy_id(BEFORE)}
+    after_dummy = dict(creature_fixture(class_file)) | {'id': leech_ratio_dummy_id(AFTER)}
+    heal_factor = leech_heal_modifier_factor(records, class_file)
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour leech ratio',
+        'contract': f'Real cast of {spec.target_rank} against a dummy below its own TargetAuraState health '
+                    f'threshold, once before {spec.name} is learned and once after, measuring the real heal and '
+                    f'damage of the same cast, which share one random roll, so their ratio is exactly deterministic '
+                    f'per cast once the reference character\'s own known heal-done modifiers are folded in.',
+        'players': [player_fixture(class_file)],
+        'creatures': [before_dummy, after_dummy],
+        'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.target_rank}] +
+                 leech_ratio_phase_steps(class_file, facts, spec, BEFORE) +
+                 [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] +
+                 leech_ratio_phase_steps(class_file, facts, spec, AFTER)}
+    expectations = [
+        Expectation(f'{spec.spell} {spec.target_rank} leech_ratio before', BEHAVIOUR_RATIO, spec.spell,
+                   spec.target_rank, None, str(spec.expected_before * heal_factor),
+                   prose_rule('healing you equal to the damage dealt', spec.target_rank),
+                   {'kind': 'leech_ratio', 'damage_label': leech_ratio_label(spec, LEECH_RATIO_DAMAGE, BEFORE),
+                    'heal_label': leech_ratio_label(spec, LEECH_RATIO_HEAL, BEFORE), 'heal_baseline_label': None,
+                    'expected': spec.expected_before * heal_factor, 'quote': 'healing you equal to the damage dealt',
+                    'target_name': f'{spec.name} (before learning it)'}),
+        Expectation(f'{spec.spell} {spec.target_rank} leech_ratio after', BEHAVIOUR_RATIO, spec.spell,
+                   spec.target_rank, None, str(spec.expected_after * heal_factor), prose_rule(entry.quote, spec.spell),
+                   {'kind': 'leech_ratio', 'damage_label': leech_ratio_label(spec, LEECH_RATIO_DAMAGE, AFTER),
+                    'heal_label': leech_ratio_label(spec, LEECH_RATIO_HEAL, AFTER),
+                    'heal_baseline_label': leech_ratio_label(spec, LEECH_RATIO_HEAL, BEFORE),
+                    'expected': spec.expected_after * heal_factor, 'quote': entry.quote,
+                    'target_name': f'{spec.name} (after learning it)'}),
+    ]
+    return scenario, expectations
+
+
+def leech_ratio_spec(entry: dict) -> LeechRatioSpec:
+    return LeechRatioSpec(entry['spell'], entry['name'], entry['quote'], entry['target_rank'],
+                          entry['expected_before'], entry['expected_after'])
 
 
 HEALTH_RATIO_MAX_HEALTH = 10000
@@ -524,6 +616,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return target_count_scenario(class_file, target_count_spec(entry))
     if entry['kind'] == 'ratio':
         return healing_ratio_scenario(class_file, healing_ratio_spec(entry))
+    if entry['kind'] == 'leech_ratio':
+        return leech_ratio_scenario(class_file, leech_ratio_spec(entry))
     if entry['kind'] == 'spread':
         return aura_spread_scenario(class_file, aura_spread_spec(entry))
     if entry['kind'] == 'trigger':

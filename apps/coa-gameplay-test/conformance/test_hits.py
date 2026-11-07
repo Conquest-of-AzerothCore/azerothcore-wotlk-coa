@@ -81,12 +81,16 @@ PHYSICAL = 1
 HOLY = 2
 SCHOOL_DAMAGE = 2
 HEAL = 10
+HEALTH_LEECH = 9
+TRIGGER_SPELL = 64
 APPLY_AURA = 6
 WEAPON_PERCENT_DAMAGE = 31
 PERIODIC_DAMAGE = 3
 DUMMY = 3
 TEMPLE_GUARDIAN = 801165
 TEMPLE_GUARDIAN_LIVE_RANK = 803792
+TITANSTRIKE = 806521
+TITANSTRIKE_MAX_RANK = 806835
 CHASTISE_MAX_RANK = 503141
 Z_99 = 2.576
 
@@ -264,6 +268,16 @@ class ExpectedHitTest(unittest.TestCase):
                 expected_hit(readout, effects, caster(), walking_stick() if weapon == () else weapon,
                              NO_MITIGATION)
             self.assertTrue(raised.exception.reason)
+
+    def test_health_leech_is_recognised_as_its_own_kind(self):
+        kind, indexes = hit_kind([HEALTH_LEECH, TRIGGER_SPELL, 0], (0, 0, 0))
+        self.assertEqual((kind, indexes), ('leech', [0]))
+
+    def test_health_leech_without_a_readable_value_still_raises(self):
+        readout = Readout(values=[], unreadable=[])
+        with self.assertRaises(Unmodelled) as raised:
+            expected_hit(readout, [HEALTH_LEECH, 0, 0], caster(), None, NO_MITIGATION)
+        self.assertIn('no readable tooltip value', raised.exception.reason)
 
     def test_chastise_prefers_the_token_bearing_kind(self):
         readout = Readout(values=[Displayed('${$m1+0+$sph*0.6+$AP*0.45}', 478.85, 0, 'flat')], unreadable=[])
@@ -467,6 +481,34 @@ class HitScenarioTest(unittest.TestCase):
         spells = {spell.spell_id: spell
                  for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER, extra_spells=extras)}
         return spells[TEMPLE_GUARDIAN]
+
+    def titanstrike_spell(self):
+        extras = [entry['spell'] for entry in self.templar.get('extra_spells', [])]
+        spells = {spell.spell_id: spell
+                 for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER, extra_spells=extras)}
+        return spells[TITANSTRIKE]
+
+    def test_titanstrike_hit_scenario_establishes_the_35_percent_health_fixture_before_casting(self):
+        scenario, expectations = hit_scenario(self.templar, self.titanstrike_spell(), 1)
+        hit = hit_expectation(expectations)
+        self.assertEqual(hit.rank_id, TITANSTRIKE_MAX_RANK)
+        steps = scenario['steps']
+        cast_index = next(index for index, step in enumerate(steps)
+                          if step['action'] == 'cast' and step['spell'] == TITANSTRIKE_MAX_RANK)
+        fixture_steps = [step for step in steps if step['action'] == 'set_health_pct']
+        self.assertEqual(fixture_steps, [{'action': 'set_health_pct', 'actor': 'caster', 'target': 'dummy',
+                                          'pct': 30}])
+        fixture_index = steps.index(fixture_steps[0])
+        self.assertLess(fixture_index, cast_index)
+        self.assertEqual(steps[fixture_index + 1], {'action': 'wait', 'ms': 1000})
+
+    def test_titanstrike_health_fixture_is_set_once_per_part_not_per_cast(self):
+        casts = casts_needed(reference_hit_model(self.templar, TITANSTRIKE_MAX_RANK))
+        parts = hit_parts(self.templar, self.titanstrike_spell(), casts)
+        for scenario, _ in parts:
+            self.assertEqual(len(steps_with(scenario, action='set_health_pct')), 1)
+            self.assertGreater(len(steps_with(scenario, action='cast', spell=TITANSTRIKE_MAX_RANK)), 1)
+            self.assertIs(run.validate(scenario), scenario)
 
     def test_temple_guardian_hit_scenario_places_an_ally_in_range(self):
         scenario, expectations = hit_scenario(self.templar, self.temple_guardian_spell(), 1)
