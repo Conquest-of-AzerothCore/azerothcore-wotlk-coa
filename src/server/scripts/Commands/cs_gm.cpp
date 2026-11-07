@@ -74,7 +74,6 @@ public:
         return commandTable;
     }
 
-    // .gm mod chat / .gm cm chat / .gm admin chat: one staff tag at a time, turning one on replaces the other.
     static bool HandleStaffChatTag(ChatHandler* handler, Optional<bool> enableArg, StaffChatTag tag, char const* name)
     {
         Player* player = handler->GetSession()->GetPlayer();

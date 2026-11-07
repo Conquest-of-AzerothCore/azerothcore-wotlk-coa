@@ -388,7 +388,6 @@ std::size_t ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg chatType, La
                     case CHAT_MSG_OFFICER:
                     case CHAT_MSG_CHANNEL:
                     {
-                        // The client-side badges key on these exact prefixes, so nobody may type them themselves.
                         for (bool stripped = true; stripped;)
                         {
                             stripped = false;

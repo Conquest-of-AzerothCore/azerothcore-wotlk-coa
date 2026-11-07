@@ -22,9 +22,6 @@
 #include "Define.h"
 #include <string_view>
 
-// .gm mod chat / .gm cm chat / .gm admin chat. The 3.3.5a client only renders the GM/DEV/AFK/DND chat tags,
-// so the server prefixes the staff member's chat text instead; the CoAModBadge addon turns
-// the prefix into a badge. Kept in Object::CustomData so Player.h stays untouched.
 enum class StaffChatTag : uint8
 {
     None,
