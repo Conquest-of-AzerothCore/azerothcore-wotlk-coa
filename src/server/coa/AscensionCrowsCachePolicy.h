@@ -18,7 +18,17 @@ constexpr unsigned Barrens = 17;
 constexpr unsigned Ratchet = 392;
 constexpr unsigned CenarionHold = 3425;
 constexpr unsigned AbyssalSands = 1939;
-constexpr unsigned RewardCount = 5;
+constexpr unsigned RewardCount = 3;
+constexpr unsigned GoldenMarkOfWar = 1201003;
+constexpr unsigned GoldenMarks = 10;
+constexpr unsigned SilverMarkOfWar = 1201002;
+constexpr unsigned SilverMarksMin = 5;
+constexpr unsigned SilverMarksMax = 10;
+constexpr bool ValidMarkRange(unsigned minimum, unsigned maximum)
+{
+    return minimum <= maximum && maximum <= 200;
+}
+
 constexpr unsigned WarningSeconds[] = {1800, 900, 300, 60};
 constexpr unsigned WarningCount = 4;
 

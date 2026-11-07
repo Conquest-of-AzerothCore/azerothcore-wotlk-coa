@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Bloodforged rare mob drops one normal epic and one Heroic item",
-  "contract": "Requires Bloodforged.Enable = 1, PvpPower.Enable = 1, Bloodforged.Rates55 = \"0.00 99.99 0.00\", Rate.Drop.Item.Uncommon, .Rare and .Epic = 1 and the catalogue SQL with its Heroic Bloodforged entries. A level 60 High-Risk character kills the natural Scarlet Judge (rank 4 rare, level 60) in Western Plaguelands and finds exactly two Bloodforged items on the corpse: one normal epic and one Heroic Bloodforged copy.",
+  "contract": "Requires Bloodforged.Enable = 1, PvpPower.Enable = 1, Bloodforged.Rates55 = \"0.00 99.99 0.00\", Bloodforged.DropRate.Rare and .Epic = 1 and the catalogue SQL with its Heroic Bloodforged entries. A level 60 High-Risk character kills the natural Scarlet Judge (rank 4 rare, level 60) in Western Plaguelands and finds exactly two Bloodforged items on the corpse: one normal epic and one Heroic Bloodforged copy, both requiring level 60 (Bloodforged.EndgameRareMinRequiredLevel = 60).",
   "players": [
     {
       "id": "h",
@@ -98,6 +98,13 @@
       "heroic": false,
       "quality": 4,
       "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "loot_bloodforged",
+      "max_required_level": 59,
+      "equals": 0
     }
   ]
 }

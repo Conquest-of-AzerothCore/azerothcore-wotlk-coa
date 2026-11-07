@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionBloodforged.h"
 #include "AscensionBloodforgedPolicy.h"
 #include "AscensionRaidGearData.h"
 #include "AscensionRaidReleasePolicy.h"
@@ -8,6 +9,12 @@
 #include "Containers.h"
 #include "Creature.h"
 #include "Formulas.h"
+#include "Chat.h"
+#include "ChatCommand.h"
+#include "CommandScript.h"
+#include "DBCStores.h"
+#include "MapMgr.h"
+#include "StringFormat.h"
 #include "GameTime.h"
 #include "GameObject.h"
 #include "Group.h"
@@ -19,6 +26,7 @@
 #include "Player.h"
 #include "Random.h"
 #include "ScriptMgr.h"
+#include "TemporarySummon.h"
 #include "World.h"
 #include "WorldSession.h"
 #include <algorithm>
@@ -28,9 +36,13 @@
 #include <mutex>
 #include <set>
 #include <sstream>
+#include <string>
+#include <string_view>
+#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+using namespace Acore::ChatCommands;
 
 namespace Bloodforged
 {
@@ -71,8 +83,20 @@ struct Options
     RareDrop rare = DefaultRare;
     RareDrop rareElite = DefaultRareElite;
     unsigned respawnMinLevel = DefaultEndgameRespawnMinLevel;
+    std::array<unsigned, 2> eliteHighRiskRespawn = DefaultEndgameEliteHighRiskRespawnMinutes;
+    std::unordered_set<uint32> highRiskElites;
     unsigned eliteEpicPercent = DefaultEliteEpicPercent;
     float eliteHeroicUpgradePercent = DefaultEliteHeroicUpgradePercent;
+    unsigned endgameRareMinRequiredLevel = DefaultEndgameRareMinRequiredLevel;
+    HiddenCacheChances rareHiddenCache = DefaultRareHiddenCache;
+    HiddenCacheChances epicHiddenCache = DefaultEpicHiddenCache;
+    std::array<float, 4> ephemeralKeyPercent = DefaultEphemeralKeyPercent;
+    float rareRate = 1.0f;
+    float epicRate = 1.0f;
+    float silverMarkRate = 1.0f;
+    float goldenMarkRate = 1.0f;
+    std::array<MarkDrop, 4> mobMarks = { NormalMobMarks, EliteMobMarks, RareMobMarks, RareEliteMobMarks };
+    std::array<MarkDrop, 3> hiddenCacheMarks = HiddenCacheMarks;
 };
 
 struct Settings
@@ -132,11 +156,6 @@ bool EligiblePlayer(Player const* player, Creature const* creature)
 bool IsRare(uint32 rank)
 {
     return rank == CREATURE_ELITE_RARE || rank == CREATURE_ELITE_RAREELITE;
-}
-
-bool IsElite(uint32 rank)
-{
-    return rank == CREATURE_ELITE_ELITE || rank == CREATURE_ELITE_WORLDBOSS;
 }
 
 uint32 RaidMap(uint32 mapId)
@@ -322,21 +341,30 @@ std::shared_ptr<Settings const> CurrentSettings()
     return rebuilt;
 }
 
-template <std::size_t Count>
-bool ReadNumbers(std::string const& key, std::array<unsigned, Count>& values)
+template <typename Number, std::size_t Count>
+bool ReadNumbers(std::string const& key, std::array<Number, Count>& values)
 {
     std::string value = sConfigMgr->GetOption<std::string>(key, "");
     if (value.empty())
         return true;
     std::istringstream input(value);
-    std::array<unsigned, Count> parsed;
-    for (unsigned& number : parsed)
+    std::array<Number, Count> parsed;
+    for (Number& number : parsed)
         if (!(input >> number))
             return false;
     std::string extra;
     if (input >> extra)
         return false;
     values = parsed;
+    return true;
+}
+
+bool ReadHiddenCache(std::string const& key, HiddenCacheChances& chances)
+{
+    std::array<unsigned, 2> values = { chances.first, chances.second };
+    if (!ReadNumbers(key, values) || values[0] > 100 || values[1] > 100)
+        return false;
+    chances = { values[0], values[1] };
     return true;
 }
 
@@ -350,6 +378,26 @@ bool ReadRareDrop(std::string const& name, RareDrop& drop)
         return false;
     drop = { chances[0], chances[1], respawn[0], respawn[1] };
     return true;
+}
+
+bool ReadMarkDrop(std::string const& key, MarkDrop& marks)
+{
+    std::array<float, 4> values = { float(marks.silver), marks.extraSilverPercent, float(marks.gold),
+        marks.extraGoldPercent };
+    if (!ReadNumbers(key, values) || values[0] < 0.0f || values[2] < 0.0f
+        || values[0] != std::floor(values[0]) || values[2] != std::floor(values[2]))
+        return false;
+    MarkDrop const parsed = { unsigned(values[0]), values[1], unsigned(values[2]), values[3] };
+    if (!ValidMarkDrop(parsed))
+        return false;
+    marks = parsed;
+    return true;
+}
+
+bool ReadDropRate(std::string const& key, float& rate)
+{
+    rate = sConfigMgr->GetOption<float>(key, 1.0f);
+    return std::isfinite(rate) && rate >= 0.0f;
 }
 
 class Configuration : public WorldScript
@@ -404,19 +452,53 @@ private:
             }
         }
         options.blueCap = sConfigMgr->GetOption<uint32>("Bloodforged.BlueMaxItemLevel", DefaultBlueMaxItemLevel);
+        {
+            std::istringstream input(sConfigMgr->GetOption<std::string>("Bloodforged.HighRiskEliteEntries", ""));
+            for (uint32 entry; input >> entry;)
+                options.highRiskElites.insert(entry);
+            if (!input.eof())
+            {
+                LOG_ERROR("server.loading", "Bloodforged disabled: invalid Bloodforged.HighRiskEliteEntries");
+                return;
+            }
+        }
         options.level60EndgameOnly = sConfigMgr->GetOption<bool>("Bloodforged.Level60EndgameZonesOnly", true);
         options.respawnMinLevel = sConfigMgr->GetOption<uint32>("Bloodforged.EndgameRareRespawnMinLevel",
             DefaultEndgameRespawnMinLevel);
         options.eliteEpicPercent = sConfigMgr->GetOption<uint32>("Bloodforged.EliteEpicPercent",
             DefaultEliteEpicPercent);
+        options.endgameRareMinRequiredLevel = std::min<uint32>(60, sConfigMgr->GetOption<uint32>(
+            "Bloodforged.EndgameRareMinRequiredLevel", DefaultEndgameRareMinRequiredLevel));
         options.eliteHeroicUpgradePercent = sConfigMgr->GetOption<float>("Bloodforged.EliteHeroicUpgradePercent",
             DefaultEliteHeroicUpgradePercent);
         if (!ReadNumbers("Bloodforged.EpicMaxItemLevelByStage", options.epicCaps)
             || !ReadRareDrop("Rare", options.rare) || !ReadRareDrop("RareElite", options.rareElite)
+            || !ReadHiddenCache("Bloodforged.RareHiddenCachePercent", options.rareHiddenCache)
+            || !ReadHiddenCache("Bloodforged.EpicHiddenCachePercent", options.epicHiddenCache)
+            || !ReadNumbers("Bloodforged.EphemeralKeyPercent", options.ephemeralKeyPercent)
+            || !ReadNumbers("Bloodforged.EndgameEliteHighRiskRespawnMinutes", options.eliteHighRiskRespawn)
+            || options.eliteHighRiskRespawn[0] > options.eliteHighRiskRespawn[1]
+            || std::any_of(options.ephemeralKeyPercent.begin(), options.ephemeralKeyPercent.end(),
+                [](float percent) { return !(percent >= 0.0f) || percent > 100.0f; })
             || options.eliteEpicPercent > 100 || !(options.eliteHeroicUpgradePercent >= 0.0f)
             || options.eliteHeroicUpgradePercent > 100.0f)
         {
             LOG_ERROR("server.loading", "Bloodforged disabled: invalid item level caps or rare mob settings");
+            return;
+        }
+        if (!ReadDropRate("Bloodforged.DropRate.Rare", options.rareRate)
+            || !ReadDropRate("Bloodforged.DropRate.Epic", options.epicRate)
+            || !ReadDropRate("Bloodforged.DropRate.SilverMarkOfWar", options.silverMarkRate)
+            || !ReadDropRate("Bloodforged.DropRate.GoldenMarkOfWar", options.goldenMarkRate)
+            || !ReadMarkDrop("Bloodforged.MarksOfWar.NormalMob", options.mobMarks[0])
+            || !ReadMarkDrop("Bloodforged.MarksOfWar.HighRiskElite", options.mobMarks[1])
+            || !ReadMarkDrop("Bloodforged.MarksOfWar.RareMob", options.mobMarks[2])
+            || !ReadMarkDrop("Bloodforged.MarksOfWar.RareEliteMob", options.mobMarks[3])
+            || !ReadMarkDrop("Bloodforged.MarksOfWar.HiddenCache", options.hiddenCacheMarks[0])
+            || !ReadMarkDrop("Bloodforged.MarksOfWar.RareHiddenCache", options.hiddenCacheMarks[1])
+            || !ReadMarkDrop("Bloodforged.MarksOfWar.EpicHiddenCache", options.hiddenCacheMarks[2]))
+        {
+            LOG_ERROR("server.loading", "Bloodforged disabled: invalid drop rates or Marks of War settings");
             return;
         }
 
@@ -465,34 +547,88 @@ private:
     }
 };
 
-uint32 PickRaidGear(Settings const& current, bool heroic, unsigned level, bool endgame, unsigned percent)
+uint32 PickRaidGear(Settings const& current, bool heroic, unsigned level, bool endgame, unsigned minRequiredLevel,
+    unsigned percent)
 {
     if (!roll_chance_i(int(percent)))
         return 0;
     std::vector<uint32> candidates;
     for (RaidGearEntry const& gear : current.raidGear)
         if (gear.heroic == heroic && RaidRelease::RaidLootStage(gear.mapId) <= current.stage
-            && gear.requiredLevel <= level
+            && gear.requiredLevel <= level && gear.requiredLevel >= minRequiredLevel
             && AllowedInZone(gear.requiredLevel, endgame, current.options.level60EndgameOnly))
             candidates.push_back(gear.entry);
     return candidates.empty() ? 0 : Acore::Containers::SelectRandomContainerElement(candidates);
 }
 
-uint32 PickBestQuality(LevelPools const& pools)
+uint32 PickFrom(std::vector<uint32> const& pool, unsigned minRequiredLevel)
+{
+    std::vector<uint32> candidates;
+    for (uint32 entry : pool)
+        if (sObjectMgr->GetItemTemplate(entry)->RequiredLevel >= minRequiredLevel)
+            candidates.push_back(entry);
+    return candidates.empty() ? 0 : Acore::Containers::SelectRandomContainerElement(candidates);
+}
+
+uint32 PickBestQuality(LevelPools const& pools, unsigned minRequiredLevel)
 {
     for (unsigned index = 3; index-- > 0;)
-        if (!pools.normal[index].empty())
-            return Acore::Containers::SelectRandomContainerElement(pools.normal[index]);
+        if (uint32 entry = PickFrom(pools.normal[index], minRequiredLevel))
+            return entry;
     return 0;
 }
 
-void AddRareMobItem(Loot& loot, uint32 entry)
+void AddRareMobItem(Loot& loot, uint32 entry, uint32 count = 1)
 {
-    if (!entry)
+    if (!entry || !count)
         return;
-    LootStoreItem item(entry, 0, 100.0f, false, LOOT_MODE_DEFAULT, 0, 1, 1);
+    LootStoreItem item(entry, 0, 100.0f, false, LOOT_MODE_DEFAULT, 0, int32(count), uint8(count));
     item.conditions = { &riskCondition, &levelCondition };
     loot.AddItem(item);
+}
+
+void AddMarks(Loot& loot, MarkDrop const& marks, Options const& options)
+{
+    AddRareMobItem(loot, SilverMarkOfWar, marks.silver
+        + (roll_chance_f(ScaledPercent(marks.extraSilverPercent, options.silverMarkRate)) ? 1 : 0));
+    AddRareMobItem(loot, GoldenMarkOfWar, marks.gold
+        + (roll_chance_f(ScaledPercent(marks.extraGoldPercent, options.goldenMarkRate)) ? 1 : 0));
+}
+
+int HiddenCacheTier(LootTemplate const* loot)
+{
+    for (std::size_t tier = 0; tier < HiddenCacheLoot.size(); ++tier)
+        if (loot && loot == LootTemplates_Gameobject.GetLootFor(HiddenCacheLoot[tier]))
+            return int(tier);
+    return -1;
+}
+
+void FillHiddenCache(Settings const& current, Loot& loot, int tier)
+{
+    AddMarks(loot, current.options.hiddenCacheMarks[tier], current.options);
+    LevelPools const& pools = current.pools[60][1];
+    unsigned const level = 60;
+    if (tier == 0)
+    {
+        AddRareMobItem(loot, PickFrom(pools.normal[1], level));
+        return;
+    }
+    uint32 const epic = PickFrom(pools.normal[2], level);
+    uint32 const normalEpic = epic ? epic : PickFrom(pools.normal[1], level);
+    if (tier == 1)
+    {
+        AddRareMobItem(loot, normalEpic);
+        if (roll_chance_i(int(current.options.rareHiddenCache.first)))
+            AddRareMobItem(loot, PickFrom(pools.heroic, level));
+        AddRareMobItem(loot, PickRaidGear(current, false, level, true, level, current.options.rareHiddenCache.second));
+        return;
+    }
+    uint32 raid = PickRaidGear(current, true, level, true, level, current.options.epicHiddenCache.first);
+    if (!raid)
+        raid = PickRaidGear(current, false, level, true, level, 100);
+    AddRareMobItem(loot, raid ? raid : normalEpic);
+    uint32 const heroic = roll_chance_i(int(current.options.epicHiddenCache.second)) ? PickFrom(pools.heroic, level) : 0;
+    AddRareMobItem(loot, heroic ? heroic : PickFrom(pools.normal[2], level));
 }
 
 class WorldDrops : public MiscScript
@@ -500,10 +636,16 @@ class WorldDrops : public MiscScript
 public:
     WorldDrops() : MiscScript("BloodforgedWorldDrops", { MISCHOOK_ON_AFTER_LOOT_TEMPLATE_PROCESS }) { }
 
-    void OnAfterLootTemplateProcess(Loot* loot, LootTemplate const*, LootStore const& store,
+    void OnAfterLootTemplateProcess(Loot* loot, LootTemplate const* lootTemplate, LootStore const& store,
         Player* owner, bool personal, bool, uint16 lootMode) override
     {
         auto current = CurrentSettings();
+        if (current && current->enabled && loot && &store == &LootTemplates_Gameobject)
+        {
+            if (int tier = HiddenCacheTier(lootTemplate); tier >= 0)
+                FillHiddenCache(*current, *loot, tier);
+            return;
+        }
         if (!current || !current->enabled || !owner || !loot || personal
             || &store != &LootTemplates_Creature || !(lootMode & LOOT_MODE_DEFAULT)
             || !owner->GetMap() || owner->GetMap()->Instanceable())
@@ -531,12 +673,18 @@ public:
         bool const endgame = IsEndgameZone(creature->GetZoneId());
         LevelPools const& pools = current->pools[targetLevel][endgame];
         uint32 const rank = creature->GetCreatureTemplate()->rank;
-        if (IsElite(rank))
+        bool const highRiskElite = current->options.highRiskElites.contains(creature->GetEntry());
+        if (roll_chance_f(current->options.ephemeralKeyPercent[rank == CREATURE_ELITE_RAREELITE ? 3
+            : rank == CREATURE_ELITE_RARE ? 2 : highRiskElite ? 1 : 0]))
+            AddRareMobItem(*loot, EphemeralKey);
+        Options const& options = current->options;
+        AddMarks(*loot, options.mobMarks[rank == CREATURE_ELITE_RAREELITE ? 3 : rank == CREATURE_ELITE_RARE ? 2
+            : highRiskElite ? 1 : 0], options);
+        if (highRiskElite && !IsRare(rank))
         {
             pools.eliteLoot->Process(*loot, store, lootMode, eligibleOwner);
-            Options const& options = current->options;
             if (pools.normal[2].empty()
-                || !roll_chance_f(float(options.eliteEpicPercent) * sWorld->getRate(RATE_DROP_ITEM_EPIC)))
+                || !roll_chance_f(ScaledPercent(float(options.eliteEpicPercent), options.epicRate)))
                 return;
             bool const upgrade = !pools.heroic.empty() && roll_chance_f(options.eliteHeroicUpgradePercent);
             AddRareMobItem(*loot, Acore::Containers::SelectRandomContainerElement(upgrade ? pools.heroic
@@ -550,12 +698,13 @@ public:
         }
 
         RareDrop const& drop = rank == CREATURE_ELITE_RARE ? current->options.rare : current->options.rareElite;
-        uint32 normal = PickRaidGear(*current, false, targetLevel, endgame, drop.raidPercent);
-        AddRareMobItem(*loot, normal ? normal : PickBestQuality(pools));
-        uint32 heroic = PickRaidGear(*current, true, targetLevel, endgame, drop.heroicRaidPercent);
-        if (!heroic && !pools.heroic.empty())
-            heroic = Acore::Containers::SelectRandomContainerElement(pools.heroic);
-        AddRareMobItem(*loot, heroic);
+        unsigned const minRequiredLevel = endgame ? current->options.endgameRareMinRequiredLevel : 0;
+        unsigned const rareLevel = endgame && minRequiredLevel ? 60 : targetLevel;
+        LevelPools const& rarePools = current->pools[rareLevel][endgame];
+        uint32 normal = PickRaidGear(*current, false, rareLevel, endgame, minRequiredLevel, drop.raidPercent);
+        AddRareMobItem(*loot, normal ? normal : PickBestQuality(rarePools, minRequiredLevel));
+        uint32 heroic = PickRaidGear(*current, true, rareLevel, endgame, minRequiredLevel, drop.heroicRaidPercent);
+        AddRareMobItem(*loot, heroic ? heroic : PickFrom(rarePools.heroic, minRequiredLevel));
     }
 };
 
@@ -564,23 +713,48 @@ class EndgameRareRespawn : public UnitScript
 public:
     EndgameRareRespawn() : UnitScript("BloodforgedEndgameRareRespawn", true, { UNITHOOK_ON_UNIT_DEATH }) { }
 
-    void OnUnitDeath(Unit* unit, Unit*) override
+    void OnUnitDeath(Unit* unit, Unit* killer) override
     {
         Creature* creature = unit ? unit->ToCreature() : nullptr;
         if (!creature || !creature->GetSpawnId() || !creature->GetMap() || creature->GetMap()->Instanceable())
             return;
         CreatureTemplate const* data = creature->GetCreatureTemplate();
         auto current = std::atomic_load(&settings);
-        if (!current || !current->enabled || !IsRare(data->rank)
-            || data->minlevel < current->options.respawnMinLevel || !IsEndgameZone(creature->GetZoneId()))
+        if (!current || !current->enabled || !IsEndgameZone(creature->GetZoneId()))
+            return;
+        if (data->rank == CREATURE_ELITE_ELITE)
+        {
+            std::array<unsigned, 2> const& minutes = current->options.eliteHighRiskRespawn;
+            if (minutes[1] && KilledInHighRisk(creature, killer) && creature->GetRespawnDelay() < minutes[0] * MINUTE)
+                Reschedule(creature, urand(minutes[0] * MINUTE, minutes[1] * MINUTE));
+            return;
+        }
+        if (!IsRare(data->rank) || data->minlevel < current->options.respawnMinLevel)
             return;
         RareDrop const& drop = data->rank == CREATURE_ELITE_RARE ? current->options.rare : current->options.rareElite;
-        if (!drop.respawnMaxMinutes)
-            return;
+        if (drop.respawnMaxMinutes)
+            Reschedule(creature, urand(drop.respawnMinMinutes * MINUTE, drop.respawnMaxMinutes * MINUTE));
+    }
+
+private:
+    static bool KilledInHighRisk(Creature const* creature, Unit* killer)
+    {
+        Player const* player = killer ? killer->GetAffectingPlayer() : nullptr;
+        if (!player && killer)
+            if (TempSummon const* summon = killer->ToTempSummon())
+                if (Unit* summoner = summon->GetSummonerUnit())
+                    player = summoner->GetAffectingPlayer();
+        if (player && player->HasAura(HighRiskAura))
+            return true;
+        Player const* recipient = creature->GetLootRecipient();
+        return recipient && recipient->HasAura(HighRiskAura);
+    }
+
+    static void Reschedule(Creature* creature, uint32 delay)
+    {
         time_t const remaining = creature->GetRespawnTime() - GameTime::GetGameTime().count();
         if (remaining < time_t(creature->GetRespawnDelay()))
             return;
-        uint32 const delay = urand(drop.respawnMinMinutes * MINUTE, drop.respawnMaxMinutes * MINUTE);
         creature->SetRespawnTime(delay + uint32(remaining - creature->GetRespawnDelay()));
         creature->SaveRespawnTime();
     }
@@ -596,15 +770,196 @@ public:
         if (&store != &LootTemplates_Creature || item->conditions.empty() || item->conditions.front() != &riskCondition)
             return true;
         auto const* proto = sObjectMgr->GetItemTemplate(item->itemid);
-        if (proto && proto->Quality >= ITEM_QUALITY_UNCOMMON && proto->Quality <= ITEM_QUALITY_EPIC)
-            chance *= sWorld->getRate(QualityRates[proto->Quality - ITEM_QUALITY_UNCOMMON]);
+        auto current = std::atomic_load(&settings);
+        if (!proto || !current)
+            return true;
+        if (proto->Quality == ITEM_QUALITY_RARE)
+            chance *= current->options.rareRate;
+        else if (proto->Quality == ITEM_QUALITY_EPIC)
+            chance *= current->options.epicRate;
+        return true;
+    }
+};
+
+constexpr uint32 DebugCacheSeconds = 3600;
+constexpr std::array<char const*, 3> HiddenCacheTierNames = { "Green", "Rare", "Epic" };
+std::vector<std::pair<uint32, ObjectGuid>> debugCaches;
+
+struct CacheSpawn
+{
+    GameObjectData const* data;
+    int tier;
+    uint32 zone;
+    Map* map;
+};
+
+std::vector<CacheSpawn> HiddenCacheSpawns(ChatHandler* handler, char const* scope, int minimumTier)
+{
+    bool const all = scope && std::string_view(scope) == "all";
+    Player* player = handler->GetSession() ? handler->GetSession()->GetPlayer() : nullptr;
+    uint32 const zone = player ? player->GetZoneId() : 0;
+    std::vector<CacheSpawn> spawns;
+    for (auto const& [spawnId, data] : sObjectMgr->GetAllGOData())
+    {
+        GameObjectTemplate const* info = sObjectMgr->GetGameObjectTemplate(data.id);
+        if (!info || info->type != GAMEOBJECT_TYPE_CHEST)
+            continue;
+        auto const tier = std::find(HiddenCacheLoot.begin(), HiddenCacheLoot.end(), info->GetLootId());
+        if (tier == HiddenCacheLoot.end() || tier - HiddenCacheLoot.begin() < minimumTier)
+            continue;
+        Map* map = sMapMgr->CreateBaseMap(data.mapid);
+        if (!map || map->Instanceable())
+            continue;
+        map->LoadGrid(data.posX, data.posY);
+        uint32 const cacheZone = map->GetZoneId(data.phaseMask, data.posX, data.posY, data.posZ);
+        if (!all && cacheZone != zone)
+            continue;
+        spawns.push_back({ &data, int(tier - HiddenCacheLoot.begin()), cacheZone, map });
+    }
+    std::sort(spawns.begin(), spawns.end(), [](CacheSpawn const& a, CacheSpawn const& b)
+    {
+        return std::tie(a.zone, b.tier, a.data->spawnId) < std::tie(b.zone, a.tier, b.data->spawnId);
+    });
+    return spawns;
+}
+
+GameObject* LiveCache(CacheSpawn const& spawn)
+{
+    auto const range = spawn.map->GetGameObjectBySpawnIdStore().equal_range(spawn.data->spawnId);
+    return range.first == range.second ? nullptr : range.first->second;
+}
+
+std::string ZoneName(uint32 zone)
+{
+    AreaTableEntry const* area = sAreaTableStore.LookupEntry(zone);
+    return area ? area->area_name[0] : std::to_string(zone);
+}
+
+class HiddenCacheCommands : public CommandScript
+{
+public:
+    HiddenCacheCommands() : CommandScript("BloodforgedHiddenCacheCommands") { }
+
+    ChatCommandTable GetCommands() const override
+    {
+        static ChatCommandTable hiddenCacheTable =
+        {
+            { "list", HandleList, SEC_GAMEMASTER, Console::Yes },
+            { "spawn", HandleSpawn, SEC_GAMEMASTER, Console::No },
+            { "despawn", HandleDespawn, SEC_GAMEMASTER, Console::Yes },
+        };
+        static ChatCommandTable commandTable =
+        {
+            { "hiddencache", hiddenCacheTable },
+        };
+        return commandTable;
+    }
+
+    static bool HandleList(ChatHandler* handler, Optional<std::string> scope)
+    {
+        std::vector<CacheSpawn> const spawns = HiddenCacheSpawns(handler, scope ? scope->c_str() : nullptr, 1);
+        time_t const now = GameTime::GetGameTime().count();
+        for (CacheSpawn const& spawn : spawns)
+        {
+            GameObject const* go = LiveCache(spawn);
+            time_t const respawn = spawn.map->GetGORespawnTime(spawn.data->spawnId);
+            std::string const state = go && go->isSpawned() ? "up"
+                : respawn > now ? Acore::StringFormat("opened, back in {} min", (respawn - now + 59) / 60) : "not loaded";
+            handler->PSendSysMessage("{} {} - {} - .go gameobject {} ({:.1f} {:.1f} {:.1f})",
+                HiddenCacheTierNames[spawn.tier], ZoneName(spawn.zone), state, spawn.data->spawnId,
+                spawn.data->posX, spawn.data->posY, spawn.data->posZ);
+        }
+        handler->PSendSysMessage("{} Rare and Epic Hidden Caches{}.", spawns.size(), scope ? "" : " in this zone");
         return true;
     }
 
-private:
-    static constexpr std::array<ServerConfigs, 3> QualityRates =
-        { RATE_DROP_ITEM_UNCOMMON, RATE_DROP_ITEM_RARE, RATE_DROP_ITEM_EPIC };
+    static bool HandleSpawn(ChatHandler* handler, Optional<std::string> scope)
+    {
+        uint32 alreadyUp = 0, respawned = 0, spawned = 0;
+        for (CacheSpawn const& spawn : HiddenCacheSpawns(handler, scope ? scope->c_str() : nullptr, 0))
+        {
+            if (GameObject* go = LiveCache(spawn))
+            {
+                if (go->isSpawned())
+                    ++alreadyUp;
+                else
+                {
+                    go->Respawn();
+                    ++respawned;
+                }
+                continue;
+            }
+            GameObjectData const& data = *spawn.data;
+            auto* go = new GameObject();
+            if (!go->Create(spawn.map->GenerateLowGuid<HighGuid::GameObject>(), data.id, spawn.map, data.phaseMask,
+                data.posX, data.posY, data.posZ, data.orientation, data.rotation, 100, GO_STATE_READY))
+            {
+                delete go;
+                continue;
+            }
+            go->SetRespawnTime(DebugCacheSeconds);
+            go->SetSpawnedByDefault(false);
+            go->setActive(true);
+            spawn.map->AddToMap(go);
+            debugCaches.emplace_back(data.mapid, go->GetGUID());
+            ++spawned;
+        }
+        handler->PSendSysMessage("Hidden Caches{}: {} already up, {} respawned, {} extra spawned for {} min "
+            "(.hiddencache despawn removes them).", scope ? "" : " in this zone", alreadyUp, respawned, spawned,
+            DebugCacheSeconds / 60);
+        return true;
+    }
+
+    static bool HandleDespawn(ChatHandler* handler)
+    {
+        uint32 removed = 0;
+        for (auto const& [mapId, guid] : debugCaches)
+            if (Map* map = sMapMgr->FindBaseNonInstanceMap(mapId))
+                if (GameObject* go = map->GetGameObject(guid))
+                {
+                    go->DespawnOrUnsummon();
+                    ++removed;
+                }
+        debugCaches.clear();
+        handler->PSendSysMessage("Removed {} debug Hidden Caches.", removed);
+        return true;
+    }
 };
+}
+
+std::vector<uint32> Bloodforged::NewestReleasedHeroicGear()
+{
+    std::vector<uint32> gear;
+    auto current = CurrentSettings();
+    if (!current || !current->enabled)
+        return gear;
+    uint32 newest = 0;
+    for (RaidGearEntry const& item : current->raidGear)
+        if (uint32 stage = RaidRelease::RaidLootStage(item.mapId); item.heroic && stage <= current->stage)
+            newest = std::max(newest, stage);
+    for (RaidGearEntry const& item : current->raidGear)
+        if (item.heroic && newest && RaidRelease::RaidLootStage(item.mapId) == newest && item.requiredLevel == 60)
+            gear.push_back(item.entry);
+    if (gear.empty())
+        for (uint32 entry : current->pools[60][1].heroic)
+            if (sObjectMgr->GetItemTemplate(entry)->RequiredLevel == 60)
+                gear.push_back(entry);
+    return gear;
+}
+
+std::vector<uint32> Bloodforged::ReleasedHeroicGear()
+{
+    std::vector<uint32> gear;
+    auto current = CurrentSettings();
+    if (!current || !current->enabled)
+        return gear;
+    for (RaidGearEntry const& item : current->raidGear)
+        if (item.heroic && item.requiredLevel == 60 && RaidRelease::RaidLootStage(item.mapId) <= current->stage)
+            gear.push_back(item.entry);
+    for (uint32 entry : current->pools[60][1].heroic)
+        if (sObjectMgr->GetItemTemplate(entry)->RequiredLevel == 60)
+            gear.push_back(entry);
+    return gear;
 }
 
 void AddSC_AscensionBloodforged()
@@ -613,4 +968,5 @@ void AddSC_AscensionBloodforged()
     new Bloodforged::WorldDrops();
     new Bloodforged::EndgameRareRespawn();
     new Bloodforged::NativeRates();
+    new Bloodforged::HiddenCacheCommands();
 }

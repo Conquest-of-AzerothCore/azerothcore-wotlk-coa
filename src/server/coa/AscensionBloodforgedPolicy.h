@@ -39,6 +39,47 @@ struct RareDrop
 constexpr RareDrop DefaultRare = {15, 5, 90, 150};
 constexpr RareDrop DefaultRareElite = {25, 10, 150, 210};
 constexpr unsigned DefaultEndgameRespawnMinLevel = 45;
+constexpr std::array<unsigned, 2> DefaultEndgameEliteHighRiskRespawnMinutes = {10, 15};
+constexpr unsigned DefaultEndgameRareMinRequiredLevel = 60;
+constexpr std::array<std::uint32_t, 3> HiddenCacheLoot = {9670, 9671, 9672};
+constexpr std::uint32_t EphemeralKey = 967680;
+constexpr std::uint32_t SilverMarkOfWar = 1201002;
+constexpr std::uint32_t GoldenMarkOfWar = 1201003;
+
+struct MarkDrop
+{
+    unsigned silver;
+    float extraSilverPercent;
+    unsigned gold;
+    float extraGoldPercent;
+};
+
+constexpr float ScaledPercent(float percent, float rate)
+{
+    return percent * rate > 100.0f ? 100.0f : percent * rate;
+}
+
+constexpr bool ValidMarkDrop(MarkDrop const& marks)
+{
+    return marks.silver <= 100 && marks.gold <= 100 && marks.extraSilverPercent >= 0.0f
+        && marks.extraSilverPercent <= 100.0f && marks.extraGoldPercent >= 0.0f && marks.extraGoldPercent <= 100.0f;
+}
+
+constexpr MarkDrop NormalMobMarks = {0, 1.0f, 0, 0.0f};
+constexpr MarkDrop EliteMobMarks = {0, 8.0f, 0, 0.5f};
+constexpr MarkDrop RareMobMarks = {1, 10.0f, 0, 10.0f};
+constexpr MarkDrop RareEliteMobMarks = {2, 10.0f, 0, 50.0f};
+constexpr std::array<MarkDrop, 3> HiddenCacheMarks = {{{1, 10.0f, 0, 0.0f}, {1, 60.0f, 0, 20.0f}, {2, 50.0f, 1, 20.0f}}};
+constexpr std::array<float, 4> DefaultEphemeralKeyPercent = {3.0f, 15.0f, 75.0f, 100.0f};
+
+struct HiddenCacheChances
+{
+    unsigned first;
+    unsigned second;
+};
+
+constexpr HiddenCacheChances DefaultRareHiddenCache = {15, 5};
+constexpr HiddenCacheChances DefaultEpicHiddenCache = {5, 15};
 
 constexpr bool WithinItemLevelCap(unsigned quality, unsigned itemLevel, unsigned blueCap, unsigned epicCap)
 {
