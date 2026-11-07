@@ -278,7 +278,7 @@ void ActivateDawn(Player* player)
         for (uint32 root : {800054, 520024, 805629})
             ReducePercent(player, root, std::abs(Amount(712380)));
     if (player->HasSpell(520639) || player->HasAura(520639))
-        for (auto [spec, helper] : {std::pair(800586u, 520641u), std::pair(500207u, 520644u),
+        for (auto [spec, helper] : {std::pair(92137u, 520641u), std::pair(500207u, 520644u),
                                     std::pair(500209u, 520645u), std::pair(680627u, 520646u)})
             if (player->HasSpell(spec) || player->HasAura(spec))
                 Cast(player, player, helper);
@@ -397,12 +397,24 @@ void Refresh(Player* player)
     if (!replacement)
         player->removeSpell(504764, SPEC_MASK_ALL, true);
     bool conversion = player->IsAlive() && player->HasAura(Dawn) && player->HasSpell(DawnCast);
-    if (conversion && !player->HasSpell(RadiantConversion))
-        player->learnSpellWithoutAnnouncement(RadiantConversion);
-    if (player->HasSpell(DawnCast))
-        player->SetTemporarySpellReplacement(DawnCast, conversion ? RadiantConversion : 0);
-    if (!conversion)
-        player->removeSpell(RadiantConversion, SPEC_MASK_ALL, true);
+    bool const converted = player->HasSpell(RadiantConversion);
+    player->SetTemporarySpellReplacement(DawnCast, 0);
+    if (conversion)
+    {
+        if (!converted)
+        {
+            player->learnSpellWithoutAnnouncement(RadiantConversion);
+            if (player->IsInWorld())
+                player->SendLearnPacket(RadiantConversion, true);
+        }
+        MapButtons(player, DawnCast, RadiantConversion);
+    }
+    else
+    {
+        MapButtons(player, RadiantConversion, DawnCast);
+        if (converted)
+            player->removeSpell(RadiantConversion, SPEC_MASK_ALL, true);
+    }
     if (!player->IsInCombat())
         state.firstAttacks.clear();
     state.refreshing = false;
