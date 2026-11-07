@@ -3,13 +3,13 @@
 
 namespace
 {
-    // The shrine in the Eastern Plaguelands by Zul'Mashar (placeholder spot until it is taken in game); his map (890)
+    // The shrine in the Eastern Plaguelands by Zul'Mashar; his map (890)
     // starts at its graveyard (WorldSafeLocs 6090).
     coa_world_boss_instance::Config const Boss = {
         "Atal'zul", 67532, 890,
         { 3353.02f, -4844.59f, 167.44f, 0.0f },
         978090, 0,
-        { 3353.02f, -4844.59f, 167.44f, 0.0f },
+        { 3349.226f, -4919.989f, 159.252f, 5.0617f },
         978091,
     };
 }

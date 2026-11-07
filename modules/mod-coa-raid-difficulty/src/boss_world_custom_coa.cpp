@@ -1119,7 +1119,7 @@ namespace
             _nextVeil = 80;
             me->RemoveAurasDueToSpell(SPELL_VEIL_POWER);
             std::list<Creature*> vessels;
-            me->GetCreatureListWithEntryInGrid(vessels, NPC_SOUL_VESSEL, 100.0f);
+            me->GetCreatureListWithEntryInGrid(vessels, NPC_SOUL_VESSEL, 150.0f);
             for (Creature* v : vessels)
             {
                 if (!v->IsAlive())
@@ -1222,7 +1222,7 @@ namespace
         void BindVessel()
         {
             std::list<Creature*> vessels;
-            me->GetCreatureListWithEntryInGrid(vessels, NPC_SOUL_VESSEL, 100.0f);
+            me->GetCreatureListWithEntryInGrid(vessels, NPC_SOUL_VESSEL, 150.0f);
             vessels.remove_if([](Creature* v) { return !v->IsAlive() || !v->HasUnitFlag(UNIT_FLAG_NOT_SELECTABLE); });
             if (vessels.empty())
                 return;

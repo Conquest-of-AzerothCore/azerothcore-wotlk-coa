@@ -1,7 +1,6 @@
 -- Atal'zul, the Soulreaver (67532) in his boss map (890), the way Setis is fought: a shrine in the Eastern
 -- Plaguelands by Zul'Mashar takes players in (Normal only), the portal he leaves where he falls and the shrine at
--- the entrance take them back, and players who die in his map rise at its start. The shrine's spot is a placeholder
--- until it is taken in game.
+-- the entrance take them back, and players who die in his map rise at its start. The shrine's spot is a taken in game.
 
 -- Loot: one roll of his 8 items (item level 74, as the quick guide shows them);
 -- atalzul_instance_death_coa rolls one more for every four players in his map.
@@ -44,7 +43,7 @@ DELETE FROM `gameobject` WHERE `guid` IN (9780930, 9780931);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`) VALUES
-(9780930, 978090, 0, 0, 0, 1, 1, 3353.02, -4844.59, 167.44, 0.0, 0, 0, 0.000000, 1.000000, 300, 100, 1),
+(9780930, 978090, 0, 0, 0, 1, 1, 3349.2258, -4919.989, 159.2524, 5.0617, 0, 0, 0.573476, -0.819222, 300, 100, 1),
 (9780931, 978092, 890, 10281, 10281, 15, 1, 3358.02, -4839.59, 167.44, 0, 0, 0, 0, 1, 300, 100, 1);
 
 -- Players who die in his map rise at its start: WorldSafeLocs.dbc 6090.
@@ -71,7 +70,7 @@ ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `faction` = VALUES(`faction`), 
 DELETE FROM `creature_template_model` WHERE `CreatureID` = 978090;
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
   `VerifiedBuild`) VALUES
-(978090, 0, 6708, 0.25, 1, 12340);
+(978090, 0, 6708, 1, 1, 12340);
 DELETE FROM `creature_template_addon` WHERE `entry` = 978090;
 INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (978090, '22650 16245');
 DELETE FROM `creature_template_movement` WHERE `CreatureId` = 978090;
@@ -80,4 +79,16 @@ INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Fligh
 DELETE FROM `creature` WHERE `guid` = 9780932;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
-(9780932, 978090, 0, 0, 0, 1, 1, 3353.02, -4844.59, 172.44, 0.0, 300, 0, 0);
+(9780932, 978090, 0, 0, 0, 1, 1, 3349.2258, -4919.989, 164.25, 5.0617, 300, 0, 0);
+
+-- In his map Zul'rogg starts on top of the pyramid and the four Soul Vessels stand around it (spots taken in game).
+UPDATE `creature` SET `position_x` = 3439.5637, `position_y` = -4982.276, `position_z` = 195.7287,
+  `orientation` = 2.3572 WHERE `guid` = 9780105 AND `id` = 67533;
+UPDATE `creature` SET `position_x` = 3404.716, `position_y` = -4901.075, `position_z` = 159.3792
+WHERE `guid` = 9780106;
+UPDATE `creature` SET `position_x` = 3358.0588, `position_y` = -4949.7046, `position_z` = 159.3839
+WHERE `guid` = 9780107;
+UPDATE `creature` SET `position_x` = 3328.0198, `position_y` = -4888.4087, `position_z` = 159.2575
+WHERE `guid` = 9780108;
+UPDATE `creature` SET `position_x` = 3377.5986, `position_y` = -4873.0796, `position_z` = 159.2516
+WHERE `guid` = 9780109;
