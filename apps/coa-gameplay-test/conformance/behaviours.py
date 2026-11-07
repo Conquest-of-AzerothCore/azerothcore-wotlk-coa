@@ -2,7 +2,8 @@ from dataclasses import dataclass
 from pathlib import Path
 import re
 
-from hits import aura_modifiers, creature_fixture
+from hits import MAIN_HAND, aura_modifiers, creature_fixture
+from procs import swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import COLOR_CODE, Records
 from values import (CAST_MARGIN_MS, Expectation, TARGET, dataset, facts_of, required_aura_steps,
@@ -611,6 +612,101 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('expire_ms', DEFAULT_METRIC_DELTA_EXPIRE_MS))
 
 
+FORCED_CRIT_RATING = 100000
+DEBT_ASSERT_TIMEOUT_MS = 2000
+
+
+@dataclass(frozen=True)
+class DurationSpec:
+    spell: int
+    name: str
+    quote: str
+    expected_ms: float
+    target_aura: int
+    debt_aura: int
+    breaker_spell: int
+    striker_entry: int
+
+
+def duration_label(spec: DurationSpec, moment: str) -> str:
+    return f'{spec.spell} {spec.target_aura} duration {moment}'
+
+
+def duration_crit_label(spec: DurationSpec) -> str:
+    return f'{spec.spell} forced_crit_count'
+
+
+def duration_debt_label(spec: DurationSpec) -> str:
+    return f'{spec.spell} {spec.target_aura} debt_amount'
+
+
+def duration_scenario(class_file: dict, spec: DurationSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'duration', spec.quote, spec.expected_ms)
+    swing_ms = swing_interval(class_file)
+    if swing_ms <= CAST_SETTLE_MS:
+        raise NotModelled(f'{spec.name} needs a swing interval above {CAST_SETTLE_MS} ms to isolate one forced '
+                          f'crit from the next natural swing, got {swing_ms} ms')
+    fixture = dict(player_fixture(class_file)) | {'melee_crit_rating': FORCED_CRIT_RATING}
+    target = creature_fixture(class_file)
+    striker = {'id': STRIKER, 'owner': CASTER, 'entry': spec.striker_entry, 'level': class_file['level'],
+              'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 1}
+    before_label = duration_label(spec, BEFORE)
+    after_label = duration_label(spec, AFTER)
+    crit_label = duration_crit_label(spec)
+    debt_label = duration_debt_label(spec)
+    steps = base_steps(class_file) + [
+        {'action': 'set_aura', 'actor': CASTER, 'spell': spec.debt_aura, 'stacks': 1},
+        {'action': 'cast', 'actor': STRIKER, 'spell': spec.breaker_spell, 'target': CASTER},
+        {'action': 'wait', 'label': f'{spec.spell} debt settle', 'ms': CAST_SETTLE_MS},
+        {'action': 'assert', 'label': debt_label, 'actor': CASTER, 'metric': 'aura_amount', 'spell': spec.target_aura,
+         'effect': 0, 'min': 1, 'within_ms': DEBT_ASSERT_TIMEOUT_MS},
+        {'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
+        measurement(before_label, CASTER, 'aura_duration_ms', spell=spec.target_aura),
+        {'action': 'attack', 'actor': CASTER, 'target': TARGET},
+        {'action': 'wait', 'label': 'forced swing', 'ms': CAST_SETTLE_MS},
+        {'action': 'stop_attack', 'actor': CASTER},
+        measurement(after_label, CASTER, 'aura_duration_ms', spell=spec.target_aura),
+        measurement(crit_label, CASTER, 'melee_damage_count', hand=MAIN_HAND, critical=True),
+    ]
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour duration',
+        'contract': f'A striker (creature entry {spec.striker_entry}) casts {spec.breaker_spell} directly at the '
+                    f'caster, who carries {spec.debt_aura} (the real "delay 40% of direct damage taken" shield), '
+                    f'so the real damage-absorb hook applies a nonzero debt to {spec.target_aura} and resets its '
+                    f'duration to its DBC maximum (`AscensionTemplar.cpp` `Delay`), rather than `set_aura`-ing '
+                    f'{spec.target_aura} directly: a stacks-only fixture leaves its debt amount at 0 (the '
+                    f'SPELL_AURA_PERIODIC_DUMMY `BasePoints -1` override in `AscensionTemplarContracts.cpp`), and '
+                    f'a zero debt makes `ReduceDebt`\'s own `reduction >= amount` branch remove the aura outright '
+                    f'on the very first crit regardless of whether Sacred Oath\'s duration claim holds, which '
+                    f'would misjudge every run as `alert` for the wrong reason (confirmed by an exploratory '
+                    f'`coa-verify --ram` run of the `set_aura`-only shape). A single forced melee crit '
+                    f'({FORCED_CRIT_RATING} melee_crit_rating on the scenario\'s own player fixture, not the class '
+                    f'file\'s shared ratings) against a plain dummy then reads {spec.target_aura}\'s '
+                    f'aura_duration_ms before and after a {CAST_SETTLE_MS} ms wait: starting an attack lands its '
+                    f'first swing immediately (observed: a {swing_ms} ms wait after \'attack\' measures two '
+                    f'crits, one immediate and one at the weapon\'s own {swing_ms} ms speed, so the wait here is '
+                    f'kept under {swing_ms} ms to isolate exactly one), and the natural elapsed time the engine '
+                    f'decrements regardless is this wait, plus {spec.expected_ms:g} ms if the passive\'s own '
+                    f'claim holds.',
+        'players': [fixture],
+        'creatures': [target, striker],
+        'steps': steps}
+    label = f'{spec.spell} behaviour_duration'
+    model = {'kind': 'duration', 'before_label': before_label, 'after_label': after_label,
+             'count_label': crit_label, 'expected_ms': spec.expected_ms, 'wait_ms': CAST_SETTLE_MS,
+             'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_DURATION, spec.spell, spec.target_aura, None, str(spec.expected_ms),
+                              prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def duration_spec(entry: dict) -> DurationSpec:
+    return DurationSpec(entry['spell'], entry['name'], entry['quote'], entry['expected_ms'], entry['target_aura'],
+                        entry['debt_aura'], entry['breaker_spell'], entry['striker_entry'])
+
+
 def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
     if entry['kind'] == 'count':
         return target_count_scenario(class_file, target_count_spec(entry))
@@ -626,6 +722,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return metric_delta_scenario(class_file, metric_delta_spec(entry))
     if entry['kind'] == 'health_ratio':
         return health_threshold_ratio_scenario(class_file, health_ratio_spec(entry))
+    if entry['kind'] == 'duration':
+        return duration_scenario(class_file, duration_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

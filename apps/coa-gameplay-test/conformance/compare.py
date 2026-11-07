@@ -9,7 +9,8 @@ import re
 from statistics import fmean, pstdev
 from typing import Callable, Mapping, Protocol
 
-from behaviours import BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER
+from behaviours import (BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_DURATION, BEHAVIOUR_METRIC_DELTA,
+                        BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
 from hits import (HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS, WEAPON_PERCENT_DAMAGE, Z_99,
                   HitModel, Modifier, Unmodelled, measured_hit_model)
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE
@@ -1584,6 +1585,31 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
                                f'required, a deterministic integer read with no combat-roll variance')
 
 
+def behaviour_duration_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    before = run.values.get(model['before_label'])
+    after = run.values.get(model['after_label'])
+    crits = run.values.get(model['count_label'])
+    missing = next((label for label, value in ((model['before_label'], before), (model['after_label'], after),
+                                               (model['count_label'], crits)) if value is None), None)
+    if missing:
+        return replace(base, explanation=missing_measurement(run, missing))
+    if crits != 1:
+        return replace(base, status='unmeasured', measured=crits,
+                       explanation=f'{model["count_label"]} measured {crits:g} forced crits; the forcing '
+                                   f'assumption (a maxed melee_crit_rating guarantees a logged critical hit) did '
+                                   f'not hold, so the duration delta cannot be attributed to a crit')
+    measured = before - after
+    expected = model['wait_ms'] + model['expected_ms']
+    low = expected - CAST_MARGIN_MS
+    high = expected
+    status = 'ok' if low - FLOAT_EPSILON <= measured <= high + FLOAT_EPSILON else 'alert'
+    return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
+                   explanation=f'{model["before_label"]} measured {before:g} ms, {model["after_label"]} measured '
+                               f'{after:g} ms, a loss of {measured:g} ms over one forced crit swing; expected at '
+                               f'least the wait ({model["wait_ms"]:g} ms) plus {model["expected_ms"]:g} ms, never '
+                               f'less, and never more than that sum')
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
@@ -1598,6 +1624,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_trigger_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_METRIC_DELTA:
         return behaviour_metric_delta_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_DURATION:
+        return behaviour_duration_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 

@@ -2,11 +2,12 @@ from pathlib import Path
 import sys
 import unittest
 
-from behaviours import (BEHAVIOUR_COUNT, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER,
-                        HealingRatioTarget, aura_spread_scenario, aura_spread_spec, behaviour_entries,
-                        behaviour_entry, behaviour_scenario, health_ratio_spec, health_threshold_ratio_scenario,
-                        healing_ratio_scenario, healing_ratio_spec, leech_heal_modifier_factor, leech_ratio_scenario,
-                        leech_ratio_spec, metric_delta_scenario, metric_delta_spec, shield_break_trigger_scenario,
+from behaviours import (BEHAVIOUR_COUNT, BEHAVIOUR_DURATION, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO,
+                        BEHAVIOUR_TRIGGER, HealingRatioTarget, aura_spread_scenario, aura_spread_spec,
+                        behaviour_entries, behaviour_entry, behaviour_scenario, duration_scenario, duration_spec,
+                        health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
+                        healing_ratio_spec, leech_heal_modifier_factor, leech_ratio_scenario, leech_ratio_spec,
+                        metric_delta_scenario, metric_delta_spec, shield_break_trigger_scenario,
                         shield_break_trigger_spec, target_count_scenario, target_count_spec)
 from compare import Verdict, judge_behaviour
 from hits import aura_modifiers
@@ -41,6 +42,10 @@ BATTLEPRIEST = 801202
 FIREBALL = 133
 TITANFALL = 300607
 TITANSTRIKE_MAX_RANK = 806835
+SACRED_OATH = 712346
+OATHKEEPER = 803237
+KEEPING_THE_OATH = 803149
+SMITE = 48123
 
 
 def scarlet_judicator_entry() -> dict:
@@ -77,6 +82,10 @@ def battlepriest_entry() -> dict:
 
 def titanfall_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == TITANFALL)
+
+
+def sacred_oath_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == SACRED_OATH)
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -166,6 +175,15 @@ class BehaviourEntryTests(unittest.TestCase):
                             'take 20% reduced Magic damage', 0.8).quote,
             'take 20% reduced Magic damage')
 
+    def test_sacred_oath_entry(self):
+        spec = duration_spec(sacred_oath_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'duration', spec.quote, spec.expected_ms)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(entry.expected, 1000)
+        self.assertEqual(spec.target_aura, OATHKEEPER)
+        self.assertEqual(spec.debt_aura, KEEPING_THE_OATH)
+        self.assertEqual(spec.breaker_spell, SMITE)
+
 
 class BehaviourEntriesLookupTests(unittest.TestCase):
     def test_behaviour_entries_filters_by_spell(self):
@@ -177,7 +195,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 9)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 10)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -467,6 +485,89 @@ class JudgeLeechRatioTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(contaminated),
                                   FakeRun({'damage': 100.0, 'heal': 300.0, 'baseline': 100.0}), contaminated)
         self.assertEqual(verdict.status, 'alert')
+
+
+class DurationScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_the_expectation(self):
+        spec = duration_spec(sacred_oath_entry())
+        scenario, expectations = duration_scenario(CLASS_FILE, spec)
+        validated = run.validate(scenario)
+        self.assertEqual(len(validated['creatures']), 2)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_DURATION)
+        self.assertTrue(expectation.rule.startswith('prose: "remove 1 sec from the duration of"'))
+        self.assertEqual(expectation.model['expected_ms'], 1000)
+        self.assertEqual(expectation.rank_id, OATHKEEPER)
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, sacred_oath_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_DURATION)
+
+    def test_steps_order_debt_setup_then_learn_then_before_attack_after_count(self):
+        spec = duration_spec(sacred_oath_entry())
+        scenario, _ = duration_scenario(CLASS_FILE, spec)
+        actions = [step.get('action') for step in scenario['steps']
+                  if step.get('action') in ('set_aura', 'cast', 'learn', 'attack', 'stop_attack')]
+        set_aura_index = actions.index('set_aura')
+        cast_index = actions.index('cast')
+        learn_index = actions.index('learn')
+        attack_index = actions.index('attack')
+        stop_index = actions.index('stop_attack')
+        self.assertLess(set_aura_index, cast_index)
+        self.assertLess(cast_index, learn_index)
+        self.assertLess(learn_index, attack_index)
+        self.assertLess(attack_index, stop_index)
+
+    def test_player_fixture_overrides_melee_crit_rating_without_touching_the_class_file(self):
+        spec = duration_spec(sacred_oath_entry())
+        scenario, _ = duration_scenario(CLASS_FILE, spec)
+        self.assertEqual(scenario['players'][0]['melee_crit_rating'], 100000)
+        self.assertNotIn('melee_crit_rating', CLASS_FILE.get('ratings', {}))
+
+    def test_measures_aura_duration_ms_of_the_target_aura_before_and_after(self):
+        spec = duration_spec(sacred_oath_entry())
+        scenario, _ = duration_scenario(CLASS_FILE, spec)
+        measure_steps = [step for step in scenario['steps']
+                         if step.get('metric') == 'aura_duration_ms' and step.get('spell') == OATHKEEPER]
+        self.assertEqual(len(measure_steps), 2)
+        for step in measure_steps:
+            self.assertEqual(step['actor'], 'caster')
+
+    def test_measures_exactly_one_forced_crit_via_melee_damage_count(self):
+        spec = duration_spec(sacred_oath_entry())
+        scenario, expectations = duration_scenario(CLASS_FILE, spec)
+        count_label = expectations[0].model['count_label']
+        step, = [step for step in scenario['steps'] if step.get('label') == count_label]
+        self.assertEqual(step['metric'], 'melee_damage_count')
+        self.assertTrue(step['critical'])
+        self.assertEqual(step['hand'], 0)
+
+    def test_sets_the_debt_aura_and_has_a_striker_cast_the_breaker_spell_at_the_caster(self):
+        spec = duration_spec(sacred_oath_entry())
+        scenario, _ = duration_scenario(CLASS_FILE, spec)
+        set_aura_steps = [step for step in scenario['steps']
+                         if step.get('action') == 'set_aura' and step.get('spell') == KEEPING_THE_OATH]
+        self.assertEqual(len(set_aura_steps), 1)
+        self.assertEqual(set_aura_steps[0]['actor'], 'caster')
+        cast_steps = [step for step in scenario['steps']
+                     if step.get('action') == 'cast' and step.get('spell') == SMITE]
+        self.assertEqual(len(cast_steps), 1)
+        self.assertEqual(cast_steps[0]['actor'], 'striker')
+        self.assertEqual(cast_steps[0]['target'], 'caster')
+
+    def test_asserts_a_nonzero_debt_before_measuring_the_before_label(self):
+        spec = duration_spec(sacred_oath_entry())
+        scenario, _ = duration_scenario(CLASS_FILE, spec)
+        actions = scenario['steps']
+        debt_assert = next(step for step in actions
+                           if step.get('metric') == 'aura_amount' and step.get('spell') == OATHKEEPER)
+        self.assertEqual(debt_assert['min'], 1)
+        self.assertNotIn('max', debt_assert)
+        before_index = next(index for index, step in enumerate(actions)
+                            if step.get('metric') == 'aura_duration_ms')
+        self.assertLess(actions.index(debt_assert), before_index)
 
 
 class ShieldBreakTriggerScenarioTests(unittest.TestCase):
@@ -860,6 +961,49 @@ class JudgeMetricDeltaTests(unittest.TestCase):
                                   '-15', 'prose: "reduces damage taken by an additional 5% per copy" (803219)', model)
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': -10.0, 'after': -15.0}), expectation)
         self.assertEqual(verdict.status, 'ok')
+
+
+class JudgeDurationTests(unittest.TestCase):
+    def expectation(self):
+        model = {'kind': 'duration', 'before_label': 'before', 'after_label': 'after', 'count_label': 'crits',
+                 'expected_ms': 1000, 'wait_ms': 500, 'quote': 'remove 1 sec from the duration of'}
+        return Expectation('label', BEHAVIOUR_DURATION, SACRED_OATH, OATHKEEPER, None, '1000',
+                           'prose: "remove 1 sec from the duration of" (712346)', model)
+
+    def test_duration_drops_by_the_wait_plus_the_extra_second_is_ok(self):
+        expectation = self.expectation()
+        values = {'before': 8000.0, 'after': 8000.0 - 500 - 1000, 'crits': 1.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_duration_drops_by_only_the_wait_is_alert_not_ok(self):
+        expectation = self.expectation()
+        values = {'before': 8000.0, 'after': 8000.0 - 500, 'crits': 1.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_forced_swing_that_did_not_crit_is_unmeasured_not_ok_or_alert(self):
+        expectation = self.expectation()
+        values = {'before': 8000.0, 'after': 8000.0 - 500, 'crits': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'unmeasured')
+
+    def test_two_forced_crits_is_unmeasured_not_ok_or_alert(self):
+        expectation = self.expectation()
+        values = {'before': 8000.0, 'after': 0.0, 'crits': 2.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'unmeasured')
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 8000.0, 'crits': 1.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('after', verdict.explanation)
+
+    def test_no_run_reports_no_scenario(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), None, expectation)
+        self.assertIn('no scenario', verdict.explanation)
 
 
 if __name__ == '__main__':

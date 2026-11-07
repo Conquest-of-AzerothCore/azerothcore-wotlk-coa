@@ -610,6 +610,14 @@
       "spell": 300607, "name": "Titanfall", "kind": "leech_ratio",
       "quote": "now heals you for twice the damage dealt",
       "target_rank": 806835, "expected_before": 1.0, "expected_after": 2.0
+    },
+    {
+      "spell": 712346, "name": "Sacred Oath", "kind": "duration",
+      "quote": "remove 1 sec from the duration of", "expected_ms": 1000,
+      "target_aura": 803237,
+      "debt_aura": 803149,
+      "breaker_spell": 48123,
+      "striker_entry": 36
     }
   ]
 }
