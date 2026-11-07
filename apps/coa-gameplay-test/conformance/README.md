@@ -811,7 +811,7 @@ skipped: it is what keeps a behaviour `ok` honestly distinguishable from a token
 | `kind` | `count`, `ratio`, `duration`, `trigger` or `spread`: which scenario builder and judge rule apply |
 | `quote` | the exact prose fragment of `Description[enUS]`, checked to be a substring at generation time |
 | `expected` | the number, ratio or duration the quote states |
-| kind-specific fields | `count`: `target_rank` (the active spell cast), `radius` and `radius_reason` (the source citation that grounds the fixture placement, never a guessed distance), `metric` (`spell_damage_count`, the default, for a spell with a school-damage effect, or `aura` for a spell whose own effect is not damage, such as a silence); `ratio`: `targets`, a list of `[rank_id, name]` pairs; `spread`: `seed_spell` (cast on the primary dummy to install the aura the passive must copy), `aura_spell` (the aura id measured on every extra dummy), `target_rank` (the active whose damage triggers the copy), `radius`/`radius_reason` |
+| kind-specific fields | `count`: `target_rank` (the active spell cast), `radius` and `radius_reason` (the source citation that grounds the fixture placement, never a guessed distance), `metric` (`spell_damage_count`, the default, for a spell with a school-damage effect, or `aura` for a spell whose own effect is not damage, such as a silence); `ratio`: `targets`, a list of `[rank_id, name]` pairs; `spread`: `seed_spell` (cast on the primary dummy to install the aura the passive must copy), `aura_spell` (the aura id measured on every extra dummy), `target_rank` (the active whose damage triggers the copy), `radius`/`radius_reason`; `trigger`: `shield_aura` (the absorb aura that must be fully consumed), `trigger_spell` (the spell the break casts), `breaker_spell` (a spell of the absorb's own school that the striker casts directly at the caster to deplete it deterministically), `striker_entry` (a creature template entry to cast it from), `break_timeout_ms` (how long to wait for the aura to clear once the breaker spell lands, default 3000) |
 
 `behaviours.py`'s `behaviour_scenario(class_file, entry)` dispatches on `kind` to a scenario builder shaped like
 `passives.passive_scenario` (base steps, measure "before," `learn`, measure "after"), with a kind-specific measure
@@ -867,6 +867,36 @@ the behaviour under judgment). The resulting `Expectation` is shaped exactly lik
 before and after phase, `alert` on a measured 0 against a nonzero `expected` (the absent-effect case this check
 exists to catch), `unmeasured` when an extra dummy already carries the aura before the passive is learned.
 
+### Shield-break trigger scenarios (`behaviour_trigger`)
+
+This is the first `behaviour_trigger` entry: a tooltip claim that is a scripted "always fires" cast, reachable
+only from an `AfterEffectRemove`-style hook, not from `triggers.py`'s native `EffectTriggerSpell` path (that path
+only recognises a cast or a swing the caster performs, `triggers.py:47-53`; here the triggering action is damage
+*taken*, consumed by an absorb shield). `ShieldBreakTriggerSpec` names `shield_aura` (the absorb aura that must be
+fully depleted), `trigger_spell` (the spell the break casts), `breaker_spell` (a spell of the absorb's own school,
+cast directly by the striker at the caster, that reliably exceeds the absorb amount), `striker_entry` (a creature
+template entry to cast it from) and `break_timeout_ms` (how long to wait for the aura to clear once the breaker
+spell lands). `shield_aura`'s own `SchoolMask` decides what `breaker_spell` must be: a generic hostile creature's
+melee is Physical and a `SPELL_AURA_SCHOOL_ABSORB` only intercepts its own school (confirmed empirically for
+Staffguard 706583, Holy-only: a melee-only striker left its 8-second duration to expire untouched every time,
+`without`/`with` elapsed consistently ~7980 ms regardless of real melee damage landing on the caster, never from
+an `AURA_REMOVE_BY_ENEMY_SPELL` absorption), so a melee swing can never satisfy this check and a Holy nuke
+(Smite 48123 here) must be cast directly at the caster instead. `shield_break_trigger_scenario` spawns one
+"striker" fixture, then runs two phases, once without the passive known and once with it: apply `shield_aura`
+fresh (`set_aura`), measure `spell_damage_count {trigger_spell, target: striker}` on the caster, have the striker
+`cast` `breaker_spell` directly at the caster (the harness's own creature-cast action, bypassing AI pathing and
+its timing variance entirely), wait `CAST_SETTLE_MS` (500 ms: the aura-removal callback was observed to still be
+mid-flight on the very next assert without this wait, intermittently failing `the shield is fully consumed` even
+though the cast had already landed), then assert `shield_aura` is fully gone (`metric: "aura", equals: 0`) within
+`break_timeout_ms` (real incoming damage consuming the shield, not an expiry or a manual cancel), and measure
+`spell_damage_count` again. The passive is `learn`ed between the two phases. The judge
+(`compare.behaviour_trigger_verdict`) computes `without_delta` and `with_delta` (the after-minus-before
+`spell_damage_count` of each phase): `ok` only when `without_delta == 0` (the damage never fires without the
+passive known) **and** `with_delta >= expected` (it fires at least once, the one time the shield broke, with the
+passive known); `alert` when `without_delta > 0` (the damage fires even without the passive, contradicting the
+tooltip's gating) **or** `with_delta == 0` (the passive is known but the break never casts the trigger spell -
+the absent-effect case this check exists to catch, since a zero effect must never read as `ok`).
+
 ### Templar entries
 
 | Passive | Kind | Quote | Expected | Mechanism |
@@ -875,6 +905,7 @@ exists to catch), `unmeasured` when an extra dummy already carries the aura befo
 | Justice 712437 | count | "strikes 1 additional nearby target" | 1 | scripted hook `templar_casts::OnSpellBeforeEffects` (`AscensionTemplarAbilities.cpp:95-102`): casting Interdict 560116 with Justice known adds exactly one unit from `Nearby(primary, 8.0f)`; the DBC's own effect 1 (`PROC_TRIGGER_SPELL` to 712364, Sacred Oath's own trigger) does not implement this sentence at all and is not used |
 | Final Prayer 705268 | ratio | "Doubles the healing done to you" | 2.0 | one named target, Testament of Faith 801478 (a direct heal); Testament of Fortitude 500678 is a periodic self-heal (`PERIODIC_TRIGGER_SPELL_WITH_VALUE` -> 500690) that needs a tick-based measurement this round did not build, so it is not in `targets` yet |
 | Holy Tempest 301339 | spread | "spreads Condemn on affected enemies to a nearby enemy" | 1 | `AscensionTemplarAbilities.cpp:294-295` (`OnSpellHitResult`): on a confirmed hit of Righteous Tempest's periodic damage (ranks `805410`/`570200..570205`) with the passive known, `AscensionTemplar.cpp:224-257` (`SpreadCondemn`) copies the Condemn aura already present on the hit target onto the first valid, non-already-afflicted, line-of-sight enemy within `Nearby(target, 10.0f)` - a hardcoded radius, not read from any DBC field |
+| Armor of Faith 804930 | trigger | "Whenever the absorption shield from Staffguard breaks, inflict" | 1 | `AscensionTemplarAuras.cpp:213-216` (`aura_ascension_templar_lifecycle::Remove`): when Staffguard 706583's absorb effect is fully depleted (`GetAmount() <= 0`) by `AURA_REMOVE_BY_ENEMY_SPELL` (an enemy's own damage, not an expiry or manual cancel) while the player is alive and knows 804930, it casts Armor of Faith's damage spell 801546 on the player, whose own nearby-enemy Holy damage effect then lands; the amount stays the pre-existing `$801546ppl1` player question (`questions.md:368-374`), unchanged by this entry. Staffguard's absorb is Holy-only (`SchoolMask` 2), so the scenario's striker casts Smite 48123 (`breaker_spell`) directly at the caster rather than swinging at it |
 
 The 10-yard and 8-yard fixture radii above are both read from server source, never guessed, per each entry's own
 `radius_reason`.

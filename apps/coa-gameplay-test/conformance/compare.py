@@ -9,7 +9,7 @@ import re
 from statistics import fmean, pstdev
 from typing import Callable, Mapping, Protocol
 
-from behaviours import BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_RATIO
+from behaviours import BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER
 from hits import (HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS, WEAPON_PERCENT_DAMAGE, Z_99,
                   HitModel, Modifier, Unmodelled, measured_hit_model)
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE
@@ -1515,6 +1515,29 @@ def behaviour_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
                                f'alert')
 
 
+def behaviour_trigger_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    labels = (model['without_before_label'], model['without_after_label'],
+             model['with_before_label'], model['with_after_label'])
+    values = [run.values.get(label) for label in labels]
+    if any(value is None for value in values):
+        missing = next(label for label, value in zip(labels, values) if value is None)
+        return replace(base, explanation=missing_measurement(run, missing))
+    without_before, without_after, with_before, with_after = values
+    without_delta = without_after - without_before
+    with_delta = with_after - with_before
+    expected = float(model['expected'])
+    trigger_spell = model['trigger_spell']
+    explanation = (f'without the passive: {without_delta:g} of {expected:g} breaks cast {trigger_spell} on the '
+                   f'striker (expected 0); with the passive: {with_delta:g} of {expected:g} breaks cast it '
+                   f'(expected >= {expected:g})')
+    if without_delta > 0:
+        return replace(base, status='alert', measured=without_delta, expected=0.0, explanation=explanation)
+    if with_delta == 0:
+        return replace(base, status='alert', measured=with_delta, expected=expected, explanation=explanation)
+    status = 'ok' if with_delta >= expected else 'alert'
+    return replace(base, status=status, measured=with_delta, expected=expected, explanation=explanation)
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
@@ -1523,6 +1546,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_count_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_RATIO:
         return behaviour_ratio_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_TRIGGER:
+        return behaviour_trigger_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 

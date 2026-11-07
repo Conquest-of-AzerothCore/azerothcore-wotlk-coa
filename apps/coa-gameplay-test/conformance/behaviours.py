@@ -287,6 +287,83 @@ def healing_ratio_spec(entry: dict) -> HealingRatioSpec:
                             tuple((target, name) for target, name in entry['targets']))
 
 
+STRIKER = 'striker'
+STRIKER_HEALTH = 1_000_000
+STRIKER_DISTANCE = 3.0
+DEFAULT_BREAK_TIMEOUT_MS = 3000
+CAST_SETTLE_MS = 500
+
+
+@dataclass(frozen=True)
+class ShieldBreakTriggerSpec:
+    spell: int
+    name: str
+    quote: str
+    expected: float
+    shield_aura: int
+    trigger_spell: int
+    breaker_spell: int
+    striker_entry: int
+    break_timeout_ms: int = DEFAULT_BREAK_TIMEOUT_MS
+
+
+def trigger_label(spec: ShieldBreakTriggerSpec, phase: str, moment: str) -> str:
+    return f'{spec.spell} {phase} {spec.trigger_spell} {moment}'
+
+
+def shield_break_phase(spec: ShieldBreakTriggerSpec, phase: str) -> tuple[list[dict], str, str]:
+    before = trigger_label(spec, phase, BEFORE)
+    after = trigger_label(spec, phase, AFTER)
+    steps = [
+        {'action': 'set_aura', 'actor': CASTER, 'spell': spec.shield_aura, 'stacks': 1},
+        {'action': 'assert', 'label': f'{spec.spell} {phase} SETUP: the shield is up', 'actor': CASTER,
+         'metric': 'aura', 'spell': spec.shield_aura, 'equals': 1, 'within_ms': 2000},
+        measurement(before, CASTER, 'spell_damage_count', spell=spec.trigger_spell, target=STRIKER),
+        {'action': 'cast', 'actor': STRIKER, 'spell': spec.breaker_spell, 'target': CASTER},
+        {'action': 'wait', 'label': f'{spec.spell} {phase} settle', 'ms': CAST_SETTLE_MS},
+        {'action': 'assert', 'label': f'{spec.spell} {phase} SETUP: the shield is fully consumed by real damage',
+         'actor': CASTER, 'metric': 'aura', 'spell': spec.shield_aura, 'equals': 0,
+         'within_ms': spec.break_timeout_ms},
+        measurement(after, CASTER, 'spell_damage_count', spell=spec.trigger_spell, target=STRIKER),
+    ]
+    return steps, before, after
+
+
+def shield_break_trigger_scenario(class_file: dict, spec: ShieldBreakTriggerSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'trigger', spec.quote, spec.expected)
+    striker = {'id': STRIKER, 'owner': CASTER, 'entry': spec.striker_entry, 'level': class_file['level'],
+              'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 1}
+    without_steps, without_before, without_after = shield_break_phase(spec, 'without')
+    with_steps, with_before, with_after = shield_break_phase(spec, 'with')
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour trigger',
+        'contract': f'A striker (creature entry {spec.striker_entry}) casts {spec.breaker_spell} directly at the '
+                    f'caster, the one school of damage shield aura {spec.shield_aura} actually absorbs, to fully '
+                    f'consume it deterministically (melee from a hostile creature cannot: {spec.shield_aura} only '
+                    f'absorbs its own school, not the physical damage a generic striker swings for), once without '
+                    f'{spec.name} known and once with it known, counting {spec.trigger_spell} casts on the '
+                    f'striker each time.',
+        'players': [player_fixture(class_file)],
+        'creatures': [striker],
+        'steps': base_steps(class_file) + without_steps +
+                 [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + with_steps}
+    label = f'{spec.spell} behaviour_trigger'
+    model = {'kind': 'trigger', 'without_before_label': without_before, 'without_after_label': without_after,
+             'with_before_label': with_before, 'with_after_label': with_after, 'expected': spec.expected,
+             'trigger_spell': spec.trigger_spell, 'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_TRIGGER, spec.spell, spec.trigger_spell, None, str(spec.expected),
+                              prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def shield_break_trigger_spec(entry: dict) -> ShieldBreakTriggerSpec:
+    return ShieldBreakTriggerSpec(entry['spell'], entry['name'], entry['quote'], entry['expected'],
+                                  entry['shield_aura'], entry['trigger_spell'], entry['breaker_spell'],
+                                  entry['striker_entry'], entry.get('break_timeout_ms', DEFAULT_BREAK_TIMEOUT_MS))
+
+
 def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
     if entry['kind'] == 'count':
         return target_count_scenario(class_file, target_count_spec(entry))
@@ -294,6 +371,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return healing_ratio_scenario(class_file, healing_ratio_spec(entry))
     if entry['kind'] == 'spread':
         return aura_spread_scenario(class_file, aura_spread_spec(entry))
+    if entry['kind'] == 'trigger':
+        return shield_break_trigger_scenario(class_file, shield_break_trigger_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

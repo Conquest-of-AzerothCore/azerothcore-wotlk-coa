@@ -2,9 +2,10 @@ from pathlib import Path
 import sys
 import unittest
 
-from behaviours import (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, aura_spread_scenario, aura_spread_spec,
+from behaviours import (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER, aura_spread_scenario, aura_spread_spec,
                         behaviour_entries, behaviour_entry, behaviour_scenario, healing_ratio_scenario,
-                        healing_ratio_spec, target_count_scenario, target_count_spec)
+                        healing_ratio_spec, shield_break_trigger_scenario, shield_break_trigger_spec,
+                        target_count_scenario, target_count_spec)
 from compare import Verdict, judge_behaviour
 from profile import DBC_DIR, load_class_file
 from tooltip import Records
@@ -24,6 +25,9 @@ TESTAMENT_OF_FAITH = 801478
 HOLY_TEMPEST = 301339
 CONDEMN_RANK = 567539
 RIGHTEOUS_TEMPEST_RANK = 807274
+ARMOR_OF_FAITH = 804930
+STAFFGUARD_SHIELD = 706583
+ARMOR_OF_FAITH_DAMAGE = 801546
 
 
 def scarlet_judicator_entry() -> dict:
@@ -40,6 +44,10 @@ def final_prayer_entry() -> dict:
 
 def holy_tempest_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == HOLY_TEMPEST)
+
+
+def armor_of_faith_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == ARMOR_OF_FAITH)
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -73,9 +81,22 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.aura_spell, CONDEMN_RANK)
         self.assertEqual(spec.target_rank, RIGHTEOUS_TEMPEST_RANK)
 
+    def test_armor_of_faith_entry(self):
+        spec = shield_break_trigger_spec(armor_of_faith_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'trigger', spec.quote, spec.expected)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(entry.expected, 1)
+        self.assertEqual(spec.shield_aura, STAFFGUARD_SHIELD)
+        self.assertEqual(spec.trigger_spell, ARMOR_OF_FAITH_DAMAGE)
+
     def test_quote_must_be_in_tooltip(self):
         with self.assertRaises(ValueError):
             behaviour_entry(RECORDS, SCARLET_JUDICATOR, 'Scarlet Judicator', 'count', 'not in the tooltip at all', 2)
+
+    def test_shield_break_trigger_spec_rejects_a_quote_not_in_the_tooltip(self):
+        with self.assertRaises(ValueError):
+            spec = shield_break_trigger_spec(armor_of_faith_entry())
+            behaviour_entry(RECORDS, spec.spell, spec.name, 'trigger', 'not in the tooltip at all', spec.expected)
 
     def test_unknown_kind_is_rejected(self):
         with self.assertRaises(ValueError):
@@ -92,7 +113,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 4)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 5)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -180,6 +201,58 @@ class HealingRatioScenarioTests(unittest.TestCase):
         self.assertEqual(len(expectations), 1)
         self.assertEqual(expectations[0].check, BEHAVIOUR_RATIO)
         self.assertEqual(expectations[0].model['expected'], 2.0)
+
+
+class ShieldBreakTriggerScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_expectations(self):
+        spec = shield_break_trigger_spec(armor_of_faith_entry())
+        scenario, expectations = shield_break_trigger_scenario(CLASS_FILE, spec)
+        validated = run.validate(scenario)
+        self.assertEqual(len(validated['creatures']), 1)
+        self.assertEqual(validated['creatures'][0]['reaction'], 1)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_TRIGGER)
+        self.assertTrue(expectation.rule.startswith('prose: "Whenever the absorption shield from Staffguard'))
+        self.assertEqual(expectation.model['expected'], 1)
+        self.assertEqual(expectation.model['trigger_spell'], ARMOR_OF_FAITH_DAMAGE)
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, armor_of_faith_entry())
+        self.assertEqual(len(run.validate(scenario)['creatures']), 1)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_TRIGGER)
+
+    def test_learn_comes_between_the_without_and_with_phases(self):
+        spec = shield_break_trigger_spec(armor_of_faith_entry())
+        scenario, _ = shield_break_trigger_scenario(CLASS_FILE, spec)
+        learn_steps = [index for index, step in enumerate(scenario['steps'])
+                      if step.get('action') == 'learn' and step.get('spell') == ARMOR_OF_FAITH]
+        set_aura_steps = [index for index, step in enumerate(scenario['steps'])
+                         if step.get('action') == 'set_aura' and step.get('spell') == STAFFGUARD_SHIELD]
+        self.assertEqual(len(learn_steps), 1)
+        self.assertEqual(len(set_aura_steps), 2)
+        self.assertLess(set_aura_steps[0], learn_steps[0])
+        self.assertLess(learn_steps[0], set_aura_steps[1])
+
+    def test_striker_casts_the_breaker_spell_directly_at_the_caster(self):
+        spec = shield_break_trigger_spec(armor_of_faith_entry())
+        scenario, _ = shield_break_trigger_scenario(CLASS_FILE, spec)
+        cast_steps = [step for step in scenario['steps']
+                     if step.get('action') == 'cast' and step.get('spell') == spec.breaker_spell]
+        self.assertEqual(len(cast_steps), 2)
+        for step in cast_steps:
+            self.assertEqual(step['actor'], 'striker')
+            self.assertEqual(step['target'], 'caster')
+
+    def test_measures_trigger_spell_damage_count_on_the_striker(self):
+        spec = shield_break_trigger_spec(armor_of_faith_entry())
+        scenario, _ = shield_break_trigger_scenario(CLASS_FILE, spec)
+        measure_steps = [step for step in scenario['steps']
+                         if step.get('metric') == 'spell_damage_count' and step.get('spell') == ARMOR_OF_FAITH_DAMAGE]
+        self.assertEqual(len(measure_steps), 4)
+        for step in measure_steps:
+            self.assertEqual(step['actor'], 'caster')
+            self.assertEqual(step['target'], 'striker')
 
 
 class FakeRun:
@@ -313,6 +386,42 @@ class JudgeHealingRatioTests(unittest.TestCase):
         expectation = self.expectation()
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 0.0, 'after': 50.0}), expectation)
         self.assertEqual(verdict.status, 'unmeasured')
+
+
+class JudgeShieldBreakTriggerTests(unittest.TestCase):
+    def expectation(self):
+        model = {'kind': 'trigger', 'without_before_label': 'wb', 'without_after_label': 'wa',
+                 'with_before_label': 'tb', 'with_after_label': 'ta', 'expected': 1,
+                 'trigger_spell': ARMOR_OF_FAITH_DAMAGE,
+                 'quote': 'Whenever the absorption shield from Staffguard breaks, inflict'}
+        return Expectation('label', BEHAVIOUR_TRIGGER, ARMOR_OF_FAITH, ARMOR_OF_FAITH_DAMAGE, None, '1',
+                           'prose: "Whenever the absorption shield from Staffguard breaks, inflict" (804930)', model)
+
+    def test_fires_only_with_the_passive_is_ok(self):
+        expectation = self.expectation()
+        values = {'wb': 0.0, 'wa': 0.0, 'tb': 0.0, 'ta': 1.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_absent_effect_with_the_passive_known_is_alert(self):
+        expectation = self.expectation()
+        values = {'wb': 0.0, 'wa': 0.0, 'tb': 0.0, 'ta': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 0.0)
+
+    def test_fires_without_the_passive_known_is_alert(self):
+        expectation = self.expectation()
+        values = {'wb': 0.0, 'wa': 1.0, 'tb': 0.0, 'ta': 1.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation()
+        values = {'wb': 0.0, 'wa': 0.0, 'tb': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('ta', verdict.explanation)
 
 
 if __name__ == '__main__':

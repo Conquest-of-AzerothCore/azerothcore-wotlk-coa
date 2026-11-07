@@ -568,6 +568,15 @@
       "seed_spell": 567539, "aura_spell": 567539, "target_rank": 807274,
       "radius": 10.0,
       "radius_reason": "AscensionTemplar.cpp:224-257 SpreadCondemn: Nearby(target, 10.0f), a hardcoded radius; 301339's own effect has EffectRadiusIndex[0] 0 and no DBC field defines this distance."
+    },
+    {
+      "spell": 804930, "name": "Armor of Faith", "kind": "trigger",
+      "quote": "Whenever the absorption shield from Staffguard breaks, inflict", "expected": 1,
+      "shield_aura": 706583,
+      "trigger_spell": 801546,
+      "breaker_spell": 48123,
+      "striker_entry": 36,
+      "break_timeout_ms": 3000
     }
   ]
 }
