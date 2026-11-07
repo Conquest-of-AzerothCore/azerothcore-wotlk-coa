@@ -139,37 +139,64 @@ def target_count_scenario(class_file: dict, spec: TargetCountSpec) -> tuple[dict
 
 
 @dataclass(frozen=True)
+class HealingRatioTarget:
+    spell: int
+    name: str
+    method: str = 'cast'
+    effect: int = 0
+
+
+def healing_ratio_target(raw) -> HealingRatioTarget:
+    if len(raw) == 2:
+        rank_id, name = raw
+        return HealingRatioTarget(rank_id, name)
+    rank_id, name, extra = raw
+    return HealingRatioTarget(rank_id, name, extra.get('method', 'cast'), extra.get('effect', 0))
+
+
+@dataclass(frozen=True)
 class HealingRatioSpec:
     spell: int
     name: str
     quote: str
     expected: float
-    targets: tuple[tuple[int, str], ...]
+    targets: tuple[HealingRatioTarget, ...]
 
 
 def healing_ratio_scenario(class_file: dict, spec: HealingRatioSpec) -> tuple[dict, list[Expectation]]:
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'ratio', spec.quote, spec.expected)
 
-    def label(rank_id: int, moment: str) -> str:
-        return f'{spec.spell} {rank_id} spell_healing_done {moment}'
+    def label(target: HealingRatioTarget, moment: str) -> str:
+        if target.method == 'effect_value':
+            return f'{spec.spell} {target.spell} spell_effect_value {moment}'
+        return f'{spec.spell} {target.spell} spell_healing_done {moment}'
 
     def cast_all() -> list[dict]:
         steps = []
-        for rank_id, _ in spec.targets:
-            facts = facts_of(records, rank_id)
+        for target in spec.targets:
+            if target.method != 'cast':
+                continue
+            facts = facts_of(records, target.spell)
             if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
                 steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
                              'value': facts.mana_cost})
-            steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': rank_id})
+            steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': target.spell})
             steps += required_aura_steps(facts)
-            steps.append({'action': 'cast', 'actor': CASTER, 'spell': rank_id, 'target': CASTER})
+            steps.append({'action': 'cast', 'actor': CASTER, 'spell': target.spell, 'target': CASTER})
             steps.append({'action': 'wait', 'ms': facts.cast_time_ms + CAST_MARGIN_MS})
         return steps
 
     def measure(moment: str) -> list[dict]:
-        return [measurement(label(rank_id, moment), CASTER, 'spell_healing_done', spell=rank_id, target=CASTER)
-                for rank_id, _ in spec.targets]
+        steps = []
+        for target in spec.targets:
+            if target.method == 'effect_value':
+                steps.append(measurement(label(target, moment), CASTER, 'spell_effect_value', spell=target.spell,
+                                         effect=target.effect))
+            else:
+                steps.append(measurement(label(target, moment), CASTER, 'spell_healing_done', spell=target.spell,
+                                         target=CASTER))
+        return steps
 
     scenario = {
         'schema': 1,
@@ -180,11 +207,11 @@ def healing_ratio_scenario(class_file: dict, spec: HealingRatioSpec) -> tuple[di
         'steps': base_steps(class_file) + cast_all() + measure(BEFORE) +
                  [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + cast_all() + measure(AFTER)}
     expectations = []
-    for rank_id, name in spec.targets:
-        model = {'kind': 'ratio', 'before_label': label(rank_id, BEFORE), 'after_label': label(rank_id, AFTER),
-                 'expected': spec.expected, 'quote': entry.quote, 'target_name': name}
-        expectations.append(Expectation(f'{spec.spell} {rank_id} behaviour_ratio', BEHAVIOUR_RATIO, spec.spell,
-                                        rank_id, None, str(spec.expected), prose_rule(entry.quote, spec.spell),
+    for target in spec.targets:
+        model = {'kind': 'ratio', 'before_label': label(target, BEFORE), 'after_label': label(target, AFTER),
+                 'expected': spec.expected, 'quote': entry.quote, 'target_name': target.name}
+        expectations.append(Expectation(f'{spec.spell} {target.spell} behaviour_ratio', BEHAVIOUR_RATIO, spec.spell,
+                                        target.spell, None, str(spec.expected), prose_rule(entry.quote, spec.spell),
                                         model))
     return scenario, expectations
 
@@ -344,7 +371,7 @@ def target_count_spec(entry: dict) -> TargetCountSpec:
 
 def healing_ratio_spec(entry: dict) -> HealingRatioSpec:
     return HealingRatioSpec(entry['spell'], entry['name'], entry['quote'], entry['expected'],
-                            tuple((target, name) for target, name in entry['targets']))
+                            tuple(healing_ratio_target(raw) for raw in entry['targets']))
 
 
 STRIKER = 'striker'

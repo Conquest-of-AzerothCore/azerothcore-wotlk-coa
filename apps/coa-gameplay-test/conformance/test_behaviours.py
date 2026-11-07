@@ -3,8 +3,8 @@ import sys
 import unittest
 
 from behaviours import (BEHAVIOUR_COUNT, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER,
-                        aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
-                        behaviour_scenario, health_ratio_spec, health_threshold_ratio_scenario,
+                        HealingRatioTarget, aura_spread_scenario, aura_spread_spec, behaviour_entries,
+                        behaviour_entry, behaviour_scenario, health_ratio_spec, health_threshold_ratio_scenario,
                         healing_ratio_scenario, healing_ratio_spec, metric_delta_scenario,
                         metric_delta_spec, shield_break_trigger_scenario, shield_break_trigger_spec,
                         target_count_scenario, target_count_spec)
@@ -24,6 +24,7 @@ FINAL_PRAYER = 705268
 DIVINE_FORCE_MAX_RANK = 807805
 INTERDICT = 560116
 TESTAMENT_OF_FAITH = 801478
+TESTAMENT_OF_FORTITUDE = 500678
 HOLY_TEMPEST = 301339
 CONDEMN_RANK = 567539
 RIGHTEOUS_TEMPEST_RANK = 807274
@@ -91,7 +92,9 @@ class BehaviourEntryTests(unittest.TestCase):
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'ratio', spec.quote, spec.expected)
         self.assertIn(spec.quote, entry.tooltip)
         self.assertEqual(entry.expected, 2.0)
-        self.assertEqual(spec.targets, ((TESTAMENT_OF_FAITH, 'Testament of Faith'),))
+        self.assertEqual(spec.targets, (
+            HealingRatioTarget(TESTAMENT_OF_FAITH, 'Testament of Faith'),
+            HealingRatioTarget(TESTAMENT_OF_FORTITUDE, 'Testament of Fortitude', 'effect_value', 0)))
 
     def test_holy_tempest_entry(self):
         spec = aura_spread_spec(holy_tempest_entry())
@@ -252,9 +255,39 @@ class HealingRatioScenarioTests(unittest.TestCase):
         spec = healing_ratio_spec(final_prayer_entry())
         scenario, expectations = healing_ratio_scenario(CLASS_FILE, spec)
         run.validate(scenario)
-        self.assertEqual(len(expectations), 1)
-        self.assertEqual(expectations[0].check, BEHAVIOUR_RATIO)
-        self.assertEqual(expectations[0].model['expected'], 2.0)
+        self.assertEqual(len(expectations), 2)
+        for expectation in expectations:
+            self.assertEqual(expectation.check, BEHAVIOUR_RATIO)
+            self.assertEqual(expectation.model['expected'], 2.0)
+
+    def test_scenario_adds_fortitude_effect_value_target(self):
+        spec = healing_ratio_spec(final_prayer_entry())
+        scenario, expectations = healing_ratio_scenario(CLASS_FILE, spec)
+        fortitude = next(expectation for expectation in expectations
+                         if expectation.rank_id == TESTAMENT_OF_FORTITUDE)
+        steps_by_label = {step['label']: step for step in scenario['steps'] if step.get('action') == 'assert'}
+        before_step = steps_by_label[fortitude.model['before_label']]
+        after_step = steps_by_label[fortitude.model['after_label']]
+        for step in (before_step, after_step):
+            self.assertEqual(step['metric'], 'spell_effect_value')
+            self.assertEqual(step['spell'], TESTAMENT_OF_FORTITUDE)
+            self.assertEqual(step['effect'], 0)
+        cast_targets = [step['spell'] for step in scenario['steps'] if step.get('action') == 'cast']
+        self.assertNotIn(TESTAMENT_OF_FORTITUDE, cast_targets)
+
+    def test_scenario_keeps_faith_cast_based(self):
+        spec = healing_ratio_spec(final_prayer_entry())
+        scenario, expectations = healing_ratio_scenario(CLASS_FILE, spec)
+        faith = next(expectation for expectation in expectations if expectation.rank_id == TESTAMENT_OF_FAITH)
+        steps_by_label = {step['label']: step for step in scenario['steps'] if step.get('action') == 'assert'}
+        before_step = steps_by_label[faith.model['before_label']]
+        after_step = steps_by_label[faith.model['after_label']]
+        for step in (before_step, after_step):
+            self.assertEqual(step['metric'], 'spell_healing_done')
+            self.assertEqual(step['spell'], TESTAMENT_OF_FAITH)
+        cast_targets = [step['spell'] for step in scenario['steps'] if step.get('action') == 'cast']
+        self.assertNotIn(TESTAMENT_OF_FORTITUDE, cast_targets)
+        self.assertIn(TESTAMENT_OF_FAITH, cast_targets)
 
 
 class HealthRatioScenarioTests(unittest.TestCase):
@@ -532,6 +565,17 @@ class JudgeHealingRatioTests(unittest.TestCase):
                  'quote': 'Doubles the healing done to you', 'target_name': 'Testament of Faith'}
         return Expectation('label', BEHAVIOUR_RATIO, FINAL_PRAYER, TESTAMENT_OF_FAITH, None, '2.0',
                            'prose: "Doubles the healing done to you" (705268)', model)
+
+    def fortitude_expectation(self):
+        model = {'kind': 'ratio', 'before_label': 'before', 'after_label': 'after', 'expected': 2.0,
+                 'quote': 'Doubles the healing done to you', 'target_name': 'Testament of Fortitude'}
+        return Expectation('label', BEHAVIOUR_RATIO, FINAL_PRAYER, TESTAMENT_OF_FORTITUDE, None, '2.0',
+                           'prose: "Doubles the healing done to you" (705268)', model)
+
+    def test_fortitude_unchanged_effect_value_is_alert_not_ok(self):
+        expectation = self.fortitude_expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 5.0, 'after': 5.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
 
     def test_ratio_matches_expected_is_ok(self):
         expectation = self.expectation()

@@ -844,14 +844,19 @@ already hit before the learn, since the delta cannot then be isolated.
 
 ### Healing-ratio scenarios (`behaviour_ratio`)
 
-The scenario casts every named target spell at the caster, measures `spell_healing_done {spell, target: caster}`
-for each, learns the passive, repeats the casts and the measurement. The judge
-(`compare.behaviour_ratio_verdict`) computes `ratio = after / before` for reporting, but judges the *healing
-delta* (`after - before`) against the delta the expected ratio implies (`before * (expected_ratio - 1)`), on the
-healing scale rather than the ratio scale: `ok` when `|delta - expected_delta| <= max(1, 0.5% of |expected_delta|)`,
-with the same zero-vs-nonzero guard as `behaviour_count` (a measured healing delta of exactly 0 against a nonzero
-expected delta is always `alert`); `unmeasured` when the before measurement is 0 or less, since a ratio needs a
-positive baseline.
+Each `targets` entry is either a 2-element `[rank_id, name]` (method `"cast"`, the default) or a 3-element
+`[rank_id, name, {"method": "effect_value", "effect": N}]`. A `"cast"` target is cast at the caster, then measured
+with `spell_healing_done {spell, target: caster}`, for each phase; an `"effect_value"` target is never cast at all
+— it is measured directly with `spell_effect_value {spell, effect}` before and after the passive is learned, for a
+doubling that is fully determined by the target spell's own `SpellEffectInfo::CalcValue` (a `SPELLMOD_EFFECT1`-style
+percent modifier applied while computing the effect's amount) rather than by anything that shows up only once the
+spell is cast and ticks. Both methods feed the same `Expectation` shape (`before_label`/`after_label`/`expected`/
+`quote`/`target_name`), so the judge below needs no per-method branch. The judge (`compare.behaviour_ratio_verdict`)
+computes `ratio = after / before` for reporting, but judges the *delta* (`after - before`) against the delta the
+expected ratio implies (`before * (expected_ratio - 1)`), on the metric's own scale rather than the ratio scale:
+`ok` when `|delta - expected_delta| <= max(1, 0.5% of |expected_delta|)`, with the same zero-vs-nonzero guard as
+`behaviour_count` (a measured delta of exactly 0 against a nonzero expected delta is always `alert`); `unmeasured`
+when the before measurement is 0 or less, since a ratio needs a positive baseline.
 
 ### Aura-spread scenarios (`behaviour_count`, `kind: "spread"`)
 
@@ -948,7 +953,7 @@ levels could not tell "the ratio is right" apart from "the ratio applies uncondi
 |---|---|---|---|---|
 | Scarlet Judicator 525024 | count | "strikes 2 additional enemies near the primary target" | 2 | Divine Force 807805's school-damage effect (`TARGET_UNIT_TARGET_ENEMY`, `DmgClass` 2/melee) always routes through `Spell::SelectImplicitChainTargets` (`Spell.cpp:1905-1923`), which applies Scarlet Judicator's `SPELLMOD_JUMP_TARGETS` flat modifier to `ChainTarget` and searches a 10-yard jump radius for a melee spell with no `JumpDistance` override (`Spell.cpp:2200-2213`) |
 | Justice 712437 | count | "strikes 1 additional nearby target" | 1 | scripted hook `templar_casts::OnSpellBeforeEffects` (`AscensionTemplarAbilities.cpp:95-102`): casting Interdict 560116 with Justice known adds exactly one unit from `Nearby(primary, 8.0f)`; the DBC's own effect 1 (`PROC_TRIGGER_SPELL` to 712364, Sacred Oath's own trigger) does not implement this sentence at all and is not used |
-| Final Prayer 705268 | ratio | "Doubles the healing done to you" | 2.0 | one named target, Testament of Faith 801478 (a direct heal); Testament of Fortitude 500678 is a periodic self-heal (`PERIODIC_TRIGGER_SPELL_WITH_VALUE` -> 500690) that needs a tick-based measurement this round did not build, so it is not in `targets` yet |
+| Final Prayer 705268 | ratio | "Doubles the healing done to you" | 2.0 | two named targets: Testament of Faith 801478 (a direct heal, `SPELL_AURA_MOD_HEALING_RECEIVED` taken-side, method `"cast"`, measured with `spell_healing_done`) and Testament of Fortitude 500678 (a `SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE` self-heal whose doubling is a `SPELLMOD_EFFECT1` percent modifier read inside its own effect-0 `CalcValue`, needing no cast at all, method `"effect_value"`, measured with `spell_effect_value {spell: 500678, effect: 0}`) |
 | Holy Tempest 301339 | spread | "spreads Condemn on affected enemies to a nearby enemy" | 1 | `AscensionTemplarAbilities.cpp:294-295` (`OnSpellHitResult`): on a confirmed hit of Righteous Tempest's periodic damage (ranks `805410`/`570200..570205`) with the passive known, `AscensionTemplar.cpp:224-257` (`SpreadCondemn`) copies the Condemn aura already present on the hit target onto the first valid, non-already-afflicted, line-of-sight enemy within `Nearby(target, 10.0f)` - a hardcoded radius, not read from any DBC field |
 | Armor of Faith 804930 | trigger | "Whenever the absorption shield from Staffguard breaks, inflict" | 1 | `AscensionTemplarAuras.cpp:213-216` (`aura_ascension_templar_lifecycle::Remove`): when Staffguard 706583's absorb effect is fully depleted (`GetAmount() <= 0`) by `AURA_REMOVE_BY_ENEMY_SPELL` (an enemy's own damage, not an expiry or manual cancel) while the player is alive and knows 804930, it casts Armor of Faith's damage spell 801546 on the player, whose own nearby-enemy Holy damage effect then lands; the amount stays the pre-existing `$801546ppl1` player question (`questions.md:368-374`), unchanged by this entry. Staffguard's absorb is Holy-only (`SchoolMask` 2), so the scenario's striker casts Smite 48123 (`breaker_spell`) directly at the caster rather than swinging at it |
 | Tyr's Guard 560649 | metric_delta | "now summons an additional copy of yourself" | 3 | a plain stock `SPELLMOD_EFFECT1` aura (effect 2 of 560649, `EffectSpellClassMask[6]` matching Testament of Hope 1397742's family flags): the engine's own `Player::ApplySpellMod`/`SpellInfo::CalcValue` path adds 1 to Testament of Hope's summon effect's base points (1 -> 2, `CalcValue` 2 -> 3) with no CoA-specific code involved; `owned_creature_count` of the copy entry 50250 is the metric, before (2, no 560649) and after (3, 560649 learned) |
