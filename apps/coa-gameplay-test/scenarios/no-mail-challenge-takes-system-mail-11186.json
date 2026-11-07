@@ -1,14 +1,15 @@
 {
   "schema": 1,
-  "name": "A no-mail challenge lets the hero take items from Postmaster and Recruit-A-Friend reward mail but not from a player or other server mail (#11186)",
+  "name": "A no-mail challenge lets the hero take items from Postmaster, Recruit-A-Friend reward and Customer Support mail but not from a player or other server mail (#11186, #11404)",
   "contract": [
     "Report #11186: under Hardcore the hero cannot take items from Postmaster mail or Recruit-A-Friend reward mail;",
-    "the take fails with \"Your challenge forbids receiving mail.\"",
-    "Expected: Postmaster and Recruit-A-Friend reward mail, like the Elite Warchest (#10678), are server gifts and not",
-    "player-to-player mail. Under Bloodbath (challenge 15, NO_MAIL) CMSG_MAIL_TAKE_ITEM answers MAIL_OK (0) for a",
-    "Silverleaf from the Postmaster and a Mageroyal from a Recruit-A-Friend reward mail, and the items land in the",
-    "bags, while a Peacebloom mailed by another character and an Earthroot in other sender-less GM-stationery mail",
-    "(boss loot, item recovery, console .send) stay refused with MAIL_ERR_INTERNAL_ERROR (6)."
+    "the take fails with \"Your challenge forbids receiving mail.\" #11404 asks the same for Customer Support mail.",
+    "Expected: Postmaster, Recruit-A-Friend reward and Customer Support mail, like the Elite Warchest (#10678), are",
+    "server or staff gifts and not player-to-player mail. Under Bloodbath (challenge 15, NO_MAIL) CMSG_MAIL_TAKE_ITEM",
+    "answers MAIL_OK (0) for a Silverleaf from the Postmaster, a Mageroyal from a Recruit-A-Friend reward mail, a",
+    "Briarthorn a game master sends with .send items and a Swiftthistle sent with .send items from the console, and",
+    "the items land in the bags, while a Peacebloom mailed by another character and an Earthroot in other",
+    "sender-less GM-stationery mail (boss loot, item recovery) stay refused with MAIL_ERR_INTERNAL_ERROR (6)."
   ],
   "timeout_ms": 90000,
   "location": {
@@ -33,6 +34,14 @@
       "class": 23,
       "level": 1,
       "account_of": "sender"
+    },
+    {
+      "id": "support",
+      "name": "Coasmailgm",
+      "race": 1,
+      "class": 23,
+      "level": 1,
+      "security": 2
     }
   ],
   "steps": [
@@ -142,6 +151,17 @@
       "kind": "server"
     },
     {
+      "action": "command",
+      "label": "A game master sends a Briarthorn with .send items",
+      "actor": "support",
+      "command": ".send items Coasmailhero \"Customer Support\" \"Your restored item.\" 2450"
+    },
+    {
+      "action": "console",
+      "label": "The console sends a Swiftthistle with .send items",
+      "command": ".send items Coasmailhero \"Customer Support\" \"Your restored item.\" 2452"
+    },
+    {
       "action": "assert",
       "actor": "hero",
       "metric": "mail_has_item",
@@ -176,6 +196,24 @@
       "equals": 1,
       "within_ms": 1000,
       "label": "The other server mail arrived"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 2450,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "The game master mail arrived"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 2452,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "The console mail arrived"
     },
     {
       "action": "summon_gameobject",
@@ -303,6 +341,130 @@
       "actor": "hero",
       "metric": "mail_has_item",
       "item": 785,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "label": "DISCRIMINATING: the challenge hook passes the game master take",
+      "actor": "hero",
+      "opcode": 582,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 2450
+        },
+        {
+          "mail_item_guid": 2450
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The mailbox hands over the Briarthorn",
+      "actor": "hero",
+      "opcode": 582,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 2450
+        },
+        {
+          "mail_item_guid": 2450
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 569,
+      "index": 2,
+      "equals": 0,
+      "label": "The game master take succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 2450,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 2450,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "label": "DISCRIMINATING: the challenge hook passes the console take",
+      "actor": "hero",
+      "opcode": 582,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 2452
+        },
+        {
+          "mail_item_guid": 2452
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The mailbox hands over the Swiftthistle",
+      "actor": "hero",
+      "opcode": 582,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 2452
+        },
+        {
+          "mail_item_guid": 2452
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 569,
+      "index": 2,
+      "equals": 0,
+      "label": "The console take succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 2452,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 2452,
       "equals": 0,
       "within_ms": 1000
     },
