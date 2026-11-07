@@ -72,7 +72,7 @@ struct Options
     RareDrop rareElite = DefaultRareElite;
     unsigned respawnMinLevel = DefaultEndgameRespawnMinLevel;
     unsigned eliteEpicPercent = DefaultEliteEpicPercent;
-    unsigned eliteHeroicUpgradePercent = DefaultEliteHeroicUpgradePercent;
+    float eliteHeroicUpgradePercent = DefaultEliteHeroicUpgradePercent;
 };
 
 struct Settings
@@ -217,8 +217,8 @@ uint32 RaidMapOf(uint32 entry, ItemTemplate const* item, std::unordered_map<uint
         ItemTemplate const* baseItem = sObjectMgr->GetItemTemplate(base);
         if (!baseItem || item->Name1 != "Bloodforged " + baseItem->Name1)
             continue;
-        auto it = raidItems.find(base);
-        return it == raidItems.end() ? 0 : it->second;
+        if (auto it = raidItems.find(base); it != raidItems.end())
+            return it->second;
     }
     return 0;
 }
@@ -409,11 +409,12 @@ private:
             DefaultEndgameRespawnMinLevel);
         options.eliteEpicPercent = sConfigMgr->GetOption<uint32>("Bloodforged.EliteEpicPercent",
             DefaultEliteEpicPercent);
-        options.eliteHeroicUpgradePercent = sConfigMgr->GetOption<uint32>("Bloodforged.EliteHeroicUpgradePercent",
+        options.eliteHeroicUpgradePercent = sConfigMgr->GetOption<float>("Bloodforged.EliteHeroicUpgradePercent",
             DefaultEliteHeroicUpgradePercent);
         if (!ReadNumbers("Bloodforged.EpicMaxItemLevelByStage", options.epicCaps)
             || !ReadRareDrop("Rare", options.rare) || !ReadRareDrop("RareElite", options.rareElite)
-            || options.eliteEpicPercent > 100 || options.eliteHeroicUpgradePercent > 100)
+            || options.eliteEpicPercent > 100 || !(options.eliteHeroicUpgradePercent >= 0.0f)
+            || options.eliteHeroicUpgradePercent > 100.0f)
         {
             LOG_ERROR("server.loading", "Bloodforged disabled: invalid item level caps or rare mob settings");
             return;
@@ -537,7 +538,7 @@ public:
             if (pools.normal[2].empty()
                 || !roll_chance_f(float(options.eliteEpicPercent) * sWorld->getRate(RATE_DROP_ITEM_EPIC)))
                 return;
-            bool const upgrade = !pools.heroic.empty() && roll_chance_i(int(options.eliteHeroicUpgradePercent));
+            bool const upgrade = !pools.heroic.empty() && roll_chance_f(options.eliteHeroicUpgradePercent);
             AddRareMobItem(*loot, Acore::Containers::SelectRandomContainerElement(upgrade ? pools.heroic
                 : pools.normal[2]));
             return;

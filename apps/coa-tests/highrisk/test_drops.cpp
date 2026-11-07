@@ -50,7 +50,7 @@ int main()
     assert(!ValidRates({40, 50, 0}));
     assert(DefaultBlueMaxItemLevel == 57);
     assert(DefaultRates[4][2] == 100 && DefaultRates[4][1] == 220);
-    assert(DefaultEliteEpicPercent == 15 && DefaultEliteHeroicUpgradePercent == 1);
+    assert(DefaultEliteEpicPercent == 15 && DefaultEliteHeroicUpgradePercent == 2.5f);
     assert(DefaultEpicMaxItemLevelByStage[1] == 61 && DefaultEpicMaxItemLevelByStage[2] == 64);
     assert(DefaultEpicMaxItemLevelByStage[3] == 65 && DefaultEpicMaxItemLevelByStage[4] == 70);
     assert(WithinItemLevelCap(3, 57, 57, 61));

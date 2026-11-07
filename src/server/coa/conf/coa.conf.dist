@@ -544,10 +544,10 @@ Bloodforged.EliteEpicPercent = 15
 
 #    Bloodforged.EliteHeroicUpgradePercent
 #        Description: Percent chance that the epic from Bloodforged.EliteEpicPercent is a Heroic
-#                     Bloodforged item instead, never raid gear, within the stage cap.
-#        Default:     1
+#                     Bloodforged item instead, never raid gear, within the stage cap. Decimals allowed.
+#        Default:     2.5
 
-Bloodforged.EliteHeroicUpgradePercent = 1
+Bloodforged.EliteHeroicUpgradePercent = 2.5
 
 #    Bloodforged.BlueMaxItemLevel
 #        Description: Highest item level of a rare (blue) Bloodforged item that drops, in every
