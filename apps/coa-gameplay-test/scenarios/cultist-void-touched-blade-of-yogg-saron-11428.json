@@ -2,10 +2,10 @@
   "schema": 1,
   "name": "Cultist: Blade of Yogg-Saron heals mark the healed Cultist with Void-Touched (#11428)",
   "contract": [
-    "Blade of Yogg-Saron 524887: damage dealt by Blade of the Empire 500720 heals the lowest health ally with the",
-    "direct heal 500748. With the Void-Touched passive 300286, that direct heal applies one Void-Touched 301982",
-    "stack to the healed ally, as every direct heal from the Cultist does. A Cultist alone is his own lowest health",
-    "ally, so a Blade of the Empire hit heals and marks him even at full health."
+    "Blade of Yogg-Saron 524887 and its rank 2 525078: damage dealt by Blade of the Empire 500720 heals the lowest",
+    "health ally with the direct heal 500748. With the Void-Touched passive 300286, that direct heal applies one",
+    "Void-Touched 301982 stack to the healed ally, as every direct heal from the Cultist does. A Cultist alone is his",
+    "own lowest health ally, so a rank 2 Blade of the Empire hit heals and marks him even at full health."
   ],
   "timeout_ms": 60000,
   "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
@@ -19,7 +19,7 @@
   "steps": [
     {"action": "wait", "label": "Let login settle", "ms": 3000},
     {"action": "learn", "actor": "cultist", "spell": 500720},
-    {"action": "learn", "actor": "cultist", "spell": 524887},
+    {"action": "learn", "actor": "cultist", "spell": 525078},
     {"action": "learn", "actor": "cultist", "spell": 300286},
     { "action": "assert", "label": "CONTROL: the Void-Touched passive is active on the Cultist", "actor": "cultist",
       "metric": "aura", "spell": 300286, "equals": 1, "within_ms": 2000 },
