@@ -57,6 +57,7 @@ void AddSC_AscensionAdventureModeRandomAggro();
 void AddSC_AscensionDungeonRelease();
 void AddSC_AscensionBattlegroundSpiritQueue();
 void AddSC_AscensionRaidRelease();
+void AddSC_AscensionPvPVendorRelease();
 void AddSC_AscensionThreatRedirect();
 void AddSC_AscensionTalentDataProcs();
 void AddSC_AscensionTreeOfLife();
@@ -851,6 +852,7 @@ void AddCoAScripts()
     AddSC_AscensionDungeonRelease();
     AddSC_AscensionBattlegroundSpiritQueue();
     AddSC_AscensionRaidRelease();
+    AddSC_AscensionPvPVendorRelease();
     AddSC_AscensionThreatRedirect();
     AddSC_AscensionTalentDataProcs();
     AddSC_AscensionTreeOfLife();
