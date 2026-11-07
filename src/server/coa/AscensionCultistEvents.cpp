@@ -23,6 +23,11 @@ bool Infusion(uint32 id)
 {
     return std::find(std::begin(CultistInfusions), std::end(CultistInfusions), id) != std::end(CultistInfusions);
 }
+void MarkVoidTouched(Player* player, Unit* healed)
+{
+    if (player->HasAura(300286))
+        Cast(player, healed, 301982);
+}
 int32 ModifiedDuration(Player* player, uint32 id)
 {
     SpellInfo const* info = sSpellMgr->GetSpellInfo(id);
@@ -189,8 +194,7 @@ class aura_ascension_cultist_event : public AuraScript
                                  .1f * player->GetTotalAttackPowerValue(BASE_ATTACK);
                     flat *= .5f;
                     Copy(player, ally, 500748, CalculatePct(damage, Amount(id)) + uint32(std::max(0.0f, flat)));
-                    if (player->HasAura(300286))
-                        Cast(player, ally, 301982);
+                    MarkVoidTouched(player, ally);
                 }
                 break;
             case 525065: Cast(player, target, 525066); break;
@@ -265,7 +269,10 @@ class aura_ascension_cultist_event : public AuraScript
                 auto allies = Allies(player, player, 40);
                 allies.remove_if([player](Unit* ally) { return !ally->HasAura(BlackBlood, player->GetGUID()); });
                 if (!allies.empty())
+                {
                     Copy(player, allies.front(), 500773, CalculatePct(damage, Amount(id)));
+                    MarkVoidTouched(player, allies.front());
+                }
                 break;
             }
             case 600327:
