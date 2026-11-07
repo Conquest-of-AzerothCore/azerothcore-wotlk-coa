@@ -523,14 +523,85 @@ Bloodforged.Enable = 0
 #    Bloodforged.Rates55
 #        Description: Base percent per eligible corpse for the level band starting at that level, as
 #                     three values: uncommon, rare, epic. One roll per quality, spread evenly across
-#                     that quality's pool, before the Rate.Drop.Item.* multipliers.
-#        Default:     "4.50 0.50 0.00", "4.00 1.00 0.00", "3.80 1.40 0.15", "3.60 1.80 0.25", "3.40 2.20 0.40"
+#                     that quality's pool, before the Rate.Drop.Item.* multipliers. Uncommon is 0:
+#                     Bloodforged drops are rare or epic only. A non-zero uncommon rate must be
+#                     above the rare one. Elite mobs use Bloodforged.EliteEpicPercent for epics instead.
+#        Default:     "0.00 0.50 0.00", "0.00 1.00 0.00", "0.00 1.40 0.15", "0.00 1.80 0.25", "0.00 2.20 1.00"
 
-Bloodforged.Rates15 = "4.50 0.50 0.00"
-Bloodforged.Rates25 = "4.00 1.00 0.00"
-Bloodforged.Rates35 = "3.80 1.40 0.15"
-Bloodforged.Rates45 = "3.60 1.80 0.25"
-Bloodforged.Rates55 = "3.40 2.20 0.40"
+Bloodforged.Rates15 = "0.00 0.50 0.00"
+Bloodforged.Rates25 = "0.00 1.00 0.00"
+Bloodforged.Rates35 = "0.00 1.40 0.15"
+Bloodforged.Rates45 = "0.00 1.80 0.25"
+Bloodforged.Rates55 = "0.00 2.20 1.00"
+
+#    Bloodforged.EliteEpicPercent
+#        Description: Percent chance for an elite mob (and an open-world boss) to drop one epic
+#                     Bloodforged item that is not raid gear, within the stage cap, before the
+#                     Rate.Drop.Item.Epic multiplier. Comes on top of its rare (blue) roll.
+#        Default:     15
+
+Bloodforged.EliteEpicPercent = 15
+
+#    Bloodforged.EliteHeroicUpgradePercent
+#        Description: Percent chance that the epic from Bloodforged.EliteEpicPercent is a Heroic
+#                     Bloodforged item instead, never raid gear, within the stage cap. Decimals allowed.
+#        Default:     2.5
+
+Bloodforged.EliteHeroicUpgradePercent = 2.5
+
+#    Bloodforged.BlueMaxItemLevel
+#        Description: Highest item level of a rare (blue) Bloodforged item that drops, in every
+#                     release stage.
+#        Default:     57
+
+Bloodforged.BlueMaxItemLevel = 57
+
+#    Bloodforged.EpicMaxItemLevelByStage
+#        Description: Highest item level of an epic Bloodforged item that drops, one value per
+#                     release stage 0-8 (Ascension.CallboardCache.ReleaseStage). Raid gear of
+#                     released raids is not limited by it.
+#        Default:     "61 61 64 65 70 70 70 70 70"
+
+Bloodforged.EpicMaxItemLevelByStage = "61 61 64 65 70 70 70 70 70"
+
+#    Bloodforged.Level60EndgameZonesOnly
+#        Description: Bloodforged items that require level 60 drop only in Western Plaguelands,
+#                     Eastern Plaguelands, Burning Steppes, Blasted Lands, Azshara, Winterspring,
+#                     Un'Goro Crater and Silithus.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+Bloodforged.Level60EndgameZonesOnly = 1
+
+#    Bloodforged.RareRaidItemPercent
+#    Bloodforged.RareEliteRaidItemPercent
+#        Description: Rare (rank 4) and rare elite (rank 2) mobs always drop one epic Bloodforged
+#                     item (rare quality when no epic fits the player's level) and one Heroic
+#                     Bloodforged item instead of the normal roll. The two values
+#                     are the percent chance that the Bloodforged item, and the Heroic
+#                     Bloodforged item, is raid gear of a released raid. Other mobs never drop
+#                     raid gear.
+#        Default:     "15 5", "25 10"
+
+Bloodforged.RareRaidItemPercent = "15 5"
+Bloodforged.RareEliteRaidItemPercent = "25 10"
+
+#    Bloodforged.EndgameRareRespawnMinutes
+#    Bloodforged.EndgameRareEliteRespawnMinutes
+#        Description: Respawn time of rare (rank 4) and rare elite (rank 2) mobs in the level 60
+#                     zones listed under Bloodforged.Level60EndgameZonesOnly, as shortest and
+#                     longest minutes. A new random time is chosen at every death. "0 0" keeps
+#                     the spawn's own respawn time.
+#        Default:     "90 150", "150 210"
+
+Bloodforged.EndgameRareRespawnMinutes = "90 150"
+Bloodforged.EndgameRareEliteRespawnMinutes = "150 210"
+
+#    Bloodforged.EndgameRareRespawnMinLevel
+#        Description: Lowest creature level that gets the random respawn time above.
+#        Default:     45
+
+Bloodforged.EndgameRareRespawnMinLevel = 45
 
 #
 #    Ascension.PrestigiousCache.ReleaseStage
@@ -572,6 +643,15 @@ Ascension.PrestigiousCache.SecondTokenChancePercent = 5
 Ascension.PrestigiousCache.ClassicStages = 8
 
 #
+#    Ascension.PrestigiousCache.PreviousStageOnly
+#        Description: Hold Classic Prestigious Caches and their tier tokens one release stage
+#                     below Ascension.CallboardCache.ReleaseStage, so a raid's cache is paid
+#                     only once the stage after it is released.
+#        Default:     0
+
+Ascension.PrestigiousCache.PreviousStageOnly = 0
+
+#
 #    Ascension.PrestigiousCache.TbcStages
 #        Description: How many of the Burning Crusade Prestigious Caches are released, 0-9,
 #                     in the order 1297310 held for Karazhan, Gruul's Lair, Magtheridon's
@@ -589,8 +669,8 @@ Ascension.PrestigiousCache.TbcStages = 0
 #                     0 - normal dungeons only
 #                     1 - Heroic Dungeons
 #                     2 - Mythic Dungeons
-#                     3 - Molten Core
-#                     4 - Zul'Gurub
+#                     3 - Zul'Gurub
+#                     4 - Molten Core
 #                     5 - Onyxia's Lair
 #                     6 - Blackwing Lair
 #                     7 - Ruins of Ahn'Qiraj and Temple of Ahn'Qiraj
@@ -601,10 +681,14 @@ Ascension.PrestigiousCache.TbcStages = 0
 #                     client lists Heroic and Mythic difficulties only once they are released.
 #                     Callboard Caches follow the same stages: only released caches are
 #                     earned, and a generic Callboard Cache resolves to a released tier.
+#                     A raid's Bloodforged gear, normal and Heroic copies, is released with its
+#                     stage and then drops only from rare mobs (see Bloodforged.RareRaidItemPercent).
 #                     Applied on .reload config; the client's difficulty list on next login.
-#        Default:     3
+#                     .raidphase set <0-8> overrides this value in the characters database
+#                     until .raidphase clear; .raidphase shows the stage.
+#        Default:     4
 
-Ascension.CallboardCache.ReleaseStage = 3
+Ascension.CallboardCache.ReleaseStage = 4
 
 #
 #    Ascension.CallboardCache.PreviousStageOnly

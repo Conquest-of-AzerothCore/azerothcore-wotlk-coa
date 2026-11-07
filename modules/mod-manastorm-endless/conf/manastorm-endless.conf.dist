@@ -17,7 +17,7 @@ Manastorm.WeeklyCacheLockout.Limit = 5
 Manastorm.AffixMinimumLevel = 50
 
 # 1 = caches follow Ascension.CallboardCache.ReleaseStage in coa.conf:
-# 0 Normal Dungeons, 1 Heroic Dungeons, 2 Mythic Dungeons, 3 Molten Core ... 8 Naxxramas.
+# 0 Normal Dungeons, 1 Heroic Dungeons, 2 Mythic Dungeons, 3 Zul'Gurub, 4 Molten Core ... 8 Naxxramas.
 # A closed cache tier falls back to the highest eligible lower bracket; DB depth/unlock requirements still apply.
 # Greedy Demon loot uses an item-level ceiling derived from released enabled endgame cache brackets.
 # 0 = release-stage restrictions are disabled; existing depth/unlock requirements still apply.

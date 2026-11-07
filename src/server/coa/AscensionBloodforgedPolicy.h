@@ -9,8 +9,46 @@
 namespace Bloodforged
 {
 using Rates = std::array<unsigned, 3>;
-constexpr std::array<Rates, 5> DefaultRates = {{{450, 50, 0}, {400, 100, 0},
-    {380, 140, 15}, {360, 180, 25}, {340, 220, 40}}};
+constexpr std::array<Rates, 5> DefaultRates = {{{0, 50, 0}, {0, 100, 0},
+    {0, 140, 15}, {0, 180, 25}, {0, 220, 100}}};
+
+constexpr unsigned DefaultEliteEpicPercent = 15;
+constexpr float DefaultEliteHeroicUpgradePercent = 2.5f;
+
+constexpr unsigned DefaultBlueMaxItemLevel = 57;
+constexpr std::array<unsigned, 9> DefaultEpicMaxItemLevelByStage = {61, 61, 64, 65, 70, 70, 70, 70, 70};
+
+constexpr std::array<std::uint32_t, 8> EndgameZones = {28, 139, 46, 4, 16, 618, 490, 1377};
+
+constexpr bool IsEndgameZone(std::uint32_t zoneId)
+{
+    for (std::uint32_t zone : EndgameZones)
+        if (zone == zoneId)
+            return true;
+    return false;
+}
+
+struct RareDrop
+{
+    unsigned raidPercent;
+    unsigned heroicRaidPercent;
+    unsigned respawnMinMinutes;
+    unsigned respawnMaxMinutes;
+};
+
+constexpr RareDrop DefaultRare = {15, 5, 90, 150};
+constexpr RareDrop DefaultRareElite = {25, 10, 150, 210};
+constexpr unsigned DefaultEndgameRespawnMinLevel = 45;
+
+constexpr bool WithinItemLevelCap(unsigned quality, unsigned itemLevel, unsigned blueCap, unsigned epicCap)
+{
+    return quality == 3 ? itemLevel <= blueCap : quality == 4 ? itemLevel <= epicCap : true;
+}
+
+constexpr bool AllowedInZone(unsigned requiredLevel, bool endgameZone, bool level60EndgameOnly)
+{
+    return endgameZone || !level60EndgameOnly || requiredLevel < 60;
+}
 
 constexpr unsigned Band(unsigned level)
 {
@@ -19,7 +57,7 @@ constexpr unsigned Band(unsigned level)
 
 constexpr bool ValidRates(Rates const& rates)
 {
-    return rates[0] <= 10000 && rates[1] < rates[0] && rates[2] < rates[1]
+    return rates[0] <= 10000 && (!rates[0] || rates[1] < rates[0]) && rates[2] < rates[1]
         && rates[0] + rates[1] + rates[2] <= 10000;
 }
 
