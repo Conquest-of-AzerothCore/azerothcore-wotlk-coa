@@ -84,6 +84,7 @@ struct Options
     RareDrop rareElite = DefaultRareElite;
     unsigned respawnMinLevel = DefaultEndgameRespawnMinLevel;
     std::array<unsigned, 2> eliteHighRiskRespawn = DefaultEndgameEliteHighRiskRespawnMinutes;
+    std::array<unsigned, 2> highRiskEliteRespawn = DefaultHighRiskEliteRespawnMinutes;
     std::unordered_set<uint32> highRiskElites;
     unsigned eliteEpicPercent = DefaultEliteEpicPercent;
     float eliteHeroicUpgradePercent = DefaultEliteHeroicUpgradePercent;
@@ -455,7 +456,7 @@ private:
         }
         options.blueCap = sConfigMgr->GetOption<uint32>("Bloodforged.BlueMaxItemLevel", DefaultBlueMaxItemLevel);
         {
-            std::istringstream input(sConfigMgr->GetOption<std::string>("Bloodforged.HighRiskEliteEntries", ""));
+            std::istringstream input(sConfigMgr->GetOption<std::string>("Bloodforged.HighRiskEliteEntries", DefaultHighRiskEliteEntries));
             for (uint32 entry; input >> entry;)
                 options.highRiskElites.insert(entry);
             if (!input.eof())
@@ -480,6 +481,8 @@ private:
             || !ReadNumbers("Bloodforged.EphemeralKeyPercent", options.ephemeralKeyPercent)
             || !ReadNumbers("Bloodforged.EndgameEliteHighRiskRespawnMinutes", options.eliteHighRiskRespawn)
             || options.eliteHighRiskRespawn[0] > options.eliteHighRiskRespawn[1]
+            || !ReadNumbers("Bloodforged.HighRiskEliteRespawnMinutes", options.highRiskEliteRespawn)
+            || options.highRiskEliteRespawn[0] > options.highRiskEliteRespawn[1]
             || std::any_of(options.ephemeralKeyPercent.begin(), options.ephemeralKeyPercent.end(),
                 [](float percent) { return !(percent >= 0.0f) || percent > 100.0f; })
             || options.eliteEpicPercent > 100 || !(options.eliteHeroicUpgradePercent >= 0.0f)
@@ -722,7 +725,16 @@ public:
             return;
         CreatureTemplate const* data = creature->GetCreatureTemplate();
         auto current = std::atomic_load(&settings);
-        if (!current || !current->enabled || !IsEndgameZone(creature->GetZoneId()))
+        if (!current || !current->enabled)
+            return;
+        if (current->options.highRiskElites.contains(creature->GetEntry()))
+        {
+            std::array<unsigned, 2> const& minutes = current->options.highRiskEliteRespawn;
+            if (minutes[1])
+                Reschedule(creature, urand(minutes[0] * MINUTE, minutes[1] * MINUTE));
+            return;
+        }
+        if (!IsEndgameZone(creature->GetZoneId()))
             return;
         if (data->rank == CREATURE_ELITE_ELITE)
         {

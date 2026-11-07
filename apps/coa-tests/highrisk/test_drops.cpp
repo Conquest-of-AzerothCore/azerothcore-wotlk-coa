@@ -55,6 +55,7 @@ int main()
     assert(DefaultBlueMaxItemLevel == 57);
     assert(DefaultEndgameRareMinRequiredLevel == 60);
     assert(DefaultEndgameEliteHighRiskRespawnMinutes[0] == 10 && DefaultEndgameEliteHighRiskRespawnMinutes[1] == 15);
+    assert(DefaultHighRiskEliteRespawnMinutes[0] == 45 && DefaultHighRiskEliteRespawnMinutes[1] == 60);
     assert(DefaultEphemeralKeyPercent[0] == 3.0f && DefaultEphemeralKeyPercent[1] == 15.0f);
     assert(DefaultEphemeralKeyPercent[2] == 75.0f && DefaultEphemeralKeyPercent[3] == 100.0f);
     assert(NormalMobMarks.silver == 0 && NormalMobMarks.extraSilverPercent == 1.0f && NormalMobMarks.extraGoldPercent == 0.0f);

@@ -624,9 +624,19 @@ Bloodforged.EndgameRareRespawnMinLevel = 45
 #                     or owns its loot, as shortest and longest minutes, chosen at random at every such
 #                     death. Kills by other players keep the spawn's own respawn time, and so do elites
 #                     whose own respawn time is at least the shortest value. "0 0" turns it off.
+#                     The High-Risk elites in Bloodforged.HighRiskEliteEntries use
+#                     Bloodforged.HighRiskEliteRespawnMinutes instead.
 #        Default:     "10 15"
 
 Bloodforged.EndgameEliteHighRiskRespawnMinutes = "10 15"
+
+#    Bloodforged.HighRiskEliteRespawnMinutes
+#        Description: Respawn time of the High-Risk elites in Bloodforged.HighRiskEliteEntries in the open
+#                     world, as shortest and longest minutes, chosen at random at every death, whoever
+#                     killed them. "0 0" keeps the spawn's own respawn time.
+#        Default:     "45 60"
+
+Bloodforged.HighRiskEliteRespawnMinutes = "45 60"
 
 #    Bloodforged.HighRiskEliteEntries
 #        Description: Creature entries, separated by spaces, of the High-Risk elite mobs. Only these get

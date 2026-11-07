@@ -40,6 +40,9 @@ constexpr RareDrop DefaultRare = {15, 5, 90, 150};
 constexpr RareDrop DefaultRareElite = {25, 10, 150, 210};
 constexpr unsigned DefaultEndgameRespawnMinLevel = 45;
 constexpr std::array<unsigned, 2> DefaultEndgameEliteHighRiskRespawnMinutes = {10, 15};
+constexpr std::array<unsigned, 2> DefaultHighRiskEliteRespawnMinutes = {45, 60};
+constexpr char const* DefaultHighRiskEliteEntries = "918530 918547 918550 918555 918562 918563 918578 918588 918589 "
+    "918590 918591 918647 918648 918690 919448 919450";
 constexpr unsigned DefaultEndgameRareMinRequiredLevel = 60;
 constexpr std::array<std::uint32_t, 3> HiddenCacheLoot = {9670, 9671, 9672};
 constexpr std::uint32_t EphemeralKey = 967680;
