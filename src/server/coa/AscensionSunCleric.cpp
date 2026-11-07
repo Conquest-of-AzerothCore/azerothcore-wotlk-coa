@@ -222,7 +222,7 @@ void Extend(Player* player, uint32 id, int32 milliseconds)
     {
         bool const wasOnCooldown = player->HasSpellCooldown(id);
         Cast(player, player, id);
-        if (!wasOnCooldown && player->HasSpellCooldown(id))
+        if (!wasOnCooldown)
             player->RemoveSpellCooldown(id, true);
         aura = player->GetAura(id);
         if (aura)
