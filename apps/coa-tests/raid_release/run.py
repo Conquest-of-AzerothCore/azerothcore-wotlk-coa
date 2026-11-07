@@ -158,7 +158,7 @@ def main():
     assert '"Ascension.CallboardCache.ReleaseStage"' in source
     assert 'WORLDHOOK_ON_STARTUP, WORLDHOOK_ON_AFTER_CONFIG_LOAD' in source
     assert loader.count('AddSC_AscensionRaidRelease()') == 2
-    assert '\nAscension.CallboardCache.ReleaseStage = 4\n' in config
+    assert '\nAscension.CallboardCache.ReleaseStage = 3\n' in config
     assert 'AutoAdvance' not in config and 'AutoAdvance' not in source
     assert '\nAscension.PrestigiousCache.PreviousStageOnly = 0\n' in config
     assert 'PLAYERHOOK_ON_CREATURE_KILL' not in source

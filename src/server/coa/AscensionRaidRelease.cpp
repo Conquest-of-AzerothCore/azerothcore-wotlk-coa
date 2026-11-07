@@ -33,7 +33,7 @@ void RefreshReleasedStage()
 void LoadRaidReleaseStage()
 {
     g_configuredStage = sConfigMgr->GetOption<uint32>("Ascension.CallboardCache.ReleaseStage",
-        RaidRelease::StageMoltenCore);
+        RaidRelease::StageZulGurub);
     RefreshReleasedStage();
 }
 
