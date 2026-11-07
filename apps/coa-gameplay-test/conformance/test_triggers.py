@@ -25,7 +25,8 @@ import batch
 import run
 
 TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 804932, 806516, 803158, 805420, 680891,
-                    803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298, 705255}
+                    803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298, 705255,
+                    680397, 524765, 560096}
 IMPROVED_SCARLET_HAMMER = 301254
 SCARLET_HAMMER = 807035
 DETERMINED = 705256
@@ -38,6 +39,9 @@ RIGHTEOUS_LUNGE = 570233
 UNTAINTED = 705298
 DIVINE_STRIKES = 705255
 SCOURGEBANE = 801832
+DISCIPLINED_BLOWS = 680397
+LIGHTS_GUIDANCE = 524765
+DEVOTION_OF_KHAZGOROTH = 560096
 SCARLET_SECRETS = 520812
 STAFFGUARD = 705295
 CHAKRA_OF_POWER = 803158
@@ -232,7 +236,7 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                     self.assertIn(f'@s:{observed}:0@', description)
                     self.assertIn(self.spell(observed, 'SpellName[enUS]'), cleaned)
                     self.assertTrue(entry['observe_note'])
-                self.assertEqual(self.spell(entry['aura'], 'ProcFlags'), 0)
+                self.assertEqual(self.spell(entry['aura'], 'ProcFlags'), entry.get('native_proc_flags', 0))
 
     def test_attempt_auras_quote_the_tooltip_that_sets_them(self):
         for entry in trigger_entries(CLASS_FILE):
@@ -489,6 +493,37 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         entry['observe_actor'] = 'ally'
         with self.assertRaises(ValueError):
             trigger_plan(CLASS_FILE, entry)
+
+    def test_disciplined_blows_and_lights_guidance_reset_health_before_every_benediction(self):
+        for aura in (DISCIPLINED_BLOWS, LIGHTS_GUIDANCE):
+            with self.subTest(aura=aura):
+                entry = templar_trigger(aura)
+                self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': 578276, 'target': 'self'})
+                self.assertEqual(entry['caster_health_pct'], 50)
+                scenario, [expectation] = trigger_scenario(CLASS_FILE, entry)
+                steps = scenario['steps']
+                casts = [index for index, step in enumerate(steps)
+                        if step['action'] == 'cast' and step['spell'] == 578276]
+                self.assertTrue(casts)
+                for index in casts:
+                    self.assertIn({'action': 'set_health', 'actor': 'caster', 'value': 5000, 'maximum': 10000},
+                                 steps[index - 2:index])
+                self.assertIn('the caster health set to 50% of max', expectation.rule)
+
+    def test_devotion_of_khazgoroth_cites_its_native_proc_flags(self):
+        entry = templar_trigger(DEVOTION_OF_KHAZGOROTH)
+        self.assertEqual(entry['trigger'], {'action': 'attack', 'spell': 0})
+        self.assertEqual(entry['trial_metric'], 'melee_attack_count')
+        self.assertEqual(entry['native_proc_flags'], 4)
+        self.assertEqual(entry['observe_spell'], 560097)
+        records = Records(dataset(DBC_DIR))
+        self.assertEqual(records.field('Spell', DEVOTION_OF_KHAZGOROTH, 'ProcFlags'), entry['native_proc_flags'])
+
+    def test_native_proc_flags_defaults_to_the_dummied_zero(self):
+        entry = copy.deepcopy(templar_trigger(CHAKRA_OF_POWER))
+        self.assertNotIn('native_proc_flags', entry)
+        records = Records(dataset(DBC_DIR))
+        self.assertEqual(records.field('Spell', CHAKRA_OF_POWER, 'ProcFlags'), entry.get('native_proc_flags', 0))
 
     def test_caster_health_pct_needs_a_cast_trigger(self):
         entry = copy.deepcopy(templar_trigger(UNTAINTED))

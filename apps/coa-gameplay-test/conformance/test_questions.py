@@ -21,7 +21,6 @@ from triggers import BASELINE_ATTEMPTS, TRIGGER_CHECK, TRIGGER_TRIALS, trigger_l
 from values import Expectation
 
 SCOURGEBANE = 92111
-PALADIN_TRAINING_PROC = 504808
 BLADE_SERMON = (572548, 572554)
 ARGENT_BLADE = 807268
 SILVERHAND_INCANTATION = 801465
@@ -177,10 +176,10 @@ class QuestionTest(unittest.TestCase):
         self.assertIn('Otherwise, count Scourgebane procs per auto attack that hits under', item.question)
 
     def test_text_question_uses_the_class_file(self):
-        self.status_entry(PALADIN_TRAINING_PROC)
+        self.status_entry(BLADE_SERMON[0])
         items = questions(self.verdicts(reader()), reader())
-        self.assertEqual([item.question for item in items], [templar_proc(PALADIN_TRAINING_PROC)['question']])
-        self.assertEqual(items[0].spells, ((PALADIN_TRAINING_PROC, 'Paladin Training'),))
+        self.assertEqual([item.question for item in items], [templar_proc(BLADE_SERMON[0])['question']])
+        self.assertEqual(items[0].spells, ((BLADE_SERMON[0], 'Blade Sermon'),))
 
     def test_markdown_entry(self):
         listed = self.scourgebane_verdicts()
@@ -380,8 +379,8 @@ class ClientTooltipTest(unittest.TestCase):
         tooltips = DbcTooltips(DBC_DIR)
         self.assertEqual(tooltips.spell_field(HEAVENS_FINEST_STACK, 'StackAmount'), 6)
         self.assertIn('12 sec, stacking 6 times', templar_trigger(HEAVENS_FINEST)['question'])
-        self.assertIn('8%', templar_proc(PALADIN_TRAINING_PROC)['question'])
-        self.assertEqual(tooltips.spell_field(PALADIN_TRAINING_PROC, 'ProcChance'), 8)
+        self.assertIn('5%', templar_proc(BLADE_SERMON[0])['question'])
+        self.assertEqual(tooltips.spell_field(BLADE_SERMON[0], 'ProcChance'), 5)
 
 
 if __name__ == '__main__':

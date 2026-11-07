@@ -229,10 +229,9 @@
       "name": "Paladin Training",
       "tooltip": "Triggering |cffffffffZealotry|r now has an $h% chance to grant you an additional auto attack on your next strike.@s:801450:0@",
       "chance_token": "$h",
-      "status": "ambiguous_tooltip",
-      "reason": "the tooltip does not say what triggers Zealotry, so neither a cast nor an attack follows from it",
+      "status": "unmodelled",
+      "reason": "the trigger condition is confirmed (a landed, damaging hit of Zealotry 801450 itself, regardless of what caused 801450 to be cast), but no scenario source for that hit exists yet: 801450 is never a player's own direct, learnable cast, only reached via AscensionTemplar.cpp's Zealotry() helper (called from 92108, 504807, 706325 or a Blade Sermon repeat), and whether it deals nonzero off-hand weapon damage without an off-hand weapon equipped is unverified (Player::_ApplyWeaponDamage zeroes the off-hand damage range and, unlike SPELL_ATTR0_REQUIRES_MAIN_HAND's unarmed fallback, has no such fallback for OFF_ATTACK, Player.cpp:7489-7499, and the hit-result gate at AscensionTemplarAbilities.cpp:275 requires nonzero damage to roll). This is not blocked by Spell::CheckItems's off-hand-weapon-required check: 801450's own EquippedItemClass is -1, and that check (Spell.cpp:7996-8023) only runs when EquippedItemClass>=0, so it never reaches the SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON gate for this spell even on a forced cast",
       "handler": "AscensionTemplarAbilities.cpp:277-286 rolls it on a damaging hit of the Zealotry strike 801450",
-      "question": "Zealotry's own tooltip (801450) only says that it deals 80% off-hand Weapon Damage as Holy Damage. On live, what makes Zealotry hit: in the combat log, which of your attacks or abilities comes right before each Zealotry hit? With Paladin Training learned (8% chance), do about 8 in 100 Zealotry hits give you an additional auto attack on your next strike?",
       "dbc": {
         "504808": {"ProcChance": 8, "ProcFlags": 0, "ProcCharges": 0}
       },
@@ -660,6 +659,50 @@
       "observe_actor": "target",
       "per_trigger": 1,
       "per_trigger_text": "now increases the damage"
+    },
+    {
+      "aura": 680397,
+      "name": "Disciplined Blows",
+      "tooltip": "Your healing done triggers a holy pulse around healed targets, dealing ${$680398m1*$<scalingbp>+$AP*0.05+$AGI*0.2} Holy damage to nearby enemies.\r\n\r\nCnly occur once every 0.5 sec.",
+      "trigger": {"action": "cast", "spell": 578276, "target": "self"},
+      "trigger_text": "Your healing done",
+      "trigger_spell_text": "Benediction",
+      "trial_metric": "spell_cast_count",
+      "caster_health_pct": 50,
+      "observe_spell": 680398,
+      "observe_source": "EffectTriggerSpell[0] of 680397",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "triggers a holy pulse"
+    },
+    {
+      "aura": 524765,
+      "name": "Light's Guidance",
+      "tooltip": "Healing with |cffffffffBenediction|r now causes your next |cffffffffBenediction|r to heal for $524766s1% more for $524766d.",
+      "trigger": {"action": "cast", "spell": 578276, "target": "self"},
+      "trigger_text": "Healing with Benediction",
+      "trigger_spell_text": "Benediction",
+      "trial_metric": "spell_cast_count",
+      "caster_health_pct": 50,
+      "observe_spell": 524766,
+      "observe_source": "EffectTriggerSpell[0] of 524765",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now causes"
+    },
+    {
+      "aura": 560096,
+      "name": "Devotion of Khaz'goroth",
+      "tooltip": "Increases all party and raid member's melee and ranged haste by $567572s1%. Does not stack with similar effects.\r\n\r\nDamage dealt with auto attacks reduce the cooldown of |cFFFFFFFFLibram|r spells by $/1000;560097S1 sec.",
+      "trigger": {"action": "attack", "spell": 0},
+      "trigger_text": "Damage dealt with auto attacks",
+      "trial_metric": "melee_attack_count",
+      "native_proc_flags": 4,
+      "observe_spell": 560097,
+      "observe_source": "EffectTriggerSpell[0] of 560096",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "reduce the cooldown"
     }
   ],
   "talent_modifiers": [
