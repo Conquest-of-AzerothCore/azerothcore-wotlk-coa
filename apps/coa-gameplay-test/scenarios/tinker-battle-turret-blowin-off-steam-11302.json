@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Battle Turret X-13 seat can vent Blowin' off Steam to knock enemies back (#11302)",
+  "contract": [
+    "Build: Battle Turret X-13 504680 summons Battle Turret X-13 457772, a vehicle the Tinker or a raid member enters",
+    "through gossip. Live combat logs from 2026-08-29 show the turret casting Blowin' off Steam 503606, an energy-100",
+    "knockback of every enemy within 10 yards, after it builds up steam. The seat may only cast spells on the creature's",
+    "creature_template_spell list, so 503606 must be on that list for the knockback to reach the vehicle bar."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "foe",
+      "owner": "tinker",
+      "entry": 299,
+      "level": 60,
+      "distance": 6,
+      "health": 100000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the spawn and level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "summon",
+      "label": "Place a Battle Turret X-13 next to the Tinker",
+      "actor": "tinker",
+      "as": "turret",
+      "entry": 457772,
+      "distance": 2
+    },
+    {
+      "action": "wait",
+      "label": "Let the turret script finish its summon setup",
+      "ms": 1000
+    },
+    {
+      "action": "gossip_hello",
+      "label": "Enter the turret through its gossip",
+      "actor": "tinker",
+      "target": "turret"
+    },
+    {
+      "action": "assert",
+      "label": "The Tinker controls the turret seat",
+      "actor": "tinker",
+      "metric": "charm_entry",
+      "equals": 457772,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The enemy stands inside the 10-yard steam radius",
+      "actor": "foe",
+      "metric": "distance",
+      "target": "turret",
+      "max": 8
+    },
+    {
+      "action": "assert",
+      "label": "The turret builds up a full 100 steam",
+      "actor": "turret",
+      "metric": "power",
+      "power": 3,
+      "min": 100,
+      "within_ms": 15000
+    },
+    {
+      "action": "cast_charm",
+      "label": "Vent Blowin' off Steam from the seat",
+      "actor": "tinker",
+      "spell": 503606
+    },
+    {
+      "action": "assert",
+      "label": "The turret casts Blowin' off Steam",
+      "actor": "tinker",
+      "metric": "spell_go_count",
+      "spell": 503606,
+      "caster": "turret",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The steam knocks the enemy out of the 10-yard radius",
+      "actor": "foe",
+      "metric": "distance",
+      "target": "turret",
+      "min": 12,
+      "within_ms": 4000
+    }
+  ]
+}
