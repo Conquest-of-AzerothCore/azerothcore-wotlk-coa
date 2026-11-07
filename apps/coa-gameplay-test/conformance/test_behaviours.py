@@ -230,6 +230,18 @@ class TargetCountScenarioTests(unittest.TestCase):
         spec = target_count_spec(scarlet_judicator_entry())
         self.assertEqual(spec.metric, 'spell_damage_count')
 
+    def test_target_rank_is_learned_before_the_first_cast(self):
+        for entry in (scarlet_judicator_entry(), justice_entry()):
+            spec = target_count_spec(entry)
+            scenario, _ = target_count_scenario(CLASS_FILE, spec)
+            steps = scenario['steps']
+            learn_index = next(i for i, step in enumerate(steps)
+                               if step.get('action') == 'learn' and step.get('spell') == spec.target_rank)
+            first_cast_index = next(i for i, step in enumerate(steps)
+                                    if step.get('action') == 'cast' and step.get('spell') == spec.target_rank)
+            self.assertLess(learn_index, first_cast_index,
+                            f'{spec.target_rank} must be learned before it is first cast')
+
 
 class AuraSpreadScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_fixtures(self):

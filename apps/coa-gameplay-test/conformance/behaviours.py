@@ -130,7 +130,8 @@ def target_count_scenario(class_file: dict, spec: TargetCountSpec) -> tuple[dict
                     f'cast snapshot: {spec.radius_reason}',
         'players': [player_fixture(class_file)],
         'creatures': creatures,
-        'steps': base_steps(class_file) + cast_steps() + measure(BEFORE) +
+        'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.target_rank}] +
+                 cast_steps() + measure(BEFORE) +
                  [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + cast_steps() + measure(AFTER)}
     label = f'{spec.spell} behaviour_count'
     model = {'kind': 'count', 'dummy_labels': list(zip(before_labels, after_labels)), 'expected': spec.expected,

@@ -836,7 +836,10 @@ spell id; with no filter, every class behaviour entry is generated.
 The scenario places `expected + 1` creature fixtures (one "primary," `expected` "extra") along the caster's fixed
 spawn axis, the primary at 3 yards and the extras spread within `radius` yards of the primary (the harness places
 every creature fixture at `owner position + (distance, 0, 0)`, `CoAGameplayTest.cpp` `CreateTargets`, so creatures
-at different `distance` values share the same line). It casts the entry's `target_rank` at the primary `repeats`
+at different `distance` values share the same line). It learns `target_rank` once up front, before the first
+cast (matching the pattern `hits.py` and `values.py` already use for their own cast targets, since the reference
+character is created directly at level 60 and a cast of an unlearned spell is silently dropped by
+`HandleCastSpellOpcode` rather than failing loudly), then casts it at the primary `repeats`
 times (5, "ever hit at least once" per dummy rather than a single-cast snapshot, since neither this package nor a
 probe established that the harness's AoE or chain targeting hits every dummy in range on one cast), measures
 `spell_damage_count {spell, target}` per dummy (or, for an entry whose `metric` is `aura`, `aura {spell, caster}`
