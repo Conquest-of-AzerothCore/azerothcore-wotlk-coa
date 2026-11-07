@@ -5,8 +5,8 @@ from typing import Sequence
 from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, UNMODELLED, Unmodelled, cast_steps, creature_fixture,
                   records_of, scenario_shell, timed)
 from procs import ATTACK, CAST, ENTRY_STATUSES, PART_BUDGET_MS, cast_interval, swing_interval
-from profile import CASTER, SETTLE_MS, measurement
-from values import TARGET, Expectation, facts_of
+from profile import CASTER, SETTLE_MS, measurement, player_fixture
+from values import ALLY, TARGET, Expectation, facts_of
 
 TRIGGER_CHECK = 'trigger_count'
 MISSED_TRIGGER_RATE = 0.025
@@ -15,7 +15,8 @@ TRIGGER_TRIALS = math.ceil(math.log(FALSE_OK_RISK) / math.log(1 - MISSED_TRIGGER
 BASELINE_ATTEMPTS = 20
 EVENT_TOLERANCE = 1
 SELF = 'self'
-TRIGGER_TARGETS = frozenset({SELF, TARGET})
+ALLY_HEALTH_MAX = 10000
+TRIGGER_TARGETS = frozenset({SELF, TARGET, ALLY})
 OBSERVE_METRICS = frozenset({'spell_cast_count', 'spell_energize_count'})
 MELEE_COUNTS = frozenset({'melee_attack_count', 'melee_damage_count'})
 TRIAL_METRICS = {CAST: frozenset({'spell_cast_count', 'spell_damage_count'}), ATTACK: MELEE_COUNTS}
@@ -57,6 +58,13 @@ def checked_entry(entry: dict) -> dict:
         raise ValueError(f'Trigger {aura} has {entry["per_trigger"]} events per trigger')
     if entry.get('attempt_auras') and trigger['action'] != CAST:
         raise ValueError(f'Trigger {aura} sets attempt auras without a cast before which to set them')
+    if entry.get('ally_health_pct') is not None and trigger.get('target') != ALLY:
+        raise ValueError(f'Trigger {aura} sets the ally health without a cast at an ally')
+    factor = entry.get('trial_attempts_factor', 1)
+    if factor < 1:
+        raise ValueError(f'Trigger {aura} has a trial attempts factor below 1')
+    if factor != 1 and not entry.get('trial_attempts_reason'):
+        raise ValueError(f'Trigger {aura} scales its trial attempts without a reason')
     return entry
 
 
@@ -71,7 +79,7 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
 
 def trigger_plan(class_file: dict, entry: dict) -> TriggerPlan:
     checked_entry(entry)
-    scheduled = math.ceil(TRIGGER_TRIALS * EXCLUDED_OUTCOME_MARGIN)
+    scheduled = math.ceil(TRIGGER_TRIALS * EXCLUDED_OUTCOME_MARGIN * entry.get('trial_attempts_factor', 1))
     interval = attempt_interval(class_file, entry)
     first = (PART_BUDGET_MS - DRAIN_MS) // interval - BASELINE_ATTEMPTS
     if first < 1:
@@ -94,9 +102,17 @@ def count_step(label: str, metric: str, spell: int) -> dict:
     return measurement(label, CASTER, metric, spell=spell, **fields)
 
 
+def ally_health_step(pct: int) -> dict:
+    value = (pct * ALLY_HEALTH_MAX) // 100
+    return {'action': 'set_health', 'actor': ALLY, 'value': value, 'maximum': ALLY_HEALTH_MAX}
+
+
 def attempt_fixtures(entry: dict) -> list[dict]:
-    return [{'action': 'set_aura', 'actor': CASTER, 'spell': aura['spell'], 'stacks': aura['stacks']}
-            for aura in entry.get('attempt_auras', [])]
+    fixtures = [{'action': 'set_aura', 'actor': CASTER, 'spell': aura['spell'], 'stacks': aura['stacks']}
+                for aura in entry.get('attempt_auras', [])]
+    if entry.get('ally_health_pct') is not None:
+        fixtures.append(ally_health_step(entry['ally_health_pct']))
+    return fixtures
 
 
 def attempt_steps(class_file: dict, entry: dict, plan: TriggerPlan, attempts: int, phase: str) -> list[dict]:
@@ -107,7 +123,7 @@ def attempt_steps(class_file: dict, entry: dict, plan: TriggerPlan, attempts: in
                  {'action': 'stop_attack', 'actor': CASTER}]
     else:
         facts = facts_of(records_of(class_file), trigger['spell'])
-        cast_target = TARGET if trigger['target'] == TARGET else None
+        cast_target = trigger['target'] if trigger['target'] in (TARGET, ALLY) else None
         steps = cast_steps(facts, trigger['spell'], cast_target, plan.attempt_ms, attempts, attempt_fixtures(entry))
     return steps + [{'action': 'wait', 'label': f'{phase}drain', 'ms': DRAIN_MS}]
 
@@ -121,9 +137,13 @@ def trigger_rule(entry: dict) -> str:
     trials = entry['trial_metric'] + (f' of {trial_spell(entry)}' if trial_spell(entry) else ' main hand')
     fixtures = ''.join(f'; before each attempt aura {aura["spell"]} set to {aura["stacks"]} stacks ({aura["source"]})'
                        for aura in entry.get('attempt_auras', []))
+    if entry.get('ally_health_pct') is not None:
+        fixtures += f'; before each attempt the ally health set to {entry["ally_health_pct"]}% of max'
+    factor = entry.get('trial_attempts_factor', 1)
+    scaled = f'; scheduled attempts x{factor:g} ({entry["trial_attempts_reason"]})' if factor != 1 else ''
     return (f'{TRIGGER_RULE}; trials: {trials}; events: {entry["observe_metric"]} of {entry["observe_spell"]} '
             f'({entry["observe_source"]}); {entry["per_trigger"]:g} per trigger ("{entry["per_trigger_text"]}")'
-            f'{fixtures}')
+            f'{fixtures}{scaled}')
 
 
 def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict, list[Expectation]]:
@@ -135,6 +155,8 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
     attempts = plan.part_attempts[part]
     baseline = BASELINE_ATTEMPTS if part == 0 else 0
     steps = [{'action': 'learn', 'actor': CASTER, 'spell': trigger['spell']}] if trigger['action'] == CAST else []
+    if trigger.get('target') == ALLY:
+        steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
     if baseline:
         steps += attempt_steps(class_file, entry, plan, baseline, 'baseline ')
         steps += counts(entry, labels['baseline_trials'], labels['without'])
@@ -149,11 +171,15 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
     scenario = scenario_shell(class_file, name, contract, steps)
     if trigger['action'] == ATTACK or trigger.get('target') == TARGET:
         scenario['creatures'] = [creature_fixture(class_file)]
+    if trigger.get('target') == ALLY:
+        scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
     model = {'part': part, 'parts': parts, 'scheduled_attempts': plan.scheduled, 'part_attempts': attempts,
              'baseline_attempts': baseline, 'attempt_ms': plan.attempt_ms, 'minimum_trials': TRIGGER_TRIALS,
              'per_trigger': entry['per_trigger'], 'trigger': dict(trigger), 'trial_metric': entry['trial_metric'],
              'observe_spell': entry['observe_spell'], 'observe_metric': entry['observe_metric'],
-             'attempt_auras': [dict(aura) for aura in entry.get('attempt_auras', [])], 'measurements': labels}
+             'attempt_auras': [dict(aura) for aura in entry.get('attempt_auras', [])],
+             'ally_health_pct': entry.get('ally_health_pct'),
+             'trial_attempts_factor': entry.get('trial_attempts_factor', 1), 'measurements': labels}
     expectation = Expectation(trigger_label(aura), TRIGGER_CHECK, aura, aura, None, entry['trigger_text'],
                               trigger_rule(entry), model)
     baseline_ms = baseline * plan.attempt_ms + DRAIN_MS if baseline else 0
