@@ -62,6 +62,19 @@ public:
         if (!player || caster != player || info->SpellFamilyName != 31 || spell->IsTriggered())
             return;
         spell->SetScriptValue(Insanity, Count(player, Insanity));
+        if (Named(info, 500110) || info->Id == 680576)
+            for (Unit* ally : Allies(player, player, 100))
+                if (Aura* marks = ally->GetAura(301982, player->GetGUID()))
+                {
+                    uint32 stacks = marks->GetStackAmount();
+                    float amount = Amount(301983, 0, player) +
+                        .35f * player->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_SHADOW);
+                    Copy(player, ally, 301983, uint32(std::max(0.0f, amount)));
+                    if (Aura* remaining = ally->GetAura(301982, player->GetGUID());
+                        remaining && remaining->GetStackAmount() == stacks)
+                        remaining->Remove();
+                    MarkVoidTouched(player, ally);
+                }
         for (uint32 id : selected)
             if (Select(id, info))
                 if (Aura* aura = player->GetAura(id))
@@ -119,15 +132,6 @@ public:
                 Reduce(player, 573028, std::abs(Amount(300297)));
                 Reduce(player, 800432, std::abs(Amount(300297, 1)));
             }
-            for (Unit* ally : Allies(player, player, 100))
-                if (Aura* marks = ally->GetAura(301982, player->GetGUID()))
-                {
-                    uint32 stacks = marks->GetStackAmount();
-                    float amount = Amount(301983, 0, player) + .35f * player->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_SHADOW);
-                    Copy(player, ally, 301983, uint32(std::max(0.0f, amount)));
-                    if (Aura* remaining = ally->GetAura(301982, player->GetGUID()); remaining && remaining->GetStackAmount() == stacks)
-                        remaining->Remove();
-                }
             if (target && player->IsValidAttackTarget(target))
             {
                 Command(player, target);
