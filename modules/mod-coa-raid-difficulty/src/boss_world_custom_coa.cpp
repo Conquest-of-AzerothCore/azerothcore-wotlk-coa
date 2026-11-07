@@ -1096,9 +1096,25 @@ namespace
     {
         explicit boss_atalzul_coa(Creature* creature) : custom_world_boss_coa(creature), _summons(creature) { }
 
+        void ApplyFlex()
+        {
+            Level const* lv = LevelOf(me);
+            if (!lv || !lv->health)
+                return;
+            uint32 const players = std::clamp<uint32>(me->GetMap()->GetPlayersCountExceptGMs(), 10, 40);
+            float const pct = me->GetHealthPct();
+            uint32 const health = lv->health * players;
+            me->SetCreateHealth(health);
+            me->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(health));
+            me->UpdateMaxHealth();
+            me->SetHealth(std::max<uint32>(uint32(me->GetMaxHealth() * pct / 100.0f), 1));
+            me->ResetPlayerDamageReq();
+        }
+
         void Reset() override
         {
             custom_world_boss_coa::Reset();
+            ApplyFlex();
             _summons.DespawnAll();
             _nextVeil = 80;
             me->RemoveAurasDueToSpell(SPELL_VEIL_POWER);
@@ -1118,6 +1134,7 @@ namespace
 
         void JustEngagedWith(Unit* who) override
         {
+            ApplyFlex();
             custom_world_boss_coa::JustEngagedWith(who);
             if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 100.0f))
                 if (!rogg->IsInCombat())
@@ -1517,6 +1534,8 @@ void AddCoaCustomWorldBossScripts()
     new custom_script<boss_soggoth_coa>("boss_soggoth_coa");
     new custom_script<npc_psychophage_coa>("npc_psychophage_coa");
     new custom_script<boss_atalzul_coa>("boss_atalzul_coa");
+    void AddCoaAtalzulInstanceScripts();
+    AddCoaAtalzulInstanceScripts();
     new custom_script<boss_zulrogg_coa>("boss_zulrogg_coa");
     new custom_script<npc_soul_vessel_coa>("npc_soul_vessel_coa");
     new custom_script<npc_restless_spirit_coa>("npc_restless_spirit_coa");
