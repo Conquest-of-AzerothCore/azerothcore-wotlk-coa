@@ -450,6 +450,20 @@
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
       "per_trigger_text": "now reduces casting speed"
+    },
+    {
+      "aura": 680891,
+      "name": "Righteousness",
+      "tooltip": "Your |cffffffffChastise|r now always triggers |cffffffffScourgebane|r on your target.",
+      "trigger": {"action": "cast", "spell": 503141, "target": "dummy"},
+      "trigger_text": "Your Chastise",
+      "trigger_spell_text": "Chastise",
+      "trial_metric": "spell_cast_count",
+      "observe_spell": 801832,
+      "observe_source": "EffectTriggerSpell[0] of 680891",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now always triggers Scourgebane"
     }
   ],
   "talent_modifiers": [
