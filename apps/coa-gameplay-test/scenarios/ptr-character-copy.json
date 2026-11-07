@@ -24,6 +24,8 @@
     { "action": "relog", "actor": "a" },
     { "action": "assert", "label": "The source account starts with one character", "actor": "a",
       "metric": "account_character_count", "equals": 1 },
+    { "action": "add_at_login_flag", "label": "The source character has a customization pending", "actor": "a",
+      "id": 8 },
 
     { "action": "command", "label": "Copy the character", "actor": "a", "command": ".ptr copy Harnessa" },
     { "action": "assert", "label": "DISCRIMINATING: the copy is a second character on the same account", "actor": "a",
@@ -38,6 +40,10 @@
       "actor": "a", "metric": "account_other_foreign_mail_count", "equals": 0 },
     { "action": "assert", "label": "The taken name is renamed at login", "actor": "a",
       "metric": "system_message_contains", "text": "choose a new one at login", "equals": 1 },
+    { "action": "assert", "label": "The copy is renamed at login", "actor": "a",
+      "metric": "account_other_at_login_flag", "id": 1, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the forced rename keeps the pending customization", "actor": "a",
+      "metric": "account_other_at_login_flag", "id": 8, "equals": 1 },
 
     { "action": "command", "label": "A second copy of the same character is refused", "actor": "a",
       "command": ".ptr copy Harnessa", "rejected": true },

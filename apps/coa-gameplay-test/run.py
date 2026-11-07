@@ -92,7 +92,7 @@ METRICS = TIMELINE_METRICS | {
     'cache_token_count', 'cache_token_stage', 'cache_token_present',
     'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item',
     'account_character_count', 'account_other_item_count', 'account_other_bank_item_count',
-    'account_other_mail_count', 'account_other_foreign_mail_count',
+    'account_other_mail_count', 'account_other_foreign_mail_count', 'account_other_at_login_flag',
     'mail_pool_item_count', 'notifications', 'notification_contains',
     'bank_bag_slots', 'bank_shows', 'guild_bank_tabs',
     'system_messages',
@@ -288,6 +288,7 @@ ACTIONS = {
     'collect_loot': ({'actor'}, {'actor'}),
     'close_loot': ({'actor'}, {'actor'}),
     'set_money': ({'actor', 'value'}, {'actor', 'value'}),
+    'add_at_login_flag': ({'actor', 'id'}, {'actor', 'id'}),
     'set_player_setting': ({'actor', 'source', 'index', 'value'}, {'actor', 'source', 'index', 'value'}),
     'set_phase': ({'actor'}, {'actor', 'value'}),
     'use_nearby_gameobject': ({'actor', 'entry'}, {'actor', 'entry', 'owner'}),
@@ -721,6 +722,8 @@ def validate(scenario):
             number(step['vote'], f'{where}.vote', 0, 3, True)
         if action == 'master_loot_give':
             require(step['target'] in player_ids, f'{where}: master loot needs a player recipient')
+        if action == 'add_at_login_flag':
+            number(step['id'], f'{where}.id', 1, 0xFFFF, True)
         if action == 'send_mail':
             require(step['target'] in player_ids and step['target'] != step['actor'],
                     f'{where}: mail needs another player as recipient')
@@ -1255,7 +1258,7 @@ def validate(scenario):
                                    'carried_pool_item_count'},
                         f'{where}: quality applies only to loot items and carried cache rewards')
                 number(step['quality'], f'{where}.quality', 0, 7, True)
-            if metric == 'at_login_flag':
+            if metric in ('at_login_flag', 'account_other_at_login_flag'):
                 number(step.get('id'), f'{where}.id', 1, 0xFFFF, True)
             if metric == 'server_packet_contains':
                 require(isinstance(step.get('text'), str) and step['text'].strip(),

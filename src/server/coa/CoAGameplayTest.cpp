@@ -5404,6 +5404,14 @@ private:
                 player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), step.get<uint32>("item"));
             return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
         }
+        if (metric == "account_other_at_login_flag")
+        {
+            uint32 const flag = step.get<uint32>("id");
+            QueryResult result = CharacterDatabase.Query(
+                "SELECT COUNT(*) FROM characters WHERE account = {} AND guid <> {} AND at_login & {} = {}",
+                player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), flag, flag);
+            return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
+        }
         if (metric == "account_other_mail_count" || metric == "account_other_foreign_mail_count")
         {
             std::string const foreignOnly = metric == "account_other_foreign_mail_count"
@@ -6731,6 +6739,13 @@ private:
             player->SetPhaseMask(step.get<uint32>("value", _phase), true);
         else if (action == "set_money")
             player->SetMoney(step.get<uint32>("value"));
+        else if (action == "add_at_login_flag")
+        {
+            uint32 const flag = step.get<uint32>("id");
+            player->SetAtLoginFlag(AtLoginFlags(flag));
+            CharacterDatabase.DirectExecute("UPDATE characters SET at_login = at_login | {} WHERE guid = {}", flag,
+                player->GetGUID().GetCounter());
+        }
         else if (action == "set_player_setting")
             player->UpdatePlayerSetting(step.get<std::string>("source"), step.get<uint32>("index"),
                 step.get<uint32>("value"));
