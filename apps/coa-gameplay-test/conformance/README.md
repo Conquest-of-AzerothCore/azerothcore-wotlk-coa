@@ -1088,10 +1088,13 @@ than exactly 1 is `unmeasured`, not `ok` or `alert` — the forcing assumption, 
 alert). Only once exactly one crit is confirmed does it compute `measured = before - after` and judge it against
 `expected = wait_ms + expected_ms` (the natural elapsed time of the wait, which the engine's own duration
 decrement removes regardless of the passive, plus the claimed extra milliseconds): `ok` when
-`expected - CAST_MARGIN_MS <= measured <= expected` (the one-sided window `judge_time` uses for a wall-clock
-delta: the server can only lose *at least* the natural elapsed time, never less, and the extra milliseconds are
-an exact claim, not a range, so `measured` is never *more* than `expected` either), `alert` otherwise — including
-exactly `wait_ms` with no extra milliseconds at all, the absent-effect case this check exists to catch.
+`expected - CAST_MARGIN_MS <= measured <= expected + run.max_step_ms` (the lower side is the one-sided window
+`judge_time` uses for a wall-clock delta: the server can only lose *at least* the natural elapsed time, never
+less; the upper side adds `run.max_step_ms`, the harness's own per-run tick-overshoot bound, because a `wait`
+step's actual elapsed time can only round *up* from its nominal `ms`, never finish early, so a correct,
+exactly-`expected_ms` fix still measures slightly more than `expected` on a real run), `alert` otherwise —
+including exactly `wait_ms` with no extra milliseconds at all, the absent-effect case this check exists to
+catch, and any overshoot beyond `run.max_step_ms`.
 
 Templar's own Sacred Oath 712346 scenario (`coa-verify --ram --stages gameplay`, the same exploratory run that
 surfaced the double-swing above) measured 2 forced crits, not 1, inside the original `swing_interval`-length wait

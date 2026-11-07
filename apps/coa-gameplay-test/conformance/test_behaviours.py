@@ -697,13 +697,13 @@ class MetricDeltaScenarioTests(unittest.TestCase):
 
 
 class FakeRun:
-    def __init__(self, values):
+    def __init__(self, values, max_step_ms=None):
         self.values = values
         self.key = 'fake'
         self.status = 'completed'
         self.message = ''
         self.steps = []
-        self.max_step_ms = None
+        self.max_step_ms = max_step_ms
         self.cast_failures = {}
 
 
@@ -992,6 +992,18 @@ class JudgeDurationTests(unittest.TestCase):
         expectation = self.expectation()
         values = {'before': 8000.0, 'after': 8000.0 - 500, 'crits': 1.0}
         verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_duration_drops_by_the_wait_plus_the_extra_second_and_tick_overshoot_is_ok(self):
+        expectation = self.expectation()
+        values = {'before': 8000.0, 'after': 8000.0 - 512 - 1000, 'crits': 1.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values, max_step_ms=20.0), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_tick_overshoot_beyond_max_step_ms_is_still_alert(self):
+        expectation = self.expectation()
+        values = {'before': 8000.0, 'after': 8000.0 - 521 - 1000, 'crits': 1.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values, max_step_ms=20.0), expectation)
         self.assertEqual(verdict.status, 'alert')
 
     def test_forced_swing_that_did_not_crit_is_unmeasured_not_ok_or_alert(self):

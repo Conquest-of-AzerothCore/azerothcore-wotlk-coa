@@ -1604,14 +1604,16 @@ def behaviour_duration_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
                                    f'not hold, so the duration delta cannot be attributed to a crit')
     measured = before - after
     expected = model['wait_ms'] + model['expected_ms']
+    overshoot = run.max_step_ms or 0.0
     low = expected - CAST_MARGIN_MS
-    high = expected
+    high = expected + overshoot
     status = 'ok' if low - FLOAT_EPSILON <= measured <= high + FLOAT_EPSILON else 'alert'
     return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
                    explanation=f'{model["before_label"]} measured {before:g} ms, {model["after_label"]} measured '
                                f'{after:g} ms, a loss of {measured:g} ms over one forced crit swing; expected at '
-                               f'least the wait ({model["wait_ms"]:g} ms) plus {model["expected_ms"]:g} ms, never '
-                               f'less, and never more than that sum')
+                               f'least the wait ({model["wait_ms"]:g} ms) plus {model["expected_ms"]:g} ms, plus up '
+                               f'to {overshoot:g} ms of the wait step\'s own tick overshoot (run.max_step_ms), '
+                               f'never less than the wait and never more than that sum plus the overshoot')
 
 
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
