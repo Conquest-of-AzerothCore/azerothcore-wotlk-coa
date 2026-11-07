@@ -120,19 +120,12 @@ constexpr std::uint32_t DefeatLevel(std::uint32_t spawnMode)
     return spawnMode ? DefeatedHeroic : DefeatedNormal;
 }
 
-constexpr bool IsBloodforgedReleased(std::uint32_t defeatLevel, bool heroicCopy)
-{
-    return defeatLevel >= (heroicCopy ? DefeatedHeroic : DefeatedNormal);
-}
-
 constexpr std::uint32_t EffectiveStage(std::uint32_t configuredStage, std::uint32_t unlockedStage)
 {
     return unlockedStage > configuredStage ? unlockedStage : configuredStage;
 }
 
 [[nodiscard]] std::uint32_t ReleasedStage();
-[[nodiscard]] std::uint32_t RaidDefeatLevel(std::uint32_t mapId);
-[[nodiscard]] std::uint32_t DefeatVersion();
 }
 
 #endif

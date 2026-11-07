@@ -117,12 +117,6 @@ int main()
     static_assert(RaidRelease::DefeatLevel(0) == RaidRelease::DefeatedNormal);
     static_assert(RaidRelease::DefeatLevel(1) == RaidRelease::DefeatedHeroic);
     static_assert(RaidRelease::DefeatLevel(3) == RaidRelease::DefeatedHeroic);
-    static_assert(!RaidRelease::IsBloodforgedReleased(RaidRelease::DefeatedNever, false));
-    static_assert(!RaidRelease::IsBloodforgedReleased(RaidRelease::DefeatedNever, true));
-    static_assert(RaidRelease::IsBloodforgedReleased(RaidRelease::DefeatedNormal, false));
-    static_assert(!RaidRelease::IsBloodforgedReleased(RaidRelease::DefeatedNormal, true));
-    static_assert(RaidRelease::IsBloodforgedReleased(RaidRelease::DefeatedHeroic, false));
-    static_assert(RaidRelease::IsBloodforgedReleased(RaidRelease::DefeatedHeroic, true));
     static_assert(RaidRelease::EffectiveStage(RaidRelease::StageHeroicDungeons, 0) == RaidRelease::StageHeroicDungeons);
     static_assert(RaidRelease::EffectiveStage(RaidRelease::StageZulGurub, RaidRelease::StageMoltenCore)
         == RaidRelease::StageMoltenCore);

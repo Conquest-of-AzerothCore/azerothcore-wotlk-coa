@@ -213,7 +213,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'min_distance', 'owner_display', 'creator_only', 'ranged_weapon_subclass', 'sheath_state', 'skill',
                  'cache', 'table', 'exclude', 'dungeon', 'source', 'opcode', 'from', 'slot', 'achievement', 'title',
                  'type_mask', 'hit_mask', 'spell_type_mask', 'items',
-                 'phase_mask', 'trigger_spell', 'trials', 'incoming', 'heal', 'quality',
+                 'phase_mask', 'trigger_spell', 'trials', 'incoming', 'heal', 'quality', 'heroic',
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'below_armor_class', 'unwearable', 'spells',
                  'min_level', 'max_level', 'min_home_distance', 'spawn',
@@ -1242,6 +1242,9 @@ def validate(scenario):
                                    'server_packet_contains'},
                         f'{where}: row applies only to captured packet counts, values or text')
                 number(step['row'], f'{where}.row', 0, 2**32 - 1, True)
+            if 'heroic' in step:
+                require(metric == 'loot_bloodforged' and isinstance(step['heroic'], bool),
+                        f'{where}.heroic must be a boolean on loot_bloodforged')
             if 'quality' in step:
                 require(metric in {'loot_count', 'loot_entry', 'loot_required_level', 'loot_item_level',
                                    'carried_pool_item_count'},

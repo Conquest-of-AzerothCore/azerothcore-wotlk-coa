@@ -3927,10 +3927,12 @@ private:
                     window = &creature->loot;
             if (!window)
                 return 0;
+            auto const heroic = step.get_optional<bool>("heroic");
             uint32 count = 0;
             for (LootItem const& item : window->items)
                 if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(item.itemid))
-                    if (!item.is_looted && itemTemplate->Name1.rfind("Bloodforged", 0) == 0)
+                    if (!item.is_looted && itemTemplate->Name1.rfind("Bloodforged", 0) == 0
+                        && (!heroic || *heroic == (itemTemplate->Description.find("Heroic Bloodforged") != std::string::npos)))
                         ++count;
             return count;
         }

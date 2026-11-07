@@ -5,8 +5,10 @@
 #include "AscensionRaidReleasePolicy.h"
 #include "ConditionMgr.h"
 #include "Config.h"
+#include "Containers.h"
 #include "Creature.h"
 #include "Formulas.h"
+#include "GameTime.h"
 #include "GameObject.h"
 #include "Group.h"
 #include "DatabaseEnv.h"
@@ -33,21 +35,50 @@
 namespace Bloodforged
 {
 constexpr uint32 HighRiskAura = 1004019;
-using Pools = std::array<std::array<std::vector<uint32>, 3>, 61>;
+constexpr uint32 BloodforgedEntryOffset = 6000000;
 
-struct HeldGear
+struct CatalogueEntry
 {
-    uint32 mapId;
+    uint32 entry;
+    uint32 quality;
+    uint32 requiredLevel;
+    uint32 itemLevel;
     bool heroic;
+};
+
+struct RaidGearEntry
+{
+    uint32 entry;
+    uint32 mapId;
+    uint32 requiredLevel;
+    bool heroic;
+};
+
+struct LevelPools
+{
+    std::array<std::vector<uint32>, 3> normal;
+    std::vector<uint32> heroic;
+    std::unique_ptr<LootTemplate> loot;
+};
+
+struct Options
+{
+    std::array<Rates, 5> rates = DefaultRates;
+    unsigned blueCap = DefaultBlueMaxItemLevel;
+    std::array<unsigned, 9> epicCaps = DefaultEpicMaxItemLevelByStage;
+    bool level60EndgameOnly = true;
+    RareDrop rare = DefaultRare;
+    RareDrop rareElite = DefaultRareElite;
+    unsigned respawnMinLevel = DefaultEndgameRespawnMinLevel;
 };
 
 struct Settings
 {
-    std::array<Rates, 5> rates = DefaultRates;
-    Pools pools;
-    std::unordered_map<uint32, HeldGear> raidGear;
-    std::array<std::unique_ptr<LootTemplate>, 61> templates;
-    uint32 defeatVersion = 0;
+    Options options;
+    std::vector<CatalogueEntry> catalogue;
+    std::vector<RaidGearEntry> raidGear;
+    std::array<std::array<LevelPools, 2>, 61> pools;
+    uint32 stage = 0;
     bool enabled = false;
 };
 
@@ -93,6 +124,11 @@ bool EligiblePlayer(Player const* player, Creature const* creature)
         && player->GetLevel() >= 15 && player->HasAura(HighRiskAura)
         && player->IsAtLootRewardDistance(creature)
         && creature->GetLevel() > Acore::XP::GetGrayLevel(player->GetLevel());
+}
+
+bool IsRare(uint32 rank)
+{
+    return rank == CREATURE_ELITE_RARE || rank == CREATURE_ELITE_RAREELITE;
 }
 
 uint32 RaidMap(uint32 mapId)
@@ -145,71 +181,161 @@ std::unordered_map<uint32, uint32> RaidItemMaps()
     return raid;
 }
 
-bool FindHeldGear(uint32 entry, std::unordered_map<uint32, uint32> const& raidItems, HeldGear& held)
+bool RequiresReputation(uint32 entry, ItemTemplate const* item)
 {
-    uint32 const base = entry % 100000;
-    ItemTemplate const* item = sObjectMgr->GetItemTemplate(entry);
-    ItemTemplate const* baseItem = base != entry ? sObjectMgr->GetItemTemplate(base) : nullptr;
-    if (!item || !baseItem || item->Name1 != "Bloodforged " + baseItem->Name1)
+    if (item->RequiredReputationFaction)
+        return true;
+    if (entry < BloodforgedEntryOffset)
         return false;
-    auto it = raidItems.find(base);
-    if (it == raidItems.end())
-        return false;
-    held = { it->second, entry / 100000 == 63 };
-    return true;
+    uint32 const variant = entry - BloodforgedEntryOffset;
+    for (uint32 base : { variant, variant % 100000 })
+        if (ItemTemplate const* baseItem = sObjectMgr->GetItemTemplate(base); baseItem && baseItem->RequiredReputationFaction)
+            return true;
+    return false;
 }
 
-void BuildTemplates(Settings& next, uint32 defeatVersion)
+bool IsHeroicCopy(ItemTemplate const* item)
 {
-    next.defeatVersion = defeatVersion;
-    for (unsigned level = 15; level <= 60; ++level)
+    return item->Description.find("Heroic Bloodforged") != std::string::npos;
+}
+
+uint32 RaidMapOf(uint32 entry, ItemTemplate const* item, std::unordered_map<uint32, uint32> const& raidItems)
+{
+    if (entry < BloodforgedEntryOffset)
+        return 0;
+    uint32 const variant = entry - BloodforgedEntryOffset;
+    for (uint32 base : { variant, variant % 100000 })
     {
-        auto entriesForLevel = std::make_unique<LootTemplate>();
-        for (unsigned index = 0; index < 3; ++index)
+        ItemTemplate const* baseItem = sObjectMgr->GetItemTemplate(base);
+        if (!baseItem || item->Name1 != "Bloodforged " + baseItem->Name1)
+            continue;
+        auto it = raidItems.find(base);
+        return it == raidItems.end() ? 0 : it->second;
+    }
+    return 0;
+}
+
+std::vector<RaidGearEntry> LoadRaidGear(std::unordered_map<uint32, uint32> const& raidItems)
+{
+    std::vector<RaidGearEntry> gear;
+    for (auto const& [entry, item] : *sObjectMgr->GetItemTemplateStore())
+    {
+        if (entry < BloodforgedEntryOffset || item.Quality < ITEM_QUALITY_RARE || item.Quality > ITEM_QUALITY_EPIC
+            || (item.Class != ITEM_CLASS_WEAPON && item.Class != ITEM_CLASS_ARMOR) || item.RequiredLevel > 60
+            || item.HasFlag(ITEM_FLAG_MULTI_DROP) || item.StartQuest || RequiresReputation(entry, &item))
+            continue;
+        if (uint32 mapId = RaidMapOf(entry, &item, raidItems))
+            gear.push_back({ entry, mapId, item.RequiredLevel, IsHeroicCopy(&item) });
+    }
+    std::sort(gear.begin(), gear.end(), [](RaidGearEntry const& a, RaidGearEntry const& b) { return a.entry < b.entry; });
+    return gear;
+}
+
+bool BuildPools(Settings& next, uint32 stage)
+{
+    next.stage = stage;
+    Options const& options = next.options;
+    unsigned const epicCap = options.epicCaps[std::min<std::size_t>(stage, options.epicCaps.size() - 1)];
+    for (unsigned level = 15; level <= 60; ++level)
+        for (unsigned endgame = 0; endgame < 2; ++endgame)
         {
-            unsigned rate = next.rates[Band(level)][index];
-            std::vector<uint32> pool;
-            for (uint32 entry : next.pools[level][index])
+            LevelPools& pools = next.pools[level][endgame];
+            for (CatalogueEntry const& item : next.catalogue)
             {
-                auto it = next.raidGear.find(entry);
-                if (it == next.raidGear.end() || RaidRelease::IsBloodforgedReleased(
-                    RaidRelease::RaidDefeatLevel(it->second.mapId), it->second.heroic))
-                    pool.push_back(entry);
+                if (!EligibleItem(item.requiredLevel, item.itemLevel, level)
+                    || !WithinItemLevelCap(item.quality, item.itemLevel, options.blueCap, epicCap)
+                    || !AllowedInZone(item.requiredLevel, endgame, options.level60EndgameOnly))
+                    continue;
+                if (item.heroic)
+                    pools.heroic.push_back(item.entry);
+                else
+                    pools.normal[item.quality - 2].push_back(item.entry);
             }
-            if (!rate || pool.empty())
-                continue;
-            for (uint32 entry : pool)
+            for (auto& pool : pools.normal)
             {
-                auto* item = new LootStoreItem(entry, 0, EntryChance(rate, pool.size()), false,
-                    LOOT_MODE_DEFAULT, index + 1, 1, 1);
-                item->conditions = { &riskCondition, &levelCondition };
-                entriesForLevel->AddEntry(item);
+                uint32 highest = 0;
+                for (uint32 entry : pool)
+                    highest = std::max(highest, sObjectMgr->GetItemTemplate(entry)->ItemLevel);
+                std::erase_if(pool, [highest, level](uint32 entry)
+                {
+                    return !InGearTier(sObjectMgr->GetItemTemplate(entry)->ItemLevel, level, highest);
+                });
+            }
+            Rates const& rates = options.rates[Band(level)];
+            if ((rates[0] && pools.normal[0].empty()) || pools.normal[1].empty())
+            {
+                LOG_ERROR("server.loading", "Bloodforged disabled: green/blue pool missing at level {}", level);
+                return false;
+            }
+            pools.loot = std::make_unique<LootTemplate>();
+            for (unsigned index = 0; index < 3; ++index)
+            {
+                std::vector<uint32> const& pool = pools.normal[index];
+                if (!rates[index] || pool.empty())
+                    continue;
+                for (uint32 entry : pool)
+                {
+                    auto* item = new LootStoreItem(entry, 0, EntryChance(rates[index], pool.size()), false,
+                        LOOT_MODE_DEFAULT, index + 1, 1, 1);
+                    item->conditions = { &riskCondition, &levelCondition };
+                    pools.loot->AddEntry(item);
+                }
             }
         }
-        next.templates[level] = std::move(entriesForLevel);
-    }
+    return true;
 }
 
 std::shared_ptr<Settings const> CurrentSettings()
 {
     auto current = std::atomic_load(&settings);
-    uint32 const defeatVersion = RaidRelease::DefeatVersion();
-    if (!current || !current->enabled || current->defeatVersion == defeatVersion)
+    uint32 const stage = RaidRelease::ReleasedStage();
+    if (!current || !current->enabled || current->stage == stage)
         return current;
 
     std::lock_guard<std::mutex> guard(rebuildLock);
     current = std::atomic_load(&settings);
-    if (!current->enabled || current->defeatVersion == defeatVersion)
+    if (!current->enabled || current->stage == stage)
         return current;
     auto next = std::make_shared<Settings>();
-    next->rates = current->rates;
-    next->pools = current->pools;
+    next->options = current->options;
+    next->catalogue = current->catalogue;
     next->raidGear = current->raidGear;
+    if (!BuildPools(*next, stage))
+        return current;
     next->enabled = true;
-    BuildTemplates(*next, defeatVersion);
     std::shared_ptr<Settings const> rebuilt = std::move(next);
     std::atomic_store(&settings, rebuilt);
     return rebuilt;
+}
+
+template <std::size_t Count>
+bool ReadNumbers(std::string const& key, std::array<unsigned, Count>& values)
+{
+    std::string value = sConfigMgr->GetOption<std::string>(key, "");
+    if (value.empty())
+        return true;
+    std::istringstream input(value);
+    std::array<unsigned, Count> parsed;
+    for (unsigned& number : parsed)
+        if (!(input >> number))
+            return false;
+    std::string extra;
+    if (input >> extra)
+        return false;
+    values = parsed;
+    return true;
+}
+
+bool ReadRareDrop(std::string const& name, RareDrop& drop)
+{
+    std::array<unsigned, 2> chances = { drop.raidPercent, drop.heroicRaidPercent };
+    std::array<unsigned, 2> respawn = { drop.respawnMinMinutes, drop.respawnMaxMinutes };
+    if (!ReadNumbers("Bloodforged." + name + "RaidItemPercent", chances)
+        || !ReadNumbers("Bloodforged.Endgame" + name + "RespawnMinutes", respawn)
+        || chances[0] > 100 || chances[1] > 100 || respawn[0] > respawn[1])
+        return false;
+    drop = { chances[0], chances[1], respawn[0], respawn[1] };
+    return true;
 }
 
 class Configuration : public WorldScript
@@ -238,7 +364,8 @@ private:
             return;
         }
 
-        for (unsigned band = 0; band < next->rates.size(); ++band)
+        Options& options = next->options;
+        for (unsigned band = 0; band < options.rates.size(); ++band)
         {
             std::string key = "Bloodforged.Rates" + std::to_string(15 + band * 10);
             std::string value = sConfigMgr->GetOption<std::string>(key, "");
@@ -254,16 +381,26 @@ private:
                 LOG_ERROR("server.loading", "Bloodforged disabled: invalid rates in {}", key);
                 return;
             }
-            next->rates[band] = {unsigned(std::lround(green * 100)), unsigned(std::lround(blue * 100)),
+            options.rates[band] = {unsigned(std::lround(green * 100)), unsigned(std::lround(blue * 100)),
                 unsigned(std::lround(purple * 100))};
-            if (!ValidRates(next->rates[band]))
+            if (!ValidRates(options.rates[band]))
             {
                 LOG_ERROR("server.loading", "Bloodforged disabled: invalid rarity order in {}", key);
                 return;
             }
         }
+        options.blueCap = sConfigMgr->GetOption<uint32>("Bloodforged.BlueMaxItemLevel", DefaultBlueMaxItemLevel);
+        options.level60EndgameOnly = sConfigMgr->GetOption<bool>("Bloodforged.Level60EndgameZonesOnly", true);
+        options.respawnMinLevel = sConfigMgr->GetOption<uint32>("Bloodforged.EndgameRareRespawnMinLevel",
+            DefaultEndgameRespawnMinLevel);
+        if (!ReadNumbers("Bloodforged.EpicMaxItemLevelByStage", options.epicCaps)
+            || !ReadRareDrop("Rare", options.rare) || !ReadRareDrop("RareElite", options.rareElite))
+        {
+            LOG_ERROR("server.loading", "Bloodforged disabled: invalid item level caps or rare mob settings");
+            return;
+        }
 
-        Pools pools;
+        std::unordered_map<uint32, uint32> const raidItems = RaidItemMaps();
         std::set<uint32> entries;
         QueryResult catalogue = WorldDatabase.Query(
             "SELECT entry,quality,required_level,item_level FROM coa_bloodforged_catalogue");
@@ -289,44 +426,67 @@ private:
                 LOG_ERROR("server.loading", "Bloodforged disabled: template mismatch for {}", entry);
                 return;
             }
-            for (unsigned level = 15; level <= 60; ++level)
-                if (EligibleItem(requiredLevel, itemLevel, level))
-                    pools[level][quality - 2].push_back(entry);
+            if (RequiresReputation(entry, item) || RaidMapOf(entry, item, raidItems))
+                continue;
+            next->catalogue.push_back({ entry, quality, requiredLevel, itemLevel, IsHeroicCopy(item) });
         } while (catalogue->NextRow());
-        if (entries.empty())
+        if (next->catalogue.empty())
         {
             LOG_ERROR("server.loading", "Bloodforged disabled: empty or incomplete catalogue");
             return;
         }
-        for (unsigned level = 15; level <= 60; ++level)
-            for (auto& pool : pools[level])
-            {
-                uint32 highest = 0;
-                for (uint32 entry : pool)
-                    highest = std::max(highest, sObjectMgr->GetItemTemplate(entry)->ItemLevel);
-                std::erase_if(pool, [highest, level](uint32 entry)
-                {
-                    return !InGearTier(sObjectMgr->GetItemTemplate(entry)->ItemLevel, level, highest);
-                });
-            }
-        for (unsigned level = 15; level <= 60; ++level)
-            if (pools[level][0].empty() || pools[level][1].empty())
-            {
-                LOG_ERROR("server.loading", "Bloodforged disabled: green/blue pool missing at level {}", level);
-                return;
-            }
-        std::unordered_map<uint32, uint32> const raidItems = RaidItemMaps();
-        for (uint32 entry : entries)
-            if (HeldGear held; FindHeldGear(entry, raidItems, held))
-                next->raidGear.emplace(entry, held);
-        next->pools = std::move(pools);
-        BuildTemplates(*next, RaidRelease::DefeatVersion());
+        next->raidGear = LoadRaidGear(raidItems);
+        if (!BuildPools(*next, RaidRelease::ReleasedStage()))
+            return;
         next->enabled = true;
         std::atomic_store(&settings, std::shared_ptr<Settings const>(next));
-        LOG_INFO("server.loading", "Bloodforged world drops ready: {} verified catalogue entries, {} raid items held "
-            "until their raid is defeated", entries.size(), next->raidGear.size());
+        LOG_INFO("server.loading", "Bloodforged world drops ready: {} catalogue entries, {} raid items for rare mobs "
+            "once their raid is released", next->catalogue.size(), next->raidGear.size());
     }
 };
+
+uint32 PickRaidGear(Settings const& current, bool heroic, unsigned level, bool endgame, unsigned percent)
+{
+    if (!roll_chance_i(int(percent)))
+        return 0;
+    std::vector<uint32> candidates;
+    for (RaidGearEntry const& gear : current.raidGear)
+        if (gear.heroic == heroic && RaidRelease::RaidLootStage(gear.mapId) <= current.stage
+            && gear.requiredLevel <= level
+            && AllowedInZone(gear.requiredLevel, endgame, current.options.level60EndgameOnly))
+            candidates.push_back(gear.entry);
+    return candidates.empty() ? 0 : Acore::Containers::SelectRandomContainerElement(candidates);
+}
+
+uint32 PickNormal(Settings const& current, LevelPools const& pools, unsigned level)
+{
+    Rates const& rates = current.options.rates[Band(level)];
+    unsigned total = 0;
+    for (unsigned index = 0; index < 3; ++index)
+        if (!pools.normal[index].empty())
+            total += rates[index];
+    if (!total)
+        return 0;
+    unsigned roll = urand(1, total);
+    for (unsigned index = 0; index < 3; ++index)
+    {
+        if (pools.normal[index].empty())
+            continue;
+        if (roll <= rates[index])
+            return Acore::Containers::SelectRandomContainerElement(pools.normal[index]);
+        roll -= rates[index];
+    }
+    return 0;
+}
+
+void AddRareMobItem(Loot& loot, uint32 entry)
+{
+    if (!entry)
+        return;
+    LootStoreItem item(entry, 0, 100.0f, false, LOOT_MODE_DEFAULT, 0, 1, 1);
+    item.conditions = { &riskCondition, &levelCondition };
+    loot.AddItem(item);
+}
 
 class WorldDrops : public MiscScript
 {
@@ -361,7 +521,49 @@ public:
             return;
 
         unsigned targetLevel = std::clamp<unsigned>(eligibleOwner->GetLevel(), 15, 60);
-        current->templates[targetLevel]->Process(*loot, store, lootMode, eligibleOwner);
+        bool const endgame = IsEndgameZone(creature->GetZoneId());
+        LevelPools const& pools = current->pools[targetLevel][endgame];
+        uint32 const rank = creature->GetCreatureTemplate()->rank;
+        if (!IsRare(rank))
+        {
+            pools.loot->Process(*loot, store, lootMode, eligibleOwner);
+            return;
+        }
+
+        RareDrop const& drop = rank == CREATURE_ELITE_RARE ? current->options.rare : current->options.rareElite;
+        uint32 normal = PickRaidGear(*current, false, targetLevel, endgame, drop.raidPercent);
+        AddRareMobItem(*loot, normal ? normal : PickNormal(*current, pools, targetLevel));
+        uint32 heroic = PickRaidGear(*current, true, targetLevel, endgame, drop.heroicRaidPercent);
+        if (!heroic && !pools.heroic.empty())
+            heroic = Acore::Containers::SelectRandomContainerElement(pools.heroic);
+        AddRareMobItem(*loot, heroic);
+    }
+};
+
+class EndgameRareRespawn : public UnitScript
+{
+public:
+    EndgameRareRespawn() : UnitScript("BloodforgedEndgameRareRespawn", true, { UNITHOOK_ON_UNIT_DEATH }) { }
+
+    void OnUnitDeath(Unit* unit, Unit*) override
+    {
+        Creature* creature = unit ? unit->ToCreature() : nullptr;
+        if (!creature || !creature->GetSpawnId() || !creature->GetMap() || creature->GetMap()->Instanceable())
+            return;
+        CreatureTemplate const* data = creature->GetCreatureTemplate();
+        auto current = std::atomic_load(&settings);
+        if (!current || !current->enabled || !IsRare(data->rank)
+            || data->minlevel < current->options.respawnMinLevel || !IsEndgameZone(creature->GetZoneId()))
+            return;
+        RareDrop const& drop = data->rank == CREATURE_ELITE_RARE ? current->options.rare : current->options.rareElite;
+        if (!drop.respawnMaxMinutes)
+            return;
+        time_t const remaining = creature->GetRespawnTime() - GameTime::GetGameTime().count();
+        if (remaining < time_t(creature->GetRespawnDelay()))
+            return;
+        uint32 const delay = urand(drop.respawnMinMinutes * MINUTE, drop.respawnMaxMinutes * MINUTE);
+        creature->SetRespawnTime(delay + uint32(remaining - creature->GetRespawnDelay()));
+        creature->SaveRespawnTime();
     }
 };
 
@@ -390,5 +592,6 @@ void AddSC_AscensionBloodforged()
 {
     new Bloodforged::Configuration();
     new Bloodforged::WorldDrops();
+    new Bloodforged::EndgameRareRespawn();
     new Bloodforged::NativeRates();
 }

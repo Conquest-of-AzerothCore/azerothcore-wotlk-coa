@@ -2,6 +2,8 @@
 
 #include "AscensionRaidReleasePolicy.h"
 #include "Chat.h"
+#include "ChatCommand.h"
+#include "CommandScript.h"
 #include "Config.h"
 #include "Creature.h"
 #include "DBCStores.h"
@@ -16,11 +18,14 @@
 #include "WorldState.h"
 #include <atomic>
 
+using namespace Acore::ChatCommands;
+
 namespace
 {
+constexpr uint32 WorldStateStageOverride = 20120;
+
 uint32 g_configuredStage = RaidRelease::StageMoltenCore;
 std::atomic<uint32> g_raidReleaseStage = RaidRelease::StageMoltenCore;
-std::atomic<uint32> g_defeatVersion = 0;
 bool g_autoAdvance = false;
 
 uint32 StoredDefeatLevel(RaidRelease::FinalBoss const& boss)
@@ -37,10 +42,15 @@ uint32 UnlockedStage()
     return unlocked;
 }
 
+uint32 BaseStage()
+{
+    uint32 const stageOverride = uint32(sWorldState->getWorldState(WorldStateStageOverride));
+    return stageOverride ? stageOverride - 1 : g_configuredStage;
+}
+
 void RefreshReleasedStage()
 {
-    g_raidReleaseStage = g_autoAdvance ? RaidRelease::EffectiveStage(g_configuredStage, UnlockedStage())
-        : g_configuredStage;
+    g_raidReleaseStage = g_autoAdvance ? RaidRelease::EffectiveStage(BaseStage(), UnlockedStage()) : BaseStage();
 }
 
 void LoadRaidReleaseStage()
@@ -49,7 +59,6 @@ void LoadRaidReleaseStage()
         RaidRelease::StageMoltenCore);
     g_autoAdvance = sConfigMgr->GetOption<bool>("Ascension.RaidRelease.AutoAdvance", false);
     RefreshReleasedStage();
-    ++g_defeatVersion;
 }
 
 char const* RaidName(uint32 mapId)
@@ -71,6 +80,10 @@ char const* StageName(uint32 stage)
 {
     switch (stage)
     {
+        case 0: return "Normal Dungeons";
+        case RaidRelease::StageHeroicDungeons: return "Heroic Dungeons";
+        case RaidRelease::StageMythicDungeons: return "Mythic Dungeons";
+        case RaidRelease::StageZulGurub: return "Zul'Gurub";
         case RaidRelease::StageMoltenCore: return "Molten Core";
         case RaidRelease::StageOnyxiasLair: return "Onyxia's Lair";
         case RaidRelease::StageBlackwingLair: return "Blackwing Lair";
@@ -96,7 +109,6 @@ void RecordFinalBossKill(Player* killer, Creature* killed)
     uint32 const previousStage = g_raidReleaseStage;
     sWorldState->setWorldState(boss->worldState, level);
     RefreshReleasedStage();
-    ++g_defeatVersion;
     LOG_INFO("scripts", "Raid release: {} first defeated at level {} by {}'s group, release stage {} -> {}",
         RaidName(boss->mapId), level, killer->GetName(), previousStage, g_raidReleaseStage.load());
 
@@ -164,6 +176,76 @@ public:
         RecordFinalBossKill(owner, killed);
     }
 };
+
+class ascension_raid_release_commands : public CommandScript
+{
+public:
+    ascension_raid_release_commands() : CommandScript("ascension_raid_release_commands") { }
+
+    ChatCommandTable GetCommands() const override
+    {
+        static ChatCommandTable raidPhaseTable =
+        {
+            { "", HandleStatus, SEC_GAMEMASTER, Console::Yes },
+            { "set", HandleSet, SEC_ADMINISTRATOR, Console::Yes },
+            { "clear", HandleClear, SEC_ADMINISTRATOR, Console::Yes },
+            { "resetkills", HandleResetKills, SEC_ADMINISTRATOR, Console::Yes },
+        };
+        static ChatCommandTable commandTable =
+        {
+            { "raidphase", raidPhaseTable },
+        };
+        return commandTable;
+    }
+
+    static bool HandleStatus(ChatHandler* handler)
+    {
+        uint32 const stageOverride = uint32(sWorldState->getWorldState(WorldStateStageOverride));
+        handler->PSendSysMessage("Release stage {} ({}). Config {}, override {}, auto advance {}.",
+            g_raidReleaseStage.load(), StageName(g_raidReleaseStage.load()), g_configuredStage,
+            stageOverride ? std::to_string(stageOverride - 1) : std::string("none"), g_autoAdvance ? "on" : "off");
+        for (RaidRelease::FinalBoss const& boss : RaidRelease::FinalBosses)
+        {
+            uint32 const level = StoredDefeatLevel(boss);
+            handler->PSendSysMessage("{}: {}", RaidName(boss.mapId), level == RaidRelease::DefeatedHeroic ?
+                "defeated on Heroic" : level == RaidRelease::DefeatedNormal ? "defeated" : "not defeated");
+        }
+        return true;
+    }
+
+    static bool HandleSet(ChatHandler* handler, uint32 stage)
+    {
+        if (stage > RaidRelease::AllReleased)
+        {
+            handler->PSendSysMessage("Release stage must be 0-{}.", RaidRelease::AllReleased);
+            return false;
+        }
+        sWorldState->setWorldState(WorldStateStageOverride, stage + 1);
+        RefreshReleasedStage();
+        handler->PSendSysMessage("Release stage set to {} ({}); now {} ({}).", stage, StageName(stage),
+            g_raidReleaseStage.load(), StageName(g_raidReleaseStage.load()));
+        return true;
+    }
+
+    static bool HandleClear(ChatHandler* handler)
+    {
+        sWorldState->setWorldState(WorldStateStageOverride, 0);
+        RefreshReleasedStage();
+        handler->PSendSysMessage("Release stage override cleared; now {} ({}).", g_raidReleaseStage.load(),
+            StageName(g_raidReleaseStage.load()));
+        return true;
+    }
+
+    static bool HandleResetKills(ChatHandler* handler)
+    {
+        for (RaidRelease::FinalBoss const& boss : RaidRelease::FinalBosses)
+            sWorldState->setWorldState(boss.worldState, RaidRelease::DefeatedNever);
+        RefreshReleasedStage();
+        handler->PSendSysMessage("Raid kills reset; now {} ({}).", g_raidReleaseStage.load(),
+            StageName(g_raidReleaseStage.load()));
+        return true;
+    }
+};
 }
 
 std::uint32_t RaidRelease::ReleasedStage()
@@ -171,19 +253,9 @@ std::uint32_t RaidRelease::ReleasedStage()
     return g_raidReleaseStage;
 }
 
-std::uint32_t RaidRelease::RaidDefeatLevel(std::uint32_t mapId)
-{
-    FinalBoss const* boss = FinalBossOfMap(mapId);
-    return boss ? StoredDefeatLevel(*boss) : DefeatedNever;
-}
-
-std::uint32_t RaidRelease::DefeatVersion()
-{
-    return g_defeatVersion;
-}
-
 void AddSC_AscensionRaidRelease()
 {
     new ascension_raid_release_config();
     new ascension_raid_release_player();
+    new ascension_raid_release_commands();
 }

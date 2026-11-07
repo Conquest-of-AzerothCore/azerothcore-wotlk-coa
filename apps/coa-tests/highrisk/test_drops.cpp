@@ -43,5 +43,28 @@ int main()
     assert(InGearTier(37, 55, 37));
     assert(EntryChance(450, 0) == 0.0f);
     assert(std::abs(EntryChance(450, 9) - 0.5f) < 0.0001f);
+    for (Rates const& rates : DefaultRates)
+        assert(rates[0] == 0);
+    assert(ValidRates({0, 50, 0}));
+    assert(!ValidRates({0, 50, 50}));
+    assert(!ValidRates({40, 50, 0}));
+    assert(DefaultBlueMaxItemLevel == 57);
+    assert(DefaultEpicMaxItemLevelByStage[1] == 61 && DefaultEpicMaxItemLevelByStage[2] == 64);
+    assert(DefaultEpicMaxItemLevelByStage[3] == 65 && DefaultEpicMaxItemLevelByStage[4] == 70);
+    assert(WithinItemLevelCap(3, 57, 57, 61));
+    assert(!WithinItemLevelCap(3, 58, 57, 61));
+    assert(WithinItemLevelCap(4, 61, 57, 61));
+    assert(!WithinItemLevelCap(4, 62, 57, 61));
+    for (std::uint32_t zone : {28u, 139u, 46u, 4u, 16u, 618u, 490u, 1377u})
+        assert(IsEndgameZone(zone));
+    assert(!IsEndgameZone(12) && !IsEndgameZone(0) && !IsEndgameZone(41));
+    assert(AllowedInZone(60, true, true));
+    assert(!AllowedInZone(60, false, true));
+    assert(AllowedInZone(59, false, true));
+    assert(AllowedInZone(60, false, false));
+    assert(DefaultRare.raidPercent == 15 && DefaultRare.heroicRaidPercent == 5);
+    assert(DefaultRareElite.raidPercent == 25 && DefaultRareElite.heroicRaidPercent == 10);
+    assert(DefaultRare.respawnMinMinutes == 90 && DefaultRare.respawnMaxMinutes == 150);
+    assert(DefaultRareElite.respawnMinMinutes == 150 && DefaultRareElite.respawnMaxMinutes == 210);
     std::cout << checked << " rate invariants verified\n";
 }
