@@ -1479,9 +1479,15 @@ def behaviour_count_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
                        explanation=f'{measured_before} of {len(before_hit)} additional dummies were already hit '
                                    f'before the passive was learned; the delta cannot be isolated')
     delta = measured_after - measured_before
-    return deterministic(base, float(delta), float(delta), float(model['expected']),
-                         f'{measured_before} of {len(before_hit)} additional dummies hit before the learn, '
-                         f'{measured_after} after')
+    expected = float(model['expected'])
+    status = delta_status(BEHAVIOUR_COUNT, delta, expected)
+    margin = delta_margin(BEHAVIOUR_COUNT, expected)
+    return replace(base, status=status, measured=float(delta), expected=expected, low=expected - margin,
+                   high=expected + margin,
+                   explanation=f'{measured_before} of {len(before_hit)} additional dummies hit before the learn, '
+                               f'{measured_after} after; |measured - expected| <= '
+                               f'max({delta_floor(BEHAVIOUR_COUNT):g}, {RELATIVE_TOLERANCE:.1%} of expected), and '
+                               f'a measured 0 against a nonzero expected is always an alert')
 
 
 def behaviour_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
@@ -1495,9 +1501,18 @@ def behaviour_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
                        explanation=f'{model["before_label"]} measured {before:g} before the learn; a ratio needs '
                                    f'a positive baseline')
     ratio = after / before
-    return deterministic(base, ratio, ratio, float(model['expected']),
-                         f'{model["target_name"]} healed {before:g} before and {after:g} after the learn, '
-                         f'ratio {ratio:g}')
+    expected_ratio = float(model['expected'])
+    delta = after - before
+    expected_delta = before * (expected_ratio - 1.0)
+    status = delta_status(BEHAVIOUR_RATIO, delta, expected_delta)
+    margin_ratio = delta_margin(BEHAVIOUR_RATIO, expected_delta) / before
+    return replace(base, status=status, measured=ratio, expected=expected_ratio, low=expected_ratio - margin_ratio,
+                   high=expected_ratio + margin_ratio,
+                   explanation=f'{model["target_name"]} healed {before:g} before and {after:g} after the learn, '
+                               f'ratio {ratio:g}; measured delta {delta:+g} against expected delta '
+                               f'{expected_delta:+g} of {model["before_label"]}, judged on the healing scale, not '
+                               f'the ratio scale, and a measured 0 against a nonzero expected delta is always an '
+                               f'alert')
 
 
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:

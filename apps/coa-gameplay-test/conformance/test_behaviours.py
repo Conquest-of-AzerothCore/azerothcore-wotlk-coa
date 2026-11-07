@@ -162,6 +162,17 @@ class JudgeTargetCountTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
         self.assertEqual(verdict.status, 'ok')
 
+    def test_zero_delta_against_expected_one_is_alert_not_ok(self):
+        model = {'kind': 'count', 'expected': 1, 'quote': 'strikes 1 additional nearby target',
+                 'dummy_labels': [('b1', 'a1')]}
+        expectation = Expectation('label', BEHAVIOUR_COUNT, JUSTICE, INTERDICT, None, '1',
+                                  'prose: "strikes 1 additional nearby target" (712437)', model)
+        values = {'b1': 0.0, 'a1': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 0.0)
+        self.assertEqual(verdict.expected, 1.0)
+
     def test_already_hit_before_learn_is_unmeasured(self):
         expectation = self.expectation()
         values = {'b1': 1.0, 'a1': 1.0, 'b2': 0.0, 'a2': 1.0}
@@ -197,10 +208,17 @@ class JudgeHealingRatioTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 100.0, 'after': 0.0}), expectation)
         self.assertEqual(verdict.status, 'alert')
 
-    def test_ratio_within_the_shared_tolerance_floor_is_ok(self):
+    def test_ratio_half_the_claimed_increase_is_alert_not_floored_to_ok(self):
         expectation = self.expectation()
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 100.0, 'after': 150.0}), expectation)
-        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_ratio_exactly_one_against_expected_doubling_is_alert_not_ok(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 800.0, 'after': 800.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 1.0)
+        self.assertEqual(verdict.expected, 2.0)
 
     def test_zero_before_is_unmeasured(self):
         expectation = self.expectation()
