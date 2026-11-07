@@ -81,3 +81,13 @@ TEST(CrowsCache, MarksOfWarRangesNeedMinimumAtMostMaximum)
     EXPECT_FALSE(CrowsCache::ValidMarkRange(11, 10));
     EXPECT_FALSE(CrowsCache::ValidMarkRange(0, 201));
 }
+
+TEST(CrowsCache, StartsFromMythicDungeonsWithThreeRewards)
+{
+    EXPECT_FALSE(CrowsCache::RewardsReleased(0, 5, 5));
+    EXPECT_FALSE(CrowsCache::RewardsReleased(1, 5, 5));
+    EXPECT_TRUE(CrowsCache::RewardsReleased(2, 5, 5));
+    EXPECT_FALSE(CrowsCache::RewardsReleased(2, 0, 5));
+    EXPECT_FALSE(CrowsCache::RewardsReleased(3, 1, 2));
+    EXPECT_TRUE(CrowsCache::RewardsReleased(3, 1, 3));
+}

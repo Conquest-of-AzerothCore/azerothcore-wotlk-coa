@@ -19,6 +19,12 @@ constexpr unsigned Ratchet = 392;
 constexpr unsigned CenarionHold = 3425;
 constexpr unsigned AbyssalSands = 1939;
 constexpr unsigned RewardCount = 3;
+constexpr unsigned FirstStage = 2;
+
+constexpr bool RewardsReleased(unsigned stage, unsigned long long newestTier, unsigned long long released)
+{
+    return stage >= FirstStage && newestTier && released >= RewardCount;
+}
 constexpr unsigned GoldenMarkOfWar = 1201003;
 constexpr unsigned GoldenMarks = 10;
 constexpr unsigned SilverMarkOfWar = 1201002;

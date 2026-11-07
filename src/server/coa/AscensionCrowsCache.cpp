@@ -2,6 +2,7 @@
 
 #include "AscensionBloodforged.h"
 #include "AscensionCrowsCachePolicy.h"
+#include "AscensionRaidReleasePolicy.h"
 #include "Chat.h"
 #include "Config.h"
 #include "Containers.h"
@@ -436,6 +437,12 @@ bool Open(Player* player, Item* cache)
         rewards.push_back(pool[index]);
         pool.erase(pool.begin() + index);
     }
+    if (rewards.size() < RewardCount)
+    {
+        ChatHandler(player->GetSession()).SendSysMessage(
+            "This Crow's Cache cannot be opened yet: no Heroic Bloodforged rewards are released.");
+        return false;
+    }
     rewards.insert(rewards.end(), materials.begin(), materials.end());
     if (uint32 count = urand(goldenMarks[0], goldenMarks[1]))
         rewards.push_back({GoldenMarkOfWar, count});
@@ -510,8 +517,16 @@ void RemoveUnclaimed()
     }
 }
 
-void Begin(uint32 seconds, Position const& point)
+bool GearReleased()
 {
+    return RewardsReleased(RaidRelease::ReleasedStage(), Bloodforged::NewestReleasedHeroicGear().size(),
+        Bloodforged::ReleasedHeroicGear().size());
+}
+
+bool Begin(uint32 seconds, Position const& point)
+{
+    if (!GearReleased())
+        return false;
     RemoveUnclaimed();
     Event event;
     event.id = nextId++;
@@ -901,7 +916,11 @@ public:
             handler->SendSysMessage("Crow's Cache is disabled or has no valid reward pool.");
             return false;
         }
-        Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), location);
+        if (!Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), location))
+        {
+            handler->SendSysMessage("Crow's Cache needs Mythic Dungeons (stage 2) and at least three released Heroic Bloodforged rewards.");
+            return false;
+        }
         handler->SendSysMessage("Crow's Cache warning started. Use .crows visit to reach it.");
         return true;
     }
@@ -910,7 +929,11 @@ public:
         std::lock_guard lock(mutex);
         if (!enabled)
             return false;
-        Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), silithus);
+        if (!Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), silithus))
+        {
+            handler->SendSysMessage("Crow's Cache needs Mythic Dungeons (stage 2) and at least three released Heroic Bloodforged rewards.");
+            return false;
+        }
         handler->SendSysMessage("Silithus Crow's Cache warning started. Use .crows visit to reach it.");
         return true;
     }
@@ -919,7 +942,11 @@ public:
         std::lock_guard lock(mutex);
         if (!enabled)
             return false;
-        Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), needles);
+        if (!Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), needles))
+        {
+            handler->SendSysMessage("Crow's Cache needs Mythic Dungeons (stage 2) and at least three released Heroic Bloodforged rewards.");
+            return false;
+        }
         handler->SendSysMessage("Crow's Cache warning started. Use .crows visit to reach it.");
         return true;
     }
@@ -928,7 +955,11 @@ public:
         std::lock_guard lock(mutex);
         if (!enabled)
             return false;
-        Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), barrens);
+        if (!Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), barrens))
+        {
+            handler->SendSysMessage("Crow's Cache needs Mythic Dungeons (stage 2) and at least three released Heroic Bloodforged rewards.");
+            return false;
+        }
         handler->SendSysMessage("Crow's Cache warning started. Use .crows visit to reach it.");
         return true;
     }
@@ -940,7 +971,11 @@ public:
                 && player->GetZoneId() != ThousandNeedles && player->GetZoneId() != Barrens) || !enabled)
             return false;
         std::lock_guard lock(mutex);
-        Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), *player);
+        if (!Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), *player))
+        {
+            handler->SendSysMessage("Crow's Cache needs Mythic Dungeons (stage 2) and at least three released Heroic Bloodforged rewards.");
+            return false;
+        }
         handler->SendSysMessage("Crow's Cache warning started at your current position.");
         return true;
     }
