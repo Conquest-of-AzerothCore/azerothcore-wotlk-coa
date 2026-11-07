@@ -11,9 +11,9 @@ from profile import (CASTER, DBC_DIR, SETTLE_MS, base_steps, caster_stats_from, 
                      player_fixture, unfit_reason)
 from tooltip import (MIXED_PERIOD, OVER_TICKS, CasterStats, ForcedPoints, Readout, Records, Tooltip, Unreadable,
                      mixed_period_reason, period_reading, read_tooltip)
-from values import (CAST_MARGIN_MS, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, EFFECT_TOKEN, EFFECTS,
-                    MEAN_HALF_WIDTH, TARGET, UNREADABLE, Z_99, Expectation, RankFacts, armed_for, dataset,
-                    equip_requirement, facts_of, required_aura_steps)
+from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, EFFECT_TOKEN,
+                    EFFECTS, MEAN_HALF_WIDTH, TARGET, UNREADABLE, Z_99, Expectation, RankFacts, armed_for, dataset,
+                    equip_requirement, facts_of, required_aura_steps, targets_ally)
 
 HIT_CHECKS = ('hit_mean', 'melee_mean', 'unmodelled')
 UNMODELLED = 'unmodelled: '
@@ -608,7 +608,7 @@ def scenario_shell(class_file: dict, name: str, contract: str, steps: list[dict]
             'steps': base_steps(class_file) + steps}
 
 
-def cast_steps(facts: RankFacts, rank_id: int, hostile: bool, interval_ms: int, casts: int,
+def cast_steps(facts: RankFacts, rank_id: int, target: str | None, interval_ms: int, casts: int,
                fixtures: Sequence[dict] = ()) -> list[dict]:
     steps = []
     for _ in range(casts):
@@ -618,8 +618,8 @@ def cast_steps(facts: RankFacts, rank_id: int, hostile: bool, interval_ms: int, 
         steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': rank_id})
         steps += required_aura_steps(facts) + [dict(fixture) for fixture in fixtures]
         cast = {'action': 'cast', 'actor': CASTER, 'spell': rank_id}
-        if hostile:
-            cast['target'] = TARGET
+        if target:
+            cast['target'] = target
         steps.append(cast)
         steps.append({'action': 'wait', 'ms': interval_ms})
     return steps
@@ -633,19 +633,20 @@ def part_casts(performed: int, interval_ms: int) -> list[int]:
     return [performed // parts + (part < performed % parts) for part in range(parts)]
 
 
-def hit_measurements(rank_id: int, hit_spell: int, hostile: bool, labels: dict[str, str]) -> list[dict]:
+def hit_measurements(rank_id: int, hit_spell: int, hostile: bool, labels: dict[str, str],
+                     ally: bool = False) -> list[dict]:
     family = 'spell_damage' if hostile else 'spell_heal'
     unblocked = {'blocked': False} if hostile else {}
-    receiver = TARGET if hostile else CASTER
+    receiver = {} if ally else {'target': TARGET if hostile else CASTER}
     steps = [{'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}]
     for part in ('total', 'count'):
-        steps.append(measurement(labels[part], CASTER, f'{family}_{part}', spell=hit_spell, target=receiver,
+        steps.append(measurement(labels[part], CASTER, f'{family}_{part}', spell=hit_spell, **receiver,
                                  critical=False, **unblocked))
     steps.append(measurement(f'{rank_id} critical_hits', CASTER, f'{family}_count', spell=hit_spell,
-                             target=receiver, critical=True))
+                             **receiver, critical=True))
     if hostile:
         steps.append(measurement(f'{rank_id} blocked_hits', CASTER, f'{family}_count', spell=hit_spell,
-                                 target=receiver, blocked=True))
+                                 **receiver, blocked=True))
     steps.append(measurement(f'{rank_id} cast_count', CASTER, 'spell_cast_count', spell=rank_id))
     return steps
 
@@ -678,6 +679,7 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int) -> list[tuple[dic
         return [(timed(scenario_shell(armed_file, name, contract, learn), SETTLE_MS), [unmodelled])]
     model = hit.model
     hostile = model.kind not in HEAL_KINDS
+    ally = not hostile and targets_ally(hit.facts)
     target, labels = target_steps(hit.school_mask) if hostile else ([], {})
     labels.update({'total': f'{label} total', 'count': f'{label} count'})
     weapon = weapon_profile(armed_file) if model.kind in WEAPON_KINDS else None
@@ -688,15 +690,19 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int) -> list[tuple[dic
     record = {**model_record(model, hit.school_mask, weapon, labels, casts), 'hit_spell': hit.hit_spell}
     unreadable = [Expectation(f'{label} unreadable #{ordinal}', 'hit_mean', spell.spell_id, rank_id, None, entry,
                               UNREADABLE + entry) for ordinal, entry in enumerate(hit.readout.unreadable)]
+    cast_target = TARGET if hostile else (ALLY if ally else None)
+    cast_fixtures = [{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}] if ally else []
     parts = []
     for part, performed in enumerate(shares):
         steps = (learn + [dict(step) for step in target]
-                 + cast_steps(hit.facts, rank_id, hostile, interval, performed)
-                 + hit_measurements(rank_id, hit.hit_spell, hostile, labels))
+                 + cast_steps(hit.facts, rank_id, cast_target, interval, performed, cast_fixtures)
+                 + hit_measurements(rank_id, hit.hit_spell, hostile, labels, ally))
         titled = name if len(shares) == 1 else f'{name} part {part + 1} of {len(shares)}'
         scenario = scenario_shell(armed_file, titled, contract, steps)
         if hostile:
             scenario['creatures'] = [creature_fixture(armed_file)]
+        if ally:
+            scenario['players'].append({**player_fixture(armed_file), 'id': ALLY})
         expectation = Expectation(label, 'hit_mean', spell.spell_id, rank_id, hit.indexes[0],
                                   ' | '.join(model.displayed), rule,
                                   {**record, 'part': part, 'parts': len(shares), 'part_casts': performed})

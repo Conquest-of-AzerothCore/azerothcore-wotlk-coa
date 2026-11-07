@@ -5,6 +5,7 @@ import sys
 import unittest
 
 from classes import class_spells
+from compare import Run, Verdict, judge_hit
 from hits import (HIT_CHECKS, MAX_SCENARIO_MS, HitModel, Modifier, Unmodelled, WeaponProfile, casts_needed,
                   expected_hit, hit_kind, hit_parts, hit_scenario, measured_hit_model, melee_scenario, records_of,
                   periodic_tick_readout, reference_caster, reference_hit_model, reference_melee_model,
@@ -12,7 +13,7 @@ from hits import (HIT_CHECKS, MAX_SCENARIO_MS, HitModel, Modifier, Unmodelled, W
 from mitigation import REFERENCE_TARGET, MitigationModel, TargetProfile, expected_mitigation
 from profile import CLASSES_DIR, load_class_file
 from tooltip import CasterStats, Displayed, Readout, read_tooltip, weapon_skill_spells
-from values import UNREADABLE
+from values import ALLY, CHARGE_OFFSET_YD, UNREADABLE
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -460,6 +461,57 @@ class HitScenarioTest(unittest.TestCase):
                 self.assertEqual(records.field('Spell', rank_id, 'EffectBasePoints[2]'), base)
                 self.assertEqual(records.field('Spell', rank_id, 'EffectDieSides[2]'), sides)
                 self.assertTrue(own.text.startswith('${$m2'))
+
+    def temple_guardian_spell(self):
+        extras = [entry['spell'] for entry in self.templar.get('extra_spells', [])]
+        spells = {spell.spell_id: spell
+                 for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER, extra_spells=extras)}
+        return spells[TEMPLE_GUARDIAN]
+
+    def test_temple_guardian_hit_scenario_places_an_ally_in_range(self):
+        scenario, expectations = hit_scenario(self.templar, self.temple_guardian_spell(), 1)
+        hit = hit_expectation(expectations)
+        records = records_of(self.templar)
+        range_min = records.field('SpellRange', 54, 'RangeMin[0]')
+        range_max = records.field('SpellRange', 54, 'RangeMax[0]')
+        self.assertIn({'id': ALLY}, [{'id': player.get('id')} for player in scenario['players']])
+        relocates = steps_with(scenario, action='relocate', actor='caster')
+        self.assertTrue(relocates)
+        for step in relocates:
+            self.assertEqual(step['dx'], CHARGE_OFFSET_YD)
+            self.assertGreater(step['dx'], range_min)
+            self.assertLess(step['dx'], range_max)
+        casts = steps_with(scenario, action='cast', spell=TEMPLE_GUARDIAN_LIVE_RANK)
+        self.assertTrue(casts)
+        for step in casts:
+            self.assertEqual(step['target'], ALLY)
+        total_steps = steps_with(scenario, action='assert', label=hit.model['measurements']['total'])
+        count_steps = steps_with(scenario, action='assert', label=hit.model['measurements']['count'])
+        self.assertTrue(total_steps)
+        self.assertTrue(count_steps)
+        for step in total_steps + count_steps:
+            self.assertNotIn('target', step)
+
+    def test_temple_guardian_hit_mean_alerts_if_only_the_self_heal_is_counted(self):
+        scenario, expectations = hit_scenario(self.templar, self.temple_guardian_spell(), 1)
+        hit = hit_expectation(expectations)
+        measured = {**self.templar['reference_stats'], f'known_aura {CLASS_TUNING_AURA}': 1}
+        model = measured_hit_model(self.templar, hit, measured)
+        labels = hit.model['measurements']
+        count = hit.model['minimum_hits']
+        base = Verdict(label=hit.label, status='unmeasured', measured=None, expected=None, low=None, high=None,
+                       explanation='')
+        full_run = Run(key='full', status='ok', message='',
+                       values={**measured, labels['total']: model.mean * count, labels['count']: count},
+                       steps=[], max_step_ms=None)
+        half_run = Run(key='half', status='ok', message='',
+                       values={**measured, labels['total']: model.mean * count / 2, labels['count']: count},
+                       steps=[], max_step_ms=None)
+        ok_verdict = judge_hit(base, self.templar, [(scenario, full_run, hit)], measured_hit_model)
+        self.assertEqual(ok_verdict.status, 'ok')
+        alert_verdict = judge_hit(base, self.templar, [(scenario, half_run, hit)], measured_hit_model)
+        self.assertEqual(alert_verdict.status, 'alert')
+        self.assertIn('usable hits', alert_verdict.explanation)
 
     def test_divine_force_is_modelled(self):
         scenario, expectations = hit_scenario(self.templar, self.spells[DIVINE_FORCE], 1)

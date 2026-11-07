@@ -21,6 +21,9 @@ DUMMY_DISTANCE = 3
 EFFECTS = range(3)
 HOSTILE_TARGETS = frozenset({2, 6, 15, 16, 24})
 SELF_TARGETS = frozenset({0, 1})
+FRIEND_TARGETS = frozenset({21})
+ALLY = 'ally'
+CHARGE_OFFSET_YD = 10
 POWER_DISPLAY_DIVISOR = {0: 1, 1: 10, 2: 1, 3: 1, 4: 1000, 5: 1, 6: 10}
 MANA = 0
 CAST_MARGIN_MS = 500
@@ -121,6 +124,12 @@ def structure_stats(class_file: dict) -> CasterStats:
 def is_hostile(facts: RankFacts) -> bool:
     return any(facts.effects[effect] and (facts.target_a[effect] in HOSTILE_TARGETS
                                           or facts.target_b[effect] in HOSTILE_TARGETS)
+               for effect in EFFECTS)
+
+
+def targets_ally(facts: RankFacts) -> bool:
+    return any(facts.effects[effect] and (facts.target_a[effect] in FRIEND_TARGETS
+                                          or facts.target_b[effect] in FRIEND_TARGETS)
                for effect in EFFECTS)
 
 

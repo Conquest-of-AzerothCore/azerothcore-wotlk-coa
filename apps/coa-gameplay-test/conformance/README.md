@@ -22,7 +22,11 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
 - `hits.py`: `hit_parts(class_file, spell, casts)` returns the parts of the hit scenario of a spell's highest rank
   (`hit_scenario` the only part of a hit that fits one scenario) and `melee_scenario(class_file, swings)` the
   auto-attack scenario, with their `Expectation` lists; `expected_hit` and `casts_needed` give the expected mean, its
-  sigma and the number of casts.
+  sigma and the number of casts. When the highest rank targets a friendly unit (`values.targets_ally`), the scenario
+  adds an `ally` player, relocates the caster `values.CHARGE_OFFSET_YD` yd before every cast (keeping it inside the
+  spell's range of the stationary ally after the previous cast closed the distance, as `procs.py`'s own ally casts
+  already do), casts at `target: 'ally'` and measures the heal total/count without a `target` filter, so both the
+  ally's and the caster's own heal land in the same metric.
 - `procs.py`: `proc_scenario(class_file, entry, part)` returns one part of the proc-rate scenario of a `procs` entry
   and its `Expectation`; `proc_plan` sizes the parts, `trials_needed(p)` gives the trials a chance `p` needs and
   `wilson_interval(procs, trials)` the 99% Wilson interval of a rate.

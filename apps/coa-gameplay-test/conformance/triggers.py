@@ -107,8 +107,8 @@ def attempt_steps(class_file: dict, entry: dict, plan: TriggerPlan, attempts: in
                  {'action': 'stop_attack', 'actor': CASTER}]
     else:
         facts = facts_of(records_of(class_file), trigger['spell'])
-        steps = cast_steps(facts, trigger['spell'], trigger['target'] == TARGET, plan.attempt_ms, attempts,
-                           attempt_fixtures(entry))
+        cast_target = TARGET if trigger['target'] == TARGET else None
+        steps = cast_steps(facts, trigger['spell'], cast_target, plan.attempt_ms, attempts, attempt_fixtures(entry))
     return steps + [{'action': 'wait', 'label': f'{phase}drain', 'ms': DRAIN_MS}]
 
 

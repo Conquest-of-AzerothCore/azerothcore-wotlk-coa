@@ -6,7 +6,8 @@ from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, PART_BUDGET_MS, 
                   cast_steps, creature_fixture, records_of, reference_caster, scenario_shell, timed, weapon_profile)
 from profile import CASTER, SETTLE_MS, measurement, player_fixture
 from tooltip import read_tooltip
-from values import CAST_MARGIN_MS, EFFECTS, TARGET, Expectation, RankFacts, facts_of, is_hostile
+from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, EFFECTS, TARGET, Expectation, RankFacts, facts_of,
+                    is_hostile, targets_ally)
 
 PROC_CHECK = 'proc_rate'
 AMBIGUOUS_TOOLTIP = 'ambiguous_tooltip: '
@@ -18,12 +19,9 @@ CAST = 'cast'
 CAST_COUNT = 'spell_cast_count'
 EVENT_METRICS = frozenset({CAST_COUNT, 'spell_damage_count'})
 CHARGES = 'spell_charges'
-ALLY = 'ally'
 TRIGGER_TARGETS = frozenset({TARGET, ALLY})
-ALLY_TARGET = 21
 PERIODIC_DAMAGE_AURA = 3
 TICKS_PER_ATTEMPT = 2
-CHARGE_OFFSET_YD = 10
 TRIGGERING_HITS = 'triggering hits only'
 WILSON_RULE = f'Wilson {Z_99:g} (99%) interval of the proc rate holds the tooltip chance'
 
@@ -98,11 +96,6 @@ def charge_label(aura: int, attempt: int) -> str:
 
 def charge_pool_label(aura: int) -> str:
     return f'{aura} proc charge pool'
-
-
-def targets_ally(facts: RankFacts) -> bool:
-    return any(facts.effects[effect] and ALLY_TARGET in (facts.target_a[effect], facts.target_b[effect])
-               for effect in EFFECTS)
 
 
 def tick_spacing(class_file: dict, facts: RankFacts, spell: int) -> int:
@@ -194,7 +187,7 @@ def cast_attempts(class_file: dict, entry: dict, plan: ProcPlan) -> list[dict]:
     facts = facts_of(records_of(class_file), spell)
     steps = []
     for attempt in range(1, plan.per_part + 1):
-        steps += [aimed(step, target) for step in cast_steps(facts, spell, target == TARGET, plan.attempt_ms, 1,
+        steps += [aimed(step, target) for step in cast_steps(facts, spell, target, plan.attempt_ms, 1,
                                                              attempt_fixtures(entry))]
         if counts_charges(entry):
             steps.append(measurement(charge_label(entry['aura'], attempt), CASTER, CHARGES, spell=spell))
