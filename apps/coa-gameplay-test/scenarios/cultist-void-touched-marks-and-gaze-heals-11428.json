@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Cultist: Void-Touched marks directly healed allies and Gaze of C'Thun consumes the marks to heal (#11428)",
+  "contract": [
+    "Void-Touched 300286 is the Cultist's level 30 passive: 'Direct healing done now applies Void-Touched' 301982,",
+    "which stacks 10 times on the ally and lasts its own duration. When the Cultist casts Gaze of C'Thun 500110, every",
+    "ally carrying the Cultist's Void-Touched loses the stacks and is healed by Void-Touched 301983. The Gaze heal",
+    "520333 is itself a direct heal, so healing an injured ally with Gaze marks that ally with one stack, and the next",
+    "Gaze consumes it with a Void-Touched heal."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "cultist", "race": 1, "class": 25, "level": 31},
+    {"id": "ally", "race": 1, "class": 1, "level": 31}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "learn", "actor": "cultist", "spell": 500110},
+    {"action": "learn", "actor": "cultist", "spell": 300286},
+    {"action": "group", "actor": "cultist", "target": "ally"},
+    { "action": "assert", "label": "CONTROL: the Void-Touched passive is active on the Cultist", "actor": "cultist",
+      "metric": "aura", "spell": 300286, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTROL: the ally carries no Void-Touched before any healing", "actor": "ally",
+      "metric": "aura_stacks", "spell": 301982, "caster": "cultist", "equals": 0 },
+    {"action": "set_health", "actor": "ally", "value": 100},
+    { "action": "cast", "label": "Gaze of C'Thun heals the injured ally", "actor": "cultist", "spell": 500110,
+      "target": "ally" },
+    { "action": "assert", "label": "CONTROL: the Gaze of C'Thun heal landed on the ally", "actor": "cultist",
+      "metric": "spell_heal_count", "spell": 520333, "target": "ally", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The direct Gaze heal marks the ally with one Void-Touched stack",
+      "actor": "ally", "metric": "aura_stacks", "spell": 301982, "caster": "cultist", "equals": 1,
+      "within_ms": 3000 },
+    { "action": "assert", "label": "CONTROL: no Void-Touched consumption heal before the next Gaze",
+      "actor": "cultist", "metric": "spell_heal_count", "spell": 301983, "target": "ally", "equals": 0 },
+    {"action": "set_health", "actor": "ally", "value": 100},
+    {"action": "reset_cooldown", "actor": "cultist", "spell": 500110},
+    { "action": "cast", "label": "The next Gaze of C'Thun consumes the mark", "actor": "cultist", "spell": 500110,
+      "target": "ally" },
+    { "action": "assert", "label": "Gaze of C'Thun heals the marked ally with Void-Touched", "actor": "cultist",
+      "metric": "spell_heal_count", "spell": 301983, "target": "ally", "equals": 1, "within_ms": 3000 }
+  ]
+}
