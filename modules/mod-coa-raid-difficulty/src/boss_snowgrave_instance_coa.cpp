@@ -3,13 +3,13 @@
 
 namespace
 {
-    // The shrine in Winterspring (placeholder spot until it is taken in game); his map (889) starts at its
+    // The shrine in Winterspring; his map (889) starts at its
     // graveyard (WorldSafeLocs 6089).
     coa_world_boss_instance::Config const Boss = {
         "Korrim Snowgrave", 64627, 889,
         { 4741.1f, -4934.99f, 695.78f, 0.0f },
         978095, 1,
-        { 4741.1f, -4934.99f, 885.43f, 0.0f },
+        { 5190.944f, -4909.031f, 752.04f, 1.7423f },
         978096,
     };
 }

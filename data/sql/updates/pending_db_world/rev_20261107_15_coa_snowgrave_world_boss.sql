@@ -1,7 +1,6 @@
 -- Korrim Snowgrave (64627) in his boss map (889), the way Setis is fought: a shrine in
 -- Winterspring takes players in (Normal only), the portal he leaves where he falls and the shrine at
--- the entrance take them back, and players who die in his map rise at its start. The shrine's spot is a placeholder
--- until it is taken in game.
+-- the entrance take them back, and players who die in his map rise at its start. The shrine's spot is taken in game.
 
 -- Loot: no source shows his items yet; every player still gets the world boss rewards.
 
@@ -23,7 +22,7 @@ DELETE FROM `gameobject` WHERE `guid` IN (9780935, 9780936);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`) VALUES
-(9780935, 978095, 1, 0, 0, 1, 1, 4741.1, -4934.99, 885.43, 0.0, 0, 0, 0.000000, 1.000000, 300, 100, 1),
+(9780935, 978095, 1, 0, 0, 1, 1, 5190.9443, -4909.031, 752.0395, 1.7423, 0, 0, 0.765070, 0.643947, 300, 100, 1),
 (9780936, 978097, 889, 10280, 10280, 15, 1, 4746.10, -4929.99, 695.78, 0, 0, 0, 0, 1, 300, 100, 1);
 
 -- Players who die in his map rise at its start: WorldSafeLocs.dbc 6089.
@@ -59,4 +58,8 @@ INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Fligh
 DELETE FROM `creature` WHERE `guid` = 9780937;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
-(9780937, 978095, 1, 0, 0, 1, 1, 4741.1, -4934.99, 890.43, 0.0, 300, 0, 0);
+(9780937, 978095, 1, 0, 0, 1, 1, 5190.9443, -4909.031, 757.04, 1.7423, 300, 0, 0);
+
+-- In his cavern he stands where Ascension has him (spot taken in game).
+UPDATE `creature` SET `position_x` = 4687.2383, `position_y` = -4801.878, `position_z` = 676.87, `orientation` = 5.5009
+WHERE `guid` = 9780103 AND `id` = 64627;
