@@ -101,10 +101,8 @@ INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Fligh
 DELETE FROM `creature` WHERE `guid` = 9780914;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
-(9780914, 978074, 0, 4, 73, 1, 1, -11665.856, -2371.7654, 5.5, 0.6004, 300, 0, 0);
+(9780914, 978074, 0, 4, 73, 1, 1, -11665.856, -2371.7654, 5.5, 3.742, 300, 0, 0);
 
--- The shrine faces the road, the other way round.
-UPDATE `gameobject` SET `orientation` = 3.742, `rotation2` = 0.955276, `rotation3` = -0.295715 WHERE `guid` = 9780137;
 
 -- The Treasures of Azeroth chest every world boss gives (978059) has a 5% roll at any world boss item (978060):
 -- his items join that pool.
