@@ -5,7 +5,8 @@
   "timeout_ms": 60000,
   "players": [
     { "id": "t41", "race": 1, "class": 28, "level": 41 },
-    { "id": "t80", "race": 1, "class": 28, "level": 80 }
+    { "id": "t80", "race": 1, "class": 28, "level": 80 },
+    { "id": "ally", "race": 1, "class": 1, "level": 80 }
   ],
   "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
   "steps": [
@@ -28,6 +29,17 @@
       "metric": "spell_effect_value", "spell": 524838, "effect": 0, "pet": true, "equals": 83 },
     { "action": "assert", "label": "Level 80 Revitalise heals 155 scaled by the level curve once", "actor": "t80",
       "metric": "spell_effect_value", "spell": 524838, "effect": 0, "pet": true, "equals": 248 },
+    { "action": "group", "actor": "t80", "target": "ally" },
+    { "action": "set_health", "label": "Injure the ally with room for the full heal", "actor": "ally",
+      "maximum": 10000, "value": 1000 },
+    { "action": "snapshot", "actor": "ally", "metric": "health", "save_as": "health_without_power" },
+    { "action": "cast_charm", "label": "ZIGGI-6K casts Revitalizing Aura", "actor": "t80", "spell": 524839,
+      "pet": true },
+    { "action": "assert", "label": "Revitalise restores 248 health without spell power", "actor": "t80",
+      "metric": "spell_effective_heal_total", "spell": 524838, "target": "ally", "pet": true, "critical": false,
+      "equals": 248, "within_ms": 15000 },
+    { "action": "assert", "label": "The ally gains health without spell power", "actor": "ally", "metric": "health",
+      "relative_to": "health_without_power", "min": 248 },
     { "action": "snapshot", "save_as": "nature0", "actor": "t80", "metric": "spell_power", "school": 3 },
     { "action": "set_aura", "label": "Grant the fixed +2000 all-school spell power fixture", "actor": "t80",
       "spell": 44505, "stacks": 1 },
@@ -35,6 +47,15 @@
       "metric": "spell_power", "school": 3, "relative_to": "nature0", "equals": 2000 },
     { "action": "assert", "label": "Revitalise adds a quarter of the Tinker's spell power", "actor": "t80",
       "metric": "spell_effect_value", "spell": 524838, "effect": 0, "pet": true, "min": 748, "max": 749 },
+    { "action": "set_health", "label": "Injure the ally again", "actor": "ally", "value": 1000 },
+    { "action": "snapshot", "actor": "ally", "metric": "health", "save_as": "health_with_power" },
+    { "action": "snapshot", "actor": "t80", "metric": "spell_effective_heal_total", "spell": 524838,
+      "target": "ally", "pet": true, "critical": false, "save_as": "healing_with_power" },
+    { "action": "assert", "label": "Revitalise restores 748 health with spell power", "actor": "t80",
+      "metric": "spell_effective_heal_total", "spell": 524838, "target": "ally", "pet": true, "critical": false,
+      "relative_to": "healing_with_power", "min": 748, "max": 749, "within_ms": 15000 },
+    { "action": "assert", "label": "The ally gains health with spell power", "actor": "ally", "metric": "health",
+      "relative_to": "health_with_power", "min": 748 },
     { "action": "assert", "label": "SETUP: the spell power fixture lasted through the measurement", "actor": "t80",
       "metric": "aura", "spell": 44505, "equals": 1 }
   ]
