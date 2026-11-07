@@ -289,11 +289,13 @@ bool BuildPools(Settings& next, uint32 stage)
                 });
             }
             Rates const& rates = options.rates[Band(level)];
-            if ((rates[0] && pools.normal[0].empty()) || pools.normal[1].empty())
-            {
-                LOG_ERROR("server.loading", "Bloodforged disabled: green/blue pool missing at level {}", level);
-                return false;
-            }
+            for (unsigned index = 0; index < 2; ++index)
+                if (rates[index] && pools.normal[index].empty())
+                {
+                    LOG_ERROR("server.loading", "Bloodforged disabled: quality {} pool missing at level {}",
+                        index + 2, level);
+                    return false;
+                }
             pools.loot = std::make_unique<LootTemplate>();
             pools.eliteLoot = std::make_unique<LootTemplate>();
             for (unsigned index = 0; index < 3; ++index)

@@ -31,6 +31,8 @@ constexpr bool ValidMarkRange(unsigned minimum, unsigned maximum)
 
 constexpr unsigned WarningSeconds[] = {1800, 900, 300, 60};
 constexpr unsigned WarningCount = 4;
+constexpr unsigned PinCacheBase = 994311000;
+constexpr unsigned PinFlags = 0x10;
 
 constexpr unsigned PassedWarnings(unsigned remaining)
 {

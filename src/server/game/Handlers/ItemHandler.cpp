@@ -29,6 +29,7 @@
 #include "ScriptMgr.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
+#include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include <algorithm>
@@ -445,7 +446,10 @@ void WorldSession::SendItemQuerySingleResponse(uint32 item)
         queryData << pProto->AllowableClass;
         queryData << pProto->AllowableRace;
         queryData << pProto->ItemLevel;
-        queryData << pProto->RequiredLevel;
+        uint32 const requiredLevel = pProto->ScriptId != 0 &&
+            pProto->ScriptId == sObjectMgr->GetScriptId("item_ascension_prestigious_cache")
+            ? uint32(sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL)) : pProto->RequiredLevel;
+        queryData << requiredLevel;
         queryData << pProto->RequiredSkill;
         queryData << pProto->RequiredSkillRank;
         queryData << pProto->RequiredSpell;

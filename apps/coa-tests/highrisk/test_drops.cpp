@@ -11,6 +11,7 @@ int main()
     {
         auto const& rates = DefaultRates[Band(level)];
         assert(ValidRates(rates));
+        assert(rates[0] == 0 && rates[1] > 0);
         for (unsigned quality = 0; quality < rates.size(); ++quality)
         {
             float total = 0.0f;
@@ -36,6 +37,9 @@ int main()
     assert(!ValidRates({1, 2, 3}));
     assert(!ValidRates({2, 2, 1}));
     assert(!ValidRates({2, 1, 1}));
+    assert(ValidRates({0, 50, 0}));
+    assert(!ValidRates({0, 50, 50}));
+    assert(ValidRates({450, 50, 0}));
     assert(!EligibleItem(10, 15, 14));
     assert(!EligibleItem(60, 65, 70));
     assert(InGearTier(61, 60, 90));

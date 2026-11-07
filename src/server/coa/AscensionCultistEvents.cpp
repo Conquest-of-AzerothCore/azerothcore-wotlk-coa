@@ -77,7 +77,8 @@ class aura_ascension_cultist_event : public AuraScript
         switch (id)
         {
             case 300280: case 301262: case 504642: return dealt && melee && critical;
-            case 300286: return healed && !periodic;
+            case 300286: return event.GetHealInfo() && event.GetHealInfo()->GetHeal() && !periodic &&
+                !(event.GetTypeMask() & TAKEN_HIT_PROC_FLAG_MASK);
             case 300300: return dealt && (periodic || (info && info->IsChanneled())) && Chance(player, id);
             case 300308: case 704527: return dealt && (periodic || (info && info->IsChanneled()));
             case 300313: return dealt && Chance(player, id);
@@ -189,6 +190,7 @@ class aura_ascension_cultist_event : public AuraScript
                                  .1f * player->GetTotalAttackPowerValue(BASE_ATTACK);
                     flat *= .5f;
                     Copy(player, ally, 500748, CalculatePct(damage, Amount(id)) + uint32(std::max(0.0f, flat)));
+                    MarkVoidTouched(player, ally);
                 }
                 break;
             case 525065: Cast(player, target, 525066); break;
@@ -263,7 +265,10 @@ class aura_ascension_cultist_event : public AuraScript
                 auto allies = Allies(player, player, 40);
                 allies.remove_if([player](Unit* ally) { return !ally->HasAura(BlackBlood, player->GetGUID()); });
                 if (!allies.empty())
+                {
                     Copy(player, allies.front(), 500773, CalculatePct(damage, Amount(id)));
+                    MarkVoidTouched(player, allies.front());
+                }
                 break;
             }
             case 600327:
