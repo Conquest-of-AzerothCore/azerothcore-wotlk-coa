@@ -7,7 +7,8 @@
     "Void-Touched and heals them with Void-Touched 301983, itself a direct heal that applies one new stack. The pop",
     "happens before the Gaze lands, so the Gaze heal 520333, also a direct heal, adds one more stack to its target",
     "instead of being consumed by the same cast. A direct heal marks its target even when it only overheals, so an",
-    "ally at full health is marked too. The Cultist's own direct self-heals mark him the same way."
+    "ally at full health is marked too. A self-heal marks the Cultist once: the stack follows the heal that landed,",
+    "not the separate healer and target proc events a self-heal raises."
   ],
   "timeout_ms": 90000,
   "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
