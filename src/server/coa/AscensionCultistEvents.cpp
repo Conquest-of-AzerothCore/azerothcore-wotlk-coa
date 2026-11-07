@@ -77,7 +77,7 @@ class aura_ascension_cultist_event : public AuraScript
         switch (id)
         {
             case 300280: case 301262: case 504642: return dealt && melee && critical;
-            case 300286: return healed && !periodic;
+            case 300286: return event.GetHealInfo() && event.GetHealInfo()->GetHeal() && !periodic;
             case 300300: return dealt && (periodic || (info && info->IsChanneled())) && Chance(player, id);
             case 300308: case 704527: return dealt && (periodic || (info && info->IsChanneled()));
             case 300313: return dealt && Chance(player, id);
