@@ -1,0 +1,1 @@
+DELETE FROM `gameobject` WHERE `guid` = 6940717 AND `id` = 517330 AND `map` = 0 AND `position_x` BETWEEN 716.0 AND 717.0 AND `position_y` BETWEEN 932.2 AND 933.2 AND `position_z` BETWEEN 19.0 AND 19.2;
