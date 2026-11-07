@@ -760,7 +760,9 @@ A `triggers` entry of the class file is a passive whose tooltip says that someth
 | `observe_note` | with a tooltip reference, why the text's spell is observed instead of an `EffectTriggerSpell` |
 | `attempt_auras` | `{"spell", "stacks", "source"}` set before every cast, `source` quoting the tooltip behind it |
 | `ally_health_pct` | for a `target: "ally"` cast, the ally's health percent set before every cast so the heal is effective |
+| `caster_health_pct` | the caster's own health percent set before every cast, for a trigger the server code gates on an effective self-heal (`GetHealInfo()->GetEffectiveHeal()`), which is 0 at full health |
 | `restore_charges` | for a cast trigger, restores the trigger rank's native charges before every attempt (needed when the rank is also a charge-counting `procs` entry's trigger) |
+| `internal_cooldown_ms` | spaces scheduled attempts at least this many ms apart, on top of the trigger rank's own cast time and recovery, for a trigger the server code gates on an internal cooldown |
 | `observe_metric` | `spell_cast_count` or `spell_energize_count` of `observe_spell` |
 | `per_trigger`, `per_trigger_text` | the events per trial, 1 or 0.5 for "Every 2nd", and the words that state it |
 | `trial_attempts_factor`, `trial_attempts_reason` | multiplies the scheduled attempts (default 1, unchanged); a cited reason, for a trigger whose own cast sometimes executes as a different spell id and so is not counted as a trial of itself |
@@ -780,9 +782,14 @@ caster with it once before the first cast (`{"action": "group", "actor": "caster
 so `Unit::IsInRaidWith` holds), relocates the caster `CHARGE_OFFSET_YD` away before every cast at the ally (the
 same fixture `hits.py`'s ally-targeted hit scenarios use, needed so a charge-type rank is not already in its
 minimum range), and, with `ally_health_pct` set, lowers the ally's health to that percent of a 10000 fixed maximum
-before every cast so a heal lands an effective, non-zero amount. With `restore_charges` set, the trigger rank's
+before every cast so a heal lands an effective, non-zero amount. With `caster_health_pct` set, the caster's own
+health is lowered the same way before every cast, for a trigger the server code only recognises on a self-heal
+with a nonzero `GetEffectiveHeal()` (the reference caster starts at full health, so an uncapped self-heal would
+otherwise always read as 0 effective healing and never fire). With `restore_charges` set, the trigger rank's
 charge pool is restored before every cast (`"restore_charges"` fixture), needed for a charge-limited rank cast at
-the harness's scheduled attempt rate rather than its native recharge rate.
+the harness's scheduled attempt rate rather than its native recharge rate. With `internal_cooldown_ms` set, each
+attempt is spaced at least that long apart (`max(StartRecoveryTime, cast time, internal_cooldown_ms) + 500 ms`),
+for a trigger the server code gates behind its own internal cooldown rather than the trigger rank's.
 
 `TRIGGER_TRIALS` is 182, the smallest N with 0.975^N <= 0.01: a trigger that fires 2.5 points under 100% of the time
 misses at least once in 182 trials with 99% probability. The scenario learns the trigger rank, makes

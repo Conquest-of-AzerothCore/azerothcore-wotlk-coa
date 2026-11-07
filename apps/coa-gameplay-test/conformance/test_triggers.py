@@ -15,8 +15,8 @@ from passives import cleaned_tooltip
 from profile import DBC_DIR
 from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader
 from tooltip import Records
-from triggers import (BASELINE_ATTEMPTS, TRIGGER_CHECK, TRIGGER_TRIALS, trigger_entries, trigger_label,
-                      trigger_measurements, trigger_plan, trigger_rule, trigger_scenario,
+from triggers import (BASELINE_ATTEMPTS, TRIGGER_CHECK, TRIGGER_TRIALS, attempt_interval, trigger_entries,
+                      trigger_label, trigger_measurements, trigger_plan, trigger_rule, trigger_scenario,
                       trigger_status_expectation)
 from values import Expectation, dataset
 
@@ -25,7 +25,7 @@ import batch
 import run
 
 TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 804932, 806516, 803158, 805420, 680891,
-                    803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286}
+                    803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298}
 IMPROVED_SCARLET_HAMMER = 301254
 SCARLET_HAMMER = 807035
 DETERMINED = 705256
@@ -35,6 +35,7 @@ CHASTISE = 503141
 LIBRAM_OF_CONSECRATION = 801441
 DUTY_CALLS = 705286
 RIGHTEOUS_LUNGE = 570233
+UNTAINTED = 705298
 SCARLET_SECRETS = 520812
 STAFFGUARD = 705295
 CHAKRA_OF_POWER = 803158
@@ -95,6 +96,13 @@ class TrialsTest(unittest.TestCase):
         self.assertEqual(TRIGGER_TRIALS, math.ceil(math.log(0.01) / math.log(0.975)))
         self.assertEqual(TRIGGER_TRIALS, 182)
         self.assertEqual(BASELINE_ATTEMPTS, 20)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_attempt_interval_respects_internal_cooldown(self):
+        entry = copy.deepcopy(templar_trigger(STAFFGUARD))
+        without_cooldown = attempt_interval(CLASS_FILE, entry)
+        entry['internal_cooldown_ms'] = without_cooldown + 5000
+        self.assertEqual(attempt_interval(CLASS_FILE, entry), entry['internal_cooldown_ms'] + 500)
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_staffguard_schedules_the_baseline_before_the_learn_and_the_margin_after_it(self):
@@ -437,6 +445,35 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         self.assertEqual(self.spell(RIGHTEOUS_LUNGE, 'SpellFamilyName'), 25)
         self.assertTrue(self.spell(RIGHTEOUS_LUNGE, 'SpellFamilyFlags[2]') & 1)
         self.assertEqual(entry['observe_spell'], 560834)
+
+    def test_untainted_entry_has_a_matching_internal_cooldown(self):
+        entry = templar_trigger(UNTAINTED)
+        self.assertEqual(entry['internal_cooldown_ms'], 15000)
+        self.assertIn('every 15 sec', entry['tooltip'].lower())
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': TEMPLE_GUARDIAN, 'target': 'ally'})
+        self.assertTrue(entry['restore_charges'])
+        self.assertEqual(entry['caster_health_pct'], 50)
+        plan = trigger_plan(CLASS_FILE, entry)
+        self.assertGreaterEqual(plan.attempt_ms, 15000)
+        scenario, [expectation] = trigger_scenario(CLASS_FILE, entry)
+        self.assertIn('attempts spaced at least 15000 ms apart', expectation.rule)
+        self.assertIn('the caster health set to 50% of max', expectation.rule)
+        self.assertEqual(expectation.model['internal_cooldown_ms'], 15000)
+        self.assertEqual(expectation.model['caster_health_pct'], 50)
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps)
+                if step['action'] == 'cast' and step['spell'] == TEMPLE_GUARDIAN]
+        self.assertTrue(casts)
+        for index in casts:
+            self.assertIn({'action': 'set_health', 'actor': 'caster', 'value': 5000, 'maximum': 10000},
+                          steps[index - 4:index])
+
+    def test_caster_health_pct_needs_a_cast_trigger(self):
+        entry = copy.deepcopy(templar_trigger(UNTAINTED))
+        entry['trigger'] = {'action': 'attack', 'spell': 0}
+        entry['trial_metric'] = 'melee_attack_count'
+        with self.assertRaises(ValueError):
+            trigger_plan(CLASS_FILE, entry)
 
     def test_status_entry_has_no_plan(self):
         entry = copy.deepcopy(templar_trigger(STAFFGUARD))

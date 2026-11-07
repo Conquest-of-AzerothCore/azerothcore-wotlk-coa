@@ -628,6 +628,23 @@
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
       "per_trigger_text": "now increases your damage dealt and movement speed"
+    },
+    {
+      "aura": 705298,
+      "name": "Untainted",
+      "tooltip": "Effectively healing yourself now reduces your Physical damage taken by ${$705299m1+$STA*0.1} for $705299d.\r\n\r\nCan only occur every 15 sec.",
+      "trigger": {"action": "cast", "spell": 803792, "target": "ally"},
+      "trigger_text": "Effectively healing yourself",
+      "trigger_spell_text": "Temple Guardian",
+      "trial_metric": "spell_cast_count",
+      "restore_charges": true,
+      "caster_health_pct": 50,
+      "observe_spell": 705299,
+      "observe_source": "EffectTriggerSpell[0] of 705298",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now reduces your Physical damage taken",
+      "internal_cooldown_ms": 15000
     }
   ],
   "talent_modifiers": [
