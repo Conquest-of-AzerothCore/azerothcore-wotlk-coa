@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "PTR character copy: .ptr copy duplicates the player's own character once",
+  "contract": "A player copies their own character from the source realm's characters schema with .ptr copy <name> (src/server/coa/CoAPtrCharacterCopy.cpp, PlayerDump). The copy is a new character on the same account that carries the inventory and its own Personal Bank; player mail it holds comes from the copy itself, so returning it cannot reach an unrelated character here; a name already taken here is renamed at login. A character keeps at most one live copy, and a player cannot copy a character of another account or an unknown name. ptr_character_copy uses this realm's own schema as the source.",
+  "timeout_ms": 60000,
+  "ptr_character_copy": true,
+  "players": [
+    { "id": "a", "race": 1, "class": 1, "level": 10 },
+    { "id": "b", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "add_item", "actor": "a", "item": 2589, "count": 7 },
+    { "action": "add_item", "label": "Acquire the Personal Bank", "actor": "a", "item": 134985, "count": 1 },
+    { "action": "use_item", "label": "Place the Personal Bank vault", "actor": "a", "item": 134985, "spell": 100702 },
+    { "action": "wait", "label": "Let the vault summon land in the world", "ms": 3000 },
+    { "action": "add_item", "actor": "a", "item": 2592, "count": 5 },
+    { "action": "personal_bank_open", "label": "Open the Personal Bank", "actor": "a", "entry": 475001 },
+    { "action": "personal_bank_swap", "label": "Deposit the wool in the character's own bank", "actor": "a",
+      "entry": 475001, "direction": "deposit", "item": 2592, "slot": 0 },
+    { "action": "assert", "label": "The wool is in the bank, not the bags", "actor": "a",
+      "metric": "item_count", "item": 2592, "equals": 0, "within_ms": 2000 },
+    { "action": "send_mail", "label": "Another player mails the source character", "actor": "b", "target": "a" },
+    { "action": "relog", "actor": "a" },
+    { "action": "assert", "label": "The source account starts with one character", "actor": "a",
+      "metric": "account_character_count", "equals": 1 },
+    { "action": "add_at_login_flag", "label": "The source character has a customization pending", "actor": "a",
+      "id": 8 },
+
+    { "action": "command", "label": "Copy the character", "actor": "a", "command": ".ptr copy Harnessa" },
+    { "action": "assert", "label": "DISCRIMINATING: the copy is a second character on the same account", "actor": "a",
+      "metric": "account_character_count", "equals": 2 },
+    { "action": "assert", "label": "DISCRIMINATING: the copy carries the inventory", "actor": "a",
+      "metric": "account_other_item_count", "item": 2589, "equals": 7 },
+    { "action": "assert", "label": "DISCRIMINATING: the copy's own Personal Bank holds the wool", "actor": "a",
+      "metric": "account_other_bank_item_count", "item": 2592, "equals": 5 },
+    { "action": "assert", "label": "The copy carries the welcome warchest and the other player's letter", "actor": "a",
+      "metric": "account_other_mail_count", "equals": 2 },
+    { "action": "assert", "label": "DISCRIMINATING: no copied player mail returns to a character of this realm",
+      "actor": "a", "metric": "account_other_foreign_mail_count", "equals": 0 },
+    { "action": "assert", "label": "The taken name is renamed at login", "actor": "a",
+      "metric": "system_message_contains", "text": "choose a new one at login", "equals": 1 },
+    { "action": "assert", "label": "The copy is renamed at login", "actor": "a",
+      "metric": "account_other_at_login_flag", "id": 1, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the forced rename keeps the pending customization", "actor": "a",
+      "metric": "account_other_at_login_flag", "id": 8, "equals": 1 },
+
+    { "action": "command", "label": "A second copy of the same character is refused", "actor": "a",
+      "command": ".ptr copy Harnessa", "rejected": true },
+    { "action": "assert", "label": "The refused copy adds no character", "actor": "a",
+      "metric": "account_character_count", "equals": 2 },
+
+    { "action": "command", "label": "Another account cannot copy the character", "actor": "b",
+      "command": ".ptr copy Harnessa", "rejected": true },
+    { "action": "assert", "label": "The other account gains no character", "actor": "b",
+      "metric": "account_character_count", "equals": 1 },
+
+    { "action": "command", "label": "An unknown name is refused", "actor": "a",
+      "command": ".ptr copy Nosuchhero", "rejected": true },
+    { "action": "assert", "label": "The unknown name adds no character", "actor": "a",
+      "metric": "account_character_count", "equals": 2 }
+  ]
+}
