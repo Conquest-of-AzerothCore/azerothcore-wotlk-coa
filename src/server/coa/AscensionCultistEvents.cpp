@@ -23,11 +23,6 @@ bool Infusion(uint32 id)
 {
     return std::find(std::begin(CultistInfusions), std::end(CultistInfusions), id) != std::end(CultistInfusions);
 }
-void MarkVoidTouched(Player* player, Unit* healed)
-{
-    if (player->HasAura(300286))
-        Cast(player, healed, 301982);
-}
 int32 ModifiedDuration(Player* player, uint32 id)
 {
     SpellInfo const* info = sSpellMgr->GetSpellInfo(id);

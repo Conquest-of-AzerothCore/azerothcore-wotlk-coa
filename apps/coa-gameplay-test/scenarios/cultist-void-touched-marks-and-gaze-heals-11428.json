@@ -3,11 +3,11 @@
   "name": "Cultist: Void-Touched marks direct heals on allies and self; Gaze of C'Thun consumes them (#11428)",
   "contract": [
     "Void-Touched 300286 is the Cultist's level 30 passive: 'Direct healing done now applies Void-Touched' 301982,",
-    "which stacks 10 times on the ally and lasts its own duration. When the Cultist casts Gaze of C'Thun 500110, every",
-    "ally carrying the Cultist's Void-Touched loses the stacks and is healed by Void-Touched 301983. The Gaze heal",
-    "520333 is itself a direct heal, so healing an ally with Gaze marks that ally with one stack, and the next Gaze",
-    "consumes it with a Void-Touched heal. A direct heal marks its target even when it only overheals, so an ally at",
-    "full health is marked too. The Cultist's own direct self-heals mark him the same way."
+    "which stacks 10 times. Casting Gaze of C'Thun 500110 consumes the stacks on every ally carrying the Cultist's",
+    "Void-Touched and heals them with Void-Touched 301983, itself a direct heal that applies one new stack. The pop",
+    "happens before the Gaze lands, so the Gaze heal 520333, also a direct heal, adds one more stack to its target",
+    "instead of being consumed by the same cast. A direct heal marks its target even when it only overheals, so an",
+    "ally at full health is marked too. The Cultist's own direct self-heals mark him the same way."
   ],
   "timeout_ms": 90000,
   "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
@@ -30,7 +30,7 @@
       "spell": 500110, "target": "ally" },
     { "action": "assert", "label": "CONTROL: the Gaze of C'Thun heal landed on the ally", "actor": "cultist",
       "metric": "spell_heal_count", "spell": 520333, "target": "ally", "min": 1, "within_ms": 3000 },
-    { "action": "assert", "label": "The direct Gaze overheal marks the full-health ally with one Void-Touched stack",
+    { "action": "assert", "label": "The Gaze overheal marks the full-health ally with one stack the same cast keeps",
       "actor": "ally", "metric": "aura_stacks", "spell": 301982, "caster": "cultist", "equals": 1,
       "within_ms": 3000 },
     { "action": "assert", "label": "CONTROL: no Void-Touched consumption heal before the next Gaze",
@@ -40,6 +40,11 @@
       "target": "ally" },
     { "action": "assert", "label": "Gaze of C'Thun heals the marked ally with Void-Touched", "actor": "cultist",
       "metric": "spell_heal_count", "spell": 301983, "target": "ally", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The Void-Touched pop heal and the new Gaze heal each leave one stack",
+      "actor": "ally", "metric": "aura_stacks", "spell": 301982, "caster": "cultist", "equals": 2,
+      "within_ms": 3000 },
+    {"action": "set_aura", "label": "Clear any chained mark on the Cultist", "actor": "cultist", "spell": 301982,
+      "stacks": 0},
     { "action": "assert", "label": "CONTROL: the Cultist carries no Void-Touched before healing himself",
       "actor": "cultist", "metric": "aura_stacks", "spell": 301982, "caster": "cultist", "equals": 0 },
     {"action": "set_health", "actor": "cultist", "value": 100},
@@ -51,11 +56,13 @@
     { "action": "assert", "label": "The direct self-heal marks the Cultist with one Void-Touched stack",
       "actor": "cultist", "metric": "aura_stacks", "spell": 301982, "caster": "cultist", "equals": 1,
       "within_ms": 3000 },
-    {"action": "set_health", "actor": "cultist", "value": 100},
+    { "action": "snapshot", "actor": "cultist", "metric": "spell_heal_count", "spell": 301983, "target": "cultist",
+      "save_as": "self_pops_before" },
     {"action": "reset_cooldown", "actor": "cultist", "spell": 500110},
     { "action": "cast", "label": "The next Gaze of C'Thun consumes the Cultist's own mark", "actor": "cultist",
       "spell": 500110, "target": "cultist" },
     { "action": "assert", "label": "Gaze of C'Thun heals the marked Cultist with Void-Touched", "actor": "cultist",
-      "metric": "spell_heal_count", "spell": 301983, "target": "cultist", "equals": 1, "within_ms": 3000 }
+      "metric": "spell_heal_count", "spell": 301983, "target": "cultist", "relative_to": "self_pops_before",
+      "equals": 1, "within_ms": 3000 }
   ]
 }
