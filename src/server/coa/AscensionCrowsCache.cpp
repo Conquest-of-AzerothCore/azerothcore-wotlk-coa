@@ -2,7 +2,6 @@
 
 #include "AscensionBloodforged.h"
 #include "AscensionCrowsCachePolicy.h"
-#include "AscensionRaidReleasePolicy.h"
 #include "Chat.h"
 #include "Config.h"
 #include "Containers.h"
@@ -519,7 +518,7 @@ void RemoveUnclaimed()
 
 bool GearReleased()
 {
-    return RewardsReleased(RaidRelease::ReleasedStage(), Bloodforged::NewestReleasedHeroicGear().size(),
+    return RewardsReleased(Bloodforged::HighRiskStage(), Bloodforged::NewestReleasedHeroicGear().size(),
         Bloodforged::ReleasedHeroicGear().size());
 }
 

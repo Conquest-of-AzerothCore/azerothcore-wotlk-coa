@@ -30,6 +30,7 @@
 #include "ScriptMgr.h"
 #include "TemporarySummon.h"
 #include "World.h"
+#include "WorldState.h"
 #include "WorldSession.h"
 #include <algorithm>
 #include <atomic>
@@ -118,6 +119,9 @@ struct Settings
 
 std::shared_ptr<Settings const> settings;
 std::mutex rebuildLock;
+std::atomic<uint32> highRiskStage{DefaultHighRiskReleaseStage};
+std::atomic<uint32> configuredHighRiskStage{DefaultHighRiskReleaseStage};
+constexpr uint32 WorldStateHighRiskStageOverride = 20130;
 
 struct RaidSpawn
 {
@@ -331,7 +335,7 @@ bool BuildPools(Settings& next, uint32 stage)
 std::shared_ptr<Settings const> CurrentSettings()
 {
     auto current = std::atomic_load(&settings);
-    uint32 const stage = RaidRelease::ReleasedStage();
+    uint32 const stage = highRiskStage.load();
     if (!current || !current->enabled || current->stage == stage)
         return current;
 
@@ -428,6 +432,17 @@ private:
     {
         auto next = std::make_shared<Settings>();
         std::atomic_store(&settings, std::make_shared<Settings const>());
+        uint32 stage = sConfigMgr->GetOption<uint32>("HighRisk.ReleaseStage", DefaultHighRiskReleaseStage);
+        if (stage > RaidRelease::AllReleased)
+        {
+            LOG_ERROR("server.loading", "HighRisk.ReleaseStage {} is above {}, using {}", stage,
+                RaidRelease::AllReleased, RaidRelease::AllReleased);
+            stage = RaidRelease::AllReleased;
+        }
+        configuredHighRiskStage = stage;
+        if (uint32 stageOverride = uint32(sWorldState->getWorldState(WorldStateHighRiskStageOverride)))
+            stage = std::min<uint32>(stageOverride - 1, RaidRelease::AllReleased);
+        highRiskStage = stage;
         if (!sConfigMgr->GetOption<bool>("Bloodforged.Enable", false))
             return;
         if (!sConfigMgr->GetOption<bool>("PvpPower.Enable", true))
@@ -565,7 +580,7 @@ private:
             return;
         }
         next->raidGear = LoadRaidGear(raidItems);
-        if (!BuildPools(*next, RaidRelease::ReleasedStage()))
+        if (!BuildPools(*next, highRiskStage.load()))
             return;
         next->enabled = true;
         std::atomic_store(&settings, std::shared_ptr<Settings const>(next));
@@ -934,9 +949,20 @@ public:
             { "spawn", HandleSpawn, SEC_GAMEMASTER, Console::No },
             { "despawn", HandleDespawn, SEC_GAMEMASTER, Console::Yes },
         };
+        static ChatCommandTable stageTable =
+        {
+            { "", HandleStageStatus, SEC_GAMEMASTER, Console::Yes },
+            { "set", HandleStageSet, SEC_ADMINISTRATOR, Console::Yes },
+            { "clear", HandleStageClear, SEC_ADMINISTRATOR, Console::Yes },
+        };
+        static ChatCommandTable highRiskTable =
+        {
+            { "stage", stageTable },
+        };
         static ChatCommandTable commandTable =
         {
             { "hiddencache", hiddenCacheTable },
+            { "hr", highRiskTable },
         };
         return commandTable;
     }
@@ -1010,6 +1036,35 @@ public:
         handler->PSendSysMessage("Removed {} debug Hidden Caches.", removed);
         return true;
     }
+
+    static bool HandleStageStatus(ChatHandler* handler)
+    {
+        uint32 const stageOverride = uint32(sWorldState->getWorldState(WorldStateHighRiskStageOverride));
+        handler->PSendSysMessage("High-Risk stage {}. Config {}, override {}.", highRiskStage.load(),
+            configuredHighRiskStage.load(), stageOverride ? std::to_string(stageOverride - 1) : std::string("none"));
+        return true;
+    }
+
+    static bool HandleStageSet(ChatHandler* handler, uint32 stage)
+    {
+        if (stage < 1 || stage > RaidRelease::AllReleased)
+        {
+            handler->PSendSysMessage("High-Risk stage must be 1-{}.", RaidRelease::AllReleased);
+            return false;
+        }
+        sWorldState->setWorldState(WorldStateHighRiskStageOverride, stage + 1);
+        highRiskStage = stage;
+        handler->PSendSysMessage("High-Risk stage set to {}.", stage);
+        return true;
+    }
+
+    static bool HandleStageClear(ChatHandler* handler)
+    {
+        sWorldState->setWorldState(WorldStateHighRiskStageOverride, 0);
+        highRiskStage = configuredHighRiskStage.load();
+        handler->PSendSysMessage("High-Risk stage override cleared; now {}.", highRiskStage.load());
+        return true;
+    }
 };
 }
 
@@ -1031,6 +1086,11 @@ std::vector<uint32> Bloodforged::NewestReleasedHeroicGear()
             if (sObjectMgr->GetItemTemplate(entry)->RequiredLevel == 60)
                 gear.push_back(entry);
     return gear;
+}
+
+uint32 Bloodforged::HighRiskStage()
+{
+    return highRiskStage.load();
 }
 
 std::vector<uint32> Bloodforged::ReleasedHeroicGear()

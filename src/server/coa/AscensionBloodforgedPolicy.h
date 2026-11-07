@@ -15,6 +15,7 @@ constexpr std::array<Rates, 5> DefaultRates = {{{0, 50, 0}, {0, 100, 0},
 constexpr unsigned DefaultEliteEpicPercent = 15;
 constexpr float DefaultEliteHeroicUpgradePercent = 2.5f;
 
+constexpr unsigned DefaultHighRiskReleaseStage = 3;
 constexpr unsigned MinimumBlueMaxItemLevel = 57;
 constexpr std::array<unsigned, 9> DefaultBlueMaxItemLevelByStage = {57, 57, 57, 57, 57, 57, 57, 57, 57};
 

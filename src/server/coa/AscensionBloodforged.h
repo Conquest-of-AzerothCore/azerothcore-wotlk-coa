@@ -8,6 +8,7 @@ namespace Bloodforged
 {
 [[nodiscard]] std::vector<uint32> NewestReleasedHeroicGear();
 [[nodiscard]] std::vector<uint32> ReleasedHeroicGear();
+[[nodiscard]] uint32 HighRiskStage();
 }
 
 #endif

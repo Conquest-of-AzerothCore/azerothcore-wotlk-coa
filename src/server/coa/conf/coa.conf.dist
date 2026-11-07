@@ -531,6 +531,20 @@ PvePower.Enable = 1
 
 Bloodforged.Enable = 0
 
+#    HighRisk.ReleaseStage
+#        Description: The release stage 0-8 of High-Risk content, set apart from the rest of the realm
+#                     (Ascension.CallboardCache.ReleaseStage and .raidphase do not change it). It decides
+#                     which raids' Bloodforged gear (normal and Heroic copies) can drop and which Heroic
+#                     items Crow's Cache gives, and picks the stage value of
+#                     Bloodforged.EpicMaxItemLevelByStage and Bloodforged.BlueMaxItemLevelByStage.
+#                     Stages: 0 normal dungeons, 1 Heroic Dungeons, 2 Mythic Dungeons, 3 Zul'Gurub,
+#                     4 Molten Core, 5 Onyxia's Lair, 6 Blackwing Lair, 7 Ahn'Qiraj, 8 Naxxramas.
+#                     Applied on .reload config. .hr stage set <1-8> overrides this value in the
+#                     characters database until .hr stage clear; .hr stage shows the stage.
+#        Default:     3
+
+HighRisk.ReleaseStage = 3
+
 #    Bloodforged.Rates15
 #    Bloodforged.Rates25
 #    Bloodforged.Rates35
@@ -566,7 +580,7 @@ Bloodforged.EliteHeroicUpgradePercent = 2.5
 
 #    Bloodforged.BlueMaxItemLevelByStage
 #        Description: Highest item level of a rare (blue) Bloodforged item that drops, one value per
-#                     release stage 0-8 (Ascension.CallboardCache.ReleaseStage). The lowest allowed
+#                     High-Risk release stage 0-8 (HighRisk.ReleaseStage). The lowest allowed
 #                     value is 57, the lowest item level of the level 60 blue items: a lower value is
 #                     raised to 57 and logged. Raid gear of released raids is not limited by it.
 #        Default:     "57 57 57 57 57 57 57 57 57"
@@ -575,7 +589,7 @@ Bloodforged.BlueMaxItemLevelByStage = "57 57 57 57 57 57 57 57 57"
 
 #    Bloodforged.EpicMaxItemLevelByStage
 #        Description: Highest item level of an epic Bloodforged item that drops, one value per
-#                     release stage 0-8 (Ascension.CallboardCache.ReleaseStage). Raid gear of
+#                     High-Risk release stage 0-8 (HighRisk.ReleaseStage). Raid gear of
 #                     released raids is not limited by it.
 #        Default:     "61 61 64 65 70 70 70 70 70"
 
@@ -842,8 +856,8 @@ Ascension.PrestigiousCache.TbcStages = 0
 #                     client lists Heroic and Mythic difficulties only once they are released.
 #                     Callboard Caches follow the same stages: only released caches are
 #                     earned, and a generic Callboard Cache resolves to a released tier.
-#                     A raid's Bloodforged gear, normal and Heroic copies, is released with its
-#                     stage and then drops only from rare mobs (see Bloodforged.RareRaidItemPercent).
+#                     High-Risk content (Bloodforged raid gear, Crow's Cache) does not follow this
+#                     value; it uses HighRisk.ReleaseStage.
 #                     Applied on .reload config; the client's difficulty list on next login.
 #                     .raidphase set <0-8> overrides this value in the characters database
 #                     until .raidphase clear; .raidphase shows the stage.
@@ -990,7 +1004,7 @@ CoA.TestZoneBonus.AnnounceIntervalMinutes = 15
 #
 #    CrowsCache.Enable
 #        Description: The Crow's Cache High-Risk PvP event. A cache starts only from Mythic Dungeons
-#                     (Ascension.CallboardCache.ReleaseStage 2) and only while at least three Heroic
+#                     (HighRisk.ReleaseStage 2) and only while at least three Heroic
 #                     Bloodforged rewards are released, so it also needs Bloodforged.Enable = 1. Until
 #                     then the automatic schedule skips its turns (unclaimed caches are still removed at
 #                     each turn) and .crows start is refused.
