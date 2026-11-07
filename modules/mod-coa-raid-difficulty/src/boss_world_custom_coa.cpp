@@ -615,9 +615,31 @@ namespace
     {
         explicit boss_snowgrave_coa(Creature* creature) : custom_world_boss_coa(creature) { }
 
+        void ApplyFlex()
+        {
+            Level const* lv = LevelOf(me);
+            if (!lv || !lv->health)
+                return;
+            uint32 const players = std::clamp<uint32>(me->GetMap()->GetPlayersCountExceptGMs(), 10, 40);
+            float const pct = me->GetHealthPct();
+            uint32 const health = lv->health * players;
+            me->SetCreateHealth(health);
+            me->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(health));
+            me->UpdateMaxHealth();
+            me->SetHealth(std::max<uint32>(uint32(me->GetMaxHealth() * pct / 100.0f), 1));
+            me->ResetPlayerDamageReq();
+        }
+
+        void JustEngagedWith(Unit* who) override
+        {
+            ApplyFlex();
+            custom_world_boss_coa::JustEngagedWith(who);
+        }
+
         void Reset() override
         {
             custom_world_boss_coa::Reset();
+            ApplyFlex();
             DoCastSelf(SPELL_FROZEN_CLUB, true);
             _stomps = 0;
         }
@@ -1514,6 +1536,8 @@ void AddCoaCustomWorldBossScripts()
     new setis_checkpoint_packets();
     new setis_checkpoint_players();
     new custom_script<boss_snowgrave_coa>("boss_snowgrave_coa");
+    void AddCoaSnowgraveInstanceScripts();
+    AddCoaSnowgraveInstanceScripts();
     new custom_script<boss_soggoth_coa>("boss_soggoth_coa");
     new custom_script<npc_psychophage_coa>("npc_psychophage_coa");
     new custom_script<boss_atalzul_coa>("boss_atalzul_coa");

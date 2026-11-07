@@ -1,0 +1,62 @@
+-- Korrim Snowgrave (64627) in his boss map (889), the way Setis is fought: a shrine in
+-- Winterspring takes players in (Normal only), the portal he leaves where he falls and the shrine at
+-- the entrance take them back, and players who die in his map rise at its start. The shrine's spot is a placeholder
+-- until it is taken in game.
+
+-- Loot: no source shows his items yet; every player still gets the world boss rewards.
+
+-- His health is per player in his map (10 to 40): each kill's pool over its players.
+UPDATE `coa_world_boss_level` SET `health` = 1120094, `note` = 'per player; kills 23:24/23:36, 22/24 players'
+WHERE `entry` = 64627 AND `difficulty` = 0;
+UPDATE `coa_world_boss_level` SET `health` = 1307460, `note` = 'per player; kills 23:24/23:36, 22/24 players'
+WHERE `entry` = 64627 AND `difficulty` = 2;
+
+-- The shrine, the portal out and the shrine at the entrance of his map.
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
+  `size`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
+(978095, 10, 4076, 'Shrine of Korrim Snowgrave', '', '', '', 3, '', 'go_snowgrave_altar_coa', 12340),
+(978096, 10, 4396, 'Portal to Winterspring', '', '', '', 1.5, '', 'go_snowgrave_exit_coa', 12340),
+(978097, 10, 4076, 'Shrine of Korrim Snowgrave', '', '', '', 3, '', 'go_snowgrave_leave_coa', 12340)
+ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`),
+  `size` = VALUES(`size`), `ScriptName` = VALUES(`ScriptName`);
+DELETE FROM `gameobject` WHERE `guid` IN (9780935, 9780936);
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
+  `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
+  `animprogress`, `state`) VALUES
+(9780935, 978095, 1, 0, 0, 1, 1, 4741.1, -4934.99, 885.43, 0.0, 0, 0, 0.000000, 1.000000, 300, 100, 1),
+(9780936, 978097, 889, 10280, 10280, 15, 1, 4746.10, -4929.99, 695.78, 0, 0, 0, 0, 1, 300, 100, 1);
+
+-- Players who die in his map rise at its start: WorldSafeLocs.dbc 6089.
+DELETE FROM `game_graveyard` WHERE `ID` = 6089;
+INSERT INTO `game_graveyard` (`ID`, `Map`, `x`, `y`, `z`, `Comment`) VALUES
+(6089, 889, 4741.1, -4934.99, 695.78, 'Frostgiantnbossmap Boss map Graveyard');
+DELETE FROM `graveyard_zone` WHERE `ID` = 6089 AND `GhostZone` = 10280;
+INSERT INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`) VALUES
+(6089, 10280, 0, 'Snowgrave''s Cavern (Korrim Snowgrave boss map)');
+
+-- The shrine's words.
+DELETE FROM `npc_text` WHERE `ID` = 978095;
+INSERT INTO `npc_text` (`ID`, `text0_0`, `text0_1`) VALUES
+(978095, 'The shrine seems to notice your presence as you place your hand on its surface to attune to its power.',
+  'The shrine seems to notice your presence as you place your hand on its surface to attune to its power.');
+
+-- His hologram above the shrine: ghostly (22650), rooted, and frozen in place (16245).
+INSERT INTO `creature_template` (`entry`, `name`, `subname`, `minlevel`, `maxlevel`, `faction`, `npcflag`,
+  `speed_walk`, `speed_run`, `unit_class`, `unit_flags`, `type`, `type_flags`, `AIName`, `ScriptName`,
+  `VerifiedBuild`) VALUES
+(978095, 'Korrim Snowgrave', '', 63, 63, 35, 0, 1, 1, 1, 33554434, 7, 0, '', '', 12340)
+ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `faction` = VALUES(`faction`), `unit_flags` = VALUES(`unit_flags`),
+  `ScriptName` = VALUES(`ScriptName`);
+DELETE FROM `creature_template_model` WHERE `CreatureID` = 978095;
+INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
+  `VerifiedBuild`) VALUES
+(978095, 0, 142079, 0.1, 1, 12340);
+DELETE FROM `creature_template_addon` WHERE `entry` = 978095;
+INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (978095, '22650 16245');
+DELETE FROM `creature_template_movement` WHERE `CreatureId` = 978095;
+INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flight`, `Rooted`) VALUES
+(978095, 1, 0, 0, 1);
+DELETE FROM `creature` WHERE `guid` = 9780937;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
+  `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
+(9780937, 978095, 1, 0, 0, 1, 1, 4741.1, -4934.99, 890.43, 0.0, 300, 0, 0);
