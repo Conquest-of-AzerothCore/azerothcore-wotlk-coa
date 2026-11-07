@@ -669,23 +669,10 @@ Ascension.PrestigiousCache.TbcStages = 0
 #                     stage and then drops only from rare mobs (see Bloodforged.RareRaidItemPercent).
 #                     Applied on .reload config; the client's difficulty list on next login.
 #                     .raidphase set <0-8> overrides this value in the characters database
-#                     until .raidphase clear; .raidphase shows the stage and the raid kills.
+#                     until .raidphase clear; .raidphase shows the stage.
 #        Default:     4
 
 Ascension.CallboardCache.ReleaseStage = 4
-
-#
-#    Ascension.RaidRelease.AutoAdvance
-#        Description: Open the next raid when the realm first defeats a raid's final boss:
-#                     Hakkar opens Molten Core, Ragnaros Onyxia's Lair, Onyxia Blackwing Lair,
-#                     Nefarian Ahn'Qiraj and C'Thun Naxxramas. Every first kill and first Heroic
-#                     kill is kept in the characters database (world states 20121-20127) and
-#                     announced to the realm whether or not this is on; the release stage is the
-#                     higher of the stage opened by kills and Ascension.CallboardCache.ReleaseStage.
-#                     Kills by Game Masters do not count.
-#        Default:     0
-
-Ascension.RaidRelease.AutoAdvance = 0
 
 #
 #    Ascension.CallboardCache.PreviousStageOnly

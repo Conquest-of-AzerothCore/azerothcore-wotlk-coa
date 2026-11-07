@@ -5,12 +5,9 @@
 #include "ChatCommand.h"
 #include "CommandScript.h"
 #include "Config.h"
-#include "Creature.h"
 #include "DBCStores.h"
 #include "DBCStructure.h"
 #include "Language.h"
-#include "Log.h"
-#include "Map.h"
 #include "Player.h"
 #include "PlayerScript.h"
 #include "ScriptMgr.h"
@@ -26,54 +23,18 @@ constexpr uint32 WorldStateStageOverride = 20120;
 
 uint32 g_configuredStage = RaidRelease::StageMoltenCore;
 std::atomic<uint32> g_raidReleaseStage = RaidRelease::StageMoltenCore;
-bool g_autoAdvance = false;
-
-uint32 StoredDefeatLevel(RaidRelease::FinalBoss const& boss)
-{
-    return uint32(sWorldState->getWorldState(boss.worldState));
-}
-
-uint32 UnlockedStage()
-{
-    uint32 unlocked = 0;
-    for (RaidRelease::FinalBoss const& boss : RaidRelease::FinalBosses)
-        if (boss.opensStage > unlocked && StoredDefeatLevel(boss) != RaidRelease::DefeatedNever)
-            unlocked = boss.opensStage;
-    return unlocked;
-}
-
-uint32 BaseStage()
-{
-    uint32 const stageOverride = uint32(sWorldState->getWorldState(WorldStateStageOverride));
-    return stageOverride ? stageOverride - 1 : g_configuredStage;
-}
 
 void RefreshReleasedStage()
 {
-    g_raidReleaseStage = g_autoAdvance ? RaidRelease::EffectiveStage(BaseStage(), UnlockedStage()) : BaseStage();
+    uint32 const stageOverride = uint32(sWorldState->getWorldState(WorldStateStageOverride));
+    g_raidReleaseStage = stageOverride ? stageOverride - 1 : g_configuredStage;
 }
 
 void LoadRaidReleaseStage()
 {
     g_configuredStage = sConfigMgr->GetOption<uint32>("Ascension.CallboardCache.ReleaseStage",
         RaidRelease::StageMoltenCore);
-    g_autoAdvance = sConfigMgr->GetOption<bool>("Ascension.RaidRelease.AutoAdvance", false);
     RefreshReleasedStage();
-}
-
-char const* RaidName(uint32 mapId)
-{
-    switch (mapId)
-    {
-        case RaidRelease::MapZulGurub: return "Zul'Gurub";
-        case RaidRelease::MapMoltenCore: return "Molten Core";
-        case RaidRelease::MapOnyxiasLair: return "Onyxia's Lair";
-        case RaidRelease::MapBlackwingLair: return "Blackwing Lair";
-        case RaidRelease::MapRuinsOfAhnQiraj: return "Ruins of Ahn'Qiraj";
-        case RaidRelease::MapTempleOfAhnQiraj: return "Temple of Ahn'Qiraj";
-        case RaidRelease::MapNaxxramas: return "Naxxramas";
-        default: return "";
-    }
 }
 
 char const* StageName(uint32 stage)
@@ -91,36 +52,6 @@ char const* StageName(uint32 stage)
         case RaidRelease::StageNaxxramas: return "Naxxramas";
         default: return "";
     }
-}
-
-void RecordFinalBossKill(Player* killer, Creature* killed)
-{
-    if (!killer || !killed || killer->IsGameMaster() || !killed->GetMap())
-        return;
-    RaidRelease::FinalBoss const* boss = RaidRelease::FindFinalBoss(killed->GetEntry());
-    if (!boss || boss->mapId != killed->GetMapId())
-        return;
-
-    uint32 const previous = StoredDefeatLevel(*boss);
-    uint32 const level = RaidRelease::DefeatLevel(uint32(killed->GetMap()->GetSpawnMode()));
-    if (level <= previous)
-        return;
-
-    uint32 const previousStage = g_raidReleaseStage;
-    sWorldState->setWorldState(boss->worldState, level);
-    RefreshReleasedStage();
-    LOG_INFO("scripts", "Raid release: {} first defeated at level {} by {}'s group, release stage {} -> {}",
-        RaidName(boss->mapId), level, killer->GetName(), previousStage, g_raidReleaseStage.load());
-
-    if (previous == RaidRelease::DefeatedNever && g_raidReleaseStage > previousStage)
-        ChatHandler(nullptr).SendWorldText("|cffff8000{} has been defeated for the first time! {} is now open.|r",
-            RaidName(boss->mapId), StageName(g_raidReleaseStage.load()));
-    else if (previous == RaidRelease::DefeatedNever)
-        ChatHandler(nullptr).SendWorldText("|cffff8000{} has been defeated for the first time!|r",
-            RaidName(boss->mapId));
-    if (level == RaidRelease::DefeatedHeroic)
-        ChatHandler(nullptr).SendWorldText("|cffff8000{} has been defeated on Heroic difficulty for the first time!|r",
-            RaidName(boss->mapId));
 }
 
 class ascension_raid_release_config : public WorldScript
@@ -145,8 +76,7 @@ class ascension_raid_release_player : public PlayerScript
 {
 public:
     ascension_raid_release_player()
-        : PlayerScript("ascension_raid_release_player", { PLAYERHOOK_CAN_ENTER_MAP, PLAYERHOOK_ON_CREATURE_KILL,
-            PLAYERHOOK_ON_CREATURE_KILLED_BY_PET }) { }
+        : PlayerScript("ascension_raid_release_player", { PLAYERHOOK_CAN_ENTER_MAP }) { }
 
     bool OnPlayerCanEnterMap(Player* player, MapEntry const* entry, InstanceTemplate const*, MapDifficulty const*,
         bool) override
@@ -165,16 +95,6 @@ public:
         player->GetSession()->SendAreaTriggerMessage(LANG_INSTANCE_CLOSED);
         return false;
     }
-
-    void OnPlayerCreatureKill(Player* killer, Creature* killed) override
-    {
-        RecordFinalBossKill(killer, killed);
-    }
-
-    void OnPlayerCreatureKilledByPet(Player* owner, Creature* killed) override
-    {
-        RecordFinalBossKill(owner, killed);
-    }
 };
 
 class ascension_raid_release_commands : public CommandScript
@@ -189,7 +109,6 @@ public:
             { "", HandleStatus, SEC_GAMEMASTER, Console::Yes },
             { "set", HandleSet, SEC_ADMINISTRATOR, Console::Yes },
             { "clear", HandleClear, SEC_ADMINISTRATOR, Console::Yes },
-            { "resetkills", HandleResetKills, SEC_ADMINISTRATOR, Console::Yes },
         };
         static ChatCommandTable commandTable =
         {
@@ -201,15 +120,9 @@ public:
     static bool HandleStatus(ChatHandler* handler)
     {
         uint32 const stageOverride = uint32(sWorldState->getWorldState(WorldStateStageOverride));
-        handler->PSendSysMessage("Release stage {} ({}). Config {}, override {}, auto advance {}.",
-            g_raidReleaseStage.load(), StageName(g_raidReleaseStage.load()), g_configuredStage,
-            stageOverride ? std::to_string(stageOverride - 1) : std::string("none"), g_autoAdvance ? "on" : "off");
-        for (RaidRelease::FinalBoss const& boss : RaidRelease::FinalBosses)
-        {
-            uint32 const level = StoredDefeatLevel(boss);
-            handler->PSendSysMessage("{}: {}", RaidName(boss.mapId), level == RaidRelease::DefeatedHeroic ?
-                "defeated on Heroic" : level == RaidRelease::DefeatedNormal ? "defeated" : "not defeated");
-        }
+        handler->PSendSysMessage("Release stage {} ({}). Config {}, override {}.", g_raidReleaseStage.load(),
+            StageName(g_raidReleaseStage.load()), g_configuredStage,
+            stageOverride ? std::to_string(stageOverride - 1) : std::string("none"));
         return true;
     }
 
@@ -222,8 +135,7 @@ public:
         }
         sWorldState->setWorldState(WorldStateStageOverride, stage + 1);
         RefreshReleasedStage();
-        handler->PSendSysMessage("Release stage set to {} ({}); now {} ({}).", stage, StageName(stage),
-            g_raidReleaseStage.load(), StageName(g_raidReleaseStage.load()));
+        handler->PSendSysMessage("Release stage set to {} ({}).", stage, StageName(stage));
         return true;
     }
 
@@ -232,16 +144,6 @@ public:
         sWorldState->setWorldState(WorldStateStageOverride, 0);
         RefreshReleasedStage();
         handler->PSendSysMessage("Release stage override cleared; now {} ({}).", g_raidReleaseStage.load(),
-            StageName(g_raidReleaseStage.load()));
-        return true;
-    }
-
-    static bool HandleResetKills(ChatHandler* handler)
-    {
-        for (RaidRelease::FinalBoss const& boss : RaidRelease::FinalBosses)
-            sWorldState->setWorldState(boss.worldState, RaidRelease::DefeatedNever);
-        RefreshReleasedStage();
-        handler->PSendSysMessage("Raid kills reset; now {} ({}).", g_raidReleaseStage.load(),
             StageName(g_raidReleaseStage.load()));
         return true;
     }
