@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "CoAPtrCharacterCopy.h"
+#include "AccountMgr.h"
 #include "Chat.h"
 #include "ChatCommand.h"
 #include "CommandScript.h"
@@ -9,6 +10,7 @@
 #include "ObjectMgr.h"
 #include "PlayerDump.h"
 #include "StringFormat.h"
+#include "World.h"
 #include "WorldSession.h"
 #include <algorithm>
 #include <atomic>
@@ -251,6 +253,12 @@ public:
                     (readyAt - now + 59) / 60), false);
                 return false;
             }
+        }
+
+        if (AccountMgr::GetCharactersCount(accountId) >= sWorld->getIntConfig(CONFIG_CHARACTERS_PER_REALM))
+        {
+            handler->SendErrorMessage(CopyFailureText(DUMP_TOO_MANY_CHARS), false);
+            return false;
         }
 
         std::string dump;

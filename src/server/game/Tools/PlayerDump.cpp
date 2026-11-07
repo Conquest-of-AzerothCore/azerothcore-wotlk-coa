@@ -687,12 +687,19 @@ bool PlayerDumpWriter::LoadSourceColumns()
 {
     _sourceColumns.clear();
     if (!IsPlainSchemaName(_sourceSchema))
+    {
+        LOG_ERROR("misc", "PlayerDump: invalid source schema name '{}'.", _sourceSchema);
         return false;
+    }
 
     QueryResult result = CharacterDatabase.Query("SELECT TABLE_NAME, COLUMN_NAME FROM information_schema.COLUMNS "
         "WHERE TABLE_SCHEMA = '{}'", _sourceSchema);
     if (!result)
+    {
+        LOG_ERROR("misc", "PlayerDump: no columns visible in source schema `{}`; check the schema name and the "
+            "SELECT grant.", _sourceSchema);
         return false;
+    }
 
     do
     {
