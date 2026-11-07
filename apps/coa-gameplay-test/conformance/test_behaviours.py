@@ -4,7 +4,8 @@ import unittest
 
 from behaviours import (BEHAVIOUR_COUNT, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER,
                         aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
-                        behaviour_scenario, healing_ratio_scenario, healing_ratio_spec, metric_delta_scenario,
+                        behaviour_scenario, health_ratio_spec, health_threshold_ratio_scenario,
+                        healing_ratio_scenario, healing_ratio_spec, metric_delta_scenario,
                         metric_delta_spec, shield_break_trigger_scenario, shield_break_trigger_spec,
                         target_count_scenario, target_count_spec)
 from compare import Verdict, judge_behaviour
@@ -34,6 +35,8 @@ SPIRITUAL_ABDICATOR = 803219
 TESTAMENT_OF_HOPE = 1397742
 TESTAMENT_OF_HOPE_COPY_ENTRY = 50250
 TESTAMENT_OF_HOPE_AURA = 704409
+BATTLEPRIEST = 801202
+FIREBALL = 133
 
 
 def scarlet_judicator_entry() -> dict:
@@ -62,6 +65,10 @@ def tyrs_guard_entry() -> dict:
 
 def spiritual_abdicator_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == SPIRITUAL_ABDICATOR)
+
+
+def battlepriest_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == BATTLEPRIEST)
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -136,6 +143,19 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.fields, {'spell': TESTAMENT_OF_HOPE_AURA, 'effect': 1})
         self.assertEqual(spec.before_expected, -10)
 
+    def test_battlepriest_entry(self):
+        spec = health_ratio_spec(battlepriest_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'ratio', spec.quote, spec.levels[0][1])
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(spec.probe_spell, FIREBALL)
+        self.assertEqual(spec.levels, ((90, 0.8), (50, 1.0), (10, 0.8)))
+
+    def test_battlepriest_quote_matches_dbc(self):
+        self.assertEqual(
+            behaviour_entry(RECORDS, BATTLEPRIEST, 'Battlepriest', 'ratio',
+                            'take 20% reduced Magic damage', 0.8).quote,
+            'take 20% reduced Magic damage')
+
 
 class BehaviourEntriesLookupTests(unittest.TestCase):
     def test_behaviour_entries_filters_by_spell(self):
@@ -147,7 +167,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 7)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 8)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -235,6 +255,63 @@ class HealingRatioScenarioTests(unittest.TestCase):
         self.assertEqual(len(expectations), 1)
         self.assertEqual(expectations[0].check, BEHAVIOUR_RATIO)
         self.assertEqual(expectations[0].model['expected'], 2.0)
+
+
+class HealthRatioScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_expectations(self):
+        spec = health_ratio_spec(battlepriest_entry())
+        scenario, expectations = health_threshold_ratio_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 3)
+        for expectation in expectations:
+            self.assertEqual(expectation.check, BEHAVIOUR_RATIO)
+            self.assertTrue(expectation.rule.startswith('prose: "take 20% reduced Magic damage"'))
+        self.assertEqual([expectation.model['expected'] for expectation in expectations], [0.8, 1.0, 0.8])
+        self.assertEqual([expectation.model['target_name'] for expectation in expectations],
+                         ['90% health', '50% health', '10% health'])
+
+    def test_mid_health_is_not_naively_reusing_the_reduced_ratio(self):
+        spec = health_ratio_spec(battlepriest_entry())
+        _, expectations = health_threshold_ratio_scenario(CLASS_FILE, spec)
+        mid = next(expectation for expectation in expectations if expectation.model['target_name'] == '50% health')
+        self.assertEqual(mid.model['expected'], 1.0)
+        self.assertNotEqual(mid.model['expected'], 0.8)
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, battlepriest_entry())
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 3)
+        self.assertTrue(all(expectation.check == BEHAVIOUR_RATIO for expectation in expectations))
+
+    def test_set_health_steps_fix_a_round_maximum_before_and_after_the_learn(self):
+        spec = health_ratio_spec(battlepriest_entry())
+        scenario, _ = health_threshold_ratio_scenario(CLASS_FILE, spec)
+        set_health_steps = [step for step in scenario['steps'] if step.get('action') == 'set_health']
+        self.assertEqual(len(set_health_steps), 6)
+        for step in set_health_steps:
+            self.assertEqual(step['maximum'], 10000)
+            self.assertEqual(step['actor'], 'caster')
+        self.assertEqual([step['value'] for step in set_health_steps], [9000, 5000, 1000, 9000, 5000, 1000])
+
+    def test_learn_comes_between_the_before_and_after_measurements(self):
+        spec = health_ratio_spec(battlepriest_entry())
+        scenario, _ = health_threshold_ratio_scenario(CLASS_FILE, spec)
+        actions = [step.get('action') for step in scenario['steps']]
+        learn_index = actions.index('learn')
+        set_health_indexes = [index for index, action in enumerate(actions) if action == 'set_health']
+        self.assertTrue(all(index < learn_index for index in set_health_indexes[:3]))
+        self.assertTrue(all(index > learn_index for index in set_health_indexes[3:]))
+
+    def test_measurements_use_the_probe_spell_on_the_dummy(self):
+        spec = health_ratio_spec(battlepriest_entry())
+        scenario, _ = health_threshold_ratio_scenario(CLASS_FILE, spec)
+        measure_steps = [step for step in scenario['steps']
+                         if step.get('metric') == 'script_spell_damage_taken']
+        self.assertEqual(len(measure_steps), 6)
+        for step in measure_steps:
+            self.assertEqual(step['spell'], FIREBALL)
+            self.assertEqual(step['target'], 'dummy')
+            self.assertEqual(step['actor'], 'caster')
 
 
 class ShieldBreakTriggerScenarioTests(unittest.TestCase):
@@ -482,6 +559,54 @@ class JudgeHealingRatioTests(unittest.TestCase):
         expectation = self.expectation()
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 0.0, 'after': 50.0}), expectation)
         self.assertEqual(verdict.status, 'unmeasured')
+
+
+class JudgeHealthRatioTests(unittest.TestCase):
+    def expectation(self, health_pct, expected_ratio):
+        model = {'kind': 'ratio', 'before_label': 'before', 'after_label': 'after', 'expected': expected_ratio,
+                 'quote': 'take 20% reduced Magic damage', 'target_name': f'{health_pct}% health'}
+        return Expectation('label', BEHAVIOUR_RATIO, BATTLEPRIEST, health_pct, None, str(expected_ratio),
+                           'prose: "take 20% reduced Magic damage" (801202)', model)
+
+    def test_90_percent_reduction_matches_is_ok(self):
+        expectation = self.expectation(90, 0.8)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 1000.0, 'after': 800.0}),
+                                  expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_10_percent_reduction_matches_is_ok(self):
+        expectation = self.expectation(10, 0.8)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 1000.0, 'after': 800.0}),
+                                  expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_50_percent_no_reduction_is_ok(self):
+        expectation = self.expectation(50, 1.0)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 1000.0, 'after': 1000.0}),
+                                  expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_90_percent_absent_effect_is_alert(self):
+        expectation = self.expectation(90, 0.8)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 1000.0, 'after': 1000.0}),
+                                  expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 1.0)
+        self.assertEqual(verdict.expected, 0.8)
+
+    def test_10_percent_absent_effect_is_alert(self):
+        expectation = self.expectation(10, 0.8)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 1000.0, 'after': 1000.0}),
+                                  expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 1.0)
+        self.assertEqual(verdict.expected, 0.8)
+
+    def test_50_percent_reduction_applying_when_it_should_not_is_alert(self):
+        expectation = self.expectation(50, 1.0)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 1000.0, 'after': 800.0}),
+                                  expectation)
+        self.assertEqual(verdict.status, 'alert')
 
 
 class JudgeShieldBreakTriggerTests(unittest.TestCase):

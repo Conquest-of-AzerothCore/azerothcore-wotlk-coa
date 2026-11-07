@@ -5,7 +5,7 @@ import re
 from hits import creature_fixture
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import COLOR_CODE, Records
-from values import CAST_MARGIN_MS, Expectation, dataset, facts_of, required_aura_steps
+from values import CAST_MARGIN_MS, Expectation, TARGET, dataset, facts_of, required_aura_steps
 
 BEHAVIOUR_COUNT = 'behaviour_count'
 BEHAVIOUR_RATIO = 'behaviour_ratio'
@@ -187,6 +187,65 @@ def healing_ratio_scenario(class_file: dict, spec: HealingRatioSpec) -> tuple[di
                                         rank_id, None, str(spec.expected), prose_rule(entry.quote, spec.spell),
                                         model))
     return scenario, expectations
+
+
+HEALTH_RATIO_MAX_HEALTH = 10000
+
+
+@dataclass(frozen=True)
+class HealthRatioSpec:
+    spell: int
+    name: str
+    quote: str
+    probe_spell: int
+    levels: tuple[tuple[int, float], ...]
+
+
+def health_ratio_label(spec: HealthRatioSpec, health_pct: int, moment: str) -> str:
+    return f'{spec.spell} {health_pct} script_spell_damage_taken {moment}'
+
+
+def health_ratio_set_health_step(health_pct: int) -> dict:
+    value = (health_pct * HEALTH_RATIO_MAX_HEALTH) // 100
+    return {'action': 'set_health', 'actor': CASTER, 'value': value, 'maximum': HEALTH_RATIO_MAX_HEALTH}
+
+
+def health_threshold_ratio_scenario(class_file: dict, spec: HealthRatioSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'ratio', spec.quote, spec.levels[0][1])
+
+    def measure(moment: str) -> list[dict]:
+        steps = []
+        for health_pct, _ in spec.levels:
+            steps.append(health_ratio_set_health_step(health_pct))
+            steps.append(measurement(health_ratio_label(spec, health_pct, moment), CASTER,
+                                      'script_spell_damage_taken', spell=spec.probe_spell, target=TARGET))
+        return steps
+
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour health ratio',
+        'contract': 'No-combat with/without check: scripted spell damage taken at caster health 90%/50%/10%, '
+                    'measured before and after the passive is learned, proving both the reduction and the '
+                    '"while above 80% or below 20% health" gate.',
+        'players': [player_fixture(class_file)],
+        'creatures': [creature_fixture(class_file)],
+        'steps': base_steps(class_file) + measure(BEFORE) +
+                 [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + measure(AFTER)}
+    expectations = []
+    for health_pct, expected_ratio in spec.levels:
+        model = {'kind': 'ratio', 'before_label': health_ratio_label(spec, health_pct, BEFORE),
+                 'after_label': health_ratio_label(spec, health_pct, AFTER), 'expected': expected_ratio,
+                 'quote': entry.quote, 'target_name': f'{health_pct}% health'}
+        expectations.append(Expectation(f'{spec.spell} {health_pct} behaviour_ratio', BEHAVIOUR_RATIO, spec.spell,
+                                        health_pct, None, str(expected_ratio), prose_rule(entry.quote, spec.spell),
+                                        model))
+    return scenario, expectations
+
+
+def health_ratio_spec(entry: dict) -> HealthRatioSpec:
+    return HealthRatioSpec(entry['spell'], entry['name'], entry['quote'], entry['probe_spell'],
+                           tuple((pct, ratio) for pct, ratio in entry['levels']))
 
 
 GCD_WAIT_MS = 1600
@@ -444,6 +503,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return shield_break_trigger_scenario(class_file, shield_break_trigger_spec(entry))
     if entry['kind'] == 'metric_delta':
         return metric_delta_scenario(class_file, metric_delta_spec(entry))
+    if entry['kind'] == 'health_ratio':
+        return health_threshold_ratio_scenario(class_file, health_ratio_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

@@ -800,6 +800,7 @@ produce the same status vocabulary (`ok`, `alert`, `unmodelled`, `measured`, `am
 | `behaviour_duration` | a duration refresh or reduction |
 | `behaviour_trigger` | a scripted "always fires" claim not reachable through `triggers.py`'s native `EffectTriggerSpell` path |
 | `behaviour_metric_delta` | a passive whose change is read through a harness metric already used elsewhere in the scenario (`owned_creature_count`, `aura_amount`, ...) around a named active spell, judged by exact equality rather than a tolerance band |
+| `behaviour_ratio` (`kind: "health_ratio"`) | a ratio conditional on the caster's own health, read at several health percentages in one scenario |
 
 Every `Expectation.rule` of these checks starts with the literal prefix `prose: ` followed by the quoted
 `Description[enUS]` fragment that states the number, e.g.
@@ -809,10 +810,10 @@ skipped: it is what keeps a behaviour `ok` honestly distinguishable from a token
 | Field | Content |
 |---|---|
 | `spell`, `name` | the passive and its `SpellName[enUS]` |
-| `kind` | `count`, `ratio`, `duration`, `trigger`, `spread` or `metric_delta`: which scenario builder and judge rule apply |
+| `kind` | `count`, `ratio`, `duration`, `trigger`, `spread`, `metric_delta` or `health_ratio`: which scenario builder and judge rule apply |
 | `quote` | the exact prose fragment of `Description[enUS]`, checked to be a substring at generation time |
-| `expected` | the number, ratio or duration the quote states |
-| kind-specific fields | `count`: `target_rank` (the active spell cast), `radius` and `radius_reason` (the source citation that grounds the fixture placement, never a guessed distance), `metric` (`spell_damage_count`, the default, for a spell with a school-damage effect, or `aura` for a spell whose own effect is not damage, such as a silence); `ratio`: `targets`, a list of `[rank_id, name]` pairs; `spread`: `seed_spell` (cast on the primary dummy to install the aura the passive must copy), `aura_spell` (the aura id measured on every extra dummy), `target_rank` (the active whose damage triggers the copy), `radius`/`radius_reason`; `trigger`: `shield_aura` (the absorb aura that must be fully consumed), `trigger_spell` (the spell the break casts), `breaker_spell` (a spell of the absorb's own school that the striker casts directly at the caster to deplete it deterministically), `striker_entry` (a creature template entry to cast it from), `break_timeout_ms` (how long to wait for the aura to clear once the breaker spell lands, default 3000); `metric_delta`: `trigger_spell` (the active spell cast to create the measurable state, learned once up front since it is not otherwise granted to the reference character), `metric`/`fields` (the harness metric and its query fields, e.g. `owned_creature_count`/`{"entry": ...}` or `aura_amount`/`{"spell": ..., "effect": ...}`), `before_expected` (the DBC-derived baseline value asserted on the "before" measurement), `wait_ms` (settle time after the cast before measuring, default 3000), `expire_ms` (wait after the learn before the second cast, long enough for the first cast's effect to fully expire so it cannot contaminate the second measurement, default 20500) |
+| `expected` | the number, ratio or duration the quote states (not used by `health_ratio`, which states its ratios in `levels` instead, one per health percentage) |
+| kind-specific fields | `count`: `target_rank` (the active spell cast), `radius` and `radius_reason` (the source citation that grounds the fixture placement, never a guessed distance), `metric` (`spell_damage_count`, the default, for a spell with a school-damage effect, or `aura` for a spell whose own effect is not damage, such as a silence); `ratio`: `targets`, a list of `[rank_id, name]` pairs; `spread`: `seed_spell` (cast on the primary dummy to install the aura the passive must copy), `aura_spell` (the aura id measured on every extra dummy), `target_rank` (the active whose damage triggers the copy), `radius`/`radius_reason`; `trigger`: `shield_aura` (the absorb aura that must be fully consumed), `trigger_spell` (the spell the break casts), `breaker_spell` (a spell of the absorb's own school that the striker casts directly at the caster to deplete it deterministically), `striker_entry` (a creature template entry to cast it from), `break_timeout_ms` (how long to wait for the aura to clear once the breaker spell lands, default 3000); `metric_delta`: `trigger_spell` (the active spell cast to create the measurable state, learned once up front since it is not otherwise granted to the reference character), `metric`/`fields` (the harness metric and its query fields, e.g. `owned_creature_count`/`{"entry": ...}` or `aura_amount`/`{"spell": ..., "effect": ...}`), `before_expected` (the DBC-derived baseline value asserted on the "before" measurement), `wait_ms` (settle time after the cast before measuring, default 3000), `expire_ms` (wait after the learn before the second cast, long enough for the first cast's effect to fully expire so it cannot contaminate the second measurement, default 20500); `health_ratio`: `probe_spell` (a magic-school spell not exempted from damage-taken modifiers, fed to `script_spell_damage_taken` as a stand-in hit), `levels` (a list of `[health_pct, expected_ratio]` pairs, one `Expectation` per pair) |
 
 `behaviours.py`'s `behaviour_scenario(class_file, entry)` dispatches on `kind` to a scenario builder shaped like
 `passives.passive_scenario` (base steps, measure "before," `learn`, measure "after"), with a kind-specific measure
@@ -917,6 +918,26 @@ exact failure this check exists to catch (a modifier of +1 silently not applying
 specifically because both metrics are deterministic integer reads taken with no combat in flight, unlike the
 live combat-roll pipeline behind `melee_damage_taken`/`spell_damage_taken`, which does need a tolerance band.
 
+### Health-threshold ratio scenarios (`behaviour_ratio`, `kind: "health_ratio"`)
+
+Some passives state a ratio that only applies while the caster's own health sits above or below a threshold
+("while above 80% health or below 20% health, ..."), a condition `healing_ratio_scenario`'s single before/after
+pair cannot exercise, since it never varies the caster's health and a passive that always applied the ratio
+would pass it just as well as one that gates it correctly. `health_threshold_ratio_scenario` instead sets the
+caster's health with `set_health` (`actor` the caster, `maximum` fixed at 10000 so each `levels` percentage maps
+to a round `value`) to each `levels` percentage in turn and measures `script_spell_damage_taken {spell:
+probe_spell, target}` on the `dummy` fixture right after, once per level before the passive is learned and once
+per level after. `script_spell_damage_taken` calls `ScriptMgr::ModifySpellDamageTaken` directly on a fixed probe
+amount (1000), the same `UnitScript` hook a real hit of `probe_spell` would invoke, without needing a live caster
+to actually land one. One `Expectation` per `levels` pair reuses `compare.behaviour_ratio_verdict` unmodified
+(`before_label`/`after_label` naming that level's before/after measurement, `target_name` the health percentage):
+`ok` when the measured damage delta matches `before * (expected_ratio - 1)` on the damage scale; `alert` on a
+measured ratio of 1.0 (no change) against a `levels` entry whose `expected_ratio` is not 1.0 - the absent-effect
+case this check exists to catch, since nulling the gate's health check or its aura check both collapse to this.
+A `levels` entry with `expected_ratio` of exactly `1.0` (the mid-health case where neither threshold applies) is
+what proves the gate itself is being tested, not just the reduction: a scenario that only measured the reduced
+levels could not tell "the ratio is right" apart from "the ratio applies unconditionally."
+
 ### Templar entries
 
 | Passive | Kind | Quote | Expected | Mechanism |
@@ -928,6 +949,7 @@ live combat-roll pipeline behind `melee_damage_taken`/`spell_damage_taken`, whic
 | Armor of Faith 804930 | trigger | "Whenever the absorption shield from Staffguard breaks, inflict" | 1 | `AscensionTemplarAuras.cpp:213-216` (`aura_ascension_templar_lifecycle::Remove`): when Staffguard 706583's absorb effect is fully depleted (`GetAmount() <= 0`) by `AURA_REMOVE_BY_ENEMY_SPELL` (an enemy's own damage, not an expiry or manual cancel) while the player is alive and knows 804930, it casts Armor of Faith's damage spell 801546 on the player, whose own nearby-enemy Holy damage effect then lands; the amount stays the pre-existing `$801546ppl1` player question (`questions.md:368-374`), unchanged by this entry. Staffguard's absorb is Holy-only (`SchoolMask` 2), so the scenario's striker casts Smite 48123 (`breaker_spell`) directly at the caster rather than swinging at it |
 | Tyr's Guard 560649 | metric_delta | "now summons an additional copy of yourself" | 3 | a plain stock `SPELLMOD_EFFECT1` aura (effect 2 of 560649, `EffectSpellClassMask[6]` matching Testament of Hope 1397742's family flags): the engine's own `Player::ApplySpellMod`/`SpellInfo::CalcValue` path adds 1 to Testament of Hope's summon effect's base points (1 -> 2, `CalcValue` 2 -> 3) with no CoA-specific code involved; `owned_creature_count` of the copy entry 50250 is the metric, before (2, no 560649) and after (3, 560649 learned) |
 | Spiritual Abdicator 803219 | metric_delta | "reduces damage taken by an additional 5% per copy" | -15 | `AscensionTemplarContracts.cpp:278-281` (`templar_scaling::ModifySpellEffectBaseValue`): when the copy's owner (the Templar) has aura 803219, the copy's own owner-area aura 704409 effect 1 (`MOD_DAMAGE_PERCENT_TAKEN`, base `CalcValue` -10, confirmed by the existing Testament of Hope regression scenario) is overridden to -15 at load, the "additional 5%" the tooltip states on top of 704409's own 10%; 803219's own effect 0 is a pure marker (`dummy()` rewrites its `ApplyAuraName` to `SPELL_AURA_DUMMY` at load, no gameplay value of its own); `aura_amount` of spell 704409 effect 1 is the metric, before (-10, no 803219) and after (-15, 803219 learned) |
+| Battlepriest 801202 | health_ratio | "take 20% reduced Magic damage" | 0.8 at 90%/10% health, 1.0 at 50% | the DBC's own mechanism (a periodic trigger casting a conditional `MOD_DAMAGE_PERCENT_TAKEN` aura, `CasterAuraState`-gated on `AURA_STATE_HEALTHLESS_20_PERCENT`/`ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT`) is `dummy()`-nulled at load (`AscensionTemplarContracts.cpp:151-154`); the real implementation is a direct multiplier in `templar_scaling::Mitigation` (`AscensionTemplarContracts.cpp:242-255`), `factor *= .8f` when the school is magic and the player both knows 801202 and is strictly above 80% or strictly below 20% health (`Unit::HealthAbovePct`/`HealthBelowPct`), called from `ModifySpellDamageTaken`/`ModifyPeriodicDamageAurasTick`/`ModifyMeleeDamage`'s hooks; `script_spell_damage_taken` with `probe_spell` Fireball 133 (magic school, no `TemplarCopies` attribute exemption) exercises the same `ModifySpellDamageTaken` hook the real pipeline uses |
 
 The 10-yard and 8-yard fixture radii above are both read from server source, never guessed, per each entry's own
 `radius_reason`.

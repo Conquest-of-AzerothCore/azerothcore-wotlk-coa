@@ -597,6 +597,11 @@
       "before_expected": -10,
       "wait_ms": 3000,
       "expire_ms": 20500
+    },
+    {
+      "spell": 801202, "name": "Battlepriest", "kind": "health_ratio",
+      "quote": "take 20% reduced Magic damage", "probe_spell": 133,
+      "levels": [[90, 0.8], [50, 1.0], [10, 0.8]]
     }
   ]
 }
