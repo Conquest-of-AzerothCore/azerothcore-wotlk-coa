@@ -559,7 +559,8 @@ void UpdateEvents()
     if (now + warning >= nextStart)
     {
         Position const* locations[] = {&location, &silithus, &needles, &barrens};
-        Begin(uint32(nextStart - now), *locations[randomLocation ? urand(0, 3) : 0]);
+        if (!Begin(uint32(nextStart - now), *locations[randomLocation ? urand(0, 3) : 0]))
+            RemoveUnclaimed();
         nextStart += interval;
         SaveSchedule();
     }

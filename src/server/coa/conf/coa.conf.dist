@@ -992,7 +992,8 @@ CoA.TestZoneBonus.AnnounceIntervalMinutes = 15
 #        Description: The Crow's Cache High-Risk PvP event. A cache starts only from Mythic Dungeons
 #                     (Ascension.CallboardCache.ReleaseStage 2) and only while at least three Heroic
 #                     Bloodforged rewards are released, so it also needs Bloodforged.Enable = 1. Until
-#                     then the automatic schedule skips its turns and .crows start is refused.
+#                     then the automatic schedule skips its turns (unclaimed caches are still removed at
+#                     each turn) and .crows start is refused.
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
