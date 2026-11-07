@@ -6,7 +6,7 @@ import unittest
 from compare import Verdict, write_verdicts
 from conformance import DIFF_EXIT, main
 from coverage import COVERAGE_FILE, coverage, write_coverage
-from hits import NEVER_CAST, UNMODELLED
+from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
 from passives import PASSIVE_DELTA
 from procs import PROC_CHECK
 from triggers import TRIGGER_CHECK
@@ -37,8 +37,8 @@ def placeholder(spell):
                    UNMODELLED + NEVER_CAST)
 
 
-def hit(spell, status='ok'):
-    return verdict(f'{spell} hit_mean', status, spell, f'conformance-templar-hit-{spell}', 'hit_mean')
+def hit(spell, status='ok', explanation=''):
+    return verdict(f'{spell} hit_mean', status, spell, f'conformance-templar-hit-{spell}', 'hit_mean', explanation)
 
 
 def passive(spell, status='ok'):
@@ -111,6 +111,16 @@ class CoverageTests(unittest.TestCase):
         self.assertEqual((result.actives_with_hit, result.actives), (2, 3))
         self.assertEqual(result.passives, 1)
 
+    def test_actives_with_effect_denominator(self):
+        verdicts = [value(ARGENT_BLADE), hit(ARGENT_BLADE),
+                    value(SACRED_SWING), hit(SACRED_SWING, 'unmodelled', UNMODELLED + NO_HIT_EFFECT +
+                                             ' among effects [6]'),
+                    value(801443), hit(801443, 'unmodelled', UNMODELLED + 'effect 2 has no readable tooltip value')]
+        result = coverage(CLASS, verdicts)
+        self.assertEqual(result.actives_with_hit, 1)
+        self.assertEqual(result.actives, 3)
+        self.assertEqual(result.actives_with_effect, 2)
+
     def test_coverage_markdown(self):
         before = self.compare_output('before', phase_one_set(2))
         after = self.compare_output('after', [value(1000), passive(1000), value(1001, 'unreadable'),
@@ -126,6 +136,19 @@ class CoverageTests(unittest.TestCase):
         self.assertIn('| ok | 7 | 3 | -4 |', text)
         self.assertIn('| alert | 0 | 1 | +1 |', text)
         self.assertIn(f'{2} phase-1 placeholders', text)
+
+    def test_coverage_markdown_has_both_denominators(self):
+        before = self.compare_output('before', phase_one_set(1))
+        after = self.compare_output('after', [value(ARGENT_BLADE), hit(ARGENT_BLADE),
+                                              value(SACRED_SWING), hit(SACRED_SWING, 'unmodelled',
+                                                                       UNMODELLED + NO_HIT_EFFECT +
+                                                                       ' among effects [6]')])
+        text = write_coverage(before, after, self.root / 'out').read_text(encoding='utf-8')
+        self.assertIn('actives with a hit model |', text)
+        self.assertIn('actives with a hit model (of those with an effect) |', text)
+        self.assertIn('| actives with a hit model | 1 of 1 (100.0%) | 1 of 2 (50.0%) | +0 |', text)
+        self.assertIn('| actives with a hit model (of those with an effect) | 1 of 1 (100.0%) | 1 of 1 (100.0%) | '
+                      '+0 |', text)
 
     def test_coverage_lists_spells_judged_only_on_one_side(self):
         before = self.compare_output('before', [value(ARGENT_BLADE), value(SACRED_SWING, 'unreadable')])

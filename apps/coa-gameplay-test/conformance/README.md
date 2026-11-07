@@ -1022,6 +1022,15 @@ A passive has a behaviour check when one of its `passive_delta`, `proc_rate` or 
 `alert`; an active has a hit model when one of its `hit_mean` verdicts is. `coverage.md` also lists the spells judged
 on one side only and the class spells present on one side only.
 
+`coverage.md`'s `## Coverage` table prints the hit-model row twice, over two denominators. "actives with a hit
+model" divides by every active (phase 2's original metric, kept for trend continuity with earlier `coverage.md`
+files). Many actives are buffs, utility or proc-only spells with no damage or healing effect at all — their
+`hit_mean` verdict is `unmodelled` with the exact reason `hits.py`'s `hit_kind` raises when no effect fits a hit
+model (`unmodelled: no damage or healing effect among effects [...]`), and they can never clear that row. "actives
+with a hit model (of those with an effect)" divides instead by `actives_with_effect`: actives whose `hit_mean`
+verdict's explanation does not start with that reason, i.e. actives that structurally could have a hit model. The
+numerator is unchanged between the two rows; only the denominator differs.
+
 ### Verdicts
 
 | Status | Given to |

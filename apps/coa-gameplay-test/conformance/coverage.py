@@ -3,7 +3,7 @@ from pathlib import Path
 import re
 
 from compare import STATUSES, Verdict, read_verdicts
-from hits import NEVER_CAST, UNMODELLED
+from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
 from passives import PASSIVE_DELTA
 from procs import PROC_CHECK
 from triggers import TRIGGER_CHECK
@@ -16,6 +16,7 @@ HIT_CHECK = 'hit_mean'
 SPELL_KINDS = ('value', 'hit', 'passive')
 PASSIVE_KIND = 'passive'
 PLACEHOLDER_RULE = UNMODELLED + NEVER_CAST
+NO_HIT_EFFECT_RULE = UNMODELLED + NO_HIT_EFFECT
 KEY_SEPARATORS = re.compile(r'[^a-z0-9]+')
 
 
@@ -28,6 +29,7 @@ class Coverage:
     passives: int
     actives_with_hit: int
     actives: int
+    actives_with_effect: int
 
 
 @dataclass(frozen=True)
@@ -37,6 +39,7 @@ class SpellSets:
     judged: frozenset[int]
     behaviour: frozenset[int]
     hit: frozenset[int]
+    hittable: frozenset[int]
     placeholders: int
 
 
@@ -63,8 +66,12 @@ def spell_sets(header: dict, verdicts: list[Verdict]) -> SpellSets:
     behaviour = {verdict.spell_id for verdict in own
                  if verdict.status in JUDGED and verdict.check in BEHAVIOUR_CHECKS} & passives
     hit = {verdict.spell_id for verdict in own if verdict.status in JUDGED and verdict.check == HIT_CHECK}
+    actives = spells - passives
+    hittable = {verdict.spell_id for verdict in own
+               if verdict.check == HIT_CHECK and verdict.spell_id in actives
+               and not verdict.explanation.startswith(NO_HIT_EFFECT_RULE)}
     return SpellSets(frozenset(spells), frozenset(passives), frozenset(judged), frozenset(behaviour),
-                     frozenset(hit & (spells - passives)), len(placeholders))
+                     frozenset(hit & actives), frozenset(hittable), len(placeholders))
 
 
 def coverage(header: dict, verdicts: list[Verdict]) -> Coverage:
@@ -72,7 +79,7 @@ def coverage(header: dict, verdicts: list[Verdict]) -> Coverage:
     counted = [verdict for verdict in verdicts if not is_placeholder(verdict)]
     statuses = {status: sum(verdict.status == status for verdict in counted) for status in STATUSES}
     return Coverage(statuses, len(sets.judged), len(sets.spells), len(sets.behaviour), len(sets.passives),
-                    len(sets.hit), len(sets.spells - sets.passives))
+                    len(sets.hit), len(sets.spells - sets.passives), len(sets.hittable))
 
 
 def share(part: int, whole: int) -> str:
@@ -94,7 +101,9 @@ def coverage_lines(before_dir: Path, after_dir: Path, headers: tuple[dict, dict]
             ('passives with a behaviour check', before.passives_with_behaviour, before.passives,
              after.passives_with_behaviour, after.passives),
             ('actives with a hit model', before.actives_with_hit, before.actives, after.actives_with_hit,
-             after.actives)]
+             after.actives),
+            ('actives with a hit model (of those with an effect)', before.actives_with_hit,
+             before.actives_with_effect, after.actives_with_hit, after.actives_with_effect)]
     lines = [f'# Conformance coverage: {headers[1]["class_name"]} (class {headers[1]["class_id"]})', '',
              f'- Before: `{before_dir}` (manifest `{headers[0].get("manifest", "")}`)',
              f'- After: `{after_dir}` (manifest `{headers[1].get("manifest", "")}`)',

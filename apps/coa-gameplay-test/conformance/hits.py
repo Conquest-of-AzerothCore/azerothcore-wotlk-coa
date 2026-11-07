@@ -18,6 +18,7 @@ from values import (CAST_MARGIN_MS, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, E
 HIT_CHECKS = ('hit_mean', 'melee_mean', 'unmodelled')
 UNMODELLED = 'unmodelled: '
 NEVER_CAST = 'passive spell is never cast'
+NO_HIT_EFFECT = 'no damage or healing effect'
 EXCLUDED_OUTCOME_MARGIN = Fraction(3, 2)
 ATTACK_POWER_PER_DPS = 14.0
 SCHOOL_DAMAGE = 2
@@ -151,7 +152,7 @@ def hit_kind(effects: Sequence[int], aura_names: Sequence[int],
               and WEAPON_EFFECTS.intersection(trigger.effects)):
             kinds.setdefault(TRIGGERED_WEAPON, []).append(index)
     if not kinds:
-        raise Unmodelled(f'no damage or healing effect among effects {list(effects)}')
+        raise Unmodelled(f'{NO_HIT_EFFECT} among effects {list(effects)}')
     if len(kinds) > 1:
         raise Unmodelled(f'effects of several hit models: {sorted(kinds)}')
     kind, indexes = next(iter(kinds.items()))
