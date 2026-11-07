@@ -808,10 +808,10 @@ skipped: it is what keeps a behaviour `ok` honestly distinguishable from a token
 | Field | Content |
 |---|---|
 | `spell`, `name` | the passive and its `SpellName[enUS]` |
-| `kind` | `count`, `ratio`, `duration` or `trigger`: which scenario builder and judge rule apply |
+| `kind` | `count`, `ratio`, `duration`, `trigger` or `spread`: which scenario builder and judge rule apply |
 | `quote` | the exact prose fragment of `Description[enUS]`, checked to be a substring at generation time |
 | `expected` | the number, ratio or duration the quote states |
-| kind-specific fields | `count`: `target_rank` (the active spell cast), `radius` and `radius_reason` (the source citation that grounds the fixture placement, never a guessed distance), `metric` (`spell_damage_count`, the default, for a spell with a school-damage effect, or `aura` for a spell whose own effect is not damage, such as a silence); `ratio`: `targets`, a list of `[rank_id, name]` pairs |
+| kind-specific fields | `count`: `target_rank` (the active spell cast), `radius` and `radius_reason` (the source citation that grounds the fixture placement, never a guessed distance), `metric` (`spell_damage_count`, the default, for a spell with a school-damage effect, or `aura` for a spell whose own effect is not damage, such as a silence); `ratio`: `targets`, a list of `[rank_id, name]` pairs; `spread`: `seed_spell` (cast on the primary dummy to install the aura the passive must copy), `aura_spell` (the aura id measured on every extra dummy), `target_rank` (the active whose damage triggers the copy), `radius`/`radius_reason` |
 
 `behaviours.py`'s `behaviour_scenario(class_file, entry)` dispatches on `kind` to a scenario builder shaped like
 `passives.passive_scenario` (base steps, measure "before," `learn`, measure "after"), with a kind-specific measure
@@ -847,6 +847,26 @@ with the same zero-vs-nonzero guard as `behaviour_count` (a measured healing del
 expected delta is always `alert`); `unmeasured` when the before measurement is 0 or less, since a ratio needs a
 positive baseline.
 
+### Aura-spread scenarios (`behaviour_count`, `kind: "spread"`)
+
+`target_count_scenario`'s `aura` metric always reads the *cast* spell's own aura, which does not fit a passive
+whose claim is that a different active's damage copies a *pre-existing, independent* aura onto a nearby target
+(Holy Tempest 301339: Righteous Tempest's damage spreads Condemn, not Righteous Tempest's own aura). `behaviours.py`
+adds a second, additive builder for this shape rather than overloading `TargetCountSpec`'s contract: `AuraSpreadSpec`
+names `seed_spell` (cast on the primary dummy before each `target_rank` cast, to install the aura that must spread),
+`aura_spell` (the aura id measured on every extra dummy; usually the same spell as `seed_spell`) and `target_rank`
+(the active whose damage triggers the copy) separately. `aura_spread_scenario` learns both `seed_spell` and
+`target_rank` once (talent-chain ranks this deep are not granted by the reference character automatically, unlike
+some lower active ranks reused by other `behaviours` entries), then per phase and per repeat: casts `seed_spell` at
+the primary dummy, waits past its cast time, waits one explicit global-cooldown interval, casts `target_rank` (no
+explicit target: its own implicit targeting is "nearby enemies"), and waits its full periodic-buff duration
+(`Records.duration_ms(target_rank)`) before the next repeat. It then measures `aura {aura_spell, caster}` on every
+extra dummy only, never re-measuring the primary (its own copy of `seed_spell`'s aura is a setup fact, not part of
+the behaviour under judgment). The resulting `Expectation` is shaped exactly like `target_count_scenario`'s, so
+`compare.behaviour_count_verdict` judges it with no change: `ok` when every extra dummy gains the aura between the
+before and after phase, `alert` on a measured 0 against a nonzero `expected` (the absent-effect case this check
+exists to catch), `unmeasured` when an extra dummy already carries the aura before the passive is learned.
+
 ### Templar entries
 
 | Passive | Kind | Quote | Expected | Mechanism |
@@ -854,6 +874,7 @@ positive baseline.
 | Scarlet Judicator 525024 | count | "strikes 2 additional enemies near the primary target" | 2 | Divine Force 807805's school-damage effect (`TARGET_UNIT_TARGET_ENEMY`, `DmgClass` 2/melee) always routes through `Spell::SelectImplicitChainTargets` (`Spell.cpp:1905-1923`), which applies Scarlet Judicator's `SPELLMOD_JUMP_TARGETS` flat modifier to `ChainTarget` and searches a 10-yard jump radius for a melee spell with no `JumpDistance` override (`Spell.cpp:2200-2213`) |
 | Justice 712437 | count | "strikes 1 additional nearby target" | 1 | scripted hook `templar_casts::OnSpellBeforeEffects` (`AscensionTemplarAbilities.cpp:95-102`): casting Interdict 560116 with Justice known adds exactly one unit from `Nearby(primary, 8.0f)`; the DBC's own effect 1 (`PROC_TRIGGER_SPELL` to 712364, Sacred Oath's own trigger) does not implement this sentence at all and is not used |
 | Final Prayer 705268 | ratio | "Doubles the healing done to you" | 2.0 | one named target, Testament of Faith 801478 (a direct heal); Testament of Fortitude 500678 is a periodic self-heal (`PERIODIC_TRIGGER_SPELL_WITH_VALUE` -> 500690) that needs a tick-based measurement this round did not build, so it is not in `targets` yet |
+| Holy Tempest 301339 | spread | "spreads Condemn on affected enemies to a nearby enemy" | 1 | `AscensionTemplarAbilities.cpp:294-295` (`OnSpellHitResult`): on a confirmed hit of Righteous Tempest's periodic damage (ranks `805410`/`570200..570205`) with the passive known, `AscensionTemplar.cpp:224-257` (`SpreadCondemn`) copies the Condemn aura already present on the hit target onto the first valid, non-already-afflicted, line-of-sight enemy within `Nearby(target, 10.0f)` - a hardcoded radius, not read from any DBC field |
 
 The 10-yard and 8-yard fixture radii above are both read from server source, never guessed, per each entry's own
 `radius_reason`.

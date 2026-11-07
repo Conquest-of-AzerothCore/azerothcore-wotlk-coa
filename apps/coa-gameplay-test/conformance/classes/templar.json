@@ -561,6 +561,13 @@
       "spell": 705268, "name": "Final Prayer", "kind": "ratio",
       "quote": "Doubles the healing done to you", "expected": 2.0,
       "targets": [[801478, "Testament of Faith"]]
+    },
+    {
+      "spell": 301339, "name": "Holy Tempest", "kind": "spread",
+      "quote": "spreads Condemn on affected enemies to a nearby enemy", "expected": 1,
+      "seed_spell": 567539, "aura_spell": 567539, "target_rank": 807274,
+      "radius": 10.0,
+      "radius_reason": "AscensionTemplar.cpp:224-257 SpreadCondemn: Nearby(target, 10.0f), a hardcoded radius; 301339's own effect has EffectRadiusIndex[0] 0 and no DBC field defines this distance."
     }
   ]
 }

@@ -188,6 +188,94 @@ def healing_ratio_scenario(class_file: dict, spec: HealingRatioSpec) -> tuple[di
     return scenario, expectations
 
 
+GCD_WAIT_MS = 1600
+
+
+@dataclass(frozen=True)
+class AuraSpreadSpec:
+    spell: int
+    name: str
+    quote: str
+    expected: int
+    seed_spell: int
+    aura_spell: int
+    target_rank: int
+    radius: float
+    radius_reason: str
+    repeats: int = 3
+
+
+def aura_spread_label(spec: AuraSpreadSpec, index: int, moment: str) -> str:
+    return f'{spec.spell} {dummy_id(index)} aura {moment}'
+
+
+def aura_spread_scenario(class_file: dict, spec: AuraSpreadSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'count', spec.quote, spec.expected)
+    dummy_count = spec.expected + 1
+    primary_distance = 3.0
+    distances = [primary_distance] + [
+        primary_distance + spec.radius * (index / dummy_count) for index in range(1, dummy_count)]
+    creatures = [dummy_fixture(index, class_file, distances[index]) for index in range(dummy_count)]
+
+    seed_facts = facts_of(records, spec.seed_spell)
+    tempest_facts = facts_of(records, spec.target_rank)
+    wait_ms = int(records.duration_ms(spec.target_rank)) + CAST_MARGIN_MS
+
+    def power_step(facts) -> list[dict]:
+        if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+            return [{'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost}]
+        return []
+
+    def cast_steps() -> list[dict]:
+        steps = []
+        for _ in range(spec.repeats):
+            steps += power_step(seed_facts)
+            steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.seed_spell})
+            steps += required_aura_steps(seed_facts)
+            steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.seed_spell, 'target': dummy_id(0)})
+            steps.append({'action': 'wait', 'ms': seed_facts.cast_time_ms + CAST_MARGIN_MS})
+            steps.append({'action': 'wait', 'label': 'Global cooldown', 'ms': GCD_WAIT_MS})
+            steps += power_step(tempest_facts)
+            steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.target_rank})
+            steps += required_aura_steps(tempest_facts)
+            steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.target_rank})
+            steps.append({'action': 'wait', 'ms': wait_ms})
+        return steps
+
+    def measure(moment: str) -> list[dict]:
+        return [measurement(aura_spread_label(spec, index, moment), dummy_id(index), 'aura', spell=spec.aura_spell,
+                            caster=CASTER)
+                for index in range(1, dummy_count)]
+
+    before_labels = [aura_spread_label(spec, index, BEFORE) for index in range(1, dummy_count)]
+    after_labels = [aura_spread_label(spec, index, AFTER) for index in range(1, dummy_count)]
+    learn_ranks = [{'action': 'learn', 'actor': CASTER, 'spell': rank}
+                  for rank in dict.fromkeys((spec.seed_spell, spec.target_rank))]
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour count',
+        'contract': f'{spec.repeats} seed+cast cycles per phase: seed {spec.seed_spell} on the primary dummy, cast '
+                    f'{spec.target_rank} and wait its full periodic buff, then count newly-afflicted nearby '
+                    f'dummies: {spec.radius_reason}',
+        'players': [player_fixture(class_file)],
+        'creatures': creatures,
+        'steps': base_steps(class_file) + learn_ranks + cast_steps() + measure(BEFORE) +
+                 [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + cast_steps() + measure(AFTER)}
+    label = f'{spec.spell} behaviour_count'
+    model = {'kind': 'count', 'dummy_labels': list(zip(before_labels, after_labels)), 'expected': spec.expected,
+             'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_COUNT, spec.spell, spec.target_rank, None, str(spec.expected),
+                              prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def aura_spread_spec(entry: dict) -> AuraSpreadSpec:
+    return AuraSpreadSpec(entry['spell'], entry['name'], entry['quote'], entry['expected'], entry['seed_spell'],
+                          entry['aura_spell'], entry['target_rank'], entry['radius'], entry['radius_reason'],
+                          entry.get('repeats', 3))
+
+
 def target_count_spec(entry: dict) -> TargetCountSpec:
     return TargetCountSpec(entry['spell'], entry['name'], entry['quote'], entry['expected'], entry['target_rank'],
                            entry['radius'], entry['radius_reason'], entry.get('metric', 'spell_damage_count'),
@@ -204,6 +292,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return target_count_scenario(class_file, target_count_spec(entry))
     if entry['kind'] == 'ratio':
         return healing_ratio_scenario(class_file, healing_ratio_spec(entry))
+    if entry['kind'] == 'spread':
+        return aura_spread_scenario(class_file, aura_spread_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

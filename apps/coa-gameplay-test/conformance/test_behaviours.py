@@ -2,8 +2,9 @@ from pathlib import Path
 import sys
 import unittest
 
-from behaviours import (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, behaviour_entries, behaviour_entry, behaviour_scenario,
-                        healing_ratio_scenario, healing_ratio_spec, target_count_scenario, target_count_spec)
+from behaviours import (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, aura_spread_scenario, aura_spread_spec,
+                        behaviour_entries, behaviour_entry, behaviour_scenario, healing_ratio_scenario,
+                        healing_ratio_spec, target_count_scenario, target_count_spec)
 from compare import Verdict, judge_behaviour
 from profile import DBC_DIR, load_class_file
 from tooltip import Records
@@ -20,6 +21,9 @@ FINAL_PRAYER = 705268
 DIVINE_FORCE_MAX_RANK = 807805
 INTERDICT = 560116
 TESTAMENT_OF_FAITH = 801478
+HOLY_TEMPEST = 301339
+CONDEMN_RANK = 567539
+RIGHTEOUS_TEMPEST_RANK = 807274
 
 
 def scarlet_judicator_entry() -> dict:
@@ -32,6 +36,10 @@ def justice_entry() -> dict:
 
 def final_prayer_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == FINAL_PRAYER)
+
+
+def holy_tempest_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == HOLY_TEMPEST)
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -56,6 +64,15 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(entry.expected, 2.0)
         self.assertEqual(spec.targets, ((TESTAMENT_OF_FAITH, 'Testament of Faith'),))
 
+    def test_holy_tempest_entry(self):
+        spec = aura_spread_spec(holy_tempest_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'count', spec.quote, spec.expected)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(entry.expected, 1)
+        self.assertEqual(spec.seed_spell, CONDEMN_RANK)
+        self.assertEqual(spec.aura_spell, CONDEMN_RANK)
+        self.assertEqual(spec.target_rank, RIGHTEOUS_TEMPEST_RANK)
+
     def test_quote_must_be_in_tooltip(self):
         with self.assertRaises(ValueError):
             behaviour_entry(RECORDS, SCARLET_JUDICATOR, 'Scarlet Judicator', 'count', 'not in the tooltip at all', 2)
@@ -75,7 +92,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 3)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 4)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -109,6 +126,50 @@ class TargetCountScenarioTests(unittest.TestCase):
     def test_scarlet_judicator_entry_reads_spell_damage_count(self):
         spec = target_count_spec(scarlet_judicator_entry())
         self.assertEqual(spec.metric, 'spell_damage_count')
+
+
+class AuraSpreadScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_fixtures(self):
+        spec = aura_spread_spec(holy_tempest_entry())
+        scenario, expectations = aura_spread_scenario(CLASS_FILE, spec)
+        validated = run.validate(scenario)
+        self.assertEqual(len(validated['creatures']), 2)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_COUNT)
+        self.assertTrue(expectation.rule.startswith('prose: "spreads Condemn on affected enemies'))
+        self.assertEqual(len(expectation.model['dummy_labels']), 1)
+        self.assertEqual(expectation.model['expected'], 1)
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, holy_tempest_entry())
+        self.assertEqual(len(run.validate(scenario)['creatures']), 2)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_COUNT)
+
+    def test_seed_cast_targets_the_primary_dummy_before_the_tempest_cast(self):
+        spec = aura_spread_spec(holy_tempest_entry())
+        scenario, _ = aura_spread_scenario(CLASS_FILE, spec)
+        seed_casts = [step for step in scenario['steps']
+                     if step.get('action') == 'cast' and step.get('spell') == CONDEMN_RANK]
+        self.assertTrue(seed_casts)
+        for step in seed_casts:
+            self.assertEqual(step['target'], 'primary')
+        tempest_casts = [step for step in scenario['steps']
+                         if step.get('action') == 'cast' and step.get('spell') == RIGHTEOUS_TEMPEST_RANK]
+        self.assertTrue(tempest_casts)
+        for step in tempest_casts:
+            self.assertNotIn('target', step)
+
+    def test_measures_aura_of_the_seeded_spell_on_the_extra_dummy_only(self):
+        spec = aura_spread_spec(holy_tempest_entry())
+        scenario, _ = aura_spread_scenario(CLASS_FILE, spec)
+        aura_steps = [step for step in scenario['steps']
+                     if step.get('metric') == 'aura' and step.get('spell') == CONDEMN_RANK
+                     and step.get('actor') != 'primary']
+        self.assertEqual(len(aura_steps), 2)
+        for step in aura_steps:
+            self.assertEqual(step['actor'], 'extra1')
+            self.assertEqual(step['caster'], 'caster')
 
 
 class HealingRatioScenarioTests(unittest.TestCase):
@@ -189,6 +250,34 @@ class JudgeTargetCountTests(unittest.TestCase):
         expectation = self.expectation()
         verdict = judge_behaviour(base_verdict(expectation), None, expectation)
         self.assertIn('no scenario', verdict.explanation)
+
+
+class JudgeHolyTempestTests(unittest.TestCase):
+    def expectation(self):
+        model = {'kind': 'count', 'expected': 1, 'quote': 'spreads Condemn on affected enemies to a nearby enemy',
+                 'dummy_labels': [('b1', 'a1')]}
+        return Expectation('label', BEHAVIOUR_COUNT, HOLY_TEMPEST, RIGHTEOUS_TEMPEST_RANK, None, '1',
+                           'prose: "spreads Condemn on affected enemies to a nearby enemy" (301339)', model)
+
+    def test_condemn_observed_on_the_nearby_dummy_is_ok(self):
+        expectation = self.expectation()
+        values = {'b1': 0.0, 'a1': 1.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_no_spread_at_all_is_alert_not_ok(self):
+        expectation = self.expectation()
+        values = {'b1': 0.0, 'a1': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 0.0)
+        self.assertEqual(verdict.expected, 1.0)
+
+    def test_condemn_already_present_before_the_learn_is_unmeasured(self):
+        expectation = self.expectation()
+        values = {'b1': 1.0, 'a1': 1.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'unmeasured')
 
 
 class JudgeHealingRatioTests(unittest.TestCase):
