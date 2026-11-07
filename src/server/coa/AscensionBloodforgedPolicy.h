@@ -9,8 +9,8 @@
 namespace Bloodforged
 {
 using Rates = std::array<unsigned, 3>;
-constexpr std::array<Rates, 5> DefaultRates = {{{450, 50, 0}, {400, 100, 0},
-    {380, 140, 15}, {360, 180, 25}, {340, 220, 40}}};
+constexpr std::array<Rates, 5> DefaultRates = {{{0, 50, 0}, {0, 100, 0},
+    {0, 140, 15}, {0, 180, 25}, {0, 220, 40}}};
 
 constexpr unsigned Band(unsigned level)
 {
@@ -19,7 +19,7 @@ constexpr unsigned Band(unsigned level)
 
 constexpr bool ValidRates(Rates const& rates)
 {
-    return rates[0] <= 10000 && rates[1] < rates[0] && rates[2] < rates[1]
+    return rates[0] <= 10000 && (!rates[0] || rates[1] < rates[0]) && rates[2] < rates[1]
         && rates[0] + rates[1] + rates[2] <= 10000;
 }
 

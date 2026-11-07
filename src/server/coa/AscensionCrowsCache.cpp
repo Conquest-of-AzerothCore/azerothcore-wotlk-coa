@@ -131,20 +131,59 @@ std::string Marker(Event const& event)
         event.position.GetPositionX(), event.position.GetPositionY());
 }
 
-void BroadcastMarker(std::string const& message)
+template <typename Send>
+void ForEachPlayerInWorld(Send send)
 {
     std::shared_lock lock(*HashMapHolder<Player>::GetLock());
     for (auto const& [guid, player] : ObjectAccessor::GetPlayers())
         if (player->IsInWorld())
-            SendMarker(player, message);
+            send(player);
+}
+
+void BroadcastMarker(std::string const& message)
+{
+    ForEachPlayerInWorld([&message](Player* player) { SendMarker(player, message); });
 }
 
 void BroadcastAnnouncement(std::string const& message)
 {
-    std::shared_lock lock(*HashMapHolder<Player>::GetLock());
-    for (auto const& [guid, player] : ObjectAccessor::GetPlayers())
-        if (player->IsInWorld())
-            ChatHandler(player->GetSession()).SendSysMessage(message.c_str());
+    ForEachPlayerInWorld([&message](Player* player)
+    {
+        ChatHandler(player->GetSession()).SendSysMessage(message.c_str());
+    });
+}
+
+unsigned EventZone(Event const& event)
+{
+    return sMapMgr->GetZoneId(PHASEMASK_NORMAL, WorldLocation(event.map, event.position));
+}
+
+std::string PinPayload(Event const& event, bool visible)
+{
+    if (!visible)
+        return Acore::StringFormat("{{\"Apply\":false,\"ID\":\"crows-cache-{}\"}}", event.id);
+    return Acore::StringFormat(
+        "{{\"Apply\":true,\"ZoneId\":{},\"ID\":\"crows-cache-{}\",\"Name\":\"Crow's Cache\","
+        "\"Description\":\"{}\",\"X\":{:.4f},\"Y\":{:.4f},\"Z\":{:.4f},"
+        "\"TextureId\":\"hr-event-gear-active\",\"Scale\":0.50,\"POIFlags\":{}}}",
+        EventZone(event), event.id,
+        event.phase == Phase::Warning ? "High-Risk 60 PvP Event: materializing soon."
+            : "High-Risk 60 PvP Event: High-Risk level-60 players can claim it.",
+        event.position.GetPositionX(), event.position.GetPositionY(), event.position.GetPositionZ(), PinFlags);
+}
+
+void SendPin(Player* player, Event const& event, bool visible)
+{
+    std::string const payload = PinPayload(event, visible);
+    WorldPacket packet(SMSG_COA_AREA_POI_PAYLOAD, 4 + payload.size() + 1);
+    packet << uint32(PinCacheBase + event.id);
+    packet << payload;
+    player->SendDirectMessage(&packet);
+}
+
+void BroadcastPin(Event const& event, bool visible)
+{
+    ForEachPlayerInWorld([&event, visible](Player* player) { SendPin(player, event, visible); });
 }
 
 void SendMarkers(Player* player)
@@ -157,9 +196,12 @@ void SendMarkers(Player* player)
     SendMarker(player, "E");
 }
 
-unsigned EventZone(Event const& event)
+void SendPins(Player* player)
 {
-    return sMapMgr->GetZoneId(PHASEMASK_NORMAL, WorldLocation(event.map, event.position));
+    if (enabled)
+        for (auto const& [id, event] : events)
+            if (VisibleMarker(event))
+                SendPin(player, event, true);
 }
 
 char const* LocationName(Event const& event)
@@ -321,6 +363,7 @@ bool Claim(Player* player, GameObject* object, bool completedCast)
         event->deadline = Now() + 86400;
     cache->SetUInt32Value(ITEM_FIELD_DURATION, uint32(event->deadline > Now() ? event->deadline - Now() : 1));
     BroadcastMarker(Acore::StringFormat("D;{}", event->id));
+    BroadcastPin(*event, false);
     event->phase = Phase::Carried;
     event->carrier = player->GetGUID().GetCounter();
     event->item = cache->GetGUID().GetCounter();
@@ -429,8 +472,28 @@ bool Open(Player* player, Item* cache)
     return true;
 }
 
+void RemoveUnclaimed()
+{
+    for (auto it = events.begin(); it != events.end();)
+    {
+        Event& event = it->second;
+        if (!VisibleMarker(event))
+        {
+            ++it;
+            continue;
+        }
+        if (Map* map = sMapMgr->FindBaseNonInstanceMap(event.map))
+            RemoveObjects(map, event);
+        Save(event, nullptr, true);
+        BroadcastMarker(Acore::StringFormat("D;{}", event.id));
+        BroadcastPin(event, false);
+        it = events.erase(it);
+    }
+}
+
 void Begin(uint32 seconds, Position const& point)
 {
+    RemoveUnclaimed();
     Event event;
     event.id = nextId++;
     event.position = point;
@@ -440,6 +503,7 @@ void Begin(uint32 seconds, Position const& point)
     auto [found, inserted] = events.emplace(event.id, event);
     Announce(found->second, Now());
     BroadcastMarker(Marker(found->second));
+    BroadcastPin(found->second, true);
     if (std::none_of(std::begin(WarningSeconds), std::end(WarningSeconds), [seconds](unsigned value)
         { return value == seconds; }))
         BroadcastAnnouncement(Acore::StringFormat(
@@ -481,6 +545,7 @@ void UpdateEvents()
                     if (Player* player = reference.GetSource())
                         if (player->IsAlive() && player->GetExactDist(&event.position) < 30)
                             player->KnockbackFrom(event.position.GetPositionX(), event.position.GetPositionY(), 15, 6);
+            BroadcastPin(event, true);
             BroadcastAnnouncement(Acore::StringFormat(
                 "Crow's Cache has appeared in {}! High-Risk level-60 players can claim it.", LocationName(event)));
         }
@@ -605,6 +670,7 @@ public:
         std::lock_guard lock(mutex);
         UpdateCarrier(player);
         SendMarkers(player);
+        SendPins(player);
         for (uint32 entry : {ChestEntry, DropEntry})
         {
             WorldPacket query(CMSG_GAMEOBJECT_QUERY, 12);
@@ -862,20 +928,7 @@ public:
     static bool Cancel(ChatHandler* handler)
     {
         std::lock_guard lock(mutex);
-        for (auto it = events.begin(); it != events.end();)
-        {
-            Event& event = it->second;
-            if (!VisibleMarker(event))
-            {
-                ++it;
-                continue;
-            }
-            if (Map* map = sMapMgr->FindBaseNonInstanceMap(event.map))
-                RemoveObjects(map, event);
-            Save(event, nullptr, true);
-            BroadcastMarker(Acore::StringFormat("D;{}", event.id));
-            it = events.erase(it);
-        }
+        RemoveUnclaimed();
         handler->SendSysMessage("Unclaimed Crow's Cache test events cancelled. Carried and dropped caches are preserved.");
         return true;
     }
