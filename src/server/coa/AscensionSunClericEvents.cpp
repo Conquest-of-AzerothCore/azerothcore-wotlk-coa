@@ -48,8 +48,9 @@ class aura_ascension_sun_cleric_event : public AuraScript
             if (trigger && trigger->Id != 805629 && trigger->Id != 807970 && trigger->Id != 807971 &&
                 trigger->Id != 807972 && trigger->Id != 807973 && trigger->Id != 807974)
                 for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
-                    if (trigger->Effects[i].ApplyAuraName == SPELL_AURA_PERIODIC_TRIGGER_SPELL ||
-                        trigger->Effects[i].ApplyAuraName == SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE)
+                    if ((trigger->Effects[i].ApplyAuraName == SPELL_AURA_PERIODIC_TRIGGER_SPELL ||
+                         trigger->Effects[i].ApplyAuraName == SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE) &&
+                        trigger->Effects[i].TriggerSpell == proc->GetSpellInfo()->Id)
                     {
                         periodic = true;
                         break;
