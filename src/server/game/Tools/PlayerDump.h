@@ -74,6 +74,8 @@ public:
     static void InitializeTables();
     static void RegisterCharacterTable(std::string const& tableName,
         std::vector<std::string> const& itemGuidColumns = {});
+    static void RegisterOwnedTable(std::string const& tableName, std::string const& characterGuidColumn,
+        std::string const& ownerFilter, std::vector<std::string> const& itemGuidColumns = {});
     static void RegisterItemTable(std::string const& tableName, std::string const& itemGuidColumn,
         std::string const& characterGuidColumn = {});
 
@@ -111,8 +113,14 @@ private:
 class PlayerDumpReader : public PlayerDump
 {
 public:
+    struct LoadOptions
+    {
+        bool DirectCommit = false;
+        bool PlayerMailFromCopy = false;
+    };
+
     PlayerDumpReader() { }
-    explicit PlayerDumpReader(bool directCommit) : _directCommit(directCommit) { }
+    explicit PlayerDumpReader(LoadOptions options) : _options(options) { }
 
     DumpReturn LoadDumpFromFile(std::string const& file, uint32 account, std::string name, ObjectGuid::LowType guid);
     DumpReturn LoadDumpFromString(std::string const& dump, uint32 account, std::string name, ObjectGuid::LowType guid);
@@ -123,7 +131,7 @@ public:
 private:
     DumpReturn LoadDump(std::istream& input, uint32 account, std::string name, ObjectGuid::LowType guid);
 
-    bool _directCommit = false;
+    LoadOptions _options;
     ObjectGuid::LowType _loadedGuid = 0;
     std::string _loadedName;
 };

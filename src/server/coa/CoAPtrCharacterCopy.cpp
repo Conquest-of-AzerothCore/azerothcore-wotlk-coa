@@ -255,7 +255,10 @@ public:
 
         std::string dump;
         DumpReturn result = PlayerDumpWriter(settings.sourceSchema).WriteDumpToString(dump, source->guid);
-        PlayerDumpReader reader(true);
+        PlayerDumpReader::LoadOptions loadOptions;
+        loadOptions.DirectCommit = true;
+        loadOptions.PlayerMailFromCopy = true;
+        PlayerDumpReader reader(loadOptions);
         if (result == DUMP_SUCCESS)
             result = reader.LoadDumpFromString(dump, accountId, source->name, 0);
         if (result != DUMP_SUCCESS)
@@ -295,6 +298,11 @@ void AddSC_CoAPtrCharacterCopy()
         "coa_mystic_enchant_known", "coa_mystic_enchant_slot", "coa_mythic_best", "coa_mythic_weekly",
         "mod_craftsmans_codex" })
         PlayerDump::RegisterCharacterTable(table);
+
+    constexpr char const* characterBankOwner = "owner_kind = 0";
+    for (char const* table : { "mod_ascension_bank_tab", "mod_ascension_bank_money" })
+        PlayerDump::RegisterOwnedTable(table, "owner_id", characterBankOwner);
+    PlayerDump::RegisterOwnedTable("mod_ascension_bank_item", "owner_id", characterBankOwner, { "item_guid" });
 
     PlayerDump::RegisterItemTable("character_item_scaling", "item_guid");
     PlayerDump::RegisterItemTable("coa_mc_fire_lord_cache_tier", "ItemGuid");

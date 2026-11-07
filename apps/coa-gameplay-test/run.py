@@ -91,7 +91,8 @@ METRICS = TIMELINE_METRICS | {
     'pool_variant_count', 'pool_retired_item_count', 'pool_row_count', 'pool_item_present',
     'cache_token_count', 'cache_token_stage', 'cache_token_present',
     'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item',
-    'account_character_count', 'account_other_item_count',
+    'account_character_count', 'account_other_item_count', 'account_other_bank_item_count',
+    'account_other_mail_count', 'account_other_foreign_mail_count',
     'mail_pool_item_count', 'notifications', 'notification_contains',
     'bank_bag_slots', 'bank_shows', 'guild_bank_tabs',
     'system_messages',
@@ -304,6 +305,7 @@ ACTIONS = {
     'loot_money': ({'actor'}, {'actor'}),
     'loot_roll': ({'actor', 'item', 'vote'}, {'actor', 'item', 'vote'}),
     'master_loot_give': ({'actor', 'item', 'target'}, {'actor', 'item', 'target'}),
+    'send_mail': ({'actor', 'target'}, {'actor', 'target'}),
     'prepare_quest': ({'actor', 'quest'}, {'actor', 'quest', 'complete'}),
     'reward_quest': ({'actor', 'quest'}, {'actor', 'quest', 'choice'}),
     'restore_quest_spells': ({'actor'}, {'actor'}),
@@ -719,6 +721,9 @@ def validate(scenario):
             number(step['vote'], f'{where}.vote', 0, 3, True)
         if action == 'master_loot_give':
             require(step['target'] in player_ids, f'{where}: master loot needs a player recipient')
+        if action == 'send_mail':
+            require(step['target'] in player_ids and step['target'] != step['actor'],
+                    f'{where}: mail needs another player as recipient')
         if action == 'lfg_dungeon':
             number(step['dungeon'], f'{where}.dungeon', 1, 2**24 - 1, True)
             if 'loot_method' in step:
@@ -1146,7 +1151,7 @@ def validate(scenario):
                 require('cache' in step, f'{where}: metric needs the cache item it checks against')
             if metric == 'cache_token_present':
                 require('item' in step, f'{where}: metric needs the token to look for')
-            if metric in ('mail_has_item', 'account_other_item_count'):
+            if metric in ('mail_has_item', 'account_other_item_count', 'account_other_bank_item_count'):
                 require('item' in step, f'{where}: metric needs the item to look for')
             if metric == 'mail_pool_item_count':
                 require('cache' in step, f'{where}: metric needs the cache item it checks against')

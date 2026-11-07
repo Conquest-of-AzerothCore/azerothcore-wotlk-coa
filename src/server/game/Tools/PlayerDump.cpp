@@ -21,6 +21,7 @@
 #include "Common.h"
 #include "DatabaseEnv.h"
 #include "Log.h"
+#include "Mail.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "StringConvert.h"
@@ -87,6 +88,7 @@ struct DumpTable
     DumpTableType Type;
     std::vector<std::string> ItemGuidColumns = {};
     std::string CharacterGuidColumn = {};
+    std::string OwnerFilter = {};
 };
 
 DumpTable const DumpTables[] =
@@ -291,6 +293,12 @@ void PlayerDump::RegisterCharacterTable(std::string const& tableName, std::vecto
     RegisteredDumpTables.push_back({ tableName, DTT_CHAR_TABLE, itemGuidColumns });
 }
 
+void PlayerDump::RegisterOwnedTable(std::string const& tableName, std::string const& characterGuidColumn,
+    std::string const& ownerFilter, std::vector<std::string> const& itemGuidColumns)
+{
+    RegisteredDumpTables.push_back({ tableName, DTT_CHAR_TABLE, itemGuidColumns, characterGuidColumn, ownerFilter });
+}
+
 void PlayerDump::RegisterItemTable(std::string const& tableName, std::string const& itemGuidColumn,
     std::string const& characterGuidColumn)
 {
@@ -350,12 +358,16 @@ void PlayerDump::InitializeTables()
             MarkDependentColumn(t, "deleteDate", GUID_TYPE_NULL);
             break;
         case DTT_CHAR_TABLE:
-            MarkWhereField(t, "guid");
+        {
+            std::string const characterGuidColumn =
+                dumpTable.CharacterGuidColumn.empty() ? "guid" : dumpTable.CharacterGuidColumn;
+            MarkWhereField(t, characterGuidColumn);
 
-            MarkDependentColumn(t, "guid", GUID_TYPE_CHAR);
+            MarkDependentColumn(t, characterGuidColumn, GUID_TYPE_CHAR);
             for (std::string const& itemGuidColumn : dumpTable.ItemGuidColumns)
                 MarkDependentColumn(t, itemGuidColumn, GUID_TYPE_ITEM);
             break;
+        }
         case DTT_EQSET_TABLE:
             MarkWhereField(t, "guid");
 
@@ -811,6 +823,8 @@ bool PlayerDumpWriter::AppendTable(StringTransaction& trans, ObjectGuid::LowType
     default:
         // not set case, get single guid string
         whereStr = GenerateWhereStr(tableStruct.WhereFieldName, guid);
+        if (!dumpTable.OwnerFilter.empty())
+            whereStr += " AND " + dumpTable.OwnerFilter;
         break;
     }
 
@@ -1080,7 +1094,8 @@ DumpReturn PlayerDumpReader::LoadDump(std::istream& input, uint32 account, std::
                 // characters.at_login set to "rename on login"
                 if (!ChangeColumn(ts, line, "name", name))
                     return DUMP_FILE_BROKEN;
-                if (!ChangeColumn(ts, line, "at_login", "1"))
+                uint32 const atLogin = Acore::StringTo<uint32>(GetColumn(ts, line, "at_login")).value_or(0);
+                if (!ChangeColumn(ts, line, "at_login", std::to_string(atLogin | AT_LOGIN_RENAME)))
                     return DUMP_FILE_BROKEN;
             }
             else if (!ChangeColumn(ts, line, "name", name)) // characters.name
@@ -1089,6 +1104,11 @@ DumpReturn PlayerDumpReader::LoadDump(std::istream& input, uint32 account, std::
                 return DUMP_FILE_BROKEN;
             break;
         }
+        case DTT_MAIL:
+            if (_options.PlayerMailFromCopy && GetColumn(ts, line, "messageType") == std::to_string(MAIL_NORMAL)
+                && !ChangeColumn(ts, line, "sender", newguid))
+                return DUMP_FILE_BROKEN;
+            break;
         default:
             break;
         }
@@ -1101,7 +1121,7 @@ DumpReturn PlayerDumpReader::LoadDump(std::istream& input, uint32 account, std::
     if (input.fail() && !input.eof())
         return DUMP_FILE_BROKEN;
 
-    if (_directCommit)
+    if (_options.DirectCommit)
     {
         CharacterDatabase.DirectCommitTransaction(trans);
 

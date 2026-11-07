@@ -54,6 +54,7 @@
 #include "Log.h"
 #include "LocalLevelScaling.h"
 #include "LootMgr.h"
+#include "Mail.h"
 #include "Map.h"
 #include "MapMgr.h"
 #include "MoveSpline.h"
@@ -5393,6 +5394,27 @@ private:
                 player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), step.get<uint32>("item"));
             return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
         }
+        if (metric == "account_other_bank_item_count")
+        {
+            QueryResult result = CharacterDatabase.Query(
+                "SELECT CAST(COALESCE(SUM(i.count), 0) AS UNSIGNED) FROM mod_ascension_bank_item b "
+                "JOIN item_instance i ON i.guid = b.item_guid "
+                "JOIN characters c ON c.guid = b.owner_id AND b.owner_kind = 0 "
+                "WHERE c.account = {} AND c.guid <> {} AND i.itemEntry = {}",
+                player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), step.get<uint32>("item"));
+            return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
+        }
+        if (metric == "account_other_mail_count" || metric == "account_other_foreign_mail_count")
+        {
+            std::string const foreignOnly = metric == "account_other_foreign_mail_count"
+                ? Acore::StringFormat(" AND m.messageType = {} AND m.sender <> m.receiver", uint32(MAIL_NORMAL))
+                : std::string();
+            QueryResult result = CharacterDatabase.Query(
+                "SELECT COUNT(*) FROM mail m JOIN characters c ON c.guid = m.receiver "
+                "WHERE c.account = {} AND c.guid <> {}{}",
+                player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), foreignOnly);
+            return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
+        }
         if (metric == "mail_count" || metric == "mail_item_count" || metric == "mail_has_item")
         {
             uint32 mails = 0, items = 0;
@@ -6858,6 +6880,14 @@ private:
             packet << (*pending)->itemGUID << uint32((*pending)->itemSlot) << uint8(step.get<uint32>("vote"));
             if (sScriptMgr->CanPacketReceive(player->GetSession(), packet))
                 player->GetSession()->HandleLootRoll(packet);
+        }
+        else if (action == "send_mail")
+        {
+            Player* recipient = GetPlayer(step.get<std::string>("target"));
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+            MailDraft("Harness mail", "Sent by the gameplay harness")
+                .SendMailTo(trans, MailReceiver(recipient), MailSender(player));
+            CharacterDatabase.DirectCommitTransaction(trans);
         }
         else if (action == "master_loot_give")
         {
