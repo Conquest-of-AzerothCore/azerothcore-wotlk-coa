@@ -830,17 +830,22 @@ probe established that the harness's AoE or chain targeting hits every dummy in 
 read on the dummy itself, for a target spell whose own effect is not a school-damage hit), learns the passive,
 repeats the casts and the measurement. The
 judge (`compare.behaviour_count_verdict`) counts, among the extra dummies only, how many were hit before the learn
-and how many were newly hit after (`after - before > 0`); `ok` when `|after_count - before_count - expected| <=
-max(1, 0.5% of expected)` (the same deterministic tolerance as every other check in this package); `unmeasured`
-when an extra dummy was already hit before the learn, since the delta cannot then be isolated.
+and how many were newly hit after (`after - before > 0`), then judges that count delta against `expected` on the
+delta scale (`compare.delta_status`): `ok` when `|delta - expected| <= max(1, 0.5% of expected)`, *except* that a
+measured delta of exactly 0 against a nonzero `expected` is always `alert`, never `ok`, even though it would fall
+inside that margin (`compare.delta_status`'s explicit zero-vs-nonzero guard); `unmeasured` when an extra dummy was
+already hit before the learn, since the delta cannot then be isolated.
 
 ### Healing-ratio scenarios (`behaviour_ratio`)
 
 The scenario casts every named target spell at the caster, measures `spell_healing_done {spell, target: caster}`
 for each, learns the passive, repeats the casts and the measurement. The judge
-(`compare.behaviour_ratio_verdict`) computes `after / before` per named spell; `ok` when `|ratio - expected| <=
-max(1, 0.5% of expected)`; `unmeasured` when the before measurement is 0 or less, since a ratio needs a positive
-baseline.
+(`compare.behaviour_ratio_verdict`) computes `ratio = after / before` for reporting, but judges the *healing
+delta* (`after - before`) against the delta the expected ratio implies (`before * (expected_ratio - 1)`), on the
+healing scale rather than the ratio scale: `ok` when `|delta - expected_delta| <= max(1, 0.5% of |expected_delta|)`,
+with the same zero-vs-nonzero guard as `behaviour_count` (a measured healing delta of exactly 0 against a nonzero
+expected delta is always `alert`); `unmeasured` when the before measurement is 0 or less, since a ratio needs a
+positive baseline.
 
 ### Templar entries
 
