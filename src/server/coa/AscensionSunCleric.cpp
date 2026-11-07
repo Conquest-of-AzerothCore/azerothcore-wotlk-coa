@@ -188,10 +188,10 @@ Spell* Origin(Player* player, Spell* spell)
                 return parent;
     return spell;
 }
-void Mana(Player* player, uint32 amount)
+void Mana(Player* player, uint32 amount, uint32 source)
 {
     if (amount)
-        player->EnergizeBySpell(player, 504877, int32(std::min<uint32>(amount, INT32_MAX)), POWER_MANA);
+        player->EnergizeBySpell(player, source, int32(std::min<uint32>(amount, INT32_MAX)), POWER_MANA);
 }
 bool Chance(Player* player, uint32 id, uint32 cooldown)
 {
