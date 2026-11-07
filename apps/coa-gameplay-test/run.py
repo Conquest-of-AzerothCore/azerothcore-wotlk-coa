@@ -41,6 +41,7 @@ TIMELINE_FIELDS = {'event', 'source_entry', 'state', 'target_actors', 'exclude_t
 ENCOUNTER_STATES = {'NOT_STARTED', 'IN_PROGRESS', 'FAIL', 'DONE', 'SPECIAL'}
 MAX_ENCOUNTER_RADIUS = 200
 RAID_ROLES = {'tank', 'healer', 'melee', 'ranged'}
+SYSTEM_MAIL_KINDS = {'postmaster', 'reward', 'server'}
 RAID_ROLE_FIELDS = {'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist'}
 SPAWN_PLACEMENT_METRICS = {'spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state',
                             'spawn_stand_state', 'spawn_clearance', 'spawn_headroom', 'spawn_distance'}
@@ -274,6 +275,7 @@ ACTIONS = {
                            {'actor', 'entry', 'direction', 'item', 'slot', 'count', 'inventory_slot'}),
     'binder_activate': ({'actor'}, {'actor', 'target', 'owner', 'entry'}),
     'destroy_item': ({'actor', 'item'}, {'actor', 'item'}),
+    'system_mail': ({'actor', 'item', 'kind'}, {'actor', 'item', 'kind'}),
     'start_challenge': ({'actor', 'challenge', 'level'}, {'actor', 'challenge', 'level'}),
     'stop_challenge': ({'actor', 'challenge'}, {'actor', 'challenge'}),
     'area_trigger': ({'actor', 'id'}, {'actor', 'id'}),
@@ -602,6 +604,10 @@ def validate(scenario):
         if action == 'addon_message':
             require(isinstance(step['prefix'], str) and step['prefix'].strip() and '\t' not in step['prefix']
                     and isinstance(step['text'], str), f'{where}: addon_message needs a prefix without tabs and text')
+        if action == 'system_mail':
+            require(step['kind'] in SYSTEM_MAIL_KINDS,
+                    f'{where}: system_mail kind must be one of {sorted(SYSTEM_MAIL_KINDS)}')
+            number(step['item'], f'{where}.item', 1, 2**32 - 1, True)
         if action == 'summon':
             require(isinstance(step['as'], str) and step['as'] not in actor_ids, f'{where}: duplicate summon id')
             actor_ids.add(step['as'])

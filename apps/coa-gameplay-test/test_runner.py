@@ -597,6 +597,18 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(step=step), self.assertRaisesRegex(ValueError, error):
                 run.validate(scenario)
 
+    def test_system_mail_needs_a_known_kind_and_an_item(self):
+        for kind in ('postmaster', 'reward', 'server'):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, {'action': 'system_mail', 'actor': 'caster', 'item': 6948, 'kind': kind})
+            self.assertIs(run.validate(scenario), scenario)
+        for step, error in (({'action': 'system_mail', 'actor': 'caster', 'item': 6948, 'kind': 'gm'}, 'kind'),
+                            ({'action': 'system_mail', 'actor': 'caster', 'item': 0, 'kind': 'reward'}, r'\.item')):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, step)
+            with self.subTest(step=step), self.assertRaisesRegex(ValueError, error):
+                run.validate(scenario)
+
     def test_hour_timezone_is_a_posix_offset_placing_local_time_at_the_start_of_that_hour(self):
         for utc_hour, hour, expected in ((10, 12, 'UTC-01:01'), (23, 0, 'UTC-00:01'), (1, 23, 'UTC+02:59'),
                                          (12, 0, 'UTC-11:01'), (12, 23, 'UTC-10:01'), (5, 5, 'UTC+00:59'),
