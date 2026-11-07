@@ -251,8 +251,14 @@ public:
             allies.remove(player);
             if (allies.size() > 5)
                 allies.resize(5);
+            bool const appraised = player->HasAura(HolyForm) && player->HasAura(300353);
+            uint32 const shared = CalculatePct(healing, Amount(301011));
             for (Unit* ally : allies)
-                Copy(player, ally, 301012, CalculatePct(healing, Amount(301011)));
+            {
+                Copy(player, ally, 301012, shared);
+                if (appraised)
+                    Copy(player, ally, 805489, shared);
+            }
         }
         if (Derived(info) || State(player).event)
             return;
