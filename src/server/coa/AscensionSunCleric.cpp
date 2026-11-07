@@ -333,6 +333,21 @@ void ReleaseSuncharge(Player* player, Unit* target, uint32 stacks)
     State(player).sunchargeStacks = previous;
     target->RemoveAurasDueToSpell(807080,player->GetGUID());
 }
+namespace
+{
+void MapButtons(Player* player, uint32 from, uint32 to)
+{
+    bool changed = false;
+    for (uint8 slot = 0; slot < MAX_ACTION_BUTTONS; ++slot)
+    {
+        ActionButton const* button = player->GetActionButton(slot);
+        if (button && button->GetType() == ACTION_BUTTON_SPELL && button->GetAction() == from)
+            changed = player->addActionButton(slot, to, ACTION_BUTTON_SPELL) != nullptr || changed;
+    }
+    if (changed && player->IsInWorld())
+        player->SendActionButtons(1);
+}
+}
 void Refresh(Player* player)
 {
     auto& state = State(player);
