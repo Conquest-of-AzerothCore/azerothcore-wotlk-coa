@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionClientLua.h"
+#include "AsyncCallbackProcessor.h"
 #include "DatabaseEnv.h"
 #include "Item.h"
 #include "Log.h"
@@ -14,6 +15,9 @@
 #include "WorldPacket.h"
 #include <algorithm>
 #include <limits>
+#include <memory>
+#include <mutex>
+#include <utility>
 #include <vector>
 
 namespace
@@ -25,9 +29,23 @@ namespace
     };
 
     std::vector<Reward> rewards;
+    std::mutex commitLock;
+    AsyncCallbackProcessor<TransactionCallback> commits;
 
-    void ShowRewardToast(Player* player, uint64 claim)
+    void ScheduleLoginReward(Player* player, uint8 attempts = 12);
+
+    void ShowRewardToast(Player* player, uint64 claim, uint8 attempts = 12)
     {
+        if (!player->IsInWorld() || !player->FindMap() || player->IsBeingTeleported())
+        {
+            if (attempts > 1)
+                player->m_Events.AddEventAtOffset([guid = player->GetGUID(), claim, attempts]()
+                {
+                    if (Player* current = ObjectAccessor::FindConnectedPlayer(guid))
+                        ShowRewardToast(current, claim, attempts - 1);
+                }, Milliseconds(5000));
+            return;
+        }
         AscensionClientLuaChunk chunk;
         chunk.RequirementTypeId = 24;
         chunk.RequirementId = 16265;
@@ -62,17 +80,10 @@ end)
         RunAscensionClientLua(player, chunk);
     }
 
-    void GrantDailyLogin(Player* player)
+    void CompleteDailyLogin(Player* player, PreparedQueryResult const& result)
     {
         WorldSession* session = player->GetSession();
-        if (rewards.empty() || !session || session->IsBot() || !player->IsInWorld() ||
-            player->IsBeingTeleported() || !player->FindMap())
-            return;
-
-        auto* read = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_DAILY_LOGIN);
-        read->SetData(0, session->GetAccountId());
-        PreparedQueryResult result = CharacterDatabase.Query(read);
-        if (!result)
+        if (!session)
             return;
         Field* fields = result->Fetch();
         uint64 const nextClaim = fields[0].Get<uint64>();
@@ -90,41 +101,76 @@ end)
         claim->SetData(4, previousClaim);
         transaction->Append(claim);
 
-        MailDraft mail("Daily Login Reward", "Thank you for playing Conquest of Azeroth! Your daily rewards are enclosed.");
+        auto mail = std::shared_ptr<MailDraft>(new MailDraft("Daily Login Reward",
+            "Thank you for playing Conquest of Azeroth! Your daily rewards are enclosed."), [](MailDraft* draft)
+        {
+            draft->DiscardItems();
+            delete draft;
+        });
         for (Reward const& reward : rewards)
         {
             ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(reward.Item);
             if (!itemTemplate)
-            {
-                mail.DiscardItems();
                 return;
-            }
             uint32 remaining = reward.Quantity;
             while (remaining)
             {
                 uint32 const count = std::min(remaining, uint32(itemTemplate->GetMaxStackSize()));
                 Item* item = Item::CreateItem(reward.Item, count, player);
                 if (!item)
-                {
-                    mail.DiscardItems();
                     return;
-                }
                 item->SaveToDB(transaction);
-                mail.AddItem(item);
+                mail->AddItem(item);
                 remaining -= count;
             }
         }
-        auto staged = mail.StageMailTo(transaction, player->GetGUID().GetCounter(), MailSender(MAIL_NORMAL, 0));
-        if (!staged || !CharacterDatabase.AsyncCommitTransaction(transaction).m_future.get())
-        {
-            mail.DiscardItems();
+        auto staged = mail->StageMailTo(transaction, player->GetGUID().GetCounter(), MailSender(MAIL_NORMAL, 0));
+        if (!staged)
             return;
-        }
-        mail.PublishStagedMail(*staged, player);
-        ShowRewardToast(player, previousClaim + 1);
+        auto committed = CharacterDatabase.AsyncCommitTransaction(transaction);
+        std::lock_guard lock(commitLock);
+        commits.AddCallback(std::move(committed)).AfterComplete(
+            [mail, staged = *staged, guid = player->GetGUID(),
+             accountId = player->GetSession()->GetAccountId(), claimNumber = previousClaim + 1](bool success)
+        {
+            if (!success)
+                return;
+            Player* current = ObjectAccessor::FindConnectedPlayer(guid);
+            if (current && (!current->GetSession() || current->GetSession()->GetAccountId() != accountId))
+                current = nullptr;
+            mail->PublishStagedMail(staged, current);
+            if (current)
+                ShowRewardToast(current, claimNumber);
+        });
     }
 
-    void ScheduleLoginReward(Player* player, uint8 attempts = 12)
+    void GrantDailyLogin(Player* player)
+    {
+        WorldSession* session = player->GetSession();
+        if (rewards.empty() || !session || session->IsBot() || !player->IsInWorld() ||
+            player->IsBeingTeleported() || !player->FindMap())
+            return;
+        auto* read = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_DAILY_LOGIN);
+        read->SetData(0, session->GetAccountId());
+        session->GetQueryProcessor().AddCallback(CharacterDatabase.AsyncQuery(read).WithPreparedCallback(
+            [guid = player->GetGUID(), accountId = session->GetAccountId()](PreparedQueryResult result)
+        {
+            if (!result)
+                return;
+            Player* current = ObjectAccessor::FindConnectedPlayer(guid);
+            if (!current || !current->GetSession() || current->GetSession()->GetAccountId() != accountId ||
+                current->GetSession()->IsBot())
+                return;
+            if (!current->IsInWorld() || !current->FindMap() || current->IsBeingTeleported())
+            {
+                ScheduleLoginReward(current);
+                return;
+            }
+            CompleteDailyLogin(current, result);
+        }));
+    }
+
+    void ScheduleLoginReward(Player* player, uint8 attempts)
     {
         player->m_Events.AddEventAtOffset([guid = player->GetGUID(), attempts]()
         {
@@ -144,7 +190,13 @@ end)
     class DailyLoginWorld final : public WorldScript
     {
     public:
-        DailyLoginWorld() : WorldScript("coa_daily_login_world", {WORLDHOOK_ON_STARTUP}) { }
+        DailyLoginWorld() : WorldScript("coa_daily_login_world", {WORLDHOOK_ON_STARTUP, WORLDHOOK_ON_UPDATE}) { }
+
+        void OnUpdate(uint32) override
+        {
+            std::lock_guard lock(commitLock);
+            commits.ProcessReadyCallbacks();
+        }
 
         void OnStartup() override
         {

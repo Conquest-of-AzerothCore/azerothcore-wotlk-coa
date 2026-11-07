@@ -2,6 +2,7 @@
 #include "AscensionClientLua.h"
 #include "Config.h"
 #include "DataMap.h"
+#include "GameTime.h"
 #include "ManastormModuleConfig.h"
 #include "ManastormRewards.h"
 #include "ObjectAccessor.h"
@@ -20,6 +21,7 @@ namespace
     struct CoALootClientState final : DataMap::Base
     {
         std::string Value;
+        uint32 ClockSync = 0;
     };
 
     constexpr std::string_view CoALootLua = R"lua(
@@ -356,20 +358,32 @@ namespace ManastormClientUIFixes
     {
         if (!CanPush(player))
             return;
-        std::string state = ManastormRewards::Instance().CoATokenClientState(player->GetGUID().GetCounter(), run);
+        std::string state = ManastormRewards::Instance().CoATokenClientState(
+            player->GetGUID().GetCounter(), run, false);
         auto* previous = player->CustomData.GetDefault<CoALootClientState>(CoALootStateKey);
         if (state == "{enabled=false}" && previous->Value.empty())
             return;
-        if (previous->Value == state)
+        bool const changed = previous->Value != state;
+        uint32 const now = uint32(GameTime::GetGameTime().count());
+        if (!changed && (state == "{enabled=false}" ||
+            (now >= previous->ClockSync && now - previous->ClockSync < 60)))
             return;
         previous->Value = state;
+        previous->ClockSync = now;
         AscensionClientLuaChunk chunk;
         chunk.RequirementTypeId = RequirementTypeId;
         chunk.RequirementId = 16264;
         chunk.Token = "MANASTORM_COA_TOKEN_REWARDS";
         chunk.TargetAddon = "Ascension_Manastorm";
-        chunk.Lua = "CoAManastormTokenState=" + state + "\n";
-        chunk.Lua.append(CoALootLua);
+        if (changed)
+        {
+            chunk.Lua = "CoAManastormTokenState=" + state + "\nCoAManastormTokenState.now=" +
+                std::to_string(now) + "\n";
+            chunk.Lua.append(CoALootLua);
+        }
+        else
+            chunk.Lua = "if CoAManastormTokenState then CoAManastormTokenState.now=" +
+                std::to_string(now) + ";CoAManastormTokenState.receivedAt=GetTime() end";
         RunAscensionClientLua(player, chunk);
     }
 

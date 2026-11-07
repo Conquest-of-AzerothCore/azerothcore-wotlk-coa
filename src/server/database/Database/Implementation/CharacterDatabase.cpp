@@ -38,7 +38,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_COA_DAILY_LOGIN,
         "SELECT CAST(COALESCE(MAX(next_claim_at), 0) AS UNSIGNED), "
         "CAST(COALESCE(MAX(claim_number), 0) AS UNSIGNED), CAST(UNIX_TIMESTAMP() AS UNSIGNED) "
-        "FROM account_coa_daily_login WHERE account_id = ?", CONNECTION_SYNCH);
+        "FROM account_coa_daily_login WHERE account_id = ?", CONNECTION_BOTH);
     PrepareStatement(CHAR_CLAIM_COA_DAILY_LOGIN,
         "INSERT INTO account_coa_daily_login (account_id, last_claim_at, next_claim_at, claim_number) "
         "VALUES (?, ?, ?, 1) ON DUPLICATE KEY UPDATE "

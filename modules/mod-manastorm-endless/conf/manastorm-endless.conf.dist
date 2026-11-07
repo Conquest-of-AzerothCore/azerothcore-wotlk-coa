@@ -5,7 +5,8 @@ Manastorm.Enable = 1
 
 # CoA realm only (CoA.ClassModel = "coa"). Replaces regular caches with Bazaar Tokens.
 # Bonus caches and other reward currencies keep their own delivery rules.
-# Apply the CoA token world/character migrations before enabling. Enabled requires restart.
+# Apply both world/character rev_20261103_01_manastorm_coa_token_rewards.sql and
+# rev_20261104_02_manastorm_coa_encounter_rewards.sql before enabling. Enabled requires restart.
 # The remaining policy options are reloadable. Existing windows retain their saved expiry.
 Manastorm.CoALootMode.Enabled = 0
 Manastorm.CoALootMode.FirstClear.Enabled = 1

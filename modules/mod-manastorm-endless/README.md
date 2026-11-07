@@ -333,6 +333,9 @@ defaults to disabled and requires a restart. Bonus caches use their existing sep
 Apply `rev_20261103_01_manastorm_coa_token_rewards.sql` from both `pending_db_world` and
 `pending_db_characters` through the core updater before using the feature. The character migration
 also supplies tables used by the module's prepared statements and character deletion hook.
+The world and character `rev_20261104_02_manastorm_coa_encounter_rewards.sql` migrations are also
+required: reward-rule loading reads the world encounter table, and Greedy Demon claims use the
+character encounter-receipt table.
 
 The default world rule grants 25 tokens for the first completion of a depth in each character's
 personal window, and 10 for repeats. First clears are separate for Solo/Duo/Trio/Group and

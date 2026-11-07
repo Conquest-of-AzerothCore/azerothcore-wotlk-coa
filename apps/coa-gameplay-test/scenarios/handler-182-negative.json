@@ -107,6 +107,14 @@
     {
       "action": "assert",
       "actor": "hero",
+      "metric": "spell_go_count",
+      "label": "moving_cast_executed",
+      "spell": 92641,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
       "metric": "position_o",
       "label": "moving_caster_unchanged",
       "equals": 0

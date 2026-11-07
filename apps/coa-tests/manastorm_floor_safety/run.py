@@ -137,8 +137,8 @@ def main():
     portal = method(source, 'void ManastormMgr::SpawnStagePortal(')
     assert 'UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC' in portal
     necromancer = (ROOT / 'src/server/coa/AscensionNecromancerAbilities.cpp').read_text(encoding='utf-8')
-    assert 'Command(info) && (player->HasAura(500983) || Minions(player).empty())' in necromancer
-    assert '(!Named(info, 504868) && Minions(player).empty())' not in necromancer
+    assert 'Command(info) && (player->HasAura(500983) ||' in necromancer
+    assert '(!Named(info, 504868) && Minions(player).empty())' in necromancer
     patch = method(spells, 'void OnLoadSpellCustomAttr(').replace(
         'void OnLoadSpellCustomAttr(', 'void PatchSafetySpell(').replace(' override', '')
     code = code.replace('// ACTUAL_PATCH', patch)

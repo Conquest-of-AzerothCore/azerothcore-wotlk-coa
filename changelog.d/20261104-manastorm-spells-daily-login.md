@@ -14,6 +14,10 @@
 
 ## Realm performance and inventory reliability
 
+- Read daily-login eligibility asynchronously and publish committed reward mail through a world-owned callback, retaining atomic claim/mail writes and cleanup across logout or failure.
+- Compare native token reward fields independently of the clock; send a small periodic clock refresh instead of repeating the full reward UI Lua.
+- Preserve the petless Command: Undead exemption used by Crypt Explosion while retaining the other minion and aura safety checks.
+
 - Stagger RAF reward checks and poll unlinked accounts roughly every 15 minutes after login. Retain periodic recovery of rewards queued before unlinking and normal progress checkpoints for recruits.
 - Move XP Hotspot timers to player-owned state so ordinary updates skip the shared lock until the next refresh. Retain the pre-reward location check for kills.
 - Persist Bloodforging through the normal inventory save path so the converted item and jar use can be saved together. Remove the synchronous spell-handler save that terminated the server on failure.
@@ -40,7 +44,7 @@
 - Share a 1000-token allowance across a character's personal 24-hour reward window, with persistent accounting and partial capped payouts.
 - Display token amounts, allowance and countdown in the native reward panel. Keep bonus-cache accounting separate.
 - Reduce selected scarce material probabilities by 75% and selected late-game material probabilities by 50%, using DB-tunable retention percentages.
-- Halve the supplied difficulty-1 health curve across depths 1â€“2000 through a replay-guarded SQL migration.
+- Halve the supplied difficulty-1 health curve across depths 1-2000 through a replay-guarded SQL migration.
 
 ## Manastorm advancement and safety
 

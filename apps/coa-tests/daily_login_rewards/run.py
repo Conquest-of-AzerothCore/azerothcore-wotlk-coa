@@ -10,11 +10,14 @@ ROOT = Path(__file__).resolve().parents[3]
 class DailyLoginTests(unittest.TestCase):
     def setUp(self):
         self.db = sqlite3.connect(':memory:')
-        schema = (ROOT / 'data/sql/updates/pending_db_characters/rev_20261104_01_coa_daily_login.sql').read_text()
+        schema = (ROOT / 'data/sql/updates/pending_db_characters/rev_20261104_01_coa_daily_login.sql') \
+            .read_text(encoding='utf-8')
         self.db.executescript(re.sub(r'\) ENGINE=InnoDB[^;]*;', ');', schema))
         self.db.execute('CREATE TABLE reward_mail (account_id INTEGER, quantity INTEGER)')
-        source = (ROOT / 'src/server/database/Database/Implementation/CharacterDatabase.cpp').read_text()
-        statement = re.search(r'PrepareStatement\(CHAR_CLAIM_COA_DAILY_LOGIN,\s*((?:"[^"\n]*"\s*)+), CONNECTION_', source)[1]
+        source = (ROOT / 'src/server/database/Database/Implementation/CharacterDatabase.cpp') \
+            .read_text(encoding='utf-8')
+        pattern = r'PrepareStatement\(CHAR_CLAIM_COA_DAILY_LOGIN,\s*((?:"[^"\n]*"\s*)+), CONNECTION_'
+        statement = re.search(pattern, source)[1]
         self.claim = ''.join(json.loads(part) for part in re.findall(r'"[^"\n]*"', statement))
         self.claim = self.claim.replace('ON DUPLICATE KEY UPDATE', 'ON CONFLICT(account_id) DO UPDATE SET')
         self.claim = self.claim.replace('IF(next_claim_at <= ? AND claim_number = ?, claim_number + 1, 0)',
@@ -63,7 +66,8 @@ class DailyLoginTests(unittest.TestCase):
         self.award(1, 1000, 0)
 
     def test_reward_seed_preserves_tuning(self):
-        text = (ROOT / 'data/sql/updates/pending_db_world/rev_20261104_01_coa_daily_login.sql').read_text()
+        text = (ROOT / 'data/sql/updates/pending_db_world/rev_20261104_01_coa_daily_login.sql') \
+            .read_text(encoding='utf-8')
         text = re.sub(r'\) ENGINE=InnoDB[^;]*;', ');', text).replace('INSERT IGNORE', 'INSERT OR IGNORE')
         self.db.executescript(text)
         self.assertEqual(self.db.execute('SELECT item_entry, quantity FROM coa_daily_login_rewards').fetchone(),
@@ -73,10 +77,11 @@ class DailyLoginTests(unittest.TestCase):
         self.assertEqual(self.db.execute('SELECT quantity, enabled FROM coa_daily_login_rewards').fetchone(), (300, 0))
 
     def test_publication_order_and_login_guards(self):
-        source = (ROOT / 'src/server/coa/AscensionDailyLogin.cpp').read_text()
-        self.assertLess(source.index('AsyncCommitTransaction'), source.index('mail.PublishStagedMail'))
-        self.assertLess(source.index('mail.PublishStagedMail'), source.index('ShowRewardToast(player,'))
-        for guard in ('mail.DiscardItems()', 'session->IsBot()',
+        source = (ROOT / 'src/server/coa/AscensionDailyLogin.cpp').read_text(encoding='utf-8')
+        completion = source.split('void CompleteDailyLogin(', 1)[1].split('void GrantDailyLogin(', 1)[0]
+        self.assertLess(completion.index('AsyncCommitTransaction'), completion.index('mail->PublishStagedMail'))
+        self.assertLess(completion.index('mail->PublishStagedMail'), completion.index('ShowRewardToast(current,'))
+        for guard in ('draft->DiscardItems()', 'session->IsBot()',
                       '!current->IsInWorld()', '"Daily Login Reward"', 'HandleItemQuerySingleOpcode'):
             self.assertIn(guard, source)
         self.assertNotIn('AscensionWildcard', source)

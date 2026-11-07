@@ -76,7 +76,8 @@ public:
     bool LoadCoATokenState(ObjectGuid::LowType characterGuid, ManastormCoATokenState& state) const;
     bool IsCoAFirstClear(ManastormCoATokenState const& state, ManastormMode mode, bool endgame, uint32 depth) const;
     uint32 CoATokenReward(ManastormMode mode, bool endgame, uint32 depth, bool firstClear) const;
-    std::string CoATokenClientState(ObjectGuid::LowType characterGuid, ManastormRun const* run) const;
+    std::string CoATokenClientState(ObjectGuid::LowType characterGuid, ManastormRun const* run,
+        bool includeClock = true) const;
 
     bool LoadState(
         ObjectGuid::LowType characterGuid,

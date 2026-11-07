@@ -8,10 +8,10 @@ INSERT IGNORE INTO `achievement_criteria_data` (`criteria_id`,`type`,`value1`,`v
 SELECT 202, `s`.`type`,`s`.`value1`,`s`.`value2`,`s`.`ScriptName`
 FROM `achievement_criteria_data` AS `s`
 WHERE `s`.`criteria_id`=211 AND `s`.`type`=12 AND `s`.`value1`=0 AND `s`.`value2`=0
-  AND NOT EXISTS (SELECT 1 FROM `achievement_criteria_data` AS `d` WHERE `d`.`criteria_id`=202);
+    AND NOT EXISTS (SELECT 1 FROM `achievement_criteria_data` AS `d` WHERE `d`.`criteria_id`=202);
 
 INSERT IGNORE INTO `achievement_criteria_data` (`criteria_id`,`type`,`value1`,`value2`,`ScriptName`)
 SELECT 6801, `s`.`type`,`s`.`value1`,`s`.`value2`,`s`.`ScriptName`
 FROM `achievement_criteria_data` AS `s`
 WHERE `s`.`criteria_id`=6805 AND `s`.`type`=12 AND `s`.`value1`=1 AND `s`.`value2`=0
-  AND NOT EXISTS (SELECT 1 FROM `achievement_criteria_data` AS `d` WHERE `d`.`criteria_id`=6801);
+    AND NOT EXISTS (SELECT 1 FROM `achievement_criteria_data` AS `d` WHERE `d`.`criteria_id`=6801);

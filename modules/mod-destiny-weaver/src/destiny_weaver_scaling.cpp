@@ -362,7 +362,8 @@ namespace
         else if (!personalInstance && !scope->WorldMaps.contains(map->GetId()))
             return false;
 
-        if (creature->IsPet() || creature->IsTrigger() || creature->IsCritter() || (creature->isWorldBoss() && !personalInstance) ||
+        if (creature->IsPet() || creature->IsTrigger() || creature->IsCritter() ||
+            (creature->isWorldBoss() && !personalInstance) ||
             creature->GetCreatureType() == CREATURE_TYPE_NON_COMBAT_PET || creature->IsControlledByPlayer() ||
             creature->GetCharmerOrOwnerPlayerOrPlayerItself())
             return false;

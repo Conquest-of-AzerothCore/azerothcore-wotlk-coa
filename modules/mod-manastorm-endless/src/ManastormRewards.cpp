@@ -1174,7 +1174,7 @@ bool ManastormRewards::AwardCoAGreedyReward(Player* player, ManastormRun const& 
 }
 
 std::string ManastormRewards::CoATokenClientState(ObjectGuid::LowType characterGuid,
-    ManastormRun const* run) const
+    ManastormRun const* run, bool includeClock) const
 {
     if (!IsCoALootMode(characterGuid))
         return "{enabled=false}";
@@ -1196,9 +1196,10 @@ std::string ManastormRewards::CoATokenClientState(ObjectGuid::LowType characterG
         bonusItem = 0;
     }
     lua << "{enabled=true,earned=" << state.Window.Earned << ",cap=" << ManastormModuleConfig::CoATokenCap()
-        << ",start=" << state.Window.Start << ",finish=" << state.Window.End
-        << ",now=" << uint32(GameTime::GetGameTime().count())
-        << ",first=" << (ManastormModuleConfig::CoAFirstClearEnabled() ? "true" : "false")
+        << ",start=" << state.Window.Start << ",finish=" << state.Window.End;
+    if (includeClock)
+        lua << ",now=" << uint32(GameTime::GetGameTime().count());
+    lua << ",first=" << (ManastormModuleConfig::CoAFirstClearEnabled() ? "true" : "false")
         << ",repeatReward=" << (ManastormModuleConfig::CoARepeatEnabled() ? "true" : "false")
         << ",perWindow=" << (ManastormModuleConfig::CoAFirstClearResetsWithWindow() ? "true" : "false")
         << ",bonus=" << (run ? run->GetBonusCacheCount() : 0) << ",bonusItem=" << bonusItem << ",bonusTokens=" << bonusTokens
