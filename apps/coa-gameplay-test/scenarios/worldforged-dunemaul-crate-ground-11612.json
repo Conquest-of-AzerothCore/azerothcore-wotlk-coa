@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "name": "The Dunemaul Crate rests on the ground in the Dunemaul Compound (#11612)",
+  "contract": "#11612 reported the Dunemaul Crate pickup (gameobject entry 515772, guid 6941658) floating at the Dunemaul Compound in Tanaris. It stood 1.22 yd above the terrain at its x/y; it now rests on the ground the server finds under it, so the Dunemaul Warbelt chest opens.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -8280.1035,
+    "y": -2911.737,
+    "z": 11.058,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 515772,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup rests on the ground instead of floating above it",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6941658,
+      "spawn_type": "gameobject",
+      "min": -0.3,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is grounded within 0.8 yd",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "guid": 6941658,
+      "spawn_type": "gameobject",
+      "tolerance": 0.8,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is not under water",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "guid": 6941658,
+      "spawn_type": "gameobject",
+      "equals": 0
+    }
+  ]
+}
