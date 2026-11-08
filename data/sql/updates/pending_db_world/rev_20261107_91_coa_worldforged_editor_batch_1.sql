@@ -112,3 +112,7 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940532 AND `id` = 517354
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940846 AND `id` = 515345;
 -- pickup 6940847 (Wheel) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940847 AND `id` = 515345;
+
+-- #7886
+-- pickup 6942434 (Highborne Momento) moved 15.5 yd across and 5.25 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 6340.7366, `position_y` = -3869.7164, `position_z` = 687.8125, `orientation` = 0.66858, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.328099, `rotation3` = 0.944643 WHERE `guid` = 6942434 AND `id` = 96226;
