@@ -10,3 +10,7 @@ UPDATE `creature` SET `position_x` = -8071.4737, `position_y` = 1700.8625, `posi
 -- #11201
 -- pickup 6940795 (Ring of the Jungle) moved 11.0 yd across and 14.80 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -12367.8783, `position_y` = -734.0621, `position_z` = 33.9647, `orientation` = 1.22969, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.576832, `rotation3` = 0.816863 WHERE `guid` = 6940795 AND `id` = 254349;
+
+-- #11235
+-- pickup 6970042 (Brambleblade Blade) moved 29.2 yd across and 0.99 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -4931.6629, `position_y` = -2277.9665, `position_z` = -65.5449, `orientation` = 6.165028, `rotation0` = -0.0421068, `rotation1` = 0.436118, `rotation2` = -0.0204341, `rotation3` = 0.898672 WHERE `guid` = 6970042 AND `id` = 9900038;
