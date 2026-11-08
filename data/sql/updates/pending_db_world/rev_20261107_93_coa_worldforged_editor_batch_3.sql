@@ -70,3 +70,7 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941369 AND `id` = 95902;
 -- #10959
 -- pickup 6940636 (Hull Breaker) moved 22.6 yd across and 0.32 yd down to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -14678.4505, `position_y` = 500.5863, `position_z` = 2.9927, `orientation` = 0.430102, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.213397, `rotation3` = 0.976965 WHERE `guid` = 6940636 AND `id` = 95710;
+
+-- #10960
+-- pickup 6940715 (Waterproof Trunk) moved 13.3 yd across and 0.62 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -1925.9785, `position_y` = -2474.6365, `position_z` = 42.4156, `orientation` = 6.08626, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.098304, `rotation3` = -0.995156 WHERE `guid` = 6940715 AND `id` = 95876;
