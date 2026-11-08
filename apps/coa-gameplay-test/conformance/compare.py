@@ -13,6 +13,7 @@ from behaviours import (BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_DURATION, B
                         BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
 from hits import (HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS, WEAPON_PERCENT_DAMAGE, Z_99,
                   HitModel, Modifier, Unmodelled, measured_hit_model)
+from observations import player_observations
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE
 from procs import AMBIGUOUS_TOOLTIP, CAST, PROC_CHECK, chance_of, wilson_interval
 from profile import DBC_DIR, EQUIP_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label
@@ -1932,6 +1933,23 @@ def passive_lines(manifest: dict, verdicts: list[Verdict]) -> list[str]:
     return lines
 
 
+def observation_lines(class_file: dict, verdicts: list[Verdict]) -> list[str]:
+    observations = player_observations(class_file)
+    if not observations:
+        return []
+    by_label = {verdict.label: verdict for verdict in verdicts}
+    lines = ['', '## Player observations', '',
+             'A player report of production-server behaviour; it corroborates or contradicts a verdict, never '
+             'sets an expected value or settles one on its own.', '',
+             '| spell | name | citation | claim | corroborates | current status |', '|---|---|---|---|---|---|']
+    for entry in sorted(observations, key=lambda entry: (entry.spell, entry.citation, entry.corroborates)):
+        current = by_label.get(entry.corroborates)
+        status = current.status if current is not None else 'label not in this run'
+        lines.append(f'| {entry.spell} | {entry.name} | {entry.citation} | {cell(entry.claim)} | '
+                     f'{cell(entry.corroborates)} | {status} |')
+    return lines
+
+
 def report_lines(manifest: dict, manifest_path: Path, results_dir: Path, runs: dict[str, Run], missing: list[str],
                  verdicts: list[Verdict]) -> list[str]:
     statuses = Counter(verdict.status for verdict in verdicts)
@@ -1970,6 +1988,7 @@ def report_lines(manifest: dict, manifest_path: Path, results_dir: Path, runs: d
         counts = ' | '.join(str(by_spell[spell_id].get(status, 0)) for status in STATUSES)
         lines.append(f'| {spell_id} | {names.get(spell_id, "")} | {counts} |')
     lines += passive_lines(manifest, verdicts)
+    lines += observation_lines(manifest['class_file'], verdicts)
     if missing:
         lines += ['', '## Scenarios without a result', ''] + [f'- `{key}`' for key in missing]
     if failed:

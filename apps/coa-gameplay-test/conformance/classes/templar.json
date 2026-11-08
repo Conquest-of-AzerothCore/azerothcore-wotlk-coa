@@ -967,5 +967,43 @@
       "override_file": "AscensionTemplarContracts.cpp",
       "reduce_function": "ReduceDebt"
     }
+  ],
+  "player_observations": [
+    {
+      "spell": 706325, "name": "Condemnation", "date": "2026-11-07", "citation": "player report 2026-11-07",
+      "claim": "Zealotry can proc back to back on each damage tick of Blade of Faith (per-tick, not once per cast); a screenshot shows one Blade of Faith tick followed by one Zealotry hit between ticks.",
+      "corroborates": "706325 proc_rate"
+    },
+    {
+      "spell": 92111, "name": "Scourgebane", "date": "2026-11-07", "citation": "player report 2026-11-07",
+      "claim": "Scourgebane does not proc off itself.",
+      "corroborates": "92111 proc_rate"
+    },
+    {
+      "spell": 92111, "name": "Scourgebane", "date": "2026-11-07", "citation": "player report 2026-11-07",
+      "claim": "Argent Blade procs Scourgebane.",
+      "corroborates": "92111 proc_rate 804929"
+    },
+    {
+      "spell": 520883, "name": "Light's Echo", "date": "2026-11-07", "citation": "player report 2026-11-07",
+      "claim": "No proc seen after about 30 Argent Blade casts.",
+      "corroborates": "520883 proc_rate"
+    },
+    {
+      "spell": 520608, "name": "Scourge-Defense Training", "date": "2026-11-07",
+      "citation": "player report 2026-11-07",
+      "claim": "The Warrior of Dawn tooltip shows 20% increased critical strike chance, not the 50% Scourge-Defense Training's own tooltip promises on that clause.",
+      "corroborates": "520608 e1"
+    },
+    {
+      "spell": 572547, "name": "Holy Upheaval", "date": "2026-11-07", "citation": "player report 2026-11-07",
+      "claim": "Zealotry's tooltip still shows 20% per stack after learning Holy Upheaval (which should raise it to 40%); whether the underlying damage is actually boosted is not stated.",
+      "corroborates": "572547 e0 spell_modifier 92108"
+    },
+    {
+      "spell": 92108, "name": "Zealotry", "date": "2026-11-07", "citation": "player report 2026-11-07",
+      "claim": "In the combat log, only off-hand auto attacks trigger Zealotry; Vindication, which should trigger it, does not.",
+      "corroborates": "92108 trigger_count"
+    }
   ]
 }

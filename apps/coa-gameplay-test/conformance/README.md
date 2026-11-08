@@ -49,6 +49,8 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
 - `coverage.py`: `coverage(header, verdicts)` counts the verdicts per status and the class spells, passives and actives
   that a compare output judges (`Coverage`), and `write_coverage` writes `coverage.md` for two outputs (see
   [Coverage comparison](#coverage-comparison)).
+- `observations.py`: `player_observations(class_file)` reads and validates a class file's `player_observations`
+  array (see [Player observations](#player-observations)) and `observations_by_spell` groups them by spell id.
 - `conformance.py`: the command line, `generate`, `compare`, `diff` and `coverage`.
 - `classes/<name>.json`: one class file per class (`classes/templar.json`).
 
@@ -1123,6 +1125,27 @@ claim the tooltip actually makes.
 
 The 10-yard and 8-yard fixture radii above are both read from server source, never guessed, per each entry's own
 `radius_reason`.
+
+## Player observations
+
+A class file's `player_observations` entry is `{"spell", "name", "date", "citation", "claim", "corroborates"}`: a
+player's report of how a spell behaves on the CoA production server (this fork's own code, possibly a different
+commit; never Ascension's own, closed live realm). `citation` is always `"player report <date>"`, with no
+character or player name ([no raw log lines or names rule](../../../AGENTS.md)), and `date` must match it;
+`checked_observation` (`observations.py`) raises otherwise. `claim` is the player's own observation in prose.
+`corroborates` names the `label` of the verdict it bears on — a `report.md`/`verdicts.json` label such as
+`"706325 proc_rate"` or `"520608 e1"`, not a spell id alone, since several labels can share a spell.
+
+This mechanism is generic and class-agnostic: `compare.py`'s `observation_lines` reads the array from whatever
+class file `report.md` is built from and prints each entry beside the *current* status of the verdict it names,
+without knowing anything about Templar or any other class's spells. A player observation never sets an expected
+value, never settles a verdict and never picks a tooltip reading on its own ([ADR
+0025](../../../docs/adr/0025-player-observations-corroborate-never-settle-a-verdict.md)): it is prose evidence
+that a verdict's `ambiguous_tooltip`/`unmodelled` status, or its chosen reading, holds (or does not hold) on the
+production server, read beside the DBC-derived expectation the run already judges. When `corroborates` names a
+label the current run does not carry — because the scenario that would measure it has not been written yet, or
+its name changed — the row says so (`label not in this run`) instead of silently matching nothing, so a stale
+citation is visible rather than hidden.
 
 ## Talent stack (lever map)
 

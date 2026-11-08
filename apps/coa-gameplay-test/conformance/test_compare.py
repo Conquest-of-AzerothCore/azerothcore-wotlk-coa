@@ -9,8 +9,9 @@ import sys
 import tempfile
 import unittest
 
-from compare import (EFFECT_VALUE_SCOPE, PERCENT_POINT_METRICS, DbcTooltips, ScenarioDrift, compare, delta_margin,
-                     measured_values, question_detail, read_verdicts, write_outputs)
+from compare import (EFFECT_VALUE_SCOPE, PERCENT_POINT_METRICS, DbcTooltips, ScenarioDrift, Verdict, compare,
+                     delta_margin, measured_values, observation_lines, question_detail, read_verdicts,
+                     write_outputs)
 from hits import HitModel, Modifier
 from profile import CLASSES_DIR, DBC_DIR
 from classes import class_spells
@@ -1040,6 +1041,34 @@ class GenerateTest(unittest.TestCase):
                                                   if item['check'] == 'hit_mean'])
         finally:
             shutil.rmtree(out)
+
+
+def verdict(label: str, status: str) -> Verdict:
+    return Verdict(label, status, None, None, None, None, '')
+
+
+class ObservationLinesTest(unittest.TestCase):
+    def test_empty_without_any_player_observations(self):
+        self.assertEqual(observation_lines({}, []), [])
+
+    def test_shows_the_current_status_of_the_corroborated_verdict(self):
+        class_file = {'player_observations': [
+            {'spell': 706325, 'name': 'Condemnation', 'date': '2026-11-07', 'citation': 'player report 2026-11-07',
+             'claim': 'Zealotry procs on each damage tick, not once per cast.',
+             'corroborates': '706325 proc_rate'}]}
+        lines = observation_lines(class_file, [verdict('706325 proc_rate', 'ambiguous_tooltip')])
+        self.assertIn('## Player observations', lines)
+        row = next(line for line in lines if line.startswith('| 706325 |'))
+        self.assertIn('706325 proc_rate', row)
+        self.assertIn('ambiguous_tooltip', row)
+
+    def test_a_corroborates_label_absent_from_this_run_is_reported_rather_than_silently_matched(self):
+        class_file = {'player_observations': [
+            {'spell': 92111, 'name': 'Scourgebane', 'date': '2026-11-07', 'citation': 'player report 2026-11-07',
+             'claim': 'Argent Blade procs Scourgebane.', 'corroborates': '92111 proc_rate 804929'}]}
+        lines = observation_lines(class_file, [verdict('92111 proc_rate', 'ambiguous_tooltip')])
+        row = next(line for line in lines if line.startswith('| 92111 |'))
+        self.assertIn('label not in this run', row)
 
 
 if __name__ == '__main__':
