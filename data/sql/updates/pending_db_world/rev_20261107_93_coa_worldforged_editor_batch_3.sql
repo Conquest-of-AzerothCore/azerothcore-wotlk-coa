@@ -96,3 +96,7 @@ UPDATE `gameobject` SET `position_x` = -1766.0787, `position_y` = -2874.4441, `p
 -- #11093
 -- pickup 6942107 (Ancient Statue) moved 1.7 yd across and 37.55 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -5657.6771, `position_y` = 1375.1053, `position_z` = 78.4736, `orientation` = 6.168476, `rotation0` = 0, `rotation1` = 0, `rotation2` = -0.0573231, `rotation3` = 0.998356 WHERE `guid` = 6942107 AND `id` = 96111;
+
+-- #11116
+-- pickup 6940924 (Radiant Rifle) moved 39.1 yd across and 14.43 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -5962.1306, `position_y` = 428.5849, `position_z` = 522.8098, `orientation` = 3.463178, `rotation0` = 0.459184, `rotation1` = 0.064559, `rotation2` = 0.875369, `rotation3` = -0.136789 WHERE `guid` = 6940924 AND `id` = 520073;
