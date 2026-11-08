@@ -120,3 +120,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `size`, `Data0`, `Data1`, `AIName`, `ScriptName`) VALUES (9900049, 5, 1072391, 'Sand Pile', 1, 0, 0, '', '') ON DUPLICATE KEY UPDATE `type` = 5, `displayId` = 1072391, `name` = 'Sand Pile', `size` = 1;
 DELETE FROM `gameobject` WHERE `guid` = 6976002;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976002, 9900049, 1, 1, 1, -9695.054092, -1924.630704, -0.655023, 6.004578, 0, 0, -0.138854, 0.990313, 300, 100, 1);
+
+-- #11627
+-- pickup 6941514 (Burning Blade Ring) moved 2.2 yd across and 0.00 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -61.863, `position_y` = -4205.79, `position_z` = 63.508, `orientation` = 5.75124, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.262848, `rotation3` = -0.964837 WHERE `guid` = 6941514 AND `id` = 90297;
