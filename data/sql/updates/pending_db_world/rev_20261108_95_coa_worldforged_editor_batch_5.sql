@@ -87,3 +87,7 @@ UPDATE `gameobject_template` SET `size` = 0.7 WHERE `entry` = 95624;
 -- #11601
 -- pickup 6941557 (Lost Shipment) moved 28.8 yd across and 0.00 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 749.815, `position_y` = 1413.85, `position_z` = -14.223, `orientation` = 1.70245, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.752088, `rotation3` = 0.659062 WHERE `guid` = 6941557 AND `id` = 97108;
+
+-- #11602
+-- pickup 6941890 (Sack of Kodo Hides) moved 9.4 yd across and 0.00 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -1405.21, `position_y` = 2084.78, `position_z` = 61.954, `orientation` = 2.05731, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.856606, `rotation3` = 0.515971 WHERE `guid` = 6941890 AND `id` = 254284;
