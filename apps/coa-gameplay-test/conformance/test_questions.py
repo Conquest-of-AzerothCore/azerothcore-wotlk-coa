@@ -1,6 +1,7 @@
 from dataclasses import asdict
 import math
 from pathlib import Path
+import re
 import shutil
 import tempfile
 import unittest
@@ -165,7 +166,8 @@ class QuestionTest(unittest.TestCase):
             self.assertAlmostEqual(reading['rate'], 525 / trials)
             self.assertEqual((reading['low'], reading['high']), wilson_interval(525, trials))
         self.assertEqual([reading['predicted'] for reading in item.readings], [0.2, 0.25])
-        self.assertIn('Scourgebane ever proc twice between two of your auto attacks', item.question)
+        self.assertIn('does a Scourgebane proc ever land between two auto attacks without an auto attack between '
+                      'them', item.question)
         self.assertEqual(item.labels, ('92111 proc_rate',))
         (spell, conditions), = item.conditions
         self.assertEqual(spell, SCOURGEBANE)
@@ -176,7 +178,7 @@ class QuestionTest(unittest.TestCase):
                                                            'at that count the 99% ranges of the readings (20.0% and '
                                                            '25.0%) no longer overlap.'),))
         self.assertEqual(observations(0.2, 0.25), 1842)
-        self.assertIn('Otherwise, count Scourgebane procs per auto attack that hits under', item.question)
+        self.assertIn('Otherwise, the logged Scourgebane procs per auto attack that hits under', item.question)
 
     def test_text_question_uses_the_class_file(self):
         self.status_entry(BLADE_SERMON[0])
@@ -192,7 +194,7 @@ class QuestionTest(unittest.TestCase):
         path = write_questions(questions(listed + [passing], chance_reader()), self.out)
         self.assertEqual(path, self.out / QUESTIONS_FILE)
         lines = path.read_text(encoding='utf-8').splitlines()
-        self.assertEqual(lines[0], '# Questions for players')
+        self.assertEqual(lines[0], '# Open conformance checks')
         start = lines.index('## Scourgebane (92111)')
         entry = lines[start:]
         self.assertIn('> Direct damage dealt now has a $520007h% chance to strike an enemy with Scourgebane, dealing '
@@ -206,7 +208,7 @@ class QuestionTest(unittest.TestCase):
         self.assertTrue(any(line.startswith('How we tested: Our test: the level 60 test character learned only '
                                             'Scourgebane') for line in entry))
         self.assertTrue(any(line.startswith('Observations needed: About 1842 auto attacks that hit') for line in entry))
-        self.assertTrue(any(line.startswith('Question: With Scourgebane learned') for line in entry))
+        self.assertTrue(any(line.startswith('To settle: With Scourgebane learned') for line in entry))
         self.assertNotIn('Never asked?', '\n'.join(lines))
         self.assertTrue(all(line.isascii() for line in lines))
 
@@ -301,7 +303,8 @@ class QuestionTest(unittest.TestCase):
                          "273 applications of Heaven's Finest (805390) for 273 Argent Blade hits")
         write_outputs(manifest, results, verdicts, self.out, tooltips=reader())
         lines = (self.out / QUESTIONS_FILE).read_text(encoding='utf-8').splitlines()
-        self.assertLess(lines.index('# Server behaviour to confirm'), lines.index("## Heaven's Finest (806516)"))
+        self.assertLess(lines.index('# Findings'), lines.index("## Heaven's Finest (806516)"))
+        self.assertTrue(any(line.startswith('Finding: ') for line in lines))
 
     def test_trigger_that_matches_its_tooltip_asks_nothing(self):
         self.workspace.scenario('conformance-templar-trigger-806516-part-1', 'trigger', [heavens_finest_expectation()],
@@ -335,9 +338,10 @@ class QuestionTest(unittest.TestCase):
         low, high = weapon['min_damage'], weapon['max_damage']
         variation = (2.15 * (high - low) / math.sqrt(12)) / (2.15 * (low + high) / 2 + 421)
         hits = math.ceil(2 * (Z_99 * variation * (1.2 + 1.25) / 0.05) ** 2)
-        self.assertIn(f'is a non-critical, unblocked Argent Blade hit 20% or 25% larger than without it? Record {hits} '
-                      f'non-critical, unblocked Argent Blade hits on the same target dummy without Paladin Training',
-                      item.question)
+        self.assertIn(f'Record {hits} non-critical, unblocked Argent Blade hits on the same target dummy without '
+                      f'Paladin Training', item.question)
+        self.assertIn('a non-critical, unblocked Argent Blade hit 20% or 25% larger than without Paladin Training '
+                      'matches one reading below', item.question)
         (_, observed), = item.observations
         self.assertIn(f'About {hits} non-critical, unblocked Argent Blade hits each way', observed)
         self.assertIn(f'with a weapon of {low:g} to {high:g} damage', observed)
@@ -392,6 +396,33 @@ class ClientTooltipTest(unittest.TestCase):
         self.assertIn('12 sec, stacking 6 times', templar_trigger(HEAVENS_FINEST)['question'])
         self.assertIn('5%', templar_proc(BLADE_SERMON[0])['question'])
         self.assertEqual(tooltips.spell_field(BLADE_SERMON[0], 'ProcChance'), 5)
+
+
+class NoLivePlayerWordingTest(unittest.TestCase):
+    PACKAGE_DIR = Path(__file__).resolve().parent
+    FORBIDDEN = (re.compile(r'\bon live\b', re.IGNORECASE), re.compile(r'\blive realm\b', re.IGNORECASE),
+                re.compile(r'please give your', re.IGNORECASE), re.compile(r'please answer', re.IGNORECASE),
+                re.compile(r'questions for players', re.IGNORECASE))
+
+    def check(self, path, text=None):
+        text = text if text is not None else (self.PACKAGE_DIR / path).read_text(encoding='utf-8')
+        for pattern in self.FORBIDDEN:
+            self.assertIsNone(pattern.search(text), f'{path} still contains {pattern.pattern!r}')
+
+    def test_questions_module_settles_from_logs_not_a_live_player(self):
+        self.check('questions.py')
+
+    def test_compare_module_settles_from_logs_not_a_live_player(self):
+        self.check('compare.py')
+
+    def test_templar_class_file_settles_from_logs_not_a_live_player(self):
+        self.check('classes/templar.json')
+
+    def test_readme_open_conformance_checks_section_settles_from_logs_not_a_live_player(self):
+        text = (self.PACKAGE_DIR / 'README.md').read_text(encoding='utf-8')
+        start = text.index('### Open conformance checks')
+        end = text.index('\n## ', start)
+        self.check('README.md#open-conformance-checks', text=text[start:end])
 
 
 if __name__ == '__main__':

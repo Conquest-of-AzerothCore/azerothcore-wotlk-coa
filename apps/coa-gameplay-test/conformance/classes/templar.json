@@ -107,7 +107,7 @@
          "meaning": "every direct damage hit rolls the chance, Scourgebane strikes too, so one Scourgebane can trigger another",
          "adds": [{"metric": "spell_damage_count", "spell": 801832}]}
       ],
-      "readings_question": "auto attack a single target dummy without using any ability: does Scourgebane ever proc twice between two of your auto attacks (one Scourgebane strike triggering another)? And do your abilities, such as Argent Blade, trigger Scourgebane too?",
+      "readings_question": "look in a reference log at auto attacks against a single target: does a Scourgebane proc ever land between two auto attacks without an auto attack between them (one Scourgebane strike triggering another)? Do abilities such as Argent Blade also log a Scourgebane proc?",
       "dbc": {
         "92111": {"ProcChance": 100, "ProcFlags": 0, "ProcCharges": 0},
         "520007": {"ProcChance": 20, "ProcFlags": 0, "ProcCharges": 0}
@@ -180,7 +180,7 @@
          "adds": [{"metric": "spell_damage_count", "spell": 804929}],
          "minus_events": false}
       ],
-      "readings_question": "cast Argent Blade at a single target dummy: after one cast, do you ever see two or more additional Argent Blade strikes (an additional strike triggering another)?",
+      "readings_question": "look in a reference log at casts of Argent Blade: does a cast ever log two or more additional Argent Blade strikes (one additional strike triggering another)?",
       "handler": "AscensionTemplarAbilities.cpp:296-300 recasts the cast rank, triggered, after a damaging hit",
       "dbc": {
         "520017": {"ProcChance": 10, "ProcFlags": 0, "ProcCharges": 0}
@@ -211,7 +211,7 @@
          "adds": [{"metric": "spell_damage_count", "spell": 804929}],
          "minus_events": false}
       ],
-      "readings_question": "cast Argent Blade at a single target dummy: after one cast, do you ever see two or more additional Argent Blade strikes (an additional strike triggering another)?",
+      "readings_question": "look in a reference log at casts of Argent Blade: does a cast ever log two or more additional Argent Blade strikes (one additional strike triggering another)?",
       "handler": "AscensionTemplarAbilities.cpp:296-300 recasts the cast rank, triggered, after a damaging hit",
       "dbc": {
         "520883": {"ProcChance": 20, "ProcFlags": 0, "ProcCharges": 0}
@@ -238,7 +238,7 @@
          "meaning": "every damage tick of Blade of Faith rolls the chance, so one cast can trigger Zealotry several times",
          "adds": []}
       ],
-      "readings_question": "cast Blade of Faith once at a single target dummy within melee range and wait the 30 sec of its damage: does Zealotry ever hit more than once during that one Blade of Faith?",
+      "readings_question": "look in a reference log at one cast of Blade of Faith within melee range, across its 30 sec of damage: does Zealotry ever log more than one hit from that one cast?",
       "dbc": {
         "706325": {"ProcChance": 15, "ProcFlags": 0, "ProcCharges": 0}
       },
@@ -268,7 +268,7 @@
       "status": "ambiguous_tooltip",
       "reason": "the tooltip does not say what triggers Zealotry, so neither a cast nor an attack follows from it",
       "handler": "AscensionTemplar.cpp:214-223 (Zealotry) rolls its ProcChance to cast the strike 801450 again",
-      "question": "Zealotry's own tooltip (801450) only says that it deals 80% off-hand Weapon Damage as Holy Damage. On live, what makes Zealotry hit: in the combat log, which of your attacks or abilities comes right before each Zealotry hit? With Blade Sermon learned (a 5% or a 10% chance, depending on which Blade Sermon you have), how often does Zealotry hit twice instead of once?",
+      "question": "Zealotry's own tooltip (801450) only says that it deals 80% off-hand Weapon Damage as Holy Damage. To settle from the reference logs: which attack or ability line comes right before each Zealotry hit? With Blade Sermon learned (a 5% or a 10% chance, depending on which Blade Sermon), how often does a logged Zealotry hit twice instead of once?",
       "dbc": {
         "572548": {"ProcChance": 5, "ProcFlags": 0, "ProcCharges": 0}
       },
@@ -282,7 +282,7 @@
       "status": "ambiguous_tooltip",
       "reason": "the tooltip does not say what triggers Zealotry, so neither a cast nor an attack follows from it",
       "handler": "AscensionTemplar.cpp:214-223 (Zealotry) rolls its ProcChance to cast the strike 801450 again",
-      "question": "Zealotry's own tooltip (801450) only says that it deals 80% off-hand Weapon Damage as Holy Damage. On live, what makes Zealotry hit: in the combat log, which of your attacks or abilities comes right before each Zealotry hit? With Blade Sermon learned (a 5% or a 10% chance, depending on which Blade Sermon you have), how often does Zealotry hit twice instead of once?",
+      "question": "Zealotry's own tooltip (801450) only says that it deals 80% off-hand Weapon Damage as Holy Damage. To settle from the reference logs: which attack or ability line comes right before each Zealotry hit? With Blade Sermon learned (a 5% or a 10% chance, depending on which Blade Sermon), how often does a logged Zealotry hit twice instead of once?",
       "dbc": {
         "572554": {"ProcChance": 10, "ProcFlags": 0, "ProcCharges": 0}
       },
@@ -325,7 +325,7 @@
         {"name": "each cast", "meaning": "a trial for every Condemn cast", "trials_metric": "spell_cast_count"},
         {"name": "each damage tick", "meaning": "a trial for every periodic damage tick of Condemn"}
       ],
-      "readings_question": "On live, with Lightkeeper learned (a 15% chance), does the parry chance buff appear about once every 6-7 Condemn casts, or about once every 6-7 periodic damage ticks of Condemn?",
+      "readings_question": "with Lightkeeper learned (a 15% chance), does the parry-chance buff line appear about once every 6-7 Condemn casts, or about once every 6-7 periodic damage ticks of Condemn, in a reference log?",
       "dbc": {
         "560835": {"ProcChance": 15, "ProcFlags": 262144, "ProcCharges": 0}
       },
@@ -346,7 +346,7 @@
         {"name": "each cast", "meaning": "a trial for every Condemn cast", "trials_metric": "spell_cast_count"},
         {"name": "each damage tick", "meaning": "a trial for every periodic damage tick of Condemn"}
       ],
-      "readings_question": "On live, with Lightkeeper learned (a 15% chance), does the Holy burst appear about once every 6-7 Condemn casts, or about once every 6-7 periodic damage ticks of Condemn?",
+      "readings_question": "with Lightkeeper learned (a 15% chance), does the Holy burst line appear about once every 6-7 Condemn casts, or about once every 6-7 periodic damage ticks of Condemn, in a reference log?",
       "dbc": {
         "560835": {"ProcChance": 15, "ProcFlags": 262144, "ProcCharges": 0}
       },
@@ -513,7 +513,7 @@
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
       "per_trigger_text": "now grants you Oath: Retribution",
-      "question": "Fervent Castigation says that casting Righteous Upheaval or Blade of Faith grants you Oath: Retribution and starts your Oath Chain. On our test server the cast grants nothing at once: Oath: Retribution appears only when your next Oath starts a new Oath Chain. On live, cast Righteous Upheaval with no Oath Chain up: do Oath: Retribution and Oath Chain appear on your buff bar right after the cast, or only when you next gain an Oath?"
+      "question": "Fervent Castigation says that casting Righteous Upheaval or Blade of Faith grants Oath: Retribution and starts the Oath Chain. Our test server grants nothing at the cast itself: Oath: Retribution appears only when the next Oath starts a new Oath Chain. A reference log line showing Oath: Retribution applied in the same combat-log timestamp as a Righteous Upheaval cast with no Oath Chain already up would confirm the tooltip reading over the test server; its absence across multiple such casts would support the test server's reading."
     },
     {
       "aura": 806273,
@@ -556,7 +556,7 @@
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
       "per_trigger_text": "now grant Heaven's Finest",
-      "question": "Heaven's Finest says that damaging abilities grant Heaven's Finest for 12 sec, stacking 6 times, and the tooltip of the Heaven's Finest buff (805390) says that at 6 stacks it increases your Energy regeneration by 100% for 8 sec. On our test server the 6th stack removes Heaven's Finest and gives you The Finest of Heaven for 8 sec, and damaging abilities give no Heaven's Finest stack while The Finest of Heaven lasts. On live, watch your buffs while you use damaging abilities: when Heaven's Finest reaches 6 stacks, do the stacks disappear, and does a new stack come only after The Finest of Heaven ends?"
+      "question": "Heaven's Finest says that damaging abilities grant it for 12 sec, stacking 6 times, and its own buff tooltip (805390) says that at 6 stacks it increases Energy regeneration by 100% for 8 sec. Our test server removes Heaven's Finest at the 6th stack and grants The Finest of Heaven for 8 sec instead, with no new Heaven's Finest stack while it lasts. A reference log showing Heaven's Finest ever reach a 6th applied-aura line (rather than being replaced by The Finest of Heaven at the 6th stacking ability) would confirm the tooltip reading."
     },
     {
       "aura": 803158,
@@ -984,7 +984,7 @@
       "source_text": "Scourgebane",
       "status": "ambiguous_tooltip",
       "reason": "'Increases the critical damage of Scourgebane by $s2%' does not say whether the percent applies to the whole critical hit or to its critical bonus",
-      "question": "With Legacy of the Silver Hand learned, the tooltip raises the critical damage of Scourgebane by 25%. On live, compare critical Scourgebane hits in the combat log without and with the talent: does the whole critical hit get 25% larger, or only the extra damage that the critical strike adds on top of a normal hit?"
+      "question": "With Legacy of the Silver Hand learned, the tooltip raises the critical damage of Scourgebane by 25%. To settle from the reference logs: compare critical Scourgebane hits logged without and with the talent: does the whole critical hit log 25% larger, or only the extra damage the critical strike adds on top of a normal hit?"
     },
     {
       "talent": 806525,

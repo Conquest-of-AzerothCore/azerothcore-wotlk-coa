@@ -42,7 +42,7 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
 - `questions.py`: `questions(verdicts, tooltips)` turns the verdicts that carry a question into one `Question(tooltip,
   spells, kind, question, readings, measured, labels, conditions, observations)` per tooltip and kind, and
   `write_questions(items, out_dir)`
-  writes `questions.md` (see [Player question list](#player-question-list)).
+  writes `questions.md` (see [Open conformance checks](#open-conformance-checks)).
 - `diff.py`: `diff(before, after, intended)` returns the `Change` of every verdict that moved between two compare
   outputs, and `write_impact` writes `impact.md` (see [Impact report](#impact-report)).
 - `stack.py`: `stack_scenarios(class_file, passes=5)` returns the passes of every cumulative talent configuration of
@@ -722,13 +722,13 @@ A `procs` entry of the class file describes one proc aura:
 | `events_per_proc` | the events in one proc |
 | `trial_readings` | readings of the trials, `{"name", "meaning", "adds", "minus_events", "trials_metric"}`, if the |
 | | text allows several; `"trials_metric": "spell_cast_count"` counts the completed trigger casts as the trials |
-| `readings_question` | an observation that tells the readings apart without counting, for `questions.md` |
+| `readings_question` | the log evidence that tells the readings apart without counting, for `questions.md` |
 | `handler` | the code that rolls a proc without a `spell_proc` or `spell_script_names` row |
 | `dbc` | `ProcChance`, `ProcFlags`, `ProcCharges` of the aura and of the spell of the chance token |
 | `spell_proc` | the `spell_proc` row of each spell, `{}` without one |
 | `internal_cooldown_ms` | the `spell_proc` `Cooldown`, the internal cooldown between procs |
 | `status`, `reason` | `ambiguous_tooltip` or `unmodelled` for an entry without a scenario, and why |
-| `question` | the question for players of an `ambiguous_tooltip` entry ([questions](#player-question-list)) |
+| `question` | the log query of an `ambiguous_tooltip` entry ([questions](#open-conformance-checks)) |
 
 The trigger comes from the tooltip text only. When the text does not say what triggers the proc, the entry is
 `ambiguous_tooltip` and never gets a chosen trigger. An entry whose observable the harness cannot separate is
@@ -901,7 +901,7 @@ A `triggers` entry of the class file is a passive whose tooltip says that someth
 | `periodic_initial_tick` | for a `periodic` trigger only: the aura's own `AttributesEx5` carries `SPELL_ATTR5_EXTRA_INITIAL_PERIOD`, so one extra tick is expected per counted part on top of `attempts x per_trigger` |
 | `status`, `reason` | `unmodelled` or `ambiguous_tooltip` for an entry without a scenario, and why |
 | `trigger` (status entries) | optional: a `status` entry with no real trigger mechanism to point to (dead effect, or reachable only through a mechanism this harness cannot drive) omits `trigger`, `trigger_spell_text` and `trial_metric` entirely rather than carry a fabricated shape; the entry-shape test only enforces the full `trigger` shape on entries that have one |
-| `question` | the question for players when the entry's verdict is an `alert` the server code explains: a server finding goes to the player question list, not into a verdict change |
+| `question` | the finding text when the entry's verdict is an `alert` the server code explains: a server finding goes to the open conformance checks list, not into a verdict change |
 
 `aura_proc_rate` is not a judge of these entries: their passives have `ProcFlags` 0 and are scripted (design D10).
 The observed spell is the passive's `EffectTriggerSpell[n]` (`observe_source` `EffectTriggerSpell[n] of <aura>`)
@@ -1057,7 +1057,7 @@ cast, 20 baseline trials and no baseline event in each entry): nine entries are 
   Heaven 806517 and is removed (`AscensionTemplarAuras.cpp:134-138`), and no stack is granted while 806517 (8 s) is
   up (`AscensionTemplarEvents.cpp:208-214`); the text, its `@s:805390:0@` reference included, does not say so.
 
-Both entries carry a `question`, so their alerts go to the "Server behaviour to confirm" section of `questions.md`.
+Both entries carry a `question`, so their alerts go to the "Findings" section of `questions.md`.
 
 ## Behaviour scenarios
 
@@ -1308,7 +1308,7 @@ claim the tooltip actually makes.
 | Justice 712437 | count | "strikes 1 additional nearby target" | 1 | scripted hook `templar_casts::OnSpellBeforeEffects` (`AscensionTemplarAbilities.cpp:95-102`): casting Interdict 560116 with Justice known adds exactly one unit from `Nearby(primary, 8.0f)`; the DBC's own effect 1 (`PROC_TRIGGER_SPELL` to 712364, Sacred Oath's own trigger) does not implement this sentence at all and is not used |
 | Final Prayer 705268 | ratio | "Doubles the healing done to you" | 2.0 | two named targets: Testament of Faith 801478 (a direct heal, `SPELL_AURA_MOD_HEALING_RECEIVED` taken-side, method `"cast"`, measured with `spell_healing_done`) and Testament of Fortitude 500678 (a `SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE` self-heal whose doubling is a `SPELLMOD_EFFECT1` percent modifier read inside its own effect-0 `CalcValue`, needing no cast at all, method `"effect_value"`, measured with `spell_effect_value {spell: 500678, effect: 0}`) |
 | Holy Tempest 301339 | spread | "spreads Condemn on affected enemies to a nearby enemy" | 1 | `AscensionTemplarAbilities.cpp:294-295` (`OnSpellHitResult`): on a confirmed hit of Righteous Tempest's periodic damage (ranks `805410`/`570200..570205`) with the passive known, `AscensionTemplar.cpp:224-257` (`SpreadCondemn`) copies the Condemn aura already present on the hit target onto the first valid, non-already-afflicted, line-of-sight enemy within `Nearby(target, 10.0f)` - a hardcoded radius, not read from any DBC field |
-| Armor of Faith 804930 | trigger | "Whenever the absorption shield from Staffguard breaks, inflict" | 1 | `AscensionTemplarAuras.cpp:213-216` (`aura_ascension_templar_lifecycle::Remove`): when Staffguard 706583's absorb effect is fully depleted (`GetAmount() <= 0`) by `AURA_REMOVE_BY_ENEMY_SPELL` (an enemy's own damage, not an expiry or manual cancel) while the player is alive and knows 804930, it casts Armor of Faith's damage spell 801546 on the player, whose own nearby-enemy Holy damage effect then lands; the amount stays the pre-existing `$801546ppl1` player question (`questions.md:368-374`), unchanged by this entry. Staffguard's absorb is Holy-only (`SchoolMask` 2), so the scenario's striker casts Smite 48123 (`breaker_spell`) directly at the caster rather than swinging at it |
+| Armor of Faith 804930 | trigger | "Whenever the absorption shield from Staffguard breaks, inflict" | 1 | `AscensionTemplarAuras.cpp:213-216` (`aura_ascension_templar_lifecycle::Remove`): when Staffguard 706583's absorb effect is fully depleted (`GetAmount() <= 0`) by `AURA_REMOVE_BY_ENEMY_SPELL` (an enemy's own damage, not an expiry or manual cancel) while the player is alive and knows 804930, it casts Armor of Faith's damage spell 801546 on the player, whose own nearby-enemy Holy damage effect then lands; the amount stays the pre-existing `$801546ppl1` open conformance check (`questions.md:368-374`), unchanged by this entry. Staffguard's absorb is Holy-only (`SchoolMask` 2), so the scenario's striker casts Smite 48123 (`breaker_spell`) directly at the caster rather than swinging at it |
 | Tyr's Guard 560649 | metric_delta | "now summons an additional copy of yourself" | 3 | a plain stock `SPELLMOD_EFFECT1` aura (effect 2 of 560649, `EffectSpellClassMask[6]` matching Testament of Hope 1397742's family flags): the engine's own `Player::ApplySpellMod`/`SpellInfo::CalcValue` path adds 1 to Testament of Hope's summon effect's base points (1 -> 2, `CalcValue` 2 -> 3) with no CoA-specific code involved; `owned_creature_count` of the copy entry 50250 is the metric, before (2, no 560649) and after (3, 560649 learned) |
 | Spiritual Abdicator 803219 | metric_delta | "reduces damage taken by an additional 5% per copy" | -15 | `AscensionTemplarContracts.cpp:278-281` (`templar_scaling::ModifySpellEffectBaseValue`): when the copy's owner (the Templar) has aura 803219, the copy's own owner-area aura 704409 effect 1 (`MOD_DAMAGE_PERCENT_TAKEN`, base `CalcValue` -10, confirmed by the existing Testament of Hope regression scenario) is overridden to -15 at load, the "additional 5%" the tooltip states on top of 704409's own 10%; 803219's own effect 0 is a pure marker (`dummy()` rewrites its `ApplyAuraName` to `SPELL_AURA_DUMMY` at load, no gameplay value of its own); `aura_amount` of spell 704409 effect 1 is the metric, before (-10, no 803219) and after (-15, 803219 learned) |
 | Battlepriest 801202 | health_ratio | "take 20% reduced Magic damage" | 0.8 at 90%/10% health, 1.0 at 50% | the DBC's own mechanism (a periodic trigger casting a conditional `MOD_DAMAGE_PERCENT_TAKEN` aura, `CasterAuraState`-gated on `AURA_STATE_HEALTHLESS_20_PERCENT`/`ASCENSION_TARGET_HEALTH_ABOVE_80_PERCENT`) is `dummy()`-nulled at load (`AscensionTemplarContracts.cpp:151-154`); the real implementation is a direct multiplier in `templar_scaling::Mitigation` (`AscensionTemplarContracts.cpp:242-255`), `factor *= .8f` when the school is magic and the player both knows 801202 and is strictly above 80% or strictly below 20% health (`Unit::HealthAbovePct`/`HealthBelowPct`), called from `ModifySpellDamageTaken`/`ModifyPeriodicDamageAurasTick`/`ModifyMeleeDamage`'s hooks; `script_spell_damage_taken` with `probe_spell` Fireball 133 (magic school, no `TemplarCopies` attribute exemption) exercises the same `ModifySpellDamageTaken` hook the real pipeline uses |
@@ -1371,7 +1371,7 @@ Norgannon's Wrath, Divine Charge, Eternal Blessing, Libram of Consecration, Silv
 Faith; each `note` states which candidate spell power the reading fits, or that it fits neither exactly. Argent
 Blade/Scourgebane's `scalingbp` reading (report of 280 Holy) is deliberately **not** cited here: evaluated at
 either candidate spell power it comes out 260-330 points higher than reported, so citing it would read as model
-confirmation it is not; it stays a player question instead (`questions-round3.md`).
+confirmation it is not; it stays an open conformance check instead (`questions-round3.md`).
 
 ## Talent stack (lever map)
 
@@ -1515,8 +1515,9 @@ every `actual` as a string; it is converted to a number, and a value that is not
 (default: the manifest directory) has one row per verdict that is neither `ok` nor `measured`; `report.md` counts the
 verdicts per status, per spell and, for passive scenarios, per measurement family ("Passives"), and lists the known
 modifiers, the probe auras, the scenarios without a result and the runs that did not pass. `verdicts.json` keeps every
-verdict with its interval, detail and explanation (schema 1) for `diff`. `questions.md` lists the checks that players on
-live must settle (see [Player question list](#player-question-list)). When the run holds stack verdicts, `compare` also
+verdict with its interval, detail and explanation (schema 1) for `diff`. `questions.md` lists the checks a reviewer must
+settle from the reference logs (see [Open conformance checks](#open-conformance-checks)). When the run holds stack
+verdicts, `compare` also
 writes `levers.md`.
 
 ### A full class run
@@ -1774,13 +1775,12 @@ The report lists each known aura's modifier effects with `EffectBasePoints`, `Ef
 value at the class level and the runs that measured the aura; a hit model applies a modifier only in a run that
 measured its aura.
 
-### Player question list
+### Open conformance checks
 
-`questions.md` is what the owner posts to players of the class on live, so it is English and self-contained, and
-each question asks for something a player sees: tooltip numbers, buff stacks, combat log lines, damage. A verdict
-asks a question when its `detail['question']` is `question_detail(kind, question, readings, measured)`; an
-`ambiguous_tooltip` verdict without one asks its explanation (kind `text`). An `ok` verdict never asks one, whatever
-its detail.
+`questions.md` is what a reviewer settles from the reference Ascension combat logs (`~/Projects/coa-log-history`);
+each entry names the log evidence that decides it, so it is English and self-contained. A verdict asks a question
+when its `detail['question']` is `question_detail(kind, question, readings, measured)`; an `ambiguous_tooltip`
+verdict without one asks its explanation (kind `text`). An `ok` verdict never asks one, whatever its detail.
 
 Kinds, what gives them and what they ask:
 
@@ -1791,20 +1791,21 @@ Kinds, what gives them and what they ask:
   (`procs`, `talent_modifiers`) or a generated `ambiguous_tooltip` rule; the entry's `question`, else the rule's
   reason.
 - `tooltip_value`: an `unreadable` value or hit whose entry holds a `$<id>pplN` token, a per-level value without client
-  evidence (owner answer Q6); the number the live tooltip shows, with the player's attack and spell power.
+  evidence; the number the tooltip shows at that level, with the attack power and spell power a log line would carry.
 - `data_issue`: an `unreadable` value or hit whose entry holds a `$<name>` variable while the spell's
-  `SpellDescriptionVariableID` is 0 (owner answer Q8); what the live tooltip shows in its place.
-- `server_behaviour`: an `alert` of a proc or trigger entry that has a class-file `question`; whether
-  live does what our server does.
+  `SpellDescriptionVariableID` is 0; what the tooltip shows in its place.
+- `server_behaviour`: an `alert` of a proc or trigger entry that has a class-file `question`; the finding that
+  explains the tooltip and the test server disagreeing, and the log evidence (if any) that would confirm or rule out
+  a defect.
 
-Every readings question also carries `conditions`, what our test did in player terms: the level, what was learned,
-what was cast or attacked and how, the counts, and the other percent modifiers measured on the character (known auras
-such as 887007 by name and percent, earlier talents of the stack) when the expected number depends on them. Readings
-carry `name`, `meaning` (one plain sentence: `multiplies` multiplies the whole value after every other modifier, `adds`
-is added to the named other percent modifiers, `whole` applies to the whole critical hit, `bonus` only to the extra
-damage of a critical strike; proc readings take the class file's `meaning`), `expects` and `measured_text` in what a
-player sees (the percent change of a hit, a critical hit as a percent of a normal hit, the share of the player's
-triggers that proc), `expected`, `status` and, as they apply, `delta`, `measured`, `predicted`, `procs`, `trials`,
+Every readings question also carries `conditions`, what our test did: the level, what was learned, what was cast or
+attacked and how, the counts, and the other percent modifiers measured on the character (known auras such as 887007
+by name and percent, earlier talents of the stack) when the expected number depends on them. Readings carry `name`,
+`meaning` (one plain sentence: `multiplies` multiplies the whole value after every other modifier, `adds` is added to
+the named other percent modifiers, `whole` applies to the whole critical hit, `bonus` only to the extra damage of a
+critical strike; proc readings take the class file's `meaning`), `expects` and `measured_text` (the percent change of
+a hit, a critical hit as a percent of a normal hit, the share of triggers that proc), `expected`, `status` and, as
+they apply, `delta`, `measured`, `predicted`, `procs`, `trials`,
 `rate`, `low` and `high` (the 99% Wilson interval), `unit`. A proc reading predicts procs per trigger of the first
 reading (the trigger the player performs): with `d` the extra trials per proc that the reading counts, measured as
 (its trials - the first reading's trials) / procs, a chance `p` gives `p / (1 - d p)` (Scourgebane: 20% and 25% of auto
@@ -1834,14 +1835,15 @@ distinct questions, and each reading, condition and observation tagged with its 
 Light's Echo 520017 and 520883, one entry with the readings of each rank; the seven Argent Blade ranks 804929 to
 807268, whose `$<scalingbp>` has no definition). `measured` is kept only when all the entry's verdicts agree.
 `questions.md` has a `# Tooltips` section (kinds `readings`, `text`, `tooltip_value`, `data_issue`, then any other
-kind) and a `# Server behaviour to confirm` section. Each entry is
+kind) and a `# Findings` section. Each entry is
 `## <name> (<ids>)`, the tooltip in a quote block (color codes removed, `$` tokens kept, `@s:<id>:<flags>@` shown as
 "followed by the tooltip of spell <id>"), the token values that are the same at any level and stats (read with two
 opposite `CasterStats`), "How we tested", one line per reading (prefixed by its spell id when the entry has several
-spells), "Observations needed", one line starting `Question:` per distinct question and the check labels.
+spells), "Observations needed", one line starting `To settle:` (`Finding:` in the `# Findings` section) per distinct
+question and the check labels.
 
 Produced on 2026-11-06 from the existing probe stamps (manifests generated again with the class file of this change,
-same scenario hashes): triggers `20261106-093404` give the two server questions (Fervent Castigation 707606, expected
+same scenario hashes): triggers `20261106-093404` give the two findings (Fervent Castigation 707606, expected
 273 against 0; Heaven's Finest 806516, 273 against 150), passives `20261106-085206` the Serendipity and Chivalric
 readings, procs `20261105-201416` the Scourgebane readings, one Light's Echo entry with both ranks' readings and the
 Paladin Training and Blade Sermon text questions, the stack `20261105-204050` Paladin Training (20% against 25%,

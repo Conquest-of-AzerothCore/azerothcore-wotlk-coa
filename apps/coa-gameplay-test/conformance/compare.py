@@ -460,7 +460,8 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
 def sign_question(base: Verdict, name: str, text: str, measured: float, expected: float) -> dict:
     opposite = deterministic(base, measured, measured, -expected, '').status
     question = (f'The {name} tooltip shows {text} as {expected:g}, but our test server applies {measured:g}, the '
-                f'opposite sign. On live, does this number add to or take away from what the tooltip describes?')
+                f'opposite sign. Find a hit or heal of {name} with a known base value in the reference logs and '
+                f'see whether the logged amount adds to or subtracts from it.')
     readings = [{'name': 'the sign the tooltip shows', 'expected': expected, 'measured': measured, 'status': 'alert'},
                 {'name': 'the opposite sign', 'expected': -expected, 'measured': measured, 'status': opposite}]
     return question_detail(READINGS_QUESTION, question, readings, measured)
@@ -762,8 +763,7 @@ def proc_question(manifest: dict, scenario: dict, expectation: Expectation, read
     needed = observations_needed(rates)
     observations = (f'About {needed} {unit}: at that count the 99% ranges of the readings '
                     f'({" and ".join(f"{rate:.1%}" for rate in rates)}) no longer overlap.' if needed else '')
-    counting = (f'count {name} procs per {one} under the conditions of our test: which reading below do your counts '
-                f'match?')
+    counting = f'the logged {name} procs per {one} under conditions matching our test should match one reading below.'
     question = (f'With {name} learned, {entry["readings_question"]} Otherwise, {counting}'
                 if entry.get('readings_question') else f'With {name} learned, {counting}')
     rows = [{'name': reading['name'], 'meaning': meanings.get(reading['name'], ''),
@@ -1093,8 +1093,9 @@ def talent_question(manifest: dict, expectation: Expectation, judged: list, delt
               f'{needed} with it' if needed else
               f'Record as many non-critical, unblocked {source} hits on the same target dummy as you can without '
               f'{talent} and with it')
-    question = (f'With {talent} learned, is a non-critical, unblocked {source} hit {changes} larger than without it? '
-                f'{record}, in a combat log and with the other modifiers of our test, and compare the averages.')
+    question = (f'{record}, in a combat log and with the other modifiers of our test, and compare the averages; a '
+                f'non-critical, unblocked {source} hit {changes} larger than without {talent} matches one reading '
+                f'below.')
     readings = [{'name': name, 'meaning': meanings.get(name, why), 'expects': f'the {source} hit {expected:+.4g}%',
                  'measured_text': f'{delta:+.4g}%', 'expected': expected, 'measured': delta, 'status': status,
                  'unit': '%'} for name, expected, status, why in judged]
@@ -1193,9 +1194,9 @@ def tooltip_value_question(spell_name: str, level: int, entry: str, description:
     token = entry_token(entry, cleaned(description))
     per_level = ', '.join(dict.fromkeys(PER_LEVEL_TOKEN.findall(token)))
     question = (f'The {spell_name} tooltip shows a number in "{sentence_with_blank(description, token)}" that '
-                f'depends on {per_level}, a per-level value that the client data alone does not give. On live, at '
-                f'level {level}, what number does the tooltip show in place of {BLANK}? Please give your attack power '
-                f'and spell power with it.')
+                f'depends on {per_level}, a per-level value that the client data alone does not give. A log line of '
+                f'{spell_name} at level {level} with known attack power and spell power, found in the reference '
+                f'logs, pins the number in place of {BLANK}.')
     return question_detail(TOOLTIP_VALUE, question, [], None)
 
 
@@ -1204,8 +1205,9 @@ def data_issue_question(spell_name: str, entry: str, description: str) -> dict:
     variables = ', '.join(dict.fromkeys(DESCRIPTION_VARIABLE.findall(token)))
     question = (f'The {spell_name} tooltip uses {variables} in "{sentence_with_blank(description, token)}", but the '
                 f'client data of this spell defines no description variable (SpellDescriptionVariableID 0), so the '
-                f'number cannot be computed from it. On live, what does the tooltip show in place of {BLANK} (a '
-                f'number, 0, nothing or the raw text)? Please give your level, attack power and spell power with it.')
+                f'number cannot be computed from it. A log line of {spell_name} with known level, attack power and '
+                f'spell power, found in the reference logs, shows the number (or confirms it is 0, blank or the '
+                f'raw text) in place of {BLANK}.')
     return question_detail(DATA_ISSUE, question, [], None)
 
 
@@ -1483,8 +1485,8 @@ def judge_modifier_target(base: Verdict, manifest: dict, entry: dict, run: Run, 
                                             f'mask spell shows the expected delta')
     others = ', '.join(target_name(tooltips, other['target']) for other, *_ in matches)
     question = (f'{entry["spell_name"]} names {name}, but its modifier changed {model["metric"]} of {others} by '
-                f'{reading.delta:+g} and of {name} by {delta:+g} here: with {entry["spell_name"]} learned on live, '
-                f'does {name} change as the tooltip says?')
+                f'{reading.delta:+g} and of {name} by {delta:+g} here. A reference log with {entry["spell_name"]} '
+                f'learned, showing whether {name} changes as the tooltip says, would settle it.')
     readings = [{'name': name, 'expected': before + reading.delta, 'delta': reading.delta, 'status': status,
                  'measured': before + delta}]
     readings += [{'name': target_name(tooltips, other['target']), 'expected': other_before + other_reading.delta,
