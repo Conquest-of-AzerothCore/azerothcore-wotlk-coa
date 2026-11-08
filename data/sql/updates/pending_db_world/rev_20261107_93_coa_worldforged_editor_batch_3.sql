@@ -86,3 +86,9 @@ UPDATE `gameobject` SET `position_x` = -9057.7807, `position_y` = 147.0395, `pos
 -- #11044
 -- pickup 6940136 (Plagued Bow) moved 9.7 yd across and 4.25 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 1868.0237, `position_y` = -3188.1495, `position_z` = 131.1175, `orientation` = 1.546897, `rotation0` = -0.00884178, `rotation1` = -0.00830129, `rotation2` = 0.698557, `rotation3` = 0.715451 WHERE `guid` = 6940136 AND `id` = 96236;
+
+-- #11068
+-- template 1345129 (Silken Travel Gloves): size 1 -> 0.4 (1 spawns)
+UPDATE `gameobject_template` SET `size` = 0.4 WHERE `entry` = 1345129;
+-- pickup 6941080 (Silken Travel Gloves) moved 7.6 yd across and 0.26 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -1766.0787, `position_y` = -2874.4441, `position_z` = 41.5836, `orientation` = 3.81393, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.944025, `rotation3` = -0.329873 WHERE `guid` = 6941080 AND `id` = 1345129;
