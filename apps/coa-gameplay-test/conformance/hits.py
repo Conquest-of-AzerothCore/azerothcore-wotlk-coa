@@ -13,8 +13,8 @@ from tooltip import (MIXED_PERIOD, OVER_TICKS, CasterStats, ForcedPoints, Readou
                      mixed_period_reason, period_reading, read_tooltip)
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, EFFECT_TOKEN,
                     EFFECTS, MEAN_HALF_WIDTH, TARGET, UNREADABLE, Z_99, Expectation, RankFacts, Unmodelled, armed_for,
-                    dataset, equip_requirement, facts_of, required_aura_steps, required_target_health_steps,
-                    targets_ally)
+                    closes_distance, dataset, equip_requirement, facts_of, required_aura_steps,
+                    required_target_health_steps, targets_ally)
 
 HIT_CHECKS = ('hit_mean', 'melee_mean', 'unmodelled')
 UNMODELLED = 'unmodelled: '
@@ -689,7 +689,8 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int) -> list[tuple[dic
     unreadable = [Expectation(f'{label} unreadable #{ordinal}', 'hit_mean', spell.spell_id, rank_id, None, entry,
                               UNREADABLE + entry) for ordinal, entry in enumerate(hit.readout.unreadable)]
     cast_target = TARGET if hostile else (ALLY if ally else None)
-    cast_fixtures = [{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}] if ally else []
+    cast_fixtures = [{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}] \
+        if ally and closes_distance(hit.facts) else []
     parts = []
     for part, performed in enumerate(shares):
         steps = (learn + [dict(step) for step in target]

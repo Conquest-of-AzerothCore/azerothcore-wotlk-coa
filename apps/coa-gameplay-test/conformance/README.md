@@ -23,10 +23,13 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
   (`hit_scenario` the only part of a hit that fits one scenario) and `melee_scenario(class_file, swings)` the
   auto-attack scenario, with their `Expectation` lists; `expected_hit` and `casts_needed` give the expected mean, its
   sigma and the number of casts. When the highest rank targets a friendly unit (`values.targets_ally`), the scenario
-  adds an `ally` player, relocates the caster `values.CHARGE_OFFSET_YD` yd before every cast (keeping it inside the
-  spell's range of the stationary ally after the previous cast closed the distance, as `procs.py`'s own ally casts
-  already do), casts at `target: 'ally'` and measures the heal total/count without a `target` filter, so both the
-  ally's and the caster's own heal land in the same metric.
+  adds an `ally` player and casts at `target: 'ally'`, measuring the heal total/count without a `target` filter, so
+  both the ally's and the caster's own heal land in the same metric. If the rank's own effects also close the
+  distance to its target (`values.closes_distance`, a charge/leap effect such as Temple Guardian's), the scenario
+  additionally relocates the caster `values.CHARGE_OFFSET_YD` yd before every cast (keeping it inside the spell's
+  range of the stationary ally after the previous cast closed the distance, as `procs.py`'s own ally casts already
+  do); a stationary ally heal with no such effect leaves the caster in place instead, since nothing would ever
+  close a relocate's drift back.
 - `procs.py`: `proc_scenario(class_file, entry, part)` returns one part of the proc-rate scenario of a `procs` entry
   and its `Expectation`; `proc_plan` sizes the parts, `trials_needed(p)` gives the trials a chance `p` needs and
   `wilson_interval(procs, trials)` the 99% Wilson interval of a rate.
@@ -648,9 +651,11 @@ scenario limit with the 60 s margin of the hit scenarios. Each part learns the a
   trigger with periodic damage (aura 3) is cast at most every two ticks (`2 x EffectAmplitude + 500 ms`): a recast
   restarts its tick timer (Blade of Faith, stamp `20261106-130708`: 2058 ticks for 2044 casts 3.5 s apart), so
   only a spacing beyond one tick lets a reading that counts ticks and one that counts casts tell their trials apart.
-- for a `cast` at `ally`: the scenario adds a second player `ally` and no creature; before each cast the caster is
-  moved 10 yards away with `relocate`, since a charge ends next to its target and Temple Guardian needs 5 to 30
-  yards; a trial is a completed cast (`spell_cast_count`).
+- for a `cast` at `ally`: the scenario adds a second player `ally` and no creature; a trial is a completed cast
+  (`spell_cast_count`). If the trigger rank's own effects close the distance to its target
+  (`values.closes_distance`), the caster is also moved 10 yards away with `relocate` before each cast, since a
+  charge ends next to its target and Temple Guardian needs 5 to 30 yards; a stationary ally heal such as Testament
+  of Faith has no such effect and leaves the caster in place.
 - for `spell_charges`: the part restores the charges of the trigger rank and measures the pool, restores them
   again before each cast and measures the charges left after it. A cast leaves the pool less one, or the whole pool
   when it refreshed a charge, and a failed cast leaves the whole pool, so the procs of a part are the summed charges
@@ -782,10 +787,13 @@ the `CasterAuraSpell` fixture is applied (Sacred Swing 681170, Righteous Upheava
 `max(StartRecoveryTime, cast time) + 500 ms`; a `self` trigger is cast without a target. An `attack` trigger attacks
 `dummy` for the attempts times the weapon speed. A `target: "ally"` trigger adds a second player `ally`, groups the
 caster with it once before the first cast (`{"action": "group", "actor": "caster", "target": "ally"}`, a raid group
-so `Unit::IsInRaidWith` holds), relocates the caster `CHARGE_OFFSET_YD` away before every cast at the ally (the
-same fixture `hits.py`'s ally-targeted hit scenarios use, needed so a charge-type rank is not already in its
-minimum range), and, with `ally_health_pct` set, lowers the ally's health to that percent of a 10000 fixed maximum
-before every cast so a heal lands an effective, non-zero amount. With `caster_health_pct` set, the caster's own
+so `Unit::IsInRaidWith` holds). If the trigger rank's own effects close the distance to its target
+(`values.closes_distance`), the caster is also relocated `CHARGE_OFFSET_YD` away before every cast at the ally
+(the same fixture `hits.py`'s ally-targeted hit scenarios use, needed so a charge-type rank is not already in its
+minimum range); a stationary ally heal such as Testament of Faith (Binding Scripture's trigger cast) has no such
+effect and leaves the caster in place. With `ally_health_pct` set, the ally's health is lowered to that percent of
+a 10000 fixed maximum before every cast so a heal lands an effective, non-zero amount. With `caster_health_pct`
+set, the caster's own
 health is lowered the same way before every cast, for a trigger the server code only recognises on a self-heal
 with a nonzero `GetEffectiveHeal()` (the reference caster starts at full health, so an uncapped self-heal would
 otherwise always read as 0 effective healing and never fire). With `restore_charges` set, the trigger rank's

@@ -466,6 +466,12 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
             self.assertIn({'action': 'restore_charges', 'actor': 'caster', 'spell': TEMPLE_GUARDIAN}, before)
         self.assertIn(f'the charges of {TEMPLE_GUARDIAN} are restored', expectation.rule)
 
+    def test_binding_scripture_does_not_relocate_the_caster(self):
+        entry = templar_trigger(BINDING_SCRIPTURE)
+        scenario, _ = trigger_scenario(CLASS_FILE, entry)
+        steps = scenario['steps']
+        self.assertNotIn({'action': 'relocate', 'actor': 'caster', 'dx': 10}, steps)
+
     def test_restore_charges_needs_a_cast_trigger(self):
         entry = copy.deepcopy(templar_trigger(DETERMINED))
         entry['trigger'] = {'action': 'attack', 'spell': 0}

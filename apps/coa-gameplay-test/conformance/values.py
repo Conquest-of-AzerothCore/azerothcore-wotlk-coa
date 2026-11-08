@@ -144,6 +144,13 @@ def targets_ally(facts: RankFacts) -> bool:
                for effect in EFFECTS)
 
 
+CHARGE_EFFECTS = frozenset({96, 149})
+
+
+def closes_distance(facts: RankFacts) -> bool:
+    return any(facts.effects[effect] in CHARGE_EFFECTS for effect in EFFECTS)
+
+
 def aura_carrier(facts: RankFacts, effect: int) -> dict:
     if facts.target_a[effect] in SELF_TARGETS or not is_hostile(facts):
         return {'actor': CASTER, 'caster': CASTER}

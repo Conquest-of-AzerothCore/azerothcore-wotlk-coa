@@ -6,7 +6,8 @@ from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, UNMODELLED, Unmo
                   records_of, scenario_shell, timed)
 from procs import ATTACK, CAST, ENTRY_STATUSES, PART_BUDGET_MS, cast_interval, swing_interval, tick_spacing
 from profile import CASTER, SETTLE_MS, measurement, player_fixture
-from values import ALLY, CHARGE_OFFSET_YD, TARGET, Expectation, armed_for, facts_of, fixture_health_step
+from values import (ALLY, CHARGE_OFFSET_YD, TARGET, Expectation, RankFacts, armed_for, closes_distance, facts_of,
+                    fixture_health_step)
 
 TRIGGER_CHECK = 'trigger_count'
 MISSED_TRIGGER_RATE = 0.025
@@ -115,9 +116,9 @@ def count_step(label: str, metric: str, spell: int, actor: str = CASTER) -> dict
     return measurement(label, actor, metric, spell=spell, **fields)
 
 
-def attempt_fixtures(entry: dict) -> list[dict]:
+def attempt_fixtures(entry: dict, facts: RankFacts) -> list[dict]:
     fixtures = [{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}] \
-        if entry['trigger'].get('target') == ALLY else []
+        if entry['trigger'].get('target') == ALLY and closes_distance(facts) else []
     if entry.get('restore_charges'):
         fixtures.append({'action': 'restore_charges', 'actor': CASTER, 'spell': entry['trigger']['spell']})
     fixtures += [{'action': 'set_aura', 'actor': CASTER, 'spell': aura['spell'], 'stacks': aura['stacks']}
@@ -138,7 +139,8 @@ def attempt_steps(class_file: dict, entry: dict, plan: TriggerPlan, attempts: in
     else:
         facts = facts_of(records_of(class_file), trigger['spell'])
         cast_target = trigger['target'] if trigger['target'] in (TARGET, ALLY) else None
-        steps = cast_steps(facts, trigger['spell'], cast_target, plan.attempt_ms, attempts, attempt_fixtures(entry))
+        steps = cast_steps(facts, trigger['spell'], cast_target, plan.attempt_ms, attempts,
+                           attempt_fixtures(entry, facts))
     return steps + [{'action': 'wait', 'label': f'{phase}drain', 'ms': DRAIN_MS}]
 
 

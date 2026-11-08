@@ -92,6 +92,8 @@ TEMPLE_GUARDIAN_LIVE_RANK = 803792
 TITANSTRIKE = 806521
 TITANSTRIKE_MAX_RANK = 806835
 CHASTISE_MAX_RANK = 503141
+BENEDICTION = 801448
+BENEDICTION_MAX_RANK = 578276
 Z_99 = 2.576
 
 
@@ -488,6 +490,12 @@ class HitScenarioTest(unittest.TestCase):
                  for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER, extra_spells=extras)}
         return spells[TITANSTRIKE]
 
+    def benediction_spell(self):
+        extras = [entry['spell'] for entry in self.templar.get('extra_spells', [])]
+        spells = {spell.spell_id: spell
+                 for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER, extra_spells=extras)}
+        return spells[BENEDICTION]
+
     def test_titanstrike_hit_scenario_establishes_the_35_percent_health_fixture_before_casting(self):
         scenario, expectations = hit_scenario(self.templar, self.titanstrike_spell(), 1)
         hit = hit_expectation(expectations)
@@ -554,6 +562,12 @@ class HitScenarioTest(unittest.TestCase):
         alert_verdict = judge_hit(base, self.templar, [(scenario, half_run, hit)], measured_hit_model)
         self.assertEqual(alert_verdict.status, 'alert')
         self.assertIn('usable hits', alert_verdict.explanation)
+
+    def test_benediction_hit_scenario_does_not_relocate_the_caster(self):
+        scenario, expectations = hit_scenario(self.templar, self.benediction_spell(), 1)
+        hit = hit_expectation(expectations)
+        self.assertEqual(hit.rank_id, BENEDICTION_MAX_RANK)
+        self.assertFalse(steps_with(scenario, action='relocate', actor='caster'))
 
     def test_divine_force_is_modelled(self):
         scenario, expectations = hit_scenario(self.templar, self.spells[DIVINE_FORCE], 1)
