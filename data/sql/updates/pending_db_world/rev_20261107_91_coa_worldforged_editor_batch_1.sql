@@ -30,3 +30,7 @@ UPDATE `gameobject` SET `position_x` = 4007.5049, `position_y` = -7129.8877, `po
 -- #4894
 -- pickup 6942249 (Stormscale Supplies) moved 9.1 yd across to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 7363.5514, `position_y` = -920.2340, `position_z` = 10.2180, `orientation` = 4.720023, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.704403, `rotation3` = -0.709801 WHERE `guid` = 6942249 AND `id` = 375327;
+
+-- #5190
+-- pickup 6940643 (Idol of the Aerie) moved 4.1 yd across and 3.39 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -46.6779, `position_y` = -4898.2940, `position_z` = 23.3699, `orientation` = 5.559157, `rotation0` = -0.726603, `rotation1` = 0.0346161, `rotation2` = 0.686185, `rotation3` = 0.000635621 WHERE `guid` = 6940643 AND `id` = 95794;
