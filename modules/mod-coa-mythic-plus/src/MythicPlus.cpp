@@ -74,6 +74,7 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
+#include "TypeContainerVisitor.h"
 #include "Timer.h"
 
 #include <algorithm>
@@ -984,18 +985,26 @@ namespace
         creature->SetControlled(true, UNIT_STATE_ROOT);
     }
 
-    void RefuseToFight(Map* map)
+    struct MapCreatureCollector
     {
         std::vector<Creature*> creatures;
-        for (auto const& [spawnId, creature] : map->GetCreatureBySpawnIdStore())
-            creatures.push_back(creature);
-        ForEachPlayer(map, [&creatures](Player* player)
+
+        void Visit(std::unordered_map<ObjectGuid, Creature*>& store)
         {
-            for (Unit* attacker : player->getAttackers())
-                if (Creature* creature = attacker->ToCreature())
-                    creatures.push_back(creature);
-        });
-        for (Creature* creature : creatures)
+            for (auto const& [guid, creature] : store)
+                creatures.push_back(creature);
+        }
+
+        template<class T>
+        void Visit(std::unordered_map<ObjectGuid, T*>&) { }
+    };
+
+    void RefuseToFight(Map* map)
+    {
+        MapCreatureCollector collector;
+        TypeContainerVisitor<MapCreatureCollector, MapStoredObjectTypesContainer> visitor(collector);
+        visitor.Visit(map->GetObjectsStore());
+        for (Creature* creature : collector.creatures)
             RefuseToFight(creature);
     }
 
