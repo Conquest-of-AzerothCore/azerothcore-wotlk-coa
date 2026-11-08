@@ -103,3 +103,9 @@ UPDATE `gameobject` SET `position_x` = 646.6526, `position_y` = -4556.1823, `pos
 -- #11608
 -- pickup 6941983 (Needlewind Crossbow) moved 5.9 yd across and 0.00 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -5573.1407, `position_y` = -2718.4827, `position_z` = -51.585, `orientation` = 4.470529, `rotation0` = -0.016105, `rotation1` = -0.146624, `rotation2` = 0.771804, `rotation3` = -0.618515 WHERE `guid` = 6941983 AND `id` = 97136;
+
+-- #11615
+-- pickup 6942139 (Scalper's Sack) moved 7.0 yd across and 0.02 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -736.2671, `position_y` = -5585.9241, `position_z` = 25.052, `orientation` = 5.119941, `rotation0` = 0.012386, `rotation1` = 0.018838, `rotation2` = 0.54924, `rotation3` = -0.83536 WHERE `guid` = 6942139 AND `id` = 95629;
+-- Scalper's Sack copies outside Durotar (Ascension and LootCollector only have the Echo Isles one): 6941009 (Scalper's Sack), 6942138 (Scalper's Sack) hidden, not deleted
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6941009, 6942138) AND `id` IN (95629);
