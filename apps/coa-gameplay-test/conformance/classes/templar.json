@@ -70,6 +70,10 @@
     {"spell": 704409, "effect": 0,
      "reason": "AscensionTemplarContracts.cpp:211 sets info->Effects[0].Effect = 0 for spell 704409 at load time"}
   ],
+  "effect_overrides": [
+    {"spell": 520442, "effect": 0, "misc_value": 15,
+     "citation": "AscensionTemplarContracts.cpp:130 rewrites EffectMiscValue 7 to SPELLMOD_CRIT_DAMAGE_BONUS (15)"}
+  ],
   "passive_targets": [
     {"spell": 520034, "effect": 1, "targets": [801205], "tooltip_words": "Tranquil Circle"},
     {"spell": 705291, "effect": 0, "targets": [567539], "tooltip_words": "Condemn"},

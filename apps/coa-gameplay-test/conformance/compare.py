@@ -65,6 +65,7 @@ PERCENT_POINT_METRICS = frozenset({'melee_crit_chance', 'melee_crit_chance_refre
 FRACTIONAL_METRICS = PERCENT_POINT_METRICS | {'weapon_damage_min'}
 FRACTIONAL_FLOOR = 0.01
 CRITICAL_DAMAGE_BASE = 1000
+DIRECT_CRIT_DAMAGE_AURA = 163
 DURATION_KIND = 'duration_ms'
 PASSIVE_METRIC = 'metric'
 PARRY_CHANCE = 'parry_chance'
@@ -1270,9 +1271,12 @@ def present_rows(manifest: dict, model: dict, run: Run, tooltips: TooltipSource)
             and run.values.get(known_aura_label(row['spell_id']), 0) > 0]
 
 
-def present_modifiers(manifest: dict, model: dict, run: Run, tooltips: TooltipSource) -> list[tuple[str, float]]:
-    return [(f'{known_label(row)} {row["percent"]:+d}%', float(row['percent']))
-            for row in present_rows(manifest, model, run, tooltips)]
+def present_modifiers(manifest: dict, model: dict, run: Run, tooltips: TooltipSource,
+                      aura: int | None = None) -> list[tuple[str, float]]:
+    rows = present_rows(manifest, model, run, tooltips)
+    if aura is not None:
+        rows = [row for row in rows if row['aura'] == aura]
+    return [(f'{known_label(row)} {row["percent"]:+d}%', float(row['percent'])) for row in rows]
 
 
 def delta_readings(manifest: dict, run: Run, model: dict, before: float, value: float,
@@ -1289,13 +1293,14 @@ def delta_readings(manifest: dict, run: Run, model: dict, before: float, value: 
     if relation == 'haste':
         return [DeltaReading('divides', before * 100 / (100 + value) - before, f'after = before / (1 {value:+g}%)')]
     if relation == 'crit_damage':
-        return [DeltaReading('whole', before * value / 100, f'the whole critical hit x (1 {value:+g}%)'),
-                DeltaReading('bonus', (before - CRITICAL_DAMAGE_BASE) * value / 100,
+        if model.get('aura') == DIRECT_CRIT_DAMAGE_AURA:
+            return [DeltaReading('whole', before * value / 100, f'the whole critical hit x (1 {value:+g}%)')]
+        return [DeltaReading('bonus', (before - CRITICAL_DAMAGE_BASE) * value / 100,
                              f'the critical bonus above the fixed base {CRITICAL_DAMAGE_BASE} x (1 {value:+g}%)')]
     if relation == 'composition':
         readings = [DeltaReading(MULTIPLIES, before * value / 100,
                                  'the bonus multiplies the value, known modifiers included')]
-        known = present_modifiers(manifest, model, run, tooltips)
+        known = present_modifiers(manifest, model, run, tooltips, model.get('aura'))
         if known:
             stacked = sum(percent for _, percent in known)
             names = ', '.join(name for name, _ in known)

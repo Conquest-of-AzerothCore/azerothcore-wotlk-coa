@@ -203,7 +203,11 @@ Known divergence: the reader reads the client DBC, which is what players' toolti
 patched. The server can override a description: `rev_20261029_240_templar_untainted_tooltip.sql` gives Untainted
 705298 `${-$705299m1+$STA*0.1}` through `coa_client_spell_description`, while the client DBC reads
 `${$705299m1+$STA*0.1}`; the comparison follows the client DBC
-([ADR 0014](../../../docs/adr/0014-level-scaled-tooltip-values-use-the-skill-rank.md)).
+([ADR 0014](../../../docs/adr/0014-level-scaled-tooltip-values-use-the-skill-rank.md)). A class script can
+similarly correct a live `SpellInfo` effect without changing `Spell.dbc` at all: Upheave! 520442 effect 0 is
+`EffectMiscValue[0]` 7 in the client DBC, but `AscensionTemplarContracts.cpp:130` rewrites it to 15 at load time;
+the class file's `effect_overrides` entry (see "Effect overrides" below) makes the reader classify the effective
+op instead of the raw DBC one.
 
 ## Reference character
 
@@ -374,7 +378,7 @@ source (`stat <n>` or `attack_power`), and whether the delta is judged (`judged`
 
 | Aura | Plans | Relation |
 |---|---|---|
-| 107 / 108 | `spell_modifier {op, base: 1000}` per target; consumer of the op: 14 `spell_power_cost`, 10 `spell_cast_time_ms`, 5 `spell_max_range`, 31 `spell_max_stacks`, 3/12/23 `spell_effect_value {effect: 0/1/2}`, 7 `spell_done_crit_chance {target: dummy}` | `spell_mod_flat` / `spell_mod_pct`; consumer `add` / `scale` |
+| 107 / 108 | `spell_modifier {op, base: 1000}` per target; consumer of the op: 14 `spell_power_cost`, 10 `spell_cast_time_ms`, 5 `spell_max_range`, 31 `spell_max_stacks`, 3/12/23 `spell_effect_value {effect: 0/1/2}`, 7 `spell_done_crit_chance {target: dummy}`, 15 `spell_critical_damage {target: dummy}` | `spell_mod_flat` / `spell_mod_pct`; consumer `add` / `scale`, op 15 `crit_damage` |
 | 29 / 137 | `stat {stat}`, all five for misc −1 | `add` / `scale` |
 | 133, 132, 166, 167 | `max_health`, `max_power {power}`, `attack_power`, `ranged_attack_power` | `scale` |
 | 240, 47, 49 | `expertise`, `parry_chance`, `dodge_chance` | `add` |
@@ -396,6 +400,31 @@ The physical part of aura 79 enters the weapon damage (`Unit::UpdateDamagePctDon
 damage modifier), and `Unit::MeleeDamageBonusDone` skips aura 79 for a physical school mask (`Unit.cpp:11419`):
 `melee_damage_done` stayed 800 → 800 with Serendipity 300929 learned, so the physical part is measured on
 `weapon_damage_min` (`UNIT_FIELD_MINDAMAGE`, the character sheet's minimum damage).
+
+A `composition` or `crit_damage` relation can read as more than one quantity (the bonus "multiplies" or "adds" to
+known modifiers; a critical-hit percent applies to the "whole" hit or only to the "bonus" above the fixed base),
+but only one of those readings is ever physically possible for a given effect's own mechanism, so `delta_readings`
+gates each alternate on `model['aura']` instead of always offering it: a `composition` known modifier only offers
+"adds" when its own `aura` (carried on every `known_modifiers` row) equals the effect's own `aura` — a known
+modifier of a different aura can never enter the same `Unit::GetTotalAuraMultiplier` call as the effect under
+test, so it cannot compose additively with it (Serendipity 300929's aura-79 effect against the Ascension tuning
+aura's 341, `Unit::GetAscensionNormalTuningDamageMultiplier` and `Unit::SpellDamageBonusDone`,
+`Unit.cpp:9284-9296, 9914-9930`). A `crit_damage` effect offers "whole" only for a direct aura 163 application
+(`Unit::SpellCriticalDamageBonus`, `Unit.cpp:10527-10561`: aura 163's own percent scales the pre-subtraction value);
+every other `crit_damage` plan — the spell-modifier op 15 consumer below — offers "bonus" only, since
+`ApplySpellMod(..., SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus)` runs only on the bonus-above-base portion.
+
+### Effect overrides
+
+A class file's `effect_overrides` list (`[{"spell": <id>, "effect": <n>, "misc_value": <n>, "citation": "..."}]`)
+substitutes a live-corrected `EffectMiscValue` for the raw client DBC value before `classify` builds any plan, the
+same `{spell_id or rank_id, effect}` lookup as `passive_targets` (point 3 above). A class script can rewrite a
+spell's effective `SpellInfo` at load time without changing `Spell.dbc`, so the raw DBC op the reader would
+otherwise classify by was never the one actually registered. Templar: Upheave! 520442 effect 0 carries
+`EffectMiscValue[0]` 7 (`SPELLMOD_CRITICAL_CHANCE`) in the client DBC, but `AscensionTemplarContracts.cpp:130`
+rewrites it to 15 (`SPELLMOD_CRIT_DAMAGE_BONUS`) at load time to match its own "critical damage" tooltip wording;
+the `effect_overrides` entry makes the reader classify it as op 15 (`spell_critical_damage`/`crit_damage`, the
+"bonus" reading above), the op the live server actually installs.
 
 Unmodelled by rule: `P5` (`proc or trigger effect without a trigger entry`), `P6` (`scripted or crowd-control
 effect`), 142 (`mail armor is out of scope`, owner ruling), 59 (`damage versus a creature type is level-scaled`),

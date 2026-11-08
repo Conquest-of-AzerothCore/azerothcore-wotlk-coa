@@ -69,6 +69,7 @@ SPELL_MODIFIER_CONSUMERS = {
     12: ('spell_effect_value', {'effect': 1}),
     23: ('spell_effect_value', {'effect': 2}),
     7: ('spell_done_crit_chance', {'target': TARGET}),
+    15: ('spell_critical_damage', {'target': TARGET}, 'crit_damage'),
 }
 
 STAT_NAMES = ('Strength', 'Agility', 'Stamina', 'Intellect', 'Spirit')
@@ -458,8 +459,9 @@ def modifier_plans(aura: int, op: int, points: float | None = None) -> tuple[Met
                                    else ('spell_mod_pct', 'scale'))
     plans = [MetricPlan('spell_modifier', {'op': op, 'base': modifier_base(aura, op, points)}, relation)]
     if op in SPELL_MODIFIER_CONSUMERS:
-        metric, fields = SPELL_MODIFIER_CONSUMERS[op]
-        plans.append(MetricPlan(metric, dict(fields), consumer_relation))
+        entry = SPELL_MODIFIER_CONSUMERS[op]
+        metric, fields = entry[0], entry[1]
+        plans.append(MetricPlan(metric, dict(fields), entry[2] if len(entry) > 2 else consumer_relation))
     return tuple(plans)
 
 
@@ -487,6 +489,12 @@ def passive_override(class_file: dict, spell_ids: set[int], effect: int) -> dict
                  if entry['spell'] in spell_ids and entry['effect'] == effect), None)
 
 
+def effect_override(class_file: dict, spell_ids: set[int], effect: int) -> int | None:
+    entry = next((entry for entry in class_file.get('effect_overrides', [])
+                 if entry['spell'] in spell_ids and entry['effect'] == effect), None)
+    return entry['misc_value'] if entry else None
+
+
 def signed_points(records: Records, rank_id: int, effect: int) -> float | None:
     try:
         return records.points(rank_id, effect, upper=False)
@@ -500,7 +508,8 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
         return records.field('Spell', rank_id, name)
 
     aura = spell(f'EffectApplyAuraName[{effect}]')
-    misc = spell(f'EffectMiscValue[{effect}]')
+    override = effect_override(class_file, {spell_id, rank_id}, effect)
+    misc = override if override is not None else spell(f'EffectMiscValue[{effect}]')
     misc_b = spell(f'EffectMiscValueB[{effect}]')
     family = family_of(spell(f'Effect[{effect}]'), aura)
     token = own_token(values, effect) or shared_token(records, rank_id, effect, effects, values)
@@ -631,7 +640,8 @@ def effect_model(effect: PassiveEffect) -> dict:
 
 def probe_model(effect: PassiveEffect, plan: MetricPlan, probe: Probe, aura_label: str) -> dict:
     measured = not probe.reason
-    return {'family': effect.family, 'effect': effect.effect, 'metric': plan.metric, 'fields': probe.fields,
+    return {'family': effect.family, 'effect': effect.effect, 'aura': effect.aura, 'metric': plan.metric,
+            'fields': probe.fields,
             'relation': plan.relation, 'source_label': plan.source,
             'before_label': f'{probe.label} {BEFORE}' if measured else None,
             'after_label': f'{probe.label} {AFTER}' if measured else None,

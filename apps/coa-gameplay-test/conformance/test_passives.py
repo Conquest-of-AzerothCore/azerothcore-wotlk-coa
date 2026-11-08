@@ -82,8 +82,8 @@ STAT_COUNT = 5
 LIBERTY_OP = 11
 SPELL_MODIFIER_BASE = 1000
 CONDEMNATION_OP = 40
-MODEL_KEYS = {'family', 'effect', 'metric', 'fields', 'relation', 'source_label', 'before_label', 'after_label',
-              'target', 'named', 'in_mask', 'points', 'judged', 'aura_label'}
+MODEL_KEYS = {'family', 'effect', 'aura', 'metric', 'fields', 'relation', 'source_label', 'before_label',
+              'after_label', 'target', 'named', 'in_mask', 'points', 'judged', 'aura_label'}
 MAGIC_SCHOOLS = [1, 2, 3, 4, 5, 6]
 NO_NAMED_TARGET = 'unmodelled: the tooltip names none of the spells the class mask affects ('
 
@@ -585,7 +585,7 @@ class PassiveScenarioTest(unittest.TestCase):
 
     def test_dummy_target_brings_the_dummy(self):
         scenario, _ = self.scenario(UPHEAVE)
-        crit = [step for step in scenario['steps'] if step.get('metric') == 'spell_done_crit_chance']
+        crit = [step for step in scenario['steps'] if step.get('metric') == 'spell_critical_damage']
         self.assertTrue(crit and all(step['target'] == TARGET for step in crit))
         self.assertEqual([creature['id'] for creature in scenario['creatures']], [TARGET])
 

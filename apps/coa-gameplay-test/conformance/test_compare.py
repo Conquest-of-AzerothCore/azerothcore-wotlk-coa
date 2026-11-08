@@ -91,10 +91,11 @@ class Workspace:
         steps, recorded_hash = self.runs.pop(key)
         self.runs[folder] = (steps, recorded_hash)
 
-    def manifest(self, **base_overrides):
+    def manifest(self, known_modifiers=None, **base_overrides):
         manifest = {'schema': 1, 'class_id': CLASS_FILE['class_id'], 'class_name': CLASS_FILE['name'],
                     'level': CLASS_FILE['level'], 'class_file': CLASS_FILE, 'scenarios': self.scenarios,
-                    'known_modifiers': [{**asdict(CLASS_TUNING), 'base_points': -1, 'real_points_per_level': -0.4}]}
+                    'known_modifiers': known_modifiers if known_modifiers is not None else
+                    [{**asdict(CLASS_TUNING), 'base_points': -1, 'real_points_per_level': -0.4}]}
         path = self.root / 'out' / 'manifest.json'
         path.write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
         results = self.root / 'stamp'
@@ -623,10 +624,10 @@ class CompareTest(unittest.TestCase):
 
 
 def passive_expectation(rank, effect, metric, relation, displayed, points, target=None, named=None, in_mask=None,
-                        source_label=None, judged=True, fields=None):
+                        source_label=None, judged=True, fields=None, aura=None):
     qualifier = target if target is not None else ' '.join(str(value) for value in (fields or {}).values())
     label = ' '.join(str(part) for part in (rank, f'e{effect}', metric, qualifier) if part != '')
-    model = {'family': 'P1' if named is not None else 'P2', 'effect': effect, 'metric': metric,
+    model = {'family': 'P1' if named is not None else 'P2', 'effect': effect, 'aura': aura, 'metric': metric,
              'fields': {**(fields or {}), **({'spell': target} if target else {})}, 'relation': relation,
              'source_label': source_label, 'before_label': f'{label} before', 'after_label': f'{label} after',
              'target': target, 'named': named, 'in_mask': in_mask, 'points': points, 'judged': judged,
@@ -645,6 +646,7 @@ SCOURGEBANE_PASSIVE, HOLY_EDGE, SCARLET_HAMMER = 92111, 707853, 807035
 HOLY_UPHEAVAL, ZEALOTRY, JUDICATOR, CALL_OF_THE_MONASTERY, PARAGON = 572547, 500008, 706359, 560550, 706357
 BELLS_OF_LIGHT, ZEALOTRY_PASSIVE = 801204, 92108
 LEGACY, SCOURGEBANE_DAMAGE, TEMPLARS_MIGHT, RIGHTEOUS_LUNGE, CONDEMN = 806522, 801832, 705291, 570233, 567539
+UPHEAVE = 520442
 SPELL_NAMES = {(RECKONING, 'SpellName[enUS]'): 'Reckoning', (INTERDICT, 'SpellName[enUS]'): 'Interdict',
                (SACRED_RESTRAINT, 'SpellName[enUS]'): 'Sacred Restraint', (RECKONING, 'SchoolMask'): 2}
 
@@ -657,7 +659,7 @@ class PassiveDeltaTest(unittest.TestCase):
         self.workspace.close()
 
     def passive_run(self, rank, measured, tokens, aura='1', fields=None, name='Passive', points=None,
-                    **base_overrides):
+                    known_modifiers=None, **base_overrides):
         self.workspace.close()
         self.workspace = Workspace()
         steps = [step for entry, (before, after) in measured.items() if before is not None
@@ -665,7 +667,7 @@ class PassiveDeltaTest(unittest.TestCase):
         steps.insert(len(steps) // 2, assert_step(f'{rank} aura_present', aura))
         self.workspace.scenario(f'conformance-templar-passive-{rank}', 'passive', list(measured), [], steps,
                                 spell=rank, name=name, rank=rank)
-        manifest, results = self.workspace.manifest(**base_overrides)
+        manifest, results = self.workspace.manifest(known_modifiers=known_modifiers, **base_overrides)
         reader = FakeTooltips(tokens, points, fields={**SPELL_NAMES, **(fields or {})})
         return {verdict.label: verdict for verdict in compare(manifest, results, tooltips=reader,
                                                               hit_model=reference_hit)}
@@ -846,38 +848,31 @@ class PassiveDeltaTest(unittest.TestCase):
             self.assertIn('passive aura 706431 absent after learn', verdicts[entry.label].explanation)
             self.assertIn('EquippedItemClass -1', verdicts[entry.label].explanation)
 
-    def test_crit_damage_readings(self):
+    def test_crit_damage_direct_aura_gives_only_the_whole_reading(self):
         entry = passive_expectation(CHIVALRIC, 0, 'spell_critical_damage', 'crit_damage', '$s1', 15.0, RECKONING,
-                                    fields={'target': 'dummy'})
+                                    fields={'target': 'dummy'}, aura=163)
         verdict = self.single(entry, '2000', '2300', [Displayed('$s1', 15.0, 0, 'percent')], name='Chivalric')
-        self.assertEqual(verdict.status, 'ambiguous_tooltip')
-        question = verdict.detail['question']
-        self.assertEqual((question['kind'], question['measured']), ('readings', 2300.0))
-        self.assertEqual([(item['name'], item['expected'], item['status']) for item in question['readings']],
-                         [('whole', 2300.0, 'ok'), ('bonus', 2150.0, 'alert')])
-        self.assertIn('Reckoning', question['question'])
-        self.assertIn('deal 230% or 215% of a normal hit (200% without it)', question['question'])
-        self.assertIn('learned only Chivalric', question['conditions'])
-        self.assertIn('extra damage', question['readings'][1]['meaning'])
+        self.assertEqual((verdict.status, verdict.expected), ('ok', 300.0))
+        alert = self.single(entry, '2000', '2150', [Displayed('$s1', 15.0, 0, 'percent')], name='Chivalric')
+        self.assertEqual(alert.status, 'alert')
 
-    def test_composition_with_known_modifier(self):
+    def test_crit_damage_spell_modifier_consumer_gives_only_the_bonus_reading(self):
+        entry = passive_expectation(UPHEAVE, 0, 'spell_critical_damage', 'crit_damage', '$s1', 20.0, RECKONING,
+                                    named=True, in_mask=True, fields={'target': 'dummy'}, aura=108)
+        verdict = self.single(entry, '2000', '2200', [Displayed('$s1', 20.0, 0, 'percent')], name='Upheave!')
+        self.assertEqual((verdict.status, verdict.expected), ('ok', 200.0))
+        alert = self.single(entry, '2000', '2300', [Displayed('$s1', 20.0, 0, 'percent')], name='Upheave!')
+        self.assertEqual(alert.status, 'alert')
+
+    def test_composition_with_a_known_modifier_of_the_same_aura_is_ambiguous(self):
         entry = passive_expectation(SERENDIPITY, 0, 'spell_damage_done', 'composition', '$s1', 3.0, RECKONING,
-                                    fields={'target': 'dummy'})
+                                    fields={'target': 'dummy'}, aura=79)
+        same_aura = {**asdict(CLASS_TUNING), 'aura': 79, 'base_points': -1, 'real_points_per_level': -0.4}
         verdict = self.single(entry, '800', '824', [Displayed('$s1', 3.0, 0, 'percent')], name='Serendipity',
-                              fields={(RECKONING, 'Effect[0]'): 2}, points={(RECKONING, 0): (165, 49)})
+                              fields={(RECKONING, 'Effect[0]'): 2}, points={(RECKONING, 0): (165, 49)},
+                              known_modifiers=[same_aura])
         self.assertEqual(verdict.status, 'ambiguous_tooltip')
         readings = verdict.detail['question']['readings']
-        variation = math.sqrt((49 ** 2 - 1) / 12) / (165 + 25)
-        hits = math.ceil(2 * (2.576 * variation * (1.03 + 1.0375) / 0.0075) ** 2)
-        question = verdict.detail['question']
-        self.assertTrue(question['question'].startswith(
-            f'With Serendipity learned, is a hit of Reckoning +3% or +3.75% larger than without it? Record {hits} '
-            f'non-critical hits of Reckoning on the same target dummy without Serendipity and {hits} with it'))
-        self.assertTrue(question['observations'].startswith(
-            f'About {hits} non-critical hits each way: at that count the 99% ranges of the readings no longer '
-            f'overlap (the client data rolls the hit over 49 values'))
-        self.assertIn('so it counts for more: +3.75% instead of +3%', readings[1]['meaning'])
-        self.assertEqual(readings[1]['expects'], '+3.75% larger')
         self.assertEqual([(reading['name'], reading['status']) for reading in readings],
                          [('multiplies', 'ok'), ('adds', 'alert')])
         self.assertAlmostEqual(readings[0]['expected'], 824.0)
@@ -885,9 +880,19 @@ class PassiveDeltaTest(unittest.TestCase):
         self.assertIn('887007 (-20% damage)', readings[1]['meaning'])
         self.assertIn('887007 (-20% damage)', verdict.detail['question']['conditions'])
 
+    def test_composition_with_a_known_modifier_of_a_different_aura_is_unambiguous(self):
+        entry = passive_expectation(SERENDIPITY, 0, 'spell_damage_done', 'composition', '$s1', 3.0, RECKONING,
+                                    fields={'target': 'dummy'}, aura=79)
+        verdict = self.single(entry, '800', '824', [Displayed('$s1', 3.0, 0, 'percent')], name='Serendipity',
+                              fields={(RECKONING, 'Effect[0]'): 2}, points={(RECKONING, 0): (165, 49)})
+        self.assertEqual((verdict.status, verdict.expected), ('ok', 24.0))
+        alert = self.single(entry, '800', '830', [Displayed('$s1', 3.0, 0, 'percent')], name='Serendipity',
+                            fields={(RECKONING, 'Effect[0]'): 2}, points={(RECKONING, 0): (165, 49)})
+        self.assertEqual(alert.status, 'alert')
+
     def test_composition_without_the_known_aura_has_one_reading(self):
         entry = passive_expectation(SERENDIPITY, 0, 'spell_damage_done', 'composition', '$s1', 3.0, RECKONING,
-                                    fields={'target': 'dummy'})
+                                    fields={'target': 'dummy'}, aura=79)
         verdict = self.single(entry, '1000', '1030', [Displayed('$s1', 3.0, 0, 'percent')],
                               **{'known_aura 887007': '0'})
         self.assertEqual((verdict.status, verdict.detail), ('ok', {'metric': 'spell_damage_done'}))
