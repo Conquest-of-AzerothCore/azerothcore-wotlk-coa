@@ -18,3 +18,7 @@ UPDATE `gameobject` SET `position_x` = -3977.9334, `position_y` = -2012.0263, `p
 UPDATE `gameobject_template` SET `size` = 0.2 WHERE `entry` = 96152;
 -- pickup 6941642 (Singed Booklet) moved 6.6 yd across to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -4763.5591, `position_y` = -3658.5874, `position_z` = 47.7020, `orientation` = 1.29503, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.603206, `rotation3` = 0.797585 WHERE `guid` = 6941642 AND `id` = 96152;
+
+-- #8430
+-- pickup 6941830 (Old Blade) moved 7.0 yd across and 0.83 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 5113.2225, `position_y` = -519.2770, `position_z` = 334.9702, `orientation` = 4.016142, `rotation0` = -0.278552, `rotation1` = 0.59589, `rotation2` = 0.682339, `rotation3` = -0.318963 WHERE `guid` = 6941830 AND `id` = 517261;
