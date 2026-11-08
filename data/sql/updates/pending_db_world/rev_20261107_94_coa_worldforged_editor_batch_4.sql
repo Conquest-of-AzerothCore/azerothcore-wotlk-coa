@@ -26,3 +26,9 @@ UPDATE `gameobject` SET `position_x` = -13232.8017, `position_y` = -483.0316, `p
 -- #11359
 -- pickup 6942308 (The Wrath of Arkkoroc) moved 20.6 yd across and 24.75 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 3857.9727, `position_y` = -7172.1229, `position_z` = 24.9720, `orientation` = 3.336149, `rotation0` = 0.69502, `rotation1` = 0.0678245, `rotation2` = 0.7124, `rotation3` = -0.0695206 WHERE `guid` = 6942308 AND `id` = 254430;
+
+-- #11401
+-- template 1345147 (Terrible Defias Mixture): size 1 -> 0.5 (1 spawns)
+UPDATE `gameobject_template` SET `size` = 0.5 WHERE `entry` = 1345147;
+-- pickup 6941205 (Terrible Defias Mixture) moved 20.4 yd across and 5.17 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -11142.2382, `position_y` = 544.9816, `position_z` = 36.9810, `orientation` = 0.562727, `rotation0` = 0.149573, `rotation1` = -0.515723, `rotation2` = 0.23454, `rotation3` = 0.810338 WHERE `guid` = 6941205 AND `id` = 1345147;
