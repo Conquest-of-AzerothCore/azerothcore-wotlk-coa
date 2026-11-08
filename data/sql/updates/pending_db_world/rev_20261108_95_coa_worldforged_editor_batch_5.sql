@@ -73,3 +73,7 @@ UPDATE `gameobject` SET `position_x` = -13091.4, `position_y` = -607.342, `posit
 -- #11586
 -- pickup 6942187 (Silverhand Spaulder) moved 6.9 yd across and 0.00 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 5201.5, `position_y` = -571.654, `position_z` = 289.32, `orientation` = 1.35445, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.626633, `rotation3` = 0.779315 WHERE `guid` = 6942187 AND `id` = 517234;
+
+-- #11591
+-- pickup 6942080 (Scorched Equipment Cache) moved 13.4 yd across and 0.89 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 578.082, `position_y` = -4113.61, `position_z` = 18.2154, `orientation` = 3.80281, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.945845, `rotation3` = -0.324619 WHERE `guid` = 6942080 AND `id` = 95633;
