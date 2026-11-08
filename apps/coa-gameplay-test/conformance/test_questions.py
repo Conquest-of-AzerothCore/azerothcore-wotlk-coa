@@ -6,7 +6,7 @@ import tempfile
 import unittest
 
 from compare import (DbcTooltips, Verdict, compare, comparison_word, hit_count, hit_spread, tooltip_value_question,
-                     unreadable_question, write_outputs)
+                     write_outputs)
 from procs import PROC_CHECK, added_trials_label, proc_measurements, proc_status_expectation, wilson_interval
 from profile import DBC_DIR, caster_stats_from
 from questions import (DATA_ISSUE, QUESTIONS_FILE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE,
@@ -38,6 +38,9 @@ ARGENT_BLADE_ENTRY = '${$801832m1*$<scalingbp>+$sph*0.25+$AP*0.25}'
 SILVERHAND_TEXT = ('Chant a silverhand incantation and toss a holy hammer at your target.\r\n\r\nUpon reaching your '
                    'target you deal ${$m1+$ppl1+$AP*2} Holy damage to all nearby enemies.')
 SILVERHAND_ENTRY = '${$m1+$ppl1+$AP*2}'
+PER_LEVEL_SAMPLE_SPELL = 900001
+PER_LEVEL_SAMPLE_TOKEN = '${$m1+$ppl1+$AP*2}'
+PER_LEVEL_SAMPLE_TEXT = f'Deals {PER_LEVEL_SAMPLE_TOKEN} Shadow damage to your target.'
 
 
 def class_fields():
@@ -265,15 +268,24 @@ class QuestionTest(unittest.TestCase):
         self.assertEqual(questions([verdict], tooltips), [])
 
     def test_per_level_token_asks_for_the_number_shown(self):
-        entry = SILVERHAND_ENTRY + ' [EffectRealPointsPerLevel[0] of spell 801465]'
-        verdict, = self.unreadable_verdicts(SILVERHAND_INCANTATION, 'Silverhand Incantation', entry, reader())
-        item, = questions([verdict], reader())
+        spell, token = PER_LEVEL_SAMPLE_SPELL, PER_LEVEL_SAMPLE_TOKEN
+        entry = token + f' [EffectRealPointsPerLevel[0] of spell {spell}]'
+        tooltips = reader(fields={(spell, 'SpellName[enUS]'): 'Sample Bolt',
+                                  (spell, 'Description[enUS]'): PER_LEVEL_SAMPLE_TEXT})
+        verdict, = self.unreadable_verdicts(spell, 'Sample Bolt', entry, tooltips)
+        item, = questions([verdict], tooltips)
         self.assertEqual(item.kind, TOOLTIP_VALUE)
-        self.assertIn('Upon reaching your target you deal ___ Holy damage to all nearby enemies.', item.question)
+        self.assertIn('Deals ___ Shadow damage to your target.', item.question)
         self.assertIn('$ppl1', item.question)
         self.assertIn('level 60', item.question)
-        self.assertEqual(tooltip_value_question('Silverhand Incantation', 60, SILVERHAND_ENTRY, SILVERHAND_TEXT),
+        self.assertEqual(tooltip_value_question('Sample Bolt', 60, token, PER_LEVEL_SAMPLE_TEXT),
                          verdict.detail['question'])
+
+    def test_per_level_token_with_a_player_reading_asks_nothing(self):
+        verdict, = self.unreadable_verdicts(SILVERHAND_INCANTATION, 'Silverhand Incantation',
+                                            SILVERHAND_ENTRY + ' [EffectRealPointsPerLevel[0] of spell 801465]',
+                                            reader())
+        self.assertEqual(questions([verdict], reader()), [])
 
     def test_server_behaviour_is_its_own_section(self):
         self.workspace.scenario('conformance-templar-trigger-806516-part-1', 'trigger', [heavens_finest_expectation()],
@@ -366,14 +378,13 @@ class ClientTooltipTest(unittest.TestCase):
             workspace.close()
         self.assertEqual([spell for spell, _ in item.spells], list(BLADE_SERMON))
 
-    def test_per_level_token_read_with_measured_skills_becomes_a_tooltip_value_question(self):
+    def test_ppl_token_reads_a_value_instead_of_asking_a_question(self):
         tooltips = DbcTooltips(DBC_DIR)
         measured = {**CLASS_FILE['reference_stats'], **{f'skill {line}': 300.0 for line in CLASS_FILE['skill_lines']}}
         readout = tooltips.read(ARMOR_OF_FAITH, caster_stats_from(measured, CLASS_FILE))
-        self.assertIn(ARMOR_OF_FAITH_ENTRY, readout.unreadable)
-        question = unreadable_question(tooltips, ARMOR_OF_FAITH, 'Armor of Faith', 60, ARMOR_OF_FAITH_ENTRY)
-        self.assertEqual(question['kind'], TOOLTIP_VALUE)
-        self.assertIn('$801546ppl1', question['question'])
+        self.assertEqual(readout.unreadable, [])
+        reading = next(value for value in readout.values if value.text == ARMOR_OF_FAITH_ENTRY)
+        self.assertAlmostEqual(reading.value, 269.2, places=1)
 
     def test_class_file_questions_quote_client_numbers(self):
         tooltips = DbcTooltips(DBC_DIR)

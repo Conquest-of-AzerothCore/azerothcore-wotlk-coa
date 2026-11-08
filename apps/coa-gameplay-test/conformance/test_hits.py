@@ -399,8 +399,7 @@ class HitScenarioTest(unittest.TestCase):
             self.assertIn(label, labels)
         self.assertEqual(steps_with(scenario, label=hit.model['measurements']['armor'])[0]['metric'], 'armor')
         unreadable = [expectation for expectation in expectations if expectation.rule.startswith(UNREADABLE)]
-        self.assertEqual([expectation.displayed for expectation in unreadable],
-                         ['${$801832m1*$<scalingbp>+$sph*0.25+$AP*0.25}'])
+        self.assertEqual(unreadable, [])
 
     def test_measured_model_recomputes_with_the_armor_and_auras_of_the_run(self):
         _, expectations = hit_scenario(self.templar, self.argent_blade, 1)

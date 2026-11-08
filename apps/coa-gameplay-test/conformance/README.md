@@ -120,12 +120,20 @@ token as written in the DBC, `value` the number before any player modifier.
 | `$u`, `$i` (with `<id>`) | `StackAmount`, `MaxAffectedTargets` | `count` |
 | `$aN` (with `<id>`) | `SpellRadius` radius of effect N | `radius_yards` |
 | `${...}` | `+ - * /`, parentheses and the variables below | as `$sN` |
-| `$<name>` | a `SpellDescriptionVariables` formula of the described spell | as `$sN` |
+| `$<name>` | a `SpellDescriptionVariables` formula of the spell it is scoped to (below) | as `$sN` |
+| `$pplN`, `$<id>pplN` (inside `${...}` only) | `EffectRealPointsPerLevel[N-1] × max(0, caster level − BaseLevel)` | as `$mN` |
 
 Inside `${...}`: `$mN`/`$MN` (signed), `$h $u $i`, `$d` in seconds, `$aN`, `$tN`/`$TN` the period in ms, each with
-an optional spell id; `$AP`, `$RAP`, `$PL`; `$SP` is the lowest spell power of schools 1 to 6, `$sph $spfi $spn $spfr
-$sps $spa` one school each; `$STR $AGI $STA $INT $SPI` the effective stats 0 to 4; `$<name>` a variable defined
-earlier.
+an optional spell id; `$pplN`/`$<id>pplN` (below); `$AP`, `$RAP`, `$PL`; `$SP` is the lowest spell power of schools
+1 to 6, `$sph $spfi $spn $spfr $sps $spa` one school each; `$STR $AGI $STA $INT $SPI` the effective stats 0 to 4;
+`$<name>` a variable defined earlier.
+`$<name>` resolves against the `SpellDescriptionVariables` formula of the spell most recently named by a `$mN`/
+`$MN`/`$sN`/`$SN`/`$aN`/`$tN`/`$TN`/`$<id>...` token earlier in the *same* `${...}` expression, or the described
+spell when the expression has not named one yet (`Tooltip.variable`'s `context_spell_id`, cached per spell id in
+`Tooltip.variable_cache` so a formula is compiled once even when several tokens reference it). Argent Blade/
+Scourgebane 807268's `${$801832m1*$<scalingbp>+$sph*0.25+$AP*0.25}` names 801832 first, so `$<scalingbp>` resolves
+801832's own `$scalingbp=${...}` formula (`SpellDescriptionVariableID` 182 on 801832, 0 on every Argent Blade rank
+itself) instead of being unreadable for lack of a variable on the described rank.
 `effect_index` is the effect of the first `$sN`/`$mN`/`$MN`/`$tN`/`$TN`/`$aN` of the spell itself in the token (for
 `$<name>`, in its formula), otherwise `None`. `spell_id` is the spell of the first `$sN`/`$mN`/`$MN`/`$tN`/`$TN`/`$aN`
 of the token, the described spell or another one, and `None` for a token without one (`$h`, `$d`, `$u`, `$i`). The
@@ -164,11 +172,11 @@ the nesting is deeper than `MAX_EXPANSION_DEPTH` (3) expansions. A referenced to
 Sacred Oath 712346 is then a tooltip without value.
 
 Everything else goes to `unreadable` verbatim and is never guessed: `$?` conditionals, other `@...@` markup, other `|`
-escapes, other tokens (`$o`, `$x`, `$l`, `$g`...), expression functions and variables such as `$BH`,
-`$ppl1` or lowercase `$ap`, durations that scale with level (`DurationPerLevel` not zero), points that scale with
-level when the skill rank cannot be read (see below), spread values (`EffectDieSides` not 1 for `$sN`), missing records,
-non-positive durations, a `$<name>` that the described spell's `SpellDescriptionVariableID` does not define, and a stat
-or school missing from `CasterStats`.
+escapes, other tokens (`$o`, `$x`, `$l`, `$g`...), expression functions and variables such as `$BH` or lowercase
+`$ap`, durations that scale with level (`DurationPerLevel` not zero), points that scale with level when the skill
+rank cannot be read (see below), spread values (`EffectDieSides` not 1 for `$sN`), missing records, non-positive
+durations, a `$<name>` whose spell (the one it is scoped to, above) has no `SpellDescriptionVariables` formula of
+that name, and a stat or school missing from `CasterStats`.
 
 ### Level-scaled points
 
@@ -195,9 +203,34 @@ capped at a positive `MaxLevel`.
 
 The entry stays unreadable and names its field and the cause in three cases: the skill line is not measured
 (`${$m3+0+$SP*1+$AP*.55} [EffectRealPointsPerLevel[2] of spell 807805: skill 72 is not measured]`), the race or
-class is unknown, or several ability lines match. `$<id>pplN` stays unreadable and goes to the player question list
-as a `tooltip_value` question. The client adds a temporary skill bonus to the rank; `skill_value` reads the pure
-value, and no metric reads that bonus.
+class is unknown, or several ability lines match. The client adds a temporary skill bonus to the rank;
+`skill_value` reads the pure value, and no metric reads that bonus.
+
+### Per-level points (`$pplN`)
+
+`$pplN`/`$<id>pplN` is only ever found inside a `${...}` expression (never as a standalone text token) and reads
+`Tooltip.per_level_points`: `EffectRealPointsPerLevel[N-1] × max(0, caster.level − BaseLevel)`, `0` when
+`EffectRealPointsPerLevel` is `0`. Unlike `$mN`/`$sN` above, the level it scales by is the **caster's actual
+level** (`CasterStats.level`), not `client_spell_level`'s skill-rank-derived level
+([ADR 0031](../../../docs/adr/0031-ppl-tokens-scale-by-actual-level-not-skill-rank.md), which does not reopen
+[ADR 0014](../../../docs/adr/0014-level-scaled-tooltip-values-use-the-skill-rank.md): `$mN`/`$sN` keep reading the
+skill rank). This followed from evidence, not from the token's name alone: none of the custom Templar spells that
+carry a `ppl` token have a `SkillLineAbility` row, so `client_spell_level` always resolves to 0 for them and the
+skill-rank reading would make every `$pplN` term 0 regardless of `EffectRealPointsPerLevel`. Two of the
+2026-11-07 player tooltip readings (Libram of Consecration 801441/803890-803893 and Eternal Blessing 705300) carry
+no `$AP`/`$sph` term, so their reported number is a direct check of `$pplN` alone at AP/SP-independent faces;
+Libram's reported 188 matches `EffectRealPointsPerLevel × (60 − BaseLevel)` exactly (`4.0 × (60 − 18) = 168`, `+20
+= 188`) and would not match a skill-rank reading (which gives 0). `player_tooltip_readings` (below) carries this
+citation.
+
+### `$<name>` resolved against the spell it names
+
+`$<name>` used to resolve only against the *described* spell's own `SpellDescriptionVariables` formula, so
+Argent Blade/Scourgebane's `${$801832m1*$<scalingbp>+$sph*0.25+$AP*0.25}` stayed unreadable: `scalingbp` is
+defined on 801832 (`SpellDescriptionVariableID` 182), not on the described rank (0 on every Argent Blade rank).
+The formula text itself already names 801832 first (`$801832m1`), so `ExpressionParser` now tracks the most
+recently named spell within the expression and resolves `$<name>` against *that* spell's formulas instead,
+falling back to the described spell when none has been named yet (see the token table above).
 
 Known divergence: the reader reads the client DBC, which is what players' tooltips show unless the client is
 patched. The server can override a description: `rev_20261029_240_templar_untainted_tooltip.sql` gives Untainted
@@ -1280,6 +1313,40 @@ production server, read beside the DBC-derived expectation the run already judge
 label the current run does not carry — because the scenario that would measure it has not been written yet, or
 its name changed — the row says so (`label not in this run`) instead of silently matching nothing, so a stale
 citation is visible rather than hidden.
+
+## Player tooltip readings
+
+A class file's `player_tooltip_readings` entry is `{"spell", "token", "value", "ap", "sp", "citation", "note"?}`:
+a tooltip *number* the client showed a player at a stated attack power and one or two candidate spell powers
+(`sp` a list; empty when the formula has no spell-power term). It is a different mechanism from "Player
+observations" above (behaviour, never a number): `citation` is validated the same way
+(`tooltip_readings.checked_tooltip_reading`), but `spell`+`token` (not `corroborates`) is the key, matched against
+the exact `$`-token text of a now-readable `${...}` expression ([ADR
+0031](../../../docs/adr/0031-ppl-tokens-scale-by-actual-level-not-skill-rank.md)). It is read-only evidence from
+production, never an expected value: the no-combat `effect_value`/`hit_mean` check already judges the token
+against the DBC formula evaluated at the harness's own reference caster, unaffected by which spec or gear the
+player's screenshot was taken under.
+
+Two generic, class-agnostic uses, both read-only:
+
+- `compare.py`'s `unreadable_question` looks up `(rank_id, entry_token)` in the class file's
+  `player_tooltip_readings` before building a `tooltip_value`/`data_issue` question for a still-unreadable entry;
+  a match stops that question from being asked again (the citation already answers it), without changing the
+  verdict's `unreadable` status.
+- `report.md`'s "Player tooltip readings" section (`tooltip_reading_lines`) re-evaluates the *same* token against
+  the reading's own `ap`/`sp` (one value per `sp` candidate, re-reading `tooltips.read` with a synthetic
+  level-60 `CasterStats` at that `ap`/`sp`) and reports the resulting band next to the run's measured value for
+  that label: `ok` when the measured value falls in the band (± the existing flat tolerance), `alert` otherwise,
+  `label not in this run` when the scenario that would measure it has not been generated. This is corroboration
+  only: it never feeds `judge_expectation`, and a `band unreadable` row means the token could not be re-evaluated
+  (not a verdict).
+
+Templar's 7 entries (`classes/templar.json`) cite the 2026-11-07 player report for Force of Golganneth,
+Norgannon's Wrath, Divine Charge, Eternal Blessing, Libram of Consecration, Silverhand Incantation and Armor of
+Faith; each `note` states which candidate spell power the reading fits, or that it fits neither exactly. Argent
+Blade/Scourgebane's `scalingbp` reading (report of 280 Holy) is deliberately **not** cited here: evaluated at
+either candidate spell power it comes out 260-330 points higher than reported, so citing it would read as model
+confirmation it is not; it stays a player question instead (`questions-round3.md`).
 
 ## Talent stack (lever map)
 

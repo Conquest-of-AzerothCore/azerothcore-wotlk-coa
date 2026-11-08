@@ -1152,5 +1152,41 @@
       "claim": "In the combat log, only off-hand auto attacks trigger Zealotry; Vindication, which should trigger it, does not.",
       "corroborates": "92108 trigger_count"
     }
+  ],
+  "player_tooltip_readings": [
+    {
+      "spell": 500694, "token": "${$803153m1+$803153ppl1+$AP*0.25+$sph*.25}", "value": 672, "ap": 916,
+      "sp": [493, 204], "citation": "player report 2026-11-07",
+      "note": "SP=493 is closer (off by 9.75) than SP=204 (off by 82), not exact"
+    },
+    {
+      "spell": 524739, "token": "${$524740m1+$524740ppl1+$sph*1+$AP*1}", "value": 2953, "ap": 916,
+      "sp": [493, 204], "citation": "player report 2026-11-07",
+      "note": "SP=493 is closer (off by 38) than SP=204 (off by 327), not exact"
+    },
+    {
+      "spell": 527023, "token": "${$527270m3+$527270ppl3+$AP*.2+$sph*.4}", "value": 384, "ap": 916,
+      "sp": [204], "citation": "player report 2026-11-07",
+      "note": "SP=204 fits to within rounding (off by 0.2); SP=493 overshoots by 115 - this reading's spec is Crusader"
+    },
+    {
+      "spell": 705300, "token": "${$707111m3+$707111ppl3+$AP*.12}", "value": 251, "ap": 916, "sp": [],
+      "citation": "player report 2026-11-07", "note": "no sph term; SP-independent, off by 0.08 (tooltip rounding)"
+    },
+    {
+      "spell": 801441, "token": "${$804148m1+$804148ppl1}", "value": 188, "ap": 916, "sp": [],
+      "citation": "player report 2026-11-07",
+      "note": "no AP/SP term; same value reported for ranks 801441, 803890-803893; exact match"
+    },
+    {
+      "spell": 801465, "token": "${$m1+$ppl1+$AP*2}", "value": 2208, "ap": 916, "sp": [],
+      "citation": "player report 2026-11-07",
+      "note": "gives 2132 at AP 916, any SP (no sph term); reported is 76 higher - unexplained, see questions-round3"
+    },
+    {
+      "spell": 804930, "token": "${$801546m1+$801546ppl1+$AP*0.2+$sph*0.5}", "value": 644, "ap": 916,
+      "sp": [493], "citation": "player report 2026-11-07",
+      "note": "SP=493 is closer (off by 7.7) than SP=204 (off by 152.2), not exact"
+    }
   ]
 }

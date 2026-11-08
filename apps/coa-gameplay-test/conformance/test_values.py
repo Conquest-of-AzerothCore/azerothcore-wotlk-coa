@@ -263,12 +263,14 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
             self.assertEqual((steps[0]['metric'], steps[0]['spell'], steps[0]['effect'], steps[0]['actor']),
                              ('spell_effect_value', ARGENT_BLADE_RANK_2, effect, 'caster'))
 
-    def test_unreadable_tooltip_part_still_gets_a_measurement_and_a_named_rule(self):
+    def test_scalingbp_token_reads_as_a_foreign_effect_value_and_gets_a_measurement(self):
         scenario, expectations = self.build(ARGENT_BLADE, ARGENT_BLADE_RANK_2)
         unreadable = [item for item in expectations if item.rule.startswith(UNREADABLE)]
-        self.assertEqual([item.displayed for item in unreadable], [ARGENT_BLADE_UNREADABLE])
-        self.assertIn(unreadable[0].label, measured_labels(scenario))
-        self.assertIn(ARGENT_BLADE_UNREADABLE, unreadable[0].rule)
+        self.assertEqual(unreadable, [])
+        scourgebane = next(item for item in expectations if item.displayed == ARGENT_BLADE_UNREADABLE)
+        self.assertEqual(scourgebane.check, 'effect_value')
+        self.assertEqual(scourgebane.model['effect_spell'], SCOURGEBANE_STRIKE)
+        self.assertIn(scourgebane.label, measured_labels(scenario))
 
     def test_cost_and_recast_come_from_the_spell_record_and_are_measured_after_a_cast(self):
         scenario, expectations = self.build(ARGENT_BLADE, ARGENT_BLADE_RANK_2)

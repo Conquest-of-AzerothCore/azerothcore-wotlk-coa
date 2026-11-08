@@ -334,13 +334,19 @@ class Tooltip:
         self.spell_id = spell_id
         self.caster = caster
         self.expanding = expanding + (spell_id,)
-        self.variables = self.read_variables()
+        self.variable_cache: dict[int, dict[str, Variable]] = {}
+        self.variables = self.variables_for(spell_id)
 
-    def read_variables(self) -> dict[str, Variable]:
-        formulas = self.records.variable_formulas(self.spell_id)
-        if formulas is None:
-            return {}
-        self.variables = {}
+    def variables_for(self, spell_id: int) -> dict[str, Variable]:
+        if spell_id not in self.variable_cache:
+            self.variable_cache[spell_id] = {}
+            self.compile_variables(spell_id, self.variable_cache[spell_id])
+        return self.variable_cache[spell_id]
+
+    def compile_variables(self, spell_id: int, variables: dict[str, Variable]) -> None:
+        formulas = self.records.variable_formulas(spell_id)
+        if not formulas:
+            return
         definitions = list(VARIABLE_DEFINITION.finditer(formulas))
         for position, definition in enumerate(definitions):
             end = definitions[position + 1].start() if position + 1 < len(definitions) else len(formulas)
@@ -348,13 +354,13 @@ class Tooltip:
             try:
                 if not body:
                     raise Unreadable
-                self.variables[definition.group(1)] = Variable(*self.evaluate(body.group(1)))
+                variables[definition.group(1)] = Variable(*self.evaluate(body.group(1)))
             except Unreadable as error:
-                self.variables[definition.group(1)] = Variable(None, None, reason=error.reason)
-        return self.variables
+                variables[definition.group(1)] = Variable(None, None, reason=error.reason)
 
-    def variable(self, name: str) -> Variable:
-        variable = self.variables.get(name)
+    def variable(self, name: str, context_spell_id: int | None = None) -> Variable:
+        variables = self.variables if context_spell_id is None else self.variables_for(context_spell_id)
+        variable = variables.get(name)
         if variable is None or variable.value is None:
             raise Unreadable(variable.reason if variable else '')
         return variable
@@ -391,6 +397,12 @@ class Tooltip:
         if single:
             return self.records.single_value(spell_id, effect, level)
         return self.records.points(spell_id, effect, upper, level)
+
+    def per_level_points(self, spell_id: int, effect: int) -> float:
+        per_level = self.records.per_level(spell_id, effect)
+        if per_level == 0:
+            return 0.0
+        return per_level * self.records.levels_above_base(spell_id, self.caster.level)
 
     def points_level(self, spell_id: int, named: bool) -> int:
         if named and self.records.field('Spell', spell_id, 'AttributesEx2') & CHARACTER_LEVEL_ATTRIBUTE_EX2:
@@ -431,6 +443,10 @@ class Tooltip:
                 return self.records.amplitude_ms(spell_id, effect), None, None
             return (self.effect_points(spell_id, effect, upper=name[0] == 'M'), self.own_effect(spell_id, effect),
                     spell_id)
+        if name[:-1] == 'ppl' and name[-1:] in EFFECT_DIGITS:
+            spell_id = self.spell_reference(digits)
+            effect = int(name[-1]) - 1
+            return self.per_level_points(spell_id, effect), self.own_effect(spell_id, effect), spell_id
         if name in ('h', 'H', 'u', 'U', 'i', 'I', 'd', 'D'):
             spell_id = self.spell_reference(digits)
             return self.spell_counter(spell_id, name.lower()), None, None
@@ -643,7 +659,8 @@ class ExpressionParser:
         if token.group('number'):
             return float(token.group('number'))
         if token.group('variable'):
-            return self.tooltip.variable(token.group('variable')).value
+            context = self.spell_id if self.spell_id is not None else self.tooltip.spell_id
+            return self.tooltip.variable(token.group('variable'), context).value
         if token.group('name'):
             value, effect_index, spell_id = self.tooltip.math_variable(token.group('spell'), token.group('name'))
             if self.effect_index is None:

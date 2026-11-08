@@ -14,6 +14,7 @@ from behaviours import (BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_DURATION, B
 from hits import (HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS, WEAPON_PERCENT_DAMAGE, Z_99,
                   HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
+from tooltip_readings import player_tooltip_readings, reading_band, reading_for
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE
 from procs import AMBIGUOUS_TOOLTIP, CAST, PROC_CHECK, chance_of, wilson_interval
 from profile import DBC_DIR, EQUIP_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label
@@ -1208,7 +1209,8 @@ def data_issue_question(spell_name: str, entry: str, description: str) -> dict:
     return question_detail(DATA_ISSUE, question, [], None)
 
 
-def unreadable_question(tooltips: TooltipSource, rank_id: int, spell_name: str, level: int, entry: str) -> dict | None:
+def unreadable_question(tooltips: TooltipSource, rank_id: int, spell_name: str, level: int, entry: str,
+                        class_file: dict | None = None) -> dict | None:
     per_level = PER_LEVEL_TOKEN.search(entry)
     undefined = DESCRIPTION_VARIABLE.search(entry)
     if not per_level and not undefined:
@@ -1216,6 +1218,10 @@ def unreadable_question(tooltips: TooltipSource, rank_id: int, spell_name: str, 
     try:
         description = tooltips.spell_field(rank_id, 'Description[enUS]')
         description = description if isinstance(description, str) else ''
+        if class_file is not None:
+            token = entry_token(entry, cleaned(description))
+            if reading_for(player_tooltip_readings(class_file), rank_id, token) is not None:
+                return None
         if per_level:
             return tooltip_value_question(spell_name, level, entry, description)
         if not tooltips.spell_field(rank_id, 'SpellDescriptionVariableID'):
@@ -1814,7 +1820,7 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
         return replace(base, status='unmodelled', measured=measured, explanation=rule)
     if rule.startswith(UNREADABLE):
         found = unreadable_question(tooltips, expectation.rank_id, entry['spell_name'], manifest['level'],
-                                    rule[len(UNREADABLE):])
+                                    rule[len(UNREADABLE):], manifest['class_file'])
         return replace(base, status='unreadable', measured=measured, explanation=rule,
                        detail={'question': found} if found else None)
     if rule.startswith(AMBIGUOUS_TOOLTIP):
@@ -1971,8 +1977,44 @@ def observation_lines(class_file: dict, verdicts: list[Verdict]) -> list[str]:
     return lines
 
 
+def tooltip_reading_status(verdict: Verdict | None, reading, tooltips: TooltipSource) -> tuple[str, str]:
+    if verdict is None or verdict.measured is None:
+        return '', 'label not in this run'
+    try:
+        low, high = reading_band(tooltips, reading)
+    except (Unreadable, ValueError) as error:
+        return '', f'band unreadable: {error}'
+    band = f'{low:.6g}' if low == high else f'{low:.6g}-{high:.6g}'
+    margin = max(ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE * abs(high))
+    status = 'ok' if low - margin <= verdict.measured <= high + margin else 'alert'
+    return band, status
+
+
+def tooltip_reading_lines(manifest: dict, verdicts: list[Verdict], tooltips: TooltipSource) -> list[str]:
+    readings = player_tooltip_readings(manifest['class_file'])
+    if not readings:
+        return []
+    by_key = {(data['rank_id'], data['displayed']): data['label']
+             for entry in manifest['scenarios'] for data in entry['expectations']}
+    by_label = {verdict.label: verdict for verdict in verdicts}
+    lines = ['', '## Player tooltip readings', '',
+             'A tooltip number the client showed a player at a stated attack power and spell power; corroborates '
+             'or contradicts the DBC-derived expected value measured at the reference caster, never sets it.', '',
+             '| spell | token | player value | ap | sp | band at ap/sp | measured | status |',
+             '|---|---|---|---|---|---|---|---|']
+    for reading in sorted(readings, key=lambda reading: (reading.spell, reading.token)):
+        label = by_key.get((reading.spell, reading.token))
+        verdict = by_label.get(label) if label else None
+        band, status = tooltip_reading_status(verdict, reading, tooltips)
+        measured = cell(verdict.measured) if verdict is not None else ''
+        sp_text = ', '.join(f'{sp:g}' for sp in reading.sp) if reading.sp else 'n/a'
+        lines.append(f'| {reading.spell} | {cell(reading.token)} | {reading.value:g} | {reading.ap:g} | {sp_text} | '
+                     f'{band} | {measured} | {status} |')
+    return lines
+
+
 def report_lines(manifest: dict, manifest_path: Path, results_dir: Path, runs: dict[str, Run], missing: list[str],
-                 verdicts: list[Verdict]) -> list[str]:
+                 verdicts: list[Verdict], tooltips: TooltipSource | None = None) -> list[str]:
     statuses = Counter(verdict.status for verdict in verdicts)
     failed = sorted((key, run) for key, run in runs.items() if run.status != 'passed')
     lines = [f'# Class conformance: {manifest["class_name"]} (class {manifest["class_id"]})', '',
@@ -2010,6 +2052,7 @@ def report_lines(manifest: dict, manifest_path: Path, results_dir: Path, runs: d
         lines.append(f'| {spell_id} | {names.get(spell_id, "")} | {counts} |')
     lines += passive_lines(manifest, verdicts)
     lines += observation_lines(manifest['class_file'], verdicts)
+    lines += tooltip_reading_lines(manifest, verdicts, tooltips)
     if missing:
         lines += ['', '## Scenarios without a result', ''] + [f'- `{key}`' for key in missing]
     if failed:
@@ -2026,11 +2069,12 @@ def write_outputs(manifest_path: Path, results_dir: Path, verdicts: list[Verdict
     out_dir.mkdir(parents=True, exist_ok=True)
     alerts, report = out_dir / ALERTS_FILE, out_dir / REPORT_FILE
     alerts.write_text('\n'.join(alert_rows(verdicts)) + '\n', encoding='utf-8')
-    report.write_text('\n'.join(report_lines(manifest, Path(manifest_path), Path(results_dir), runs, missing,
-                                             verdicts)), encoding='utf-8')
     write_verdicts(manifest, Path(manifest_path), Path(results_dir), verdicts, out_dir)
     asked_verdicts = [verdict for verdict in verdicts if asked(verdict)]
-    source = tooltips or (DbcTooltips(manifest.get('dbc_dir', DBC_DIR)) if asked_verdicts else None)
+    has_readings = bool(manifest['class_file'].get('player_tooltip_readings'))
+    source = tooltips or (DbcTooltips(manifest.get('dbc_dir', DBC_DIR)) if asked_verdicts or has_readings else None)
+    report.write_text('\n'.join(report_lines(manifest, Path(manifest_path), Path(results_dir), runs, missing,
+                                             verdicts, source)), encoding='utf-8')
     write_questions(questions(asked_verdicts, source) if asked_verdicts else [], out_dir, source)
     return alerts, report
 

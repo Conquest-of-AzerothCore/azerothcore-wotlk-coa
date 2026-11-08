@@ -70,6 +70,8 @@ UNTAINTED_EFFECT_BASE_POINTS = -11
 CHAKRA_OF_LIGHT = 803844
 CHAKRA_OF_LIGHT_BASE_POINTS = 49
 ARMOR_OF_FAITH = 804930
+ARMOR_OF_FAITH_FORMULA = 801546
+ARMOR_OF_FAITH_BASE_POINTS, ARMOR_OF_FAITH_PER_LEVEL, ARMOR_OF_FAITH_BASE_LEVEL = 165, 1.4, 31
 RIGHTEOUS_TEMPEST = 807274
 RIGHTEOUS_TEMPEST_PERIOD_MS = 1000
 BLADE_OF_FAITH = 803880
@@ -110,9 +112,12 @@ class ClientDbcTooltipTest(unittest.TestCase):
         self.assertAlmostEqual(bonus.value, 568.9, delta=0.01)
         self.assertEqual((bonus.effect_index, bonus.kind), (0, 'flat'))
 
-    def test_argent_blade_without_description_variables_cannot_read_scalingbp(self):
+    def test_argent_blade_resolves_scalingbp_against_the_spell_that_defines_it(self):
         readout = self.read(ARGENT_BLADE)
-        self.assertEqual(readout.unreadable, ['${$801832m1*$<scalingbp>+$sph*0.25+$AP*0.25}'])
+        damage = displayed(readout, '${$801832m1*$<scalingbp>+$sph*0.25+$AP*0.25}')
+        damage_points, _ = SCOURGEBANE_DAMAGE_BASE_POINTS
+        self.assertAlmostEqual(damage.value, (damage_points + 1) * scalingbp(60) + 313 * 0.25, places=6)
+        self.assertEqual(readout.unreadable, [])
 
     def test_scourgebane_proc_chance_and_scaled_damage(self):
         readout = self.read(SCOURGEBANE_PASSIVE)
@@ -240,9 +245,14 @@ class ClientDbcTooltipTest(unittest.TestCase):
         readout = self.read(CHAKRA_OF_LIGHT, SKILLED_TEMPLAR)
         self.assertEqual(displayed(readout, '${$m1+$SP*0.35}').value, CHAKRA_OF_LIGHT_BASE_POINTS + 1)
 
-    def test_ppl_stays_unreadable(self):
+    def test_ppl_resolves_to_the_per_level_points(self):
         readout = self.read(ARMOR_OF_FAITH, SKILLED_TEMPLAR)
-        self.assertIn('${$801546m1+$801546ppl1+$AP*0.2+$sph*0.5}', readout.unreadable)
+        reading = displayed(readout, '${$801546m1+$801546ppl1+$AP*0.2+$sph*0.5}')
+        flat = ARMOR_OF_FAITH_BASE_POINTS + 1
+        scaled = flat + ARMOR_OF_FAITH_PER_LEVEL * (60 - ARMOR_OF_FAITH_BASE_LEVEL) + 0.2 * SKILLED_TEMPLAR.ap
+        self.assertNotEqual(scaled, flat + 0.2 * SKILLED_TEMPLAR.ap)
+        self.assertAlmostEqual(reading.value, scaled, places=4)
+        self.assertEqual(readout.unreadable, [])
 
     def test_amplitude_tokens(self):
         tempest = self.read(RIGHTEOUS_TEMPEST, SKILLED_TEMPLAR)
@@ -382,10 +392,16 @@ FIXTURE_SPELLS = {
          'EffectAmplitude[0]': 1000, 'EffectBasePoints[0]': 1999, 'EffectDieSides[0]': 1, 'DurationIndex': 1},
     45: {'Description[enUS]': 'Every $t1 sec.', 'EffectAmplitude[0]': 2000, 'AttributesEx5': 0x2000,
          'AttributesEx3': 0x20000000},
+    50: {'Description[enUS]': 'Scales by ${$50m1+$50ppl1}.', 'EffectBasePoints[0]': 10, 'EffectDieSides[0]': 1,
+         'EffectRealPointsPerLevel[0]': 2.0, 'BaseLevel': 10},
+    60: {'Description[enUS]': 'Cross-spell ${$61m1*$<scalingbp>}.'},
+    61: {'Description[enUS]': 'Unused directly.', 'EffectBasePoints[0]': 5, 'EffectDieSides[0]': 1,
+         'SpellDescriptionVariableID': 3},
 }
 FIXTURE_VARIABLES = {
     1: '$bonus=${$m1*2+$PL}\r\n',
     2: '$odd=$?s100[${1}][${2}]\r\n',
+    3: '$scalingbp=${1+$PL*0}\r\n',
 }
 FIXTURE_CASTER = CasterStats(level=60, ap=200.0, rap=0.0,
                              sp_by_school={0: 0.0, HOLY: 40.0, FIRE: 30.0, NATURE: 50.0, FROST: 60.0, SHADOW: 70.0,
@@ -486,6 +502,19 @@ class FixtureTooltipTest(unittest.TestCase):
     def test_unknown_spell_is_rejected(self):
         with self.assertRaises(ValueError):
             read_tooltip(self.dbc, 404, FIXTURE_CASTER)
+
+    def test_ppl_token_adds_the_per_level_term_an_absent_one_would_miss(self):
+        readout = read_tooltip(self.dbc, 50, FIXTURE_CASTER)
+        flat = 10 + 1
+        scaled = flat + 2.0 * (FIXTURE_CASTER.level - 10)
+        self.assertNotEqual(scaled, flat)
+        self.assertEqual(readout.values, [Displayed('${$50m1+$50ppl1}', scaled, 0, 'flat', 50)])
+        self.assertEqual(readout.unreadable, [])
+
+    def test_named_variable_resolves_against_the_spell_that_defines_it(self):
+        readout = read_tooltip(self.dbc, 60, FIXTURE_CASTER)
+        self.assertEqual(readout.values, [Displayed('${$61m1*$<scalingbp>}', 6.0, None, 'flat', 61)])
+        self.assertEqual(readout.unreadable, [])
 
 
 if __name__ == '__main__':
