@@ -1085,7 +1085,7 @@ namespace
                 me->CastSpell(p, SPELL_SOUL_RELEASE_HIT, true);
                 AddStack(me, p, SPELL_SOUL_RELEASE);
             }
-            if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 200.0f))
+            if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
                 atal->AI()->DoAction(1);
         }
 
@@ -1136,7 +1136,7 @@ namespace
         {
             ApplyFlex();
             custom_world_boss_coa::JustEngagedWith(who);
-            if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 100.0f))
+            if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 400.0f))
                 if (!rogg->IsInCombat())
                     rogg->AI()->AttackStart(who);
         }
@@ -1152,7 +1152,7 @@ namespace
         void JustDied(Unit* /*killer*/) override
         {
             _summons.DespawnAll();
-            if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 200.0f))
+            if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 400.0f))
                 rogg->DespawnOrUnsummon(10s);
         }
 
@@ -1266,7 +1266,7 @@ namespace
         void JustEngagedWith(Unit* who) override
         {
             custom_world_boss_coa::JustEngagedWith(who);
-            if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 100.0f))
+            if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
                 if (!atal->IsInCombat())
                     atal->AI()->AttackStart(who);
         }
@@ -1315,7 +1315,7 @@ namespace
         {
             custom_world_boss_coa::DamageTaken(attacker, damage, type, school);
             if (damage >= me->GetHealth())
-                if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 200.0f))
+                if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
                     if (atal->IsAlive())
                         damage = me->GetHealth() > 1 ? me->GetHealth() - 1 : 0;
         }
