@@ -54,3 +54,7 @@ UPDATE `gameobject` SET `position_x` = -2253.4172, `position_y` = -2389.7135, `p
 -- #10938
 -- pickup 6941136 (Splinterspear Armor Crate) moved 1.3 yd across and 0.05 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -10397.4809, `position_y` = -2614.6986, `position_z` = 41.0717, `orientation` = 6.235741, `rotation0` = 0.00179477, `rotation1` = 0.0756431, `rotation2` = -0.0236521, `rotation3` = 0.996853 WHERE `guid` = 6941136 AND `id` = 254378;
+
+-- #10941
+-- pickup 6940851 (Old Crate) moved 17.7 yd across and 0.52 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -11139.7759, `position_y` = -3166.7492, `position_z` = 9.8843, `orientation` = 2.38275, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.928879, `rotation3` = 0.370383 WHERE `guid` = 6940851 AND `id` = 96194;
