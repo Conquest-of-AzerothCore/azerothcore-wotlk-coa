@@ -58,11 +58,11 @@ int main()
     assert(DefaultEndgameRareMinRequiredLevel == 60);
     assert(DefaultEndgameEliteHighRiskRespawnMinutes[0] == 10 && DefaultEndgameEliteHighRiskRespawnMinutes[1] == 15);
     assert(DefaultHighRiskEliteRespawnMinutes[0] == 45 && DefaultHighRiskEliteRespawnMinutes[1] == 60);
-    assert(DefaultEphemeralKeyPercent[0] == 3.0f && DefaultEphemeralKeyPercent[1] == 40.0f);
-    assert(DefaultHighRiskEliteExtraKeyPercent == 5.0f);
+    assert(DefaultEphemeralKeyPercent[0] == 8.0f && DefaultEphemeralKeyPercent[1] == 50.0f);
+    assert(DefaultHighRiskEliteExtraKeyPercent == 10.0f);
     assert(DefaultExtraBluePercent == 50 && DefaultExtraBlueRaidItemPercent == 50);
-    assert(DefaultEphemeralKeyPercent[2] == 75.0f && DefaultEphemeralKeyPercent[3] == 100.0f);
-    assert(NormalMobMarks.silver == 0 && NormalMobMarks.extraSilverPercent == 1.0f && NormalMobMarks.extraGoldPercent == 0.0f);
+    assert(DefaultEphemeralKeyPercent[2] == 100.0f && DefaultEphemeralKeyPercent[3] == 100.0f);
+    assert(NormalMobMarks.silver == 0 && NormalMobMarks.extraSilverPercent == 5.0f && NormalMobMarks.extraGoldPercent == 0.5f);
     assert(EliteMobMarks.extraSilverPercent == 8.0f && EliteMobMarks.extraGoldPercent == 0.5f);
     assert(RareMobMarks.silver == 1 && RareMobMarks.extraSilverPercent == 10.0f && RareMobMarks.extraGoldPercent == 10.0f);
     assert(RareEliteMobMarks.silver == 2 && RareEliteMobMarks.extraSilverPercent == 10.0f && RareEliteMobMarks.extraGoldPercent == 50.0f);
@@ -74,6 +74,8 @@ int main()
     assert(ValidMarkDrop(NormalMobMarks) && ValidMarkDrop(HiddenCacheMarks[2]));
     assert(ValidMarkDrop({100, 100.0f, 100, 100.0f}));
     assert(!ValidMarkDrop({0, 100.5f, 0, 0.0f}) && !ValidMarkDrop({0, 0.0f, 0, -1.0f}) && !ValidMarkDrop({101, 0.0f, 0, 0.0f}));
+    assert(DefaultMobBazaarTokens[0] == 300 && DefaultMobBazaarTokens[1] == 300 && DefaultMobBazaarTokens[2] == 300);
+    assert(DefaultHiddenCacheBazaarTokens[0] == 40 && DefaultHiddenCacheBazaarTokens[1] == 100 && DefaultHiddenCacheBazaarTokens[2] == 150);
     assert(DefaultRates[4][2] == 100 && DefaultRates[4][1] == 220);
     assert(DefaultEliteEpicPercent == 15 && DefaultEliteHeroicUpgradePercent == 2.5f);
     assert(DefaultEpicMaxItemLevelByStage[1] == 61 && DefaultEpicMaxItemLevelByStage[2] == 64);

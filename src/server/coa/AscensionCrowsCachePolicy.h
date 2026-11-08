@@ -30,6 +30,7 @@ constexpr unsigned GoldenMarks = 10;
 constexpr unsigned SilverMarkOfWar = 1201002;
 constexpr unsigned SilverMarksMin = 5;
 constexpr unsigned SilverMarksMax = 10;
+constexpr unsigned DefaultBazaarTokens = 400;
 constexpr bool ValidMarkRange(unsigned minimum, unsigned maximum)
 {
     return minimum <= maximum && maximum <= 200;

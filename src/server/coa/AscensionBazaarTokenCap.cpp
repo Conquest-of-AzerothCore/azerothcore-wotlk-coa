@@ -7,6 +7,8 @@
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "GameTime.h"
+#include "Item.h"
+#include "Mail.h"
 #include "Player.h"
 #include "StringFormat.h"
 #include "WorldSession.h"
@@ -20,6 +22,7 @@ using namespace Acore::ChatCommands;
 namespace
 {
 constexpr uint32 CAPPED_REMINDER_INTERVAL_SECONDS = 300;
+constexpr uint32 TIRAXIS = 900007;
 
 struct Window
 {
@@ -141,6 +144,31 @@ uint32 AscensionBazaarTokenCap::Claim(Player* player, uint32 count)
 uint32 AscensionBazaarTokenCap::LimitReward(Player* player, uint32 itemId, uint32 count)
 {
     return itemId == TOKEN_ITEM ? Claim(player, count) : count;
+}
+
+uint32 AscensionBazaarTokenCap::Give(Player* player, uint32 count)
+{
+    if (!player || !player->GetSession() || player->GetSession()->IsBot())
+        return 0;
+    count = Claim(player, count);
+    if (!count)
+        return 0;
+    ItemPosCountVec dest;
+    if (player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, TOKEN_ITEM, count) == EQUIP_ERR_OK)
+    {
+        if (Item* item = player->StoreNewItem(dest, TOKEN_ITEM, true))
+            player->SendNewItem(item, count, true, false);
+    }
+    else if (Item* item = Item::CreateItem(TOKEN_ITEM, count, player))
+    {
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+        item->SaveToDB(trans);
+        MailDraft("Bazaar Tokens", "Your bags were full, so your Bazaar Tokens were sent by mail.")
+            .AddItem(item)
+            .SendMailTo(trans, MailReceiver(player), MailSender(MAIL_CREATURE, TIRAXIS));
+        CharacterDatabase.CommitTransaction(trans);
+    }
+    return count;
 }
 
 std::string AscensionBazaarTokenCap::Describe(uint32 accountId)

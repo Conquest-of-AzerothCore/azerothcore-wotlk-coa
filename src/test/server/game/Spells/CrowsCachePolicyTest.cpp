@@ -91,3 +91,8 @@ TEST(CrowsCache, StartsFromMythicDungeonsWithThreeRewards)
     EXPECT_FALSE(CrowsCache::RewardsReleased(3, 1, 2));
     EXPECT_TRUE(CrowsCache::RewardsReleased(3, 1, 3));
 }
+
+TEST(CrowsCache, OpeningGivesFourHundredBazaarTokensByDefault)
+{
+    EXPECT_EQ(CrowsCache::DefaultBazaarTokens, 400u);
+}

@@ -2,6 +2,7 @@
 
 #include "AscensionBloodforged.h"
 #include "AscensionBloodforgedPolicy.h"
+#include "AscensionBazaarTokenCap.h"
 #include "AscensionRaidGearData.h"
 #include "AscensionRaidReleasePolicy.h"
 #include "ConditionMgr.h"
@@ -105,6 +106,8 @@ struct Options
     float goldenMarkRate = 1.0f;
     std::array<MarkDrop, 4> mobMarks = { NormalMobMarks, EliteMobMarks, RareMobMarks, RareEliteMobMarks };
     std::array<MarkDrop, 3> hiddenCacheMarks = HiddenCacheMarks;
+    std::array<uint32, 3> mobTokens = DefaultMobBazaarTokens;
+    std::array<uint32, 3> hiddenCacheTokens = DefaultHiddenCacheBazaarTokens;
 };
 
 struct Settings
@@ -544,6 +547,14 @@ private:
             return;
         }
 
+        options.mobTokens = { sConfigMgr->GetOption<uint32>("Bloodforged.BazaarTokens.HighRiskElite", DefaultMobBazaarTokens[0]),
+            sConfigMgr->GetOption<uint32>("Bloodforged.BazaarTokens.RareMob", DefaultMobBazaarTokens[1]),
+            sConfigMgr->GetOption<uint32>("Bloodforged.BazaarTokens.RareEliteMob", DefaultMobBazaarTokens[2]) };
+        options.hiddenCacheTokens = {
+            sConfigMgr->GetOption<uint32>("Bloodforged.BazaarTokens.HiddenCache", DefaultHiddenCacheBazaarTokens[0]),
+            sConfigMgr->GetOption<uint32>("Bloodforged.BazaarTokens.RareHiddenCache", DefaultHiddenCacheBazaarTokens[1]),
+            sConfigMgr->GetOption<uint32>("Bloodforged.BazaarTokens.EpicHiddenCache", DefaultHiddenCacheBazaarTokens[2]) };
+
         std::unordered_map<uint32, uint32> const raidItems = RaidItemMaps();
         std::set<uint32> entries;
         QueryResult catalogue = WorldDatabase.Query(
@@ -656,8 +667,9 @@ int HiddenCacheTier(LootTemplate const* loot)
     return -1;
 }
 
-void FillHiddenCache(Settings const& current, Loot& loot, int tier)
+void FillHiddenCache(Settings const& current, Loot& loot, int tier, Player* opener)
 {
+    AscensionBazaarTokenCap::Give(opener, current.options.hiddenCacheTokens[tier]);
     AddMarks(loot, current.options.hiddenCacheMarks[tier], current.options);
     LevelPools const& pools = current.pools[60][1];
     unsigned const level = 60;
@@ -696,7 +708,7 @@ public:
         if (current && current->enabled && loot && &store == &LootTemplates_Gameobject)
         {
             if (int tier = HiddenCacheTier(lootTemplate); tier >= 0)
-                FillHiddenCache(*current, *loot, tier);
+                FillHiddenCache(*current, *loot, tier, owner);
             return;
         }
         if (!current || !current->enabled || !owner || !loot || personal
@@ -729,12 +741,24 @@ public:
         bool const highRiskElite = current->options.highRiskElites.contains(creature->GetEntry());
         uint32 keys = roll_chance_f(current->options.ephemeralKeyPercent[rank == CREATURE_ELITE_RAREELITE ? 3
             : rank == CREATURE_ELITE_RARE ? 2 : highRiskElite ? 1 : 0]) ? 1 : 0;
-        if (highRiskElite && !IsRare(rank) && roll_chance_f(current->options.highRiskEliteExtraKeyPercent))
+        if (keys && highRiskElite && !IsRare(rank) && roll_chance_f(current->options.highRiskEliteExtraKeyPercent))
             ++keys;
         AddRareMobItem(*loot, EphemeralKey, keys);
         Options const& options = current->options;
         AddMarks(*loot, options.mobMarks[rank == CREATURE_ELITE_RAREELITE ? 3 : rank == CREATURE_ELITE_RARE ? 2
             : highRiskElite ? 1 : 0], options);
+        if (rank == CREATURE_ELITE_RAREELITE || rank == CREATURE_ELITE_RARE || highRiskElite)
+        {
+            uint32 const tokens = options.mobTokens[rank == CREATURE_ELITE_RAREELITE ? 2 : rank == CREATURE_ELITE_RARE ? 1 : 0];
+            if (Group* group = owner->GetGroup())
+            {
+                for (auto* reference = group->GetFirstMember(); reference; reference = reference->next())
+                    if (EligiblePlayer(reference->GetSource(), creature))
+                        AscensionBazaarTokenCap::Give(reference->GetSource(), tokens);
+            }
+            else
+                AscensionBazaarTokenCap::Give(eligibleOwner, tokens);
+        }
         if (highRiskElite && !IsRare(rank))
         {
             pools.eliteLoot->Process(*loot, store, lootMode, eligibleOwner);

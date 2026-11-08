@@ -707,18 +707,18 @@ Bloodforged.EpicHiddenCachePercent = "5 15"
 #                     them, as four values: normal (and every other elite), High-Risk elite
 #                     (Bloodforged.HighRiskEliteEntries), rare, rare elite.
 #                     Decimals allowed. Not scaled by any drop rate multiplier.
-#        Default:     "3 40 75 100"
+#        Default:     "8 50 100 100"
 
-Bloodforged.EphemeralKeyPercent = "3 40 75 100"
+Bloodforged.EphemeralKeyPercent = "8 50 100 100"
 
 #    Bloodforged.HighRiskEliteExtraKeyPercent
-#        Description: Percent chance for one more Ephemeral Key from a High-Risk elite
-#                     (Bloodforged.HighRiskEliteEntries), rolled on its own next to the High-Risk elite
-#                     value of Bloodforged.EphemeralKeyPercent, so such a kill can give 0, 1 or 2 keys.
+#        Description: Percent chance that the Ephemeral Key a High-Risk elite (Bloodforged.HighRiskEliteEntries)
+#                     drops is two keys instead of one. It is only rolled when the High-Risk elite value of
+#                     Bloodforged.EphemeralKeyPercent gave a key, so such a kill gives 0, 1 or 2 keys.
 #                     Decimals allowed. Not scaled by any drop rate multiplier.
-#        Default:     5
+#        Default:     10
 
-Bloodforged.HighRiskEliteExtraKeyPercent = 5
+Bloodforged.HighRiskEliteExtraKeyPercent = 10
 
 #    Bloodforged.DropRate.Rare
 #    Bloodforged.DropRate.Epic
@@ -757,9 +757,9 @@ Bloodforged.DropRate.Epic = 1
 #                     green, rare and epic Hidden Caches. Crow's Cache marks are set with
 #                     CrowsCache.SilverMarksOfWar and CrowsCache.GoldenMarksOfWar.
 #                     Marks are not scaled by Rate.Drop.Item.*; use the DropRate keys below.
-#        Default:     "0 1 0 0", "0 8 0 0.5", "1 10 0 10", "2 10 0 50", "1 10 0 0", "1 60 0 20", "2 50 1 20"
+#        Default:     "0 5 0 0.5", "0 8 0 0.5", "1 10 0 10", "2 10 0 50", "1 10 0 0", "1 60 0 20", "2 50 1 20"
 
-Bloodforged.MarksOfWar.NormalMob = "0 1 0 0"
+Bloodforged.MarksOfWar.NormalMob = "0 5 0 0.5"
 Bloodforged.MarksOfWar.HighRiskElite = "0 8 0 0.5"
 Bloodforged.MarksOfWar.RareMob = "1 10 0 10"
 Bloodforged.MarksOfWar.RareEliteMob = "2 10 0 50"
@@ -777,6 +777,32 @@ Bloodforged.MarksOfWar.EpicHiddenCache = "2 50 1 20"
 
 Bloodforged.DropRate.SilverMarkOfWar = 1
 Bloodforged.DropRate.GoldenMarkOfWar = 1
+
+#    Bloodforged.BazaarTokens.HighRiskElite
+#    Bloodforged.BazaarTokens.RareMob
+#    Bloodforged.BazaarTokens.RareEliteMob
+#        Description: Bazaar Tokens (975001) that every High-Risk player in the group gets for killing a
+#                     High-Risk elite (Bloodforged.HighRiskEliteEntries), a rare or a rare elite in the open
+#                     world, when the mob is not grey to them and they are close enough to share the loot.
+#                     Counts against the hourly Bazaar Token limit (CoA.BazaarTokens.HourlyCap.Amount);
+#                     tokens over the limit are not given. 0 = no tokens.
+#        Default:     300, 300, 300
+
+Bloodforged.BazaarTokens.HighRiskElite = 300
+Bloodforged.BazaarTokens.RareMob = 300
+Bloodforged.BazaarTokens.RareEliteMob = 300
+
+#    Bloodforged.BazaarTokens.HiddenCache
+#    Bloodforged.BazaarTokens.RareHiddenCache
+#    Bloodforged.BazaarTokens.EpicHiddenCache
+#        Description: Bazaar Tokens (975001) for the player who opens a green, rare or epic Hidden Cache.
+#                     Counts against the hourly Bazaar Token limit; tokens over the limit are not given.
+#                     0 = no tokens.
+#        Default:     40, 100, 150
+
+Bloodforged.BazaarTokens.HiddenCache = 40
+Bloodforged.BazaarTokens.RareHiddenCache = 100
+Bloodforged.BazaarTokens.EpicHiddenCache = 150
 
 #
 #    Ascension.PrestigiousCache.ReleaseStage
@@ -1025,6 +1051,14 @@ CrowsCache.WarningSeconds = 1800
 
 CrowsCache.SilverMarksOfWar = "5 10"
 CrowsCache.GoldenMarksOfWar = "10 10"
+
+#    CrowsCache.BazaarTokens
+#        Description: Bazaar Tokens (975001) for the player who opens a claimed Crow's Cache in town.
+#                     Counts against the hourly Bazaar Token limit; tokens over the limit are not given.
+#                     0 = no tokens.
+#        Default:     400
+
+CrowsCache.BazaarTokens = 400
 CrowsCache.X = -7831
 CrowsCache.Y = -3465
 CrowsCache.Z = 56.87

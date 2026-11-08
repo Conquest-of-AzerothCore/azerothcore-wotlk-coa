@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionBloodforged.h"
+#include "AscensionBazaarTokenCap.h"
 #include "AscensionCrowsCachePolicy.h"
 #include "Chat.h"
 #include "Config.h"
@@ -69,6 +70,7 @@ uint32 interval = 10800;
 uint32 warning = 1800;
 std::array<uint32, 2> silverMarks = {SilverMarksMin, SilverMarksMax};
 std::array<uint32, 2> goldenMarks = {GoldenMarks, GoldenMarks};
+uint32 bazaarTokens = DefaultBazaarTokens;
 uint64 nextStart = 0;
 Position location(-7831.0f, -3465.0f, 56.87f, 0.0f);
 Position silithus(-7203.1616f, 372.38562f, 25.355282f, 4.4326873f);
@@ -492,8 +494,9 @@ bool Open(Player* player, Item* cache)
     Save(found->second, player, true);
     events.erase(found);
     UpdateCarrier(player);
+    AscensionBazaarTokenCap::Give(player, bazaarTokens);
     ChatHandler(player->GetSession()).SendSysMessage(
-        "Crow's Cache opened: three Heroic Bloodforged items, one of them from the newest released tier, High-Risk materials and Marks of War.");
+        "Crow's Cache opened: three Heroic Bloodforged items, one of them from the newest released tier, High-Risk materials, Marks of War and Bazaar Tokens.");
     return true;
 }
 
@@ -641,6 +644,7 @@ public:
             sConfigMgr->GetOption<float>("CrowsCache.Z", 56.87f), 0.0f);
         if (!enabled)
             return;
+        bazaarTokens = sConfigMgr->GetOption<uint32>("CrowsCache.BazaarTokens", DefaultBazaarTokens);
         if (!ReadMarkRange("CrowsCache.SilverMarksOfWar", silverMarks)
             || !ReadMarkRange("CrowsCache.GoldenMarksOfWar", goldenMarks))
         {

@@ -76,13 +76,15 @@ constexpr bool ValidMarkDrop(MarkDrop const& marks)
         && marks.extraSilverPercent <= 100.0f && marks.extraGoldPercent >= 0.0f && marks.extraGoldPercent <= 100.0f;
 }
 
-constexpr MarkDrop NormalMobMarks = {0, 1.0f, 0, 0.0f};
+constexpr MarkDrop NormalMobMarks = {0, 5.0f, 0, 0.5f};
 constexpr MarkDrop EliteMobMarks = {0, 8.0f, 0, 0.5f};
 constexpr MarkDrop RareMobMarks = {1, 10.0f, 0, 10.0f};
 constexpr MarkDrop RareEliteMobMarks = {2, 10.0f, 0, 50.0f};
 constexpr std::array<MarkDrop, 3> HiddenCacheMarks = {{{1, 10.0f, 0, 0.0f}, {1, 60.0f, 0, 20.0f}, {2, 50.0f, 1, 20.0f}}};
-constexpr std::array<float, 4> DefaultEphemeralKeyPercent = {3.0f, 40.0f, 75.0f, 100.0f};
-constexpr float DefaultHighRiskEliteExtraKeyPercent = 5.0f;
+constexpr std::array<std::uint32_t, 3> DefaultMobBazaarTokens = {300, 300, 300};
+constexpr std::array<std::uint32_t, 3> DefaultHiddenCacheBazaarTokens = {40, 100, 150};
+constexpr std::array<float, 4> DefaultEphemeralKeyPercent = {8.0f, 50.0f, 100.0f, 100.0f};
+constexpr float DefaultHighRiskEliteExtraKeyPercent = 10.0f;
 constexpr unsigned DefaultExtraBluePercent = 50;
 constexpr unsigned DefaultExtraBlueRaidItemPercent = 50;
 

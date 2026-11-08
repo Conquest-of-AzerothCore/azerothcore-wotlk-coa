@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "High-Risk elite drops one key plus an extra key",
-  "contract": "Requires Bloodforged.Enable = 1, PvpPower.Enable = 1, Bloodforged.HighRiskEliteEntries containing 1834, Bloodforged.EphemeralKeyPercent = \"3 100 75 100\" and Bloodforged.HighRiskEliteExtraKeyPercent = 100. A level 60 High-Risk character kills a natural Scarlet Paladin (elite, listed as a High-Risk elite) in Western Plaguelands and finds two Ephemeral Keys (967680) on the corpse: the High-Risk elite key and the extra key.",
+  "name": "High-Risk elite key can be doubled",
+  "contract": "Requires Bloodforged.Enable = 1, PvpPower.Enable = 1, Bloodforged.HighRiskEliteEntries containing 1834, Bloodforged.EphemeralKeyPercent = \"3 100 75 100\" and Bloodforged.HighRiskEliteExtraKeyPercent = 100. A level 60 High-Risk character kills a natural Scarlet Paladin (elite, listed as a High-Risk elite) in Western Plaguelands and finds two Ephemeral Keys (967680) on the corpse: the High-Risk elite key, doubled by Bloodforged.HighRiskEliteExtraKeyPercent.",
   "players": [
     {
       "id": "h",
