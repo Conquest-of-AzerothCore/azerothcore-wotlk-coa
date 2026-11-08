@@ -64,3 +64,7 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941424 AND `id` = 254413
 UPDATE `gameobject` SET `position_x` = -10977.5358, `position_y` = -1752.4602, `position_z` = 140.6754, `orientation` = 4.62174, `rotation0` = 0.477314, `rotation1` = 0.501466, `rotation2` = 0.532841, `rotation3` = -0.486604 WHERE `guid` = 6940954 AND `id` = 254506;
 -- pickup 6940955 (Reverent Ring) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940955 AND `id` = 254506;
+
+-- #8736
+-- pickup 6941178 (Scorched Knife) moved 4.5 yd across and 0.31 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -6766.9369, `position_y` = -3131.2577, `position_z` = 241.8665, `orientation` = 4.885609, `rotation0` = -0.532331, `rotation1` = 0.43372, `rotation2` = 0.475126, `rotation3` = -0.550241 WHERE `guid` = 6941178 AND `id` = 518098;
