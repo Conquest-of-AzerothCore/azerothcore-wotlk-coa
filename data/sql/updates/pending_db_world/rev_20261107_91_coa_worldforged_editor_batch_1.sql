@@ -92,3 +92,15 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940494 AND `id` = 90480;
 -- #7742
 -- pickup 6941906 (Magnify Glass) moved 7.8 yd across and 4.10 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -6728.4526, `position_y` = -4716.7856, `position_z` = 24.7109, `orientation` = 0.253263, `rotation0` = -0.739137, `rotation1` = -0.0819755, `rotation2` = 0.0976903, `rotation3` = 0.661373 WHERE `guid` = 6941906 AND `id` = 515835;
+
+-- #7856, #10853
+-- pickup 6941179 (Intact Plate Helm) moved 1.1 yd across and 0.87 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -1251.9875, `position_y` = -1607.9724, `position_z` = 50.9242, `orientation` = 1.12556, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.533539, `rotation3` = 0.845775 WHERE `guid` = 6941179 AND `id` = 95865;
+-- skeleton wearing the Intact Plate Helm, own template so its size never touches the other Sitting Skeleton 01 spawns
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`, `size`, `Data0`, `Data1`, `Data2`, `Data3`, `Data4`, `Data5`, `Data6`, `Data7`, `Data8`, `Data9`, `Data10`, `Data11`, `Data12`, `Data13`, `Data14`, `Data15`, `Data16`, `Data17`, `Data18`, `Data19`, `Data20`, `Data21`, `Data22`, `Data23`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
+(9900048, 5, 7308, 'Sitting Skeleton 01', '', '', '', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '', '', 12340) ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`), `size` = VALUES(`size`);
+DELETE FROM `gameobject` WHERE `guid` = 6976000;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `ScriptName`, `VerifiedBuild`, `Comment`) VALUES
+(6976000, 9900048, 0, 0, 0, 1, 1, -1252.0372, -1607.9080, 50.06, 1.128609, 0, 0, 0.534828, 0.844961, 300, 100, 1, '', NULL, 'Skeleton under the Intact Plate Helm');
+-- template 95865 (Intact Plate Helm): size 1 -> 1.25 so the helm sits over the skull
+UPDATE `gameobject_template` SET `size` = 1.25 WHERE `entry` = 95865;
