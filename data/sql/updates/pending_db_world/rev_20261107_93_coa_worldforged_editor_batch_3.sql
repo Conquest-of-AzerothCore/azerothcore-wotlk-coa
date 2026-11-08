@@ -26,3 +26,7 @@ UPDATE `gameobject` SET `position_x` = -7103.6983, `position_y` = -3492.3236, `p
 -- #10630
 -- pickup 6940485 (Flayer's Helmet) moved 0.2 yd across and 0.28 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 1753.8239, `position_y` = -1133.1192, `position_z` = 61.5667, `orientation` = 1.79949, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.783168, `rotation3` = 0.62181 WHERE `guid` = 6940485 AND `id` = 340068;
+
+-- #10653
+-- pickup 6942406 (Alchemist Cache) moved 27.1 yd across to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -7683.7707, `position_y` = -4266.2539, `position_z` = 10.5920, `orientation` = 5.452117, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.403679, `rotation3` = -0.914901 WHERE `guid` = 6942406 AND `id` = 515742;
