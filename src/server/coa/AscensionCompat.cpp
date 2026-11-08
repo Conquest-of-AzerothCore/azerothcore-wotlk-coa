@@ -10375,6 +10375,16 @@ public:
                 case 256779:
                     spellInfo->AttributesEx5 |= SPELL_ATTR5_AI_DOESNT_FACE_TARGET;
                     break;
+                case 979871:
+                case 979872:
+                    if (spellInfo->Effects[EFFECT_2].Effect == SPELL_EFFECT_APPLY_AURA &&
+                        spellInfo->Effects[EFFECT_2].ApplyAuraName == SPELL_AURA_TRANSFORM)
+                    {
+                        spellInfo->Effects[EFFECT_2].Effect = 0;
+                        spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_NONE;
+                        spellInfo->_InitializeExplicitTargetMask();
+                    }
+                    break;
                 case 83086:
                 case 9930889:
                     spellInfo->AttributesEx6 |= SPELL_ATTR6_NOT_IN_RAID_INSTANCES;
