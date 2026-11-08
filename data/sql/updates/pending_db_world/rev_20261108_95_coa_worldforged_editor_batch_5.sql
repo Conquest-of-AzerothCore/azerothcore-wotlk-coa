@@ -35,3 +35,7 @@ UPDATE `gameobject` SET `position_x` = -13781.7138, `position_y` = -214.3342, `p
 -- #11145
 -- pickup 6942005 (Precious Ring) moved 5.5 yd across and 0.00 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -7131.33, `position_y` = -1267.74, `position_z` = -198.349, `orientation` = 3.18828, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.999728, `rotation3` = -0.023342 WHERE `guid` = 6942005 AND `id` = 95934;
+
+-- #11426
+-- pickup 6941234 (Blackrock Smuggled Goods) moved 4.4 yd across and 6.81 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -9614.424, `position_y` = -3008.34, `position_z` = 52.878, `orientation` = 4.32816, `rotation0` = -0.053369, `rotation1` = 0.035988, `rotation2` = 0.82739, `rotation3` = -0.557928 WHERE `guid` = 6941234 AND `id` = 90262;
