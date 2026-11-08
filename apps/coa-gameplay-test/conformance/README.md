@@ -997,6 +997,7 @@ The Templar entries quote their trigger words from the cleaned DBC tooltips:
 | Whirling Tempest 300504 | "While Righteous Tempest is active", 805409 (channel start) `self` | casts | 301340 aura applies | 1 |
 | Light's Ward 300529 | periodic, 2000 ms amplitude | ticks | 301283 casts | 1 |
 | Light's Chosen 301310 | periodic, 5000 ms amplitude | ticks | 301369 casts | 1 |
+| Disciplined Mind 680399 | "causes it to dispel", 578276 at `self` | casts | 525052 casts (`EffectTriggerSpell[1]`) | 1 |
 
 Chakra of Light's two ranks share Mending Ward's 806273 `Breaker()` condition and its 572027 fixture (same
 `AscensionTemplarAbilities.cpp:192-198`): both are in `TemplarCastDrivers`, so the DBC's own `EffectTriggerSpell[0]`

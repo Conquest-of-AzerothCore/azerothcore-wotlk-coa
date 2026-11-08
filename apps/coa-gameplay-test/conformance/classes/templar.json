@@ -958,6 +958,24 @@
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
       "per_trigger_text": ""
+    },
+    {
+      "aura": 680399,
+      "name": "Disciplined Mind",
+      "tooltip": "Increases the healing of |cffffffffBenediction|r by $s1% and causes it to dispel $525052s2 poison and disease effect.",
+      "trigger": {
+        "action": "cast",
+        "spell": 578276,
+        "target": "self"
+      },
+      "trigger_text": "causes it to dispel",
+      "trigger_spell_text": "Benediction",
+      "trial_metric": "spell_cast_count",
+      "observe_spell": 525052,
+      "observe_source": "EffectTriggerSpell[1] of 680399",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "poison and disease effect"
     }
   ],
   "talent_modifiers": [
