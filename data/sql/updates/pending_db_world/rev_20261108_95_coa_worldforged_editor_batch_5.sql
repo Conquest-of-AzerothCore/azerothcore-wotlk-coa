@@ -19,3 +19,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 -- #8420
 -- pickup 6942306 (The Wingman) moved 8.9 yd across and 0.79 yd down to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -10083.3, `position_y` = -4170.7, `position_z` = 2.6922, `orientation` = 2.01255, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.844845, `rotation3` = 0.535011 WHERE `guid` = 6942306 AND `id` = 515801;
+
+-- #10478
+-- pickup 6941033 (Fishing Box) moved 11.9 yd across and 0.41 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 1299.087, `position_y` = -2188.949, `position_z` = 53.106, `orientation` = 5.81458, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.232165, `rotation3` = -0.972676 WHERE `guid` = 6941033 AND `id` = 340115;
