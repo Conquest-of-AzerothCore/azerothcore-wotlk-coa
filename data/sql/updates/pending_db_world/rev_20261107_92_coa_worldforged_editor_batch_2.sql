@@ -104,3 +104,7 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941581 AND `id` = 95829;
 -- #9147
 -- pickup 6941387 (Affray Cuirras) moved 1.0 yd across to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -1643.3418, `position_y` = -4367.4108, `position_z` = 6.7520, `orientation` = 2.428011, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.937023, `rotation3` = 0.349269 WHERE `guid` = 6941387 AND `id` = 1345000;
+
+-- #9194, #10674
+-- pickup 6942183 (Silt Covered Ring) moved 3.2 yd across and 0.39 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 1439.6139, `position_y` = -4735.6322, `position_z` = -16.6884, `orientation` = 4.20163, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.862798, `rotation3` = -0.505549 WHERE `guid` = 6942183 AND `id` = 95645;
