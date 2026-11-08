@@ -26,7 +26,13 @@ import run
 
 TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 804932, 806516, 803158, 805420, 680891,
                     803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298, 705255,
-                    680397, 524765, 560096}
+                    680397, 524765, 560096, 707364, 504107, 706385, 523712}
+GUARDIAN_OF_THE_LIGHT = 707364
+DIVINE_FURY = 504107
+UTHERS_LEGACY = 706385
+IRON_PENANCE = 523712
+VINDICATION_MAX_RANK = 573324
+CONDEMN = 804906
 IMPROVED_SCARLET_HAMMER = 301254
 SCARLET_HAMMER = 807035
 DETERMINED = 705256
@@ -267,8 +273,27 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
     def test_every_second_cast_is_the_only_half_rate(self):
         for entry in trigger_entries(CLASS_FILE):
             with self.subTest(aura=entry['aura']):
-                expected = 0.5 if entry['per_trigger_text'].startswith('Every 2nd') else 1
+                if entry['per_trigger_text'].startswith('Every 2nd'):
+                    expected = 0.5
+                elif entry['per_trigger_text'].startswith('10 times'):
+                    expected = 0.1
+                else:
+                    expected = 1
                 self.assertEqual(entry['per_trigger'], expected)
+
+    def test_divine_fury_and_iron_penance_share_the_vindication_driver(self):
+        divine_fury, iron_penance = templar_trigger(DIVINE_FURY), templar_trigger(IRON_PENANCE)
+        self.assertEqual(divine_fury['trigger']['spell'], VINDICATION_MAX_RANK)
+        self.assertEqual(iron_penance['trigger']['spell'], VINDICATION_MAX_RANK)
+        self.assertEqual(divine_fury['trigger'], iron_penance['trigger'])
+
+    def test_uthers_legacy_waits_for_condemns_full_tick_spacing(self):
+        entry = templar_trigger(UTHERS_LEGACY)
+        self.assertEqual(entry['trigger']['spell'], CONDEMN)
+        interval = attempt_interval(CLASS_FILE, entry)
+        self.assertGreaterEqual(interval, 2 * 3000)
+        plan = trigger_plan(CLASS_FILE, entry)
+        self.assertEqual(plan.attempt_ms, interval)
 
     def test_every_entry_has_a_scenario_or_a_status(self):
         for entry in trigger_entries(CLASS_FILE):
@@ -323,6 +348,18 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         self.assertTrue(casts and all(step['spell'] == LIBRAM_OF_TENACITY and 'target' not in step for step in casts))
         resets = [step for step in scenario['steps'] if step['action'] == 'reset_cooldown']
         self.assertEqual(len(resets), BASELINE_ATTEMPTS + SCHEDULED)
+
+    def test_a_cast_trigger_equips_a_weapon_fitting_the_trigger_spell(self):
+        entry = {'aura': STAFFGUARD, 'name': 'test', 'trigger': {'action': 'cast', 'spell': VINDICATION_MAX_RANK,
+                                                                   'target': 'dummy'},
+                 'trigger_text': 'test', 'trial_metric': 'spell_cast_count', 'observe_spell': ARGENT_BLADE,
+                 'observe_source': 'test', 'observe_metric': 'spell_cast_count', 'per_trigger': 1,
+                 'per_trigger_text': 'test'}
+        scenario, _ = trigger_scenario(CLASS_FILE, entry)
+        equips = [step for step in scenario['steps'] if step['action'] == 'equip']
+        self.assertEqual(len(equips), 1)
+        self.assertNotEqual(equips[0]['item'], CLASS_FILE['weapon']['item'])
+        self.assertEqual(equips[0]['item'], CLASS_FILE['alternate_weapons'][0]['item'])
 
     def test_unknown_aura_is_refused(self):
         with self.assertRaises(ValueError):

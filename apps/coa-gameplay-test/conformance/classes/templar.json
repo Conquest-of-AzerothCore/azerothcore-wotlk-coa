@@ -329,6 +329,51 @@
       },
       "spell_proc": {},
       "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 524620,
+      "name": "Pulverizing",
+      "tooltip": "Damage dealt by |cffffffffCondemn|r now has a $h% chance to consecrate the earth around you with holy fervor, dealing ${$524619m1*$<scalingbp>+$sph*0.225+$AP*.1} Holy damage to nearby enemies.",
+      "chance_token": "$h",
+      "trigger": {"action": "cast", "spell": 804906, "target": "dummy"},
+      "trigger_text": "Damage dealt by",
+      "event_metric": "spell_damage_count",
+      "proc_spell": 524619,
+      "proc_spell_source": "EffectTriggerSpell[0] of 524620, DBC token $524619m1",
+      "events_per_proc": 1,
+      "dbc": {
+        "524620": {"ProcChance": 15, "ProcFlags": 0, "ProcCharges": 0}
+      },
+      "spell_proc": {
+        "524620": {"ProcFlags": 1048575, "Chance": 0, "ProcsPerMinute": 0, "Cooldown": 0, "Charges": 0}
+      },
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 803163,
+      "name": "Might of Aggramar",
+      "tooltip": "Physical damage dealt now has a $h% chance to increase the tick rate of your |cffffffffBlade of Faith|r and |cffffffffCondemn|r by $803164s1%, stacking $803164u times.",
+      "chance_token": "$h",
+      "trigger": {"action": "attack", "spell": 0},
+      "trigger_text": "Physical damage dealt",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 803164,
+      "proc_spell_source": "EffectTriggerSpell[0] of 803163",
+      "events_per_proc": 1,
+      "trial_readings": [
+        {"name": "melee auto attacks only",
+         "meaning": "only main/off-hand auto attacks roll the chance, matching the DBC ProcFlags=4 (PROC_FLAG_DONE_MELEE_AUTO_ATTACK)",
+         "adds": []},
+        {"name": "any physical damage, abilities included",
+         "meaning": "physical-school ability hits (Zealotry, Argent Blade) also roll the chance, matching the tooltip's literal 'Physical damage dealt'",
+         "adds": [{"metric": "spell_cast_count", "spell": 803164}]}
+      ],
+      "readings_question": "auto attack a single target dummy without using any ability learned: does Might of Aggramar's stacking buff (803164) ever appear? Then repeat using only Zealotry (no auto attacks, e.g. by disarming or using a ranged weapon): does 803164 ever appear from ability hits alone?",
+      "dbc": {
+        "803163": {"ProcChance": 25, "ProcFlags": 4, "ProcCharges": 0}
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
     }
   ],
   "triggers": [
@@ -704,6 +749,66 @@
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
       "per_trigger_text": "reduce the cooldown"
+    },
+    {
+      "aura": 707364,
+      "name": "Guardian of the Light",
+      "tooltip": "Casting |cffffffffBenediction|r now reduces the cost of your next |cffffffffTemple Guardian|r by $712378s1% for $712378d.",
+      "trigger": {"action": "cast", "spell": 578276, "target": "self"},
+      "trigger_text": "Casting Benediction",
+      "trigger_spell_text": "Benediction",
+      "trial_metric": "spell_cast_count",
+      "observe_spell": 712378,
+      "observe_source": "EffectTriggerSpell[0] of 707364",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now reduces the cost of your next Temple Guardian"
+    },
+    {
+      "aura": 504107,
+      "name": "Divine Fury",
+      "tooltip": "|cFF66DDFFLevel 40 Passive|r\r\nTriggering |cffffffffZealotry|r 10 times now transforms your |cFFFFFFFFVindication|r into |cFFFFFFFFDivine Fury|r. @s:500689:0@",
+      "trigger": {"action": "cast", "spell": 573324, "target": "dummy"},
+      "trigger_text": "Triggering Zealotry 10 times",
+      "trigger_spell_text": "Zealotry",
+      "trial_metric": "spell_cast_count",
+      "status": "unmodelled",
+      "reason": "the trigger condition is confirmed (AscensionTemplarAbilities.cpp:279-284: every Zealotry (801450) hit result casts 563270, EffectTriggerSpell[0] of 504107, when 504107 is known), but Vindication (573324) casts are not a 1:1 proxy for a Zealotry trigger: each Vindication cast unconditionally triggers one Zealotry (AscensionTemplarAbilities.cpp:305-307) and, in the same OnSpellHitResult call, also grants/stacks 'Oath: Vindication' (805332) on cast (AscensionTemplarAbilities.cpp:155-162 GrantOath; AscensionTemplar.cpp:163-182) and then rolls that just-stacked Oath's own chance to fire a second Zealotry on the same hit (AscensionTemplarAbilities.cpp:310-313: Ability(info) && roll_chance_i(oath->GetAmount())). Measured this round (gameplay-test, simulated clock, RAM MySQL): 232 Vindication casts produced 416 casts of 563270 (ratio 1.79, not 1.0), and the identical driver gave Iron Penance (523712) 505 casts of 523713 over 273 casts (ratio 1.85) - both far outside this check's |events - trials x per_trigger| <= 1 tolerance for any fixed per_trigger, and the ratio depends on how saturated the Oath Chain (704576, caps at 10 stacks) is at measurement time, so it is not a stable constant. triggers.py has no alternate trial-reading mechanism (unlike procs.py's trial_readings) to count actual Zealotry (801450) casts instead of Vindication casts - needs that infrastructure before this entry can be built",
+      "observe_spell": 563270,
+      "observe_source": "EffectTriggerSpell[0] of 504107",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 0.1,
+      "per_trigger_text": "10 times now transforms"
+    },
+    {
+      "aura": 706385,
+      "name": "Uther's Legacy",
+      "tooltip": "Your |cffffffffCondemn|r now heals you for $s1% of the damage dealt.",
+      "trigger": {"action": "cast", "spell": 804906, "target": "dummy"},
+      "trigger_text": "Your Condemn",
+      "trigger_spell_text": "Condemn",
+      "trial_metric": "spell_damage_count",
+      "observe_spell": 707302,
+      "observe_source": "EffectTriggerSpell[0] of 706385",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now heals you"
+    },
+    {
+      "aura": 523712,
+      "name": "Iron Penance",
+      "tooltip": "Dealing damage with |cffffffffZealotry|r now applies |cffffffffIron Penance|r to the target, increasing their Physical damage taken by you by $523713s1% for $523713d, stacking $523713u times.",
+      "trigger": {"action": "cast", "spell": 573324, "target": "dummy"},
+      "trigger_text": "Dealing damage with Zealotry",
+      "trigger_spell_text": "Zealotry",
+      "trial_metric": "spell_cast_count",
+      "status": "unmodelled",
+      "reason": "the trigger condition is confirmed (AscensionTemplarAbilities.cpp:276-284: every confirmed Zealotry (801450) hit on a target casts 523713 at that target, EffectTriggerSpell[0] of 523712, when 523712 is known), but Vindication (573324) casts are not a 1:1 proxy for a Zealotry trigger, for the exact reason recorded on the Divine Fury (504107) entry above, which shares this driver: Vindication grants and stacks 'Oath: Vindication' (805332, AscensionTemplarAbilities.cpp:155-162 GrantOath, AscensionTemplar.cpp:163-182) on every cast and then rolls that just-stacked Oath's own chance to fire a second Zealotry on the same hit (AscensionTemplarAbilities.cpp:310-313). Measured this round: 273 Vindication casts produced 505 casts of 523713 (ratio 1.85, not 1.0), consistent with the 1.79 ratio measured for Divine Fury's 563270 over the same driver. triggers.py has no alternate trial-reading mechanism (unlike procs.py's trial_readings) to count actual Zealotry (801450) casts instead of Vindication casts - needs that infrastructure before this entry can be built",
+      "observe_spell": 523713,
+      "observe_source": "EffectTriggerSpell[0] of 523712",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now applies Iron Penance"
     }
   ],
   "talent_modifiers": [

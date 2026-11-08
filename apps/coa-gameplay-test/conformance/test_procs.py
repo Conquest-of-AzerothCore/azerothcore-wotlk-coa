@@ -60,6 +60,10 @@ LIGHTKEEPER = 560835
 LIGHTKEEPER_PARRY = 561016
 LIGHTKEEPER_BURST = 561277
 CONDEMN = 804906
+PULVERIZING = 524620
+PULVERIZING_STRIKE = 524619
+MIGHT_OF_AGGRAMAR = 803163
+MIGHT_OF_AGGRAMAR_STACK = 803164
 
 
 def templar_proc(aura):
@@ -566,6 +570,22 @@ class TemplarProcEntriesTest(unittest.TestCase):
         [expectation] = proc_scenario(CLASS_FILE, burst)[1]
         manifest = {'class_file': CLASS_FILE}
         self.assertEqual(class_entry(manifest, expectation)['proc_spell'], LIGHTKEEPER_BURST)
+
+    def test_pulverizing_rolls_on_condemn_damage_ticks_not_casts(self):
+        entry = templar_proc(PULVERIZING)
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': CONDEMN, 'target': 'dummy'})
+        self.assertEqual(entry['event_metric'], 'spell_damage_count')
+        self.assertEqual(entry['proc_spell'], PULVERIZING_STRIKE)
+        self.assertEqual(entry['dbc'][str(PULVERIZING)]['ProcChance'], 15)
+
+    def test_might_of_aggramar_rolls_on_auto_attacks_with_a_scope_question(self):
+        entry = templar_proc(MIGHT_OF_AGGRAMAR)
+        self.assertEqual(entry['trigger'], {'action': 'attack', 'spell': 0})
+        self.assertEqual(entry['proc_spell'], MIGHT_OF_AGGRAMAR_STACK)
+        self.assertEqual(entry['dbc'][str(MIGHT_OF_AGGRAMAR)]['ProcFlags'], 4)
+        self.assertEqual({reading['name'] for reading in entry['trial_readings']},
+                         {'melee auto attacks only', 'any physical damage, abilities included'})
+        self.assertTrue(entry['readings_question'])
 
     def test_lightkeeper_scenario_keys_do_not_collide(self):
         from conformance import generate

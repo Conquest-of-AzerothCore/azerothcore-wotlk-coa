@@ -4,9 +4,9 @@ from typing import Sequence
 
 from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, UNMODELLED, Unmodelled, cast_steps, creature_fixture,
                   records_of, scenario_shell, timed)
-from procs import ATTACK, CAST, ENTRY_STATUSES, PART_BUDGET_MS, cast_interval, swing_interval
+from procs import ATTACK, CAST, ENTRY_STATUSES, PART_BUDGET_MS, cast_interval, swing_interval, tick_spacing
 from profile import CASTER, SETTLE_MS, measurement, player_fixture
-from values import ALLY, CHARGE_OFFSET_YD, TARGET, Expectation, facts_of, fixture_health_step
+from values import ALLY, CHARGE_OFFSET_YD, TARGET, Expectation, armed_for, facts_of, fixture_health_step
 
 TRIGGER_CHECK = 'trigger_count'
 MISSED_TRIGGER_RATE = 0.025
@@ -79,9 +79,11 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
     cooldown = entry.get('internal_cooldown_ms', 0)
     if trigger['action'] == ATTACK:
         return swing_interval(class_file, cooldown)
-    if facts_of(records_of(class_file), trigger['spell']).passive:
+    facts = facts_of(records_of(class_file), trigger['spell'])
+    if facts.passive:
         raise Unmodelled(f'trigger spell {trigger["spell"]} is passive')
-    return cast_interval(class_file, trigger['spell'], cooldown)
+    return max(cast_interval(class_file, trigger['spell'], cooldown),
+               tick_spacing(class_file, facts, trigger['spell']))
 
 
 def trigger_plan(class_file: dict, entry: dict) -> TriggerPlan:
@@ -167,6 +169,8 @@ def trigger_rule(entry: dict) -> str:
 
 
 def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict, list[Expectation]]:
+    if entry['trigger']['action'] == CAST:
+        class_file = armed_for(class_file, records_of(class_file), entry['trigger']['spell'])
     plan = trigger_plan(class_file, entry)
     if not 0 <= part < len(plan.part_attempts):
         raise ValueError(f'Trigger {entry["aura"]} has parts 0 to {len(plan.part_attempts) - 1}, not {part}')
