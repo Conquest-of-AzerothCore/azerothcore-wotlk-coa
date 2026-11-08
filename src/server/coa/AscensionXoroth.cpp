@@ -409,8 +409,18 @@ class xoroth_player : public PlayerScript
         states.erase(player->GetGUID());
     }
 };
+class xoroth_greater_imp_pet : public PetScript
+{
+public:
+    xoroth_greater_imp_pet() : PetScript("xoroth_greater_imp_pet", { PETHOOK_CAN_UNLEARN_SPELL_SET }) { }
+    bool CanUnlearnSpellSet(Pet* pet, uint32, uint32 spell) override
+    {
+        return pet->GetEntry() != 510100 || (spell != 630930 && spell != 630931);
+    }
+};
 }
 void AddSC_AscensionXoroth()
 {
     new xoroth_player();
+    new xoroth_greater_imp_pet();
 }
