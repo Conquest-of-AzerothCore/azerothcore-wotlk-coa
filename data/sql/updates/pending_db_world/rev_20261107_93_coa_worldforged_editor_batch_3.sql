@@ -82,3 +82,7 @@ UPDATE `gameobject` SET `position_x` = -394.8158, `position_y` = 1853.2276, `pos
 -- #11016
 -- pickup 6940523 (Spare Equipment) moved 4.3 yd across and 0.33 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -9057.7807, `position_y` = 147.0395, `position_z` = 115.0235, `orientation` = 1.60014, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.717404, `rotation3` = 0.696657 WHERE `guid` = 6940523 AND `id` = 95686;
+
+-- #11044
+-- pickup 6940136 (Plagued Bow) moved 9.7 yd across and 4.25 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 1868.0237, `position_y` = -3188.1495, `position_z` = 131.1175, `orientation` = 1.546897, `rotation0` = -0.00884178, `rotation1` = -0.00830129, `rotation2` = 0.698557, `rotation3` = 0.715451 WHERE `guid` = 6940136 AND `id` = 96236;
