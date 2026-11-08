@@ -659,10 +659,10 @@ skill line for that spell.
 therefore writes `PLAYER_CRIT_PERCENTAGE`, which later melee crit rolls read. `expertise` reads main-hand
 expertise; `combat_rating` requires `rating` (0..24, native `CombatRating`) and reads the rating value. `stat` requires
 `stat` (0..4), `resistance` requires `school` (1..6); `armor`, `attack_power`, `ranged_attack_power`, the hasted
-`attack_time_ms` (optional `hand`, 0..2) and `run_speed_rate` read the unit's current totals. `pet_attack_time_ms` uses the same hand
-selection for a player's current pet and requires that pet to exist. `attack_timer_ms` (optional `hand`, 0..2)
-reads the time left until that hand's next swing (0 when ready). `aura_amplitude_ms` reads an aura effect's
-periodic interval.
+`attack_time_ms` (optional `hand`, 0..2) and `run_speed_rate` read the unit's current totals.
+`pet_attack_time_ms` uses the same hand selection for a player's current pet and requires that
+pet to exist. `attack_timer_ms` (optional `hand`, 0..2) reads the time left until that hand's
+next swing (0 when ready). `aura_amplitude_ms` reads an aura effect's periodic interval.
 `block_chance` reads the player's percentage field; `block_value` reads native shield block value;
 `critical_block_chance` reads the total modifier used by the native critical block roll.
 `moving` reads the unit's native movement state. `water_walk` reports whether the unit has a water-walking aura.

@@ -556,6 +556,21 @@ class DurationScenarioTests(unittest.TestCase):
         self.assertTrue(step['critical'])
         self.assertEqual(step['hand'], 0)
 
+    def test_striker_cannot_miss_the_breaker_spell(self):
+        spec = duration_spec(sacred_oath_entry())
+        scenario, _ = duration_scenario(CLASS_FILE, spec)
+        striker = next(creature for creature in scenario['creatures'] if creature['id'] == 'striker')
+        self.assertEqual(striker.get('spell_hit_bonus'), 100,
+                         'the striker must be forced to hit or the debt_amount assert is flaky '
+                         '(Unit::MagicSpellHitResult gives Smite only ~96% hit at equal level)')
+
+    def test_striker_spell_hit_bonus_round_trips_through_validate(self):
+        spec = duration_spec(sacred_oath_entry())
+        scenario, _ = duration_scenario(CLASS_FILE, spec)
+        validated = run.validate(scenario)
+        striker = next(creature for creature in validated['creatures'] if creature['id'] == 'striker')
+        self.assertEqual(striker.get('spell_hit_bonus'), 100)
+
     def test_sets_the_debt_aura_and_has_a_striker_cast_the_breaker_spell_at_the_caster(self):
         spec = duration_spec(sacred_oath_entry())
         scenario, _ = duration_scenario(CLASS_FILE, spec)

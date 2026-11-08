@@ -646,7 +646,7 @@ def duration_scenario(class_file: dict, spec: DurationSpec) -> tuple[dict, list[
     fixture = dict(player_fixture(class_file)) | {'melee_crit_rating': FORCED_CRIT_RATING}
     target = creature_fixture(class_file)
     striker = {'id': STRIKER, 'owner': CASTER, 'entry': spec.striker_entry, 'level': class_file['level'],
-              'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 1}
+              'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 1, 'spell_hit_bonus': 100}
     before_label = duration_label(spec, BEFORE)
     after_label = duration_label(spec, AFTER)
     crit_label = duration_crit_label(spec)
@@ -685,7 +685,10 @@ def duration_scenario(class_file: dict, spec: DurationSpec) -> tuple[dict, list[
                     f'crits, one immediate and one at the weapon\'s own {swing_ms} ms speed, so the wait here is '
                     f'kept under {swing_ms} ms to isolate exactly one), and the natural elapsed time the engine '
                     f'decrements regardless is this wait, plus {spec.expected_ms:g} ms if the passive\'s own '
-                    f'claim holds.',
+                    f'claim holds. The striker\'s spell_hit_bonus is forced to 100 so this single direct-damage '
+                    f'swing cannot miss (Unit::MagicSpellHitResult, Unit.cpp:3970-4028, gives Smite only a base '
+                    f'~96% hit chance at equal level otherwise), which was the actual source of a round-2 flaky '
+                    f'failure (round2/run-report.md), misdiagnosed there as a wait-margin issue.',
         'players': [fixture],
         'creatures': [target, striker],
         'steps': steps}
