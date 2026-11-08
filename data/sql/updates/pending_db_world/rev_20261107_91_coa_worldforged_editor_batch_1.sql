@@ -120,3 +120,7 @@ UPDATE `gameobject` SET `position_x` = 6340.7366, `position_y` = -3869.7164, `po
 -- #7889
 -- pickup 6941505 (Adventurer's Backpack) moved 6.8 yd across and 5.25 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -5375.5455, `position_y` = 270.3399, `position_z` = 25.7813, `orientation` = 1.20845, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.568124, `rotation3` = 0.822943 WHERE `guid` = 6941505 AND `id` = 96141;
+
+-- #7902
+-- pickup 6940536 (Ghoul-Stitched Shoulders) moved 3.8 yd across and 0.27 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 1590.6304, `position_y` = -914.4513, `position_z` = 64.7401, `orientation` = 3.31423, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.996277, `rotation3` = -0.086212 WHERE `guid` = 6940536 AND `id` = 735901;
