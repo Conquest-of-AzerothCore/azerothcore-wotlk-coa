@@ -613,6 +613,10 @@ def plan_probes(class_file: dict, records: Records, effect: PassiveEffect, plan:
             if plan.metric == 'spell_effect_value' and not records.field(
                     'Spell', target.spell_id, f'Effect[{plan.fields["effect"]}]'):
                 reason = UNMODELLED + f'target {target.spell_id} has no effect {plan.fields["effect"]}'
+            elif plan.metric == 'spell_power_cost':
+                facts = facts_of(records, target.spell_id)
+                if not (facts.mana_cost or facts.mana_cost_per_level or facts.mana_cost_percentage):
+                    reason = UNMODELLED + f'target {target.spell_id} has no power cost to modify'
             probes.append(probe(target.spell_id, target.named, target.in_mask, reason))
         return probes
     try:

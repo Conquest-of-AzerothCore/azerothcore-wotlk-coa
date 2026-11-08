@@ -48,6 +48,16 @@ LIGHTS_CHOSEN = 301310
 BLESSED_STRIKES = 704180
 CHAKRA_OF_LIGHT = (803159, 803844)
 DEEP_SECRETS = 705263
+PIOUS_SWEEP = 520034
+TEMPLARS_MIGHT = 705291
+MARK_OF_AGGRAMAR = 804928
+TRANQUIL_CIRCLE = 801205
+TRANQUIL_CIRCLE_INCOMPLETE = 524667
+PIOUS_SWEEP_DEV_SPELL = 521052
+WRONGLY_NAMED_CHASTISE = 503141
+TESTAMENT_OF_FAITH = 501606
+TESTAMENT_OF_FORTITUDE = 500678
+ASCETIC_ABDICATION = 500699
 FINESSE = 705271
 PIOUS = 706431
 SERENDIPITY = 300929
@@ -258,15 +268,41 @@ class TemplarPassiveTest(unittest.TestCase):
         self.assertTrue(all(isinstance(target, PassiveTarget) and target.named for target in targets))
 
     def test_spell_name_inside_a_longer_proper_noun_is_not_named(self):
+        records = Records(dataset(DBC_DIR))
+        blessed_strikes = named_targets(records, TEMPLAR_FAMILY_NAME,
+                                        'Reduces the Energy cost of your Oath Breakers by $s1.', LEVEL)
+        self.assertFalse(any(target.named for target in blessed_strikes))
+        chakra = named_targets(records, TEMPLAR_FAMILY_NAME,
+                               'Oath Breakers now heal allies around the target', LEVEL)
+        self.assertFalse(any(target.named for target in chakra))
+
+    def test_passive_targets_override_fixes_named_but_wrong_mask_targets(self):
+        pious_sweep = effect_of(self.effects(PIOUS_SWEEP), 1)
+        self.assertEqual(target_ids(pious_sweep, True, True), {TRANQUIL_CIRCLE})
+        self.assertNotIn(WRONGLY_NAMED_CHASTISE, {target.spell_id for target in pious_sweep.targets})
+        self.assertNotIn(TRANQUIL_CIRCLE_INCOMPLETE, {target.spell_id for target in pious_sweep.targets})
+        self.assertIn(PIOUS_SWEEP_DEV_SPELL, target_ids(pious_sweep, False, True))
+        self.assertEqual(pious_sweep.reason, '')
+        templars_might = effect_of(self.effects(TEMPLARS_MIGHT), 0)
+        self.assertEqual(target_ids(templars_might, True, True), {CONDEMN_AT_60})
+        self.assertEqual(templars_might.reason, '')
+
+    def test_passive_targets_override_resolves_category_unmodelled_effects(self):
         blessed_strikes = effect_of(self.effects(BLESSED_STRIKES), 0)
-        self.assertNotIn('Oath', {target.name for target in blessed_strikes.targets if target.named})
-        self.assertFalse(any(target.named for target in blessed_strikes.targets))
-        self.assertTrue(blessed_strikes.reason.startswith(NO_NAMED_TARGET))
+        self.assertEqual(blessed_strikes.reason, '')
+        self.assertTrue({target.spell_id for target in blessed_strikes.targets if target.named})
+        deep_secrets = effect_of(self.effects(DEEP_SECRETS), 0)
+        self.assertEqual(deep_secrets.reason, '')
+        self.assertIn(TESTAMENT_OF_FORTITUDE, target_ids(deep_secrets, True, True))
+        mark_of_aggramar = effect_of(self.effects(MARK_OF_AGGRAMAR), 0)
+        self.assertEqual(mark_of_aggramar.reason, '')
+        self.assertIn(TESTAMENT_OF_FAITH, target_ids(mark_of_aggramar, True, True))
+        self.assertIn(ASCETIC_ABDICATION, target_ids(mark_of_aggramar, False, True))
         for chakra in CHAKRA_OF_LIGHT:
             effect = effect_of(self.effects(chakra), 1)
-            self.assertFalse(any(target.named for target in effect.targets))
-            self.assertTrue(effect.reason.startswith(NO_NAMED_TARGET), effect.reason)
-        self.assertTrue(effect_of(self.effects(DEEP_SECRETS), 0).reason.startswith(NO_NAMED_TARGET))
+            self.assertEqual(effect.reason, '')
+            self.assertIn(TESTAMENT_OF_FAITH, target_ids(effect, True, True))
+            self.assertIn(ASCETIC_ABDICATION, target_ids(effect, False, True))
 
     def test_named_target_outside_the_mask_is_kept(self):
         effect = effect_of(self.effects(PATIENCE), 0)
@@ -482,6 +518,45 @@ class PassiveScenarioTest(unittest.TestCase):
             self.assertFalse(records.field('Spell', expectation.model['target'],
                                            f'Effect[{expectation.model["fields"]["effect"]}]'))
             self.assertTrue(expectation.rule.startswith('unmodelled: target '), expectation.rule)
+
+    def test_pious_sweep_modifier_targets_tranquil_circle_not_chastise(self):
+        scenario, expectations = self.scenario(PIOUS_SWEEP)
+        modifiers = {step['spell'] for step in scenario['steps'] if step.get('metric') == 'spell_modifier'}
+        self.assertNotIn(WRONGLY_NAMED_CHASTISE, modifiers)
+        self.assertNotIn(TRANQUIL_CIRCLE_INCOMPLETE, modifiers)
+        self.assertIn(TRANQUIL_CIRCLE, modifiers)
+        values = {step['spell'] for step in scenario['steps'] if step.get('metric') == 'spell_effect_value'}
+        self.assertIn(TRANQUIL_CIRCLE, values)
+        self.assertNotIn(WRONGLY_NAMED_CHASTISE, values)
+        self.assertNotIn(TRANQUIL_CIRCLE_INCOMPLETE, values)
+        labels = {expectation.label for expectation in expectations}
+        self.assertNotIn(f'{PIOUS_SWEEP} e1 spell_modifier {WRONGLY_NAMED_CHASTISE}', labels)
+        self.assertNotIn(f'{PIOUS_SWEEP} e1 spell_modifier {TRANQUIL_CIRCLE_INCOMPLETE}', labels)
+        self.assertIn(f'{PIOUS_SWEEP} e1 spell_modifier {TRANQUIL_CIRCLE}', labels)
+        run.validate(scenario)
+
+    def test_templars_might_modifier_targets_condemn_not_its_named_abilities(self):
+        scenario, expectations = self.scenario(TEMPLARS_MIGHT)
+        modifiers = [step for step in scenario['steps'] if step.get('metric') == 'spell_modifier']
+        self.assertEqual({step['spell'] for step in modifiers}, {CONDEMN_AT_60})
+        labels = {expectation.label for expectation in expectations}
+        self.assertIn(f'{TEMPLARS_MIGHT} e0 spell_modifier {CONDEMN_AT_60}', labels)
+        self.assertNotIn(f'{TEMPLARS_MIGHT} e0 spell_modifier {WRONGLY_NAMED_CHASTISE}', labels)
+        run.validate(scenario)
+
+    def test_spell_power_cost_skips_targets_with_no_plain_cost(self):
+        scenario, expectations = self.scenario(BLESSED_STRIKES)
+        costs = {step['spell'] for step in scenario['steps'] if step.get('metric') == 'spell_power_cost'}
+        self.assertNotIn(501567, costs)
+        self.assertNotIn(572741, costs)
+        self.assertNotIn(704573, costs)
+        self.assertIn(503141, costs)
+        skipped = {expectation.model['target']: expectation.rule for expectation in expectations
+                  if expectation.check == 'unmodelled' and expectation.model
+                  and expectation.model.get('metric') == 'spell_power_cost'}
+        for spell_id in (501567, 572741, 704573):
+            self.assertEqual(skipped[spell_id], f'unmodelled: target {spell_id} has no power cost to modify')
+        run.validate(scenario)
 
     def test_spell_metrics_use_an_active_class_spell_of_the_school(self):
         scenario, expectations = self.scenario(SERENDIPITY)

@@ -418,7 +418,11 @@ table without a plan (31, 87, 283, 286: `aura <n> has no passive measurement`).
    effect's target only (D2: Grace of Aman'thul's effect 1 takes Sacred Swing, not Righteous Lunge). Otherwise a
    named spell resolves to its rank at the class level through the chains of `AscensionSpellProgressionData.h`
    (Righteous Lunge → 570233, Argent Blade → 807268), else to every record of that name, outside the mask.
-   `named_targets(records, family_name, text, level, in_mask, sibling_mask)` returns them.
+   `named_targets(records, family_name, text, level, in_mask, sibling_mask)` returns them. A named spell neither
+   in this mask nor in a `P1` sibling's gets a `passive_targets` entry instead (Pious Sweep 520034 effect 1 names
+   Chastise, whose own flags never meet the mask; the mask's real target is Tranquil Circle 801205, each a
+   separate half of the tooltip sentence. Templar's Might 705291 effect 0 names its four boosted abilities, but
+   the mask belongs to Condemn 567539, the stacking debuff that gates the boost).
 2. Category: when nothing is named and the first capitalised word (four letters or more) of every name the class
    mask matches is in the tooltip ("Libram spells": Libram of Tenacity, Libram of Zeal, ...), the mask's spells are
    the targets.
@@ -428,7 +432,10 @@ table without a plan (31, 87, 283, 286: `aura <n> has no passive measurement`).
 4. Otherwise `unmodelled: the tooltip names none of the spells the class mask affects (<names>)`. Templar: Deep
    Secrets 705263, Mark of Aggramar 804928 and Chakra of Light 803159/803844 say "Testaments" while their masks
    also match Ascetic and Mortal Abdication; Blessed Strikes 704180 says "Oath Breakers" while its mask matches
-   Benediction, Blade of Faith, ... (no name starts with "Oath"). These need a `passive_targets` entry.
+   Benediction, Blade of Faith, ... (no name starts with "Oath"). These have a `passive_targets` entry
+   (`classes/templar.json`): Blessed Strikes' own `Description[enUS]` of each of the 10 mask-matched spells
+   carries "Oath"/"Oaths", the in-fiction label `category_holds` cannot see because it only checks a candidate's
+   `SpellName`.
 
 `PassiveTarget(spell_id, name, named, in_mask)`: `in_mask` is whether the record's `SpellFamilyFlags` meet the
 effect's `EffectSpellClassMask`. Mask spells whose name is not matched are listed too (`named` false, one rank per
@@ -478,6 +485,10 @@ token text, `rule` the plan's relation, and `model` with `family`, `effect`, `me
   effect 1, op 40: no step is generated);
 - a target without the effect a `spell_effect_value` consumer reads: `unmodelled: target <id> has no effect <n>`
   (the harness would stop the scenario);
+- a target of a `spell_power_cost` consumer with no plain cost (`ManaCost`, `ManaCostPerlevel` and
+  `ManaCostPercentage` all 0): `unmodelled: target <id> has no power cost to modify` (`CalcPowerCost` clamps a
+  negative cost to 0, so a flat reduction on a 0-cost target would measure a false 0 → 0 instead of its real
+  token; Blessed Strikes 704180's Divine Fury 501567, Reckoning 572741 and Chakram 704573 have no plain cost);
 - a reference spell missing: `unmodelled: no active class spell with a heal effect in school mask <mask>` (Templar
   has no heal spell: Sacred Style 705278 and Fortified Body 300515 are unmodelled).
 
