@@ -42,3 +42,7 @@ UPDATE `gameobject` SET `position_x` = -10558.0607, `position_y` = 1991.1986, `p
 -- #6089
 -- pickup 6940055 (Sunken Stash) moved 6.5 yd across and 1.60 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 28.7522, `position_y` = -3775.9517, `position_z` = 136.9218, `orientation` = 0.23541, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.117433, `rotation3` = 0.993081 WHERE `guid` = 6940055 AND `id` = 254573;
+
+-- #6522
+-- pickup 6942045 (Feeding Pile) moved 17.7 yd across and 8.58 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -8214.7939, `position_y` = -1592.7333, `position_z` = -203.0017, `orientation` = 5.642196, `rotation0` = 0.161805, `rotation1` = 0.00107755, `rotation2` = 0.318537, `rotation3` = -0.933998 WHERE `guid` = 6942045 AND `id` = 95937;
