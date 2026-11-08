@@ -104,3 +104,11 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, 
 (6976000, 9900048, 0, 0, 0, 1, 1, -1252.0372, -1607.9080, 50.06, 1.128609, 0, 0, 0.534828, 0.844961, 300, 100, 1, '', NULL, 'Skeleton under the Intact Plate Helm');
 -- template 95865 (Intact Plate Helm): size 1 -> 1.25 so the helm sits over the skull
 UPDATE `gameobject_template` SET `size` = 1.25 WHERE `entry` = 95865;
+
+-- #7862, #7864
+-- pickup 6940532 (Shallow Grave) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940532 AND `id` = 517354;
+-- pickup 6940846 (Wheel) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940846 AND `id` = 515345;
+-- pickup 6940847 (Wheel) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940847 AND `id` = 515345;
