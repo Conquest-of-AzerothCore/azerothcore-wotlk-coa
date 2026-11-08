@@ -88,3 +88,7 @@ UPDATE `gameobject` SET `position_x` = 1552.5447, `position_y` = -3811.4318, `po
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941743 AND `id` = 90480;
 -- pickup 6940494 (Forbidden Fruit) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940494 AND `id` = 90480;
+
+-- #7742
+-- pickup 6941906 (Magnify Glass) moved 7.8 yd across and 4.10 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -6728.4526, `position_y` = -4716.7856, `position_z` = 24.7109, `orientation` = 0.253263, `rotation0` = -0.739137, `rotation1` = -0.0819755, `rotation2` = 0.0976903, `rotation3` = 0.661373 WHERE `guid` = 6941906 AND `id` = 515835;
