@@ -62,3 +62,7 @@ UPDATE `gameobject` SET `position_x` = -11139.7759, `position_y` = -3166.7492, `
 -- #10954
 -- pickup 6941098 (Jewelled Ring) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941098 AND `id` = 68394;
+
+-- #10955
+-- pickup 6941369 (Warder's Cache) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941369 AND `id` = 95902;
