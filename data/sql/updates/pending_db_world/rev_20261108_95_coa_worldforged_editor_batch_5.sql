@@ -43,3 +43,7 @@ UPDATE `gameobject` SET `position_x` = -9614.424, `position_y` = -3008.34, `posi
 -- #11435
 -- pickup 6941817 (Worshipped Warpwood Growth) moved 21.9 yd across and 85.96 yd down to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 6439.7, `position_y` = -1725.53, `position_z` = 418.171, `orientation` = 4.18642, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.866617, `rotation3` = -0.498973 WHERE `guid` = 6941817 AND `id` = 96155;
+
+-- #11491
+-- pickup 6940546 (Gilnean Crate) moved 9.1 yd across and 3.97 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 851.152, `position_y` = 1909.88, `position_z` = -5.198, `orientation` = 5.74223, `rotation0` = 0, `rotation1` = 0, `rotation2` = -0.267192, `rotation3` = 0.963643 WHERE `guid` = 6940546 AND `id` = 90328;
