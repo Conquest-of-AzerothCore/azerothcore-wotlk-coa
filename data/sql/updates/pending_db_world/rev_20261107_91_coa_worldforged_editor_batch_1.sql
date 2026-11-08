@@ -80,3 +80,11 @@ UPDATE `gameobject` SET `position_x` = -685.9327, `position_y` = -3783.5016, `po
 UPDATE `gameobject_template` SET `size` = 0.5 WHERE `entry` = 1345163;
 -- pickup 6941320 (Wand of the Broodbound) moved 14.7 yd across and 65.81 yd down to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -760.6532, `position_y` = -3791.7767, `position_z` = 234.7217, `orientation` = 3.904247, `rotation0` = 0.406178, `rotation1` = -0.557785, `rotation2` = 0.714832, `rotation3` = -0.113622 WHERE `guid` = 6941320 AND `id` = 1345163;
+
+-- #7741
+-- pickup 6940495 (Forbidden Fruit) moved 1.6 yd across and 0.10 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 1552.5447, `position_y` = -3811.4318, `position_z` = 115.9059, `orientation` = 6.23936, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.021911, `rotation3` = -0.99976 WHERE `guid` = 6940495 AND `id` = 90480;
+-- pickup 6941743 (Forbidden Fruit) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941743 AND `id` = 90480;
+-- pickup 6940494 (Forbidden Fruit) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940494 AND `id` = 90480;
