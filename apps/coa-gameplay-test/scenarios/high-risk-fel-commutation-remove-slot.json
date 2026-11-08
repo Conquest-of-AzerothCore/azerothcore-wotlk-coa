@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "name": "A player can remove a slot from the Fel Commutation default",
+  "contract": [
+    "With all slots insured by default, a player who removes the chest slot in the window",
+    "loses the chest piece and pays no fee.",
+    "Requires HighRisk.Losses = 1, HighRisk.GearChance = 0.001, HighRisk.ResourceChance = 0,",
+    "HighRisk.GoldChance = 0 and HighRisk.FelCommutation.Enable = 1; InsureAllSlotsByDefault is not set,",
+    "so its default 1 applies."
+  ],
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "name": "Felremove"
+    },
+    {
+      "id": "k",
+      "race": 2,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "timeout_ms": 120000,
+  "steps": [
+    {
+      "action": "teleport",
+      "actor": "k",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "v",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "v",
+      "item": 355242,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "v",
+      "item": 355242,
+      "slot": 4
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "equipped_item",
+      "slot": 4,
+      "equals": 355242
+    },
+    {
+      "action": "destroy_item",
+      "actor": "v",
+      "item": 38
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "item_count",
+      "item": 38,
+      "equals": 0
+    },
+    {
+      "action": "destroy_item",
+      "actor": "v",
+      "item": 39
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "item_count",
+      "item": 39,
+      "equals": 0
+    },
+    {
+      "action": "destroy_item",
+      "actor": "v",
+      "item": 40
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "item_count",
+      "item": 40,
+      "equals": 0
+    },
+    {
+      "action": "destroy_item",
+      "actor": "v",
+      "item": 49778
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "item_count",
+      "item": 49778,
+      "equals": 0
+    },
+    {
+      "action": "set_money",
+      "actor": "v",
+      "value": 10000000
+    },
+    {
+      "action": "assert",
+      "label": "All slots were insured at login",
+      "actor": "v",
+      "metric": "system_message_contains",
+      "text": "Fel Commutation now protects all your equipment slots",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "whisper",
+      "label": "The player removes the chest slot",
+      "actor": "v",
+      "to": "Felremove",
+      "language": 4294967295,
+      "text": "FELCOMM\tUNINSURE 5"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "pvp",
+      "actor": "v",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "k",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "attack",
+      "actor": "k",
+      "target": "v"
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Nothing was kept safe",
+      "actor": "v",
+      "metric": "system_message_contains",
+      "text": "kept safe for",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The chest piece dropped",
+      "actor": "v",
+      "metric": "equipped_item",
+      "slot": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No fee was paid",
+      "actor": "v",
+      "metric": "carried_money",
+      "min": 10000000
+    }
+  ]
+}
