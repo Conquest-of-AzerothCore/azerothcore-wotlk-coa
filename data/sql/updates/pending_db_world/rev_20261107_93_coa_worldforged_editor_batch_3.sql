@@ -50,3 +50,7 @@ UPDATE `gameobject` SET `position_x` = -10038.0948, `position_y` = -4310.4067, `
 -- #10918
 -- pickup 6942283 (Discarded Wand) moved 36.9 yd across and 1.91 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -2253.4172, `position_y` = -2389.7135, `position_z` = 93.9540, `orientation` = 2.354208, `rotation0` = 0.323827, `rotation1` = 0.779596, `rotation2` = 0.205635, `rotation3` = -0.495056 WHERE `guid` = 6942283 AND `id` = 97116;
+
+-- #10938
+-- pickup 6941136 (Splinterspear Armor Crate) moved 1.3 yd across and 0.05 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -10397.4809, `position_y` = -2614.6986, `position_z` = 41.0717, `orientation` = 6.235741, `rotation0` = 0.00179477, `rotation1` = 0.0756431, `rotation2` = -0.0236521, `rotation3` = 0.996853 WHERE `guid` = 6941136 AND `id` = 254378;
