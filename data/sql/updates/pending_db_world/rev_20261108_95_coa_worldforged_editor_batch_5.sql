@@ -31,3 +31,7 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6941265) AND `id` IN (5
 -- #10923
 -- pickup 6940028 (Ladel) moved 25.8 yd across and 18.07 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -13781.7138, `position_y` = -214.3342, `position_z` = 28.4171, `orientation` = 5.36533, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.442987, `rotation3` = -0.896528 WHERE `guid` = 6940028 AND `id` = 515466;
+
+-- #11145
+-- pickup 6942005 (Precious Ring) moved 5.5 yd across and 0.00 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -7131.33, `position_y` = -1267.74, `position_z` = -198.349, `orientation` = 3.18828, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.999728, `rotation3` = -0.023342 WHERE `guid` = 6942005 AND `id` = 95934;
