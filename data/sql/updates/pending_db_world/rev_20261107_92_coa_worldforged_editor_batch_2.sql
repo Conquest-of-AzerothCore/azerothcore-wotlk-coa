@@ -68,3 +68,9 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940955 AND `id` = 254506
 -- #8736
 -- pickup 6941178 (Scorched Knife) moved 4.5 yd across and 0.31 yd down to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -6766.9369, `position_y` = -3131.2577, `position_z` = 241.8665, `orientation` = 4.885609, `rotation0` = -0.532331, `rotation1` = 0.43372, `rotation2` = 0.475126, `rotation3` = -0.550241 WHERE `guid` = 6941178 AND `id` = 518098;
+
+-- #8822, #11405
+-- template 254233 (Crimson Dragonscale): size 1 -> 1.6 (1 spawns)
+UPDATE `gameobject_template` SET `size` = 1.6 WHERE `entry` = 254233;
+-- pickup 6940273 (Crimson Dragonscale) moved 5.8 yd across and 2.89 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -4057.3253, `position_y` = -3456.0894, `position_z` = 284.6397, `orientation` = 1.864571, `rotation0` = -0.245373, `rotation1` = 0.395313, `rotation2` = -0.657469, `rotation3` = -0.592667 WHERE `guid` = 6940273 AND `id` = 254233;
