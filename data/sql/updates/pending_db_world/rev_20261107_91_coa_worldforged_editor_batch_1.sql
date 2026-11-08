@@ -74,3 +74,9 @@ UPDATE `gameobject` SET `position_x` = -4001.4296, `position_y` = 304.4279, `pos
 UPDATE `gameobject_template` SET `size` = 0.7 WHERE `entry` = 1345084;
 -- pickup 6940703 (Libram of Resolute Light) moved 11.8 yd across and 109.76 yd down to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -685.9327, `position_y` = -3783.5016, `position_z` = 229.0637, `orientation` = 1.95887, `rotation0` = 0.394944, `rotation1` = 0.588126, `rotation2` = 0.585928, `rotation3` = 0.393467 WHERE `guid` = 6940703 AND `id` = 1345084;
+
+-- #7702
+-- template 1345163 (Wand of the Broodbound): size 1 -> 0.5 (1 spawns)
+UPDATE `gameobject_template` SET `size` = 0.5 WHERE `entry` = 1345163;
+-- pickup 6941320 (Wand of the Broodbound) moved 14.7 yd across and 65.81 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -760.6532, `position_y` = -3791.7767, `position_z` = 234.7217, `orientation` = 3.904247, `rotation0` = 0.406178, `rotation1` = -0.557785, `rotation2` = 0.714832, `rotation3` = -0.113622 WHERE `guid` = 6941320 AND `id` = 1345163;
