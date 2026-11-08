@@ -22,3 +22,11 @@ UPDATE `gameobject` SET `position_x` = -4763.5591, `position_y` = -3658.5874, `p
 -- #8430
 -- pickup 6941830 (Old Blade) moved 7.0 yd across and 0.83 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 5113.2225, `position_y` = -519.2770, `position_z` = 334.9702, `orientation` = 4.016142, `rotation0` = -0.278552, `rotation1` = 0.59589, `rotation2` = 0.682339, `rotation3` = -0.318963 WHERE `guid` = 6941830 AND `id` = 517261;
+
+-- #8432, #10476
+-- template 254463 (Warbanner): size 1 -> 1.5 (2 spawns)
+UPDATE `gameobject_template` SET `size` = 1.5 WHERE `entry` = 254463;
+-- pickup 6942227 (Warbanner) moved 2.3 yd across and 4.53 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 3326.1057, `position_y` = -5664.3597, `position_z` = 13.0586, `orientation` = 3.624124, `rotation0` = 0.686988, `rotation1` = -0.0393853, `rotation2` = 0.725395, `rotation3` = 0.0172611 WHERE `guid` = 6942227 AND `id` = 254463;
+-- pickup 6941134 (Warbanner) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941134 AND `id` = 254463;
