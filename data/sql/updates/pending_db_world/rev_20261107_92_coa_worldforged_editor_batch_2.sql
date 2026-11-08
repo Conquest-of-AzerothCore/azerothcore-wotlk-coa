@@ -112,3 +112,7 @@ UPDATE `gameobject` SET `position_x` = 1439.6139, `position_y` = -4735.6322, `po
 -- #9225
 -- pickup 6975030 (Apothecary's Lantern) moved 0.76 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -7189.7000, `position_y` = -3793.6000, `position_z` = 9.7738, `orientation` = 0, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0, `rotation3` = 1 WHERE `guid` = 6975030 AND `id` = 1345004;
+
+-- #9295
+-- pickup 6942241 (Steelrider Girdle) moved 3.3 yd across and 1.49 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 276.0405, `position_y` = -3038.1650, `position_z` = 97.5888, `orientation` = 4.84623, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.658239, `rotation3` = -0.752809 WHERE `guid` = 6942241 AND `id` = 1345138;
