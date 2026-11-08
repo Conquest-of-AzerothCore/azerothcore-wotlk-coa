@@ -148,3 +148,7 @@ UPDATE `gameobject` SET `position_x` = -296.5522, `position_y` = -4331.1618, `po
 UPDATE `gameobject_template` SET `displayId` = 1044834, `size` = 0.9 WHERE `entry` = 520071;
 -- pickup 6942392 (Vulture Effigy) moved 2.9 yd across and 2.01 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 10602.6398, `position_y` = 462.9497, `position_z` = 1394.8924, `orientation` = 3.244403, `rotation0` = -0.00131207, `rotation1` = 0.000437435, `rotation2` = 0.998678, `rotation3` = -0.0513817 WHERE `guid` = 6942392 AND `id` = 520071;
+
+-- #8329
+-- pickup 6941543 (Carrion Eye) moved 1.3 yd across to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 10837.5602, `position_y` = 524.2728, `position_z` = 1398.2700, `orientation` = 5.51525, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.374602, `rotation3` = -0.927186 WHERE `guid` = 6941543 AND `id` = 520067;
