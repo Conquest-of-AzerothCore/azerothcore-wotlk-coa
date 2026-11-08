@@ -7,9 +7,11 @@ DROP TEMPORARY TABLE IF EXISTS `coa_dungeon_copy`;
 CREATE TEMPORARY TABLE `coa_dungeon_copy` AS SELECT * FROM `creature_template` WHERE `entry` IN (8437, 8438);
 UPDATE `coa_dungeon_copy` SET `entry` = `entry` + 100000, `difficulty_entry_1` = 0, `difficulty_entry_2` = 0,
     `difficulty_entry_3` = 0, `AIName` = '', `ScriptName` = '';
-INSERT INTO `creature_template` SELECT * FROM `coa_dungeon_copy` ON DUPLICATE KEY UPDATE `entry` = `creature_template`.`entry`;
+INSERT INTO `creature_template` SELECT * FROM `coa_dungeon_copy`
+ON DUPLICATE KEY UPDATE `entry` = `creature_template`.`entry`;
 UPDATE `coa_dungeon_copy` SET `entry` = `entry` + 100000;
-INSERT INTO `creature_template` SELECT * FROM `coa_dungeon_copy` ON DUPLICATE KEY UPDATE `entry` = `creature_template`.`entry`;
+INSERT INTO `creature_template` SELECT * FROM `coa_dungeon_copy`
+ON DUPLICATE KEY UPDATE `entry` = `creature_template`.`entry`;
 DROP TEMPORARY TABLE `coa_dungeon_copy`;
 
 DROP TEMPORARY TABLE IF EXISTS `coa_dungeon_copy`;
