@@ -72,6 +72,8 @@ bool SlotInsured(uint32 mask, unsigned key)
     return Insurable(key) && (mask & (1u << key)) != 0;
 }
 
+void SendState(Player* player);
+
 void SyncDefault(Player* player)
 {
     if (player->GetSession()->IsBot())
@@ -87,11 +89,13 @@ void SyncDefault(Player* player)
             player->UpdatePlayerSetting(Setting, InsuredSlotsIndex, AllSlotsMask);
             player->UpdatePlayerSetting(Setting, DefaultAppliedIndex, 1);
             ChatHandler(player->GetSession()).SendSysMessage(DefaultAppliedText);
+            SendState(player);
             break;
         case DefaultSync::Clear:
             player->UpdatePlayerSetting(Setting, ActiveIndex, 0);
             player->UpdatePlayerSetting(Setting, InsuredSlotsIndex, 0);
             player->UpdatePlayerSetting(Setting, DefaultAppliedIndex, 0);
+            SendState(player);
             break;
         case DefaultSync::None:
             break;
