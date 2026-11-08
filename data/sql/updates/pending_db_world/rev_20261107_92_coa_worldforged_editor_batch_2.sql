@@ -36,3 +36,9 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941134 AND `id` = 254463
 UPDATE `gameobject` SET `position_x` = -612.1900, `position_y` = -1071.4953, `position_z` = 66.0557, `orientation` = 0.07712, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.03855, `rotation3` = 0.999257 WHERE `guid` = 6940320 AND `id` = 515385;
 -- pickup 6940321 (Deadman's Dagger) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940321 AND `id` = 515385;
+
+-- #8465, #8706, #11074
+-- pickup 6941970 (Moss Picker's Pouch) moved 2.0 yd across to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 10263.2379, `position_y` = 970.1101, `position_z` = 1341.2000, `orientation` = 6.088498, `rotation0` = 0.0102433, `rotation1` = -0.681456, `rotation2` = 5.8517e-05, `rotation3` = -0.731787 WHERE `guid` = 6941970 AND `id` = 1344099;
+-- pickup 6941972 (Mossy Bag) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941972 AND `id` = 90626;
