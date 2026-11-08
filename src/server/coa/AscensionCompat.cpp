@@ -841,6 +841,17 @@ constexpr std::array<FelswornRiftGrant, 3> FelswornHordeCapitalRifts =
     {535600, 36}
 }};
 
+struct SpellTaughtBySpell
+{
+    uint32 SpellId;
+    uint32 TeacherSpellId;
+};
+
+constexpr std::array<SpellTaughtBySpell, 1> SpellsTaughtByKnownSpells =
+{{
+    {801294, 804492}
+}};
+
 bool CanGrantAscensionRacialSpell(Player const* player, uint32 spellId)
 {
     if (!AscensionFelsworn::CanLearnRift(player, spellId))
@@ -943,8 +954,11 @@ public:
             return CanGrantAutomaticEntry(player, entry, activeSpec) &&
                    std::find(entry.SpellIds.begin(), entry.SpellIds.end(), spellId) != entry.SpellIds.end();
           });
+      bool const taughtByKnownSpell = std::any_of(SpellsTaughtByKnownSpells.begin(), SpellsTaughtByKnownSpells.end(),
+          [player, spellId](SpellTaughtBySpell const& taught)
+          { return taught.SpellId == spellId && player->HasSpell(taught.TeacherSpellId); });
       return std::binary_search(racialSpells.begin(), racialSpells.end(), spellId) ||
-          observed || proficiency || unresolved || automatic || selectedTalentOwns(spellId) ||
+          observed || proficiency || unresolved || automatic || taughtByKnownSpell || selectedTalentOwns(spellId) ||
           std::any_of(AscensionCompatData::ClassSpells.begin(),
           AscensionCompatData::ClassSpells.end(), [player, spellId](auto const& entry)
           {
