@@ -77,3 +77,9 @@ UPDATE `gameobject` SET `position_x` = 5201.5, `position_y` = -571.654, `positio
 -- #11591
 -- pickup 6942080 (Scorched Equipment Cache) moved 13.4 yd across and 0.89 yd down to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 578.082, `position_y` = -4113.61, `position_z` = 18.2154, `orientation` = 3.80281, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.945845, `rotation3` = -0.324619 WHERE `guid` = 6942080 AND `id` = 95633;
+
+-- #11597
+-- pickup 6942318 (Broken Tail Spike) moved 3.9 yd across and 0.37 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 968.932, `position_y` = -4278.434, `position_z` = -7.1, `orientation` = 0.8309, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.403602, `rotation3` = 0.914935 WHERE `guid` = 6942318 AND `id` = 95624;
+-- template 95624 (Broken Tail Spike) was smaller than the reported model
+UPDATE `gameobject_template` SET `size` = 0.7 WHERE `entry` = 95624;
