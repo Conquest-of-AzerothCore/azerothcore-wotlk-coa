@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionCacheRewards.h"
 #include "AscensionRaidReleasePolicy.h"
+#include "AscensionSpecLoot.h"
 #include "Chat.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
@@ -204,38 +205,22 @@ uint32 NewestReleasedCache(uint32 genericCacheItemId, CacheConfig const& config)
     return NewestReleasedTier(ClassicLadder, config);
 }
 
-uint8 PrimaryStat(Player const* player)
-{
-    uint32 strength = player->GetStat(STAT_STRENGTH);
-    uint32 agility = player->GetStat(STAT_AGILITY);
-    uint32 intellect = player->GetStat(STAT_INTELLECT);
-    if (strength >= agility && strength >= intellect)
-        return 1;
-    return agility >= intellect ? 2 : 3;
-}
-
 bool PickReward(Player* player, CachePool const& pool, AscensionCacheRewards::Reward& out)
 {
-    std::vector<AscensionCacheRewards::Reward const*> preferred;
-    std::vector<AscensionCacheRewards::Reward const*> fallback;
-    uint8 stat = PrimaryStat(player);
+    std::vector<AscensionCacheRewards::Reward const*> usable;
     for (AscensionCacheRewards::Reward const& reward : pool)
     {
         ItemTemplate const* proto = sObjectMgr->GetItemTemplate(reward.itemId);
-        if (!proto || player->CanUseItem(proto) != EQUIP_ERR_OK ||
-            (proto->GetSkill() && !player->GetSkillValue(proto->GetSkill())))
-            continue;
-        fallback.push_back(&reward);
-        if (reward.statType == stat || reward.statType == 4 || reward.statType == 5)
-            preferred.push_back(&reward);
+        if (proto && player->CanUseItem(proto) == EQUIP_ERR_OK &&
+            (!proto->GetSkill() || player->GetSkillValue(proto->GetSkill())))
+            usable.push_back(&reward);
     }
-
-    std::vector<AscensionCacheRewards::Reward const*> const& candidates =
-        preferred.empty() ? fallback : preferred;
-    if (candidates.empty())
+    usable = AscensionSpecLoot::PreferSpecialization(player, usable,
+        [](AscensionCacheRewards::Reward const* reward) { return sObjectMgr->GetItemTemplate(reward->itemId); });
+    if (usable.empty())
         return false;
 
-    out = *candidates[urand(0, uint32(candidates.size() - 1))];
+    out = *usable[urand(0, uint32(usable.size() - 1))];
     return true;
 }
 
