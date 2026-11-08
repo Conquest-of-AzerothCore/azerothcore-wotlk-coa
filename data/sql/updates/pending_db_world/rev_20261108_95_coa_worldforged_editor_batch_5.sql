@@ -69,3 +69,7 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6942359) AND `id` IN (9
 -- #11584
 -- pickup 6940745 (Ritual Tome) moved 22.1 yd across and 29.89 yd down to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -13091.4, `position_y` = -607.342, `position_z` = 58.3065, `orientation` = 0.77223, `rotation0` = -0.597578, `rotation1` = -0.242928, `rotation2` = 0.287763, `rotation3` = 0.707869 WHERE `guid` = 6940745 AND `id` = 95755;
+
+-- #11586
+-- pickup 6942187 (Silverhand Spaulder) moved 6.9 yd across and 0.00 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 5201.5, `position_y` = -571.654, `position_z` = 289.32, `orientation` = 1.35445, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.626633, `rotation3` = 0.779315 WHERE `guid` = 6942187 AND `id` = 517234;
