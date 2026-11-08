@@ -61,3 +61,7 @@ UPDATE `gameobject` SET `position_x` = -5888.99, `position_y` = 478.711, `positi
 UPDATE `gameobject` SET `position_x` = -10335.8241, `position_y` = 410.7642, `position_z` = 18.567, `orientation` = 6.032167, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.12518, `rotation3` = -0.992134 WHERE `guid` = 6940225 AND `id` = 90282;
 -- copy outside the catacombs: 6940226 (Catacombs Relic Torch) hidden, not deleted
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6940226) AND `id` IN (90282);
+
+-- #11561
+-- leftover copy of the Embedded Sword: 6942359 (Embedded Sword) hidden, not deleted
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6942359) AND `id` IN (95622);
