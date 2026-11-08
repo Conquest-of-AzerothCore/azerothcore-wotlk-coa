@@ -6,7 +6,8 @@
     "A Warcraft Reborn character keeps its talents as a free-pick build, so it switches specializations like a free-pick Hero: each slot keeps its own build and action bars; trainer spells are shared; the stock talent spec is not used.",
     "Before the fix the swap spells fell through to the stock dual-spec switch: Specialization II changed the stock talent group, III to XX did nothing, and 0x725 was never sent.",
     "The per-specialization equipment set link (CMSG 0x73A { u32 spec-1, u8 linked, [u64 set guid] }) is saved and echoed as SMSG 0x738 with the same layout, and resent at world entry; a set the character does not own is refused.",
-    "The swap spells have a 5 s cast time (SpellCastTimes 6), like the stock 63644; every check after a cast waits for it."
+    "The swap spells have a 5 s cast time (SpellCastTimes 6), like the stock 63644; every check after a cast waits for it.",
+    "Deleting a linked set leaves the link pointing at nothing: a set marked deleted (until the next save) cannot be linked, and a link whose set no longer exists is cleared at world entry instead of being resent."
   ],
   "timeout_ms": 180000,
   "players": [
@@ -519,6 +520,105 @@
       "source": "core.equipment_set.spec",
       "index": 2,
       "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "Link the set to Specialization II again",
+      "actor": "w",
+      "opcode": 1850,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u8": 1
+        },
+        {
+          "equipment_set_guid": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the link is saved",
+      "actor": "w",
+      "metric": "player_setting",
+      "source": "core.equipment_set.spec",
+      "index": 2,
+      "min": 1
+    },
+    {
+      "action": "relog",
+      "label": "Relog so the set is saved to the database",
+      "actor": "w"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "Delete the linked set (CMSG_DELETEEQUIPMENT_SET)",
+      "actor": "w",
+      "opcode": 318,
+      "fields": [
+        {
+          "packed_equipment_set_guid": 0
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "client_packet",
+      "label": "Try to link the deleted set to Specialization III before the next save",
+      "actor": "w",
+      "opcode": 1850,
+      "fields": [
+        {
+          "u32": 2
+        },
+        {
+          "u8": 1
+        },
+        {
+          "equipment_set_guid": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: a deleted set cannot be linked",
+      "actor": "w",
+      "metric": "player_setting",
+      "equals": 0,
+      "source": "core.equipment_set.spec",
+      "index": 4
+    },
+    {
+      "action": "relog",
+      "label": "Relog: the save removes the deleted set",
+      "actor": "w"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "The client reports world entry (CMSG_EXTENSION_INITIALIZED)",
+      "actor": "w",
+      "opcode": 1377,
+      "fields": []
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the link to the deleted set is cleared at world entry",
+      "actor": "w",
+      "metric": "player_setting",
+      "equals": 0,
+      "source": "core.equipment_set.spec",
+      "index": 2,
+      "within_ms": 3000
     }
   ]
 }

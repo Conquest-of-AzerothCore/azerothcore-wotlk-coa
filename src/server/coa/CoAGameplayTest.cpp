@@ -5875,12 +5875,15 @@ private:
                             request << value.get_value<std::string>();
                         else if (kind == "buyback_guid")
                             request << BuybackGuid(player, value.get_value<uint32>());
-                        else if (kind == "equipment_set_guid")
+                        else if (kind == "equipment_set_guid" || kind == "packed_equipment_set_guid")
                         {
                             auto const set = player->GetEquipmentSets().find(value.get_value<uint32>());
                             Require(set != player->GetEquipmentSets().end(),
                                 "Packet equipment set GUID requires a saved equipment set at that index");
-                            request << set->second.Guid;
+                            if (kind == "equipment_set_guid")
+                                request << set->second.Guid;
+                            else
+                                request.appendPackGUID(set->second.Guid);
                         }
                         else if (kind == "item_guid")
                         {

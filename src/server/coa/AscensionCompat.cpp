@@ -7267,11 +7267,34 @@ private:
         player->SendDirectMessage(&packet);
     }
 
+    static bool OwnsEquipmentSet(Player const* player, uint64 setGuid)
+    {
+        return setGuid && std::any_of(player->GetEquipmentSets().begin(), player->GetEquipmentSets().end(),
+            [setGuid](auto const& set)
+            {
+                return set.second.Guid == setGuid && set.second.state != EQUIPMENT_SET_DELETED;
+            });
+    }
+
+    static void StoreSpecializationEquipmentSet(Player* player, uint32 specialization, uint64 setGuid)
+    {
+        player->UpdatePlayerSetting(SPECIALIZATION_EQUIPMENT_SET_SETTING, 2 * specialization, uint32(setGuid));
+        player->UpdatePlayerSetting(SPECIALIZATION_EQUIPMENT_SET_SETTING, 2 * specialization + 1,
+            uint32(setGuid >> 32));
+    }
+
     static void SendSpecializationEquipmentSets(Player* player)
     {
         for (uint32 specialization = 0; specialization < SPECIALIZATION_LINK_COUNT; ++specialization)
-            if (uint64 const setGuid = SpecializationEquipmentSet(player, specialization))
+        {
+            uint64 const setGuid = SpecializationEquipmentSet(player, specialization);
+            if (!setGuid)
+                continue;
+            if (OwnsEquipmentSet(player, setGuid))
                 SendSpecializationEquipmentSet(player, specialization, setGuid);
+            else
+                StoreSpecializationEquipmentSet(player, specialization, 0);
+        }
     }
 
     static void HandleSpecializationEquipmentSet(Player* player, WorldPacket& packet)
@@ -7281,16 +7304,12 @@ private:
         uint64 const setGuid = linked ? packet.read<uint64>() : 0;
         if (specialization >= SPECIALIZATION_LINK_COUNT)
             return;
-        bool const owned = !linked || std::any_of(player->GetEquipmentSets().begin(),
-            player->GetEquipmentSets().end(), [setGuid](auto const& set) { return set.second.Guid == setGuid; });
-        if (!owned || (linked && !setGuid))
+        if (linked && !OwnsEquipmentSet(player, setGuid))
         {
             SendSpecializationEquipmentSet(player, specialization, SpecializationEquipmentSet(player, specialization));
             return;
         }
-        player->UpdatePlayerSetting(SPECIALIZATION_EQUIPMENT_SET_SETTING, 2 * specialization, uint32(setGuid));
-        player->UpdatePlayerSetting(SPECIALIZATION_EQUIPMENT_SET_SETTING, 2 * specialization + 1,
-            uint32(setGuid >> 32));
+        StoreSpecializationEquipmentSet(player, specialization, setGuid);
         SendSpecializationEquipmentSet(player, specialization, setGuid);
     }
 
