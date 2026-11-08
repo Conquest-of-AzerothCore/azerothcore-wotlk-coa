@@ -94,3 +94,9 @@ UPDATE `gameobject` SET `position_x` = 6007.9000, `position_y` = -55.0000, `posi
 UPDATE `gameobject` SET `position_x` = -52.6875, `position_y` = -3179.5643, `position_z` = 101.0433, `orientation` = 5.2851, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.478585, `rotation3` = -0.878041 WHERE `guid` = 6940491 AND `id` = 95894;
 -- pickup 6940490 (Floodworn Shoulderguards) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940490 AND `id` = 95894;
+
+-- #9077
+-- pickup 6941580 (Conscription Supplies) moved 3.6 yd across to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 177.0061, `position_y` = -3596.2594, `position_z` = 27.1879, `orientation` = 3.89401, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.930064, `rotation3` = -0.367397 WHERE `guid` = 6941580 AND `id` = 95829;
+-- pickup 6941581 (Conscription Supplies) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941581 AND `id` = 95829;
