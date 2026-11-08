@@ -80,3 +80,7 @@ UPDATE `gameobject` SET `position_x` = -4057.3253, `position_y` = -3456.0894, `p
 UPDATE `gameobject` SET `position_x` = 1791.3300, `position_y` = 1333.7500, `position_z` = 89.9502, `orientation` = 5.73666, `rotation0` = 0, `rotation1` = 0, `rotation2` = -0.269872, `rotation3` = 0.962896 WHERE `guid` = 6941021 AND `id` = 254164;
 -- pickup 6941022 (Scarlet Shield) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941022 AND `id` = 254164;
+
+-- #8910, #9394, #11292
+-- pickup 6960003 (Bloodied Axe) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6960003 AND `id` = 93008;
