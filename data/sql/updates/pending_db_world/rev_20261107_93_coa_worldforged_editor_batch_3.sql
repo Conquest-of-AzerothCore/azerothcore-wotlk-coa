@@ -66,3 +66,7 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941098 AND `id` = 68394;
 -- #10955
 -- pickup 6941369 (Warder's Cache) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941369 AND `id` = 95902;
+
+-- #10959
+-- pickup 6940636 (Hull Breaker) moved 22.6 yd across and 0.32 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -14678.4505, `position_y` = 500.5863, `position_z` = 2.9927, `orientation` = 0.430102, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.213397, `rotation3` = 0.976965 WHERE `guid` = 6940636 AND `id` = 95710;
