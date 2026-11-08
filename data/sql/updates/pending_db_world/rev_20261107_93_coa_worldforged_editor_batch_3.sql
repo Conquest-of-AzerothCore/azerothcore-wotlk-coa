@@ -22,3 +22,7 @@ UPDATE `gameobject` SET `position_x` = -10415.5000, `position_y` = -2020.5700, `
 -- #10604
 -- pickup 6940572 (Gravesword) moved 1.2 yd across to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -7103.6983, `position_y` = -3492.3236, `position_z` = 243.4000, `orientation` = 0.980417, `rotation0` = -0.474102, `rotation1` = -0.583181, `rotation2` = 0.308458, `rotation3` = -0.583078 WHERE `guid` = 6940572 AND `id` = 518052;
+
+-- #10630
+-- pickup 6940485 (Flayer's Helmet) moved 0.2 yd across and 0.28 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 1753.8239, `position_y` = -1133.1192, `position_z` = 61.5667, `orientation` = 1.79949, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.783168, `rotation3` = 0.62181 WHERE `guid` = 6940485 AND `id` = 340068;
