@@ -1098,6 +1098,26 @@
       "mechanism_file": "AscensionTemplar.cpp",
       "override_file": "AscensionTemplarContracts.cpp",
       "reduce_function": "ReduceDebt"
+    },
+    {
+      "spell": 705271, "name": "Finesse (Rank 1)", "kind": "duration_ratio",
+      "quote": "reduces the duration of disarm effects against you by", "expected_ratio": 0.85,
+      "vehicle_spell": 301235, "striker_entry": 36
+    },
+    {
+      "spell": 707851, "name": "Finesse (Rank 2)", "kind": "duration_ratio",
+      "quote": "reduces the duration of disarm effects against you by", "expected_ratio": 0.70,
+      "vehicle_spell": 301235, "striker_entry": 36
+    },
+    {
+      "spell": 707754, "name": "Courage (Rank 1)", "kind": "duration_ratio",
+      "quote": "reduces the duration of movement slowing effects on you by", "expected_ratio": 0.90,
+      "vehicle_spell": 1715, "striker_entry": 36
+    },
+    {
+      "spell": 712466, "name": "Courage (Rank 2)", "kind": "duration_ratio",
+      "quote": "reduces the duration of movement slowing effects on you by", "expected_ratio": 0.80,
+      "vehicle_spell": 1715, "striker_entry": 36
     }
   ],
   "player_observations": [

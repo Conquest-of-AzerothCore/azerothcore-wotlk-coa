@@ -12,10 +12,12 @@ from values import (CAST_MARGIN_MS, Expectation, TARGET, dataset, facts_of, fixt
 BEHAVIOUR_COUNT = 'behaviour_count'
 BEHAVIOUR_RATIO = 'behaviour_ratio'
 BEHAVIOUR_DURATION = 'behaviour_duration'
+BEHAVIOUR_DURATION_RATIO = 'behaviour_duration_ratio'
 BEHAVIOUR_TRIGGER = 'behaviour_trigger'
 BEHAVIOUR_METRIC_DELTA = 'behaviour_metric_delta'
-BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_TRIGGER, BEHAVIOUR_METRIC_DELTA)
-KINDS = ('count', 'ratio', 'duration', 'trigger', 'metric_delta')
+BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
+                    BEHAVIOUR_METRIC_DELTA)
+KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta')
 PROSE = 'prose: '
 BEFORE = 'before'
 AFTER = 'after'
@@ -707,6 +709,72 @@ def duration_spec(entry: dict) -> DurationSpec:
                         entry['mechanism_file'], entry['override_file'], entry['reduce_function'])
 
 
+MECHANIC_DR_RESET_MS = 15000
+MECHANIC_GAP_MARGIN_MS = 2000
+
+
+@dataclass(frozen=True)
+class MechanicDurationSpec:
+    spell: int
+    name: str
+    quote: str
+    expected_ratio: float
+    vehicle_spell: int
+    striker_entry: int = 36
+
+
+def mechanic_duration_label(spec: MechanicDurationSpec, moment: str) -> str:
+    return f'{spec.spell} {spec.vehicle_spell} duration {moment}'
+
+
+def mechanic_duration_scenario(class_file: dict, spec: MechanicDurationSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'ratio', spec.quote, spec.expected_ratio)
+    striker = {'id': STRIKER, 'owner': CASTER, 'entry': spec.striker_entry, 'level': class_file['level'],
+              'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 1, 'spell_hit_bonus': 100}
+    before_label = mechanic_duration_label(spec, BEFORE)
+    after_label = mechanic_duration_label(spec, AFTER)
+    unreduced_ms = records.duration_ms(spec.vehicle_spell)
+    gap_ms = int(unreduced_ms) + MECHANIC_DR_RESET_MS + MECHANIC_GAP_MARGIN_MS
+
+    def phase(label: str) -> list[dict]:
+        return [{'action': 'cast', 'actor': STRIKER, 'spell': spec.vehicle_spell, 'target': CASTER},
+                {'action': 'wait', 'label': f'{spec.spell} {label} settle', 'ms': CAST_MARGIN_MS},
+                measurement(label, CASTER, 'aura_duration_ms', spell=spec.vehicle_spell)]
+
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour duration ratio',
+        'contract': f'A striker (creature entry {spec.striker_entry}, forced to hit so the mechanic-duration '
+                    f'aura is never simply absent from a missed cast) casts {spec.vehicle_spell} directly at the '
+                    f'caster, once before {spec.name} is learned and once after, reading the applied aura\'s '
+                    f'aura_duration_ms each time (the live, decrementing remaining duration, consistent across '
+                    f'both reads since each is taken after the same {CAST_MARGIN_MS} ms settle wait, with the '
+                    f'judge\'s own margin sized on that settle window to absorb the ms-level jitter of exactly '
+                    f'when each cast\'s effect actually lands), with a {gap_ms} ms gap between the two casts so '
+                    f'the {spec.vehicle_spell} aura has fully expired and its {MECHANIC_DR_RESET_MS} ms '
+                    f'diminishing-returns window (DIMINISHING_DISARM/stock DRTYPE_PLAYER group, SpellMgr.cpp) has '
+                    f'reset before the second cast, so neither reading is itself diminished.',
+        'players': [player_fixture(class_file)],
+        'creatures': [striker],
+        'steps': base_steps(class_file) + phase(before_label) +
+                 [{'action': 'wait', 'label': f'{spec.spell} let the vehicle aura and its DR window expire',
+                  'ms': gap_ms},
+                 {'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + phase(after_label)}
+    label = f'{spec.spell} behaviour_duration_ratio'
+    model = {'kind': 'duration_ratio', 'before_label': before_label, 'after_label': after_label,
+             'expected': spec.expected_ratio, 'quote': entry.quote, 'target_name': spec.name,
+             'vehicle_spell': spec.vehicle_spell}
+    expectation = Expectation(label, BEHAVIOUR_DURATION_RATIO, spec.spell, spec.vehicle_spell, None,
+                              str(spec.expected_ratio), prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def mechanic_duration_spec(entry: dict) -> MechanicDurationSpec:
+    return MechanicDurationSpec(entry['spell'], entry['name'], entry['quote'], entry['expected_ratio'],
+                                entry['vehicle_spell'], entry.get('striker_entry', 36))
+
+
 def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
     if entry['kind'] == 'count':
         return target_count_scenario(class_file, target_count_spec(entry))
@@ -724,6 +792,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return health_threshold_ratio_scenario(class_file, health_ratio_spec(entry))
     if entry['kind'] == 'duration':
         return duration_scenario(class_file, duration_spec(entry))
+    if entry['kind'] == 'duration_ratio':
+        return mechanic_duration_scenario(class_file, mechanic_duration_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

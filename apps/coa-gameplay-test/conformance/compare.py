@@ -9,8 +9,8 @@ import re
 from statistics import fmean, pstdev
 from typing import Callable, Mapping, Protocol
 
-from behaviours import (BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_DURATION, BEHAVIOUR_METRIC_DELTA,
-                        BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
+from behaviours import (BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
+                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
 from hits import (HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS, WEAPON_PERCENT_DAMAGE, Z_99,
                   HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
@@ -1646,6 +1646,35 @@ def behaviour_duration_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
                                f'never less than the wait and never more than that sum plus the overshoot')
 
 
+def behaviour_duration_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    before = run.values.get(model['before_label'])
+    after = run.values.get(model['after_label'])
+    if before is None or after is None:
+        return replace(base, explanation=missing_measurement(run, model['before_label'] if before is None
+                                                              else model['after_label']))
+    if before <= 0:
+        return replace(base, status='unmeasured', measured=after,
+                       explanation=f'{model["before_label"]} measured {before:g} ms; a duration ratio needs a '
+                                   f'positive baseline')
+    ratio = after / before
+    expected_ratio = float(model['expected'])
+    delta = after - before
+    expected_delta = before * (expected_ratio - 1.0)
+    overshoot = run.max_step_ms or 0.0
+    settle_window_jitter_margin = CAST_MARGIN_MS + overshoot
+    status = 'alert' if abs(delta) <= FLOAT_EPSILON < abs(expected_delta) \
+        else 'ok' if abs(delta - expected_delta) <= settle_window_jitter_margin + FLOAT_EPSILON else 'alert'
+    margin_ratio = settle_window_jitter_margin / before
+    return replace(base, status=status, measured=ratio, expected=expected_ratio, low=expected_ratio - margin_ratio,
+                   high=expected_ratio + margin_ratio,
+                   explanation=f'{model["vehicle_spell"]} aura_duration_ms measured {before:g} ms before and '
+                               f'{after:g} ms after {model["target_name"]} was learned, ratio {ratio:g}; measured '
+                               f'delta {delta:+g} ms against expected delta {expected_delta:+g} ms of '
+                               f'{model["before_label"]}, within a margin of {settle_window_jitter_margin:g} ms '
+                               f'({overshoot:g} ms of it the run\'s own tick overshoot, run.max_step_ms), and a '
+                               f'measured 0 against a nonzero expected delta is always an alert')
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
@@ -1662,6 +1691,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_metric_delta_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_DURATION:
         return behaviour_duration_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_DURATION_RATIO:
+        return behaviour_duration_ratio_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 

@@ -2,13 +2,14 @@ from pathlib import Path
 import sys
 import unittest
 
-from behaviours import (BEHAVIOUR_COUNT, BEHAVIOUR_DURATION, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO,
-                        BEHAVIOUR_TRIGGER, HealingRatioTarget, aura_spread_scenario, aura_spread_spec,
-                        behaviour_entries, behaviour_entry, behaviour_scenario, duration_scenario, duration_spec,
-                        health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
+from behaviours import (BEHAVIOUR_COUNT, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_METRIC_DELTA,
+                        BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER, HealingRatioTarget, aura_spread_scenario,
+                        aura_spread_spec, behaviour_entries, behaviour_entry, behaviour_scenario, duration_scenario,
+                        duration_spec, health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
                         healing_ratio_spec, leech_heal_modifier_factor, leech_ratio_scenario, leech_ratio_spec,
-                        metric_delta_scenario, metric_delta_spec, shield_break_trigger_scenario,
-                        shield_break_trigger_spec, target_count_scenario, target_count_spec)
+                        mechanic_duration_scenario, mechanic_duration_spec, metric_delta_scenario,
+                        metric_delta_spec, shield_break_trigger_scenario, shield_break_trigger_spec,
+                        target_count_scenario, target_count_spec)
 from compare import Verdict, judge_behaviour
 from hits import aura_modifiers
 from profile import DBC_DIR, load_class_file
@@ -46,6 +47,12 @@ SACRED_OATH = 712346
 OATHKEEPER = 803237
 KEEPING_THE_OATH = 803149
 SMITE = 48123
+FINESSE_RANK_1 = 705271
+FINESSE_RANK_2 = 707851
+COURAGE_RANK_1 = 707754
+COURAGE_RANK_2 = 712466
+MELT_WEAPON = 301235
+HAMSTRING = 1715
 
 
 def scarlet_judicator_entry() -> dict:
@@ -86,6 +93,22 @@ def titanfall_entry() -> dict:
 
 def sacred_oath_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == SACRED_OATH)
+
+
+def finesse_rank_1_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == FINESSE_RANK_1)
+
+
+def finesse_rank_2_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == FINESSE_RANK_2)
+
+
+def courage_rank_1_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == COURAGE_RANK_1)
+
+
+def courage_rank_2_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == COURAGE_RANK_2)
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -142,6 +165,30 @@ class BehaviourEntryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             behaviour_entry(RECORDS, SCARLET_JUDICATOR, 'Scarlet Judicator', 'ghost', 'strikes', 2)
 
+    def test_finesse_rank_1_entry(self):
+        spec = mechanic_duration_spec(finesse_rank_1_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'ratio', spec.quote, spec.expected_ratio)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(spec.expected_ratio, 0.85)
+        self.assertEqual(spec.vehicle_spell, MELT_WEAPON)
+
+    def test_finesse_rank_2_entry(self):
+        spec = mechanic_duration_spec(finesse_rank_2_entry())
+        self.assertEqual(spec.expected_ratio, 0.70)
+        self.assertEqual(spec.vehicle_spell, MELT_WEAPON)
+
+    def test_courage_rank_1_entry(self):
+        spec = mechanic_duration_spec(courage_rank_1_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'ratio', spec.quote, spec.expected_ratio)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(spec.expected_ratio, 0.90)
+        self.assertEqual(spec.vehicle_spell, HAMSTRING)
+
+    def test_courage_rank_2_entry(self):
+        spec = mechanic_duration_spec(courage_rank_2_entry())
+        self.assertEqual(spec.expected_ratio, 0.80)
+        self.assertEqual(spec.vehicle_spell, HAMSTRING)
+
     def test_tyrs_guard_entry(self):
         spec = metric_delta_spec(tyrs_guard_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
@@ -195,7 +242,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 10)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 14)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -595,6 +642,81 @@ class DurationScenarioTests(unittest.TestCase):
         before_index = next(index for index, step in enumerate(actions)
                             if step.get('metric') == 'aura_duration_ms')
         self.assertLess(actions.index(debt_assert), before_index)
+
+
+class MechanicDurationScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_the_expectation(self):
+        spec = mechanic_duration_spec(finesse_rank_1_entry())
+        scenario, expectations = mechanic_duration_scenario(CLASS_FILE, spec)
+        validated = run.validate(scenario)
+        self.assertEqual(len(validated['creatures']), 1)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_DURATION_RATIO)
+        self.assertTrue(expectation.rule.startswith('prose: "reduces the duration of disarm effects against you '
+                                                     'by"'))
+        self.assertEqual(expectation.model['expected'], 0.85)
+        self.assertEqual(expectation.rank_id, MELT_WEAPON)
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, finesse_rank_1_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_DURATION_RATIO)
+
+    def test_striker_casts_the_vehicle_spell_at_the_caster_twice(self):
+        spec = mechanic_duration_spec(finesse_rank_1_entry())
+        scenario, _ = mechanic_duration_scenario(CLASS_FILE, spec)
+        cast_steps = [step for step in scenario['steps']
+                     if step.get('action') == 'cast' and step.get('spell') == MELT_WEAPON]
+        self.assertEqual(len(cast_steps), 2)
+        for step in cast_steps:
+            self.assertEqual(step['actor'], 'striker')
+            self.assertEqual(step['target'], 'caster')
+
+    def test_learn_happens_between_the_two_casts(self):
+        spec = mechanic_duration_spec(finesse_rank_1_entry())
+        scenario, _ = mechanic_duration_scenario(CLASS_FILE, spec)
+        actions = [step.get('action') for step in scenario['steps'] if step.get('action') in ('cast', 'learn')]
+        self.assertEqual(actions, ['cast', 'learn', 'cast'])
+
+    def test_measures_aura_duration_ms_of_the_vehicle_spell_before_and_after(self):
+        spec = mechanic_duration_spec(finesse_rank_1_entry())
+        scenario, expectations = mechanic_duration_scenario(CLASS_FILE, spec)
+        model = expectations[0].model
+        measure_steps = [step for step in scenario['steps']
+                         if step.get('metric') == 'aura_duration_ms' and step.get('spell') == MELT_WEAPON]
+        self.assertEqual(len(measure_steps), 2)
+        self.assertEqual({step['label'] for step in measure_steps}, {model['before_label'], model['after_label']})
+        for step in measure_steps:
+            self.assertEqual(step['actor'], 'caster')
+
+    def test_striker_cannot_miss_the_vehicle_spell(self):
+        spec = mechanic_duration_spec(finesse_rank_1_entry())
+        scenario, _ = mechanic_duration_scenario(CLASS_FILE, spec)
+        striker = next(creature for creature in scenario['creatures'] if creature['id'] == 'striker')
+        self.assertEqual(striker.get('spell_hit_bonus'), 100,
+                         'a missed vehicle cast reads an absent aura as duration 0 on that phase, which is '
+                         'indistinguishable from the vehicle spell actually missing nothing to do with the check')
+
+    def test_gap_between_casts_clears_the_diminishing_returns_window(self):
+        spec = mechanic_duration_spec(finesse_rank_1_entry())
+        scenario, _ = mechanic_duration_scenario(CLASS_FILE, spec)
+        waits = [step['ms'] for step in scenario['steps']
+                if step.get('action') == 'wait' and 'DR window' in step.get('label', '')]
+        self.assertEqual(len(waits), 1)
+        self.assertGreaterEqual(waits[0], 6000 + 15000)
+
+    def test_snare_vehicle_has_a_longer_gap_than_disarm(self):
+        disarm_spec = mechanic_duration_spec(finesse_rank_1_entry())
+        snare_spec = mechanic_duration_spec(courage_rank_1_entry())
+        disarm_scenario, _ = mechanic_duration_scenario(CLASS_FILE, disarm_spec)
+        snare_scenario, _ = mechanic_duration_scenario(CLASS_FILE, snare_spec)
+
+        def gap(scenario):
+            return next(step['ms'] for step in scenario['steps']
+                       if step.get('action') == 'wait' and 'DR window' in step.get('label', ''))
+
+        self.assertGreater(gap(snare_scenario), gap(disarm_scenario))
 
 
 class ShieldBreakTriggerScenarioTests(unittest.TestCase):
@@ -1043,6 +1165,56 @@ class JudgeDurationTests(unittest.TestCase):
         expectation = self.expectation()
         verdict = judge_behaviour(base_verdict(expectation), None, expectation)
         self.assertIn('no scenario', verdict.explanation)
+
+
+class JudgeDurationRatioTests(unittest.TestCase):
+    def expectation(self):
+        model = {'kind': 'duration_ratio', 'before_label': 'before', 'after_label': 'after', 'expected': 0.85,
+                 'quote': 'reduces the duration of disarm effects against you by', 'target_name': 'Finesse',
+                 'vehicle_spell': MELT_WEAPON}
+        return Expectation('label', BEHAVIOUR_DURATION_RATIO, FINESSE_RANK_1, MELT_WEAPON, None, '0.85',
+                           'prose: "reduces the duration of disarm effects against you by" (705271)', model)
+
+    def test_exact_expected_ratio_is_ok(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 6000.0, 'after': 5100.0}),
+                                  expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_absent_effect_leaving_the_duration_unchanged_is_alert(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 6000.0, 'after': 6000.0}),
+                                  expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_a_too_strong_reduction_is_alert(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 6000.0, 'after': 4200.0}),
+                                  expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_a_diff_beyond_the_settle_margin_alone_is_alert(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 6000.0, 'after': 4590.0}),
+                                  expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_tick_overshoot_widens_the_margin_enough_to_cover_that_same_diff(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 6000.0, 'after': 4590.0},
+                                                                      max_step_ms=20.0), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_zero_baseline_is_unmeasured(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 0.0, 'after': 0.0}), expectation)
+        self.assertEqual(verdict.status, 'unmeasured')
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 6000.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('after', verdict.explanation)
 
 
 if __name__ == '__main__':
