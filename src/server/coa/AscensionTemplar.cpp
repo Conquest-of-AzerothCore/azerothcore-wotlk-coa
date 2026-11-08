@@ -165,7 +165,6 @@ void GrantOath(Player* player, uint32 oath)
     Aura* chain = player->GetAura(704576);
     if (chain && chain->GetStackAmount() >= 10)
         return;
-    bool first = !chain;
     int32 duration = chain ? chain->GetDuration() : 15000;
     Cast(player, player, oath);
     if (Aura* aura = player->GetAura(oath))
@@ -174,11 +173,6 @@ void GrantOath(Player* player, uint32 oath)
     if (Aura* aura = player->GetAura(704576))
         aura->SetDuration(aura->GetMaxDuration());
     SyncOaths(player);
-    if (first && State(player).retribution)
-    {
-        State(player).retribution = false;
-        GrantOath(player, 804924);
-    }
 }
 void Delay(Player* player, uint32 amount)
 {

@@ -176,7 +176,7 @@ class templar_casts : public AllSpellScript
             if (Named(info, 501562))
                 player->RemoveAurasDueToSpell(807764);
             if (player->HasAura(707606) && (Named(info, 501562) || Named(info, 803872)))
-                State(player).retribution = true;
+                GrantOath(player, 804924);
             talent(806273, 806353);
             if (player->HasAura(804927))
                 ReduceLibrams(player, std::abs(Amount(806106)));

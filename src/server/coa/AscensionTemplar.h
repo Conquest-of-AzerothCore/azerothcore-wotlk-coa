@@ -21,7 +21,6 @@ struct TemplarState
     uint32 argent = 0;
     bool event = false;
     bool oath = false;
-    bool retribution = false;
 };
 Player* Owner(Unit const* unit);
 TemplarState& State(Player* player);
