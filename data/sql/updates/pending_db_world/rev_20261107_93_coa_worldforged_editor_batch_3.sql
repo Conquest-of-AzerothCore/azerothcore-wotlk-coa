@@ -6,3 +6,7 @@
 UPDATE `gameobject` SET `position_x` = 6136.2900, `position_y` = -1517.9923, `position_z` = 440.8850, `orientation` = 0, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0, `rotation3` = 1 WHERE `guid` = 6970018 AND `id` = 9900020;
 -- pickup 6940796 (Shining Necklace) moved 3.6 yd across and 0.52 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 6135.3237, `position_y` = -1516.6354, `position_z` = 441.3366, `orientation` = 1.148519, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.543213, `rotation3` = 0.839595 WHERE `guid` = 6940796 AND `id` = 96161;
+
+-- #10483
+-- pickup 6940646 (Totem of the Flowing River) moved 1.6 yd across and 1.44 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 321.0562, `position_y` = -1465.9578, `position_z` = 43.9157, `orientation` = 3.048732, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.998922, `rotation3` = 0.0464137 WHERE `guid` = 6940646 AND `id` = 1345154;
