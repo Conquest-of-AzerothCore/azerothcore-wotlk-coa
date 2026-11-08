@@ -15,3 +15,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `size`, `Data0`, `Data1`, `AIName`, `ScriptName`) VALUES (3297126, 5, 1029654, 'Night Elf Cart', 1, 0, 0, '', '') ON DUPLICATE KEY UPDATE `type` = 5, `displayId` = 1029654, `name` = 'Night Elf Cart', `size` = 1;
 DELETE FROM `gameobject` WHERE `guid` = 6976003;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976003, 3297126, 1, 1, 1, 5201.485306, 256.8455, 34.117395, 1.553366, 0, 0, 0.700917, 0.713242, 300, 100, 1);
+
+-- #8420
+-- pickup 6942306 (The Wingman) moved 8.9 yd across and 0.79 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -10083.3, `position_y` = -4170.7, `position_z` = 2.6922, `orientation` = 2.01255, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.844845, `rotation3` = 0.535011 WHERE `guid` = 6942306 AND `id` = 515801;
