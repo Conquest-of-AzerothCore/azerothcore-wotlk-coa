@@ -315,7 +315,7 @@ UploadResult ApplyEntries(Player* player, Build const& base, std::vector<Entry> 
 
 std::uint32_t PrestigeSpecialization(Player* player)
 {
-    if (!IsFreepickHero(player))
+    if (!HasFreepickBuild(player))
         return 0;
     std::vector<Entry> const before = StoredEntries(player);
     std::vector<Entry> kept;
@@ -400,7 +400,7 @@ std::uint32_t ActiveSpecialization(Player const* player)
 
 bool SwitchSpecialization(Player* player, std::uint32_t index, std::string& error)
 {
-    if (!IsFreepickHero(player) || index >= AscensionWildcard::SPECIALIZATION_COUNT ||
+    if (!HasFreepickBuild(player) || index >= AscensionWildcard::SPECIALIZATION_COUNT ||
         !player->HasSpell(AscensionWildcard::SPECIALIZATION_SWAP_SPELLS[index]))
     {
         error = "That specialization slot is not unlocked.";
@@ -415,7 +415,8 @@ bool SwitchSpecialization(Player* player, std::uint32_t index, std::string& erro
         return false;
 
     std::vector<Entry> const before = StoredEntries(player);
-    Build next(Loaded, CurrentRealm, player->GetLevel(), StoredEntries(player, SpecializationBuildSetting(index)));
+    Build next(Loaded, CurrentRealm, player->GetLevel(), StoredEntries(player, SpecializationBuildSetting(index)),
+        player->getClass());
     next.AutoLearn(UnitRules(player));
     Store(player, before, SpecializationBuildSetting(previous));
     StoreActionBars(player, previous);
@@ -447,7 +448,7 @@ class spell_ascension_freepick_specialization_swap : public SpellScript
         Player* player = GetCaster()->ToPlayer();
         auto const& spells = AscensionWildcard::SPECIALIZATION_SWAP_SPELLS;
         auto const found = std::find(spells.begin(), spells.end(), GetSpellInfo()->Id);
-        if (!player || !IsFreepickHero(player) || found == spells.end())
+        if (!player || !HasFreepickBuild(player) || found == spells.end())
             return false;
         _index = std::uint32_t(found - spells.begin());
         return true;
@@ -487,13 +488,10 @@ void Synchronize(Player* player)
 {
     if (!HasFreepickBuild(player))
         return;
-    if (IsFreepickHero(player))
-    {
-        if (player->GetActiveSpec())
-            player->ActivateSpec(0);
-        if (!player->HasSpell(AscensionWildcard::SPECIALIZATION_SWAP_SPELLS[0]))
-            player->learnSpell(AscensionWildcard::SPECIALIZATION_SWAP_SPELLS[0]);
-    }
+    if (player->GetActiveSpec())
+        player->ActivateSpec(0);
+    if (!player->HasSpell(AscensionWildcard::SPECIALIZATION_SWAP_SPELLS[0]))
+        player->learnSpell(AscensionWildcard::SPECIALIZATION_SWAP_SPELLS[0]);
     std::vector<Entry> const stored = StoredEntries(player);
     Build build(Loaded, CurrentRealm, player->GetLevel(), stored, player->getClass());
     if (build.AutoLearn(UnitRules(player)))
