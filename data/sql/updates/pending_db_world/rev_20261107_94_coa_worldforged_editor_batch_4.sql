@@ -6,3 +6,7 @@
 UPDATE `gameobject` SET `position_x` = -8074.4856, `position_y` = 1703.7052, `position_z` = 25.3299, `orientation` = 1.75607, `rotation0` = -0.184684, `rotation1` = 0.577097, `rotation2` = 0.449774, `rotation3` = 0.656166 WHERE `guid` = 6942140 AND `id` = 686877;
 -- creature 42763 (Jonathan the Revelator) stood floating next to the Scarab Smasher: set on the ground
 UPDATE `creature` SET `position_x` = -8071.4737, `position_y` = 1700.8625, `position_z` = 24.5805, `orientation` = 4.76475 WHERE `guid` = 42763 AND `id` = 15693;
+
+-- #11201
+-- pickup 6940795 (Ring of the Jungle) moved 11.0 yd across and 14.80 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -12367.8783, `position_y` = -734.0621, `position_z` = 33.9647, `orientation` = 1.22969, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.576832, `rotation3` = 0.816863 WHERE `guid` = 6940795 AND `id` = 254349;
