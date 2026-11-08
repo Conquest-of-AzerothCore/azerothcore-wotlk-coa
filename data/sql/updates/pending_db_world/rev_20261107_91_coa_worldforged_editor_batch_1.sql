@@ -34,3 +34,7 @@ UPDATE `gameobject` SET `position_x` = 7363.5514, `position_y` = -920.2340, `pos
 -- #5190
 -- pickup 6940643 (Idol of the Aerie) moved 4.1 yd across and 3.39 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -46.6779, `position_y` = -4898.2940, `position_z` = 23.3699, `orientation` = 5.559157, `rotation0` = -0.726603, `rotation1` = 0.0346161, `rotation2` = 0.686185, `rotation3` = 0.000635621 WHERE `guid` = 6940643 AND `id` = 95794;
+
+-- #5579
+-- pickup 6940876 (Peculiar Gold Nugget) moved 8.8 yd across and 7.21 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -10558.0607, `position_y` = 1991.1986, `position_z` = -14.0901, `orientation` = 2.95216, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.995518, `rotation3` = 0.094575 WHERE `guid` = 6940876 AND `id` = 90244;
