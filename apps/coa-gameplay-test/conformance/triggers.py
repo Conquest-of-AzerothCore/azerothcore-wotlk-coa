@@ -16,11 +16,14 @@ TRIGGER_TRIALS = math.ceil(math.log(FALSE_OK_RISK) / math.log(1 - MISSED_TRIGGER
 BASELINE_ATTEMPTS = 20
 EVENT_TOLERANCE = 1
 SELF = 'self'
+PERIODIC = 'periodic'
 TRIGGER_TARGETS = frozenset({SELF, TARGET, ALLY})
 OBSERVE_METRICS = frozenset({'spell_cast_count', 'spell_energize_count', 'aura_apply_count'})
 OBSERVE_ACTORS = {CASTER: CASTER, 'target': TARGET}
 MELEE_COUNTS = frozenset({'melee_attack_count', 'melee_damage_count'})
-TRIAL_METRICS = {CAST: frozenset({'spell_cast_count', 'spell_damage_count'}), ATTACK: MELEE_COUNTS}
+PERIODIC_TRIAL_METRICS = frozenset({'spell_cast_count'})
+TRIAL_METRICS = {CAST: frozenset({'spell_cast_count', 'spell_damage_count'}), ATTACK: MELEE_COUNTS,
+                PERIODIC: PERIODIC_TRIAL_METRICS}
 TRIGGER_RULE = (f'|events - trials x per_trigger| <= {EVENT_TOLERANCE} over at least {TRIGGER_TRIALS} trials, '
                 f'no event in the {BASELINE_ATTEMPTS} baseline attempts without the passive')
 
@@ -53,6 +56,10 @@ def checked_entry(entry: dict) -> dict:
                          f'{trigger["action"]}')
     if trigger['action'] == CAST and trigger.get('target') not in TRIGGER_TARGETS:
         raise ValueError(f'Trigger {aura} casts at {trigger.get("target")!r}, not one of {sorted(TRIGGER_TARGETS)}')
+    if trigger['action'] == PERIODIC and trigger.get('amplitude_ms', 0) <= 0:
+        raise ValueError(f'Trigger {aura} periodic action needs a positive amplitude_ms')
+    if entry.get('periodic_initial_tick') and trigger['action'] != PERIODIC:
+        raise ValueError(f'Trigger {aura} has an initial tick without a periodic action')
     if entry['observe_metric'] not in OBSERVE_METRICS:
         raise ValueError(f'Unknown observe metric {entry["observe_metric"]!r} of trigger {aura}')
     if entry.get('observe_actor', CASTER) not in OBSERVE_ACTORS:
@@ -77,6 +84,8 @@ def checked_entry(entry: dict) -> dict:
 
 def attempt_interval(class_file: dict, entry: dict) -> int:
     trigger = entry['trigger']
+    if trigger['action'] == PERIODIC:
+        return trigger['amplitude_ms']
     cooldown = entry.get('internal_cooldown_ms', 0)
     if trigger['action'] == ATTACK:
         return swing_interval(class_file, cooldown)
@@ -132,6 +141,8 @@ def attempt_fixtures(entry: dict, facts: RankFacts) -> list[dict]:
 
 def attempt_steps(class_file: dict, entry: dict, plan: TriggerPlan, attempts: int, phase: str) -> list[dict]:
     trigger = entry['trigger']
+    if trigger['action'] == PERIODIC:
+        return [{'action': 'wait', 'label': f'{phase}ticks', 'ms': attempts * plan.attempt_ms}]
     if trigger['action'] == ATTACK:
         steps = [{'action': 'attack', 'actor': CASTER, 'target': TARGET},
                  {'action': 'wait', 'label': f'{phase}swings', 'ms': attempts * plan.attempt_ms},
@@ -145,12 +156,18 @@ def attempt_steps(class_file: dict, entry: dict, plan: TriggerPlan, attempts: in
 
 
 def counts(entry: dict, trials_label: str, events_label: str) -> list[dict]:
-    return [count_step(trials_label, entry['trial_metric'], trial_spell(entry)),
-            count_step(events_label, entry['observe_metric'], entry['observe_spell'], observe_actor(entry))]
+    steps = [] if entry['trigger']['action'] == PERIODIC \
+        else [count_step(trials_label, entry['trial_metric'], trial_spell(entry))]
+    steps.append(count_step(events_label, entry['observe_metric'], entry['observe_spell'], observe_actor(entry)))
+    return steps
 
 
 def trigger_rule(entry: dict) -> str:
-    trials = entry['trial_metric'] + (f' of {trial_spell(entry)}' if trial_spell(entry) else ' main hand')
+    trigger = entry['trigger']
+    if trigger['action'] == PERIODIC:
+        trials = f'periodic ticks every {trigger["amplitude_ms"]} ms'
+    else:
+        trials = entry['trial_metric'] + (f' of {trial_spell(entry)}' if trial_spell(entry) else ' main hand')
     fixtures = ''.join(f'; before each attempt aura {aura["spell"]} set to {aura["stacks"]} stacks ({aura["source"]})'
                        for aura in entry.get('attempt_auras', []))
     if entry.get('caster_health_pct') is not None:
@@ -159,6 +176,8 @@ def trigger_rule(entry: dict) -> str:
         fixtures += f'; before each attempt the ally health set to {entry["ally_health_pct"]}% of max'
     if entry.get('restore_charges'):
         fixtures += f'; before each attempt the charges of {entry["trigger"]["spell"]} are restored'
+    if entry.get('periodic_initial_tick'):
+        fixtures += '; one extra tick on every learn (SPELL_ATTR5_EXTRA_INITIAL_PERIOD)'
     cooldown = entry.get('internal_cooldown_ms', 0)
     if cooldown:
         fixtures += f'; attempts spaced at least {cooldown} ms apart (internal cooldown)'
@@ -208,7 +227,8 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
              'caster_health_pct': entry.get('caster_health_pct'), 'ally_health_pct': entry.get('ally_health_pct'),
              'restore_charges': entry.get('restore_charges', False),
              'internal_cooldown_ms': entry.get('internal_cooldown_ms', 0),
-             'trial_attempts_factor': entry.get('trial_attempts_factor', 1), 'measurements': labels}
+             'trial_attempts_factor': entry.get('trial_attempts_factor', 1),
+             'periodic_initial_tick': entry.get('periodic_initial_tick', False), 'measurements': labels}
     expectation = Expectation(trigger_label(aura), TRIGGER_CHECK, aura, aura, None, entry['trigger_text'],
                               trigger_rule(entry), model)
     baseline_ms = baseline * plan.attempt_ms + DRAIN_MS if baseline else 0

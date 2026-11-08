@@ -808,10 +808,10 @@ A `triggers` entry of the class file is a passive whose tooltip says that someth
 |---|---|
 | `aura`, `name` | the passive and its `SpellName[enUS]` |
 | `tooltip` | its `Description[enUS]`, copied verbatim from the client DBC |
-| `trigger` | `{"action": "cast", "spell": <rank>, "target": "self"/"dummy"/"ally"}` or `{"action": "attack", "spell": 0}` |
+| `trigger` | `{"action": "cast", "spell": <rank>, "target": "self"/"dummy"/"ally"}`, `{"action": "attack", "spell": 0}`, or `{"action": "periodic", "amplitude_ms": <ms>}` for a trigger that is the aura's own tick, not a player action |
 | `trigger_text` | the words of the cleaned tooltip that name the trigger |
 | `trigger_spell_text` | for a cast, the words of the rank's name or cleaned tooltip that make it such a trigger |
-| `trial_metric` | one trial: `spell_cast_count`, `spell_damage_count`, `melee_attack_count`, `melee_damage_count` |
+| `trial_metric` | one trial: `spell_cast_count`, `spell_damage_count`, `melee_attack_count`, `melee_damage_count`; for `periodic`, always `spell_cast_count` (descriptive only, no trial-count measurement is taken) |
 | `observe_spell`, `observe_source` | the spell a trigger casts, from `EffectTriggerSpell[n]` or tooltip `@s:<id>:0@` |
 | `observe_note` | with a tooltip reference, why the text's spell is observed instead of an `EffectTriggerSpell` |
 | `attempt_auras` | `{"spell", "stacks", "source"}` set before every cast, `source` quoting the tooltip behind it |
@@ -823,6 +823,7 @@ A `triggers` entry of the class file is a passive whose tooltip says that someth
 | `observe_actor` | `"caster"` (default) or `"target"`: which actor's `observe_metric` is measured, for a trigger whose effect lands on the target rather than the caster (`Unit::AddAura`, not a `CastSpell`) |
 | `per_trigger`, `per_trigger_text` | the events per trial, 1 or 0.5 for "Every 2nd", and the words that state it |
 | `trial_attempts_factor`, `trial_attempts_reason` | multiplies the scheduled attempts (default 1, unchanged); a cited reason, for a trigger whose own cast sometimes executes as a different spell id and so is not counted as a trial of itself |
+| `periodic_initial_tick` | for a `periodic` trigger only: the aura's own `AttributesEx5` carries `SPELL_ATTR5_EXTRA_INITIAL_PERIOD`, so one extra tick is expected per counted part on top of `attempts x per_trigger` |
 | `status`, `reason` | `unmodelled` or `ambiguous_tooltip` for an entry without a scenario, and why |
 | `question` | the question for players when the entry's verdict is an `alert` the server code explains: a server finding goes to the player question list, not into a verdict change |
 
@@ -850,6 +851,22 @@ charge pool is restored before every cast (`"restore_charges"` fixture), needed 
 the harness's scheduled attempt rate rather than its native recharge rate. With `internal_cooldown_ms` set, each
 attempt is spaced at least that long apart (`max(StartRecoveryTime, cast time, internal_cooldown_ms) + 500 ms`),
 for a trigger the server code gates behind its own internal cooldown rather than the trigger rank's.
+
+A `periodic` trigger is not a player action at all: it is `SPELL_AURA_PERIODIC_TRIGGER_SPELL`'s own amplitude tick,
+running from the generic engine's periodic-effect path rather than the proc-event path, so it is unaffected by
+`ProcFlags` and needs no learned trigger rank. The scenario only learns the passive and waits
+`attempts x amplitude_ms`; there is no cast, no attack and no `trial_metric` measurement (the `counts()` step pair
+collapses to the single `observe_metric` count). Judging compares the events measured against the attempt count
+computed at generation time (`part_attempts`, known from the scheduled wait), not against a game-measured trial
+count: `|events - attempts x per_trigger| <= 1`, with the same no-event-in-the-baseline rule as every other
+trigger. `per_trigger` is still required and is 1 for every `periodic` entry seen so far (one trigger-spell cast
+per tick). The main-phase wait is not followed by the generic `drain` step every other trigger action gets: the
+periodic aura keeps ticking for as long as it is applied, so any extra wait after the scheduled attempts would
+let more ticks bleed into the same count; the events measurement is taken the instant the scheduled wait ends.
+`periodic_initial_tick`, when true, adds one event per counted part on top of `attempts x per_trigger`, for a
+passive whose own `Spell.dbc` `AttributesEx5` carries `SPELL_ATTR5_EXTRA_INITIAL_PERIOD` (0x200, "Immediately do
+periodic tick on apply"): each part is a separate scenario that re-learns the passive from scratch, so each part
+gets its own extra tick at apply, on top of the regular amplitude cadence.
 
 `aura_apply_count` counts a target's `AuraApplyCounter` (`CoAGameplayTest.cpp`), a static `(unit, spell)` map
 recorded from `UnitScript::OnAuraApply`, the generic engine hook `Unit::_ApplyAura` calls after every aura
@@ -886,6 +903,9 @@ The Templar entries quote their trigger words from the cleaned DBC tooltips:
 | Chakra of Light 803844, 803159 | "Oath Breakers", 572027 ("a dominating Oath Breaker") | casts | 803160 casts | 1 |
 | Scarlet Training 301065 | "Casting Argent Blade", 807268 at `dummy` | casts | 301172 casts | 1 |
 | Binding Scripture 801457 | "Healing an ally", Testament of Faith 801478 at `ally` | casts | 705309 casts | 1 |
+| Whirling Tempest 300504 | "While Righteous Tempest is active", 805409 (channel start) `self` | casts | 301340 aura applies | 1 |
+| Light's Ward 300529 | periodic, 2000 ms amplitude | ticks | 301283 casts | 1 |
+| Light's Chosen 301310 | periodic, 5000 ms amplitude | ticks | 301369 casts | 1 |
 
 Chakra of Light's two ranks share Mending Ward's 806273 `Breaker()` condition and its 572027 fixture (same
 `AscensionTemplarAbilities.cpp:192-198`): both are in `TemplarCastDrivers`, so the DBC's own `EffectTriggerSpell[0]`
@@ -901,6 +921,34 @@ and is not counted as an 807268 trial, roughly halving the usable trials per sch
 (`AscensionTemplarEvents.cpp:77-78`) is an effective heal (`GetEffectiveHeal()` non-zero) on a raid member other than
 the caster, with no roll (matches `ProcChance` 100): the scenario groups the caster with the `ally` player once and
 sets the ally to 50% of a 10000 fixed health before every Testament of Faith 801478 cast, so every heal is effective.
+
+Whirling Tempest 300504 is in `TemplarCastDrivers`, so `ApplyContracts` zeroes its `EffectApplyAuraName[0]`
+(`PROC_TRIGGER_SPELL`) at runtime and sets `ProcFlags` 0; the behaviour the entry measures is scripted
+(`AscensionTemplarAuras.cpp:154-158`, an apply hook keyed on `Named(GetSpellInfo(), 805409)`, i.e. the self aura
+805409 that starts the Righteous Tempest channel being applied while 300504 is known — not its periodic damage
+tick 805410, which applies no aura to the caster and so never reaches this hook), not the generic engine. The entry still cites
+`EffectTriggerSpell[0] of 300504` as `observe_source` because the DBC's own field happens to equal the real
+observed spell (301340) even though the runtime path that actually casts it is the scripted hook, not the DBC
+effect — the same coincidence `301065 Scarlet Training` and `301254 Improved Scarlet Hammer` already rely on.
+805409 is its own self-channel (`SpellDuration.dbc` id 27, 3000 ms) with `RecoveryTime` and `CategoryRecoveryTime`
+both 0, so nothing stops the harness from scheduling the next cast before the current one's 3000 ms duration
+ends; recasting into an active channel fails `SPELL_FAILED_SPELL_IN_PROGRESS` (measured live: 146 failed casts
+of 273 scheduled before this was caught). The entry sets `internal_cooldown_ms: 3000` to space attempts at least
+that far apart; this is not a server-scripted cooldown like Untainted's, only the self-channel's own duration,
+reusing the field for the same effect (a floor below the harness's own `CAST_MARGIN_MS` spacing) rather than
+adding a second field with an identical mechanism.
+Light's Ward 300529 and Light's Chosen 301310 are in neither `TemplarEvents` nor `TemplarCastDrivers`: their
+`SPELL_AURA_PERIODIC_TRIGGER_SPELL` effects (23) run unmodified through the generic engine's amplitude tick
+(2000 ms and 5000 ms), using the new `periodic` trigger action described above. Keeping the Oath 92109 and
+Warrior of Tyr 301253 carry a `SPELL_AURA_PROC_TRIGGER_SPELL` effect (42) that no code path in this tree can
+ever fire: both have `ProcFlags` 0 on their own `Spell.dbc` row, `SpellMgr.cpp:2512` ("Skip if no proc flags in
+DBC") skips generating a `spell_proc` row for either, no `spell_proc` SQL row exists for either id or their
+`EffectTriggerSpell`, and `AscensionTemplarEvents.cpp`'s `DoCheckProc`/`OnProc` switch has no case for either —
+so both entries are `status: "unmodelled"`, same convention as Disciplined Blows 680397.
+Blessing of Aggramar 300502, Holy Tempest 301339 and Holy Combatant 500011 share this lot's remaining P5-family
+gap (round3 `trigger-lot-5-spec.md`, part A) but are not yet modelled: each needs mechanism work beyond this
+`triggers` schema (an `aura_refresh` check family reading a duration delta instead of a discrete count, and, for
+301339, a second creature fixture for the hit's spread target) that this round did not build.
 
 Measured on 2026-11-07 (stamp `20261107-184729`, simulated clock, gameplay stage 57.0 s for 10 parts, no failed
 cast, 20 baseline trials and no baseline event in each entry): all four entries are `ok` with 273 events in 273

@@ -22,7 +22,7 @@ from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUE
 from stack import (ADDS, MEASURED, MELEE_SOURCE, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE, TALENT_DELTA,
                    levers, mean_interval, ratio_interval)
 from tooltip import CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, Unreadable
-from triggers import EVENT_TOLERANCE, TRIGGER_CHECK
+from triggers import EVENT_TOLERANCE, PERIODIC, TRIGGER_CHECK
 from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECTS, FIXED_DIE_SIDES, UNMEASURABLE, UNREADABLE, Expectation,
                     dataset, mean_samples, roll_range, sample_labels)
 
@@ -774,7 +774,15 @@ def proc_question(manifest: dict, scenario: dict, expectation: Expectation, read
                            observations=observations)
 
 
-def trigger_counts(run: Run, labels: dict, with_baseline: bool) -> tuple[float, float, float, float] | None:
+def trigger_counts(run: Run, labels: dict, with_baseline: bool, periodic: bool, part_attempts: int,
+                   baseline_attempts: int) -> tuple[float, float, float, float] | None:
+    if periodic:
+        without = run.values.get(labels['without']) if with_baseline else 0.0
+        events = run.values.get(labels['events'])
+        if events is None or without is None:
+            return None
+        return (float(baseline_attempts) if with_baseline else 0.0, without if with_baseline else 0.0,
+               float(part_attempts), events)
     names = ('baseline_trials', 'without', 'trials', 'events') if with_baseline else ('trials', 'events')
     values = [run.values.get(labels[name]) for name in names]
     if None in values:
@@ -789,6 +797,7 @@ def judge_trigger(parts: list[ProcPart]) -> Verdict:
                    expectation.rank_id, expectation.check)
     labels = model['measurements']
     trigger = model['trigger']['spell'] if model['trigger']['action'] == CAST else 0
+    periodic = model['trigger']['action'] == PERIODIC
     observed = f'{model["observe_metric"]} of {model["observe_spell"]}'
     trials = events = 0.0
     baseline: tuple[float, float] | None = None
@@ -797,7 +806,8 @@ def judge_trigger(parts: list[ProcPart]) -> Verdict:
         if trigger:
             reasons += failure_reasons(run, trigger)
         with_baseline = part.model['baseline_attempts'] > 0
-        found = trigger_counts(run, labels, with_baseline)
+        found = trigger_counts(run, labels, with_baseline, periodic, part.model['part_attempts'],
+                               part.model['baseline_attempts'])
         aura = run.values.get(labels['aura'])
         if found is None or aura is None:
             unmeasured.append(f'{run.key} ({run.status}: {run.message})')
@@ -809,7 +819,7 @@ def judge_trigger(parts: list[ProcPart]) -> Verdict:
             without_aura.append(run.key)
             continue
         counted.append(run.key)
-        trials += total_trials - baseline_trials
+        trials += total_trials if periodic else total_trials - baseline_trials
         events += total_events - without
     notes = f'{len(counted)} of {model["parts"]} parts'
     if without_aura:
@@ -825,7 +835,7 @@ def judge_trigger(parts: list[ProcPart]) -> Verdict:
     if trials <= 0:
         status = 'alert' if unmeasured and not (without_aura or reasons) else 'unmeasured'
         return replace(base, status=status, explanation=f'no usable trial with the passive learned ({notes})')
-    expected = trials * model['per_trigger']
+    expected = trials * model['per_trigger'] + (len(counted) if model.get('periodic_initial_tick') else 0)
     low, high = expected - EVENT_TOLERANCE, expected + EVENT_TOLERANCE
     counts = (f'{events:g} events ({observed}) in {trials:g} trials ({model["trial_metric"]}), '
               f'{model["per_trigger"]:g} per trigger expects {expected:g}')

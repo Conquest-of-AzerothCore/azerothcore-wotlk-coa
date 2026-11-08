@@ -15,9 +15,9 @@ from passives import cleaned_tooltip
 from profile import DBC_DIR
 from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader
 from tooltip import Records
-from triggers import (BASELINE_ATTEMPTS, TRIGGER_CHECK, TRIGGER_TRIALS, attempt_interval, trigger_entries,
-                      trigger_label, trigger_measurements, trigger_plan, trigger_rule, trigger_scenario,
-                      trigger_status_expectation)
+from triggers import (BASELINE_ATTEMPTS, PERIODIC, TRIGGER_CHECK, TRIGGER_TRIALS, attempt_interval, attempt_steps,
+                      counts, trigger_entries, trigger_label, trigger_measurements, trigger_plan, trigger_rule,
+                      trigger_scenario, trigger_status_expectation)
 from values import Expectation, dataset
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -26,7 +26,8 @@ import run
 
 TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 804932, 806516, 803158, 805420, 680891,
                     803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298, 705255,
-                    680397, 524765, 560096, 707364, 504107, 706385, 523712, 520534}
+                    680397, 524765, 560096, 707364, 504107, 706385, 523712, 520534,
+                    92109, 300504, 300529, 301253, 301310}
 GUARDIAN_OF_THE_LIGHT = 707364
 DIVINE_FURY = 504107
 UTHERS_LEGACY = 706385
@@ -68,6 +69,12 @@ LIBRAM_OF_TENACITY = 801461
 OATH_CHAIN = 704576
 OATH_OF_RETRIBUTION = 804924
 SCHEDULED = 273
+KEEPING_THE_OATH = 92109
+WHIRLING_TEMPEST = 300504
+LIGHTS_WARD = 300529
+WARRIOR_OF_TYR = 301253
+LIGHTS_CHOSEN = 301310
+RIGHTEOUS_TEMPEST_CHANNEL = 805409
 KEY = 'conformance-templar-trigger-520812-part-1'
 SECOND_KEY = 'conformance-templar-trigger-520812-part-2'
 LABELS = trigger_measurements(SCARLET_SECRETS)
@@ -211,6 +218,59 @@ class TriggerCompareTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'unmodelled')
         self.assertIn('the trigger cast fails', verdict.explanation)
 
+    def periodic_entry(self, initial_tick):
+        return {'aura': LIGHTS_WARD, 'name': "Light's Ward", 'tooltip': '', 'trigger_text': '',
+                'trigger_spell_text': '', 'trigger': {'action': PERIODIC, 'amplitude_ms': 2000},
+                'trial_metric': 'spell_cast_count', 'observe_spell': 301283, 'observe_source': 'none',
+                'observe_metric': 'spell_cast_count', 'per_trigger': 1, 'per_trigger_text': '',
+                'periodic_initial_tick': initial_tick}
+
+    def test_periodic_trigger_judges_events_against_the_known_attempt_count(self):
+        entry = self.periodic_entry(initial_tick=False)
+        plan = trigger_plan(CLASS_FILE, entry)
+        first_attempts, second_attempts = plan.part_attempts
+        labels = trigger_measurements(LIGHTS_WARD)
+        first, [first_exp] = trigger_scenario(CLASS_FILE, entry, 0)
+        second, [second_exp] = trigger_scenario(CLASS_FILE, entry, 1)
+        self.workspace.scenario('conformance-templar-trigger-300529-part-1', 'trigger', [first_exp], steps=[
+            assert_step(labels['baseline_trials'], str(BASELINE_ATTEMPTS)), assert_step(labels['without'], '0'),
+            assert_step(labels['events'], str(first_attempts)), assert_step(labels['aura'], '1')])
+        self.workspace.scenario('conformance-templar-trigger-300529-part-2', 'trigger', [second_exp], steps=[
+            assert_step(labels['events'], str(second_attempts)), assert_step(labels['aura'], '1')])
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual((verdict.measured, verdict.expected), (plan.scheduled, plan.scheduled))
+
+    def test_periodic_initial_tick_adds_one_event_per_counted_part(self):
+        entry = self.periodic_entry(initial_tick=True)
+        plan = trigger_plan(CLASS_FILE, entry)
+        first_attempts, second_attempts = plan.part_attempts
+        labels = trigger_measurements(LIGHTS_WARD)
+        first, [first_exp] = trigger_scenario(CLASS_FILE, entry, 0)
+        second, [second_exp] = trigger_scenario(CLASS_FILE, entry, 1)
+        self.workspace.scenario('conformance-templar-trigger-300529-part-1', 'trigger', [first_exp], steps=[
+            assert_step(labels['baseline_trials'], str(BASELINE_ATTEMPTS)), assert_step(labels['without'], '0'),
+            assert_step(labels['events'], str(first_attempts + 1)), assert_step(labels['aura'], '1')])
+        self.workspace.scenario('conformance-templar-trigger-300529-part-2', 'trigger', [second_exp], steps=[
+            assert_step(labels['events'], str(second_attempts + 1)), assert_step(labels['aura'], '1')])
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.expected, plan.scheduled + 2)
+
+    def test_periodic_initial_tick_without_the_extra_event_is_an_alert(self):
+        entry = self.periodic_entry(initial_tick=True)
+        plan = trigger_plan(CLASS_FILE, entry)
+        first_attempts, second_attempts = plan.part_attempts
+        labels = trigger_measurements(LIGHTS_WARD)
+        first, [first_exp] = trigger_scenario(CLASS_FILE, entry, 0)
+        second, [second_exp] = trigger_scenario(CLASS_FILE, entry, 1)
+        self.workspace.scenario('conformance-templar-trigger-300529-part-1', 'trigger', [first_exp], steps=[
+            assert_step(labels['baseline_trials'], str(BASELINE_ATTEMPTS)), assert_step(labels['without'], '0'),
+            assert_step(labels['events'], str(first_attempts)), assert_step(labels['aura'], '1')])
+        self.workspace.scenario('conformance-templar-trigger-300529-part-2', 'trigger', [second_exp], steps=[
+            assert_step(labels['events'], str(second_attempts)), assert_step(labels['aura'], '1')])
+        self.assertEqual(self.verdict().status, 'alert')
+
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class TemplarTriggerEntriesTest(unittest.TestCase):
@@ -262,6 +322,10 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                 trigger = entry['trigger']
                 if trigger['action'] == 'attack':
                     self.assertIn(entry['trial_metric'], ('melee_attack_count', 'melee_damage_count'))
+                    continue
+                if trigger['action'] == PERIODIC:
+                    self.assertGreater(trigger['amplitude_ms'], 0)
+                    self.assertEqual(entry['trial_metric'], 'spell_cast_count')
                     continue
                 self.assertEqual(trigger['action'], 'cast')
                 self.assertIn(trigger['target'], ('self', 'dummy', 'ally'))
@@ -586,6 +650,65 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         entry.update(status='unmodelled', reason='the trigger cast fails')
         with self.assertRaises(ValueError):
             trigger_plan(CLASS_FILE, entry)
+
+    def test_keeping_the_oath_and_warrior_of_tyr_stay_unmodelled(self):
+        for aura in (KEEPING_THE_OATH, WARRIOR_OF_TYR):
+            with self.subTest(aura=aura):
+                entry = templar_trigger(aura)
+                self.assertEqual(entry['status'], 'unmodelled')
+                self.assertIn('no case for', entry['reason'])
+                with self.assertRaises(ValueError):
+                    trigger_plan(CLASS_FILE, entry)
+
+    def test_periodic_trigger_interval_is_its_own_amplitude(self):
+        for aura, amplitude in ((LIGHTS_WARD, 2000), (LIGHTS_CHOSEN, 5000)):
+            with self.subTest(aura=aura):
+                entry = templar_trigger(aura)
+                self.assertEqual(entry['trigger'], {'action': PERIODIC, 'amplitude_ms': amplitude})
+                self.assertEqual(attempt_interval(CLASS_FILE, entry), amplitude)
+
+    def test_periodic_attempt_steps_only_wait(self):
+        entry = templar_trigger(LIGHTS_WARD)
+        plan = trigger_plan(CLASS_FILE, entry)
+        steps = attempt_steps(CLASS_FILE, entry, plan, 5, '')
+        self.assertEqual(steps, [{'action': 'wait', 'label': 'ticks', 'ms': 5 * plan.attempt_ms}])
+
+    def test_periodic_trigger_has_no_trial_count_step_but_has_an_events_step(self):
+        entry = templar_trigger(LIGHTS_CHOSEN)
+        labels = trigger_measurements(entry['aura'])
+        steps = counts(entry, labels['trials'], labels['events'])
+        self.assertEqual(len(steps), 1)
+        self.assertEqual(steps[0]['label'], labels['events'])
+
+    def test_periodic_trigger_amplitude_must_be_positive(self):
+        entry = copy.deepcopy(templar_trigger(LIGHTS_WARD))
+        entry['trigger'] = {'action': PERIODIC, 'amplitude_ms': 0}
+        with self.assertRaises(ValueError):
+            trigger_plan(CLASS_FILE, entry)
+
+    def test_periodic_initial_tick_matches_the_dbc_attribute(self):
+        extra_initial_period = 0x200
+        for aura, initial_tick in ((LIGHTS_WARD, True), (LIGHTS_CHOSEN, False)):
+            with self.subTest(aura=aura):
+                entry = templar_trigger(aura)
+                self.assertEqual(entry.get('periodic_initial_tick', False), initial_tick)
+                attributes_ex5 = self.spell(aura, 'AttributesEx5')
+                self.assertEqual(bool(attributes_ex5 & extra_initial_period), initial_tick)
+
+    def test_whirling_tempest_observes_an_aura_apply_of_its_own_dbc_trigger(self):
+        entry = templar_trigger(WHIRLING_TEMPEST)
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': RIGHTEOUS_TEMPEST_CHANNEL, 'target': 'self'})
+        self.assertEqual(entry['observe_metric'], 'aura_apply_count')
+        self.assertEqual(entry['observe_spell'], 301340)
+
+    def test_periodic_entry_builds_a_valid_scenario(self):
+        for aura in (LIGHTS_WARD, LIGHTS_CHOSEN):
+            with self.subTest(aura=aura):
+                entry = templar_trigger(aura)
+                scenario, [expectation] = trigger_scenario(CLASS_FILE, entry, 0)
+                run.validate(scenario)
+                self.assertNotIn('creatures', scenario)
+                self.assertEqual(expectation.model['trigger']['action'], PERIODIC)
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
