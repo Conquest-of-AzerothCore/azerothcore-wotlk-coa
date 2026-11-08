@@ -7,11 +7,12 @@ import sys
 import tempfile
 import unittest
 
+import compare
 from classes import PROGRESSION_HEADER as HEADER, ClassSpell, class_spells, table_rows
-from passives import (FAMILIES, MAX_SPELLMOD, PASSIVE_DELTA, PHRASES, MetricPlan, PassiveTarget, family_of,
-                      named_targets, passive_effects, passive_scenario, stat_after_token)
-from profile import load_class_file
-from tooltip import Records
+from passives import (FAMILIES, MAX_SPELLMOD, PASSIVE_DELTA, PHRASES, MetricPlan, PassiveTarget, classify,
+                      family_of, named_targets, passive_effects, passive_scenario, stat_after_token)
+from profile import load_class_file, spell_power_label, stat_label
+from tooltip import Displayed, Records
 from values import TARGET, dataset
 import schemas
 
@@ -66,6 +67,7 @@ GRACE_OF_AMANTHUL = 301059
 SACRED_SWING_AT_60 = 572769
 SACRED_CANDLE = 300501
 CONDEMN_AT_60 = 567539
+FORTIFIED_BODY = 300515
 STAT_COUNT = 5
 LIBERTY_OP = 11
 SPELL_MODIFIER_BASE = 1000
@@ -81,6 +83,8 @@ PASSIVE = 0x40
 APPLY_AURA = 6
 FIXTURE_SPELL = 900001
 FIXTURE_AURA = 999
+ALIASED_FIXTURE_SPELL = 900002
+ALIASED_AURA = 133
 
 
 def templar_passive(spell_id: int) -> ClassSpell:
@@ -111,6 +115,26 @@ def write_spell_fixture(directory: Path):
                          ('EffectApplyAuraName[0]', FIXTURE_AURA), ('EffectBasePoints[0]', 4),
                          ('EffectDieSides[0]', 1), ('SpellName[enUS]', name_offset),
                          ('Description[enUS]', description_offset), ('SpellFamilyName', TEMPLAR_FAMILY_NAME)):
+        struct.pack_into('<i', row, offsets[field], value)
+    header = struct.pack('<4s4I', b'WDBC', 1, SPELL_FIELDS, SPELL_RECORD_BYTES, len(strings))
+    (directory / 'Spell.dbc').write_bytes(header + bytes(row) + strings)
+
+
+def write_aliased_token_fixture(directory: Path):
+    offsets = {column.name: column.offset for column in schemas.registry()['Spell'].columns}
+    strings = b'\0'
+    name_offset = len(strings)
+    strings += b'Aliased Fixture Passive\0'
+    description_offset = len(strings)
+    strings += b'Increases your maximum health by $s1%. Also increases your maximum health by $s1%.\0'
+    row = bytearray(SPELL_RECORD_BYTES)
+    for field, value in (('Id', ALIASED_FIXTURE_SPELL), ('Attributes', PASSIVE),
+                         ('Effect[0]', APPLY_AURA), ('EffectApplyAuraName[0]', ALIASED_AURA),
+                         ('EffectBasePoints[0]', 5), ('EffectDieSides[0]', 1),
+                         ('Effect[1]', APPLY_AURA), ('EffectApplyAuraName[1]', ALIASED_AURA),
+                         ('EffectBasePoints[1]', 9), ('EffectDieSides[1]', 1),
+                         ('SpellName[enUS]', name_offset), ('Description[enUS]', description_offset),
+                         ('SpellFamilyName', TEMPLAR_FAMILY_NAME)):
         struct.pack_into('<i', row, offsets[field], value)
     header = struct.pack('<4s4I', b'WDBC', 1, SPELL_FIELDS, SPELL_RECORD_BYTES, len(strings))
     (directory / 'Spell.dbc').write_bytes(header + bytes(row) + strings)
@@ -162,6 +186,41 @@ class FixturePassiveTest(unittest.TestCase):
         effect = effects[0]
         self.assertEqual((effect.family, effect.aura), ('unknown', FIXTURE_AURA))
         self.assertEqual(effect.reason, 'unmodelled: aura 999 has no passive measurement')
+        self.assertEqual(effect.plans, ())
+
+
+class AliasedTokenFixtureTest(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.directory = Path(self.temp.name)
+        write_aliased_token_fixture(self.directory)
+
+    def tearDown(self):
+        self.temp.cleanup()
+
+    def effects(self):
+        class_file = {'class_id': TEMPLAR_CLASS_ID, 'level': LEVEL, 'dbc_dir': str(self.directory)}
+        return passive_effects(class_file, ClassSpell(ALIASED_FIXTURE_SPELL, 'Aliased Fixture Passive',
+                                                       (ALIASED_FIXTURE_SPELL,), ALIASED_FIXTURE_SPELL, 1, True))
+
+    def test_second_effect_follows_the_first_effects_own_value(self):
+        effects = self.effects()
+        first, second = effect_of(effects, 0), effect_of(effects, 1)
+        self.assertEqual(first.points, 6.0)
+        self.assertEqual(second.points, 6.0)
+        self.assertNotEqual(second.points, 10.0)
+        self.assertEqual(second.token.text, '$s1')
+        self.assertEqual(second.reason, '')
+        self.assertTrue(second.plans)
+
+    def test_second_effect_without_a_reused_token_stays_unmodelled(self):
+        class_file = {'class_id': TEMPLAR_CLASS_ID, 'level': LEVEL, 'dbc_dir': str(self.directory)}
+        dbc = dataset(self.directory)
+        records = Records(dbc)
+        text = 'Grants $s1% of one thing.'
+        values = [Displayed('$s1', 6.0, 0, 'percent')]
+        effect = classify(class_file, records, ALIASED_FIXTURE_SPELL, ALIASED_FIXTURE_SPELL, 1, [0, 1], text, values)
+        self.assertEqual(effect.reason, 'unmodelled: no own token and no sibling token with equal points')
         self.assertEqual(effect.plans, ())
 
 
@@ -309,6 +368,16 @@ class TemplarPassiveTest(unittest.TestCase):
         self.assertEqual(cost.points, -20.0)
         self.assertEqual(effect_of(effects, 0).points, 20.0)
 
+    def test_aliased_token_follows_the_owning_effects_value(self):
+        effects = self.effects(FORTIFIED_BODY)
+        healing, health = effect_of(effects, 0), effect_of(effects, 1)
+        self.assertEqual(healing.points, 6.0)
+        self.assertEqual((health.token.text, health.token.effect_index), ('$s1', 0))
+        self.assertEqual(health.points, 6.0)
+        self.assertNotEqual(health.points, 10.0)
+        self.assertEqual(health.reason, '')
+        self.assertEqual(plan_named(health, 'max_health').relation, 'scale')
+
     def test_rating_mask_gives_one_plan_per_rating(self):
         effect = effect_of(self.effects(LIGHTS_CHOSEN), 1)
         self.assertEqual(sorted(plan.fields['rating'] for plan in effect.plans), [8, 10])
@@ -444,6 +513,30 @@ class PassiveScenarioTest(unittest.TestCase):
         crit = [step for step in scenario['steps'] if step.get('metric') == 'spell_done_crit_chance']
         self.assertTrue(crit and all(step['target'] == TARGET for step in crit))
         self.assertEqual([creature['id'] for creature in scenario['creatures']], [TARGET])
+
+    def test_aliased_token_judges_against_the_owning_effects_value(self):
+        _, expectations = self.scenario(FORTIFIED_BODY)
+        expectation = next(entry for entry in expectations if entry.model and entry.model.get('metric')
+                           == 'max_health')
+        self.assertEqual(expectation.model['points'], 6.0)
+        tooltips = compare.DbcTooltips(DBC_DIR)
+        manifest = {'class_file': self.class_file, 'level': LEVEL}
+        entry = {'key': 'aliased-token-test', 'spell_name': 'Fortified Body',
+                 'expectations': [{'check': PASSIVE_DELTA, 'model': expectation.model,
+                                   'displayed': expectation.displayed}]}
+        before = 1000.0
+        base_values = {'attack_power': 0.0, 'ranged_attack_power': 0.0,
+                       **{spell_power_label(school): 0.0 for school in range(1, 7)},
+                       **{stat_label(stat): 0.0 for stat in range(STAT_COUNT)},
+                       expectation.model['aura_label']: 1.0, expectation.model['before_label']: before}
+
+        def verdict_for(after: float):
+            values = {**base_values, expectation.model['after_label']: after}
+            run = compare.Run('aliased-token-test', 'ok', '', values, [], None)
+            return compare.judge_passive(manifest, entry, run, expectation, tooltips)
+
+        self.assertEqual(verdict_for(before * 1.06).status, 'ok')
+        self.assertEqual(verdict_for(before * 1.10).status, 'alert')
 
     def test_every_templar_passive_scenario_validates(self):
         passives = [spell for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER) if spell.passive]

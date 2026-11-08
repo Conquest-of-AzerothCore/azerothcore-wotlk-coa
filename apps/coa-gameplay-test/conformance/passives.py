@@ -327,6 +327,23 @@ def shared_token(records: Records, rank_id: int, effect: int, effects: list[int]
     return None
 
 
+def aliased_token(records: Records, rank_id: int, effect: int, effects: list[int],
+                  values: list[Displayed]) -> tuple[Displayed | None, float | None]:
+    for sibling in effects:
+        if sibling == effect:
+            continue
+        candidates = (value for value in values
+                     if value.effect_index == sibling and SHAREABLE_TOKEN.fullmatch(value.text))
+        for token in candidates:
+            if sum(1 for value in values if value.text == token.text) < 2:
+                continue
+            points = signed_points(records, rank_id, sibling)
+            if points is None:
+                continue
+            return token, points
+    return None, None
+
+
 def bits(mask: int, positions) -> list[int]:
     return [position for position in positions if mask & (1 << position)]
 
@@ -487,6 +504,9 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
     misc_b = spell(f'EffectMiscValueB[{effect}]')
     family = family_of(spell(f'Effect[{effect}]'), aura)
     token = own_token(values, effect) or shared_token(records, rank_id, effect, effects, values)
+    alias_points: float | None = None
+    if token is None:
+        token, alias_points = aliased_token(records, rank_id, effect, effects, values)
     targets: tuple[PassiveTarget, ...] = ()
     plans: tuple[MetricPlan, ...] = ()
     reason = ''
@@ -509,13 +529,14 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
         if token is None:
             raise NotModelled('no own token and no sibling token with equal points')
         if family == 'P1':
-            plans = () if reason else modifier_plans(aura, misc, signed_points(records, rank_id, effect))
+            plans = () if reason else modifier_plans(
+                aura, misc, alias_points if alias_points is not None else signed_points(records, rank_id, effect))
         else:
             plans = effect_plans(aura, misc, text, token)
     except NotModelled as error:
         plans, reason = (), UNMODELLED + str(error)
-    return PassiveEffect(rank_id, effect, aura, misc, misc_b, family, token, plans, targets, reason,
-                         signed_points(records, rank_id, effect))
+    points = alias_points if alias_points is not None else signed_points(records, rank_id, effect)
+    return PassiveEffect(rank_id, effect, aura, misc, misc_b, family, token, plans, targets, reason, points)
 
 
 def passive_effects(class_file: dict, spell: ClassSpell) -> list[PassiveEffect]:
