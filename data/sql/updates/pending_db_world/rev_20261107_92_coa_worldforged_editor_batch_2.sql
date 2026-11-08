@@ -108,3 +108,7 @@ UPDATE `gameobject` SET `position_x` = -1643.3418, `position_y` = -4367.4108, `p
 -- #9194, #10674
 -- pickup 6942183 (Silt Covered Ring) moved 3.2 yd across and 0.39 yd down to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 1439.6139, `position_y` = -4735.6322, `position_z` = -16.6884, `orientation` = 4.20163, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.862798, `rotation3` = -0.505549 WHERE `guid` = 6942183 AND `id` = 95645;
+
+-- #9225
+-- pickup 6975030 (Apothecary's Lantern) moved 0.76 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -7189.7000, `position_y` = -3793.6000, `position_z` = 9.7738, `orientation` = 0, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0, `rotation3` = 1 WHERE `guid` = 6975030 AND `id` = 1345004;
