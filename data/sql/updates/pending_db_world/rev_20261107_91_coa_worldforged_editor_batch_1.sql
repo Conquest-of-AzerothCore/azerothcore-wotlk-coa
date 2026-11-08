@@ -116,3 +116,7 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940847 AND `id` = 515345
 -- #7886
 -- pickup 6942434 (Highborne Momento) moved 15.5 yd across and 5.25 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 6340.7366, `position_y` = -3869.7164, `position_z` = 687.8125, `orientation` = 0.66858, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.328099, `rotation3` = 0.944643 WHERE `guid` = 6942434 AND `id` = 96226;
+
+-- #7889
+-- pickup 6941505 (Adventurer's Backpack) moved 6.8 yd across and 5.25 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -5375.5455, `position_y` = 270.3399, `position_z` = 25.7813, `orientation` = 1.20845, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.568124, `rotation3` = 0.822943 WHERE `guid` = 6941505 AND `id` = 96141;
