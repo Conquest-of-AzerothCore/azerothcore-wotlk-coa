@@ -126,3 +126,7 @@ UPDATE `gameobject` SET `position_x` = -705.3076, `position_y` = -536.4640, `pos
 UPDATE `gameobject` SET `position_x` = -5204.2000, `position_y` = -3535.0000, `position_z` = 305.2797, `orientation` = 3.57389, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.976731, `rotation3` = -0.21447 WHERE `guid` = 6941086 AND `id` = 375024;
 -- pickup 6941087 (Sinter Wive's Rope) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941087 AND `id` = 375024;
+
+-- #11172
+-- pickup 6940064 (Apprentice Staff) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940064 AND `id` = 95670;
