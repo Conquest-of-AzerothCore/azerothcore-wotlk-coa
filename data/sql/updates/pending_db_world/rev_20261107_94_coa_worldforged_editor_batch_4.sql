@@ -18,3 +18,7 @@ UPDATE `gameobject` SET `position_x` = -4931.6629, `position_y` = -2277.9665, `p
 -- #11250
 -- pickup 6940946 (Red Metal Pauldrons) moved 0.8 yd across and 0.12 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 3007.2122, `position_y` = -2736.0122, `position_z` = 129.5041, `orientation` = 4.01963, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.905169, `rotation3` = -0.425051 WHERE `guid` = 6940946 AND `id` = 1345112;
+
+-- #11274
+-- pickup 6941160 (Stonesplitter) moved 11.4 yd across and 0.21 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -13232.8017, `position_y` = -483.0316, `position_z` = 6.0350, `orientation` = 3.29389, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.997102, `rotation3` = -0.076075 WHERE `guid` = 6941160 AND `id` = 95759;
