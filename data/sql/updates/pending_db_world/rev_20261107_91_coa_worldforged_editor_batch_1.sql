@@ -130,3 +130,7 @@ UPDATE `gameobject` SET `position_x` = 1590.6304, `position_y` = -914.4513, `pos
 UPDATE `gameobject_template` SET `size` = 0.2 WHERE `entry` = 90387;
 -- pickup 6941681 (Elune Tear Fragment) moved 12.2 yd across and 3.19 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 2904.0117, `position_y` = -971.6407, `position_z` = 202.3337, `orientation` = 2.27933, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.908494, `rotation3` = 0.417899 WHERE `guid` = 6941681 AND `id` = 90387;
+
+-- #8057
+-- pickup 6940195 (Boom Barrel) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940195 AND `id` = 95526;
