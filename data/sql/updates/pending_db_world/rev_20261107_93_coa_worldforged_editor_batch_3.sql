@@ -18,3 +18,7 @@ UPDATE `gameobject` SET `position_x` = -9547.6208, `position_y` = -2233.6335, `p
 -- #10506
 -- pickup 6940537 (Chainmail Gauntlets) moved turned to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -10415.5000, `position_y` = -2020.5700, `position_z` = 93.1403, `orientation` = 3.81489, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.943867, `rotation3` = -0.330326 WHERE `guid` = 6940537 AND `id` = 90508;
+
+-- #10604
+-- pickup 6940572 (Gravesword) moved 1.2 yd across to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -7103.6983, `position_y` = -3492.3236, `position_z` = 243.4000, `orientation` = 0.980417, `rotation0` = -0.474102, `rotation1` = -0.583181, `rotation2` = 0.308458, `rotation3` = -0.583078 WHERE `guid` = 6940572 AND `id` = 518052;
