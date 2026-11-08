@@ -51,3 +51,7 @@ UPDATE `gameobject` SET `position_x` = 851.152, `position_y` = 1909.88, `positio
 -- #11526
 -- pickup 6940791 (Empty Bag) moved 9.9 yd across and 0.17 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 3244.2393, `position_y` = -3834.5845, `position_z` = 141.1332, `orientation` = 5.799426, `rotation0` = 0.053581, `rotation1` = 0.217181, `rotation2` = 0.233458, `rotation3` = -0.946287 WHERE `guid` = 6940791 AND `id` = 96239;
+
+-- #11535
+-- pickup 6940923 (Radiant Helmet) moved 1.4 yd across and 2.00 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -5888.99, `position_y` = 478.711, `position_z` = 535.981, `orientation` = 1.93339, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.823013, `rotation3` = 0.568023 WHERE `guid` = 6940923 AND `id` = 520704;
