@@ -88,3 +88,9 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6960003 AND `id` = 93008;
 -- #9035
 -- pickup 6960209 (Shadow Cowl) moved 2.35 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 6007.9000, `position_y` = -55.0000, `position_z` = 24.6030, `orientation` = 1.24088, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.581391, `rotation3` = 0.813624 WHERE `guid` = 6960209 AND `id` = 1345125;
+
+-- #9069, #10491
+-- pickup 6940491 (Floodworn Shoulderguards) moved 0.2 yd across and 0.10 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -52.6875, `position_y` = -3179.5643, `position_z` = 101.0433, `orientation` = 5.2851, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.478585, `rotation3` = -0.878041 WHERE `guid` = 6940491 AND `id` = 95894;
+-- pickup 6940490 (Floodworn Shoulderguards) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940490 AND `id` = 95894;
