@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "High-Risk refinery: Altar of Bones refines Animated Bone",
+  "contract": "The Altar of Bones (spell focus 1665) stands in The Noxious Glade, Eastern Plaguelands, guarded by a Dark Enchantress (918550). A level 60 High-Risk character using Animated Bone (1303736) away from it gets no Animated Bone Dust (1303709); next to it, the same use refines the bone into dust. The Hellish Altar (395754) stands at Serpent's Coil, Blasted Lands.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_health", "actor": "p", "value": 5000000, "maximum": 5000000 },
+    { "action": "set_aura", "actor": "p", "spell": 1004019, "stacks": 1 },
+    { "action": "add_item", "actor": "p", "item": 1303736, "count": 5 },
+    { "action": "teleport", "actor": "p", "map": 0, "x": 2700.0, "y": -5300.0, "z": 200.0 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "use_item", "actor": "p", "item": 1303736, "spell": 1979733 },
+    { "action": "wait", "ms": 4000 },
+    { "action": "assert", "label": "CONTROL: no dust away from the altar", "actor": "p", "metric": "item_count", "item": 1303709, "equals": 0 },
+    { "action": "teleport", "actor": "p", "map": 0, "x": 2863.58, "y": -5415.86, "z": 163.55 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_phase", "label": "Join world phase 1, where the altar is spawned", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 2500 },
+    { "action": "assert", "label": "The Altar of Bones is spawned", "actor": "p", "metric": "nearby_gameobject_count", "entry": 395715, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Its Dark Enchantress guard is spawned", "actor": "p", "metric": "nearby_creature_count", "entry": 918550, "min": 1 },
+    { "action": "use_item", "actor": "p", "item": 1303736, "spell": 1979733 },
+    { "action": "assert", "label": "Next to the altar the bone is refined into dust", "actor": "p", "metric": "item_count", "item": 1303709, "min": 1, "within_ms": 8000 },
+    { "action": "teleport", "actor": "p", "map": 0, "x": -12418.44, "y": -3021.52, "z": 116.79 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "The Hellish Altar is spawned", "actor": "p", "metric": "nearby_gameobject_count", "entry": 395754, "equals": 1, "within_ms": 3000 }
+  ]
+}
