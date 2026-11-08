@@ -83,3 +83,7 @@ UPDATE `gameobject` SET `position_x` = 578.082, `position_y` = -4113.61, `positi
 UPDATE `gameobject` SET `position_x` = 968.932, `position_y` = -4278.434, `position_z` = -7.1, `orientation` = 0.8309, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.403602, `rotation3` = 0.914935 WHERE `guid` = 6942318 AND `id` = 95624;
 -- template 95624 (Broken Tail Spike) was smaller than the reported model
 UPDATE `gameobject_template` SET `size` = 0.7 WHERE `entry` = 95624;
+
+-- #11601
+-- pickup 6941557 (Lost Shipment) moved 28.8 yd across and 0.00 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 749.815, `position_y` = 1413.85, `position_z` = -14.223, `orientation` = 1.70245, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.752088, `rotation3` = 0.659062 WHERE `guid` = 6941557 AND `id` = 97108;
