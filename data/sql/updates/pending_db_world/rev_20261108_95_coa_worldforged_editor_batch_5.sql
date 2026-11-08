@@ -27,3 +27,7 @@ UPDATE `gameobject` SET `position_x` = 1299.087, `position_y` = -2188.949, `posi
 -- #10604
 -- second Gravesword left after the first was moved: 6941265 (Gravesword) hidden, not deleted
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6941265) AND `id` IN (518052);
+
+-- #10923
+-- pickup 6940028 (Ladel) moved 25.8 yd across and 18.07 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -13781.7138, `position_y` = -214.3342, `position_z` = 28.4171, `orientation` = 5.36533, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.442987, `rotation3` = -0.896528 WHERE `guid` = 6940028 AND `id` = 515466;
