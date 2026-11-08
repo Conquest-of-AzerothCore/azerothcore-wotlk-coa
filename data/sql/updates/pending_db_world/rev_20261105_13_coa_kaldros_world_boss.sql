@@ -106,3 +106,8 @@ DELETE FROM `creature_equip_template` WHERE `CreatureID` = 978080;
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, `VerifiedBuild`) VALUES
 (978080, 1, 37461, 0, 0, 12340);
 UPDATE `creature` SET `equipment_id` = 1 WHERE `guid` = 9780920;
+
+-- He stands where Ascension has him in the hollow (spot taken in game); his hologram is bigger.
+UPDATE `creature` SET `position_x` = -4638.2725, `position_y` = 2384.2036, `position_z` = -82.4319,
+  `orientation` = 2.5683 WHERE `guid` = 9780920 AND `id` = 978080;
+UPDATE `creature_template_model` SET `DisplayScale` = 0.4 WHERE `CreatureID` = 978081;
