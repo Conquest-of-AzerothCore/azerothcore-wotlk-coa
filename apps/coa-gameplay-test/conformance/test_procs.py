@@ -13,7 +13,7 @@ import unittest
 from compare import STATUSES, class_entry
 from hits import EXCLUDED_OUTCOME_MARGIN, MAX_SCENARIO_MS, Unmodelled
 from procs import (PART_BUDGET_MS, PROC_CHECK, proc_label, proc_plan, proc_scenario, proc_status_expectation,
-                   shares_aura, trials_needed, wilson_interval)
+                   shares_aura, shares_proc_spell, trials_needed, trigger_key, wilson_interval)
 from profile import DBC_DIR
 from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader
 from tooltip import Displayed, Records
@@ -64,6 +64,7 @@ PULVERIZING = 524620
 PULVERIZING_STRIKE = 524619
 MIGHT_OF_AGGRAMAR = 803163
 MIGHT_OF_AGGRAMAR_STACK = 803164
+RIGHTEOUS_UPHEAVAL = 501562
 
 
 def templar_proc(aura):
@@ -589,6 +590,51 @@ class TemplarProcEntriesTest(unittest.TestCase):
         trials_label = expectation.model['measurements']['trials']
         self.assertEqual(expectation.model['readings'], [{'name': 'triggering hits only', 'labels': [trials_label],
                          'minus_events': False}])
+
+    def test_might_of_aggramar_entries_share_the_aura_and_the_proc_spell_but_differ_by_trigger(self):
+        entries = [entry for entry in CLASS_FILE['procs'] if entry['aura'] == MIGHT_OF_AGGRAMAR]
+        self.assertEqual(len(entries), 2)
+        self.assertEqual({entry['proc_spell'] for entry in entries}, {MIGHT_OF_AGGRAMAR_STACK})
+        triggers = {entry['trigger']['action'] for entry in entries}
+        self.assertEqual(triggers, {'attack', 'cast'})
+        spell_entry = next(entry for entry in entries if entry['trigger']['action'] == 'cast')
+        self.assertEqual(spell_entry['trigger']['spell'], RIGHTEOUS_UPHEAVAL)
+        for entry in entries:
+            with self.subTest(trigger=entry['trigger']):
+                self.assertTrue(shares_aura(CLASS_FILE, entry))
+                self.assertTrue(shares_proc_spell(CLASS_FILE, entry))
+
+    def test_proc_label_disambiguates_might_of_aggramar_by_trigger(self):
+        attack, cast = (next(entry for entry in CLASS_FILE['procs']
+                             if entry['aura'] == MIGHT_OF_AGGRAMAR and entry['trigger']['action'] == action)
+                        for action in ('attack', 'cast'))
+        [attack_expectation] = proc_scenario(CLASS_FILE, attack)[1]
+        [cast_expectation] = proc_scenario(CLASS_FILE, cast)[1]
+        self.assertNotEqual(attack_expectation.label, cast_expectation.label)
+        self.assertEqual(attack_expectation.label,
+                         proc_label(MIGHT_OF_AGGRAMAR, MIGHT_OF_AGGRAMAR_STACK, trigger_key(attack)))
+        self.assertEqual(cast_expectation.label,
+                         proc_label(MIGHT_OF_AGGRAMAR, MIGHT_OF_AGGRAMAR_STACK, RIGHTEOUS_UPHEAVAL))
+
+    def test_might_of_aggramar_cast_trigger_arms_the_weapon_the_spell_needs(self):
+        cast = next(entry for entry in CLASS_FILE['procs']
+                   if entry['aura'] == MIGHT_OF_AGGRAMAR and entry['trigger']['action'] == 'cast')
+        scenario, _ = proc_scenario(CLASS_FILE, cast)
+        equips = [step for step in scenario['steps'] if step['action'] == 'equip']
+        self.assertEqual(equips[0]['item'], CLASS_FILE['alternate_weapons'][0]['item'])
+
+    def test_might_of_aggramar_scenario_keys_do_not_collide(self):
+        from conformance import generate
+        out = Path(tempfile.mkdtemp(prefix='conformance-might-of-aggramar-'))
+        try:
+            manifest_path = generate(CLASS_FILE['class_id'], out, procs=[MIGHT_OF_AGGRAMAR])
+            manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+            keys = [entry['key'] for entry in manifest['scenarios']]
+            self.assertEqual(len(keys), len(set(keys)))
+            self.assertTrue(any('attack' in key for key in keys))
+            self.assertTrue(any(str(RIGHTEOUS_UPHEAVAL) in key for key in keys))
+        finally:
+            shutil.rmtree(out)
 
     def test_lightkeeper_scenario_keys_do_not_collide(self):
         from conformance import generate

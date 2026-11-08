@@ -388,6 +388,23 @@
       },
       "spell_proc": {},
       "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 803163,
+      "name": "Might of Aggramar",
+      "tooltip": "Physical damage dealt now has a $h% chance to increase the tick rate of your |cffffffffBlade of Faith|r and |cffffffffCondemn|r by $803164s1%, stacking $803164u times.",
+      "chance_token": "$h",
+      "trigger": {"action": "cast", "spell": 501562, "target": "dummy"},
+      "trigger_text": "Physical damage dealt",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 803164,
+      "proc_spell_source": "EffectTriggerSpell[0] of 803163",
+      "events_per_proc": 1,
+      "dbc": {
+        "803163": {"ProcChance": 25, "ProcFlags": 4, "ProcCharges": 0}
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
     }
   ],
   "triggers": [

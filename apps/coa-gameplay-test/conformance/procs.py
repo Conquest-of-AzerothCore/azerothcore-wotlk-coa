@@ -6,8 +6,8 @@ from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, PART_BUDGET_MS, 
                   cast_steps, creature_fixture, records_of, reference_caster, scenario_shell, timed, weapon_profile)
 from profile import CASTER, SETTLE_MS, measurement, player_fixture
 from tooltip import read_tooltip
-from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, EFFECTS, TARGET, Expectation, RankFacts, facts_of,
-                    is_hostile, targets_ally)
+from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, EFFECTS, TARGET, Expectation, RankFacts, armed_for,
+                    facts_of, is_hostile, targets_ally)
 
 PROC_CHECK = 'proc_rate'
 AMBIGUOUS_TOOLTIP = 'ambiguous_tooltip: '
@@ -51,8 +51,9 @@ def wilson_interval(events: float, trials: float) -> tuple[float, float]:
     return centre - half, centre + half
 
 
-def proc_label(aura: int, proc_spell: int | None = None) -> str:
-    return f'{aura} proc_rate' if proc_spell is None else f'{aura} proc_rate {proc_spell}'
+def proc_label(aura: int, proc_spell: int | None = None, trigger: int | str | None = None) -> str:
+    label = f'{aura} proc_rate' if proc_spell is None else f'{aura} proc_rate {proc_spell}'
+    return label if trigger is None else f'{label} {trigger}'
 
 
 def proc_measurements(aura: int) -> dict[str, str]:
@@ -61,6 +62,18 @@ def proc_measurements(aura: int) -> dict[str, str]:
 
 def shares_aura(class_file: dict, entry: dict) -> bool:
     return sum(1 for other in class_file.get('procs', []) if other['aura'] == entry['aura']) > 1
+
+
+def shares_proc_spell(class_file: dict, entry: dict) -> bool:
+    if 'proc_spell' not in entry:
+        return False
+    return sum(1 for other in class_file.get('procs', [])
+              if other['aura'] == entry['aura'] and other.get('proc_spell') == entry['proc_spell']) > 1
+
+
+def trigger_key(entry: dict) -> int | str:
+    trigger = entry['trigger']
+    return trigger['spell'] if trigger['action'] == CAST else trigger['action']
 
 
 def chance_of(values: Sequence, token: str) -> float | None:
@@ -287,6 +300,8 @@ def added_trial_steps(entry: dict) -> list[dict]:
 def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
                   attempts: int | None = None) -> tuple[dict, list[Expectation]]:
     plan = proc_plan(class_file, entry, attempts)
+    if entry['trigger']['action'] == CAST:
+        class_file = armed_for(class_file, records_of(class_file), entry['trigger']['spell'])
     if not 0 <= part < plan.parts:
         raise ValueError(f'Proc {entry["aura"]} has parts 0 to {plan.parts - 1}, not {part}')
     aura = entry['aura']
@@ -312,7 +327,8 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
                           for reading in trial_readings(entry)]}
     if counts_charges(entry):
         model['charge_pool'] = charge_pool_label(aura)
-    label = proc_label(aura, entry['proc_spell']) if shares_aura(class_file, entry) else proc_label(aura)
+    trigger = trigger_key(entry) if shares_proc_spell(class_file, entry) else None
+    label = proc_label(aura, entry['proc_spell'], trigger) if shares_aura(class_file, entry) else proc_label(aura)
     expectation = Expectation(label, PROC_CHECK, aura, aura, None, entry['chance_token'],
                               f'{WILSON_RULE}; {trial_rule(entry)}{handler_note(entry)}', model)
     return timed(scenario, SETTLE_MS + plan.per_part * plan.attempt_ms + DRAIN_MS), [expectation]

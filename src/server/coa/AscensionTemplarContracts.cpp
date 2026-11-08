@@ -6,6 +6,7 @@
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
+#include "SpellMgr.h"
 #include <algorithm>
 #include <cmath>
 
@@ -64,6 +65,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[2].ApplyAuraName = SPELL_AURA_PREVENTS_FLEEING;
     if (id == 707111)
         info->Effects[0].Effect = info->Effects[1].Effect = 0;
+    if (id == 803163)
+        info->ProcFlags |= PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS;
     if (id == 92109 || id == 803149)
     {
         for (auto& effect : info->Effects)

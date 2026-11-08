@@ -741,6 +741,16 @@ own half's `chance_token`, `trigger_text`, `trial_readings` and `dbc`. `proc_lab
 label and scenario keys are unchanged. `extra_event_terms` is for a trigger that fires more than one countable event
 per proc of the *same* roll; it never folds two independently-chanced effects into one entry.
 
+A tooltip phrase that reads broader than the aura's own `ProcFlags` (for example "physical damage dealt", not
+"melee attacks") gets a second `procs` entry sharing both `aura` and `proc_spell` with the first: the first entry
+keeps the narrow trigger the DBC's `ProcFlags` already covers (`{"action": "attack", "spell": 0}`), the second
+drives the same roll through a trigger the tooltip's wording covers but the current `ProcFlags` does not (a `cast`
+of a spell dealing the broader kind of damage). `shares_proc_spell` detects this case and `trigger_key` (the
+trigger's action, or its spell id for a `cast` trigger) becomes the extra disambiguator in `proc_label`/
+`scenario_key`, so neither collides with the first entry's. `proc_scenario` arms the caster with `armed_for` for a
+`cast` trigger, the same equip-requirement check `triggers.py` already applies, so a trigger spell that needs a
+different weapon than the class's reference weapon still casts.
+
 When the text leaves open which events are trials, `trial_readings` lists each reading: the triggering hits plus the
 counts in `adds`, less the events when `minus_events` is true. No reading is chosen: the comparison judges each one,
 gives their common verdict when they agree and `ambiguous_tooltip` with every reading's numbers when they do not, so
