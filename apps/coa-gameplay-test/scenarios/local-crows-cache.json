@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Local Crows Cache handoff and rewards",
-  "contract": "Tanaris cache has a crow warning and ten-second damage/movement-interruptible claim for living level-60 High-Risk players. Carrier cannot open outside Gadgetzan; death drops an instant-claim chest. Safe opening gives five distinct ilvl-95 Heroic Bloodforged Naxxramas items and three stacks of twenty High-Risk cloth. Requires CrowsCache.Enable=1. Existing zone PvP rules are retained. Automatic cycles are deferred by the isolated test configuration so the manual countdown is the only event. First announcement is thirty minutes before appearance and broadcasts a map location without a crow; self addon resync restores that location, cancelling removes it, and automatic scheduling creates the next warning. The same location is sent as a native client map pin (SMSG 0x77C) to every player and removed by cancel and claim. First claim removes the public location for both factions. Warning threshold/cadence boundaries and client hover/map rendering are independently covered by unit and Lua harness checks. All four warning texts and the final-five-minute crow appearance are exercised natively; sixty seconds is the one-minute testing countdown.",
+  "contract": "Tanaris cache has a crow warning and ten-second damage/movement-interruptible claim for living level-60 High-Risk players. Carrier cannot open outside Gadgetzan; death drops an instant-claim chest. Safe opening gives three distinct Heroic Bloodforged items of released raids (one from the newest released tier), three stacks of twenty High-Risk cloth, 10 Golden and 5-10 Silver Marks of War and 400 Bazaar Tokens (CrowsCache.GoldenMarksOfWar and CrowsCache.SilverMarksOfWar defaults). Requires CrowsCache.Enable=1. Existing zone PvP rules are retained. Automatic cycles are deferred by the isolated test configuration so the manual countdown is the only event. First announcement is thirty minutes before appearance and broadcasts a map location without a crow; self addon resync restores that location, cancelling removes it, and automatic scheduling creates the next warning. The same location is sent as a native client map pin (SMSG 0x77C) to every player and removed by cancel and claim. First claim removes the public location for both factions. Warning threshold/cadence boundaries and client hover/map rendering are independently covered by unit and Lua harness checks. All four warning texts and the final-five-minute crow appearance are exercised natively; sixty seconds is the one-minute testing countdown.",
   "players": [
     {
       "id": "owner",
@@ -627,7 +627,30 @@
       "actor": "captor",
       "metric": "carried_item_count",
       "relative_to": "before_rewards",
-      "equals": 64
+      "min": 477,
+      "max": 482
+    },
+    {
+      "action": "assert",
+      "actor": "captor",
+      "metric": "item_count",
+      "item": 1201003,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "captor",
+      "metric": "item_count",
+      "item": 1201002,
+      "min": 5,
+      "max": 10
+    },
+    {
+      "action": "assert",
+      "actor": "captor",
+      "metric": "item_count",
+      "item": 975001,
+      "min": 400
     }
   ]
 }

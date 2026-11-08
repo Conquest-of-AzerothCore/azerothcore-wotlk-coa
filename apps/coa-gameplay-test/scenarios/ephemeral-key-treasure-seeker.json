@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Ephemeral Key gives Treasure Seeker while carried",
+  "contract": "Carrying any Ephemeral Key (967680/967681/967682) keeps Treasure Seeker (670041, track Treasure) on the player; the aura goes when the last key is gone.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "No key, no aura", "actor": "p", "metric": "aura", "spell": 670041, "equals": 0 },
+    { "action": "add_item", "actor": "p", "item": 967680, "count": 1 },
+    { "action": "assert", "label": "Key gives the aura", "actor": "p", "metric": "aura", "spell": 670041, "equals": 1, "within_ms": 2000 },
+    { "action": "add_item", "actor": "p", "item": 967681, "count": 1 },
+    { "action": "destroy_item", "actor": "p", "item": 967680 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "A second key keeps the aura", "actor": "p", "metric": "aura", "spell": 670041, "equals": 1 },
+    { "action": "destroy_item", "actor": "p", "item": 967681 },
+    { "action": "assert", "label": "Last key gone, aura gone", "actor": "p", "metric": "aura", "spell": 670041, "equals": 0, "within_ms": 2000 }
+  ]
+}
