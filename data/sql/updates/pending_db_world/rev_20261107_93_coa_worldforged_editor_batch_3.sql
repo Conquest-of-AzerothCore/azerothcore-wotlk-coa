@@ -74,3 +74,7 @@ UPDATE `gameobject` SET `position_x` = -14678.4505, `position_y` = 500.5863, `po
 -- #10960
 -- pickup 6940715 (Waterproof Trunk) moved 13.3 yd across and 0.62 yd down to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -1925.9785, `position_y` = -2474.6365, `position_z` = 42.4156, `orientation` = 6.08626, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.098304, `rotation3` = -0.995156 WHERE `guid` = 6940715 AND `id` = 95876;
+
+-- #10979
+-- pickup 6941445 (Blade of Thunder) moved 3.8 yd across and 2.88 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -394.8158, `position_y` = 1853.2276, `position_z` = 129.6771, `orientation` = 2.710688, `rotation0` = -0.547586, `rotation1` = -0.437935, `rotation2` = 0.655352, `rotation3` = -0.28085 WHERE `guid` = 6941445 AND `id` = 254264;
