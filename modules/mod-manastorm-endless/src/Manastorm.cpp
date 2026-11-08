@@ -1103,8 +1103,7 @@ public:
         bool /*strict*/,
         SpellCastResult& result) override
     {
-        if (!ManastormModuleConfig::Enabled() ||
-            !spell ||
+        if (!spell ||
             !spell->GetCaster())
         {
             return;
