@@ -4674,7 +4674,7 @@ private:
         }
         if (metric == "spell_modifier" || metric == "spell_cast_time_ms" || metric == "spell_max_range"
             || metric == "spell_max_stacks" || metric == "spell_duration_ms" || metric == "spell_healing_done"
-            || metric == "spell_effect_value" || metric == "spell_family_flags")
+            || metric == "spell_effect_value" || metric == "spell_effect_radius" || metric == "spell_family_flags")
         {
             SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
             Require(info != nullptr, "Unknown spell in metric");
@@ -4717,6 +4717,12 @@ private:
                     player->AddSpellMod(modifier.get(), true);
                 }
                 return info->Effects[effect].CalcValue(caster);
+            }
+            if (metric == "spell_effect_radius")
+            {
+                uint32 effect = step.get<uint32>("effect", EFFECT_0);
+                Require(effect < MAX_SPELL_EFFECTS && info->Effects[effect].IsEffect(), "Spell effect does not exist");
+                return info->Effects[effect].CalcRadius(player);
             }
             if (metric == "spell_cast_time_ms")
                 return info->CalcCastTime(player);

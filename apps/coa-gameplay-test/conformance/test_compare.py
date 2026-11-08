@@ -400,6 +400,57 @@ class CompareTest(unittest.TestCase):
                                   constant_reader(Displayed('$d', 20000.0, None, 'duration_ms')))
         self.assertEqual((verdicts[label].status, verdicts[label].low), ('ok', 19925.0))
 
+    def test_effect_radius_is_read_from_spellradius(self):
+        label = '1001 effect_radius e0 #0'
+        token = Displayed('$a1', 40.0, 0, 'radius_yards')
+        verdicts = self.value_run([expectation(label, 'effect_radius', '$a1', 'read radius_yards', 0)], ['$a1'],
+                                  [assert_step(label, '40')], constant_reader(token))
+        self.assertEqual(verdicts[label].status, 'ok')
+
+    def test_effect_radius_outside_the_tolerance_is_an_alert(self):
+        label = '1001 effect_radius e0 #0'
+        token = Displayed('$a1', 40.0, 0, 'radius_yards')
+        verdicts = self.value_run([expectation(label, 'effect_radius', '$a1', 'read radius_yards', 0)], ['$a1'],
+                                  [assert_step(label, '30')], constant_reader(token))
+        self.assertEqual(verdicts[label].status, 'alert')
+
+    def test_aura_amplitude_reads_the_period_token_again(self):
+        label = '1001 aura_amplitude_ms e0 #0'
+        steps = [plain_step('cast'), assert_step('1001 cast_failure', '0'), assert_step('1001 aura_present', '1'),
+                 assert_step(label, '1000')]
+        verdicts = self.value_run([expectation(label, 'aura_amplitude_ms', '$t1', 'read amplitude_ms', 0)], ['$t1'],
+                                  steps, constant_reader(Displayed('$t1', 1000.0, 0, 'amplitude_ms')))
+        self.assertEqual(verdicts[label].status, 'ok')
+
+    def test_aura_amplitude_outside_the_tolerance_is_an_alert(self):
+        label = '1001 aura_amplitude_ms e0 #0'
+        steps = [plain_step('cast'), assert_step('1001 cast_failure', '0'), assert_step('1001 aura_present', '1'),
+                 assert_step(label, '800')]
+        verdicts = self.value_run([expectation(label, 'aura_amplitude_ms', '$t1', 'read amplitude_ms', 0)], ['$t1'],
+                                  steps, constant_reader(Displayed('$t1', 1000.0, 0, 'amplitude_ms')))
+        self.assertEqual(verdicts[label].status, 'alert')
+
+    def test_aura_amplitude_after_a_failed_cast_is_unmeasured(self):
+        label = '1001 aura_amplitude_ms e0 #0'
+        steps = [plain_step('cast'), assert_step('1001 cast_failure', '22')]
+        verdicts = self.value_run([expectation(label, 'aura_amplitude_ms', '$t1', 'read amplitude_ms', 0)], ['$t1'],
+                                  steps, constant_reader(Displayed('$t1', 1000.0, 0, 'amplitude_ms')))
+        self.assertEqual(verdicts[label].status, 'unmeasured')
+
+    def test_own_max_stacks_is_read_from_stackamount(self):
+        label = '1001 max_stacks 1001 #0'
+        token = Displayed('$u', 3.0, None, 'count')
+        verdicts = self.value_run([expectation(label, 'max_stacks', '$u', 'read count')], ['$u'],
+                                  [assert_step(label, '3')], constant_reader(token))
+        self.assertEqual(verdicts[label].status, 'ok')
+
+    def test_own_max_stacks_mismatch_is_an_alert(self):
+        label = '1001 max_stacks 1001 #0'
+        token = Displayed('$u', 3.0, None, 'count')
+        verdicts = self.value_run([expectation(label, 'max_stacks', '$u', 'read count')], ['$u'],
+                                  [assert_step(label, '2')], constant_reader(token))
+        self.assertEqual(verdicts[label].status, 'alert')
+
     def test_power_cost_is_compared_in_the_client_display_unit(self):
         label = '1001 power_cost'
         verdicts = self.value_run([expectation(label, 'power_cost', '15', 'ManaCost divisor 10')], [],

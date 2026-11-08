@@ -247,7 +247,7 @@ class ClientDbcTooltipTest(unittest.TestCase):
     def test_amplitude_tokens(self):
         tempest = self.read(RIGHTEOUS_TEMPEST, SKILLED_TEMPLAR)
         self.assertEqual(displayed(tempest, '$t1'),
-                         Displayed('$t1', RIGHTEOUS_TEMPEST_PERIOD_MS, None, 'duration_ms'))
+                         Displayed('$t1', RIGHTEOUS_TEMPEST_PERIOD_MS, 0, 'amplitude_ms', RIGHTEOUS_TEMPEST))
         self.assertNotIn('$t1', tempest.unreadable)
         blade = Tooltip(Records(self.dbc), BLADE_OF_FAITH, SKILLED_TEMPLAR)
         self.assertEqual(blade.evaluate('$T1'), (BLADE_OF_FAITH_PERIOD_MS, None, None))
@@ -260,7 +260,8 @@ class ClientDbcTooltipTest(unittest.TestCase):
 
     def test_radius(self):
         readout = self.read(VEILED_IN_DARKNESS)
-        self.assertEqual(displayed(readout, '$a1'), Displayed('$a1', VEILED_IN_DARKNESS_RADIUS_YARDS, None, 'flat'))
+        self.assertEqual(displayed(readout, '$a1'),
+                         Displayed('$a1', VEILED_IN_DARKNESS_RADIUS_YARDS, 0, 'radius_yards', VEILED_IN_DARKNESS))
         self.assertEqual(readout.unreadable, [])
 
     def test_foreign_value_token_names_its_spell(self):
@@ -409,7 +410,7 @@ class FixtureTooltipTest(unittest.TestCase):
             Displayed('$s2', 25, 1, 'percent', 10),
             Displayed('$d', 6000, None, 'duration_ms'),
             Displayed('$i', 3, None, 'count'),
-            Displayed('$a1', 8.0, None, 'flat'),
+            Displayed('$a1', 8.0, 0, 'radius_yards', 10),
             Displayed('$u', 5, None, 'count'),
             Displayed('$h', 35, None, 'chance_pct'),
             Displayed('$<bonus>', 100 * 2 + 60, 0, 'flat', 10),
@@ -432,7 +433,7 @@ class FixtureTooltipTest(unittest.TestCase):
 
     def test_amplitude_of_the_named_effect_in_text_and_in_expressions(self):
         readout = read_tooltip(self.dbc, 40, FIXTURE_CASTER)
-        self.assertEqual(readout.values, [Displayed('$t2', 2000, None, 'duration_ms'),
+        self.assertEqual(readout.values, [Displayed('$t2', 2000, 1, 'amplitude_ms', 40),
                                           Displayed('${$d*1000/$T2}', 3, None, 'flat')])
 
     def test_the_first_proc_flag_reads_a_five_second_period(self):
@@ -447,7 +448,7 @@ class FixtureTooltipTest(unittest.TestCase):
 
     def test_the_haste_exemption_keeps_the_shown_period_readable(self):
         readout = read_tooltip(self.dbc, 45, FIXTURE_CASTER)
-        self.assertEqual(readout.values, [Displayed('$t1', 2000, None, 'duration_ms')])
+        self.assertEqual(readout.values, [Displayed('$t1', 2000, 0, 'amplitude_ms', 45)])
 
     def test_a_token_read_with_its_following_text_is_one_tick(self):
         readout = read_tooltip(self.dbc, 44, FIXTURE_CASTER)

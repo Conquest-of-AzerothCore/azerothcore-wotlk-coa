@@ -573,10 +573,12 @@ class Tooltip:
         if scaled:
             raise Unreadable
         if letter in 'aA' and digit and digit in EFFECT_DIGITS:
-            return self.records.radius(spell_id, int(digit) - 1), None, 'flat', None
+            effect = int(digit) - 1
+            return self.records.radius(spell_id, effect), self.own_effect(spell_id, effect), 'radius_yards', spell_id
         if letter in AMPLITUDE_LETTERS and digit and digit in EFFECT_DIGITS:
-            amplitude = self.records.amplitude_ms(spell_id, int(digit) - 1, shown_as_text=True)
-            return amplitude, None, 'duration_ms', None
+            effect = int(digit) - 1
+            amplitude = self.records.amplitude_ms(spell_id, effect, shown_as_text=True)
+            return amplitude, self.own_effect(spell_id, effect), 'amplitude_ms', spell_id
         if digit:
             raise Unreadable
         if letter in 'hH':

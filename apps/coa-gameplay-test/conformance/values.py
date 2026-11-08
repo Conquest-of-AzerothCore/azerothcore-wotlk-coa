@@ -13,7 +13,7 @@ from tooltip import (MIXED_PERIOD, OVER_TICKS, TICKING_AURAS, CasterStats, Displ
                      Unreadable, mixed_period_reason, period_reading, read_tooltip)
 
 CHECKS = ('effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'spell_duration', 'power_cost',
-          'cooldown_ms', 'known_aura')
+          'cooldown_ms', 'known_aura', 'effect_radius', 'aura_amplitude_ms')
 TARGET = 'dummy'
 DUMMY_ENTRY = 36
 DUMMY_HEALTH = 50000000
@@ -33,6 +33,7 @@ UNMEASURABLE = 'unmeasurable: '
 OWN_DURATION = re.compile(r'\$(\d*)[dD]')
 EFFECT_KINDS = ('flat', 'percent', 'duration_ms')
 EFFECT_TOKEN = re.compile(r'\$(?:/\d+;)?(?P<spell>\d*)[sSmM](?P<digit>[1-3])')
+RADIUS_TOKEN = re.compile(r'\$(?:/\d+;)?(?P<spell>\d*)[aA](?P<digit>[1-3])')
 STACKS_TOKEN = re.compile(r'\$(?P<spell>\d*)[uU]')
 LEVEL_PLACEHOLDER_STAT = 1.0
 Z_99 = 2.576
@@ -237,6 +238,26 @@ def foreign_effect(records: Records, rank_id: int, shown: Displayed) -> tuple[di
     return {'effect_spell': shown.spell_id, 'effect': effect}, ''
 
 
+def disabled_foreign_effects(class_file: dict) -> frozenset[tuple[int, int]]:
+    return frozenset((entry['spell'], entry['effect']) for entry in class_file.get('disabled_foreign_effects', []))
+
+
+def foreign_radius(records: Records, rank_id: int, shown: Displayed,
+                   disabled: frozenset[tuple[int, int]] = frozenset()) -> tuple[dict | None, str]:
+    if shown.effect_index is not None or shown.spell_id in (None, rank_id) or shown.kind != 'radius_yards':
+        return None, ''
+    token = next((match for match in RADIUS_TOKEN.finditer(shown.text)
+                  if token_spell(match.group('spell'), rank_id, shown) == shown.spell_id), None)
+    if token is None:
+        return None, f'{shown.kind} token of spell {shown.spell_id} without a readable effect'
+    effect = int(token.group('digit')) - 1
+    if (shown.spell_id, effect) in disabled:
+        return None, f'effect {effect} of spell {shown.spell_id} is disabled by a server correction'
+    if not records.field('Spell', shown.spell_id, f'Effect[{effect}]'):
+        return None, f'effect {effect} of spell {shown.spell_id} does not exist'
+    return {'effect_spell': shown.spell_id, 'effect': effect}, ''
+
+
 def foreign_counter(pattern: re.Pattern, rank_id: int, shown: Displayed) -> int | None:
     match = pattern.fullmatch(shown.text)
     if match is None:
@@ -313,6 +334,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
     cast_wanted = False
     first_effect = next((effect for effect in EFFECTS if facts.effects[effect]), None)
     rolled: dict[str, int] = {}
+    disabled_effects = disabled_foreign_effects(class_file)
 
     def sample_rolled(label: str, ordinal: int, text: str, spell_id: int, effect: int):
         samples = rolled_samples(dbc, records, rank_id, caster, ordinal, text, spell_id, effect)
@@ -330,7 +352,8 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
 
     for ordinal, shown in enumerate(readout.values):
         effect = shown.effect_index
-        periodic = periodic_reason(records, rank_id, caster, shown) if effect is not None else ''
+        periodic = (periodic_reason(records, rank_id, caster, shown)
+                   if effect is not None and shown.kind in EFFECT_KINDS else '')
         if periodic:
             expect(f'{rank_id} effect_value #{ordinal}', 'effect_value', effect, shown.text, UNMEASURABLE + periodic)
             continue
@@ -345,11 +368,46 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
                 expect(aura_label, 'aura_amount', effect, shown.text, f'read {shown.kind}')
                 cast_wanted = True
             continue
-        stacks_spell = foreign_stacks(rank_id, shown)
+        stacks_spell = foreign_stacks(rank_id, shown) or (rank_id if STACKS_TOKEN.fullmatch(shown.text) else None)
         if stacks_spell:
             label = f'{rank_id} max_stacks {stacks_spell} #{ordinal}'
             measured.append(measurement(label, CASTER, 'spell_max_stacks', spell=stacks_spell))
-            expect(label, 'max_stacks', None, shown.text, f'read {shown.kind}', {'effect_spell': stacks_spell})
+            expect(label, 'max_stacks', None, shown.text, f'read {shown.kind}',
+                   {'effect_spell': stacks_spell} if stacks_spell != rank_id else None)
+            continue
+        if shown.kind == 'radius_yards':
+            if shown.effect_index is not None:
+                radius_effect = shown.effect_index
+                label = f'{rank_id} effect_radius e{radius_effect} #{ordinal}'
+                measured.append(measurement(label, CASTER, 'spell_effect_radius', spell=rank_id,
+                                            effect=radius_effect))
+                expect(label, 'effect_radius', radius_effect, shown.text, f'read {shown.kind}')
+                continue
+            radius_foreign, radius_unmeasurable = foreign_radius(records, rank_id, shown, disabled_effects)
+            if radius_foreign:
+                label = (f'{rank_id} effect_radius {radius_foreign["effect_spell"]}'
+                         f'e{radius_foreign["effect"]} #{ordinal}')
+                measured.append(measurement(label, CASTER, 'spell_effect_radius',
+                                            spell=radius_foreign['effect_spell'], effect=radius_foreign['effect']))
+                expect(label, 'effect_radius', None, shown.text, f'read {shown.kind}', radius_foreign)
+                continue
+            expect(f'{rank_id} effect_radius #{ordinal}', 'effect_radius', None, shown.text,
+                   UNMEASURABLE + radius_unmeasurable)
+            continue
+        if shown.kind == 'amplitude_ms':
+            amplitude_effect = shown.effect_index
+            label = f'{rank_id} aura_amplitude_ms #{ordinal}'
+            if shown.spell_id not in (None, rank_id) or amplitude_effect is None or facts.passive:
+                expect(label, 'aura_amplitude_ms', None, shown.text,
+                       UNMEASURABLE + 'amplitude of a foreign spell or a passive effect has no scenario yet')
+            elif facts.cast_time_ms:
+                expect(label, 'aura_amplitude_ms', None, shown.text,
+                       UNMEASURABLE + 'the remaining amplitude of a cast-time spell is read after its cast')
+            else:
+                after_cast.append(aura_measurement(label, 'aura_amplitude_ms', amplitude_effect,
+                                                   effect=amplitude_effect))
+                expect(label, 'aura_amplitude_ms', amplitude_effect, shown.text, f'read {shown.kind}')
+                cast_wanted = True
             continue
         duration_spell = foreign_duration(rank_id, shown)
         if duration_spell:

@@ -66,6 +66,10 @@
     {"spell": 805410, "name": "Righteous Tempest",
      "citation": "2026-08-01 16:37:16.076, spell 570205 Righteous Tempest, Ascension combat log, private archive"}
   ],
+  "disabled_foreign_effects": [
+    {"spell": 704409, "effect": 0,
+     "reason": "AscensionTemplarContracts.cpp:211 sets info->Effects[0].Effect = 0 for spell 704409 at load time"}
+  ],
   "procs": [
     {
       "aura": 92111,

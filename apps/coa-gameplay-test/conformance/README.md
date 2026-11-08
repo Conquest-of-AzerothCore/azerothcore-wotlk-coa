@@ -115,10 +115,10 @@ token as written in the DBC, `value` the number before any player modifier.
 | `$mN`, `$MN` (with `<id>`) | `EffectBasePoints + 1`, `EffectBasePoints + EffectDieSides`, unsigned | as `$sN` |
 | `$/N;` then `$sN`/`$SN`/`$mN`/`$MN` | divided by N; `$/1000;` followed by `sec` stays in ms | `duration_ms` or as `$sN` |
 | `$d`, `$<id>d` | `SpellDuration` `Duration`, capped by `MaxDuration` | `duration_ms` |
-| `$tN`, `$TN`, `$<id>tN` | the period of effect N (below), in ms; the client shows seconds | `duration_ms` |
+| `$tN`, `$TN`, `$<id>tN` | the period of effect N (below), in ms; the client shows seconds | `amplitude_ms` |
 | `$h`, `$<id>h` | `ProcChance` | `chance_pct` |
 | `$u`, `$i` (with `<id>`) | `StackAmount`, `MaxAffectedTargets` | `count` |
-| `$aN` (with `<id>`) | `SpellRadius` radius of effect N | `flat` |
+| `$aN` (with `<id>`) | `SpellRadius` radius of effect N | `radius_yards` |
 | `${...}` | `+ - * /`, parentheses and the variables below | as `$sN` |
 | `$<name>` | a `SpellDescriptionVariables` formula of the described spell | as `$sN` |
 
@@ -126,19 +126,31 @@ Inside `${...}`: `$mN`/`$MN` (signed), `$h $u $i`, `$d` in seconds, `$aN`, `$tN`
 an optional spell id; `$AP`, `$RAP`, `$PL`; `$SP` is the lowest spell power of schools 1 to 6, `$sph $spfi $spn $spfr
 $sps $spa` one school each; `$STR $AGI $STA $INT $SPI` the effective stats 0 to 4; `$<name>` a variable defined
 earlier.
-`effect_index` is the effect of the first `$sN`/`$mN`/`$MN` of the spell itself in the token (for `$<name>`, in its
-formula), otherwise `None`. `spell_id` is the spell of the first `$sN`/`$mN`/`$MN` of the token, the described spell
-or another one, and `None` for a token without one (`$h`, `$d`, `$tN`, `$u`, `$i`, `$aN`). The client reads `$D $H
-$U $I $AN $SN` as their lowercase forms (`$S` as `$s`: `QuestTextParser.cpp:829-834`), and so does the reader.
+`effect_index` is the effect of the first `$sN`/`$mN`/`$MN`/`$tN`/`$TN`/`$aN` of the spell itself in the token (for
+`$<name>`, in its formula), otherwise `None`. `spell_id` is the spell of the first `$sN`/`$mN`/`$MN`/`$tN`/`$TN`/`$aN`
+of the token, the described spell or another one, and `None` for a token without one (`$h`, `$d`, `$u`, `$i`). The
+client reads `$D $H $U $I $AN $SN` as their lowercase forms (`$S` as `$s`: `QuestTextParser.cpp:829-834`), and so does
+the reader.
 The period of effect N is `EffectAmplitude[N-1]`, or 5000 ms when `ProcFlags & 1` (`QuestTextParser.cpp:977-1001`
 for the text, `MathState.cpp:594-615` for expressions; the field is `m_effectAuraPeriod`, `SpellRec.h:78`). It is
 unreadable in the text form when `AttributesEx5 & 0x2000` and not `AttributesEx3 & 0x20000000`: the client hastes
 that shown period by the player's cast speed, which no metric reads; the expression form is never hasted
 (`MathState.cpp`). A period of 0 is unreadable (`EffectAmplitude[N] 0 of spell S`). The client also applies the
-player's period modifiers (`Spell_C_ModifySpellValue(..., 19)`); the reader gives the value before them. `$tN` has
-`effect_index` and `spell_id` `None`, like `$d`, so the no-combat scenario leaves it `unmeasurable: duration_ms token
-without a no-combat metric`. Righteous Tempest 807274 reads `$t1` as 1000 ms; inside Blade of Faith 803880's
-`${($d*1000/$T1)*(...)}`, `$T1` is 3000.
+player's period modifiers (`Spell_C_ModifySpellValue(..., 19)`); the reader gives the value before them. The
+standalone `$tN`/`$TN` text form keeps its own effect's `effect_index`/`spell_id` (the periodic-total detection
+below only applies to `EFFECT_KINDS` tokens, never to the period token itself); inside an expression it still
+resolves through `math_variable` with both `None`, exactly like `$aN` there. Righteous Tempest 807274 reads `$t1` as
+1000 ms, measured after a cast against the live `aura_amplitude_ms`; inside Blade of Faith 803880's
+`${($d*1000/$T1)*(...)}`, `$T1` is 3000 and carries no `effect_index`/`spell_id`.
+A standalone `$aN`/`$<id>aN` radius token keeps its own effect's `effect_index`/`spell_id` the same way, read
+no-combat against `spell_effect_radius` (`SpellEffectInfo::CalcRadius`, no cast needed, unlike the period token).
+A class file's `disabled_foreign_effects` list (`[{"spell": <id>, "effect": <n>, "reason": "..."}]`) names a
+foreign effect that a class script zeroes at `SpellInfo` load time (`info->Effects[N].Effect = 0`), so raw DBC
+alone cannot tell it apart from a live one; `foreign_radius` treats a listed pair as
+`unmeasurable: effect <n> of spell <id> is disabled by a server correction` instead of generating a step that
+would fail against the live server. Templar: Testament of Hope 1397742's `$704409a1` names effect 0 of 704409,
+which `AscensionTemplarContracts.cpp:211` disables (effect 1, the one still applying the aura, carries the
+identical `EffectRadiusIndex`).
 Color codes `|c........` and `|r` are removed, in either case.
 
 `@s:<id>:<flags>@` with `flags` 0 or more expands to the tooltip of spell `<id>`, read by a nested reader of that spell
@@ -300,9 +312,13 @@ A value that cannot be compared is never dropped; its `rule` starts with a stabl
 `unreadable: <entry>` for a part the reader could not evaluate (the scenario measures the spell's first active effect
 beside it, which is not the token's own effect), `unreadable: tooltip without value` for an empty readout,
 `unreadable: ManaCostPercentage ...` or `unreadable: ManaCostPerlevel ...` for a cost the DBC alone does not give, and
-`unmeasurable: <reason>` for a readable token with no no-combat metric (radius, the rank's own stack token, a chance
-token, an aura of a passive or cast-time spell, another spell's effect that `Spell.dbc` does not define, which
-`spell_effect_value` refuses). Only `unmeasurable` expectations may lack a measurement step.
+`unmeasurable: <reason>` for a readable token with no no-combat metric (a periodic total or `mixed` token left to
+the hit scenario, a chance token, an aura of a passive or cast-time spell, a foreign amplitude or an amplitude of a
+passive effect, another spell's effect or radius that `Spell.dbc` does not define or that `disabled_foreign_effects`
+names, which `spell_effect_value`/`spell_effect_radius` refuse). Only `unmeasurable` expectations may lack a
+measurement step. The rank's own radius (`$aN`), own period (`$tN`/`$TN` after an instant cast) and own stack count
+(`$u`) are measured, through `spell_effect_radius`, `aura_amplitude_ms` and `spell_max_stacks`; `$i`
+(`MaxAffectedTargets`) still has no no-combat metric.
 `$<id>h` stays `unmeasurable: chance_pct token ...`: `spell_proc_chance` needs a `spell_proc` row of that spell, so
 no step reads it. A `$/1000;sN sec` token (own or of another spell) is an `effect_value` in ms: Liberty 705266
 `$/1000;s1` expects −30000. A `$<id>d` token of another spell is a `spell_duration`, read without a cast: Keeping

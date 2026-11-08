@@ -29,7 +29,7 @@ from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECTS, FIXED_DIE_SIDES, U
 STATUSES = ('ok', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials', 'unmeasured',
             MEASURED)
 NOT_ALERTS = frozenset({'ok', MEASURED})
-CAST_DEPENDENT_CHECKS = frozenset({'cooldown_ms', 'aura_amount', 'aura_duration_ms'})
+CAST_DEPENDENT_CHECKS = frozenset({'cooldown_ms', 'aura_amount', 'aura_duration_ms', 'aura_amplitude_ms'})
 NO_CAST_FAILURE = 0
 CAST_RESULTS_HEADER = Path(__file__).resolve().parents[3] / 'src/server/shared/SharedDefines.h'
 CAST_RESULT_ENUM = re.compile(r'enum SpellCastResult\b[^{]*\{(?P<body>[^}]*)\}')
@@ -37,7 +37,8 @@ CAST_RESULT_ENTRY = re.compile(r'^\s*(?P<name>SPELL_\w+)\s*=\s*(?P<code>\d+)', r
 ABSOLUTE_TOLERANCE = 1.0
 RELATIVE_TOLERANCE = 0.005
 FLOAT_EPSILON = 1e-9
-TOKEN_CHECKS = frozenset({'effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'spell_duration'})
+TOKEN_CHECKS = frozenset({'effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'spell_duration',
+                          'effect_radius', 'aura_amplitude_ms'})
 ROLLED_CHECKS = frozenset({'effect_value', 'aura_amount'})
 ROLL_SPREAD = 'roll_spread'
 HIT_CHECKS = frozenset({'hit_mean', 'melee_mean'})
@@ -425,6 +426,11 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
         return judge_time(base, run, measured, token.value, f'{token.text} read with the measured stats')
     if expectation.check == 'max_stacks':
         return exact(base, measured, token.value, f'{token.text} read from StackAmount')
+    if expectation.check == 'effect_radius':
+        return deterministic(base, measured, measured, token.value,
+                             f'{token.text} read from SpellRadius.RadiusMin')
+    if expectation.check == 'aura_amplitude_ms':
+        return deterministic(base, measured, measured, token.value, f'{token.text} read with the measured stats')
     if expectation.check == 'spell_duration':
         verdict = deterministic(base, measured, measured, token.value,
                                 f'{token.text} read from SpellDuration against the {SPELL_DURATION_SCOPE}')

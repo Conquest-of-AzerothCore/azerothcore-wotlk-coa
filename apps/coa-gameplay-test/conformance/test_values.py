@@ -11,10 +11,10 @@ from classes import class_spells
 from profile import (CASTER, CLASSES_DIR, armed, base_steps, caster_stats_from, load_class_file, skill_label,
                     unfit_reason)
 from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, write_fixture
-from tooltip import CasterStats, DataSet, Records, read_tooltip
+from tooltip import CasterStats, DataSet, Displayed, Records, read_tooltip
 from values import (AURA_STATE_HEALTHLESS_35_PERCENT, CHECKS, FIXTURE_MAX_HEALTH, TARGET, UNMEASURABLE, UNREADABLE,
-                    Expectation, Unmodelled, facts_of, fixture_health_step, foreign_effect, periodic_reason,
-                    required_target_health_steps, sample_labels, value_scenario)
+                    Expectation, Unmodelled, disabled_foreign_effects, facts_of, fixture_health_step, foreign_effect,
+                    foreign_radius, periodic_reason, required_target_health_steps, sample_labels, value_scenario)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -70,6 +70,13 @@ RIGHTEOUS_TEMPEST_MAX_RANK = 807274
 BLADE_OF_FAITH = 803872
 BLADE_OF_FAITH_MAX_RANK = 803880
 BLADE_OF_FAITH_TOTAL = '${($d*1000/$T1)*($m1+0+$SP*.2+$AP*0.1)}'
+CRUSADERS_PRESENCE = 562302
+TESTAMENT_OF_HOPE = 1397742
+TESTAMENT_OF_HOPE_RADIUS_SPELL = 704409
+RIGHTEOUS_CUSTODIAN = 572808
+CONDEMN = 804906
+NORGANNONS_WRATH = 524739
+NORGANNONS_WRATH_RADIUS_SPELL = 524740
 NON_PERIODIC_AURA_WITH_AMPLITUDE = 43
 PERIODIC_AURA_WITH_SECONDS = 44
 HUMAN = 1
@@ -224,9 +231,15 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
     def setUpClass(cls):
         cls.class_file = load_class_file(TEMPLAR_CLASS_ID)
         cls.spells = {spell.spell_id: spell for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER)}
+        extra = tuple(entry['spell'] for entry in cls.class_file.get('extra_spells', []))
+        cls.extra_spells = {spell.spell_id: spell
+                           for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER, extra_spells=extra)}
 
     def build(self, spell_id, rank_id):
         return value_scenario(self.class_file, self.spells[spell_id], rank_id)
+
+    def build_extra(self, spell_id, rank_id):
+        return value_scenario(self.class_file, self.extra_spells[spell_id], rank_id)
 
     def test_rank_two_of_argent_blade_learns_the_rank_and_passes_the_harness_validator(self):
         scenario, expectations = self.build(ARGENT_BLADE, ARGENT_BLADE_RANK_2)
@@ -367,12 +380,53 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         self.assertEqual((item.check, item.rule), ('effect_value', UNMEASURABLE + reason))
         self.assertFalse(self.steps_of(scenario, item.label))
 
-    def test_own_period_token_has_no_no_combat_metric(self):
+    def test_own_amplitude_token_is_measured_after_a_cast(self):
         scenario, expectations = self.build(RIGHTEOUS_TEMPEST, RIGHTEOUS_TEMPEST_MAX_RANK)
         item, = [item for item in expectations if item.displayed == '$t1']
-        self.assertEqual((item.check, item.effect_index, item.rule),
-                         ('effect_value', None, UNMEASURABLE + 'duration_ms token without a no-combat metric'))
+        self.assertEqual((item.check, item.effect_index, item.rule), ('aura_amplitude_ms', 0, 'read amplitude_ms'))
+        step, = self.steps_of(scenario, item.label)
+        self.assertEqual((step['metric'], step['spell'], step['effect'], step['caster']),
+                         ('aura_amplitude_ms', RIGHTEOUS_TEMPEST_MAX_RANK, 0, 'caster'))
+
+    def test_own_radius_token(self):
+        scenario, expectations = self.build_extra(CRUSADERS_PRESENCE, CRUSADERS_PRESENCE)
+        item, = [item for item in expectations if item.displayed == '$a1']
+        self.assertEqual((item.check, item.effect_index, item.rule), ('effect_radius', 0, 'read radius_yards'))
+        step, = self.steps_of(scenario, item.label)
+        self.assertEqual((step['metric'], step['spell'], step['effect']), ('spell_effect_radius', CRUSADERS_PRESENCE, 0))
+
+    def test_foreign_radius_token(self):
+        scenario, expectations = self.build(NORGANNONS_WRATH, NORGANNONS_WRATH)
+        item, = [item for item in expectations if item.displayed == '$524740a1']
+        self.assertEqual((item.check, item.effect_index, item.rule, item.model),
+                         ('effect_radius', None, 'read radius_yards',
+                          {'effect_spell': NORGANNONS_WRATH_RADIUS_SPELL, 'effect': 0}))
+        step, = self.steps_of(scenario, item.label)
+        self.assertEqual((step['metric'], step['spell'], step['effect']),
+                         ('spell_effect_radius', NORGANNONS_WRATH_RADIUS_SPELL, 0))
+
+    def test_foreign_radius_token_of_a_server_disabled_effect_stays_unmeasurable(self):
+        scenario, expectations = self.build(TESTAMENT_OF_HOPE, TESTAMENT_OF_HOPE)
+        item, = [item for item in expectations if item.displayed == '$704409a1']
+        reason = 'effect 0 of spell 704409 is disabled by a server correction'
+        self.assertEqual((item.check, item.effect_index, item.rule), ('effect_radius', None, UNMEASURABLE + reason))
         self.assertFalse(self.steps_of(scenario, item.label))
+
+    def test_own_amplitude_token(self):
+        scenario, expectations = self.build_extra(RIGHTEOUS_CUSTODIAN, RIGHTEOUS_CUSTODIAN)
+        item, = [item for item in expectations if item.displayed == '$t1']
+        self.assertEqual((item.check, item.effect_index, item.rule), ('aura_amplitude_ms', 0, 'read amplitude_ms'))
+        step, = self.steps_of(scenario, item.label)
+        self.assertEqual((step['metric'], step['spell'], step['effect'], step['caster']),
+                         ('aura_amplitude_ms', RIGHTEOUS_CUSTODIAN, 0, 'caster'))
+
+    def test_own_stack_token(self):
+        scenario, expectations = self.build_extra(CONDEMN, CONDEMN)
+        item, = [item for item in expectations if item.displayed == '$u']
+        self.assertEqual((item.check, item.rule, item.model), ('max_stacks', 'read count', None))
+        step, = self.steps_of(scenario, item.label)
+        self.assertEqual((step['metric'], step['spell'], step['actor']),
+                         ('spell_max_stacks', CONDEMN, 'caster'))
 
     def test_foreign_value_token(self):
         scenario, expectations = self.build(SCOURGEBANE, SCOURGEBANE)
@@ -468,6 +522,21 @@ class ForeignEffectFixtureTest(unittest.TestCase):
             shown = read_tooltip(dbc, 13, FIXTURE_CASTER).values[0]
             self.assertEqual((shown.text, shown.spell_id), ('$10s2', 10))
             self.assertEqual(foreign_effect(Records(dbc), 13, shown), (None, 'effect 1 of spell 10 does not exist'))
+
+    def test_foreign_radius_of_a_disabled_effect_is_unmeasurable(self):
+        with tempfile.TemporaryDirectory() as temp:
+            write_fixture(Path(temp), FIXTURE_SPELLS, FIXTURE_VARIABLES)
+            records = Records(DataSet(Path(temp)))
+            shown = Displayed('$43a1', 8.0, None, 'radius_yards', 43)
+            self.assertEqual(foreign_radius(records, 99, shown), ({'effect_spell': 43, 'effect': 0}, ''))
+            disabled = frozenset({(43, 0)})
+            self.assertEqual(foreign_radius(records, 99, shown, disabled),
+                             (None, 'effect 0 of spell 43 is disabled by a server correction'))
+
+    def test_disabled_foreign_effects_reads_the_class_file_entries(self):
+        self.assertEqual(disabled_foreign_effects({'disabled_foreign_effects': [{'spell': 43, 'effect': 0}]}),
+                         frozenset({(43, 0)}))
+        self.assertEqual(disabled_foreign_effects({}), frozenset())
 
     def test_seconds_of_an_aura_with_an_amplitude_stay_a_judged_value(self):
         with tempfile.TemporaryDirectory() as temp:
