@@ -135,10 +135,15 @@ public:
                 case NPC_HAKKARI_MINION:
                 case NPC_NIGHTMARE_SUPPRESSOR:
                     if (!creature->GetSpawnId() && GetData(TYPE_HAKKAR_EVENT) == IN_PROGRESS)
+                    {
+                        // Passive until the next update, so nobody standing at the summon point pulls it first.
+                        creature->SetReactState(REACT_PASSIVE);
                         creature->m_Events.AddEventAtOffset([this, creature]
                         {
+                            creature->SetReactState(REACT_AGGRESSIVE);
                             AttackHakkarActivator(creature);
                         }, 1ms);
+                    }
                     break;
             }
         }
