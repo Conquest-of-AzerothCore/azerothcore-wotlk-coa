@@ -577,6 +577,21 @@ class witch_hunter_unbroken_damage : public UnitScript
     }
 };
 
+class witch_hunter_unbroken_contracts : public GlobalScript
+{
+  public:
+    witch_hunter_unbroken_contracts()
+        : GlobalScript("witch_hunter_unbroken_contracts", {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR})
+    {
+    }
+
+    void OnLoadSpellCustomAttr(SpellInfo* info) override
+    {
+        if (info && info->Id == SPELL_UNBROKEN_AP)
+            info->AttributesCu |= SPELL_ATTR0_CU_AURA_CANNOT_BE_SAVED;
+    }
+};
+
 class witch_hunter_unbroken_decay : public PlayerScript
 {
   public:
@@ -636,6 +651,7 @@ void AddAscensionWitchHunterEventScripts()
 {
     RegisterSpellScript(aura_ascension_witch_hunter_event);
     RegisterSpellScript(aura_ascension_witch_hunter_anguish);
+    new witch_hunter_unbroken_contracts();
     new witch_hunter_unbroken_damage();
     new witch_hunter_unbroken_decay();
 }

@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Only one Worldforged Lordamere Cuffs node floats at Lordamere Lake (#11466)",
+  "contract": "Two pickups of template 517330 (item 521133) stood 17 yd apart at Lordamere Lake: the floating debris node on the water at (726.5, 938.9, 33.2) and a copy on the lake bed at (716.5, 932.7, 19.1), 12 yd under the surface. The reporter calls the floating node the usual one and the lake-bed copy the duplicate. Only the floating node remains and it still hands out the cuffs.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": 721.5, "y": 935.8, "z": 33.0, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 41 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: one Lordamere Cuffs pickup", "actor": "p", "metric": "nearby_gameobject_count", "entry": 517330, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup left is the floating node, above the water", "actor": "p", "metric": "spawn_submerged", "guid": 6900615, "spawn_type": "gameobject", "equals": 0 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 517330 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the remaining pickup is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "the remaining pickup holds the cuffs", "actor": "p", "metric": "loot_entry", "item": 521133, "equals": 521133, "within_ms": 3000 }
+  ]
+}

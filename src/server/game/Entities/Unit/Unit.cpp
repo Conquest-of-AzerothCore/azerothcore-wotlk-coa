@@ -4545,7 +4545,7 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, Unit const* victi
 
     crit += victim->GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER, [this](AuraEffect const* aurEff)
     {
-       return GetGUID() == aurEff->GetCasterGUID();
+       return GetGUID() == aurEff->GetCasterGUID() && !aurEff->HasSpellClassMask();
     });
 
     crit += victim->GetTotalAuraModifier(
@@ -10532,9 +10532,11 @@ float Unit::SpellTakenCritChance(Unit const* caster, SpellInfo const* spellProto
 
     if (caster)
     {
-        crit_chance += GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER, [caster](AuraEffect const* aurEff)
+        crit_chance += GetTotalAuraModifier(
+            SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER, [caster, spellProto](AuraEffect const* aurEff)
         {
-            return caster->GetGUID() == aurEff->GetCasterGUID();
+            return caster->GetGUID() == aurEff->GetCasterGUID() &&
+                (!aurEff->HasSpellClassMask() || aurEff->IsAffectedOnSpell(spellProto));
         });
 
         crit_chance += GetTotalAuraModifier(

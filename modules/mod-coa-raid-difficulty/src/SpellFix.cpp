@@ -58,9 +58,28 @@ namespace
             LOG_INFO("server.loading", ">> Applied {} spell value corrections", applied);
         }
     };
+
+    class coa_dragon_sleep_mechanic : public GlobalScript
+    {
+    public:
+        coa_dragon_sleep_mechanic() : GlobalScript("coa_dragon_sleep_mechanic",
+            {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR}) { }
+
+        void OnLoadSpellCustomAttr(SpellInfo* info) override
+        {
+            if (info->Id != 2119419 && info->Id != 2119519 && info->Id != 2119619 && info->Id != 2119719)
+                return;
+
+            info->Mechanic = MECHANIC_SLEEP;
+            for (SpellEffectInfo& effect : info->Effects)
+                if (effect.IsEffect())
+                    effect.Mechanic = MECHANIC_SLEEP;
+        }
+    };
 }
 
 void AddCoaSpellFixScripts()
 {
     new coa_spell_fix_loader();
+    new coa_dragon_sleep_mechanic();
 }

@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "name": "Call of the Lightning and Greater Call of the Lightning do not stack (#11540)",
+  "contract": "Greater Call of the Lightning (575846) is the raid-wide form of Call of the Lightning (575843-575845): Spell.dbc gives each a single SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE (143) effect with MiscValue 126 and 20 resistance (rank 3 and the Greater form share the amount), the Greater form only targeting TARGET_UNIT_CASTER_AREA_RAID instead of TARGET_UNIT_TARGET_ALLY. The ranks are one spell_ranks chain but 575846 is unranked and in no spell_group, so both auras stay on the recipient and the buff bar shows two icons for one effect - the report. A Greater buff is the same family as its normal form (Greater Calls of the Storm and of the Wind, group 1171, #10238), so a spell_group with exclusive-from-the-same-caster stack rule 2 must hold all four ids; Unit::_RemoveNoStackAurasDueToAura then removes the other form of the same caster on the recipient, in both directions. Every assertion checks the party member that received the cast.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "storm",
+      "race": 1,
+      "class": 16,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling and spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "label": "Gather both actors for the raid area",
+      "actor": "storm",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "group",
+      "label": "The Call recipient is a party member",
+      "actor": "storm",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "storm",
+      "spell": 575845
+    },
+    {
+      "action": "learn",
+      "actor": "storm",
+      "spell": 575846
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Call of the Lightning costs less than the fixture mana",
+      "actor": "storm",
+      "metric": "spell_power_cost",
+      "spell": 575845,
+      "max": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Greater Call of the Lightning costs less than the fixture mana",
+      "actor": "storm",
+      "metric": "spell_power_cost",
+      "spell": 575846,
+      "max": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "storm",
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Call of the Lightning on the party member",
+      "actor": "storm",
+      "spell": 575845,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Call of the Lightning reaches the party member",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 575845,
+      "caster": "storm",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "storm",
+      "value": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Greater Call of the Lightning, the raid-wide form",
+      "actor": "storm",
+      "spell": 575846,
+      "target": "storm"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Greater Call of the Lightning reaches the party member",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 575846,
+      "caster": "storm",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Greater Call of the Lightning also covers the caster",
+      "actor": "storm",
+      "metric": "aura",
+      "spell": 575846,
+      "caster": "storm",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Greater form removes Call of the Lightning from the party member",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 575845,
+      "caster": "storm",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "storm",
+      "value": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Call of the Lightning again on the party member",
+      "actor": "storm",
+      "spell": 575845,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Call of the Lightning is back on the party member",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 575845,
+      "caster": "storm",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the lesser Call removes Greater Call of the Lightning from the party member",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 575846,
+      "caster": "storm",
+      "equals": 0
+    }
+  ]
+}

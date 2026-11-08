@@ -298,7 +298,7 @@ class xoroth_casts : public AllSpellScript
         if (!player)
             return;
         uint32 fire = State(player).fire, id = aura->GetId();
-        if (id == 801064 || id == 801063)
+        if (id == 801064)
             duration = Amount(500906, EFFECT_2, player) * int32(fire);
         if (id == 801017)
             duration *= 1 + fire;
