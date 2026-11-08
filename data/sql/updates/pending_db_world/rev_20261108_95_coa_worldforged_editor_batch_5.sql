@@ -91,3 +91,7 @@ UPDATE `gameobject` SET `position_x` = 749.815, `position_y` = 1413.85, `positio
 -- #11602
 -- pickup 6941890 (Sack of Kodo Hides) moved 9.4 yd across and 0.00 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -1405.21, `position_y` = 2084.78, `position_z` = 61.954, `orientation` = 2.05731, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.856606, `rotation3` = 0.515971 WHERE `guid` = 6941890 AND `id` = 254284;
+
+-- #11605
+-- pickup 6942233 (Infused Staff) moved 10.1 yd across and 0.84 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -5306.4288, `position_y` = -1801.1319, `position_z` = -53.3761, `orientation` = 3.125398, `rotation0` = 0.032676, `rotation1` = -0.000265, `rotation2` = 0.999433, `rotation3` = 0.008093 WHERE `guid` = 6942233 AND `id` = 254560;
