@@ -32,3 +32,17 @@ UPDATE `gameobject` SET `position_x` = 3857.9727, `position_y` = -7172.1229, `po
 UPDATE `gameobject_template` SET `size` = 0.5 WHERE `entry` = 1345147;
 -- pickup 6941205 (Terrible Defias Mixture) moved 20.4 yd across and 5.17 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -11142.2382, `position_y` = 544.9816, `position_z` = 36.9810, `orientation` = 0.562727, `rotation0` = 0.149573, `rotation1` = -0.515723, `rotation2` = 0.23454, `rotation3` = 0.810338 WHERE `guid` = 6941205 AND `id` = 1345147;
+
+-- no issue
+-- template 9900034 (Steel Helmet): displayId 515290 -> 515287 (1 spawns)
+UPDATE `gameobject_template` SET `displayId` = 515287 WHERE `entry` = 9900034;
+-- pickup 209574 (Gold Vein) moved 3.59 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -14643.3000, `position_y` = 481.6200, `position_z` = 20.2087, `orientation` = 2.72271, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.978148, `rotation3` = 0.207912 WHERE `guid` = 209574 AND `id` = 1734;
+-- pickup 209618 (Truesilver Deposit) moved 3.87 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -14643.3000, `position_y` = 481.6200, `position_z` = 19.9253, `orientation` = 2.72271, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.978148, `rotation3` = 0.207912 WHERE `guid` = 209618 AND `id` = 2047;
+-- pickup 209530 (Mithril Deposit) moved 3.58 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -14643.3000, `position_y` = 481.6200, `position_z` = 20.2104, `orientation` = 2.72271, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.978148, `rotation3` = 0.207912 WHERE `guid` = 209530 AND `id` = 2040;
+-- pickup 6970037 (Steel Helmet) moved 6.8 yd across and 17.64 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -4947.1627, `position_y` = -2293.9843, `position_z` = -82.1888, `orientation` = 0.839312, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.407446, `rotation3` = 0.913229 WHERE `guid` = 6970037 AND `id` = 9900034;
+-- pickup 6940863 (Stashed Goods) moved 0.15 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 1984.0000, `position_y` = 1596.3000, `position_z` = 82.4757, `orientation` = 1.03615, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.495209, `rotation3` = 0.868774 WHERE `guid` = 6940863 AND `id` = 95671;
