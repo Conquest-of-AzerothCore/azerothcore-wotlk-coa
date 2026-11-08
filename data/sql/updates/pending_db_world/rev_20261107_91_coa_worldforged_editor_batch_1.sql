@@ -52,3 +52,11 @@ UPDATE `gameobject` SET `position_x` = -8214.7939, `position_y` = -1592.7333, `p
 UPDATE `gameobject_template` SET `size` = 0.7 WHERE `entry` = 515828;
 -- pickup 6941523 (Captain's Compass) moved 10.1 yd across and 1.73 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -8015.3655, `position_y` = -5193.8004, `position_z` = 14.8455, `orientation` = 1.67885, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.744259, `rotation3` = 0.667891 WHERE `guid` = 6941523 AND `id` = 515828;
+
+-- #6735
+-- pickup 6940734 (Rusty Shotgun) moved 10.5 yd across and 2.62 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 2911.9517, `position_y` = 375.5602, `position_z` = 32.7246, `orientation` = 4.711447, `rotation0` = -0.101454, `rotation1` = 0.0307977, `rotation2` = 0.706768, `rotation3` = -0.699456 WHERE `guid` = 6940734 AND `id` = 517353;
+-- pickup 6940021 (Agamand Dresser) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940021 AND `id` = 515370;
+-- pickup 6940732 (Rusty Shotgun) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940732 AND `id` = 517353;
