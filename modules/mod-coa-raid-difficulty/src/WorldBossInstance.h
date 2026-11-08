@@ -92,8 +92,8 @@ namespace coa_world_boss_instance
             CloseGossipMenuFor(player);
             if (action != GOSSIP_ACTION_INFO_DEF + 1 || !player->IsAlive())
                 return true;
-            // Only the Normal difficulties are open for now.
-            if (player->GetRaidDifficulty() > RAID_DIFFICULTY_25MAN_NORMAL)
+            // Only Normal is open for now: Heroic, Mythic and Ascended (raid difficulties 1-3) are refused.
+            if (player->GetRaidDifficulty() != RAID_DIFFICULTY_10MAN_NORMAL)
             {
                 ChatHandler(player->GetSession()).SendNotification("{} only answers the Normal difficulty.",
                     _config.boss);
