@@ -300,6 +300,7 @@ void AddSC_AscensionPrimalistRylaksBlessing();
 void AddSC_AscensionPrimalistWildheart();
 void AddSC_AscensionPrimalistDreamslip();
 void AddSC_AscensionPrimalistDouse();
+void AddSC_AscensionProvisionsSeating();
 void AddSC_AscensionPrimalistNeptulonWrath();
 void AddSC_AscensionConvenienceItems();
 void AddSC_AscensionRaidDamageAuras();
@@ -599,6 +600,7 @@ void AddCoAScripts()
     AddSC_AscensionPrimalistWildheart();
     AddSC_AscensionPrimalistDreamslip();
     AddSC_AscensionPrimalistDouse();
+    AddSC_AscensionProvisionsSeating();
     AddSC_AscensionPrimalistNeptulonWrath();
     AddSC_AscensionConvenienceItems();
     AddSC_AscensionRaidDamageAuras();
