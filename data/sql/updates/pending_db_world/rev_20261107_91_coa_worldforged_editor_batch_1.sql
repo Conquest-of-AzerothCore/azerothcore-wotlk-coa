@@ -38,3 +38,7 @@ UPDATE `gameobject` SET `position_x` = -46.6779, `position_y` = -4898.2940, `pos
 -- #5579
 -- pickup 6940876 (Peculiar Gold Nugget) moved 8.8 yd across and 7.21 yd down to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -10558.0607, `position_y` = 1991.1986, `position_z` = -14.0901, `orientation` = 2.95216, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.995518, `rotation3` = 0.094575 WHERE `guid` = 6940876 AND `id` = 90244;
+
+-- #6089
+-- pickup 6940055 (Sunken Stash) moved 6.5 yd across and 1.60 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 28.7522, `position_y` = -3775.9517, `position_z` = 136.9218, `orientation` = 0.23541, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.117433, `rotation3` = 0.993081 WHERE `guid` = 6940055 AND `id` = 254573;
