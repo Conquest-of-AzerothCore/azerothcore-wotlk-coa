@@ -93,6 +93,8 @@ METRICS = TIMELINE_METRICS | {
     'pool_variant_count', 'pool_retired_item_count', 'pool_row_count', 'pool_item_present',
     'cache_token_count', 'cache_token_stage', 'cache_token_present',
     'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item',
+    'account_character_count', 'account_other_item_count', 'account_other_bank_item_count',
+    'account_other_mail_count', 'account_other_foreign_mail_count', 'account_other_at_login_flag',
     'mail_pool_item_count', 'notifications', 'notification_contains',
     'bank_bag_slots', 'bank_shows', 'guild_bank_tabs',
     'system_messages',
@@ -289,6 +291,7 @@ ACTIONS = {
     'collect_loot': ({'actor'}, {'actor'}),
     'close_loot': ({'actor'}, {'actor'}),
     'set_money': ({'actor', 'value'}, {'actor', 'value'}),
+    'add_at_login_flag': ({'actor', 'id'}, {'actor', 'id'}),
     'set_player_setting': ({'actor', 'source', 'index', 'value'}, {'actor', 'source', 'index', 'value'}),
     'set_phase': ({'actor'}, {'actor', 'value'}),
     'use_nearby_gameobject': ({'actor', 'entry'}, {'actor', 'entry', 'owner'}),
@@ -306,6 +309,7 @@ ACTIONS = {
     'loot_money': ({'actor'}, {'actor'}),
     'loot_roll': ({'actor', 'item', 'vote'}, {'actor', 'item', 'vote'}),
     'master_loot_give': ({'actor', 'item', 'target'}, {'actor', 'item', 'target'}),
+    'send_mail': ({'actor', 'target'}, {'actor', 'target'}),
     'prepare_quest': ({'actor', 'quest'}, {'actor', 'quest', 'complete'}),
     'reward_quest': ({'actor', 'quest'}, {'actor', 'quest', 'choice'}),
     'restore_quest_spells': ({'actor'}, {'actor'}),
@@ -477,7 +481,8 @@ def validate_raid_role(player):
 def validate(scenario):
     keys(scenario, {'schema', 'name', 'players', 'steps'},
          {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour',
-          'creature_scaling', 'vanity_ownership', 'two_side', 'quest_log_size'}, 'scenario')
+          'creature_scaling', 'ptr_character_copy', 'vanity_ownership', 'two_side', 'quest_log_size'},
+         'scenario')
     schema = scenario['schema']
     require(type(schema) is int and schema in MAX_PLAYERS, 'Unsupported scenario schema')
     require(isinstance(scenario['name'], str) and scenario['name'].strip(), 'Scenario needs a name')
@@ -485,6 +490,7 @@ def validate(scenario):
     if 'hour' in scenario:
         number(scenario['hour'], 'hour', 0, HOURS_PER_DAY - 1, True)
     require(type(scenario.get('creature_scaling', False)) is bool, 'creature_scaling must be boolean')
+    require(type(scenario.get('ptr_character_copy', False)) is bool, 'ptr_character_copy must be boolean')
     if 'vanity_ownership' in scenario:
         ownership = scenario['vanity_ownership']
         keys(ownership, {'unlock_all'}, {'unlock_all', 'starter_items'}, 'vanity_ownership')
@@ -726,6 +732,11 @@ def validate(scenario):
             number(step['vote'], f'{where}.vote', 0, 3, True)
         if action == 'master_loot_give':
             require(step['target'] in player_ids, f'{where}: master loot needs a player recipient')
+        if action == 'add_at_login_flag':
+            number(step['id'], f'{where}.id', 1, 0xFFFF, True)
+        if action == 'send_mail':
+            require(step['target'] in player_ids and step['target'] != step['actor'],
+                    f'{where}: mail needs another player as recipient')
         if action == 'lfg_dungeon':
             number(step['dungeon'], f'{where}.dungeon', 1, 2**24 - 1, True)
             if 'loot_method' in step:
@@ -1163,7 +1174,7 @@ def validate(scenario):
                 require('cache' in step, f'{where}: metric needs the cache item it checks against')
             if metric == 'cache_token_present':
                 require('item' in step, f'{where}: metric needs the token to look for')
-            if metric in ('mail_has_item',):
+            if metric in ('mail_has_item', 'account_other_item_count', 'account_other_bank_item_count'):
                 require('item' in step, f'{where}: metric needs the item to look for')
             if metric == 'mail_pool_item_count':
                 require('cache' in step, f'{where}: metric needs the cache item it checks against')
@@ -1270,7 +1281,7 @@ def validate(scenario):
                                    'carried_pool_item_count'},
                         f'{where}: quality applies only to loot items and carried cache rewards')
                 number(step['quality'], f'{where}.quality', 0, 7, True)
-            if metric == 'at_login_flag':
+            if metric in ('at_login_flag', 'account_other_at_login_flag'):
                 number(step.get('id'), f'{where}.id', 1, 0xFFFF, True)
             if metric == 'server_packet_contains':
                 require(isinstance(step.get('text'), str) and step['text'].strip(),

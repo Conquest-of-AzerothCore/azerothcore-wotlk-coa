@@ -26,6 +26,7 @@
 #include "Chat.h"
 #include "ClientDBC.h"
 #include "CoACreatureScaling.h"
+#include "CoAPtrCharacterCopy.h"
 #include "Config.h"
 #include "Creature.h"
 #include "CreatureAI.h"
@@ -53,6 +54,7 @@
 #include "Log.h"
 #include "LocalLevelScaling.h"
 #include "LootMgr.h"
+#include "Mail.h"
 #include "Map.h"
 #include "MapMgr.h"
 #include "MoveSpline.h"
@@ -1850,6 +1852,8 @@ public:
         Require(_timeout > 0 && _timeout <= MaximumTimeoutMs(_schema), "Invalid scenario timeout");
         if (_scenario.get<bool>("creature_scaling", false))
             _creatureScaling.emplace();
+        if (_scenario.get<bool>("ptr_character_copy", false))
+            _ptrCharacterCopy.emplace();
         if (auto ownership = _scenario.get_child_optional("vanity_ownership"))
         {
             std::string starterItems;
@@ -5433,6 +5437,50 @@ private:
             Require(title != nullptr, "has_title needs a title from CharTitles.dbc");
             return player->HasTitle(title) ? 1.0 : 0.0;
         }
+        if (metric == "account_character_count")
+        {
+            QueryResult result = CharacterDatabase.Query("SELECT COUNT(*) FROM characters WHERE account = {}",
+                player->GetSession()->GetAccountId());
+            return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
+        }
+        if (metric == "account_other_item_count")
+        {
+            QueryResult result = CharacterDatabase.Query(
+                "SELECT CAST(COALESCE(SUM(i.count), 0) AS UNSIGNED) FROM item_instance i "
+                "JOIN characters c ON c.guid = i.owner_guid "
+                "WHERE c.account = {} AND c.guid <> {} AND i.itemEntry = {}",
+                player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), step.get<uint32>("item"));
+            return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
+        }
+        if (metric == "account_other_bank_item_count")
+        {
+            QueryResult result = CharacterDatabase.Query(
+                "SELECT CAST(COALESCE(SUM(i.count), 0) AS UNSIGNED) FROM mod_ascension_bank_item b "
+                "JOIN item_instance i ON i.guid = b.item_guid "
+                "JOIN characters c ON c.guid = b.owner_id AND b.owner_kind = 0 "
+                "WHERE c.account = {} AND c.guid <> {} AND i.itemEntry = {}",
+                player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), step.get<uint32>("item"));
+            return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
+        }
+        if (metric == "account_other_at_login_flag")
+        {
+            uint32 const flag = step.get<uint32>("id");
+            QueryResult result = CharacterDatabase.Query(
+                "SELECT COUNT(*) FROM characters WHERE account = {} AND guid <> {} AND at_login & {} = {}",
+                player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), flag, flag);
+            return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
+        }
+        if (metric == "account_other_mail_count" || metric == "account_other_foreign_mail_count")
+        {
+            std::string const foreignOnly = metric == "account_other_foreign_mail_count"
+                ? Acore::StringFormat(" AND m.messageType = {} AND m.sender <> m.receiver", uint32(MAIL_NORMAL))
+                : std::string();
+            QueryResult result = CharacterDatabase.Query(
+                "SELECT COUNT(*) FROM mail m JOIN characters c ON c.guid = m.receiver "
+                "WHERE c.account = {} AND c.guid <> {}{}",
+                player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), foreignOnly);
+            return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
+        }
         if (metric == "mail_count" || metric == "mail_item_count" || metric == "mail_has_item")
         {
             uint32 mails = 0, items = 0;
@@ -6766,6 +6814,13 @@ private:
             player->SetPhaseMask(step.get<uint32>("value", _phase), true);
         else if (action == "set_money")
             player->SetMoney(step.get<uint32>("value"));
+        else if (action == "add_at_login_flag")
+        {
+            uint32 const flag = step.get<uint32>("id");
+            player->SetAtLoginFlag(AtLoginFlags(flag));
+            CharacterDatabase.DirectExecute("UPDATE characters SET at_login = at_login | {} WHERE guid = {}", flag,
+                player->GetGUID().GetCounter());
+        }
         else if (action == "set_player_setting")
             player->UpdatePlayerSetting(step.get<std::string>("source"), step.get<uint32>("index"),
                 step.get<uint32>("value"));
@@ -6915,6 +6970,14 @@ private:
             packet << (*pending)->itemGUID << uint32((*pending)->itemSlot) << uint8(step.get<uint32>("vote"));
             if (sScriptMgr->CanPacketReceive(player->GetSession(), packet))
                 player->GetSession()->HandleLootRoll(packet);
+        }
+        else if (action == "send_mail")
+        {
+            Player* recipient = GetPlayer(step.get<std::string>("target"));
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+            MailDraft("Harness mail", "Sent by the gameplay harness")
+                .SendMailTo(trans, MailReceiver(recipient), MailSender(player));
+            CharacterDatabase.DirectCommitTransaction(trans);
         }
         else if (action == "master_loot_give")
         {
@@ -7848,6 +7911,7 @@ private:
     std::optional<Target> _encounterBoss;
     QueryCallbackProcessor _queries;
     std::optional<CreatureScaling::TestOverride> _creatureScaling;
+    std::optional<PtrCharacterCopy::TestOverride> _ptrCharacterCopy;
     std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
     std::optional<TwoSideConfig> _twoSide;
     std::optional<QuestLogSizeConfig> _questLogSize;

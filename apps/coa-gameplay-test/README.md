@@ -382,7 +382,9 @@ runs such a case exclusively because the setting is process-global. Optional
 `CoA.StarterVanityItems` for that case in the same way, and is likewise run exclusively. Optional
 `two_side: {"trade": true, "mail": false}` sets `AllowTwoSide.Trade` and `AllowTwoSide.Interaction.Mail` for that
 case (an omitted field is disabled) and is likewise run exclusively. Its optional `group` sets
-`AllowTwoSide.Interaction.Group`, which keeps the configured value when omitted.
+`AllowTwoSide.Interaction.Group`, which keeps the configured value when omitted. Optional
+`ptr_character_copy: true` enables `.ptr copy` for that case with this realm's own characters schema as the
+source and no cooldown, and is likewise run exclusively.
 The [talent and item scenario](scenarios/talent-and-items.json) exercises talent learning, passive removal,
 equipping a shirt and consuming a healing potion. It does not measure the talent's damage coefficient.
 The [Shadowblast scenario](scenarios/shadowblast-shadow-rage.json) reproduces a Shadow Rage pet-targeting crash
@@ -499,6 +501,8 @@ assert stable maximums and final levels when testing damage coefficients.
 | `group` | `actor`, `target`, optional `loot_method` (0-4) and `master_looter` (a player id, read with `loot_method`): fixture party; creates the actor's group if needed, adds an ungrouped player and sets the loot method and master looter. |
 | `loot_roll` | Player `actor`, `item`, `vote` (0 pass, 1 need, 2 greed, 3 disenchant): native `CMSG_LOOT_ROLL` on the group's pending roll for that item (or a level-scaled copy) in which the actor takes part. |
 | `master_loot_give` | Player `actor` as master looter, `item`, `target` (a player id): native `CMSG_LOOT_MASTER_GIVE` of that item from the actor's open loot to the target. |
+| `send_mail` | Player `actor`, `target` (another player id): the actor mails the target a plain player letter, committed to the database at once. |
+| `add_at_login_flag` | Player `actor`, `AtLoginFlags` value `id`: adds that flag to the player and to the stored character at once, as a pending customize or reset would. |
 | `lfg_dungeon` | `actor`, LFGDungeons.dbc `dungeon`: fixture Dungeon Finder group; converts the actor's ordinary group to an LFG group assigned to that dungeon, as a completed proposal does, and re-sends each member's scaled creature views. Conversion sets Need Before Greed; optional `loot_method` (0-4) sets another afterwards. |
 | `lfg_teleport` | Player `actor`, optional boolean `out` (default false): native `CMSG_LFG_TELEPORT` request into or out of the group's dungeon. |
 | `lfg_join` | Player `actor`, LFGDungeons.dbc `dungeons` list, `roles` mask (1 leader, 2 tank, 4 healer, 8 damage): native `CMSG_LFG_JOIN` queue request, as the Dungeon Finder button sends it. A group leader starts the role check. |
@@ -597,7 +601,13 @@ effect that picks one of several auras at random),
 number of mails the player holds and `mail_item_count` the items inside them, which is how a reward
 that the bags could not take proves it was posted rather than lost; `mail_has_item` takes `item` and
 returns whether any mail carries it, and `mail_pool_item_count` takes `cache` (optional `table`) and
-counts only the mail items that are in that cache's own pool. `notifications` counts the
+counts only the mail items that are in that cache's own pool. `account_character_count` counts the stored
+characters on the player's account, and `account_other_item_count` takes `item` and counts that item on the
+account's other characters, which is how a character copy proves it carried the inventory.
+`account_other_bank_item_count` (needs `item`) counts that item in those characters' own Personal Banks,
+`account_other_mail_count` counts the mails they hold and `account_other_foreign_mail_count` only the player mails
+whose sender is not the receiver. `account_other_at_login_flag` takes an `AtLoginFlags` value as `id` and counts
+those characters that carry it in the database. `notifications` counts the
 centre-screen notices a session has been sent and `notification_contains` takes `text` and returns
 whether one carried it, which is how a test proves a player was told something in the middle of the
 screen and not only in chat. The cache metrics are `carried_pool_item_count` (needs `cache`,
