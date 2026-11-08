@@ -134,3 +134,7 @@ UPDATE `gameobject` SET `position_x` = 2904.0117, `position_y` = -971.6407, `pos
 -- #8057
 -- pickup 6940195 (Boom Barrel) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940195 AND `id` = 95526;
+
+-- #8172
+-- template 3244513 (Jar of Spiders): size 1 -> 0.2 (2 spawns)
+UPDATE `gameobject_template` SET `size` = 0.2 WHERE `entry` = 3244513;
