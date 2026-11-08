@@ -74,6 +74,7 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
+#include "TypeContainerVisitor.h"
 #include "Timer.h"
 
 #include <algorithm>
@@ -961,6 +962,61 @@ namespace
         }
     }
 
+    bool Finished(Run const& run)
+    {
+        return run.state == STATE_TIMED || run.state == STATE_OVERTIME;
+    }
+
+    void RefuseToFight(Creature* creature)
+    {
+        if (!creature || !creature->IsInWorld() || !creature->IsAlive() || !TakesAffixes(creature))
+            return;
+        creature->SetReactState(REACT_PASSIVE);
+        creature->SetUnitFlag(UNIT_FLAG_PACIFIED);
+        creature->SetUnitFlag(UNIT_FLAG_SILENCED);
+        creature->SetHomePosition(creature->GetPosition());
+        creature->InterruptNonMeleeSpells(true);
+        creature->AttackStop();
+        creature->CombatStop(true);
+        creature->GetThreatMgr().ClearAllThreat();
+        creature->GetMotionMaster()->Clear();
+        creature->GetMotionMaster()->MoveIdle();
+        creature->StopMoving();
+        creature->SetControlled(true, UNIT_STATE_ROOT);
+    }
+
+    struct MapCreatureCollector
+    {
+        std::vector<Creature*> creatures;
+
+        void Visit(std::unordered_map<ObjectGuid, Creature*>& store)
+        {
+            for (auto const& [guid, creature] : store)
+                creatures.push_back(creature);
+        }
+
+        template<class T>
+        void Visit(std::unordered_map<ObjectGuid, T*>&) { }
+    };
+
+    void RefuseToFight(Map* map)
+    {
+        MapCreatureCollector collector;
+        TypeContainerVisitor<MapCreatureCollector, MapStoredObjectTypesContainer> visitor(collector);
+        visitor.Visit(map->GetObjectsStore());
+        for (Creature* creature : collector.creatures)
+            RefuseToFight(creature);
+    }
+
+    bool RefusesToFight(Unit const* unit)
+    {
+        Creature const* creature = unit ? unit->ToCreature() : nullptr;
+        if (!creature || !creature->HasUnitFlag(UNIT_FLAG_PACIFIED) || !creature->HasReactState(REACT_PASSIVE))
+            return false;
+        Run const* run = RunFor(creature->GetMap());
+        return run && Finished(*run);
+    }
+
     void Complete(Map* map, Run& run)
     {
         uint32 limit = run.dungeon.timeLimitMs;
@@ -989,6 +1045,7 @@ namespace
 
         CoAResurrectDeadPlayers(map);
         ClearRunSpawns(map);
+        RefuseToFight(map);
 
         ForEachPlayer(map, [&](Player* player)
         {
@@ -1439,6 +1496,33 @@ public:
         }
     }
 
+    void OnAllCreatureUpdate(Creature* creature, uint32 /*diff*/) override
+    {
+        if (!creature->HasUnitFlag(UNIT_FLAG_PACIFIED) || !creature->HasReactState(REACT_PASSIVE)
+            || creature->IsInEvadeMode() || !creature->IsAlive())
+            return;
+        bool const unattacked = creature->IsInCombat() && creature->getAttackers().empty();
+        if (creature->HasUnitState(UNIT_STATE_ROOT) && !unattacked)
+            return;
+        Map* map = creature->FindMap();
+        if (!map || !map->IsDungeon())
+            return;
+        std::lock_guard<std::recursive_mutex> guard(g_lock);
+        if (!RefusesToFight(creature))
+            return;
+        if (unattacked)
+        {
+            creature->CombatStop(true);
+            creature->GetThreatMgr().ClearAllThreat();
+            return;
+        }
+        creature->SetHomePosition(creature->GetPosition());
+        creature->GetMotionMaster()->Clear();
+        creature->GetMotionMaster()->MoveIdle();
+        creature->StopMoving();
+        creature->SetControlled(true, UNIT_STATE_ROOT);
+    }
+
     // Summons and creatures spawned during a run get the week's affixes too.
     void OnCreatureAddWorld(Creature* creature) override
     {
@@ -1452,6 +1536,13 @@ public:
             creature->SetVisible(run && run->Active());
         if (run && run->Active())
             ApplyCreatureAffixes(creature, *run);
+        if (run && Finished(*run))
+            creature->m_Events.AddEventAtOffset([creature]
+            {
+                std::lock_guard<std::recursive_mutex> guard(g_lock);
+                if (Run* current = RunFor(creature->GetMap()); current && Finished(*current))
+                    RefuseToFight(creature);
+            }, 1ms);
     }
 };
 
@@ -1461,24 +1552,47 @@ public:
     coa_mythic_plus_unit() : UnitScript("coa_mythic_plus_unit", true,
         { UNITHOOK_MODIFY_MELEE_DAMAGE, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN, UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK, UNITHOOK_ON_UNIT_DEATH }) { }
 
-    void ModifyMeleeDamage(Unit* /*target*/, Unit* attacker, uint32& damage) override
+    void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
     {
+        if (Refuses(target))
+        {
+            damage = 0;
+            return;
+        }
         if (float f = Factor(attacker, true); f != 1.0f)
             damage = uint32(damage * f);
     }
 
-    void ModifySpellDamageTaken(Unit* /*target*/, Unit* attacker, int32& damage, SpellInfo const* spellInfo) override
+    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo) override
     {
+        if (Refuses(target))
+        {
+            damage = 0;
+            return;
+        }
         if (IsHealthShare(spellInfo))
             return;
         if (float f = Factor(attacker, IsPhysical(spellInfo)); f != 1.0f)
             damage = int32(damage * f);
     }
 
-    void ModifyPeriodicDamageAurasTick(Unit* /*target*/, Unit* attacker, uint32& damage, SpellInfo const* spellInfo) override
+    void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const* spellInfo) override
     {
+        if (Refuses(target))
+        {
+            damage = 0;
+            return;
+        }
         if (float f = Factor(attacker, IsPhysical(spellInfo)); f != 1.0f)
             damage = uint32(damage * f);
+    }
+
+    static bool Refuses(Unit const* target)
+    {
+        if (!target || !target->IsCreature() || !target->HasUnitFlag(UNIT_FLAG_PACIFIED))
+            return false;
+        std::lock_guard<std::recursive_mutex> guard(g_lock);
+        return RefusesToFight(target);
     }
 
     void OnUnitDeath(Unit* unit, Unit* /*killer*/) override
