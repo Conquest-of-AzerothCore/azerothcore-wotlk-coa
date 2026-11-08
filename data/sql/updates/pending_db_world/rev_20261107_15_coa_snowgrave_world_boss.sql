@@ -64,9 +64,14 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 UPDATE `creature` SET `position_x` = 4687.2383, `position_y` = -4801.878, `position_z` = 676.87, `orientation` = 5.5009
 WHERE `guid` = 9780103 AND `id` = 64627;
 
--- His greatsword and shield, the models of his Glacierborn Greatsword and Frostbound Bulwark, at his
--- scale.
+-- His greatsword and shield, the models of his Glacierborn Greatsword and Frostbound Bulwark, at his scale. The
+-- client hides an off hand next to a two-handed weapon, so the sword he holds is a one-handed look item (9781665,
+-- client row only) with the greatsword's model.
+DELETE FROM `item_dbc` WHERE `ID` = 9781665;
+INSERT INTO `item_dbc` (`ID`, `ClassID`, `SubclassID`, `Sound_Override_Subclassid`, `Material`, `DisplayInfoID`,
+  `InventoryType`, `SheatheType`) VALUES
+(9781665, 2, 7, -1, 1, 56808, 21, 3);
 DELETE FROM `creature_equip_template` WHERE `CreatureID` = 64627;
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, `VerifiedBuild`) VALUES
-(64627, 1, 17665, 17663, 0, 12340);
+(64627, 1, 9781665, 17663, 0, 12340);
 UPDATE `creature` SET `equipment_id` = 1 WHERE `guid` = 9780103;
