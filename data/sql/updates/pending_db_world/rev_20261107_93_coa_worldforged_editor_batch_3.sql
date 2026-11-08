@@ -112,3 +112,7 @@ UPDATE `gameobject` SET `position_x` = -13255.8701, `position_y` = -354.3124, `p
 UPDATE `gameobject` SET `position_x` = -5206.1882, `position_y` = -3100.0369, `position_z` = 303.3347, `orientation` = 1.25241, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.586074, `rotation3` = 0.810257 WHERE `guid` = 6940843 AND `id` = 517341;
 -- pickup 6940844 (Storage Crate) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940844 AND `id` = 517341;
+
+-- #11161
+-- pickup 6940613 (Heavy Ogre Axe) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940613 AND `id` = 95519;
