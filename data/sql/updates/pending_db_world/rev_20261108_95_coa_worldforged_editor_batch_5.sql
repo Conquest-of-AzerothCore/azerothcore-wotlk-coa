@@ -47,3 +47,7 @@ UPDATE `gameobject` SET `position_x` = 6439.7, `position_y` = -1725.53, `positio
 -- #11491
 -- pickup 6940546 (Gilnean Crate) moved 9.1 yd across and 3.97 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 851.152, `position_y` = 1909.88, `position_z` = -5.198, `orientation` = 5.74223, `rotation0` = 0, `rotation1` = 0, `rotation2` = -0.267192, `rotation3` = 0.963643 WHERE `guid` = 6940546 AND `id` = 90328;
+
+-- #11526
+-- pickup 6940791 (Empty Bag) moved 9.9 yd across and 0.17 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 3244.2393, `position_y` = -3834.5845, `position_z` = 141.1332, `orientation` = 5.799426, `rotation0` = 0.053581, `rotation1` = 0.217181, `rotation2` = 0.233458, `rotation3` = -0.946287 WHERE `guid` = 6940791 AND `id` = 96239;
