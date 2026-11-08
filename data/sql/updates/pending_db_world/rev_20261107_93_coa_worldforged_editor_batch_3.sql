@@ -42,3 +42,7 @@ UPDATE `gameobject` SET `position_x` = -10373.5141, `position_y` = -1254.2955, `
 -- #10832, #10888
 -- pickup 6940983 (Rugged Leather Runners) moved 25.5 yd across and 29.99 yd down to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -11354.6597, `position_y` = -246.7811, `position_z` = 47.4797, `orientation` = 4.19247, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.865104, `rotation3` = -0.501593 WHERE `guid` = 6940983 AND `id` = 254354;
+
+-- #10869
+-- pickup 6940784 (Murloc Crown) moved 2.1 yd across and 2.07 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -10038.0948, `position_y` = -4310.4067, `position_z` = 3.4909, `orientation` = 3.52196, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.98197, `rotation3` = -0.189039 WHERE `guid` = 6940784 AND `id` = 254394;
