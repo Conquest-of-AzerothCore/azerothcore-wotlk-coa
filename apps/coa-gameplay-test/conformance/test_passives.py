@@ -9,8 +9,9 @@ import unittest
 
 import compare
 from classes import PROGRESSION_HEADER as HEADER, ClassSpell, class_spells, table_rows
-from passives import (FAMILIES, MAX_SPELLMOD, PASSIVE_DELTA, PHRASES, MetricPlan, PassiveTarget, classify,
-                      family_of, named_targets, passive_effects, passive_scenario, stat_after_token)
+from passives import (ALIASED_REASON_MARKER, FAMILIES, MAX_SPELLMOD, PASSIVE_DELTA, PHRASES, MetricPlan,
+                      PassiveTarget, classify, family_of, named_targets, passive_effects, passive_scenario,
+                      stat_after_token)
 from profile import load_class_file, spell_power_label, stat_label
 from tooltip import Displayed, Records
 from values import TARGET, dataset
@@ -220,7 +221,8 @@ class AliasedTokenFixtureTest(unittest.TestCase):
         self.assertEqual(second.points, 6.0)
         self.assertNotEqual(second.points, 10.0)
         self.assertEqual(second.token.text, '$s1')
-        self.assertEqual(second.reason, '')
+        self.assertEqual(second.reason, 'token $s1 reused from effect 0; expected value follows effect 0, '
+                         'not own points')
         self.assertTrue(second.plans)
 
     def test_second_effect_without_a_reused_token_stays_unmodelled(self):
@@ -229,6 +231,16 @@ class AliasedTokenFixtureTest(unittest.TestCase):
         records = Records(dbc)
         text = 'Grants $s1% of one thing.'
         values = [Displayed('$s1', 6.0, 0, 'percent')]
+        effect = classify(class_file, records, ALIASED_FIXTURE_SPELL, ALIASED_FIXTURE_SPELL, 1, [0, 1], text, values)
+        self.assertEqual(effect.reason, 'unmodelled: no own token and no sibling token with equal points')
+        self.assertEqual(effect.plans, ())
+
+    def test_second_effect_stays_unmodelled_when_the_reuse_is_within_the_first_effects_own_sentence(self):
+        class_file = {'class_id': TEMPLAR_CLASS_ID, 'level': LEVEL, 'dbc_dir': str(self.directory)}
+        dbc = dataset(self.directory)
+        records = Records(dbc)
+        text = 'Increases your maximum health by $s1%, further increasing by $s1% past 50% health.'
+        values = [Displayed('$s1', 6.0, 0, 'percent'), Displayed('$s1', 6.0, 0, 'percent')]
         effect = classify(class_file, records, ALIASED_FIXTURE_SPELL, ALIASED_FIXTURE_SPELL, 1, [0, 1], text, values)
         self.assertEqual(effect.reason, 'unmodelled: no own token and no sibling token with equal points')
         self.assertEqual(effect.plans, ())
@@ -411,7 +423,8 @@ class TemplarPassiveTest(unittest.TestCase):
         self.assertEqual((health.token.text, health.token.effect_index), ('$s1', 0))
         self.assertEqual(health.points, 6.0)
         self.assertNotEqual(health.points, 10.0)
-        self.assertEqual(health.reason, '')
+        self.assertEqual(health.reason, 'token $s1 reused from effect 0; expected value follows effect 0, '
+                         'not own points')
         self.assertEqual(plan_named(health, 'max_health').relation, 'scale')
 
     def test_rating_mask_gives_one_plan_per_rating(self):
@@ -438,7 +451,8 @@ class TemplarPassiveTest(unittest.TestCase):
             for spell in class_spells(DBC_DIR, class_id, HEADER):
                 if spell.passive:
                     for effect in passive_effects(class_file, spell):
-                        self.assertTrue(effect.reason == '' or effect.reason.startswith('unmodelled: '),
+                        self.assertTrue(effect.reason == '' or effect.reason.startswith('unmodelled: ')
+                                        or ALIASED_REASON_MARKER in effect.reason,
                                         (class_id, spell.spell_id, effect.effect, effect.reason))
 
 

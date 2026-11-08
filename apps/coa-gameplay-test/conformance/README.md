@@ -377,8 +377,9 @@ rating), the 125 base the client shows, while CalcValue gives 305.
 `passive_effects(class_file, spell)` classifies every effect of a passive's rank at the class level as
 `PassiveEffect(spell_id, effect, aura, misc, misc_b, family, token, plans, targets, reason, points)`. It measures
 nothing:
-the scenarios and the judging build on it. `reason` is empty for a modelled effect and starts with `unmodelled: `
-otherwise; an unmodelled effect has no `plans`.
+the scenarios and the judging build on it. `reason` starts with `unmodelled: ` for an unmodelled effect, which then
+has no `plans`; it names the distinguishing marker below for an effect modelled through `aliased_token`, and is
+empty for every other modelled effect.
 
 Family by `(Effect, EffectApplyAuraName)` (`FAMILIES`, `family_of`): effect 3 (dummy) is `P6` whatever its aura;
 otherwise the aura decides, and an aura absent from the table is `unknown` (`unmodelled: aura <n> has no passive
@@ -404,6 +405,18 @@ scale with level), so the expected value is `token.value` with the sign of `poin
 Otherwise: `unmodelled: no own token and no sibling token with equal points` (Graceful Fighter 705303 effect 2 has 0
 points beside 20 and 20). On Templar, 18 effects share a token; 16 of them are modelled (Courage's two aura 31
 effects stay unmodelled).
+
+An effect whose points disagree with every sibling's own token can still be modelled when the tooltip's own
+authoring reuses a sibling's literal `$sN` token verbatim for this effect's clause, rather than giving this effect
+its own number at all (`aliased_token`): the sibling's token text must recur in a second sentence of the tooltip
+(`SENTENCE_BREAK`-split), not merely a second time anywhere in the text, so a token legitimately repeated twice
+within its owning effect's own clause is never mistaken for a second effect's clause. The expected value is then
+that sibling's own signed points, not this effect's own (never displayed) raw `EffectBasePoints`: Fortified Body
+300515 effect 1 (max health, raw points 10%) reuses effect 0's `$s1` (6%) for its own "increases your maximum
+health by $s1%" sentence, so the expected value is 6%, matching both the client's rendered tooltip and CoA's own
+`AscensionTemplarContracts.cpp` load-time patch of effect 1's `BasePoints` down to effect 0's value. `reason` then
+reads `token <text> reused from effect <sibling>; expected value follows effect <sibling>, not own points`, so a
+reviewer can tell this path apart from a directly-owned or evenly-shared token without reading the source.
 
 Each `MetricPlan(metric, fields, relation, source, judged)` names a harness metric, its fields (the scenario adds
 `spell` where the metric needs one), the relation of the delta to the token, for `share` the base-step label of the

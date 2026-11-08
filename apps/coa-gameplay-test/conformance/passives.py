@@ -11,6 +11,7 @@ from tooltip import COLOR_CODE, Displayed, Records, Unreadable, read_tooltip
 from values import EFFECTS, TARGET, Expectation, dataset, facts_of, structure_stats
 
 UNMODELLED = 'unmodelled: '
+ALIASED_REASON_MARKER = ' reused from effect '
 UNKNOWN = 'unknown'
 SCRIPTED = 'P6'
 EFFECT_DUMMY = 3
@@ -329,14 +330,15 @@ def shared_token(records: Records, rank_id: int, effect: int, effects: list[int]
 
 
 def aliased_token(records: Records, rank_id: int, effect: int, effects: list[int],
-                  values: list[Displayed]) -> tuple[Displayed | None, float | None]:
+                  values: list[Displayed], text: str) -> tuple[Displayed | None, float | None]:
     for sibling in effects:
         if sibling == effect:
             continue
         candidates = (value for value in values
                      if value.effect_index == sibling and SHAREABLE_TOKEN.fullmatch(value.text))
         for token in candidates:
-            if sum(1 for value in values if value.text == token.text) < 2:
+            holding_sentences = {sentence for sentence in SENTENCE_BREAK.split(text) if token.text in sentence}
+            if len(holding_sentences) < 2:
                 continue
             points = signed_points(records, rank_id, sibling)
             if points is None:
@@ -514,8 +516,12 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
     family = family_of(spell(f'Effect[{effect}]'), aura)
     token = own_token(values, effect) or shared_token(records, rank_id, effect, effects, values)
     alias_points: float | None = None
+    alias_reason = ''
     if token is None:
-        token, alias_points = aliased_token(records, rank_id, effect, effects, values)
+        token, alias_points = aliased_token(records, rank_id, effect, effects, values, text)
+        if token is not None:
+            alias_reason = (f'token {token.text}{ALIASED_REASON_MARKER}{token.effect_index}; expected value '
+                            f'follows effect {token.effect_index}, not own points')
     targets: tuple[PassiveTarget, ...] = ()
     plans: tuple[MetricPlan, ...] = ()
     reason = ''
@@ -544,6 +550,8 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
             plans = effect_plans(aura, misc, text, token)
     except NotModelled as error:
         plans, reason = (), UNMODELLED + str(error)
+    if not reason:
+        reason = alias_reason
     points = alias_points if alias_points is not None else signed_points(records, rank_id, effect)
     return PassiveEffect(rank_id, effect, aura, misc, misc_b, family, token, plans, targets, reason, points)
 
