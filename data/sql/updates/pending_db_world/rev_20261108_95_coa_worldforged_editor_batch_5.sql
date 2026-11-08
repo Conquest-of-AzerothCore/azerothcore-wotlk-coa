@@ -23,3 +23,7 @@ UPDATE `gameobject` SET `position_x` = -10083.3, `position_y` = -4170.7, `positi
 -- #10478
 -- pickup 6941033 (Fishing Box) moved 11.9 yd across and 0.41 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 1299.087, `position_y` = -2188.949, `position_z` = 53.106, `orientation` = 5.81458, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.232165, `rotation3` = -0.972676 WHERE `guid` = 6941033 AND `id` = 340115;
+
+-- #10604
+-- second Gravesword left after the first was moved: 6941265 (Gravesword) hidden, not deleted
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6941265) AND `id` IN (518052);
