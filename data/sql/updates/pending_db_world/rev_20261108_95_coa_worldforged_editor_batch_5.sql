@@ -99,3 +99,7 @@ UPDATE `gameobject` SET `position_x` = -5306.4288, `position_y` = -1801.1319, `p
 -- #11606 #11625
 -- pickup 6941810 (Harpy Hunter) moved 7.5 yd across and 0.05 yd down to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 646.6526, `position_y` = -4556.1823, `position_z` = 20.1039, `orientation` = 5.758936, `rotation0` = 0.622917, `rotation1` = -0.20701, `rotation2` = 0.162949, `rotation3` = -0.736593 WHERE `guid` = 6941810 AND `id` = 95650;
+
+-- #11608
+-- pickup 6941983 (Needlewind Crossbow) moved 5.9 yd across and 0.00 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -5573.1407, `position_y` = -2718.4827, `position_z` = -51.585, `orientation` = 4.470529, `rotation0` = -0.016105, `rotation1` = -0.146624, `rotation2` = 0.771804, `rotation3` = -0.618515 WHERE `guid` = 6941983 AND `id` = 97136;
