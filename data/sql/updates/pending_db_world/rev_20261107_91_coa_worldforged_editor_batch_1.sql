@@ -60,3 +60,7 @@ UPDATE `gameobject` SET `position_x` = 2911.9517, `position_y` = 375.5602, `posi
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940021 AND `id` = 515370;
 -- pickup 6940732 (Rusty Shotgun) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940732 AND `id` = 517353;
+
+-- #7370
+-- pickup 6960004 (Bloodied Axe) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6960004 AND `id` = 93008;
