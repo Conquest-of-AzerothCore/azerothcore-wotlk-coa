@@ -64,3 +64,7 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940732 AND `id` = 517353
 -- #7370
 -- pickup 6960004 (Bloodied Axe) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6960004 AND `id` = 93008;
+
+-- #7488
+-- pickup 6942243 (Hanging Ogre Pouch) moved 4.6 yd across and 1.46 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -4001.4296, `position_y` = 304.4279, `position_z` = 59.7854, `orientation` = 0.22169, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.110618, `rotation3` = 0.993863 WHERE `guid` = 6942243 AND `id` = 96103;
