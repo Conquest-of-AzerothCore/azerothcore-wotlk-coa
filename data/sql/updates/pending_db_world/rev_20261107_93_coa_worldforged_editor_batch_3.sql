@@ -46,3 +46,7 @@ UPDATE `gameobject` SET `position_x` = -11354.6597, `position_y` = -246.7811, `p
 -- #10869
 -- pickup 6940784 (Murloc Crown) moved 2.1 yd across and 2.07 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -10038.0948, `position_y` = -4310.4067, `position_z` = 3.4909, `orientation` = 3.52196, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.98197, `rotation3` = -0.189039 WHERE `guid` = 6940784 AND `id` = 254394;
+
+-- #10918
+-- pickup 6942283 (Discarded Wand) moved 36.9 yd across and 1.91 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -2253.4172, `position_y` = -2389.7135, `position_z` = 93.9540, `orientation` = 2.354208, `rotation0` = 0.323827, `rotation1` = 0.779596, `rotation2` = 0.205635, `rotation3` = -0.495056 WHERE `guid` = 6942283 AND `id` = 97116;
