@@ -321,6 +321,9 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
     def test_cast_triggers_name_the_words_that_make_the_spell_a_trigger(self):
         for entry in trigger_entries(CLASS_FILE):
             with self.subTest(aura=entry['aura']):
+                if 'trigger' not in entry:
+                    self.assertTrue(entry.get('status'))
+                    continue
                 trigger = entry['trigger']
                 if trigger['action'] == 'attack':
                     self.assertIn(entry['trial_metric'], ('melee_attack_count', 'melee_damage_count'))
@@ -675,9 +678,20 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
             with self.subTest(aura=aura):
                 entry = templar_trigger(aura)
                 self.assertEqual(entry['status'], 'unmodelled')
-                self.assertIn('no case for', entry['reason'])
+                self.assertNotIn('trigger', entry)
                 with self.assertRaises(ValueError):
                     trigger_plan(CLASS_FILE, entry)
+
+    def test_keeping_the_oath_is_reachable_through_its_own_spell_proc_row(self):
+        entry = templar_trigger(KEEPING_THE_OATH)
+        self.assertIn('rev_20261001_04_templar_keeping_the_oath_avoid.sql', entry['reason'])
+        self.assertIn('PROC_HIT_DODGE|PROC_HIT_PARRY', entry['reason'])
+        self.assertIn('no action in run.py', entry['reason'])
+
+    def test_warrior_of_tyr_has_no_reachable_trigger_at_all(self):
+        entry = templar_trigger(WARRIOR_OF_TYR)
+        self.assertIn('no case for 301253', entry['reason'])
+        self.assertIn('out of scope to fix here', entry['reason'])
 
     def test_periodic_trigger_interval_is_its_own_amplitude(self):
         for aura, amplitude in ((LIGHTS_WARD, 2000), (LIGHTS_CHOSEN, 5000)):

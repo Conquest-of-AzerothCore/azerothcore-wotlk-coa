@@ -900,6 +900,7 @@ A `triggers` entry of the class file is a passive whose tooltip says that someth
 | `trial_attempts_factor`, `trial_attempts_reason` | multiplies the scheduled attempts (default 1, unchanged); a cited reason, for a trigger whose own cast sometimes executes as a different spell id and so is not counted as a trial of itself |
 | `periodic_initial_tick` | for a `periodic` trigger only: the aura's own `AttributesEx5` carries `SPELL_ATTR5_EXTRA_INITIAL_PERIOD`, so one extra tick is expected per counted part on top of `attempts x per_trigger` |
 | `status`, `reason` | `unmodelled` or `ambiguous_tooltip` for an entry without a scenario, and why |
+| `trigger` (status entries) | optional: a `status` entry with no real trigger mechanism to point to (dead effect, or reachable only through a mechanism this harness cannot drive) omits `trigger`, `trigger_spell_text` and `trial_metric` entirely rather than carry a fabricated shape; the entry-shape test only enforces the full `trigger` shape on entries that have one |
 | `question` | the question for players when the entry's verdict is an `alert` the server code explains: a server finding goes to the player question list, not into a verdict change |
 
 `aura_proc_rate` is not a judge of these entries: their passives have `ProcFlags` 0 and are scripted (design D10).
@@ -1014,12 +1015,23 @@ reusing the field for the same effect (a floor below the harness's own `CAST_MAR
 adding a second field with an identical mechanism.
 Light's Ward 300529 and Light's Chosen 301310 are in neither `TemplarEvents` nor `TemplarCastDrivers`: their
 `SPELL_AURA_PERIODIC_TRIGGER_SPELL` effects (23) run unmodified through the generic engine's amplitude tick
-(2000 ms and 5000 ms), using the new `periodic` trigger action described above. Keeping the Oath 92109 and
-Warrior of Tyr 301253 carry a `SPELL_AURA_PROC_TRIGGER_SPELL` effect (42) that no code path in this tree can
-ever fire: both have `ProcFlags` 0 on their own `Spell.dbc` row, `SpellMgr.cpp:2512` ("Skip if no proc flags in
-DBC") skips generating a `spell_proc` row for either, no `spell_proc` SQL row exists for either id or their
-`EffectTriggerSpell`, and `AscensionTemplarEvents.cpp`'s `DoCheckProc`/`OnProc` switch has no case for either —
-so both entries are `status: "unmodelled"`, same convention as Disciplined Blows 680397.
+(2000 ms and 5000 ms), using the new `periodic` trigger action described above. Warrior of Tyr 301253 carries a
+`SPELL_AURA_PROC_TRIGGER_SPELL` effect (42) that no code path in this tree can ever fire: `ProcFlags` 0 on its
+own `Spell.dbc` row, `SpellMgr.cpp:2512` ("Skip if no proc flags in DBC") skips generating a `spell_proc` row for
+it, no `spell_proc` SQL row exists for 301253 or its `EffectTriggerSpell`, and `AscensionTemplarEvents.cpp`'s
+`DoCheckProc`/`OnProc` switch has no case for it — so this entry is `status: "unmodelled"`, same convention as
+Disciplined Blows 680397, and (unlike Keeping the Oath below) has no `trigger` field at all since no mechanism
+backs one. Keeping the Oath 92109 also carries a `SPELL_AURA_PROC_TRIGGER_SPELL` effect (42,
+`EffectTriggerSpell` 681170 `SPELL_RECENTLY_PARRIED_OR_DODGED`), and `ApplyContracts` sets its DBC `ProcFlags` to
+0 at runtime the same way, but this one is reachable: `data/sql/updates/pending_db_world/rev_20261001_04_templar_keeping_the_oath_avoid.sql`
+(merged, PR #6159) gives 92109 an explicit `spell_proc` row (`ProcFlags` 40, `HitMask` 48 = dodge or parry,
+`Chance` 100), and `LoadSpellProcs` populates `mSpellProcMap` from that row before the DBC-autogeneration gate
+`SpellMgr.cpp:2512` ever runs, so the generic engine's `AuraEffect::HandleProcTriggerSpellAuraProc` casts 681170
+on a taken melee dodge or parry with no scripted `OnProc` case needed. The entry is still `status: "unmodelled"`,
+without a `trigger` field, because this harness has no action that makes a creature melee-attack the player
+(`hits.py`'s `creature_fixture` is a stationary, non-aggressive dummy) nor one that forces or statistically
+bounds a dodge/parry outcome — the same kind of missing-capability gap as 300502/301339/500011 below, not a
+dead effect.
 Blessing of Aggramar 300502, Holy Tempest 301339 and Holy Combatant 500011 share this lot's remaining P5-family
 gap (round3 `trigger-lot-5-spec.md`, part A) but are not yet modelled: each needs mechanism work beyond this
 `triggers` schema (an `aura_refresh` check family reading a duration delta instead of a discrete count, and, for
