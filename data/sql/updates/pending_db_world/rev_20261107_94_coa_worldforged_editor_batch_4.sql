@@ -14,3 +14,7 @@ UPDATE `gameobject` SET `position_x` = -12367.8783, `position_y` = -734.0621, `p
 -- #11235
 -- pickup 6970042 (Brambleblade Blade) moved 29.2 yd across and 0.99 yd down to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -4931.6629, `position_y` = -2277.9665, `position_z` = -65.5449, `orientation` = 6.165028, `rotation0` = -0.0421068, `rotation1` = 0.436118, `rotation2` = -0.0204341, `rotation3` = 0.898672 WHERE `guid` = 6970042 AND `id` = 9900038;
+
+-- #11250
+-- pickup 6940946 (Red Metal Pauldrons) moved 0.8 yd across and 0.12 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 3007.2122, `position_y` = -2736.0122, `position_z` = 129.5041, `orientation` = 4.01963, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.905169, `rotation3` = -0.425051 WHERE `guid` = 6940946 AND `id` = 1345112;
