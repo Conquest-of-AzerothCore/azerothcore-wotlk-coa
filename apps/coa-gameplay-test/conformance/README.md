@@ -507,7 +507,11 @@ Temple Guardian 801165/803792 charges an ally and heals both it and the caster f
 `EffectDieSides` exactly match a sibling effect's (`matching_sibling`) borrows that sibling's reading and roll, so
 both effects contribute the same expected value; this is conservative on purpose (`SHARED_TOKEN_KINDS`), since
 `shown_values`/`value_range`/`fixed_value` stay pure functions of their own effect for every other kind and for
-rolled/periodic reads. Chastise 503141 has a `school` effect with a readable token (`$m1`) and a `WEAPON_PERCENT_DAMAGE`
+rolled/periodic reads. `effect_hit` never sums several effect indexes into one combined roll: each index is an
+independent per-cast event (one heal landing on the ally, another on the caster for Temple Guardian), mixed
+(equally-weighted averaged) into one distribution, and `expected_hit` multiplies `hits_per_cast` by the index
+count so the measured event total still has to clear all of them (ADR 0027). Chastise 503141 has a `school`
+effect with a readable token (`$m1`) and a `WEAPON_PERCENT_DAMAGE`
 effect gated by an unparsed `$?s` conditional with no token of its own; `hit_kind` resolves several candidate kinds to
 one by keeping only the kinds that have an own token on one of their effects (`readout.values`), and raises `effects of
 several hit models` as before when more than one kind still has one (or none does).

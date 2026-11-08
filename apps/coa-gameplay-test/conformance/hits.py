@@ -272,10 +272,19 @@ def matching_sibling(records: Records, rank_id: int, index: int) -> int | None:
     return None
 
 
+def mixed(distributions: Sequence[Distribution]) -> Distribution:
+    result: Distribution = {}
+    weight = 1.0 / len(distributions)
+    for distribution in distributions:
+        for value, share in distribution.items():
+            result[value] = result.get(value, 0.0) + share * weight
+    return result
+
+
 def effect_hit(readout: Readout, indexes: list[int], rolls: Mapping[int, Sequence[float]], *, kind: str = '',
               records: Records | None = None, rank_id: int = 0) -> tuple[Distribution, float, list[str]]:
-    distribution: Distribution = {0: 1.0}
-    tooltip_mean = 0.0
+    distributions: list[Distribution] = []
+    tooltip_means: list[float] = []
     texts: list[str] = []
     for index in indexes:
         source = index
@@ -287,13 +296,13 @@ def effect_hit(readout: Readout, indexes: list[int], rolls: Mapping[int, Sequenc
         low, high, shown = value_range(readout, source)
         key = index if index in rolls else source if source in rolls else None
         if key is not None:
-            distribution = summed(distribution, rolled_hit(rolls[key]))
-            tooltip_mean += sum(rolls[key]) / len(rolls[key])
+            distributions.append(rolled_hit(rolls[key]))
+            tooltip_means.append(sum(rolls[key]) / len(rolls[key]))
         else:
-            distribution = summed(distribution, effect_roll(low, high))
-            tooltip_mean += (low + high) / 2
+            distributions.append(effect_roll(low, high))
+            tooltip_means.append((low + high) / 2)
         texts += shown
-    return distribution, tooltip_mean, ordered(readout, texts)
+    return mixed(distributions), sum(tooltip_means) / len(tooltip_means), ordered(readout, texts)
 
 
 def rolled_values(records: Records, rank_id: int, caster: CasterStats, readout: Readout,
@@ -352,6 +361,7 @@ def expected_hit(readout: Readout, spell_effects: Sequence[int], caster: CasterS
                  rank_id: int = 0) -> HitModel:
     names = tuple(aura_names) or (0,) * len(spell_effects)
     kind, indexes = hit_kind(spell_effects, names, triggered, readout)
+    events = 1
     if kind == 'weapon':
         distribution, tooltip_mean, texts = weapon_hit(readout, spell_effects, caster, weapon)
     elif kind == TRIGGERED_WEAPON:
@@ -362,10 +372,11 @@ def expected_hit(readout: Readout, spell_effects: Sequence[int], caster: CasterS
         if kind in PERIODIC_KINDS.values() and len(distribution) > 1:
             raise Unmodelled('a periodic amount is rolled once per aura (AuraEffect::CalculateAmount) and its ticks '
                              'share it, so its ticks are not independent hits')
+        events = len(indexes)
     used = applicable(modifiers, kind)
     mean, sigma = moments(mitigated(done(distribution, used), mitigation))
     return HitModel(kind=kind, mean=mean, sigma=sigma, tooltip_mean=tooltip_mean,
-                    hits_per_cast=ticks if kind in TICKING_KINDS else 1, modifiers=used,
+                    hits_per_cast=ticks if kind in TICKING_KINDS else events, modifiers=used,
                     displayed=tuple(texts))
 
 

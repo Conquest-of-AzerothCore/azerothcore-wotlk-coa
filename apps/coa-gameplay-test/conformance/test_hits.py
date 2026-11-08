@@ -7,8 +7,8 @@ import unittest
 from classes import class_spells
 from compare import Run, Verdict, judge_hit
 from hits import (HIT_CHECKS, MAX_SCENARIO_MS, HitModel, Modifier, Unmodelled, WeaponProfile, casts_needed,
-                  expected_hit, hit_kind, hit_parts, hit_scenario, measured_hit_model, melee_scenario, records_of,
-                  periodic_tick_readout, reference_caster, reference_hit_model, reference_melee_model,
+                  effect_hit, expected_hit, hit_kind, hit_parts, hit_scenario, measured_hit_model, melee_scenario,
+                  records_of, periodic_tick_readout, reference_caster, reference_hit_model, reference_melee_model,
                   rolled_values, scheduled_casts, weapon_profile)
 from mitigation import REFERENCE_TARGET, MitigationModel, TargetProfile, expected_mitigation
 from profile import CLASSES_DIR, load_class_file
@@ -472,7 +472,8 @@ class HitScenarioTest(unittest.TestCase):
                 base = records.field('Spell', rank_id, 'EffectBasePoints[1]')
                 rolls = rolled_values(records, rank_id, caster, readout, [1])[1]
                 self.assertEqual(len(rolls), sides)
-                self.assertAlmostEqual(model.tooltip_mean, 2 * (sum(rolls) / len(rolls)), places=6)
+                self.assertEqual(model.hits_per_cast, 2)
+                self.assertAlmostEqual(model.tooltip_mean, sum(rolls) / len(rolls), places=6)
                 self.assertEqual(model.kind, 'heal')
                 self.assertEqual(records.field('Spell', rank_id, 'EffectBasePoints[2]'), base)
                 self.assertEqual(records.field('Spell', rank_id, 'EffectDieSides[2]'), sides)
@@ -562,6 +563,31 @@ class HitScenarioTest(unittest.TestCase):
         alert_verdict = judge_hit(base, self.templar, [(scenario, half_run, hit)], measured_hit_model)
         self.assertEqual(alert_verdict.status, 'alert')
         self.assertIn('usable hits', alert_verdict.explanation)
+
+    def test_effect_hit_mixes_instead_of_summing_several_indexes(self):
+        readout = Readout(values=[Displayed('$m1', 100.0, 0, 'flat'), Displayed('$m2', 200.0, 1, 'flat')],
+                          unreadable=[])
+        distribution, tooltip_mean, _ = effect_hit(readout, [0, 1], {})
+        mean = sum(value * share for value, share in distribution.items())
+        self.assertAlmostEqual(mean, 150.0, places=6)
+        self.assertAlmostEqual(tooltip_mean, 150.0, places=6)
+
+    def test_temple_guardian_hit_mean_insufficient_when_only_one_receiver_is_measured(self):
+        scenario, expectations = hit_scenario(self.templar, self.temple_guardian_spell(), 1)
+        hit = hit_expectation(expectations)
+        self.assertEqual(hit.model['hits_per_cast'], 2)
+        measured = {**self.templar['reference_stats'], f'known_aura {CLASS_TUNING_AURA}': 1}
+        model = measured_hit_model(self.templar, hit, measured)
+        labels = hit.model['measurements']
+        minimum = hit.model['minimum_hits']
+        base = Verdict(label=hit.label, status='unmeasured', measured=None, expected=None, low=None, high=None,
+                       explanation='')
+        one_receiver_only = Run(key='one-receiver', status='ok', message='',
+                                values={**measured, labels['total']: model.mean * (minimum // 2),
+                                        labels['count']: minimum // 2},
+                                steps=[], max_step_ms=None)
+        verdict = judge_hit(base, self.templar, [(scenario, one_receiver_only, hit)], measured_hit_model)
+        self.assertEqual(verdict.status, 'insufficient_trials')
 
     def test_benediction_hit_scenario_does_not_relocate_the_caster(self):
         scenario, expectations = hit_scenario(self.templar, self.benediction_spell(), 1)
