@@ -84,3 +84,7 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941022 AND `id` = 254164
 -- #8910, #9394, #11292
 -- pickup 6960003 (Bloodied Axe) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6960003 AND `id` = 93008;
+
+-- #9035
+-- pickup 6960209 (Shadow Cowl) moved 2.35 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 6007.9000, `position_y` = -55.0000, `position_z` = 24.6030, `orientation` = 1.24088, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.581391, `rotation3` = 0.813624 WHERE `guid` = 6960209 AND `id` = 1345125;
