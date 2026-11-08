@@ -48,7 +48,7 @@ UPDATE `gameobject` SET `position_x` = 28.7522, `position_y` = -3775.9517, `posi
 UPDATE `gameobject` SET `position_x` = -8214.7939, `position_y` = -1592.7333, `position_z` = -203.0017, `orientation` = 5.642196, `rotation0` = 0.161805, `rotation1` = 0.00107755, `rotation2` = 0.318537, `rotation3` = -0.933998 WHERE `guid` = 6942045 AND `id` = 95937;
 
 -- #6558
--- template 515828 (Captain\'s Compass): size 1 -> 0.7 (1 spawns)
+-- template 515828 (Captain's Compass): size 1 -> 0.7 (1 spawns)
 UPDATE `gameobject_template` SET `size` = 0.7 WHERE `entry` = 515828;
 -- pickup 6941523 (Captain's Compass) moved 10.1 yd across and 1.73 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -8015.3655, `position_y` = -5193.8004, `position_z` = 14.8455, `orientation` = 1.67885, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.744259, `rotation3` = 0.667891 WHERE `guid` = 6941523 AND `id` = 515828;
