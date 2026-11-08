@@ -19,6 +19,7 @@
 #include "Config.h"
 #include "CryptoRandom.h"
 #include "DatabaseEnv.h"
+#include "IpAddress.h"
 #include "Item.h"
 #include "Mail.h"
 #include "Realm.h"
@@ -48,6 +49,30 @@ namespace
     constexpr uint32 AcceptRecruitment = 1;
     constexpr uint32 DeclineRecruitment = 2;
     constexpr time_t ProposalLifetime = 60;
+    constexpr time_t LinkedRewardInterval = 60;
+    constexpr time_t UnlinkedRecoveryInterval = 15 * 60;
+    constexpr uint32 RewardSpread = 17;
+
+    bool CanLinkRecruitmentAddresses(WorldSession& inviter, WorldSession& recipient)
+    {
+        auto parse = [](WorldSession& session) -> std::optional<boost::asio::ip::address_v6::bytes_type>
+        {
+            boost::system::error_code error;
+            auto const address = Acore::Net::make_address(session.GetRemoteAddress(), error);
+            if (error || address.is_unspecified())
+                return std::nullopt;
+            auto const normalized = address.is_v4()
+                ? boost::asio::ip::make_address_v6(boost::asio::ip::v4_mapped, address.to_v4())
+                : address.to_v6();
+            if (normalized.is_v4_mapped() &&
+                boost::asio::ip::make_address_v4(boost::asio::ip::v4_mapped, normalized).is_unspecified())
+                return std::nullopt;
+            return normalized.to_bytes();
+        };
+        auto const inviterAddress = parse(inviter);
+        auto const recipientAddress = parse(recipient);
+        return inviterAddress && recipientAddress && *inviterAddress != *recipientAddress;
+    }
 
     uint8 GrantLevelError(Player* donor, Player* target)
     {
@@ -162,7 +187,6 @@ void WorldSession::ClearRecruitAFriendRequests()
     _rafGrantExpiry = 0;
     _rafInviter.Clear();
     _rafInviteExpiry = 0;
-    _rafRewardsNextUpdate = 0;
     _rafSummoner.Clear();
 }
 
@@ -194,6 +218,8 @@ bool WorldSession::InviteRecruitAFriend(Player* target)
         return reject("You cannot recruit yourself or another character on your own account.");
 
     WorldSession* recipient = target->GetSession();
+    if (!CanLinkRecruitmentAddresses(*this, *recipient))
+        return reject("Recruit-A-Friend requires two different, valid IP addresses.");
     if (recipient->recruiterId == GetAccountId())
         return reject("That account is already recruited by you. The link is permanent; use .raf status to view your recruits.");
     if (recipient->recruiterId)
@@ -257,6 +283,12 @@ bool WorldSession::HandleRecruitAFriendInviteResponse(uint32 menuId, uint32 acti
         !_player->IsAlive() || !inviter->IsAlive() ||
         _player->IsInCombat() || inviter->IsInCombat())
         return true;
+
+    if (!CanLinkRecruitmentAddresses(*inviter->GetSession(), *this))
+    {
+        ChatHandler(this).SendSysMessage("Recruit-A-Friend requires two different, valid IP addresses.");
+        return true;
+    }
 
     uint32 const inviterAccount = inviter->GetSession()->GetAccountId();
     auto* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_RAF_RECRUITER);
@@ -387,9 +419,11 @@ void WorldSession::UpdateRecruitAFriendRewards(bool force)
     if (IsBot() || !_player || !_player->IsInWorld())
         return;
     time_t const now = GameTime::GetGameTime().count();
-    if (!force && now < _rafRewardsNextUpdate)
+    bool const linked = recruiterId || isRecruiter;
+    if ((!force || !linked) && now < _rafRewardsNextUpdate)
         return;
-    _rafRewardsNextUpdate = now + 60;
+    _rafRewardsNextUpdate = now + (linked ? LinkedRewardInterval : UnlinkedRecoveryInterval) +
+        GetAccountId() % RewardSpread;
     if (recruiterId)
     {
         if (!_rafRewardSession)

@@ -1195,7 +1195,7 @@ void ObserveExtensionPacket(Actor& actor, WorldPacket const& packet)
         packet.GetOpcode() != SMSG_CORPSE_RECLAIM_DELAY &&
         packet.GetOpcode() != SMSG_TRADE_STATUS &&
         packet.GetOpcode() != SMSG_TOTEM_CREATED &&
-        packet.GetOpcode() != SMSG_MIRRORIMAGE_DATA)
+        packet.GetOpcode() != SMSG_MIRRORIMAGE_DATA && packet.GetOpcode() != SMSG_TRIGGER_MOVIE)
         return;
 
     ++actor.extensionPackets[packet.GetOpcode()];
@@ -3128,6 +3128,53 @@ private:
             return unit->IsAlive();
         if (metric == "map_id")
             return unit->GetMapId();
+        if (metric == "spell_power_cost")
+        {
+            SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
+            Require(info != nullptr, "Power cost observation needs a valid spell");
+            return info->CalcPowerCost(unit, info->GetSchoolMask());
+        }
+        if (metric == "spell_effect_kind" || metric == "spell_effect_misc")
+        {
+            SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
+            uint32 const effect = step.get<uint32>("effect", 0);
+            Require(info && effect < MAX_SPELL_EFFECTS, "Spell effect observation needs a valid spell and slot");
+            return metric == "spell_effect_kind" ? double(info->Effects[effect].Effect)
+                : double(info->Effects[effect].MiscValue);
+        }
+        if (metric == "movie_exists")
+            return sMovieStore.LookupEntry(step.get<uint32>("id")) != nullptr;
+        if (metric == "position_o")
+            return unit->GetOrientation();
+        if (metric == "avoidance_samples")
+        {
+            Unit* target = GetUnit(step.get<std::string>("target"));
+            uint32 const probe = step.get<uint32>("id") - 1;
+            Require(probe <= 5, "Unknown native avoidance probe");
+            SpellInfo const* info = sSpellMgr->GetSpellInfo(step.get<uint32>("spell", 78));
+            Require(info != nullptr, "Avoidance probe spell missing");
+            uint32 count = 0;
+            for (uint32 sample = 0; sample < 512; ++sample)
+            {
+                if (probe <= 3)
+                {
+                    MeleeHitOutcome const outcome = unit->RollMeleeOutcomeAgainst(target, BASE_ATTACK, 0,
+                        probe == 3 ? 20000 : 0, probe == 0 ? 20000 : 0,
+                        probe == 1 ? 20000 : 0, probe == 2 ? 20000 : 0);
+                    MeleeHitOutcome const expected = probe == 0 ? MELEE_HIT_DODGE
+                        : probe == 1 ? MELEE_HIT_PARRY : probe == 2 ? MELEE_HIT_BLOCK : MELEE_HIT_MISS;
+                    count += outcome == expected;
+                }
+                else if (probe == 4)
+                {
+                    SpellMissInfo const outcome = unit->MeleeSpellHitResult(target, info);
+                    count += outcome == SPELL_MISS_DODGE || outcome == SPELL_MISS_PARRY || outcome == SPELL_MISS_BLOCK;
+                }
+                else
+                    count += unit->isSpellBlocked(target, info);
+            }
+            return count;
+        }
         if (metric == "position_x")
             return unit->GetPositionX();
         if (metric == "position_y")
@@ -6460,6 +6507,13 @@ private:
                 player->AddUnitMovementFlag(movementFlag);
             else
                 player->RemoveUnitMovementFlag(movementFlag);
+            if (step.get<bool>("unit_state", false))
+            {
+                if (step.get<bool>("enabled"))
+                    player->AddUnitState(UNIT_STATE_MOVING);
+                else
+                    player->ClearUnitState(UNIT_STATE_MOVING);
+            }
         }
         else if (action == "relocate")
         {
@@ -7150,19 +7204,24 @@ private:
                 recipient = player->GetGuardianPet();
             if (auto entry = step.get_optional<uint32>("owned_entry"))
                 recipient = GetOwnedCreature(player, *entry);
+            if (auto target = step.get_optional<std::string>("target"))
+                recipient = GetUnit(*target);
             Require(recipient != nullptr, "Aura fixture requires its selected player, pet or owned creature");
             SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
             Require(info != nullptr, "Unknown fixture aura");
+            auto const casterId = step.get_optional<std::string>("caster");
+            Unit* auraCaster = casterId ? GetUnit(*casterId) : recipient;
+            ObjectGuid const casterGuid = casterId ? auraCaster->GetGUID() : ObjectGuid::Empty;
             uint32 stacks = step.get<uint32>("stacks");
             Require(stacks <= std::max<uint32>(1, info->CalcMaxAuraStacks(recipient)),
                 "Fixture aura exceeds its stack limit");
             if (!stacks)
-                recipient->RemoveAurasDueToSpell(spell);
+                recipient->RemoveAurasDueToSpell(spell, casterGuid);
             else
             {
-                Aura* aura = recipient->GetAura(spell);
+                Aura* aura = recipient->GetAura(spell, casterGuid);
                 if (!aura)
-                    aura = recipient->AddAura(spell, recipient);
+                    aura = auraCaster->AddAura(spell, recipient);
                 Require(aura != nullptr, "Could not apply fixture aura");
                 aura->SetStackAmount(uint8(stacks));
                 if (aura->GetMaxDuration() == 0)
@@ -7408,6 +7467,8 @@ private:
             uint32 const skill = step.get<uint32>("skill");
             Require(sSkillLineStore.LookupEntry(skill) != nullptr, "Unknown fixture skill");
             player->SetSkill(skill, 1, step.get<uint16>("value"), step.get<uint16>("maximum"));
+            if (step.get<bool>("refresh_stats", false))
+                player->UpdateAllStats();
         }
         else if (action == "gather_skill")
         {

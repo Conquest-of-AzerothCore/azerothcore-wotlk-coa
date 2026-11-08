@@ -12,6 +12,7 @@ namespace AscensionBazaarTokenCap
 constexpr uint32 TOKEN_ITEM = 975001;
 
 uint32 GetCap();
+void WarmAccount(Player* player);
 
 uint32 Claim(Player* player, uint32 count);
 

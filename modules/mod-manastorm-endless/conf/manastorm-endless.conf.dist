@@ -3,6 +3,23 @@
 # Enable/disable the Manastorm gameplay module (requires restart).
 Manastorm.Enable = 1
 
+# CoA realm only (CoA.ClassModel = "coa"). Replaces regular caches with Bazaar Tokens.
+# Bonus caches and other reward currencies keep their own delivery rules.
+# Apply both world/character rev_20261103_01_manastorm_coa_token_rewards.sql and
+# rev_20261104_02_manastorm_coa_encounter_rewards.sql before enabling. Enabled requires restart.
+# The remaining policy options are reloadable. Existing windows retain their saved expiry.
+Manastorm.CoALootMode.Enabled = 0
+Manastorm.CoALootMode.FirstClear.Enabled = 1
+Manastorm.CoALootMode.Repeat.Enabled = 1
+# 1 = first clears renew with the personal window; 0 = lifetime first clears.
+# First clears are separate per character, depth, difficulty and normal/endgame track.
+Manastorm.CoALootMode.FirstClear.ResetWithWindow = 1
+# Shared across all difficulties/tracks per character. Range 0..1000000; 0 stops token awards.
+Manastorm.CoALootMode.TokenCap = 1000
+# Window starts on the first eligible completion, then expires after this many hours (1..168).
+Manastorm.CoALootMode.WindowHours = 24
+# Reward amounts/depth overrides/milestones are in manastorm_coa_token_rewards.
+
 # Weekly cap for regular endgame-track caches only, per character and shared across modes/tiers.
 # Leveling and normal-track caches (including level 60), first-clear bonus caches,
 # Treasure Keeper caches, currencies, cases, card packs and Greedy Demon rewards are exempt.

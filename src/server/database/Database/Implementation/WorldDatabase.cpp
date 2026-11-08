@@ -23,6 +23,9 @@ void WorldDatabaseConnection::DoPrepareStatements()
     if (!m_reconnecting)
         m_stmts.resize(MAX_WORLDDATABASE_STATEMENTS);
 
+    PrepareStatement(WORLD_SEL_COA_DAILY_LOGIN_REWARDS,
+        "SELECT item_entry, quantity FROM coa_daily_login_rewards WHERE enabled = 1 ORDER BY id", CONNECTION_SYNCH);
+
     PrepareStatement(WORLD_SEL_ASCENSION_NPC_OVERHEAD_ICONS,
         "SELECT creature_entry, spell_id FROM ascension_npc_overhead_icons WHERE enabled = 1", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_ASCENSION_RACE_CLASS_STATS,

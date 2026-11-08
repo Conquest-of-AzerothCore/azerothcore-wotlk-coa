@@ -336,8 +336,8 @@ namespace
     /// fought (a Mythical Boon, a prisoner) never gets one.
     ///
     /// The maps are the open world the realm lists and the classic dungeons with a band. Raids,
-    /// battlegrounds and arenas never scale, and neither does CoA's scripted private content. A dungeon
-    /// scales on its regular difficulty only (`ScaledDungeon`).
+    /// battlegrounds and arenas keep their authored scaling. Registered grouped Manastorm private
+    /// instances use personal levels. Other dungeons scale on regular difficulty (`ScaledDungeon`).
     ///
     /// There is no realm switch in front of the list: whether a character scales in the open world is
     /// their own choice (`ScalingChoiceEnabled`), and the module's switch only decides whether that
@@ -349,18 +349,21 @@ namespace
 
         Map* map = creature->GetMap();
         ScalingScope const* scope = Scope();
-        if (!map || !scope || map->IsScriptedPrivateInstance() || map->IsBattlegroundOrArena() || map->IsRaid())
+        bool const personalInstance = LocalLevelScaling::PersonalInstanceScalingFor(map);
+        if (!map || map->IsBattlegroundOrArena() ||
+            (!personalInstance && (!scope || map->IsScriptedPrivateInstance() || map->IsRaid())))
             return false;
 
-        if (map->IsDungeon())
+        if (!personalInstance && map->IsDungeon())
         {
             if (!ScaledDungeon(map))
                 return false;
         }
-        else if (!scope->WorldMaps.contains(map->GetId()))
+        else if (!personalInstance && !scope->WorldMaps.contains(map->GetId()))
             return false;
 
-        if (creature->IsPet() || creature->IsTrigger() || creature->IsCritter() || creature->isWorldBoss() ||
+        if (creature->IsPet() || creature->IsTrigger() || creature->IsCritter() ||
+            (creature->isWorldBoss() && !personalInstance) ||
             creature->GetCreatureType() == CREATURE_TYPE_NON_COMBAT_PET || creature->IsControlledByPlayer() ||
             creature->GetCharmerOrOwnerPlayerOrPlayerItself())
             return false;
@@ -433,12 +436,18 @@ namespace
         // scales for a Dungeon Finder group, which the finder admits well below the dungeon's authored
         // level, and for nobody who walked in.
         Map const* map = creature->GetMap();
-        if (map->IsDungeon() ? !FinderScaledDungeon(viewer, map) : !LocalLevelScaling::ScalingChoiceEnabled(viewer))
+        bool const personalInstance = LocalLevelScaling::PersonalInstanceScalingFor(map, viewer);
+        if (map->IsScriptedPrivateInstance() && !personalInstance)
+            return false;
+        if (!personalInstance && (map->IsDungeon() ?
+            !FinderScaledDungeon(viewer, map) : !LocalLevelScaling::ScalingChoiceEnabled(viewer)))
             return false;
 
         uint8 const own = creature->GetLevel();
         uint8 level = own;
-        if (map->IsDungeon())
+        if (personalInstance)
+            level = viewer->GetLevel();
+        else if (map->IsDungeon())
         {
             LocalLevelScaling::LevelBand const* band = DungeonBandFor(map);
             if (!band)
@@ -453,7 +462,7 @@ namespace
             level = LocalLevelScaling::ScaleCreatureLevelForViewer(own, viewer->GetLevel(), offset);
         }
 
-        if (level == own)
+        if (level == own && !personalInstance)
             return false;               // their version *is* the creature: nothing to virtualise
 
         CreatureTemplate const* info = creature->GetCreatureTemplate();
@@ -513,6 +522,12 @@ namespace
         return view.Level;
     }
 
+    double ViewDamageForCore(Player const* viewer, Creature const* creature)
+    {
+        CreatureView view;
+        return ViewFor(creature, const_cast<Player*>(viewer), view) ? view.DamageTakenFactor : 1.0;
+    }
+
     uint32 ViewMaxHealthForCore(Player const* viewer, Creature const* creature)
     {
         CreatureView view;
@@ -555,7 +570,10 @@ namespace
             return 1.0;
 
         Map const* map = to->FindMap();
-        if (from->FindMap() != map || !FinderScaledDungeon(from, map) || !FinderScaledDungeon(to, map))
+        bool const personalInstance = LocalLevelScaling::PersonalInstanceScalingFor(map, from) &&
+            LocalLevelScaling::PersonalInstanceScalingFor(map, to);
+        if (from->FindMap() != map ||
+            (!personalInstance && (!FinderScaledDungeon(from, map) || !FinderScaledDungeon(to, map))))
             return 1.0;
 
         // A character held to the authored creatures by a challenge fights blows of the authored size.
@@ -564,8 +582,10 @@ namespace
             return 1.0;
 
         LocalLevelScaling::LevelBand const* band = DungeonBandFor(map);
-        uint8 const fromLevel = LocalLevelScaling::ScaleDungeonCreatureLevelForViewer(from->GetLevel(), *band);
-        uint8 const toLevel = LocalLevelScaling::ScaleDungeonCreatureLevelForViewer(to->GetLevel(), *band);
+        uint8 const fromLevel = personalInstance ? from->GetLevel() :
+            LocalLevelScaling::ScaleDungeonCreatureLevelForViewer(from->GetLevel(), *band);
+        uint8 const toLevel = personalInstance ? to->GetLevel() :
+            LocalLevelScaling::ScaleDungeonCreatureLevelForViewer(to->GetLevel(), *band);
         if (fromLevel == toLevel)
             return 1.0;
 
@@ -1249,6 +1269,8 @@ public:
                                                         std::memory_order_relaxed);
         LocalLevelScaling::CreatureViewLevelOwner.store(available ? &ViewLevelForCore : nullptr,
                                                         std::memory_order_relaxed);
+        LocalLevelScaling::CreatureViewDamageOwner.store(available ? &ViewDamageForCore : nullptr,
+                                                       std::memory_order_relaxed);
         LocalLevelScaling::CreatureViewMaxHealthOwner.store(available ? &ViewMaxHealthForCore : nullptr,
                                                             std::memory_order_relaxed);
         LocalLevelScaling::ScalingChangedOwner.store(available ? &RefreshChangedScaling : nullptr,
@@ -1288,6 +1310,7 @@ public:
         LocalLevelScaling::CreatureViewArmorOwner.store(nullptr);
         LocalLevelScaling::CreatureViewLevelOwner.store(nullptr);
         LocalLevelScaling::CreatureViewMaxHealthOwner.store(nullptr);
+        LocalLevelScaling::CreatureViewDamageOwner.store(nullptr);
         LocalLevelScaling::ScalingChangedOwner.store(nullptr);
         LocalLevelScaling::ScaledDungeonOwner.store(nullptr);
         LocalLevelScaling::HealReceivedOwner.store(nullptr);

@@ -17,6 +17,8 @@
 #include "QuestDef.h"
 #include "ScriptMgr.h"
 #include "PlayerScript.h"
+#include "LocalLevelScaling.h"
+#include "DatabaseEnv.h"
 #include <algorithm>
 #include <limits>
 #include "Language.h"
@@ -405,6 +407,11 @@ public:
 
     void OnStartup() override
     {
+        LocalLevelScaling::PersonalInstanceScalingOwner.store([](Map const* map, Player const* viewer)
+        {
+            return ManastormModuleConfig::Enabled() &&
+                ManastormMgr::Instance().HasPersonalLevelScaling(map, viewer);
+        }, std::memory_order_relaxed);
         ManastormModuleConfig::LogConfiguration();
 
         if (!ManastormModuleConfig::Enabled())
@@ -428,6 +435,11 @@ public:
                 "Apply the world SQL before using `.manastorm start`.");
         }
     }
+    void OnShutdown() override
+    {
+        LocalLevelScaling::PersonalInstanceScalingOwner.store(nullptr, std::memory_order_relaxed);
+    }
+
     void OnUpdate(uint32 diff) override
     {
         if (!ManastormModuleConfig::Enabled())
@@ -742,6 +754,7 @@ public:
             "manastorm_playerscript",
             {
                 PLAYERHOOK_ON_LOGIN,
+                PLAYERHOOK_ON_DELETE_FROM_DB,
                 PLAYERHOOK_ON_LOGOUT,
                 PLAYERHOOK_ON_MAP_CHANGED,
                 PLAYERHOOK_ON_LEVEL_CHANGED,
@@ -750,6 +763,7 @@ public:
                 PLAYERHOOK_PASSED_QUEST_KILLED_MONSTER_CREDIT,
                 PLAYERHOOK_ON_BEFORE_CRITERIA_PROGRESS,
                 PLAYERHOOK_ON_SEND_SPELL_CHARGE_STATES,
+                PLAYERHOOK_ON_PLAYER_ENVIRONMENTAL_DAMAGE,
                 PLAYERHOOK_CAN_REPOP_AT_GRAVEYARD
             })
     {
@@ -772,10 +786,26 @@ public:
         ManastormClientUIFixes::ResetObjectiveHighlight(player);
     }
 
+    void OnPlayerDeleteFromDB(CharacterDatabaseTransaction transaction, uint32 guid) override
+    {
+        for (auto index : {CHAR_DEL_MANASTORM_COA_TOKEN_WINDOW, CHAR_DEL_MANASTORM_COA_TOKEN_CLEARS})
+        {
+            auto* statement = CharacterDatabase.GetPreparedStatement(index);
+            statement->SetData(0, guid);
+            transaction->Append(statement);
+        }
+    }
+
     void OnPlayerMapChanged(Player* player) override
     {
         ManastormMobilityClient::SyncAuras(player);
         ManastormMgr::Instance().SyncManastormPotionCharges(player);
+    }
+
+    bool OnPlayerEnvironmentalDamage(Player* player, uint32 /*type*/, uint32 /*damage*/) override
+    {
+        return !ManastormModuleConfig::Enabled() ||
+            !ManastormMgr::Instance().IsPlayerProtectedDuringTransition(player);
     }
 
     bool OnPlayerCanRepopAtGraveyard(Player* player) override

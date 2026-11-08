@@ -1148,6 +1148,7 @@ void WorldSession::HandlePlayerLoginFromDB(LoginQueryHolder const& holder)
     }
 
     _rafRewardSession = 0;
+    _rafRewardsNextUpdate = 0;
     UpdateRecruitAFriendRewards(true);
     sScriptMgr->OnPlayerLogin(pCurrChar);
 
