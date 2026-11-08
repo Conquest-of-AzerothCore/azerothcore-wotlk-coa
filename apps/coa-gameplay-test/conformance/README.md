@@ -483,11 +483,16 @@ table without a plan (31, 87, 283, 286: `aura <n> has no passive measurement`).
 1. Named: every `Spell.dbc` record of the passive's `SpellFamilyName` whose `SpellName[enUS]` appears in the tooltip
    (color codes removed, whole words, longest names first, overlapping matches skipped: "Oath: Condemn" before
    "Condemn"). A match followed by a space and a capitalised word is part of a longer proper noun and does not
-   count: the spell "Oath" is not named by "Oath Breakers" (Blessed Strikes 704180, Chakra of Light 803159). Names
-   are read in the sentence that holds the effect's token when the token sits in one sentence that names a spell,
-   else in the whole tooltip (ADR 0017 D3: Legacy of the Silver Hand's `$s2` sentence names Scourgebane only). A
-   named spell whose records meet this effect's mask has those records as targets, resolved to the ranks the class
-   level reaches, records outside a chain all kept (ADR 0017 D1: Pure Focus 705253 on Scourgebane 520007, not
+   count: the spell "Oath" is not named by "Oath Breakers" (Blessed Strikes 704180, Chakra of Light 803159). A name
+   inside a counter clause ("per trigger of", "per stack of", "per charge of", "for each time you triggered") is
+   blanked out before matching and never counts as named: Holy Upheaval 572547's "Increases the effectiveness
+   Righteous Upheaval gains per trigger of Zealotry by `$s1`%" grammatically raises Righteous Upheaval's own value,
+   with Zealotry only the counted trigger, so Zealotry is not a target at all, named or otherwise
+   (`without_counted_names`). Names are read in the sentence that holds the effect's token when the token sits in
+   one sentence that names a spell, else in the whole tooltip (ADR 0017 D3: Legacy of the Silver Hand's `$s2`
+   sentence names Scourgebane only). A named spell whose records meet this effect's mask has those records as
+   targets, resolved to the ranks the class level reaches, records outside a chain all kept (ADR 0017 D1: Pure
+   Focus 705253 on Scourgebane 520007, not
    92111, 801832, 801861 or 804916; Argent Knight 300512 on Righteous Tempest 570200 to 570205 and 805410, not the
    aura 807274). A named spell with no record in this mask but one in a sibling spell-modifier effect's mask is that
    effect's target only (D2: Grace of Aman'thul's effect 1 takes Sacred Swing, not Righteous Lunge). Otherwise a

@@ -79,6 +79,9 @@ SACRED_SWING_AT_60 = 572769
 SACRED_CANDLE = 300501
 CONDEMN_AT_60 = 567539
 FORTIFIED_BODY = 300515
+HOLY_UPHEAVAL = 572547
+RIGHTEOUS_UPHEAVAL_AT_60 = 807764
+RIGHTEOUS_UPHEAVAL_GENERIC_RANK = 572027
 STAT_COUNT = 5
 LIBERTY_OP = 11
 SPELL_MODIFIER_BASE = 1000
@@ -287,6 +290,18 @@ class TemplarPassiveTest(unittest.TestCase):
         chakra = named_targets(records, TEMPLAR_FAMILY_NAME,
                                'Oath Breakers now heal allies around the target', LEVEL)
         self.assertFalse(any(target.named for target in chakra))
+
+    def test_name_inside_a_per_trigger_counter_clause_is_not_named(self):
+        records = Records(dataset(DBC_DIR))
+        text = 'Increases the effectiveness Righteous Upheaval gains per trigger of Zealotry by $s1%.'
+        targets = named_targets(records, TEMPLAR_FAMILY_NAME, text, LEVEL)
+        self.assertEqual({target.spell_id for target in targets}, {RIGHTEOUS_UPHEAVAL_GENERIC_RANK})
+        self.assertNotIn('Zealotry', {target.name for target in targets})
+
+    def test_holy_upheaval_targets_righteous_upheaval_not_the_counted_zealotry(self):
+        effect = effect_of(self.effects(HOLY_UPHEAVAL), 0)
+        self.assertEqual({target.spell_id for target in effect.targets if target.named}, {RIGHTEOUS_UPHEAVAL_AT_60})
+        self.assertEqual(effect.reason, '')
 
     def test_passive_targets_override_fixes_named_but_wrong_mask_targets(self):
         pious_sweep = effect_of(self.effects(PIOUS_SWEEP), 1)

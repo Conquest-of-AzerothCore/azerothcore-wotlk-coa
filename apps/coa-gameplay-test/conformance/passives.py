@@ -119,6 +119,9 @@ CATEGORY_WORD = re.compile(r'[A-Z][a-z]{3,}\b')
 PROPER_NOUN_CONTINUATION = re.compile(r' [A-Z]')
 SENTENCE_BREAK = re.compile(r'(?<=[.!?])\s+')
 LINE_BREAKS = re.compile(r'\s+')
+COUNTER_CLAUSE = re.compile(
+    r'\b(?:per\s+(?:trigger|stack|charge)\s+of|for\s+each\s+time\s+you\s+triggered)\s+'
+    r'((?:[A-Z][\w\']*\s*)+)')
 
 
 @dataclass(frozen=True)
@@ -230,8 +233,17 @@ def reached_ranks(spell_ids: set[int], level: int) -> set[int]:
     return (reached | (spell_ids - chained)) & spell_ids
 
 
+def without_counted_names(text: str) -> str:
+    def blank(match: re.Match) -> str:
+        prefix = match.group(0)[:match.start(1) - match.start()]
+        return prefix + ' ' * len(match.group(1))
+
+    return COUNTER_CLAUSE.sub(blank, text)
+
+
 def named_targets(records: Records, family_name: int, text: str, level: int, in_mask: frozenset[int] = frozenset(),
                   sibling_mask: frozenset[int] = frozenset()) -> list[PassiveTarget]:
+    text = without_counted_names(text)
     claimed: list[tuple[int, int]] = []
     targets = []
     for name, spell_ids, pattern in name_patterns(records.dbc, family_name):
