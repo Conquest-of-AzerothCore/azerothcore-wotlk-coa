@@ -1,9 +1,9 @@
 -- Zul'Gurub, tester feedback round 4 (2026-11-08).
--- Venoxis's Parasitic Serpents: 897 health per player (live 10,768 at 12 players), on the ZG ladder.
+-- Venoxis's Parasitic Serpents: 979 health per player (live 10,768 at 11 players, 2026-08-02), on the ZG ladder.
 -- Spawn of Mar'li: 3,304 health per player (live 36,342 at 11 players, 2026-08-02), on the ZG ladder.
 DELETE FROM `coa_boss_flex` WHERE `entry` IN (14884, 15041);
 INSERT INTO `coa_boss_flex` (`entry`, `hp_d0`, `hp_d1`, `hp_d2`, `hp_d3`, `comment`) VALUES
-(14884, 897, 1292, 1686, 2081, 'ZG Parasitic Serpent: live 10,768 at 12 players (measured)'),
+(14884, 979, 1410, 1841, 2271, 'ZG Parasitic Serpent: live 10,768 at 11 players (measured)'),
 (15041, 3304, 4758, 6212, 7665, 'ZG Spawn of Mar''li: live 36,342 at 11 players (measured)');
 
 -- Hakkar can be taunted, as on live: the same immunities without the taunt effect and aura.
@@ -23,9 +23,6 @@ UPDATE `creature_template` SET `DamageModifier` = 198.8 WHERE `entry` = 315082;
 
 -- Mandokir rides Ohgan on his own double-size display before the fight.
 UPDATE `creature_template_addon` SET `mount` = 215271 WHERE `entry` IN (11382, 111382, 211382, 311382);
-
--- Claw Storm bleeds like the rest of Arlokk's attacks: Razor Claws no longer needs a script.
-DELETE FROM `spell_script_names` WHERE `spell_id` = 2118325 AND `ScriptName` = 'spell_arlokk_coa_razor_claws';
 
 -- The Shade of Jin'do casts Seeking Shadow Bolts (boss_jindo_coa).
 UPDATE `creature_template` SET `ScriptName` = 'npc_shade_of_jindo_coa' WHERE `entry` = 14986;

@@ -1,14 +1,14 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: High Priestess Arlokk Ravages the tank, Claw Storm bleeds and she vanishes 44 s after Ravage",
+  "name": "Zul'Gurub: High Priestess Arlokk Ravages the tank, Claw Storm bleeds on 8% of its hits and she vanishes 44 s after Ravage",
   "contract": [
     "The tester of 2026-11-08 (live): Arlokk's (14515) Ravage (2118330, hits 2118331) goes to the tank, her Claw Storm",
-    "(2118336, hits 2118337) applies the Razor Claws bleed (2118326) like her other attacks, and she vanishes",
-    "(2118312) later than 26 s after Ravage. The CoA logs show 7 of 7 Ravages on the tank and Vanish 44 s after each",
-    "Ravage (decided 2026-11-08). In panther form she Ravages 11 s after the change and Claw Storms 18 s after the",
-    "Ravage. The tank wounds her below half health and holds by far the most threat; two raiders who never swing at",
-    "her stand on the same spot and wound her for 1 % each. Her melee bleeds only the tank, so a raider's bleed",
-    "comes from Ravage or Claw Storm."
+    "(2118336, hits 2118337) applies the Razor Claws bleed (2118326), and she vanishes (2118312) later than 26 s after",
+    "Ravage. The CoA logs show 7 of 7 Ravages on the tank, Vanish 44 s after each Ravage, and the bleed after 54 of 55",
+    "landed swings but only 34 of 452 Claw Storm hits (BB 65 of 816), so a Claw Storm hit bleeds with an 8% chance",
+    "(decided 2026-11-08). Her Razor Claws aura replays 40,000 synthetic hits per rate. In panther form she Ravages",
+    "11 s after the change and Claw Storms 18 s after the Ravage. The tank wounds her below half health and holds by",
+    "far the most threat; two raiders who never swing at her stand on the same spot and wound her for 1 % each."
   ],
   "timeout_ms": 180000,
   "location": {
@@ -169,6 +169,27 @@
       "spell": 2118323,
       "equals": 1,
       "within_ms": 3000
+    },    {
+      "action": "assert",
+      "label": "CONTROL: Razor Claws bleeds on every landed swing",
+      "actor": "arlokk",
+      "metric": "aura_proc_rate",
+      "spell": 2118325,
+      "target": "hero",
+      "type_mask": 4,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: but only on about 8% of Claw Storm hits",
+      "actor": "arlokk",
+      "metric": "aura_proc_rate",
+      "spell": 2118325,
+      "target": "raider1",
+      "trigger_spell": 2118337,
+      "type_mask": 16,
+      "min": 6.5,
+      "max": 9.5
     },
     {
       "action": "assert",
@@ -236,17 +257,7 @@
       "min": 1,
       "within_ms": 20000
     },
-    {
-      "action": "assert",
-      "label": "DISCRIMINATING: and leaves the Razor Claws bleed on them",
-      "actor": "raider1",
-      "metric": "spell_damage_count",
-      "caster": "arlokk",
-      "spell": 2118326,
-      "target": "raider1",
-      "min": 1,
-      "within_ms": 6000
-    },
+
     {
       "action": "wait",
       "label": "Past 30 s after Ravage, inside the old 26-36 s Vanish",
@@ -267,7 +278,7 @@
       "metric": "aura",
       "spell": 2118312,
       "equals": 1,
-      "within_ms": 17000
+      "within_ms": 20000
     },
     {
       "action": "assert",

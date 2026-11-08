@@ -22,7 +22,7 @@
  *     Bat-tering Charge  first 2s, every 20s   random player out of melee and within 25
  *                                              yards, knocks back everyone within 10 yards
  *     Terrifying Screech the moment the charge stuns, or in its place when no player
- *                                              is in reach (live: 17 of 17 charges, 0-15 ms):
+ *                                              is in reach (live: 12 of 12 landed charges, 0-9 ms):
  *                                              everyone in the room, and fears everyone
  *                                              within 20 yards
  *     Vampirism          passive, her hits drain life

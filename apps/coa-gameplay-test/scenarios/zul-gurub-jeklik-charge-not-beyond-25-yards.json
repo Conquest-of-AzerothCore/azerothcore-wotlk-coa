@@ -8,7 +8,7 @@
     "hero stands about 35 yards away, the only player out of melee, so no charge comes 2 s in. Then the near hero",
     "steps out to about 15 yards and the next charge reaches them. Fear Ward keeps the tank and the near hero in",
     "place through her Screech. The tester of 2026-11-08: on live her Terrifying Screech (2106131) comes the moment",
-    "the charge stuns its target (17 of 17 charges, 0-15 ms), not on a timer of its own 2 s after the charge."
+    "the charge stuns its target (12 of 12 landed charges, 0-9 ms), not on a timer of its own 2 s after the charge."
   ],
   "timeout_ms": 120000,
   "location": {

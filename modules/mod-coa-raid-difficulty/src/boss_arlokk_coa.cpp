@@ -24,8 +24,9 @@
  *     Shadowstep,        18s after each Ravage  behind a random player, then
  *     Claw Storm                                spins for 8s, 5 yards around her
  *     Vanish             44s after each Ravage  10s out of sight (the CoA logs)
- *     Razor Claws        passive, her melee hits, Ravage and Claw Storm bleed
- *                        (decided 2026-11-08)
+ *     Razor Claws        passive, her melee hits and Ravage bleed; each Claw
+ *                        Storm hit with an 8% chance (the CoA logs: 34 of
+ *                        452 hits, BB 65 of 816; decided 2026-11-08)
  *
  *   Both forms
  *     Fierce Blow        first 6.7-17.3s, every 6-10s   on the tank
@@ -129,6 +130,8 @@ namespace
     constexpr Milliseconds STEP_LANDING            = 250ms;
 
     constexpr std::array<uint32, 4> RAZOR_CLAWS_BLEEDS = { 2118326, 2118327, 2118328, 2118329 };
+    constexpr std::array<uint32, 4> CLAW_STORM_HITS    = { 2118337, 2118338, 2118339, 2118340 };
+    constexpr int32 CLAW_STORM_BLEED_CHANCE = 8;
 
     Position const PosMoveOnSpawn = { -11561.9f, -1627.868f, 41.29941f, 0.0f };
 
@@ -452,6 +455,24 @@ namespace
         uint32 _afterStep = EVENT_RAVAGE;
     };
 
+    class spell_arlokk_coa_razor_claws : public AuraScript
+    {
+        PrepareAuraScript(spell_arlokk_coa_razor_claws);
+
+        bool CheckProc(ProcEventInfo& eventInfo)
+        {
+            SpellInfo const* spell = eventInfo.GetSpellInfo();
+            bool const clawStorm = spell
+                && std::find(CLAW_STORM_HITS.begin(), CLAW_STORM_HITS.end(), spell->Id) != CLAW_STORM_HITS.end();
+            return !clawStorm || roll_chance_i(CLAW_STORM_BLEED_CHANCE);
+        }
+
+        void Register() override
+        {
+            DoCheckProc += AuraCheckProcFn(spell_arlokk_coa_razor_claws::CheckProc);
+        }
+    };
+
     class ArlokkRazorClawsBleedsEndOnDeath final : public GlobalScript
     {
     public:
@@ -469,5 +490,6 @@ namespace
 void AddCoaArlokkScripts()
 {
     RegisterZulGurubCreatureAI(boss_arlokk_coa);
+    RegisterSpellScript(spell_arlokk_coa_razor_claws);
     new ArlokkRazorClawsBleedsEndOnDeath();
 }
