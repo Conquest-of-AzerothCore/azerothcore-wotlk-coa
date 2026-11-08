@@ -24,7 +24,7 @@ class CheckedTooltipReadingTest(unittest.TestCase):
             checked_tooltip_reading(entry)
 
     def test_rejects_citation_naming_a_person(self):
-        entry = {**WELL_FORMED, 'citation': 'Dakeyras report 2026-11-07'}
+        entry = {**WELL_FORMED, 'citation': 'Someone report 2026-11-07'}
         with self.assertRaises(ValueError):
             checked_tooltip_reading(entry)
 

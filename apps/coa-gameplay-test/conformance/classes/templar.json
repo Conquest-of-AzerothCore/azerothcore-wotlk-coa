@@ -1170,8 +1170,8 @@
     },
     {
       "spell": 804930, "token": "${$801546m1+$801546ppl1+$AP*0.2+$sph*0.5}", "value": 644, "ap": 916,
-      "sp": [493], "citation": "player report 2026-11-07",
-      "note": "SP=493 is closer (off by 7.7) than SP=204 (off by 152.2), not exact"
+      "sp": [493, 204], "citation": "player report 2026-11-07",
+      "note": "SP=493 is closer (off by 7.7) than SP=204 (off by 152.2), not exact; banded like Force of Golganneth and Norgannon's Wrath, the other two leaning-but-unconfirmed SP=493 readings, for the same reason"
     }
   ]
 }

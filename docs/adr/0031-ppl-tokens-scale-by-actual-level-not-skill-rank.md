@@ -33,6 +33,12 @@ confirms.
    helper (the same `max(0, level − BaseLevel)` clamp `$mN`/`$sN` already apply, just fed a different level).
    Chosen: it is the only hypothesis Libram of Consecration's player-reported number confirms exactly, and it
    needs no new per-level arithmetic (`Records.levels_above_base` already existed for the skill-rank path).
+   Caveat: the harness's own reference caster is always level 60, the same level the 2026-11-07 report was
+   read at, so this single confirming data point cannot by itself distinguish "scales by `caster.level`" from
+   "always evaluates the per-level term at a hardcoded level 60" — both predict the identical 188 here. The
+   actual-level reading is still chosen on design grounds (it is the general rule; a hardcoded 60 is not a
+   rule at all, only this round's accidental test condition), not because the evidence rules out the
+   hardcoded-60 alternative; it does not.
 
 ## Decision
 
