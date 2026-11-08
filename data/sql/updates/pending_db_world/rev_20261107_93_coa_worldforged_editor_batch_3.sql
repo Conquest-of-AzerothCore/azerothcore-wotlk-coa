@@ -34,3 +34,7 @@ UPDATE `gameobject` SET `position_x` = -7683.7707, `position_y` = -4266.2539, `p
 -- #10740, #11340
 -- pickup 6940442 (Eroded Pit Fighter Knuckles) moved 8.3 yd across and 0.06 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -498.3902, `position_y` = -1562.4511, `position_z` = 52.5904, `orientation` = 4.95517, `rotation0` = 0.540102, `rotation1` = -0.422655, `rotation2` = 0.44851, `rotation3` = -0.573142 WHERE `guid` = 6940442 AND `id` = 515386;
+
+-- #10771
+-- pickup 6941252 (Tilloa's Flowers) moved 18.0 yd across and 1.09 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -10373.5141, `position_y` = -1254.2955, `position_z` = 37.6732, `orientation` = 4.48359, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.783201, `rotation3` = -0.621768 WHERE `guid` = 6941252 AND `id` = 95825;
