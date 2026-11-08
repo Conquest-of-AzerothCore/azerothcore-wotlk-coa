@@ -26,12 +26,14 @@ import run
 
 TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 804932, 806516, 803158, 805420, 680891,
                     803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298, 705255,
-                    680397, 524765, 560096, 707364, 504107, 706385, 523712, 520534,
+                    680397, 524765, 560096, 707364, 504107, 706385, 523712, 520534, 504561, 504807,
                     92109, 300504, 300529, 301253, 301310}
 GUARDIAN_OF_THE_LIGHT = 707364
 DIVINE_FURY = 504107
 UTHERS_LEGACY = 706385
 IRON_PENANCE = 523712
+PRIEST_TRAINING = 504561
+ONE_WITH_THE_LIGHT = 504807
 VINDICATION_MAX_RANK = 573324
 CONDEMN = 804906
 IMPROVED_SCARLET_HAMMER = 301254
@@ -351,6 +353,23 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         self.assertEqual(divine_fury['trigger']['spell'], VINDICATION_MAX_RANK)
         self.assertEqual(iron_penance['trigger']['spell'], VINDICATION_MAX_RANK)
         self.assertEqual(divine_fury['trigger'], iron_penance['trigger'])
+
+    def test_priest_training_stays_unmodelled_on_the_measured_vindication_ratio(self):
+        entry = templar_trigger(PRIEST_TRAINING)
+        self.assertEqual(entry['status'], 'unmodelled')
+        self.assertEqual(entry['trigger']['spell'], VINDICATION_MAX_RANK)
+        self.assertIn('293 Vindication casts produced 491 casts of 504809', entry['reason'])
+        with self.assertRaises(ValueError):
+            trigger_plan(CLASS_FILE, entry)
+
+    def test_one_with_the_light_zealotry_effect_stays_unmodelled(self):
+        entry = templar_trigger(ONE_WITH_THE_LIGHT)
+        self.assertEqual(entry['status'], 'unmodelled')
+        self.assertEqual(entry['observe_spell'], 801450)
+        self.assertEqual(entry['observe_source'], f'EffectTriggerSpell[1] of {ONE_WITH_THE_LIGHT}')
+        self.assertIn('0 casts of 801450', entry['reason'])
+        with self.assertRaises(ValueError):
+            trigger_plan(CLASS_FILE, entry)
 
     def test_uthers_legacy_waits_for_condemns_full_tick_spacing(self):
         entry = templar_trigger(UTHERS_LEGACY)
