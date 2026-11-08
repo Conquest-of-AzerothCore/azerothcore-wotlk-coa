@@ -58,3 +58,9 @@ UPDATE `gameobject` SET `position_x` = 580.5571, `position_y` = -4547.9254, `pos
 UPDATE `gameobject` SET `position_x` = -11151.8681, `position_y` = -1963.5067, `position_z` = 35.7490, `orientation` = 6.10981, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.086579, `rotation3` = -0.996245 WHERE `guid` = 6940101 AND `id` = 254413;
 -- pickup 6941424 (Bag of Folding) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941424 AND `id` = 254413;
+
+-- #8678
+-- pickup 6940954 (Reverent Ring) moved turned to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -10977.5358, `position_y` = -1752.4602, `position_z` = 140.6754, `orientation` = 4.62174, `rotation0` = 0.477314, `rotation1` = 0.501466, `rotation2` = 0.532841, `rotation3` = -0.486604 WHERE `guid` = 6940954 AND `id` = 254506;
+-- pickup 6940955 (Reverent Ring) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940955 AND `id` = 254506;
