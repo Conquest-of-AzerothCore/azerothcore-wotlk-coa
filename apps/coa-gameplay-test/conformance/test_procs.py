@@ -578,14 +578,17 @@ class TemplarProcEntriesTest(unittest.TestCase):
         self.assertEqual(entry['proc_spell'], PULVERIZING_STRIKE)
         self.assertEqual(entry['dbc'][str(PULVERIZING)]['ProcChance'], 15)
 
-    def test_might_of_aggramar_rolls_on_auto_attacks_with_a_scope_question(self):
+    def test_might_of_aggramar_rolls_on_auto_attacks_only(self):
         entry = templar_proc(MIGHT_OF_AGGRAMAR)
         self.assertEqual(entry['trigger'], {'action': 'attack', 'spell': 0})
         self.assertEqual(entry['proc_spell'], MIGHT_OF_AGGRAMAR_STACK)
         self.assertEqual(entry['dbc'][str(MIGHT_OF_AGGRAMAR)]['ProcFlags'], 4)
-        self.assertEqual({reading['name'] for reading in entry['trial_readings']},
-                         {'melee auto attacks only', 'any physical damage, abilities included'})
-        self.assertTrue(entry['readings_question'])
+        self.assertNotIn('trial_readings', entry)
+        self.assertNotIn('readings_question', entry)
+        [expectation] = proc_scenario(CLASS_FILE, entry)[1]
+        trials_label = expectation.model['measurements']['trials']
+        self.assertEqual(expectation.model['readings'], [{'name': 'triggering hits only', 'labels': [trials_label],
+                         'minus_events': False}])
 
     def test_lightkeeper_scenario_keys_do_not_collide(self):
         from conformance import generate

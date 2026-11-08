@@ -383,15 +383,6 @@
       "proc_spell": 803164,
       "proc_spell_source": "EffectTriggerSpell[0] of 803163",
       "events_per_proc": 1,
-      "trial_readings": [
-        {"name": "melee auto attacks only",
-         "meaning": "only main/off-hand auto attacks roll the chance, matching the DBC ProcFlags=4 (PROC_FLAG_DONE_MELEE_AUTO_ATTACK)",
-         "adds": []},
-        {"name": "any physical damage, abilities included",
-         "meaning": "physical-school ability hits (Zealotry, Argent Blade) also roll the chance, matching the tooltip's literal 'Physical damage dealt'",
-         "adds": [{"metric": "spell_cast_count", "spell": 803164}]}
-      ],
-      "readings_question": "auto attack a single target dummy without using any ability learned: does Might of Aggramar's stacking buff (803164) ever appear? Then repeat using only Zealotry (no auto attacks, e.g. by disarming or using a ranged weapon): does 803164 ever appear from ability hits alone?",
       "dbc": {
         "803163": {"ProcChance": 25, "ProcFlags": 4, "ProcCharges": 0}
       },
