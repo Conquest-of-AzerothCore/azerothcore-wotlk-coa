@@ -68,3 +68,9 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6960004 AND `id` = 93008;
 -- #7488
 -- pickup 6942243 (Hanging Ogre Pouch) moved 4.6 yd across and 1.46 yd down to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -4001.4296, `position_y` = 304.4279, `position_z` = 59.7854, `orientation` = 0.22169, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.110618, `rotation3` = 0.993863 WHERE `guid` = 6942243 AND `id` = 96103;
+
+-- #7700
+-- template 1345084 (Libram of Resolute Light): size 1 -> 0.7 (1 spawns)
+UPDATE `gameobject_template` SET `size` = 0.7 WHERE `entry` = 1345084;
+-- pickup 6940703 (Libram of Resolute Light) moved 11.8 yd across and 109.76 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -685.9327, `position_y` = -3783.5016, `position_z` = 229.0637, `orientation` = 1.95887, `rotation0` = 0.394944, `rotation1` = 0.588126, `rotation2` = 0.585928, `rotation3` = 0.393467 WHERE `guid` = 6940703 AND `id` = 1345084;
