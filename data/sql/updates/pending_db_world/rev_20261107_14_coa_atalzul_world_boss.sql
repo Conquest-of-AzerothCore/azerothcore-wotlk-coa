@@ -43,7 +43,7 @@ DELETE FROM `gameobject` WHERE `guid` IN (9780930, 9780931);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`) VALUES
-(9780930, 978090, 0, 0, 0, 1, 1, 3349.2258, -4919.989, 159.2524, 5.0617, 0, 0, 0.573476, -0.819222, 300, 100, 1),
+(9780930, 978090, 0, 0, 0, 1, 1, 3335.8843, -4842.772, 167.1344, 5.1617, 0, 0, 0.531815, -0.846860, 300, 100, 1),
 (9780931, 978092, 890, 10281, 10281, 15, 1, 3358.02, -4839.59, 167.44, 0, 0, 0, 0, 1, 300, 100, 1);
 
 -- Players who die in his map rise at its start: WorldSafeLocs.dbc 6090.
@@ -79,7 +79,7 @@ INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Fligh
 DELETE FROM `creature` WHERE `guid` = 9780932;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
-(9780932, 978090, 0, 0, 0, 1, 1, 3349.2258, -4919.989, 164.25, 5.0617, 300, 0, 0);
+(9780932, 978090, 0, 0, 0, 1, 1, 3335.8843, -4842.772, 172.13, 5.1617, 300, 0, 0);
 
 -- In his map Zul'rogg starts on top of the pyramid and the four Soul Vessels stand around it (spots taken in game).
 UPDATE `creature` SET `position_x` = 3439.5637, `position_y` = -4982.276, `position_z` = 195.7287,
