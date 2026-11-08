@@ -554,6 +554,34 @@ void Loot::AddItem(LootStoreItem const& item)
     }
 }
 
+void LootTemplate::CollectItems(std::vector<LootStoreItem const*>& out, uint8 depth) const
+{
+    if (depth > 4)
+        return;
+
+    auto collect = [&](LootStoreItemList const& list)
+    {
+        for (LootStoreItem const* item : list)
+        {
+            if (item->reference > 0)
+            {
+                if (LootTemplate const* referenced = LootTemplates_Reference.GetLootFor(item->reference))
+                    referenced->CollectItems(out, depth + 1);
+            }
+            else
+                out.push_back(item);
+        }
+    };
+
+    collect(Entries);
+    for (LootGroup* group : Groups)
+        if (group)
+        {
+            collect(*group->GetExplicitlyChancedItemList());
+            collect(*group->GetEqualChancedItemList());
+        }
+}
+
 // Calls processor of corresponding LootTemplate (which handles everything including references)
 bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError, uint16 lootMode /*= LOOT_MODE_DEFAULT*/, WorldObject* lootSource /*= nullptr*/)
 {

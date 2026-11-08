@@ -268,6 +268,8 @@ public:
     void CheckLootRefs(LootStore const& lootstore, uint32 Id, LootIdSet* ref_set) const;
     bool addConditionItem(Condition* cond);
     [[nodiscard]] bool isReference(uint32 id) const;
+    // Every item entry this template can drop, references followed (the pool of a boss's guaranteed drop)
+    void CollectItems(std::vector<LootStoreItem const*>& out, uint8 depth = 0) const;
 
 private:
     LootStoreItemList Entries;                          // not grouped only
