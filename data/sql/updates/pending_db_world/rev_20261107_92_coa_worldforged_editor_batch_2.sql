@@ -42,3 +42,9 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940321 AND `id` = 515385
 UPDATE `gameobject` SET `position_x` = 10263.2379, `position_y` = 970.1101, `position_z` = 1341.2000, `orientation` = 6.088498, `rotation0` = 0.0102433, `rotation1` = -0.681456, `rotation2` = 5.8517e-05, `rotation3` = -0.731787 WHERE `guid` = 6941970 AND `id` = 1344099;
 -- pickup 6941972 (Mossy Bag) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941972 AND `id` = 90626;
+
+-- #8513
+-- template 515434 (Celestial Edge of Starfall): size 1 -> 1.3 (1 spawns)
+UPDATE `gameobject_template` SET `size` = 1.3 WHERE `entry` = 515434;
+-- pickup 6942238 (Celestial Edge of Starfall) moved 31.3 yd across and 22.24 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 9981.4921, `position_y` = 2007.3812, `position_z` = 1354.7006, `orientation` = 5.711063, `rotation0` = -0.651556, `rotation1` = -0.270598, `rotation2` = 0.57505, `rotation3` = -0.414209 WHERE `guid` = 6942238 AND `id` = 515434;
