@@ -22,3 +22,7 @@ UPDATE `gameobject` SET `position_x` = 3007.2122, `position_y` = -2736.0122, `po
 -- #11274
 -- pickup 6941160 (Stonesplitter) moved 11.4 yd across and 0.21 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -13232.8017, `position_y` = -483.0316, `position_z` = 6.0350, `orientation` = 3.29389, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.997102, `rotation3` = -0.076075 WHERE `guid` = 6941160 AND `id` = 95759;
+
+-- #11359
+-- pickup 6942308 (The Wrath of Arkkoroc) moved 20.6 yd across and 24.75 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 3857.9727, `position_y` = -7172.1229, `position_z` = 24.9720, `orientation` = 3.336149, `rotation0` = 0.69502, `rotation1` = 0.0678245, `rotation2` = 0.7124, `rotation3` = -0.0695206 WHERE `guid` = 6942308 AND `id` = 254430;
