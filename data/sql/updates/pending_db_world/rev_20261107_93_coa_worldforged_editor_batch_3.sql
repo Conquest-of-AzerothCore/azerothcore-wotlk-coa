@@ -106,3 +106,9 @@ UPDATE `gameobject` SET `position_x` = -5962.1306, `position_y` = 428.5849, `pos
 UPDATE `gameobject_template` SET `size` = 0.7 WHERE `entry` = 95756;
 -- pickup 6940435 (Encased Amulet) moved 11.0 yd across and 1.52 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -13255.8701, `position_y` = -354.3124, `position_z` = 13.9959, `orientation` = 3.017202, `rotation0` = 0.21629, `rotation1` = -0.025285, `rotation2` = 0.973948, `rotation3` = 0.0632857 WHERE `guid` = 6940435 AND `id` = 95756;
+
+-- #11150
+-- pickup 6940843 (Storage Crate) moved 3.8 yd across and 3.32 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -5206.1882, `position_y` = -3100.0369, `position_z` = 303.3347, `orientation` = 1.25241, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.586074, `rotation3` = 0.810257 WHERE `guid` = 6940843 AND `id` = 517341;
+-- pickup 6940844 (Storage Crate) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940844 AND `id` = 517341;
