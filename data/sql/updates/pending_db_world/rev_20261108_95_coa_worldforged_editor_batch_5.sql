@@ -95,3 +95,7 @@ UPDATE `gameobject` SET `position_x` = -1405.21, `position_y` = 2084.78, `positi
 -- #11605
 -- pickup 6942233 (Infused Staff) moved 10.1 yd across and 0.84 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -5306.4288, `position_y` = -1801.1319, `position_z` = -53.3761, `orientation` = 3.125398, `rotation0` = 0.032676, `rotation1` = -0.000265, `rotation2` = 0.999433, `rotation3` = 0.008093 WHERE `guid` = 6942233 AND `id` = 254560;
+
+-- #11606 #11625
+-- pickup 6941810 (Harpy Hunter) moved 7.5 yd across and 0.05 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 646.6526, `position_y` = -4556.1823, `position_z` = 20.1039, `orientation` = 5.758936, `rotation0` = 0.622917, `rotation1` = -0.20701, `rotation2` = 0.162949, `rotation3` = -0.736593 WHERE `guid` = 6941810 AND `id` = 95650;
