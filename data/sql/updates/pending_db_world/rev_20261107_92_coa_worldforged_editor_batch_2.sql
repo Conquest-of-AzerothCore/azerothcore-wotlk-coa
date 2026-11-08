@@ -52,3 +52,9 @@ UPDATE `gameobject` SET `position_x` = 9981.4921, `position_y` = 2007.3812, `pos
 -- #8525
 -- pickup 6941672 (Shiny Hammer) moved 7.0 yd across and 1.30 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 580.5571, `position_y` = -4547.9254, `position_z` = 41.4276, `orientation` = 5.65093, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.310888, `rotation3` = -0.950446 WHERE `guid` = 6941672 AND `id` = 254633;
+
+-- #8528
+-- pickup 6940101 (Bag of Folding) moved 1.4 yd across to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -11151.8681, `position_y` = -1963.5067, `position_z` = 35.7490, `orientation` = 6.10981, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.086579, `rotation3` = -0.996245 WHERE `guid` = 6940101 AND `id` = 254413;
+-- pickup 6941424 (Bag of Folding) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941424 AND `id` = 254413;
