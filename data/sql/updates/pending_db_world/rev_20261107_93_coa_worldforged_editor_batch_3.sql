@@ -38,3 +38,7 @@ UPDATE `gameobject` SET `position_x` = -498.3902, `position_y` = -1562.4511, `po
 -- #10771
 -- pickup 6941252 (Tilloa's Flowers) moved 18.0 yd across and 1.09 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -10373.5141, `position_y` = -1254.2955, `position_z` = 37.6732, `orientation` = 4.48359, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.783201, `rotation3` = -0.621768 WHERE `guid` = 6941252 AND `id` = 95825;
+
+-- #10832, #10888
+-- pickup 6940983 (Rugged Leather Runners) moved 25.5 yd across and 29.99 yd down to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -11354.6597, `position_y` = -246.7811, `position_z` = 47.4797, `orientation` = 4.19247, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.865104, `rotation3` = -0.501593 WHERE `guid` = 6940983 AND `id` = 254354;
