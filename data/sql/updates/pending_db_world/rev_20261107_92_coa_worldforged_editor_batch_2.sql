@@ -116,3 +116,9 @@ UPDATE `gameobject` SET `position_x` = -7189.7000, `position_y` = -3793.6000, `p
 -- #9295
 -- pickup 6942241 (Steelrider Girdle) moved 3.3 yd across and 1.49 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 276.0405, `position_y` = -3038.1650, `position_z` = 97.5888, `orientation` = 4.84623, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.658239, `rotation3` = -0.752809 WHERE `guid` = 6942241 AND `id` = 1345138;
+
+-- #9351
+-- pickup 6940588 (Hammerspine's Fallen Hammer) moved 1.7 yd across to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -5576.3670, `position_y` = -1729.7324, `position_z` = 354.1330, `orientation` = 5.471822, `rotation0` = 0.615358, `rotation1` = -0.501728, `rotation2` = 0.3452, `rotation3` = 0.50044 WHERE `guid` = 6940588 AND `id` = 95616;
+-- pickup 6941132 (Hammerspine's Fallen Hammer) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941132 AND `id` = 95616;
