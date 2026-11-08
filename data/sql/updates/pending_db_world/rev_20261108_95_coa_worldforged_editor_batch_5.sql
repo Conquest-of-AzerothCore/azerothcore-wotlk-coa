@@ -109,6 +109,12 @@ UPDATE `gameobject` SET `position_x` = -5573.1407, `position_y` = -2718.4827, `p
 UPDATE `gameobject` SET `position_x` = -736.2671, `position_y` = -5585.9241, `position_z` = 25.052, `orientation` = 5.119941, `rotation0` = 0.012386, `rotation1` = 0.018838, `rotation2` = 0.54924, `rotation3` = -0.83536 WHERE `guid` = 6942139 AND `id` = 95629;
 -- Scalper's Sack copies outside Durotar (Ascension and LootCollector only have the Echo Isles one): 6941009 (Scalper's Sack), 6942138 (Scalper's Sack) hidden, not deleted
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6941009, 6942138) AND `id` IN (95629);
+-- pickup 6942256 (String of Ears) moved 7.9 yd across and 2.20 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -1127.2611, `position_y` = -5582.1106, `position_z` = 12.1103, `orientation` = 1.526639, `rotation0` = -0.143869, `rotation1` = 0.149423, `rotation2` = 0.676388, `rotation3` = 0.706735 WHERE `guid` = 6942256 AND `id` = 1345142;
+-- the String of Ears hangs from a nail on the hut wall, as on Ascension
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `size`, `Data0`, `Data1`, `AIName`, `ScriptName`) VALUES (9900050, 5, 1046085, 'Nail', 1, 0, 0, '', '') ON DUPLICATE KEY UPDATE `type` = 5, `displayId` = 1046085, `name` = 'Nail', `size` = 1;
+DELETE FROM `gameobject` WHERE `guid` = 6976005;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976005, 9900050, 1, 1, 1, -1127.275533, -5582.259811, 12.95405, 1.54321, 0, 0, 0.697287, 0.716792, 300, 100, 1);
 
 -- #11616
 -- pickup 6941715 (Lost Treasure) moved 64.5 yd across and 9.83 yd up to the spot checked in the editor
