@@ -694,6 +694,7 @@ in-RAM test database, read on 2026-11-05 (`SELECT * FROM spell_proc WHERE SpellI
 | Transcendent Guardian 804571 | `$h` 40% | Temple Guardian 803792 at an ally | its refreshed charge | scenario |
 | Lightkeeper (parry) 560835 | `$h` 15% | periodic damage of Condemn 804906 | 561016, `EffectTriggerSpell[0]` | 2 readings |
 | Lightkeeper (burst) 560835 | `$h` 15% | periodic damage of Condemn 804906 | 561277 (damage), `EffectTriggerSpell[1]` | 2 readings |
+| Pulverizing 524620 | `$h` 15% | cast of Condemn 804906 (damage dealt) | 524619, tooltip `$524619m1` | scenario |
 
 `spell_proc` has rows for 92111 (Chance 100), 520007, 560648 and 707391 (Chance 0, so the DBC `ProcChance`), all
 with `ProcFlags` 1048575 and `Cooldown` 0, and none for the other auras; the four are scripted by
@@ -704,7 +705,12 @@ of them (`handler`), so none is known to stay at 0%. Condemnation 706325 has a `
 DBC `ProcChance` 15) and the same script, read on 2026-11-06; its check (`AscensionTemplarEvents.cpp:81-83`) accepts
 damage of Condemn, Holy Cleave or Blade of Faith within melee range, periodic damage included, and casts Zealotry
 801450 (`AscensionTemplarEvents.cpp:121-123`). Only Blade of Faith is in the class set; its damage is periodic only,
-so the readings are each cast and each damage tick. Transcendent Guardian refreshes the charge of the cast rank on
+so the readings are each cast and each damage tick. Pulverizing 524620 has its own `spell_proc` row too (`Chance`
+0, read on 2026-11-08), from the same native re-insert as the four `aura_ascension_templar_event` auras above, with
+its `Chance` zeroed by `rev_20260919_20_coa_proc_chance_parity.sql`; the DBC `ProcChance` 15% fallback
+(`SpellMgr.cpp:2371-2372`) is a plain `EffectTriggerSpell` roll on each damaging Condemn cast, with no scripted
+override and a single reading (damage is the only trigger named by the tooltip), unlike Lightkeeper's two readings.
+Transcendent Guardian refreshes the charge of the cast rank on
 40% of the casts at another unit (`AscensionTemplarAbilities.cpp:220-224`) and casts nothing; owner ruling 3 of
 ADR 0011 (any target other than the caster) stays open, since the scenario casts at an ally only. Temple Guardian is
 outside the CharacterAdvancement class set and is cast by live Templars (owner answer Q3); the scenario learns
@@ -739,10 +745,10 @@ Transcendent Guardian parts, simulated clock, no failed cast):
 | Transcendent Guardian 804571 | 11 | casts at the ally | 1509 in 3828 | 0.374 to 0.415 | `ok` | `ok` |
 
 Lightkeeper 560835 is absent from both `TemplarEvents` and `TemplarCastDrivers` (grepped `src/server/coa/*.cpp` for
-`560835`): it is the one Templar proc entry of the nine that is a plain, native `ProcFlags`/`ProcChance`/
-`EffectTriggerSpell` proc with no scripted override. Its two `EffectTriggerSpell` slots each roll their own 15%
-independently on the same periodic tick of Condemn 804906; no `spell_proc` row exists for it, so `spell_proc` is
-`{}` for both entries, like the other auras with no row.
+`560835`): it is one of two Templar proc entries of the nine that are plain, native `ProcFlags`/`ProcChance`/
+`EffectTriggerSpell` procs with no scripted override, the other being Pulverizing 524620 below. Its two
+`EffectTriggerSpell` slots each roll their own 15% independently on the same periodic tick of Condemn 804906; no
+`spell_proc` row exists for it, so `spell_proc` is `{}` for both entries, like the other auras with no row.
 
 Measured on 2026-11-07 (stamp `20261107-184729`, simulated clock, no failed cast, 26 parts each):
 
@@ -757,6 +763,14 @@ Both readings disagree the same way Condemnation 706325 does: counting each Cond
 doubles the apparent rate (Condemn ticks about twice per cast at this attempt spacing), while counting each
 periodic damage tick holds the tooltip's 15% within the Wilson interval. Both carry `readings_question` and go to
 `questions.md`.
+
+Pulverizing has a single reading (damaging Condemn casts), so it needs no `trial_readings` split. Measured on
+2026-11-08 (`report.json` `.cache/verify-all/20261108-125057/report.json`, simulated clock, 26 of 26 parts, no
+failed cast):
+
+| Aura | Reading | Procs in trials | Wilson 99% | Verdict |
+|---|---|---|---|---|
+| Pulverizing 524620 | damage events of Condemn 804906 on the target | 622 in 4472 | 0.126 to 0.153 | `ok` |
 
 ## Trigger entries
 
