@@ -63,3 +63,10 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 -- In his cavern he stands where Ascension has him (spot taken in game).
 UPDATE `creature` SET `position_x` = 4687.2383, `position_y` = -4801.878, `position_z` = 676.87, `orientation` = 5.5009
 WHERE `guid` = 9780103 AND `id` = 64627;
+
+-- His greatsword and shield, the models of his Glacierborn Greatsword and Frostbound Bulwark (49839 shares the
+-- sword's model), at his scale.
+DELETE FROM `creature_equip_template` WHERE `CreatureID` = 64627;
+INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, `VerifiedBuild`) VALUES
+(64627, 1, 49839, 17663, 0, 12340);
+UPDATE `creature` SET `equipment_id` = 1 WHERE `guid` = 9780103;
