@@ -589,6 +589,8 @@ namespace
         SPELL_WATER_SPIKE       = 2119765,
         SPELL_HAIL              = 2119769,
         SPELL_HAIL_SHARD        = 2119773,
+        SPELL_HAIL_MISSILE_LEFT = 2119771,
+        SPELL_HAIL_MISSILE_RIGHT= 2119772,
         SPELL_STEAL_WARMTH      = 2119777,
         SPELL_CHILLED           = 2119778,
         SPELL_SHOCK_FROST       = 2119779,
@@ -607,6 +609,7 @@ namespace
     };
 
     constexpr uint8 CHILL_FROZEN      = 10;
+    constexpr uint32 GO_FALLEN_ICICLE = 978098;
     constexpr float HUDDLE_RANGE      = 2.0f;   // Body Heat's radius
     constexpr uint8 HAIL_VOLLEYS      = 4;
     constexpr uint8 GRASP_RINGS       = 8;
@@ -642,6 +645,21 @@ namespace
             ApplyFlex();
             DoCastSelf(SPELL_FROZEN_CLUB, true);
             _stomps = 0;
+            ClearIcicles();
+        }
+
+        void JustDied(Unit* killer) override
+        {
+            ClearIcicles();
+            custom_world_boss_coa::JustDied(killer);
+        }
+
+        void ClearIcicles()
+        {
+            for (ObjectGuid const& guid : _fallen)
+                if (GameObject* icicle = me->GetMap()->GetGameObject(guid))
+                    icicle->DespawnOrUnsummon();
+            _fallen.clear();
         }
 
         void Schedule() override
@@ -750,13 +768,31 @@ namespace
                     break;
                 }
                 case TW_ICICLE:
+                    // The icicle stays where it fell until the fight ends.
                     for (Position const& pos : _icicles)
+                    {
                         CastAt(pos, SPELL_WATER_SPIKE);
+                        if (GameObject* icicle = me->SummonGameObject(GO_FALLEN_ICICLE, pos.GetPositionX(),
+                                pos.GetPositionY(), pos.GetPositionZ(), frand(0.0f, 2 * float(M_PI)), 0, 0, 0, 0, 0))
+                            _fallen.push_back(icicle->GetGUID());
+                    }
                     break;
                 case TW_HAIL:
                     if (Unit* t = ObjectAccessor::GetUnit(*me, _hailTarget))
                     {
                         float const toward = me->GetAngle(t);
+                        // The shards seen flying: Ascension's left and right dummy missiles into the cone.
+                        for (uint32 shard : { SPELL_HAIL_MISSILE_LEFT, SPELL_HAIL_MISSILE_RIGHT })
+                        {
+                            float const a = toward + frand(-float(M_PI) / 8, float(M_PI) / 8);
+                            float const d = frand(10.0f, 35.0f);
+                            Position pos = me->GetPosition();
+                            pos.m_positionX += d * std::cos(a);
+                            pos.m_positionY += d * std::sin(a);
+                            pos.m_positionZ = me->GetMap()->GetHeight(me->GetPhaseMask(), pos.GetPositionX(),
+                                pos.GetPositionY(), pos.GetPositionZ() + 5.0f);
+                            CastAt(pos, shard);
+                        }
                         for (Player* p : PlayersWithin(me, 40.0f))
                         {
                             float const off = Position::NormalizeOrientation(me->GetAngle(p) - toward);
@@ -769,9 +805,10 @@ namespace
                     break;
                 case TW_RING:
                 {
-                    // A ring every 1.5s, six yards further out, a spike every seven yards on it.
+                    // A ring every 1.5s, six yards further out, a spike every twelve yards on it (at most sixteen, so a
+                    // full raid's clients are not flooded with spike effects).
                     float const radius = 6.0f * (_ring + 1);
-                    uint32 const spikes = std::max<uint32>(6, uint32(2 * float(M_PI) * radius / 7.0f));
+                    uint32 const spikes = std::clamp<uint32>(uint32(2 * float(M_PI) * radius / 12.0f), 6, 16);
                     std::vector<Position>& ring = _ringSpikes[_ring % 2];
                     ring.clear();
                     for (uint32 i = 0; i < spikes; ++i)
@@ -828,6 +865,7 @@ namespace
         uint8 _warmthSeconds = 0;
         ObjectGuid _hailTarget;
         std::vector<Position> _icicles;
+        std::vector<ObjectGuid> _fallen;
         std::vector<Position> _ringSpikes[2];
     };
 

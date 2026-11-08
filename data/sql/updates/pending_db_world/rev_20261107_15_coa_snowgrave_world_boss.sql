@@ -1,4 +1,4 @@
--- Korrim Snowgrave (64627) in his boss map (889), the way Setis is fought: a shrine in
+-- Snowgrave (64627) in his boss map (889), the way Setis is fought: a shrine in
 -- Winterspring takes players in (Normal only), the portal he leaves where he falls and the shrine at
 -- the entrance take them back, and players who die in his map rise at its start. The shrine's spot is taken in game.
 
@@ -13,9 +13,9 @@ WHERE `entry` = 64627 AND `difficulty` = 2;
 -- The shrine, the portal out and the shrine at the entrance of his map.
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
   `size`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
-(978095, 10, 4076, 'Shrine of Korrim Snowgrave', '', '', '', 3, '', 'go_snowgrave_altar_coa', 12340),
+(978095, 10, 4076, 'Shrine of Snowgrave', '', '', '', 3, '', 'go_snowgrave_altar_coa', 12340),
 (978096, 10, 4396, 'Portal to Winterspring', '', '', '', 1.5, '', 'go_snowgrave_exit_coa', 12340),
-(978097, 10, 4076, 'Shrine of Korrim Snowgrave', '', '', '', 3, '', 'go_snowgrave_leave_coa', 12340)
+(978097, 10, 4076, 'Shrine of Snowgrave', '', '', '', 3, '', 'go_snowgrave_leave_coa', 12340)
 ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`),
   `size` = VALUES(`size`), `ScriptName` = VALUES(`ScriptName`);
 DELETE FROM `gameobject` WHERE `guid` IN (9780935, 9780936);
@@ -31,7 +31,7 @@ INSERT INTO `game_graveyard` (`ID`, `Map`, `x`, `y`, `z`, `Comment`) VALUES
 (6089, 889, 4741.1, -4934.99, 695.78, 'Frostgiantnbossmap Boss map Graveyard');
 DELETE FROM `graveyard_zone` WHERE `ID` = 6089 AND `GhostZone` = 10280;
 INSERT INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`) VALUES
-(6089, 10280, 0, 'Snowgrave''s Cavern (Korrim Snowgrave boss map)');
+(6089, 10280, 0, 'Snowgrave''s Cavern (Snowgrave boss map)');
 
 -- The shrine's words.
 DELETE FROM `npc_text` WHERE `ID` = 978095;
@@ -43,7 +43,7 @@ INSERT INTO `npc_text` (`ID`, `text0_0`, `text0_1`) VALUES
 INSERT INTO `creature_template` (`entry`, `name`, `subname`, `minlevel`, `maxlevel`, `faction`, `npcflag`,
   `speed_walk`, `speed_run`, `unit_class`, `unit_flags`, `type`, `type_flags`, `AIName`, `ScriptName`,
   `VerifiedBuild`) VALUES
-(978095, 'Korrim Snowgrave', '', 63, 63, 35, 0, 1, 1, 1, 33554434, 7, 0, '', '', 12340)
+(978095, 'Snowgrave', '', 63, 63, 35, 0, 1, 1, 1, 33554434, 7, 0, '', '', 12340)
 ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `faction` = VALUES(`faction`), `unit_flags` = VALUES(`unit_flags`),
   `ScriptName` = VALUES(`ScriptName`);
 DELETE FROM `creature_template_model` WHERE `CreatureID` = 978095;
@@ -70,3 +70,13 @@ DELETE FROM `creature_equip_template` WHERE `CreatureID` = 64627;
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, `VerifiedBuild`) VALUES
 (64627, 1, 18085, 17663, 0, 12340);
 UPDATE `creature` SET `equipment_id` = 1 WHERE `guid` = 9780103;
+
+-- He is just "Snowgrave", as on Ascension.
+UPDATE `creature_template` SET `name` = 'Snowgrave' WHERE `entry` = 64627;
+
+-- The icicles his Massive Stomp brings down stay where they fall until the fight ends.
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
+  `size`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
+(978098, 5, 9227, 'Fallen Icicle', '', '', '', 1, '', '', 12340)
+ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`),
+  `size` = VALUES(`size`);
