@@ -58,3 +58,7 @@ UPDATE `gameobject` SET `position_x` = -10397.4809, `position_y` = -2614.6986, `
 -- #10941
 -- pickup 6940851 (Old Crate) moved 17.7 yd across and 0.52 yd down to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -11139.7759, `position_y` = -3166.7492, `position_z` = 9.8843, `orientation` = 2.38275, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.928879, `rotation3` = 0.370383 WHERE `guid` = 6940851 AND `id` = 96194;
+
+-- #10954
+-- pickup 6941098 (Jewelled Ring) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941098 AND `id` = 68394;
