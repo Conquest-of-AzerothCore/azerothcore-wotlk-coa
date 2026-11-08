@@ -138,3 +138,7 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940195 AND `id` = 95526;
 -- #8172
 -- template 3244513 (Jar of Spiders): size 1 -> 0.2 (2 spawns)
 UPDATE `gameobject_template` SET `size` = 0.2 WHERE `entry` = 3244513;
+
+-- #8188
+-- pickup 6941410 (Apprentice Staff) moved 0.8 yd across and 1.21 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -296.5522, `position_y` = -4331.1618, `position_z` = 58.8337, `orientation` = 5.434536, `rotation0` = 0.336952, `rotation1` = 0.466957, `rotation2` = 0.407561, `rotation3` = -0.708737 WHERE `guid` = 6941410 AND `id` = 95670;
