@@ -12,3 +12,9 @@ UPDATE `gameobject` SET `position_x` = -7785.7000, `position_y` = -686.6000, `po
 -- #8417
 -- pickup 6941440 (Blackthorn Splitter) moved 8.8 yd across and 0.52 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -3977.9334, `position_y` = -2012.0263, `position_z` = 96.3491, `orientation` = 3.09538, `rotation0` = -0.43858, `rotation1` = 0.552432, `rotation2` = -0.545049, `rotation3` = -0.453197 WHERE `guid` = 6941440 AND `id` = 97114;
+
+-- #8423
+-- template 96152 (Singed Booklet): size 1 -> 0.2 (1 spawns)
+UPDATE `gameobject_template` SET `size` = 0.2 WHERE `entry` = 96152;
+-- pickup 6941642 (Singed Booklet) moved 6.6 yd across to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -4763.5591, `position_y` = -3658.5874, `position_z` = 47.7020, `orientation` = 1.29503, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.603206, `rotation3` = 0.797585 WHERE `guid` = 6941642 AND `id` = 96152;
