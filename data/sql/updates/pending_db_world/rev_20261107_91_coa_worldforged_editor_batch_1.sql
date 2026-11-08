@@ -26,3 +26,7 @@ UPDATE `gameobject` SET `position_x` = -1058.4698, `position_y` = -4777.9313, `p
 -- #4851
 -- pickup 6941861 (Idol of the Ocean's Depths) moved 18.9 yd across and 33.51 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 4007.5049, `position_y` = -7129.8877, `position_z` = 24.8407, `orientation` = 2.919134, `rotation0` = 0.00531745, `rotation1` = -0.000593907, `rotation2` = 0.993806, `rotation3` = 0.110998 WHERE `guid` = 6941861 AND `id` = 1345076;
+
+-- #4894
+-- pickup 6942249 (Stormscale Supplies) moved 9.1 yd across to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 7363.5514, `position_y` = -920.2340, `position_z` = 10.2180, `orientation` = 4.720023, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.704403, `rotation3` = -0.709801 WHERE `guid` = 6942249 AND `id` = 375327;
