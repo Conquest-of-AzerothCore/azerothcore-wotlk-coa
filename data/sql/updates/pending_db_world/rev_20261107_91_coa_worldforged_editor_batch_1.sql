@@ -18,3 +18,7 @@ UPDATE `gameobject` SET `position_x` = 1406.4193, `position_y` = -1282.6190, `po
 -- #4816
 -- pickup 6942360 (Embedded Sword) moved 10.0 yd across and 8.14 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -217.3840, `position_y` = -5310.0917, `position_z` = 0.4372, `orientation` = 4.463721, `rotation0` = 0.113488, `rotation1` = -0.711815, `rotation2` = 0.227171, `rotation3` = -0.654853 WHERE `guid` = 6942360 AND `id` = 95622;
+
+-- #4823
+-- pickup 6941411 (Apprentice's Harpoon) moved 2.8 yd across and 0.05 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -1058.4698, `position_y` = -4777.9313, `position_z` = 17.2490, `orientation` = 4.26674, `rotation0` = -0.0998524, `rotation1` = -0.701235, `rotation2` = -0.194933, `rotation3` = 0.678455 WHERE `guid` = 6941411 AND `id` = 95640;
