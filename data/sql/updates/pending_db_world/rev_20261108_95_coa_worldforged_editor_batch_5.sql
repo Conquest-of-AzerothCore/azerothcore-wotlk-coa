@@ -109,3 +109,14 @@ UPDATE `gameobject` SET `position_x` = -5573.1407, `position_y` = -2718.4827, `p
 UPDATE `gameobject` SET `position_x` = -736.2671, `position_y` = -5585.9241, `position_z` = 25.052, `orientation` = 5.119941, `rotation0` = 0.012386, `rotation1` = 0.018838, `rotation2` = 0.54924, `rotation3` = -0.83536 WHERE `guid` = 6942139 AND `id` = 95629;
 -- Scalper's Sack copies outside Durotar (Ascension and LootCollector only have the Echo Isles one): 6941009 (Scalper's Sack), 6942138 (Scalper's Sack) hidden, not deleted
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6941009, 6942138) AND `id` IN (95629);
+
+-- #11616
+-- pickup 6941715 (Lost Treasure) moved 64.5 yd across and 9.83 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -9695.4861, `position_y` = -1924.7839, `position_z` = 0.3131, `orientation` = 0.158753, `rotation0` = 0.092481, `rotation1` = 0.007356, `rotation2` = 0.078951, `rotation3` = 0.992552 WHERE `guid` = 6941715 AND `id` = 515755;
+-- the overturned sailboat and the sand mound around the chest were missing (Ascension sailboat 515938)
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `size`, `Data0`, `Data1`, `AIName`, `ScriptName`) VALUES (515938, 5, 1025981, 'Raider''s Sailboat', 1, 0, 0, '', '') ON DUPLICATE KEY UPDATE `type` = 5, `displayId` = 1025981, `name` = 'Raider''s Sailboat', `size` = 1;
+DELETE FROM `gameobject` WHERE `guid` = 6976001;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976001, 515938, 1, 1, 1, -9698.14778, -1920.627693, 1.168119, 1.442727, 0.706231, 0.639128, -0.198224, 0.231216, 300, 100, 1);
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `size`, `Data0`, `Data1`, `AIName`, `ScriptName`) VALUES (9900049, 5, 1072391, 'Sand Pile', 1, 0, 0, '', '') ON DUPLICATE KEY UPDATE `type` = 5, `displayId` = 1072391, `name` = 'Sand Pile', `size` = 1;
+DELETE FROM `gameobject` WHERE `guid` = 6976002;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976002, 9900049, 1, 1, 1, -9695.054092, -1924.630704, -0.655023, 6.004578, 0, 0, -0.138854, 0.990313, 300, 100, 1);
