@@ -544,6 +544,7 @@ bool Begin(uint32 seconds, Position const& point)
         { return value == seconds; }))
         BroadcastAnnouncement(Acore::StringFormat(
             "Crow's Cache is materializing in {} in {} seconds!", LocationName(found->second), seconds).c_str());
+    return true;
 }
 
 void UpdateEvents()
