@@ -19,6 +19,7 @@ ARGENT_BLADE = 804929
 ARGENT_BLADE_RANKS = (804929, 807263, 807264, 807265, 807266, 807267, 807268)
 RIGHTEOUS_LUNGE = 801443
 HOLY_CLEAVE = 801445
+RIGHTEOUS_TEMPEST = 805410
 STAFF_SUBCLASS = 10
 TEMPLAR_SKILL_LINES = [70, 71, 72, 136]
 
@@ -182,6 +183,12 @@ class ClientDbcClassSpellTest(unittest.TestCase):
         self.assertEqual(len(extended), TEMPLAR_SPELL_IDS + 2)
         self.assertEqual(len(self.templar), TEMPLAR_SPELL_IDS)
         self.assertFalse({RIGHTEOUS_LUNGE, HOLY_CLEAVE} & {spell.spell_id for spell in self.templar})
+
+    def test_righteous_tempest_extra_spell_joins_the_set(self):
+        extended = {spell.spell_id: spell for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER,
+                                                                    extra_spells=(RIGHTEOUS_TEMPEST,))}
+        self.assertEqual(extended[RIGHTEOUS_TEMPEST].max_rank, 570205)
+        self.assertEqual(len(extended[RIGHTEOUS_TEMPEST].ranks), 7)
 
     def test_templar_extra_spells_cite_a_logged_rank_of_their_chain(self):
         entries = load_class_file(TEMPLAR_CLASS_ID)['extra_spells']

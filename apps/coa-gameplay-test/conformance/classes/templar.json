@@ -62,7 +62,9 @@
     {"spell": 572808, "name": "Righteous Custodian",
      "citation": "2026-08-23 20:31:31.212, spell 572808 Righteous Custodian, Ascension combat log, private archive"},
     {"spell": 3018, "name": "Shoot",
-     "citation": "2026-08-02 20:33:19.015, spell 3018 Shoot, Ascension combat log, private archive"}
+     "citation": "2026-08-02 20:33:19.015, spell 3018 Shoot, Ascension combat log, private archive"},
+    {"spell": 805410, "name": "Righteous Tempest",
+     "citation": "2026-08-01 16:37:16.076, spell 570205 Righteous Tempest, Ascension combat log, private archive"}
   ],
   "procs": [
     {
@@ -809,6 +811,20 @@
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
       "per_trigger_text": "now applies Iron Penance"
+    },
+    {
+      "aura": 520534,
+      "name": "Templar Rituals",
+      "tooltip": "Damage dealt by |cFFFFFFFFRighteous Tempest|r now deals an additional ${$520544m1+$sph*0.5+$AP*0.085} Holy damage, and upon dealing damage, you pull enemies within 15 yds towards you.\r\n\r\n@ext:Enemies pulled cannot be pulled this way again within 15 seconds.:ext@",
+      "trigger": {"action": "cast", "spell": 805410, "target": "dummy"},
+      "trigger_text": "Damage dealt by Righteous Tempest",
+      "trigger_spell_text": "Righteous Tempest",
+      "trial_metric": "spell_damage_count",
+      "observe_spell": 520544,
+      "observe_source": "EffectTriggerSpell[0] of 520534",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "upon dealing damage, you pull enemies"
     }
   ],
   "talent_modifiers": [

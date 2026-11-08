@@ -94,6 +94,10 @@ Titanstrike, Crusader's Presence, Righteous Custodian and Shoot (a ranged hit; i
 is `unmodelled`). Temple Guardian is logged at Rank 6 803796 (`Spell.dbc` `Rank[enUS]`, level 60), while the header
 chains 801165 to Rank 2 803792 only, so the run judges Rank 2.
 
+Righteous Tempest 805410 (`AscensionTemplarAbilities.cpp`'s `RighteousTempest()`, ranks 805410/570200-570205) is a
+23rd `extra_spells` entry, logged at Rank 7 570205 (level 60); it is not one of the 34 `ClassSpells` candidates above
+(round 3, 2026-11-08), so ADR 0016's citation mechanism applies to it independently of that candidate list.
+
 Not confirmed, left out: Dodge 81, Block 107, Dual Wield 674, Auto Attack 6603, Resilient Constitution 552011,
 Divine Stand 807729, Detect Evil 562226, Gift of Fervor 572629, Shackle The Unrepentant 560963, Greater Gift of Fervor
 572630 and Greater Gift of Zeal 680306 (no log line), and Throw 2764 (cast only by players who cast no Templar
