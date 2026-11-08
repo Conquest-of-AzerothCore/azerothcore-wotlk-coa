@@ -1,14 +1,19 @@
 -- Azeroth World Editor 0.10.0
 -- Pridewing Wyvern paths and spawn heights (Highwind Hold, Stonetalon Mountains)
 -- Schema: ec4dbf0c7e2ffbe21a91d275b19a344f8bffe1dc476fe49e1502e6e9a75afc22
--- Generated: 2026-11-07
+-- Generated: 2026-11-07 (merged with additional_wyvern 2026-11-08)
 
 DELETE FROM `creature_addon` WHERE `guid` IN (29946, 29981);
 INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
 (29981, 299810, 0, 0, 1, 0, 0, ''),
 (29946, 299460, 0, 0, 1, 0, 0, NULL);
 
-DELETE FROM `waypoint_data` WHERE `id` IN (299400, 299570, 299560, 299510, 299500, 299590, 299580, 299810, 299520, 299540, 299460, 299530) AND `point` > 0;
+-- Additional wyvern (guid 29949, id 4012): keep any existing addon row, just set its path
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(29949, 299490, 0, 0, 1, 0, 0, NULL)
+ON DUPLICATE KEY UPDATE `path_id` = VALUES(`path_id`);
+
+DELETE FROM `waypoint_data` WHERE `id` IN (299400, 299570, 299560, 299510, 299500, 299590, 299580, 299810, 299520, 299540, 299460, 299530, 299490) AND `point` > 0;
 
 INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `velocity`, `delay`, `smoothTransition`, `move_type`, `action`, `action_chance`, `wpguid`) VALUES (299400, 1, 1486.3980913597961, 591.3601058261622, 143.12103141767489, NULL, 0, 0, 0, 0, 0, 100, 0),
 (299400, 2, 1476.1052388749117, 587.8864605179978, 145.51309947425327, NULL, 0, 0, 0, 0, 0, 100, 0),
@@ -117,7 +122,24 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 (299530, 4, 1640.085110571882, 653.7994832735324, 177.06510528840397, NULL, 0, 0, 0, 0, 0, 100, 0),
 (299530, 5, 1634.3406896820118, 665.410778493806, 176.9153594970703, NULL, 0, 0, 0, 0, 0, 100, 0),
 (299530, 6, 1634.0142159680047, 649.3677297241694, 176.91613493402548, NULL, 0, 0, 0, 0, 0, 100, 0),
-(299530, 7, 1625.5514547534754, 659.2913728880527, 178.21431117917464, NULL, 0, 0, 0, 0, 0, 100, 0);
+(299530, 7, 1625.5514547534754, 659.2913728880527, 178.21431117917464, NULL, 0, 0, 0, 0, 0, 100, 0),
+(299490, 1, 1507.12, 713.368, 140.925, NULL, 0, 0, 0, 0, 0, 100, 0),
+(299490, 2, 1498.1, 703.444, 142.048, NULL, 0, 0, 0, 0, 0, 100, 0),
+(299490, 3, 1488.54, 694.112, 142.574, NULL, 0, 0, 0, 0, 0, 100, 0),
+(299490, 4, 1477.81, 685.382, 143.645, NULL, 0, 0, 0, 0, 0, 100, 0),
+(299490, 5, 1476.85, 671.219, 144.146, NULL, 0, 0, 0, 0, 0, 100, 0),
+(299490, 6, 1479.46, 656.53, 141.61056456637758, NULL, 0, 0, 0, 0, 0, 100, 0),
+(299490, 7, 1487.23, 653.1233134275432, 141.60367675136325, NULL, 0, 0, 0, 0, 0, 100, 0),
+(299490, 8, 1492.051201854215, 664.8276154267064, 142.37111492224253, NULL, 0, 0, 0, 0, 0, 100, 0),
+(299490, 9, 1515.93, 674.7340990460112, 142.88287776504455, NULL, 0, 0, 0, 0, 0, 100, 0),
+(299490, 10, 1531.09, 669.5693082140072, 140.68891705652135, NULL, 0, 0, 0, 0, 0, 100, 0),
+(299490, 11, 1544.8, 672.3005118776198, 141.772, NULL, 0, 0, 0, 0, 0, 100, 0),
+(299490, 12, 1554.02, 681.1035327907015, 141.55029211167553, NULL, 0, 0, 0, 0, 0, 100, 0),
+(299490, 13, 1562.49, 695.5807924081756, 141.19740081078243, NULL, 0, 0, 0, 0, 0, 100, 0),
+(299490, 14, 1554.27, 697.8606643254718, 141.33991839609953, NULL, 0, 0, 0, 0, 0, 100, 0),
+(299490, 15, 1538.65, 695.189, 141.764, NULL, 0, 0, 0, 0, 0, 100, 0),
+(299490, 16, 1521.64, 699.504, 140.059, NULL, 0, 0, 0, 0, 0, 100, 0),
+(299490, 17, 1515.99, 713.737, 141.411, NULL, 0, 0, 0, 0, 0, 100, 0);
 
 UPDATE `creature` SET `position_x` = 1529.9332420903677, `position_y` = 594.5832061888412, `position_z` = 142.7632520294438, `orientation` = 4.92608 WHERE `id` = 4012 AND `guid` = 29945;
 UPDATE `creature` SET `position_x` = 1495.2603469642359, `position_y` = 597.7514787142886, `position_z` = 142.7814687840185, `orientation` = 2.72952 WHERE `id` = 4012 AND `guid` = 29940;
@@ -126,6 +148,6 @@ UPDATE `creature` SET `position_x` = 1686.73, `position_y` = 601.179, `position_
 UPDATE `creature` SET `position_x` = 1703.64, `position_y` = 579.024, `position_z` = 200.974, `orientation` = 4.002230470771325 WHERE `id` = 4013 AND `guid` = 29951;
 UPDATE `creature` SET `position_x` = 1680.43, `position_y` = 541.915, `position_z` = 208.223, `orientation` = 0.020849615124989902 WHERE `id` = 4013 AND `guid` = 29950;
 
-UPDATE `creature` SET `wander_distance` = 0, `MovementType` = 2 WHERE `id` IN (4012, 4013, 4015) AND `guid` IN (29957, 29956, 29951, 29950, 29959, 29958, 29981, 29952, 29946, 29953);
+UPDATE `creature` SET `wander_distance` = 0, `MovementType` = 2 WHERE `id` IN (4012, 4013, 4015) AND `guid` IN (29957, 29956, 29951, 29950, 29959, 29958, 29981, 29952, 29946, 29953, 29949);
 
-UPDATE `creature_addon` SET `path_id` = `guid` * 10 WHERE `guid` IN (29957, 29956, 29951, 29950, 29959, 29958, 29952, 29953);
+UPDATE `creature_addon` SET `path_id` = `guid` * 10 WHERE `guid` IN (29957, 29956, 29951, 29950, 29959, 29958, 29952, 29953, 29949);
