@@ -124,3 +124,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 -- #11627
 -- pickup 6941514 (Burning Blade Ring) moved 2.2 yd across and 0.00 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -61.863, `position_y` = -4205.79, `position_z` = 63.508, `orientation` = 5.75124, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.262848, `rotation3` = -0.964837 WHERE `guid` = 6941514 AND `id` = 90297;
+
+-- #11643
+-- Deathwhisper Wand copy in Stormwind: 6940326 (Deathwhisper Wand) hidden, not deleted
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6940326) AND `id` IN (1345034);
