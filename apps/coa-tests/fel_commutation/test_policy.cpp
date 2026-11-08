@@ -92,5 +92,17 @@ int main()
         }
     }
 
+    assert(AllSlotsMask == 0x7FFEEu);
+    for (unsigned slot = 0; slot <= 21; ++slot)
+        assert(((AllSlotsMask >> slot) & 1u) == (Insurable(slot) ? 1u : 0u));
+    assert(DecideDefaultSync(true, true, false) == DefaultSync::Apply);
+    assert(DecideDefaultSync(true, true, true) == DefaultSync::None);
+    assert(DecideDefaultSync(false, true, true) == DefaultSync::Clear);
+    assert(DecideDefaultSync(true, false, true) == DefaultSync::Clear);
+    assert(DecideDefaultSync(false, false, true) == DefaultSync::Clear);
+    assert(DecideDefaultSync(false, true, false) == DefaultSync::None);
+    assert(DecideDefaultSync(true, false, false) == DefaultSync::None);
+    assert(DecideDefaultSync(false, false, false) == DefaultSync::None);
+
     std::cout << checked << " rate band, cost, settlement and toggle checks verified\n";
 }

@@ -34,6 +34,34 @@ constexpr bool Insurable(unsigned slot)
     return slot >= 1 && slot <= SlotCount && slot != ShirtSlot && slot != TabardSlot;
 }
 
+constexpr std::uint32_t BuildAllSlotsMask()
+{
+    std::uint32_t mask = 0;
+    for (unsigned slot = 1; slot <= SlotCount; ++slot)
+        if (Insurable(slot))
+            mask |= 1u << slot;
+    return mask;
+}
+
+constexpr std::uint32_t AllSlotsMask = BuildAllSlotsMask();
+
+enum class DefaultSync : std::uint8_t
+{
+    None,
+    Apply,
+    Clear
+};
+
+constexpr DefaultSync DecideDefaultSync(bool enabled, bool insureAllByDefault, bool defaultApplied)
+{
+    bool const wanted = enabled && insureAllByDefault;
+    if (wanted && !defaultApplied)
+        return DefaultSync::Apply;
+    if (!wanted && defaultApplied)
+        return DefaultSync::Clear;
+    return DefaultSync::None;
+}
+
 enum class ToggleResult : std::uint8_t
 {
     Ok,
