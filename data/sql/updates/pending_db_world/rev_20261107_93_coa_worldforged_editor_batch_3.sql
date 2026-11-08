@@ -120,3 +120,9 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940613 AND `id` = 95519;
 -- #11163
 -- pickup 6975021 (Morin's Jug) moved 13.7 yd across and 3.38 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -705.3076, `position_y` = -536.4640, `position_z` = 27.1831, `orientation` = 6.283185, `rotation0` = 0.16543, `rotation1` = -0.683375, `rotation2` = 0.163354, `rotation3` = 0.69206 WHERE `guid` = 6975021 AND `id` = 1345092;
+
+-- #11169
+-- pickup 6941086 (Sinter Wive's Rope) moved 1.20 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -5204.2000, `position_y` = -3535.0000, `position_z` = 305.2797, `orientation` = 3.57389, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.976731, `rotation3` = -0.21447 WHERE `guid` = 6941086 AND `id` = 375024;
+-- pickup 6941087 (Sinter Wive's Rope) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941087 AND `id` = 375024;
