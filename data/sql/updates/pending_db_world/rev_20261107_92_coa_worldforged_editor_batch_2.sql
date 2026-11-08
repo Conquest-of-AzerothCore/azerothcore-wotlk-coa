@@ -30,3 +30,9 @@ UPDATE `gameobject_template` SET `size` = 1.5 WHERE `entry` = 254463;
 UPDATE `gameobject` SET `position_x` = 3326.1057, `position_y` = -5664.3597, `position_z` = 13.0586, `orientation` = 3.624124, `rotation0` = 0.686988, `rotation1` = -0.0393853, `rotation2` = 0.725395, `rotation3` = 0.0172611 WHERE `guid` = 6942227 AND `id` = 254463;
 -- pickup 6941134 (Warbanner) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941134 AND `id` = 254463;
+
+-- #8433
+-- pickup 6940320 (Deadman's Dagger) moved 6.2 yd across and 3.73 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -612.1900, `position_y` = -1071.4953, `position_z` = 66.0557, `orientation` = 0.07712, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.03855, `rotation3` = 0.999257 WHERE `guid` = 6940320 AND `id` = 515385;
+-- pickup 6940321 (Deadman's Dagger) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940321 AND `id` = 515385;
