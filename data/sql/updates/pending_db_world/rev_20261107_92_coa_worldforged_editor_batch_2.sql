@@ -48,3 +48,7 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6941972 AND `id` = 90626;
 UPDATE `gameobject_template` SET `size` = 1.3 WHERE `entry` = 515434;
 -- pickup 6942238 (Celestial Edge of Starfall) moved 31.3 yd across and 22.24 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 9981.4921, `position_y` = 2007.3812, `position_z` = 1354.7006, `orientation` = 5.711063, `rotation0` = -0.651556, `rotation1` = -0.270598, `rotation2` = 0.57505, `rotation3` = -0.414209 WHERE `guid` = 6942238 AND `id` = 515434;
+
+-- #8525
+-- pickup 6941672 (Shiny Hammer) moved 7.0 yd across and 1.30 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 580.5571, `position_y` = -4547.9254, `position_z` = 41.4276, `orientation` = 5.65093, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.310888, `rotation3` = -0.950446 WHERE `guid` = 6941672 AND `id` = 254633;
