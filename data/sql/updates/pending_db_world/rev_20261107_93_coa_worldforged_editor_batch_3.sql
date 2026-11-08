@@ -116,3 +116,7 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940844 AND `id` = 517341
 -- #11161
 -- pickup 6940613 (Heavy Ogre Axe) is a misplaced duplicate: hidden (spawnMask 0), kept in the table
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` = 6940613 AND `id` = 95519;
+
+-- #11163
+-- pickup 6975021 (Morin's Jug) moved 13.7 yd across and 3.38 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -705.3076, `position_y` = -536.4640, `position_z` = 27.1831, `orientation` = 6.283185, `rotation0` = 0.16543, `rotation1` = -0.683375, `rotation2` = 0.163354, `rotation3` = 0.69206 WHERE `guid` = 6975021 AND `id` = 1345092;
