@@ -30,3 +30,7 @@ UPDATE `gameobject` SET `position_x` = 1753.8239, `position_y` = -1133.1192, `po
 -- #10653
 -- pickup 6942406 (Alchemist Cache) moved 27.1 yd across to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -7683.7707, `position_y` = -4266.2539, `position_z` = 10.5920, `orientation` = 5.452117, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.403679, `rotation3` = -0.914901 WHERE `guid` = 6942406 AND `id` = 515742;
+
+-- #10740, #11340
+-- pickup 6940442 (Eroded Pit Fighter Knuckles) moved 8.3 yd across and 0.06 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -498.3902, `position_y` = -1562.4511, `position_z` = 52.5904, `orientation` = 4.95517, `rotation0` = 0.540102, `rotation1` = -0.422655, `rotation2` = 0.44851, `rotation3` = -0.573142 WHERE `guid` = 6940442 AND `id` = 515386;
