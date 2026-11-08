@@ -18,13 +18,15 @@
  *   Panther form (her Aspect of Bethekk), a 55s cycle
  *     Mark and Vanish    at the change          she marks a player and vanishes
  *                                               for 10s (tester, live)
- *     Shadowstep, Ravage 11s after the change,  behind a random player, then
- *                        every 55s              pins and mauls that player
+ *     Shadowstep, Ravage 11s after the change,  behind the tank, then pins and
+ *                        every 55s              mauls the tank (the CoA logs:
+ *                                               7 of 7 Ravages on the tank)
  *     Shadowstep,        18s after each Ravage  behind a random player, then
  *     Claw Storm                                spins for 8s, 5 yards around her
- *     Vanish             26s after each Ravage  10s out of sight
- *     Razor Claws        passive, her melee hits and Ravage bleed; Claw Storm
- *                        does not (tester, live)
+ *     Vanish             44s after each Ravage  10s out of sight (the CoA logs)
+ *     Razor Claws        passive, her melee hits and Ravage bleed; each Claw
+ *                        Storm hit with an 8% chance (the CoA logs: 34 of
+ *                        452 hits, BB 65 of 816; decided 2026-11-08)
  *
  *   Both forms
  *     Fierce Blow        first 6.7-17.3s, every 6-10s   on the tank
@@ -38,8 +40,7 @@
  *
  * Decided here, not in the data:
  *   - the panther cycle's timings (the video shows two Ravages, each after a
- *     Shadowstep) and that Ravage hits the player she stepped behind; Kidney
- *     Shot's first cast;
+ *     Shadowstep) besides the Vanish; Kidney Shot's first cast;
  *   - the mark lasts until it is removed and does not stack; prowlers within
  *     40 yards of the marked player turn on them every 2 seconds.
  */
@@ -124,12 +125,13 @@ namespace
     constexpr Milliseconds VANISH_STEALTH          = 10s;
     constexpr Milliseconds FIRST_PANTHER_STEP      = 11s;
     constexpr Milliseconds CLAW_STORM_AFTER_RAVAGE = 18s;
-    constexpr Milliseconds VANISH_AFTER_RAVAGE     = 26s;
+    constexpr Milliseconds VANISH_AFTER_RAVAGE     = 44s;
     constexpr Milliseconds PANTHER_CYCLE           = 55s;
     constexpr Milliseconds STEP_LANDING            = 250ms;
 
     constexpr std::array<uint32, 4> RAZOR_CLAWS_BLEEDS = { 2118326, 2118327, 2118328, 2118329 };
     constexpr std::array<uint32, 4> CLAW_STORM_HITS    = { 2118337, 2118338, 2118339, 2118340 };
+    constexpr int32 CLAW_STORM_BLEED_CHANCE = 8;
 
     Position const PosMoveOnSpawn = { -11561.9f, -1627.868f, 41.29941f, 0.0f };
 
@@ -261,11 +263,11 @@ namespace
                 AttackStart(target);
         }
 
-        void StepBehindRandomPlayer(uint32 followUp)
+        void StepBehind(SelectTargetMethod method, uint32 followUp)
         {
             Reappear();
             _afterStep = followUp;
-            if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, SHADOWSTEP_RANGE, true))
+            if (Unit* target = SelectTarget(method, 0, SHADOWSTEP_RANGE, true))
             {
                 _stepTarget = target->GetGUID();
                 DoCast(target, SPELL_SHADOWSTEP);
@@ -408,13 +410,13 @@ namespace
                         Reappear();
                         break;
                     case EVENT_STEP_TO_RAVAGE:
-                        StepBehindRandomPlayer(EVENT_RAVAGE);
+                        StepBehind(SelectTargetMethod::MaxThreat, EVENT_RAVAGE);
                         events.ScheduleEvent(EVENT_STEP_TO_CLAW_STORM, CLAW_STORM_AFTER_RAVAGE, 0, PHASE_TWO);
                         events.ScheduleEvent(EVENT_VANISH, VANISH_AFTER_RAVAGE, 0, PHASE_TWO);
                         events.ScheduleEvent(EVENT_STEP_TO_RAVAGE, PANTHER_CYCLE, 0, PHASE_TWO);
                         break;
                     case EVENT_STEP_TO_CLAW_STORM:
-                        StepBehindRandomPlayer(EVENT_CLAW_STORM);
+                        StepBehind(SelectTargetMethod::Random, EVENT_CLAW_STORM);
                         break;
                     case EVENT_RAVAGE:
                         if (Unit* target = ObjectAccessor::GetUnit(*me, _stepTarget); target && target->IsAlive())
@@ -460,7 +462,9 @@ namespace
         bool CheckProc(ProcEventInfo& eventInfo)
         {
             SpellInfo const* spell = eventInfo.GetSpellInfo();
-            return !spell || std::find(CLAW_STORM_HITS.begin(), CLAW_STORM_HITS.end(), spell->Id) == CLAW_STORM_HITS.end();
+            bool const clawStorm = spell
+                && std::find(CLAW_STORM_HITS.begin(), CLAW_STORM_HITS.end(), spell->Id) != CLAW_STORM_HITS.end();
+            return !clawStorm || roll_chance_i(CLAW_STORM_BLEED_CHANCE);
         }
 
         void Register() override
