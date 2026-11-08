@@ -1678,6 +1678,21 @@ class spell_coa_mythic_life_steal : public SpellScript
     }
 };
 
+class spell_coa_mythic_horde : public AuraScript
+{
+    PrepareAuraScript(spell_coa_mythic_horde);
+
+    bool CheckAreaTarget(Unit* target)
+    {
+        return target != GetUnitOwner();
+    }
+
+    void Register() override
+    {
+        DoCheckAreaTarget += AuraCheckAreaTargetFn(spell_coa_mythic_horde::CheckAreaTarget);
+    }
+};
+
 class coa_mythic_plus_keystone_use : public AllSpellScript
 {
 public:
@@ -3076,4 +3091,5 @@ void AddCoaMythicPlusScripts()
     new coa_mythic_plus_boss_kills();
     new coa_mythic_plus_keystone_use();
     RegisterSpellScript(spell_coa_mythic_life_steal);
+    RegisterSpellScript(spell_coa_mythic_horde);
 }
