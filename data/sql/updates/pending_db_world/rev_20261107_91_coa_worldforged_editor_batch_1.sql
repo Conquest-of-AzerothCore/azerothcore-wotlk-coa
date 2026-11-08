@@ -142,3 +142,9 @@ UPDATE `gameobject_template` SET `size` = 0.2 WHERE `entry` = 3244513;
 -- #8188
 -- pickup 6941410 (Apprentice Staff) moved 0.8 yd across and 1.21 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -296.5522, `position_y` = -4331.1618, `position_z` = 58.8337, `orientation` = 5.434536, `rotation0` = 0.336952, `rotation1` = 0.466957, `rotation2` = 0.407561, `rotation3` = -0.708737 WHERE `guid` = 6941410 AND `id` = 95670;
+
+-- #8328
+-- template 520071 (Vulture Effigy): displayId 188302 -> 1044834; size 1 -> 0.9 (1 spawns)
+UPDATE `gameobject_template` SET `displayId` = 1044834, `size` = 0.9 WHERE `entry` = 520071;
+-- pickup 6942392 (Vulture Effigy) moved 2.9 yd across and 2.01 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = 10602.6398, `position_y` = 462.9497, `position_z` = 1394.8924, `orientation` = 3.244403, `rotation0` = -0.00131207, `rotation1` = 0.000437435, `rotation2` = 0.998678, `rotation3` = -0.0513817 WHERE `guid` = 6942392 AND `id` = 520071;
