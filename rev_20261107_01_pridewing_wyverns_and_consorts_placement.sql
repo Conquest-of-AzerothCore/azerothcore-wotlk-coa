@@ -2,7 +2,6 @@
 -- Pridewing Wyvern paths and spawn heights (Highwind Hold, Stonetalon Mountains)
 -- Schema: ec4dbf0c7e2ffbe21a91d275b19a344f8bffe1dc476fe49e1502e6e9a75afc22
 -- Generated: 2026-11-07
--- DRAFT: replace every @@ID_...@@ placeholder with the creature id1 of that spawn before committing
 
 DELETE FROM `creature_addon` WHERE `guid` IN (29946, 29981);
 INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
@@ -120,13 +119,13 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 (299530, 6, 1634.0142159680047, 649.3677297241694, 176.91613493402548, NULL, 0, 0, 0, 0, 0, 100, 0),
 (299530, 7, 1625.5514547534754, 659.2913728880527, 178.21431117917464, NULL, 0, 0, 0, 0, 0, 100, 0);
 
-UPDATE `creature` SET `position_x` = 1529.9332420903677, `position_y` = 594.5832061888412, `position_z` = 142.7632520294438, `orientation` = 4.92608 WHERE `id1` = @@ID_29945@@ AND `guid` = 29945;
-UPDATE `creature` SET `position_x` = 1495.2603469642359, `position_y` = 597.7514787142886, `position_z` = 142.7814687840185, `orientation` = 2.72952 WHERE `id1` = @@ID_29940@@ AND `guid` = 29940;
-UPDATE `creature` SET `position_x` = 1536.8359342948652, `position_y` = 539.6081441736665, `position_z` = 172.616, `orientation` = 0.7648250863358141 WHERE `id1` = @@ID_29968@@ AND `guid` = 29968;
-UPDATE `creature` SET `position_x` = 1686.73, `position_y` = 601.179, `position_z` = 196.849, `orientation` = 3.0531650517196285 WHERE `id1` = @@ID_29956@@ AND `guid` = 29956;
-UPDATE `creature` SET `position_x` = 1703.64, `position_y` = 579.024, `position_z` = 200.974, `orientation` = 4.002230470771325 WHERE `id1` = @@ID_29951@@ AND `guid` = 29951;
-UPDATE `creature` SET `position_x` = 1680.43, `position_y` = 541.915, `position_z` = 208.223, `orientation` = 0.020849615124989902 WHERE `id1` = @@ID_29950@@ AND `guid` = 29950;
+UPDATE `creature` SET `position_x` = 1529.9332420903677, `position_y` = 594.5832061888412, `position_z` = 142.7632520294438, `orientation` = 4.92608 WHERE `id` = 4012 AND `guid` = 29945;
+UPDATE `creature` SET `position_x` = 1495.2603469642359, `position_y` = 597.7514787142886, `position_z` = 142.7814687840185, `orientation` = 2.72952 WHERE `id` = 4012 AND `guid` = 29940;
+UPDATE `creature` SET `position_x` = 1536.8359342948652, `position_y` = 539.6081441736665, `position_z` = 172.616, `orientation` = 0.7648250863358141 WHERE `id` = 4014 AND `guid` = 29968;
+UPDATE `creature` SET `position_x` = 1686.73, `position_y` = 601.179, `position_z` = 196.849, `orientation` = 3.0531650517196285 WHERE `id` = 4013 AND `guid` = 29956;
+UPDATE `creature` SET `position_x` = 1703.64, `position_y` = 579.024, `position_z` = 200.974, `orientation` = 4.002230470771325 WHERE `id` = 4013 AND `guid` = 29951;
+UPDATE `creature` SET `position_x` = 1680.43, `position_y` = 541.915, `position_z` = 208.223, `orientation` = 0.020849615124989902 WHERE `id` = 4013 AND `guid` = 29950;
 
-UPDATE `creature` SET `wander_distance` = 0, `MovementType` = 2 WHERE `id1` IN (@@ID_LIST@@) AND `guid` IN (29957, 29956, 29951, 29950, 29959, 29958, 29981, 29952, 29946, 29953);
+UPDATE `creature` SET `wander_distance` = 0, `MovementType` = 2 WHERE `id` IN (4012, 4013, 4015) AND `guid` IN (29957, 29956, 29951, 29950, 29959, 29958, 29981, 29952, 29946, 29953);
 
 UPDATE `creature_addon` SET `path_id` = `guid` * 10 WHERE `guid` IN (29957, 29956, 29951, 29950, 29959, 29958, 29952, 29953);
