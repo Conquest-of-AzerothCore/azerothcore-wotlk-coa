@@ -19,8 +19,9 @@ constexpr std::array<uint32, 15> TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_SPELLS = {
     801446, 501589, 501590, 501591, 501592, 501593, 573324,
     805421, 748505, 748506, 748507, 572739, 572740, 572741, 804150};
 
-constexpr std::array<std::pair<uint32, uint8>, 5> TEMPLAR_TOOLTIP_FULL_SCALED_BY_LEVEL_SPELLS = {{
-    {503135, 0}, {503136, 0}, {803157, 0}, {803373, 1}, {803374, 1}}};
+constexpr std::array<std::pair<uint32, uint8>, 15> TEMPLAR_TOOLTIP_FULL_SCALED_BY_LEVEL_SPELLS = {{
+    {503135, 0}, {503136, 0}, {503137, 0}, {503138, 0}, {503139, 0}, {503140, 0}, {503141, 0}, {803157, 0},
+    {803373, 1}, {803374, 1}, {803375, 1}, {803376, 1}, {803377, 1}, {803378, 1}, {578276, 1}}};
 
 float StockEffectRealPointsPerLevelAmount(Unit const* caster, SpellInfo const* info, uint8 index)
 {
