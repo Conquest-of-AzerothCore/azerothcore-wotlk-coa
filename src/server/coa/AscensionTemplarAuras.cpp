@@ -132,10 +132,7 @@ class aura_ascension_templar_lifecycle : public AuraScript
             if (duration)
                 GetAura()->SetDuration(std::min(GetAura()->GetDuration(), int32(duration)));
             if (GetAura()->GetStackAmount() >= 6)
-            {
                 Cast(player, player, 806517);
-                GetAura()->Remove();
-            }
         }
         if (id == 801202)
         {

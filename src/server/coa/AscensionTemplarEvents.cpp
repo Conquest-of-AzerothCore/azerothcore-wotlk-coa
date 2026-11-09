@@ -208,12 +208,9 @@ class aura_ascension_templar_event : public AuraScript
                 Cast(player, player, 807648);
             break;
         case 806516:
-            if (!player->HasAura(806517))
-            {
-                if (Aura* aura = player->GetAura(805390))
-                    aura->SetScriptValue(805390, std::max(0, aura->GetDuration()));
-                Cast(player, player, 805390);
-            }
+            if (Aura* aura = player->GetAura(805390))
+                aura->SetScriptValue(805390, std::max(0, aura->GetDuration()));
+            Cast(player, player, 805390);
             break;
         default:
             break;
