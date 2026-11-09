@@ -5,7 +5,7 @@
     "Creatures drop no loot while a keystone run is active (MythicPlus.NoCreatureLoot). Chests did, so the",
     "Chest of The Seven 169243 in Blackrock Depths paid out during a +7. Chests opened while a run is active now",
     "give nothing too. Gathering and lockpicking chests (herbs, ore, fish, footlockers) keep their loot. The",
-    "scenario opens the Chest of The Seven in a Mythic Scarlet Monastery Armory before and during a key."
+    "scenario opens the Chest of The Seven before the key and a Solid Chest 153451 during it."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -128,7 +128,7 @@
     {
       "action": "summon_gameobject",
       "actor": "hero",
-      "entry": 169243,
+      "entry": 153451,
       "distance": 3,
       "duration_s": 60
     },
@@ -140,10 +140,10 @@
     {
       "action": "loot_gameobject",
       "actor": "hero",
-      "entry": 169243
+      "entry": 153451
     },
     {
-      "label": "DISCRIMINATING: during the run the Chest of The Seven gives nothing",
+      "label": "DISCRIMINATING: during the run a Solid Chest gives nothing",
       "action": "assert",
       "actor": "hero",
       "metric": "loot_count",
