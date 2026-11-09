@@ -605,13 +605,14 @@ namespace
     enum SnowgraveEvents
     {
         EW_STOMP = 1, EW_HAIL, EW_GRASP, EW_WARMTH, EW_SHOCK, EW_FIERCE,
-        TW_ICICLE_WARN, TW_ICICLE, TW_HAIL, TW_RING, TW_RING_HIT, TW_WARMTH,
+        TW_ICICLE_WARN, TW_ICICLE, TW_HAIL, TW_HAIL_IMPACT, TW_RING, TW_RING_HIT, TW_WARMTH,
     };
 
     constexpr uint8 CHILL_FROZEN      = 10;
     constexpr uint32 GO_FALLEN_ICICLE = 978098;
     constexpr float HUDDLE_RANGE      = 5.0f;   // close enough to share Body Heat
     constexpr uint8 HAIL_VOLLEYS      = 4;
+    constexpr float HAIL_RADIUS       = 5.0f;
     constexpr uint8 GRASP_RINGS       = 8;
 
     struct boss_snowgrave_coa : public custom_world_boss_coa
@@ -688,8 +689,7 @@ namespace
                 case EW_HAIL:
                     if (Unit* t = RandomPlayer())
                     {
-                        // The cone is aimed once, where the target stood: moving out of it is the counter.
-                        _hailAngle = me->GetAngle(t);
+                        _hailTarget = t->GetGUID();
                         DoCast(t, SPELL_HAIL);
                     }
                     // Three hails a rotation: 20.1s, 24.6s and 17.4s apart.
@@ -787,29 +787,30 @@ namespace
                     }
                     break;
                 case TW_HAIL:
+                    // Each volley is thrown at where the target stands now: the shards follow them, and land where
+                    // they were, so one who keeps moving leaves a trail of them behind.
+                    if (Unit* t = ObjectAccessor::GetUnit(*me, _hailTarget))
                     {
-                        float const toward = _hailAngle;
-                        // The shards seen flying: Ascension's left and right dummy missiles into the cone.
-                        for (uint32 shard : { SPELL_HAIL_MISSILE_LEFT, SPELL_HAIL_MISSILE_RIGHT })
-                        {
-                            float const a = toward + frand(-float(M_PI) / 8, float(M_PI) / 8);
-                            float const d = frand(10.0f, 35.0f);
-                            Position pos = me->GetPosition();
-                            pos.m_positionX += d * std::cos(a);
-                            pos.m_positionY += d * std::sin(a);
-                            pos.m_positionZ = me->GetMap()->GetHeight(me->GetPhaseMask(), pos.GetPositionX(),
-                                pos.GetPositionY(), pos.GetPositionZ() + 5.0f);
-                            CastAt(pos, shard);
-                        }
-                        for (Player* p : PlayersWithin(me, 40.0f))
-                        {
-                            float const off = Position::NormalizeOrientation(me->GetAngle(p) - toward);
-                            if (off < float(M_PI) / 8 || off > 2 * float(M_PI) - float(M_PI) / 8)
-                                me->CastSpell(p, SPELL_HAIL_SHARD, true);
-                        }
+                        Position pos = t->GetPosition();
+                        pos.m_positionZ = me->GetMap()->GetHeight(me->GetPhaseMask(), pos.GetPositionX(),
+                            pos.GetPositionY(), pos.GetPositionZ() + 2.0f);
+                        CastAt(pos, _hailVolleys % 2 ? SPELL_HAIL_MISSILE_LEFT : SPELL_HAIL_MISSILE_RIGHT);
+                        _hailImpacts.push_back(pos);
+                        uint32 const flight = uint32(me->GetExactDist(&pos) / 60.0f * 1000);
+                        _clock.ScheduleEvent(TW_HAIL_IMPACT, Milliseconds(flight));
                     }
                     if (--_hailVolleys)
                         _clock.ScheduleEvent(TW_HAIL, 750ms);
+                    break;
+                case TW_HAIL_IMPACT:
+                    if (!_hailImpacts.empty())
+                    {
+                        Position const pos = _hailImpacts.front();
+                        _hailImpacts.erase(_hailImpacts.begin());
+                        for (Player* p : PlayersWithin(me, 100.0f))
+                            if (p->GetExactDist2d(&pos) < HAIL_RADIUS)
+                                me->CastSpell(p, SPELL_HAIL_SHARD, true);
+                    }
                     break;
                 case TW_RING:
                 {
@@ -891,7 +892,8 @@ namespace
         uint8 _ring = 0;
         uint8 _ringHit = 0;
         uint8 _warmthSeconds = 0;
-        float _hailAngle = 0.0f;
+        ObjectGuid _hailTarget;
+        std::vector<Position> _hailImpacts;
         std::vector<Position> _icicles;
         std::vector<ObjectGuid> _fallen;
         std::vector<Position> _ringSpikes[2];
