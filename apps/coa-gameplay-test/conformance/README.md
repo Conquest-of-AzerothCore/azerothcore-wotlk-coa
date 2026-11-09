@@ -804,8 +804,9 @@ different weapon than the class's reference weapon still casts.
 When the text leaves open which events are trials, `trial_readings` lists each reading: the triggering hits plus the
 counts in `adds`, less the events when `minus_events` is true. No reading is chosen: the comparison judges each one,
 gives their common verdict when they agree and `ambiguous_tooltip` with every reading's numbers when they do not, so
-that the owner can rule. "Direct damage dealt" (Scourgebane) reads as the auto attacks only, or as every direct
-damage event, its own strikes 801832 included (Effect 2 and 31, DmgClass 1).
+that the owner can rule. "Direct damage dealt" (Scourgebane) reads as every direct damage event, its own strikes
+801832 included (Effect 2 and 31, DmgClass 1); its own strikes do trigger further Scourgebane strikes, settled from
+the Ascension logs below, so the "auto attacks only" reading that would exclude them is no longer listed.
 
 `trials_needed(p)` is `ceil(2.576^2 x p (1 - p) / 0.025^2)`, the trials that put the half width of the 99% interval
 of the rate at 2.5 points: 1699 for 20%, 956 for 10%. The scenario performs `ceil(1.5 x trials_needed)` attempts
@@ -846,16 +847,16 @@ in-RAM test database, read on 2026-11-05 (`SELECT * FROM spell_proc WHERE SpellI
 
 | Aura | Chance | Trigger | Proc spell | Entry |
 |---|---|---|---|---|
-| Scourgebane 92111 | `$520007h` 20% | attack ("Direct damage dealt") | 801832, tooltip `$801832s2` | 2 readings |
+| Scourgebane 92111 | `$520007h` 20% | attack ("Direct damage dealt") | 801832, tooltip `$801832s2` | scenario |
 | Warrior of Dawn 560648 | `$h` 10% | attack ("Melee damage dealt") | 561156, tooltip `$561156s1` | scenario |
 | Retribution 707391 | `$h` 20% | attack ("Melee damage dealt") | 525028 (2 per proc), `EffectTriggerSpell` | scenario |
 | Light's Echo 520017, 520883 | `$h` 10%, 20% | cast of Argent Blade 807268 | 804929 or 807268 casts | 2 readings |
 | Paladin Training 504808 | `$h` 8% | "Triggering Zealotry" | | `ambiguous_tooltip` |
 | Blade Sermon 572548, 572554 | `$h` 5%, 10% | Zealotry | | `ambiguous_tooltip` |
-| Condemnation 706325 | `$h` 15% | cast of Blade of Faith 803880 | 801450, `@s:801450:0@` | 2 readings |
+| Condemnation 706325 | `$h` 15% | cast of Blade of Faith 803880 | 801450, `@s:801450:0@` | scenario |
 | Transcendent Guardian 804571 | `$h` 40% | Temple Guardian 803792 at an ally | its refreshed charge | scenario |
-| Lightkeeper (parry) 560835 | `$h` 15% | periodic damage of Condemn 804906 | 561016, `EffectTriggerSpell[0]` | 2 readings |
-| Lightkeeper (burst) 560835 | `$h` 15% | periodic damage of Condemn 804906 | 561277 (damage), `EffectTriggerSpell[1]` | 2 readings |
+| Lightkeeper (parry) 560835 | `$h` 15% | periodic damage of Condemn 804906 | 561016, `EffectTriggerSpell[0]` | scenario |
+| Lightkeeper (burst) 560835 | `$h` 15% | periodic damage of Condemn 804906 | 561277 (damage), `EffectTriggerSpell[1]` | scenario |
 | Pulverizing 524620 | `$h` 15% | cast of Condemn 804906 (damage dealt) | 524619, tooltip `$524619m1` | scenario |
 
 `spell_proc` has rows for 92111 (Chance 100), 520007, 560648 and 707391 (Chance 0, so the DBC `ProcChance`), all
@@ -867,11 +868,14 @@ of them (`handler`), so none is known to stay at 0%. Condemnation 706325 has a `
 DBC `ProcChance` 15) and the same script, read on 2026-11-06; its check (`AscensionTemplarEvents.cpp:81-83`) accepts
 damage of Condemn, Holy Cleave or Blade of Faith within melee range, periodic damage included, and casts Zealotry
 801450 (`AscensionTemplarEvents.cpp:121-123`). Only Blade of Faith is in the class set; its damage is periodic only,
-so the readings are each cast and each damage tick. Pulverizing 524620 has its own `spell_proc` row too (`Chance`
+so Condemnation has a single reading, each damage tick (settled from the Ascension logs below; its own `Check()`
+does not gate on the periodic flag, but Blade of Faith's only damage-dealing effect is its DoT tick, so every
+damage event the check sees is in practice a tick). Pulverizing 524620 has its own `spell_proc` row too (`Chance`
 0, read on 2026-11-08), from the same native re-insert as the four `aura_ascension_templar_event` auras above, with
 its `Chance` zeroed by `rev_20260919_20_coa_proc_chance_parity.sql`; the DBC `ProcChance` 15% fallback
 (`SpellMgr.cpp:2371-2372`) is a plain `EffectTriggerSpell` roll on each damaging Condemn cast, with no scripted
-override and a single reading (damage is the only trigger named by the tooltip), unlike Lightkeeper's two readings.
+override and a single reading (damage is the only trigger named by the tooltip), like Lightkeeper's two entries
+below.
 Transcendent Guardian refreshes the charge of the cast rank on
 40% of the casts at another unit (`AscensionTemplarAbilities.cpp:220-224`) and casts nothing; owner ruling 3 of
 ADR 0011 (any target other than the caster) stays open, since the scenario casts at an ally only. Temple Guardian is
@@ -886,45 +890,33 @@ cast):
 
 | Aura | Parts | Reading | Procs in trials | Wilson 99% | Reading verdict | Verdict |
 |---|---|---|---|---|---|---|
-| Scourgebane 92111 | 13 | auto attacks only | 525 in 2554 | 0.186 to 0.227 | `ok` | `ambiguous_tooltip` |
-| | | every direct damage event | 525 in 3079 | 0.154 to 0.189 | `alert` | |
 | Light's Echo 520017 | 5 | player casts only | 173 in 1435 | 0.100 to 0.145 | `alert` | `ambiguous_tooltip` |
 | | | every Argent Blade strike | 173 in 1608 | 0.089 to 0.129 | `ok` | |
 | Light's Echo 520883 | 8 | player casts only | 519 in 2552 | 0.184 to 0.225 | `ok` | `ambiguous_tooltip` |
 | | | every Argent Blade strike | 519 in 3071 | 0.152 to 0.187 | `alert` | |
 
-Scourgebane parts made 196 or 197 swings, Light's Echo parts 287 and 319 player casts. Every extra Argent Blade
-strike was a cast of 807268; 804929 was never cast. A Scourgebane part takes 500.7 s of game time in 3.8 to 4.7 s of
-real time, a Light's Echo part 443 to 491 s in 3.2 to 4.3 s.
+Light's Echo parts made 287 and 319 player casts. Every extra Argent Blade strike was a cast of 807268; 804929
+was never cast. A Light's Echo part takes 443 to 491 s of game time in 3.2 to 4.3 s of real time. Scourgebane
+92111 was also measured this round with the same two readings (13 parts, 196 or 197 swings each, 525 in 2554
+auto attacks only, 525 in 3079 every direct damage event); round 4's Ascension-log pass (below) found its own
+strikes do trigger further strikes, settling the reading and dropping this table to the single-reading
+measurement further down.
 
 Measured on 2026-11-06 (stamps `20261106-130841`, 26 Condemnation parts in 36.2 s, and `20261106-130708`, 11
 Transcendent Guardian parts, simulated clock, no failed cast):
 
 | Aura | Parts | Reading | Procs in trials | Wilson 99% | Reading verdict | Verdict |
 |---|---|---|---|---|---|---|
-| Condemnation 706325 | 26 | each cast | 622 in 2054 | 0.277 to 0.330 | `alert` | `ambiguous_tooltip` |
-| | | each damage tick | 622 in 4134 | 0.137 to 0.165 | `ok` | |
 | Transcendent Guardian 804571 | 11 | casts at the ally | 1509 in 3828 | 0.374 to 0.415 | `ok` | `ok` |
+
+Condemnation 706325 was measured the same session with the same two readings this round settled (622 in 2054 each
+cast, `alert`; 622 in 4134 each damage tick, `ok`); see the single-reading measurement below.
 
 Lightkeeper 560835 is absent from both `TemplarEvents` and `TemplarCastDrivers` (grepped `src/server/coa/*.cpp` for
 `560835`): it is one of two Templar proc entries of the nine that are plain, native `ProcFlags`/`ProcChance`/
 `EffectTriggerSpell` procs with no scripted override, the other being Pulverizing 524620 below. Its two
 `EffectTriggerSpell` slots each roll their own 15% independently on the same periodic tick of Condemn 804906; no
 `spell_proc` row exists for it, so `spell_proc` is `{}` for both entries, like the other auras with no row.
-
-Measured on 2026-11-07 (stamp `20261107-184729`, simulated clock, no failed cast, 26 parts each):
-
-| Aura | Parts | Reading | Procs in trials | Wilson 99% | Reading verdict | Verdict |
-|---|---|---|---|---|---|---|
-| Lightkeeper (parry) 560835 | 26 | each cast | 695 in 2054 | 0.312 to 0.366 | `alert` | `ambiguous_tooltip` |
-| | | each damage tick | 695 in 4472 | 0.142 to 0.170 | `ok` | |
-| Lightkeeper (burst) 560835 | 26 | each cast | 668 in 2054 | 0.299 to 0.352 | `alert` | `ambiguous_tooltip` |
-| | | each damage tick | 668 in 4472 | 0.136 to 0.164 | `ok` | |
-
-Both readings disagree the same way Condemnation 706325 does: counting each Condemn cast as one trial roughly
-doubles the apparent rate (Condemn ticks about twice per cast at this attempt spacing), while counting each
-periodic damage tick holds the tooltip's 15% within the Wilson interval. Both carry `readings_question` and go to
-`questions.md`.
 
 Pulverizing has a single reading (damaging Condemn casts), so it needs no `trial_readings` split. Measured on
 2026-11-08 (`report.json` `.cache/verify-all/20261108-125057/report.json`, simulated clock, 26 of 26 parts, no
@@ -933,6 +925,68 @@ failed cast):
 | Aura | Reading | Procs in trials | Wilson 99% | Verdict |
 |---|---|---|---|---|
 | Pulverizing 524620 | damage events of Condemn 804906 on the target | 622 in 4472 | 0.126 to 0.153 | `ok` |
+
+### Two-reading tooltips settled from the Ascension logs (round 4)
+
+Round 4's owner ruling (2026-11-08) settles an ambiguous tooltip from the Ascension logs
+(`~/Projects/coa-log-history`, May-Aug 2026) before asking a player. Three entries above (Lightkeeper's two
+`trial_readings` entries and Condemnation's) carried an "each cast" reading alongside "each damage tick"; the
+logs settle all three as "each damage tick" only, and Scourgebane's own two readings settle as "every direct
+damage event, Scourgebane strikes included" only (dropping "auto attacks only"), so `trial_readings` for all
+four now holds a single entry and no `ambiguous_tooltip` verdict remains for any of them:
+
+- **Lightkeeper 560835 (561016, 561277) and Condemnation 706325 — "each cast" is mechanically impossible, not
+  just disfavoured.** Lightkeeper's own `ProcFlags` is `262144`, exactly `PROC_FLAG_DONE_PERIODIC`
+  (`src/server/game/Spells/SpellMgr.h:140`): the engine only rolls `EffectTriggerSpell[0]`/`[1]` on a periodic
+  tick, so a plain Condemn cast never reaches the check. Condemnation 706325 is scripted
+  (`AscensionTemplarEvents.cpp:81`) and does not itself gate on the periodic flag, but Condemn/Blade of Faith's
+  only damage-dealing effect is their DoT tick, so every damage event the check sees is in practice a tick too.
+  Log corroboration: one Zealotry-bearing log gives 2259 periodic ticks of Condemn against 250 casts (about 9
+  ticks per cast); archive-wide, Zealotry 801450's dominant triggers are periodic Condemn/Blade of Faith damage
+  (9712 and 6164 of about 48000 hits), an order of magnitude ahead of any cast-shaped trigger. Citation:
+  `2026-11-08, Condemn 567539 periodic-tick/cast ratio ~9:1, Ascension combat log, private archive`.
+- **Scourgebane 92111 — settles as "every direct damage event, Scourgebane strikes included".** `Check()`'s case
+  `92111`/`520007` (`AscensionTemplarEvents.cpp:58`) excludes only Light's Echo's extra Argent Blade strike
+  (804929) from re-triggering Scourgebane; it does not exclude Scourgebane's own strike (801832). Across the 13
+  archive logs containing Scourgebane (18476 hits), 982 pairs of consecutive Scourgebane hits from the same
+  source land on the same target at the exact same millisecond with no other event between them — one
+  Scourgebane strike's own damage re-rolling the 20% chance and landing a second strike inside one server tick;
+  this is a lower bound (same-target-same-millisecond only). Citation: `2026-11-08, Scourgebane 801832
+  same-target same-ms chains 982 of 18476 hits (13 logs), Ascension combat log, private archive`. This drops the
+  verdict from `ambiguous_tooltip` to a reported `alert`, not `ok`: the single surviving reading is the
+  tooltip-correct one, and the measured rate undershoots 20% once self-chains are counted — a real finding for
+  an implementer to trace (root cause not established by this pass), not a fix proposed here.
+
+Measured on 2026-11-09 (gameplay stage, `.cache/verify-all/20261109-093335/report.json`, simulated clock, no
+failed cast, exploratory-only selection, 91 of 91 parts passed natively; `conformance.py compare` against that
+stamp, `.cache/conformance/r4-log-checks/verdicts.json`):
+
+| Aura | Parts | Reading | Procs in trials | Wilson 99% | Verdict |
+|---|---|---|---|---|---|
+| Scourgebane 92111 | 13 | every direct damage event, Scourgebane strikes included | 523 in 3084 | 0.1529 to 0.1877 | `alert` |
+| Condemnation 706325 | 26 | each damage tick | 627 in 4134 | 0.1379 to 0.1666 | `ok` |
+| Lightkeeper (parry) 560835 | 26 | each damage tick | 689 in 4472 | 0.1407 to 0.1685 | `ok` |
+| Lightkeeper (burst) 560835 | 26 | each damage tick | 659 in 4472 | 0.1342 to 0.1615 | `ok` |
+
+`questions.md` from this run lists no open check for any of the four: Lightkeeper and Condemnation are `ok` and
+Scourgebane's `alert` is a server finding for an implementer, not a player question (its tooltip reading is
+already settled; no reading disagreement remains to ask about). `report.md` cross-checks the player reports on
+file: the 2026-11-07 report "Zealotry can proc back to back on each damage tick of Blade of Faith" corroborates
+Condemnation's settled reading (`ok`); the 2026-11-07 report "Scourgebane does not proc off itself" is
+contradicted by the settled reading (`alert`) and is set aside per the owner's ruling that the logs decide.
+
+Zealotry 801450 itself has three independently-coded trigger paths, found while tracing Condemnation's trigger
+for this pass: the already-modelled 706325 periodic-tick path and 92108 off-hand-swing path, plus an
+Oath: Vindication (805332) ability-cast roll (`AscensionTemplarAbilities.cpp:297`) outside both auras, confirmed
+by 1021 archive instances of a logged Vindication cast immediately preceding a Zealotry hit. This third path
+already has its own code and is not itself a `procs`/`triggers` entry in this class file; no entry or check is
+added for it here. Citation: `2026-11-08, Zealotry 801450 trigger attribution across 16 logs (48473 hits),
+Ascension combat log, private archive`.
+
+Two further two-reading disagreements named by this round could not be settled from the archive and stay open in
+`owner-decisions.md` instead: Blade Sermon 572548/572554's double-hit rate (`grep` for its name or either spell
+id returns zero files across all 186 logs) and Light's Echo 520017/520883's self-chain question and real-play
+mismatch (neither rank is ever applied anywhere in the archive). Both entries are unchanged by this pass.
 
 ## Trigger entries
 

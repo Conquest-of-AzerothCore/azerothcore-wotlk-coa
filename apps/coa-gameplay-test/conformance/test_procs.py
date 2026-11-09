@@ -279,6 +279,59 @@ class ProcCompareTest(unittest.TestCase):
                                 steps=proc_steps(1699, 0, strikes=0))
         self.assertEqual(self.verdict().status, 'alert')
 
+    def single_reading_verdict(self, entry, aura, procs, trials, chance):
+        self.workspace.close()
+        self.workspace = Workspace()
+        scenario, [expectation] = proc_scenario(CLASS_FILE, entry)
+        labels = expectation.model['measurements']
+        [reading] = expectation.model['readings']
+        extra_labels = [label for label in reading['labels'] if label != labels['trials']]
+        steps = [assert_step(labels['aura'], '1'), assert_step(labels['events'], str(procs)),
+                 assert_step(labels['trials'], str(trials))] + [assert_step(label, '0') for label in extra_labels]
+        self.workspace.scenario(f'conformance-templar-proc-{entry["aura"]}-{entry["proc_spell"]}', 'proc',
+                                [expectation], steps=steps, spell=aura, rank=aura)
+        return self.verdict(chance_reader(chance, entry['chance_token']))
+
+    def test_scourgebane_self_chain_reading_is_the_only_reading_left(self):
+        entry = templar_proc(SCOURGEBANE)
+        self.assertEqual([reading['name'] for reading in entry['trial_readings']],
+                         ['every direct damage event, Scourgebane strikes included'])
+
+    def test_lightkeeper_and_condemnation_keep_only_the_tick_reading(self):
+        for aura, proc_spell in ((LIGHTKEEPER, LIGHTKEEPER_PARRY), (LIGHTKEEPER, LIGHTKEEPER_BURST),
+                                 (CONDEMNATION, ZEALOTRY_STRIKE)):
+            with self.subTest(proc_spell=proc_spell):
+                entry = next(entry for entry in CLASS_FILE['procs']
+                            if entry['aura'] == aura and entry['proc_spell'] == proc_spell)
+                self.assertEqual([reading['name'] for reading in entry['trial_readings']], ['each damage tick'])
+                self.assertNotIn('readings_question', entry)
+
+    def test_lightkeeper_parry_single_reading_holds_the_tooltip_chance(self):
+        entry = next(entry for entry in CLASS_FILE['procs']
+                    if entry['aura'] == LIGHTKEEPER and entry['proc_spell'] == LIGHTKEEPER_PARRY)
+        verdict = self.single_reading_verdict(entry, LIGHTKEEPER, 695, 4472, 15.0)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 695 / 4472)
+
+    def test_lightkeeper_burst_single_reading_holds_the_tooltip_chance(self):
+        entry = next(entry for entry in CLASS_FILE['procs']
+                    if entry['aura'] == LIGHTKEEPER and entry['proc_spell'] == LIGHTKEEPER_BURST)
+        verdict = self.single_reading_verdict(entry, LIGHTKEEPER, 668, 4472, 15.0)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 668 / 4472)
+
+    def test_condemnation_single_reading_holds_the_tooltip_chance(self):
+        entry = templar_proc(CONDEMNATION)
+        verdict = self.single_reading_verdict(entry, CONDEMNATION, 622, 4134, 15.0)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 622 / 4134)
+
+    def test_scourgebane_single_reading_is_an_alert_against_the_tooltip_chance(self):
+        entry = templar_proc(SCOURGEBANE)
+        verdict = self.single_reading_verdict(entry, SCOURGEBANE, 525, 3079, 20.0)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertAlmostEqual(verdict.measured, 525 / 3079)
+
     def test_ambiguous_and_unmodelled_entries_are_never_ok(self):
         for status in ('ambiguous_tooltip', 'unmodelled'):
             entry = {'aura': 572548, 'name': 'Blade Sermon', 'chance_token': '$h', 'status': status,
@@ -365,7 +418,7 @@ class ProcScenarioTest(unittest.TestCase):
             self.assertEqual((expectation.model['part'], expectation.model['parts']), (part, plan.parts))
             self.assertEqual(expectation.model['minimum_trials'], 1699)
             self.assertEqual([reading['labels'] for reading in expectation.model['readings']],
-                             [[LABELS['trials']], [LABELS['trials'], STRIKE_TRIALS]])
+                             [[LABELS['trials'], STRIKE_TRIALS]])
 
     def test_lights_echo_casts_argent_blade_and_counts_the_strikes_of_its_first_rank(self):
         for aura, chance in zip(LIGHTS_ECHO, (10.0, 20.0)):
@@ -394,8 +447,8 @@ class ProcScenarioTest(unittest.TestCase):
         self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': BLADE_OF_FAITH})
         self.assertEqual((entry['proc_spell'], entry['event_metric']), (ZEALOTRY_STRIKE, 'spell_cast_count'))
         self.assertEqual([(reading['name'], reading.get('trials_metric')) for reading in entry['trial_readings']],
-                         [('each cast', 'spell_cast_count'), ('each damage tick', None)])
-        self.assertTrue(entry['readings_question'])
+                         [('each damage tick', None)])
+        self.assertNotIn('readings_question', entry)
         self.assertEqual(trials_needed(0.15), 1354)
         plan = proc_plan(CLASS_FILE, entry)
         self.assertEqual((plan.chance_pct, plan.needed), (15.0, 1354))
@@ -422,7 +475,7 @@ class ProcScenarioTest(unittest.TestCase):
             self.assertEqual((measured['706325 proc attempts']['metric'], measured['706325 proc attempts']['spell']),
                              ('spell_cast_count', BLADE_OF_FAITH))
             self.assertEqual([reading['labels'] for reading in expectation.model['readings']],
-                             [['706325 proc attempts'], ['706325 proc trials']])
+                             [['706325 proc trials']])
 
     def test_ally_trigger_scenario(self):
         entry = templar_proc(TRANSCENDENT_GUARDIAN)

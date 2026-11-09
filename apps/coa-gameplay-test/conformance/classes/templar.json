@@ -136,14 +136,10 @@
       "proc_spell_source": "tooltip tokens $801832s2 and $801832m1",
       "events_per_proc": 1,
       "trial_readings": [
-        {"name": "auto attacks only",
-         "meaning": "only your auto attack hits roll the chance here; a Scourgebane strike cannot trigger another Scourgebane",
-         "adds": []},
         {"name": "every direct damage event, Scourgebane strikes included",
          "meaning": "every direct damage hit rolls the chance, Scourgebane strikes too, so one Scourgebane can trigger another",
          "adds": [{"metric": "spell_damage_count", "spell": 801832}]}
       ],
-      "readings_question": "look in a reference log at auto attacks against a single target: does a Scourgebane proc ever land between two auto attacks without an auto attack between them (one Scourgebane strike triggering another)? Do abilities such as Argent Blade also log a Scourgebane proc?",
       "dbc": {
         "92111": {"ProcChance": 100, "ProcFlags": 0, "ProcCharges": 0},
         "520007": {"ProcChance": 20, "ProcFlags": 0, "ProcCharges": 0}
@@ -267,14 +263,10 @@
       "proc_spell_source": "tooltip reference @s:801450:0@ and EffectTriggerSpell[0] of 706325: Zealotry 801450",
       "events_per_proc": 1,
       "trial_readings": [
-        {"name": "each cast",
-         "meaning": "each Blade of Faith cast rolls the chance once, however many times it deals damage",
-         "trials_metric": "spell_cast_count"},
         {"name": "each damage tick",
          "meaning": "every damage tick of Blade of Faith rolls the chance, so one cast can trigger Zealotry several times",
          "adds": []}
       ],
-      "readings_question": "look in a reference log at one cast of Blade of Faith within melee range, across its 30 sec of damage: does Zealotry ever log more than one hit from that one cast?",
       "dbc": {
         "706325": {"ProcChance": 15, "ProcFlags": 0, "ProcCharges": 0}
       },
@@ -358,10 +350,8 @@
       "proc_spell_source": "EffectTriggerSpell[0] of 560835",
       "event_metric": "spell_cast_count",
       "trial_readings": [
-        {"name": "each cast", "meaning": "a trial for every Condemn cast", "trials_metric": "spell_cast_count"},
         {"name": "each damage tick", "meaning": "a trial for every periodic damage tick of Condemn"}
       ],
-      "readings_question": "with Lightkeeper learned (a 15% chance), does the parry-chance buff line appear about once every 6-7 Condemn casts, or about once every 6-7 periodic damage ticks of Condemn, in a reference log?",
       "dbc": {
         "560835": {"ProcChance": 15, "ProcFlags": 262144, "ProcCharges": 0}
       },
@@ -379,10 +369,8 @@
       "proc_spell_source": "EffectTriggerSpell[1] of 560835",
       "event_metric": "spell_damage_count",
       "trial_readings": [
-        {"name": "each cast", "meaning": "a trial for every Condemn cast", "trials_metric": "spell_cast_count"},
         {"name": "each damage tick", "meaning": "a trial for every periodic damage tick of Condemn"}
       ],
-      "readings_question": "with Lightkeeper learned (a 15% chance), does the Holy burst line appear about once every 6-7 Condemn casts, or about once every 6-7 periodic damage ticks of Condemn, in a reference log?",
       "dbc": {
         "560835": {"ProcChance": 15, "ProcFlags": 262144, "ProcCharges": 0}
       },

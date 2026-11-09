@@ -166,8 +166,6 @@ class QuestionTest(unittest.TestCase):
             self.assertAlmostEqual(reading['rate'], 525 / trials)
             self.assertEqual((reading['low'], reading['high']), wilson_interval(525, trials))
         self.assertEqual([reading['predicted'] for reading in item.readings], [0.2, 0.25])
-        self.assertIn('does a Scourgebane proc ever land between two auto attacks without an auto attack between '
-                      'them', item.question)
         self.assertEqual(item.labels, ('92111 proc_rate',))
         (spell, conditions), = item.conditions
         self.assertEqual(spell, SCOURGEBANE)
@@ -178,7 +176,8 @@ class QuestionTest(unittest.TestCase):
                                                            'at that count the 99% ranges of the readings (20.0% and '
                                                            '25.0%) no longer overlap.'),))
         self.assertEqual(observations(0.2, 0.25), 1842)
-        self.assertIn('Otherwise, the logged Scourgebane procs per auto attack that hits under', item.question)
+        self.assertEqual(item.question, 'With Scourgebane learned, the logged Scourgebane procs per auto attack '
+                         'that hits under conditions matching our test should match one reading below.')
 
     def test_text_question_uses_the_class_file(self):
         self.status_entry(BLADE_SERMON[0])
@@ -200,8 +199,7 @@ class QuestionTest(unittest.TestCase):
         self.assertIn('> Direct damage dealt now has a $520007h% chance to strike an enemy with Scourgebane, dealing '
                       'an additional $801832s2% Weapon damage plus ${$801832m1*$<scalingbp>+$SP*.25+$AP*.25} '
                       'Holyflame Damage.', entry)
-        self.assertIn('- auto attacks only (only your auto attack hits roll the chance here; a Scourgebane strike '
-                      'cannot trigger another Scourgebane): expects 20.0% of auto attacks that hit give a Scourgebane '
+        self.assertIn('- auto attacks only: expects 20.0% of auto attacks that hit give a Scourgebane '
                       'proc, test server 20.56%: matches the test server', entry)
         self.assertIn('- every direct damage event: expects 25.0% of auto attacks that hit give a Scourgebane proc, '
                       'test server 20.56%: does not match the test server', entry)
