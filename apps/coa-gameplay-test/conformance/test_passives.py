@@ -470,7 +470,19 @@ class TemplarPassiveTest(unittest.TestCase):
             self.assertFalse(effect.reason.startswith('closed: '), (spell_id, index, effect.reason))
 
     def test_effect_notes_without_an_entry_keep_the_generic_reason(self):
-        self.assertEqual(effect_of(self.effects(804897), 2).reason, 'unmodelled: scripted or crowd-control effect')
+        self.assertEqual(effect_of(self.effects(803149), 1).reason, 'unmodelled: scripted or crowd-control effect')
+
+    def test_effect_notes_round5_close_a_dead_effect(self):
+        effect = effect_of(self.effects(92109), 1)
+        self.assertTrue(effect.reason.startswith('unmodelled: closed: '), effect.reason)
+        self.assertNotEqual(effect.reason, 'unmodelled: scripted or crowd-control effect', effect.reason)
+        self.assertIn('effect zeroed at load', effect.reason)
+
+    def test_effect_notes_round5_reclassify_without_closing(self):
+        effect = effect_of(self.effects(804897), 2)
+        self.assertTrue(effect.reason.startswith('unmodelled: reclassify: '), effect.reason)
+        self.assertFalse(effect.reason.startswith('closed: '), effect.reason)
+        self.assertNotEqual(effect.reason, 'unmodelled: scripted or crowd-control effect', effect.reason)
 
     def test_lightkeeper_effects_link_to_their_own_disambiguated_proc_entry_not_each_others(self):
         parry_entry = next(entry for entry in self.class_file['procs']
