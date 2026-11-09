@@ -8,7 +8,7 @@ import sys
 from typing import Sequence
 
 from behaviours import behaviour_entries, behaviour_scenario
-from classes import PROGRESSION_HEADER, ClassSpell, class_spells
+from classes import CHARACTER_LEVEL, PROGRESSION_HEADER, ClassSpell, class_spells
 from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_FILE, ScenarioDrift, evaluate,
                      write_levers, write_outputs)
 from coverage import COVERAGE_FILE, write_coverage
@@ -20,6 +20,7 @@ from procs import (proc_entries, proc_plan, proc_scenario, proc_status_expectati
                    shares_aura, shares_proc_spell, trigger_key)
 from profile import DBC_DIR, load_class_file
 from questions import QUESTIONS_FILE
+from scaffold import LIVE_BASELINE_HEADER, SHARED_DEFINES, scaffold_class
 from stack import PASSES, STACK_CHECKS, STACK_DPS, STACK_KIND, stack_scenarios
 from tooltip import read_tooltip
 from triggers import (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND, cooldown_trigger_scenario,
@@ -295,6 +296,18 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
     return path
 
 
+def scaffold_command(args) -> int:
+    if args.out.exists():
+        raise ValueError(f'{args.out} already exists; scaffold into a new file')
+    class_file = scaffold_class(args.class_id, args.dbc_dir, args.config, args.mysql, level=args.level,
+                                shared_defines=args.shared_defines, live_baseline=args.live_baseline)
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    with args.out.open('x', encoding='utf-8') as stream:
+        stream.write(json.dumps(class_file, indent=2) + '\n')
+    print(f'{args.out}: scaffolded class {class_file["class_id"]} ({class_file["name"]})')
+    return 0
+
+
 def generate_command(args) -> int:
     path = generate(args.class_id, args.out, args.spell, args.proc, args.stack, args.passes, args.passive,
                     args.trigger, args.behaviour)
@@ -354,6 +367,15 @@ def coverage_command(args) -> int:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description='Generate class conformance scenarios and compare their results.')
     commands = parser.add_subparsers(dest='command', required=True)
+    scaffolding = commands.add_parser('scaffold', help='write a minimal classes/<name>.json for a CoA class')
+    scaffolding.add_argument('--class', dest='class_id', type=int, required=True)
+    scaffolding.add_argument('--out', type=Path, required=True)
+    scaffolding.add_argument('--dbc-dir', dest='dbc_dir', type=Path, default=DBC_DIR)
+    scaffolding.add_argument('--config', type=Path, required=True, help='worldserver config, for WorldDatabaseInfo')
+    scaffolding.add_argument('--mysql', required=True, help='mysql client binary')
+    scaffolding.add_argument('--level', type=int, default=CHARACTER_LEVEL)
+    scaffolding.add_argument('--shared-defines', dest='shared_defines', type=Path, default=SHARED_DEFINES)
+    scaffolding.add_argument('--live-baseline', dest='live_baseline', type=Path, default=LIVE_BASELINE_HEADER)
     generating = commands.add_parser('generate', help='write the scenarios and manifest of a class')
     generating.add_argument('--class', dest='class_id', type=int, required=True)
     generating.add_argument('--out', type=Path, required=True)
@@ -388,8 +410,8 @@ def main(argv=None) -> int:
     covering.add_argument('--after', type=Path, required=True, help='a compare output directory')
     covering.add_argument('--out', type=Path, help='output directory, the after directory by default')
     args = parser.parse_args(argv)
-    handlers = {'generate': generate_command, 'compare': compare_command, 'diff': diff_command,
-                'coverage': coverage_command}
+    handlers = {'scaffold': scaffold_command, 'generate': generate_command, 'compare': compare_command,
+                'diff': diff_command, 'coverage': coverage_command}
     return handlers[args.command](args)
 
 

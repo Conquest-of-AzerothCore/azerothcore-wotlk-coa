@@ -73,7 +73,8 @@ SUITES = {
     'conformance': {
         'paths': [CONFORMANCE + '*', GAMEPLAY + 'run.py', GAMEPLAY + 'batch.py', GAMEPLAY + 'catalog.py',
                   GAMEPLAY + 'verification.py', GAMEPLAY + 'world_cache.py', DBC + '*.py',
-                  COA + 'AscensionSpellProgressionData.h', 'src/server/shared/SharedDefines.h'],
+                  COA + 'AscensionSpellProgressionData.h', COA + 'AscensionLiveBaselineData.h',
+                  'src/server/shared/SharedDefines.h'],
         'commands': [[CONFORMANCE + 'test_mitigation.py'], [CONFORMANCE + 'test_classes.py'],
                      [CONFORMANCE + 'test_tooltip.py'], [CONFORMANCE + 'test_values.py'],
                      [CONFORMANCE + 'test_hits.py'], [CONFORMANCE + 'test_compare.py'],
@@ -82,7 +83,7 @@ SUITES = {
                      [CONFORMANCE + 'test_behaviours.py'], [CONFORMANCE + 'test_observations.py'],
                      [CONFORMANCE + 'test_tooltip_readings.py'],
                      [CONFORMANCE + 'test_triggers.py'], [CONFORMANCE + 'test_questions.py'],
-                     [CONFORMANCE + 'test_coverage.py']],
+                     [CONFORMANCE + 'test_coverage.py'], [CONFORMANCE + 'test_scaffold.py']],
     },
     'world-content': {
         'paths': [CONTENT + '*.py'],
