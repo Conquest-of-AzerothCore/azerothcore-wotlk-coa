@@ -66,13 +66,20 @@ already hit before the learn, since the delta cannot then be isolated.
 ### Healing-ratio scenarios (`behaviour_ratio`)
 
 Each `targets` entry is either a 2-element `[rank_id, name]` (method `"cast"`, the default) or a 3-element
-`[rank_id, name, {"method": "effect_value", "effect": N}]`. A `"cast"` target is cast at the caster, then measured
-with `spell_healing_done {spell, target: caster}`, for each phase; an `"effect_value"` target is never cast at all
-— it is measured directly with `spell_effect_value {spell, effect}` before and after the passive is learned, for a
-doubling that is fully determined by the target spell's own `SpellEffectInfo::CalcValue` (a `SPELLMOD_EFFECT1`-style
-percent modifier applied while computing the effect's amount) rather than by anything that shows up only once the
-spell is cast and ticks. Both methods feed the same `Expectation` shape (`before_label`/`after_label`/`expected`/
-`quote`/`target_name`), so the judge below needs no per-method branch. The judge (`compare.behaviour_ratio_verdict`)
+`[rank_id, name, {"method": "effect_value" | "taken", ...}]`. A `"cast"` target is cast at the caster, then measured
+with `spell_healing_done {spell, target: caster}`, for each phase: `spell_healing_done` calls
+`Unit::SpellHealingBonusDone`, the *caster*-side healing-bonus multiplier (`SpellPctHealingModsDone` and the
+caster's own fixed-bonus auras), so this method only sees a passive that augments the healer's own output. An
+`"effect_value"` target is never cast at all — it is measured directly with `spell_effect_value {spell, effect}`
+before and after the passive is learned, for a doubling that is fully determined by the target spell's own
+`SpellEffectInfo::CalcValue` (a `SPELLMOD_EFFECT1`-style percent modifier applied while computing the effect's
+amount) rather than by anything that shows up only once the spell is cast and ticks. A `"taken"` target is cast at
+the caster like `"cast"`, but measured with `spell_healing_taken {spell, target: caster}`, which calls
+`Unit::SpellHealingBonusTaken` on the target instead: the *target*-side multiplier (`SPELL_AURA_MOD_HEALING_RECEIVED`
+and the other taken-side healing auras) that `spell_healing_done` cannot see, because `SpellHealingBonusDone` never
+reads a taken-side aura of the healed unit. All three methods feed the same `Expectation` shape
+(`before_label`/`after_label`/`expected`/`quote`/`target_name`), so the judge below needs no per-method branch. The
+judge (`compare.behaviour_ratio_verdict`)
 computes `ratio = after / before` for reporting, but judges the *delta* (`after - before`) against the delta the
 expected ratio implies (`before * (expected_ratio - 1)`), on the metric's own scale rather than the ratio scale:
 `ok` when `|delta - expected_delta| <= max(1, 0.5% of |expected_delta|)`, with the same zero-vs-nonzero guard as
@@ -266,11 +273,19 @@ no-ops in `SpellAuraEffects.cpp` (`HandleNoImmediateEffect`): the real consumer 
 (mechanic duration mod, called from the live cast path, not the passive's own effect handler) or
 `Unit::MagicSpellHitResult` (debuff resistance, a hit/miss roll contribution). Neither is reachable from a
 no-combat before/after stat read, but both are reachable through a real cast: `mechanic_duration_scenario`
-has a striker (creature entry `striker_entry`, `spell_hit_bonus` forced to 100 so the vehicle cast itself is
-never the missing variable) cast `vehicle_spell` — a stock, non-class spell whose own effect mechanic matches
-the passive's `EffectMiscValue` (e.g. `MECHANIC_DISARM`, `MECHANIC_SNARE`) — directly at the caster, once before
-the passive is learned and once after, reading `aura_duration_ms` of `vehicle_spell`'s own applied aura
-`CAST_MARGIN_MS` (500 ms) after each cast. The two casts are separated by `vehicle_spell`'s own DBC duration
+has a striker (creature entry `striker_entry`, `spell_hit_bonus` forced to 100) cast `vehicle_spell` — a stock,
+non-class spell whose own effect mechanic matches the passive's `EffectMiscValue` (e.g. `MECHANIC_DISARM`,
+`MECHANIC_SNARE`) — directly at the caster, once before the passive is learned and once after, reading
+`aura_duration_ms` of `vehicle_spell`'s own applied aura `CAST_MARGIN_MS` (500 ms) after the last of up to
+`MECHANIC_LAND_ATTEMPTS` (3) casts, `MECHANIC_RETRY_WAIT_MS` (500 ms) apart, per phase (round9: a
+`vehicle_spell` with `DmgClass SPELL_DAMAGE_CLASS_MELEE`, such as Hamstring 1715, still rolls the separate
+dodge/parry leg of the melee combat table that `spell_hit_bonus` does not reach — only the miss roll does — so
+a single cast could land on no one about one time in several; 712466's `behaviour_duration_ratio` flipped
+`unmeasured`/`alert` across round 8's two runs for exactly this reason, proven this round by an isolated,
+reverted replay of the single-cast design against this base. `vehicle_spell` does not stack and refreshes to
+its full duration on every landed cast, so the repeated attempts are safe: whichever attempt lands last is what
+the final, fixed-delay-from-the-last-attempt read reflects, identically for the `before` and `after` phase).
+The two phases are separated by `vehicle_spell`'s own DBC duration
 plus 15000 ms plus a margin (`records.duration_ms(vehicle_spell) + MECHANIC_DR_RESET_MS + MECHANIC_GAP_MARGIN_MS`
 in `behaviours.py`): this is a conservative allowance against a vehicle carrying its own stock
 diminishing-returns reduction against a non-player caster (`SpellMgr.cpp`'s `GetDiminishingReturnsGroupForSpell`/
@@ -359,7 +374,7 @@ case) and a with-phase mismatch of any size.
 |---|---|---|---|---|
 | Scarlet Judicator 525024 | count | "strikes 2 additional enemies near the primary target" | 2 | Divine Force 807805's school-damage effect (`TARGET_UNIT_TARGET_ENEMY`, `DmgClass` 2/melee) always routes through `Spell::SelectImplicitChainTargets` (`Spell.cpp:1905-1923`), which applies Scarlet Judicator's `SPELLMOD_JUMP_TARGETS` flat modifier to `ChainTarget` and searches a 10-yard jump radius for a melee spell with no `JumpDistance` override (`Spell.cpp:2200-2213`) |
 | Justice 712437 | count | "strikes 1 additional nearby target" | 1 | scripted hook `templar_casts::OnSpellBeforeEffects` (`AscensionTemplarAbilities.cpp:95-102`): casting Interdict 560116 with Justice known adds exactly one unit from `Nearby(primary, 8.0f)`; the DBC's own effect 1 (`PROC_TRIGGER_SPELL` to 712364, Sacred Oath's own trigger) does not implement this sentence at all and is not used |
-| Final Prayer 705268 | ratio | "Doubles the healing done to you" | 2.0 | two named targets: Testament of Faith 801478 (a direct heal, `SPELL_AURA_MOD_HEALING_RECEIVED` taken-side, method `"cast"`, measured with `spell_healing_done`) and Testament of Fortitude 500678 (a `SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE` self-heal whose doubling is a `SPELLMOD_EFFECT1` percent modifier read inside its own effect-0 `CalcValue`, needing no cast at all, method `"effect_value"`, measured with `spell_effect_value {spell: 500678, effect: 0}`) |
+| Final Prayer 705268 | ratio | "Doubles the healing done to you" | 2.0 | two named targets: Testament of Faith 501606 (a direct heal, `SPELL_AURA_MOD_HEALING_RECEIVED` taken-side, method `"taken"`, measured with `spell_healing_taken`; round8/round9 found method `"cast"`/`spell_healing_done` structurally blind to this aura — `Unit::SpellHealingBonusDone` is the healer's own caster-side multiplier and never reads a taken-side aura of the healed unit, so it measured the same 800 before and after regardless of whether the server doubles the heal) and Testament of Fortitude 500678 (a `SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE` self-heal whose doubling is a `SPELLMOD_EFFECT1` percent modifier read inside its own effect-0 `CalcValue`, needing no cast at all, method `"effect_value"`, measured with `spell_effect_value {spell: 500678, effect: 0}`) |
 | Holy Tempest 301339 | spread | "spreads Condemn on affected enemies to a nearby enemy" | 1 | `AscensionTemplarAbilities.cpp:294-295` (`OnSpellHitResult`): on a confirmed hit of Righteous Tempest's periodic damage (ranks `805410`/`570200..570205`) with the passive known, `AscensionTemplar.cpp:224-257` (`SpreadCondemn`) copies the Condemn aura already present on the hit target onto the first valid, non-already-afflicted, line-of-sight enemy within `Nearby(target, 10.0f)` - a hardcoded radius, not read from any DBC field |
 | Armor of Faith 804930 | trigger | "Whenever the absorption shield from Staffguard breaks, inflict" | 1 | `AscensionTemplarAuras.cpp:213-216` (`aura_ascension_templar_lifecycle::Remove`): when Staffguard 706583's absorb effect is fully depleted (`GetAmount() <= 0`) by `AURA_REMOVE_BY_ENEMY_SPELL` (an enemy's own damage, not an expiry or manual cancel) while the player is alive and knows 804930, it casts Armor of Faith's damage spell 801546 on the player, whose own nearby-enemy Holy damage effect then lands; the amount stays the pre-existing `$801546ppl1` open conformance check (`questions.md:368-374`), unchanged by this entry. Staffguard's absorb is Holy-only (`SchoolMask` 2), so the scenario's striker casts Smite 48123 (`breaker_spell`) directly at the caster rather than swinging at it |
 | Tyr's Guard 560649 | metric_delta | "now summons an additional copy of yourself" | 3 | a plain stock `SPELLMOD_EFFECT1` aura (effect 2 of 560649, `EffectSpellClassMask[6]` matching Testament of Hope 1397742's family flags): the engine's own `Player::ApplySpellMod`/`SpellInfo::CalcValue` path adds 1 to Testament of Hope's summon effect's base points (1 -> 2, `CalcValue` 2 -> 3) with no CoA-specific code involved; `owned_creature_count` of the copy entry 50250 is the metric, before (2, no 560649) and after (3, 560649 learned) |

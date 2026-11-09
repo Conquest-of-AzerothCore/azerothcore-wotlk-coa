@@ -585,7 +585,10 @@ def measured_hit_model(class_file: dict, expectation: Expectation, measured: Map
     auras = [aura for aura in class_file.get('known_auras', []) if measured[known_aura_label(aura)] > 0]
     if expectation.model['kind'] == 'melee':
         return melee_model(class_file, caster, target, auras)
-    return rank_hit(class_file, expectation.rank_id, caster, target, auras).model
+    model = rank_hit(class_file, expectation.rank_id, caster, target, auras).model
+    performed = expectation.model.get('part_casts', 1)
+    multiplier = self_stack_multiplier(class_file, expectation.rank_id, performed)
+    return model if multiplier == 1.0 else replace(model, mean=model.mean * multiplier)
 
 
 def creature_fixture(class_file: dict) -> dict:
@@ -680,6 +683,13 @@ def hit_note(class_file: dict, spell_ids: set[int]) -> str | None:
     return entry['reason'] if entry else None
 
 
+def self_stack_multiplier(class_file: dict, rank_id: int, performed: int) -> float:
+    entry = next((entry for entry in class_file.get('self_stack_bonus', []) if entry['rank'] == rank_id), None)
+    if entry is None:
+        return 1.0
+    return 1.0 + entry['percent_per_stack'] / 100.0 * (performed - 1) / 2.0
+
+
 def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | None = None,
              label: str | None = None, check: str = 'hit_mean') -> list[tuple[dict, list[Expectation]]]:
     if casts < 1:
@@ -713,7 +723,6 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
     source = f' of triggered spell {hit.hit_spell} per tick' if hit.hit_spell != rank_id else ''
     rule = (f'{model.kind} hit{source}{order}, integer steps modelled'
             f'{weapon_note(class_file, armed_file, records, rank_id)}')
-    record = {**model_record(model, hit.school_mask, weapon, labels, casts), 'hit_spell': hit.hit_spell}
     unreadable = [Expectation(f'{label} unreadable #{ordinal}', check, spell.spell_id, rank_id, None, entry,
                               UNREADABLE + entry) for ordinal, entry in enumerate(hit.readout.unreadable)]
     cast_target = TARGET if hostile else (ALLY if ally else None)
@@ -731,6 +740,8 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
             scenario['creatures'] = [creature_fixture(armed_file)]
         if ally:
             scenario['players'].append({**player_fixture(armed_file), 'id': ALLY})
+        scaled = replace(model, mean=model.mean * self_stack_multiplier(armed_file, rank_id, performed))
+        record = {**model_record(scaled, hit.school_mask, weapon, labels, casts), 'hit_spell': hit.hit_spell}
         expectation = Expectation(label, check, spell.spell_id, rank_id, hit.indexes[0],
                                   ' | '.join(model.displayed), rule,
                                   {**record, 'part': part, 'parts': len(shares), 'part_casts': performed})

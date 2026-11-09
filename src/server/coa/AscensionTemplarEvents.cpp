@@ -34,7 +34,8 @@ class aura_ascension_templar_event : public AuraScript
             return outgoing && damage && event.GetActionTarget() != player &&
                    (id != 801483 || !player->HasAura(801482));
         bool const legacyHeal = (id == 680397 || id == 705298) && info && info->Id == 707302;
-        if (State(player).event && !legacyHeal)
+        bool const scourgebaneChain = (id == 92111 || id == 520007) && info && info->Id == 801832;
+        if (State(player).event && !legacyHeal && !scourgebaneChain)
             return false;
         if (id == 300513)
             return event.GetActor() == GetTarget() && damage && !periodic;
@@ -48,7 +49,7 @@ class aura_ascension_templar_event : public AuraScript
                    (event.GetDamageInfo()->GetSchoolMask() & SPELL_SCHOOL_MASK_NORMAL) &&
                    (!event.GetActor()->IsCreature() || (!event.GetActor()->ToCreature()->IsDungeonBoss() &&
                                                         !event.GetActor()->ToCreature()->isWorldBoss()));
-        if (!outgoing || (Derived(info) && !legacyHeal))
+        if (!outgoing || (Derived(info) && !legacyHeal && !scourgebaneChain))
             return false;
         switch (id)
         {

@@ -4689,7 +4689,8 @@ private:
         }
         if (metric == "spell_modifier" || metric == "spell_cast_time_ms" || metric == "spell_max_range"
             || metric == "spell_max_stacks" || metric == "spell_duration_ms" || metric == "spell_healing_done"
-            || metric == "spell_effect_value" || metric == "spell_effect_radius" || metric == "spell_family_flags")
+            || metric == "spell_healing_taken" || metric == "spell_effect_value" || metric == "spell_effect_radius"
+            || metric == "spell_family_flags")
         {
             SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
             Require(info != nullptr, "Unknown spell in metric");
@@ -4756,6 +4757,12 @@ private:
                 return player->SpellHealingBonusDone(GetUnit(step.get<std::string>("target")), info, 1000,
                     step.get<bool>("periodic", false) ? DOT : HEAL,
                     uint8(step.get<uint32>("effect", EFFECT_0)));
+            if (metric == "spell_healing_taken")
+            {
+                Unit* taken = GetUnit(step.get<std::string>("target"));
+                Require(taken != nullptr, "Healing-taken query needs a present target");
+                return taken->SpellHealingBonusTaken(player, info, 1000, step.get<bool>("periodic", false) ? DOT : HEAL);
+            }
         }
         if (metric == "spell_damage_done" || metric == "melee_damage_done")
         {

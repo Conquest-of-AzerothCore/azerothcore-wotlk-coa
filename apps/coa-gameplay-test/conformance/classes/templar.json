@@ -22,6 +22,10 @@
   "known_auras": [887007],
   "probe_auras": [92111],
   "weapon_percent_before_flat": [804929, 807263, 807264, 807265, 807266, 807267, 807268],
+  "self_stack_bonus": [
+    {"rank": 570233, "percent_per_stack": 5.0,
+     "reason": "Righteous Lunge's own tooltip references $804904s2 (5%), the Oath chain buff AscensionTemplarAbilities.cpp:157/163 grants after every cast of a Family(info, 2, 1) ability (801443 included), stacking on chain aura 704576; the hit_mean scenario casts this rank several times in a row, so cast N carries N-1 pre-existing stacks instead of the 0 stacks a single isolated cast has. Isolated single-cast proof: round9 gameplay stamp 20261109-203303, conformance-templar-hit-570233-onecast measured mean 373.0 against the unstacked model 372.0 (0 stacks); the 3-cast scenario's measured mean (stamp 20261109-203047) matches the 1-stack-average model to within 0.2%."}
+  ],
   "extra_spells": [
     {"spell": 801443, "name": "Righteous Lunge",
      "citation": "2026-08-02 18:36:00.041, spell 570233 Righteous Lunge, Ascension combat log, private archive"},
@@ -1415,7 +1419,7 @@
       "spell": 705268, "name": "Final Prayer", "kind": "ratio",
       "quote": "Doubles the healing done to you", "expected": 2.0,
       "targets": [
-        [501606, "Testament of Faith"],
+        [501606, "Testament of Faith", {"method": "taken"}],
         [500678, "Testament of Fortitude", {"method": "effect_value", "effect": 0}]
       ]
     },

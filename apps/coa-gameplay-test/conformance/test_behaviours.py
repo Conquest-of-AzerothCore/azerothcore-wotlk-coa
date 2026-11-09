@@ -8,9 +8,9 @@ import unittest
 
 from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_COUNT, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
                         BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER,
-                        HealingRatioTarget, amount_delta_scenario, amount_delta_spec, aura_spread_scenario,
-                        aura_spread_spec, behaviour_entries, behaviour_entry, behaviour_scenario,
-                        duration_refresh_scenario, duration_refresh_spec, duration_scenario,
+                        MECHANIC_LAND_ATTEMPTS, HealingRatioTarget, amount_delta_scenario, amount_delta_spec,
+                        aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
+                        behaviour_scenario, duration_refresh_scenario, duration_refresh_spec, duration_scenario,
                         duration_spec, health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
                         healing_ratio_spec, leech_heal_modifier_factor, leech_ratio_scenario, leech_ratio_spec,
                         mechanic_duration_scenario, mechanic_duration_spec, metric_delta_scenario,
@@ -188,7 +188,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertIn(spec.quote, entry.tooltip)
         self.assertEqual(entry.expected, 2.0)
         self.assertEqual(spec.targets, (
-            HealingRatioTarget(TESTAMENT_OF_FAITH, 'Testament of Faith'),
+            HealingRatioTarget(TESTAMENT_OF_FAITH, 'Testament of Faith', 'taken'),
             HealingRatioTarget(TESTAMENT_OF_FORTITUDE, 'Testament of Fortitude', 'effect_value', 0)))
 
     def test_holy_tempest_entry(self):
@@ -475,7 +475,7 @@ class HealingRatioScenarioTests(unittest.TestCase):
         before_step = steps_by_label[faith.model['before_label']]
         after_step = steps_by_label[faith.model['after_label']]
         for step in (before_step, after_step):
-            self.assertEqual(step['metric'], 'spell_healing_done')
+            self.assertEqual(step['metric'], 'spell_healing_taken')
             self.assertEqual(step['spell'], TESTAMENT_OF_FAITH)
         cast_targets = [step['spell'] for step in scenario['steps'] if step.get('action') == 'cast']
         self.assertNotIn(TESTAMENT_OF_FORTITUDE, cast_targets)
@@ -771,21 +771,21 @@ class MechanicDurationScenarioTests(unittest.TestCase):
         run.validate(scenario)
         self.assertEqual(expectations[0].check, BEHAVIOUR_DURATION_RATIO)
 
-    def test_striker_casts_the_vehicle_spell_at_the_caster_twice(self):
+    def test_striker_casts_the_vehicle_spell_at_the_caster_up_to_land_attempts_times_per_phase(self):
         spec = mechanic_duration_spec(finesse_rank_1_entry())
         scenario, _ = mechanic_duration_scenario(CLASS_FILE, spec)
         cast_steps = [step for step in scenario['steps']
                      if step.get('action') == 'cast' and step.get('spell') == MELT_WEAPON]
-        self.assertEqual(len(cast_steps), 2)
+        self.assertEqual(len(cast_steps), 2 * MECHANIC_LAND_ATTEMPTS)
         for step in cast_steps:
             self.assertEqual(step['actor'], 'striker')
             self.assertEqual(step['target'], 'caster')
 
-    def test_learn_happens_between_the_two_casts(self):
+    def test_learn_happens_between_the_two_phases(self):
         spec = mechanic_duration_spec(finesse_rank_1_entry())
         scenario, _ = mechanic_duration_scenario(CLASS_FILE, spec)
         actions = [step.get('action') for step in scenario['steps'] if step.get('action') in ('cast', 'learn')]
-        self.assertEqual(actions, ['cast', 'learn', 'cast'])
+        self.assertEqual(actions, ['cast'] * MECHANIC_LAND_ATTEMPTS + ['learn'] + ['cast'] * MECHANIC_LAND_ATTEMPTS)
 
     def test_measures_aura_duration_ms_of_the_vehicle_spell_before_and_after(self):
         spec = mechanic_duration_spec(finesse_rank_1_entry())

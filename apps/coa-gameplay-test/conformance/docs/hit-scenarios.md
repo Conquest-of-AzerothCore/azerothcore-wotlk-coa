@@ -145,3 +145,16 @@ because it has no claim of its own left unaccounted for, but the deferred check 
 free-text reason until a future item builds it. 3 of the 35 (300514 Testament of Strength, 500678 Testament of
 Fortitude, 500694 Force of Golganneth) found no existing evidence to cite and stay `unmodelled`.
 
+## Self-stacking ranks (`self_stack_bonus`, ADR 0046)
+
+`hit_parts`'s repeated casts (`casts_needed`/`scheduled_casts`) assume every cast is an independent, identically
+distributed sample of the same hit — true for a plain weapon/school/heal hit, false for a rank whose own tooltip
+documents a bonus that stacks on the caster from a *previous* cast of the same ability (a self-buffing active). A
+class file's `self_stack_bonus` list (`[{"rank": <id>, "percent_per_stack": <float>}]`) names such a rank: `rank_hit`
+still models a single, unstacked hit (the `displayed` tokens and `tooltip_mean` stay unstacked), but `hit_parts`
+(generate time) and `measured_hit_model` (compare time, used by `judge_hit` through `HitModelSource`) both scale
+that hit's mean by `1 + percent_per_stack/100 x (performed - 1)/2` for a part performing `performed` casts — the
+average multiplier over stacks `0, 1, ..., performed - 1`, since the buff is granted *after* each cast and each
+scenario part starts a fresh character (no stacks carry in). This is additive and class-agnostic: a class file that
+omits `self_stack_bonus` gets multiplier 1.0 (today's unstacked behaviour) for every rank.
+

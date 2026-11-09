@@ -178,12 +178,14 @@ def healing_ratio_scenario(class_file: dict, spec: HealingRatioSpec) -> tuple[di
     def label(target: HealingRatioTarget, moment: str) -> str:
         if target.method == 'effect_value':
             return f'{spec.spell} {target.spell} spell_effect_value {moment}'
+        if target.method == 'taken':
+            return f'{spec.spell} {target.spell} spell_healing_taken {moment}'
         return f'{spec.spell} {target.spell} spell_healing_done {moment}'
 
     def cast_all() -> list[dict]:
         steps = []
         for target in spec.targets:
-            if target.method != 'cast':
+            if target.method not in ('cast', 'taken'):
                 continue
             facts = facts_of(records, target.spell)
             if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
@@ -201,6 +203,9 @@ def healing_ratio_scenario(class_file: dict, spec: HealingRatioSpec) -> tuple[di
             if target.method == 'effect_value':
                 steps.append(measurement(label(target, moment), CASTER, 'spell_effect_value', spell=target.spell,
                                          effect=target.effect))
+            elif target.method == 'taken':
+                steps.append(measurement(label(target, moment), CASTER, 'spell_healing_taken', spell=target.spell,
+                                         target=CASTER))
             else:
                 steps.append(measurement(label(target, moment), CASTER, 'spell_healing_done', spell=target.spell,
                                          target=CASTER))
@@ -838,6 +843,8 @@ def amount_delta_spec(entry: dict) -> AmountDeltaSpec:
 
 MECHANIC_DR_RESET_MS = 15000
 MECHANIC_GAP_MARGIN_MS = 2000
+MECHANIC_LAND_ATTEMPTS = 3
+MECHANIC_RETRY_WAIT_MS = 500
 
 
 @dataclass(frozen=True)
@@ -865,26 +872,37 @@ def mechanic_duration_scenario(class_file: dict, spec: MechanicDurationSpec) -> 
     gap_ms = int(unreduced_ms) + MECHANIC_DR_RESET_MS + MECHANIC_GAP_MARGIN_MS
 
     def phase(label: str) -> list[dict]:
-        return [{'action': 'cast', 'actor': STRIKER, 'spell': spec.vehicle_spell, 'target': CASTER},
-                {'action': 'wait', 'label': f'{spec.spell} {label} settle', 'ms': CAST_MARGIN_MS},
-                measurement(label, CASTER, 'aura_duration_ms', spell=spec.vehicle_spell)]
+        steps = []
+        for attempt in range(MECHANIC_LAND_ATTEMPTS):
+            steps.append({'action': 'cast', 'actor': STRIKER, 'spell': spec.vehicle_spell, 'target': CASTER})
+            if attempt < MECHANIC_LAND_ATTEMPTS - 1:
+                steps.append({'action': 'wait', 'label': f'{spec.spell} {label} land attempt {attempt + 1}',
+                             'ms': MECHANIC_RETRY_WAIT_MS})
+        steps.append({'action': 'wait', 'label': f'{spec.spell} {label} settle', 'ms': CAST_MARGIN_MS})
+        steps.append(measurement(label, CASTER, 'aura_duration_ms', spell=spec.vehicle_spell))
+        return steps
 
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour duration ratio',
-        'contract': f'A striker (creature entry {spec.striker_entry}, forced to hit so the mechanic-duration '
-                    f'aura is never simply absent from a missed cast) casts {spec.vehicle_spell} directly at the '
-                    f'caster, once before {spec.name} is learned and once after, reading the applied aura\'s '
-                    f'aura_duration_ms each time (the live, decrementing remaining duration, consistent across '
-                    f'both reads since each is taken after the same {CAST_MARGIN_MS} ms settle wait, with the '
-                    f'judge\'s own margin sized on that settle window to absorb the ms-level jitter of exactly '
-                    f'when each cast\'s effect actually lands), with a {gap_ms} ms gap between the two casts so '
-                    f'the {spec.vehicle_spell} aura has fully expired and a {MECHANIC_DR_RESET_MS} ms margin has '
-                    f'passed, a conservative allowance against this vehicle possibly carrying its own stock '
-                    f'diminishing-returns reduction against a non-player caster (SpellMgr.cpp), which is not '
-                    f'assumed to apply (each vehicle\'s actual diminishing-returns group must be checked on its '
-                    f'own, not inferred from its mechanic alone) but costs nothing if it does not, so neither '
-                    f'reading risks being itself diminished.',
+        'contract': f'A striker (creature entry {spec.striker_entry}, spell_hit_bonus forced to 100) casts '
+                    f'{spec.vehicle_spell} directly at the caster up to {MECHANIC_LAND_ATTEMPTS} times '
+                    f'(DmgClass SPELL_DAMAGE_CLASS_MELEE: spell_hit_bonus only removes the miss roll, not the '
+                    f'separate dodge/parry roll of the melee combat table, so a single cast can still land on no '
+                    f'one; {spec.vehicle_spell} does not stack and refreshes to its full duration on every '
+                    f'landed cast, so whichever of the attempts lands last is what the final read reflects, with '
+                    f'{MECHANIC_RETRY_WAIT_MS} ms between attempts), once before {spec.name} is learned and once '
+                    f'after, reading the applied aura\'s aura_duration_ms each time (the live, decrementing '
+                    f'remaining duration, consistent across both reads since each is taken after the same '
+                    f'{CAST_MARGIN_MS} ms settle wait from the last attempt, with the judge\'s own margin sized '
+                    f'on that settle window to absorb the ms-level jitter of exactly when each cast\'s effect '
+                    f'actually lands), with a {gap_ms} ms gap between the two phases so the {spec.vehicle_spell} '
+                    f'aura has fully expired and a {MECHANIC_DR_RESET_MS} ms margin has passed, a conservative '
+                    f'allowance against this vehicle possibly carrying its own stock diminishing-returns '
+                    f'reduction against a non-player caster (SpellMgr.cpp), which is not assumed to apply (each '
+                    f'vehicle\'s actual diminishing-returns group must be checked on its own, not inferred from '
+                    f'its mechanic alone) but costs nothing if it does not, so neither reading risks being '
+                    f'itself diminished.',
         'players': [player_fixture(class_file)],
         'creatures': [striker],
         'steps': base_steps(class_file) + phase(before_label) +
