@@ -47,6 +47,7 @@ IRON_PENANCE = 523712
 PRIEST_TRAINING = 504561
 ONE_WITH_THE_LIGHT = 504807
 VINDICATION_MAX_RANK = 573324
+ZEALOTRY_HIT = 801450
 CONDEMN = 804906
 IMPROVED_SCARLET_HAMMER = 301254
 SCARLET_HAMMER = 807035
@@ -675,13 +676,23 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         self.assertEqual(iron_penance['trigger']['spell'], VINDICATION_MAX_RANK)
         self.assertEqual(divine_fury['trigger'], iron_penance['trigger'])
 
-    def test_priest_training_stays_unmodelled_on_the_measured_vindication_ratio(self):
+    def test_priest_training_reads_zealotry_hits_instead_of_the_vindication_ratio(self):
         entry = templar_trigger(PRIEST_TRAINING)
-        self.assertEqual(entry['status'], 'unmodelled')
+        self.assertNotIn('status', entry)
         self.assertEqual(entry['trigger']['spell'], VINDICATION_MAX_RANK)
-        self.assertIn('293 Vindication casts produced 491 casts of 504809', entry['reason'])
-        with self.assertRaises(ValueError):
-            trigger_plan(CLASS_FILE, entry)
+        self.assertEqual(entry['trial_metric'], 'spell_damage_count')
+        self.assertEqual(entry['trial_spell'], ZEALOTRY_HIT)
+        plan = trigger_plan(CLASS_FILE, entry)
+        self.assertEqual(sum(plan.part_attempts), SCHEDULED)
+
+    def test_iron_penance_reads_zealotry_hits_instead_of_the_vindication_ratio(self):
+        entry = templar_trigger(IRON_PENANCE)
+        self.assertNotIn('status', entry)
+        self.assertEqual(entry['trigger']['spell'], VINDICATION_MAX_RANK)
+        self.assertEqual(entry['trial_metric'], 'spell_damage_count')
+        self.assertEqual(entry['trial_spell'], ZEALOTRY_HIT)
+        plan = trigger_plan(CLASS_FILE, entry)
+        self.assertEqual(sum(plan.part_attempts), SCHEDULED)
 
     def test_one_with_the_light_zealotry_effect_stays_unmodelled(self):
         entry = templar_trigger(ONE_WITH_THE_LIGHT)
@@ -770,6 +781,45 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         entry['trial_metric_fields'] = {'critical': True}
         with self.assertRaises(ValueError):
             checked_entry(entry)
+
+    def test_trial_spell_needs_a_cast_or_taken_hit_action(self):
+        entry = copy.deepcopy(templar_trigger(LIGHTS_WARD))
+        entry['trial_spell'] = 801450
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
+
+    def test_trial_spell_needs_a_spell_damage_count_trial_metric(self):
+        entry = copy.deepcopy(templar_trigger(IRON_PENANCE))
+        entry['status'], entry['reason'] = None, None
+        entry['trial_metric'] = 'spell_cast_count'
+        entry['trial_spell'] = 801450
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
+
+    def test_trial_spell_must_be_an_integer(self):
+        entry = copy.deepcopy(templar_trigger(IRON_PENANCE))
+        entry['status'], entry['reason'] = None, None
+        entry['trial_metric'] = 'spell_damage_count'
+        entry['trial_spell'] = '801450'
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_trial_spell_overrides_the_trigger_spell_in_the_trial_count_and_rule(self):
+        entry = copy.deepcopy(templar_trigger(IRON_PENANCE))
+        entry['status'], entry['reason'] = None, None
+        entry['trial_metric'] = 'spell_damage_count'
+        entry['trial_spell'] = 801450
+        checked_entry(entry)
+        scenario, [expectation] = trigger_scenario(CLASS_FILE, entry)
+        labels = trigger_measurements(IRON_PENANCE)
+        measured = {step['label']: step for step in scenario['steps'] if step['action'] == 'assert'}
+        self.assertEqual((measured[labels['trials']]['metric'], measured[labels['trials']]['spell']),
+                         ('spell_damage_count', 801450))
+        casts = {step['spell'] for step in scenario['steps'] if step['action'] == 'cast'}
+        self.assertIn(VINDICATION_MAX_RANK, casts)
+        self.assertNotIn(801450, casts)
+        self.assertIn('spell_damage_count of 801450', expectation.rule)
 
     def test_self_cast_trigger_has_no_target(self):
         scenario, _ = trigger_scenario(CLASS_FILE, templar_trigger(705274))

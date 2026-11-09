@@ -112,6 +112,13 @@ def checked_entry(entry: dict) -> dict:
     if entry.get('trial_metric_fields') and entry['trial_metric'] not in MELEE_COUNTS:
         raise ValueError(f'Trigger {aura} sets trial_metric_fields on a non-melee trial_metric '
                          f'{entry["trial_metric"]!r}')
+    if entry.get('trial_spell') is not None:
+        if trigger['action'] not in (CAST, TAKEN_HIT):
+            raise ValueError(f'Trigger {aura} sets trial_spell without a cast or taken_hit action')
+        if entry['trial_metric'] != 'spell_damage_count':
+            raise ValueError(f'Trigger {aura} sets trial_spell without trial_metric spell_damage_count')
+        if not isinstance(entry['trial_spell'], int):
+            raise ValueError(f'Trigger {aura} has a non-integer trial_spell')
     factor = entry.get('trial_attempts_factor', 1)
     if factor < 1:
         raise ValueError(f'Trigger {aura} has a trial attempts factor below 1')
@@ -154,7 +161,10 @@ def trigger_plan(class_file: dict, entry: dict) -> TriggerPlan:
 
 
 def trial_spell(entry: dict) -> int:
-    return entry['trigger']['spell'] if entry['trigger']['action'] in (CAST, TAKEN_HIT) else 0
+    trigger = entry['trigger']
+    if trigger['action'] not in (CAST, TAKEN_HIT):
+        return 0
+    return entry.get('trial_spell', trigger['spell'])
 
 
 def observe_actor(entry: dict) -> str:
