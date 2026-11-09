@@ -62,6 +62,11 @@
       "duration_s": 4
     },
     {
+      "action": "wait",
+      "label": "Let the chest become ready",
+      "ms": 1000
+    },
+    {
       "action": "loot_gameobject",
       "actor": "hero",
       "entry": 169243
@@ -73,6 +78,10 @@
       "metric": "loot_count",
       "min": 1,
       "within_ms": 2000
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
     },
     {
       "action": "wait",
@@ -122,6 +131,11 @@
       "entry": 169243,
       "distance": 3,
       "duration_s": 60
+    },
+    {
+      "action": "wait",
+      "label": "Let the chest become ready",
+      "ms": 1000
     },
     {
       "action": "loot_gameobject",
