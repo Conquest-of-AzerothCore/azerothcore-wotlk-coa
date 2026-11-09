@@ -12,6 +12,7 @@ from classes import PROGRESSION_HEADER as HEADER, ClassSpell, class_spells, tabl
 from passives import (ALIASED_REASON_MARKER, AURA_STATE_METRIC, FAMILIES, MAX_SPELLMOD, PARRY_CHANCE, PASSIVE_DELTA,
                       PHRASES, STAT_EXACT_METRIC, STAT_METRIC, MetricPlan, PassiveTarget, classify, crit_plans,
                       family_of, literal_token, named_targets, passive_effects, passive_scenario, stat_after_token)
+from procs import proc_scenario
 from profile import CASTER, load_class_file, spell_power_label, stat_label
 from tooltip import Displayed, Records
 from values import TARGET, dataset
@@ -88,6 +89,11 @@ FORTIFIED_BODY = 300515
 HOLY_UPHEAVAL = 572547
 RIGHTEOUS_UPHEAVAL_AT_60 = 807764
 RIGHTEOUS_UPHEAVAL_GENERIC_RANK = 572027
+LIGHTKEEPER = 560835
+LIGHTKEEPER_PARRY = 561016
+LIGHTKEEPER_BURST = 561277
+MIGHT_OF_AGGRAMAR = 803163
+MIGHT_OF_AGGRAMAR_STACK = 803164
 STAT_COUNT = 5
 LIBERTY_OP = 11
 SPELL_MODIFIER_BASE = 1000
@@ -217,6 +223,63 @@ class TriggerLinkTest(unittest.TestCase):
         effect1 = effect_of(effects, 1)
         self.assertIn('"Fixture Proc Zero"', effect0.reason)
         self.assertIn('"Fixture Proc One"', effect1.reason)
+
+    def test_p5_link_to_cooldown_delta_entry_uses_its_cooldown_label(self):
+        effects = self.effects_with({'triggers': [{'aura': P5_FIXTURE_SPELL, 'name': 'Fixture Cooldown',
+                                                    'kind': 'cooldown_delta', 'observe_spell': 999}]})
+        effect = effect_of(effects, 0)
+        self.assertIn(f'"{P5_FIXTURE_SPELL} trigger_cooldown_delta"', effect.reason)
+
+    def test_p5_link_to_duration_delta_entry_uses_its_duration_label_not_the_plain_trigger_label(self):
+        effects = self.effects_with({'triggers': [{'aura': P5_FIXTURE_SPELL, 'name': 'Fixture Duration',
+                                                    'kind': 'duration_delta', 'observe_spell': 999}]})
+        effect = effect_of(effects, 0)
+        self.assertIn(f'"{P5_FIXTURE_SPELL} trigger_duration_delta"', effect.reason)
+        self.assertNotIn(f'"{P5_FIXTURE_SPELL} trigger_count"', effect.reason)
+
+    def test_p5_link_to_two_cooldown_delta_entries_sharing_an_aura_disambiguates_each_by_observe_spell(self):
+        effects = self.effects_with({'triggers': [
+            {'aura': P5_FIXTURE_SPELL, 'effect': 0, 'name': 'Fixture Cooldown A', 'kind': 'cooldown_delta',
+             'observe_spell': 10},
+            {'aura': P5_FIXTURE_SPELL, 'effect': 1, 'name': 'Fixture Cooldown B', 'kind': 'cooldown_delta',
+             'observe_spell': 20}]})
+        effect0 = effect_of(effects, 0)
+        effect1 = effect_of(effects, 1)
+        self.assertIn(f'"{P5_FIXTURE_SPELL} trigger_cooldown_delta 10"', effect0.reason)
+        self.assertIn(f'"{P5_FIXTURE_SPELL} trigger_cooldown_delta 20"', effect1.reason)
+
+    def test_p5_link_to_two_proc_entries_sharing_an_aura_disambiguates_each_by_proc_spell(self):
+        effects = self.effects_with({'procs': [
+            {'aura': P5_FIXTURE_SPELL, 'effect': 0, 'name': 'Fixture Proc A', 'proc_spell': 10,
+             'trigger': {'action': 'attack', 'spell': 0}},
+            {'aura': P5_FIXTURE_SPELL, 'effect': 1, 'name': 'Fixture Proc B', 'proc_spell': 20,
+             'trigger': {'action': 'attack', 'spell': 0}}]})
+        effect0 = effect_of(effects, 0)
+        effect1 = effect_of(effects, 1)
+        self.assertIn(f'"{P5_FIXTURE_SPELL} proc_rate 10"', effect0.reason)
+        self.assertIn(f'"{P5_FIXTURE_SPELL} proc_rate 20"', effect1.reason)
+
+    def test_p5_link_to_two_proc_entries_sharing_aura_and_proc_spell_disambiguates_by_trigger(self):
+        effects = self.effects_with({'procs': [
+            {'aura': P5_FIXTURE_SPELL, 'effect': 0, 'name': 'Fixture Proc Attack', 'proc_spell': 10,
+             'trigger': {'action': 'attack', 'spell': 0}},
+            {'aura': P5_FIXTURE_SPELL, 'effect': 0, 'name': 'Fixture Proc Cast', 'proc_spell': 10,
+             'trigger': {'action': 'cast', 'spell': 30}}]})
+        effect = effect_of(effects, 0)
+        self.assertIn(f'"{P5_FIXTURE_SPELL} proc_rate 10 attack"', effect.reason)
+        self.assertIn(f'"{P5_FIXTURE_SPELL} proc_rate 10 30"', effect.reason)
+        self.assertIn('"Fixture Proc Attack"', effect.reason)
+        self.assertIn('"Fixture Proc Cast"', effect.reason)
+
+    def test_p5_links_to_every_candidate_when_none_disambiguates_by_effect(self):
+        effects = self.effects_with({'procs': [
+            {'aura': P5_FIXTURE_SPELL, 'name': 'Fixture Proc Attack', 'proc_spell': 10,
+             'trigger': {'action': 'attack', 'spell': 0}},
+            {'aura': P5_FIXTURE_SPELL, 'name': 'Fixture Proc Cast', 'proc_spell': 10,
+             'trigger': {'action': 'cast', 'spell': 30}}]})
+        effect = effect_of(effects, 0)
+        self.assertIn('"Fixture Proc Attack"', effect.reason)
+        self.assertIn('"Fixture Proc Cast"', effect.reason)
 
 
 class FamilyTest(unittest.TestCase):
@@ -397,6 +460,28 @@ class TemplarPassiveTest(unittest.TestCase):
 
     def test_effect_notes_without_an_entry_keep_the_generic_reason(self):
         self.assertEqual(effect_of(self.effects(804897), 2).reason, 'unmodelled: scripted or crowd-control effect')
+
+    def test_lightkeeper_effects_link_to_their_own_disambiguated_proc_entry_not_each_others(self):
+        parry_entry = next(entry for entry in self.class_file['procs']
+                           if entry['aura'] == LIGHTKEEPER and entry['proc_spell'] == LIGHTKEEPER_PARRY)
+        burst_entry = next(entry for entry in self.class_file['procs']
+                           if entry['aura'] == LIGHTKEEPER and entry['proc_spell'] == LIGHTKEEPER_BURST)
+        [parry_expectation] = proc_scenario(self.class_file, parry_entry)[1]
+        [burst_expectation] = proc_scenario(self.class_file, burst_entry)[1]
+        effect0 = effect_of(self.effects(LIGHTKEEPER), 0)
+        effect1 = effect_of(self.effects(LIGHTKEEPER), 1)
+        self.assertIn(f'"{parry_expectation.label}"', effect0.reason)
+        self.assertIn(f'"{burst_expectation.label}"', effect1.reason)
+        self.assertNotIn(f'"{burst_expectation.label}"', effect0.reason)
+        self.assertNotIn(f'"{parry_expectation.label}"', effect1.reason)
+
+    def test_might_of_aggramar_effect_links_to_both_its_proc_entries(self):
+        entries = [entry for entry in self.class_file['procs'] if entry['aura'] == MIGHT_OF_AGGRAMAR]
+        self.assertEqual(len(entries), 2)
+        expectations = [proc_scenario(self.class_file, entry)[1][0] for entry in entries]
+        effect = effect_of(self.effects(MIGHT_OF_AGGRAMAR), 0)
+        for expectation in expectations:
+            self.assertIn(f'"{expectation.label}"', effect.reason)
 
     def test_unmodelled_effects_mark_the_scoped_spellmod_crit_bonus_unmodelled(self):
         for spell_id in (560650, 561346):

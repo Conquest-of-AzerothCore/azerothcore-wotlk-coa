@@ -356,6 +356,7 @@
     {
       "aura": 560835,
       "name": "Lightkeeper",
+      "effect": 0,
       "tooltip": "Periodic damage dealt by |cffffffffCondemn|r now has a $h% chance to increase your parry chance by $561016s1% for $561016d, stacking $561016u times.\r\n\r\nPeriodic damage dealt by |cffffffffCondemn|r also has a $h% chance to burst, dealing ${$561277m1*$<scalingbp>+$AP*.22} Holy damage to up to $561277i1 enemies within $561277a1 yds of the target.",
       "chance_token": "$h",
       "trigger": {"action": "cast", "spell": 804906},
@@ -375,6 +376,7 @@
     {
       "aura": 560835,
       "name": "Lightkeeper",
+      "effect": 1,
       "tooltip": "Periodic damage dealt by |cffffffffCondemn|r now has a $h% chance to increase your parry chance by $561016s1% for $561016d, stacking $561016u times.\r\n\r\nPeriodic damage dealt by |cffffffffCondemn|r also has a $h% chance to burst, dealing ${$561277m1*$<scalingbp>+$AP*.22} Holy damage to up to $561277i1 enemies within $561277a1 yds of the target.",
       "chance_token": "$h",
       "trigger": {"action": "cast", "spell": 804906},
@@ -413,6 +415,7 @@
     {
       "aura": 803163,
       "name": "Might of Aggramar",
+      "effect": 0,
       "tooltip": "Physical damage dealt now has a $h% chance to increase the tick rate of your |cffffffffBlade of Faith|r and |cffffffffCondemn|r by $803164s1%, stacking $803164u times.",
       "chance_token": "$h",
       "trigger": {"action": "attack", "spell": 0},
@@ -430,6 +433,7 @@
     {
       "aura": 803163,
       "name": "Might of Aggramar",
+      "effect": 0,
       "tooltip": "Physical damage dealt now has a $h% chance to increase the tick rate of your |cffffffffBlade of Faith|r and |cffffffffCondemn|r by $803164s1%, stacking $803164u times.",
       "chance_token": "$h",
       "trigger": {"action": "cast", "spell": 501562, "target": "dummy"},

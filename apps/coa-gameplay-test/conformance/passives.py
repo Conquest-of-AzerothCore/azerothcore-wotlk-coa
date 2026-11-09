@@ -5,11 +5,12 @@ import re
 
 from classes import PROGRESSION_HEADER, PROGRESSION_ROW, ClassSpell, class_spells, table_rows
 from hits import creature_fixture
-from procs import proc_label
+from procs import proc_label, shares_aura, shares_proc_spell, trigger_key
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture, stat_label
 from stack import class_mask, family_flags
 from tooltip import COLOR_CODE, Displayed, Records, Unreadable, read_tooltip
-from triggers import cooldown_label, shares_cooldown_aura, trigger_label
+from triggers import (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND, cooldown_label, duration_label,
+                      shares_cooldown_aura, trigger_label)
 from values import EFFECTS, TARGET, Expectation, dataset, facts_of, structure_stats
 
 UNMODELLED = 'unmodelled: '
@@ -560,7 +561,7 @@ def behaviour_label(entry: dict) -> list[str]:
     return BEHAVIOUR_LABELS[kind](entry)
 
 
-def trigger_link(class_file: dict, spell_ids: set[int], effect: int) -> tuple[str, dict] | None:
+def trigger_link(class_file: dict, spell_ids: set[int], effect: int) -> list[tuple[str, dict]] | None:
     candidates: list[tuple[str, dict]] = []
     for key, id_field in (('triggers', 'aura'), ('procs', 'aura')):
         for entry in class_file.get(key, []):
@@ -572,24 +573,35 @@ def trigger_link(class_file: dict, spell_ids: set[int], effect: int) -> tuple[st
     if not candidates:
         return None
     exact = [(key, entry) for key, entry in candidates if entry.get('effect') == effect]
-    return (exact or candidates)[0]
+    if exact:
+        return exact
+    unscoped = [(key, entry) for key, entry in candidates if entry.get('effect') is None]
+    return unscoped or candidates
 
 
-def linked_reason(class_file: dict, kind: str, entry: dict) -> str:
+def check_label(class_file: dict, kind: str, entry: dict) -> list[str]:
     if kind == 'triggers':
-        if entry.get('kind') == 'cooldown_delta':
-            label = cooldown_label(entry['aura'], entry['observe_spell']) \
-                if shares_cooldown_aura(class_file, entry) else cooldown_label(entry['aura'])
-        else:
-            label = trigger_label(entry['aura'])
-        labels = [label]
-    elif kind == 'procs':
-        labels = [proc_label(entry['aura'])]
-    else:
-        labels = behaviour_label(entry)
-    status = entry.get('status', 'ok')
-    verdicts = ', '.join(f'"{label}"' for label in labels)
-    return f'checked by {kind} entry "{entry.get("name")}" (verdict {verdicts}, status {status})'
+        if entry.get('kind') == COOLDOWN_DELTA_KIND:
+            return [cooldown_label(entry['aura'], entry['observe_spell'])
+                   if shares_cooldown_aura(class_file, entry) else cooldown_label(entry['aura'])]
+        if entry.get('kind') == DURATION_DELTA_KIND:
+            return [duration_label(entry['aura'])]
+        return [trigger_label(entry['aura'])]
+    if kind == 'procs':
+        trigger = trigger_key(entry) if shares_proc_spell(class_file, entry) else None
+        return [proc_label(entry['aura'], entry['proc_spell'], trigger)
+               if shares_aura(class_file, entry) else proc_label(entry['aura'])]
+    return behaviour_label(entry)
+
+
+def linked_reason(class_file: dict, links: list[tuple[str, dict]]) -> str:
+    pointers = []
+    for kind, entry in links:
+        labels = check_label(class_file, kind, entry)
+        status = entry.get('status', 'ok')
+        verdicts = ', '.join(f'"{label}"' for label in labels)
+        pointers.append(f'{kind} entry "{entry.get("name")}" (verdict {verdicts}, status {status})')
+    return f'checked by {"; ".join(pointers)}'
 
 
 def signed_points(records: Records, rank_id: int, effect: int) -> float | None:
@@ -637,8 +649,7 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
         if family in FAMILY_REASONS:
             link = trigger_link(class_file, {spell_id, rank_id}, effect) if family == LINKED_FAMILY else None
             if link is not None:
-                kind, linked_entry = link
-                raise NotModelled(linked_reason(class_file, kind, linked_entry))
+                raise NotModelled(linked_reason(class_file, link))
             raise NotModelled(FAMILY_REASONS[family])
         if aura == 142:
             raise Closed(OUT_OF_SCOPE[142])

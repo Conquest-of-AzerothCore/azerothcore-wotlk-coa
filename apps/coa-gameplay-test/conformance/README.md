@@ -492,13 +492,28 @@ the `effect_overrides` entry makes the reader classify it as op 15 (`spell_criti
 
 Unmodelled by rule: `P5` (`proc or trigger effect without a trigger entry`) — unless the class file's own
 `triggers`/`procs`/`behaviours` entry for this exact `{spell_id or rank_id, effect}` already checks it
-(`trigger_link`, round5 `trigger-accounting`): when one matches, the reason instead points at that entry's own
-label and status (`checked by <triggers|procs|behaviours> entry "<name>" (verdict "<label>", status <status>)`),
-so a P5 effect a trigger lot already covers is never reported as a second, duplicate `unmodelled` row. A P5
-effect with more than one candidate entry prefers the one whose own `effect` field matches this effect index
-(the same precedence `passive_targets`/`effect_overrides`/`effect_notes`/`unmodelled_effects` already use for
-their `{spell_id, rank_id}` lookups); an entry with no `effect` field is assumed to cover every P5 effect of
-that spell unless a more specific entry (with a matching `effect`) exists for the same effect index. `P6`
+(`trigger_link`, round5 `trigger-accounting`): when one or more match, the reason instead points at each
+matched entry's own label and status (`checked by <triggers|procs|behaviours> entry "<name>" (verdict "<label>",
+status <status>)`, joined with `; ` when more than one entry links), so a P5 effect a trigger lot already covers
+is never reported as a second, duplicate `unmodelled` row. Each pointer's `<label>` is the exact label that
+entry's own scenario produces: a plain `triggers` entry gets `trigger_count`, a `cooldown_delta` entry
+`trigger_cooldown_delta` (disambiguated with its `observe_spell` when more than one `cooldown_delta` entry
+shares the aura), a `duration_delta` entry `trigger_duration_delta`, and a `procs` entry `proc_rate`
+(disambiguated with its `proc_spell` and then its trigger, exactly as `proc_scenario` disambiguates its own
+label when more than one `procs` entry shares the aura or the `aura`+`proc_spell` pair) — never the bare,
+undisambiguated label a shared-aura group would otherwise collide on. A P5 effect with more than one candidate
+entry prefers the ones whose own `effect` field matches this effect index (the same precedence
+`passive_targets`/`effect_overrides`/`effect_notes`/`unmodelled_effects` already use for their
+`{spell_id, rank_id}` lookups); when none of the candidates for this effect carries an `effect` field at all,
+every one of them is linked (never an arbitrary single pick), since more than one check can legitimately cover
+the same single effect through different trigger paths (Templar: Might of Aggramar 803163 effect 0, two `procs`
+entries sharing `proc_spell` 803164, one triggered by an auto-attack and one by a spell cast). A status-less
+pointer's `status ok` is read once, at generation time, from the entry's own `status` field, not cross-checked
+against that entry's own latest measured verdict in `verdicts.json`; if the linked check later regresses
+without a matching `status` edit to its entry, the pointer text still reads `ok` even though the real row for
+that entry now alerts — the independent row for the linked entry itself still carries the real, current
+verdict, so the regression is not lost, but a reader who only skims the P5 pointer text would be told a stale
+"ok". `P6`
 (`scripted or crowd-control effect`), 59 (`damage versus a creature type is level-scaled`), 122 (`no off-hand
 weapon damage metric`), 110 (`no energy regeneration metric`), a spell modifier op of 32 or more (`SpellModOp
 <op> is not below MAX_SPELLMOD 32`: `spell_modifier` requires `op < MAX_SPELLMOD`), and the auras of the table
