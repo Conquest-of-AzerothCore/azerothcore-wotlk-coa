@@ -18,6 +18,7 @@
                       "skill 70": 300, "skill 71": 300, "skill 72": 300, "skill 136": 300},
   "known_auras": [887007],
   "probe_auras": [92111],
+  "weapon_percent_before_flat": [804929, 807263, 807264, 807265, 807266, 807267, 807268],
   "extra_spells": [
     {"spell": 801443, "name": "Righteous Lunge",
      "citation": "2026-08-02 18:36:00.041, spell 570233 Righteous Lunge, Ascension combat log, private archive"},

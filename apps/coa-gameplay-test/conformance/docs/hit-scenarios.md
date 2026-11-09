@@ -10,7 +10,7 @@ above), `cast`, and a wait of
 
 | `kind` | Effects | Hit before modifiers |
 |---|---|---|
-| `weapon` | 31 percent, 17/58/121 flat | roll times the percent, truncated, plus the floored flats (ADR 0010) |
+| `weapon` | 31 percent, 17/58/121 flat | the floored flats added to the roll, truncated, times the percent (DBC order); `(roll x percent) + flats` for a rank the class file lists in `weapon_percent_before_flat` (ADR 0010) |
 | `school` | 2 | the floored tooltip value of each effect, or each integer from `$mN` to `$MN`, or each roll (below) |
 | `leech` | 9 (`SPELL_EFFECT_HEALTH_LEECH`) | as `school`: the same `SpellDamageBonusDone`/`Taken` path, with mitigation and damage modifiers |
 | `heal` | 10 | as `school`, on the caster, without mitigation |
@@ -59,7 +59,8 @@ amplitude 1500) keeps its `$/1000;s1` as an `effect_value` in ms.
 
 A `triggered_weapon` effect reads the tokens of the described spell's tooltip that belong to the triggered spell, each
 on the effect of its first `$<id>sN`/`$<id>mN`, and models them as a `weapon` hit of the triggered spell's effects,
-with the same ADR 0010 order. The triggered spell's school gives the mitigation and the modifiers, and its damage is
+with the same DBC effect order (`weapon_percent_before_flat` is not consulted for a triggered spell). The triggered
+spell's school gives the mitigation and the modifiers, and its damage is
 measured: `hit_spell` in the model (the rank itself for the other kinds) names the spell of `spell_damage_*`,
 `critical_hits` and `blocked_hits`; `cast_count` stays the rank. Righteous Tempest 807274: aura 23 every 1000 ms for
 5000 ms triggers 570205 (effects 121 and 31); its tooltip shows `$570205s2`% (100) Weapon Damage plus

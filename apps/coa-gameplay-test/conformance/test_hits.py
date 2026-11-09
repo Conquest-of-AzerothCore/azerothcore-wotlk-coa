@@ -6,10 +6,10 @@ import unittest
 
 from classes import class_spells
 from compare import Run, Verdict, judge_hit
-from hits import (HIT_CHECKS, MAX_SCENARIO_MS, HitModel, Modifier, Unmodelled, WeaponProfile, casts_needed,
-                  effect_hit, expected_hit, hit_kind, hit_parts, hit_scenario, measured_hit_model, melee_scenario,
-                  records_of, periodic_tick_readout, reference_caster, reference_hit_model, reference_melee_model,
-                  rolled_values, scheduled_casts, weapon_profile)
+from hits import (CLOSED, HIT_CHECKS, MAX_SCENARIO_MS, UNMODELLED, HitModel, Modifier, Unmodelled, WeaponProfile,
+                  casts_needed, effect_hit, expected_hit, hit_kind, hit_parts, hit_scenario, measured_hit_model,
+                  melee_scenario, records_of, periodic_tick_readout, reference_caster, reference_hit_model,
+                  reference_melee_model, rolled_values, scheduled_casts, weapon_profile)
 from mitigation import REFERENCE_TARGET, MitigationModel, TargetProfile, expected_mitigation
 from profile import CLASSES_DIR, load_class_file
 from tooltip import CasterStats, Displayed, Readout, read_tooltip, weapon_skill_spells
@@ -39,6 +39,8 @@ ARGENT_BLADE_EFFECTS = [121, 31, 64]
 ARGENT_BLADE_PERCENT = 215.0
 ARGENT_BLADE_FLAT = 421 + 0.4725 * REFERENCE_ATTACK_POWER
 ARGENT_BLADE_ENERGY_COST = 50
+SACRED_SWING = 705293
+SACRED_SWING_MAX_RANK = 572769
 ENERGY = 3
 CLASS_TUNING_AURA = 887007
 RIGHTEOUS_UPHEAVAL = 501562
@@ -167,7 +169,8 @@ class WeaponProfileTest(unittest.TestCase):
 
 class ExpectedHitTest(unittest.TestCase):
     def test_argent_blade_tooltip_mean_adds_the_flat_bonus_after_the_weapon_percent(self):
-        model = expected_hit(argent_blade_readout(), ARGENT_BLADE_EFFECTS, caster(), walking_stick(), NO_MITIGATION)
+        model = expected_hit(argent_blade_readout(), ARGENT_BLADE_EFFECTS, caster(), walking_stick(), NO_MITIGATION,
+                             percent_before_flat=True)
         weapon_average = (WALKING_STICK_MIN + WALKING_STICK_MAX) / 2
         self.assertAlmostEqual(
             model.tooltip_mean,
@@ -175,7 +178,8 @@ class ExpectedHitTest(unittest.TestCase):
             places=6)
 
     def test_argent_blade_mean_truncates_the_roll_the_percent_and_the_flat_bonus(self):
-        model = expected_hit(argent_blade_readout(), ARGENT_BLADE_EFFECTS, caster(), walking_stick(), NO_MITIGATION)
+        model = expected_hit(argent_blade_readout(), ARGENT_BLADE_EFFECTS, caster(), walking_stick(), NO_MITIGATION,
+                             percent_before_flat=True)
         rolls = range(80, 85)
         mean, sigma = moments([roll * 215 // 100 + 568 for roll in rolls])
         self.assertEqual((mean, sigma), (744.0, math.sqrt(8)))
@@ -187,7 +191,7 @@ class ExpectedHitTest(unittest.TestCase):
     def test_class_tuning_and_armor_are_applied_after_the_hit_with_their_own_rounding(self):
         armor = expected_mitigation(PHYSICAL, ARMOR_528, 60)
         model = expected_hit(argent_blade_readout(), ARGENT_BLADE_EFFECTS, caster(), walking_stick(), armor,
-                             modifiers=(tuning(),))
+                             modifiers=(tuning(),), percent_before_flat=True)
         mean, sigma = moments([541, 542, 543, 544, 546])
         self.assertAlmostEqual(model.mean, mean, places=9)
         self.assertAlmostEqual(model.sigma, sigma, places=9)
@@ -195,9 +199,18 @@ class ExpectedHitTest(unittest.TestCase):
 
     def test_healing_modifier_never_changes_damage(self):
         with_heal_modifier = expected_hit(argent_blade_readout(), ARGENT_BLADE_EFFECTS, caster(), walking_stick(),
-                                          NO_MITIGATION, modifiers=(tuning('heal', HEALING_DONE_PCT),))
+                                          NO_MITIGATION, modifiers=(tuning('heal', HEALING_DONE_PCT),),
+                                          percent_before_flat=True)
         self.assertAlmostEqual(with_heal_modifier.mean, 744.0, places=9)
         self.assertEqual(with_heal_modifier.modifiers, ())
+
+    def test_weapon_percent_damage_applies_after_the_flat_bonus_by_default(self):
+        model = expected_hit(argent_blade_readout(), ARGENT_BLADE_EFFECTS, caster(), walking_stick(), NO_MITIGATION)
+        rolls = range(80, 85)
+        mean, sigma = moments([(roll + 568) * 215 // 100 for roll in rolls])
+        self.assertAlmostEqual(model.mean, mean, places=9)
+        self.assertAlmostEqual(model.sigma, sigma, places=9)
+        self.assertNotAlmostEqual(model.mean, 744.0, places=0)
 
     def test_school_damage_keeps_the_resisted_floor_of_each_partial_resist_step(self):
         readout = Readout(values=[Displayed('$s1', 336.0, 0, 'flat')], unreadable=[])
@@ -329,6 +342,24 @@ class HitScenarioTest(unittest.TestCase):
         self.assertAlmostEqual(model.mean, moments([541, 542, 543, 544, 546])[0], places=9)
         self.assertEqual([(modifier.spell_id, modifier.effect_index, modifier.percent)
                           for modifier in model.modifiers], [(CLASS_TUNING_AURA, 0, CLASS_TUNING_PERCENT_AT_60)])
+
+    def test_argent_blade_rank_is_the_class_files_only_percent_before_flat_entry(self):
+        self.assertIn(ARGENT_BLADE_MAX_RANK, self.templar['weapon_percent_before_flat'])
+
+    def test_sacred_swing_applies_its_weapon_percent_after_the_flat_bonus(self):
+        caster = reference_caster(self.templar)
+        records = records_of(self.templar)
+        weapon = weapon_profile(self.templar)
+        fixed = records.field('Spell', SACRED_SWING_MAX_RANK, 'EffectBasePoints[0]') + 1
+        percent = records.field('Spell', SACRED_SWING_MAX_RANK, 'EffectBasePoints[1]') + 1
+        bonus = caster.ap / 14 * weapon.normalized_speed
+        rolls = range(math.floor(weapon.min_damage + bonus), math.floor(weapon.max_damage + bonus) + 1)
+        tuned = 100 + CLASS_TUNING_PERCENT_AT_60
+        kept = expected_mitigation(PHYSICAL, REFERENCE_TARGET, 60).mean
+        hits = [math.ceil(math.floor((roll + fixed) * percent / 100) * tuned // 100 * kept) for roll in rolls]
+        model = reference_hit_model(self.templar, SACRED_SWING_MAX_RANK)
+        self.assertNotIn(SACRED_SWING_MAX_RANK, self.templar['weapon_percent_before_flat'])
+        self.assertAlmostEqual(model.mean, moments(hits)[0], places=9)
 
     def test_righteous_upheaval_rolls_its_die_before_the_attack_power_term(self):
         model = reference_hit_model(self.templar, RIGHTEOUS_UPHEAVAL_MAX_RANK)
@@ -722,7 +753,7 @@ class HitScenarioTest(unittest.TestCase):
                 labels = {step['label'] for step in scenario['steps'] if step['action'] == 'assert'}
                 for expectation in expectations:
                     if expectation.check == 'unmodelled':
-                        self.assertTrue(expectation.rule.startswith('unmodelled: '))
+                        self.assertTrue(expectation.rule.startswith((UNMODELLED, CLOSED)))
                     elif not expectation.rule.startswith(UNREADABLE):
                         self.assertIn(expectation.label + ' total', labels)
                         self.assertIn(expectation.label + ' count', labels)

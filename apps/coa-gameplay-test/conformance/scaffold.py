@@ -30,7 +30,7 @@ EMPTY_LIST_FIELDS = ('alternate_weapons', 'known_auras', 'probe_auras', 'extra_s
                      'disabled_foreign_effects', 'effect_overrides', 'unmodelled_effects', 'literal_tokens',
                      'effect_notes', 'passive_targets', 'procs', 'triggers', 'talent_modifiers', 'rotation',
                      'stack', 'behaviours', 'player_observations', 'player_tooltip_readings', 'hit_notes',
-                     'conditional_spells')
+                     'conditional_spells', 'weapon_percent_before_flat')
 
 
 class ScaffoldError(ValueError):

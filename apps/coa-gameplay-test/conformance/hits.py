@@ -205,8 +205,8 @@ def effect_roll(low: float, high: float) -> Distribution:
     return mapped(uniform(0, int(high - low)), lambda roll: math.floor(low + roll))
 
 
-def weapon_hit(readout: Readout, effects: Sequence[int], caster: CasterStats,
-               weapon: WeaponProfile | None) -> tuple[Distribution, float, list[str]]:
+def weapon_hit(readout: Readout, effects: Sequence[int], caster: CasterStats, weapon: WeaponProfile | None,
+               *, percent_before_flat: bool = False) -> tuple[Distribution, float, list[str]]:
     if weapon is None:
         raise Unmodelled('weapon damage needs the weapon stats of the class file')
     percent = Fraction(1)
@@ -226,8 +226,12 @@ def weapon_hit(readout: Readout, effects: Sequence[int], caster: CasterStats,
     speed = weapon.normalized_speed if NORMALIZED_WEAPON_DMG in effects else weapon.speed_ms / 1000
     bonus = caster.ap / ATTACK_POWER_PER_DPS * speed
     roll = uniform(math.floor(weapon.min_damage + bonus), math.floor(weapon.max_damage + bonus))
-    distribution = mapped(roll, lambda damage: math.floor(damage * percent) + flat_floor)
-    tooltip_mean = float(percent) * ((weapon.min_damage + weapon.max_damage) / 2 + bonus) + flat
+    if percent_before_flat:
+        distribution = mapped(roll, lambda damage: math.floor(damage * percent) + flat_floor)
+        tooltip_mean = float(percent) * ((weapon.min_damage + weapon.max_damage) / 2 + bonus) + flat
+    else:
+        distribution = mapped(roll, lambda damage: math.floor((damage + flat_floor) * percent))
+        tooltip_mean = float(percent) * ((weapon.min_damage + weapon.max_damage) / 2 + bonus + flat)
     return distribution, tooltip_mean, ordered(readout, texts)
 
 
@@ -359,12 +363,13 @@ def expected_hit(readout: Readout, spell_effects: Sequence[int], caster: CasterS
                  mitigation: MitigationModel, *, aura_names: Sequence[int] = (), modifiers: Sequence[Modifier] = (),
                  ticks: int = 1, rolls: Mapping[int, Sequence[float]] | None = None,
                  triggered: Mapping[int, Triggered] | None = None, records: Records | None = None,
-                 rank_id: int = 0) -> HitModel:
+                 rank_id: int = 0, percent_before_flat: bool = False) -> HitModel:
     names = tuple(aura_names) or (0,) * len(spell_effects)
     kind, indexes = hit_kind(spell_effects, names, triggered, readout)
     events = 1
     if kind == 'weapon':
-        distribution, tooltip_mean, texts = weapon_hit(readout, spell_effects, caster, weapon)
+        distribution, tooltip_mean, texts = weapon_hit(readout, spell_effects, caster, weapon,
+                                                        percent_before_flat=percent_before_flat)
     elif kind == TRIGGERED_WEAPON:
         distribution, tooltip_mean, texts = triggered_hit(readout, triggered[indexes[0]], caster, weapon)
     else:
@@ -529,9 +534,11 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
         shown = periodic_tick_readout(records, rank_id, caster, readout, indexes[0])
     modifiers = for_school(aura_modifiers(records, auras, class_file['level']), school_mask)
     rolls = {} if kind in WEAPON_KINDS else rolled_values(records, rank_id, caster, shown, indexes)
+    percent_before_flat = rank_id in class_file.get('weapon_percent_before_flat', ())
     model = expected_hit(shown, facts.effects, caster, weapon_profile(class_file), mitigation,
                          aura_names=facts.aura_names, modifiers=modifiers, ticks=ticks, rolls=rolls,
-                         triggered=triggered, records=records, rank_id=rank_id)
+                         triggered=triggered, records=records, rank_id=rank_id,
+                         percent_before_flat=percent_before_flat)
     return RankHit(model, readout, facts, school_mask, indexes, duration, hit_spell)
 
 
