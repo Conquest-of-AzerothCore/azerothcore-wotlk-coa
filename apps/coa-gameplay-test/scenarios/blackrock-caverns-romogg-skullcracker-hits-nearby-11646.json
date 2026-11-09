@@ -60,6 +60,21 @@
       "maximum": 100000
     },
     {
+      "action": "set_phase",
+      "actor": "tank",
+      "value": 2
+    },
+    {
+      "action": "set_phase",
+      "actor": "near",
+      "value": 2
+    },
+    {
+      "action": "set_phase",
+      "actor": "far",
+      "value": 2
+    },
+    {
       "action": "summon",
       "actor": "tank",
       "entry": 39665,
