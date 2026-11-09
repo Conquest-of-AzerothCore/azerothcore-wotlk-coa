@@ -2297,6 +2297,52 @@ with a hit model (of those with an effect)" divides instead by `actives_with_eff
 verdict's explanation does not start with that reason, i.e. actives that structurally could have a hit model. The
 numerator is unchanged between the two rows; only the denominator differs.
 
+### Behaviour sheets and reader records
+
+```sh
+python3 -B conformance.py sheets --class 19 --out DIR --spell ID [--spell ID ...] [--verdicts COMPARE_OUT]
+python3 -B score.py --records RECORDS_DIR --class-file classes/templar.json [--out score.json]
+```
+
+`sheets` (`sheets.py`) writes one `DIR/<spell_id>.json` and one `DIR/<spell_id>.txt` per `--spell`, built only from
+code this package already runs: the tooltip's `Description[enUS]`, its cleaned text (`behaviours.cleaned_tooltip`),
+and its resolved tokens at two `CasterStats` bounds (`questions.ANY_STATS`: level 1 all-zero, level 80
+thousand-everywhere, the same pair `questions.py` uses to find stat-independent tokens) via `tooltip.read_tooltip`,
+which already expands one `@s:<id>:<flags>@` reference inline (`tooltip.py`'s own `MAX_EXPANSION_DEPTH`); every
+effect's family, token, targets and reason from `passives.classify`, called directly with `spell_id == rank_id` so
+it works on any spell id, not only a class's own passive ranks; the raw `ProcFlags`, `ProcChance`, `ProcCharges` and
+`EffectTriggerSpell[0..2]` fields (candidate proc/trigger material no existing module decodes for a spell with no
+hand-written entry yet); `values.facts_of`'s duration/cooldown/cast-time/aura-state facts; every `grep -rn -w
+<spell_id>` hit under `src/server/coa` (file:line, verbatim, not interpreted) as the scripted-hook material a DBC-only
+reading cannot see; and, when `--verdicts` names a `compare` output directory, that spell's existing verdicts. A
+sheet never includes a `classes/<name>.json` entry or a verdict's pass/fail judgement beyond the raw verdict rows
+themselves, so a reader given only the sheet cannot see what the class file already claims (the blind-reader
+requirement of the scale-out design,
+`.agents/plans/class-conformance-3/scale-out-sheets.md`).
+
+A **reader record** (`records.py`) is a reader's claim about one spell's one `entry_kind`: `spell_id`, `entry_kind`
+(one of the 9 kinds a class file's `procs`/`triggers`/`behaviours`/`passive_targets`/`talent_modifiers`/
+`effect_overrides`/`unmodelled_effects`/`literal_tokens`/`effect_notes` lists already carry), `entry` (the literal
+class-file entry, validated against `REQUIRED_ENTRY_FIELDS[entry_kind]`, the fields every existing Templar entry of
+that kind has in common), `sources` (one `{token_or_field, sheet_section, value, citation}` per cited sheet value),
+`reader`, `confidence` (`high`/`low`) and `rationale`. `records.record_schema()` exports this shape as a JSON
+Schema document; `records.write_record_schema` writes it to a file. `records.validate_record` checks the required
+fields and that every kind's key fields (`KEY_FIELDS`, e.g. `aura` for `procs`/`triggers`, `spell` for
+`behaviours`) are present. `records.traceability_errors(record, sheet)` is the deterministic gate: every source's
+`value` must appear verbatim in `json.dumps(sheet, sort_keys=True)`, and every number in `entry` other than its own
+key fields must equal some source's `value` — a record that cites nothing, or claims a number no source matches,
+is rejected before any human sees it. `records.convert_records` groups a list of records by `entry_kind` into the
+`{kind: [entry, ...]}` shape a `classes/<name>.json` merge expects.
+
+`score.py` (`score.py --records RECORDS_DIR --class-file FILE`) loads every `*.json` record in `RECORDS_DIR`
+(`records.load_records`) and, per kind, matches each ground-truth and generated entry by its `KEY_FIELDS` key:
+**match** (same key, same fields within a `1e-6` numeric tolerance), **miss** (a ground-truth key with no generated
+entry), **false_claim** (a generated key absent from the ground truth), **wrong_value** (same key, a field differs).
+`precision = match / (match + false_claim + wrong_value)`; `recall = match / (match + miss)`; both `None` when their
+denominator is 0. This is the validation protocol of
+`.agents/plans/class-conformance-3/scale-out-sheets.md` part 3, scored against Templar's own hand-written entries
+as ground truth.
+
 ### Verdicts
 
 | Status | Given to |

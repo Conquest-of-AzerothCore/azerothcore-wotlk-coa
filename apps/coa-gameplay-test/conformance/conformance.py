@@ -21,6 +21,7 @@ from procs import (proc_entries, proc_plan, proc_scenario, proc_status_expectati
 from profile import DBC_DIR, load_class_file
 from questions import QUESTIONS_FILE
 from scaffold import LIVE_BASELINE_HEADER, SHARED_DEFINES, scaffold_class
+from sheets import write_sheets
 from stack import PASSES, STACK_CHECKS, STACK_DPS, STACK_KIND, stack_scenarios
 from tooltip import read_tooltip
 from triggers import (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND, cooldown_trigger_scenario,
@@ -335,6 +336,14 @@ def compare_command(args) -> int:
     return 0
 
 
+def sheets_command(args) -> int:
+    class_file = load_class_file(args.class_id)
+    dbc_dir = Path(class_file.get('dbc_dir', DBC_DIR))
+    written = write_sheets(dbc_dir, class_file, args.out, args.spell, args.verdicts)
+    print(f'{len(written)} sheets in {args.out}')
+    return 0
+
+
 def spell_ids(text: str) -> set[int]:
     return {int(part) for part in text.split(',') if part.strip()}
 
@@ -392,6 +401,14 @@ def main(argv=None) -> int:
     generating.add_argument('--stack', action='store_true',
                             help='the passes of every stack configuration of the class file, cumulative talents')
     generating.add_argument('--passes', type=int, default=PASSES, help=f'passes per stack configuration ({PASSES})')
+    sheeting = commands.add_parser('sheets', help='write one JSON+text behaviour sheet per spell into --out, '
+                                                   'with no class-file entries or verdicts (a blind-reader input)')
+    sheeting.add_argument('--class', dest='class_id', type=int, required=True)
+    sheeting.add_argument('--out', type=Path, required=True)
+    sheeting.add_argument('--spell', type=int, action='append', required=True,
+                          help='a spell id to sheet; repeat to select several spells')
+    sheeting.add_argument('--verdicts', type=Path,
+                          help='a compare output directory (verdicts.json) to attach that spell\'s verdicts')
     comparing = commands.add_parser('compare', help=f'judge a verify_all stamp, write {ALERTS_FILE}, {REPORT_FILE}, '
                                                     f'{VERDICTS_FILE}, {QUESTIONS_FILE} and, for stack runs, '
                                                     f'{LEVERS_FILE}')
@@ -410,8 +427,8 @@ def main(argv=None) -> int:
     covering.add_argument('--after', type=Path, required=True, help='a compare output directory')
     covering.add_argument('--out', type=Path, help='output directory, the after directory by default')
     args = parser.parse_args(argv)
-    handlers = {'scaffold': scaffold_command, 'generate': generate_command, 'compare': compare_command,
-                'diff': diff_command, 'coverage': coverage_command}
+    handlers = {'scaffold': scaffold_command, 'generate': generate_command, 'sheets': sheets_command,
+                'compare': compare_command, 'diff': diff_command, 'coverage': coverage_command}
     return handlers[args.command](args)
 
 
