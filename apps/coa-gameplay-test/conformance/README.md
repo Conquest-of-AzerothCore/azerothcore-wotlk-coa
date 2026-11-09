@@ -918,7 +918,7 @@ A `triggers` entry of the class file is a passive whose tooltip says that someth
 |---|---|
 | `aura`, `name` | the passive and its `SpellName[enUS]` |
 | `tooltip` | its `Description[enUS]`, copied verbatim from the client DBC |
-| `trigger` | `{"action": "cast", "spell": <rank>, "target": "self"/"dummy"/"ally"}`, `{"action": "attack", "spell": 0}`, or `{"action": "periodic", "amplitude_ms": <ms>}` for a trigger that is the aura's own tick, not a player action |
+| `trigger` | `{"action": "cast", "spell": <rank>, "target": "self"/"dummy"/"ally"}`, `{"action": "attack", "spell": 0}`, `{"action": "periodic", "amplitude_ms": <ms>}` for a trigger that is the aura's own tick, not a player action, or `{"action": "taken_hit", "spell": <id>, "striker_entry": <entry>}` for a trigger a hostile creature's own hit starts, not a player action (see "Taken-hit trigger entries" below) |
 | `trigger_text` | the words of the cleaned tooltip that name the trigger |
 | `trigger_spell_text` | for a cast, the words of the rank's name or cleaned tooltip that make it such a trigger |
 | `trial_metric` | one trial: `spell_cast_count`, `spell_damage_count`, `melee_attack_count`, `melee_damage_count`; for `periodic`, always `spell_cast_count` (descriptive only, no trial-count measurement is taken) |
@@ -992,6 +992,28 @@ let more ticks bleed into the same count; the events measurement is taken the in
 passive whose own `Spell.dbc` `AttributesEx5` carries `SPELL_ATTR5_EXTRA_INITIAL_PERIOD` (0x200, "Immediately do
 periodic tick on apply"): each part is a separate scenario that re-learns the passive from scratch, so each part
 gets its own extra tick at apply, on top of the regular amplitude cadence.
+
+### Taken-hit trigger entries
+
+A `taken_hit` trigger is the mirror image of `attack`: the aura's own tooltip condition starts on a hit the
+caster *takes*, never one it deals ("When you take Physical damage you now strike back..."), so there is no
+caster action to drive at all. A `striker` creature fixture (`entry: trigger["striker_entry"]`, reusing
+`behaviours.py`'s `STRIKER`/`STRIKER_HEALTH`/`STRIKER_DISTANCE` constants, `reaction: 0`/`stationary: true` so it
+never engages or chases once the caster's own retaliation starts landing on it) repeatedly casts `trigger["spell"]`
+directly at the caster instead, spaced `max(StartRecoveryTime, cast time, internal_cooldown_ms) + 500 ms` apart
+(reusing `cast_interval` against the striker's own spell, not the caster's). Each attempt is a single
+`{"action": "cast", "actor": "striker", "spell": trigger["spell"], "target": "caster"}`, with no auto-attack
+`wait`/`stop_attack` bracket. A trial is counted the same way `attack`'s trials already are, but reversed:
+`trial_metric` is always `spell_damage_count`, read with `actor: "caster"` (a player; the harness can only read a
+combat-log metric from a player actor) and `caster: "striker"`, `target: "caster"` (a cast query selecting its
+source rather than its target). `observe_metric`/`observe_spell`/`observe_actor` are unchanged. The breaker
+spell chosen for `trigger["spell"]` must actually be castable by a generic NPC through `CastSpell(...,
+TRIGGERED_FULL_MASK)`: a player spell with a nonzero `CasterAuraState` (Revenge 6572's `AURA_STATE_DEFENSE`,
+requiring a prior block/dodge/parry the striker never has) still fails `Spell::CheckCast` with
+`SPELL_FAILED_BAD_TARGETS` even triggered, so the chosen spell needs `CasterAuraState` 0 (confirmed empirically,
+not by reading `TRIGGERED_FULL_MASK`'s own flag bits, since those did not resolve it); Claw (Pet) 16827
+(`SchoolMask` 1, `DmgClass` 2, `Effect[0]` 2 `SCHOOL_DAMAGE`, `CasterAuraState` 0) is the one confirmed working so
+far, reused by the Sacred Defense (705306) entry.
 
 ### Cooldown-delta trigger entries
 
@@ -1475,6 +1497,38 @@ gating condition should never fire) **and** the with-phase's `after >= full_dura
 (a reading that stays merely decayed, rather than refreshed, is always an alert); `alert` otherwise. There is no
 tolerance-margin scale here because the claim itself is binary (refreshed to near-full, or not), not a ratio or
 a delta of a known magnitude.
+
+### Amount-delta scenarios (`behaviour_amount_delta`, `kind: "amount_delta"`)
+
+Some prose passives reduce a running debt aura's own stored amount by a percentage the moment a *different*
+spell is cast ("Using a Libram now removes 70% of the delayed damage from Oathkeeper"): a condition
+`metric_delta_scenario` cannot express, since its `before_expected`/`expected` are fixed constants read once at
+generation time, not a fraction of whatever amount a fresh debt-establishing hit happens to produce, and
+`duration_scenario` forces a melee crit to read a *duration* decrease, not an *amount* decrease around a cast of
+an unrelated spell. `amount_delta_scenario` runs two phases, each: `set_aura`s `debt_aura` (`stacks: 1`), has a
+`striker` creature (reusing `behaviours.py`'s `STRIKER` fixture, `spell_hit_bonus: 100` so the breaker cannot
+miss) `cast` `breaker_spell` directly at the caster, asserts the resulting `target_aura`'s `aura_amount` effect 0
+is nonzero (the same `DEBT_ASSERT_TIMEOUT_MS` pattern `duration_scenario` already uses), measures `aura_amount`
+("before"), casts `trigger_spell` (self-targeted) and measures `aura_amount` again ("after") — once *without*
+the passive learned (the reduction call is gated on it and must leave the amount unchanged — the absent-effect
+case this check exists to catch) and once *with* it (must drop by exactly `fraction`, truncating integer
+division, matching the server's own `uint64` arithmetic). The wait between the cast and the "after" read is
+`AMOUNT_DELTA_CAST_WAIT_MS` (150 ms), not the usual `CAST_SETTLE_MS` (500 ms): an exploratory `coa-verify --ram`
+run of this exact scenario at `CAST_SETTLE_MS` for both the debt-settle wait and the post-cast wait measured a
+spurious reduction in the *without* phase too (293 before, 251 after, no passive known) — `target_aura` itself
+carries `EffectApplyAuraName[0]` 3 (`SPELL_AURA_PERIODIC_DAMAGE`) at `EffectAmplitude[0]` 1000 ms (read from the
+client DBC), releasing part of its own staggered amount on a 1-second cycle independent of any Libram cast, and
+`500 + 500 = 1000` ms straddled that cycle on almost every run; shrinking the post-cast wait keeps the total
+elapsed time from the debt-establishing hit to the "after" read comfortably under 1000 ms, so neither read
+straddles a natural tick.
+
+The judge (`compare.behaviour_amount_delta_verdict`) computes `percent = round(fraction * 100)` and
+`with_expected = with_before - (int(with_before) * percent) // 100` (the same truncating integer division the
+server's `ReduceDebt` performs, not a float multiply, so a server using ceiling or rounding instead of
+truncation would be caught): `ok` only when the without-phase's `after == before` exactly **and** the
+with-phase's `after == with_expected` exactly (a deterministic integer read with no combat-roll variance, so no
+tolerance band beyond `FLOAT_EPSILON`); `alert` otherwise, including a without-phase change (the absent-effect
+case) and a with-phase mismatch of any size.
 
 ### Templar entries
 

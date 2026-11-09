@@ -16,7 +16,7 @@ from procs import ATTACK
 from profile import DBC_DIR
 from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader
 from tooltip import Records
-from triggers import (BASELINE_ATTEMPTS, COOLDOWN_CHECK, COOLDOWN_DELTA_KIND, PERIODIC, TRIGGER_CHECK,
+from triggers import (BASELINE_ATTEMPTS, COOLDOWN_CHECK, COOLDOWN_DELTA_KIND, PERIODIC, TAKEN_HIT, TRIGGER_CHECK,
                       TRIGGER_TRIALS, attempt_interval, attempt_steps, checked_cooldown_entry, checked_entry,
                       cooldown_label, cooldown_trial_label, cooldown_trial_steps, cooldown_trigger_scenario, counts,
                       trigger_entries, trigger_label, trigger_measurements, trigger_plan, trigger_rule,
@@ -30,7 +30,7 @@ import run
 TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 804932, 806516, 803158, 805420, 680891,
                     803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298, 705255,
                     680397, 524765, 560096, 707364, 504107, 706385, 523712, 520534, 504561, 504807,
-                    92108, 92109, 300504, 300529, 301310, 680399, 681483, 704116, 804927, 805415, 806522}
+                    92108, 92109, 300504, 300529, 301310, 680399, 681483, 704116, 804927, 805415, 806522, 705306}
 LORESCRIBE = 804927
 LORESCRIBE_DEAD_TRIGGER = 806089
 LORESCRIBE_REDUCTION_SOURCE = 806106
@@ -65,6 +65,7 @@ DEVOTION_OF_KHAZGOROTH = 560096
 SCARLET_SECRETS = 520812
 STAFFGUARD = 705295
 CHAKRA_OF_POWER = 803158
+SACRED_DEFENSE = 705306
 CHAKRA_OF_LIGHT_R1 = 803844
 CHAKRA_OF_LIGHT_R2 = 803159
 SCARLET_TRAINING = 301065
@@ -619,6 +620,10 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                     self.assertGreater(trigger['amplitude_ms'], 0)
                     self.assertEqual(entry['trial_metric'], 'spell_cast_count')
                     continue
+                if trigger['action'] == TAKEN_HIT:
+                    self.assertEqual(entry['trial_metric'], 'spell_damage_count')
+                    self.assertGreater(trigger['striker_entry'], 0)
+                    continue
                 self.assertEqual(trigger['action'], 'cast')
                 self.assertIn(trigger['target'], ('self', 'dummy', 'ally'))
                 spell = trigger['spell']
@@ -1091,6 +1096,61 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                 run.validate(scenario)
                 self.assertNotIn('creatures', scenario)
                 self.assertEqual(expectation.model['trigger']['action'], PERIODIC)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class TakenHitTriggerTests(unittest.TestCase):
+    def entry(self):
+        return templar_trigger(SACRED_DEFENSE)
+
+    def test_attempt_interval_folds_the_strikers_own_cast_time(self):
+        entry = self.entry()
+        interval = attempt_interval(CLASS_FILE, entry)
+        self.assertGreater(interval, entry['internal_cooldown_ms'])
+
+    def test_attempt_steps_build_a_striker_cast_loop_not_a_caster_loop(self):
+        entry = self.entry()
+        plan = trigger_plan(CLASS_FILE, entry)
+        steps = attempt_steps(CLASS_FILE, entry, plan, 3, '')
+        casts = [step for step in steps if step.get('action') == 'cast']
+        self.assertEqual(len(casts), 3)
+        for cast in casts:
+            self.assertEqual(cast['actor'], 'striker')
+            self.assertEqual(cast['target'], 'caster')
+            self.assertEqual(cast['spell'], entry['trigger']['spell'])
+        self.assertFalse(any(step.get('action') in ('attack', 'stop_attack') for step in steps))
+
+    def test_counts_reads_the_strikers_spell_damage_on_the_caster(self):
+        entry = self.entry()
+        steps = counts(entry, 'trials', 'events')
+        trial_step = steps[0]
+        self.assertEqual(trial_step['actor'], 'caster')
+        self.assertEqual(trial_step['caster'], 'striker')
+        self.assertEqual(trial_step['target'], 'caster')
+        self.assertEqual(trial_step['spell'], entry['trigger']['spell'])
+
+    def test_scenario_adds_a_striker_creature_and_validates(self):
+        scenario, [expectation] = trigger_scenario(CLASS_FILE, self.entry(), 0)
+        run.validate(scenario)
+        striker = next(creature for creature in scenario['creatures'] if creature['id'] == 'striker')
+        self.assertEqual(striker['entry'], self.entry()['trigger']['striker_entry'])
+        self.assertEqual(expectation.check, TRIGGER_CHECK)
+
+    def test_striker_entry_is_required(self):
+        entry = copy.deepcopy(self.entry())
+        entry['trigger'] = dict(entry['trigger'])
+        del entry['trigger']['striker_entry']
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
+
+    def test_absent_passive_gives_zero_baseline_events(self):
+        scenario, [expectation] = trigger_scenario(CLASS_FILE, self.entry(), 0)
+        labels = expectation.model['measurements']
+        learn_index = next(index for index, step in enumerate(scenario['steps'])
+                           if step.get('action') == 'learn' and step.get('spell') == SACRED_DEFENSE)
+        baseline_events_index = next(index for index, step in enumerate(scenario['steps'])
+                                    if step.get('label') == labels['without'])
+        self.assertLess(baseline_events_index, learn_index)
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')

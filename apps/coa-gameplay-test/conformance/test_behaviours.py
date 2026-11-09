@@ -2,10 +2,11 @@ from pathlib import Path
 import sys
 import unittest
 
-from behaviours import (BEHAVIOUR_COUNT, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH,
-                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER, HealingRatioTarget,
-                        aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
-                        behaviour_scenario, duration_refresh_scenario, duration_refresh_spec, duration_scenario,
+from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_COUNT, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
+                        BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER,
+                        HealingRatioTarget, amount_delta_scenario, amount_delta_spec, aura_spread_scenario,
+                        aura_spread_spec, behaviour_entries, behaviour_entry, behaviour_scenario,
+                        duration_refresh_scenario, duration_refresh_spec, duration_scenario,
                         duration_spec, health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
                         healing_ratio_spec, leech_heal_modifier_factor, leech_ratio_scenario, leech_ratio_spec,
                         mechanic_duration_scenario, mechanic_duration_spec, metric_delta_scenario,
@@ -64,6 +65,8 @@ SACRED_RESISTANCE = 301309
 RECKONING_AT_60 = 572741
 RECKONING_ARMOR = 680870
 KEEPING_THE_OATH_PASSIVE = 92109
+HOLY_BOOKS = 706468
+LIBRAM_OF_CONSECRATION = 801441
 
 
 def scarlet_judicator_entry() -> dict:
@@ -136,6 +139,10 @@ def sacred_resistance_entry() -> dict:
 
 def keeping_the_oath_passive_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == KEEPING_THE_OATH_PASSIVE)
+
+
+def holy_books_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == HOLY_BOOKS)
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -291,7 +298,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 18)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 19)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1028,6 +1035,74 @@ class DurationRefreshScenarioTests(unittest.TestCase):
         self.assertNotEqual(equip_step['item'], CLASS_FILE['weapon']['item'])
 
 
+class AmountDeltaScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_the_expectation(self):
+        spec = amount_delta_spec(holy_books_entry())
+        scenario, expectations = amount_delta_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_AMOUNT_DELTA)
+        self.assertTrue(expectation.rule.startswith('prose: "Using a Libram now removes"'))
+        self.assertEqual(expectation.rank_id, OATHKEEPER)
+        self.assertEqual(expectation.model['fraction'], 0.70)
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, holy_books_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_AMOUNT_DELTA)
+
+    def test_without_phase_comes_before_the_learn_which_comes_before_the_with_phase(self):
+        spec = amount_delta_spec(holy_books_entry())
+        scenario, _ = amount_delta_scenario(CLASS_FILE, spec)
+        learn_index = next(index for index, step in enumerate(scenario['steps'])
+                           if step.get('action') == 'learn' and step.get('spell') == HOLY_BOOKS)
+        trigger_casts = [index for index, step in enumerate(scenario['steps'])
+                        if step.get('action') == 'cast' and step.get('spell') == LIBRAM_OF_CONSECRATION
+                        and step.get('actor') == 'caster']
+        self.assertEqual(len(trigger_casts), 2)
+        self.assertLess(trigger_casts[0], learn_index)
+        self.assertLess(learn_index, trigger_casts[1])
+
+    def test_each_phase_re_establishes_its_own_debt_from_a_fresh_striker_hit(self):
+        spec = amount_delta_spec(holy_books_entry())
+        scenario, _ = amount_delta_scenario(CLASS_FILE, spec)
+        breaker_casts = [index for index, step in enumerate(scenario['steps'])
+                        if step.get('action') == 'cast' and step.get('spell') == SMITE
+                        and step.get('actor') == 'striker']
+        self.assertEqual(len(breaker_casts), 2)
+        set_aura_steps = [step for step in scenario['steps']
+                         if step.get('action') == 'set_aura' and step.get('spell') == KEEPING_THE_OATH]
+        self.assertEqual(len(set_aura_steps), 2)
+
+    def test_measures_aura_amount_of_the_target_aura_effect_0_four_times(self):
+        spec = amount_delta_spec(holy_books_entry())
+        scenario, _ = amount_delta_scenario(CLASS_FILE, spec)
+        measure_steps = [step for step in scenario['steps']
+                         if step.get('metric') == 'aura_amount' and step.get('spell') == OATHKEEPER
+                         and 'max' in step]
+        self.assertEqual(len(measure_steps), 4)
+        for step in measure_steps:
+            self.assertEqual(step['actor'], 'caster')
+            self.assertEqual(step['effect'], 0)
+
+    def test_asserts_a_nonzero_debt_before_measuring_each_before_label(self):
+        spec = amount_delta_spec(holy_books_entry())
+        scenario, _ = amount_delta_scenario(CLASS_FILE, spec)
+        debt_asserts = [step for step in scenario['steps']
+                       if step.get('action') == 'assert' and step.get('metric') == 'aura_amount'
+                       and step.get('spell') == OATHKEEPER and step.get('min') == 1]
+        self.assertEqual(len(debt_asserts), 2)
+        for debt_assert in debt_asserts:
+            self.assertNotIn('max', debt_assert)
+
+    def test_striker_is_forced_to_hit(self):
+        spec = amount_delta_spec(holy_books_entry())
+        scenario, _ = amount_delta_scenario(CLASS_FILE, spec)
+        striker = next(creature for creature in scenario['creatures'] if creature['id'] == 'striker')
+        self.assertEqual(striker.get('spell_hit_bonus'), 100)
+
+
 class FakeRun:
     def __init__(self, values, max_step_ms=None):
         self.values = values
@@ -1441,6 +1516,51 @@ class JudgeDurationRefreshTests(unittest.TestCase):
     def test_missing_measurement_leaves_alert_with_explanation(self):
         expectation = self.expectation()
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({'wb': 20000.0, 'wa': 19500.0, 'tb': 20000.0}),
+                                  expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('ta', verdict.explanation)
+
+    def test_no_run_reports_no_scenario(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), None, expectation)
+        self.assertIn('no scenario', verdict.explanation)
+
+
+class JudgeAmountDeltaTests(unittest.TestCase):
+    def expectation(self):
+        model = {'kind': 'amount_delta', 'without_before_label': 'wb', 'without_after_label': 'wa',
+                 'with_before_label': 'tb', 'with_after_label': 'ta', 'fraction': 0.70,
+                 'quote': 'Using a Libram now removes'}
+        return Expectation('label', BEHAVIOUR_AMOUNT_DELTA, HOLY_BOOKS, OATHKEEPER, None, '0.7',
+                           'prose: "Using a Libram now removes" (706468)', model)
+
+    def test_a_truncating_70_percent_reduction_is_ok(self):
+        expectation = self.expectation()
+        values = {'wb': 100.0, 'wa': 100.0, 'tb': 101.0, 'ta': 101.0 - (101 * 70) // 100}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_without_the_passive_any_change_is_alert(self):
+        expectation = self.expectation()
+        values = {'wb': 100.0, 'wa': 90.0, 'tb': 100.0, 'ta': 30.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_absent_effect_leaving_the_amount_unchanged_with_the_passive_known_is_alert(self):
+        expectation = self.expectation()
+        values = {'wb': 100.0, 'wa': 100.0, 'tb': 100.0, 'ta': 100.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_rounding_instead_of_truncating_is_alert(self):
+        expectation = self.expectation()
+        values = {'wb': 100.0, 'wa': 100.0, 'tb': 101.0, 'ta': 101.0 - round(101 * 0.70)}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'wb': 100.0, 'wa': 100.0, 'tb': 101.0}),
                                   expectation)
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('ta', verdict.explanation)

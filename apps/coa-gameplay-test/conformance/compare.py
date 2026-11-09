@@ -9,8 +9,9 @@ import re
 from statistics import fmean, pstdev
 from typing import Callable, Mapping, Protocol
 
-from behaviours import (BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
-                        BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
+from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_DURATION,
+                        BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_METRIC_DELTA,
+                        BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
 from hits import (HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS, WEAPON_PERCENT_DAMAGE, Z_99,
                   HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
@@ -1796,6 +1797,28 @@ def behaviour_duration_refresh_verdict(base: Verdict, run: Run, model: dict) -> 
                                f'a without-phase increase or a with-phase shortfall is always an alert')
 
 
+def behaviour_amount_delta_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    labels = ('without_before_label', 'without_after_label', 'with_before_label', 'with_after_label')
+    values = {label: run.values.get(model[label]) for label in labels}
+    missing = next((model[label] for label, value in values.items() if value is None), None)
+    if missing:
+        return replace(base, explanation=missing_measurement(run, missing))
+    without_before, without_after = values['without_before_label'], values['without_after_label']
+    with_before, with_after = values['with_before_label'], values['with_after_label']
+    percent = round(float(model['fraction']) * 100)
+    with_expected = with_before - (int(with_before) * percent) // 100
+    without_ok = abs(without_after - without_before) <= FLOAT_EPSILON
+    with_ok = abs(with_after - with_expected) <= FLOAT_EPSILON
+    status = 'ok' if without_ok and with_ok else 'alert'
+    return replace(base, status=status, measured=with_after, expected=with_expected, low=with_expected,
+                   high=with_expected,
+                   explanation=f'without the passive: {without_before:g} before the cast, {without_after:g} after '
+                               f'(must be unchanged); with the passive learned: {with_before:g} before, '
+                               f'{with_after:g} after (expected {with_expected:g}, a truncating {percent}% '
+                               f'reduction of the before amount); a without-phase change or a with-phase mismatch '
+                               f'is always an alert')
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
@@ -1816,6 +1839,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_duration_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_DURATION_RATIO:
         return behaviour_duration_ratio_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_AMOUNT_DELTA:
+        return behaviour_amount_delta_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 

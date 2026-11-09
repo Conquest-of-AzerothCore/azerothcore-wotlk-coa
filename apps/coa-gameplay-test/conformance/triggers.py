@@ -2,6 +2,7 @@ from dataclasses import dataclass
 import math
 from typing import Sequence
 
+from behaviours import STRIKER, STRIKER_DISTANCE, STRIKER_HEALTH
 from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, UNMODELLED, Unmodelled, cast_steps, creature_fixture,
                   records_of, scenario_shell, timed)
 from procs import ATTACK, CAST, ENTRY_STATUSES, PART_BUDGET_MS, cast_interval, swing_interval, tick_spacing
@@ -19,13 +20,16 @@ BASELINE_ATTEMPTS = 20
 EVENT_TOLERANCE = 1
 SELF = 'self'
 PERIODIC = 'periodic'
+TAKEN_HIT = 'taken_hit'
+TAKEN_HIT_MIN_INTERVAL_MS = 500
 TRIGGER_TARGETS = frozenset({SELF, TARGET, ALLY})
 OBSERVE_METRICS = frozenset({'spell_cast_count', 'spell_energize_count', 'aura_apply_count'})
 OBSERVE_ACTORS = {CASTER: CASTER, 'target': TARGET}
 MELEE_COUNTS = frozenset({'melee_attack_count', 'melee_damage_count'})
 PERIODIC_TRIAL_METRICS = frozenset({'spell_cast_count'})
+TAKEN_HIT_TRIAL_METRICS = frozenset({'spell_damage_count'})
 TRIAL_METRICS = {CAST: frozenset({'spell_cast_count', 'spell_damage_count'}), ATTACK: MELEE_COUNTS,
-                PERIODIC: PERIODIC_TRIAL_METRICS}
+                PERIODIC: PERIODIC_TRIAL_METRICS, TAKEN_HIT: TAKEN_HIT_TRIAL_METRICS}
 FORCE_CRIT_RATINGS = {'melee': 'melee_crit_rating', 'spell': 'spell_crit_rating'}
 TRIGGER_RULE = (f'|events - trials x per_trigger| <= {EVENT_TOLERANCE} over at least {TRIGGER_TRIALS} trials, '
                 f'no event in the {BASELINE_ATTEMPTS} baseline attempts without the passive')
@@ -80,6 +84,8 @@ def checked_entry(entry: dict) -> dict:
                          f'{trigger["action"]}')
     if trigger['action'] == CAST and trigger.get('target') not in TRIGGER_TARGETS:
         raise ValueError(f'Trigger {aura} casts at {trigger.get("target")!r}, not one of {sorted(TRIGGER_TARGETS)}')
+    if trigger['action'] == TAKEN_HIT and not trigger.get('striker_entry', 0) > 0:
+        raise ValueError(f'Trigger {aura} taken_hit action needs a positive striker_entry')
     if trigger['action'] == PERIODIC and trigger.get('amplitude_ms', 0) <= 0:
         raise ValueError(f'Trigger {aura} periodic action needs a positive amplitude_ms')
     if entry.get('periodic_initial_tick') and trigger['action'] != PERIODIC:
@@ -118,6 +124,8 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
     cooldown = entry.get('internal_cooldown_ms', 0)
     if trigger['action'] == ATTACK:
         return swing_interval(class_file, cooldown)
+    if trigger['action'] == TAKEN_HIT:
+        return max(cast_interval(class_file, trigger['spell'], cooldown), TAKEN_HIT_MIN_INTERVAL_MS)
     facts = facts_of(records_of(class_file), trigger['spell'])
     if facts.passive:
         raise Unmodelled(f'trigger spell {trigger["spell"]} is passive')
@@ -143,17 +151,22 @@ def trigger_plan(class_file: dict, entry: dict) -> TriggerPlan:
 
 
 def trial_spell(entry: dict) -> int:
-    return entry['trigger']['spell'] if entry['trigger']['action'] == CAST else 0
+    return entry['trigger']['spell'] if entry['trigger']['action'] in (CAST, TAKEN_HIT) else 0
 
 
 def observe_actor(entry: dict) -> str:
     return OBSERVE_ACTORS[entry.get('observe_actor', CASTER)]
 
 
-def count_step(label: str, metric: str, spell: int, actor: str = CASTER) -> dict:
+def count_step(label: str, metric: str, spell: int, actor: str = CASTER, target: str = TARGET,
+              caster: str | None = None) -> dict:
     if metric in MELEE_COUNTS:
         return measurement(label, CASTER, metric, hand=MAIN_HAND)
-    fields = {'target': TARGET} if metric == 'spell_damage_count' else {}
+    fields = {}
+    if metric == 'spell_damage_count':
+        fields['target'] = target
+        if caster is not None:
+            fields['caster'] = caster
     return measurement(label, actor, metric, spell=spell, **fields)
 
 
@@ -179,6 +192,11 @@ def attempt_steps(class_file: dict, entry: dict, plan: TriggerPlan, attempts: in
         steps = [{'action': 'attack', 'actor': CASTER, 'target': TARGET},
                  {'action': 'wait', 'label': f'{phase}swings', 'ms': attempts * plan.attempt_ms},
                  {'action': 'stop_attack', 'actor': CASTER}]
+    elif trigger['action'] == TAKEN_HIT:
+        steps = []
+        for _ in range(attempts):
+            steps.append({'action': 'cast', 'actor': STRIKER, 'spell': trigger['spell'], 'target': CASTER})
+            steps.append({'action': 'wait', 'ms': plan.attempt_ms})
     else:
         facts = facts_of(records_of(class_file), trigger['spell'])
         cast_target = trigger['target'] if trigger['target'] in (TARGET, ALLY) else None
@@ -188,8 +206,13 @@ def attempt_steps(class_file: dict, entry: dict, plan: TriggerPlan, attempts: in
 
 
 def counts(entry: dict, trials_label: str, events_label: str) -> list[dict]:
-    steps = [] if entry['trigger']['action'] == PERIODIC \
-        else [count_step(trials_label, entry['trial_metric'], trial_spell(entry))]
+    action = entry['trigger']['action']
+    if action == PERIODIC:
+        steps = []
+    elif action == TAKEN_HIT:
+        steps = [count_step(trials_label, entry['trial_metric'], trial_spell(entry), target=CASTER, caster=STRIKER)]
+    else:
+        steps = [count_step(trials_label, entry['trial_metric'], trial_spell(entry))]
     steps.append(count_step(events_label, entry['observe_metric'], entry['observe_spell'], observe_actor(entry)))
     return steps
 
@@ -253,7 +276,11 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
     force_crit = entry.get('force_crit')
     if force_crit:
         scenario['players'][0][FORCE_CRIT_RATINGS[force_crit]] = FORCED_CRIT_RATING
-    if trigger['action'] == ATTACK or trigger.get('target') == TARGET:
+    if trigger['action'] == TAKEN_HIT:
+        scenario['creatures'] = [{'id': STRIKER, 'owner': CASTER, 'entry': trigger['striker_entry'],
+                                  'level': class_file['level'], 'health': STRIKER_HEALTH,
+                                  'distance': STRIKER_DISTANCE, 'reaction': 0, 'stationary': True}]
+    elif trigger['action'] == ATTACK or trigger.get('target') == TARGET:
         scenario['creatures'] = [creature_fixture(class_file)]
     if trigger.get('target') == ALLY:
         scenario['players'].append({**player_fixture(class_file), 'id': ALLY})

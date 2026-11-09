@@ -16,9 +16,11 @@ BEHAVIOUR_DURATION_RATIO = 'behaviour_duration_ratio'
 BEHAVIOUR_TRIGGER = 'behaviour_trigger'
 BEHAVIOUR_METRIC_DELTA = 'behaviour_metric_delta'
 BEHAVIOUR_DURATION_REFRESH = 'behaviour_duration_refresh'
+BEHAVIOUR_AMOUNT_DELTA = 'behaviour_amount_delta'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
-                    BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH)
-KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh')
+                    BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA)
+KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
+        'amount_delta')
 PROSE = 'prose: '
 BEFORE = 'before'
 AFTER = 'after'
@@ -615,6 +617,7 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
 
 
 DEBT_ASSERT_TIMEOUT_MS = 2000
+AMOUNT_DELTA_CAST_WAIT_MS = 150
 
 
 @dataclass(frozen=True)
@@ -713,6 +716,92 @@ def duration_spec(entry: dict) -> DurationSpec:
     return DurationSpec(entry['spell'], entry['name'], entry['quote'], entry['expected_ms'], entry['target_aura'],
                         entry['debt_aura'], entry['breaker_spell'], entry['striker_entry'],
                         entry['mechanism_file'], entry['override_file'], entry['reduce_function'])
+
+
+@dataclass(frozen=True)
+class AmountDeltaSpec:
+    spell: int
+    name: str
+    quote: str
+    fraction: float
+    target_aura: int
+    debt_aura: int
+    breaker_spell: int
+    striker_entry: int
+    trigger_spell: int
+    mechanism_file: str
+    reduce_function: str
+
+
+def amount_delta_label(spec: AmountDeltaSpec, phase: str, moment: str) -> str:
+    return f'{spec.target_aura} amount {phase} {moment}'
+
+
+def amount_delta_phase_steps(spec: AmountDeltaSpec, facts_trigger, phase: str) -> tuple[list[dict], str, str]:
+    before_label = amount_delta_label(spec, phase, BEFORE)
+    after_label = amount_delta_label(spec, phase, AFTER)
+    steps = [
+        {'action': 'set_aura', 'actor': CASTER, 'spell': spec.debt_aura, 'stacks': 1},
+        {'action': 'cast', 'actor': STRIKER, 'spell': spec.breaker_spell, 'target': CASTER},
+        {'action': 'wait', 'label': f'{spec.spell} {phase} debt settle', 'ms': CAST_SETTLE_MS},
+        {'action': 'assert', 'label': f'{spec.spell} {phase} SETUP: the debt is established', 'actor': CASTER,
+         'metric': 'aura_amount', 'spell': spec.target_aura, 'effect': 0, 'min': 1,
+         'within_ms': DEBT_ASSERT_TIMEOUT_MS},
+        measurement(before_label, CASTER, 'aura_amount', spell=spec.target_aura, effect=0),
+    ]
+    if facts_trigger.mana_cost > 0 and not facts_trigger.mana_cost_percentage and not facts_trigger.mana_cost_per_level:
+        steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts_trigger.power_type,
+                     'value': facts_trigger.mana_cost})
+    steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
+    steps += required_aura_steps(facts_trigger)
+    steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': CASTER})
+    steps.append({'action': 'wait', 'label': f'{spec.spell} {phase} cast settle', 'ms': AMOUNT_DELTA_CAST_WAIT_MS})
+    steps.append(measurement(after_label, CASTER, 'aura_amount', spell=spec.target_aura, effect=0))
+    return steps, before_label, after_label
+
+
+def amount_delta_scenario(class_file: dict, spec: AmountDeltaSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'amount_delta', spec.quote, spec.fraction)
+    class_file = armed_for(class_file, records, spec.trigger_spell)
+    facts_trigger = facts_of(records, spec.trigger_spell)
+    striker = {'id': STRIKER, 'owner': CASTER, 'entry': spec.striker_entry, 'level': class_file['level'],
+              'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 1, 'spell_hit_bonus': 100}
+    without_steps, without_before, without_after = amount_delta_phase_steps(spec, facts_trigger, 'without')
+    with_steps, with_before, with_after = amount_delta_phase_steps(spec, facts_trigger, 'with')
+    steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] \
+        + without_steps + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + with_steps
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour amount delta',
+        'contract': f'A striker (creature entry {spec.striker_entry}, forced to hit) casts {spec.breaker_spell} '
+                    f'directly at the caster, who carries {spec.debt_aura}, to apply a nonzero debt to '
+                    f'{spec.target_aura}; {spec.target_aura}\'s aura_amount effect 0 is read before and after a '
+                    f'cast of {spec.trigger_spell}, once before {spec.name} is learned (the '
+                    f'`{spec.mechanism_file}` `{spec.reduce_function}` call is gated on the passive and must leave '
+                    f'the amount unchanged) and once after (must drop by {spec.fraction:.0%}, truncating integer '
+                    f'division), each phase re-establishing its own debt from a fresh striker hit rather than '
+                    f'reusing one amount across phases. The wait after the cast is kept at '
+                    f'{AMOUNT_DELTA_CAST_WAIT_MS} ms, well under {spec.target_aura}\'s own 1000 ms periodic tick '
+                    f'(EffectAmplitude[0] of {spec.target_aura}, which releases part of the staggered debt on its '
+                    f'own schedule regardless of the Libram), so neither read straddles a natural tick and the '
+                    f'measured delta is attributable only to the cast.',
+        'players': [player_fixture(class_file)],
+        'creatures': [striker],
+        'steps': steps}
+    label = f'{spec.spell} behaviour_amount_delta'
+    model = {'kind': 'amount_delta', 'without_before_label': without_before, 'without_after_label': without_after,
+             'with_before_label': with_before, 'with_after_label': with_after, 'fraction': spec.fraction,
+             'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_AMOUNT_DELTA, spec.spell, spec.target_aura, None,
+                              str(spec.fraction), prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def amount_delta_spec(entry: dict) -> AmountDeltaSpec:
+    return AmountDeltaSpec(entry['spell'], entry['name'], entry['quote'], entry['fraction'], entry['target_aura'],
+                           entry['debt_aura'], entry['breaker_spell'], entry['striker_entry'],
+                           entry['trigger_spell'], entry['mechanism_file'], entry['reduce_function'])
 
 
 MECHANIC_DR_RESET_MS = 15000
@@ -889,6 +978,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return mechanic_duration_scenario(class_file, mechanic_duration_spec(entry))
     if entry['kind'] == 'duration_refresh':
         return duration_refresh_scenario(class_file, duration_refresh_spec(entry))
+    if entry['kind'] == 'amount_delta':
+        return amount_delta_scenario(class_file, amount_delta_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 
