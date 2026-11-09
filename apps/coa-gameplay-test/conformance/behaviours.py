@@ -872,9 +872,12 @@ def mechanic_duration_scenario(class_file: dict, spec: MechanicDurationSpec) -> 
                     f'both reads since each is taken after the same {CAST_MARGIN_MS} ms settle wait, with the '
                     f'judge\'s own margin sized on that settle window to absorb the ms-level jitter of exactly '
                     f'when each cast\'s effect actually lands), with a {gap_ms} ms gap between the two casts so '
-                    f'the {spec.vehicle_spell} aura has fully expired and its {MECHANIC_DR_RESET_MS} ms '
-                    f'diminishing-returns window (DIMINISHING_DISARM/stock DRTYPE_PLAYER group, SpellMgr.cpp) has '
-                    f'reset before the second cast, so neither reading is itself diminished.',
+                    f'the {spec.vehicle_spell} aura has fully expired and a {MECHANIC_DR_RESET_MS} ms margin has '
+                    f'passed, a conservative allowance against this vehicle possibly carrying its own stock '
+                    f'diminishing-returns reduction against a non-player caster (SpellMgr.cpp), which is not '
+                    f'assumed to apply (each vehicle\'s actual diminishing-returns group must be checked on its '
+                    f'own, not inferred from its mechanic alone) but costs nothing if it does not, so neither '
+                    f'reading risks being itself diminished.',
         'players': [player_fixture(class_file)],
         'creatures': [striker],
         'steps': base_steps(class_file) + phase(before_label) +

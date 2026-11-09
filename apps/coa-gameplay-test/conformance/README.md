@@ -1593,10 +1593,15 @@ the passive's `EffectMiscValue` (e.g. `MECHANIC_DISARM`, `MECHANIC_SNARE`) — d
 the passive is learned and once after, reading `aura_duration_ms` of `vehicle_spell`'s own applied aura
 `CAST_MARGIN_MS` (500 ms) after each cast. The two casts are separated by `vehicle_spell`'s own DBC duration
 plus 15000 ms plus a margin (`records.duration_ms(vehicle_spell) + MECHANIC_DR_RESET_MS + MECHANIC_GAP_MARGIN_MS`
-in `behaviours.py`): most of these mechanics (disarm, snare without the disoriented exception, ...) carry their
-own stock diminishing-returns group against a player target (`SpellMgr.cpp`'s `GetDiminishingReturnsGroupType`
-defaulting non-exempt groups to `DRTYPE_PLAYER`), so a second application inside that window would read a
-diminished, not a full or passive-reduced, duration on either side of the comparison.
+in `behaviours.py`): this is a conservative allowance against a vehicle carrying its own stock
+diminishing-returns reduction against a non-player caster (`SpellMgr.cpp`'s `GetDiminishingReturnsGroupForSpell`/
+`GetDiminishingReturnsGroupType`), not a guarantee that it does. The generic mechanic-based match in that switch
+defaults non-exempt groups to `DRTYPE_PLAYER`, but a spell can instead be matched first by its own
+family-specific branch into a different group — one that can resolve to `DRTYPE_NONE` for a non-player caster,
+which `Unit::ApplyDiminishingToDuration` then never reduces by percentage — so each vehicle's actual
+diminishing-returns path has to be checked on its own rather than inferred from its mechanic alone. The gap
+stays uniform across vehicles regardless, since an unneeded wait only slows the scenario and never produces a
+wrong reading.
 
 The judge (`compare.behaviour_duration_ratio_verdict`) computes `ratio = after / before` and
 `expected_delta = before * (expected_ratio - 1.0)`: `unmeasured` when `before <= 0` (a ratio needs a positive
