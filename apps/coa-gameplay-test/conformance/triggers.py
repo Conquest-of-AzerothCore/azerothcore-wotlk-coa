@@ -10,6 +10,8 @@ from values import (ALLY, CHARGE_OFFSET_YD, FORCED_CRIT_RATING, TARGET, Expectat
                     closes_distance, facts_of, fixture_health_step)
 
 TRIGGER_CHECK = 'trigger_count'
+COOLDOWN_DELTA_KIND = 'cooldown_delta'
+COOLDOWN_CHECK = 'trigger_cooldown_delta'
 MISSED_TRIGGER_RATE = 0.025
 FALSE_OK_RISK = 0.01
 TRIGGER_TRIALS = math.ceil(math.log(FALSE_OK_RISK) / math.log(1 - MISSED_TRIGGER_RATE))
@@ -45,10 +47,31 @@ def trigger_measurements(aura: int) -> dict[str, str]:
             'aura': f'{aura} trigger aura', 'trials': f'{aura} trigger trials', 'events': f'{aura} trigger events'}
 
 
+def checked_cooldown_entry(entry: dict) -> dict:
+    aura = entry['aura']
+    trigger = entry['trigger']
+    if trigger['action'] != CAST:
+        raise ValueError(f'Cooldown-delta trigger {aura} must cast, not {trigger["action"]!r}')
+    if trigger.get('target') not in TRIGGER_TARGETS:
+        raise ValueError(f'Cooldown-delta trigger {aura} casts at {trigger.get("target")!r}, not one of '
+                         f'{sorted(TRIGGER_TARGETS)}')
+    if entry.get('observe_metric') != 'cooldown_ms':
+        raise ValueError(f'Cooldown-delta trigger {aura} observe_metric must be cooldown_ms, not '
+                         f'{entry.get("observe_metric")!r}')
+    if not entry.get('expected_delta_ms', 0) > 0:
+        raise ValueError(f'Cooldown-delta trigger {aura} needs a positive expected_delta_ms')
+    if entry.get('force_crit') is not None and entry['force_crit'] not in FORCE_CRIT_RATINGS:
+        raise ValueError(f'Trigger {aura} has an unknown force_crit {entry["force_crit"]!r}, not one of '
+                         f'{sorted(FORCE_CRIT_RATINGS)}')
+    return entry
+
+
 def checked_entry(entry: dict) -> dict:
     aura = entry['aura']
     if entry.get('status'):
         raise ValueError(f'Trigger {aura} is {entry["status"]}: {entry.get("reason", "")}')
+    if entry.get('kind') == COOLDOWN_DELTA_KIND:
+        return checked_cooldown_entry(entry)
     trigger = entry['trigger']
     if trigger['action'] not in TRIAL_METRICS:
         raise ValueError(f'Unknown trigger action {trigger["action"]!r} of trigger {aura}')
@@ -98,8 +121,11 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
     facts = facts_of(records_of(class_file), trigger['spell'])
     if facts.passive:
         raise Unmodelled(f'trigger spell {trigger["spell"]} is passive')
-    return max(cast_interval(class_file, trigger['spell'], cooldown),
-               tick_spacing(class_file, facts, trigger['spell']))
+    interval = max(cast_interval(class_file, trigger['spell'], cooldown),
+                   tick_spacing(class_file, facts, trigger['spell']))
+    if entry.get('kind') == COOLDOWN_DELTA_KIND:
+        interval += cast_interval(class_file, entry['observe_spell'], 0)
+    return interval
 
 
 def trigger_plan(class_file: dict, entry: dict) -> TriggerPlan:
@@ -245,6 +271,87 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
              'periodic_initial_tick': entry.get('periodic_initial_tick', False), 'measurements': labels}
     expectation = Expectation(trigger_label(aura), TRIGGER_CHECK, aura, aura, None, entry['trigger_text'],
                               trigger_rule(entry), model)
+    baseline_ms = baseline * plan.attempt_ms + DRAIN_MS if baseline else 0
+    return timed(scenario, SETTLE_MS + baseline_ms + attempts * plan.attempt_ms + DRAIN_MS), [expectation]
+
+
+def cooldown_label(aura: int) -> str:
+    return f'{aura} trigger_cooldown_delta'
+
+
+def cooldown_trial_label(aura: int, phase: str, index: int, moment: str) -> str:
+    return f'{aura} trigger cooldown {phase} {index} {moment}'
+
+
+def cooldown_measurement_labels(aura: int) -> dict[str, str]:
+    return {'aura': f'{aura} trigger cooldown aura'}
+
+
+def cooldown_trial_steps(class_file: dict, entry: dict, count: int, phase: str) -> list[dict]:
+    if count <= 0:
+        return []
+    aura, trigger = entry['aura'], entry['trigger']
+    observe_facts = facts_of(records_of(class_file), entry['observe_spell'])
+    trigger_facts = facts_of(records_of(class_file), trigger['spell'])
+    observe_interval = cast_interval(class_file, entry['observe_spell'], 0)
+    trigger_interval = cast_interval(class_file, trigger['spell'], entry.get('internal_cooldown_ms', 0))
+    trigger_target = trigger['target'] if trigger['target'] in (TARGET, ALLY) else None
+    steps = []
+    for index in range(count):
+        steps += cast_steps(observe_facts, entry['observe_spell'], None, 0, 1)
+        steps.append(measurement(cooldown_trial_label(aura, phase, index, 'before'), CASTER, 'cooldown_ms',
+                                 spell=entry['observe_spell']))
+        steps += cast_steps(trigger_facts, trigger['spell'], trigger_target, 0, 1)
+        steps.append(measurement(cooldown_trial_label(aura, phase, index, 'after'), CASTER, 'cooldown_ms',
+                                 spell=entry['observe_spell']))
+        steps.append({'action': 'wait', 'label': f'{phase}spacing', 'ms': observe_interval + trigger_interval})
+    return steps
+
+
+def cooldown_trigger_rule(entry: dict) -> str:
+    return (f'baseline delta 0 ms over {BASELINE_ATTEMPTS} attempts without the passive; measured delta of '
+            f'{entry["observe_metric"]} of {entry["observe_spell"]} between a cast of {entry["observe_spell"]} and '
+            f'a cast of {entry["trigger"]["spell"]} matches {entry["expected_delta_ms"]:g} ms within '
+            f'max(1, 0.5% of expected), over at least {TRIGGER_TRIALS} trials ("{entry["per_trigger_text"]}")')
+
+
+def cooldown_trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict, list[Expectation]]:
+    class_file = armed_for(class_file, records_of(class_file), entry['trigger']['spell'])
+    class_file = armed_for(class_file, records_of(class_file), entry['observe_spell'])
+    plan = trigger_plan(class_file, entry)
+    if not 0 <= part < len(plan.part_attempts):
+        raise ValueError(f'Trigger {entry["aura"]} has parts 0 to {len(plan.part_attempts) - 1}, not {part}')
+    aura, trigger = entry['aura'], entry['trigger']
+    attempts = plan.part_attempts[part]
+    baseline = BASELINE_ATTEMPTS if part == 0 else 0
+    labels = cooldown_measurement_labels(aura)
+    steps = [{'action': 'learn', 'actor': CASTER, 'spell': trigger['spell']},
+             {'action': 'learn', 'actor': CASTER, 'spell': entry['observe_spell']}]
+    if trigger.get('target') == ALLY:
+        steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
+    if baseline:
+        steps += cooldown_trial_steps(class_file, entry, baseline, 'baseline')
+        steps.append({'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS})
+    steps.append({'action': 'learn', 'actor': CASTER, 'spell': aura})
+    steps += cooldown_trial_steps(class_file, entry, attempts, 'measured')
+    steps.append({'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS})
+    steps.append(measurement(labels['aura'], CASTER, 'aura', spell=aura))
+    parts = len(plan.part_attempts)
+    name = f'Conformance trigger {class_file["name"]} {entry["name"]} {aura} part {part + 1} of {parts}'
+    contract = ('Cooldown delta of an always-on passive: no change before the learn, a fixed cooldown reduction per '
+               'trigger after it, summed over its parts, against its tooltip.')
+    scenario = scenario_shell(class_file, name, contract, steps)
+    if trigger['action'] == ATTACK or trigger.get('target') == TARGET:
+        scenario['creatures'] = [creature_fixture(class_file)]
+    if trigger.get('target') == ALLY:
+        scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
+    model = {'part': part, 'parts': parts, 'scheduled_attempts': plan.scheduled, 'part_attempts': attempts,
+            'baseline_attempts': baseline, 'attempt_ms': plan.attempt_ms, 'minimum_trials': TRIGGER_TRIALS,
+            'trigger': dict(trigger), 'observe_spell': entry['observe_spell'],
+            'observe_metric': entry['observe_metric'], 'expected_delta_ms': entry['expected_delta_ms'],
+            'measurements': labels}
+    expectation = Expectation(cooldown_label(aura), COOLDOWN_CHECK, aura, aura, None, entry['trigger_text'],
+                              cooldown_trigger_rule(entry), model)
     baseline_ms = baseline * plan.attempt_ms + DRAIN_MS if baseline else 0
     return timed(scenario, SETTLE_MS + baseline_ms + attempts * plan.attempt_ms + DRAIN_MS), [expectation]
 

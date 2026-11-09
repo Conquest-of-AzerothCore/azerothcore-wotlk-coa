@@ -12,12 +12,15 @@ import unittest
 from compare import STATUSES, compare
 from hits import MAX_SCENARIO_MS
 from passives import cleaned_tooltip
+from procs import ATTACK
 from profile import DBC_DIR
 from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader
 from tooltip import Records
-from triggers import (BASELINE_ATTEMPTS, PERIODIC, TRIGGER_CHECK, TRIGGER_TRIALS, attempt_interval, attempt_steps,
-                      checked_entry, counts, trigger_entries, trigger_label, trigger_measurements, trigger_plan,
-                      trigger_rule, trigger_scenario, trigger_status_expectation)
+from triggers import (BASELINE_ATTEMPTS, COOLDOWN_CHECK, COOLDOWN_DELTA_KIND, PERIODIC, TRIGGER_CHECK,
+                      TRIGGER_TRIALS, attempt_interval, attempt_steps, checked_cooldown_entry, checked_entry,
+                      cooldown_label, cooldown_trial_label, cooldown_trial_steps, cooldown_trigger_scenario, counts,
+                      trigger_entries, trigger_label, trigger_measurements, trigger_plan, trigger_rule,
+                      trigger_scenario, trigger_status_expectation)
 from values import ALLY, FORCED_CRIT_RATING, Expectation, dataset
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -27,7 +30,15 @@ import run
 TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 804932, 806516, 803158, 805420, 680891,
                     803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298, 705255,
                     680397, 524765, 560096, 707364, 504107, 706385, 523712, 520534, 504561, 504807,
-                    92108, 92109, 300504, 300529, 301310, 680399, 681483, 704116}
+                    92108, 92109, 300504, 300529, 301310, 680399, 681483, 704116, 804927, 805415, 806522}
+LORESCRIBE = 804927
+LORESCRIBE_DEAD_TRIGGER = 806089
+LORESCRIBE_REDUCTION_SOURCE = 806106
+SCARLET_CHAMPION = 805415
+SCARLET_CHAMPION_STACK = 805416
+LEGACY_OF_THE_SILVER_HAND = 806522
+LEGACY_OF_THE_SILVER_HAND_CHARGES = 806523
+RIGHTEOUS_UPHEAVAL = 572027
 GUARDIAN_OF_THE_LIGHT = 707364
 DIVINE_FURY = 504107
 UTHERS_LEGACY = 706385
@@ -90,6 +101,40 @@ LABELS = trigger_measurements(SCARLET_SECRETS)
 
 def templar_trigger(aura):
     return next(entry for entry in CLASS_FILE['triggers'] if entry['aura'] == aura)
+
+
+def lorescribe_entries():
+    entries = [entry for entry in CLASS_FILE['triggers'] if entry['aura'] == LORESCRIBE]
+    return {entry['effect']: entry for entry in entries}
+
+
+COOLDOWN_LABELS = {'aura': f'{LORESCRIBE} trigger cooldown aura'}
+COOLDOWN_KEY = 'conformance-templar-trigger-804927-1-part-1'
+
+
+def cooldown_model(part=0, parts=1, baseline=BASELINE_ATTEMPTS, attempts=SCHEDULED):
+    return {'part': part, 'parts': parts, 'scheduled_attempts': SCHEDULED, 'part_attempts': attempts,
+            'baseline_attempts': baseline, 'minimum_trials': TRIGGER_TRIALS,
+            'trigger': {'action': 'cast', 'spell': RIGHTEOUS_UPHEAVAL, 'target': 'dummy'},
+            'observe_spell': LIBRAM_OF_TENACITY, 'observe_metric': 'cooldown_ms', 'expected_delta_ms': 4000,
+            'measurements': COOLDOWN_LABELS}
+
+
+def cooldown_expectation(**model):
+    return Expectation(cooldown_label(LORESCRIBE), COOLDOWN_CHECK, LORESCRIBE, LORESCRIBE, None,
+                       'Casting Oath Breaker abilities', 'cooldown delta rule', cooldown_model(**model))
+
+
+def cooldown_steps(baseline_deltas=(), measured_deltas=(), aura=1):
+    full_cooldown = 180000.0
+    steps = []
+    for phase, deltas in (('baseline', baseline_deltas), ('measured', measured_deltas)):
+        for index, delta in enumerate(deltas):
+            steps.append(assert_step(cooldown_trial_label(LORESCRIBE, phase, index, 'before'), str(full_cooldown)))
+            steps.append(assert_step(cooldown_trial_label(LORESCRIBE, phase, index, 'after'),
+                                     str(full_cooldown - delta)))
+    steps.append(assert_step(COOLDOWN_LABELS['aura'], str(aura)))
+    return steps
 
 
 def trigger_model(per_trigger=0.5, part=0, parts=1, baseline=BASELINE_ATTEMPTS, attempts=SCHEDULED):
@@ -158,6 +203,137 @@ class TrialsTest(unittest.TestCase):
         auras = [step for step in steps if step['action'] == 'set_aura']
         self.assertEqual(len(auras), BASELINE_ATTEMPTS + SCHEDULED)
         self.assertTrue(all(step['spell'] == 681170 for step in auras))
+
+
+class CooldownDeltaEntryTest(unittest.TestCase):
+    def cooldown_entry(self):
+        return lorescribe_entries()[1]
+
+    def dead_entry(self):
+        return lorescribe_entries()[0]
+
+    def test_lorescribe_has_exactly_two_entries_for_its_two_effects(self):
+        entries = lorescribe_entries()
+        self.assertEqual(set(entries), {0, 1})
+        self.assertEqual(entries[0]['aura'], LORESCRIBE)
+        self.assertEqual(entries[1]['aura'], LORESCRIBE)
+
+    def test_lorescribe_e0_is_a_dead_effect_with_no_trigger_field(self):
+        entry = self.dead_entry()
+        self.assertEqual(entry['status'], 'unmodelled')
+        self.assertNotIn('trigger', entry)
+        self.assertEqual(entry['observe_spell'], LORESCRIBE_DEAD_TRIGGER)
+        self.assertEqual(entry['observe_source'], f'EffectTriggerSpell[0] of {LORESCRIBE}')
+        with self.assertRaises(ValueError):
+            trigger_plan(CLASS_FILE, entry)
+
+    def test_lorescribe_cooldown_entry_has_the_cooldown_delta_kind(self):
+        entry = self.cooldown_entry()
+        self.assertEqual(entry['kind'], COOLDOWN_DELTA_KIND)
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': RIGHTEOUS_UPHEAVAL, 'target': 'dummy'})
+        self.assertEqual(entry['observe_spell'], LIBRAM_OF_TENACITY)
+        self.assertEqual(entry['observe_metric'], 'cooldown_ms')
+        self.assertEqual(entry['expected_delta_ms'], 4000)
+
+    def test_checked_cooldown_entry_rejects_a_count_based_observe_metric(self):
+        entry = copy.deepcopy(self.cooldown_entry())
+        entry['observe_metric'] = 'spell_cast_count'
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
+
+    def test_checked_cooldown_entry_rejects_a_non_cast_trigger(self):
+        entry = copy.deepcopy(self.cooldown_entry())
+        entry['trigger'] = {'action': ATTACK}
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
+
+    def test_checked_cooldown_entry_rejects_a_non_positive_expected_delta(self):
+        entry = copy.deepcopy(self.cooldown_entry())
+        entry['expected_delta_ms'] = 0
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
+
+    def test_checked_cooldown_entry_accepts_the_lorescribe_entry(self):
+        self.assertIs(checked_cooldown_entry(self.cooldown_entry()), self.cooldown_entry())
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_cooldown_trial_steps_reset_cast_measure_cast_measure_per_attempt(self):
+        entry = self.cooldown_entry()
+        steps = cooldown_trial_steps(CLASS_FILE, entry, 2, 'measured')
+        actions = [step['action'] for step in steps]
+        self.assertEqual(actions.count('cast'), 4)
+        self.assertEqual(actions.count('reset_cooldown'), 4)
+        first_cast = actions.index('cast')
+        self.assertEqual(steps[first_cast]['spell'], LIBRAM_OF_TENACITY)
+        before_label = cooldown_trial_label(LORESCRIBE, 'measured', 0, 'before')
+        after_label = cooldown_trial_label(LORESCRIBE, 'measured', 0, 'after')
+        before_index = next(i for i, step in enumerate(steps) if step.get('label') == before_label)
+        after_index = next(i for i, step in enumerate(steps) if step.get('label') == after_label)
+        self.assertLess(before_index, after_index)
+        second_cast = actions.index('cast', first_cast + 1)
+        self.assertEqual(steps[second_cast]['spell'], RIGHTEOUS_UPHEAVAL)
+        self.assertEqual(steps[second_cast]['target'], 'dummy')
+        self.assertLess(before_index, second_cast)
+        self.assertLess(second_cast, after_index)
+
+    def test_cooldown_trial_steps_empty_for_zero_attempts(self):
+        self.assertEqual(cooldown_trial_steps(CLASS_FILE, self.cooldown_entry(), 0, 'baseline'), [])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_cooldown_trigger_scenario_schedules_the_baseline_before_the_learn(self):
+        entry = self.cooldown_entry()
+        scenario, [expectation] = cooldown_trigger_scenario(CLASS_FILE, entry, part=0)
+        run.validate(scenario)
+        steps = scenario['steps']
+        learn_aura = steps.index({'action': 'learn', 'actor': 'caster', 'spell': LORESCRIBE})
+        before_baseline = [step for step in steps[:learn_aura]
+                           if step.get('metric') == 'cooldown_ms' and step['label'].startswith(f'{LORESCRIBE} '
+                                                                                                f'trigger cooldown '
+                                                                                                f'baseline')]
+        before_measured = [step for step in steps[learn_aura:]
+                           if step.get('metric') == 'cooldown_ms' and step['label'].startswith(f'{LORESCRIBE} '
+                                                                                                f'trigger cooldown '
+                                                                                                f'measured')]
+        self.assertEqual(len(before_baseline), BASELINE_ATTEMPTS * 2)
+        self.assertEqual(len(before_measured), expectation.model['part_attempts'] * 2)
+        self.assertEqual((expectation.label, expectation.check), (cooldown_label(LORESCRIBE), COOLDOWN_CHECK))
+        self.assertLessEqual(scenario['timeout_ms'], MAX_SCENARIO_MS)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_cooldown_trigger_scenario_part_without_baseline_has_no_baseline_labels(self):
+        entry = self.cooldown_entry()
+        scenario, [expectation] = cooldown_trigger_scenario(CLASS_FILE, entry, part=1)
+        steps = scenario['steps']
+        self.assertFalse(any(step.get('label', '').startswith(f'{LORESCRIBE} trigger cooldown baseline')
+                             for step in steps))
+        self.assertEqual(expectation.model['baseline_attempts'], 0)
+
+
+class ScarletChampionLegacyEntriesTest(unittest.TestCase):
+    def test_scarlet_champion_forces_a_melee_crit_on_the_trigger_cast(self):
+        entry = templar_trigger(SCARLET_CHAMPION)
+        self.assertEqual(entry['force_crit'], 'melee')
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': ARGENT_BLADE_RANK, 'target': 'dummy'})
+        self.assertEqual(entry['trial_metric'], 'spell_damage_count')
+        self.assertEqual(entry['internal_cooldown_ms'], 1000)
+        self.assertEqual(entry['observe_spell'], SCARLET_CHAMPION_STACK)
+
+    def test_scarlet_champion_scenario_forces_melee_crit_rating(self):
+        scenario, _ = trigger_scenario(CLASS_FILE, templar_trigger(SCARLET_CHAMPION))
+        self.assertEqual(scenario['players'][0]['melee_crit_rating'], FORCED_CRIT_RATING)
+
+    def test_legacy_of_the_silver_hand_is_a_plain_cast_trigger(self):
+        entry = templar_trigger(LEGACY_OF_THE_SILVER_HAND)
+        self.assertNotIn('force_crit', entry)
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': ARGENT_BLADE_RANK, 'target': 'dummy'})
+        self.assertEqual(entry['trial_metric'], 'spell_cast_count')
+        self.assertEqual(entry['observe_spell'], LEGACY_OF_THE_SILVER_HAND_CHARGES)
+
+    def test_legacy_of_the_silver_hand_scenario_builds_and_validates(self):
+        scenario, [expectation] = trigger_scenario(CLASS_FILE, templar_trigger(LEGACY_OF_THE_SILVER_HAND))
+        run.validate(scenario)
+        self.assertEqual((expectation.label, expectation.check),
+                         (trigger_label(LEGACY_OF_THE_SILVER_HAND), TRIGGER_CHECK))
 
 
 class TriggerCompareTest(unittest.TestCase):
@@ -311,6 +487,77 @@ class TriggerCompareTest(unittest.TestCase):
         self.assertEqual(self.verdict().status, 'alert')
 
 
+class CooldownTriggerCompareTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def verdict(self):
+        manifest, results = self.workspace.manifest()
+        verdicts = [verdict for verdict in compare(manifest, results, tooltips=constant_reader())
+                    if verdict.check == COOLDOWN_CHECK]
+        self.assertEqual(len(verdicts), 1)
+        self.assertIn(verdicts[0].status, STATUSES)
+        return verdicts[0]
+
+    def test_mean_delta_within_tolerance_is_ok(self):
+        self.workspace.scenario(COOLDOWN_KEY, 'trigger', [cooldown_expectation()],
+                                steps=cooldown_steps(baseline_deltas=[0] * BASELINE_ATTEMPTS,
+                                                     measured_deltas=[4000] * SCHEDULED))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual((verdict.measured, verdict.expected), (4000, 4000))
+
+    def test_absent_effect_measured_delta_zero_is_an_alert(self):
+        self.workspace.scenario(COOLDOWN_KEY, 'trigger', [cooldown_expectation()],
+                                steps=cooldown_steps(baseline_deltas=[0] * BASELINE_ATTEMPTS,
+                                                     measured_deltas=[0] * SCHEDULED))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('outside', verdict.explanation)
+
+    def test_nonzero_baseline_delta_is_an_alert(self):
+        self.workspace.scenario(COOLDOWN_KEY, 'trigger', [cooldown_expectation()],
+                                steps=cooldown_steps(baseline_deltas=[4000] + [0] * (BASELINE_ATTEMPTS - 1),
+                                                     measured_deltas=[4000] * SCHEDULED))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('baseline trial without the passive', verdict.explanation)
+
+    def test_too_few_measured_trials_is_insufficient(self):
+        self.workspace.scenario(COOLDOWN_KEY, 'trigger',
+                                [cooldown_expectation(attempts=TRIGGER_TRIALS - 1)],
+                                steps=cooldown_steps(baseline_deltas=[0] * BASELINE_ATTEMPTS,
+                                                     measured_deltas=[4000] * (TRIGGER_TRIALS - 1)))
+        self.assertEqual(self.verdict().status, 'insufficient_trials')
+
+    def test_absent_passive_aura_is_unmeasured(self):
+        self.workspace.scenario(COOLDOWN_KEY, 'trigger', [cooldown_expectation()],
+                                steps=cooldown_steps(baseline_deltas=[0] * BASELINE_ATTEMPTS, aura=0))
+        self.assertEqual(self.verdict().status, 'unmeasured')
+
+    def test_baseline_without_trials_is_never_ok(self):
+        self.workspace.scenario(COOLDOWN_KEY, 'trigger', [cooldown_expectation(baseline=0)],
+                                steps=cooldown_steps(measured_deltas=[4000] * SCHEDULED))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('baseline', verdict.explanation)
+
+    def test_parts_are_summed_and_only_the_first_holds_the_baseline(self):
+        second_key = 'conformance-templar-trigger-804927-1-part-2'
+        self.workspace.scenario(COOLDOWN_KEY, 'trigger', [cooldown_expectation(parts=2, attempts=150)],
+                                steps=cooldown_steps(baseline_deltas=[0] * BASELINE_ATTEMPTS,
+                                                     measured_deltas=[4000] * 150))
+        self.workspace.scenario(second_key, 'trigger',
+                                [cooldown_expectation(part=1, parts=2, baseline=0, attempts=SCHEDULED - 150)],
+                                steps=cooldown_steps(measured_deltas=[4000] * (SCHEDULED - 150)))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('2 parts', verdict.explanation)
+
+
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class TemplarTriggerEntriesTest(unittest.TestCase):
     def setUp(self):
@@ -333,7 +580,10 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                 self.assertIn(entry['per_trigger_text'], cleaned)
                 observed = entry['observe_spell']
                 triggered = [self.spell(entry['aura'], f'EffectTriggerSpell[{index}]') for index in range(3)]
-                if entry['observe_source'].startswith('EffectTriggerSpell'):
+                if entry.get('kind') == COOLDOWN_DELTA_KIND:
+                    self.assertTrue(entry['observe_source'])
+                    self.assertNotIn(observed, triggered)
+                elif entry['observe_source'].startswith('EffectTriggerSpell'):
                     self.assertIn(observed, triggered)
                     self.assertEqual(entry['observe_source'],
                                      f'EffectTriggerSpell[{triggered.index(observed)}] of {entry["aura"]}')
@@ -375,11 +625,16 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                 own_text = self.spell(spell, 'SpellName[enUS]') + ' ' + cleaned_tooltip(
                     self.spell(spell, 'Description[enUS]'))
                 self.assertIn(entry['trigger_spell_text'], own_text)
+                if entry.get('kind') == COOLDOWN_DELTA_KIND:
+                    self.assertEqual(entry['observe_metric'], 'cooldown_ms')
+                    continue
                 self.assertIn(entry['trial_metric'], ('spell_cast_count', 'spell_damage_count'))
 
     def test_every_second_cast_is_the_only_half_rate(self):
         for entry in trigger_entries(CLASS_FILE):
             with self.subTest(aura=entry['aura']):
+                if entry.get('kind') == COOLDOWN_DELTA_KIND:
+                    continue
                 if entry['per_trigger_text'].startswith('Every 2nd'):
                     expected = 0.5
                 elif entry['per_trigger_text'].startswith('10 times'):
@@ -427,8 +682,10 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                     continue
                 plan = trigger_plan(CLASS_FILE, entry)
                 self.assertEqual(sum(plan.part_attempts), SCHEDULED * entry.get('trial_attempts_factor', 1))
+                scenario_fn = cooldown_trigger_scenario if entry.get('kind') == COOLDOWN_DELTA_KIND \
+                    else trigger_scenario
                 for part in range(len(plan.part_attempts)):
-                    scenario, _ = trigger_scenario(CLASS_FILE, entry, part)
+                    scenario, _ = scenario_fn(CLASS_FILE, entry, part)
                     run.validate(scenario)
                     self.assertLessEqual(scenario['timeout_ms'], MAX_SCENARIO_MS)
 

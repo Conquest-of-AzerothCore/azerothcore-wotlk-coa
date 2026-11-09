@@ -1008,6 +1008,77 @@
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
       "per_trigger_text": "poison and disease effect"
+    },
+    {
+      "aura": 804927,
+      "name": "Lorescribe",
+      "effect": 0,
+      "tooltip": "|cFF66DDFFLevel 40 Passive|r\r\nCasting |cffffffffOath Breaker|r abilities now reduce the cooldown of |cffffffffLibrams|r by $/1000;806106s1 sec.\r\n\r\nIncreases your Holy spell damage by $s3% of your Agility.",
+      "trigger_text": "",
+      "status": "unmodelled",
+      "reason": "EffectTriggerSpell[0] 806089 of 804927 has no code path: no spell_proc row (deleted by rev_20260909_04_templar_completion.sql's DELETE ... WHERE SpellId IN (..., 804927, ...) list), no OnProc case in AscensionTemplarEvents.cpp, no reference anywhere in src/server/coa/ to spell 806089 (grep -rn 806089 src/ data/sql/ returns nothing). The tooltip's single stated reduction amount is sourced from effect 1 (806106, EffectTriggerSpell[1] of 804927) only, which is covered by the trigger_cooldown_delta entry below",
+      "observe_spell": 806089,
+      "observe_source": "EffectTriggerSpell[0] of 804927",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": ""
+    },
+    {
+      "aura": 804927,
+      "name": "Lorescribe",
+      "effect": 1,
+      "kind": "cooldown_delta",
+      "tooltip": "|cFF66DDFFLevel 40 Passive|r\r\nCasting |cffffffffOath Breaker|r abilities now reduce the cooldown of |cffffffffLibrams|r by $/1000;806106s1 sec.\r\n\r\nIncreases your Holy spell damage by $s3% of your Agility.",
+      "trigger": {
+        "action": "cast",
+        "spell": 572027,
+        "target": "dummy"
+      },
+      "trigger_text": "Casting Oath Breaker abilities",
+      "trigger_spell_text": "a dominating Oath Breaker",
+      "observe_spell": 801461,
+      "observe_source": "Amount(806106) read by AscensionTemplarAbilities.cpp:181-182's ReduceLibrams call, gated on Breaker(info) (Family(info, 2, 128) || Named(info, 805409)) and HasAura(804927); 806106 itself is never cast, only read as a magnitude",
+      "observe_metric": "cooldown_ms",
+      "expected_delta_ms": 4000,
+      "per_trigger_text": "now reduce the cooldown of Librams"
+    },
+    {
+      "aura": 805415,
+      "name": "Scarlet Champion",
+      "tooltip": "Your damaging critical strikes now increase your Holy damage dealt by $805416s1% for $805416d. stacking $805416u times. Can only occur once per sec.\r\n\r\nAt 5 stacks, you are granted |cffffffffHigh General|r.@s:524617:0@",
+      "trigger": {
+        "action": "cast",
+        "spell": 807268,
+        "target": "dummy"
+      },
+      "trigger_text": "Your damaging critical strikes",
+      "trigger_spell_text": "Crush an enemy with argent fervor, dealing",
+      "trial_metric": "spell_damage_count",
+      "force_crit": "melee",
+      "observe_spell": 805416,
+      "observe_source": "EffectTriggerSpell[0] of 805415",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now increase your Holy damage dealt",
+      "internal_cooldown_ms": 1000
+    },
+    {
+      "aura": 806522,
+      "name": "Legacy of the Silver Hand",
+      "tooltip": "Casting |cffffffffArgent Blade|r or |cffffffffScarlet Hammer|r now guarantees your next 2 instances of damage dealt by |cffffffffScourgebane|r to critically strike.\r\n\r\nIncreases the critical damage of |cffffffffScourgebane|r by $s2%.",
+      "trigger": {
+        "action": "cast",
+        "spell": 807268,
+        "target": "dummy"
+      },
+      "trigger_text": "Casting Argent Blade",
+      "trigger_spell_text": "Crush an enemy with argent fervor, dealing",
+      "trial_metric": "spell_cast_count",
+      "observe_spell": 806523,
+      "observe_source": "EffectTriggerSpell[0] of 806522",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now guarantees your next 2 instances"
     }
   ],
   "talent_modifiers": [
