@@ -10,22 +10,29 @@ import json
 from pathlib import Path
 import sys
 
+from compare import ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE
 from records import ENTRY_KINDS, KEY_FIELDS, key_of, load_records
-
-TOLERANCE = 1e-6
 
 
 def ground_truth_entries(class_file: dict, kind: str) -> dict:
-    return {key_of(kind, entry): entry for entry in class_file.get(kind, [])}
+    grouped: dict = {}
+    for entry in class_file.get(kind, []):
+        grouped.setdefault(key_of(kind, entry), []).append(entry)
+    return grouped
 
 
 def generated_entries(records: list[dict], kind: str) -> dict:
-    return {key_of(kind, record['entry']): record['entry'] for record in records if record['entry_kind'] == kind}
+    grouped: dict = {}
+    for record in records:
+        if record['entry_kind'] == kind:
+            grouped.setdefault(key_of(kind, record['entry']), []).append(record['entry'])
+    return grouped
 
 
 def values_equal(expected, actual) -> bool:
     if isinstance(expected, (int, float)) and not isinstance(expected, bool) and isinstance(actual, (int, float)):
-        return abs(float(expected) - float(actual)) <= TOLERANCE
+        margin = max(ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE * abs(float(expected)))
+        return abs(float(expected) - float(actual)) <= margin
     if isinstance(expected, dict) and isinstance(actual, dict):
         return set(expected) == set(actual) and all(values_equal(expected[key], actual[key]) for key in expected)
     if isinstance(expected, (list, tuple)) and isinstance(actual, (list, tuple)):
@@ -42,16 +49,21 @@ def score_kind(class_file: dict, records: list[dict], kind: str) -> dict:
     truth = ground_truth_entries(class_file, kind)
     generated = generated_entries(records, kind)
     match = miss = false_claim = wrong_value = 0
-    for key, expected in truth.items():
-        if key not in generated:
-            miss += 1
-        elif entries_match(kind, expected, generated[key]):
-            match += 1
-        else:
-            wrong_value += 1
-    for key in generated:
-        if key not in truth:
-            false_claim += 1
+    for key, expected_entries in truth.items():
+        remaining = list(generated.get(key, []))
+        for expected in expected_entries:
+            matched = next((candidate for candidate in remaining if entries_match(kind, expected, candidate)), None)
+            if matched is not None:
+                match += 1
+                remaining.remove(matched)
+            elif remaining:
+                wrong_value += 1
+                remaining.pop(0)
+            else:
+                miss += 1
+        generated[key] = remaining
+    for entries in generated.values():
+        false_claim += len(entries)
     precision_base = match + false_claim + wrong_value
     recall_base = match + miss
     return {

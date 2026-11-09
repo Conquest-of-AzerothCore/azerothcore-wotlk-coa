@@ -2335,11 +2335,19 @@ is rejected before any human sees it. `records.convert_records` groups a list of
 `{kind: [entry, ...]}` shape a `classes/<name>.json` merge expects.
 
 `score.py` (`score.py --records RECORDS_DIR --class-file FILE`) loads every `*.json` record in `RECORDS_DIR`
-(`records.load_records`) and, per kind, matches each ground-truth and generated entry by its `KEY_FIELDS` key:
-**match** (same key, same fields within a `1e-6` numeric tolerance), **miss** (a ground-truth key with no generated
-entry), **false_claim** (a generated key absent from the ground truth), **wrong_value** (same key, a field differs).
-`precision = match / (match + false_claim + wrong_value)`; `recall = match / (match + miss)`; both `None` when their
-denominator is 0. This is the validation protocol of
+(`records.load_records`) and, per kind, groups both ground-truth and generated entries by their `KEY_FIELDS` key
+(a list per key, not a single entry: a `KEY_FIELDS` key is not guaranteed unique — e.g. Templar's `procs` carry two
+distinct `aura=560835` entries, two field-for-field identical `aura=803163` entries that differ only in a
+non-`KEY_FIELDS` `trigger` sub-object, `triggers` has a duplicate `aura=804927`, `behaviours` a duplicate
+`spell=300504`). Within one key, each ground-truth entry claims the first generated entry it field-matches exactly
+(removing it from that key's remaining pool); a ground-truth entry left unclaimed is a **miss** only if the pool is
+then empty, otherwise it consumes one remaining generated entry as a **wrong_value**; every generated entry still
+unclaimed at the end (whether its key matches no ground-truth key, or outnumbers it) is a **false_claim**. A
+**match** is a key shared by both sides whose fields agree within the same tolerance `compare.py` uses to call a
+measurement `ok`: `max(compare.ABSOLUTE_TOLERANCE, compare.RELATIVE_TOLERANCE * expected)` (currently `max(1,
+0.5%)`), not an arbitrary separate constant — so "close enough" means the same thing here as it means in
+`alerts.tsv`. `precision = match / (match + false_claim + wrong_value)`; `recall = match / (match + miss)`; both
+`None` when their denominator is 0. This is the validation protocol of
 `.agents/plans/class-conformance-3/scale-out-sheets.md` part 3, scored against Templar's own hand-written entries
 as ground truth.
 

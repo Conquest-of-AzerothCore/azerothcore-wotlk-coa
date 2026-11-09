@@ -72,3 +72,11 @@ Split the pipeline into three pieces, each independently testable:
   spell/effect before calling a generated entry a false claim.
 - `sheets.py`'s scripted-hook scan shells out to `grep` per spell; this is fast enough for a few hundred spells per
   class but was not measured at the full 21-class scale.
+- A `KEY_FIELDS` key is not guaranteed unique even on Templar's own file (two `aura=560835` procs, two
+  `aura=803163` procs, a duplicate `aura=804927` trigger, a duplicate `spell=300504` behaviour all exist today).
+  `score.py` groups both ground-truth and generated entries into a list per key and claims within that list by
+  field match rather than overwriting one entry with another, so no entry is silently dropped before scoring; a
+  future class whose entries legitimately share a key is covered the same way.
+- `score.py`'s numeric match tolerance reuses `compare.py`'s own `ABSOLUTE_TOLERANCE`/`RELATIVE_TOLERANCE` floor
+  (`max(1, 0.5% of expected)`) instead of an independent constant, so "close enough" means the same thing in a
+  score run as it means in `alerts.tsv`, matching `scale-out-sheets.md` part 3 step 2's explicit instruction.

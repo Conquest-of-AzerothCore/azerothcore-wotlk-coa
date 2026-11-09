@@ -20,11 +20,19 @@ class ValueComparisonTests(unittest.TestCase):
         self.assertTrue(values_equal(100, 100.0000001))
 
     def test_numbers_outside_tolerance_differ(self):
-        self.assertFalse(values_equal(100, 101))
+        self.assertFalse(values_equal(100, 103))
+
+    def test_tolerance_matches_compare_pys_absolute_floor(self):
+        self.assertTrue(values_equal(100, 101))
+        self.assertFalse(values_equal(100, 102))
+
+    def test_tolerance_matches_compare_pys_relative_floor(self):
+        self.assertTrue(values_equal(1000, 1005))
+        self.assertFalse(values_equal(1000, 1006))
 
     def test_nested_dicts_compare_field_by_field(self):
         self.assertTrue(values_equal({'a': 1, 'b': [1, 2]}, {'a': 1, 'b': [1, 2]}))
-        self.assertFalse(values_equal({'a': 1}, {'a': 2}))
+        self.assertFalse(values_equal({'a': 1}, {'a': 5}))
 
     def test_entries_match_ignores_field_order(self):
         self.assertTrue(entries_match('literal_tokens', {'spell': 1, 'value': 100}, {'value': 100, 'spell': 1}))
@@ -61,6 +69,43 @@ class ScoreKindTests(unittest.TestCase):
         result = score_kind(CLASS_FILE, [], 'literal_tokens')
         self.assertIsNone(result['precision'])
         self.assertEqual(result['recall'], 0.0)
+
+    def test_duplicate_key_ground_truth_entries_are_not_dropped(self):
+        class_file = {
+            'procs': [
+                {'aura': 10, 'chance_token': '$s1', 'name': 'first', 'proc_spell': 11},
+                {'aura': 10, 'chance_token': '$s1', 'name': 'second', 'proc_spell': 22},
+            ],
+        }
+        records = [record('procs', {'aura': 10, 'chance_token': '$s1', 'name': 'first', 'proc_spell': 11})]
+        result = score_kind(class_file, records, 'procs')
+        self.assertEqual(result['match'], 1)
+        self.assertEqual(result['miss'], 1)
+        self.assertEqual(result['false_claim'], 0)
+        self.assertEqual(result['wrong_value'], 0)
+
+    def test_duplicate_key_generated_entries_are_not_dropped(self):
+        class_file = {
+            'procs': [{'aura': 10, 'chance_token': '$s1', 'name': 'first', 'proc_spell': 11}],
+        }
+        records = [record('procs', {'aura': 10, 'chance_token': '$s1', 'name': 'first', 'proc_spell': 11}),
+                  record('procs', {'aura': 10, 'chance_token': '$s1', 'name': 'other', 'proc_spell': 99})]
+        result = score_kind(class_file, records, 'procs')
+        self.assertEqual(result['match'], 1)
+        self.assertEqual(result['miss'], 0)
+        self.assertEqual(result['false_claim'], 1)
+        self.assertEqual(result['wrong_value'], 0)
+
+    def test_duplicate_key_with_both_sides_unmatched_counts_wrong_value(self):
+        class_file = {
+            'procs': [{'aura': 10, 'chance_token': '$s1', 'name': 'first', 'proc_spell': 11}],
+        }
+        records = [record('procs', {'aura': 10, 'chance_token': '$s1', 'name': 'other', 'proc_spell': 99})]
+        result = score_kind(class_file, records, 'procs')
+        self.assertEqual(result['match'], 0)
+        self.assertEqual(result['miss'], 0)
+        self.assertEqual(result['false_claim'], 0)
+        self.assertEqual(result['wrong_value'], 1)
 
 
 class ScoreTests(unittest.TestCase):
