@@ -1350,6 +1350,17 @@
       "mechanism_file": "AscensionTemplarAbilities.cpp",
       "reduce_function": "ReduceDebt",
       "observe_source": "AscensionTemplarAbilities.cpp:212-213 (post-cast OnSpellCast, gated on !spell->IsTriggered()): if (Libram(info) && player->HasAura(706468)) ReduceDebt(player, 70); Libram() (AscensionTemplar.cpp:43-46) matches the 801441 Libram of Consecration chain. ReduceDebt's non-oneTick branch (AscensionTemplar.cpp:200-211) computes reduction = amount * min(100, percent) / 100 (uint64, truncating) against the Oathkeeper 803237 EFFECT_0 amount, the same debt aura 712346 Sacred Oath's own duration entry already establishes via a striker cast of 48123 at the caster while the caster carries 803149. The DBC's own $707208s1 token (707208 EffectBasePoints[0]=69 -> 70) agrees with the hardcoded 70 literal; the raw DBC EffectTriggerSpell[0] 707208 path is dead (its SpellId is in the DELETE-only spell_proc list of rev_20260909_04_templar_completion.sql:9, with no matching re-INSERT, so SpellMgr.cpp's 'skip if no proc flags in DBC' leaves it unreachable; confirmed no C++ cast of 707208 anywhere in src/server/coa)."
+    },
+    {
+      "spell": 804897, "name": "Transcending Strikes", "kind": "metric_delta",
+      "quote": "Your Divine Force will now trigger a", "expected": 112994,
+      "trigger_spell": 806153,
+      "setup_casts": [803872],
+      "target": "dummy",
+      "metric": "cooldown_ms",
+      "fields": { "spell": 806153 },
+      "before_expected": 116994,
+      "observe_source": "AscensionTemplarAbilities.cpp:327-333 (OnSpellCast): if (Named(info, 806153) && player->HasAura(804897) && !spell->GetScriptValue(804918)) for each aura the target carries, if it is Blade of Faith 803872 cast by this player, Reduce(player, 806153, 4000) (AscensionTemplar.cpp:115-122: ModifySpellCooldown(-4000) on every known rank of Divine Force's chain root), once per Divine Force cast, unconditionally (no ProcChance roll; 804897's own effect 0, aura 42 EffectApplyAuraName, is dummied at load since 804897 is in TemplarCastDrivers, AscensionTemplarContracts.cpp:26-32,38-42, so the raw DBC EffectTriggerSpell[0] 804907 is never cast by the generic proc path). Divine Force's own RecoveryTime 0 / CategoryRecoveryTime 120000 ms (coa-dbc-viewer Spell 806153) is the base the 4000 ms reduction and the metric_delta_scenario's wait_ms are read against; cooldown_ms is read after the default wait_ms (3000 ms) following each cast, with reset_cooldown called before each Divine Force cast so the two phases' readings do not carry over one another's remaining cooldown. The tooltip's own duration token ($/1000;804918s1) belongs to the unrelated 804918 cooldown-reduction-percentage helper used by a separate mechanism (Transcend(), AscensionTemplarAbilities.cpp:383-397,418-420); it is not this effect's own number and is out of this entry's scope. before_expected/expected are 120000 minus the 3000 ms wait_ms minus a 6 ms simulated-clock processing delta between the cast step and its cooldown_ms read, confirmed identical (116994 then 112994, a clean 4000 ms drop) across two independent gameplay runs on the simulated clock (.cache/verify-all/20261109-045100 and -045234); the 4000 ms delta itself, not the absolute reading, is this check's real evidence of the mechanism."
     }
   ],
   "player_observations": [

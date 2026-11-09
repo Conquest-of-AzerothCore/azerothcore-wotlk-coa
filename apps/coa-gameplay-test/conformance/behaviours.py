@@ -560,6 +560,7 @@ class MetricDeltaSpec:
     expire_ms: int = DEFAULT_METRIC_DELTA_EXPIRE_MS
     target: str = CASTER
     disable_regeneration: bool = False
+    setup_casts: tuple[int, ...] = ()
 
 
 def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
@@ -571,6 +572,24 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
     entry = behaviour_entry(records, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
     facts = facts_of(records, spec.trigger_spell)
 
+    def setup_cast_steps() -> list[dict]:
+        if not spec.setup_casts:
+            return []
+        steps = []
+        for setup_spell in spec.setup_casts:
+            setup_facts = facts_of(records, setup_spell)
+            if setup_facts.mana_cost > 0 and not setup_facts.mana_cost_percentage \
+                    and not setup_facts.mana_cost_per_level:
+                steps.append({'action': 'set_power', 'actor': CASTER, 'power': setup_facts.power_type,
+                             'value': setup_facts.mana_cost})
+            steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': setup_spell})
+            steps += required_aura_steps(setup_facts)
+            steps.append({'action': 'cast', 'actor': CASTER, 'spell': setup_spell, 'target': spec.target})
+        if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
+                         'value': facts.mana_cost})
+        return steps
+
     def cast_steps() -> list[dict]:
         steps = []
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
@@ -578,6 +597,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                          'value': facts.mana_cost})
         steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
         steps += required_aura_steps(facts)
+        steps += setup_cast_steps()
         steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': spec.target})
         steps.append({'action': 'wait', 'ms': spec.wait_ms})
         return steps
@@ -593,6 +613,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         'players': [{**player_fixture(class_file), 'allow_regeneration': False}] if spec.disable_regeneration
                    else [player_fixture(class_file)],
         'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] +
+                 [{'action': 'learn', 'actor': CASTER, 'spell': setup_spell} for setup_spell in spec.setup_casts] +
                  cast_steps() + [measurement(before_label, CASTER, spec.metric, **spec.fields)] +
                  [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] +
                  [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}] +
@@ -613,7 +634,7 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry['metric'], entry['fields'], entry['before_expected'],
                            entry.get('wait_ms', DEFAULT_METRIC_DELTA_WAIT_MS),
                            entry.get('expire_ms', DEFAULT_METRIC_DELTA_EXPIRE_MS), entry.get('target', CASTER),
-                           entry.get('disable_regeneration', False))
+                           entry.get('disable_regeneration', False), tuple(entry.get('setup_casts', ())))
 
 
 DEBT_ASSERT_TIMEOUT_MS = 2000

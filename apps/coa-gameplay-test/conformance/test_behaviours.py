@@ -1,3 +1,4 @@
+from dataclasses import replace
 from pathlib import Path
 import sys
 import unittest
@@ -67,6 +68,8 @@ RECKONING_ARMOR = 680870
 KEEPING_THE_OATH_PASSIVE = 92109
 HOLY_BOOKS = 706468
 LIBRAM_OF_CONSECRATION = 801441
+TRANSCENDING_STRIKES = 804897
+DIVINE_FORCE = 806153
 
 
 def scarlet_judicator_entry() -> dict:
@@ -143,6 +146,10 @@ def keeping_the_oath_passive_entry() -> dict:
 
 def holy_books_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == HOLY_BOOKS)
+
+
+def transcending_strikes_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == TRANSCENDING_STRIKES)
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -232,6 +239,17 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.metric, 'owned_creature_count')
         self.assertEqual(spec.fields, {'entry': TESTAMENT_OF_HOPE_COPY_ENTRY})
         self.assertEqual(spec.before_expected, 2)
+        self.assertEqual(spec.setup_casts, ())
+
+    def test_transcending_strikes_entry(self):
+        spec = metric_delta_spec(transcending_strikes_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(spec.trigger_spell, DIVINE_FORCE)
+        self.assertEqual(spec.metric, 'cooldown_ms')
+        self.assertEqual(spec.fields, {'spell': DIVINE_FORCE})
+        self.assertEqual(spec.setup_casts, (BLADE_OF_FAITH,))
+        self.assertEqual(spec.target, 'dummy')
 
     def test_spiritual_abdicator_entry(self):
         spec = metric_delta_spec(spiritual_abdicator_entry())
@@ -298,7 +316,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 19)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 20)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -951,6 +969,54 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['expected'], 1)
         self.assertEqual(expectations[0].model['before_expected'], 0)
         self.assertEqual(expectations[0].model['metric'], 'aura')
+
+    def test_empty_setup_casts_reproduces_the_scenario_byte_for_byte(self):
+        spec = metric_delta_spec(tyrs_guard_entry())
+        with_field, _ = metric_delta_scenario(CLASS_FILE, spec)
+        without_field, _ = metric_delta_scenario(CLASS_FILE, replace(spec, setup_casts=()))
+        self.assertEqual(with_field, without_field)
+
+    def test_setup_casts_cast_blade_of_faith_at_the_dummy_before_each_divine_force_cast(self):
+        spec = metric_delta_spec(transcending_strikes_entry())
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        steps = scenario['steps']
+        setup_casts = [index for index, step in enumerate(steps)
+                      if step.get('action') == 'cast' and step.get('spell') == BLADE_OF_FAITH]
+        trigger_casts = [index for index, step in enumerate(steps)
+                         if step.get('action') == 'cast' and step.get('spell') == DIVINE_FORCE]
+        self.assertEqual(len(setup_casts), 2)
+        self.assertEqual(len(trigger_casts), 2)
+        self.assertTrue(all(step['target'] == 'dummy' for step in steps
+                            if step.get('action') == 'cast' and step.get('spell') in (BLADE_OF_FAITH, DIVINE_FORCE)))
+        for setup_index, trigger_index in zip(setup_casts, trigger_casts):
+            self.assertLess(setup_index, trigger_index)
+        self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
+
+    def test_setup_casts_learn_blade_of_faith_once_before_the_first_cast(self):
+        spec = metric_delta_spec(transcending_strikes_entry())
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        learn_steps = [index for index, step in enumerate(scenario['steps'])
+                      if step.get('action') == 'learn' and step.get('spell') == BLADE_OF_FAITH]
+        first_cast_index = next(index for index, step in enumerate(scenario['steps'])
+                                if step.get('action') == 'cast' and step.get('spell') == BLADE_OF_FAITH)
+        self.assertEqual(len(learn_steps), 1)
+        self.assertLess(learn_steps[0], first_cast_index)
+
+    def test_setup_casts_restore_the_trigger_spells_own_power_before_its_cast(self):
+        spec = metric_delta_spec(transcending_strikes_entry())
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        divine_force_index = steps.index({'action': 'cast', 'actor': 'caster', 'spell': DIVINE_FORCE,
+                                          'target': 'dummy'})
+        preceding_power = steps[divine_force_index - 1]
+        self.assertEqual(preceding_power, {'action': 'set_power', 'actor': 'caster', 'power': 3, 'value': 15})
+
+    def test_dispatch_transcending_strikes_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, transcending_strikes_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_DELTA)
+        self.assertEqual(expectations[0].model['metric'], 'cooldown_ms')
 
     def test_keeping_the_oath_passive_casts_reckoning_at_the_dummy_fixture(self):
         spec = metric_delta_spec(keeping_the_oath_passive_entry())
