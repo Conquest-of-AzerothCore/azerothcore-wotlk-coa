@@ -8,11 +8,35 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include <algorithm>
+#include <array>
 #include <cmath>
 
 namespace
 {
 constexpr uint32 SPELL_RECENTLY_PARRIED_OR_DODGED = 681170;
+
+constexpr std::array<uint32, 14> TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_SPELLS = {
+    801446, 501589, 501590, 501591, 501592, 501593, 573324,
+    805421, 748505, 748506, 748507, 572739, 572740, 572741};
+
+void CancelStockEffectRealPointsPerLevel(Unit const* caster, SpellInfo const* info, uint8 index, float& value)
+{
+    if (!caster || !info)
+        return;
+    if (std::find(TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_SPELLS.begin(), TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_SPELLS.end(),
+                  info->Id) == TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_SPELLS.end())
+        return;
+    float perLevel = info->Effects[index].RealPointsPerLevel;
+    if (perLevel == 0.0f)
+        return;
+    int32 level = int32(caster->GetLevel());
+    if (int32(info->MaxLevel) > 0 && level > int32(info->MaxLevel))
+        level = int32(info->MaxLevel);
+    else if (level < int32(info->BaseLevel))
+        level = int32(info->BaseLevel);
+    level -= int32(std::max(info->BaseLevel, info->SpellLevel));
+    value -= float(level) * perLevel;
+}
 }
 
 namespace AscensionTemplar
@@ -289,6 +313,7 @@ class templar_scaling : public UnitScript
         Player* player = Owner(caster);
         if (!player || !info)
             return;
+        CancelStockEffectRealPointsPerLevel(caster, info, index, value);
         if (info->Id == 527269 && index == 0)
             value = float(Amount(527270, 2, player));
         if (info->Id == 803160 && index == 0)
