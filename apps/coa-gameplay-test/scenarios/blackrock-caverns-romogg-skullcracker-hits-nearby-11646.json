@@ -84,7 +84,7 @@
       "ms": 2000
     },
     {
-      "label": "CONTROL: the three share one instance",
+      "label": "CONTROL: the grouped players are in Blackrock Caverns",
       "action": "assert",
       "actor": "near",
       "metric": "map_id",
