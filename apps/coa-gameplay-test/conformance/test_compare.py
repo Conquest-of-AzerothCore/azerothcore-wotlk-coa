@@ -1201,13 +1201,13 @@ class GeneratedTokenTest(unittest.TestCase):
         self.assertEqual((verdict.status, verdict.expected), ('ok', 50.0))
         self.assertEqual(self.judged(SCOURGEBANE, '$801832s2', '5').status, 'alert')
 
-    def test_foreign_level_scaled_token_is_judged_at_the_rank_of_its_own_spell(self):
+    def test_foreign_level_scaled_token_disabled_by_a_server_correction_is_unmodelled(self):
         stamina = float(BASE_ACTUALS['stat 2'])
         verdict = self.judged(STAFFGUARD, STAFFGUARD_TOKEN, str(STAFFGUARD_HEALTH_AT_RANK_ZERO + 0.3 * stamina))
-        self.assertEqual((verdict.status, verdict.expected), ('ok', STAFFGUARD_HEALTH_AT_RANK_ZERO + 0.3 * stamina))
-        self.assertEqual(verdict.detail['scope'], EFFECT_VALUE_SCOPE)
+        self.assertEqual(verdict.status, 'unmodelled')
+        self.assertIn('disabled by a server correction', verdict.explanation)
         self.assertEqual(self.judged(STAFFGUARD, STAFFGUARD_TOKEN,
-                                     str(STAFFGUARD_HEALTH_AT_LEVEL_60 + 0.3 * stamina)).status, 'alert')
+                                     str(STAFFGUARD_HEALTH_AT_LEVEL_60 + 0.3 * stamina)).status, 'unmodelled')
 
     def test_foreign_stack_token_is_judged_exactly(self):
         verdict = self.judged(IRON_PENANCE, '$523713u', '10')

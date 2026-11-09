@@ -10,7 +10,7 @@ from typing import Sequence
 from behaviours import behaviour_entries, behaviour_scenario
 from classes import CHARACTER_LEVEL, PROGRESSION_HEADER, ClassSpell, class_spells
 from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_FILE, ScenarioDrift, evaluate,
-                     write_levers, write_outputs)
+                     literal_values, write_levers, write_outputs)
 from coverage import COVERAGE_FILE, write_coverage
 from diff import IMPACT_FILE, diff_directories, write_impact
 from passives import passive_scenario
@@ -103,13 +103,17 @@ def add_periodic_total(writer: ManifestWriter, spell: ClassSpell, rank_id: int, 
 
 def add_values(writer: ManifestWriter, spell: ClassSpell, dbc_dir: Path):
     class_file = writer.class_file
+    records = records_of(class_file)
     for rank_id in spell.ranks:
         scenario, expectations, periodic_totals = value_scenario(class_file, spell, rank_id)
-        armed_file = armed_for(class_file, records_of(class_file), rank_id)
+        armed_file = armed_for(class_file, records, rank_id)
         conditional_known = static_conditional_known(class_file, rank_id)
         readout = read_tooltip(dataset(dbc_dir), rank_id, structure_stats(armed_file, conditional_known))
+        description = records.field('Spell', rank_id, 'Description[enUS]')
+        literal = literal_values(class_file, rank_id, description)
+        tokens = [value.text for value in readout.values] + [value.text for value in literal]
         writer.add(scenario_key(class_file['name'], 'value', rank_id), 'value', spell, rank_id, expectations,
-                   scenario, [value.text for value in readout.values], known_spells=sorted(conditional_known))
+                   scenario, tokens, known_spells=sorted(conditional_known))
         for item in periodic_totals:
             add_periodic_total(writer, spell, rank_id, item)
 

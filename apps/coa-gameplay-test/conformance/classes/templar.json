@@ -69,7 +69,13 @@
   ],
   "disabled_foreign_effects": [
     {"spell": 704409, "effect": 0,
-     "reason": "AscensionTemplarContracts.cpp:211 sets info->Effects[0].Effect = 0 for spell 704409 at load time"}
+     "reason": "AscensionTemplarContracts.cpp:211 sets info->Effects[0].Effect = 0 for spell 704409 at load time"},
+    {"spell": 706583, "effect": 0,
+     "reason": "round8 large-values: AscensionTemplarAuras.cpp:60-63 (aura_ascension_templar_lifecycle::Calculate, id == 706583) fully reassigns amount = 125 + .3*Stamina + .25*(dodge+parry), discarding this effect's own SpellEffectInfo::CalcValue (level-scaled to 305 at level 60 per ADR 0014) before it is ever applied; spell_effect_value reads CalcValue before this AuraScript CalcAmount hook runs (detail.scope \"CalcValue before aura scripts\"), so it measures a value the server never uses"},
+    {"spell": 806353, "effect": 0,
+     "reason": "round8 large-values: AscensionTemplarEvents.cpp:186-191 (case 806353) removes this aura on proc and casts 806352 once per stack instead; 806353's own EffectBasePoints (394) is never read by any server code (confirmed by grep of src/server/coa/), so spell_effect_value's read of 806353 effect 0 measures a value with no runtime effect. 806352 has its own effect_value coverage via its own coefficients (AscensionTemplarData.h, AscensionTemplarContracts.cpp:298-299)"},
+    {"spell": 705299, "effect": 0,
+     "reason": "round8 large-values: fixed AscensionTemplarAuras.cpp:66-67 (aura_ascension_templar_lifecycle::Calculate, id == 705299) to reassign amount = -10 - .1*Stamina, the tooltip's own rank-0 base per ADR 0014, instead of subtracting from the per-level-inflated SpellEffectInfo::CalcValue; the fix corrects the real applied amount, but spell_effect_value still reads CalcValue before this AuraScript CalcAmount hook runs (detail.scope \"CalcValue before aura scripts\"), the same structural gap ADR 0014 documents for Staffguard 706583, so this check can never see the correction"}
   ],
   "conditional_spells": [
     {"spell": 705300, "learn": 573452,

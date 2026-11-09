@@ -228,7 +228,8 @@ def token_spell(digits: str, rank_id: int, shown: Displayed) -> int:
     return int(digits) if digits else shown.spell_id or rank_id
 
 
-def foreign_effect(records: Records, rank_id: int, shown: Displayed) -> tuple[dict | None, str]:
+def foreign_effect(records: Records, rank_id: int, shown: Displayed,
+                   disabled: frozenset[tuple[int, int]] = frozenset()) -> tuple[dict | None, str]:
     if shown.effect_index is not None or shown.spell_id in (None, rank_id) or shown.kind not in EFFECT_KINDS:
         return None, ''
     token = next((match for match in EFFECT_TOKEN.finditer(shown.text)
@@ -236,6 +237,8 @@ def foreign_effect(records: Records, rank_id: int, shown: Displayed) -> tuple[di
     if token is None:
         return None, f'{shown.kind} token of spell {shown.spell_id} without a readable effect'
     effect = int(token.group('digit')) - 1
+    if (shown.spell_id, effect) in disabled:
+        return None, f'effect {effect} of spell {shown.spell_id} is disabled by a server correction'
     if not records.field('Spell', shown.spell_id, f'Effect[{effect}]'):
         return None, f'effect {effect} of spell {shown.spell_id} does not exist'
     return {'effect_spell': shown.spell_id, 'effect': effect}, ''
@@ -465,7 +468,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             expect(label, 'spell_duration', None, shown.text, note_rule(f'read {shown.kind}', note),
                    {'effect_spell': duration_spell})
             return
-        foreign, unmeasurable = foreign_effect(records, rank_id, shown)
+        foreign, unmeasurable = foreign_effect(records, rank_id, shown, disabled_effects)
         if foreign:
             label = f'{rank_id} effect_value {foreign["effect_spell"]}e{foreign["effect"]} #{ordinal}'
             measured.append(measurement(label, CASTER, 'spell_effect_value', spell=foreign['effect_spell'],
