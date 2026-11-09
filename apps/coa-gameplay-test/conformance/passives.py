@@ -346,6 +346,16 @@ def shared_token(records: Records, rank_id: int, effect: int, effects: list[int]
     return None
 
 
+def literal_token(class_file: dict, spell_ids: set[int], effect: int, text: str) -> Displayed | None:
+    entry = next((entry for entry in class_file.get('literal_tokens', [])
+                 if entry['spell'] in spell_ids and entry['effect'] == effect), None)
+    if entry is None:
+        return None
+    if entry['quote'] not in text:
+        raise ValueError(f'{spell_ids} literal_tokens entry quotes {entry["quote"]!r} not found in the tooltip')
+    return Displayed(entry['quote'], float(entry['value']), effect, 'percent')
+
+
 def aliased_token(records: Records, rank_id: int, effect: int, effects: list[int],
                   values: list[Displayed], text: str) -> tuple[Displayed | None, float | None]:
     for sibling in effects:
@@ -543,7 +553,8 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
     misc = override if override is not None else spell(f'EffectMiscValue[{effect}]')
     misc_b = spell(f'EffectMiscValueB[{effect}]')
     family = family_of(spell(f'Effect[{effect}]'), aura)
-    token = own_token(values, effect) or shared_token(records, rank_id, effect, effects, values)
+    token = (own_token(values, effect) or shared_token(records, rank_id, effect, effects, values)
+             or literal_token(class_file, {spell_id, rank_id}, effect, text))
     alias_points: float | None = None
     alias_reason = ''
     if token is None:

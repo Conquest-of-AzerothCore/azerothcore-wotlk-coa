@@ -16,7 +16,7 @@ from hits import (HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_
                   HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
-from passives import PASSIVE_DELTA, VERSUS_AURA_STATE
+from passives import PASSIVE_DELTA, VERSUS_AURA_STATE, cleaned_tooltip, literal_token
 from procs import AMBIGUOUS_TOOLTIP, CAST, PROC_CHECK, chance_of, wilson_interval
 from profile import DBC_DIR, EQUIP_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label
 from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE, asked, cleaned,
@@ -139,14 +139,24 @@ class TooltipSource(Protocol):
     def spell_field(self, spell_id: int, name: str): ...
 
 
+def literal_values(class_file: dict, rank_id: int, description: str) -> list[Displayed]:
+    text = cleaned_tooltip(description)
+    tokens = (literal_token(class_file, {rank_id}, effect, text) for effect in EFFECTS)
+    return [token for token in tokens if token is not None]
+
+
 class DbcTooltips:
-    def __init__(self, dbc_dir: Path):
+    def __init__(self, dbc_dir: Path, class_file: dict | None = None):
         self.dbc = dataset(Path(dbc_dir))
         self.records = Records(self.dbc)
+        self.class_file = class_file or {}
 
     def read(self, rank_id: int, caster: CasterStats, forced: tuple[int, int, int] | None = None) -> Readout:
         records = self.records if forced is None else ForcedPoints(self.dbc, *forced)
-        return Tooltip(records, rank_id, caster).read(records.field('Spell', rank_id, 'Description[enUS]'))
+        description = records.field('Spell', rank_id, 'Description[enUS]')
+        readout = Tooltip(records, rank_id, caster).read(description)
+        literal = literal_values(self.class_file, rank_id, description)
+        return replace(readout, values=readout.values + literal) if literal else readout
 
     def effect_points(self, spell_id: int, effect: int) -> tuple[int, int]:
         return (self.records.field('Spell', spell_id, f'EffectBasePoints[{effect}]'),
@@ -2082,7 +2092,7 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
              hit_model: HitModelSource | None = None) -> Comparison:
     manifest = json.loads(Path(manifest_path).read_text(encoding='utf-8'))
     runs, missing = load_runs(manifest, Path(results_dir))
-    tooltips = tooltips or DbcTooltips(manifest.get('dbc_dir', DBC_DIR))
+    tooltips = tooltips or DbcTooltips(manifest.get('dbc_dir', DBC_DIR), manifest.get('class_file'))
     hit_model = hit_model or measured_hit_model
     verdicts = []
     proc_parts: dict[str, list[ProcPart]] = {}
@@ -2287,7 +2297,8 @@ def write_outputs(manifest_path: Path, results_dir: Path, verdicts: list[Verdict
     write_verdicts(manifest, Path(manifest_path), Path(results_dir), verdicts, out_dir)
     asked_verdicts = [verdict for verdict in verdicts if asked(verdict)]
     has_readings = bool(manifest['class_file'].get('player_tooltip_readings'))
-    source = tooltips or (DbcTooltips(manifest.get('dbc_dir', DBC_DIR)) if asked_verdicts or has_readings else None)
+    source = tooltips or (DbcTooltips(manifest.get('dbc_dir', DBC_DIR), manifest.get('class_file'))
+                         if asked_verdicts or has_readings else None)
     report.write_text('\n'.join(report_lines(manifest, Path(manifest_path), Path(results_dir), runs, missing,
                                              verdicts, source)), encoding='utf-8')
     write_questions(questions(asked_verdicts, source) if asked_verdicts else [], out_dir, source)

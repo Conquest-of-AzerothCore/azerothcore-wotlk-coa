@@ -422,6 +422,20 @@ health by $s1%" sentence, so the expected value is 6%, matching both the client'
 reads `token <text> reused from effect <sibling>; expected value follows effect <sibling>, not own points`, so a
 reviewer can tell this path apart from a directly-owned or evenly-shared token without reading the source.
 
+A class file's `literal_tokens` list (`[{"spell": <id>, "effect": <n>, "quote": "<exact substring>", "value": <n>}]`)
+gives `classify` a token for an effect whose tooltip clause expresses its magnitude in prose rather than a `$sN`
+token, the same `{spell_id or rank_id, effect}` lookup as `passive_targets`/`effect_overrides`, consulted only after
+`own_token`/`shared_token` both return nothing: `token = own_token(...) or shared_token(...) or literal_token(...)`.
+The reader raises `ValueError` if `quote` is not a substring of the effect's own tooltip, the same discipline
+`passive_targets`' `tooltip_words` already enforces. `DbcTooltips.read` (`compare.py`) also injects a matching
+`Displayed` for each `literal_tokens` entry alongside the real `$sN` tokens it reads from `Spell.dbc`, so a judging
+run's own tooltip re-read (`signed_token`) can still find the literal token by its exact text and derive its
+expected numeric value from `value`, the same path a real token takes. Templar: Final Prayer 705268 effect 0
+("Doubles the healing done to you by Testament of Fortitude...") and Justicar of the Light 707663 effect 0
+("Removes the cooldown from Benediction...") each get a `literal_tokens` entry (`value: 100`), which makes both
+effects modelled (`spell_effect_value`/`spell_modifier` plans) instead of `unmodelled: no own token and no sibling
+token with equal points`.
+
 Each `MetricPlan(metric, fields, relation, source, judged)` names a harness metric, its fields (the scenario adds
 `spell` where the metric needs one), the relation of the delta to the token, for `share` the base-step label of the
 source (`stat <n>` or `attack_power`), and whether the delta is judged (`judged` false: reported as `measured`):
@@ -514,6 +528,19 @@ found no way to check with the harness's existing metrics (respectively: `aura_a
 forces both auras' amount to -1, so no existing metric distinguishes which of the two absorbed; the bonus needs a
 statistical hit-mean comparison this package's exact-equality `behaviour_metric_delta` shape does not provide) —
 `effect_notes` records that finding as a deferred reason instead of the generic label, pending a follow-up item.
+Templar (round4 `no-own-token` investigation, part B, 2026-11): Condemnation 704175 effect 2 (aura 286
+`SPELL_AURA_ABILITY_PERIODIC_CRIT` only gates periodic-crit eligibility; its `EffectBasePoints` is never read by
+`AuraEffect::CalcPeriodicCritChance`, and the tooltip gives no number for this clause), Final Prayer 705268 effect 1
+(targets Testament of Faith 801478 through aura 283, which has no passive-measurement plan in this tool; the
+tooltip's real claim is already checked, and already alerts, through `behaviours.json`'s "705268 801478
+behaviour_ratio"), Justice 712437 effect 0 (its `SPELLMOD_JUMP_TARGETS` targets Interdict 560116, whose own effect
+is `SPELL_AURA_MOD_SILENCE` and performs no chain-target selection; the tooltip's "1 additional nearby target" is
+already checked through the scripted hook in `AscensionTemplarAbilities.cpp:95-102`) and Spiritual Abdicator 803219
+effect 0 (its own `EffectBasePoints` is 0; the "+5% per copy" it names is implemented on a different spell/effect,
+704409 effect 1, and already checked through `behaviours.json`'s `metric_delta` entry) are each given an
+`effect_notes` entry for the same reason: a real, textual tooltip claim that a different, already-working check
+(elsewhere in this item's own effects or in `behaviours.json`) already covers, so the bare "no own token" label no
+longer reads as an open gap.
 
 ### Targets of a spell modifier
 

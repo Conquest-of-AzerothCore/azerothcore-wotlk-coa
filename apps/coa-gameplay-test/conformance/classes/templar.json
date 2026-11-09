@@ -84,7 +84,19 @@
     {"spell": 712678, "effect": 1,
      "reason": "round4 alert-triage: same load-time dummy as 712678 effect 0; the -5000ms cooldown reduction on 560116 is implemented as a scripted cast-success hook (AscensionTemplarAbilities.cpp, info->Id == 560116 branch calling ModifySpellCooldown) rather than a static SpellMod. The generic spell_modifier probe cannot see it; needs a cooldown-remaining check on 560116 instead"}
   ],
+  "literal_tokens": [
+    {"spell": 705268, "effect": 0, "quote": "Doubles the healing done to you", "value": 100},
+    {"spell": 707663, "effect": 0, "quote": "Removes the cooldown from Benediction", "value": 100}
+  ],
   "effect_notes": [
+    {"spell": 704175, "effect": 2,
+     "reason": "no own token and no sibling token with equal points (aura 286 SPELL_AURA_ABILITY_PERIODIC_CRIT only gates periodic-crit eligibility; EffectBasePoints is not read by AuraEffect::CalcPeriodicCritChance, SpellAuraEffects.cpp:1179-1203, and the tooltip gives no number for this clause)"},
+    {"spell": 705268, "effect": 1,
+     "reason": "no own token and no sibling token with equal points (targets Testament of Faith 801478; aura 283 SPELL_AURA_MOD_HEALING_RECEIVED has no passive-measurement plan in this tool, a pre-existing gap; the tooltip's real claim is independently checked by behaviours.json's \"705268 801478 behaviour_ratio\", which already alerts — see alert-triage, not gated by this gap)"},
+    {"spell": 712437, "effect": 0,
+     "reason": "no own token and no sibling token with equal points (targets Interdict 560116 via SPELLMOD_JUMP_TARGETS op 17; Interdict's own effect is SPELL_AURA_MOD_SILENCE, which performs no chain-target selection, so this modifier has no effect on it; the tooltip's \"1 additional nearby target\" is implemented and already checked by behaviours.json's \"count\" entry via the scripted hook in AscensionTemplarAbilities.cpp:95-102)"},
+    {"spell": 803219, "effect": 0,
+     "reason": "no own token and no sibling token with equal points (the tooltip's \"+5% per copy\" is implemented on a different spell/effect, 704409 effect 1, via templar_scaling::ModifySpellEffectBaseValue, AscensionTemplarContracts.cpp:278-279, and already checked by behaviours.json's \"metric_delta\" entry; this effect's own EffectBasePoints is 0, dead)"},
     {"spell": 300529, "effect": 1,
      "reason": "no check needed: round4 scripted-script-aura investigation. Both tooltip clauses of Deep Secrets are resolved through 301283's own effects (periodic trigger e0, magic-resist/damage-reduction amount), already ok; no code anywhere reads 300529's own effect 1 (BasePoints/MiscValue both 0), which carries no tooltip clause of its own"},
     {"spell": 705263, "effect": 1,

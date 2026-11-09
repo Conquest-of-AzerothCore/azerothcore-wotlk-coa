@@ -11,7 +11,7 @@ import compare
 from classes import PROGRESSION_HEADER as HEADER, ClassSpell, class_spells, table_rows
 from passives import (ALIASED_REASON_MARKER, AURA_STATE_METRIC, FAMILIES, MAX_SPELLMOD, PARRY_CHANCE, PASSIVE_DELTA,
                       PHRASES, STAT_EXACT_METRIC, STAT_METRIC, MetricPlan, PassiveTarget, classify, crit_plans,
-                      family_of, named_targets, passive_effects, passive_scenario, stat_after_token)
+                      family_of, literal_token, named_targets, passive_effects, passive_scenario, stat_after_token)
 from profile import CASTER, load_class_file, spell_power_label, stat_label
 from tooltip import Displayed, Records
 from values import TARGET, dataset
@@ -41,6 +41,10 @@ LIBRAMS = (801461, 801466, 805423)
 CONDEMNATION = 704175
 OATH_CONDEMN = 804922
 GRACEFUL_FIGHTER = 705303
+FINAL_PRAYER = 705268
+JUSTICAR_OF_THE_LIGHT = 707663
+JUSTICE = 712437
+SPIRITUAL_ABDICATOR = 803219
 AGGRAMARS_RAGE = 561346
 STURDY = 681009
 BLESSED_PADDING = 301311
@@ -221,6 +225,29 @@ class FixturePassiveTest(unittest.TestCase):
                                                          FIXTURE_SPELL, 1, True))
         effect = effects[0]
         self.assertEqual(effect.reason, 'unmodelled: aura 999 has no passive measurement')
+
+
+class LiteralTokenTest(unittest.TestCase):
+    def test_literal_token_resolves_a_textual_percent_claim(self):
+        class_file = {'literal_tokens': [{'spell': FINAL_PRAYER, 'effect': 0,
+                                          'quote': 'Doubles the healing done to you', 'value': 100}]}
+        token = literal_token(class_file, {FINAL_PRAYER}, 0,
+                              'Doubles the healing done to you by Testament of Fortitude.')
+        self.assertEqual(token.text, 'Doubles the healing done to you')
+        self.assertEqual(token.value, 100.0)
+        self.assertEqual(token.effect_index, 0)
+
+    def test_literal_token_without_a_matching_entry_returns_none(self):
+        class_file = {'literal_tokens': [{'spell': FINAL_PRAYER, 'effect': 0,
+                                          'quote': 'Doubles the healing done to you', 'value': 100}]}
+        self.assertIsNone(literal_token(class_file, {FINAL_PRAYER}, 1, 'anything'))
+        self.assertIsNone(literal_token(class_file, {999999}, 0, 'anything'))
+
+    def test_literal_token_requires_the_quote_in_the_tooltip(self):
+        class_file = {'literal_tokens': [{'spell': FINAL_PRAYER, 'effect': 0,
+                                          'quote': 'Doubles the healing done to you', 'value': 100}]}
+        with self.assertRaises(ValueError):
+            literal_token(class_file, {FINAL_PRAYER}, 0, 'Grants $s1% of one thing.')
 
 
 class AliasedTokenFixtureTest(unittest.TestCase):
@@ -443,6 +470,49 @@ class TemplarPassiveTest(unittest.TestCase):
         effect = effect_of(self.effects(CONDEMNATION), 1)
         self.assertEqual(effect.plans, ())
         self.assertEqual(effect.reason, 'unmodelled: SpellModOp 40 is not below MAX_SPELLMOD 32')
+
+    def test_final_prayer_effect_0_is_modelled_via_literal_token(self):
+        effect = effect_of(self.effects(FINAL_PRAYER), 0)
+        self.assertEqual(effect.reason, '')
+        self.assertEqual(effect.token.text, 'Doubles the healing done to you')
+        value_plan = plan_named(effect, 'spell_effect_value')
+        self.assertEqual(value_plan.fields, {'effect': 0})
+        modifier_plan = plan_named(effect, 'spell_modifier')
+        self.assertEqual(modifier_plan.fields['op'], 3)
+
+    def test_final_prayer_effect_1_stays_unmodelled_with_evidence(self):
+        effect = effect_of(self.effects(FINAL_PRAYER), 1)
+        self.assertTrue(effect.reason.startswith('unmodelled: no own token'), effect.reason)
+        self.assertIn('801478', effect.reason)
+        self.assertIn('behaviour_ratio', effect.reason)
+
+    def test_justicar_removes_cooldown_is_modelled_via_literal_token(self):
+        effect = effect_of(self.effects(JUSTICAR_OF_THE_LIGHT), 0)
+        self.assertEqual(effect.reason, '')
+        self.assertEqual(effect.token.text, 'Removes the cooldown from Benediction')
+        modifier_plan = plan_named(effect, 'spell_modifier')
+        self.assertEqual(modifier_plan.fields, {'op': 11, 'base': SPELL_MODIFIER_BASE})
+
+    def test_condemnation_effect_2_stays_unmodelled_with_evidence(self):
+        effect = effect_of(self.effects(CONDEMNATION), 2)
+        self.assertTrue(effect.reason.startswith('unmodelled: no own token'), effect.reason)
+        self.assertIn('SPELL_AURA_ABILITY_PERIODIC_CRIT', effect.reason)
+
+    def test_justice_effect_0_stays_unmodelled_with_evidence(self):
+        effect = effect_of(self.effects(JUSTICE), 0)
+        self.assertTrue(effect.reason.startswith('unmodelled: no own token'), effect.reason)
+        self.assertIn('SPELL_AURA_MOD_SILENCE', effect.reason)
+
+    def test_spiritual_abdicator_effect_0_stays_unmodelled_with_evidence(self):
+        effect = effect_of(self.effects(SPIRITUAL_ABDICATOR), 0)
+        self.assertTrue(effect.reason.startswith('unmodelled: no own token'), effect.reason)
+        self.assertIn('704409', effect.reason)
+
+    def test_graceful_fighter_and_holy_warstaff_dead_effects_stay_unmodelled_plainly(self):
+        self.assertEqual(effect_of(self.effects(GRACEFUL_FIGHTER), 2).reason,
+                         'unmodelled: no own token and no sibling token with equal points')
+        self.assertEqual(effect_of(self.effects(705307), 0).reason,
+                         'unmodelled: no own token and no sibling token with equal points')
 
     def test_rating_from_stat_reads_the_tooltip_stat(self):
         effects = self.effects(GRACEFUL_FIGHTER)

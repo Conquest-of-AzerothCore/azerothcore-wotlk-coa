@@ -26,6 +26,7 @@ RANK = 1001
 FIXED_POINTS = (0, 1)
 ROLLS = range(100, 110)
 RIGHTEOUS_UPHEAVAL = 501562
+FINAL_PRAYER = 705268
 SPELL = 1000
 HEADER = Path(__file__).resolve().parents[3] / 'src/server/coa/AscensionSpellProgressionData.h'
 SCOURGEBANE = 92111
@@ -1034,6 +1035,21 @@ class DbcTooltipsTest(unittest.TestCase):
         self.assertEqual(tooltips.effect_points(RIGHTEOUS_UPHEAVAL, 0), (71, 32))
         self.assertEqual(tooltips.read(RIGHTEOUS_UPHEAVAL, caster).values[0].value, 72 + 45)
         self.assertEqual(tooltips.read(RIGHTEOUS_UPHEAVAL, caster, (RIGHTEOUS_UPHEAVAL, 0, 7)).values[0].value, 7 + 45)
+
+    def test_literal_token_entries_are_read_alongside_the_dollar_tokens(self):
+        tooltips = DbcTooltips(DBC_DIR, CLASS_FILE)
+        caster = CasterStats(level=60, ap=100.0, rap=0.0, sp_by_school={school: 0.0 for school in range(1, 7)},
+                             stats={stat: 0.0 for stat in range(5)})
+        values = tooltips.read(FINAL_PRAYER, caster).values
+        literal = next(value for value in values if value.text == 'Doubles the healing done to you')
+        self.assertEqual((literal.value, literal.effect_index), (100.0, 0))
+
+    def test_literal_token_entries_are_absent_for_a_spell_without_one(self):
+        tooltips = DbcTooltips(DBC_DIR, CLASS_FILE)
+        caster = CasterStats(level=60, ap=100.0, rap=0.0, sp_by_school={school: 0.0 for school in range(1, 7)},
+                             stats={stat: 0.0 for stat in range(5)})
+        values = tooltips.read(RIGHTEOUS_UPHEAVAL, caster).values
+        self.assertFalse(any(value.text == 'Doubles the healing done to you' for value in values))
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
