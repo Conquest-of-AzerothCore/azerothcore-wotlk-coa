@@ -10,6 +10,7 @@
 #include "Mail.h"
 #include "Map.h"
 #include "MapMgr.h"
+#include "PlayerScript.h"
 #include "Player.h"
 #include "ScriptedGossip.h"
 #include "SetisLoot.h"
@@ -174,6 +175,25 @@ namespace coa_world_boss_instance
         Config const& _config;
     };
 
+    class revive : public PlayerScript
+    {
+    public:
+        revive(char const* name, Config const& config)
+            : PlayerScript(name, {PLAYERHOOK_ON_PLAYER_RESURRECT}), _config(config) { }
+
+        // Brought back at the entrance, a player faces the way the shrine sends them in.
+        void OnPlayerResurrect(Player* player, float /*restorePercent*/, bool& /*applySickness*/) override
+        {
+            Position const& at = _config.entrance;
+            if (player->GetMapId() == _config.bossMap && player->GetExactDist2d(&at) < 30.0f)
+                player->NearTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(),
+                    at.GetOrientation());
+        }
+
+    private:
+        Config const& _config;
+    };
+
     inline void AddScripts(char const* altar, char const* exit, char const* leave, char const* death,
         Config const& config)
     {
@@ -181,6 +201,7 @@ namespace coa_world_boss_instance
         new go_exit(exit, config);
         new go_exit(leave, config);
         new boss_death(death, config);
+        new revive((std::string(death) + "_revive").c_str(), config);
     }
 }
 
