@@ -4187,6 +4187,12 @@ private:
                 }
             return nearest;
         }
+        if (metric == "nearby_creature_orientation")
+        {
+            Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f);
+            Require(creature != nullptr, "Orientation needs an existing nearby creature");
+            return creature->GetOrientation();
+        }
         if (metric == "nearby_creature_count")
         {
             std::list<Creature*> creatures;

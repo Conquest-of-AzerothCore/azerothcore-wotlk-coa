@@ -133,7 +133,8 @@ METRICS = TIMELINE_METRICS | {
     'carried_item_stat',
     'nearby_gameobject_count', 'nearby_gameobject_quest_active', 'nearby_gameobject_state', 'nearby_gameobject_scale',
     'nearby_gameobject_display', 'nearby_gameobject_ground_offset', 'nearby_gameobject_orientation',
-    'nearby_creature_count', 'nearest_creature_distance', 'map_creature_count', 'map_creatures_below_floor',
+    'nearby_creature_count', 'nearest_creature_distance', 'nearby_creature_orientation', 'map_creature_count',
+    'map_creatures_below_floor',
     'nearby_gameobject_at_client',
     'voidportal_group',
     'carried_money',
@@ -981,7 +982,7 @@ def validate(scenario):
                             f'{where}.entries must be a non-empty list')
                     for index, entry in enumerate(step['entries']):
                         number(entry, f'{where}.entries[{index}]', 1, 2**32 - 1, True)
-            if metric == 'nearest_creature_distance':
+            if metric in {'nearest_creature_distance', 'nearby_creature_orientation'}:
                 require(step['actor'] in player_ids, f'{where}: creature distance needs a player')
                 number(step.get('entry'), f'{where}.entry', 1, 2**32 - 1, True)
             if metric == 'map_creatures_below_floor':
