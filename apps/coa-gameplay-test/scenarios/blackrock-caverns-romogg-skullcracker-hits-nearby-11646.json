@@ -90,6 +90,11 @@
       "z": 191.8
     },
     {
+      "action": "set_phase",
+      "actor": "far",
+      "value": 2
+    },
+    {
       "action": "wait",
       "ms": 1500
     },
