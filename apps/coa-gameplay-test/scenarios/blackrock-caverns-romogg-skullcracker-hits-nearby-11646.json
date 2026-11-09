@@ -8,12 +8,11 @@
   ],
   "timeout_ms": 120000,
   "location": {
-    "map": 645,
-    "x": 225.0,
-    "y": 949.0,
-    "z": 191.2,
-    "o": 3.14,
-    "ignore_access": true
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
   },
   "players": [
     {
@@ -41,25 +40,62 @@
       "ms": 1000
     },
     {
+      "action": "group",
+      "actor": "tank",
+      "target": "near"
+    },
+    {
+      "action": "group",
+      "actor": "tank",
+      "target": "far"
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 645,
+      "x": 225.0,
+      "y": 949.0,
+      "z": 191.2,
+      "o": 3.14,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "near",
+      "map": 645,
+      "x": 225.0,
+      "y": 949.0,
+      "z": 191.2,
+      "o": 3.14,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "far",
+      "map": 645,
+      "x": 225.0,
+      "y": 949.0,
+      "z": 191.2,
+      "o": 3.14,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "label": "CONTROL: the three share one instance",
+      "action": "assert",
+      "actor": "near",
+      "metric": "map_id",
+      "equals": 645,
+      "within_ms": 10000
+    },
+    {
       "action": "set_health",
       "actor": "tank",
       "value": 50000000,
       "maximum": 50000000
-    },
-    {
-      "action": "set_phase",
-      "actor": "tank",
-      "value": 2
-    },
-    {
-      "action": "set_phase",
-      "actor": "near",
-      "value": 2
-    },
-    {
-      "action": "set_phase",
-      "actor": "far",
-      "value": 2
     },
     {
       "action": "summon",
@@ -111,12 +147,8 @@
       "map": 645,
       "x": 249.3,
       "y": 949.2,
-      "z": 191.8
-    },
-    {
-      "action": "set_phase",
-      "actor": "far",
-      "value": 2
+      "z": 191.8,
+      "ignore_access": true
     },
     {
       "action": "set_health",
