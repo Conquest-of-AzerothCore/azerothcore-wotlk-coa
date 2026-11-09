@@ -82,7 +82,15 @@ ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId
   `size` = VALUES(`size`);
 
 -- The icicles look like his hail shards, bigger: a cluster of ice crystals.
-UPDATE `gameobject_template` SET `displayId` = 8324, `size` = 2 WHERE `entry` = 978098;
+UPDATE `gameobject_template` SET `displayId` = 8324, `size` = 1 WHERE `entry` = 978098;
 
 -- His hitbox is as wide as he is.
 UPDATE `creature_model_info` SET `BoundingRadius` = 10, `CombatReach` = 15 WHERE `DisplayID` = 142079;
+
+-- His selection circle as wide as his hitbox: his model's collision width, sent to the client.
+REPLACE INTO `creaturemodeldata_dbc` (`ID`, `Flags`, `ModelName`, `SizeClass`, `ModelScale`, `BloodID`, `FootprintTextureID`,
+  `FootprintTextureLength`, `FootprintTextureWidth`, `FootprintParticleScale`, `FoleyMaterialID`,
+  `FootstepShakeSize`, `DeathThudShakeSize`, `SoundID`, `CollisionWidth`, `CollisionHeight`, `MountHeight`,
+  `GeoBoxMinX`, `GeoBoxMinY`, `GeoBoxMinZ`, `GeoBoxMaxX`, `GeoBoxMaxY`, `GeoBoxMaxZ`, `WorldEffectScale`,
+  `AttachedEffectScale`, `MissileCollisionRadius`, `MissileCollisionPush`, `MissileCollisionRaise`) VALUES
+(113990, 0, 'Creature\\korrim\\korrim.m2', 3, 1.0, 3, 1, 18.0, 12.0, 1.0, 0, 2, 11, 193, 4.0, 2.083, 0.0, -2.2947, -4.1475, -0.0213, 2.4742, 4.0076, 7.679, 1.0, 0.75, 0.0, 0.0, 0.0);

@@ -613,6 +613,8 @@ namespace
     constexpr float HUDDLE_RANGE      = 5.0f;   // close enough to share Body Heat
     constexpr uint8 HAIL_VOLLEYS      = 12;  // one shard every quarter second through the 3s channel
     constexpr float HAIL_RADIUS       = 5.0f;
+    constexpr float RING_THROW_XY     = 8.0f;   // about six yards, onto the next ring
+    constexpr float RING_THROW_Z      = 4.0f;
     constexpr uint8 GRASP_RINGS       = 8;
 
     struct boss_snowgrave_coa : public custom_world_boss_coa
@@ -845,14 +847,13 @@ namespace
                         if (std::none_of(onRing.begin(), onRing.end(),
                                 [&](Player* p) { return p->GetExactDist2d(&pos) < 6.0f; }))
                             CastAt(pos, SPELL_ICE_SPIKE);
-                    // Everyone on the ring is hit, and thrown outward onto the next ring, six yards out.
+                    // Everyone on the ring is hit and thrown outward onto the next ring, six yards out. No spell
+                    // effect per player: a full raid on one ring would flood the clients with spikes.
+                    int32 const spike = Info(me, SPELL_ICE_SPIKE);
                     for (Player* p : onRing)
                     {
-                        float const a = me->GetAngle(p);
-                        Position from = p->GetPosition();
-                        from.m_positionX -= 2.0f * std::cos(a);
-                        from.m_positionY -= 2.0f * std::sin(a);
-                        CastAt(from, SPELL_ICE_SPIKE);
+                        Hit(me, p, SPELL_ICE_SPIKE, spike);
+                        p->KnockbackFrom(me->GetPositionX(), me->GetPositionY(), RING_THROW_XY, RING_THROW_Z);
                     }
                     break;
                 }
