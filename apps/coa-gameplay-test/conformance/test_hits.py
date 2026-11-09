@@ -664,6 +664,17 @@ class HitScenarioTest(unittest.TestCase):
         self.assertEqual((hit.check, hit.effect_index, hit.model['kind']), ('hit_mean', 0, 'periodic_damage'))
         self.assertTrue(steps_with(scenario, metric='spell_damage_total', spell=BLADE_OF_FAITH_MAX_RANK))
 
+    def test_periodic_total_check_is_measured_on_a_non_max_rank(self):
+        label = f'{BLADE_OF_FAITH} effect_value #0'
+        parts = hit_parts(self.templar, self.spells[BLADE_OF_FAITH], 1, rank_id=BLADE_OF_FAITH, label=label,
+                          check='periodic_total')
+        scenario, expectations = parts[0]
+        run.validate(scenario)
+        hit = next(expectation for expectation in expectations if expectation.check == 'periodic_total')
+        self.assertEqual((hit.check, hit.label, hit.rank_id), ('periodic_total', label, BLADE_OF_FAITH))
+        self.assertTrue(steps_with(scenario, metric='spell_damage_total', spell=BLADE_OF_FAITH, critical=False))
+        self.assertTrue(steps_with(scenario, metric='spell_damage_count', spell=BLADE_OF_FAITH, critical=False))
+
     def test_a_periodic_token_that_is_neither_a_total_nor_one_tick_is_unmodelled(self):
         readout = Readout(values=[Displayed('${($d*1000/$T1)+1}', 11, 0, 'flat', BLADE_OF_FAITH_MAX_RANK)],
                           unreadable=[])

@@ -67,14 +67,46 @@ def unmodelled(label: str, spell: ClassSpell, reason: str) -> list[Expectation]:
     return [Expectation(label, 'unmodelled', spell.spell_id, spell.max_rank, None, '', UNMODELLED + reason)]
 
 
+def add_periodic_total(writer: ManifestWriter, spell: ClassSpell, rank_id: int, item: dict):
+    class_file = writer.class_file
+    key = scenario_key(class_file['name'], 'periodic-total', rank_id)
+    try:
+        casts = casts_needed(reference_hit_model(class_file, rank_id))
+    except Unmodelled as error:
+        writer.add(key, 'periodic_total', spell, rank_id,
+                  [Expectation(item['label'], 'unmodelled', spell.spell_id, rank_id, item['effect'], '',
+                               UNMODELLED + error.reason)])
+        return
+    except ValueError as error:
+        writer.add(key, 'periodic_total', spell, rank_id,
+                  [Expectation(item['label'], 'unmodelled', spell.spell_id, rank_id, item['effect'], '',
+                               UNMODELLED + str(error))])
+        return
+    try:
+        parts = hit_parts(class_file, spell, casts, rank_id=rank_id, label=item['label'], check='periodic_total')
+    except ValueError as error:
+        writer.add(key, 'periodic_total', spell, rank_id,
+                  [Expectation(item['label'], 'unmodelled', spell.spell_id, rank_id, item['effect'], '',
+                               UNMODELLED + str(error))])
+        return
+    if len(parts) == 1:
+        scenario, expectations = parts[0]
+        writer.add(key, 'periodic_total', spell, rank_id, expectations, scenario)
+        return
+    for part, (scenario, expectations) in enumerate(parts, start=1):
+        writer.add(f'{key}-part-{part}', 'periodic_total', spell, rank_id, expectations, scenario)
+
+
 def add_values(writer: ManifestWriter, spell: ClassSpell, dbc_dir: Path):
     class_file = writer.class_file
     for rank_id in spell.ranks:
-        scenario, expectations = value_scenario(class_file, spell, rank_id)
+        scenario, expectations, periodic_totals = value_scenario(class_file, spell, rank_id)
         armed_file = armed_for(class_file, records_of(class_file), rank_id)
         readout = read_tooltip(dataset(dbc_dir), rank_id, structure_stats(armed_file))
         writer.add(scenario_key(class_file['name'], 'value', rank_id), 'value', spell, rank_id, expectations,
                    scenario, [value.text for value in readout.values])
+        for item in periodic_totals:
+            add_periodic_total(writer, spell, rank_id, item)
 
 
 def add_hit(writer: ManifestWriter, spell: ClassSpell):

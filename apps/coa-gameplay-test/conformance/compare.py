@@ -45,7 +45,8 @@ TOKEN_CHECKS = frozenset({'effect_value', 'aura_amount', 'aura_duration_ms', 'ma
                           'effect_radius', 'aura_amplitude_ms'})
 ROLLED_CHECKS = frozenset({'effect_value', 'aura_amount'})
 ROLL_SPREAD = 'roll_spread'
-HIT_CHECKS = frozenset({'hit_mean', 'melee_mean'})
+PERIODIC_TOTAL = 'periodic_total'
+HIT_CHECKS = frozenset({'hit_mean', 'melee_mean', PERIODIC_TOTAL})
 READ_RULE = 'read '
 ORDINAL = re.compile(r'#(\d+)$')
 DIVIDED_TOKEN = re.compile(r'\$/(\d+);')
@@ -537,8 +538,14 @@ def judge_hit(base: Verdict, class_file: dict, parts: list[ProcPart], hit_model:
     status = 'ok' if low - FLOAT_EPSILON <= mean <= high + FLOAT_EPSILON else 'alert'
     first = models[0][0]
     modifiers = ' or '.join(dict.fromkeys(describe_modifiers(expected.modifiers) for expected, _ in models))
+    kind_term = 'mean'
+    if expectation.check == PERIODIC_TOTAL:
+        ticks = model['hits_per_cast']
+        mean, expected_mean, half = mean * ticks, expected_mean * ticks, half * ticks
+        low, high = expected_mean - half, expected_mean + half
+        kind_term = f'total over {ticks} ticks'
     return replace(base, status=status, measured=mean, expected=expected_mean, low=low, high=high,
-                   explanation=f'{count:g} usable hits; {first.kind} model mean {expected_mean:.3f} sigma '
+                   explanation=f'{count:g} usable hits; {first.kind} model {kind_term} {expected_mean:.3f} sigma '
                                f'{math.sqrt(variance):.3f} from the measured stats and target, 99% interval of the '
                                f'mean; tooltip mean {first.tooltip_mean:.2f} (display only); modifiers '
                                f'{modifiers}{notes}{failures}')

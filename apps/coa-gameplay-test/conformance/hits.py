@@ -16,7 +16,7 @@ from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, DUMM
                     closes_distance, dataset, equip_requirement, facts_of, required_aura_steps,
                     required_target_health_steps, targets_ally)
 
-HIT_CHECKS = ('hit_mean', 'melee_mean', 'unmodelled')
+HIT_CHECKS = ('hit_mean', 'melee_mean', 'periodic_total', 'unmodelled')
 UNMODELLED = 'unmodelled: '
 CLOSED = 'closed: '
 NEVER_CAST = 'passive spell is never cast'
@@ -673,11 +673,12 @@ def hit_note(class_file: dict, spell_ids: set[int]) -> str | None:
     return entry['reason'] if entry else None
 
 
-def hit_parts(class_file: dict, spell: ClassSpell, casts: int) -> list[tuple[dict, list[Expectation]]]:
+def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | None = None,
+             label: str | None = None, check: str = 'hit_mean') -> list[tuple[dict, list[Expectation]]]:
     if casts < 1:
         raise ValueError(f'{spell.name} needs at least one cast, not {casts}')
-    rank_id = spell.max_rank
-    label = f'{rank_id} hit_mean'
+    rank_id = spell.max_rank if rank_id is None else rank_id
+    label = f'{rank_id} hit_mean' if label is None else label
     name = f'Conformance hit {class_file["name"]} {spell.name} {rank_id}'
     contract = 'Mean non-critical hit of the highest rank against its tooltip, its known modifiers and mitigation.'
     learn = [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
@@ -706,7 +707,7 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int) -> list[tuple[dic
     rule = (f'{model.kind} hit{source}{order}, integer steps modelled'
             f'{weapon_note(class_file, armed_file, records, rank_id)}')
     record = {**model_record(model, hit.school_mask, weapon, labels, casts), 'hit_spell': hit.hit_spell}
-    unreadable = [Expectation(f'{label} unreadable #{ordinal}', 'hit_mean', spell.spell_id, rank_id, None, entry,
+    unreadable = [Expectation(f'{label} unreadable #{ordinal}', check, spell.spell_id, rank_id, None, entry,
                               UNREADABLE + entry) for ordinal, entry in enumerate(hit.readout.unreadable)]
     cast_target = TARGET if hostile else (ALLY if ally else None)
     cast_fixtures = [{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}] \
@@ -723,7 +724,7 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int) -> list[tuple[dic
             scenario['creatures'] = [creature_fixture(armed_file)]
         if ally:
             scenario['players'].append({**player_fixture(armed_file), 'id': ALLY})
-        expectation = Expectation(label, 'hit_mean', spell.spell_id, rank_id, hit.indexes[0],
+        expectation = Expectation(label, check, spell.spell_id, rank_id, hit.indexes[0],
                                   ' | '.join(model.displayed), rule,
                                   {**record, 'part': part, 'parts': len(shares), 'part_casts': performed})
         parts.append((timed(scenario, SETTLE_MS + performed * interval + DRAIN_MS),

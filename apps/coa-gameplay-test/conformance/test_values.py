@@ -238,10 +238,12 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
                            for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER, extra_spells=extra)}
 
     def build(self, spell_id, rank_id):
-        return value_scenario(self.class_file, self.spells[spell_id], rank_id)
+        scenario, expectations, _ = value_scenario(self.class_file, self.spells[spell_id], rank_id)
+        return scenario, expectations
 
     def build_extra(self, spell_id, rank_id):
-        return value_scenario(self.class_file, self.extra_spells[spell_id], rank_id)
+        scenario, expectations, _ = value_scenario(self.class_file, self.extra_spells[spell_id], rank_id)
+        return scenario, expectations
 
     def test_rank_two_of_argent_blade_learns_the_rank_and_passes_the_harness_validator(self):
         scenario, expectations = self.build(ARGENT_BLADE, ARGENT_BLADE_RANK_2)
@@ -391,11 +393,11 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         self.assertEqual((step['metric'], step['spell'], step['effect']), ('spell_effect_value', LIBERTY, 0))
 
     def test_periodic_total_is_left_to_the_hit_scenario(self):
-        scenario, expectations = self.build(BLADE_OF_FAITH, BLADE_OF_FAITH_MAX_RANK)
-        item, = [item for item in expectations if item.displayed == BLADE_OF_FAITH_TOTAL]
-        reason = 'a total over the ticks of periodic effect 0; the hit scenario judges one tick'
-        self.assertEqual((item.check, item.rule), ('effect_value', UNMEASURABLE + reason))
-        self.assertFalse(self.steps_of(scenario, item.label))
+        scenario, expectations, periodic_totals = value_scenario(self.class_file, self.spells[BLADE_OF_FAITH],
+                                                                  BLADE_OF_FAITH_MAX_RANK)
+        self.assertFalse([item for item in expectations if item.displayed == BLADE_OF_FAITH_TOTAL])
+        self.assertEqual(periodic_totals, [{'label': f'{BLADE_OF_FAITH_MAX_RANK} effect_value #0', 'effect': 0}])
+        self.assertFalse(self.steps_of(scenario, periodic_totals[0]['label']))
 
     def test_own_amplitude_token_is_measured_after_a_cast(self):
         scenario, expectations = self.build(RIGHTEOUS_TEMPEST, RIGHTEOUS_TEMPEST_MAX_RANK)
@@ -521,9 +523,10 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         self.assertEqual(unreadable, [UNREADABLE + 'tooltip without value'])
 
     def test_every_templar_rank_has_a_valid_scenario_and_no_dropped_expectation(self):
+        all_periodic_total_labels = []
         for spell in self.spells.values():
             for rank_id in spell.ranks:
-                scenario, expectations = value_scenario(self.class_file, spell, rank_id)
+                scenario, expectations, periodic_totals = value_scenario(self.class_file, spell, rank_id)
                 run.validate(scenario)
                 labels = [item.label for item in expectations]
                 self.assertEqual(len(labels), len(set(labels)), rank_id)
@@ -536,6 +539,10 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
                         self.assertTrue(item.rule.startswith((UNREADABLE, UNMEASURABLE)), (rank_id, item))
                     step_labels = [step.get('label') for step in scenario['steps']]
                     self.assertLessEqual(step_labels.count(item.label), 1, (rank_id, item.label))
+                total_labels = [item['label'] for item in periodic_totals]
+                self.assertFalse(set(total_labels) & set(labels), rank_id)
+                all_periodic_total_labels += total_labels
+        self.assertEqual(len(all_periodic_total_labels), len(set(all_periodic_total_labels)))
 
 
 class ForeignEffectFixtureTest(unittest.TestCase):

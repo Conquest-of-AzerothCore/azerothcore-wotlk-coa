@@ -280,6 +280,9 @@ def foreign_duration(rank_id: int, shown: Displayed) -> int | None:
     return foreign_counter(OWN_DURATION, rank_id, shown)
 
 
+OVER_TICKS_REASON = 'a total over the ticks of periodic effect'
+
+
 def periodic_reason(records: Records, rank_id: int, caster: CasterStats, shown: Displayed) -> str:
     effect = shown.effect_index
     aura = records.field('Spell', rank_id, f'EffectApplyAuraName[{effect}]')
@@ -290,7 +293,7 @@ def periodic_reason(records: Records, rank_id: int, caster: CasterStats, shown: 
     except Unreadable as error:
         return error.reason
     if reading == OVER_TICKS:
-        return f'a total over the ticks of periodic effect {effect}; the hit scenario judges one tick'
+        return f'{OVER_TICKS_REASON} {effect}; the hit scenario judges one tick'
     if reading == MIXED_PERIOD:
         return mixed_period_reason(shown.text, effect)
     return ''
@@ -325,7 +328,8 @@ def sampled_reads(measured: list[dict], rolled: dict[str, int], budget: int) -> 
     return steps, samples
 
 
-def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[dict, list[Expectation]]:
+def value_scenario(class_file: dict, spell: ClassSpell,
+                   rank_id: int) -> tuple[dict, list[Expectation], list[dict]]:
     if rank_id not in spell.ranks:
         raise ValueError(f'Spell {rank_id} is not a rank of {spell.spell_id}')
     dbc = dataset(Path(class_file.get('dbc_dir', DBC_DIR)))
@@ -337,6 +341,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
     measured: list[dict] = []
     after_cast: list[dict] = []
     expectations: list[Expectation] = []
+    periodic_totals: list[dict] = []
     cast_wanted = False
     first_effect = next((effect for effect in EFFECTS if facts.effects[effect]), None)
     rolled: dict[str, int] = {}
@@ -361,7 +366,11 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
         periodic = (periodic_reason(records, rank_id, caster, shown)
                    if effect is not None and shown.kind in EFFECT_KINDS else '')
         if periodic:
-            expect(f'{rank_id} effect_value #{ordinal}', 'effect_value', effect, shown.text, UNMEASURABLE + periodic)
+            label = f'{rank_id} effect_value #{ordinal}'
+            if periodic.startswith(OVER_TICKS_REASON):
+                periodic_totals.append({'label': label, 'effect': effect})
+            else:
+                expect(label, 'effect_value', effect, shown.text, UNMEASURABLE + periodic)
             continue
         if shown.kind in EFFECT_KINDS and effect is not None and facts.effects[effect]:
             label = f'{rank_id} effect_value e{effect} #{ordinal}'
@@ -514,4 +523,4 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
                                   'health': DUMMY_HEALTH, 'distance': DUMMY_DISTANCE}]
     if targets_resurrect(facts) and cast_wanted:
         scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
-    return scenario, expectations
+    return scenario, expectations, periodic_totals

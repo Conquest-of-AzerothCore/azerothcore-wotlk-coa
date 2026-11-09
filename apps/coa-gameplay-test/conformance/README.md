@@ -13,8 +13,8 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
   measured `CasterStats` and returns `Readout(values, unreadable)`.
 - `profile.py`: the reference character of a class file and `base_steps(class_file)`, the steps every scenario starts
   with. Its name shadows the standard library `profile`: run the package from its own directory.
-- `values.py`: `value_scenario(class_file, spell, rank_id)` returns the no-combat scenario of one rank and its
-  `Expectation` list.
+- `values.py`: `value_scenario(class_file, spell, rank_id)` returns the no-combat scenario of one rank, its
+  `Expectation` list, and the `periodic_totals` of any `OVER_TICKS` token deferred to a companion scenario (below).
 - `passives.py`: `passive_effects(class_file, spell)` classifies each effect of a passive into a family, its expected
   token, its metric plans and, for a spell modifier, its targets (see [Passive effects](#passive-effects));
   `passive_scenario(class_file, spell)` returns its with/without scenario, or `None` when no effect is measured, and
@@ -743,9 +743,19 @@ value doubles, then halves, `tick` when it does not change, and `mixed` otherwis
 context (the token alone), so a token whose value depends on the text after it (`$/1000;s1 sec` is ms only before
 `sec`) is compared with itself. `periodic_tick_readout` divides a total into one
 tick, `total x period / duration`: Blade of Faith 803880's `${($d*1000/$T1)*($m1+0+$SP*.2+$AP*0.1)}` is ten ticks,
-and its tick is the total x 3000 / 30000. A `mixed` token (`${($d*1000/$T1)+1}`) is `unmodelled`. In the
-no-combat scenario such a total or `mixed` token is `unmeasurable` (`a total over the ticks of periodic effect <n>;
-the hit scenario judges one tick`): `spell_effect_value` and `aura_amount` are one tick. Only effects that tick are
+and its tick is the total x 3000 / 30000. A `mixed` token (`${($d*1000/$T1)+1}`) is `unmodelled`, and in the
+no-combat scenario it is `unmeasurable` (`a total over the ticks of periodic effect <n>; the hit scenario judges one
+tick`): `spell_effect_value` and `aura_amount` are one tick. A `total` token is not left unmeasurable: the
+no-combat scenario (`value_scenario`) hands it back as a third return value, `periodic_totals`
+(`[{'label': ..., 'effect': ...}]`, same label the `effect_value` expectation would otherwise have used), and
+`add_periodic_total` (`conformance.py`) builds a companion `periodic_total` scenario for that rank from
+`hit_parts(..., rank_id=<rank>, label=..., check='periodic_total')`: it casts the rank, waits its full tick
+duration, and reuses the `hit_mean` non-crit per-tick mean (`spell_damage_total`/`_count` or
+`spell_heal_total`/`_count`, `critical: False`) and its 99% interval. `judge_hit` scales `mean`, `expected_mean`
+and the interval half-width by `model['hits_per_cast']` (the DBC tick count) for a `periodic_total` check only, so
+the `ok`/`alert` boundary is exactly the one the per-tick comparison would have given (both sides of the interval
+are multiplied by the same positive constant); only the reported numbers and wording ("total over N ticks" instead
+of "mean") change. Only effects that tick are
 read this way: an aura the server makes periodic (`AuraEffect::CalculatePeriodic`, `SpellAuraEffects.cpp:682-702`:
 3, 8, 20, 21, 23, 24, 48, 53, 62, 64, 89, 162, 226, 227) with a positive `EffectAmplitude`. Rapid 680323 (aura 107,
 amplitude 1500) keeps its `$/1000;s1` as an `effect_value` in ms.

@@ -38,6 +38,8 @@ HIT_KEY = 'conformance-templar-hit-1001'
 CLASS_TUNING = Modifier(spell_id=887007, effect_index=0, aura=341, percent=-20, applies_to='damage', school_mask=127)
 HIT_LABELS = {'armor': 'target armor', 'view_level': 'target view_level', 'total': '1001 hit_mean total',
               'count': '1001 hit_mean count'}
+PERIODIC_TOTAL_LABEL = '1001 effect_value #0'
+PERIODIC_TOTAL_LABELS = {'total': f'{PERIODIC_TOTAL_LABEL} total', 'count': f'{PERIODIC_TOTAL_LABEL} count'}
 BASE_ACTUALS = {'attack_power': '313', 'ranged_attack_power': '182', 'spell_power 1': '0', 'spell_power 2': '0',
                 'spell_power 3': '0', 'spell_power 4': '0', 'spell_power 5': '0', 'spell_power 6': '0',
                 'stat 0': '81', 'stat 1': '132', 'stat 2': '79', 'stat 3': '32', 'stat 4': '50',
@@ -64,6 +66,13 @@ def hit_model_record(minimum_hits=4):
             'hits_per_cast': 1, 'reference': {'mean': 543.2, 'sigma': 1.72, 'tooltip_mean': 746.33,
                                               'casts_needed': 1},
             'minimum_hits': minimum_hits, 'scheduled_casts': 6, 'measurements': HIT_LABELS}
+
+
+def periodic_total_model_record(minimum_hits=4, hits_per_cast=10):
+    return {'kind': 'periodic_damage', 'school_mask': 2, 'weapon': None, 'modifiers': [],
+            'hits_per_cast': hits_per_cast, 'reference': {'mean': 100.0, 'sigma': 5.0, 'tooltip_mean': 1000.0,
+                                                          'casts_needed': 1},
+            'minimum_hits': minimum_hits, 'scheduled_casts': 6, 'measurements': PERIODIC_TOTAL_LABELS}
 
 
 class Workspace:
@@ -146,6 +155,14 @@ def constant_reader(*values, points=None):
 def reference_hit(class_file, expectation, measured):
     return HitModel(kind='weapon', mean=543.2, sigma=1.72, tooltip_mean=746.33, modifiers=(CLASS_TUNING,),
                     displayed=('$s2', '${$AP*0.4725+$sph*1.35+$m1+0}'))
+
+
+PERIODIC_TOTAL_TOKEN = '${($d*1000/$T1)*($m1+0+$SP*.2+$AP*0.1)}'
+
+
+def periodic_reference_hit(class_file, expectation, measured):
+    return HitModel(kind='periodic_damage', mean=100.0, sigma=5.0, tooltip_mean=1000.0, hits_per_cast=10,
+                    displayed=(PERIODIC_TOTAL_TOKEN,))
 
 
 class CompareTest(unittest.TestCase):
@@ -550,6 +567,36 @@ class CompareTest(unittest.TestCase):
         verdict = self.hit_verdict('4074', '4')
         self.assertEqual((verdict.status, verdict.measured), ('alert', 1018.5))
         self.assertIn('746.33', verdict.explanation)
+
+    def periodic_verdict(self, total, count, hits_per_cast=10, minimum_hits=4):
+        label = PERIODIC_TOTAL_LABEL
+        entry = expectation(label, 'periodic_total', PERIODIC_TOTAL_TOKEN, 'periodic_damage hit', 0,
+                            periodic_total_model_record(minimum_hits, hits_per_cast))
+        steps = [assert_step(PERIODIC_TOTAL_LABELS['total'], total), assert_step(PERIODIC_TOTAL_LABELS['count'], count)]
+        self.workspace.scenario(HIT_KEY, 'periodic_total', [entry], [], steps)
+        return {verdict.label: verdict for verdict in self.verdicts(hit_model=periodic_reference_hit)}[label]
+
+    def test_periodic_total_with_a_zeroed_effect_is_an_alert(self):
+        verdict = self.periodic_verdict('0', '40')
+        self.assertEqual((verdict.status, verdict.measured), ('alert', 0.0))
+
+    def test_periodic_total_inside_the_99_percent_interval_is_ok(self):
+        verdict = self.periodic_verdict('4000', '40')
+        self.assertEqual((verdict.status, verdict.measured, verdict.expected), ('ok', 1000.0, 1000.0))
+
+    def test_periodic_total_scales_the_hit_mean_result_by_its_tick_count(self):
+        base = self.hit_verdict('2172', '4')
+        self.fresh()
+        ticks = 10
+        label = '1001 periodic_total'
+        record = {**hit_model_record(4), 'hits_per_cast': ticks, 'measurements': PERIODIC_TOTAL_LABELS}
+        entry = expectation(label, 'periodic_total', '$s2 | ${$AP*0.4725+$sph*1.35+$m1+0}', 'weapon hit', 0, record)
+        steps = [assert_step(PERIODIC_TOTAL_LABELS['total'], '2172'), assert_step(PERIODIC_TOTAL_LABELS['count'], '4')]
+        self.workspace.scenario(HIT_KEY, 'hit', [entry], [], steps)
+        scaled = {verdict.label: verdict for verdict in self.verdicts()}[label]
+        self.assertEqual(scaled.status, base.status)
+        for attr in ('measured', 'expected', 'low', 'high'):
+            self.assertAlmostEqual(getattr(scaled, attr), getattr(base, attr) * ticks)
 
     def fail_casts(self, key, spell, *reasons):
         self.workspace.cast_failures[key] = [{'cast_count': str(count), 'spell': str(spell), 'reason': reason,
@@ -1107,7 +1154,7 @@ class GeneratedTokenTest(unittest.TestCase):
         self.workspace.close()
         self.workspace = Workspace()
         spell = self.spells[spell_id]
-        scenario, expectations = value_scenario(CLASS_FILE, spell, spell_id)
+        scenario, expectations, _ = value_scenario(CLASS_FILE, spell, spell_id)
         item = next(item for item in expectations if item.displayed == displayed)
         tokens = [value.text for value in read_tooltip(self.tooltips.dbc, spell_id, structure_stats(CLASS_FILE)).values]
         self.workspace.scenario(f'conformance-templar-value-{spell_id}', 'value', expectations, tokens,
