@@ -49,9 +49,12 @@
 #include "ItemScript.h"
 #include "ScriptedGossip.h"
 #include <cmath>
+#include "GameObject.h"
 #include "Group.h"
 #include "InstanceScript.h"
 #include "Item.h"
+#include "LootMgr.h"
+#include "MiscScript.h"
 #include "LFGMgr.h"
 #include "Log.h"
 #include "Map.h"
@@ -1473,6 +1476,53 @@ public:
         std::lock_guard<std::recursive_mutex> guard(g_lock);
         if (Run* run = RunFor(map); run && run->Active())
             ApplyPlayerAffixes(player, *run);
+    }
+};
+
+class coa_mythic_plus_chest_loot : public MiscScript
+{
+public:
+    coa_mythic_plus_chest_loot() : MiscScript("coa_mythic_plus_chest_loot", { MISCHOOK_ON_AFTER_LOOT_TEMPLATE_PROCESS })
+    { }
+
+    void OnAfterLootTemplateProcess(Loot* loot, LootTemplate const*, LootStore const& store, Player* owner, bool, bool,
+        uint16) override
+    {
+        if (!loot || !owner || &store != &LootTemplates_Gameobject
+            || !sConfigMgr->GetOption<bool>("MythicPlus.NoCreatureLoot", true))
+            return;
+        GameObject* chest = ObjectAccessor::GetGameObject(*owner, loot->sourceWorldObjectGUID);
+        if (!chest || chest->GetGoType() != GAMEOBJECT_TYPE_CHEST || IsGathered(chest))
+            return;
+        std::lock_guard<std::recursive_mutex> guard(g_lock);
+        Run const* run = RunFor(owner->GetMap());
+        if (!run || !run->Active())
+            return;
+        loot->items.clear();
+        loot->quest_items.clear();
+        loot->unlootedCount = 0;
+        loot->gold = 0;
+    }
+
+private:
+    static bool IsGathered(GameObject const* chest)
+    {
+        LockEntry const* lock = sLockStore.LookupEntry(chest->GetGOInfo()->GetLockId());
+        if (!lock)
+            return false;
+        for (uint8 i = 0; i < MAX_LOCK_CASE; ++i)
+            if (lock->Type[i] == LOCK_KEY_SKILL)
+                switch (lock->Index[i])
+                {
+                    case LOCKTYPE_PICKLOCK:
+                    case LOCKTYPE_HERBALISM:
+                    case LOCKTYPE_MINING:
+                    case LOCKTYPE_FISHING:
+                        return true;
+                    default:
+                        break;
+                }
+        return false;
     }
 };
 
@@ -3190,6 +3240,7 @@ void AddCoaMythicPlusScripts()
     new coa_mythic_plus_map();
     new coa_mythic_plus_group();
     new coa_mythic_plus_creature();
+    new coa_mythic_plus_chest_loot();
     new coa_mythic_plus_player();
     new coa_mythic_plus_unit();
     new coa_mythic_plus_command();
