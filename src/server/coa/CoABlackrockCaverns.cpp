@@ -267,6 +267,8 @@ constexpr float FireZoneSpread = 3.0f;
 constexpr uint32 FireZoneMs = 2500;
 constexpr uint32 FireZoneCallers = 2;
 constexpr float RazDamageBonus = 1.3f;
+constexpr float SkullcrackerRadius = 12.0f;
+constexpr float SkullcrackerShare = 0.75f;
 
 constexpr float HeatWavePerStack = 57.6f;
 constexpr float HeatWaveBaseStacks = 2.33f;
@@ -497,8 +499,13 @@ struct boss_coa_brc_romogg : public BossAI
             case SPELL_SKULLCRACKER_MYTHIC:
             {
                 for (Player* player : PlayersNear(me, 200.0f))
+                {
                     if (player->HasAura(SPELL_CHAINS_OF_WOE_ROOT))
                         DealDamage(me, player, spell->Id, player->GetMaxHealth() * 10, SPELL_SCHOOL_MASK_NORMAL);
+                    else if (me->GetExactDist2d(player) <= SkullcrackerRadius)
+                        DealDamage(me, player, spell->Id, uint32(player->GetMaxHealth() * SkullcrackerShare),
+                            SPELL_SCHOOL_MASK_NORMAL);
+                }
                 me->SetReactState(REACT_AGGRESSIVE);
                 break;
             }
