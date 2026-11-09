@@ -9,7 +9,7 @@ from compare import Run, Verdict, judge_hit
 from hits import (CLOSED, HIT_CHECKS, MAX_SCENARIO_MS, UNMODELLED, HitModel, Modifier, Unmodelled, WeaponProfile,
                   casts_needed, effect_hit, expected_hit, hit_kind, hit_parts, hit_scenario, measured_hit_model,
                   melee_scenario, records_of, periodic_tick_readout, reference_caster, reference_hit_model,
-                  reference_melee_model, rolled_values, scheduled_casts, weapon_profile)
+                  reference_melee_model, rolled_values, scheduled_casts, self_stack_multiplier, weapon_profile)
 from mitigation import REFERENCE_TARGET, MitigationModel, TargetProfile, expected_mitigation
 from profile import CLASSES_DIR, load_class_file
 from tooltip import CasterStats, Displayed, Readout, read_tooltip, weapon_skill_spells
@@ -327,6 +327,30 @@ class CastsNeededTest(unittest.TestCase):
     def test_a_non_positive_mean_is_refused(self):
         with self.assertRaises(ValueError):
             casts_needed(HitModel(kind='school', mean=0.0, sigma=1.0, tooltip_mean=0.0))
+
+
+class SelfStackMultiplierTest(unittest.TestCase):
+    def test_no_self_stack_bonus_field_is_a_no_op(self):
+        self.assertEqual(self_stack_multiplier({}, 570233, 3), 1.0)
+
+    def test_an_unlisted_rank_is_a_no_op(self):
+        class_file = {'self_stack_bonus': [{'rank': 804904, 'percent_per_stack': 5.0}]}
+        self.assertEqual(self_stack_multiplier(class_file, 570233, 3), 1.0)
+
+    def test_a_single_cast_is_unscaled_regardless_of_the_percent(self):
+        class_file = {'self_stack_bonus': [{'rank': 570233, 'percent_per_stack': 5.0}]}
+        self.assertEqual(self_stack_multiplier(class_file, 570233, 1), 1.0)
+
+    def test_scales_by_the_average_pre_cast_stack_count(self):
+        class_file = {'self_stack_bonus': [{'rank': 570233, 'percent_per_stack': 5.0}]}
+        self.assertAlmostEqual(self_stack_multiplier(class_file, 570233, 3), 1.0 + 0.05 * (3 - 1) / 2.0)
+        self.assertAlmostEqual(self_stack_multiplier(class_file, 570233, 3), 1.05)
+
+    def test_a_wrong_percent_per_stack_moves_the_multiplier_away_from_the_correct_value(self):
+        correct = {'self_stack_bonus': [{'rank': 570233, 'percent_per_stack': 5.0}]}
+        seeded_defect = {'self_stack_bonus': [{'rank': 570233, 'percent_per_stack': 50.0}]}
+        self.assertNotAlmostEqual(self_stack_multiplier(correct, 570233, 3),
+                                  self_stack_multiplier(seeded_defect, 570233, 3))
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')

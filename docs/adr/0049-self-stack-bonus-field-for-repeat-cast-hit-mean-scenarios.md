@@ -57,13 +57,20 @@ own self-buffing tooltip breaks.
   list like every other optional per-spell override.
 - `classes/templar.json` gains one entry: `{"rank": 570233, "percent_per_stack": 5.0, "reason": "..."}`, citing
   the tooltip token, the granting code, and this round's isolated-cast proof.
+- `test_hits.py` gains `SelfStackMultiplierTest`, unit-testing `self_stack_multiplier` directly and
+  independently of any class file or gameplay run: multiplier `1.0` with no `self_stack_bonus` field at all,
+  `1.0` for a rank the field lists but doesn't match, `1.0` for a single cast regardless of percent, the exact
+  linear formula for a 3-cast example, and a seeded-defect case (a wrong `percent_per_stack` produces a
+  different multiplier than the correct one) proving the test can fail.
 
 ## Consequences
 
 - 570233's `hit_mean` moves from a 3+ round open `alert` to `ok` (verified this round, build+gameplay stamp
   `20261109-203047`/`...-203303`; see `round9/mechanics-report.md`), with no loss of check power: the scenario
   still measures the real weapon-damage formula and will still alert on an actual regression in the roll, armor
-  mitigation, or the Oath bonus's own percentage.
+  mitigation, or the Oath bonus's own percentage. `self_stack_multiplier` itself is now covered by a unit test,
+  so a future regression in the formula (an off-by-one in `performed - 1`, a sign flip, a wrong `performed`)
+  fails `test_hits.py` directly rather than relying only on the one live gameplay data point.
 - Any future class rank whose own tooltip documents an identical "stacks from a previous cast of itself" bonus
   can use `self_stack_bonus` directly, with no new class-specific code in `hits.py`; a rank without this pattern
   is completely unaffected (multiplier 1.0).

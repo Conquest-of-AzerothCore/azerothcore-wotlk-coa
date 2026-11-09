@@ -41,8 +41,10 @@ judges a `before`/`after` delta correctly once it is given the right numbers.
 
 ## Decision
 
-- `CoAGameplayTest.cpp`'s metric dispatch gains `spell_healing_taken`: `target->SpellHealingBonusTaken(player,
-  info, 1000, periodic ? DOT : HEAL)`, read-only, with the same `{spell, target, periodic}` step shape
+- `CoAGameplayTest.cpp`'s metric dispatch already had `spell_healing_taken` (`unit->SpellHealingBonusTaken(
+  GetUnit(target), info, 1000, periodic ? DOT : HEAL)`, read-only, used today by `passives.py`'s generic
+  aura-driven passive checks) before this round; it needed no C++ change. This round reuses that existing
+  metric from `behaviours.py`'s new `"taken"` method, with the same `{spell, target, periodic}` step shape
   `spell_healing_done` already uses. `spell_healing_done` is unchanged.
 - `behaviours.py`'s `HealingRatioTarget` gains method `"taken"`: cast like `"cast"` (so mana/cooldown/aura
   prerequisites still apply and the real heal still lands, even though this metric does not read it), but
