@@ -383,9 +383,9 @@ runs such a case exclusively because the setting is process-global. Optional
 `two_side: {"trade": true, "mail": false}` sets `AllowTwoSide.Trade` and `AllowTwoSide.Interaction.Mail` for that
 case (an omitted field is disabled) and is likewise run exclusively. Its optional `group` sets
 `AllowTwoSide.Interaction.Group`, which keeps the configured value when omitted. Optional
-`ptr_character_copy: true` enables `.ptr copy` for that case with this realm's own characters schema as the
-source and no cooldown, and is likewise run exclusively. Its companion `ptr_character_copy_source` names another
-source schema instead, for example one the realm cannot read.
+`ptr_character_copy: true` makes this realm both the source and the target of `.ptr copy` for that case, with no
+cooldown, and is likewise run exclusively. Queued copies load and report within a 5-second poll, so wait after
+the command before asserting.
 The [talent and item scenario](scenarios/talent-and-items.json) exercises talent learning, passive removal,
 equipping a shirt and consuming a healing potion. It does not measure the talent's damage coefficient.
 The [Shadowblast scenario](scenarios/shadowblast-shadow-rage.json) reproduces a Shadow Rage pet-targeting crash

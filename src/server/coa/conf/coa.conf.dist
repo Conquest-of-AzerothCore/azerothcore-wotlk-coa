@@ -52,14 +52,16 @@ CoA.BazaarTokens.WarchestRealmBound = 1
 CoA.BazaarTokens.HourlyCap.Amount = 0
 CoA.BazaarTokens.HourlyCap.WindowSeconds = 3600
 
-# PTR character copy: players copy their own characters from another realm with .ptr list and .ptr copy <name>.
-# Enable it only on the PTR. SourceDatabase is the source realm's characters schema on the same MySQL server;
-# this realm's characters DB user needs SELECT on it. Both realms must share the auth database, because the copy
-# keeps the account id. A character has at most one live copy; after deleting it, the next copy waits
-# CooldownSeconds from the previous one.
-CoA.PtrCopy.Enable = 0
-CoA.PtrCopy.SourceDatabase = ""
-CoA.PtrCopy.SourceRealmName = "Rexxar"
+# PTR character copy: on the live realm players copy their own characters to the PTR with .ptr list and
+# .ptr copy <name>. The live realm saves the character and queues its dump in the shared auth database
+# (coa_ptr_copy_request); the PTR loads queued copies every few seconds, and the live realm then tells the player.
+# Both realms must share the auth database, because the copy keeps the account id.
+# TargetRealmID: on the live realm, the PTR's realmlist id; 0 disables the command.
+# Receive: 1 on the PTR, to load copies queued for its realm id.
+# A character has at most one live copy on the PTR; after deleting it, the next copy waits CooldownSeconds from
+# the previous one.
+CoA.PtrCopy.TargetRealmID = 0
+CoA.PtrCopy.Receive = 0
 CoA.PtrCopy.CooldownSeconds = 3600
 
 # Ascension character screen: enable/disable (activate/deactivate) and the

@@ -1853,7 +1853,7 @@ public:
         if (_scenario.get<bool>("creature_scaling", false))
             _creatureScaling.emplace();
         if (_scenario.get<bool>("ptr_character_copy", false))
-            _ptrCharacterCopy.emplace(_scenario.get<std::string>("ptr_character_copy_source", ""));
+            _ptrCharacterCopy.emplace();
         if (auto ownership = _scenario.get_child_optional("vanity_ownership"))
         {
             std::string starterItems;
