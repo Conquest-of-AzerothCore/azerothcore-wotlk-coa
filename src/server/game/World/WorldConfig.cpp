@@ -198,6 +198,9 @@ void WorldConfig::BuildConfigCache()
 
     SetConfigValue<float>(RATE_CORPSE_DECAY_LOOTED, "Rate.Corpse.Decay.Looted", 0.5f);
     SetConfigValue<bool>(CONFIG_RESPAWN_TIMER_STARTS_AT_DEATH, "Respawn.TimerStartsAtDeath", true);
+    SetConfigValue<uint32>(CONFIG_RESPAWN_QUEST_TARGET_NAMED, "Respawn.QuestTarget.Named", 150);
+    SetConfigValue<uint32>(CONFIG_RESPAWN_QUEST_TARGET_GENERAL, "Respawn.QuestTarget.General", 0);
+    SetConfigValue<uint32>(CONFIG_RESPAWN_QUEST_TARGET_LONG_RESPAWN, "Respawn.QuestTarget.LongRespawn", 358);
 
     SetConfigValue<float>(RATE_DURABILITY_LOSS_ON_DEATH, "DurabilityLoss.OnDeath", 10.0f, ConfigValueCache::Reloadable::Yes, [](float const& value) { return value >= 0.0f && value <= 100.0f; }, ">= 0 && <= 100");
 
