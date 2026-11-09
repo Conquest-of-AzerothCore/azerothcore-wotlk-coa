@@ -2,7 +2,7 @@
   "class_id": 19,
   "name": "Templar",
   "log_queries": {
-    "705278 e1 spell_healing_done 803792": "coa-history spell \"Temple Guardian\" and spell \"Sacred Style\", Ascension combat log archive, 2026-11-09: no rows for either spell in any of the 186 logs"
+    "705278 e1 spell_healing_done 803792": "coa-history spell \"Temple Guardian\" and spell \"Sacred Style\", Ascension combat log archive, 2026-11-09: no rows for either spell in any of the 186 logs, but `spell` only reads enemy_abilities (enemy casts); the archive has no table of player-cast spells, so this query cannot settle either reading and is not evidence either way"
   },
   "race": 1,
   "level": 60,
