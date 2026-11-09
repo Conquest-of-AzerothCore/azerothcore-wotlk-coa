@@ -11,7 +11,7 @@ import tempfile
 import unittest
 
 from compare import STATUSES, class_entry
-from hits import EXCLUDED_OUTCOME_MARGIN, MAX_SCENARIO_MS, Unmodelled
+from hits import EXCLUDED_OUTCOME_MARGIN, MAX_SCENARIO_MS, UNMODELLED, Unmodelled
 from procs import (PART_BUDGET_MS, PROC_CHECK, proc_label, proc_plan, proc_scenario, proc_status_expectation,
                    shares_aura, shares_proc_spell, trials_needed, trigger_key, wilson_interval)
 from profile import DBC_DIR
@@ -721,8 +721,8 @@ class GenerateProcTest(unittest.TestCase):
                 self.assertEqual(entry['sha256'], hashlib.sha256(text.encode('utf-8')).hexdigest())
                 self.assertEqual(batch.exploratory_key(path, set()), entry['key'])
                 self.assertEqual((entry['spell_id'], entry['spell_name']), (SCOURGEBANE, 'Scourgebane'))
-            [ambiguous] = [entry for entry in manifest['scenarios'] if not entry['file']]
-            self.assertTrue(ambiguous['expectations'][0]['rule'].startswith('ambiguous_tooltip: '))
+            [status_entry] = [entry for entry in manifest['scenarios'] if not entry['file']]
+            self.assertTrue(status_entry['expectations'][0]['rule'].startswith(UNMODELLED))
         finally:
             shutil.rmtree(out)
 

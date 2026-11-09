@@ -17,7 +17,7 @@ from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAP
 from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE, cleaned_tooltip, literal_token
-from procs import AMBIGUOUS_TOOLTIP, CAST, PROC_CHECK, chance_of, wilson_interval
+from procs import AMBIGUOUS_TOOLTIP, CAST, DELTA_CHECK, DELTA_SANITY_FACTOR, PROC_CHECK, chance_of, wilson_interval
 from profile import DBC_DIR, EQUIP_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label
 from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE, asked, cleaned,
                        questions, spell_name, write_questions)
@@ -1441,6 +1441,71 @@ def unreadable_question(tooltips: TooltipSource, rank_id: int, spell_name: str, 
     return None
 
 
+def judge_proc_delta(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -> Verdict:
+    first_entry, first_run, expectation = parts[0]
+    model = expectation.model
+    base = Verdict(expectation.label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
+                   expectation.rank_id, expectation.check)
+    labels = model['measurements']
+    wanted = [labels['aura'], labels['baseline_trials'], labels['baseline_events'], labels['trials'],
+             labels['events']]
+    totals = dict.fromkeys(wanted[1:], 0.0)
+    counted, without_aura, unmeasured = [], [], []
+    for _, run, _ in parts:
+        values = [run.values.get(label) for label in wanted]
+        if None in values:
+            unmeasured.append(f'{run.key} ({run.status}: {run.message})')
+        elif values[0] <= 0:
+            without_aura.append(run.key)
+        else:
+            counted.append(run.key)
+            for label, value in zip(wanted[1:], values[1:]):
+                totals[label] += value
+    notes = f'{len(counted)} of {model["parts"]} parts'
+    if without_aura:
+        notes += f'; aura {expectation.spell_id} absent in {", ".join(without_aura)}'
+    if unmeasured:
+        notes += f'; no proc measurements in {", ".join(unmeasured)}'
+    baseline_trials, baseline_events = totals[labels['baseline_trials']], totals[labels['baseline_events']]
+    cumulative_trials, cumulative_events = totals[labels['trials']], totals[labels['events']]
+    trials, events = cumulative_trials - baseline_trials, cumulative_events - baseline_events
+    if baseline_trials <= 0 or trials <= 0:
+        return replace(base, status='unmeasured', explanation=f'no usable trial in either phase ({notes})')
+    p_baseline = baseline_events / baseline_trials
+    p_main = events / trials
+    try:
+        caster = caster_stats_from(first_run.values, manifest['class_file'])
+    except KeyError as error:
+        return replace(base, explanation=f'base measurement {error} is missing from {first_run.key}')
+    chance = chance_of(tooltips.read(expectation.rank_id, caster).values, expectation.displayed)
+    if chance is None:
+        return replace(base, explanation=f'the tooltip of {expectation.rank_id} no longer shows the chance token '
+                                         f'{expectation.displayed}')
+    if abs(chance - model['chance_pct']) > FLOAT_EPSILON:
+        return replace(base, expected=chance / 100,
+                       explanation=f'{expectation.displayed} shows {chance:g}%, generated as {model["chance_pct"]:g}%')
+    expected = chance / 100
+    if p_baseline <= 0:
+        return replace(base, status='unmeasured', expected=expected,
+                       explanation=f'no baseline events to compare against ({notes})')
+    measured = p_main / p_baseline - 1
+    se = math.sqrt(p_main * (1 - p_main) / trials + p_baseline * (1 - p_baseline) / baseline_trials)
+    sanity_low, sanity_high = 0.0, DELTA_SANITY_FACTOR * expected
+    if se <= 0:
+        status = 'unmeasured'
+        z = None
+    else:
+        z = (p_main - p_baseline) / se
+        status = 'ok' if z >= Z_99 and sanity_low - FLOAT_EPSILON <= measured <= sanity_high + FLOAT_EPSILON \
+            else 'alert'
+    z_text = f'{z:.2f}' if z is not None else 'n/a'
+    explanation = (f'baseline rate {p_baseline:.4f} ({baseline_events:g} in {baseline_trials:g}), with-aura rate '
+                   f'{p_main:.4f} ({events:g} in {trials:g}), two-proportion z {z_text} (>= {Z_99:g} needed); '
+                   f'measured chance {measured:+.4f}, tooltip {expected:g} ({notes})')
+    return replace(base, status=status, measured=measured, expected=expected, low=sanity_low, high=sanity_high,
+                   explanation=explanation)
+
+
 def server_question(manifest: dict, expectation: Expectation, verdict: Verdict, tooltips: TooltipSource) -> Verdict:
     entry = class_entry(manifest, expectation)
     if verdict.status != 'alert' or not entry.get('question'):
@@ -2197,6 +2262,7 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
     hit_model = hit_model or measured_hit_model
     verdicts = []
     proc_parts: dict[str, list[ProcPart]] = {}
+    delta_parts: dict[str, list[ProcPart]] = {}
     stack_parts: dict[str, list[ProcPart]] = {}
     trigger_parts: dict[str, list[ProcPart]] = {}
     hit_parts: dict[str, list[ProcPart]] = {}
@@ -2210,6 +2276,8 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
             expectation = Expectation(**data)
             if expectation.check == PROC_CHECK and run is not None:
                 proc_parts.setdefault(expectation.label, []).append((entry, run, expectation))
+            elif expectation.check == DELTA_CHECK and run is not None:
+                delta_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             elif expectation.check in STACK_CHECKS and run is not None:
                 stack_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             elif expectation.check in (TRIGGER_CHECK, COOLDOWN_CHECK, DURATION_CHECK) and run is not None:
@@ -2228,6 +2296,8 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
         verdicts[hit_slots[label]] = judge_hit(base, manifest['class_file'], parts, hit_model)
     verdicts += [server_question(manifest, parts[0][2], judge_proc(manifest, parts, tooltips), tooltips)
                  for parts in proc_parts.values()]
+    verdicts += [server_question(manifest, parts[0][2], judge_proc_delta(manifest, parts, tooltips), tooltips)
+                 for parts in delta_parts.values()]
     trigger_judges = {TRIGGER_CHECK: judge_trigger, COOLDOWN_CHECK: judge_trigger_cooldown,
                       DURATION_CHECK: judge_trigger_duration}
     verdicts += [server_question(manifest, parts[0][2], trigger_judges[parts[0][2].check](parts), tooltips)

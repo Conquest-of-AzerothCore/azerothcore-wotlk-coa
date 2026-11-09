@@ -13,7 +13,7 @@ from profile import DBC_DIR, caster_stats_from
 from questions import (DATA_ISSUE, QUESTIONS_FILE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE,
                        questions, write_questions)
 from test_compare import CLASS_FILE, FakeTooltips, Workspace, assert_step, expectation
-from test_procs import PROC_KEY, READINGS, proc_expectation, proc_steps, templar_proc
+from test_procs import PROC_KEY, READINGS, proc_expectation, proc_steps
 from test_stack import (BASE, BASE_MEANS, PALADIN, PALADIN_MEANS, delta_expectation, dps_expectation, pass_steps,
                         source_expectation)
 from test_triggers import templar_trigger
@@ -23,6 +23,11 @@ from values import Expectation
 
 SCOURGEBANE = 92111
 BLADE_SERMON = (572548, 572554)
+BLADE_SERMON_CHANCE = {572548: 5, 572554: 10}
+BLADE_SERMON_REASON = ('the tooltip does not say what triggers Zealotry, so neither a cast nor an attack follows '
+                      'from it')
+BLADE_SERMON_HANDLER = 'AscensionTemplar.cpp:214-223 (Zealotry) rolls its ProcChance to cast the strike 801450 again'
+BLADE_SERMON_EXPLANATION = f'{BLADE_SERMON_REASON}; handler: {BLADE_SERMON_HANDLER}'
 ARGENT_BLADE = 807268
 SILVERHAND_INCANTATION = 801465
 HEAVENS_FINEST = 806516
@@ -107,12 +112,20 @@ def heavens_finest_steps(events):
             assert_step(labels['events'], str(events))]
 
 
+def blade_sermon_entry(aura):
+    return {'aura': aura, 'name': 'Blade Sermon', 'chance_token': '$h', 'status': 'ambiguous_tooltip',
+            'reason': BLADE_SERMON_REASON, 'handler': BLADE_SERMON_HANDLER,
+            'question': f'With Blade Sermon learned (a {BLADE_SERMON_CHANCE[aura]}% chance), how often does a '
+                       'logged Zealotry hit twice instead of once?'}
+
+
 def status_entry(workspace, aura):
     (workspace.root / 'out').mkdir(parents=True, exist_ok=True)
+    entry = blade_sermon_entry(aura)
     workspace.scenarios.append({'key': f'conformance-templar-proc-{aura}', 'file': None, 'sha256': None,
-                                'kind': 'proc', 'spell_id': aura, 'spell_name': templar_proc(aura)['name'],
+                                'kind': 'proc', 'spell_id': aura, 'spell_name': entry['name'],
                                 'rank_id': aura, 'tokens': [],
-                                'expectations': [asdict(proc_status_expectation(templar_proc(aura)))]})
+                                'expectations': [asdict(proc_status_expectation(entry))]})
 
 
 class QuestionTest(unittest.TestCase):
@@ -151,7 +164,7 @@ class QuestionTest(unittest.TestCase):
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0].spells, tuple((aura, 'Blade Sermon') for aura in BLADE_SERMON))
         self.assertEqual(items[0].kind, TEXT_QUESTION)
-        self.assertEqual(items[0].question, templar_proc(BLADE_SERMON[0])['question'])
+        self.assertEqual(items[0].question, BLADE_SERMON_EXPLANATION)
 
     def test_readings_carry_numbers(self):
         items = questions(self.scourgebane_verdicts(), chance_reader())
@@ -179,10 +192,10 @@ class QuestionTest(unittest.TestCase):
         self.assertEqual(item.question, 'With Scourgebane learned, the logged Scourgebane procs per auto attack '
                          'that hits under conditions matching our test should match one reading below.')
 
-    def test_text_question_uses_the_class_file(self):
+    def test_text_question_falls_back_to_the_reason(self):
         self.status_entry(BLADE_SERMON[0])
         items = questions(self.verdicts(reader()), reader())
-        self.assertEqual([item.question for item in items], [templar_proc(BLADE_SERMON[0])['question']])
+        self.assertEqual([item.question for item in items], [BLADE_SERMON_EXPLANATION])
         self.assertEqual(items[0].spells, ((BLADE_SERMON[0], 'Blade Sermon'),))
 
     def test_markdown_entry(self):
@@ -392,7 +405,7 @@ class ClientTooltipTest(unittest.TestCase):
         tooltips = DbcTooltips(DBC_DIR)
         self.assertEqual(tooltips.spell_field(HEAVENS_FINEST_STACK, 'StackAmount'), 6)
         self.assertIn('12 sec, stacking 6 times', templar_trigger(HEAVENS_FINEST)['question'])
-        self.assertIn('5%', templar_proc(BLADE_SERMON[0])['question'])
+        self.assertIn('5%', blade_sermon_entry(BLADE_SERMON[0])['question'])
         self.assertEqual(tooltips.spell_field(BLADE_SERMON[0], 'ProcChance'), 5)
 
 

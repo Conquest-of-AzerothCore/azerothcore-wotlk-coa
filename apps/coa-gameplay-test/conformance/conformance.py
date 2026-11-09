@@ -16,8 +16,8 @@ from diff import IMPACT_FILE, diff_directories, write_impact
 from passives import passive_scenario
 from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, hit_parts, melee_scenario, records_of,
                   reference_hit_model, reference_melee_model)
-from procs import (proc_entries, proc_plan, proc_scenario, proc_status_expectation, proc_unmodelled_expectation,
-                   shares_aura, shares_proc_spell, trigger_key)
+from procs import (DELTA_CHECK, delta_proc_plan, delta_proc_scenario, proc_entries, proc_plan, proc_scenario,
+                   proc_status_expectation, proc_unmodelled_expectation, shares_aura, shares_proc_spell, trigger_key)
 from profile import DBC_DIR, load_class_file
 from questions import QUESTIONS_FILE
 from scaffold import LIVE_BASELINE_HEADER, SHARED_DEFINES, scaffold_class
@@ -179,13 +179,15 @@ def add_proc(writer: ManifestWriter, entry: dict):
     if entry.get('status'):
         writer.add(key, 'proc', None, aura, [proc_status_expectation(entry)], name=name)
         return
+    plan_fn = delta_proc_plan if entry.get('kind') == DELTA_CHECK else proc_plan
+    scenario_fn = delta_proc_scenario if entry.get('kind') == DELTA_CHECK else proc_scenario
     try:
-        plan = proc_plan(class_file, entry)
+        plan = plan_fn(class_file, entry)
     except Unmodelled as error:
         writer.add(key, 'proc', None, aura, [proc_unmodelled_expectation(entry, error.reason)], name=name)
         return
     for part in range(plan.parts):
-        scenario, expectations = proc_scenario(class_file, entry, part)
+        scenario, expectations = scenario_fn(class_file, entry, part)
         writer.add(scenario_key(class_file['name'], 'proc', *key_parts, 'part', part + 1), 'proc', None, aura,
                    expectations, scenario, name=name)
 

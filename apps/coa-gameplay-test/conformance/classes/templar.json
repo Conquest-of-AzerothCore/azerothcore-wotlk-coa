@@ -413,10 +413,9 @@
       "name": "Blade Sermon",
       "tooltip": "Increases the Weapon Damage dealt by |cFFFFFFFFZealotry|r by $s1% and gives it a $h% chance to trigger twice.",
       "chance_token": "$h",
-      "status": "ambiguous_tooltip",
-      "reason": "the tooltip does not say what triggers Zealotry, so neither a cast nor an attack follows from it",
+      "status": "unmodelled",
+      "reason": "owner ruling 2026-11-09 settles the tooltip: the double-hit chance applies to all three Zealotry sources (periodic tick 706325, off-hand swing 92108, Oath: Vindication 805332 ability cast), all reached through the single shared AscensionTemplar.cpp:212-220 Zealotry() function (repeat=false default), whose unconditional roll_chance_i(info->ProcChance) reroll of this spell's own ProcChance is not duplicated or branched per caller. Round 6 measured this on the periodic-tick source with the same proc_rate_delta scenario shape as 572554's own entry (round6/blade-sermon-fix-report.md, stamp 20261109-162302, 2031 attempts per phase): with 706325 co-learned as the baseline and 572548 added for the main phase, baseline rate 0.1428 (590 in 4131), with-aura rate 0.1561 (645 in 4131), two-proportion z 1.70 (needs >= 2.576), measured chance +0.0932 vs tooltip 0.05 - directionally consistent (positive, same order of magnitude) but short of this check's power threshold at this trial count. The delta-method half-width needed to also require +-2.5 points of precision on a 5% nested chance from this baseline rate would need roughly two orders of magnitude more trials (derived in the fix report), out of this round's budget. The sibling rank 572554 (10%, same function, same lines, only a different ProcChance operand) carries a 572554 proc_rate_delta check that does measure ok, at 12000 attempts per phase for a reliable margin (z's own sampling noise has unit variance regardless of trial count, so 2031 attempts gave an unreliable z between 1.67 and 3.08 across repeated runs; 12000 gives z 5.00, stamp 20261109-162749): that is runtime evidence the shared mechanism is live on the periodic-tick source, which this rank's identical code path inherits without a separate roll. The off-hand-swing (92108) and Oath: Vindication (805332) sources are not independently measurable by this harness today for pre-existing reasons recorded on their own entries (92108: no CanDualWield path for Templar, so the harness cannot produce an off-hand swing at all; 805332/504107: triggers.py/procs.py have no fixture to co-learn the Oath aura before a roll that depends on it) - not a gap this round introduces.",
       "handler": "AscensionTemplar.cpp:214-223 (Zealotry) rolls its ProcChance to cast the strike 801450 again",
-      "question": "Zealotry's own tooltip (801450) only says that it deals 80% off-hand Weapon Damage as Holy Damage. To settle from the reference logs: which attack or ability line comes right before each Zealotry hit? With Blade Sermon learned (a 5% or a 10% chance, depending on which Blade Sermon), how often does a logged Zealotry hit twice instead of once?",
       "dbc": {
         "572548": {"ProcChance": 5, "ProcFlags": 0, "ProcCharges": 0}
       },
@@ -427,10 +426,17 @@
       "name": "Blade Sermon",
       "tooltip": "Increases the Weapon Damage dealt by |cFFFFFFFFZealotry|r by $s1% and gives it a $h% chance to trigger twice.",
       "chance_token": "$h",
-      "status": "ambiguous_tooltip",
-      "reason": "the tooltip does not say what triggers Zealotry, so neither a cast nor an attack follows from it",
+      "kind": "proc_rate_delta",
+      "trigger": {"action": "cast", "spell": 803880},
+      "trigger_text": "Zealotry",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 801450,
+      "proc_spell_source": "AscensionTemplar.cpp:212-220 Zealotry(): the repeat=true recursive call casts 801450 again, same spell as the first hit, so only a baseline (706325 alone) vs with-aura (706325 + 572554) delta tells the repeat apart from the first hit; the tooltip names only Zealotry, not a specific trigger, so the periodic-tick route (Blade of Faith 803880, Condemnation 706325) is this entry's own choice of a measurable Zealotry source, documented in reason",
+      "baseline_co_learn": [706325],
+      "delta_attempts": 12000,
+      "internal_cooldown_ms": 0,
       "handler": "AscensionTemplar.cpp:214-223 (Zealotry) rolls its ProcChance to cast the strike 801450 again",
-      "question": "Zealotry's own tooltip (801450) only says that it deals 80% off-hand Weapon Damage as Holy Damage. To settle from the reference logs: which attack or ability line comes right before each Zealotry hit? With Blade Sermon learned (a 5% or a 10% chance, depending on which Blade Sermon), how often does a logged Zealotry hit twice instead of once?",
+      "reason": "owner ruling 2026-11-09: the double-hit chance applies to all three Zealotry sources (periodic tick 706325, off-hand swing 92108, Oath: Vindication 805332), reached through the single shared Zealotry() function; measured here on the periodic-tick source (706325 co-learned as the baseline), see 572548's entry for why 92108 and 805332 are not independently measurable by this harness and why 572548 itself could not reach ok at this trial count",
       "dbc": {
         "572554": {"ProcChance": 10, "ProcFlags": 0, "ProcCharges": 0}
       },

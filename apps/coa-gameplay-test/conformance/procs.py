@@ -24,6 +24,12 @@ PERIODIC_DAMAGE_AURA = 3
 TICKS_PER_ATTEMPT = 2
 TRIGGERING_HITS = 'triggering hits only'
 WILSON_RULE = f'Wilson {Z_99:g} (99%) interval of the proc rate holds the tooltip chance'
+DELTA_CHECK = 'proc_rate_delta'
+DELTA_SANITY_FACTOR = 3
+DELTA_RULE = (f'two-proportion z >= {Z_99:g} (one-sided, 99%) that the with-aura rate exceeds the baseline rate, '
+             f'and the measured chance (with-rate / baseline-rate - 1) is between 0 and {DELTA_SANITY_FACTOR:g}x '
+             'the tooltip chance; proves the chance is positive and roughly the right order of magnitude, not a '
+             'tight match (see README \'Nested proc rate\')')
 
 
 @dataclass(frozen=True)
@@ -336,6 +342,80 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
 
 def handler_note(entry: dict) -> str:
     return f'; handler: {entry["handler"]}' if entry.get('handler') else ''
+
+
+def delta_proc_measurements(aura: int) -> dict[str, str]:
+    return {'baseline_trials': f'{aura} proc delta baseline trials',
+            'baseline_events': f'{aura} proc delta baseline events', 'trials': f'{aura} proc delta trials',
+            'events': f'{aura} proc delta events', 'aura': f'{aura} proc delta aura'}
+
+
+def checked_delta_entry(entry: dict) -> dict:
+    aura = entry['aura']
+    if entry['trigger']['action'] != CAST:
+        raise ValueError(f'Proc delta {aura} needs a cast trigger, not {entry["trigger"]["action"]!r}')
+    if entry['event_metric'] not in EVENT_METRICS:
+        raise ValueError(f'Unknown event metric {entry["event_metric"]!r} of proc delta {aura}')
+    if not entry.get('baseline_co_learn'):
+        raise ValueError(f'Proc delta {aura} needs baseline_co_learn: the spell(s) that produce the trigger '
+                         f'without {aura} itself')
+    if any(not isinstance(spell, int) for spell in entry['baseline_co_learn']):
+        raise ValueError(f'Proc delta {aura} has a non-integer baseline_co_learn spell')
+    return entry
+
+
+def delta_proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> ProcPlan:
+    if entry.get('status'):
+        raise ValueError(f'Proc {entry["aura"]} is {entry["status"]}: {entry.get("reason", "")}')
+    checked_delta_entry(entry)
+    chance = proc_chance(class_file, entry)
+    scheduled = attempts if attempts is not None else entry.get('delta_attempts', trials_needed(chance / 100))
+    interval = attempt_interval(class_file, entry)
+    capacity = PART_BUDGET_MS // (interval * 2)
+    if capacity < 1:
+        raise Unmodelled(f'two attempts of {interval} ms each exceed the scenario budget of {PART_BUDGET_MS} ms')
+    parts = math.ceil(scheduled / capacity)
+    return ProcPlan(chance_pct=chance, needed=scheduled, scheduled=scheduled, attempt_ms=interval, parts=parts,
+                    per_part=math.ceil(scheduled / parts))
+
+
+def delta_attempt_block(class_file: dict, entry: dict, plan: ProcPlan, learn_spells: list[int], trials_label: str,
+                        events_label: str) -> list[dict]:
+    steps = [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in learn_spells]
+    steps += [{'action': 'learn', 'actor': CASTER, 'spell': trigger_spell(entry)}]
+    steps += cast_attempts(class_file, entry, plan)
+    steps += [{'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}, trials_step(entry, trials_label),
+             spell_count_step(events_label, entry['event_metric'], entry['proc_spell'])]
+    return steps
+
+
+def delta_proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
+                        attempts: int | None = None) -> tuple[dict, list[Expectation]]:
+    plan = delta_proc_plan(class_file, entry, attempts)
+    class_file = armed_for(class_file, records_of(class_file), entry['trigger']['spell'])
+    if not 0 <= part < plan.parts:
+        raise ValueError(f'Proc delta {entry["aura"]} has parts 0 to {plan.parts - 1}, not {part}')
+    aura = entry['aura']
+    labels = delta_proc_measurements(aura)
+    steps = delta_attempt_block(class_file, entry, plan, entry['baseline_co_learn'],
+                                labels['baseline_trials'], labels['baseline_events'])
+    steps += [{'action': 'learn', 'actor': CASTER, 'spell': aura}]
+    steps += delta_attempt_block(class_file, entry, plan, [], labels['trials'], labels['events'])
+    steps += [measurement(labels['aura'], CASTER, 'aura', spell=aura)]
+    name = f'Conformance proc delta {class_file["name"]} {entry["name"]} {aura} part {part + 1} of {plan.parts}'
+    contract = ('Two-proportion rate delta of a nested proc chance: a baseline phase without the aura, then a '
+               'phase with it, over the same trigger, summed over its parts, against a positive-effect floor.')
+    scenario = scenario_shell(class_file, name, contract, steps)
+    scenario['creatures'] = [creature_fixture(class_file)]
+    model = {'part': part, 'parts': plan.parts, 'chance_pct': plan.chance_pct, 'scheduled_attempts': plan.scheduled,
+            'part_attempts': plan.per_part, 'attempt_ms': plan.attempt_ms, 'trigger': dict(entry['trigger']),
+            'proc_spell': entry['proc_spell'], 'event_metric': entry['event_metric'], 'measurements': labels,
+            'baseline_co_learn': list(entry['baseline_co_learn'])}
+    trigger = trigger_key(entry) if shares_proc_spell(class_file, entry) else None
+    label = proc_label(aura, entry['proc_spell'], trigger) if shares_aura(class_file, entry) else proc_label(aura)
+    expectation = Expectation(label, DELTA_CHECK, aura, aura, None, entry['chance_token'],
+                              f'{DELTA_RULE}; {trial_rule(entry)}{handler_note(entry)}', model)
+    return timed(scenario, SETTLE_MS + 2 * plan.per_part * plan.attempt_ms + 2 * DRAIN_MS), [expectation]
 
 
 def proc_status_expectation(entry: dict) -> Expectation:

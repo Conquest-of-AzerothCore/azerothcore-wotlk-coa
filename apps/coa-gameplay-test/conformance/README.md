@@ -31,7 +31,8 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
   do); a stationary ally heal with no such effect leaves the caster in place instead, since nothing would ever
   close a relocate's drift back.
 - `procs.py`: `proc_scenario(class_file, entry, part)` returns one part of the proc-rate scenario of a `procs` entry
-  and its `Expectation`; `proc_plan` sizes the parts, `trials_needed(p)` gives the trials a chance `p` needs and
+  and its `Expectation`; `delta_proc_scenario`/`delta_proc_plan` do the same for a `kind: "proc_rate_delta"` entry
+  (see [Nested proc rate](#nested-proc-rate-round-6-blade-sermon)); `proc_plan` sizes the parts, `trials_needed(p)` gives the trials a chance `p` needs and
   `wilson_interval(procs, trials)` the 99% Wilson interval of a rate.
 - `triggers.py`: `trigger_scenario(class_file, entry, part)` returns one part of the scenario of a `triggers` entry and
   its `Expectation`; `trigger_plan` sizes the parts and `trigger_entries(class_file, auras)` selects the entries (see
@@ -1132,6 +1133,61 @@ Two further two-reading disagreements named by this round could not be settled f
 `owner-decisions.md` instead: Blade Sermon 572548/572554's double-hit rate (`grep` for its name or either spell
 id returns zero files across all 186 logs) and Light's Echo 520017/520883's self-chain question and real-play
 mismatch (neither rank is ever applied anywhere in the archive). Both entries are unchanged by this pass.
+
+### Nested proc rate (round 6, Blade Sermon)
+
+Owner ruling 2026-11-09 settles Blade Sermon 572548/572554 (`$h` chance to trigger Zealotry 801450 twice): the
+chance applies to all three Zealotry sources (periodic tick 706325, off-hand swing 92108, Oath: Vindication
+805332), which already reach a single shared helper (`AscensionTemplar.cpp:212-220` `Zealotry()`) with the
+reroll unconditional for every caller. No `procs`/`triggers` entry kind in this file can measure this directly:
+the reroll's own cast (801450) is the *same spell id* as the hit that triggered it, so no existing metric tells
+a first hit from its repeat apart within one sample. A `kind: "proc_rate_delta"` entry (`procs.py`) adds a
+with/without-the-aura delta inside one scenario instead of a direct rate:
+
+| Field (beyond the plain `procs` fields above) | Content |
+|---|---|
+| `kind` | `"proc_rate_delta"` |
+| `baseline_co_learn` | the spell(s) that must be learned so the `trigger` produces the `proc_spell` at all, *without* this entry's own `aura` (for Blade Sermon: `[706325]`, Condemnation, the periodic-tick Zealotry source) |
+| `delta_attempts` | attempts scheduled per phase; defaults to `trials_needed(chance/100)` (no safety margin), but a delta needs far more than a single-rate `procs` entry at the same chance (see below) and is usually set explicitly |
+
+Each part of the scenario runs two phases over the identical `trigger`/`proc_spell`: a baseline phase with only
+`baseline_co_learn` known, then a phase with the entry's own `aura` additionally learned. Both phases measure
+the same way a plain `procs` CAST-trigger entry does (`trials_step`, `spell_count_step`); because the main
+phase's counters are cumulative since the scenario (not the phase) began, its own trials/events are the
+cumulative reading at the end less the baseline phase's own cumulative reading, not the raw end value.
+
+`judge_proc_delta` (`compare.py`) computes `p_baseline = baseline_events / baseline_trials` and `p_main =
+events / trials` (after that subtraction) and a two-proportion z: `(p_main - p_baseline) / sqrt(p_main(1 -
+p_main)/trials + p_baseline(1 - p_baseline)/baseline_trials)`. The verdict is `ok` when `z >= 2.576` (one-sided
+99%, i.e. the with-aura rate is above the baseline rate, not by chance) **and** the measured chance (`p_main /
+p_baseline - 1`) lands between 0 and 3x the tooltip chance (a loose sanity envelope, not a precision target).
+This is a weaker standard than the `WILSON_RULE` a plain `procs` entry holds itself to: it proves the chance is
+positive and roughly the right order of magnitude, not that it sits within +-2.5 points of the tooltip value.
+Reaching that tighter standard with this with/without design needs, by the delta method's own variance
+(`Var(chance_hat) ~= (Var(p_main)/p_baseline^2 + Var(p_baseline) x (p_main/p_baseline^2)^2)`, both terms O(1/n)),
+roughly two orders of magnitude more trials than a direct `procs` rate at the same chance (about 130000 for
+Blade Sermon's 10% rank from its ~15% baseline) - out of proportion with a single round, so this kind does not
+attempt it.
+
+The z-statistic's own sampling variance is always ~1 regardless of trial count (only its mean shifts with more
+trials), so a trial count picked to put the *expected* z just over 2.576 gives a check that is `ok` about half
+the time and `alert` the other half - flaky, not wrong. `delta_attempts` should be sized so the expected z clears
+the 99% threshold with margin (empirically, 2031 attempts/phase gave z between 1.67 and 3.08 across repeated
+runs of Blade Sermon 572554's 10% rank against its ~15% Condemnation baseline; 12000 attempts/phase gave z 5.00
+and 5.90 across two repeated runs, reliably `ok`).
+
+Blade Sermon 572554 (10%) carries this check (`baseline_co_learn: [706325]`, `delta_attempts: 12000`,
+300 parts), measured `ok` (stamp `20261109-163213`: baseline 3662 in 24300, with-aura 4139 in 24300, z 5.90,
+measured chance +0.1303 against tooltip 0.1). Blade Sermon 572548 (5%) could not reach `ok` within this round's
+budget: its smaller nested chance needs a baseline many times larger before the same two-proportion z reliably
+clears 2.576 (at 2031 attempts/phase, stamp `20261109-162302`: baseline 590 in 4131, with-aura 645 in 4131, z
+1.70, measured chance +0.0932 against tooltip 0.05 - directionally consistent, underpowered); it stays
+`unmodelled` with this measurement recorded in its `reason`, since 572554's identical code path (same function,
+same lines, only a different `ProcChance` operand) is the runtime evidence for both ranks sharing one mechanism.
+The off-hand-swing (92108) and Oath: Vindication (805332) sources named by the same ruling are not independently
+measurable by this harness for reasons already on their own entries (92108: no `CanDualWield` path for Templar;
+805332/504107: no fixture to co-learn the Oath aura before a roll that depends on it) - not a gap this round
+introduces, and out of scope for a `baseline_co_learn` fixture to close.
 
 ## Trigger entries
 
