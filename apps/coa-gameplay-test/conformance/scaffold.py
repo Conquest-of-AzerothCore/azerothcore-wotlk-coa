@@ -29,7 +29,8 @@ REFERENCE_RATINGS = {'spell_hit_rating': 10000, 'melee_hit_rating': 10000, 'expe
 EMPTY_LIST_FIELDS = ('alternate_weapons', 'known_auras', 'probe_auras', 'extra_spells',
                      'disabled_foreign_effects', 'effect_overrides', 'unmodelled_effects', 'literal_tokens',
                      'effect_notes', 'passive_targets', 'procs', 'triggers', 'talent_modifiers', 'rotation',
-                     'stack', 'behaviours', 'player_observations', 'player_tooltip_readings')
+                     'stack', 'behaviours', 'player_observations', 'player_tooltip_readings', 'hit_notes',
+                     'conditional_spells')
 
 
 class ScaffoldError(ValueError):
