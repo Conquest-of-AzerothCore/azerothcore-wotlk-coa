@@ -8,7 +8,7 @@ import unittest
 from unittest import mock
 
 from classes import class_spells
-from profile import (CASTER, CLASSES_DIR, armed, base_steps, caster_stats_from, load_class_file, skill_label,
+from profile import (CASTER, armed, base_steps, caster_stats_from, class_file_paths, load_class_file, skill_label,
                     unfit_reason)
 from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, write_fixture
 from tooltip import CasterStats, DataSet, Displayed, Records, read_tooltip
@@ -123,10 +123,13 @@ class ClassFileTest(unittest.TestCase):
         self.assertEqual(templar['weapon']['subclass'], STAFF_SUBCLASS)
 
     def test_every_class_file_names_its_class(self):
-        files = sorted(CLASSES_DIR.glob('*.json'))
+        files = class_file_paths()
         self.assertTrue(files)
         for path in files:
             self.assertIn('class_id', json.loads(path.read_text(encoding='utf-8')), path.name)
+
+    def test_class_file_paths_leaves_out_the_clause_ledger(self):
+        self.assertNotIn('templar_clauses.json', [path.name for path in class_file_paths()])
 
     def test_unknown_class_is_refused(self):
         with self.assertRaises(ValueError):

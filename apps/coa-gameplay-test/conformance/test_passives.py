@@ -199,11 +199,11 @@ class TriggerLinkTest(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
-    def effects_with(self, class_file_extra: dict):
+    def effects_with(self, class_file_extra: dict, verdicts=None):
         class_file = {'class_id': TEMPLAR_CLASS_ID, 'level': LEVEL, 'dbc_dir': str(self.directory),
                       **class_file_extra}
         return passive_effects(class_file, ClassSpell(P5_FIXTURE_SPELL, 'Fixture Proc', (P5_FIXTURE_SPELL,),
-                                                       P5_FIXTURE_SPELL, 2, True))
+                                                       P5_FIXTURE_SPELL, 2, True), verdicts)
 
     def test_p5_effect_links_to_existing_trigger_entry(self):
         effects = self.effects_with({'triggers': [{'aura': P5_FIXTURE_SPELL, 'name': 'Fixture Proc',
@@ -211,6 +211,21 @@ class TriggerLinkTest(unittest.TestCase):
         effect = effect_of(effects, 0)
         self.assertTrue(effect.reason.startswith('unmodelled: checked by triggers entry'), effect.reason)
         self.assertNotEqual(effect.reason, 'unmodelled: proc or trigger effect without a trigger entry')
+
+    def test_p5_link_reports_the_live_verdict_status_not_a_recorded_one(self):
+        label = f'{P5_FIXTURE_SPELL} trigger_count'
+        effects = self.effects_with({'triggers': [{'aura': P5_FIXTURE_SPELL, 'name': 'Fixture Proc', 'kind': None,
+                                                    'status': 'ok'}]}, verdicts={label: 'alert'})
+        effect = effect_of(effects, 0)
+        self.assertIn(f'"{label}" (status alert)', effect.reason)
+        self.assertNotIn('status ok', effect.reason)
+
+    def test_p5_link_without_a_live_verdict_falls_back_to_the_recorded_status(self):
+        label = f'{P5_FIXTURE_SPELL} trigger_count'
+        effects = self.effects_with({'triggers': [{'aura': P5_FIXTURE_SPELL, 'name': 'Fixture Proc', 'kind': None,
+                                                    'status': 'ok'}]}, verdicts={})
+        effect = effect_of(effects, 0)
+        self.assertIn(f'"{label}" (status ok)', effect.reason)
 
     def test_p5_effect_without_any_entry_keeps_generic_reason(self):
         effects = self.effects_with({})

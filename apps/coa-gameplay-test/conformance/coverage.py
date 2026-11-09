@@ -1,16 +1,17 @@
 from dataclasses import dataclass
+import json
 from pathlib import Path
 import re
 
 from behaviours import BEHAVIOUR_CHECKS as PROSE_BEHAVIOUR_CHECKS
-from compare import STATUSES, Verdict, read_verdicts
+from compare import CONFORMANT, STATUSES, Verdict, read_verdicts
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
 from passives import PASSIVE_DELTA
 from procs import PROC_CHECK
 from triggers import TRIGGER_CHECK
 
 COVERAGE_FILE = 'coverage.md'
-JUDGED = frozenset({'ok', 'alert'})
+JUDGED = frozenset({'ok', 'tolerated', 'alert'})
 CHARACTER_CHECKS = frozenset({'known_aura'})
 BEHAVIOUR_CHECKS = frozenset({PASSIVE_DELTA, PROC_CHECK, TRIGGER_CHECK, *PROSE_BEHAVIOUR_CHECKS})
 HIT_CHECK = 'hit_mean'
@@ -129,6 +130,50 @@ def coverage_lines(before_dir: Path, after_dir: Path, headers: tuple[dict, dict]
               f'- Before only: {spell_list(sets[0].spells - sets[1].spells)}',
               f'- After only: {spell_list(sets[1].spells - sets[0].spells)}']
     return lines + ['']
+
+
+ORDINAL_SUFFIX = re.compile(r' #\d+$')
+
+
+def load_clauses(path: Path) -> list[dict]:
+    return json.loads(Path(path).read_text(encoding='utf-8'))
+
+
+def resolved_labels(label: str, statuses: dict[str, str]) -> list[str]:
+    if label in statuses:
+        return [label]
+    if ORDINAL_SUFFIX.search(label):
+        return []
+    prefix = f'{label} #'
+    return sorted(candidate for candidate in statuses
+                 if candidate.startswith(prefix) and candidate[len(prefix):].isdigit())
+
+
+def clause_proven(labels: list[str], statuses: dict[str, str]) -> bool:
+    if not labels:
+        return False
+    for label in labels:
+        matches = resolved_labels(label, statuses)
+        if not matches or any(statuses.get(match) not in CONFORMANT for match in matches):
+            return False
+    return True
+
+
+def clause_coverage(clauses: list[dict], verdicts: list[Verdict]) -> tuple[int, int, list[dict]]:
+    statuses = {verdict.label: verdict.status for verdict in verdicts}
+    claims = [clause for clause in clauses if clause.get('kind') == 'claim']
+    unproven = [clause for clause in claims if not clause_proven(clause.get('labels') or [], statuses)]
+    return len(claims) - len(unproven), len(claims), unproven
+
+
+def clause_coverage_lines(proven: int, total: int, unproven: list[dict]) -> list[str]:
+    lines = [f'clauses proven: {share(proven, total)}', '']
+    if unproven:
+        lines.append('Unproven clauses:')
+        for clause in unproven:
+            lines.append(f"  spell {clause.get('spell')}: {clause.get('clause')} "
+                        f"(labels {clause.get('labels') or []})")
+    return lines
 
 
 def write_coverage(before_dir: Path, after_dir: Path, out_dir: Path) -> Path:

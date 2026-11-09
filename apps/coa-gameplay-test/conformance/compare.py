@@ -29,9 +29,10 @@ from triggers import (COOLDOWN_CHECK, DURATION_CHECK, EVENT_TOLERANCE, PERIODIC,
 from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECTS, FIXED_DIE_SIDES, GENERIC, UNMEASURABLE, UNREADABLE,
                     Expectation, dataset, mean_samples, roll_range, sample_labels)
 
-STATUSES = ('ok', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials', 'unmeasured',
-            MEASURED, 'closed')
+STATUSES = ('ok', 'tolerated', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials',
+            'unmeasured', MEASURED, 'closed')
 NOT_ALERTS = frozenset({'ok', MEASURED, 'closed'})
+CONFORMANT = frozenset({'ok', 'tolerated', 'closed'})
 CAST_DEPENDENT_CHECKS = frozenset({'cooldown_ms', 'aura_amount', 'aura_duration_ms', 'aura_amplitude_ms'})
 NO_CAST_FAILURE = 0
 CAST_RESULTS_HEADER = Path(__file__).resolve().parents[3] / 'src/server/shared/SharedDefines.h'
@@ -39,6 +40,7 @@ CAST_RESULT_ENUM = re.compile(r'enum SpellCastResult\b[^{]*\{(?P<body>[^}]*)\}')
 CAST_RESULT_ENTRY = re.compile(r'^\s*(?P<name>SPELL_\w+)\s*=\s*(?P<code>\d+)', re.MULTILINE)
 ABSOLUTE_TOLERANCE = 1.0
 RELATIVE_TOLERANCE = 0.005
+TOLERATED_RELATIVE = 0.05
 FLOAT_EPSILON = 1e-9
 METRIC_DELTA_FLOAT_TOLERANCE = 1e-5
 TOKEN_CHECKS = frozenset({'effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'spell_duration',
@@ -316,13 +318,26 @@ def margin_of(expected: float) -> float:
     return max(ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE * abs(expected))
 
 
+def banded_status(value: float, low: float, high: float, expected: float) -> str:
+    if low - FLOAT_EPSILON <= value <= high + FLOAT_EPSILON:
+        return 'ok'
+    tolerated_margin = TOLERATED_RELATIVE * abs(expected)
+    if expected - tolerated_margin - FLOAT_EPSILON <= value <= expected + tolerated_margin + FLOAT_EPSILON:
+        return 'tolerated'
+    return 'alert'
+
+
 def deterministic(base: Verdict, measured: float, judged: float, expected: float, why: str) -> Verdict:
     margin = margin_of(expected)
     low, high = expected - margin, expected + margin
-    status = 'ok' if low - FLOAT_EPSILON <= judged <= high + FLOAT_EPSILON else 'alert'
+    status = banded_status(judged, low, high, expected)
+    explanation = (f'{why}; |measured - expected| <= max({ABSOLUTE_TOLERANCE:g}, '
+                   f'{RELATIVE_TOLERANCE:.1%} of expected)')
+    if status == 'tolerated':
+        explanation += (f'; outside that band but within {TOLERATED_RELATIVE:.0%} of expected, deviation '
+                        f'{(judged - expected) / expected if expected else judged - expected:+.1%}: tolerated')
     return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
-                   explanation=f'{why}; |measured - expected| <= max({ABSOLUTE_TOLERANCE:g}, '
-                               f'{RELATIVE_TOLERANCE:.1%} of expected)')
+                   explanation=explanation)
 
 
 def exact(base: Verdict, measured: float, expected: float, why: str) -> Verdict:
@@ -413,11 +428,12 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
     half = Z_99 * sigma / math.sqrt(len(reads))
     low = expected - half - (TRUNCATED_READ if expected > 0 else 0)
     high = expected + half + (TRUNCATED_READ if expected < 0 else 0)
-    status = 'ok' if low - FLOAT_EPSILON <= mean <= high + FLOAT_EPSILON else 'alert'
+    status = banded_status(mean, low, high, expected)
+    tolerated_note = '; outside the 99% interval but within 5% of expected: tolerated' if status == 'tolerated' else ''
     return replace(base, status=status, measured=mean, expected=expected, low=low, high=high, detail=detail,
                    explanation=f'{roll}; 99% interval of the mean, expected mean +- Z x sigma / sqrt(reads) '
                                f'{half:.3f}, widened by {TRUNCATED_READ:g} toward zero for the int32 truncation of '
-                               f'CalcValue')
+                               f'CalcValue{tolerated_note}')
 
 
 def token_drift(expectation: Expectation, tokens: Tokens | None) -> str | None:
@@ -535,7 +551,7 @@ def judge_hit(base: Verdict, class_file: dict, parts: list[ProcPart], hit_model:
     variance = sum(part_count * expected.sigma ** 2 for expected, part_count in models) / count
     half = Z_99 * math.sqrt(variance / count)
     low, high = expected_mean - half, expected_mean + half
-    status = 'ok' if low - FLOAT_EPSILON <= mean <= high + FLOAT_EPSILON else 'alert'
+    status = banded_status(mean, low, high, expected_mean)
     first = models[0][0]
     modifiers = ' or '.join(dict.fromkeys(describe_modifiers(expected.modifiers) for expected, _ in models))
     kind_term = 'mean'
@@ -2291,6 +2307,29 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
     return replace(base, measured=measured, explanation=f'no comparison for check {check!r} with rule {rule!r}')
 
 
+LINKED_VERDICT_REFERENCE = re.compile(r'"([^"]+)" \(status \w+\)')
+
+
+def resolve_linked_statuses(verdicts: list[Verdict]) -> list[Verdict]:
+    by_label = {verdict.label: verdict.status for verdict in verdicts}
+
+    def live_text(match: re.Match) -> str:
+        label = match.group(1)
+        return f'"{label}" (status {by_label.get(label, "unmodelled")})'
+
+    resolved = []
+    for verdict in verdicts:
+        referenced = (LINKED_VERDICT_REFERENCE.findall(verdict.explanation)
+                     if verdict.check == 'unmodelled' and 'checked by' in verdict.explanation else [])
+        if not referenced:
+            resolved.append(verdict)
+            continue
+        explanation = LINKED_VERDICT_REFERENCE.sub(live_text, verdict.explanation)
+        status = 'closed' if all(by_label.get(label) in CONFORMANT for label in referenced) else verdict.status
+        resolved.append(replace(verdict, status=status, explanation=explanation))
+    return resolved
+
+
 def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource | None = None,
              hit_model: HitModelSource | None = None) -> Comparison:
     manifest = json.loads(Path(manifest_path).read_text(encoding='utf-8'))
@@ -2340,7 +2379,7 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
     verdicts += [server_question(manifest, parts[0][2], trigger_judges[parts[0][2].check](parts), tooltips)
                  for parts in trigger_parts.values()]
     verdicts += judge_stack(manifest, stack_parts, tooltips, hit_model)
-    return Comparison(manifest, runs, missing, verdicts)
+    return Comparison(manifest, runs, missing, resolve_linked_statuses(verdicts))
 
 
 def compare(manifest: Path, results_dir: Path, *, tooltips: TooltipSource | None = None,

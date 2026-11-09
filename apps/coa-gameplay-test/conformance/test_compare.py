@@ -10,8 +10,9 @@ import tempfile
 import unittest
 
 from compare import (ALERT_COLUMNS, EFFECT_VALUE_SCOPE, PERCENT_POINT_METRICS, DbcTooltips, ScenarioDrift, Verdict,
-                     alert_rows, compare, delta_margin, log_query_of, measured_values, observation_lines,
-                     owner_fallback, question_detail, read_verdicts, write_outputs)
+                     alert_rows, banded_status, compare, delta_margin, log_query_of, measured_values,
+                     observation_lines, owner_fallback, question_detail, read_verdicts, resolve_linked_statuses,
+                     write_outputs)
 from hits import HitModel, Modifier
 from profile import CLASSES_DIR, DBC_DIR
 from classes import class_spells
@@ -203,7 +204,17 @@ class CompareTest(unittest.TestCase):
         token = Displayed('${$m1*10}', 10000.0, 0, 'flat')
         self.assertEqual(self.effect_verdict('9951', token).status, 'ok')
         self.fresh()
-        self.assertEqual(self.effect_verdict('9949', token).status, 'alert')
+        self.assertEqual(self.effect_verdict('9949', token).status, 'tolerated')
+
+    def test_a_deviation_within_five_percent_is_tolerated_not_an_alert(self):
+        token = Displayed('${$m1*10}', 10000.0, 0, 'flat')
+        verdict = self.effect_verdict('10400', token)
+        self.assertEqual(verdict.status, 'tolerated')
+        self.assertIn('tolerated', verdict.explanation)
+
+    def test_a_deviation_beyond_five_percent_is_still_an_alert(self):
+        token = Displayed('${$m1*10}', 10000.0, 0, 'flat')
+        self.assertEqual(self.effect_verdict('10600', token).status, 'alert')
 
     def test_unsigned_token_takes_the_sign_of_its_dbc_points(self):
         token = Displayed('$s1', 50.0, 0, 'percent')
@@ -254,9 +265,17 @@ class CompareTest(unittest.TestCase):
         self.assertAlmostEqual(verdict.low, fmean(values) - half - 1)
         self.assertAlmostEqual(verdict.high, fmean(values) + half)
 
-    def test_an_offset_of_half_the_roll_spread_is_an_alert_at_the_needed_count(self):
+    def test_an_offset_of_half_the_roll_spread_is_outside_the_interval_but_tolerated(self):
         values, needed = rolled_reads_needed()
         offset = (max(values) - min(values)) / 2
+        reads = [math.trunc(values[index % len(values)] + offset) for index in range(needed)]
+        verdict = self.rolled_verdict(reads)
+        self.assertEqual(verdict.status, 'tolerated')
+        self.assertIn('tolerated', verdict.explanation)
+
+    def test_a_roll_offset_beyond_five_percent_is_still_an_alert(self):
+        values, needed = rolled_reads_needed()
+        offset = fmean(values) * 0.5
         reads = [math.trunc(values[index % len(values)] + offset) for index in range(needed)]
         self.assertEqual(self.rolled_verdict(reads).status, 'alert')
 
@@ -521,7 +540,7 @@ class CompareTest(unittest.TestCase):
         write_outputs(manifest, results, verdicts, out)
         report = (out / 'report.md').read_text(encoding='utf-8')
         self.assertIn('| unreadable | 1 |', report)
-        self.assertRegex(report, r'\| 1000 \| Test Strike \| 0 \| 0 \| 1 \| 0 \| 0 \| 0 \| 0 \|')
+        self.assertRegex(report, r'\| 1000 \| Test Strike \| 0 \| 0 \| 0 \| 1 \| 0 \| 0 \| 0 \| 0 \| 0 \| 0 \|')
         self.assertIn('887007', report)
         alerts = (out / 'alerts.tsv').read_text(encoding='utf-8').splitlines()
         self.assertEqual(len(alerts), 2)
@@ -1086,8 +1105,8 @@ class PassiveDeltaTest(unittest.TestCase):
         write_outputs(manifest, results, verdicts, out)
         report = (out / 'report.md').read_text(encoding='utf-8')
         self.assertIn('## Passives', report)
-        self.assertRegex(report, r'\| P2 \| 1 \| 0 \| 0 \| 0 \| 0 \| 0 \| 0 \| 0 \|')
-        self.assertRegex(report, r'\| P6 \| 0 \| 0 \| 0 \| 1 \| 0 \| 0 \| 0 \| 0 \|')
+        self.assertRegex(report, r'\| P2 \| 1 \| 0 \| 0 \| 0 \| 0 \| 0 \| 0 \| 0 \| 0 \| 0 \|')
+        self.assertRegex(report, r'\| P6 \| 0 \| 0 \| 0 \| 0 \| 1 \| 0 \| 0 \| 0 \| 0 \| 0 \|')
 
 
 class QuestionDetailTest(unittest.TestCase):
@@ -1126,6 +1145,23 @@ class OwnerFallbackTest(unittest.TestCase):
         self.assertEqual(log_query_of(manifest, '706325 proc_rate'), 'coa-history query: none')
         self.assertIsNone(log_query_of(manifest, 'unregistered label'))
         self.assertIsNone(log_query_of({'class_file': {}}, '706325 proc_rate'))
+
+
+class BandedStatusTest(unittest.TestCase):
+    def test_inside_the_band_is_ok(self):
+        self.assertEqual(banded_status(1002.0, 995.0, 1005.0, 1000.0), 'ok')
+
+    def test_a_four_percent_deviation_outside_the_band_is_tolerated(self):
+        self.assertEqual(banded_status(1040.0, 995.0, 1005.0, 1000.0), 'tolerated')
+
+    def test_a_six_percent_deviation_is_still_an_alert(self):
+        self.assertEqual(banded_status(1060.0, 995.0, 1005.0, 1000.0), 'alert')
+
+    def test_exactly_five_percent_is_tolerated_not_an_alert(self):
+        self.assertEqual(banded_status(1050.0, 995.0, 1005.0, 1000.0), 'tolerated')
+
+    def test_a_zero_expected_value_never_tolerates_a_nonzero_measurement(self):
+        self.assertEqual(banded_status(1.0, 0.0, 0.0, 0.0), 'alert')
 
 
 class MeasuredValuesTest(unittest.TestCase):
@@ -1225,7 +1261,7 @@ class GeneratedTokenTest(unittest.TestCase):
         self.assertIn('before script hooks', verdict.detail['scope'])
         self.assertIn('OnCalcMaxDuration', verdict.detail['scope'])
         self.assertEqual(self.judged(KEEPING_THE_OATH, '$803237d', '8040').status, 'ok')
-        self.assertEqual(self.judged(KEEPING_THE_OATH, '$803237d', '8041').status, 'alert')
+        self.assertEqual(self.judged(KEEPING_THE_OATH, '$803237d', '8041').status, 'tolerated')
         self.assertEqual(self.judged(KEEPING_THE_OATH, '$803237d', '9000').status, 'alert')
 
 
@@ -1271,6 +1307,42 @@ class GenerateTest(unittest.TestCase):
 
 def verdict(label: str, status: str) -> Verdict:
     return Verdict(label, status, None, None, None, None, '')
+
+
+def linked_verdict(label: str, reference: str, referenced_status: str) -> Verdict:
+    explanation = (f'unmodelled: checked by triggers entry "Fixture Proc" '
+                   f'(verdict "{reference}" (status {referenced_status}))')
+    return Verdict(label, 'unmodelled', None, None, None, None, explanation, check='unmodelled')
+
+
+class ResolveLinkedStatusesTest(unittest.TestCase):
+    def test_a_link_to_a_conformant_live_verdict_becomes_closed_not_unmodelled(self):
+        resolved = resolve_linked_statuses([linked_verdict('1 e0', '2 proc_rate', 'alert'),
+                                            verdict('2 proc_rate', 'ok')])
+        self.assertEqual(resolved[0].status, 'closed')
+        self.assertIn('(status ok)', resolved[0].explanation)
+
+    def test_a_link_to_an_alerting_live_verdict_stays_unmodelled_not_closed(self):
+        resolved = resolve_linked_statuses([linked_verdict('1 e0', '2 proc_rate', 'ok'),
+                                            verdict('2 proc_rate', 'alert')])
+        self.assertEqual(resolved[0].status, 'unmodelled')
+        self.assertIn('(status alert)', resolved[0].explanation)
+        self.assertNotIn('(status ok)', resolved[0].explanation)
+
+    def test_a_tolerated_live_verdict_also_counts_as_conformant(self):
+        resolved = resolve_linked_statuses([linked_verdict('1 e0', '2 proc_rate', 'ok'),
+                                            verdict('2 proc_rate', 'tolerated')])
+        self.assertEqual(resolved[0].status, 'closed')
+
+    def test_a_missing_referenced_label_leaves_the_row_unmodelled(self):
+        resolved = resolve_linked_statuses([linked_verdict('1 e0', '2 proc_rate', 'ok')])
+        self.assertEqual(resolved[0].status, 'unmodelled')
+        self.assertIn('(status unmodelled)', resolved[0].explanation)
+
+    def test_an_unrelated_verdict_passes_through_unchanged(self):
+        plain = verdict('1 e0', 'ok')
+        resolved = resolve_linked_statuses([plain])
+        self.assertEqual(resolved[0], plain)
 
 
 class ObservationLinesTest(unittest.TestCase):

@@ -5,7 +5,7 @@ import unittest
 
 from compare import Verdict, write_verdicts
 from conformance import DIFF_EXIT, main
-from coverage import COVERAGE_FILE, coverage, write_coverage
+from coverage import COVERAGE_FILE, clause_coverage, coverage, write_coverage
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
 from passives import PASSIVE_DELTA
 from procs import PROC_CHECK
@@ -168,6 +168,70 @@ class CoverageTests(unittest.TestCase):
         after = self.compare_output('after', [value(ARGENT_BLADE)], {**CLASS, 'class_id': 20})
         self.assertEqual(main(['coverage', '--before', str(before), '--after', str(after)]), DIFF_EXIT)
         self.assertFalse((after / COVERAGE_FILE).exists())
+
+
+class ClauseCoverageTest(unittest.TestCase):
+    def test_a_claim_with_every_label_conformant_is_proven(self):
+        clauses = [{'spell': ARGENT_BLADE, 'clause': 'deals extra damage', 'kind': 'claim',
+                   'labels': [f'{ARGENT_BLADE} effect_value #0']}]
+        proven, total, unproven = clause_coverage(clauses, [value(ARGENT_BLADE)])
+        self.assertEqual((proven, total, unproven), (1, 1, []))
+
+    def test_a_tolerated_verdict_counts_as_proven(self):
+        clauses = [{'spell': ARGENT_BLADE, 'clause': 'deals extra damage', 'kind': 'claim',
+                   'labels': [f'{ARGENT_BLADE} effect_value #0']}]
+        proven, _, unproven = clause_coverage(clauses, [value(ARGENT_BLADE, 'tolerated')])
+        self.assertEqual((proven, unproven), (1, []))
+
+    def test_an_alerting_label_leaves_the_claim_unproven(self):
+        clauses = [{'spell': ARGENT_BLADE, 'clause': 'deals extra damage', 'kind': 'claim',
+                   'labels': [f'{ARGENT_BLADE} effect_value #0']}]
+        proven, total, unproven = clause_coverage(clauses, [value(ARGENT_BLADE, 'alert')])
+        self.assertEqual((proven, total), (0, 1))
+        self.assertEqual(unproven[0]['clause'], 'deals extra damage')
+
+    def test_a_claim_with_no_labels_is_unproven(self):
+        clauses = [{'spell': ARGENT_BLADE, 'clause': 'deals extra damage', 'kind': 'claim', 'labels': []}]
+        proven, total, unproven = clause_coverage(clauses, [value(ARGENT_BLADE)])
+        self.assertEqual((proven, total, len(unproven)), (0, 1, 1))
+
+    def test_no_claim_entries_are_excluded_from_the_total(self):
+        clauses = [{'spell': ARGENT_BLADE, 'clause': 'Level 10 Passive', 'kind': 'no_claim',
+                   'reason': 'a level-gate label', 'labels': []}]
+        proven, total, unproven = clause_coverage(clauses, [])
+        self.assertEqual((proven, total, unproven), (0, 0, []))
+
+    def test_an_ordinal_free_label_matches_the_real_ordinal_suffixed_verdict(self):
+        clauses = [{'spell': ARGENT_BLADE, 'clause': 'deals extra damage', 'kind': 'claim',
+                   'labels': [f'{ARGENT_BLADE} effect_value 801832e1']}]
+        verdicts = [verdict(f'{ARGENT_BLADE} effect_value 801832e1 #1', 'ok', ARGENT_BLADE,
+                           f'conformance-templar-value-{ARGENT_BLADE}', 'effect_value')]
+        proven, total, unproven = clause_coverage(clauses, verdicts)
+        self.assertEqual((proven, total, unproven), (1, 1, []))
+
+    def test_an_ordinal_free_label_needs_every_matching_occurrence_conformant(self):
+        clauses = [{'spell': ARGENT_BLADE, 'clause': 'deals extra damage twice', 'kind': 'claim',
+                   'labels': [f'{ARGENT_BLADE} effect_value 801832e1']}]
+        verdicts = [verdict(f'{ARGENT_BLADE} effect_value 801832e1 #1', 'ok', ARGENT_BLADE,
+                           f'conformance-templar-value-{ARGENT_BLADE}', 'effect_value'),
+                   verdict(f'{ARGENT_BLADE} effect_value 801832e1 #2', 'alert', ARGENT_BLADE,
+                           f'conformance-templar-value-{ARGENT_BLADE}', 'effect_value')]
+        proven, total, unproven = clause_coverage(clauses, verdicts)
+        self.assertEqual((proven, total), (0, 1))
+
+    def test_an_ordinal_free_label_with_no_matching_verdict_is_unproven(self):
+        clauses = [{'spell': ARGENT_BLADE, 'clause': 'deals extra damage', 'kind': 'claim',
+                   'labels': [f'{ARGENT_BLADE} effect_value 801832e1']}]
+        proven, total, unproven = clause_coverage(clauses, [])
+        self.assertEqual((proven, total), (0, 1))
+
+    def test_a_label_already_carrying_an_ordinal_is_not_expanded(self):
+        clauses = [{'spell': ARGENT_BLADE, 'clause': 'deals extra damage', 'kind': 'claim',
+                   'labels': [f'{ARGENT_BLADE} effect_value 801832e1 #1']}]
+        verdicts = [verdict(f'{ARGENT_BLADE} effect_value 801832e1 #10', 'ok', ARGENT_BLADE,
+                           f'conformance-templar-value-{ARGENT_BLADE}', 'effect_value')]
+        proven, total, unproven = clause_coverage(clauses, verdicts)
+        self.assertEqual((proven, total), (0, 1))
 
 
 if __name__ == '__main__':

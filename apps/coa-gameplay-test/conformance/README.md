@@ -66,6 +66,8 @@ Each topic lives in its own page under `docs/`, so an agent reads only the page 
   leaves for a human.
 - [Generate and compare](docs/generate-and-compare.md) — `generate`/`compare` CLI, a full class run, the impact
   report, coverage comparison, behaviour sheets, verdict statuses, open conformance checks.
+- [Clause ledger and clause coverage](docs/clause-ledger.md) — `classes/<name>_clauses.json` format, how a
+  workstream contributes labels, `coverage.py coverage --clauses`.
 
 ## Run
 

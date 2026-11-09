@@ -604,13 +604,18 @@ def check_label(class_file: dict, kind: str, entry: dict) -> list[str]:
     return behaviour_label(entry)
 
 
-def linked_reason(class_file: dict, links: list[tuple[str, dict]]) -> str:
+def live_status(verdicts: dict[str, str] | None, label: str, entry: dict) -> str:
+    if verdicts is not None and label in verdicts:
+        return verdicts[label]
+    return entry.get('status', 'ok')
+
+
+def linked_reason(class_file: dict, links: list[tuple[str, dict]], verdicts: dict[str, str] | None = None) -> str:
     pointers = []
     for kind, entry in links:
         labels = check_label(class_file, kind, entry)
-        status = entry.get('status', 'ok')
-        verdicts = ', '.join(f'"{label}"' for label in labels)
-        pointers.append(f'{kind} entry "{entry.get("name")}" (verdict {verdicts}, status {status})')
+        parts = [f'"{label}" (status {live_status(verdicts, label, entry)})' for label in labels]
+        pointers.append(f'{kind} entry "{entry.get("name")}" (verdict {", ".join(parts)})')
     return f'checked by {"; ".join(pointers)}'
 
 
@@ -622,7 +627,7 @@ def signed_points(records: Records, rank_id: int, effect: int) -> float | None:
 
 
 def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, effect: int, effects: list[int],
-             text: str, values: list[Displayed]) -> PassiveEffect:
+             text: str, values: list[Displayed], verdicts: dict[str, str] | None = None) -> PassiveEffect:
     def spell(name: str):
         return records.field('Spell', rank_id, name)
 
@@ -658,7 +663,7 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
         if family in FAMILY_REASONS:
             link = trigger_link(class_file, {spell_id, rank_id}, effect) if family == LINKED_FAMILY else None
             if link is not None:
-                raise NotModelled(linked_reason(class_file, link))
+                raise NotModelled(linked_reason(class_file, link, verdicts))
             raise NotModelled(FAMILY_REASONS[family])
         if aura == 142:
             raise Closed(OUT_OF_SCOPE[142])
@@ -688,14 +693,15 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
     return PassiveEffect(rank_id, effect, aura, misc, misc_b, family, token, plans, targets, reason, points)
 
 
-def passive_effects(class_file: dict, spell: ClassSpell) -> list[PassiveEffect]:
+def passive_effects(class_file: dict, spell: ClassSpell,
+                    verdicts: dict[str, str] | None = None) -> list[PassiveEffect]:
     dbc = dataset(Path(class_file.get('dbc_dir', DBC_DIR)))
     records = Records(dbc)
     rank_id = spell.max_rank
     text = cleaned_tooltip(records.field('Spell', rank_id, 'Description[enUS]'))
     values = read_tooltip(dbc, rank_id, structure_stats(class_file)).values
     effects = [effect for effect in EFFECTS if records.field('Spell', rank_id, f'Effect[{effect}]')]
-    return [classify(class_file, records, spell.spell_id, rank_id, effect, effects, text, values)
+    return [classify(class_file, records, spell.spell_id, rank_id, effect, effects, text, values, verdicts)
             for effect in effects]
 
 

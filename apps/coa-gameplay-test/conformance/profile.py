@@ -43,8 +43,15 @@ def probe_aura_label(spell_id: int) -> str:
     return f'probe_aura {spell_id}'
 
 
+CLAUSE_LEDGER_SUFFIX = '_clauses'
+
+
+def class_file_paths() -> list[Path]:
+    return sorted(path for path in CLASSES_DIR.glob('*.json') if not path.stem.endswith(CLAUSE_LEDGER_SUFFIX))
+
+
 def load_class_file(class_id: int) -> dict:
-    for path in sorted(CLASSES_DIR.glob('*.json')):
+    for path in class_file_paths():
         class_file = json.loads(path.read_text(encoding='utf-8'))
         if class_file['class_id'] == class_id:
             return class_file

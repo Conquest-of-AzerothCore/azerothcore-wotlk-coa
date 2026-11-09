@@ -35,12 +35,14 @@ def spell_effects(records: Records, spell_id: int) -> list[int]:
     return [effect for effect in EFFECTS if records.field('Spell', spell_id, f'Effect[{effect}]')]
 
 
-def decoded_effects(class_file: dict, records: Records, spell_id: int, text: str, values: list) -> list[dict]:
+def decoded_effects(class_file: dict, records: Records, spell_id: int, text: str, values: list,
+                    verdicts: dict | None = None) -> list[dict]:
     effects = spell_effects(records, spell_id)
     decoded = []
     for effect in effects:
         try:
-            effect_record = classify(class_file, records, spell_id, spell_id, effect, effects, text, values)
+            effect_record = classify(class_file, records, spell_id, spell_id, effect, effects, text, values,
+                                     verdicts)
         except Unreadable as error:
             decoded.append({'effect': effect, 'reason': f'unreadable: {error}'})
             continue
@@ -112,6 +114,17 @@ def verdict_entries(verdicts_dir, spell_id: int) -> list[dict]:
     return [asdict(verdict) for verdict in verdicts if verdict.spell_id == spell_id or verdict.rank_id == spell_id]
 
 
+def live_statuses(verdicts_dir) -> dict[str, str] | None:
+    if verdicts_dir is None:
+        return None
+    from compare import read_verdicts
+    path = Path(verdicts_dir)
+    if not (path / 'verdicts.json').is_file():
+        return None
+    _, verdicts = read_verdicts(path)
+    return {verdict.label: verdict.status for verdict in verdicts}
+
+
 def sheet(dbc_dir, class_file: dict, spell_id: int, verdicts_dir=None) -> dict:
     dbc = dataset(Path(dbc_dir))
     records = Records(dbc)
@@ -131,7 +144,7 @@ def sheet(dbc_dir, class_file: dict, spell_id: int, verdicts_dir=None) -> dict:
             'low': serialize_readout(readouts['low']),
             'high': serialize_readout(readouts['high']),
         },
-        'effects': decoded_effects(class_file, records, spell_id, text, high_values),
+        'effects': decoded_effects(class_file, records, spell_id, text, high_values, live_statuses(verdicts_dir)),
         'facts': rank_facts(records, spell_id),
         'proc_trigger_fields': proc_trigger_candidate(records, spell_id),
         'scripted_hooks': scripted_hooks(spell_id),

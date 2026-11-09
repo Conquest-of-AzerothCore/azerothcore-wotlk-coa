@@ -11,7 +11,7 @@ from behaviours import behaviour_entries, behaviour_scenario
 from classes import CHARACTER_LEVEL, PROGRESSION_HEADER, ClassSpell, class_spells
 from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_FILE, ScenarioDrift, evaluate,
                      literal_values, write_levers, write_outputs)
-from coverage import COVERAGE_FILE, write_coverage
+from coverage import COVERAGE_FILE, clause_coverage, clause_coverage_lines, load_clauses, write_coverage
 from diff import IMPACT_FILE, diff_directories, write_impact
 from passives import passive_scenario
 from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, hit_parts, melee_scenario, records_of,
@@ -376,6 +376,11 @@ def coverage_command(args) -> int:
         print(f'No coverage report: {error}', file=sys.stderr)
         return DIFF_EXIT
     print(path)
+    if args.clauses:
+        from compare import read_verdicts
+        _, verdicts = read_verdicts(args.after)
+        proven, total, unproven = clause_coverage(load_clauses(args.clauses), verdicts)
+        print('\n'.join(clause_coverage_lines(proven, total, unproven)))
     return 0
 
 
@@ -432,6 +437,9 @@ def main(argv=None) -> int:
     covering.add_argument('--before', type=Path, required=True, help=f'a compare output directory ({VERDICTS_FILE})')
     covering.add_argument('--after', type=Path, required=True, help='a compare output directory')
     covering.add_argument('--out', type=Path, help='output directory, the after directory by default')
+    covering.add_argument('--clauses', type=Path,
+                          help='a classes/<name>_clauses.json clause ledger; prints proven/total clause coverage '
+                               'against --after and lists every unproven clause')
     args = parser.parse_args(argv)
     handlers = {'scaffold': scaffold_command, 'generate': generate_command, 'sheets': sheets_command,
                 'compare': compare_command, 'diff': diff_command, 'coverage': coverage_command}
