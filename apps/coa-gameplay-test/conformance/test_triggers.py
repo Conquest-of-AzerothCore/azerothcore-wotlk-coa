@@ -883,11 +883,11 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                     expected = 1
                 self.assertEqual(entry['per_trigger'], expected)
 
-    def test_divine_fury_and_iron_penance_share_the_vindication_driver(self):
+    def test_divine_fury_is_unmodelled_and_iron_penance_keeps_its_vindication_driver(self):
         divine_fury, iron_penance = templar_trigger(DIVINE_FURY), templar_trigger(IRON_PENANCE)
-        self.assertEqual(divine_fury['trigger']['spell'], VINDICATION_MAX_RANK)
+        self.assertEqual(divine_fury.get('status'), 'unmodelled')
+        self.assertNotIn('trigger', divine_fury)
         self.assertEqual(iron_penance['trigger']['spell'], VINDICATION_MAX_RANK)
-        self.assertEqual(divine_fury['trigger'], iron_penance['trigger'])
 
     def test_priest_training_reads_zealotry_hits_instead_of_the_vindication_ratio(self):
         entry = templar_trigger(PRIEST_TRAINING)
@@ -1411,7 +1411,15 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class TakenHitTriggerTests(unittest.TestCase):
     def entry(self):
-        return templar_trigger(SACRED_DEFENSE)
+        return {
+            'aura': SACRED_DEFENSE, 'name': 'Sacred Defense',
+            'tooltip': 'When you take Physical damage you now strike back at enemies for $s1% of the damage '
+                       'dealt as Holy damage. Can only occur once per sec.',
+            'trigger': {'action': 'taken_hit', 'spell': 16827, 'striker_entry': 36},
+            'trigger_text': 'When you take Physical damage', 'trigger_spell_text': '',
+            'trial_metric': 'spell_damage_count', 'observe_spell': 707720, 'observe_source': 'synthetic fixture',
+            'observe_metric': 'spell_cast_count', 'per_trigger': 1, 'per_trigger_text': 'now strike back at enemies',
+            'internal_cooldown_ms': 1000}
 
     def test_attempt_interval_folds_the_strikers_own_cast_time(self):
         entry = self.entry()
