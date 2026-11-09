@@ -84,6 +84,16 @@
     {"spell": 705299, "effect": 0,
      "reason": "round8 large-values: fixed AscensionTemplarAuras.cpp:66-67 (aura_ascension_templar_lifecycle::Calculate, id == 705299) to reassign amount = -10 - .1*Stamina, the tooltip's own rank-0 base per ADR 0014, instead of subtracting from the per-level-inflated SpellEffectInfo::CalcValue; the fix corrects the real applied amount, but spell_effect_value still reads CalcValue before this AuraScript CalcAmount hook runs (detail.scope \"CalcValue before aura scripts\"), the same structural gap ADR 0014 documents for Staffguard 706583, so this check can never see the correction"}
   ],
+  "foreign_aura_grants": [
+    {"spell": 804228, "target": 102208,
+     "reason": "Spell.dbc 804228 effect 1 is SPELL_EFFECT_TRIGGER_SPELL (EffectTriggerSpell 102208) targeting TARGET_UNIT_TARGET_ALLY; only the computed SpellDuration of 102208 was proven before, never that casting 804228 on an ally actually applies it"},
+    {"spell": 1397742, "target": 102208,
+     "reason": "AscensionTemplarAbilities.cpp:252-254 casts 102208 on the cast target, or on the caster when none is given, whenever spell 1397742 is cast; a scripted trigger with no DBC effect, so only a live cast proves it"},
+    {"spell": 805422, "target": 806354,
+     "reason": "AscensionTemplarAuras.cpp:122-127 (id == 805422) casts 806354 on the caster when 805422 is cast; a scripted trigger with no DBC effect, so only a live cast proves it"},
+    {"spell": 805422, "target": 807004,
+     "reason": "AscensionTemplarAuras.cpp:122-127 (id == 805422) casts 807004 on the caster when 805422 is cast; a scripted trigger with no DBC effect, so only a live cast proves it"}
+  ],
   "conditional_spells": [
     {"spell": 705300, "learn": 573452,
      "reason": "$?s573452 true branch names 806106's own effect 0, a static value independent of caster state"},

@@ -438,6 +438,26 @@ class CompareTest(unittest.TestCase):
                                   constant_reader(Displayed('$d', 20000.0, None, 'duration_ms')))
         self.assertEqual((verdicts[label].status, verdicts[label].low), ('ok', 19925.0))
 
+    def test_foreign_aura_grant_duration_on_the_ally_matches_the_duration_token(self):
+        label = '1001 aura_duration_ms 2002 #0'
+        steps = [plain_step('cast'), assert_step('1001 cast_failure', '0'),
+                 plain_step('reset_cooldown'), plain_step('cast'), assert_step('1001 cast_failure 2002 #0', '0'),
+                 assert_step(label, '19988')]
+        verdicts = self.value_run(
+            [expectation(label, 'aura_duration_ms', '$2002d', 'read duration_ms')],
+            ['$2002d'], steps, constant_reader(Displayed('$2002d', 20000.0, None, 'duration_ms', 2002)))
+        self.assertEqual((verdicts[label].status, verdicts[label].low), ('ok', 19950.0))
+
+    def test_foreign_aura_grant_duration_missing_on_the_ally_is_an_alert(self):
+        label = '1001 aura_duration_ms 2002 #0'
+        steps = [plain_step('cast'), assert_step('1001 cast_failure', '0'),
+                 plain_step('reset_cooldown'), plain_step('cast'), assert_step('1001 cast_failure 2002 #0', '0'),
+                 assert_step(label, '0')]
+        verdicts = self.value_run(
+            [expectation(label, 'aura_duration_ms', '$2002d', 'read duration_ms')],
+            ['$2002d'], steps, constant_reader(Displayed('$2002d', 20000.0, None, 'duration_ms', 2002)))
+        self.assertEqual(verdicts[label].status, 'alert')
+
     def test_effect_radius_is_read_from_spellradius(self):
         label = '1001 effect_radius e0 #0'
         token = Displayed('$a1', 40.0, 0, 'radius_yards')

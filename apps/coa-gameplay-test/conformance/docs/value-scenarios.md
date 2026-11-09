@@ -79,7 +79,14 @@ so a step names only spells of that set; a spell the server's store lacks still 
 spell in metric`). `spell_duration_ms` is the base duration after the player's spell modifiers, before script
 hooks: every `spell_duration` verdict carries that limit in `detail['scope']`.
 Known limit: a duration that a `ScriptMgr::OnCalcMaxDuration` script changes (`Aura::CalcMaxDuration`,
-`SpellAuras.cpp:815`) is not covered, so such a spell needs a cast-based `aura_duration_ms` check instead.
+`SpellAuras.cpp:815`) is not covered, so such a spell needs a cast-based `aura_duration_ms` check instead. A
+`spell_duration` check also never proves the foreign spell is actually granted by casting the rank, only that its
+computed duration matches the token; a class file's `foreign_aura_grants` (`{spell, target, reason}`, the `reason`
+citing the DBC trigger effect or the script that applies it) lists the pairs this has been confirmed for, and
+`value_scenario` adds a live `aura_duration_ms` check on top for each one, on the caster or on a dedicated `ally`
+test player reached by its own reset-cooldown-and-recast sequence, chosen by whether the rank's own effects target
+`TARGET_UNIT_TARGET_ALLY` (`targets_ally`). Only the listed pairs get this extra check, so an uninvestigated
+`foreign_duration` match elsewhere in the class is unaffected (ADR 0051).
 `spell_effect_value` is `SpellEffectInfo::CalcValue`, before aura scripts: every `effect_value` verdict carries
 `detail['scope']` "CalcValue before aura scripts (CalcAmount hooks not covered)". Known limit: an amount that an
 AuraScript `CalcAmount` hook sets is not covered, so a passing value can still differ from the applied aura, and a

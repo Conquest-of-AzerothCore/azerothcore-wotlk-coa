@@ -12,10 +12,10 @@ from profile import (CASTER, armed, base_steps, caster_stats_from, class_file_pa
                     unfit_reason)
 from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, write_fixture
 from tooltip import CasterStats, DataSet, Displayed, Records, read_tooltip
-from values import (AURA_STATE_HEALTHLESS_35_PERCENT, CHECKS, FIXTURE_MAX_HEALTH, GENERIC, TARGET, UNMEASURABLE,
-                    UNREADABLE, Expectation, Unmodelled, conditional_extra_values, disabled_foreign_effects,
-                    facts_of, fixture_health_step, foreign_effect, foreign_radius, periodic_reason,
-                    required_target_health_steps, sample_labels, value_scenario)
+from values import (ALLY, AURA_STATE_HEALTHLESS_35_PERCENT, CHECKS, FIXTURE_MAX_HEALTH, GENERIC, TARGET,
+                    UNMEASURABLE, UNREADABLE, Expectation, Unmodelled, conditional_extra_values,
+                    disabled_foreign_effects, facts_of, fixture_health_step, foreign_aura_grants, foreign_effect,
+                    foreign_radius, periodic_reason, required_target_health_steps, sample_labels, value_scenario)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -88,6 +88,10 @@ TESTAMENT_OF_HOPE_RADIUS_SPELL = 704409
 RIGHTEOUS_CUSTODIAN = 572808
 CONDEMN = 804906
 NORGANNONS_WRATH = 524739
+TESTAMENT_OF_RESOLVE = 804228
+SACRED_RESTRAINT = 102208
+TOME_OF_LIGHT = 805422
+TOME_OF_LIGHT_AURAS = (806354, 807004)
 NORGANNONS_WRATH_RADIUS_SPELL = 524740
 NON_PERIODIC_AURA_WITH_AMPLITUDE = 43
 PERIODIC_AURA_WITH_SECONDS = 44
@@ -496,6 +500,44 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         step, = self.steps_of(scenario, item.label)
         self.assertEqual((step['metric'], step['spell'], step['actor']),
                          ('spell_duration_ms', KEEPING_THE_OATH_AURA, 'caster'))
+
+    def test_foreign_aura_grant_is_proven_live_on_the_actual_ally(self):
+        scenario, expectations = self.build_extra(TESTAMENT_OF_RESOLVE, TESTAMENT_OF_RESOLVE)
+        run.validate(scenario)
+        self.assertIn((TESTAMENT_OF_RESOLVE, SACRED_RESTRAINT), foreign_aura_grants(self.class_file))
+        label = f'{TESTAMENT_OF_RESOLVE} aura_duration_ms {SACRED_RESTRAINT} #1'
+        item = next(item for item in expectations if item.label == label)
+        self.assertEqual(item.check, 'aura_duration_ms')
+        step, = self.steps_of(scenario, label)
+        self.assertEqual((step['metric'], step['spell'], step['actor'], step['caster']),
+                         ('aura_duration_ms', SACRED_RESTRAINT, ALLY, 'caster'))
+        casts = [step for step in scenario['steps'] if step['action'] == 'cast']
+        self.assertEqual([step.get('target') for step in casts], [None, ALLY])
+        self.assertIn({'action': 'reset_cooldown', 'actor': 'caster', 'spell': TESTAMENT_OF_RESOLVE},
+                      scenario['steps'])
+        self.assertIn(ALLY, {player['id'] for player in scenario['players']})
+        own_duration_step, = self.steps_of(scenario, f'{TESTAMENT_OF_RESOLVE} aura_duration_ms #0')
+        self.assertEqual(own_duration_step['actor'], 'caster')
+        self.assertLess(scenario['steps'].index(own_duration_step), scenario['steps'].index(step))
+
+    def test_foreign_aura_grant_on_a_self_targeted_spell_stays_on_the_caster(self):
+        scenario, expectations = self.build(TESTAMENT_OF_HOPE, TESTAMENT_OF_HOPE)
+        run.validate(scenario)
+        label = f'{TESTAMENT_OF_HOPE} aura_duration_ms {SACRED_RESTRAINT} #4'
+        item = next(item for item in expectations if item.label == label)
+        self.assertEqual(item.check, 'aura_duration_ms')
+        step, = self.steps_of(scenario, label)
+        self.assertEqual((step['metric'], step['spell'], step['actor']),
+                         ('aura_duration_ms', SACRED_RESTRAINT, 'caster'))
+        self.assertNotIn(ALLY, {player['id'] for player in scenario['players']})
+        self.assertEqual([step for step in scenario['steps'] if step['action'] == 'reset_cooldown'], [])
+
+    def test_foreign_duration_without_a_grant_entry_stays_computed_only(self):
+        scenario, expectations = self.build(KEEPING_THE_OATH, KEEPING_THE_OATH)
+        label = f'{KEEPING_THE_OATH} aura_duration_ms {KEEPING_THE_OATH_AURA} #0'
+        self.assertNotIn((KEEPING_THE_OATH, KEEPING_THE_OATH_AURA), foreign_aura_grants(self.class_file))
+        self.assertFalse([item for item in expectations if item.label == label])
+        self.assertFalse(self.steps_of(scenario, label))
 
     def test_foreign_chance_stays_unmeasurable(self):
         scenario, expectations = self.build(SCOURGEBANE, SCOURGEBANE)

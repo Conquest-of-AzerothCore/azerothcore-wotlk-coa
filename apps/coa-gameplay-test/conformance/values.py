@@ -190,6 +190,10 @@ def first_aura_effect(facts: RankFacts) -> int | None:
     return next((effect for effect in EFFECTS if facts.effects[effect] and facts.aura_names[effect]), None)
 
 
+def foreign_aura_grants(class_file: dict) -> frozenset[tuple[int, int]]:
+    return frozenset((entry['spell'], entry['target']) for entry in class_file.get('foreign_aura_grants', []))
+
+
 def roll_range(base_points: int, die_sides: int) -> range:
     low, high = sorted((base_points + 1, base_points + die_sides))
     return range(low, high + 1)
@@ -371,12 +375,15 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                             'referenced value does not depend on caster state')
     measured: list[dict] = []
     after_cast: list[dict] = []
+    ally_grant_proofs: list[dict] = []
     expectations: list[Expectation] = []
     periodic_totals: list[dict] = []
     cast_wanted = False
+    needs_ally_target = False
     first_effect = next((effect for effect in EFFECTS if facts.effects[effect]), None)
     rolled: dict[str, int] = {}
     disabled_effects = disabled_foreign_effects(class_file)
+    aura_grants = foreign_aura_grants(class_file)
 
     def sample_rolled(label: str, ordinal: int, text: str, spell_id: int, effect: int):
         samples = rolled_samples(dbc, records, rank_id, caster, ordinal, text, spell_id, effect)
@@ -396,7 +403,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         return f'{rule} ({note})' if note else rule
 
     def handle_shown(ordinal: int, shown: Displayed, note: str = ''):
-        nonlocal cast_wanted
+        nonlocal cast_wanted, needs_ally_target
         effect = shown.effect_index
         periodic = (periodic_reason(records, rank_id, caster, shown)
                    if effect is not None and shown.kind in EFFECT_KINDS else '')
@@ -468,6 +475,27 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             measured.append(measurement(label, CASTER, 'spell_duration_ms', spell=duration_spell))
             expect(label, 'spell_duration', None, shown.text, note_rule(f'read {shown.kind}', note),
                    {'effect_spell': duration_spell})
+            if (rank_id, duration_spell) in aura_grants:
+                live_label = f'{rank_id} aura_duration_ms {duration_spell} #{ordinal}'
+                live_actor = ALLY if targets_ally(facts) else CASTER
+                if live_actor == ALLY:
+                    needs_ally_target = True
+                    ally_grant_proofs.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': rank_id})
+                    if facts.mana_cost > 0 and facts.power_type != MANA:
+                        ally_grant_proofs.append({'action': 'set_power', 'actor': CASTER,
+                                                  'power': facts.power_type, 'value': facts.mana_cost})
+                    ally_grant_proofs.append({'action': 'cast', 'actor': CASTER, 'spell': rank_id,
+                                              'target': ALLY})
+                    ally_grant_proofs.append(measurement(f'{rank_id} cast_failure {duration_spell} #{ordinal}',
+                                                         CASTER, 'cast_failure', spell=rank_id))
+                    ally_grant_proofs.append(measurement(live_label, live_actor, 'aura_duration_ms',
+                                                         spell=duration_spell, caster=CASTER))
+                else:
+                    after_cast.append(measurement(live_label, live_actor, 'aura_duration_ms',
+                                                  spell=duration_spell, caster=CASTER))
+                expect(live_label, 'aura_duration_ms', None, shown.text,
+                       note_rule(f'read {shown.kind} (live aura actually applied by the cast)', note))
+                cast_wanted = True
             return
         foreign, unmeasurable = foreign_effect(records, rank_id, shown, disabled_effects)
         if foreign:
@@ -548,7 +576,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             cast_steps.append({'action': 'wait', 'label': CAST_WAIT_LABEL,
                                'ms': facts.cast_time_ms + CAST_MARGIN_MS})
         cast_steps.append(measurement(f'{rank_id} cast_failure', CASTER, 'cast_failure', spell=rank_id))
-        if any(step['metric'].startswith('aura_') for step in after_cast):
+        if any(step.get('metric', '').startswith('aura_') for step in after_cast):
             effect = first_aura_effect(facts) or 0
             cast_steps.append(aura_measurement(f'{rank_id} aura_present', 'aura', effect))
 
@@ -557,8 +585,8 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             known_aura_label(aura), 'known_aura', aura, aura, None, str(aura), 'reference profile aura'))
     learn = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
             + [{'action': 'learn', 'actor': CASTER, 'spell': gating} for gating in sorted(known_spells)])
-    budget = min(MAX_SCENARIO_STEPS - len(learn) - len(measured) - len(cast_steps) - len(after_cast),
-                 READ_BUDGET_MS // READ_STEP_MS)
+    budget = min(MAX_SCENARIO_STEPS - len(learn) - len(measured) - len(cast_steps) - len(after_cast)
+                 - len(ally_grant_proofs), READ_BUDGET_MS // READ_STEP_MS)
     sampled, samples = sampled_reads(measured, rolled, budget)
     expectations = [replace(item, model={**(item.model or {}), 'samples': samples[item.label]})
                     if item.check == 'effect_value' and item.label in samples else item for item in expectations]
@@ -567,10 +595,10 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         'name': f'Conformance {class_file["name"]} {spell.name} {rank_id}',
         'contract': 'No-combat check of the effect values, cost, cooldown and aura of one rank against its tooltip.',
         'players': [player_fixture(class_file)],
-        'steps': learn + sampled + cast_steps + after_cast}
+        'steps': learn + sampled + cast_steps + after_cast + ally_grant_proofs}
     if is_hostile(facts) and cast_wanted:
         scenario['creatures'] = [{'id': TARGET, 'owner': CASTER, 'entry': DUMMY_ENTRY, 'level': class_file['level'],
                                   'health': DUMMY_HEALTH, 'distance': DUMMY_DISTANCE}]
-    if targets_resurrect(facts) and cast_wanted:
+    if (targets_resurrect(facts) or needs_ally_target) and cast_wanted:
         scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
     return scenario, expectations, periodic_totals
