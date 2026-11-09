@@ -844,6 +844,11 @@ public:
         return nullptr;
     }
     [[nodiscard]] CreatureQuestItemMap const* GetCreatureQuestItemMap() const { return &_creatureQuestItemStore; }
+    [[nodiscard]] QuestTargetRespawn GetQuestTargetRespawn(uint32 entry) const
+    {
+        auto itr = _questTargetRespawnStore.find(entry);
+        return itr != _questTargetRespawnStore.end() ? itr->second : QuestTargetRespawn::None;
+    }
 
     [[nodiscard]] Quest const* GetQuestTemplate(uint32 quest_id) const
     {
@@ -1057,6 +1062,7 @@ public:
     void CheckCreatureMovement(char const* table, uint64 id, CreatureMovementData& creatureMovement);
     void LoadGameObjectQuestItems();
     void LoadCreatureQuestItems();
+    void LoadQuestTargetRespawns();
     void LoadTempSummons();
     void LoadGameObjectSummons();
     void LoadSpawnGroupTemplates();
@@ -1687,6 +1693,7 @@ private:
     GameObjectAddonContainer _gameObjectAddonStore;
     GameObjectQuestItemMap _gameObjectQuestItemStore;
     CreatureQuestItemMap _creatureQuestItemStore;
+    std::unordered_map<uint32, QuestTargetRespawn> _questTargetRespawnStore;
     EquipmentInfoContainer _equipmentInfoStore;
     LinkedRespawnContainer _linkedRespawnStore;
     CreatureLocaleContainer _creatureLocaleStore;
