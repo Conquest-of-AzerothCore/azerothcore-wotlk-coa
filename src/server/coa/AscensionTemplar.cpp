@@ -202,7 +202,11 @@ void ReduceDebt(Player* player, uint32 percent, bool oneTick)
             if (reduction >= amount)
                 aura->Remove();
             else
+            {
                 effect->ChangeAmount(amount - reduction);
+                if (oneTick)
+                    aura->SetDuration(std::max(0, aura->GetDuration() - 1000));
+            }
         }
 }
 void Zealotry(Player* player, Unit* target, bool repeat)
