@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import re
 import sys
+from typing import Sequence
 
 from behaviours import behaviour_entries, behaviour_scenario
 from classes import PROGRESSION_HEADER, ClassSpell, class_spells
@@ -47,7 +48,8 @@ class ManifestWriter:
         self.entries: list[dict] = []
 
     def add(self, key: str, kind: str, spell: ClassSpell | None, rank_id: int, expectations: list[Expectation],
-            scenario: dict | None = None, tokens: list[str] = (), name: str | None = None):
+            scenario: dict | None = None, tokens: list[str] = (), name: str | None = None,
+            known_spells: Sequence[int] = ()):
         if any(entry['key'] == key for entry in self.entries):
             raise ValueError(f'Duplicate scenario key {key}')
         file, sha = None, None
@@ -59,7 +61,7 @@ class ManifestWriter:
         self.entries.append({'key': key, 'file': file, 'sha256': sha, 'kind': kind,
                              'spell_id': spell.spell_id if spell else rank_id,
                              'spell_name': spell.name if spell else name or kind,
-                             'rank_id': rank_id, 'tokens': list(tokens),
+                             'rank_id': rank_id, 'tokens': list(tokens), 'known_spells': list(known_spells),
                              'expectations': [asdict(expectation) for expectation in expectations]})
 
 
@@ -107,6 +109,20 @@ def add_values(writer: ManifestWriter, spell: ClassSpell, dbc_dir: Path):
                    scenario, [value.text for value in readout.values])
         for item in periodic_totals:
             add_periodic_total(writer, spell, rank_id, item)
+        add_conditional_value(writer, spell, rank_id, dbc_dir)
+
+
+def add_conditional_value(writer: ManifestWriter, spell: ClassSpell, rank_id: int, dbc_dir: Path):
+    class_file = writer.class_file
+    entry = next((item for item in class_file.get('conditional_spells', []) if item['spell'] == rank_id), None)
+    if entry is None:
+        return
+    known_spells = frozenset({entry['learn']})
+    scenario, expectations, _ = value_scenario(class_file, spell, rank_id, known_spells)
+    armed_file = armed_for(class_file, records_of(class_file), rank_id)
+    readout = read_tooltip(dataset(dbc_dir), rank_id, structure_stats(armed_file, known_spells))
+    writer.add(scenario_key(class_file['name'], 'value-true', rank_id), 'value', spell, rank_id, expectations,
+               scenario, [value.text for value in readout.values], known_spells=sorted(known_spells))
 
 
 def add_hit(writer: ManifestWriter, spell: ClassSpell):

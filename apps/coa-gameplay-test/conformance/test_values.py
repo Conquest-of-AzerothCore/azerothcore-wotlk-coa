@@ -12,9 +12,10 @@ from profile import (CASTER, CLASSES_DIR, armed, base_steps, caster_stats_from, 
                     unfit_reason)
 from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, write_fixture
 from tooltip import CasterStats, DataSet, Displayed, Records, read_tooltip
-from values import (AURA_STATE_HEALTHLESS_35_PERCENT, CHECKS, FIXTURE_MAX_HEALTH, TARGET, UNMEASURABLE, UNREADABLE,
-                    Expectation, Unmodelled, disabled_foreign_effects, facts_of, fixture_health_step, foreign_effect,
-                    foreign_radius, periodic_reason, required_target_health_steps, sample_labels, value_scenario)
+from values import (AURA_STATE_HEALTHLESS_35_PERCENT, CHECKS, FIXTURE_MAX_HEALTH, GENERIC, TARGET, UNMEASURABLE,
+                    UNREADABLE, Expectation, Unmodelled, disabled_foreign_effects, facts_of, fixture_health_step,
+                    foreign_effect, foreign_radius, periodic_reason, required_target_health_steps, sample_labels,
+                    value_scenario)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -67,6 +68,12 @@ SACRED_OATH = 712346
 GLORY = 801481
 DOWNFALL = 801482
 REDEMPTION = 801483
+LIBRAM_OF_TENACITY = 801461
+ETERNAL_BLESSING = 705300
+OATH_BREAKERS = 573452
+LIBRAMS = 806106
+LIGHTS_HOPE = 807814
+LIGHTKEEPER = 560835
 RIGHTEOUS_TEMPEST = 805409
 RIGHTEOUS_TEMPEST_MAX_RANK = 807274
 BLADE_OF_FAITH = 803872
@@ -520,7 +527,42 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         scenario, expectations = self.build(SACRED_OATH, SACRED_OATH)
         run.validate(scenario)
         unreadable = [item.rule for item in expectations if item.rule.startswith(UNREADABLE)]
-        self.assertEqual(unreadable, [UNREADABLE + 'tooltip without value'])
+        self.assertEqual(unreadable, [])
+        generic = [item.rule for item in expectations if item.rule.startswith(GENERIC)]
+        self.assertEqual(generic, [GENERIC + 'tooltip has no $ token to check (prose-only effect; see README '
+                                           '"Tooltip reading")'])
+
+    def test_client_extension_note_is_classified_as_generic_not_unreadable(self):
+        scenario, expectations = self.build(LIBRAM_OF_TENACITY, LIBRAM_OF_TENACITY)
+        run.validate(scenario)
+        self.assertFalse([item for item in expectations if item.rule.startswith(UNREADABLE)])
+        generic = [item.rule for item in expectations if item.rule.startswith(GENERIC)]
+        self.assertEqual(len(generic), 1)
+        self.assertIn('@ext:', generic[0])
+
+    def test_conditional_true_branch_names_the_gating_spells_own_effect(self):
+        scenario, expectations = value_scenario(self.class_file, self.spells[ETERNAL_BLESSING],
+                                                 ETERNAL_BLESSING, frozenset({OATH_BREAKERS}))
+        run.validate(scenario)
+        self.assertFalse([item for item in expectations if item.rule.startswith(UNREADABLE)])
+        foreign = next(item for item in expectations if item.model and item.model.get('effect_spell') == LIBRAMS)
+        self.assertEqual(foreign.check, 'effect_value')
+        self.assertIn(foreign.label, measured_labels(scenario))
+        learns = [step['spell'] for step in scenario['steps'] if step['action'] == 'learn']
+        self.assertEqual(learns, [ETERNAL_BLESSING, OATH_BREAKERS])
+
+    def test_periodic_total_token_is_routed_through_the_existing_periodic_explanation(self):
+        scenario, expectations = self.build_extra(LIGHTS_HOPE, LIGHTS_HOPE)
+        run.validate(scenario)
+        self.assertFalse([item for item in expectations if item.rule.startswith(UNREADABLE)])
+        periodic = [item for item in expectations if item.rule.startswith(UNMEASURABLE) and 'total over the ticks'
+                   in item.rule]
+        self.assertEqual(len(periodic), 1)
+
+    def test_trailing_digit_on_a_proc_count_token_is_unmeasurable_not_unreadable(self):
+        scenario, expectations = self.build(LIGHTKEEPER, LIGHTKEEPER)
+        run.validate(scenario)
+        self.assertFalse([item for item in expectations if item.rule.startswith(UNREADABLE)])
 
     def test_every_templar_rank_has_a_valid_scenario_and_no_dropped_expectation(self):
         all_periodic_total_labels = []
@@ -536,7 +578,7 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
                     self.assertIn(item.check, CHECKS)
                     self.assertIsInstance(item, Expectation)
                     if item.label not in measured:
-                        self.assertTrue(item.rule.startswith((UNREADABLE, UNMEASURABLE)), (rank_id, item))
+                        self.assertTrue(item.rule.startswith((UNREADABLE, UNMEASURABLE, GENERIC)), (rank_id, item))
                     step_labels = [step.get('label') for step in scenario['steps']]
                     self.assertLessEqual(step_labels.count(item.label), 1, (rank_id, item.label))
                 total_labels = [item['label'] for item in periodic_totals]

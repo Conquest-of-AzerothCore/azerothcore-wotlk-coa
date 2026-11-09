@@ -163,15 +163,33 @@ class ClientDbcTooltipTest(unittest.TestCase):
                                           Displayed('$s1', RETRIBUTION_BASE_POINTS + 1, 0, 'percent', RETRIBUTION)])
         self.assertEqual(readout.unreadable, [])
 
-    def test_known_spell_conditional_is_unreadable_and_the_rest_is_read(self):
+    def test_known_spell_conditional_chooses_the_false_branch_when_the_gate_is_unknown(self):
         readout = self.read(HEXBREAK)
         self.assertEqual(readout.values, [Displayed('$s1', 1, 0, 'flat', HEXBREAK)])
-        self.assertEqual(readout.unreadable, ['$?s572870[s][]'])
+        self.assertEqual(readout.unreadable, [])
+
+    def test_known_spell_conditional_chooses_the_true_branch_when_the_gate_is_known(self):
+        caster = replace(LEVEL_60_TEMPLAR, known_spells=frozenset({572870}))
+        readout = self.read(HEXBREAK, caster)
+        self.assertEqual(readout.values, [Displayed('$s1', 1, 0, 'flat', HEXBREAK)])
+        self.assertEqual(readout.unreadable, [])
 
     def test_conditional_keeps_its_color_codes_verbatim_and_negative_points_display_unsigned(self):
         readout = self.read(STUDIOUS)
-        self.assertEqual(readout.unreadable, ['$?s92098[|cffffffffBrine|r][|cffffffffShock|r]'])
+        self.assertEqual(readout.unreadable, [])
         self.assertEqual(readout.values, [Displayed('$s1', abs(STUDIOUS_BASE_POINTS + 1), 0, 'percent', STUDIOUS)])
+
+    def test_conditional_with_an_unhandled_operator_stays_one_unreadable_entry(self):
+        readout = Tooltip(Records(self.dbc), HEXBREAK, LEVEL_60_TEMPLAR).read('$?!s572870[s][]')
+        self.assertEqual(readout.values, [])
+        self.assertEqual(len(readout.unreadable), 1)
+        self.assertIn('unhandled $? operator', readout.unreadable[0])
+
+    def test_chained_conditional_stays_one_unreadable_entry(self):
+        readout = Tooltip(Records(self.dbc), HEXBREAK, LEVEL_60_TEMPLAR).read('$?s572870[a]?s1[b][c]')
+        self.assertEqual(readout.values, [])
+        self.assertEqual(len(readout.unreadable), 1)
+        self.assertIn('chains a nested $? conditional', readout.unreadable[0])
 
     def test_durations_stacks_and_level_scaled_points_of_a_spell_without_an_ability_row(self):
         readout = self.read(OUTMANEUVER)
@@ -397,6 +415,17 @@ FIXTURE_SPELLS = {
     60: {'Description[enUS]': 'Cross-spell ${$61m1*$<scalingbp>}.'},
     61: {'Description[enUS]': 'Unused directly.', 'EffectBasePoints[0]': 5, 'EffectDieSides[0]': 1,
          'SpellDescriptionVariableID': 3},
+    70: {'Description[enUS]': 'Base $s1$?s71[ plus $71s1 bonus][].', 'EffectBasePoints[0]': 4, 'EffectDieSides[0]': 1},
+    71: {'Description[enUS]': 'Bonus source.', 'EffectBasePoints[0]': 6, 'EffectDieSides[0]': 1},
+    72: {'Description[enUS]': 'Broken $?s71[no closing.'},
+    73: {'Description[enUS]': 'Chance $h1, lasts $d1, stacks $u1, hits $i1 targets.', 'ProcChance': 40,
+         'DurationIndex': 1, 'StackAmount': 6, 'MaxAffectedTargets': 2},
+    74: {'Description[enUS]': 'Restores $o1 over $d.', 'EffectBasePoints[0]': 9, 'EffectDieSides[0]': 1,
+         'EffectAmplitude[0]': 1000, 'DurationIndex': 1},
+    75: {'Description[enUS]': 'Restores $O1 over $d.', 'EffectBasePoints[0]': 9, 'EffectDieSides[0]': 1,
+         'EffectAmplitude[0]': 1000, 'DurationIndex': 1, 'AttributesEx5': 0x200},
+    76: {'Description[enUS]': 'Restores $o1 over $d.', 'EffectBasePoints[0]': 9, 'EffectDieSides[0]': 1,
+         'DurationIndex': 1},
 }
 FIXTURE_VARIABLES = {
     1: '$bonus=${$m1*2+$PL}\r\n',
@@ -498,6 +527,45 @@ class FixtureTooltipTest(unittest.TestCase):
         readout = read_tooltip(self.dbc, 30, FIXTURE_CASTER)
         self.assertEqual(readout.values, [Displayed('$s1', 33, None, 'flat', 33)])
         self.assertEqual(readout.unreadable, ['@s:34:0@ [nesting deeper than 3 expansions]'])
+
+    def test_conditional_false_branch_is_empty_and_contributes_nothing(self):
+        readout = read_tooltip(self.dbc, 70, FIXTURE_CASTER)
+        self.assertEqual(readout.values, [Displayed('$s1', 5, 0, 'flat', 70)])
+        self.assertEqual(readout.unreadable, [])
+
+    def test_conditional_true_branch_is_read_as_a_normal_token(self):
+        caster = replace(FIXTURE_CASTER, known_spells=frozenset({71}))
+        readout = read_tooltip(self.dbc, 70, caster)
+        self.assertEqual(readout.values, [Displayed('$s1', 5, 0, 'flat', 70),
+                                          Displayed('$71s1', 7, None, 'flat', 71)])
+        self.assertEqual(readout.unreadable, [])
+
+    def test_malformed_conditional_is_unreadable(self):
+        readout = read_tooltip(self.dbc, 72, FIXTURE_CASTER)
+        self.assertEqual(readout.values, [])
+        self.assertEqual(readout.unreadable, ['$?s71[no closing. [malformed $? conditional]'])
+
+    def test_trailing_digit_on_h_d_u_i_is_accepted_and_ignored(self):
+        readout = read_tooltip(self.dbc, 73, FIXTURE_CASTER)
+        self.assertEqual(readout.values, [
+            Displayed('$h1', 40, None, 'chance_pct'),
+            Displayed('$d1', 6000, None, 'duration_ms'),
+            Displayed('$u1', 6, None, 'count'),
+            Displayed('$i1', 2, None, 'count'),
+        ])
+        self.assertEqual(readout.unreadable, [])
+
+    def test_periodic_total_token_scales_points_by_the_duration_over_the_period(self):
+        readout = read_tooltip(self.dbc, 74, FIXTURE_CASTER)
+        self.assertEqual(readout.values[0], Displayed('$o1', 60.0, 0, 'flat', 74))
+
+    def test_periodic_total_token_adds_one_period_when_the_aura_starts_ticking_at_apply(self):
+        readout = read_tooltip(self.dbc, 75, FIXTURE_CASTER)
+        self.assertEqual(readout.values[0], Displayed('$O1', 70.0, 0, 'flat', 75))
+
+    def test_periodic_total_token_defaults_the_period_to_five_seconds(self):
+        readout = read_tooltip(self.dbc, 76, FIXTURE_CASTER)
+        self.assertEqual(readout.values[0], Displayed('$o1', 12.0, 0, 'flat', 76))
 
     def test_unknown_spell_is_rejected(self):
         with self.assertRaises(ValueError):

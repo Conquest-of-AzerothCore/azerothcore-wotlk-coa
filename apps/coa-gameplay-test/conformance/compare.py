@@ -26,8 +26,8 @@ from stack import (ADDS, MEASURED, MELEE_SOURCE, MULTIPLIES, STACK_CHECKS, STACK
 from tooltip import CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, Unreadable
 from triggers import (COOLDOWN_CHECK, DURATION_CHECK, EVENT_TOLERANCE, PERIODIC, TRIGGER_CHECK,
                       cooldown_trial_label, duration_trial_label)
-from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECTS, FIXED_DIE_SIDES, UNMEASURABLE, UNREADABLE, Expectation,
-                    dataset, mean_samples, roll_range, sample_labels)
+from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECTS, FIXED_DIE_SIDES, GENERIC, UNMEASURABLE, UNREADABLE,
+                    Expectation, dataset, mean_samples, roll_range, sample_labels)
 
 STATUSES = ('ok', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials', 'unmeasured',
             MEASURED, 'closed')
@@ -301,7 +301,7 @@ def load_runs(manifest: dict, results_dir: Path) -> tuple[dict[str, Run], list[s
 def read_tokens(class_file: dict, entry: dict, run: Run, tooltips: TooltipSource) -> Tokens:
     class_file = armed(class_file, {name: tooltips.spell_field(entry['rank_id'], name) for name in EQUIP_FIELDS})
     try:
-        caster = caster_stats_from(run.values, class_file)
+        caster = caster_stats_from(run.values, class_file, frozenset(entry.get('known_spells', ())))
     except KeyError as error:
         return Tokens(None, error=f'base measurement {error} is missing from {run.key}')
     readout = tooltips.read(entry['rank_id'], caster)
@@ -2139,7 +2139,8 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
     measured = run.values.get(expectation.label) if run else None
     if rule.startswith(CLOSED):
         return replace(base, status='closed', measured=measured, explanation=rule)
-    if check == 'unmodelled' or rule.startswith(UNMODELLED) or rule.startswith(UNMEASURABLE):
+    if (check == 'unmodelled' or rule.startswith(UNMODELLED) or rule.startswith(UNMEASURABLE)
+            or rule.startswith(GENERIC)):
         return replace(base, status='unmodelled', measured=measured, explanation=rule)
     if rule.startswith(UNREADABLE):
         found = unreadable_question(tooltips, expectation.rank_id, entry['spell_name'], manifest['level'],

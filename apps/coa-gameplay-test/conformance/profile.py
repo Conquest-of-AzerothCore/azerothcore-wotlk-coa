@@ -126,7 +126,8 @@ def character_of(class_file: dict, skills: dict[int, float]) -> dict:
             'race': class_file.get('race'), 'class_id': class_file.get('class_id')}
 
 
-def caster_stats_from(measured: Mapping[str, float], class_file: dict) -> CasterStats:
+def caster_stats_from(measured: Mapping[str, float], class_file: dict,
+                      known_spells: frozenset[int] = frozenset()) -> CasterStats:
     skills = {line: measured[skill_label(line)] for line in class_file.get('skill_lines', [])
               if skill_label(line) in measured}
     return CasterStats(
@@ -134,4 +135,5 @@ def caster_stats_from(measured: Mapping[str, float], class_file: dict) -> Caster
         rap=measured['ranged_attack_power'],
         sp_by_school={school: measured[spell_power_label(school)] for school in SPELL_POWER_SCHOOLS},
         stats={stat: measured[stat_label(stat)] for stat in STATS},
+        known_spells=known_spells,
         **character_of(class_file, skills))

@@ -492,6 +492,12 @@ class CompareTest(unittest.TestCase):
         self.assertEqual([verdicts[entry.label].status for entry in entries],
                          ['unreadable', 'unmodelled', 'unmodelled', 'unreadable'])
 
+    def test_generic_rule_is_judged_unmodelled_not_unreadable(self):
+        entries = [expectation('1001 effect_value #0', 'effect_value', '',
+                               'generic: tooltip has no $ token to check')]
+        verdicts = self.value_run(entries, [], [], constant_reader())
+        self.assertEqual(verdicts['1001 effect_value #0'].status, 'unmodelled')
+
     def test_closed_rule_wins_over_the_unmodelled_check(self):
         label = '1001 hit_mean'
         entries = [expectation(label, 'unmodelled', '', 'closed: mail armor is out of scope')]

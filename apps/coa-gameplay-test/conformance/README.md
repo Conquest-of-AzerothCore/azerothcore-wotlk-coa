@@ -119,6 +119,7 @@ token as written in the DBC, `value` the number before any player modifier.
 | `$h`, `$<id>h` | `ProcChance` | `chance_pct` |
 | `$u`, `$i` (with `<id>`) | `StackAmount`, `MaxAffectedTargets` | `count` |
 | `$aN` (with `<id>`) | `SpellRadius` radius of effect N | `radius_yards` |
+| `$oN`, `$ON` (with `<id>`) | `abs(EffectBasePoints + 1)` of effect N scaled by `duration / period` (`+ period` when `AttributesEx5 & 0x200`; period is `EffectAmplitude[N-1]`, or 5000 ms when that is 0 or unreadable; `QuestTextParser.cpp:830-900`, same case as `$sN`/`$mN`) | as `$sN`, routed through the periodic-total detection below like any other `EFFECT_KINDS` token |
 | `${...}` | `+ - * /`, parentheses and the variables below | as `$sN` |
 | `$<name>` | a `SpellDescriptionVariables` formula of the spell it is scoped to (below) | as `$sN` |
 | `$pplN`, `$<id>pplN` (inside `${...}` only) | `EffectRealPointsPerLevel[N-1] × max(0, caster level − BaseLevel)` | as `$mN` |
@@ -160,6 +161,26 @@ would fail against the live server. Templar: Testament of Hope 1397742's `$70440
 which `AscensionTemplarContracts.cpp:211` disables (effect 1, the one still applying the aura, carries the
 identical `EffectRadiusIndex`).
 Color codes `|c........` and `|r` are removed, in either case.
+A trailing digit on `$h`, `$d`, `$u`, `$i` (`$h1`, `$d1`, `$u1`, `$i1`) is accepted and ignored: in
+`QuestTextParser.cpp`'s token switch, `case 'H'/'h'` (`:804-805`), `case 'D'/'d'` (`:743-744`), `case 'U'/'u'`
+(`:1012-1013`) and `case 'I'/'i'` (`:814-815`) never read the digit that follows the letter, so it is a harmless
+no-op the client silently consumes. Lightkeeper 560835's `$561277i1` reads `MaxAffectedTargets` of 561277 exactly
+like `$561277i` would.
+
+`$?s<id>[<true>][<false>]` and `$?S<id>[<true>][<false>]` evaluate the single `s<id>`/`S<id>` atom against
+`CasterStats.known_spells` (empty by default, so every existing scenario reads the false branch exactly as before
+this was added) and recurse into the chosen branch's text with the same `Tooltip` instance, so a `$` token inside it
+still attributes to the described spell like any other in-line token. An empty chosen branch adds nothing. Any
+other `$?` shape — a boolean operator (`!`/`&`/`|`/`(`), an `a<id>`/`A<id>` aura-known atom, or a chained conditional
+(`...]?s<id2>[...][...]`, the client's own nested-ternary shape) — stays one `unreadable` entry naming the unhandled
+operator or the chain, never guessed. The grammar is `QuestTextParser.cpp`'s `SpellParserConditional` (evidence, not
+authority). Eternal Blessing 705300's `$?s573452[...$/1000;806106s1 sec.][]` reads 806106's own effect 0 once
+573452 is known; Chastise 803157 and Righteous Tempest 805409's conditionals name their own gating spell's own
+effect, static regardless of caster state; Libram of Tenacity 801461's `$?s707385[...$s1%...][]` names its *own*
+effect 0, which a live `SPELLMOD_EFFECT1` from 707385 changes at runtime — a value this DBC-only reader cannot
+predict, so no check is generated for that one token (its row simply stops being `unreadable` once the false
+branch, empty, is read instead; see
+[ADR 0039](../../../docs/adr/0039-conditional-tooltip-reads-the-chosen-branch.md)).
 
 `@s:<id>:<flags>@` with `flags` 0 or more expands to the tooltip of spell `<id>`, read by a nested reader of that spell
 ([ADR 0013](../../../docs/adr/0013-conformance-expands-spell-markup.md)). The header line the client draws before it
@@ -171,12 +192,15 @@ shift-reveal and partial renderings), when the spell is missing from the DBC set
 the nesting is deeper than `MAX_EXPANSION_DEPTH` (3) expansions. A referenced tooltip without a token adds nothing:
 Sacred Oath 712346 is then a tooltip without value.
 
-Everything else goes to `unreadable` verbatim and is never guessed: `$?` conditionals, other `@...@` markup, other `|`
-escapes, other tokens (`$o`, `$x`, `$l`, `$g`...), expression functions and variables such as `$BH` or lowercase
-`$ap`, durations that scale with level (`DurationPerLevel` not zero), points that scale with level when the skill
-rank cannot be read (see below), spread values (`EffectDieSides` not 1 for `$sN`), missing records, non-positive
-durations, a `$<name>` whose spell (the one it is scoped to, above) has no `SpellDescriptionVariables` formula of
-that name, and a stat or school missing from `CasterStats`.
+Everything else goes to `unreadable` verbatim and is never guessed: a `$?` conditional with an unhandled operator
+or a chained conditional (above), other `@...@` markup, other `|` escapes, other tokens (`$x`, `$l`, `$g`...),
+expression functions and variables such as `$BH` or lowercase `$ap`, durations that scale with level
+(`DurationPerLevel` not zero), points that scale with level when the skill rank cannot be read (see below), spread
+values (`EffectDieSides` not 1 for `$sN`), missing records, non-positive durations, a `$<name>` whose spell (the
+one it is scoped to, above) has no `SpellDescriptionVariables` formula of that name, and a stat or school missing
+from `CasterStats`. A tooltip with no `$`/`@` token at all, or a `readout.unreadable` entry that is only a client
+`@ext:...:ext@` note, is `generic: ` instead (never a number either way, so never guessed; see "No-combat scenario
+of a rank" below).
 
 ### Level-scaled points
 
@@ -351,8 +375,13 @@ flag and fail `SPELL_FAILED_TARGET_AURASTATE` (111). An unmapped `TargetAuraStat
 
 A value that cannot be compared is never dropped; its `rule` starts with a stable prefix:
 `unreadable: <entry>` for a part the reader could not evaluate (the scenario measures the spell's first active effect
-beside it, which is not the token's own effect), `unreadable: tooltip without value` for an empty readout,
-`unreadable: ManaCostPercentage ...` or `unreadable: ManaCostPerlevel ...` for a cost the DBC alone does not give, and
+beside it, which is not the token's own effect),
+`unreadable: ManaCostPercentage ...` or `unreadable: ManaCostPerlevel ...` for a cost the DBC alone does not give,
+`generic: tooltip has no $ token to check (prose-only effect; see README "Tooltip reading")` for an empty readout
+(an `unreadable: tooltip without value` row before this item; never a number either way, so classified `unmodelled`
+rather than left for the reader to keep re-investigating),
+`generic: client extension note, never a number: <entry>` for a `readout.unreadable` entry that is only a client
+`@ext:...:ext@` note, and
 `unmeasurable: <reason>` for a readable token with no no-combat metric (a periodic total or `mixed` token left to
 the hit scenario, a chance token, an aura of a passive or cast-time spell, a foreign amplitude or an amplitude of a
 passive effect, another spell's effect or radius that `Spell.dbc` does not define or that `disabled_foreign_effects`
@@ -489,6 +518,19 @@ otherwise classify by was never the one actually registered. Templar: Upheave! 5
 rewrites it to 15 (`SPELLMOD_CRIT_DAMAGE_BONUS`) at load time to match its own "critical damage" tooltip wording;
 the `effect_overrides` entry makes the reader classify it as op 15 (`spell_critical_damage`/`crit_damage`, the
 "bonus" reading above), the op the live server actually installs.
+
+### Conditional tooltips
+
+A class file's `conditional_spells` list (`[{"spell": <rank>, "learn": <gating spell>, "reason": "..."}]`) names,
+per rank, a `$?s<id>[...][...]` gating spell whose true branch carries a `$` token worth its own check (see
+"Tooltip reading" above and [ADR 0039](../../../docs/adr/0039-conditional-tooltip-reads-the-chosen-branch.md)).
+`add_conditional_value` (`conformance.py`, next to `add_values`) builds a second, `value-true`-keyed scenario for
+that rank with `known_spells={<gating spell>}` (so the Python reading chooses the true branch) and one extra
+`learn` step for the gating spell (so the live caster actually knows it); the rest of the scenario, including the
+rank's own `learn` step and every other `Expectation`, is identical to the baseline `value` scenario. A rank with
+no `conditional_spells` entry gets no `value-true` scenario at all — including a rank whose true branch names
+its *own* effect through a live, caster-state-dependent SpellMod (ADR 0039's 801461 case), where no check this
+reader can compute would be reliable.
 
 Unmodelled by rule: `P5` (`proc or trigger effect without a trigger entry`) — unless the class file's own
 `triggers`/`procs`/`behaviours` entry for this exact `{spell_id or rank_id, effect}` already checks it
@@ -2189,7 +2231,7 @@ numerator is unchanged between the two rows; only the denominator differs.
 | `ok` | a measurement within its rule below |
 | `alert` | a measurement outside its rule, a missing measurement, or tokens that changed since generation |
 | `unreadable` | an expectation whose rule starts with `unreadable: ` |
-| `unmodelled` | an `unmodelled` check, a `unmodelled: ` or `unmeasurable: ` rule, a hit model left unmodelled, a mask spell beside named targets that are all unmodelled |
+| `unmodelled` | an `unmodelled` check, a `unmodelled: `, `unmeasurable: ` or `generic: ` rule, a hit model left unmodelled, a mask spell beside named targets that are all unmodelled |
 | `ambiguous_tooltip` | a sign opposite to the measured value, a proc of unstated trigger, disagreeing talent or passive readings, a named spell outside the class mask while a mask spell moves |
 | `insufficient_trials` | a hit mean below `minimum_hits`, a proc rate below `trials_needed` (R9), a missing pass |
 | `unmeasured` | a check after a failed single cast; a hit mean, proc rate or talent delta without usable hit (R11); a passive whose aura is absent after `learn`; damage against an aura state the scenario does not establish; a passive delta that cannot move (a multiplying relation on a before value of 0, a `stat` change below 1, `parry_chance` on a character that cannot parry) |

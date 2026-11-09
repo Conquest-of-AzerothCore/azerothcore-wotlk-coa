@@ -31,6 +31,8 @@ CAST_MARGIN_MS = 500
 CAST_WAIT_LABEL = 'cast time'
 UNREADABLE = 'unreadable: '
 UNMEASURABLE = 'unmeasurable: '
+GENERIC = 'generic: '
+EXT_NOTE = re.compile(r'@ext:.*:ext@', re.DOTALL)
 OWN_DURATION = re.compile(r'\$(\d*)[dD]')
 EFFECT_KINDS = ('flat', 'percent', 'duration_ms')
 EFFECT_TOKEN = re.compile(r'\$(?:/\d+;)?(?P<spell>\d*)[sSmM](?P<digit>[1-3])')
@@ -126,12 +128,13 @@ def armed_for(class_file: dict, records: Records, rank_id: int) -> dict:
     return armed(class_file, equip_requirement(records, rank_id))
 
 
-def structure_stats(class_file: dict) -> CasterStats:
+def structure_stats(class_file: dict, known_spells: frozenset[int] = frozenset()) -> CasterStats:
     skills = {line: float(skill_target(class_file)) for line in class_file.get('skill_lines', [])}
     return CasterStats(
         ap=LEVEL_PLACEHOLDER_STAT, rap=LEVEL_PLACEHOLDER_STAT,
         sp_by_school={school: LEVEL_PLACEHOLDER_STAT for school in range(1, 7)},
         stats={stat: LEVEL_PLACEHOLDER_STAT for stat in range(5)},
+        known_spells=known_spells,
         **character_of(class_file, skills))
 
 
@@ -328,15 +331,15 @@ def sampled_reads(measured: list[dict], rolled: dict[str, int], budget: int) -> 
     return steps, samples
 
 
-def value_scenario(class_file: dict, spell: ClassSpell,
-                   rank_id: int) -> tuple[dict, list[Expectation], list[dict]]:
+def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
+                   known_spells: frozenset[int] = frozenset()) -> tuple[dict, list[Expectation], list[dict]]:
     if rank_id not in spell.ranks:
         raise ValueError(f'Spell {rank_id} is not a rank of {spell.spell_id}')
     dbc = dataset(Path(class_file.get('dbc_dir', DBC_DIR)))
     records = Records(dbc)
     class_file = armed_for(class_file, records, rank_id)
     facts = facts_of(records, rank_id)
-    caster = structure_stats(class_file)
+    caster = structure_stats(class_file, known_spells)
     readout = read_tooltip(dbc, rank_id, caster)
     measured: list[dict] = []
     after_cast: list[dict] = []
@@ -465,12 +468,16 @@ def value_scenario(class_file: dict, spell: ClassSpell,
         label = f'{rank_id} effect_value #{ordinal}'
         if first_effect is not None:
             measured.append(effect_measurement(label, first_effect))
-        expect(label, 'effect_value', None, entry, UNREADABLE + entry)
+        if EXT_NOTE.fullmatch(entry):
+            expect(label, 'effect_value', None, entry, GENERIC + f'client extension note, never a number: {entry}')
+        else:
+            expect(label, 'effect_value', None, entry, UNREADABLE + entry)
     if not readout.values and not readout.unreadable:
         label = f'{rank_id} effect_value #0'
         if first_effect is not None:
             measured.append(effect_measurement(label, first_effect))
-        expect(label, 'effect_value', None, '', UNREADABLE + 'tooltip without value')
+        expect(label, 'effect_value', None, '',
+               GENERIC + 'tooltip has no $ token to check (prose-only effect; see README "Tooltip reading")')
 
     cast_steps: list[dict] = []
     if not facts.passive:
@@ -506,7 +513,8 @@ def value_scenario(class_file: dict, spell: ClassSpell,
     for aura in class_file.get('known_auras', []):
         expectations.append(Expectation(
             known_aura_label(aura), 'known_aura', aura, aura, None, str(aura), 'reference profile aura'))
-    learn = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
+    learn = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
+            + [{'action': 'learn', 'actor': CASTER, 'spell': gating} for gating in sorted(known_spells)])
     budget = min(MAX_SCENARIO_STEPS - len(learn) - len(measured) - len(cast_steps) - len(after_cast),
                  READ_BUDGET_MS // READ_STEP_MS)
     sampled, samples = sampled_reads(measured, rolled, budget)

@@ -42,12 +42,16 @@ PER_TICK = 'tick'
 OVER_TICKS = 'total'
 MIXED_PERIOD = 'mixed'
 PERIOD_PROBE_FACTOR = 2
+PERIODIC_TOTAL_LETTERS = 'oO'
+PERIODIC_AT_APPLY_ATTRIBUTE_EX5 = 0x200
+DEFAULT_PERIOD_MS = 5000
 
 COLOR_CODE = re.compile(r'\|[cC][0-9a-fA-F]{8}|\|[rR]')
 EXTENSION_MARKUP = re.compile(r'@+[^@]*@?')
 SPELL_MARKUP = re.compile(r'@s:(?P<spell>\d+):(?P<flags>-?\d+)@')
 TOKEN_SPELL = re.compile(r'\$(\d+)')
 SPELL_TOKEN = re.compile(r'(?P<spell>\d*)(?P<letter>[A-Za-z])(?P<digit>[1-9]?)')
+SINGLE_CONDITION = re.compile(r'[sS](\d+)')
 SCALED_TOKEN = re.compile(r'(?P<operator>[/*])(?P<factor>\d+);')
 FORMAT_SUFFIX = re.compile(r'\.[1-9]')
 NAMED_VARIABLE = re.compile(r'<(\w+)>')
@@ -76,6 +80,7 @@ class CasterStats:
     weapon_subclass: int | None = None
     race: int | None = None
     class_id: int | None = None
+    known_spells: frozenset[int] = field(default_factory=frozenset)
 
 
 @dataclass(frozen=True)
@@ -207,6 +212,16 @@ class Records:
     def radius(self, spell_id: int, effect: int) -> float:
         index = self.field('Spell', spell_id, f'EffectRadiusIndex[{effect}]')
         return float(self.field('SpellRadius', index, 'RadiusMin'))
+
+    def periodic_total(self, spell_id: int, effect: int, points: float) -> float:
+        try:
+            period = self.amplitude_ms(spell_id, effect)
+        except Unreadable:
+            period = float(DEFAULT_PERIOD_MS)
+        duration = self.duration_ms(spell_id)
+        if self.field('Spell', spell_id, 'AttributesEx5') & PERIODIC_AT_APPLY_ATTRIBUTE_EX5:
+            duration += period
+        return points * duration / period
 
     def variable_formulas(self, spell_id: int) -> str | None:
         identity = self.field('Spell', spell_id, 'SpellDescriptionVariableID')
@@ -469,6 +484,12 @@ class Tooltip:
         while position < len(description):
             character = description[position]
             if character == '$':
+                if description[position + 1:position + 2] == '?':
+                    end, readout = self.conditional(description, position)
+                    values += readout.values
+                    unreadable += readout.unreadable
+                    position = end
+                    continue
                 end, value = self.token(description, position)
                 if isinstance(value, Displayed):
                     values.append(value)
@@ -518,13 +539,30 @@ class Tooltip:
     def token(self, text: str, start: int) -> tuple[int, Displayed | Unreadable | None]:
         position = start + 1
         following = text[position:position + 1]
-        if following == '?':
-            return conditional_end(text, position + 1), None
         if following == '{':
             return self.expression_token(text, start)
         if following == '<':
             return self.variable_token(text, start)
         return self.spell_token(text, start)
+
+    def conditional(self, text: str, start: int) -> tuple[int, Readout]:
+        cond_start = start + 2
+        true_start, true_end, false_start, false_end, end, chained = conditional_bounds(text, cond_start)
+        if true_end < 0:
+            return end, Readout([], [unreadable_entry(text[start:end], Unreadable('malformed $? conditional'))])
+        if chained:
+            return end, Readout([], [unreadable_entry(
+                text[start:end], Unreadable(f'{text[start:end]} chains a nested $? conditional, not read'))])
+        match = SINGLE_CONDITION.fullmatch(text[cond_start:true_start])
+        if not match:
+            return end, Readout([], [unreadable_entry(
+                text[start:end],
+                Unreadable(f'{text[start:end]} uses an unhandled $? operator (only a single sN/SN atom is read)'))])
+        if int(match.group(1)) in self.caster.known_spells:
+            chosen = text[true_start + 1:true_end]
+        else:
+            chosen = text[false_start + 1:false_end] if false_end >= 0 else ''
+        return end, self.read(chosen)
 
     def expression_token(self, text: str, start: int) -> tuple[int, Displayed | Unreadable | None]:
         close = text.find('}', start)
@@ -595,8 +633,12 @@ class Tooltip:
             effect = int(digit) - 1
             amplitude = self.records.amplitude_ms(spell_id, effect, shown_as_text=True)
             return amplitude, self.own_effect(spell_id, effect), 'amplitude_ms', spell_id
-        if digit:
-            raise Unreadable
+        if letter in PERIODIC_TOTAL_LETTERS and digit and digit in EFFECT_DIGITS:
+            effect = int(digit) - 1
+            points = abs(self.effect_points(spell_id, effect, upper=False, single=True,
+                                            named=bool(match.group('spell'))))
+            total = self.records.periodic_total(spell_id, effect, points)
+            return total, self.own_effect(spell_id, effect), percent_or_flat(text, end), spell_id
         if letter in 'hH':
             return self.spell_counter(spell_id, 'h'), None, 'chance_pct', None
         if letter in 'dD':
@@ -695,16 +737,18 @@ def escape_end(text: str, start: int) -> int:
     return min(start + 2, len(text))
 
 
-def conditional_end(text: str, start: int) -> int:
+def conditional_bounds(text: str, start: int) -> tuple[int, int, int, int, int, bool]:
     true_start = text.find('[', start)
     true_end = text.find(']', true_start) if true_start >= 0 else -1
     if true_end < 0:
-        return len(text)
+        return true_start, -1, -1, -1, len(text), False
     if text[true_end + 1:true_end + 2] == '?':
-        return conditional_end(text, true_end + 2)
+        _, _, _, _, end, _ = conditional_bounds(text, true_end + 2)
+        return true_start, true_end, -1, -1, end, True
     false_start = text.find('[', true_end)
     false_end = text.find(']', false_start) if false_start >= 0 else -1
-    return false_end + 1 if false_end >= 0 else len(text)
+    end = false_end + 1 if false_end >= 0 else len(text)
+    return true_start, true_end, false_start, false_end, end, False
 
 
 def period_reading(records: Records, spell_id: int, caster: CasterStats, shown: Displayed, effect: int) -> str:
