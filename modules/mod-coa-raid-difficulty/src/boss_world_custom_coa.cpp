@@ -571,7 +571,11 @@ namespace
     {
     public:
         setis_checkpoint_players()
-            : PlayerScript("setis_checkpoint_players", {PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_MAP_CHANGED}) { }
+            : PlayerScript("setis_checkpoint_players", {PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_MAP_CHANGED,
+                PLAYERHOOK_ON_LOGIN}) { }
+
+        // A relog inside a boss map gets the Last Checkpoint button back too.
+        void OnPlayerLogin(Player* player) override { OnPlayerMapChanged(player); }
 
         void OnPlayerMapChanged(Player* player) override
         {
