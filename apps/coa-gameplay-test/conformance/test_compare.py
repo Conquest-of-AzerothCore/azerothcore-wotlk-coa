@@ -758,6 +758,7 @@ BELLS_OF_LIGHT, ZEALOTRY_PASSIVE = 801204, 92108
 LEGACY, SCOURGEBANE_DAMAGE, TEMPLARS_MIGHT, RIGHTEOUS_LUNGE, CONDEMN = 806522, 801832, 705291, 570233, 567539
 UPHEAVE = 520442
 BLESSED_PADDING = 301311
+FURY_OF_AGGRAMAR, LIBRAM_OF_CONSECRATION, LIBRAM_OF_FERVOR = 801480, 803893, 805423
 SPELL_NAMES = {(RECKONING, 'SpellName[enUS]'): 'Reckoning', (INTERDICT, 'SpellName[enUS]'): 'Interdict',
                (SACRED_RESTRAINT, 'SpellName[enUS]'): 'Sacred Restraint', (RECKONING, 'SchoolMask'): 2}
 
@@ -826,6 +827,21 @@ class PassiveDeltaTest(unittest.TestCase):
         self.assertAlmostEqual(divided.expected, 2500 / 1.1 - 2500)
         self.assertEqual(divided.detail, {'metric': 'attack_time_ms'})
         self.assertEqual(self.single(entry, '2500', '2250', token).status, 'alert')
+
+    def test_override_naming_every_target_judges_each_one_ok(self):
+        libram_a, libram_b = (
+            passive_expectation(FURY_OF_AGGRAMAR, 1, 'spell_modifier', 'spell_mod_pct', '$s2', 100.0, target, True,
+                                True, fields={'op': 12, 'base': 1000})
+            for target in (LIBRAM_OF_CONSECRATION, LIBRAM_OF_FERVOR))
+        token = [Displayed('$s2', 100.0, 1, 'percent')]
+        verdicts = self.passive_run(FURY_OF_AGGRAMAR, {libram_a: ('1000', '2000'), libram_b: ('1000', '2000')},
+                                    token, name='Fury of Aggramar')
+        self.assertEqual(verdicts[libram_a.label].status, 'ok')
+        self.assertEqual(verdicts[libram_b.label].status, 'ok')
+        wrong = self.passive_run(FURY_OF_AGGRAMAR, {libram_a: ('1000', '2000'), libram_b: ('1000', '1500')}, token,
+                                 name='Fury of Aggramar')
+        self.assertEqual(wrong[libram_a.label].status, 'ok')
+        self.assertEqual(wrong[libram_b.label].status, 'alert')
 
     def test_named_target_outside_the_mask(self):
         interdict, restraint = (

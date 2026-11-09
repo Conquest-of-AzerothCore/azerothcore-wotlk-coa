@@ -58,6 +58,7 @@ DEEP_SECRETS = 705263
 PIOUS_SWEEP = 520034
 TEMPLARS_MIGHT = 705291
 MARK_OF_AGGRAMAR = 804928
+FURY_OF_AGGRAMAR = 801480
 TRANQUIL_CIRCLE = 801205
 TRANQUIL_CIRCLE_INCOMPLETE = 524667
 PIOUS_SWEEP_DEV_SPELL = 521052
@@ -624,6 +625,15 @@ class TemplarPassiveTest(unittest.TestCase):
             self.assertEqual(effect.reason, '')
             self.assertIn(TESTAMENT_OF_FAITH, target_ids(effect, True, True))
             self.assertIn(ASCETIC_ABDICATION, target_ids(effect, False, True))
+
+    def test_fury_of_aggramar_names_every_libram(self):
+        all_librams = {803893, 805423, 801463, 801461, 801466}
+        effectiveness = effect_of(self.effects(FURY_OF_AGGRAMAR), 1)
+        self.assertEqual(target_ids(effectiveness, True, True), all_librams)
+        self.assertEqual(effectiveness.reason, '')
+        cooldown = effect_of(self.effects(FURY_OF_AGGRAMAR), 2)
+        self.assertEqual(target_ids(cooldown, True, True), all_librams)
+        self.assertEqual(cooldown.reason, '')
 
     def test_named_target_outside_the_mask_is_kept(self):
         effect = effect_of(self.effects(PATIENCE), 0)

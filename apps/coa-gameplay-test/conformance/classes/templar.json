@@ -259,6 +259,8 @@
      "reason": "no check needed: round5 aura-only-actives investigation. Testament of Hope's own effects (28 SPELL_EFFECT_SUMMON, 3 SPELL_EFFECT_DUMMY) have no damage/heal effect of their own for hit_mean: the summoned copies deal damage through their own AI and spells, a different combat entity entirely, not a direct or periodic effect of this spell. Its own numeric tokens are already measured and judged ok by this rank's own value scenario (round4 verdicts.json: 1397742 effect_value e0, effect_value 704409e1, spell_duration 102208, power_cost, cooldown_ms, all ok); hit_mean has nothing left to add"}
   ],
   "passive_targets": [
+    {"spell": 801480, "effect": 1, "targets": [803893, 805423, 801463, 801461, 801466], "tooltip_words": "Librams"},
+    {"spell": 801480, "effect": 2, "targets": [803893, 805423, 801463, 801461, 801466], "tooltip_words": "Librams"},
     {"spell": 520608, "effect": 0, "targets": [561156, 561167], "tooltip_words": "Argent Blade"},
     {"spell": 520034, "effect": 0, "targets": [503141], "tooltip_words": "Chastise"},
     {"spell": 520034, "effect": 1, "targets": [801205], "tooltip_words": "Tranquil Circle"},
