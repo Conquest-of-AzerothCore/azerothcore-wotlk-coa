@@ -11,7 +11,7 @@ from stack import class_mask, family_flags
 from tooltip import COLOR_CODE, Displayed, Records, Unreadable, read_tooltip
 from triggers import (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND, cooldown_label, duration_label,
                       shares_cooldown_aura, trigger_label)
-from values import EFFECTS, TARGET, Expectation, dataset, facts_of, structure_stats
+from values import EFFECT_KINDS, EFFECTS, TARGET, Expectation, dataset, facts_of, structure_stats
 
 UNMODELLED = 'unmodelled: '
 CLOSED = 'closed: '
@@ -352,7 +352,7 @@ def modifier_targets(records: Records, rank_id: int, effect: int, text: str, lev
 
 
 def own_token(values: list[Displayed], effect: int) -> Displayed | None:
-    return next((value for value in values if value.effect_index == effect), None)
+    return next((value for value in values if value.effect_index == effect and value.kind in EFFECT_KINDS), None)
 
 
 def shared_token(records: Records, rank_id: int, effect: int, effects: list[int],
@@ -643,11 +643,11 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
     targets: tuple[PassiveTarget, ...] = ()
     plans: tuple[MetricPlan, ...] = ()
     reason = ''
-    if family == 'P1':
+    override = passive_override(class_file, {spell_id, rank_id}, effect)
+    if family == 'P1' or override:
         siblings = tuple(sibling for sibling in effects if sibling != effect)
         targets, reason = modifier_targets(records, rank_id, effect, text, class_file['level'],
-                                           passive_override(class_file, {spell_id, rank_id}, effect), siblings,
-                                           token.text if token else None)
+                                           override, siblings, token.text if token else None)
     try:
         forced = effect_unmodelled(class_file, {spell_id, rank_id}, effect)
         if forced is not None:
@@ -760,7 +760,7 @@ def plan_probes(class_file: dict, records: Records, effect: PassiveEffect, plan:
 
     if plan.metric not in SPELL_METRICS:
         return [probe(None)]
-    if effect.family == 'P1':
+    if effect.targets:
         probes = []
         for target in effect.targets:
             reason = ''

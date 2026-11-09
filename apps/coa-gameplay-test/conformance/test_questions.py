@@ -242,7 +242,13 @@ class QuestionTest(unittest.TestCase):
         self.assertEqual([spell for spell, _ in item.conditions], list(LIGHTS_ECHO))
         self.assertIn('cast it at a target dummy every 5.5 sec', item.conditions[0][1])
         self.assertIn(f'About {observations(0.1, 0.1 / 0.9)} casts of Argent Blade', item.observations[0][1])
-        self.assertEqual(len(item.question.split('\n')), 1)
+        questions_asked = item.question.split('\n')
+        self.assertEqual(len(questions_asked), 2)
+        self.assertTrue(questions_asked[0].startswith(
+            'With Light\'s Echo learned, look in a reference log at casts of Argent Blade'))
+        self.assertEqual(questions_asked[1],
+                         'With Light\'s Echo learned, the logged Light\'s Echo procs per cast of Argent Blade '
+                         'under conditions matching our test should match one reading below.')
         path = write_questions([item], self.out)
         lines = path.read_text(encoding='utf-8').splitlines()
         self.assertEqual(sum(line.startswith("## Light's Echo") for line in lines), 1)

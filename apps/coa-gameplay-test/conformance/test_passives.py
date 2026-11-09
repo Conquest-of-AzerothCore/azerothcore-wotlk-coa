@@ -12,7 +12,7 @@ from classes import PROGRESSION_HEADER as HEADER, ClassSpell, class_spells, tabl
 from passives import (ALIASED_REASON_MARKER, AURA_STATE_METRIC, FAMILIES, MAX_SPELLMOD, PARRY_CHANCE, PASSIVE_DELTA,
                       PHRASES, STAT_EXACT_METRIC, STAT_METRIC, MetricPlan, NotModelled, PassiveTarget,
                       active_class_ranks, classify, crit_plans, family_of, literal_token, named_targets,
-                      passive_effects, passive_scenario, reference_spell, stat_after_token)
+                      own_token, passive_effects, passive_scenario, reference_spell, stat_after_token)
 from procs import proc_scenario
 from profile import CASTER, load_class_file, spell_power_label, stat_label
 from tooltip import Displayed, Records
@@ -373,6 +373,18 @@ class LiteralTokenTest(unittest.TestCase):
             literal_token(class_file, {FINAL_PRAYER}, 0, 'Grants $s1% of one thing.')
 
 
+class OwnTokenTest(unittest.TestCase):
+    def test_own_token_skips_a_radius_token_at_the_same_effect_index(self):
+        values = [Displayed('$a1', 40.0, 0, 'radius_yards'), Displayed('$s1', 6.0, 0, 'percent')]
+        token = own_token(values, 0)
+        self.assertEqual(token.text, '$s1')
+        self.assertEqual(token.kind, 'percent')
+
+    def test_own_token_returns_none_without_a_value_bearing_token(self):
+        values = [Displayed('$a1', 40.0, 0, 'radius_yards'), Displayed('$h', 20.0, 0, 'chance_pct')]
+        self.assertIsNone(own_token(values, 0))
+
+
 class AliasedTokenFixtureTest(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -453,6 +465,16 @@ class TemplarPassiveTest(unittest.TestCase):
         for spell_id, index in ((92109, 0), (300520, 0)):
             effect = effect_of(self.effects(spell_id), index)
             self.assertTrue(effect.reason.startswith('unmodelled: deferred: '), (spell_id, index, effect.reason))
+
+    def test_fortified_body_effect_0_token_is_its_own_percent_not_its_radius(self):
+        effect = effect_of(self.effects(300515), 0)
+        self.assertEqual(effect.token.text, '$s1')
+        self.assertEqual(effect.points, 6.0)
+
+    def test_pious_sweep_effect_0_targets_chastise_not_the_raw_class_mask(self):
+        effect = effect_of(self.effects(520034), 0)
+        self.assertEqual([target.spell_id for target in effect.targets], [503141])
+        self.assertTrue(effect.targets[0].named)
 
     def test_courage_movement_speed_aura_is_measured(self):
         for spell_id, percent in ((707754, 10), (712466, 20)):

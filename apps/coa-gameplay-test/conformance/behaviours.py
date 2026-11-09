@@ -563,6 +563,7 @@ class MetricDeltaSpec:
     setup_casts: tuple[int, ...] = ()
     setup_actor_aura: int | None = None
     gate_spell: int | None = None
+    label_suffix: str = ''
 
 
 def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
@@ -627,7 +628,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                  cast_steps() + [measurement(after_label, CASTER, spec.metric, **spec.fields)]}
     if spec.target == TARGET:
         scenario['creatures'] = [creature_fixture(class_file)]
-    label = f'{spec.spell} behaviour_metric_delta'
+    label = f'{spec.spell} behaviour_metric_delta' + (f' {spec.label_suffix}' if spec.label_suffix else '')
     model = {'kind': 'metric_delta', 'before_label': before_label, 'after_label': after_label,
              'expected': spec.expected, 'before_expected': spec.before_expected, 'metric': spec.metric,
              'quote': entry.quote}
@@ -642,7 +643,7 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('wait_ms', DEFAULT_METRIC_DELTA_WAIT_MS),
                            entry.get('expire_ms', DEFAULT_METRIC_DELTA_EXPIRE_MS), entry.get('target', CASTER),
                            entry.get('disable_regeneration', False), tuple(entry.get('setup_casts', ())),
-                           entry.get('setup_actor_aura'), entry.get('gate_spell'))
+                           entry.get('setup_actor_aura'), entry.get('gate_spell'), entry.get('label_suffix', ''))
 
 
 DEBT_ASSERT_TIMEOUT_MS = 2000

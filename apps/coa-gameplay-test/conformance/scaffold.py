@@ -135,7 +135,7 @@ def build_class_file(class_id: int, title: str, race: int, main: tuple[int, int,
     _, _, main_subclass = main
     class_file = {'class_id': class_id, 'name': title, 'race': race, 'level': level,
                  'weapon': weapon_entry(weapon_item_row, main_subclass), 'skill_lines': list(skill_lines),
-                 'ratings': dict(REFERENCE_RATINGS), 'reference_stats': {}}
+                 'ratings': dict(REFERENCE_RATINGS), 'reference_stats': {}, 'log_queries': {}}
     for field in EMPTY_LIST_FIELDS:
         class_file[field] = []
     if alternate is not None and alternate_item_row is not None:

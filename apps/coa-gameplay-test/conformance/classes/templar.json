@@ -1,6 +1,9 @@
 {
   "class_id": 19,
   "name": "Templar",
+  "log_queries": {
+    "705278 e1 spell_healing_done 803792": "coa-history spell \"Temple Guardian\" and spell \"Sacred Style\", Ascension combat log archive, 2026-11-09: no rows for either spell in any of the 186 logs"
+  },
   "race": 1,
   "level": 60,
   "weapon": {"item": 2495, "slot": 15, "subclass": 10, "min_damage": 6.5625, "max_damage": 10.9375,
@@ -238,6 +241,8 @@
      "reason": "no check needed: round5 aura-only-actives investigation. Testament of Hope's own effects (28 SPELL_EFFECT_SUMMON, 3 SPELL_EFFECT_DUMMY) have no damage/heal effect of their own for hit_mean: the summoned copies deal damage through their own AI and spells, a different combat entity entirely, not a direct or periodic effect of this spell. Its own numeric tokens are already measured and judged ok by this rank's own value scenario (round4 verdicts.json: 1397742 effect_value e0, effect_value 704409e1, spell_duration 102208, power_cost, cooldown_ms, all ok); hit_mean has nothing left to add"}
   ],
   "passive_targets": [
+    {"spell": 520608, "effect": 0, "targets": [561156, 561167], "tooltip_words": "Argent Blade"},
+    {"spell": 520034, "effect": 0, "targets": [503141], "tooltip_words": "Chastise"},
     {"spell": 520034, "effect": 1, "targets": [801205], "tooltip_words": "Tranquil Circle"},
     {"spell": 705291, "effect": 0, "targets": [567539], "tooltip_words": "Condemn"},
     {"spell": 803159, "effect": 1, "targets": [501606, 500678, 1397742, 801455], "tooltip_words": "Testaments"},
@@ -364,13 +369,8 @@
         {"name": "player casts only",
          "meaning": "only the Argent Blade casts you press roll the chance; an additional strike cannot trigger another",
          "adds": [{"metric": "spell_damage_count", "spell": 804929}],
-         "minus_events": true},
-        {"name": "every Argent Blade strike, additional strikes included",
-         "meaning": "every Argent Blade strike rolls the chance, so an additional strike can trigger another",
-         "adds": [{"metric": "spell_damage_count", "spell": 804929}],
-         "minus_events": false}
+         "minus_events": true}
       ],
-      "readings_question": "look in a reference log at casts of Argent Blade: does a cast ever log two or more additional Argent Blade strikes (one additional strike triggering another)?",
       "handler": "AscensionTemplarAbilities.cpp:296-300 recasts the cast rank, triggered, after a damaging hit",
       "dbc": {
         "520883": {"ProcChance": 20, "ProcFlags": 0, "ProcCharges": 0}
@@ -1487,6 +1487,18 @@
       "before_expected": 0.0,
       "target": "dummy",
       "observe_source": "520608's own effects carry EffectSpellClassMask word 2 = 16777216, matching Warrior of Dawn 561156's own SpellFamilyFlags, not Argent Blade 807268's (32); AuraEffect::CalculateSpellMod (SpellAuraEffects.cpp) turns 520608's two ADD_FLAT_MODIFIER effects into SpellModifiers against 561156's own effect 1 (SPELLMOD_EFFECT2, damage) and effect 2 (SPELLMOD_EFFECT3, crit chance). 561156 effect 2 (ApplyAuraName 107, MiscValue 7 = SPELLMOD_CRITICAL_CHANCE, BasePoints -1 -> CalcValue 0) is read back by Unit::SpellDoneCritChance (Unit.cpp) via ApplySpellMod(..., SPELLMOD_CRITICAL_CHANCE, ...) for the next Argent Blade cast while 561156 is up. Pre-fix, 520608 effect 1's raw BasePoints 19 (CalcValue 20) is what gets added onto 561156 effect 2's own 0, giving 20% against the tooltip's single $s1 = 50%. trigger_spell is Reckoning (max rank 572741), not Argent Blade itself: casting Argent Blade/804929 consumes Warrior of Dawn via AscensionTemplarAbilities.cpp's ConsumeSelected/Selected(561156) (Named(info, 804929)), so measuring spell_done_crit_chance for 807268 right after a real Argent Blade cast would read the buff already dropped; confirmed empirically (diagnostic aura_amount/aura reads on this worktree, 2026-11-09) that spell 561156 itself reads 0 (consumed) immediately after such a cast while 520608 effect 1's own aura_amount still reads its raw, unconsumed 20 (pre-fix)/50 (post-fix). Reckoning 572741 belongs to a different rank chain (Named() compares GetFirstSpellInChain), so it never matches Selected(561156) and leaves the Warrior of Dawn buff standing through the measurement; before_expected is 0.0 because, before 520608 is learned, 561156 effect 2's own raw CalcValue is 0 (BasePoints -1 + DieSides 1), confirmed by the same diagnostic run before 520608 was learned."
+    },
+    {
+      "spell": 520608, "variant": "damage", "name": "Scourge-Defense Training (damage)", "kind": "metric_delta",
+      "quote": "increases the damage and critical strike chance of your next Argent Blade by $s1%", "expected": 1200.0,
+      "trigger_spell": 572741,
+      "metric": "spell_damage_done",
+      "fields": { "spell": 807268, "target": "dummy", "effect": 1, "base": 1000 },
+      "setup_actor_aura": 561156,
+      "before_expected": 800.0,
+      "target": "dummy",
+      "label_suffix": "spell_damage_done",
+      "observe_source": "520608 effect 0 (ApplyAuraName 107 ADD_FLAT_MODIFIER, MiscValue 12 = SPELLMOD_EFFECT2, EffectSpellClassMask word 2 = 16777216, matching Warrior of Dawn 561156's own SpellFamilyFlags) feeds 561156's own effect 1 (ApplyAuraName 108 ADD_PCT_MODIFIER, MiscValue 0 = SPELLMOD_DAMAGE, EffectSpellClassMask word 2 = 32, matching Argent Blade 807268's own SpellFamilyFlags word 2, 32). 561156 effect 1's own raw BasePoints -1 -> CalcValue 0 before 520608 is learned; 520608 effect 0's CalcValue 50 (BasePoints 49, DieSides 1) replaces that 0 through the same AuraEffect::CalculateSpellMod nesting the crit entry above already proves. CoAGameplayTest.cpp's spell_damage_done metric reads caster->SpellDamageBonusDone(target, info(807268), base=1000, SPELL_DIRECT_DAMAGE, effect 1), a deterministic formula call (no combat roll) that applies every active percent SpellMod matching 807268's own family flags, 561156's effect 1 among them once it is up; trigger_spell is Reckoning (572741), not Argent Blade itself, for the same consumption reason as the crit entry (ConsumeSelected drops 561156 on an Argent Blade cast, Selected(561156) never matches Reckoning). Measured on this worktree, 2026-11-09 (.cache/verify-all/20261109-184440, step '520608 spell_damage_done before'/'after'): 800 before 520608 is learned, 1200 after, a +50% multiplicative change on top of the known class aura CoA Aura - Templar Class 887007's own -20% school modifier (1000 x 0.8 = 800; 800 x 1.5 = 1200), not a plain 1000-based 50%; before_expected 800.0 and expected 1200.0 are those two absolute readings (behaviour_metric_delta_verdict compares the after reading against expected directly, not as a delta)."
     },
     {
       "spell": 801202, "name": "Battlepriest", "kind": "health_ratio",

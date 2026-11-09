@@ -438,8 +438,12 @@ class ProcScenarioTest(unittest.TestCase):
                 self.assertEqual(measured[f'{aura} proc trials']['spell'], ARGENT_BLADE_MAX_RANK)
                 self.assertTrue(expectation.model['exclude_trigger_casts'])
                 self.assertEqual(expectation.model['part_attempts'], len(casts_of(scenario)))
-                self.assertEqual([reading['minus_events'] for reading in expectation.model['readings']],
-                                 [True, False])
+                if aura == LIGHTS_ECHO[1]:
+                    self.assertEqual([reading['minus_events'] for reading in expectation.model['readings']], [True])
+                    self.assertNotIn('readings_question', entry)
+                else:
+                    self.assertEqual([reading['minus_events'] for reading in expectation.model['readings']],
+                                     [True, False])
                 self.assertIn('handler: AscensionTemplarAbilities.cpp:296-300', expectation.rule)
 
     def test_condemnation_entry(self):

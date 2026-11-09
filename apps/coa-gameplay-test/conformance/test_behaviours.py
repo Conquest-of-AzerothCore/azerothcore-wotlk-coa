@@ -350,7 +350,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 24)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 25)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1003,6 +1003,13 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['expected'], 1)
         self.assertEqual(expectations[0].model['before_expected'], 0)
         self.assertEqual(expectations[0].model['metric'], 'aura')
+
+    def test_label_suffix_disambiguates_a_second_metric_delta_check_on_the_same_spell(self):
+        spec = metric_delta_spec(tyrs_guard_entry())
+        _, plain = metric_delta_scenario(CLASS_FILE, spec)
+        _, suffixed = metric_delta_scenario(CLASS_FILE, replace(spec, label_suffix='owned_creature_count'))
+        self.assertEqual(plain[0].label, f'{TYRS_GUARD} behaviour_metric_delta')
+        self.assertEqual(suffixed[0].label, f'{TYRS_GUARD} behaviour_metric_delta owned_creature_count')
 
     def test_empty_setup_casts_reproduces_the_scenario_byte_for_byte(self):
         spec = metric_delta_spec(tyrs_guard_entry())
