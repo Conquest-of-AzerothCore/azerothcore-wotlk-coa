@@ -82,7 +82,7 @@ ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId
   `size` = VALUES(`size`);
 
 -- The icicles look like his hail shards, bigger: a cluster of ice crystals.
-UPDATE `gameobject_template` SET `displayId` = 8324, `size` = 3 WHERE `entry` = 978098;
+UPDATE `gameobject_template` SET `displayId` = 8324, `size` = 2 WHERE `entry` = 978098;
 
 -- His hitbox is as wide as he is.
-UPDATE `creature_model_info` SET `BoundingRadius` = 6, `CombatReach` = 9 WHERE `DisplayID` = 142079;
+UPDATE `creature_model_info` SET `BoundingRadius` = 10, `CombatReach` = 15 WHERE `DisplayID` = 142079;

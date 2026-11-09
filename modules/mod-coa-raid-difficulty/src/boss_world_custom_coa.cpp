@@ -611,7 +611,7 @@ namespace
     constexpr uint8 CHILL_FROZEN      = 10;
     constexpr uint32 GO_FALLEN_ICICLE = 978098;
     constexpr float HUDDLE_RANGE      = 5.0f;   // close enough to share Body Heat
-    constexpr uint8 HAIL_VOLLEYS      = 4;
+    constexpr uint8 HAIL_VOLLEYS      = 12;  // one shard every quarter second through the 3s channel
     constexpr float HAIL_RADIUS       = 5.0f;
     constexpr uint8 GRASP_RINGS       = 8;
 
@@ -720,7 +720,7 @@ namespace
                 }
                 case SPELL_HAIL:
                     _hailVolleys = HAIL_VOLLEYS;
-                    _clock.ScheduleEvent(TW_HAIL, 500ms);
+                    _clock.ScheduleEvent(TW_HAIL, 250ms);
                     break;
                 case SPELL_WINTERS_GRASP:
                     _ring = _ringHit = 0;
@@ -800,7 +800,7 @@ namespace
                         _clock.ScheduleEvent(TW_HAIL_IMPACT, Milliseconds(flight));
                     }
                     if (--_hailVolleys)
-                        _clock.ScheduleEvent(TW_HAIL, 750ms);
+                        _clock.ScheduleEvent(TW_HAIL, 250ms);
                     break;
                 case TW_HAIL_IMPACT:
                     if (!_hailImpacts.empty())
