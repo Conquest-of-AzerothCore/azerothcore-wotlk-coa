@@ -816,6 +816,27 @@ parts of the tooltip the reader could not evaluate become `hit_mean` expectation
 `unreadable: `, without a measurement. Not modelled: talent or proc modifiers, critical strikes, spell power
 coefficients the tooltip does not show, and costs that are a percentage of base mana (no `set_power`).
 
+A class file's `hit_notes` list (`[{"spell": <id>, "reason": "..."}]`, matched against the spell's own id or its
+`max_rank`, same shape as `effect_notes` above) substitutes a specific explanation for `hit_parts`'s own generic
+`unmodelled: ` reason, applied only when `rank_hit` already raised `Unmodelled` (it never turns a modelled hit
+unmodelled, or the reverse: `hit_kind` still runs first and a spell whose effects do fit a model never consults
+`hit_notes`). This documents, per spell, why its active has no `hit_mean` of its own — most often because every one
+of its effects is a buff/debuff/utility aura, never a damage or heal effect `hit_kind` recognizes, so the
+tooltip's real numbers are already measured and judged by that spell's own `effect_value`/`aura_amount`/
+`aura_duration_ms`/`power_cost`/`cooldown_ms` verdicts instead. A reason beginning `no check needed: ` moves the
+status to `closed` (same `CLOSED`/ADR 0037 mechanism `effect_notes` uses, checked in `hit_parts` before falling
+back to `unmodelled`): this active's `hit_mean` gap is settled by that already-judged evidence, not left as open
+work, so `coverage.md`/`report.md`/`summary.md`'s status tables and `alerts.tsv` count it apart from the
+genuinely missing checks. Any other `hit_notes` reason keeps the `unmodelled` status and only replaces the
+explanation text. Templar (round5 `aura-only-actives` investigation, 2026-11): 32 of the 35 Templar actives whose
+own effects are all buffs/debuffs/utility are closed this way, each citing the concrete effects and the round4
+value-scenario verdicts that already cover them; a `closed` reason may itself name a different, genuinely more
+functional check (dispel-success, taunt-success, mechanic-immunity, mounted/ground `run_speed_rate`) as deferred,
+new-check-kind work out of this item's scope rather than an invented one — the `hit_mean` gap is still closed
+because it has no claim of its own left unaccounted for, but the deferred check stays unbuilt and belongs to the
+free-text reason until a future item builds it. 3 of the 35 (300514 Testament of Strength, 500678 Testament of
+Fortitude, 500694 Force of Golganneth) found no existing evidence to cite and stay `unmodelled`.
+
 ## Proc rates
 
 A `procs` entry of the class file describes one proc aura:
