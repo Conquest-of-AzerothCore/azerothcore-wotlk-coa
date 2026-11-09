@@ -11,7 +11,8 @@ from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_
                         BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY,
                         BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
                         BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
-                        BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER, MECHANIC_LAND_ATTEMPTS, STRIKER,
+                        BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER,
+                        MECHANIC_LAND_ATTEMPTS, STRIKER,
                         NotModelled,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
                         OathConsumptionRemovalSpec,
@@ -30,6 +31,7 @@ from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_
                         mechanic_duration_scenario, mechanic_duration_spec, metric_delta_scenario,
                         metric_delta_spec, oath_consumption_scenario, oath_consumption_spec,
                         oath_consumption_removal_scenario, oath_consumption_removal_spec,
+                        party_ally_id, party_stat_ratio_scenario, party_stat_ratio_spec,
                         shield_break_trigger_scenario, shield_break_trigger_spec,
                         single_target_scenario, single_target_spec,
                         target_count_scenario, target_count_spec)
@@ -117,6 +119,9 @@ TEMPLE_GUARDIAN = 803792
 
 
 HOLY_CLEAVE = 573049
+CALL_OF_THE_MONASTERY = 560550
+SERENDIPITY = 300929
+FORTIFIED_BODY = 300515
 
 
 def scarlet_judicator_entry() -> dict:
@@ -125,6 +130,18 @@ def scarlet_judicator_entry() -> dict:
 
 def holy_cleave_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == HOLY_CLEAVE)
+
+
+def call_of_the_monastery_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == CALL_OF_THE_MONASTERY)
+
+
+def serendipity_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == SERENDIPITY)
+
+
+def fortified_body_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == FORTIFIED_BODY)
 
 
 def justice_entry() -> dict:
@@ -457,7 +474,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 54)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 57)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -540,6 +557,68 @@ class FixedTargetCountScenarioTests(unittest.TestCase):
         spec = fixed_target_count_spec(entry)
         self.assertEqual(spec.cast_spell, 1)
         self.assertEqual(spec.target_rank, 2)
+
+
+class PartyStatRatioScenarioTests(unittest.TestCase):
+    def test_raid_wide_scenario_has_one_ally_no_far_ally(self):
+        spec = party_stat_ratio_spec(call_of_the_monastery_entry())
+        scenario, expectations = party_stat_ratio_scenario(CLASS_FILE, spec)
+        validated = run.validate(scenario)
+        self.assertEqual(len(validated['players']), 2)
+        ally_ids = {p['id'] for p in validated['players']}
+        self.assertEqual(ally_ids, {'caster', party_ally_id(0)})
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_PARTY_STAT_RATIO)
+        self.assertTrue(expectation.rule.startswith('prose: "Increases the attack power'))
+        self.assertIsNone(expectation.model['far_before_label'])
+        self.assertEqual(expectation.model['expected'], 1.05)
+
+    def test_radius_scenario_adds_a_second_far_ally_grouped_too(self):
+        spec = party_stat_ratio_spec(fortified_body_entry())
+        scenario, expectations = party_stat_ratio_scenario(CLASS_FILE, spec)
+        validated = run.validate(scenario)
+        ally_ids = {p['id'] for p in validated['players']}
+        self.assertEqual(ally_ids, {'caster', party_ally_id(0), party_ally_id(1)})
+        group_targets = {step['target'] for step in scenario['steps'] if step.get('action') == 'group'}
+        self.assertEqual(group_targets, {party_ally_id(0), party_ally_id(1)})
+        far_distance = sum(step['dx'] for step in scenario['steps']
+                          if step.get('action') == 'relocate' and step.get('actor') == party_ally_id(1))
+        self.assertGreater(far_distance, spec.radius)
+        expectation = expectations[0]
+        self.assertIsNotNone(expectation.model['far_before_label'])
+        self.assertIsNotNone(expectation.model['far_after_label'])
+
+    def test_needs_dummy_target_adds_a_creature_and_target_field(self):
+        spec = party_stat_ratio_spec(serendipity_entry())
+        self.assertTrue(spec.needs_dummy_target)
+        scenario, _ = party_stat_ratio_scenario(CLASS_FILE, spec)
+        validated = run.validate(scenario)
+        self.assertEqual(len(validated['creatures']), 1)
+        measure_steps = [step for step in scenario['steps']
+                         if step.get('action') == 'assert' and step.get('metric') == 'spell_damage_done']
+        self.assertEqual(len(measure_steps), 2)
+        for step in measure_steps:
+            self.assertEqual(step['target'], 'primary')
+            self.assertEqual(step['spell'], 572741)
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, call_of_the_monastery_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_PARTY_STAT_RATIO)
+
+    def test_before_measurement_precedes_the_learn_step(self):
+        spec = party_stat_ratio_spec(call_of_the_monastery_entry())
+        scenario, expectations = party_stat_ratio_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        before_index = next(index for index, step in enumerate(steps)
+                            if step.get('label') == expectations[0].model['near_before_label'])
+        learn_index = next(index for index, step in enumerate(steps)
+                           if step.get('action') == 'learn' and step.get('spell') == spec.spell)
+        after_index = next(index for index, step in enumerate(steps)
+                           if step.get('label') == expectations[0].model['near_after_label'])
+        self.assertLess(before_index, learn_index)
+        self.assertLess(learn_index, after_index)
 
 
 class AuraSpreadScenarioTests(unittest.TestCase):
@@ -2007,6 +2086,58 @@ class JudgeFixedTargetCountTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({}), expectation)
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('a1', verdict.explanation)
+
+    def test_no_run_reports_no_scenario(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), None, expectation)
+        self.assertIn('no scenario', verdict.explanation)
+
+
+class JudgePartyStatRatioTests(unittest.TestCase):
+    def expectation(self, expected=1.05, radius=None):
+        model = {'kind': 'party_stat_ratio', 'expected': expected, 'metric': 'attack_power',
+                 'near_before_label': 'nb', 'near_after_label': 'na',
+                 'far_before_label': 'fb' if radius is not None else None,
+                 'far_after_label': 'fa' if radius is not None else None,
+                 'quote': 'Increases the attack power of all party and raid members $s1%.'}
+        return Expectation('label', BEHAVIOUR_PARTY_STAT_RATIO, CALL_OF_THE_MONASTERY, CALL_OF_THE_MONASTERY, None,
+                           '1.05', 'prose: "Increases the attack power of all party and raid members $s1%." '
+                           '(560550)', model)
+
+    def test_near_ratio_matching_expected_is_ok(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'nb': 300.0, 'na': 315.0}), expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 1.05)
+
+    def test_seeded_wrong_ratio_fails(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'nb': 300.0, 'na': 300.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertAlmostEqual(verdict.measured, 1.0)
+
+    def test_far_ally_unchanged_is_ok(self):
+        expectation = self.expectation(radius=40.0)
+        values = {'nb': 300.0, 'na': 315.0, 'fb': 300.0, 'fa': 300.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_far_ally_also_changing_is_an_alert(self):
+        expectation = self.expectation(radius=40.0)
+        values = {'nb': 300.0, 'na': 315.0, 'fb': 300.0, 'fa': 315.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'nb': 300.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('na', verdict.explanation)
+
+    def test_zero_baseline_is_unmeasured(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'nb': 0.0, 'na': 0.0}), expectation)
+        self.assertEqual(verdict.status, 'unmeasured')
 
     def test_no_run_reports_no_scenario(self):
         expectation = self.expectation()

@@ -29,16 +29,17 @@ BEHAVIOUR_SINGLE_TARGET = 'behaviour_single_target'
 BEHAVIOUR_CRIT_MAGNITUDE = 'behaviour_crit_magnitude'
 BEHAVIOUR_CHARGE_RECHARGE = 'behaviour_charge_recharge'
 BEHAVIOUR_FIXED_COUNT = 'behaviour_fixed_count'
+BEHAVIOUR_PARTY_STAT_RATIO = 'behaviour_party_stat_ratio'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
                     BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_EXCLUSIVITY,
                     BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_CRIT_MAGNITUDE,
-                    BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT)
+                    BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_PARTY_STAT_RATIO)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
-        'charge_recharge', 'fixed_count')
+        'charge_recharge', 'fixed_count', 'party_stat_ratio')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -230,6 +231,120 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
     expectation = Expectation(label, BEHAVIOUR_FIXED_COUNT, spec.spell, spec.target_rank, None, str(spec.expected),
                               prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]
+
+
+PARTY_STAT_RATIO_SETTLE_MS = 2000
+PARTY_ALLY_NEAR_DISTANCE_YD = 3.0
+PARTY_ALLY_FAR_MARGIN_YD = 15.0
+
+
+@dataclass(frozen=True)
+class PartyStatRatioSpec:
+    spell: int
+    name: str
+    quote: str
+    expected: float
+    metric: str
+    metric_fields: tuple[tuple[str, object], ...] = ()
+    radius: float | None = None
+    radius_reason: str = ''
+    near_distance: float = PARTY_ALLY_NEAR_DISTANCE_YD
+    far_margin: float = PARTY_ALLY_FAR_MARGIN_YD
+    needs_dummy_target: bool = False
+    settle_ms: int = PARTY_STAT_RATIO_SETTLE_MS
+
+
+RELOCATE_STEP_LIMIT_YD = 20.0
+
+
+def relocate_steps(actor: str, distance: float) -> list[dict]:
+    steps = []
+    remaining = distance
+    while remaining > 0:
+        chunk = min(remaining, RELOCATE_STEP_LIMIT_YD)
+        steps.append({'action': 'relocate', 'actor': actor, 'dx': chunk})
+        remaining -= chunk
+    return steps
+
+
+def party_ally_id(index: int) -> str:
+    return 'ally' if index == 0 else 'ally_far'
+
+
+def party_ally_fixture(index: int, class_file: dict) -> dict:
+    fixture = player_fixture(class_file)
+    fixture['id'] = party_ally_id(index)
+    return fixture
+
+
+def party_stat_label(spec: PartyStatRatioSpec, ally: str, moment: str) -> str:
+    return f'{spec.spell} {ally} {spec.metric} {moment}'
+
+
+def party_stat_measurement(spec: PartyStatRatioSpec, ally: str, moment: str) -> tuple[str, dict]:
+    label = party_stat_label(spec, ally, moment)
+    fields = dict(spec.metric_fields)
+    if spec.needs_dummy_target:
+        fields['target'] = dummy_id(0)
+    return label, measurement(label, ally, spec.metric, **fields)
+
+
+def party_stat_ratio_scenario(class_file: dict, spec: PartyStatRatioSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'party_stat_ratio', spec.quote, spec.expected)
+    far = spec.radius is not None
+    allies = [party_ally_fixture(0, class_file)] + ([party_ally_fixture(1, class_file)] if far else [])
+    creatures = [dummy_fixture(0, class_file, 5.0)] if spec.needs_dummy_target else []
+
+    near_before_label, near_before_step = party_stat_measurement(spec, party_ally_id(0), BEFORE)
+    near_after_label, near_after_step = party_stat_measurement(spec, party_ally_id(0), AFTER)
+    far_before_label = far_after_label = None
+    far_before_steps: list[dict] = []
+    far_after_steps: list[dict] = []
+    if far:
+        far_before_label, far_before_step = party_stat_measurement(spec, party_ally_id(1), BEFORE)
+        far_after_label, far_after_step = party_stat_measurement(spec, party_ally_id(1), AFTER)
+        far_before_steps = [far_before_step]
+        far_after_steps = [far_after_step]
+
+    position_steps = relocate_steps(party_ally_id(0), spec.near_distance) + [
+        {'action': 'group', 'actor': CASTER, 'target': party_ally_id(0)}]
+    if far:
+        position_steps += relocate_steps(party_ally_id(1), spec.radius + spec.far_margin) + [
+            {'action': 'group', 'actor': CASTER, 'target': party_ally_id(1)}]
+
+    radius_clause = (f'; a second ally beyond the {spec.radius:g} yd radius must show no change ('
+                     f'{spec.radius_reason})') if far else '; raid- or party-wide, no distance token in the tooltip'
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour party stat ratio',
+        'contract': f'No-combat with/without check: {spec.metric} measured on a grouped, non-caster ally before '
+                    f'and after {spec.spell} is learned on the caster, settling {spec.settle_ms} ms for the aura '
+                    f'to propagate{radius_clause}.',
+        'players': [player_fixture(class_file)] + allies,
+        'creatures': creatures,
+        'steps': base_steps(class_file) + position_steps + [near_before_step] + far_before_steps +
+                 [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
+                  {'action': 'wait', 'ms': spec.settle_ms}] +
+                 [near_after_step] + far_after_steps}
+    model = {'kind': 'party_stat_ratio', 'near_before_label': near_before_label,
+             'near_after_label': near_after_label, 'far_before_label': far_before_label,
+             'far_after_label': far_after_label, 'expected': spec.expected, 'metric': spec.metric,
+             'quote': entry.quote}
+    label = f'{spec.spell} behaviour_party_stat_ratio'
+    expectation = Expectation(label, BEHAVIOUR_PARTY_STAT_RATIO, spec.spell, spec.spell, None, str(spec.expected),
+                              prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def party_stat_ratio_spec(entry: dict) -> PartyStatRatioSpec:
+    return PartyStatRatioSpec(entry['spell'], entry['name'], entry['quote'], entry['expected'], entry['metric'],
+                              tuple(entry.get('metric_fields', {}).items()), entry.get('radius'),
+                              entry.get('radius_reason', ''),
+                              entry.get('near_distance', PARTY_ALLY_NEAR_DISTANCE_YD),
+                              entry.get('far_margin', PARTY_ALLY_FAR_MARGIN_YD),
+                              entry.get('needs_dummy_target', False),
+                              entry.get('settle_ms', PARTY_STAT_RATIO_SETTLE_MS))
 
 
 @dataclass(frozen=True)
@@ -1965,6 +2080,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return target_count_scenario(class_file, target_count_spec(entry))
     if entry['kind'] == 'fixed_count':
         return fixed_target_count_scenario(class_file, fixed_target_count_spec(entry))
+    if entry['kind'] == 'party_stat_ratio':
+        return party_stat_ratio_scenario(class_file, party_stat_ratio_spec(entry))
     if entry['kind'] == 'ratio':
         return healing_ratio_scenario(class_file, healing_ratio_spec(entry))
     if entry['kind'] == 'leech_ratio':

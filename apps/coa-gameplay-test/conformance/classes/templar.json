@@ -1678,6 +1678,28 @@
       "radius_reason": "Holy Cleave 573049 DmgClass 2 (SPELL_DAMAGE_CLASS_MELEE, apps/coa-dbc record); its EffectChainTarget[0]=EffectChainTarget[1]=2 on both weapon-damage effects (0 NORMALIZED_WEAPON_DMG, 1 WEAPON_PERCENT_DAMAGE) targets TARGET_UNIT_TARGET_ENEMY, routed through Spell::SelectImplicitTargetObjectTargets, which always calls SelectImplicitChainTargets (src/server/game/Spells/Spell.cpp:1905-1920); Spell::SearchChainTargets's own comment names a 10y jump radius for SPELL_DAMAGE_CLASS_MELEE as used 'for swipe, cleave and similar' when no per-spell JumpDistance override exists (Spell.cpp:2200-2213). The chain is inherent to every cast (ChainTarget 2, i.e. 1 beyond the primary, not gated by any separate passive), so this is a single-phase fixed-count check rather than a before/after passive delta."
     },
     {
+      "spell": 560550, "name": "Call of the Monastery", "kind": "party_stat_ratio",
+      "quote": "Increases the attack power of all party and raid members $s1%.", "expected": 1.05,
+      "metric": "attack_power",
+      "radius_reason": "560550 effect 0 (ApplyAuraName 166 SPELL_AURA_MOD_ATTACK_POWER_PCT, EffectRadiusIndex[0]=287 -> SpellRadius.dbc 100.0 yd, read this session via coa-dbc-viewer) is Effect[0]=65 SPELL_EFFECT_APPLY_AREA_AURA_RAID; EffectBasePoints[0]=4 with EffectDieSides[0]=1 gives CalcValue 5 (+1 roll), matching the tooltip's $s1 token. Effect 2 (same aura type, EffectRadiusIndex[2]=0, self-only) is the spell's own separate 'In addition, increases your attack power by $s2%' sentence and is a different clause, not measured here; a non-caster grouped ally only ever receives effect 0's party-wide +5%, never effect 2's self-only +5% stacked on top, which is why the ally ratio must land on 1.05 and not on the ~1.1025 a caster self-read would show."
+    },
+    {
+      "spell": 300929, "name": "Serendipity", "kind": "party_stat_ratio",
+      "quote": "Increases the all damage dealt by party and raid members by $s1%.", "expected": 1.03,
+      "metric": "spell_damage_done",
+      "metric_fields": {"spell": 572741},
+      "needs_dummy_target": true,
+      "radius_reason": "300929 effect 0 (ApplyAuraName 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, EffectRadiusIndex[0]=287 -> SpellRadius.dbc 100.0 yd) is Effect[0]=65 SPELL_EFFECT_APPLY_AREA_AURA_RAID; EffectBasePoints[0]=2 with EffectDieSides[0]=1 gives CalcValue 3 (+1 roll), matching the tooltip's $s1 token. spell_damage_done with reference spell 572741 (Reckoning) is the same formula call and reference spell the existing caster-side effect_value verdict for this spell already uses (label '300929 e0 spell_damage_done 572741'), read on a non-caster grouped ally instead of the caster."
+    },
+    {
+      "spell": 300515, "name": "Fortified Body", "kind": "party_stat_ratio",
+      "quote": "Allies within $a1 yds receive $s1% more healing.", "expected": 1.06,
+      "metric": "spell_healing_taken",
+      "metric_fields": {"spell": 803792, "target": "caster"},
+      "radius": 40.0,
+      "radius_reason": "300515 effect 0 (ApplyAuraName 118 SPELL_AURA_MOD_HEALING_PCT, EffectRadiusIndex[0]=23 -> SpellRadius.dbc 40.0 yd, matching the tooltip's $a1 token) is Effect[0]=65 SPELL_EFFECT_APPLY_AREA_AURA_RAID; EffectBasePoints[0]=5 with EffectDieSides[0]=1 gives CalcValue 6 (+1 roll), matching the tooltip's $s1 token. spell_healing_taken with reference spell 803792 is the same formula call and reference spell the existing self-measured passive_delta note for this spell already names; here it is read on a non-caster grouped ally at a controlled distance, with a second ally beyond 40 yd expected to show no change, isolating the radius gate the self-measurement could not."
+    },
+    {
       "spell": 525024, "name": "Scarlet Judicator", "kind": "count",
       "quote": "strikes 2 additional enemies near the primary target", "expected": 2,
       "target_rank": 807805,

@@ -14,7 +14,7 @@ from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_
                         BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY,
                         BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
                         BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
-                        BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER)
+                        BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER)
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
@@ -2020,6 +2020,46 @@ def behaviour_fixed_count_verdict(base: Verdict, run: Run, model: dict) -> Verdi
                                f'and a measured 0 against a nonzero expected is always an alert')
 
 
+PARTY_STAT_RATIO_TOLERANCE = 1e-4
+
+
+def behaviour_party_stat_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    near_before = run.values.get(model['near_before_label'])
+    near_after = run.values.get(model['near_after_label'])
+    if near_before is None or near_after is None:
+        return replace(base, explanation=missing_measurement(
+            run, model['near_before_label'] if near_before is None else model['near_after_label']))
+    if near_before <= 0:
+        return replace(base, status='unmeasured', measured=near_after,
+                       explanation=f'{model["near_before_label"]} measured {near_before:g}; a party stat ratio '
+                                   f'check needs a positive baseline on the grouped ally')
+    near_ratio = near_after / near_before
+    expected = float(model['expected'])
+    near_ok = abs(near_ratio - expected) <= PARTY_STAT_RATIO_TOLERANCE
+    far_before_label, far_after_label = model.get('far_before_label'), model.get('far_after_label')
+    far_detail = ''
+    far_ok = True
+    if far_before_label is not None:
+        far_before = run.values.get(far_before_label)
+        far_after = run.values.get(far_after_label)
+        if far_before is None or far_after is None:
+            return replace(base, explanation=missing_measurement(
+                run, far_before_label if far_before is None else far_after_label))
+        if far_before <= 0:
+            return replace(base, status='unmeasured', measured=near_ratio,
+                           explanation=f'{far_before_label} measured {far_before:g}; the out-of-radius ally needs '
+                                       f'a positive baseline too')
+        far_ratio = far_after / far_before
+        far_ok = abs(far_ratio - 1.0) <= PARTY_STAT_RATIO_TOLERANCE
+        far_detail = f'; out-of-radius ally ratio {far_ratio:g} (must stay at 1.0, within range it would move too)'
+    status = 'ok' if near_ok and far_ok else 'alert'
+    return replace(base, status=status, measured=near_ratio, expected=expected,
+                   low=expected - PARTY_STAT_RATIO_TOLERANCE, high=expected + PARTY_STAT_RATIO_TOLERANCE,
+                   explanation=f'{model["metric"]} on the grouped, non-caster ally measured {near_before:g} before '
+                               f'the caster learned the passive and {near_after:g} after, ratio {near_ratio:g} '
+                               f'against expected {expected:g}{far_detail}')
+
+
 def behaviour_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     before = run.values.get(model['before_label'])
     after = run.values.get(model['after_label'])
@@ -2521,6 +2561,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_count_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_FIXED_COUNT:
         return behaviour_fixed_count_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_PARTY_STAT_RATIO:
+        return behaviour_party_stat_ratio_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_RATIO:
         if model.get('kind') == 'leech_ratio':
             return behaviour_leech_ratio_verdict(base, run, model)
