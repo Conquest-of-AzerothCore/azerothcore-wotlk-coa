@@ -123,7 +123,9 @@ Stages run in this order. Each reports `passed`, `failed`, `unavailable` (a prer
 `blocked` (the build failed) or `skipped` (not selected).
 
 1. `source`: `tools/check_source.py`, which covers SQL boundaries, comments in CoA-owned code, loader
-   registrations and the tooling test suites. See [Source comparison base](#source-comparison-base).
+   registrations and the tooling test suites. See [Source comparison base](#source-comparison-base). Its
+   commands run concurrently (`--jobs N`, default the CPU count; each command isolates its own temp directories
+   and mocked tools, so none of them share state); the stage's wall time is close to its single slowest command.
 2. `build`: configures a build directory as described for `cmake_args`, reconfigures one that has
    `BUILD_TESTING` off with `-DBUILD_TESTING=ON`, then runs `cmake --build <build> --parallel <jobs>` (with
    `--config` for a multi-config generator). The directory holding `mysql_config` is put first on `PATH`.

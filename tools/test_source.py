@@ -1,7 +1,11 @@
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import redirect_stdout
 import io
 import json
+import os
 import subprocess
+import threading
+import time
 import unittest
 from unittest.mock import patch
 
@@ -98,9 +102,39 @@ class SourceSelectionTests(unittest.TestCase):
                 patch.object(check_source.subprocess, 'run', side_effect=[
                     subprocess.CompletedProcess([], 1, '', 'first failed'),
                     subprocess.CompletedProcess([], 0, 'second passed', '')]) as execute:
-            result = check_source.execute([['one.py'], ['two.py']])
+            result = check_source.execute([['one.py'], ['two.py']], jobs=1)
         self.assertEqual([entry['status'] for entry in result], ['failed', 'passed'])
         self.assertNotIn('PYTHONOPTIMIZE', execute.call_args.kwargs['env'])
+
+    def test_commands_run_concurrently_up_to_the_job_limit(self):
+        barrier = threading.Barrier(2, timeout=5)
+
+        def run(command, **_kwargs):
+            barrier.wait()
+            return subprocess.CompletedProcess(command, 0, 'ok', '')
+
+        with patch.object(check_source.subprocess, 'run', side_effect=run):
+            result = check_source.execute([['one.py'], ['two.py']], jobs=2)
+        self.assertEqual([entry['status'] for entry in result], ['passed', 'passed'])
+
+    def test_jobs_defaults_to_the_cpu_count_but_never_exceeds_the_command_count(self):
+        with patch.object(check_source.os, 'cpu_count', return_value=8), \
+                patch.object(check_source, 'ThreadPoolExecutor', wraps=ThreadPoolExecutor) as pool, \
+                patch.object(check_source.subprocess, 'run',
+                            return_value=subprocess.CompletedProcess([], 0, '', '')):
+            check_source.execute([['one.py'], ['two.py']])
+        pool.assert_called_once_with(max_workers=2)
+
+    def test_results_keep_command_order_regardless_of_finish_order(self):
+        delays = {'slow.py': 0.05, 'fast.py': 0.0}
+
+        def run(command, **_kwargs):
+            time.sleep(delays[command[-1]])
+            return subprocess.CompletedProcess(command, 0, command[-1], '')
+
+        with patch.object(check_source.subprocess, 'run', side_effect=run):
+            result = check_source.execute([['slow.py'], ['fast.py']], jobs=2)
+        self.assertEqual([entry['command'][-1] for entry in result], ['slow.py', 'fast.py'])
 
 
 if __name__ == '__main__':
