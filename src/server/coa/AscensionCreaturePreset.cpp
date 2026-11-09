@@ -118,6 +118,10 @@ void AscensionCreaturePresetMgr::LoadVarietiesFromDB()
 {
     _varieties.clear();
 
+    if (!WorldDatabase.Query("SELECT 1 FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND "
+        "TABLE_NAME = 'creature_display_preset_variety'"))
+        return;
+
     QueryResult result = WorldDatabase.Query(
         "SELECT entry, gender, skins, faces, hair_styles, hair_colors, facial_hairs FROM creature_display_preset_variety");
     if (!result)
