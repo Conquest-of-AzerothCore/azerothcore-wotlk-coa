@@ -908,6 +908,8 @@ A `triggers` entry of the class file is a passive whose tooltip says that someth
 | `ally_health_pct` | for a `target: "ally"` cast, the ally's health percent set before every cast so the heal is effective |
 | `caster_health_pct` | the caster's own health percent set before every cast, for a trigger the server code gates on an effective self-heal (`GetHealInfo()->GetEffectiveHeal()`), which is 0 at full health |
 | `restore_charges` | for a cast trigger, restores the trigger rank's native charges before every attempt (needed when the rank is also a charge-counting `procs` entry's trigger) |
+| `co_learn` | spell ids learned once, right after the aura's own `learn`, before any attempt; for a trigger whose server-side mechanism also requires a second, independent passive to be known |
+| `force_crit` | `"melee"` or `"spell"`: the scenario's own player fixture (not the class file's shared `ratings`) gets `melee_crit_rating`/`spell_crit_rating` set to `FORCED_CRIT_RATING`, for a trigger the server code gates on `PROC_HIT_CRITICAL` |
 | `internal_cooldown_ms` | spaces scheduled attempts at least this many ms apart, on top of the trigger rank's own cast time and recovery, for a trigger the server code gates on an internal cooldown |
 | `observe_metric` | `spell_cast_count`, `spell_energize_count` or `aura_apply_count` of `observe_spell` |
 | `observe_actor` | `"caster"` (default) or `"target"`: which actor's `observe_metric` is measured, for a trigger whose effect lands on the target rather than the caster (`Unit::AddAura`, not a `CastSpell`) |
@@ -941,7 +943,16 @@ otherwise always read as 0 effective healing and never fire). With `restore_char
 charge pool is restored before every cast (`"restore_charges"` fixture), needed for a charge-limited rank cast at
 the harness's scheduled attempt rate rather than its native recharge rate. With `internal_cooldown_ms` set, each
 attempt is spaced at least that long apart (`max(StartRecoveryTime, cast time, internal_cooldown_ms) + 500 ms`),
-for a trigger the server code gates behind its own internal cooldown rather than the trigger rank's.
+for a trigger the server code gates behind its own internal cooldown rather than the trigger rank's. With
+`co_learn` set, each listed spell is learned once right after the aura's own `learn`, before the baseline and
+the scheduled attempts, for a trigger whose server code also requires a second, independent passive to be known
+before the mechanism runs at all (Divine Strikes 705255 needs Righteousness 680891 learned for Chastise to cast
+Scourgebane in the first place). With `force_crit` set to `"melee"` or `"spell"`, the scenario's own player
+fixture (not the class file's shared `ratings`, which would force every scenario's crit chance) gets
+`melee_crit_rating`/`spell_crit_rating` set to `FORCED_CRIT_RATING` (100000, shared with `behaviours.py`'s own
+duration-scenario fixture), for a trigger the server code gates on `PROC_HIT_CRITICAL`: every scheduled attempt
+is then a valid trial of the crit-gated condition (Deliverance 704116 needs a crit on Vindication or Righteous
+Lunge).
 
 A `periodic` trigger is not a player action at all: it is `SPELL_AURA_PERIODIC_TRIGGER_SPELL`'s own amplitude tick,
 running from the generic engine's periodic-effect path rather than the proc-event path, so it is unaffected by
@@ -998,6 +1009,8 @@ The Templar entries quote their trigger words from the cleaned DBC tooltips:
 | Light's Ward 300529 | periodic, 2000 ms amplitude | ticks | 301283 casts | 1 |
 | Light's Chosen 301310 | periodic, 5000 ms amplitude | ticks | 301369 casts | 1 |
 | Disciplined Mind 680399 | "causes it to dispel", 578276 at `self` | casts | 525052 casts (`EffectTriggerSpell[1]`) | 1 |
+| Disciplined Mind 681483 | "causes it to dispel 2 poison and disease effects", 578276 at `ally` | casts | 525052 casts (`EffectTriggerSpell[1]`/`[2]`, cast once) | 1 |
+| Deliverance 704116 | "Critically striking with Vindication", 573324 at `dummy`, `force_crit: "melee"` | casts | 801456 casts (`EffectTriggerSpell[0]`) | 1 |
 
 Chakra of Light's two ranks share Mending Ward's 806273 `Breaker()` condition and its 572027 fixture (same
 `AscensionTemplarAbilities.cpp:192-198`): both are in `TemplarCastDrivers`, so the DBC's own `EffectTriggerSpell[0]`

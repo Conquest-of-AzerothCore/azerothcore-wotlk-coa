@@ -16,9 +16,9 @@ from profile import DBC_DIR
 from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader
 from tooltip import Records
 from triggers import (BASELINE_ATTEMPTS, PERIODIC, TRIGGER_CHECK, TRIGGER_TRIALS, attempt_interval, attempt_steps,
-                      counts, trigger_entries, trigger_label, trigger_measurements, trigger_plan, trigger_rule,
-                      trigger_scenario, trigger_status_expectation)
-from values import Expectation, dataset
+                      checked_entry, counts, trigger_entries, trigger_label, trigger_measurements, trigger_plan,
+                      trigger_rule, trigger_scenario, trigger_status_expectation)
+from values import ALLY, FORCED_CRIT_RATING, Expectation, dataset
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import batch
@@ -27,7 +27,7 @@ import run
 TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 804932, 806516, 803158, 805420, 680891,
                     803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298, 705255,
                     680397, 524765, 560096, 707364, 504107, 706385, 523712, 520534, 504561, 504807,
-                    92108, 92109, 300504, 300529, 301310, 680399}
+                    92108, 92109, 300504, 300529, 301310, 680399, 681483, 704116}
 GUARDIAN_OF_THE_LIGHT = 707364
 DIVINE_FURY = 504107
 UTHERS_LEGACY = 706385
@@ -77,6 +77,12 @@ WHIRLING_TEMPEST = 300504
 LIGHTS_WARD = 300529
 LIGHTS_CHOSEN = 301310
 RIGHTEOUS_TEMPEST_CHANNEL = 805409
+DISCIPLINED_MIND_681483 = 681483
+BENEDICTION_RANK_60 = 578276
+DISPEL_FOR_BENEDICTION = 525052
+DELIVERANCE = 704116
+DELIVERANCE_COPY = 801456
+RIGHTEOUSNESS = 680891
 KEY = 'conformance-templar-trigger-520812-part-1'
 SECOND_KEY = 'conformance-templar-trigger-520812-part-2'
 LABELS = trigger_measurements(SCARLET_SECRETS)
@@ -111,6 +117,17 @@ def trigger_steps(trials, events, without=0, baseline_trials=BASELINE_ATTEMPTS, 
 
 def casts_of(steps, spell):
     return sum(1 for step in steps if step['action'] == 'cast' and step['spell'] == spell)
+
+
+def generic_trigger_steps(aura, trials, events, without=0, baseline_trials=BASELINE_ATTEMPTS, learned=1):
+    labels = trigger_measurements(aura)
+    before = baseline_trials or 0
+    steps = [assert_step(labels['aura'], str(learned)), assert_step(labels['trials'], str(trials + before)),
+             assert_step(labels['events'], str(events + without))]
+    if baseline_trials is not None:
+        steps = [assert_step(labels['baseline_trials'], str(baseline_trials)),
+                 assert_step(labels['without'], str(without))] + steps
+    return steps
 
 
 class TrialsTest(unittest.TestCase):
@@ -271,6 +288,26 @@ class TriggerCompareTest(unittest.TestCase):
             assert_step(labels['events'], str(first_attempts)), assert_step(labels['aura'], '1')])
         self.workspace.scenario('conformance-templar-trigger-300529-part-2', 'trigger', [second_exp], steps=[
             assert_step(labels['events'], str(second_attempts)), assert_step(labels['aura'], '1')])
+        self.assertEqual(self.verdict().status, 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_disciplined_mind_681483_absent_dispel_cast_alerts(self):
+        entry = copy.deepcopy(templar_trigger(DISCIPLINED_MIND_681483))
+        entry['observe_spell'] = 1
+        scenario, [expectation] = trigger_scenario(CLASS_FILE, entry)
+        key = f'conformance-templar-trigger-{DISCIPLINED_MIND_681483}-part-1'
+        self.workspace.scenario(key, 'trigger', [expectation],
+                                steps=generic_trigger_steps(DISCIPLINED_MIND_681483, SCHEDULED, 0))
+        self.assertEqual(self.verdict().status, 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_deliverance_absent_crit_copy_alerts(self):
+        entry = copy.deepcopy(templar_trigger(DELIVERANCE))
+        entry['observe_spell'] = 1
+        scenario, [expectation] = trigger_scenario(CLASS_FILE, entry)
+        key = f'conformance-templar-trigger-{DELIVERANCE}-part-1'
+        self.workspace.scenario(key, 'trigger', [expectation],
+                                steps=generic_trigger_steps(DELIVERANCE, SCHEDULED, 0))
         self.assertEqual(self.verdict().status, 'alert')
 
 
@@ -623,6 +660,59 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         entry['observe_actor'] = 'ally'
         with self.assertRaises(ValueError):
             trigger_plan(CLASS_FILE, entry)
+
+    def test_divine_strikes_co_learns_righteousness_before_the_first_cast(self):
+        entry = templar_trigger(DIVINE_STRIKES)
+        self.assertEqual(entry['co_learn'], [RIGHTEOUSNESS])
+        scenario, expectations = trigger_scenario(CLASS_FILE, entry)
+        steps = scenario['steps']
+        learn_aura = steps.index({'action': 'learn', 'actor': 'caster', 'spell': DIVINE_STRIKES})
+        co_learn = steps.index({'action': 'learn', 'actor': 'caster', 'spell': RIGHTEOUSNESS})
+        chastise_after_learn = steps[learn_aura:].index(
+            {'action': 'cast', 'actor': 'caster', 'spell': CHASTISE, 'target': 'dummy'}) + learn_aura
+        self.assertLess(learn_aura, co_learn)
+        self.assertLess(co_learn, chastise_after_learn)
+        self.assertIn(f'; {DIVINE_STRIKES} also learns {RIGHTEOUSNESS}', expectations[0].rule)
+
+    def test_without_co_learn_the_scenario_omits_righteousness(self):
+        entry = copy.deepcopy(templar_trigger(DIVINE_STRIKES))
+        del entry['co_learn']
+        scenario, expectations = trigger_scenario(CLASS_FILE, entry)
+        self.assertNotIn({'action': 'learn', 'actor': 'caster', 'spell': RIGHTEOUSNESS}, scenario['steps'])
+        self.assertNotIn('also learns', expectations[0].rule)
+
+    def test_disciplined_mind_681483_entry_casts_at_an_ally(self):
+        entry = templar_trigger(DISCIPLINED_MIND_681483)
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': BENEDICTION_RANK_60, 'target': 'ally'})
+        self.assertEqual(entry['observe_spell'], DISPEL_FOR_BENEDICTION)
+        self.assertEqual(entry['observe_metric'], 'spell_cast_count')
+        scenario, [expectation] = trigger_scenario(CLASS_FILE, entry)
+        steps = scenario['steps']
+        self.assertIn({'action': 'group', 'actor': 'caster', 'target': ALLY}, steps)
+        casts = [index for index, step in enumerate(steps)
+                if step['action'] == 'cast' and step['spell'] == BENEDICTION_RANK_60]
+        self.assertTrue(casts)
+        for index in casts:
+            self.assertEqual(steps[index]['target'], ALLY)
+        self.assertEqual(expectation.model['observe_spell'], DISPEL_FOR_BENEDICTION)
+
+    def test_deliverance_force_crit_is_melee(self):
+        entry = templar_trigger(DELIVERANCE)
+        self.assertEqual(entry['force_crit'], 'melee')
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': VINDICATION_MAX_RANK, 'target': 'dummy'})
+        self.assertEqual(entry['observe_spell'], DELIVERANCE_COPY)
+
+    def test_deliverance_force_crit_rating_overrides_melee_crit_rating_without_touching_the_class_file(self):
+        entry = templar_trigger(DELIVERANCE)
+        scenario, _ = trigger_scenario(CLASS_FILE, entry)
+        self.assertEqual(scenario['players'][0]['melee_crit_rating'], FORCED_CRIT_RATING)
+        self.assertNotIn('melee_crit_rating', CLASS_FILE.get('ratings', {}))
+
+    def test_force_crit_outside_the_known_kinds_is_refused(self):
+        entry = copy.deepcopy(templar_trigger(DELIVERANCE))
+        entry['force_crit'] = 'ranged'
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
 
     def test_lights_guidance_resets_health_before_every_benediction(self):
         entry = templar_trigger(LIGHTS_GUIDANCE)

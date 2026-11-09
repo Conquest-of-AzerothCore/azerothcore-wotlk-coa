@@ -6,8 +6,8 @@ from hits import MAIN_HAND, aura_modifiers, creature_fixture
 from procs import swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import COLOR_CODE, Records
-from values import (CAST_MARGIN_MS, Expectation, TARGET, armed_for, dataset, facts_of, fixture_health_step,
-                    required_aura_steps, required_target_health_steps)
+from values import (CAST_MARGIN_MS, FORCED_CRIT_RATING, Expectation, TARGET, armed_for, dataset, facts_of,
+                    fixture_health_step, required_aura_steps, required_target_health_steps)
 
 BEHAVIOUR_COUNT = 'behaviour_count'
 BEHAVIOUR_RATIO = 'behaviour_ratio'
@@ -614,7 +614,6 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('disable_regeneration', False))
 
 
-FORCED_CRIT_RATING = 100000
 DEBT_ASSERT_TIMEOUT_MS = 2000
 
 

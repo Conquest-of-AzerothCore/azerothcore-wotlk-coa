@@ -6,8 +6,8 @@ from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, UNMODELLED, Unmo
                   records_of, scenario_shell, timed)
 from procs import ATTACK, CAST, ENTRY_STATUSES, PART_BUDGET_MS, cast_interval, swing_interval, tick_spacing
 from profile import CASTER, SETTLE_MS, measurement, player_fixture
-from values import (ALLY, CHARGE_OFFSET_YD, TARGET, Expectation, RankFacts, armed_for, closes_distance, facts_of,
-                    fixture_health_step)
+from values import (ALLY, CHARGE_OFFSET_YD, FORCED_CRIT_RATING, TARGET, Expectation, RankFacts, armed_for,
+                    closes_distance, facts_of, fixture_health_step)
 
 TRIGGER_CHECK = 'trigger_count'
 MISSED_TRIGGER_RATE = 0.025
@@ -24,6 +24,7 @@ MELEE_COUNTS = frozenset({'melee_attack_count', 'melee_damage_count'})
 PERIODIC_TRIAL_METRICS = frozenset({'spell_cast_count'})
 TRIAL_METRICS = {CAST: frozenset({'spell_cast_count', 'spell_damage_count'}), ATTACK: MELEE_COUNTS,
                 PERIODIC: PERIODIC_TRIAL_METRICS}
+FORCE_CRIT_RATINGS = {'melee': 'melee_crit_rating', 'spell': 'spell_crit_rating'}
 TRIGGER_RULE = (f'|events - trials x per_trigger| <= {EVENT_TOLERANCE} over at least {TRIGGER_TRIALS} trials, '
                 f'no event in the {BASELINE_ATTEMPTS} baseline attempts without the passive')
 
@@ -74,6 +75,11 @@ def checked_entry(entry: dict) -> dict:
         raise ValueError(f'Trigger {aura} restores charges without a cast to restore them before')
     if entry.get('caster_health_pct') is not None and trigger['action'] != CAST:
         raise ValueError(f'Trigger {aura} sets the caster health without a cast before which to set it')
+    if any(not isinstance(spell, int) for spell in entry.get('co_learn', [])):
+        raise ValueError(f'Trigger {aura} has a non-integer co_learn spell')
+    if entry.get('force_crit') is not None and entry['force_crit'] not in FORCE_CRIT_RATINGS:
+        raise ValueError(f'Trigger {aura} has an unknown force_crit {entry["force_crit"]!r}, not one of '
+                         f'{sorted(FORCE_CRIT_RATINGS)}')
     factor = entry.get('trial_attempts_factor', 1)
     if factor < 1:
         raise ValueError(f'Trigger {aura} has a trial attempts factor below 1')
@@ -170,6 +176,7 @@ def trigger_rule(entry: dict) -> str:
         trials = entry['trial_metric'] + (f' of {trial_spell(entry)}' if trial_spell(entry) else ' main hand')
     fixtures = ''.join(f'; before each attempt aura {aura["spell"]} set to {aura["stacks"]} stacks ({aura["source"]})'
                        for aura in entry.get('attempt_auras', []))
+    fixtures += ''.join(f'; {entry["aura"]} also learns {spell}' for spell in entry.get('co_learn', []))
     if entry.get('caster_health_pct') is not None:
         fixtures += f'; before each attempt the caster health set to {entry["caster_health_pct"]}% of max'
     if entry.get('ally_health_pct') is not None:
@@ -178,6 +185,8 @@ def trigger_rule(entry: dict) -> str:
         fixtures += f'; before each attempt the charges of {entry["trigger"]["spell"]} are restored'
     if entry.get('periodic_initial_tick'):
         fixtures += '; one extra tick on every learn (SPELL_ATTR5_EXTRA_INITIAL_PERIOD)'
+    if entry.get('force_crit'):
+        fixtures += f'; every attempt forced to crit ({entry["force_crit"]})'
     cooldown = entry.get('internal_cooldown_ms', 0)
     if cooldown:
         fixtures += f'; attempts spaced at least {cooldown} ms apart (internal cooldown)'
@@ -206,6 +215,7 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
         steps += attempt_steps(class_file, entry, plan, baseline, 'baseline ')
         steps += counts(entry, labels['baseline_trials'], labels['without'])
     steps.append({'action': 'learn', 'actor': CASTER, 'spell': aura})
+    steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in entry.get('co_learn', [])]
     steps += attempt_steps(class_file, entry, plan, attempts, '')
     steps += counts(entry, labels['trials'], labels['events'])
     steps.append(measurement(labels['aura'], CASTER, 'aura', spell=aura))
@@ -214,6 +224,9 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
     contract = ('Events of an always-on passive trigger: none before the learn, one per trigger after it, summed over '
                 'its parts, against its tooltip.')
     scenario = scenario_shell(class_file, name, contract, steps)
+    force_crit = entry.get('force_crit')
+    if force_crit:
+        scenario['players'][0][FORCE_CRIT_RATINGS[force_crit]] = FORCED_CRIT_RATING
     if trigger['action'] == ATTACK or trigger.get('target') == TARGET:
         scenario['creatures'] = [creature_fixture(class_file)]
     if trigger.get('target') == ALLY:
@@ -224,6 +237,7 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
              'observe_spell': entry['observe_spell'], 'observe_metric': entry['observe_metric'],
              'observe_actor': entry.get('observe_actor', CASTER),
              'attempt_auras': [dict(aura) for aura in entry.get('attempt_auras', [])],
+             'co_learn': list(entry.get('co_learn', [])), 'force_crit': force_crit,
              'caster_health_pct': entry.get('caster_health_pct'), 'ally_health_pct': entry.get('ally_health_pct'),
              'restore_charges': entry.get('restore_charges', False),
              'internal_cooldown_ms': entry.get('internal_cooldown_ms', 0),
