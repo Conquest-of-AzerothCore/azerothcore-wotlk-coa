@@ -562,6 +562,7 @@ class MetricDeltaSpec:
     disable_regeneration: bool = False
     setup_casts: tuple[int, ...] = ()
     setup_actor_aura: int | None = None
+    gate_spell: int | None = None
 
 
 def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
@@ -611,14 +612,17 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour metric delta',
         'contract': f'No-combat with/without check: {spec.metric} {spec.fields} around a cast of {spec.trigger_spell},'
-                    f' measured before and after the passive is learned, waiting {spec.expire_ms} ms between phases '
-                    f'for the first cast\'s effect to fully expire before the second cast.',
+                    f' measured before and after '
+                    f'{spec.gate_spell if spec.gate_spell is not None else spec.spell} is learned, waiting '
+                    f'{spec.expire_ms} ms between phases for the first cast\'s effect to fully expire before the '
+                    f'second cast.',
         'players': [{**player_fixture(class_file), 'allow_regeneration': False}] if spec.disable_regeneration
                    else [player_fixture(class_file)],
         'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] +
                  [{'action': 'learn', 'actor': CASTER, 'spell': setup_spell} for setup_spell in spec.setup_casts] +
                  cast_steps() + [measurement(before_label, CASTER, spec.metric, **spec.fields)] +
-                 [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] +
+                 [{'action': 'learn', 'actor': CASTER, 'spell':
+                   spec.gate_spell if spec.gate_spell is not None else spec.spell}] +
                  [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}] +
                  cast_steps() + [measurement(after_label, CASTER, spec.metric, **spec.fields)]}
     if spec.target == TARGET:
@@ -638,7 +642,7 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('wait_ms', DEFAULT_METRIC_DELTA_WAIT_MS),
                            entry.get('expire_ms', DEFAULT_METRIC_DELTA_EXPIRE_MS), entry.get('target', CASTER),
                            entry.get('disable_regeneration', False), tuple(entry.get('setup_casts', ())),
-                           entry.get('setup_actor_aura'))
+                           entry.get('setup_actor_aura'), entry.get('gate_spell'))
 
 
 DEBT_ASSERT_TIMEOUT_MS = 2000
