@@ -16,11 +16,11 @@ from procs import ATTACK
 from profile import DBC_DIR
 from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader
 from tooltip import Records
-from triggers import (BASELINE_ATTEMPTS, COOLDOWN_CHECK, COOLDOWN_DELTA_KIND, PERIODIC, TAKEN_HIT, TRIGGER_CHECK,
-                      TRIGGER_TRIALS, attempt_interval, attempt_steps, checked_cooldown_entry, checked_entry,
-                      cooldown_label, cooldown_trial_label, cooldown_trial_steps, cooldown_trigger_scenario, counts,
-                      trigger_entries, trigger_label, trigger_measurements, trigger_plan, trigger_rule,
-                      trigger_scenario, trigger_status_expectation)
+from triggers import (BASELINE_ATTEMPTS, COOLDOWN_CHECK, COOLDOWN_DELTA_KIND, MAIN_HAND, PERIODIC, TAKEN_HIT,
+                      TRIGGER_CHECK, TRIGGER_TRIALS, attempt_interval, attempt_steps, checked_cooldown_entry,
+                      checked_entry, cooldown_label, cooldown_trial_label, cooldown_trial_steps,
+                      cooldown_trigger_scenario, count_step, counts, trigger_entries, trigger_label,
+                      trigger_measurements, trigger_plan, trigger_rule, trigger_scenario, trigger_status_expectation)
 from values import ALLY, FORCED_CRIT_RATING, Expectation, dataset
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -30,7 +30,8 @@ import run
 TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 804932, 806516, 803158, 805420, 680891,
                     803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298, 705255,
                     680397, 524765, 560096, 707364, 504107, 706385, 523712, 520534, 504561, 504807,
-                    92108, 92109, 300504, 300529, 301310, 680399, 681483, 704116, 804927, 805415, 806522, 705306}
+                    92108, 92109, 300504, 300529, 301310, 680399, 681483, 704116, 804927, 805415, 806522, 705306,
+                    804912}
 LORESCRIBE = 804927
 LORESCRIBE_DEAD_TRIGGER = 806089
 LORESCRIBE_REDUCTION_SOURCE = 806106
@@ -65,6 +66,7 @@ DEVOTION_OF_KHAZGOROTH = 560096
 SCARLET_SECRETS = 520812
 STAFFGUARD = 705295
 CHAKRA_OF_POWER = 803158
+PARRY_DANCE = 804912
 SACRED_DEFENSE = 705306
 CHAKRA_OF_LIGHT_R1 = 803844
 CHAKRA_OF_LIGHT_R2 = 803159
@@ -181,6 +183,25 @@ class TrialsTest(unittest.TestCase):
         self.assertEqual(TRIGGER_TRIALS, math.ceil(math.log(0.01) / math.log(0.975)))
         self.assertEqual(TRIGGER_TRIALS, 182)
         self.assertEqual(BASELINE_ATTEMPTS, 20)
+
+    def test_count_step_defaults_to_main_hand_with_no_trial_metric_fields(self):
+        step = count_step('label', 'melee_damage_count', 0)
+        self.assertEqual(step, {'action': 'assert', 'label': 'label', 'actor': 'caster',
+                                'metric': 'melee_damage_count', 'hand': MAIN_HAND,
+                                'min': -1000000000, 'max': 1000000000})
+
+    def test_count_step_merges_trial_metric_fields_without_dropping_hand(self):
+        step = count_step('label', 'melee_damage_count', 0, trial_metric_fields={'critical': True})
+        self.assertEqual(step['hand'], MAIN_HAND)
+        self.assertTrue(step['critical'])
+
+    def test_count_step_trial_metric_fields_can_override_hand(self):
+        step = count_step('label', 'melee_damage_count', 0, trial_metric_fields={'hand': 1})
+        self.assertEqual(step['hand'], 1)
+
+    def test_count_step_ignores_trial_metric_fields_on_a_non_melee_metric(self):
+        step = count_step('label', 'spell_cast_count', 42, trial_metric_fields={'critical': True})
+        self.assertNotIn('critical', step)
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_attempt_interval_respects_internal_cooldown(self):
@@ -711,6 +732,22 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                          ('spell_energize_count', 804181))
         self.assertEqual(measured[labels['trials']]['metric'], 'melee_attack_count')
 
+    def test_parry_dance_crit_leg_trial_counts_only_critical_melee_damage(self):
+        entry = templar_trigger(PARRY_DANCE)
+        self.assertEqual(entry['trial_metric'], 'melee_damage_count')
+        self.assertEqual(entry['trial_metric_fields'], {'critical': True})
+        self.assertEqual(entry['force_crit'], 'melee')
+        scenario, [expectation] = trigger_scenario(CLASS_FILE, entry, 0)
+        run.validate(scenario)
+        labels = trigger_measurements(PARRY_DANCE)
+        measured = {step['label']: step for step in scenario['steps'] if step['action'] == 'assert'}
+        self.assertEqual(measured[labels['trials']]['metric'], 'melee_damage_count')
+        self.assertTrue(measured[labels['trials']]['critical'])
+        self.assertEqual(measured[labels['trials']]['hand'], MAIN_HAND)
+        self.assertEqual((measured[labels['events']]['metric'], measured[labels['events']]['spell']),
+                         ('spell_cast_count', 560651))
+        self.assertEqual(scenario['players'][0]['melee_crit_rating'], FORCED_CRIT_RATING)
+
     def test_scarlet_secrets_clears_the_oath_chain_before_every_argent_blade(self):
         scenario, [expectation] = trigger_scenario(CLASS_FILE, templar_trigger(SCARLET_SECRETS))
         steps = scenario['steps']
@@ -727,6 +764,12 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         entry['attempt_auras'] = [{'spell': OATH_CHAIN, 'stacks': 0, 'source': 'test'}]
         with self.assertRaises(ValueError):
             trigger_plan(CLASS_FILE, entry)
+
+    def test_trial_metric_fields_need_a_melee_trial_metric(self):
+        entry = copy.deepcopy(templar_trigger(STAFFGUARD))
+        entry['trial_metric_fields'] = {'critical': True}
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
 
     def test_self_cast_trigger_has_no_target(self):
         scenario, _ = trigger_scenario(CLASS_FILE, templar_trigger(705274))

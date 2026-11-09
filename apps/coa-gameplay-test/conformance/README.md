@@ -930,6 +930,7 @@ A `triggers` entry of the class file is a passive whose tooltip says that someth
 | `restore_charges` | for a cast trigger, restores the trigger rank's native charges before every attempt (needed when the rank is also a charge-counting `procs` entry's trigger) |
 | `co_learn` | spell ids learned once, right after the aura's own `learn`, before any attempt; for a trigger whose server-side mechanism also requires a second, independent passive to be known |
 | `force_crit` | `"melee"` or `"spell"`: the scenario's own player fixture (not the class file's shared `ratings`) gets `melee_crit_rating`/`spell_crit_rating` set to `FORCED_CRIT_RATING`, for a trigger the server code gates on `PROC_HIT_CRITICAL` |
+| `trial_metric_fields` | optional, `attack` action only (`trial_metric` one of `MELEE_COUNTS`): extra fields merged into the trial measurement's `hand: "main_hand"` default, for example `{"critical": true}` to count only the swings that landed a critical hit, when the trigger's own condition is narrower than "every swing" (Parry Dance 804912's outgoing-crit leg: `melee_damage_count` filtered to `critical: true`, paired with `force_crit: "melee"` so most scheduled swings are valid trials) |
 | `internal_cooldown_ms` | spaces scheduled attempts at least this many ms apart, on top of the trigger rank's own cast time and recovery, for a trigger the server code gates on an internal cooldown |
 | `observe_metric` | `spell_cast_count`, `spell_energize_count` or `aura_apply_count` of `observe_spell` |
 | `observe_actor` | `"caster"` (default) or `"target"`: which actor's `observe_metric` is measured, for a trigger whose effect lands on the target rather than the caster (`Unit::AddAura`, not a `CastSpell`) |
@@ -1071,6 +1072,7 @@ The Templar entries quote their trigger words from the cleaned DBC tooltips:
 | Unbroken Creed 804932 | "Damaging abilities", 807268 at `dummy` | damage events | 807648 casts | 1 |
 | Heaven's Finest 806516 | "Damaging abilities", 807268 at `dummy` | damage events | 805390 casts | 1 |
 | Chakra of Power 803158 | "Melee attacks", auto attack | swings | 804181 energizes | 1 |
+| Parry Dance 804912, effect 1 (crit leg only) | "critically strike with auto attacks", auto attack, `critical: true` | critical melee damage events (`force_crit: "melee"`) | 560651 casts | 1 |
 | Way of the Monk 805420 | "Damage dealt by Sacred Swing", 572769 at `dummy` | damage events | 572052 casts | 1 |
 | Chakra of Light 803844, 803159 | "Oath Breakers", 572027 ("a dominating Oath Breaker") | casts | 803160 casts | 1 |
 | Scarlet Training 301065 | "Casting Argent Blade", 807268 at `dummy` | casts | 301172 casts | 1 |

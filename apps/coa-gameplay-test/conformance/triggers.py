@@ -109,6 +109,9 @@ def checked_entry(entry: dict) -> dict:
     if entry.get('force_crit') is not None and entry['force_crit'] not in FORCE_CRIT_RATINGS:
         raise ValueError(f'Trigger {aura} has an unknown force_crit {entry["force_crit"]!r}, not one of '
                          f'{sorted(FORCE_CRIT_RATINGS)}')
+    if entry.get('trial_metric_fields') and entry['trial_metric'] not in MELEE_COUNTS:
+        raise ValueError(f'Trigger {aura} sets trial_metric_fields on a non-melee trial_metric '
+                         f'{entry["trial_metric"]!r}')
     factor = entry.get('trial_attempts_factor', 1)
     if factor < 1:
         raise ValueError(f'Trigger {aura} has a trial attempts factor below 1')
@@ -159,9 +162,9 @@ def observe_actor(entry: dict) -> str:
 
 
 def count_step(label: str, metric: str, spell: int, actor: str = CASTER, target: str = TARGET,
-              caster: str | None = None) -> dict:
+              caster: str | None = None, trial_metric_fields: dict | None = None) -> dict:
     if metric in MELEE_COUNTS:
-        return measurement(label, CASTER, metric, hand=MAIN_HAND)
+        return measurement(label, CASTER, metric, **{**{'hand': MAIN_HAND}, **(trial_metric_fields or {})})
     fields = {}
     if metric == 'spell_damage_count':
         fields['target'] = target
@@ -207,12 +210,15 @@ def attempt_steps(class_file: dict, entry: dict, plan: TriggerPlan, attempts: in
 
 def counts(entry: dict, trials_label: str, events_label: str) -> list[dict]:
     action = entry['trigger']['action']
+    trial_metric_fields = entry.get('trial_metric_fields', {})
     if action == PERIODIC:
         steps = []
     elif action == TAKEN_HIT:
-        steps = [count_step(trials_label, entry['trial_metric'], trial_spell(entry), target=CASTER, caster=STRIKER)]
+        steps = [count_step(trials_label, entry['trial_metric'], trial_spell(entry), target=CASTER, caster=STRIKER,
+                            trial_metric_fields=trial_metric_fields)]
     else:
-        steps = [count_step(trials_label, entry['trial_metric'], trial_spell(entry))]
+        steps = [count_step(trials_label, entry['trial_metric'], trial_spell(entry),
+                            trial_metric_fields=trial_metric_fields)]
     steps.append(count_step(events_label, entry['observe_metric'], entry['observe_spell'], observe_actor(entry)))
     return steps
 

@@ -1121,6 +1121,23 @@
       "per_trigger_text": "now strike back at enemies",
       "internal_cooldown_ms": 1000,
       "handler": "AscensionTemplarEvents.cpp:128-137 (aura_ascension_templar_event::Proc, case 705306), reachable via the explicit spell_proc row (rev_20260909_04_templar_completion.sql:21, ProcFlags 1048575, Chance 100) and spell_script_names row (same file, lines 98-99), not the raw DBC ProcFlags 0/EffectTriggerSpell 707720 alone"
+    },
+    {
+      "aura": 804912,
+      "effect": 1,
+      "name": "Parry Dance",
+      "tooltip": "When you critically strike with auto attacks or parry an attack, your chance to parry is now increased by $560651s1% for $560651d, stacking $560651u times.",
+      "trigger": {"action": "attack", "spell": 0},
+      "trigger_text": "critically strike with auto attacks",
+      "trial_metric": "melee_damage_count",
+      "trial_metric_fields": {"critical": true},
+      "force_crit": "melee",
+      "observe_spell": 560651,
+      "observe_source": "EffectTriggerSpell[1] of 804912",
+      "handler": "AscensionTemplarEvents.cpp:41-43,181-182 (aura_ascension_templar_event::Check/Proc, case 804912): outgoing && damage && crit && PROC_FLAG_DONE_MELEE_AUTO_ATTACK casts 560651, unconditionally (ProcChance/ProcFlags are dead on the raw DBC effect, which is dummied at load since 804912 is in TemplarEvents, AscensionTemplarContracts.cpp:26-32,35-37). This entry covers only the outgoing-crit leg of the tooltip's two conditions; the incoming-parry leg has no harness metric or creature-attacks-caster action yet and is tracked separately.",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "your chance to parry is now increased"
     }
   ],
   "talent_modifiers": [
