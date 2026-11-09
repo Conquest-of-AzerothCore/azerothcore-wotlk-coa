@@ -7,8 +7,8 @@ from procs import swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import COLOR_CODE, Records
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_ENTRY, FORCE_CRIT_RATINGS, FORCED_CRIT_RATING,
-                    Expectation, TARGET, armed_for, dataset, facts_of, fixture_health_step, required_aura_steps,
-                    required_target_health_steps)
+                    GCD_WAIT_MS, Expectation, TARGET, armed_for, dataset, facts_of, fixture_health_step,
+                    required_aura_steps, required_target_health_steps)
 
 BEHAVIOUR_COUNT = 'behaviour_count'
 BEHAVIOUR_RATIO = 'behaviour_ratio'
@@ -387,9 +387,6 @@ def health_threshold_ratio_scenario(class_file: dict, spec: HealthRatioSpec) -> 
 def health_ratio_spec(entry: dict) -> HealthRatioSpec:
     return HealthRatioSpec(entry['spell'], entry['name'], entry['quote'], entry['probe_spell'],
                            tuple((pct, ratio) for pct, ratio in entry['levels']))
-
-
-GCD_WAIT_MS = 1600
 
 
 @dataclass(frozen=True)

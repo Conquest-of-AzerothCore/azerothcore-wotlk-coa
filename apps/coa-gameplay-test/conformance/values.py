@@ -27,6 +27,7 @@ CHARGE_OFFSET_YD = 10
 POWER_DISPLAY_DIVISOR = {0: 1, 1: 10, 2: 1, 3: 1, 4: 1000, 5: 1, 6: 10}
 MANA = 0
 CAST_MARGIN_MS = 500
+GCD_WAIT_MS = 1600
 CAST_WAIT_LABEL = 'cast time'
 UNREADABLE = 'unreadable: '
 UNMEASURABLE = 'unmeasurable: '
@@ -481,6 +482,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                 if live_actor == ALLY:
                     needs_ally_target = True
                     ally_grant_proofs.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': rank_id})
+                    ally_grant_proofs.append({'action': 'wait', 'label': 'Global cooldown', 'ms': GCD_WAIT_MS})
                     if facts.mana_cost > 0 and facts.power_type != MANA:
                         ally_grant_proofs.append({'action': 'set_power', 'actor': CASTER,
                                                   'power': facts.power_type, 'value': facts.mana_cost})

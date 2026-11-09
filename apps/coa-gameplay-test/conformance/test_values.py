@@ -12,8 +12,8 @@ from profile import (CASTER, armed, base_steps, caster_stats_from, class_file_pa
                     unfit_reason)
 from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, write_fixture
 from tooltip import CasterStats, DataSet, Displayed, Records, read_tooltip
-from values import (ALLY, AURA_STATE_HEALTHLESS_35_PERCENT, CHECKS, FIXTURE_MAX_HEALTH, GENERIC, TARGET,
-                    UNMEASURABLE, UNREADABLE, Expectation, Unmodelled, conditional_extra_values,
+from values import (ALLY, AURA_STATE_HEALTHLESS_35_PERCENT, CHECKS, FIXTURE_MAX_HEALTH, GCD_WAIT_MS, GENERIC,
+                    TARGET, UNMEASURABLE, UNREADABLE, Expectation, Unmodelled, conditional_extra_values,
                     disabled_foreign_effects, facts_of, fixture_health_step, foreign_aura_grants, foreign_effect,
                     foreign_radius, periodic_reason, required_target_health_steps, sample_labels, value_scenario)
 
@@ -513,12 +513,20 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
                          ('aura_duration_ms', SACRED_RESTRAINT, ALLY, 'caster'))
         casts = [step for step in scenario['steps'] if step['action'] == 'cast']
         self.assertEqual([step.get('target') for step in casts], [None, ALLY])
-        self.assertIn({'action': 'reset_cooldown', 'actor': 'caster', 'spell': TESTAMENT_OF_RESOLVE},
-                      scenario['steps'])
+        reset_step = next(step for step in scenario['steps'] if step['action'] == 'reset_cooldown'
+                          and step['spell'] == TESTAMENT_OF_RESOLVE)
         self.assertIn(ALLY, {player['id'] for player in scenario['players']})
         own_duration_step, = self.steps_of(scenario, f'{TESTAMENT_OF_RESOLVE} aura_duration_ms #0')
         self.assertEqual(own_duration_step['actor'], 'caster')
         self.assertLess(scenario['steps'].index(own_duration_step), scenario['steps'].index(step))
+        second_cast = next(step for step in scenario['steps']
+                           if step['action'] == 'cast' and step.get('target') == ALLY)
+        reset_index = scenario['steps'].index(reset_step)
+        second_cast_index = scenario['steps'].index(second_cast)
+        waits_between = [step for step in scenario['steps'][reset_index + 1:second_cast_index]
+                         if step['action'] == 'wait']
+        self.assertTrue(waits_between, 'the recast after reset_cooldown needs a global-cooldown wait')
+        self.assertGreaterEqual(sum(w['ms'] for w in waits_between), GCD_WAIT_MS)
 
     def test_foreign_aura_grant_on_a_self_targeted_spell_stays_on_the_caster(self):
         scenario, expectations = self.build(TESTAMENT_OF_HOPE, TESTAMENT_OF_HOPE)
