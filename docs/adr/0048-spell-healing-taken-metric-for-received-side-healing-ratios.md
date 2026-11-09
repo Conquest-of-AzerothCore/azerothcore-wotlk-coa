@@ -1,4 +1,4 @@
-# 0045. `spell_healing_taken` metric for received-side healing ratio checks
+# 0048. `spell_healing_taken` metric for received-side healing ratio checks
 
 - Status: accepted
 - Date: 2026-11-09

@@ -1,4 +1,4 @@
-# 0046. `self_stack_bonus` class-file field for repeat-cast `hit_mean` scenarios
+# 0049. `self_stack_bonus` class-file field for repeat-cast `hit_mean` scenarios
 
 - Status: accepted
 - Date: 2026-11-09

@@ -1,4 +1,4 @@
-# 0047. Retry a melee-class vehicle cast in `behaviour_duration_ratio` scenarios
+# 0050. Retry a melee-class vehicle cast in `behaviour_duration_ratio` scenarios
 
 - Status: accepted
 - Date: 2026-11-09

@@ -145,7 +145,7 @@ because it has no claim of its own left unaccounted for, but the deferred check 
 free-text reason until a future item builds it. 3 of the 35 (300514 Testament of Strength, 500678 Testament of
 Fortitude, 500694 Force of Golganneth) found no existing evidence to cite and stay `unmodelled`.
 
-## Self-stacking ranks (`self_stack_bonus`, ADR 0046)
+## Self-stacking ranks (`self_stack_bonus`, ADR 0049)
 
 `hit_parts`'s repeated casts (`casts_needed`/`scheduled_casts`) assume every cast is an independent, identically
 distributed sample of the same hit — true for a plain weapon/school/heal hit, false for a rank whose own tooltip
