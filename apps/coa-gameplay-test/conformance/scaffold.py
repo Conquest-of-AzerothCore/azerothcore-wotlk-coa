@@ -177,13 +177,12 @@ def reference_stats_from_result(result: dict, class_file: dict) -> dict:
 def scaffold_class(class_id: int, dbc_dir: Path, config: Path, mysql, level: int = CHARACTER_LEVEL,
                    shared_defines: Path = SHARED_DEFINES, live_baseline: Path = LIVE_BASELINE_HEADER,
                    progression_header: Path = PROGRESSION_HEADER) -> dict:
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'coa-dbc'))
-    from inspect_dbc import DataSet
+    from classes import dataset
     from tooltip import Records, weapon_skill_spells
 
     title = class_title(Path(shared_defines).read_text(encoding='utf-8'), class_id)
     proficiency_rows = class_proficiencies(Path(live_baseline).read_text(encoding='utf-8'), class_id)
-    records = Records(DataSet(dbc_dir))
+    records = Records(dataset(dbc_dir))
     subclass_of_spell = {spell: subclass for subclass, spell in weapon_skill_spells(records).items()}
     main, alternate = select_weapon_rows(proficiency_rows, subclass_of_spell)
     races = [row['race'] for row in local_select(config, mysql, playercreateinfo_sql(class_id))]
