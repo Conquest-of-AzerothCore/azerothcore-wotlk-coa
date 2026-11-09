@@ -7,6 +7,7 @@
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "GameTime.h"
+#include "Log.h"
 #include "ObjectMgr.h"
 #include "PlayerDump.h"
 #include "StringFormat.h"
@@ -22,6 +23,7 @@ using namespace Acore::ChatCommands;
 namespace
 {
 std::atomic<bool> testOverrideActive = false;
+std::string testSourceSchema;
 
 struct Settings
 {
@@ -64,6 +66,12 @@ bool IsPlainSchemaName(std::string const& name)
     });
 }
 
+bool SourceCharactersReadable(std::string const& schema)
+{
+    return CharacterDatabase.Query("SELECT 1 FROM information_schema.TABLES WHERE TABLE_SCHEMA = '{}' "
+        "AND TABLE_NAME = 'characters'", schema) != nullptr;
+}
+
 Settings LoadSettings()
 {
     Settings settings;
@@ -72,7 +80,7 @@ Settings LoadSettings()
     {
         settings.enabled = true;
         settings.requireSourceOffline = false;
-        settings.sourceSchema = CurrentSchema();
+        settings.sourceSchema = testSourceSchema.empty() ? CurrentSchema() : testSourceSchema;
         return settings;
     }
 
@@ -123,8 +131,10 @@ bool RejectUnavailable(ChatHandler* handler, Settings const& settings)
         return true;
     }
 
-    if (!IsPlainSchemaName(settings.sourceSchema))
+    if (!IsPlainSchemaName(settings.sourceSchema) || !SourceCharactersReadable(settings.sourceSchema))
     {
+        LOG_ERROR("misc", "CoA.PtrCopy.SourceDatabase `{}` has no readable characters table; check the "
+            "schema name and this realm's SELECT grant on it.", settings.sourceSchema);
         handler->SendErrorMessage("Character copies are not configured on this realm.", false);
         return true;
     }
@@ -148,14 +158,16 @@ std::string CopyFailureText(DumpReturn result)
 
 namespace PtrCharacterCopy
 {
-TestOverride::TestOverride()
+TestOverride::TestOverride(std::string sourceSchema)
 {
+    testSourceSchema = std::move(sourceSchema);
     testOverrideActive = true;
 }
 
 TestOverride::~TestOverride()
 {
     testOverrideActive = false;
+    testSourceSchema.clear();
 }
 }
 
