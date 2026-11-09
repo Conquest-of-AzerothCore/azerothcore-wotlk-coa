@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "CoAPtrCharacterCopy.h"
 #include "AccountMgr.h"
+#include "AsyncCallbackProcessor.h"
 #include "Chat.h"
 #include "ChatCommand.h"
 #include "CommandScript.h"
@@ -12,6 +13,7 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "PlayerDump.h"
+#include "QueryCallback.h"
 #include "Realm.h"
 #include "ScriptMgr.h"
 #include "StringFormat.h"
@@ -34,8 +36,6 @@ enum class RequestState : uint8
 };
 
 constexpr uint32 PollIntervalMs = 5000;
-constexpr uint32 RequestsPerPoll = 5;
-
 constexpr uint32 SaveTimeoutSeconds = 60;
 
 std::atomic<bool> testOverrideActive = false;
@@ -243,48 +243,55 @@ void LoadCopy(PendingCopy const& copy)
     Complete(copy.id, RequestState::Copied, {}, reader.GetLoadedGuid(), reader.GetLoadedName());
 }
 
-void ProcessPendingCopies()
+std::string OldestPendingCopyQuery()
 {
-    QueryResult pending = LoginDatabase.Query("SELECT id, account, source_realm, source_guid, source_name, dump "
-        "FROM coa_ptr_copy_request WHERE target_realm = {} AND state = {} ORDER BY id LIMIT {}", realm.Id.Realm,
-        uint8(RequestState::Pending), RequestsPerPoll);
+    return Acore::StringFormat("SELECT id, account, source_realm, source_guid, source_name, dump "
+        "FROM coa_ptr_copy_request WHERE target_realm = {} AND state = {} ORDER BY id LIMIT 1", realm.Id.Realm,
+        uint8(RequestState::Pending));
+}
+
+void LoadOldestPendingCopy(QueryResult pending)
+{
     if (!pending)
         return;
 
-    do
-    {
-        Field* fields = pending->Fetch();
-        LoadCopy(PendingCopy{ fields[0].Get<uint32>(), fields[1].Get<uint32>(), fields[2].Get<uint32>(),
-            fields[3].Get<uint32>(), fields[4].Get<std::string>(), fields[5].Get<std::string>() });
-    } while (pending->NextRow());
+    Field* fields = pending->Fetch();
+    LoadCopy(PendingCopy{ fields[0].Get<uint32>(), fields[1].Get<uint32>(), fields[2].Get<uint32>(),
+        fields[3].Get<uint32>(), fields[4].Get<std::string>(), fields[5].Get<std::string>() });
 }
 
-Player* OnlinePlayerOfAccount(uint32 accountId)
+std::string FinishedCopiesQuery()
 {
+    return Acore::StringFormat("SELECT id, account, source_name, target_realm, state, result, copy_name "
+        "FROM coa_ptr_copy_request WHERE source_realm = {} AND notified = 0 AND state <> {}", realm.Id.Realm,
+        uint8(RequestState::Pending));
+}
+
+std::unordered_map<uint32, Player*> OnlinePlayersByAccount()
+{
+    std::unordered_map<uint32, Player*> players;
     for (auto const& [guid, player] : ObjectAccessor::GetPlayers())
-        if (player->IsInWorld() && player->GetSession()->GetAccountId() == accountId)
-            return player;
-    return nullptr;
+        if (player->IsInWorld())
+            players.emplace(player->GetSession()->GetAccountId(), player);
+    return players;
 }
 
-void NotifyFinishedCopies()
+void NotifyFinishedCopies(QueryResult finished)
 {
-    QueryResult finished = LoginDatabase.Query("SELECT id, account, source_name, target_realm, state, result, "
-        "copy_name FROM coa_ptr_copy_request WHERE source_realm = {} AND notified = 0 AND state <> {}",
-        realm.Id.Realm, uint8(RequestState::Pending));
     if (!finished)
         return;
 
+    std::unordered_map<uint32, Player*> const online = OnlinePlayersByAccount();
     do
     {
         Field* fields = finished->Fetch();
-        Player* player = OnlinePlayerOfAccount(fields[1].Get<uint32>());
-        if (!player)
+        auto const player = online.find(fields[1].Get<uint32>());
+        if (player == online.end())
             continue;
 
         std::string const sourceName = fields[2].Get<std::string>();
         std::string const targetName = RealmName(fields[3].Get<uint32>());
-        ChatHandler chat(player->GetSession());
+        ChatHandler chat(player->second->GetSession());
         if (RequestState(fields[4].Get<uint8>()) == RequestState::Copied)
         {
             chat.PSendSysMessage("{} was copied to {}. Log in there to play it.", sourceName, targetName);
@@ -444,20 +451,40 @@ public:
 
     void OnUpdate(uint32 diff) override
     {
+        _queries.ProcessReadyCallbacks();
         _sinceLastPoll += diff;
         if (_sinceLastPoll < PollIntervalMs)
             return;
         _sinceLastPoll = 0;
 
         Settings const settings = LoadSettings();
-        if (settings.receive)
-            ProcessPendingCopies();
-        if (settings.targetRealm)
-            NotifyFinishedCopies();
+        if (settings.receive && !_loadingCopy)
+        {
+            _loadingCopy = true;
+            _queries.AddCallback(LoginDatabase.AsyncQuery(OldestPendingCopyQuery()).WithCallback(
+                [this](QueryResult pending)
+                {
+                    LoadOldestPendingCopy(std::move(pending));
+                    _loadingCopy = false;
+                }));
+        }
+        if (settings.targetRealm && !_notifying)
+        {
+            _notifying = true;
+            _queries.AddCallback(LoginDatabase.AsyncQuery(FinishedCopiesQuery()).WithCallback(
+                [this](QueryResult finished)
+                {
+                    NotifyFinishedCopies(std::move(finished));
+                    _notifying = false;
+                }));
+        }
     }
 
 private:
+    QueryCallbackProcessor _queries;
     uint32 _sinceLastPoll = 0;
+    bool _loadingCopy = false;
+    bool _notifying = false;
 };
 
 void AddSC_CoAPtrCharacterCopy()
