@@ -16,6 +16,7 @@ from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_
                         NotModelled,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
                         OathConsumptionRemovalSpec,
+                        ally_heal_breadth_scenario, ally_heal_breadth_spec,
                         amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
                         aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
                         behaviour_scenario, charge_recharge_scenario, charge_recharge_spec,
@@ -29,7 +30,7 @@ from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_
                         healing_ratio_spec, icd_gate_scenario, icd_gate_spec, leech_heal_modifier_factor,
                         leech_ratio_scenario, leech_ratio_spec,
                         mechanic_duration_scenario, mechanic_duration_spec, metric_delta_scenario,
-                        metric_delta_spec, oath_consumption_scenario, oath_consumption_spec,
+                        metric_delta_spec, nearby_ally_id, oath_consumption_scenario, oath_consumption_spec,
                         oath_consumption_removal_scenario, oath_consumption_removal_spec,
                         party_ally_id, party_stat_ratio_scenario, party_stat_ratio_spec,
                         shield_break_trigger_scenario, shield_break_trigger_spec,
@@ -122,6 +123,8 @@ HOLY_CLEAVE = 573049
 CALL_OF_THE_MONASTERY = 560550
 SERENDIPITY = 300929
 FORTIFIED_BODY = 300515
+LIBRAM_OF_GRACE = 801463
+CHAKRA_OF_LIGHT = 803159
 
 
 def scarlet_judicator_entry() -> dict:
@@ -142,6 +145,14 @@ def serendipity_entry() -> dict:
 
 def fortified_body_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == FORTIFIED_BODY)
+
+
+def libram_of_grace_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == LIBRAM_OF_GRACE)
+
+
+def chakra_of_light_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == CHAKRA_OF_LIGHT)
 
 
 def justice_entry() -> dict:
@@ -474,7 +485,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 57)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 59)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -619,6 +630,65 @@ class PartyStatRatioScenarioTests(unittest.TestCase):
                            if step.get('label') == expectations[0].model['near_after_label'])
         self.assertLess(before_index, learn_index)
         self.assertLess(learn_index, after_index)
+
+
+class AllyHealBreadthScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_fixtures(self):
+        spec = ally_heal_breadth_spec(libram_of_grace_entry())
+        scenario, expectations = ally_heal_breadth_scenario(CLASS_FILE, spec)
+        validated = run.validate(scenario)
+        self.assertEqual(len(validated['creatures']), 1)
+        ally_ids = {p['id'] for p in validated['players']} - {'caster'}
+        self.assertEqual(ally_ids, {nearby_ally_id(0), nearby_ally_id(1)})
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_COUNT)
+        self.assertTrue(expectation.rule.startswith('prose: "causing your damaging abilities to restore'))
+        self.assertEqual(len(expectation.model['dummy_labels']), 2)
+
+    def test_measures_spell_heal_count_on_each_ally_target(self):
+        spec = ally_heal_breadth_spec(chakra_of_light_entry())
+        scenario, _ = ally_heal_breadth_scenario(CLASS_FILE, spec)
+        measure_steps = [step for step in scenario['steps']
+                         if step.get('action') == 'assert' and step.get('metric') == 'spell_heal_count']
+        self.assertEqual(len(measure_steps), 4)
+        for step in measure_steps:
+            self.assertEqual(step['actor'], 'caster')
+            self.assertEqual(step['spell'], spec.heal_spell)
+            self.assertIn(step['target'], (nearby_ally_id(0), nearby_ally_id(1)))
+
+    def test_allies_are_grouped_with_the_caster(self):
+        spec = ally_heal_breadth_spec(libram_of_grace_entry())
+        scenario, _ = ally_heal_breadth_scenario(CLASS_FILE, spec)
+        group_targets = {step['target'] for step in scenario['steps'] if step.get('action') == 'group'}
+        self.assertEqual(group_targets, {nearby_ally_id(0), nearby_ally_id(1)})
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, chakra_of_light_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_COUNT)
+
+    def test_before_measurement_precedes_the_passive_learn_which_precedes_after(self):
+        spec = ally_heal_breadth_spec(libram_of_grace_entry())
+        scenario, expectations = ally_heal_breadth_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        before_label, after_label = expectations[0].model['dummy_labels'][0]
+        before_index = next(index for index, step in enumerate(steps) if step.get('label') == before_label)
+        learn_index = next(index for index, step in enumerate(steps)
+                           if step.get('action') == 'learn' and step.get('spell') == spec.spell)
+        after_index = next(index for index, step in enumerate(steps) if step.get('label') == after_label)
+        self.assertLess(before_index, learn_index)
+        self.assertLess(learn_index, after_index)
+
+    def test_trigger_spell_is_learned_before_the_first_cast(self):
+        spec = ally_heal_breadth_spec(libram_of_grace_entry())
+        scenario, _ = ally_heal_breadth_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        learn_index = next(index for index, step in enumerate(steps)
+                           if step.get('action') == 'learn' and step.get('spell') == spec.trigger_spell)
+        first_cast_index = next(index for index, step in enumerate(steps)
+                                if step.get('action') == 'cast' and step.get('spell') == spec.trigger_spell)
+        self.assertLess(learn_index, first_cast_index)
 
 
 class AuraSpreadScenarioTests(unittest.TestCase):
@@ -2059,6 +2129,36 @@ class JudgeTargetCountTests(unittest.TestCase):
         expectation = self.expectation()
         verdict = judge_behaviour(base_verdict(expectation), None, expectation)
         self.assertIn('no scenario', verdict.explanation)
+
+
+class JudgeAllyHealBreadthTests(unittest.TestCase):
+    def expectation(self):
+        spec = ally_heal_breadth_spec(libram_of_grace_entry())
+        _, expectations = ally_heal_breadth_scenario(CLASS_FILE, spec)
+        return expectations[0]
+
+    def test_both_allies_healed_after_the_learn_is_ok(self):
+        expectation = self.expectation()
+        (b0, a0), (b1, a1) = expectation.model['dummy_labels']
+        values = {b0: 0.0, a0: 1.0, b1: 0.0, a1: 1.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_seeded_zero_healed_allies_against_expected_two_is_alert(self):
+        expectation = self.expectation()
+        (b0, a0), (b1, a1) = expectation.model['dummy_labels']
+        values = {b0: 0.0, a0: 0.0, b1: 0.0, a1: 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 0.0)
+        self.assertEqual(verdict.expected, 2.0)
+
+    def test_only_one_of_two_allies_healed_is_ok_within_the_shared_tolerance_floor(self):
+        expectation = self.expectation()
+        (b0, a0), (b1, a1) = expectation.model['dummy_labels']
+        values = {b0: 0.0, a0: 1.0, b1: 0.0, a1: 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
 
 
 class JudgeFixedTargetCountTests(unittest.TestCase):

@@ -69,6 +69,7 @@ OUT_OF_SCOPE = {
 LINKED_FAMILY = 'P5'
 BEHAVIOUR_LABELS = {
     'count': lambda entry: [f"{entry['spell']} behaviour_count"],
+    'ally_heal_breadth': lambda entry: [f"{entry['spell']} behaviour_count"],
     'spread': lambda entry: [f"{entry['spell']} behaviour_count"],
     'metric_delta': lambda entry: [f"{entry['spell']} behaviour_metric_delta"],
     'duration_refresh': lambda entry: [f"{entry['spell']} behaviour_duration_refresh"],

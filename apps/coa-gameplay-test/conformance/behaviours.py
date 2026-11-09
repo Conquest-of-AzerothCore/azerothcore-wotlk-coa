@@ -347,6 +347,101 @@ def party_stat_ratio_spec(entry: dict) -> PartyStatRatioSpec:
                               entry.get('settle_ms', PARTY_STAT_RATIO_SETTLE_MS))
 
 
+NEARBY_ALLY_DISTANCE_YD = 3.0
+NEARBY_ALLY_TRIGGER_DISTANCE_YD = 3.0
+
+
+def nearby_ally_id(index: int) -> str:
+    return f'nearby_ally{index}'
+
+
+def nearby_ally_fixture(index: int, class_file: dict) -> dict:
+    fixture = player_fixture(class_file)
+    fixture['id'] = nearby_ally_id(index)
+    return fixture
+
+
+@dataclass(frozen=True)
+class AllyHealBreadthSpec:
+    spell: int
+    name: str
+    quote: str
+    expected: int
+    heal_spell: int
+    trigger_spell: int
+    radius_reason: str
+    near_distance: float = NEARBY_ALLY_DISTANCE_YD
+    repeats: int = 5
+
+
+def ally_heal_label(spec: AllyHealBreadthSpec, index: int, moment: str) -> str:
+    return f'{spec.spell} {nearby_ally_id(index)} spell_heal_count {moment}'
+
+
+def ally_heal_measurement(spec: AllyHealBreadthSpec, index: int, moment: str) -> dict:
+    label = ally_heal_label(spec, index, moment)
+    return measurement(label, CASTER, 'spell_heal_count', spell=spec.heal_spell, target=nearby_ally_id(index))
+
+
+def ally_heal_breadth_scenario(class_file: dict, spec: AllyHealBreadthSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'count', spec.quote, spec.expected)
+    class_file = armed_for(class_file, records, spec.trigger_spell)
+    allies = [nearby_ally_fixture(index, class_file) for index in range(spec.expected)]
+    creatures = [dummy_fixture(0, class_file, NEARBY_ALLY_TRIGGER_DISTANCE_YD)]
+
+    facts = facts_of(records, spec.trigger_spell)
+    wait_ms = facts.cast_time_ms + CAST_MARGIN_MS
+
+    def cast_steps() -> list[dict]:
+        steps = []
+        for _ in range(spec.repeats):
+            if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+                steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
+                             'value': facts.mana_cost})
+            steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
+            steps += required_aura_steps(facts)
+            steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': dummy_id(0)})
+            steps.append({'action': 'wait', 'ms': wait_ms})
+        return steps
+
+    def measure(moment: str) -> list[dict]:
+        return [ally_heal_measurement(spec, index, moment) for index in range(spec.expected)]
+
+    position_steps = []
+    for index in range(spec.expected):
+        position_steps += relocate_steps(nearby_ally_id(index), spec.near_distance) + [
+            {'action': 'group', 'actor': CASTER, 'target': nearby_ally_id(index)}]
+
+    before_labels = [ally_heal_label(spec, index, BEFORE) for index in range(spec.expected)]
+    after_labels = [ally_heal_label(spec, index, AFTER) for index in range(spec.expected)]
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour ally heal breadth',
+        'contract': f'{spec.repeats} casts of {spec.trigger_spell} per phase, before without {spec.spell} known '
+                    f'and after with it, counting spell_heal_count of {spec.heal_spell} toward {spec.expected} '
+                    f'grouped, non-caster ally fixtures {spec.near_distance:g} yd from the caster: '
+                    f'{spec.radius_reason}',
+        'players': [player_fixture(class_file)] + allies,
+        'creatures': creatures,
+        'steps': base_steps(class_file) + position_steps +
+                 [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] +
+                 cast_steps() + measure(BEFORE) +
+                 [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + cast_steps() + measure(AFTER)}
+    label = f'{spec.spell} behaviour_count'
+    model = {'kind': 'count', 'dummy_labels': list(zip(before_labels, after_labels)), 'expected': spec.expected,
+             'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_COUNT, spec.spell, spec.trigger_spell, None, str(spec.expected),
+                              prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def ally_heal_breadth_spec(entry: dict) -> AllyHealBreadthSpec:
+    return AllyHealBreadthSpec(entry['spell'], entry['name'], entry['quote'], entry['expected'], entry['heal_spell'],
+                               entry['trigger_spell'], entry.get('radius_reason', ''),
+                               entry.get('near_distance', NEARBY_ALLY_DISTANCE_YD), entry.get('repeats', 5))
+
+
 @dataclass(frozen=True)
 class HealingRatioTarget:
     spell: int
@@ -2082,6 +2177,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return fixed_target_count_scenario(class_file, fixed_target_count_spec(entry))
     if entry['kind'] == 'party_stat_ratio':
         return party_stat_ratio_scenario(class_file, party_stat_ratio_spec(entry))
+    if entry['kind'] == 'ally_heal_breadth':
+        return ally_heal_breadth_scenario(class_file, ally_heal_breadth_spec(entry))
     if entry['kind'] == 'ratio':
         return healing_ratio_scenario(class_file, healing_ratio_spec(entry))
     if entry['kind'] == 'leech_ratio':
