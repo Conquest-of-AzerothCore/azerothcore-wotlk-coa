@@ -1,13 +1,13 @@
-# 0039. Operational-field scoring, batch record loading and the talent catalog scan
+# 0043. Operational-field scoring, batch record loading and the talent catalog scan
 
 - Status: accepted
 - Date: 2026-11-09
-- Follows: 0038 (does not supersede it; narrows several of its explicitly stated gaps after the first validation
+- Follows: 0042 (does not supersede it; narrows several of its explicitly stated gaps after the first validation
   round measured them)
 
 ## Context
 
-The first Templar validation round of ADR 0038's pipeline (`.agents/plans/class-conformance-3/scale-out/
+The first Templar validation round of ADR 0042's pipeline (`.agents/plans/class-conformance-3/scale-out/
 reader-score.md`) scored 29.0%/15.4% merged precision/recall, far below any usable bar, and traced most of the
 gap to the scoring tool itself rather than reader quality: `records.load_records` could not read the round's own
 batch files at all without a hand-written flattener; `records.traceability_errors` crashed on a list-valued
@@ -20,7 +20,7 @@ set, because nothing told a reader a spell was a talent rank rather than an ordi
 ## Decision
 
 1. **One record shape, three accepted batch encodings.** `records.py`'s canonical record is unchanged (ADR
-   0038); `extract_batch_records`/`extract_batch_residuals` turn a dict-wrapped batch, a bare list mixing record
+   0042); `extract_batch_records`/`extract_batch_residuals` turn a dict-wrapped batch, a bare list mixing record
    and residual dicts, or a residual wrapped as `{"entry_kind": "residual", "residual": {...}}` into that shape,
    and `load_records`/`load_residuals` apply this to every file in a directory, so `score.py` runs on a round's
    own `records/<class>/<side>/` directory unmodified.
@@ -35,7 +35,7 @@ set, because nothing told a reader a spell was a talent rank rather than an ordi
    `passive_targets`, `spell`+`kind`+`values`-family fields for `behaviours`, per `reader-score.md` §1's own
    worked examples; the remaining kinds are this decision's own choice, not lifted from that document).
    `entries_match` restricts comparison to a kind's operational fields (still with `compare.py`'s tolerance) by
-   default; `--strict` keeps ADR 0038's literal full-field equality. `--records-b` (`score.merge_sides`) scores
+   default; `--strict` keeps ADR 0042's literal full-field equality. `--records-b` (`score.merge_sides`) scores
    only the records both sides agree on at the chosen strictness, replacing the hand-written merge script the
    first round's scorer wrote outside the repo.
 5. **`sheets.talent_catalog_entry`** scans `CharacterAdvancement.dbc` (CoA's own talent catalog; the stock
@@ -76,10 +76,10 @@ set, because nothing told a reader a spell was a talent rank rather than an ordi
   `.agents/plans/class-conformance-3/scale-out/reader-rescore.md`.
 - `OPERATIONAL_FIELDS` is a second source of truth about each kind's "real" fields, alongside
   `REQUIRED_ENTRY_FIELDS`; the two can drift (as the `proc_spell`/`spell_proc` naming already has). A future class
-  should re-check `OPERATIONAL_FIELDS` against its own entries' actual field names, the same way ADR 0038 flagged
+  should re-check `OPERATIONAL_FIELDS` against its own entries' actual field names, the same way ADR 0042 flagged
   `REQUIRED_ENTRY_FIELDS` as read from Templar's file and not yet confirmed against a second class.
 - `score.merge_sides`'s conflict/one-sided counts are diagnostic, not a promotion of either side's claim; a
   conflict still needs a human (or a third reading) to resolve, same as the first round's residual list.
 - The talent catalog scan adds one more `table_rows` pass over `CharacterAdvancement.dbc` per sheet batch,
   cached per `DataSet` instance (`lru_cache` on `talent_catalog_ranks`); not measured at full 21-class scale, the
-  same caveat ADR 0038 already noted for the scripted-hook `grep` scan.
+  same caveat ADR 0042 already noted for the scripted-hook `grep` scan.

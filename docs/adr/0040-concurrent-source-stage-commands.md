@@ -1,4 +1,4 @@
-# 0038. Concurrent `check_source.py` commands, and process-shared DBC derived-table caches
+# 0040. Concurrent `check_source.py` commands, and process-shared DBC derived-table caches
 
 - Status: accepted
 - Date: 2026-11-09

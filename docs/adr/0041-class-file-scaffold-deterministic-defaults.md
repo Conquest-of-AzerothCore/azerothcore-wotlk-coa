@@ -1,4 +1,4 @@
-# 0038. A deterministic `scaffold` command for a class file's mandatory fields
+# 0041. A deterministic `scaffold` command for a class file's mandatory fields
 
 - Status: accepted
 - Date: 2026-11-09

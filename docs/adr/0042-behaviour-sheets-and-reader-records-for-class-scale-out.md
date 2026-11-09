@@ -1,4 +1,4 @@
-# 0038. Behaviour sheets and reader records to scale class conformance past Templar
+# 0042. Behaviour sheets and reader records to scale class conformance past Templar
 
 - Status: accepted
 - Date: 2026-11-09
