@@ -60,21 +60,6 @@
       "maximum": 100000
     },
     {
-      "action": "set_phase",
-      "actor": "tank",
-      "value": 2
-    },
-    {
-      "action": "set_phase",
-      "actor": "near",
-      "value": 2
-    },
-    {
-      "action": "set_phase",
-      "actor": "far",
-      "value": 2
-    },
-    {
       "action": "summon",
       "actor": "tank",
       "entry": 39665,
@@ -90,11 +75,6 @@
       "z": 191.8
     },
     {
-      "action": "set_phase",
-      "actor": "far",
-      "value": 2
-    },
-    {
       "action": "wait",
       "ms": 1500
     },
@@ -103,20 +83,31 @@
       "ms": 500
     },
     {
-      "label": "CONTROL: far stands more than 12 yards from Rom'ogg",
+      "label": "CONTROL: Rom'ogg stands 4 yards in front of the tank",
       "action": "assert",
-      "actor": "far",
-      "metric": "nearest_creature_distance",
-      "entry": 39665,
-      "min": 13
+      "actor": "romogg",
+      "metric": "point_distance_2d",
+      "x": 229.0,
+      "y": 949.0,
+      "max": 1
     },
     {
-      "label": "CONTROL: near stands within 12 yards",
+      "label": "CONTROL: near stands 4 yards from him",
       "action": "assert",
       "actor": "near",
-      "metric": "nearest_creature_distance",
-      "entry": 39665,
-      "max": 12
+      "metric": "point_distance_2d",
+      "x": 229.0,
+      "y": 949.0,
+      "max": 5
+    },
+    {
+      "label": "CONTROL: far stands 20 yards from him, at Raz's cage",
+      "action": "assert",
+      "actor": "far",
+      "metric": "point_distance_2d",
+      "x": 229.0,
+      "y": 949.0,
+      "min": 19
     },
     {
       "action": "cast",
