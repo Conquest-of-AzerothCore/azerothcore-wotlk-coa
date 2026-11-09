@@ -2091,8 +2091,10 @@ of the hit: the damage modifiers of the known auras that apply to the source's s
 talents on the same source (rulings R12, R14). When there are any, the delta has two readings, judged like the proc
 readings: `multiplies` (the bonus scales the damage of the previous configuration, the other percents included, so they
 cancel in the ratio) and `adds` (the bonus adds to the other percents, 100 × b / (100 + Σ others)). Agreeing readings
-give their verdict; disagreeing readings are `ambiguous_tooltip` with both expected values and the measurement, until
-the owner rules (ADR 0011). A known aura present in some passes only makes the delta `unmodelled`. The integer steps
+give their verdict; disagreeing readings are `ambiguous_tooltip` with both expected values and the measurement, unless
+the class file's `log_queries[label]` records that the Ascension logs were consulted and said nothing (ADR 0044's
+owner fallback, below) and the server applies one of the two readings, which then settles `ok`. A known aura present
+in some passes only makes the delta `unmodelled`. The integer steps
 of a hit (truncation after a modifier, armor) are not modelled here: each moves a hit by under one point, about 0.1%
 of the 1014 measured Argent Blade hit. The bonus is read again with the measured stats: a changed value is an alert.
 Fewer passes than generated in either configuration are `insufficient_trials`; no hit of the source in either
@@ -2132,6 +2134,24 @@ of c0 and c1 alone (stamp `20261105-203950`) gave 20.00% (19.22 to 20.78), the s
 decisive: the intervals of c1 to c4 exclude 0 but their half-widths are 2.58%, 2.03%, 16.31% and 18.41% of the
 ratio, and the intervals of c5 to c7 hold 0. The procs spread the passes of a configuration (c5: 615 to 1031 per
 second).
+
+### Owner fallback for a two-reading ambiguous tooltip
+
+`compare.py`'s `owner_fallback(statuses, log_query)` is the one place that decides what a disagreement between a
+tooltip's two permitted readings becomes, used by both `judge_talent_delta` (talent stack deltas, above) and
+`judge_readings` (passive deltas whose metric has a `composition`, "[Passive effects](#passive-effects)"). The rule
+(ADR 0044, the owner's 2026-11-09 ruling generalised): a tooltip that permits two readings and whose server
+measurement matches exactly one of them is `ambiguous_tooltip` until the class file records, in a top-level
+`log_queries` dict keyed by the verdict's `label`, that the Ascension combat logs (`~/Projects/coa-log-history`,
+never committed) were queried for the ambiguity and found nothing; once recorded, the verdict is `ok`, naming the
+reading the server applies and the log query in its explanation. It is still `ambiguous_tooltip` without a recorded
+`log_queries` entry (the status quo for every entry today: the dict is empty in `classes/templar.json`), and it is
+`alert`, not `ambiguous_tooltip`, when a recorded query exists but the server's measurement matches neither reading
+(unreachable with today's two-valued `ok`/`alert` status domain, since two disagreeing readings always include one
+`ok` reading by construction, but kept as an explicit branch for a future check with three or more readings). A
+`log_queries` entry only records that a query was made and drew a blank; a query that actually finds a reading in
+the logs is an owner ruling settled in prose (like Light's Echo 520017/520883, "no self-chain, current behaviour"),
+not a `log_queries` entry.
 
 ## Scaffolding a class file
 

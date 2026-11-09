@@ -10,8 +10,8 @@ import tempfile
 import unittest
 
 from compare import (ALERT_COLUMNS, EFFECT_VALUE_SCOPE, PERCENT_POINT_METRICS, DbcTooltips, ScenarioDrift, Verdict,
-                     alert_rows, compare, delta_margin, measured_values, observation_lines, question_detail,
-                     read_verdicts, write_outputs)
+                     alert_rows, compare, delta_margin, log_query_of, measured_values, observation_lines,
+                     owner_fallback, question_detail, read_verdicts, write_outputs)
 from hits import HitModel, Modifier
 from profile import CLASSES_DIR, DBC_DIR
 from classes import class_spells
@@ -1104,6 +1104,28 @@ class QuestionDetailTest(unittest.TestCase):
         self.assertEqual(PERCENT_POINT_METRICS, frozenset({'melee_crit_chance', 'melee_crit_chance_refreshed',
                                                            'spell_crit_chance', 'melee_hit_chance', 'spell_hit_chance',
                                                            'parry_chance', 'dodge_chance', 'spell_done_crit_chance'}))
+
+
+class OwnerFallbackTest(unittest.TestCase):
+    def test_a_single_status_passes_through_untouched(self):
+        self.assertEqual(owner_fallback({'ok'}, None), 'ok')
+        self.assertEqual(owner_fallback({'alert'}, 'coa-history query: none'), 'alert')
+
+    def test_disagreeing_readings_without_a_recorded_log_query_stay_ambiguous(self):
+        self.assertEqual(owner_fallback({'ok', 'alert'}, None), 'ambiguous_tooltip')
+        self.assertEqual(owner_fallback({'ok', 'alert'}, ''), 'ambiguous_tooltip')
+
+    def test_disagreeing_readings_with_a_recorded_log_query_settle_on_the_reading_applied(self):
+        self.assertEqual(owner_fallback({'ok', 'alert'}, 'coa-history query: none'), 'ok')
+
+    def test_a_recorded_log_query_alerts_when_the_server_applies_neither_reading(self):
+        self.assertEqual(owner_fallback({'alert', 'unmeasured'}, 'coa-history query: none'), 'alert')
+
+    def test_log_query_of_reads_the_class_files_log_queries_dict(self):
+        manifest = {'class_file': {'log_queries': {'706325 proc_rate': 'coa-history query: none'}}}
+        self.assertEqual(log_query_of(manifest, '706325 proc_rate'), 'coa-history query: none')
+        self.assertIsNone(log_query_of(manifest, 'unregistered label'))
+        self.assertIsNone(log_query_of({'class_file': {}}, '706325 proc_rate'))
 
 
 class MeasuredValuesTest(unittest.TestCase):

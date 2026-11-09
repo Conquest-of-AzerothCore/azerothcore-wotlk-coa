@@ -1186,6 +1186,18 @@ def passes_needed(passes: int, relative_half: float) -> int:
     return math.ceil(passes * (relative_half / MEAN_HALF_WIDTH) ** 2)
 
 
+def owner_fallback(statuses: set[str], log_query: str | None) -> str:
+    if len(statuses) == 1:
+        return next(iter(statuses))
+    if not log_query:
+        return 'ambiguous_tooltip'
+    return 'ok' if 'ok' in statuses else 'alert'
+
+
+def log_query_of(manifest: dict, label: str) -> str | None:
+    return (manifest['class_file'].get('log_queries') or {}).get(label)
+
+
 def judge_talent_delta(manifest: dict, parts: list[ProcPart], config_runs: dict[str, dict[str, Run]],
                        tooltips: TooltipSource) -> Verdict:
     entry, _, expectation = parts[0]
@@ -1247,14 +1259,25 @@ def judge_talent_delta(manifest: dict, parts: list[ProcPart], config_runs: dict[
     judged = [(name, expected, 'ok' if low - FLOAT_EPSILON <= expected <= high + FLOAT_EPSILON else 'alert', why)
               for name, expected, why in composition_readings(model, known)]
     statuses = {status for _, _, status, _ in judged}
-    status = judged[0][2] if len(statuses) == 1 else 'ambiguous_tooltip'
-    lead = 'the composition readings disagree; ' if len(statuses) > 1 else ''
-    readings = '; '.join(f'{name} ({why}): expected {expected:.4g}%: {status}'
-                         for name, expected, status, why in judged)
+    log_query = log_query_of(manifest, expectation.label)
+    status = owner_fallback(statuses, log_query)
+    applied = next((item for item in judged if item[2] == 'ok'), None) if status == 'ok' and len(statuses) > 1 else None
+    if len(statuses) == 1:
+        lead = ''
+    elif applied:
+        lead = (f'owner fallback: logs queried ({log_query}) say nothing; the server applies {applied[0]} '
+               f'({applied[3]}), a reading the tooltip permits; ')
+    elif status == 'alert':
+        lead = f'owner fallback: logs queried ({log_query}) say nothing; the server applies neither reading; '
+    else:
+        lead = 'the composition readings disagree; '
+    readings = '; '.join(f'{name} ({why}): expected {expected:.4g}%: {item_status}'
+                         for name, expected, item_status, why in judged)
+    expected_value = applied[1] if applied else judged[0][1]
     detail = base.detail
-    if len(statuses) > 1:
+    if status == 'ambiguous_tooltip':
         detail = {**base.detail, 'question': talent_question(manifest, expectation, judged, delta, known, tooltips)}
-    return replace(base, status=status, measured=delta, expected=judged[0][1], low=low, high=high, detail=detail,
+    return replace(base, status=status, measured=delta, expected=expected_value, low=low, high=high, detail=detail,
                    explanation=f'{lead}{readings}; per-hit means of {source} in {len(current)} and {len(baseline)} '
                                f'passes: {listed(current)} against {listed(baseline)}; 99% Welch interval of the '
                                f'ratio of the means, half-width {relative:.2%} of the expected ratio; '
@@ -1655,6 +1678,20 @@ def judge_readings(base: Verdict, manifest: dict, entry: dict, run: Run, model: 
     statuses = {status for _, status in judged}
     if len(statuses) == 1:
         return interval_verdict(base, model['metric'], delta, judged, context)
+    log_query = log_query_of(manifest, base.label)
+    fallback = owner_fallback(statuses, log_query)
+    if fallback == 'ok':
+        applied = next(item for item in judged if item[1] == 'ok')
+        verdict = interval_verdict(base, model['metric'], delta, [applied], context)
+        return replace(verdict, explanation=f'owner fallback: logs queried ({log_query}) say nothing; the server '
+                                            f'applies {applied[0].name} ({applied[0].why}), a reading the tooltip '
+                                            f'permits; {verdict.explanation}')
+    if fallback == 'alert':
+        readings_text = '; '.join(f'{item.name} ({item.why}): expected delta {item.delta:+.6g}: {item_status}'
+                                  for item, item_status in judged)
+        return replace(base, status='alert', measured=delta, expected=judged[0][0].delta,
+                       explanation=f'owner fallback: logs queried ({log_query}) say nothing; the server applies '
+                                   f'neither reading; {context}; {readings_text}')
     spell = (tooltips.spell_field(model['target'], 'SpellName[enUS]') if model['target'] is not None
              else model['metric'])
     passive = entry['spell_name']

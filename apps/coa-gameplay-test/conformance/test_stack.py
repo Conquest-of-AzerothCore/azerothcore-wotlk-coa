@@ -141,6 +141,13 @@ class StackCompareTest(unittest.TestCase):
         manifest, results = self.workspace.manifest(**(base or {}))
         return {verdict.label: verdict for verdict in compare(manifest, results, tooltips=reader or bonus_reader())}
 
+    def verdicts_with_log_query(self, label, log_query, reader=None, base=None):
+        manifest_path, results = self.workspace.manifest(**(base or {}))
+        manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+        manifest['class_file'] = {**manifest['class_file'], 'log_queries': {label: log_query}}
+        manifest_path.write_text(json.dumps(manifest), encoding='utf-8')
+        return {verdict.label: verdict for verdict in compare(manifest_path, results, tooltips=reader or bonus_reader())}
+
     def test_measured_delta_whose_interval_holds_the_tooltip_bonus_is_ok(self):
         self.add_config(BASE, 0, BASE_MEANS)
         self.add_config(PALADIN, 1, PALADIN_MEANS, delta_expectation())
@@ -180,6 +187,24 @@ class StackCompareTest(unittest.TestCase):
         self.assertIn('known aura 887007 effect 0 aura 341 -20%', verdict.explanation)
         self.assertIn('expected 25%: alert', verdict.explanation)
         self.assertIn('expected 20%: ok', verdict.explanation)
+
+    def test_disagreeing_readings_stay_ambiguous_without_a_recorded_log_query(self):
+        self.add_config(BASE, 0, BASE_MEANS)
+        self.add_config(PALADIN, 1, PALADIN_MEANS, delta_expectation())
+        verdict = self.verdicts()[DELTA_LABEL]
+        self.assertEqual(verdict.status, 'ambiguous_tooltip')
+        self.assertNotIn('owner fallback', verdict.explanation)
+
+    def test_owner_fallback_settles_a_disagreement_the_logs_say_nothing_about(self):
+        self.add_config(BASE, 0, BASE_MEANS)
+        self.add_config(PALADIN, 1, PALADIN_MEANS, delta_expectation())
+        verdict = self.verdicts_with_log_query(DELTA_LABEL, 'coa-history: no 807268 crit hits in range')[DELTA_LABEL]
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.expected, 20.0)
+        self.assertIn('owner fallback', verdict.explanation)
+        self.assertIn('coa-history: no 807268 crit hits in range', verdict.explanation)
+        self.assertIn('multiplies', verdict.explanation)
+        self.assertIn('expected 25%: alert', verdict.explanation)
 
     def test_known_aura_present_in_some_passes_only_is_unmodelled(self):
         self.add_config(BASE, 0, BASE_MEANS, extra=[assert_step('known_aura 887007', '0')])
