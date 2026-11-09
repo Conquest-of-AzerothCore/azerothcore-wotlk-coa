@@ -470,13 +470,15 @@ class TemplarPassiveTest(unittest.TestCase):
             self.assertFalse(effect.reason.startswith('closed: '), (spell_id, index, effect.reason))
 
     def test_effect_notes_without_an_entry_keep_the_generic_reason(self):
-        self.assertEqual(effect_of(self.effects(803149), 1).reason, 'unmodelled: scripted or crowd-control effect')
+        self.assertEqual(effect_of(self.effects(706323), 1).reason, 'unmodelled: scripted or crowd-control effect')
 
     def test_effect_notes_round5_close_a_dead_effect(self):
-        effect = effect_of(self.effects(92109), 1)
-        self.assertTrue(effect.reason.startswith('unmodelled: closed: '), effect.reason)
-        self.assertNotEqual(effect.reason, 'unmodelled: scripted or crowd-control effect', effect.reason)
-        self.assertIn('effect zeroed at load', effect.reason)
+        for spell_id in (92109, 803149):
+            effect = effect_of(self.effects(spell_id), 1)
+            self.assertTrue(effect.reason.startswith('unmodelled: closed: '), (spell_id, effect.reason))
+            self.assertNotEqual(effect.reason, 'unmodelled: scripted or crowd-control effect', (spell_id, effect.reason))
+            self.assertIn('effect zeroed at load', effect.reason)
+        self.assertIn('twin of the 92109 effect-1 finding', effect_of(self.effects(803149), 1).reason)
 
     def test_effect_notes_round5_reclassify_without_closing(self):
         effect = effect_of(self.effects(804897), 2)
