@@ -544,7 +544,7 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         self.assertIn('@ext:', generic[0])
 
     def test_known_spells_parameter_still_adds_a_live_learn_step_for_a_future_state_dependent_conditional(self):
-        scenario, _ = value_scenario(self.class_file, self.spells[VINDICATION], VINDICATION, frozenset({707385}))
+        scenario, _, _ = value_scenario(self.class_file, self.spells[VINDICATION], VINDICATION, frozenset({707385}))
         learns = [step['spell'] for step in scenario['steps'] if step['action'] == 'learn']
         self.assertEqual(learns, [VINDICATION, 707385])
 
@@ -589,19 +589,18 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         for entry in self.class_file['conditional_spells']:
             with self.subTest(spell=entry['spell']):
                 spell = self.spell_owning_rank(entry['spell'])
-                scenario, expectations = value_scenario(self.class_file, spell, entry['spell'])
+                scenario, expectations, _ = value_scenario(self.class_file, spell, entry['spell'])
                 run.validate(scenario)
                 conditional = [item for item in expectations if 'the true branch of the $?s' in item.rule]
                 self.assertEqual(len(conditional), 1, entry)
                 self.assertFalse([item for item in expectations if item.rule.startswith(UNREADABLE)])
 
     def test_periodic_total_token_is_routed_through_the_existing_periodic_explanation(self):
-        scenario, expectations = self.build_extra(LIGHTS_HOPE, LIGHTS_HOPE)
+        scenario, expectations, periodic_totals = value_scenario(self.class_file, self.extra_spells[LIGHTS_HOPE],
+                                                                  LIGHTS_HOPE)
         run.validate(scenario)
         self.assertFalse([item for item in expectations if item.rule.startswith(UNREADABLE)])
-        periodic = [item for item in expectations if item.rule.startswith(UNMEASURABLE) and 'total over the ticks'
-                   in item.rule]
-        self.assertEqual(len(periodic), 1)
+        self.assertEqual(len(periodic_totals), 1)
 
     def test_trailing_digit_on_a_proc_count_token_is_unmeasurable_not_unreadable(self):
         scenario, expectations = self.build(LIGHTKEEPER, LIGHTKEEPER)
