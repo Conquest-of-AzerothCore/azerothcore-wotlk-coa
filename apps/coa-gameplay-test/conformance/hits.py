@@ -18,6 +18,7 @@ from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, DUMM
 
 HIT_CHECKS = ('hit_mean', 'melee_mean', 'unmodelled')
 UNMODELLED = 'unmodelled: '
+CLOSED = 'closed: '
 NEVER_CAST = 'passive spell is never cast'
 NO_HIT_EFFECT = 'no damage or healing effect'
 EXCLUDED_OUTCOME_MARGIN = Fraction(3, 2)

@@ -312,19 +312,30 @@ class TemplarPassiveTest(unittest.TestCase):
         self.assertEqual(sum(families.values()), TEMPLAR_PASSIVE_EFFECTS)
         self.assertEqual(dict(families), TEMPLAR_FAMILY_COUNTS)
 
-    def test_effect_notes_reclassify_scripted_effects_already_covered_elsewhere(self):
+    def test_effect_notes_close_scripted_effects_already_covered_elsewhere(self):
         for spell_id, index in ((300529, 1), (705263, 1), (705272, 1), (705274, 1), (705283, 1), (705287, 1),
-                                (705298, 1), (805420, 1), (806516, 0), (804930, 0)):
+                                (705298, 1), (805420, 1), (806516, 0)):
             effect = effect_of(self.effects(spell_id), index)
-            self.assertTrue(effect.reason.startswith('unmodelled: '), (spell_id, index, effect.reason))
-            self.assertNotEqual(effect.reason, 'unmodelled: scripted or crowd-control effect',
-                                (spell_id, index, effect.reason))
+            self.assertTrue(effect.reason.startswith('closed: '), (spell_id, index, effect.reason))
             self.assertIn('round4 scripted-script-aura investigation', effect.reason)
+
+    def test_effect_notes_reclassify_without_closing(self):
+        effect = effect_of(self.effects(804930), 0)
+        self.assertTrue(effect.reason.startswith('unmodelled: '), effect.reason)
+        self.assertFalse(effect.reason.startswith('closed: '), effect.reason)
+        self.assertNotEqual(effect.reason, 'unmodelled: scripted or crowd-control effect', effect.reason)
+        self.assertIn('round4 scripted-script-aura investigation', effect.reason)
 
     def test_effect_notes_defer_the_effects_this_item_cannot_check(self):
         for spell_id, index in ((92109, 0), (300520, 0)):
             effect = effect_of(self.effects(spell_id), index)
             self.assertTrue(effect.reason.startswith('unmodelled: deferred: '), (spell_id, index, effect.reason))
+
+    def test_effect_notes_no_own_token_entries_stay_unmodelled(self):
+        for spell_id, index in ((704175, 2), (705268, 1), (712437, 0), (803219, 0)):
+            effect = effect_of(self.effects(spell_id), index)
+            self.assertTrue(effect.reason.startswith('unmodelled: no own token'), (spell_id, index, effect.reason))
+            self.assertFalse(effect.reason.startswith('closed: '), (spell_id, index, effect.reason))
 
     def test_effect_notes_without_an_entry_keep_the_generic_reason(self):
         self.assertEqual(effect_of(self.effects(804897), 2).reason, 'unmodelled: scripted or crowd-control effect')
@@ -581,7 +592,14 @@ class TemplarPassiveTest(unittest.TestCase):
 
     def test_mail_armor_is_out_of_scope(self):
         effect = effect_of(self.effects(BLESSED_PADDING), 0)
-        self.assertEqual(effect.reason, 'unmodelled: mail armor is out of scope')
+        self.assertEqual(effect.reason, 'closed: mail armor is out of scope')
+
+    def test_other_out_of_scope_auras_stay_unmodelled(self):
+        for spell_id, index, aura in ((706323, 0, 59), (705276, 0, 122), (560833, 0, 110)):
+            effect = effect_of(self.effects(spell_id), index)
+            self.assertEqual(effect.aura, aura)
+            self.assertTrue(effect.reason.startswith('unmodelled: '), (spell_id, index, effect.reason))
+            self.assertFalse(effect.reason.startswith('closed: '), (spell_id, index, effect.reason))
 
     def test_every_custom_class_classifies(self):
         classes = sorted({fields['ClassID'] for _, fields in table_rows(
@@ -594,6 +612,7 @@ class TemplarPassiveTest(unittest.TestCase):
                 if spell.passive:
                     for effect in passive_effects(class_file, spell):
                         self.assertTrue(effect.reason == '' or effect.reason.startswith('unmodelled: ')
+                                        or effect.reason.startswith('closed: ')
                                         or ALIASED_REASON_MARKER in effect.reason,
                                         (class_id, spell.spell_id, effect.effect, effect.reason))
 
@@ -720,7 +739,7 @@ class PassiveScenarioTest(unittest.TestCase):
                   if expectation.check == 'unmodelled' and expectation.model
                   and expectation.model.get('metric') == 'spell_power_cost'}
         for spell_id in (501567, 572741, 704573):
-            self.assertEqual(skipped[spell_id], f'unmodelled: target {spell_id} has no power cost to modify')
+            self.assertEqual(skipped[spell_id], f'closed: target {spell_id} has no power cost to modify')
         run.validate(scenario)
 
     def test_spell_metrics_use_an_active_class_spell_of_the_school(self):

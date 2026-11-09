@@ -491,10 +491,13 @@ the `effect_overrides` entry makes the reader classify it as op 15 (`spell_criti
 "bonus" reading above), the op the live server actually installs.
 
 Unmodelled by rule: `P5` (`proc or trigger effect without a trigger entry`), `P6` (`scripted or crowd-control
-effect`), 142 (`mail armor is out of scope`, owner ruling), 59 (`damage versus a creature type is level-scaled`),
-122 (`no off-hand weapon damage metric`), 110 (`no energy regeneration metric`), a spell modifier op of 32 or more
-(`SpellModOp <op> is not below MAX_SPELLMOD 32`: `spell_modifier` requires `op < MAX_SPELLMOD`), and the auras of the
-table without a plan (31, 87, 283, 286: `aura <n> has no passive measurement`).
+effect`), 59 (`damage versus a creature type is level-scaled`), 122 (`no off-hand weapon damage metric`), 110
+(`no energy regeneration metric`), a spell modifier op of 32 or more (`SpellModOp <op> is not below MAX_SPELLMOD
+32`: `spell_modifier` requires `op < MAX_SPELLMOD`), and the auras of the table without a plan (31, 87, 283, 286:
+`aura <n> has no passive measurement`). Closed by rule: aura 142 (`closed: mail armor is out of scope`, owner
+ruling, round5 `closed-statuses`) — the reference character's armor slot never equips a mail item and the harness
+has no action to re-gear it for one passive check, a structural tool-scope gap the same shape as 59/122/110, but
+proven rather than left as open work since both ranks' clause is already fully accounted for elsewhere.
 
 A class file's `unmodelled_effects` list (`[{"spell": <id>, "effect": <n>, "reason": "..."}]`) forces a specific
 effect straight to `unmodelled`, the same `{spell_id or rank_id, effect}` lookup as `effect_overrides`, checked
@@ -516,12 +519,17 @@ modelled effect unmodelled, or the reverse). This documents, per effect, *why* a
 or similarly auto-labelled effect needs no check of its own — because a sibling effect of the same spell already
 carries the number the tooltip states, or because the server-side behaviour is proven by an existing `behaviours`/
 `triggers` entry on a different effect index — or, when an effect's own claim is real but this package cannot yet
-measure it, that it is deferred and why. The status stays `unmodelled` either way: `effect_notes` only replaces the
-explanation text, never the verdict. Templar (round4 `scripted-script-aura` investigation, 2026-11): 300529 effect
-1, 705263 effect 1, 705272 effect 1, 705274 effect 1, 705283 effect 1, 705287 effect 1, 705298 effect 1, 805420
-effect 1 and 806516 effect 0 are reclassified this way (each a `P6`-family `DUMMY`/`OVERRIDE_CLASS_SCRIPTS` effect
-with no tooltip clause of its own, read by no code by index, while a sibling effect of the same spell is already
-`ok`); 804930 effect 0 is reclassified to cite the spell's own `804930 behaviour_trigger` check (below), which
+measure it, that it is deferred and why. A reason beginning `no check needed: ` instead moves the status to
+`closed` (`CLOSED = 'closed: '` in `passives.py`/`hits.py`, checked in `compare.py`'s `judge_expectation` ahead of
+the `unmodelled` branch): this effect has no claim left to check, proven by evidence in the explanation, so it is
+settled rather than open work; `coverage.md`/`report.md`/`summary.md`'s status tables and `alerts.tsv` (built from
+`NOT_ALERTS`) count it apart from the genuinely missing checks. Every other `effect_notes` reason keeps the
+`unmodelled` status: `effect_notes` only replaces the explanation text, never the verdict, for those. Templar
+(round4 `scripted-script-aura` investigation, 2026-11): 300529 effect 1, 705263 effect 1, 705272 effect 1, 705274
+effect 1, 705283 effect 1, 705287 effect 1, 705298 effect 1, 805420 effect 1 and 806516 effect 0 are reclassified
+to `closed` this way (each a `P6`-family `DUMMY`/`OVERRIDE_CLASS_SCRIPTS` effect with no tooltip clause of its
+own, read by no code by index, while a sibling effect of the same spell is already `ok`); 804930 effect 0 stays
+`unmodelled`, reclassified only in text to cite the spell's own `804930 behaviour_trigger` check (below), which
 already proves the behaviour this effect stands for. 92109 effect 0 (the absorb takeover from Keeping the Oath
 803149 to 92109) and 300520 effect 0 (the sub-20%-health damage bonus) are genuine, real effects that this item
 found no way to check with the harness's existing metrics (respectively: `aura_ascension_templar_stagger::Calculate`
@@ -638,9 +646,10 @@ metric), `aura_state_label` (the `has_aura_state` label, `None` off aura 303), `
 - a target without the effect a `spell_effect_value` consumer reads: `unmodelled: target <id> has no effect <n>`
   (the harness would stop the scenario);
 - a target of a `spell_power_cost` consumer with no plain cost (`ManaCost`, `ManaCostPerlevel` and
-  `ManaCostPercentage` all 0): `unmodelled: target <id> has no power cost to modify` (`CalcPowerCost` clamps a
+  `ManaCostPercentage` all 0): `closed: target <id> has no power cost to modify` (`CalcPowerCost` clamps a
   negative cost to 0, so a flat reduction on a 0-cost target would measure a false 0 → 0 instead of its real
-  token; Blessed Strikes 704180's Divine Fury 501567, Reckoning 572741 and Chakram 704573 have no plain cost);
+  token; Blessed Strikes 704180's Divine Fury 501567, Reckoning 572741 and Chakram 704573 have no plain cost — a
+  DBC-proven not-applicable, status `closed` since round5 `closed-statuses`, not open work);
 - a reference spell missing: `unmodelled: no active class spell with a heal effect in school mask <mask>` (Templar
   has no heal spell: Sacred Style 705278 and Fortified Body 300515 are unmodelled).
 

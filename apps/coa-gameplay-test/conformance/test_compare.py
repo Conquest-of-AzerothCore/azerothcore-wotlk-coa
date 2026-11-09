@@ -9,9 +9,9 @@ import sys
 import tempfile
 import unittest
 
-from compare import (EFFECT_VALUE_SCOPE, PERCENT_POINT_METRICS, DbcTooltips, ScenarioDrift, Verdict, compare,
-                     delta_margin, measured_values, observation_lines, question_detail, read_verdicts,
-                     write_outputs)
+from compare import (ALERT_COLUMNS, EFFECT_VALUE_SCOPE, PERCENT_POINT_METRICS, DbcTooltips, ScenarioDrift, Verdict,
+                     alert_rows, compare, delta_margin, measured_values, observation_lines, question_detail,
+                     read_verdicts, write_outputs)
 from hits import HitModel, Modifier
 from profile import CLASSES_DIR, DBC_DIR
 from classes import class_spells
@@ -474,6 +474,20 @@ class CompareTest(unittest.TestCase):
         verdicts = self.value_run(entries, [], [assert_step('1001 effect_value #1', '3')], constant_reader())
         self.assertEqual([verdicts[entry.label].status for entry in entries],
                          ['unreadable', 'unmodelled', 'unmodelled', 'unreadable'])
+
+    def test_closed_rule_wins_over_the_unmodelled_check(self):
+        label = '1001 hit_mean'
+        entries = [expectation(label, 'unmodelled', '', 'closed: mail armor is out of scope')]
+        verdicts = self.value_run(entries, [], [], constant_reader())
+        self.assertEqual(verdicts[label].status, 'closed')
+        self.assertEqual(verdicts[label].explanation, 'closed: mail armor is out of scope')
+
+    def test_closed_verdicts_are_excluded_from_alert_rows(self):
+        label = '1001 hit_mean'
+        entries = [expectation(label, 'unmodelled', '', 'closed: mail armor is out of scope')]
+        self.workspace.scenario(VALUE_KEY, 'value', entries, [], [])
+        verdicts = self.verdicts(constant_reader())
+        self.assertEqual(alert_rows(verdicts), ['\t'.join(ALERT_COLUMNS)])
 
     def test_unreadable_portion_is_counted_in_the_report(self):
         entries = [expectation('1001 effect_value #0', 'effect_value', '$?s1[a][b]', 'unreadable: $?s1[a][b]')]

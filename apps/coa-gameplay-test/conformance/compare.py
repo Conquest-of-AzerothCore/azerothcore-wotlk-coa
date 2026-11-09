@@ -12,8 +12,8 @@ from typing import Callable, Mapping, Protocol
 from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_DURATION,
                         BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_METRIC_DELTA,
                         BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
-from hits import (HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS, WEAPON_PERCENT_DAMAGE, Z_99,
-                  HitModel, Modifier, Unmodelled, measured_hit_model)
+from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
+                  WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE, cleaned_tooltip, literal_token
@@ -29,8 +29,8 @@ from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECTS, FIXED_DIE_SIDES, U
                     dataset, mean_samples, roll_range, sample_labels)
 
 STATUSES = ('ok', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials', 'unmeasured',
-            MEASURED)
-NOT_ALERTS = frozenset({'ok', MEASURED})
+            MEASURED, 'closed')
+NOT_ALERTS = frozenset({'ok', MEASURED, 'closed'})
 CAST_DEPENDENT_CHECKS = frozenset({'cooldown_ms', 'aura_amount', 'aura_duration_ms', 'aura_amplitude_ms'})
 NO_CAST_FAILURE = 0
 CAST_RESULTS_HEADER = Path(__file__).resolve().parents[3] / 'src/server/shared/SharedDefines.h'
@@ -2039,6 +2039,8 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
                    expectation.rank_id, expectation.check)
     rule, check = expectation.rule, expectation.check
     measured = run.values.get(expectation.label) if run else None
+    if rule.startswith(CLOSED):
+        return replace(base, status='closed', measured=measured, explanation=rule)
     if check == 'unmodelled' or rule.startswith(UNMODELLED) or rule.startswith(UNMEASURABLE):
         return replace(base, status='unmodelled', measured=measured, explanation=rule)
     if rule.startswith(UNREADABLE):

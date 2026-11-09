@@ -11,6 +11,7 @@ from tooltip import COLOR_CODE, Displayed, Records, Unreadable, read_tooltip
 from values import EFFECTS, TARGET, Expectation, dataset, facts_of, structure_stats
 
 UNMODELLED = 'unmodelled: '
+CLOSED = 'closed: '
 ALIASED_REASON_MARKER = ' reused from effect '
 UNKNOWN = 'unknown'
 SCRIPTED = 'P6'
@@ -162,6 +163,10 @@ class PassiveEffect:
 
 
 class NotModelled(Exception):
+    pass
+
+
+class Closed(Exception):
     pass
 
 
@@ -580,6 +585,8 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
                               else f'effect {spell(f"Effect[{effect}]")} applies no aura')
         if family in FAMILY_REASONS:
             raise NotModelled(FAMILY_REASONS[family])
+        if aura == 142:
+            raise Closed(OUT_OF_SCOPE[142])
         if aura in OUT_OF_SCOPE:
             raise NotModelled(OUT_OF_SCOPE[aura])
         if family == 'P1' and misc >= MAX_SPELLMOD:
@@ -591,6 +598,8 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
                 aura, misc, alias_points if alias_points is not None else signed_points(records, rank_id, effect))
         else:
             plans = effect_plans(aura, misc, text, token)
+    except Closed as closed:
+        plans, reason = (), CLOSED + str(closed)
     except NotModelled as error:
         plans, reason = (), UNMODELLED + str(error)
     if not reason:
@@ -598,7 +607,8 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
     if reason.startswith(UNMODELLED):
         note = effect_note(class_file, {spell_id, rank_id}, effect)
         if note is not None:
-            reason = UNMODELLED + note
+            prefix = CLOSED if note.startswith('no check needed:') else UNMODELLED
+            reason = prefix + note
     points = alias_points if alias_points is not None else signed_points(records, rank_id, effect)
     return PassiveEffect(rank_id, effect, aura, misc, misc_b, family, token, plans, targets, reason, points)
 
@@ -680,7 +690,7 @@ def plan_probes(class_file: dict, records: Records, effect: PassiveEffect, plan:
             elif plan.metric == 'spell_power_cost':
                 facts = facts_of(records, target.spell_id)
                 if not (facts.mana_cost or facts.mana_cost_per_level or facts.mana_cost_percentage):
-                    reason = UNMODELLED + f'target {target.spell_id} has no power cost to modify'
+                    reason = CLOSED + f'target {target.spell_id} has no power cost to modify'
             probes.append(probe(target.spell_id, target.named, target.in_mask, reason))
         return probes
     try:
