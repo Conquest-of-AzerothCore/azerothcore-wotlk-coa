@@ -120,6 +120,7 @@ PHRASES: dict[str, tuple[str, ...]] = {
     **{f'{school} {CRIT_CHANCE}': (f'{school} {CRIT_CHANCE}',) for school in SCHOOL_NAMES.values()},
     'chance to hit': ('chance to hit', 'hit chance'),
     'melee haste': ('melee haste', 'attack speed'),
+    'movement speed': ('movement speed', 'move speed', 'running speed'),
     **{name: (name,) for name in RATING_NAMES.values()},
     SPELL_POWER: (SPELL_POWER,),
     **{f'{school} spell damage': (f'{school} spell damage', f'{school} spell power')
@@ -460,6 +461,7 @@ def aura_plans(aura: int, misc: int, text: str) -> list[tuple[MetricPlan, str]]:
             raise NotModelled(f'stat {misc} is not a primary attribute')
         return [(MetricPlan('stat', {'stat': misc}, 'share'), STAT_NAMES[misc])]
     simple = {
+        31: ('run_speed_rate', {}, 'scale', 'movement speed'),
         133: ('max_health', {}, 'scale', 'maximum health'),
         166: ('attack_power', {}, 'scale', ATTACK_POWER),
         167: ('ranged_attack_power', {}, 'scale', 'ranged attack power'),
@@ -701,8 +703,9 @@ class Probe:
 
 
 @lru_cache(maxsize=None)
-def active_class_ranks(dbc_dir: Path, class_id: int, level: int) -> tuple[int, ...]:
-    return tuple(spell.max_rank for spell in class_spells(dbc_dir, class_id, PROGRESSION_HEADER, level)
+def active_class_ranks(dbc_dir: Path, class_id: int, level: int,
+                       extra_spells: tuple[int, ...] = ()) -> tuple[int, ...]:
+    return tuple(spell.max_rank for spell in class_spells(dbc_dir, class_id, PROGRESSION_HEADER, level, extra_spells)
                  if not spell.passive)
 
 
@@ -725,6 +728,10 @@ def reference_spell(class_file: dict, records: Records, metric: str, school_mask
     kind = REFERENCE_KINDS[metric]
     dbc_dir = Path(class_file.get('dbc_dir', DBC_DIR))
     for rank_id in active_class_ranks(dbc_dir, class_file['class_id'], class_file['level']):
+        if records.field('Spell', rank_id, 'SchoolMask') & school_mask and serves(records, rank_id, kind):
+            return rank_id
+    extra_spells = tuple(entry['spell'] for entry in class_file.get('extra_spells', []))
+    for rank_id in active_class_ranks(dbc_dir, class_file['class_id'], class_file['level'], extra_spells):
         if records.field('Spell', rank_id, 'SchoolMask') & school_mask and serves(records, rank_id, kind):
             return rank_id
     raise NotModelled(f'no active class spell with {kind} in school mask {school_mask}')

@@ -668,6 +668,11 @@ def weapon_note(class_file: dict, armed_file: dict, records: Records, rank_id: i
     return f'; reference weapon {armed_file["weapon"]["item"]} ({reason})'
 
 
+def hit_note(class_file: dict, spell_ids: set[int]) -> str | None:
+    entry = next((entry for entry in class_file.get('hit_notes', []) if entry['spell'] in spell_ids), None)
+    return entry['reason'] if entry else None
+
+
 def hit_parts(class_file: dict, spell: ClassSpell, casts: int) -> list[tuple[dict, list[Expectation]]]:
     if casts < 1:
         raise ValueError(f'{spell.name} needs at least one cast, not {casts}')
@@ -685,7 +690,10 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int) -> list[tuple[dic
         interval = max(start_recovery, hit.facts.cast_time_ms, hit.duration_ms) + CAST_MARGIN_MS
         shares = part_casts(scheduled_casts(casts), interval)
     except Unmodelled as error:
-        unmodelled = Expectation(label, 'unmodelled', spell.spell_id, rank_id, None, '', UNMODELLED + error.reason)
+        note = hit_note(class_file, {spell.spell_id, rank_id})
+        prefix = CLOSED if note and note.startswith('no check needed:') else UNMODELLED
+        reason = prefix + (note if note is not None else error.reason)
+        unmodelled = Expectation(label, 'unmodelled', spell.spell_id, rank_id, None, '', reason)
         return [(timed(scenario_shell(armed_file, name, contract, learn), SETTLE_MS), [unmodelled])]
     model = hit.model
     hostile = model.kind not in HEAL_KINDS

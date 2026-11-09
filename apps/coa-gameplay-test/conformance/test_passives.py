@@ -10,8 +10,9 @@ import unittest
 import compare
 from classes import PROGRESSION_HEADER as HEADER, ClassSpell, class_spells, table_rows
 from passives import (ALIASED_REASON_MARKER, AURA_STATE_METRIC, FAMILIES, MAX_SPELLMOD, PARRY_CHANCE, PASSIVE_DELTA,
-                      PHRASES, STAT_EXACT_METRIC, STAT_METRIC, MetricPlan, PassiveTarget, classify, crit_plans,
-                      family_of, literal_token, named_targets, passive_effects, passive_scenario, stat_after_token)
+                      PHRASES, STAT_EXACT_METRIC, STAT_METRIC, MetricPlan, NotModelled, PassiveTarget,
+                      active_class_ranks, classify, crit_plans, family_of, literal_token, named_targets,
+                      passive_effects, passive_scenario, reference_spell, stat_after_token)
 from procs import proc_scenario
 from profile import CASTER, load_class_file, spell_power_label, stat_label
 from tooltip import Displayed, Records
@@ -70,6 +71,7 @@ FINESSE = 705271
 PIOUS = 706431
 SERENDIPITY = 300929
 SACRED_STYLE = 705278
+TEMPLE_GUARDIAN_HEAL = 803792
 RECKONING_AT_60 = 572741
 CRUSADERS_BRAND = 300513
 MARTIAL_TRAINING = 806525
@@ -451,6 +453,15 @@ class TemplarPassiveTest(unittest.TestCase):
         for spell_id, index in ((92109, 0), (300520, 0)):
             effect = effect_of(self.effects(spell_id), index)
             self.assertTrue(effect.reason.startswith('unmodelled: deferred: '), (spell_id, index, effect.reason))
+
+    def test_courage_movement_speed_aura_is_measured(self):
+        for spell_id, percent in ((707754, 10), (712466, 20)):
+            effect = effect_of(self.effects(spell_id), 0)
+            self.assertEqual(effect.aura, 31)
+            self.assertFalse(effect.reason, (spell_id, effect.reason))
+            plan = plan_named(effect, 'run_speed_rate')
+            self.assertEqual(plan.relation, 'scale')
+            self.assertEqual(effect.points, float(percent))
 
     def test_effect_notes_no_own_token_entries_stay_unmodelled(self):
         for spell_id, index in ((704175, 2), (705268, 1), (712437, 0), (803219, 0)):
@@ -920,12 +931,29 @@ class PassiveScenarioTest(unittest.TestCase):
                          (f'{SERENDIPITY} e0 weapon_damage_min 0', {'hand': 0}, 'ratio'))
         self.assertNotIn('melee_damage_done', [entry.model.get('metric') for entry in expectations])
 
-    def test_healing_without_a_class_heal_spell_is_unmodelled(self):
+    def test_healing_is_measured_against_an_extra_spell_heal_reference(self):
         scenario, expectations = self.scenario(SACRED_STYLE)
-        self.assertIsNone(scenario)
-        self.assertEqual({expectation.check for expectation in expectations}, {'unmodelled'})
-        self.assertTrue(all(expectation.rule.startswith('unmodelled: no active class spell with a heal effect')
-                            for expectation in expectations))
+        taken = next(step for step in scenario['steps'] if step.get('metric') == 'spell_healing_taken')
+        done = next(step for step in scenario['steps'] if step.get('metric') == 'spell_healing_done')
+        self.assertEqual(taken['spell'], TEMPLE_GUARDIAN_HEAL)
+        self.assertEqual(done['spell'], TEMPLE_GUARDIAN_HEAL)
+        labels = {expectation.label for expectation in expectations}
+        self.assertIn(f'{SACRED_STYLE} e0 spell_healing_taken {TEMPLE_GUARDIAN_HEAL}', labels)
+        self.assertIn(f'{SACRED_STYLE} e1 spell_healing_done {TEMPLE_GUARDIAN_HEAL}', labels)
+        run.validate(scenario)
+
+    def test_reference_spell_searches_extra_spells_for_a_heal_effect(self):
+        rank_id = reference_spell(self.class_file, Records(dataset(DBC_DIR)), 'spell_healing_taken', 2)
+        self.assertEqual(rank_id, TEMPLE_GUARDIAN_HEAL)
+        extra_spells = tuple(entry['spell'] for entry in self.class_file['extra_spells'])
+        self.assertIn(TEMPLE_GUARDIAN_HEAL, active_class_ranks(DBC_DIR, self.class_file['class_id'],
+                                                        self.class_file['level'], extra_spells))
+        self.assertNotIn(TEMPLE_GUARDIAN_HEAL, active_class_ranks(DBC_DIR, self.class_file['class_id'],
+                                                          self.class_file['level']))
+
+    def test_reference_spell_still_unmodelled_without_a_matching_school_mask(self):
+        with self.assertRaises(NotModelled):
+            reference_spell(self.class_file, Records(dataset(DBC_DIR)), 'spell_healing_taken', 0)
 
     def test_dummy_target_brings_the_dummy(self):
         scenario, _ = self.scenario(UPHEAVE)
