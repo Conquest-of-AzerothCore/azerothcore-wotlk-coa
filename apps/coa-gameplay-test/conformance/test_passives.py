@@ -640,6 +640,23 @@ class TemplarPassiveTest(unittest.TestCase):
         self.assertIn('801478', effect.reason)
         self.assertIn('behaviour_ratio', effect.reason)
 
+    def test_final_prayer_effect_0_targets_exclude_the_sibling_named_spell(self):
+        effect = effect_of(self.effects(FINAL_PRAYER), 0)
+        targets = {target.spell_id for target in effect.targets}
+        self.assertFalse({TESTAMENT_OF_FAITH, 801478} & targets)
+        self.assertIn(TESTAMENT_OF_FORTITUDE, target_ids(effect, True, True))
+
+    def test_modifier_targets_excludes_a_non_p1_sibling_that_already_claims_the_name(self):
+        records = Records(dataset(DBC_DIR))
+        text = 'Doubles the healing done to you by Testament of Fortitude and Testament of Faith.'
+        values = [Displayed('Doubles the healing done to you', 100.0, 0, 'percent')]
+        class_file = {'level': LEVEL}
+        with_claim = classify(class_file, records, FINAL_PRAYER, FINAL_PRAYER, 0, [0, 1], text, values)
+        self.assertNotIn(TESTAMENT_OF_FAITH, {target.spell_id for target in with_claim.targets})
+        self.assertNotIn(801478, {target.spell_id for target in with_claim.targets})
+        without_claim = classify(class_file, records, FINAL_PRAYER, FINAL_PRAYER, 0, [0], text, values)
+        self.assertIn(TESTAMENT_OF_FAITH, {target.spell_id for target in without_claim.targets})
+
     def test_justicar_removes_cooldown_is_modelled_via_literal_token(self):
         effect = effect_of(self.effects(JUSTICAR_OF_THE_LIGHT), 0)
         self.assertEqual(effect.reason, '')

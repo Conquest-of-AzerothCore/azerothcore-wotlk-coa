@@ -864,6 +864,30 @@ class PassiveDeltaTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'unmeasured')
         self.assertIn('multiplies the before value 0', verdict.explanation)
 
+    def test_scale_of_a_zero_before_value_on_a_named_target_stays_unmeasured(self):
+        entry = passive_expectation(HOLY_UPHEAVAL, 0, 'spell_effect_value', 'scale', '$s1', 100.0, ZEALOTRY,
+                                    named=True, in_mask=True, fields={'effect': 0})
+        verdict = self.single(entry, '0', '0', [Displayed('$s1', 100.0, 0, 'percent')])
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('multiplies the before value 0', verdict.explanation)
+
+    def test_scale_of_a_zero_before_value_on_a_collateral_mask_target_is_measured_not_judged(self):
+        moving, collateral = (
+            passive_expectation(HOLY_UPHEAVAL, 0, 'spell_effect_value', 'scale', '$s1', 100.0, target, named,
+                                True, fields={'effect': 0})
+            for target, named in ((ZEALOTRY, True), (RECKONING, False)))
+        token = [Displayed('$s1', 100.0, 0, 'percent')]
+        verdicts = self.passive_run(HOLY_UPHEAVAL, {moving: ('100', '200'), collateral: ('0', '0')}, token)
+        self.assertEqual(verdicts[moving.label].status, 'ok')
+        self.assertEqual(verdicts[collateral.label].status, 'measured')
+        self.assertIn('reported, not judged', verdicts[collateral.label].explanation)
+
+    def test_zero_before_collateral_target_without_a_moving_sibling_can_still_alert(self):
+        collateral = passive_expectation(HOLY_UPHEAVAL, 0, 'spell_effect_value', 'scale', '$s1', 100.0,
+                                         RECKONING, named=False, in_mask=True, fields={'effect': 0})
+        verdict = self.single(collateral, '0', '50', [Displayed('$s1', 100.0, 0, 'percent')])
+        self.assertEqual(verdict.status, 'alert')
+
     def test_parry_without_parry_before_the_learn_is_unmeasured(self):
         entry = passive_expectation(JUDICATOR, 0, 'parry_chance', 'add', '$s1', 3.0)
         verdict = self.single(entry, '0', '8', [Displayed('$s1', 3.0, 0, 'percent')])

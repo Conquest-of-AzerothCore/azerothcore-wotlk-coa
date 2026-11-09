@@ -590,15 +590,19 @@ longer reads as an open gap.
    targets, resolved to the ranks the class level reaches, records outside a chain all kept (ADR 0017 D1: Pure
    Focus 705253 on Scourgebane 520007, not
    92111, 801832, 801861 or 804916; Argent Knight 300512 on Righteous Tempest 570200 to 570205 and 805410, not the
-   aura 807274). A named spell with no record in this mask but one in a sibling spell-modifier effect's mask is that
-   effect's target only (D2: Grace of Aman'thul's effect 1 takes Sacred Swing, not Righteous Lunge). Otherwise a
-   named spell resolves to its rank at the class level through the chains of `AscensionSpellProgressionData.h`
+   aura 807274). A named spell with no record in this mask but one in **any other effect of the same rank's** mask
+   is that other effect's target only, not this one's — the sibling effect need not itself be a spell modifier
+   (D2: Grace of Aman'thul's effect 1 takes Sacred Swing, not Righteous Lunge; Final Prayer 705268's effect 0,
+   `SPELLMOD_EFFECT1`, does not claim Testament of Faith 501606/801478 because effect 1, `MOD_HEALING_RECEIVED`
+   and not itself a `P1` effect, already claims it — round 5's `705268 e0 * 501606` fix). Otherwise a named spell
+   resolves to its rank at the class level through the chains of `AscensionSpellProgressionData.h`
    (Righteous Lunge → 570233, Argent Blade → 807268), else to every record of that name, outside the mask.
-   `named_targets(records, family_name, text, level, in_mask, sibling_mask)` returns them. A named spell neither
-   in this mask nor in a `P1` sibling's gets a `passive_targets` entry instead (Pious Sweep 520034 effect 1 names
-   Chastise, whose own flags never meet the mask; the mask's real target is Tranquil Circle 801205, each a
-   separate half of the tooltip sentence. Templar's Might 705291 effect 0 names its four boosted abilities, but
-   the mask belongs to Condemn 567539, the stacking debuff that gates the boost).
+   `named_targets(records, family_name, text, level, in_mask, sibling_mask)` returns them; `sibling_mask` is built
+   from every other effect index of the rank (`classify`'s `siblings`), regardless of that effect's own family. A
+   named spell neither in this mask nor in a sibling's gets a `passive_targets` entry instead (Pious Sweep 520034
+   effect 1 names Chastise, whose own flags never meet the mask; the mask's real target is Tranquil Circle 801205,
+   each a separate half of the tooltip sentence. Templar's Might 705291 effect 0 names its four boosted abilities,
+   but the mask belongs to Condemn 567539, the stacking debuff that gates the boost).
 2. Category: when nothing is named and the first capitalised word (four letters or more) of every name the class
    mask matches is in the tooltip ("Libram spells": Libram of Tenacity, Libram of Zeal, ...), the mask's spells are
    the targets.
@@ -2269,7 +2273,14 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   debuff boosts), else an alert (Patience 712678 names Interdict 560116, its mask matches Sacred Restraint 102208).
   A measured delta of 0 against a non-zero expected delta is never `ok` (the 1-point floor does not apply to it).
   Not judged, `unmeasured` with the reason: a relation that multiplies a before value of 0 (`spell_mod_pct`,
-  `scale`, `ratio`, `composition`, `crit_damage`); `parry_chance` 0 before the learn (the reference character cannot
+  `scale`, `ratio`, `composition`, `crit_damage`) **on a named target, or on a non-modifier check (`named` is
+  `None`)** — a mask-only collateral target (`named` is `False`) with that same structurally-always-zero before
+  value instead falls through to the spell-modifier target rules above, so it reports `measured`/"reported, not
+  judged" when a named sibling target is present, exactly like a `spell_modifier` check on the same ids (round 5:
+  Final Prayer 705268's `spell_effect_value` on the Ascetic Abdication chain, whose own effect is
+  `SPELL_EFFECT_PLAY_SOUND` and never reads the value a `SPELLMOD_EFFECT1` modifier that only incidentally also
+  matches it changes — the quantity is always zero before and after on every build, not a measurement gap);
+  `parry_chance` 0 before the learn (the reference character cannot
   parry, and a parry aura enables parry when applied, `AuraEffect::HandleAuraModParryPercent`) — a `parry_chance`
   probe's scenario primes `CanParry()` first (apply the rank's own aura once, then remove it, same pattern as
   `cultist-adaptive-combatant.json`), so this guard fires only when that priming itself was skipped; a `stat` delta

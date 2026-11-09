@@ -2005,7 +2005,7 @@ def passive_verdict(manifest: dict, entry: dict, run: Run | None, expectation: E
     if model['metric'] == PARRY_CHANCE and before == 0:
         return replace(base, status='unmeasured', measured=delta,
                        explanation=f'{moved}; {NO_PARRY_BEFORE}')
-    if model['relation'] in MULTIPLYING_RELATIONS and before == 0:
+    if model['relation'] in MULTIPLYING_RELATIONS and before == 0 and model['named'] is not False:
         return replace(base, status='unmeasured', measured=delta,
                        explanation=f'{moved}; relation {model["relation"]} multiplies the before value 0, so every '
                                    f'bonus gives a delta of 0')

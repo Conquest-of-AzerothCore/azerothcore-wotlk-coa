@@ -634,8 +634,7 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
     plans: tuple[MetricPlan, ...] = ()
     reason = ''
     if family == 'P1':
-        siblings = tuple(sibling for sibling in effects if sibling != effect
-                         and family_of(spell(f'Effect[{sibling}]'), spell(f'EffectApplyAuraName[{sibling}]')) == 'P1')
+        siblings = tuple(sibling for sibling in effects if sibling != effect)
         targets, reason = modifier_targets(records, rank_id, effect, text, class_file['level'],
                                            passive_override(class_file, {spell_id, rank_id}, effect), siblings,
                                            token.text if token else None)
