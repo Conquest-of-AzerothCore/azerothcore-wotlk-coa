@@ -243,11 +243,11 @@
     },
     {
       "action": "assert",
-      "label": "The used key is gone (replaced by the next lower one)",
+      "label": "The used key keeps its level while the run is on",
       "actor": "hero",
       "metric": "item_count",
       "item": 1233407,
-      "equals": 0
+      "equals": 1
     },
     {
       "action": "assert",

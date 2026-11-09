@@ -11,7 +11,7 @@
   "contract": [
     "#7354: leaving the party during a keystone run used to brick the key, stop the timer and downgrade",
     "it; the run kept going instead. When the keystone's owner leaves the group the run stops (state 2, no more timer",
-    "updates) and the key stays at the level it lost at the start."
+    "updates) and the key drops one level."
   ],
   "players": [
     {
@@ -152,10 +152,10 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: the key lost its level at the start",
+      "label": "CONTROL: the key keeps its level at the start",
       "actor": "hero",
       "metric": "item_count",
-      "item": 1233263,
+      "item": 1233329,
       "equals": 1
     },
     {
@@ -202,11 +202,12 @@
     },
     {
       "action": "assert",
-      "label": "the owner keeps the key one level down",
+      "label": "the brick takes the key one level down",
       "actor": "hero",
       "metric": "item_count",
       "item": 1233263,
-      "equals": 1
+      "equals": 1,
+      "within_ms": 3000
     },
     {
       "action": "assert",
