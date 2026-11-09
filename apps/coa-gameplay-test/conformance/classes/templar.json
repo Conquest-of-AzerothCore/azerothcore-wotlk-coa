@@ -160,7 +160,7 @@
     {"spell": 805420, "effect": 1,
      "reason": "no check needed: round4 scripted-script-aura investigation. Way of the Monk's native e0 (PROC_TRIGGER_SPELL to 572052, routed to DUMMY + ProcFlags=0) already carries effect_value/spell_duration/max_stacks/trigger_count checks, all ok; e1 (BasePoints -1, MiscValue 0) has no tooltip clause and is read nowhere by index"},
     {"spell": 806516, "effect": 0,
-     "reason": "no check needed: round4 scripted-script-aura investigation. Heaven's Finest's single tooltip clause is already fully covered by five ok checks on the companion effects (spell_duration/max_stacks/effect_value of 805390 and 806517); e0 (BasePoints -1, MiscValue 0) carries no clause of its own and is read nowhere by index. The companion effect at e1 (native AuraName 42 to 805390, routed to DUMMY) keeps its own open trigger_count alert (150 of 273 trials, roughly 55%), unchanged by this note"},
+     "reason": "no check needed: round4 scripted-script-aura investigation. Heaven's Finest's single tooltip clause is already fully covered by five ok checks on the companion effects (spell_duration/max_stacks/effect_value of 805390 and 806517); e0 (BasePoints -1, MiscValue 0) carries no clause of its own and is read nowhere by index. The companion effect at e1 (native AuraName 42 to 805390, routed to DUMMY) previously carried an open trigger_count alert (150 of 273 trials); round8's fix (removing the 806517 self-exclusion gate and no longer capping 805390 by removal at 6 stacks) resolved it, and the check now verifies ok"},
     {"spell": 804930, "effect": 0,
      "reason": "reclassify: round4 scripted-script-aura investigation. The behaviour this effect stands for (casting Armor of Faith's damage spell 801546 when Staffguard's absorb breaks) is already proven by the class file's own 804930 behaviour_trigger entry (behaviours.py ShieldBreakTriggerSpec), status ok; e0 (BasePoints -1) is read only as a presence flag in aura_ascension_templar_lifecycle::Remove and carries no number of its own, so it stays unmodelled here only because no check is keyed on this exact effect index"},
     {"spell": 92109, "effect": 0,
@@ -764,7 +764,7 @@
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
       "per_trigger_text": "now grant Heaven's Finest",
-      "question": "Heaven's Finest says that damaging abilities grant it for 12 sec, stacking 6 times, and its own buff tooltip (805390) says that at 6 stacks it increases Energy regeneration by 100% for 8 sec. Our test server removes Heaven's Finest at the 6th stack and grants The Finest of Heaven for 8 sec instead, with no new Heaven's Finest stack while it lasts. A reference log showing Heaven's Finest ever reach a 6th applied-aura line (rather than being replaced by The Finest of Heaven at the 6th stacking ability) would confirm the tooltip reading."
+      "question": "Heaven's Finest says that damaging abilities grant it for 12 sec, stacking 6 times, and its own buff tooltip (805390) says that at 6 stacks it increases Energy regeneration by 100% for 8 sec. Round8's fix (AscensionTemplarEvents.cpp dropping the 806517 self-exclusion gate, AscensionTemplarAuras.cpp no longer removing 805390 at 6 stacks) resolved this: the server now keeps Heaven's Finest capped at 6 stacks rather than removing it, matching the tooltip's stacking reading, and the check now verifies ok."
     },
     {
       "aura": 803158,
