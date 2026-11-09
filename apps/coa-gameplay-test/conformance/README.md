@@ -482,6 +482,19 @@ effect`), 142 (`mail armor is out of scope`, owner ruling), 59 (`damage versus a
 (`SpellModOp <op> is not below MAX_SPELLMOD 32`: `spell_modifier` requires `op < MAX_SPELLMOD`), and the auras of the
 table without a plan (31, 87, 283, 286: `aura <n> has no passive measurement`).
 
+A class file's `unmodelled_effects` list (`[{"spell": <id>, "effect": <n>, "reason": "..."}]`) forces a specific
+effect straight to `unmodelled`, the same `{spell_id or rank_id, effect}` lookup as `effect_overrides`, checked
+before any family/aura rule and ahead of whatever plan `classify` would otherwise build — unlike `effect_notes`,
+this *can* turn an effect `classify` would call modelled into `unmodelled`, because the generic reader has no way
+to see that the live `SpellInfo` differs from what `Spell.dbc` describes. Templar (round4 `alert-triage`
+investigation, 2026-11): `AscensionTemplarContracts.cpp:96-100` rewrites Aggramar's Rage's (560650/561346) crit
+effect from `SPELL_AURA_MOD_CRIT_PCT` to a classmask-scoped `SPELL_AURA_ADD_FLAT_MODIFIER` at load time, so the
+generic reader's global `spell_crit_chance` probe reads a stat the scoped `SpellMod` never touches; `:126-129`
+dummies every effect of Patience (712678) at load and reimplements both as scripted per-cast hooks on Interdict
+(560116), so its `spell_modifier` probe looks for a static table entry that is never populated. Both are confirmed
+tool defects (a generic check that can never pass, not a server bug), left `unmodelled` pending a per-cast check
+that measures the actual scoped/scripted behaviour instead of the table/stat it bypasses.
+
 A class file's `effect_notes` list (`[{"spell": <id>, "effect": <n>, "reason": "..."}]`) substitutes a specific
 explanation for `classify`'s own generic `unmodelled: ` reason, the same `{spell_id or rank_id, effect}` lookup as
 `effect_overrides`, applied only when the generic reason already starts with `unmodelled: ` (it never turns a

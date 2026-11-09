@@ -10,8 +10,8 @@ import unittest
 import compare
 from classes import PROGRESSION_HEADER as HEADER, ClassSpell, class_spells, table_rows
 from passives import (ALIASED_REASON_MARKER, AURA_STATE_METRIC, FAMILIES, MAX_SPELLMOD, PARRY_CHANCE, PASSIVE_DELTA,
-                      PHRASES, STAT_EXACT_METRIC, STAT_METRIC, MetricPlan, PassiveTarget, classify, family_of,
-                      named_targets, passive_effects, passive_scenario, stat_after_token)
+                      PHRASES, STAT_EXACT_METRIC, STAT_METRIC, MetricPlan, PassiveTarget, classify, crit_plans,
+                      family_of, named_targets, passive_effects, passive_scenario, stat_after_token)
 from profile import CASTER, load_class_file, spell_power_label, stat_label
 from tooltip import Displayed, Records
 from values import TARGET, dataset
@@ -205,6 +205,23 @@ class FixturePassiveTest(unittest.TestCase):
         self.assertEqual(effect.reason, 'unmodelled: aura 999 has no passive measurement')
         self.assertEqual(effect.plans, ())
 
+    def test_unmodelled_effects_override_forces_unmodelled_even_with_a_checkable_plan(self):
+        class_file = {'class_id': TEMPLAR_CLASS_ID, 'level': LEVEL, 'dbc_dir': str(self.directory),
+                      'unmodelled_effects': [{'spell': FIXTURE_SPELL, 'effect': 0, 'reason': 'test reason'}]}
+        effects = passive_effects(class_file, ClassSpell(FIXTURE_SPELL, 'Fixture Passive', (FIXTURE_SPELL,),
+                                                         FIXTURE_SPELL, 1, True))
+        effect = effects[0]
+        self.assertEqual(effect.reason, 'unmodelled: test reason')
+        self.assertEqual(effect.plans, ())
+
+    def test_unmodelled_effects_override_without_a_match_keeps_the_generic_outcome(self):
+        class_file = {'class_id': TEMPLAR_CLASS_ID, 'level': LEVEL, 'dbc_dir': str(self.directory),
+                      'unmodelled_effects': [{'spell': FIXTURE_SPELL + 1, 'effect': 0, 'reason': 'test reason'}]}
+        effects = passive_effects(class_file, ClassSpell(FIXTURE_SPELL, 'Fixture Passive', (FIXTURE_SPELL,),
+                                                         FIXTURE_SPELL, 1, True))
+        effect = effects[0]
+        self.assertEqual(effect.reason, 'unmodelled: aura 999 has no passive measurement')
+
 
 class AliasedTokenFixtureTest(unittest.TestCase):
     def setUp(self):
@@ -285,6 +302,20 @@ class TemplarPassiveTest(unittest.TestCase):
     def test_effect_notes_without_an_entry_keep_the_generic_reason(self):
         self.assertEqual(effect_of(self.effects(804897), 2).reason, 'unmodelled: scripted or crowd-control effect')
 
+    def test_unmodelled_effects_mark_the_scoped_spellmod_crit_bonus_unmodelled(self):
+        for spell_id in (560650, 561346):
+            effect = effect_of(self.effects(spell_id), 0)
+            self.assertTrue(effect.reason.startswith('unmodelled: round4 alert-triage: '), (spell_id, effect.reason))
+            self.assertEqual(effect.plans, ())
+            self.assertEqual(effect.family, 'P2')
+
+    def test_unmodelled_effects_mark_patiences_scripted_effects_on_interdict(self):
+        for index in (0, 1):
+            effect = effect_of(self.effects(PATIENCE), index)
+            self.assertTrue(effect.reason.startswith('unmodelled: round4 alert-triage: '), (index, effect.reason))
+            self.assertEqual(effect.plans, ())
+            self.assertEqual(effect.family, 'P1')
+
     def test_named_targets_follow_the_tooltip(self):
         effect = effect_of(self.effects(PALADIN_TRAINING), 0)
         self.assertEqual({target.spell_id for target in effect.targets if target.named},
@@ -355,7 +386,7 @@ class TemplarPassiveTest(unittest.TestCase):
         effect = effect_of(self.effects(PATIENCE), 0)
         self.assertIn(INTERDICT, target_ids(effect, True, False))
         self.assertIn(SACRED_RESTRAINT, target_ids(effect, False, True))
-        self.assertEqual(effect.reason, '')
+        self.assertTrue(effect.reason.startswith('unmodelled: round4 alert-triage: '), effect.reason)
 
     def test_in_mask_namesakes_are_the_targets_of_a_named_spell(self):
         effect = effect_of(self.effects(PURE_FOCUS), 0)
@@ -429,11 +460,17 @@ class TemplarPassiveTest(unittest.TestCase):
         self.assertEqual(energy.reason, '')
 
     def test_crit_phrase_selects_the_school(self):
-        effects = self.effects(AGGRAMARS_RAGE)
-        crit = plan_named(effect_of(effects, 0), 'spell_crit_chance')
-        self.assertEqual((crit.fields, crit.relation), ({'school': 1}, 'add'))
-        expertise = plan_named(effect_of(effects, 1), 'expertise')
+        plans = crit_plans('Increases your Holy critical strike chance by $s1% and your expertise by $s2.')
+        plan, quantity = plans[0]
+        self.assertEqual((plan.fields, plan.relation), ({'school': 1}, 'add'))
+        self.assertEqual(quantity, 'Holy critical strike chance')
+        expertise = plan_named(effect_of(self.effects(AGGRAMARS_RAGE), 1), 'expertise')
         self.assertEqual(expertise.relation, 'add')
+
+    def test_aggramars_rage_crit_effect_is_unmodelled_by_the_round4_override(self):
+        effect = effect_of(self.effects(AGGRAMARS_RAGE), 0)
+        self.assertTrue(effect.reason.startswith('unmodelled: round4 alert-triage: '), effect.reason)
+        self.assertEqual(effect.plans, ())
 
     def test_generic_crit_phrase_judges_melee_and_measures_spell_crit(self):
         effect = effect_of(self.effects(FINESSE), 0)

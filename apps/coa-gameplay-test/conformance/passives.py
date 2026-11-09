@@ -520,6 +520,12 @@ def effect_note(class_file: dict, spell_ids: set[int], effect: int) -> str | Non
     return entry['reason'] if entry else None
 
 
+def effect_unmodelled(class_file: dict, spell_ids: set[int], effect: int) -> str | None:
+    entry = next((entry for entry in class_file.get('unmodelled_effects', [])
+                 if entry['spell'] in spell_ids and entry['effect'] == effect), None)
+    return entry['reason'] if entry else None
+
+
 def signed_points(records: Records, rank_id: int, effect: int) -> float | None:
     try:
         return records.points(rank_id, effect, upper=False)
@@ -555,6 +561,9 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
                                            passive_override(class_file, {spell_id, rank_id}, effect), siblings,
                                            token.text if token else None)
     try:
+        forced = effect_unmodelled(class_file, {spell_id, rank_id}, effect)
+        if forced is not None:
+            raise NotModelled(forced)
         if family == UNKNOWN:
             raise NotModelled(f'aura {aura} has no passive measurement' if aura
                               else f'effect {spell(f"Effect[{effect}]")} applies no aura')

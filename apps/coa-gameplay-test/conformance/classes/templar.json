@@ -74,6 +74,16 @@
     {"spell": 520442, "effect": 0, "misc_value": 15,
      "citation": "AscensionTemplarContracts.cpp:130 rewrites EffectMiscValue 7 to SPELLMOD_CRIT_DAMAGE_BONUS (15)"}
   ],
+  "unmodelled_effects": [
+    {"spell": 560650, "effect": 0,
+     "reason": "round4 alert-triage: AscensionTemplarContracts.cpp:96-100 rewrites e0 from SPELL_AURA_MOD_CRIT_PCT to SPELL_AURA_ADD_FLAT_MODIFIER at load because the DBC authors it with a nonzero EffectSpellClassMask (mechanic map templar-aggramars-rage names Chastise, Scarlet Hammer and Blade of Faith); the resulting SpellMod is scoped to those matching spells by the stock engine and never touches the global spell_crit_chance stat the generic passive probe reads, so the probe's always-zero delta proves nothing about the scoped bonus. Needs a per-cast crit check on the matching spell(s), not the generic global-stat check"},
+    {"spell": 561346, "effect": 0,
+     "reason": "round4 alert-triage: same load-time MOD_CRIT_PCT -> ADD_FLAT_MODIFIER rewrite as 560650 (rank 2, AscensionTemplarContracts.cpp:96-100), same scoped-SpellMod gap in the generic global spell_crit_chance probe"},
+    {"spell": 712678, "effect": 0,
+     "reason": "round4 alert-triage: AscensionTemplarContracts.cpp:126-129 dummies every effect of 712678 at load; the +2000ms duration this effect's DBC SpellMod would have applied to 560116 is instead implemented as a scripted per-cast hook (AscensionTemplarAbilities.cpp OnCalcMaxDuration, keyed on HasAura(712678) while 560116 applies). The generic spell_modifier probe looks for a static SpellMod table entry that is never populated at runtime; needs a duration-on-apply check on 560116 instead"},
+    {"spell": 712678, "effect": 1,
+     "reason": "round4 alert-triage: same load-time dummy as 712678 effect 0; the -5000ms cooldown reduction on 560116 is implemented as a scripted cast-success hook (AscensionTemplarAbilities.cpp, info->Id == 560116 branch calling ModifySpellCooldown) rather than a static SpellMod. The generic spell_modifier probe cannot see it; needs a cooldown-remaining check on 560116 instead"}
+  ],
   "effect_notes": [
     {"spell": 300529, "effect": 1,
      "reason": "no check needed: round4 scripted-script-aura investigation. Both tooltip clauses of Deep Secrets are resolved through 301283's own effects (periodic trigger e0, magic-resist/damage-reduction amount), already ok; no code anywhere reads 300529's own effect 1 (BasePoints/MiscValue both 0), which carries no tooltip clause of its own"},
