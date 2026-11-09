@@ -341,6 +341,51 @@ as a delta no larger than the window's own natural decay, which is always outsid
 pass by accident. Fewer than `TRIGGER_TRIALS` usable trials is `insufficient_trials`; a mean within tolerance
 but no baseline trial is `unmeasured`.
 
+### Magnitude-ratio trigger entries
+
+A `kind: "magnitude_ratio"` entry is for a tooltip whose trigger spell casts a second, distinct spell whose own
+magnitude is a fixed percentage of the triggering hit's own (variable, crit-dependent) damage or heal — "now
+deals/heals X% of the damage dealt", as opposed to a fixed flat amount. `trial_metric`/`per_trigger`/
+`observe_metric` (the `trigger_count` family, `spell_cast_count`/`aura_apply_count`/`spell_energize_count`) prove
+the triggered spell fires at all, but never that its amount tracks the specific hit that triggered it, which is
+what this clause literally claims. A `magnitude_ratio` entry is added **alongside** the class file's existing
+plain entry for the same aura (same `aura`, a distinct `effect` ordinal so the two scenario keys do not collide):
+it does not replace the `trigger_count` entry, which keeps proving the "fires at all" half of the clause.
+
+Fields: `trigger` (always `action: "cast"`, `target` one of `"self"`/`"dummy"`/`"ally"`), `trigger_metric` (the
+metric summing the trigger spell's own output, today only `spell_damage_total`), `observe_spell` (the triggered
+copy spell), `observe_metric` (`spell_damage_total` for a damage bonus, `spell_heal_total` for a self-heal),
+`expected_ratio` (the tooltip's `$s1`/100 fraction) and an optional `force_crit` in place of `trial_metric`/
+`per_trigger`/the plain `observe_metric` values. `checked_entry` validates this shape through its own
+`checked_magnitude_entry` branch.
+
+The scenario (`magnitude_ratio_scenario`) reuses the same `trigger_plan`/`attempt_interval` scheduling as every
+other trigger kind (so the `TRIGGER_TRIALS` sample-size floor below is the same one `trigger_count` checks use),
+learns the trigger spell and the passive together (no baseline part: the trigger spell always deals its own
+damage/heal regardless of the passive, so a zero-passive control proves nothing about the *ratio*, only about
+presence, which the sibling `trigger_count` entry already covers), repeats the trigger cast across the part's
+scheduled attempts, then reads four cumulative totals once at the end of the part: the trigger spell's own
+`trigger_metric` total and `spell_damage_count` (the trial count), and the triggered spell's `observe_metric`
+total. `judge_trigger_magnitude` sums each of these across every part, then takes the ratio of the two summed
+totals: because the server computes the triggered amount as a deterministic function of that same hit's own
+damage (truncated per event, not rolled independently), the ratio of sums converges on the tooltip fraction far
+faster than a per-hit mean ever would, so `TRIGGER_TRIALS` trials (the same floor `trigger_count` needs for its
+own false-negative risk) is already enough precision for a tight band: `max(0.01, 5% of expected)` around
+`expected_ratio` (the owner's own "within 5% on numbers" standard), everything outside is `alert`. Fewer than
+`TRIGGER_TRIALS` summed trigger-spell hits is `insufficient_trials`; no usable part at all (the passive never
+learned, or a run with no measurement) is `unmeasured`.
+
+Deliverance 704116 (round10 `proc-chains`): "Critically striking with Vindication or Righteous Lunge now deals
+$s1% additional Physical damage" — `$s1` is `EffectBasePoints[0]` 49 + `EffectDieSides[0]` 1 = 50 (`704116`'s own
+`EffectApplyAuraName[0]` 354 `SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT`, a scripted percent-of-event aura, not the
+generic engine). The entry casts Vindication 573324 at a dummy with every swing forced to crit, and reads
+`spell_damage_total` of 573324 against `spell_damage_total` of the crit-bonus copy 801456.
+
+Uther's Legacy 706385 (round10 `proc-chains`): "Your Condemn now heals you for $s1% of the damage dealt" — `$s1`
+is `EffectBasePoints[0]` 74 + `EffectDieSides[0]` 1 = 75 (same `SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT` aura).
+The entry casts Condemn 804906 at a dummy and reads `spell_damage_total` of 804906 against `spell_heal_total` of
+the self-heal copy 707302.
+
 Holy Combatant 500011 (round5 `trigger-accounting`): "Your Argent Blade now also extends the duration of
 Interdict on your target by 1 sec" extends Interdict 560116's remaining duration by `Amount(500014)` (1000 ms)
 on every landed Argent Blade hit when the target still carries the caster's own Interdict

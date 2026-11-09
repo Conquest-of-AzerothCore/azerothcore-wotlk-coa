@@ -17,11 +17,15 @@ from profile import DBC_DIR
 from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader
 from tooltip import Records
 from triggers import (BASELINE_ATTEMPTS, COOLDOWN_CHECK, COOLDOWN_DELTA_KIND, DURATION_CHECK, DURATION_DELTA_KIND,
-                      MAIN_HAND, PERIODIC, TAKEN_HIT, TRIGGER_CHECK, TRIGGER_TRIALS, attempt_interval,
+                      MAGNITUDE_CHECK, MAGNITUDE_RATIO_KIND, MAIN_HAND, PERIODIC, TAKEN_HIT, TRIGGER_CHECK,
+                      TRIGGER_TRIALS, attempt_interval,
                       attempt_steps, checked_cooldown_entry, checked_duration_entry, checked_entry,
+                      checked_magnitude_entry,
                       cooldown_label, cooldown_trial_label, cooldown_trial_steps, cooldown_trigger_rule,
                       cooldown_trigger_scenario, count_step, counts, duration_label, duration_trial_label,
                       duration_trial_steps, duration_trigger_rule, duration_trigger_scenario,
+                      magnitude_label, magnitude_measurement_labels, magnitude_ratio_scenario,
+                      magnitude_trigger_rule,
                       shares_cooldown_aura, trigger_entries,
                       trigger_label, trigger_measurements, trigger_plan, trigger_rule, trigger_scenario,
                       trigger_status_expectation)
@@ -113,6 +117,11 @@ def templar_trigger(aura):
     return next(entry for entry in CLASS_FILE['triggers'] if entry['aura'] == aura)
 
 
+def templar_magnitude_trigger(aura):
+    return next(entry for entry in CLASS_FILE['triggers']
+               if entry['aura'] == aura and entry.get('kind') == MAGNITUDE_RATIO_KIND)
+
+
 def lorescribe_entries():
     entries = [entry for entry in CLASS_FILE['triggers'] if entry['aura'] == LORESCRIBE]
     return {entry['effect']: entry for entry in entries}
@@ -149,6 +158,31 @@ def cooldown_steps(baseline_deltas=(), measured_deltas=(), aura=1):
                                      str(full_cooldown - delta)))
     steps.append(assert_step(COOLDOWN_LABELS['aura'], str(aura)))
     return steps
+
+
+MAGNITUDE_LABELS = magnitude_measurement_labels(DELIVERANCE)
+MAGNITUDE_KEY = f'conformance-templar-trigger-{DELIVERANCE}-1-part-1'
+
+
+def magnitude_model(part=0, parts=1, attempts=SCHEDULED, expected_ratio=0.5, observe_metric='spell_damage_total'):
+    return {'part': part, 'parts': parts, 'scheduled_attempts': SCHEDULED, 'part_attempts': attempts,
+            'minimum_trials': TRIGGER_TRIALS, 'trigger': {'action': 'cast', 'spell': VINDICATION_MAX_RANK,
+            'target': 'dummy'}, 'trigger_metric': 'spell_damage_total', 'observe_spell': DELIVERANCE_COPY,
+            'observe_metric': observe_metric, 'expected_ratio': expected_ratio, 'force_crit': 'melee',
+            'measurements': MAGNITUDE_LABELS}
+
+
+def magnitude_expectation(**model):
+    return Expectation(magnitude_label(DELIVERANCE), MAGNITUDE_CHECK, DELIVERANCE, DELIVERANCE, None,
+                       'Critically striking with Vindication or Righteous Lunge', 'magnitude rule',
+                       magnitude_model(**model))
+
+
+def magnitude_steps(trigger_total, observe_total, trigger_count=SCHEDULED, aura=1):
+    return [assert_step(MAGNITUDE_LABELS['trigger_total'], str(trigger_total)),
+            assert_step(MAGNITUDE_LABELS['trigger_count'], str(trigger_count)),
+            assert_step(MAGNITUDE_LABELS['observe_total'], str(observe_total)),
+            assert_step(MAGNITUDE_LABELS['aura'], str(aura))]
 
 
 def trigger_model(per_trigger=0.5, part=0, parts=1, baseline=BASELINE_ATTEMPTS, attempts=SCHEDULED):
@@ -791,6 +825,69 @@ class CooldownTriggerCompareTest(unittest.TestCase):
         self.assertIn('2 parts', verdict.explanation)
 
 
+class MagnitudeTriggerCompareTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def verdict(self):
+        manifest, results = self.workspace.manifest()
+        verdicts = [verdict for verdict in compare(manifest, results, tooltips=constant_reader())
+                    if verdict.check == MAGNITUDE_CHECK]
+        self.assertEqual(len(verdicts), 1)
+        self.assertIn(verdicts[0].status, STATUSES)
+        return verdicts[0]
+
+    def test_ratio_at_the_expected_fraction_is_ok(self):
+        self.workspace.scenario(MAGNITUDE_KEY, 'trigger', [magnitude_expectation()],
+                                steps=magnitude_steps(trigger_total=100000, observe_total=50000))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 0.5)
+        self.assertEqual(verdict.expected, 0.5)
+
+    def test_ratio_far_from_the_expected_fraction_alerts(self):
+        self.workspace.scenario(MAGNITUDE_KEY, 'trigger', [magnitude_expectation()],
+                                steps=magnitude_steps(trigger_total=100000, observe_total=1000))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'alert')
+        self.assertAlmostEqual(verdict.measured, 0.01)
+
+    def test_absent_passive_aura_is_unmeasured(self):
+        self.workspace.scenario(MAGNITUDE_KEY, 'trigger', [magnitude_expectation()],
+                                steps=magnitude_steps(trigger_total=100000, observe_total=50000, aura=0))
+        self.assertEqual(self.verdict().status, 'unmeasured')
+
+    def test_too_few_trigger_hits_is_insufficient(self):
+        self.workspace.scenario(MAGNITUDE_KEY, 'trigger', [magnitude_expectation(attempts=TRIGGER_TRIALS - 1)],
+                                steps=magnitude_steps(trigger_total=1000, observe_total=500,
+                                                      trigger_count=TRIGGER_TRIALS - 1))
+        self.assertEqual(self.verdict().status, 'insufficient_trials')
+
+    def test_heal_ratio_metric_is_read_the_same_way(self):
+        self.workspace.scenario(MAGNITUDE_KEY, 'trigger',
+                                [magnitude_expectation(expected_ratio=0.75, observe_metric='spell_heal_total')],
+                                steps=magnitude_steps(trigger_total=400000, observe_total=300000))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 0.75)
+
+    def test_parts_are_summed_before_the_ratio_is_taken(self):
+        second_key = f'conformance-templar-trigger-{DELIVERANCE}-1-part-2'
+        self.workspace.scenario(MAGNITUDE_KEY, 'trigger', [magnitude_expectation(parts=2, attempts=150)],
+                                steps=magnitude_steps(trigger_total=60000, observe_total=30000,
+                                                      trigger_count=150))
+        self.workspace.scenario(second_key, 'trigger',
+                                [magnitude_expectation(part=1, parts=2, attempts=SCHEDULED - 150)],
+                                steps=magnitude_steps(trigger_total=40000, observe_total=20000,
+                                                      trigger_count=SCHEDULED - 150))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 0.5)
+
+
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class TemplarTriggerEntriesTest(unittest.TestCase):
     def setUp(self):
@@ -868,12 +965,15 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                 if entry.get('kind') == DURATION_DELTA_KIND:
                     self.assertEqual(entry['observe_metric'], 'aura_duration_ms')
                     continue
+                if entry.get('kind') == MAGNITUDE_RATIO_KIND:
+                    self.assertIn(entry['observe_metric'], ('spell_damage_total', 'spell_heal_total'))
+                    continue
                 self.assertIn(entry['trial_metric'], ('spell_cast_count', 'spell_damage_count'))
 
     def test_every_second_cast_is_the_only_half_rate(self):
         for entry in trigger_entries(CLASS_FILE):
             with self.subTest(aura=entry['aura']):
-                if entry.get('kind') in (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND):
+                if entry.get('kind') in (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND, MAGNITUDE_RATIO_KIND):
                     continue
                 if entry['per_trigger_text'].startswith('Every 2nd'):
                     expected = 0.5
@@ -934,8 +1034,9 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                 plan = trigger_plan(CLASS_FILE, entry)
                 self.assertEqual(sum(plan.part_attempts), SCHEDULED * entry.get('trial_attempts_factor', 1))
                 scenario_fn = {COOLDOWN_DELTA_KIND: cooldown_trigger_scenario,
-                              DURATION_DELTA_KIND: duration_trigger_scenario}.get(entry.get('kind'),
-                                                                                  trigger_scenario)
+                              DURATION_DELTA_KIND: duration_trigger_scenario,
+                              MAGNITUDE_RATIO_KIND: magnitude_ratio_scenario}.get(entry.get('kind'),
+                                                                                 trigger_scenario)
                 for part in range(len(plan.part_attempts)):
                     scenario, _ = scenario_fn(CLASS_FILE, entry, part)
                     run.validate(scenario)

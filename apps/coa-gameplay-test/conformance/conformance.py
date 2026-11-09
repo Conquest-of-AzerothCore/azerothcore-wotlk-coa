@@ -24,9 +24,9 @@ from scaffold import LIVE_BASELINE_HEADER, SHARED_DEFINES, scaffold_class
 from sheets import write_sheets
 from stack import PASSES, STACK_CHECKS, STACK_DPS, STACK_KIND, stack_scenarios
 from tooltip import read_tooltip
-from triggers import (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND, cooldown_trigger_scenario,
-                      duration_trigger_scenario, trigger_entries, trigger_plan, trigger_scenario,
-                      trigger_status_expectation, trigger_unmodelled_expectation)
+from triggers import (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND, MAGNITUDE_RATIO_KIND, cooldown_trigger_scenario,
+                      duration_trigger_scenario, magnitude_ratio_scenario, trigger_entries, trigger_plan,
+                      trigger_scenario, trigger_status_expectation, trigger_unmodelled_expectation)
 from values import Expectation, armed_for, dataset, static_conditional_known, structure_stats, value_scenario
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -204,8 +204,8 @@ def add_trigger(writer: ManifestWriter, entry: dict):
     if entry.get('status'):
         writer.add(key, 'trigger', None, aura, [trigger_status_expectation(entry)], name=name)
         return
-    scenario_fn = {COOLDOWN_DELTA_KIND: cooldown_trigger_scenario,
-                  DURATION_DELTA_KIND: duration_trigger_scenario}.get(entry.get('kind'), trigger_scenario)
+    scenario_fn = {COOLDOWN_DELTA_KIND: cooldown_trigger_scenario, DURATION_DELTA_KIND: duration_trigger_scenario,
+                  MAGNITUDE_RATIO_KIND: magnitude_ratio_scenario}.get(entry.get('kind'), trigger_scenario)
     try:
         plan = trigger_plan(class_file, entry)
     except Unmodelled as error:

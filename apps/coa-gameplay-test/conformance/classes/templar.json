@@ -1002,6 +1002,24 @@
       "per_trigger_text": "now deals"
     },
     {
+      "aura": 704116,
+      "effect": 1,
+      "name": "Deliverance",
+      "kind": "magnitude_ratio",
+      "tooltip": "Critically striking with |cffffffffVindication|r or |cFFFFFFFFRighteous Lunge|r now deals $s1% additional Physical damage.",
+      "trigger": {"action": "cast", "spell": 573324, "target": "dummy"},
+      "trigger_text": "Critically striking with Vindication or Righteous Lunge",
+      "trigger_spell_text": "Vindication",
+      "force_crit": "melee",
+      "trigger_metric": "spell_damage_total",
+      "observe_spell": 801456,
+      "observe_source": "EffectTriggerSpell[0] of 704116",
+      "observe_metric": "spell_damage_total",
+      "expected_ratio": 0.5,
+      "expected_ratio_source": "Spell.dbc 704116 EffectBasePoints[0] 49 + EffectDieSides[0] 1 = 50% ($s1)",
+      "per_trigger_text": "now deals"
+    },
+    {
       "aura": 680397,
       "name": "Disciplined Blows",
       "tooltip": "Your healing done triggers a holy pulse around healed targets, dealing ${$680398m1*$<scalingbp>+$AP*0.05+$AGI*0.2} Holy damage to nearby enemies.\r\n\r\nCnly occur once every 0.5 sec.",
@@ -1085,6 +1103,23 @@
       "observe_source": "EffectTriggerSpell[0] of 706385",
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
+      "per_trigger_text": "now heals you"
+    },
+    {
+      "aura": 706385,
+      "effect": 1,
+      "name": "Uther's Legacy",
+      "kind": "magnitude_ratio",
+      "tooltip": "Your |cffffffffCondemn|r now heals you for $s1% of the damage dealt.",
+      "trigger": {"action": "cast", "spell": 804906, "target": "dummy"},
+      "trigger_text": "Your Condemn",
+      "trigger_spell_text": "Condemn",
+      "trigger_metric": "spell_damage_total",
+      "observe_spell": 707302,
+      "observe_source": "EffectTriggerSpell[0] of 706385",
+      "observe_metric": "spell_heal_total",
+      "expected_ratio": 0.75,
+      "expected_ratio_source": "Spell.dbc 706385 EffectBasePoints[0] 74 + EffectDieSides[0] 1 = 75% ($s1)",
       "per_trigger_text": "now heals you"
     },
     {
