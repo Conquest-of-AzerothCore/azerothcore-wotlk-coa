@@ -756,6 +756,7 @@ class AmountDeltaSpec:
     trigger_spell: int
     mechanism_file: str
     reduce_function: str
+    mechanism_label: str
 
 
 def amount_delta_label(spec: AmountDeltaSpec, phase: str, moment: str) -> str:
@@ -809,8 +810,8 @@ def amount_delta_scenario(class_file: dict, spec: AmountDeltaSpec) -> tuple[dict
                     f'reusing one amount across phases. The wait after the cast is kept at '
                     f'{AMOUNT_DELTA_CAST_WAIT_MS} ms, well under {spec.target_aura}\'s own 1000 ms periodic tick '
                     f'(EffectAmplitude[0] of {spec.target_aura}, which releases part of the staggered debt on its '
-                    f'own schedule regardless of the Libram), so neither read straddles a natural tick and the '
-                    f'measured delta is attributable only to the cast.',
+                    f'own schedule regardless of {spec.mechanism_label}), so neither read straddles a natural tick '
+                    f'and the measured delta is attributable only to the cast.',
         'players': [player_fixture(class_file)],
         'creatures': [striker],
         'steps': steps}
@@ -826,7 +827,8 @@ def amount_delta_scenario(class_file: dict, spec: AmountDeltaSpec) -> tuple[dict
 def amount_delta_spec(entry: dict) -> AmountDeltaSpec:
     return AmountDeltaSpec(entry['spell'], entry['name'], entry['quote'], entry['fraction'], entry['target_aura'],
                            entry['debt_aura'], entry['breaker_spell'], entry['striker_entry'],
-                           entry['trigger_spell'], entry['mechanism_file'], entry['reduce_function'])
+                           entry['trigger_spell'], entry['mechanism_file'], entry['reduce_function'],
+                           entry['mechanism_label'])
 
 
 MECHANIC_DR_RESET_MS = 15000
