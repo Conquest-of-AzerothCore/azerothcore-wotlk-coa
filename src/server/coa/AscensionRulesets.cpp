@@ -107,7 +107,8 @@ void ApplyRuleset(Player* player, uint32 selectionId)
     player->RemoveAurasDueToSpell(SPELL_HIGH_RISK);
     player->RemoveAurasDueToSpell(SPELL_WAR_MODE);
     player->RemoveAurasDueToSpell(SPELL_PVE);
-    player->RemoveAurasDueToSpell(SPELL_MERCENARY);
+    if (selectionId == SPELL_SELECT_PVE)
+        player->RemoveAurasDueToSpell(SPELL_MERCENARY);
     if (selectionId == SPELL_SELECT_HIGH_RISK)
         player->CastSpell(player, SPELL_HIGH_RISK, true);
     else if (selectionId == SPELL_SELECT_PVE)
