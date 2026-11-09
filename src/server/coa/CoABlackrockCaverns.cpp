@@ -2398,8 +2398,14 @@ class spell_coa_brc_superheated : public AuraScript
                     karsh->AI()->DoAction(ACTION_LAVA_SPOUT);
     }
 
+    bool CheckProc(ProcEventInfo& )
+    {
+        return false;
+    }
+
     void Register() override
     {
+        DoCheckProc += AuraCheckProcFn(spell_coa_brc_superheated::CheckProc);
         OnEffectApply += AuraEffectApplyFn(
             spell_coa_brc_superheated::HandleApply, EFFECT_2, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
         OnEffectRemove += AuraEffectRemoveFn(
