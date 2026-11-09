@@ -229,11 +229,19 @@ def class_level_ranks(spell_ids: set[int], level: int) -> list[int]:
 
 
 @lru_cache(maxsize=None)
+def spell_names_by_family(records_dbc) -> dict[int, dict[int, str]]:
+    grouped: dict[int, dict[int, str]] = {}
+    for identity, fields in table_rows(records_dbc, 'Spell', ['SpellName[enUS]', 'SpellFamilyName']):
+        if fields['SpellName[enUS]']:
+            grouped.setdefault(fields['SpellFamilyName'], {})[identity] = fields['SpellName[enUS]']
+    return grouped
+
+
+@lru_cache(maxsize=None)
 def family_spells(records_dbc, family_name: int) -> dict[int, tuple[str, tuple[int, ...]]]:
     records = Records(records_dbc)
-    return {identity: (fields['SpellName[enUS]'], tuple(family_flags(records, identity)))
-            for identity, fields in table_rows(records_dbc, 'Spell', ['SpellName[enUS]', 'SpellFamilyName'])
-            if fields['SpellFamilyName'] == family_name and fields['SpellName[enUS]']}
+    names = spell_names_by_family(records_dbc).get(family_name, {})
+    return {identity: (name, tuple(family_flags(records, identity))) for identity, name in names.items()}
 
 
 def spells_by_name(spells: dict[int, tuple[str, tuple[int, ...]]]) -> dict[str, set[int]]:

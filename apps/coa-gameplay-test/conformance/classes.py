@@ -1,5 +1,6 @@
 from collections import Counter
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 import re
 import sys
@@ -13,6 +14,11 @@ CHARACTER_LEVEL = 60
 RANK_SLOTS = 5
 PROGRESSION_HEADER = Path(__file__).resolve().parents[3] / 'src/server/coa/AscensionSpellProgressionData.h'
 PROGRESSION_ROW = re.compile(r'^\s*\{\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\s*\},?\s*$', re.MULTILINE)
+
+
+@lru_cache(maxsize=None)
+def dataset(directory: Path) -> DataSet:
+    return DataSet(directory)
 
 
 @dataclass(frozen=True)
@@ -30,6 +36,13 @@ def table_rows(dataset: DataSet, name: str, fields: list[str]):
     columns = {column.name: column for column in schema.columns}
     for identity, row in index.items():
         yield identity, {field: dataset.value(table, row, columns[field])[0] for field in fields}
+
+
+def rows_by_identity(dataset: DataSet, name: str, identities: set[int], fields: list[str]) -> dict[int, dict]:
+    table, schema, index, _ = dataset.load(name)
+    columns = {column.name: column for column in schema.columns}
+    return {identity: {field: dataset.value(table, index[identity], columns[field])[0] for field in fields}
+            for identity in identities if identity in index}
 
 
 def progression_chains(header: Path, class_id: int) -> dict[int, list[tuple[int, int]]]:
@@ -64,8 +77,8 @@ def advancement_levels(dataset: DataSet, types: set[int]) -> dict[int, int]:
 
 def class_spells(dbc_dir: Path, class_id: int, progression_header: Path, level: int = CHARACTER_LEVEL,
                  extra_spells: Sequence[int] = ()) -> list[ClassSpell]:
-    dataset = DataSet(dbc_dir)
-    levels = advancement_levels(dataset, class_type_ids(dataset, class_id))
+    dbc = dataset(dbc_dir)
+    levels = advancement_levels(dbc, class_type_ids(dbc, class_id))
     repeated = sorted(spell_id for spell_id, count in Counter(extra_spells).items() if count > 1)
     if repeated:
         raise ValueError(f'Extra spells {repeated} are listed more than once')
@@ -74,9 +87,7 @@ def class_spells(dbc_dir: Path, class_id: int, progression_header: Path, level: 
         raise ValueError(f'Extra spells {duplicated} are already CharacterAdvancement class spells')
     chains = progression_chains(progression_header, class_id)
     wanted = set(levels) | set(extra_spells)
-    spells = {identity: fields
-              for identity, fields in table_rows(dataset, 'Spell', ['SpellName[enUS]', 'Attributes', 'BaseLevel'])
-              if identity in wanted}
+    spells = rows_by_identity(dbc, 'Spell', wanted, ['SpellName[enUS]', 'Attributes', 'BaseLevel'])
     levels.update({spell_id: spells[spell_id]['BaseLevel'] for spell_id in extra_spells if spell_id in spells})
     missing = sorted(wanted - set(spells))
     if missing:
@@ -96,7 +107,7 @@ def class_spells(dbc_dir: Path, class_id: int, progression_header: Path, level: 
 
 
 def class_skill_lines(dbc_dir: Path, spells: list[ClassSpell], weapon_subclass: int | None) -> list[int]:
-    records = Records(DataSet(dbc_dir))
+    records = Records(dataset(dbc_dir))
     ranked = {rank for spell in spells for rank in spell.ranks}
     weapon_spell = weapon_skill_spells(records).get(weapon_subclass) if weapon_subclass is not None else None
     if weapon_spell:

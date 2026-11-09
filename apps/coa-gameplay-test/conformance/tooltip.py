@@ -4,6 +4,7 @@ from pathlib import Path
 import re
 import struct
 import sys
+from weakref import WeakKeyDictionary
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'coa-dbc'))
 from inspect_dbc import DataSet
@@ -115,13 +116,42 @@ class Variable:
     reason: str = ''
 
 
+DERIVED_TABLE_CACHE: 'WeakKeyDictionary[DataSet, dict]' = WeakKeyDictionary()
+
+
+def derived_table_cache(dbc: DataSet) -> dict:
+    cache = DERIVED_TABLE_CACHE.get(dbc)
+    if cache is None:
+        cache = {'raw': {}, 'ability_index': None, 'weapon_skills': None}
+        DERIVED_TABLE_CACHE[dbc] = cache
+    return cache
+
+
 class Records:
     def __init__(self, dbc: DataSet):
         self.dbc = dbc
         self.columns = {}
-        self.raw = {}
-        self.ability_index = None
-        self.weapon_skills = None
+        self._derived = derived_table_cache(dbc)
+
+    @property
+    def raw(self) -> dict:
+        return self._derived['raw']
+
+    @property
+    def ability_index(self):
+        return self._derived['ability_index']
+
+    @ability_index.setter
+    def ability_index(self, value) -> None:
+        self._derived['ability_index'] = value
+
+    @property
+    def weapon_skills(self):
+        return self._derived['weapon_skills']
+
+    @weapon_skills.setter
+    def weapon_skills(self, value) -> None:
+        self._derived['weapon_skills'] = value
 
     def field(self, table_name: str, identity: int, name: str):
         table, schema, index, _ = self.dbc.load(table_name)

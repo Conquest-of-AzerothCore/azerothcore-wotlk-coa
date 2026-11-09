@@ -1,12 +1,11 @@
 from dataclasses import dataclass, field, replace
-from functools import lru_cache
 import math
 from pathlib import Path
 import re
 from statistics import fmean, pstdev
 from typing import Sequence
 
-from classes import PASSIVE_ATTRIBUTE, ClassSpell, DataSet
+from classes import PASSIVE_ATTRIBUTE, ClassSpell, DataSet, dataset
 from profile import (CASTER, DBC_DIR, EQUIP_FIELDS, armed, base_steps, character_of, known_aura_label, measurement,
                      player_fixture, skill_target)
 from tooltip import (MIXED_PERIOD, OVER_TICKS, TICKING_AURAS, CasterStats, Displayed, ForcedPoints, Records, Tooltip,
@@ -86,11 +85,6 @@ class RankFacts:
     cast_time_ms: int
     caster_aura_spell: int
     target_aura_state: int
-
-
-@lru_cache(maxsize=None)
-def dataset(directory: Path) -> DataSet:
-    return DataSet(directory)
 
 
 def facts_of(records: Records, rank_id: int) -> RankFacts:
