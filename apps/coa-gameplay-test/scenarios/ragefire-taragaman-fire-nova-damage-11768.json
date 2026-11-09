@@ -4,16 +4,15 @@
   "contract": [
     "Taragaman the Hungerer 11520's Fire Nova 11970 hit level 60 players for about 2k. A coa_dungeon_creature_damage",
     "row for Taragaman and that one spell triples it. His other spells and other casters of Fire Nova keep",
-    "their damage. The scenario compares his Fire Nova with the same spell from Jergosh the Invoker 11518."
+    "their damage. The scenario compares his Fire Nova with the same spell from Jergosh the Invoker 11518 on Mythic."
   ],
   "timeout_ms": 60000,
   "location": {
-    "map": 389,
-    "x": -243.0,
-    "y": 150.0,
-    "z": -18.6,
-    "o": 0,
-    "ignore_access": true
+    "map": 1,
+    "x": 1811.0,
+    "y": -4410.0,
+    "z": -18.0,
+    "o": 0
   },
   "players": [
     {
@@ -26,7 +25,35 @@
   "steps": [
     {
       "action": "wait",
-      "ms": 500
+      "ms": 1000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "hero",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 389,
+      "x": -243.0,
+      "y": 150.0,
+      "z": -18.6
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "label": "CONTROL: the hero is in a Mythic Ragefire Chasm",
+      "action": "assert",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 2
     },
     {
       "action": "summon",
@@ -34,13 +61,6 @@
       "entry": 11520,
       "as": "taragaman",
       "distance": 5
-    },
-    {
-      "label": "CONTROL: the hero is in Ragefire Chasm",
-      "action": "assert",
-      "actor": "hero",
-      "metric": "map_id",
-      "equals": 389
     },
     {
       "action": "summon",
