@@ -2,8 +2,9 @@
 -- Winterspring takes players in (Normal only), the portal he leaves where he falls and the shrine at
 -- the entrance take them back, and players who die in his map rise at its start. The shrine's spot is taken in game.
 
--- Loot: one roll of his ten items (the drops seen on Ascension); snowgrave_instance_death_coa rolls one more for
--- every four players in his map, and every player gets the runes and the Treasures of Azeroth chest.
+-- Loot: one roll of his ten items (the drops seen on Ascension; loot mode 2 holds their heroic ones);
+-- snowgrave_instance_death_coa rolls one more for every four players in his map, and every player gets the runes
+-- and the Treasures of Azeroth chest.
 UPDATE `creature_template` SET `lootid` = 64627 WHERE `entry` = 64627;
 DELETE FROM `creature_loot_template` WHERE `Entry` = 64627;
 INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`,
@@ -17,7 +18,17 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 (64627, 18064, 0, 0, 0, 1, 1, 1, 1, 'Snowgrave - Band of Winter''s Grasp'),
 (64627, 17663, 0, 0, 0, 1, 1, 1, 1, 'Snowgrave - Frostbound Bulwark'),
 (64627, 18085, 0, 0, 0, 1, 1, 1, 1, 'Snowgrave - Frostbite Spellhammer'),
-(64627, 17665, 0, 0, 0, 1, 1, 1, 1, 'Snowgrave - Glacierborn Greatsword');
+(64627, 17665, 0, 0, 0, 1, 1, 1, 1, 'Snowgrave - Glacierborn Greatsword'),
+(64627, 318085, 0, 0, 0, 2, 1, 1, 1, 'Snowgrave (heroic) - Frostbite Spellhammer'),
+(64627, 317665, 0, 0, 0, 2, 1, 1, 1, 'Snowgrave (heroic) - Glacierborn Greatsword'),
+(64627, 317663, 0, 0, 0, 2, 1, 1, 1, 'Snowgrave (heroic) - Frostbound Bulwark'),
+(64627, 318064, 0, 0, 0, 2, 1, 1, 1, 'Snowgrave (heroic) - Band of Winter''s Grasp'),
+(64627, 317304, 0, 0, 0, 2, 1, 1, 1, 'Snowgrave (heroic) - Crystalized Water Spike'),
+(64627, 317664, 0, 0, 0, 2, 1, 1, 1, 'Snowgrave (heroic) - Glaciermind Spellfocus'),
+(64627, 318084, 0, 0, 0, 2, 1, 1, 1, 'Snowgrave (heroic) - Glacierbound Wristguards'),
+(64627, 318065, 0, 0, 0, 2, 1, 1, 1, 'Snowgrave (heroic) - Frostwoven Spiritbinder Gloves'),
+(64627, 317912, 0, 0, 0, 2, 1, 1, 1, 'Snowgrave (heroic) - Glacierwoven Legwraps'),
+(64627, 317913, 0, 0, 0, 2, 1, 1, 1, 'Snowgrave (heroic) - Frostbite Warcloak');
 
 -- The Treasures of Azeroth chest every world boss gives (978059) has a 5% roll at any world boss item (978060):
 -- his items join that pool.
@@ -25,7 +36,7 @@ INSERT IGNORE INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Cha
   `GroupId`, `MinCount`, `MaxCount`, `Comment`)
 SELECT 978060, l.`Item`, 0, 0, 0, 1, 1, 1, 1, CONCAT('Treasures of Azeroth - World Boss - ', i.`name`)
 FROM `creature_loot_template` l JOIN `item_template` i ON i.`entry` = l.`Item`
-WHERE l.`Entry` = 64627 AND l.`GroupId` = 1 AND l.`Reference` = 0 AND i.`Quality` = 4;
+WHERE l.`Entry` = 64627 AND l.`LootMode` = 1 AND l.`GroupId` = 1 AND l.`Reference` = 0 AND i.`Quality` = 4;
 
 -- His health is per player in his map (10 to 40): each kill's pool over its players.
 UPDATE `coa_world_boss_level` SET `health` = 1120094, `note` = 'per player; kills 23:24/23:36, 22/24 players'
