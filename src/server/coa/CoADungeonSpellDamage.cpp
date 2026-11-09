@@ -59,7 +59,7 @@ namespace
         if ((CreatureMultipliers.empty() && CreatureSpellMultipliers.empty()) || !attacker)
             return 1.0f;
         Creature const* creature = attacker->ToCreature();
-        if (!creature || creature->GetCharmerOrOwnerPlayerOrPlayerItself())
+        if (!creature || creature->IsControlledByPlayer())
             return 1.0f;
         Map const* map = creature->GetMap();
         if (!map || !map->IsDungeon())
