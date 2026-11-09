@@ -42,6 +42,7 @@
 #include "Unit.h"
 #include "Util.h"
 #include "Vehicle.h"
+#include "World.h"
 #include "WorldPacket.h"
 
 /// @todo: this import is not necessary for compilation and marked as unused by the IDE
@@ -392,7 +393,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     nullptr,                                                      //323 unknown Ascension aura
     nullptr,                                                      //324 unknown Ascension aura
     nullptr,                                                      //325 unknown Ascension aura
-    nullptr,                                                      //326 unknown Ascension aura
+    &AuraEffect::HandleNoImmediateEffect,                         //326 SPELL_AURA_ASCENSION_SUPPRESS_AVOIDANCE
     &AuraEffect::HandleAscensionModStatFromStat,                  //327 SPELL_AURA_ASCENSION_MOD_STAT_FROM_STAT
     &AuraEffect::HandleAscensionModMaxManaFromStat,               //328 SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT
     nullptr,                                                      //329 unknown Ascension aura
@@ -414,7 +415,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     &AuraEffect::HandleModHealingDone,                            //345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT
     nullptr,                                                      //346 unknown Ascension aura
     nullptr,                                                      //347 unknown Ascension aura
-    nullptr,                                                      //348 unknown Ascension aura
+    &AuraEffect::HandleNoImmediateEffect,                         //348 SPELL_AURA_ASCENSION_DEFEND_DURING_CAST
     nullptr,                                                      //349 unknown Ascension aura
     &AuraEffect::HandleAscensionModCritChance,                    //350 SPELL_AURA_ASCENSION_MOD_CRIT_CHANCE
     nullptr,                                                      //351 unknown Ascension aura
@@ -431,7 +432,7 @@ pAuraEffectHandler AuraEffectHandler[TOTAL_AURAS] =
     nullptr,                                                      //362 unknown Ascension aura
     nullptr,                                                      //363 unknown Ascension aura
     nullptr,                                                      //364 unknown Ascension aura
-    nullptr,                                                      //365 unknown Ascension aura
+    &AuraEffect::HandleNoImmediateEffect,                         //365 SPELL_AURA_ASCENSION_MOD_POWER_COST_PCT
     nullptr,                                                      //366 unknown Ascension aura
 };
 
@@ -6632,7 +6633,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     if (GetAuraType() == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
     {
         // xinef: ceil obtained value, it may happen that 10 ticks for 10% damage may not kill owner
-        damage = uint32(std::ceil(CalculatePct<float, float>(target->GetMaxHealth(), damage)));
+        damage = uint32(std::ceil(CalculatePct<float, float>(LocalLevelScaling::PersonalDamageHealthFor(caster, target), damage)));
     }
 
     // Script Hook For HandlePeriodicDamageAurasTick -- Allow scripts to change the Damage pre class mitigation calculations
@@ -6986,7 +6987,7 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
 
     if (caster)
     {
-        float threat = float(gain) * 0.5f;
+        float threat = float(gain) * sWorld->getRate(RATE_THREAT_HEALING);
         if (caster->IsClass(CLASS_PALADIN))
             threat *= 0.5f;
         target->GetThreatMgr().ForwardThreatForAssistingMe(caster, threat, GetSpellInfo());
@@ -7127,6 +7128,9 @@ void AuraEffect::HandleObsModPowerAuraTick(Unit* target, Unit* caster) const
         target->SendPeriodicAuraLog(&pInfo);
         return;
     }
+
+    if (Player* player = target->ToPlayer(); player && !sScriptMgr->OnPlayerCanRegenerate(player, int32(PowerType)))
+        return;
 
     // don't regen when permanent aura target has full power
     if (GetBase()->IsPermanent() && target->GetPower(PowerType) == target->GetMaxPower(PowerType))

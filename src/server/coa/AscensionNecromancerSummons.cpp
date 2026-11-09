@@ -407,8 +407,12 @@ bool Summon(Player* player, uint32 spell, Unit* target, Position const& position
                     point.SetOrientation(heading);
                     player->MovePositionToFirstCollision(point, 2.0f, heading - player->GetOrientation());
                     float const lateral = (float(i) - (count - 1) / 2.0f) * 1.0f;
-                    point.m_positionX += std::cos(heading + float(M_PI) / 2) * lateral;
-                    point.m_positionY += std::sin(heading + float(M_PI) / 2) * lateral;
+                    float const lateralX = std::cos(heading + float(M_PI) / 2) * lateral;
+                    float const lateralY = std::sin(heading + float(M_PI) / 2) * lateral;
+                    point.m_positionX += lateralX;
+                    point.m_positionY += lateralY;
+                    aim.m_positionX += lateralX;
+                    aim.m_positionY += lateralY;
                     point.SetOrientation(heading);
                 }
                 else

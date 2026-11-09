@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Path to Ascension: a claimed tracking tutorial counts its quest as done (#8833)",
+  "contract": [
+    "Tutorial 56 (Tutorial.dbc: achievement 87246, quest 1903520 'Path to Ascension: Rank Up Your Spells', level 8) is a tracking tutorial. The client (UIParent.lua PLAYER_LEVEL_UP) offers 1903520 as an auto-quest pop-up at level 11 (AUTO_QUEST_RANK_UP_SPELLS_LEVEL) unless C_Quest:HasOrHasDoneQuest finds it in the log, in GetQuestsCompleted() or already popped.",
+    "GetQuestsCompleted() is filled by SMSG_QUERY_QUESTS_COMPLETED_RESPONSE, which lists rewarded quests only. PathToAscensionRewards Claim() records the claim in core.ascension.tutorial_rewards but never marks 1903520 rewarded, so a claimed tutorial keeps its pop-up, and accepting it is refused as already collected (#6079 path).",
+    "Expected: claiming tutorial 56 pays the reward and marks 1903520 rewarded, so the completed-quest query reports it and the client stops offering it. A character that claimed it earlier gets the rewarded mark at its next login.",
+    "The pop-up itself is client-side and remains an in-game check."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8833.38,
+    "y": 628.628,
+    "z": 94.0066,
+    "o": 1.06535
+  },
+  "players": [
+    { "id": "initiate", "race": 1, "class": 1, "level": 10, "security": 3 },
+    { "id": "veteran", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login rewards and the tutorial state settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "CONTROL: an unclaimed tutorial leaves its quest open", "actor": "initiate",
+      "metric": "quest_rewarded", "quest": 1903520, "equals": 0
+    },
+    {
+      "action": "set_player_setting", "label": "SETUP: tutorial 56 is verified", "actor": "initiate",
+      "source": "core.ascension.tutorial_verified", "index": 56, "value": 1
+    },
+    { "action": "command", "label": "SETUP: earn tutorial 56's achievement", "actor": "initiate", "command": ".achievement add 87246" },
+    {
+      "action": "assert", "label": "SETUP: the achievement is earned", "actor": "initiate", "metric": "has_achievement",
+      "achievement": 87246, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "client_packet", "label": "Claim tutorial 56", "actor": "initiate",
+      "opcode": 1704, "fields": [{"u32": 56}]
+    },
+    {
+      "action": "assert", "label": "SETUP: the claim is accepted", "actor": "initiate",
+      "metric": "server_packet_contains", "opcode": 1711, "text": "CLAIM_TUTORIAL_OK", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: the claim is recorded", "actor": "initiate",
+      "metric": "player_setting", "source": "core.ascension.tutorial_rewards", "index": 56, "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the tracking quest counts as rewarded", "actor": "initiate",
+      "metric": "quest_rewarded", "quest": 1903520, "equals": 1
+    },
+    {
+      "action": "set_player_setting", "label": "SETUP: the veteran claimed tutorial 56 before the fix", "actor": "veteran",
+      "source": "core.ascension.tutorial_rewards", "index": 56, "value": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the earlier claim left the quest open", "actor": "veteran",
+      "metric": "quest_rewarded", "quest": 1903520, "equals": 0
+    },
+    { "action": "relog", "label": "The veteran logs in again", "actor": "veteran" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: login records the claimed tracking quest as rewarded", "actor": "veteran",
+      "metric": "quest_rewarded", "quest": 1903520, "equals": 1, "within_ms": 5000
+    }
+  ]
+}

@@ -28,10 +28,15 @@
  *
  *   Spider form, when the avatar dies
  *     Acid Spit          first 1s,  every 12s   on the tank, poison and -10% armour
- *     Web Spray          first 15s, every 45s   everyone within 20 yards is
- *                                               slowed, then webbed; then she
- *                                               charges a caster, as in stock
- *     Burrow             first 20.5s, every 45s under ground for 3s, untargetable;
+ *     Web Spray          first 15s, every 45s   everyone within 35 yards (the
+ *                                               spell's own 20 widened: tester,
+ *                                               2026-11-08) is slowed, then
+ *                                               webbed; then she charges a
+ *                                               caster, as in stock
+ *     Burrow             first 20.5s, every 45s under ground for 3s, untargetable
+ *                                               and hidden (the Hide Body display
+ *                                               of Burrow's misc value 24417, as
+ *                                               Kurinnaxx's Tunneling);
  *                                               she comes up on the player
  *                                               farthest from her and stays on
  *                                               them for 8s, untauntable (tester,
@@ -139,6 +144,8 @@ namespace
     constexpr float VOLLEY_RANGE   = 200.0f;
     constexpr uint8 EGGS_PER_HATCH = 10;
     constexpr float NOVA_RANGE     = 20.0f;
+    constexpr float WEB_SPRAY_RANGE = 35.0f;
+    constexpr uint32 DISPLAY_HIDE_BODY = 22452;
     constexpr Milliseconds BURROW_LENGTH        = 3s;
     constexpr Milliseconds HUNT_LENGTH          = 8s;
     constexpr Milliseconds HATCH_EVERY          = 30s;
@@ -252,10 +259,16 @@ namespace
                         Hit(me, p, SPELL_POISON_NOVA, int32(full * (1.0f - me->GetDistance(p) / NOVA_RANGE)));
                     break;
                 }
+                case SPELL_WEB_SPRAY:
+                    for (Player* p : PlayersWithin(me, WEB_SPRAY_RANGE))
+                        if (!p->HasAura(SPELL_WEB_SPRAY, me->GetGUID()) && me->IsWithinLOSInMap(p))
+                            me->AddAura(SPELL_WEB_SPRAY, p);
+                    break;
                 case SPELL_BURROW:
                     me->AttackStop();
                     me->SetReactState(REACT_PASSIVE);
                     me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                    me->SetDisplayId(DISPLAY_HIDE_BODY);
                     events.ScheduleEvent(EVENT_EMERGE, BURROW_LENGTH, 0, PHASE_SPIDER);
                     break;
                 default:
@@ -311,6 +324,8 @@ namespace
         void Emerge()
         {
             me->RemoveAurasDueToSpell(SPELL_BURROW);
+            if (me->GetDisplayId() == DISPLAY_HIDE_BODY)
+                me->RestoreDisplayId();
             me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
             me->SetReactState(REACT_AGGRESSIVE);
         }

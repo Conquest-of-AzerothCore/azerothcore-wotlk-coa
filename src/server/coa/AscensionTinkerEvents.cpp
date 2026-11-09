@@ -118,7 +118,7 @@ class aura_ascension_tinker_event : public AuraScript
             case 92138: return damage && !periodic && fire && player->IsValidAttackTarget(target);
             case 707239: return damage && Any(info,{653238,653247}) && Chance(player,707239);
             case 704107: return damage && Named(info,805351);
-            case 705846: return healing && periodic && Named(info,801809);
+            case 705846: return healing && (event.GetTypeMask() & PROC_FLAG_DONE_PERIODIC) && Named(info,801809);
             case 806629: return damage && !periodic &&
                 ((!info && (event.GetTypeMask() & PROC_FLAG_DONE_RANGED_AUTO_ATTACK)) ||
                  (info && info->DmgClass == SPELL_DAMAGE_CLASS_RANGED)) && Chance(player,806629);

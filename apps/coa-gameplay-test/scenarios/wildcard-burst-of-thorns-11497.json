@@ -1,0 +1,160 @@
+{
+  "schema": 1,
+  "name": "Wildcard Burst of Thorns damages attackers every second and grants Thornscale once per 8 s when struck (#11497)",
+  "contract": [
+    "Burst of Thorns 282195 reads 'Thorns emerge from your ally's armor for 15 sec, damaging nearby enemies and granting Thornscale when struck. Thornscale can only occur once every 8 sec, and the damage effect can only occur once every 1 sec.'",
+    "Effect 0 triggers 282196 (thorns damage) and effect 1 triggers 282197 (Thornscale, 5 sec), but the aura had no spell_proc row, so neither ever fired.",
+    "A level 10 wolf swings about every 2 s, so a struck hero sees the damage proc on each landed swing while Thornscale, once up for 5 s, is not cast again until 8 s after its first cast.",
+    "Expected: Thornscale appears after the first strike with at most 5000 ms left; 5.5 s later, with the wolf still swinging, it has expired and was cast exactly once while 282196 was cast at least twice; after the 8 s interval it is cast a second time."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 20,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "wolf",
+      "owner": "hero",
+      "entry": 299,
+      "level": 10,
+      "health": 1000000,
+      "reaction": 1,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 200000,
+      "maximum": 200000,
+      "label": "Configure the survival health before the wolf can attack"
+    },
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 282195
+    },
+    {
+      "action": "cast",
+      "label": "Cast Burst of Thorns on self",
+      "actor": "hero",
+      "spell": 282195
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Burst of Thorns is up",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 282195,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: nothing has struck the hero yet, so Thornscale is absent",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 282197,
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "label": "Engage the wolf so it swings back",
+      "actor": "hero",
+      "target": "wolf"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: being struck grants Thornscale",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 282197,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Thornscale lasts 5 s",
+      "actor": "hero",
+      "metric": "aura_duration_ms",
+      "spell": 282197,
+      "min": 1,
+      "max": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the thorns damage went off on the strike",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 282196,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let Thornscale run out while the wolf keeps swinging, inside the 8 s interval",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "The wolf kept striking the hero",
+      "actor": "hero",
+      "metric": "melee_attacks_taken",
+      "target": "wolf",
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "Thornscale was not refreshed by the later strikes",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 282197,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Thornscale was cast exactly once inside the 8 s interval",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 282197,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the damage effect fires on its own 1 s cadence, more than once in that window",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 282196,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "The thorns hurt the wolf",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 282196,
+      "target": "wolf",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Once the 8 s interval has passed Thornscale is granted again",
+      "actor": "hero",
+      "metric": "spell_cast_count",
+      "spell": 282197,
+      "min": 2,
+      "within_ms": 6000
+    }
+  ]
+}

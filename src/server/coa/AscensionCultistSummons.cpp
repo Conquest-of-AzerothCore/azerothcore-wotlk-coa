@@ -187,6 +187,11 @@ struct npc_ascension_cultist_summon : public ScriptedAI
                 return enemy;
         return nullptr;
     }
+    void Face(Unit* target)
+    {
+        me->SetFacingToObject(target);
+        me->SetOrientation(me->GetAngle(target));
+    }
     void DoAction(int32 action) override
     {
         Player* player = ObjectAccessor::GetPlayer(*me, owner);
@@ -194,7 +199,7 @@ struct npc_ascension_cultist_summon : public ScriptedAI
             return;
         if (Unit* target = Target(player))
         {
-            me->SetFacingToObject(target);
+            Face(target);
             if (action == 1 && me->GetEntry() == 50096)
                 Cast(me, target, 802046);
             if (action == 2)
@@ -281,7 +286,7 @@ struct npc_ascension_cultist_summon : public ScriptedAI
         Unit* target = Target(player);
         if (!target)
             return;
-        me->SetFacingToObject(target);
+        Face(target);
         if (entry == 533030 && !portalCast)
         {
             portalCast = true;

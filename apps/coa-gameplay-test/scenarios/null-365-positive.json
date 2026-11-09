@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "name": "Aura365: selected resource and school percentage cost",
+  "contract": "34471 and34512 name50% mana cost reduction. The extra selectors are resource bitmask in MiscA and school mask in MiscB;973841 explicitly names mana with mask1.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mob",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 116
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_power_cost",
+      "save_as": "base",
+      "spell": 116
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_power_cost",
+      "spell": 116,
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 34471,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_power_cost",
+      "spell": 116,
+      "ratio_to": "base",
+      "min": 0.48,
+      "max": 0.51,
+      "label": "The Beast Within halves eligible mana cost"
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "power",
+      "save_as": "mana",
+      "power": 0
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 116,
+      "target": "mob"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 116,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "mana",
+      "max": -1,
+      "label": "A real normal cast spends mana"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 34471,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_power_cost",
+      "spell": 116,
+      "relative_to": "base",
+      "equals": 0,
+      "label": "Removal restores native cost"
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 34512,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_power_cost",
+      "spell": 116,
+      "ratio_to": "base",
+      "min": 0.48,
+      "max": 0.51,
+      "label": "The mana-only variant uses the same percentage"
+    }
+  ]
+}

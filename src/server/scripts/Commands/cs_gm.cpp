@@ -25,6 +25,7 @@
 #include "Player.h"
 #include "RBAC.h"
 #include "Realm.h"
+#include "StaffChatTag.h"
 #include "World.h"
 #include "WorldSession.h"
 
@@ -37,8 +38,26 @@ public:
 
     ChatCommandTable GetCommands() const override
     {
+        static ChatCommandTable gmModCommandTable =
+        {
+            { "chat",      HandleGMModChatCommand,    rbac::RBAC_PERM_COMMAND_GM_MOD_CHAT, Console::No  }
+        };
+
+        static ChatCommandTable gmCmCommandTable =
+        {
+            { "chat",      HandleGMCmChatCommand,     rbac::RBAC_PERM_COMMAND_GM_CM_CHAT,  Console::No  }
+        };
+
+        static ChatCommandTable gmAdminCommandTable =
+        {
+            { "chat",      HandleGMAdminChatCommand,  rbac::RBAC_PERM_COMMAND_GM_ADMIN_CHAT, Console::No  }
+        };
+
         static ChatCommandTable gmCommandTable =
         {
+            { "mod",       gmModCommandTable                                                       },
+            { "cm",        gmCmCommandTable                                                        },
+            { "admin",     gmAdminCommandTable                                                     },
             { "chat",      HandleGMChatCommand,       rbac::RBAC_PERM_COMMAND_GM_CHAT,    Console::No  },
             { "fly",       HandleGMFlyCommand,        rbac::RBAC_PERM_COMMAND_GM_FLY,     Console::No  },
             { "ingame",    HandleGMListIngameCommand, rbac::RBAC_PERM_COMMAND_GM_INGAME,  Console::Yes },
@@ -53,6 +72,42 @@ public:
             { "gm", gmCommandTable }
         };
         return commandTable;
+    }
+
+    static bool HandleStaffChatTag(ChatHandler* handler, Optional<bool> enableArg, StaffChatTag tag, char const* name)
+    {
+        Player* player = handler->GetSession()->GetPlayer();
+        StaffChatTagData const* data = player->CustomData.Get<StaffChatTagData>(STAFF_CHAT_TAG_KEY);
+        bool const isOn = data && data->Tag == tag;
+
+        if (!enableArg)
+        {
+            handler->PSendSysMessage("{} tag is {}.", name, isOn ? "ON" : "OFF");
+            return true;
+        }
+
+        if (*enableArg)
+            player->CustomData.GetDefault<StaffChatTagData>(STAFF_CHAT_TAG_KEY)->Tag = tag;
+        else if (isOn)
+            player->CustomData.Erase(STAFF_CHAT_TAG_KEY);
+
+        handler->SendNotification(*enableArg ? "{} tag is ON" : "{} tag is OFF", name);
+        return true;
+    }
+
+    static bool HandleGMModChatCommand(ChatHandler* handler, Optional<bool> enableArg)
+    {
+        return HandleStaffChatTag(handler, enableArg, StaffChatTag::Moderator, "Moderator");
+    }
+
+    static bool HandleGMCmChatCommand(ChatHandler* handler, Optional<bool> enableArg)
+    {
+        return HandleStaffChatTag(handler, enableArg, StaffChatTag::CommunityManager, "Community Manager");
+    }
+
+    static bool HandleGMAdminChatCommand(ChatHandler* handler, Optional<bool> enableArg)
+    {
+        return HandleStaffChatTag(handler, enableArg, StaffChatTag::Administrator, "Administrator");
     }
 
     // Enables or disables the staff badge

@@ -14,7 +14,8 @@
  * into his tiger kit without being healed. As the other priests, at 50% he
  * drains the Avatar of Shirvallah (see LoaAvatar), taking ~1% damage while it
  * dies; then the Gift of the Blood God and his tiger form (Shredding Claws in
- * the log 0.3 seconds before the avatar's death).
+ * the log 0.3 seconds before the avatar's death). The tank keeps his threat
+ * through the change (the CoA logs of 2026-08-02 and 2026-08-24, 3 of 3 pulls).
  *
  *   Troll form
  *     Mortal Cleave    first 4s,  every 13s   cone in front, -25% healing taken
@@ -23,11 +24,13 @@
  *
  *   Tiger form (his Aspect of Shirvallah), when the avatar dies
  *     Rending Swipe    first 4s,  every 14s   cone in front
- *     War Stomp        first 12s, every 40s   on the tank, 50 yards, knocks back
- *     Speed Slash      first 14s, every 40s   runs through the raid for 17s,
- *                                             a new random player every 2s, no
- *                                             melee meanwhile; each cut adds a
- *                                             stack of Rip
+ *     War Stomp        first 1s,  every 40s   on the tank, 50 yards, knocks back
+ *     Speed Slash      as each War Stomp's    runs through the raid for 17s,
+ *                      2s cast ends           to a new random player every 2s,
+ *                                             no melee meanwhile; each cut adds
+ *                                             a stack of Rip
+ *                      (both casts start 1 and 3s after Shredding Claws in
+ *                      the CoA logs, 3 of 3 pulls)
  *     Shredding Claws  passive, armour down on hit
  *     Summon Tigers, frenzy every 30s and enrage at 20% from stock
  *
@@ -101,6 +104,7 @@ namespace
 
     constexpr Milliseconds SPEED_SLASH_RETARGET = 2s;
     constexpr Milliseconds SPEED_SLASH_DURATION = 17s;
+    constexpr uint32 POINT_SPEED_SLASH = 1;
 
     constexpr float CLEAVE_RANGE = 10.0f;
     constexpr float CLEAVE_ARC   = float(M_PI) / 2;
@@ -182,13 +186,13 @@ namespace
             {
                 DoCastVictim(SPELL_RENDING_SWIPE);
                 context.Repeat(14s);
-            }).Schedule(12s, [this](TaskContext context)
+            }).Schedule(1s, [this](TaskContext context)
             {
                 DoCastVictim(SPELL_WAR_STOMP);
-                context.Repeat(40s);
-            }).Schedule(14s, [this](TaskContext context)
-            {
-                DoCastSelf(SPELL_SPEED_SLASH);
+                context.Schedule(0ms, [this](TaskContext)
+                {
+                    DoCastSelf(SPELL_SPEED_SLASH);
+                });
                 context.Repeat(40s);
             }).Schedule(30s, [this](TaskContext context)
             {
@@ -221,8 +225,15 @@ namespace
         {
             scheduler.Schedule(0ms, GROUP_SPEED_SLASH, [this](TaskContext slash)
             {
-                if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 0.0f, true))
-                    me->GetMotionMaster()->MoveChase(target);
+                Unit* victim = me->GetVictim();
+                Unit* target = SelectTarget(SelectTargetMethod::Random, 0, [victim](Unit* u)
+                {
+                    return u->IsPlayer() && u != victim;
+                });
+                if (!target)
+                    target = victim;
+                if (target)
+                    me->GetMotionMaster()->MovePoint(POINT_SPEED_SLASH, target->GetPosition());
                 slash.Repeat(SPEED_SLASH_RETARGET);
             }).Schedule(SPEED_SLASH_DURATION, GROUP_SPEED_SLASH, [this](TaskContext)
             {
@@ -305,7 +316,6 @@ namespace
             DoCastSelf(SPELL_ASPECT_OF_SHIRVALLAH, true);
             DoCastSelf(SPELL_SHREDDING_CLAWS, true);
             me->LoadEquipment(0, true);
-            DoResetThreatList();
             ScheduleTiger();
         }
 

@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Unbroken attack power does not outlive a relog frozen (#11503)",
+  "contract": [
+    "#11503: Unbroken 707407 'This degrades slowly over time, and while out of combat'. The attack power aura 707487 is granted by hits the hunter takes and decays on a two second tick. A character that logs out holding the buff must not log back in with an attack power aura that nothing decays.",
+    "Expected independent of the implementation: after a relog with no further damage, the buff is gone (or has decayed) once six idle seconds have passed."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "w", "race": 2, "class": 15, "level": 60, "ascension_client": true }
+  ],
+  "creatures": [
+    { "id": "brute", "owner": "w", "entry": 36, "faction": 16, "level": 60, "health": 100000, "reaction": 2, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "w", "spell": 707407 },
+    { "action": "wait", "ms": 500 },
+    { "action": "attack", "actor": "w", "target": "brute" },
+    { "action": "assert", "label": "Taking hits grants the attack power aura", "actor": "w", "metric": "aura", "spell": 707487, "equals": 1, "within_ms": 15000 },
+    { "action": "attack_nearby", "actor": "w", "entry": 36, "kill": true },
+    { "action": "assert", "label": "SETUP: the buff is held when the character logs out", "actor": "w", "metric": "aura_amount", "spell": 707487, "min": 1 },
+    { "action": "relog", "actor": "w" },
+    { "action": "login_hooks", "actor": "w" },
+    { "action": "assert", "label": "CONTROL: the passive talent is back after the relog", "actor": "w", "metric": "aura", "spell": 707407, "equals": 1 },
+    { "action": "wait", "ms": 6000 },
+    { "action": "assert", "label": "No attack power aura is left frozen after the idle wait", "actor": "w", "metric": "aura", "spell": 707487, "equals": 0 }
+  ]
+}

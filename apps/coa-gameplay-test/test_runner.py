@@ -141,6 +141,13 @@ class RunnerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             run.validate(scenario)
 
+    def test_lfg_dungeon_takes_an_optional_loot_method(self):
+        step = {'action': 'lfg_dungeon', 'actor': 'caster', 'dungeon': 26}
+        self.assert_step_validates(step)
+        self.assert_step_validates({**step, 'loot_method': 0})
+        for change in ({'loot_method': 5}, {'loot_method': '0'}, {'dungeon': 0}):
+            self.assert_step_rejected({**step, **change})
+
     def test_nearby_creature_can_attack_needs_a_player_and_entry(self):
         step = {'action': 'assert', 'actor': 'caster', 'metric': 'nearby_creature_can_attack', 'entry': 24484,
                 'equals': 0}
@@ -585,6 +592,18 @@ class RunnerTests(unittest.TestCase):
         for step, error in (({'action': 'game_event', 'event': 12, 'active': 1}, 'active must be boolean'),
                             ({'action': 'game_event', 'event': 0, 'active': True}, r'\.event'),
                             ({'action': 'game_event', 'event': 12}, 'step 0')):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, step)
+            with self.subTest(step=step), self.assertRaisesRegex(ValueError, error):
+                run.validate(scenario)
+
+    def test_system_mail_needs_a_known_kind_and_an_item(self):
+        for kind in ('postmaster', 'reward', 'server'):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, {'action': 'system_mail', 'actor': 'caster', 'item': 6948, 'kind': kind})
+            self.assertIs(run.validate(scenario), scenario)
+        for step, error in (({'action': 'system_mail', 'actor': 'caster', 'item': 6948, 'kind': 'gm'}, 'kind'),
+                            ({'action': 'system_mail', 'actor': 'caster', 'item': 0, 'kind': 'reward'}, r'\.item')):
             scenario = copy.deepcopy(self.scenario)
             scenario['steps'].insert(0, step)
             with self.subTest(step=step), self.assertRaisesRegex(ValueError, error):

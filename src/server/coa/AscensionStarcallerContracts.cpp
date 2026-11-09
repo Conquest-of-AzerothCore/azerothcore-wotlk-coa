@@ -11,6 +11,16 @@ namespace AscensionStarcaller
 {
 void ApplyContracts(SpellInfo* info)
 {
+    if (info && info->Id == 993772)
+    {
+        info->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
+        info->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);
+        info->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo();
+        info->Effects[EFFECT_0].RadiusEntry = nullptr;
+        info->Effects[EFFECT_1].Effect = 0;
+        info->Effects[EFFECT_2].Effect = 0;
+        info->_InitializeExplicitTargetMask();
+    }
     if (!info || info->SpellFamilyName != 32)
         return;
     uint32 id = info->Id;

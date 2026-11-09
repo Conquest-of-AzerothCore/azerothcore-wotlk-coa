@@ -9,7 +9,7 @@
     "(-8835.8, 490.1, 109.7) and Thor (523) at Sentinel Hill. Retreating must land the player where a flight master",
     "actually stands, so the whistle used in Goldshire arrives at the Stormwind flight master instead of leaving the",
     "player standing in Goldshire. Node positions come from the client's TaxiNodes.dbc; the flight master creatures",
-    "come from the world database of the tested build."
+    "come from the world database of the tested build. Since #9460 the whistle first offers the nearest flight masters; option 0 is the closest one."
   ],
   "timeout_ms": 60000,
   "players": [
@@ -34,10 +34,10 @@
       "ms": 4000
     },
     {
-      "action": "learn",
-      "label": "Learn the whistle",
+      "action": "add_item",
+      "label": "Carry the whistle",
       "actor": "cleric",
-      "spell": 158
+      "item": 10
     },
     {
       "action": "assert",
@@ -48,9 +48,10 @@
       "max": -9560.2
     },
     {
-      "action": "cast",
+      "action": "use_item",
       "label": "Use the whistle in Goldshire",
       "actor": "cleric",
+      "item": 10,
       "spell": 158
     },
     {
@@ -63,12 +64,26 @@
     },
     {
       "action": "assert",
+      "label": "The whistle offers three flight masters",
+      "actor": "cleric",
+      "metric": "gossip_options",
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_select",
+      "label": "Choose the closest flight master",
+      "actor": "cleric",
+      "option": 0
+    },
+    {
+      "action": "assert",
       "label": "The whistle lands at the Stormwind flight master",
       "actor": "cleric",
       "metric": "position_x",
       "min": -8900,
       "max": -8780,
-      "within_ms": 8000
+      "within_ms": 20000
     },
     {
       "action": "assert",
@@ -77,7 +92,7 @@
       "metric": "position_y",
       "min": 440,
       "max": 540,
-      "within_ms": 8000
+      "within_ms": 20000
     },
     {
       "action": "assert",

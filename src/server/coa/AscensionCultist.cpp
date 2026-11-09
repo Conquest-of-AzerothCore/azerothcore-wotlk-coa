@@ -139,6 +139,11 @@ void RestoreBlade(Player* player)
 {
     player->RestoreSpellCharge(Highest(player, 500720));
 }
+void MarkVoidTouched(Player* player, Unit* healed)
+{
+    if (player->HasAura(300286))
+        Cast(player, healed, 301982);
+}
 void SetHelper(Player* player, uint32 id, bool enabled)
 {
     if (enabled && !player->HasAura(id))

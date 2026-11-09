@@ -79,9 +79,66 @@ def main():
     functions = {'COMPANION_ATTACK': 'bool SuppressPreparingCompanionAttack(', 'PROTECT': 'void ApplySafetyBubbleProtection(', 'CLEAR': 'void ClearSafetyBubble(',
                  'CAPTURE': 'void CaptureStageCompanions(', 'RESTORE': 'void RestoreStageCompanions(',
                  'USABLE': 'bool ManastormMgr::IsPlayerInUsableEndlessStage(',
-                 'HEARTS': 'void ManastormMgr::UpdateHeartPickups('}
+                 'HEARTS': 'void ManastormMgr::UpdateHeartPickups(',
+                 'TRANSITION_PROTECTION': 'bool ManastormMgr::IsPlayerProtectedDuringTransition('}
+    functions.update({
+        'RECOVERABLE_BUFF': 'bool IsRecoverableStageBuff(',
+        'CLEAR_DEBUFFS': 'void ClearStageDebuffs(',
+        'CAPTURE_RECOVERY': 'void CaptureStageRecovery(',
+        'RESTORE_RECOVERY': 'void RestoreStageRecovery(',
+        'PREPARE_MEMBER_TRANSFER': 'bool PrepareStageMemberTransfer(',
+        'PROTECTED_PORTAL': 'bool IsProtectedStagePortal(',
+        'LEFT_ENTRANCE': 'bool HasPlayerLeftStageEntrance(',
+    })
+    run_header = (MODULE / 'ManastormRun.h').read_text(encoding='utf-8')
+    for marker, signature in [('STAGE_BUFF', 'struct StageBuff'), ('STAGE_RECOVERY', 'struct StageRecovery')]:
+        code = code.replace('// ACTUAL_' + marker, method(run_header, signature) + ';')
+    code = code.replace('// ACTUAL_COOLDOWN_RESET',
+        method(run_header, 'bool MarkStageCooldownsReset(').replace('_instanceId', 'instanceId'))
+    remove_member = method(run_header, 'bool RemoveMember(').replace('_members', 'members')
+    remove_member = remove_member.replace('_ownerGuid', 'ownerGuid')
+    remove_member = remove_member.replace('_pendingStageTransferMembers', 'pendingTransfers')
+    code = code.replace('// ACTUAL_REMOVE_MEMBER', remove_member)
     for marker, signature in functions.items():
         code = code.replace('// ACTUAL_' + marker, method(source, signature))
+    damage = re.sub(r'\s+', '', method(source, 'void ManastormMgr::OnDamage('))
+    protection = ('if(IsProtectedStagePortal(victim->ToCreature())||'
+                  'IsPlayerProtectedDuringTransition(victim->ToPlayer())){damage=0;return;}')
+    assert protection in damage
+    assert damage.index(protection) < damage.index('if(sManastormReflectDamageDispatch)')
+    environment = method(spells, 'bool OnPlayerEnvironmentalDamage(')
+    assert 'IsPlayerProtectedDuringTransition(player)' in environment
+    assert 'PLAYERHOOK_ON_PLAYER_ENVIRONMENTAL_DAMAGE' in spells
+    for signature in ['bool ManastormMgr::PrepareStage(', 'bool ManastormMgr::TransferMemberToCurrentStage(']:
+        transfer = method(source, signature)
+        assert transfer.index('PrepareStageMemberTransfer(') < transfer.index('->TeleportTo(')
+    arrival = method(source, 'bool ManastormMgr::OnPlayerEnterMap(')
+    assert 'RemoveAllSpellCooldown()' in arrival and 'MarkStageCooldownsReset(' in arrival
+    assert 'HasPlayerLeftStageEntrance(member, map, *entrance)' in arrival
+    assert 'member->GetExactDist(entrance->position_x' not in arrival
+    assert 'ClearSafetyBubble(member,true)' in re.sub(r'\s+', '', arrival)
+    update = method(source, 'void ManastormMgr::Update(')
+    assert 'ClearSafetyBubble(member,true)' in re.sub(r'\s+', '', update)
+    ui = (MODULE / 'ManastormClientUIFixes.cpp').read_text(encoding='utf-8')
+    queue = ui.split('constexpr std::string_view QueueLevelGuardsLua = R"lua(', 1)[1].split(')lua";', 1)[0]
+    assert 'table.sort(levels, function(left, right) return left > right end)' in queue
+    assert queue.count('self.levels = GetSortedLevels()') == 2
+    assert 'levels[#levels + 1] = level' in queue
+    assert 'levelSelect.ScrollList:SetSelectedIndex(index, ScrollListMixin.UpdateType.Always)' in queue
+    assert 'if wasShown then levelSelect:Show() end' in queue
+    leave = method(source, 'bool ManastormMgr::LeaveRunMember(')
+    assert 'FailRun(' not in leave
+    assert leave.index('->TeleportTo(') < leave.index('run.RemoveMember(guid)')
+    assert 'SetScriptedPrivateOwner(owner, members' in leave
+    assert 'member->PrepareScriptedPrivateInstance(' in leave
+    assert 'LeaveRunMember(' in method(source, 'bool ManastormMgr::StopRun(')
+    assert 'LeaveRunMember(' in method(source, 'bool ManastormMgr::HandleReleaseAfterWipe(')
+    assert 'LeaveRunMember(*run, player, false' in arrival
+    portal = method(source, 'void ManastormMgr::SpawnStagePortal(')
+    assert 'UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC' in portal
+    necromancer = (ROOT / 'src/server/coa/AscensionNecromancerAbilities.cpp').read_text(encoding='utf-8')
+    assert 'Command(info) && (player->HasAura(500983) ||' in necromancer
+    assert '(!Named(info, 504868) && Minions(player).empty())' in necromancer
     patch = method(spells, 'void OnLoadSpellCustomAttr(').replace(
         'void OnLoadSpellCustomAttr(', 'void PatchSafetySpell(').replace(' override', '')
     code = code.replace('// ACTUAL_PATCH', patch)

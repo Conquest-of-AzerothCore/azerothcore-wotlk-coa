@@ -19,6 +19,7 @@ constexpr uint32 CharmOfWarding = 705967;
 constexpr uint32 Spider = 800841;
 constexpr uint32 SpiderlingVenomSource = 807702;
 constexpr uint32 Beetle = 803183;
+constexpr uint32 Weaver = 804980;
 constexpr uint32 Skulk = 800843;
 constexpr uint32 SpiderLord = 704264;
 constexpr uint32 SpiderLordDisplay = 142811;

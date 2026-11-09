@@ -185,6 +185,7 @@ public:
         if (player->GetSession()->IsBot() || !AscensionBazaarTokenCap::GetCap())
             return;
 
+        AscensionBazaarTokenCap::WarmAccount(player);
         ObjectGuid const guid = player->GetGUID();
         player->m_Events.AddEventAtOffset([guid]()
         {

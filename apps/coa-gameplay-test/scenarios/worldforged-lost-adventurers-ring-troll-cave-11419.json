@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Worldforged Lost Adventurer's Ring rests on the troll cave floor in Coldridge Valley (#11419)",
+  "contract": "#11419 reported the Lost Adventurer's Ring (gameobject entry 95502, guid 6940718) floating in the air at the end of the troll cave south of Coldridge Valley, where the reporter stood at (-6521.28, 303.625, 382.24). It stood at (-6519.8, 305.1, 382.848), 1.27 yd above the ground the server measures there. It now stands on the cave floor at the reporter's x/y, at z 382.2 where the server measures the floor, so the pickup rests on it.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -6521.28,
+    "y": 303.625,
+    "z": 382.24,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95502,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "MEASURE: the reporter's point sits on a floor",
+      "actor": "p",
+      "metric": "point_ground_gap",
+      "map": 0,
+      "x": -6521.28,
+      "y": 303.625,
+      "z": 382.24,
+      "min": -0.3,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "the pickup stands at the reporter's position",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -6521.28,
+      "y": 303.625,
+      "z": 382.2,
+      "max": 0.5,
+      "guid": 6940718,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup rests on the floor instead of floating 1.27 yd above it",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.5,
+      "guid": 6940718,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is grounded within 0.8 yd",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 6940718,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is not under water",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6940718,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is not inside a model",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "min": 0.3,
+      "guid": 6940718,
+      "spawn_type": "gameobject"
+    }
+  ]
+}

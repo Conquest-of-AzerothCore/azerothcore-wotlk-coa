@@ -27,6 +27,10 @@ inline bool Dawn(SpellInfo const* info)
     return info && (info->Id == 802024 || (info->Id >= 802248 && info->Id <= 802252) || info->Id == 574342 ||
                     info->Id == 574343);
 }
+inline bool RavenHillDawn(SpellInfo const* info)
+{
+    return info && (info->Id == 681788 || info->Id == 685020 || info->Id == 686020);
+}
 inline bool Dusk(SpellInfo const* info)
 {
     return info && (info->Id == 802020 || (info->Id >= 802253 && info->Id <= 802258));

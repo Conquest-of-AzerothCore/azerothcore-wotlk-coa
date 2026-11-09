@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Bannok Grimaxe stands in the middle of the Firebrand encampment in Lower Blackrock Spire",
+  "contract": [
+    "Bannok Grimaxe (9596, spawn 45843) stands at -74.0, -411.5, -18.9, the middle of the encampment, as on Ascension.",
+    "The observer stands 37 yards from that point and 74 yards from his former spot by the entrance camp, so the",
+    "60-yard nearby count no longer sees him at his former spot; the spawn distance pins the reported point."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
+  "players": [
+    { "id": "player", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_phase", "actor": "player", "value": 1 },
+    { "action": "teleport", "actor": "player", "map": 229, "x": -100.27, "y": -437.4, "z": -18.76, "o": 0.0 },
+    { "action": "assert", "label": "CONTROL: player is in Lower Blackrock Spire", "actor": "player", "metric": "map_id",
+      "equals": 229, "within_ms": 15000 },
+    { "action": "assert", "label": "CONTROL: the encampment's Firebrand Invoker stands nearby", "actor": "player",
+      "metric": "nearby_creature_count", "entry": 9262, "min": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "Bannok Grimaxe stands in the middle of the encampment", "actor": "player",
+      "metric": "nearby_creature_count", "entry": 9596, "equals": 1 },
+    { "action": "assert", "label": "Bannok Grimaxe stands at the reported position", "actor": "player",
+      "metric": "spawn_distance", "guid": 45843, "spawn_type": "creature", "x": -73.99575, "y": -411.5069, "z": -18.935,
+      "max": 1 }
+  ]
+}

@@ -524,6 +524,10 @@ public:
     // The client behind this connection holds the streamed spell visual and sound rows.
     bool HasAscensionSpellVisualRows() const { return _ascensionSpellVisualRows; }
     void SetAscensionSpellVisualRows() { _ascensionSpellVisualRows = true; }
+    // The character whose display patch rows this connection's client received (0: none). A reconnect to a
+    // character still in the world gets a new session, so its client is streamed again.
+    uint32 GetAscensionPatchStreamGuid() const { return _ascensionPatchStreamGuid; }
+    void SetAscensionPatchStreamGuid(uint32 guid) { _ascensionPatchStreamGuid = guid; }
     void SetPlayer(Player* player);
     uint8 Expansion() const { return m_expansion; }
 
@@ -1361,6 +1365,7 @@ private:
     std::string m_Address;
     bool _ascensionCompatEnabled = false;
     bool _ascensionSpellVisualRows = false;
+    uint32 _ascensionPatchStreamGuid = 0;
 
     AccountTypes _security;
     bool _skipQueue;

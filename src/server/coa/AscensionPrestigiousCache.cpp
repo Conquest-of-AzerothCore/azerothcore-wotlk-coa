@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionCacheRewards.h"
 #include "AscensionRaidReleasePolicy.h"
+#include "AscensionSpecLoot.h"
 #include "Chat.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
@@ -49,6 +50,7 @@ struct CacheConfig
     uint8 releasedTokenStage = 12;
     uint8 classicStages = 8;
     uint8 tbcStages = 0;
+    bool previousStageOnly = false;
 };
 
 CacheConfig g_config;
@@ -75,9 +77,15 @@ uint32 ClassicStage(uint32 cacheItemId)
     }
 }
 
-bool IsCacheReleased(uint32 cacheItemId, CacheConfig const& config)
+uint32 ReleasedStage(CacheConfig const& config)
 {
     uint32 const released = RaidRelease::ReleasedStage();
+    return config.previousStageOnly && released > 0 ? released - 1 : released;
+}
+
+bool IsCacheReleased(uint32 cacheItemId, CacheConfig const& config)
+{
+    uint32 const released = ReleasedStage(config);
     for (std::size_t index = 0; index < ClassicLadder.size(); ++index)
         if (ClassicLadder[index] == cacheItemId)
             return index < config.classicStages && ClassicStage(cacheItemId) <= released;
@@ -88,7 +96,7 @@ bool IsCacheReleased(uint32 cacheItemId, CacheConfig const& config)
     return false;
 }
 
-bool IsTokenReleased(uint8 tokenStage, uint32 cacheItemId)
+bool IsTokenReleased(uint8 tokenStage, uint32 cacheItemId, CacheConfig const& config)
 {
     uint32 stage = 0;
     switch (tokenStage)
@@ -100,7 +108,7 @@ bool IsTokenReleased(uint8 tokenStage, uint32 cacheItemId)
         case 6: stage = RaidRelease::StageNaxxramas; break;
         default: return tokenStage >= 8 && sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL) >= 70;
     }
-    return stage <= RaidRelease::ReleasedStage();
+    return stage <= ReleasedStage(config);
 }
 
 void LoadPrestigiousCachePools()
@@ -116,6 +124,7 @@ void LoadPrestigiousCachePools()
         sConfigMgr->GetOption<uint32>("Ascension.PrestigiousCache.ClassicStages", 8), ClassicLadder.size()));
     config.tbcStages = uint8(std::min<uint32>(
         sConfigMgr->GetOption<uint32>("Ascension.PrestigiousCache.TbcStages", 0), TbcLadder.size()));
+    config.previousStageOnly = sConfigMgr->GetOption<bool>("Ascension.PrestigiousCache.PreviousStageOnly", false);
 
     std::unordered_map<uint32, CachePool> pools;
     if (QueryResult result = WorldDatabase.Query(
@@ -196,38 +205,22 @@ uint32 NewestReleasedCache(uint32 genericCacheItemId, CacheConfig const& config)
     return NewestReleasedTier(ClassicLadder, config);
 }
 
-uint8 PrimaryStat(Player const* player)
-{
-    uint32 strength = player->GetStat(STAT_STRENGTH);
-    uint32 agility = player->GetStat(STAT_AGILITY);
-    uint32 intellect = player->GetStat(STAT_INTELLECT);
-    if (strength >= agility && strength >= intellect)
-        return 1;
-    return agility >= intellect ? 2 : 3;
-}
-
 bool PickReward(Player* player, CachePool const& pool, AscensionCacheRewards::Reward& out)
 {
-    std::vector<AscensionCacheRewards::Reward const*> preferred;
-    std::vector<AscensionCacheRewards::Reward const*> fallback;
-    uint8 stat = PrimaryStat(player);
+    std::vector<AscensionCacheRewards::Reward const*> usable;
     for (AscensionCacheRewards::Reward const& reward : pool)
     {
         ItemTemplate const* proto = sObjectMgr->GetItemTemplate(reward.itemId);
-        if (!proto || player->CanUseItem(proto) != EQUIP_ERR_OK ||
-            (proto->GetSkill() && !player->GetSkillValue(proto->GetSkill())))
-            continue;
-        fallback.push_back(&reward);
-        if (reward.statType == stat || reward.statType == 4 || reward.statType == 5)
-            preferred.push_back(&reward);
+        if (proto && player->CanUseItem(proto) == EQUIP_ERR_OK &&
+            (!proto->GetSkill() || player->GetSkillValue(proto->GetSkill())))
+            usable.push_back(&reward);
     }
-
-    std::vector<AscensionCacheRewards::Reward const*> const& candidates =
-        preferred.empty() ? fallback : preferred;
-    if (candidates.empty())
+    usable = AscensionSpecLoot::PreferSpecialization(player, usable,
+        [](AscensionCacheRewards::Reward const* reward) { return sObjectMgr->GetItemTemplate(reward->itemId); });
+    if (usable.empty())
         return false;
 
-    out = *candidates[urand(0, uint32(candidates.size() - 1))];
+    out = *usable[urand(0, uint32(usable.size() - 1))];
     return true;
 }
 
@@ -246,7 +239,7 @@ bool PickToken(Player* player, uint32 cacheItemId, CacheConfig const& config,
 
         for (ContentToken const& token : it->second)
         {
-            if (token.stage > config.releasedTokenStage || !IsTokenReleased(token.stage, cacheItemId))
+            if (token.stage > config.releasedTokenStage || !IsTokenReleased(token.stage, cacheItemId, config))
                 continue;
 
             ItemTemplate const* proto = sObjectMgr->GetItemTemplate(token.itemId);

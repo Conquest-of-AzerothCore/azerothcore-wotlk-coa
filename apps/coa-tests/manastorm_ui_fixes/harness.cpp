@@ -1,9 +1,11 @@
+#include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -54,10 +56,57 @@ struct WorldSession
     std::vector<WorldPacket> sent;
 };
 
+namespace DataMap
+{
+    struct Base { };
+}
+
+namespace GameTime
+{
+    std::chrono::seconds clock{100};
+    std::chrono::seconds GetGameTime() { return clock; }
+}
+
+struct PlayerData
+{
+    template<class T> T* GetDefault(char const*)
+    {
+        if (!value)
+            value = std::make_shared<T>();
+        return static_cast<T*>(value.get());
+    }
+    std::shared_ptr<void> value;
+};
+
+struct Guid
+{
+    uint32 GetCounter() const { return 1; }
+};
+
 struct Player
 {
     WorldSession* GetSession() const { return session; }
+    Guid GetGUID() const { return {}; }
     WorldSession* session = nullptr;
+    PlayerData CustomData;
+};
+
+struct ManastormRun { };
+
+struct ManastormRewards
+{
+    static ManastormRewards& Instance()
+    {
+        static ManastormRewards rewards;
+        return rewards;
+    }
+    std::string CoATokenClientState(uint32, ManastormRun const*, bool includeClock = true) const
+    {
+        if (includeClock && Value != "{enabled=false}")
+            return Value.substr(0, Value.size() - 1) + ",now=" + std::to_string(GameTime::clock.count()) + "}";
+        return Value;
+    }
+    std::string Value = "{enabled=false}";
 };
 
 // ACTUAL_CLIENT_LUA
@@ -190,6 +239,51 @@ int main(int argc, char** argv)
         Player player;
         RunAscensionClientLua(&player, chunk);
         RunAscensionClientLua(nullptr, chunk);
+    }
+
+    {
+        WorldSession session;
+        Player player;
+        player.session = &session;
+        auto& rewards = ManastormRewards::Instance();
+        rewards.Value = "{enabled=false}";
+        ManastormClientUIFixes::SendCoALootState(&player, nullptr);
+        Check(session.sent.empty(), "initial disabled token mode sends nothing");
+        rewards.Value = "{enabled=true,earned=0}";
+        GameTime::clock = std::chrono::seconds(100);
+        ManastormClientUIFixes::SendCoALootState(&player, nullptr);
+        std::size_t first = session.sent.size();
+        Check(first > 0, "initial enabled token state sends a payload");
+        GameTime::clock = std::chrono::seconds(101);
+        ManastormClientUIFixes::SendCoALootState(&player, nullptr);
+        Check(session.sent.size() == first, "a new second alone does not resend reward Lua");
+        GameTime::clock = std::chrono::seconds(160);
+        ManastormClientUIFixes::SendCoALootState(&player, nullptr);
+        Check(session.sent.size() > first, "unchanged state periodically resynchronizes the client clock");
+        if (session.sent.size() > first)
+        {
+            auto const& bytes = session.sent[first].bytes;
+            std::string payload(bytes.begin(), bytes.end());
+            Check(payload.find("receivedAt=GetTime()") != std::string::npos,
+                "clock refresh resets client elapsed time");
+            Check(payload.find("local function ApplyCoALootState") == std::string::npos,
+                "clock refresh omits the full reward UI implementation");
+        }
+        std::size_t synced = session.sent.size();
+        GameTime::clock = std::chrono::seconds(161);
+        rewards.Value = "{enabled=true,earned=1}";
+        ManastormClientUIFixes::SendCoALootState(&player, nullptr);
+        Check(session.sent.size() > synced, "reward changes send immediately inside the clock refresh interval");
+        std::size_t changed = session.sent.size();
+        GameTime::clock = std::chrono::seconds(90);
+        ManastormClientUIFixes::SendCoALootState(&player, nullptr);
+        Check(session.sent.size() > changed, "server clock rollback resynchronizes instead of waiting for old time");
+        rewards.Value = "{enabled=false}";
+        ManastormClientUIFixes::SendCoALootState(&player, nullptr);
+        std::size_t disabled = session.sent.size();
+        GameTime::clock = std::chrono::seconds(200);
+        ManastormClientUIFixes::SendCoALootState(&player, nullptr);
+        Check(session.sent.size() == disabled, "disabled state does not send periodic clock updates");
     }
 
     Check(ManastormClientUIFixes::BuildLua(0).empty(), "mask 0 pushes nothing");

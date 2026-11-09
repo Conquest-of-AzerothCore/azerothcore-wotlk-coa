@@ -20,6 +20,10 @@
 
 #include "ObjectGuid.h"
 #include <set>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 enum DumpTableType
 {
@@ -46,7 +50,9 @@ enum DumpTableType
     DTT_ITEM_GIFT,      // <- item guids                    // character_gifts
 
     DTT_PET,            //    -> pet guids collection       // character_pet
-    DTT_PET_TABLE       // <- pet guids                     // pet_aura, pet_spell, pet_spell_cooldown
+    DTT_PET_TABLE,      // <- pet guids                     // pet_aura, pet_spell, pet_spell_cooldown
+
+    DTT_ITEM_TABLE      // <- item guids                    // registered tables keyed by an item guid column
 };
 
 enum DumpReturn
@@ -66,6 +72,12 @@ class PlayerDump
 {
 public:
     static void InitializeTables();
+    static void RegisterCharacterTable(std::string const& tableName,
+        std::vector<std::string> const& itemGuidColumns = {});
+    static void RegisterOwnedTable(std::string const& tableName, std::string const& characterGuidColumn,
+        std::string const& ownerFilter, std::vector<std::string> const& itemGuidColumns = {});
+    static void RegisterItemTable(std::string const& tableName, std::string const& itemGuidColumn,
+        std::string const& characterGuidColumn = {});
 
 protected:
     PlayerDump() { }
@@ -75,6 +87,7 @@ class PlayerDumpWriter : public PlayerDump
 {
 public:
     PlayerDumpWriter() { }
+    explicit PlayerDumpWriter(std::string sourceSchema) : _sourceSchema(std::move(sourceSchema)) { }
 
     bool GetDump(ObjectGuid::LowType guid, std::string& dump);
     DumpReturn WriteDumpToFile(std::string const& file, ObjectGuid::LowType guid);
@@ -83,6 +96,12 @@ public:
 private:
     bool AppendTable(StringTransaction& trans, ObjectGuid::LowType guid, TableStruct const& tableStruct, DumpTable const& dumpTable);
     void PopulateGuids(ObjectGuid::LowType guid);
+    bool LoadSourceColumns();
+    std::string SourceTable(std::string const& tableName) const;
+    std::string SelectList(TableStruct const& tableStruct) const;
+
+    std::string _sourceSchema;
+    std::unordered_map<std::string, std::unordered_set<std::string>> _sourceColumns;
 
     std::set<ObjectGuid::LowType> _pets;
     std::set<ObjectGuid::LowType> _mails;
@@ -94,13 +113,27 @@ private:
 class PlayerDumpReader : public PlayerDump
 {
 public:
+    struct LoadOptions
+    {
+        bool DirectCommit = false;
+        bool PlayerMailFromCopy = false;
+    };
+
     PlayerDumpReader() { }
+    explicit PlayerDumpReader(LoadOptions options) : _options(options) { }
 
     DumpReturn LoadDumpFromFile(std::string const& file, uint32 account, std::string name, ObjectGuid::LowType guid);
     DumpReturn LoadDumpFromString(std::string const& dump, uint32 account, std::string name, ObjectGuid::LowType guid);
 
+    ObjectGuid::LowType GetLoadedGuid() const { return _loadedGuid; }
+    std::string const& GetLoadedName() const { return _loadedName; }
+
 private:
     DumpReturn LoadDump(std::istream& input, uint32 account, std::string name, ObjectGuid::LowType guid);
+
+    LoadOptions _options;
+    ObjectGuid::LowType _loadedGuid = 0;
+    std::string _loadedName;
 };
 
 #endif
