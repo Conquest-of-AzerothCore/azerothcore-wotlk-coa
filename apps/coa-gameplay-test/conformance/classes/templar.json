@@ -1465,6 +1465,17 @@
       "target": "dummy"
     },
     {
+      "spell": 520608, "name": "Scourge-Defense Training (crit chance)", "kind": "metric_delta",
+      "quote": "critical strike chance of your next Argent Blade by $s1%", "expected": 50.0,
+      "trigger_spell": 572741,
+      "metric": "spell_done_crit_chance",
+      "fields": { "spell": 807268, "target": "dummy" },
+      "setup_actor_aura": 561156,
+      "before_expected": 0.0,
+      "target": "dummy",
+      "observe_source": "520608's own effects carry EffectSpellClassMask word 2 = 16777216, matching Warrior of Dawn 561156's own SpellFamilyFlags, not Argent Blade 807268's (32); AuraEffect::CalculateSpellMod (SpellAuraEffects.cpp) turns 520608's two ADD_FLAT_MODIFIER effects into SpellModifiers against 561156's own effect 1 (SPELLMOD_EFFECT2, damage) and effect 2 (SPELLMOD_EFFECT3, crit chance). 561156 effect 2 (ApplyAuraName 107, MiscValue 7 = SPELLMOD_CRITICAL_CHANCE, BasePoints -1 -> CalcValue 0) is read back by Unit::SpellDoneCritChance (Unit.cpp) via ApplySpellMod(..., SPELLMOD_CRITICAL_CHANCE, ...) for the next Argent Blade cast while 561156 is up. Pre-fix, 520608 effect 1's raw BasePoints 19 (CalcValue 20) is what gets added onto 561156 effect 2's own 0, giving 20% against the tooltip's single $s1 = 50%. trigger_spell is Reckoning (max rank 572741), not Argent Blade itself: casting Argent Blade/804929 consumes Warrior of Dawn via AscensionTemplarAbilities.cpp's ConsumeSelected/Selected(561156) (Named(info, 804929)), so measuring spell_done_crit_chance for 807268 right after a real Argent Blade cast would read the buff already dropped; confirmed empirically (diagnostic aura_amount/aura reads on this worktree, 2026-11-09) that spell 561156 itself reads 0 (consumed) immediately after such a cast while 520608 effect 1's own aura_amount still reads its raw, unconsumed 20 (pre-fix)/50 (post-fix). Reckoning 572741 belongs to a different rank chain (Named() compares GetFirstSpellInChain), so it never matches Selected(561156) and leaves the Warrior of Dawn buff standing through the measurement; before_expected is 0.0 because, before 520608 is learned, 561156 effect 2's own raw CalcValue is 0 (BasePoints -1 + DieSides 1), confirmed by the same diagnostic run before 520608 was learned."
+    },
+    {
       "spell": 801202, "name": "Battlepriest", "kind": "health_ratio",
       "quote": "take 20% reduced Magic damage", "probe_spell": 133,
       "levels": [[90, 0.8], [50, 1.0], [10, 0.8]]

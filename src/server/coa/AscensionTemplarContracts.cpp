@@ -161,6 +161,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[1].BasePoints = int32(id - 803890);
     if (id == 300515)
         info->Effects[1].BasePoints = 5;
+    if (id == 520608)
+        info->Effects[1].BasePoints = 49;
     if (id == 801409)
         info->DurationEntry = sSpellDurationStore.LookupEntry(8);
     if (id == 807004)
