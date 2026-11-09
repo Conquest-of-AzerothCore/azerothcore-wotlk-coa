@@ -611,11 +611,12 @@ namespace
     constexpr uint8 CHILL_FROZEN      = 10;
     constexpr uint32 GO_FALLEN_ICICLE = 978098;
     constexpr float HUDDLE_RANGE      = 5.0f;   // close enough to share Body Heat
-    constexpr uint8 HAIL_VOLLEYS      = 12;  // one shard every quarter second through the 3s channel
+    constexpr uint8 HAIL_VOLLEYS      = 20;  // one shard every 150 ms through the 3s channel
     constexpr float HAIL_RADIUS       = 5.0f;
     constexpr float RING_THROW_XY     = 8.0f;   // about six yards, onto the next ring
     constexpr float RING_THROW_Z      = 4.0f;
-    constexpr uint8 GRASP_RINGS       = 8;
+    constexpr uint8 GRASP_RINGS       = 6;
+    constexpr uint8 MAX_FALLEN        = 12;  // icicles left on the ground at once; the oldest melts
 
     struct boss_snowgrave_coa : public custom_world_boss_coa
     {
@@ -722,7 +723,7 @@ namespace
                 }
                 case SPELL_HAIL:
                     _hailVolleys = HAIL_VOLLEYS;
-                    _clock.ScheduleEvent(TW_HAIL, 250ms);
+                    _clock.ScheduleEvent(TW_HAIL, 150ms);
                     break;
                 case SPELL_WINTERS_GRASP:
                     _ring = _ringHit = 0;
@@ -779,13 +780,21 @@ namespace
                     break;
                 }
                 case TW_ICICLE:
-                    // The icicle stays where it fell until the fight ends.
+                    // The icicle stays where it fell until the fight ends; the last wave's chilling areas go (each
+                    // one lasts ten minutes, and wave after wave of them weighs on every client).
+                    me->RemoveDynObject(SPELL_WATER_SPIKE);
                     for (Position const& pos : _icicles)
                     {
                         CastAt(pos, SPELL_WATER_SPIKE);
                         if (GameObject* icicle = me->SummonGameObject(GO_FALLEN_ICICLE, pos.GetPositionX(),
                                 pos.GetPositionY(), pos.GetPositionZ(), frand(0.0f, 2 * float(M_PI)), 0, 0, 0, 0, 0))
                             _fallen.push_back(icicle->GetGUID());
+                        if (_fallen.size() > MAX_FALLEN)
+                        {
+                            if (GameObject* oldest = me->GetMap()->GetGameObject(_fallen.front()))
+                                oldest->DespawnOrUnsummon();
+                            _fallen.erase(_fallen.begin());
+                        }
                     }
                     break;
                 case TW_HAIL:
@@ -802,7 +811,7 @@ namespace
                         _clock.ScheduleEvent(TW_HAIL_IMPACT, Milliseconds(flight));
                     }
                     if (--_hailVolleys)
-                        _clock.ScheduleEvent(TW_HAIL, 250ms);
+                        _clock.ScheduleEvent(TW_HAIL, 150ms);
                     break;
                 case TW_HAIL_IMPACT:
                     if (!_hailImpacts.empty())
@@ -816,10 +825,10 @@ namespace
                     break;
                 case TW_RING:
                 {
-                    // A ring every 1.5s, six yards further out, a spike every twelve yards on it (at most sixteen, so a
+                    // A ring every 1.5s, six yards further out, a spike every twelve yards on it (at most twelve, so a
                     // full raid's clients are not flooded with spike effects).
                     float const radius = 6.0f * (_ring + 1);
-                    uint32 const spikes = std::clamp<uint32>(uint32(2 * float(M_PI) * radius / 12.0f), 6, 16);
+                    uint32 const spikes = std::clamp<uint32>(uint32(2 * float(M_PI) * radius / 12.0f), 6, 12);
                     std::vector<Position>& ring = _ringSpikes[_ring % 2];
                     ring.clear();
                     for (uint32 i = 0; i < spikes; ++i)
