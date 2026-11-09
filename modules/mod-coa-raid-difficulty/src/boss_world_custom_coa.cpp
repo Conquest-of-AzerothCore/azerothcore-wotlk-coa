@@ -610,7 +610,7 @@ namespace
 
     constexpr uint8 CHILL_FROZEN      = 10;
     constexpr uint32 GO_FALLEN_ICICLE = 978098;
-    constexpr float HUDDLE_RANGE      = 2.0f;   // Body Heat's radius
+    constexpr float HUDDLE_RANGE      = 5.0f;   // close enough to share Body Heat
     constexpr uint8 HAIL_VOLLEYS      = 4;
     constexpr uint8 GRASP_RINGS       = 8;
 
@@ -656,6 +656,10 @@ namespace
 
         void ClearIcicles()
         {
+            me->RemoveDynObject(SPELL_WATER_SPIKE);
+            me->RemoveDynObject(SPELL_ICE_SPIKE_WARNING);
+            me->RemoveDynObject(SPELL_CAVE_IN_WARNING);
+            me->GetMap()->DoForAllPlayers([](Player* p) { p->RemoveAurasDueToSpell(SPELL_CHILLED); });
             for (ObjectGuid const& guid : _fallen)
                 if (GameObject* icicle = me->GetMap()->GetGameObject(guid))
                     icicle->DespawnOrUnsummon();
@@ -684,7 +688,8 @@ namespace
                 case EW_HAIL:
                     if (Unit* t = RandomPlayer())
                     {
-                        _hailTarget = t->GetGUID();
+                        // The cone is aimed once, where the target stood: moving out of it is the counter.
+                        _hailAngle = me->GetAngle(t);
                         DoCast(t, SPELL_HAIL);
                     }
                     // Three hails a rotation: 20.1s, 24.6s and 17.4s apart.
@@ -761,8 +766,12 @@ namespace
                     _icicles.clear();
                     for (Player* p : pool)
                     {
-                        _icicles.push_back(p->GetPosition());
-                        CastAt(p->GetPosition(), SPELL_CAVE_IN_WARNING);
+                        // On the ground under the player, even one who is in the air when it is picked.
+                        Position pos = p->GetPosition();
+                        pos.m_positionZ = me->GetMap()->GetHeight(me->GetPhaseMask(), pos.GetPositionX(),
+                            pos.GetPositionY(), pos.GetPositionZ() + 2.0f);
+                        _icicles.push_back(pos);
+                        CastAt(pos, SPELL_CAVE_IN_WARNING);
                     }
                     _clock.ScheduleEvent(TW_ICICLE, 4s);
                     break;
@@ -778,9 +787,8 @@ namespace
                     }
                     break;
                 case TW_HAIL:
-                    if (Unit* t = ObjectAccessor::GetUnit(*me, _hailTarget))
                     {
-                        float const toward = me->GetAngle(t);
+                        float const toward = _hailAngle;
                         // The shards seen flying: Ascension's left and right dummy missiles into the cone.
                         for (uint32 shard : { SPELL_HAIL_MISSILE_LEFT, SPELL_HAIL_MISSILE_RIGHT })
                         {
@@ -827,9 +835,26 @@ namespace
                     break;
                 }
                 case TW_RING_HIT:
+                {
+                    float const radius = 6.0f * (_ringHit + 1);
+                    std::vector<Player*> onRing = PlayersWithin(me, radius + 3.0f);
+                    std::erase_if(onRing, [&](Player* p) { return me->GetExactDist2d(p) < radius - 3.0f; });
+                    // The spikes nobody stands by; those under a player are cast at that player below.
                     for (Position const& pos : _ringSpikes[_ringHit++ % 2])
-                        CastAt(pos, SPELL_ICE_SPIKE);
+                        if (std::none_of(onRing.begin(), onRing.end(),
+                                [&](Player* p) { return p->GetExactDist2d(&pos) < 6.0f; }))
+                            CastAt(pos, SPELL_ICE_SPIKE);
+                    // Everyone on the ring is hit, and thrown outward onto the next ring, six yards out.
+                    for (Player* p : onRing)
+                    {
+                        float const a = me->GetAngle(p);
+                        Position from = p->GetPosition();
+                        from.m_positionX -= 2.0f * std::cos(a);
+                        from.m_positionY -= 2.0f * std::sin(a);
+                        CastAt(from, SPELL_ICE_SPIKE);
+                    }
                     break;
+                }
                 case TW_WARMTH:
                     // Isolated players gain a stack each second, huddled ones lose one.
                     for (Player* p : PlayersWithin(me, 100.0f))
@@ -852,6 +877,9 @@ namespace
                     }
                     if (--_warmthSeconds)
                         _clock.ScheduleEvent(TW_WARMTH, 1s);
+                    else
+                        for (Player* p : PlayersWithin(me, 100.0f))
+                            p->RemoveAurasDueToSpell(SPELL_CHILLED);
                     break;
             }
         }
@@ -863,7 +891,7 @@ namespace
         uint8 _ring = 0;
         uint8 _ringHit = 0;
         uint8 _warmthSeconds = 0;
-        ObjectGuid _hailTarget;
+        float _hailAngle = 0.0f;
         std::vector<Position> _icicles;
         std::vector<ObjectGuid> _fallen;
         std::vector<Position> _ringSpikes[2];

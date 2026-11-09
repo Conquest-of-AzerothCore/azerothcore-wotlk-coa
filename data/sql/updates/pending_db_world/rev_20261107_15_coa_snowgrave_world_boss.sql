@@ -80,3 +80,9 @@ INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconNa
 (978098, 5, 9227, 'Fallen Icicle', '', '', '', 1, '', '', 12340)
 ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`),
   `size` = VALUES(`size`);
+
+-- The icicles look like his hail shards, bigger: a cluster of ice crystals.
+UPDATE `gameobject_template` SET `displayId` = 8324, `size` = 3 WHERE `entry` = 978098;
+
+-- His hitbox is as wide as he is.
+UPDATE `creature_model_info` SET `BoundingRadius` = 6, `CombatReach` = 9 WHERE `DisplayID` = 142079;
