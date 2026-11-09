@@ -6478,7 +6478,8 @@ private:
         if (auto const found = _actors.find(id); found != _actors.end())
             found->second.lastBuyOrdinal = found->second.packetOrdinal;
         uint32 spell = step.get<uint32>("spell", 0);
-        if (action == "learn" || action == "unlearn" || action == "cast" || action == "cast_charm")
+        if (action == "learn" || action == "unlearn" || action == "cast" || action == "cast_no_target" ||
+            action == "cast_charm")
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell: " + std::to_string(spell));
         if (action == "set_moving")
         {
@@ -7244,8 +7245,9 @@ private:
             player->resetTalents(true);
             Require(player->GetFreeTalentPoints() == player->CalculateTalentsPoints(), "Talent reset rejected");
         }
-        else if (action == "cast" || action == "cast_charm" || action == "use_item")
+        else if (action == "cast" || action == "cast_no_target" || action == "cast_charm" || action == "use_item")
         {
+            bool const noExplicitTarget = action == "cast_no_target";
             _actors.at(step.get<std::string>("actor")).castFailureReason.erase(spell);
             SpellCastTargets targets;
             Unit* caster = action != "cast_charm" ? player :
@@ -7274,7 +7276,7 @@ private:
                 Require(object != nullptr, "Target gameobject is not nearby");
                 targets.SetGOTarget(object);
             }
-            else
+            else if (!noExplicitTarget)
                 targets.SetUnitTarget(target);
             if (auto destination = step.get_child_optional("destination"))
                 targets.SetDst(destination->get<float>("x"), destination->get<float>("y"),
@@ -7288,9 +7290,9 @@ private:
             record.put("target_faction", target->GetFaction());
             if (SpellInfo const* info = sSpellMgr->GetSpellInfo(spell))
                 record.put("target_check", uint32(info->CheckTarget(caster, target, false)));
-            WorldPacket packet(action == "cast" ? CMSG_CAST_SPELL :
+            WorldPacket packet(action == "cast" || action == "cast_no_target" ? CMSG_CAST_SPELL :
                 action == "cast_charm" ? CMSG_PET_CAST_SPELL : CMSG_USE_ITEM, 64);
-            if (action == "cast" || action == "cast_charm")
+            if (action == "cast" || action == "cast_no_target" || action == "cast_charm")
             {
                 if (action == "cast_charm")
                     packet << caster->GetGUID();
@@ -7304,7 +7306,7 @@ private:
                 packet << item->GetGUID() << uint32(0) << uint8(0);
             }
             targets.Write(packet);
-            if (action == "cast")
+            if (action == "cast" || action == "cast_no_target")
                 player->GetSession()->HandleCastSpellOpcode(packet);
             else if (action == "cast_charm")
                 player->GetSession()->HandlePetCastSpellOpcode(packet);
