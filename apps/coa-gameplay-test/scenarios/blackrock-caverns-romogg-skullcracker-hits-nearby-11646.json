@@ -82,14 +82,16 @@
       "distance": 4
     },
     {
-      "action": "relocate",
+      "action": "teleport",
       "actor": "far",
-      "dx": 15
+      "map": 645,
+      "x": 249.3,
+      "y": 949.2,
+      "z": 191.8
     },
     {
-      "action": "relocate",
-      "actor": "far",
-      "dx": 10
+      "action": "wait",
+      "ms": 1500
     },
     {
       "action": "wait",
