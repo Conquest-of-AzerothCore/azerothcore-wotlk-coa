@@ -487,7 +487,8 @@ namespace
     // MythicPlus.Forces.WingFactor: "lfgId:factor" pairs that correct single wings to what live runs showed.
     float WingForcesFactor(uint32 lfgId)
     {
-        std::istringstream in(sConfigMgr->GetOption<std::string>("MythicPlus.Forces.WingFactor", "3320:0.626"));
+        std::istringstream in(sConfigMgr->GetOption<std::string>("MythicPlus.Forces.WingFactor",
+            "3320:0.626 2038:1.333"));
         std::string pair;
         while (in >> pair)
         {
