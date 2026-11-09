@@ -8999,11 +8999,16 @@ public:
             ObjectGuid guid = packet.read<ObjectGuid>(0);
             CreatureDisplayPreset const* preset = nullptr;
             uint32 unitDisplayId = 0;
+            uint32 spawnSeed = guid.GetCounter();
 
             if (guid.IsCreatureOrVehicle())
             {
                 if (Creature const* creature = session->GetPlayer()->GetMap()->GetCreature(guid))
+                {
                     unitDisplayId = creature->GetDisplayId();
+                    if (creature->GetSpawnId())
+                        spawnSeed = creature->GetSpawnId();
+                }
 
                 preset = sAscensionPresets->GetPreset(guid.GetEntry(), unitDisplayId);
             }
@@ -9024,19 +9029,20 @@ public:
 
             if (preset)
             {
+                CreatureDisplayPreset const look = sAscensionPresets->WithSpawnVariety(*preset, spawnSeed);
                 WorldPacket response(SMSG_MIRRORIMAGE_DATA, 68);
                 response << guid;
-                response << uint32(unitDisplayId != 0 ? unitDisplayId : preset->display_id);
-                response << uint8(preset->race);
-                response << uint8(preset->gender);
-                response << uint8(preset->class_id);
-                response << uint8(preset->skin);
-                response << uint8(preset->face);
-                response << uint8(preset->hair);
-                response << uint8(preset->haircolor);
-                response << uint8(preset->facialhair);
-                response << uint32(preset->guild_id);
-                for (uint32 item : preset->items)
+                response << uint32(unitDisplayId != 0 ? unitDisplayId : look.display_id);
+                response << uint8(look.race);
+                response << uint8(look.gender);
+                response << uint8(look.class_id);
+                response << uint8(look.skin);
+                response << uint8(look.face);
+                response << uint8(look.hair);
+                response << uint8(look.haircolor);
+                response << uint8(look.facialhair);
+                response << uint32(look.guild_id);
+                for (uint32 item : look.items)
                     response << uint32(item);
 
                 session->SendPacket(&response);
