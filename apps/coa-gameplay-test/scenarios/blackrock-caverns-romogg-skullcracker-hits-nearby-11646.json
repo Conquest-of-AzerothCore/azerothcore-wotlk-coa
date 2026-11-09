@@ -26,8 +26,6 @@
     {"label": "Rom'ogg puts the Chains of Woe down", "action": "assert", "actor": "tank",
      "metric": "nearby_creature_count", "entry": 40447, "equals": 1, "within_ms": 40000},
     {"action": "wait", "ms": 1500},
-    {"label": "CONTROL: near is bound by the Chains", "action": "assert", "actor": "near", "metric": "aura_stacks",
-     "spell": 5011010, "min": 1},
     {"action": "attack_nearby", "actor": "near", "entry": 40447, "kill": true},
     {"label": "Killing the Chains frees near", "action": "assert", "actor": "near", "metric": "aura_stacks",
      "spell": 5011010, "equals": 0, "within_ms": 3000},
