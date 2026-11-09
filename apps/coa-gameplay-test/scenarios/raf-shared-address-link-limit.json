@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "name": "Recruit-A-Friend allows two links per shared IP address and still links different addresses",
+  "contract": [
+    "RecruitAFriend.SharedAddressLinks (default 2) caps the Recruit-A-Friend links one IP address can hold between",
+    "a recruiter and a recruit who both play from it. The recruiter on 198.51.100.7 recruits two accounts on that",
+    "address. A third invitation sent while only one link existed is refused when accepted, because the link update",
+    "counts the address's links in the same statement. A new invitation to that third account is refused before it",
+    "is sent. An account on another address is still recruited."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8833.38,
+    "y": 628.628,
+    "z": 94.0066,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "host",
+      "race": 1,
+      "class": 21,
+      "level": 20,
+      "name": "Rafhost",
+      "address": "198.51.100.7"
+    },
+    {
+      "id": "first",
+      "race": 1,
+      "class": 21,
+      "level": 10,
+      "name": "Raffirst",
+      "address": "198.51.100.7"
+    },
+    {
+      "id": "second",
+      "race": 1,
+      "class": 21,
+      "level": 10,
+      "name": "Rafsecond",
+      "address": "198.51.100.7"
+    },
+    {
+      "id": "third",
+      "race": 1,
+      "class": 21,
+      "level": 10,
+      "name": "Rafthird",
+      "address": "198.51.100.7"
+    },
+    {
+      "id": "away",
+      "race": 1,
+      "class": 21,
+      "level": 10,
+      "name": "Rafaway",
+      "address": "203.0.113.9"
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "host",
+      "command": ".raf Raffirst"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "first",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "label": "the first account on the recruiter's IP address is recruited",
+      "metric": "system_message_contains",
+      "text": "Your account is now permanently recruited.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "command",
+      "actor": "host",
+      "command": ".raf Rafsecond"
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "command",
+      "actor": "host",
+      "command": ".raf Rafthird"
+    },
+    {
+      "action": "assert",
+      "actor": "host",
+      "label": "with one same-IP link the recruiter can still invite a third account on that address",
+      "metric": "system_message_contains",
+      "text": "this IP address has reached that limit",
+      "equals": 0
+    },
+    {
+      "action": "gossip_select",
+      "actor": "second",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "second",
+      "label": "the second account on the recruiter's IP address is recruited",
+      "metric": "system_message_contains",
+      "text": "Your account is now permanently recruited.",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_select",
+      "actor": "third",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "third",
+      "label": "the link limit is enforced when the pending third invitation is accepted",
+      "metric": "system_message_contains",
+      "text": "reached its Recruit-A-Friend link limit",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "third",
+      "label": "the third account on the shared IP address stays unrecruited",
+      "metric": "system_message_contains",
+      "text": "Your account is now permanently recruited.",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "command",
+      "actor": "host",
+      "command": ".raf Rafthird"
+    },
+    {
+      "action": "assert",
+      "actor": "host",
+      "label": "a new invitation to a third account on the shared IP address is refused",
+      "metric": "system_message_contains",
+      "text": "this IP address has reached that limit",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "command",
+      "actor": "host",
+      "command": ".raf Rafaway"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "away",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "away",
+      "label": "an account on a different IP address is still recruited after the shared address is full",
+      "metric": "system_message_contains",
+      "text": "Your account is now permanently recruited.",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

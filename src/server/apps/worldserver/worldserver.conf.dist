@@ -4842,6 +4842,16 @@ RecruitAFriend.MaxLevel = 60
 RecruitAFriend.MaxDifference = 30
 
 #
+#    RecruitAFriend.SharedAddressLinks
+#        Description: Number of Recruit-A-Friend links one IP address can hold between a recruiter
+#                     and a recruit who both play from that address. Links between different
+#                     addresses are not limited.
+#        Default:     2
+#                     0 - (Recruiter and recruit must use different IP addresses)
+
+RecruitAFriend.SharedAddressLinks = 2
+
+#
 #    MaxRecruitAFriendBonusDistance
 #        Description: Max distance for Recruit-A-Friend level grants and reputation bonuses.
 #        Default:     100

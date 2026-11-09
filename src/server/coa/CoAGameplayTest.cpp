@@ -2565,6 +2565,8 @@ private:
             AccountTypes(security), uint8(expansion), 0, LOCALE_enUS, 0, false, false, 0,
             actor.definition.get<bool>("bot", false));
         actor.session->SetAscensionCompatEnabled(actor.definition.get<bool>("ascension_client", false));
+        if (auto const address = actor.definition.get_optional<std::string>("address"))
+            actor.session->SetAddress(*address);
         actor.session->SetSocketlessPacketObserver([&actor](WorldPacket const& packet)
         {
             try

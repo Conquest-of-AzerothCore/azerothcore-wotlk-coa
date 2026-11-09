@@ -430,6 +430,9 @@ setting caps a real client's; it gates maps and profession ranks.
 Optional `ascension_client: true` marks the socketless session as having negotiated Ascension compatibility,
 including its spell modifier packet layout. It defaults to false. This tests server packet construction;
 it does not perform socket authentication or verify delivery to a rendered client.
+Optional `address` sets the IPv4 or IPv6 address the socketless session reports as its remote address, for
+rules keyed by player IP such as Recruit-A-Friend links. Without it the session reports an empty address
+(`bot` for a bot), which is not a valid IP address.
 Characters are created and loaded through the existing character creation, enumeration and login
 handlers with ordinary player security. A player may set `account_of` to an earlier player id to share that
 fixture's disposable account; otherwise each player gets its own account. This supports account-wide state
