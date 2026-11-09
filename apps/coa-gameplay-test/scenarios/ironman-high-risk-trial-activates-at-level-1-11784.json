@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Trials: Ironman - High-Risk activates at level 1 and puts the character in High-Risk (#11784)",
+  "contract": [
+    "Ironman - High-Risk (challenge 70) must be started at level 1 and requires High-Risk, while manual High-Risk",
+    "selection needs level 15 (#9174). Accepting the trial therefore applies High-Risk itself, as PvE-only trials apply",
+    "PvE Mode: a level 1 character in PvE Mode starts the trial, wears High-Risk 1004019 and has left PvE Mode 9931032.",
+    "High Roller (challenge 78) is not a trial and keeps its refusal: a level 15 character in PvE Mode that starts it",
+    "is told it requires High-Risk and stays in PvE Mode."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9483.25, "y": -17.99, "z": 56.96, "o": 3.8 },
+  "players": [
+    { "id": "ironman", "race": 1, "class": 20, "level": 1 },
+    { "id": "roller", "race": 1, "class": 20, "level": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: the level 1 character starts in PvE Mode", "actor": "ironman", "metric": "aura",
+      "spell": 9931032, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: it does not wear High-Risk", "actor": "ironman", "metric": "aura",
+      "spell": 1004019, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: the level 15 character starts in PvE Mode", "actor": "roller", "metric": "aura",
+      "spell": 9931032, "equals": 1, "within_ms": 3000
+    },
+    { "action": "start_challenge", "label": "Accept Ironman - High-Risk at level 1", "actor": "ironman", "challenge": 70, "level": 1 },
+    {
+      "action": "assert", "label": "The trial is accepted", "actor": "ironman", "metric": "challenge_start_code",
+      "equals": 0, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The trial puts the character in High-Risk", "actor": "ironman", "metric": "aura",
+      "spell": 1004019, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "High-Risk replaced PvE Mode", "actor": "ironman", "metric": "aura",
+      "spell": 9931032, "equals": 0
+    },
+    { "action": "start_challenge", "label": "Start High Roller without High-Risk", "actor": "roller", "challenge": 78, "level": 1 },
+    {
+      "action": "assert", "label": "High Roller is still refused without High-Risk", "actor": "roller",
+      "metric": "challenge_start_code", "equals": 12, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "It says why", "actor": "roller", "metric": "system_message_contains",
+      "text": "requires you to be in High Risk", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The refused character keeps PvE Mode", "actor": "roller", "metric": "aura",
+      "spell": 9931032, "equals": 1
+    },
+    {
+      "action": "assert", "label": "and wears no High-Risk", "actor": "roller", "metric": "aura",
+      "spell": 1004019, "equals": 0
+    }
+  ]
+}

@@ -98,9 +98,9 @@ void NotifyLevelScalingIfChanged(Player* player, bool blockedBefore)
         player->RefreshQuestLogQueries();
 }
 
-void ApplyRuleset(Player* player, uint32 selectionId)
+void ApplyRuleset(Player* player, uint32 selectionId, bool forChallenge = false)
 {
-    if (!AscensionRulesets::CanApply(player, SelectedRuleset(selectionId)))
+    if (!AscensionRulesets::CanApply(player, SelectedRuleset(selectionId), forChallenge))
         return;
     SetHighRiskSuspended(player, false);
     bool const blockedBefore = RulesetBlocksLevelScaling(player);
@@ -339,11 +339,11 @@ void AscensionRulesets::RegisterGuard(Guard guard)
         rulesetGuards.push_back(guard);
 }
 
-bool AscensionRulesets::CanApply(Player* player, Ruleset ruleset)
+bool AscensionRulesets::CanApply(Player* player, Ruleset ruleset, bool forChallenge)
 {
     if (!player)
         return false;
-    if (ruleset == Ruleset::HighRisk && player->GetLevel() < HighRisk::MinimumLevel)
+    if (ruleset == Ruleset::HighRisk && !forChallenge && player->GetLevel() < HighRisk::MinimumLevel)
         return false;
     for (Guard guard : rulesetGuards)
         if (!guard(player, ruleset))
@@ -351,9 +351,9 @@ bool AscensionRulesets::CanApply(Player* player, Ruleset ruleset)
     return true;
 }
 
-void AscensionRulesets::Apply(Player* player, Ruleset ruleset)
+void AscensionRulesets::Apply(Player* player, Ruleset ruleset, bool forChallenge)
 {
-    ApplyRuleset(player, SelectionSpell(ruleset));
+    ApplyRuleset(player, SelectionSpell(ruleset), forChallenge);
 }
 
 bool AscensionRulesets::Has(Player* player, Ruleset ruleset)
