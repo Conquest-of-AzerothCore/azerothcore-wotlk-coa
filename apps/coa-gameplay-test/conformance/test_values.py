@@ -38,6 +38,8 @@ SCOURGEBANE = 92111
 CLASS_TUNING_AURA = 887007
 ARGENT_BLADE = 804929
 ARGENT_BLADE_RANK_2 = 807263
+SPIRITUAL_ASCENSION = 500688
+SPIRITUAL_ASCENSION_MAX_RANK = 500758
 ARGENT_BLADE_RANK_2_ENERGY_COST = 50
 ARGENT_BLADE_RECAST_MS = 5000
 ENERGY = 3
@@ -305,6 +307,19 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         self.assertNotIn('cast', {step['action'] for step in scenario['steps']})
         self.assertNotIn('creatures', scenario)
         self.assertFalse({'power_cost', 'cooldown_ms'} & {item.check for item in expectations})
+
+    def test_resurrect_rank_casts_on_a_dead_ally(self):
+        scenario, _ = self.build_extra(SPIRITUAL_ASCENSION, SPIRITUAL_ASCENSION_MAX_RANK)
+        run.validate(scenario)
+        actions = [step['action'] for step in scenario['steps']]
+        die = actions.index('die')
+        cast = actions.index('cast')
+        self.assertEqual(scenario['steps'][die], {'action': 'die', 'actor': 'ally'})
+        self.assertLess(die, cast)
+        self.assertEqual((scenario['steps'][cast]['spell'], scenario['steps'][cast]['target']),
+                         (SPIRITUAL_ASCENSION_MAX_RANK, 'ally'))
+        self.assertEqual([player['id'] for player in scenario['players']], ['caster', 'ally'])
+        self.assertNotIn('creatures', scenario)
 
     def test_cast_is_preceded_by_the_caster_aura_the_spell_record_requires(self):
         scenario, _ = self.build(RIGHTEOUS_UPHEAVAL, RIGHTEOUS_UPHEAVAL_MAX_RANK)

@@ -30,6 +30,11 @@ SCHOOL_DAMAGE_EFFECT = 2
 HEAL_EFFECT = 10
 VERSUS_AURA_STATE = 303
 DAMAGE_DONE_PERCENT = 79
+PARRY_CHANCE = 'parry_chance'
+STAT_METRIC = 'stat'
+STAT_EXACT_METRIC = 'stat_exact'
+AURA_STATE_METRIC = 'has_aura_state'
+AURA_STATE_WAIT_MS = 1000
 PASSIVE_DELTA = 'passive_delta'
 BEFORE = 'before'
 AFTER = 'after'
@@ -431,7 +436,7 @@ def aura_plans(aura: int, misc: int, text: str) -> list[tuple[MetricPlan, str]]:
         166: ('attack_power', {}, 'scale', ATTACK_POWER),
         167: ('ranged_attack_power', {}, 'scale', 'ranged attack power'),
         240: ('expertise', {}, 'add', 'expertise'),
-        47: ('parry_chance', {}, 'add', 'parry chance'),
+        47: (PARRY_CHANCE, {}, 'add', 'parry chance'),
         49: ('dodge_chance', {}, 'add', 'dodge chance'),
         138: ('attack_time_ms', {'hand': 0}, 'haste', 'melee haste'),
         136: ('spell_healing_done', {'target': CASTER}, 'composition', 'healing done'),
@@ -670,11 +675,16 @@ def effect_model(effect: PassiveEffect) -> dict:
 
 def probe_model(effect: PassiveEffect, plan: MetricPlan, probe: Probe, aura_label: str) -> dict:
     measured = not probe.reason
+    exact = measured and plan.metric == STAT_METRIC
+    versus_aura_state = measured and effect.aura == VERSUS_AURA_STATE
     return {'family': effect.family, 'effect': effect.effect, 'aura': effect.aura, 'metric': plan.metric,
             'fields': probe.fields,
             'relation': plan.relation, 'source_label': plan.source,
             'before_label': f'{probe.label} {BEFORE}' if measured else None,
             'after_label': f'{probe.label} {AFTER}' if measured else None,
+            'exact_before_label': f'{probe.label} exact {BEFORE}' if exact else None,
+            'exact_after_label': f'{probe.label} exact {AFTER}' if exact else None,
+            'aura_state_label': f'{probe.label} aura_state' if versus_aura_state else None,
             'target': probe.target, 'named': probe.named, 'in_mask': probe.in_mask, 'points': effect.points,
             'judged': plan.judged, 'aura_label': aura_label}
 
@@ -690,6 +700,7 @@ def passive_scenario(class_file: dict, spell: ClassSpell) -> tuple[dict | None, 
         expectations.append(Expectation(label, check, spell.spell_id, rank_id, effect.effect,
                                         effect.token.text if effect.token else '', rule, model))
 
+    aura_state_steps: list[dict] = []
     for effect in passive_effects(class_file, spell):
         if not effect.plans:
             expect(f'{rank_id} e{effect.effect}', 'unmodelled', effect, effect.reason, effect_model(effect))
@@ -702,6 +713,10 @@ def passive_scenario(class_file: dict, spell: ClassSpell) -> tuple[dict | None, 
                     continue
                 probes.append(probe)
                 expect(probe.label, PASSIVE_DELTA, effect, plan.relation, model)
+                if model['aura_state_label']:
+                    aura_state_steps.append(measurement(model['aura_state_label'], CASTER, AURA_STATE_METRIC,
+                                                        target=probe.fields.get('target', TARGET),
+                                                        aura_state=effect.misc))
     labels = [expectation.label for expectation in expectations]
     if len(set(labels)) != len(labels):
         raise ValueError(f'Passive {rank_id} gives duplicate labels')
@@ -709,8 +724,17 @@ def passive_scenario(class_file: dict, spell: ClassSpell) -> tuple[dict | None, 
         return None, expectations
 
     def measured(moment: str) -> list[dict]:
-        return [measurement(f'{probe.label} {moment}', CASTER, probe.metric, **probe.fields) for probe in probes]
+        steps = [measurement(f'{probe.label} {moment}', CASTER, probe.metric, **probe.fields) for probe in probes]
+        steps += [measurement(f'{probe.label} exact {moment}', CASTER, STAT_EXACT_METRIC, **probe.fields)
+                 for probe in probes if probe.metric == STAT_METRIC]
+        return steps
 
+    priming = []
+    if any(probe.metric == PARRY_CHANCE for probe in probes):
+        priming = [{'action': 'set_aura', 'actor': CASTER, 'spell': rank_id, 'stacks': 1},
+                   {'action': 'set_aura', 'actor': CASTER, 'spell': rank_id, 'stacks': 0}]
+    if aura_state_steps:
+        priming = priming + [{'action': 'wait', 'ms': AURA_STATE_WAIT_MS}] + aura_state_steps
     learning = [{'action': 'learn', 'actor': CASTER, 'spell': rank_id},
                 measurement(aura_label, CASTER, 'aura', spell=rank_id)]
     scenario = {
@@ -719,7 +743,7 @@ def passive_scenario(class_file: dict, spell: ClassSpell) -> tuple[dict | None, 
         'contract': 'No-combat with/without check: the quantities a passive changes, measured before and after '
                     'it is learned.',
         'players': [player_fixture(class_file)],
-        'steps': base_steps(class_file) + measured(BEFORE) + learning + measured(AFTER)}
+        'steps': base_steps(class_file) + priming + measured(BEFORE) + learning + measured(AFTER)}
     if any(probe.fields.get('target') == TARGET for probe in probes):
         scenario['creatures'] = [creature_fixture(class_file)]
     return scenario, expectations

@@ -3388,10 +3388,25 @@ private:
             Require(stat < MAX_STATS, "Invalid stat index");
             return unit->GetStat(Stats(stat));
         }
+        if (metric == "stat_exact")
+        {
+            uint32 stat = step.get<uint32>("stat");
+            Require(stat < MAX_STATS, "Invalid stat index");
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "stat_exact metric needs a player");
+            return player->GetExactStatValue(Stats(stat));
+        }
         if (metric == "attack_power" || metric == "ranged_attack_power")
             return unit->GetTotalAttackPowerValue(metric == "attack_power" ? BASE_ATTACK : RANGED_ATTACK);
         if (metric == "armor")
             return unit->GetArmor();
+        if (metric == "has_aura_state")
+        {
+            uint32 state = step.get<uint32>("aura_state");
+            Unit* target = GetUnit(step.get<std::string>("target"));
+            Require(target != nullptr, "aura_state metric needs a target");
+            return target->HasAuraState(AuraStateType(state)) ? 1.0 : 0.0;
+        }
         if (metric == "weapon_damage_min")
         {
             uint32 hand = step.get<uint32>("hand", BASE_ATTACK);

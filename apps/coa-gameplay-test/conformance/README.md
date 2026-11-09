@@ -329,8 +329,12 @@ referenced spell, so its `$sN`, `$u` and `$d` are checked as tokens of another s
 spell's points.
 
 The cast, when a cooldown or an aura is measured, targets the fixture creature `dummy` (entry 36) when an active
-effect has an enemy target (implicit targets 2, 6, 15, 16, 24) and the caster otherwise; an aura whose target is the
-caster is read on the caster. A cost in a power other than mana is set to its cost before the cast. A rank whose
+effect has an enemy target (implicit targets 2, 6, 15, 16, 24), a fixture ally player `ally` when an active effect
+is a resurrection (`SPELL_EFFECT_RESURRECT` 18 or `SPELL_EFFECT_RESURRECT_NEW` 113, `targets_resurrect`) — the ally
+is killed with a `die` step right before the cast, since `TARGET_FLAG_CORPSE_ALLY` needs a dead friendly unit, not
+a living one (Templar: Spiritual Ascension 500688/500757/500758/500759/500760) — and the caster otherwise; an aura
+whose target is the caster is read on the caster. A cost in a power other than mana is set to its cost before the
+cast. A rank whose
 record names a `CasterAuraSpell` gets that aura as a one-stack fixture (`set_aura`) right before the cast: without it
 the server refuses the cast with `SPELL_FAILED_CASTER_AURASTATE` (22, `Spell.cpp:5930`). Templar: Oath Chain 704576
 for Righteous Upheaval, Blade of Faith, Righteous Tempest and Reckoning; Recently Parried or Dodged 681170, a dummy
@@ -559,9 +563,15 @@ ADR 0012 records the method. `passive_scenario(class_file, spell)` measures ever
 the passive's rank at the class level (`spell.max_rank`) twice in one no-combat scenario:
 
 1. `base_steps(class_file)` (fixtures, stats, known and probe auras);
-2. each measurement labelled `<passive> e<n> <metric> <target> before`;
-3. `learn` the passive, then `aura` of the passive labelled `<passive> aura_present` (diagnostic);
-4. the same measurements labelled `<passive> e<n> <metric> <target> after`.
+2. when any plan's metric is `parry_chance`, prime `CanParry()` with the rank's own aura (`set_aura` stacks 1 then
+   stacks 0, the `cultist-adaptive-combatant.json` pattern), so the `before` snapshot already reflects the
+   unlocked base parry chance with no rank bonus active; when any effect is aura 303 (`VERSUS_AURA_STATE`), wait
+   `AURA_STATE_WAIT_MS` and measure `has_aura_state` on the dummy for that effect's state, labelled
+   `<passive> e<n> <metric> <target> aura_state`;
+3. each measurement labelled `<passive> e<n> <metric> <target> before`, plus a parallel `stat_exact` measurement
+   labelled `<passive> e<n> <metric> <target> exact before` for every `stat`-metric plan;
+4. `learn` the passive, then `aura` of the passive labelled `<passive> aura_present` (diagnostic);
+5. the same measurements labelled `<passive> e<n> <metric> <target> after` (and `exact after` for `stat` plans).
 
 `<target>` is the spell the metric is asked about, else the values of the plan's fields other than `target`
 (`706431 e0 stat 0 before`, `705303 e0 combat_rating 3 after`, `561346 e1 expertise before`). A spell modifier and
@@ -578,8 +588,10 @@ targets it.
 Expectations, one per measured pair: label `<passive> e<n> <metric> <target>`, check `passive_delta`, `displayed` the
 token text, `rule` the plan's relation, and `model` with `family`, `effect`, `metric`, `fields` (the step's fields,
 `spell` included), `relation`, `source_label` (the base-step label of a `share` source), `before_label`,
-`after_label`, `target` (the spell measured, else `None`), `named` and `in_mask` (spell modifier targets, else
-`None`), `points` (the effect's own signed points), `judged` and `aura_label`. Not measured, check `unmodelled`:
+`after_label`, `exact_before_label` and `exact_after_label` (the parallel `stat_exact` labels, `None` off a `stat`
+metric), `aura_state_label` (the `has_aura_state` label, `None` off aura 303), `target` (the spell measured, else
+`None`), `named` and `in_mask` (spell modifier targets, else `None`), `points` (the effect's own signed points),
+`judged` and `aura_label`. Not measured, check `unmodelled`:
 
 - an effect without plans: one expectation labelled `<passive> e<n>` with the effect's reason (Condemnation 704175
   effect 1, op 40: no step is generated);
@@ -2002,7 +2014,10 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   with its `EquippedItemClass`, `Stances` and `CasterAuraSpell`; a missing before or after value is an alert (a
   plan with `judged` false: `unmeasured`); a plan with `judged` false is `measured`, never `ok` or alert; an
   effect of aura 303 (damage against a target in aura state `EffectMiscValue`, Pious Sweep 520034 effect 0, state
-  23) is `unmeasured`, since the scenario neither establishes nor measures that state on the dummy. The tooltip is
+  23) adds a `has_aura_state` measurement of that state on the dummy, taken after an `AURA_STATE_WAIT_MS` wait so
+  `Unit::Update` has ticked (`passives.py`'s `aura_state_label`); when it reads 1 the delta is judged normally,
+  when it reads 0 the check is `unmeasured: aura state <n> is not set on the dummy`, and when the measurement is
+  absent (an older manifest, or a probe without this field) it keeps the original blanket reason. The tooltip is
   then read again with the measured base stats; a token text absent from that reading is an alert. The token value
   (times N for `$/N;`, except a `$/1000;sN sec` token of kind `duration_ms`, which the reader gives in ms) takes the
   sign of the effect's own points (`copysign`, own or shared token); for points that scale with level, the sign rule of
@@ -2038,8 +2053,13 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   A measured delta of 0 against a non-zero expected delta is never `ok` (the 1-point floor does not apply to it).
   Not judged, `unmeasured` with the reason: a relation that multiplies a before value of 0 (`spell_mod_pct`,
   `scale`, `ratio`, `composition`, `crit_damage`); `parry_chance` 0 before the learn (the reference character cannot
-  parry, and a parry aura enables parry when applied, `AuraEffect::HandleAuraModParryPercent`); a `stat` delta below
-  1 (the server truncates stats to integers, `Unit::UpdateStats` `SetStat(stat, int32(value))`). Two judged effects
+  parry, and a parry aura enables parry when applied, `AuraEffect::HandleAuraModParryPercent`) — a `parry_chance`
+  probe's scenario primes `CanParry()` first (apply the rank's own aura once, then remove it, same pattern as
+  `cultist-adaptive-combatant.json`), so this guard fires only when that priming itself was skipped; a `stat` delta
+  below 1 (the server truncates stats to integers, `Unit::UpdateStats` `SetStat(stat, int32(value))`) unless a
+  parallel `stat_exact` measurement (`Player::GetExactStatValue`, the pre-truncation float) is present, in which
+  case the exact delta is judged against the same expected value with a tighter, `stat_exact`-only tolerance
+  (`FRACTIONAL_FLOOR` 0.01) instead of the 1-point floor. Two judged effects
   of one passive on the same metric and fields (no target) are judged together: the product of their factors when
   both scale (Call of the Monastery: 313 x 1.05 x 1.05), the sum of their deltas when they add or share (Paragon:
   10 + 10% of 132 Agility), else `measured`. A `spell_modifier` of a flat duration or cast-time reduction starts

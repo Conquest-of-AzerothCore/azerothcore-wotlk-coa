@@ -141,7 +141,8 @@ METRICS = TIMELINE_METRICS | {
     'ball_offer_count', 'ball_offers_quest',
     'ball_carried_count', 'ball_carried_quest', 'ball_turn_in_count', 'ball_turn_in_quest',
     'gossip_text',
-    'stat', 'attack_power', 'ranged_attack_power', 'armor', 'weapon_damage_min', 'resistance',
+    'stat', 'stat_exact', 'attack_power', 'ranged_attack_power', 'armor', 'has_aura_state', 'weapon_damage_min',
+    'resistance',
     'attack_timer_ms',
     'attack_time_ms', 'pet_attack_time_ms', 'run_speed_rate', 'flight_speed_rate', 'display_id', 'mount_display_id', 'can_fly',
     'aura_amplitude_ms', 'melee_crit_chance', 'melee_crit_chance_refreshed', 'dodge_chance', 'parry_chance',
@@ -215,7 +216,8 @@ PLAYER_STAT_METRICS = {
     'pet_run_speed_rate',
 }
 METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item', 'entry', 'button',
-                 'relative_to', 'ratio_to', 'target', 'quest', 'id', 'stat', 'school', 'hand', 'rating', 'op',
+                 'relative_to', 'ratio_to', 'target', 'quest', 'id', 'stat', 'aura_state', 'school', 'hand',
+                 'rating', 'op',
                  'base', 'key', 'index', 'pet', 'critical', 'target_pet', 'periodic', 'name', 'text',
                  'min_distance', 'owner_display', 'creator_only', 'ranged_weapon_subclass', 'sheath_state', 'skill',
                  'cache', 'table', 'exclude', 'dungeon', 'source', 'opcode', 'from', 'slot', 'achievement', 'title',
@@ -1078,12 +1080,15 @@ def validate(scenario):
                         require(type(step[key]) is bool, f'{where}: {key} must be boolean')
             if metric == 'distance':
                 require('target' in step, f'{where}: {metric} metric needs target')
+            if metric == 'has_aura_state':
+                require('target' in step, f'{where}: {metric} metric needs target')
+                number(step.get('aura_state'), f'{where}.aura_state', 0, 32, True)
             if metric in {'point_distance_2d', 'spawn_distance'} or metric in POINT_PLACEMENT_METRICS:
                 for key in ('x', 'y'):
                     number(step.get(key), f'{where}.{key}', -17000, 17000)
             elif 'x' in step or 'y' in step:
                 require(False, f'{where}: x and y only apply to point metrics')
-            if metric == 'stat':
+            if metric in {'stat', 'stat_exact'}:
                 number(step.get('stat'), f'{where}.stat', 0, 4, True)
             if metric == 'aura_script_value':
                 number(step.get('key'), f'{where}.key', 0, 2**32 - 1, True)

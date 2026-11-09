@@ -2002,6 +2002,7 @@ public:
     float GetManaBonusFromIntellect();
 
     bool UpdateStats(Stats stat) override;
+    [[nodiscard]] float GetExactStatValue(Stats stat) const;
     bool UpdateAllStats() override;
     void ApplySpellPenetrationBonus(int32 amount, bool apply);
     void UpdateResistances(uint32 school) override;

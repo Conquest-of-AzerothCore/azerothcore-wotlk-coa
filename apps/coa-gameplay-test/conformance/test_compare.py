@@ -624,12 +624,15 @@ class CompareTest(unittest.TestCase):
 
 
 def passive_expectation(rank, effect, metric, relation, displayed, points, target=None, named=None, in_mask=None,
-                        source_label=None, judged=True, fields=None, aura=None):
+                        source_label=None, judged=True, fields=None, aura=None, exact=False, aura_state=False):
     qualifier = target if target is not None else ' '.join(str(value) for value in (fields or {}).values())
     label = ' '.join(str(part) for part in (rank, f'e{effect}', metric, qualifier) if part != '')
     model = {'family': 'P1' if named is not None else 'P2', 'effect': effect, 'aura': aura, 'metric': metric,
              'fields': {**(fields or {}), **({'spell': target} if target else {})}, 'relation': relation,
              'source_label': source_label, 'before_label': f'{label} before', 'after_label': f'{label} after',
+             'exact_before_label': f'{label} exact before' if exact else None,
+             'exact_after_label': f'{label} exact after' if exact else None,
+             'aura_state_label': f'{label} aura_state' if aura_state else None,
              'target': target, 'named': named, 'in_mask': in_mask, 'points': points, 'judged': judged,
              'aura_label': f'{rank} aura_present'}
     return Expectation(label, 'passive_delta', rank, rank, effect, displayed, relation, model)
@@ -659,11 +662,12 @@ class PassiveDeltaTest(unittest.TestCase):
         self.workspace.close()
 
     def passive_run(self, rank, measured, tokens, aura='1', fields=None, name='Passive', points=None,
-                    known_modifiers=None, **base_overrides):
+                    known_modifiers=None, extra_steps=(), **base_overrides):
         self.workspace.close()
         self.workspace = Workspace()
         steps = [step for entry, (before, after) in measured.items() if before is not None
                  for step in delta_steps(entry, before, after)]
+        steps += list(extra_steps)
         steps.insert(len(steps) // 2, assert_step(f'{rank} aura_present', aura))
         self.workspace.scenario(f'conformance-templar-passive-{rank}', 'passive', list(measured), [], steps,
                                 spell=rank, name=name, rank=rank)
@@ -776,6 +780,43 @@ class PassiveDeltaTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'unmeasured')
         self.assertIn('truncates', verdict.explanation)
         self.assertEqual(self.single(entry, '132', '135', [Displayed('$s1', 3.0, 0, 'percent')]).status, 'ok')
+
+    def test_exact_stat_reading_judges_a_sub_point_delta(self):
+        entry = passive_expectation(BELLS_OF_LIGHT, 2, 'stat', 'scale', '$s1', 3.0, fields={'stat': 3}, exact=True)
+        token = [Displayed('$s1', 3.0, 0, 'percent')]
+        genuine = [assert_step(entry.model['exact_before_label'], '32'),
+                  assert_step(entry.model['exact_after_label'], '32.96')]
+        verdict = self.passive_run(entry.rank_id, {entry: ('32', '32')}, token, extra_steps=genuine)[entry.label]
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 0.96)
+        absent = [assert_step(entry.model['exact_before_label'], '32'),
+                 assert_step(entry.model['exact_after_label'], '32')]
+        missing = self.passive_run(entry.rank_id, {entry: ('32', '32')}, token, extra_steps=absent)[entry.label]
+        self.assertEqual(missing.status, 'alert')
+
+    def test_damage_versus_an_established_aura_state_is_judged(self):
+        entry = passive_expectation(PIOUS_SWEEP, 0, 'spell_damage_done', 'ratio', '$s1', 25.0, 572027,
+                                    fields={'target': 'dummy'}, aura_state=True)
+        fields = {(PIOUS_SWEEP, 'EffectApplyAuraName[0]'): 303, (PIOUS_SWEEP, 'EffectMiscValue[0]'): 23}
+        token = [Displayed('$s1', 25.0, 0, 'percent')]
+        established = [assert_step(entry.model['aura_state_label'], '1')]
+        ok = self.passive_run(entry.rank_id, {entry: ('800', '1000')}, token, fields=fields,
+                              extra_steps=established)[entry.label]
+        self.assertEqual(ok.status, 'ok')
+        missing_bonus = self.passive_run(entry.rank_id, {entry: ('800', '800')}, token, fields=fields,
+                                         extra_steps=established)[entry.label]
+        self.assertEqual(missing_bonus.status, 'alert')
+
+    def test_damage_versus_an_unestablished_aura_state_is_unmeasured_with_a_sharper_reason(self):
+        entry = passive_expectation(PIOUS_SWEEP, 0, 'spell_damage_done', 'ratio', '$s1', 25.0, 572027,
+                                    fields={'target': 'dummy'}, aura_state=True)
+        fields = {(PIOUS_SWEEP, 'EffectApplyAuraName[0]'): 303, (PIOUS_SWEEP, 'EffectMiscValue[0]'): 23}
+        token = [Displayed('$s1', 25.0, 0, 'percent')]
+        unestablished = [assert_step(entry.model['aura_state_label'], '0')]
+        verdict = self.passive_run(entry.rank_id, {entry: ('800', '800')}, token, fields=fields,
+                                   extra_steps=unestablished)[entry.label]
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('is not set on the dummy', verdict.explanation)
 
     def test_a_namesake_without_a_change_shows_nothing(self):
         moving, still = (

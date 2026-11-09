@@ -1853,6 +1853,29 @@ def judge_passive(manifest: dict, entry: dict, run: Run | None, expectation: Exp
     return replace(verdict, detail={**(verdict.detail or {}), PASSIVE_METRIC: expectation.model['metric']})
 
 
+def exact_truncated_verdict(base: Verdict, manifest: dict, run: Run, model: dict, value: float, context: str,
+                            tooltips: TooltipSource) -> Verdict | None:
+    exact_before_label, exact_after_label = model.get('exact_before_label'), model.get('exact_after_label')
+    if exact_before_label is None or exact_after_label is None:
+        return None
+    exact_before, exact_after = run.values.get(exact_before_label), run.values.get(exact_after_label)
+    if exact_before is None or exact_after is None:
+        return None
+    exact_delta = exact_after - exact_before
+    exact_readings = delta_readings(manifest, run, model, exact_before, value, tooltips)
+    if not exact_readings:
+        return None
+    reading = exact_readings[0]
+    margin = max(FRACTIONAL_FLOOR, RELATIVE_TOLERANCE * abs(reading.delta))
+    status = 'ok' if abs(exact_delta - reading.delta) <= margin + FLOAT_EPSILON else 'alert'
+    return replace(base, status=status, measured=exact_delta, expected=reading.delta,
+                   low=reading.delta - margin, high=reading.delta + margin,
+                   explanation=f'{context}; the pre-truncation {model["metric"]} read {exact_before:g} before and '
+                               f'{exact_after:g} after, delta {exact_delta:+.6g}; {reading.name} ({reading.why}): '
+                               f'expected delta {reading.delta:+.6g}; |delta - expected| <= max({FRACTIONAL_FLOOR:g}, '
+                               f'{RELATIVE_TOLERANCE:.1%} of expected)')
+
+
 def passive_verdict(manifest: dict, entry: dict, run: Run | None, expectation: Expectation,
                     tooltips: TooltipSource) -> Verdict:
     model = expectation.model
@@ -1888,9 +1911,12 @@ def passive_verdict(manifest: dict, entry: dict, run: Run | None, expectation: E
     effect = model['effect']
     if tooltips.spell_field(rank_id, f'EffectApplyAuraName[{effect}]') == VERSUS_AURA_STATE:
         state = tooltips.spell_field(rank_id, f'EffectMiscValue[{effect}]')
-        return replace(base, status='unmeasured', measured=delta,
-                       explanation=f'{moved}; aura {VERSUS_AURA_STATE} applies against a target in aura state '
-                                   f'{state}, which the scenario neither establishes nor measures on the dummy')
+        established = run.values.get(model.get('aura_state_label'))
+        if established != 1:
+            reason = (f'aura state {state} is not set on the dummy' if established == 0 else
+                      f'aura {VERSUS_AURA_STATE} applies against a target in aura state {state}, which the '
+                      f'scenario neither establishes nor measures on the dummy')
+            return replace(base, status='unmeasured', measured=delta, explanation=f'{moved}; {reason}')
     try:
         caster = caster_stats_from(run.values, manifest['class_file'])
     except KeyError as error:
@@ -1908,6 +1934,9 @@ def passive_verdict(manifest: dict, entry: dict, run: Run | None, expectation: E
         return replace(base, measured=delta, explanation=f'no comparison for relation {model["relation"]!r}')
     context = f'{moved}; {sign}, expected {value:+g}'
     if model['metric'] in TRUNCATED_METRICS and all(abs(reading.delta) < 1 for reading in readings):
+        exact = exact_truncated_verdict(base, manifest, run, model, value, context, tooltips)
+        if exact is not None:
+            return exact
         return replace(base, status='unmeasured', measured=delta, expected=readings[0].delta,
                        explanation=f'{context}; the expected delta {readings[0].delta:+.6g} is below the 1-point '
                                    f'resolution of {model["metric"]}, which the server truncates to an integer')

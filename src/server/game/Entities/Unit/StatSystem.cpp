@@ -247,6 +247,11 @@ bool Player::UpdateStats(Stats stat)
     return true;
 }
 
+float Player::GetExactStatValue(Stats stat) const
+{
+    return GetTotalStatValue(stat, GetAscensionStatFromStatBonus(*this, stat));
+}
+
 void Player::ApplySpellPowerBonus(int32 amount, bool apply)
 {
     apply = _ModifyUInt32(apply, m_baseSpellPower, amount);

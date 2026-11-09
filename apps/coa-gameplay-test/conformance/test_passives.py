@@ -9,10 +9,10 @@ import unittest
 
 import compare
 from classes import PROGRESSION_HEADER as HEADER, ClassSpell, class_spells, table_rows
-from passives import (ALIASED_REASON_MARKER, FAMILIES, MAX_SPELLMOD, PASSIVE_DELTA, PHRASES, MetricPlan,
-                      PassiveTarget, classify, family_of, named_targets, passive_effects, passive_scenario,
-                      stat_after_token)
-from profile import load_class_file, spell_power_label, stat_label
+from passives import (ALIASED_REASON_MARKER, AURA_STATE_METRIC, FAMILIES, MAX_SPELLMOD, PARRY_CHANCE, PASSIVE_DELTA,
+                      PHRASES, STAT_EXACT_METRIC, STAT_METRIC, MetricPlan, PassiveTarget, classify, family_of,
+                      named_targets, passive_effects, passive_scenario, stat_after_token)
+from profile import CASTER, load_class_file, spell_power_label, stat_label
 from tooltip import Displayed, Records
 from values import TARGET, dataset
 import schemas
@@ -58,6 +58,8 @@ PIOUS_SWEEP_DEV_SPELL = 521052
 WRONGLY_NAMED_CHASTISE = 503141
 TESTAMENT_OF_FAITH = 501606
 TESTAMENT_OF_FORTITUDE = 500678
+JUDICATOR = 706359
+BELLS_OF_LIGHT = 801204
 ASCETIC_ABDICATION = 500699
 FINESSE = 705271
 PIOUS = 706431
@@ -87,7 +89,8 @@ LIBERTY_OP = 11
 SPELL_MODIFIER_BASE = 1000
 CONDEMNATION_OP = 40
 MODEL_KEYS = {'family', 'effect', 'aura', 'metric', 'fields', 'relation', 'source_label', 'before_label',
-              'after_label', 'target', 'named', 'in_mask', 'points', 'judged', 'aura_label'}
+              'after_label', 'exact_before_label', 'exact_after_label', 'aura_state_label', 'target', 'named',
+              'in_mask', 'points', 'judged', 'aura_label'}
 MAGIC_SCHOOLS = [1, 2, 3, 4, 5, 6]
 NO_NAMED_TARGET = 'unmodelled: the tooltip names none of the spells the class mask affects ('
 
@@ -509,11 +512,20 @@ class PassiveScenarioTest(unittest.TestCase):
         self.assertEqual((aura['label'], aura['metric'], aura['spell']), (f'{PIOUS} aura_present', 'aura', PIOUS))
         before = [step for step in steps[:learn] if step.get('label', '').endswith(' before')]
         after = [step for step in steps[learn + 2:] if step.get('label', '').endswith(' after')]
-        self.assertEqual([(step['metric'], step['stat']) for step in before],
+        plain_before = [step for step in before if step['metric'] == 'stat']
+        plain_after = [step for step in after if step['metric'] == 'stat']
+        self.assertEqual([(step['metric'], step['stat']) for step in plain_before],
                          [('stat', stat) for stat in range(STAT_COUNT)])
-        self.assertEqual([step['label'] for step in before], [f'{PIOUS} e0 stat {stat} before' for stat in range(5)])
-        self.assertEqual([step['label'].removesuffix(' after') for step in after],
-                         [step['label'].removesuffix(' before') for step in before])
+        self.assertEqual([step['label'] for step in plain_before],
+                         [f'{PIOUS} e0 stat {stat} before' for stat in range(5)])
+        self.assertEqual([step['label'].removesuffix(' after') for step in plain_after],
+                         [step['label'].removesuffix(' before') for step in plain_before])
+        exact_before = [step for step in before if step['metric'] == STAT_EXACT_METRIC]
+        exact_after = [step for step in after if step['metric'] == STAT_EXACT_METRIC]
+        self.assertEqual([step['label'] for step in exact_before],
+                         [f'{PIOUS} e0 stat {stat} exact before' for stat in range(5)])
+        self.assertEqual([step['label'] for step in exact_after],
+                         [f'{PIOUS} e0 stat {stat} exact after' for stat in range(5)])
         self.assertEqual(len(steps), learn + 2 + len(after))
         self.assertIs(run.validate(scenario), scenario)
         self.assertEqual([expectation.check for expectation in expectations], [PASSIVE_DELTA] * STAT_COUNT)
@@ -658,6 +670,48 @@ class PassiveScenarioTest(unittest.TestCase):
 
         self.assertEqual(verdict_for(before * 1.06).status, 'ok')
         self.assertEqual(verdict_for(before * 1.10).status, 'alert')
+
+    def test_parry_chance_probe_primes_can_parry_before_the_baseline(self):
+        scenario, _ = self.scenario(JUDICATOR)
+        steps = scenario['steps']
+        learn = steps.index({'action': 'learn', 'actor': 'caster', 'spell': JUDICATOR})
+        before = next(index for index, step in enumerate(steps) if step.get('label', '').endswith(' before'))
+        priming = steps[before - 2:before]
+        self.assertEqual([(step['action'], step['spell'], step['stacks']) for step in priming],
+                         [('set_aura', JUDICATOR, 1), ('set_aura', JUDICATOR, 0)])
+        self.assertTrue(all(step['actor'] == CASTER for step in priming))
+        self.assertLess(before, learn)
+        self.assertTrue(any(step.get('metric') == PARRY_CHANCE for step in steps[before:]))
+        run.validate(scenario)
+
+    def test_stat_probe_adds_a_parallel_exact_measurement(self):
+        scenario, expectations = self.scenario(BELLS_OF_LIGHT)
+        model = next(expectation.model for expectation in expectations
+                    if expectation.model and expectation.model.get('metric') == STAT_METRIC
+                    and expectation.model['fields'] == {'stat': 3})
+        self.assertEqual(model['exact_before_label'], f'{BELLS_OF_LIGHT} e2 {STAT_METRIC} 3 exact before')
+        self.assertEqual(model['exact_after_label'], f'{BELLS_OF_LIGHT} e2 {STAT_METRIC} 3 exact after')
+        exact = [step for step in scenario['steps'] if step.get('metric') == STAT_EXACT_METRIC]
+        labels = {step['label'] for step in exact}
+        self.assertIn(model['exact_before_label'], labels)
+        self.assertIn(model['exact_after_label'], labels)
+        self.assertTrue(any(step['stat'] == 3 for step in exact))
+        run.validate(scenario)
+
+    def test_versus_aura_state_probe_adds_an_aura_state_measurement(self):
+        scenario, expectations = self.scenario(PIOUS_SWEEP)
+        model = next(expectation.model for expectation in expectations
+                    if expectation.model and expectation.model.get('metric') == 'spell_damage_done')
+        self.assertIsNotNone(model['aura_state_label'])
+        state_steps = [step for step in scenario['steps'] if step.get('metric') == AURA_STATE_METRIC]
+        self.assertEqual(len(state_steps), 1)
+        state_step = state_steps[0]
+        self.assertEqual((state_step['label'], state_step['target'], state_step['aura_state']),
+                         (model['aura_state_label'], TARGET, 23))
+        steps = scenario['steps']
+        learn = steps.index({'action': 'learn', 'actor': 'caster', 'spell': PIOUS_SWEEP})
+        self.assertLess(steps.index(state_step), learn)
+        run.validate(scenario)
 
     def test_every_templar_passive_scenario_validates(self):
         passives = [spell for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER) if spell.passive]

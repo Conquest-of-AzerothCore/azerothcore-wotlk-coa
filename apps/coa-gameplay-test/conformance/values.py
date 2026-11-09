@@ -22,6 +22,7 @@ EFFECTS = range(3)
 HOSTILE_TARGETS = frozenset({2, 6, 15, 16, 24})
 SELF_TARGETS = frozenset({0, 1})
 FRIEND_TARGETS = frozenset({21})
+RESURRECT_EFFECTS = frozenset({18, 113})
 ALLY = 'ally'
 CHARGE_OFFSET_YD = 10
 POWER_DISPLAY_DIVISOR = {0: 1, 1: 10, 2: 1, 3: 1, 4: 1000, 5: 1, 6: 10}
@@ -144,6 +145,10 @@ def targets_ally(facts: RankFacts) -> bool:
     return any(facts.effects[effect] and (facts.target_a[effect] in FRIEND_TARGETS
                                           or facts.target_b[effect] in FRIEND_TARGETS)
                for effect in EFFECTS)
+
+
+def targets_resurrect(facts: RankFacts) -> bool:
+    return any(facts.effects[effect] in RESURRECT_EFFECTS for effect in EFFECTS)
 
 
 CHARGE_EFFECTS = frozenset({96, 149})
@@ -473,6 +478,9 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
         if is_hostile(facts):
             cast['target'] = TARGET
             cast_steps += required_target_health_steps(facts)
+        elif targets_resurrect(facts):
+            cast_steps.append({'action': 'die', 'actor': ALLY})
+            cast['target'] = ALLY
         cast_steps += required_aura_steps(facts)
         cast_steps.append(cast)
         if facts.cast_time_ms:
@@ -501,4 +509,6 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
     if is_hostile(facts) and cast_wanted:
         scenario['creatures'] = [{'id': TARGET, 'owner': CASTER, 'entry': DUMMY_ENTRY, 'level': class_file['level'],
                                   'health': DUMMY_HEALTH, 'distance': DUMMY_DISTANCE}]
+    if targets_resurrect(facts) and cast_wanted:
+        scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
     return scenario, expectations
