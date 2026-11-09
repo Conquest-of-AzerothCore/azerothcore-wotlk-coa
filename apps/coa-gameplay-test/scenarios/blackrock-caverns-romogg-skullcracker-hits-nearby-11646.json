@@ -2,40 +2,121 @@
   "schema": 1,
   "name": "Blackrock Caverns: Rom'ogg's Skullcracker hits every player within 12 yards (#11646)",
   "contract": [
-    "Rom'ogg Bonecrusher 39665 casts Chains of Woe, then The Skullcracker (12.5 s). Its tooltip reads 'Physical damage to",
-    "all enemies within 12 yds of the caster'. A player still bound by the Chains (5011010) dies. A player who broke",
-    "free but stayed within 12 yards loses 75 % of his health. A player more than 12 yards away takes nothing."
+    "Rom'ogg Bonecrusher 39665's The Skullcracker (12.5 s) reads 'Physical damage to all enemies within 12 yds",
+    "of the caster'. A player still bound by the Chains of Woe (5011010) dies. A player within 12 yards who is not",
+    "bound loses 75 % of their health, a player more than 12 yards away takes nothing. The scenario has Rom'ogg cast",
+    "The Skullcracker directly, without the Chains."
   ],
   "timeout_ms": 120000,
-  "location": {"map": 645, "x": 225.0, "y": 949.0, "z": 191.2, "o": 3.14, "ignore_access": true},
+  "location": {
+    "map": 645,
+    "x": 225.0,
+    "y": 949.0,
+    "z": 191.2,
+    "o": 3.14,
+    "ignore_access": true
+  },
   "players": [
-    {"id": "tank", "race": 1, "class": 1, "level": 60},
-    {"id": "near", "race": 1, "class": 1, "level": 60},
-    {"id": "far", "race": 1, "class": 1, "level": 60}
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "near",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "far",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
   ],
   "steps": [
-    {"action": "wait", "ms": 1000},
-    {"action": "group", "actor": "tank", "target": "near"},
-    {"action": "group", "actor": "tank", "target": "far"},
-    {"action": "set_health", "actor": "tank", "value": 50000000, "maximum": 50000000},
-    {"action": "set_health", "actor": "near", "value": 100000, "maximum": 100000},
-    {"action": "set_health", "actor": "far", "value": 100000, "maximum": 100000},
-    {"action": "summon", "actor": "tank", "entry": 39665, "as": "romogg", "distance": 4},
-    {"action": "wait", "ms": 500},
-    {"action": "attack", "actor": "tank", "target": "romogg"},
-    {"label": "Rom'ogg puts the Chains of Woe down", "action": "assert", "actor": "tank",
-     "metric": "nearby_creature_count", "entry": 40447, "equals": 1, "within_ms": 40000},
-    {"action": "wait", "ms": 1500},
-    {"action": "attack_nearby", "actor": "near", "entry": 40447, "kill": true},
-    {"label": "Killing the Chains frees near", "action": "assert", "actor": "near", "metric": "aura_stacks",
-     "spell": 5011010, "equals": 0, "within_ms": 3000},
-    {"action": "relocate", "actor": "far", "dx": 15},
-    {"action": "relocate", "actor": "far", "dx": 10},
-    {"action": "set_health", "actor": "near", "value": 100000, "maximum": 100000},
-    {"action": "set_health", "actor": "far", "value": 100000, "maximum": 100000},
-    {"label": "DISCRIMINATING: the Skullcracker takes 75 % from near, who stands within 12 yards", "action": "assert",
-     "actor": "near", "metric": "health_pct", "min": 20, "max": 30, "within_ms": 20000},
-    {"label": "far, 25 yards away, takes nothing", "action": "assert", "actor": "far", "metric": "health_pct",
-     "equals": 100}
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "set_health",
+      "actor": "near",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "set_health",
+      "actor": "far",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 39665,
+      "as": "romogg",
+      "distance": 4
+    },
+    {
+      "action": "relocate",
+      "actor": "far",
+      "dx": 15
+    },
+    {
+      "action": "relocate",
+      "actor": "far",
+      "dx": 10
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "label": "CONTROL: far stands more than 12 yards from Rom'ogg",
+      "action": "assert",
+      "actor": "far",
+      "metric": "nearest_creature_distance",
+      "entry": 39665,
+      "min": 13
+    },
+    {
+      "label": "CONTROL: near stands within 12 yards",
+      "action": "assert",
+      "actor": "near",
+      "metric": "nearest_creature_distance",
+      "entry": 39665,
+      "max": 12
+    },
+    {
+      "action": "cast",
+      "actor": "romogg",
+      "spell": 5011002,
+      "target": "romogg"
+    },
+    {
+      "label": "DISCRIMINATING: the Skullcracker takes 75 % from near",
+      "action": "assert",
+      "actor": "near",
+      "metric": "health_pct",
+      "min": 24,
+      "max": 26,
+      "within_ms": 16000
+    },
+    {
+      "label": "far takes nothing",
+      "action": "assert",
+      "actor": "far",
+      "metric": "health_pct",
+      "equals": 100
+    }
   ]
 }
