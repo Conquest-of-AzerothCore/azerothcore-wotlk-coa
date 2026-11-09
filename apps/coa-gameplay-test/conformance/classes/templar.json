@@ -82,7 +82,9 @@
     {"spell": 712678, "effect": 0,
      "reason": "round4 alert-triage: AscensionTemplarContracts.cpp:126-129 dummies every effect of 712678 at load; the +2000ms duration this effect's DBC SpellMod would have applied to 560116 is instead implemented as a scripted per-cast hook (AscensionTemplarAbilities.cpp OnCalcMaxDuration, keyed on HasAura(712678) while 560116 applies). The generic spell_modifier probe looks for a static SpellMod table entry that is never populated at runtime; needs a duration-on-apply check on 560116 instead"},
     {"spell": 712678, "effect": 1,
-     "reason": "round4 alert-triage: same load-time dummy as 712678 effect 0; the -5000ms cooldown reduction on 560116 is implemented as a scripted cast-success hook (AscensionTemplarAbilities.cpp, info->Id == 560116 branch calling ModifySpellCooldown) rather than a static SpellMod. The generic spell_modifier probe cannot see it; needs a cooldown-remaining check on 560116 instead"}
+     "reason": "round4 alert-triage: same load-time dummy as 712678 effect 0; the -5000ms cooldown reduction on 560116 is implemented as a scripted cast-success hook (AscensionTemplarAbilities.cpp, info->Id == 560116 branch calling ModifySpellCooldown) rather than a static SpellMod. The generic spell_modifier probe cannot see it; needs a cooldown-remaining check on 560116 instead"},
+    {"spell": 504807, "effect": 0,
+     "reason": "round5 trigger-accounting: effect 0's claim (Reduce(player, root, 1000) for each of {500694, 806153, 801455}, AscensionTemplarAbilities.cpp:184-189, run unconditionally in the same Breaker(info) block whose adjacent ReduceLibrams(player, 1000) call is confirmed ok by this round's own effect-2 cooldown_delta entry) is not a dead effect, but none of its three roots can be put on a measurable cooldown by the existing cooldown_trigger_scenario/cooldown_trial_steps shape, which self-casts the observe_spell with no explicit target and no wait before the trigger cast: 806153 (Divine Force, EffectImplicitTargetA[0] 6 TARGET_UNIT_TARGET_ENEMY) and 801455 (Testament of Will, EffectImplicitTargetA[0] 21 TARGET_UNIT_TARGET_ALLY) cannot complete a self-cast at all (coa-dbc-viewer Spell record); 500694 (Force of Golganneth, EffectImplicitTargetA[0] 1 TARGET_UNIT_CASTER) can self-cast but its own StartRecoveryTime 1250 ms (coa-dbc-viewer) triggers the player's global cooldown, which Spell::CheckCast (Spell.cpp:5846, HasGlobalCooldown) rejects with SPELL_FAILED_NOT_READY (67) on the immediately-following zero-wait trigger cast of 572027; measured this round in a real gameplay run (conformance-templar-trigger-504807-0-part-1, .cache/verify-all/20261109-133249): 162 of 244 scheduled trigger casts failed with reason 67, leaving a diluted mean delta of 17.996 ms against the expected 1000 ms, which would misreport this as a broken mechanism rather than the measurement gap it is. A harness change (a trigger-cast wait sized to the observe_spell's own GCD, or a target-capable observe cast) would be needed to measure this effect; out of this item's no-harness-change scope"}
   ],
   "literal_tokens": [
     {"spell": 705268, "effect": 0, "quote": "Doubles the healing done to you", "value": 100},
@@ -477,6 +479,36 @@
       "per_trigger": 1,
       "per_trigger_text": "now triggers Zealotry on your target",
       "handler": "AscensionTemplarAbilities.cpp:166,185,187 (OnSpellCast, Breaker(info) block) calls Zealotry(player, target ? target : player->GetVictim())"
+    },
+    {
+      "aura": 504807,
+      "effect": 2,
+      "name": "One With The Light",
+      "tooltip": "Casting |cffffffffOath Breakers|r now triggers |cffffffffZealotry|r on your target and reduces the cooldown of |cffffffffLibrams|r, |cffffffffForce of Golganneth|r, |cffffffffDivine Force|r, and |cffffffffTestament of Will|r by $/1000;505205s1 sec.@s:801450:0@",
+      "trigger": {"action": "cast", "spell": 572027, "target": "dummy"},
+      "trigger_text": "Casting Oath Breakers",
+      "trigger_spell_text": "a dominating Oath Breaker",
+      "kind": "cooldown_delta",
+      "observe_spell": 801461,
+      "observe_source": "AscensionTemplarAbilities.cpp:184-189 (OnSpellCast's shared Breaker(info) block every Oath Breaker ability cast runs through): if the caster knows One With The Light 504807, ReduceLibrams(player, 1000), unconditionally; this call does not depend on target at all, unlike effect 1's Zealotry(player, target ? target : player->GetVictim()), so the harness's always-explicit cast target does not block it",
+      "observe_metric": "cooldown_ms",
+      "expected_delta_ms": 1000,
+      "per_trigger_text": "reduces the cooldown of Librams"
+    },
+    {
+      "aura": 500011,
+      "name": "Holy Combatant",
+      "tooltip": "Your |cffffffffArgent Blade|r now also extends the duration of |cffffffffInterdict|r on your target by $/1000;500014s1 sec.",
+      "trigger": {"action": "cast", "spell": 807268, "target": "dummy"},
+      "trigger_text": "Your Argent Blade now also extends the duration of Interdict",
+      "trigger_spell_text": "Argent Blade",
+      "kind": "duration_delta",
+      "observe_spell": 560116,
+      "observe_source": "AscensionTemplarAbilities.cpp:296-303 (OnSpellHit, Named(info, 804929) block): if the caster knows Holy Combatant 500011 and the target carries the caster's own Interdict 560116, extend its remaining duration by Amount(500014) (EffectBasePoints[0] 999 + EffectDieSides[0] 1 = 1000 ms), clamped to Interdict's own MaxDuration (SpellDuration.dbc id 32, Duration/MaxDuration 6000 ms)",
+      "observe_metric": "aura_duration_ms",
+      "expected_delta_ms": 1000,
+      "decay_wait_ms": 1500,
+      "per_trigger_text": "now also extends the duration of Interdict on your target"
     },
     {
       "aura": 520812,

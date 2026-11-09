@@ -5,9 +5,11 @@ import re
 
 from classes import PROGRESSION_HEADER, PROGRESSION_ROW, ClassSpell, class_spells, table_rows
 from hits import creature_fixture
+from procs import proc_label
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture, stat_label
 from stack import class_mask, family_flags
 from tooltip import COLOR_CODE, Displayed, Records, Unreadable, read_tooltip
+from triggers import cooldown_label, shares_cooldown_aura, trigger_label
 from values import EFFECTS, TARGET, Expectation, dataset, facts_of, structure_stats
 
 UNMODELLED = 'unmodelled: '
@@ -62,6 +64,16 @@ OUT_OF_SCOPE = {
     59: 'damage versus a creature type is level-scaled',
     122: 'no off-hand weapon damage metric',
     110: 'no energy regeneration metric',
+}
+LINKED_FAMILY = 'P5'
+BEHAVIOUR_LABELS = {
+    'count': lambda entry: [f"{entry['spell']} behaviour_count"],
+    'spread': lambda entry: [f"{entry['spell']} behaviour_count"],
+    'metric_delta': lambda entry: [f"{entry['spell']} behaviour_metric_delta"],
+    'duration_refresh': lambda entry: [f"{entry['spell']} behaviour_duration_refresh"],
+    'amount_delta': lambda entry: [f"{entry['spell']} behaviour_amount_delta"],
+    'duration': lambda entry: [f"{entry['spell']} behaviour_duration"],
+    'health_ratio': lambda entry: [f"{entry['spell']} {pct} behaviour_ratio" for pct, _ in entry['levels']],
 }
 FAMILY_REASONS = {
     'P5': 'proc or trigger effect without a trigger entry',
@@ -541,6 +553,45 @@ def effect_unmodelled(class_file: dict, spell_ids: set[int], effect: int) -> str
     return entry['reason'] if entry else None
 
 
+def behaviour_label(entry: dict) -> list[str]:
+    kind = entry['kind']
+    if kind not in BEHAVIOUR_LABELS:
+        raise ValueError(f'behaviour kind {kind!r} has no known label format for a P5 link')
+    return BEHAVIOUR_LABELS[kind](entry)
+
+
+def trigger_link(class_file: dict, spell_ids: set[int], effect: int) -> tuple[str, dict] | None:
+    candidates: list[tuple[str, dict]] = []
+    for key, id_field in (('triggers', 'aura'), ('procs', 'aura')):
+        for entry in class_file.get(key, []):
+            if entry[id_field] in spell_ids:
+                candidates.append((key, entry))
+    for entry in class_file.get('behaviours', []):
+        if entry['spell'] in spell_ids:
+            candidates.append(('behaviours', entry))
+    if not candidates:
+        return None
+    exact = [(key, entry) for key, entry in candidates if entry.get('effect') == effect]
+    return (exact or candidates)[0]
+
+
+def linked_reason(class_file: dict, kind: str, entry: dict) -> str:
+    if kind == 'triggers':
+        if entry.get('kind') == 'cooldown_delta':
+            label = cooldown_label(entry['aura'], entry['observe_spell']) \
+                if shares_cooldown_aura(class_file, entry) else cooldown_label(entry['aura'])
+        else:
+            label = trigger_label(entry['aura'])
+        labels = [label]
+    elif kind == 'procs':
+        labels = [proc_label(entry['aura'])]
+    else:
+        labels = behaviour_label(entry)
+    status = entry.get('status', 'ok')
+    verdicts = ', '.join(f'"{label}"' for label in labels)
+    return f'checked by {kind} entry "{entry.get("name")}" (verdict {verdicts}, status {status})'
+
+
 def signed_points(records: Records, rank_id: int, effect: int) -> float | None:
     try:
         return records.points(rank_id, effect, upper=False)
@@ -584,6 +635,10 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
             raise NotModelled(f'aura {aura} has no passive measurement' if aura
                               else f'effect {spell(f"Effect[{effect}]")} applies no aura')
         if family in FAMILY_REASONS:
+            link = trigger_link(class_file, {spell_id, rank_id}, effect) if family == LINKED_FAMILY else None
+            if link is not None:
+                kind, linked_entry = link
+                raise NotModelled(linked_reason(class_file, kind, linked_entry))
             raise NotModelled(FAMILY_REASONS[family])
         if aura == 142:
             raise Closed(OUT_OF_SCOPE[142])

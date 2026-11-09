@@ -13,6 +13,8 @@ from values import (ALLY, CHARGE_OFFSET_YD, FORCED_CRIT_RATING, TARGET, Expectat
 TRIGGER_CHECK = 'trigger_count'
 COOLDOWN_DELTA_KIND = 'cooldown_delta'
 COOLDOWN_CHECK = 'trigger_cooldown_delta'
+DURATION_DELTA_KIND = 'duration_delta'
+DURATION_CHECK = 'trigger_duration_delta'
 MISSED_TRIGGER_RATE = 0.025
 FALSE_OK_RISK = 0.01
 TRIGGER_TRIALS = math.ceil(math.log(FALSE_OK_RISK) / math.log(1 - MISSED_TRIGGER_RATE))
@@ -72,12 +74,32 @@ def checked_cooldown_entry(entry: dict) -> dict:
     return entry
 
 
+def checked_duration_entry(entry: dict) -> dict:
+    aura = entry['aura']
+    trigger = entry['trigger']
+    if trigger['action'] != CAST:
+        raise ValueError(f'Duration-delta trigger {aura} must cast, not {trigger["action"]!r}')
+    if trigger.get('target') not in TRIGGER_TARGETS:
+        raise ValueError(f'Duration-delta trigger {aura} casts at {trigger.get("target")!r}, not one of '
+                         f'{sorted(TRIGGER_TARGETS)}')
+    if entry.get('observe_metric') != 'aura_duration_ms':
+        raise ValueError(f'Duration-delta trigger {aura} observe_metric must be aura_duration_ms, not '
+                         f'{entry.get("observe_metric")!r}')
+    if not entry.get('expected_delta_ms', 0) > 0:
+        raise ValueError(f'Duration-delta trigger {aura} needs a positive expected_delta_ms')
+    if not entry.get('decay_wait_ms', 0) > entry.get('expected_delta_ms', 0):
+        raise ValueError(f'Duration-delta trigger {aura} needs decay_wait_ms greater than expected_delta_ms')
+    return entry
+
+
 def checked_entry(entry: dict) -> dict:
     aura = entry['aura']
     if entry.get('status'):
         raise ValueError(f'Trigger {aura} is {entry["status"]}: {entry.get("reason", "")}')
     if entry.get('kind') == COOLDOWN_DELTA_KIND:
         return checked_cooldown_entry(entry)
+    if entry.get('kind') == DURATION_DELTA_KIND:
+        return checked_duration_entry(entry)
     trigger = entry['trigger']
     if trigger['action'] not in TRIAL_METRICS:
         raise ValueError(f'Unknown trigger action {trigger["action"]!r} of trigger {aura}')
@@ -146,6 +168,9 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
     if entry.get('kind') == COOLDOWN_DELTA_KIND:
         interval += cast_interval(class_file, entry['observe_spell'], 0)
         interval += sum(cast_interval(class_file, spell, 0) for spell in entry.get('setup_casts', []))
+    if entry.get('kind') == DURATION_DELTA_KIND:
+        interval += cast_interval(class_file, entry['observe_spell'], 0)
+        interval += entry['decay_wait_ms']
     return interval
 
 
@@ -321,8 +346,14 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
     return timed(scenario, SETTLE_MS + baseline_ms + attempts * plan.attempt_ms + DRAIN_MS), [expectation]
 
 
-def cooldown_label(aura: int) -> str:
-    return f'{aura} trigger_cooldown_delta'
+def cooldown_label(aura: int, observe_spell: int | None = None) -> str:
+    return f'{aura} trigger_cooldown_delta' if observe_spell is None \
+        else f'{aura} trigger_cooldown_delta {observe_spell}'
+
+
+def shares_cooldown_aura(class_file: dict, entry: dict) -> bool:
+    return sum(1 for other in class_file.get('triggers', [])
+              if other.get('kind') == COOLDOWN_DELTA_KIND and other['aura'] == entry['aura']) > 1
 
 
 def cooldown_trial_label(aura: int, phase: str, index: int, moment: str) -> str:
@@ -408,8 +439,90 @@ def cooldown_trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> t
             'trigger': dict(trigger), 'observe_spell': entry['observe_spell'],
             'observe_metric': entry['observe_metric'], 'expected_delta_ms': entry['expected_delta_ms'],
             'measurements': labels}
-    expectation = Expectation(cooldown_label(aura), COOLDOWN_CHECK, aura, aura, None, entry['trigger_text'],
+    label = cooldown_label(aura, entry['observe_spell']) if shares_cooldown_aura(class_file, entry) \
+        else cooldown_label(aura)
+    expectation = Expectation(label, COOLDOWN_CHECK, aura, aura, None, entry['trigger_text'],
                               cooldown_trigger_rule(entry), model)
+    baseline_ms = baseline * plan.attempt_ms + DRAIN_MS if baseline else 0
+    return timed(scenario, SETTLE_MS + baseline_ms + attempts * plan.attempt_ms + DRAIN_MS), [expectation]
+
+
+def duration_label(aura: int) -> str:
+    return f'{aura} trigger_duration_delta'
+
+
+def duration_trial_label(aura: int, phase: str, index: int, moment: str) -> str:
+    return f'{aura} trigger duration {phase} {index} {moment}'
+
+
+def duration_measurement_labels(aura: int) -> dict[str, str]:
+    return {'aura': f'{aura} trigger duration aura'}
+
+
+def duration_trial_steps(class_file: dict, entry: dict, count: int, phase: str) -> list[dict]:
+    if count <= 0:
+        return []
+    aura, trigger = entry['aura'], entry['trigger']
+    records = records_of(class_file)
+    observe_facts = facts_of(records, entry['observe_spell'])
+    trigger_facts = facts_of(records, trigger['spell'])
+    observe_interval = cast_interval(class_file, entry['observe_spell'], 0)
+    trigger_interval = cast_interval(class_file, trigger['spell'], 0)
+    target = trigger['target']
+    steps = []
+    for index in range(count):
+        steps += cast_steps(observe_facts, entry['observe_spell'], target, 0, 1)
+        steps.append({'action': 'wait', 'label': f'{phase}decay', 'ms': entry['decay_wait_ms']})
+        steps.append(measurement(duration_trial_label(aura, phase, index, 'before'), target, 'aura_duration_ms',
+                                 spell=entry['observe_spell'], caster=CASTER))
+        steps += cast_steps(trigger_facts, trigger['spell'], target, 0, 1)
+        steps.append(measurement(duration_trial_label(aura, phase, index, 'after'), target, 'aura_duration_ms',
+                                 spell=entry['observe_spell'], caster=CASTER))
+        steps.append({'action': 'wait', 'label': f'{phase}spacing', 'ms': observe_interval + trigger_interval})
+    return steps
+
+
+def duration_trigger_rule(entry: dict) -> str:
+    return (f'baseline delta 0 ms over {BASELINE_ATTEMPTS} attempts without the passive; measured delta of '
+            f'{entry["observe_metric"]} of {entry["observe_spell"]} between a cast of {entry["observe_spell"]} '
+            f'(after waiting {entry["decay_wait_ms"]} ms for it to decay) and a cast of '
+            f'{entry["trigger"]["spell"]} matches {entry["expected_delta_ms"]:g} ms within max(1, 0.5% of '
+            f'expected), over at least {TRIGGER_TRIALS} trials ("{entry["per_trigger_text"]}")')
+
+
+def duration_trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict, list[Expectation]]:
+    class_file = armed_for(class_file, records_of(class_file), entry['trigger']['spell'])
+    class_file = armed_for(class_file, records_of(class_file), entry['observe_spell'])
+    plan = trigger_plan(class_file, entry)
+    if not 0 <= part < len(plan.part_attempts):
+        raise ValueError(f'Trigger {entry["aura"]} has parts 0 to {len(plan.part_attempts) - 1}, not {part}')
+    aura, trigger = entry['aura'], entry['trigger']
+    attempts = plan.part_attempts[part]
+    baseline = BASELINE_ATTEMPTS if part == 0 else 0
+    labels = duration_measurement_labels(aura)
+    steps = [{'action': 'learn', 'actor': CASTER, 'spell': trigger['spell']},
+             {'action': 'learn', 'actor': CASTER, 'spell': entry['observe_spell']}]
+    if baseline:
+        steps += duration_trial_steps(class_file, entry, baseline, 'baseline')
+        steps.append({'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS})
+    steps.append({'action': 'learn', 'actor': CASTER, 'spell': aura})
+    steps += duration_trial_steps(class_file, entry, attempts, 'measured')
+    steps.append({'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS})
+    steps.append(measurement(labels['aura'], CASTER, 'aura', spell=aura))
+    parts = len(plan.part_attempts)
+    name = f'Conformance trigger {class_file["name"]} {entry["name"]} {aura} part {part + 1} of {parts}'
+    contract = ('Duration delta of an always-on passive: no change before the learn, a fixed extension of a '
+               'foreign aura\'s remaining duration per trigger after it, summed over its parts, against its '
+               'tooltip.')
+    scenario = scenario_shell(class_file, name, contract, steps)
+    scenario['creatures'] = [creature_fixture(class_file)]
+    model = {'part': part, 'parts': parts, 'scheduled_attempts': plan.scheduled, 'part_attempts': attempts,
+            'baseline_attempts': baseline, 'attempt_ms': plan.attempt_ms, 'minimum_trials': TRIGGER_TRIALS,
+            'trigger': dict(trigger), 'observe_spell': entry['observe_spell'],
+            'observe_metric': entry['observe_metric'], 'expected_delta_ms': entry['expected_delta_ms'],
+            'decay_wait_ms': entry['decay_wait_ms'], 'measurements': labels}
+    expectation = Expectation(duration_label(aura), DURATION_CHECK, aura, aura, None, entry['trigger_text'],
+                              duration_trigger_rule(entry), model)
     baseline_ms = baseline * plan.attempt_ms + DRAIN_MS if baseline else 0
     return timed(scenario, SETTLE_MS + baseline_ms + attempts * plan.attempt_ms + DRAIN_MS), [expectation]
 

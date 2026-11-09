@@ -161,6 +161,64 @@ def write_aliased_token_fixture(directory: Path):
     (directory / 'Spell.dbc').write_bytes(header + bytes(row) + strings)
 
 
+P5_FIXTURE_SPELL = 900003
+P5_FIXTURE_AURA = 42
+
+
+def write_p5_fixture(directory: Path):
+    offsets = {column.name: column.offset for column in schemas.registry()['Spell'].columns}
+    strings = b'\0'
+    name_offset = len(strings)
+    strings += b'Fixture Proc\0'
+    description_offset = len(strings)
+    strings += b'Triggers something.\0'
+    row = bytearray(SPELL_RECORD_BYTES)
+    for field, value in (('Id', P5_FIXTURE_SPELL), ('Attributes', PASSIVE), ('Effect[0]', APPLY_AURA),
+                         ('EffectApplyAuraName[0]', P5_FIXTURE_AURA), ('Effect[1]', APPLY_AURA),
+                         ('EffectApplyAuraName[1]', P5_FIXTURE_AURA), ('SpellName[enUS]', name_offset),
+                         ('Description[enUS]', description_offset), ('SpellFamilyName', TEMPLAR_FAMILY_NAME)):
+        struct.pack_into('<i', row, offsets[field], value)
+    header = struct.pack('<4s4I', b'WDBC', 1, SPELL_FIELDS, SPELL_RECORD_BYTES, len(strings))
+    (directory / 'Spell.dbc').write_bytes(header + bytes(row) + strings)
+
+
+class TriggerLinkTest(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.directory = Path(self.temp.name)
+        write_p5_fixture(self.directory)
+
+    def tearDown(self):
+        self.temp.cleanup()
+
+    def effects_with(self, class_file_extra: dict):
+        class_file = {'class_id': TEMPLAR_CLASS_ID, 'level': LEVEL, 'dbc_dir': str(self.directory),
+                      **class_file_extra}
+        return passive_effects(class_file, ClassSpell(P5_FIXTURE_SPELL, 'Fixture Proc', (P5_FIXTURE_SPELL,),
+                                                       P5_FIXTURE_SPELL, 2, True))
+
+    def test_p5_effect_links_to_existing_trigger_entry(self):
+        effects = self.effects_with({'triggers': [{'aura': P5_FIXTURE_SPELL, 'name': 'Fixture Proc',
+                                                    'kind': None}]})
+        effect = effect_of(effects, 0)
+        self.assertTrue(effect.reason.startswith('unmodelled: checked by triggers entry'), effect.reason)
+        self.assertNotEqual(effect.reason, 'unmodelled: proc or trigger effect without a trigger entry')
+
+    def test_p5_effect_without_any_entry_keeps_generic_reason(self):
+        effects = self.effects_with({})
+        effect = effect_of(effects, 0)
+        self.assertEqual(effect.reason, 'unmodelled: proc or trigger effect without a trigger entry')
+
+    def test_p5_links_prefer_matching_effect_index(self):
+        effects = self.effects_with({'triggers': [
+            {'aura': P5_FIXTURE_SPELL, 'effect': 0, 'name': 'Fixture Proc Zero', 'kind': None},
+            {'aura': P5_FIXTURE_SPELL, 'effect': 1, 'name': 'Fixture Proc One', 'kind': None}]})
+        effect0 = effect_of(effects, 0)
+        effect1 = effect_of(effects, 1)
+        self.assertIn('"Fixture Proc Zero"', effect0.reason)
+        self.assertIn('"Fixture Proc One"', effect1.reason)
+
+
 class FamilyTest(unittest.TestCase):
     def test_dummy_effect_is_scripted_whatever_its_aura(self):
         self.assertEqual(family_of(3, 42), 'P6')

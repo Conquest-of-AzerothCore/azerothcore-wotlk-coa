@@ -24,7 +24,8 @@ from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUE
 from stack import (ADDS, MEASURED, MELEE_SOURCE, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE, TALENT_DELTA,
                    levers, mean_interval, ratio_interval)
 from tooltip import CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, Unreadable
-from triggers import COOLDOWN_CHECK, EVENT_TOLERANCE, PERIODIC, TRIGGER_CHECK, cooldown_trial_label
+from triggers import (COOLDOWN_CHECK, DURATION_CHECK, EVENT_TOLERANCE, PERIODIC, TRIGGER_CHECK,
+                      cooldown_trial_label, duration_trial_label)
 from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECTS, FIXED_DIE_SIDES, UNMEASURABLE, UNREADABLE, Expectation,
                     dataset, mean_samples, roll_range, sample_labels)
 
@@ -79,7 +80,8 @@ MULTIPLYING_RELATIONS = frozenset({'spell_mod_pct', 'scale', 'ratio', 'compositi
 ADDITIVE_RELATIONS = frozenset({'add', 'share'})
 TRUNCATED_METRICS = frozenset({'stat'})
 CLASS_ENTRIES = {PROC_CHECK: ('procs', 'aura'), TRIGGER_CHECK: ('triggers', 'aura'),
-                 COOLDOWN_CHECK: ('triggers', 'aura'), TALENT_DELTA: ('talent_modifiers', 'talent')}
+                 COOLDOWN_CHECK: ('triggers', 'aura'), DURATION_CHECK: ('triggers', 'aura'),
+                 TALENT_DELTA: ('talent_modifiers', 'talent')}
 PER_LEVEL_TOKEN = re.compile(r'\$\d*ppl\d')
 DESCRIPTION_VARIABLE = re.compile(r'\$<\w+>')
 SENTENCE_END = re.compile(r'[.!?](?=\s|$|[$@])|\n')
@@ -952,6 +954,95 @@ def judge_trigger_cooldown(parts: list[ProcPart]) -> Verdict:
         return replace(judged, status='alert',
                        explanation=f'{len(outliers)} of {len(measured_found)} trials outside '
                                    f'[{expected - margin:g}, expected + up to {window:g} ms elapsed] ms '
+                                   f'(e.g. {delta:g}); mean {mean_delta:g} ms; no nonzero baseline delta beyond its '
+                                   f'own elapsed window ({notes})')
+    if not baseline_found:
+        return replace(judged, status='unmeasured',
+                       explanation=f'mean {mean_delta:g} ms over {len(measured_found)} trials within tolerance of '
+                                   f'the expected {expected:g} ms; the baseline without the passive has no trial, '
+                                   f'so the delta is not tied to the passive ({notes})')
+    return replace(judged, status='ok',
+                   explanation=f'mean {mean_delta:g} ms over {len(measured_found)} trials within tolerance of the '
+                               f'expected {expected:g} ms; no baseline trial without the passive exceeded its own '
+                               f'elapsed-time window; {expectation.rule} ({notes})')
+
+
+def duration_trial_windows(run: Run, aura: int, labels: dict, phase: str,
+                          count: int) -> list[tuple[float, float]] | None:
+    found = []
+    for index in range(count):
+        before_label = duration_trial_label(aura, phase, index, 'before')
+        after_label = duration_trial_label(aura, phase, index, 'after')
+        before, after = run.values.get(before_label), run.values.get(after_label)
+        window = elapsed_between(run, before_label, after_label)
+        if before is None or after is None or window is None:
+            return None
+        found.append((after - before, window))
+    return found
+
+
+def judge_trigger_duration(parts: list[ProcPart]) -> Verdict:
+    first_entry, _, expectation = parts[0]
+    model = expectation.model
+    aura = expectation.spell_id
+    base = Verdict(expectation.label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
+                   expectation.rank_id, expectation.check)
+    expected = model['expected_delta_ms']
+    margin = margin_of(expected)
+    measured_found: list[tuple[float, float]] = []
+    baseline_found: list[tuple[float, float]] = []
+    without_aura, unmeasured = [], []
+    for _, run, part in parts:
+        labels = part.model['measurements']
+        baseline_attempts = part.model['baseline_attempts']
+        baseline = duration_trial_windows(run, aura, labels, 'baseline', baseline_attempts)
+        if baseline_attempts and baseline is None:
+            unmeasured.append(unusable_run(run))
+            continue
+        if baseline:
+            baseline_found += baseline
+        aura_value = run.values.get(labels['aura'])
+        if aura_value is None:
+            unmeasured.append(unusable_run(run))
+            continue
+        if aura_value <= 0:
+            without_aura.append(run.key)
+            continue
+        measured = duration_trial_windows(run, aura, labels, 'measured', part.model['part_attempts'])
+        if measured is None:
+            unmeasured.append(unusable_run(run))
+            continue
+        measured_found += measured
+    notes = f'{len(measured_found)} measured trials across {model["parts"]} parts'
+    if without_aura:
+        notes += f'; aura {aura} absent in {", ".join(without_aura)}'
+    if unmeasured:
+        notes += f'; no duration measurements in {", ".join(unmeasured)}'
+    bad_baseline = [(delta, window) for delta, window in baseline_found
+                    if not (-(window + margin) <= delta <= margin)]
+    if bad_baseline:
+        delta, window = bad_baseline[0]
+        return replace(base, measured=delta, expected=0.0, low=-(window + margin), high=margin,
+                       explanation=f'duration delta {delta:g} ms (up to {window:g} ms of natural decay since the '
+                                   f'before reading) in a baseline trial without the passive ({notes})')
+    if not measured_found:
+        status = 'alert' if unmeasured and not without_aura else 'unmeasured'
+        return replace(base, status=status, explanation=f'no usable trial with the passive learned ({notes})')
+    measured_deltas = [delta for delta, _ in measured_found]
+    mean_delta = fmean(measured_deltas)
+    low, high = expected - margin, expected + margin
+    judged = replace(base, measured=mean_delta, expected=expected, low=low, high=high)
+    if len(measured_found) < model['minimum_trials']:
+        return replace(judged, status='insufficient_trials',
+                       explanation=f'{len(measured_found)} trials, fewer than the {model["minimum_trials"]} the '
+                                   f'check needs ({notes})')
+    outliers = [(delta, window) for delta, window in measured_found
+               if not (expected - window - margin <= delta <= expected + margin)]
+    if outliers:
+        delta, window = outliers[0]
+        return replace(judged, status='alert',
+                       explanation=f'{len(outliers)} of {len(measured_found)} trials outside '
+                                   f'[expected - up to {window:g} ms elapsed, {expected + margin:g}] ms '
                                    f'(e.g. {delta:g}); mean {mean_delta:g} ms; no nonzero baseline delta beyond its '
                                    f'own elapsed window ({notes})')
     if not baseline_found:
@@ -2113,7 +2204,7 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                 proc_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             elif expectation.check in STACK_CHECKS and run is not None:
                 stack_parts.setdefault(expectation.label, []).append((entry, run, expectation))
-            elif expectation.check in (TRIGGER_CHECK, COOLDOWN_CHECK) and run is not None:
+            elif expectation.check in (TRIGGER_CHECK, COOLDOWN_CHECK, DURATION_CHECK) and run is not None:
                 trigger_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             elif expectation.check in HIT_CHECKS and expectation.model and run is not None:
                 if expectation.label not in hit_slots:
@@ -2129,9 +2220,9 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
         verdicts[hit_slots[label]] = judge_hit(base, manifest['class_file'], parts, hit_model)
     verdicts += [server_question(manifest, parts[0][2], judge_proc(manifest, parts, tooltips), tooltips)
                  for parts in proc_parts.values()]
-    verdicts += [server_question(manifest, parts[0][2],
-                                 judge_trigger(parts) if parts[0][2].check == TRIGGER_CHECK
-                                 else judge_trigger_cooldown(parts), tooltips)
+    trigger_judges = {TRIGGER_CHECK: judge_trigger, COOLDOWN_CHECK: judge_trigger_cooldown,
+                      DURATION_CHECK: judge_trigger_duration}
+    verdicts += [server_question(manifest, parts[0][2], trigger_judges[parts[0][2].check](parts), tooltips)
                  for parts in trigger_parts.values()]
     verdicts += judge_stack(manifest, stack_parts, tooltips, hit_model)
     return Comparison(manifest, runs, missing, verdicts)

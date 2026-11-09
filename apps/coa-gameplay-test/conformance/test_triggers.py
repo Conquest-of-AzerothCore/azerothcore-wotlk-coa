@@ -16,10 +16,13 @@ from procs import ATTACK
 from profile import DBC_DIR
 from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader
 from tooltip import Records
-from triggers import (BASELINE_ATTEMPTS, COOLDOWN_CHECK, COOLDOWN_DELTA_KIND, MAIN_HAND, PERIODIC, TAKEN_HIT,
-                      TRIGGER_CHECK, TRIGGER_TRIALS, attempt_interval, attempt_steps, checked_cooldown_entry,
-                      checked_entry, cooldown_label, cooldown_trial_label, cooldown_trial_steps,
-                      cooldown_trigger_rule, cooldown_trigger_scenario, count_step, counts, trigger_entries,
+from triggers import (BASELINE_ATTEMPTS, COOLDOWN_CHECK, COOLDOWN_DELTA_KIND, DURATION_CHECK, DURATION_DELTA_KIND,
+                      MAIN_HAND, PERIODIC, TAKEN_HIT, TRIGGER_CHECK, TRIGGER_TRIALS, attempt_interval,
+                      attempt_steps, checked_cooldown_entry, checked_duration_entry, checked_entry,
+                      cooldown_label, cooldown_trial_label, cooldown_trial_steps, cooldown_trigger_rule,
+                      cooldown_trigger_scenario, count_step, counts, duration_label, duration_trial_label,
+                      duration_trial_steps, duration_trigger_rule, duration_trigger_scenario,
+                      shares_cooldown_aura, trigger_entries,
                       trigger_label, trigger_measurements, trigger_plan, trigger_rule, trigger_scenario,
                       trigger_status_expectation)
 from values import ALLY, FORCED_CRIT_RATING, Expectation, dataset
@@ -30,7 +33,7 @@ import run
 
 TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 804932, 806516, 803158, 805420, 680891,
                     803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298, 705255,
-                    680397, 524765, 560096, 707364, 504107, 706385, 523712, 520534, 504561, 504807,
+                    680397, 524765, 560096, 707364, 504107, 706385, 523712, 520534, 504561, 504807, 500011,
                     92108, 92109, 300504, 300529, 301310, 680399, 681483, 704116, 804927, 805415, 806522, 705306,
                     804912, 573452}
 ETERNALLY_DEVOTED = 573452
@@ -392,6 +395,153 @@ class CooldownDeltaSetupCastsTest(unittest.TestCase):
         self.assertIn(f'{ETERNAL_BLESSING} is reset and cast at self', cooldown_trigger_rule(self.entry()))
 
 
+HOLY_COMBATANT = 500011
+ARGENT_BLADE_AT_60 = 807268
+INTERDICT = 560116
+ONE_WITH_THE_LIGHT = 504807
+
+
+class CooldownDeltaLabelDisambiguationTest(unittest.TestCase):
+    def two_entries(self, aura=ONE_WITH_THE_LIGHT):
+        base = {'aura': aura, 'kind': COOLDOWN_DELTA_KIND, 'trigger': {'action': 'cast', 'spell': RIGHTEOUS_UPHEAVAL,
+                                                                       'target': 'dummy'},
+               'observe_metric': 'cooldown_ms', 'expected_delta_ms': 1000}
+        return {'triggers': [{**base, 'effect': 0, 'observe_spell': 1}, {**base, 'effect': 1, 'observe_spell': 2}]}
+
+    def test_shares_cooldown_aura_true_for_two_entries_of_the_same_aura(self):
+        class_file = self.two_entries()
+        self.assertTrue(shares_cooldown_aura(class_file, class_file['triggers'][0]))
+        self.assertTrue(shares_cooldown_aura(class_file, class_file['triggers'][1]))
+
+    def test_shares_cooldown_aura_false_for_a_sole_entry(self):
+        entry = self.cooldown_entry()
+        self.assertFalse(shares_cooldown_aura(CLASS_FILE, entry))
+
+    def cooldown_entry(self):
+        return templar_trigger(LORESCRIBE)
+
+    def test_cooldown_label_with_observe_spell_is_distinct_per_entry(self):
+        self.assertNotEqual(cooldown_label(ONE_WITH_THE_LIGHT, 1), cooldown_label(ONE_WITH_THE_LIGHT, 2))
+        self.assertEqual(cooldown_label(ONE_WITH_THE_LIGHT), '504807 trigger_cooldown_delta')
+        self.assertEqual(cooldown_label(ONE_WITH_THE_LIGHT, 801461), '504807 trigger_cooldown_delta 801461')
+
+
+class OneWithTheLightCooldownEntryTest(unittest.TestCase):
+    def entry(self):
+        return templar_trigger(ONE_WITH_THE_LIGHT)
+
+    def cooldown_entries(self):
+        return [entry for entry in CLASS_FILE['triggers'] if entry['aura'] == ONE_WITH_THE_LIGHT
+               and entry.get('kind') == COOLDOWN_DELTA_KIND]
+
+    def test_exactly_one_new_cooldown_delta_entry_covers_effect_2(self):
+        entries = self.cooldown_entries()
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]['effect'], 2)
+        self.assertEqual(entries[0]['observe_spell'], LIBRAM_OF_TENACITY)
+
+    def test_effect_0_has_no_new_entry_and_is_closed_via_unmodelled_effects(self):
+        self.assertFalse(any(entry.get('effect') == 0 and entry.get('kind') == COOLDOWN_DELTA_KIND
+                             for entry in CLASS_FILE['triggers'] if entry['aura'] == ONE_WITH_THE_LIGHT))
+        override = next(entry for entry in CLASS_FILE['unmodelled_effects']
+                        if entry['spell'] == ONE_WITH_THE_LIGHT and entry['effect'] == 0)
+        self.assertIn('SPELL_FAILED_NOT_READY', override['reason'])
+
+    def test_checked_entry_accepts_the_new_cooldown_entry(self):
+        entry = self.cooldown_entries()[0]
+        self.assertIs(checked_entry(entry), entry)
+
+
+class HolyCombatantDurationEntryTest(unittest.TestCase):
+    def entry(self):
+        return templar_trigger(HOLY_COMBATANT)
+
+    def test_entry_has_the_duration_delta_kind(self):
+        entry = self.entry()
+        self.assertEqual(entry['kind'], DURATION_DELTA_KIND)
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': ARGENT_BLADE_AT_60, 'target': 'dummy'})
+        self.assertEqual(entry['observe_spell'], INTERDICT)
+        self.assertEqual(entry['observe_metric'], 'aura_duration_ms')
+        self.assertEqual(entry['expected_delta_ms'], 1000)
+        self.assertGreater(entry['decay_wait_ms'], entry['expected_delta_ms'])
+
+    def test_checked_duration_entry_accepts_the_entry(self):
+        self.assertIs(checked_duration_entry(self.entry()), self.entry())
+
+    def test_checked_duration_entry_rejects_a_non_cast_trigger(self):
+        entry = copy.deepcopy(self.entry())
+        entry['trigger'] = {'action': ATTACK}
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
+
+    def test_checked_duration_entry_rejects_a_non_duration_observe_metric(self):
+        entry = copy.deepcopy(self.entry())
+        entry['observe_metric'] = 'cooldown_ms'
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
+
+    def test_checked_duration_entry_rejects_a_non_positive_expected_delta(self):
+        entry = copy.deepcopy(self.entry())
+        entry['expected_delta_ms'] = 0
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
+
+    def test_checked_duration_entry_rejects_a_decay_wait_not_exceeding_the_expected_delta(self):
+        entry = copy.deepcopy(self.entry())
+        entry['decay_wait_ms'] = entry['expected_delta_ms']
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_duration_trial_steps_cast_observe_wait_decay_then_cast_trigger(self):
+        entry = self.entry()
+        steps = duration_trial_steps(CLASS_FILE, entry, 1, 'measured')
+        actions = [step['action'] for step in steps]
+        self.assertEqual(actions.count('cast'), 2)
+        first_cast = actions.index('cast')
+        self.assertEqual(steps[first_cast]['spell'], INTERDICT)
+        decay_wait = next(step for step in steps if step.get('label') == 'measureddecay')
+        self.assertEqual(decay_wait['ms'], entry['decay_wait_ms'])
+        before_label = duration_trial_label(HOLY_COMBATANT, 'measured', 0, 'before')
+        after_label = duration_trial_label(HOLY_COMBATANT, 'measured', 0, 'after')
+        before_index = next(i for i, step in enumerate(steps) if step.get('label') == before_label)
+        after_index = next(i for i, step in enumerate(steps) if step.get('label') == after_label)
+        second_cast = actions.index('cast', first_cast + 1)
+        self.assertEqual(steps[second_cast]['spell'], ARGENT_BLADE_AT_60)
+        self.assertLess(before_index, second_cast)
+        self.assertLess(second_cast, after_index)
+
+    def test_duration_trial_steps_empty_for_zero_attempts(self):
+        self.assertEqual(duration_trial_steps(CLASS_FILE, self.entry(), 0, 'baseline'), [])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_duration_trigger_scenario_schedules_the_baseline_before_the_learn(self):
+        entry = self.entry()
+        scenario, [expectation] = duration_trigger_scenario(CLASS_FILE, entry, part=0)
+        run.validate(scenario)
+        steps = scenario['steps']
+        learn_aura = steps.index({'action': 'learn', 'actor': 'caster', 'spell': HOLY_COMBATANT})
+        before_baseline = [step for step in steps[:learn_aura]
+                           if step.get('metric') == 'aura_duration_ms'
+                           and step['label'].startswith(f'{HOLY_COMBATANT} trigger duration baseline')]
+        before_measured = [step for step in steps[learn_aura:]
+                           if step.get('metric') == 'aura_duration_ms'
+                           and step['label'].startswith(f'{HOLY_COMBATANT} trigger duration measured')]
+        self.assertEqual(len(before_baseline), BASELINE_ATTEMPTS * 2)
+        self.assertEqual(len(before_measured), expectation.model['part_attempts'] * 2)
+        self.assertEqual((expectation.label, expectation.check), (duration_label(HOLY_COMBATANT), DURATION_CHECK))
+        self.assertLessEqual(scenario['timeout_ms'], MAX_SCENARIO_MS)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_duration_trigger_scenario_part_without_baseline_has_no_baseline_labels(self):
+        entry = self.entry()
+        scenario, [expectation] = duration_trigger_scenario(CLASS_FILE, entry, part=1)
+        steps = scenario['steps']
+        self.assertFalse(any(step.get('label', '').startswith(f'{HOLY_COMBATANT} trigger duration baseline')
+                             for step in steps))
+        self.assertEqual(expectation.model['baseline_attempts'], 0)
+
+
 class ScarletChampionLegacyEntriesTest(unittest.TestCase):
     def test_scarlet_champion_forces_a_melee_crit_on_the_trigger_cast(self):
         entry = templar_trigger(SCARLET_CHAMPION)
@@ -663,7 +813,7 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                 self.assertIn(entry['per_trigger_text'], cleaned)
                 observed = entry['observe_spell']
                 triggered = [self.spell(entry['aura'], f'EffectTriggerSpell[{index}]') for index in range(3)]
-                if entry.get('kind') == COOLDOWN_DELTA_KIND:
+                if entry.get('kind') in (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND):
                     self.assertTrue(entry['observe_source'])
                     self.assertNotIn(observed, triggered)
                 elif entry['observe_source'].startswith('EffectTriggerSpell'):
@@ -715,12 +865,15 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                 if entry.get('kind') == COOLDOWN_DELTA_KIND:
                     self.assertEqual(entry['observe_metric'], 'cooldown_ms')
                     continue
+                if entry.get('kind') == DURATION_DELTA_KIND:
+                    self.assertEqual(entry['observe_metric'], 'aura_duration_ms')
+                    continue
                 self.assertIn(entry['trial_metric'], ('spell_cast_count', 'spell_damage_count'))
 
     def test_every_second_cast_is_the_only_half_rate(self):
         for entry in trigger_entries(CLASS_FILE):
             with self.subTest(aura=entry['aura']):
-                if entry.get('kind') == COOLDOWN_DELTA_KIND:
+                if entry.get('kind') in (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND):
                     continue
                 if entry['per_trigger_text'].startswith('Every 2nd'):
                     expected = 0.5
@@ -779,8 +932,9 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                     continue
                 plan = trigger_plan(CLASS_FILE, entry)
                 self.assertEqual(sum(plan.part_attempts), SCHEDULED * entry.get('trial_attempts_factor', 1))
-                scenario_fn = cooldown_trigger_scenario if entry.get('kind') == COOLDOWN_DELTA_KIND \
-                    else trigger_scenario
+                scenario_fn = {COOLDOWN_DELTA_KIND: cooldown_trigger_scenario,
+                              DURATION_DELTA_KIND: duration_trigger_scenario}.get(entry.get('kind'),
+                                                                                  trigger_scenario)
                 for part in range(len(plan.part_attempts)):
                     scenario, _ = scenario_fn(CLASS_FILE, entry, part)
                     run.validate(scenario)

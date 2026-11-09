@@ -490,13 +490,22 @@ rewrites it to 15 (`SPELLMOD_CRIT_DAMAGE_BONUS`) at load time to match its own "
 the `effect_overrides` entry makes the reader classify it as op 15 (`spell_critical_damage`/`crit_damage`, the
 "bonus" reading above), the op the live server actually installs.
 
-Unmodelled by rule: `P5` (`proc or trigger effect without a trigger entry`), `P6` (`scripted or crowd-control
-effect`), 59 (`damage versus a creature type is level-scaled`), 122 (`no off-hand weapon damage metric`), 110
-(`no energy regeneration metric`), a spell modifier op of 32 or more (`SpellModOp <op> is not below MAX_SPELLMOD
-32`: `spell_modifier` requires `op < MAX_SPELLMOD`), and the auras of the table without a plan (31, 87, 283, 286:
-`aura <n> has no passive measurement`). Closed by rule: aura 142 (`closed: mail armor is out of scope`, owner
-ruling, round5 `closed-statuses`) — the reference character's armor slot never equips a mail item and the harness
-has no action to re-gear it for one passive check, a structural tool-scope gap the same shape as 59/122/110, but
+Unmodelled by rule: `P5` (`proc or trigger effect without a trigger entry`) — unless the class file's own
+`triggers`/`procs`/`behaviours` entry for this exact `{spell_id or rank_id, effect}` already checks it
+(`trigger_link`, round5 `trigger-accounting`): when one matches, the reason instead points at that entry's own
+label and status (`checked by <triggers|procs|behaviours> entry "<name>" (verdict "<label>", status <status>)`),
+so a P5 effect a trigger lot already covers is never reported as a second, duplicate `unmodelled` row. A P5
+effect with more than one candidate entry prefers the one whose own `effect` field matches this effect index
+(the same precedence `passive_targets`/`effect_overrides`/`effect_notes`/`unmodelled_effects` already use for
+their `{spell_id, rank_id}` lookups); an entry with no `effect` field is assumed to cover every P5 effect of
+that spell unless a more specific entry (with a matching `effect`) exists for the same effect index. `P6`
+(`scripted or crowd-control effect`), 59 (`damage versus a creature type is level-scaled`), 122 (`no off-hand
+weapon damage metric`), 110 (`no energy regeneration metric`), a spell modifier op of 32 or more (`SpellModOp
+<op> is not below MAX_SPELLMOD 32`: `spell_modifier` requires `op < MAX_SPELLMOD`), and the auras of the table
+without a plan (31, 87, 283, 286: `aura <n> has no passive measurement`). Closed by rule: aura 142 (`closed: mail
+armor is out of scope`, owner ruling, round5 `closed-statuses`) — the reference character's armor slot never
+equips a mail item and the harness has no action to re-gear it for one passive check, a structural tool-scope
+gap the same shape as 59/122/110, but
 proven rather than left as open work since both ranks' clause is already fully accounted for elsewhere.
 
 A class file's `unmodelled_effects` list (`[{"spell": <id>, "effect": <n>, "reason": "..."}]`) forces a specific
@@ -1335,6 +1344,64 @@ cast, 20 baseline trials and no baseline event in each entry): nine entries are 
   up (`AscensionTemplarEvents.cpp:208-214`); the text, its `@s:805390:0@` reference included, does not say so.
 
 Both entries carry a `question`, so their alerts go to the "Findings" section of `questions.md`.
+
+### Duration-delta trigger entries
+
+A `kind: "duration_delta"` entry is for a trigger whose tooltip states a fixed extension of a *foreign* aura's
+remaining duration on the trigger cast's target, the `aura_duration_ms` analogue of `cooldown_delta`'s
+`cooldown_ms`: `trigger` (always `action: "cast"`, `target` one of `"self"`/`"dummy"`/`"ally"`), `observe_spell`
+(the aura whose remaining duration is read, cast and read on the same unit `trigger["target"]` names, not the
+caster), `observe_metric` (always `aura_duration_ms`), `expected_delta_ms` (a positive magnitude) and
+`decay_wait_ms` (a wait, strictly greater than `expected_delta_ms`, spent between casting `observe_spell` and
+reading its "before" duration) in place of `trial_metric`/`per_trigger`. The wait matters because the
+observed aura's own duration only ever counts down on its own; reading it immediately after casting it (at or
+near its `MaxDuration`) would clamp any real extension to 0 and the check could not tell "mechanism present"
+from "mechanism absent" (the same "must be able to fail" rule every other check follows) — `decay_wait_ms` lets
+it decay below `MaxDuration - expected_delta_ms` first, so a successful extension has somewhere to go.
+`checked_entry` validates this narrower shape through its own `checked_duration_entry` branch (cast only,
+`aura_duration_ms` only, a positive `expected_delta_ms`, `decay_wait_ms` strictly greater than it) instead of
+the standard one.
+
+The scenario (`duration_trigger_scenario`) repeats, per trial: cast the observed aura at `trigger["target"]`,
+wait `decay_wait_ms`, measure `aura_duration_ms`, cast the trigger once at the same target, measure
+`aura_duration_ms` again. A baseline part (the passive not learned) runs first; without the trigger's own
+extension, the measured delta is only the aura's own natural decay over the real time the trial's steps take,
+so the baseline tolerance band is `[-(elapsed window + margin), margin]`, not a flat 0 (the same "comparison
+against the real elapsed window" `cooldown_delta`'s own baseline check already uses, mirrored because here the
+passive *adds* duration back against the same natural decay rather than subtracting further). The judged label
+is `<aura> trigger_duration_delta`; with the passive learned, each trial's `after - before` must fall within
+`[expected_delta_ms - elapsed window - margin, expected_delta_ms + margin]` of `expected_delta_ms` (`margin` is
+`max(1, 0.5% of expected_delta_ms)`, the usual formula) or the whole check is an `alert`; an absent effect reads
+as a delta no larger than the window's own natural decay, which is always outside that band, so it can never
+pass by accident. Fewer than `TRIGGER_TRIALS` usable trials is `insufficient_trials`; a mean within tolerance
+but no baseline trial is `unmeasured`.
+
+Holy Combatant 500011 (round5 `trigger-accounting`): "Your Argent Blade now also extends the duration of
+Interdict on your target by 1 sec" extends Interdict 560116's remaining duration by `Amount(500014)` (1000 ms)
+on every landed Argent Blade hit when the target still carries the caster's own Interdict
+(`AscensionTemplarAbilities.cpp:296-303`). Interdict's own `SpellDuration.dbc` row (id 32) has `Duration` and
+`MaxDuration` both 6000 ms, so `decay_wait_ms` 1500 lets it decay to 4500 ms remaining before the Argent Blade
+cast, leaving headroom under the 6000 ms cap for the 1000 ms extension. Measured this round (stamp
+`20261109-132802`): `ok`, mean 987.12 ms over 273 trials against the expected 1000 ms.
+
+One With The Light 504807's own effect 2 (round5 `trigger-accounting`) is a plain `cooldown_delta` entry, not a
+`duration_delta` one, observing Libram of Tenacity 801461's `cooldown_ms` the same way effect 1's existing entry
+already observes Zealotry 801450's `spell_cast_count` (`checked by triggers entry` links the generic P5 report
+at both effects to their own check, "Unmodelled by rule" above); measured this round (stamp `20261109-133249` and
+again `20261109-134641`): `ok`, mean ~1018 ms against the expected 1000 ms. Effect 0's own claim (`Reduce(player,
+root, 1000)` for each of `{500694, 806153, 801455}`, the same `Breaker(info)` block whose adjacent
+`ReduceLibrams` call effect 2 confirms `ok`) could not get a working entry of its own this round: none of its
+three roots fits the existing `cooldown_trigger_scenario`/`cooldown_trial_steps` shape, which self-casts the
+observed rank with no explicit target and no wait before the trigger cast — 806153 (Divine Force) and 801455
+(Testament of Will) need a hostile/friendly target they never get from a self-cast, and 500694 (Force of
+Golganneth) can self-cast but its own 1250 ms `StartRecoveryTime` (its GCD) collides with the immediately
+following, zero-wait trigger cast, which `Spell::CheckCast`'s global-cooldown check (`Spell.cpp:5846`) then
+rejects with `SPELL_FAILED_NOT_READY`; measured this round (stamp `20261109-133249`), 162 of 244 scheduled
+trigger casts failed that way, diluting the mean delta to 17.996 ms. Rather than report that dilution as an
+`alert` on a mechanism effect 2's own sibling check already confirms works, effect 0 is closed through
+`unmodelled_effects` (`passives.py`, checked ahead of `trigger_link`) with this evidence; a harness change (a
+trigger-cast wait sized to the observed rank's own GCD, or a target-capable observed cast) would be needed to
+measure it, out of this item's scope.
 
 ## Behaviour scenarios
 
