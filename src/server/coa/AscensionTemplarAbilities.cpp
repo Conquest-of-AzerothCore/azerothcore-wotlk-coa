@@ -330,7 +330,7 @@ class templar_casts : public AllSpellScript
                     Named(aura->GetSpellInfo(), 803872) && aura->GetCasterGUID() == player->GetGUID())
                 {
                     spell->SetScriptValue(804918, 1);
-                    Reduce(player, 806153, 4000);
+                    Reduce(player, 806153, std::abs(Amount(804918)));
                     break;
                 }
         if (info->Id == 805410 || Family(info, 0, 2))
