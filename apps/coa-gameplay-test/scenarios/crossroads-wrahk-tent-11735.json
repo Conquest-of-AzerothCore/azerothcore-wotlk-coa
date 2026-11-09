@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Crossroads: Wrahk stands inside Kil'hala's tent (#11735)",
+  "contract": "#11735 reported Wrahk (Tailoring Supplies, creature guid 15098, entry 3485) outside the Crossroads tent, 33 yd from his partner Kil'hala (guid 15097), who patch-WB1 had moved to the tent. He now stands at the reporter's map point (51.92, 31.94), world (-545.547, -2638.534), on the tent floor at z 97.166, under the tent roof and about 2 yd from Kil'hala. His orientation is unchanged. Kil'hala (guid 15097) stood 1.13 yd under that floor at z 96.011 and now stands on it at z 97.140, same x/y and orientation.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -545.547,
+    "y": -2638.534,
+    "z": 97.2,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Wrahk stands at the reporter's point",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -545.547,
+      "y": -2638.534,
+      "z": 97.166,
+      "max": 0.3,
+      "guid": 15098,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Wrahk stands beside Kil'hala (was 33 yd away)",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 15098,
+      "spawn_type": "creature",
+      "x": -546.279,
+      "y": -2640.23,
+      "z": 96.011,
+      "max": 6
+    },
+    {
+      "action": "assert",
+      "label": "Wrahk stands on the tent floor",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.3,
+      "guid": 15098,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "Wrahk is grounded within 0.8 yd",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 15098,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "Wrahk is not under water",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 15098,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "Wrahk is clear of the tent walls and props",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "min": 1,
+      "guid": 15098,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the tent roof lies above Wrahk, not a model surface at his head",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "min": 3,
+      "max": 9,
+      "guid": 15098,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Kil'hala stands on the tent floor (was 1.13 yd under it)",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.3,
+      "guid": 15097,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Kil'hala is grounded within 0.8 yd (placement was 2)",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 15097,
+      "spawn_type": "creature"
+    }
+  ]
+}
