@@ -7715,6 +7715,16 @@ private:
             Require(health > 0 && health <= target->GetMaxHealth(), "Health fixture outside valid range");
             target->SetHealth(health);
         }
+        else if (action == "set_combat_avoidance")
+        {
+            Unit* target = player;
+            if (auto id = step.get_optional<std::string>("target"))
+                target = GetUnit(*id);
+            Require(target != nullptr && target->IsPlayer(), "Combat avoidance fixture needs a player target");
+            float dodge = step.get<float>("dodge", 0.0f);
+            float parry = step.get<float>("parry", 0.0f);
+            target->ToPlayer()->SetRealDodgeParryForTest(dodge, parry);
+        }
         else if (action == "set_health_pct")
         {
             Creature* creature = nullptr;

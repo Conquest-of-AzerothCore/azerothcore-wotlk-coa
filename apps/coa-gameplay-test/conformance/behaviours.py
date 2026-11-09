@@ -872,7 +872,7 @@ def mechanic_duration_scenario(class_file: dict, spec: MechanicDurationSpec) -> 
     gap_ms = int(unreduced_ms) + MECHANIC_DR_RESET_MS + MECHANIC_GAP_MARGIN_MS
 
     def phase(label: str) -> list[dict]:
-        steps = []
+        steps = [{'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': 0, 'parry': 0}]
         for attempt in range(MECHANIC_LAND_ATTEMPTS):
             steps.append({'action': 'cast', 'actor': STRIKER, 'spell': spec.vehicle_spell, 'target': CASTER})
             if attempt < MECHANIC_LAND_ATTEMPTS - 1:
@@ -885,12 +885,16 @@ def mechanic_duration_scenario(class_file: dict, spec: MechanicDurationSpec) -> 
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour duration ratio',
-        'contract': f'A striker (creature entry {spec.striker_entry}, spell_hit_bonus forced to 100) casts '
+        'contract': f'The caster\'s dodge and parry chance are forced to 0 (set_combat_avoidance, a Player-only '
+                    f'fixture overriding Player::m_realDodge/m_realParry directly, the same fields '
+                    f'Unit::MeleeSpellHitResult reads via GetUnitDodgeChance/GetUnitParryChance) before a striker '
+                    f'(creature entry {spec.striker_entry}, spell_hit_bonus forced to 100) casts '
                     f'{spec.vehicle_spell} directly at the caster up to {MECHANIC_LAND_ATTEMPTS} times '
                     f'(DmgClass SPELL_DAMAGE_CLASS_MELEE: spell_hit_bonus only removes the miss roll, not the '
-                    f'separate dodge/parry roll of the melee combat table, so a single cast can still land on no '
-                    f'one; {spec.vehicle_spell} does not stack and refreshes to its full duration on every '
-                    f'landed cast, so whichever of the attempts lands last is what the final read reflects, with '
+                    f'separate dodge/parry roll of the melee combat table, so without this override a single cast '
+                    f'could still land on no one; the retries stay as a safety margin, no longer load-bearing); '
+                    f'{spec.vehicle_spell} does not stack and refreshes to its full duration on every landed '
+                    f'cast, so whichever of the attempts lands last is what the final read reflects, with '
                     f'{MECHANIC_RETRY_WAIT_MS} ms between attempts), once before {spec.name} is learned and once '
                     f'after, reading the applied aura\'s aura_duration_ms each time (the live, decrementing '
                     f'remaining duration, consistent across both reads since each is taken after the same '

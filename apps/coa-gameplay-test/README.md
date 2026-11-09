@@ -485,6 +485,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `money` | `actor`, `copper`: fixture purse, so a priced trainer row can be bought on a character that starts with none. |
 | `set_player_setting` | `actor`, `source`, `index`, `value`: fixture a stored character setting, such as a value saved by an earlier build, before a `relog` reads it. |
 | `set_aura` | `actor`, `spell`, `stacks`: fixture aura state, within its stack limit; zero removes it. Optional `pet: true` selects the actor's current pet, `owned_entry` a creature the actor owns and `target` any scenario actor. |
+| `set_combat_avoidance` | Player `actor` (or its `target`, also a player), optional `dodge`/`parry` (default 0): fixture `Player::m_realDodge`/`m_realParry` directly (`SetRealDodgeParryForTest`), bypassing the normal rating/skill recompute, so a melee-class vehicle cast lands deterministically regardless of the target's own avoidance stats. |
 | `cancel_aura` | Player `actor`, `spell`: native `CMSG_CANCEL_AURA` handler; assert the resulting aura state. |
 | `cancel_mount` | Player `actor`: native `CMSG_CANCEL_MOUNT_AURA` handler, the dismount a client sends with a mounted cast. |
 | `talent` | `actor`, `talent`, zero-based `rank`: learn with normal point/prerequisite checks; optional `command` skips the point and tier checks like the GM command. |

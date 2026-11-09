@@ -787,6 +787,24 @@ class MechanicDurationScenarioTests(unittest.TestCase):
         actions = [step.get('action') for step in scenario['steps'] if step.get('action') in ('cast', 'learn')]
         self.assertEqual(actions, ['cast'] * MECHANIC_LAND_ATTEMPTS + ['learn'] + ['cast'] * MECHANIC_LAND_ATTEMPTS)
 
+    def test_each_phase_forces_the_caster_dodge_and_parry_to_zero_before_the_land_attempts(self):
+        spec = mechanic_duration_spec(finesse_rank_1_entry())
+        scenario, _ = mechanic_duration_scenario(CLASS_FILE, spec)
+        avoidance_steps = [step for step in scenario['steps'] if step.get('action') == 'set_combat_avoidance']
+        self.assertEqual(len(avoidance_steps), 2, 'one override per phase, since learn may recompute stats')
+        for step in avoidance_steps:
+            self.assertEqual(step['actor'], 'caster')
+            self.assertEqual(step['dodge'], 0)
+            self.assertEqual(step['parry'], 0)
+        first_cast_indexes = []
+        steps = scenario['steps']
+        for index, step in enumerate(steps):
+            if step.get('action') == 'cast' and step.get('spell') == MELT_WEAPON:
+                first_cast_indexes.append(index)
+        avoidance_indexes = [index for index, step in enumerate(steps) if step.get('action') == 'set_combat_avoidance']
+        self.assertLess(avoidance_indexes[0], first_cast_indexes[0])
+        self.assertLess(avoidance_indexes[1], first_cast_indexes[MECHANIC_LAND_ATTEMPTS])
+
     def test_measures_aura_duration_ms_of_the_vehicle_spell_before_and_after(self):
         spec = mechanic_duration_spec(finesse_rank_1_entry())
         scenario, expectations = mechanic_duration_scenario(CLASS_FILE, spec)

@@ -277,13 +277,16 @@ has a striker (creature entry `striker_entry`, `spell_hit_bonus` forced to 100) 
 non-class spell whose own effect mechanic matches the passive's `EffectMiscValue` (e.g. `MECHANIC_DISARM`,
 `MECHANIC_SNARE`) — directly at the caster, once before the passive is learned and once after, reading
 `aura_duration_ms` of `vehicle_spell`'s own applied aura `CAST_MARGIN_MS` (500 ms) after the last of up to
-`MECHANIC_LAND_ATTEMPTS` (3) casts, `MECHANIC_RETRY_WAIT_MS` (500 ms) apart, per phase (round9: a
-`vehicle_spell` with `DmgClass SPELL_DAMAGE_CLASS_MELEE`, such as Hamstring 1715, still rolls the separate
-dodge/parry leg of the melee combat table that `spell_hit_bonus` does not reach — only the miss roll does — so
-a single cast could land on no one about one time in several; 712466's `behaviour_duration_ratio` flipped
-`unmeasured`/`alert` across round 8's two runs for exactly this reason, proven this round by an isolated,
-reverted replay of the single-cast design against this base. `vehicle_spell` does not stack and refreshes to
-its full duration on every landed cast, so the repeated attempts are safe: whichever attempt lands last is what
+`MECHANIC_LAND_ATTEMPTS` (3) casts, `MECHANIC_RETRY_WAIT_MS` (500 ms) apart, per phase. A `vehicle_spell` with
+`DmgClass SPELL_DAMAGE_CLASS_MELEE`, such as Hamstring 1715, rolls the separate dodge/parry leg of the melee
+combat table that `spell_hit_bonus` does not reach — only the miss roll does — so each phase opens with a
+`set_combat_avoidance` fixture step (`Player::SetRealDodgeParryForTest`, round10 ADR 0053, superseding round9's
+retry-only ADR 0050) that zeroes the caster's dodge and parry chance before the attempts, making the first
+attempt land deterministically; 712466's `behaviour_duration_ratio` flipped `unmeasured`/`alert` across round
+8's two runs before this fix, for exactly the dodge/parry-roll reason above. The retry loop itself stays as a
+harmless safety margin (never needed once avoidance is zeroed, and a no-op for any non-melee vehicle, which
+never rolled dodge/parry at all). `vehicle_spell` does not stack and refreshes to its full duration on every
+landed cast, so the repeated attempts are safe: whichever attempt lands last is what
 the final, fixed-delay-from-the-last-attempt read reflects, identically for the `before` and `after` phase).
 The two phases are separated by `vehicle_spell`'s own DBC duration
 plus 15000 ms plus a margin (`records.duration_ms(vehicle_spell) + MECHANIC_DR_RESET_MS + MECHANIC_GAP_MARGIN_MS`

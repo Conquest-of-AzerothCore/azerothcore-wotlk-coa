@@ -347,6 +347,7 @@ ACTIONS = {
     'set_reputation': ({'actor', 'id', 'value'}, {'actor', 'id', 'value'}),
     'set_health': ({'actor', 'value'}, {'actor', 'value', 'pet', 'maximum'}),
     'set_health_pct': ({'actor', 'pct'}, {'actor', 'pct', 'entry', 'target'}),
+    'set_combat_avoidance': ({'actor'}, {'actor', 'target', 'dodge', 'parry'}),
     'reset_cooldown': ({'actor', 'spell'}, {'actor', 'spell'}),
     'restore_charges': ({'actor', 'spell'}, {'actor', 'spell'}),
     'set_power': ({'actor', 'value'}, {'actor', 'value', 'power', 'pet'}),
@@ -904,6 +905,12 @@ def validate(scenario):
         if action == 'set_health_pct':
             require(('entry' in step) != ('target' in step), f'{where}: needs exactly one of entry or target')
             number(step['pct'], f'{where}.pct', 1, 99, True)
+        if action == 'set_combat_avoidance':
+            require(step.get('target', step['actor']) in player_ids,
+                    f'{where}: combat avoidance fixture needs a player target')
+            for key in ('dodge', 'parry'):
+                if key in step:
+                    number(step[key], f'{where}.{key}', 0, 100)
         if action == 'set_health' and 'maximum' in step:
             require(step['actor'] in player_ids, f'{where}: maximum health fixture needs a player or their pet')
             number(step['maximum'], f'{where}.maximum', 1, 2**31 - 1, True)
