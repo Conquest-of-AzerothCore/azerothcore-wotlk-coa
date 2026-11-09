@@ -600,18 +600,16 @@
       "aura": 504807,
       "name": "One With The Light",
       "tooltip": "Casting |cffffffffOath Breakers|r now triggers |cffffffffZealotry|r on your target and reduces the cooldown of |cffffffffLibrams|r, |cffffffffForce of Golganneth|r, |cffffffffDivine Force|r, and |cffffffffTestament of Will|r by $/1000;505205s1 sec.@s:801450:0@",
-      "trigger": {"action": "cast", "spell": 578276, "target": "self"},
+      "trigger": {"action": "cast", "spell": 572027, "target": "dummy"},
       "trigger_text": "Casting Oath Breakers",
-      "trigger_spell_text": "Benediction",
+      "trigger_spell_text": "a dominating Oath Breaker",
       "trial_metric": "spell_cast_count",
-      "status": "unmodelled",
-      "reason": "the trigger site is confirmed (AscensionTemplarAbilities.cpp:166,185,187, OnSpellCast's Breaker(info) block, calls Zealotry(player, target ? target : player->GetVictim()) on every Breaker cast when 504807 is known; Benediction 801448 matches Breaker() via SpellFamilyFlags[2]=128), but the player->GetVictim() fallback is structurally unreachable through any cast of Benediction, not merely a harness gap: round5 added a cast_no_target harness action (CoAGameplayTest.cpp, sends the CMSG_CAST_SPELL packet with no unit/item/gameobject target at all) specifically to null spell->m_targets.GetUnitTarget() for this check, but Spell::InitExplicitTargets (Spell.cpp:731-776, run unconditionally in Spell::prepare before CheckCast and before any OnSpellCast script hook) fills a missing unit target itself whenever the spell's GetExplicitTargetMask() includes TARGET_FLAG_UNIT_ALLY/PARTY/RAID and no player selection resolves one ('didn't find anything - let's use self as target'; unit = m_caster); Benediction's own EffectImplicitTargetA[0]=21 TARGET_UNIT_TARGET_ALLY sets that bit, so spell->m_targets.GetUnitTarget() is self by the time the Breaker(info) hook reads it, cast_no_target included. Measured this round (before adding that action): self-casting Benediction 293 times with 504807 known produced 0 casts of 801450 (confirmed via Unit::_IsValidAttackTarget, Unit.cpp:11958-11972: 'can't attack self' returns false for target==player, so Zealotry(player, player) always returns without casting); targeting a hostile dummy directly was also tried and produced 0 Benediction casts at all (TARGET_UNIT_TARGET_ALLY rejects a hostile unit target, so the cast itself never completes). cast_no_target remains in run.py/CoAGameplayTest.cpp as a general-purpose action (useful for a trigger spell whose explicit mask has no ally/party/raid bit, where InitExplicitTargets leaves the target null or a creature caster's own GetVictim()), but it does not and cannot unblock this specific effect; there is no scenario-constructible cast of Benediction that leaves spell->m_targets.GetUnitTarget() null",
       "observe_spell": 801450,
       "observe_source": "EffectTriggerSpell[1] of 504807",
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
       "per_trigger_text": "now triggers Zealotry on your target",
-      "handler": "AscensionTemplarAbilities.cpp:166,185,187 (OnSpellCast, Breaker(info) block) calls Zealotry(player, target ? target : player->GetVictim())"
+      "handler": "AscensionTemplarAbilities.cpp:166,185,187 (OnSpellCast, Breaker(info) block) calls Zealotry(player, target ? target : player->GetVictim()); the entry's earlier representative cast (Benediction 578276 at self) always resolved target to self via Spell::InitExplicitTargets' TARGET_UNIT_TARGET_ALLY fallback, so player->GetVictim() was never exercised and Unit::_IsValidAttackTarget always rejected target==player (round10 r10/proc-chains). Righteous Upheaval 572027 at a hostile dummy is the same representative Oath Breaker cast effect 2's own cooldown_delta entry already proves reaches the shared Breaker(info) block (ReduceLibrams), so it reaches Zealotry(player, target) with target the dummy, a valid attack target."
     },
     {
       "aura": 504807,

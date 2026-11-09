@@ -907,14 +907,15 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         plan = trigger_plan(CLASS_FILE, entry)
         self.assertEqual(sum(plan.part_attempts), SCHEDULED)
 
-    def test_one_with_the_light_zealotry_effect_stays_unmodelled(self):
+    def test_one_with_the_light_zealotry_effect_casts_a_hostile_targeted_breaker(self):
         entry = templar_trigger(ONE_WITH_THE_LIGHT)
-        self.assertEqual(entry['status'], 'unmodelled')
+        self.assertNotIn('status', entry)
+        self.assertEqual(entry['trigger']['spell'], OATH_BREAKER_CAST)
+        self.assertEqual(entry['trigger']['target'], 'dummy')
         self.assertEqual(entry['observe_spell'], 801450)
         self.assertEqual(entry['observe_source'], f'EffectTriggerSpell[1] of {ONE_WITH_THE_LIGHT}')
-        self.assertIn('0 casts of 801450', entry['reason'])
-        with self.assertRaises(ValueError):
-            trigger_plan(CLASS_FILE, entry)
+        plan = trigger_plan(CLASS_FILE, entry)
+        self.assertEqual(sum(plan.part_attempts), SCHEDULED)
 
     def test_uthers_legacy_waits_for_condemns_full_tick_spacing(self):
         entry = templar_trigger(UTHERS_LEGACY)
