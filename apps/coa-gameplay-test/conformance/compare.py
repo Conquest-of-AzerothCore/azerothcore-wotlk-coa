@@ -10,7 +10,7 @@ from statistics import fmean, pstdev
 from typing import Callable, Mapping, Protocol
 
 from behaviours import (BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
-                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
+                        BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
 from hits import (HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS, WEAPON_PERCENT_DAMAGE, Z_99,
                   HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
@@ -1675,6 +1675,29 @@ def behaviour_duration_ratio_verdict(base: Verdict, run: Run, model: dict) -> Ve
                                f'measured 0 against a nonzero expected delta is always an alert')
 
 
+def behaviour_duration_refresh_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    labels = ('without_before_label', 'without_after_label', 'with_before_label', 'with_after_label')
+    values = {label: run.values.get(model[label]) for label in labels}
+    missing = next((model[label] for label, value in values.items() if value is None), None)
+    if missing:
+        return replace(base, explanation=missing_measurement(run, missing))
+    without_before, without_after = values['without_before_label'], values['without_after_label']
+    with_before, with_after = values['with_before_label'], values['with_after_label']
+    full_duration = model['full_duration_ms']
+    margin = model['refresh_margin_ms']
+    without_ok = without_after <= without_before + FLOAT_EPSILON
+    with_ok = with_after >= full_duration - margin - FLOAT_EPSILON
+    status = 'ok' if without_ok and with_ok else 'alert'
+    measured = with_after
+    low = full_duration - margin
+    return replace(base, status=status, measured=measured, expected=full_duration, low=low, high=full_duration,
+                   explanation=f'without the passive: {without_before:g} ms before the breaker cast, '
+                               f'{without_after:g} ms after (must not increase); with the passive learned: '
+                               f'{with_before:g} ms before, {with_after:g} ms after (must return to within '
+                               f'{margin:g} ms of the {full_duration:g} ms full duration, SpellDuration.dbc); '
+                               f'a without-phase increase or a with-phase shortfall is always an alert')
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
@@ -1685,6 +1708,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         if model.get('kind') == 'leech_ratio':
             return behaviour_leech_ratio_verdict(base, run, model)
         return behaviour_ratio_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_DURATION_REFRESH:
+        return behaviour_duration_refresh_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_TRIGGER:
         return behaviour_trigger_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_METRIC_DELTA:

@@ -933,17 +933,17 @@
       "per_trigger_text": ""
     },
     {
-      "aura": 301253,
-      "name": "Warrior of Tyr",
-      "tooltip": "Periodic damage dealt now generates $524987s1 Energy.",
-      "trigger_text": "Periodic damage dealt",
+      "aura": 92108,
+      "name": "Zealotry",
+      "tooltip": "|cFF66DDFFLevel 10 Passive|r\r\nYour off-hand auto attacks now trigger |cFFFFFFFFZealotry|r.@s:801450:0@",
+      "trigger_text": "",
       "status": "unmodelled",
-      "reason": "unmodelled: proc or trigger effect without a reachable trigger (effect 0, EffectApplyAuraName 42 SPELL_AURA_PROC_TRIGGER_SPELL, EffectTriggerSpell 524987); 301253 is not in TemplarEvents or TemplarCastDrivers (AscensionTemplarData.h:130-199) so its raw ProcFlags 0 stands unmodified; SpellMgr.cpp:2512 skips generating a spell_proc row when ProcFlags is 0 and no spell_proc SQL row exists for 301253 or 524987 anywhere under data/sql/; AscensionTemplarEvents.cpp's DoCheckProc/OnProc switch (lines 30-96, 109-199) has no case for 301253. This reads as a genuine gap between the tooltip's promise and live behaviour on this fork rather than an untested-but-working effect; out of scope to fix here (investigator role, fix-only-reported-issues)",
-      "observe_spell": 524987,
-      "observe_source": "EffectTriggerSpell[0] of 301253",
-      "observe_metric": "spell_energize_count",
+      "reason": "unmodelled: harness cannot produce an off-hand swing for a non-dual-wielding class. DBC: Effect[1]=6 (APPLY_AURA), EffectApplyAuraName[1]=42 (PROC_TRIGGER_SPELL), EffectTriggerSpell[1]=801450, ProcFlags=0, ProcChance=100. rev_20260909_04_templar_completion.sql gives 92108 an explicit spell_proc row and registers spell_script_names 92108 -> aura_ascension_templar_event, bypassing the DBC's zeroed ProcFlags; that script's Check (AscensionTemplarEvents.cpp:55-57) fires only on a damaging off-hand auto-attack hit (PROC_FLAG_DONE_MELEE_AUTO_ATTACK, AttackType OFF_ATTACK), unconditional (no roll), then Proc (AscensionTemplarEvents.cpp:120-122) unconditionally casts 801450 (Zealotry()). The effect is reachable and deterministic in principle, but this package's reference Templar carries only a main-hand weapon (classes/templar.json weapon slot 15, no slot 16 entry): grep of src/server/coa/ for SetCanDualWield/CanDualWield shows every call site scoped to CLASS_SON_OF_ARUGAL only (AscensionCompat.cpp:1104-1109, 9583-9594), with no path granting CanDualWield to Templar (ClassId 19); Player::CanEquipItem rejects an off-hand weapon item without CanDualWield (Player.cpp:13412). So the harness's generic equip/attack actions cannot make this class file's reference character land an off-hand swing at all, and no scenario here can observe the proc. Same category of gap as 92109 (a creature-attacker/off-hand-swing driver would be a shared harness capability, better scoped as its own item, not duplicated per-class here).",
+      "observe_spell": 801450,
+      "observe_source": "EffectTriggerSpell[1] of 92108",
+      "observe_metric": "spell_cast_count",
       "per_trigger": 1,
-      "per_trigger_text": "now generates"
+      "per_trigger_text": ""
     },
     {
       "aura": 301310,
@@ -1153,6 +1153,28 @@
       "spell": 712466, "name": "Courage (Rank 2)", "kind": "duration_ratio",
       "quote": "reduces the duration of movement slowing effects on you by", "expected_ratio": 0.80,
       "vehicle_spell": 1715, "striker_entry": 36
+    },
+    {
+      "spell": 300502, "name": "Blessing of Aggramar", "kind": "duration_refresh",
+      "quote": "now refreshes the duration of Blade of Faith on all nearby enemies.",
+      "target_aura": 803872,
+      "gating_aura": 704576,
+      "gating_stacks": 10,
+      "apply_spell": 803872,
+      "breaker_spell": 501562,
+      "observe_source": "AscensionTemplarAbilities.cpp Breaker(info): player->HasAura(300502) && spell->GetScriptValue(704576) >= 10 refreshes every nearby Blade of Faith 803872 aura to its max duration (SpellDuration.dbc id 9, 30000 ms); matches the already-working threshold already proven by the issue scenario apps/coa-gameplay-test/scenarios/templar-blessing-of-aggramar-blade-refresh-7806.json (#7806), which fixes the 9-vs-10-stack boundary with the passive already known. This entry instead varies whether 300502 itself is known, holding the stack count fixed at the gating threshold (10) in both phases, since the same player->HasAura(300502) condition governs both axes."
+    },
+    {
+      "spell": 301253, "name": "Warrior of Tyr", "kind": "metric_delta",
+      "quote": "Periodic damage dealt now generates", "expected": 10,
+      "trigger_spell": 567541,
+      "metric": "power",
+      "fields": { "power": 3 },
+      "target": "dummy",
+      "disable_regeneration": true,
+      "before_expected": 0,
+      "wait_ms": 3300,
+      "observe_source": "AscensionCustomResourceData.h:475 NativePowerGainRules {ClassId 19, FirstSpellId 0, LastSpellId 0, PowerType 3, InternalAmount 10, Event PeriodicDamageTick, RequiredAuraSpellId 301253}; AscensionCompat.cpp:3632-3680 OnPeriodicDamageTick adds 10 Energy (power type 3) per periodic-damage tick while 301253 is known, matching 524987's own EffectBasePoints[0]=9 -> shown value 10. Condemn 567541 (EffectApplyAuraName[0]=3 PERIODIC_DAMAGE, EffectAmplitude[0]=3000 ms, ManaCost 30, PowerType 3) is cast as a real periodic-damage source; the scenario's own set_power (via the generic mana-cost fixture) resets Energy to 0 immediately before each cast, so one tick's +10 is read exactly. Matches the already-written issue scenario apps/coa-gameplay-test/scenarios/templar-5163-warrior-of-tyr-energy-generation.json (#5163, #4432); no code or SQL fix needed, only this conformance entry (the prior disposition in this file's triggers list, now removed, wrongly called the effect dead: it searched only the ProcFlags/spell_proc path and missed the separate native-resource-rule path that actually implements this tooltip)."
     }
   ],
   "player_observations": [

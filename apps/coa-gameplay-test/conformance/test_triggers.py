@@ -27,7 +27,7 @@ import run
 TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 804932, 806516, 803158, 805420, 680891,
                     803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298, 705255,
                     680397, 524765, 560096, 707364, 504107, 706385, 523712, 520534, 504561, 504807,
-                    92109, 300504, 300529, 301253, 301310, 680399}
+                    92108, 92109, 300504, 300529, 301310, 680399}
 GUARDIAN_OF_THE_LIGHT = 707364
 DIVINE_FURY = 504107
 UTHERS_LEGACY = 706385
@@ -72,9 +72,9 @@ OATH_CHAIN = 704576
 OATH_OF_RETRIBUTION = 804924
 SCHEDULED = 273
 KEEPING_THE_OATH = 92109
+ZEALOTRY = 92108
 WHIRLING_TEMPEST = 300504
 LIGHTS_WARD = 300529
-WARRIOR_OF_TYR = 301253
 LIGHTS_CHOSEN = 301310
 RIGHTEOUS_TEMPEST_CHANNEL = 805409
 KEY = 'conformance-templar-trigger-520812-part-1'
@@ -673,8 +673,8 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             trigger_plan(CLASS_FILE, entry)
 
-    def test_keeping_the_oath_and_warrior_of_tyr_stay_unmodelled(self):
-        for aura in (KEEPING_THE_OATH, WARRIOR_OF_TYR):
+    def test_keeping_the_oath_and_zealotry_stay_unmodelled(self):
+        for aura in (KEEPING_THE_OATH, ZEALOTRY):
             with self.subTest(aura=aura):
                 entry = templar_trigger(aura)
                 self.assertEqual(entry['status'], 'unmodelled')
@@ -688,10 +688,12 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         self.assertIn('PROC_HIT_DODGE|PROC_HIT_PARRY', entry['reason'])
         self.assertIn('no action in run.py', entry['reason'])
 
-    def test_warrior_of_tyr_has_no_reachable_trigger_at_all(self):
-        entry = templar_trigger(WARRIOR_OF_TYR)
-        self.assertIn('no case for 301253', entry['reason'])
-        self.assertIn('out of scope to fix here', entry['reason'])
+    def test_zealotry_is_reachable_but_the_harness_cannot_produce_an_off_hand_swing(self):
+        entry = templar_trigger(ZEALOTRY)
+        self.assertIn('rev_20260909_04_templar_completion.sql', entry['reason'])
+        self.assertIn('OFF_ATTACK', entry['reason'])
+        self.assertIn('CanDualWield', entry['reason'])
+        self.assertIn('no path granting CanDualWield to Templar', entry['reason'])
 
     def test_periodic_trigger_interval_is_its_own_amplitude(self):
         for aura, amplitude in ((LIGHTS_WARD, 2000), (LIGHTS_CHOSEN, 5000)):

@@ -6,7 +6,7 @@ from hits import MAIN_HAND, aura_modifiers, creature_fixture
 from procs import swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import COLOR_CODE, Records
-from values import (CAST_MARGIN_MS, Expectation, TARGET, dataset, facts_of, fixture_health_step,
+from values import (CAST_MARGIN_MS, Expectation, TARGET, armed_for, dataset, facts_of, fixture_health_step,
                     required_aura_steps, required_target_health_steps)
 
 BEHAVIOUR_COUNT = 'behaviour_count'
@@ -15,9 +15,10 @@ BEHAVIOUR_DURATION = 'behaviour_duration'
 BEHAVIOUR_DURATION_RATIO = 'behaviour_duration_ratio'
 BEHAVIOUR_TRIGGER = 'behaviour_trigger'
 BEHAVIOUR_METRIC_DELTA = 'behaviour_metric_delta'
+BEHAVIOUR_DURATION_REFRESH = 'behaviour_duration_refresh'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
-                    BEHAVIOUR_METRIC_DELTA)
-KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta')
+                    BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH)
+KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh')
 PROSE = 'prose: '
 BEFORE = 'before'
 AFTER = 'after'
@@ -555,6 +556,8 @@ class MetricDeltaSpec:
     before_expected: float
     wait_ms: int = DEFAULT_METRIC_DELTA_WAIT_MS
     expire_ms: int = DEFAULT_METRIC_DELTA_EXPIRE_MS
+    target: str = CASTER
+    disable_regeneration: bool = False
 
 
 def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
@@ -573,7 +576,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                          'value': facts.mana_cost})
         steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
         steps += required_aura_steps(facts)
-        steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': CASTER})
+        steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': spec.target})
         steps.append({'action': 'wait', 'ms': spec.wait_ms})
         return steps
 
@@ -585,12 +588,15 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         'contract': f'No-combat with/without check: {spec.metric} {spec.fields} around a cast of {spec.trigger_spell},'
                     f' measured before and after the passive is learned, waiting {spec.expire_ms} ms between phases '
                     f'for the first cast\'s effect to fully expire before the second cast.',
-        'players': [player_fixture(class_file)],
+        'players': [{**player_fixture(class_file), 'allow_regeneration': False}] if spec.disable_regeneration
+                   else [player_fixture(class_file)],
         'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] +
                  cast_steps() + [measurement(before_label, CASTER, spec.metric, **spec.fields)] +
                  [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] +
                  [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}] +
                  cast_steps() + [measurement(after_label, CASTER, spec.metric, **spec.fields)]}
+    if spec.target == TARGET:
+        scenario['creatures'] = [creature_fixture(class_file)]
     label = f'{spec.spell} behaviour_metric_delta'
     model = {'kind': 'metric_delta', 'before_label': before_label, 'after_label': after_label,
              'expected': spec.expected, 'before_expected': spec.before_expected, 'metric': spec.metric,
@@ -604,7 +610,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
     return MetricDeltaSpec(entry['spell'], entry['name'], entry['quote'], entry['expected'], entry['trigger_spell'],
                            entry['metric'], entry['fields'], entry['before_expected'],
                            entry.get('wait_ms', DEFAULT_METRIC_DELTA_WAIT_MS),
-                           entry.get('expire_ms', DEFAULT_METRIC_DELTA_EXPIRE_MS))
+                           entry.get('expire_ms', DEFAULT_METRIC_DELTA_EXPIRE_MS), entry.get('target', CASTER),
+                           entry.get('disable_regeneration', False))
 
 
 FORCED_CRIT_RATING = 100000
@@ -775,6 +782,93 @@ def mechanic_duration_spec(entry: dict) -> MechanicDurationSpec:
                                 entry['vehicle_spell'], entry.get('striker_entry', 36))
 
 
+DEFAULT_DURATION_REFRESH_DECAY_MS = 4000
+DEFAULT_DURATION_REFRESH_MARGIN_MS = 500
+
+
+@dataclass(frozen=True)
+class DurationRefreshSpec:
+    spell: int
+    name: str
+    quote: str
+    target_aura: int
+    gating_aura: int
+    gating_stacks: int
+    apply_spell: int
+    breaker_spell: int
+    decay_ms: int = DEFAULT_DURATION_REFRESH_DECAY_MS
+    refresh_margin_ms: int = DEFAULT_DURATION_REFRESH_MARGIN_MS
+
+
+def duration_refresh_label(spec: DurationRefreshSpec, phase: str, moment: str) -> str:
+    return f'{spec.target_aura} duration {phase} {moment}'
+
+
+def duration_refresh_phase_steps(spec: DurationRefreshSpec, facts_apply, facts_breaker, phase: str) -> list[dict]:
+    before_label = duration_refresh_label(spec, phase, BEFORE)
+    after_label = duration_refresh_label(spec, phase, AFTER)
+    return [
+        {'action': 'set_aura', 'actor': CASTER, 'spell': spec.gating_aura, 'stacks': 1},
+        {'action': 'set_power', 'actor': CASTER, 'power': facts_apply.power_type, 'value': facts_apply.mana_cost},
+        {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.apply_spell},
+        {'action': 'cast', 'actor': CASTER, 'spell': spec.apply_spell, 'target': TARGET},
+        {'action': 'wait', 'label': f'{phase} decay', 'ms': spec.decay_ms},
+        measurement(before_label, TARGET, 'aura_duration_ms', spell=spec.target_aura, caster=CASTER),
+        {'action': 'set_aura', 'actor': CASTER, 'spell': spec.gating_aura, 'stacks': spec.gating_stacks},
+        {'action': 'set_power', 'actor': CASTER, 'power': facts_breaker.power_type, 'value': facts_breaker.mana_cost},
+        {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.breaker_spell},
+        {'action': 'cast', 'actor': CASTER, 'spell': spec.breaker_spell, 'target': TARGET},
+        measurement(after_label, TARGET, 'aura_duration_ms', spell=spec.target_aura, caster=CASTER),
+    ]
+
+
+def duration_refresh_scenario(class_file: dict, spec: DurationRefreshSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    full_duration_ms = records.duration_ms(spec.target_aura)
+    entry = behaviour_entry(records, spec.spell, spec.name, 'duration_refresh', spec.quote, full_duration_ms)
+    class_file = armed_for(class_file, records, spec.breaker_spell)
+    facts_apply = facts_of(records, spec.apply_spell)
+    facts_breaker = facts_of(records, spec.breaker_spell)
+    target = creature_fixture(class_file)
+    without_before = duration_refresh_label(spec, 'without', BEFORE)
+    without_after = duration_refresh_label(spec, 'without', AFTER)
+    with_before = duration_refresh_label(spec, 'with', BEFORE)
+    with_after = duration_refresh_label(spec, 'with', AFTER)
+    steps = base_steps(class_file) + [
+        {'action': 'learn', 'actor': CASTER, 'spell': spec.apply_spell},
+        {'action': 'learn', 'actor': CASTER, 'spell': spec.breaker_spell},
+    ]
+    steps += duration_refresh_phase_steps(spec, facts_apply, facts_breaker, 'without')
+    steps.append({'action': 'learn', 'actor': CASTER, 'spell': spec.spell})
+    steps += duration_refresh_phase_steps(spec, facts_apply, facts_breaker, 'with')
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour duration refresh',
+        'contract': f'No-combat with/without check: {spec.apply_spell} is cast on the target, left to decay '
+                    f'{spec.decay_ms} ms, then {spec.breaker_spell} is cast at {spec.gating_stacks} stacks of '
+                    f'{spec.gating_aura}; {spec.target_aura}\'s aura_duration_ms is read before and after the '
+                    f'breaker cast, once before {spec.name} is learned (must keep decaying, no refresh) and once '
+                    f'after (must return to within {spec.refresh_margin_ms} ms of its own {full_duration_ms:g} ms '
+                    f'full duration, read from SpellDuration.dbc).',
+        'players': [player_fixture(class_file)],
+        'creatures': [target],
+        'steps': steps}
+    label = f'{spec.spell} behaviour_duration_refresh'
+    model = {'kind': 'duration_refresh', 'without_before_label': without_before, 'without_after_label': without_after,
+             'with_before_label': with_before, 'with_after_label': with_after, 'full_duration_ms': full_duration_ms,
+             'refresh_margin_ms': spec.refresh_margin_ms, 'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_DURATION_REFRESH, spec.spell, spec.target_aura, None,
+                              str(full_duration_ms), prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def duration_refresh_spec(entry: dict) -> DurationRefreshSpec:
+    return DurationRefreshSpec(entry['spell'], entry['name'], entry['quote'], entry['target_aura'],
+                               entry['gating_aura'], entry['gating_stacks'], entry['apply_spell'],
+                               entry['breaker_spell'], entry.get('decay_ms', DEFAULT_DURATION_REFRESH_DECAY_MS),
+                               entry.get('refresh_margin_ms', DEFAULT_DURATION_REFRESH_MARGIN_MS))
+
+
 def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
     if entry['kind'] == 'count':
         return target_count_scenario(class_file, target_count_spec(entry))
@@ -794,6 +888,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return duration_scenario(class_file, duration_spec(entry))
     if entry['kind'] == 'duration_ratio':
         return mechanic_duration_scenario(class_file, mechanic_duration_spec(entry))
+    if entry['kind'] == 'duration_refresh':
+        return duration_refresh_scenario(class_file, duration_refresh_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

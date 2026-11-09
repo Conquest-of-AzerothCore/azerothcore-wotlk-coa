@@ -2,9 +2,10 @@ from pathlib import Path
 import sys
 import unittest
 
-from behaviours import (BEHAVIOUR_COUNT, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_METRIC_DELTA,
-                        BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER, HealingRatioTarget, aura_spread_scenario,
-                        aura_spread_spec, behaviour_entries, behaviour_entry, behaviour_scenario, duration_scenario,
+from behaviours import (BEHAVIOUR_COUNT, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH,
+                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER, HealingRatioTarget,
+                        aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
+                        behaviour_scenario, duration_refresh_scenario, duration_refresh_spec, duration_scenario,
                         duration_spec, health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
                         healing_ratio_spec, leech_heal_modifier_factor, leech_ratio_scenario, leech_ratio_spec,
                         mechanic_duration_scenario, mechanic_duration_spec, metric_delta_scenario,
@@ -53,6 +54,12 @@ COURAGE_RANK_1 = 707754
 COURAGE_RANK_2 = 712466
 MELT_WEAPON = 301235
 HAMSTRING = 1715
+BLESSING_OF_AGGRAMAR = 300502
+BLADE_OF_FAITH = 803872
+OATH_CHAIN = 704576
+RIGHTEOUS_UPHEAVAL = 501562
+WARRIOR_OF_TYR = 301253
+CONDEMN = 567541
 
 
 def scarlet_judicator_entry() -> dict:
@@ -109,6 +116,14 @@ def courage_rank_1_entry() -> dict:
 
 def courage_rank_2_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == COURAGE_RANK_2)
+
+
+def blessing_of_aggramar_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == BLESSING_OF_AGGRAMAR)
+
+
+def warrior_of_tyr_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == WARRIOR_OF_TYR)
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -242,7 +257,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 14)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 16)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -832,6 +847,99 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(len(trigger_learn_steps), 1)
         self.assertLess(trigger_learn_steps[0], first_cast_index)
 
+    def test_default_target_stays_caster_without_a_creature_fixture(self):
+        spec = metric_delta_spec(tyrs_guard_entry())
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        cast_steps = [step for step in scenario['steps']
+                     if step.get('action') == 'cast' and step.get('spell') == TESTAMENT_OF_HOPE]
+        self.assertTrue(all(step['target'] == 'caster' for step in cast_steps))
+        self.assertNotIn('creatures', scenario)
+
+    def test_dummy_target_casts_at_the_creature_fixture_and_adds_it(self):
+        spec = metric_delta_spec(warrior_of_tyr_entry())
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        cast_steps = [step for step in scenario['steps']
+                     if step.get('action') == 'cast' and step.get('spell') == CONDEMN]
+        self.assertTrue(all(step['target'] == 'dummy' for step in cast_steps))
+        self.assertEqual(len(scenario['creatures']), 1)
+        self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
+
+    def test_dispatch_warrior_of_tyr_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, warrior_of_tyr_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_DELTA)
+        self.assertEqual(expectations[0].model['expected'], 10)
+        self.assertEqual(expectations[0].model['before_expected'], 0)
+        self.assertEqual(expectations[0].model['metric'], 'power')
+
+    def test_disable_regeneration_overrides_the_player_fixture(self):
+        spec = metric_delta_spec(warrior_of_tyr_entry())
+        self.assertTrue(spec.disable_regeneration)
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        self.assertEqual(scenario['players'][0]['allow_regeneration'], False)
+
+    def test_regeneration_stays_enabled_by_default(self):
+        spec = metric_delta_spec(tyrs_guard_entry())
+        self.assertFalse(spec.disable_regeneration)
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        self.assertNotIn('allow_regeneration', scenario['players'][0])
+
+
+class DurationRefreshScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_the_expectation(self):
+        spec = duration_refresh_spec(blessing_of_aggramar_entry())
+        scenario, expectations = duration_refresh_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_DURATION_REFRESH)
+        self.assertTrue(expectation.rule.startswith('prose: "now refreshes the duration of Blade of Faith'))
+        self.assertEqual(expectation.rank_id, BLADE_OF_FAITH)
+        self.assertEqual(expectation.model['full_duration_ms'], 30000.0)
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, blessing_of_aggramar_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_DURATION_REFRESH)
+
+    def test_without_phase_comes_before_the_learn_which_comes_before_the_with_phase(self):
+        spec = duration_refresh_spec(blessing_of_aggramar_entry())
+        scenario, _ = duration_refresh_scenario(CLASS_FILE, spec)
+        learn_index = next(index for index, step in enumerate(scenario['steps'])
+                           if step.get('action') == 'learn' and step.get('spell') == BLESSING_OF_AGGRAMAR)
+        breaker_casts = [index for index, step in enumerate(scenario['steps'])
+                        if step.get('action') == 'cast' and step.get('spell') == RIGHTEOUS_UPHEAVAL]
+        self.assertEqual(len(breaker_casts), 2)
+        self.assertLess(breaker_casts[0], learn_index)
+        self.assertLess(learn_index, breaker_casts[1])
+
+    def test_gating_stacks_are_set_before_each_breaker_cast(self):
+        spec = duration_refresh_spec(blessing_of_aggramar_entry())
+        scenario, _ = duration_refresh_scenario(CLASS_FILE, spec)
+        breaker_casts = [index for index, step in enumerate(scenario['steps'])
+                        if step.get('action') == 'cast' and step.get('spell') == RIGHTEOUS_UPHEAVAL]
+        for index in breaker_casts:
+            preceding = [step for step in scenario['steps'][:index]
+                        if step.get('action') == 'set_aura' and step.get('spell') == OATH_CHAIN]
+            self.assertEqual(preceding[-1]['stacks'], spec.gating_stacks)
+
+    def test_measures_aura_duration_ms_of_the_target_aura_four_times(self):
+        spec = duration_refresh_spec(blessing_of_aggramar_entry())
+        scenario, _ = duration_refresh_scenario(CLASS_FILE, spec)
+        measure_steps = [step for step in scenario['steps']
+                         if step.get('metric') == 'aura_duration_ms' and step.get('spell') == BLADE_OF_FAITH]
+        self.assertEqual(len(measure_steps), 4)
+        for step in measure_steps:
+            self.assertEqual(step['actor'], 'dummy')
+            self.assertEqual(step['caster'], 'caster')
+
+    def test_arms_the_weapon_the_breaker_spell_needs(self):
+        spec = duration_refresh_spec(blessing_of_aggramar_entry())
+        scenario, _ = duration_refresh_scenario(CLASS_FILE, spec)
+        equip_step = next(step for step in scenario['steps'] if step.get('action') == 'equip')
+        self.assertEqual(equip_step['item'], CLASS_FILE['alternate_weapons'][0]['item'])
+        self.assertNotEqual(equip_step['item'], CLASS_FILE['weapon']['item'])
+
 
 class FakeRun:
     def __init__(self, values, max_step_ms=None):
@@ -1215,6 +1323,45 @@ class JudgeDurationRatioTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 6000.0}), expectation)
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('after', verdict.explanation)
+
+
+class JudgeDurationRefreshTests(unittest.TestCase):
+    def expectation(self):
+        model = {'kind': 'duration_refresh', 'without_before_label': 'wb', 'without_after_label': 'wa',
+                 'with_before_label': 'tb', 'with_after_label': 'ta', 'full_duration_ms': 30000.0,
+                 'refresh_margin_ms': 500, 'quote': 'now refreshes the duration of Blade of Faith'}
+        return Expectation('label', BEHAVIOUR_DURATION_REFRESH, BLESSING_OF_AGGRAMAR, BLADE_OF_FAITH, None, '30000.0',
+                           'prose: "now refreshes the duration of Blade of Faith" (300502)', model)
+
+    def test_refreshed_to_near_full_duration_without_the_passive_decaying_is_ok(self):
+        expectation = self.expectation()
+        values = {'wb': 20000.0, 'wa': 19500.0, 'tb': 20000.0, 'ta': 29800.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_without_the_passive_the_breaker_must_not_increase_the_duration(self):
+        expectation = self.expectation()
+        values = {'wb': 20000.0, 'wa': 25000.0, 'tb': 20000.0, 'ta': 29800.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_with_the_passive_a_duration_that_stays_merely_decayed_is_alert(self):
+        expectation = self.expectation()
+        values = {'wb': 20000.0, 'wa': 19500.0, 'tb': 20000.0, 'ta': 19500.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'wb': 20000.0, 'wa': 19500.0, 'tb': 20000.0}),
+                                  expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('ta', verdict.explanation)
+
+    def test_no_run_reports_no_scenario(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), None, expectation)
+        self.assertIn('no scenario', verdict.explanation)
 
 
 if __name__ == '__main__':

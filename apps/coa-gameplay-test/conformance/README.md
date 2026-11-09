@@ -1031,13 +1031,8 @@ reusing the field for the same effect (a floor below the harness's own `CAST_MAR
 adding a second field with an identical mechanism.
 Light's Ward 300529 and Light's Chosen 301310 are in neither `TemplarEvents` nor `TemplarCastDrivers`: their
 `SPELL_AURA_PERIODIC_TRIGGER_SPELL` effects (23) run unmodified through the generic engine's amplitude tick
-(2000 ms and 5000 ms), using the new `periodic` trigger action described above. Warrior of Tyr 301253 carries a
-`SPELL_AURA_PROC_TRIGGER_SPELL` effect (42) that no code path in this tree can ever fire: `ProcFlags` 0 on its
-own `Spell.dbc` row, `SpellMgr.cpp:2512` ("Skip if no proc flags in DBC") skips generating a `spell_proc` row for
-it, no `spell_proc` SQL row exists for 301253 or its `EffectTriggerSpell`, and `AscensionTemplarEvents.cpp`'s
-`DoCheckProc`/`OnProc` switch has no case for it — so this entry is `status: "unmodelled"`, same convention as
-Disciplined Blows 680397, and (unlike Keeping the Oath below) has no `trigger` field at all since no mechanism
-backs one. Keeping the Oath 92109 also carries a `SPELL_AURA_PROC_TRIGGER_SPELL` effect (42,
+(2000 ms and 5000 ms), using the new `periodic` trigger action described above. Keeping the Oath 92109 also
+carries a `SPELL_AURA_PROC_TRIGGER_SPELL` effect (42,
 `EffectTriggerSpell` 681170 `SPELL_RECENTLY_PARRIED_OR_DODGED`), and `ApplyContracts` sets its DBC `ProcFlags` to
 0 at runtime the same way, but this one is reachable: `data/sql/updates/pending_db_world/rev_20261001_04_templar_keeping_the_oath_avoid.sql`
 (merged, PR #6159) gives 92109 an explicit `spell_proc` row (`ProcFlags` 40, `HitMask` 48 = dodge or parry,
@@ -1046,12 +1041,22 @@ backs one. Keeping the Oath 92109 also carries a `SPELL_AURA_PROC_TRIGGER_SPELL`
 on a taken melee dodge or parry with no scripted `OnProc` case needed. The entry is still `status: "unmodelled"`,
 without a `trigger` field, because this harness has no action that makes a creature melee-attack the player
 (`hits.py`'s `creature_fixture` is a stationary, non-aggressive dummy) nor one that forces or statistically
-bounds a dodge/parry outcome — the same kind of missing-capability gap as 300502/301339/500011 below, not a
-dead effect.
-Blessing of Aggramar 300502, Holy Tempest 301339 and Holy Combatant 500011 share this lot's remaining P5-family
-gap (round3 `trigger-lot-5-spec.md`, part A) but are not yet modelled: each needs mechanism work beyond this
-`triggers` schema (an `aura_refresh` check family reading a duration delta instead of a discrete count, and, for
-301339, a second creature fixture for the hit's spread target) that this round did not build.
+bounds a dodge/parry outcome — the same kind of missing-capability gap as Zealotry below, not a dead effect.
+Zealotry 92108 carries a second `SPELL_AURA_PROC_TRIGGER_SPELL` effect (effect 1, `EffectTriggerSpell` 801450),
+reachable the same way as 92109 (`rev_20260909_04_templar_completion.sql` gives it an explicit `spell_proc` row
+and a `spell_script_names` entry, bypassing its own zeroed `ProcFlags`): `AscensionTemplarEvents.cpp`'s `Check`
+fires unconditionally on a damaging *off-hand* auto-attack hit. This harness's reference Templar carries only a
+main-hand weapon, and no code path under `src/server/coa/` grants Templar `CanDualWield` (every `SetCanDualWield`
+call site is scoped to `CLASS_SON_OF_ARUGAL`, `AscensionCompat.cpp:1104-1109, 9583-9594`), so `Player::CanEquipItem`
+(`Player.cpp:13412`) would refuse an off-hand weapon on this class file's character before an off-hand swing could
+even be attempted; the entry is `status: "unmodelled"`, without a `trigger` field, for that harness-capability
+reason. Warrior of Tyr 301253's own `SPELL_AURA_PROC_TRIGGER_SPELL` effect is likewise unreachable through the
+proc/`ProcFlags` path `AscensionTemplarEvents.cpp` implements (no case, no `spell_proc` row for it or its
+`EffectTriggerSpell`), but the tooltip's effect is reachable through a separate mechanism this `triggers` schema
+cannot express (a power gain, not a discrete trigger count): see `classes/templar.json`'s `behaviours` entry for
+301253 (`metric_delta`, "Behaviour scenarios" below) instead. Holy Tempest 301339 and Holy Combatant 500011 remain
+genuinely open P5-family gaps (round3 `trigger-lot-5-spec.md`, part A); 301339 in particular needs a second
+creature fixture for the hit's spread target that this round did not build.
 
 Measured on 2026-11-07 (stamp `20261107-184729`, simulated clock, gameplay stage 57.0 s for 10 parts, no failed
 cast, 20 baseline trials and no baseline event in each entry): all four entries are `ok` with 273 events in 273
@@ -1096,7 +1101,8 @@ produce the same status vocabulary (`ok`, `alert`, `unmodelled`, `measured`, `am
 | `behaviour_duration` | a duration refresh or reduction |
 | `behaviour_duration_ratio` | a duration reduction on a mechanic the engine's own generic `SPELL_AURA_MECHANIC_DURATION_MOD` consumer applies, read off a named vehicle spell cast at the caster rather than off a forced crit |
 | `behaviour_trigger` | a scripted "always fires" claim not reachable through `triggers.py`'s native `EffectTriggerSpell` path |
-| `behaviour_metric_delta` | a passive whose change is read through a harness metric already used elsewhere in the scenario (`owned_creature_count`, `aura_amount`, ...) around a named active spell, judged by exact equality rather than a tolerance band |
+| `behaviour_metric_delta` | a passive whose change is read through a harness metric already used elsewhere in the scenario (`owned_creature_count`, `aura_amount`, `power`, ...) around a named active spell, judged by exact equality rather than a tolerance band |
+| `behaviour_duration_refresh` | a passive that resets a named aura's remaining duration back to (near) its own DBC maximum when a named breaker spell is cast at a gating condition, with the same with/without-the-passive check every other `behaviours` kind applies |
 | `behaviour_ratio` (`kind: "health_ratio"`) | a ratio conditional on the caster's own health, read at several health percentages in one scenario |
 
 Every `Expectation.rule` of these checks starts with the literal prefix `prose: ` followed by the quoted
@@ -1107,10 +1113,10 @@ skipped: it is what keeps a behaviour `ok` honestly distinguishable from a token
 | Field | Content |
 |---|---|
 | `spell`, `name` | the passive and its `SpellName[enUS]` |
-| `kind` | `count`, `ratio`, `duration`, `duration_ratio`, `trigger`, `spread`, `metric_delta` or `health_ratio`: which scenario builder and judge rule apply |
+| `kind` | `count`, `ratio`, `duration`, `duration_ratio`, `duration_refresh`, `trigger`, `spread`, `metric_delta` or `health_ratio`: which scenario builder and judge rule apply |
 | `quote` | the exact prose fragment of `Description[enUS]`, checked to be a substring at generation time |
 | `expected` | the number, ratio or duration the quote states (not used by `health_ratio`, which states its ratios in `levels` instead, one per health percentage, or by `duration`, which states its milliseconds in `expected_ms` instead) |
-| kind-specific fields | `count`: `target_rank` (the active spell cast), `radius` and `radius_reason` (the source citation that grounds the fixture placement, never a guessed distance), `metric` (`spell_damage_count`, the default, for a spell with a school-damage effect, or `aura` for a spell whose own effect is not damage, such as a silence); `ratio`: `targets`, a list of `[rank_id, name]` pairs; `spread`: `seed_spell` (cast on the primary dummy to install the aura the passive must copy), `aura_spell` (the aura id measured on every extra dummy), `target_rank` (the active whose damage triggers the copy), `radius`/`radius_reason`; `trigger`: `shield_aura` (the absorb aura that must be fully consumed), `trigger_spell` (the spell the break casts), `breaker_spell` (a spell of the absorb's own school that the striker casts directly at the caster to deplete it deterministically), `striker_entry` (a creature template entry to cast it from), `break_timeout_ms` (how long to wait for the aura to clear once the breaker spell lands, default 3000); `metric_delta`: `trigger_spell` (the active spell cast to create the measurable state, learned once up front since it is not otherwise granted to the reference character), `metric`/`fields` (the harness metric and its query fields, e.g. `owned_creature_count`/`{"entry": ...}` or `aura_amount`/`{"spell": ..., "effect": ...}`), `before_expected` (the DBC-derived baseline value asserted on the "before" measurement), `wait_ms` (settle time after the cast before measuring, default 3000), `expire_ms` (wait after the learn before the second cast, long enough for the first cast's effect to fully expire so it cannot contaminate the second measurement, default 20500); `health_ratio`: `probe_spell` (a magic-school spell not exempted from damage-taken modifiers, fed to `script_spell_damage_taken` as a stand-in hit), `levels` (a list of `[health_pct, expected_ratio]` pairs, one `Expectation` per pair); `duration`: `target_aura` (the aura whose `aura_duration_ms` is read before and after one forced melee crit), `expected_ms` (the milliseconds the quote states, added on top of the one swing interval that elapses naturally), `debt_aura` (the real absorb aura that must carry a nonzero debt amount before the crit, so the forcing fixture exercises the real damage-absorb hook instead of a bare `set_aura`), `breaker_spell`/`striker_entry` (the spell and creature template entry that deplete `debt_aura` deterministically before the measured crit), `mechanism_file`/`override_file`/`reduce_function` (free text naming the server source file that resets the duration, the file that overrides the aura's periodic base points, and the function whose early-removal branch the debt fixture must avoid triggering for the wrong reason — generated into the scenario's own `contract` field, so each class supplies its own instead of the builder hardcoding one class's names); `duration_ratio`: `vehicle_spell` (a stock, non-class spell whose own mechanic the passive's `SPELL_AURA_MECHANIC_DURATION_MOD` effect targets, cast by a striker at the caster once before and once after the passive is learned), `striker_entry` (a creature template entry, default 36) |
+| kind-specific fields | `count`: `target_rank` (the active spell cast), `radius` and `radius_reason` (the source citation that grounds the fixture placement, never a guessed distance), `metric` (`spell_damage_count`, the default, for a spell with a school-damage effect, or `aura` for a spell whose own effect is not damage, such as a silence); `ratio`: `targets`, a list of `[rank_id, name]` pairs; `spread`: `seed_spell` (cast on the primary dummy to install the aura the passive must copy), `aura_spell` (the aura id measured on every extra dummy), `target_rank` (the active whose damage triggers the copy), `radius`/`radius_reason`; `trigger`: `shield_aura` (the absorb aura that must be fully consumed), `trigger_spell` (the spell the break casts), `breaker_spell` (a spell of the absorb's own school that the striker casts directly at the caster to deplete it deterministically), `striker_entry` (a creature template entry to cast it from), `break_timeout_ms` (how long to wait for the aura to clear once the breaker spell lands, default 3000); `metric_delta`: `trigger_spell` (the active spell cast to create the measurable state, learned once up front since it is not otherwise granted to the reference character), `metric`/`fields` (the harness metric and its query fields, e.g. `owned_creature_count`/`{"entry": ...}`, `aura_amount`/`{"spell": ..., "effect": ...}` or `power`/`{"power": <type>}`), `before_expected` (the DBC-derived baseline value asserted on the "before" measurement), `wait_ms` (settle time after the cast before measuring, default 3000), `expire_ms` (wait after the learn before the second cast, long enough for the first cast's effect to fully expire so it cannot contaminate the second measurement, default 20500), `target` (`"caster"`, the default, or `"dummy"` for a trigger spell that needs a hostile target, such as a periodic-damage spell; adds the stock creature fixture only when set to `"dummy"`), `disable_regeneration` (default `false`; `true` sets `allow_regeneration: false` on the player fixture, for a `power` metric whose resource type regenerates on its own — a resource pool's passive regen (confirmed empirically: Energy regenerated ~10/sec of real time during the cast-and-wait window, contaminating both the "before" and "after" absolute reads by the same roughly-equal amount, even though it cancels out of the delta) would otherwise make the check's required exact-equality baseline nondeterministic, since the exact regen gained during a fixed wait is itself a live-timing read, not a DBC-derived constant); `duration_refresh`: `target_aura` (the aura whose `aura_duration_ms` is read before and after the breaker cast), `gating_aura`/`gating_stacks` (the stack-gated aura and the stack count the breaker's own code checks, held fixed in both phases since the passive's presence is the axis under test here, not the stack threshold), `apply_spell` (cast at the creature fixture to apply `target_aura`), `breaker_spell` (cast afterwards; refreshes `target_aura` only when the passive is known and `gating_aura` has at least `gating_stacks`), `decay_ms` (wait between the apply and the breaker cast, default 4000), `refresh_margin_ms` (how close to the DBC's own full duration the "with" phase's refreshed reading must land, default 500); `health_ratio`: `probe_spell` (a magic-school spell not exempted from damage-taken modifiers, fed to `script_spell_damage_taken` as a stand-in hit), `levels` (a list of `[health_pct, expected_ratio]` pairs, one `Expectation` per pair); `duration`: `target_aura` (the aura whose `aura_duration_ms` is read before and after one forced melee crit), `expected_ms` (the milliseconds the quote states, added on top of the one swing interval that elapses naturally), `debt_aura` (the real absorb aura that must carry a nonzero debt amount before the crit, so the forcing fixture exercises the real damage-absorb hook instead of a bare `set_aura`), `breaker_spell`/`striker_entry` (the spell and creature template entry that deplete `debt_aura` deterministically before the measured crit), `mechanism_file`/`override_file`/`reduce_function` (free text naming the server source file that resets the duration, the file that overrides the aura's periodic base points, and the function whose early-removal branch the debt fixture must avoid triggering for the wrong reason — generated into the scenario's own `contract` field, so each class supplies its own instead of the builder hardcoding one class's names); `duration_ratio`: `vehicle_spell` (a stock, non-class spell whose own mechanic the passive's `SPELL_AURA_MECHANIC_DURATION_MOD` effect targets, cast by a striker at the caster once before and once after the passive is learned), `striker_entry` (a creature template entry, default 36) |
 
 `behaviours.py`'s `behaviour_scenario(class_file, entry)` dispatches on `kind` to a scenario builder shaped like
 `passives.passive_scenario` (base steps, measure "before," `learn`, measure "after"), with a kind-specific measure
@@ -1349,6 +1355,32 @@ vary slightly run to run); that per-read jitter is amplified by the ratio itself
 measured at up to ~100 ms for Courage's -20% rank — within `CAST_MARGIN_MS`, comfortably outside the shared
 delta-margin scale's usual 0.5%-of-expected floor.
 
+### Duration-refresh scenarios (`behaviour_duration_refresh`, `kind: "duration_refresh"`)
+
+Some prose passives refresh an existing aura's remaining duration back to its own maximum, rather than reducing
+or extending a fresh one by a ratio: a condition that no shape above fits, since `duration_scenario` forces one
+melee crit to read a *decrease* against a running debt mechanism, and `mechanic_duration_scenario` compares two
+*fresh* applications of a stock vehicle spell rather than a refresh of one already-applied aura. `duration_refresh_scenario`
+runs two phases, each casting `apply_spell` at the creature fixture (install `target_aura`), waiting `decay_ms`
+for it to partially decay, measuring `aura_duration_ms` ("before"), setting `gating_aura` to `gating_stacks` and
+casting `breaker_spell` (the real condition the server code checks), then measuring again ("after"): once
+*without* the passive learned (the breaker must leave the decayed duration alone — the absent-effect case this
+check exists to catch) and once *with* it (the breaker must return the duration to within `refresh_margin_ms` of
+`records.duration_ms(target_aura)`, the DBC's own full duration, read once at generation time rather than
+hardcoded). Both phases hold `gating_stacks` fixed at the breaker's own gating threshold, since only the
+passive's presence varies between them; a scenario that also wanted to prove the stack *threshold* itself would
+need the shape round3's `trigger-lot-5-spec.md` originally sketched, which (as with the issue scenario this
+entry's mechanism matches, `apps/coa-gameplay-test/scenarios/templar-blessing-of-aggramar-blade-refresh-7806.json`)
+holds the passive constant and varies the stack count instead — a different scenario for a different claim,
+not duplicated here.
+
+The judge (`compare.behaviour_duration_refresh_verdict`) reads all four measurements: `ok` only when the
+without-phase's `after <= before` (any increase without the passive is always an alert, since the breaker's own
+gating condition should never fire) **and** the with-phase's `after >= full_duration - refresh_margin_ms`
+(a reading that stays merely decayed, rather than refreshed, is always an alert); `alert` otherwise. There is no
+tolerance-margin scale here because the claim itself is binary (refreshed to near-full, or not), not a ratio or
+a delta of a known magnitude.
+
 ### Templar entries
 
 | Passive | Kind | Quote | Expected | Mechanism |
@@ -1367,9 +1399,27 @@ delta-margin scale's usual 0.5%-of-expected floor.
 | Finesse (Rank 2) 707851, effect 1 | duration_ratio | "reduces the duration of disarm effects against you by" | 0.70 | same mechanism and vehicle as Rank 1 |
 | Courage (Rank 1) 707754, effect 1 | duration_ratio | "reduces the duration of movement slowing effects on you by" | 0.90 | stock engine `SPELL_AURA_MECHANIC_DURATION_MOD` (232), `EffectMiscValue` 11 (`MECHANIC_SNARE`), no CoA code involved; vehicle Hamstring 1715 (`EffectMechanic[0]` 11, `DurationIndex` 8 = 15000 ms); `MECHANIC_SNARE` is exempted from `ModSpellDuration`'s duration-mod reduction only when the applied spell's own mechanic mask also carries `MECHANIC_DISORIENTED`, which Hamstring does not |
 | Courage (Rank 2) 712466, effect 1 | duration_ratio | "reduces the duration of movement slowing effects on you by" | 0.80 | same mechanism and vehicle as Rank 1 |
+| Blessing of Aggramar 300502 | duration_refresh | "now refreshes the duration of Blade of Faith on all nearby enemies." | 30000 ms (`SpellDuration.dbc` id 9) | `AscensionTemplarAbilities.cpp` `Breaker(info)`: `player->HasAura(300502) && spell->GetScriptValue(704576) >= 10` refreshes every nearby Blade of Faith 803872 aura to its own max duration; matches the already-working 9-vs-10-stack threshold the issue scenario `templar-blessing-of-aggramar-blade-refresh-7806.json` (#7806) proves, varying the passive's presence instead of the stack count |
+| Warrior of Tyr 301253 | metric_delta | "Periodic damage dealt now generates" | 10 (Energy, power type 3) | `AscensionCustomResourceData.h:475` `NativePowerGainRules` (`ClassId 19, PowerType 3, InternalAmount 10, Event PeriodicDamageTick, RequiredAuraSpellId 301253`), consumed by `AscensionCompat.cpp:3632-3680` `OnPeriodicDamageTick`; Condemn 567541 (periodic damage, 3000 ms ticks) is cast as a real tick source, with the scenario's own mana-cost fixture resetting Energy to a known baseline immediately before each cast; matches the already-written issue scenario `templar-5163-warrior-of-tyr-energy-generation.json` (#5163, #4432). No code or SQL fix needed — the prior `triggers` entry for 301253 (removed) searched only the `ProcFlags`/`spell_proc` path and missed this separate native-resource-rule path |
 
 The 10-yard and 8-yard fixture radii above are both read from server source, never guessed, per each entry's own
 `radius_reason`.
+
+Measured on 2026-11-09 (simulated clock, `coa-verify --ram`, exploratory native execution of each scenario alone,
+not combined verification): Blessing of Aggramar 300502 `ok` (without the passive, 25991 ms before the breaker
+cast and 25979 ms after, continuing to decay; with it learned, 21955 ms before and 30000 ms after, exactly its own
+full duration); Warrior of Tyr 301253 `ok` (0 Energy before the learn, 10 after, exact). Blessing of Aggramar's
+breaker spell Righteous Upheaval 501562 needs the alternate one-handed weapon (`EquippedItemSubClassMask` 41105
+excludes the reference Walking Stick's subclass 10, the same exclusion the hit-scenario machinery already
+documents for Vindication 573324): the first pass of this scenario, equipping only the reference weapon, measured
+the breaker cast failing with `SPELL_FAILED_EQUIPPED_ITEM_CLASS` (29) every time, so `duration_refresh_scenario`
+arms the whole scenario with `armed_for(class_file, records, breaker_spell)` (both 803872 and 501562 accept the
+alternate weapon's subclass 4, confirmed by DBC read, so one weapon serves the whole scenario). Warrior of Tyr's
+first pass (without `disable_regeneration`) measured Energy regenerating roughly 10/sec of real time during the
+3300 ms wait (33 before the learn, 43 after — the +10 delta already correct, but the absolute reads this check's
+exact-equality judge needs were not), matching standard Energy regen and the same contamination the issue
+scenario `templar-5163-warrior-of-tyr-energy-generation.json` avoids with its own `allow_regeneration: false`
+player fixture field; `metric_delta`'s new `disable_regeneration` field reuses that same harness field.
 
 ## Player observations
 
