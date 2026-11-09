@@ -561,6 +561,7 @@ class MetricDeltaSpec:
     target: str = CASTER
     disable_regeneration: bool = False
     setup_casts: tuple[int, ...] = ()
+    setup_actor_aura: int | None = None
 
 
 def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
@@ -592,6 +593,8 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
 
     def cast_steps() -> list[dict]:
         steps = []
+        if spec.setup_actor_aura is not None:
+            steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': spec.setup_actor_aura, 'stacks': 1})
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
             steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
                          'value': facts.mana_cost})
@@ -634,7 +637,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry['metric'], entry['fields'], entry['before_expected'],
                            entry.get('wait_ms', DEFAULT_METRIC_DELTA_WAIT_MS),
                            entry.get('expire_ms', DEFAULT_METRIC_DELTA_EXPIRE_MS), entry.get('target', CASTER),
-                           entry.get('disable_regeneration', False), tuple(entry.get('setup_casts', ())))
+                           entry.get('disable_regeneration', False), tuple(entry.get('setup_casts', ())),
+                           entry.get('setup_actor_aura'))
 
 
 DEBT_ASSERT_TIMEOUT_MS = 2000

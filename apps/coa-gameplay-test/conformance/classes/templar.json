@@ -1345,6 +1345,30 @@
       "observe_source": "AscensionTemplarAbilities.cpp Breaker(info): player->HasAura(300502) && spell->GetScriptValue(704576) >= 10 refreshes every nearby Blade of Faith 803872 aura to its max duration (SpellDuration.dbc id 9, 30000 ms); matches the already-working threshold already proven by the issue scenario apps/coa-gameplay-test/scenarios/templar-blessing-of-aggramar-blade-refresh-7806.json (#7806), which fixes the 9-vs-10-stack boundary with the passive already known. This entry instead varies whether 300502 itself is known, holding the stack count fixed at the gating threshold (10) in both phases, since the same player->HasAura(300502) condition governs both axes."
     },
     {
+      "spell": 300504, "name": "Whirling Tempest", "kind": "metric_delta",
+      "quote": "you gain 20% increased movement speed", "expected": 1.20,
+      "trigger_spell": 805409,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.0,
+      "wait_ms": 500,
+      "expire_ms": 4000,
+      "observe_source": "300504's own EffectTriggerSpell[0] (ApplyAuraName 42, dummied by AscensionTemplarContracts.cpp's TemplarCastDrivers routed() path) never fires natively; the live wiring is AscensionTemplarAuras.cpp aura_ascension_templar_lifecycle::Apply, which casts 301340 on the player whenever 805409 (Righteous Tempest) applies while 300504 is known, and copies 805409's own duration onto it. 301340's Effect[0] (SPELL_AURA_MOD_INCREASE_SPEED, BasePoints 19 -> +20%) is read by Unit::UpdateSpeed's main_speed_mod via GetMaxPositiveAuraModifier, with no other SPELL_AURA_MOD_INCREASE_SPEED aura active in this scenario, so run_speed_rate should read 1.20 while 805409/301340 is up. wait_ms 500 (not the 3000 ms default) because 805409/301340's own duration is exactly 3000 ms (SpellDuration.dbc id 27); the default wait_ms would measure at or past expiry."
+    },
+    {
+      "spell": 300504, "variant": "stacks_with_courage",
+      "name": "Whirling Tempest (stacks with Courage)", "kind": "metric_delta",
+      "quote": "stacks with Courage", "expected": 1.32,
+      "trigger_spell": 805409,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.10,
+      "setup_actor_aura": 707754,
+      "wait_ms": 500,
+      "expire_ms": 4000,
+      "observe_source": "Courage Rank 1 (707754, Effect[0] SPELL_AURA_MOD_INCREASE_SPEED, BasePoints 9 -> +10%) and 301340 (see the 300504 entry above) were both aura type 31 before this round's fix, so Unit::UpdateSpeed's main_speed_mod (GetMaxPositiveAuraModifier, a max not a sum) gave only max(10%, 20%) = 20% with both active, contradicting 300504's own tooltip clause this entry quotes. Fixed in AscensionTemplarContracts.cpp's id == 301340 branch by moving 301340's Effect[0] to SPELL_AURA_MOD_SPEED_ALWAYS (129), which Unit::UpdateSpeed reads as a separate, multiplicative stack_bonus (GetTotalAuraMultiplier) on top of main_speed_mod; with Courage's own aura type (31) untouched, before_expected 1.10 is Courage alone through main_speed_mod, and expected 1.32 is 1.10 (Courage, main_speed_mod) x 1.20 (301340, stack_bonus) once the fix is in place. Pre-fix this entry reads ~1.20 against an expected 1.32 and alerts, the required failing case proving the check can fail. setup_actor_aura applies Courage via the generic set_aura action before each metric_delta cast phase (both before- and after-learning), reusing set_aura's existing meaning."
+    },
+    {
       "spell": 301253, "name": "Warrior of Tyr", "kind": "metric_delta",
       "quote": "Periodic damage dealt now generates", "expected": 10,
       "trigger_spell": 567541,

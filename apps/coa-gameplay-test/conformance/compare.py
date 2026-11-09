@@ -39,6 +39,7 @@ CAST_RESULT_ENTRY = re.compile(r'^\s*(?P<name>SPELL_\w+)\s*=\s*(?P<code>\d+)', r
 ABSOLUTE_TOLERANCE = 1.0
 RELATIVE_TOLERANCE = 0.005
 FLOAT_EPSILON = 1e-9
+METRIC_DELTA_FLOAT_TOLERANCE = 1e-5
 TOKEN_CHECKS = frozenset({'effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'spell_duration',
                           'effect_radius', 'aura_amplitude_ms'})
 ROLLED_CHECKS = frozenset({'effect_value', 'aura_amount'})
@@ -1709,13 +1710,15 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
                                                               else model['after_label']))
     before_expected = float(model['before_expected'])
     expected = float(model['expected'])
-    before_ok = abs(before - before_expected) <= FLOAT_EPSILON
-    after_ok = abs(after - expected) <= FLOAT_EPSILON
+    before_ok = abs(before - before_expected) <= METRIC_DELTA_FLOAT_TOLERANCE
+    after_ok = abs(after - expected) <= METRIC_DELTA_FLOAT_TOLERANCE
     status = 'ok' if before_ok and after_ok else 'alert'
     return replace(base, status=status, measured=after, expected=expected, low=expected, high=expected,
                    explanation=f'{model["metric"]} measured {before:g} before the learn (expected '
-                               f'{before_expected:g}) and {after:g} after (expected {expected:g}); exact match '
-                               f'required, a deterministic integer read with no combat-roll variance')
+                               f'{before_expected:g}) and {after:g} after (expected {expected:g}); match within '
+                               f'{METRIC_DELTA_FLOAT_TOLERANCE:g} required, wide enough to absorb IEEE-754 float32 '
+                               f'round-trip noise on a ratio metric (observed ~1e-7) but far below any real '
+                               f'defect in this family of checks, with no combat-roll variance of its own')
 
 
 def behaviour_duration_verdict(base: Verdict, run: Run, model: dict) -> Verdict:

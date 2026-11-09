@@ -1,6 +1,9 @@
 from dataclasses import replace
+import json
 from pathlib import Path
+import shutil
 import sys
+import tempfile
 import unittest
 
 from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_COUNT, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
@@ -70,6 +73,8 @@ HOLY_BOOKS = 706468
 LIBRAM_OF_CONSECRATION = 801441
 TRANSCENDING_STRIKES = 804897
 DIVINE_FORCE = 806153
+WHIRLING_TEMPEST = 300504
+RIGHTEOUS_TEMPEST = 805409
 
 
 def scarlet_judicator_entry() -> dict:
@@ -150,6 +155,16 @@ def holy_books_entry() -> dict:
 
 def transcending_strikes_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == TRANSCENDING_STRIKES)
+
+
+def whirling_tempest_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == WHIRLING_TEMPEST and 'variant' not in entry)
+
+
+def whirling_tempest_stacks_with_courage_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == WHIRLING_TEMPEST and entry.get('variant') == 'stacks_with_courage')
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -305,6 +320,25 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.debt_aura, KEEPING_THE_OATH)
         self.assertEqual(spec.breaker_spell, SMITE)
 
+    def test_whirling_tempest_entry(self):
+        spec = metric_delta_spec(whirling_tempest_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(spec.trigger_spell, RIGHTEOUS_TEMPEST)
+        self.assertEqual(spec.metric, 'run_speed_rate')
+        self.assertEqual(spec.expected, 1.20)
+        self.assertEqual(spec.before_expected, 1.0)
+        self.assertIsNone(spec.setup_actor_aura)
+
+    def test_whirling_tempest_stacks_with_courage_entry(self):
+        spec = metric_delta_spec(whirling_tempest_stacks_with_courage_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(spec.spell, WHIRLING_TEMPEST)
+        self.assertEqual(spec.setup_actor_aura, COURAGE_RANK_1)
+        self.assertEqual(spec.expected, 1.32)
+        self.assertEqual(spec.before_expected, 1.10)
+
 
 class BehaviourEntriesLookupTests(unittest.TestCase):
     def test_behaviour_entries_filters_by_spell(self):
@@ -316,7 +350,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 20)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 22)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1018,6 +1052,61 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_DELTA)
         self.assertEqual(expectations[0].model['metric'], 'cooldown_ms')
 
+    def test_setup_actor_aura_defaults_to_no_extra_set_aura_steps(self):
+        spec = metric_delta_spec(whirling_tempest_entry())
+        self.assertIsNone(spec.setup_actor_aura)
+        with_field, _ = metric_delta_scenario(CLASS_FILE, spec)
+        without_field, _ = metric_delta_scenario(CLASS_FILE, replace(spec, setup_actor_aura=None))
+        self.assertEqual(with_field, without_field)
+        set_aura_spells = {step['spell'] for step in with_field['steps'] if step.get('action') == 'set_aura'}
+        self.assertNotIn(COURAGE_RANK_1, set_aura_spells)
+
+    def test_setup_actor_aura_applies_courage_before_each_phase_cast(self):
+        spec = metric_delta_spec(whirling_tempest_stacks_with_courage_entry())
+        self.assertEqual(spec.setup_actor_aura, COURAGE_RANK_1)
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        steps = scenario['steps']
+        set_aura_steps = [index for index, step in enumerate(steps)
+                         if step.get('action') == 'set_aura' and step.get('spell') == COURAGE_RANK_1]
+        cast_steps = [index for index, step in enumerate(steps)
+                     if step.get('action') == 'cast' and step.get('spell') == RIGHTEOUS_TEMPEST]
+        self.assertEqual(len(set_aura_steps), 2)
+        self.assertEqual(len(cast_steps), 2)
+        self.assertEqual(steps[set_aura_steps[0]]['stacks'], 1)
+        self.assertLess(set_aura_steps[0], cast_steps[0])
+        self.assertLess(set_aura_steps[1], cast_steps[1])
+
+    def test_whirling_tempest_waits_500ms_not_the_default_3000ms(self):
+        spec = metric_delta_spec(whirling_tempest_entry())
+        self.assertEqual(spec.wait_ms, 500)
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        wait_steps = [step for step in scenario['steps']
+                     if step.get('action') == 'wait' and step.get('ms') == 500 and 'label' not in step]
+        self.assertTrue(wait_steps)
+
+    def test_dispatch_whirling_tempest_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, whirling_tempest_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_DELTA)
+        self.assertEqual(expectations[0].model['expected'], 1.20)
+        self.assertEqual(expectations[0].model['before_expected'], 1.0)
+        self.assertEqual(expectations[0].model['metric'], 'run_speed_rate')
+
+    def test_dispatch_whirling_tempest_stacks_with_courage_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, whirling_tempest_stacks_with_courage_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_DELTA)
+        self.assertEqual(expectations[0].model['expected'], 1.32)
+        self.assertEqual(expectations[0].model['before_expected'], 1.10)
+        self.assertEqual(expectations[0].model['metric'], 'run_speed_rate')
+
+    def test_the_two_whirling_tempest_entries_share_a_spell_id_but_differ_by_variant(self):
+        plain = whirling_tempest_entry()
+        stacking = whirling_tempest_stacks_with_courage_entry()
+        self.assertEqual(plain['spell'], stacking['spell'])
+        self.assertNotEqual(plain.get('variant'), stacking.get('variant', ''))
+
     def test_keeping_the_oath_passive_casts_reckoning_at_the_dummy_fixture(self):
         spec = metric_delta_spec(keeping_the_oath_passive_entry())
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -1043,6 +1132,31 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['expected'], 1)
         self.assertEqual(expectations[0].model['before_expected'], 0)
         self.assertEqual(expectations[0].model['metric'], 'aura')
+
+
+TEMPLAR_CLASS_ID = 19
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class GenerateBehaviourVariantTest(unittest.TestCase):
+    def setUp(self):
+        self.out = Path(tempfile.mkdtemp(prefix='conformance-behaviour-variant-'))
+
+    def tearDown(self):
+        shutil.rmtree(self.out)
+
+    def test_two_behaviour_entries_sharing_a_spell_id_get_distinct_manifest_keys(self):
+        from conformance import generate
+        manifest = json.loads(
+            generate(TEMPLAR_CLASS_ID, self.out, behaviours=[WHIRLING_TEMPEST]).read_text(encoding='utf-8'))
+        entries = [entry for entry in manifest['scenarios'] if entry['spell_id'] == WHIRLING_TEMPEST]
+        self.assertEqual(len(entries), 2)
+        self.assertEqual(len({entry['key'] for entry in entries}), 2)
+
+    def test_the_plain_entry_keeps_its_pre_variant_key(self):
+        from conformance import scenario_key
+        self.assertEqual(scenario_key('Templar', 'behaviour', WHIRLING_TEMPEST, ''),
+                         scenario_key('Templar', 'behaviour', WHIRLING_TEMPEST))
 
 
 class DurationRefreshScenarioTests(unittest.TestCase):
@@ -1446,6 +1560,26 @@ class JudgeMetricDeltaTests(unittest.TestCase):
                                   '-15', 'prose: "reduces damage taken by an additional 5% per copy" (803219)', model)
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': -10.0, 'after': -15.0}), expectation)
         self.assertEqual(verdict.status, 'ok')
+
+    def test_run_speed_rate_tolerates_float32_round_trip_noise(self):
+        model = {'kind': 'metric_delta', 'before_label': 'before', 'after_label': 'after', 'expected': 1.32,
+                 'before_expected': 1.10, 'metric': 'run_speed_rate', 'quote': 'stacks with Courage'}
+        expectation = Expectation('label', BEHAVIOUR_METRIC_DELTA, WHIRLING_TEMPEST, RIGHTEOUS_TEMPEST, None,
+                                  '1.32', 'prose: "stacks with Courage" (300504)', model)
+        verdict = judge_behaviour(
+            base_verdict(expectation),
+            FakeRun({'before': 1.1000000238418579, 'after': 1.3200000524520874}), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_run_speed_rate_still_alerts_on_the_pre_fix_non_stacking_reading(self):
+        model = {'kind': 'metric_delta', 'before_label': 'before', 'after_label': 'after', 'expected': 1.32,
+                 'before_expected': 1.10, 'metric': 'run_speed_rate', 'quote': 'stacks with Courage'}
+        expectation = Expectation('label', BEHAVIOUR_METRIC_DELTA, WHIRLING_TEMPEST, RIGHTEOUS_TEMPEST, None,
+                                  '1.32', 'prose: "stacks with Courage" (300504)', model)
+        verdict = judge_behaviour(
+            base_verdict(expectation),
+            FakeRun({'before': 1.1000000238418579, 'after': 1.2000000476837158}), expectation)
+        self.assertEqual(verdict.status, 'alert')
 
 
 class JudgeDurationTests(unittest.TestCase):

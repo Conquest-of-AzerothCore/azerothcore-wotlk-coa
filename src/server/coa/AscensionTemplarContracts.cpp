@@ -190,6 +190,7 @@ void ApplyContracts(SpellInfo* info)
     }
     if (id == 301340)
     {
+        info->Effects[0].ApplyAuraName = SPELL_AURA_MOD_SPEED_ALWAYS;
         info->Effects[0].BasePoints = 19;
         info->Effects[0].MiscValue = 0;
         info->Effects[1].Effect = 0;
