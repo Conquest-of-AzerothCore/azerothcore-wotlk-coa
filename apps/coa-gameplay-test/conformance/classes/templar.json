@@ -74,6 +74,32 @@
     {"spell": 520442, "effect": 0, "misc_value": 15,
      "citation": "AscensionTemplarContracts.cpp:130 rewrites EffectMiscValue 7 to SPELLMOD_CRIT_DAMAGE_BONUS (15)"}
   ],
+  "effect_notes": [
+    {"spell": 300529, "effect": 1,
+     "reason": "no check needed: round4 scripted-script-aura investigation. Both tooltip clauses of Deep Secrets are resolved through 301283's own effects (periodic trigger e0, magic-resist/damage-reduction amount), already ok; no code anywhere reads 300529's own effect 1 (BasePoints/MiscValue both 0), which carries no tooltip clause of its own"},
+    {"spell": 705263, "effect": 1,
+     "reason": "no check needed: round4 scripted-script-aura investigation. Deep Secrets' single tooltip clause resolves through its own e0 (SPELL_AURA_ADD_FLAT_MODIFIER, generic engine spellmod), already ok/measured; no src/server/coa/ file references spell 705263 at all, and e1 (BasePoints 99, MiscValue 12) is named by no token"},
+    {"spell": 705272, "effect": 1,
+     "reason": "no check needed: round4 scripted-script-aura investigation. Chivalric's single tooltip clause resolves through its own e0 (SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, generic engine), already ok/passive_delta; no src/server/coa/ reference to spell 705272 anywhere, and e1 (BasePoints 9) carries no tooltip clause"},
+    {"spell": 705274, "effect": 1,
+     "reason": "no check needed: round4 scripted-script-aura investigation. Sanctify's single tooltip clause resolves through its own e0 (native SPELL_AURA_PROC_TRIGGER_SPELL to 705275, generic engine proc, already ok with a passing trigger_count); AscensionTemplarTemporaryLibramProcs.cpp only ever reads e0, never e1 (BasePoints 9)"},
+    {"spell": 705283, "effect": 1,
+     "reason": "no check needed: round4 scripted-script-aura investigation. Oath Flow's single tooltip clause resolves through its own e0 (SPELL_AURA_ADD_PCT_MODIFIER, generic engine), already ok/passive_delta against every mask-matched Oath Chain rank; no src/server/coa/ reference to spell 705283 anywhere, and e1 (BasePoints 9) carries no tooltip clause"},
+    {"spell": 705287, "effect": 1,
+     "reason": "no check needed: round4 scripted-script-aura investigation. Improved Benediction's single tooltip clause is already ok as passive_delta on spell 801409 (e0's SPELL_AURA_ADD_FLAT_MODIFIER); the armor amount itself is set in aura_ascension_templar_lifecycle::Calculate keyed on HasAura(705287) acting on 801409's own effect, a flag read of the aura's presence, not of e1's value (BasePoints 9), which is read nowhere by index"},
+    {"spell": 705298, "effect": 1,
+     "reason": "no check needed: round4 scripted-script-aura investigation. Untainted's own e0 (routed to DUMMY by ApplyContracts) already carries effect_value/spell_duration checks plus an open trigger_count alert (546 observed in 273 trials, roughly double the expected rate, carried forward separately, not this effect's remit); e1 (BasePoints -9, MiscValue 23) has no tooltip clause of its own and is read nowhere by index"},
+    {"spell": 805420, "effect": 1,
+     "reason": "no check needed: round4 scripted-script-aura investigation. Way of the Monk's native e0 (PROC_TRIGGER_SPELL to 572052, routed to DUMMY + ProcFlags=0) already carries effect_value/spell_duration/max_stacks/trigger_count checks, all ok; e1 (BasePoints -1, MiscValue 0) has no tooltip clause and is read nowhere by index"},
+    {"spell": 806516, "effect": 0,
+     "reason": "no check needed: round4 scripted-script-aura investigation. Heaven's Finest's single tooltip clause is already fully covered by five ok checks on the companion effects (spell_duration/max_stacks/effect_value of 805390 and 806517); e0 (BasePoints -1, MiscValue 0) carries no clause of its own and is read nowhere by index. The companion effect at e1 (native AuraName 42 to 805390, routed to DUMMY) keeps its own open trigger_count alert (150 of 273 trials, roughly 55%), unchanged by this note"},
+    {"spell": 804930, "effect": 0,
+     "reason": "reclassify: round4 scripted-script-aura investigation. The behaviour this effect stands for (casting Armor of Faith's damage spell 801546 when Staffguard's absorb breaks) is already proven by the class file's own 804930 behaviour_trigger entry (behaviours.py ShieldBreakTriggerSpec), status ok; e0 (BasePoints -1) is read only as a presence flag in aura_ascension_templar_lifecycle::Remove and carries no number of its own, so it stays unmodelled here only because no check is keyed on this exact effect index"},
+    {"spell": 92109, "effect": 0,
+     "reason": "deferred: round4 scripted-script-aura investigation found no existing metric that can distinguish 92109's own SPELL_AURA_SCHOOL_ABSORB (ApplyContracts-rewritten, amount forced to -1, unlimited) from 803149's identical absorb: aura_ascension_templar_stagger::Calculate sets both auras' amount to -1 regardless of which one is skipped, and Absorb redirects 40% of the hit to the same 803237 debt pool through either path, so GetAmount()/the debt total read identically whichever aura actually fired. Proving the takeover (803149 pre-empted when 92109 is also known) needs a new telemetry hook that reports which AuraEffect's OnEffectAbsorb ran, which is beyond this item's no-new-C++-metric scope; a follow-up item should add that hook before building this check"},
+    {"spell": 300520, "effect": 0,
+     "reason": "deferred: round4 scripted-script-aura investigation confirmed the 25% bonus is real and health-gated (AscensionTemplarAbilities.cpp OnSpellCalculatedTarget, target->HealthBelowPct(20) on Scourgebane/Scarlet Hammer/Titanstrike), but proving it needs a statistical hit-mean comparison across several live casts at both a full-health and a sub-20%-health target (hits.py's own tolerance machinery), not the exact-equality two-read model behaviour_metric_delta provides; building that comparison needs either a new behaviour kind or a hits.py-level scenario this item's no-new-kind scope does not cover. A follow-up item should add that comparison"}
+  ],
   "passive_targets": [
     {"spell": 520034, "effect": 1, "targets": [801205], "tooltip_words": "Tranquil Circle"},
     {"spell": 705291, "effect": 0, "targets": [567539], "tooltip_words": "Condemn"},
@@ -1215,6 +1241,24 @@
       "before_expected": -10,
       "wait_ms": 3000,
       "expire_ms": 20500
+    },
+    {
+      "spell": 301309, "name": "Sacred Resistance", "kind": "metric_delta",
+      "quote": "now increases your Armor by", "expected": 1,
+      "trigger_spell": 572741,
+      "metric": "aura",
+      "fields": { "spell": 680870 },
+      "before_expected": 0,
+      "target": "dummy"
+    },
+    {
+      "spell": 92109, "name": "Keeping the Oath", "kind": "metric_delta",
+      "quote": "you no longer consume your Oaths with Oath Breakers", "expected": 1,
+      "trigger_spell": 572741,
+      "metric": "aura",
+      "fields": { "spell": 704576 },
+      "before_expected": 0,
+      "target": "dummy"
     },
     {
       "spell": 801202, "name": "Battlepriest", "kind": "health_ratio",

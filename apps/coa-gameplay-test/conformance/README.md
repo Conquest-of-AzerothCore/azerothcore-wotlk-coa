@@ -478,6 +478,26 @@ effect`), 142 (`mail armor is out of scope`, owner ruling), 59 (`damage versus a
 (`SpellModOp <op> is not below MAX_SPELLMOD 32`: `spell_modifier` requires `op < MAX_SPELLMOD`), and the auras of the
 table without a plan (31, 87, 283, 286: `aura <n> has no passive measurement`).
 
+A class file's `effect_notes` list (`[{"spell": <id>, "effect": <n>, "reason": "..."}]`) substitutes a specific
+explanation for `classify`'s own generic `unmodelled: ` reason, the same `{spell_id or rank_id, effect}` lookup as
+`effect_overrides`, applied only when the generic reason already starts with `unmodelled: ` (it never turns a
+modelled effect unmodelled, or the reverse). This documents, per effect, *why* a `P6` (scripted or crowd-control)
+or similarly auto-labelled effect needs no check of its own — because a sibling effect of the same spell already
+carries the number the tooltip states, or because the server-side behaviour is proven by an existing `behaviours`/
+`triggers` entry on a different effect index — or, when an effect's own claim is real but this package cannot yet
+measure it, that it is deferred and why. The status stays `unmodelled` either way: `effect_notes` only replaces the
+explanation text, never the verdict. Templar (round4 `scripted-script-aura` investigation, 2026-11): 300529 effect
+1, 705263 effect 1, 705272 effect 1, 705274 effect 1, 705283 effect 1, 705287 effect 1, 705298 effect 1, 805420
+effect 1 and 806516 effect 0 are reclassified this way (each a `P6`-family `DUMMY`/`OVERRIDE_CLASS_SCRIPTS` effect
+with no tooltip clause of its own, read by no code by index, while a sibling effect of the same spell is already
+`ok`); 804930 effect 0 is reclassified to cite the spell's own `804930 behaviour_trigger` check (below), which
+already proves the behaviour this effect stands for. 92109 effect 0 (the absorb takeover from Keeping the Oath
+803149 to 92109) and 300520 effect 0 (the sub-20%-health damage bonus) are genuine, real effects that this item
+found no way to check with the harness's existing metrics (respectively: `aura_ascension_templar_stagger::Calculate`
+forces both auras' amount to -1, so no existing metric distinguishes which of the two absorbed; the bonus needs a
+statistical hit-mean comparison this package's exact-equality `behaviour_metric_delta` shape does not provide) —
+`effect_notes` records that finding as a deferred reason instead of the generic label, pending a follow-up item.
+
 ### Targets of a spell modifier
 
 1. Named: every `Spell.dbc` record of the passive's `SpellFamilyName` whose `SpellName[enUS]` appears in the tooltip
@@ -1476,6 +1496,8 @@ a delta of a known magnitude.
 | Courage (Rank 2) 712466, effect 1 | duration_ratio | "reduces the duration of movement slowing effects on you by" | 0.80 | same mechanism and vehicle as Rank 1 |
 | Blessing of Aggramar 300502 | duration_refresh | "now refreshes the duration of Blade of Faith on all nearby enemies." | 30000 ms (`SpellDuration.dbc` id 9) | `AscensionTemplarAbilities.cpp` `Breaker(info)`: `player->HasAura(300502) && spell->GetScriptValue(704576) >= 10` refreshes every nearby Blade of Faith 803872 aura to its own max duration; matches the already-working 9-vs-10-stack threshold the issue scenario `templar-blessing-of-aggramar-blade-refresh-7806.json` (#7806) proves, varying the passive's presence instead of the stack count |
 | Warrior of Tyr 301253 | metric_delta | "Periodic damage dealt now generates" | 10 (Energy, power type 3) | `AscensionCustomResourceData.h:475` `NativePowerGainRules` (`ClassId 19, PowerType 3, InternalAmount 10, Event PeriodicDamageTick, RequiredAuraSpellId 301253`), consumed by `AscensionCompat.cpp:3632-3680` `OnPeriodicDamageTick`; Condemn 567541 (periodic damage, 3000 ms ticks) is cast as a real tick source, with the scenario's own mana-cost fixture resetting Energy to a known baseline immediately before each cast; matches the already-written issue scenario `templar-5163-warrior-of-tyr-energy-generation.json` (#5163, #4432). No code or SQL fix needed — the prior `triggers` entry for 301253 (removed) searched only the `ProcFlags`/`spell_proc` path and missed this separate native-resource-rule path |
+| Sacred Resistance 301309 | metric_delta | "now increases your Armor by" | 1 (aura present) | round4 `scripted-script-aura` investigation (2026-11): `talent(301309, 680870)` inside `OnSpellCast`'s generic `talent` helper (`AscensionTemplarAbilities.cpp:152-153`), `if (Named(info, 805421)) talent(301309, 680870)` i.e. `if (player->HasAura(301309)) Cast(player, player, 680870)` whenever the player casts a Reckoning rank (805421, family 25, `SpellFamilyFlags[2]` bit 128 set); `680870`'s own armor-percent and duration tokens are already `ok` (`301309 effect_value 680870e0 #0`, `301309 spell_duration 680870 #1`). 301309's own effect 0 (`BasePoints`/`MiscValue` both 0) is a pure flag, read nowhere by value: the metric is `aura {spell: 680870}` before and after learning 301309, around a cast of Reckoning's max rank 572741 (`EffectImplicitTargetA[0]` 6, TARGET_UNIT_TARGET_ENEMY, so `target: "dummy"`) |
+| Keeping the Oath 92109, effect 1 | metric_delta | "you no longer consume your Oaths with Oath Breakers" | 1 (aura present) | round4 `scripted-script-aura` investigation (2026-11): `AscensionTemplarAbilities.cpp:174`, `if (!player->HasAura(92109) && !player->HasAura(803149) && !Named(info, 805409)) ClearOaths(player);` inside the `Breaker(info)` block, run on every cast satisfying `Breaker` (`SpellFamilyFlags[2]` bit 128, or `Named(info, 805409)`, Righteous Tempest); `ClearOaths` removes Oath Chain 704576 among others. Reckoning 572741 (max rank) satisfies `Breaker` through the `SpellFamilyFlags[2]` bit, not through `Named(info, 805409)`, so it exercises the 92109 gate specifically rather than the separate, always-exempt Righteous Tempest case; the scenario measures `aura {spell: 704576}` before and after learning 92109, around a Reckoning cast whose own `required_aura_steps` fixture re-grants Oath Chain fresh immediately before each cast (shared with the Sacred Resistance entry above, same `trigger_spell`) |
 
 The 10-yard and 8-yard fixture radii above are both read from server source, never guessed, per each entry's own
 `radius_reason`.
@@ -1495,6 +1517,15 @@ first pass (without `disable_regeneration`) measured Energy regenerating roughly
 exact-equality judge needs were not), matching standard Energy regen and the same contamination the issue
 scenario `templar-5163-warrior-of-tyr-energy-generation.json` avoids with its own `allow_regeneration: false`
 player fixture field; `metric_delta`'s new `disable_regeneration` field reuses that same harness field.
+
+Measured on 2026-11-09 (round4 `scripted-script-aura`, simulated clock, `coa-verify --ram`, exploratory native
+execution of each scenario alone, not combined verification): Sacred Resistance 301309 `ok` (aura 680870 read 0
+before learning 301309, 1 after, exact); Keeping the Oath 92109 `ok` (aura 704576 read 0 before learning 92109 —
+the Reckoning cast cleared the fresh Oath Chain, as Breaker spells do by default — and 1 after, exact: with 92109
+known the clear is skipped and the freshly re-granted Oath Chain survives the cast). Both reuse Reckoning's max
+rank 572741 as `trigger_spell`, which satisfies `Breaker(info)` through its own `SpellFamilyFlags[2]` bit 128, not
+through `Named(info, 805409)` (Righteous Tempest, which the code exempts from clearing Oaths regardless of 92109),
+so the scenario exercises the 92109 gate itself rather than that unrelated exemption.
 
 ## Player observations
 

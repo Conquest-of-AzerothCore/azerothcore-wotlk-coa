@@ -265,6 +265,23 @@ class TemplarPassiveTest(unittest.TestCase):
         self.assertEqual(sum(families.values()), TEMPLAR_PASSIVE_EFFECTS)
         self.assertEqual(dict(families), TEMPLAR_FAMILY_COUNTS)
 
+    def test_effect_notes_reclassify_scripted_effects_already_covered_elsewhere(self):
+        for spell_id, index in ((300529, 1), (705263, 1), (705272, 1), (705274, 1), (705283, 1), (705287, 1),
+                                (705298, 1), (805420, 1), (806516, 0), (804930, 0)):
+            effect = effect_of(self.effects(spell_id), index)
+            self.assertTrue(effect.reason.startswith('unmodelled: '), (spell_id, index, effect.reason))
+            self.assertNotEqual(effect.reason, 'unmodelled: scripted or crowd-control effect',
+                                (spell_id, index, effect.reason))
+            self.assertIn('round4 scripted-script-aura investigation', effect.reason)
+
+    def test_effect_notes_defer_the_effects_this_item_cannot_check(self):
+        for spell_id, index in ((92109, 0), (300520, 0)):
+            effect = effect_of(self.effects(spell_id), index)
+            self.assertTrue(effect.reason.startswith('unmodelled: deferred: '), (spell_id, index, effect.reason))
+
+    def test_effect_notes_without_an_entry_keep_the_generic_reason(self):
+        self.assertEqual(effect_of(self.effects(804897), 2).reason, 'unmodelled: scripted or crowd-control effect')
+
     def test_named_targets_follow_the_tooltip(self):
         effect = effect_of(self.effects(PALADIN_TRAINING), 0)
         self.assertEqual({target.spell_id for target in effect.targets if target.named},

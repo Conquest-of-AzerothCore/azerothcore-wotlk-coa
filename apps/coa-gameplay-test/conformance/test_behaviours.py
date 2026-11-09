@@ -60,6 +60,10 @@ OATH_CHAIN = 704576
 RIGHTEOUS_UPHEAVAL = 501562
 WARRIOR_OF_TYR = 301253
 CONDEMN = 567541
+SACRED_RESISTANCE = 301309
+RECKONING_AT_60 = 572741
+RECKONING_ARMOR = 680870
+KEEPING_THE_OATH_PASSIVE = 92109
 
 
 def scarlet_judicator_entry() -> dict:
@@ -124,6 +128,14 @@ def blessing_of_aggramar_entry() -> dict:
 
 def warrior_of_tyr_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == WARRIOR_OF_TYR)
+
+
+def sacred_resistance_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == SACRED_RESISTANCE)
+
+
+def keeping_the_oath_passive_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == KEEPING_THE_OATH_PASSIVE)
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -224,6 +236,28 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.fields, {'spell': TESTAMENT_OF_HOPE_AURA, 'effect': 1})
         self.assertEqual(spec.before_expected, -10)
 
+    def test_sacred_resistance_entry(self):
+        spec = metric_delta_spec(sacred_resistance_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(entry.expected, 1)
+        self.assertEqual(spec.trigger_spell, RECKONING_AT_60)
+        self.assertEqual(spec.metric, 'aura')
+        self.assertEqual(spec.fields, {'spell': RECKONING_ARMOR})
+        self.assertEqual(spec.before_expected, 0)
+        self.assertEqual(spec.target, 'dummy')
+
+    def test_keeping_the_oath_passive_entry(self):
+        spec = metric_delta_spec(keeping_the_oath_passive_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(entry.expected, 1)
+        self.assertEqual(spec.trigger_spell, RECKONING_AT_60)
+        self.assertEqual(spec.metric, 'aura')
+        self.assertEqual(spec.fields, {'spell': OATH_CHAIN})
+        self.assertEqual(spec.before_expected, 0)
+        self.assertEqual(spec.target, 'dummy')
+
     def test_battlepriest_entry(self):
         spec = health_ratio_spec(battlepriest_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'ratio', spec.quote, spec.levels[0][1])
@@ -257,7 +291,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 16)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 18)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -883,6 +917,59 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertFalse(spec.disable_regeneration)
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
         self.assertNotIn('allow_regeneration', scenario['players'][0])
+
+    def test_sacred_resistance_casts_reckoning_at_the_dummy_fixture(self):
+        spec = metric_delta_spec(sacred_resistance_entry())
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        cast_steps = [step for step in scenario['steps']
+                     if step.get('action') == 'cast' and step.get('spell') == RECKONING_AT_60]
+        self.assertEqual(len(cast_steps), 2)
+        self.assertTrue(all(step['target'] == 'dummy' for step in cast_steps))
+        self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
+
+    def test_sacred_resistance_measures_the_reckoning_armor_aura(self):
+        spec = metric_delta_spec(sacred_resistance_entry())
+        scenario, expectations = metric_delta_scenario(CLASS_FILE, spec)
+        measure_steps = [step for step in scenario['steps']
+                         if step.get('metric') == 'aura' and step.get('spell') == RECKONING_ARMOR]
+        self.assertEqual(len(measure_steps), 2)
+        self.assertEqual(expectations[0].model['expected'], 1)
+        self.assertEqual(expectations[0].model['before_expected'], 0)
+
+    def test_dispatch_sacred_resistance_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, sacred_resistance_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_DELTA)
+        self.assertEqual(expectations[0].model['expected'], 1)
+        self.assertEqual(expectations[0].model['before_expected'], 0)
+        self.assertEqual(expectations[0].model['metric'], 'aura')
+
+    def test_keeping_the_oath_passive_casts_reckoning_at_the_dummy_fixture(self):
+        spec = metric_delta_spec(keeping_the_oath_passive_entry())
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        cast_steps = [step for step in scenario['steps']
+                     if step.get('action') == 'cast' and step.get('spell') == RECKONING_AT_60]
+        self.assertEqual(len(cast_steps), 2)
+        self.assertTrue(all(step['target'] == 'dummy' for step in cast_steps))
+
+    def test_keeping_the_oath_passive_measures_the_oath_chain_aura(self):
+        spec = metric_delta_spec(keeping_the_oath_passive_entry())
+        scenario, expectations = metric_delta_scenario(CLASS_FILE, spec)
+        measure_steps = [step for step in scenario['steps']
+                         if step.get('metric') == 'aura' and step.get('spell') == OATH_CHAIN]
+        self.assertEqual(len(measure_steps), 2)
+        self.assertEqual(expectations[0].model['expected'], 1)
+        self.assertEqual(expectations[0].model['before_expected'], 0)
+
+    def test_dispatch_keeping_the_oath_passive_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, keeping_the_oath_passive_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_DELTA)
+        self.assertEqual(expectations[0].model['expected'], 1)
+        self.assertEqual(expectations[0].model['before_expected'], 0)
+        self.assertEqual(expectations[0].model['metric'], 'aura')
 
 
 class DurationRefreshScenarioTests(unittest.TestCase):

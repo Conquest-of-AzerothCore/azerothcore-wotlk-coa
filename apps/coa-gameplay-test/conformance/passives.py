@@ -509,6 +509,12 @@ def effect_override(class_file: dict, spell_ids: set[int], effect: int) -> int |
     return entry['misc_value'] if entry else None
 
 
+def effect_note(class_file: dict, spell_ids: set[int], effect: int) -> str | None:
+    entry = next((entry for entry in class_file.get('effect_notes', [])
+                 if entry['spell'] in spell_ids and entry['effect'] == effect), None)
+    return entry['reason'] if entry else None
+
+
 def signed_points(records: Records, rank_id: int, effect: int) -> float | None:
     try:
         return records.points(rank_id, effect, upper=False)
@@ -564,6 +570,10 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
         plans, reason = (), UNMODELLED + str(error)
     if not reason:
         reason = alias_reason
+    if reason.startswith(UNMODELLED):
+        note = effect_note(class_file, {spell_id, rank_id}, effect)
+        if note is not None:
+            reason = UNMODELLED + note
     points = alias_points if alias_points is not None else signed_points(records, rank_id, effect)
     return PassiveEffect(rank_id, effect, aura, misc, misc_b, family, token, plans, targets, reason, points)
 
