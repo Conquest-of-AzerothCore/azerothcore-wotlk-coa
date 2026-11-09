@@ -970,8 +970,10 @@ attempt is spaced at least that long apart (`max(StartRecoveryTime, cast time, i
 for a trigger the server code gates behind its own internal cooldown rather than the trigger rank's. With
 `co_learn` set, each listed spell is learned once right after the aura's own `learn`, before the baseline and
 the scheduled attempts, for a trigger whose server code also requires a second, independent passive to be known
-before the mechanism runs at all (Divine Strikes 705255 needs Righteousness 680891 learned for Chastise to cast
-Scourgebane in the first place). With `force_crit` set to `"melee"` or `"spell"`, the scenario's own player
+before the mechanism runs at all. Divine Strikes 705255 still co-learns Righteousness 680891 from when the
+entry's trigger cast Chastise (which needs Righteousness to cast Scourgebane); the entry's trigger now casts
+Argent Blade 807268 instead, which casts Scourgebane unconditionally, so this `co_learn` is no longer required
+by the mechanism, only kept as a harmless fixture leftover. With `force_crit` set to `"melee"` or `"spell"`, the scenario's own player
 fixture (not the class file's shared `ratings`, which would force every scenario's crit chance) gets
 `melee_crit_rating`/`spell_crit_rating` set to `FORCED_CRIT_RATING` (100000, shared with `behaviours.py`'s own
 duration-scenario fixture), for a trigger the server code gates on `PROC_HIT_CRITICAL`: every scheduled attempt

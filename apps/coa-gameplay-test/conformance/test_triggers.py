@@ -948,7 +948,7 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
 
     def test_divine_strikes_entry_uses_an_aura_apply_observe(self):
         entry = templar_trigger(DIVINE_STRIKES)
-        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': CHASTISE, 'target': 'dummy'})
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': ARGENT_BLADE_RANK, 'target': 'dummy'})
         self.assertEqual(entry['observe_metric'], 'aura_apply_count')
         self.assertEqual(entry['observe_actor'], 'target')
         self.assertEqual(entry['observe_spell'], 803372)
@@ -973,10 +973,10 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         steps = scenario['steps']
         learn_aura = steps.index({'action': 'learn', 'actor': 'caster', 'spell': DIVINE_STRIKES})
         co_learn = steps.index({'action': 'learn', 'actor': 'caster', 'spell': RIGHTEOUSNESS})
-        chastise_after_learn = steps[learn_aura:].index(
-            {'action': 'cast', 'actor': 'caster', 'spell': CHASTISE, 'target': 'dummy'}) + learn_aura
+        trigger_cast_after_learn = steps[learn_aura:].index(
+            {'action': 'cast', 'actor': 'caster', 'spell': ARGENT_BLADE_RANK, 'target': 'dummy'}) + learn_aura
         self.assertLess(learn_aura, co_learn)
-        self.assertLess(co_learn, chastise_after_learn)
+        self.assertLess(co_learn, trigger_cast_after_learn)
         self.assertIn(f'; {DIVINE_STRIKES} also learns {RIGHTEOUSNESS}', expectations[0].rule)
 
     def test_without_co_learn_the_scenario_omits_righteousness(self):
