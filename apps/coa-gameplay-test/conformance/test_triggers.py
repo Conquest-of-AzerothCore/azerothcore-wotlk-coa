@@ -19,8 +19,9 @@ from tooltip import Records
 from triggers import (BASELINE_ATTEMPTS, COOLDOWN_CHECK, COOLDOWN_DELTA_KIND, MAIN_HAND, PERIODIC, TAKEN_HIT,
                       TRIGGER_CHECK, TRIGGER_TRIALS, attempt_interval, attempt_steps, checked_cooldown_entry,
                       checked_entry, cooldown_label, cooldown_trial_label, cooldown_trial_steps,
-                      cooldown_trigger_scenario, count_step, counts, trigger_entries, trigger_label,
-                      trigger_measurements, trigger_plan, trigger_rule, trigger_scenario, trigger_status_expectation)
+                      cooldown_trigger_rule, cooldown_trigger_scenario, count_step, counts, trigger_entries,
+                      trigger_label, trigger_measurements, trigger_plan, trigger_rule, trigger_scenario,
+                      trigger_status_expectation)
 from values import ALLY, FORCED_CRIT_RATING, Expectation, dataset
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -31,7 +32,9 @@ TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 8049
                     803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298, 705255,
                     680397, 524765, 560096, 707364, 504107, 706385, 523712, 520534, 504561, 504807,
                     92108, 92109, 300504, 300529, 301310, 680399, 681483, 704116, 804927, 805415, 806522, 705306,
-                    804912}
+                    804912, 573452}
+ETERNALLY_DEVOTED = 573452
+ETERNAL_BLESSING = 705300
 LORESCRIBE = 804927
 LORESCRIBE_DEAD_TRIGGER = 806089
 LORESCRIBE_REDUCTION_SOURCE = 806106
@@ -110,6 +113,10 @@ def templar_trigger(aura):
 def lorescribe_entries():
     entries = [entry for entry in CLASS_FILE['triggers'] if entry['aura'] == LORESCRIBE]
     return {entry['effect']: entry for entry in entries}
+
+
+def eternally_devoted_entry():
+    return templar_trigger(ETERNALLY_DEVOTED)
 
 
 COOLDOWN_LABELS = {'aura': f'{LORESCRIBE} trigger cooldown aura'}
@@ -330,6 +337,59 @@ class CooldownDeltaEntryTest(unittest.TestCase):
         self.assertFalse(any(step.get('label', '').startswith(f'{LORESCRIBE} trigger cooldown baseline')
                              for step in steps))
         self.assertEqual(expectation.model['baseline_attempts'], 0)
+
+
+class CooldownDeltaSetupCastsTest(unittest.TestCase):
+    def entry(self):
+        return eternally_devoted_entry()
+
+    def test_eternally_devoted_entry_sets_up_a_cast_of_eternal_blessing(self):
+        entry = self.entry()
+        self.assertEqual(entry['kind'], COOLDOWN_DELTA_KIND)
+        self.assertEqual(entry['setup_casts'], [ETERNAL_BLESSING])
+
+    def test_checked_cooldown_entry_rejects_a_non_integer_setup_cast_spell(self):
+        entry = copy.deepcopy(self.entry())
+        entry['setup_casts'] = ['705300']
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
+
+    def test_checked_cooldown_entry_accepts_the_eternally_devoted_entry(self):
+        self.assertIs(checked_cooldown_entry(self.entry()), self.entry())
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_cooldown_trigger_scenario_learns_setup_casts_once_up_front(self):
+        entry = self.entry()
+        scenario, _ = cooldown_trigger_scenario(CLASS_FILE, entry, part=0)
+        steps = scenario['steps']
+        learn_aura = steps.index({'action': 'learn', 'actor': 'caster', 'spell': ETERNALLY_DEVOTED})
+        learn_setup = steps.index({'action': 'learn', 'actor': 'caster', 'spell': ETERNAL_BLESSING})
+        self.assertLess(learn_setup, learn_aura)
+        run.validate(scenario)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_cooldown_trial_steps_cast_the_setup_spell_before_the_observed_and_trigger_casts(self):
+        entry = self.entry()
+        steps = cooldown_trial_steps(CLASS_FILE, entry, 2, 'measured')
+        casts = [step['spell'] for step in steps if step['action'] == 'cast']
+        self.assertEqual(casts, [ETERNAL_BLESSING, LIBRAM_OF_TENACITY, RIGHTEOUS_UPHEAVAL] * 2)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_cooldown_trial_steps_cast_the_setup_spell_in_the_baseline_too(self):
+        entry = self.entry()
+        steps = cooldown_trial_steps(CLASS_FILE, entry, 1, 'baseline')
+        casts = [step['spell'] for step in steps if step['action'] == 'cast']
+        self.assertEqual(casts, [ETERNAL_BLESSING, LIBRAM_OF_TENACITY, RIGHTEOUS_UPHEAVAL])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_cooldown_trial_steps_spend_the_setup_wait_only_once(self):
+        entry = self.entry()
+        steps = cooldown_trial_steps(CLASS_FILE, entry, 1, 'measured')
+        self.assertEqual(sum(step.get('ms', 0) for step in steps if step['action'] == 'wait'),
+                         attempt_interval(CLASS_FILE, entry))
+
+    def test_cooldown_trigger_rule_names_the_setup_cast_spell(self):
+        self.assertIn(f'{ETERNAL_BLESSING} is reset and cast at self', cooldown_trigger_rule(self.entry()))
 
 
 class ScarletChampionLegacyEntriesTest(unittest.TestCase):

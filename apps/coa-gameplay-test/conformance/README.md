@@ -1069,6 +1069,25 @@ check is an `alert`; an absent effect reads as a 0 ms delta, which is always out
 never pass by accident. Fewer than `TRIGGER_TRIALS` usable trials is `insufficient_trials`; a mean within
 tolerance but no baseline trial is `unmeasured`, the same as the count-based check.
 
+With `setup_casts` set, each listed spell is learned once up front (alongside the trigger and observed ranks,
+before the baseline), then reset and cast at self first in every trial, before that trial's own observed-rank
+cast and trigger cast, in both the baseline and the measured phases (the same semantics `metric_delta`'s own
+`setup_casts` already gives the behaviour-scenario kind, reused here for the cooldown-delta kind). Each
+setup cast's own wait (`cast_interval`) is spent once, right after it, instead of being folded a second time
+into the trial's trailing spacing wait (which stays `observe_interval + trigger_interval`): `attempt_interval`
+still sums all three for scheduling and for the scenario's own declared duration, so the two must never double
+count the same wait or the generated scenario silently needs more real time than its own `timeout_ms` allows. This is for a cooldown-delta trigger whose
+server code gates the reduction behind a second, independently-cast buff rather than a known-passive check:
+Eternally Devoted 573452 needs Eternal Blessing 705300 *active*, not merely known — 705300 carries
+`SPELL_ATTR0_IS_ABILITY` with a real `RecoveryTime`/`DurationIndex` (a 60 s cooldown, a 30 s buff), not
+`SPELL_ATTR0_PASSIVE`, so the harness's `learn` action alone never applies its aura the way it does for an
+always-on passive. Casting it fresh before every trigger cast keeps its buff active exactly when
+`AscensionTemplarAbilities.cpp`'s `Breaker(info)` block checks `player->HasAura(705300)` to cast the hidden
+707111 whose hit is what actually gates the reduction; `setup_casts` runs in the baseline phase too, since
+705300 being active changes nothing there (the reduction itself still requires Eternally Devoted's own aura,
+checked only in `OnSpellHitResult`), so a baseline delta still proves nothing fires without the checked aura
+itself.
+
 `aura_apply_count` counts a target's `AuraApplyCounter` (`CoAGameplayTest.cpp`), a static `(unit, spell)` map
 recorded from `UnitScript::OnAuraApply`, the generic engine hook `Unit::_ApplyAura` calls after every aura
 application, including one made by `Unit::AddAura` (which never builds a `Spell` object, so `ProcCounter`'s

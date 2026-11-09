@@ -1079,6 +1079,26 @@
       "per_trigger_text": "now reduce the cooldown of Librams"
     },
     {
+      "aura": 573452,
+      "name": "Eternally Devoted",
+      "effect": 0,
+      "kind": "cooldown_delta",
+      "tooltip": "Damage dealt through |cFFFFFFFFEternal Blessing|r now reduces the cooldown of |cFFFFFFFFLibram|r spells by $/1000;806106s1 sec.",
+      "trigger": {
+        "action": "cast",
+        "spell": 572027,
+        "target": "dummy"
+      },
+      "trigger_text": "Damage dealt through Eternal Blessing",
+      "trigger_spell_text": "a dominating Oath Breaker",
+      "setup_casts": [705300],
+      "observe_spell": 801461,
+      "observe_source": "Amount(806106) read by AscensionTemplarAbilities.cpp:289-292's OnSpellHitResult (if (info->Id == 707111 && player->HasAura(573452) && !spell->GetScriptValue(806106))), gated on a hit of the hidden 707111 that AscensionTemplarAbilities.cpp:182-183's Breaker(info) block casts on the player when it has Eternal Blessing 705300 known; 806106 itself is never cast, only read as a magnitude",
+      "observe_metric": "cooldown_ms",
+      "expected_delta_ms": 4000,
+      "per_trigger_text": "now reduces the cooldown of Libram spells"
+    },
+    {
       "aura": 805415,
       "name": "Scarlet Champion",
       "tooltip": "Your damaging critical strikes now increase your Holy damage dealt by $805416s1% for $805416d. stacking $805416u times. Can only occur once per sec.\r\n\r\nAt 5 stacks, you are granted |cffffffffHigh General|r.@s:524617:0@",

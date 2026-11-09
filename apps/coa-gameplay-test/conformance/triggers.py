@@ -67,6 +67,8 @@ def checked_cooldown_entry(entry: dict) -> dict:
     if entry.get('force_crit') is not None and entry['force_crit'] not in FORCE_CRIT_RATINGS:
         raise ValueError(f'Trigger {aura} has an unknown force_crit {entry["force_crit"]!r}, not one of '
                          f'{sorted(FORCE_CRIT_RATINGS)}')
+    if any(not isinstance(spell, int) for spell in entry.get('setup_casts', [])):
+        raise ValueError(f'Cooldown-delta trigger {aura} has a non-integer setup_casts spell')
     return entry
 
 
@@ -143,6 +145,7 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
                    tick_spacing(class_file, facts, trigger['spell']))
     if entry.get('kind') == COOLDOWN_DELTA_KIND:
         interval += cast_interval(class_file, entry['observe_spell'], 0)
+        interval += sum(cast_interval(class_file, spell, 0) for spell in entry.get('setup_casts', []))
     return interval
 
 
@@ -334,13 +337,19 @@ def cooldown_trial_steps(class_file: dict, entry: dict, count: int, phase: str) 
     if count <= 0:
         return []
     aura, trigger = entry['aura'], entry['trigger']
-    observe_facts = facts_of(records_of(class_file), entry['observe_spell'])
-    trigger_facts = facts_of(records_of(class_file), trigger['spell'])
+    records = records_of(class_file)
+    observe_facts = facts_of(records, entry['observe_spell'])
+    trigger_facts = facts_of(records, trigger['spell'])
+    setup_spells = entry.get('setup_casts', [])
+    setup_facts = [facts_of(records, spell) for spell in setup_spells]
+    setup_intervals = [cast_interval(class_file, spell, 0) for spell in setup_spells]
     observe_interval = cast_interval(class_file, entry['observe_spell'], 0)
     trigger_interval = cast_interval(class_file, trigger['spell'], entry.get('internal_cooldown_ms', 0))
     trigger_target = trigger['target'] if trigger['target'] in (TARGET, ALLY) else None
     steps = []
     for index in range(count):
+        for setup_spell, facts, interval in zip(setup_spells, setup_facts, setup_intervals):
+            steps += cast_steps(facts, setup_spell, None, interval, 1)
         steps += cast_steps(observe_facts, entry['observe_spell'], None, 0, 1)
         steps.append(measurement(cooldown_trial_label(aura, phase, index, 'before'), CASTER, 'cooldown_ms',
                                  spell=entry['observe_spell']))
@@ -352,15 +361,20 @@ def cooldown_trial_steps(class_file: dict, entry: dict, count: int, phase: str) 
 
 
 def cooldown_trigger_rule(entry: dict) -> str:
+    fixtures = ''.join(f'; before each trial, {spell} is reset and cast at self'
+                       for spell in entry.get('setup_casts', []))
     return (f'baseline delta 0 ms over {BASELINE_ATTEMPTS} attempts without the passive; measured delta of '
             f'{entry["observe_metric"]} of {entry["observe_spell"]} between a cast of {entry["observe_spell"]} and '
             f'a cast of {entry["trigger"]["spell"]} matches {entry["expected_delta_ms"]:g} ms within '
-            f'max(1, 0.5% of expected), over at least {TRIGGER_TRIALS} trials ("{entry["per_trigger_text"]}")')
+            f'max(1, 0.5% of expected), over at least {TRIGGER_TRIALS} trials ("{entry["per_trigger_text"]}")'
+            f'{fixtures}')
 
 
 def cooldown_trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict, list[Expectation]]:
     class_file = armed_for(class_file, records_of(class_file), entry['trigger']['spell'])
     class_file = armed_for(class_file, records_of(class_file), entry['observe_spell'])
+    for spell in entry.get('setup_casts', []):
+        class_file = armed_for(class_file, records_of(class_file), spell)
     plan = trigger_plan(class_file, entry)
     if not 0 <= part < len(plan.part_attempts):
         raise ValueError(f'Trigger {entry["aura"]} has parts 0 to {len(plan.part_attempts) - 1}, not {part}')
@@ -370,6 +384,7 @@ def cooldown_trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> t
     labels = cooldown_measurement_labels(aura)
     steps = [{'action': 'learn', 'actor': CASTER, 'spell': trigger['spell']},
              {'action': 'learn', 'actor': CASTER, 'spell': entry['observe_spell']}]
+    steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in entry.get('setup_casts', [])]
     if trigger.get('target') == ALLY:
         steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
     if baseline:
