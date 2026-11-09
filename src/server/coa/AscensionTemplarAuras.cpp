@@ -64,7 +64,7 @@ class aura_ascension_templar_lifecycle : public AuraScript
         if (id == 801409 && index == 0)
             amount = player->HasAura(705287) ? int32(player->GetStat(STAT_AGILITY) + player->GetStat(STAT_STAMINA)) : 0;
         if (id == 705299 && index == 0)
-            amount -= int32(.1f * player->GetStat(STAT_STAMINA));
+            amount = int32(-10 - .1f * player->GetStat(STAT_STAMINA));
         if (id == 301369 && index == 0)
             if (AuraEffect const* source = player->GetAuraEffect(301310, EFFECT_2))
                 amount = int32(source->GetAmount() * player->GetStat(STAT_INTELLECT) / 100.f);

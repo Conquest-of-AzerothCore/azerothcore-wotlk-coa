@@ -314,6 +314,12 @@ class templar_scaling : public UnitScript
         if (!player || !info)
             return;
         CancelStockEffectRealPointsPerLevel(caster, info, index, value);
+        if (info->Id == 803844 && index == 0)
+            value -= 2.65f * float(player->GetLevel());
+        if (info->Id == 804150 && index == 0)
+            value -= 3.03f * float(std::max<int32>(0, int32(player->GetLevel()) - 10));
+        if (info->Id == 807035 && index == 1)
+            value -= 9.76f * float(std::max<int32>(0, int32(player->GetLevel()) - 30));
         if (info->Id == 527269 && index == 0)
             value = float(Amount(527270, 2, player));
         if (info->Id == 803160 && index == 0)
