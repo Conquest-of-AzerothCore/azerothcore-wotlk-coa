@@ -87,7 +87,8 @@ UPDATE `gameobject_template` SET `displayId` = 8324, `size` = 1 WHERE `entry` = 
 -- His hitbox is as wide as he is.
 UPDATE `creature_model_info` SET `BoundingRadius` = 10, `CombatReach` = 15 WHERE `DisplayID` = 142079;
 
--- His selection circle as wide as his hitbox: his model's collision width, sent to the client.
+-- His selection circle as wide as his hitbox: his model's collision width, sent to the
+-- client.
 REPLACE INTO `creaturemodeldata_dbc` (`ID`, `Flags`, `ModelName`, `SizeClass`, `ModelScale`, `BloodID`, `FootprintTextureID`,
   `FootprintTextureLength`, `FootprintTextureWidth`, `FootprintParticleScale`, `FoleyMaterialID`,
   `FootstepShakeSize`, `DeathThudShakeSize`, `SoundID`, `CollisionWidth`, `CollisionHeight`, `MountHeight`,
