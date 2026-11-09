@@ -247,6 +247,26 @@ def foreign_effect(records: Records, rank_id: int, shown: Displayed) -> tuple[di
     return {'effect_spell': shown.spell_id, 'effect': effect}, ''
 
 
+def static_conditional_known(class_file: dict, rank_id: int) -> frozenset[int]:
+    entry = next((item for item in class_file.get('conditional_spells', ()) if item['spell'] == rank_id), None)
+    return frozenset({entry['learn']}) if entry is not None else frozenset()
+
+
+def conditional_extra_values(base_values: Sequence[Displayed], gated_values: Sequence[Displayed], rank_id: int,
+                             gating: int) -> list[Displayed]:
+    extra: list[Displayed] = []
+    matched = 0
+    for shown in gated_values:
+        if matched < len(base_values) and shown.text == base_values[matched].text:
+            matched += 1
+        else:
+            extra.append(shown)
+    if matched != len(base_values) or not extra:
+        raise ValueError(f'{rank_id}: learning {gating} did not add exactly the expected new token(s) to the '
+                         f'tooltip (matched {matched}/{len(base_values)} baseline tokens, {len(extra)} extra)')
+    return extra
+
+
 def disabled_foreign_effects(class_file: dict) -> frozenset[tuple[int, int]]:
     return frozenset((entry['spell'], entry['effect']) for entry in class_file.get('disabled_foreign_effects', []))
 
@@ -339,8 +359,18 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
     records = Records(dbc)
     class_file = armed_for(class_file, records, rank_id)
     facts = facts_of(records, rank_id)
-    caster = structure_stats(class_file, known_spells)
+    conditional_known = static_conditional_known(class_file, rank_id)
+    caster = structure_stats(class_file, known_spells | conditional_known)
     readout = read_tooltip(dbc, rank_id, caster)
+    conditional_note = ''
+    conditional_extra_ids: frozenset[int] = frozenset()
+    if conditional_known:
+        gating, = conditional_known
+        base_readout = read_tooltip(dbc, rank_id, structure_stats(class_file, known_spells))
+        extra = conditional_extra_values(base_readout.values, readout.values, rank_id, gating)
+        conditional_extra_ids = frozenset(id(shown) for shown in extra)
+        conditional_note = (f'the true branch of the $?s{gating} conditional, read unconditionally because the '
+                            'referenced value does not depend on caster state')
     measured: list[dict] = []
     after_cast: list[dict] = []
     expectations: list[Expectation] = []
@@ -364,7 +394,11 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
     def expect(label: str, check: str, effect: int | None, displayed: str, rule: str, model: dict | None = None):
         expectations.append(Expectation(label, check, spell.spell_id, rank_id, effect, displayed, rule, model))
 
-    for ordinal, shown in enumerate(readout.values):
+    def note_rule(rule: str, note: str) -> str:
+        return f'{rule} ({note})' if note else rule
+
+    def handle_shown(ordinal: int, shown: Displayed, note: str = ''):
+        nonlocal cast_wanted
         effect = shown.effect_index
         periodic = (periodic_reason(records, rank_id, caster, shown)
                    if effect is not None and shown.kind in EFFECT_KINDS else '')
@@ -373,97 +407,107 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             if periodic.startswith(OVER_TICKS_REASON):
                 periodic_totals.append({'label': label, 'effect': effect})
             else:
-                expect(label, 'effect_value', effect, shown.text, UNMEASURABLE + periodic)
-            continue
+                expect(label, 'effect_value', effect, shown.text, note_rule(UNMEASURABLE + periodic, note))
+            return
         if shown.kind in EFFECT_KINDS and effect is not None and facts.effects[effect]:
             label = f'{rank_id} effect_value e{effect} #{ordinal}'
             measured.append(effect_measurement(label, effect))
-            expect(label, 'effect_value', effect, shown.text, f'read {shown.kind}')
+            expect(label, 'effect_value', effect, shown.text, note_rule(f'read {shown.kind}', note))
             sample_rolled(label, ordinal, shown.text, rank_id, effect)
             if facts.aura_names[effect] and not facts.passive:
                 aura_label = f'{rank_id} aura_amount e{effect} #{ordinal}'
                 after_cast.append(aura_measurement(aura_label, 'aura_amount', effect, effect=effect))
-                expect(aura_label, 'aura_amount', effect, shown.text, f'read {shown.kind}')
+                expect(aura_label, 'aura_amount', effect, shown.text, note_rule(f'read {shown.kind}', note))
                 cast_wanted = True
-            continue
+            return
         stacks_spell = foreign_stacks(rank_id, shown) or (rank_id if STACKS_TOKEN.fullmatch(shown.text) else None)
         if stacks_spell:
             label = f'{rank_id} max_stacks {stacks_spell} #{ordinal}'
             measured.append(measurement(label, CASTER, 'spell_max_stacks', spell=stacks_spell))
-            expect(label, 'max_stacks', None, shown.text, f'read {shown.kind}',
+            expect(label, 'max_stacks', None, shown.text, note_rule(f'read {shown.kind}', note),
                    {'effect_spell': stacks_spell} if stacks_spell != rank_id else None)
-            continue
+            return
         if shown.kind == 'radius_yards':
             if shown.effect_index is not None:
                 radius_effect = shown.effect_index
                 label = f'{rank_id} effect_radius e{radius_effect} #{ordinal}'
                 measured.append(measurement(label, CASTER, 'spell_effect_radius', spell=rank_id,
                                             effect=radius_effect))
-                expect(label, 'effect_radius', radius_effect, shown.text, f'read {shown.kind}')
-                continue
+                expect(label, 'effect_radius', radius_effect, shown.text, note_rule(f'read {shown.kind}', note))
+                return
             radius_foreign, radius_unmeasurable = foreign_radius(records, rank_id, shown, disabled_effects)
             if radius_foreign:
                 label = (f'{rank_id} effect_radius {radius_foreign["effect_spell"]}'
                          f'e{radius_foreign["effect"]} #{ordinal}')
                 measured.append(measurement(label, CASTER, 'spell_effect_radius',
                                             spell=radius_foreign['effect_spell'], effect=radius_foreign['effect']))
-                expect(label, 'effect_radius', None, shown.text, f'read {shown.kind}', radius_foreign)
-                continue
+                expect(label, 'effect_radius', None, shown.text, note_rule(f'read {shown.kind}', note), radius_foreign)
+                return
             expect(f'{rank_id} effect_radius #{ordinal}', 'effect_radius', None, shown.text,
-                   UNMEASURABLE + radius_unmeasurable)
-            continue
+                   note_rule(UNMEASURABLE + radius_unmeasurable, note))
+            return
         if shown.kind == 'amplitude_ms':
             amplitude_effect = shown.effect_index
             label = f'{rank_id} aura_amplitude_ms #{ordinal}'
             if shown.spell_id not in (None, rank_id) or amplitude_effect is None or facts.passive:
                 expect(label, 'aura_amplitude_ms', None, shown.text,
-                       UNMEASURABLE + 'amplitude of a foreign spell or a passive effect has no scenario yet')
+                       note_rule(UNMEASURABLE + 'amplitude of a foreign spell or a passive effect has no scenario '
+                                 'yet', note))
             elif facts.cast_time_ms:
                 expect(label, 'aura_amplitude_ms', None, shown.text,
-                       UNMEASURABLE + 'the remaining amplitude of a cast-time spell is read after its cast')
+                       note_rule(UNMEASURABLE + 'the remaining amplitude of a cast-time spell is read after its '
+                                 'cast', note))
             else:
                 after_cast.append(aura_measurement(label, 'aura_amplitude_ms', amplitude_effect,
                                                    effect=amplitude_effect))
-                expect(label, 'aura_amplitude_ms', amplitude_effect, shown.text, f'read {shown.kind}')
+                expect(label, 'aura_amplitude_ms', amplitude_effect, shown.text, note_rule(f'read {shown.kind}',
+                                                                                           note))
                 cast_wanted = True
-            continue
+            return
         duration_spell = foreign_duration(rank_id, shown)
         if duration_spell:
             label = f'{rank_id} spell_duration {duration_spell} #{ordinal}'
             measured.append(measurement(label, CASTER, 'spell_duration_ms', spell=duration_spell))
-            expect(label, 'spell_duration', None, shown.text, f'read {shown.kind}', {'effect_spell': duration_spell})
-            continue
+            expect(label, 'spell_duration', None, shown.text, note_rule(f'read {shown.kind}', note),
+                   {'effect_spell': duration_spell})
+            return
         foreign, unmeasurable = foreign_effect(records, rank_id, shown)
         if foreign:
             label = f'{rank_id} effect_value {foreign["effect_spell"]}e{foreign["effect"]} #{ordinal}'
             measured.append(measurement(label, CASTER, 'spell_effect_value', spell=foreign['effect_spell'],
                                         effect=foreign['effect']))
-            expect(label, 'effect_value', None, shown.text, f'read {shown.kind}', foreign)
+            expect(label, 'effect_value', None, shown.text, note_rule(f'read {shown.kind}', note), foreign)
             sample_rolled(label, ordinal, shown.text, foreign['effect_spell'], foreign['effect'])
-            continue
+            return
         if unmeasurable:
-            expect(f'{rank_id} effect_value #{ordinal}', 'effect_value', None, shown.text, UNMEASURABLE + unmeasurable)
-            continue
+            expect(f'{rank_id} effect_value #{ordinal}', 'effect_value', None, shown.text,
+                   note_rule(UNMEASURABLE + unmeasurable, note))
+            return
         own_duration = OWN_DURATION.fullmatch(shown.text)
         aura_effect = first_aura_effect(facts)
         if shown.kind == 'duration_ms' and own_duration and own_duration.group(1) in ('', str(rank_id)):
             label = f'{rank_id} aura_duration_ms #{ordinal}'
             if facts.passive or aura_effect is None:
                 expect(label, 'aura_duration_ms', None, shown.text,
-                       UNMEASURABLE + 'the spell is passive or applies no aura')
+                       note_rule(UNMEASURABLE + 'the spell is passive or applies no aura', note))
             elif facts.cast_time_ms:
                 expect(label, 'aura_duration_ms', None, shown.text,
-                       UNMEASURABLE + 'the remaining duration of a cast-time spell is read after its cast')
+                       note_rule(UNMEASURABLE + 'the remaining duration of a cast-time spell is read after its '
+                                 'cast', note))
             else:
                 after_cast.append(aura_measurement(label, 'aura_duration_ms', aura_effect))
-                expect(label, 'aura_duration_ms', None, shown.text, f'read {shown.kind}')
+                expect(label, 'aura_duration_ms', None, shown.text, note_rule(f'read {shown.kind}', note))
                 cast_wanted = True
-            continue
+            return
         reason = f'{shown.kind} token without a no-combat metric'
         if shown.kind == 'chance_pct':
             reason += (f' (see the "{rank_id} proc_rate" trial-based verdict, if one exists, for the real '
                        'measurement)')
-        expect(f'{rank_id} effect_value #{ordinal}', 'effect_value', effect, shown.text, UNMEASURABLE + reason)
+        expect(f'{rank_id} effect_value #{ordinal}', 'effect_value', effect, shown.text,
+               note_rule(UNMEASURABLE + reason, note))
+
+    for ordinal, shown in enumerate(readout.values):
+        handle_shown(ordinal, shown, conditional_note if id(shown) in conditional_extra_ids else '')
     for ordinal, entry in enumerate(readout.unreadable, start=len(readout.values)):
         label = f'{rank_id} effect_value #{ordinal}'
         if first_effect is not None:

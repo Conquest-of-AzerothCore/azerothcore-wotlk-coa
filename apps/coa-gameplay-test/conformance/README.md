@@ -522,15 +522,23 @@ the `effect_overrides` entry makes the reader classify it as op 15 (`spell_criti
 ### Conditional tooltips
 
 A class file's `conditional_spells` list (`[{"spell": <rank>, "learn": <gating spell>, "reason": "..."}]`) names,
-per rank, a `$?s<id>[...][...]` gating spell whose true branch carries a `$` token worth its own check (see
-"Tooltip reading" above and [ADR 0039](../../../docs/adr/0039-conditional-tooltip-reads-the-chosen-branch.md)).
-`add_conditional_value` (`conformance.py`, next to `add_values`) builds a second, `value-true`-keyed scenario for
-that rank with `known_spells={<gating spell>}` (so the Python reading chooses the true branch) and one extra
-`learn` step for the gating spell (so the live caster actually knows it); the rest of the scenario, including the
-rank's own `learn` step and every other `Expectation`, is identical to the baseline `value` scenario. A rank with
-no `conditional_spells` entry gets no `value-true` scenario at all — including a rank whose true branch names
-its *own* effect through a live, caster-state-dependent SpellMod (ADR 0039's 801461 case), where no check this
-reader can compute would be reliable.
+per rank, a `$?s<id>[...][...]` gating spell whose true branch carries a `$` token worth its own check, when
+that token's value does not depend on live caster state (see "Tooltip reading" above and
+[ADR 0039](../../../docs/adr/0039-conditional-tooltip-reads-the-chosen-branch.md)). `static_conditional_known`
+looks up the entry and unions its gating spell into the *same* reading `value_scenario` already builds — no
+live `learn` step, because this only steers which text the Python reader picks, never the live scenario. A
+second, baseline-only reading finds which token `conditional_extra_values` added (by position, not just by
+trailing length: the conditional is not always the last token in the description). That token goes through the
+same per-token dispatch as every other one, with its `rule` documenting it as "the true branch of the
+`$?s<gating>` conditional, read unconditionally because the referenced value does not depend on caster state";
+every `Expectation`'s ordinal, including a later-positioned, pre-existing token's, is the token's real position
+in this one reading — the same one `compare.py` re-derives at judge time from the `known_spells` recorded on
+the manifest entry, so nothing drifts out of sync with a second, differently-ordered reading. A rank with no
+`conditional_spells` entry gets no
+extra check at all — including a rank whose true branch names its *own* effect through a live, caster-state-
+dependent SpellMod (ADR 0039's 801461 case), where no check this reader can compute would be reliable; the
+underlying live mechanism (`value_scenario`'s `known_spells` parameter and the `learn` step it adds) stays in
+place, tested directly, for that kind of case if one is ever added.
 
 Unmodelled by rule: `P5` (`proc or trigger effect without a trigger entry`) — unless the class file's own
 `triggers`/`procs`/`behaviours` entry for this exact `{spell_id or rank_id, effect}` already checks it

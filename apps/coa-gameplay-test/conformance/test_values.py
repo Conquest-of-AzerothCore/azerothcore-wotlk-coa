@@ -13,9 +13,9 @@ from profile import (CASTER, CLASSES_DIR, armed, base_steps, caster_stats_from, 
 from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, write_fixture
 from tooltip import CasterStats, DataSet, Displayed, Records, read_tooltip
 from values import (AURA_STATE_HEALTHLESS_35_PERCENT, CHECKS, FIXTURE_MAX_HEALTH, GENERIC, TARGET, UNMEASURABLE,
-                    UNREADABLE, Expectation, Unmodelled, disabled_foreign_effects, facts_of, fixture_health_step,
-                    foreign_effect, foreign_radius, periodic_reason, required_target_health_steps, sample_labels,
-                    value_scenario)
+                    UNREADABLE, Expectation, Unmodelled, conditional_extra_values, disabled_foreign_effects,
+                    facts_of, fixture_health_step, foreign_effect, foreign_radius, periodic_reason,
+                    required_target_health_steps, sample_labels, value_scenario)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -76,6 +76,9 @@ LIGHTS_HOPE = 807814
 LIGHTKEEPER = 560835
 RIGHTEOUS_TEMPEST = 805409
 RIGHTEOUS_TEMPEST_MAX_RANK = 807274
+RIGHTEOUS_TEMPEST_GATING = 300512
+CHASTISE = 803157
+CHASTISE_GATING = 806525
 BLADE_OF_FAITH = 803872
 BLADE_OF_FAITH_MAX_RANK = 803880
 BLADE_OF_FAITH_TOTAL = '${($d*1000/$T1)*($m1+0+$SP*.2+$AP*0.1)}'
@@ -540,16 +543,57 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         self.assertEqual(len(generic), 1)
         self.assertIn('@ext:', generic[0])
 
-    def test_conditional_true_branch_names_the_gating_spells_own_effect(self):
-        scenario, expectations = value_scenario(self.class_file, self.spells[ETERNAL_BLESSING],
-                                                 ETERNAL_BLESSING, frozenset({OATH_BREAKERS}))
+    def test_known_spells_parameter_still_adds_a_live_learn_step_for_a_future_state_dependent_conditional(self):
+        scenario, _ = value_scenario(self.class_file, self.spells[VINDICATION], VINDICATION, frozenset({707385}))
+        learns = [step['spell'] for step in scenario['steps'] if step['action'] == 'learn']
+        self.assertEqual(learns, [VINDICATION, 707385])
+
+    def test_conditional_true_branch_names_a_foreign_spells_own_effect(self):
+        scenario, expectations = self.build(ETERNAL_BLESSING, ETERNAL_BLESSING)
         run.validate(scenario)
         self.assertFalse([item for item in expectations if item.rule.startswith(UNREADABLE)])
         foreign = next(item for item in expectations if item.model and item.model.get('effect_spell') == LIBRAMS)
         self.assertEqual(foreign.check, 'effect_value')
+        self.assertIn('the true branch of the $?s573452 conditional', foreign.rule)
         self.assertIn(foreign.label, measured_labels(scenario))
         learns = [step['spell'] for step in scenario['steps'] if step['action'] == 'learn']
-        self.assertEqual(learns, [ETERNAL_BLESSING, OATH_BREAKERS])
+        self.assertEqual(learns, [ETERNAL_BLESSING])
+
+    def test_conditional_true_branch_names_the_gating_spells_own_effect(self):
+        scenario, expectations = self.build_extra(CHASTISE, CHASTISE)
+        run.validate(scenario)
+        self.assertFalse([item for item in expectations if item.rule.startswith(UNREADABLE)])
+        foreign = next(item for item in expectations
+                      if item.model and item.model.get('effect_spell') == CHASTISE_GATING)
+        self.assertEqual((foreign.check, foreign.model['effect']), ('effect_value', 0))
+        self.assertIn('the true branch of the $?s806525 conditional', foreign.rule)
+        self.assertIn(foreign.label, measured_labels(scenario))
+        learns = [step['spell'] for step in scenario['steps'] if step['action'] == 'learn']
+        self.assertEqual(learns, [CHASTISE])
+
+    def test_conditional_true_branch_on_a_mid_sentence_gate_is_the_token_after_it_not_a_trailing_one(self):
+        scenario, expectations = self.build(RIGHTEOUS_TEMPEST, RIGHTEOUS_TEMPEST)
+        run.validate(scenario)
+        foreign = next(item for item in expectations
+                      if item.model and item.model.get('effect_spell') == RIGHTEOUS_TEMPEST_GATING)
+        self.assertEqual((foreign.check, foreign.model['effect'], foreign.displayed), ('effect_value', 1,
+                                                                                       '$300512s2'))
+        self.assertIn(foreign.label, measured_labels(scenario))
+        self.assertTrue([item for item in expectations if item.check == 'aura_duration_ms'])
+
+    def spell_owning_rank(self, rank_id):
+        return next(spell for group in (self.spells, self.extra_spells) for spell in group.values()
+                    if rank_id in spell.ranks)
+
+    def test_every_static_conditional_entry_yields_its_declared_gating_spell_token(self):
+        for entry in self.class_file['conditional_spells']:
+            with self.subTest(spell=entry['spell']):
+                spell = self.spell_owning_rank(entry['spell'])
+                scenario, expectations = value_scenario(self.class_file, spell, entry['spell'])
+                run.validate(scenario)
+                conditional = [item for item in expectations if 'the true branch of the $?s' in item.rule]
+                self.assertEqual(len(conditional), 1, entry)
+                self.assertFalse([item for item in expectations if item.rule.startswith(UNREADABLE)])
 
     def test_periodic_total_token_is_routed_through_the_existing_periodic_explanation(self):
         scenario, expectations = self.build_extra(LIGHTS_HOPE, LIGHTS_HOPE)
@@ -585,6 +629,32 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
                 self.assertFalse(set(total_labels) & set(labels), rank_id)
                 all_periodic_total_labels += total_labels
         self.assertEqual(len(all_periodic_total_labels), len(set(all_periodic_total_labels)))
+
+
+class ConditionalExtraValuesTest(unittest.TestCase):
+    def shown(self, text):
+        return Displayed(text, 1.0, None, 'flat', None)
+
+    def test_the_inserted_token_is_found_even_when_it_is_not_trailing(self):
+        base = [self.shown('$a'), self.shown('$b')]
+        gated = [self.shown('$a'), self.shown('$new'), self.shown('$b')]
+        self.assertEqual(conditional_extra_values(base, gated, 1, 2), [gated[1]])
+
+    def test_a_trailing_insertion_is_found_too(self):
+        base = [self.shown('$a')]
+        gated = [self.shown('$a'), self.shown('$new')]
+        self.assertEqual(conditional_extra_values(base, gated, 1, 2), [gated[1]])
+
+    def test_no_extra_token_raises_instead_of_silently_passing(self):
+        base = [self.shown('$a')]
+        with self.assertRaises(ValueError):
+            conditional_extra_values(base, base, 1, 2)
+
+    def test_a_missing_base_token_raises_instead_of_guessing(self):
+        base = [self.shown('$a'), self.shown('$b')]
+        gated = [self.shown('$a'), self.shown('$new')]
+        with self.assertRaises(ValueError):
+            conditional_extra_values(base, gated, 1, 2)
 
 
 class ForeignEffectFixtureTest(unittest.TestCase):

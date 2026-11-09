@@ -25,7 +25,7 @@ from tooltip import read_tooltip
 from triggers import (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND, cooldown_trigger_scenario,
                       duration_trigger_scenario, trigger_entries, trigger_plan, trigger_scenario,
                       trigger_status_expectation, trigger_unmodelled_expectation)
-from values import Expectation, armed_for, dataset, structure_stats, value_scenario
+from values import Expectation, armed_for, dataset, static_conditional_known, structure_stats, value_scenario
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -104,25 +104,12 @@ def add_values(writer: ManifestWriter, spell: ClassSpell, dbc_dir: Path):
     for rank_id in spell.ranks:
         scenario, expectations, periodic_totals = value_scenario(class_file, spell, rank_id)
         armed_file = armed_for(class_file, records_of(class_file), rank_id)
-        readout = read_tooltip(dataset(dbc_dir), rank_id, structure_stats(armed_file))
+        conditional_known = static_conditional_known(class_file, rank_id)
+        readout = read_tooltip(dataset(dbc_dir), rank_id, structure_stats(armed_file, conditional_known))
         writer.add(scenario_key(class_file['name'], 'value', rank_id), 'value', spell, rank_id, expectations,
-                   scenario, [value.text for value in readout.values])
+                   scenario, [value.text for value in readout.values], known_spells=sorted(conditional_known))
         for item in periodic_totals:
             add_periodic_total(writer, spell, rank_id, item)
-        add_conditional_value(writer, spell, rank_id, dbc_dir)
-
-
-def add_conditional_value(writer: ManifestWriter, spell: ClassSpell, rank_id: int, dbc_dir: Path):
-    class_file = writer.class_file
-    entry = next((item for item in class_file.get('conditional_spells', []) if item['spell'] == rank_id), None)
-    if entry is None:
-        return
-    known_spells = frozenset({entry['learn']})
-    scenario, expectations, _ = value_scenario(class_file, spell, rank_id, known_spells)
-    armed_file = armed_for(class_file, records_of(class_file), rank_id)
-    readout = read_tooltip(dataset(dbc_dir), rank_id, structure_stats(armed_file, known_spells))
-    writer.add(scenario_key(class_file['name'], 'value-true', rank_id), 'value', spell, rank_id, expectations,
-               scenario, [value.text for value in readout.values], known_spells=sorted(known_spells))
 
 
 def add_hit(writer: ManifestWriter, spell: ClassSpell):

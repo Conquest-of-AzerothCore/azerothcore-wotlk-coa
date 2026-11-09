@@ -55,16 +55,38 @@ an `a<id>`/`A<id>` atom) or a chained conditional (`...]?s<id2>[...][...]`, the 
 shape, detected by `conditional_bounds`'s existing recursive end-of-block search) stays one `unreadable` entry
 naming the unhandled operator or the chain, never guessed.
 
-`value_scenario` gains the same `known_spells` parameter, threaded into `structure_stats`/`CasterStats` and into
-an extra `learn` step per gating spell, so the Python-side reading and the live scenario's precondition always
-agree. `classes/<name>.json`'s new `conditional_spells` list (`[{"spell": <rank>, "learn": <gating spell>,
-"reason": "..."}]`) names, per rank, which gating spell to additionally learn in a second, `value-true`-keyed
-scenario (`conformance.py`'s `add_conditional_value`, next to `add_values`, named distinctly per AGENTS.md).
-Templar's list carries 16 entries: 705300, the 8 Chastise ranks (503135-503141, 803157) and the 7 Righteous
-Tempest ranks (805409, 807269-807274) — all three state-independent. **801461 is deliberately left out of this
-list**: no `value-true` scenario is generated for it, so no new check is ever produced for its own-effect true
-branch; at the baseline (`known_spells` empty) its `unreadable` row simply stops being generated (the false
-branch is empty), which already satisfies "judged or closed" for that row without inventing an unreliable check.
+`value_scenario` keeps a `known_spells` parameter (threaded into `structure_stats`/`CasterStats` and into an
+extra live `learn` step per name) for a genuinely state-dependent true branch, tested directly, but no spell in
+this item uses it that way (see below). For the three state-*independent* true branches (705300, 803157-family,
+805409-family), the new helper `static_conditional_known` looks up the rank's `conditional_spells` entry, and
+its gating spell id is unioned into the *same* `caster`/`readout` the rest of the function already builds — no
+live `learn` step, because this union only steers which text the Python reader chooses, never the live
+worldserver scenario. A second, baseline-only reading (`known_spells` alone, without the gating id) is taken
+purely to find which token(s) the union added; the new helper `conditional_extra_values` diffs the two token
+lists positionally (not just by trailing length, since the conditional is not always the last token in the
+description — 805409's sits before a trailing `$d`) and raises instead of guessing if the diff does not come
+out to "every baseline token, plus at least one new one". Dispatch itself does not change: every token in the
+one, now-larger `readout.values` — including the new one — goes through the same per-token logic (extracted
+into a `handle_shown` closure), with only the new token's `rule` carrying the extra note. The ordinal in each
+`Expectation`'s label is therefore the token's real position in this one reading, which is also what
+`compare.py` re-derives at judge time from the same `known_spells` recorded on the manifest entry — so the
+later-positioned, pre-existing tokens (805409's own `$d`, now ordinal 4 instead of 3) stay correctly indexed
+too, instead of drifting out of sync with a second, differently-ordered reading. No second scenario, no live
+`learn` step: the value does not depend on caster state. `classes/<name>.json`'s `conditional_spells` list
+(`[{"spell": <rank>, "learn": <gating spell>, "reason": "..."}]`) names, per rank, which gating spell's true
+branch to fold in this way. Templar's list
+carries 16 entries: 705300, the 8 Chastise ranks (503135-503141, 803157) and the 7 Righteous Tempest ranks
+(805409, 807269-807274) — all three state-independent. **801461 is deliberately left out of this list**: no
+extra check is generated for it; at the baseline (`known_spells` empty) its `unreadable` row simply stops being
+generated (the false branch is empty), which already satisfies "judged or closed" for that row without
+inventing an unreliable check. An earlier implementation of this same decision (round5 commit `3bf26c53c0`)
+instead gave all 16 entries a second, `value-true`-keyed scenario with a live `learn` step, tripling the new
+scenario count for no correctness benefit. A round5 review (`unreadable-review.md`) caught this and found that
+learning 806525/300512 live also applies each one's own `SPELLMOD_EFFECT2`/`SPELLMOD_EFFECT3` to the Chastise/
+Righteous Tempest ranks' *own* effect 2/1 — the exact live-SpellMod hazard correctly avoided for 801461 — and
+that it happened not to cause a false alert only because neither family's tooltip tokenizes that specific
+effect index. This revision removes the live `learn` step for all three state-independent families, so that
+hazard cannot occur at all for them.
 
 For the no-token shapes: `values.py` gains `GENERIC = 'generic: '` (circular-import-safe, `values.py` cannot
 import `hits.UNMODELLED` back) and `EXT_NOTE = re.compile(r'@ext:.*:ext@', re.DOTALL)`. A `readout.unreadable`
@@ -94,8 +116,9 @@ scenario judges one tick` explanation.
   (the reader cannot predict a live SpellMod), not a defect — the existing `passives.py` generic-modifier scan
   already covers the same 707385 → 801461 relationship correctly, from a different angle (the modifier's own
   magnitude, not the tooltip text).
-- `caster_stats_from` (`profile.py`) and `ManifestWriter.add`/manifest entries (`conformance.py`) gained the same
-  `known_spells` passthrough, serialized per scenario entry, so `compare.py`'s `read_tokens` rebuilds the correct
-  caster state when re-reading a `value-true` scenario's tokens against the live measurement.
+- `caster_stats_from` (`profile.py`), `ManifestWriter.add`/manifest entries and `compare.py`'s `read_tokens`
+  keep their `known_spells` passthrough for a future live, state-dependent conditional (tested directly via
+  `value_scenario`'s `known_spells` parameter on an unrelated spell); none of this item's 16 entries exercise it,
+  since all 16 are read at generation time only, with no live precondition.
 - No server fix, no C++ or SQL change: every edit is Python tool code under `apps/coa-gameplay-test/
   conformance/`.
