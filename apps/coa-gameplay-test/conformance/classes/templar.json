@@ -1123,6 +1123,23 @@
       "per_trigger_text": "now heals you"
     },
     {
+      "aura": 707391,
+      "name": "Retribution",
+      "kind": "magnitude_ratio",
+      "tooltip": "Melee damage dealt now has a $h% chance to strike 2 additional times for $s1% of the damage dealt as Holy Damage.",
+      "trigger": {"action": "attack", "spell": 0},
+      "trigger_text": "Melee damage dealt",
+      "trigger_metric": "melee_damage_total",
+      "observe_spell": 525028,
+      "observe_source": "EffectTriggerSpell[0] of 707391",
+      "observe_metric": "spell_damage_total",
+      "expected_ratio": 0.3,
+      "expected_ratio_source": "Spell.dbc 707391 EffectBasePoints[0] 29 + EffectDieSides[0] 1 = 30% ($s1)",
+      "per_trigger_text": "for $s1% of the damage dealt as Holy Damage",
+      "trial_attempts_factor": 2,
+      "trial_attempts_reason": "ProcChance 20 with 2 strikes per proc leaves roughly 0.4 observed strikes per swing, so the unscaled schedule falls short of the minimum strike-event floor"
+    },
+    {
       "aura": 523712,
       "name": "Iron Penance",
       "tooltip": "Dealing damage with |cffffffffZealotry|r now applies |cffffffffIron Penance|r to the target, increasing their Physical damage taken by you by $523713s1% for $523713d, stacking $523713u times.",

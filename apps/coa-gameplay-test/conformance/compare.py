@@ -1091,7 +1091,7 @@ def judge_trigger_magnitude(parts: list[ProcPart]) -> Verdict:
                    expectation.rank_id, expectation.check)
     expected = model['expected_ratio']
     margin = max(MAGNITUDE_RATIO_FLOOR, MAGNITUDE_RATIO_TOLERANCE * expected)
-    trigger_total = observe_total = trials = 0.0
+    trigger_total = trigger_count = observe_total = observe_count = 0.0
     without_aura, unmeasured = [], []
     reasons: list[int] = []
     for _, run, part in parts:
@@ -1101,15 +1101,17 @@ def judge_trigger_magnitude(parts: list[ProcPart]) -> Verdict:
         trig_total = run.values.get(labels['trigger_total'])
         trig_count = run.values.get(labels['trigger_count'])
         obs_total = run.values.get(labels['observe_total'])
-        if aura is None or trig_total is None or trig_count is None or obs_total is None:
+        obs_count = run.values.get(labels['observe_count'])
+        if aura is None or trig_total is None or trig_count is None or obs_total is None or obs_count is None:
             unmeasured.append(f'{run.key} ({run.status}: {run.message})')
             continue
         if aura <= 0:
             without_aura.append(run.key)
             continue
         trigger_total += trig_total
+        trigger_count += trig_count
         observe_total += obs_total
-        trials += trig_count
+        observe_count += obs_count
     usable = len(parts) - len(without_aura) - len(unmeasured)
     notes = f'{usable} usable parts of {model["parts"]}'
     if without_aura:
@@ -1118,22 +1120,29 @@ def judge_trigger_magnitude(parts: list[ProcPart]) -> Verdict:
         notes += f'; no magnitude measurements in {", ".join(unmeasured)}'
     if reasons:
         notes += f'; failed casts: {describe_failures(reasons)}'
-    if usable <= 0 or trigger_total <= 0:
+    if usable <= 0 or trigger_total <= 0 or trigger_count <= 0:
         status = 'alert' if unmeasured and not without_aura else 'unmeasured'
         return replace(base, status=status,
                        explanation=f'no usable trial with the passive learned and trigger damage measured ({notes})')
-    if trials < model['minimum_trials']:
-        return replace(base, status='insufficient_trials',
-                       explanation=f'{trials:g} trigger-spell hits, fewer than the {model["minimum_trials"]} the '
-                                   f'check needs ({notes})')
-    ratio = observe_total / trigger_total
+    if observe_count < model['minimum_trials']:
+        status = 'insufficient_trials' if observe_count > 0 else ('alert' if unmeasured and not without_aura
+                                                                   else 'unmeasured')
+        return replace(base, status=status,
+                       explanation=f'{observe_count:g} {model["observe_metric"]} events, fewer than the '
+                                   f'{model["minimum_trials"]} the check needs ({notes})')
+    mean_trigger = trigger_total / trigger_count
+    mean_observe = observe_total / observe_count
+    ratio = mean_observe / mean_trigger
     low, high = expected - margin, expected + margin
     judged = replace(base, measured=ratio, expected=expected, low=low, high=high)
     status = 'ok' if low - FLOAT_EPSILON <= ratio <= high + FLOAT_EPSILON else 'alert'
+    trigger_source = 'main-hand melee attacks' if model['trigger']['action'] == 'attack' \
+        else str(model['trigger']['spell'])
     return replace(judged, status=status,
-                   explanation=f'{observe_total:g} {model["observe_metric"]} of {model["observe_spell"]} over '
-                               f'{trigger_total:g} {model["trigger_metric"]} of {model["trigger"]["spell"]} across '
-                               f'{trials:g} trigger-spell hits = {ratio:.4f}, within max({MAGNITUDE_RATIO_FLOOR:g}, '
+                   explanation=f'mean {mean_observe:g} {model["observe_metric"]} of {model["observe_spell"]} over '
+                               f'{observe_count:g} of its own events, against mean {mean_trigger:g} '
+                               f'{model["trigger_metric"]} of {trigger_source} over {trigger_count:g} of its own '
+                               f'events, = {ratio:.4f}, within max({MAGNITUDE_RATIO_FLOOR:g}, '
                                f'{MAGNITUDE_RATIO_TOLERANCE:.0%} of expected) of {expected:g}; {expectation.rule} '
                                f'({notes})')
 

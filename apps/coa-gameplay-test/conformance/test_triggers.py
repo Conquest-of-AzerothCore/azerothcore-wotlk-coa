@@ -12,7 +12,7 @@ import unittest
 from compare import STATUSES, compare
 from hits import MAX_SCENARIO_MS
 from passives import cleaned_tooltip
-from procs import ATTACK
+from procs import ATTACK, CAST
 from profile import DBC_DIR
 from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader
 from tooltip import Records
@@ -39,7 +39,7 @@ TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 8049
                     803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298, 705255,
                     680397, 524765, 560096, 707364, 504107, 706385, 523712, 520534, 504561, 504807, 500011,
                     92108, 92109, 300504, 300529, 301310, 680399, 681483, 704116, 804927, 805415, 806522, 705306,
-                    804912, 573452}
+                    804912, 573452, 707391}
 ETERNALLY_DEVOTED = 573452
 ETERNAL_BLESSING = 705300
 LORESCRIBE = 804927
@@ -108,6 +108,8 @@ DISPEL_FOR_BENEDICTION = 525052
 DELIVERANCE = 704116
 DELIVERANCE_COPY = 801456
 RIGHTEOUSNESS = 680891
+RETRIBUTION = 707391
+RETRIBUTION_EXTRA_STRIKE = 525028
 KEY = 'conformance-templar-trigger-520812-part-1'
 SECOND_KEY = 'conformance-templar-trigger-520812-part-2'
 LABELS = trigger_measurements(SCARLET_SECRETS)
@@ -178,11 +180,38 @@ def magnitude_expectation(**model):
                        magnitude_model(**model))
 
 
-def magnitude_steps(trigger_total, observe_total, trigger_count=SCHEDULED, aura=1):
+def magnitude_steps(trigger_total, observe_total, trigger_count=SCHEDULED, observe_count=None, aura=1):
+    observe_count = trigger_count if observe_count is None else observe_count
     return [assert_step(MAGNITUDE_LABELS['trigger_total'], str(trigger_total)),
             assert_step(MAGNITUDE_LABELS['trigger_count'], str(trigger_count)),
             assert_step(MAGNITUDE_LABELS['observe_total'], str(observe_total)),
+            assert_step(MAGNITUDE_LABELS['observe_count'], str(observe_count)),
             assert_step(MAGNITUDE_LABELS['aura'], str(aura))]
+
+
+RETRIBUTION_LABELS = magnitude_measurement_labels(RETRIBUTION)
+RETRIBUTION_KEY = f'conformance-templar-trigger-{RETRIBUTION}-1-part-1'
+
+
+def retribution_magnitude_model(part=0, parts=1, attempts=SCHEDULED, expected_ratio=0.3):
+    return {'part': part, 'parts': parts, 'scheduled_attempts': SCHEDULED, 'part_attempts': attempts,
+            'minimum_trials': TRIGGER_TRIALS, 'trigger': {'action': 'attack', 'spell': 0},
+            'trigger_metric': 'melee_damage_total', 'observe_spell': RETRIBUTION_EXTRA_STRIKE,
+            'observe_metric': 'spell_damage_total', 'expected_ratio': expected_ratio, 'force_crit': None,
+            'measurements': RETRIBUTION_LABELS}
+
+
+def retribution_magnitude_expectation(**model):
+    return Expectation(magnitude_label(RETRIBUTION), MAGNITUDE_CHECK, RETRIBUTION, RETRIBUTION, None,
+                       'Melee damage dealt', 'magnitude rule', retribution_magnitude_model(**model))
+
+
+def retribution_magnitude_steps(trigger_total, observe_total, trigger_count, observe_count, aura=1):
+    return [assert_step(RETRIBUTION_LABELS['trigger_total'], str(trigger_total)),
+            assert_step(RETRIBUTION_LABELS['trigger_count'], str(trigger_count)),
+            assert_step(RETRIBUTION_LABELS['observe_total'], str(observe_total)),
+            assert_step(RETRIBUTION_LABELS['observe_count'], str(observe_count)),
+            assert_step(RETRIBUTION_LABELS['aura'], str(aura))]
 
 
 def trigger_model(per_trigger=0.5, part=0, parts=1, baseline=BASELINE_ATTEMPTS, attempts=SCHEDULED):
@@ -887,6 +916,87 @@ class MagnitudeTriggerCompareTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'ok')
         self.assertAlmostEqual(verdict.measured, 0.5)
 
+    def test_attack_trigger_ratio_at_the_expected_fraction_is_ok(self):
+        self.workspace.scenario(RETRIBUTION_KEY, 'trigger', [retribution_magnitude_expectation()],
+                                steps=retribution_magnitude_steps(trigger_total=10000, trigger_count=200,
+                                                                  observe_total=3000, observe_count=200))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 0.3)
+        self.assertEqual(verdict.expected, 0.3)
+        self.assertNotIn(' of 0 ', verdict.explanation)
+        self.assertIn('main-hand melee attacks', verdict.explanation)
+
+    def test_attack_trigger_ratio_normalises_by_each_sides_own_event_count_not_the_raw_sums(self):
+        self.workspace.scenario(RETRIBUTION_KEY, 'trigger', [retribution_magnitude_expectation()],
+                                steps=retribution_magnitude_steps(trigger_total=100000, trigger_count=2000,
+                                                                  observe_total=3000, observe_count=200))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 0.3)
+
+    def test_attack_trigger_ratio_far_from_the_expected_fraction_alerts(self):
+        self.workspace.scenario(RETRIBUTION_KEY, 'trigger', [retribution_magnitude_expectation()],
+                                steps=retribution_magnitude_steps(trigger_total=10000, trigger_count=200,
+                                                                  observe_total=500, observe_count=200))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'alert')
+        self.assertAlmostEqual(verdict.measured, 0.05)
+
+    def test_attack_trigger_insufficient_trials_is_judged_on_observe_count_not_trigger_count(self):
+        self.workspace.scenario(RETRIBUTION_KEY, 'trigger',
+                                [retribution_magnitude_expectation(attempts=TRIGGER_TRIALS - 1)],
+                                steps=retribution_magnitude_steps(trigger_total=1000000, trigger_count=1000000,
+                                                                  observe_total=TRIGGER_TRIALS - 1,
+                                                                  observe_count=TRIGGER_TRIALS - 1))
+        self.assertEqual(self.verdict().status, 'insufficient_trials')
+
+
+class CheckedMagnitudeEntryTest(unittest.TestCase):
+    def cast_entry(self):
+        return copy.deepcopy(templar_magnitude_trigger(DELIVERANCE))
+
+    def attack_entry(self):
+        return copy.deepcopy(templar_magnitude_trigger(RETRIBUTION))
+
+    def test_accepts_a_cast_trigger_entry(self):
+        entry = self.cast_entry()
+        self.assertIs(checked_magnitude_entry(entry), entry)
+
+    def test_accepts_an_attack_trigger_entry(self):
+        entry = self.attack_entry()
+        self.assertIs(checked_magnitude_entry(entry), entry)
+
+    def test_rejects_an_unknown_trigger_action(self):
+        entry = self.attack_entry()
+        entry['trigger'] = {'action': PERIODIC, 'amplitude_ms': 1000}
+        with self.assertRaises(ValueError):
+            checked_magnitude_entry(entry)
+
+    def test_rejects_an_attack_trigger_naming_a_spell(self):
+        entry = self.attack_entry()
+        entry['trigger'] = {'action': ATTACK, 'spell': VINDICATION_MAX_RANK}
+        with self.assertRaises(ValueError):
+            checked_magnitude_entry(entry)
+
+    def test_rejects_an_attack_trigger_with_a_spell_damage_metric(self):
+        entry = self.attack_entry()
+        entry['trigger_metric'] = 'spell_damage_total'
+        with self.assertRaises(ValueError):
+            checked_magnitude_entry(entry)
+
+    def test_rejects_a_cast_trigger_with_a_melee_damage_metric(self):
+        entry = self.cast_entry()
+        entry['trigger_metric'] = 'melee_damage_total'
+        with self.assertRaises(ValueError):
+            checked_magnitude_entry(entry)
+
+    def test_rejects_a_cast_trigger_at_an_unknown_target(self):
+        entry = self.cast_entry()
+        entry['trigger'] = {'action': CAST, 'spell': VINDICATION_MAX_RANK, 'target': 'nowhere'}
+        with self.assertRaises(ValueError):
+            checked_magnitude_entry(entry)
+
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class TemplarTriggerEntriesTest(unittest.TestCase):
@@ -942,6 +1052,10 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                     self.assertTrue(entry.get('status'))
                     continue
                 trigger = entry['trigger']
+                if trigger['action'] == 'attack' and entry.get('kind') == MAGNITUDE_RATIO_KIND:
+                    self.assertEqual(entry['trigger_metric'], 'melee_damage_total')
+                    self.assertIn(entry['observe_metric'], ('spell_damage_total', 'spell_heal_total'))
+                    continue
                 if trigger['action'] == 'attack':
                     self.assertIn(entry['trial_metric'], ('melee_attack_count', 'melee_damage_count'))
                     continue

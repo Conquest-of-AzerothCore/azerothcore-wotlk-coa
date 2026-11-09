@@ -352,28 +352,42 @@ what this clause literally claims. A `magnitude_ratio` entry is added **alongsid
 plain entry for the same aura (same `aura`, a distinct `effect` ordinal so the two scenario keys do not collide):
 it does not replace the `trigger_count` entry, which keeps proving the "fires at all" half of the clause.
 
-Fields: `trigger` (always `action: "cast"`, `target` one of `"self"`/`"dummy"`/`"ally"`), `trigger_metric` (the
-metric summing the trigger spell's own output, today only `spell_damage_total`), `observe_spell` (the triggered
-copy spell), `observe_metric` (`spell_damage_total` for a damage bonus, `spell_heal_total` for a self-heal),
-`expected_ratio` (the tooltip's `$s1`/100 fraction) and an optional `force_crit` in place of `trial_metric`/
-`per_trigger`/the plain `observe_metric` values. `checked_entry` validates this shape through its own
-`checked_magnitude_entry` branch.
+Fields: `trigger` (`action: "cast"` with `target` one of `"self"`/`"dummy"`/`"ally"`, or `action: "attack"` with
+`spell: 0` for a plain main-hand melee swing with no trigger spell), `trigger_metric` (the metric summing the
+trigger side's own output: `spell_damage_total` for a `cast` trigger, `melee_damage_total` for an `attack`
+trigger), `observe_spell` (the triggered copy spell), `observe_metric` (`spell_damage_total` for a damage bonus,
+`spell_heal_total` for a self-heal), `expected_ratio` (the tooltip's `$s1`/100 fraction) and an optional
+`force_crit` in place of `trial_metric`/`per_trigger`/the plain `observe_metric` values. `checked_magnitude_entry`
+validates this shape, including that `trigger_metric` matches the trigger's own action (an `attack` trigger
+naming a spell, or pairing the wrong metric with either action, is rejected).
 
 The scenario (`magnitude_ratio_scenario`) reuses the same `trigger_plan`/`attempt_interval` scheduling as every
-other trigger kind (so the `TRIGGER_TRIALS` sample-size floor below is the same one `trigger_count` checks use),
-learns the trigger spell and the passive together (no baseline part: the trigger spell always deals its own
-damage/heal regardless of the passive, so a zero-passive control proves nothing about the *ratio*, only about
-presence, which the sibling `trigger_count` entry already covers), repeats the trigger cast across the part's
-scheduled attempts, then reads four cumulative totals once at the end of the part: the trigger spell's own
-`trigger_metric` total and `spell_damage_count` (the trial count), and the triggered spell's `observe_metric`
-total. `judge_trigger_magnitude` sums each of these across every part, then takes the ratio of the two summed
-totals: because the server computes the triggered amount as a deterministic function of that same hit's own
-damage (truncated per event, not rolled independently), the ratio of sums converges on the tooltip fraction far
-faster than a per-hit mean ever would, so `TRIGGER_TRIALS` trials (the same floor `trigger_count` needs for its
-own false-negative risk) is already enough precision for a tight band: `max(0.01, 5% of expected)` around
-`expected_ratio` (the owner's own "within 5% on numbers" standard), everything outside is `alert`. Fewer than
-`TRIGGER_TRIALS` summed trigger-spell hits is `insufficient_trials`; no usable part at all (the passive never
-learned, or a run with no measurement) is `unmeasured`.
+other trigger kind, learns the passive (plus the trigger spell, for a `cast` trigger) with no baseline part: the
+trigger side always deals its own damage/heal regardless of the passive, so a zero-passive control proves
+nothing about the *ratio*, only about presence, which a sibling `trigger_count`/`proc_rate` entry already
+covers. A `cast` trigger repeats the trigger cast across the part's scheduled attempts; an `attack` trigger
+instead swings a main-hand weapon at the target for the same number of attempts (`attack`/`wait`/`stop_attack`,
+the same shape `trigger_scenario`'s own `ATTACK` branch uses). The part then reads four cumulative numbers once
+at the end: the trigger side's own `trigger_metric` total and its matching count (`spell_damage_count` of the
+trigger spell for `cast`, `melee_damage_count` of the main hand for `attack`), and the triggered spell's
+`observe_metric` total **and** its matching count (`spell_damage_count`/`spell_heal_count` of `observe_spell`).
+
+`judge_trigger_magnitude` sums each of the four numbers across every part, then judges
+`ratio = (observe_total / observe_count) / (trigger_total / trigger_count)` — the triggered spell's own mean
+amount per occurrence, over the trigger side's own mean amount per attempt — against `expected_ratio` within
+`max(0.01, 5% of expected)` (the owner's own "within 5% on numbers" standard), everything outside is `alert`.
+Normalising by each side's *own* event count, rather than taking a plain ratio of the two raw sums, matters
+whenever the trigger does not fire on every attempt: summing raw totals instead would measure
+`expected_ratio × (the trigger's own fire rate) × (events per trigger)`, diluted by however rarely the aura
+procs, not the tooltip's `$s1` fraction alone (discovered empirically on Retribution 707391, ADR 0052). For a
+trigger that fires on every attempt with exactly one triggered event each (Deliverance, Uther's Legacy),
+`trigger_count == observe_count` and the two counts cancel, so the formula reduces to ADR 0051's original
+sum-ratio exactly; the per-event form is a strict generalisation, not a different check for those two.
+`insufficient_trials` compares `observe_count` (not `trigger_count`) against `TRIGGER_TRIALS`, since that is the
+actual number of magnitude samples feeding the ratio — for a trigger that always fires this is the same number
+as `trigger_count`, but for a probabilistic one it can be far smaller, needing a `trial_attempts_factor` to
+schedule enough attempts; no usable part at all (the passive never learned, or a run with no measurement) is
+`unmeasured`.
 
 Deliverance 704116 (round10 `proc-chains`): "Critically striking with Vindication or Righteous Lunge now deals
 $s1% additional Physical damage" — `$s1` is `EffectBasePoints[0]` 49 + `EffectDieSides[0]` 1 = 50 (`704116`'s own
@@ -386,6 +400,35 @@ is `EffectBasePoints[0]` 74 + `EffectDieSides[0]` 1 = 75 (same `SPELL_AURA_ASCEN
 The entry casts Condemn 804906 at a dummy and reads `spell_damage_total` of 804906 against `spell_heal_total` of
 the self-heal copy 707302.
 
+Retribution 707391 (round10 `proc-chains`, the first `attack`-trigger entry of this kind): "Melee damage dealt
+now has a $h% chance to strike 2 additional times for $s1% of the damage dealt as Holy Damage" — `$s1` is
+`EffectBasePoints[0]` 29 + `EffectDieSides[0]` 1 = 30; `EffectTriggerSpell[0..2]` all name the extra-strike copy
+525028 (`SchoolMask` 2 Holy, `ProcChance` 20). The `$h%` chance-to-trigger half of this clause is already proven
+by the sibling `proc_rate` entry in `procs.py` (`707391 proc_rate`, `ok`, measured ~0.187 vs 0.2); this entry's
+own job is the other half, that the extra strikes' own Holy damage tracks the triggering swing's damage rather
+than being a flat amount. The trigger is a plain main-hand auto attack (`action: "attack"`, `spell: 0`, no
+trigger spell to learn or cast) against a dummy; the scenario reads `melee_damage_total`/`melee_damage_count` of
+the main hand against `spell_damage_total`/`spell_damage_count` of 525028, with `trial_attempts_factor: 2` (a
+~20%-chance, 2-strikes-per-proc trigger only yields ~0.4 observed strikes per scheduled swing).
+
+A first attempt without the per-event normalisation (ADR 0052) measured `0.1066` against a naive
+`expected_ratio: 0.3` and alerted; that was the ratio-of-sums dilution the ADR fixes, not a server defect. After
+the fix, three independent full-schedule gameplay runs (stamps `20261109-230914`/its two re-derived parts)
+measured a consistent `0.2627`/`0.2626`/`0.2650` (mean ≈`0.263`) against the DBC's `0.3`, still an `alert`: a
+reproducible ~12% shortfall, not sampling noise (three independent 15-lane runs agree to within 0.002). Read
+this session and ruled out: `spell_bonus_data` zeroes 525028's AP/SP coefficients (so no bonus is added on top
+of the override); `EffectRealPointsPerLevel[0]` is 0 for 525028, so `SpellEffectInfo::CalcValue`'s per-level
+scaling branch never runs (`SpellInfo.cpp:474`) and the `BaseLevel`/`SpellLevel` 26 vs the level-60 test
+character cannot explain the gap that way; the dummy's measured Holy resistance is `0` (so no partial-resist
+mitigation applies to 525028); the generic engine's own `HandleAscensionPercentEventProc`
+(`SpellAuraEffects.cpp:7283`) returns immediately for 707391 (its hardcoded id list does not include it), so
+the whole effect runs through the CoA-scripted path alone, `AscensionTemplarEvents.cpp`'s shared `Check`/`Proc`
+(`case 707391: return damage && melee && !periodic;` / `Copy(player, target, 525028, uint64(damage) * 30 / 100);`
+called twice), read in full. No mechanism in that path visibly scales the override down by ~12%; the cause is
+**not yet proven** and the clause is not closed. The next step is a per-swing pairing diagnostic (correlate each
+individual triggering swing's own damage with its own resulting 525028 cast's damage, rather than comparing
+pooled means) to see whether the shortfall is uniform across hits or concentrated in a subset (e.g. partial
+block/glancing swings specifically), which would point at the actual mechanism.
 Holy Combatant 500011 (round5 `trigger-accounting`): "Your Argent Blade now also extends the duration of
 Interdict on your target by 1 sec" extends Interdict 560116's remaining duration by `Amount(500014)` (1000 ms)
 on every landed Argent Blade hit when the target still carries the caster's own Interdict

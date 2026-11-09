@@ -17,7 +17,8 @@ DURATION_DELTA_KIND = 'duration_delta'
 DURATION_CHECK = 'trigger_duration_delta'
 MAGNITUDE_RATIO_KIND = 'magnitude_ratio'
 MAGNITUDE_CHECK = 'trigger_magnitude_ratio'
-MAGNITUDE_TRIGGER_METRICS = frozenset({'spell_damage_total'})
+MAGNITUDE_TRIGGER_METRICS_BY_ACTION = {'cast': frozenset({'spell_damage_total'}),
+                                       'attack': frozenset({'melee_damage_total'})}
 MAGNITUDE_OBSERVE_METRICS = frozenset({'spell_damage_total', 'spell_heal_total'})
 MISSED_TRIGGER_RATE = 0.025
 FALSE_OK_RISK = 0.01
@@ -99,14 +100,18 @@ def checked_duration_entry(entry: dict) -> dict:
 def checked_magnitude_entry(entry: dict) -> dict:
     aura = entry['aura']
     trigger = entry['trigger']
-    if trigger['action'] != CAST:
-        raise ValueError(f'Magnitude-ratio trigger {aura} must cast, not {trigger["action"]!r}')
-    if trigger.get('target') not in TRIGGER_TARGETS:
-        raise ValueError(f'Magnitude-ratio trigger {aura} casts at {trigger.get("target")!r}, not one of '
-                         f'{sorted(TRIGGER_TARGETS)}')
-    if entry.get('trigger_metric') not in MAGNITUDE_TRIGGER_METRICS:
+    if trigger['action'] not in MAGNITUDE_TRIGGER_METRICS_BY_ACTION:
+        raise ValueError(f'Magnitude-ratio trigger {aura} must cast or attack, not {trigger["action"]!r}')
+    if trigger['action'] == CAST:
+        if trigger.get('target') not in TRIGGER_TARGETS:
+            raise ValueError(f'Magnitude-ratio trigger {aura} casts at {trigger.get("target")!r}, not one of '
+                             f'{sorted(TRIGGER_TARGETS)}')
+    elif trigger.get('spell', 0) != 0:
+        raise ValueError(f'Magnitude-ratio attack trigger {aura} must not name a spell')
+    if entry.get('trigger_metric') not in MAGNITUDE_TRIGGER_METRICS_BY_ACTION[trigger['action']]:
         raise ValueError(f'Magnitude-ratio trigger {aura} trigger_metric must be one of '
-                         f'{sorted(MAGNITUDE_TRIGGER_METRICS)}, not {entry.get("trigger_metric")!r}')
+                         f'{sorted(MAGNITUDE_TRIGGER_METRICS_BY_ACTION[trigger["action"]])} for a '
+                         f'{trigger["action"]!r} trigger, not {entry.get("trigger_metric")!r}')
     if entry.get('observe_metric') not in MAGNITUDE_OBSERVE_METRICS:
         raise ValueError(f'Magnitude-ratio trigger {aura} observe_metric must be one of '
                          f'{sorted(MAGNITUDE_OBSERVE_METRICS)}, not {entry.get("observe_metric")!r}')
@@ -115,6 +120,11 @@ def checked_magnitude_entry(entry: dict) -> dict:
     if entry.get('force_crit') is not None and entry['force_crit'] not in FORCE_CRIT_RATINGS:
         raise ValueError(f'Trigger {aura} has an unknown force_crit {entry["force_crit"]!r}, not one of '
                          f'{sorted(FORCE_CRIT_RATINGS)}')
+    factor = entry.get('trial_attempts_factor', 1)
+    if factor < 1:
+        raise ValueError(f'Trigger {aura} has a trial attempts factor below 1')
+    if factor != 1 and not entry.get('trial_attempts_reason'):
+        raise ValueError(f'Trigger {aura} scales its trial attempts without a reason')
     return entry
 
 
@@ -559,41 +569,68 @@ def magnitude_label(aura: int) -> str:
     return f'{aura} trigger_magnitude_ratio'
 
 
+MAGNITUDE_OBSERVE_COUNT_METRICS = {'spell_damage_total': 'spell_damage_count', 'spell_heal_total': 'spell_heal_count'}
+
+
 def magnitude_measurement_labels(aura: int) -> dict[str, str]:
     return {'aura': f'{aura} magnitude aura', 'trigger_total': f'{aura} magnitude trigger total',
-            'trigger_count': f'{aura} magnitude trigger count', 'observe_total': f'{aura} magnitude observe total'}
+            'trigger_count': f'{aura} magnitude trigger count', 'observe_total': f'{aura} magnitude observe total',
+            'observe_count': f'{aura} magnitude observe count'}
+
+
+def magnitude_trigger_descriptor(entry: dict) -> str:
+    trigger = entry['trigger']
+    if trigger['action'] == ATTACK:
+        return f'{entry["trigger_metric"]} of main-hand melee attacks'
+    return f'{entry["trigger_metric"]} of {trigger["spell"]}'
 
 
 def magnitude_trigger_rule(entry: dict) -> str:
-    return (f'ratio of {entry["observe_metric"]} of {entry["observe_spell"]} over {entry["trigger_metric"]} of '
-            f'{entry["trigger"]["spell"]}, summed over at least {TRIGGER_TRIALS} trials, matches '
-            f'{entry["expected_ratio"]:.3g} within tolerance ("{entry["per_trigger_text"]}")')
+    return (f'mean {entry["observe_metric"]} of {entry["observe_spell"]} per its own event over '
+            f'mean {magnitude_trigger_descriptor(entry)} per its own event, at least {TRIGGER_TRIALS} '
+            f'{entry["observe_metric"]} events, matches {entry["expected_ratio"]:.3g} within tolerance '
+            f'("{entry["per_trigger_text"]}")')
 
 
 def magnitude_ratio_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict, list[Expectation]]:
-    class_file = armed_for(class_file, records_of(class_file), entry['trigger']['spell'])
+    trigger = entry['trigger']
+    if trigger['action'] == CAST:
+        class_file = armed_for(class_file, records_of(class_file), trigger['spell'])
     plan = trigger_plan(class_file, entry)
     if not 0 <= part < len(plan.part_attempts):
         raise ValueError(f'Trigger {entry["aura"]} has parts 0 to {len(plan.part_attempts) - 1}, not {part}')
     aura, trigger = entry['aura'], entry['trigger']
     attempts = plan.part_attempts[part]
     labels = magnitude_measurement_labels(aura)
-    facts = facts_of(records_of(class_file), trigger['spell'])
-    cast_target = trigger['target'] if trigger['target'] in (TARGET, ALLY) else None
-    steps = [{'action': 'learn', 'actor': CASTER, 'spell': trigger['spell']},
-             {'action': 'learn', 'actor': CASTER, 'spell': aura}]
-    if trigger.get('target') == ALLY:
-        steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
-    steps += cast_steps(facts, trigger['spell'], cast_target, plan.attempt_ms, attempts)
+    if trigger['action'] == CAST:
+        facts = facts_of(records_of(class_file), trigger['spell'])
+        cast_target = trigger['target'] if trigger['target'] in (TARGET, ALLY) else None
+        steps = [{'action': 'learn', 'actor': CASTER, 'spell': trigger['spell']},
+                 {'action': 'learn', 'actor': CASTER, 'spell': aura}]
+        if trigger.get('target') == ALLY:
+            steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
+        steps += cast_steps(facts, trigger['spell'], cast_target, plan.attempt_ms, attempts)
+    else:
+        cast_target = TARGET
+        steps = [{'action': 'learn', 'actor': CASTER, 'spell': aura},
+                 {'action': 'attack', 'actor': CASTER, 'target': TARGET},
+                 {'action': 'wait', 'label': f'{aura} magnitude swings', 'ms': attempts * plan.attempt_ms},
+                 {'action': 'stop_attack', 'actor': CASTER}]
     steps.append({'action': 'wait', 'label': f'{aura} magnitude drain', 'ms': DRAIN_MS})
-    steps.append(measurement(labels['trigger_total'], CASTER, entry['trigger_metric'], spell=trigger['spell']))
-    steps.append(measurement(labels['trigger_count'], CASTER, 'spell_damage_count', spell=trigger['spell']))
+    if trigger['action'] == CAST:
+        steps.append(measurement(labels['trigger_total'], CASTER, entry['trigger_metric'], spell=trigger['spell']))
+        steps.append(measurement(labels['trigger_count'], CASTER, 'spell_damage_count', spell=trigger['spell']))
+    else:
+        steps.append(measurement(labels['trigger_total'], CASTER, entry['trigger_metric'], hand=MAIN_HAND))
+        steps.append(measurement(labels['trigger_count'], CASTER, 'melee_damage_count', hand=MAIN_HAND))
     steps.append(measurement(labels['observe_total'], CASTER, entry['observe_metric'], spell=entry['observe_spell']))
+    observe_count_metric = MAGNITUDE_OBSERVE_COUNT_METRICS[entry['observe_metric']]
+    steps.append(measurement(labels['observe_count'], CASTER, observe_count_metric, spell=entry['observe_spell']))
     steps.append(measurement(labels['aura'], CASTER, 'aura', spell=aura))
     parts = len(plan.part_attempts)
     name = f'Conformance trigger {class_file["name"]} {entry["name"]} {aura} magnitude part {part + 1} of {parts}'
-    contract = ('Magnitude ratio of a triggered proc against the damage of the hit that triggered it, summed '
-               'over repeated casts, against its tooltip fraction.')
+    contract = ('Mean magnitude of a triggered proc against the mean damage of the hits that triggered it, over '
+               'repeated attempts, against its tooltip fraction.')
     scenario = scenario_shell(class_file, name, contract, steps)
     if cast_target == TARGET:
         scenario['creatures'] = [creature_fixture(class_file)]
