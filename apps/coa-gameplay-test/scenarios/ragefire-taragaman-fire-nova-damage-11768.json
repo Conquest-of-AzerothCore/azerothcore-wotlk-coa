@@ -4,7 +4,7 @@
   "contract": [
     "Taragaman the Hungerer 11520's Fire Nova 11970 hit level 60 players for about 2k. A coa_dungeon_creature_damage",
     "row for Taragaman and that one spell triples it. His other spells and other casters of Fire Nova keep",
-    "their damage."
+    "their damage. The scenario compares his Fire Nova with the same spell from Jergosh the Invoker 11518."
   ],
   "timeout_ms": 60000,
   "location": {
@@ -43,13 +43,38 @@
       "equals": 389
     },
     {
-      "label": "DISCRIMINATING: Taragaman's Fire Nova goes through the damage hooks times three",
+      "action": "summon",
+      "actor": "hero",
+      "entry": 11518,
+      "as": "jergosh",
+      "distance": 5
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "target": "jergosh",
+      "spell": 11970,
+      "save_as": "plain_nova"
+    },
+    {
+      "label": "DISCRIMINATING: Taragaman's Fire Nova goes through the damage hooks three times as high as Jergosh's",
       "action": "assert",
       "actor": "hero",
       "metric": "script_spell_damage_taken",
       "target": "taragaman",
       "spell": 11970,
-      "equals": 3000
+      "ratio_to": "plain_nova",
+      "min": 2.95,
+      "max": 3.05
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "target": "jergosh",
+      "spell": 2102516,
+      "save_as": "plain_massive"
     },
     {
       "label": "CONTROL: his Massive Fire Nova keeps its damage",
@@ -58,7 +83,9 @@
       "metric": "script_spell_damage_taken",
       "target": "taragaman",
       "spell": 2102516,
-      "equals": 1000
+      "ratio_to": "plain_massive",
+      "min": 0.99,
+      "max": 1.01
     }
   ]
 }
