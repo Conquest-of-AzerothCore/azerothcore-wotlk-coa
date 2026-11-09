@@ -430,10 +430,9 @@ class NoLivePlayerWordingTest(unittest.TestCase):
         self.check('classes/templar.json')
 
     def test_readme_open_conformance_checks_section_settles_from_logs_not_a_live_player(self):
-        text = (self.PACKAGE_DIR / 'README.md').read_text(encoding='utf-8')
+        text = (self.PACKAGE_DIR / 'docs' / 'generate-and-compare.md').read_text(encoding='utf-8')
         start = text.index('### Open conformance checks')
-        end = text.index('\n## ', start)
-        self.check('README.md#open-conformance-checks', text=text[start:end])
+        self.check('docs/generate-and-compare.md#open-conformance-checks', text=text[start:])
 
 
 if __name__ == '__main__':

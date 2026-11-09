@@ -1,0 +1,370 @@
+# Trigger entries
+
+A `triggers` entry of the class file is a passive whose tooltip says that something always happens on a trigger
+("Casting Sacred Swing now grants you Staffguard"): a proc entry whose chance is 100%, without a chance token.
+
+| Field | Content |
+|---|---|
+| `aura`, `name` | the passive and its `SpellName[enUS]` |
+| `tooltip` | its `Description[enUS]`, copied verbatim from the client DBC |
+| `trigger` | `{"action": "cast", "spell": <rank>, "target": "self"/"dummy"/"ally"}`, `{"action": "attack", "spell": 0}`, `{"action": "periodic", "amplitude_ms": <ms>}` for a trigger that is the aura's own tick, not a player action, or `{"action": "taken_hit", "spell": <id>, "striker_entry": <entry>}` for a trigger a hostile creature's own hit starts, not a player action (see "Taken-hit trigger entries" below) |
+| `trigger_text` | the words of the cleaned tooltip that name the trigger |
+| `trigger_spell_text` | for a cast, the words of the rank's name or cleaned tooltip that make it such a trigger |
+| `trial_metric` | one trial: `spell_cast_count`, `spell_damage_count`, `melee_attack_count`, `melee_damage_count`; for `periodic`, always `spell_cast_count` (descriptive only, no trial-count measurement is taken) |
+| `trial_spell` | optional, `cast`/`taken_hit` action with `trial_metric: "spell_damage_count"` only: counts landed-hit events of this spell id instead of `trigger.spell`, for a trigger condition keyed on a different spell actually hitting (a server-cast ability, not the ability the scenario casts), regardless of what caused that spell to fire; the harness still drives attempts by casting `trigger.spell` as usual, it only reads a different spell's hits as the trial count (Priest Training 504561 and Iron Penance 523712: the scenario casts Vindication 573324 to drive attempts, but the real trigger is a landed hit of Zealotry 801450, which Vindication's own handler casts at a ratio that is not a fixed 1:1, so the trial reads `spell_damage_count` of 801450 directly) |
+| `observe_spell`, `observe_source` | the spell a trigger casts, from `EffectTriggerSpell[n]` or tooltip `@s:<id>:0@` |
+| `observe_note` | with a tooltip reference, why the text's spell is observed instead of an `EffectTriggerSpell` |
+| `attempt_auras` | `{"spell", "stacks", "source"}` set before every cast, `source` quoting the tooltip behind it |
+| `ally_health_pct` | for a `target: "ally"` cast, the ally's health percent set before every cast so the heal is effective |
+| `caster_health_pct` | the caster's own health percent set before every cast, for a trigger the server code gates on an effective self-heal (`GetHealInfo()->GetEffectiveHeal()`), which is 0 at full health |
+| `restore_charges` | for a cast trigger, restores the trigger rank's native charges before every attempt (needed when the rank is also a charge-counting `procs` entry's trigger) |
+| `co_learn` | spell ids learned once, right after the aura's own `learn`, before any attempt; for a trigger whose server-side mechanism also requires a second, independent passive to be known |
+| `force_crit` | `"melee"` or `"spell"`: the scenario's own player fixture (not the class file's shared `ratings`) gets `melee_crit_rating`/`spell_crit_rating` set to `FORCED_CRIT_RATING`, for a trigger the server code gates on `PROC_HIT_CRITICAL` |
+| `trial_metric_fields` | optional, `attack` action only (`trial_metric` one of `MELEE_COUNTS`): extra fields merged into the trial measurement's `hand: "main_hand"` default, for example `{"critical": true}` to count only the swings that landed a critical hit, when the trigger's own condition is narrower than "every swing" (Parry Dance 804912's outgoing-crit leg: `melee_damage_count` filtered to `critical: true`, paired with `force_crit: "melee"` so most scheduled swings are valid trials) |
+| `internal_cooldown_ms` | spaces scheduled attempts at least this many ms apart, on top of the trigger rank's own cast time and recovery, for a trigger the server code gates on an internal cooldown |
+| `observe_metric` | `spell_cast_count`, `spell_energize_count` or `aura_apply_count` of `observe_spell` |
+| `observe_actor` | `"caster"` (default) or `"target"`: which actor's `observe_metric` is measured, for a trigger whose effect lands on the target rather than the caster (`Unit::AddAura`, not a `CastSpell`) |
+| `per_trigger`, `per_trigger_text` | the events per trial, 1 or 0.5 for "Every 2nd", and the words that state it |
+| `trial_attempts_factor`, `trial_attempts_reason` | multiplies the scheduled attempts (default 1, unchanged); a cited reason, for a trigger whose own cast sometimes executes as a different spell id and so is not counted as a trial of itself |
+| `periodic_initial_tick` | for a `periodic` trigger only: the aura's own `AttributesEx5` carries `SPELL_ATTR5_EXTRA_INITIAL_PERIOD`, so one extra tick is expected per counted part on top of `attempts x per_trigger` |
+| `status`, `reason` | `unmodelled` or `ambiguous_tooltip` for an entry without a scenario, and why |
+| `trigger` (status entries) | optional: a `status` entry with no real trigger mechanism to point to (dead effect, or reachable only through a mechanism this harness cannot drive) omits `trigger`, `trigger_spell_text` and `trial_metric` entirely rather than carry a fabricated shape; the entry-shape test only enforces the full `trigger` shape on entries that have one |
+| `question` | the finding text when the entry's verdict is an `alert` the server code explains: a server finding goes to the open conformance checks list, not into a verdict change |
+| `effect` | optional: disambiguates two entries sharing one `aura` (one DBC spell with more than one proc/trigger effect that each need their own check or disposition); the generated scenario key includes it so the two do not collide |
+| `kind` | optional: `"cooldown_delta"` for a trigger whose effect is a fixed cooldown reduction rather than a counted cast/energize/aura-apply event (see "Cooldown-delta trigger entries" below); omitted for every ordinary entry, which keeps the shape above unchanged |
+| `expected_delta_ms` | `kind: "cooldown_delta"` only: the expected reduction in milliseconds, read once as a magnitude (`abs(EffectBasePoints + 1)`), never cast |
+
+`aura_proc_rate` is not a judge of these entries: their passives have `ProcFlags` 0 and are scripted (design D10).
+The observed spell is the passive's `EffectTriggerSpell[n]` (`observe_source` `EffectTriggerSpell[n] of <aura>`)
+unless the text names another spell through an `@s:` reference; then the entry observes the named spell
+(`tooltip reference @s:<id>:0@ of <aura>`) and says why in `observe_note`. An `attempt_auras` fixture keeps a
+condition stated by another tooltip from blocking the claim, for example a cap on stacks.
+A trigger is cast as the hit scenarios cast: before each cast the power is set to the cost, the cooldown is reset and
+the `CasterAuraSpell` fixture is applied (Sacred Swing 681170, Righteous Upheaval 704576), one cast every
+`max(StartRecoveryTime, cast time) + 500 ms`; a `self` trigger is cast without a target. An `attack` trigger attacks
+`dummy` for the attempts times the weapon speed. A `target: "ally"` trigger adds a second player `ally`, groups the
+caster with it once before the first cast (`{"action": "group", "actor": "caster", "target": "ally"}`, a raid group
+so `Unit::IsInRaidWith` holds). If the trigger rank's own effects close the distance to its target
+(`values.closes_distance`), the caster is also relocated `CHARGE_OFFSET_YD` away before every cast at the ally
+(the same fixture `hits.py`'s ally-targeted hit scenarios use, needed so a charge-type rank is not already in its
+minimum range); a stationary ally heal such as Testament of Faith (Binding Scripture's trigger cast) has no such
+effect and leaves the caster in place. With `ally_health_pct` set, the ally's health is lowered to that percent of
+a 10000 fixed maximum before every cast so a heal lands an effective, non-zero amount. With `caster_health_pct`
+set, the caster's own
+health is lowered the same way before every cast, for a trigger the server code only recognises on a self-heal
+with a nonzero `GetEffectiveHeal()` (the reference caster starts at full health, so an uncapped self-heal would
+otherwise always read as 0 effective healing and never fire). With `restore_charges` set, the trigger rank's
+charge pool is restored before every cast (`"restore_charges"` fixture), needed for a charge-limited rank cast at
+the harness's scheduled attempt rate rather than its native recharge rate. With `internal_cooldown_ms` set, each
+attempt is spaced at least that long apart (`max(StartRecoveryTime, cast time, internal_cooldown_ms) + 500 ms`),
+for a trigger the server code gates behind its own internal cooldown rather than the trigger rank's. With
+`co_learn` set, each listed spell is learned once right after the aura's own `learn`, before the baseline and
+the scheduled attempts, for a trigger whose server code also requires a second, independent passive to be known
+before the mechanism runs at all. Divine Strikes 705255 still co-learns Righteousness 680891 from when the
+entry's trigger cast Chastise (which needs Righteousness to cast Scourgebane); the entry's trigger now casts
+Argent Blade 807268 instead, which casts Scourgebane unconditionally, so this `co_learn` is no longer required
+by the mechanism, only kept as a harmless fixture leftover. With `force_crit` set to `"melee"` or `"spell"`, the scenario's own player
+fixture (not the class file's shared `ratings`, which would force every scenario's crit chance) gets
+`melee_crit_rating`/`spell_crit_rating` set to `FORCED_CRIT_RATING` (100000, shared with `behaviours.py`'s own
+duration-scenario fixture), for a trigger the server code gates on `PROC_HIT_CRITICAL`: every scheduled attempt
+is then a valid trial of the crit-gated condition (Deliverance 704116 needs a crit on Vindication or Righteous
+Lunge).
+
+A `periodic` trigger is not a player action at all: it is `SPELL_AURA_PERIODIC_TRIGGER_SPELL`'s own amplitude tick,
+running from the generic engine's periodic-effect path rather than the proc-event path, so it is unaffected by
+`ProcFlags` and needs no learned trigger rank. The scenario only learns the passive and waits
+`attempts x amplitude_ms`; there is no cast, no attack and no `trial_metric` measurement (the `counts()` step pair
+collapses to the single `observe_metric` count). Judging compares the events measured against the attempt count
+computed at generation time (`part_attempts`, known from the scheduled wait), not against a game-measured trial
+count: `|events - attempts x per_trigger| <= 1`, with the same no-event-in-the-baseline rule as every other
+trigger. `per_trigger` is still required and is 1 for every `periodic` entry seen so far (one trigger-spell cast
+per tick). The main-phase wait is not followed by the generic `drain` step every other trigger action gets: the
+periodic aura keeps ticking for as long as it is applied, so any extra wait after the scheduled attempts would
+let more ticks bleed into the same count; the events measurement is taken the instant the scheduled wait ends.
+`periodic_initial_tick`, when true, adds one event per counted part on top of `attempts x per_trigger`, for a
+passive whose own `Spell.dbc` `AttributesEx5` carries `SPELL_ATTR5_EXTRA_INITIAL_PERIOD` (0x200, "Immediately do
+periodic tick on apply"): each part is a separate scenario that re-learns the passive from scratch, so each part
+gets its own extra tick at apply, on top of the regular amplitude cadence.
+
+### Taken-hit trigger entries
+
+A `taken_hit` trigger is the mirror image of `attack`: the aura's own tooltip condition starts on a hit the
+caster *takes*, never one it deals ("When you take Physical damage you now strike back..."), so there is no
+caster action to drive at all. A `striker` creature fixture (`entry: trigger["striker_entry"]`, reusing
+`behaviours.py`'s `STRIKER`/`STRIKER_HEALTH`/`STRIKER_DISTANCE` constants, `reaction: 0`/`stationary: true` so it
+never engages or chases once the caster's own retaliation starts landing on it) repeatedly casts `trigger["spell"]`
+directly at the caster instead, spaced `max(StartRecoveryTime, cast time, internal_cooldown_ms) + 500 ms` apart
+(reusing `cast_interval` against the striker's own spell, not the caster's). Each attempt is a single
+`{"action": "cast", "actor": "striker", "spell": trigger["spell"], "target": "caster"}`, with no auto-attack
+`wait`/`stop_attack` bracket. A trial is counted the same way `attack`'s trials already are, but reversed:
+`trial_metric` is always `spell_damage_count`, read with `actor: "caster"` (a player; the harness can only read a
+combat-log metric from a player actor) and `caster: "striker"`, `target: "caster"` (a cast query selecting its
+source rather than its target). `observe_metric`/`observe_spell`/`observe_actor` are unchanged. The breaker
+spell chosen for `trigger["spell"]` must actually be castable by a generic NPC through `CastSpell(...,
+TRIGGERED_FULL_MASK)`: a player spell with a nonzero `CasterAuraState` (Revenge 6572's `AURA_STATE_DEFENSE`,
+requiring a prior block/dodge/parry the striker never has) still fails `Spell::CheckCast` with
+`SPELL_FAILED_BAD_TARGETS` even triggered, so the chosen spell needs `CasterAuraState` 0 (confirmed empirically,
+not by reading `TRIGGERED_FULL_MASK`'s own flag bits, since those did not resolve it); Claw (Pet) 16827
+(`SchoolMask` 1, `DmgClass` 2, `Effect[0]` 2 `SCHOOL_DAMAGE`, `CasterAuraState` 0) is the one confirmed working so
+far, reused by the Sacred Defense (705306) entry.
+
+### Cooldown-delta trigger entries
+
+A `kind: "cooldown_delta"` entry is for a trigger whose tooltip states a fixed cooldown reduction on another,
+unrelated rank rather than a cast, an energize or an aura application: the server code reads the trigger
+effect's magnitude once per trigger and subtracts it from a native spell cooldown, without ever casting the
+triggered spell. The ordinary `trial_metric`/`per_trigger`/`observe_metric` shape cannot express "a cooldown
+drops by a fixed amount", so this kind carries its own narrower shape: `trigger` (always `action: "cast"`),
+`observe_spell` (the rank whose cooldown is read, not the dead `EffectTriggerSpell` target), `observe_metric`
+(always `cooldown_ms`) and `expected_delta_ms` (a positive magnitude) in place of `trial_metric`/`per_trigger`.
+`checked_entry` validates this narrower shape through its own `checked_cooldown_entry` branch (cast only,
+`cooldown_ms` only, a positive `expected_delta_ms`) instead of the standard one.
+
+The scenario (`cooldown_trigger_scenario`) repeats, per trial: reset the observed rank's native cooldown, cast
+it once (filling its cooldown back to its native `RecoveryTime`), measure `cooldown_ms`, cast the trigger once,
+measure `cooldown_ms` again. Each trial is independent (the observed rank is always freshly reset before it),
+so the per-trial time cost never grows with the number of trials; the same `TRIGGER_TRIALS`/`BASELINE_ATTEMPTS`
+sizing and part-splitting as every other trigger entry applies (`trigger_plan`, reused unchanged). A baseline
+part (the passive not learned) runs first and must measure a delta of exactly 0 in every trial. The judged
+label is `<aura> trigger_cooldown_delta`, not `<aura> trigger_count`: a nonzero baseline delta is an `alert`;
+with the passive learned, each trial's `before - after` must fall within `max(1, 0.5% of expected_delta_ms)`
+of `expected_delta_ms` (the same tolerance formula `effect_value`/`passive_delta` already use) or the whole
+check is an `alert`; an absent effect reads as a 0 ms delta, which is always outside that band, so it can
+never pass by accident. Fewer than `TRIGGER_TRIALS` usable trials is `insufficient_trials`; a mean within
+tolerance but no baseline trial is `unmeasured`, the same as the count-based check.
+
+With `setup_casts` set, each listed spell is learned once up front (alongside the trigger and observed ranks,
+before the baseline), then reset and cast at self first in every trial, before that trial's own observed-rank
+cast and trigger cast, in both the baseline and the measured phases (the same semantics `metric_delta`'s own
+`setup_casts` already gives the behaviour-scenario kind, reused here for the cooldown-delta kind). Each
+setup cast's own wait (`cast_interval`) is spent once, right after it, instead of being folded a second time
+into the trial's trailing spacing wait (which stays `observe_interval + trigger_interval`): `attempt_interval`
+still sums all three for scheduling and for the scenario's own declared duration, so the two must never double
+count the same wait or the generated scenario silently needs more real time than its own `timeout_ms` allows. This is for a cooldown-delta trigger whose
+server code gates the reduction behind a second, independently-cast buff rather than a known-passive check:
+Eternally Devoted 573452 needs Eternal Blessing 705300 *active*, not merely known — 705300 carries
+`SPELL_ATTR0_IS_ABILITY` with a real `RecoveryTime`/`DurationIndex` (a 60 s cooldown, a 30 s buff), not
+`SPELL_ATTR0_PASSIVE`, so the harness's `learn` action alone never applies its aura the way it does for an
+always-on passive. Casting it fresh before every trigger cast keeps its buff active exactly when
+`AscensionTemplarAbilities.cpp`'s `Breaker(info)` block checks `player->HasAura(705300)` to cast the hidden
+707111 whose hit is what actually gates the reduction; `setup_casts` runs in the baseline phase too, since
+705300 being active changes nothing there (the reduction itself still requires Eternally Devoted's own aura,
+checked only in `OnSpellHitResult`), so a baseline delta still proves nothing fires without the checked aura
+itself.
+
+`aura_apply_count` counts a target's `AuraApplyCounter` (`CoAGameplayTest.cpp`), a static `(unit, spell)` map
+recorded from `UnitScript::OnAuraApply`, the generic engine hook `Unit::_ApplyAura` calls after every aura
+application, including one made by `Unit::AddAura` (which never builds a `Spell` object, so `ProcCounter`'s
+`OnSpellCast`-based metrics never see it). It is for an effect applied this way rather than through `CastSpell`;
+`observe_actor: "target"` then measures it on the hostile `dummy` fixture instead of the caster.
+
+`TRIGGER_TRIALS` is 182, the smallest N with 0.975^N <= 0.01: a trigger that fires 2.5 points under 100% of the time
+misses at least once in 182 trials with 99% probability. The scenario learns the trigger rank, makes
+`BASELINE_ATTEMPTS` (20, a choice, not derived) attempts and measures the trials and the events, learns the passive,
+makes 273 attempts (`ceil(1.5 x 182)`, ruling R9) and measures the trials, the events and the passive's aura. Parts
+split the attempts so that each wait fits the 600 s limit with the 60 s margin; only the first part holds the
+baseline. The `trigger_count` expectation of every part has the label `<aura> trigger_count`; the comparison sums the
+trials and the events after the learn of the parts whose run measured the aura. Any event in the baseline is an
+`alert`; no usable trial is `unmeasured`; fewer than 182 trials are `insufficient_trials`; otherwise
+`|events - trials x per_trigger| <= 1` is `ok` and anything else `alert`. A baseline without a trial never gives
+`ok`: its verdict is `unmeasured`.
+
+The Templar entries quote their trigger words from the cleaned DBC tooltips:
+
+| Passive | Trigger | Trials | Observed | Per trial |
+|---|---|---|---|---|
+| Scarlet Secrets 520812 | "Every 2nd cast of Argent Blade", 807268 at `dummy` | casts | 804924 casts (`@s:`) | 0.5 |
+| Sanctify 705274 | "Your Libram spells", Libram of Tenacity 801461, `self` | casts | 705275 casts | 1 |
+| Blessing of Eonar 705290 | "Using Libram spells", 801461, `self` | casts | 520537 casts | 1 |
+| Staffguard 705295 | "Casting Sacred Swing", 572769 at `dummy` | casts | 706583 casts | 1 |
+| Conviction 712677 | "Casting Sacred Swing", 572769 at `dummy` | casts | 712679 casts | 1 |
+| Fervent Castigation 707606 | "Casting Righteous Upheaval", 572027 at `dummy` | casts | 804924 casts | 1 |
+| Mending Ward 806273 | "Oath Breakers", 572027 ("a dominating Oath Breaker") | casts | 806353 casts | 1 |
+| Unbroken Creed 804932 | "Damaging abilities", 807268 at `dummy` | damage events | 807648 casts | 1 |
+| Heaven's Finest 806516 | "Damaging abilities", 807268 at `dummy` | damage events | 805390 casts | 1 |
+| Chakra of Power 803158 | "Melee attacks", auto attack | swings | 804181 energizes | 1 |
+| Parry Dance 804912, effect 1 (crit leg only) | "critically strike with auto attacks", auto attack, `critical: true` | critical melee damage events (`force_crit: "melee"`) | 560651 casts | 1 |
+| Way of the Monk 805420 | "Damage dealt by Sacred Swing", 572769 at `dummy` | damage events | 572052 casts | 1 |
+| Chakra of Light 803844, 803159 | "Oath Breakers", 572027 ("a dominating Oath Breaker") | casts | 803160 casts | 1 |
+| Scarlet Training 301065 | "Casting Argent Blade", 807268 at `dummy` | casts | 301172 casts | 1 |
+| Binding Scripture 801457 | "Healing an ally", Testament of Faith 801478 at `ally` | casts | 705309 casts | 1 |
+| Whirling Tempest 300504 | "While Righteous Tempest is active", 805409 (channel start) `self` | casts | 301340 aura applies | 1 |
+| Light's Ward 300529 | periodic, 2000 ms amplitude | ticks | 301283 casts | 1 |
+| Light's Chosen 301310 | periodic, 5000 ms amplitude | ticks | 301369 casts | 1 |
+| Disciplined Mind 680399 | "causes it to dispel", 578276 at `self` | casts | 525052 casts (`EffectTriggerSpell[1]`) | 1 |
+| Disciplined Mind 681483 | "causes it to dispel 2 poison and disease effects", 578276 at `ally` | casts | 525052 casts (`EffectTriggerSpell[1]`/`[2]`, cast once) | 1 |
+| Deliverance 704116 | "Critically striking with Vindication", 573324 at `dummy`, `force_crit: "melee"` | casts | 801456 casts (`EffectTriggerSpell[0]`) | 1 |
+| Lorescribe 804927 (effect 1, `kind: "cooldown_delta"`) | "Casting Oath Breaker abilities", 572027 at `dummy` | cooldown delta of Libram of Tenacity 801461 | 4000 ms reduction (`Amount(806106)`, never cast) | n/a |
+| Scarlet Champion 805415 | "Your damaging critical strikes", 807268 at `dummy`, `force_crit: "melee"` | damage events | 805416 casts (`EffectTriggerSpell[0]`) | 1 |
+| Legacy of the Silver Hand 806522 | "Casting Argent Blade", 807268 at `dummy` | casts | 806523 casts (`EffectTriggerSpell[0]`) | 1 |
+
+Chakra of Light's two ranks share Mending Ward's 806273 `Breaker()` condition and its 572027 fixture (same
+`AscensionTemplarAbilities.cpp:192-198`): both are in `TemplarCastDrivers`, so the DBC's own `EffectTriggerSpell[0]`
+803160 never fires natively (routed to `SPELL_AURA_DUMMY`, same P3-R8 pattern as Mending Ward); the scripted hook
+casts it unconditionally on every Oath Breaker cast, once for the solo caster. Scarlet Training is also in
+`TemplarCastDrivers` (its own `EffectTriggerSpell[0]` 301172 likewise decorative); the real condition
+(`AscensionTemplarAbilities.cpp:232-235`) is casting Argent Blade 804929-family while a `GetScriptValue(704576)`
+set by Warrior of Dawn 561156's apply hook (`AscensionTemplarAuras.cpp:114-120`) is non-zero, which the harness's
+`set_aura` fixture (`attempt_auras`) satisfies by applying 561156 fresh before every cast. Once the transform fires,
+the next scheduled Argent Blade 807268 cast executes as Scarlet Hammer 807035 instead (`SetTemporarySpellReplacement`)
+and is not counted as an 807268 trial, roughly halving the usable trials per scheduled attempt; `trial_attempts_factor`
+2 schedules 546 attempts so enough stay valid. Binding Scripture is in `TemplarEvents`; its condition
+(`AscensionTemplarEvents.cpp:77-78`) is an effective heal (`GetEffectiveHeal()` non-zero) on a raid member other than
+the caster, with no roll (matches `ProcChance` 100): the scenario groups the caster with the `ally` player once and
+sets the ally to 50% of a 10000 fixed health before every Testament of Faith 801478 cast, so every heal is effective.
+
+Whirling Tempest 300504 is in `TemplarCastDrivers`, so `ApplyContracts` zeroes its `EffectApplyAuraName[0]`
+(`PROC_TRIGGER_SPELL`) at runtime and sets `ProcFlags` 0; the behaviour the entry measures is scripted
+(`AscensionTemplarAuras.cpp:154-158`, an apply hook keyed on `Named(GetSpellInfo(), 805409)`, i.e. the self aura
+805409 that starts the Righteous Tempest channel being applied while 300504 is known — not its periodic damage
+tick 805410, which applies no aura to the caster and so never reaches this hook), not the generic engine. The entry still cites
+`EffectTriggerSpell[0] of 300504` as `observe_source` because the DBC's own field happens to equal the real
+observed spell (301340) even though the runtime path that actually casts it is the scripted hook, not the DBC
+effect — the same coincidence `301065 Scarlet Training` and `301254 Improved Scarlet Hammer` already rely on.
+805409 is its own self-channel (`SpellDuration.dbc` id 27, 3000 ms) with `RecoveryTime` and `CategoryRecoveryTime`
+both 0, so nothing stops the harness from scheduling the next cast before the current one's 3000 ms duration
+ends; recasting into an active channel fails `SPELL_FAILED_SPELL_IN_PROGRESS` (measured live: 146 failed casts
+of 273 scheduled before this was caught). The entry sets `internal_cooldown_ms: 3000` to space attempts at least
+that far apart; this is not a server-scripted cooldown like Untainted's, only the self-channel's own duration,
+reusing the field for the same effect (a floor below the harness's own `CAST_MARGIN_MS` spacing) rather than
+adding a second field with an identical mechanism.
+Light's Ward 300529 and Light's Chosen 301310 are in neither `TemplarEvents` nor `TemplarCastDrivers`: their
+`SPELL_AURA_PERIODIC_TRIGGER_SPELL` effects (23) run unmodified through the generic engine's amplitude tick
+(2000 ms and 5000 ms), using the new `periodic` trigger action described above. Keeping the Oath 92109 also
+carries a `SPELL_AURA_PROC_TRIGGER_SPELL` effect (42,
+`EffectTriggerSpell` 681170 `SPELL_RECENTLY_PARRIED_OR_DODGED`), and `ApplyContracts` sets its DBC `ProcFlags` to
+0 at runtime the same way, but this one is reachable: `data/sql/updates/pending_db_world/rev_20261001_04_templar_keeping_the_oath_avoid.sql`
+(merged, PR #6159) gives 92109 an explicit `spell_proc` row (`ProcFlags` 40, `HitMask` 48 = dodge or parry,
+`Chance` 100), and `LoadSpellProcs` populates `mSpellProcMap` from that row before the DBC-autogeneration gate
+`SpellMgr.cpp:2512` ever runs, so the generic engine's `AuraEffect::HandleProcTriggerSpellAuraProc` casts 681170
+on a taken melee dodge or parry with no scripted `OnProc` case needed. The entry is still `status: "unmodelled"`,
+without a `trigger` field, because this harness has no action that makes a creature melee-attack the player
+(`hits.py`'s `creature_fixture` is a stationary, non-aggressive dummy) nor one that forces or statistically
+bounds a dodge/parry outcome — the same kind of missing-capability gap as Zealotry below, not a dead effect.
+Zealotry 92108 carries a second `SPELL_AURA_PROC_TRIGGER_SPELL` effect (effect 1, `EffectTriggerSpell` 801450),
+reachable the same way as 92109 (`rev_20260909_04_templar_completion.sql` gives it an explicit `spell_proc` row
+and a `spell_script_names` entry, bypassing its own zeroed `ProcFlags`): `AscensionTemplarEvents.cpp`'s `Check`
+fires unconditionally on a damaging *off-hand* auto-attack hit. This harness's reference Templar carries only a
+main-hand weapon, and no code path under `src/server/coa/` grants Templar `CanDualWield` (every `SetCanDualWield`
+call site is scoped to `CLASS_SON_OF_ARUGAL`, `AscensionCompat.cpp:1104-1109, 9583-9594`), so `Player::CanEquipItem`
+(`Player.cpp:13412`) would refuse an off-hand weapon on this class file's character before an off-hand swing could
+even be attempted; the entry is `status: "unmodelled"`, without a `trigger` field, for that harness-capability
+reason. Warrior of Tyr 301253's own `SPELL_AURA_PROC_TRIGGER_SPELL` effect is likewise unreachable through the
+proc/`ProcFlags` path `AscensionTemplarEvents.cpp` implements (no case, no `spell_proc` row for it or its
+`EffectTriggerSpell`), but the tooltip's effect is reachable through a separate mechanism this `triggers` schema
+cannot express (a power gain, not a discrete trigger count): see `classes/templar.json`'s `behaviours` entry for
+301253 (`metric_delta`, "Behaviour scenarios" below) instead. Holy Tempest 301339 and Holy Combatant 500011 remain
+genuinely open P5-family gaps (round3 `trigger-lot-5-spec.md`, part A); 301339 in particular needs a second
+creature fixture for the hit's spread target that this round did not build.
+
+Lorescribe 804927 carries two `SPELL_AURA_PROC_TRIGGER_SPELL` effects. Effect 0's `EffectTriggerSpell` 806089
+is dead the same way Warrior of Tyr's own effect is unreachable through the proc path above: no `spell_proc` row
+(`rev_20260909_04_templar_completion.sql` deletes any auto-generated one for 804927), no `OnProc` case, and no
+reference to 806089 anywhere under `src/server/coa/`; the tooltip's single stated amount is sourced from effect 1
+alone, so the entry is `status: "unmodelled"`, without a `trigger` field, the same shape as Keeping the Oath and
+Zealotry above. Effect 1's `EffectTriggerSpell` 806106 is never cast either, but is not dead: `AscensionTemplarAbilities.cpp`'s
+`OnSpellCast` reads `Amount(806106)` as a magnitude on every `Breaker()` cast while 804927 is known and reduces
+every known Libram rank's native cooldown by it (`ReduceLibrams`). This is the `kind: "cooldown_delta"` entry
+documented above: the observed rank is Libram of Tenacity 801461 (the same representative Libram the Sanctify
+705274 and Blessing of Eonar 705290 entries already use), the trigger cast is Righteous Upheaval 572027 (the
+same representative Oath Breaker cast Mending Ward 806273 uses), and `expected_delta_ms` is 4000 (806106's own
+`EffectBasePoints[0]` -4001, `EffectDieSides[0]` 1, so `Amount()` is -4000; the tooltip's own
+`$/1000;806106s1 sec` token divides that same magnitude by 1000).
+
+Scarlet Champion 805415's `EffectTriggerSpell[0]` (805416) is cast from `AscensionTemplarEvents.cpp`'s scripted
+`Check`/`OnProc` pair on any damaging critical strike, gated at most once per second
+(`State(player).cooldowns.HasTimeUntilEvent`/`ScheduleEvent`, matching the tooltip's own "Can only occur once per
+sec"); the condition is not restricted to a spell family, but the representative cast is Argent Blade 807268 (a
+weapon-damage effect, so `force_crit: "melee"`), the same representative "damaging ability" Unbroken Creed 804932
+and Heaven's Finest 806516 already use. `internal_cooldown_ms` is 1000, matching the scripted gate, and
+`trial_metric` is `spell_damage_count` (the condition also requires `damage` nonzero, so only a hit, not every
+cast, counts as a trial). The effect's 5-stack branch to High General 524617 is a separate, already-`ok` check
+(`805415 effect_value 524617e0 #3`), not part of this entry.
+
+Legacy of the Silver Hand 806522's `EffectTriggerSpell[0]` (806523) is cast unconditionally from the same
+`talent` lambda Mending Ward 806273 uses, gated on casting Argent Blade (`Named(info, 804929)`, any rank) or
+Scarlet Hammer (`info->Id == 807035`), matching the tooltip's "Casting Argent Blade or Scarlet Hammer" verbatim
+and `ProcChance` 100 on 806522's own row; the representative cast is Argent Blade 807268, with no `force_crit`
+needed (the trigger has no crit gate). 806523's own role (two guaranteed-crit charges on Scourgebane) is a
+separate, already-reachable behaviour this entry does not need to reach to prove the cast fires.
+
+Measured on 2026-11-07 (stamp `20261107-184729`, simulated clock, gameplay stage 57.0 s for 10 parts, no failed
+cast, 20 baseline trials and no baseline event in each entry): all four entries are `ok` with 273 events in 273
+trials.
+
+Scarlet Secrets' `EffectTriggerSpell[0]` is 520926, a dummy aura its text does not name; the server never cast it in
+273 Argent Blade casts (stamp `20261106-092819`), while the text grants Oath: Retribution 804924. Oath Chain 704576
+caps the Oaths ("Once 10 stacks are reached you are unable to build more Oaths."): with the chain kept, 100 of 273
+casts granted the Oath (stamp `20261106-093118`), so the entry removes the chain before every attempt.
+
+Measured on 2026-11-06 (stamp `20261106-093404`, simulated clock, gameplay stage 29.8 s for 12 parts, no failed
+cast, 20 baseline trials and no baseline event in each entry): nine entries are `ok` with 273 events in 273 trials
+(Scarlet Secrets 136 in 273, expected 136.5). Two are `alert`, both explained by server code:
+
+- Fervent Castigation 707606: 0 casts of 804924 in 273 Righteous Upheaval casts. The cast only sets a flag
+  (`AscensionTemplarAbilities.cpp:178-179`); the Oath is granted when a later Oath starts a new chain
+  (`AscensionTemplar.cpp:177-181`), not on the cast as the text says.
+- Heaven's Finest 806516: 150 casts of 805390 in 273 Argent Blade hits. At 6 stacks the aura casts The Finest of
+  Heaven 806517 and is removed (`AscensionTemplarAuras.cpp:134-138`), and no stack is granted while 806517 (8 s) is
+  up (`AscensionTemplarEvents.cpp:208-214`); the text, its `@s:805390:0@` reference included, does not say so.
+
+Both entries carry a `question`, so their alerts go to the "Findings" section of `questions.md`.
+
+### Duration-delta trigger entries
+
+A `kind: "duration_delta"` entry is for a trigger whose tooltip states a fixed extension of a *foreign* aura's
+remaining duration on the trigger cast's target, the `aura_duration_ms` analogue of `cooldown_delta`'s
+`cooldown_ms`: `trigger` (always `action: "cast"`, `target` one of `"self"`/`"dummy"`/`"ally"`), `observe_spell`
+(the aura whose remaining duration is read, cast and read on the same unit `trigger["target"]` names, not the
+caster), `observe_metric` (always `aura_duration_ms`), `expected_delta_ms` (a positive magnitude) and
+`decay_wait_ms` (a wait, strictly greater than `expected_delta_ms`, spent between casting `observe_spell` and
+reading its "before" duration) in place of `trial_metric`/`per_trigger`. The wait matters because the
+observed aura's own duration only ever counts down on its own; reading it immediately after casting it (at or
+near its `MaxDuration`) would clamp any real extension to 0 and the check could not tell "mechanism present"
+from "mechanism absent" (the same "must be able to fail" rule every other check follows) — `decay_wait_ms` lets
+it decay below `MaxDuration - expected_delta_ms` first, so a successful extension has somewhere to go.
+`checked_entry` validates this narrower shape through its own `checked_duration_entry` branch (cast only,
+`aura_duration_ms` only, a positive `expected_delta_ms`, `decay_wait_ms` strictly greater than it) instead of
+the standard one.
+
+The scenario (`duration_trigger_scenario`) repeats, per trial: cast the observed aura at `trigger["target"]`,
+wait `decay_wait_ms`, measure `aura_duration_ms`, cast the trigger once at the same target, measure
+`aura_duration_ms` again. A baseline part (the passive not learned) runs first; without the trigger's own
+extension, the measured delta is only the aura's own natural decay over the real time the trial's steps take,
+so the baseline tolerance band is `[-(elapsed window + margin), margin]`, not a flat 0 (the same "comparison
+against the real elapsed window" `cooldown_delta`'s own baseline check already uses, mirrored because here the
+passive *adds* duration back against the same natural decay rather than subtracting further). The judged label
+is `<aura> trigger_duration_delta`; with the passive learned, each trial's `after - before` must fall within
+`[expected_delta_ms - elapsed window - margin, expected_delta_ms + margin]` of `expected_delta_ms` (`margin` is
+`max(1, 0.5% of expected_delta_ms)`, the usual formula) or the whole check is an `alert`; an absent effect reads
+as a delta no larger than the window's own natural decay, which is always outside that band, so it can never
+pass by accident. Fewer than `TRIGGER_TRIALS` usable trials is `insufficient_trials`; a mean within tolerance
+but no baseline trial is `unmeasured`.
+
+Holy Combatant 500011 (round5 `trigger-accounting`): "Your Argent Blade now also extends the duration of
+Interdict on your target by 1 sec" extends Interdict 560116's remaining duration by `Amount(500014)` (1000 ms)
+on every landed Argent Blade hit when the target still carries the caster's own Interdict
+(`AscensionTemplarAbilities.cpp:296-303`). Interdict's own `SpellDuration.dbc` row (id 32) has `Duration` and
+`MaxDuration` both 6000 ms, so `decay_wait_ms` 1500 lets it decay to 4500 ms remaining before the Argent Blade
+cast, leaving headroom under the 6000 ms cap for the 1000 ms extension. Measured this round (stamp
+`20261109-132802`): `ok`, mean 987.12 ms over 273 trials against the expected 1000 ms.
+
+One With The Light 504807's own effect 2 (round5 `trigger-accounting`) is a plain `cooldown_delta` entry, not a
+`duration_delta` one, observing Libram of Tenacity 801461's `cooldown_ms` the same way effect 1's existing entry
+already observes Zealotry 801450's `spell_cast_count` (`checked by triggers entry` links the generic P5 report
+at both effects to their own check, "Unmodelled by rule" above); measured this round (stamp `20261109-133249` and
+again `20261109-134641`): `ok`, mean ~1018 ms against the expected 1000 ms. Effect 0's own claim (`Reduce(player,
+root, 1000)` for each of `{500694, 806153, 801455}`, the same `Breaker(info)` block whose adjacent
+`ReduceLibrams` call effect 2 confirms `ok`) could not get a working entry of its own this round: none of its
+three roots fits the existing `cooldown_trigger_scenario`/`cooldown_trial_steps` shape, which self-casts the
+observed rank with no explicit target and no wait before the trigger cast — 806153 (Divine Force) and 801455
+(Testament of Will) need a hostile/friendly target they never get from a self-cast, and 500694 (Force of
+Golganneth) can self-cast but its own 1250 ms `StartRecoveryTime` (its GCD) collides with the immediately
+following, zero-wait trigger cast, which `Spell::CheckCast`'s global-cooldown check (`Spell.cpp:5846`) then
+rejects with `SPELL_FAILED_NOT_READY`; measured this round (stamp `20261109-133249`), 162 of 244 scheduled
+trigger casts failed that way, diluting the mean delta to 17.996 ms. Rather than report that dilution as an
+`alert` on a mechanism effect 2's own sibling check already confirms works, effect 0 is closed through
+`unmodelled_effects` (`passives.py`, checked ahead of `trigger_link`) with this evidence; a harness change (a
+trigger-cast wait sized to the observed rank's own GCD, or a target-capable observed cast) would be needed to
+measure it, out of this item's scope.
+
