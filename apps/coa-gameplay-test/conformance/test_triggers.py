@@ -1297,12 +1297,15 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                          steps[index - 2:index])
         self.assertIn('the caster health set to 50% of max', expectation.rule)
 
-    def test_disciplined_blows_stays_unmodelled_on_the_measured_double_count(self):
+    def test_disciplined_blows_is_checked_after_the_round5_type_mask_fix(self):
         entry = templar_trigger(DISCIPLINED_BLOWS)
-        self.assertEqual(entry['status'], 'unmodelled')
-        self.assertIn('546 casts of 680398 for 273 Benediction casts', entry['reason'])
-        with self.assertRaises(ValueError):
-            trigger_plan(CLASS_FILE, entry)
+        self.assertNotIn('status', entry)
+        self.assertNotIn('reason', entry)
+        self.assertEqual(entry['per_trigger'], 1)
+        self.assertIn('546 casts of 680398 for 273', entry['fix_note'])
+        self.assertIn('DONE_HIT_PROC_FLAG_MASK', entry['fix_note'])
+        plan = trigger_plan(CLASS_FILE, entry)
+        self.assertGreater(plan.scheduled, 0)
 
     def test_devotion_of_khazgoroth_cites_its_native_proc_flags(self):
         entry = templar_trigger(DEVOTION_OF_KHAZGOROTH)

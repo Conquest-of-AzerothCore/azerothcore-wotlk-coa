@@ -71,7 +71,8 @@ class aura_ascension_templar_event : public AuraScript
         case 560648:
             return damage && melee && !periodic;
         case 680397:
-            return heal && !State(player).cooldowns.HasTimeUntilEvent(id);
+            return heal && (event.GetTypeMask() & DONE_HIT_PROC_FLAG_MASK) &&
+                   !State(player).cooldowns.HasTimeUntilEvent(id);
         case 705298:
             return heal && event.GetActionTarget() == player && (event.GetTypeMask() & DONE_HIT_PROC_FLAG_MASK) &&
                    !State(player).cooldowns.HasTimeUntilEvent(id);
