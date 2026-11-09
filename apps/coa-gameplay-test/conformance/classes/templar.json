@@ -1672,6 +1672,12 @@
   ],
   "behaviours": [
     {
+      "spell": 573049, "name": "Holy Cleave", "kind": "fixed_count",
+      "quote": "and an additional nearby enemy", "expected": 1,
+      "radius": 10.0,
+      "radius_reason": "Holy Cleave 573049 DmgClass 2 (SPELL_DAMAGE_CLASS_MELEE, apps/coa-dbc record); its EffectChainTarget[0]=EffectChainTarget[1]=2 on both weapon-damage effects (0 NORMALIZED_WEAPON_DMG, 1 WEAPON_PERCENT_DAMAGE) targets TARGET_UNIT_TARGET_ENEMY, routed through Spell::SelectImplicitTargetObjectTargets, which always calls SelectImplicitChainTargets (src/server/game/Spells/Spell.cpp:1905-1920); Spell::SearchChainTargets's own comment names a 10y jump radius for SPELL_DAMAGE_CLASS_MELEE as used 'for swipe, cleave and similar' when no per-spell JumpDistance override exists (Spell.cpp:2200-2213). The chain is inherent to every cast (ChainTarget 2, i.e. 1 beyond the primary, not gated by any separate passive), so this is a single-phase fixed-count check rather than a before/after passive delta."
+    },
+    {
       "spell": 525024, "name": "Scarlet Judicator", "kind": "count",
       "quote": "strikes 2 additional enemies near the primary target", "expected": 2,
       "target_rank": 807805,

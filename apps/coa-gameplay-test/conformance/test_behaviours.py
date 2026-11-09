@@ -9,9 +9,10 @@ import unittest
 from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_COUNT,
                         BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION,
                         BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY,
-                        BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA,
-                        BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO,
-                        BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER, MECHANIC_LAND_ATTEMPTS, STRIKER, NotModelled,
+                        BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
+                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
+                        BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER, MECHANIC_LAND_ATTEMPTS, STRIKER,
+                        NotModelled,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
                         OathConsumptionRemovalSpec,
                         amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
@@ -21,6 +22,7 @@ from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_
                         crit_magnitude_scenario, crit_magnitude_spec,
                         duration_refresh_scenario, duration_refresh_spec, duration_scenario, duration_spec,
                         exclusivity_chain_scenario, exclusivity_chain_spec,
+                        fixed_target_count_scenario, fixed_target_count_spec,
                         group_stack_cap_scenario, group_stack_cap_spec,
                         health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
                         healing_ratio_spec, icd_gate_scenario, icd_gate_spec, leech_heal_modifier_factor,
@@ -114,8 +116,15 @@ TENACIOUS_DEFENDER = 707385
 TEMPLE_GUARDIAN = 803792
 
 
+HOLY_CLEAVE = 573049
+
+
 def scarlet_judicator_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == SCARLET_JUDICATOR)
+
+
+def holy_cleave_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == HOLY_CLEAVE)
 
 
 def justice_entry() -> dict:
@@ -448,7 +457,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 53)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 54)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -494,6 +503,43 @@ class TargetCountScenarioTests(unittest.TestCase):
                                     if step.get('action') == 'cast' and step.get('spell') == spec.target_rank)
             self.assertLess(learn_index, first_cast_index,
                             f'{spec.target_rank} must be learned before it is first cast')
+
+
+class FixedTargetCountScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_fixtures(self):
+        spec = fixed_target_count_spec(holy_cleave_entry())
+        scenario, expectations = fixed_target_count_scenario(CLASS_FILE, spec)
+        validated = run.validate(scenario)
+        self.assertEqual(len(validated['creatures']), 2)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_FIXED_COUNT)
+        self.assertTrue(expectation.rule.startswith('prose: "and an additional nearby enemy'))
+        self.assertEqual(len(expectation.model['dummy_labels']), 1)
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, holy_cleave_entry())
+        self.assertEqual(len(run.validate(scenario)['creatures']), 2)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_FIXED_COUNT)
+
+    def test_single_phase_has_no_before_measurement(self):
+        spec = fixed_target_count_spec(holy_cleave_entry())
+        scenario, _ = fixed_target_count_scenario(CLASS_FILE, spec)
+        measure_steps = [step for step in scenario['steps']
+                         if step.get('action') == 'assert' and step.get('metric') == spec.metric
+                         and step.get('spell') == spec.target_rank]
+        self.assertEqual(len(measure_steps), 2)
+
+    def test_cast_spell_defaults_to_the_claim_spell(self):
+        spec = fixed_target_count_spec(holy_cleave_entry())
+        self.assertEqual(spec.cast_spell, HOLY_CLEAVE)
+        self.assertEqual(spec.target_rank, HOLY_CLEAVE)
+
+    def test_cast_spell_and_target_rank_can_be_overridden(self):
+        entry = {**holy_cleave_entry(), 'cast_spell': 1, 'target_rank': 2}
+        spec = fixed_target_count_spec(entry)
+        self.assertEqual(spec.cast_spell, 1)
+        self.assertEqual(spec.target_rank, 2)
 
 
 class AuraSpreadScenarioTests(unittest.TestCase):
@@ -1929,6 +1975,38 @@ class JudgeTargetCountTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({'b1': 0.0, 'a1': 1.0}), expectation)
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('b2', verdict.explanation)
+
+    def test_no_run_reports_no_scenario(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), None, expectation)
+        self.assertIn('no scenario', verdict.explanation)
+
+
+class JudgeFixedTargetCountTests(unittest.TestCase):
+    def expectation(self, expected=1):
+        model = {'kind': 'fixed_count', 'expected': expected, 'quote': 'and an additional nearby enemy',
+                 'dummy_labels': ['a1']}
+        return Expectation('label', BEHAVIOUR_FIXED_COUNT, HOLY_CLEAVE, HOLY_CLEAVE, None, '1',
+                           'prose: "and an additional nearby enemy" (573049)', model)
+
+    def test_measured_count_matches_expected_is_ok(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 1.0}), expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.measured, 1.0)
+
+    def test_seeded_zero_hit_against_a_nonzero_expectation_fails(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 0.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 0.0)
+        self.assertEqual(verdict.expected, 1.0)
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('a1', verdict.explanation)
 
     def test_no_run_reports_no_scenario(self):
         expectation = self.expectation()

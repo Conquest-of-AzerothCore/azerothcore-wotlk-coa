@@ -12,9 +12,9 @@ from typing import Callable, Mapping, Protocol
 from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_CHECKS,
                         BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION,
                         BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY,
-                        BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA,
-                        BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO,
-                        BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER)
+                        BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
+                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
+                        BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER)
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
@@ -2002,6 +2002,24 @@ def behaviour_count_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
                                f'a measured 0 against a nonzero expected is always an alert')
 
 
+def behaviour_fixed_count_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    hits = []
+    for label in model['dummy_labels']:
+        value = run.values.get(label)
+        if value is None:
+            return replace(base, explanation=missing_measurement(run, label))
+        hits.append(value > 0)
+    measured = float(sum(hits))
+    expected = float(model['expected'])
+    status = delta_status(BEHAVIOUR_FIXED_COUNT, measured, expected)
+    margin = delta_margin(BEHAVIOUR_FIXED_COUNT, expected)
+    return replace(base, status=status, measured=measured, expected=expected, low=expected - margin,
+                   high=expected + margin,
+                   explanation=f'{int(measured)} of {len(hits)} additional dummies hit; |measured - expected| <= '
+                               f'max({delta_floor(BEHAVIOUR_FIXED_COUNT):g}, {RELATIVE_TOLERANCE:.1%} of expected), '
+                               f'and a measured 0 against a nonzero expected is always an alert')
+
+
 def behaviour_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     before = run.values.get(model['before_label'])
     after = run.values.get(model['after_label'])
@@ -2501,6 +2519,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
     model = expectation.model
     if expectation.check == BEHAVIOUR_COUNT:
         return behaviour_count_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_FIXED_COUNT:
+        return behaviour_fixed_count_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_RATIO:
         if model.get('kind') == 'leech_ratio':
             return behaviour_leech_ratio_verdict(base, run, model)

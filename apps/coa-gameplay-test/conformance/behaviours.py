@@ -28,16 +28,17 @@ BEHAVIOUR_GROUP_STACK_CAP = 'behaviour_group_stack_cap'
 BEHAVIOUR_SINGLE_TARGET = 'behaviour_single_target'
 BEHAVIOUR_CRIT_MAGNITUDE = 'behaviour_crit_magnitude'
 BEHAVIOUR_CHARGE_RECHARGE = 'behaviour_charge_recharge'
+BEHAVIOUR_FIXED_COUNT = 'behaviour_fixed_count'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
                     BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_EXCLUSIVITY,
                     BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_CRIT_MAGNITUDE,
-                    BEHAVIOUR_CHARGE_RECHARGE)
+                    BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
-        'charge_recharge')
+        'charge_recharge', 'fixed_count')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -163,6 +164,70 @@ def target_count_scenario(class_file: dict, spec: TargetCountSpec) -> tuple[dict
     model = {'kind': 'count', 'dummy_labels': list(zip(before_labels, after_labels)), 'expected': spec.expected,
              'quote': entry.quote}
     expectation = Expectation(label, BEHAVIOUR_COUNT, spec.spell, spec.target_rank, None, str(spec.expected),
+                              prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+@dataclass(frozen=True)
+class FixedTargetCountSpec:
+    spell: int
+    name: str
+    quote: str
+    expected: int
+    radius: float
+    radius_reason: str
+    cast_spell: int = 0
+    target_rank: int = 0
+    metric: str = 'spell_damage_count'
+    repeats: int = 5
+
+    def __post_init__(self):
+        if not self.cast_spell:
+            object.__setattr__(self, 'cast_spell', self.spell)
+        if not self.target_rank:
+            object.__setattr__(self, 'target_rank', self.cast_spell)
+
+
+def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'fixed_count', spec.quote, spec.expected)
+    dummy_count = spec.expected + 1
+    primary_distance = 3.0
+    distances = [primary_distance] + [
+        primary_distance + spec.radius * (index / dummy_count) for index in range(1, dummy_count)]
+    creatures = [dummy_fixture(index, class_file, distances[index]) for index in range(dummy_count)]
+
+    facts = facts_of(records, spec.cast_spell)
+    wait_ms = facts.cast_time_ms + CAST_MARGIN_MS
+
+    def cast_steps() -> list[dict]:
+        steps = []
+        for _ in range(spec.repeats):
+            if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+                steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
+                             'value': facts.mana_cost})
+            steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.cast_spell})
+            steps += required_aura_steps(facts)
+            steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': dummy_id(0)})
+            steps.append({'action': 'wait', 'ms': wait_ms})
+        return steps
+
+    def measure() -> list[dict]:
+        return [hit_measurement(spec, index, AFTER) for index in range(dummy_count)]
+
+    extra_labels = [hit_label(spec, index, AFTER) for index in range(1, dummy_count)]
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour fixed count',
+        'contract': f'{spec.repeats} casts, "ever hit at least once" per dummy, single phase (the breadth is '
+                    f'inherent to the cast, not gated by a separate passive learn): {spec.radius_reason}',
+        'players': [player_fixture(class_file)],
+        'creatures': creatures,
+        'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}] +
+                 cast_steps() + measure()}
+    label = f'{spec.spell} behaviour_fixed_count'
+    model = {'kind': 'fixed_count', 'dummy_labels': extra_labels, 'expected': spec.expected, 'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_FIXED_COUNT, spec.spell, spec.target_rank, None, str(spec.expected),
                               prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]
 
@@ -481,6 +546,12 @@ def target_count_spec(entry: dict) -> TargetCountSpec:
     return TargetCountSpec(entry['spell'], entry['name'], entry['quote'], entry['expected'], entry['target_rank'],
                            entry['radius'], entry['radius_reason'], entry.get('metric', 'spell_damage_count'),
                            entry.get('repeats', 5))
+
+
+def fixed_target_count_spec(entry: dict) -> FixedTargetCountSpec:
+    return FixedTargetCountSpec(entry['spell'], entry['name'], entry['quote'], entry['expected'], entry['radius'],
+                                entry['radius_reason'], entry.get('cast_spell', 0), entry.get('target_rank', 0),
+                                entry.get('metric', 'spell_damage_count'), entry.get('repeats', 5))
 
 
 def healing_ratio_spec(entry: dict) -> HealingRatioSpec:
@@ -1892,6 +1963,8 @@ def charge_recharge_spec(entry: dict) -> ChargeRechargeSpec:
 def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
     if entry['kind'] == 'count':
         return target_count_scenario(class_file, target_count_spec(entry))
+    if entry['kind'] == 'fixed_count':
+        return fixed_target_count_scenario(class_file, fixed_target_count_spec(entry))
     if entry['kind'] == 'ratio':
         return healing_ratio_scenario(class_file, healing_ratio_spec(entry))
     if entry['kind'] == 'leech_ratio':
