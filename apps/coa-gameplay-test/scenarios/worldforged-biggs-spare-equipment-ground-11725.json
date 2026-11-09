@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "Worldforged Biggs's Spare Equipment rests on its crate instead of inside it (#11725)",
+  "contract": "#11725 reported the Biggs's Spare Equipment pickup (gameobject entry 254380, guid 6940119) clipping through a box. It stood inside the Replacecrate02 model, 0.75 yd under the surface the server measures at its position with a model surface 0.45 yd above it. It now rests on that surface at z 23.509, so it sits on the crate and the chest opens.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -10535.1,
+    "y": -2840.7,
+    "z": 24.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 254380,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the pickup stays at its spot, raised to the crate surface",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -10535.1,
+      "y": -2840.7,
+      "z": 23.509,
+      "max": 0.3,
+      "guid": 6940119,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup rests on the crate surface instead of 0.75 yd under it",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.3,
+      "guid": 6940119,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is grounded within 0.8 yd",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 6940119,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is not under water",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6940119,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no model surface lies above the pickup (0.45 yd of headroom while it was inside the crate)",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "min": 5,
+      "guid": 6940119,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 254380
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}
