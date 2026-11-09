@@ -486,9 +486,16 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         scenario, expectations = self.build(SCOURGEBANE, SCOURGEBANE)
         item = next(item for item in expectations if item.displayed == '$520007h')
         self.assertTrue(item.rule.startswith(UNMEASURABLE + 'chance_pct token'), item.rule)
+        self.assertIn('"92111 proc_rate"', item.rule)
         self.assertFalse(self.steps_of(scenario, item.label))
         self.assertNotIn('spell_proc_chance', {step.get('metric') for step in scenario['steps']})
         self.assertNotIn('set_aura', {step['action'] for step in scenario['steps']})
+
+    def test_foreign_count_stays_unmeasurable_without_a_chance_cross_reference(self):
+        scenario, expectations = self.build(NORGANNONS_WRATH, NORGANNONS_WRATH)
+        item = next(item for item in expectations if item.displayed == '$524740i')
+        self.assertEqual(item.rule, UNMEASURABLE + 'count token without a no-combat metric')
+        self.assertFalse(self.steps_of(scenario, item.label))
 
     def test_expanded_token_is_measured_on_the_referenced_spell(self):
         scenario, expectations = self.build(ZEALOTRY_PASSIVE, ZEALOTRY_PASSIVE)

@@ -447,8 +447,11 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int) -> tuple[d
                 expect(label, 'aura_duration_ms', None, shown.text, f'read {shown.kind}')
                 cast_wanted = True
             continue
-        expect(f'{rank_id} effect_value #{ordinal}', 'effect_value', effect, shown.text,
-               UNMEASURABLE + f'{shown.kind} token without a no-combat metric')
+        reason = f'{shown.kind} token without a no-combat metric'
+        if shown.kind == 'chance_pct':
+            reason += (f' (see the "{rank_id} proc_rate" trial-based verdict, if one exists, for the real '
+                       'measurement)')
+        expect(f'{rank_id} effect_value #{ordinal}', 'effect_value', effect, shown.text, UNMEASURABLE + reason)
     for ordinal, entry in enumerate(readout.unreadable, start=len(readout.values)):
         label = f'{rank_id} effect_value #{ordinal}'
         if first_effect is not None:
