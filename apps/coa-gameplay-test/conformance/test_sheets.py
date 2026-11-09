@@ -3,7 +3,7 @@ import tempfile
 import unittest
 
 from profile import DBC_DIR, load_class_file
-from sheets import render_text, scripted_hooks, sheet, talent_catalog_entry, write_sheets
+from sheets import render_text, scripted_hooks, sheet, talent_catalog_entry, talent_catalog_ranks, write_sheets
 from values import dataset
 
 TEMPLAR_CLASS_ID = 19
@@ -98,6 +98,13 @@ class SheetTests(unittest.TestCase):
     def test_sheet_carries_the_talent_catalog_entry(self):
         data = sheet(DBC_DIR, self.class_file, SCOURGEBANE)
         self.assertIn(SCOURGEBANE, data['talent_catalog_entry']['ranks'])
+
+    def test_talent_catalog_ranks_falls_back_on_a_missing_table(self):
+        class MissingTableDataset:
+            def load(self, name):
+                raise ValueError(f'Table not found: {name}')
+
+        self.assertEqual(talent_catalog_ranks(MissingTableDataset()), {})
 
 
 if __name__ == '__main__':

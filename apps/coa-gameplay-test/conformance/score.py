@@ -18,10 +18,10 @@ from compare import ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE
 from records import ENTRY_KINDS, KEY_FIELDS, key_of, load_records
 
 OPERATIONAL_FIELDS = {
-    'procs': frozenset({'aura', 'proc_spell', 'spell_proc', 'chance_pct', 'chance_value', 'chance_value_pct'}),
+    'procs': frozenset({'aura', 'proc_spell', 'spell_proc', 'chance_token'}),
     'triggers': frozenset({'aura', 'observe_spell'}),
-    'behaviours': frozenset({'spell', 'kind', 'values', 'value', 'value_percent', 'expected', 'expected_percent',
-                             'expected_ratio', 'expected_delta_percent'}),
+    'behaviours': frozenset({'spell', 'kind', 'expected', 'expected_before', 'expected_after', 'before_expected',
+                             'expected_ms', 'expected_ratio', 'levels', 'fraction'}),
     'passive_targets': frozenset({'spell', 'effect', 'targets'}),
     'talent_modifiers': frozenset({'talent', 'source'}),
     'effect_overrides': frozenset({'spell', 'effect', 'misc_value'}),

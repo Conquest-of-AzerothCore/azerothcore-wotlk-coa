@@ -87,7 +87,7 @@ def scripted_hooks(spell_id: int, src_dir: Path = COA_SRC) -> list[str]:
 def talent_catalog_ranks(dbc) -> dict:
     mapping: dict[int, dict] = {}
     try:
-        rows = table_rows(dbc, 'CharacterAdvancement', [f'RankSpell[{i}]' for i in range(TALENT_RANK_SLOTS)])
+        rows = list(table_rows(dbc, 'CharacterAdvancement', [f'RankSpell[{i}]' for i in range(TALENT_RANK_SLOTS)]))
     except ValueError:
         return mapping
     for entry_id, row in rows:

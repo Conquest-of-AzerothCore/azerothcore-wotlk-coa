@@ -48,6 +48,16 @@ class ValueComparisonTests(unittest.TestCase):
         actual = {'spell': 1, 'effect': 0, 'quote': 'a', 'value': 999}
         self.assertFalse(entries_match('literal_tokens', expected, actual))
 
+    def test_operational_mode_catches_a_wrong_proc_chance(self):
+        expected = {'aura': 1, 'proc_spell': 2, 'chance_token': '$s1'}
+        actual = {'aura': 1, 'proc_spell': 2, 'chance_token': '$s2'}
+        self.assertFalse(entries_match('procs', expected, actual))
+
+    def test_operational_mode_catches_a_wrong_behaviour_expected_value(self):
+        expected = {'spell': 1, 'kind': 'count', 'expected': 2}
+        actual = {'spell': 1, 'kind': 'count', 'expected': 5}
+        self.assertFalse(entries_match('behaviours', expected, actual))
+
 
 class ScoreKindTests(unittest.TestCase):
     def test_exact_match_counts_as_match(self):
