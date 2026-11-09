@@ -3,7 +3,8 @@ import tempfile
 import unittest
 
 from profile import DBC_DIR, load_class_file
-from sheets import render_text, scripted_hooks, sheet, write_sheets
+from sheets import render_text, scripted_hooks, sheet, talent_catalog_entry, write_sheets
+from values import dataset
 
 TEMPLAR_CLASS_ID = 19
 SCOURGEBANE = 92111
@@ -83,6 +84,20 @@ class SheetTests(unittest.TestCase):
             text = (Path(out_dir) / f'{SCOURGEBANE}.json').read_text(encoding='utf-8')
             self.assertNotIn('"procs"', text)
             self.assertNotIn('"verdict"', text)
+
+    def test_talent_catalog_entry_resolves_the_rank_key_space(self):
+        dbc = dataset(DBC_DIR)
+        entry = talent_catalog_entry(dbc, SCOURGEBANE)
+        self.assertIsNotNone(entry)
+        self.assertIn(SCOURGEBANE, entry['ranks'])
+
+    def test_talent_catalog_entry_is_none_for_a_spell_outside_the_catalog(self):
+        dbc = dataset(DBC_DIR)
+        self.assertIsNone(talent_catalog_entry(dbc, MISSING_SPELL))
+
+    def test_sheet_carries_the_talent_catalog_entry(self):
+        data = sheet(DBC_DIR, self.class_file, SCOURGEBANE)
+        self.assertIn(SCOURGEBANE, data['talent_catalog_entry']['ranks'])
 
 
 if __name__ == '__main__':

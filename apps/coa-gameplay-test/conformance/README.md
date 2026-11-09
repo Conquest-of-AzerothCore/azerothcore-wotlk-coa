@@ -2301,7 +2301,7 @@ numerator is unchanged between the two rows; only the denominator differs.
 
 ```sh
 python3 -B conformance.py sheets --class 19 --out DIR --spell ID [--spell ID ...] [--verdicts COMPARE_OUT]
-python3 -B score.py --records RECORDS_DIR --class-file classes/templar.json [--out score.json]
+python3 -B score.py --records RECORDS_DIR [--records-b RECORDS_B_DIR] --class-file classes/templar.json [--strict] [--out score.json]
 ```
 
 `sheets` (`sheets.py`) writes one `DIR/<spell_id>.json` and one `DIR/<spell_id>.txt` per `--spell`, built only from
@@ -2314,11 +2314,13 @@ it works on any spell id, not only a class's own passive ranks; the raw `ProcFla
 `EffectTriggerSpell[0..2]` fields (candidate proc/trigger material no existing module decodes for a spell with no
 hand-written entry yet); `values.facts_of`'s duration/cooldown/cast-time/aura-state facts; every `grep -rn -w
 <spell_id>` hit under `src/server/coa` (file:line, verbatim, not interpreted) as the scripted-hook material a DBC-only
-reading cannot see; and, when `--verdicts` names a `compare` output directory, that spell's existing verdicts. A
-sheet never includes a `classes/<name>.json` entry or a verdict's pass/fail judgement beyond the raw verdict rows
-themselves, so a reader given only the sheet cannot see what the class file already claims (the blind-reader
-requirement of the scale-out design,
-`.agents/plans/class-conformance-3/scale-out-sheets.md`).
+reading cannot see; `sheets.talent_catalog_entry`, the spell's own entry in `CharacterAdvancement.dbc` (CoA's talent
+catalog, not the stock `Talent` table) when the spell is one of a `RankSpell[0..4]`, giving `entry`, `rank_index` and
+every sibling `ranks` id so a reader can tell a talent rank apart from an ordinary ability and key a
+`talent_modifiers` record on it; and, when `--verdicts` names a `compare` output directory, that spell's existing
+verdicts. A sheet never includes a `classes/<name>.json` entry or a verdict's pass/fail judgement beyond the raw
+verdict rows themselves, so a reader given only the sheet cannot see what the class file already claims (the
+blind-reader requirement of the scale-out design, `.agents/plans/class-conformance-3/scale-out-sheets.md`).
 
 A **reader record** (`records.py`) is a reader's claim about one spell's one `entry_kind`: `spell_id`, `entry_kind`
 (one of the 9 kinds a class file's `procs`/`triggers`/`behaviours`/`passive_targets`/`talent_modifiers`/
@@ -2326,28 +2328,49 @@ A **reader record** (`records.py`) is a reader's claim about one spell's one `en
 class-file entry, validated against `REQUIRED_ENTRY_FIELDS[entry_kind]`, the fields every existing Templar entry of
 that kind has in common), `sources` (one `{token_or_field, sheet_section, value, citation}` per cited sheet value),
 `reader`, `confidence` (`high`/`low`) and `rationale`. `records.record_schema()` exports this shape as a JSON
-Schema document; `records.write_record_schema` writes it to a file. `records.validate_record` checks the required
-fields and that every kind's key fields (`KEY_FIELDS`, e.g. `aura` for `procs`/`triggers`, `spell` for
-`behaviours`) are present. `records.traceability_errors(record, sheet)` is the deterministic gate: every source's
-`value` must appear verbatim in `json.dumps(sheet, sort_keys=True)`, and every number in `entry` other than its own
-key fields must equal some source's `value` — a record that cites nothing, or claims a number no source matches,
-is rejected before any human sees it. `records.convert_records` groups a list of records by `entry_kind` into the
-`{kind: [entry, ...]}` shape a `classes/<name>.json` merge expects.
+Schema document, with a `guidance` block spelling out two conventions the schema fields alone do not state:
+`literal_tokens` is only for a tooltip number with no DBC token or effect behind it at all, never a hedge for a
+number a reader cannot bind to an effect index (that belongs in a residual); and `unmodelled_effects`/
+`effect_notes` are scored as the same claim (see `score.py` below), so either name is correct.
+`records.write_record_schema` writes it to a file. `records.validate_record` checks the required fields and that
+every kind's key fields (`KEY_FIELDS`, e.g. `aura` for `procs`/`triggers`, `spell` for `behaviours`) are present.
+`records.traceability_errors(record, sheet)` is the deterministic gate: every source's `value` (a bare literal, or
+a list of them for a multi-target claim; description and units belong only in `citation`) must appear verbatim in
+`json.dumps(sheet, sort_keys=True)`, and every number in `entry` other than its own key fields must equal some
+source's `value` — a record that cites nothing, or claims a number no source matches, is rejected before any human
+sees it. `records.convert_records` groups a list of records by `entry_kind` into the `{kind: [entry, ...]}` shape a
+`classes/<name>.json` merge expects. A reading round's own output is one of three batch shapes, not one file per
+record (a single record, a `{..., "records": [...], "residuals": [...]}` wrapper, or a bare list mixing record and
+residual dicts); `records.extract_batch_records`/`extract_batch_residuals` recognise all three, and
+`records.load_records`/`load_residuals` apply them to every `*.json` file in a directory, so `score.py` below runs
+directly on a round's own `records/<class>/<side>/` directory.
 
-`score.py` (`score.py --records RECORDS_DIR --class-file FILE`) loads every `*.json` record in `RECORDS_DIR`
-(`records.load_records`) and, per kind, groups both ground-truth and generated entries by their `KEY_FIELDS` key
-(a list per key, not a single entry: a `KEY_FIELDS` key is not guaranteed unique — e.g. Templar's `procs` carry two
-distinct `aura=560835` entries, two field-for-field identical `aura=803163` entries that differ only in a
-non-`KEY_FIELDS` `trigger` sub-object, `triggers` has a duplicate `aura=804927`, `behaviours` a duplicate
-`spell=300504`). Within one key, each ground-truth entry claims the first generated entry it field-matches exactly
-(removing it from that key's remaining pool); a ground-truth entry left unclaimed is a **miss** only if the pool is
-then empty, otherwise it consumes one remaining generated entry as a **wrong_value**; every generated entry still
-unclaimed at the end (whether its key matches no ground-truth key, or outnumbers it) is a **false_claim**. A
-**match** is a key shared by both sides whose fields agree within the same tolerance `compare.py` uses to call a
-measurement `ok`: `max(compare.ABSOLUTE_TOLERANCE, compare.RELATIVE_TOLERANCE * expected)` (currently `max(1,
-0.5%)`), not an arbitrary separate constant — so "close enough" means the same thing here as it means in
-`alerts.tsv`. `precision = match / (match + false_claim + wrong_value)`; `recall = match / (match + miss)`; both
-`None` when their denominator is 0. This is the validation protocol of
+`score.py` (`score.py --records RECORDS_DIR --class-file FILE`) loads every record in `RECORDS_DIR`
+(`records.load_records`, batch shapes included) and, per kind, groups both ground-truth and generated entries by
+their `KEY_FIELDS` key (a list per key, not a single entry: a `KEY_FIELDS` key is not guaranteed unique — e.g.
+Templar's `procs` carry two distinct `aura=560835` entries, two field-for-field identical `aura=803163` entries
+that differ only in a non-`KEY_FIELDS` `trigger` sub-object, `triggers` has a duplicate `aura=804927`, `behaviours`
+a duplicate `spell=300504`). `unmodelled_effects` and `effect_notes` require the same fields (`effect`, `reason`,
+`spell`) and are scored as one claim under `effect_notes`; `unmodelled_effects` is not a separate row.
+Within one key, each ground-truth entry claims the first generated entry it field-matches (removing it from that
+key's remaining pool); a ground-truth entry left unclaimed is a **miss** only if the pool is then empty, otherwise
+it consumes one remaining generated entry as a **wrong_value**; every generated entry still unclaimed at the end
+(whether its key matches no ground-truth key, or outnumbers it) is a **false_claim**. A **match** is a key shared
+by both sides whose *scored* fields agree within the same tolerance `compare.py` uses to call a measurement `ok`:
+`max(compare.ABSOLUTE_TOLERANCE, compare.RELATIVE_TOLERANCE * expected)` (currently `max(1, 0.5%)`), not an
+arbitrary separate constant — so "close enough" means the same thing here as it means in `alerts.tsv`. By default
+the scored fields are each kind's `OPERATIONAL_FIELDS` (plus its key fields): the measurable substance of the
+claim (`aura`+`observe_spell` for `triggers`, `spell`+`effect`+`targets` for `passive_targets`, and so on) rather
+than every field either side happens to carry — two independent readers, or a reader and the hand file, phrase a
+`name`/`quote`/`tooltip`/`reason`/… field differently for the identical fact, and a field only one side bothers to
+add (an investigation aside the schema does not require) counts for neither side. `--strict` compares every field
+of both entries instead, the literal field-by-field equality the design doc first proposed; it is far stricter
+since free-text wording is almost never identical between two independent authors.
+`precision = match / (match + false_claim + wrong_value)`; `recall = match / (match + miss)`; both `None` when
+their denominator is 0. `--records-b RECORDS_B_DIR` scores only the records both sides agree on: `score.merge_sides`
+groups each side by kind and key, promotes a pair that `entries_match`es (same strictness) into the merged set,
+and reports the rest as `only_a`/`only_b` (one side only) or a same-key disagreeing pair as a conflict — the
+`merge` block in the output gives these four counts. This is the validation protocol of
 `.agents/plans/class-conformance-3/scale-out-sheets.md` part 3, scored against Templar's own hand-written entries
 as ground truth.
 

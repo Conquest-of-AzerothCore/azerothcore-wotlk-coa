@@ -1,9 +1,11 @@
 from dataclasses import asdict
+from functools import lru_cache
 import json
 from pathlib import Path
 import subprocess
 
 from behaviours import cleaned_tooltip
+from classes import table_rows
 from passives import classify
 from profile import DBC_DIR
 from questions import ANY_STATS
@@ -15,6 +17,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 PROC_FIELDS = ('ProcFlags', 'ProcChance', 'ProcCharges')
 TRIGGER_SPELL_FIELDS = ('EffectTriggerSpell[0]', 'EffectTriggerSpell[1]', 'EffectTriggerSpell[2]')
 STAT_LABELS = ('low', 'high')
+TALENT_RANK_SLOTS = 5
 
 
 def serialize_readout(readout: Readout) -> dict:
@@ -80,6 +83,24 @@ def scripted_hooks(spell_id: int, src_dir: Path = COA_SRC) -> list[str]:
     return sorted(relative)
 
 
+@lru_cache(maxsize=None)
+def talent_catalog_ranks(dbc) -> dict:
+    mapping: dict[int, dict] = {}
+    try:
+        rows = table_rows(dbc, 'CharacterAdvancement', [f'RankSpell[{i}]' for i in range(TALENT_RANK_SLOTS)])
+    except ValueError:
+        return mapping
+    for entry_id, row in rows:
+        ranks = [row[f'RankSpell[{i}]'] for i in range(TALENT_RANK_SLOTS) if row[f'RankSpell[{i}]']]
+        for rank_index, rank_spell_id in enumerate(ranks):
+            mapping[rank_spell_id] = {'entry': entry_id, 'rank_index': rank_index, 'ranks': ranks}
+    return mapping
+
+
+def talent_catalog_entry(dbc, spell_id: int) -> dict | None:
+    return talent_catalog_ranks(dbc).get(spell_id)
+
+
 def verdict_entries(verdicts_dir, spell_id: int) -> list[dict]:
     if verdicts_dir is None:
         return []
@@ -114,6 +135,7 @@ def sheet(dbc_dir, class_file: dict, spell_id: int, verdicts_dir=None) -> dict:
         'facts': rank_facts(records, spell_id),
         'proc_trigger_fields': proc_trigger_candidate(records, spell_id),
         'scripted_hooks': scripted_hooks(spell_id),
+        'talent_catalog_entry': talent_catalog_entry(dbc, spell_id),
         'verdicts': verdict_entries(verdicts_dir, spell_id),
     }
 
@@ -153,6 +175,11 @@ def render_text(data: dict) -> str:
     for hook in data['scripted_hooks']:
         lines.append(f'  {hook}')
     lines.append('')
+    talent_entry = data.get('talent_catalog_entry')
+    if talent_entry:
+        lines.append(f"Talent catalog entry {talent_entry['entry']} rank {talent_entry['rank_index']}: "
+                     f"ranks {talent_entry['ranks']}")
+        lines.append('')
     lines.append('Verdicts:')
     for verdict in data['verdicts']:
         lines.append(f"  {verdict.get('check')} {verdict.get('status')}: {verdict.get('explanation')}")

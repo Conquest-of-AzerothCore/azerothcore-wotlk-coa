@@ -33,6 +33,25 @@ RESIDUAL_FIELDS = ('class', 'spell_id', 'tooltip', 'data_says', 'candidate_a', '
                    'answer', 'answered_by', 'answered_at')
 
 
+RECORD_FILE_SHAPE_NOTE = (
+    'One JSON file per record, entry_kind at the top level. Do not batch several records into one file.'
+)
+LITERAL_TOKENS_GUIDANCE = (
+    "literal_tokens is for a tooltip number with no DBC token or effect behind it at all (the schema's own "
+    "edge cases). A number you read but cannot bind to a specific effect index is not a literal_tokens entry: "
+    'file it as a residual instead, with the uncertainty stated in why_undecidable.'
+)
+SOURCE_VALUE_NOTE = (
+    "sources[].value is the bare literal the gate string-matches against the sheet: a plain number or a short "
+    'id, or a list of such literals for a multi-target claim. Any description, unit or derivation belongs in '
+    'citation, never joined into value.'
+)
+KIND_MERGE_NOTE = (
+    'unmodelled_effects and effect_notes share the same required fields (effect, reason, spell) and are scored '
+    'as one claim; pick whichever name reads better, the scorer does not distinguish them.'
+)
+
+
 def record_schema() -> dict:
     return {
         '$schema': 'https://json-schema.org/draft/2020-12/schema',
@@ -46,6 +65,7 @@ def record_schema() -> dict:
             'sources': {
                 'type': 'array',
                 'items': {'type': 'object', 'required': list(REQUIRED_SOURCE_FIELDS)},
+                'description': SOURCE_VALUE_NOTE,
             },
             'reader': {'type': 'string'},
             'confidence': {'enum': list(CONFIDENCE_LEVELS)},
@@ -55,6 +75,12 @@ def record_schema() -> dict:
         'residual': {
             'type': 'object',
             'required': list(RESIDUAL_FIELDS),
+        },
+        'file_shape': RECORD_FILE_SHAPE_NOTE,
+        'guidance': {
+            'literal_tokens': LITERAL_TOKENS_GUIDANCE,
+            'unmodelled_effects': KIND_MERGE_NOTE,
+            'effect_notes': KIND_MERGE_NOTE,
         },
     }
 
@@ -114,22 +140,32 @@ def numeric_leaves(value):
             yield from numeric_leaves(item)
 
 
+def value_tokens(value) -> list[str]:
+    if isinstance(value, (list, tuple)):
+        return [str(item) for item in value]
+    if value is None:
+        return []
+    return [str(value)]
+
+
 def traceability_errors(record: dict, sheet: dict) -> list[str]:
     sheet_text = json.dumps(sheet, sort_keys=True)
     sources = record.get('sources', [])
-    cited_values = {source.get('value') for source in sources}
+    cited_values: set[str] = set()
     errors = []
     for source in sources:
         value = source.get('value')
-        if value is None or str(value) not in sheet_text:
+        tokens = value_tokens(value)
+        if not tokens or any(token not in sheet_text for token in tokens):
             errors.append(f'source citation {value!r} does not appear verbatim in the sheet')
+        cited_values.update(tokens)
     kind = record.get('entry_kind')
     entry = record.get('entry', {})
     exempt = set(KEY_FIELDS.get(kind, ()))
     claimed_entry = {field: value for field, value in entry.items() if field not in exempt}
     for leaf in numeric_leaves(claimed_entry):
         text = number_text(leaf)
-        if text not in cited_values and str(leaf) not in cited_values:
+        if text not in cited_values:
             errors.append(f'entry number {leaf!r} has no matching source value')
     return errors
 
@@ -141,13 +177,55 @@ def convert_records(records: list[dict]) -> dict:
     return out
 
 
+def is_residual_payload(item) -> bool:
+    return isinstance(item, dict) and 'entry_kind' not in item and 'candidate_a' in item and 'candidate_b' in item
+
+
+def extract_batch_records(obj) -> list[dict]:
+    if isinstance(obj, dict) and 'entry_kind' in obj:
+        return [obj]
+    if isinstance(obj, dict) and 'records' in obj:
+        return [item for item in obj.get('records', []) if isinstance(item, dict) and 'entry_kind' in item]
+    if isinstance(obj, list):
+        records = []
+        for item in obj:
+            if not isinstance(item, dict) or 'entry_kind' not in item:
+                continue
+            if item['entry_kind'] == 'residual' or is_residual_payload(item):
+                continue
+            records.append(item)
+        return records
+    return []
+
+
+def extract_batch_residuals(obj) -> list[dict]:
+    if isinstance(obj, dict) and 'residuals' in obj:
+        return [item for item in obj.get('residuals', []) if isinstance(item, dict)]
+    if isinstance(obj, list):
+        residuals = []
+        for item in obj:
+            if is_residual_payload(item):
+                residuals.append(item)
+            elif isinstance(item, dict) and item.get('entry_kind') == 'residual' and isinstance(item.get('residual'), dict):
+                residuals.append(item['residual'])
+        return residuals
+    return []
+
+
 def load_records(records_dir: Path) -> list[dict]:
     records = []
     for path in sorted(Path(records_dir).glob('*.json')):
-        record = json.loads(path.read_text(encoding='utf-8'))
-        if 'entry_kind' in record:
-            records.append(record)
+        obj = json.loads(path.read_text(encoding='utf-8'))
+        records.extend(extract_batch_records(obj))
     return records
+
+
+def load_residuals(records_dir: Path) -> list[dict]:
+    residuals = []
+    for path in sorted(Path(records_dir).glob('*.json')):
+        obj = json.loads(path.read_text(encoding='utf-8'))
+        residuals.extend(extract_batch_residuals(obj))
+    return residuals
 
 
 def write_record_schema(out_path: Path) -> Path:

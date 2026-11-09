@@ -1,6 +1,6 @@
 import unittest
 
-from score import entries_match, score, score_kind, values_equal
+from score import entries_match, merge_sides, score, score_kind, values_equal
 
 CLASS_FILE = {
     'literal_tokens': [
@@ -36,6 +36,17 @@ class ValueComparisonTests(unittest.TestCase):
 
     def test_entries_match_ignores_field_order(self):
         self.assertTrue(entries_match('literal_tokens', {'spell': 1, 'value': 100}, {'value': 100, 'spell': 1}))
+
+    def test_operational_mode_ignores_free_text_wording(self):
+        expected = {'spell': 1, 'effect': 0, 'quote': 'Doubles the healing done to you', 'value': 100}
+        actual = {'spell': 1, 'effect': 0, 'quote': 'twice the healing you take', 'value': 100}
+        self.assertTrue(entries_match('literal_tokens', expected, actual))
+        self.assertFalse(entries_match('literal_tokens', expected, actual, strict=True))
+
+    def test_operational_mode_still_catches_a_numeric_disagreement(self):
+        expected = {'spell': 1, 'effect': 0, 'quote': 'a', 'value': 100}
+        actual = {'spell': 1, 'effect': 0, 'quote': 'a', 'value': 999}
+        self.assertFalse(entries_match('literal_tokens', expected, actual))
 
 
 class ScoreKindTests(unittest.TestCase):
@@ -116,6 +127,51 @@ class ScoreTests(unittest.TestCase):
         self.assertEqual(result['overall']['match'], 2)
         self.assertIn('literal_tokens', result['per_kind'])
         self.assertIn('procs', result['per_kind'])
+
+    def test_unmodelled_effects_is_not_a_separate_scored_kind(self):
+        result = score(CLASS_FILE, [])
+        self.assertNotIn('unmodelled_effects', result['per_kind'])
+        self.assertIn('effect_notes', result['per_kind'])
+
+
+class KindMergeTests(unittest.TestCase):
+    CLASS_FILE = {'effect_notes': [{'spell': 1, 'effect': 0, 'reason': 'hand reason'}]}
+
+    def test_a_reader_filed_under_the_other_merged_kind_still_matches(self):
+        records = [record('unmodelled_effects', {'spell': 1, 'effect': 0, 'reason': 'reader reason'})]
+        result = score_kind(self.CLASS_FILE, records, 'effect_notes')
+        self.assertEqual(result['match'], 1)
+        self.assertEqual(result['false_claim'], 0)
+
+    def test_the_merged_kind_is_not_also_scored_as_unmodelled_effects(self):
+        records = [record('unmodelled_effects', {'spell': 1, 'effect': 0, 'reason': 'reader reason'})]
+        result = score(self.CLASS_FILE, records)
+        self.assertEqual(result['overall']['match'], 1)
+        self.assertEqual(result['overall']['false_claim'], 0)
+
+
+class MergeSidesTests(unittest.TestCase):
+    def test_agreeing_sides_promote_to_one_merged_record(self):
+        side_a = [record('triggers', {'aura': 1, 'observe_spell': 2, 'name': 'a wording'})]
+        side_b = [record('triggers', {'aura': 1, 'observe_spell': 2, 'name': 'b wording'})]
+        result = merge_sides(side_a, side_b)
+        self.assertEqual(len(result['merged']), 1)
+        self.assertEqual(result['only_a'], [])
+        self.assertEqual(result['only_b'], [])
+        self.assertEqual(result['conflicts'], [])
+
+    def test_disagreeing_sides_are_a_conflict_not_a_merge(self):
+        side_a = [record('triggers', {'aura': 1, 'observe_spell': 2, 'name': 'a'})]
+        side_b = [record('triggers', {'aura': 1, 'observe_spell': 705268, 'name': 'b'})]
+        result = merge_sides(side_a, side_b)
+        self.assertEqual(result['merged'], [])
+        self.assertEqual(len(result['conflicts']), 1)
+
+    def test_one_sided_key_is_not_promoted(self):
+        side_a = [record('triggers', {'aura': 1, 'observe_spell': 2, 'name': 'a'})]
+        result = merge_sides(side_a, [])
+        self.assertEqual(result['merged'], [])
+        self.assertEqual(len(result['only_a']), 1)
 
 
 if __name__ == '__main__':

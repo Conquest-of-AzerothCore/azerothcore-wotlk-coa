@@ -2,8 +2,9 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from records import (REQUIRED_ENTRY_FIELDS, convert_records, key_of, load_records, number_text, numeric_leaves,
-                     record_schema, traceability_errors, validate_record, write_record_schema)
+from records import (REQUIRED_ENTRY_FIELDS, convert_records, extract_batch_records, extract_batch_residuals,
+                     key_of, load_records, load_residuals, number_text, numeric_leaves, record_schema,
+                     traceability_errors, validate_record, write_record_schema)
 
 SHEET = {
     'spell_id': 705268,
@@ -80,6 +81,17 @@ class TraceabilityTests(unittest.TestCase):
         errors = traceability_errors(record, SHEET)
         self.assertTrue(any('does not appear verbatim' in error for error in errors))
 
+    def test_list_valued_source_does_not_crash(self):
+        record = literal_token_record(value=100, sourced_value='100')
+        record['sources'][0]['value'] = [705268, 100]
+        self.assertEqual(traceability_errors(record, SHEET), [])
+
+    def test_list_valued_source_with_an_element_outside_the_sheet_is_rejected(self):
+        record = literal_token_record(value=100, sourced_value='100')
+        record['sources'][0]['value'] = [705268, 999999]
+        errors = traceability_errors(record, SHEET)
+        self.assertTrue(any('does not appear verbatim' in error for error in errors))
+
     def test_numeric_leaves_walks_nested_structures(self):
         leaves = list(numeric_leaves({'a': 1, 'b': [2, {'c': 3.5}], 'd': 'text', 'e': True}))
         self.assertEqual(leaves, [1, 2, 3.5])
@@ -104,6 +116,44 @@ class ConversionTests(unittest.TestCase):
             (Path(directory) / 'not-a-record.json').write_text(json.dumps({'other': 1}), encoding='utf-8')
             records = load_records(directory)
             self.assertEqual(len(records), 1)
+
+    def test_extract_batch_records_from_dict_wrapped_batch(self):
+        residual = {'class': 'templar', 'spell_id': 1, 'tooltip': 't', 'data_says': 'd', 'candidate_a': 'a',
+                    'candidate_b': 'b', 'why_undecidable': 'u', 'answer': None, 'answered_by': None,
+                    'answered_at': None}
+        batch = {'reader': 'a', 'class': 'templar', 'group': 1,
+                'records': [literal_token_record(), literal_token_record(value=50, sourced_value='50')],
+                'residuals': [residual]}
+        self.assertEqual(len(extract_batch_records(batch)), 2)
+        self.assertEqual(extract_batch_residuals(batch), [residual])
+
+    def test_extract_batch_records_from_bare_list_with_inline_residuals(self):
+        residual = {'class': 'templar', 'spell_id': 1, 'tooltip': 't', 'data_says': 'd', 'candidate_a': 'a',
+                    'candidate_b': 'b', 'why_undecidable': 'u', 'answer': None, 'answered_by': None,
+                    'answered_at': None}
+        batch = [literal_token_record(), residual]
+        self.assertEqual(len(extract_batch_records(batch)), 1)
+        self.assertEqual(extract_batch_residuals(batch), [residual])
+
+    def test_extract_batch_records_from_bare_list_with_wrapped_residual_kind(self):
+        wrapped_residual = {'spell_id': 1, 'entry_kind': 'residual', 'reader': 'b', 'class': 'templar',
+                            'residual': {'class': 'templar', 'spell_id': 1, 'tooltip': 't', 'data_says': 'd',
+                                        'candidate_a': 'a', 'candidate_b': 'b', 'why_undecidable': 'u',
+                                        'answer': None, 'answered_by': None, 'answered_at': None}}
+        batch = [literal_token_record(), wrapped_residual]
+        self.assertEqual(len(extract_batch_records(batch)), 1)
+        self.assertEqual(extract_batch_residuals(batch), [wrapped_residual['residual']])
+
+    def test_load_records_flattens_a_directory_of_batch_files_without_hand_flattening(self):
+        with tempfile.TemporaryDirectory() as directory:
+            import json
+            batch = {'reader': 'a', 'class': 'templar', 'group': 1,
+                    'records': [literal_token_record(), literal_token_record(value=50, sourced_value='50')],
+                    'residuals': []}
+            (Path(directory) / 'group-1.json').write_text(json.dumps(batch), encoding='utf-8')
+            records = load_records(directory)
+            self.assertEqual(len(records), 2)
+            self.assertEqual(load_residuals(directory), [])
 
 
 class SchemaExportTests(unittest.TestCase):
