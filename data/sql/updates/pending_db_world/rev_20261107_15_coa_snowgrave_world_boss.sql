@@ -2,7 +2,30 @@
 -- Winterspring takes players in (Normal only), the portal he leaves where he falls and the shrine at
 -- the entrance take them back, and players who die in his map rise at its start. The shrine's spot is taken in game.
 
--- Loot: no source shows his items yet; every player still gets the world boss rewards.
+-- Loot: one roll of his ten items (the drops seen on Ascension); snowgrave_instance_death_coa rolls one more for
+-- every four players in his map, and every player gets the runes and the Treasures of Azeroth chest.
+UPDATE `creature_template` SET `lootid` = 64627 WHERE `entry` = 64627;
+DELETE FROM `creature_loot_template` WHERE `Entry` = 64627;
+INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`,
+  `MinCount`, `MaxCount`, `Comment`) VALUES
+(64627, 17913, 0, 0, 0, 1, 1, 1, 1, 'Snowgrave - Frostbite Warcloak'),
+(64627, 17912, 0, 0, 0, 1, 1, 1, 1, 'Snowgrave - Glacierwoven Legwraps'),
+(64627, 18065, 0, 0, 0, 1, 1, 1, 1, 'Snowgrave - Frostwoven Spiritbinder Gloves'),
+(64627, 18084, 0, 0, 0, 1, 1, 1, 1, 'Snowgrave - Glacierbound Wristguards'),
+(64627, 17664, 0, 0, 0, 1, 1, 1, 1, 'Snowgrave - Glaciermind Spellfocus'),
+(64627, 17304, 0, 0, 0, 1, 1, 1, 1, 'Snowgrave - Crystalized Water Spike'),
+(64627, 18064, 0, 0, 0, 1, 1, 1, 1, 'Snowgrave - Band of Winter''s Grasp'),
+(64627, 17663, 0, 0, 0, 1, 1, 1, 1, 'Snowgrave - Frostbound Bulwark'),
+(64627, 18085, 0, 0, 0, 1, 1, 1, 1, 'Snowgrave - Frostbite Spellhammer'),
+(64627, 17665, 0, 0, 0, 1, 1, 1, 1, 'Snowgrave - Glacierborn Greatsword');
+
+-- The Treasures of Azeroth chest every world boss gives (978059) has a 5% roll at any world boss item (978060):
+-- his items join that pool.
+INSERT IGNORE INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`,
+  `GroupId`, `MinCount`, `MaxCount`, `Comment`)
+SELECT 978060, l.`Item`, 0, 0, 0, 1, 1, 1, 1, CONCAT('Treasures of Azeroth - World Boss - ', i.`name`)
+FROM `creature_loot_template` l JOIN `item_template` i ON i.`entry` = l.`Item`
+WHERE l.`Entry` = 64627 AND l.`GroupId` = 1 AND l.`Reference` = 0 AND i.`Quality` = 4;
 
 -- His health is per player in his map (10 to 40): each kill's pool over its players.
 UPDATE `coa_world_boss_level` SET `health` = 1120094, `note` = 'per player; kills 23:24/23:36, 22/24 players'
