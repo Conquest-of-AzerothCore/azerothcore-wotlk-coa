@@ -195,7 +195,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].ApplyAuraName = SPELL_AURA_MOD_SPEED_ALWAYS;
         info->Effects[0].BasePoints = 19;
         info->Effects[0].MiscValue = 0;
-        info->Effects[1].Effect = 0;
+        info->Effects[1].ApplyAuraName = SPELL_AURA_MECHANIC_IMMUNITY;
+        info->Effects[1].MiscValue = MECHANIC_SNARE;
     }
     if (id == 527272)
     {
