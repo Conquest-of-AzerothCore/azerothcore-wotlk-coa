@@ -1105,6 +1105,8 @@ guid) and returns the seconds until the actor's map respawns that spawn, from th
 the current loot window (zero if absent). The three `vanilla-dungeons-*` scenarios use these to check
 all 19 map/mode pairs per tier and a real VanCleef killing blow, without a GM access bypass.
 `nearest_creature_distance` requires player `entry` and reads the 2D distance from the player to the nearest living creature with that entry in its phase within 60 yards, or -1 when there is none.
+`nearby_creature_orientation` requires a player and `entry`, and returns the orientation in radians (0 to 2 pi) of the
+nearest living creature with that entry within 60 yards; it requires one to exist there.
 `nearby_creature_count` requires a player and `entry`, and counts living creatures in the same phase within
 60 yards. Optional `min_level` and `max_level` filter their native levels; `min_home_distance` keeps creatures
 at least that many yards from their own home positions (2D), and `spell` those carrying that aura. This can
@@ -1120,6 +1122,8 @@ down a ramp does not. Each one counted is logged with its spawn id, position and
 (0 open, 1 closed, 99 none).
 `nearby_gameobject_scale` takes `entry` and returns the object scale of the nearest such gameobject within
 20 yards (0 when none).
+`nearby_gameobject_orientation` takes `entry` and returns the orientation in radians (0 to 2 pi) of the nearest such
+gameobject within 20 yards; it requires a gameobject to exist there.
 `nearby_gameobject_display` takes `entry` and returns the display id the server sends for the nearest such
 gameobject within 20 yards (0 when none); it does not verify client rendering.
 `nearby_gameobject_ground_offset` takes `entry` and returns the nearest such gameobject's Z minus the map's terrain

@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Silithus Rock Stalkers are elite",
+  "contract": "Issue #11674. Rock Stalker (11739) is elite (rank 1) in CoA's own creature query cache (conquest-of-azeroth, captured 2026-09-04), so its creature query response carries rank 1. Its Silithus neighbour Sand Skitterer (11738) stays a normal creature (rank 0) in the same cache.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "player", "race": 1, "class": 25, "level": 60 }
+  ],
+  "steps": [
+    { "action": "client_packet", "label": "Query Rock Stalker", "actor": "player",
+      "opcode": 96, "consumed": false, "fields": [ { "u32": 11739 }, { "u64": 0 } ] },
+    { "action": "assert", "label": "Rock Stalker is elite", "actor": "player",
+      "metric": "creature_query_rank", "entry": 11739, "equals": 1, "within_ms": 5000 },
+    { "action": "client_packet", "label": "Query Sand Skitterer", "actor": "player",
+      "opcode": 96, "consumed": false, "fields": [ { "u32": 11738 }, { "u64": 0 } ] },
+    { "action": "assert", "label": "Sand Skitterer stays normal", "actor": "player",
+      "metric": "creature_query_rank", "entry": 11738, "equals": 0, "within_ms": 5000 }
+  ]
+}

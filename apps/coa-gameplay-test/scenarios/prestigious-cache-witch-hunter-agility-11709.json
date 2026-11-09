@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "name": "A Prestigious Cache gives a Witch Hunter Agility gear, not Intellect or Spirit cloth (#11709)",
+  "contract": "Report #11709: a Witch Hunter received cloth with spell power from a Prestigious Cache. ChrSpecs.dbc lists a specialization's primary stats in priority order (fields 8-10): Witch Hunter spec 11 lists Agility, then Intellect. A Prestigious Cache must prefer gear whose strongest of Strength, Agility, Intellect and Spirit is the first listed attribute, as every other CoA cache does, so after ten opens at the maximum level (a Prestigious Cache opens only at maximum level) of the Heroic Dungeons cache (1287304) no reward may have a stronger attribute than Agility. About 27 percent of the Witch Hunter-wearable preferred rewards were Agility-dominant when every Spirit and Misc row counted as a match, so the old selection fails this check in virtually every run.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "hunter",
+      "id": 11,
+      "label": "Witch Hunter picks ChrSpecs 11 (primary stats Agility then Intellect)"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "add_item",
+      "actor": "hunter",
+      "item": 1287304,
+      "count": 10
+    },
+    {
+      "action": "use_item",
+      "actor": "hunter",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 9,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "hunter",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 8,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "hunter",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 7,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "hunter",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 6,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "hunter",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "hunter",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "hunter",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "hunter",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "hunter",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "hunter",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Prestigious Cache rewards are in the bags",
+      "actor": "hunter",
+      "metric": "carried_pool_item_count",
+      "cache": 1287304,
+      "table": "prestigious",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no reward has a primary attribute stronger than Agility",
+      "actor": "hunter",
+      "metric": "carried_pool_item_count",
+      "cache": 1287304,
+      "table": "prestigious",
+      "off_stat": 3,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The rewards include Agility gear",
+      "actor": "hunter",
+      "metric": "carried_pool_item_count",
+      "cache": 1287304,
+      "table": "prestigious",
+      "dominant_stat": 3,
+      "min": 1
+    }
+  ]
+}

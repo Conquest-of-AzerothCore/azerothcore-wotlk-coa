@@ -132,8 +132,9 @@ METRICS = TIMELINE_METRICS | {
     'carried_item_level', 'carried_item_required_level', 'carried_item_armor', 'carried_item_scaling_level',
     'carried_item_stat',
     'nearby_gameobject_count', 'nearby_gameobject_quest_active', 'nearby_gameobject_state', 'nearby_gameobject_scale',
-    'nearby_gameobject_display', 'nearby_gameobject_ground_offset',
-    'nearby_creature_count', 'nearest_creature_distance', 'map_creature_count', 'map_creatures_below_floor',
+    'nearby_gameobject_display', 'nearby_gameobject_ground_offset', 'nearby_gameobject_orientation',
+    'nearby_creature_count', 'nearest_creature_distance', 'nearby_creature_orientation', 'map_creature_count',
+    'map_creatures_below_floor',
     'nearby_gameobject_at_client',
     'voidportal_group',
     'carried_money',
@@ -985,7 +986,7 @@ def validate(scenario):
                             f'{where}.entries must be a non-empty list')
                     for index, entry in enumerate(step['entries']):
                         number(entry, f'{where}.entries[{index}]', 1, 2**32 - 1, True)
-            if metric == 'nearest_creature_distance':
+            if metric in {'nearest_creature_distance', 'nearby_creature_orientation'}:
                 require(step['actor'] in player_ids, f'{where}: creature distance needs a player')
                 number(step.get('entry'), f'{where}.entry', 1, 2**32 - 1, True)
             if metric == 'map_creatures_below_floor':
@@ -1231,7 +1232,7 @@ def validate(scenario):
                           'spellbook_buy_succeeded', 'spellbook_buy_failed', 'cast_failure'}:
                 require('spell' in step, f'{where}: metric needs spell')
             if metric in {'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale',
-                          'nearby_gameobject_display'}:
+                          'nearby_gameobject_display', 'nearby_gameobject_orientation'}:
                 require('entry' in step, f'{where}: metric needs gameobject entry')
             if metric in {'quest_status', 'quest_takeable', 'quest_objective_count', 'quest_log_slot',
                           'quest_log_client_slot', 'quest_log_client_count'}:
@@ -1313,7 +1314,7 @@ def validate(scenario):
                           'dynamic_object', 'dynamic_object_duration_ms', 'dynamic_object_height',
                           'gossip_options', 'gossip_option_text',
                           'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale',
-                          'nearby_gameobject_display', 'at_homebind', 'summon_pending',
+                          'nearby_gameobject_display', 'nearby_gameobject_orientation', 'at_homebind', 'summon_pending',
                           'spellbook_rows', 'spellbook_offers_spell', 'spellbook_covers_spell',
                           'spellbook_learned_alerts', 'spellbook_buy_succeeded', 'spellbook_buy_failed',
                           'spellbook_buys_granted', 'spellbook_unannounced_buys',
