@@ -8,15 +8,16 @@ import unittest
 
 from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
                         BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH,
-                        BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION,
-                        BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER,
-                        MECHANIC_LAND_ATTEMPTS, STRIKER, NotModelled,
+                        BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA,
+                        BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO,
+                        BEHAVIOUR_TRIGGER, MECHANIC_LAND_ATTEMPTS, STRIKER, NotModelled,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
                         OathConsumptionRemovalSpec,
                         amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
                         aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
                         behaviour_scenario, crit_guarantee_scenario, crit_guarantee_spec,
                         duration_refresh_scenario, duration_refresh_spec, duration_scenario, duration_spec,
+                        exclusivity_chain_scenario, exclusivity_chain_spec,
                         health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
                         healing_ratio_spec, icd_gate_scenario, icd_gate_spec, leech_heal_modifier_factor,
                         leech_ratio_scenario, leech_ratio_spec,
@@ -80,6 +81,10 @@ RECKONING_ARMOR = 680870
 KEEPING_THE_OATH_PASSIVE = 92109
 HOLY_BOOKS = 706468
 LIBRAM_OF_CONSECRATION = 801441
+LIBRAM_OF_TENACITY = 801461
+LIBRAM_OF_GRACE = 801463
+LIBRAM_OF_ZEAL = 801466
+LIBRAM_OF_FERVOR = 805423
 TRANSCENDING_STRIKES = 804897
 DIVINE_FORCE = 806153
 WHIRLING_TEMPEST = 300504
@@ -160,6 +165,11 @@ def keeping_the_oath_passive_entry() -> dict:
 
 def holy_books_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == HOLY_BOOKS)
+
+
+def libram_exclusivity_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == LIBRAM_OF_CONSECRATION and entry['kind'] == 'exclusivity')
 
 
 def transcending_strikes_entry() -> dict:
@@ -359,7 +369,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 40)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 41)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1317,6 +1327,60 @@ class AmountDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(striker.get('spell_hit_bonus'), 100)
 
 
+class ExclusivityChainScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_the_expectations(self):
+        spec = exclusivity_chain_spec(libram_exclusivity_entry())
+        scenario, expectations = exclusivity_chain_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 5)
+        for expectation in expectations:
+            self.assertEqual(expectation.check, BEHAVIOUR_EXCLUSIVITY)
+            self.assertTrue(expectation.rule.startswith(
+                'prose: "Only 1 Libram spell can be active at a time."'))
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, libram_exclusivity_entry())
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 5)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_EXCLUSIVITY)
+
+    def test_chain_wraps_back_to_the_first_member(self):
+        spec = exclusivity_chain_spec(libram_exclusivity_entry())
+        _, expectations = exclusivity_chain_scenario(CLASS_FILE, spec)
+        removed_spells = [expectation.model['removed_spell'] for expectation in expectations]
+        self.assertEqual(removed_spells, [LIBRAM_OF_CONSECRATION, LIBRAM_OF_TENACITY, LIBRAM_OF_GRACE,
+                                          LIBRAM_OF_ZEAL, LIBRAM_OF_FERVOR])
+        kept_spells = [expectation.model['kept_spell'] for expectation in expectations]
+        self.assertEqual(kept_spells, [LIBRAM_OF_TENACITY, LIBRAM_OF_GRACE, LIBRAM_OF_ZEAL, LIBRAM_OF_FERVOR,
+                                       LIBRAM_OF_CONSECRATION])
+
+    def test_each_cast_resets_its_own_cooldown_first(self):
+        spec = exclusivity_chain_spec(libram_exclusivity_entry())
+        scenario, _ = exclusivity_chain_scenario(CLASS_FILE, spec)
+        for spell in spec.chain:
+            resets = [index for index, step in enumerate(scenario['steps'])
+                     if step.get('action') == 'reset_cooldown' and step.get('spell') == spell]
+            casts = [index for index, step in enumerate(scenario['steps'])
+                    if step.get('action') == 'cast' and step.get('spell') == spell]
+            self.assertTrue(resets)
+            self.assertTrue(casts)
+            self.assertLess(resets[0], casts[0])
+
+    def test_measures_aura_presence_on_the_removed_and_kept_spell_after_each_cast(self):
+        spec = exclusivity_chain_spec(libram_exclusivity_entry())
+        scenario, expectations = exclusivity_chain_scenario(CLASS_FILE, spec)
+        for expectation in expectations:
+            labels = {step['label'] for step in scenario['steps'] if step.get('action') == 'assert'}
+            self.assertIn(expectation.model['removed_label'], labels)
+            self.assertIn(expectation.model['kept_label'], labels)
+
+    def test_chain_of_fewer_than_two_spells_is_rejected(self):
+        entry = dict(libram_exclusivity_entry())
+        entry['chain'] = [LIBRAM_OF_CONSECRATION]
+        with self.assertRaises(ValueError):
+            exclusivity_chain_scenario(CLASS_FILE, exclusivity_chain_spec(entry))
+
+
 class FakeRun:
     def __init__(self, values, max_step_ms=None):
         self.values = values
@@ -1807,6 +1871,41 @@ class JudgeAmountDeltaTests(unittest.TestCase):
 
 SCOURGEBANE = 92111
 SCOURGEBANE_EXTRA_DAMAGE = 801832
+
+
+class JudgeExclusivityTests(unittest.TestCase):
+    def expectation(self):
+        model = {'kind': 'exclusivity', 'removed_label': 'removed', 'kept_label': 'kept',
+                 'removed_spell': LIBRAM_OF_CONSECRATION, 'kept_spell': LIBRAM_OF_TENACITY,
+                 'quote': 'Only 1 Libram spell can be active at a time.'}
+        return Expectation('label', BEHAVIOUR_EXCLUSIVITY, LIBRAM_OF_CONSECRATION, LIBRAM_OF_TENACITY, None, '0',
+                           'prose: "Only 1 Libram spell can be active at a time." (801441)', model)
+
+    def test_previous_removed_and_new_kept_is_ok(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'removed': 0.0, 'kept': 1.0}), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_both_auras_held_at_once_is_alert(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'removed': 1.0, 'kept': 1.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_the_newly_cast_libram_missing_its_own_aura_is_alert(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'removed': 0.0, 'kept': 0.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'removed': 0.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('kept', verdict.explanation)
+
+    def test_no_run_reports_no_scenario(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), None, expectation)
+        self.assertIn('no scenario', verdict.explanation)
 
 
 class CritGuaranteeScenarioTests(unittest.TestCase):

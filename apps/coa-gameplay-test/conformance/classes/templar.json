@@ -1606,6 +1606,12 @@
       "observe_source": "AscensionCustomResourceData.h:475 NativePowerGainRules {ClassId 19, FirstSpellId 0, LastSpellId 0, PowerType 3, InternalAmount 10, Event PeriodicDamageTick, RequiredAuraSpellId 301253}; AscensionCompat.cpp:3632-3680 OnPeriodicDamageTick adds 10 Energy (power type 3) per periodic-damage tick while 301253 is known, matching 524987's own EffectBasePoints[0]=9 -> shown value 10. Condemn 567541 (EffectApplyAuraName[0]=3 PERIODIC_DAMAGE, EffectAmplitude[0]=3000 ms, ManaCost 30, PowerType 3) is cast as a real periodic-damage source; the scenario's own set_power (via the generic mana-cost fixture) resets Energy to 0 immediately before each cast, so one tick's +10 is read exactly. Matches the already-written issue scenario apps/coa-gameplay-test/scenarios/templar-5163-warrior-of-tyr-energy-generation.json (#5163, #4432); no code or SQL fix needed, only this conformance entry (the prior disposition in this file's triggers list, now removed, wrongly called the effect dead: it searched only the ProcFlags/spell_proc path and missed the separate native-resource-rule path that actually implements this tooltip)."
     },
     {
+      "spell": 801441, "name": "Libram mutual exclusivity", "kind": "exclusivity",
+      "quote": "Only 1 Libram spell can be active at a time.",
+      "chain": [801441, 801461, 801463, 801466, 805423],
+      "observe_source": "data/sql/updates/pending_db_world/rev_20260907_02_exclusive_self_buffs.sql spell_group 1128 (stack_rule 2, 'one active Libram per caster') lists exactly these five rank-chain roots (801441 covers the 803890-803893 Libram of Consecration ranks via GetFirstSpellInChain, as SpellMgr::IsSpellMemberOfSpellGroup resolves membership). Stock engine code (Unit::AddAura calling Unit::RemoveAurasDueToSpellByGroup through the SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT path) removes a caster's previously held group member when a new member's aura applies; no CoA-specific code implements the exclusivity itself. Casting each Libram in turn and wrapping back to the first proves all five tooltip's identical ext-note clause in one chain: Consecration (801441/803893) removed by casting Tenacity, Tenacity (801461) removed by Grace, Grace (801463) removed by Zeal, Zeal (801466) removed by Fervor, and Fervor (805423) removed by looping back to Consecration."
+    },
+    {
       "spell": 706468, "name": "Holy Books", "kind": "amount_delta",
       "quote": "Using a Libram now removes", "fraction": 0.70,
       "target_aura": 803237,

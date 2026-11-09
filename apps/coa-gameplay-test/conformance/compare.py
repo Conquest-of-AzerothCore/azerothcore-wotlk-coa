@@ -11,9 +11,9 @@ from typing import Callable, Mapping, Protocol
 
 from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT,
                         BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
-                        BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA,
-                        BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO,
-                        BEHAVIOUR_TRIGGER)
+                        BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
+                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
+                        BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
@@ -2225,6 +2225,20 @@ def behaviour_internal_cooldown_gate_verdict(base: Verdict, run: Run, model: dic
                                f'inside the {icd:g} ms internal cooldown); {reopened_delta:+g} event(s) between '
                                f'the second and third ({model["reopen_gap_ms"]} ms apart, {icd:g} ms internal '
                                f'cooldown plus margin) ({model["quote"]!r})')
+def behaviour_exclusivity_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    removed = run.values.get(model['removed_label'])
+    kept = run.values.get(model['kept_label'])
+    if removed is None or kept is None:
+        return replace(base, explanation=missing_measurement(run, model['removed_label'] if removed is None
+                                                              else model['kept_label']))
+    removed_ok = abs(removed - 0.0) <= FLOAT_EPSILON
+    kept_ok = abs(kept - 1.0) <= FLOAT_EPSILON
+    status = 'ok' if removed_ok and kept_ok else 'alert'
+    return replace(base, status=status, measured=removed, expected=0.0, low=0.0, high=0.0,
+                   explanation=f'{model["removed_spell"]} aura measured {removed:g} (expected 0) after casting '
+                               f'{model["kept_spell"]}, whose own aura measured {kept:g} (expected 1); a nonzero '
+                               f'read on the previous member or a zero read on the newly cast member is always an '
+                               f'alert')
 
 
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
@@ -2259,6 +2273,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_oath_consumption_removal_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_INTERNAL_COOLDOWN_GATE:
         return behaviour_internal_cooldown_gate_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_EXCLUSIVITY:
+        return behaviour_exclusivity_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 

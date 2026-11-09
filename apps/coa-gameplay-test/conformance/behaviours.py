@@ -23,13 +23,14 @@ BEHAVIOUR_AURA_GRANT = 'behaviour_aura_grant'
 BEHAVIOUR_OATH_CONSUMPTION = 'behaviour_oath_consumption'
 BEHAVIOUR_OATH_CONSUMPTION_REMOVAL = 'behaviour_oath_consumption_removal'
 BEHAVIOUR_INTERNAL_COOLDOWN_GATE = 'behaviour_internal_cooldown_gate'
+BEHAVIOUR_EXCLUSIVITY = 'behaviour_exclusivity'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
-                    BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_INTERNAL_COOLDOWN_GATE)
+                    BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_EXCLUSIVITY)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
-        'internal_cooldown_gate')
+        'internal_cooldown_gate', 'exclusivity')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1292,6 +1293,70 @@ def icd_gate_spec(entry: dict) -> IcdGateSpec:
                       entry.get('caster_health_pct'), entry.get('restore_charges', False),
                       entry.get('force_crit'), entry.get('reopen_margin_ms', ICD_GATE_REOPEN_MARGIN_MS),
                       entry.get('trigger_actor', CASTER), entry.get('striker_entry'))
+EXCLUSIVITY_CAST_WAIT_MS = 300
+
+
+@dataclass(frozen=True)
+class ExclusivityChainSpec:
+    spell: int
+    name: str
+    quote: str
+    chain: tuple[int, ...]
+    wait_ms: int = EXCLUSIVITY_CAST_WAIT_MS
+
+
+def exclusivity_label(spell: int, phase: str) -> str:
+    return f'{spell} aura {phase}'
+
+
+def exclusivity_chain_scenario(class_file: dict, spec: ExclusivityChainSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    if len(spec.chain) < 2:
+        raise ValueError(f'{spec.name} exclusivity chain needs at least 2 spells, got {spec.chain}')
+    for member in spec.chain:
+        behaviour_entry(records, member, spec.name, 'exclusivity', spec.quote, 1.0)
+
+    def cast_steps(sid: int) -> list[dict]:
+        facts = facts_of(records, sid)
+        steps = []
+        if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
+                         'value': facts.mana_cost})
+        steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': sid})
+        steps += required_aura_steps(facts)
+        steps.append({'action': 'cast', 'actor': CASTER, 'spell': sid, 'target': CASTER})
+        steps.append({'action': 'wait', 'ms': spec.wait_ms})
+        return steps
+
+    sequence = list(spec.chain) + [spec.chain[0]]
+    steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': sid} for sid in spec.chain]
+    steps += cast_steps(sequence[0])
+    steps.append(measurement(exclusivity_label(sequence[0], 'kept_initial'), CASTER, 'aura', spell=sequence[0]))
+    expectations = []
+    for previous, following in zip(sequence, sequence[1:]):
+        steps += cast_steps(following)
+        removed_label = exclusivity_label(previous, f'removed_by_{following}')
+        kept_label = exclusivity_label(following, f'kept_after_{previous}')
+        steps.append(measurement(removed_label, CASTER, 'aura', spell=previous))
+        steps.append(measurement(kept_label, CASTER, 'aura', spell=following))
+        model = {'kind': 'exclusivity', 'removed_label': removed_label, 'kept_label': kept_label,
+                 'removed_spell': previous, 'kept_spell': following, 'quote': spec.quote}
+        expectations.append(Expectation(f'{previous} behaviour_exclusivity', BEHAVIOUR_EXCLUSIVITY, previous,
+                                        following, None, '0', prose_rule(spec.quote, previous), model))
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} behaviour exclusivity',
+        'contract': f'Casts each spell of the mutual exclusivity chain {spec.chain} in turn, looping back to the '
+                    f'first member, and after each cast reads the just-cast member\'s own aura (expected 1, kept) '
+                    f'and the previous member\'s aura (expected 0, removed): {spec.quote!r}.',
+        'players': [player_fixture(class_file)],
+        'steps': steps}
+    return scenario, expectations
+
+
+def exclusivity_chain_spec(entry: dict) -> ExclusivityChainSpec:
+    return ExclusivityChainSpec(entry['spell'], entry['name'], entry['quote'], tuple(entry['chain']),
+                                entry.get('wait_ms', EXCLUSIVITY_CAST_WAIT_MS))
 
 
 MECHANIC_DR_RESET_MS = 15000
@@ -1500,6 +1565,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return oath_consumption_removal_scenario(class_file, oath_consumption_removal_spec(entry))
     if entry['kind'] == 'internal_cooldown_gate':
         return icd_gate_scenario(class_file, icd_gate_spec(entry))
+    if entry['kind'] == 'exclusivity':
+        return exclusivity_chain_scenario(class_file, exclusivity_chain_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 
