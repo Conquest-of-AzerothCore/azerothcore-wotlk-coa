@@ -27,6 +27,8 @@ UPDATE `gameobject` SET `position_x` = -5456.72, `position_y` = 128.94, `positio
 -- #11777
 -- pickup 6940837 (Old Ogre Relic) moved 82.3 yd across and 31.17 yd up to its Ascension position
 UPDATE `gameobject` SET `position_x` = -7733.8024, `position_y` = -2792.3808, `position_z` = 164.6, `orientation` = 5.40399, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.425575, `rotation3` = -0.904923 WHERE `guid` = 6940837 AND `id` = 254669;
+-- the relic model was far too big for a pickup; its only spawn is this one
+UPDATE `gameobject_template` SET `size` = 0.3 WHERE `entry` = 254669;
 
 -- #11766
 -- pickup 6942389 (Fallen Glaive) moved 18.3 yd across and 5.09 yd up to the spot checked in the editor
