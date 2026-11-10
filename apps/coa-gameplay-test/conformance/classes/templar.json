@@ -1665,6 +1665,41 @@
       "trigger_spell": 804906,
       "oath_aura": 804922,
       "source": "AscensionTemplarAbilities.cpp:155-165, same Family(info,2,1) GrantOath block as 570233. 804906 Condemn has SpellFamilyFlags[2] bit 0 set (coa-dbc-viewer record); Named(info, 804906) matches 804906 directly, selecting oath 804922 (\"Oath: Condemn\")."
+    },
+    {
+      "spell": 572027, "name": "Righteous Upheaval", "kind": "oath_consumption",
+      "quote": "Consumes your Oaths, dealing additional damage for each consumed.",
+      "trigger_spell": 572027, "oath_spell": 804904, "relation": "ratio", "expected": 1.365,
+      "metric": "spell_damage_done", "effect": 0, "periodic": false, "target": "dummy",
+      "source": "804904 (Oath: Righteous Lunge) carries two ADD_PCT_MODIFIER (108) effects keyed to SPELLMOD_DAMAGE (MiscValue 0) whose EffectSpellClassMask word 2 includes bit 128 (effect 0 mask 161, effect 2 mask 128; coa-dbc-viewer record), both matching 572027's own SpellFamilyFlags word 2 (128, Family(info,2,128) == AscensionTemplar::Breaker), so both register in Player::m_spellMods[SPELLMOD_DAMAGE] and both multiply in Player::ApplySpellMod's totalmul (Player.cpp:10539). Rather than hand-deriving BasePoints via Spell.dbc (4 and 29, which undercounts: SpellEffectInfo::CalcValue's DieSides==1 roll adds +1, not +0, giving actual registered mod values 5 and 30), this entry's 1.365 is the engine's own ground truth, read directly with the spell_modifier metric (base 1000, op 0) before and after fixturing 804904 to 1 stack: 1000 -> 1364.9998779296875 (round10/judging-work/diag, 2026-11-10). 1.05 * 1.30 = 1.365, confirming both mods and the +1 die-roll correction together, not a coincidence. Unit::SpellDamageBonusDone (Unit.cpp:9920) applies this same op unconditionally for a non-DOT effect onto the already-computed tmpDamage (what the 'before' formula read already measures), so the ratio is exact and caster-stat-independent. AscensionTemplarAbilities.cpp:174 (Breaker(info) branch) calls ClearOaths(player) unconditionally on a 572027 cast (572027 is not Named(info,805409), the one exemption), consuming every held Oath aura including 804904."
+    },
+    {
+      "spell": 503141, "name": "Chastise", "kind": "oath_consumption",
+      "quote": "Consumes your Oaths, dealing additional damage for each consumed.",
+      "trigger_spell": 503141, "oath_spell": 804904, "relation": "ratio", "expected": 1.365,
+      "metric": "spell_damage_done", "effect": 0, "periodic": false, "target": "dummy",
+      "source": "Same mechanism and the same ground-truthed 1.365 ratio as 572027's own oath_consumption entry (see its source note for the spell_modifier diagnostic and the +1 die-roll correction): 503141's SpellFamilyFlags word 2 is 128 (coa-dbc-viewer record), matching both of 804904's SPELLMOD_DAMAGE-keyed effects. ClearOaths(player) runs unconditionally on the Breaker(info) branch of a 503141 cast."
+    },
+    {
+      "spell": 578276, "name": "Benediction", "kind": "oath_consumption",
+      "quote": "Consumes your Oaths, dealing additional healing for each consumed.",
+      "trigger_spell": 578276, "oath_spell": 804904, "relation": "ratio", "expected": 1.365,
+      "metric": "spell_healing_done", "effect": 1, "periodic": false, "target": "caster",
+      "source": "Same SpellMod mechanism and the same ground-truthed 1.365 ratio as 572027's own oath_consumption entry (see its source note), the healing side: Unit::SpellHealingBonusDone (Unit.cpp:10868) applies modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, heal) for a non-DOT heal, reading the same SPELLMOD_DAMAGE op list as damage. 578276's SpellFamilyFlags word 2 is 128, matching both of 804904's SPELLMOD_DAMAGE-keyed effects. Benediction's own healing effect is effect 1 (the class file's existing '578276 effect_value e1' labels for its headline clause); target is the caster (self-heal, matching the existing scenario convention 'target': 'self' used for this spell's other checks)."
+    },
+    {
+      "spell": 803872, "name": "Blade of Faith", "kind": "oath_consumption",
+      "quote": "Consumes your Oaths, dealing additional damage for each consumed.",
+      "trigger_spell": 803872, "oath_spell": 804903, "relation": "flat", "expected": 25,
+      "metric": "spell_damage_done", "effect": 0, "periodic": true, "target": "dummy",
+      "source": "803872 is a periodic-damage spell (Effect[0] 6 SPELL_EFFECT_APPLY_AURA, EffectApplyAuraName[0] 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude[0] 3000; coa-dbc-viewer record), so Unit::SpellDamageBonusDone is called with damagetype DOT and applies SPELLMOD_DOT instead of SPELLMOD_DAMAGE (Unit.cpp:9920). Of the 5 Oath auras, only 804903 (Oath: Holy Cleave) carries a SPELLMOD_DOT entry (effect 2, ApplyAuraName 107 ADD_FLAT_MODIFIER, MiscValue 22 = SPELLMOD_DOT, EffectSpellClassMask word 1 = 2048), matching 803872's own SpellFamilyFlags word 1 (2048); the other 4 Oaths' effect 2 is keyed to SPELLMOD_DAMAGE (misc 0), which this DOT path never consults, so they contribute 0 here even though 803872 also carries SpellFamilyFlags word 2 = 128. Rather than hand-deriving the raw Spell.dbc BasePoints (24, which undercounts: SpellEffectInfo::CalcValue's DieSides==1 roll adds +1, not +0), this entry's 25 is the engine's own ground truth, read directly with the spell_modifier metric (base 1000, op 22) before and after fixturing 804903 to 1 stack: 1000 -> 1025 exactly (round10/judging-work/diag, 2026-11-10). A SPELLMOD_FLAT op adds this value onto tmpDamage after every other scaling term (Player.cpp:10539's totalflat path), so the before/after delta is a fixed +25 regardless of caster stats. This entry is independent of the open dot-overshoot question (round10/questions-judging.md), which concerns 803872's own base periodic_total value, not this Oath delta."
+    },
+    {
+      "spell": 805421, "name": "Reckoning", "kind": "oath_consumption",
+      "quote": "Consumes your Oaths, dealing additional damage for each consumed.",
+      "trigger_spell": 572741, "oath_spell": 804904, "relation": "ratio", "expected": 1.365,
+      "metric": "spell_damage_done", "effect": 0, "periodic": false, "target": "dummy",
+      "source": "805421's own clause is proven via its max rank, 572741 (coa-dbc-viewer record: SpellFamilyFlags word 2 = 128, Effect[0] 2 SPELL_EFFECT_SCHOOL_DAMAGE), the same castable spell the class file's existing 572741-labelled checks for this clause's own headline damage already use. Same SpellMod mechanism and the same ground-truthed 1.365 ratio as 572027's own oath_consumption entry (see its source note for the spell_modifier diagnostic)."
     }
   ],
   "player_observations": [

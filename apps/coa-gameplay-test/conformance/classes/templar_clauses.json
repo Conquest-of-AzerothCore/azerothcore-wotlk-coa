@@ -611,7 +611,9 @@
   {
     "spell": 572027,
     "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
-    "labels": [],
+    "labels": [
+      "572027 behaviour_oath_consumption"
+    ],
     "kind": "claim"
   },
   {
@@ -2722,7 +2724,9 @@
   {
     "spell": 578276,
     "clause": "Consumes your Oaths, dealing additional healing for each consumed.",
-    "labels": [],
+    "labels": [
+      "578276 behaviour_oath_consumption"
+    ],
     "kind": "claim"
   },
   {
@@ -3001,7 +3005,9 @@
   {
     "spell": 503141,
     "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
-    "labels": [],
+    "labels": [
+      "503141 behaviour_oath_consumption"
+    ],
     "kind": "claim"
   },
   {
@@ -3163,7 +3169,9 @@
   {
     "spell": 803872,
     "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
-    "labels": [],
+    "labels": [
+      "803872 behaviour_oath_consumption"
+    ],
     "kind": "claim"
   },
   {
@@ -3544,7 +3552,9 @@
   {
     "spell": 805421,
     "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
-    "labels": [],
+    "labels": [
+      "805421 behaviour_oath_consumption"
+    ],
     "kind": "claim"
   },
   {

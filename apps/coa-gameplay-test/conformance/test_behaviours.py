@@ -8,16 +8,18 @@ import unittest
 
 from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
                         BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH,
-                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER, MECHANIC_LAND_ATTEMPTS,
-                        AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, amount_delta_scenario,
-                        amount_delta_spec, aura_grant_scenario, aura_grant_spec, aura_spread_scenario,
-                        aura_spread_spec, behaviour_entries, behaviour_entry, behaviour_scenario,
-                        crit_guarantee_scenario, crit_guarantee_spec, duration_refresh_scenario,
-                        duration_refresh_spec, duration_scenario, duration_spec, health_ratio_spec,
-                        health_threshold_ratio_scenario, healing_ratio_scenario, healing_ratio_spec,
-                        leech_heal_modifier_factor, leech_ratio_scenario, leech_ratio_spec,
+                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER,
+                        MECHANIC_LAND_ATTEMPTS, NotModelled,
+                        AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, OathConsumptionSpec,
+                        amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
+                        aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
+                        behaviour_scenario, crit_guarantee_scenario, crit_guarantee_spec,
+                        duration_refresh_scenario, duration_refresh_spec, duration_scenario, duration_spec,
+                        health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
+                        healing_ratio_spec, leech_heal_modifier_factor, leech_ratio_scenario, leech_ratio_spec,
                         mechanic_duration_scenario, mechanic_duration_spec, metric_delta_scenario,
-                        metric_delta_spec, shield_break_trigger_scenario, shield_break_trigger_spec,
+                        metric_delta_spec, oath_consumption_scenario, oath_consumption_spec,
+                        shield_break_trigger_scenario, shield_break_trigger_spec,
                         target_count_scenario, target_count_spec)
 from compare import Verdict, judge_behaviour
 from hits import aura_modifiers
@@ -353,7 +355,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 30)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 35)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1880,6 +1882,142 @@ class JudgeCritGuaranteeTests(unittest.TestCase):
 
     def test_no_run_reports_no_scenario(self):
         expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), None, expectation)
+        self.assertIn('no scenario', verdict.explanation)
+
+
+UPHEAVAL_BREAKER = 572027
+OATH_HOLY_CLEAVE = 804903
+
+
+class OathConsumptionScenarioTests(unittest.TestCase):
+    def ratio_spec(self):
+        return OathConsumptionSpec(UPHEAVAL_BREAKER, 'Righteous Upheaval',
+                                   'Consumes your Oaths, dealing additional damage for each consumed.',
+                                   UPHEAVAL_BREAKER, OATH_RIGHTEOUS_LUNGE, 'ratio', 1.365, 'spell_damage_done')
+
+    def flat_spec(self):
+        return OathConsumptionSpec(BLADE_OF_FAITH, 'Blade of Faith',
+                                   'Consumes your Oaths, dealing additional damage for each consumed.',
+                                   BLADE_OF_FAITH, OATH_HOLY_CLEAVE, 'flat', 25, 'spell_damage_done',
+                                   periodic=True)
+
+    def test_a_bad_relation_is_not_modelled(self):
+        with self.assertRaises(NotModelled):
+            oath_consumption_scenario(CLASS_FILE, replace(self.ratio_spec(), relation='nonsense'))
+
+    def test_scenario_reads_the_metric_before_and_after_fixturing_the_oath_then_casts_and_confirms_consumption(self):
+        scenario, [expectation] = oath_consumption_scenario(CLASS_FILE, self.ratio_spec())
+        validated = run.validate(scenario)
+        self.assertEqual(expectation.check, BEHAVIOUR_OATH_CONSUMPTION)
+        self.assertEqual(expectation.spell_id, UPHEAVAL_BREAKER)
+        self.assertEqual(expectation.rank_id, UPHEAVAL_BREAKER)
+        model = expectation.model
+        before_step = next(step for step in validated['steps'] if step.get('label') == model['before_label'])
+        after_step = next(step for step in validated['steps'] if step.get('label') == model['after_label'])
+        stacks_step = next(step for step in validated['steps'] if step.get('label') == model['stacks_label'])
+        self.assertEqual(before_step['metric'], 'spell_damage_done')
+        self.assertEqual(before_step['spell'], UPHEAVAL_BREAKER)
+        self.assertEqual(stacks_step['metric'], 'aura_stacks')
+        self.assertEqual(stacks_step['spell'], OATH_RIGHTEOUS_LUNGE)
+        set_aura_steps = [step for step in validated['steps']
+                          if step.get('action') == 'set_aura' and step.get('spell') == OATH_RIGHTEOUS_LUNGE]
+        self.assertEqual(len(set_aura_steps), 1)
+        self.assertEqual(set_aura_steps[0]['stacks'], 1)
+        cast_steps = [step for step in validated['steps']
+                     if step.get('action') == 'cast' and step.get('spell') == UPHEAVAL_BREAKER]
+        self.assertEqual(len(cast_steps), 1)
+        before_index = validated['steps'].index(before_step)
+        set_aura_index = validated['steps'].index(set_aura_steps[0])
+        after_index = validated['steps'].index(after_step)
+        cast_index = validated['steps'].index(cast_steps[0])
+        stacks_index = validated['steps'].index(stacks_step)
+        self.assertLess(before_index, set_aura_index)
+        self.assertLess(set_aura_index, after_index)
+        self.assertLess(after_index, cast_index)
+        self.assertLess(cast_index, stacks_index)
+
+    def test_a_periodic_flat_spec_reads_the_metric_with_periodic_true(self):
+        scenario, [_expectation] = oath_consumption_scenario(CLASS_FILE, self.flat_spec())
+        validated = run.validate(scenario)
+        before_step = next(step for step in validated['steps']
+                           if step.get('label', '').endswith('oath_consumption_before'))
+        self.assertTrue(before_step['periodic'])
+
+    def test_entries_from_the_class_file_round_trip_through_the_spec_parser(self):
+        entries = [entry for entry in CLASS_FILE['behaviours'] if entry['kind'] == 'oath_consumption']
+        self.assertEqual(len(entries), 5)
+        for entry in entries:
+            scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
+            self.assertEqual(expectation.rule, f'prose: "{entry["quote"]}" ({entry["spell"]})')
+            run.validate(scenario)
+
+
+class JudgeOathConsumptionTests(unittest.TestCase):
+    def ratio_expectation(self):
+        model = {'kind': 'oath_consumption', 'before_label': 'before', 'after_label': 'after',
+                 'stacks_label': 'stacks', 'relation': 'ratio', 'expected': 1.365, 'metric': 'spell_damage_done',
+                 'oath_spell': OATH_RIGHTEOUS_LUNGE,
+                 'quote': 'Consumes your Oaths, dealing additional damage for each consumed.'}
+        return Expectation('label', BEHAVIOUR_OATH_CONSUMPTION, UPHEAVAL_BREAKER, UPHEAVAL_BREAKER, None,
+                           '1.365', 'prose: "..." (572027)', model)
+
+    def flat_expectation(self):
+        model = {'kind': 'oath_consumption', 'before_label': 'before', 'after_label': 'after',
+                 'stacks_label': 'stacks', 'relation': 'flat', 'expected': 25, 'metric': 'spell_damage_done',
+                 'oath_spell': OATH_HOLY_CLEAVE,
+                 'quote': 'Consumes your Oaths, dealing additional damage for each consumed.'}
+        return Expectation('label', BEHAVIOUR_OATH_CONSUMPTION, BLADE_OF_FAITH, BLADE_OF_FAITH, None, '25',
+                           'prose: "..." (803872)', model)
+
+    def test_a_delta_matching_the_expected_ratio_and_a_consumed_oath_is_ok(self):
+        expectation = self.ratio_expectation()
+        values = {'before': 800.0, 'after': 1092.0, 'stacks': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_a_flat_delta_matching_25_and_a_consumed_oath_is_ok(self):
+        expectation = self.flat_expectation()
+        values = {'before': 1000.0, 'after': 1025.0, 'stacks': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_a_6_percent_deviation_from_the_expected_ratio_delta_is_an_alert(self):
+        expectation = self.ratio_expectation()
+        expected_delta = 800.0 * (1.365 - 1.0)
+        values = {'before': 800.0, 'after': 800.0 + expected_delta * 1.06, 'stacks': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_a_4_percent_deviation_from_the_expected_ratio_delta_is_tolerated(self):
+        expectation = self.ratio_expectation()
+        expected_delta = 800.0 * (1.365 - 1.0)
+        values = {'before': 800.0, 'after': 800.0 + expected_delta * 1.04, 'stacks': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'tolerated')
+
+    def test_a_correct_delta_with_the_oath_not_consumed_is_an_alert(self):
+        expectation = self.ratio_expectation()
+        values = {'before': 800.0, 'after': 1092.0, 'stacks': 1.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('consumed', verdict.explanation)
+
+    def test_a_seeded_unchanged_reading_is_an_alert(self):
+        expectation = self.ratio_expectation()
+        values = {'before': 800.0, 'after': 800.0, 'stacks': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.ratio_expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 800.0, 'after': 1092.0}),
+                                  expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('stacks', verdict.explanation)
+
+    def test_no_run_reports_no_scenario(self):
+        expectation = self.ratio_expectation()
         verdict = judge_behaviour(base_verdict(expectation), None, expectation)
         self.assertIn('no scenario', verdict.explanation)
 

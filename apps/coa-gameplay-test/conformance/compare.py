@@ -11,7 +11,8 @@ from typing import Callable, Mapping, Protocol
 
 from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT,
                         BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
-                        BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
+                        BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION,
+                        BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
@@ -2088,6 +2089,29 @@ def behaviour_aura_grant_verdict(base: Verdict, run: Run, model: dict) -> Verdic
                                f'missing Oath aura is always an alert ({model["quote"]!r})')
 
 
+def behaviour_oath_consumption_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    labels = ('before_label', 'after_label', 'stacks_label')
+    values = {label: run.values.get(model[label]) for label in labels}
+    missing = next((model[label] for label, value in values.items() if value is None), None)
+    if missing:
+        return replace(base, explanation=missing_measurement(run, missing))
+    before, after, stacks = values['before_label'], values['after_label'], values['stacks_label']
+    delta = after - before
+    expected = float(model['expected'])
+    expected_delta = before * (expected - 1.0) if model['relation'] == 'ratio' else expected
+    verdict = deterministic(base, delta, delta, expected_delta,
+                            f'{model["metric"]} measured {before:g} before {model["oath_spell"]} was fixtured to '
+                            f'1 stack and {after:g} after (delta {delta:+g}), both deterministic formula reads '
+                            f'with no combat roll; expected delta {expected_delta:+g} from {model["oath_spell"]}\'s '
+                            f'own Spell.dbc SpellMod effect ({model["relation"]} {expected:g})')
+    if stacks != 0 and verdict.status in ('ok', 'tolerated'):
+        verdict = replace(verdict, status='alert',
+                          explanation=verdict.explanation + f'; {model["stacks_label"]} measured {stacks:g} after '
+                                      f'actually casting the trigger spell (expected 0: the Oath must be consumed, '
+                                      f'not just read, {model["quote"]!r})')
+    return verdict
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
@@ -2114,6 +2138,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_crit_guarantee_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_AURA_GRANT:
         return behaviour_aura_grant_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_OATH_CONSUMPTION:
+        return behaviour_oath_consumption_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 

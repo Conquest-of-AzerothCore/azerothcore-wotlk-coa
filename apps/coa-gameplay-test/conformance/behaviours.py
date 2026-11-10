@@ -19,11 +19,12 @@ BEHAVIOUR_DURATION_REFRESH = 'behaviour_duration_refresh'
 BEHAVIOUR_AMOUNT_DELTA = 'behaviour_amount_delta'
 BEHAVIOUR_CRIT_GUARANTEE = 'behaviour_crit_guarantee'
 BEHAVIOUR_AURA_GRANT = 'behaviour_aura_grant'
+BEHAVIOUR_OATH_CONSUMPTION = 'behaviour_oath_consumption'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
-                    BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT)
+                    BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
-        'amount_delta', 'crit_guarantee', 'aura_grant')
+        'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 PROSE = 'prose: '
@@ -963,6 +964,80 @@ def aura_grant_spec(entry: dict) -> AuraGrantSpec:
                         entry.get('chain_aura', DEFAULT_CHAIN_AURA))
 
 
+OATH_CONSUMPTION_SETTLE_MS = 500
+
+
+@dataclass(frozen=True)
+class OathConsumptionSpec:
+    spell: int
+    name: str
+    quote: str
+    trigger_spell: int
+    oath_spell: int
+    relation: str
+    expected: float
+    metric: str
+    effect: int = 0
+    periodic: bool = False
+    target: str = TARGET
+
+
+def oath_consumption_label(spec: OathConsumptionSpec, moment: str) -> str:
+    return f'{spec.spell} {spec.metric} oath_consumption_{moment}'
+
+
+def oath_consumption_scenario(class_file: dict, spec: OathConsumptionSpec) -> tuple[dict, list[Expectation]]:
+    if spec.relation not in ('ratio', 'flat'):
+        raise NotModelled(f'oath_consumption relation {spec.relation!r} is neither ratio nor flat')
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'oath_consumption', spec.quote, spec.expected)
+    class_file = armed_for(class_file, records, spec.trigger_spell)
+    facts = facts_of(records, spec.trigger_spell)
+    before_label = oath_consumption_label(spec, BEFORE)
+    after_label = oath_consumption_label(spec, AFTER)
+    stacks_label = f'{spec.oath_spell} aura_stacks oath_consumption {spec.spell} after'
+    read_fields = {'spell': spec.trigger_spell, 'target': spec.target, 'effect': spec.effect,
+                  'periodic': spec.periodic}
+    steps = [measurement(before_label, CASTER, spec.metric, **read_fields),
+             {'action': 'set_aura', 'actor': CASTER, 'spell': spec.oath_spell, 'stacks': 1},
+             measurement(after_label, CASTER, spec.metric, **read_fields)]
+    if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+        steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
+                     'value': facts.mana_cost})
+    steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
+    steps += required_aura_steps(facts)
+    steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': spec.target})
+    steps.append({'action': 'wait', 'ms': OATH_CONSUMPTION_SETTLE_MS})
+    steps.append(measurement(stacks_label, CASTER, 'aura_stacks', spell=spec.oath_spell))
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour oath consumption',
+        'contract': f'{spec.metric} of {spec.trigger_spell} (effect {spec.effect}) is read once with no Oath held '
+                    f'and once immediately after fixturing Oath aura {spec.oath_spell} to 1 stack (set_aura, no '
+                    f'cast), a deterministic formula call with no combat roll; the {spec.relation} delta between '
+                    f'the two readings must match the Oath\'s own Spell.dbc SpellMod effect. {spec.trigger_spell} '
+                    f'is then actually cast once and {spec.oath_spell}\'s aura_stacks is read afterward, which '
+                    f'must read 0: casting a Breaker spell consumes the Oath (AscensionTemplar.cpp ClearOaths).',
+        'players': [player_fixture(class_file)],
+        'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}]
+                 + steps}
+    if spec.target == TARGET:
+        scenario['creatures'] = [creature_fixture(class_file)]
+    label = f'{spec.spell} behaviour_oath_consumption'
+    model = {'kind': 'oath_consumption', 'before_label': before_label, 'after_label': after_label,
+            'stacks_label': stacks_label, 'relation': spec.relation, 'expected': spec.expected,
+            'metric': spec.metric, 'oath_spell': spec.oath_spell, 'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_OATH_CONSUMPTION, spec.spell, spec.trigger_spell, None,
+                              str(spec.expected), prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def oath_consumption_spec(entry: dict) -> OathConsumptionSpec:
+    return OathConsumptionSpec(entry['spell'], entry['name'], entry['quote'], entry['trigger_spell'],
+                               entry['oath_spell'], entry['relation'], entry['expected'], entry['metric'],
+                               entry.get('effect', 0), entry.get('periodic', False), entry.get('target', TARGET))
+
+
 MECHANIC_DR_RESET_MS = 15000
 MECHANIC_GAP_MARGIN_MS = 2000
 MECHANIC_LAND_ATTEMPTS = 3
@@ -1163,6 +1238,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return crit_guarantee_scenario(class_file, crit_guarantee_spec(entry))
     if entry['kind'] == 'aura_grant':
         return aura_grant_scenario(class_file, aura_grant_spec(entry))
+    if entry['kind'] == 'oath_consumption':
+        return oath_consumption_scenario(class_file, oath_consumption_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 
