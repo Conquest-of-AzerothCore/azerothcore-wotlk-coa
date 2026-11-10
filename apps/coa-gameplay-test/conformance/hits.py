@@ -12,9 +12,9 @@ from profile import (CASTER, DBC_DIR, SETTLE_MS, base_steps, caster_stats_from, 
 from tooltip import (MIXED_PERIOD, OVER_TICKS, CasterStats, ForcedPoints, Readout, Records, Tooltip, Unreadable,
                      mixed_period_reason, period_reading, read_tooltip)
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, EFFECT_TOKEN,
-                    EFFECTS, MEAN_HALF_WIDTH, TARGET, UNREADABLE, Z_99, Expectation, RankFacts, Unmodelled, armed_for,
-                    closes_distance, dataset, equip_requirement, facts_of, required_aura_steps,
-                    required_target_health_steps, targets_ally)
+                    EFFECTS, GCD_WAIT_MS, MEAN_HALF_WIDTH, READ_STEP_MS, TARGET, UNREADABLE, Z_99, Expectation,
+                    RankFacts, Unmodelled, armed_for, closes_distance, dataset, equip_requirement, facts_of,
+                    required_aura_steps, required_target_health_steps, targets_ally)
 
 HIT_CHECKS = ('hit_mean', 'melee_mean', 'periodic_total', 'unmodelled')
 UNMODELLED = 'unmodelled: '
@@ -587,7 +587,8 @@ def measured_hit_model(class_file: dict, expectation: Expectation, measured: Map
         return melee_model(class_file, caster, target, auras)
     model = rank_hit(class_file, expectation.rank_id, caster, target, auras).model
     performed = expectation.model.get('part_casts', 1)
-    multiplier = self_stack_multiplier(class_file, expectation.rank_id, performed)
+    multiplier = self_stack_multiplier(class_file, expectation.rank_id, performed) \
+        * expectation.model.get('gate_multiplier', 1.0)
     return model if multiplier == 1.0 else replace(model, mean=model.mean * multiplier)
 
 
@@ -703,8 +704,28 @@ def self_stack_multiplier(class_file: dict, rank_id: int, performed: int) -> flo
     return 1.0 + entry['percent_per_stack'] / 100.0 * (performed - 1) / 2.0
 
 
+GATE_FIXTURE_STEP_COUNT = 5
+
+
+def gate_fixture_steps(target_gate_facts: RankFacts, gate_spell: int, restore_facts: RankFacts) -> list[dict]:
+    steps = [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': gate_spell}]
+    if target_gate_facts.mana_cost > 0 and not target_gate_facts.mana_cost_percentage \
+            and not target_gate_facts.mana_cost_per_level:
+        steps.append({'action': 'set_power', 'actor': CASTER, 'power': target_gate_facts.power_type,
+                      'value': target_gate_facts.mana_cost})
+    steps += required_aura_steps(target_gate_facts)
+    steps.append({'action': 'cast', 'actor': CASTER, 'spell': gate_spell, 'target': TARGET})
+    steps.append({'action': 'wait', 'ms': GCD_WAIT_MS})
+    if restore_facts.mana_cost > 0 and not restore_facts.mana_cost_percentage \
+            and not restore_facts.mana_cost_per_level:
+        steps.append({'action': 'set_power', 'actor': CASTER, 'power': restore_facts.power_type,
+                      'value': restore_facts.mana_cost})
+    return steps
+
+
 def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | None = None,
-             label: str | None = None, check: str = 'hit_mean') -> list[tuple[dict, list[Expectation]]]:
+             label: str | None = None, check: str = 'hit_mean',
+             gate: tuple[int, float, int] | None = None) -> list[tuple[dict, list[Expectation]]]:
     if casts < 1:
         raise ValueError(f'{spell.name} needs at least one cast, not {casts}')
     rank_id = spell.max_rank if rank_id is None else rank_id
@@ -712,14 +733,22 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
     name = f'Conformance hit {class_file["name"]} {spell.name} {rank_id}'
     contract = 'Mean non-critical hit of the highest rank against its tooltip, its known modifiers and mitigation.'
     learn = [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
+    if gate is not None:
+        learn = learn + [{'action': 'learn', 'actor': CASTER, 'spell': gate[2]}]
     records = records_of(class_file)
     armed_file = armed_for(class_file, records, rank_id)
     try:
         hit = rank_hit(armed_file, rank_id, reference_caster(armed_file), REFERENCE_TARGET,
                        armed_file.get('known_auras', []))
+        if gate is not None and hit.model.kind in HEAL_KINDS:
+            raise ValueError(f'{rank_id} target_aura_gate needs a hostile hit model, got {hit.model.kind!r}')
+        gate_facts = facts_of(records, gate[0]) if gate is not None else None
+        gate_extra_ms = (GCD_WAIT_MS + gate_facts.cast_time_ms + CAST_MARGIN_MS + GATE_FIXTURE_STEP_COUNT
+                         * READ_STEP_MS) if gate_facts else 0
         start_recovery = records.field('Spell', rank_id, 'StartRecoveryTime')
         interval = max(start_recovery, hit.facts.cast_time_ms, hit.duration_ms) + CAST_MARGIN_MS
-        shares = part_casts(scheduled_casts(casts), interval)
+        budget_interval = interval + gate_extra_ms
+        shares = part_casts(scheduled_casts(casts), budget_interval)
     except Unmodelled as error:
         note = hit_note(class_file, {spell.spell_id, rank_id})
         prefix = CLOSED if note and note.startswith('no check needed:') else UNMODELLED
@@ -734,13 +763,16 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
     weapon = weapon_profile(armed_file) if model.kind in WEAPON_KINDS else None
     order = ', percent of the roll before the flat bonus (ADR 0010)' if model.kind in WEAPON_KINDS else ''
     source = f' of triggered spell {hit.hit_spell} per tick' if hit.hit_spell != rank_id else ''
+    gate_note = f'; {gate[0]} re-cast on the target every trial, {gate[1]:g}% expected mean bonus' if gate else ''
     rule = (f'{model.kind} hit{source}{order}, integer steps modelled'
-            f'{weapon_note(class_file, armed_file, records, rank_id)}')
+            f'{weapon_note(class_file, armed_file, records, rank_id)}{gate_note}')
     unreadable = [Expectation(f'{label} unreadable #{ordinal}', check, spell.spell_id, rank_id, None, entry,
                               UNREADABLE + entry) for ordinal, entry in enumerate(hit.readout.unreadable)]
     cast_target = TARGET if hostile else (ALLY if ally else None)
     cast_fixtures = [{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}] \
         if ally and closes_distance(hit.facts) else []
+    if gate is not None:
+        cast_fixtures = cast_fixtures + gate_fixture_steps(gate_facts, gate[0], hit.facts)
     dual = dual_target_entry(class_file, rank_id) if not hostile else None
     if dual and model.kind != 'heal':
         raise ValueError(f'{rank_id} dual_target_effects needs a heal-kind model, got {model.kind!r}')
@@ -763,8 +795,11 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
             scenario['creatures'] = [creature_fixture(armed_file)]
         if ally:
             scenario['players'].append({**player_fixture(armed_file), 'id': ALLY})
-        scaled = replace(model, mean=model.mean * self_stack_multiplier(armed_file, rank_id, performed))
-        record = {**model_record(scaled, hit.school_mask, weapon, labels, casts), 'hit_spell': hit.hit_spell}
+        gate_multiplier = 1.0 + gate[1] / 100.0 if gate is not None else 1.0
+        scaled = replace(model, mean=model.mean * self_stack_multiplier(armed_file, rank_id, performed)
+                         * gate_multiplier)
+        record = {**model_record(scaled, hit.school_mask, weapon, labels, casts), 'hit_spell': hit.hit_spell,
+                  'gate_multiplier': gate_multiplier}
         expectation = Expectation(label, check, spell.spell_id, rank_id, hit.indexes[0],
                                   ' | '.join(model.displayed), rule,
                                   {**record, 'part': part, 'parts': len(shares), 'part_casts': performed})
@@ -777,7 +812,7 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
                 secondary_label, check, spell.spell_id, rank_id, dual['secondary_effect'],
                 ' | '.join(model.displayed), rule,
                 {**secondary_record, 'part': part, 'parts': len(shares), 'part_casts': performed})]
-        parts.append((timed(scenario, SETTLE_MS + performed * interval + DRAIN_MS),
+        parts.append((timed(scenario, SETTLE_MS + performed * budget_interval + DRAIN_MS),
                        [expectation] + secondary_expectations + (unreadable if part == 0 else [])))
     return parts
 

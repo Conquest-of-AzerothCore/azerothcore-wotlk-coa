@@ -160,6 +160,46 @@ def add_behaviour(writer: ManifestWriter, entry: dict):
     writer.add(key, 'behaviour', None, entry['spell'], expectations, scenario, name=entry['name'])
 
 
+def target_gate_entries(class_file: dict, spell_ids: list[int] | None) -> list[dict]:
+    entries = class_file.get('target_aura_gates', [])
+    if spell_ids is None:
+        return entries
+    chosen = [entry for entry in entries if entry['spell'] in spell_ids]
+    unknown = set(spell_ids) - {entry['spell'] for entry in chosen}
+    if unknown:
+        raise ValueError(f'Spells {sorted(unknown)} are not {class_file["name"]} target_aura_gates entries')
+    return chosen
+
+
+def add_target_gate(writer: ManifestWriter, entry: dict):
+    class_file = writer.class_file
+    records = records_of(class_file)
+    rank_id = entry['rank']
+    suffix = entry.get('label_suffix', '')
+    name = records.field('Spell', rank_id, 'SpellName[enUS]')
+    test_spell = ClassSpell(rank_id, name, (rank_id,), rank_id, 0, False)
+    label = f'{rank_id} hit_mean {suffix}' if suffix else f'{rank_id} hit_mean'
+    key = scenario_key(class_file['name'], 'target-gate', entry['spell'], suffix)
+    try:
+        casts = casts_needed(reference_hit_model(class_file, rank_id))
+    except Unmodelled as error:
+        writer.add(key, 'target_gate', test_spell, rank_id, unmodelled(label, test_spell, str(error)))
+        return
+    try:
+        parts = hit_parts(class_file, test_spell, casts, rank_id=rank_id, label=label,
+                          gate=(entry['gate_spell'], entry['percent'], entry['spell']))
+    except ValueError as error:
+        writer.add(key, 'target_gate', test_spell, rank_id, unmodelled(label, test_spell, str(error)))
+        return
+    if len(parts) == 1:
+        scenario, expectations = parts[0]
+        writer.add(key, 'target_gate', test_spell, rank_id, expectations, scenario)
+        return
+    for part, (scenario, expectations) in enumerate(parts, start=1):
+        writer.add(scenario_key(class_file['name'], 'target-gate', entry['spell'], suffix, 'part', part),
+                   'target_gate', test_spell, rank_id, expectations, scenario)
+
+
 def add_melee(writer: ManifestWriter):
     class_file = writer.class_file
     try:
@@ -270,7 +310,8 @@ def selected_passives(class_file: dict, dbc_dir: Path, spell_ids: list[int]) -> 
 
 def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: list[int] | None = None,
              stack: bool = False, passes: int = PASSES, passives: list[int] | None = None,
-             triggers: list[int] | None = None, behaviours: list[int] | None = None) -> Path:
+             triggers: list[int] | None = None, behaviours: list[int] | None = None,
+             target_gates: list[int] | None = None) -> Path:
     class_file = load_class_file(class_id)
     dbc_dir = Path(class_file.get('dbc_dir', DBC_DIR))
     out = Path(out)
@@ -280,11 +321,13 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
     scenario_dir.mkdir(parents=True, exist_ok=True)
     writer = ManifestWriter(class_file, out)
     everything = (spells is None and procs is None and passives is None and triggers is None and behaviours is None
-                 and not stack)
+                 and target_gates is None and not stack)
     chosen_procs = proc_entries(class_file, procs) if everything or procs is not None else []
     chosen_triggers = trigger_entries(class_file, triggers) if everything or triggers is not None else []
     chosen_passives = selected_passives(class_file, dbc_dir, passives) if passives is not None else []
     chosen_behaviours = behaviour_entries(class_file, behaviours) if everything or behaviours is not None else []
+    chosen_target_gates = target_gate_entries(class_file, target_gates) \
+        if everything or target_gates is not None else []
     generated_passives: set[int] = set()
     if everything or spells is not None:
         for spell in selected_spells(class_file, dbc_dir, spells):
@@ -303,6 +346,8 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
         add_trigger(writer, entry)
     for entry in chosen_behaviours:
         add_behaviour(writer, entry)
+    for entry in chosen_target_gates:
+        add_target_gate(writer, entry)
     if stack:
         add_stack(writer, passes)
     if everything:
@@ -329,7 +374,7 @@ def scaffold_command(args) -> int:
 
 def generate_command(args) -> int:
     path = generate(args.class_id, args.out, args.spell, args.proc, args.stack, args.passes, args.passive,
-                    args.trigger, args.behaviour)
+                    args.trigger, args.behaviour, args.target_gate)
     manifest = json.loads(path.read_text(encoding='utf-8'))
     written = sum(1 for entry in manifest['scenarios'] if entry['file'])
     print(f'{path}: {written} scenarios in {path.parent / SCENARIO_DIR}, '
@@ -421,6 +466,9 @@ def main(argv=None) -> int:
                             help='the aura of a trigger entry of the class file; repeat to select several triggers')
     generating.add_argument('--behaviour', type=int, action='append',
                             help='the spell of a behaviour entry of the class file; repeat to select several')
+    generating.add_argument('--target-gate', dest='target_gate', type=int, action='append',
+                            help='the spell of a target_aura_gates entry of the class file; repeat to select '
+                                 'several')
     generating.add_argument('--stack', action='store_true',
                             help='the passes of every stack configuration of the class file, cumulative talents')
     generating.add_argument('--passes', type=int, default=PASSES, help=f'passes per stack configuration ({PASSES})')

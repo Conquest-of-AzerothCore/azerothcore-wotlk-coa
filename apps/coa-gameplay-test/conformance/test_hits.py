@@ -1,10 +1,11 @@
+from dataclasses import replace
 import json
 import math
 from pathlib import Path
 import sys
 import unittest
 
-from classes import class_spells
+from classes import ClassSpell, class_spells
 from compare import Run, Verdict, judge_hit
 from hits import (CLOSED, HIT_CHECKS, MAX_SCENARIO_MS, UNMODELLED, HitModel, Modifier, Unmodelled, WeaponProfile,
                   casts_needed, dual_target_entry, effect_hit, expected_hit, hit_kind, hit_parts, hit_scenario,
@@ -95,6 +96,8 @@ TEMPLE_GUARDIAN_LIVE_RANK = 803792
 TITANSTRIKE = 806521
 TITANSTRIKE_MAX_RANK = 806835
 CHASTISE_MAX_RANK = 503141
+TEMPLARS_MIGHT = 705291
+CONDEMN_LIVE_RANK = 567539
 BENEDICTION = 801448
 BENEDICTION_MAX_RANK = 578276
 Z_99 = 2.576
@@ -689,6 +692,54 @@ class HitScenarioTest(unittest.TestCase):
         alert_verdict = judge_hit(base, self.templar, [(scenario, caster_never_healed, secondary)],
                                   measured_hit_model)
         self.assertEqual(alert_verdict.status, 'insufficient_trials')
+
+    def chastise_spell(self):
+        return ClassSpell(CHASTISE_MAX_RANK, 'Chastise', (CHASTISE_MAX_RANK,), CHASTISE_MAX_RANK, 0, False)
+
+    def test_templars_might_gate_learns_condemn_and_recasts_it_before_every_measured_hit(self):
+        entry = next(entry for entry in self.templar['target_aura_gates'] if entry['spell'] == TEMPLARS_MIGHT)
+        self.assertEqual({key: value for key, value in entry.items() if key != 'reason'},
+                         {'spell': TEMPLARS_MIGHT, 'name': "Templar's Might", 'rank': CHASTISE_MAX_RANK,
+                          'gate_spell': CONDEMN_LIVE_RANK, 'percent': 18.0, 'label_suffix': 'condemn_gate',
+                          'quote': 'on enemies affected by your Condemn'})
+        parts = hit_parts(self.templar, self.chastise_spell(), 3, rank_id=CHASTISE_MAX_RANK, label='gate test',
+                          gate=(entry['gate_spell'], entry['percent'], entry['spell']))
+        scenario, expectations = parts[0]
+        self.assertTrue(steps_with(scenario, action='learn', spell=TEMPLARS_MIGHT))
+        gate_casts = steps_with(scenario, action='cast', spell=CONDEMN_LIVE_RANK, target='dummy')
+        rank_casts = steps_with(scenario, action='cast', spell=CHASTISE_MAX_RANK, target='dummy')
+        self.assertEqual(len(gate_casts), len(rank_casts))
+        self.assertTrue(gate_casts)
+        hit = hit_expectation(expectations)
+        self.assertEqual(hit.model['gate_multiplier'], 1.18)
+
+    def test_templars_might_gate_judges_the_unscaled_measured_mean_as_alert(self):
+        entry = next(entry for entry in self.templar['target_aura_gates'] if entry['spell'] == TEMPLARS_MIGHT)
+        casts = 3
+        scenario, expectations = hit_parts(self.templar, self.chastise_spell(), casts, rank_id=CHASTISE_MAX_RANK,
+                                           label='gate test', gate=(entry['gate_spell'], entry['percent'],
+                                                                    entry['spell']))[0]
+        hit = hit_expectation(expectations)
+        measured = measured_reference(self.templar, hit)
+        scaled_model = measured_hit_model(self.templar, hit, measured)
+        labels = hit.model['measurements']
+        minimum = hit.model['minimum_hits']
+        base = Verdict(label=hit.label, status='unmeasured', measured=None, expected=None, low=None, high=None,
+                       explanation='')
+        correctly_gated = Run(key='gated', status='ok', message='',
+                              values={**measured, labels['total']: scaled_model.mean * minimum,
+                                      labels['count']: minimum},
+                              steps=[], max_step_ms=None)
+        ok_verdict = judge_hit(base, self.templar, [(scenario, correctly_gated, hit)], measured_hit_model)
+        self.assertEqual(ok_verdict.status, 'ok')
+        unscaled_hit = replace(hit, model={**hit.model, 'gate_multiplier': 1.0})
+        unscaled_model = measured_hit_model(self.templar, unscaled_hit, measured)
+        no_bonus_applied = Run(key='no-bonus', status='ok', message='',
+                               values={**measured, labels['total']: unscaled_model.mean * minimum,
+                                       labels['count']: minimum},
+                               steps=[], max_step_ms=None)
+        alert_verdict = judge_hit(base, self.templar, [(scenario, no_bonus_applied, hit)], measured_hit_model)
+        self.assertEqual(alert_verdict.status, 'alert')
 
     def test_benediction_hit_scenario_does_not_relocate_the_caster(self):
         scenario, expectations = hit_scenario(self.templar, self.benediction_spell(), 1)
