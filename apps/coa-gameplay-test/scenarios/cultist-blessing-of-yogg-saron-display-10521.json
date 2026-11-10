@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Blessing of Yogg-Saron's Faceless Monstrosity is drawn at player size, not boss size (#10521)",
+  "contract": [
+    "Talent 807128 makes Herald of the Depths 520326 also apply 806769, whose SPELL_AURA_TRANSFORM targets creature",
+    "250044 'Faceless Monstrosity'. Its display was 28844, the FacelessOne2 brute at DBC scale 4; transforms ignore",
+    "DisplayScale, so the Cultist was drawn at boss size. Display 280071 is the same model and skin at DBC scale 1",
+    "(#5707). Expected: with the talent, Herald leaves the Cultist on display 280071 at object scale 1."
+  ],
+  "timeout_ms": 30000,
+  "location": {"map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0},
+  "players": [
+    {"id": "cultist", "race": 1, "class": 25, "level": 22, "allow_regeneration": false}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "learn", "actor": "cultist", "spell": 520326},
+    {"action": "learn", "label": "Blessing of Yogg-Saron talent", "actor": "cultist", "spell": 807128},
+    {"action": "set_aura", "label": "Insanity meets Herald's caster requirement", "actor": "cultist", "spell": 500706,
+     "stacks": 90},
+    {"action": "wait", "ms": 2000},
+    {"action": "cast", "label": "Herald of the Depths", "actor": "cultist", "spell": 520326, "target": "cultist"},
+    {"action": "assert", "label": "SETUP: Herald is active", "actor": "cultist", "metric": "aura", "spell": 520326,
+     "equals": 1, "within_ms": 5000},
+    {"action": "assert", "label": "SETUP: the talent applied the Faceless Monstrosity form", "actor": "cultist",
+     "metric": "aura", "spell": 806769, "equals": 1, "within_ms": 5000},
+    {"action": "assert", "label": "The Cultist shows the player-sized Faceless Monstrosity display", "actor": "cultist",
+     "metric": "display_id", "equals": 280071},
+    {"action": "assert", "label": "No object scale change follows the transform", "actor": "cultist",
+     "metric": "unit_scale", "min": 0.99, "max": 1.01}
+  ]
+}
