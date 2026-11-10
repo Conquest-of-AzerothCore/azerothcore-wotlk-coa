@@ -64,6 +64,30 @@ INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry
 (22, 2, 764795, 0, 0, 29, 1, 775898, 100, 0, 1, 0, 0, '', 'Gorguk Skullhook - summon Ironhide Gorefist only if none is alive in the pit'),
 (22, 3, 764795, 0, 0, 29, 1, 775899, 100, 0, 1, 0, 0, '', 'Gorguk Skullhook - summon Majara only if no Majara is alive in the pit');
 
+-- retry (ours): while the quest is incomplete and its boss is not alive in the pit (it died for someone else, or
+-- despawned after the player died), Gorguk offers to send in the opponent again
+DELETE FROM `gossip_menu_option` WHERE `MenuID` = 764795;
+INSERT INTO `gossip_menu_option` (`MenuID`, `OptionID`, `OptionIcon`, `OptionText`, `OptionBroadcastTextID`, `OptionType`, `OptionNpcFlag`, `ActionMenuID`, `ActionPoiID`, `BoxCoded`, `BoxMoney`, `BoxText`, `BoxBroadcastTextID`, `VerifiedBuild`) VALUES
+(764795, 0, 0, 'I''m ready for my fight.', 0, 1, 1, 0, 0, 0, 0, '', 0, 0),
+(764795, 1, 0, 'I''m ready for my fight.', 0, 1, 1, 0, 0, 0, 0, '', 0, 0),
+(764795, 2, 0, 'I''m ready for my fight.', 0, 1, 1, 0, 0, 0, 0, '', 0, 0);
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 15 AND `SourceGroup` = 764795;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(15, 764795, 0, 0, 0, 9, 0, 760000, 0, 0, 0, 0, 0, '', 'Gorguk Skullhook - fight option while Warm Blooded Welcome is incomplete'),
+(15, 764795, 0, 0, 0, 29, 1, 775897, 100, 0, 1, 0, 0, '', 'Gorguk Skullhook - and no Brakka is alive in the pit'),
+(15, 764795, 1, 0, 0, 9, 0, 760001, 0, 0, 0, 0, 0, '', 'Gorguk Skullhook - fight option while No Chain, No Gain is incomplete'),
+(15, 764795, 1, 0, 0, 29, 1, 775898, 100, 0, 1, 0, 0, '', 'Gorguk Skullhook - and no Ironhide Gorefist is alive in the pit'),
+(15, 764795, 2, 0, 0, 9, 0, 760002, 0, 0, 0, 0, 0, '', 'Gorguk Skullhook - fight option while The Final Roar is incomplete'),
+(15, 764795, 2, 0, 0, 29, 1, 775899, 100, 0, 1, 0, 0, '', 'Gorguk Skullhook - and no Majara is alive in the pit');
+DELETE FROM `smart_scripts` WHERE `entryorguid` = 764795 AND `source_type` = 0 AND `id` BETWEEN 6 AND 11;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(764795, 0, 6, 9, 62, 0, 100, 0, 764795, 0, 0, 0, 0, 12, 775897, 4, 300000, 0, 0, 0, 8, 0, 0, 0, 0, -13344.084, 207.1044, 5.9858, 4.755127, 'Gorguk Skullhook - On Gossip Option 0 Selected - Summon Brakka'),
+(764795, 0, 7, 10, 62, 0, 100, 0, 764795, 1, 0, 0, 0, 12, 775898, 4, 300000, 0, 0, 0, 8, 0, 0, 0, 0, -13344.084, 207.1044, 5.9858, 4.755127, 'Gorguk Skullhook - On Gossip Option 1 Selected - Summon Ironhide Gorefist'),
+(764795, 0, 8, 11, 62, 0, 100, 0, 764795, 2, 0, 0, 0, 12, 775899, 4, 300000, 0, 0, 0, 8, 0, 0, 0, 0, -13344.084, 207.1044, 5.9858, 4.755127, 'Gorguk Skullhook - On Gossip Option 2 Selected - Summon Majara'),
+(764795, 0, 9, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gorguk Skullhook - On Link - Close Gossip'),
+(764795, 0, 10, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gorguk Skullhook - On Link - Close Gossip'),
+(764795, 0, 11, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 72, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 'Gorguk Skullhook - On Link - Close Gossip');
+
 -- Gorguk points the player to the pit (one line per quest, from the gameplay video)
 DELETE FROM `creature_text` WHERE `CreatureID` = 764795;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
