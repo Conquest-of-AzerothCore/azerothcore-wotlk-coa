@@ -11,7 +11,8 @@ from behaviours import (AFTER, BEFORE, BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GR
                         BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
                         BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
                         BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_FIXED_COUNT,
-                        BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA,
+                        BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
+                        BEHAVIOUR_METRIC_DELTA,
                         BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
                         BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER,
                         MECHANIC_LAND_ATTEMPTS, NO_CAST_FAILURE, SPELL_FAILED_ONLY_MOUNTED,
@@ -32,7 +33,8 @@ from behaviours import (AFTER, BEFORE, BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GR
                         fixed_target_count_scenario, fixed_target_count_spec,
                         group_stack_cap_scenario, group_stack_cap_spec,
                         health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
-                        healing_ratio_spec, icd_gate_scenario, icd_gate_spec, leech_heal_modifier_factor,
+                        healing_ratio_spec, icd_gate_scenario, icd_gate_spec,
+                        internal_cooldown_scenario, internal_cooldown_spec, leech_heal_modifier_factor,
                         leech_ratio_scenario, leech_ratio_spec,
                         mechanic_duration_scenario, mechanic_duration_spec, metric_delta_label, metric_delta_scenario,
                         metric_delta_spec, mount_grant_scenario, mount_grant_spec,
@@ -136,6 +138,8 @@ TITANSTRIKE = 806521
 TESTAMENT_OF_STRENGTH = 300514
 DIVINE_CHARGE = 527023
 CRUSADERS_PRESENCE = 562302
+DISCIPLINED_BLOWS = 680397
+DISCIPLINED_BLOWS_PULSE = 680398
 
 
 def scarlet_judicator_entry() -> dict:
@@ -211,6 +215,10 @@ def crusaders_presence_speed_entry() -> dict:
 def divine_charge_mount_grant_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours']
                if entry['spell'] == DIVINE_CHARGE and entry['kind'] == 'mount_grant')
+
+
+def disciplined_blows_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == DISCIPLINED_BLOWS)
 
 
 def spiritual_abdicator_entry() -> dict:
@@ -523,7 +531,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 65)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 66)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -4146,6 +4154,93 @@ class JudgeMountGrantTests(unittest.TestCase):
         run = FakeRun({'527023 mount_grant caster granted': 14584.0})
         verdict = judge_behaviour(base_verdict(expectation), run, expectation)
         self.assertIn('527023 mount_grant ally granted', verdict.explanation)
+
+
+class InternalCooldownScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_the_expectation(self):
+        spec = internal_cooldown_spec(disciplined_blows_entry())
+        scenario, expectations = internal_cooldown_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_INTERNAL_COOLDOWN)
+        self.assertEqual(expectation.spell_id, DISCIPLINED_BLOWS)
+        self.assertEqual(expectation.rank_id, 578276)
+        self.assertEqual(expectation.model['window_ms'], 500)
+
+    def test_the_item_use_lands_between_the_first_and_third_heal_casts(self):
+        spec = internal_cooldown_spec(disciplined_blows_entry())
+        scenario, _ = internal_cooldown_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        cast_indexes = [index for index, step in enumerate(steps)
+                        if step.get('action') == 'cast' and step.get('spell') == 578276]
+        item_index = next(index for index, step in enumerate(steps) if step.get('action') == 'use_item')
+        self.assertEqual(len(cast_indexes), 2)
+        self.assertLess(cast_indexes[0], item_index)
+        self.assertLess(item_index, cast_indexes[1])
+
+    def test_every_cast_resets_the_trigger_spells_own_cooldown_first(self):
+        spec = internal_cooldown_spec(disciplined_blows_entry())
+        scenario, _ = internal_cooldown_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        cast_indexes = [index for index, step in enumerate(steps)
+                        if step.get('action') == 'cast' and step.get('spell') == 578276]
+        for cast_index in cast_indexes:
+            preceding = steps[:cast_index]
+            self.assertTrue(any(step.get('action') == 'reset_cooldown' and step.get('spell') == 578276
+                                for step in preceding))
+
+    def test_every_measurement_label_has_a_matching_assert_step(self):
+        spec = internal_cooldown_spec(disciplined_blows_entry())
+        scenario, expectations = internal_cooldown_scenario(CLASS_FILE, spec)
+        measured_labels = {step.get('label') for step in scenario['steps'] if step.get('action') == 'assert'
+                           and step.get('metric') == 'spell_cast_count'
+                           and step.get('spell') == DISCIPLINED_BLOWS_PULSE}
+        model = expectations[0].model
+        for key in ('first_label', 'blocked_label', 'allowed_label'):
+            self.assertIn(model[key], measured_labels)
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, disciplined_blows_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_INTERNAL_COOLDOWN)
+
+
+class JudgeInternalCooldownTests(unittest.TestCase):
+    def expectation(self):
+        model = {'kind': 'internal_cooldown', 'first_label': '680397 internal_cooldown first',
+                 'blocked_label': '680397 internal_cooldown blocked',
+                 'allowed_label': '680397 internal_cooldown allowed', 'window_ms': 500,
+                 'quote': 'Cnly occur once every 0.5 sec.'}
+        return Expectation('680397 behaviour_internal_cooldown', BEHAVIOUR_INTERNAL_COOLDOWN, DISCIPLINED_BLOWS,
+                           578276, None, '500', 'prose: "Cnly occur once every 0.5 sec." (680397)', model)
+
+    def test_a_blocked_second_heal_and_a_later_third_heal_firing_is_ok(self):
+        expectation = self.expectation()
+        run = FakeRun({'680397 internal_cooldown first': 1.0, '680397 internal_cooldown blocked': 1.0,
+                      '680397 internal_cooldown allowed': 2.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_a_second_heal_firing_inside_the_window_is_alert(self):
+        expectation = self.expectation()
+        run = FakeRun({'680397 internal_cooldown first': 1.0, '680397 internal_cooldown blocked': 2.0,
+                      '680397 internal_cooldown allowed': 3.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_a_third_heal_still_blocked_past_the_window_is_alert(self):
+        expectation = self.expectation()
+        run = FakeRun({'680397 internal_cooldown first': 1.0, '680397 internal_cooldown blocked': 1.0,
+                      '680397 internal_cooldown allowed': 1.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_missing_measurement_explains_which_label(self):
+        expectation = self.expectation()
+        run = FakeRun({'680397 internal_cooldown first': 1.0, '680397 internal_cooldown blocked': 1.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertIn('680397 internal_cooldown allowed', verdict.explanation)
 
 
 if __name__ == '__main__':

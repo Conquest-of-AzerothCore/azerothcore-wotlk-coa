@@ -33,17 +33,20 @@ BEHAVIOUR_PARTY_STAT_RATIO = 'behaviour_party_stat_ratio'
 BEHAVIOUR_CAST_GATE = 'behaviour_cast_gate'
 BEHAVIOUR_CAST_CONDITION = 'behaviour_cast_condition'
 BEHAVIOUR_MOUNT_GRANT = 'behaviour_mount_grant'
+BEHAVIOUR_INTERNAL_COOLDOWN = 'behaviour_internal_cooldown'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
                     BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_EXCLUSIVITY,
                     BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_CRIT_MAGNITUDE,
                     BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_PARTY_STAT_RATIO,
-                    BEHAVIOUR_CAST_GATE, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_MOUNT_GRANT)
+                    BEHAVIOUR_CAST_GATE, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_MOUNT_GRANT,
+                    BEHAVIOUR_INTERNAL_COOLDOWN)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
-        'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition', 'mount_grant')
+        'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition', 'mount_grant',
+        'internal_cooldown')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -2160,6 +2163,88 @@ def mount_grant_spec(entry: dict) -> MountGrantSpec:
                           entry['mount_display_id'], entry['persist_spell'])
 
 
+INTERNAL_COOLDOWN_SETTLE_MS = 200
+
+
+@dataclass(frozen=True)
+class InternalCooldownSpec:
+    spell: int
+    name: str
+    quote: str
+    window_ms: float
+    trigger_spell: int
+    observe_spell: int
+    item: int
+    item_spell: int
+    allowed_wait_ms: int
+    caster_health_pct: int = 50
+    target: str = CASTER
+
+
+def internal_cooldown_label(spec: InternalCooldownSpec, moment: str) -> str:
+    return f'{spec.spell} internal_cooldown {moment}'
+
+
+def internal_cooldown_scenario(class_file: dict, spec: InternalCooldownSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'internal_cooldown', spec.quote, spec.window_ms)
+    facts = facts_of(records, spec.trigger_spell)
+
+    def cast_trigger_steps() -> list[dict]:
+        steps = [fixture_health_step(spec.target, spec.caster_health_pct),
+                 {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell}]
+        steps += required_aura_steps(facts)
+        if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
+                         'value': facts.mana_cost})
+        steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': spec.target})
+        return steps
+
+    first_label = internal_cooldown_label(spec, 'first')
+    blocked_label = internal_cooldown_label(spec, 'blocked')
+    allowed_label = internal_cooldown_label(spec, 'allowed')
+
+    def observe(label: str) -> dict:
+        return measurement(label, CASTER, 'spell_cast_count', spell=spec.observe_spell)
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour internal cooldown',
+        'contract': f'Window check: {spec.trigger_spell} is cast once, then item {spec.item} (own spell has '
+                    f'StartRecoveryTime 0, so it shares no global cooldown with {spec.trigger_spell}) heals the '
+                    f'same caster again well inside {spec.window_ms:g} ms of the first heal; {spec.observe_spell} '
+                    f'spell_cast_count must stay unchanged across that second heal. After waiting '
+                    f'{spec.allowed_wait_ms} ms past the window, {spec.trigger_spell} is cast again and '
+                    f'{spec.observe_spell} spell_cast_count must then increase by exactly one.',
+        'players': [player_fixture(class_file)],
+        'steps': base_steps(class_file) +
+                 [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
+                  {'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell},
+                  {'action': 'add_item', 'actor': CASTER, 'item': spec.item}] +
+                 cast_trigger_steps() +
+                 [{'action': 'wait', 'ms': INTERNAL_COOLDOWN_SETTLE_MS}, observe(first_label),
+                  fixture_health_step(spec.target, spec.caster_health_pct),
+                  {'action': 'use_item', 'actor': CASTER, 'item': spec.item, 'spell': spec.item_spell},
+                  {'action': 'wait', 'ms': INTERNAL_COOLDOWN_SETTLE_MS}, observe(blocked_label),
+                  {'action': 'wait', 'ms': spec.allowed_wait_ms}] +
+                 cast_trigger_steps() +
+                 [{'action': 'wait', 'ms': INTERNAL_COOLDOWN_SETTLE_MS}, observe(allowed_label)]}
+    if spec.target == TARGET:
+        scenario['creatures'] = [creature_fixture(class_file)]
+    label = f'{spec.spell} behaviour_internal_cooldown'
+    model = {'kind': 'internal_cooldown', 'first_label': first_label, 'blocked_label': blocked_label,
+             'allowed_label': allowed_label, 'window_ms': spec.window_ms, 'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_INTERNAL_COOLDOWN, spec.spell, spec.trigger_spell, None,
+                              str(spec.window_ms), prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def internal_cooldown_spec(entry: dict) -> InternalCooldownSpec:
+    return InternalCooldownSpec(entry['spell'], entry['name'], entry['quote'], entry['window_ms'],
+                                entry['trigger_spell'], entry['observe_spell'], entry['item'], entry['item_spell'],
+                                entry['allowed_wait_ms'], entry.get('caster_health_pct', 50),
+                                entry.get('target', CASTER))
+
+
 MECHANIC_DR_RESET_MS = 15000
 MECHANIC_GAP_MARGIN_MS = 2000
 MECHANIC_LAND_ATTEMPTS = 3
@@ -2493,6 +2578,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return cast_condition_scenario(class_file, cast_condition_spec(entry))
     if entry['kind'] == 'mount_grant':
         return mount_grant_scenario(class_file, mount_grant_spec(entry))
+    if entry['kind'] == 'internal_cooldown':
+        return internal_cooldown_scenario(class_file, internal_cooldown_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

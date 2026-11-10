@@ -13,9 +13,10 @@ from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_
                         BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
                         BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
                         BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_FIXED_COUNT,
-                        BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA,
-                        BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
-                        BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER)
+                        BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
+                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
+                        BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO,
+                        BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER)
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
@@ -2589,6 +2590,25 @@ def behaviour_mount_grant_verdict(base: Verdict, run: Run, model: dict) -> Verdi
                                f'on either actor is always an alert')
 
 
+def behaviour_internal_cooldown_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    first = run.values.get(model['first_label'])
+    blocked = run.values.get(model['blocked_label'])
+    allowed = run.values.get(model['allowed_label'])
+    missing = next((label for label, value in ((model['first_label'], first), (model['blocked_label'], blocked),
+                                               (model['allowed_label'], allowed)) if value is None), None)
+    if missing:
+        return replace(base, explanation=missing_measurement(run, missing))
+    blocked_ok = abs(blocked - first) <= FLOAT_EPSILON
+    allowed_ok = abs(allowed - (first + 1.0)) <= FLOAT_EPSILON
+    status = 'ok' if blocked_ok and allowed_ok else 'alert'
+    return replace(base, status=status, measured=blocked, expected=first, low=first, high=first,
+                   explanation=f'spell_cast_count measured {first:g} after the first heal, {blocked:g} after a '
+                               f'second heal landed inside the {model["window_ms"]:g} ms window (must stay '
+                               f'{first:g}), and {allowed:g} after a third heal landed past the window (must be '
+                               f'{first + 1.0:g}); a count change inside the window or no change past it is '
+                               f'always an alert')
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
@@ -2641,6 +2661,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_crit_magnitude_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_MOUNT_GRANT:
         return behaviour_mount_grant_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_INTERNAL_COOLDOWN:
+        return behaviour_internal_cooldown_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 
