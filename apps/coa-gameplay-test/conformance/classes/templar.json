@@ -2225,6 +2225,21 @@
       "spell": 500688, "name": "Spiritual Ascension", "kind": "cast_combat",
       "quote": "Usable while in combat.",
       "observe_source": "500688's own Attributes DBC field (coa-dbc-viewer record --id 500688) carries NOT_SHAPESHIFTED, AURA_IS_DEBUFF, ALLOW_WHILE_SITTING and NO_AURA_CANCEL only, no SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL -- unlike a stock combat-blocked resurrection spell such as Redemption (7328, whose own Attributes carries exactly that one flag, confirmed via the same tool); Spell.cpp's SpellInfo::CheckShapeshift/CheckCasterAuras path (the stock engine check that returns SPELL_FAILED_AFFECTING_COMBAT for a NOT_IN_COMBAT_ONLY_PEACEFUL spell when the caster IsInCombat()) therefore never triggers for 500688. The scenario has the caster attack a dummy fixture (real Unit::IsInCombat(), the harness's own 'combat' metric, reads true after the swing) and then casts 500688 at a dead ally (its only effect is 18 SPELL_EFFECT_RESURRECT) while still fighting; cast_failure reads 0 (no refusal) both now and before this step, so no server defect, stock engine behaviour already correct, unaudited by any existing scenario before this capability."
+    },
+    {
+      "spell": 804914, "name": "Beckon", "kind": "aggro_redirect",
+      "quote": "Taunt an enemy to attack you",
+      "targets": [{"distance": 3.0, "expected_redirect": true}],
+      "self_cast": false,
+      "observe_source": "coa-dbc-viewer record --id 804914: EffectImplicitTargetA[0..2] are all 6 (TARGET_UNIT_TARGET_ENEMY), a single explicit enemy target, not an area; Effect[0] 114 (SPELL_EFFECT_ATTACK_ME, Spell::EffectTaunt) calls ThreatMgr::MatchUnitThreatToHighestThreat(caster) once on cast, Effect[1] 11 (SPELL_AURA_MOD_TAUNT) applies a persistent AuraEffect::HandleModTaunt -> ThreatMgr::TauntUpdate() lock. Both require the target's own threat list to be non-empty (Spell::EffectTaunt returns early via SPELL_FAILED_DONT_REPORT-free no-op otherwise); the scenario's new 'engage' action (ThreatMgr::AddThreat + CreatureAI::AttackStart) gives the dummy fixture real threat and a real victim on the ally before the cast, rather than relying on emergent AI aggro timing."
+    },
+    {
+      "spell": 800424, "name": "Absolution", "kind": "aggro_redirect",
+      "quote": "Taunt all enemies within 8 yds",
+      "targets": [{"distance": 3.0, "expected_redirect": true}, {"distance": 6.0, "expected_redirect": true},
+                 {"distance": 20.0, "expected_redirect": false}],
+      "self_cast": true,
+      "observe_source": "coa-dbc-viewer record --id 800424: EffectImplicitTargetA[0] 22 (TARGET_SRC_CASTER) paired with EffectImplicitTargetB[0] 15 (TARGET_UNIT_SRC_AREA_ENEMY) and EffectRadiusIndex[0] 14 (SpellRadius.dbc RadiusMax 8.0), a self-centred area taunt (Effect[0] 6 SPELL_EFFECT_APPLY_AURA, EffectApplyAuraName[0] 11 SPELL_AURA_MOD_TAUNT) matching the tooltip's own '8 yds' literally, not inferred. Each dummy is attacked by the ally first (see the kind's own contract for why REACT_DEFENSIVE and a real swing are both needed) at a distance inside (3.0, 6.0 yd) or clearly outside (20.0 yd, past any area-search hitbox padding around the nominal 8.0 yd radius) the 8.0 yd radius; the cast is self-targeted (no explicit 'target' field, TARGET_SRC_CASTER has none). A first attempt at 10.0 yd (just past the nominal radius) measured redirected=true, an area-search padding effect around the boundary rather than a server defect in the 8 yd figure itself; 20.0 yd was chosen to test the clause unambiguously instead of characterising that padding, which is out of this capability's scope."
     }
   ],
   "player_observations": [

@@ -9,7 +9,7 @@ import re
 from statistics import fmean, pstdev
 from typing import Callable, Mapping, Protocol
 
-from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_COMBAT,
+from behaviours import (BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_COMBAT,
                         BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_CAST_GATE,
                         BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
                         BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
@@ -2610,6 +2610,15 @@ def behaviour_internal_cooldown_verdict(base: Verdict, run: Run, model: dict) ->
                                f'always an alert')
 
 
+def behaviour_aggro_redirect_verdict(base: Verdict, run: Run, expectation: Expectation) -> Verdict:
+    measured = run.values.get(expectation.label)
+    if measured is None:
+        return replace(base, explanation=missing_measurement(run, expectation.label))
+    expected = float(expectation.displayed)
+    return exact(base, float(measured), expected,
+                'victim (Unit::GetVictim() == caster) compared exactly to whether the clause redirects it')
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
@@ -2666,6 +2675,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_mount_grant_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_INTERNAL_COOLDOWN:
         return behaviour_internal_cooldown_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_AGGRO_REDIRECT:
+        return behaviour_aggro_redirect_verdict(base, run, expectation)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 

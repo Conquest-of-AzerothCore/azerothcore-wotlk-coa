@@ -35,6 +35,7 @@ BEHAVIOUR_CAST_CONDITION = 'behaviour_cast_condition'
 BEHAVIOUR_MOUNT_GRANT = 'behaviour_mount_grant'
 BEHAVIOUR_INTERNAL_COOLDOWN = 'behaviour_internal_cooldown'
 BEHAVIOUR_CAST_COMBAT = 'behaviour_cast_combat'
+BEHAVIOUR_AGGRO_REDIRECT = 'behaviour_aggro_redirect'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
@@ -42,12 +43,12 @@ BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVI
                     BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_CRIT_MAGNITUDE,
                     BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_PARTY_STAT_RATIO,
                     BEHAVIOUR_CAST_GATE, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_MOUNT_GRANT,
-                    BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_CAST_COMBAT)
+                    BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_AGGRO_REDIRECT)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
         'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition', 'mount_grant',
-        'internal_cooldown', 'cast_combat')
+        'internal_cooldown', 'cast_combat', 'aggro_redirect')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -2149,6 +2150,98 @@ def cast_combat_spec(entry: dict) -> CastCombatSpec:
     return CastCombatSpec(entry['spell'], entry['name'], entry['quote'])
 
 
+AGGRO_SETTLE_MS = 300
+AGGRO_REDIRECT_REACTION = 1
+
+
+@dataclass(frozen=True)
+class AggroTarget:
+    distance: float
+    expected_redirect: bool
+
+
+@dataclass(frozen=True)
+class AggroRedirectSpec:
+    spell: int
+    name: str
+    quote: str
+    targets: tuple[AggroTarget, ...]
+    self_cast: bool = False
+
+
+def aggro_redirect_label(spell: int, index: int, moment: str) -> str:
+    return f'{spell} aggro_redirect {dummy_id(index)} {moment}'
+
+
+def aggro_redirect_scenario(class_file: dict, spec: AggroRedirectSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'aggro_redirect', spec.quote, 1)
+    facts = facts_of(records, spec.spell)
+    creatures = [{**dummy_fixture(index, class_file, target.distance), 'reaction': AGGRO_REDIRECT_REACTION}
+                for index, target in enumerate(spec.targets)]
+    swing_ms = swing_interval(class_file)
+    engage_steps = []
+    ally_offset = 0.0
+    for index, target in enumerate(spec.targets):
+        engage_steps += [
+            {'action': 'relocate', 'actor': ALLY, 'dx': target.distance - ally_offset},
+            {'action': 'attack', 'actor': ALLY, 'target': dummy_id(index)},
+            {'action': 'wait', 'ms': swing_ms + AGGRO_SETTLE_MS},
+            {'action': 'stop_attack', 'actor': ALLY},
+            measurement(aggro_redirect_label(spec.spell, index, 'before'), dummy_id(index), 'victim', target=ALLY),
+        ]
+        ally_offset = target.distance
+    cast_step = {'action': 'cast', 'actor': CASTER, 'spell': spec.spell}
+    if not spec.self_cast:
+        cast_step['target'] = dummy_id(0)
+    steps = (base_steps(class_file)
+            + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
+            + engage_steps
+            + [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell}]
+            + cast_gate_power_step(facts)
+            + required_aura_steps(facts)
+            + [cast_step, {'action': 'wait', 'ms': facts.cast_time_ms + CAST_GATE_WAIT_MS}])
+    for index in range(len(spec.targets)):
+        steps.append(measurement(aggro_redirect_label(spec.spell, index, 'after'), dummy_id(index), 'victim',
+                                 target=CASTER))
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour aggro redirect',
+        'contract': f'Each listed dummy fixture is spawned with reaction {AGGRO_REDIRECT_REACTION} '
+                    f'(REACT_DEFENSIVE): CreatureAI::UpdateVictim (CreatureAI.cpp) calls AttackStop() on every AI '
+                    f'tick for a REACT_PASSIVE creature that already has a victim, which is why every other '
+                    f'fixture in this harness (REACT_PASSIVE by default) can never sustain real combat, '
+                    f'confirmed empirically before this fix (two independent gameplay runs, one via a forced '
+                    f'Unit::Attack and one via a real player swing, both showed Unit::GetVictim() revert to null '
+                    f'within the first AI tick while REACT_PASSIVE); REACT_DEFENSIVE keeps the dummy from '
+                    f'auto-aggroing on sight (no proactive engagement) while still letting UpdateVictim\'s own '
+                    f'threat-based SelectVictim path run once it is actually attacked. {ALLY} is relocated next '
+                    f'to each dummy in turn (the fixtures are stationary, so this keeps the melee swing below in '
+                    f'range without moving the dummy itself off the distance its own Absolution-radius clause is '
+                    f'judged against) and real-attacks it for one swing interval (existing "attack" action), '
+                    f'generating real threat so the dummy\'s own retaliation sets Unit::GetVictim() to {ALLY} '
+                    f'with a non-empty threat list, the precondition Spell::EffectTaunt itself requires; the '
+                    f'"before" reading on each dummy asserts that precondition. {spec.spell} is then cast '
+                    f'{"at self" if spec.self_cast else f"at {dummy_id(0)}"}; the "after" reading on each dummy '
+                    f'checks whether its own victim switched to {CASTER}, proving "{spec.quote}" per dummy.',
+        'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY}],
+        'creatures': creatures,
+        'steps': steps}
+    model = {'kind': 'aggro_redirect', 'quote': entry.quote}
+    expectations = []
+    for index, target in enumerate(spec.targets):
+        expected = '1' if target.expected_redirect else '0'
+        expectations.append(Expectation(aggro_redirect_label(spec.spell, index, 'after'), BEHAVIOUR_AGGRO_REDIRECT,
+                                        spec.spell, spec.spell, None, expected,
+                                        prose_rule(entry.quote, spec.spell), dict(model)))
+    return scenario, expectations
+
+
+def aggro_redirect_spec(entry: dict) -> AggroRedirectSpec:
+    targets = tuple(AggroTarget(raw['distance'], raw['expected_redirect']) for raw in entry['targets'])
+    return AggroRedirectSpec(entry['spell'], entry['name'], entry['quote'], targets, entry.get('self_cast', False))
+
+
 @dataclass(frozen=True)
 class MountGrantSpec:
     spell: int
@@ -2642,6 +2735,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return internal_cooldown_scenario(class_file, internal_cooldown_spec(entry))
     if entry['kind'] == 'cast_combat':
         return cast_combat_scenario(class_file, cast_combat_spec(entry))
+    if entry['kind'] == 'aggro_redirect':
+        return aggro_redirect_scenario(class_file, aggro_redirect_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

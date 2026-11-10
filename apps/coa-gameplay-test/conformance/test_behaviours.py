@@ -6,7 +6,8 @@ import sys
 import tempfile
 import unittest
 
-from behaviours import (AFTER, BEFORE, BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_COMBAT,
+from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA,
+                        BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_COMBAT,
                         BEHAVIOUR_CAST_CONDITION,
                         BEHAVIOUR_CAST_GATE,
                         BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
@@ -21,6 +22,7 @@ from behaviours import (AFTER, BEFORE, BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GR
                         NotModelled,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
                         OathConsumptionRemovalSpec,
+                        aggro_redirect_label, aggro_redirect_scenario, aggro_redirect_spec,
                         ally_heal_breadth_scenario, ally_heal_breadth_spec,
                         amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
                         aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
@@ -31,6 +33,7 @@ from behaviours import (AFTER, BEFORE, BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GR
                         crit_guarantee_scenario, crit_guarantee_spec,
                         crit_magnitude_scenario, crit_magnitude_spec,
                         duration_refresh_scenario, duration_refresh_spec, duration_scenario, duration_spec,
+                        dummy_id,
                         exclusivity_chain_scenario, exclusivity_chain_spec,
                         fixed_target_count_scenario, fixed_target_count_spec,
                         group_stack_cap_scenario, group_stack_cap_spec,
@@ -143,6 +146,8 @@ CRUSADERS_PRESENCE = 562302
 DISCIPLINED_BLOWS = 680397
 DISCIPLINED_BLOWS_PULSE = 680398
 SPIRITUAL_ASCENSION = 500688
+BECKON = 804914
+ABSOLUTION = 800424
 
 
 def scarlet_judicator_entry() -> dict:
@@ -222,6 +227,14 @@ def divine_charge_mount_grant_entry() -> dict:
 
 def spiritual_ascension_cast_combat_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == SPIRITUAL_ASCENSION)
+
+
+def beckon_aggro_redirect_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == BECKON)
+
+
+def absolution_aggro_redirect_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == ABSOLUTION)
 
 
 def disciplined_blows_entry() -> dict:
@@ -538,7 +551,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 67)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 69)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -4151,6 +4164,131 @@ class JudgeCastCombatTests(unittest.TestCase):
         run = FakeRun({expectation.label: 95.0})
         verdict = judge_behaviour(base_verdict(expectation), run, expectation)
         self.assertEqual(verdict.status, 'alert')
+
+
+class AggroRedirectScenarioTests(unittest.TestCase):
+    def test_single_target_scenario_validates_and_shapes_one_expectation(self):
+        spec = aggro_redirect_spec(beckon_aggro_redirect_entry())
+        scenario, expectations = aggro_redirect_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_AGGRO_REDIRECT)
+        self.assertEqual(expectations[0].spell_id, BECKON)
+        self.assertEqual(expectations[0].displayed, '1')
+
+    def test_area_scenario_shapes_one_expectation_per_target(self):
+        spec = aggro_redirect_spec(absolution_aggro_redirect_entry())
+        scenario, expectations = aggro_redirect_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 3)
+        self.assertEqual([expectation.displayed for expectation in expectations], ['1', '1', '0'])
+
+    def test_every_dummy_fixture_is_react_defensive(self):
+        spec = aggro_redirect_spec(absolution_aggro_redirect_entry())
+        scenario, _ = aggro_redirect_scenario(CLASS_FILE, spec)
+        for creature in scenario['creatures']:
+            self.assertEqual(creature['reaction'], AGGRO_REDIRECT_REACTION)
+
+    def test_each_attack_precedes_its_own_before_measurement(self):
+        spec = aggro_redirect_spec(absolution_aggro_redirect_entry())
+        scenario, _ = aggro_redirect_scenario(CLASS_FILE, spec)
+        for index in range(3):
+            attack_index = next(i for i, step in enumerate(scenario['steps'])
+                                if step.get('action') == 'attack' and step.get('target') == dummy_id(index))
+            before_index = next(i for i, step in enumerate(scenario['steps'])
+                                if step.get('label') == aggro_redirect_label(ABSOLUTION, index, 'before'))
+            self.assertLess(attack_index, before_index)
+
+    def test_every_attack_is_stopped_before_its_before_measurement(self):
+        spec = aggro_redirect_spec(absolution_aggro_redirect_entry())
+        scenario, _ = aggro_redirect_scenario(CLASS_FILE, spec)
+        for index in range(3):
+            attack_index = next(i for i, step in enumerate(scenario['steps'])
+                                if step.get('action') == 'attack' and step.get('target') == dummy_id(index))
+            stop_index = next(i for i, step in enumerate(scenario['steps'][attack_index:])
+                              if step.get('action') == 'stop_attack') + attack_index
+            before_index = next(i for i, step in enumerate(scenario['steps'])
+                                if step.get('label') == aggro_redirect_label(ABSOLUTION, index, 'before'))
+            self.assertLess(stop_index, before_index)
+
+    def test_all_before_measurements_precede_the_cast(self):
+        spec = aggro_redirect_spec(absolution_aggro_redirect_entry())
+        scenario, _ = aggro_redirect_scenario(CLASS_FILE, spec)
+        cast_index = next(i for i, step in enumerate(scenario['steps'])
+                          if step.get('action') == 'cast' and step.get('spell') == ABSOLUTION)
+        for index in range(3):
+            before_index = next(i for i, step in enumerate(scenario['steps'])
+                                if step.get('label') == aggro_redirect_label(ABSOLUTION, index, 'before'))
+            self.assertLess(before_index, cast_index)
+
+    def test_self_cast_has_no_explicit_target(self):
+        spec = aggro_redirect_spec(absolution_aggro_redirect_entry())
+        scenario, _ = aggro_redirect_scenario(CLASS_FILE, spec)
+        cast_step = next(step for step in scenario['steps']
+                         if step.get('action') == 'cast' and step.get('spell') == ABSOLUTION)
+        self.assertNotIn('target', cast_step)
+
+    def test_single_target_cast_targets_the_dummy(self):
+        spec = aggro_redirect_spec(beckon_aggro_redirect_entry())
+        scenario, _ = aggro_redirect_scenario(CLASS_FILE, spec)
+        cast_step = next(step for step in scenario['steps']
+                         if step.get('action') == 'cast' and step.get('spell') == BECKON)
+        self.assertEqual(cast_step['target'], dummy_id(0))
+
+    def test_every_expectation_label_has_a_matching_measurement_step(self):
+        spec = aggro_redirect_spec(absolution_aggro_redirect_entry())
+        scenario, expectations = aggro_redirect_scenario(CLASS_FILE, spec)
+        measured_labels = {step.get('label') for step in scenario['steps'] if step.get('action') == 'assert'
+                           and step.get('metric') == 'victim'}
+        for expectation in expectations:
+            self.assertIn(expectation.label, measured_labels)
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, beckon_aggro_redirect_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_AGGRO_REDIRECT)
+
+
+class JudgeAggroRedirectTests(unittest.TestCase):
+    def redirected_expectation(self):
+        model = {'kind': 'aggro_redirect', 'quote': 'Taunt an enemy to attack you'}
+        return Expectation(aggro_redirect_label(BECKON, 0, 'after'), BEHAVIOUR_AGGRO_REDIRECT, BECKON, BECKON, None,
+                           '1', 'prose: "Taunt an enemy to attack you" (804914)', model)
+
+    def not_redirected_expectation(self):
+        model = {'kind': 'aggro_redirect', 'quote': 'Taunt all enemies within 8 yds'}
+        return Expectation(aggro_redirect_label(ABSOLUTION, 2, 'after'), BEHAVIOUR_AGGRO_REDIRECT, ABSOLUTION,
+                           ABSOLUTION, None, '0', 'prose: "Taunt all enemies within 8 yds" (800424)', model)
+
+    def test_victim_switched_to_caster_as_expected_is_ok(self):
+        expectation = self.redirected_expectation()
+        run = FakeRun({expectation.label: 1.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_victim_not_switched_as_expected_is_ok(self):
+        expectation = self.not_redirected_expectation()
+        run = FakeRun({expectation.label: 0.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_taunted_dummy_whose_victim_did_not_switch_is_alert(self):
+        expectation = self.redirected_expectation()
+        run = FakeRun({expectation.label: 0.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_out_of_radius_dummy_whose_victim_switched_anyway_is_alert(self):
+        expectation = self.not_redirected_expectation()
+        run = FakeRun({expectation.label: 1.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_missing_measurement_names_the_missing_label(self):
+        expectation = self.redirected_expectation()
+        run = FakeRun({})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertIn(expectation.label, verdict.explanation)
 
 
 class MountGrantScenarioTests(unittest.TestCase):
