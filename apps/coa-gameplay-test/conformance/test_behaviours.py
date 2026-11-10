@@ -104,6 +104,7 @@ SANCTIFY = 705274
 LIBRAM_OF_TENACITY = 801461
 CHAKRA_OF_POWER = 803158
 CHAKRA_OF_POWER_ENERGIZE = 804181
+PATIENCE = 712678
 
 
 def scarlet_judicator_entry() -> dict:
@@ -233,6 +234,16 @@ def sanctify_entry() -> dict:
 
 def chakra_of_power_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == CHAKRA_OF_POWER)
+
+
+def patience_duration_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == PATIENCE and 'variant' not in entry)
+
+
+def patience_cooldown_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == PATIENCE and entry.get('variant') == 'cooldown')
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -418,7 +429,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 48)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 50)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1096,6 +1107,64 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         _, suffixed = metric_delta_scenario(CLASS_FILE, replace(spec, label_suffix='owned_creature_count'))
         self.assertEqual(plain[0].label, f'{TYRS_GUARD} behaviour_metric_delta')
         self.assertEqual(suffixed[0].label, f'{TYRS_GUARD} behaviour_metric_delta owned_creature_count')
+
+    def test_measure_actor_defaults_to_caster(self):
+        spec = metric_delta_spec(tyrs_guard_entry())
+        self.assertEqual(spec.measure_actor, 'caster')
+
+    def test_measure_actor_reads_the_metric_on_the_named_actor_instead_of_the_caster(self):
+        spec = metric_delta_spec(patience_duration_entry())
+        self.assertEqual(spec.measure_actor, 'dummy')
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        measure_steps = [step for step in scenario['steps']
+                         if step.get('metric') == 'aura_duration_ms' and step.get('spell') == INTERDICT]
+        self.assertEqual(len(measure_steps), 2)
+        for step in measure_steps:
+            self.assertEqual(step['actor'], 'dummy')
+        self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
+
+    def test_measure_actor_on_a_dummy_adds_the_creature_fixture_even_without_a_dummy_cast_target(self):
+        spec = replace(metric_delta_spec(tyrs_guard_entry()), measure_actor='dummy')
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
+
+    def test_dispatch_patience_duration_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, patience_duration_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_DELTA)
+        self.assertEqual(expectations[0].model['metric'], 'aura_duration_ms')
+        self.assertEqual(expectations[0].model['tolerance'], 10)
+        self.assertEqual(expectations[0].label, f'{PATIENCE} behaviour_metric_delta duration')
+
+    def test_entries_without_an_explicit_tolerance_omit_it_from_the_model(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, tyrs_guard_entry())
+        self.assertNotIn('tolerance', expectations[0].model)
+        scenario, expectations = behaviour_scenario(CLASS_FILE, patience_cooldown_entry())
+        self.assertNotIn('tolerance', expectations[0].model)
+
+    def test_dispatch_patience_cooldown_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, patience_cooldown_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_DELTA)
+        self.assertEqual(expectations[0].model['metric'], 'cooldown_ms')
+        self.assertEqual(expectations[0].label, f'{PATIENCE} behaviour_metric_delta cooldown')
+
+    def test_patience_casts_interdict_at_the_dummy_fixture_for_both_clauses(self):
+        for entry in (patience_duration_entry(), patience_cooldown_entry()):
+            spec = metric_delta_spec(entry)
+            scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+            cast_steps = [step for step in scenario['steps']
+                         if step.get('action') == 'cast' and step.get('spell') == INTERDICT]
+            self.assertEqual(len(cast_steps), 2)
+            self.assertTrue(all(step['target'] == 'dummy' for step in cast_steps))
+
+    def test_the_two_patience_entries_share_a_spell_id_but_differ_by_variant(self):
+        plain = patience_duration_entry()
+        with_variant = patience_cooldown_entry()
+        self.assertNotIn('variant', plain)
+        self.assertEqual(with_variant.get('variant'), 'cooldown')
+        self.assertNotEqual(plain['metric'], with_variant['metric'])
 
     def test_empty_setup_casts_reproduces_the_scenario_byte_for_byte(self):
         spec = metric_delta_spec(tyrs_guard_entry())
@@ -2085,6 +2154,55 @@ class JudgeCritMagnitudeTests(unittest.TestCase):
         expectation = self.expectation()
         verdict = judge_behaviour(base_verdict(expectation), None, expectation)
         self.assertIn('no scenario', verdict.explanation)
+
+
+class JudgePatienceMetricDeltaTests(unittest.TestCase):
+    def test_patience_duration_matches_the_scripted_plus_2000ms_hook_is_ok(self):
+        entry = patience_duration_entry()
+        spec = metric_delta_spec(entry)
+        model = {'kind': 'metric_delta', 'before_label': 'before', 'after_label': 'after',
+                 'expected': spec.expected, 'before_expected': spec.before_expected, 'metric': spec.metric,
+                 'quote': entry['quote']}
+        expectation = Expectation('label', BEHAVIOUR_METRIC_DELTA, PATIENCE, INTERDICT, None, str(spec.expected),
+                                  'prose', model)
+        verdict = judge_behaviour(
+            base_verdict(expectation),
+            FakeRun({'before': spec.before_expected, 'after': spec.expected}), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_patience_cooldown_reads_the_seeded_wrong_sign_mistake_as_alert(self):
+        entry = patience_cooldown_entry()
+        spec = metric_delta_spec(entry)
+        model = {'kind': 'metric_delta', 'before_label': 'before', 'after_label': 'after',
+                 'expected': spec.expected, 'before_expected': spec.before_expected, 'metric': spec.metric,
+                 'quote': entry['quote']}
+        expectation = Expectation('label', BEHAVIOUR_METRIC_DELTA, PATIENCE, INTERDICT, None, str(spec.expected),
+                                  'prose', model)
+        wrong_sign_after = spec.before_expected + (spec.before_expected - spec.expected)
+        verdict = judge_behaviour(
+            base_verdict(expectation),
+            FakeRun({'before': spec.before_expected, 'after': wrong_sign_after}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_explicit_tolerance_absorbs_simulated_clock_jitter_within_its_margin(self):
+        model = {'kind': 'metric_delta', 'before_label': 'before', 'after_label': 'after', 'expected': 7940,
+                 'before_expected': 5944, 'metric': 'aura_duration_ms', 'tolerance': 10,
+                 'quote': 'Increases the duration of Interdict by $/1000;s1 sec'}
+        expectation = Expectation('label', BEHAVIOUR_METRIC_DELTA, PATIENCE, INTERDICT, None, '7940', 'prose',
+                                  model)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 5944, 'after': 7938}), expectation)
+        self.assertEqual(verdict.status, 'ok')
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 5944, 'after': 7941}), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_explicit_tolerance_still_alerts_outside_its_own_margin(self):
+        model = {'kind': 'metric_delta', 'before_label': 'before', 'after_label': 'after', 'expected': 7940,
+                 'before_expected': 5944, 'metric': 'aura_duration_ms', 'tolerance': 10,
+                 'quote': 'Increases the duration of Interdict by $/1000;s1 sec'}
+        expectation = Expectation('label', BEHAVIOUR_METRIC_DELTA, PATIENCE, INTERDICT, None, '7940', 'prose',
+                                  model)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 5944, 'after': 5944}), expectation)
+        self.assertEqual(verdict.status, 'alert')
 
 
 class JudgeDurationTests(unittest.TestCase):

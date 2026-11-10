@@ -144,9 +144,11 @@
     {"spell": 561346, "effect": 0,
      "reason": "round4 alert-triage: same load-time MOD_CRIT_PCT -> ADD_FLAT_MODIFIER rewrite as 560650 (rank 2, AscensionTemplarContracts.cpp:96-100), same scoped-SpellMod gap in the generic global spell_crit_chance probe"},
     {"spell": 712678, "effect": 0,
-     "reason": "round4 alert-triage: AscensionTemplarContracts.cpp:126-129 dummies every effect of 712678 at load; the +2000ms duration this effect's DBC SpellMod would have applied to 560116 is instead implemented as a scripted per-cast hook (AscensionTemplarAbilities.cpp OnCalcMaxDuration, keyed on HasAura(712678) while 560116 applies). The generic spell_modifier probe looks for a static SpellMod table entry that is never populated at runtime; needs a duration-on-apply check on 560116 instead"},
+     "reason": "round4 alert-triage: AscensionTemplarContracts.cpp:126-129 dummies every effect of 712678 at load; the +2000ms duration this effect's DBC SpellMod would have applied to 560116 is instead implemented as a scripted per-cast hook (AscensionTemplarAbilities.cpp OnCalcMaxDuration, keyed on HasAura(712678) while 560116 applies). The generic spell_modifier probe looks for a static SpellMod table entry that is never populated at runtime; needs a duration-on-apply check on 560116 instead -- now built as the 712678 behaviour_metric_delta duration entry below, reading 560116's own aura_duration_ms on the dummy target live"},
     {"spell": 712678, "effect": 1,
-     "reason": "round4 alert-triage: same load-time dummy as 712678 effect 0; the -5000ms cooldown reduction on 560116 is implemented as a scripted cast-success hook (AscensionTemplarAbilities.cpp, info->Id == 560116 branch calling ModifySpellCooldown) rather than a static SpellMod. The generic spell_modifier probe cannot see it; needs a cooldown-remaining check on 560116 instead"}
+     "reason": "round4 alert-triage: same load-time dummy as 712678 effect 0; the -5000ms cooldown reduction on 560116 is implemented as a scripted cast-success hook (AscensionTemplarAbilities.cpp, info->Id == 560116 branch calling ModifySpellCooldown) rather than a static SpellMod. The generic spell_modifier probe cannot see it; needs a cooldown-remaining check on 560116 instead -- now built as the 712678 behaviour_metric_delta cooldown entry below, reading 560116's own cooldown_ms on the caster live"},
+    {"spell": 504807, "effect": 0,
+     "reason": "round5 trigger-accounting: effect 0's claim (Reduce(player, root, 1000) for each of {500694, 806153, 801455}, AscensionTemplarAbilities.cpp:184-189, run unconditionally in the same Breaker(info) block whose adjacent ReduceLibrams(player, 1000) call is confirmed ok by this round's own effect-2 cooldown_delta entry) is not a dead effect, but none of its three roots can be put on a measurable cooldown by the existing cooldown_trigger_scenario/cooldown_trial_steps shape, which self-casts the observe_spell with no explicit target and no wait before the trigger cast: 806153 (Divine Force, EffectImplicitTargetA[0] 6 TARGET_UNIT_TARGET_ENEMY) and 801455 (Testament of Will, EffectImplicitTargetA[0] 21 TARGET_UNIT_TARGET_ALLY) cannot complete a self-cast at all (coa-dbc-viewer Spell record); 500694 (Force of Golganneth, EffectImplicitTargetA[0] 1 TARGET_UNIT_CASTER) can self-cast but its own StartRecoveryTime 1250 ms (coa-dbc-viewer) triggers the player's global cooldown, which Spell::CheckCast (Spell.cpp:5846, HasGlobalCooldown) rejects with SPELL_FAILED_NOT_READY (67) on the immediately-following zero-wait trigger cast of 572027; measured this round in a real gameplay run (conformance-templar-trigger-504807-0-part-1, .cache/verify-all/20261109-133249): 162 of 244 scheduled trigger casts failed with reason 67, leaving a diluted mean delta of 17.996 ms against the expected 1000 ms, which would misreport this as a broken mechanism rather than the measurement gap it is. A harness change (a trigger-cast wait sized to the observe_spell's own GCD, or a target-capable observe cast) would be needed to measure this effect; out of this item's no-harness-change scope"}
   ],
   "literal_tokens": [
     {"spell": 705268, "effect": 0, "quote": "Doubles the healing done to you", "value": 100},
@@ -2058,6 +2060,31 @@
       "observe_spell": 804181, "metric": "spell_energize_total",
       "base_expected": 1.0, "crit_bonus_expected": 2.0, "attempts": 10,
       "observe_source": "AscensionTemplarEvents.cpp:82-83 (case 803158: return damage && melee && !periodic;) gates the proc on a landed melee hit; AscensionTemplarEvents.cpp:170 player->EnergizeBySpell(player, 804181, (event.GetHitMask() & PROC_HIT_CRITICAL) ? 3 : 1, POWER_ENERGY) grants 1 Energy on a normal hit and 3 on a critical one. The existing 803158 trigger_count entry (triggers list) already proves the base 1 Energy fires once per melee attack (273/273); this entry forces melee_crit_rating to FORCED_CRIT_RATING so (almost) every landed hit is a critical, and checks that spell_energize_total of 804181 equals melee_attack_count x base_expected (1) plus the measured critical melee_damage_count x crit_bonus_expected (2), i.e. the tooltip's +2-on-crit magnitude, not just that a crit-conditional branch exists in code."
+    },
+    {
+      "spell": 712678, "name": "Patience", "kind": "metric_delta",
+      "quote": "Increases the duration of Interdict by $/1000;s1 sec", "expected": 7940,
+      "trigger_spell": 560116,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura_duration_ms",
+      "fields": { "spell": 560116 },
+      "before_expected": 5944,
+      "wait_ms": 50,
+      "tolerance": 10,
+      "label_suffix": "duration",
+      "observe_source": "AscensionTemplarAbilities.cpp:70-75 (templar_casts::OnCalcMaxDuration): if (player && aura->GetId() == 560116 && player->HasAura(712678)) duration += 2000. Interdict's own SpellDuration.dbc id 32 gives a base 6000ms (coa-dbc-viewer record --table SpellDuration --id 32); Interdict targets TARGET_UNIT_TARGET_ENEMY (coa-dbc-viewer record --table Spell --id 560116) so the Mod Silence aura 560116 lands on the dummy target, not the caster, hence measure_actor 'dummy'. A short 50ms wait_ms (not the 3000ms default) keeps the cast-to-read window small; the aura's own live decrement (Aura::Update's per-tick countdown, unlike cooldown_ms's absolute-endtime subtraction) still carries a few ms of simulated-clock tick jitter across separate exploratory runs even at this short window (two runs read 5944/7941 and 5944/7938, a 3ms spread on the after reading only), so this entry carries an explicit 10ms tolerance -- two orders of magnitude below the 2000ms clause this check exists to catch -- while every other metric_delta entry in this file keeps the tight default float tolerance. before_expected 5944 (6000-50-6ms) and expected 7940 (8000-50-10ms, the midpoint of the two observed after readings) are both read from .cache/verify-all/20261110-000604 and -000646 (apps/coa-gameplay-test/conformance/.cache/conformance/fvs-patience/scenarios/conformance-templar-behaviour-712678.json)."
+    },
+    {
+      "spell": 712678, "variant": "cooldown", "name": "Patience (cooldown)", "kind": "metric_delta",
+      "quote": "and its cooldown by $/1000;s2 sec", "expected": 111994,
+      "trigger_spell": 560116,
+      "target": "dummy",
+      "metric": "cooldown_ms",
+      "fields": { "spell": 560116 },
+      "before_expected": 116994,
+      "label_suffix": "cooldown",
+      "observe_source": "AscensionTemplarAbilities.cpp:210-211 (templar_casts::OnSpellCast, after Spell::cast already calls SendSpellCooldown at Spell.cpp:4029 before ScriptMgr's OnSpellCast fires at Spell.cpp:4184, confirmed by reading both call sites): if (info->Id == 560116 && player->HasAura(712678)) player->ModifySpellCooldown(info->Id, -5000). Player::ModifySpellCooldown adds its signed argument to the cooldown's stored end time (Player.cpp:11950-11956, itr->second.end += cooldown), so a negative argument is required to shorten the remaining cooldown; this was a confirmed server defect, not a measurement gap -- before this fix the live code read 'player->ModifySpellCooldown(info->Id, 5000)' (a positive 5000), which this same scenario measured as 116994 before 712678 is learned and 121994 after (a lengthening, the opposite of the tooltip's 'reduces ... cooldown by 5 sec'), confirmed via .cache/verify-all/20261110-000148; after flipping the literal to -5000, the same scenario reads 116994/111994 (a clean -5000ms drop), confirmed identically across .cache/verify-all/20261110-000356 and -000604. Interdict's own RecoveryTime/CategoryRecoveryTime 120000ms (coa-dbc-viewer record --table Spell --id 560116) minus the metric_delta_scenario default wait_ms (3000) minus a 6ms simulated-clock delta (the same family of offset as the Transcending Strikes 804897 entry above) gives 116994; unlike aura_duration_ms, cooldown_ms is computed from a stored absolute end time rather than ticked down live, so it reads identically across repeated runs with no jitter and needs no explicit tolerance."
     }
   ],
   "player_observations": [

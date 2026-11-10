@@ -585,6 +585,8 @@ class MetricDeltaSpec:
     gate_spell: int | None = None
     label_suffix: str = ''
     setup_only_after: bool = False
+    measure_actor: str = CASTER
+    tolerance: float | None = None
 
 
 def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
@@ -644,10 +646,10 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         learn_steps = [gate_learn_step, {'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] + \
             [{'action': 'learn', 'actor': CASTER, 'spell': setup_spell} for setup_spell in spec.setup_casts]
         steps = (base_steps(class_file) + learn_steps + cast_steps(apply_setup_casts=False) +
-                 [measurement(before_label, CASTER, spec.metric, **spec.fields)] +
+                 [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields)] +
                  [{'action': 'wait', 'label': 'let the first phase fully expire', 'ms': spec.expire_ms}] +
                  cast_steps(apply_setup_casts=True) +
-                 [measurement(after_label, CASTER, spec.metric, **spec.fields)])
+                 [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields)])
     else:
         contract = (f'No-combat with/without check: {spec.metric} {spec.fields} around a cast of '
                     f'{spec.trigger_spell}, measured before and after {gate_spell} is learned, waiting '
@@ -656,9 +658,9 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         learn_steps = [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] + \
             [{'action': 'learn', 'actor': CASTER, 'spell': setup_spell} for setup_spell in spec.setup_casts]
         steps = (base_steps(class_file) + learn_steps + cast_steps() +
-                 [measurement(before_label, CASTER, spec.metric, **spec.fields), gate_learn_step] +
+                 [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields), gate_learn_step] +
                  [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}] +
-                 cast_steps() + [measurement(after_label, CASTER, spec.metric, **spec.fields)])
+                 cast_steps() + [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields)])
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour metric delta',
@@ -666,12 +668,14 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         'players': [{**player_fixture(class_file), 'allow_regeneration': False}] if spec.disable_regeneration
                    else [player_fixture(class_file)],
         'steps': steps}
-    if spec.target == TARGET:
+    if spec.target == TARGET or spec.measure_actor == TARGET:
         scenario['creatures'] = [creature_fixture(class_file)]
     label = f'{spec.spell} behaviour_metric_delta' + (f' {spec.label_suffix}' if spec.label_suffix else '')
     model = {'kind': 'metric_delta', 'before_label': before_label, 'after_label': after_label,
              'expected': spec.expected, 'before_expected': spec.before_expected, 'metric': spec.metric,
              'quote': entry.quote}
+    if spec.tolerance is not None:
+        model['tolerance'] = spec.tolerance
     expectation = Expectation(label, BEHAVIOUR_METRIC_DELTA, spec.spell, spec.trigger_spell, None,
                               str(spec.expected), prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]
@@ -684,7 +688,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('expire_ms', DEFAULT_METRIC_DELTA_EXPIRE_MS), entry.get('target', CASTER),
                            entry.get('disable_regeneration', False), tuple(entry.get('setup_casts', ())),
                            entry.get('setup_actor_aura'), entry.get('gate_spell'), entry.get('label_suffix', ''),
-                           entry.get('setup_only_after', False))
+                           entry.get('setup_only_after', False),
+                           entry.get('measure_actor', CASTER), entry.get('tolerance'))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10
