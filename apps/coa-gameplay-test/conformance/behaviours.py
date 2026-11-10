@@ -1928,8 +1928,8 @@ def cast_gate_power_step(facts) -> list[dict]:
     return []
 
 
-def cast_gate_attempt(spell: int, facts, moment: str) -> list[dict]:
-    label = cast_gate_label(spell, moment)
+def cast_gate_attempt(spell: int, facts, moment: str, label_spell: int | None = None) -> list[dict]:
+    label = cast_gate_label(label_spell if label_spell is not None else spell, moment)
     return ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell}] + cast_gate_power_step(facts)
             + required_aura_steps(facts)
             + [{'action': 'cast', 'actor': CASTER, 'spell': spell, 'target': TARGET},
@@ -1958,7 +1958,7 @@ def cast_gate_scenario(class_file: dict, spec: CastGateSpec) -> tuple[dict, list
                {'action': 'learn', 'actor': CASTER, 'spell': spec.bypass_spell}]
             + cast_gate_attempt(spec.spell, gated_facts, 'blocked')
             + bypass_cast_steps
-            + cast_gate_attempt(spec.spell, gated_facts, 'bypassed')
+            + cast_gate_attempt(spec.spell, gated_facts, 'bypassed', label_spell=spec.bypass_spell)
             + [{'action': 'unlearn', 'actor': CASTER, 'spell': spec.bypass_spell}]
             + required_target_health_steps(gated_facts)
             + cast_gate_attempt(spec.spell, gated_facts, 'allowed'))

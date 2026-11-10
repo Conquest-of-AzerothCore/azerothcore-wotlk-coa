@@ -3760,6 +3760,14 @@ class CastGateScenarioTests(unittest.TestCase):
         with self.assertRaises(Exception):
             cast_gate_scenario(CLASS_FILE, cast_gate_spec(entry))
 
+    def test_every_expectation_label_has_a_matching_measurement_step(self):
+        spec = cast_gate_spec(titanstrike_cast_gate_entry())
+        scenario, expectations = cast_gate_scenario(CLASS_FILE, spec)
+        measured_labels = {step.get('label') for step in scenario['steps'] if step.get('action') == 'assert'
+                           and step.get('metric') == 'cast_failure'}
+        for expectation in expectations:
+            self.assertIn(expectation.label, measured_labels)
+
 
 class JudgeCastGateTests(unittest.TestCase):
     def blocked_expectation(self):
