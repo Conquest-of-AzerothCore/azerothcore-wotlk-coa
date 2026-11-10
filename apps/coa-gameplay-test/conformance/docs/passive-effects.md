@@ -203,13 +203,14 @@ effect straight to `unmodelled`, the same `{spell_id or rank_id, effect}` lookup
 before any family/aura rule and ahead of whatever plan `classify` would otherwise build — unlike `effect_notes`,
 this *can* turn an effect `classify` would call modelled into `unmodelled`, because the generic reader has no way
 to see that the live `SpellInfo` differs from what `Spell.dbc` describes. Templar (round4 `alert-triage`
-investigation, 2026-11): `AscensionTemplarContracts.cpp:96-100` rewrites Aggramar's Rage's (560650/561346) crit
-effect from `SPELL_AURA_MOD_CRIT_PCT` to a classmask-scoped `SPELL_AURA_ADD_FLAT_MODIFIER` at load time, so the
-generic reader's global `spell_crit_chance` probe reads a stat the scoped `SpellMod` never touches; `:126-129`
-dummies every effect of Patience (712678) at load and reimplements both as scripted per-cast hooks on Interdict
-(560116), so its `spell_modifier` probe looks for a static table entry that is never populated. Both are confirmed
-tool defects (a generic check that can never pass, not a server bug), left `unmodelled` pending a per-cast check
-that measures the actual scoped/scripted behaviour instead of the table/stat it bypasses.
+investigation, 2026-11): `AscensionTemplarContracts.cpp` dummies every effect of Patience (712678) at load and
+reimplements both as scripted per-cast hooks on Interdict (560116), so its `spell_modifier` probe looks for a static
+table entry that is never populated. That is a confirmed tool defect (a generic check that can never pass, not a
+server bug), left `unmodelled` and judged instead by the per-cast `behaviour_metric_delta` entries that measure the
+scripted duration and cooldown. Aggramar's Rage (560650/561346) carried a second entry while the server rewrote its
+crit effect into a classmask-scoped `SPELL_AURA_ADD_FLAT_MODIFIER`; since the 2026-11-10 fix the same contract makes
+effect 0 a Holy-school `SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL` aura, the entry is gone and the generic Holy
+`spell_crit_chance` probe judges it.
 
 A class file's `effect_notes` list (`[{"spell": <id>, "effect": <n>, "reason": "..."}]`) substitutes a specific
 explanation for `classify`'s own generic `unmodelled: ` reason, the same `{spell_id or rank_id, effect}` lookup as

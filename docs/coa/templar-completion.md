@@ -90,8 +90,10 @@ Choices behind the 2026-09-17 audit fixes, where the shutdown tooltip names more
   it hits and ignores absorbs and resistances (tooltip, and the client SpellCustomAttr bit shared with Dragon's
   Wrath). A missed primary hit roll still cancels the blast.
 - Devotion of Khaz'goroth refunds 0.5 sec on every Libram rank (tooltip and 2025-08-04 changelog) instead of its
-  helper's per-spell values. Aggramar's Rage's crit applies only to its masked Holy abilities; the 2026-01-07
-  changelog's extra Chastise damage has no shutdown data and is not implemented.
+  helper's per-spell values. Aggramar's Rage's crit is a Holy-school crit chance aura (tooltip "Holy critical
+  strike chance", owner ruling of 2026-11-10), so every Holy ability gains it, melee or magic, and Physical abilities
+  such as Blade of Faith do not; the 2026-01-07 changelog's extra Chastise damage has no shutdown data and is not
+  implemented.
 - Fury of Aggramar also doubles Libram of Consecration's extra jump targets through the client data; no tooltip or
   changelog confirms that, and it is left unchanged.
 
