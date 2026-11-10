@@ -100,6 +100,12 @@ inline std::uint32_t TokenCost(std::uint32_t rewardTokens, double multiplier, st
     return ScaledCost(rewardTokens, multiplier, minimum, std::numeric_limits<std::uint32_t>::max());
 }
 
+inline std::uint32_t CostOfRemaining(std::uint32_t unitCost, std::uint32_t remaining)
+{
+    std::uint64_t const completions = std::max<std::uint32_t>(1, remaining);
+    return std::max<std::uint32_t>(1, Saturate(std::uint64_t(unitCost) * completions));
+}
+
 inline std::uint32_t DisplayedCachePoints(std::uint32_t points)
 {
     return (points + PointsPerDisplayedPoint - 1) / PointsPerDisplayedPoint;
@@ -288,7 +294,20 @@ private:
     std::vector<std::uint8_t> _bytes;
 };
 
-inline std::vector<std::uint8_t> SerializeView(std::vector<Category> const& categories)
+struct PaymentOptions
+{
+    bool gold = true;
+    bool tokens = true;
+
+    [[nodiscard]] bool Allows(bool payWithGold) const { return payWithGold ? gold : tokens; }
+};
+
+inline std::uint32_t Offered(bool enabled, std::uint32_t cost)
+{
+    return enabled ? cost : 0;
+}
+
+inline std::vector<std::uint8_t> SerializeView(std::vector<Category> const& categories, PaymentOptions payment = {})
 {
     Writer out;
     out.U32(static_cast<std::uint32_t>(categories.size()));
@@ -298,8 +317,8 @@ inline std::vector<std::uint8_t> SerializeView(std::vector<Category> const& cate
         out.CString(category.contentType);
         out.CString(category.name);
         out.U32(total.remaining);
-        out.U32(total.moneyCost);
-        out.U32(total.tokenCost);
+        out.U32(Offered(payment.gold, total.moneyCost));
+        out.U32(Offered(payment.tokens, total.tokenCost));
         out.Rewards(total.reward);
         out.U32(static_cast<std::uint32_t>(category.subCategories.size()));
         for (SubCategory const& sub : category.subCategories)
@@ -307,8 +326,8 @@ inline std::vector<std::uint8_t> SerializeView(std::vector<Category> const& cate
             out.CString(sub.type);
             out.CString(sub.name);
             out.U32(sub.remaining);
-            out.U32(std::max<std::uint32_t>(1, sub.moneyCost));
-            out.U32(std::max<std::uint32_t>(1, sub.tokenCost));
+            out.U32(Offered(payment.gold, CostOfRemaining(sub.moneyCost, sub.remaining)));
+            out.U32(Offered(payment.tokens, CostOfRemaining(sub.tokenCost, sub.remaining)));
             out.U32(sub.minimumLevel);
             out.Rewards(sub.reward);
         }

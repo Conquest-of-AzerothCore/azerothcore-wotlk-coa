@@ -964,6 +964,17 @@ CoA.CallboardContracts.Enable = 1
 CoA.CallboardContracts.DailyCompletions = 1
 
 #
+#    CoA.CallboardContracts.GoldEnable
+#    CoA.CallboardContracts.TokenEnable
+#        Description: Allow Complete Now to be paid with gold or with Bazaar Tokens. A disabled
+#                     currency shows a price of 0 and is refused; with both disabled the Call
+#                     Board hides Complete Now.
+#        Default:     1, 1
+
+CoA.CallboardContracts.GoldEnable = 1
+CoA.CallboardContracts.TokenEnable = 1
+
+#
 #    CoA.CallboardContracts.MoneyCostMultiplier
 #    CoA.CallboardContracts.MinMoneyCost
 #        Description: Gold price of one Complete Now completion: the quest's money reward

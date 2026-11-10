@@ -68,6 +68,7 @@ struct Settings
     uint32 minMoneyCost = 100000;
     double tokenCostMultiplier = 2.0;
     uint32 minTokenCost = 50;
+    PaymentOptions payment;
 };
 
 struct LedgerData final : DataMap::Base
@@ -108,6 +109,8 @@ void LoadSettings()
     loaded.minMoneyCost = positive("CoA.CallboardContracts.MinMoneyCost", 100000);
     loaded.tokenCostMultiplier = sConfigMgr->GetOption<float>("CoA.CallboardContracts.TokenCostMultiplier", 2.0f);
     loaded.minTokenCost = positive("CoA.CallboardContracts.MinTokenCost", 50);
+    loaded.payment.gold = sConfigMgr->GetOption<bool>("CoA.CallboardContracts.GoldEnable", true);
+    loaded.payment.tokens = sConfigMgr->GetOption<bool>("CoA.CallboardContracts.TokenEnable", true);
     {
         std::lock_guard lock(stateMutex);
         settings = loaded;
@@ -296,7 +299,7 @@ void SendView(Player* player)
         categories.push_back(std::move(category));
     }
 
-    std::vector<uint8> const bytes = SerializeView(categories);
+    std::vector<uint8> const bytes = SerializeView(categories, current.payment);
     WorldPacket packet(ViewOpcode, bytes.size());
     packet.append(bytes.data(), bytes.size());
     player->GetSession()->SendPacket(&packet);
@@ -477,6 +480,13 @@ uint32 Activate(Player* player, Catalogue const& contracts, Settings const& curr
         return 0;
 
     std::string const name = DisplayName(contract->type);
+    if (!current.payment.Allows(request.payWithGold))
+    {
+        chat.SendSysMessage(request.payWithGold ? "Temporal Contracts cannot be paid with gold."
+            : "Temporal Contracts cannot be paid with Bazaar Tokens.");
+        return 0;
+    }
+
     Quest const* quest = ChooseQuest(player, *contract);
     if (!quest)
     {
