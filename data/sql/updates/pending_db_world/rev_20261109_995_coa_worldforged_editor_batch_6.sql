@@ -19,3 +19,7 @@ UPDATE `gameobject` SET `position_x` = -2014.859, `position_y` = 1926.0041, `pos
 -- #11787
 -- pickup 6940799 (Left Behind Boots) moved 27.2 yd across and 4.94 yd up to its Ascension position on the dock
 UPDATE `gameobject` SET `position_x` = -11583.41, `position_y` = -38.3, `position_z` = 10.94, `orientation` = 0.49008, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.242595, `rotation3` = 0.970128 WHERE `guid` = 6940799 AND `id` = 95740;
+
+-- #11781
+-- pickup 6942169 (Unearthed Treasures) moved 21.2 yd across and 165.43 yd down to its Ascension position on the cave floor
+UPDATE `gameobject` SET `position_x` = -5456.72, `position_y` = 128.94, `position_z` = 28.13, `orientation` = 5.21483, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.509133, `rotation3` = -0.860688 WHERE `guid` = 6942169 AND `id` = 96140;
