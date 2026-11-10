@@ -32,6 +32,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_AGGRO_
                         charge_recharge_scenario, charge_recharge_spec,
                         crit_guarantee_scenario, crit_guarantee_spec,
                         crit_magnitude_scenario, crit_magnitude_spec,
+                        dispel_removal_scenario, dispel_removal_spec,
                         duration_refresh_scenario, duration_refresh_spec, duration_scenario, duration_spec,
                         dummy_id,
                         exclusivity_chain_scenario, exclusivity_chain_spec,
@@ -148,6 +149,7 @@ DISCIPLINED_BLOWS_PULSE = 680398
 SPIRITUAL_ASCENSION = 500688
 BECKON = 804914
 ABSOLUTION = 800424
+REBUKE = 525051
 
 
 def scarlet_judicator_entry() -> dict:
@@ -311,6 +313,15 @@ def transcending_strikes_target_gate_entry() -> dict:
 def whirling_tempest_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours']
                if entry['spell'] == WHIRLING_TEMPEST and 'variant' not in entry)
+
+
+def rebuke_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == REBUKE)
+
+
+def testament_of_fortitude_dispel_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == TESTAMENT_OF_FORTITUDE and entry['kind'] == 'dispel_removal')
 
 
 def whirling_tempest_stacks_with_courage_entry() -> dict:
@@ -551,7 +562,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 69)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 71)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -4485,6 +4496,88 @@ class JudgeInternalCooldownTests(unittest.TestCase):
         run = FakeRun({'680397 internal_cooldown first': 1.0, '680397 internal_cooldown blocked': 1.0})
         verdict = judge_behaviour(base_verdict(expectation), run, expectation)
         self.assertIn('680397 internal_cooldown allowed', verdict.explanation)
+
+
+class DispelRemovalScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_one_expectation_per_debuff(self):
+        spec = dispel_removal_spec(rebuke_entry())
+        scenario, expectations = dispel_removal_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 3)
+        for expectation in expectations:
+            self.assertEqual(expectation.check, BEHAVIOUR_METRIC_DELTA)
+            self.assertEqual(expectation.model['metric'], 'aura')
+            self.assertEqual(expectation.model['before_expected'], 1.0)
+            self.assertEqual(expectation.model['expected'], 0.0)
+            self.assertTrue(expectation.rule.startswith('prose: "dispelling $s1 magic, poison, and disease effects'))
+
+    def test_debuffs_are_applied_to_the_ally_target_and_measured_before_and_after(self):
+        spec = dispel_removal_spec(rebuke_entry())
+        scenario, _ = dispel_removal_scenario(CLASS_FILE, spec)
+        set_aura_steps = [step for step in scenario['steps'] if step.get('action') == 'set_aura']
+        self.assertEqual({step['spell'] for step in set_aura_steps}, {31589, 2818, 55095})
+        self.assertTrue(all(step['actor'] == 'ally' for step in set_aura_steps))
+        aura_measurements = [step for step in scenario['steps']
+                            if step.get('metric') == 'aura' and step.get('spell') in (31589, 2818, 55095)]
+        self.assertEqual(len(aura_measurements), 6)
+        self.assertTrue(all(step['actor'] == 'ally' for step in aura_measurements))
+        self.assertEqual(len(scenario['players']), 2)
+        self.assertEqual(scenario['players'][1]['id'], 'ally')
+
+    def test_dispel_cast_comes_after_the_debuffs_and_before_the_after_measurement(self):
+        spec = dispel_removal_spec(rebuke_entry())
+        scenario, _ = dispel_removal_scenario(CLASS_FILE, spec)
+        set_aura_indexes = [index for index, step in enumerate(scenario['steps']) if step.get('action') == 'set_aura']
+        cast_index = next(index for index, step in enumerate(scenario['steps'])
+                          if step.get('action') == 'cast' and step.get('spell') == REBUKE)
+        measure_after_index = next(index for index, step in enumerate(scenario['steps'])
+                                   if step.get('label', '').endswith(' after'))
+        self.assertTrue(all(step_index < cast_index for step_index in set_aura_indexes))
+        self.assertLess(cast_index, measure_after_index)
+
+    def test_self_target_dispel_does_not_add_a_second_player_fixture(self):
+        spec = dispel_removal_spec(testament_of_fortitude_dispel_entry())
+        scenario, expectations = dispel_removal_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+        self.assertEqual(len(scenario['players']), 1)
+        set_aura_step = next(step for step in scenario['steps'] if step.get('action') == 'set_aura')
+        self.assertEqual(set_aura_step['actor'], 'caster')
+        self.assertEqual(set_aura_step['spell'], 55095)
+
+    def test_dispatch_rebuke_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, rebuke_entry())
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 3)
+
+
+class JudgeDispelRemovalTests(unittest.TestCase):
+    def expectation(self, debuff: int) -> Expectation:
+        model = {'kind': 'metric_delta', 'before_label': f'before_{debuff}', 'after_label': f'after_{debuff}',
+                 'expected': 0.0, 'before_expected': 1.0, 'metric': 'aura',
+                 'quote': 'dispelling $s1 magic, poison, and disease effects from them'}
+        return Expectation('label', BEHAVIOUR_METRIC_DELTA, REBUKE, REBUKE, None, '0',
+                           'prose: "dispelling $s1 magic, poison, and disease effects from them" (525051)', model)
+
+    def test_debuff_actually_removed_is_ok(self):
+        expectation = self.expectation(2818)
+        verdict = judge_behaviour(base_verdict(expectation),
+                                  FakeRun({'before_2818': 1.0, 'after_2818': 0.0}), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_debuff_left_in_place_is_an_alert(self):
+        expectation = self.expectation(2818)
+        verdict = judge_behaviour(base_verdict(expectation),
+                                  FakeRun({'before_2818': 1.0, 'after_2818': 1.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 1.0)
+        self.assertEqual(verdict.expected, 0.0)
+
+    def test_debuff_never_applied_before_the_cast_is_an_alert(self):
+        expectation = self.expectation(55095)
+        verdict = judge_behaviour(base_verdict(expectation),
+                                  FakeRun({'before_55095': 0.0, 'after_55095': 0.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
 
 
 if __name__ == '__main__':

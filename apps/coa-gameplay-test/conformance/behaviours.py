@@ -48,7 +48,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
         'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition', 'mount_grant',
-        'internal_cooldown', 'cast_combat', 'aggro_redirect')
+        'internal_cooldown', 'cast_combat', 'aggro_redirect', 'dispel_removal')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1067,6 +1067,75 @@ def crit_magnitude_spec(entry: dict) -> CritMagnitudeSpec:
     return CritMagnitudeSpec(entry['spell'], entry['name'], entry['quote'], entry['observe_spell'], entry['metric'],
                              entry['base_expected'], entry['crit_bonus_expected'],
                              entry.get('attempts', CRIT_MAGNITUDE_DEFAULT_ATTEMPTS), entry.get('force_crit', 'melee'))
+
+
+DEFAULT_DISPEL_REMOVAL_WAIT_MS = 1500
+
+
+@dataclass(frozen=True)
+class DispelRemovalSpec:
+    spell: int
+    name: str
+    quote: str
+    debuffs: tuple[int, ...]
+    target: str = CASTER
+    wait_ms: int = DEFAULT_DISPEL_REMOVAL_WAIT_MS
+    label_suffix: str = ''
+
+
+def dispel_removal_label(spec: DispelRemovalSpec, debuff: int, moment: str) -> str:
+    return f'{spec.spell} aura {debuff} {moment}'
+
+
+def dispel_removal_scenario(class_file: dict, spec: DispelRemovalSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'dispel_removal', spec.quote, 0.0)
+    facts = facts_of(records, spec.spell)
+
+    debuff_steps = [{'action': 'set_aura', 'actor': spec.target, 'spell': debuff, 'stacks': 1}
+                   for debuff in spec.debuffs]
+    before_measurements = [measurement(dispel_removal_label(spec, debuff, BEFORE), spec.target, 'aura', spell=debuff)
+                           for debuff in spec.debuffs]
+    after_measurements = [measurement(dispel_removal_label(spec, debuff, AFTER), spec.target, 'aura', spell=debuff)
+                          for debuff in spec.debuffs]
+    cast_steps = []
+    if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+        cast_steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
+                           'value': facts.mana_cost})
+    cast_steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell})
+    cast_steps += required_aura_steps(facts)
+    cast_steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': spec.target})
+    cast_steps.append({'action': 'wait', 'ms': spec.wait_ms})
+
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour dispel removal',
+        'contract': f'Debuffs {list(spec.debuffs)} applied to {spec.target}, then {spec.spell} cast on them; each '
+                    f'debuff\'s aura metric is measured before and after, waiting {spec.wait_ms} ms for the '
+                    f'removal to take effect.',
+        'players': [player_fixture(class_file)],
+        'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
+                + debuff_steps + before_measurements + cast_steps + after_measurements}
+    if spec.target != CASTER:
+        scenario['players'].append({**player_fixture(class_file), 'id': spec.target})
+
+    expectations = []
+    for debuff in spec.debuffs:
+        before_label = dispel_removal_label(spec, debuff, BEFORE)
+        after_label = dispel_removal_label(spec, debuff, AFTER)
+        model = {'kind': 'metric_delta', 'before_label': before_label, 'after_label': after_label,
+                 'expected': 0.0, 'before_expected': 1.0, 'metric': 'aura', 'quote': entry.quote}
+        label = f'{spec.spell} behaviour_dispel_removal {debuff}' + \
+            (f' {spec.label_suffix}' if spec.label_suffix else '')
+        expectations.append(Expectation(label, BEHAVIOUR_METRIC_DELTA, spec.spell, spec.spell, None, '0',
+                                        prose_rule(entry.quote, spec.spell), model))
+    return scenario, expectations
+
+
+def dispel_removal_spec(entry: dict) -> DispelRemovalSpec:
+    return DispelRemovalSpec(entry['spell'], entry['name'], entry['quote'], tuple(entry['debuffs']),
+                             entry.get('target', CASTER), entry.get('wait_ms', DEFAULT_DISPEL_REMOVAL_WAIT_MS),
+                             entry.get('label_suffix', ''))
 
 
 DEBT_ASSERT_TIMEOUT_MS = 2000
@@ -2737,6 +2806,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return cast_combat_scenario(class_file, cast_combat_spec(entry))
     if entry['kind'] == 'aggro_redirect':
         return aggro_redirect_scenario(class_file, aggro_redirect_spec(entry))
+    if entry['kind'] == 'dispel_removal':
+        return dispel_removal_scenario(class_file, dispel_removal_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 
