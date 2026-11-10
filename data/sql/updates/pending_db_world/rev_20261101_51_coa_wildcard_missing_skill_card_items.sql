@@ -2,6 +2,7 @@
 -- Each copies the existing Backstab card (98071, or golden 99211) and takes its Item.dbc display, its SkillCard.dbc quality and the name rule of rev_20261010_22_wildcard_skill_card_names.
 DROP TEMPORARY TABLE IF EXISTS `coa_missing_skill_cards`;
 CREATE TEMPORARY TABLE `coa_missing_skill_cards` (`entry` INT UNSIGNED PRIMARY KEY, `template` INT UNSIGNED NOT NULL, `name` VARCHAR(255) NOT NULL, `displayid` INT UNSIGNED NOT NULL, `Quality` TINYINT UNSIGNED NOT NULL);
+DELETE FROM `coa_missing_skill_cards`;
 INSERT INTO `coa_missing_skill_cards` (`entry`, `template`, `name`, `displayid`, `Quality`) VALUES
 (2205095, 98071, 'Skill Card - Poison Mastery', 48625, 3),
 (2205096, 99211, 'Golden Skill Card - Poison Mastery', 48625, 3),
@@ -406,11 +407,12 @@ INSERT INTO `coa_missing_skill_cards` (`entry`, `template`, `name`, `displayid`,
 (3400129, 99211, 'Golden Skill Card - Heartchill', 143779, 1),
 (3400130, 98071, 'Skill Card - Corrupt Mind', 170906, 4),
 (3400131, 99211, 'Golden Skill Card - Corrupt Mind', 143779, 4);
-DELETE FROM `item_template` WHERE `entry` IN (SELECT `entry` FROM `coa_missing_skill_cards`);
 DROP TEMPORARY TABLE IF EXISTS `coa_missing_skill_card_rows`;
 CREATE TEMPORARY TABLE `coa_missing_skill_card_rows` SELECT `i`.*, `c`.`entry` AS `new_entry`, `c`.`name` AS `new_name`, `c`.`displayid` AS `new_displayid`, `c`.`Quality` AS `new_quality` FROM `coa_missing_skill_cards` `c` JOIN `item_template` `i` ON `i`.`entry` = `c`.`template`;
 UPDATE `coa_missing_skill_card_rows` SET `entry` = `new_entry`, `name` = `new_name`, `displayid` = IF(`new_displayid` = 0, `displayid`, `new_displayid`), `Quality` = `new_quality`, `BuyPrice` = 5000000;
 ALTER TABLE `coa_missing_skill_card_rows` DROP COLUMN `new_entry`, DROP COLUMN `new_name`, DROP COLUMN `new_displayid`, DROP COLUMN `new_quality`;
-INSERT INTO `item_template` SELECT * FROM `coa_missing_skill_card_rows`;
+INSERT INTO `item_template` SELECT * FROM `coa_missing_skill_card_rows`
+ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `displayid` = VALUES(`displayid`), `Quality` = VALUES(`Quality`),
+    `BuyPrice` = VALUES(`BuyPrice`);
 DROP TEMPORARY TABLE `coa_missing_skill_card_rows`;
 DROP TEMPORARY TABLE `coa_missing_skill_cards`;

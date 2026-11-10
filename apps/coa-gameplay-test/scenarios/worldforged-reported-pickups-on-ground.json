@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Worldforged pickups reported floating, sunk or buried sit on the ground",
-  "contract": "Fourteen Worldforged pickups were reported floating (#10499, #10464, #10446, #10116, #10119, #10461, #10487, #10494, #10451, #10405), sunk (#10471, #10144) or missing because buried (#10484, #10115). The server's ground under each (Map::GetHeight from above) was 3.8 yd above to 18.4 yd below them. Expected: each pickup sits between 0.15 yd below and 0.5 yd above the ground under it.",
+  "contract": "Fourteen Worldforged pickups were reported floating (#10499, #10464, #10446, #10116, #10119, #10461, #10487, #10494, #10451, #10405), sunk (#10471, #10144) or missing because buried (#10484, #10115). The server's ground under each (Map::GetHeight from above) was 3.8 yd above to 18.4 yd below them. The Zul'Kunda Tribe Trophy's position comes from #10507, kept by #10600. Expected: each pickup sits between 0.15 yd below and 0.5 yd above the ground under it.",
   "timeout_ms": 180000,
   "location": {
     "map": 0,
@@ -357,7 +357,7 @@
     },
     {
       "action": "assert",
-      "label": "SETUP: Zul is in the area",
+      "label": "SETUP: Zul'Kunda Tribe Trophy is in the area",
       "actor": "p",
       "metric": "nearby_gameobject_count",
       "entry": 95732,
@@ -365,7 +365,7 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: Zul sits on the ground (#10144)",
+      "label": "Zul'Kunda Tribe Trophy sits on the ground (#10144, #10387, #9983)",
       "actor": "p",
       "metric": "nearby_gameobject_ground_offset",
       "entry": 95732,
