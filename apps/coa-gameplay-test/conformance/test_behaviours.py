@@ -8,9 +8,9 @@ import unittest
 
 from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
                         BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH,
-                        BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA,
-                        BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO,
-                        BEHAVIOUR_TRIGGER, MECHANIC_LAND_ATTEMPTS, STRIKER, NotModelled,
+                        BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
+                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
+                        BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER, MECHANIC_LAND_ATTEMPTS, STRIKER, NotModelled,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
                         OathConsumptionRemovalSpec,
                         amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
@@ -18,6 +18,7 @@ from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_
                         behaviour_scenario, crit_guarantee_scenario, crit_guarantee_spec,
                         duration_refresh_scenario, duration_refresh_spec, duration_scenario, duration_spec,
                         exclusivity_chain_scenario, exclusivity_chain_spec,
+                        group_stack_cap_scenario, group_stack_cap_spec,
                         health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
                         healing_ratio_spec, icd_gate_scenario, icd_gate_spec, leech_heal_modifier_factor,
                         leech_ratio_scenario, leech_ratio_spec,
@@ -89,6 +90,10 @@ TRANSCENDING_STRIKES = 804897
 DIVINE_FORCE = 806153
 WHIRLING_TEMPEST = 300504
 RIGHTEOUS_TEMPEST = 805409
+SERENDIPITY = 300929
+RUNIC_POWER = 300944
+CALL_OF_THE_MONASTERY = 560550
+UNLEASHED_RAGE = 30802
 
 
 def scarlet_judicator_entry() -> dict:
@@ -184,6 +189,16 @@ def whirling_tempest_entry() -> dict:
 def whirling_tempest_stacks_with_courage_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours']
                if entry['spell'] == WHIRLING_TEMPEST and entry.get('variant') == 'stacks_with_courage')
+
+
+def serendipity_group_stack_cap_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == SERENDIPITY and entry['kind'] == 'group_stack_cap')
+
+
+def call_of_the_monastery_group_stack_cap_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == CALL_OF_THE_MONASTERY and entry['kind'] == 'group_stack_cap')
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -369,7 +384,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 41)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 43)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1379,6 +1394,82 @@ class ExclusivityChainScenarioTests(unittest.TestCase):
         entry['chain'] = [LIBRAM_OF_CONSECRATION]
         with self.assertRaises(ValueError):
             exclusivity_chain_scenario(CLASS_FILE, exclusivity_chain_spec(entry))
+
+
+class GroupStackCapScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_the_expectation(self):
+        spec = group_stack_cap_spec(serendipity_group_stack_cap_entry())
+        scenario, expectations = group_stack_cap_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_GROUP_STACK_CAP)
+        self.assertEqual(expectation.spell_id, SERENDIPITY)
+        self.assertEqual(expectation.rank_id, RUNIC_POWER)
+        self.assertTrue(expectation.rule.startswith('prose: "Does not stack with similar effects."'))
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, serendipity_group_stack_cap_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_GROUP_STACK_CAP)
+
+    def test_own_pct_and_partner_pct_are_read_from_the_dbc(self):
+        spec = group_stack_cap_spec(serendipity_group_stack_cap_entry())
+        _, expectations = group_stack_cap_scenario(CLASS_FILE, spec)
+        records = Records(dataset(DBC_DIR))
+        own_pct = records.single_value(SERENDIPITY, 0)
+        partner_pct = records.single_value(RUNIC_POWER, 0)
+        self.assertEqual(expectations[0].model['own_pct'], own_pct)
+        self.assertEqual(expectations[0].model['partner_pct'], partner_pct)
+        self.assertEqual(float(expectations[0].displayed), max(own_pct, partner_pct))
+
+    def test_baseline_measured_before_either_spell_is_learned(self):
+        spec = group_stack_cap_spec(serendipity_group_stack_cap_entry())
+        scenario, expectations = group_stack_cap_scenario(CLASS_FILE, spec)
+        baseline_index = next(index for index, step in enumerate(scenario['steps'])
+                             if step.get('action') == 'assert'
+                             and step.get('label') == expectations[0].model['baseline_label'])
+        learn_indices = [index for index, step in enumerate(scenario['steps'])
+                        if step.get('action') == 'learn']
+        self.assertTrue(all(baseline_index < index for index in learn_indices))
+
+    def test_own_measured_after_learning_own_but_before_the_partner(self):
+        spec = group_stack_cap_spec(serendipity_group_stack_cap_entry())
+        scenario, expectations = group_stack_cap_scenario(CLASS_FILE, spec)
+        own_learn_index = next(index for index, step in enumerate(scenario['steps'])
+                              if step.get('action') == 'learn' and step.get('spell') == SERENDIPITY)
+        own_label_index = next(index for index, step in enumerate(scenario['steps'])
+                              if step.get('action') == 'assert'
+                              and step.get('label') == expectations[0].model['own_label'])
+        partner_learn_index = next(index for index, step in enumerate(scenario['steps'])
+                                  if step.get('action') == 'learn' and step.get('spell') == RUNIC_POWER)
+        self.assertLess(own_learn_index, own_label_index)
+        self.assertLess(own_label_index, partner_learn_index)
+
+    def test_combined_measured_after_learning_the_partner(self):
+        spec = group_stack_cap_spec(serendipity_group_stack_cap_entry())
+        scenario, expectations = group_stack_cap_scenario(CLASS_FILE, spec)
+        partner_learn_index = next(index for index, step in enumerate(scenario['steps'])
+                                  if step.get('action') == 'learn' and step.get('spell') == RUNIC_POWER)
+        combined_label_index = next(index for index, step in enumerate(scenario['steps'])
+                                   if step.get('action') == 'assert'
+                                   and step.get('label') == expectations[0].model['combined_label'])
+        self.assertLess(partner_learn_index, combined_label_index)
+
+    def test_attack_power_entry_uses_the_attack_power_metric_with_no_target(self):
+        spec = group_stack_cap_spec(call_of_the_monastery_group_stack_cap_entry())
+        self.assertEqual(spec.metric, 'attack_power')
+        self.assertEqual(spec.fields, {})
+        scenario, _ = group_stack_cap_scenario(CLASS_FILE, spec)
+        self.assertNotIn('creatures', scenario)
+
+    def test_spell_damage_entry_adds_a_creature_fixture_for_its_target_field(self):
+        spec = group_stack_cap_spec(serendipity_group_stack_cap_entry())
+        self.assertEqual(spec.metric, 'spell_damage_done')
+        self.assertEqual(spec.fields, {'target': 'dummy', 'spell': 133})
+        scenario, _ = group_stack_cap_scenario(CLASS_FILE, spec)
+        self.assertIn('creatures', scenario)
+        self.assertGreaterEqual(len(scenario['creatures']), 1)
 
 
 class FakeRun:
@@ -2580,6 +2671,74 @@ class JudgeIcdGateTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({'after1': 1.0, 'after2': 1.0}), expectation)
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('after3', verdict.explanation)
+
+    def test_no_run_reports_no_scenario(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), None, expectation)
+        self.assertIn('no scenario', verdict.explanation)
+
+
+class JudgeGroupStackCapTests(unittest.TestCase):
+    def expectation(self, own_pct=5.0, partner_pct=4.0, personal_pct=0.0):
+        model = {'kind': 'group_stack_cap', 'baseline_label': 'baseline', 'own_label': 'own',
+                 'combined_label': 'combined', 'own_pct': own_pct, 'partner_pct': partner_pct,
+                 'personal_pct': personal_pct, 'quote': 'Does not stack with similar effects.'}
+        return Expectation('label', BEHAVIOUR_GROUP_STACK_CAP, CALL_OF_THE_MONASTERY, UNLEASHED_RAGE, None,
+                           str(max(own_pct, partner_pct)), 'prose: "Does not stack with similar effects." (560550)',
+                           model)
+
+    def test_an_uncapped_personal_effect_keeps_compounding_on_top_of_the_capped_area_effect(self):
+        expectation = self.expectation(own_pct=5.0, partner_pct=4.0, personal_pct=5.0)
+        baseline = 1000.0
+        own = baseline * 1.05 * 1.05
+        combined = baseline * 1.05 * 1.05
+        run = FakeRun({'baseline': baseline, 'own': own, 'combined': combined})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_the_personal_effect_also_counted_toward_the_group_cap_is_an_alert(self):
+        expectation = self.expectation(own_pct=5.0, partner_pct=4.0, personal_pct=5.0)
+        baseline = 1000.0
+        own = baseline * 1.05 * 1.05
+        combined = baseline * 1.05
+        run = FakeRun({'baseline': baseline, 'own': own, 'combined': combined})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_combined_capped_at_the_stronger_own_percentage_is_ok(self):
+        expectation = self.expectation(own_pct=5.0, partner_pct=4.0)
+        baseline = 1000.0
+        run = FakeRun({'baseline': baseline, 'own': baseline * 1.05, 'combined': baseline * 1.05})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_combined_summing_both_percentages_is_an_alert(self):
+        expectation = self.expectation(own_pct=5.0, partner_pct=4.0)
+        baseline = 1000.0
+        run = FakeRun({'baseline': baseline, 'own': baseline * 1.05, 'combined': baseline * 1.09})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_own_reading_missing_the_single_percentage_is_an_alert(self):
+        expectation = self.expectation(own_pct=5.0, partner_pct=4.0)
+        baseline = 1000.0
+        run = FakeRun({'baseline': baseline, 'own': baseline, 'combined': baseline * 1.05})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_combined_capped_at_the_stronger_partner_percentage_when_partner_wins(self):
+        expectation = self.expectation(own_pct=3.0, partner_pct=3.0)
+        baseline = 1000.0
+        run = FakeRun({'baseline': baseline, 'own': baseline * 1.03, 'combined': baseline * 1.03})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation()
+        run = FakeRun({'baseline': 1000.0, 'own': 1050.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('combined', verdict.explanation)
 
     def test_no_run_reports_no_scenario(self):
         expectation = self.expectation()

@@ -24,13 +24,15 @@ BEHAVIOUR_OATH_CONSUMPTION = 'behaviour_oath_consumption'
 BEHAVIOUR_OATH_CONSUMPTION_REMOVAL = 'behaviour_oath_consumption_removal'
 BEHAVIOUR_INTERNAL_COOLDOWN_GATE = 'behaviour_internal_cooldown_gate'
 BEHAVIOUR_EXCLUSIVITY = 'behaviour_exclusivity'
+BEHAVIOUR_GROUP_STACK_CAP = 'behaviour_group_stack_cap'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
-                    BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_EXCLUSIVITY)
+                    BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_EXCLUSIVITY,
+                    BEHAVIOUR_GROUP_STACK_CAP)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
-        'internal_cooldown_gate', 'exclusivity')
+        'internal_cooldown_gate', 'exclusivity', 'group_stack_cap')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1359,6 +1361,76 @@ def exclusivity_chain_spec(entry: dict) -> ExclusivityChainSpec:
                                 entry.get('wait_ms', EXCLUSIVITY_CAST_WAIT_MS))
 
 
+GROUP_STACK_CAP_LEARN_WAIT_MS = 300
+
+
+@dataclass(frozen=True)
+class GroupStackCapSpec:
+    spell: int
+    name: str
+    quote: str
+    effect: int
+    partner: int
+    partner_effect: int
+    metric: str
+    fields: dict
+    personal_effect: int | None = None
+    wait_ms: int = GROUP_STACK_CAP_LEARN_WAIT_MS
+
+
+def group_stack_cap_label(spec: GroupStackCapSpec, moment: str) -> str:
+    return f'{spec.spell} {spec.partner} {spec.metric} {moment}'
+
+
+def group_stack_cap_scenario(class_file: dict, spec: GroupStackCapSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'group_stack_cap', spec.quote, 1.0)
+    own_pct = records.single_value(spec.spell, spec.effect)
+    partner_pct = records.single_value(spec.partner, spec.partner_effect)
+    personal_pct = records.single_value(spec.spell, spec.personal_effect) if spec.personal_effect is not None \
+        else 0.0
+    baseline_label = group_stack_cap_label(spec, 'baseline')
+    own_label = group_stack_cap_label(spec, 'own')
+    combined_label = group_stack_cap_label(spec, 'combined')
+    steps = base_steps(class_file) + [measurement(baseline_label, CASTER, spec.metric, **spec.fields)]
+    steps.append({'action': 'learn', 'actor': CASTER, 'spell': spec.spell})
+    steps.append({'action': 'wait', 'ms': spec.wait_ms})
+    steps.append(measurement(own_label, CASTER, spec.metric, **spec.fields))
+    steps.append({'action': 'learn', 'actor': CASTER, 'spell': spec.partner})
+    steps.append({'action': 'wait', 'ms': spec.wait_ms})
+    steps.append(measurement(combined_label, CASTER, spec.metric, **spec.fields))
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour group stack cap',
+        'contract': f'Reads {spec.metric} with neither passive known, after learning {spec.spell} alone '
+                    f'({own_pct:g}%, effect {spec.effect}, plus an uncapped personal {personal_pct:g}% from '
+                    f'effect {spec.personal_effect} when one is given), waiting {spec.wait_ms} ms for the area '
+                    f'aura\'s own target-map rescan (Aura::UpdateOwner, SpellAuras.cpp) to reach the caster, and '
+                    f'again after additionally learning {spec.partner} ({partner_pct:g}%, effect '
+                    f'{spec.partner_effect}), a different spell carrying the identical '
+                    f'SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT spell_group membership (stock '
+                    f'Unit::GetHighestExclusiveSameEffectSpellGroupValue): {spec.quote!r}. The combined reading '
+                    f'must reflect only the stronger of the two area-aura percentages, never their sum, while any '
+                    f'separate personal (non-area) effect of {spec.spell} keeps applying in full.',
+        'players': [player_fixture(class_file)],
+        'steps': steps}
+    if spec.fields.get('target') == TARGET:
+        scenario['creatures'] = [creature_fixture(class_file)]
+    label = f'{spec.spell} behaviour_group_stack_cap'
+    model = {'kind': 'group_stack_cap', 'baseline_label': baseline_label, 'own_label': own_label,
+             'combined_label': combined_label, 'own_pct': own_pct, 'partner_pct': partner_pct,
+             'personal_pct': personal_pct, 'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_GROUP_STACK_CAP, spec.spell, spec.partner, None,
+                              str(max(own_pct, partner_pct)), prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def group_stack_cap_spec(entry: dict) -> GroupStackCapSpec:
+    return GroupStackCapSpec(entry['spell'], entry['name'], entry['quote'], entry['effect'], entry['partner'],
+                             entry['partner_effect'], entry['metric'], entry.get('fields', {}),
+                             entry.get('personal_effect'), entry.get('wait_ms', GROUP_STACK_CAP_LEARN_WAIT_MS))
+
+
 MECHANIC_DR_RESET_MS = 15000
 MECHANIC_GAP_MARGIN_MS = 2000
 MECHANIC_LAND_ATTEMPTS = 3
@@ -1567,6 +1639,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return icd_gate_scenario(class_file, icd_gate_spec(entry))
     if entry['kind'] == 'exclusivity':
         return exclusivity_chain_scenario(class_file, exclusivity_chain_spec(entry))
+    if entry['kind'] == 'group_stack_cap':
+        return group_stack_cap_scenario(class_file, group_stack_cap_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

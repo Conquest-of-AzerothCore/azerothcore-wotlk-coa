@@ -11,9 +11,9 @@ from typing import Callable, Mapping, Protocol
 
 from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT,
                         BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
-                        BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
-                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
-                        BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
+                        BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_GROUP_STACK_CAP,
+                        BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION,
+                        BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
@@ -2241,6 +2241,35 @@ def behaviour_exclusivity_verdict(base: Verdict, run: Run, model: dict) -> Verdi
                                f'alert')
 
 
+def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    baseline = run.values.get(model['baseline_label'])
+    own = run.values.get(model['own_label'])
+    combined = run.values.get(model['combined_label'])
+    missing = next((model[key] for key, value in (
+        ('baseline_label', baseline), ('own_label', own), ('combined_label', combined)) if value is None), None)
+    if missing:
+        return replace(base, explanation=missing_measurement(run, missing))
+    own_pct, partner_pct = model['own_pct'], model['partner_pct']
+    personal_pct = model.get('personal_pct', 0.0)
+    cap_pct = max(own_pct, partner_pct)
+    own_expected = baseline * (1 + own_pct / 100) * (1 + personal_pct / 100)
+    combined_expected = baseline * (1 + cap_pct / 100) * (1 + personal_pct / 100)
+    own_margin = max(ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE * abs(own_expected))
+    combined_margin = max(ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE * abs(combined_expected))
+    own_ok = abs(own - own_expected) <= own_margin
+    combined_ok = abs(combined - combined_expected) <= combined_margin
+    status = 'ok' if own_ok and combined_ok else 'alert'
+    return replace(base, status=status, measured=combined, expected=combined_expected,
+                   low=combined_expected - combined_margin, high=combined_expected + combined_margin,
+                   explanation=f'baseline {baseline:g}; after learning the own passive alone, measured {own:g} '
+                               f'against expected {own_expected:g} (+{own_pct:g}%, +/-{own_margin:g}); after also '
+                               f'learning the partner ({partner_pct:g}%, same spell_group '
+                               f'SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT membership), measured {combined:g} '
+                               f'against expected {combined_expected:g} (capped at the stronger +{cap_pct:g}%, '
+                               f'+/-{combined_margin:g}); a combined reading that reflects the sum of both '
+                               f'percentages instead of their cap is always an alert')
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
@@ -2275,6 +2304,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_internal_cooldown_gate_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_EXCLUSIVITY:
         return behaviour_exclusivity_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_GROUP_STACK_CAP:
+        return behaviour_group_stack_cap_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 
