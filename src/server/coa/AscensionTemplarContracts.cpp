@@ -178,6 +178,8 @@ void ApplyContracts(SpellInfo* info)
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             if (info->Effects[i].Effect)
                 dummy(i);
+    if (id == 712678)
+        info->Effects[EFFECT_1].BasePoints = 4999;
     if (id == 520442)
         info->Effects[0].MiscValue = SPELLMOD_CRIT_DAMAGE_BONUS;
     if (id == 806522)
