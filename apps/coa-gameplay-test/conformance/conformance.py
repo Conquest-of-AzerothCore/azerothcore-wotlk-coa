@@ -25,8 +25,8 @@ from sheets import write_sheets
 from stack import PASSES, STACK_CHECKS, STACK_DPS, STACK_KIND, stack_scenarios
 from tooltip import read_tooltip
 from triggers import (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND, MAGNITUDE_RATIO_KIND, cooldown_trigger_scenario,
-                      duration_trigger_scenario, magnitude_ratio_scenario, trigger_entries, trigger_plan,
-                      trigger_scenario, trigger_status_expectation, trigger_unmodelled_expectation)
+                      duration_trigger_scenario, magnitude_ratio_scenario, shares_trigger_aura, trigger_entries,
+                      trigger_plan, trigger_scenario, trigger_status_expectation, trigger_unmodelled_expectation)
 from values import Expectation, armed_for, dataset, static_conditional_known, structure_stats, value_scenario
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -199,7 +199,12 @@ def add_proc(writer: ManifestWriter, entry: dict):
 def add_trigger(writer: ManifestWriter, entry: dict):
     class_file = writer.class_file
     aura, name = entry['aura'], entry['name']
-    key_parts = (aura, entry['effect']) if entry.get('effect') is not None else (aura,)
+    if entry.get('effect') is not None:
+        key_parts = (aura, entry['effect'])
+    elif entry.get('kind') is None and not entry.get('status') and shares_trigger_aura(class_file, entry):
+        key_parts = (aura, entry['trigger'].get('spell', entry['trigger']['action']))
+    else:
+        key_parts = (aura,)
     key = scenario_key(class_file['name'], 'trigger', *key_parts)
     if entry.get('status'):
         writer.add(key, 'trigger', None, aura, [trigger_status_expectation(entry)], name=name)

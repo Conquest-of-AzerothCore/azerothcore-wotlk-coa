@@ -49,8 +49,13 @@ class TriggerPlan:
     part_attempts: tuple[int, ...]
 
 
-def trigger_label(aura: int) -> str:
-    return f'{aura} trigger_count'
+def trigger_label(aura: int, trigger_spell: int | str | None = None) -> str:
+    return f'{aura} trigger_count' if trigger_spell is None else f'{aura} trigger_count {trigger_spell}'
+
+
+def shares_trigger_aura(class_file: dict, entry: dict) -> bool:
+    return sum(1 for other in class_file.get('triggers', [])
+              if other.get('kind') is None and not other.get('status') and other['aura'] == entry['aura']) > 1
 
 
 def trigger_measurements(aura: int) -> dict[str, str]:
@@ -378,7 +383,9 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
              'internal_cooldown_ms': entry.get('internal_cooldown_ms', 0),
              'trial_attempts_factor': entry.get('trial_attempts_factor', 1),
              'periodic_initial_tick': entry.get('periodic_initial_tick', False), 'measurements': labels}
-    expectation = Expectation(trigger_label(aura), TRIGGER_CHECK, aura, aura, None, entry['trigger_text'],
+    label = trigger_label(aura, trigger.get('spell', trigger['action'])) if shares_trigger_aura(class_file, entry) \
+        else trigger_label(aura)
+    expectation = Expectation(label, TRIGGER_CHECK, aura, aura, None, entry['trigger_text'],
                               trigger_rule(entry), model)
     baseline_ms = baseline * plan.attempt_ms + DRAIN_MS if baseline else 0
     return timed(scenario, SETTLE_MS + baseline_ms + attempts * plan.attempt_ms + DRAIN_MS), [expectation]
@@ -660,8 +667,22 @@ def trigger_unmodelled_expectation(entry: dict, reason: str) -> Expectation:
                        entry.get('trigger_text', ''), UNMODELLED + reason)
 
 
+def checked_trigger_set(entries: list[dict]) -> list[dict]:
+    seen: set[tuple[int, int | str]] = set()
+    for entry in entries:
+        if entry.get('kind') is not None or entry.get('status'):
+            continue
+        trigger = entry['trigger']
+        key = (entry['aura'], trigger.get('spell', trigger['action']))
+        if key in seen:
+            raise ValueError(f'Trigger {entry["aura"]} has two trigger_count entries both triggered by '
+                             f'{key[1]!r}; they would collide under the same label')
+        seen.add(key)
+    return entries
+
+
 def trigger_entries(class_file: dict, auras: Sequence[int] | None = None) -> list[dict]:
-    entries = class_file.get('triggers', [])
+    entries = checked_trigger_set(class_file.get('triggers', []))
     if auras is None:
         return list(entries)
     unknown = set(auras) - {entry['aura'] for entry in entries}

@@ -41,7 +41,7 @@ READINGS = [{'name': 'auto attacks only', 'labels': [LABELS['trials']]},
             {'name': 'every direct damage event', 'labels': [LABELS['trials'], STRIKE_TRIALS]}]
 LIGHTS_ECHO = (520017, 520883)
 ARGENT_BLADE_FIRST_RANK = 804929
-SCRIPTED_IN_CODE = {504808, 520017, 520883, 572548, 572554, 804571}
+SCRIPTED_IN_CODE = {504808, 520017, 520883, 572548, 572554, 706325, 804571}
 CONDEMNATION = 706325
 BLADE_OF_FAITH = 803880
 BLADE_OF_FAITH_TICK_MS = 3000
@@ -703,6 +703,41 @@ class TemplarProcEntriesTest(unittest.TestCase):
             self.assertEqual(len(keys), len(set(keys)))
             self.assertTrue(any(str(LIGHTKEEPER_PARRY) in key for key in keys))
             self.assertTrue(any(str(LIGHTKEEPER_BURST) in key for key in keys))
+        finally:
+            shutil.rmtree(out)
+
+    def test_condemnation_has_one_entry_per_named_trigger_spell(self):
+        entries = [entry for entry in CLASS_FILE['procs'] if entry['aura'] == CONDEMNATION]
+        self.assertEqual(len(entries), 3)
+        self.assertEqual({entry['trigger']['spell'] for entry in entries}, {CONDEMN, 801445, BLADE_OF_FAITH})
+        self.assertEqual({entry['proc_spell'] for entry in entries}, {ZEALOTRY_STRIKE})
+        for entry in entries:
+            with self.subTest(trigger=entry['trigger']):
+                self.assertTrue(shares_aura(CLASS_FILE, entry))
+                self.assertTrue(shares_proc_spell(CLASS_FILE, entry))
+                self.assertTrue(entry['handler'])
+
+    def test_proc_label_disambiguates_condemnation_by_trigger_spell(self):
+        condemn, cleave, blade = (next(entry for entry in CLASS_FILE['procs']
+                                       if entry['aura'] == CONDEMNATION and entry['trigger']['spell'] == spell)
+                                  for spell in (CONDEMN, 801445, BLADE_OF_FAITH))
+        labels = [proc_scenario(CLASS_FILE, entry)[1][0].label for entry in (condemn, cleave, blade)]
+        self.assertEqual(len(labels), len(set(labels)))
+        self.assertEqual(labels, [proc_label(CONDEMNATION, ZEALOTRY_STRIKE, CONDEMN),
+                                  proc_label(CONDEMNATION, ZEALOTRY_STRIKE, 801445),
+                                  proc_label(CONDEMNATION, ZEALOTRY_STRIKE, BLADE_OF_FAITH)])
+
+    def test_condemnation_scenario_keys_do_not_collide(self):
+        from conformance import generate
+        out = Path(tempfile.mkdtemp(prefix='conformance-condemnation-'))
+        try:
+            manifest_path = generate(CLASS_FILE['class_id'], out, procs=[CONDEMNATION])
+            manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+            keys = [entry['key'] for entry in manifest['scenarios']]
+            self.assertEqual(len(keys), len(set(keys)))
+            self.assertTrue(any(str(CONDEMN) in key for key in keys))
+            self.assertTrue(any('801445' in key for key in keys))
+            self.assertTrue(any(str(BLADE_OF_FAITH) in key for key in keys))
         finally:
             shutil.rmtree(out)
 

@@ -410,7 +410,58 @@
       "spell_proc": {
         "706325": {"ProcFlags": 1048575, "Chance": 0, "ProcsPerMinute": 0, "Cooldown": 0, "Charges": 0}
       },
-      "internal_cooldown_ms": 0
+      "internal_cooldown_ms": 0,
+      "handler": "AscensionTemplarEvents.cpp:84 (aura_ascension_templar_event::Check, case 706325): damage && (Named(info, 804906) || Named(info, 801445) || Named(info, 803872)) && IsWithinMeleeRange(target); this entry's own trigger (803880, Blade of Faith) proves the third of the three named spells."
+    },
+    {
+      "aura": 706325,
+      "name": "Condemnation",
+      "tooltip": "Dealing damage with |cffffffffCondemn|r, |cFFFFFFFFHoly Cleave|r, or |cFFFFFFFFBlade of Faith|r now has a $h% chance to trigger |cffffffffZealotry|r if you are within melee range of your target.@s:801450:0@",
+      "chance_token": "$h",
+      "trigger": {"action": "cast", "spell": 804906},
+      "trigger_text": "Condemn",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 801450,
+      "proc_spell_source": "tooltip reference @s:801450:0@ and EffectTriggerSpell[0] of 706325: Zealotry 801450",
+      "events_per_proc": 1,
+      "trial_readings": [
+        {"name": "each damage tick",
+         "meaning": "every damage tick of Condemn rolls the chance, so one cast can trigger Zealotry several times",
+         "adds": []}
+      ],
+      "dbc": {
+        "706325": {"ProcChance": 15, "ProcFlags": 0, "ProcCharges": 0}
+      },
+      "spell_proc": {
+        "706325": {"ProcFlags": 1048575, "Chance": 0, "ProcsPerMinute": 0, "Cooldown": 0, "Charges": 0}
+      },
+      "internal_cooldown_ms": 0,
+      "handler": "AscensionTemplarEvents.cpp:84 (aura_ascension_templar_event::Check, case 706325): damage && (Named(info, 804906) || Named(info, 801445) || Named(info, 803872)) && IsWithinMeleeRange(target); this entry proves the first of the three named spells independently."
+    },
+    {
+      "aura": 706325,
+      "name": "Condemnation",
+      "tooltip": "Dealing damage with |cffffffffCondemn|r, |cFFFFFFFFHoly Cleave|r, or |cFFFFFFFFBlade of Faith|r now has a $h% chance to trigger |cffffffffZealotry|r if you are within melee range of your target.@s:801450:0@",
+      "chance_token": "$h",
+      "trigger": {"action": "cast", "spell": 801445},
+      "trigger_text": "Holy Cleave",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 801450,
+      "proc_spell_source": "tooltip reference @s:801450:0@ and EffectTriggerSpell[0] of 706325: Zealotry 801450",
+      "events_per_proc": 1,
+      "trial_readings": [
+        {"name": "each damage tick",
+         "meaning": "every damage tick of Holy Cleave rolls the chance, so one cast can trigger Zealotry several times",
+         "adds": []}
+      ],
+      "dbc": {
+        "706325": {"ProcChance": 15, "ProcFlags": 0, "ProcCharges": 0}
+      },
+      "spell_proc": {
+        "706325": {"ProcFlags": 1048575, "Chance": 0, "ProcsPerMinute": 0, "Cooldown": 0, "Charges": 0}
+      },
+      "internal_cooldown_ms": 0,
+      "handler": "AscensionTemplarEvents.cpp:84 (aura_ascension_templar_event::Check, case 706325): damage && (Named(info, 804906) || Named(info, 801445) || Named(info, 803872)) && IsWithinMeleeRange(target); this entry proves the second of the three named spells independently."
     },
     {
       "aura": 504808,
@@ -689,6 +740,22 @@
       "per_trigger_text": "now increases your damage dealt and healing done"
     },
     {
+      "aura": 705290,
+      "name": "Blessing of Eonar",
+      "tooltip": "Using |cffffffffLibram|r spells$?s520007[ or |cffffffffSilverhand Incantation|r][] now increases your damage dealt and healing done by $520537s1% for $520537d.",
+      "trigger": {"action": "cast", "spell": 801465, "target": "dummy"},
+      "trigger_text": "Silverhand Incantation",
+      "trigger_spell_text": "Silverhand Incantation",
+      "trial_metric": "spell_cast_count",
+      "observe_spell": 520537,
+      "observe_source": "EffectTriggerSpell[0] of 705290",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now increases your damage dealt and healing done",
+      "co_learn": [92111],
+      "handler": "AscensionTemplarTemporaryLibramProcs.cpp:88-95 (spell_ascension_templar_temporary_libram::CheckProc) allows 705290's proc when the finishing cast is Silverhand Incantation 801465 (SPELL_SILVERHAND) and the caster knows Scourgebane 520007 (SPELL_LEGACY_SCOURGEBANE) or its current rank 92111; the tooltip's $?s520007[...] conditional names 520007, but the handler accepts either rank, so this entry co-learns 92111 (the rank already proven learnable by the 92111 Scourgebane proc entry) to satisfy it. Confirmed defect fixed in round10/r10-proc-chains: 705290's spell_proc row (rev_20260909_04_templar_completion.sql) only ever set PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS, matching the Librams' positive self-casts, never _NEG, so a harmful magic-class cast like 801465 (targeting the dummy) never generated a matching finish-phase proc event at all, regardless of the CheckProc logic; rev_20261110_01_blessing_of_eonar_silverhand_proc_flags.sql adds the _NEG bit (0x10000) to the same row."
+    },
+    {
       "aura": 705295,
       "name": "Staffguard",
       "tooltip": "Casting |cffffffffSacred Swing|r now grants you |cffffffffStaffguard|r, absorbing ${$706583m1+$STA*.3} damage, scaling with Stamina, parry and dodge rating, for $706583d.",
@@ -730,6 +797,21 @@
       "per_trigger": 1,
       "per_trigger_text": "now grants you Oath: Retribution",
       "question": "Fervent Castigation says that casting Righteous Upheaval or Blade of Faith grants Oath: Retribution and starts the Oath Chain. Our test server grants nothing at the cast itself: Oath: Retribution appears only when the next Oath starts a new Oath Chain. A reference log line showing Oath: Retribution applied in the same combat-log timestamp as a Righteous Upheaval cast with no Oath Chain already up would confirm the tooltip reading over the test server; its absence across multiple such casts would support the test server's reading."
+    },
+    {
+      "aura": 707606,
+      "name": "Fervent Castigation",
+      "tooltip": "Casting |cffffffffRighteous Upheaval|r or |cffffffffBlade of Faith|r now grants you |cffffffffOath: Retribution|r and starts your |cFFFFFFFFOath Chain|r.@s:804924:0@",
+      "trigger": {"action": "cast", "spell": 803880, "target": "dummy"},
+      "trigger_text": "Blade of Faith",
+      "trigger_spell_text": "Blade of Faith",
+      "trial_metric": "spell_cast_count",
+      "observe_spell": 804924,
+      "observe_source": "EffectTriggerSpell[0] of 707606",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now grants you Oath: Retribution",
+      "handler": "AscensionTemplarAbilities.cpp:178 (OnSpellCast's Breaker(info) block): player->HasAura(707606) && (Named(info, 501562) || Named(info, 803872)) grants Oath: Retribution; Blade of Faith 803880 is rank 9 of chain 803872 (spell_ranks, rev_20260831_01_local_spell_progression.sql:1482) and carries SpellFamilyFlags[2]=128, satisfying both Named(info, 803872) and Breaker's own Family(info, 2, 128) test, so this entry proves the second of the two named trigger spells independently of the Righteous Upheaval 572027 entry above."
     },
     {
       "aura": 806273,

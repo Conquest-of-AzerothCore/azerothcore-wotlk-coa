@@ -34,6 +34,17 @@ A `triggers` entry of the class file is a passive whose tooltip says that someth
 | `kind` | optional: `"cooldown_delta"` for a trigger whose effect is a fixed cooldown reduction rather than a counted cast/energize/aura-apply event (see "Cooldown-delta trigger entries" below); omitted for every ordinary entry, which keeps the shape above unchanged |
 | `expected_delta_ms` | `kind: "cooldown_delta"` only: the expected reduction in milliseconds, read once as a magnitude (`abs(EffectBasePoints + 1)`), never cast |
 
+When a tooltip names more than one independent trigger spell for the same effect ("Casting Righteous Upheaval
+or Blade of Faith now grants you..."), each named spell gets its own entry: same `aura` and `observe_spell`,
+different `trigger.spell`. `trigger_scenario` (ADR 0053) then labels the `Expectation` `"<aura> trigger_count
+<trigger.spell>"` instead of the plain `"<aura> trigger_count"`, and the generated scenario key does the same,
+so the entries never collide; a single-entry aura's label is unaffected. `checked_trigger_set` (run by
+`trigger_entries()` over the whole class) rejects two default-kind entries that share both `aura` and trigger
+spell, catching the mistake this disambiguation exists to prevent. `proc_rate` entries (`procs.py`) already
+had the equivalent shape (`proc_label(aura, proc_spell, trigger)`); see Condemnation 706325 below for a
+per-trigger-spell `proc_rate` example and Fervent Castigation 707606 / Blessing of Eonar 705290 for
+`trigger_count` ones.
+
 `aura_proc_rate` is not a judge of these entries: their passives have `ProcFlags` 0 and are scripted (design D10).
 The observed spell is the passive's `EffectTriggerSpell[n]` (`observe_source` `EffectTriggerSpell[n] of <aura>`)
 unless the text names another spell through an `@s:` reference; then the entry observes the named spell
@@ -455,4 +466,46 @@ trigger casts failed that way, diluting the mean delta to 17.996 ms. Rather than
 `unmodelled_effects` (`passives.py`, checked ahead of `trigger_link`) with this evidence; a harness change (a
 trigger-cast wait sized to the observed rank's own GCD, or a target-capable observed cast) would be needed to
 measure it, out of this item's scope.
+
+Fervent Castigation 707606 (round10 `proc-chains`, per-trigger-spell breakdown): "Casting Righteous Upheaval or
+Blade of Faith now grants you Oath: Retribution" names two trigger spells; the existing entry (Righteous
+Upheaval 572027) only proved one. Added a second entry, trigger spell Blade of Faith 803880 (chain-matches
+803872, `AscensionTemplarAbilities.cpp:178`'s `Named(info, 501562) || Named(info, 803872)` Breaker(info) gate),
+same `observe_spell` 804924. Both measured `ok` (two independent full runs, stamp `20261110-001004`/
+`20261110-001147`): 572027's entry unchanged, 803880's entry events/trials matching 1:1.
+
+Condemnation 706325 (round10 `proc-chains`, per-trigger-spell breakdown, `procs.py`, zero new tool code):
+"Dealing damage with Condemn, Holy Cleave, or Blade of Faith now has a $h% chance to trigger Zealotry" names
+three trigger spells; the existing entry (Blade of Faith 803880) only proved one.
+`AscensionTemplarEvents.cpp:84`'s `Check()` reads, verbatim: `case 706325: return damage && (Named(info,
+804906) || Named(info, 801445) || Named(info, 803872)) && IsWithinMeleeRange(...)`. Added two more entries,
+trigger spells Condemn 804906 and Holy Cleave 801445, same `proc_spell` 801450; `procs.py`'s existing
+`shares_aura`/`shares_proc_spell`/`trigger_key` disambiguation (used already by Lightkeeper and Might of
+Aggramar) needed no changes. All three measured `ok` in two independent full runs.
+
+Blessing of Eonar 705290 (round10 `proc-chains`, alternate trigger + a confirmed server defect): the clause
+"$?s520007[ or Silverhand Incantation][]" is a conditional display token (if the caster knows spell 520007,
+the tooltip adds "or Silverhand Incantation" to the trigger list); the existing entry (Libram of Tenacity
+801461) only proved the unconditional half. Read `AscensionTemplarTemporaryLibramProcs.cpp`'s
+`CheckProc`: it allows the proc when the finishing cast is Silverhand Incantation 801465 (`SPELL_SILVERHAND`)
+and `player->HasSpell(520007) || player->HasSpell(92111)` (`92111`, "Scourgebane", is the already-learnable
+rank an existing proc entry uses, so the new entry's `co_learn: [92111]` satisfies this without guessing
+whether 520007 itself is directly learnable). The new entry first measured `alert` (0/273 events); misread as
+an id mismatch, since 801465 itself deals no damage (its `EffectTriggerSpell[0]` 801501, same name, does) —
+changing `SPELL_SILVERHAND` to 801501 in C++ still measured 0/273, disproving that guess (reverted, no diff
+survives). The real cause, confirmed by reading `Spell::finish()` and `SpellMgr::CanSpellTriggerProcOnEvent`:
+705290's `spell_proc` row (`ProcFlags` 16400, i.e. `PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS |
+PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS`) only ever matches a *positive* cast — true for Libram of Tenacity (a
+self-buff) but not for Silverhand Incantation (a harmful cast at the dummy, whose finish-phase `procAttacker`
+is the `_NEG` flag, never in the row's mask) — so the proc-flag gate itself rejected every attempt, before
+`CheckProc` (and its id) ever ran. Fixed in a *new* migration,
+`rev_20261110_01_blessing_of_eonar_silverhand_proc_flags.sql` (`UPDATE spell_proc SET ProcFlags = 81936 WHERE
+SpellId = 705290`, adding the `_NEG` bit), **not** by editing the original
+`rev_20260909_04_templar_completion.sql` in place: a first attempt did exactly that, and the edit's changed
+checksum made the world-cache refresh re-apply that already-merged file's own `INSERT` (which sets
+Condemnation 706325's `spell_proc.Chance` to 100) without re-running the later, corrective
+`rev_20260919_20_coa_proc_chance_parity.sql` (`UPDATE ... SET Chance = 0 WHERE SpellId IN (..., 706325, ...)`)
+that depends on it running afterward — reproduced twice (Condemnation's three entries all read 100% instead of
+~15%, same rebuilt binary sha256 as the passing baseline). Both halves measured `ok` after the new-file fix,
+in two independent full runs.
 

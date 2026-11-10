@@ -20,13 +20,13 @@ from triggers import (BASELINE_ATTEMPTS, COOLDOWN_CHECK, COOLDOWN_DELTA_KIND, DU
                       MAGNITUDE_CHECK, MAGNITUDE_RATIO_KIND, MAIN_HAND, PERIODIC, TAKEN_HIT, TRIGGER_CHECK,
                       TRIGGER_TRIALS, attempt_interval,
                       attempt_steps, checked_cooldown_entry, checked_duration_entry, checked_entry,
-                      checked_magnitude_entry,
+                      checked_magnitude_entry, checked_trigger_set,
                       cooldown_label, cooldown_trial_label, cooldown_trial_steps, cooldown_trigger_rule,
                       cooldown_trigger_scenario, count_step, counts, duration_label, duration_trial_label,
                       duration_trial_steps, duration_trigger_rule, duration_trigger_scenario,
                       magnitude_label, magnitude_measurement_labels, magnitude_ratio_scenario,
                       magnitude_trigger_rule,
-                      shares_cooldown_aura, trigger_entries,
+                      shares_cooldown_aura, shares_trigger_aura, trigger_entries,
                       trigger_label, trigger_measurements, trigger_plan, trigger_rule, trigger_scenario,
                       trigger_status_expectation)
 from values import ALLY, FORCED_CRIT_RATING, Expectation, dataset
@@ -487,6 +487,73 @@ class CooldownDeltaLabelDisambiguationTest(unittest.TestCase):
         self.assertNotEqual(cooldown_label(ONE_WITH_THE_LIGHT, 1), cooldown_label(ONE_WITH_THE_LIGHT, 2))
         self.assertEqual(cooldown_label(ONE_WITH_THE_LIGHT), '504807 trigger_cooldown_delta')
         self.assertEqual(cooldown_label(ONE_WITH_THE_LIGHT, 801461), '504807 trigger_cooldown_delta 801461')
+
+
+FERVENT_CASTIGATION = 707606
+BLESSING_OF_EONAR = 705290
+BLADE_OF_FAITH = 803880
+SILVERHAND_INCANTATION = 801465
+
+
+class TriggerCountLabelDisambiguationTest(unittest.TestCase):
+    def two_entries(self, aura=FERVENT_CASTIGATION):
+        base = {'aura': aura, 'trial_metric': 'spell_cast_count', 'observe_spell': 1, 'observe_metric': 'spell_cast_count',
+               'per_trigger': 1, 'per_trigger_text': ''}
+        first = {**base, 'trigger': {'action': 'cast', 'spell': RIGHTEOUS_UPHEAVAL, 'target': 'dummy'}}
+        second = {**base, 'trigger': {'action': 'cast', 'spell': BLADE_OF_FAITH, 'target': 'dummy'}}
+        return {'triggers': [first, second]}
+
+    def test_shares_trigger_aura_true_for_two_default_kind_entries_of_the_same_aura(self):
+        class_file = self.two_entries()
+        self.assertTrue(shares_trigger_aura(class_file, class_file['triggers'][0]))
+        self.assertTrue(shares_trigger_aura(class_file, class_file['triggers'][1]))
+
+    def test_shares_trigger_aura_false_for_a_sole_entry(self):
+        self.assertFalse(shares_trigger_aura(CLASS_FILE, templar_trigger(SCARLET_SECRETS)))
+
+    def test_shares_trigger_aura_ignores_entries_of_another_kind(self):
+        class_file = self.two_entries(aura=ONE_WITH_THE_LIGHT)
+        cooldown_entry = {'aura': ONE_WITH_THE_LIGHT, 'kind': COOLDOWN_DELTA_KIND,
+                          'trigger': {'action': 'cast', 'spell': RIGHTEOUS_UPHEAVAL, 'target': 'dummy'},
+                          'observe_metric': 'cooldown_ms', 'expected_delta_ms': 1000, 'observe_spell': 2}
+        class_file['triggers'] = class_file['triggers'][:1] + [cooldown_entry]
+        self.assertFalse(shares_trigger_aura(class_file, class_file['triggers'][0]))
+
+    def test_trigger_label_with_trigger_spell_is_distinct_per_entry(self):
+        self.assertNotEqual(trigger_label(FERVENT_CASTIGATION, RIGHTEOUS_UPHEAVAL),
+                            trigger_label(FERVENT_CASTIGATION, BLADE_OF_FAITH))
+        self.assertEqual(trigger_label(FERVENT_CASTIGATION), '707606 trigger_count')
+        self.assertEqual(trigger_label(FERVENT_CASTIGATION, BLADE_OF_FAITH), '707606 trigger_count 803880')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_trigger_scenario_disambiguates_the_expectation_label_when_the_aura_is_shared(self):
+        entries = [entry for entry in CLASS_FILE['triggers'] if entry['aura'] == FERVENT_CASTIGATION]
+        self.assertEqual(len(entries), 2)
+        first, second = entries
+        _, [first_expectation] = trigger_scenario(CLASS_FILE, first)
+        _, [second_expectation] = trigger_scenario(CLASS_FILE, second)
+        self.assertNotEqual(first_expectation.label, second_expectation.label)
+        self.assertEqual({first_expectation.label, second_expectation.label},
+                         {trigger_label(FERVENT_CASTIGATION, RIGHTEOUS_UPHEAVAL),
+                          trigger_label(FERVENT_CASTIGATION, BLADE_OF_FAITH)})
+
+    def test_checked_trigger_set_rejects_two_entries_triggered_by_the_same_spell(self):
+        base = {'aura': FERVENT_CASTIGATION, 'trigger': {'action': 'cast', 'spell': RIGHTEOUS_UPHEAVAL,
+                                                         'target': 'dummy'}}
+        with self.assertRaises(ValueError):
+            checked_trigger_set([dict(base), dict(base)])
+
+    def test_checked_trigger_set_accepts_two_entries_triggered_by_different_spells(self):
+        entries = self.two_entries()['triggers']
+        self.assertIs(checked_trigger_set(entries), entries)
+
+    def test_checked_trigger_set_ignores_a_status_entry_sharing_the_trigger_spell(self):
+        base = {'aura': FERVENT_CASTIGATION, 'trigger': {'action': 'cast', 'spell': RIGHTEOUS_UPHEAVAL,
+                                                         'target': 'dummy'}}
+        status = {'aura': FERVENT_CASTIGATION, 'status': 'unmodelled', 'reason': 'x',
+                  'trigger': {'action': 'cast', 'spell': RIGHTEOUS_UPHEAVAL, 'target': 'dummy'}}
+        entries = checked_trigger_set([dict(base), status])
+        self.assertEqual(len(entries), 2)
 
 
 class OneWithTheLightCooldownEntryTest(unittest.TestCase):
@@ -1707,6 +1774,55 @@ class GenerateTriggerTest(unittest.TestCase):
                           {entry['key'] for entry in manifest['scenarios']})
         finally:
             shutil.rmtree(out)
+
+    def test_fervent_castigation_scenario_keys_do_not_collide(self):
+        from conformance import generate
+        out = Path(tempfile.mkdtemp(prefix='conformance-fervent-castigation-'))
+        try:
+            manifest_path = generate(CLASS_FILE['class_id'], out, triggers=[FERVENT_CASTIGATION])
+            manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+            keys = [entry['key'] for entry in manifest['scenarios']]
+            self.assertEqual(len(keys), len(set(keys)))
+            self.assertTrue(any(str(RIGHTEOUS_UPHEAVAL) in key for key in keys))
+            self.assertTrue(any(str(BLADE_OF_FAITH) in key for key in keys))
+        finally:
+            shutil.rmtree(out)
+
+    def test_blessing_of_eonar_scenario_keys_do_not_collide(self):
+        from conformance import generate
+        out = Path(tempfile.mkdtemp(prefix='conformance-blessing-of-eonar-'))
+        try:
+            manifest_path = generate(CLASS_FILE['class_id'], out, triggers=[BLESSING_OF_EONAR])
+            manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+            keys = [entry['key'] for entry in manifest['scenarios']]
+            self.assertEqual(len(keys), len(set(keys)))
+            self.assertTrue(any('801461' in key for key in keys))
+            self.assertTrue(any(str(SILVERHAND_INCANTATION) in key for key in keys))
+        finally:
+            shutil.rmtree(out)
+
+
+class FerventCastigationAndBlessingOfEonarEntriesTest(unittest.TestCase):
+    def entries(self, aura):
+        return [entry for entry in CLASS_FILE['triggers'] if entry['aura'] == aura]
+
+    def test_fervent_castigation_has_one_entry_per_named_trigger_spell(self):
+        entries = self.entries(FERVENT_CASTIGATION)
+        self.assertEqual(len(entries), 2)
+        self.assertEqual({entry['trigger']['spell'] for entry in entries}, {RIGHTEOUS_UPHEAVAL, BLADE_OF_FAITH})
+        self.assertEqual({entry['observe_spell'] for entry in entries}, {OATH_OF_RETRIBUTION})
+        for entry in entries:
+            with self.subTest(trigger=entry['trigger']):
+                self.assertTrue(shares_trigger_aura(CLASS_FILE, entry))
+                self.assertIs(checked_entry(entry), entry)
+
+    def test_blessing_of_eonar_has_one_entry_per_named_trigger_spell(self):
+        entries = self.entries(BLESSING_OF_EONAR)
+        self.assertEqual(len(entries), 2)
+        self.assertEqual({entry['trigger']['spell'] for entry in entries}, {801461, SILVERHAND_INCANTATION})
+        silverhand = next(entry for entry in entries if entry['trigger']['spell'] == SILVERHAND_INCANTATION)
+        self.assertEqual(silverhand['co_learn'], [92111])
+        self.assertIs(checked_entry(silverhand), silverhand)
 
 
 if __name__ == '__main__':
