@@ -5,6 +5,7 @@
 - Supersedes: the last Decision item of ADR 0075 (Patience's `ModifySpellCooldown` literal flipped to `-5000`,
   "lengthening Interdict's cooldown by Patience instead of shortening it" called the defect)
 - Qualifies: ADR 0011's sign rule (Expected values), for a token whose effect a class contract rewrites at load
+- Superseded in part by: ADR 0105 (the five client texts are restated from the server)
 
 ## Context
 

@@ -120,8 +120,12 @@ the game disagree, the ruling governs the server data, scripts, conformance clas
   Agility + Stamina.
 - Scourgebane's re-roll chain stops after eight strikes. Heaven's Finest hits do not refresh The Finest of Heaven
   ("Additional applications do not refresh the duration.").
-- Texts only the client shows that state a losing option (the tick, strike and heal spells' descriptions, Force of
-  Golganneth's buff tooltip) are not restated through `coa_client_spell_description`; that is the owner's call.
+- Texts only the client shows that state a losing option are restated through `coa_client_spell_description`
+  ([ADR 0105](../adr/0105-templar-client-texts-restated-from-the-server.md),
+  `rev_20261110_02_templar_client_texts.sql`, regression `templar-ruling-client-texts`): the tick spells' and
+  Scourgebane strike's descriptions, Chakra of Light's heal (the held talent rank's base through `$?s803844`), and the
+  Force of Golganneth and Righteous Tempest buff tooltips. That the client renders them is still to be checked in the
+  lab client.
 
 The 113 coefficient slots preserve normal weapon contributions while adding separately authored terms
 once. The recovered parent values override stale Scourgebane/Tempest/Chakra helpers. Copied-result helpers
