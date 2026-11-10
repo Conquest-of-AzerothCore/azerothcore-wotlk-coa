@@ -594,6 +594,13 @@ def leech_heal_modifier_factor(records: Records, class_file: dict) -> float:
     return factor
 
 
+SPELL_ATTR3_IGNORE_CASTER_MODIFIERS = 0x20000000
+
+
+def ignores_caster_heal_modifiers(records: Records, spell_id: int) -> bool:
+    return bool(records.field('Spell', spell_id, 'AttributesEx3') & SPELL_ATTR3_IGNORE_CASTER_MODIFIERS)
+
+
 def leech_ratio_scenario(class_file: dict, spec: LeechRatioSpec) -> tuple[dict, list[Expectation]]:
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'ratio', spec.quote, spec.expected_after)
@@ -636,6 +643,57 @@ def leech_ratio_scenario(class_file: dict, spec: LeechRatioSpec) -> tuple[dict, 
 def leech_ratio_spec(entry: dict) -> LeechRatioSpec:
     return LeechRatioSpec(entry['spell'], entry['name'], entry['quote'], entry['target_rank'],
                           entry['expected_before'], entry['expected_after'])
+
+
+@dataclass(frozen=True)
+class CastLeechRatioSpec:
+    spell: int
+    name: str
+    quote: str
+    heal_spell: int
+    expected: float
+
+
+def cast_leech_ratio_scenario(class_file: dict, spec: CastLeechRatioSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'ratio', spec.quote, spec.expected)
+    facts = facts_of(records, spec.spell)
+    dummy = creature_fixture(class_file)
+    heal_factor = (1.0 if ignores_caster_heal_modifiers(records, spec.heal_spell)
+                  else leech_heal_modifier_factor(records, class_file))
+    damage_label = f'{spec.spell} cast_leech_ratio damage'
+    heal_label = f'{spec.spell} cast_leech_ratio heal'
+    steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
+    if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+        steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost})
+    steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell})
+    steps += required_aura_steps(facts)
+    steps += required_target_health_steps(facts, dummy['id'])
+    steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': dummy['id']})
+    steps.append({'action': 'wait', 'ms': facts.cast_time_ms + CAST_MARGIN_MS})
+    steps.append(measurement(damage_label, CASTER, 'spell_damage_total', spell=spec.spell, target=dummy['id']))
+    steps.append(measurement(heal_label, CASTER, 'spell_heal_total', spell=spec.heal_spell, target=CASTER))
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour cast leech ratio',
+        'contract': f'Single real cast of {spec.spell} against a dummy, measuring its own spell_damage_total and '
+                    f'the self-heal spell {spec.heal_spell}\'s spell_heal_total from that one cast, which share '
+                    f'the triggering hit\'s damage roll, so the heal/damage ratio is exactly deterministic once '
+                    f'the reference character\'s own known heal-done modifiers are folded in.',
+        'players': [player_fixture(class_file)],
+        'creatures': [dummy],
+        'steps': steps}
+    expectation = Expectation(f'{spec.spell} {spec.heal_spell} behaviour_ratio', BEHAVIOUR_RATIO, spec.spell,
+                              spec.heal_spell, None, str(spec.expected * heal_factor),
+                              prose_rule(entry.quote, spec.spell),
+                              {'kind': 'leech_ratio', 'damage_label': damage_label, 'heal_label': heal_label,
+                               'heal_baseline_label': None, 'expected': spec.expected * heal_factor,
+                               'quote': entry.quote, 'target_name': spec.name})
+    return scenario, [expectation]
+
+
+def cast_leech_ratio_spec(entry: dict) -> CastLeechRatioSpec:
+    return CastLeechRatioSpec(entry['spell'], entry['name'], entry['quote'], entry['heal_spell'], entry['expected'])
 
 
 @dataclass(frozen=True)
@@ -3026,6 +3084,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return healing_ratio_scenario(class_file, healing_ratio_spec(entry))
     if entry['kind'] == 'leech_ratio':
         return leech_ratio_scenario(class_file, leech_ratio_spec(entry))
+    if entry['kind'] == 'cast_leech_ratio':
+        return cast_leech_ratio_scenario(class_file, cast_leech_ratio_spec(entry))
     if entry['kind'] == 'spread':
         return aura_spread_scenario(class_file, aura_spread_spec(entry))
     if entry['kind'] == 'trigger':

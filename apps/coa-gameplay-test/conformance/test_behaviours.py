@@ -32,6 +32,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_AGGRO_
                         cast_combat_scenario, cast_combat_spec,
                         cast_condition_scenario, cast_condition_spec,
                         cast_gate_scenario, cast_gate_spec,
+                        cast_leech_ratio_scenario, cast_leech_ratio_spec,
                         charge_recharge_scenario, charge_recharge_spec,
                         crit_guarantee_scenario, crit_guarantee_spec,
                         crit_magnitude_scenario, crit_magnitude_spec,
@@ -42,7 +43,8 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_AGGRO_
                         fixed_target_count_scenario, fixed_target_count_spec,
                         group_stack_cap_scenario, group_stack_cap_spec,
                         health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
-                        healing_ratio_spec, heal_block_scenario, heal_block_spec, icd_gate_scenario, icd_gate_spec,
+                        healing_ratio_spec, heal_block_scenario, heal_block_spec,
+                        icd_gate_scenario, icd_gate_spec, ignores_caster_heal_modifiers,
                         internal_cooldown_scenario, internal_cooldown_spec, leech_heal_modifier_factor,
                         leech_ratio_scenario, leech_ratio_spec,
                         mechanic_duration_scenario, mechanic_duration_spec, metric_delta_label, metric_delta_scenario,
@@ -160,6 +162,8 @@ BINDING_SCRIPTURE = 801457
 BINDING_SCRIPTURE_DAMAGE_REDUCTION = 707307
 TESTAMENT_OF_STRENGTH = 300514
 SACRED_RESTRAINT = 102208
+ARGENT_BLADE = 804929
+ARGENT_BLADE_HEAL = 807414
 
 
 def scarlet_judicator_entry() -> dict:
@@ -421,6 +425,10 @@ def testament_of_strength_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == TESTAMENT_OF_STRENGTH)
 
 
+def argent_blade_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == ARGENT_BLADE)
+
+
 class BehaviourEntryTests(unittest.TestCase):
     def test_scarlet_judicator_entry(self):
         spec = target_count_spec(scarlet_judicator_entry())
@@ -656,6 +664,14 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.target, 'caster')
         self.assertEqual(spec.expected_ms, 60000)
 
+    def test_argent_blade_entry(self):
+        spec = cast_leech_ratio_spec(argent_blade_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'ratio', spec.quote, spec.expected)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(spec.spell, ARGENT_BLADE)
+        self.assertEqual(spec.heal_spell, ARGENT_BLADE_HEAL)
+        self.assertEqual(spec.expected, 1.0)
+
 
 class BehaviourEntriesLookupTests(unittest.TestCase):
     def test_behaviour_entries_filters_by_spell(self):
@@ -667,7 +683,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 80)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 81)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -2105,6 +2121,60 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['expected'], 2.40)
         self.assertEqual(expectations[0].model['before_expected'], 1.60)
         self.assertEqual(expectations[0].model['metric'], 'run_speed_rate')
+
+
+class CastLeechRatioScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_expectations(self):
+        spec = cast_leech_ratio_spec(argent_blade_entry())
+        scenario, expectations = cast_leech_ratio_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_RATIO)
+        self.assertTrue(expectation.rule.startswith('prose: "healing you equal to the damage dealt"'))
+        self.assertEqual(expectation.model['kind'], 'leech_ratio')
+        self.assertEqual(expectation.model['heal_baseline_label'], None)
+        self.assertEqual(expectation.model['expected'], 1.0)
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, argent_blade_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_RATIO)
+        self.assertEqual(expectations[0].model['kind'], 'leech_ratio')
+
+    def test_single_cast_at_a_dummy_then_measures_damage_and_self_heal(self):
+        spec = cast_leech_ratio_spec(argent_blade_entry())
+        scenario, _ = cast_leech_ratio_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        cast_steps = [index for index, step in enumerate(steps)
+                     if step.get('action') == 'cast' and step.get('spell') == ARGENT_BLADE]
+        damage_steps = [index for index, step in enumerate(steps)
+                        if step.get('metric') == 'spell_damage_total' and step.get('spell') == ARGENT_BLADE]
+        heal_steps = [index for index, step in enumerate(steps)
+                     if step.get('metric') == 'spell_heal_total' and step.get('spell') == ARGENT_BLADE_HEAL]
+        self.assertEqual(len(cast_steps), 1)
+        self.assertEqual(len(damage_steps), 1)
+        self.assertEqual(len(heal_steps), 1)
+        self.assertLess(cast_steps[0], damage_steps[0])
+        self.assertLess(cast_steps[0], heal_steps[0])
+        heal_step = steps[heal_steps[0]]
+        self.assertEqual(heal_step['target'], 'caster')
+        self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
+
+    def test_wrong_heal_reading_is_caught(self):
+        spec = cast_leech_ratio_spec(argent_blade_entry())
+        _, expectations = cast_leech_ratio_scenario(CLASS_FILE, spec)
+        expectation = expectations[0]
+        wrong_run = FakeRun({expectation.model['damage_label']: 1000.0, expectation.model['heal_label']: 0.0})
+        verdict = judge_behaviour(base_verdict(expectation), wrong_run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+        right_run = FakeRun({expectation.model['damage_label']: 1000.0, expectation.model['heal_label']: 1000.0})
+        verdict = judge_behaviour(base_verdict(expectation), right_run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_ignores_caster_heal_modifiers_reads_the_dbc_attribute(self):
+        self.assertTrue(ignores_caster_heal_modifiers(RECORDS, ARGENT_BLADE_HEAL))
+        self.assertFalse(ignores_caster_heal_modifiers(RECORDS, TITANSTRIKE_MAX_RANK))
 
 
 TEMPLAR_CLASS_ID = 19
