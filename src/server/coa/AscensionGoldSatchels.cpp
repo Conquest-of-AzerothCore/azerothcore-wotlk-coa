@@ -1,6 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "Item.h"
-#include "ItemScript.h"
 #include "Player.h"
 #include "PlayerScript.h"
 #include "ScriptMgr.h"
@@ -47,17 +46,6 @@ bool PayGoldSatchel(Player* player, Item* item)
     return true;
 }
 
-class item_ascension_gold_satchel : public ItemScript
-{
-public:
-    item_ascension_gold_satchel() : ItemScript("item_ascension_gold_satchel") { }
-
-    bool OnUse(Player* player, Item* item, SpellCastTargets const&) override
-    {
-        return PayGoldSatchel(player, item);
-    }
-};
-
 class ascension_gold_satchel_open : public PlayerScript
 {
 public:
@@ -72,6 +60,5 @@ public:
 
 void AddSC_AscensionGoldSatchels()
 {
-    new item_ascension_gold_satchel();
     new ascension_gold_satchel_open();
 }

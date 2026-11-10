@@ -4,7 +4,6 @@ from pathlib import Path
 import re
 import runpy
 import shutil
-import sqlite3
 import subprocess
 import tempfile
 import zipfile
@@ -13,7 +12,6 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 method = runpy.run_path(str(HERE.parent / "client_compat/run.py"))["method"]
 SATCHEL = 800901
-SQL = ROOT / "data/sql/updates/pending_db_world/rev_1794298617094941633.sql"
 
 
 def snapshot_row(entry):
@@ -31,22 +29,11 @@ def snapshot_row(entry):
     return dict(zip(columns, values)), loot
 
 
-def check_snapshot_and_binding():
+def check_snapshot():
     row, loot = snapshot_row(SATCHEL)
     assert row["name"] == "Boss Blitz Gold Satchel (500)" and row["description"] == "Contains 500 gold."
     assert int(row["Flags"]) & 4 and not loot
-    assert (row["minMoneyLoot"], row["maxMoneyLoot"], row["spellid_1"], row["ScriptName"]) == ("0", "0", "0", "")
-
-    sql = SQL.read_text(encoding="utf-8")
-    db = sqlite3.connect(":memory:")
-    db.executescript("CREATE TABLE item_template(entry INT,ScriptName TEXT);"
-                     "INSERT INTO item_template VALUES(800901,''),(800902,'item_ascension_rune_pouch'),(1,'keep');")
-    db.executescript(sql)
-    once = list(db.iterdump())
-    db.executescript(sql)
-    assert list(db.iterdump()) == once
-    assert db.execute("SELECT * FROM item_template ORDER BY entry").fetchall() == [
-        (1, "keep"), (800901, "item_ascension_gold_satchel"), (800902, "item_ascension_rune_pouch")]
+    assert (row["minMoneyLoot"], row["maxMoneyLoot"], row["spellid_1"]) == ("0", "0", "0")
 
 
 def check_payout():
@@ -81,14 +68,12 @@ struct Player
     void SendDirectMessage(WorldPacket const* packet){packets.push_back(*packet);}
 };
 '''
-    code += source[source.index("struct GoldSatchel"):source.index("class item_ascension_gold_satchel")]
+    code += source[source.index("struct GoldSatchel"):source.index("class ascension_gold_satchel_open")]
     code += "struct OpenHook {" + method(source, "bool OnPlayerBeforeOpenItem(").replace(" override", "") + "};\n"
-    code += "struct UseHook {" + method(source, "bool OnUse(").replace(" override", "").replace(
-        ", SpellCastTargets const&", "") + "};\n"
     code += r'''
 int main()
 {
-    OpenHook open;UseHook use;
+    OpenHook open;
     {
         Player p;p.money=123;Item satchel{800901};
         assert(!open.OnPlayerBeforeOpenItem(&p,&satchel));
@@ -96,10 +81,6 @@ int main()
         assert(p.packets.size()==1 && p.packets[0].opcode==SMSG_LOOT_MONEY_NOTIFY);
         assert(p.packets[0].fields==std::vector<uint32>({500*GOLD,1}));
         assert(p.errors==std::vector<InventoryResult>({EQUIP_ERR_NONE}));
-    }
-    {
-        Player p;Item satchel{800901};
-        assert(use.OnUse(&p,&satchel) && p.money==500*GOLD && satchel.count==0);
     }
     {
         Player p;p.money=MAX_MONEY_AMOUNT-100*GOLD;Item satchel{800901};
@@ -110,7 +91,7 @@ int main()
     for (uint32 entry : {800902u,1u})
     {
         Player p;Item other{entry};
-        assert(open.OnPlayerBeforeOpenItem(&p,&other) && !use.OnUse(&p,&other));
+        assert(open.OnPlayerBeforeOpenItem(&p,&other));
         assert(!p.money && other.count==1 && p.errors.empty() && p.packets.empty());
     }
     Player p;assert(open.OnPlayerBeforeOpenItem(&p,nullptr));
@@ -128,10 +109,10 @@ int main()
 
 
 def main():
-    check_snapshot_and_binding()
+    check_snapshot()
     check_payout()
     print("PASS: satchel 800901 opens for exactly 500 gold, is consumed, stays at the gold cap, leaves other "
-          "items alone; SQL binding replays idempotently")
+          "items alone")
 
 
 if __name__ == "__main__":
