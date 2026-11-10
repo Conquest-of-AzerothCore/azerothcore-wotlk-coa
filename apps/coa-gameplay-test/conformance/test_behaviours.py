@@ -166,7 +166,7 @@ BINDING_SCRIPTURE = 801457
 BINDING_SCRIPTURE_DAMAGE_REDUCTION = 707307
 TESTAMENT_OF_STRENGTH = 300514
 SACRED_RESTRAINT = 102208
-ARGENT_BLADE = 804929
+ARGENT_BLADE_CAST = 804929
 ARGENT_BLADE_HEAL = 807414
 TOME_OF_LIGHT = 805422
 RIGHTEOUS_CUSTODIAN = 572808
@@ -262,7 +262,8 @@ def absolution_aggro_redirect_entry() -> dict:
 
 
 def disciplined_blows_entry() -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == DISCIPLINED_BLOWS)
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == DISCIPLINED_BLOWS and entry['kind'] == 'internal_cooldown')
 
 
 def spiritual_abdicator_entry() -> dict:
@@ -399,7 +400,8 @@ def patience_cooldown_entry() -> dict:
 
 
 def chastise_weapon_damage_gate_entry() -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == CHASTISE)
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == CHASTISE and entry['kind'] == 'metric_delta')
 
 
 def libram_of_tenacity_heal_gate_entry() -> dict:
@@ -434,7 +436,7 @@ def testament_of_strength_entry() -> dict:
 
 
 def argent_blade_entry() -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == ARGENT_BLADE)
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == ARGENT_BLADE_CAST)
 
 
 def tome_of_light_entry() -> dict:
@@ -442,7 +444,8 @@ def tome_of_light_entry() -> dict:
 
 
 def righteous_custodian_entry() -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == RIGHTEOUS_CUSTODIAN)
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == RIGHTEOUS_CUSTODIAN and entry['kind'] == 'threat_tick_ratio')
 
 
 def norgannons_wrath_entry() -> dict:
@@ -688,7 +691,7 @@ class BehaviourEntryTests(unittest.TestCase):
         spec = cast_leech_ratio_spec(argent_blade_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'ratio', spec.quote, spec.expected)
         self.assertIn(spec.quote, entry.tooltip)
-        self.assertEqual(spec.spell, ARGENT_BLADE)
+        self.assertEqual(spec.spell, ARGENT_BLADE_CAST)
         self.assertEqual(spec.heal_spell, ARGENT_BLADE_HEAL)
         self.assertEqual(spec.expected, 1.0)
 
@@ -2321,9 +2324,9 @@ class CastLeechRatioScenarioTests(unittest.TestCase):
         scenario, _ = cast_leech_ratio_scenario(CLASS_FILE, spec)
         steps = scenario['steps']
         cast_steps = [index for index, step in enumerate(steps)
-                     if step.get('action') == 'cast' and step.get('spell') == ARGENT_BLADE]
+                     if step.get('action') == 'cast' and step.get('spell') == ARGENT_BLADE_CAST]
         damage_steps = [index for index, step in enumerate(steps)
-                        if step.get('metric') == 'spell_damage_total' and step.get('spell') == ARGENT_BLADE]
+                        if step.get('metric') == 'spell_damage_total' and step.get('spell') == ARGENT_BLADE_CAST]
         heal_steps = [index for index, step in enumerate(steps)
                      if step.get('metric') == 'spell_heal_total' and step.get('spell') == ARGENT_BLADE_HEAL]
         self.assertEqual(len(cast_steps), 1)
@@ -4383,6 +4386,22 @@ class JudgeSingleTargetTests(unittest.TestCase):
     def test_first_cast_never_applying_the_aura_is_an_alert(self):
         expectation = self.expectation()
         run = FakeRun({'first': 0.0, 'removed': 0.0, 'second': 1.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation()
+        run = FakeRun({'first': 1.0, 'removed': 0.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('second', verdict.explanation)
+
+    def test_no_run_reports_no_scenario(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), None, expectation)
+        self.assertIn('no scenario', verdict.explanation)
+
+
 class CastGateScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_expectations(self):
         spec = cast_gate_spec(titanstrike_cast_gate_entry())
@@ -4504,18 +4523,6 @@ class JudgeCastGateTests(unittest.TestCase):
         run = FakeRun({expectation.label: float(SPELL_FAILED_TARGET_AURASTATE)})
         verdict = judge_behaviour(base_verdict(expectation), run, expectation)
         self.assertEqual(verdict.status, 'alert')
-
-    def test_missing_measurement_leaves_alert_with_explanation(self):
-        expectation = self.expectation()
-        run = FakeRun({'first': 1.0, 'removed': 0.0})
-        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
-        self.assertEqual(verdict.status, 'alert')
-        self.assertIn('second', verdict.explanation)
-
-    def test_no_run_reports_no_scenario(self):
-        expectation = self.expectation()
-        verdict = judge_behaviour(base_verdict(expectation), None, expectation)
-        self.assertIn('no scenario', verdict.explanation)
 
 
 class JudgeCastGateMissingMeasurementTests(unittest.TestCase):
