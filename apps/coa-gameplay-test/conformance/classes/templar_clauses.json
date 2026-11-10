@@ -41,7 +41,8 @@
     "clause": "In addition, you no longer consume your Oaths with Oath Breakers.",
     "labels": [
       "92109 trigger_count",
-      "92109 e2"
+      "92109 e2",
+      "92109 behaviour_metric_delta"
     ],
     "kind": "claim"
   },
@@ -133,7 +134,8 @@
     "labels": [
       "300512 effect_value e1",
       "300512 e1 spell_modifier 807274",
-      "300512 e1 spell_effect_value 807274"
+      "300512 e1 spell_effect_value 807274",
+      "300512 behaviour_metric_delta while_active"
     ],
     "kind": "claim"
   },
@@ -189,7 +191,9 @@
   {
     "spell": 300514,
     "clause": "are usable regardless of your target's health percentage,",
-    "labels": [],
+    "labels": [
+      "300514 cast_gate bypassed"
+    ],
     "kind": "claim"
   },
   {
@@ -213,7 +217,8 @@
     "spell": 300514,
     "clause": "Applies Sacred Restraint for $102208d.",
     "labels": [
-      "300514 spell_duration 102208"
+      "300514 spell_duration 102208",
+      "300514 behaviour_cast_applies_aura"
     ],
     "kind": "claim"
   },
@@ -223,14 +228,17 @@
     "labels": [
       "300515 effect_radius e0",
       "300515 effect_value e0 #1",
-      "300515 e0 spell_healing_taken 803792"
+      "300515 e0 spell_healing_taken 803792",
+      "300515 behaviour_party_stat_ratio"
     ],
     "kind": "claim"
   },
   {
     "spell": 300515,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "300515 behaviour_group_stack_cap"
+    ],
     "kind": "claim"
   },
   {
@@ -317,7 +325,9 @@
     "spell": 300607,
     "clause": "Your Titanstrike now heals you for twice the damage dealt.",
     "labels": [
-      "300607 e0"
+      "300607 e0",
+      "300607 806835 leech_ratio before",
+      "300607 806835 leech_ratio after"
     ],
     "kind": "claim"
   },
@@ -327,14 +337,17 @@
     "labels": [
       "300929 effect_value e0",
       "300929 e0 spell_damage_done 572741",
-      "300929 e0 weapon_damage_min 0"
+      "300929 e0 weapon_damage_min 0",
+      "300929 behaviour_party_stat_ratio"
     ],
     "kind": "claim"
   },
   {
     "spell": 300929,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "300929 behaviour_group_stack_cap"
+    ],
     "kind": "claim"
   },
   {
@@ -415,7 +428,8 @@
     "clause": "Casting Reckoning now increases your Armor by $680870s1% for $680870d.",
     "labels": [
       "301309 effect_value 680870e0",
-      "301309 spell_duration 680870"
+      "301309 spell_duration 680870",
+      "301309 behaviour_metric_delta armor"
     ],
     "kind": "claim"
   },
@@ -540,14 +554,17 @@
   {
     "spell": 500678,
     "clause": "Each second you will also remove 1 disease effect from yourself.",
-    "labels": [],
+    "labels": [
+      "500678 behaviour_dispel_removal 55095"
+    ],
     "kind": "claim"
   },
   {
     "spell": 500678,
     "clause": "Applies Sacred Restraint for $102208d.",
     "labels": [
-      "500678 spell_duration 102208"
+      "500678 spell_duration 102208",
+      "500678 self_trigger_count"
     ],
     "kind": "claim"
   },
@@ -562,7 +579,10 @@
   {
     "spell": 500688,
     "clause": "Usable while in combat.",
-    "labels": [],
+    "labels": [
+      "500688 cast_combat combat",
+      "500688 cast_combat cast_failure"
+    ],
     "kind": "claim"
   },
   {
@@ -656,7 +676,11 @@
     "clause": "and reduces the cooldown of Librams, Force of Golganneth, Divine Force, and Testament of Will by $/1000;505205s1 sec.",
     "labels": [
       "504807 effect_value 505205e0 #0",
-      "504807 trigger_cooldown_delta"
+      "504807 trigger_cooldown_delta",
+      "504807 trigger_cooldown_delta 801461",
+      "504807 trigger_cooldown_delta 500694",
+      "504807 trigger_cooldown_delta 806153",
+      "504807 trigger_cooldown_delta 801455"
     ],
     "kind": "claim"
   },
@@ -853,7 +877,8 @@
     "spell": 524739,
     "clause": "Damage dealt pierces all immunities, resistances, and damage absorption effects.",
     "labels": [
-      "524739 hit_mean"
+      "524739 hit_mean",
+      "524739 behaviour_absorb_pierce_ratio"
     ],
     "kind": "claim"
   },
@@ -913,7 +938,8 @@
     "clause": "Your Divine Force now strikes 2 additional enemies near the primary target.",
     "labels": [
       "525024 effect_value #0",
-      "525024 e0"
+      "525024 e0",
+      "525024 behaviour_count"
     ],
     "kind": "claim"
   },
@@ -922,7 +948,10 @@
     "clause": "Bask an ally in the light, dispelling $s1 magic, poison, and disease effects from them.",
     "labels": [
       "525051 effect_value e0 #0",
-      "525051 hit_mean"
+      "525051 hit_mean",
+      "525051 behaviour_dispel_removal 31589",
+      "525051 behaviour_dispel_removal 2818",
+      "525051 behaviour_dispel_removal 55095"
     ],
     "kind": "claim"
   },
@@ -944,7 +973,9 @@
   {
     "spell": 527023,
     "clause": "You and your party members leap upon a divine steed,",
-    "labels": [],
+    "labels": [
+      "527023 behaviour_mount_grant granted"
+    ],
     "kind": "claim"
   },
   {
@@ -968,13 +999,18 @@
   {
     "spell": 527023,
     "clause": "While active, casting does not dismount you or your allies.",
-    "labels": [],
+    "labels": [
+      "527023 behaviour_mount_grant persisted"
+    ],
     "kind": "claim"
   },
   {
     "spell": 527023,
     "clause": "Can only be used outdoors.",
-    "labels": [],
+    "labels": [
+      "527023 cast_condition blocked",
+      "527023 cast_condition allowed"
+    ],
     "kind": "claim"
   },
   {
@@ -1012,7 +1048,10 @@
     "spell": 560116,
     "clause": "If they are an Undead or Demon they are unable to be healed for the duration.",
     "labels": [
-      "560116 hit_mean"
+      "560116 hit_mean",
+      "560116 behaviour_heal_block 201",
+      "560116 behaviour_heal_block 416",
+      "560116 behaviour_heal_block 36"
     ],
     "kind": "claim"
   },
@@ -1021,14 +1060,17 @@
     "clause": "Increases the attack power of all party and raid members $s1%.",
     "labels": [
       "560550 effect_value e0 #0",
-      "560550 e0 attack_power"
+      "560550 e0 attack_power",
+      "560550 behaviour_party_stat_ratio"
     ],
     "kind": "claim"
   },
   {
     "spell": 560550,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "560550 behaviour_group_stack_cap"
+    ],
     "kind": "claim"
   },
   {
@@ -1091,7 +1133,9 @@
   {
     "spell": 560653,
     "clause": "and granting the ability to walk on water.",
-    "labels": [],
+    "labels": [
+      "560653 behaviour_aura_presence"
+    ],
     "kind": "claim"
   },
   {
@@ -1147,7 +1191,8 @@
     "clause": "Increases mounted movement speed by $s1%",
     "labels": [
       "562302 effect_value e0 #0",
-      "562302 aura_amount e0 #0"
+      "562302 aura_amount e0 #0",
+      "562302 behaviour_metric_delta"
     ],
     "kind": "claim"
   },
@@ -1170,7 +1215,10 @@
   {
     "spell": 562302,
     "clause": "Can only be used while Mounted.",
-    "labels": [],
+    "labels": [
+      "562302 cast_condition blocked",
+      "562302 cast_condition allowed"
+    ],
     "kind": "claim"
   },
   {
@@ -1280,7 +1328,8 @@
     "spell": 572808,
     "clause": "reducing their total threat by $572809s1% every $t1 sec for $d",
     "labels": [
-      "572808 effect_value 572809e0 #0"
+      "572808 effect_value 572809e0 #0",
+      "572808 behaviour_metric_ratio_delta"
     ],
     "kind": "claim"
   },
@@ -1303,7 +1352,9 @@
   {
     "spell": 572808,
     "clause": "Can only be placed on 1 target at a time.",
-    "labels": [],
+    "labels": [
+      "572808 behaviour_single_target"
+    ],
     "kind": "claim"
   },
   {
@@ -1341,7 +1392,8 @@
     "spell": 680397,
     "clause": "Can only occur once every 0.5 sec.",
     "labels": [
-      "680397 behaviour_internal_cooldown_gate"
+      "680397 behaviour_internal_cooldown_gate",
+      "680397 behaviour_internal_cooldown"
     ],
     "kind": "claim"
   },
@@ -1437,7 +1489,8 @@
     "clause": "Critically striking with Vindication or Righteous Lunge now deals $s1% additional Physical damage.",
     "labels": [
       "704116 effect_value e0 #0",
-      "704116 trigger_count"
+      "704116 trigger_count",
+      "704116 trigger_magnitude_ratio"
     ],
     "kind": "claim"
   },
@@ -1570,7 +1623,9 @@
   {
     "spell": 705259,
     "clause": "While a Libram is active",
-    "labels": [],
+    "labels": [
+      "705259 gate_absence_count"
+    ],
     "kind": "claim"
   },
   {
@@ -1638,7 +1693,8 @@
     "clause": "and reduces the duration of disarm effects against you by $s2%",
     "labels": [
       "705271 effect_value e1 #1",
-      "705271 e1"
+      "705271 e1",
+      "705271 behaviour_duration_ratio"
     ],
     "kind": "claim"
   },
@@ -1656,7 +1712,8 @@
     "clause": "Your Libram spells now grant you $705275s1% increased melee haste",
     "labels": [
       "705274 effect_value 705275e0 #0",
-      "705274 trigger_count"
+      "705274 trigger_count",
+      "705274 behaviour_metric_delta"
     ],
     "kind": "claim"
   },
@@ -1801,7 +1858,9 @@
   {
     "spell": 705290,
     "clause": "$?s520007[ or Silverhand Incantation][]",
-    "labels": [],
+    "labels": [
+      "705290 trigger_count 801465"
+    ],
     "kind": "claim"
   },
   {
@@ -1964,7 +2023,8 @@
     "spell": 705300,
     "clause": "$?s573452[Dealing damage this way reduces the cooldown of your Librams by $/1000;806106s1 sec.][]",
     "labels": [
-      "conformance-templar-value-705300 (effect_value 806106e0 #3, -4000 ok)"
+      "conformance-templar-value-705300 (effect_value 806106e0 #3, -4000 ok)",
+      "573452 trigger_cooldown_delta"
     ],
     "kind": "claim"
   },
@@ -2119,7 +2179,10 @@
     "spell": 706325,
     "clause": "Dealing damage with Condemn, Holy Cleave, or Blade of Faith (each trigger source individually)",
     "labels": [
-      "706325 proc_rate ok (aggregate only)"
+      "706325 proc_rate ok (aggregate only)",
+      "706325 proc_rate 801450 804906",
+      "706325 proc_rate 801450 801445",
+      "706325 proc_rate 801450 803880"
     ],
     "kind": "claim"
   },
@@ -2162,7 +2225,8 @@
     "clause": "Your Condemn now heals you for $s1% of the damage dealt.",
     "labels": [
       "conformance-templar-value-706385",
-      "706385 trigger_count ok (594/594)"
+      "706385 trigger_count ok (594/594)",
+      "706385 trigger_magnitude_ratio"
     ],
     "kind": "claim"
   },
@@ -2298,7 +2362,9 @@
     "spell": 707606,
     "clause": "Casting Righteous Upheaval or Blade of Faith now grants you Oath: Retribution (per trigger spell)",
     "labels": [
-      "707606 trigger_count ok (273/273, aggregate)"
+      "707606 trigger_count ok (273/273, aggregate)",
+      "707606 trigger_count 572027",
+      "707606 trigger_count 803880"
     ],
     "kind": "claim"
   },
@@ -2347,7 +2413,8 @@
     "clause": "reduces the duration of movement slowing effects on you by $s2%",
     "labels": [
       "conformance-templar-value-707754 (effect_value e1 #0, -10, ok)",
-      "707754 e1 (unmodelled) -- scripted or crowd-control effect"
+      "707754 e1 (unmodelled) -- scripted or crowd-control effect",
+      "707754 behaviour_duration_ratio"
     ],
     "kind": "claim"
   },
@@ -2365,7 +2432,8 @@
     "clause": "reduces the duration of disarm effects against you by $s2%",
     "labels": [
       "707851 effect_value e1 #1",
-      "707851 e1 (unmodelled)"
+      "707851 e1 (unmodelled)",
+      "707851 behaviour_duration_ratio"
     ],
     "kind": "claim"
   },
@@ -2462,7 +2530,8 @@
     "clause": "Increases the duration of Interdict by $/1000;s1 sec",
     "labels": [
       "712678 effect_value e0 #0",
-      "712678 e0 (unmodelled)"
+      "712678 e0 (unmodelled)",
+      "712678 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -2471,14 +2540,19 @@
     "clause": "and its cooldown by $/1000;s2 sec",
     "labels": [
       "712678 effect_value e1 #1",
-      "712678 e1 (unmodelled)"
+      "712678 e1 (unmodelled)",
+      "712678 behaviour_metric_delta cooldown"
     ],
     "kind": "claim"
   },
   {
     "spell": 800424,
     "clause": "Taunt all enemies within 8 yds",
-    "labels": [],
+    "labels": [
+      "800424 aggro_redirect primary after",
+      "800424 aggro_redirect extra1 after",
+      "800424 aggro_redirect extra2 after"
+    ],
     "kind": "claim"
   },
   {
@@ -2501,19 +2575,25 @@
   {
     "spell": 803792,
     "clause": "3 Charges",
-    "labels": [],
+    "labels": [
+      "803792 behaviour_charge_recharge"
+    ],
     "kind": "claim"
   },
   {
     "spell": 803792,
     "clause": "35 sec recharge",
-    "labels": [],
+    "labels": [
+      "803792 behaviour_charge_recharge"
+    ],
     "kind": "claim"
   },
   {
     "spell": 803792,
     "clause": "Charge towards an ally",
-    "labels": [],
+    "labels": [
+      "803792 hit_mean gap_closer_distance"
+    ],
     "kind": "claim"
   },
   {
@@ -2521,7 +2601,8 @@
     "clause": "healing you and them for ${$m2+0+$AP*0.805+$sph*0.85}",
     "labels": [
       "803792 effect_value e1 #0",
-      "803792 hit_mean"
+      "803792 hit_mean",
+      "803792 hit_mean e2"
     ],
     "kind": "claim"
   },
@@ -2625,7 +2706,9 @@
   {
     "spell": 803893,
     "clause": "@ext:Only 1 Libram spell can be active at a time.:ext@",
-    "labels": [],
+    "labels": [
+      "801441 behaviour_exclusivity"
+    ],
     "kind": "claim"
   },
   {
@@ -2667,7 +2750,9 @@
   {
     "spell": 573049,
     "clause": "and an additional nearby enemy",
-    "labels": [],
+    "labels": [
+      "573049 behaviour_fixed_count"
+    ],
     "kind": "claim"
   },
   {
@@ -2698,7 +2783,9 @@
   {
     "spell": 573324,
     "clause": "triggering Zealotry",
-    "labels": [],
+    "labels": [
+      "573324 self_trigger_count"
+    ],
     "kind": "claim"
   },
   {
@@ -2766,7 +2853,8 @@
     "clause": "and reduces your damage taken by $707307s1% for $705309d",
     "labels": [
       "801457 effect_value 707307e0 #1",
-      "801457 spell_duration 705309 #2"
+      "801457 spell_duration 705309 #2",
+      "801457 behaviour_metric_delta"
     ],
     "kind": "claim"
   },
@@ -2813,13 +2901,17 @@
   {
     "spell": 801461,
     "clause": "$?s707385[ and instantly healing you for $s1% maximum health][]",
-    "labels": [],
+    "labels": [
+      "801461 behaviour_metric_delta heal_gate"
+    ],
     "kind": "claim"
   },
   {
     "spell": 801461,
     "clause": "@ext:Only 1 Libram spell can be active at a time.:ext@",
-    "labels": [],
+    "labels": [
+      "801461 behaviour_exclusivity"
+    ],
     "kind": "claim"
   },
   {
@@ -2856,13 +2948,17 @@
   {
     "spell": 801463,
     "clause": "@ext:Only 1 Libram spell can be active at a time.:ext@",
-    "labels": [],
+    "labels": [
+      "801463 behaviour_exclusivity"
+    ],
     "kind": "claim"
   },
   {
     "spell": 801465,
     "clause": "toss a holy hammer at your target, charging you to them",
-    "labels": [],
+    "labels": [
+      "801465 hit_mean gap_closer_distance"
+    ],
     "kind": "claim"
   },
   {
@@ -2904,7 +3000,8 @@
     "spell": 801466,
     "clause": "and causes your damaging abilities to reduce the cooldown of Righteous Upheaval by $/1000;575328S1 sec",
     "labels": [
-      "801466 effect_value 575328e0 #1"
+      "801466 effect_value 575328e0 #1",
+      "801466 trigger_cooldown_delta"
     ],
     "kind": "claim"
   },
@@ -2919,7 +3016,9 @@
   {
     "spell": 801466,
     "clause": "@ext:Only 1 Libram spell can be active at a time.:ext@",
-    "labels": [],
+    "labels": [
+      "801466 behaviour_exclusivity"
+    ],
     "kind": "claim"
   },
   {
@@ -2953,7 +3052,11 @@
     "clause": "increases the effectiveness of your Librams by $s2%",
     "labels": [
       "801480 effect_value e1 #1",
-      "801480 e1 spell_modifier 803893"
+      "801480 e1 spell_modifier 803893",
+      "801480 e1 spell_modifier 805423",
+      "801480 e1 spell_modifier 801463",
+      "801480 e1 spell_modifier 801461",
+      "801480 e1 spell_modifier 801466"
     ],
     "kind": "claim"
   },
@@ -2962,7 +3065,11 @@
     "clause": "and reduces their cooldown by $s3%",
     "labels": [
       "801480 effect_value e2 #2",
-      "801480 e2 spell_modifier 803893"
+      "801480 e2 spell_modifier 803893",
+      "801480 e2 spell_modifier 805423",
+      "801480 e2 spell_modifier 801463",
+      "801480 e2 spell_modifier 801461",
+      "801480 e2 spell_modifier 801466"
     ],
     "kind": "claim"
   },
@@ -3004,7 +3111,8 @@
     "spell": 503141,
     "clause": "$?s806525[ plus an additional $806525s1% Weapon Damage][]",
     "labels": [
-      "503141 effect_value 806525e0 #1"
+      "503141 effect_value 806525e0 #1",
+      "503141 behaviour_metric_delta weapon_damage_gate"
     ],
     "kind": "claim"
   },
@@ -3028,7 +3136,9 @@
   {
     "spell": 803158,
     "clause": "plus an additional 2 Energy when they critically strike",
-    "labels": [],
+    "labels": [
+      "803158 behaviour_crit_magnitude"
+    ],
     "kind": "claim"
   },
   {
@@ -3198,7 +3308,9 @@
     "spell": 804228,
     "clause": "Applies Sacred Restraint for $102208d.",
     "labels": [
-      "804228 spell_duration 102208 #1"
+      "804228 spell_duration 102208 #1",
+      "804228 aura_duration_ms #0",
+      "804228 aura_duration_ms 102208 #1"
     ],
     "kind": "claim"
   },
@@ -3237,7 +3349,8 @@
     "labels": [
       "804897 effect_value 804918e0 #0",
       "804897 e0 (behaviours entry 'Transcending Strikes', behaviour_metric_delta, status ok)",
-      "804897 e2 (reclassify note: already proven by the class file's own check)"
+      "804897 e2 (reclassify note: already proven by the class file's own check)",
+      "804897 behaviour_metric_delta target_gate"
     ],
     "kind": "claim"
   },
@@ -3314,7 +3427,9 @@
   {
     "spell": 804914,
     "clause": "Taunt an enemy to attack you",
-    "labels": [],
+    "labels": [
+      "804914 aggro_redirect primary after"
+    ],
     "kind": "claim"
   },
   {
@@ -3381,7 +3496,9 @@
   {
     "spell": 804929,
     "clause": "healing you equal to the damage dealt",
-    "labels": [],
+    "labels": [
+      "804929 807414 behaviour_ratio"
+    ],
     "kind": "claim"
   },
   {
@@ -3462,7 +3579,8 @@
     "spell": 805409,
     "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
     "labels": [
-      "805409 behaviour_oath_consumption_removal"
+      "805409 behaviour_oath_consumption_removal",
+      "805409 behaviour_oath_consumption"
     ],
     "kind": "claim"
   },
@@ -3570,7 +3688,9 @@
   {
     "spell": 805422,
     "clause": "Grants a shield equal to 100% of your maximum health",
-    "labels": [],
+    "labels": [
+      "805422 behaviour_ratio"
+    ],
     "kind": "claim"
   },
   {
@@ -3592,7 +3712,10 @@
     "clause": "and grants an additional effect for each.@s:806354:0@@s:807004:0@",
     "labels": [
       "805422 spell_duration 806354 #1",
-      "805422 spell_duration 807004 #2"
+      "805422 spell_duration 807004 #2",
+      "805422 aura_duration_ms #0",
+      "805422 aura_duration_ms 806354 #1",
+      "805422 aura_duration_ms 807004 #2"
     ],
     "kind": "claim"
   },
@@ -3626,14 +3749,17 @@
     "spell": 805423,
     "clause": "@ext:Only 1 Libram spell can be active at a time.:ext@",
     "labels": [
-      "805423 effect_value #3"
+      "805423 effect_value #3",
+      "805423 behaviour_exclusivity"
     ],
     "kind": "claim"
   },
   {
     "spell": 806153,
     "clause": "Leap at an enemy with divine force",
-    "labels": [],
+    "labels": [
+      "807805 hit_mean gap_closer_distance"
+    ],
     "kind": "claim"
   },
   {
@@ -3709,7 +3835,10 @@
   {
     "spell": 806521,
     "clause": "Only usable on enemies below 35% health.",
-    "labels": [],
+    "labels": [
+      "806521 cast_gate blocked",
+      "806521 cast_gate allowed"
+    ],
     "kind": "claim"
   },
   {
@@ -3787,7 +3916,8 @@
     "spell": 1397742,
     "clause": "Applies Sacred Restraint for $102208d.",
     "labels": [
-      "1397742 spell_duration 102208 #4"
+      "1397742 spell_duration 102208 #4",
+      "1397742 aura_duration_ms 102208 #4"
     ],
     "kind": "claim"
   }
