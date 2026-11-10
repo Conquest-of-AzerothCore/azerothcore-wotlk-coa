@@ -76,7 +76,10 @@ spell's school gives the mitigation and the modifiers, and its damage is
 measured: `hit_spell` in the model (the rank itself for the other kinds) names the spell of `spell_damage_*`,
 `critical_hits` and `blocked_hits`; `cast_count` stays the rank. Righteous Tempest 807274: aura 23 every 1000 ms for
 5000 ms triggers 570205 (effects 121 and 31); its tooltip shows `$570205s2`% (100) Weapon Damage plus
-`${$570205m1+$SP*0.3}` (154), five hits per cast. Known limits: the tokens of the triggered spell are not given the
+`${$570205m1+$SP*0.3}` (154), five hits per cast. The triggered spell's own description (570205: `$SP*.15`) is
+never read for this model: the text of the spell the player casts governs the coefficient (owner ruling of
+2026-11-10, [ADR 0104](../../../../docs/adr/0104-templar-owner-rulings-of-2026-11-10.md)).
+Known limits: the tokens of the triggered spell are not given the
 total reading (a `${$<id>m1*$d/$t1}` there would be modelled as one tick, an alert); and `hits_per_cast` ignores the
 extra tick on apply of `AttributesEx5 & 0x200` (`SPELL_ATTR5_EXTRA_INITIAL_PERIOD`): Righteous Tempest lands 6 hits
 per cast, so it schedules more casts than needed, while the judged mean is unaffected.
