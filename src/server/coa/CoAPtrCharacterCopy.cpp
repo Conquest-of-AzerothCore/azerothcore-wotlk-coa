@@ -40,6 +40,7 @@ constexpr uint32 PollIntervalMs = 5000;
 constexpr uint32 SaveTimeoutSeconds = 60;
 
 std::atomic<bool> testOverrideActive = false;
+std::atomic<PtrCharacterCopy::Interruption> testInterruption = PtrCharacterCopy::Interruption::None;
 std::mutex savingLock;
 std::unordered_map<uint32, uint32> savingSince;
 
@@ -64,6 +65,14 @@ struct PendingCopy
     uint32 sourceGuid = 0;
     std::string sourceName;
     std::string dump;
+};
+
+struct InterruptedLoad
+{
+    uint32 id = 0;
+    uint32 account = 0;
+    uint32 copyGuid = 0;
+    std::string sourceName;
 };
 
 uint32 Now()
@@ -213,22 +222,50 @@ void Complete(uint32 id, RequestState state, std::string result, uint32 copyGuid
         Now(), id);
 }
 
-bool Claim(uint32 id)
+bool Claim(uint32 id, uint32 copyGuid)
 {
-    LoginDatabase.DirectExecute("UPDATE coa_ptr_copy_request SET state = {} WHERE id = {} AND state = {}",
-        uint8(RequestState::Loading), id, uint8(RequestState::Pending));
-    return LoginDatabase.Query("SELECT 1 FROM coa_ptr_copy_request WHERE id = {} AND state = {}", id,
-        uint8(RequestState::Loading)) != nullptr;
+    LoginDatabase.DirectExecute("UPDATE coa_ptr_copy_request SET state = {}, copy_guid = {} "
+        "WHERE id = {} AND state = {}", uint8(RequestState::Loading), copyGuid, id, uint8(RequestState::Pending));
+    return LoginDatabase.Query("SELECT 1 FROM coa_ptr_copy_request WHERE id = {} AND state = {} AND copy_guid = {}",
+        id, uint8(RequestState::Loading), copyGuid) != nullptr;
+}
+
+bool TakeTestInterruption(PtrCharacterCopy::Interruption point)
+{
+    PtrCharacterCopy::Interruption expected = point;
+    return testInterruption.compare_exchange_strong(expected, PtrCharacterCopy::Interruption::None);
+}
+
+void RecoverInterruptedLoad(InterruptedLoad const& load)
+{
+    if (QueryResult copy = CharacterDatabase.Query("SELECT name FROM characters WHERE guid = {} AND account = {}",
+        load.copyGuid, load.account))
+    {
+        std::string const copyName = copy->Fetch()[0].Get<std::string>();
+        LOG_WARN("misc", "PTR copy request {} of {} was interrupted after {} (guid {}) was created; reporting it",
+            load.id, load.sourceName, copyName, load.copyGuid);
+        Complete(load.id, RequestState::Copied, {}, load.copyGuid, copyName);
+        return;
+    }
+
+    LOG_WARN("misc", "PTR copy request {} of {} was interrupted before its character was created", load.id,
+        load.sourceName);
+    Complete(load.id, RequestState::Failed,
+        "the realm stopped before the copy was loaded. Nothing was changed there, so you can copy it again.");
 }
 
 void LoadCopy(PendingCopy const& copy)
 {
-    if (!Claim(copy.id))
+    uint32 const copyGuid = sObjectMgr->GetGenerator<HighGuid::Player>().GetNextAfterMaxUsed();
+    if (!Claim(copy.id, copyGuid))
     {
         LOG_ERROR("misc", "PTR copy request {} of {} (realm {}, guid {}) could not be claimed and is not loaded",
             copy.id, copy.sourceName, copy.sourceRealm, copy.sourceGuid);
         return;
     }
+
+    if (TakeTestInterruption(PtrCharacterCopy::Interruption::BeforeLoad))
+        return;
 
     if (std::optional<std::string> liveName = LiveCopyName(copy))
     {
@@ -256,22 +293,32 @@ void LoadCopy(PendingCopy const& copy)
         return;
     }
 
+    if (TakeTestInterruption(PtrCharacterCopy::Interruption::AfterLoad))
+        return;
+
     Complete(copy.id, RequestState::Copied, {}, reader.GetLoadedGuid(), reader.GetLoadedName());
 }
 
-std::string OldestPendingCopyQuery()
+std::string NextCopyRequestQuery()
 {
-    return Acore::StringFormat("SELECT id, account, source_realm, source_guid, source_name, dump "
-        "FROM coa_ptr_copy_request WHERE target_realm = {} AND state = {} ORDER BY id LIMIT 1", realm.Id.Realm,
-        uint8(RequestState::Pending));
+    return Acore::StringFormat("SELECT id, account, source_realm, source_guid, source_name, dump, state, copy_guid "
+        "FROM coa_ptr_copy_request WHERE target_realm = {} AND state IN ({}, {}) ORDER BY state, id LIMIT 1",
+        realm.Id.Realm, uint8(RequestState::Pending), uint8(RequestState::Loading));
 }
 
-void LoadOldestPendingCopy(QueryResult pending)
+void ProcessNextCopyRequest(QueryResult request)
 {
-    if (!pending)
+    if (!request)
         return;
 
-    Field* fields = pending->Fetch();
+    Field* fields = request->Fetch();
+    if (RequestState(fields[6].Get<uint8>()) == RequestState::Loading)
+    {
+        RecoverInterruptedLoad(InterruptedLoad{ fields[0].Get<uint32>(), fields[1].Get<uint32>(),
+            fields[7].Get<uint32>(), fields[4].Get<std::string>() });
+        return;
+    }
+
     LoadCopy(PendingCopy{ fields[0].Get<uint32>(), fields[1].Get<uint32>(), fields[2].Get<uint32>(),
         fields[3].Get<uint32>(), fields[4].Get<std::string>(), fields[5].Get<std::string>() });
 }
@@ -325,14 +372,16 @@ void NotifyFinishedCopies(QueryResult finished)
 
 namespace PtrCharacterCopy
 {
-TestOverride::TestOverride()
+TestOverride::TestOverride(Interruption firstLoadInterruption)
 {
+    testInterruption = firstLoadInterruption;
     testOverrideActive = true;
 }
 
 TestOverride::~TestOverride()
 {
     testOverrideActive = false;
+    testInterruption = Interruption::None;
 }
 }
 
@@ -480,10 +529,10 @@ public:
         if (settings.receive && !_loadingCopy)
         {
             _loadingCopy = true;
-            _queries.AddCallback(LoginDatabase.AsyncQuery(OldestPendingCopyQuery()).WithCallback(
-                [this](QueryResult pending)
+            _queries.AddCallback(LoginDatabase.AsyncQuery(NextCopyRequestQuery()).WithCallback(
+                [this](QueryResult request)
                 {
-                    LoadOldestPendingCopy(std::move(pending));
+                    ProcessNextCopyRequest(std::move(request));
                     _loadingCopy = false;
                 }));
         }
