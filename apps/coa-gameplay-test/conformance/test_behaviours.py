@@ -10,7 +10,8 @@ from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_
                         BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH,
                         BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
                         BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
-                        BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER, MECHANIC_LAND_ATTEMPTS, STRIKER, NotModelled,
+                        BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER, MECHANIC_LAND_ATTEMPTS,
+                        STRIKER, NotModelled,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
                         OathConsumptionRemovalSpec,
                         amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
@@ -26,6 +27,7 @@ from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_
                         metric_delta_spec, oath_consumption_scenario, oath_consumption_spec,
                         oath_consumption_removal_scenario, oath_consumption_removal_spec,
                         shield_break_trigger_scenario, shield_break_trigger_spec,
+                        single_target_scenario, single_target_spec,
                         target_count_scenario, target_count_spec)
 from compare import Verdict, judge_behaviour
 from hits import aura_modifiers
@@ -94,6 +96,7 @@ SERENDIPITY = 300929
 RUNIC_POWER = 300944
 CALL_OF_THE_MONASTERY = 560550
 UNLEASHED_RAGE = 30802
+RIGHTEOUS_CUSTODIAN = 572808
 
 
 def scarlet_judicator_entry() -> dict:
@@ -199,6 +202,11 @@ def serendipity_group_stack_cap_entry() -> dict:
 def call_of_the_monastery_group_stack_cap_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours']
                if entry['spell'] == CALL_OF_THE_MONASTERY and entry['kind'] == 'group_stack_cap')
+
+
+def righteous_custodian_single_target_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == RIGHTEOUS_CUSTODIAN and entry['kind'] == 'single_target')
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -384,7 +392,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 43)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 44)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1470,6 +1478,85 @@ class GroupStackCapScenarioTests(unittest.TestCase):
         scenario, _ = group_stack_cap_scenario(CLASS_FILE, spec)
         self.assertIn('creatures', scenario)
         self.assertGreaterEqual(len(scenario['creatures']), 1)
+
+
+class SingleTargetScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_the_expectation(self):
+        spec = single_target_spec(righteous_custodian_single_target_entry())
+        scenario, expectations = single_target_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_SINGLE_TARGET)
+        self.assertEqual(expectation.spell_id, RIGHTEOUS_CUSTODIAN)
+        self.assertEqual(expectation.rank_id, RIGHTEOUS_CUSTODIAN)
+        self.assertTrue(expectation.rule.startswith('prose: "Can only be placed on 1 target at a time."'))
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, righteous_custodian_single_target_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_SINGLE_TARGET)
+
+    def test_scenario_fixtures_two_grouped_allies_alongside_the_caster(self):
+        spec = single_target_spec(righteous_custodian_single_target_entry())
+        scenario, _ = single_target_scenario(CLASS_FILE, spec)
+        ids = {player['id'] for player in scenario['players']}
+        self.assertEqual(ids, {'caster', 'ally', 'ally2'})
+        groups = [step for step in scenario['steps'] if step.get('action') == 'group']
+        self.assertEqual([step['target'] for step in groups], ['ally', 'ally2'])
+
+    def test_first_ally_measured_after_the_first_cast_and_before_the_second(self):
+        spec = single_target_spec(righteous_custodian_single_target_entry())
+        scenario, expectations = single_target_scenario(CLASS_FILE, spec)
+        casts = [index for index, step in enumerate(scenario['steps']) if step.get('action') == 'cast']
+        first_label_index = next(index for index, step in enumerate(scenario['steps'])
+                                if step.get('action') == 'assert'
+                                and step.get('label') == expectations[0].model['first_label'])
+        self.assertEqual(len(casts), 2)
+        self.assertLess(casts[0], first_label_index)
+        self.assertLess(first_label_index, casts[1])
+
+    def test_removed_and_second_measured_after_the_second_cast(self):
+        spec = single_target_spec(righteous_custodian_single_target_entry())
+        scenario, expectations = single_target_scenario(CLASS_FILE, spec)
+        casts = [index for index, step in enumerate(scenario['steps']) if step.get('action') == 'cast']
+        removed_label_index = next(index for index, step in enumerate(scenario['steps'])
+                                  if step.get('action') == 'assert'
+                                  and step.get('label') == expectations[0].model['removed_label'])
+        second_label_index = next(index for index, step in enumerate(scenario['steps'])
+                                 if step.get('action') == 'assert'
+                                 and step.get('label') == expectations[0].model['second_label'])
+        self.assertLess(casts[1], removed_label_index)
+        self.assertLess(casts[1], second_label_index)
+
+    def test_each_cast_resets_the_spell_cooldown_first(self):
+        spec = single_target_spec(righteous_custodian_single_target_entry())
+        scenario, _ = single_target_scenario(CLASS_FILE, spec)
+        resets = [index for index, step in enumerate(scenario['steps'])
+                 if step.get('action') == 'reset_cooldown' and step.get('spell') == spec.spell]
+        casts = [index for index, step in enumerate(scenario['steps'])
+                if step.get('action') == 'cast' and step.get('spell') == spec.spell]
+        self.assertEqual(len(resets), 2)
+        self.assertEqual(len(casts), 2)
+        self.assertLess(resets[0], casts[0])
+        self.assertLess(resets[1], casts[1])
+
+    def test_first_cast_targets_ally_and_second_targets_ally2(self):
+        spec = single_target_spec(righteous_custodian_single_target_entry())
+        scenario, _ = single_target_scenario(CLASS_FILE, spec)
+        casts = [step for step in scenario['steps'] if step.get('action') == 'cast']
+        self.assertEqual([step['target'] for step in casts], ['ally', 'ally2'])
+
+    def test_second_cast_waits_out_the_global_cooldown_from_the_first(self):
+        spec = single_target_spec(righteous_custodian_single_target_entry())
+        scenario, _ = single_target_scenario(CLASS_FILE, spec)
+        casts = [index for index, step in enumerate(scenario['steps']) if step.get('action') == 'cast']
+        gcd_waits = [index for index, step in enumerate(scenario['steps'])
+                    if step.get('action') == 'wait' and step.get('label') == 'Global cooldown'
+                    and step.get('ms') >= 1500]
+        self.assertTrue(gcd_waits)
+        self.assertLess(casts[0], gcd_waits[0])
+        self.assertLess(gcd_waits[0], casts[1])
 
 
 class FakeRun:
@@ -2739,6 +2826,50 @@ class JudgeGroupStackCapTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), run, expectation)
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('combined', verdict.explanation)
+
+    def test_no_run_reports_no_scenario(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), None, expectation)
+        self.assertIn('no scenario', verdict.explanation)
+
+
+class JudgeSingleTargetTests(unittest.TestCase):
+    def expectation(self):
+        model = {'kind': 'single_target', 'first_label': 'first', 'removed_label': 'removed',
+                 'second_label': 'second', 'quote': 'Can only be placed on 1 target at a time.'}
+        return Expectation('label', BEHAVIOUR_SINGLE_TARGET, RIGHTEOUS_CUSTODIAN, RIGHTEOUS_CUSTODIAN, None, '0',
+                           'prose: "Can only be placed on 1 target at a time." (572808)', model)
+
+    def test_first_present_then_removed_once_the_second_is_cast_is_ok(self):
+        expectation = self.expectation()
+        run = FakeRun({'first': 1.0, 'removed': 0.0, 'second': 1.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_first_still_held_after_the_second_cast_is_an_alert(self):
+        expectation = self.expectation()
+        run = FakeRun({'first': 1.0, 'removed': 1.0, 'second': 1.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_second_ally_never_receiving_the_aura_is_an_alert(self):
+        expectation = self.expectation()
+        run = FakeRun({'first': 1.0, 'removed': 0.0, 'second': 0.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_first_cast_never_applying_the_aura_is_an_alert(self):
+        expectation = self.expectation()
+        run = FakeRun({'first': 0.0, 'removed': 0.0, 'second': 1.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation()
+        run = FakeRun({'first': 1.0, 'removed': 0.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('second', verdict.explanation)
 
     def test_no_run_reports_no_scenario(self):
         expectation = self.expectation()

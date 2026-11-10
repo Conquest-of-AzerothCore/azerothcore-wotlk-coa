@@ -25,14 +25,15 @@ BEHAVIOUR_OATH_CONSUMPTION_REMOVAL = 'behaviour_oath_consumption_removal'
 BEHAVIOUR_INTERNAL_COOLDOWN_GATE = 'behaviour_internal_cooldown_gate'
 BEHAVIOUR_EXCLUSIVITY = 'behaviour_exclusivity'
 BEHAVIOUR_GROUP_STACK_CAP = 'behaviour_group_stack_cap'
+BEHAVIOUR_SINGLE_TARGET = 'behaviour_single_target'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
                     BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_EXCLUSIVITY,
-                    BEHAVIOUR_GROUP_STACK_CAP)
+                    BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_SINGLE_TARGET)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
-        'internal_cooldown_gate', 'exclusivity', 'group_stack_cap')
+        'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1431,6 +1432,77 @@ def group_stack_cap_spec(entry: dict) -> GroupStackCapSpec:
                              entry.get('personal_effect'), entry.get('wait_ms', GROUP_STACK_CAP_LEARN_WAIT_MS))
 
 
+SINGLE_TARGET_CAST_WAIT_MS = 300
+SINGLE_TARGET_SECOND_ALLY = 'ally2'
+SINGLE_TARGET_GCD_WAIT_MS = 1600
+
+
+@dataclass(frozen=True)
+class SingleTargetSpec:
+    spell: int
+    name: str
+    quote: str
+    wait_ms: int = SINGLE_TARGET_CAST_WAIT_MS
+
+
+def single_target_label(spec: SingleTargetSpec, moment: str) -> str:
+    return f'{spec.spell} {moment}'
+
+
+def single_target_scenario(class_file: dict, spec: SingleTargetSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'single_target', spec.quote, 1.0)
+    class_file = armed_for(class_file, records, spec.spell)
+    facts = facts_of(records, spec.spell)
+    second_ally = SINGLE_TARGET_SECOND_ALLY
+
+    def cast_steps(target: str) -> list[dict]:
+        steps = []
+        if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
+                         'value': facts.mana_cost})
+        steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell})
+        steps += required_aura_steps(facts)
+        steps += required_target_health_steps(facts, target)
+        steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': target})
+        steps.append({'action': 'wait', 'ms': spec.wait_ms})
+        return steps
+
+    first_label = single_target_label(spec, 'first_after_first_cast')
+    removed_label = single_target_label(spec, 'first_after_second_cast')
+    second_label = single_target_label(spec, 'second_after_second_cast')
+    steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
+                                      {'action': 'group', 'actor': CASTER, 'target': ALLY},
+                                      {'action': 'group', 'actor': CASTER, 'target': second_ally}]
+    steps += cast_steps(ALLY)
+    steps.append(measurement(first_label, ALLY, 'aura', spell=spec.spell))
+    steps.append({'action': 'wait', 'label': 'Global cooldown', 'ms': SINGLE_TARGET_GCD_WAIT_MS})
+    steps += cast_steps(second_ally)
+    steps.append(measurement(removed_label, ALLY, 'aura', spell=spec.spell))
+    steps.append(measurement(second_label, second_ally, 'aura', spell=spec.spell))
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour single target',
+        'contract': f'Casts {spec.spell} on a first grouped ally, reads its own aura ({first_label!r}, expected '
+                    f'present), then casts it again on a second grouped ally and reads the first ally\'s aura '
+                    f'again ({removed_label!r}, expected removed) alongside the second ally\'s aura '
+                    f'({second_label!r}, expected present): {spec.quote!r}.',
+        'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY},
+                   {**player_fixture(class_file), 'id': second_ally}],
+        'steps': steps}
+    label = f'{spec.spell} behaviour_single_target'
+    model = {'kind': 'single_target', 'first_label': first_label, 'removed_label': removed_label,
+             'second_label': second_label, 'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_SINGLE_TARGET, spec.spell, spec.spell, None, '0',
+                              prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def single_target_spec(entry: dict) -> SingleTargetSpec:
+    return SingleTargetSpec(entry['spell'], entry['name'], entry['quote'],
+                            entry.get('wait_ms', SINGLE_TARGET_CAST_WAIT_MS))
+
+
 MECHANIC_DR_RESET_MS = 15000
 MECHANIC_GAP_MARGIN_MS = 2000
 MECHANIC_LAND_ATTEMPTS = 3
@@ -1641,6 +1713,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return exclusivity_chain_scenario(class_file, exclusivity_chain_spec(entry))
     if entry['kind'] == 'group_stack_cap':
         return group_stack_cap_scenario(class_file, group_stack_cap_spec(entry))
+    if entry['kind'] == 'single_target':
+        return single_target_scenario(class_file, single_target_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

@@ -13,7 +13,8 @@ from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_
                         BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
                         BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_GROUP_STACK_CAP,
                         BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION,
-                        BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
+                        BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET,
+                        BEHAVIOUR_TRIGGER)
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
@@ -2241,6 +2242,25 @@ def behaviour_exclusivity_verdict(base: Verdict, run: Run, model: dict) -> Verdi
                                f'alert')
 
 
+def behaviour_single_target_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    first = run.values.get(model['first_label'])
+    removed = run.values.get(model['removed_label'])
+    second = run.values.get(model['second_label'])
+    missing = next((model[key] for key, value in (
+        ('first_label', first), ('removed_label', removed), ('second_label', second)) if value is None), None)
+    if missing:
+        return replace(base, explanation=missing_measurement(run, missing))
+    first_ok = abs(first - 1.0) <= FLOAT_EPSILON
+    removed_ok = abs(removed - 0.0) <= FLOAT_EPSILON
+    second_ok = abs(second - 1.0) <= FLOAT_EPSILON
+    status = 'ok' if first_ok and removed_ok and second_ok else 'alert'
+    return replace(base, status=status, measured=removed, expected=0.0, low=0.0, high=0.0,
+                   explanation=f'first ally\'s aura measured {first:g} after the first cast (expected 1) and '
+                               f'{removed:g} after the second cast onto a different ally (expected 0, removed); '
+                               f'the second ally\'s aura measured {second:g} after that second cast (expected 1); '
+                               f'any of these three readings missing its expected value is always an alert')
+
+
 def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     baseline = run.values.get(model['baseline_label'])
     own = run.values.get(model['own_label'])
@@ -2306,6 +2326,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_exclusivity_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_GROUP_STACK_CAP:
         return behaviour_group_stack_cap_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_SINGLE_TARGET:
+        return behaviour_single_target_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 
