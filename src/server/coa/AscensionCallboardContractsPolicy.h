@@ -100,6 +100,31 @@ inline std::uint32_t TokenCost(std::uint32_t rewardTokens, double multiplier, st
     return ScaledCost(rewardTokens, multiplier, minimum, std::numeric_limits<std::uint32_t>::max());
 }
 
+inline std::uint32_t EscalatedCost(std::uint32_t baseCost, double multiplier, std::uint32_t purchased,
+    std::uint32_t maximum)
+{
+    double const factor = std::pow(std::max(1.0, multiplier), double(purchased));
+    double const scaled = std::round(double(baseCost) * factor);
+    std::uint32_t const value = scaled >= double(maximum) ? maximum : static_cast<std::uint32_t>(scaled);
+    return std::clamp<std::uint32_t>(value, 1, maximum);
+}
+
+inline std::uint32_t EscalatedMoneyCost(std::uint32_t baseCost, double multiplier, std::uint32_t purchased)
+{
+    return EscalatedCost(baseCost, multiplier, purchased, MaxMoneyCost);
+}
+
+inline std::uint32_t EscalatedTokenCost(std::uint32_t baseCost, double multiplier, std::uint32_t purchased)
+{
+    return EscalatedCost(baseCost, multiplier, purchased, std::numeric_limits<std::uint32_t>::max());
+}
+
+inline std::uint32_t CostOfRemaining(std::uint32_t unitCost, std::uint32_t remaining)
+{
+    std::uint64_t const completions = std::max<std::uint32_t>(1, remaining);
+    return std::max<std::uint32_t>(1, Saturate(std::uint64_t(unitCost) * completions));
+}
+
 inline std::uint32_t DisplayedCachePoints(std::uint32_t points)
 {
     return (points + PointsPerDisplayedPoint - 1) / PointsPerDisplayedPoint;
@@ -288,7 +313,20 @@ private:
     std::vector<std::uint8_t> _bytes;
 };
 
-inline std::vector<std::uint8_t> SerializeView(std::vector<Category> const& categories)
+struct PaymentOptions
+{
+    bool gold = true;
+    bool tokens = true;
+
+    [[nodiscard]] bool Allows(bool payWithGold) const { return payWithGold ? gold : tokens; }
+};
+
+inline std::uint32_t Offered(bool enabled, std::uint32_t cost)
+{
+    return enabled ? cost : 0;
+}
+
+inline std::vector<std::uint8_t> SerializeView(std::vector<Category> const& categories, PaymentOptions payment = {})
 {
     Writer out;
     out.U32(static_cast<std::uint32_t>(categories.size()));
@@ -298,8 +336,8 @@ inline std::vector<std::uint8_t> SerializeView(std::vector<Category> const& cate
         out.CString(category.contentType);
         out.CString(category.name);
         out.U32(total.remaining);
-        out.U32(total.moneyCost);
-        out.U32(total.tokenCost);
+        out.U32(Offered(payment.gold, total.moneyCost));
+        out.U32(Offered(payment.tokens, total.tokenCost));
         out.Rewards(total.reward);
         out.U32(static_cast<std::uint32_t>(category.subCategories.size()));
         for (SubCategory const& sub : category.subCategories)
@@ -307,8 +345,8 @@ inline std::vector<std::uint8_t> SerializeView(std::vector<Category> const& cate
             out.CString(sub.type);
             out.CString(sub.name);
             out.U32(sub.remaining);
-            out.U32(std::max<std::uint32_t>(1, sub.moneyCost));
-            out.U32(std::max<std::uint32_t>(1, sub.tokenCost));
+            out.U32(Offered(payment.gold, CostOfRemaining(sub.moneyCost, sub.remaining)));
+            out.U32(Offered(payment.tokens, CostOfRemaining(sub.tokenCost, sub.remaining)));
             out.U32(sub.minimumLevel);
             out.Rewards(sub.reward);
         }
@@ -460,6 +498,12 @@ private:
     std::atomic<std::size_t> _pending{0};
 };
 
+struct Tally
+{
+    std::uint32_t completions = 0;
+    std::uint32_t purchases = 0;
+};
+
 class WeekLedger
 {
 public:
@@ -469,26 +513,40 @@ public:
             return;
 
         _weekStart = weekStart;
-        _completions.clear();
+        _tallies.clear();
     }
 
-    void Set(std::string const& type, std::uint32_t completions) { _completions[type] = completions; }
-
-    std::uint32_t Add(std::string const& type)
+    void Set(std::string const& type, std::uint32_t completions, std::uint32_t purchases = 0)
     {
-        std::uint32_t& completions = _completions[type];
-        if (completions < std::numeric_limits<std::uint32_t>::max())
-            ++completions;
-        return completions;
+        _tallies[type] = { completions, purchases };
+    }
+
+    Tally Add(std::string const& type, bool purchased = false)
+    {
+        Tally& tally = _tallies[type];
+        tally.completions = Saturate(std::uint64_t(tally.completions) + 1);
+        if (purchased)
+            tally.purchases = Saturate(std::uint64_t(tally.purchases) + 1);
+        return tally;
+    }
+
+    [[nodiscard]] Tally For(std::string const& type, std::int64_t weekStart) const
+    {
+        if (weekStart != _weekStart)
+            return {};
+
+        auto const found = _tallies.find(type);
+        return found == _tallies.end() ? Tally{} : found->second;
     }
 
     [[nodiscard]] std::uint32_t Completions(std::string const& type, std::int64_t weekStart) const
     {
-        if (weekStart != _weekStart)
-            return 0;
+        return For(type, weekStart).completions;
+    }
 
-        auto const found = _completions.find(type);
-        return found == _completions.end() ? 0 : found->second;
+    [[nodiscard]] std::uint32_t Purchases(std::string const& type, std::int64_t weekStart) const
+    {
+        return For(type, weekStart).purchases;
     }
 
     void Merge(WeekLedger const& stored)
@@ -496,18 +554,19 @@ public:
         if (stored._weekStart != _weekStart)
             return;
 
-        for (auto const& [type, completions] : stored._completions)
+        for (auto const& [type, tally] : stored._tallies)
         {
-            std::uint32_t& current = _completions[type];
-            current = Saturate(std::uint64_t(current) + completions);
+            Tally& current = _tallies[type];
+            current.completions = Saturate(std::uint64_t(current.completions) + tally.completions);
+            current.purchases = Saturate(std::uint64_t(current.purchases) + tally.purchases);
         }
     }
 
     [[nodiscard]] std::vector<std::string> Types() const
     {
         std::vector<std::string> types;
-        types.reserve(_completions.size());
-        for (auto const& entry : _completions)
+        types.reserve(_tallies.size());
+        for (auto const& entry : _tallies)
             types.push_back(entry.first);
         return types;
     }
@@ -516,7 +575,7 @@ public:
 
 private:
     std::int64_t _weekStart = std::numeric_limits<std::int64_t>::min();
-    std::unordered_map<std::string, std::uint32_t> _completions;
+    std::unordered_map<std::string, Tally> _tallies;
 };
 }
 

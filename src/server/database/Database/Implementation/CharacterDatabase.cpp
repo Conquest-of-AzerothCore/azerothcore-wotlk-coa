@@ -231,11 +231,11 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_DEL_COA_BUILD_CREATOR_ACTIVE_ALL, "DELETE FROM coa_build_creator_active WHERE guid = ?",
         CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_COA_CALLBOARD_CONTRACTS,
-        "SELECT contract_type, completions FROM character_callboard_contract WHERE guid = ? AND week_start = ?",
-        CONNECTION_ASYNC);
+        "SELECT contract_type, completions, purchases FROM character_callboard_contract "
+        "WHERE guid = ? AND week_start = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_REP_COA_CALLBOARD_CONTRACT,
-        "REPLACE INTO character_callboard_contract (guid, contract_type, week_start, completions) VALUES (?, ?, ?, ?)",
-        CONNECTION_ASYNC);
+        "REPLACE INTO character_callboard_contract (guid, contract_type, week_start, completions, purchases) "
+        "VALUES (?, ?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_COA_CALLBOARD_CONTRACT_OLD_WEEKS,
         "DELETE FROM character_callboard_contract WHERE guid = ? AND week_start <> ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_COA_CALLBOARD_CONTRACTS, "DELETE FROM character_callboard_contract WHERE guid = ?",
