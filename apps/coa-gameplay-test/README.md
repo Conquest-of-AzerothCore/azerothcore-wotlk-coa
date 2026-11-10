@@ -843,6 +843,8 @@ returns the highest per-item level that native item scaling stored for such an i
 for the actor and reports the percentage of fills holding an item of at least `quality` (default 3, rare).
 `item_loot_item_rate` requires `entry` (an item loot id, the container's item entry) and `item`, fills that template
 10000 times for the actor and reports the percentage of fills holding `item`.
+`gameobject_loot_item_rate` does the same for a gameobject loot id (a chest's loot `entry`) and `item`, so script
+hooks that fill chest loot, such as the High-Risk Hidden Caches, take part.
 `forced_loot_count` requires `item`, adds it directly through `Loot::AddItem` with the actor as loot owner
 (bypassing any loot table), and reports how many uncollected copies survive that call; a gate inside `AddItem`
 that rejects the item for that actor reports zero.

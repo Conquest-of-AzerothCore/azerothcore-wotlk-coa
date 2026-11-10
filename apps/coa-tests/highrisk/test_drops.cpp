@@ -52,7 +52,8 @@ int main()
     assert(ValidRates({0, 50, 0}));
     assert(!ValidRates({0, 50, 50}));
     assert(!ValidRates({40, 50, 0}));
-    assert(DefaultBlueMaxItemLevelByStage[0] == 57 && DefaultBlueMaxItemLevelByStage[8] == 57);
+    assert(DefaultBlueMaxItemLevelByStage[0] == 60 && DefaultBlueMaxItemLevelByStage[8] == 60);
+    assert(DefaultHiddenCacheBlueMinRequiredLevel == 55);
     assert(DefaultHighRiskReleaseStage == 3);
     assert(RaisedBlueCap(56) == 57 && RaisedBlueCap(57) == 57 && RaisedBlueCap(60) == 60);
     assert(DefaultEndgameRareMinRequiredLevel == 60);

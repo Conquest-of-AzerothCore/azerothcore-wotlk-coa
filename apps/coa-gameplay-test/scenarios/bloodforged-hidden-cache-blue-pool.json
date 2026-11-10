@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Green Hidden Cache blue comes from the level 55-60 pool up to item level 60",
+  "contract": "Requires Bloodforged.Enable = 1 with Bloodforged.BlueMaxItemLevelByStage and Bloodforged.HiddenCacheBlueMinRequiredLevel at their defaults (60 and 55) and the catalogue rows of rev_20261109_950. A green High-Risk Hidden Cache (gameobject loot 9670) always adds one rare (blue) Bloodforged item that requires level 55 to 60 and has item level 60 or lower. The pool holds about 320 such items, so no single item dominates: Bloodforged Spellweaver's Turban (6022267, requires 60, item level 57) was one of only four possible items (25%) and is now below 2%. Bloodforged Amulet of the Inner Dusk (6292708, requires 55, item level 58), Bloodforged Globe of D'sak (6313261, requires 60, item level 59) and Bloodforged Band of the Hierophant (6013096, requires 55, item level 60) can drop; Bloodforged Torch of Austen (6013004, requires 53, item level 58) never does, and neither does Bloodforged Corporal's Hand Cannon (6862027), a copy of an item sold for honor that rev_20261109_950 removes from the catalogue.",
+  "players": [
+    { "id": "opener", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "A green Hidden Cache can give a requires-55, item level 58 blue",
+      "actor": "opener",
+      "metric": "gameobject_loot_item_rate",
+      "entry": 9670,
+      "item": 6292708,
+      "min": 0.01
+    },
+    {
+      "action": "assert",
+      "label": "A green Hidden Cache can give a requires-60, item level 59 blue",
+      "actor": "opener",
+      "metric": "gameobject_loot_item_rate",
+      "entry": 9670,
+      "item": 6313261,
+      "min": 0.01
+    },
+    {
+      "action": "assert",
+      "label": "A green Hidden Cache can give a requires-55, item level 60 blue",
+      "actor": "opener",
+      "metric": "gameobject_loot_item_rate",
+      "entry": 9670,
+      "item": 6013096,
+      "min": 0.01
+    },
+    {
+      "action": "assert",
+      "label": "One of the old four requires-60 blues is no longer a quarter of all openings",
+      "actor": "opener",
+      "metric": "gameobject_loot_item_rate",
+      "entry": 9670,
+      "item": 6022267,
+      "max": 2
+    },
+    {
+      "action": "assert",
+      "label": "A blue below the minimum required level never comes from a green Hidden Cache",
+      "actor": "opener",
+      "metric": "gameobject_loot_item_rate",
+      "entry": 9670,
+      "item": 6013004,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The honor-vendor Corporal's Hand Cannon copy never comes from a green Hidden Cache",
+      "actor": "opener",
+      "metric": "gameobject_loot_item_rate",
+      "entry": 9670,
+      "item": 6862027,
+      "equals": 0
+    }
+  ]
+}
