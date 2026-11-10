@@ -105,6 +105,8 @@ LIBRAM_OF_TENACITY = 801461
 CHAKRA_OF_POWER = 803158
 CHAKRA_OF_POWER_ENERGIZE = 804181
 PATIENCE = 712678
+CHASTISE = 503141
+MARTIAL_TRAINING = 806525
 
 
 def scarlet_judicator_entry() -> dict:
@@ -244,6 +246,10 @@ def patience_duration_entry() -> dict:
 def patience_cooldown_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours']
                if entry['spell'] == PATIENCE and entry.get('variant') == 'cooldown')
+
+
+def chastise_weapon_damage_gate_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == CHASTISE)
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -429,7 +435,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 50)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 51)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1149,6 +1155,32 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_DELTA)
         self.assertEqual(expectations[0].model['metric'], 'cooldown_ms')
         self.assertEqual(expectations[0].label, f'{PATIENCE} behaviour_metric_delta cooldown')
+
+    def test_chastise_weapon_damage_gate_learns_martial_training_only_between_phases(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, chastise_weapon_damage_gate_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_DELTA)
+        self.assertEqual(expectations[0].model['metric'], 'spell_effect_value')
+        self.assertEqual(expectations[0].model['before_expected'], 0)
+        self.assertEqual(expectations[0].model['expected'], 150)
+        learn_steps = [step for step in scenario['steps']
+                      if step.get('action') == 'learn' and step.get('spell') == MARTIAL_TRAINING]
+        self.assertEqual(len(learn_steps), 1)
+        before_index = next(index for index, step in enumerate(scenario['steps'])
+                            if step.get('label') == '503141 spell_effect_value before')
+        after_index = next(index for index, step in enumerate(scenario['steps'])
+                           if step.get('label') == '503141 spell_effect_value after')
+        learn_index = scenario['steps'].index(learn_steps[0])
+        self.assertTrue(before_index < learn_index < after_index)
+
+    def test_chastise_weapon_damage_gate_judges_a_wrong_after_value_as_alert(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, chastise_weapon_damage_gate_entry())
+        expectation = expectations[0]
+        correct = {'503141 spell_effect_value before': 0.0, '503141 spell_effect_value after': 150.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(correct), expectation).status, 'ok')
+        seeded_wrong = {'503141 spell_effect_value before': 0.0, '503141 spell_effect_value after': 0.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(seeded_wrong), expectation).status,
+                         'alert')
 
     def test_patience_casts_interdict_at_the_dummy_fixture_for_both_clauses(self):
         for entry in (patience_duration_entry(), patience_cooldown_entry()):
