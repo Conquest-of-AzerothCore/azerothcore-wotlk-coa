@@ -63,9 +63,19 @@ class templar_casts : public AllSpellScript
   public:
     templar_casts()
         : AllSpellScript("templar_casts",
-                         {ALLSPELLHOOK_ON_BEFORE_EFFECTS, ALLSPELLHOOK_ON_CAST, ALLSPELLHOOK_ON_CALCULATED_TARGET,
-                          ALLSPELLHOOK_ON_HIT_RESULT, ALLSPELLHOOK_ON_CALC_MAX_DURATION})
+                         {ALLSPELLHOOK_ON_SPELL_CHECK_CAST, ALLSPELLHOOK_ON_BEFORE_EFFECTS, ALLSPELLHOOK_ON_CAST,
+                          ALLSPELLHOOK_ON_CALCULATED_TARGET, ALLSPELLHOOK_ON_HIT_RESULT,
+                          ALLSPELLHOOK_ON_CALC_MAX_DURATION})
     {
+    }
+    void OnSpellCheckCast(Spell* spell, bool, SpellCastResult& result) override
+    {
+        Player* player = Owner(spell->GetCaster());
+        SpellInfo const* info = spell->GetSpellInfo();
+        if (!player || info->SpellFamilyName != 25 || spell->IsTriggered())
+            return;
+        if (info->Id == 562302 && !player->IsMounted())
+            result = SPELL_FAILED_ONLY_MOUNTED;
     }
     void OnCalcMaxDuration(Aura const* aura, int32& duration) override
     {

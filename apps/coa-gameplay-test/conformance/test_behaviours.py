@@ -6,20 +6,23 @@ import sys
 import tempfile
 import unittest
 
-from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_GATE, BEHAVIOUR_CHARGE_RECHARGE,
-                        BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION,
-                        BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY,
-                        BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
-                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
-                        BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER,
-                        MECHANIC_LAND_ATTEMPTS, NO_CAST_FAILURE, SPELL_FAILED_TARGET_AURASTATE, STRIKER,
+from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_CAST_GATE,
+                        BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
+                        BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
+                        BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_FIXED_COUNT,
+                        BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA,
+                        BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO,
+                        BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER,
+                        MECHANIC_LAND_ATTEMPTS, NO_CAST_FAILURE, SPELL_FAILED_ONLY_MOUNTED,
+                        SPELL_FAILED_ONLY_OUTDOORS, SPELL_FAILED_TARGET_AURASTATE, STRIKER,
                         NotModelled,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
                         OathConsumptionRemovalSpec,
                         ally_heal_breadth_scenario, ally_heal_breadth_spec,
                         amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
                         aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
-                        behaviour_scenario, cast_gate_scenario, cast_gate_spec,
+                        behaviour_scenario, cast_condition_scenario, cast_condition_spec,
+                        cast_gate_scenario, cast_gate_spec,
                         charge_recharge_scenario, charge_recharge_spec,
                         crit_guarantee_scenario, crit_guarantee_spec,
                         crit_magnitude_scenario, crit_magnitude_spec,
@@ -129,6 +132,8 @@ LIBRAM_OF_GRACE = 801463
 CHAKRA_OF_LIGHT = 803159
 TITANSTRIKE = 806521
 TESTAMENT_OF_STRENGTH = 300514
+DIVINE_CHARGE = 527023
+CRUSADERS_PRESENCE = 562302
 
 
 def scarlet_judicator_entry() -> dict:
@@ -185,6 +190,14 @@ def tyrs_guard_entry() -> dict:
 
 def titanstrike_cast_gate_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == TITANSTRIKE)
+
+
+def divine_charge_cast_condition_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == DIVINE_CHARGE)
+
+
+def crusaders_presence_cast_condition_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == CRUSADERS_PRESENCE)
 
 
 def spiritual_abdicator_entry() -> dict:
@@ -497,7 +510,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 61)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 63)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -3853,6 +3866,113 @@ class JudgeCastGateMissingMeasurementTests(unittest.TestCase):
         expectation = self.blocked_expectation()
         verdict = judge_behaviour(base_verdict(expectation), None, expectation)
         self.assertIn('no scenario', verdict.explanation)
+
+
+class CastConditionScenarioTests(unittest.TestCase):
+    def test_outdoors_scenario_validates_and_shapes_expectations(self):
+        spec = cast_condition_spec(divine_charge_cast_condition_entry())
+        scenario, expectations = cast_condition_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 2)
+        blocked, allowed = expectations
+        self.assertEqual(blocked.check, BEHAVIOUR_CAST_CONDITION)
+        self.assertEqual(blocked.spell_id, DIVINE_CHARGE)
+        self.assertEqual(blocked.displayed, str(SPELL_FAILED_ONLY_OUTDOORS))
+        self.assertEqual(allowed.spell_id, DIVINE_CHARGE)
+        self.assertEqual(allowed.displayed, str(NO_CAST_FAILURE))
+
+    def test_mounted_scenario_validates_and_shapes_expectations(self):
+        spec = cast_condition_spec(crusaders_presence_cast_condition_entry())
+        scenario, expectations = cast_condition_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        blocked, allowed = expectations
+        self.assertEqual(blocked.spell_id, CRUSADERS_PRESENCE)
+        self.assertEqual(blocked.displayed, str(SPELL_FAILED_ONLY_MOUNTED))
+        self.assertEqual(allowed.displayed, str(NO_CAST_FAILURE))
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, divine_charge_cast_condition_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_CAST_CONDITION)
+
+    def test_outdoors_blocked_attempt_precedes_the_outdoor_teleport(self):
+        spec = cast_condition_spec(divine_charge_cast_condition_entry())
+        scenario, _ = cast_condition_scenario(CLASS_FILE, spec)
+        blocked_cast = next(index for index, step in enumerate(scenario['steps'])
+                            if step.get('action') == 'cast' and step.get('spell') == DIVINE_CHARGE)
+        outdoor_teleport = next(index for index, step in enumerate(scenario['steps'])
+                                if step.get('action') == 'teleport' and step.get('x') == -9617.06)
+        self.assertLess(blocked_cast, outdoor_teleport)
+
+    def test_mounted_blocked_attempt_precedes_mounting(self):
+        spec = cast_condition_spec(crusaders_presence_cast_condition_entry())
+        scenario, _ = cast_condition_scenario(CLASS_FILE, spec)
+        blocked_cast = next(index for index, step in enumerate(scenario['steps'])
+                            if step.get('action') == 'cast' and step.get('spell') == CRUSADERS_PRESENCE)
+        mount_step = next(index for index, step in enumerate(scenario['steps'])
+                          if step.get('action') == 'set_aura' and step.get('stacks') == 1)
+        self.assertLess(blocked_cast, mount_step)
+
+    def test_every_cast_attempt_resets_its_own_cooldown_first(self):
+        spec = cast_condition_spec(divine_charge_cast_condition_entry())
+        scenario, _ = cast_condition_scenario(CLASS_FILE, spec)
+        cast_indexes = [index for index, step in enumerate(scenario['steps'])
+                       if step.get('action') == 'cast' and step.get('spell') == DIVINE_CHARGE]
+        for index in cast_indexes:
+            preceding = scenario['steps'][:index]
+            self.assertTrue(any(step.get('action') == 'reset_cooldown' and step.get('spell') == DIVINE_CHARGE
+                                for step in preceding))
+
+    def test_rejects_an_unmodelled_condition(self):
+        entry = dict(divine_charge_cast_condition_entry())
+        entry['condition'] = 'in_combat'
+        with self.assertRaises(Exception):
+            cast_condition_scenario(CLASS_FILE, cast_condition_spec(entry))
+
+    def test_every_expectation_label_has_a_matching_measurement_step(self):
+        spec = cast_condition_spec(divine_charge_cast_condition_entry())
+        scenario, expectations = cast_condition_scenario(CLASS_FILE, spec)
+        measured_labels = {step.get('label') for step in scenario['steps'] if step.get('action') == 'assert'
+                           and step.get('metric') == 'cast_failure'}
+        for expectation in expectations:
+            self.assertIn(expectation.label, measured_labels)
+
+
+class JudgeCastConditionTests(unittest.TestCase):
+    def blocked_expectation(self):
+        model = {'kind': 'cast_condition', 'quote': 'Can only be used outdoors.'}
+        return Expectation('527023 cast_condition blocked', BEHAVIOUR_CAST_CONDITION, DIVINE_CHARGE, DIVINE_CHARGE,
+                           None, str(SPELL_FAILED_ONLY_OUTDOORS), 'prose: "Can only be used outdoors." (527023)',
+                           model)
+
+    def allowed_expectation(self):
+        model = {'kind': 'cast_condition', 'quote': 'Can only be used outdoors.'}
+        return Expectation('527023 cast_condition allowed', BEHAVIOUR_CAST_CONDITION, DIVINE_CHARGE, DIVINE_CHARGE,
+                           None, str(NO_CAST_FAILURE), 'prose: "Can only be used outdoors." (527023)', model)
+
+    def test_blocked_attempt_refused_with_the_right_reason_is_ok(self):
+        expectation = self.blocked_expectation()
+        run = FakeRun({expectation.label: float(SPELL_FAILED_ONLY_OUTDOORS)})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_blocked_attempt_that_actually_succeeded_is_alert(self):
+        expectation = self.blocked_expectation()
+        run = FakeRun({expectation.label: float(NO_CAST_FAILURE)})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_allowed_attempt_that_succeeded_is_ok(self):
+        expectation = self.allowed_expectation()
+        run = FakeRun({expectation.label: float(NO_CAST_FAILURE)})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_allowed_attempt_still_refused_is_alert(self):
+        expectation = self.allowed_expectation()
+        run = FakeRun({expectation.label: float(SPELL_FAILED_ONLY_OUTDOORS)})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
 
 
 if __name__ == '__main__':

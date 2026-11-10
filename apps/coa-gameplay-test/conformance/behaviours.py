@@ -31,17 +31,18 @@ BEHAVIOUR_CHARGE_RECHARGE = 'behaviour_charge_recharge'
 BEHAVIOUR_FIXED_COUNT = 'behaviour_fixed_count'
 BEHAVIOUR_PARTY_STAT_RATIO = 'behaviour_party_stat_ratio'
 BEHAVIOUR_CAST_GATE = 'behaviour_cast_gate'
+BEHAVIOUR_CAST_CONDITION = 'behaviour_cast_condition'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
                     BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_EXCLUSIVITY,
                     BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_CRIT_MAGNITUDE,
                     BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_PARTY_STAT_RATIO,
-                    BEHAVIOUR_CAST_GATE)
+                    BEHAVIOUR_CAST_GATE, BEHAVIOUR_CAST_CONDITION)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
-        'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate')
+        'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1993,6 +1994,92 @@ def cast_gate_spec(entry: dict) -> CastGateSpec:
                         entry['bypass_quote'])
 
 
+SPELL_FAILED_ONLY_OUTDOORS = 93
+SPELL_FAILED_ONLY_MOUNTED = 91
+CAST_CONDITION_OUTDOORS = 'outdoors'
+CAST_CONDITION_MOUNTED = 'mounted'
+CAST_CONDITIONS = (CAST_CONDITION_OUTDOORS, CAST_CONDITION_MOUNTED)
+GENERIC_GROUND_MOUNT_SPELL = 458
+OUTDOOR_LOCATION = {'map': 0, 'x': -9617.06, 'y': -288.949, 'z': 57.3053}
+INDOOR_LOCATION = {'map': 0, 'x': -4840.67, 'y': -857.094, 'z': 501.997}
+
+
+@dataclass(frozen=True)
+class CastConditionSpec:
+    spell: int
+    name: str
+    quote: str
+    condition: str
+    blocked_result: int
+
+
+def cast_condition_label(spell: int, moment: str) -> str:
+    return f'{spell} cast_condition {moment}'
+
+
+def cast_condition_attempt(spell: int, facts, moment: str) -> list[dict]:
+    label = cast_condition_label(spell, moment)
+    return ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell}] + cast_gate_power_step(facts)
+            + [{'action': 'cast', 'actor': CASTER, 'spell': spell, 'target': CASTER},
+               {'action': 'wait', 'ms': CAST_GATE_WAIT_MS},
+               measurement(label, CASTER, 'cast_failure', spell=spell)])
+
+
+def cast_condition_scenario(class_file: dict, spec: CastConditionSpec) -> tuple[dict, list[Expectation]]:
+    if spec.condition not in CAST_CONDITIONS:
+        raise NotModelled(f'{spec.spell} cast_condition {spec.condition!r} is not modelled')
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'cast_condition', spec.quote, NO_CAST_FAILURE)
+    facts = facts_of(records, spec.spell)
+    blocked_label = cast_condition_label(spec.spell, 'blocked')
+    allowed_label = cast_condition_label(spec.spell, 'allowed')
+    if spec.condition == CAST_CONDITION_OUTDOORS:
+        setup_blocked = [{'action': 'teleport', 'actor': CASTER, **INDOOR_LOCATION},
+                         {'action': 'wait', 'ms': 2000}]
+        setup_allowed = [{'action': 'teleport', 'actor': CASTER, **OUTDOOR_LOCATION},
+                         {'action': 'wait', 'ms': 2000}]
+        mechanism = (f'Location pair reused from the existing indoor/outdoor fixture already verified in '
+                    f'scenarios/reaper-ghost-form-indoor-corpse-reclaim-6437.json: Firebrew Inn indoor at '
+                    f'map {INDOOR_LOCATION["map"]} ({INDOOR_LOCATION["x"]}, {INDOOR_LOCATION["y"]}, '
+                    f'{INDOOR_LOCATION["z"]}), open-world outdoor at ({OUTDOOR_LOCATION["x"]}, '
+                    f'{OUTDOOR_LOCATION["y"]}, {OUTDOOR_LOCATION["z"]}).')
+    else:
+        setup_blocked = [{'action': 'set_aura', 'actor': CASTER, 'spell': GENERIC_GROUND_MOUNT_SPELL, 'stacks': 0}]
+        setup_allowed = [{'action': 'set_aura', 'actor': CASTER, 'spell': GENERIC_GROUND_MOUNT_SPELL, 'stacks': 1}]
+        mechanism = (f'Mounted state is set directly via a fixture aura of {GENERIC_GROUND_MOUNT_SPELL} (Brown '
+                    f'Horse, Spell.dbc EffectApplyAuraName[0] SPELL_AURA_MOUNTED), independent of any class '
+                    f'mount ability.')
+    steps = (base_steps(class_file)
+            + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
+            + setup_blocked
+            + cast_condition_attempt(spec.spell, facts, 'blocked')
+            + setup_allowed
+            + cast_condition_attempt(spec.spell, facts, 'allowed'))
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour cast condition',
+        'contract': f'No-combat cast-attempt check of {spec.spell}\'s own "{spec.quote}" clause: the spell is '
+                    f'attempted once with the {spec.condition} condition unmet, expecting refusal with code '
+                    f'{spec.blocked_result}, then once with it met, expecting {NO_CAST_FAILURE} (no failure). '
+                    + mechanism,
+        'players': [player_fixture(class_file)],
+        'creatures': [creature_fixture(class_file)],
+        'steps': steps}
+    model = {'kind': 'cast_condition', 'quote': entry.quote}
+    expectations = [
+        Expectation(blocked_label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.spell, None,
+                   str(spec.blocked_result), prose_rule(entry.quote, spec.spell), model),
+        Expectation(allowed_label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.spell, None, str(NO_CAST_FAILURE),
+                   prose_rule(entry.quote, spec.spell), model),
+    ]
+    return scenario, expectations
+
+
+def cast_condition_spec(entry: dict) -> CastConditionSpec:
+    return CastConditionSpec(entry['spell'], entry['name'], entry['quote'], entry['condition'],
+                             entry['blocked_result'])
+
+
 MECHANIC_DR_RESET_MS = 15000
 MECHANIC_GAP_MARGIN_MS = 2000
 MECHANIC_LAND_ATTEMPTS = 3
@@ -2322,6 +2409,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return charge_recharge_scenario(class_file, charge_recharge_spec(entry))
     if entry['kind'] == 'cast_gate':
         return cast_gate_scenario(class_file, cast_gate_spec(entry))
+    if entry['kind'] == 'cast_condition':
+        return cast_condition_scenario(class_file, cast_condition_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

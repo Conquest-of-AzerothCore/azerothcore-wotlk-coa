@@ -2175,6 +2175,18 @@
       "bypass_spell": 300514, "bypass_name": "Testament of Strength",
       "bypass_quote": "are usable regardless of your target's health percentage,",
       "observe_source": "SpellInfo::CheckTarget (SpellInfo.cpp ~2135-2141) returns SPELL_FAILED_TARGET_AURASTATE when the target lacks AuraStateType(TargetAuraState); 806521's own TargetAuraState (DBC field, read via values.py facts_of) is 13 (AURA_STATE_HEALTHLESS_35_PERCENT), the same state values.py's required_target_health_steps already fixtures to 30% for the unrelated effect_value scenario. Unit::HasAuraState (Unit.cpp ~8522) first checks Caster->GetAuraEffectsByType(SPELL_AURA_ABILITY_IGNORE_AURASTATE) and returns true unconditionally for any matching effect whose IsAffectedOnSpell(spellProto) is true, regardless of the target's own state; 300514's own effect 2 (EffectApplyAuraName[2]=262, SPELL_AURA_ABILITY_IGNORE_AURASTATE) is exactly this bypass, which this scenario proves by casting 806521 at the untouched (full-health) dummy fixture once without 300514, expecting a refusal, and once with 300514 cast on the caster, expecting success at the same unmodified target health."
+    },
+    {
+      "spell": 527023, "name": "Divine Charge", "kind": "cast_condition",
+      "quote": "Can only be used outdoors.",
+      "condition": "outdoors", "blocked_result": 93,
+      "observe_source": "Spell.cpp:5857-5859: m_spellInfo->HasAttribute(SPELL_ATTR0_ONLY_OUTDOORS) (527023's own Attributes DBC field carries this bit) returns SPELL_FAILED_ONLY_OUTDOORS (93) when !caster->IsOutdoors(). Stock engine path, no CoA code involved."
+    },
+    {
+      "spell": 562302, "name": "Crusader's Presence", "kind": "cast_condition",
+      "quote": "Can only be used while Mounted.",
+      "condition": "mounted", "blocked_result": 91,
+      "observe_source": "No attribute, CasterAuraState or CasterAuraSpell DBC field enforced this clause before round10 (562302's own Attributes carries only SPELL_ATTR0_ALLOW_WHILE_MOUNTED, which permits casting while mounted and does not require it; CasterAuraState/CasterAuraSpell are both 0). Confirmed defect, fixed this round: a new OnSpellCheckCast hook on the Templar-scoped templar_casts AllSpellScript (AscensionTemplarAbilities.cpp, SpellFamilyName 25) returns SPELL_FAILED_ONLY_MOUNTED (91) for spell 562302 when !player->IsMounted(), the same per-class idiom AscensionTinkerAbilities.cpp's tinker_spells::OnSpellCheckCast already uses for an analogous Tinker-only mounted-form gate."
     }
   ],
   "player_observations": [
