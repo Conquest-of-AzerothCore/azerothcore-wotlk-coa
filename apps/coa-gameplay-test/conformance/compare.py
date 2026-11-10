@@ -9,7 +9,8 @@ import re
 from statistics import fmean, pstdev
 from typing import Callable, Mapping, Protocol
 
-from behaviours import (BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT,
+from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA,
+                        BEHAVIOUR_AURA_GRANT,
                         BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_CAST_COMBAT,
                         BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_CAST_GATE,
                         BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
@@ -2264,6 +2265,34 @@ def behaviour_metric_ratio_delta_verdict(base: Verdict, run: Run, model: dict) -
                                f'deterministic')
 
 
+def behaviour_absorb_pierce_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    labels = (model['zero_label'], model['unshielded_label'], model['shielded_label'],
+             model['shield_before_label'], model['shield_after_label'])
+    values = [run.values.get(label) for label in labels]
+    if any(value is None for value in values):
+        missing = next(label for label, value in zip(labels, values) if value is None)
+        return replace(base, explanation=missing_measurement(run, missing))
+    zero, unshielded, shielded, shield_before, shield_after = values
+    unshielded_delta = unshielded - zero
+    shielded_delta = shielded - unshielded
+    expected_ratio = float(model['expected_ratio'])
+    tolerance = float(model['tolerance'])
+    if unshielded_delta <= 0:
+        return replace(base, status='unmeasured', measured=shielded_delta,
+                       explanation=f'{model["unshielded_label"]} measured a damage delta of {unshielded_delta:g} '
+                                   f'against the unshielded dummy; a ratio needs a positive baseline hit')
+    ratio = shielded_delta / unshielded_delta
+    shield_untouched = shield_after == shield_before
+    status = 'ok' if abs(ratio - expected_ratio) <= tolerance and shield_untouched else 'alert'
+    explanation = (f'damage dealt to the dummy measured {unshielded_delta:g} unshielded and {shielded_delta:g} '
+                   f'with {model["shield_before_label"]!r} shielding it, ratio {ratio:g} against expected '
+                   f'{expected_ratio:g} within {tolerance:g}; the shield\'s own aura_amount measured '
+                   f'{shield_before:g} before the shielded cast and {shield_after:g} after it '
+                   f'({"untouched" if shield_untouched else "consumed, contradicting the piercing claim"})')
+    return replace(base, status=status, measured=ratio, expected=expected_ratio, low=expected_ratio - tolerance,
+                   high=expected_ratio + tolerance, explanation=explanation)
+
+
 def behaviour_duration_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     before = run.values.get(model['before_label'])
     after = run.values.get(model['after_label'])
@@ -2763,6 +2792,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_heal_block_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_METRIC_RATIO_DELTA:
         return behaviour_metric_ratio_delta_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_ABSORB_PIERCE_RATIO:
+        return behaviour_absorb_pierce_ratio_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_DURATION:
         return behaviour_duration_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_DURATION_RATIO:

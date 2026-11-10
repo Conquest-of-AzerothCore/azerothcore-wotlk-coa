@@ -39,6 +39,7 @@ BEHAVIOUR_AGGRO_REDIRECT = 'behaviour_aggro_redirect'
 BEHAVIOUR_HEAL_BLOCK = 'behaviour_heal_block'
 BEHAVIOUR_CAST_APPLIES_AURA = 'behaviour_cast_applies_aura'
 BEHAVIOUR_METRIC_RATIO_DELTA = 'behaviour_metric_ratio_delta'
+BEHAVIOUR_ABSORB_PIERCE_RATIO = 'behaviour_absorb_pierce_ratio'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
@@ -47,13 +48,14 @@ BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVI
                     BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_PARTY_STAT_RATIO,
                     BEHAVIOUR_CAST_GATE, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_MOUNT_GRANT,
                     BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_AGGRO_REDIRECT,
-                    BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_METRIC_RATIO_DELTA)
+                    BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_METRIC_RATIO_DELTA,
+                    BEHAVIOUR_ABSORB_PIERCE_RATIO)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
         'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition', 'mount_grant',
         'internal_cooldown', 'cast_combat', 'aggro_redirect', 'dispel_removal', 'aura_presence', 'heal_block',
-        'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio', 'threat_tick_ratio')
+        'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio', 'threat_tick_ratio', 'absorb_pierce_ratio')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -978,6 +980,7 @@ def shield_break_trigger_spec(entry: dict) -> ShieldBreakTriggerSpec:
 
 DEFAULT_METRIC_DELTA_WAIT_MS = 3000
 DEFAULT_METRIC_DELTA_EXPIRE_MS = 20500
+DEFAULT_ABSORB_PIERCE_WAIT_MS = 3000
 
 
 @dataclass(frozen=True)
@@ -1517,6 +1520,86 @@ def threat_tick_ratio_spec(entry: dict) -> ThreatTickRatioSpec:
                                entry['aura_spell'], entry.get('attack_wait_ms', 3000),
                                entry.get('tick_wait_ms', 1200), entry.get('tolerance', 0.005),
                                entry.get('aura_stacks', 1))
+
+
+@dataclass(frozen=True)
+class AbsorbPierceRatioSpec:
+    spell: int
+    name: str
+    quote: str
+    expected_ratio: float
+    damage_spell: int
+    shield_aura: int
+    tolerance: float
+    wait_ms: int = DEFAULT_ABSORB_PIERCE_WAIT_MS
+
+
+def absorb_pierce_damage_label(spec: AbsorbPierceRatioSpec, phase: str) -> str:
+    return f'{spec.spell} {spec.damage_spell} spell_damage_total {phase}'
+
+
+def absorb_pierce_shield_label(spec: AbsorbPierceRatioSpec, moment: str) -> str:
+    return f'{spec.spell} {spec.shield_aura} aura_amount {moment}'
+
+
+def absorb_pierce_ratio_scenario(class_file: dict, spec: AbsorbPierceRatioSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'absorb_pierce_ratio', spec.quote, spec.expected_ratio)
+    facts = facts_of(records, spec.spell)
+    zero_label = absorb_pierce_damage_label(spec, 'zero')
+    unshielded_label = absorb_pierce_damage_label(spec, 'unshielded')
+    shielded_label = absorb_pierce_damage_label(spec, 'shielded')
+    shield_before_label = absorb_pierce_shield_label(spec, BEFORE)
+    shield_after_label = absorb_pierce_shield_label(spec, AFTER)
+
+    def cast_steps() -> list[dict]:
+        steps = [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell}]
+        if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
+                         'value': facts.mana_cost})
+        steps += required_aura_steps(facts)
+        steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': TARGET})
+        steps.append({'action': 'wait', 'label': f'{spec.spell} settle', 'ms': spec.wait_ms})
+        return steps
+
+    steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + [
+        measurement(zero_label, CASTER, 'spell_damage_total', spell=spec.damage_spell, target=TARGET)] + \
+        cast_steps() + [
+        measurement(unshielded_label, CASTER, 'spell_damage_total', spell=spec.damage_spell, target=TARGET),
+        {'action': 'set_aura', 'actor': CASTER, 'target': TARGET, 'spell': spec.shield_aura, 'stacks': 1},
+        {'action': 'assert', 'label': f'{spec.spell} SETUP: the shield is up on the dummy', 'actor': TARGET,
+         'metric': 'aura', 'spell': spec.shield_aura, 'equals': 1, 'within_ms': 2000},
+        measurement(shield_before_label, TARGET, 'aura_amount', spell=spec.shield_aura, effect=0)] + \
+        cast_steps() + [
+        measurement(shielded_label, CASTER, 'spell_damage_total', spell=spec.damage_spell, target=TARGET),
+        measurement(shield_after_label, TARGET, 'aura_amount', spell=spec.shield_aura, effect=0)]
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour absorb pierce ratio',
+        'contract': f'{spec.damage_spell}\'s own cumulative spell_damage_total against the dummy is read once '
+                    f'with no shield present and once more after {spec.shield_aura} is set directly on the '
+                    f'dummy (recipient of its own real SPELL_AURA_SCHOOL_ABSORB effect), isolating whether the '
+                    f'second cast\'s own damage increment is reduced by that shield; {spec.shield_aura}\'s own '
+                    f'remaining aura_amount is read immediately before and after that second cast too, so a '
+                    f'shield the piercing claim should leave untouched cannot quietly absorb part of the hit '
+                    f'without the damage ratio catching it.',
+        'players': [player_fixture(class_file)],
+        'creatures': [creature_fixture(class_file)],
+        'steps': steps}
+    label = f'{spec.spell} {BEHAVIOUR_ABSORB_PIERCE_RATIO}'
+    model = {'kind': 'absorb_pierce_ratio', 'zero_label': zero_label, 'unshielded_label': unshielded_label,
+             'shielded_label': shielded_label, 'shield_before_label': shield_before_label,
+             'shield_after_label': shield_after_label, 'expected_ratio': spec.expected_ratio,
+             'tolerance': spec.tolerance, 'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_ABSORB_PIERCE_RATIO, spec.spell, spec.shield_aura, None,
+                              str(spec.expected_ratio), prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def absorb_pierce_ratio_spec(entry: dict) -> AbsorbPierceRatioSpec:
+    return AbsorbPierceRatioSpec(entry['spell'], entry['name'], entry['quote'], entry['expected_ratio'],
+                                 entry['damage_spell'], entry['shield_aura'], entry.get('tolerance', 0.05),
+                                 entry.get('wait_ms', DEFAULT_ABSORB_PIERCE_WAIT_MS))
 
 
 @dataclass(frozen=True)
@@ -3255,6 +3338,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return heal_block_scenario(class_file, heal_block_spec(entry))
     if entry['kind'] == 'threat_tick_ratio':
         return threat_tick_ratio_scenario(class_file, threat_tick_ratio_spec(entry))
+    if entry['kind'] == 'absorb_pierce_ratio':
+        return absorb_pierce_ratio_scenario(class_file, absorb_pierce_ratio_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

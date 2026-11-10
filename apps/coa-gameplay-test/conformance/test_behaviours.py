@@ -6,7 +6,8 @@ import sys
 import tempfile
 import unittest
 
-from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA,
+from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB_PIERCE_RATIO,
+                        BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA,
                         BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_HEAL_BLOCK,
                         BEHAVIOUR_CAST_CONDITION,
                         BEHAVIOUR_CAST_GATE,
@@ -22,6 +23,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_AGGRO_
                         NotModelled,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
                         OathConsumptionRemovalSpec,
+                        absorb_pierce_ratio_scenario, absorb_pierce_ratio_spec,
                         aggro_redirect_label, aggro_redirect_scenario, aggro_redirect_spec,
                         ally_heal_breadth_scenario, ally_heal_breadth_spec,
                         amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
@@ -168,6 +170,8 @@ ARGENT_BLADE = 804929
 ARGENT_BLADE_HEAL = 807414
 TOME_OF_LIGHT = 805422
 RIGHTEOUS_CUSTODIAN = 572808
+NORGANNONS_WRATH = 524739
+NORGANNONS_WRATH_DAMAGE = 524740
 
 
 def scarlet_judicator_entry() -> dict:
@@ -439,6 +443,10 @@ def tome_of_light_entry() -> dict:
 
 def righteous_custodian_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == RIGHTEOUS_CUSTODIAN)
+
+
+def norgannons_wrath_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == NORGANNONS_WRATH)
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -714,7 +722,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 83)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 84)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -2221,6 +2229,70 @@ class ThreatTickRatioScenarioTests(unittest.TestCase):
         _, expectations = threat_tick_ratio_scenario(CLASS_FILE, spec)
         expectation = expectations[0]
         zero_run = FakeRun({expectation.model['before_label']: 0.0, expectation.model['after_label']: 0.0})
+        verdict = judge_behaviour(base_verdict(expectation), zero_run, expectation)
+        self.assertEqual(verdict.status, 'unmeasured')
+
+
+class AbsorbPierceRatioScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_expectations(self):
+        spec = absorb_pierce_ratio_spec(norgannons_wrath_entry())
+        scenario, expectations = absorb_pierce_ratio_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_ABSORB_PIERCE_RATIO)
+        self.assertTrue(expectation.rule.startswith(
+            'prose: "Damage dealt pierces all immunities, resistances, and damage absorption effects."'))
+        self.assertEqual(expectation.model['kind'], 'absorb_pierce_ratio')
+        self.assertEqual(expectation.model['expected_ratio'], 1.0)
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, norgannons_wrath_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_ABSORB_PIERCE_RATIO)
+        self.assertEqual(expectations[0].model['expected_ratio'], 1.0)
+
+    def test_scenario_always_has_the_creature_fixture(self):
+        spec = absorb_pierce_ratio_spec(norgannons_wrath_entry())
+        scenario, _ = absorb_pierce_ratio_scenario(CLASS_FILE, spec)
+        self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
+
+    def test_shield_is_set_on_the_dummy_between_the_two_casts(self):
+        spec = absorb_pierce_ratio_spec(norgannons_wrath_entry())
+        scenario, _ = absorb_pierce_ratio_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        cast_indexes = [index for index, step in enumerate(steps)
+                        if step.get('action') == 'cast' and step.get('spell') == NORGANNONS_WRATH]
+        set_aura_index = next(index for index, step in enumerate(steps)
+                              if step.get('action') == 'set_aura' and step.get('spell') == STAFFGUARD_SHIELD)
+        self.assertEqual(len(cast_indexes), 2)
+        self.assertEqual(steps[set_aura_index]['target'], 'dummy')
+        self.assertLess(cast_indexes[0], set_aura_index)
+        self.assertLess(set_aura_index, cast_indexes[1])
+
+    def test_wrong_full_absorption_is_caught(self):
+        spec = absorb_pierce_ratio_spec(norgannons_wrath_entry())
+        _, expectations = absorb_pierce_ratio_scenario(CLASS_FILE, spec)
+        expectation = expectations[0]
+        model = expectation.model
+        wrong_run = FakeRun({model['zero_label']: 0.0, model['unshielded_label']: 1000.0,
+                             model['shielded_label']: 1000.0, model['shield_before_label']: 500.0,
+                             model['shield_after_label']: 0.0})
+        verdict = judge_behaviour(base_verdict(expectation), wrong_run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+        right_run = FakeRun({model['zero_label']: 0.0, model['unshielded_label']: 1000.0,
+                             model['shielded_label']: 2000.0, model['shield_before_label']: 500.0,
+                             model['shield_after_label']: 500.0})
+        verdict = judge_behaviour(base_verdict(expectation), right_run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_zero_baseline_is_unmeasured_not_alert(self):
+        spec = absorb_pierce_ratio_spec(norgannons_wrath_entry())
+        _, expectations = absorb_pierce_ratio_scenario(CLASS_FILE, spec)
+        expectation = expectations[0]
+        model = expectation.model
+        zero_run = FakeRun({model['zero_label']: 0.0, model['unshielded_label']: 0.0, model['shielded_label']: 0.0,
+                            model['shield_before_label']: 500.0, model['shield_after_label']: 500.0})
         verdict = judge_behaviour(base_verdict(expectation), zero_run, expectation)
         self.assertEqual(verdict.status, 'unmeasured')
 
