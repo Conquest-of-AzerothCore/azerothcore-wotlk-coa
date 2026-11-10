@@ -11,3 +11,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 -- Plague Barrel
 DELETE FROM `gameobject` WHERE `guid` = 6976007;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976007, 193414, 0, 1, 1, 1776.3, -1863.48, 72.989, 5.16438, 0, 0, 0.53068, -0.847572, 300, 100, 1);
+
+-- #11797
+-- pickup 6941648 (Doomwarden) moved 12.7 yd across and 7.41 yd up to the spot checked in the editor
+UPDATE `gameobject` SET `position_x` = -2014.859, `position_y` = 1926.0041, `position_z` = 71.2119, `orientation` = 2.807448, `rotation0` = -0.406886, `rotation1` = 0.560093, `rotation2` = 0.527353, `rotation3` = 0.492584 WHERE `guid` = 6941648 AND `id` = 254287;
