@@ -2014,6 +2014,17 @@
       "spell": 572808, "name": "Righteous Custodian single target limit", "kind": "single_target",
       "quote": "Can only be placed on 1 target at a time.",
       "observe_source": "Spell.dbc AttributesEx5 for 572808 is 0x20 (SPELL_ATTR5_LIMIT_N, 'Single-target aura: remove previous application to another unit if applied', SharedDefines.h:647); SpellInfo::IsSingleTarget (SpellInfo.cpp:1683-1689) returns true for this flag alone. Unit::AddAura (Unit.cpp:5440-5456) marks a newly applied single-target aura with SetIsSingleTarget and pushes it onto the caster's own GetSingleCastAuras() list, then (Unit.cpp:6072-6089) removes any other aura already on that list whose IsSingleTargetWith() matches, regardless of which unit holds it -- a stock engine mechanism, with no CoA script implementing or overriding it for 572808 (grep of src/server/coa/ for 572808 finds only its class-list registration in AscensionCustomClassData.h and this file's own entries; the harness's existing hit_notes entry for 572808 already establishes it carries no other custom scripting). This is an audit gap in the harness's measurement vocabulary (no scenario kind read a single-target aura's presence across two different recipients before this entry), not a server defect: the clause is already enforced by the DBC attribute alone."
+    },
+    {
+      "spell": 705274, "name": "Sanctify", "kind": "metric_delta",
+      "quote": "now grant you $705275s1% increased melee haste", "expected": 2272.727294921875,
+      "trigger_spell": 801461,
+      "metric": "attack_time_ms",
+      "fields": { "hand": 0 },
+      "before_expected": 2500.0,
+      "wait_ms": 3000,
+      "expire_ms": 20500,
+      "observe_source": "705274's EffectTriggerSpell[0] casts 705275 (Spell.dbc: EffectApplyAuraName[0]=138 SPELL_AURA_MOD_MELEE_HASTE, EffectBasePoints[0]=9 + EffectDieSides[0]=1 = 10%, DurationIndex 18 -> SpellDuration.dbc 20000 ms) whenever the caster casts a Libram spell while 705274 is known; the existing 705274 trigger_count entry in the triggers list already proves 705275 applies 1:1 on a cast of Libram of Tenacity (801461), so trigger_spell reuses that same cast rather than re-deriving it. AuraEffect::HandleModMeleeSpeedPct (SpellAuraEffects.cpp:5110) calls Unit::ApplyAttackTimePercentMod(BASE_ATTACK, 10.0f, true), which multiplies UNIT_FIELD_BASEATTACKTIME by ApplyPercentModFloatVar's apply=false branch, 100.0f/(100.0f+10.0f) (Unit.cpp:14889-14911): float32 2500.0f * (100.0f/110.0f) = 2272.727294921875, exactly the value CoAGameplayTest.cpp's attack_time_ms metric reads back (GetFloatValue(UNIT_FIELD_BASEATTACKTIME)), confirmed by replaying the same float32 steps in Python (struct.pack('f', ...)). The class file's own weapon.speed_ms (2500) is the caster's unmodified main-hand attack time with no Libram-haste aura present, matching the documented Solemn Soldier 572555 passive check's own 2500 -> 2272.73 baseline (docs/passive-effects.md:336) for the identical 10% SPELL_AURA_MOD_MELEE_HASTE formula. wait_ms 3000 and expire_ms 20500 are the metric_delta default (DEFAULT_METRIC_DELTA_WAIT_MS/DEFAULT_METRIC_DELTA_EXPIRE_MS), both comfortably inside/outside 705275's own 20000 ms duration so the 'after' read lands while the buff is still up and the 'before' phase of a rerun would not race its own prior-cast remnant."
     }
   ],
   "player_observations": [

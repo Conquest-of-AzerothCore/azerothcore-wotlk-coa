@@ -99,6 +99,8 @@ UNLEASHED_RAGE = 30802
 RIGHTEOUS_CUSTODIAN = 572808
 FORTIFIED_BODY = 300515
 TREE_OF_LIFE = 34123
+SANCTIFY = 705274
+LIBRAM_OF_TENACITY = 801461
 
 
 def scarlet_judicator_entry() -> dict:
@@ -214,6 +216,10 @@ def fortified_body_group_stack_cap_entry() -> dict:
 def righteous_custodian_single_target_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours']
                if entry['spell'] == RIGHTEOUS_CUSTODIAN and entry['kind'] == 'single_target')
+
+
+def sanctify_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == SANCTIFY)
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -399,7 +405,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 45)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 46)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1175,6 +1181,24 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['before_expected'], 1.10)
         self.assertEqual(expectations[0].model['metric'], 'run_speed_rate')
 
+    def test_dispatch_sanctify_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, sanctify_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_DELTA)
+        self.assertEqual(expectations[0].model['expected'], 2272.727294921875)
+        self.assertEqual(expectations[0].model['before_expected'], 2500.0)
+        self.assertEqual(expectations[0].model['metric'], 'attack_time_ms')
+
+    def test_sanctify_casts_libram_of_tenacity_at_self_in_both_phases(self):
+        spec = metric_delta_spec(sanctify_entry())
+        self.assertEqual(spec.trigger_spell, LIBRAM_OF_TENACITY)
+        self.assertEqual(spec.target, 'caster')
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        cast_steps = [step for step in scenario['steps']
+                     if step.get('action') == 'cast' and step.get('spell') == LIBRAM_OF_TENACITY]
+        self.assertEqual(len(cast_steps), 2)
+
     def test_the_two_whirling_tempest_entries_share_a_spell_id_but_differ_by_variant(self):
         plain = whirling_tempest_entry()
         stacking = whirling_tempest_stacks_with_courage_entry()
@@ -1885,6 +1909,30 @@ class JudgeMetricDeltaTests(unittest.TestCase):
         verdict = judge_behaviour(
             base_verdict(expectation),
             FakeRun({'before': 1.1000000238418579, 'after': 1.2000000476837158}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_attack_time_ms_haste_matches_the_exact_float32_division(self):
+        model = {'kind': 'metric_delta', 'before_label': 'before', 'after_label': 'after',
+                 'expected': 2272.727294921875, 'before_expected': 2500.0, 'metric': 'attack_time_ms',
+                 'quote': 'now grant you $705275s1% increased melee haste'}
+        expectation = Expectation('label', BEHAVIOUR_METRIC_DELTA, SANCTIFY, LIBRAM_OF_TENACITY, None,
+                                  '2272.727294921875',
+                                  'prose: "now grant you $705275s1% increased melee haste" (705274)', model)
+        verdict = judge_behaviour(
+            base_verdict(expectation),
+            FakeRun({'before': 2500.0, 'after': 2272.727294921875}), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_a_seeded_wrong_haste_reading_is_alert(self):
+        model = {'kind': 'metric_delta', 'before_label': 'before', 'after_label': 'after',
+                 'expected': 2272.727294921875, 'before_expected': 2500.0, 'metric': 'attack_time_ms',
+                 'quote': 'now grant you $705275s1% increased melee haste'}
+        expectation = Expectation('label', BEHAVIOUR_METRIC_DELTA, SANCTIFY, LIBRAM_OF_TENACITY, None,
+                                  '2272.727294921875',
+                                  'prose: "now grant you $705275s1% increased melee haste" (705274)', model)
+        verdict = judge_behaviour(
+            base_verdict(expectation),
+            FakeRun({'before': 2500.0, 'after': 2250.0}), expectation)
         self.assertEqual(verdict.status, 'alert')
 
 
