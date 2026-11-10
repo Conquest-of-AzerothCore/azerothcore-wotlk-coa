@@ -6,7 +6,8 @@ import sys
 import tempfile
 import unittest
 
-from behaviours import (AFTER, BEFORE, BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_CONDITION,
+from behaviours import (AFTER, BEFORE, BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_COMBAT,
+                        BEHAVIOUR_CAST_CONDITION,
                         BEHAVIOUR_CAST_GATE,
                         BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
                         BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
@@ -23,7 +24,8 @@ from behaviours import (AFTER, BEFORE, BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GR
                         ally_heal_breadth_scenario, ally_heal_breadth_spec,
                         amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
                         aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
-                        behaviour_scenario, cast_condition_scenario, cast_condition_spec,
+                        behaviour_scenario, cast_combat_scenario, cast_combat_spec,
+                        cast_condition_scenario, cast_condition_spec,
                         cast_gate_scenario, cast_gate_spec,
                         charge_recharge_scenario, charge_recharge_spec,
                         crit_guarantee_scenario, crit_guarantee_spec,
@@ -140,6 +142,7 @@ DIVINE_CHARGE = 527023
 CRUSADERS_PRESENCE = 562302
 DISCIPLINED_BLOWS = 680397
 DISCIPLINED_BLOWS_PULSE = 680398
+SPIRITUAL_ASCENSION = 500688
 
 
 def scarlet_judicator_entry() -> dict:
@@ -215,6 +218,10 @@ def crusaders_presence_speed_entry() -> dict:
 def divine_charge_mount_grant_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours']
                if entry['spell'] == DIVINE_CHARGE and entry['kind'] == 'mount_grant')
+
+
+def spiritual_ascension_cast_combat_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == SPIRITUAL_ASCENSION)
 
 
 def disciplined_blows_entry() -> dict:
@@ -531,7 +538,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 66)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 67)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -4043,6 +4050,105 @@ class JudgeCastConditionTests(unittest.TestCase):
     def test_allowed_attempt_still_refused_is_alert(self):
         expectation = self.allowed_expectation()
         run = FakeRun({expectation.label: float(SPELL_FAILED_ONLY_OUTDOORS)})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+
+class CastCombatScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_expectations(self):
+        spec = cast_combat_spec(spiritual_ascension_cast_combat_entry())
+        scenario, expectations = cast_combat_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 2)
+        combat, cast_failure = expectations
+        self.assertEqual(combat.check, BEHAVIOUR_CAST_COMBAT)
+        self.assertEqual(combat.spell_id, SPIRITUAL_ASCENSION)
+        self.assertEqual(combat.displayed, '1')
+        self.assertEqual(cast_failure.spell_id, SPIRITUAL_ASCENSION)
+        self.assertEqual(cast_failure.displayed, str(NO_CAST_FAILURE))
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, spiritual_ascension_cast_combat_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_CAST_COMBAT)
+
+    def test_ally_dies_before_the_attack_starts(self):
+        spec = cast_combat_spec(spiritual_ascension_cast_combat_entry())
+        scenario, _ = cast_combat_scenario(CLASS_FILE, spec)
+        die_index = next(index for index, step in enumerate(scenario['steps'])
+                         if step.get('action') == 'die' and step.get('actor') == 'ally')
+        attack_index = next(index for index, step in enumerate(scenario['steps'])
+                            if step.get('action') == 'attack')
+        self.assertLess(die_index, attack_index)
+
+    def test_attack_starts_before_the_combat_measurement(self):
+        spec = cast_combat_spec(spiritual_ascension_cast_combat_entry())
+        scenario, expectations = cast_combat_scenario(CLASS_FILE, spec)
+        attack_index = next(index for index, step in enumerate(scenario['steps'])
+                            if step.get('action') == 'attack')
+        combat_index = next(index for index, step in enumerate(scenario['steps'])
+                            if step.get('label') == expectations[0].label)
+        self.assertLess(attack_index, combat_index)
+
+    def test_combat_measurement_precedes_the_cast_attempt(self):
+        spec = cast_combat_spec(spiritual_ascension_cast_combat_entry())
+        scenario, expectations = cast_combat_scenario(CLASS_FILE, spec)
+        combat_index = next(index for index, step in enumerate(scenario['steps'])
+                            if step.get('label') == expectations[0].label)
+        cast_index = next(index for index, step in enumerate(scenario['steps'])
+                          if step.get('action') == 'cast' and step.get('spell') == SPIRITUAL_ASCENSION)
+        self.assertLess(combat_index, cast_index)
+
+    def test_cast_targets_the_ally_not_the_dummy(self):
+        spec = cast_combat_spec(spiritual_ascension_cast_combat_entry())
+        scenario, _ = cast_combat_scenario(CLASS_FILE, spec)
+        cast_step = next(step for step in scenario['steps']
+                         if step.get('action') == 'cast' and step.get('spell') == SPIRITUAL_ASCENSION)
+        self.assertEqual(cast_step['target'], 'ally')
+
+    def test_attack_stops_after_the_cast_failure_measurement(self):
+        spec = cast_combat_spec(spiritual_ascension_cast_combat_entry())
+        scenario, expectations = cast_combat_scenario(CLASS_FILE, spec)
+        measurement_index = next(index for index, step in enumerate(scenario['steps'])
+                                 if step.get('label') == expectations[1].label)
+        stop_index = next(index for index, step in enumerate(scenario['steps'])
+                          if step.get('action') == 'stop_attack')
+        self.assertLess(measurement_index, stop_index)
+
+
+class JudgeCastCombatTests(unittest.TestCase):
+    def combat_expectation(self):
+        model = {'kind': 'cast_combat', 'quote': 'Usable while in combat.'}
+        return Expectation('500688 cast_combat combat', BEHAVIOUR_CAST_COMBAT, SPIRITUAL_ASCENSION,
+                           SPIRITUAL_ASCENSION, None, '1', 'prose: "Usable while in combat." (500688)', model)
+
+    def cast_failure_expectation(self):
+        model = {'kind': 'cast_combat', 'quote': 'Usable while in combat.'}
+        return Expectation('500688 cast_combat cast_failure', BEHAVIOUR_CAST_COMBAT, SPIRITUAL_ASCENSION,
+                           SPIRITUAL_ASCENSION, None, str(NO_CAST_FAILURE),
+                           'prose: "Usable while in combat." (500688)', model)
+
+    def test_actually_in_combat_is_ok(self):
+        expectation = self.combat_expectation()
+        run = FakeRun({expectation.label: 1.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_fixture_that_never_entered_combat_is_alert(self):
+        expectation = self.combat_expectation()
+        run = FakeRun({expectation.label: 0.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_unrefused_cast_is_ok(self):
+        expectation = self.cast_failure_expectation()
+        run = FakeRun({expectation.label: float(NO_CAST_FAILURE)})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_cast_refused_while_in_combat_is_alert(self):
+        expectation = self.cast_failure_expectation()
+        run = FakeRun({expectation.label: 95.0})
         verdict = judge_behaviour(base_verdict(expectation), run, expectation)
         self.assertEqual(verdict.status, 'alert')
 

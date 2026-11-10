@@ -9,7 +9,8 @@ import re
 from statistics import fmean, pstdev
 from typing import Callable, Mapping, Protocol
 
-from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_CAST_GATE,
+from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_COMBAT,
+                        BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_CAST_GATE,
                         BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
                         BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
                         BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_FIXED_COUNT,
@@ -2616,6 +2617,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
     if expectation.check == BEHAVIOUR_CAST_GATE:
         return behaviour_cast_gate_verdict(base, run, expectation)
     if expectation.check == BEHAVIOUR_CAST_CONDITION:
+        return behaviour_cast_gate_verdict(base, run, expectation)
+    if expectation.check == BEHAVIOUR_CAST_COMBAT:
         return behaviour_cast_gate_verdict(base, run, expectation)
     if expectation.check == BEHAVIOUR_COUNT:
         return behaviour_count_verdict(base, run, model)

@@ -34,6 +34,7 @@ BEHAVIOUR_CAST_GATE = 'behaviour_cast_gate'
 BEHAVIOUR_CAST_CONDITION = 'behaviour_cast_condition'
 BEHAVIOUR_MOUNT_GRANT = 'behaviour_mount_grant'
 BEHAVIOUR_INTERNAL_COOLDOWN = 'behaviour_internal_cooldown'
+BEHAVIOUR_CAST_COMBAT = 'behaviour_cast_combat'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
@@ -41,12 +42,12 @@ BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVI
                     BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_CRIT_MAGNITUDE,
                     BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_PARTY_STAT_RATIO,
                     BEHAVIOUR_CAST_GATE, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_MOUNT_GRANT,
-                    BEHAVIOUR_INTERNAL_COOLDOWN)
+                    BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_CAST_COMBAT)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
         'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition', 'mount_grant',
-        'internal_cooldown')
+        'internal_cooldown', 'cast_combat')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -2089,6 +2090,65 @@ def cast_condition_spec(entry: dict) -> CastConditionSpec:
                              entry['blocked_result'])
 
 
+CAST_COMBAT_SETTLE_MS = CAST_MARGIN_MS
+
+
+@dataclass(frozen=True)
+class CastCombatSpec:
+    spell: int
+    name: str
+    quote: str
+
+
+def cast_combat_label(spell: int, metric: str) -> str:
+    return f'{spell} cast_combat {metric}'
+
+
+def cast_combat_scenario(class_file: dict, spec: CastCombatSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'cast_combat', spec.quote, NO_CAST_FAILURE)
+    facts = facts_of(records, spec.spell)
+    combat_label = cast_combat_label(spec.spell, 'combat')
+    cast_label = cast_combat_label(spec.spell, 'cast_failure')
+    steps = (base_steps(class_file)
+            + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
+               {'action': 'die', 'actor': ALLY},
+               {'action': 'attack', 'actor': CASTER, 'target': TARGET},
+               {'action': 'wait', 'ms': CAST_COMBAT_SETTLE_MS},
+               measurement(combat_label, CASTER, 'combat'),
+               {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell}]
+            + cast_gate_power_step(facts)
+            + required_aura_steps(facts)
+            + [{'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': ALLY},
+               {'action': 'wait', 'ms': facts.cast_time_ms + CAST_GATE_WAIT_MS},
+               measurement(cast_label, CASTER, 'cast_failure', spell=spec.spell),
+               {'action': 'stop_attack', 'actor': CASTER}])
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour cast combat',
+        'contract': f'Combat-attempt check: the caster attacks a dummy fixture to enter real combat '
+                    f'(Unit::IsInCombat(), the "combat" metric), then attempts {spec.spell} at a dead ally '
+                    f'({spec.spell}\'s only effect is SPELL_EFFECT_RESURRECT, the same dead-ally fixture shape '
+                    f'proven by the generic rank scenario\'s own targets_resurrect() path) while still fighting '
+                    f'the dummy; cast_failure must read {NO_CAST_FAILURE} (no refusal), proving the '
+                    f'"{spec.quote}" clause.',
+        'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY}],
+        'creatures': [creature_fixture(class_file)],
+        'steps': steps}
+    model = {'kind': 'cast_combat', 'quote': entry.quote}
+    expectations = [
+        Expectation(combat_label, BEHAVIOUR_CAST_COMBAT, spec.spell, spec.spell, None, '1',
+                   prose_rule(entry.quote, spec.spell), dict(model)),
+        Expectation(cast_label, BEHAVIOUR_CAST_COMBAT, spec.spell, spec.spell, None, str(NO_CAST_FAILURE),
+                   prose_rule(entry.quote, spec.spell), dict(model)),
+    ]
+    return scenario, expectations
+
+
+def cast_combat_spec(entry: dict) -> CastCombatSpec:
+    return CastCombatSpec(entry['spell'], entry['name'], entry['quote'])
+
+
 @dataclass(frozen=True)
 class MountGrantSpec:
     spell: int
@@ -2580,6 +2640,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return mount_grant_scenario(class_file, mount_grant_spec(entry))
     if entry['kind'] == 'internal_cooldown':
         return internal_cooldown_scenario(class_file, internal_cooldown_spec(entry))
+    if entry['kind'] == 'cast_combat':
+        return cast_combat_scenario(class_file, cast_combat_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 
