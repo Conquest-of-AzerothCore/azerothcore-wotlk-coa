@@ -107,6 +107,8 @@ CHAKRA_OF_POWER_ENERGIZE = 804181
 PATIENCE = 712678
 CHASTISE = 503141
 MARTIAL_TRAINING = 806525
+LIBRAM_OF_TENACITY = 801461
+TENACIOUS_DEFENDER = 707385
 
 
 def scarlet_judicator_entry() -> dict:
@@ -250,6 +252,10 @@ def patience_cooldown_entry() -> dict:
 
 def chastise_weapon_damage_gate_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == CHASTISE)
+
+
+def libram_of_tenacity_heal_gate_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == LIBRAM_OF_TENACITY)
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -435,7 +441,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 51)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 52)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1179,6 +1185,32 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         correct = {'503141 spell_effect_value before': 0.0, '503141 spell_effect_value after': 150.0}
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(correct), expectation).status, 'ok')
         seeded_wrong = {'503141 spell_effect_value before': 0.0, '503141 spell_effect_value after': 0.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(seeded_wrong), expectation).status,
+                         'alert')
+
+    def test_libram_of_tenacity_heal_gate_learns_tenacious_defender_only_between_phases(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, libram_of_tenacity_heal_gate_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_DELTA)
+        self.assertEqual(expectations[0].model['metric'], 'spell_effect_value')
+        self.assertEqual(expectations[0].model['before_expected'], 0)
+        self.assertEqual(expectations[0].model['expected'], 20)
+        learn_steps = [step for step in scenario['steps']
+                      if step.get('action') == 'learn' and step.get('spell') == TENACIOUS_DEFENDER]
+        self.assertEqual(len(learn_steps), 1)
+        before_index = next(index for index, step in enumerate(scenario['steps'])
+                            if step.get('label') == '801461 spell_effect_value before')
+        after_index = next(index for index, step in enumerate(scenario['steps'])
+                           if step.get('label') == '801461 spell_effect_value after')
+        learn_index = scenario['steps'].index(learn_steps[0])
+        self.assertTrue(before_index < learn_index < after_index)
+
+    def test_libram_of_tenacity_heal_gate_judges_a_wrong_after_value_as_alert(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, libram_of_tenacity_heal_gate_entry())
+        expectation = expectations[0]
+        correct = {'801461 spell_effect_value before': 0.0, '801461 spell_effect_value after': 20.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(correct), expectation).status, 'ok')
+        seeded_wrong = {'801461 spell_effect_value before': 0.0, '801461 spell_effect_value after': 0.0}
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(seeded_wrong), expectation).status,
                          'alert')
 
