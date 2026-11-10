@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "name": "Bench: a Command does not make a Stationary minion attack",
+  "contract": "AscensionNecromancerSummons.cpp's Responds() switch returns false for 500991/504868/504907/504908/805871 when Stationary(entry) is true, and Stationary() (AscensionNecromancerData.h) lists the Phylactery (50132, raised by 500933), Tombstone (542064) and Scourge Transporter (575091) as never responding to any Command. A separate, earlier gate in AscensionNecromancerAbilities.cpp's OnSpellCheckCast refuses any Command with SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW (173) when Minions(player) (which itself excludes the three Stationary entries, AscensionNecromancer.cpp:148) is empty, UNLESS the command is 504868 ('!Named(info, 504868)'); 504868 is exempted from that gate and can start with zero ordinary minions, so it is the one Command that can actually reach Order() with only a Stationary minion up. A level-60 necromancer raises only a Phylactery and never swings; Command: Undead (504868) is cast on a weak creature. Because the only live minion is Stationary, Order() must find no responding minion, the creature must survive, and the necromancer must gain no experience. This bench establishes that exclusion still holds on unfixed main.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "necro",
+      "race": 1,
+      "class": 23,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "necro",
+      "entry": 36,
+      "level": 60,
+      "health": 300,
+      "distance": 25
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 500933
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 504868
+    },
+    {
+      "action": "add_item",
+      "actor": "necro",
+      "item": 37201,
+      "count": 2
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 0,
+      "value": 1500
+    },
+    {
+      "action": "cast",
+      "label": "Raise: Phylactery",
+      "actor": "necro",
+      "spell": 500933
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Phylactery exists",
+      "actor": "necro",
+      "metric": "owned_creature_count",
+      "entry": 50132,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown and formation",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "xp",
+      "save_as": "xp0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "necro",
+      "metric": "melee_attack_count",
+      "save_as": "swings0"
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "necro",
+      "spell": 504868
+    },
+    {
+      "action": "cast",
+      "label": "Command: Undead (504868) on the creature with only a Stationary minion up",
+      "actor": "necro",
+      "spell": 504868,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Command cast went",
+      "actor": "necro",
+      "metric": "spell_go_count",
+      "spell": 504868,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the necromancer never swung",
+      "actor": "necro",
+      "metric": "melee_attack_count",
+      "relative_to": "swings0",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let a would-be minion attack have time to land",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "BENCH: the Stationary minion never attacked, the creature survives",
+      "actor": "target",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "BENCH: no experience from a Command with only a Stationary minion up",
+      "actor": "necro",
+      "metric": "xp",
+      "relative_to": "xp0",
+      "equals": 0
+    }
+  ]
+}
