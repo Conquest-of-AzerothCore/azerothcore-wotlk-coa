@@ -6,20 +6,21 @@ import sys
 import tempfile
 import unittest
 
-from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_COUNT,
-                        BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION,
+from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_GATE, BEHAVIOUR_CHARGE_RECHARGE,
+                        BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION,
                         BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY,
                         BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
                         BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
                         BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER,
-                        MECHANIC_LAND_ATTEMPTS, STRIKER,
+                        MECHANIC_LAND_ATTEMPTS, NO_CAST_FAILURE, SPELL_FAILED_TARGET_AURASTATE, STRIKER,
                         NotModelled,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
                         OathConsumptionRemovalSpec,
                         ally_heal_breadth_scenario, ally_heal_breadth_spec,
                         amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
                         aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
-                        behaviour_scenario, charge_recharge_scenario, charge_recharge_spec,
+                        behaviour_scenario, cast_gate_scenario, cast_gate_spec,
+                        charge_recharge_scenario, charge_recharge_spec,
                         crit_guarantee_scenario, crit_guarantee_spec,
                         crit_magnitude_scenario, crit_magnitude_spec,
                         duration_refresh_scenario, duration_refresh_spec, duration_scenario, duration_spec,
@@ -126,6 +127,8 @@ SERENDIPITY = 300929
 FORTIFIED_BODY = 300515
 LIBRAM_OF_GRACE = 801463
 CHAKRA_OF_LIGHT = 803159
+TITANSTRIKE = 806521
+TESTAMENT_OF_STRENGTH = 300514
 
 
 def scarlet_judicator_entry() -> dict:
@@ -178,6 +181,10 @@ def armor_of_faith_entry() -> dict:
 
 def tyrs_guard_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == TYRS_GUARD)
+
+
+def titanstrike_cast_gate_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == TITANSTRIKE)
 
 
 def spiritual_abdicator_entry() -> dict:
@@ -490,7 +497,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 60)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 61)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -3694,6 +3701,117 @@ class JudgeSingleTargetTests(unittest.TestCase):
     def test_first_cast_never_applying_the_aura_is_an_alert(self):
         expectation = self.expectation()
         run = FakeRun({'first': 0.0, 'removed': 0.0, 'second': 1.0})
+class CastGateScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_expectations(self):
+        spec = cast_gate_spec(titanstrike_cast_gate_entry())
+        scenario, expectations = cast_gate_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 3)
+        blocked, allowed, bypassed = expectations
+        self.assertEqual(blocked.check, BEHAVIOUR_CAST_GATE)
+        self.assertEqual(blocked.spell_id, TITANSTRIKE)
+        self.assertEqual(blocked.displayed, str(SPELL_FAILED_TARGET_AURASTATE))
+        self.assertEqual(allowed.spell_id, TITANSTRIKE)
+        self.assertEqual(allowed.displayed, str(NO_CAST_FAILURE))
+        self.assertEqual(bypassed.spell_id, TESTAMENT_OF_STRENGTH)
+        self.assertEqual(bypassed.rank_id, TITANSTRIKE)
+        self.assertEqual(bypassed.displayed, str(NO_CAST_FAILURE))
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, titanstrike_cast_gate_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_CAST_GATE)
+
+    def test_blocked_attempt_precedes_casting_the_bypass_spell(self):
+        spec = cast_gate_spec(titanstrike_cast_gate_entry())
+        scenario, _ = cast_gate_scenario(CLASS_FILE, spec)
+        blocked_cast = next(index for index, step in enumerate(scenario['steps'])
+                            if step.get('action') == 'cast' and step.get('spell') == TITANSTRIKE)
+        bypass_cast = next(index for index, step in enumerate(scenario['steps'])
+                           if step.get('action') == 'cast' and step.get('spell') == TESTAMENT_OF_STRENGTH)
+        self.assertLess(blocked_cast, bypass_cast)
+
+    def test_bypass_spell_is_unlearned_before_the_health_fixture_attempt(self):
+        spec = cast_gate_spec(titanstrike_cast_gate_entry())
+        scenario, _ = cast_gate_scenario(CLASS_FILE, spec)
+        unlearn_index = next(index for index, step in enumerate(scenario['steps'])
+                             if step.get('action') == 'unlearn' and step.get('spell') == TESTAMENT_OF_STRENGTH)
+        health_fixture_index = next(index for index, step in enumerate(scenario['steps'])
+                                    if step.get('action') == 'set_health_pct')
+        final_cast_index = [index for index, step in enumerate(scenario['steps'])
+                            if step.get('action') == 'cast' and step.get('spell') == TITANSTRIKE][-1]
+        self.assertLess(unlearn_index, health_fixture_index)
+        self.assertLess(health_fixture_index, final_cast_index)
+
+    def test_every_cast_attempt_resets_its_own_cooldown_first(self):
+        spec = cast_gate_spec(titanstrike_cast_gate_entry())
+        scenario, _ = cast_gate_scenario(CLASS_FILE, spec)
+        cast_indexes = [index for index, step in enumerate(scenario['steps'])
+                       if step.get('action') == 'cast' and step.get('spell') == TITANSTRIKE]
+        for index in cast_indexes:
+            preceding = scenario['steps'][:index]
+            self.assertTrue(any(step.get('action') == 'reset_cooldown' and step.get('spell') == TITANSTRIKE
+                                for step in preceding))
+
+    def test_rejects_a_spell_without_a_target_aura_state(self):
+        entry = dict(titanstrike_cast_gate_entry())
+        entry['spell'] = TESTAMENT_OF_STRENGTH
+        entry['quote'] = "are usable regardless of your target's health percentage,"
+        with self.assertRaises(Exception):
+            cast_gate_scenario(CLASS_FILE, cast_gate_spec(entry))
+
+
+class JudgeCastGateTests(unittest.TestCase):
+    def blocked_expectation(self):
+        model = {'kind': 'cast_gate', 'quote': 'Only usable on enemies below 35% health.'}
+        return Expectation('806521 cast_gate blocked', BEHAVIOUR_CAST_GATE, TITANSTRIKE, TITANSTRIKE, None,
+                           str(SPELL_FAILED_TARGET_AURASTATE),
+                           'prose: "Only usable on enemies below 35% health." (806521)', model)
+
+    def allowed_expectation(self):
+        model = {'kind': 'cast_gate', 'quote': 'Only usable on enemies below 35% health.'}
+        return Expectation('806521 cast_gate allowed', BEHAVIOUR_CAST_GATE, TITANSTRIKE, TITANSTRIKE, None,
+                           str(NO_CAST_FAILURE), 'prose: "Only usable on enemies below 35% health." (806521)', model)
+
+    def bypassed_expectation(self):
+        model = {'kind': 'cast_gate', 'quote': "are usable regardless of your target's health percentage,"}
+        return Expectation('300514 cast_gate bypassed', BEHAVIOUR_CAST_GATE, TESTAMENT_OF_STRENGTH, TITANSTRIKE,
+                           None, str(NO_CAST_FAILURE),
+                           'prose: "are usable regardless of your target\'s health percentage," (300514)', model)
+
+    def test_blocked_attempt_refused_with_the_right_reason_is_ok(self):
+        expectation = self.blocked_expectation()
+        run = FakeRun({expectation.label: float(SPELL_FAILED_TARGET_AURASTATE)})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_blocked_attempt_that_actually_succeeded_is_alert(self):
+        expectation = self.blocked_expectation()
+        run = FakeRun({expectation.label: float(NO_CAST_FAILURE)})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_allowed_attempt_that_succeeded_is_ok(self):
+        expectation = self.allowed_expectation()
+        run = FakeRun({expectation.label: float(NO_CAST_FAILURE)})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_allowed_attempt_still_refused_is_alert(self):
+        expectation = self.allowed_expectation()
+        run = FakeRun({expectation.label: float(SPELL_FAILED_TARGET_AURASTATE)})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_bypassed_attempt_that_succeeded_is_ok(self):
+        expectation = self.bypassed_expectation()
+        run = FakeRun({expectation.label: float(NO_CAST_FAILURE)})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_bypassed_attempt_still_refused_by_the_gate_is_alert(self):
+        expectation = self.bypassed_expectation()
+        run = FakeRun({expectation.label: float(SPELL_FAILED_TARGET_AURASTATE)})
         verdict = judge_behaviour(base_verdict(expectation), run, expectation)
         self.assertEqual(verdict.status, 'alert')
 
@@ -3706,6 +3824,25 @@ class JudgeSingleTargetTests(unittest.TestCase):
 
     def test_no_run_reports_no_scenario(self):
         expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), None, expectation)
+        self.assertIn('no scenario', verdict.explanation)
+
+
+class JudgeCastGateMissingMeasurementTests(unittest.TestCase):
+    def blocked_expectation(self):
+        model = {'kind': 'cast_gate', 'quote': 'Only usable on enemies below 35% health.'}
+        return Expectation('806521 cast_gate blocked', BEHAVIOUR_CAST_GATE, TITANSTRIKE, TITANSTRIKE, None,
+                           str(SPELL_FAILED_TARGET_AURASTATE),
+                           'prose: "Only usable on enemies below 35% health." (806521)', model)
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.blocked_expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn(expectation.label, verdict.explanation)
+
+    def test_no_run_reports_no_scenario(self):
+        expectation = self.blocked_expectation()
         verdict = judge_behaviour(base_verdict(expectation), None, expectation)
         self.assertIn('no scenario', verdict.explanation)
 

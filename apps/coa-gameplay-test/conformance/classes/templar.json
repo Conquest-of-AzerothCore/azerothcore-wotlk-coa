@@ -2168,6 +2168,13 @@
       "quote": "heal allies around the target", "expected": 2,
       "heal_spell": 803160, "trigger_spell": 572027,
       "radius_reason": "803159's own scripted Oath Breaker hook (AscensionTemplarAbilities.cpp:192-198, per docs/trigger-entries.md's 'Chakra of Light 803844, 803159' row) casts 803160 once per Oath Breaker cast (modelled here with the same 572027 'a dominating Oath Breaker' fixture that row already uses); 803160 is SPELL_EFFECT_HEAL with EffectImplicitTargetA[0]=22 TARGET_SRC_CASTER / EffectImplicitTargetB[0]=30 TARGET_UNIT_SRC_AREA_ALLY, EffectRadiusIndex[0]=18 -> SpellRadius.dbc 15.0 yd (coa-dbc-viewer Spell 803159 and SpellRadius 18 read this session), so the heal lands on every grouped ally within 15 yd of the caster; before/after the passive is learned isolates the breadth, since 572027 alone casts nothing that heals."
+    },
+    {
+      "spell": 806521, "name": "Titanstrike", "kind": "cast_gate",
+      "quote": "Only usable on enemies below 35% health.",
+      "bypass_spell": 300514, "bypass_name": "Testament of Strength",
+      "bypass_quote": "are usable regardless of your target's health percentage,",
+      "observe_source": "SpellInfo::CheckTarget (SpellInfo.cpp ~2135-2141) returns SPELL_FAILED_TARGET_AURASTATE when the target lacks AuraStateType(TargetAuraState); 806521's own TargetAuraState (DBC field, read via values.py facts_of) is 13 (AURA_STATE_HEALTHLESS_35_PERCENT), the same state values.py's required_target_health_steps already fixtures to 30% for the unrelated effect_value scenario. Unit::HasAuraState (Unit.cpp ~8522) first checks Caster->GetAuraEffectsByType(SPELL_AURA_ABILITY_IGNORE_AURASTATE) and returns true unconditionally for any matching effect whose IsAffectedOnSpell(spellProto) is true, regardless of the target's own state; 300514's own effect 2 (EffectApplyAuraName[2]=262, SPELL_AURA_ABILITY_IGNORE_AURASTATE) is exactly this bypass, which this scenario proves by casting 806521 at the untouched (full-health) dummy fixture once without 300514, expecting a refusal, and once with 300514 cast on the caster, expecting success at the same unmodified target health."
     }
   ],
   "player_observations": [

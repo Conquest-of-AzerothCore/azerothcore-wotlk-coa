@@ -30,16 +30,18 @@ BEHAVIOUR_CRIT_MAGNITUDE = 'behaviour_crit_magnitude'
 BEHAVIOUR_CHARGE_RECHARGE = 'behaviour_charge_recharge'
 BEHAVIOUR_FIXED_COUNT = 'behaviour_fixed_count'
 BEHAVIOUR_PARTY_STAT_RATIO = 'behaviour_party_stat_ratio'
+BEHAVIOUR_CAST_GATE = 'behaviour_cast_gate'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
                     BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_EXCLUSIVITY,
                     BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_CRIT_MAGNITUDE,
-                    BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_PARTY_STAT_RATIO)
+                    BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_PARTY_STAT_RATIO,
+                    BEHAVIOUR_CAST_GATE)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
-        'charge_recharge', 'fixed_count', 'party_stat_ratio')
+        'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1901,6 +1903,96 @@ def single_target_spec(entry: dict) -> SingleTargetSpec:
                             entry.get('wait_ms', SINGLE_TARGET_CAST_WAIT_MS))
 
 
+SPELL_FAILED_TARGET_AURASTATE = 111
+NO_CAST_FAILURE = 0
+CAST_GATE_WAIT_MS = CAST_MARGIN_MS
+
+
+@dataclass(frozen=True)
+class CastGateSpec:
+    spell: int
+    name: str
+    quote: str
+    bypass_spell: int
+    bypass_name: str
+    bypass_quote: str
+
+
+def cast_gate_label(spell: int, moment: str) -> str:
+    return f'{spell} cast_gate {moment}'
+
+
+def cast_gate_power_step(facts) -> list[dict]:
+    if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+        return [{'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost}]
+    return []
+
+
+def cast_gate_attempt(spell: int, facts, moment: str) -> list[dict]:
+    label = cast_gate_label(spell, moment)
+    return ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell}] + cast_gate_power_step(facts)
+            + required_aura_steps(facts)
+            + [{'action': 'cast', 'actor': CASTER, 'spell': spell, 'target': TARGET},
+               {'action': 'wait', 'ms': CAST_GATE_WAIT_MS},
+               measurement(label, CASTER, 'cast_failure', spell=spell)])
+
+
+def cast_gate_scenario(class_file: dict, spec: CastGateSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    gated_entry = behaviour_entry(records, spec.spell, spec.name, 'cast_gate', spec.quote, NO_CAST_FAILURE)
+    bypass_entry = behaviour_entry(records, spec.bypass_spell, spec.bypass_name, 'cast_gate', spec.bypass_quote,
+                                   NO_CAST_FAILURE)
+    gated_facts = facts_of(records, spec.spell)
+    bypass_facts = facts_of(records, spec.bypass_spell)
+    if not gated_facts.target_aura_state:
+        raise NotModelled(f'{spec.spell} has no TargetAuraState to gate on')
+    blocked_label = cast_gate_label(spec.spell, 'blocked')
+    allowed_label = cast_gate_label(spec.spell, 'allowed')
+    bypassed_label = cast_gate_label(spec.bypass_spell, 'bypassed')
+    bypass_cast_steps = ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.bypass_spell}]
+                         + cast_gate_power_step(bypass_facts)
+                         + [{'action': 'cast', 'actor': CASTER, 'spell': spec.bypass_spell, 'target': CASTER},
+                            {'action': 'wait', 'ms': CAST_GATE_WAIT_MS}])
+    steps = (base_steps(class_file)
+            + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
+               {'action': 'learn', 'actor': CASTER, 'spell': spec.bypass_spell}]
+            + cast_gate_attempt(spec.spell, gated_facts, 'blocked')
+            + bypass_cast_steps
+            + cast_gate_attempt(spec.spell, gated_facts, 'bypassed')
+            + [{'action': 'unlearn', 'actor': CASTER, 'spell': spec.bypass_spell}]
+            + required_target_health_steps(gated_facts)
+            + cast_gate_attempt(spec.spell, gated_facts, 'allowed'))
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour cast gate',
+        'contract': f'No-combat cast-attempt check: {spec.spell} is attempted at the dummy fixture\'s default '
+                    f'(full) health and must be refused with SPELL_FAILED_TARGET_AURASTATE '
+                    f'({SPELL_FAILED_TARGET_AURASTATE}); {spec.bypass_spell} is then cast on the caster and the '
+                    f'same attempt at the same full health '
+                    f'must succeed; {spec.bypass_spell} is unlearned, the target\'s health is lowered to the DBC\'s '
+                    f'own TargetAuraState fixture and the same attempt must succeed through the health gate itself.',
+        'players': [player_fixture(class_file)],
+        'creatures': [creature_fixture(class_file)],
+        'steps': steps}
+    blocked_model = {'kind': 'cast_gate', 'quote': gated_entry.quote}
+    allowed_model = {'kind': 'cast_gate', 'quote': gated_entry.quote}
+    bypassed_model = {'kind': 'cast_gate', 'quote': bypass_entry.quote}
+    expectations = [
+        Expectation(blocked_label, BEHAVIOUR_CAST_GATE, spec.spell, spec.spell, None,
+                   str(SPELL_FAILED_TARGET_AURASTATE), prose_rule(gated_entry.quote, spec.spell), blocked_model),
+        Expectation(allowed_label, BEHAVIOUR_CAST_GATE, spec.spell, spec.spell, None, str(NO_CAST_FAILURE),
+                   prose_rule(gated_entry.quote, spec.spell), allowed_model),
+        Expectation(bypassed_label, BEHAVIOUR_CAST_GATE, spec.bypass_spell, spec.spell, None, str(NO_CAST_FAILURE),
+                   prose_rule(bypass_entry.quote, spec.bypass_spell), bypassed_model),
+    ]
+    return scenario, expectations
+
+
+def cast_gate_spec(entry: dict) -> CastGateSpec:
+    return CastGateSpec(entry['spell'], entry['name'], entry['quote'], entry['bypass_spell'], entry['bypass_name'],
+                        entry['bypass_quote'])
+
+
 MECHANIC_DR_RESET_MS = 15000
 MECHANIC_GAP_MARGIN_MS = 2000
 MECHANIC_LAND_ATTEMPTS = 3
@@ -2228,6 +2320,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return crit_magnitude_scenario(class_file, crit_magnitude_spec(entry))
     if entry['kind'] == 'charge_recharge':
         return charge_recharge_scenario(class_file, charge_recharge_spec(entry))
+    if entry['kind'] == 'cast_gate':
+        return cast_gate_scenario(class_file, cast_gate_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 
