@@ -47,3 +47,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 -- Bedroll
 DELETE FROM `gameobject` WHERE `guid` = 6976009;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976009, 9900052, 0, 1, 1, -8354.11, -910.969, 208.3964, 0, 0, 0, 0, 1, 300, 100, 1);
+
+-- #11774
+-- duplicate of the Casket Will pickup 6941339 (the one at the Ascension position): 6960034 hidden, not deleted
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6960034) AND `id` IN (90281);
