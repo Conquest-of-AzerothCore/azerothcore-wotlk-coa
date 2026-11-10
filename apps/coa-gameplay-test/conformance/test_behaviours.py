@@ -14,7 +14,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_AGGRO_
                         BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
                         BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_FIXED_COUNT,
                         BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
-                        BEHAVIOUR_METRIC_DELTA,
+                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_METRIC_RATIO_DELTA,
                         BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
                         BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER,
                         MECHANIC_LAND_ATTEMPTS, NO_CAST_FAILURE, SPELL_FAILED_ONLY_MOUNTED,
@@ -55,7 +55,8 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_AGGRO_
                         party_ally_id, party_stat_ratio_scenario, party_stat_ratio_spec,
                         shield_break_trigger_scenario, shield_break_trigger_spec,
                         single_target_scenario, single_target_spec,
-                        target_count_scenario, target_count_spec)
+                        target_count_scenario, target_count_spec, threat_tick_ratio_scenario,
+                        threat_tick_ratio_spec)
 from compare import Verdict, judge_behaviour
 from hits import aura_modifiers
 from procs import cast_interval
@@ -166,6 +167,7 @@ SACRED_RESTRAINT = 102208
 ARGENT_BLADE = 804929
 ARGENT_BLADE_HEAL = 807414
 TOME_OF_LIGHT = 805422
+RIGHTEOUS_CUSTODIAN = 572808
 
 
 def scarlet_judicator_entry() -> dict:
@@ -435,6 +437,10 @@ def tome_of_light_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == TOME_OF_LIGHT)
 
 
+def righteous_custodian_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == RIGHTEOUS_CUSTODIAN)
+
+
 class BehaviourEntryTests(unittest.TestCase):
     def test_scarlet_judicator_entry(self):
         spec = target_count_spec(scarlet_judicator_entry())
@@ -687,6 +693,16 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.effect, 1)
         self.assertEqual(spec.expected, 1.0)
 
+    def test_righteous_custodian_entry(self):
+        spec = threat_tick_ratio_spec(righteous_custodian_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'threat_tick_ratio', spec.quote,
+                                spec.expected_ratio)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(spec.spell, RIGHTEOUS_CUSTODIAN)
+        self.assertEqual(spec.aura_spell, RIGHTEOUS_CUSTODIAN)
+        self.assertEqual(spec.expected_ratio, 0.98)
+        self.assertEqual(spec.aura_stacks, 1)
+
 
 class BehaviourEntriesLookupTests(unittest.TestCase):
     def test_behaviour_entries_filters_by_spell(self):
@@ -698,7 +714,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 82)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 83)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -2136,6 +2152,77 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['expected'], 2.40)
         self.assertEqual(expectations[0].model['before_expected'], 1.60)
         self.assertEqual(expectations[0].model['metric'], 'run_speed_rate')
+
+
+class ThreatTickRatioScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_expectations(self):
+        spec = threat_tick_ratio_spec(righteous_custodian_entry())
+        scenario, expectations = threat_tick_ratio_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_METRIC_RATIO_DELTA)
+        self.assertTrue(expectation.rule.startswith('prose: "reducing their total threat by"'))
+        self.assertEqual(expectation.model['kind'], 'metric_ratio_delta')
+        self.assertEqual(expectation.model['expected_ratio'], 0.98)
+        self.assertEqual(expectation.model['metric'], 'threat')
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, righteous_custodian_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_RATIO_DELTA)
+        self.assertEqual(expectations[0].model['expected_ratio'], 0.98)
+
+    def test_attack_builds_threat_before_the_before_measurement(self):
+        spec = threat_tick_ratio_spec(righteous_custodian_entry())
+        scenario, _ = threat_tick_ratio_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        attack_index = next(index for index, step in enumerate(steps) if step.get('action') == 'attack')
+        stop_index = next(index for index, step in enumerate(steps) if step.get('action') == 'stop_attack')
+        before_index = next(index for index, step in enumerate(steps)
+                            if step.get('metric') == 'threat' and step.get('label', '').endswith('before'))
+        self.assertLess(attack_index, stop_index)
+        self.assertLess(stop_index, before_index)
+        self.assertEqual(steps[attack_index]['actor'], 'caster')
+        self.assertEqual(steps[attack_index]['target'], 'dummy')
+
+    def test_set_aura_happens_between_the_before_and_after_measurements(self):
+        spec = threat_tick_ratio_spec(righteous_custodian_entry())
+        scenario, _ = threat_tick_ratio_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        measure_indexes = [index for index, step in enumerate(steps) if step.get('metric') == 'threat']
+        set_aura_index = next(index for index, step in enumerate(steps)
+                              if step.get('action') == 'set_aura' and step.get('spell') == RIGHTEOUS_CUSTODIAN)
+        self.assertEqual(len(measure_indexes), 2)
+        self.assertLess(measure_indexes[0], set_aura_index)
+        self.assertLess(set_aura_index, measure_indexes[1])
+        for index in measure_indexes:
+            self.assertEqual(steps[index]['actor'], 'dummy')
+            self.assertEqual(steps[index]['target'], 'caster')
+
+    def test_scenario_always_has_the_creature_fixture(self):
+        spec = threat_tick_ratio_spec(righteous_custodian_entry())
+        scenario, _ = threat_tick_ratio_scenario(CLASS_FILE, spec)
+        self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
+
+    def test_wrong_after_reading_is_caught(self):
+        spec = threat_tick_ratio_spec(righteous_custodian_entry())
+        _, expectations = threat_tick_ratio_scenario(CLASS_FILE, spec)
+        expectation = expectations[0]
+        wrong_run = FakeRun({expectation.model['before_label']: 1000.0, expectation.model['after_label']: 1000.0})
+        verdict = judge_behaviour(base_verdict(expectation), wrong_run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+        right_run = FakeRun({expectation.model['before_label']: 1000.0, expectation.model['after_label']: 980.0})
+        verdict = judge_behaviour(base_verdict(expectation), right_run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_zero_baseline_is_unmeasured_not_alert(self):
+        spec = threat_tick_ratio_spec(righteous_custodian_entry())
+        _, expectations = threat_tick_ratio_scenario(CLASS_FILE, spec)
+        expectation = expectations[0]
+        zero_run = FakeRun({expectation.model['before_label']: 0.0, expectation.model['after_label']: 0.0})
+        verdict = judge_behaviour(base_verdict(expectation), zero_run, expectation)
+        self.assertEqual(verdict.status, 'unmeasured')
 
 
 class CastLeechRatioScenarioTests(unittest.TestCase):

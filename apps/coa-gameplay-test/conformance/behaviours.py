@@ -38,6 +38,7 @@ BEHAVIOUR_CAST_COMBAT = 'behaviour_cast_combat'
 BEHAVIOUR_AGGRO_REDIRECT = 'behaviour_aggro_redirect'
 BEHAVIOUR_HEAL_BLOCK = 'behaviour_heal_block'
 BEHAVIOUR_CAST_APPLIES_AURA = 'behaviour_cast_applies_aura'
+BEHAVIOUR_METRIC_RATIO_DELTA = 'behaviour_metric_ratio_delta'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
@@ -46,13 +47,13 @@ BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVI
                     BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_PARTY_STAT_RATIO,
                     BEHAVIOUR_CAST_GATE, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_MOUNT_GRANT,
                     BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_AGGRO_REDIRECT,
-                    BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_CAST_APPLIES_AURA)
+                    BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_METRIC_RATIO_DELTA)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
         'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition', 'mount_grant',
         'internal_cooldown', 'cast_combat', 'aggro_redirect', 'dispel_removal', 'aura_presence', 'heal_block',
-        'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio')
+        'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio', 'threat_tick_ratio')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1459,6 +1460,63 @@ def aura_metric_delta_spec(entry: dict) -> AuraMetricDeltaSpec:
                                entry['metric'], entry['fields'], entry['before_expected'],
                                entry.get('aura_stacks', 1), entry.get('target', CASTER),
                                entry.get('label_suffix', ''))
+
+
+@dataclass(frozen=True)
+class ThreatTickRatioSpec:
+    spell: int
+    name: str
+    quote: str
+    expected_ratio: float
+    aura_spell: int
+    attack_wait_ms: int
+    tick_wait_ms: int
+    tolerance: float
+    aura_stacks: int = 1
+
+
+def threat_tick_ratio_label(spec: ThreatTickRatioSpec, moment: str) -> str:
+    return f'{spec.spell} threat aura_gated {moment}'
+
+
+def threat_tick_ratio_scenario(class_file: dict, spec: ThreatTickRatioSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'threat_tick_ratio', spec.quote, spec.expected_ratio)
+    before_label = threat_tick_ratio_label(spec, BEFORE)
+    after_label = threat_tick_ratio_label(spec, AFTER)
+    steps = base_steps(class_file) + [
+        {'action': 'attack', 'actor': CASTER, 'target': TARGET},
+        {'action': 'wait', 'label': 'build threat on the dummy', 'ms': spec.attack_wait_ms},
+        {'action': 'stop_attack', 'actor': CASTER},
+        measurement(before_label, TARGET, 'threat', target=CASTER),
+        {'action': 'set_aura', 'actor': CASTER, 'spell': spec.aura_spell, 'stacks': spec.aura_stacks},
+        {'action': 'wait', 'label': 'let exactly one periodic tick fire', 'ms': spec.tick_wait_ms},
+        measurement(after_label, TARGET, 'threat', target=CASTER)]
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour threat tick ratio',
+        'contract': f'The dummy\'s own threat against the caster is read once after the caster builds it through '
+                    f'real melee attacks, and once more after {spec.aura_spell} is set directly on the caster and '
+                    f'exactly one of its periodic ticks fires ({spec.tick_wait_ms} ms), isolating the percentage '
+                    f'the tick removes as a ratio rather than an absolute value, since the baseline threat a real '
+                    f'attack sequence builds is not a deterministic number.',
+        'players': [player_fixture(class_file)],
+        'creatures': [creature_fixture(class_file)],
+        'steps': steps}
+    label = f'{spec.spell} behaviour_metric_ratio_delta'
+    model = {'kind': 'metric_ratio_delta', 'before_label': before_label, 'after_label': after_label,
+             'expected_ratio': spec.expected_ratio, 'tolerance': spec.tolerance, 'metric': 'threat',
+             'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_METRIC_RATIO_DELTA, spec.spell, spec.aura_spell, None,
+                              str(spec.expected_ratio), prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def threat_tick_ratio_spec(entry: dict) -> ThreatTickRatioSpec:
+    return ThreatTickRatioSpec(entry['spell'], entry['name'], entry['quote'], entry['expected_ratio'],
+                               entry['aura_spell'], entry.get('attack_wait_ms', 3000),
+                               entry.get('tick_wait_ms', 1200), entry.get('tolerance', 0.005),
+                               entry.get('aura_stacks', 1))
 
 
 @dataclass(frozen=True)
@@ -3195,6 +3253,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return aura_presence_scenario(class_file, aura_presence_spec(entry))
     if entry['kind'] == 'heal_block':
         return heal_block_scenario(class_file, heal_block_spec(entry))
+    if entry['kind'] == 'threat_tick_ratio':
+        return threat_tick_ratio_scenario(class_file, threat_tick_ratio_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

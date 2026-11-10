@@ -17,7 +17,8 @@ from behaviours import (BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA, BEHAVI
                         BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_FIXED_COUNT,
                         BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_INTERNAL_COOLDOWN,
                         BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
-                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
+                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_METRIC_RATIO_DELTA, BEHAVIOUR_MOUNT_GRANT,
+                        BEHAVIOUR_OATH_CONSUMPTION,
                         BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO,
                         BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER)
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
@@ -2240,6 +2241,29 @@ def behaviour_heal_block_verdict(base: Verdict, run: Run, model: dict) -> Verdic
                                f'(expected {expected:g}); {requirement}')
 
 
+def behaviour_metric_ratio_delta_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    before = run.values.get(model['before_label'])
+    after = run.values.get(model['after_label'])
+    if before is None or after is None:
+        return replace(base, explanation=missing_measurement(run, model['before_label'] if before is None
+                                                              else model['after_label']))
+    if before <= 0:
+        return replace(base, status='unmeasured', measured=after,
+                       explanation=f'{model["before_label"]} measured {before:g}; a ratio needs a positive '
+                                   f'baseline (the caster never built any threat on the dummy)')
+    ratio = after / before
+    expected_ratio = float(model['expected_ratio'])
+    tolerance = float(model['tolerance'])
+    status = 'ok' if abs(ratio - expected_ratio) <= tolerance else 'alert'
+    return replace(base, status=status, measured=ratio, expected=expected_ratio, low=expected_ratio - tolerance,
+                   high=expected_ratio + tolerance,
+                   explanation=f'{model["metric"]} measured {before:g} before {model["before_label"]!r} and '
+                               f'{after:g} after one periodic tick {model["after_label"]!r}, ratio {ratio:g}; '
+                               f'expected {expected_ratio:g} within {tolerance:g}, a ratio rather than an '
+                               f'absolute value since the baseline a real attack sequence builds is not '
+                               f'deterministic')
+
+
 def behaviour_duration_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     before = run.values.get(model['before_label'])
     after = run.values.get(model['after_label'])
@@ -2737,6 +2761,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_metric_delta_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_HEAL_BLOCK:
         return behaviour_heal_block_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_METRIC_RATIO_DELTA:
+        return behaviour_metric_ratio_delta_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_DURATION:
         return behaviour_duration_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_DURATION_RATIO:
