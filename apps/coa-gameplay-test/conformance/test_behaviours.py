@@ -10,7 +10,7 @@ from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_
                         BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH,
                         BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION,
                         BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER,
-                        MECHANIC_LAND_ATTEMPTS, NotModelled,
+                        MECHANIC_LAND_ATTEMPTS, STRIKER, NotModelled,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
                         OathConsumptionRemovalSpec,
                         amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
@@ -359,7 +359,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 39)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 40)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -2238,6 +2238,9 @@ DISCIPLINED_BLOWS_TICK = 680398
 SCARLET_CHAMPION = 805415
 ARGENT_BLADE = 807268
 SCARLET_CHAMPION_STACK = 805416
+SACRED_DEFENSE = 705306
+KARAZHAN_CHESS_FOOTMAN_MELEE = 32247
+SACRED_DEFENSE_STRIKE = 707720
 
 
 class IcdGateScenarioTests(unittest.TestCase):
@@ -2275,11 +2278,35 @@ class IcdGateScenarioTests(unittest.TestCase):
 
     def test_entries_from_the_class_file_round_trip_through_the_spec_parser(self):
         entries = [entry for entry in CLASS_FILE['behaviours'] if entry['kind'] == 'internal_cooldown_gate']
-        self.assertEqual(len(entries), 3)
+        self.assertEqual(len(entries), 4)
         for entry in entries:
             scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
             self.assertEqual(expectation.rule, f'prose: "{entry["quote"]}" ({entry["spell"]})')
             run.validate(scenario)
+
+    def test_a_striker_trigger_without_an_entry_is_not_modelled(self):
+        spec = IcdGateSpec(SACRED_DEFENSE, 'Sacred Defense', 'Can only occur once per sec.', KARAZHAN_CHESS_FOOTMAN_MELEE,
+                           SACRED_DEFENSE_STRIKE, 1000, target=None, trigger_actor=STRIKER, striker_entry=0)
+        with self.assertRaises(ValueError):
+            icd_gate_scenario(CLASS_FILE, spec)
+
+    def test_a_striker_trigger_casts_the_trigger_spell_from_the_fixtured_creature(self):
+        spec = IcdGateSpec(SACRED_DEFENSE, 'Sacred Defense', 'Can only occur once per sec.', KARAZHAN_CHESS_FOOTMAN_MELEE,
+                           SACRED_DEFENSE_STRIKE, 1000, target=None, trigger_actor=STRIKER, striker_entry=36)
+        scenario, [expectation] = icd_gate_scenario(CLASS_FILE, spec)
+        validated = run.validate(scenario)
+        self.assertEqual(expectation.spell_id, SACRED_DEFENSE)
+        striker_casts = [step for step in validated['steps']
+                        if step.get('action') == 'cast' and step.get('actor') == STRIKER]
+        self.assertEqual(len(striker_casts), 3)
+        for step in striker_casts:
+            self.assertEqual(step['spell'], KARAZHAN_CHESS_FOOTMAN_MELEE)
+            self.assertEqual(step['target'], 'caster')
+        self.assertFalse(any(step.get('action') == 'learn' and step.get('spell') == KARAZHAN_CHESS_FOOTMAN_MELEE
+                             for step in validated['steps']))
+        self.assertEqual(scenario['creatures'][0]['entry'], 36)
+        self.assertEqual(scenario['creatures'][0]['reaction'], 0)
+        self.assertTrue(scenario['creatures'][0]['stationary'])
 
 
 class JudgeIcdGateTests(unittest.TestCase):

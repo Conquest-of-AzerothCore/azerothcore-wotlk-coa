@@ -1152,6 +1152,8 @@ class IcdGateSpec:
     restore_charges: bool = False
     force_crit: str | None = None
     reopen_margin_ms: int = ICD_GATE_REOPEN_MARGIN_MS
+    trigger_actor: str = CASTER
+    striker_entry: int | None = None
 
 
 def icd_gate_label(spec: IcdGateSpec, moment: str) -> str:
@@ -1169,41 +1171,58 @@ def icd_gate_attempt_fixtures(spec: IcdGateSpec) -> list[dict]:
     return fixtures
 
 
+def icd_gate_striker_attempt(spec: IcdGateSpec, gap_ms: int) -> list[dict]:
+    return [{'action': 'cast', 'actor': STRIKER, 'spell': spec.trigger_spell, 'target': CASTER},
+            {'action': 'wait', 'ms': gap_ms}]
+
+
 def icd_gate_scenario(class_file: dict, spec: IcdGateSpec) -> tuple[dict, list[Expectation]]:
     if spec.internal_cooldown_ms <= 0:
         raise NotModelled('internal_cooldown_gate needs a positive internal_cooldown_ms')
+    if spec.trigger_actor == STRIKER and not (spec.striker_entry and spec.striker_entry > 0):
+        raise ValueError(f'{spec.spell} internal_cooldown_gate needs a positive striker_entry when triggered by a '
+                          f'striker')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'internal_cooldown_gate', spec.quote, 0.0)
-    class_file = armed_for(class_file, records, spec.trigger_spell)
-    facts = facts_of(records, spec.trigger_spell)
-    cast_target = spec.target if spec.target in (TARGET, ALLY) else None
-    fixtures = icd_gate_attempt_fixtures(spec)
     short_gap_ms = max(1, spec.internal_cooldown_ms // 2)
     reopen_gap_ms = spec.internal_cooldown_ms - short_gap_ms + spec.reopen_margin_ms
     labels = {moment: icd_gate_label(spec, moment) for moment in ('after1', 'after2', 'after3')}
     steps = []
-    if spec.target == ALLY:
-        steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
-    steps += cast_steps(facts, spec.trigger_spell, cast_target, short_gap_ms, 1, fixtures)
+    learn_steps = [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
+    if spec.trigger_actor == STRIKER:
+        attempt = lambda gap_ms: icd_gate_striker_attempt(spec, gap_ms)
+    else:
+        class_file = armed_for(class_file, records, spec.trigger_spell)
+        facts = facts_of(records, spec.trigger_spell)
+        cast_target = spec.target if spec.target in (TARGET, ALLY) else None
+        fixtures = icd_gate_attempt_fixtures(spec)
+        attempt = lambda gap_ms: cast_steps(facts, spec.trigger_spell, cast_target, gap_ms, 1, fixtures)
+        learn_steps = [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] + learn_steps
+        if spec.target == ALLY:
+            steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
+    steps += attempt(short_gap_ms)
     steps.append(measurement(labels['after1'], CASTER, 'spell_cast_count', spell=spec.observe_spell))
-    steps += cast_steps(facts, spec.trigger_spell, cast_target, reopen_gap_ms, 1, fixtures)
+    steps += attempt(reopen_gap_ms)
     steps.append(measurement(labels['after2'], CASTER, 'spell_cast_count', spell=spec.observe_spell))
-    steps += cast_steps(facts, spec.trigger_spell, cast_target, DRAIN_MS, 1, fixtures)
+    steps += attempt(DRAIN_MS)
     steps.append(measurement(labels['after3'], CASTER, 'spell_cast_count', spell=spec.observe_spell))
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour internal cooldown gate',
-        'contract': f'Three casts of {spec.trigger_spell}, {short_gap_ms} ms then {reopen_gap_ms} ms apart (total '
-                    f'{short_gap_ms + reopen_gap_ms} ms, {spec.reopen_margin_ms} ms past the tooltip\'s own '
-                    f'{spec.internal_cooldown_ms} ms internal cooldown): {spec.observe_spell}\'s spell_cast_count '
-                    f'is read after each. It must not increase between the first and second cast (the gate is '
-                    f'still closed {short_gap_ms} ms after the first fire, inside the {spec.internal_cooldown_ms} '
-                    f'ms window) and must increase by exactly 1 between the second and third (the gate has '
-                    f'reopened by then).',
+        'contract': f'Three {"strikes" if spec.trigger_actor == STRIKER else "casts"} of {spec.trigger_spell}, '
+                    f'{short_gap_ms} ms then {reopen_gap_ms} ms apart (total {short_gap_ms + reopen_gap_ms} ms, '
+                    f'{spec.reopen_margin_ms} ms past the tooltip\'s own {spec.internal_cooldown_ms} ms internal '
+                    f'cooldown): {spec.observe_spell}\'s spell_cast_count is read after each. It must not increase '
+                    f'between the first and second cast (the gate is still closed {short_gap_ms} ms after the '
+                    f'first fire, inside the {spec.internal_cooldown_ms} ms window) and must increase by exactly 1 '
+                    f'between the second and third (the gate has reopened by then).',
         'players': [player_fixture(class_file)],
-        'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell},
-                                           {'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + steps}
-    if spec.target == TARGET:
+        'steps': base_steps(class_file) + learn_steps + steps}
+    if spec.trigger_actor == STRIKER:
+        scenario['creatures'] = [{'id': STRIKER, 'owner': CASTER, 'entry': spec.striker_entry,
+                                  'level': class_file['level'], 'health': STRIKER_HEALTH,
+                                  'distance': STRIKER_DISTANCE, 'reaction': 0, 'stationary': True}]
+    elif spec.target == TARGET:
         scenario['creatures'] = [creature_fixture(class_file)]
     if spec.target == ALLY:
         scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
@@ -1221,7 +1240,8 @@ def icd_gate_spec(entry: dict) -> IcdGateSpec:
     return IcdGateSpec(entry['spell'], entry['name'], entry['quote'], entry['trigger_spell'],
                       entry['observe_spell'], entry['internal_cooldown_ms'], entry.get('target', TARGET),
                       entry.get('caster_health_pct'), entry.get('restore_charges', False),
-                      entry.get('force_crit'), entry.get('reopen_margin_ms', ICD_GATE_REOPEN_MARGIN_MS))
+                      entry.get('force_crit'), entry.get('reopen_margin_ms', ICD_GATE_REOPEN_MARGIN_MS),
+                      entry.get('trigger_actor', CASTER), entry.get('striker_entry'))
 
 
 MECHANIC_DR_RESET_MS = 15000

@@ -1997,7 +1997,7 @@
     "spell": 705306,
     "clause": "When you take Physical damage you now strike back at enemies for $s1% of the damage dealt as Holy damage.",
     "labels": [
-      "705306 trigger_count -- unmodelled: proven integer-truncation artifact of the only available taken_hit striker fixture"
+      "705306 behaviour_internal_cooldown_gate"
     ],
     "kind": "claim"
   },
@@ -2012,7 +2012,9 @@
   {
     "spell": 705306,
     "clause": "Can only occur once per sec.",
-    "labels": [],
+    "labels": [
+      "705306 behaviour_internal_cooldown_gate"
+    ],
     "kind": "claim"
   },
   {
