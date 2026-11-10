@@ -208,7 +208,7 @@ class templar_casts : public AllSpellScript
         if (info->Id == 805417 && spell->GetScriptValue(806354))
             ReduceDebt(player, 100);
         if (info->Id == 560116 && player->HasAura(712678))
-            player->ModifySpellCooldown(info->Id, 5000);
+            player->ModifySpellCooldown(info->Id, -5000);
         if (Libram(info) && player->HasAura(706468))
             ReduceDebt(player, 70);
         if (Named(info, 801448))
