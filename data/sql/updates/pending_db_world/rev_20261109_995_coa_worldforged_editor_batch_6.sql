@@ -51,3 +51,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 -- #11774
 -- duplicate of the Casket Will pickup 6941339 (the one at the Ascension position): 6960034 hidden, not deleted
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6960034) AND `id` IN (90281);
+
+-- #11808
+-- pickup 6942017 (Owlbeast Talon) moved 9.5 yd across and 0.31 yd up to out of the rock it was buried in
+UPDATE `gameobject` SET `position_x` = 7650.2247, `position_y` = -4919.5979, `position_z` = 697.0921, `orientation` = 2.68263, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.973785, `rotation3` = 0.227472 WHERE `guid` = 6942017 AND `id` = 1345104;
