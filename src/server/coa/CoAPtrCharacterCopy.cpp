@@ -407,12 +407,14 @@ public:
         return true;
     }
 
-    static bool HandleCopy(ChatHandler* handler, std::string name)
+    static bool HandleCopy(ChatHandler* handler, Tail typedName)
     {
         Settings const settings = LoadSettings();
         if (RejectNotSource(handler, settings))
             return false;
 
+        std::string name(typedName);
+        name.erase(name.find_last_not_of(' ') + 1);
         WorldSession* session = handler->GetSession();
         uint32 const accountId = session->GetAccountId();
         std::optional<SourceCharacter> source;
