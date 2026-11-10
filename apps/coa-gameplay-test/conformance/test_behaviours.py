@@ -958,6 +958,30 @@ class AllyHealBreadthScenarioTests(unittest.TestCase):
                                 if step.get('action') == 'cast' and step.get('spell') == spec.trigger_spell)
         self.assertLess(learn_index, first_cast_index)
 
+    def test_active_aura_is_cast_on_the_caster_between_its_learn_and_the_after_phase(self):
+        spec = ally_heal_breadth_spec(libram_of_grace_entry())
+        scenario, _ = ally_heal_breadth_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        learn_index = next(index for index, step in enumerate(steps)
+                           if step.get('action') == 'learn' and step.get('spell') == spec.spell)
+        aura_casts = [index for index, step in enumerate(steps)
+                      if step.get('action') == 'cast' and step.get('spell') == spec.spell]
+        self.assertEqual(len(aura_casts), 1)
+        self.assertEqual(steps[aura_casts[0]]['target'], 'caster')
+        later_trigger_casts = [index for index, step in enumerate(steps)
+                               if index > aura_casts[0] and step.get('action') == 'cast'
+                               and step.get('spell') == spec.trigger_spell]
+        self.assertEqual(len(later_trigger_casts), spec.repeats)
+        self.assertLess(learn_index, aura_casts[0])
+        self.assertTrue(any(step.get('action') == 'reset_cooldown' and step.get('spell') == spec.spell
+                            for step in steps[learn_index:aura_casts[0]]))
+
+    def test_passive_is_learned_without_a_cast(self):
+        spec = ally_heal_breadth_spec(chakra_of_light_entry())
+        scenario, _ = ally_heal_breadth_scenario(CLASS_FILE, spec)
+        self.assertFalse(any(step.get('action') == 'cast' and step.get('spell') == spec.spell
+                             for step in scenario['steps']))
+
 
 class AuraSpreadScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_fixtures(self):

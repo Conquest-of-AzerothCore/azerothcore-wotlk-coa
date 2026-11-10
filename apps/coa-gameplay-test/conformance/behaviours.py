@@ -433,6 +433,17 @@ def ally_heal_breadth_scenario(class_file: dict, spec: AllyHealBreadthSpec) -> t
     def measure(moment: str) -> list[dict]:
         return [ally_heal_measurement(spec, index, moment) for index in range(spec.expected)]
 
+    def activation_steps() -> list[dict]:
+        aura = facts_of(records, spec.spell)
+        if aura.passive:
+            return []
+        steps = [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell}]
+        if aura.mana_cost > 0 and not aura.mana_cost_percentage and not aura.mana_cost_per_level:
+            steps.append({'action': 'set_power', 'actor': CASTER, 'power': aura.power_type, 'value': aura.mana_cost})
+        return steps + required_aura_steps(aura) + [
+            {'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': CASTER},
+            {'action': 'wait', 'ms': aura.cast_time_ms + CAST_MARGIN_MS}]
+
     position_steps = []
     for index in range(spec.expected):
         position_steps += relocate_steps(nearby_ally_id(index), spec.near_distance) + [
@@ -444,15 +455,16 @@ def ally_heal_breadth_scenario(class_file: dict, spec: AllyHealBreadthSpec) -> t
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour ally heal breadth',
         'contract': f'{spec.repeats} casts of {spec.trigger_spell} per phase, before without {spec.spell} known '
-                    f'and after with it, counting spell_heal_count of {spec.heal_spell} toward {spec.expected} '
-                    f'grouped, non-caster ally fixtures {spec.near_distance:g} yd from the caster: '
+                    f'and after with it learned and, unless passive, cast on the caster, counting spell_heal_count '
+                    f'of {spec.heal_spell} toward {spec.expected} grouped, non-caster ally fixtures {spec.near_distance:g} yd from the caster: '
                     f'{spec.radius_reason}',
         'players': [player_fixture(class_file)] + allies,
         'creatures': creatures,
         'steps': base_steps(class_file) + position_steps +
                  [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] +
                  cast_steps() + measure(BEFORE) +
-                 [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + cast_steps() + measure(AFTER)}
+                 [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + activation_steps() + cast_steps() +
+                 measure(AFTER)}
     label = f'{spec.spell} behaviour_count'
     model = {'kind': 'count', 'dummy_labels': list(zip(before_labels, after_labels)), 'expected': spec.expected,
              'quote': entry.quote}
