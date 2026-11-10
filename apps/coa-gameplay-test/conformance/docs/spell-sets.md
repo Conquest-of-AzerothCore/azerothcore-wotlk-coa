@@ -47,7 +47,8 @@ Righteous Tempest 805410 (`AscensionTemplarAbilities.cpp`'s `RighteousTempest()`
 23rd `extra_spells` entry, logged at Rank 7 570205 (level 60); it is not one of the 34 `ClassSpells` candidates above
 (round 3, 2026-11-08), so ADR 0016's citation mechanism applies to it independently of that candidate list. Its chain
 is the one its cast ranks trigger: `EffectTriggerSpell[0]` of 805409 is 805410 and of 807269 to 807274 is 570200 to
-570205, at levels 20 to 60.
+570205, at levels 20 to 60. No player learns these tick spells, so the server header carries no rows for them
+(removed 2026-11-10, owner ruling).
 
 Not confirmed, left out: Dodge 81, Block 107, Dual Wield 674, Auto Attack 6603, Resilient Constitution 552011,
 Divine Stand 807729, Detect Evil 562226, Gift of Fervor 572629, Shackle The Unrepentant 560963, Greater Gift of Fervor
