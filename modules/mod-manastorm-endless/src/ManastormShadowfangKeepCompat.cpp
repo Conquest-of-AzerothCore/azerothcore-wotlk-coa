@@ -28,7 +28,7 @@ namespace
             return;
 
         ManastormRun const* run = ManastormMgr::Instance().GetRunFor(player);
-        if (!run || run->GetMode() != ManastormMode::Solo || run->GetInstanceId() != map->GetInstanceId())
+        if (!run || run->GetInstanceId() != map->GetInstanceId())
             return;
 
         if (SmartAI* smartAI = CAST_AI(SmartAI, boss->AI()))

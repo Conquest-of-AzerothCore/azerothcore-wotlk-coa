@@ -46,17 +46,21 @@ enum Spells
     SPELL_TIGER_FORM                    = 24169,
 
     // Zealot Lor'Khan Spells
-    SPELL_SHIELD                        = 20545,
+    SPELL_SHIELD                        = 2118261,
     SPELL_BLOODLUST                     = 24185,
-    SPELL_GREATERHEAL                   = 24208,
+    SPELL_GREATERHEAL                   = 2118260,
     SPELL_DISARM                        = 6713,
 
     // Zealot Zath Spells
     SPELL_SWEEPINGSTRIKES               = 18765,
-    SPELL_SINISTERSTRIKE                = 15581,
+    SPELL_SINISTERSTRIKE                = 2118250,
     SPELL_GOUGE                         = 12540,
     SPELL_KICK                          = 15614,
-    SPELL_BLIND                         = 21060
+    SPELL_BLIND                         = 2118252,
+    SPELL_ZATH_DISARM                   = 2118255,
+
+    SPELL_HOLY_WARD                     = 2760204,
+    SPELL_FIERCE_BLOW                   = 975011
 };
 
 enum Actions
@@ -354,8 +358,8 @@ struct npc_zealot_lorkhan : public ScriptedAI
         _scheduler.Schedule(1s, [this](TaskContext context)
         {
             DoCastSelf(SPELL_SHIELD);
-            context.Repeat(1min);
-        }).Schedule(32s, [this](TaskContext context)
+            context.Repeat(10s);
+        }).Schedule(17s, [this](TaskContext context)
         {
             Unit* thekal = instance->GetCreature(DATA_THEKAL);
             Unit* zath = instance->GetCreature(DATA_ZATH);
@@ -376,11 +380,19 @@ struct npc_zealot_lorkhan : public ScriptedAI
                 DoCast(thekal, SPELL_GREATERHEAL);
             }
 
-            context.Repeat(15s, 20s);
+            context.Repeat(27s);
         }).Schedule(6s, [this](TaskContext context)
         {
             DoCastVictim(SPELL_DISARM);
             context.Repeat(15s, 25s);
+        }).Schedule(28s, [this](TaskContext context)
+        {
+            DoCastSelf(SPELL_HOLY_WARD);
+            context.Repeat(28s);
+        }).Schedule(7700ms, [this](TaskContext context)
+        {
+            DoCastVictim(SPELL_FIERCE_BLOW);
+            context.Repeat(6400ms, 9800ms);
         });
     }
 
@@ -458,10 +470,10 @@ struct npc_zealot_zath : public ScriptedAI
         {
             DoCastSelf(SPELL_BLOODLUST);
             context.Repeat(22s, 26s);
-        }).Schedule(8s, [this](TaskContext context)
+        }).Schedule(1s, [this](TaskContext context)
         {
             DoCastVictim(SPELL_SINISTERSTRIKE);
-            context.Repeat(8s, 16s);
+            context.Repeat(3300ms, 6300ms);
         }).Schedule(25s, [this](TaskContext context)
         {
             DoCastVictim(SPELL_GOUGE);
@@ -476,10 +488,22 @@ struct npc_zealot_zath : public ScriptedAI
         {
             DoCastVictim(SPELL_KICK);
             context.Repeat(15s, 25s);
-        }).Schedule(5s, [this](TaskContext context)
+        }).Schedule(10s, [this](TaskContext context)
         {
             DoCastVictim(SPELL_BLIND);
-            context.Repeat(10s, 20s);
+            context.Repeat(16s, 20500ms);
+        }).Schedule(14s, [this](TaskContext context)
+        {
+            DoCastVictim(SPELL_ZATH_DISARM);
+            context.Repeat(30s, 35500ms);
+        }).Schedule(28s, [this](TaskContext context)
+        {
+            DoCastSelf(SPELL_HOLY_WARD);
+            context.Repeat(28s, 80s);
+        }).Schedule(7400ms, [this](TaskContext context)
+        {
+            DoCastVictim(SPELL_FIERCE_BLOW);
+            context.Repeat(6500ms, 9900ms);
         });
     }
 

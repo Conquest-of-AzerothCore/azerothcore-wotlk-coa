@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "The Barrens Mageroyal and Briarthorn spot west of the Stonetalon road rests on the ground",
+  "contract": "GatherMate herb spot pool 20020589 (Mageroyal 12018230, Briarthorn 12018231) at (646.04, -1582.78) was imported at z 102.94, on top of a stone tree 11.3 yd above the terrain at 91.68, where it could not be gathered. Both rows now sit on the terrain under the tree's canopy, so open sky above the spot means it is back up in the tree. Issue #9927.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "p", "race": 2, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the stone tree's canopy hangs over the Mageroyal",
+      "actor": "p", "metric": "spawn_headroom", "guid": 12018230, "spawn_type": "gameobject", "max": 9.5
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the stone tree's canopy hangs over the Briarthorn",
+      "actor": "p", "metric": "spawn_headroom", "guid": 12018231, "spawn_type": "gameobject", "max": 9.5
+    },
+    {
+      "action": "assert", "label": "Mageroyal rests on the ground",
+      "actor": "p", "metric": "spawn_ground_gap", "guid": 12018230, "spawn_type": "gameobject", "min": -0.5, "max": 0.5
+    },
+    {
+      "action": "assert", "label": "Briarthorn rests on the ground",
+      "actor": "p", "metric": "spawn_ground_gap", "guid": 12018231, "spawn_type": "gameobject", "min": -0.5, "max": 0.5
+    },
+    {
+      "action": "assert", "label": "The spot is not inside a model",
+      "actor": "p", "metric": "spawn_clearance", "guid": 12018230, "spawn_type": "gameobject", "min": 0.5
+    }
+  ]
+}

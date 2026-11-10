@@ -1757,8 +1757,8 @@ public:
     [[nodiscard]] bool CanCastSpellWhileMoving(SpellInfo const* info) const;
     [[nodiscard]] bool IsActionPreventedByCasting() const;
     [[nodiscard]] bool CanCastDuringChannel(SpellInfo const* info) const;
-    [[nodiscard]] bool CanDefendDuringChannel() const;
-    [[nodiscard]] bool CanDefendDuringCast() const;
+    [[nodiscard]] bool CanDefendDuringChannel(Unit const* attacker = nullptr) const;
+    [[nodiscard]] bool CanDefendDuringCast(Unit const* attacker = nullptr) const;
 
     [[nodiscard]] virtual bool CanEnterWater() const = 0;
     [[nodiscard]] virtual bool CanSwim() const;
@@ -1924,6 +1924,7 @@ public:
     // Mount methods
     [[nodiscard]] bool IsMounted() const { return HasUnitFlag(UNIT_FLAG_MOUNT); }
     [[nodiscard]] uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID); }
+    [[nodiscard]] bool IsOnDivineSteed() const;
     void Mount(uint32 mount, uint32 vehicleId = 0, uint32 creatureEntry = 0);
     void Dismount();
     [[nodiscard]] bool IsInDisallowedMountForm() const;

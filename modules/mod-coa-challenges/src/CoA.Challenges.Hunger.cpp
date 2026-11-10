@@ -111,9 +111,24 @@ namespace CoAChallenges
         }
     }
 
+    // Only a seated food or drink aura counts (SpellInfo classifies it as
+    // SPELL_SPECIFIC_FOOD/DRINK). A bare regen aura type is not enough: class
+    // buffs, totems and procs share MOD_REGEN / MOD_POWER_REGEN with food and
+    // drink and would otherwise grant hunger/thirst immunity.
+    static bool HasConsumableAura(Player const* player, SpellSpecificType kind)
+    {
+        for (auto const& [spellId, application] : player->GetAppliedAuras())
+        {
+            SpellSpecificType const specific = application->GetBase()->GetSpellInfo()->GetSpellSpecific();
+            if (specific == kind || specific == SPELL_SPECIFIC_FOOD_AND_DRINK)
+                return true;
+        }
+        return false;
+    }
+
     // Per-player ticker (map thread). The counters are authoritative in
     // memory and flushed to the DB periodically / on logout. Rise: thirst
-    // +1/10s, hunger +1/16s. Fall: while the eat/drink regen aura is present,
+    // +1/10s, hunger +1/16s. Fall: while a food/drink aura is present,
     // -FoodRestore / -DrinkRestore every FoodTickMs / DrinkTickMs (default
     // 1 point each; drinking ticks ~3x faster than eating).
     // Tracked set is maintained on activate/stop/fail/login/logout.
@@ -134,8 +149,8 @@ namespace CoAChallenges
         uint32 maxV = sConfigMgr->GetOption<uint32>("CoAChallenges.HungerMax", 100);
         uint32 foodRestore = sConfigMgr->GetOption<uint32>("CoAChallenges.FoodRestore", 1);
         uint32 drinkRestore = sConfigMgr->GetOption<uint32>("CoAChallenges.DrinkRestore", 1);
-        bool eating = player->HasAuraType(SPELL_AURA_MOD_REGEN);
-        bool drinking = player->HasAuraType(SPELL_AURA_MOD_POWER_REGEN);
+        bool eating = HasConsumableAura(player, SPELL_SPECIFIC_FOOD);
+        bool drinking = HasConsumableAura(player, SPELL_SPECIFIC_DRINK);
 
         struct Changed { uint32 challengeID; int32 hunger; int32 thirst; };
         std::vector<Changed> changed;

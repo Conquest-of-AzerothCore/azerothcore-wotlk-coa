@@ -184,6 +184,9 @@ constexpr uint32 CrystalBreakMs = 3000;
 constexpr uint32 RingLifeMs = 6000;
 constexpr uint32 SoakLifeMs = 4500;
 constexpr uint32 SoakDelayMs = 4000;
+constexpr float VoidflareReach = 18.0f;
+constexpr float SpectralStrikeWidth = 2.5f;
+constexpr float SpectralStrikeLength = 53.0f;
 constexpr float SoakRadius = 4.2f;
 constexpr float SoakKnockSpeed = 2.0f;
 constexpr float SoakKnockHeight = 18.0f;
@@ -2013,6 +2016,50 @@ class spell_coa_vaults_damage : public SpellScript
     }
 };
 
+class spell_coa_vaults_voidflare : public SpellScript
+{
+    PrepareSpellScript(spell_coa_vaults_voidflare);
+
+    void FilterReach(std::list<WorldObject*>& targets)
+    {
+        Unit* caster = GetCaster();
+        targets.remove_if([caster](WorldObject* target)
+        {
+            Unit const* unit = target->ToUnit();
+            return caster->GetExactDist2d(target) > VoidflareReach + (unit ? unit->GetBoundaryRadius() : 0.0f);
+        });
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_coa_vaults_voidflare::FilterReach,
+            EFFECT_ALL, TARGET_UNIT_CONE_ENEMY_24);
+    }
+};
+
+class spell_coa_vaults_spectral_strike : public SpellScript
+{
+    PrepareSpellScript(spell_coa_vaults_spectral_strike);
+
+    void FilterLine(std::list<WorldObject*>& targets)
+    {
+        Unit* caster = GetCaster();
+        targets.remove_if([caster](WorldObject* target)
+        {
+            Unit const* unit = target->ToUnit();
+            float const size = unit ? unit->GetBoundaryRadius() : 0.0f;
+            return !caster->HasInLine(target, size, SpectralStrikeWidth)
+                || caster->GetExactDist2d(target) > SpectralStrikeLength + size;
+        });
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_coa_vaults_spectral_strike::FilterLine,
+            EFFECT_ALL, TARGET_UNIT_CONE_ENEMY_24);
+    }
+};
+
 class spell_coa_vaults_damage_aura : public AuraScript
 {
     PrepareAuraScript(spell_coa_vaults_damage_aura);
@@ -2158,6 +2205,8 @@ void AddSC_CoAVaults()
     RegisterCreatureAI(npc_coa_vaults_tentacle_vehicle);
     RegisterCreatureAI(npc_coa_vaults_trash);
     RegisterSpellAndAuraScriptPair(spell_coa_vaults_damage, spell_coa_vaults_damage_aura);
+    RegisterSpellScript(spell_coa_vaults_voidflare);
+    RegisterSpellScript(spell_coa_vaults_spectral_strike);
     RegisterSpellScript(spell_coa_vaults_void_wrath);
     RegisterSpellScript(spell_coa_vaults_void_wrath_tick);
     RegisterSpellScript(spell_coa_custom_dungeon_fierce_blow);

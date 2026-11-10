@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "A specialization slot keeps its purchased talent button across a round trip (#9808)",
+  "contract": [
+    "#9808 reports that switching between specialization slots silently drops action bar buttons from the",
+    "slot being switched to, and that buttons placed on a slot after switching into it never reach that",
+    "slot's stored record. Reproduces with two Incineration (spec 38) talents (CharacterAdvancement.dbc",
+    "ClassType 26 Tab 62): entry 5187 rank 1 grants 520485 on slot I, entry 6985 rank 1 grants 800791 on",
+    "slot II. Buy each talent and bind it to button 2 on its own slot, then round-trip slot I -> slot II ->",
+    "slot I -> slot II and assert each slot's bound button survives every switch away and back, including",
+    "the button placed on slot II immediately after switching into it for the first time.",
+    "AscensionCompat.cpp's SwitchSlot snapshots the outgoing slot's live bar (LiveSlot) before touching talents",
+    "and stores it (StoreSlot) after the target slot's own entries are already re-applied (ApplyKnownEntriesUpload",
+    "completes synchronously, including the SetTalentRank diff that regrants the incoming slot's talents,",
+    "before addActionButton validates HasSpell on the incoming bar), so a clean round trip is expected to",
+    "keep both buttons and both talents."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "pyromancer", "race": 1, "class": 24, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 5000 },
+    { "action": "specialization", "label": "Choose Incineration for slot I", "actor": "pyromancer", "id": 38 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "advancement_rank", "label": "Buy entry 5187 -> 520485 on slot I", "actor": "pyromancer", "entry": 5187, "rank": 1 },
+    {
+      "action": "assert", "label": "SETUP: 520485 is known on slot I", "actor": "pyromancer",
+      "metric": "knows_spell", "spell": 520485, "equals": 1
+    },
+    { "action": "set_action_button", "actor": "pyromancer", "button": 2, "spell": 520485 },
+    {
+      "action": "assert", "label": "SETUP: slot I's bar holds 520485", "actor": "pyromancer",
+      "metric": "action_button", "button": 2, "equals": 520485
+    },
+    { "action": "learn", "label": "Unlock specialization slot II", "actor": "pyromancer", "spell": 979994 },
+    { "action": "cast", "label": "Switch to slot II (first time, blank)", "actor": "pyromancer", "spell": 979994 },
+    { "action": "wait", "ms": 6000 },
+    {
+      "action": "assert", "label": "slot II is active", "actor": "pyromancer",
+      "metric": "player_setting", "source": "core.ascension_slot.active", "index": 0, "equals": 1
+    },
+    { "action": "specialization", "label": "Choose Incineration for slot II too", "actor": "pyromancer", "id": 38 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "advancement_rank", "label": "Buy entry 6985 -> 800791 on slot II", "actor": "pyromancer", "entry": 6985, "rank": 1 },
+    {
+      "action": "assert", "label": "SETUP: 800791 is known on slot II", "actor": "pyromancer",
+      "metric": "knows_spell", "spell": 800791, "equals": 1
+    },
+    {
+      "action": "set_action_button", "label": "Bind 800791 right after switching into the newly opened slot II",
+      "actor": "pyromancer", "button": 2, "spell": 800791
+    },
+    {
+      "action": "assert", "label": "SETUP: slot II's bar holds 800791", "actor": "pyromancer",
+      "metric": "action_button", "button": 2, "equals": 800791
+    },
+    { "action": "cast", "label": "Switch back to slot I", "actor": "pyromancer", "spell": 979993 },
+    { "action": "wait", "ms": 6000 },
+    {
+      "action": "assert", "label": "slot I is active again", "actor": "pyromancer",
+      "metric": "player_setting", "source": "core.ascension_slot.active", "index": 0, "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: slot I's own button (520485) survives the round trip", "actor": "pyromancer",
+      "metric": "action_button", "button": 2, "equals": 520485
+    },
+    {
+      "action": "assert", "label": "520485 is known again on slot I", "actor": "pyromancer",
+      "metric": "knows_spell", "spell": 520485, "equals": 1
+    },
+    { "action": "cast", "label": "Switch to slot II a second time", "actor": "pyromancer", "spell": 979994 },
+    { "action": "wait", "ms": 6000 },
+    {
+      "action": "assert", "label": "slot II is active again", "actor": "pyromancer",
+      "metric": "player_setting", "source": "core.ascension_slot.active", "index": 0, "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the button placed right after the first switch into slot II (800791) survived leaving and returning", "actor": "pyromancer",
+      "metric": "action_button", "button": 2, "equals": 800791
+    },
+    {
+      "action": "assert", "label": "800791 is still known on the second visit to slot II", "actor": "pyromancer",
+      "metric": "knows_spell", "spell": 800791, "equals": 1
+    }
+  ]
+}

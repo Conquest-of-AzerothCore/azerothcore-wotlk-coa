@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "name": "Hero: Starburst Barrage gains a stack from Arcane Barrage (#10722)",
+  "contract": "Starburst Barrage 284222 reads 'Casting Starfire and Arcane Barrage reduce channel time of your next Starburst', stacking up to 3 times. Arcane Barrage 44425 is a Hero ability (CharacterAdvancement 3603/40857, class type 5 = class 10). A level 60 Hero with the passive casts Arcane Barrage at a dummy: the Barrage aura 284220 and the Mystic Enchant rank aura 979138 must each gain one stack. Issue #10722.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "h",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "h",
+      "entry": 36,
+      "level": 60,
+      "health": 500000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "h",
+      "spell": 284222
+    },
+    {
+      "action": "learn",
+      "actor": "h",
+      "spell": 979137
+    },
+    {
+      "action": "learn",
+      "actor": "h",
+      "spell": 44425
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Starburst Barrage passive is active",
+      "actor": "h",
+      "metric": "aura",
+      "spell": 284222,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "h",
+      "spell": 44425,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "Arcane Barrage hits the dummy",
+      "actor": "h",
+      "metric": "spell_damage_count",
+      "spell": 44425,
+      "target": "d",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Starburst Barrage gains a stack from Arcane Barrage",
+      "actor": "h",
+      "metric": "aura_stacks",
+      "spell": 284220,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Mystic Enchant rank gains a stack from Arcane Barrage",
+      "actor": "h",
+      "metric": "aura_stacks",
+      "spell": 979138,
+      "equals": 1,
+      "within_ms": 1000
+    }
+  ]
+}

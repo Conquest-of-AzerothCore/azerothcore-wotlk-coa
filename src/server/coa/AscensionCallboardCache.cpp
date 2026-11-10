@@ -55,8 +55,8 @@ struct StagedCache
 std::array<StagedCache, 9> const CallboardTiers = {{
     { RaidRelease::StageHeroicDungeons, 1615001 },
     { RaidRelease::StageMythicDungeons, 1615002 },
-    { RaidRelease::StageMoltenCore, 1615004 },
     { RaidRelease::StageZulGurub, 1615003 },
+    { RaidRelease::StageMoltenCore, 1615004 },
     { RaidRelease::StageOnyxiasLair, 1615005 },
     { RaidRelease::StageBlackwingLair, 1615006 },
     { RaidRelease::StageAhnQiraj, 1615007 },
@@ -230,7 +230,8 @@ bool PickReward(Player* player, CallboardPool const& pool, uint32 averageItemLev
     for (AscensionCacheRewards::Reward const& reward : pool)
     {
         ItemTemplate const* proto = sObjectMgr->GetItemTemplate(reward.itemId);
-        if (proto && player->CanUseItem(proto) == EQUIP_ERR_OK)
+        if (proto && player->CanUseItem(proto) == EQUIP_ERR_OK &&
+            (!proto->GetSkill() || player->GetSkillValue(proto->GetSkill())))
             usable.push_back(&reward);
     }
     usable = AscensionSpecLoot::PreferSpecialization(player, usable,
@@ -503,8 +504,12 @@ public:
 
     bool OnPlayerBeforeOpenItem(Player* player, Item* item) override
     {
-        if (!item || !OpenCallboardCache(player, item))
+        if (!item)
             return true;
+        ObjectGuid const cache = item->GetGUID();
+        if (!OpenCallboardCache(player, item))
+            return true;
+        player->SendLootRelease(cache);
         return false;
     }
 };

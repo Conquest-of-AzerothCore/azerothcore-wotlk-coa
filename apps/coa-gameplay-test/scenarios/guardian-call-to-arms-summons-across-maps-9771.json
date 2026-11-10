@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "name": "Guardian Call To Arms summons a party member on another map (#9771, #10164)",
+  "contract": [
+    "Call To Arms 804723 is SPELL_EFFECT_SUMMON_PLAYER on the caster's selected party member. Spell::CheckEffectTarget",
+    "drops a target the caster cannot see, and IsWithinLOSInMap is false across maps, so without",
+    "SPELL_ATTR2_IGNORE_LINE_OF_SIGHT (set on Ritual of Summoning 7720) the cast finishes but EffectSummonPlayer",
+    "never sends SMSG_SUMMON_REQUEST. Expected: an ally in Durotar receives the request, accepts it with",
+    "CMSG_SUMMON_RESPONSE and arrives next to the Guardian in Elwynn Forest."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "g", "race": 1, "class": 18, "level": 60 },
+    { "id": "ally", "race": 1, "class": 12, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 3000 },
+    { "action": "teleport", "actor": "g", "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+    { "action": "teleport", "actor": "ally", "map": 1, "x": 340.36, "y": -4686.29, "z": 16.4581, "o": 0 },
+    {
+      "action": "assert", "label": "The ally is in Kalimdor",
+      "actor": "ally", "metric": "map_id", "equals": 1, "within_ms": 5000
+    },
+    { "action": "group", "actor": "g", "target": "ally" },
+    { "action": "learn", "actor": "g", "spell": 804723 },
+    {
+      "action": "client_packet", "label": "Select the ally (CMSG_SET_SELECTION)",
+      "actor": "g", "opcode": 317, "consumed": false, "fields": [ { "actor_guid": "ally" } ]
+    },
+    { "action": "cast", "actor": "g", "spell": 804723 },
+    {
+      "action": "assert", "label": "The cast does not fail",
+      "actor": "g", "metric": "cast_failure", "spell": 804723, "equals": 0, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The cast completes",
+      "actor": "g", "metric": "spell_cast_count", "spell": 804723, "min": 1, "within_ms": 7000
+    },
+    {
+      "action": "client_packet", "label": "The ally accepts the summon (CMSG_SUMMON_RESPONSE)",
+      "actor": "ally", "opcode": 684, "consumed": false, "fields": [ { "actor_guid": "g" }, { "u8": 1 } ]
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the ally is moved to the Guardian's map",
+      "actor": "ally", "metric": "map_id", "equals": 0, "within_ms": 10000
+    },
+    {
+      "action": "assert", "label": "The ally arrives at the Guardian",
+      "actor": "ally", "metric": "distance", "target": "g", "max": 5, "within_ms": 5000
+    }
+  ]
+}

@@ -381,7 +381,12 @@ runs such a case exclusively because the setting is process-global. Optional
 `vanity_ownership: {"unlock_all": false, "starter_items": [98457]}` replaces `CoA.UnlockAllVanity` and
 `CoA.StarterVanityItems` for that case in the same way, and is likewise run exclusively. Optional
 `two_side: {"trade": true, "mail": false}` sets `AllowTwoSide.Trade` and `AllowTwoSide.Interaction.Mail` for that
-case (an omitted field is disabled) and is likewise run exclusively.
+case (an omitted field is disabled) and is likewise run exclusively. Its optional `group` sets
+`AllowTwoSide.Interaction.Group`, which keeps the configured value when omitted. Optional
+`ptr_character_copy: true` makes this realm both the source and the target of `.ptr copy` for that case, with no
+cooldown, and is likewise run exclusively. Queued copies load and report within a 5-second poll, so wait after
+the command before asserting. With it, `ptr_character_copy_interruption: "before_load"` or `"after_load"` stops
+the first claimed copy at that point, as a realm stopping mid-load would; the next poll recovers the request.
 The [talent and item scenario](scenarios/talent-and-items.json) exercises talent learning, passive removal,
 equipping a shirt and consuming a healing potion. It does not measure the talent's damage coefficient.
 The [Shadowblast scenario](scenarios/shadowblast-shadow-rage.json) reproduces a Shadow Rage pet-targeting crash
@@ -433,6 +438,8 @@ checks through separate socketless character sessions and does not test simultan
 `client_packet` fields may use `item_guid` with a carried item entry, `item_bag` or `item_slot` with a carried
 item entry (its u8 bag and slot), or `gameobject_guid` with an entry of
 exactly one owned fixture gameobject. Both write the native raw GUID and require the referenced object to exist.
+`mail_id` and `mail_item_guid` take an item entry and write the u32 id of the first held mail carrying it and that
+item's low GUID, as `CMSG_MAIL_TAKE_ITEM` sends them.
 Optional `location` supplies `map`, `x`, `y`, `z`, `o` for a fixture
 teleport. `location.ignore_access` optionally bypasses entry requirements for a fixture (for example a solo
 raid test), without enabling GM mode during combat. Actors share their lane's phase (`1 << 30` with one lane) to
@@ -444,7 +451,9 @@ in world steps of up to 25 ms, so keep timing assertions robust to one step.
 Without `name`, players are `Harness<a..h>` with one lane and generated 10-letter names with several;
 `Harness<a..h>` in `console` and `command` text is rewritten to match, so refer to players by actor id elsewhere.
 A scenario that depends on process-global state, such as the Who list, belongs in `clock_policy.json`
-([exclusive cases](../../docs/coa/verification.md#exclusive-cases)). A `set_phase` mask that includes the normal
+([exclusive cases](../../docs/coa/verification.md#exclusive-cases)). Players start in their lane's isolation phase (bit 30 for lane 0, bits 16 and up for the others), not in
+phase mask 1: a fixture spawned with `phaseMask` 1 stays invisible to them until a `set_phase` step moves them
+into it. A `set_phase` mask that includes the normal
 world phase (mask 1) automatically runs exclusively, including in an exploratory scenario. Phases do not
 separate creature text with
 area, zone or map range, which `system_messages` counts.
@@ -476,14 +485,14 @@ assert stable maximums and final levels when testing damage coefficients.
 | `learn`, `unlearn` | `actor`, `spell`: configure learned spells/passives through player APIs. `unlearn` accepts `all_specs: true` to remove the fixture grant from every specialization before testing a lower weapon rank. |
 | `money` | `actor`, `copper`: fixture purse, so a priced trainer row can be bought on a character that starts with none. |
 | `set_player_setting` | `actor`, `source`, `index`, `value`: fixture a stored character setting, such as a value saved by an earlier build, before a `relog` reads it. |
-| `set_aura` | `actor`, `spell`, `stacks`: fixture aura state, within its stack limit; zero removes it. Optional `pet: true` selects the actor's current pet. |
+| `set_aura` | `actor`, `spell`, `stacks`: fixture aura state, within its stack limit; zero removes it. Optional `pet: true` selects the actor's current pet, `owned_entry` a creature the actor owns and `target` any scenario actor. |
 | `cancel_aura` | Player `actor`, `spell`: native `CMSG_CANCEL_AURA` handler; assert the resulting aura state. |
 | `cancel_mount` | Player `actor`: native `CMSG_CANCEL_MOUNT_AURA` handler, the dismount a client sends with a mounted cast. |
 | `talent` | `actor`, `talent`, zero-based `rank`: learn with normal point/prerequisite checks; optional `command` skips the point and tier checks like the GM command. |
 | `reset_talents` | `actor`: reset active talents through normal removal, without a trainer fee. |
 | `specialization` | Player `actor`, `ChrSpecs.dbc` `id`: the client's specialization switch. Uploads the class tree plus the specialization's identity and signature entries as native `0x0727`, as `SwitchActiveChrSpec` and `ApplyPendingBuild` do, then waits up to 2 s for the server to activate it. Optional `entries` lists further CharacterAdvancement entries the client sends at rank 1 in the same upload, such as automatic entries chained on the new identity entry. With `refused: true` it instead waits for the upload's `0x072C` result and requires the specialization to stay inactive. |
 | `advancement_rank` | Player `actor`, CharacterAdvancement `entry`, `rank` (0 removes): uploads the known entries with that rank as native `0x0727`, then waits up to 2 s for the server to apply it. With `refused: true` it instead waits for the upload's `0x072C` result and requires the rank to stay unapplied. |
-| `client_packet` | Player `actor`, `opcode`, optional `fields` (a list of one-key objects: `u8`, `u32`, `u64`, `string` as a C string, `buyback_guid` slot, `actor_guid` player or creature id as a raw GUID, `packed_actor_guid` player or creature id as a packed GUID, `pet_guid` player id as the current pet raw GUID, `duel_arbiter` player id as the pending duel flag raw GUID, `invited_battleground_type` player id as the `u32` type of the battleground or arena it is invited to, as the client echoes it in `CMSG_BATTLEFIELD_PORT`, `stabled_pet` stable slot 0-3 as its pet number), `consumed` (default true) and `early` (default true): sends the request through the early packet hook as the client would, and a request that hook passes on reaches its logged-in core opcode handler, as the session would deliver it; `early: false` sends it through the packet hook the session update runs instead, as for `CMSG_SET_ACTIVE_MOVER` after the client enters the world. |
+| `client_packet` | Player `actor`, `opcode`, optional `fields` (a list of one-key objects: `u8`, `u32`, `u64`, `string` as a C string, `buyback_guid` slot, `actor_guid` player or creature id as a raw GUID, `nearest_creature_guid` creature entry as the raw GUID of its nearest creature within 100 yards in the actor's phase, `packed_actor_guid` player or creature id as a packed GUID, `pet_guid` player id as the current pet raw GUID, `duel_arbiter` player id as the pending duel flag raw GUID, `invited_battleground_type` player id as the `u32` type of the battleground or arena it is invited to, as the client echoes it in `CMSG_BATTLEFIELD_PORT`, `stabled_pet` stable slot 0-3 as its pet number), `consumed` (default true) and `early` (default true): sends the request through the early packet hook as the client would, and a request that hook passes on reaches its logged-in core opcode handler, as the session would deliver it; `early: false` sends it through the packet hook the session update runs instead, as for `CMSG_SET_ACTIVE_MOVER` after the client enters the world. |
 | `apply_appearances` | Player `actor`, `selection` mapping category ids to appearance ids: sends the complete array as native `CMSG_APPLY_APPEARANCES` (`0x0697`); unlisted categories are 0. The next step sees the result. |
 | `cast` | `actor`, `spell`, optional `target` (self by default), `target_item` (an owned item entry) or `target_gameobject` (the nearest gameobject of that entry within 20 yards): normal session cast handler. |
 | `attack` | `actor`, `target`: native melee attack request; optional `pet: true` sends the pet's attack command. Verify combat or damage with assertions. |
@@ -494,7 +503,9 @@ assert stable maximums and final levels when testing damage coefficients.
 | `group` | `actor`, `target`, optional `loot_method` (0-4) and `master_looter` (a player id, read with `loot_method`): fixture party; creates the actor's group if needed, adds an ungrouped player and sets the loot method and master looter. |
 | `loot_roll` | Player `actor`, `item`, `vote` (0 pass, 1 need, 2 greed, 3 disenchant): native `CMSG_LOOT_ROLL` on the group's pending roll for that item (or a level-scaled copy) in which the actor takes part. |
 | `master_loot_give` | Player `actor` as master looter, `item`, `target` (a player id): native `CMSG_LOOT_MASTER_GIVE` of that item from the actor's open loot to the target. |
-| `lfg_dungeon` | `actor`, LFGDungeons.dbc `dungeon`: fixture Dungeon Finder group; converts the actor's ordinary group to an LFG group assigned to that dungeon, as a completed proposal does. |
+| `send_mail` | Player `actor`, `target` (another player id): the actor mails the target a plain player letter, committed to the database at once. |
+| `add_at_login_flag` | Player `actor`, `AtLoginFlags` value `id`: adds that flag to the player and to the stored character at once, as a pending customize or reset would. |
+| `lfg_dungeon` | `actor`, LFGDungeons.dbc `dungeon`: fixture Dungeon Finder group; converts the actor's ordinary group to an LFG group assigned to that dungeon, as a completed proposal does, and re-sends each member's scaled creature views. Conversion sets Need Before Greed; optional `loot_method` (0-4) sets another afterwards. |
 | `lfg_teleport` | Player `actor`, optional boolean `out` (default false): native `CMSG_LFG_TELEPORT` request into or out of the group's dungeon. |
 | `lfg_join` | Player `actor`, LFGDungeons.dbc `dungeons` list, `roles` mask (1 leader, 2 tank, 4 healer, 8 damage): native `CMSG_LFG_JOIN` queue request, as the Dungeon Finder button sends it. A group leader starts the role check. |
 | `lfg_set_roles` | Player `actor` in a group, `roles` mask: native `CMSG_LFG_SET_ROLES` answer to the group role check. |
@@ -503,15 +514,16 @@ assert stable maximums and final levels when testing damage coefficients.
 | `encounter_credit` | Player `actor` in a dungeon, creature `entry`: credits that dungeon boss kill to the actor's map through the native encounter update, as a boss death does, including the Dungeon Finder completion it triggers. |
 | `encounter_start` | Player `actor`, `boss_entry`, optional `radius` (yards, default 100, maximum 200): finds the nearest living creature of that entry in the actor's phase and starts recording its [encounter timeline](#encounter-timelines). It fails at once with `encounter_start found no creature <entry> within <radius> yards` when none is in range. A scenario has at most one; the case runs exclusively because the recorder is process-global. |
 | `leave_group` | Player `actor`: native `CMSG_GROUP_DISBAND` leave request; fails if the player stays grouped. |
-| `die` | Player `actor`: fixture death through self damage equal to current health; the body stays unreleased. |
+| `die` | Player `actor`: fixture death through self damage equal to current health; the body stays unreleased. `pet: true` kills the actor's current pet the same way. |
 | `release_spirit` | Player `actor`: native `CMSG_REPOP_REQUEST` for an unreleased body; fails if the player is neither a ghost nor alive afterwards. |
 | `cast_charm` | Same fields: native pet-cast handler, with the charmed unit as the default target. `pet: true` casts from the player's pet instead. |
 | `gossip_hello` | `actor`, optional `target`: native gossip handler; defaults to the actor's summoned companion. |
 | `banker_activate` | `actor`, optional `target`, or optional `owner` + `entry`: native banker click (`CMSG_BANKER_ACTIVATE`); defaults to the actor's summoned companion, and `owner` aims it at a companion another actor summoned, walking up to it first. |
 | `personal_bank_open` | `actor`, bank object `entry`: native Personal Bank open (`CMSG_GUILD_BANKER_ACTIVATE`) on the nearest vault of that entry within 20 yards. |
 | `personal_bank_swap` | `actor`, vault `entry`, `direction` `deposit` or `withdraw`, optional bank `slot` (default 0) and split `count` (0 moves the stack); `deposit` needs `item`, the first carried item of that entry. Withdrawals optionally take backpack `inventory_slot` (23-38), otherwise use automatic storage. Sends native `CMSG_GUILD_BANK_SWAP_ITEMS` into or out of the open Personal Bank. |
-| `binder_activate` | `actor`, innkeeper `target`: native "make this inn your home" confirmation (`CMSG_BINDER_ACTIVATE`), walking up to the innkeeper first. |
+| `binder_activate` | `actor`, innkeeper `target` (or `owner` + `entry` for a creature that actor has out): native "make this inn your home" confirmation (`CMSG_BINDER_ACTIVATE`), walking up to the innkeeper first. |
 | `destroy_item` | `actor`, `item`: native `CMSG_DESTROYITEM` of the first carried item of that entry, as the player deleting it. |
+| `system_mail` | `actor`, `item`, `kind` `postmaster` (a mail from the Postmaster creature, as `Player::SendItemRetrievalMail` sends), `reward` (a Recruit-A-Friend reward mail: no sender, GM stationery and the reward subject) or `server` (the same sender-less GM-stationery mail with another subject, as boss loot and item recovery mail): post one such mail carrying one `item` to the actor. |
 | `area_trigger` | `actor`, `id`: native area-trigger packet, as the client sends on walking into one; inn triggers are what set the rested flag. |
 | `gossip_select` | `actor`, zero-based `option`: select from the current menu through the session handler. |
 | `who` | `actor`, optional name-filter `target`, `class_mask`, `race_mask`: submit a native Who query. |
@@ -521,6 +533,8 @@ assert stable maximums and final levels when testing damage coefficients.
 | `use_item` | `actor`, `item`, `spell`, optional `target`, `target_item` (an owned item entry, sent as the item target instead of a unit) and `destination`: normal item-use handler. |
 | `use_nearby_gameobject` | `actor`, `entry`, optional `owner` (a player id): native use request for the single gameobject of that entry within 20 yards in the actor's phase; `owner` narrows the choice to the object that player owns, so one of several nearby objects can be clicked. |
 | `spell_click_nearby` | `actor`, `entry`: native `CMSG_SPELLCLICK` on the nearest living creature of that entry within 20 yards, as the client sends on right-clicking a spell-click creature. |
+| `select` | `actor`, `target` (any actor id): native `CMSG_SET_SELECTION` on that unit, as the client sends on clicking it; meeting stones summon the selected party member. |
+| `minion_kill` | Player `actor`, `minion` (creature entry), `target` (creature fixture or `summon` id): the actor's living owned creature of that entry deals the target's whole health in direct damage through `Unit::DealDamage`, so the kill credits the minion as the killer. |
 | `select_nearby` | `actor`, `entry`, optional `radius` (default 40): native `CMSG_SET_SELECTION` on the nearest living creature of that entry, as the client sends on clicking it. GM commands that read `ChatHandler::getSelectedCreature()` (`.cast target`, `.cast back`, …) need this first; `attack_nearby` only sends `CMSG_ATTACKSWING` and never selects. |
 | `use_gameobject` | `actor`, `entry`: native use request for the actor's single nearby owned gameobject. |
 | `voidportal` | Player `actor`, `op` `force` with `group` and `spawn`, or `op` `roll` with `success`: put the one realm-wide Void Portal on that configured point as a point rotation does, or replace the next proximity roll; the manager is process-global, so the case runs exclusively. |
@@ -530,8 +544,10 @@ assert stable maximums and final levels when testing damage coefficients.
 | `mapless_loot_hook` | Player `actor`, `store` (`mail`/`gameobject`): test registered loot hooks without a map. |
 | `set_skill` | `actor`, `skill`, `value`, `maximum`: fixture a native profession skill. |
 | `gather_skill` | `actor`, gathering `skill`, `required`: native gathering XP and skill-up attempt. |
+| `give_xp` | `actor`, `amount` (1..2^31-1): grant experience through native `Player::GiveXP` without a victim, so XP hooks and level gates apply. |
 | `set_xp_enabled` | `actor`, boolean `enabled`: fixture the native XP-lock flag. |
 | `set_level` | `actor`, `value` (1..80): fixture level change through native `GiveLevel`, including level-change hooks. |
+| `set_reputation` | `actor`, `id`, `value` (-42000..42999): fixture absolute standing with faction `id` through native `ReputationMgr::SetOneFactionReputation`, without spillover; rank hooks and achievement criteria still run. |
 | `set_health`, `set_power` | `actor`, `value` within native maximums; `set_power` accepts `power` (default 0). Optional `pet: true` selects the player's current pet. |
 | `set_health_pct` | Player `actor`, `pct` (1..99) and exactly one of `entry` (nearest living creature within 100 yards) or `target` (creature fixture id): deals the missing health as direct damage from the actor through `Unit::DealDamage`, so damage-driven phase hooks fire. Refuses to raise health. Use `attack_nearby` with `kill: true` for an early exit through the normal death path. |
 | `reset_cooldown` | Player `actor`, `spell`: reset that native spell cooldown between independent cases. |
@@ -566,12 +582,13 @@ a previously named snapshot of the same metric; it is available on snapshots and
 `ratio_to` then divides by a nonzero snapshot, including a different numeric metric such as healing/damage.
 `cast` accepts an optional `destination` with `x`, `y`, `z` to send an explicit ground target.
 `target_pet: true` in place of `target` sends a player's cast at their current pet.
+`target_owned_entry` in place of `target` sends it at the player's living creature of that entry.
 
 Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`, `map_id`, `combat`, `casting`,
 `level`, `quest_objective_count` (needs `quest`, optional `index`), `knows_spell`, `has_talent`, `talent_points`, `active_talent_spec`,
-`cooldown_ms`, `item_count`, `carried_item_count`, `bank_bag_slots`, `aura`, `aura_stacks`, `aura_charges`,
+`cooldown_ms`, `spell_cooldown_packet_ms`, `item_loot_releases`, `item_count`, `carried_item_count`, `bank_bag_slots`, `guild_bank_tabs`, `aura`, `aura_stacks`, `aura_charges`,
 `aura_duration_ms`, `aura_amount`, `pet_entry`, `pet_aura_stacks`, `owned_creature_count`, `owned_creature_spacing`,
-`charm_entry`, `charm_aura_stacks`, `controls_self`, `private_instance`, `dynamic_object`,
+`charm_entry`, `charm_distance`, `charm_aura_stacks`, `owned_creature_sent_faction`, `controls_self`, `private_instance`, `dynamic_object`,
 `dynamic_object_duration_ms`, `dynamic_object_height`, `distance`, `spell_proc_count`, `spell_proc_chance`,
 `aura_proc_rate`, `spell_cast_count`, `temporary_spell_replacement`,
 `carried_aura_count` (how many of the `spells` list the unit carries, optionally only from `caster`; for an
@@ -586,7 +603,13 @@ effect that picks one of several auras at random),
 number of mails the player holds and `mail_item_count` the items inside them, which is how a reward
 that the bags could not take proves it was posted rather than lost; `mail_has_item` takes `item` and
 returns whether any mail carries it, and `mail_pool_item_count` takes `cache` (optional `table`) and
-counts only the mail items that are in that cache's own pool. `notifications` counts the
+counts only the mail items that are in that cache's own pool. `account_character_count` counts the stored
+characters on the player's account, and `account_other_item_count` takes `item` and counts that item on the
+account's other characters, which is how a character copy proves it carried the inventory.
+`account_other_bank_item_count` (needs `item`) counts that item in those characters' own Personal Banks,
+`account_other_mail_count` counts the mails they hold and `account_other_foreign_mail_count` only the player mails
+whose sender is not the receiver. `account_other_at_login_flag` takes an `AtLoginFlags` value as `id` and counts
+those characters that carry it in the database. `notifications` counts the
 centre-screen notices a session has been sent and `notification_contains` takes `text` and returns
 whether one carried it, which is how a test proves a player was told something in the middle of the
 screen and not only in chat. The cache metrics are `carried_pool_item_count` (needs `cache`,
@@ -594,12 +617,15 @@ optional `table`: `prestigious`, `callboard`, or `loot` for the cache's item loo
 optional `min_required_level`/`max_required_level` that keep only carried items in that range; optional
 `dominant_stat` keeps items whose strongest of Agility 3, Strength 4, Intellect 5 and Spirit 6 is that stat,
 and `off_stat` keeps items that carry one of those four but whose strongest is not that stat; optional `quality`
-keeps items of that exact quality), `pool_variant_count`, `pool_retired_item_count`, `pool_row_count`,
+keeps items of that exact quality; optional `below_armor_class` (2 leather, 3 mail, 4 plate) keeps only cloth,
+leather or mail body armor of a lower armor class, cloaks excluded; optional `unwearable: true` keeps only armor
+and weapons whose skill the player lacks), `pool_variant_count`, `pool_retired_item_count`, `pool_row_count`,
 `pool_item_present` (needs `item`; `table` `fire_lord` with `cache` 2400040 reads Cache of the Fire Lord's
 pool across every raid difficulty), and `cache_token_count`, `cache_token_stage`, `cache_token_present`
 (need `cache`, the last also `item`), which read the token table the realm loads and answer how many
 tier tokens a cache may pay, the highest tier among them, and whether one named token is among them.
-Boolean metrics use 0/1. Spell/aura metrics require `spell`; `item_count` requires `item`.
+Boolean metrics use 0/1. Spell/aura metrics require `spell`; `item_count` requires `item`, or `items` to sum the
+counts of several entries.
 `spell_family_flags` reads one word of the effective server spell's family flags; `index` is 0..2 (default 0).
 `stunned` reads the unit's native stun state, including changes caused by aura removal.
 `carried_item_count` sums the stack counts of equipped items (bags included), the backpack and the bags' contents.
@@ -647,7 +673,8 @@ skill line for that spell.
 `rating` (0..24, native `CombatRating`) and reads the rating value. `stat` requires `stat` (0..4), `resistance`
 requires `school` (1..6); `armor`, `attack_power`, `ranged_attack_power`, the hasted `attack_time_ms` (optional
 `hand`, 0..2) and `run_speed_rate` read the unit's current totals. `pet_attack_time_ms` uses the same hand
-selection for a player's current pet and requires that pet to exist. `aura_amplitude_ms` reads an aura effect's
+selection for a player's current pet and requires that pet to exist. `attack_timer_ms` (optional `hand`, 0..2)
+reads the time left until that hand's next swing (0 when ready). `aura_amplitude_ms` reads an aura effect's
 periodic interval.
 `block_chance` reads the player's percentage field; `block_value` reads native shield block value;
 `critical_block_chance` reads the total modifier used by the native critical block roll.
@@ -667,12 +694,14 @@ optional `hand` selects main hand (0, default), off hand (1), or ranged (2).
 `spell_critical_damage` requires `spell` and `target` and calculates a critical hit from a fixed base of 1000,
 including native critical damage modifiers, without executing an attack or applying mitigation.
 `armor_reduced_damage` requires `spell` and `target` and applies native armor mitigation to a fixed base of
-1000, including the attacker's armor penetration; optional `pet: true` selects the player's current pet.
+1000, including the attacker's armor penetration; optional `pet: true` selects the player's current pet, and
+optional `from` names another attacking player or creature, so `target` can be the actor itself.
 It does not execute an attack.
 `spell_uses_armor` separately checks whether the native damage path applies armor to `spell` and `effect`
 (default 0), including spell school, armor bypass and bleed mechanics.
 `aoe_damage_taken` applies native area damage avoidance to 1000 damage for `school` (0..6).
 `reputation_gain` calculates a native spell reputation reward of 1000 for faction `id`, without granting it.
+`reputation` reads the actor's absolute standing with faction `id` (base standing for its race and class included).
 `spell_immune` and `spell_effect_immune` query native immunity against `spell` from `target`; the latter
 accepts `effect` (default 0). These queries submit no attack.
 `melee_attack_count` counts the actor's native melee combat packets, including extra attacks and misses.
@@ -680,11 +709,35 @@ accepts `effect` (default 0). These queries submit no attack.
 `melee_damage_total` sums the positive melee damage in those packets and accepts the same hand filter.
 `melee_attacks_taken` counts the melee combat packets whose victim is the player actor, optionally only those from
 the `target` attacker.
+`pet_melee_swings`, `pet_melee_crits`, `pet_melee_glancing`, `pet_melee_plain_count`, `pet_melee_plain_damage`
+and `pet_melee_damage` read the melee combat packets the player actor received from its current pet, or with
+`entry` from every creature of that entry: all swings, critical hits, glancing blows, the count and summed damage
+of the remaining hits that dealt damage, and the summed damage of every swing. Snapshot them around a fight;
+`ratio_to` a plain-count snapshot gives an average plain hit.
 These observations do not test delivery to a network client.
+`owned_creature_damage_total`, `owned_creature_damage_count` and `owned_creature_attack_count` require `entry` and
+combine, for creatures of that entry, the same melee combat packets `pet_melee_*` reads with the actor's already
+recorded `spell_damage_count`/`spell_damage_total` events (both direct and periodic, including its own critical
+filter semantics, but without a `target`, `caster`, `pet` or `critical` filter): `owned_creature_damage_total` sums
+melee and spell damage together, `owned_creature_damage_count` sums the melee hit count (crits, glancing blows and
+plain hits; misses are excluded) with the spell damage event count, and `owned_creature_attack_count` sums every
+melee swing (hits and misses) with the spell damage event count, so a single swing or cast from a creature that
+never repeats it is observable even once. Unlike `spell_damage_count`/`spell_damage_total` with `entry`, these three
+metrics never resolve a live creature: they only filter the actor's already-recorded events by the attacking or
+casting GUID's entry, so a summon, guardian or totem a player does not strictly own by `GetOwnerGUID` (a temporary
+summon whose `SummonerGUID` or `CreatorGUID` the player holds instead) is observable, and remains observable after
+it despawns or dies. As with `pet_melee_*`, this trades a precise ownership check for the actor's own observation:
+scope each scenario to one creature of that entry near the observing actor. Snapshot them around a fight; use
+`relative_to` for the delta and `ratio_to` a `pet_melee_swings`/`pet_melee_damage` delta of the same fight to cross-check
+melee-only aggregation, as [the regression scenario](scenarios/coa-owned-creature-damage-metric-honored-ancestor.json)
+does for the Honored Ancestor guardian pet.
+`owned_creature_heal_count`, `owned_creature_heal_total` and `owned_creature_effective_heal_total` require `entry`
+and apply the same entry resolution to the actor's recorded `spell_heal_*` events: they count the healing events cast
+by creatures of that entry, or sum their healing including or excluding overhealing, whoever the healed unit is.
 `spell_damage_count` and `spell_damage_total` require `spell` and count positive direct or periodic spell
 damage events, or sum their post-mitigation damage, from the actor's native combat packets. Optional `target`
-filters the victim, `pet: true` selects the actor's current pet as caster, and `critical` filters critical or
-noncritical hits. Values accumulate throughout the scenario; use snapshots and `relative_to` around a cast.
+filters the victim, `pet: true` selects the actor's current pet as caster, `caster` selects another actor such
+as a creature fixture, and `critical` filters critical or noncritical hits. Values accumulate throughout the scenario; use snapshots and `relative_to` around a cast.
 They exclude zero damage, melee swing packets, and healing, and do not test network delivery.
 `spell_heal_count`, `spell_heal_total` and `spell_effective_heal_total` similarly observe native direct and
 periodic healing logs, counting positive heals, summing healing including overhealing, or summing effective
@@ -770,7 +823,7 @@ owned creature of that entry as the victim instead of the actor. `script_heal_re
 on the actor before armor: the weapon roll with the melee range hooks, the done and taken bonuses and the melee
 damage hooks, as `Unit::CalculateMeleeDamage` applies them.
 `script_melee_damage_dealt` requires `target` as the victim and returns 1000 after the registered melee damage hooks
-with the actor as the attacker.
+with the actor as the attacker, or `pet: true` to run the hooks with the actor's current pet as the attacker instead.
 `set_health` also accepts a creature actor, or `pet: true` with a player actor to set its current pet's health.
 `cast` also accepts a creature actor: the creature casts `spell` on `target` (itself by default) with
 `TRIGGERED_FULL_MASK`, like `.cast back ... triggered`, and the step fails unless the cast starts.
@@ -791,6 +844,8 @@ returns the highest per-item level that native item scaling stored for such an i
 `loot_slot` with `item` also picks up a copy of that item.
 `creature_loot_quality_rate` requires `entry` (a creature loot id), fills that template `rolls` times (default 10000)
 for the actor and reports the percentage of fills holding an item of at least `quality` (default 3, rare).
+`item_loot_item_rate` requires `entry` (an item loot id, the container's item entry) and `item`, fills that template
+10000 times for the actor and reports the percentage of fills holding `item`.
 `forced_loot_count` requires `item`, adds it directly through `Loot::AddItem` with the actor as loot owner
 (bypassing any loot table), and reports how many uncollected copies survive that call; a gate inside `AddItem`
 that rejects the item for that actor reports zero.
@@ -815,7 +870,8 @@ The recorded core packets include duel request (359), countdown (695) and comple
 `SMSG_MOVE_KNOCK_BACK` (239), whose final two floats are horizontal
 speed and the negated vertical speed. These observations do not simulate client movement or keyboard input.
 Besides the Ascension extension opcodes (0x520 and above), the recorded packets include the learned, superseded
-and removed spell notices (299, 300 and 515) that the client prints to chat.
+and removed spell notices (299, 300 and 515) that the client prints to chat, and `SMSG_TOTEM_CREATED` (1043),
+whose leading byte is the zero-based totem bar slot.
 
 `relog` takes `actor`, commits the character through the native save path, logs it out, and reloads it
 through the native character-login handler. It preserves saved character state and the scenario phase.
@@ -823,9 +879,12 @@ Optional `race` seeds the saved character's race through `CHAR_UPD_CHAR_RACE` an
 before login, retaining saved pet data. This fixtures the post-service state; it does not submit a race/faction
 service request or perform that service's spell, quest, faction, language or appearance conversions.
 Optional `offline_seconds` moves the saved logout time that far back, so the login handler treats the character
-as offline for that long (real-time item durations, rest). `item_duration` requires `item` and reads the
+as offline for that long (real-time item durations, rest). `reconnect` takes `actor` and hands the character, still in the world, to a new session through the native reconnect handler (`HandlePlayerLoginToCharInWorld`), as a client restarted before its character logged out would. No login hook runs; packets recorded on the actor accumulate across both sessions.
+
+`item_duration` requires `item` and reads the
 remaining duration in seconds of the first carried copy of that item.
-`race` reads the loaded unit's current race. `pet_native_display` reads the guardian's native display,
+`race` reads the loaded unit's current race. `faction` reads its server faction template, which clients may be
+sent differently (`sent_faction`). `pet_native_display` reads the guardian's native display,
 which the pet save path persists and transformation removal restores.
 
 `login_hooks` takes `actor` and replays registered player-login hooks on the current character; it does not reconnect
@@ -852,6 +911,8 @@ no-placement bit (0x1000000 of the fourth attribute dword); up to level 10 the c
 button. `client_placing_supersedes_for` counts the superseded notices adding that spell while the Rank text of its last
 `SMSG_PATCH_SPELL` row (the number in it) was 1 or less, or before any row was sent: up to level 10 the client places
 such a spell on an empty button. `client_spell_rank_for` returns that number for the last row sent, or -1.
+`client_spell_caster_aura_for` returns the CasterAuraSpell of the last `SMSG_PATCH_SPELL` row sent for `spell`, or -1
+when none was sent; the client refuses a cast without that aura before the request reaches the server.
 `client_removals_keeping_buttons_for` counts its removed notices ending in a zero byte, which Extensions.dll
 answers without clearing the spell's action buttons. `client_spell_row_restored` returns 1 when the last two
 `SMSG_PATCH_SPELL` rows for `spell` are the same row, first with `SPELL_ATTR0_DO_NOT_DISPLAY` and then without.
@@ -863,7 +924,8 @@ client draws.
 `has_talent` requires the talent rank's spell ID; passive talents are separate from the learned spellbook.
 `talent_points` measures unspent points in the active specialization. `active_talent_spec` is the active talent
 spec: 0 for the primary, 1 for the secondary.
-`bank_bag_slots` measures the player's unlocked standard bank bag slots (0..7).
+`bank_bag_slots` measures the player's unlocked standard bank bag slots (0..7). `guild_bank_tabs` measures the
+bank tabs of the player's guild (0..6), or `-1` without a guild.
 `pet_entry` measures the player's current guardian pet entry, or the entry of the companion it summoned
 (a minipet, which never occupies the guardian slot), or zero if absent; `pet_display`, `pet_scale`
 and `pet_is_banker` read the same unit, and `pet_distance` is its 2D distance from the player in yards.
@@ -878,6 +940,15 @@ banker click is answered with. `system_messages` counts the chat lines the sessi
 `cast_failure` requires `spell` and reports the reason the client was told the last submitted cast of
 that spell was refused, or zero if it was not refused since (the record is cleared when the scenario
 submits that spell again).
+`spell_cooldown_packet_ms` requires `spell` and reads the cooldown duration from the last native
+`SMSG_SPELL_COOLDOWN` the session was sent for it, or -1 if none was observed; unlike `cooldown_ms`,
+which reads the server-side cooldown map directly, this proves the client was actually notified.
+`item_loot_releases` counts the `SMSG_LOOT_RELEASE_RESPONSE` packets the actor's session was sent for an item, which
+is how a custom item opening tells the client to leave the looting state it entered on `CMSG_OPEN_ITEM`.
+`sent_aura_amount` requires `spell` and accepts `effect` (0..2, default 0). It reads that effect's amount from the
+last `SMSG_ASCENSION_AURA_AMOUNT` the actor's session was sent for its own aura, which feeds the `$wN` tooltip tokens,
+and fails if none was observed; the actor needs `ascension_client` set. Unlike `aura_amount`, which reads the server-side
+aura effect, this proves what the client was told.
 `pet_aura_stacks`
 requires `spell`, accepts `caster` for aura ownership, and returns zero if the pet or aura is absent.
 `pet_aura_amount` and `pet_aura_amplitude_ms` accept `effect` and read its amount or tick interval.
@@ -888,6 +959,7 @@ resource type, recipient and current pets. The total is the logged nominal gain 
 
 `pet_max_health`, `pet_attack_power` and `pet_run_speed_rate` read the current pet's totals and require a present pet.
 `charm_entry` and `charm_aura_stacks` observe the player's charmed unit in the same way.
+`charm_distance` is the 2D distance from the player to its charmed unit, or -1 without one.
 `controls_self` checks that the player's movement controller is their own character.
 `private_instance` checks membership in a scripted private map such as Manastorm.
 `dynamic_object` checks for the player's ground effect with the specified `spell`.
@@ -900,11 +972,16 @@ Player commands retain normal permission and gameplay checks; verify their effec
 `owned_creature_count` requires a player and `entry`. It counts living creatures of that entry owned, created or summoned by
 the player, in the same phase and within 100 yards, including summons outside the guardian-pet slot.
 `creator_only: true` restricts that count to creatures whose native creator GUID is the player.
+`controlled_aura_count` requires `spell` and counts the actor's living controlled units (pets, guardians and
+minions of any entry) that carry that aura. `controlled_aura_min_damage` and `controlled_aura_max_damage` return
+the main-hand `UNIT_FIELD_MINDAMAGE`/`UNIT_FIELD_MAXDAMAGE` of the first such unit: the range its melee swing
+rolls in before armor, critical strikes and the victim's modifiers.
 This observes creator metadata; it does not establish a rendered owner title.
 An optional `spell` restricts the count to creatures with that aura; `caster` can select its aura owner. `min_distance` keeps creatures at least that many yards from the player (2D), and `owner_display: true` those wearing the player's display.
 `ranged_weapon_subclass` (0..20) restricts the count to creatures carrying a weapon of that item subclass
 in their ranged virtual equipment slot; subclass 2 means bows. This observes server equipment, not client rendering.
 `sheath_state` (0..2) restricts it to creatures whose server sheath state is unarmed, melee or ranged (2).
+`target` restricts it to creatures whose current victim is that scenario unit.
 `owned_creature_spacing` requires a player and `entry`. It reads the smallest 2D distance between two of those
 living creatures, selected as `owned_creature_count` does, or zero when fewer than two are present.
 `owned_creature_visible` requires a player and `entry` and reads one matching summon's server visibility,
@@ -913,6 +990,8 @@ returning zero when absent. Pair it with a count assertion when checking a hidde
 It reads that creature's native spell hit modifier. `set_aura` accepts `owned_entry` to select the same type
 of owned creature within 100 yards and the player's phase; it cannot also select `pet: true`.
 `owned_creature_attackable` requires the owning player, a present creature `entry` and a `target` unit.
+`owned_creature_sent_faction` requires the owning player, a present creature `entry` and a viewing `target` player; it
+reads the last faction template value update that player received for the creature (0 when none arrived).
 It reads whether that target can attack the summon through the native `IsValidAttackTarget` check.
 `owned_creature_victim` requires the owning player, a present creature `entry` and a `target` unit.
 It returns one while that unit is the summon's current victim.
@@ -923,15 +1002,17 @@ aura expiry is a separate event.
 `owned_creature_weapon_damage_min` requires a player and `entry`. It returns the lowest minimum weapon damage (`UNIT_FIELD_MINDAMAGE`) across their living
 owned creatures of that entry in the same phase and within 100 yards, so every copy of a guardian must meet an asserted `min`; zero when there are none.
 `owned_creature_armor` requires a player and a present owned creature selected by `entry`. It reads that creature's
-native `GetArmor()`, zero when absent. `owned_creature_max_health` reads the same creature's `GetMaxHealth()` and
-requires it to be present.
+native `GetArmor()`, zero when absent. `owned_creature_max_health` and `owned_creature_health` read the same
+creature's `GetMaxHealth()` and `GetHealth()` and require it to be present.
 `owned_gameobject_count` requires a player and `entry`. It counts their summoned gameobjects of that entry
-in the same phase and within 100 yards. `gameobject_display` and `gameobject_scale` read the single owned
-object's native display id and scale, returning zero when absent. They do not verify client rendering.
+in the same phase and within 100 yards. `gameobject_display` reads the native display id shared by every owned
+object of that entry and fails when they differ. `gameobject_scale` reads the single owned object's native
+scale. Both return zero when absent and do not verify client rendering.
 `gameobject_remaining_ms` uses the same lookup and requires exactly
 one object when present; it returns the remaining lifetime with one-second precision, zero when absent,
 or -1 for an object without an expiry. Moving out of range is not proof of despawn.
 `at_homebind` checks that the player is on their homebind map and within five yards of its position.
+`summon_pending` is 1 while the player has an unanswered summon request (meeting stone, ritual or warlock summon).
 `use_gameobject` keeps normal interaction-distance and usability checks. It does not inspect a rendered UI.
 The [portable gadgets scenario](scenarios/portable-gadgets.json) checks item summons, lifetimes, portal
 teleports and expiry. It requires `mod-portablemail`; mailbox and altar client interfaces are not tested.
@@ -1017,19 +1098,26 @@ before one arrives.
 
 `dungeon_difficulty_packet` takes a player `actor` and `value` (0, 1 or 2), sends the native dungeon
 selection packet through the packet hook and typed session handler, and does not bypass its group or
-in-instance restrictions. `map_id` and `map_difficulty` observe the current map after a normal teleport.
+in-instance restrictions. `raid_difficulty_packet` does the same for raids with `value` 0-3 (3 is Ascended).
+A `teleport` step with `ignore_access: true` skips the entry checks, as the scenario `location` does, so a solo
+actor can enter a raid on the difficulty it selected outside. `map_id` and `map_difficulty` observe the current
+map after a normal teleport.
 `nearby_creature_template` requires `entry` and exactly one creature within 60 yards, then returns its
 selected difficulty template. `spawn_respawn_remaining` requires a player and a creature `spawn` (its database
 guid) and returns the seconds until the actor's map respawns that spawn, from the map's saved respawn times
 (zero when none is saved). `loot_gear_item_level` returns the first unlooted weapon/armor item's level in
 the current loot window (zero if absent). The three `vanilla-dungeons-*` scenarios use these to check
 all 19 map/mode pairs per tier and a real VanCleef killing blow, without a GM access bypass.
+`nearest_creature_distance` requires player `entry` and reads the 2D distance from the player to the nearest living creature with that entry in its phase within 60 yards, or -1 when there is none.
+`nearby_creature_orientation` requires a player and `entry`, and returns the orientation in radians (0 to 2 pi) of the
+nearest living creature with that entry within 60 yards; it requires one to exist there.
 `nearby_creature_count` requires a player and `entry`, and counts living creatures in the same phase within
 60 yards. Optional `min_level` and `max_level` filter their native levels; `min_home_distance` keeps creatures
 at least that many yards from their own home positions (2D), and `spell` those carrying that aura. This can
 observe movement and auras of native summons without creating or controlling them.
 `map_creature_count` requires a player and counts living spawned creatures loaded anywhere on the player's map,
-in any phase, of `entry` when given and of every entry otherwise; a spawn whose grid is not loaded is not counted.
+in any phase, of `entry` or of any entry in the list `entries` when given and of every entry otherwise; a spawn
+whose grid is not loaded is not counted.
 `map_creatures_below_floor` requires a player and counts those loaded living spawns that stand more than 3 yards
 below the floor under them, or over no floor at all. The floor is searched downward from the higher of the
 creature's current Z and its spawn Z, so a creature that sank through the ground counts while one that walked
@@ -1038,6 +1126,10 @@ down a ramp does not. Each one counted is logged with its spawn id, position and
 (0 open, 1 closed, 99 none).
 `nearby_gameobject_scale` takes `entry` and returns the object scale of the nearest such gameobject within
 20 yards (0 when none).
+`nearby_gameobject_orientation` takes `entry` and returns the orientation in radians (0 to 2 pi) of the nearest such
+gameobject within 20 yards; it requires a gameobject to exist there.
+`nearby_gameobject_display` takes `entry` and returns the display id the server sends for the nearest such
+gameobject within 20 yards (0 when none); it does not verify client rendering.
 `nearby_gameobject_ground_offset` takes `entry` and returns the nearest such gameobject's Z minus the map's terrain
 height under it (negative when buried); it requires a gameobject to exist within 20 yards.
 `nearby_gameobject_at_client` takes `entry` and is 1 while the nearest such gameobject within 20 yards is in
@@ -1132,6 +1224,7 @@ must be a player but is not used.
 | `spawn_stand_state` | `guid`, `spawn_type` (`creature` only) | The creature's effective `creature_addon.bytes1` (else template addon) low byte: the `UNIT_STAND_STATE` a load applies, 0 `stand` without an addon. Fails "Stand state metric needs a creature spawn" for a gameobject. |
 | `spawn_clearance` | `guid`, `spawn_type` | Yards from the spawn to the nearest vmap model (building, wall, prop) along 24 level rays at 0.6, 1.2 and 1.8 yd above it, capped at 10. |
 | `spawn_headroom` | `guid`, `spawn_type` | Yards from 0.3 yd above the spawn straight up to the nearest vmap model (a roof or an overhang), capped at 10. |
+| `spawn_distance` | `guid`, `spawn_type`, `x`, `y`, `z` | Yards from the spawn's loaded position to the point, in 3D. |
 | `point_ground_gap` | `map`, `x`, `y`, `z` | The point's height above its ground, as for a spawn. Fails "No ground found for the point". |
 | `point_placement` | `map`, `x`, `y`, `z`, `tolerance` | The verdict code of the point, phase 1, without exemptions. |
 
@@ -1256,7 +1349,9 @@ real early receive hook and session queue; follow it with a wait before teleport
 requires an entry and reads the nearest living matching creature within 60 yards; `nearby_creature_health_pct`
 reads that creature's current health as a percentage of its maximum, so a real spawn such as a raid boss can be
 checked undamaged before its encounter. `nearby_creature_can_attack` returns 1 when the native
-`IsValidAttackTarget` lets the actor attack that creature, otherwise 0. `nearby_creature_mount_display` reads
+`IsValidAttackTarget` lets the actor attack that creature, otherwise 0. `nearby_creature_at_client` returns 1 while
+that creature is in the actor's client-visible set, as the player would see it, otherwise 0; a creature hidden with
+`SetVisible(false)` stays 0 for a non-GM player. `nearby_creature_mount_display` reads
 that creature's mount display id (0 when on foot) and `nearby_creature_display` its current display id.
 `nearby_creature_aura_count` requires `spell` and counts the
 living creatures of the entry within 60 yards that carry that aura.

@@ -40,6 +40,13 @@ bool Ranged(ProcEventInfo const& event)
         Family(event.GetSpellInfo(), 1, 8));
 }
 
+int32 OutrageExtension(Player* player)
+{
+    int32 step = sSpellMgr->AssertSpellInfo(560016)->Effects[EFFECT_0].CalcValue(player);
+    player->ApplySpellMod(560016, SPELLMOD_EFFECT1, step);
+    return step;
+}
+
 void Bleed(Unit* owner, Unit* target, uint32 id, uint32 damage, uint32 percent)
 {
     SpellInfo const* info = sSpellMgr->GetSpellInfo(id);
@@ -298,7 +305,7 @@ class aura_ascension_barbarian_event : public AuraScript
                         int32(uint64(event.GetHealInfo()->GetEffectiveHeal()) * 30 / 100), pet, TRIGGERED_FULL_MASK);
                 break;
             case 801759:
-            case 803499: ExtendLimited(1000, owner->HasAura(300497) ? 20000 : 10000); break;
+            case 803499: ExtendLimited(OutrageExtension(player), owner->HasAura(300497) ? 20000 : 10000); break;
             case 804141:
             {
                 float chance = 20.0f;

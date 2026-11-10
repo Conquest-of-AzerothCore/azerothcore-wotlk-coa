@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Healing Dummy: friendly heal target with its own damage, shields and reports",
+  "contract": "Healing Dummy 9990150 (npc_healing_dummy) is a friendly target a healer treats like a wounded party member. Its gossip options are, in order: take no damage, steady damage (3% of maximum health per second), heavy damage (8% per second), spiky damage (35% every 5 seconds), drop to 20% health, match the speaker's level and maximum health, toggle dropping back to 20% when healed to full, show the speaker's healing, reset the statistics. Heals land on it like on a player; its own damage is absorbed by shields and never kills it (it stops at 1 health); healed to full with no damage running, it reports the healing to its healers and drops back to 20% after 3 seconds. Like a player it is a party member of a grouped healer, so party heals such as Prayer of Healing reach it.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "healer", "race": 1, "class": 5, "level": 60, "allow_regeneration": false },
+    { "id": "partner", "race": 1, "class": 1, "level": 60, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "healer", "entry": 9990150, "faction": 35, "level": 60, "health": 400, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 3000 },
+    { "action": "learn", "actor": "healer", "spell": 2061 },
+    { "action": "learn", "actor": "healer", "spell": 17 },
+
+    { "action": "gossip_hello", "actor": "healer", "target": "dummy" },
+    { "action": "gossip_select", "label": "Drop to 20% health", "actor": "healer", "option": 4 },
+    { "action": "assert", "label": "The dummy is wounded to 20% of 400", "actor": "dummy", "metric": "health", "equals": 80 },
+
+    { "action": "snapshot", "actor": "dummy", "metric": "health", "save_as": "wounded" },
+    { "action": "cast", "actor": "healer", "spell": 2061, "target": "dummy" },
+    {
+      "action": "assert", "label": "Flash Heal lands on the friendly dummy", "actor": "healer",
+      "metric": "spell_effective_heal_total", "spell": 2061, "target": "dummy", "min": 1, "within_ms": 4000
+    },
+    { "action": "assert", "label": "The heal raises the dummy's health", "actor": "dummy", "metric": "health", "relative_to": "wounded", "min": 1 },
+
+    { "action": "snapshot", "actor": "healer", "metric": "system_messages", "save_as": "messages_before_full" },
+    { "action": "wait", "label": "Global cooldown", "ms": 1600 },
+    { "action": "cast", "actor": "healer", "spell": 2061, "target": "dummy" },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast", "actor": "healer", "spell": 2061, "target": "dummy" },
+    { "action": "assert", "label": "Healed to full", "actor": "dummy", "metric": "health", "equals": 400, "within_ms": 4000 },
+    {
+      "action": "assert", "label": "Full for 3 seconds: the dummy drops back to 20%", "actor": "dummy",
+      "metric": "health", "equals": 80, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "The healer is told how the healing went", "actor": "healer",
+      "metric": "system_messages", "relative_to": "messages_before_full", "min": 1
+    },
+
+    { "action": "gossip_hello", "actor": "healer", "target": "dummy" },
+    { "action": "gossip_select", "label": "Take steady damage", "actor": "healer", "option": 1 },
+    { "action": "snapshot", "actor": "dummy", "metric": "health", "save_as": "before_steady" },
+    { "action": "wait", "ms": 3100 },
+    {
+      "action": "assert", "label": "Steady damage: three ticks of 3% (12 each)", "actor": "dummy",
+      "metric": "health", "relative_to": "before_steady", "min": -48, "max": -36
+    },
+
+    { "action": "gossip_hello", "actor": "healer", "target": "dummy" },
+    { "action": "gossip_select", "label": "Take heavy damage", "actor": "healer", "option": 2 },
+    {
+      "action": "assert", "label": "Heavy damage stops at 1 health", "actor": "dummy",
+      "metric": "health", "equals": 1, "within_ms": 6000
+    },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "The dummy never dies", "actor": "dummy", "metric": "alive", "equals": 1 },
+    { "action": "assert", "actor": "dummy", "metric": "health", "equals": 1 },
+
+    { "action": "gossip_hello", "actor": "healer", "target": "dummy" },
+    { "action": "gossip_select", "label": "Take no damage", "actor": "healer", "option": 0 },
+    { "action": "gossip_hello", "actor": "healer", "target": "dummy" },
+    { "action": "gossip_select", "label": "Drop to 20% health", "actor": "healer", "option": 4 },
+    { "action": "assert", "actor": "dummy", "metric": "health", "equals": 80 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast", "actor": "healer", "spell": 17, "target": "dummy" },
+    { "action": "assert", "label": "Power Word: Shield on the dummy", "actor": "dummy", "metric": "aura", "spell": 17, "equals": 1, "within_ms": 2000 },
+    { "action": "snapshot", "actor": "dummy", "metric": "health", "save_as": "shielded" },
+    { "action": "gossip_hello", "actor": "healer", "target": "dummy" },
+    { "action": "gossip_select", "label": "Take steady damage", "actor": "healer", "option": 1 },
+    { "action": "wait", "ms": 1100 },
+    {
+      "action": "assert", "label": "The shield absorbs the first steady tick", "actor": "dummy",
+      "metric": "health", "relative_to": "shielded", "equals": 0
+    },
+    { "action": "assert", "actor": "dummy", "metric": "aura", "spell": 17, "equals": 1 },
+    { "action": "gossip_hello", "actor": "healer", "target": "dummy" },
+    { "action": "gossip_select", "label": "Take no damage", "actor": "healer", "option": 0 },
+
+    { "action": "snapshot", "actor": "healer", "metric": "max_health", "save_as": "healer_max_health" },
+    { "action": "gossip_hello", "actor": "healer", "target": "dummy" },
+    { "action": "gossip_select", "label": "Match my level and maximum health", "actor": "healer", "option": 5 },
+    {
+      "action": "assert", "label": "The dummy takes the healer's maximum health", "actor": "dummy",
+      "metric": "max_health", "relative_to": "healer_max_health", "equals": 0
+    },
+    { "action": "assert", "actor": "dummy", "metric": "level", "equals": 60 },
+
+    { "action": "learn", "actor": "healer", "spell": 596 },
+    { "action": "group", "actor": "healer", "target": "partner" },
+    { "action": "assert", "label": "The dummy is wounded again", "actor": "dummy", "metric": "health", "max": 1000 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "cast", "actor": "healer", "spell": 596 },
+    {
+      "action": "assert", "label": "Prayer of Healing counts the dummy as a party member", "actor": "healer",
+      "metric": "spell_heal_count", "spell": 596, "target": "dummy", "min": 1, "within_ms": 5000
+    }
+  ]
+}

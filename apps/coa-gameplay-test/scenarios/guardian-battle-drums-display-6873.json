@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Guardian Battle Drums summon the captured tauren drum display (#6873, #8978)",
+  "contract": "Battle Drums 803683 places three gameobjects 9000117. The client gameobject cache records that entry with display 1032401 (world/expansion06/doodads/tauren/7tr_tauren_drumsmall01, present in GameObjectDisplayInfo.dbc); the server row carried 7217, the stock orc voodoo drum the reports describe as the wrong model. Each summoned drum must carry display 1032401.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    { "id": "g", "race": 1, "class": 18, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "g", "spell": 803683 },
+    { "action": "set_power", "actor": "g", "power": 3, "value": 100 },
+    { "action": "set_power", "actor": "g", "power": 1, "value": 100 },
+    { "action": "cast", "actor": "g", "spell": 803683 },
+    { "action": "assert", "label": "Battle Drums places three drums", "actor": "g",
+      "metric": "owned_gameobject_count", "entry": 9000117, "equals": 3, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the drums wear the captured tauren drum display, not 7217",
+      "actor": "g", "metric": "gameobject_display", "entry": 9000117, "equals": 1032401 }
+  ]
+}

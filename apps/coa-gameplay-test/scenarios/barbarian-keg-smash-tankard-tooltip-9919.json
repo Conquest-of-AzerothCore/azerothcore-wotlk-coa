@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Ancestry Barbarians know the Fill Level passive required by Keg Smash's Tankard tooltip (#9919)",
+  "contract": [
+    "Keg Smash 805808 requires the free Ancestry Fill Level node 4003, which grants visible passive 92083.",
+    "Its Spell.dbc description renders the Tankard consumption sentence only when the player knows hidden passive",
+    "500061. That passive already supplies the Fill Level periodic aura and ancestor-heal proc, so knowing Keg Smash",
+    "without knowing 500061 leaves the authored tooltip incomplete. An existing character who lacks 500061 relearns it",
+    "from 92083 on login without changing the mechanic's acquisition boundary."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "b", "race": 1, "class": 12, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "specialization", "actor": "b", "id": 3 },
+    {
+      "action": "assert", "label": "SETUP: Ancestry grants Keg Smash",
+      "actor": "b", "metric": "knows_spell", "spell": 805808, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: Ancestry grants the visible Fill Level passive",
+      "actor": "b", "metric": "knows_spell", "spell": 92083, "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the hidden Fill Level passive is known for the tooltip conditional",
+      "actor": "b", "metric": "knows_spell", "spell": 500061, "equals": 1, "within_ms": 2000
+    },
+    { "action": "unlearn", "label": "An existing character lacks the hidden passive", "actor": "b", "spell": 500061 },
+    { "action": "relog", "actor": "b" },
+    {
+      "action": "assert", "label": "The visible Fill Level passive teaches it again on login",
+      "actor": "b", "metric": "knows_spell", "spell": 500061, "equals": 1, "within_ms": 10000
+    }
+  ]
+}

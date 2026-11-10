@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Defias Trainee closes to casting range on a victim past 25 yards (#11507)",
+  "contract": "Defias Trainee 537 holds position and casts Fireball 9488 only while its victim is within 25 yd (smart_scripts id 4); with combat movement disabled it neither chased nor cast at a victim beyond that. A CoA Sun Cleric pulls a summoned trainee from 30 yd with Sunflare; a trainee that engages must walk to within its 25 yd cast range, so its 2D distance to the idle player must fall below 26 yd. The player never moves. The trainee's own Fireball is not asserted: the pull's Sunflare may kill a level 1-2 trainee before it casts, so the discriminating observation is the approach itself.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 11
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "cleric",
+      "value": 100000,
+      "maximum": 100000
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 502386
+    },
+    {
+      "action": "summon",
+      "actor": "cleric",
+      "entry": 537,
+      "as": "trainee",
+      "distance": 30
+    },
+    {
+      "action": "assert",
+      "label": "The trainee starts beyond its 25 yd cast range",
+      "actor": "trainee",
+      "metric": "distance",
+      "target": "cleric",
+      "min": 29,
+      "max": 31
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 502386,
+      "target": "trainee"
+    },
+    {
+      "action": "assert",
+      "label": "The pulled trainee selects the player as its victim",
+      "actor": "trainee",
+      "metric": "victim",
+      "target": "cleric",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The trainee closes to within 26 yd of the player",
+      "actor": "trainee",
+      "metric": "distance",
+      "target": "cleric",
+      "max": 26,
+      "within_ms": 15000
+    }
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "A Lesser Shadowhound's damage follows its owner's ranged attack power and spell power",
+  "contract": [
+    "Live logs show a Lesser Shadowhound hitting for 0.20-0.25 of a permanent Shadowhound, which fits",
+    "0.6 x level + 0.046 x ranged attack power + 0.08 x spell power, with a weapon minimum of 90% of that. Unleash the",
+    "Hounds 807918 summons one in combat. A level-60 owner with +20000 ranged attack power gives about 870 and one",
+    "with +10000 spell power about 760. Expected: 820-920 and 720-800."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "ranged", "race": 1, "class": 15, "level": 60, "ranged_attack_power": 20000, "ranged_hit_rating": 10000},
+    {"id": "caster", "race": 1, "class": 15, "level": 60, "spell_power": 10000, "ranged_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "golem", "owner": "ranged", "entry": 36, "level": 60, "health": 10000000, "distance": 12}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "ranged", "spell": 75},
+    {"action": "learn", "actor": "caster", "spell": 75},
+    {"action": "learn", "actor": "ranged", "spell": 5011},
+    {"action": "learn", "actor": "caster", "spell": 5011},
+    {"action": "add_item", "actor": "ranged", "item": 15807},
+    {"action": "add_item", "actor": "caster", "item": 15807},
+    {"action": "equip", "actor": "ranged", "item": 15807, "slot": 17},
+    {"action": "equip", "actor": "caster", "item": 15807, "slot": 17},
+    {"action": "wait", "label": "Let the weapon swap cooldown expire", "ms": 2000},
+    {"action": "learn", "actor": "ranged", "spell": 807918},
+    {"action": "learn", "actor": "caster", "spell": 807918},
+    {"action": "cast", "label": "Enter combat", "actor": "ranged", "spell": 75, "target": "golem"},
+    {"action": "cast", "label": "Enter combat", "actor": "caster", "spell": 75, "target": "golem"},
+    {"action": "wait", "ms": 3000},
+    {"action": "set_power", "actor": "ranged", "power": 1, "value": 1000},
+    {"action": "set_power", "actor": "caster", "power": 1, "value": 1000},
+    {"action": "cast", "label": "Unleash the Hounds", "actor": "ranged", "spell": 807918},
+    {"action": "cast", "label": "Unleash the Hounds", "actor": "caster", "spell": 807918},
+    {"action": "assert", "label": "SETUP: the first Lesser Shadowhound is out", "actor": "ranged",
+     "metric": "owned_creature_count", "entry": 50224, "min": 1, "within_ms": 3000},
+    {"action": "assert", "label": "SETUP: the second Lesser Shadowhound is out", "actor": "caster",
+     "metric": "owned_creature_count", "entry": 50224, "min": 1, "within_ms": 3000},
+    {"action": "wait", "label": "Let the hounds refresh their damage from the owners", "ms": 2000},
+    {"action": "snapshot", "actor": "ranged", "metric": "ranged_attack_power", "save_as": "ranged_owner_rap"},
+    {"action": "snapshot", "actor": "caster", "metric": "ranged_attack_power", "save_as": "caster_owner_rap"},
+    {"action": "assert", "label": "Ranged attack power sets the lesser hound's damage", "actor": "ranged",
+     "metric": "owned_creature_weapon_damage_min", "entry": 50224, "min": 820, "max": 920},
+    {"action": "assert", "label": "Spell power sets the lesser hound's damage", "actor": "caster",
+     "metric": "owned_creature_weapon_damage_min", "entry": 50224, "min": 720, "max": 800}
+  ]
+}

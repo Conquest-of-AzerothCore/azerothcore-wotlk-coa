@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "name": "Curse of Xoroth grants Black Shield on the next Shieldgore of any rank (#10698)",
+  "contract": "Curse of Xoroth 804169 reads 'Your next Shieldgore within $680729d grants you Black Shield, absorbing ... damage for $805680d' (Spell.dbc Description). Casting the curse gives the knight the marker aura 680729, which every Shieldgore rank consumes (spell_ranks chains 806869-806874 to rank 1 804353, rev_20260924_4930_shieldgore_ranks.sql). A level 58+ knight casts Shieldgore rank 7 (806874), so the shield must follow that rank as well as rank 1. Control: no Black Shield before the Shieldgore cast.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "knight",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "add_item", "actor": "knight", "item": 629951 },
+    { "action": "equip", "label": "One-hander so a shield fits", "actor": "knight", "item": 629951, "slot": 15 },
+    { "action": "add_item", "actor": "knight", "item": 2362 },
+    { "action": "equip", "label": "Shieldgore requires a shield", "actor": "knight", "item": 2362, "slot": 16 },
+    { "action": "learn", "actor": "knight", "spell": 804169 },
+    { "action": "learn", "actor": "knight", "spell": 806874 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000 },
+    { "action": "cast", "label": "Curse the dummy", "actor": "knight", "spell": 804169, "target": "dummy" },
+    {
+      "action": "assert", "label": "SETUP: the curse marker is on the knight",
+      "actor": "knight", "metric": "aura", "spell": 680729, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTROL: no Black Shield before Shieldgore",
+      "actor": "knight", "metric": "aura", "spell": 805680, "equals": 0
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 2000 },
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000 },
+    { "action": "cast", "label": "Shieldgore rank 7", "actor": "knight", "spell": 806874, "target": "dummy" },
+    {
+      "action": "assert", "label": "SETUP: Shieldgore rank 7 was cast",
+      "actor": "knight", "metric": "spell_cast_count", "spell": 806874, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Shieldgore rank 7 grants Black Shield",
+      "actor": "knight", "metric": "aura", "spell": 805680, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "CONTRACT: Shieldgore consumed the curse marker",
+      "actor": "knight", "metric": "aura", "spell": 680729, "equals": 0, "within_ms": 2000
+    }
+  ]
+}

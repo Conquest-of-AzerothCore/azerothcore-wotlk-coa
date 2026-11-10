@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "name": "Effect 182 faces nearest qualifying player",
+  "contract": "Spell92641 names nearest player. Developer spell9931328 explicitly defines MiscA as required aura15473 and calculated points as range100; an ineligible nearer player must not hide a farther eligible player.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "near",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "far",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000,
+      "label": "Settle native login"
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 0,
+      "x": -8949.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "near",
+      "map": 0,
+      "x": -8949.95,
+      "y": -127.493,
+      "z": 83.5312,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "far",
+      "map": 0,
+      "x": -8957.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 0
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 92641
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 9931328
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 92641
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 92641,
+      "min": 1,
+      "label": "Facing spell executed"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "position_o",
+      "label": "nearest_player_faced",
+      "min": 1.5697963267948967,
+      "max": 1.5717963267948964
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 0,
+      "x": -8949.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "far",
+      "spell": 15473,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 9931328
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 9931328,
+      "min": 1,
+      "label": "Facing spell executed"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "position_o",
+      "label": "farther_qualified_player_faced",
+      "min": 3.1405926535897932,
+      "max": 3.142592653589793
+    }
+  ]
+}

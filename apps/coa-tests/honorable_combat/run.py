@@ -21,7 +21,7 @@ def main():
                        if msvc else [compiler, "-std=c++20", "-Wall", "-Wextra", "-Werror", source, "-o", str(exe)])
             subprocess.run(command, cwd=out, check=True, timeout=120)
             subprocess.run([str(exe)], cwd=out, check=True, timeout=30)
-    print("PASS: Honorable Combat zone, lock and win policy checks")
+    print("PASS: Honorable Combat zone, lock, win and Respite policy checks")
 
 
 if __name__ == "__main__":

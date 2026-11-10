@@ -430,6 +430,7 @@ public:
 
     void AddPlayerToResurrectQueue(ObjectGuid npc_guid, ObjectGuid player_guid);
     void RemovePlayerFromResurrectQueue(Player* player);
+    [[nodiscard]] bool IsPlayerInResurrectQueue(ObjectGuid playerGuid) const;
 
     /// Relocate all players in ReviveQueue to the closest graveyard
     void RelocateDeadPlayers(ObjectGuid queueIndex);

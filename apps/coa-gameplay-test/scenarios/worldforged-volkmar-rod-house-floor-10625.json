@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "Volkmar's Enchanting Rod stands on the Deadwood Pass house floor (#10625)",
+  "contract": "The Worldforged Volkmar's Enchanting Rod pickup (spawn 6970008) sat at terrain height 47.077, 1.22 yd under the house floor at 48.294, so it could not be targeted from inside. Issue #10625.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the pickup stands on the house floor, not under it",
+      "actor": "p", "metric": "spawn_ground_gap", "guid": 6970008, "spawn_type": "gameobject", "min": -0.3, "max": 0.3
+    }
+  ]
+}

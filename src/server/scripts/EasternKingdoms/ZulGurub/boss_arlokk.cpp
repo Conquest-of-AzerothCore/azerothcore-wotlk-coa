@@ -305,7 +305,11 @@ enum ZulianProwlerSpells
 {
     SPELL_SNEAK_RANK_1_1         = 22766,
     SPELL_SNEAK_RANK_1_2         = 7939,  // Added to Spell_dbc
-    SPELL_MARK_OF_ARLOKK_TRIGGER = 24211  // Added to Spell_dbc
+    SPELL_MARK_OF_ARLOKK_TRIGGER = 24211, // Added to Spell_dbc
+    SPELL_PROWL                  = 2118350,
+    SPELL_SHRED                  = 2118351,
+    SPELL_SHADOWSTEP             = 2118352,
+    SPELL_PROWLER_FIERCE_BLOW    = 975011
 };
 
 enum ZulianProwlerEvents
@@ -329,8 +333,13 @@ public:
             else
                 _sideData = 2;
 
-            DoCast(me, SPELL_SNEAK_RANK_1_1);
-            DoCast(me, SPELL_SNEAK_RANK_1_2);
+            _scheduler.CancelAll();
+            _scheduler.SetValidator([this]
+            {
+                return !me->HasUnitState(UNIT_STATE_CASTING);
+            });
+
+            DoCast(me, SPELL_PROWL);
 
             if (Unit* arlokk = ObjectAccessor::GetUnit(*me, _instance->GetGuidData(NPC_ARLOKK)))
                 me->GetMotionMaster()->MovePoint(0, arlokk->GetPositionX(), arlokk->GetPositionY(), arlokk->GetPositionZ());
@@ -340,8 +349,21 @@ public:
         void JustEngagedWith(Unit* /*who*/) override
         {
             me->GetMotionMaster()->Clear(false);
-            me->RemoveAura(SPELL_SNEAK_RANK_1_1);
-            me->RemoveAura(SPELL_SNEAK_RANK_1_2);
+            me->RemoveAura(SPELL_PROWL);
+
+            _scheduler.Schedule(300ms, 4s, [this](TaskContext /*context*/)
+            {
+                DoCastVictim(SPELL_SHADOWSTEP);
+            });
+            _scheduler.Schedule(2s, 6s, [this](TaskContext /*context*/)
+            {
+                DoCastVictim(SPELL_SHRED);
+            });
+            _scheduler.Schedule(1s, 7s, [this](TaskContext context)
+            {
+                DoCastVictim(SPELL_PROWLER_FIERCE_BLOW);
+                context.Repeat(6s, 10s);
+            });
         }
 
         void SpellHit(Unit* caster, SpellInfo const* spell) override
@@ -366,6 +388,7 @@ public:
         {
             if (UpdateVictim())
             {
+                _scheduler.Update(diff);
                 DoMeleeAttackIfReady();
                 return;
             }
@@ -391,6 +414,7 @@ public:
     private:
         int32 _sideData;
         EventMap _events;
+        TaskScheduler _scheduler;
         InstanceScript* _instance;
     };
 

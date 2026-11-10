@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "Worldforged Brambleblade stands on the cave floor where the reporter stood (#11395)",
+  "contract": "#11395 reported no Brambleblade pickup (gameobject entry 90336, guid 6941487) in the Brambleblade Ravine cave. It stood 11 yd from the reporter at (-3106.8, -1209.4, 85.38), where the server finds no floor within 50 yd below it: the ground it measures there is the terrain 40.8 yd above, so the pickup lay inside the hill outside the cave. It now stands on the cave floor at the reporter's position (-3107.236, -1198.347, 85.295), so the pickup is visible and the chest opens.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -3107.236,
+    "y": -1198.347,
+    "z": 85.295,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 90336,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the pickup stands at the reporter's position",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -3107.236,
+      "y": -1198.347,
+      "z": 85.295,
+      "max": 0.5,
+      "guid": 6941487,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup rests on a floor instead of 40.8 yd under the terrain",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.5,
+      "guid": 6941487,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is grounded within 0.8 yd",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 6941487,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is not under water",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6941487,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is not inside a model",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "min": 0.5,
+      "guid": 6941487,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 90336
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

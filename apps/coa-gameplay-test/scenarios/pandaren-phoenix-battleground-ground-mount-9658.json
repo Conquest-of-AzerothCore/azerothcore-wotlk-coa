@@ -1,0 +1,189 @@
+{
+  "schema": 1,
+  "name": "Pandaren Phoenix mounts are usable as ground mounts in battlegrounds (#9658)",
+  "contract": [
+    "Emerald Pandaren Phoenix 900048 carries a 100% mounted ground speed aura and a 280% mounted flight speed aura.",
+    "Spell::CheckCast refused every spell with a flight aura inside a battleground (\"You can't use that here\"),",
+    "although AscensionMountSpeed already strips a known mount's flight effects wherever flying is not allowed,",
+    "battlegrounds included. Expected: outdoors in Warsong Gulch the known Phoenix mounts the player at ground speed and",
+    "never grants flight."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "alliance",
+      "race": 1,
+      "class": 31,
+      "level": 60
+    },
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "alliance",
+      "spell": 900048
+    },
+    {
+      "action": "set_skill",
+      "actor": "alliance",
+      "skill": 762,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "horde",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "alliance"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the rider enters Warsong Gulch",
+      "actor": "alliance",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the rider is in a battleground",
+      "actor": "alliance",
+      "metric": "battleground_team",
+      "min": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "alliance",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 835,
+      "save_as": "flight_grants_before_cast"
+    },
+    {
+      "action": "cast",
+      "actor": "alliance",
+      "spell": 900048
+    },
+    {
+      "action": "assert",
+      "label": "The Phoenix mounts the rider in Warsong Gulch",
+      "actor": "alliance",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The Phoenix keeps its 100% ground speed",
+      "actor": "alliance",
+      "metric": "run_speed_rate",
+      "min": 1.999,
+      "max": 2.001
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The Phoenix does not fly in a battleground",
+      "actor": "alliance",
+      "metric": "server_packets",
+      "opcode": 835,
+      "relative_to": "flight_grants_before_cast",
+      "equals": 0
+    }
+  ]
+}

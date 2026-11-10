@@ -84,12 +84,13 @@ using int32 = std::int32_t;
 enum AuraType { SPELL_AURA_NONE = 0, SPELL_AURA_ADD_FLAT_MODIFIER = 107, SPELL_AURA_ADD_PCT_MODIFIER = 108 };
 enum SpellModOp { SPELLMOD_DAMAGE = 0, SPELLMOD_CRITICAL_CHANCE = 7, SPELLMOD_DOT = 22 };
 enum SpellEffIndex { EFFECT_0 = 0, EFFECT_1 = 1 };
+enum SpellEffects { SPELL_EFFECT_NONE = 0, SPELL_EFFECT_SUMMON = 28, SPELL_EFFECT_SUMMON_PET = 56 };
 struct flag96
 {
     uint32 part[3] = {};
     uint32& operator[](int index) { return part[index]; }
 };
-struct SpellEffectInfo { AuraType ApplyAuraName = SPELL_AURA_NONE; int32 MiscValue = 0; int32 BasePoints = 0; flag96 SpellClassMask; };
+struct SpellEffectInfo { SpellEffects Effect = SPELL_EFFECT_NONE; AuraType ApplyAuraName = SPELL_AURA_NONE; int32 MiscValue = 0; int32 BasePoints = 0; flag96 SpellClassMask; };
 struct SpellInfo { uint32 Id = 0; SpellEffectInfo Effects[3]; };
 namespace AscensionWarcraftReborn
 {
@@ -134,10 +135,19 @@ int main()
     other.Effects[0].MiscValue = SPELLMOD_CRITICAL_CHANCE;
     ApplyAscensionWarcraftRebornMageContracts(&other);
     assert(other.Effects[0].SpellClassMask[1] == 0);
+    SpellInfo elemental; elemental.Id = 1170908;
+    elemental.Effects[0].Effect = SPELL_EFFECT_SUMMON;
+    ApplyAscensionWarcraftRebornMageContracts(&elemental);
+    assert(elemental.Effects[0].Effect == SPELL_EFFECT_SUMMON_PET);
+    SpellInfo stock; stock.Id = 31687;
+    stock.Effects[0].Effect = SPELL_EFFECT_SUMMON;
+    ApplyAscensionWarcraftRebornMageContracts(&stock);
+    assert(stock.Effects[0].Effect == SPELL_EFFECT_SUMMON);
 }
 """
     return check(compile_and_run(code, "coa-reborn-mage-contracts-"),
-                 "World in Flames' crit bonus covers Living Bomb; Fire Power's periodic bonus is its 4/7/10%")
+                 "World in Flames' crit bonus covers Living Bomb; Fire Power's periodic bonus is its 4/7/10%; "
+                 "the permanent Water Elemental is summoned as a pet")
 
 
 def compile_and_run(code, prefix):

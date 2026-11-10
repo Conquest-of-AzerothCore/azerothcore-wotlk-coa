@@ -31,6 +31,8 @@ class aura_ascension_venomancer_lifecycle : public AuraScript
         uint32 id = GetId();
         Unit* target = GetTarget();
         GetAura()->SetScriptValue(Brood,++State(player).sequence);
+        if (id == Weaver)
+            target->ApplySpellImmune(id,IMMUNITY_MECHANIC,MECHANIC_POLYMORPH,true);
         if (id == 504737 || id == 505203 || id == 808083 || id == 504341)
         {
             if (mode & AURA_EFFECT_HANDLE_REAPPLY)
@@ -137,7 +139,7 @@ class aura_ascension_venomancer_lifecycle : public AuraScript
         if (Named(GetSpellInfo(),800901) && slot > 0)
             amount = player->HasAura(706014) ? Amount(800903) : 0;
         if (Named(GetSpellInfo(),800926) && slot == 1 && player->HasAura(504356))
-            if (Aura* stacks = GetTarget()->GetAura(806454,player->GetGUID()))
+            if (Aura* stacks = GetUnitOwner()->GetAura(806454,player->GetGUID()))
                 AddPct(amount,stacks->GetStackAmount() * Amount(504356,1));
         if (id == 803216 && slot == 1)
             amount = int32(5 * (player->GetStat(STAT_INTELLECT) + player->GetStat(STAT_AGILITY)));
@@ -161,6 +163,8 @@ class aura_ascension_venomancer_lifecycle : public AuraScript
         uint32 id = GetId();
         Unit* target = GetTarget();
         bool expired = GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE;
+        if (id == Weaver)
+            target->ApplySpellImmune(id,IMMUNITY_MECHANIC,MECHANIC_POLYMORPH,false);
         if (id == 681291 && expired && !GetAura()->GetScriptValue(681301))
         {
             GetAura()->SetScriptValue(681301,1);

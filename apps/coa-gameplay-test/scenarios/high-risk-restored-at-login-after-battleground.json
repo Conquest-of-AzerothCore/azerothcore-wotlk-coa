@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "name": "High-Risk held back by a battleground returns at the next login outside it",
+  "contract": "A player can leave a battleground by logging out, so High-Risk turned off inside one is remembered with the character. A character that logs in outside a battleground with High-Risk held back gets High-Risk again instead of the PvE Mode login default, and nothing stays held back.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "player",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "player",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "player",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "player",
+      "spell": 1004019,
+      "stacks": 0
+    },
+    {
+      "action": "set_player_setting",
+      "label": "The character logged out of a battleground with High-Risk held back",
+      "actor": "player",
+      "source": "core.ruleset.high_risk_suspended",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "relog",
+      "actor": "player"
+    },
+    {
+      "action": "assert",
+      "label": "High-Risk returns at login",
+      "actor": "player",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The PvE Mode login default does not replace it",
+      "actor": "player",
+      "metric": "aura",
+      "spell": 9931032,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Nothing stays held back",
+      "actor": "player",
+      "metric": "player_setting",
+      "source": "core.ruleset.high_risk_suspended",
+      "index": 0,
+      "equals": 0
+    }
+  ]
+}

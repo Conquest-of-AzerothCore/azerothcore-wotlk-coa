@@ -1,0 +1,11 @@
+-- Resonance (706079) procced from Artificer's Wand but never from Crystal Cannon (#10371).
+--
+-- The row's family mask already names both abilities: family 28 word2 0x200 is Artificer's Wand damage 561064 and
+-- word2 0x1000 is Crystal Cannon damage 560134. The Crystal Cannon attacks are cast from the 704481 channel's
+-- periodic trigger with TRIGGERED_DISALLOW_PROC_EVENTS, and Aura::GetProcEffectMask drops a triggered-spell event
+-- unless the proc entry carries PROC_ATTR_TRIGGERED_CAN_PROC (or the event is an auto attack, a kill, or the
+-- triggering spell carries SPELL_ATTR3_NOT_A_PROC). Artificer's Wand's 561064 only worked because it carries
+-- SPELL_ATTR3_NOT_A_PROC, the other exemption in the same gate.
+--
+-- Let Resonance proc from triggered spells; the family mask still limits it to those two damage spells.
+UPDATE `spell_proc` SET `AttributesMask` = `AttributesMask` | 2 WHERE `SpellId` = 706079;

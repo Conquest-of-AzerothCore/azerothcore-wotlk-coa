@@ -153,6 +153,13 @@ void ClearOaths(Player* player)
     player->RemoveAurasDueToSpell(807764);
     State(player).oath = false;
 }
+void SyncOaths(Player* player)
+{
+    if (Aura* chain = player->GetAura(704576))
+        for (uint32 held : oaths)
+            if (Aura* granted = player->GetAura(held))
+                granted->SetDuration(chain->GetDuration());
+}
 void GrantOath(Player* player, uint32 oath)
 {
     Aura* chain = player->GetAura(704576);
@@ -165,12 +172,8 @@ void GrantOath(Player* player, uint32 oath)
         aura->SetDuration(duration);
     Cast(player, player, 704576);
     if (Aura* aura = player->GetAura(704576))
-    {
         aura->SetDuration(aura->GetMaxDuration());
-        for (uint32 held : oaths)
-            if (Aura* granted = player->GetAura(held))
-                granted->SetDuration(aura->GetDuration());
-    }
+    SyncOaths(player);
     if (first && State(player).retribution)
     {
         State(player).retribution = false;

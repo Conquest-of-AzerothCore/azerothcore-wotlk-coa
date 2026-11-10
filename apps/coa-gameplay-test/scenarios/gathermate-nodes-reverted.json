@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "The GatherMate2 node import is reverted to the earlier gathering nodes",
+  "contract": "rev_20261105_100_coa_revert_gathermate_nodes removes the nodes and pools added by rev_20261027_60_coa_gathermate_nodes (guids 12000000-12099999, pools 20000000-20099999) except those in Pale Reach, and restores the nodes and pools that import replaced outside Pale Reach. At the imported Silverleaf spot 12001165 in Westfall (the only spot of its area pool, so it always spawned) nothing spawns. Westfall Tree 8000112, an earlier node outside any pool that the import deleted, spawns again when the player stands beside it. In Pale Reach the imported Mageroyal 12002510, the only spot of its area pool, still spawns.",
+  "timeout_ms": 300000,
+  "location": {
+    "map": 0,
+    "x": -11201.08,
+    "y": 1329.48,
+    "z": 89.25,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 10,
+      "security": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "the imported Silverleaf spot is gone",
+      "actor": "p",
+      "metric": "spawn_active",
+      "spawn": 12001165,
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "actor": "p",
+      "command": ".go xyz -11165 1265 87 0"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "the earlier Westfall Tree is spawned again",
+      "actor": "p",
+      "metric": "spawn_active",
+      "spawn": 8000112,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "command",
+      "actor": "p",
+      "command": ".go xyz -8228.38 244.16 117 0"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "the imported Pale Reach node is kept",
+      "actor": "p",
+      "metric": "spawn_active",
+      "spawn": 12002510,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

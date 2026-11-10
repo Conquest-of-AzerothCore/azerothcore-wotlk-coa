@@ -298,7 +298,7 @@ class xoroth_casts : public AllSpellScript
         if (!player)
             return;
         uint32 fire = State(player).fire, id = aura->GetId();
-        if (id == 801064 || id == 801063)
+        if (id == 801064)
             duration = Amount(500906, EFFECT_2, player) * int32(fire);
         if (id == 801017)
             duration *= 1 + fire;
@@ -493,7 +493,7 @@ class xoroth_casts : public AllSpellScript
             spell->SetScriptValue(802615, 1);
             Cast(player, player, 802617);
         }
-        if (id == 804353 && spell->GetScriptValue(680729))
+        if (Named(info, 804353) && spell->GetScriptValue(680729))
         {
             bool old = State(player).curseShield;
             State(player).curseShield = true;

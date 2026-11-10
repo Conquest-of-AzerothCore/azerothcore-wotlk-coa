@@ -3,24 +3,33 @@
  *
  * Kit: Ascension's block 2118000-2118087. Timings: a Bronzebeard kill on video
  * (Ascension's mechanics, read off his cast bar at 10 frames a second), see
- * raid-difficulty-werkzeug/zg-video-zeitplan.json.
+ * raid-difficulty-werkzeug/zg-video-zeitplan.json. Holy Nova, Renew and Fierce Blow
+ * repeat as in the CoA combat log of 2026-08-02.
  *
  *   Troll form
- *     Holy Nova     first 7s,  every 18s   15 yards around him; heals him and
+ *     Holy Nova     first 7s,  every 17s   15 yards around him; heals him and
  *                                          his cobras for 6% of his health
- *     Renew         first 16s, every 24s   on himself, 2% of his health every 3s
+ *     Renew         first 16s, every 28s   on himself, 2% of his health every 3s
  *     Holy Wrath    first 18s, every 15s   on the tank, arcs on
  *     Holy Fire     first 22s, every 10s   random player, hit and burn
  *
- *   Snake form, at 50% (the video: 47-50%)
+ *   At 50% (the video: 47-50%) he drains the Avatar of Hethiss (see LoaAvatar),
+ *   taking ~1% damage while it dies; then the Gift of the Blood God and his
+ *   snake form.
+ *
+ *   Snake form, when the avatar dies
  *     Toxic Bombardement  first 1s,  every 15s   toxic cloud at a random player
- *     Parasitic Poison    first 3s,  every 15s   random player; dispelled, a
- *                                                Parasitic Serpent breaks out
+ *     Parasitic Poison    first 3s,  every 15s   random player; when it ends or
+ *                                                is dispelled, three Parasitic
+ *                                                Serpents break out
  *     Venom Spit          first 5s,  every 10s   everyone in front, stacks
  *                                                Virulent Poison
  *     Corpse Explosion    first 17s, every 40s   every snake corpse nearby
  *                                                bursts and leaves acid
  *     Poisonous Fangs     passive, his hits apply Virulent Poison
+ *
+ *   Both forms
+ *     Fierce Blow   tank, first 6.7-17.3s, then every 6-10s
  *
  * Decided here, not in the data:
  *   - Holy Wrath jumps up to 4 times, 10 yards each, +50% per jump minus 2%
@@ -66,7 +75,9 @@ namespace
         INFO_HOLY_WRATH            = 2118016,
         SPELL_HOLY_WRATH           = 2118020,
         SPELL_HOLY_WRATH_HIT       = 2118021,
+        SPELL_DRAIN_POWER          = 2118022,
         SPELL_ASPECT_OF_HETHISS    = 2118023,
+        SPELL_GIFT_OF_THE_BLOOD_GOD = 2118024,
         SPELL_POISONOUS_FANGS      = 2118025,
         SPELL_VIRULENT_POISON      = 2118026,
         SPELL_VENOM_SPIT           = 2118030,
@@ -81,9 +92,11 @@ namespace
 
     enum Npcs
     {
+        NPC_VENOXIS           = 14507,
         NPC_RAZZASHI_COBRA    = 11373,
         NPC_PARASITIC_SERPENT = 14884,
-        NPC_WORLD_TRIGGER     = 12999
+        NPC_WORLD_TRIGGER     = 12999,
+        NPC_AVATAR_OF_HETHISS = 666991
     };
 
     enum Events
@@ -97,6 +110,7 @@ namespace
         EVENT_PARASITIC_POISON,
         EVENT_VENOM_SPIT,
         EVENT_CORPSE_EXPLOSION,
+        EVENT_FIERCE_BLOW,
     };
 
     enum Phases
@@ -108,9 +122,12 @@ namespace
     constexpr float HOLY_NOVA_RANGE  = 15.0f;
     constexpr float WRATH_JUMP_RANGE = 10.0f;
     constexpr uint8 WRATH_JUMPS      = 4;
+    constexpr uint8 PARASITIC_SERPENTS = 3;
+    constexpr float SERPENT_PREY_THREAT = 1000000.0f;
     constexpr float SPIT_RANGE       = 60.0f;
     constexpr float SPIT_ARC         = float(M_PI) / 2;
     constexpr float CORPSE_RANGE     = 80.0f;
+    constexpr float VENOXIS_RANGE    = 200.0f;
 
     struct boss_venoxis_coa : public BossAI
     {
@@ -120,6 +137,8 @@ namespace
         {
             BossAI::Reset();
             me->RemoveAllAuras();
+            me->RemoveAllDynObjects();
+            _avatar.Restore(me);
             _snake = false;
             _frenzied = false;
             _burst.clear();
@@ -128,6 +147,7 @@ namespace
         void JustEngagedWith(Unit* who) override
         {
             BossAI::JustEngagedWith(who);
+            _avatar.Restore(me);
 
             events.SetPhase(PHASE_TROLL);
             events.ScheduleEvent(EVENT_THRASH, 8s);
@@ -135,13 +155,16 @@ namespace
             events.ScheduleEvent(EVENT_RENEW, 16s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_HOLY_WRATH, 18s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_HOLY_FIRE, 22s, 0, PHASE_TROLL);
+            events.ScheduleEvent(EVENT_FIERCE_BLOW, FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX);
         }
 
         void JustDied(Unit* killer) override
         {
             BossAI::JustDied(killer);
             Talk(SAY_DEATH);
+            _avatar.Release(me);
             me->RemoveAllAuras();
+            me->RemoveAllDynObjects();
         }
 
         void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType type, SpellSchoolMask school) override
@@ -151,17 +174,8 @@ namespace
             if (!_snake && me->HealthBelowPctDamaged(50, damage))
             {
                 _snake = true;
-                me->InterruptNonMeleeSpells(false);
-                DoCastSelf(SPELL_ASPECT_OF_HETHISS, true);
-                DoCastSelf(SPELL_POISONOUS_FANGS, true);
-                Talk(SAY_TRANSFORM);
-                DoResetThreatList();
-
-                events.SetPhase(PHASE_SNAKE);
-                events.ScheduleEvent(EVENT_TOXIC_BOMBARDEMENT, 1s, 0, PHASE_SNAKE);
-                events.ScheduleEvent(EVENT_PARASITIC_POISON, 3s, 0, PHASE_SNAKE);
-                events.ScheduleEvent(EVENT_VENOM_SPIT, 5s, 0, PHASE_SNAKE);
-                events.ScheduleEvent(EVENT_CORPSE_EXPLOSION, 17s, 0, PHASE_SNAKE);
+                if (!_avatar.Drain(me))
+                    TakeSnakeForm();
             }
 
             if (!_frenzied && me->HealthBelowPctDamaged(20, damage))
@@ -169,6 +183,22 @@ namespace
                 _frenzied = true;
                 DoCastSelf(SPELL_FRENZY, true);
             }
+        }
+
+        void TakeSnakeForm()
+        {
+            me->InterruptNonMeleeSpells(false);
+            DoCastSelf(SPELL_GIFT_OF_THE_BLOOD_GOD, true);
+            DoCastSelf(SPELL_ASPECT_OF_HETHISS, true);
+            DoCastSelf(SPELL_POISONOUS_FANGS, true);
+            Talk(SAY_TRANSFORM);
+            DoResetThreatList();
+
+            events.SetPhase(PHASE_SNAKE);
+            events.ScheduleEvent(EVENT_TOXIC_BOMBARDEMENT, 1s, 0, PHASE_SNAKE);
+            events.ScheduleEvent(EVENT_PARASITIC_POISON, 3s, 0, PHASE_SNAKE);
+            events.ScheduleEvent(EVENT_VENOM_SPIT, 5s, 0, PHASE_SNAKE);
+            events.ScheduleEvent(EVENT_CORPSE_EXPLOSION, 17s, 0, PHASE_SNAKE);
         }
 
         // The casts are dummies; what they do happens when they finish.
@@ -192,12 +222,15 @@ namespace
                     }
                     break;
                 case SPELL_VENOM_SPIT:
+                {
+                    uint32 const poison = sSpellMgr->GetSpellIdForDifficulty(SPELL_VIRULENT_POISON, me);
                     for (Player* p : PlayersInFront(me, SPIT_RANGE, SPIT_ARC))
                     {
                         me->CastSpell(p, SPELL_VENOM_SPIT_HIT, true);
-                        AddStack(me, p, SPELL_VIRULENT_POISON);
+                        AddStack(me, p, poison);
                     }
                     break;
+                }
                 case SPELL_PARASITIC_POISON:
                     if (Unit* target = ObjectAccessor::GetUnit(*me, _target))
                         me->CastSpell(target, SPELL_PARASITIC_POISON_DOT, true);
@@ -284,6 +317,9 @@ namespace
             if (!UpdateVictim())
                 return;
 
+            if (_avatar.Consumed(me))
+                TakeSnakeForm();
+
             events.Update(diff);
 
             if (me->HasUnitState(UNIT_STATE_CASTING))
@@ -299,13 +335,13 @@ namespace
                         break;
                     case EVENT_HOLY_NOVA:
                         DoCastSelf(SPELL_HOLY_NOVA);
-                        events.ScheduleEvent(EVENT_HOLY_NOVA, 18s, 0, PHASE_TROLL);
+                        events.ScheduleEvent(EVENT_HOLY_NOVA, 17s, 0, PHASE_TROLL);
                         break;
                     case EVENT_RENEW:
                     {
                         int32 heal = int32(me->CountPctFromMaxHealth(2));
                         me->CastCustomSpell(me, SPELL_RENEW, &heal, nullptr, nullptr, false);
-                        events.ScheduleEvent(EVENT_RENEW, 24s, 0, PHASE_TROLL);
+                        events.ScheduleEvent(EVENT_RENEW, 28s, 0, PHASE_TROLL);
                         break;
                     }
                     case EVENT_HOLY_WRATH:
@@ -349,32 +385,83 @@ namespace
     private:
         bool _snake = false;
         bool _frenzied = false;
+        LoaAvatar _avatar{ NPC_AVATAR_OF_HETHISS, SPELL_DRAIN_POWER };
         ObjectGuid _target;
         GuidSet _burst;
     };
 
-    // Parasitic Poison: removed by any means before it runs out, a Parasitic
-    // Serpent breaks out of the target.
+    // Parasitic Poison: when it ends, run out or removed, three Parasitic
+    // Serpents break out of the target (live log: three per poison). Each one
+    // hunts its own random player from Venoxis's threat list (live: six groups,
+    // every serpent on a different player).
     class spell_venoxis_coa_parasitic_poison : public AuraScript
     {
         PrepareAuraScript(spell_venoxis_coa_parasitic_poison);
 
         void AfterRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
         {
-            if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
-                return;
             Unit* target = GetTarget();
             Unit* caster = GetCaster();
             if (!target || !caster || !caster->IsAlive())
                 return;
-            if (Creature* boss = caster->ToCreature())
-                if (Creature* serpent = boss->SummonCreature(NPC_PARASITIC_SERPENT, target->GetPosition(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000))
-                    serpent->AI()->AttackStart(target);
+            Creature* boss = caster->ToCreature();
+            if (!boss || !boss->AI())
+                return;
+
+            std::list<Unit*> prey;
+            boss->AI()->SelectTargetList(prey, PARASITIC_SERPENTS, SelectTargetMethod::Random, 0, [](Unit* u)
+            {
+                return u->IsPlayer() && u->IsAlive();
+            });
+            if (prey.empty())
+                prey.push_back(target);
+
+            auto next = prey.begin();
+            for (uint8 i = 0; i < PARASITIC_SERPENTS; ++i)
+            {
+                Unit* victim = *next;
+                if (++next == prey.end())
+                    next = prey.begin();
+
+                Position const spot = target->GetNearPosition(2.0f, float(2 * M_PI) * i / PARASITIC_SERPENTS);
+                if (Creature* serpent = boss->SummonCreature(NPC_PARASITIC_SERPENT, spot, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 120000))
+                {
+                    serpent->GetThreatMgr().AddThreat(victim, SERPENT_PREY_THREAT);
+                    serpent->AI()->AttackStart(victim);
+                }
+            }
         }
 
         void Register() override
         {
             AfterEffectRemove += AuraEffectRemoveFn(spell_venoxis_coa_parasitic_poison::AfterRemove, EFFECT_0, SPELL_AURA_PERIODIC_DAMAGE, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    // Poisonous Fangs of his snakes: their hits add Virulent Poison on behalf of
+    // Venoxis while he fights, so it stacks with his own; otherwise the snake's.
+    class spell_venoxis_coa_snake_fangs : public AuraScript
+    {
+        PrepareAuraScript(spell_venoxis_coa_snake_fangs);
+
+        void HandleProc(AuraEffect const* /*aurEff*/, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+            Unit* snake = GetTarget();
+            Unit* victim = eventInfo.GetActionTarget();
+            if (!victim || victim == snake || !victim->IsAlive())
+                return;
+
+            Unit* source = snake;
+            if (Creature* venoxis = snake->FindNearestCreature(NPC_VENOXIS, VENOXIS_RANGE))
+                if (venoxis->IsInCombat())
+                    source = venoxis;
+            AddStack(source, victim, sSpellMgr->GetSpellIdForDifficulty(SPELL_VIRULENT_POISON, source));
+        }
+
+        void Register() override
+        {
+            OnEffectProc += AuraEffectProcFn(spell_venoxis_coa_snake_fangs::HandleProc, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
         }
     };
 }
@@ -383,4 +470,5 @@ void AddCoaVenoxisScripts()
 {
     RegisterZulGurubCreatureAI(boss_venoxis_coa);
     RegisterSpellScript(spell_venoxis_coa_parasitic_poison);
+    RegisterSpellScript(spell_venoxis_coa_snake_fangs);
 }

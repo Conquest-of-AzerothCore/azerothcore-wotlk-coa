@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Worldforged upgrades above the first rank open for the account once its raid boss falls",
-  "contract": "Issue #7361: on Ascension a Worldforged item climbed past its first upgrade at the Guardian of Time (custom stores 8 and 9, CMSG 0x6BB {u32 key, u32 quantity}, SMSG 0x6BC result string) once the account had killed a raid's last boss: Hakkar opened the next tier for every character of the account, then Ragnaros, then Onyxia (reported by the user). The unlock is kept per account, so a character of another account stays locked; a second character of the same account is not driven here because two sessions of one account share its extension packet queue. Each tier is a fixed item-id offset from the first-rank item: Rusty Blunderbuss 1378061 (ilvl 64) upgrades to 1380061 (ilvl 70) after Hakkar and to 1392061 (ilvl 73) after Ragnaros. The prices are computed, not recovered: tier n costs the first upgrade's price times 1 + 0.5 (n - 1), so 5000 Runes of Ascension becomes 7500 for tier 2. A locked purchase names the boss and takes nothing.",
+  "name": "Worldforged upgrades past the dungeon rank open for the account once its raid boss falls",
+  "contract": "Issue #7361: on Ascension a Worldforged item climbed past its dungeon rank at the Guardian of Time (custom stores 8 and 9, CMSG 0x6BB {u32 key, u32 quantity}, SMSG 0x6BC result string) once the account had killed a raid's last boss, and the unlock covered every character of the account. On the live ladder (user, 2026-11-04) item level 64 is the Zul'Gurub upgrade and item level 67 and 70 the Molten Core upgrades. The unlock is kept per account, so a character of another account stays locked; a second character of the same account is not driven here because two sessions of one account share its extension packet queue. Rusty Blunderbuss 1388061 (item level 60, dungeon rank) upgrades to 1378061 (item level 64, key 1, 5000 Runes of Ascension) after Hakkar, and on to 1380061 (item level 70, key 1380061) after Ragnaros. A locked purchase names the boss and takes nothing.",
   "timeout_ms": 120000,
   "location": {"map": 309, "x": -11787.4, "y": -1649.34, "z": 54.1017, "o": 4.76475, "ignore_access": true},
   "players": [
@@ -13,36 +13,38 @@
   ],
   "steps": [
     {"action": "wait", "label": "Let the instance settle", "ms": 3000},
-    {"action": "add_item", "actor": "killer", "item": 1378061},
+    {"action": "add_item", "actor": "killer", "item": 1388061},
     {"action": "add_item", "actor": "killer", "item": 375250, "count": 20000},
-    {"action": "add_item", "actor": "stranger", "item": 1378061},
-    {"action": "add_item", "actor": "stranger", "item": 375250, "count": 7500},
+    {"action": "add_item", "actor": "stranger", "item": 1388061},
+    {"action": "add_item", "actor": "stranger", "item": 375250, "count": 5000},
 
-    {"action": "client_packet", "label": "Upgrade the Rusty Blunderbuss before Hakkar falls", "actor": "killer", "opcode": 1723, "fields": [{"u32": 1380061}, {"u32": 1}]},
+    {"action": "client_packet", "label": "Upgrade the Rusty Blunderbuss before Hakkar falls", "actor": "killer", "opcode": 1723, "fields": [{"u32": 1}, {"u32": 1}]},
     {"action": "wait", "ms": 500},
-    {"action": "assert", "label": "The second tier waits for Hakkar", "actor": "killer", "metric": "server_packet_contains", "opcode": 1724, "text": "Defeat Hakkar", "equals": 1},
-    {"action": "assert", "label": "and keeps the item", "actor": "killer", "metric": "item_count", "item": 1378061, "equals": 1},
+    {"action": "assert", "label": "The first epic rank waits for Hakkar", "actor": "killer", "metric": "server_packet_contains", "opcode": 1724, "text": "Defeat Hakkar", "equals": 1},
+    {"action": "assert", "label": "and keeps the item", "actor": "killer", "metric": "item_count", "item": 1388061, "equals": 1},
     {"action": "assert", "label": "and the runes", "actor": "killer", "metric": "item_count", "item": 375250, "equals": 20000},
 
     {"action": "learn", "label": "Death Touch Copy kills outright", "actor": "killer", "spell": 24080},
     {"action": "cast", "actor": "killer", "spell": 24080, "target": "hakkar"},
     {"action": "assert", "label": "Hakkar falls", "actor": "hakkar", "metric": "alive", "equals": 0, "within_ms": 45000},
+    {"action": "assert", "label": "and pays his 2500 runes", "actor": "killer", "metric": "item_count", "item": 375250, "equals": 22500},
 
-    {"action": "client_packet", "label": "Upgrade the Rusty Blunderbuss after Hakkar", "actor": "killer", "opcode": 1723, "fields": [{"u32": 1380061}, {"u32": 1}]},
+    {"action": "client_packet", "label": "Upgrade the Rusty Blunderbuss after Hakkar", "actor": "killer", "opcode": 1723, "fields": [{"u32": 1}, {"u32": 1}]},
     {"action": "wait", "ms": 500},
-    {"action": "assert", "label": "The second tier is sold", "actor": "killer", "metric": "server_packet_contains", "opcode": 1724, "text": "PURCHASE_CUSTOM_STORE_ITEM_OK", "equals": 1},
-    {"action": "assert", "label": "as the ilvl 70 Rusty Blunderbuss", "actor": "killer", "metric": "item_count", "item": 1380061, "equals": 1},
-    {"action": "assert", "label": "in place of the first rank", "actor": "killer", "metric": "item_count", "item": 1378061, "equals": 0},
-    {"action": "assert", "label": "for 7500 runes", "actor": "killer", "metric": "item_count", "item": 375250, "equals": 12500},
+    {"action": "assert", "label": "The first epic rank is sold", "actor": "killer", "metric": "server_packet_contains", "opcode": 1724, "text": "PURCHASE_CUSTOM_STORE_ITEM_OK", "equals": 1},
+    {"action": "assert", "label": "as the item level 64 Rusty Blunderbuss", "actor": "killer", "metric": "item_count", "item": 1378061, "equals": 1},
+    {"action": "assert", "label": "in place of the dungeon rank", "actor": "killer", "metric": "item_count", "item": 1388061, "equals": 0},
+    {"action": "assert", "label": "for 5000 runes", "actor": "killer", "metric": "item_count", "item": 375250, "equals": 17500},
 
-    {"action": "client_packet", "label": "Upgrade to the third tier", "actor": "killer", "opcode": 1723, "fields": [{"u32": 1392061}, {"u32": 1}]},
+    {"action": "client_packet", "label": "Upgrade to item level 70", "actor": "killer", "opcode": 1723, "fields": [{"u32": 1380061}, {"u32": 1}]},
     {"action": "wait", "ms": 500},
-    {"action": "assert", "label": "The third tier waits for Ragnaros", "actor": "killer", "metric": "server_packet_contains", "opcode": 1724, "text": "Defeat Ragnaros", "equals": 1},
-    {"action": "assert", "label": "and keeps the second tier", "actor": "killer", "metric": "item_count", "item": 1380061, "equals": 1},
+    {"action": "assert", "label": "Item level 70 waits for Ragnaros", "actor": "killer", "metric": "server_packet_contains", "opcode": 1724, "text": "Defeat Ragnaros", "equals": 1},
+    {"action": "assert", "label": "and keeps the item level 64 rank", "actor": "killer", "metric": "item_count", "item": 1378061, "equals": 1},
+    {"action": "assert", "label": "and the runes", "actor": "killer", "metric": "item_count", "item": 375250, "equals": 17500},
 
-    {"action": "client_packet", "label": "A character of another account upgrades", "actor": "stranger", "opcode": 1723, "fields": [{"u32": 1380061}, {"u32": 1}]},
+    {"action": "client_packet", "label": "A character of another account upgrades", "actor": "stranger", "opcode": 1723, "fields": [{"u32": 1}, {"u32": 1}]},
     {"action": "wait", "ms": 500},
     {"action": "assert", "label": "Other accounts still need their own kill", "actor": "stranger", "metric": "server_packet_contains", "opcode": 1724, "text": "Defeat Hakkar", "equals": 1},
-    {"action": "assert", "label": "and keep their item", "actor": "stranger", "metric": "item_count", "item": 1378061, "equals": 1}
+    {"action": "assert", "label": "and keep their item", "actor": "stranger", "metric": "item_count", "item": 1388061, "equals": 1}
   ]
 }

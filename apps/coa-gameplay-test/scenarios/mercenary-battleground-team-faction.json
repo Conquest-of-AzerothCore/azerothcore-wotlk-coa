@@ -1,0 +1,395 @@
+{
+  "schema": 1,
+  "name": "Mercenary for Hire! and High-Risk: a Human Mercenary on the Horde side of a cross-faction battleground fights for the Horde",
+  "contract": "Mercenary for Hire! and High-Risk are open-world states; inside a battleground the battleground team decides the player's faction. A Human High-Risk Mercenary whom cross-faction queueing places on the Horde side of Warsong Gulch keeps Mercenary for Hire! but it has no effect there, and High-Risk turns itself off and is remembered: the server and their own client give them the Horde faction and the two can attack each other. Back outside, High-Risk returns and the Mercenary is an Outlaw again: a same-faction High-Risk player can attack them and receives faction 1163. Rendering and banner or flag clicks are untested.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "opponent",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "mercenary",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "observer",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "observer",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "observer",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "observer",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "mercenary",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "observer",
+      "enabled": true
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "The High-Risk player becomes a Mercenary",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "A High-Risk player receives the Mercenary's Outlaw faction",
+      "actor": "observer",
+      "metric": "sent_faction",
+      "target": "mercenary",
+      "equals": 1163,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The same-faction High-Risk player can attack the Mercenary",
+      "actor": "observer",
+      "metric": "can_attack",
+      "target": "mercenary",
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "The opponent queues for Warsong Gulch",
+      "actor": "opponent",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The Mercenary queues for Warsong Gulch",
+      "actor": "mercenary",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Let the queue invite both players",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "The opponent enters the battleground",
+      "actor": "opponent",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "opponent"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The Mercenary enters the battleground",
+      "actor": "mercenary",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "mercenary"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The opponent is in Warsong Gulch",
+      "actor": "opponent",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The Mercenary is in Warsong Gulch",
+      "actor": "mercenary",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The opponent fights for the Alliance",
+      "actor": "opponent",
+      "metric": "battleground_team",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Human Mercenary fights for the Horde",
+      "actor": "mercenary",
+      "metric": "battleground_team",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Mercenary keeps Mercenary for Hire!",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "High-Risk turns itself off inside the battleground",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "and is remembered for afterwards",
+      "actor": "mercenary",
+      "metric": "player_setting",
+      "source": "core.ruleset.high_risk_suspended",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Mercenary's own client receives the Horde faction",
+      "actor": "mercenary",
+      "metric": "sent_faction",
+      "target": "mercenary",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The server gives the Mercenary the Horde faction",
+      "actor": "mercenary",
+      "metric": "faction",
+      "equals": 2
+    },
+    {
+      "action": "teleport",
+      "label": "The Mercenary walks over to the Alliance entrance",
+      "actor": "mercenary",
+      "map": 489,
+      "x": 1521.0,
+      "y": 1479.0,
+      "z": 352.0
+    },
+    {
+      "action": "wait",
+      "label": "Let the opponent see the Mercenary",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The Mercenary can attack the Alliance opponent",
+      "actor": "mercenary",
+      "metric": "can_attack",
+      "target": "opponent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Alliance opponent can attack the Mercenary",
+      "actor": "opponent",
+      "metric": "can_attack",
+      "target": "mercenary",
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "The Mercenary leaves the battleground",
+      "actor": "mercenary",
+      "opcode": 737,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The Mercenary is back outside",
+      "actor": "mercenary",
+      "metric": "battleground_team",
+      "equals": -1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "High-Risk returns after the battleground",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "and is no longer held back",
+      "actor": "mercenary",
+      "metric": "player_setting",
+      "source": "core.ruleset.high_risk_suspended",
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The same-faction High-Risk player can attack the Mercenary again",
+      "actor": "observer",
+      "metric": "can_attack",
+      "target": "mercenary",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "and the Mercenary is an Outlaw again",
+      "actor": "mercenary",
+      "metric": "faction",
+      "equals": 1163,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The Mercenary's own client receives their Human faction again",
+      "actor": "mercenary",
+      "metric": "sent_faction",
+      "target": "mercenary",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

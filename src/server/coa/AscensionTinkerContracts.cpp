@@ -109,7 +109,10 @@ void ApplyContracts(SpellInfo* info)
         info->ProcFlags = 0;
     }
     if (Named(info,801709))
+    {
         info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_PERIODIC_DUMMY;
+        info->SpellLevel = 0;
+    }
     if (id == 573054)
     {
         info->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ENEMY);

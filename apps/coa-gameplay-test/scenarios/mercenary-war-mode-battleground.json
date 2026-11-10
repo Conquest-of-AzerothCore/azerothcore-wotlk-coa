@@ -1,0 +1,303 @@
+{
+  "schema": 1,
+  "name": "Mercenary for Hire!: a War Mode Mercenary on the Horde side of a cross-faction battleground fights for the Horde",
+  "contract": "Mercenary for Hire! is an open-world state that War Mode and High-Risk players can take up. A Human War Mode Mercenary whom cross-faction queueing places on the Horde side of Warsong Gulch keeps War Mode and Mercenary for Hire!, but the server gives them the Horde faction, their own client receives it, and they and an Alliance opponent can attack each other. Inside the battleground Mercenary for Hire! cannot be cast again even though War Mode allows it outside, and losing it there leaves the Horde faction in place.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "opponent",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "mercenary",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 1004019,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "mercenary",
+      "spell": 1004119,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "mercenary",
+      "enabled": true
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "The War Mode player becomes a Mercenary",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "and is an Outlaw",
+      "actor": "mercenary",
+      "metric": "faction",
+      "equals": 1163
+    },
+    {
+      "action": "client_packet",
+      "label": "The opponent queues for Warsong Gulch",
+      "actor": "opponent",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The Mercenary queues for Warsong Gulch",
+      "actor": "mercenary",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Let the queue invite both players",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "The opponent enters the battleground",
+      "actor": "opponent",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "opponent"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The Mercenary enters the battleground",
+      "actor": "mercenary",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "mercenary"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The Mercenary is in Warsong Gulch",
+      "actor": "mercenary",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The opponent is in Warsong Gulch",
+      "actor": "opponent",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The Human Mercenary fights for the Horde",
+      "actor": "mercenary",
+      "metric": "battleground_team",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "War Mode stays on",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 1004119,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Mercenary keeps Mercenary for Hire!",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The server gives the Mercenary the Horde faction",
+      "actor": "mercenary",
+      "metric": "faction",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "and the Mercenary's own client receives it",
+      "actor": "mercenary",
+      "metric": "sent_faction",
+      "target": "mercenary",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "label": "The Mercenary walks over to the Alliance entrance",
+      "actor": "mercenary",
+      "map": 489,
+      "x": 1521.0,
+      "y": 1479.0,
+      "z": 352.0
+    },
+    {
+      "action": "wait",
+      "label": "Let the opponent see the Mercenary",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The Mercenary can attack the Alliance opponent",
+      "actor": "mercenary",
+      "metric": "can_attack",
+      "target": "opponent",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The Alliance opponent can attack the Mercenary",
+      "actor": "opponent",
+      "metric": "can_attack",
+      "target": "mercenary",
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "The Mercenary loses Mercenary for Hire!",
+      "actor": "mercenary",
+      "spell": 9930874,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Losing it leaves the Horde faction in place",
+      "actor": "mercenary",
+      "metric": "faction",
+      "equals": 2
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 9930874
+    },
+    {
+      "action": "wait",
+      "label": "Give the cast time to land",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Mercenary for Hire! cannot be cast inside the battleground",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "and the Mercenary still fights for the Horde",
+      "actor": "mercenary",
+      "metric": "faction",
+      "equals": 2
+    }
+  ]
+}

@@ -22,6 +22,7 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "SpellAuras.h"
+#include "SpellAuraEffects.h"
 #include "SpellMgr.h"
 #include "ManastormDataStore.h"
 #include "ManastormGenerator.h"
@@ -34,6 +35,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <iterator>
 #include <utility>
 #include "Random.h"
 #include "Chat.h"
@@ -2774,6 +2776,13 @@ namespace
         return true;
     }
 
+    bool HasPlayerLeftStageEntrance(Player const* player, Map const* stage, GameTele const& entrance)
+    {
+        return player && stage && player->IsInWorld() && !player->IsBeingTeleported() && !player->IsInFlight() &&
+            player->FindMap() == stage && player->IsAlive() &&
+            player->GetExactDist(entrance.position_x, entrance.position_y, entrance.position_z) > 8.0f;
+    }
+
     void ApplySafetyBubbleProtection(Unit* unit, ManastormRun const& run)
     {
         if (!unit || !unit->IsAlive() || !unit->IsInWorld() ||
@@ -2787,6 +2796,18 @@ namespace
         {
             aura->SetMaxDuration(int32(run.GetPreparationProtectionRemainingMs()));
             aura->SetDuration(int32(run.GetPreparationProtectionRemainingMs()));
+        }
+
+        if (unit->IsPlayer())
+        {
+            Aura* aura = unit->GetAura(SPELL_SAFETY_BUBBLE, unit->GetGUID());
+            if (!aura)
+                aura = unit->AddAura(SPELL_SAFETY_BUBBLE, unit);
+            if (aura)
+            {
+                aura->SetMaxDuration(int32(run.GetPreparationProtectionRemainingMs()));
+                aura->SetDuration(int32(run.GetPreparationProtectionRemainingMs()));
+            }
         }
     }
 
@@ -2878,7 +2899,129 @@ namespace
         }
     }
 
-    void ClearSafetyBubble(Player* player)
+    bool IsRecoverableStageBuff(AuraApplication const* application, Player const* player)
+    {
+        Aura const* aura = application->GetBase();
+        return application->IsPositive() && aura->GetOwner() == player &&
+            !aura->IsPassive() && !aura->IsArea() && !aura->HasEffectType(SPELL_AURA_MOUNTED) &&
+            aura->CanBeSaved() &&
+            !aura->GetCasterGUID().IsEmpty() &&
+            std::find(std::begin(SAFETY_BUBBLE_CLEANUP_SPELLS), std::end(SAFETY_BUBBLE_CLEANUP_SPELLS),
+                aura->GetId()) == std::end(SAFETY_BUBBLE_CLEANUP_SPELLS);
+    }
+
+    void ClearStageDebuffs(Player* player)
+    {
+        player->RemoveAppliedAuras([](AuraApplication const* application)
+        {
+            return !application->IsPositive() && !application->GetBase()->IsPassive();
+        });
+    }
+
+    void CaptureStageRecovery(Player* player, ManastormRun& run)
+    {
+        if (!run.HasPreviousStage() || !run.IsPendingStageTransfer(player->GetGUID().GetCounter()) ||
+            player->GetMapId() != run.GetPreviousSegment().MapId ||
+            player->GetInstanceId() != run.GetPreviousInstanceId())
+            return;
+
+        auto& recovery = run.StageRecoveries[player->GetGUID().GetCounter()];
+        recovery = {};
+        recovery.DestinationInstanceId = run.GetInstanceId();
+        if (!player->IsAlive())
+            return;
+
+        for (auto const& [spellId, application] : player->GetAppliedAuras())
+        {
+            if (!IsRecoverableStageBuff(application, player))
+                continue;
+            Aura const* aura = application->GetBase();
+            ManastormRun::StageBuff saved;
+            saved.Spell = spellId;
+            saved.Caster = aura->GetCasterGUID();
+            saved.CastItem = aura->GetCastItemGUID();
+            saved.EffectMask = application->GetEffectMask();
+            saved.Stacks = aura->GetStackAmount();
+            saved.Charges = aura->GetCharges();
+            saved.MaxDuration = aura->GetMaxDuration();
+            for (uint8 index = 0; index < MAX_SPELL_EFFECTS; ++index)
+                if (AuraEffect const* effect = aura->GetEffect(index))
+                {
+                    saved.Amounts[index] = effect->GetAmount();
+                    saved.BaseAmounts[index] = effect->GetBaseAmount();
+                    if (effect->CanBeRecalculated())
+                        saved.RecalculateMask |= uint8(1 << index);
+                }
+            recovery.Buffs.push_back(saved);
+        }
+    }
+
+    void RestoreStageRecovery(Player* player, ManastormRun& run)
+    {
+        auto found = run.StageRecoveries.find(player->GetGUID().GetCounter());
+        if (found == run.StageRecoveries.end() ||
+            found->second.DestinationInstanceId != run.GetInstanceId())
+            return;
+
+        if (!player->IsAlive())
+        {
+            player->ResurrectPlayer(1.0f, false);
+            if (!player->IsAlive())
+                return;
+            player->SpawnCorpseBones();
+        }
+
+        auto recovery = std::move(found->second);
+        run.StageRecoveries.erase(found);
+        ClearStageDebuffs(player);
+        for (auto& saved : recovery.Buffs)
+        {
+            if (player->GetAura(saved.Spell, saved.Caster, saved.CastItem))
+                continue;
+            SpellInfo const* info = sSpellMgr->GetSpellInfo(saved.Spell);
+            if (!info)
+                continue;
+            if (Aura* aura = Aura::TryCreate(info, saved.EffectMask, player, nullptr,
+                saved.BaseAmounts.data(), nullptr, saved.Caster, saved.CastItem))
+            {
+                aura->SetLoadedState(saved.MaxDuration, saved.MaxDuration, saved.Charges, saved.Stacks,
+                    saved.RecalculateMask, saved.Amounts.data());
+                aura->ApplyForTargets();
+            }
+        }
+        for (auto const& [spellId, application] : player->GetAppliedAuras())
+            if (IsRecoverableStageBuff(application, player))
+            {
+                Aura* aura = application->GetBase();
+                aura->SetDuration(aura->GetMaxDuration());
+            }
+        player->SetFullHealth();
+        player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
+    }
+
+    bool PrepareStageMemberTransfer(Player* player, ManastormRun& run)
+    {
+        CaptureStageCompanions(player, run);
+        CaptureStageRecovery(player, run);
+        if (run.HasPreviousStage() && !player->IsAlive())
+        {
+            player->ResurrectPlayer(1.0f, false);
+            if (!player->IsAlive())
+                return false;
+            player->SpawnCorpseBones();
+        }
+        return true;
+    }
+
+    bool IsProtectedStagePortal(Creature const* portal)
+    {
+        if (!portal || portal->GetEntry() != NPC_STAGE_PORTAL)
+            return false;
+        Map const* map = portal->FindMap();
+        return map && map->IsScriptedPrivateInstance();
+    }
+
+    void ClearSafetyBubble(Player* player, bool preserveEntranceVisual = false)
     {
         if (!player)
             return;
@@ -2890,8 +3033,8 @@ namespace
         for (uint32 spellId :
             SAFETY_BUBBLE_CLEANUP_SPELLS)
         {
-            player->RemoveDynObject(
-                spellId);
+            if (!preserveEntranceVisual || spellId != SPELL_SAFETY_BUBBLE)
+                player->RemoveDynObject(spellId);
 
             player->RemoveAurasDueToSpell(
                 spellId);
@@ -3252,6 +3395,13 @@ void ManastormMgr::SendClientState(
                 rewardError);
         }
 
+        if (ManastormRewards::Instance().IsCoALootMode(player->GetGUID().GetCounter()))
+        {
+            cacheChancePct = 0;
+            if (!guaranteedCaches)
+                cacheItemId = 0;
+        }
+
         message
             << "1|"
             << run->GetDepth()
@@ -3279,6 +3429,24 @@ void ManastormMgr::SendClientState(
             << guaranteedCaches
             << "|"
             << cacheItemId;
+    }
+
+    if (ManastormRewards::Instance().IsCoALootMode(player->GetGUID().GetCounter()))
+    {
+        ManastormCoATokenState tokens;
+        bool const available = ManastormRewards::Instance().LoadCoATokenState(player->GetGUID().GetCounter(), tokens);
+        uint32 quantity = 0;
+        if (available && active)
+        {
+            bool const first = ManastormRewards::Instance().IsCoAFirstClear(
+                tokens, run->GetMode(), run->IsEndgame(), run->GetDepth());
+            uint32 const amount = ManastormRewards::Instance().CoATokenReward(
+                run->GetMode(), run->IsEndgame(), run->GetDepth(), first);
+            quantity = ManastormCoALoot::Award(amount, tokens.Window.Earned, ManastormModuleConfig::CoATokenCap());
+        }
+        message << "|COA_TOKENS|" << ManastormCoALoot::TokenItem << '|' << quantity << '|'
+            << tokens.Window.Earned << '|' << ManastormModuleConfig::CoATokenCap() << '|'
+            << tokens.Window.Start << '|' << tokens.Window.End << '|' << (available ? 1 : 0);
     }
 
     WorldPacket packet;
@@ -4795,6 +4963,7 @@ void ManastormMgr::SpawnStagePortal(
     {
         portal->SetFaction(35);
         portal->SetReactState(REACT_PASSIVE);
+        portal->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
 
         //
         // 80910 is only an invisible visual/controller anchor.
@@ -5079,7 +5248,11 @@ bool ManastormMgr::PrepareStage(
             continue;
         }
 
-        CaptureStageCompanions(member, run);
+        if (!PrepareStageMemberTransfer(member, run))
+        {
+            error = "A dead Manastorm member could not be revived before stage transfer.";
+            return false;
+        }
         member->CombatStopWithPets(
             true);
 
@@ -5234,6 +5407,11 @@ bool ManastormMgr::TransferMemberToCurrentStage(
     player->SetScriptedPrivateInstanceId(
         run.GetInstanceId());
 
+    if (!PrepareStageMemberTransfer(player, run))
+    {
+        error = "The dead Manastorm member could not be revived before stage transfer.";
+        return false;
+    }
     player->CombatStopWithPets(
         true);
 
@@ -5803,17 +5981,11 @@ bool ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
         run->GetInstanceId())
     {
         //
-        // Server-authorized stage movement must not be
-        // mistaken for abandoning the run.
-        //
-        // During an Endless depth transition the run may
-        // temporarily be Transitioning / Preparing while
-        // the destination instance is being established.
-        //
-        if (run->GetState() ==
-            ManastormRunState::Transitioning ||
-            run->GetState() ==
-            ManastormRunState::Preparing)
+        // Members awaiting their portal remain in the completed private map.
+    if (run->HasPreviousStage() &&
+        run->IsPendingStageTransfer(player->GetGUID().GetCounter()) &&
+        map->GetId() == run->GetPreviousSegment().MapId &&
+        map->GetInstanceId() == run->GetPreviousInstanceId())
         {
             RemoveBaselineRunItems(
                 player,
@@ -5835,9 +6007,7 @@ bool ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
         // - normal dungeon exit portal
         // - any other external map/instance transfer
         //
-        // The external teleport has already succeeded,
-        // therefore FailRun receives this player's GUID
-        // and will NOT teleport that player back again.
+        // External departure cleanup retains the destination already reached.
         //
         ObjectGuid::LowType const departingGuid =
             player->GetGUID().GetCounter();
@@ -5849,10 +6019,13 @@ bool ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
             << departingGuid
             << " left the active Endless stage.";
 
-        FailRun(
-            *run,
-            reason.str(),
-            departingGuid);
+        if (run->GetMembers().size() > 1)
+        {
+            std::string error;
+            LeaveRunMember(*run, player, false, ManastormFailureExit::SavedLocation, error);
+        }
+        else
+            FailRun(*run, reason.str(), departingGuid);
 
         return false;
     }
@@ -5882,31 +6055,34 @@ bool ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
     //
     GrantBaselineRunItems(player);
 
+    ManastormSegment const& segment = run->GetSegment();
+    if (map->GetId() != segment.MapId || map->GetInstanceId() != run->GetInstanceId())
+        return true;
+
     // Arrival hooks can repeat for reconnects. Reset each member once per floor.
     // The shared potion backend keeps ownership of its three-charge recharge state.
     if ((run->GetState() == ManastormRunState::Preparing ||
         run->GetState() == ManastormRunState::Active) &&
         run->MarkStageCooldownsReset(player->GetGUID().GetCounter()))
     {
-        for (auto const& gadget : Ascension::Manastorm::Gadgets)
-        {
-            if (gadget.passive || !player->HasSpell(gadget.spell) ||
-                gadget.spell == 254440 || gadget.spell == 992090 || gadget.spell == 762608)
-                continue;
-
-            player->RemoveSpellCooldown(gadget.spell, true);
-        }
-
+        auto const recovery = run->StageRecoveries.find(player->GetGUID().GetCounter());
+        if (recovery != run->StageRecoveries.end() &&
+            recovery->second.DestinationInstanceId == run->GetInstanceId())
+            player->RemoveAllSpellCooldown();
+        else
+            for (auto const& gadget : Ascension::Manastorm::Gadgets)
+                if (!gadget.passive && player->HasSpell(gadget.spell) &&
+                    gadget.spell != 254440 && gadget.spell != 992090 && gadget.spell != 762608)
+                    player->RemoveSpellCooldown(gadget.spell, true);
         player->RemoveActivePetSpellCooldowns();
+        SyncManastormPotionCharges(player);
     }
 
-    ManastormSegment const& segment = run->GetSegment();
-    if (map->GetId() != segment.MapId ||
-        map->GetInstanceId() != run->GetInstanceId())
-        return true;
-
     if (run->GetState() == ManastormRunState::Preparing || run->GetState() == ManastormRunState::Active)
+    {
+        RestoreStageRecovery(player, *run);
         RestoreStageCompanions(player, *run);
+    }
 
     if (run->GetState() == ManastormRunState::Preparing)
     {
@@ -6011,8 +6187,7 @@ bool ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
         }
         for (auto guid : run->GetMembers())
             if (Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid)))
-                start = start || (member->IsAlive() && member->GetExactDist(entrance->position_x,
-                    entrance->position_y, entrance->position_z) > 8.0f);
+                start = start || HasPlayerLeftStageEntrance(member, map, *entrance);
         if (!start)
         {
             SendClientState(player, run);
@@ -6020,7 +6195,7 @@ bool ManastormMgr::OnPlayerEnterMap(Map* map, Player* player)
         }
         for (auto guid : run->GetMembers())
             if (Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid)))
-                ClearSafetyBubble(member);
+            ClearSafetyBubble(member, true);
         run->SetState(ManastormRunState::Active);
 
         //
@@ -6889,6 +7064,36 @@ bool ManastormMgr::TrySpawnTrashHeart(
         true);
 }
 
+bool ManastormMgr::HasPersonalLevelScaling(Map const* map, Player const* viewer)
+{
+    if (!map || !map->IsScriptedPrivateInstance())
+        return false;
+    ManastormRun* run = GetRunForStage(map->GetId(), map->GetInstanceId());
+    if (!run || run->GetMode() == ManastormMode::Solo)
+        return false;
+    return !viewer || (viewer->FindMap() == map && GetRunFor(viewer) == run);
+}
+
+bool ManastormMgr::IsPlayerProtectedDuringTransition(Player const* player) const
+{
+    ManastormRun const* run = GetRunFor(player);
+    Map const* map = player ? player->FindMap() : nullptr;
+    if (!run || !map)
+        return false;
+
+    if (run->GetState() == ManastormRunState::StageComplete &&
+        map->GetId() == run->GetSegment().MapId && map->GetInstanceId() == run->GetInstanceId())
+        return true;
+
+    bool const transferring = run->GetState() == ManastormRunState::StageComplete ||
+        run->GetState() == ManastormRunState::Transitioning ||
+        run->GetState() == ManastormRunState::Preparing || run->GetState() == ManastormRunState::Active;
+    return transferring && run->HasPreviousStage() &&
+        run->IsPendingStageTransfer(player->GetGUID().GetCounter()) &&
+        map->GetId() == run->GetPreviousSegment().MapId &&
+        map->GetInstanceId() == run->GetPreviousInstanceId();
+}
+
 void ManastormMgr::OnDamage(
     Unit* attacker,
     Unit* victim,
@@ -6896,6 +7101,12 @@ void ManastormMgr::OnDamage(
 {
     if (!victim || !damage)
         return;
+
+    if (IsProtectedStagePortal(victim->ToCreature()) || IsPlayerProtectedDuringTransition(victim->ToPlayer()))
+    {
+        damage = 0;
+        return;
+    }
 
     if (sManastormReflectDamageDispatch)
         return;
@@ -8702,6 +8913,11 @@ void ManastormMgr::OnUnitDeath(
     run->SetState(
         ManastormRunState::StageComplete);
 
+    for (ObjectGuid::LowType guid : run->GetMembers())
+        if (Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid)))
+            if (member->FindMap() == map)
+                ClearStageDebuffs(member);
+
     // Spawn the recovered Ascension presentation at the dead objective:
     //
     //     80910 invisible controller
@@ -9571,7 +9787,7 @@ void ManastormMgr::Update(uint32 diff)
                             run.GetInstanceId())
                     {
                         ClearSafetyBubble(
-                            member);
+                            member, true);
                     }
                 }
             }
@@ -9670,11 +9886,149 @@ void ManastormMgr::Update(uint32 diff)
     }
 }
 
+bool ManastormMgr::LeaveRunMember(ManastormRun& run, Player* player, bool returnToSavedLocation,
+    ManastormFailureExit exit, std::string& error)
+{
+    error.clear();
+    if (!player || GetRunFor(player) != &run || run.GetMembers().size() < 2)
+    {
+        error = "The player is not part of a shared Manastorm run.";
+        return false;
+    }
+    ObjectGuid::LowType const guid = player->GetGUID().GetCounter();
+    WorldLocation const* savedReturn = run.GetReturnLocation(guid);
+    if (returnToSavedLocation &&
+        (!savedReturn || !player->IsInWorld() || player->IsBeingTeleported()))
+    {
+        error = "The player is not ready to leave Manastorm.";
+        return false;
+    }
+
+    WorldLocation destination = savedReturn ? *savedReturn : WorldLocation();
+    if (returnToSavedLocation && exit == ManastormFailureExit::FactionHub)
+        if (ManastormHubReturn const* hub = ManastormDataStore::Instance().GetHubReturn(
+            static_cast<uint8>(player->GetTeamId())))
+            destination = WorldLocation(hub->MapId, hub->PositionX, hub->PositionY,
+                hub->PositionZ + hub->ZOffset, hub->Orientation);
+
+    if (returnToSavedLocation && !player->IsAlive())
+    {
+        player->ResurrectPlayer(1.0f, false);
+        if (!player->IsAlive())
+        {
+            error = "The player could not be revived to leave Manastorm.";
+            return false;
+        }
+        player->SpawnCorpseBones();
+    }
+
+    uint32 const privateMap = player->GetScriptedPrivateMapId();
+    uint32 const privateInstance = player->GetScriptedPrivateInstanceId();
+    ObjectGuid const privateOwner = player->GetScriptedPrivateOwner();
+    auto const privateMembers = player->GetScriptedPrivateMembers();
+    WorldLocation const privateReturn = player->GetScriptedPrivateReturn();
+    bool const databaseSpawns = player->LoadsScriptedPrivateDatabaseSpawns();
+    Map* departureMap = player->FindMap();
+    bool const forceFarTransfer = departureMap && departureMap->IsScriptedPrivateInstance();
+    ManastormDifficultySettings const activeDifficulty{player->GetDungeonDifficulty(), player->GetRaidDifficulty()};
+    auto original = _originalDifficulties.find(guid);
+    bool const hadOriginalDifficulty = original != _originalDifficulties.end();
+    ManastormDifficultySettings const originalDifficulty =
+        hadOriginalDifficulty ? original->second : activeDifficulty;
+    auto potion = _manastormPotionCharges.find(guid);
+    bool const hadPotionState = potion != _manastormPotionCharges.end();
+    ManastormPotionChargeState const potionState = hadPotionState ? potion->second : ManastormPotionChargeState{};
+    uint32 companionSpell = 0;
+    if (!player->GetCritterGUID().IsEmpty())
+        if (Creature* critter = ObjectAccessor::GetCreature(*player, player->GetCritterGUID()))
+            if (critter->GetEntry() == NPC_COGSLEY)
+                companionSpell = critter->GetUInt32Value(UNIT_CREATED_BY_SPELL);
+
+    ManastormRewards::Instance().SettlePendingCurrency(guid);
+    ManastormAffixEngine::Instance().RemoveActivePlayerAffixes(player, run);
+    RemoveBaselineRunItems(player, true);
+    DespawnCogsleyCompanion(player);
+    RestoreOriginalDifficulties(player);
+    player->ClearScriptedPrivateInstance();
+    if (returnToSavedLocation)
+    {
+        player->CombatStopWithPets(true);
+        if (!player->TeleportTo(destination.GetMapId(), destination.GetPositionX(), destination.GetPositionY(),
+            destination.GetPositionZ(), destination.GetOrientation(), 0, nullptr, forceFarTransfer))
+        {
+            if (privateMap != MAPID_INVALID)
+            {
+                player->PrepareScriptedPrivateInstance(privateMap, privateReturn, privateOwner,
+                    privateMembers, databaseSpawns);
+                player->SetScriptedPrivateInstanceId(privateInstance);
+            }
+            player->SetDungeonDifficulty(activeDifficulty.Dungeon);
+            player->SetRaidDifficulty(activeDifficulty.Raid);
+            if (hadOriginalDifficulty)
+                _originalDifficulties[guid] = originalDifficulty;
+            GrantBaselineRunItems(player);
+            if (hadPotionState)
+                _manastormPotionCharges[guid] = potionState;
+            SyncManastormPotionCharges(player);
+            if (companionSpell && sSpellMgr->GetSpellInfo(companionSpell))
+                player->CastSpell(player, companionSpell, true);
+            if (run.GetState() == ManastormRunState::Active)
+                ManastormAffixEngine::Instance().ApplyActivePlayerAffixes(player, run);
+            error = "Returning from Manastorm failed. You are still a member of the run.";
+            return false;
+        }
+    }
+
+    run.RemoveMember(guid);
+    _memberRunIds.erase(guid);
+    std::set<ObjectGuid> members;
+    for (ObjectGuid::LowType memberGuid : run.GetMembers())
+        members.insert(ObjectGuid::Create<HighGuid::Player>(memberGuid));
+    ObjectGuid const owner = ObjectGuid::Create<HighGuid::Player>(run.GetOwnerGuid());
+    auto updateMap = [&](uint32 mapId, uint32 instanceId)
+    {
+        if (!instanceId)
+            return;
+        if (Map* map = sMapMgr->FindMap(mapId, instanceId))
+            if (map->IsScriptedPrivateInstance())
+                map->SetScriptedPrivateOwner(owner, members, map->LoadsScriptedPrivateDatabaseSpawns());
+    };
+    updateMap(run.GetSegment().MapId, run.GetInstanceId());
+    if (run.HasPreviousStage())
+        updateMap(run.GetPreviousSegment().MapId, run.GetPreviousInstanceId());
+    for (ObjectGuid::LowType memberGuid : run.GetMembers())
+        if (Player* member = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(memberGuid)))
+            if (WorldLocation const* location = run.GetReturnLocation(memberGuid))
+            {
+                member->PrepareScriptedPrivateInstance(run.GetSegment().MapId, *location, owner, members, true);
+                member->SetScriptedPrivateInstanceId(run.GetInstanceId());
+            }
+    if (run.HasPreviousStage() && !run.HasPendingStageTransfers())
+    {
+        if (run.GetState() != ManastormRunState::StageComplete)
+            _transitionTimers.erase(run.GetRunId());
+        FinishPreviousStageTransition(run);
+    }
+    SendClientState(player, nullptr);
+    SendClientProgression(player);
+    BroadcastClientState(run);
+    player->SendSystemMessage("Manastorm: you left the run. The remaining members can continue.");
+    return true;
+}
+
 bool ManastormMgr::HandleReleaseAfterWipe(Player* player)
 {
     ManastormRun* run = GetRunFor(player);
     if (!run || run->GetState() != ManastormRunState::AwaitingExit)
         return false;
+
+    if (run->GetMembers().size() > 1)
+    {
+        std::string error;
+        if (!LeaveRunMember(*run, player, true, ManastormFailureExit::FactionHub, error))
+            player->SendSystemMessage(error);
+        return true;
+    }
 
     FailRun(*run, "All run members are dead.", 0, ManastormFailureExit::FactionHub);
     return true;
@@ -9696,6 +10050,11 @@ bool ManastormMgr::StopRun(Player* player, std::string& error)
         error = "You are not part of an active Manastorm run.";
         return false;
     }
+
+    if (run->GetMembers().size() > 1)
+        return LeaveRunMember(*run, player, true,
+            run->GetState() == ManastormRunState::AwaitingExit ?
+                ManastormFailureExit::FactionHub : ManastormFailureExit::SavedLocation, error);
 
     if (run->GetState() == ManastormRunState::AwaitingExit)
     {

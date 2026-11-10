@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "name": "Scholomance: Lord Alexei Barov casts Veil of Shadows in combat on Normal (#10061)",
+  "contract": "Lord Alexei Barov's (10504) 'In Combat - Cast Veil of Shadows' smart_scripts event used event_flags = 16 (SMART_EVENT_FLAG_DIFFICULTY_3). SmartScript::FillScript only keeps a difficulty-flagged event when (1 << (GetSpawnMode()+1)) & event_flags, which for Normal/Heroic/Mythic (spawn modes 0/1/2) tests bits 2/4/8, never bit 16; the event was unreachable on any difficulty Lower Scholomance has, so Veil of Shadows (17820) never cast. The event's own schedule (event_param1=5000, event_param2=12000) is the fix's independent check: once the event is unrestricted again (event_flags = 0), it must be installed and fire within that designed first-cast window after the boss engages; with the regression still present it never fires no matter how long combat runs.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "hero",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 289,
+      "x": 175.3,
+      "y": -91.0,
+      "z": 70.86
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is inside Scholomance",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 289,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the instance runs on Normal difficulty",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 500000,
+      "maximum": 500000
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 10504,
+      "as": "barov",
+      "distance": 2
+    },
+    {
+      "action": "encounter_start",
+      "actor": "hero",
+      "boss_entry": 10504,
+      "radius": 20
+    },
+    {
+      "action": "attack_nearby",
+      "label": "The hero attacks Barov so combat is established either way",
+      "actor": "hero",
+      "entry": 10504
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Barov is in combat with the hero",
+      "actor": "hero",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let Barov's In Combat events run through their first-cast window",
+      "ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "Barov casts Veil of Shadows (the event is no longer gated to an unreachable difficulty)",
+      "actor": "hero",
+      "metric": "timeline_count",
+      "event": "cast",
+      "spell": 17820,
+      "source_entry": 10504,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survives the measurement",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

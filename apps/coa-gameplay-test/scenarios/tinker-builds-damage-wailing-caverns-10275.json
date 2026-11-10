@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Tinker builds damage Wailing Caverns creatures (#10275, #10271, #10267)",
+  "contract": [
+    "#10275, #10271 and #10267 report that Sentry Turret 500239, Firepot Drone 500600 and Spider Bomb 500535 deal no",
+    "damage in Wailing Caverns at levels 17-22. A level-20 Tinker builds each device against a Deviate Ravager 3636",
+    "at the Sentry Turret report's position; each build must take health from the creature."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 43, "x": 8.587, "y": -239.586, "z": -75.108, "o": 0},
+  "players": [
+    {"id": "tinker", "race": 1, "class": 28, "level": 20}
+  ],
+  "creatures": [
+    {"id": "ravager", "owner": "tinker", "entry": 3636, "level": 19, "distance": 8, "health": 100000}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"label": "SETUP: the Tinker is in Wailing Caverns", "action": "assert", "actor": "tinker", "metric": "map_id",
+     "equals": 43},
+    {"action": "learn", "actor": "tinker", "spell": 500535},
+    {"action": "learn", "actor": "tinker", "spell": 500600},
+    {"action": "learn", "actor": "tinker", "spell": 500239},
+    {"action": "snapshot", "actor": "ravager", "metric": "health", "save_as": "start"},
+    {"action": "cast", "actor": "tinker", "spell": 500535, "target": "ravager"},
+    {"action": "wait", "ms": 6000},
+    {"action": "reset_cooldown", "actor": "tinker", "spell": 500535},
+    {"action": "cast", "actor": "tinker", "spell": 500535, "target": "ravager"},
+    {"label": "Two Spider Bombs damage the creature despite their 4% miss chance", "action": "assert",
+     "actor": "ravager", "metric": "health", "relative_to": "start", "max": -1, "within_ms": 8000},
+    {"action": "snapshot", "actor": "ravager", "metric": "health", "save_as": "after_bomb"},
+    {"action": "wait", "ms": 1600},
+    {"action": "cast", "actor": "tinker", "spell": 500600, "target": "ravager"},
+    {"label": "Firepot Drone damages the creature", "action": "assert", "actor": "ravager", "metric": "health",
+     "relative_to": "after_bomb", "max": -1, "within_ms": 10000},
+    {"action": "snapshot", "actor": "ravager", "metric": "health", "save_as": "after_drone"},
+    {"action": "wait", "ms": 1600},
+    {"action": "cast", "actor": "tinker", "spell": 500239, "target": "ravager"},
+    {"label": "SETUP: a Sentry Turret stands", "action": "assert", "actor": "tinker",
+     "metric": "owned_creature_count", "entry": 50046, "equals": 1, "within_ms": 5000},
+    {"label": "Sentry Turret damages the creature", "action": "assert", "actor": "ravager", "metric": "health",
+     "relative_to": "after_drone", "max": -1, "within_ms": 15000}
+  ]
+}

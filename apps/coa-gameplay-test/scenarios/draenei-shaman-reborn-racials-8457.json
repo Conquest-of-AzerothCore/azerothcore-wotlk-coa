@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "A new Draenei Shaman knows the Warcraft Reborn Draenei racials (#8457)",
+  "contract": [
+    "Report #8457: a Draenei Shaman (stock class 7) has no Gift of the Naaru and no Heroic Presence hit bonus.",
+    "SkillLineAbility puts no stock class bit on the skill 760 (Draenei - Racial) rows: 28875 and 59221 carry ClassMask 0xFFFFFA00, 28878 and 59542 carry 512 (Hero).",
+    "The stock-class Draenei racials are skill 11760 rows learned on skill learn: 1128875 (ClassMask 1535, classes 1-9 and 11), 1128878 (every class but Hero), and for the Shaman (ClassMask 64) 1159540 and Gift of the Naaru 1159547; 1159221 is the Warrior (ClassMask 1) variant.",
+    "SkillRaceClassInfo allows skill 11760 for race 1024 and every class, so a stock-class Draenei must receive it from playercreateinfo_skills like every other race's racial skill, and learn its own class's rows only.",
+    "Control: a Draenei Witch Doctor (class 13) keeps its custom-class Gift of the Naaru 814280.",
+    "This scenario needs a stock-class character because the defect is confined to stock classes; custom classes take their racials through AscensionRacialAbilities::CanLearn."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "shaman", "race": 11, "class": 7, "level": 21 },
+    { "id": "witch_doctor", "race": 11, "class": 13, "level": 21 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "The Draenei Shaman has the Reborn Draenei racial skill 11760", "actor": "shaman", "metric": "skill_value", "skill": 11760, "min": 1 },
+    { "action": "assert", "label": "The Draenei Shaman knows Shadow Resistance 1128875", "actor": "shaman", "metric": "knows_spell", "spell": 1128875, "equals": 1 },
+    { "action": "assert", "label": "The Draenei Shaman knows Heroic Presence 1128878", "actor": "shaman", "metric": "knows_spell", "spell": 1128878, "equals": 1 },
+    { "action": "assert", "label": "The Draenei Shaman knows its Shaman racial 1159540", "actor": "shaman", "metric": "knows_spell", "spell": 1159540, "equals": 1 },
+    { "action": "assert", "label": "The Draenei Shaman knows Gift of the Naaru 1159547", "actor": "shaman", "metric": "knows_spell", "spell": 1159547, "equals": 1 },
+    { "action": "assert", "label": "The Draenei Shaman does not learn the Warrior Gift of the Naaru 1159221", "actor": "shaman", "metric": "knows_spell", "spell": 1159221, "equals": 0 },
+    { "action": "assert", "label": "Control: the Draenei Witch Doctor keeps its Gift of the Naaru 814280", "actor": "witch_doctor", "metric": "knows_spell", "spell": 814280, "equals": 1 }
+  ]
+}

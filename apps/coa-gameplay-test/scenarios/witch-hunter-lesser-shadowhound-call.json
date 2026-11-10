@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "A Lesser Shadowhound's Houndmaster's Call hit is 0.3 of the Shadowhound's",
+  "contract": [
+    "In live raid logs from 2026-08-27 and 2026-08-31 (three Witch Hunters, eight fights) a Lesser Shadowhound's",
+    "non-crit Houndmaster's Call (706332) hit is 0.27-0.31 of the permanent Shadowhound's in the same fight, and",
+    "the permanent hound also has Lethal Pursuit's 10%, so lesser hounds land 0.3 of the Call value. Both hounds",
+    "hit the same target, so armor and target modifiers cancel. The averages are compared through a chain: the",
+    "Shadowhound's total over the lesser hound's average hit is its hit count times 1 / R, and its hit count over",
+    "that is R. Expected: R within 0.27-0.33. Without the reduction R is 1."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "wh", "race": 1, "class": 15, "level": 60, "ranged_attack_power": 2000, "ranged_hit_rating": 10000,
+     "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "golem", "owner": "wh", "entry": 36, "level": 60, "health": 10000000, "distance": 12}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "wh", "spell": 5011},
+    {"action": "learn", "actor": "wh", "spell": 75},
+    {"action": "add_item", "actor": "wh", "item": 15807},
+    {"action": "equip", "actor": "wh", "item": 15807, "slot": 17},
+    {"action": "wait", "label": "Let the weapon swap cooldown expire", "ms": 2000},
+    {"action": "learn", "actor": "wh", "spell": 801343},
+    {"action": "learn", "actor": "wh", "spell": 802273},
+    {"action": "learn", "actor": "wh", "spell": 807918},
+    {"action": "cast", "label": "Houndmaster's Whistle", "actor": "wh", "spell": 801343},
+    {"action": "assert", "label": "SETUP: the Shadowhound is out", "actor": "wh", "metric": "pet_entry",
+     "equals": 50124, "within_ms": 5000},
+    {"action": "cast", "label": "Enter combat", "actor": "wh", "spell": 75, "target": "golem"},
+    {"action": "wait", "ms": 3000},
+    {"action": "set_power", "actor": "wh", "power": 1, "value": 1000},
+    {"action": "cast", "label": "Unleash the Hounds", "actor": "wh", "spell": 807918},
+    {"action": "assert", "label": "SETUP: a Lesser Shadowhound is out", "actor": "wh", "metric": "owned_creature_count",
+     "entry": 50224, "min": 1, "within_ms": 3000},
+    {"action": "wait", "ms": 1600},
+    {"action": "set_power", "actor": "wh", "power": 1, "value": 1000},
+    {"action": "cast", "label": "Houndmaster's Call", "actor": "wh", "spell": 802273, "target": "golem"},
+    {"action": "assert", "label": "SETUP: the lesser hound's Call landed", "actor": "wh", "metric": "spell_damage_count",
+     "spell": 706332, "entry": 50224, "target": "golem", "critical": false, "min": 1, "within_ms": 6000},
+    {"action": "assert", "label": "SETUP: the Shadowhound's Call landed", "actor": "wh", "metric": "spell_damage_count",
+     "spell": 706332, "pet": true, "target": "golem", "critical": false, "min": 1, "within_ms": 6000},
+    {"action": "snapshot", "actor": "wh", "metric": "spell_damage_count", "spell": 706332, "entry": 50224,
+     "target": "golem", "critical": false, "save_as": "lesser_hits"},
+    {"action": "snapshot", "actor": "wh", "metric": "spell_damage_total", "spell": 706332, "entry": 50224,
+     "target": "golem", "critical": false, "ratio_to": "lesser_hits", "save_as": "lesser_average"},
+    {"action": "snapshot", "actor": "wh", "metric": "spell_damage_total", "spell": 706332, "pet": true,
+     "target": "golem", "critical": false, "ratio_to": "lesser_average", "save_as": "hits_over_ratio"},
+    {"action": "assert", "label": "A lesser hound's Call hit is 0.24-0.36 of the Shadowhound's", "actor": "wh",
+     "metric": "spell_damage_count", "spell": 706332, "pet": true, "target": "golem", "critical": false,
+     "ratio_to": "hits_over_ratio", "min": 0.24, "max": 0.36}
+  ]
+}

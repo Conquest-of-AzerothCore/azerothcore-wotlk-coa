@@ -1,0 +1,167 @@
+{
+  "schema": 1,
+  "name": "Account reputation only raises standings and follows absolute values",
+  "contract": "Account-wide reputation keeps the best absolute standing of the account's characters: a higher own standing is never lowered by a weaker sibling, a gain on an alt flows back to the main at its next login, and a loss on one character does not lower the others. Characters with different base standings for the same faction share the absolute value, not the stored offset. Only standing a sibling earned above its own base is shared, so an untouched alt of another race does not lift anyone to its racial base, and a sibling's loss below its base never raises anyone.",
+  "players": [
+    {
+      "id": "main",
+      "race": 1,
+      "class": 32,
+      "level": 60
+    },
+    {
+      "id": "dwarf",
+      "race": 3,
+      "class": 20,
+      "level": 60,
+      "account_of": "main"
+    },
+    {
+      "id": "elf",
+      "race": 4,
+      "class": 14,
+      "level": 60,
+      "account_of": "main"
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_reputation",
+      "actor": "dwarf",
+      "id": 576,
+      "value": 30000
+    },
+    {
+      "action": "set_reputation",
+      "actor": "main",
+      "id": 576,
+      "value": 10000
+    },
+    {
+      "action": "relog",
+      "actor": "dwarf"
+    },
+    {
+      "action": "relog",
+      "actor": "main"
+    },
+    {
+      "action": "assert",
+      "actor": "main",
+      "metric": "reputation",
+      "id": 576,
+      "equals": 30000,
+      "label": "Main logs in and rises to the alt's higher Timbermaw standing"
+    },
+    {
+      "action": "assert",
+      "actor": "main",
+      "metric": "reputation",
+      "id": 69,
+      "equals": 3100,
+      "label": "An untouched night elf alt does not lift the human to the night elf's higher Darnassus base"
+    },
+    {
+      "action": "relog",
+      "actor": "dwarf"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "reputation",
+      "id": 576,
+      "equals": 30000,
+      "label": "The alt's higher standing is not lowered by the main"
+    },
+    {
+      "action": "set_reputation",
+      "actor": "main",
+      "id": 576,
+      "value": -5000
+    },
+    {
+      "action": "relog",
+      "actor": "main"
+    },
+    {
+      "action": "relog",
+      "actor": "dwarf"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "reputation",
+      "id": 576,
+      "equals": 30000,
+      "label": "A loss on another character does not lower the alt"
+    },
+    {
+      "action": "assert",
+      "actor": "main",
+      "metric": "reputation",
+      "id": 576,
+      "equals": 30000,
+      "label": "The losing character returns to the account's best standing at its next login"
+    },
+    {
+      "action": "set_reputation",
+      "actor": "elf",
+      "id": 69,
+      "value": 42999
+    },
+    {
+      "action": "set_reputation",
+      "actor": "dwarf",
+      "id": 72,
+      "value": 20000
+    },
+    {
+      "action": "relog",
+      "actor": "elf"
+    },
+    {
+      "action": "relog",
+      "actor": "dwarf"
+    },
+    {
+      "action": "relog",
+      "actor": "main"
+    },
+    {
+      "action": "assert",
+      "actor": "main",
+      "metric": "reputation",
+      "id": 69,
+      "equals": 42999,
+      "label": "Human receives the night elf's absolute Exalted Darnassus"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "reputation",
+      "id": 69,
+      "equals": 42999,
+      "label": "Dwarf receives the night elf's absolute Exalted Darnassus"
+    },
+    {
+      "action": "assert",
+      "actor": "main",
+      "metric": "reputation",
+      "id": 72,
+      "equals": 20000,
+      "label": "Human, whose Stormwind base is 4000, receives the dwarf's absolute 20000"
+    },
+    {
+      "action": "relog",
+      "actor": "elf"
+    },
+    {
+      "action": "assert",
+      "actor": "elf",
+      "metric": "reputation",
+      "id": 72,
+      "equals": 20000,
+      "label": "Night elf receives the dwarf's absolute Stormwind standing at its next login"
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Holiday dungeon reward boxes hold no stock level-80 gear",
+  "contract": "The Keg-Shaped Treasure Chest gives the CoA level-60 Tankard O' Terror at 8% instead of the level-80 Tankard and Direbrew's Bloody Shanker, the Loot-Filled Pumpkin no longer gives The Horseman's Horrific Helm or Baleful Blade, and the Heart-Shaped Box no longer gives the level-80 Love is in the Air necks.",
+  "players": [
+    { "id": "reveler", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "The keg gives the CoA Tankard O' Terror in about 8% of openings",
+      "actor": "reveler",
+      "metric": "item_loot_item_rate",
+      "entry": 54535,
+      "item": 2048663,
+      "min": 5,
+      "max": 11
+    },
+    {
+      "action": "assert",
+      "label": "The keg never gives the level-80 Tankard O' Terror",
+      "actor": "reveler",
+      "metric": "item_loot_item_rate",
+      "entry": 54535,
+      "item": 48663,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The keg never gives the level-80 Direbrew's Bloody Shanker",
+      "actor": "reveler",
+      "metric": "item_loot_item_rate",
+      "entry": 54535,
+      "item": 49120,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The pumpkin never gives the level-80 Horseman's Horrific Helm",
+      "actor": "reveler",
+      "metric": "item_loot_item_rate",
+      "entry": 54516,
+      "item": 49126,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The pumpkin never gives the level-80 Horseman's Baleful Blade",
+      "actor": "reveler",
+      "metric": "item_loot_item_rate",
+      "entry": 54516,
+      "item": 49128,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The pumpkin still gives its Tricky Treats",
+      "actor": "reveler",
+      "metric": "item_loot_item_rate",
+      "entry": 54516,
+      "item": 33226,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "The Heart-Shaped Box never gives the level-80 Winking Eye of Love",
+      "actor": "reveler",
+      "metric": "item_loot_item_rate",
+      "entry": 54537,
+      "item": 51804,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Heart-Shaped Box never gives the level-80 Choker of the Pure Heart",
+      "actor": "reveler",
+      "metric": "item_loot_item_rate",
+      "entry": 54537,
+      "item": 51808,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Heart-Shaped Box still gives its Love Tokens",
+      "actor": "reveler",
+      "metric": "item_loot_item_rate",
+      "entry": 54537,
+      "item": 49927,
+      "equals": 100
+    }
+  ]
+}

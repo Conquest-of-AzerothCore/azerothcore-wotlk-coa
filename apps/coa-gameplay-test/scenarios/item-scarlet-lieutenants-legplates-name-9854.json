@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Scarlet Lieutenant's Legplates is named without the typo (#9854)",
+  "contract": "Item 4050846 was named Scrlet Lieutenant's Legplates while its siblings 4050843 to 4050850 read Scarlet Lieutenant's. The item query response (SMSG 0x0058, answering CMSG 0x0056) carries the template name as its first string. Expected: the response for 4050846 contains Scarlet Lieutenant's Legplates and does not contain the misspelling; the sibling 4050845 stays Scarlet Lieutenant's Belt.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "client_packet", "label": "Query the legplates", "actor": "hero", "opcode": 86, "consumed": false, "fields": [ { "u32": 4050846 } ] },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the response names Scarlet Lieutenant's Legplates", "actor": "hero",
+      "metric": "server_packet_contains", "opcode": 88, "row": 4050846, "text": "Scarlet Lieutenant's Legplates",
+      "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The misspelled name is gone", "actor": "hero",
+      "metric": "server_packet_contains", "opcode": 88, "row": 4050846, "text": "Scrlet", "equals": 0
+    },
+    { "action": "client_packet", "label": "Query the sibling belt", "actor": "hero", "opcode": 86, "consumed": false, "fields": [ { "u32": 4050845 } ] },
+    {
+      "action": "assert", "label": "CONTROL: the sibling keeps its name", "actor": "hero",
+      "metric": "server_packet_contains", "opcode": 88, "row": 4050845, "text": "Scarlet Lieutenant's Belt",
+      "equals": 1, "within_ms": 2000
+    }
+  ]
+}

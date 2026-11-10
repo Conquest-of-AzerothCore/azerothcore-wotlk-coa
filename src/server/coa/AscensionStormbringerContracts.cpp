@@ -1,6 +1,8 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionStormbringer.h"
+#include "AscensionClientSpellPatches.h"
+#include "DBCStores.h"
 #include "SpellDefines.h"
 
 namespace
@@ -18,9 +20,13 @@ enum StormbringerContractSpells : uint32
     SPELL_CRUSHING_PRESSURE = 803564,
     SPELL_CRUSHING_PRESSURE_RANK_2 = 803567,
     SPELL_CRUSHING_PRESSURE_RANK_3 = 803569,
-    SPELL_WINDRIDE = 804724
+    SPELL_WINDRIDE = 804724,
+    SPELL_THUNDERALE = 804762
 };
 
+constexpr uint32 THUNDERALE_DURATION_INDEX = 63;
+constexpr int32 THUNDERALE_PERCENT_BASE_POINTS = 5;
+constexpr uint32 THUNDERALE_TICK_MS = 1000;
 constexpr uint32 SHOCK_FAMILY_MASK = 2048;
 constexpr uint32 BRINE_FAMILY_MASK = 128;
 constexpr uint32 DROWN_FAMILY_MASK = 0x08000000;
@@ -34,6 +40,7 @@ bool IsCancellablePressureSpell(uint32 id)
         case SPELL_CRUSHING_PRESSURE:
         case SPELL_CRUSHING_PRESSURE_RANK_2:
         case SPELL_CRUSHING_PRESSURE_RANK_3:
+        case AscensionStormbringer::SPELL_ATMOSPHERIC_PRESSURE:
             return true;
         default:
             return false;
@@ -45,6 +52,20 @@ namespace AscensionStormbringer
 {
 void ApplyContracts(SpellInfo* info)
 {
+    if (info && info->Id == SPELL_THUNDERALE &&
+        info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_MOD_REGEN &&
+        info->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_MOD_POWER_REGEN)
+    {
+        info->DurationEntry = sSpellDurationStore.LookupEntry(THUNDERALE_DURATION_INDEX);
+        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_OBS_MOD_HEALTH;
+        info->Effects[EFFECT_1].ApplyAuraName = SPELL_AURA_OBS_MOD_POWER;
+        info->Effects[EFFECT_1].MiscValue = POWER_MANA;
+        for (uint8 i = EFFECT_0; i <= EFFECT_1; ++i)
+        {
+            info->Effects[i].BasePoints = THUNDERALE_PERCENT_BASE_POINTS;
+            info->Effects[i].Amplitude = THUNDERALE_TICK_MS;
+        }
+    }
     if (!info || info->SpellFamilyName != 22)
         return;
     if (info->Id == SPELL_TOME_OF_LIGHTNING &&
@@ -66,6 +87,13 @@ void ApplyContracts(SpellInfo* info)
         info->TargetAuraSpell = 0;
     if (info->Id == SPELL_WINDRIDE)
         info->AttributesEx2 |= SPELL_ATTR2_IGNORE_LINE_OF_SIGHT;
+    if (info->Id == SPELL_ATMOSPHERIC_PRESSURE && info->HasAttribute(SPELL_ATTR5_NO_CASTER_AURA_ICON))
+    {
+        info->Attributes &= ~SPELL_ATTR0_AURA_IS_DEBUFF;
+        info->AttributesEx5 &= ~SPELL_ATTR5_NO_CASTER_AURA_ICON;
+        info->AttributesEx5 |= SPELL_ATTR5_NO_TARGET_AURA_ICON;
+        Ascension::ClientSpellPatches::Instance().Register(info->Id);
+    }
     if (IsCancellablePressureSpell(info->Id))
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             if (info->Effects[i].IsEffect() && !info->Effects[i].IsEffect(SPELL_EFFECT_APPLY_AREA_AURA_ENEMY))

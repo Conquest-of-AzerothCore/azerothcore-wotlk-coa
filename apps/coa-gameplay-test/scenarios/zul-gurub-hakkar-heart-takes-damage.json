@@ -1,0 +1,188 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: the Heart of Hakkar takes damage during Blood Siphon, and breaking it ends the siphon",
+  "contract": [
+    "The tester saw the exposed Heart of Hakkar (92005) take no damage at all. On live (combat logs of 2026-08-02",
+    "and 2026-08-24, Bronzebeard 2026-04-22) the raid deals 120k to 430k damage to the heart in every Blood Siphon",
+    "(2118615) and none outside it, and each siphon ends at the heart's killing blow, which never kills it. Damage",
+    "to the heart must lower its health and reach Hakkar (14834), and its breaking blow must end the siphon well",
+    "before the scripted SIPHON_LENGTH of 20 s, while the heart stays at 1 health."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 309,
+    "x": -11787.4,
+    "y": -1649.34,
+    "z": 54.1017,
+    "o": 4.76475,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boss",
+      "owner": "hero",
+      "entry": 14834,
+      "level": 63,
+      "health": 5000000,
+      "reaction": 2,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "attack",
+      "label": "Engage Hakkar",
+      "actor": "hero",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar fights the hero",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar casts Blood Siphon",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 14834,
+      "spell": 2118615,
+      "min": 1,
+      "within_ms": 100000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar channels Blood Siphon",
+      "actor": "boss",
+      "metric": "aura",
+      "spell": 2118615,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the heart is exposed at full health",
+      "actor": "hero",
+      "metric": "nearby_creature_health_pct",
+      "entry": 92005,
+      "min": 99.9,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar is unhurt before the heart is hit",
+      "actor": "boss",
+      "metric": "health_pct",
+      "min": 99.9
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Hit the heart for 40% of its health",
+      "actor": "hero",
+      "entry": 92005,
+      "damage_pct": 40
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the heart loses that health",
+      "actor": "hero",
+      "metric": "nearby_creature_health_pct",
+      "entry": 92005,
+      "min": 59.0,
+      "max": 61.0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the damage reaches Hakkar too",
+      "actor": "boss",
+      "metric": "health_pct",
+      "max": 99.9
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a heart that still stands leaves the siphon running",
+      "actor": "boss",
+      "metric": "aura",
+      "spell": 2118615,
+      "equals": 1
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Break the heart with a blow larger than its remaining health",
+      "actor": "hero",
+      "entry": 92005,
+      "damage_pct": 70
+    },
+    {
+      "action": "snapshot",
+      "actor": "boss",
+      "metric": "health",
+      "save_as": "hakkar_after_break"
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Hit the broken heart again before the siphon's end runs",
+      "actor": "hero",
+      "entry": 92005,
+      "damage_pct": 50
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a broken heart passes no more damage to Hakkar",
+      "actor": "boss",
+      "metric": "health",
+      "relative_to": "hakkar_after_break",
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: breaking the heart ends the siphon at once, not after its 20 s",
+      "actor": "boss",
+      "metric": "aura",
+      "spell": 2118615,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survived the fight",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

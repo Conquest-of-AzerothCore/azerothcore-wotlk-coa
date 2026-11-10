@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "High-Risk stage command",
+  "contract": "Requires Bloodforged.Enable = 1 and CrowsCache.Enable = 1. .hr stage set 3 is accepted from the console and Crow's Cache can start at High-Risk stage 3 (Zul'Gurub Heroic rewards); .hr stage shows it and .hr stage clear removes the override.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "console",
+      "command": "hr stage set 3"
+    },
+    {
+      "action": "console",
+      "command": "hr stage"
+    },
+    {
+      "action": "console",
+      "command": "crows start 600"
+    },
+    {
+      "action": "console",
+      "command": "crows cancel"
+    },
+    {
+      "action": "console",
+      "command": "hr stage clear"
+    },
+    {
+      "action": "console",
+      "command": "hr stage"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: all console commands succeeded",
+      "actor": "p",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

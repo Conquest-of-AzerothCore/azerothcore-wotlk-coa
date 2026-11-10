@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Uther's Legacy healing triggers Untainted (#10273)",
+  "contract": "Uther's Legacy 706385 reads \"Condemn now heals you for 75% of the damage dealt\" and casts the heal copy 707302 on the Templar. Untainted 705298 reads \"Effectively healing yourself now reduces your Physical damage taken...\", and its aura_ascension_templar_event::Check() case (id == 705298) accepts any heal targeted at the player, which 707302 satisfies. The recursion guard in Check() blocks every event aura's Check() while Uther's Legacy's own Proc() holds the Templar event flag, except for a hand-written exception that only covered Disciplined Blows (680397); Untainted's Check() therefore always returned false for the 707302 heal. The Templar starts wounded so the heal is effective, no other healing is cast, so the only possible source of the 705299 buff is the Uther's Legacy self-heal. Discriminating metric: the 705299 buff aura, absent before Condemn and present after.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "templar", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "templar", "spell": 804906 },
+    { "action": "learn", "actor": "templar", "spell": 706385 },
+    { "action": "learn", "actor": "templar", "spell": 705298 },
+    { "action": "add_item", "actor": "templar", "item": 2495 },
+    { "action": "equip", "actor": "templar", "item": 2495, "slot": 15 },
+    { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+    { "action": "set_health", "label": "Start wounded so Uther's Legacy heals effectively", "actor": "templar", "value": 1000 },
+    { "action": "assert", "label": "SETUP: Uther's Legacy is known", "actor": "templar", "metric": "knows_spell", "spell": 706385, "equals": 1 },
+    { "action": "assert", "label": "SETUP: Untainted is known", "actor": "templar", "metric": "knows_spell", "spell": 705298, "equals": 1 },
+    { "action": "assert", "label": "SETUP: the Untainted buff is not active yet", "actor": "templar", "metric": "aura", "spell": 705299, "equals": 0 },
+    { "action": "cast", "actor": "templar", "spell": 804906, "target": "dummy" },
+    { "action": "assert", "label": "Condemn ticks heal the Templar through Uther's Legacy", "actor": "templar", "metric": "spell_heal_count", "spell": 707302, "min": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "DISCRIMINATING: that heal procs the Untainted buff", "actor": "templar", "metric": "aura", "spell": 705299, "equals": 1, "within_ms": 5000 }
+  ]
+}

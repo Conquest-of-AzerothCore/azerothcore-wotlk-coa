@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Cultist: Blade of Yogg-Saron heals mark the healed Cultist with Void-Touched (#11428)",
+  "contract": [
+    "Blade of Yogg-Saron 524887 and its rank 2 525078: damage dealt by Blade of the Empire 500720 heals the lowest",
+    "health ally with the direct heal 500748. With the Void-Touched passive 300286, that direct heal applies one",
+    "Void-Touched 301982 stack to the healed ally, as every direct heal from the Cultist does. A Cultist alone is his",
+    "own lowest health ally, so a rank 2 Blade of the Empire hit heals and marks him even at full health."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "cultist", "race": 1, "class": 25, "level": 31, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "cultist", "entry": 36, "level": 31, "health": 1000000, "faction": 14, "distance": 3,
+      "reaction": 1 }
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "learn", "actor": "cultist", "spell": 500720},
+    {"action": "learn", "actor": "cultist", "spell": 525078},
+    {"action": "learn", "actor": "cultist", "spell": 300286},
+    { "action": "assert", "label": "CONTROL: the Void-Touched passive is active on the Cultist", "actor": "cultist",
+      "metric": "aura", "spell": 300286, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTROL: the Cultist carries no Void-Touched before the strike", "actor": "cultist",
+      "metric": "aura_stacks", "spell": 301982, "caster": "cultist", "equals": 0 },
+    { "action": "cast", "label": "Blade of the Empire strikes the dummy", "actor": "cultist", "spell": 500720,
+      "target": "dummy" },
+    { "action": "assert", "label": "CONTROL: Blade of Yogg-Saron heals the Cultist", "actor": "cultist",
+      "metric": "spell_heal_count", "spell": 500748, "target": "cultist", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "The Blade of Yogg-Saron heal marks the Cultist with one Void-Touched stack",
+      "actor": "cultist", "metric": "aura_stacks", "spell": 301982, "caster": "cultist", "equals": 1,
+      "within_ms": 3000 }
+  ]
+}

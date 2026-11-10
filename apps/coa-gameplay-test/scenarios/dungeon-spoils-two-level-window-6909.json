@@ -1,12 +1,11 @@
 {
   "schema": 1,
-  "name": "Dungeon Spoils give items within two levels of the opener (#6909)",
+  "name": "Dungeon Spoils give items within three levels of the opener (#6909)",
   "contract": [
     "#6909: Dungeon Spoils (2021814) opened at level 44 could give an item that requires level 39, five levels",
-    "below the opener. The pick now keeps only items within two levels of the highest required level the opener can",
-    "use, so a level 44 Warrior who opens six spoils gets six items that require level 42-44. The pool holds 48 items",
-    "that require level 39-41 and 45 that require 42-44, so the old window would put an item below 42 in the bags",
-    "about once in every two opens."
+    "below the opener. The pick keeps only items within three levels of the highest required level the opener",
+    "can use, so a level 44 Warrior who opens six spoils gets six items that require level 41-44 and none that",
+    "requires level 39-40."
   ],
   "timeout_ms": 90000,
   "location": {
@@ -133,24 +132,24 @@
     },
     {
       "action": "assert",
-      "label": "Every item requires level 42-44",
+      "label": "Every item requires level 41-44",
       "actor": "p1",
       "metric": "carried_pool_item_count",
       "cache": 2021814,
       "table": "loot",
-      "min_required_level": 42,
+      "min_required_level": 41,
       "max_required_level": 44,
       "equals": 6
     },
     {
       "action": "assert",
-      "label": "None requires level 39-41, which the five-level window allowed",
+      "label": "None requires level 39-40, which the five-level window allowed",
       "actor": "p1",
       "metric": "carried_pool_item_count",
       "cache": 2021814,
       "table": "loot",
       "min_required_level": 39,
-      "max_required_level": 41,
+      "max_required_level": 40,
       "equals": 0
     }
   ]

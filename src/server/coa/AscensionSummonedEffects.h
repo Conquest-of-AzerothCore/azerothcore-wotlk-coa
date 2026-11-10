@@ -148,6 +148,11 @@ constexpr Summon SUMMONS[] = {
     Ranked(2304866, 2304861, Behaviour::Tick, 2305067, 2304872),
     Ranked(2304867, 2304861, Behaviour::Tick, 2305068, 2304873),
     Ranked(1186384, 2404861, Behaviour::Tick, 1186383, 1186385),
+    Ranked(280575, 280576, Behaviour::Tick, 280577, 280578),
+    Ranked(280635, 280576, Behaviour::Tick, 280577, 280671),
+    Ranked(280636, 280576, Behaviour::Tick, 280577, 280672),
+    Ranked(280637, 280576, Behaviour::Tick, 280577, 280673),
+    Ranked(280638, 280576, Behaviour::Tick, 280577, 280674),
 
     Ranked(955032, 840040, Behaviour::Tick, 955033, 955034, 955054, Motion::Forward, 35.0f),
     Ranked(955036, 840040, Behaviour::Tick, 955042, 955048, 955054, Motion::Forward, 35.0f),
@@ -351,6 +356,7 @@ constexpr Summon SUMMONS[] = {
     Timed(282942, 80486, Behaviour::Mine, 92419, 0),
     Timed(1583130, 80486, Behaviour::Mine, 1583110, 0),
 
+    Still(290441, 840095),
     Still(283494, 840051),
     Still(283494, 840052),
     Still(955108, 840051),

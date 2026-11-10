@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Phoenix Dive starts its return as soon as it arrives (#10210)",
+  "contract": "Phoenix Dive 706854 moves the Phoenix pet to an ally via MoveCharge and grants passing allies a shield (Shields()); AscensionPyromancerSummons.cpp hardcoded diveTime = 4000 regardless of travel distance, and UpdateAI only let FollowOwner() restart the return trip once diveTime reached zero, so a short dive still idled at the target for the rest of the 4 s window instead of returning immediately on arrival. The fix clears diveTime as soon as the Phoenix's own movement generator reports IDLE_MOTION_TYPE (the charge finished), so FollowOwner() runs that same tick. The ally stands 15 yards from the caster, well short of the dive's travel limit, so MoveCharge at speed 25 covers it in well under a second; the discriminating window (1.0-2.4 s after the cast) sits entirely inside the old hardcoded 4 s idle but after any plausible travel time. Discriminating metric: the Phoenix's distance from its owner, snapshotted once shortly after arrival and again 1.2 s later - under the fix it is already closing the gap; under the reported idle it would not move at all until the full 4 s elapsed.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "caster", "race": 1, "class": 24, "level": 80 },
+    { "id": "ally", "race": 1, "class": 24, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "teleport", "label": "Move the ally 15 yards away so the dive has real travel distance", "actor": "ally", "map": 0, "x": -8902.41, "y": -115.853, "z": 82.3711 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "learn", "actor": "caster", "spell": 800796 },
+    { "action": "cast", "actor": "caster", "spell": 800796, "destination": { "x": -8912.41, "y": -115.853, "z": 82.3711 } },
+    { "action": "assert", "label": "SETUP: the caster owns one Phoenix", "actor": "caster", "metric": "owned_creature_count", "entry": 50258, "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "SETUP: the Phoenix comes to follow its owner", "actor": "caster", "metric": "pet_distance", "max": 5, "within_ms": 10000 },
+    { "action": "learn", "actor": "caster", "spell": 706854 },
+    { "action": "set_aura", "actor": "caster", "spell": 807533, "stacks": 1 },
+    { "action": "cast", "label": "Dive to the ally, 15 yards away", "actor": "caster", "spell": 706854, "target": "ally" },
+    { "action": "wait", "label": "Let the dive's travel (well under a second at speed 25) finish", "ms": 1000 },
+    { "action": "snapshot", "actor": "caster", "metric": "pet_distance", "save_as": "d0" },
+    { "action": "wait", "ms": 1200 },
+    { "action": "assert", "label": "DISCRIMINATING: the Phoenix is already closing the distance back to its owner, well before the old hardcoded 4 s idle would have let it move", "actor": "caster", "metric": "pet_distance", "relative_to": "d0", "max": -1 }
+  ]
+}

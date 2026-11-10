@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "A Trogg Idol of The Cleansing of Grimepit credits once however fast it is clicked (#10543)",
+  "contract": [
+    "The Cleansing of Grimepit 175016 asks for five Trogg Idols 2300633 destroyed in Grimepit (objective 'Destroyed Trogg Idol 0/5'). One use of an idol destroys it: one idol is one credit.",
+    "The idol's SmartAI despawns it one second after use, and the goober has no auto-close, so during that second every further click credited the quest again and one idol completed it, as reported.",
+    "Expected: three clicks on the same idol in a row credit 1, not 3, and the idol disappears; after its two-minute respawn the same idol is usable again and credits the next use, so the in-use guard does not stick to the respawned idol (the #9476 failure). The camp's troggs are kept off with Divine Shield."
+  ],
+  "timeout_ms": 200000,
+  "location": { "map": 0, "x": -6540.0, "y": 916.0, "z": 370.0, "o": 0.3 },
+  "players": [
+    { "id": "p", "race": 1, "class": 26, "level": 25 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "prepare_quest", "actor": "p", "quest": 175016, "complete": false },
+    { "action": "set_aura", "label": "SETUP: Divine Shield keeps the camp's troggs off p", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: one idol stands by the east camp's trading post", "actor": "p", "metric": "nearby_gameobject_count", "entry": 2300633, "equals": 1 },
+    { "action": "use_nearby_gameobject", "label": "Click the idol", "actor": "p", "entry": 2300633 },
+    { "action": "use_nearby_gameobject", "label": "Click the same idol again at once", "actor": "p", "entry": 2300633 },
+    { "action": "use_nearby_gameobject", "label": "And a third time", "actor": "p", "entry": 2300633 },
+    { "action": "assert", "label": "SETUP: the first click destroys the idol", "actor": "p", "metric": "quest_objective_count", "quest": 175016, "min": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: one idol credits once", "actor": "p", "metric": "quest_objective_count", "quest": 175016, "equals": 1 },
+    { "action": "assert", "label": "the idol is gone after use", "actor": "p", "metric": "nearby_gameobject_at_client", "entry": 2300633, "equals": 0, "within_ms": 5000 },
+    { "action": "assert", "label": "the idol respawns after 2 minutes", "actor": "p", "metric": "nearby_gameobject_at_client", "entry": 2300633, "equals": 1, "within_ms": 140000 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "use_nearby_gameobject", "label": "Click the respawned idol", "actor": "p", "entry": 2300633 },
+    { "action": "assert", "label": "DISCRIMINATING: the respawned idol is usable again and credits once more", "actor": "p", "metric": "quest_objective_count", "quest": 175016, "equals": 2, "within_ms": 2000 }
+  ]
+}

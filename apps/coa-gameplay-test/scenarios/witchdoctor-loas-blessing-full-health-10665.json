@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "name": "Loa's Blessing empowers the Loa's Brew target even at full health (#10665)",
+  "contract": [
+    "Report #10665: Loa's Brew does not give its target the random Loa's Blessing empowerment.",
+    "Loa's Blessing 705848 tooltip: \"Healing done by Loa's Brew now applies a random empowerment to the target ally\"",
+    "(802207, 802208, 802215 or 802216). The tooltip sets no condition on missing health, so every Loa's Brew 801670",
+    "heal that lands applies exactly one of the four to its target: the wounded ally and the ally at full health alike."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "wd",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    },
+    {
+      "id": "hurt",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "full",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "wd",
+      "spell": 801670
+    },
+    {
+      "action": "learn",
+      "actor": "wd",
+      "spell": 705848
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "aura",
+      "spell": 705848,
+      "equals": 1,
+      "within_ms": 2000,
+      "label": "Loa's Blessing is active on the Witch Doctor"
+    },
+    {
+      "action": "set_health",
+      "actor": "hurt",
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "actor": "wd",
+      "spell": 801670,
+      "target": "hurt"
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "spell_heal_count",
+      "spell": 801670,
+      "target": "hurt",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "A Brew on a wounded ally applies one empowerment",
+      "actor": "hurt",
+      "metric": "carried_aura_count",
+      "spells": [
+        802207,
+        802208,
+        802215,
+        802216
+      ],
+      "caster": "wd",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "full",
+      "metric": "health_pct",
+      "equals": 100
+    },
+    {
+      "action": "cast",
+      "actor": "wd",
+      "spell": 801670,
+      "target": "full"
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "spell_heal_count",
+      "spell": 801670,
+      "target": "full",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a Brew on an ally at full health also applies one empowerment",
+      "actor": "full",
+      "metric": "carried_aura_count",
+      "spells": [
+        802207,
+        802208,
+        802215,
+        802216
+      ],
+      "caster": "wd",
+      "equals": 1,
+      "within_ms": 1000
+    }
+  ]
+}

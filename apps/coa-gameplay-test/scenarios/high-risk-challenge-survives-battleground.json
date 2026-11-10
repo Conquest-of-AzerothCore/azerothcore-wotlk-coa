@@ -1,0 +1,270 @@
+{
+  "schema": 1,
+  "name": "High Roller: High-Risk turned off inside a battleground does not fail the High-Risk-only challenge",
+  "contract": "High Roller (challenge 78) fails a character that leaves High-Risk. Battlegrounds turn High-Risk off while inside and return it afterwards, which is not leaving High-Risk: a level 15 High Roller, below the level that completes the challenge, who plays Warsong Gulch and comes back keeps the challenge, gets High-Risk back, and never sees 'You left High Risk and failed your challenge.' Really leaving High-Risk afterwards still fails it, so the challenge was watching all along.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "opponent",
+      "race": 1,
+      "class": 1,
+      "level": 15
+    },
+    {
+      "id": "roller",
+      "race": 1,
+      "class": 1,
+      "level": 15
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "roller",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "roller",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "roller",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "start_challenge",
+      "actor": "roller",
+      "challenge": 78,
+      "level": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the challenge start",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "High Roller starts",
+      "actor": "roller",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "An opponent queues for Warsong Gulch first",
+      "actor": "opponent",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The High Roller queues for Warsong Gulch",
+      "actor": "roller",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Let the queue invite both players",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "The opponent enters the battleground",
+      "actor": "opponent",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "opponent"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The High Roller enters the battleground",
+      "actor": "roller",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "roller"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The High Roller is in Warsong Gulch",
+      "actor": "roller",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "High-Risk is off inside the battleground",
+      "actor": "roller",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the challenge check High-Risk for a few seconds",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The challenge is not failed inside the battleground",
+      "actor": "roller",
+      "metric": "system_message_contains",
+      "text": "You left High Risk and failed your challenge.",
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "The High Roller leaves the battleground",
+      "actor": "roller",
+      "opcode": 737,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The High Roller is back in Stormwind",
+      "actor": "roller",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "High-Risk returns",
+      "actor": "roller",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "label": "Let the challenge check High-Risk again",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The challenge was never failed",
+      "actor": "roller",
+      "metric": "system_message_contains",
+      "text": "You left High Risk and failed your challenge.",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "The High Roller really leaves High-Risk",
+      "actor": "roller",
+      "spell": 1004019,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "which fails the challenge",
+      "actor": "roller",
+      "metric": "system_message_contains",
+      "text": "You left High Risk and failed your challenge.",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

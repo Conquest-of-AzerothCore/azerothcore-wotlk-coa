@@ -19,13 +19,16 @@ enum HeroShamanSpells : uint32
     TidalWavesFinalRank         = 51564,
     ElectrocuteDamage           = 272034,
     ElectrocuteIncapacitate     = 272053,
-    ElectrocuteIncapacitateLock = 272056
+    ElectrocuteIncapacitateLock = 272056,
+    ConduitBuff                 = 278599
 };
 
 constexpr float ELECTROCUTE_DAMAGE_PER_LEVEL = 2.6f;
 
 constexpr float ELEMENTAL_REACH_YARDS = 20.0f;
 constexpr uint32 IMPROVED_EARTH_SHIELD_COOLDOWN_MS = 5000;
+constexpr uint32 LIGHTNING_SHIELD_FAMILY_FLAG0 = 1024;
+constexpr int32 CONDUIT_MS_PER_LIGHTNING_SHIELD_CHARGE = 1000;
 }
 
 class aura_hero_shaman_elemental_reach : public AuraScript
@@ -163,12 +166,50 @@ class spell_hero_shaman_sundering : public SpellScript
     }
 };
 
+class spell_hero_shaman_conduit : public SpellScript
+{
+    PrepareSpellScript(spell_hero_shaman_conduit);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({ ConduitBuff });
+    }
+
+    void ConsumeLightningShield(SpellEffIndex)
+    {
+        Unit* caster = GetCaster();
+        if (!caster)
+            return;
+        Aura* conduit = caster->GetAura(ConduitBuff, caster->GetGUID());
+        if (!conduit)
+            return;
+        AuraEffect* shield = caster->GetAuraEffect(SPELL_AURA_PROC_TRIGGER_SPELL, SPELLFAMILY_SHAMAN,
+            LIGHTNING_SHIELD_FAMILY_FLAG0, 0, 0, caster->GetGUID());
+        if (!shield)
+            return;
+        int32 const charges = shield->GetBase()->GetCharges();
+        if (charges <= 0)
+            return;
+        caster->RemoveAura(shield->GetBase()->GetId(), caster->GetGUID());
+        int32 const extension = charges * CONDUIT_MS_PER_LIGHTNING_SHIELD_CHARGE;
+        conduit->SetMaxDuration(conduit->GetMaxDuration() + extension);
+        conduit->SetDuration(conduit->GetDuration() + extension);
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_hero_shaman_conduit::ConsumeLightningShield, EFFECT_1,
+            SPELL_EFFECT_DUMMY);
+    }
+};
+
 void AddSC_AscensionHeroShaman()
 {
     RegisterSpellScript(spell_hero_shaman_sundering);
     RegisterSpellScript(aura_hero_shaman_elemental_reach);
     RegisterSpellScript(aura_hero_shaman_enhancing_totems);
     RegisterSpellScript(aura_hero_shaman_dual_wield_specialization);
+    RegisterSpellScript(spell_hero_shaman_conduit);
     RegisterSpellScript(spell_hero_shaman_earth_shield_heal);
     RegisterSpellScript(aura_hero_shaman_doused);
 }

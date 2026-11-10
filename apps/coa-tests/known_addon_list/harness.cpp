@@ -116,10 +116,11 @@ int main()
     Expect(Find(entries, "Blizzard_TrainerUI")->secure == 1, "Blizzard addons are secure");
     Expect(Find(entries, "!BugGrabber")->secure == 0, "third-party addons are not secure");
 
-    for (char const* name : { "AscensionUI", "Ascension_Collections", "Ascension_CompactRaidFrames",
-                              "Ascension_EnchantCollection", "Ascension_HelpUI", "Ascension_InspectUI",
-                              "Ascension_MythicPlus", "Ascension_SeasonCollection", "Ascension_TicketUI",
-                              "Ascension_UIDevelopmentTools", "Ascension_WildCard" })
+    for (char const* name : { "AscensionUI", "Ascension_CharacterAdvancement", "Ascension_CharacterAdvancementSeason9",
+                              "Ascension_Collections", "Ascension_CompactRaidFrames", "Ascension_EnchantCollection",
+                              "Ascension_HelpUI", "Ascension_InspectUI", "Ascension_Manastorm", "Ascension_MythicPlus",
+                              "Ascension_SeasonCollection", "Ascension_TicketUI", "Ascension_UIDevelopmentTools",
+                              "Ascension_WildCard" })
     {
         Entry const* entry = Find(entries, name);
         Expect(entry != nullptr, "Ascension's own addons are listed even when the client did not report them");
@@ -127,10 +128,9 @@ int main()
     }
 
     for (char const* name : { "AscensionResources", "Ascension_AddonPanel", "Ascension_AppearanceUI",
-                              "Ascension_BuildCreator", "Ascension_ChallengesUI", "Ascension_CharacterAdvancement",
-                              "Ascension_CharacterAdvancementSeason9", "Ascension_CoATalents",
-                              "Ascension_Draft", "Ascension_ForcedPrimaryStat",
-                              "Ascension_Manastorm", "Ascension_NamePlates", "Ascension_NewPlayerExperience",
+                              "Ascension_BuildCreator", "Ascension_ChallengesUI", "Ascension_CoATalents",
+                              "Ascension_Draft", "Ascension_ForcedPrimaryStat", "Ascension_NamePlates",
+                              "Ascension_NewPlayerExperience",
                               "Ascension_PTRFeedback", "Ascension_PathToAscension", "Ascension_Poll",
                               "Ascension_RandomModeShared", "Ascension_SkillCards", "Ascension_TalentUI",
                               "Ascension_VanityCollection", "Ascension_Warmode", "Ascension_WarmodeLegacy" })
@@ -146,6 +146,6 @@ int main()
                          [](Entry const& e) { return e.name == "Ascension_HelpUI"; }) == 1,
            "an addon the client already reported is not listed twice");
 
-    std::cout << "PASS: SMSG 0x94E echoes " << entries.size() << " addons, Blizzard and 11 Ascension addons secure\n";
+    std::cout << "PASS: SMSG 0x94E echoes " << entries.size() << " addons, Blizzard and 14 Ascension addons secure\n";
     return 0;
 }

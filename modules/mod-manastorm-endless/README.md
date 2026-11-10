@@ -309,3 +309,62 @@ contexts only. When guaranteed bonus caches are present, the tracker keeps their
 showing regular-cache quota progress. The queue regular-cache icon still reflects its weekly lock.
 No client files, opcodes, loot tables or reward delivery systems are replaced. Reset countdown presentation
 still requires a matching-client check because of the known utility field-name mismatch.
+
+### Independent endgame scaling
+
+Endgame runs use `manastorm_Endgame_scaling_curve` and `manastorm_Endgame_group_scaling`.
+Normal-track runs retain `manastorm_scaling_curve` and `manastorm_group_scaling`, including normal
+segments entered at level 60. Run creation and every stage advance select the tables from the run track.
+
+Apply `rev_20261023_90_manastorm_endgame_scaling.sql` through the world updater. It copies the normal
+curve with exactly twice its global damage multiplier and copies group ranges unchanged. Health,
+melee and spell multiplier columns remain identical on initial import. Existing melee/spell/periodic
+scaling paths therefore receive twice their previous endgame damage multiplier without changing HP.
+Rerunning the migration preserves existing endgame rows and any subsequent independent tuning.
+Keep the table-name capitalization consistent on case-sensitive MySQL servers. Missing tables fail
+module data loading; reload module data or restart the worldserver after later SQL tuning.
+
+### CoA Bazaar Token loot mode
+
+`Manastorm.CoALootMode.Enabled = 1` replaces regular cache awards with Bazaar Tokens on a
+`CoA.ClassModel = "coa"` realm. Wildcard characters use the original reward policy. The option
+defaults to disabled and requires a restart. Bonus caches use their existing separate award rules.
+
+Apply `rev_20261103_01_manastorm_coa_token_rewards.sql` from both `pending_db_world` and
+`pending_db_characters` through the core updater before using the feature. The character migration
+also supplies tables used by the module's prepared statements and character deletion hook.
+The world and character `rev_20261104_02_manastorm_coa_encounter_rewards.sql` migrations are also
+required: reward-rule loading reads the world encounter table, and Greedy Demon claims use the
+character encounter-receipt table.
+
+The default world rule grants 25 tokens for the first completion of a depth in each character's
+personal window, and 10 for repeats. First clears are separate for Solo/Duo/Trio/Group and
+normal/endgame tracks. All of them share `Manastorm.CoALootMode.TokenCap` (default 1000).
+Rewards are guaranteed on eligible completion, independent of regular-cache chance, weekly cache
+allowance, group multipliers and segment multipliers. The final award is reduced to the remaining
+token allowance. Optional completion-reward rows for the Bazaar Token item are superseded by this
+policy while it is active.
+
+The first completion starts a personal window of `Manastorm.CoALootMode.WindowHours` (default 24).
+Further completions retain its saved expiry. After expiry the next completion starts a new window.
+`FirstClear.ResetWithWindow = 1` renews first clears with that window; setting it to 0 uses lifetime
+token first clears. Permanent Manastorm unlocks and other first-clear rewards use their original
+progression. The first-clear and repeat reward switches, cap and window length are reloadable.
+New window lengths apply when opening the next window.
+
+Tune `manastorm_coa_token_rewards` and reload module data. Mode 0 matches every difficulty, 1..4
+select Solo/Duo/Trio/Group. Track 0 matches both tracks, 1 is normal and 2 is endgame. A maximum
+depth of 0 is unlimited. The first matching enabled row ordered by priority descending and ID
+ascending wins. Use a higher priority for depth-specific overrides. `milestone_every` and
+`milestone_tokens` add an optional bonus on first clears of divisible depths. The cap includes
+these bonuses. Migration reruns preserve edited or disabled default rows.
+
+Token windows, clear records and token item delivery share the durable stage-completion
+transaction. Revision checks reject competing stale allowance updates, and the stage receipt
+rejects replayed completions. Inventory overflow retains the existing mail delivery path.
+
+The native I-panel receives a Bazaar Token reward icon, first/repeat amount, allowance and countdown
+through the existing client Lua transport. The cache icon is reserved for an earned bonus cache.
+Reconstructed-mode state appends `COA_TOKENS|item|quantity|earned|cap|start|end|available` after the
+existing state fields for addons that consume the extension. Client rendering requires in-game
+acceptance with the installed addon/runtime.

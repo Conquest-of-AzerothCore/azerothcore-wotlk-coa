@@ -91,12 +91,12 @@ int32 ReputationMgr::GetReputation(uint32 faction_id) const
 
 int32 ReputationMgr::GetBaseReputation(FactionEntry const* factionEntry) const
 {
-    if (!factionEntry)
-        return 0;
+    return GetBaseReputation(factionEntry, _player->getRaceMask(), _player->getClassMask());
+}
 
-    uint32 raceMask = _player->getRaceMask();
-    uint32 classMask = _player->getClassMask();
-    for (int i = 0; i < 4; i++)
+int8 ReputationMgr::FindBaseReputationIndex(FactionEntry const* factionEntry, uint32 raceMask, uint32 classMask)
+{
+    for (int8 i = 0; i < 4; i++)
     {
         if ((factionEntry->BaseRepRaceMask[i] & raceMask  ||
                 (factionEntry->BaseRepRaceMask[i] == 0  &&
@@ -104,11 +104,21 @@ int32 ReputationMgr::GetBaseReputation(FactionEntry const* factionEntry) const
                 (factionEntry->BaseRepClassMask[i] & classMask ||
                  factionEntry->BaseRepClassMask[i] == 0))
 
-            return factionEntry->BaseRepValue[i];
+            return i;
     }
 
+    return -1;
+}
+
+int32 ReputationMgr::GetBaseReputation(FactionEntry const* factionEntry, uint32 raceMask, uint32 classMask)
+{
+    if (!factionEntry)
+        return 0;
+
+    int8 index = FindBaseReputationIndex(factionEntry, raceMask, classMask);
+
     // in faction.dbc exist factions with (RepListId >=0, listed in character reputation list) with all BaseRepRaceMask[i] == 0
-    return 0;
+    return index >= 0 ? factionEntry->BaseRepValue[index] : 0;
 }
 
 int32 ReputationMgr::GetReputation(FactionEntry const* factionEntry) const
@@ -145,22 +155,16 @@ void ReputationMgr::ApplyForceReaction(uint32 faction_id, ReputationRank rank, b
 
 uint32 ReputationMgr::GetDefaultStateFlags(FactionEntry const* factionEntry) const
 {
+    return GetDefaultStateFlags(factionEntry, _player->getRaceMask(), _player->getClassMask());
+}
+
+uint32 ReputationMgr::GetDefaultStateFlags(FactionEntry const* factionEntry, uint32 raceMask, uint32 classMask)
+{
     if (!factionEntry)
         return 0;
 
-    uint32 raceMask = _player->getRaceMask();
-    uint32 classMask = _player->getClassMask();
-    for (int i = 0; i < 4; i++)
-    {
-        if ((factionEntry->BaseRepRaceMask[i] & raceMask  ||
-                (factionEntry->BaseRepRaceMask[i] == 0  &&
-                 factionEntry->BaseRepClassMask[i] != 0)) &&
-                (factionEntry->BaseRepClassMask[i] & classMask ||
-                 factionEntry->BaseRepClassMask[i] == 0))
-
-            return factionEntry->ReputationFlags[i];
-    }
-    return 0;
+    int8 index = FindBaseReputationIndex(factionEntry, raceMask, classMask);
+    return index >= 0 ? factionEntry->ReputationFlags[index] : 0;
 }
 
 void ReputationMgr::SendForceReactions()

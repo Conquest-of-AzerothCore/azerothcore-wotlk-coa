@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "name": "Electrocute consumes Electrocutioner",
+  "contract": "Electrocutioner (804592) resets Electrocute and makes the next one usable regardless of the target's health. Its Spell.dbc record has no proc flags or charges (ProcFlags 0, ProcCharges 0, 15 s duration), so nothing removed it when Electrocute was cast: the buff kept Electrocute highlighted for its whole duration while the 6 s category cooldown (978) Electrocute had just started ran underneath it. A player Electrocute (801844) cast on a full-health target, possible only through the buff's SPELL_AURA_ABILITY_IGNORE_AURASTATE, must remove the buff. The actor lacks the Electrocutioner passive (500068), so Electrocute's own hit cannot grant a fresh buff and the aura reading after the cast isolates consumption.",
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "s",
+      "race": 1,
+      "class": 16,
+      "level": 20,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "s",
+      "entry": 36,
+      "level": 20,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 801844
+    },
+    {
+      "action": "set_aura",
+      "actor": "s",
+      "spell": 804592,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Electrocutioner is up before the cast",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 804592,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 801844,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Electrocute was cast on a full-health target through Electrocutioner",
+      "actor": "s",
+      "metric": "spell_cast_count",
+      "spell": 801844,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Casting Electrocute used up Electrocutioner",
+      "actor": "s",
+      "metric": "aura",
+      "spell": 804592,
+      "equals": 0
+    }
+  ]
+}

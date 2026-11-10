@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "name": "Mercenary for Hire!: a High-Risk Mercenary and a same-faction War Mode player can fight each other",
+  "contract": "Mercenary for Hire! makes its user hostile to their own faction's War Mode and High-Risk players. Two Humans pick their rulesets in Stormwind with the ruleset spells, one War Mode and one High-Risk, and the High-Risk player takes up Mercenary for Hire!. They can attack each other in Stormwind and in Elwynn Forest.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "mercenary",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "warmode",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Stormwind lets both characters rest",
+      "actor": "warmode",
+      "metric": "resting",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "warmode",
+      "spell": 84420
+    },
+    {
+      "action": "wait",
+      "label": "Let the ruleset change land",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The War Mode selection is not refused",
+      "actor": "warmode",
+      "metric": "cast_failure",
+      "spell": 84420,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "One character is in War Mode",
+      "actor": "warmode",
+      "metric": "aura",
+      "spell": 1004119,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 84421
+    },
+    {
+      "action": "assert",
+      "label": "The other is in High-Risk",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the ruleset spell's global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "and takes up Mercenary for Hire!",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "In Stormwind the Mercenary can attack the War Mode player",
+      "actor": "mercenary",
+      "metric": "can_attack",
+      "target": "warmode",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and the War Mode player can attack the Mercenary",
+      "actor": "warmode",
+      "metric": "can_attack",
+      "target": "mercenary",
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "mercenary",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053
+    },
+    {
+      "action": "teleport",
+      "actor": "warmode",
+      "map": 0,
+      "x": -9615.06,
+      "y": -288.949,
+      "z": 57.3053
+    },
+    {
+      "action": "wait",
+      "label": "Let both arrive in Elwynn Forest",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "In Elwynn Forest the Mercenary can attack the War Mode player",
+      "actor": "mercenary",
+      "metric": "can_attack",
+      "target": "warmode",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and the War Mode player can attack the Mercenary",
+      "actor": "warmode",
+      "metric": "can_attack",
+      "target": "mercenary",
+      "equals": 1
+    }
+  ]
+}

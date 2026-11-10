@@ -98,6 +98,8 @@ Read the relevant sections when needed for the work. Do not read every guide or 
 - Subsystem-specific questions → the relevant section in `.agents/docs/systems/`
 - Ascension damage/healing, AP/RAP/SP coefficients, triggered spells or tooltip parity →
   `.agents/docs/systems/ascension-spell-parity.md`
+- Warcraft Reborn spell twins, namesakes, `GetSpellTwinFor` or stock code running for Reborn spells →
+  `.agents/docs/systems/warcraft-reborn-spell-twins.md`
 - DBC record retrieval, links, provenance or data comparison → `apps/coa-dbc/README.md` (`coa-dbc-viewer`, JSON CLI)
 - Spell/quest ranks, acquisition, expected behavior, execution paths and regression links →
   `apps/coa-mechanics/README.md` (compact mechanic maps)

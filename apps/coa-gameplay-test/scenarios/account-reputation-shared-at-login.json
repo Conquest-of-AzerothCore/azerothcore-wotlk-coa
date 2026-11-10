@@ -1,0 +1,163 @@
+{
+  "schema": 1,
+  "name": "Reputation is shared between the characters of an account at login",
+  "contract": "Ascension shared reputation across an account (#9918, #1432). When a character logs in it is raised to the best absolute standing another character of the same account saved, for factions its team shares or whose base standing is the same for both characters. Opposite-team city factions, hidden factions such as profession specializations, and other accounts are not shared. Reaching Exalted this way counts for reputation achievements.",
+  "players": [
+    {
+      "id": "main",
+      "race": 1,
+      "class": 32,
+      "level": 60
+    },
+    {
+      "id": "dwarf",
+      "race": 3,
+      "class": 20,
+      "level": 60,
+      "account_of": "main"
+    },
+    {
+      "id": "orc",
+      "race": 2,
+      "class": 12,
+      "level": 60,
+      "account_of": "main"
+    },
+    {
+      "id": "stranger",
+      "race": 1,
+      "class": 27,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_reputation",
+      "actor": "main",
+      "id": 576,
+      "value": 21000
+    },
+    {
+      "action": "set_reputation",
+      "actor": "main",
+      "id": 529,
+      "value": 9000
+    },
+    {
+      "action": "set_reputation",
+      "actor": "main",
+      "id": 72,
+      "value": 42999
+    },
+    {
+      "action": "set_reputation",
+      "actor": "main",
+      "id": 46,
+      "value": 42999
+    },
+    {
+      "action": "relog",
+      "actor": "main"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "reputation",
+      "id": 576,
+      "equals": -3500,
+      "label": "Before relogging the alt keeps its own Timbermaw standing"
+    },
+    {
+      "action": "relog",
+      "actor": "dwarf"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "reputation",
+      "id": 576,
+      "equals": 21000,
+      "label": "Same-team alt receives the account's Revered Timbermaw"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "reputation",
+      "id": 529,
+      "equals": 9000,
+      "label": "Same-team alt receives the account's Honored Argent Dawn"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "reputation",
+      "id": 72,
+      "equals": 42999,
+      "label": "Same-team alt receives Exalted Stormwind although its own base differs"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "reputation",
+      "id": 46,
+      "equals": 0,
+      "label": "Hidden profession specialization factions stay per character"
+    },
+    {
+      "action": "assert",
+      "actor": "dwarf",
+      "metric": "has_achievement",
+      "achievement": 522,
+      "equals": 1,
+      "label": "Exalted reached through the account counts for Somebody Likes Me"
+    },
+    {
+      "action": "relog",
+      "actor": "orc"
+    },
+    {
+      "action": "assert",
+      "actor": "orc",
+      "metric": "reputation",
+      "id": 576,
+      "equals": 21000,
+      "label": "Opposite-team alt receives Timbermaw, whose base is the same for both teams"
+    },
+    {
+      "action": "assert",
+      "actor": "orc",
+      "metric": "reputation",
+      "id": 529,
+      "equals": 9000,
+      "label": "Opposite-team alt receives Argent Dawn, whose base is the same for both teams"
+    },
+    {
+      "action": "assert",
+      "actor": "orc",
+      "metric": "reputation",
+      "id": 72,
+      "equals": -42000,
+      "label": "Opposite-team alt keeps its Hated base with Stormwind"
+    },
+    {
+      "action": "assert",
+      "actor": "orc",
+      "metric": "has_achievement",
+      "achievement": 522,
+      "equals": 0,
+      "label": "Opposite-team alt has no Exalted faction from the account"
+    },
+    {
+      "action": "relog",
+      "actor": "stranger"
+    },
+    {
+      "action": "assert",
+      "actor": "stranger",
+      "metric": "reputation",
+      "id": 576,
+      "equals": -3500,
+      "label": "A character of another account is not affected"
+    }
+  ]
+}

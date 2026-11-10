@@ -1148,6 +1148,7 @@ void WorldSession::HandlePlayerLoginFromDB(LoginQueryHolder const& holder)
     }
 
     _rafRewardSession = 0;
+    _rafRewardsNextUpdate = 0;
     UpdateRecruitAFriendRewards(true);
     sScriptMgr->OnPlayerLogin(pCurrChar);
 
@@ -2103,8 +2104,8 @@ void WorldSession::HandleCharFactionOrRaceChangeCallback(std::shared_ptr<Charact
             return;
         }
 
-        // is arena team captain
-        if (sArenaTeamMgr->GetArenaTeamByCaptain(factionChangeInfo->Guid))
+        // is captain of an arena team with other members, a one-member team is disbanded below
+        if (sArenaTeamMgr->IsCaptainOfTeamWithOtherMembers(factionChangeInfo->Guid))
         {
             SendCharFactionChange(CHAR_CREATE_CHARACTER_ARENA_LEADER, factionChangeInfo.get());
             return;
@@ -2424,6 +2425,7 @@ void WorldSession::HandleCharFactionOrRaceChangeCallback(std::shared_ptr<Charact
             }
 
             // Leave Arena Teams
+            sArenaTeamMgr->DisbandSoloTeamsOfCaptain(factionChangeInfo->Guid);
             Player::LeaveAllArenaTeams(factionChangeInfo->Guid);
 
             // Reset homebind and position

@@ -46,7 +46,11 @@ class aura_ascension_mountain_avatar : public AuraScript
         }
         else
         {
+            Player* player = owner->ToPlayer();
+            bool const hadRealCooldown = player && player->HasSpellCooldown(EarthenAvatar);
             owner->CastSpell(owner, EarthenAvatar, TRIGGERED_FULL_MASK);
+            if (player && !hadRealCooldown)
+                player->RemoveSpellCooldown(EarthenAvatar, true);
             if (Aura* avatar = owner->GetAura(EarthenAvatar, owner->GetGUID()))
             {
                 avatar->SetMaxDuration(5000);

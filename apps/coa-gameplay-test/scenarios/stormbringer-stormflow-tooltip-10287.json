@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Stormflow's tooltip quotes Unbridled Flow's real bonus (#10287)",
+  "contract": "Stormflow (567555, 572861-572867) says '$?s578299[ and deals $567557s3% increased damage][]'. 567557 is a hidden aura whose effect 2 amount is 0, so players with Unbridled Flow read '0% increased damage'. The bonus applied by stormbringer_unbridled_flow is Unbridled Flow's effect 0 amount, so the streamed description quotes $578299s1 instead.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "s", "race": 1, "class": 16, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the patch stream arrive", "ms": 3000 },
+    { "action": "assert", "label": "FIX: rank 1 quotes Unbridled Flow's amount", "actor": "s",
+      "metric": "server_packet_contains", "opcode": 2346, "row": 567555,
+      "text": "and deals $578299s1% increased damage", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "FIX: rank 1 no longer quotes the zero amount", "actor": "s",
+      "metric": "server_packet_contains", "opcode": 2346, "row": 567555, "text": "$567557s3", "equals": 0 },
+    { "action": "assert", "label": "FIX: the top rank quotes it too", "actor": "s",
+      "metric": "server_packet_contains", "opcode": 2346, "row": 572867,
+      "text": "and deals $578299s1% increased damage", "equals": 1 }
+  ]
+}

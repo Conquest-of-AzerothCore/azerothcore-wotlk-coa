@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Permafrost stacks survive a non-Rime cast (#10270)",
+  "contract": "Permafrost 704681 reads 'a $h% chance to grant you the Permafrost, which treats your next 2 spells cast as if the target were Frozen' (ProcChance 15 per Spell.dbc, SpellDuration row 29 = 12000 ms); its own cast-check (AscensionNecromancerAbilities.cpp) only lets Lichfrost 801722, Ice Barrage 801760 and Glacial Impact 704355/707399-707402 consume the 801747 buff. AscensionNecromancerAbilities.cpp's OnSpellCast fired consume(801747, true) for every non-triggered player cast, so an unrelated spell such as Blight 500237 (SpellFamilyFlags word 2 = 8192, matching neither Lichfrost's mask 0x8000000 nor Ice Barrage's spell chain) dropped a charge it should never touch. Getting the buff deterministically relies on aura_ascension_necromancer_lifecycle::Apply (AscensionNecromancerAuras.cpp) setting GetAura()->SetCharges(2) on every real-or-reapply application of 801747, independent of the talent's own 15% roll: the scenario casts 801747 on the Necromancer directly, so the fixture does not depend on the random proc at all. 801747's 12000 ms duration comfortably outlasts the short window the two cast assertions below need. Blight is a single SCHOOL_DAMAGE effect with no aura and no periodic tail, so its cast cannot itself disturb the charge count through any other mechanism; this isolates the assertions to the fix under test. Lichfrost's own 1500 ms cast time (SpellCastTimes row 16) needs the longer wait before its assertion. Discriminating metric: the 801747 aura's exact charge count, unchanged after Blight and down by exactly one after Lichfrost.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "necro",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "necro",
+      "entry": 299,
+      "level": 60,
+      "distance": 12
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 500237
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 801722
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 801747
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Permafrost buff is not active yet",
+      "actor": "necro",
+      "metric": "aura",
+      "spell": 801747,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Cast Permafrost on self directly: AscensionNecromancerAuras.cpp's Apply() sets its real 2 charges on every application, independent of the Permafrost talent's own 15% proc chance",
+      "actor": "necro",
+      "spell": 801747,
+      "target": "necro"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Permafrost is active at its full 2 charges",
+      "actor": "necro",
+      "metric": "aura_charges",
+      "spell": 801747,
+      "equals": 2
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Blight is not a Rime spell",
+      "actor": "necro",
+      "spell": 500237,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Permafrost keeps both charges after the unrelated cast",
+      "actor": "necro",
+      "metric": "aura_charges",
+      "spell": 801747,
+      "equals": 2
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Lichfrost is one of the three eligible Rime spells",
+      "actor": "necro",
+      "spell": 801722,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Lichfrost drops exactly one charge",
+      "actor": "necro",
+      "metric": "aura_charges",
+      "spell": 801747,
+      "equals": 1
+    }
+  ]
+}

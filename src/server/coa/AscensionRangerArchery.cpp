@@ -11,6 +11,9 @@
 #include "SpellScriptLoader.h"
 #include <algorithm>
 #include <limits>
+#include <map>
+#include <mutex>
+#include <utility>
 
 namespace
 {
@@ -80,6 +83,28 @@ void ApplyPierced(Player* player, Unit* target, uint32 damage)
     player->CastCustomSpell(SPELL_PIERCED_BLEED, SPELLVALUE_BASE_POINT0, dealt, target, TRIGGERED_FULL_MASK);
 }
 
+std::mutex landedDamageLock;
+std::map<std::pair<ObjectGuid, ObjectGuid>, uint32> landedDamage;
+
+void RememberLandedDamage(Unit* attacker, Unit* target, uint32 damage)
+{
+    std::lock_guard<std::mutex> lock(landedDamageLock);
+    if (landedDamage.size() > 4096)
+        landedDamage.clear();
+    landedDamage[{attacker->GetGUID(), target->GetGUID()}] = damage;
+}
+
+uint32 TakeLandedDamage(Unit* attacker, Unit* target)
+{
+    std::lock_guard<std::mutex> lock(landedDamageLock);
+    auto itr = landedDamage.find({attacker->GetGUID(), target->GetGUID()});
+    if (itr == landedDamage.end())
+        return 0;
+    uint32 damage = itr->second;
+    landedDamage.erase(itr);
+    return damage;
+}
+
 void TriggerIncendiaryExplosion(Spell* spell, Player* player, Unit* target, uint32 damage)
 {
     Aura* arrows = player->GetAura(SPELL_INCENDIARY_ARROWS, player->GetGUID());
@@ -92,7 +117,8 @@ void TriggerIncendiaryExplosion(Spell* spell, Player* player, Unit* target, uint
 
     spell->SetScriptValue(SPELL_INCENDIARY_ARROWS, 1);
     SpellCastTargets targets;
-    targets.SetUnitTarget(target);
+    if (target->IsAlive())
+        targets.SetUnitTarget(target);
     targets.SetDst(target->GetPosition());
     CustomSpellValues values;
     values.AddSpellMod(SPELLVALUE_BASE_POINT0, ClampedPct(damage, share->GetAmount()));
@@ -165,13 +191,38 @@ public:
     void OnSpellHitResult(Spell* spell, Unit* target, uint8 miss, uint32 damage, uint32, bool critical) override
     {
         Player* player = spell->GetCaster()->ToPlayer();
-        if (!player || player->getClass() != CLASS_RANGER || miss != SPELL_MISS_NONE || !damage || !target ||
-            target == player || !target->IsAlive() || !IsRangerSpell(spell->GetSpellInfo()))
+        SpellInfo const* info = spell->GetSpellInfo();
+        if (!player || player->getClass() != CLASS_RANGER || miss != SPELL_MISS_NONE || !target ||
+            !IsRangerSpell(info))
             return;
-        if (critical && IsPiercingShot(spell->GetSpellInfo()))
-            ApplyPierced(player, target, damage);
-        if (IsIncendiarySpender(spell))
+
+        if (!damage)
+            damage = TakeLandedDamage(player, target);
+        if (!damage)
+            return;
+
+        if (target != player && IsIncendiarySpender(spell))
             TriggerIncendiaryExplosion(spell, player, target, damage);
+        if (target == player || !target->IsAlive())
+            return;
+        if (critical && IsPiercingShot(info))
+            ApplyPierced(player, target, damage);
+    }
+};
+
+class ranger_archery_damage : public UnitScript
+{
+public:
+    ranger_archery_damage() : UnitScript("ranger_archery_damage", true,
+        {UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN}) { }
+
+    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo) override
+    {
+        Player* player = attacker ? attacker->ToPlayer() : nullptr;
+        if (!player || player->getClass() != CLASS_RANGER || !target || !spellInfo || damage <= 0 ||
+            !IsRangerSpell(spellInfo) || spellInfo->CasterAuraSpell != SPELL_ADVANTAGE)
+            return;
+        RememberLandedDamage(player, target, uint32(damage));
     }
 };
 
@@ -281,5 +332,6 @@ void AddSC_AscensionRangerArchery()
     RegisterSpellScript(aura_ascension_ranger_pierced_bleed);
     RegisterSpellScript(aura_ascension_ranger_hawkeye);
     new ranger_archery_hits();
+    new ranger_archery_damage();
     new ranger_archery_contracts();
 }

@@ -1,0 +1,241 @@
+{
+  "schema": 1,
+  "name": "Callboard and Prestigious Caches never give armor or weapons the opener cannot wear (#10868)",
+  "contract": [
+    "Report #10868: a Necromancer opened a Heroic Dungeon Callboard Cache (1615001) and received Scarab Plate Helm. Both caches filtered their pools with Player::CanUseItem(ItemTemplate const*), which checks class, race, level and required skill but not the armor or weapon proficiency an equip checks; the other CoA caches add that skill check.",
+    "Expected: after six Callboard Caches and six Prestigious Caches (1287304) the Necromancer carries rewards from each pool and none of them is armor or a weapon whose skill it lacks."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "necro",
+      "race": 1,
+      "class": 23,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "necro",
+      "item": 1615001,
+      "count": 6
+    },
+    {
+      "action": "open_item",
+      "actor": "necro",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "necro",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "necro",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "necro",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "necro",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "necro",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "necro",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "necro",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "necro",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "necro",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "necro",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "necro",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "6 Callboard Cache rewards are in the bags",
+      "actor": "necro",
+      "metric": "carried_pool_item_count",
+      "cache": 1615001,
+      "table": "callboard",
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: none of them needs a skill the Necromancer lacks",
+      "actor": "necro",
+      "metric": "carried_pool_item_count",
+      "cache": 1615001,
+      "table": "callboard",
+      "unwearable": true,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "necro",
+      "item": 1287304,
+      "count": 6
+    },
+    {
+      "action": "use_item",
+      "actor": "necro",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "necro",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "necro",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "necro",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "necro",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "necro",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "necro",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "necro",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "necro",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "necro",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_item",
+      "actor": "necro",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "actor": "necro",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Prestigious Cache rewards are in the bags",
+      "actor": "necro",
+      "metric": "carried_pool_item_count",
+      "cache": 1287304,
+      "table": "prestigious",
+      "min": 6
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: none of them needs a skill the Necromancer lacks",
+      "actor": "necro",
+      "metric": "carried_pool_item_count",
+      "cache": 1287304,
+      "table": "prestigious",
+      "unwearable": true,
+      "equals": 0
+    }
+  ]
+}

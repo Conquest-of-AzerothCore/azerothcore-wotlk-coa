@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "Spellpiercing Cloak crate in the Badlands rests on the ground (#10603)",
+  "contract": "The Worldforged Spellpiercing Cloak crate (spawn 6941125) next to Theldurin the Lost stood 0.69 yd above the terrain at 244.555. Issue #10603.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the crate rests on the terrain",
+      "actor": "p", "metric": "spawn_ground_gap", "guid": 6941125, "spawn_type": "gameobject", "min": -0.3, "max": 0.3
+    }
+  ]
+}

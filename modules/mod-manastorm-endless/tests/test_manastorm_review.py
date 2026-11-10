@@ -28,7 +28,7 @@ class ReviewRegressions(unittest.TestCase):
             (directory / "fixture.cpp").write_text(source, encoding="utf-8")
             if os.name == "nt":
                 installs = Path(os.environ.get("ProgramFiles", "C:/Program Files")) / "Microsoft Visual Studio"
-                vcvars = next(installs.glob("2022/*/VC/Auxiliary/Build/vcvars64.bat"), None)
+                vcvars = next(installs.glob("*/*/VC/Auxiliary/Build/vcvars64.bat"), None)
                 self.assertIsNotNone(vcvars)
                 flags = " ".join("/D" + value for value in defines)
                 command = (f'cmd.exe /d /c call "{vcvars}" >nul && '
@@ -296,6 +296,83 @@ int main() {
 """
         self.compile_and_run(fixture)
         self.compile_and_run(fixture, ("MOD_MANASTORM_ENDLESS",))
+
+    def test_gadget_spells_need_a_run_whether_or_not_the_module_is_enabled(self):
+        module = (MODULE / "src/Manastorm.cpp").read_text(encoding="utf-8")
+        guard = function(function(module, "class manastorm_gadget_spells"), "void OnSpellCheckCast(")
+        gadgets = (ROOT / "src/server/coa/AscensionManastormGadgets.h").read_text(encoding="utf-8")
+        fixture = gadgets + r"""
+#include <cassert>
+typedef std::uint32_t uint32;
+enum SpellCastResult { SPELL_CAST_OK, SPELL_FAILED_NOT_HERE, SPELL_FAILED_NOT_READY };
+enum class ManastormRunState { Preparing, Active, StageComplete, Finished };
+namespace ManastormBaseline { constexpr uint32 SpellPotionChargeSystem = 992090; }
+namespace ManastormModuleConfig { bool enabled = false; bool Enabled() { return enabled; } }
+struct Guid { uint32 GetCounter() const { return 7; } };
+struct Player {
+    uint32 GetMapId() const { return 1; }
+    uint32 GetInstanceId() const { return 2; }
+    Guid GetGUID() const { return {}; }
+};
+struct Unit { Player* player; Player* ToPlayer() { return player; } };
+struct SpellInfo { uint32 Id; };
+struct Spell {
+    Unit* caster;
+    SpellInfo info;
+    Unit* GetCaster() { return caster; }
+    SpellInfo const* GetSpellInfo() const { return &info; }
+};
+struct Segment { uint32 MapId = 1; };
+struct ManastormRun {
+    ManastormRunState state = ManastormRunState::Active;
+    uint32 equipped = 0;
+    Segment segment;
+    ManastormRunState GetState() const { return state; }
+    Segment const& GetSegment() const { return segment; }
+    uint32 GetInstanceId() const { return 2; }
+    bool IsGadgetEquipped(uint32, uint32 spell) const { return spell == equipped; }
+};
+struct ManastormMgr {
+    ManastormRun const* run = nullptr;
+    static ManastormMgr& Instance() { static ManastormMgr manager; return manager; }
+    ManastormRun const* GetRunFor(Player const*) const { return run; }
+    bool IsPlayerInUsableEndlessStage(Player const*) const { return run != nullptr; }
+};
+struct AllSpellScript {
+    virtual ~AllSpellScript() = default;
+    virtual void OnSpellCheckCast(Spell*, bool, SpellCastResult&) = 0;
+};
+struct Guard final : AllSpellScript {
+""" + guard + r"""
+};
+SpellCastResult Cast(uint32 id) {
+    Player player;
+    Unit unit{&player};
+    Spell spell{&unit, {id}};
+    SpellCastResult result = SPELL_CAST_OK;
+    Guard().OnSpellCheckCast(&spell, true, result);
+    return result;
+}
+int main() {
+    for (bool enabled : {false, true}) {
+        ManastormModuleConfig::enabled = enabled;
+        ManastormMgr::Instance().run = nullptr;
+        for (uint32 spell : {991539u, 293498u, 991881u, 293526u, 93430u, 293436u, 992090u})
+            assert(Cast(spell) == SPELL_FAILED_NOT_HERE);
+        assert(Cast(93467) == SPELL_CAST_OK);
+        assert(Cast(304286) == SPELL_CAST_OK);
+        ManastormRun run;
+        run.equipped = 991539;
+        ManastormMgr::Instance().run = &run;
+        assert(Cast(991539) == SPELL_CAST_OK);
+        assert(Cast(991881) == SPELL_FAILED_NOT_READY);
+        assert(Cast(992090) == SPELL_CAST_OK);
+        run.state = ManastormRunState::Finished;
+        assert(Cast(991539) == SPELL_FAILED_NOT_HERE);
+    }
+}
+"""
+        self.compile_and_run(fixture)
 
 
 if __name__ == "__main__":

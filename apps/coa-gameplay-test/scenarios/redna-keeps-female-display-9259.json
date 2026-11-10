@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Redna always spawns with her dwarf female display (#9259)",
+  "contract": [
+    "Report #9259: Redna 161820 sometimes appears as a male dwarf.",
+    "Her template lists only display 3766 (dwarf female); its creature_model_info gender link to 3765 swapped her display on half of all spawns.",
+    "Expected: twelve fresh spawns all use 3766. With the link, all twelve staying female has a 1 in 4096 chance."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8914, "y": -133, "z": 80.6, "o": 0 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "summon", "actor": "hero", "entry": 161820, "as": "redna1", "distance": 4 },
+    { "action": "assert", "label": "Redna 1 keeps her dwarf female display", "actor": "redna1", "metric": "display_id", "equals": 3766 },
+    { "action": "summon", "actor": "hero", "entry": 161820, "as": "redna2", "distance": 4 },
+    { "action": "assert", "label": "Redna 2 keeps her dwarf female display", "actor": "redna2", "metric": "display_id", "equals": 3766 },
+    { "action": "summon", "actor": "hero", "entry": 161820, "as": "redna3", "distance": 4 },
+    { "action": "assert", "label": "Redna 3 keeps her dwarf female display", "actor": "redna3", "metric": "display_id", "equals": 3766 },
+    { "action": "summon", "actor": "hero", "entry": 161820, "as": "redna4", "distance": 4 },
+    { "action": "assert", "label": "Redna 4 keeps her dwarf female display", "actor": "redna4", "metric": "display_id", "equals": 3766 },
+    { "action": "summon", "actor": "hero", "entry": 161820, "as": "redna5", "distance": 4 },
+    { "action": "assert", "label": "Redna 5 keeps her dwarf female display", "actor": "redna5", "metric": "display_id", "equals": 3766 },
+    { "action": "summon", "actor": "hero", "entry": 161820, "as": "redna6", "distance": 4 },
+    { "action": "assert", "label": "Redna 6 keeps her dwarf female display", "actor": "redna6", "metric": "display_id", "equals": 3766 },
+    { "action": "summon", "actor": "hero", "entry": 161820, "as": "redna7", "distance": 4 },
+    { "action": "assert", "label": "Redna 7 keeps her dwarf female display", "actor": "redna7", "metric": "display_id", "equals": 3766 },
+    { "action": "summon", "actor": "hero", "entry": 161820, "as": "redna8", "distance": 4 },
+    { "action": "assert", "label": "Redna 8 keeps her dwarf female display", "actor": "redna8", "metric": "display_id", "equals": 3766 },
+    { "action": "summon", "actor": "hero", "entry": 161820, "as": "redna9", "distance": 4 },
+    { "action": "assert", "label": "Redna 9 keeps her dwarf female display", "actor": "redna9", "metric": "display_id", "equals": 3766 },
+    { "action": "summon", "actor": "hero", "entry": 161820, "as": "redna10", "distance": 4 },
+    { "action": "assert", "label": "Redna 10 keeps her dwarf female display", "actor": "redna10", "metric": "display_id", "equals": 3766 },
+    { "action": "summon", "actor": "hero", "entry": 161820, "as": "redna11", "distance": 4 },
+    { "action": "assert", "label": "Redna 11 keeps her dwarf female display", "actor": "redna11", "metric": "display_id", "equals": 3766 },
+    { "action": "summon", "actor": "hero", "entry": 161820, "as": "redna12", "distance": 4 },
+    { "action": "assert", "label": "Redna 12 keeps her dwarf female display", "actor": "redna12", "metric": "display_id", "equals": 3766 }
+  ]
+}

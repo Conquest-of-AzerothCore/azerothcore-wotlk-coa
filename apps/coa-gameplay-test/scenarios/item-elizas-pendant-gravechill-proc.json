@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Eliza's Pendant's proc slows the creature it hits (#9883)",
+  "contract": "Eliza's Pendant's equip spell is 303050, a passive aura 42 (proc trigger spell) on 303051 Gravechill. Its Spell.dbc record carries ProcFlags 0 and the world had no spell_proc row, so Aura::GetProcEffectMask found no proc entry and the tooltip's 5% roll never ran: the trinket never slowed anything (#9883). The tooltip promises a $h% chance on dealing magic damage to reduce a creature's movement speed by 50/50/58/65% for 5 sec, and none of the tiers names an internal cooldown. The repair grants PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG at the hit phase over every school and spell family, defers Chance to the record's own ProcChance 5, and leaves Cooldown 0. Base dummy 303050 and tiers 312849/316849/320849 are covered; the tiers trigger 303051/312850/316850/320850 Gravechill. spell_proc_chance reads the loaded entries' 5, and aura_proc_rate replays the aura's native proc decision (including the 5% roll) 40000 times per sample on a synthetic landed magic-class direct hit naming Frostbolt 116; melee-class and periodic events proc it zero times, and the slow payload itself is asserted by casting Gravechill on the dummy and reading its run speed. Before the repair the chance lookups fail with 'Spell has no proc entry' and every rate reads 0, so both discriminating assertions fail rather than flake.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "caster", "entry": 36, "level": 80, "health": 1000000, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "set_aura", "label": "Base item proc dummy", "actor": "caster", "spell": 303050, "stacks": 1 },
+    { "action": "set_aura", "label": "Top worldforged tier proc dummy", "actor": "caster", "spell": 320849, "stacks": 1 },
+    { "action": "assert", "label": "SETUP: base proc dummy aura is applied", "actor": "caster", "metric": "aura", "spell": 303050, "equals": 1 },
+    { "action": "assert", "label": "SETUP: top tier proc dummy aura is applied", "actor": "caster", "metric": "aura", "spell": 320849, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: base dummy loads the record's 5% chance", "actor": "caster", "metric": "spell_proc_chance", "spell": 303050, "equals": 5 },
+    { "action": "assert", "label": "DISCRIMINATING: dungeon/Zul'Gurub tier loads the record's 5% chance", "actor": "caster", "metric": "spell_proc_chance", "spell": 312849, "equals": 5 },
+    { "action": "assert", "label": "DISCRIMINATING: higher tier loads the record's 5% chance", "actor": "caster", "metric": "spell_proc_chance", "spell": 316849, "equals": 5 },
+    { "action": "assert", "label": "DISCRIMINATING: top tier loads the record's 5% chance", "actor": "caster", "metric": "spell_proc_chance", "spell": 320849, "equals": 5 },
+    { "action": "assert", "label": "DISCRIMINATING: landed direct magic damage procs the base dummy at about 5%", "actor": "caster", "metric": "aura_proc_rate", "spell": 303050, "target": "dummy", "trigger_spell": 116, "type_mask": 65536, "phase_mask": 2, "spell_type_mask": 1, "hit_mask": 1, "min": 4, "max": 6 },
+    { "action": "assert", "label": "DISCRIMINATING: landed direct magic damage procs the top tier dummy at about 5%", "actor": "caster", "metric": "aura_proc_rate", "spell": 320849, "target": "dummy", "trigger_spell": 116, "type_mask": 65536, "phase_mask": 2, "spell_type_mask": 1, "hit_mask": 1, "min": 4, "max": 6 },
+    { "action": "assert", "label": "CONTROL: a melee-class hit is not magic damage", "actor": "caster", "metric": "aura_proc_rate", "spell": 303050, "target": "dummy", "trigger_spell": 34027, "type_mask": 16, "phase_mask": 2, "spell_type_mask": 1, "hit_mask": 1, "equals": 0 },
+    { "action": "assert", "label": "CONTROL: a periodic tick is not a landed direct hit", "actor": "caster", "metric": "aura_proc_rate", "spell": 303050, "target": "dummy", "trigger_spell": 116, "type_mask": 262144, "phase_mask": 2, "spell_type_mask": 1, "hit_mask": 1, "equals": 0 },
+    { "action": "learn", "label": "Learn the proc's slow payload", "actor": "caster", "spell": 303051 },
+    { "action": "cast", "label": "Cast Gravechill on the dummy", "actor": "caster", "spell": 303051, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: Gravechill cast accepted", "actor": "caster", "metric": "cast_failure", "spell": 303051, "equals": 0 },
+    { "action": "assert", "label": "SETUP: the dummy carries Gravechill", "actor": "dummy", "metric": "aura", "spell": 303051, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: Gravechill halves the dummy's run rate (50% rank-1 slow on the Harvest Golem's 1.14286 run template reads 0.57143)", "actor": "dummy", "metric": "run_speed_rate", "min": 0.55, "max": 0.6 },
+    { "action": "assert", "label": "CONTROL: the caster itself is not slowed", "actor": "caster", "metric": "run_speed_rate", "equals": 1 }
+  ]
+}

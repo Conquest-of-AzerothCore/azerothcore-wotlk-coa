@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "name": "Conduit consumes Lightning Shield charges to extend its duration (#9700)",
+  "contract": "Conduit 278599 promises to consume the caster's Lightning Shield and add one second of duration per charge consumed. Apply Lightning Shield (3 charges), cast Conduit, and confirm Lightning Shield is removed and Conduit's duration is extended from its base 2000 ms by 3000 ms.",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 3,
+      "class": 10,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 10431
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 278599
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 10431
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura_charges",
+      "spell": 10431,
+      "equals": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 278599
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 10431,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 278599,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura_duration_ms",
+      "spell": 278599,
+      "min": 4500,
+      "max": 5000,
+      "within_ms": 300
+    }
+  ]
+}

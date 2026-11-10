@@ -47,6 +47,7 @@
 #include "Creature.h"
 #include "DBCStores.h"
 #include "Group.h"
+#include "LFGMgr.h"
 #include "LocalLevelScaling.h"
 #include "Log.h"
 #include "Map.h"
@@ -54,6 +55,7 @@
 #include "Player.h"
 #include "Random.h"
 #include "ScriptMgr.h"
+#include "SpellInfo.h"
 #include "StringConvert.h"
 #include "Timer.h"
 #include "Tokenize.h"
@@ -102,12 +104,14 @@ namespace
     /// The dungeon finder entries whose dungeons scale: the classic five-player dungeons the client's own
     /// scaling list names, plus Blackrock Depths, Lower and Upper Blackrock Spire, Dire Maul, Stratholme
     /// and Scholomance, the classic dungeons the client list leaves out.
-    constexpr char DEFAULT_SCALING_DUNGEONS[] = "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 163 164 165 272 273 274 276 601 402 401";
+    constexpr char DEFAULT_SCALING_DUNGEONS[] =
+        "1 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 44 51 54 "
+        "163 164 165 272 273 274 276 601 402 401 45";
 
     /// Finder entries whose band is set here instead of read from LFGDungeons.dbc, as `entry:low-high`:
     /// Vaults of the Inquisition and Road to De Other Side scale with the character like the classic dungeons
     /// (15-59), while their finder rows admit 10-59.
-    constexpr char DEFAULT_SCALING_BANDS[] = "401:15-59 402:15-59";
+    constexpr char DEFAULT_SCALING_BANDS[] = "401:15-59 402:15-59 45:35-59";
 
     /// Where a view can exist at all: the open-world maps, and the classic dungeons with the band their
     /// creatures are held inside. Built on every config load and at startup, and published whole, so a
@@ -236,11 +240,28 @@ namespace
                !map->IsScriptedPrivateInstance() && map->IsRegularDifficulty() && DungeonBandFor(map);
     }
 
+    /// Whether this character plays a scaled dungeon at their own level: only a Dungeon Finder group inside
+    /// the dungeon it was assigned, as on Ascension. Walking in keeps the authored creatures and loot,
+    /// whatever the Destiny Weaver switch says, and so does a finder group that walks into another dungeon.
+    bool FinderScaledDungeon(Player const* player, Map const* map)
+    {
+        if (!player || !ScaledDungeon(map))
+            return false;
+
+        Group const* group = const_cast<Player*>(player)->GetGroup();
+        return group && group->isLFGGroup() &&
+               sLFGMgr->inLfgDungeonMap(group->GetGUID(), map->GetId(), map->GetDifficulty());
+    }
+
     /// Installed as the core's resolver, so the loot a scaled dungeon drops follows the same rule as its
     /// creatures.
-    bool InScaledDungeonForCore(Player const* player)
+    LocalLevelScaling::DungeonScaling InScaledDungeonForCore(Player const* player)
     {
-        return player && ScaledDungeon(player->FindMap());
+        Map const* map = player ? player->FindMap() : nullptr;
+        if (!ScaledDungeon(map))
+            return LocalLevelScaling::DungeonScaling::None;
+        return FinderScaledDungeon(player, map) ? LocalLevelScaling::DungeonScaling::Finder
+                                                : LocalLevelScaling::DungeonScaling::WalkedIn;
     }
 
     /// One row of `creature_classlevelstats`: everything the core builds a creature of a given level
@@ -315,8 +336,8 @@ namespace
     /// fought (a Mythical Boon, a prisoner) never gets one.
     ///
     /// The maps are the open world the realm lists and the classic dungeons with a band. Raids,
-    /// battlegrounds and arenas never scale, and neither does CoA's scripted private content. A dungeon
-    /// scales on its regular difficulty only (`ScaledDungeon`).
+    /// battlegrounds and arenas keep their authored scaling. Registered grouped Manastorm private
+    /// instances use personal levels. Other dungeons scale on regular difficulty (`ScaledDungeon`).
     ///
     /// There is no realm switch in front of the list: whether a character scales in the open world is
     /// their own choice (`ScalingChoiceEnabled`), and the module's switch only decides whether that
@@ -328,18 +349,21 @@ namespace
 
         Map* map = creature->GetMap();
         ScalingScope const* scope = Scope();
-        if (!map || !scope || map->IsScriptedPrivateInstance() || map->IsBattlegroundOrArena() || map->IsRaid())
+        bool const personalInstance = LocalLevelScaling::PersonalInstanceScalingFor(map);
+        if (!map || map->IsBattlegroundOrArena() ||
+            (!personalInstance && (!scope || map->IsScriptedPrivateInstance() || map->IsRaid())))
             return false;
 
-        if (map->IsDungeon())
+        if (!personalInstance && map->IsDungeon())
         {
             if (!ScaledDungeon(map))
                 return false;
         }
-        else if (!scope->WorldMaps.contains(map->GetId()))
+        else if (!personalInstance && !scope->WorldMaps.contains(map->GetId()))
             return false;
 
-        if (creature->IsPet() || creature->IsTrigger() || creature->IsCritter() || creature->isWorldBoss() ||
+        if (creature->IsPet() || creature->IsTrigger() || creature->IsCritter() ||
+            (creature->isWorldBoss() && !personalInstance) ||
             creature->GetCreatureType() == CREATURE_TYPE_NON_COMBAT_PET || creature->IsControlledByPlayer() ||
             creature->GetCharmerOrOwnerPlayerOrPlayerItself())
             return false;
@@ -409,16 +433,21 @@ namespace
             return false;
 
         // The Weaver's switch is open world scaling, as its menu and its messages say. A scaled dungeon
-        // scales for everyone inside it: the finder admits a group well below its authored level, and
-        // a level-60 leader whose open world switch is off must not hold the rest of the party to
-        // creatures twenty levels above them.
+        // scales for a Dungeon Finder group, which the finder admits well below the dungeon's authored
+        // level, and for nobody who walked in.
         Map const* map = creature->GetMap();
-        if (!map->IsDungeon() && !LocalLevelScaling::ScalingChoiceEnabled(viewer))
+        bool const personalInstance = LocalLevelScaling::PersonalInstanceScalingFor(map, viewer);
+        if (map->IsScriptedPrivateInstance() && !personalInstance)
+            return false;
+        if (!personalInstance && (map->IsDungeon() ?
+            !FinderScaledDungeon(viewer, map) : !LocalLevelScaling::ScalingChoiceEnabled(viewer)))
             return false;
 
         uint8 const own = creature->GetLevel();
         uint8 level = own;
-        if (map->IsDungeon())
+        if (personalInstance)
+            level = viewer->GetLevel();
+        else if (map->IsDungeon())
         {
             LocalLevelScaling::LevelBand const* band = DungeonBandFor(map);
             if (!band)
@@ -433,7 +462,7 @@ namespace
             level = LocalLevelScaling::ScaleCreatureLevelForViewer(own, viewer->GetLevel(), offset);
         }
 
-        if (level == own)
+        if (level == own && !personalInstance)
             return false;               // their version *is* the creature: nothing to virtualise
 
         CreatureTemplate const* info = creature->GetCreatureTemplate();
@@ -493,12 +522,74 @@ namespace
         return view.Level;
     }
 
+    double ViewDamageForCore(Player const* viewer, Creature const* creature)
+    {
+        CreatureView view;
+        return ViewFor(creature, const_cast<Player*>(viewer), view) ? view.DamageTakenFactor : 1.0;
+    }
+
     uint32 ViewMaxHealthForCore(Player const* viewer, Creature const* creature)
     {
         CreatureView view;
         if (!ViewFor(creature, const_cast<Player*>(viewer), view))
             return 0;
         return view.MaxHealth;
+    }
+
+    /// What the average blow of a creature built at this level hits for, from the warrior row every melee
+    /// creature is built from. Only the ratio between two levels is used, so the attack time and the
+    /// template, rank and aura multipliers it leaves out cancel.
+    double AverageHitAt(uint8 level)
+    {
+        CreatureBaseStats const* stats = sObjectMgr->GetCreatureBaseStats(level, CLASS_WARRIOR);
+        return DestinyWeaver::AverageCreatureMeleeHit(stats->BaseDamage[EXPANSION_CLASSIC], stats->AttackPower,
+                                                      1.0f, BASE_ATTACK_TIME);
+    }
+
+    /// A share of the receiver's health is already the receiver's size.
+    bool HealsShareOfHealth(SpellInfo const* spell)
+    {
+        return spell && (spell->HasEffect(SPELL_EFFECT_HEAL_PCT) || spell->HasEffect(SPELL_EFFECT_HEAL_MAX_HEALTH) ||
+                         spell->HasAura(SPELL_AURA_OBS_MOD_HEALTH));
+    }
+
+    /// Installed as the core's resolver for heals between characters in a scaled dungeon. The healer's
+    /// creatures stand at the healer's level and the receiver's at the receiver's, both held inside the
+    /// dungeon's band, and each takes blows the size of their own version (DamageTakenFactor). A heal is
+    /// sized for the blows of the healer's version, so it is carried over to the receiver's by the ratio
+    /// of the two average blows: a level-20 healer keeps a level-38 tank up as well as a level-20 one,
+    /// and a level-60 healer in the same group is held to the band's top like their creatures are.
+    double HealReceivedForCore(Unit const* healer, Unit const* receiver, SpellInfo const* spell)
+    {
+        if (!ScalingAvailable() || !healer || !receiver || HealsShareOfHealth(spell))
+            return 1.0;
+
+        Player const* from = healer->GetCharmerOrOwnerPlayerOrPlayerItself();
+        Player const* to = receiver->GetCharmerOrOwnerPlayerOrPlayerItself();
+        if (!from || !to || from == to)
+            return 1.0;
+
+        Map const* map = to->FindMap();
+        bool const personalInstance = LocalLevelScaling::PersonalInstanceScalingFor(map, from) &&
+            LocalLevelScaling::PersonalInstanceScalingFor(map, to);
+        if (from->FindMap() != map ||
+            (!personalInstance && (!FinderScaledDungeon(from, map) || !FinderScaledDungeon(to, map))))
+            return 1.0;
+
+        // A character held to the authored creatures by a challenge fights blows of the authored size.
+        if ((LocalLevelScaling::ScalingBlocksFor(from) | LocalLevelScaling::ScalingBlocksFor(to)) &
+            LocalLevelScaling::ChallengeBlocksCreatureScaling)
+            return 1.0;
+
+        LocalLevelScaling::LevelBand const* band = DungeonBandFor(map);
+        uint8 const fromLevel = personalInstance ? from->GetLevel() :
+            LocalLevelScaling::ScaleDungeonCreatureLevelForViewer(from->GetLevel(), *band);
+        uint8 const toLevel = personalInstance ? to->GetLevel() :
+            LocalLevelScaling::ScaleDungeonCreatureLevelForViewer(to->GetLevel(), *band);
+        if (fromLevel == toLevel)
+            return 1.0;
+
+        return DestinyWeaver::ViewDamageTakenFactor(AverageHitAt(toLevel), AverageHitAt(fromLevel));
     }
 
     /// The fields a view rewrites, in one list. The patch looks a position up by index, and a forced
@@ -1178,12 +1269,16 @@ public:
                                                         std::memory_order_relaxed);
         LocalLevelScaling::CreatureViewLevelOwner.store(available ? &ViewLevelForCore : nullptr,
                                                         std::memory_order_relaxed);
+        LocalLevelScaling::CreatureViewDamageOwner.store(available ? &ViewDamageForCore : nullptr,
+                                                       std::memory_order_relaxed);
         LocalLevelScaling::CreatureViewMaxHealthOwner.store(available ? &ViewMaxHealthForCore : nullptr,
                                                             std::memory_order_relaxed);
         LocalLevelScaling::ScalingChangedOwner.store(available ? &RefreshChangedScaling : nullptr,
                                                      std::memory_order_relaxed);
         LocalLevelScaling::ScaledDungeonOwner.store(available ? &InScaledDungeonForCore : nullptr,
                                                     std::memory_order_relaxed);
+        LocalLevelScaling::HealReceivedOwner.store(available ? &HealReceivedForCore : nullptr,
+                                                   std::memory_order_relaxed);
 
         LOG_INFO("module.destiny_weaver",
                  "open world scaling: creatures per character, level - {} in the open world and the "
@@ -1215,8 +1310,10 @@ public:
         LocalLevelScaling::CreatureViewArmorOwner.store(nullptr);
         LocalLevelScaling::CreatureViewLevelOwner.store(nullptr);
         LocalLevelScaling::CreatureViewMaxHealthOwner.store(nullptr);
+        LocalLevelScaling::CreatureViewDamageOwner.store(nullptr);
         LocalLevelScaling::ScalingChangedOwner.store(nullptr);
         LocalLevelScaling::ScaledDungeonOwner.store(nullptr);
+        LocalLevelScaling::HealReceivedOwner.store(nullptr);
     }
 };
 

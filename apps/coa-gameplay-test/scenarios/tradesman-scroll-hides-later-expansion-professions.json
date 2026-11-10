@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Tradesman's Scroll lists only professions of the session's expansion",
+  "contract": "Trainers and the Book of Artisans refuse Jewelcrafting below The Burning Crusade and Inscription below Wrath of the Lich King, but the scroll listed all 17 professions on every session. On a classic session it must list 15, with Leatherworking directly after Engineering, and choosing that fifth option must raise Leatherworking, not the hidden Inscription in the same position of the full list; on a Wrath session it still lists all 17, with Inscription and Jewelcrafting after Engineering.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "classic", "race": 1, "class": 1, "level": 60, "expansion": 0 },
+    { "id": "wrath", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "classic", "spell": 2108, "label": "classic: Apprentice Leatherworking" },
+    { "action": "assert", "actor": "classic", "metric": "skill_maximum", "skill": 165, "equals": 75, "label": "classic: leatherworking starts capped at 75" },
+    { "action": "add_item", "actor": "classic", "item": 777998, "label": "classic: a Tradesman's Scroll" },
+    { "action": "use_item", "actor": "classic", "item": 777998, "spell": 200165, "label": "classic: read the scroll" },
+    { "action": "assert", "actor": "classic", "metric": "gossip_options", "equals": 15, "label": "classic: 15 professions are listed" },
+    { "action": "assert", "actor": "classic", "metric": "gossip_option_text", "index": 3, "text": "Engineering (not learned)", "equals": 1, "label": "classic: Engineering is the fourth option" },
+    { "action": "assert", "actor": "classic", "metric": "gossip_option_text", "index": 4, "text": "Leatherworking", "equals": 1, "label": "classic: Leatherworking follows Engineering" },
+    { "action": "gossip_select", "actor": "classic", "option": 4, "label": "classic: choose the fifth option" },
+    { "action": "assert", "actor": "classic", "metric": "skill_maximum", "skill": 165, "equals": 300, "label": "classic: leatherworking caps at 300" },
+    { "action": "assert", "actor": "classic", "metric": "skill_value", "skill": 165, "equals": 300, "label": "classic: leatherworking is raised to 300" },
+    { "action": "assert", "actor": "classic", "metric": "item_count", "item": 777998, "equals": 0, "label": "classic: the scroll is consumed" },
+
+    { "action": "add_item", "actor": "wrath", "item": 777998, "label": "wrath: a Tradesman's Scroll" },
+    { "action": "use_item", "actor": "wrath", "item": 777998, "spell": 200165, "label": "wrath: read the scroll" },
+    { "action": "assert", "actor": "wrath", "metric": "gossip_options", "equals": 17, "label": "wrath: 17 professions are listed" },
+    { "action": "assert", "actor": "wrath", "metric": "gossip_option_text", "index": 4, "text": "Inscription (not learned)", "equals": 1, "label": "wrath: Inscription follows Engineering" },
+    { "action": "assert", "actor": "wrath", "metric": "gossip_option_text", "index": 5, "text": "Jewelcrafting (not learned)", "equals": 1, "label": "wrath: Jewelcrafting follows Inscription" }
+  ]
+}

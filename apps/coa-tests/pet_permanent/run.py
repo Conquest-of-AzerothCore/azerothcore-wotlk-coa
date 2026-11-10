@@ -1,7 +1,7 @@
 CLI_DESCRIPTION = """Check which pets the client treats as permanent, without a server.
 
 Compiles the production Pet::IsPermanentPetFor and checks the stock warlock, death knight, mage and hunter
-rules, plus the custom-class summons that previously returned false: a Tinker's build pets and any Ascension
+rules (the Warcraft Reborn copies of the stock pets included), plus the custom-class summons that previously returned false: a Tinker's build pets and any Ascension
 class's summoned pet. No database, build or game client is needed.
 """
 
@@ -33,7 +33,12 @@ def main():
         return (ROOT / name).read_text(encoding="utf-8")
 
     pet = source("src/server/game/Entities/Pet/Pet.cpp")
+    defines = source("src/server/game/Entities/Pet/PetDefines.h")
+    offset = defines[defines.index("constexpr uint32 REBORN_CREATURE_OFFSET"):]
+    offset = offset[:offset.index(";") + 1]
     harness = (HERE / "harness.cpp").read_text(encoding="utf-8")
+    harness = harness.replace("// ACTUAL_STOCK_PET_ENTRY",
+                              offset + "\n\n" + method(defines, "inline uint32 GetStockPetEntry("))
     harness = harness.replace("// ACTUAL_PERMANENT", method(pet, "bool Pet::IsPermanentPetFor("))
 
     compiler = shutil.which(os.environ.get("CXX", "cl.exe" if os.name == "nt" else "c++"))

@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "The Dusty Hat pickup rests on the barn floor",
+  "contract": "The Worldforged Dusty Hat pickup was pinned to the terrain under the barn, 0.71 yd below the floor and hidden by it. It now rests on the floor. Issue #10835.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the dusty hat pickup rests on the barn floor",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6940395,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}

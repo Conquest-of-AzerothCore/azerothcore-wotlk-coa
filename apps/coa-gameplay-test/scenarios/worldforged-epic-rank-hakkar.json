@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "name": "Worldforged epic ranks follow the live raid ladder: 64 after Hakkar, 67 and 70 after Ragnaros",
+  "contract": [
+    "The live Worldforged upgrade ladder (user, 2026-11-04): below Zul'Gurub 60, Zul'Gurub 64, Molten Core 67 and 70,",
+    "Onyxia 73, Blackwing Lair 77, Ahn'Qiraj 81, Naxxramas 88; the item level 67 Zul'Gurub upgrades opened with Molten",
+    "Core. Decayed Breeches 1389233 (blue dungeon variant, item level 60) upgrades to 1379719 (item level 64, key 1569,",
+    "5000 Runes of Ascension). Flesh Flayer Hook 278843 upgrades to 1378062 (item level 67, key 4) and Junglewood",
+    "Recurve 1389875 to 1379880 (item level 67, key 2). The recurve climbs on through 1381880 (70), 1393880 (73, key",
+    "1393880), 1383880 (77, key 1383880), 1385880 (81, key 1385880) and 1387880 (88, key 1387880). Before Hakkar the",
+    "item level 64 rank names Hakkar and the 67 rank Ragnaros. After Hakkar only the 64 rank is sold; the 67 ranks",
+    "still wait for Ragnaros, and the 73, 77, 81 and 88 ranks name Onyxia, Nefarian, C'Thun and Kel'Thuzad. A locked",
+    "purchase takes neither the item nor the runes."
+  ],
+  "timeout_ms": 120000,
+  "location": {"map": 309, "x": -11787.4, "y": -1649.34, "z": 54.1017, "o": 4.76475, "ignore_access": true},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "creatures": [
+    {"id": "hakkar", "owner": "hero", "entry": 14834, "level": 63, "health": 20, "distance": 4}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the instance settle", "ms": 3000},
+    {"action": "add_item", "actor": "hero", "item": 278843},
+    {"action": "add_item", "actor": "hero", "item": 1389875},
+    {"action": "add_item", "actor": "hero", "item": 1389233},
+    {"action": "add_item", "actor": "hero", "item": 1381880},
+    {"action": "add_item", "actor": "hero", "item": 1393880},
+    {"action": "add_item", "actor": "hero", "item": 1383880},
+    {"action": "add_item", "actor": "hero", "item": 1385880},
+    {"action": "add_item", "actor": "hero", "item": 375250, "count": 20000},
+
+    {"action": "client_packet", "label": "Upgrade the Decayed Breeches to item level 64 before Hakkar", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1569}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "CONTROL: the item level 64 rank waits for Hakkar", "actor": "hero", "metric": "server_packet_contains", "opcode": 1724, "text": "Defeat Hakkar", "equals": 1},
+    {"action": "assert", "label": "and is not handed out", "actor": "hero", "metric": "item_count", "item": 1379719, "equals": 0},
+
+    {"action": "client_packet", "label": "Upgrade the Flesh Flayer Hook to item level 67 before Hakkar", "actor": "hero", "opcode": 1723, "fields": [{"u32": 4}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "DISCRIMINATING: the item level 67 rank waits for Ragnaros", "actor": "hero", "metric": "server_packet_contains", "opcode": 1724, "text": "Defeat Ragnaros", "equals": 1},
+    {"action": "assert", "label": "and is not handed out", "actor": "hero", "metric": "item_count", "item": 1378062, "equals": 0},
+    {"action": "assert", "label": "and no runes are taken", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 20000},
+
+    {"action": "learn", "label": "Death Touch Copy kills outright", "actor": "hero", "spell": 24080},
+    {"action": "cast", "actor": "hero", "spell": 24080, "target": "hakkar"},
+    {"action": "assert", "label": "Hakkar falls", "actor": "hakkar", "metric": "alive", "equals": 0, "within_ms": 45000},
+    {"action": "assert", "label": "and pays his 2500 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 22500},
+
+    {"action": "client_packet", "label": "Upgrade the Decayed Breeches after Hakkar", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1569}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The item level 64 breeches are sold", "actor": "hero", "metric": "item_count", "item": 1379719, "equals": 1},
+    {"action": "assert", "label": "in place of the dungeon variant", "actor": "hero", "metric": "item_count", "item": 1389233, "equals": 0},
+    {"action": "assert", "label": "for 5000 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 17500},
+
+    {"action": "client_packet", "label": "Upgrade the Flesh Flayer Hook after Hakkar", "actor": "hero", "opcode": 1723, "fields": [{"u32": 4}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "DISCRIMINATING: the item level 67 hook still waits for Ragnaros", "actor": "hero", "metric": "item_count", "item": 1378062, "equals": 0},
+    {"action": "assert", "label": "the hook stays", "actor": "hero", "metric": "item_count", "item": 278843, "equals": 1},
+
+    {"action": "client_packet", "label": "Upgrade the Junglewood Recurve to item level 67 after Hakkar", "actor": "hero", "opcode": 1723, "fields": [{"u32": 2}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "DISCRIMINATING: the item level 67 recurve still waits for Ragnaros", "actor": "hero", "metric": "item_count", "item": 1379880, "equals": 0},
+    {"action": "assert", "label": "the dungeon variant stays", "actor": "hero", "metric": "item_count", "item": 1389875, "equals": 1},
+
+    {"action": "client_packet", "label": "Upgrade the recurve to item level 73", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1393880}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "DISCRIMINATING: item level 73 waits for Onyxia", "actor": "hero", "metric": "server_packet_contains", "opcode": 1724, "text": "Defeat Onyxia", "equals": 1},
+    {"action": "assert", "label": "and is not handed out", "actor": "hero", "metric": "item_count", "item": 1393880, "equals": 1},
+
+    {"action": "client_packet", "label": "Upgrade the recurve to item level 77", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1383880}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "DISCRIMINATING: item level 77 waits for Nefarian", "actor": "hero", "metric": "server_packet_contains", "opcode": 1724, "text": "Defeat Nefarian", "equals": 1},
+    {"action": "assert", "label": "and is not handed out", "actor": "hero", "metric": "item_count", "item": 1383880, "equals": 1},
+
+    {"action": "client_packet", "label": "Upgrade the recurve to item level 81", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1385880}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "DISCRIMINATING: item level 81 waits for C'Thun", "actor": "hero", "metric": "server_packet_contains", "opcode": 1724, "text": "Defeat C'Thun", "equals": 1},
+    {"action": "assert", "label": "and is not handed out", "actor": "hero", "metric": "item_count", "item": 1385880, "equals": 1},
+
+    {"action": "client_packet", "label": "Upgrade the recurve to item level 88", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1387880}, {"u32": 1}]},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "DISCRIMINATING: item level 88 waits for Kel'Thuzad", "actor": "hero", "metric": "server_packet_contains", "opcode": 1724, "text": "Defeat Kel'Thuzad", "equals": 1},
+    {"action": "assert", "label": "and is not handed out", "actor": "hero", "metric": "item_count", "item": 1387880, "equals": 0},
+    {"action": "assert", "label": "and no runes are taken", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 17500}
+  ]
+}

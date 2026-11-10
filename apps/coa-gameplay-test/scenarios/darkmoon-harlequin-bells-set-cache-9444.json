@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Darkmoon Harlequin's Bells opens and hands out its eight-piece ethereal set (#9444)",
+  "contract": "Item 2977352 'Darkmoon Harlequin's Bells (Soulbound)' is an ethereal_bazaar_set_cache cache_item (8 member items, 276080-276086 and 276088) whose item_template row never got the set-cache fixup: no ScriptName, so right-clicking did nothing and the cache could not be opened. The fix wires it exactly like its sibling set-cache items: ScriptName item_ethereal_set_cache and the shared use spell 60034 (spelltrigger 0) the client needs to offer Use at all.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "p", "race": 1, "class": 12, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "add_item", "actor": "p", "item": 2977352 },
+    { "action": "fill_bags", "actor": "p", "slots": 8 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "fill_bags", "label": "Refill a slot freed by a filler item that vanished", "actor": "p", "slots": 8 },
+    { "action": "assert", "label": "SETUP: at least eight slots are free", "actor": "p", "metric": "free_inventory_slots", "min": 8 },
+    { "action": "use_item", "label": "Open the cache", "actor": "p", "item": 2977352, "spell": 60034 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "the cache opens without being refused", "actor": "p", "metric": "cast_failure", "spell": 60034, "equals": 0 },
+    { "action": "assert", "label": "member item 276080 is handed out", "actor": "p", "metric": "item_count", "item": 276080, "equals": 1 },
+    { "action": "assert", "label": "member item 276081 is handed out", "actor": "p", "metric": "item_count", "item": 276081, "equals": 1 },
+    { "action": "assert", "label": "member item 276082 is handed out", "actor": "p", "metric": "item_count", "item": 276082, "equals": 1 },
+    { "action": "assert", "label": "member item 276083 is handed out", "actor": "p", "metric": "item_count", "item": 276083, "equals": 1 },
+    { "action": "assert", "label": "member item 276084 is handed out", "actor": "p", "metric": "item_count", "item": 276084, "equals": 1 },
+    { "action": "assert", "label": "member item 276085 is handed out", "actor": "p", "metric": "item_count", "item": 276085, "equals": 1 },
+    { "action": "assert", "label": "member item 276086 is handed out", "actor": "p", "metric": "item_count", "item": 276086, "equals": 1 },
+    { "action": "assert", "label": "member item 276088 is handed out", "actor": "p", "metric": "item_count", "item": 276088, "equals": 1 },
+    { "action": "assert", "label": "the cache itself is consumed", "actor": "p", "metric": "item_count", "item": 2977352, "equals": 0 }
+  ]
+}

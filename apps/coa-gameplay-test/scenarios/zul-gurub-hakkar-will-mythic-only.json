@@ -1,0 +1,291 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Hakkar casts Will of Hakkar only on Mythic and Ascended",
+  "contract": [
+    "The tester saw Hakkar (14834) take control of players on Normal; on live, Will of Hakkar is a Mythic and",
+    "Ascended mechanic. It comes 45 s into the fight on a random player other than his target, starting with Will",
+    "Slipping (2118633). Two grouped heroes fight a Hakkar on Mythic (raid difficulty 2) and two more fight one on",
+    "Normal, each pair in its own instance: by 55 s the Mythic Hakkar has cast it and the Normal one has not."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "mythic_lead",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mythic_mate",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "normal_lead",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "normal_mate",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic_lead",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic_mate",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "normal_lead",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "normal_mate",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "mythic_lead",
+      "value": 2
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "mythic_mate",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "group",
+      "actor": "mythic_lead",
+      "target": "mythic_mate"
+    },
+    {
+      "action": "group",
+      "actor": "normal_lead",
+      "target": "normal_mate"
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic_lead",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "normal_lead",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the leaders' transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic_mate",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "normal_mate",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the mates' transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic pair is in Zul'Gurub on Mythic",
+      "actor": "mythic_mate",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal pair is in Zul'Gurub on Normal",
+      "actor": "normal_mate",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "mythic_lead",
+      "entry": 14834,
+      "as": "hakkar_mythic",
+      "distance": 4
+    },
+    {
+      "action": "summon",
+      "actor": "normal_lead",
+      "entry": 14834,
+      "as": "hakkar_normal",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Hakkar uses his Mythic template",
+      "actor": "mythic_lead",
+      "metric": "nearby_creature_template",
+      "entry": 14834,
+      "equals": 214834
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Hakkar uses his Normal template",
+      "actor": "normal_lead",
+      "metric": "nearby_creature_template",
+      "entry": 14834,
+      "equals": 14834
+    },
+    {
+      "action": "attack",
+      "actor": "mythic_lead",
+      "target": "hakkar_mythic"
+    },
+    {
+      "action": "attack",
+      "actor": "mythic_mate",
+      "target": "hakkar_mythic"
+    },
+    {
+      "action": "attack",
+      "actor": "normal_lead",
+      "target": "hakkar_normal"
+    },
+    {
+      "action": "attack",
+      "actor": "normal_mate",
+      "target": "hakkar_normal"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Hakkar fights",
+      "actor": "hakkar_mythic",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Hakkar fights",
+      "actor": "hakkar_normal",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mythic_lead"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mythic_mate"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "normal_lead"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "normal_mate"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Hakkar casts Will of Hakkar at 45 s",
+      "actor": "mythic_lead",
+      "metric": "spell_go_count",
+      "entry": 14834,
+      "spell": 2118633,
+      "min": 1,
+      "within_ms": 55000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Normal Hakkar pass his own 45 s mark",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Hakkar is still fighting",
+      "actor": "hakkar_normal",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Normal Hakkar never casts it",
+      "actor": "normal_lead",
+      "metric": "spell_go_count",
+      "entry": 14834,
+      "spell": 2118633,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: nor does his target's groupmate feel it",
+      "actor": "normal_mate",
+      "metric": "spell_go_count",
+      "entry": 14834,
+      "spell": 2118633,
+      "equals": 0
+    }
+  ]
+}

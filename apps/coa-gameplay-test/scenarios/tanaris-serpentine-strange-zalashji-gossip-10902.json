@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "Speaking to Zalashji resolves A Serpentine Strange (#10902)",
+  "contract": [
+    "A Serpentine Strange 255028 asks for the naga sighting resolved (Zalashji 8617, objective index 0). Zalashji's SmartAI credits it on Gossip Hello while the quest is taken.",
+    "Zalashji carried only the quest giver flag, and his only quest 255029 needs 255028 rewarded, so the client offered no interaction and the credit never fired, as reported. The gossip flag lets the client speak to him.",
+    "Expected: a native CMSG_GOSSIP_HELLO to the Zalashji world spawn credits the objective once. The server's Gossip Hello handler accepts any npc flag, so the decisive check is the gossip flag the client receives in Zalashji's UNIT_NPC_FLAGS; without it the client offers no interaction."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -7353.6, "y": -4891.0, "z": 0.3, "o": 3.3 },
+  "players": [
+    { "id": "p", "race": 1, "class": 12, "level": 41 }
+  ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "prepare_quest", "actor": "p", "quest": 255028, "complete": false },
+    { "action": "assert", "label": "DISCRIMINATING: the client is told Zalashji can be spoken to (gossip flag)", "actor": "p", "metric": "nearby_creature_sent_gossip", "entry": 8617, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: the naga sighting is not resolved yet", "actor": "p", "metric": "quest_objective_count", "quest": 255028, "index": 0, "equals": 0 },
+    {
+      "action": "client_packet", "label": "Speak to Zalashji (CMSG_GOSSIP_HELLO)",
+      "actor": "p", "opcode": 379, "consumed": false,
+      "fields": [ { "nearest_creature_guid": 8617 } ]
+    },
+    { "action": "assert", "label": "DISCRIMINATING: speaking to Zalashji resolves the sighting", "actor": "p", "metric": "quest_objective_count", "quest": 255028, "index": 0, "equals": 1, "within_ms": 2000 }
+  ]
+}

@@ -41,6 +41,7 @@ enum WarriorSpells
     SPELL_WARRIOR_DEEP_WOUNDS_RANK_3                = 12868,
     SPELL_WARRIOR_DEEP_WOUNDS_RANK_PERIODIC         = 12721,
     SPELL_WARRIOR_EXECUTE                           = 20647,
+    SPELL_WARRIOR_GLYPH_OF_BLOODTHIRST              = 58369,
     SPELL_WARRIOR_GLYPH_OF_EXECUTION                = 58367,
     SPELL_WARRIOR_GLYPH_OF_VIGILANCE                = 63326,
     SPELL_WARRIOR_JUGGERNAUT_CRIT_BONUS_BUFF        = 65156,
@@ -48,11 +49,24 @@ enum WarriorSpells
     SPELL_WARRIOR_LAST_STAND_TRIGGERED              = 12976,
     SPELL_WARRIOR_RETALIATION_DAMAGE                = 20240,
     SPELL_WARRIOR_SLAM                              = 50783,
-    SPELL_WARRIOR_STORM_SLAM                        = 903140,
-    SPELL_WARRIOR_STORM_SLAM_DAMAGE                 = 903246,
+    SPELL_WARRIOR_ARCANE_SLAM_FIRST_RANK            = 903100,
+    SPELL_WARRIOR_ARCANE_SLAM_LAST_RANK             = 903109,
+    SPELL_WARRIOR_ARCANE_SLAM_DAMAGE                = 903242,
+    SPELL_WARRIOR_SHADOW_SLAM_FIRST_RANK            = 903110,
+    SPELL_WARRIOR_SHADOW_SLAM_LAST_RANK             = 903119,
+    SPELL_WARRIOR_SHADOW_SLAM_DAMAGE                = 903243,
+    SPELL_WARRIOR_BURNING_SLAM_FIRST_RANK           = 903120,
+    SPELL_WARRIOR_BURNING_SLAM_LAST_RANK            = 903129,
+    SPELL_WARRIOR_BURNING_SLAM_DAMAGE               = 903244,
     SPELL_WARRIOR_FROZEN_SLAM_FIRST_RANK            = 903130,
     SPELL_WARRIOR_FROZEN_SLAM_LAST_RANK             = 903139,
     SPELL_WARRIOR_FROZEN_SLAM_DAMAGE                = 903245,
+    SPELL_WARRIOR_STORM_SLAM_FIRST_RANK             = 903140,
+    SPELL_WARRIOR_STORM_SLAM_LAST_RANK              = 903149,
+    SPELL_WARRIOR_STORM_SLAM_DAMAGE                 = 903246,
+    SPELL_WARRIOR_BRILLIANT_SLAM_FIRST_RANK         = 907906,
+    SPELL_WARRIOR_BRILLIANT_SLAM_LAST_RANK          = 907915,
+    SPELL_WARRIOR_BRILLIANT_SLAM_DAMAGE             = 903247,
     SPELL_WARRIOR_SUNDER_ARMOR                      = 58567,
     SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_1   = 12723,
     SPELL_WARRIOR_SWEEPING_STRIKES_EXTRA_ATTACK_2   = 26654,
@@ -326,15 +340,32 @@ class spell_warr_slam : public SpellScript
 {
     PrepareSpellScript(spell_warr_slam);
 
+    struct SlamVariant
+    {
+        uint32 FirstRank;
+        uint32 LastRank;
+        uint32 DamageSpell;
+    };
+
+    static constexpr SlamVariant SlamVariants[] =
+    {
+        { SPELL_WARRIOR_ARCANE_SLAM_FIRST_RANK, SPELL_WARRIOR_ARCANE_SLAM_LAST_RANK, SPELL_WARRIOR_ARCANE_SLAM_DAMAGE },
+        { SPELL_WARRIOR_SHADOW_SLAM_FIRST_RANK, SPELL_WARRIOR_SHADOW_SLAM_LAST_RANK, SPELL_WARRIOR_SHADOW_SLAM_DAMAGE },
+        { SPELL_WARRIOR_BURNING_SLAM_FIRST_RANK, SPELL_WARRIOR_BURNING_SLAM_LAST_RANK,
+            SPELL_WARRIOR_BURNING_SLAM_DAMAGE },
+        { SPELL_WARRIOR_FROZEN_SLAM_FIRST_RANK, SPELL_WARRIOR_FROZEN_SLAM_LAST_RANK, SPELL_WARRIOR_FROZEN_SLAM_DAMAGE },
+        { SPELL_WARRIOR_STORM_SLAM_FIRST_RANK, SPELL_WARRIOR_STORM_SLAM_LAST_RANK, SPELL_WARRIOR_STORM_SLAM_DAMAGE },
+        { SPELL_WARRIOR_BRILLIANT_SLAM_FIRST_RANK, SPELL_WARRIOR_BRILLIANT_SLAM_LAST_RANK,
+            SPELL_WARRIOR_BRILLIANT_SLAM_DAMAGE },
+    };
+
     static uint32 DamageSpell(SpellInfo const* info)
     {
-        if (info->Id == SPELL_WARRIOR_STORM_SLAM)
-            return SPELL_WARRIOR_STORM_SLAM_DAMAGE;
+        for (SlamVariant const& variant : SlamVariants)
+            if (info->Id >= variant.FirstRank && info->Id <= variant.LastRank)
+                return variant.DamageSpell;
 
-        if (info->Id >= SPELL_WARRIOR_FROZEN_SLAM_FIRST_RANK && info->Id <= SPELL_WARRIOR_FROZEN_SLAM_LAST_RANK)
-            return SPELL_WARRIOR_FROZEN_SLAM_DAMAGE;
-
-        return SPELL_WARRIOR_SLAM;
+        return sSpellMgr->GetSpellTwinFor(SPELL_WARRIOR_SLAM, info->GetFirstRankSpell()->Id);
     }
 
     bool Validate(SpellInfo const* info) override
@@ -518,6 +549,11 @@ class spell_warr_bloodthirst_heal : public SpellScript
             SetEffectValue(GetCaster()->CountPctFromMaxHealth(buff->GetAmount()));
         else if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(SPELL_WARRIOR_BLOODTHIRST_DAMAGE))
             SetEffectValue(GetCaster()->CountPctFromMaxHealth(spellInfo->Effects[EFFECT_1].CalcValue(GetCaster())));
+        if (AuraEffect const* glyph = GetCaster()->GetAuraEffectOfRankedSpellOrTwin(SPELL_WARRIOR_GLYPH_OF_BLOODTHIRST, EFFECT_0))
+        {
+            int32 heal = GetEffectValue();
+            SetEffectValue(AddPct(heal, glyph->GetAmount()));
+        }
     }
 
     void Register() override
@@ -1028,7 +1064,7 @@ class spell_war_sudden_death_aura : public AuraScript
         if (eventInfo.GetSpellPhaseMask() != PROC_SPELL_PHASE_FINISH)
             return isTriggeredAtSpellProcEvent;
         if (Spell const* procSpell = eventInfo.GetProcSpell())
-            if (procSpell->GetSpellInfo()->GetFirstRankSpell()->Id == SPELL_WARRIOR_EXECUTE_R1)
+            if (sSpellMgr->GetSpellTwinSource(procSpell->GetSpellInfo()->GetFirstRankSpell()->Id) == SPELL_WARRIOR_EXECUTE_R1)
                 return isTriggeredAtSpellProcEvent;
         return false;
     }

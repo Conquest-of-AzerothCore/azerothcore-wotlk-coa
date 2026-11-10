@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "name": "Frozen Bodies grants a stack from a minion's critical Frost attack (#9977)",
+  "contract": [
+    "Frozen Bodies 707562 reads 'When you kill an enemy that yields experience or honor or critically strike",
+    "with Frost damage you now gain a stack of Frozen Bodies.' aura_ascension_necromancer_event::Proc only checked",
+    "the crit-frost branch inside its 'own' block (actor == player), never inside its 'minion' block (actor is an",
+    "owned minion), so a Skeletal Mage's own Frost auto-attack (801513) critically striking never granted a",
+    "stack. The Necromancer here pulls a dummy with a Physical melee swing only (no Frost cast of its own, so the",
+    "'own' branch cannot grant a stack) while a raised Skeletal Mage (50075) fights the same dummy with its Frost",
+    "auto-attack; spell_crit_rating 10000 makes every spell crit, including the minion's inherited Frost spell",
+    "crit chance (AscensionNecromancerSummons.cpp Scale() copies PLAYER_SPELL_CRIT_PERCENTAGE1+SPELL_SCHOOL_FROST",
+    "onto the minion's m_baseSpellCritChance every second), so the Mage's very next 801513 cast must be a critical",
+    "hit and must grant exactly the stack the report says never appeared."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "necro",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "spell_crit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "necro",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 500000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "necro",
+      "spell": 707562,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Necromancer has Frozen Bodies",
+      "actor": "necro",
+      "metric": "aura",
+      "spell": 707562,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Frozen Bodies stack before any Frost crit lands",
+      "actor": "necro",
+      "metric": "aura_stacks",
+      "spell": 712434,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 500331
+    },
+    {
+      "action": "cast",
+      "label": "Raise a Skeletal Mage",
+      "actor": "necro",
+      "spell": 500331
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a Skeletal Mage is raised",
+      "actor": "necro",
+      "metric": "owned_creature_count",
+      "entry": 50075,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Let the Mage take its formation place",
+      "ms": 2000
+    },
+    {
+      "action": "attack",
+      "label": "Pull the dummy with a Physical melee swing (never Frost-schooled)",
+      "actor": "necro",
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the Mage's Frost auto-attack crit and resolve the proc",
+      "ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the minion's Frost crit grants a Frozen Bodies stack",
+      "actor": "necro",
+      "metric": "aura_stacks",
+      "spell": 712434,
+      "min": 1,
+      "within_ms": 5000
+    }
+  ]
+}

@@ -1,0 +1,320 @@
+{
+  "schema": 1,
+  "name": "Effect 167 sends the DBC tutorial movie ID once",
+  "contract": "Spell.dbc 104/105/106/109 uses effect167 MiscA17/18/19/20; Movie.dbc contains those tutorial IDs. Native packets must carry that ID once per cast, without a player-rendering claim.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000,
+      "label": "Settle native login"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 104
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 1124,
+      "save_as": "before_movie_17"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_effect_kind",
+      "spell": 104,
+      "equals": 167
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_effect_misc",
+      "spell": 104,
+      "equals": 17
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "movie_exists",
+      "id": 17,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 104
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 104,
+      "save_as": "failure_104"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 104,
+      "min": 1,
+      "label": "Movie spell cast executed",
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packets",
+      "label": "movie_17",
+      "opcode": 1124,
+      "relative_to": "before_movie_17",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "label": "movie_id_17",
+      "opcode": 1124,
+      "offset": 0,
+      "equals": 17
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 105
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 1124,
+      "save_as": "before_movie_18"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_effect_kind",
+      "spell": 105,
+      "equals": 167
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_effect_misc",
+      "spell": 105,
+      "equals": 18
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "movie_exists",
+      "id": 18,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 105
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 105,
+      "save_as": "failure_105"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 105,
+      "min": 1,
+      "label": "Movie spell cast executed",
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packets",
+      "label": "movie_18",
+      "opcode": 1124,
+      "relative_to": "before_movie_18",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "label": "movie_id_18",
+      "opcode": 1124,
+      "offset": 0,
+      "equals": 18
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 106
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 1124,
+      "save_as": "before_movie_19"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_effect_kind",
+      "spell": 106,
+      "equals": 167
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_effect_misc",
+      "spell": 106,
+      "equals": 19
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "movie_exists",
+      "id": 19,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 106
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 106,
+      "save_as": "failure_106"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 106,
+      "min": 1,
+      "label": "Movie spell cast executed",
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packets",
+      "label": "movie_19",
+      "opcode": 1124,
+      "relative_to": "before_movie_19",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "label": "movie_id_19",
+      "opcode": 1124,
+      "offset": 0,
+      "equals": 19
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 109
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 1124,
+      "save_as": "before_movie_20"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_effect_kind",
+      "spell": 109,
+      "equals": 167
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_effect_misc",
+      "spell": 109,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "movie_exists",
+      "id": 20,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 109
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 109,
+      "save_as": "failure_109"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "spell": 109,
+      "min": 1,
+      "label": "Movie spell cast executed",
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packets",
+      "label": "movie_20",
+      "opcode": 1124,
+      "relative_to": "before_movie_20",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "label": "movie_id_20",
+      "opcode": 1124,
+      "offset": 0,
+      "equals": 20
+    }
+  ]
+}

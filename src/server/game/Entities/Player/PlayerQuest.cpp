@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AscensionBazaarTokenCap.h"
 #include "AscensionQuestLog.h"
 #include "CreatureAI.h"
 #include "DisableMgr.h"
@@ -623,6 +624,8 @@ void Player::AddQuest(Quest const* quest, Object* questGiver)
         PlayerTalkClass->SendQuestQueryResponse(quest);
 
     SetQuestSlot(log_slot, quest_id, qtime);
+    if (qtime)
+        log_slot = std::min<uint16>(MoveQuestToNativeLog(log_slot), log_slot);
     AscensionQuestLog::SendSlot(this, log_slot);
 
     m_QuestStatusSave[quest_id] = true;
@@ -714,6 +717,33 @@ void Player::IncompleteQuest(uint32 quest_id)
     }
 }
 
+// A quest item is of no use once its quest is handed in. A drop stack can overshoot what the quest asks for, so the
+// whole lot goes, unless the item does something on its own (starts a quest, is used or is opened) or any other
+// quest asks for or hands out the same item, as the next quest of a chain may need it.
+static bool IsDiscardableQuestItem(ItemTemplate const* proto, uint32 questId)
+{
+    bool const doesSomething = proto->StartQuest || proto->HasFlag(ITEM_FLAG_HAS_LOOT) ||
+        std::any_of(std::begin(proto->Spells), std::end(proto->Spells),
+            [](_Spell const& spell) { return spell.SpellId != 0; });
+
+    if (proto->Class == ITEM_CLASS_QUEST && doesSomething)
+        return false;
+
+    if (proto->Bonding == BIND_QUEST_ITEM)
+        return true;
+
+    if (proto->Class != ITEM_CLASS_QUEST)
+        return false;
+
+    for (auto const& [otherId, other] : sObjectMgr->GetQuestTemplates())
+        if (otherId != questId &&
+            (std::find(std::begin(other->RequiredItemId), std::end(other->RequiredItemId), proto->ItemId) != std::end(other->RequiredItemId) ||
+             std::find(std::begin(other->ItemDrop), std::end(other->ItemDrop), proto->ItemId) != std::end(other->ItemDrop)))
+            return false;
+
+    return true;
+}
+
 void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, bool announce, bool isLFGReward)
 {
     //this THING should be here to protect code from quest, which cast on player far teleport as a reward
@@ -726,7 +756,7 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     {
         if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(quest->RequiredItemId[i]))
         {
-            if (quest->RequiredItemCount[i] > 0 && itemTemplate->Bonding == BIND_QUEST_ITEM && !quest->IsRepeatable() && !HasQuestForItem(quest->RequiredItemId[i], quest_id, true))
+            if (quest->RequiredItemCount[i] > 0 && IsDiscardableQuestItem(itemTemplate, quest_id) && !quest->IsRepeatable() && !HasQuestForItem(quest->RequiredItemId[i], quest_id, true))
                 DestroyItemCount(quest->RequiredItemId[i], 9999, true);
             else
                 DestroyItemCount(quest->RequiredItemId[i], quest->RequiredItemCount[i], true);
@@ -749,21 +779,22 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
 
     if (quest->GetRewChoiceItemsCount())
     {
-        if (uint32 itemId = LocalLevelScaling::QuestRewardItemFor(this, quest->RewardChoiceItemId[reward],
-            quest))
+        uint32 itemId = LocalLevelScaling::QuestRewardItemFor(this, quest->RewardChoiceItemId[reward], quest);
+        uint32 const count = itemId ? AscensionBazaarTokenCap::LimitReward(this, itemId, quest->RewardChoiceItemCount[reward]) : 0;
+        if (itemId && count)
         {
             ItemPosCountVec dest;
-            if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, quest->RewardChoiceItemCount[reward]) == EQUIP_ERR_OK)
+            if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, count) == EQUIP_ERR_OK)
             {
                 Item* item = StoreNewItem(dest, itemId, true);
-                SendNewItem(item, quest->RewardChoiceItemCount[reward], true, false, false, false);
+                SendNewItem(item, count, true, false, false, false);
                 LocalLevelScaling::NotifyQuestRewardItem(this, item, quest);
 
-                sScriptMgr->OnPlayerQuestRewardItem(this, item, quest->RewardChoiceItemCount[reward]);
+                sScriptMgr->OnPlayerQuestRewardItem(this, item, count);
             }
             else
             {
-                problematicItems.emplace_back(itemId, quest->RewardChoiceItemCount[reward]);
+                problematicItems.emplace_back(itemId, count);
             }
         }
     }
@@ -772,20 +803,21 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver, 
     {
         for (uint32 i = 0; i < quest->GetRewItemsCount(); ++i)
         {
-            if (uint32 itemId = LocalLevelScaling::QuestRewardItemFor(this, quest->RewardItemId[i],
-                quest))
+            uint32 itemId = LocalLevelScaling::QuestRewardItemFor(this, quest->RewardItemId[i], quest);
+            uint32 const count = itemId ? AscensionBazaarTokenCap::LimitReward(this, itemId, quest->RewardItemIdCount[i]) : 0;
+            if (itemId && count)
             {
                 ItemPosCountVec dest;
-                if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, quest->RewardItemIdCount[i]) == EQUIP_ERR_OK)
+                if (CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, itemId, count) == EQUIP_ERR_OK)
                 {
                     Item* item = StoreNewItem(dest, itemId, true);
-                    SendNewItem(item, quest->RewardItemIdCount[i], true, false, false, false);
+                    SendNewItem(item, count, true, false, false, false);
                     LocalLevelScaling::NotifyQuestRewardItem(this, item, quest);
 
-                    sScriptMgr->OnPlayerQuestRewardItem(this, item, quest->RewardItemIdCount[i]);
+                    sScriptMgr->OnPlayerQuestRewardItem(this, item, count);
                 }
                 else
-                    problematicItems.emplace_back(itemId, quest->RewardItemIdCount[i]);
+                    problematicItems.emplace_back(itemId, count);
             }
         }
     }
@@ -1915,11 +1947,134 @@ void Player::AdjustQuestReqItemCount(Quest const* quest, QuestStatusData& questS
 
 uint16 Player::FindQuestSlot(uint32 quest_id) const
 {
-    for (uint16 i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
-        if (GetQuestSlotQuestId(i) == quest_id)
-            return i;
+    return m_questLogSlots.Find(quest_id, quest_id ? MAX_QUEST_LOG_SIZE : GetQuestLogCapacity());
+}
 
-    return MAX_QUEST_LOG_SIZE;
+uint16 Player::GetQuestLogCapacity() const
+{
+    return static_cast<uint16>(std::clamp<uint32>(sWorld->getIntConfig(CONFIG_QUEST_LOG_SIZE),
+        NATIVE_QUEST_LOG_SIZE, MAX_QUEST_LOG_SIZE));
+}
+
+void Player::MirrorQuestSlot(uint16 slot)
+{
+    if (slot >= NATIVE_QUEST_LOG_SIZE)
+        return;
+
+    QuestLogSlot const& entry = m_questLogSlots[slot];
+    uint16 const field = PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET;
+    SetUInt32Value(field + QUEST_ID_OFFSET, entry.QuestId);
+    SetUInt32Value(field + QUEST_STATE_OFFSET, entry.State);
+    SetUInt64Value(field + QUEST_COUNTS_OFFSET, entry.Counters);
+    SetUInt32Value(field + QUEST_TIME_OFFSET, entry.Time);
+
+    if (!entry.QuestId && m_questLogSlots.HasOverflow())
+        m_questLogPromotionPending = true;
+}
+
+void Player::SetQuestSlot(uint16 slot, uint32 quest_id, uint32 timer)
+{
+    QuestLogSlot& entry = m_questLogSlots[slot];
+    entry = QuestLogSlot{ quest_id, 0, 0, timer, static_cast<uint64>(GameTime::GetGameTimeMS().count()) };
+    MirrorQuestSlot(slot);
+}
+
+void Player::SetQuestSlotCounter(uint16 slot, uint8 counter, uint16 count)
+{
+    QuestLogSlot& entry = m_questLogSlots[slot];
+    entry.Counters &= ~(uint64(0xFFFF) << (counter * 16));
+    entry.Counters |= uint64(count) << (counter * 16);
+    entry.LastProgress = static_cast<uint64>(GameTime::GetGameTimeMS().count());
+    MirrorQuestSlot(slot);
+}
+
+void Player::SetQuestSlotState(uint16 slot, uint32 state)
+{
+    QuestLogSlot& entry = m_questLogSlots[slot];
+    entry.State |= state;
+    entry.LastProgress = static_cast<uint64>(GameTime::GetGameTimeMS().count());
+    MirrorQuestSlot(slot);
+}
+
+void Player::RemoveQuestSlotState(uint16 slot, uint32 state)
+{
+    QuestLogSlot& entry = m_questLogSlots[slot];
+    entry.State &= ~state;
+    entry.LastProgress = static_cast<uint64>(GameTime::GetGameTimeMS().count());
+    MirrorQuestSlot(slot);
+}
+
+void Player::SetQuestSlotTimer(uint16 slot, uint32 timer)
+{
+    m_questLogSlots[slot].Time = timer;
+    MirrorQuestSlot(slot);
+}
+
+void Player::SwapQuestSlot(uint16 slot1, uint16 slot2)
+{
+    std::swap(m_questLogSlots[slot1], m_questLogSlots[slot2]);
+    MirrorQuestSlot(slot1);
+    MirrorQuestSlot(slot2);
+}
+
+namespace
+{
+    bool IsQuestPinnedToNativeLog(uint32 questId)
+    {
+        Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
+        return quest && quest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED);
+    }
+}
+
+uint16 Player::MoveQuestToNativeLog(uint16 slot)
+{
+    if (slot < NATIVE_QUEST_LOG_SIZE)
+        return slot;
+
+    uint16 target = m_questLogSlots.Find(0, NATIVE_QUEST_LOG_SIZE);
+    if (target == MAX_QUEST_LOG_SIZE)
+        target = m_questLogSlots.IdlestNative(IsQuestPinnedToNativeLog);
+
+    if (target == MAX_QUEST_LOG_SIZE)
+        return MAX_QUEST_LOG_SIZE;
+
+    SwapQuestSlot(slot, target);
+    m_questLogSlots[target].LastProgress = static_cast<uint64>(GameTime::GetGameTimeMS().count());
+    return target;
+}
+
+void Player::PinTimedQuestsToNativeLog()
+{
+    for (uint16 slot = NATIVE_QUEST_LOG_SIZE; slot < MAX_QUEST_LOG_SIZE; ++slot)
+        if (IsQuestPinnedToNativeLog(m_questLogSlots[slot].QuestId))
+            MoveQuestToNativeLog(slot);
+}
+
+void Player::PromoteOverflowQuests()
+{
+    m_questLogPromotionPending = false;
+    while (std::optional<QuestLogMove> const move = m_questLogSlots.NextPromotion())
+    {
+        SwapQuestSlot(move->From, move->To);
+        AscensionQuestLog::SendSlot(this, move->To);
+    }
+}
+
+bool Player::PromoteQuestToNativeLog(uint32 questId)
+{
+    if (!questId)
+        return false;
+
+    uint16 const slot = m_questLogSlots.Find(questId, MAX_QUEST_LOG_SIZE);
+    if (slot < NATIVE_QUEST_LOG_SIZE || slot == MAX_QUEST_LOG_SIZE)
+        return false;
+
+    uint16 const target = MoveQuestToNativeLog(slot);
+    if (target == MAX_QUEST_LOG_SIZE)
+        return false;
+
+    AscensionQuestLog::SendSlot(this, target);
+    return true;
 }
 
 void Player::AreaExploredOrEventHappens(uint32 questId)
@@ -2455,7 +2610,7 @@ bool Player::HasQuestForItem(uint32 itemid, uint32 excludeQuestId /* 0 */, bool 
                     }
                 }
 
-                if (turnIn && q_status.ItemCount[j] >= qinfo->RequiredItemCount[j])
+                if (turnIn && itemid == qinfo->RequiredItemId[j] && q_status.ItemCount[j] >= qinfo->RequiredItemCount[j])
                 {
                     return true;
                 }

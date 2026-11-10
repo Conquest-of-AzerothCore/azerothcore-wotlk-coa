@@ -1,0 +1,200 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: the Shade of Jin'do hits every player with Seeking Shadow Bolts until it dies",
+  "contract": [
+    "The tester of 2026-11-08 (live): the Shade of Jin'do (14986) should not melee or Shadow Shock. In the CoA logs",
+    "of 2026-08-02 and 2026-08-24 the shade only casts Seeking Shadow Bolts (2118556, 4 s, interruptible) and every",
+    "4 s each player takes a Seeking Shadow Bolt (2118551 on Normal) until the shade dies. Two heroes summon a shade",
+    "next to them; the test removes its invisibility (24307), which only the Delusions curse lets players see",
+    "through, so a hero can kill it. Within 10 s both heroes take at least two bolts without a single swing from",
+    "the shade, and no bolt lands in the 9 s after it dies."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "raider",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "group",
+      "label": "Both heroes share one Zul'Gurub instance",
+      "actor": "hero",
+      "target": "raider"
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let both transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the heroes are in Zul'Gurub",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14986,
+      "as": "shade",
+      "distance": 6
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "set_aura",
+      "label": "Show the shade to the heroes",
+      "actor": "hero",
+      "target": "shade",
+      "spell": 24307,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the shade fights",
+      "actor": "shade",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the shade casts Seeking Shadow Bolts",
+      "actor": "shade",
+      "metric": "cast_remaining_ms",
+      "spell": 2118556,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Seeking Shadow Bolts hit the hero every 4 s",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "caster": "shade",
+      "spell": 2118551,
+      "target": "hero",
+      "min": 2,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and the raider as well",
+      "actor": "raider",
+      "metric": "spell_damage_count",
+      "caster": "shade",
+      "spell": 2118551,
+      "target": "raider",
+      "min": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the shade never swings at the hero",
+      "actor": "hero",
+      "metric": "melee_attacks_taken",
+      "target": "shade",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: nor at the raider",
+      "actor": "raider",
+      "metric": "melee_attacks_taken",
+      "target": "shade",
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "label": "The hero kills the shade",
+      "actor": "hero",
+      "entry": 14986,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "label": "Let bolts already in flight land",
+      "ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "actor": "raider",
+      "metric": "spell_damage_count",
+      "caster": "shade",
+      "spell": 2118551,
+      "target": "raider",
+      "save_as": "bolts_at_death"
+    },
+    {
+      "action": "wait",
+      "label": "Two volleys' time",
+      "ms": 9000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no bolt lands after the shade dies",
+      "actor": "raider",
+      "metric": "spell_damage_count",
+      "caster": "shade",
+      "spell": 2118551,
+      "target": "raider",
+      "relative_to": "bolts_at_death",
+      "equals": 0
+    }
+  ]
+}

@@ -43,8 +43,11 @@ def harness(source):
     died = block(method(creature, 'void Creature::setDeathState('), 'if (state == DeathState::JustDied)')
     signatures = ['void Creature::RemoveCorpse(', 'void Creature::AllLootRemovedFromCorpse()',
                   'void Creature::ForcedDespawn(', 'void Creature::SaveRespawnTime()']
-    if 'bool Creature::IsRespawnTimerFromDeath() const' in creature:
-        signatures.append('bool Creature::IsRespawnTimerFromDeath() const')
+    optional_signatures = ('bool Creature::IsRespawnTimerFromDeath() const',
+                           'uint32 Creature::GetQuestTargetRespawnCap() const')
+    for optional in optional_signatures:
+        if optional in creature:
+            signatures.append(optional)
     methods = '\n'.join(method(creature, signature) for signature in signatures)
     code = (HERE / 'harness.cpp').read_text(encoding='utf-8')
     for marker, text in (('// NATIVE_CLOCK', clock), ('// NATIVE_JUST_DIED', died),
@@ -166,7 +169,7 @@ def main():
                       run(executable, config=1, **exempt, **decay, **case), expected)
 
         for config in (0, 1):
-            for delay, expected_delay in ((375, 30), (25, 25), (10, 25)):
+            for delay, expected_delay in ((300, 150), (120, 120), (25, 25), (10, 25)):
                 check(f'named quest target, config {config}, delay {delay}',
                       run(executable, config=config, decay=300, delay=delay, named=1),
                       {'corpse': DEATH + expected_delay, 'respawn': DEATH + expected_delay})
@@ -177,6 +180,47 @@ def main():
             check(f'named flag preserves world boss respawns, config {config}',
                   run(executable, config=config, decay=300, delay=7200, named=1, worldboss=1),
                   {'corpse': DEATH + 300, 'death_save': DEATH + 7200 + (0 if config else 300)})
+
+        for config in (0, 1):
+            for kind, cap_key in (('named', 'named_cap'), ('general', 'general_cap')):
+                for delay, cap, expected_delay in ((300, 60, 60), (300, 45, 45), (20, 45, 25)):
+                    check(f'{kind} quest target capped at {cap} s, config {config}, delay {delay}',
+                          run(executable, config=config, decay=60, delay=delay, **{kind: 1, cap_key: cap}),
+                          {'corpse': DEATH + expected_delay, 'respawn': DEATH + expected_delay})
+                uncapped = dict(config=config, decay=60, delay=300, **{kind: 1, cap_key: 0})
+                check(f'{kind} quest target cap 0 keeps the database respawn, config {config}',
+                      run(executable, **uncapped),
+                      {'corpse': DEATH + 60, 'respawn': DEATH + 300 + (0 if config else 60)})
+            check(f'general quest targets default to the database respawn, config {config}',
+                  run(executable, config=config, decay=60, delay=300, general=1),
+                  {'corpse': DEATH + 60, 'respawn': DEATH + 300 + (0 if config else 60)})
+            check(f'general cap does not shorten named targets, config {config}',
+                  run(executable, config=config, decay=60, delay=300, named=1, named_cap=0, general_cap=45),
+                  {'corpse': DEATH + 60, 'respawn': DEATH + 300 + (0 if config else 60)})
+            check(f'named cap does not shorten general targets, config {config}',
+                  run(executable, config=config, decay=60, delay=300, general=1, named_cap=45),
+                  {'corpse': DEATH + 60, 'respawn': DEATH + 300 + (0 if config else 60)})
+            check(f'general cap preserves world boss respawns, config {config}',
+                  run(executable, config=config, decay=300, delay=7200, general=1, general_cap=45, worldboss=1),
+                  {'corpse': DEATH + 300, 'death_save': DEATH + 7200 + (0 if config else 300)})
+        for config in (0, 1):
+            for kind, cap_key in (('named', 'named_cap'), ('general', 'general_cap')):
+                capped = {kind: 1, cap_key: 150}
+                check(f'{kind} quest target at the long-respawn limit is shortened, config {config}',
+                      run(executable, config=config, decay=60, delay=358, **capped),
+                      {'corpse': DEATH + 60, 'respawn': DEATH + 150})
+                check(f'{kind} quest target over the long-respawn limit keeps it, config {config}',
+                      run(executable, config=config, decay=60, delay=3600, **capped),
+                      {'corpse': DEATH + 60, 'respawn': DEATH + 3600 + (0 if config else 60)})
+                check(f'{kind} quest target with no long-respawn limit is shortened, config {config}',
+                      run(executable, config=config, decay=60, delay=3600, long_respawn=0, **capped),
+                      {'corpse': DEATH + 60, 'respawn': DEATH + 150})
+                check(f'{kind} quest target under a lowered long-respawn limit is shortened, config {config}',
+                      run(executable, config=config, decay=60, delay=300, long_respawn=300, **capped),
+                      {'corpse': DEATH + 60, 'respawn': DEATH + 150})
+        check('general cap does not shorten dungeon respawns',
+              run(executable, config=1, decay=60, delay=7200, dungeon=1, general=1, general_cap=45),
+              {'corpse': DEATH + 60, 'death_save': DEATH + 7200})
 
         roll = dict(rank=1, delay=180, roll=1170, roll_ms=60000)
         check('group roll holds the corpse past the respawn time',
@@ -198,7 +242,8 @@ def main():
 
     assert not failures, '\n'.join(failures)
     print(f'PASS: {len(CASES)} death/loot/skin/despawn/dynamic-mode cases on the vanilla clock and on the '
-          'AzerothCore clock, exemptions, group roll and saved respawn times')
+          'AzerothCore clock, exemptions, named and general quest target caps with the long-respawn limit, '
+          'group roll and saved respawn times')
 
 
 if __name__ == '__main__':

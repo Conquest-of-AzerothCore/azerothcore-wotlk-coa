@@ -364,11 +364,15 @@ void SpellScript::_InitHit()
 void SpellScript::_PrepareScriptCall(SpellScriptHookType hookType)
 {
     m_currentScriptState = hookType;
+    // a stock spell triggered by a Reborn aura runs for that Reborn spell too (Deep Wounds' stock trigger)
+    SpellInfo const* triggeredBy = m_spell ? m_spell->GetTriggeredByAuraSpellInfo() : nullptr;
+    SpellMgr::PushScriptTwin(m_scriptSpellId, triggeredBy ? triggeredBy->Id : 0);
 }
 
 void SpellScript::_FinishScriptCall()
 {
     m_currentScriptState = SPELL_SCRIPT_STATE_NONE;
+    SpellMgr::PopScriptTwin(m_scriptSpellId);
 }
 
 bool SpellScript::IsInCheckCastHook() const
@@ -967,6 +971,7 @@ void AuraScript::_PrepareScriptCall(AuraScriptHookType hookType, AuraApplication
     m_currentScriptState = hookType;
     m_defaultActionPrevented = false;
     m_auraApplication = aurApp;
+    SpellMgr::PushScriptTwin(m_scriptSpellId);
 }
 
 void AuraScript::_FinishScriptCall()
@@ -976,6 +981,7 @@ void AuraScript::_FinishScriptCall()
     m_auraApplication = stateStore._auraApplication;
     m_defaultActionPrevented = stateStore._defaultActionPrevented;
     m_scriptStates.pop();
+    SpellMgr::PopScriptTwin(m_scriptSpellId);
 }
 
 bool AuraScript::_IsDefaultActionPrevented()

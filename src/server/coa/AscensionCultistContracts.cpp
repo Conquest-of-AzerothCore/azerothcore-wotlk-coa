@@ -16,6 +16,8 @@ void ApplyContracts(SpellInfo* info)
     if (!info || info->SpellFamilyName != 31)
         return;
     uint32 id = info->Id;
+    if (id == 807815)
+        info->AttributesEx &= ~SPELL_ATTR1_NO_THREAT;
     auto dummy = [info](uint8 slot)
     {
         info->Effects[slot].ApplyAuraName = SPELL_AURA_DUMMY;
@@ -78,8 +80,6 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].MiscValue = 250043;
     if (id == 806769)
         info->Effects[2].MiscValue = 250044;
-    if (Named(info, 804152))
-        info->CasterAuraSpell = 680602;
     if (Any(info, {805116, 804152}))
         info->AscensionIgnoreAbsorb = Named(info, 805116);
     if (Named(info, 567524))
@@ -127,7 +127,10 @@ void ApplyContracts(SpellInfo* info)
     }
     for (uint32 infusion : CultistInfusions)
         if (id == infusion)
+        {
             info->AuraInterruptFlags = 0;
+            info->SpellLevel = 0;
+        }
     if (Named(info, 500714))
         info->Effects[1].Effect = SPELL_EFFECT_DUMMY;
     if (id == BlackBlood)

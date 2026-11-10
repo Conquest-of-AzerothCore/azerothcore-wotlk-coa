@@ -54,15 +54,24 @@ enum StormbringerTalentSpells : uint32
     SPELL_PULSE_CONVERSION = 707619,
     SPELL_PULSE_CONVERSION_HEAL = 504830,
     SPELL_STORM_BARRIER = 707204,
+    SPELL_LIGHTNING_CAGE = 560030,
     SPELL_LIGHTNING_CAGE_BARRIER = 560032,
     SPELL_THORIMS_GIFT = 570173,
     SPELL_THORIMS_GIFT_PATCH = 570174,
     SPELL_HURRICANES_BUFF = 570129,
-    SPELL_UNBOUND_ELEMENTALIST = 705702
+    SPELL_UNBOUND_ELEMENTALIST = 705702,
+    SPELL_CONDUCTIVE_PASSIVE = 92098,
+    SPELL_CONDUCTIVE = 567559,
+    SPELL_CONDUCTIVE_STACKS = 567573,
+    SPELL_CONDUCTION = 567560
 };
 
 constexpr int32 ASCENSION_SPELLMOD_BONUS_MULTIPLIER = 41;
 constexpr uint32 CONJURE_STORM_FAMILY_FLAG_TWO = 16;
+constexpr uint32 SHOCK_FAMILY_FLAG_ZERO = 2048;
+constexpr uint32 BRINE_FAMILY_FLAG_ONE = 128;
+constexpr uint32 TORRENTIAL_WRATH_FAMILY_FLAG_ONE = 1;
+constexpr uint32 TORRENTIAL_WRATH_FAMILY_FLAG_TWO = 32;
 
 bool IsConjureStorm(SpellInfo const* info)
 {
@@ -174,7 +183,15 @@ class stormbringer_talent_casts : public AllSpellScript
 {
 public:
     stormbringer_talent_casts() : AllSpellScript("stormbringer_talent_casts",
-        {ALLSPELLHOOK_ON_CAST, ALLSPELLHOOK_ON_HIT_RESULT}) { }
+        {ALLSPELLHOOK_ON_BEFORE_EFFECTS, ALLSPELLHOOK_ON_CAST, ALLSPELLHOOK_ON_HIT_RESULT}) { }
+
+    void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
+    {
+        Player* player = caster ? caster->ToPlayer() : nullptr;
+        if (player && player->getClass() == CLASS_STORMBRINGER && !spell->IsTriggered() &&
+            sSpellMgr->GetFirstSpellInChain(info->Id) == SPELL_ELECTROCUTE)
+            player->RemoveAurasDueToSpell(SPELL_ELECTROCUTIONER);
+    }
 
     void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* info, bool) override
     {
@@ -201,6 +218,15 @@ public:
             roll_chance_i(StaticScaledChance(player, SPELL_ELECTROCUTIONER_TALENT)))
             player->CastSpell(player, SPELL_ELECTROCUTIONER, true);
 
+        if (damage && !spell->IsTriggered() && !player->HasAura(SPELL_THUNDER_WARD) &&
+            !spell->GetScriptValue(SPELL_LIGHTNING_CAGE) && player->HasAura(SPELL_LIGHTNING_CAGE))
+            if (SpellInfo const* cage = sSpellMgr->GetSpellInfo(SPELL_LIGHTNING_CAGE))
+                if (info->IsAffected(cage->SpellFamilyName, cage->Effects[EFFECT_1].SpellClassMask))
+                {
+                    spell->SetScriptValue(SPELL_LIGHTNING_CAGE, 1);
+                    player->CastSpell(player, SPELL_GENERATE_STATIC_20, true);
+                }
+
         if (critical && damage && !spell->IsTriggered() && player->HasAura(SPELL_CRITICAL_CIRCUIT) &&
             SpendsStatic(info->Id) && !spell->GetScriptValue(SPELL_CRITICAL_CIRCUIT))
         {
@@ -221,6 +247,19 @@ public:
             sSpellMgr->GetFirstSpellInChain(info->Id) == SPELL_ELECTROCUTE &&
             roll_chance_i(TalentProcChance(SPELL_NEVER_STRIKES_TWICE)))
             player->CastSpell(target, info->Id, true);
+
+        if (damage && !spell->IsTriggered() && (info->SpellFamilyFlags[1] & TORRENTIAL_WRATH_FAMILY_FLAG_ONE) &&
+            (info->SpellFamilyFlags[2] & TORRENTIAL_WRATH_FAMILY_FLAG_TWO) && player->HasAura(SPELL_CONDUCTIVE))
+        {
+            player->CastSpell(target, SPELL_CONDUCTION, true);
+            player->RemoveAurasDueToSpell(SPELL_CONDUCTIVE);
+            player->RemoveAurasDueToSpell(SPELL_CONDUCTIVE_STACKS);
+        }
+
+        if (damage && !spell->IsTriggered() &&
+            ((info->SpellFamilyFlags[0] & SHOCK_FAMILY_FLAG_ZERO) || (info->SpellFamilyFlags[1] & BRINE_FAMILY_FLAG_ONE)) &&
+            player->HasAura(SPELL_CONDUCTIVE_PASSIVE))
+            player->CastSpell(player, SPELL_CONDUCTIVE, true);
 
         bool repeat =info->Id == SPELL_PERPETUAL_SHOCK;
         if (!repeat && (spell->IsTriggered() || sSpellMgr->GetFirstSpellInChain(info->Id) != SPELL_SHOCK))

@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "Greater Call of the Storm and Call of the Storm do not stack (#10238)",
+  "contract": "Greater Call of the Storm (578316) is the raid-wide form of Call of the Storm: Spell.dbc gives it the same SPELL_AURA_MOD_STAT Intellect aura (Effect 6/aura 29, MiscValue 3, BasePoints 30, DieSides 1), the same 30-minute duration and the identical magnitude as rank 5 (578315), only targeting TARGET_UNIT_CASTER_AREA_RAID instead of TARGET_UNIT_TARGET_ALLY; Greater Call of the Wind (680291) mirrors that relation for Call of the Wind rank 6 (503323). Neither Greater spell is in a spell_ranks chain, so GetFirstRankSpell resolves each to itself and only a spell_group row ties the family together. PR #5640's group 1171 (stack rule 2, exclusive from the same caster) made one Call exclusive but left both Greater variants out because their descriptions carry no 'Does not stack' clause, so a Call and its Greater form stay active together and apply the stat twice - the report. A Greater stat buff is the same family as its normal form, not an additional buff (Illidari Intuition pair group 1154, Templar raid versions group 1160), so group 1171 must cover the Greater forms too. Unit::_RemoveNoStackAurasDueToAura runs Aura::CanStackWith when an aura is applied, so the newly applied Call removes the other Call of the same caster on that recipient, in both directions; the two Calls owned by different recipients are independent, so every assertion below checks the recipient of the cast.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "storm", "race": 1, "class": 16, "level": 60 },
+    { "id": "ally", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling and spawn AI settle", "ms": 3000 },
+    { "action": "teleport", "label": "Gather both actors for the 10-yard raid area", "actor": "storm", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "ally", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "group", "label": "The Call recipient is a party member", "actor": "storm", "target": "ally" },
+
+    { "action": "learn", "actor": "storm", "spell": 578315 },
+    { "action": "learn", "actor": "storm", "spell": 578316 },
+    { "action": "learn", "actor": "storm", "spell": 680291 },
+    { "action": "assert", "label": "SETUP: rank 5 Call of the Storm costs less than the fixture mana", "actor": "storm", "metric": "spell_power_cost", "spell": 578315, "max": 1000 },
+    { "action": "assert", "label": "SETUP: Greater Call of the Storm costs less than the fixture mana", "actor": "storm", "metric": "spell_power_cost", "spell": 578316, "max": 1000 },
+    { "action": "assert", "label": "SETUP: Greater Call of the Wind costs less than the fixture mana", "actor": "storm", "metric": "spell_power_cost", "spell": 680291, "max": 1000 },
+
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "cast", "label": "Call of the Storm on the party member", "actor": "storm", "spell": 578315, "target": "ally" },
+    { "action": "assert", "label": "SETUP: Call of the Storm reaches the party member", "actor": "ally", "metric": "aura", "spell": 578315, "caster": "storm", "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "SETUP: the single-target Call leaves the caster without it", "actor": "storm", "metric": "aura", "spell": 578315, "equals": 0 },
+
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "cast", "label": "Greater Call of the Storm, the raid-wide form", "actor": "storm", "spell": 578316, "target": "storm" },
+    { "action": "assert", "label": "SETUP: Greater Call of the Storm reaches the party member", "actor": "ally", "metric": "aura", "spell": 578316, "caster": "storm", "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "SETUP: Greater Call of the Storm also covers the caster", "actor": "storm", "metric": "aura", "spell": 578316, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "DISCRIMINATING: the Greater form removes Call of the Storm from the party member", "actor": "ally", "metric": "aura", "spell": 578315, "caster": "storm", "equals": 0 },
+
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "cast", "label": "Call of the Storm again on the party member", "actor": "storm", "spell": 578315, "target": "ally" },
+    { "action": "assert", "label": "SETUP: Call of the Storm is back on the party member", "actor": "ally", "metric": "aura", "spell": 578315, "caster": "storm", "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "DISCRIMINATING: the lesser Call removes Greater Call of the Storm from the party member", "actor": "ally", "metric": "aura", "spell": 578316, "caster": "storm", "equals": 0 },
+
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "cast", "label": "Greater Call of the Wind, the other Call family", "actor": "storm", "spell": 680291, "target": "storm" },
+    { "action": "assert", "label": "SETUP: Greater Call of the Wind reaches the party member", "actor": "ally", "metric": "aura", "spell": 680291, "caster": "storm", "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "DISCRIMINATING: Greater Call of the Wind removes Call of the Storm", "actor": "ally", "metric": "aura", "spell": 578315, "caster": "storm", "equals": 0 },
+
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "cast", "label": "Greater Call of the Storm again", "actor": "storm", "spell": 578316, "target": "storm" },
+    { "action": "assert", "label": "SETUP: Greater Call of the Storm is back on the party member", "actor": "ally", "metric": "aura", "spell": 578316, "caster": "storm", "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "DISCRIMINATING: Greater Call of the Storm removes Greater Call of the Wind", "actor": "ally", "metric": "aura", "spell": 680291, "caster": "storm", "equals": 0 },
+
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "cast", "label": "The reported pair on the caster: Call of the Storm first", "actor": "storm", "spell": 578315, "target": "storm" },
+    { "action": "assert", "label": "SETUP: the caster holds Call of the Storm", "actor": "storm", "metric": "aura", "spell": 578315, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "DISCRIMINATING: the caster's Greater form from before is gone", "actor": "storm", "metric": "aura", "spell": 578316, "equals": 0 },
+
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "cast", "label": "The reported pair on the caster: Greater Call of the Storm second", "actor": "storm", "spell": 578316, "target": "storm" },
+    { "action": "assert", "label": "SETUP: the caster holds Greater Call of the Storm", "actor": "storm", "metric": "aura", "spell": 578316, "equals": 1, "within_ms": 1500 },
+    { "action": "assert", "label": "DISCRIMINATING: the caster's Call of the Storm is removed", "actor": "storm", "metric": "aura", "spell": 578315, "equals": 0 }
+  ]
+}

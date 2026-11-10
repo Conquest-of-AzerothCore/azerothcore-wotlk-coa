@@ -1,8 +1,19 @@
 {
   "schema": 1,
-  "name": "Dungeon Spoils (Heroic) and (Mythic) prefer items for the opener's specialization",
-  "contract": "Dungeon Spoils (Heroic) (1202039) and Dungeon Spoils (Mythic) (1027965) give one or two epic dungeon items, never the same item twice. The opener's active specialization names its primary stats in ChrSpecs.dbc fields 8-10, the same stats the specialization card shows: Venomancer Venom (54) lists Intellect and Fortitude (52) Agility and Stamina. Among the rewards the opener can use, the cache prefers an item whose strongest of Strength, Agility, Intellect and Spirit is one of those stats, so after six opens no reward may have a different strongest attribute. About four in five Intellect-fitting rewards carry Intellect, so the Venom Venomancer receives Intellect gear; the Fortitude Venomancer may also receive gear without a primary attribute (attack power, defense or stamina), which suits its Agility and Stamina.",
-  "timeout_ms": 120000,
+  "name": "Dungeon Spoils (Heroic) and (Mythic) favour items for the opener's specialization",
+  "contract": [
+    "Dungeon Spoils (Heroic) (1202039) and Dungeon Spoils (Mythic) (1027965) give one or two epic",
+    "dungeon items, never the same item twice.",
+    "Ascension makes items for other specializations less likely rather than impossible (CoA changelog",
+    "2026-08-16, Mythic Cache: \"less likely to get items that are not for your current specialization\"). Among",
+    "the items the opener can use, one whose biggest of Strength, Agility and Intellect is the active",
+    "specialization's main stat (ChrSpecs.dbc fields 8-10: Venomancer Venom (54) Intellect, Fortitude (52)",
+    "Agility) is three times as likely as an item without it, one that has it but a bigger other main stat twice;",
+    "secondary stats such as crit, hit and haste add nothing.",
+    "After 20 opens at level 60 each Venomancer has gear for its own main stat and gear for another main",
+    "stat; the old filter, which only gave items for the specialization, never put the second kind in the bags."
+  ],
+  "timeout_ms": 300000,
   "location": {
     "map": 0,
     "x": -8914.0,
@@ -45,7 +56,7 @@
       "action": "specialization",
       "actor": "venom_heroic",
       "id": 54,
-      "label": "venom_heroic picks Venom (ChrSpecs 54, primary stat Intellect)"
+      "label": "venom_heroic picks Venom (ChrSpecs 54, main stat Intellect)"
     },
     {
       "action": "wait",
@@ -54,8 +65,223 @@
     {
       "action": "add_item",
       "actor": "venom_heroic",
+      "item": 4500
+    },
+    {
+      "action": "equip",
+      "actor": "venom_heroic",
+      "item": 4500,
+      "slot": 19
+    },
+    {
+      "action": "add_item",
+      "actor": "venom_heroic",
+      "item": 4500
+    },
+    {
+      "action": "equip",
+      "actor": "venom_heroic",
+      "item": 4500,
+      "slot": 20
+    },
+    {
+      "action": "add_item",
+      "actor": "venom_heroic",
+      "item": 4500
+    },
+    {
+      "action": "equip",
+      "actor": "venom_heroic",
+      "item": 4500,
+      "slot": 21
+    },
+    {
+      "action": "add_item",
+      "actor": "venom_heroic",
       "item": 1202039,
-      "count": 6
+      "count": 20
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "venom_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 19,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "venom_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 18,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "venom_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 17,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "venom_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 16,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "venom_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 15,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "venom_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 14,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "venom_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 13,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "venom_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 12,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "venom_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 11,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "venom_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "venom_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 9,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "venom_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 8,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "venom_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 7,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "venom_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 6,
+      "within_ms": 3000
     },
     {
       "action": "open_item",
@@ -137,23 +363,20 @@
     },
     {
       "action": "assert",
-      "label": "6 Dungeon Spoils (Heroic) put their rewards in the bags",
+      "label": "20 Dungeon Spoils (Heroic) put their rewards in the bags",
       "actor": "venom_heroic",
       "metric": "carried_pool_item_count",
       "cache": 1202039,
       "table": "loot",
-      "min": 6,
-      "max": 12
+      "min": 18,
+      "max": 40
     },
     {
       "action": "assert",
-      "label": "No reward has a primary attribute stronger than Intellect",
+      "label": "At most two items wait in the mail (a second copy of a unique reward is posted)",
       "actor": "venom_heroic",
-      "metric": "carried_pool_item_count",
-      "cache": 1202039,
-      "table": "loot",
-      "off_stat": 5,
-      "equals": 0
+      "metric": "mail_item_count",
+      "max": 2
     },
     {
       "action": "assert",
@@ -166,10 +389,20 @@
       "min": 1
     },
     {
+      "action": "assert",
+      "label": "Gear for another main stat stays possible, only less likely",
+      "actor": "venom_heroic",
+      "metric": "carried_pool_item_count",
+      "cache": 1202039,
+      "table": "loot",
+      "off_stat": 5,
+      "min": 1
+    },
+    {
       "action": "specialization",
       "actor": "fortitude_heroic",
       "id": 52,
-      "label": "fortitude_heroic picks Fortitude (ChrSpecs 52, primary stats Agility and Stamina)"
+      "label": "fortitude_heroic picks Fortitude (ChrSpecs 52, main stat Agility)"
     },
     {
       "action": "wait",
@@ -178,8 +411,223 @@
     {
       "action": "add_item",
       "actor": "fortitude_heroic",
+      "item": 4500
+    },
+    {
+      "action": "equip",
+      "actor": "fortitude_heroic",
+      "item": 4500,
+      "slot": 19
+    },
+    {
+      "action": "add_item",
+      "actor": "fortitude_heroic",
+      "item": 4500
+    },
+    {
+      "action": "equip",
+      "actor": "fortitude_heroic",
+      "item": 4500,
+      "slot": 20
+    },
+    {
+      "action": "add_item",
+      "actor": "fortitude_heroic",
+      "item": 4500
+    },
+    {
+      "action": "equip",
+      "actor": "fortitude_heroic",
+      "item": 4500,
+      "slot": 21
+    },
+    {
+      "action": "add_item",
+      "actor": "fortitude_heroic",
       "item": 1202039,
-      "count": 6
+      "count": 20
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 19,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 18,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 17,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 16,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 15,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 14,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 13,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 12,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 11,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 9,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 8,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 7,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_heroic",
+      "item": 1202039
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_heroic",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 6,
+      "within_ms": 3000
     },
     {
       "action": "open_item",
@@ -261,29 +709,46 @@
     },
     {
       "action": "assert",
-      "label": "6 Dungeon Spoils (Heroic) put their rewards in the bags",
+      "label": "20 Dungeon Spoils (Heroic) put their rewards in the bags",
       "actor": "fortitude_heroic",
       "metric": "carried_pool_item_count",
       "cache": 1202039,
       "table": "loot",
-      "min": 6,
-      "max": 12
+      "min": 18,
+      "max": 40
     },
     {
       "action": "assert",
-      "label": "No reward has a primary attribute stronger than Agility",
+      "label": "At most two items wait in the mail (a second copy of a unique reward is posted)",
+      "actor": "fortitude_heroic",
+      "metric": "mail_item_count",
+      "max": 2
+    },
+    {
+      "action": "assert",
+      "label": "The rewards include Agility gear",
+      "actor": "fortitude_heroic",
+      "metric": "carried_pool_item_count",
+      "cache": 1202039,
+      "table": "loot",
+      "dominant_stat": 3,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Gear for another main stat stays possible, only less likely",
       "actor": "fortitude_heroic",
       "metric": "carried_pool_item_count",
       "cache": 1202039,
       "table": "loot",
       "off_stat": 3,
-      "equals": 0
+      "min": 1
     },
     {
       "action": "specialization",
       "actor": "venom_mythic",
       "id": 54,
-      "label": "venom_mythic picks Venom (ChrSpecs 54, primary stat Intellect)"
+      "label": "venom_mythic picks Venom (ChrSpecs 54, main stat Intellect)"
     },
     {
       "action": "wait",
@@ -292,8 +757,223 @@
     {
       "action": "add_item",
       "actor": "venom_mythic",
+      "item": 4500
+    },
+    {
+      "action": "equip",
+      "actor": "venom_mythic",
+      "item": 4500,
+      "slot": 19
+    },
+    {
+      "action": "add_item",
+      "actor": "venom_mythic",
+      "item": 4500
+    },
+    {
+      "action": "equip",
+      "actor": "venom_mythic",
+      "item": 4500,
+      "slot": 20
+    },
+    {
+      "action": "add_item",
+      "actor": "venom_mythic",
+      "item": 4500
+    },
+    {
+      "action": "equip",
+      "actor": "venom_mythic",
+      "item": 4500,
+      "slot": 21
+    },
+    {
+      "action": "add_item",
+      "actor": "venom_mythic",
       "item": 1027965,
-      "count": 6
+      "count": 20
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "venom_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 19,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "venom_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 18,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "venom_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 17,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "venom_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 16,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "venom_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 15,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "venom_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 14,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "venom_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 13,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "venom_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 12,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "venom_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 11,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "venom_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "venom_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 9,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "venom_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 8,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "venom_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 7,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "venom_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "venom_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 6,
+      "within_ms": 3000
     },
     {
       "action": "open_item",
@@ -375,23 +1055,20 @@
     },
     {
       "action": "assert",
-      "label": "6 Dungeon Spoils (Mythic) put their rewards in the bags",
+      "label": "20 Dungeon Spoils (Mythic) put their rewards in the bags",
       "actor": "venom_mythic",
       "metric": "carried_pool_item_count",
       "cache": 1027965,
       "table": "loot",
-      "min": 6,
-      "max": 12
+      "min": 18,
+      "max": 40
     },
     {
       "action": "assert",
-      "label": "No reward has a primary attribute stronger than Intellect",
+      "label": "At most two items wait in the mail (a second copy of a unique reward is posted)",
       "actor": "venom_mythic",
-      "metric": "carried_pool_item_count",
-      "cache": 1027965,
-      "table": "loot",
-      "off_stat": 5,
-      "equals": 0
+      "metric": "mail_item_count",
+      "max": 2
     },
     {
       "action": "assert",
@@ -404,10 +1081,20 @@
       "min": 1
     },
     {
+      "action": "assert",
+      "label": "Gear for another main stat stays possible, only less likely",
+      "actor": "venom_mythic",
+      "metric": "carried_pool_item_count",
+      "cache": 1027965,
+      "table": "loot",
+      "off_stat": 5,
+      "min": 1
+    },
+    {
       "action": "specialization",
       "actor": "fortitude_mythic",
       "id": 52,
-      "label": "fortitude_mythic picks Fortitude (ChrSpecs 52, primary stats Agility and Stamina)"
+      "label": "fortitude_mythic picks Fortitude (ChrSpecs 52, main stat Agility)"
     },
     {
       "action": "wait",
@@ -416,8 +1103,223 @@
     {
       "action": "add_item",
       "actor": "fortitude_mythic",
+      "item": 4500
+    },
+    {
+      "action": "equip",
+      "actor": "fortitude_mythic",
+      "item": 4500,
+      "slot": 19
+    },
+    {
+      "action": "add_item",
+      "actor": "fortitude_mythic",
+      "item": 4500
+    },
+    {
+      "action": "equip",
+      "actor": "fortitude_mythic",
+      "item": 4500,
+      "slot": 20
+    },
+    {
+      "action": "add_item",
+      "actor": "fortitude_mythic",
+      "item": 4500
+    },
+    {
+      "action": "equip",
+      "actor": "fortitude_mythic",
+      "item": 4500,
+      "slot": 21
+    },
+    {
+      "action": "add_item",
+      "actor": "fortitude_mythic",
       "item": 1027965,
-      "count": 6
+      "count": 20
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 19,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 18,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 17,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 16,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 15,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 14,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 13,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 12,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 11,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 9,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 8,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 7,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "fortitude_mythic",
+      "item": 1027965
+    },
+    {
+      "action": "assert",
+      "actor": "fortitude_mythic",
+      "metric": "item_count",
+      "item": 1027965,
+      "equals": 6,
+      "within_ms": 3000
     },
     {
       "action": "open_item",
@@ -499,23 +1401,40 @@
     },
     {
       "action": "assert",
-      "label": "6 Dungeon Spoils (Mythic) put their rewards in the bags",
+      "label": "20 Dungeon Spoils (Mythic) put their rewards in the bags",
       "actor": "fortitude_mythic",
       "metric": "carried_pool_item_count",
       "cache": 1027965,
       "table": "loot",
-      "min": 6,
-      "max": 12
+      "min": 18,
+      "max": 40
     },
     {
       "action": "assert",
-      "label": "No reward has a primary attribute stronger than Agility",
+      "label": "At most two items wait in the mail (a second copy of a unique reward is posted)",
+      "actor": "fortitude_mythic",
+      "metric": "mail_item_count",
+      "max": 2
+    },
+    {
+      "action": "assert",
+      "label": "The rewards include Agility gear",
+      "actor": "fortitude_mythic",
+      "metric": "carried_pool_item_count",
+      "cache": 1027965,
+      "table": "loot",
+      "dominant_stat": 3,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Gear for another main stat stays possible, only less likely",
       "actor": "fortitude_mythic",
       "metric": "carried_pool_item_count",
       "cache": 1027965,
       "table": "loot",
       "off_stat": 3,
-      "equals": 0
+      "min": 1
     }
   ]
 }

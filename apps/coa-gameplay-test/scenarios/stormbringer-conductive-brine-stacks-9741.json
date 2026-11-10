@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Conductive: Brine and Shock grant stacks, Torrential Wrath consumes them into Conduction (#9741, #4245)",
+  "contract": "Conductive's passive (92098) reads '$?s560020[Brine][Shock] now grants Conductive for $567559d, stacking $567559u times.' Its only effect is a PROC_TRIGGER_SPELL of Conduction (567560) with ProcFlags 0, so nothing ever applied the stacking buff 567559 (30 sec, 10 stacks). A Stormbringer hit-result hook now applies 567559 to the caster when a non-triggered Brine (family flag 1 & 128) or Shock (family flag 0 & 2048) hits while the passive is known. Without the passive, Brine grants nothing. Torrential Wrath (family flags 1 & 1, 2 & 32) then triggers Conduction (567560) while Conductive is up, boosted 30% per stack by 567573, and consumes both auras.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "storm", "race": 1, "class": 16, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "storm", "entry": 36, "level": 60, "health": 1000000, "distance": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "storm", "spell": 807105 },
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "cast", "actor": "storm", "spell": 807105, "target": "enemy" },
+    { "action": "assert", "label": "SETUP: Brine hits the enemy",
+      "actor": "storm", "metric": "spell_damage_count", "spell": 807105, "min": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "CONTROL: without the Conductive passive Brine grants no Conductive",
+      "actor": "storm", "metric": "aura_stacks", "spell": 567559, "equals": 0, "within_ms": 500 },
+
+    { "action": "learn", "actor": "storm", "spell": 92098 },
+    { "action": "assert", "label": "SETUP: the Conductive passive is active",
+      "actor": "storm", "metric": "aura", "spell": 92098, "equals": 1, "within_ms": 1000 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "cast", "actor": "storm", "spell": 807105, "target": "enemy" },
+    { "action": "assert", "label": "FIX: Brine grants one stack of Conductive",
+      "actor": "storm", "metric": "aura_stacks", "spell": 567559, "equals": 1, "within_ms": 5000 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "cast", "actor": "storm", "spell": 807105, "target": "enemy" },
+    { "action": "assert", "label": "FIX: a second Brine stacks Conductive",
+      "actor": "storm", "metric": "aura_stacks", "spell": 567559, "equals": 2, "within_ms": 5000 },
+
+    { "action": "learn", "actor": "storm", "spell": 804020 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "cast", "actor": "storm", "spell": 804020, "target": "enemy" },
+    { "action": "assert", "label": "FIX: Shock also grants a stack",
+      "actor": "storm", "metric": "aura_stacks", "spell": 567559, "equals": 3, "within_ms": 5000 },
+    { "action": "assert", "label": "SETUP: Conductive's damage stacks follow it",
+      "actor": "storm", "metric": "aura_stacks", "spell": 567573, "equals": 3 },
+    { "action": "assert", "label": "FIX: three stacks raise Conduction's damage by 90%",
+      "actor": "storm", "metric": "spell_modifier", "spell": 567560, "op": 0, "base": 100, "equals": 190 },
+
+    { "action": "learn", "actor": "storm", "spell": 503352 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "storm", "spell": 503352, "target": "enemy" },
+    { "action": "assert", "label": "SETUP: Torrential Wrath hits the enemy",
+      "actor": "storm", "metric": "spell_damage_count", "spell": 503352, "min": 1, "within_ms": 6000 },
+    { "action": "assert", "label": "FIX: Torrential Wrath triggers Conduction",
+      "actor": "storm", "metric": "spell_damage_count", "spell": 567560, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "FIX: Conduction consumes Conductive",
+      "actor": "storm", "metric": "aura_stacks", "spell": 567559, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "label": "FIX: Conduction consumes the damage stacks",
+      "actor": "storm", "metric": "aura_stacks", "spell": 567573, "equals": 0 },
+
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+    { "action": "set_power", "actor": "storm", "value": 1000 },
+    { "action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 100 },
+    { "action": "cast", "actor": "storm", "spell": 503352, "target": "enemy" },
+    { "action": "assert", "label": "SETUP: a second Torrential Wrath hits",
+      "actor": "storm", "metric": "spell_damage_count", "spell": 503352, "min": 2, "within_ms": 6000 },
+    { "action": "assert", "label": "CONTROL: without Conductive Torrential Wrath triggers no Conduction",
+      "actor": "storm", "metric": "spell_damage_count", "spell": 567560, "equals": 1, "within_ms": 1000 }
+  ]
+}

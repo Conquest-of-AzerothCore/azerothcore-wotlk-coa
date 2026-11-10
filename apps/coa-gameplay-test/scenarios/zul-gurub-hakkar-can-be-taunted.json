@@ -1,0 +1,160 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Hakkar can be taunted",
+  "contract": [
+    "The tester of 2026-11-08 (live): tanks taunt Hakkar (14834) off each other on live, but here every taunt",
+    "failed. His creature immunities (CreatureImmunitiesId) included the taunt effect and aura; set -273 keeps the",
+    "other immunities without them. In his room (he evades above it), the raider takes Hakkar with far more threat,",
+    "then the tank's Hand of Reckoning (62124) must land on him and turn him to the tank."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 2,
+      "level": 60
+    },
+    {
+      "id": "raider",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "raider",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 62124
+    },
+    {
+      "action": "group",
+      "label": "Both heroes share one Zul'Gurub instance",
+      "actor": "tank",
+      "target": "raider"
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let both transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the heroes are in Zul'Gurub",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "summon",
+      "actor": "raider",
+      "entry": 14834,
+      "as": "hakkar",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "label": "The raider engages Hakkar",
+      "actor": "raider",
+      "target": "hakkar"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar fights",
+      "actor": "hakkar",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_health_pct",
+      "label": "The raider wounds him for 5 % of his health",
+      "actor": "raider",
+      "entry": 14834,
+      "pct": 95
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar attacks the raider",
+      "actor": "hakkar",
+      "metric": "victim",
+      "target": "raider",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "The tank taunts Hakkar",
+      "actor": "tank",
+      "spell": 62124,
+      "target": "hakkar"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the taunt lands on Hakkar",
+      "actor": "hakkar",
+      "metric": "aura",
+      "spell": 62124,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and turns him to the tank",
+      "actor": "hakkar",
+      "metric": "victim",
+      "target": "tank",
+      "equals": 1,
+      "within_ms": 1000
+    }
+  ]
+}

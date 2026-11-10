@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Singularity Core empowers Artificer's Wand damage (#10383)",
+  "contract": "Singularity Core 804438 applies aura 42 (proc trigger spell) on 804437 and its tooltip says it empowers wand attacks. Its DBC proc aura has an empty EffectSpellClassMask, but SpellMgr::LoadSpellProcs builds the default proc entry by ORing the class masks of every trigger-aura effect: effects 1 and 2 are SPELL_AURA_ADD_PCT_MODIFIER (the Shatter Echo damage bonus) with mask (0, 0, 16), so the generated entry was SpellFamilyName 28 / mask (0, 0, 16). CanSpellTriggerProcOnEvent then requires the damaging spell's SpellFamilyFlags to intersect that mask; Artificer's Wand damage 561064 (family flags 0, 0, 512) and Wand of Time 520175 (16781312, 1048576, 0) never match, so 804437 was never cast from wand spells, while auto attacks (no spell info, family check skipped) still procced. The explicit wildcard spell_proc row from the DBC flags fixes that: one 561064 hit while Singularity Core is up must land 804437 damage. Fixture: level 80 Chronomancer with Fire Wand 5069 in the ranged slot (561064 and 804437 require the wand subclass), one Echo Fragment stack for the 5-second Singularity Core window, dummy 3 yards away. Fails before the fix, passes after.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "ranged_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "chronomancer", "entry": 36, "level": 80, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "add_item", "actor": "chronomancer", "item": 5069 },
+    { "action": "equip", "label": "Wand attacks and the trigger need a wand in the ranged slot", "actor": "chronomancer", "item": 5069, "slot": 17 },
+    { "action": "wait", "label": "Let the weapon swap cooldown expire", "ms": 2000 },
+    { "action": "learn", "label": "Learn Artificer's Wand damage spell", "actor": "chronomancer", "spell": 561064 },
+    { "action": "learn", "label": "Learn Singularity Core", "actor": "chronomancer", "spell": 804438 },
+    { "action": "set_power", "actor": "chronomancer", "power": 0, "value": 2000 },
+    { "action": "set_aura", "label": "Echo Fragment stack Singularity Core needs to cast", "actor": "chronomancer", "spell": 804455, "stacks": 1 },
+    { "action": "cast", "actor": "chronomancer", "label": "Cast Singularity Core", "spell": 804438 },
+    { "action": "assert", "actor": "chronomancer", "equals": 1, "label": "SETUP: Singularity Core is up", "metric": "aura", "spell": 804438, "within_ms": 2000 },
+    { "action": "wait", "label": "Let the global cooldown clear", "ms": 1800 },
+    { "action": "cast", "actor": "chronomancer", "label": "Fire Artificer's Wand at the dummy while Singularity Core is up", "spell": 561064, "target": "dummy" },
+    { "action": "assert", "actor": "chronomancer", "equals": 0, "label": "SETUP: Artificer's Wand cast accepted", "metric": "cast_failure", "spell": 561064 },
+    { "action": "assert", "actor": "chronomancer", "label": "SETUP: Artificer's Wand damaged the dummy", "metric": "spell_damage_count", "spell": 561064, "target": "dummy", "min": 1, "within_ms": 5000 },
+    { "action": "assert", "actor": "chronomancer", "label": "DISCRIMINATING: Singularity Core trigger damaged the dummy from Artificer's Wand", "metric": "spell_damage_count", "spell": 804437, "target": "dummy", "min": 1, "within_ms": 5000 }
+  ]
+}

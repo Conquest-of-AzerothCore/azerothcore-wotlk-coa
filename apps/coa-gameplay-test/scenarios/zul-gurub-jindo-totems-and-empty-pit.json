@@ -1,0 +1,273 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Jin'do's totems lose one health per hit, the Blood Pit starts empty, and he neither Hexes nor Banishes",
+  "contract": [
+    "On live every hit takes exactly one health from Jin'do's (11380) totems: a Brain Wash Totem (15112) has 5 and",
+    "the Powerful Healing Ward (14987) 15 on Normal. The Blood Pit holds no Sacrificed Trolls (14826) before the",
+    "fight; Animate Bones (2118560) raises them. He summons the Brain Wash Totems (2118501) 16 s into the fight,",
+    "the ward (2118503) at 21 s and Animate Bones at 23 s, and never casts Hex (17172) or Banish (24466) (live",
+    "logs, tester 2026-11-04). Two heroes pull him, so the fight goes on when Delusions phases one of them out."
+  ],
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "mate",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "group",
+      "label": "Group the heroes so both enter the same instance",
+      "actor": "tank",
+      "target": "mate"
+    },
+    {
+      "action": "teleport",
+      "label": "Into the Blood Pit",
+      "actor": "tank",
+      "map": 309,
+      "x": -11583.0,
+      "y": -1251.2,
+      "z": 77.63,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank is in Zul'Gurub",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jin'do's own spawn next to the pit is loaded",
+      "actor": "tank",
+      "metric": "map_creature_count",
+      "entry": 11380,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Sacrificed Troll lies in the pit before the fight",
+      "actor": "tank",
+      "metric": "map_creature_count",
+      "entry": 14826,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "mate",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "mate",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 15112,
+      "as": "brain_wash_totem",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a Brain Wash Totem has 5 health",
+      "actor": "brain_wash_totem",
+      "metric": "max_health",
+      "equals": 5
+    },
+    {
+      "action": "attack",
+      "label": "The tank hits the totem",
+      "actor": "tank",
+      "target": "brain_wash_totem"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a level 60 hit takes one health, not the totem",
+      "actor": "brain_wash_totem",
+      "metric": "health",
+      "min": 1,
+      "max": 4,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "tank"
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 14987,
+      "as": "healing_ward",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ward has 15 health on Normal",
+      "actor": "healing_ward",
+      "metric": "max_health",
+      "equals": 15
+    },
+    {
+      "action": "attack",
+      "label": "The tank hits the ward",
+      "actor": "tank",
+      "target": "healing_ward"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a level 60 hit takes one health from the ward too",
+      "actor": "healing_ward",
+      "metric": "health",
+      "min": 1,
+      "max": 14,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "tank"
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 11380,
+      "as": "jindo",
+      "distance": 4
+    },
+    {
+      "action": "attack",
+      "label": "The tank pulls Jin'do",
+      "actor": "tank",
+      "target": "jindo"
+    },
+    {
+      "action": "attack",
+      "label": "The mate joins",
+      "actor": "mate",
+      "target": "jindo"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jin'do fights",
+      "actor": "jindo",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "tank"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mate"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Brain Wash Totems come 16 s into the fight",
+      "actor": "jindo",
+      "metric": "spell_cast_count",
+      "spell": 2118501,
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ward follows at 21 s",
+      "actor": "jindo",
+      "metric": "spell_cast_count",
+      "spell": 2118503,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Animate Bones at 23 s",
+      "actor": "jindo",
+      "metric": "spell_cast_count",
+      "spell": 2118560,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jin'do is still fighting",
+      "actor": "jindo",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Hex",
+      "actor": "jindo",
+      "metric": "spell_cast_count",
+      "spell": 17172,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Banish into the pit",
+      "actor": "jindo",
+      "metric": "spell_cast_count",
+      "spell": 24466,
+      "equals": 0
+    }
+  ]
+}

@@ -45,6 +45,15 @@ enum CreatureType : unsigned
     CREATURE_TYPE_MECHANICAL = 9
 };
 
+using uint32 = unsigned;
+
+enum PetEntry : unsigned
+{
+    NPC_WATER_ELEMENTAL_PERM = 37994
+};
+
+// ACTUAL_STOCK_PET_ENTRY
+
 bool IsAscensionClass(unsigned classId)
 {
     return classId >= CLASS_BARBARIAN && classId <= CLASS_SPIRIT_MAGE;
@@ -126,6 +135,10 @@ int main()
         "the mage's water elemental is permanent");
     Check(!Permanent(Make(SUMMON_PET, 99999, CREATURE_TYPE_ELEMENTAL), CLASS_MAGE),
         "another mage summon is not permanent");
+    Check(Permanent(Make(SUMMON_PET, 1137994, CREATURE_TYPE_ELEMENTAL), CLASS_MAGE),
+        "the Warcraft Reborn mage's water elemental is permanent");
+    Check(!Permanent(Make(SUMMON_PET, 1100510, CREATURE_TYPE_ELEMENTAL), CLASS_MAGE),
+        "the Warcraft Reborn temporary water elemental is not permanent");
 
     Check(Permanent(Make(HUNTER_PET, 1188, CREATURE_TYPE_BEAST), CLASS_TINKER),
         "a hunter pet stays permanent for any owner class");

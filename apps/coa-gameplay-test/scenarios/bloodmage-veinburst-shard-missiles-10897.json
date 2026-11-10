@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "name": "Veinburst launches each Blood Shard as its own missile (#10897)",
+  "contract": [
+    "Veinburst 504260 expends every stored Blood Shard (count on 505366), each dealing a Blood Shard hit 504115. 504115 is instant (speed 0), so the shards only vanished from above the Bloodmage, as reported.",
+    "The client carries one missile per shard slot, Blood Shard Trigger Attack 1-8 (505357-505364, speed 30, visuals 200286-200293), whose TRIGGER_MISSILE would trigger 504115. Each spent shard now casts its slot's Trigger Attack at the target for the flight; its trigger is neutralized so the damage stays one scaled 504115 hit per shard. The shards leave one after another, 100 ms apart, and each 504115 hit lands when its missile arrives (distance / missile speed).",
+    "Expected with three stored shards: Trigger Attack 1, 2 and 3 are cast once each, 4 is not, with the dummy 25 yd away no Blood Shard hit has landed when Veinburst lands and launches them, and the dummy takes exactly three Blood Shard hits after the missiles land."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 20,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "b",
+      "entry": 299,
+      "level": 60,
+      "distance": 25,
+      "health": 1000000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 804849
+    },
+    {
+      "action": "learn",
+      "actor": "b",
+      "spell": 504260
+    },
+    {
+      "action": "set_aura",
+      "label": "Three stored Blood Shards",
+      "actor": "b",
+      "spell": 505366,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: three shards stored",
+      "actor": "b",
+      "metric": "aura_stacks",
+      "spell": 505366,
+      "equals": 3
+    },
+    {
+      "action": "set_power",
+      "actor": "b",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Veinburst the dummy",
+      "actor": "b",
+      "spell": 504260,
+      "target": "d"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Veinburst landed",
+      "actor": "b",
+      "metric": "spell_damage_count",
+      "spell": 504260,
+      "target": "d",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: when Veinburst lands and launches the shards, none has hit the dummy 25 yd away yet",
+      "actor": "b",
+      "metric": "spell_damage_count",
+      "spell": 504115,
+      "target": "d",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Veinburst expended every shard",
+      "actor": "b",
+      "metric": "aura_stacks",
+      "spell": 505366,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: shard 1 flies as Trigger Attack 1",
+      "actor": "b",
+      "metric": "spell_cast_count",
+      "spell": 505357,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: shard 2 flies as Trigger Attack 2",
+      "actor": "b",
+      "metric": "spell_cast_count",
+      "spell": 505358,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: shard 3 flies as Trigger Attack 3",
+      "actor": "b",
+      "metric": "spell_cast_count",
+      "spell": 505359,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "No missile for an empty slot",
+      "actor": "b",
+      "metric": "spell_cast_count",
+      "spell": 505360,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let the missiles land",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "REGRESSION: one Blood Shard hit per shard, none from the missiles",
+      "actor": "b",
+      "metric": "spell_damage_count",
+      "spell": 504115,
+      "target": "d",
+      "equals": 3
+    }
+  ]
+}

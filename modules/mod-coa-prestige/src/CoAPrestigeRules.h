@@ -322,6 +322,8 @@ namespace CoAPrestige
         uint32_t tome = 0;
     };
 
+    // The "Riding Tome: <tier> (Prestige)" items, which the CoA world package
+    // (data/coa-world) defines; data/sql holds no item_template row for them.
     constexpr RidingTome RidingTomes[] =
     {
         { 33388, 2200037 },

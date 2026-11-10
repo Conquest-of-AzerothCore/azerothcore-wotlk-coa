@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "name": "Stratholme: the Slaughter Square gates stay shut until the three ziggurats are done",
+  "contract": [
+    "Issue #10581: the Gauntlet gate (175374) and the Slaughter Square gate (175373) are the way to Baron Rivendare.",
+    "They open once Baroness Anastari, Nerub'enkan and Maleki the Pallid are dead and their ziggurats done. A group",
+    "that walks in, without the Dungeon Finder's Service Entrance lock, found them already open.",
+    "01 (175375) and the other portcullises still start open for such a group."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 329,
+      "x": 4039.0,
+      "y": -3480.0,
+      "z": 121.8
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero walked into Stratholme",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 329,
+      "within_ms": 15000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Slaughter Square gate is shut",
+      "actor": "hero",
+      "metric": "nearby_gameobject_state",
+      "entry": 175373,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 329,
+      "x": 4040.0,
+      "y": -3496.0,
+      "z": 121.8
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The Gauntlet gate is shut",
+      "actor": "hero",
+      "metric": "nearby_gameobject_state",
+      "entry": 175374,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 329,
+      "x": 3680.0,
+      "y": -3220.0,
+      "z": 127.1
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Service Entrance portcullis 01 stands open for a walk-in group",
+      "actor": "hero",
+      "metric": "nearby_gameobject_state",
+      "entry": 175375,
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "schema": 1,
+  "name": "Air Engraving on both weapons gives two 10% casting haste sources and keeps one after removing either (#10466)",
+  "contract": [
+    "Weapon Engraving: Air 653222 enchants one weapon with enchant 999, whose equip spell 653223 promises 10% melee, ranged",
+    "and casting speed for that weapon; the casting half and the damage copy live in its Air Engraving aura 653225.",
+    "Two engraved weapons are two sources: each 10% divides cast and attack times by 1.1, so both together give",
+    "1 / 1.1 / 1.1 = 0.8264 of the base times, casting the same as melee. Replacing one weapon's Air with Ice must leave",
+    "the other weapon's 653223 and 653225 and exactly one 10% (0.9091) for casting and melee alike."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "r", "race": 1, "class": 32, "level": 24}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "learn", "actor": "r", "spell": 1180},
+    {"action": "learn", "actor": "r", "spell": 674},
+    {"action": "add_item", "actor": "r", "item": 25},
+    {"action": "add_item", "actor": "r", "item": 2092},
+    {"action": "equip", "label": "Worn Shortsword in the main hand", "actor": "r", "item": 25, "slot": 15},
+    {"action": "equip", "label": "Worn Dagger in the off hand", "actor": "r", "item": 2092, "slot": 16},
+    {"action": "learn", "actor": "r", "spell": 653222},
+    {"action": "learn", "actor": "r", "spell": 653264},
+    {"action": "wait", "ms": 1000},
+    {"action": "snapshot", "actor": "r", "metric": "attack_time_ms", "hand": 0, "save_as": "melee_before"},
+    {"action": "snapshot", "actor": "r", "metric": "cast_speed_multiplier", "save_as": "casting_before"},
+
+    {"action": "cast", "label": "Engrave the main-hand weapon", "actor": "r", "spell": 653222, "target_item": 25},
+    {"action": "assert", "actor": "r", "metric": "aura", "spell": 653223, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "actor": "r", "metric": "aura", "spell": 653225, "equals": 1},
+    {"action": "assert", "label": "One engraving: casting 10% faster", "actor": "r", "metric": "cast_speed_multiplier",
+      "ratio_to": "casting_before", "min": 0.909, "max": 0.9092},
+    {"action": "assert", "actor": "r", "metric": "attack_time_ms", "hand": 0, "ratio_to": "melee_before",
+      "min": 0.908, "max": 0.91},
+
+    {"action": "wait", "label": "Global cooldown", "ms": 1600},
+    {"action": "cast", "label": "Engrave the off-hand weapon", "actor": "r", "spell": 653222, "target_item": 2092},
+    {"action": "assert", "label": "Two engravings: melee from two 10% sources", "actor": "r",
+      "metric": "attack_time_ms", "hand": 0, "ratio_to": "melee_before", "min": 0.825, "max": 0.828,
+      "within_ms": 3000},
+    {"action": "assert", "label": "Two engravings: casting from two 10% sources", "actor": "r",
+      "metric": "cast_speed_multiplier", "ratio_to": "casting_before", "min": 0.8263, "max": 0.8266},
+
+    {"action": "wait", "label": "Global cooldown", "ms": 1600},
+    {"action": "cast", "label": "Replace the off-hand Air with Ice", "actor": "r", "spell": 653264, "target_item": 2092},
+    {"action": "assert", "actor": "r", "metric": "aura", "spell": 653266, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The main-hand engraving stays", "actor": "r", "metric": "aura", "spell": 653223,
+      "equals": 1},
+    {"action": "assert", "label": "The main-hand engraving keeps its casting aura", "actor": "r", "metric": "aura",
+      "spell": 653225, "equals": 1},
+    {"action": "assert", "label": "One engraving left: casting still 10% faster", "actor": "r",
+      "metric": "cast_speed_multiplier", "ratio_to": "casting_before", "min": 0.909, "max": 0.9092},
+    {"action": "assert", "actor": "r", "metric": "attack_time_ms", "hand": 0, "ratio_to": "melee_before",
+      "min": 0.908, "max": 0.91},
+
+    {"action": "wait", "label": "Global cooldown", "ms": 1600},
+    {"action": "cast", "label": "Replace the main-hand Air with Ice", "actor": "r", "spell": 653264, "target_item": 25},
+    {"action": "assert", "actor": "r", "metric": "aura", "spell": 653223, "equals": 0, "within_ms": 3000},
+    {"action": "assert", "actor": "r", "metric": "aura", "spell": 653225, "equals": 0},
+    {"action": "assert", "label": "No engraving: base casting speed", "actor": "r", "metric": "cast_speed_multiplier",
+      "ratio_to": "casting_before", "min": 0.999, "max": 1.001},
+    {"action": "assert", "actor": "r", "metric": "attack_time_ms", "hand": 0, "ratio_to": "melee_before",
+      "min": 0.999, "max": 1.001}
+  ]
+}

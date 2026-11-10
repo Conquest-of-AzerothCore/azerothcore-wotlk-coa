@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "name": "Worldforged Icon of Blood stands on the ground in Swamp of Sorrows (#9680)",
+  "contract": "The Icon of Blood pickup (gameobject entry 254370, guid 6940640) floated 0.914 yd above the true ground (measured with spawn_ground_gap against the live map/vmap data, exceeding the 0.8 yd placement tolerance); it was never touched by any worldforged ground-correction pass. rev_20261101_30 lowers it to the measured ground height, so a character there can open it.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -10627.4, "y": -3844.1, "z": 23.9, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the pickup is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 254370, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pickup stands within tolerance of the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940640, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+    { "action": "set_aura", "actor": "p", "spell": 642, "stacks": 1 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 254370 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the pickup is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot is shown", "actor": "p", "metric": "loot_count", "min": 1, "within_ms": 3000 }
+  ]
+}

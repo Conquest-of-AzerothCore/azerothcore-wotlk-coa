@@ -18,6 +18,8 @@ namespace
 using AscensionReaperTalentProcs::Rules;
 
 constexpr uint32 CrimsonDeath = 705414;
+constexpr uint32 SoulrotTalent = 805196;
+constexpr uint32 SoulrotDebuff = 804660;
 constexpr uint32 JailersWill = 524939;
 constexpr uint32 JailersWillHelper = 578264;
 constexpr float JailersWillStrengthCoefficient = 0.3f;
@@ -144,11 +146,29 @@ class spell_ascension_reaper_talent_proc : public AuraScript
             GetTarget()->CastSpell(event.GetActionTarget(), source->Id, TRIGGERED_FULL_MASK, nullptr, effect);
     }
 
+    void StackSoulrotWithoutRefresh(AuraEffect const* effect, ProcEventInfo& event)
+    {
+        PreventDefaultAction();
+        Unit* reaper = GetTarget();
+        Unit* victim = event.GetActionTarget();
+        if (!victim)
+            return;
+
+        Aura* existing = victim->GetAura(SoulrotDebuff, reaper->GetGUID());
+        int32 const remaining = existing ? existing->GetDuration() : 0;
+        reaper->CastSpell(victim, SoulrotDebuff, TRIGGERED_FULL_MASK, nullptr, effect);
+        if (existing && victim->GetAura(SoulrotDebuff, reaper->GetGUID()) == existing)
+            existing->SetDuration(remaining);
+    }
+
     void Register() override
     {
         DoCheckProc += AuraCheckProcFn(spell_ascension_reaper_talent_proc::CheckProc);
         if (m_scriptSpellId == CrimsonDeath)
             OnEffectProc += AuraEffectProcFn(spell_ascension_reaper_talent_proc::RepeatSlaughter,
+                EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+        else if (m_scriptSpellId == SoulrotTalent)
+            OnEffectProc += AuraEffectProcFn(spell_ascension_reaper_talent_proc::StackSoulrotWithoutRefresh,
                 EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
     }
 };

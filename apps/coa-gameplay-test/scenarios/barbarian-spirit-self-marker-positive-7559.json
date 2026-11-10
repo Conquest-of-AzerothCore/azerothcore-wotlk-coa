@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Spirit of Savagery and Spirit of the Hunt mark the caster with a positive aura (#9916, #7795, #7559)",
+  "contract": [
+    "The five Spirits are stance-bar toggles whose self effect is a DUMMY marker on the caster. Savagery 707775",
+    "(self effect 1) and Hunt 707763 (self effect 2) also carry SPELL_ATTR0_AURA_IS_DEBUFF for their enemy area auras,",
+    "so every effect was classed negative and the caster's marker was sent with AFLAG_NEGATIVE. Conflict, War and",
+    "Bloodshed, which lack that attribute and which players report as shown active, send a positive marker.",
+    "Expected: the caster's own Savagery and Hunt applications are positive, like War's."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "b", "race": 1, "class": 12, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "b", "spell": 707775 },
+    { "action": "learn", "actor": "b", "spell": 707763 },
+    { "action": "learn", "actor": "b", "spell": 712467 },
+
+    { "action": "cast", "actor": "b", "spell": 707775 },
+    { "action": "assert", "label": "Spirit of Savagery marks the caster", "actor": "b", "metric": "aura", "spell": 707775, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the Savagery self marker is a positive aura", "actor": "b", "metric": "aura_positive", "spell": 707775, "equals": 1 },
+
+    { "action": "cast", "actor": "b", "spell": 707763 },
+    { "action": "assert", "label": "Spirit of the Hunt marks the caster", "actor": "b", "metric": "aura", "spell": 707763, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the Hunt self marker is a positive aura", "actor": "b", "metric": "aura_positive", "spell": 707763, "equals": 1 },
+
+    { "action": "cast", "actor": "b", "spell": 712467 },
+    { "action": "assert", "label": "Control: Spirit of War marks the caster", "actor": "b", "metric": "aura", "spell": 712467, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Control: the War self marker is positive", "actor": "b", "metric": "aura_positive", "spell": 712467, "equals": 1 }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Wardrobe cosmetics: a shapeshift takes the wings off only while it lasts",
+  "contract": [
+    "Appearance 2030 (Blossom Gossamer Wings) resolves to cosmetic aura 286530. While the character wears",
+    "another form, the client drops the cosmetic aura with a cancel. That cancel must not clear the saved",
+    "selection, and the wardrobe refresh does not put the wings on the form. Once the character is back",
+    "in their own form, the refresh puts the wings back within 2 s. A cancel in the character's own form",
+    "still clears the selection (wardrobe-cosmetic-cancel-5482)."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "druid",
+      "race": 4,
+      "class": 11,
+      "level": 80
+    }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "druid", "spell": 5487 },
+    { "action": "apply_appearances", "actor": "druid", "selection": {"56": 2030} },
+    {
+      "action": "assert", "label": "The selected wings apply their cosmetic aura",
+      "actor": "druid", "metric": "aura", "spell": 286530, "equals": 1
+    },
+    { "action": "cast", "actor": "druid", "spell": 5487 },
+    {
+      "action": "assert", "label": "The druid is in Bear Form",
+      "actor": "druid", "metric": "aura", "spell": 5487, "equals": 1, "within_ms": 2000
+    },
+    { "action": "cancel_aura", "actor": "druid", "spell": 286530 },
+    { "action": "wait", "ms": 2500 },
+    {
+      "action": "assert", "label": "The form wears no wings",
+      "actor": "druid", "metric": "aura", "spell": 286530, "equals": 0
+    },
+    { "action": "cancel_aura", "actor": "druid", "spell": 5487 },
+    {
+      "action": "assert", "label": "Back in their own form, the wings come back",
+      "actor": "druid", "metric": "aura", "spell": 286530, "equals": 1, "within_ms": 2500
+    }
+  ]
+}

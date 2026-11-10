@@ -24,7 +24,8 @@ def main():
     enums += method(info, 'enum SpellCustomAttributes') + ';\n'
     enums += method((ROOT / 'src/server/game/Entities/Player/Player.h').read_text(), 'enum PlayerFlags') + ';\n'
     header = (ROOT / 'src/server/coa/AscensionRulesets.h').read_text().replace('class Player;', 'struct Player;')
-    source = header + (ROOT / 'src/server/coa/AscensionRulesets.cpp').read_text()
+    policy = (ROOT / 'src/server/coa/AscensionHighRiskPolicy.h').read_text()
+    source = policy + header + (ROOT / 'src/server/coa/AscensionRulesets.cpp').read_text()
     source = re.sub(r'^#include.*\n', '', source, flags=re.M)
     source = source.replace(': public SpellScript\n{', ': public SpellScript\n{\npublic:')
     code = (HERE / 'harness.cpp').read_text().replace('// ENUMS', enums).replace('// SOURCE', source)

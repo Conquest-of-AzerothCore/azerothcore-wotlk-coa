@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "name": "Bloodmage mounting drops Accursed Form (#11364)",
+  "contract": "#11364 reported that mounting while shapeshifted in Accursed Form 562572 leaves the form up, so the player stands on the horse. Venomancer forms 803183 and 800841 carry the native mount interrupt flag and #8344 asserts the mount drops them. The same expectation applies to Accursed Form: the mount's own aura removes the form and its Cursed Form transform, and the normal display returns.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 20,
+      "level": 13,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "display_id",
+      "save_as": "unshifted_display"
+    },
+    {
+      "action": "set_skill",
+      "actor": "p",
+      "skill": 762,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 458
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 562572
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 562572,
+      "target": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Accursed Form is active",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 562572,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Cursed Form transform is active",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 562722,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 458,
+      "target": "p"
+    },
+    {
+      "action": "assert",
+      "label": "the mount cast is accepted while shapeshifted",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 458,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 4500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the player is mounted",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 458,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Accursed Form is dropped by the mount",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 562572,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Cursed Form transform is dropped with it",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 562722,
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "the normal display returns after dismount",
+      "actor": "p",
+      "metric": "display_id",
+      "relative_to": "unshifted_display",
+      "equals": 0
+    }
+  ]
+}
