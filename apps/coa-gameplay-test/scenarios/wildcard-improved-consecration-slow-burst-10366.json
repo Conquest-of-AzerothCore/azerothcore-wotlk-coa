@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "name": "Improved Consecration triggers an instant Holy burst and attack-speed slow",
+  "contract": [
+    "Improved Consecration410002 is a SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE aura with ProcFlags0 in",
+    "Spell.dbc and no spell_proc/spell_script_names row, so it never fired. The new row procs it off the",
+    "Wildcard's own Consecration26573 periodic Holy damage ticks; the proc casts410003, dealing instant",
+    "Holy damage and applying a melee attack-speed slow to nearby enemies."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 26573
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 410002
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 410003,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 410002,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 26573,
+      "target": "hero"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 26573,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 410003,
+      "target": "enemy",
+      "min": 1,
+      "within_ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 410003,
+      "caster": "hero",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 410003,
+      "effect": 1,
+      "caster": "hero",
+      "max": -1
+    }
+  ]
+}

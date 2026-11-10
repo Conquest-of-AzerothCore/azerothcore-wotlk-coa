@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: High Priestess Jeklik's Terrifying Screech fears the players near her in her bat form",
+  "contract": [
+    "The tester saw Jeklik take her bat form without the fear that followed on live. In the live logs of 2025-12",
+    "to 2026-08 her Terrifying Screech (2106131) fears part of the raid with 2106137 (\"all nearby enemies\"), and",
+    "the script gives that fear the 20 yards of her Mass Fear. Below half health she drains her avatar, then takes",
+    "her bat form. With nobody out of melee to charge, her Screech comes in place of the first charge 2 s later,",
+    "so the hero fighting next to her must be feared."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 309,
+    "x": -12273.9,
+    "y": -1407.77,
+    "z": 132.223,
+    "o": 0.0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14517,
+      "as": "jeklik",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "label": "Engage Jeklik",
+      "actor": "hero",
+      "target": "jeklik"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jeklik fights the hero",
+      "actor": "jeklik",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jeklik lands from her intro flight as a troll",
+      "actor": "jeklik",
+      "metric": "aura",
+      "spell": 23966,
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Screech fear in her troll form",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2106137,
+      "equals": 0
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound Jeklik below half health",
+      "actor": "hero",
+      "target": "jeklik",
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jeklik takes her bat form with the Aspect of Hir'eek",
+      "actor": "jeklik",
+      "metric": "aura",
+      "spell": 2106122,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: she screeches 2 s into her bat form",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "entry": 14517,
+      "spell": 2106131,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Screech fears the hero next to her",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2106137,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero survived the fight",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

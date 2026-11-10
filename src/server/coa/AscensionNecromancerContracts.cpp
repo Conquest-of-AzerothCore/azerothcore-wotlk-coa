@@ -48,10 +48,14 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[index].Amplitude = interval;
         info->Effects[index].TriggerSpell = 0;
     };
+    auto nativeSummonProc = [id](SpellEffectInfo const& effect)
+    {
+        return effect.Effect == SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS &&
+               ((id == 503740 && effect.TriggerSpell == 707014) ||
+                (id == 531128 && effect.TriggerSpell == 531131));
+    };
     for (SpellEffectInfo& effect : info->Effects)
-        if ((effect.ApplyAuraName == 42 || effect.ApplyAuraName == 354) &&
-            !(id == 503740 && effect.Effect == SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS &&
-                effect.TriggerSpell == 707014))
+        if ((effect.ApplyAuraName == 42 || effect.ApplyAuraName == 354) && !nativeSummonProc(effect))
         {
             effect.ApplyAuraName = SPELL_AURA_DUMMY;
             effect.TriggerSpell = 0;
@@ -207,7 +211,10 @@ void ApplyContracts(SpellInfo* info)
     if (id == 500981)
         info->Effects[2].Effect = 0;
     if (id == 804371)
+    {
         info->Effects[0].MiscValue = 444914;
+        info->Attributes |= SPELL_ATTR0_NO_IMMUNITIES;
+    }
     if (id == 505224)
     {
         info->Effects[0].ApplyAuraName = SPELL_AURA_SCHOOL_ABSORB;
@@ -450,6 +457,10 @@ class necromancer_scaling : public UnitScript
         Player* player = Owner(caster);
         if (!player)
             return;
+        if (info->Id == 707592 && index == EFFECT_0)
+            if (Aura const* stacks = player->GetAura(712434))
+                if (stacks->GetStackAmount() >= stacks->GetSpellInfo()->StackAmount)
+                    value *= 1.5f;
         for (auto const& row : NecromancerCoefficients)
             if (info->Id == row.id && index == row.effect)
             {

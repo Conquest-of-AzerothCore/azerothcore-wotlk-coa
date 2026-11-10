@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Staff chat badges: .gm mod chat, .gm cm chat and .gm admin chat mark the staff member's chat",
+  "contract": [
+    "The 3.3.5a client only renders the GM, DEV, AFK and DND chat tags, so a moderator, community manager or administrator badge is carried in the chat text: with .gm mod chat on the server sends |cff33bbff<MOD>|r in front of the text, with .gm cm chat on |cff33bbff<CM>|r, with .gm admin chat on |cff33bbff<ADMIN>|r. The client UI turns that prefix into a badge in front of the name.",
+    "Only one staff tag is active at a time: turning one on replaces the other, and turning off a tag that is not active changes nothing. With every tag off the text arrives unchanged.",
+    "The MOD command needs the Moderator command role (permission 1009): an ordinary player cannot use it. The CM and ADMIN commands need the Administrator command role (permissions 1010 and 1011): a moderator cannot use them either.",
+    "Nobody can fake the badge: a player's message that carries the prefix itself does not arrive with it."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "mod", "name": "Badgemod", "race": 1, "class": 1, "level": 20, "security": 1},
+    {"id": "player", "name": "Badgeplayer", "race": 1, "class": 1, "level": 20},
+    {"id": "admin", "name": "Badgeadmin", "race": 1, "class": 1, "level": 20, "security": 3}
+  ],
+  "steps": [
+    {"action": "command", "label": "An ordinary player cannot turn the moderator tag on", "actor": "player", "command": ".gm mod chat on", "rejected": true},
+    {"action": "command", "label": "An ordinary player cannot turn the community manager tag on", "actor": "player", "command": ".gm cm chat on", "rejected": true},
+    {"action": "command", "label": "An ordinary player cannot turn the administrator tag on", "actor": "player", "command": ".gm admin chat on", "rejected": true},
+    {"action": "command", "label": "A moderator cannot turn the community manager tag on", "actor": "mod", "command": ".gm cm chat on", "rejected": true},
+    {"action": "command", "label": "A moderator cannot turn the administrator tag on", "actor": "mod", "command": ".gm admin chat on", "rejected": true},
+
+    {"action": "whisper", "label": "Before any tag, the moderator whispers", "actor": "mod", "to": "Badgeplayer", "text": "hello zero"},
+    {"action": "assert", "label": "Without a tag the text arrives unchanged", "actor": "player", "metric": "whispers_received", "from": "mod", "text": "hello zero", "equals": 1, "within_ms": 2000},
+
+    {"action": "command", "label": "The moderator turns the moderator tag on", "actor": "mod", "command": ".gm mod chat on"},
+    {"action": "whisper", "actor": "mod", "to": "Badgeplayer", "text": "hello mod"},
+    {"action": "assert", "label": "THE TAG: the whisper arrives with the MOD prefix", "actor": "player", "metric": "whispers_received", "from": "mod", "text": "|cff33bbff<MOD>|r hello mod", "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "and not without it", "actor": "player", "metric": "whispers_received", "from": "mod", "text": "hello mod", "equals": 0},
+
+    {"action": "command", "label": "The moderator turns the moderator tag off", "actor": "mod", "command": ".gm mod chat off"},
+    {"action": "whisper", "actor": "mod", "to": "Badgeplayer", "text": "hello plain"},
+    {"action": "assert", "label": "With the tag off the text arrives unchanged again", "actor": "player", "metric": "whispers_received", "from": "mod", "text": "hello plain", "equals": 1, "within_ms": 2000},
+
+    {"action": "whisper", "label": "A player types the MOD prefix into a whisper", "actor": "player", "to": "Badgemod", "text": "|cff33bbff<MOD>|r fake"},
+    {"action": "whisper", "label": "then whispers normally", "actor": "player", "to": "Badgemod", "text": "after fake"},
+    {"action": "assert", "label": "The normal whisper arrives", "actor": "mod", "metric": "whispers_received", "from": "player", "text": "after fake", "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE GUARD: the faked prefix never arrives", "actor": "mod", "metric": "whispers_received", "from": "player", "text": "|cff33bbff<MOD>|r fake", "equals": 0},
+
+    {"action": "command", "label": "An administrator turns the moderator tag on", "actor": "admin", "command": ".gm mod chat on"},
+    {"action": "command", "label": "then the community manager tag, which replaces it", "actor": "admin", "command": ".gm cm chat on"},
+    {"action": "command", "label": "Turning off the inactive moderator tag changes nothing", "actor": "admin", "command": ".gm mod chat off"},
+    {"action": "command", "label": "Ask for the community manager tag state", "actor": "admin", "command": ".gm cm chat"},
+    {"action": "assert", "label": "The community manager tag is on", "actor": "admin", "metric": "system_message_contains", "text": "Community Manager tag is ON.", "equals": 1, "within_ms": 2000},
+    {"action": "command", "label": "Ask for the moderator tag state", "actor": "admin", "command": ".gm mod chat"},
+    {"action": "assert", "label": "The moderator tag was replaced", "actor": "admin", "metric": "system_message_contains", "text": "Moderator tag is OFF.", "equals": 1, "within_ms": 2000},
+
+    {"action": "command", "label": "The administrator tag replaces the community manager tag", "actor": "admin", "command": ".gm admin chat on"},
+    {"action": "command", "label": "Ask for the administrator tag state", "actor": "admin", "command": ".gm admin chat"},
+    {"action": "assert", "label": "The administrator tag is on", "actor": "admin", "metric": "system_message_contains", "text": "Administrator tag is ON.", "equals": 1, "within_ms": 2000},
+    {"action": "command", "label": "Ask for the community manager tag state again", "actor": "admin", "command": ".gm cm chat"},
+    {"action": "assert", "label": "The community manager tag was replaced", "actor": "admin", "metric": "system_message_contains", "text": "Community Manager tag is OFF.", "equals": 1, "within_ms": 2000},
+
+    {"action": "command", "label": "The administrator turns the administrator tag off", "actor": "admin", "command": ".gm admin chat off"},
+    {"action": "command", "label": "Ask for the administrator tag state again", "actor": "admin", "command": ".gm admin chat"},
+    {"action": "assert", "label": "The administrator tag is off", "actor": "admin", "metric": "system_message_contains", "text": "Administrator tag is OFF.", "equals": 1, "within_ms": 2000}
+  ]
+}

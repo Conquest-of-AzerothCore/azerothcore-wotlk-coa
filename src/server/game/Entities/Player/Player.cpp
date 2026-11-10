@@ -25,7 +25,9 @@
 #include "ArenaTeamMgr.h"
 #include "ArenaSeasonMgr.h"
 #include "AscensionBazaarTokenReserve.h"
+#include "AscensionDisplayPatch.h"
 #include "AscensionPooledVitality.h"
+#include "AscensionCosmeticPetTokens.h"
 #include "AscensionVanityOwnership.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
@@ -2952,10 +2954,10 @@ void Player::SendInitialSpells()
             continue;
 
         if ((!itr->second->Active && !IsKeptInClientSpellbookWhenSuperseded(itr->first)) ||
-            !itr->second->IsInSpec(GetActiveSpec()))
+            !itr->second->IsInSpec(GetActiveSpec()) || IsTemporarySpellReplacementStandIn(itr->first))
             continue;
 
-        data << uint32(itr->first);
+        data << uint32(GetTemporarySpellReplacement(itr->first));
         data << uint16(0);                                  // it's not slot id
 
         ++spellCount;
@@ -3028,6 +3030,7 @@ void Player::SendInitialSpells()
     }
 
     SendDirectMessage(&data);
+    AscensionDisplayPatch::ResendSkillLineAbilityRows(this);
 }
 
 void Player::SendUnlearnSpells()
@@ -3284,6 +3287,7 @@ void Player::SendLearnPacket(uint32 spellId, bool learn, bool keepActionButtons 
         data << uint32(spellId);
         data << uint16(0);
         SendDirectMessage(&data);
+        AscensionDisplayPatch::ResendSkillLineAbilityRows(this, spellId);
     }
     else
     {
@@ -3864,6 +3868,21 @@ void Player::removeSpell(uint32 spell_id, uint8 removeSpecMask, bool onlyTempora
         SendLearnPacket(spell_id, false, onlyTemporary && IsTemporarySpellReplacementStandIn(spell_id));
         if (onlyTemporary)
             sScriptMgr->OnPlayerTemporarySpellRemoveNotice(this, spell_id, true);
+    }
+
+    // A forgotten spell left on the bar stays clickable until the next login drops it there.
+    if (!onlyTemporary && removeSpecMask == SPEC_MASK_ALL && IsInWorld() && !HasSpell(spell_id))
+    {
+        bool barChanged = false;
+        for (uint8 button = 0; button < MAX_ACTION_BUTTONS; ++button)
+            if (ActionButton const* action = GetActionButton(button);
+                action && action->GetType() == ACTION_BUTTON_SPELL && action->GetAction() == spell_id)
+            {
+                removeActionButton(button);
+                barChanged = true;
+            }
+        if (barChanged)
+            SendInitialActionButtons();
     }
 }
 
@@ -7521,6 +7540,28 @@ void Player::CastAllObtainSpells()
 
 void Player::ApplyItemObtainSpells(Item* item, bool apply)
 {
+    auto carriedElsewhere = [this, item](int32 spellId)
+    {
+        auto grants = [item, spellId](Item const* other)
+        {
+            if (!other || other == item)
+                return false;
+            for (auto const& spell : other->GetTemplate()->Spells)
+                if (spell.SpellTrigger == ITEM_SPELLTRIGGER_ON_NO_DELAY_USE && spell.SpellId == spellId)
+                    return true;
+            return false;
+        };
+        for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
+            if (grants(GetItemByPos(INVENTORY_SLOT_BAG_0, slot)))
+                return true;
+        for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+            if (Bag* bag = GetBagByPos(i))
+                for (uint32 slot = 0; slot < bag->GetBagSize(); ++slot)
+                    if (grants(bag->GetItemByPos(slot)))
+                        return true;
+        return false;
+    };
+
     ItemTemplate const* itemTemplate = item->GetTemplate();
     for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
     {
@@ -7536,7 +7577,7 @@ void Player::ApplyItemObtainSpells(Item* item, bool apply)
             if (!HasAura(spellId))
                 CastSpell(this, spellId, true, item);
         }
-        else
+        else if (!carriedElsewhere(spellId))
             RemoveAurasDueToSpell(spellId);
     }
 }
@@ -7815,7 +7856,9 @@ void Player::CastItemCombatSpell(Unit* target, WeaponAttackType attType, uint32 
                 uint32 WeaponSpeed = GetAttackTime(attType);
                 chance = GetPPMProcChance(WeaponSpeed, spellData.SpellPPMRate, spellInfo);
             }
-            else if (chance > 100.0f)
+            // CoA: a chance on hit without a PPM rate never procs on every hit; Ascension's custom
+            // weapons (Worldforged, Bloodforged copies) store 100 there, stock uses 101
+            else if (chance >= 100.0f)
             {
                 chance = GetWeaponProcChance();
             }
@@ -11547,6 +11590,13 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorguid, uint32 vendorslot, uin
         return false;
     }
 
+    // Cosmetic pet tokens only sell on realm types whose classes can use them
+    if (!IsGameMaster() && !AscensionCosmeticPetTokens::AvailableOnRealm(item))
+    {
+        SendBuyError(BUY_ERR_CANT_FIND_ITEM, creature, item, 0);
+        return false;
+    }
+
     VendorItemData const* vItems = GetSession()->GetCurrentVendor() ? sObjectMgr->GetNpcVendorItemList(GetSession()->GetCurrentVendor()) : creature->GetVendorItems();
     if (!vItems || vItems->Empty())
     {
@@ -11904,6 +11954,15 @@ void Player::ModifySpellCooldown(uint32 spellId, int32 cooldown)
         return;
 
     itr->second.end += cooldown;
+
+    if (cooldown > 0)
+    {
+        uint32 const now = GameTime::GetGameTimeMS().count();
+        WorldPacket data;
+        BuildCooldownPacket(data, SPELL_COOLDOWN_FLAG_NONE, spellId, itr->second.end > now ? itr->second.end - now : 0);
+        SendDirectMessage(&data);
+        return;
+    }
 
     WorldPacket data(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
     data << uint32(spellId);            // Spell ID
@@ -13445,7 +13504,8 @@ bool Player::HasItemFitToSpellRequirements(SpellInfo const* spellInfo, Item cons
                     bool hasWeaponInSlot = false;
                     for (uint8 i = EQUIPMENT_SLOT_MAINHAND; i < EQUIPMENT_SLOT_TABARD; ++i)
                         if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-                            if (item != ignoreItem && item->IsFitToSpellRequirements(spellInfo))
+                            if (item != ignoreItem && (!ignoreItem || CanUseAttackType(GetAttackBySlot(i))) &&
+                                item->IsFitToSpellRequirements(spellInfo))
                             {
                                 hasWeaponInSlot = true;
                                 break;
@@ -13598,9 +13658,13 @@ uint32 Player::GetResurrectionSpellId()
 
     // Reincarnation (passive spell)  // prio: 1                  // Glyph of Renewed Life
     std::vector<uint32> const reincarnation = sSpellMgr->GetSpellAndRelatives(20608);
-    bool const knowsReincarnation = std::any_of(reincarnation.begin(), reincarnation.end(), [this](uint32 spellId) { return HasSpell(spellId); });
-    if (prio < 1 && knowsReincarnation && !HasSpellCooldown(21169) && (HasAura(58059) || HasItemCount(17030)))
-        spell_id = 21169;
+    auto const known = std::find_if(reincarnation.begin(), reincarnation.end(), [this](uint32 spellId) { return HasSpell(spellId); });
+    if (known != reincarnation.end())
+    {
+        uint32 const resurrect = sSpellMgr->GetSpellTwinFor(21169, *known);
+        if (prio < 1 && !HasSpellCooldown(resurrect) && (HasAura(58059) || HasItemCount(17030)))
+            spell_id = resurrect;
+    }
 
     return spell_id;
 }
@@ -15392,7 +15456,7 @@ bool Player::CanResummonPet(uint32 spellid)
 
     if (IsClass(CLASS_MAGE, CLASS_CONTEXT_PET))
     {
-        if (HasSpell(31687) && HasAuraOrTwin(70937))  //Has [Summon Water Elemental] spell and [Glyph of Eternal Water].
+        if (HasSpellOrTwin(31687) && HasAuraOrTwin(70937))  //Has [Summon Water Elemental] spell and [Glyph of Eternal Water].
             return true;
     }
 

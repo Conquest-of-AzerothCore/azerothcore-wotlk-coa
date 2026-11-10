@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Guardian Grand Entrance landing plays its slam visual spell (#4165)",
+  "contract": [
+    "Grand Entrance 802870 leaps to the target and lands with 802874 damage. Spell 802873 carries the slam visual (2113) and the sound.",
+    "The landing must cast 802873 exactly once as an effect-less visual while the 802874 casts and hits stay as measured on the base build."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "p", "race": 1, "class": 18, "level": 80,
+      "spell_hit_rating": 10000, "melee_hit_rating": 10000, "allow_regeneration": false }
+  ],
+  "creatures": [
+    { "id": "t", "owner": "p", "entry": 11520, "faction": 14, "health": 400000, "distance": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "learn", "actor": "p", "spell": 802870 },
+    { "action": "cast", "actor": "p", "spell": 802870, "target": "t" },
+    { "action": "wait", "ms": 5000 },
+    { "action": "assert", "label": "The cast was accepted", "actor": "p", "metric": "cast_failure", "spell": 802870, "equals": 0 },
+    { "action": "assert", "label": "The leap spell 802871 landed", "actor": "p", "metric": "spell_cast_count", "spell": 802871, "min": 1 },
+    { "action": "assert", "label": "Landing cast the slam visual spell exactly once", "actor": "p", "metric": "spell_cast_count", "spell": 802873, "equals": 1 },
+    { "action": "assert", "label": "802874 damage count on the target is unchanged from the base build", "actor": "p", "metric": "spell_damage_count", "spell": 802874, "target": "t", "equals": 3 },
+    { "action": "assert", "label": "802874 cast count is unchanged from the base build", "actor": "p", "metric": "spell_cast_count", "spell": 802874, "equals": 2 },
+    { "action": "assert", "label": "802874 damage lands", "actor": "p", "metric": "spell_damage_total", "spell": 802874, "target": "t", "min": 1 }
+  ]
+}

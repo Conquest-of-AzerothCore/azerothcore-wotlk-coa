@@ -1028,8 +1028,10 @@ bool Pet::CreateBaseAtTamed(CreatureTemplate const* cinfo, Map* map, uint32 phas
     {
         SetUInt32Value(UNIT_FIELD_BYTES_0, 0x02020100);
         SetSheath(SHEATH_STATE_MELEE);
-        SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED);
     }
+    // CoA tames demons, undead, dragonkin and elementals too; without these flags the client offers
+    // Dismiss instead of Abandon, and that Dismiss deletes the hunter pet
+    SetByteFlag(UNIT_FIELD_BYTES_2, 2, UNIT_CAN_BE_RENAMED | UNIT_CAN_BE_ABANDONED);
 
     return true;
 }
@@ -2300,7 +2302,7 @@ bool Pet::IsPermanentPetFor(Player* owner) const
             else if (owner->IsClass(CLASS_DEATH_KNIGHT, CLASS_CONTEXT_PET))
                 return GetCreatureTemplate()->type == CREATURE_TYPE_UNDEAD;
             else if (owner->IsClass(CLASS_MAGE, CLASS_CONTEXT_PET))
-                return GetEntry() == 37994;
+                return GetStockPetEntry(GetEntry()) == NPC_WATER_ELEMENTAL_PERM;
             else if (owner->IsClass(CLASS_TINKER, CLASS_CONTEXT_PET))
                 return GetCreatureTemplate()->type == CREATURE_TYPE_MECHANICAL;
             else

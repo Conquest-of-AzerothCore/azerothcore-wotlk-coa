@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Gavel 'ability not ready' right after a Dawn's Arrival reset is the global cooldown, not a leftover cooldown (#10346, #10339)",
+  "contract": "#10346 and #10339 report that after Dawn's Arrival resets a Gavel's cooldown (the action-bar swipe clears), casting it again briefly fails with 'ability/spell not ready' -- #10339 says this lasts '1-2 seconds' before the cast is finally accepted. AscensionSunClericAbilities.cpp's Dawnbreak-cast branch calls AscensionSunCleric::Reduce(player, root, INT32_MAX) for each Gavel root, which for an infinite reduction calls player->RemoveSpellCooldown(spellId, true) (AscensionSunCleric.cpp) -- the exact engine call the CoAGameplayTest 'reset_cooldown' fixture action also makes (src/server/coa/CoAGameplayTest.cpp). Spell::CheckCast (src/server/game/Spells/Spell.cpp) returns the identical SPELL_FAILED_NOT_READY (67) for two unrelated conditions: Player::HasSpellCooldown(spellId) (the ability's own per-spell cooldown) and, separately and unconditionally, Spell::HasGlobalCooldown() (the ordinary 1.5 s GCD, StartRecoveryCategory 133 / StartRecoveryTime 1500 ms, shared by Dawnbreak and every Gavel). Casting Dawnbreak itself starts a fresh GCD at the exact moment its OnSpellCast hook calls Reduce(); recasting a Gavel in that same instant is rejected by the still-running GCD with the same 'not ready' message a real cooldown would produce, even though the Gavel's own per-spell cooldown entry was already erased. This scenario reproduces the engine mechanism deterministically with reset_cooldown standing in for Reduce()'s RemoveSpellCooldown call at the same point in the timeline (right after a Dawnbreak-equivalent cast starts the GCD): the immediate recast fails with SPELL_FAILED_NOT_READY purely from the GCD, and the SAME ability succeeds well under 2 seconds later -- far short of its normal 5-second cooldown -- proving the per-spell cooldown really was cleared and the brief 'not ready' window is the unavoidable global cooldown, not a defect in the reset.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "cleric",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "cleric", "spell": 800614 },
+    { "action": "learn", "actor": "cleric", "spell": 800654 },
+    { "action": "add_item", "actor": "cleric", "item": 406570 },
+    { "action": "equip", "actor": "cleric", "item": 406570, "slot": 15 },
+    { "action": "add_item", "actor": "cleric", "item": 406742 },
+    { "action": "equip", "actor": "cleric", "item": 406742, "slot": 16 },
+    { "action": "cast", "actor": "cleric", "spell": 800614, "target": "dummy", "label": "Put Gavel of Grace on its normal cooldown" },
+    {
+      "action": "assert", "label": "SETUP: Gavel of Grace is accepted",
+      "actor": "cleric", "metric": "cast_failure", "spell": 800614, "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: Gavel of Grace is now on cooldown",
+      "actor": "cleric", "metric": "cooldown_ms", "spell": 800614, "min": 1
+    },
+    {
+      "action": "assert", "label": "Wait for the global cooldown to clear",
+      "actor": "cleric", "metric": "global_cooldown_ms", "spell": 800614, "equals": 0, "within_ms": 2000
+    },
+    { "action": "cast", "actor": "cleric", "spell": 800654, "label": "Cast Dawnbreak: in the live reset path, OnSpellCast calls Reduce() exactly here, before a fresh GCD elapses" },
+    {
+      "action": "assert", "label": "SETUP: Dawnbreak is accepted",
+      "actor": "cleric", "metric": "cast_failure", "spell": 800654, "equals": 0
+    },
+    { "action": "reset_cooldown", "actor": "cleric", "spell": 800614, "label": "Stand in for Reduce()'s RemoveSpellCooldown(800614, true) call" },
+    {
+      "action": "assert", "label": "SETUP: the per-spell cooldown entry is genuinely cleared",
+      "actor": "cleric", "metric": "cooldown_ms", "spell": 800614, "equals": 0
+    },
+    { "action": "cast", "actor": "cleric", "spell": 800614, "target": "dummy", "label": "Immediately recast Gavel of Grace, same instant as the Dawnbreak-started GCD" },
+    {
+      "action": "assert", "label": "CONTRACT: the immediate recast fails with SPELL_FAILED_NOT_READY purely from the Dawnbreak-started GCD, not a leftover ability cooldown",
+      "actor": "cleric", "metric": "cast_failure", "spell": 800614, "equals": 67
+    },
+    {
+      "action": "assert", "label": "CONTRACT (#10339): the ability becomes castable again within ~2 seconds, far under its normal 5-second cooldown",
+      "actor": "cleric", "metric": "global_cooldown_ms", "spell": 800614, "equals": 0, "within_ms": 2000
+    },
+    { "action": "cast", "actor": "cleric", "spell": 800614, "target": "dummy", "label": "Retry once the global cooldown has cleared" },
+    {
+      "action": "assert", "label": "CONTRACT: the retry succeeds, proving the per-spell cooldown clear genuinely worked",
+      "actor": "cleric", "metric": "cast_failure", "spell": 800614, "equals": 0
+    }
+  ]
+}

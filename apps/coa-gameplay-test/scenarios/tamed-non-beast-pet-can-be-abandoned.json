@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "A newly made demon, undead, dragonkin or elemental hunter pet can be abandoned and renamed",
+  "contract": [
+    "The client offers Abandon (and Rename) on a pet's portrait menu only when UNIT_FIELD_BYTES_2 byte 2 carries UNIT_CAN_BE_ABANDONED (and UNIT_CAN_BE_RENAMED). Pet::LoadPetFromDB sets both for every hunter pet, but Pet::CreateBaseAtTamed set them only for beasts, so a Hero's starter demon from Summon Demon, a wardrobe cosmetic pet and a tamed non-beast came out without them.",
+    "Without the flag the client offered Dismiss instead, which sends COMMAND_ABANDON: the server deleted the pet, and the next call granted a fresh starter, losing any cosmetic pet. After dismissing with the spell and calling again the pet loaded from the database and had the flag, which hid the fault.",
+    "A freshly granted starter demon and a freshly summoned cosmetic demon now both carry both flags (value 3), as does the pet loaded after a dismiss."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {"id": "caller", "name": "Abandoner", "race": 1, "class": 10, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "console", "command": "coa gamemode WildCard on Abandoner"},
+    {"action": "learn", "label": "Enslave Demon Abilities", "actor": "caller", "spell": 890},
+    {"action": "assert", "label": "SETUP: Summon Demon known", "actor": "caller", "metric": "knows_spell", "spell": 884, "equals": 1},
+    {"action": "assert", "label": "SETUP: no pet yet", "actor": "caller", "metric": "pet_rows", "equals": 0},
+    {"action": "cast", "label": "Summon Demon grants the starter demon", "actor": "caller", "spell": 884},
+    {"action": "assert", "label": "SETUP: the starter demon is out", "actor": "caller", "metric": "pet_entry", "min": 1, "within_ms": 3000},
+    {"action": "assert", "label": "THE FIX: the new starter demon can be abandoned and renamed", "actor": "caller", "metric": "pet_flags", "equals": 3, "within_ms": 1000},
+    {"action": "reset_cooldown", "actor": "caller", "spell": 892},
+    {"action": "cast", "label": "Dismiss Demon", "actor": "caller", "spell": 892},
+    {"action": "assert", "label": "SETUP: dismissed", "actor": "caller", "metric": "pet_entry", "equals": 0, "within_ms": 3000},
+    {"action": "reset_cooldown", "actor": "caller", "spell": 884},
+    {"action": "cast", "label": "Summon Demon calls the saved demon", "actor": "caller", "spell": 884},
+    {"action": "assert", "label": "SETUP: the demon is back", "actor": "caller", "metric": "pet_entry", "min": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The loaded demon keeps both flags", "actor": "caller", "metric": "pet_flags", "equals": 3, "within_ms": 1000},
+    {"action": "assert", "label": "Still one pet, not a second starter", "actor": "caller", "metric": "pet_rows", "equals": 1},
+    {"action": "apply_appearances", "label": "Use the Subdued Mistress Summoner's Stone", "actor": "caller", "selection": {"34": 753}},
+    {"action": "assert", "label": "SETUP: the Subdued Mistress is the pet", "actor": "caller", "metric": "pet_entry", "equals": 45906, "within_ms": 5000},
+    {"action": "assert", "label": "THE FIX: the new cosmetic pet can be abandoned and renamed", "actor": "caller", "metric": "pet_flags", "equals": 3, "within_ms": 1000}
+  ]
+}

@@ -81,11 +81,18 @@ void HandleAscensionBarbarianAura(Player* player, uint32 spellId, bool apply)
             break;
         case FILL_LEVEL:
             helper = FILL_LEVEL_EFFECTS;
-            if (!apply)
+            if (apply)
+            {
+                if (!player->HasSpell(helper))
+                    player->learnSpell(helper, false);
+            }
+            else
             {
                 player->RemoveAurasDueToSpell(TANKARD);
                 player->RemoveAurasDueToSpell(AscensionBarbarian::SPELL_FULL_TANKARD);
                 player->RemoveAurasDueToSpell(AscensionBarbarian::SPELL_EMPTY_TANKARD);
+                if (player->HasSpell(helper))
+                    player->removeSpell(helper, SPEC_MASK_ALL, false);
             }
             break;
         case BODY_BUILDER:

@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Smoke Grenade keeps a split enemy attackable instead of dropping its aggro (#9837)",
+  "contract": "witch_hunter_state::CanUnitAttack (AscensionWitchHunterDefenses.cpp) backs Unit::_IsValidAttackTarget, the single choke point both Spell::CheckCast's explicit hostile-target validation (SpellInfo::CheckExplicitTarget, spell non-null) and ThreatManager::ShouldBeOffline (via Creature::CanCreatureAttack -> IsValidAttackTarget, spell == nullptr) read. Returning false whenever InSmoke() was true regardless of the spell parameter made ThreatReference::UpdateOffline() mark a split enemy's threat reference offline and SendRemoveToClients it -- the reported 'drops aggro' symptom -- instead of only blocking the targeted cast/attack the tooltip promises ('enemies are unable to target into or out of the Smoke'). The fix only returns false for an actual spell-targeted check (spell != nullptr); the generic, spell-less check ThreatManager performs now stays true across the boundary, and an explicit hostile spell cast across it is still rejected exactly as before. The harness 'can_attack' metric calls IsValidAttackTarget(target, spell-or-null) directly, isolating both branches without needing live AI engagement.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9617.41, "y": -288, "z": 57.65, "o": 0 },
+  "players": [
+    { "id": "hunter", "race": 1, "class": 15, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "mob", "owner": "hunter", "entry": 36, "faction": 14, "level": 60, "health": 100000, "reaction": 0, "distance": 10.5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "hunter", "spell": 805756 },
+    {
+      "action": "assert", "label": "SETUP: the mob can attack the hunter before any smoke exists",
+      "actor": "mob", "metric": "can_attack", "target": "hunter", "equals": 1
+    },
+    { "action": "cast", "actor": "hunter", "spell": 805756 },
+    {
+      "action": "assert", "label": "SETUP: the hostile smoke cloud exists",
+      "actor": "hunter", "metric": "dynamic_object", "spell": 805756, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "SETUP: the mob (10.5 yd) is outside the 8 yd cloud, the hunter (its center) is inside",
+      "actor": "mob", "metric": "aura", "spell": 805756, "caster": "hunter", "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the split mob can still generically attack the hunter (ThreatManager's own check)",
+      "actor": "mob", "metric": "can_attack", "target": "hunter", "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTROL: an explicit hostile spell cast across the same boundary is still rejected",
+      "actor": "mob", "metric": "can_attack", "target": "hunter", "spell": 2136, "equals": 0
+    }
+  ]
+}

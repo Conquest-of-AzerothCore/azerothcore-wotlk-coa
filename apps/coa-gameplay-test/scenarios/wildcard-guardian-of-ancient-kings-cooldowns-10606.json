@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Wildcard Guardian of Ancient Kings resets and halves the Holy Shock cooldown (#10606)",
+  "contract": [
+    "Guardian of Ancient Kings 277875 reads 'resetting the cooldown of Hammer of the Righteous, Divine Storm, and Holy Shock' and 'Reduced cooldown of Hammer of the Righteous, Divine Storm, and Holy Shock by $277877s1%'.",
+    "Helper 277876 resets Divine Storm (family mask) and the cooldowns of 53595 and 20473; helper 277877 is ADD_PCT_MODIFIER cooldown -50% on the Holy Shock, Divine Storm and Hammer of the Righteous family masks. Nothing cast either helper.",
+    "Holy Shock 20473 has a 6000 ms category cooldown: the Guardian clears a running one, and a Holy Shock cast under the Guardian starts a 3000 ms cooldown. The reduction ends with the Guardian aura."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wild", "name": "Wildguard", "race": 1, "class": 10, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Wildguard" },
+    { "action": "assert", "label": "SETUP: the Hero plays Wildcard", "actor": "wild", "metric": "game_mode_mask", "min": 64 },
+    { "action": "learn", "actor": "wild", "spell": 20473 },
+    { "action": "learn", "actor": "wild", "spell": 277875 },
+    { "action": "wait", "ms": 300 },
+    { "action": "cast", "label": "Holy Shock on self", "actor": "wild", "spell": 20473 },
+    { "action": "assert", "label": "SETUP: Holy Shock starts its full 6 s cooldown", "actor": "wild", "metric": "cooldown_ms", "spell": 20473, "min": 5000, "within_ms": 1000 },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Guardian of Ancient Kings", "actor": "wild", "spell": 277875 },
+    { "action": "assert", "label": "SETUP: Guardian of Ancient Kings is accepted", "actor": "wild", "metric": "cast_failure", "spell": 277875, "equals": 0 },
+    { "action": "assert", "label": "SETUP: the Guardian aura is up", "actor": "wild", "metric": "aura", "spell": 277875, "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "DISCRIMINATING: the Guardian resets the running Holy Shock cooldown", "actor": "wild", "metric": "cooldown_ms", "spell": 20473, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "label": "The cooldown reduction aura is up", "actor": "wild", "metric": "aura", "spell": 277877, "equals": 1, "within_ms": 1000 },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Holy Shock under the Guardian", "actor": "wild", "spell": 20473 },
+    { "action": "assert", "label": "DISCRIMINATING: Holy Shock starts a halved 3 s cooldown", "actor": "wild", "metric": "cooldown_ms", "spell": 20473, "min": 2500, "max": 3050, "within_ms": 1000 },
+    { "action": "cancel_aura", "label": "End the Guardian", "actor": "wild", "spell": 277875 },
+    { "action": "assert", "label": "The cooldown reduction ends with the Guardian", "actor": "wild", "metric": "aura", "spell": 277877, "equals": 0, "within_ms": 1000 }
+  ]
+}

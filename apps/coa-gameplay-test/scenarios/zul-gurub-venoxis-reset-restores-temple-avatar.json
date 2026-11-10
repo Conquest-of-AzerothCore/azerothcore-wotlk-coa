@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: a priest's reset brings the drained Loa Avatar back to its temple",
+  "contract": [
+    "Both live videos (youtube c7iqfz04PmI and 6ihbw1PKc2E) show each Loa Avatar standing in its priest's",
+    "temple before the pull and again after a wipe. High Priest Venoxis (14507) drains the Avatar of Hethiss",
+    "(666991, spawn 9999804) to death below half health; its spawn would stay dead for seven days, so his reset",
+    "after the wipe respawns it. The hero joins phase 1 to fight the instance's own Venoxis and avatar."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 309,
+    "x": -12018.0,
+    "y": -1700.0,
+    "z": 39.413,
+    "o": 3.71755,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "set_phase",
+      "label": "See the instance's own spawns",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: High Priest Venoxis stands in his temple",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 14507,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Avatar of Hethiss stands beside him",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 666991,
+      "equals": 1
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Pull Venoxis",
+      "actor": "hero",
+      "entry": 14507
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero fights Venoxis",
+      "actor": "hero",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound Venoxis below half health",
+      "actor": "hero",
+      "entry": 14507,
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Venoxis drains the Avatar of Hethiss to death",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 666991,
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "die",
+      "label": "The raid wipes",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Venoxis's reset brings his avatar back to the temple",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 666991,
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Venoxis is back at full health",
+      "actor": "hero",
+      "metric": "nearby_creature_health_pct",
+      "entry": 14507,
+      "equals": 100,
+      "within_ms": 10000
+    }
+  ]
+}

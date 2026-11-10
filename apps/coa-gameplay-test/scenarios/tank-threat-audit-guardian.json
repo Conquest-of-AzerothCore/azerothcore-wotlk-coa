@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Guardian tank threat audit: Hammer of the Law keeps its High Threat multiplier",
+  "contract": "Hammer of the Law 704418 (client 'High Threat Physical damage', effect 63 value 100 converted by #9382 to spell_threat pctMod 2) must put at least 1.9x its dealt damage in threat on a fresh target, matching the already-verified Heavy Blow rank 503126 pattern in coa-tank-ability-threat.json but for this separate ability chain, which had no prior runtime coverage.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "gd",
+      "race": 1,
+      "class": 18,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "hotl_target",
+      "owner": "gd",
+      "entry": 36,
+      "level": 60,
+      "health": 10000000,
+      "faction": 14,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "gd", "spell": 704418 },
+    { "action": "set_power", "actor": "gd", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "gd", "spell": 704418, "target": "hotl_target" },
+    { "action": "assert", "label": "Hammer of the Law is cast", "actor": "gd",
+      "metric": "cast_failure", "spell": 704418, "equals": 0, "within_ms": 2000 },
+    { "action": "assert", "label": "Hammer of the Law: threat is at least 1.9x its damage (spell_threat pctMod 2)",
+      "actor": "hotl_target", "metric": "threat_per_damage", "target": "gd", "min": 1.9, "within_ms": 3000 }
+  ]
+}

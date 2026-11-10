@@ -1,0 +1,256 @@
+{
+  "schema": 1,
+  "name": "Quest log: a completed overflow quest can be turned in",
+  "contract": [
+    "A completed quest in the overflow log is turned in at its quest ender like any other: Marshal McBride (197) rewards Kobold Camp Cleanup (7) and the quest leaves the log."
+  ],
+  "timeout_ms": 90000,
+  "quest_log_size": 64,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mcbride",
+      "owner": "hero",
+      "entry": 197,
+      "level": 20,
+      "distance": 3,
+      "faction": 12
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 5",
+      "actor": "hero",
+      "quest": 5,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 12",
+      "actor": "hero",
+      "quest": 12,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 13",
+      "actor": "hero",
+      "quest": 13,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 14",
+      "actor": "hero",
+      "quest": 14,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 35",
+      "actor": "hero",
+      "quest": 35,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 37",
+      "actor": "hero",
+      "quest": 37,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 39",
+      "actor": "hero",
+      "quest": 39,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 40",
+      "actor": "hero",
+      "quest": 40,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 52",
+      "actor": "hero",
+      "quest": 52,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 85",
+      "actor": "hero",
+      "quest": 85,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 109",
+      "actor": "hero",
+      "quest": 109,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 111",
+      "actor": "hero",
+      "quest": 111,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 152",
+      "actor": "hero",
+      "quest": 152,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 163",
+      "actor": "hero",
+      "quest": 163,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 170",
+      "actor": "hero",
+      "quest": 170,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 182",
+      "actor": "hero",
+      "quest": 182,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 183",
+      "actor": "hero",
+      "quest": 183,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 217",
+      "actor": "hero",
+      "quest": 217,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 224",
+      "actor": "hero",
+      "quest": 224,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 237",
+      "actor": "hero",
+      "quest": 237,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 239",
+      "actor": "hero",
+      "quest": 239,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 250",
+      "actor": "hero",
+      "quest": 250,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 255",
+      "actor": "hero",
+      "quest": 255,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 263",
+      "actor": "hero",
+      "quest": 263,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: native quest 302",
+      "actor": "hero",
+      "quest": 302,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Complete Kobold Camp Cleanup in the overflow log",
+      "actor": "hero",
+      "quest": 7,
+      "complete": true
+    },
+    {
+      "action": "assert",
+      "label": "Kobold Camp Cleanup is in the overflow log",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 7,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "It is complete",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 7,
+      "equals": 1
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "Turn it in to Marshal McBride",
+      "actor": "hero",
+      "quest": 7,
+      "entry": 197
+    },
+    {
+      "action": "assert",
+      "label": "The quest is rewarded",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 7,
+      "equals": 6,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The quest left the log",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 7,
+      "equals": -1
+    }
+  ]
+}

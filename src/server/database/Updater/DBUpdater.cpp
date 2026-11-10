@@ -461,6 +461,18 @@ bool DBUpdater<T>::PopulateFromBaseline(DatabaseWorkerPool<T>& pool, Path const&
             ApplyFile(pool, file);
             std::filesystem::remove(file, ignored);
         }
+
+        for (WorldBaseline::LedgerHash const& ledger
+            : WorldBaseline::LineEndingLedgerHashes(manifest, DBUpdater<T>::GetSourceDirectory()))
+        {
+            LOG_INFO("sql.updates", ">> Recording the native hash of '{}'...", ledger.name);
+            Apply(pool, Acore::StringFormat(
+                "UPDATE `updates` SET `hash` = '{}' WHERE `name` = '{}' AND LOWER(`hash`) = '{}'",
+                ledger.nativeHash, ledger.name, ledger.coveredHash));
+            if (!Retrieve(pool, Acore::StringFormat("SELECT 1 FROM `updates` WHERE `name` = '{}' AND `hash` = '{}'",
+                ledger.name, ledger.nativeHash)))
+                throw UpdateException("World baseline: unexpected ledger row for covered migration " + ledger.name);
+        }
     }
     catch (std::exception const& error)
     {

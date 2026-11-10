@@ -509,6 +509,16 @@ public:
         return damage;
     }
 
+    /// the same pet auras for a Warcraft Reborn twin: each aura replaced by its own twin
+    template <typename Resolve>
+    [[nodiscard]] PetAura ForTwin(Resolve&& resolve) const
+    {
+        PetAura copy = *this;
+        for (auto& [petEntry, aura] : copy.auras)
+            aura = resolve(aura);
+        return copy;
+    }
+
 private:
     PetAuraMap auras;
     bool removeOnChangePet{false};
@@ -681,6 +691,19 @@ inline uint16 GetMaxProfessionSkillStep(uint8 expansion)
     return 4 + expansion;
 }
 
+inline uint8 GetProfessionExpansion(uint32 skill)
+{
+    switch (skill)
+    {
+        case SKILL_JEWELCRAFTING:
+            return EXPANSION_THE_BURNING_CRUSADE;
+        case SKILL_INSCRIPTION:
+            return EXPANSION_WRATH_OF_THE_LICH_KING;
+        default:
+            return EXPANSION_CLASSIC;
+    }
+}
+
 bool IsPartOfSkillLine(uint32 skillId, uint32 spellId);
 
 // spell diminishing returns
@@ -851,6 +874,11 @@ public:
     [[nodiscard]] uint32 GetSpellTwinSource(uint32 spellId) const;
     /// the twin or namesake of a stock spell that belongs with a related spell's own twin, or the stock spell
     [[nodiscard]] uint32 GetSpellTwinFor(uint32 stockSpellId, uint32 relatedSpellId) const;
+    /// the twin whose script is running on this thread (a stock script bound to it through its stock spell), or 0
+    static void PushScriptTwin(uint32 spellId, uint32 triggeringSpellId = 0);
+    static void PopScriptTwin(uint32 spellId);
+    [[nodiscard]] static uint32 GetRunningScriptTwin();
+    [[nodiscard]] static uint32 GetScriptTwinOf(uint32 spellId);
     void LoadSpellRequired();
     void LoadSpellLearnSkills();
     void LoadSpellTargetPositions();

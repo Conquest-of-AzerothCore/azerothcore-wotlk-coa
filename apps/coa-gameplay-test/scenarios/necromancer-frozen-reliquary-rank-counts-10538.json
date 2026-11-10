@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Create Frozen Reliquary creates its tooltip count per rank (#10538)",
+  "contract": "Create Frozen Reliquary reads 'Create $s1 Frozen Reliquary'. Rank 1 803772 has EffectBasePoints resolving to 1 and rank 2 803774 to 2, both SPELL_EFFECT_CREATE_ITEM for item 555555 (stack 20, no max count), reagent 37201. A level 60 Necromancer with one reagent per cast gets 1 from rank 1, then 2 more from rank 2.",
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "necro",
+      "race": 5,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 803772
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 803774
+    },
+    {
+      "action": "add_item",
+      "actor": "necro",
+      "item": 37201,
+      "count": 2
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Frozen Reliquary yet",
+      "actor": "necro",
+      "metric": "item_count",
+      "item": 555555,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Rank 1",
+      "actor": "necro",
+      "spell": 803772
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 creates one Frozen Reliquary",
+      "actor": "necro",
+      "metric": "item_count",
+      "item": 555555,
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Rank 2",
+      "actor": "necro",
+      "spell": 803774
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 creates two more Frozen Reliquaries",
+      "actor": "necro",
+      "metric": "item_count",
+      "item": 555555,
+      "equals": 3,
+      "within_ms": 6000
+    }
+  ]
+}

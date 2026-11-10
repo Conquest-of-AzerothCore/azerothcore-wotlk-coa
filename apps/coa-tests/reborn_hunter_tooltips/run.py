@@ -148,6 +148,7 @@ struct flag96
 {
     uint32 part[3] = {};
     uint32& operator[](int index) { return part[index]; }
+    explicit operator bool() const { return part[0] || part[1] || part[2]; }
 };
 struct SpellEffectInfo
 {
@@ -159,7 +160,7 @@ struct SpellEffectInfo
     flag96 SpellClassMask;
 };
 struct SpellInfo { uint32 Id = 0; uint32 SpellFamilyName = SPELLFAMILY_HUNTER; uint32 ProcChance = 0;
-    std::array<SpellEffectInfo, 3> Effects; };
+    flag96 SpellFamilyFlags; std::array<SpellEffectInfo, 3> Effects; };
 namespace AscensionWarcraftReborn
 {
 constexpr uint32 REBORN_SPELL_OFFSET = 1100000;
@@ -205,6 +206,9 @@ int main()
     SpellInfo stock = aimed; stock.Id = 49050; stock.Effects[0].BasePoints = 454;
     ApplyAscensionWarcraftRebornHunterContracts(&stock);
     assert(stock.Effects[0].BasePoints == 454);
+    SpellInfo carve; carve.Id = 1101500;
+    ApplyAscensionWarcraftRebornHunterContracts(&carve);
+    assert(carve.SpellFamilyFlags[2] == 0x10000000);
 }
 """
     compiler = shutil.which(os.environ.get("CXX", "cl.exe" if os.name == "nt" else "c++"))
@@ -220,7 +224,7 @@ int main()
         subprocess.run([compiler, *flags], cwd=out, check=True)
         ok = subprocess.run([str(exe)], cwd=out).returncode == 0
     return check(ok, "Aimed Shot keeps its flat bonus outside the weapon percent, Mortal Shots and Hawk Eye reach the "
-                 "shots their tooltips name, and Improved Steady Shot rank 3 has a 15% chance")
+                 "shots their tooltips name, Improved Steady Shot rank 3 has a 15% chance and Carve carries its family flag")
 
 
 def main():

@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Wildcard Seal of Ebon Vengeance makes Paladin melee abilities apply Ebon Corruption (#10354)",
+  "contract": [
+    "Seal of Ebon Vengeance 288847 reads 'causing Paladin and Death Knight melee abilities to apply Ebon Corruption, which deals $288848o1 additional Shadow damage over $288848d. Ebon Corruption can stack up to $288848u times.'",
+    "It copies Seal of Vengeance 31801 but had no spell_proc row or script, so no ability applied Ebon Corruption 288848 (5 stacks, 15 s). The inherited Seal of Vengeance mechanism casts the seal damage 288849 on each proc once Ebon Corruption is present.",
+    "Expected: each Crusader Strike adds one Ebon Corruption stack from the paladin; the second strike, landing on a corrupted target, also deals Seal of Ebon Vengeance 288849."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wild", "name": "Wildebon", "race": 1, "class": 10, "level": 80, "melee_hit_rating": 10000,
+      "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "e", "owner": "wild", "entry": 1601, "level": 80, "health": 10000000, "distance": 3, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks settle", "ms": 3000 },
+    { "action": "console", "command": "coa gamemode WildCard on Wildebon" },
+    { "action": "assert", "label": "SETUP: the Hero plays Wildcard", "actor": "wild", "metric": "game_mode_mask", "min": 64 },
+    { "action": "add_item", "actor": "wild", "item": 506 },
+    { "action": "equip", "actor": "wild", "item": 506, "slot": 15 },
+    { "action": "learn", "actor": "wild", "spell": 35395 },
+    { "action": "learn", "actor": "wild", "spell": 288847 },
+    { "action": "wait", "ms": 300 },
+    { "action": "cast", "actor": "wild", "spell": 288847 },
+    { "action": "assert", "label": "SETUP: Seal of Ebon Vengeance is accepted", "actor": "wild", "metric": "cast_failure", "spell": 288847, "equals": 0 },
+    { "action": "assert", "label": "SETUP: Seal of Ebon Vengeance is up", "actor": "wild", "metric": "aura", "spell": 288847, "equals": 1, "within_ms": 1000 },
+    { "action": "wait", "label": "Let the global cooldown pass", "ms": 1600 },
+    { "action": "cast", "label": "Crusader Strike 1", "actor": "wild", "spell": 35395, "target": "e" },
+    { "action": "assert", "label": "SETUP: Crusader Strike is accepted", "actor": "wild", "metric": "cast_failure", "spell": 35395, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: the strike applies Ebon Corruption", "actor": "e", "metric": "aura_stacks", "spell": 288848, "caster": "wild", "equals": 1, "within_ms": 1000 },
+    { "action": "wait", "label": "Let the Crusader Strike cooldown pass", "ms": 4500 },
+    { "action": "cast", "label": "Crusader Strike 2", "actor": "wild", "spell": 35395, "target": "e" },
+    { "action": "assert", "label": "The second strike stacks Ebon Corruption", "actor": "e", "metric": "aura_stacks", "spell": 288848, "caster": "wild", "equals": 2, "within_ms": 1000 },
+    { "action": "assert", "label": "DISCRIMINATING: the strike on a corrupted target deals Seal of Ebon Vengeance damage", "actor": "wild", "metric": "spell_damage_count", "spell": 288849, "target": "e", "min": 1, "within_ms": 1000 }
+  ]
+}

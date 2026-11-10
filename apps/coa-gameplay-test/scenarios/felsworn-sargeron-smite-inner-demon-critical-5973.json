@@ -3,7 +3,7 @@
   "name": "Inner Demon repeats Sargeron Smite resolved critical damage (#5973)",
   "contract": [
     "501318 rank6 at level 44 consumes2 Felfury and grants20 Energy; its installed parent description promises one additional free cast while Inner Demon804216 is active.",
-    "Compare actual native primary and helper803467 damage on the same target, including a forced primary critical hit, and require no second cost, energy grant or critical roll. An ordinary cast without Inner Demon must have no copy."
+    "Compare actual native primary and helper803467 damage on the same target, including a forced primary critical hit, and require no second cost or critical roll; the copy grants its own 20 Energy, as recorded Ascension logs show two 521213 energizes per copy (#10719). An ordinary cast without Inner Demon must have no copy."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -195,8 +195,8 @@
       "actor": "f",
       "metric": "power",
       "power": 3,
-      "equals": 70,
-      "label": "The free copy does not grant a second 20 Energy"
+      "equals": 90,
+      "label": "The cast and its free copy each grant 20 Energy (#10719)"
     },
     {
       "action": "assert",

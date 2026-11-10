@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "name": "Gaze of C'Thun does not lock the caster in combat with an unattackable quest NPC (#11422)",
+  "contract": "A Horde cultist casts Gaze of C'Thun 500110 on a hostile creature that stands one yard from Dorius Stonetender 8284, an Alliance quest NPC the Searing Gorge script makes immune to players, with the cultist farther away than Dorius so the jump picks the closest unit of any kind within ten yards. The creature dies to the first hit, so no fight with it remains. Any combat the cultist keeps afterwards is combat with the quest NPC, a unit the cultist can neither attack nor assist, which the spell must not select.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -7007.2,
+    "y": -1749.2,
+    "z": 234.2
+  },
+  "players": [
+    {
+      "id": "cultist",
+      "race": 2,
+      "class": 25,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "mob",
+      "owner": "cultist",
+      "entry": 299,
+      "faction": 14,
+      "level": 1,
+      "health": 1,
+      "distance": 8
+    },
+    {
+      "id": "dorius",
+      "owner": "cultist",
+      "entry": 8284,
+      "faction": 231,
+      "level": 40,
+      "health": 100000,
+      "distance": 9
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the cultist cannot attack Dorius",
+      "actor": "cultist",
+      "metric": "nearby_creature_can_attack",
+      "entry": 8284,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the cultist can attack the mob",
+      "actor": "cultist",
+      "metric": "nearby_creature_can_attack",
+      "entry": 299,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no combat before the cast",
+      "actor": "cultist",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 500110
+    },
+    {
+      "action": "cast",
+      "actor": "cultist",
+      "spell": 500110,
+      "target": "mob"
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "cast_failure",
+      "spell": 500110,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the mob died to the gaze",
+      "actor": "cultist",
+      "metric": "nearby_creature_count",
+      "entry": 299,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the cultist is not left in combat",
+      "actor": "cultist",
+      "metric": "combat",
+      "equals": 0
+    }
+  ]
+}

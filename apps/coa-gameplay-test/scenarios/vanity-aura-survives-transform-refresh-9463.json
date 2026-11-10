@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Vanity auras stay applied when their visuals are refreshed after a transform (#9463)",
+  "contract": [
+    "Blazing Irie Wings 12000142 is a vanity aura (skill line 120) whose wings are a client-side spell visual. When a",
+    "transform ends the client rebuilds the player model without that visual, so 300 ms after the player is back on",
+    "the native display the server re-sends each vanity aura to the client as removed and then added. The removal is",
+    "client-only. Expected: after Herald of the Depths 520326 is cancelled and the refresh has fired, the Cultist is",
+    "back on the native display, still has 12000142 applied, and the server recorded no removal of 12000142 while",
+    "the refresh ran, and the worldserver keeps running. The timeline is anchored on a distant stationary creature",
+    "only so that aura removals are recorded. The client redrawing the wings is not observable here."
+  ],
+  "timeout_ms": 30000,
+  "location": {"map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0},
+  "players": [
+    {"id": "cultist", "race": 1, "class": 25, "level": 22, "allow_regeneration": false}
+  ],
+  "creatures": [
+    {"id": "timeline_anchor", "owner": "cultist", "entry": 36, "level": 2, "distance": 20, "stationary": true}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "learn", "actor": "cultist", "spell": 520326},
+    {"action": "set_aura", "label": "Blazing Irie Wings is applied", "actor": "cultist", "spell": 12000142,
+     "stacks": 1},
+    {"action": "assert", "label": "SETUP: the vanity aura is applied", "actor": "cultist", "metric": "aura",
+     "spell": 12000142, "equals": 1},
+    {"action": "snapshot", "actor": "cultist", "metric": "display_id", "save_as": "native_display"},
+    {"action": "encounter_start", "label": "Record aura removals from here on", "actor": "cultist", "boss_entry": 36,
+     "radius": 30},
+    {"action": "set_aura", "label": "Insanity meets Herald's caster requirement", "actor": "cultist", "spell": 500706,
+     "stacks": 90},
+    {"action": "wait", "ms": 2000},
+    {"action": "cast", "label": "Herald of the Depths", "actor": "cultist", "spell": 520326, "target": "cultist"},
+    {"action": "assert", "label": "SETUP: Herald is active", "actor": "cultist", "metric": "aura", "spell": 520326,
+     "equals": 1, "within_ms": 5000},
+    {"action": "cancel_aura", "label": "Herald of the Depths ends", "actor": "cultist", "spell": 520326},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "SETUP: Herald has ended", "actor": "cultist", "metric": "aura", "spell": 520326,
+     "equals": 0},
+    {"action": "assert", "label": "The Cultist is back on the native display", "actor": "cultist",
+     "metric": "display_id", "relative_to": "native_display", "equals": 0},
+    {"action": "assert", "label": "The vanity aura is still applied after the visual refresh", "actor": "cultist",
+     "metric": "aura", "spell": 12000142, "equals": 1},
+    {"action": "assert", "label": "The server never removed the vanity aura; the refresh removal is client-only",
+     "actor": "cultist", "metric": "timeline_count", "event": "aura_removed", "spell": 12000142,
+     "target_actors": ["cultist"], "equals": 0}
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric Vow of Radiance adds 25% to Radiance's healing as to its damage (#9135)",
+  "contract": "Vow of Radiance 803489 reads 'Direct ability damage or healing generates 2 Solar Power and damages or heals for an additional $s2% of the amount' (s2 = 25). Radiance 800054 bursts every 2 s through 800038, one spell that heals nearby allies (effect 0) and damages nearby enemies (effect 1). With a wounded grouped ally and an enemy in range, each Radiance burst is a direct heal and a direct hit, so the ally receives the 803816 copy for 25% of Radiance's effective healing, as the enemy takes an 803490 copy of the damage half. The heal ratio allows truncation of the percentage to whole points; the damage copy is only counted because the Holyfire hit can be partially resisted.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80, "spell_hit_rating": 10000, "spell_power": 3000 },
+    { "id": "ally", "race": 1, "class": 27, "level": 80 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "cleric", "entry": 36, "level": 80, "health": 1000000, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "cleric", "spell": 803489 },
+    { "action": "learn", "actor": "cleric", "spell": 800054 },
+    { "action": "group", "actor": "cleric", "target": "ally" },
+    { "action": "cast", "label": "Take Vow of Radiance", "actor": "cleric", "spell": 803489 },
+    { "action": "assert", "label": "SETUP: Vow of Radiance is active", "actor": "cleric", "metric": "aura", "spell": 803489, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Let the Vow's global cooldown expire", "ms": 1600 },
+    { "action": "set_health", "label": "Leave room for Radiance's heals and their copies", "actor": "ally", "maximum": 500000, "value": 10 },
+    { "action": "cast", "label": "Radiance", "actor": "cleric", "spell": 800054 },
+    { "action": "assert", "label": "SETUP: a Radiance burst heals the ally", "actor": "cleric", "metric": "spell_effective_heal_total", "spell": 800038, "target": "ally", "min": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: a Radiance burst hits the enemy", "actor": "cleric", "metric": "spell_damage_count", "spell": 800038, "target": "enemy", "min": 1, "within_ms": 1000 },
+    { "action": "wait", "label": "Let the Vow copies resolve", "ms": 500 },
+    { "action": "snapshot", "actor": "cleric", "metric": "spell_effective_heal_total", "spell": 800038, "target": "ally", "save_as": "radiance_heal" },
+    { "action": "assert", "label": "Vow of Radiance adds 25% of Radiance's effective healing", "actor": "cleric", "metric": "spell_heal_total", "spell": 803816, "target": "ally", "ratio_to": "radiance_heal", "min": 0.245, "max": 0.2501 },
+    { "action": "assert", "label": "CONTROL: Radiance's damage half also gets its Holyfire copy", "actor": "cleric", "metric": "spell_damage_count", "spell": 803490, "target": "enemy", "min": 1 }
+  ]
+}

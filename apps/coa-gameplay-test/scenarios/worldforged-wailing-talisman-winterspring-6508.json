@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Worldforged Wailing Talisman has its second Winterspring pickup back (#6508)",
+  "contract": "The pre-realm-map Worldforged data recorded two distinct Wailing Talisman pickups (entry 518565, item 410095) in Winterspring: guid 6904931 at map 1 (6444.900, -4290.200, 663.0291) and guid 6904932 at (6413.100, -4299.800, 663.7570), 33.22 yd apart. The realm-map pass retained only the second as guid 6942396, leaving nothing within reach of the reported position (6449.1816, -4278.8457, 666.7479). The fix restores guid 6904931 at its recorded placement. A phase-1 player at the reported position sees exactly one entry-518565 pickup, opens it with Opening (3365) from its own spot and loots item 410095, while the retained pickup still stands at (6413.100, -4299.800).",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": 6449.1816, "y": -4278.8457, "z": 666.7479, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: one Wailing Talisman pickup near the reported position", "actor": "p", "metric": "nearby_gameobject_count", "entry": 518565, "equals": 1 },
+    { "action": "assert", "label": "the restored spawn is active", "actor": "p", "metric": "spawn_active", "spawn": 6904931, "equals": 1 },
+    { "action": "teleport", "actor": "p", "map": 1, "x": 6444.900, "y": -4290.200, "z": 663.53 },
+    { "action": "learn", "actor": "p", "spell": 3365 },
+    { "action": "cast", "actor": "p", "spell": 3365, "target_gameobject": 518565 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "the pickup is within reach and opens", "actor": "p", "metric": "cast_failure", "spell": 3365, "equals": 0 },
+    { "action": "assert", "label": "its loot holds the Wailing Talisman", "actor": "p", "metric": "loot_entry", "item": 410095, "equals": 410095, "within_ms": 3000 },
+    { "action": "loot_slot", "actor": "p", "item": 410095 },
+    { "action": "assert", "label": "the talisman reaches the bags", "actor": "p", "metric": "item_count", "item": 410095, "equals": 1 },
+    { "action": "close_loot", "actor": "p" },
+    { "action": "teleport", "actor": "p", "map": 1, "x": 6413.100, "y": -4299.800, "z": 664.257 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "the retained pickup still stands at its own spot", "actor": "p", "metric": "nearby_gameobject_count", "entry": 518565, "equals": 1 }
+  ]
+}

@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Screech of the Darkwing doubles every Call of the Darkwing (#1533)",
-  "contract": "Screech of the Darkwing 300260's single effect is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Call of the Darkwing 801958. Spell.dbc gives 300260 ProcFlags 0 and no spell_proc row existed, so Aura::GetProcEffectMask returned 0 and the aura was inert. The tooltip is 'Your effects that trigger Call of the Darkwing now trigger an additional Call of the Darkwing. Can only occur once per sec' at ProcChance 100. Call of the Darkwing 801958 is SPELL_EFFECT_SUMMON with MiscValue 50069 (Shadow Bat), BasePoints 0 and DieSides 2, so every Call summons one or two bats, uniformly. Casting it five times, at least 1.1 s apart so the row's 1000 ms internal cooldown never suppresses a proc, yields five Calls today (five to ten bats, never more than ten) and ten Calls with the fix (ten to twenty bats). The assertion 'at least eleven living Shadow Bats' is therefore impossible without the fix and fails with the fix only if all ten Calls roll their minimum, i.e. one time in 1024. The bats live 15 s (DurationIndex 8), longer than the 7.5 s the five casts take, so every one of them is still alive at the assertion. Aura::GetProcEffectMask refuses to proc an aura from a spell its own effect triggered, so the extra Call cannot cascade.",
+  "contract": "Screech of the Darkwing 300260's single effect is SPELL_AURA_PROC_TRIGGER_SPELL (aura 42) on Call of the Darkwing 801958. Spell.dbc gives 300260 ProcFlags 0 and no spell_proc row existed, so Aura::GetProcEffectMask returned 0 and the aura was inert. The tooltip is 'Your effects that trigger Call of the Darkwing now trigger an additional Call of the Darkwing. Can only occur once per sec' at ProcChance 100. Casting Call of the Darkwing five times, at least 1.1 s apart so the row's 1000 ms internal cooldown never suppresses a proc, yields five completed casts of 801958 today and ten with the fix (one extra, triggered, cast per explicit cast). The discriminating metric is spell_cast_count for 801958 (it counts completed casts, triggered casts included, so the extra Screech-triggered Call is counted the same as an explicit one) rather than living Shadow Bat count: AscensionBloodmageDarkwing.cpp's #10614 fix now caps live Shadow Bats at 10 per owner (the live-observed maximum), so a bat-count assertion that depends on exceeding 10 would fail after that fix regardless of whether Screech still doubles casts. Aura::GetProcEffectMask refuses to proc an aura from a spell its own effect triggered, so the extra Call cannot cascade.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -38,6 +38,13 @@
       "action": "learn",
       "actor": "bloodmage",
       "spell": 300260
+    },
+    {
+      "action": "snapshot",
+      "actor": "bloodmage",
+      "metric": "spell_cast_count",
+      "spell": 801958,
+      "save_as": "casts_before"
     },
     {
       "action": "set_power",
@@ -97,11 +104,12 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: five casts produced more bats than five Calls ever could",
+      "label": "DISCRIMINATING: five explicit casts completed ten total casts of 801958 (Screech doubled each one)",
       "actor": "bloodmage",
-      "metric": "owned_creature_count",
-      "entry": 50069,
-      "min": 11,
+      "metric": "spell_cast_count",
+      "spell": 801958,
+      "relative_to": "casts_before",
+      "min": 10,
       "within_ms": 3000
     }
   ]

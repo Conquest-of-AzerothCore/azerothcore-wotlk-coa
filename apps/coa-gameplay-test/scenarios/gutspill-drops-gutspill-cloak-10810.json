@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Gutspill drops the Gutspill Cloak on every kill (#10810)",
+  "contract": "Report #10810: Gutspill (6170) in Duskwood never dropped the Gutspill Cloak (450585). Ascension's loot table lists the cloak at 100% for Gutspill; ours had no row. Expected: a killed Gutspill offers the cloak.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 32
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 6170,
+      "as": "gutspill",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 6170,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "gutspill",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "hero",
+      "target": "gutspill"
+    },
+    {
+      "action": "assert",
+      "label": "the corpse offers the Gutspill Cloak",
+      "actor": "hero",
+      "metric": "loot_offered_item_count",
+      "item": 450585,
+      "equals": 1
+    }
+  ]
+}

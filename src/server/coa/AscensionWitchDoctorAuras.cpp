@@ -16,6 +16,8 @@ namespace AscensionWitchDoctor
 {
 void SyncReplacements(Player* player)
 {
+    if (!player->HasAura(MassAllcureTalent) && player->HasSpell(MassAllcure))
+        player->removeSpell(MassAllcure, SPEC_MASK_ALL, false);
     std::vector<uint32> known;
     for (auto const& [id, state] : player->GetSpellMap())
         if (state->State != PLAYERSPELL_REMOVED)

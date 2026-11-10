@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "name": "A specialization switch takes the thrown Warpdagger's Warp button off the bar (#6945)",
+  "contract": [
+    "Warp 500587 is a temporary spell granted while a thrown Warpdagger is out; it is listed in no CharacterAdvancement entry, so a specialization switch (Glyphic 62 to Riftblade 63) does not take its button off the bar although the switch ends the travel and forgets Warp.",
+    "Expected: Warp is unknown after the switch and no button holds it."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login state settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "label": "Enter Glyphic",
+      "actor": "rm",
+      "id": 62
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "rm",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "rm",
+      "item": 2092,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 500287
+    },
+    {
+      "action": "cast",
+      "label": "Toss Warpdagger",
+      "actor": "rm",
+      "spell": 500287
+    },
+    {
+      "action": "assert",
+      "label": "The thrown dagger replaces Warpdagger with Warp",
+      "actor": "rm",
+      "metric": "temporary_spell_replacement",
+      "spell": 500287,
+      "equals": 500587,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_action_button",
+      "label": "Warp on button 2",
+      "actor": "rm",
+      "button": 2,
+      "spell": 500587
+    },
+    {
+      "action": "specialization",
+      "label": "Switch to Riftblade",
+      "actor": "rm",
+      "id": 63
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Warp is no longer known",
+      "actor": "rm",
+      "metric": "knows_spell",
+      "spell": 500587,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No dead Warp button stays on button 2",
+      "actor": "rm",
+      "metric": "action_button",
+      "button": 2,
+      "equals": 0
+    }
+  ]
+}

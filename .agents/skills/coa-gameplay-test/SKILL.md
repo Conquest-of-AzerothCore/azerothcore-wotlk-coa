@@ -37,7 +37,8 @@ results as single-scenario evidence.
 - The gameplay stage runs up to 15 scenarios at once in one worldserver on a simulated clock. Keep timing
   assertions robust to one world step (up to 25 ms in a `wait`, 10 ms while polling `within_ms`). Refer to players
   by actor id: `Harness<a..h>` is rewritten only in `console` and `command` text, and explicit fixture names are
-  not made unique per lane. A `set_phase` mask that includes the normal world phase (mask 1) automatically makes
+  not made unique per lane. Players start in their lane's isolation phase, not in phase mask 1, so a fixture whose DB
+  `phaseMask` is 1 stays invisible until a `set_phase` step. A `set_phase` mask that includes the normal world phase (mask 1) automatically makes
   the scenario exclusive, including exploratory scenarios. Other process-global state (such as the Who list)
   needs an entry with its reason in `apps/coa-gameplay-test/clock_policy.json`. Creature text with area, zone or
   map range crosses phases and counts in `system_messages`, so an exact delta can pick up another lane's

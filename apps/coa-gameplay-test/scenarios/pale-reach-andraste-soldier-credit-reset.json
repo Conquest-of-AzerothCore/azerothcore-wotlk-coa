@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Amphora From The Spring: injured soldiers grant credit again after their injury resets",
+  "contract": "Both Injured Andraste Soldier entries grant quest 175084 credit on Heal Injured and can grant it again after they become injured at 60 seconds.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -7497.0, "y": -431.0, "z": 360.0, "o": 0 },
+  "players": [
+    { "id": "healer", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "soldier", "owner": "healer", "entry": 164153, "distance": 2, "faction": 35, "level": 25 },
+    { "id": "other_soldier", "owner": "healer", "entry": 164263, "distance": 3, "faction": 35, "level": 25 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "prepare_quest", "actor": "healer", "quest": 175084, "complete": false },
+    { "action": "use_item", "actor": "healer", "item": 559925, "spell": 257543, "target": "soldier" },
+    { "action": "assert", "actor": "healer", "metric": "quest_objective_count", "quest": 175084, "equals": 1, "within_ms": 5000 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "use_item", "actor": "healer", "item": 559925, "spell": 257543, "target": "other_soldier" },
+    { "action": "assert", "actor": "healer", "metric": "quest_objective_count", "quest": 175084, "equals": 2, "within_ms": 5000 },
+    { "action": "wait", "ms": 62000 },
+    { "action": "assert", "actor": "soldier", "metric": "health_pct", "max": 11 },
+    { "action": "assert", "actor": "other_soldier", "metric": "health_pct", "max": 11 },
+    { "action": "use_item", "actor": "healer", "item": 559925, "spell": 257543, "target": "soldier" },
+    { "action": "assert", "actor": "healer", "metric": "quest_objective_count", "quest": 175084, "equals": 3, "within_ms": 5000 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "use_item", "actor": "healer", "item": 559925, "spell": 257543, "target": "other_soldier" },
+    { "action": "assert", "actor": "healer", "metric": "quest_objective_count", "quest": 175084, "equals": 4, "within_ms": 5000 }
+  ]
+}

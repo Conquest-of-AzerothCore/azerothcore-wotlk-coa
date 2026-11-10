@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "The Affray Cuirras pickup rests on the Fray Island building floor (#10829)",
+  "contract": "Report #10829: the Affray Cuirras pickup (guid 6941387) in the main building on Fray Island could not be found. The vmap ground the harness measures under it was 1.9 yd above it: it was under the building floor. Expected: it sits within 0.3 yd of the floor.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "the Affray Cuirras rests on the building floor",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6941387,
+      "spawn_type": "gameobject",
+      "min": -0.3,
+      "max": 0.3
+    }
+  ]
+}

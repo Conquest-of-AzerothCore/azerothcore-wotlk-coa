@@ -1,0 +1,283 @@
+{
+  "schema": 1,
+  "name": "Bloodletter's Rhythm at full stacks makes the next Death Strike or Heart Strike cost no runes and is consumed (#11479)",
+  "contract": "With 2 stacks of BloodlettersRhythm288961 two Death Strike 49998 casts spend both Frost and Unholy runes, a third is rejected and the buff keeps 2 stacks. With 3 stacks (StackAmount 3) the next Death Strike lands with no rune available and the buff is gone, even with BloodlettersRhythm288960 learned so landed strikes proc it. The same holds for Heart Strike 55050 and the Blood runes: two casts spend both, a third is rejected, and a cast with 3 stacks lands and consumes the buff.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 10,
+      "level": 20,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "p",
+      "entry": 36,
+      "level": 20,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 49998
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 55050
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 288961,
+      "stacks": 2
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 49998,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 49998,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 49998,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 49998,
+      "target": "enemy",
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 49998,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 49998,
+      "target": "enemy",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 49998,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 288961,
+      "equals": 2
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 288960
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 288961,
+      "stacks": 3
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 49998,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 49998,
+      "target": "enemy",
+      "equals": 3,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 288961,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 55050,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 55050,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 55050,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 55050,
+      "target": "enemy",
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 55050,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 55050,
+      "target": "enemy",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 55050,
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 288961,
+      "stacks": 3
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 55050,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "spell_damage_count",
+      "spell": 55050,
+      "target": "enemy",
+      "equals": 3,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 288961,
+      "equals": 0
+    }
+  ]
+}

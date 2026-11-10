@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Issue 10692: a forgotten talent spell leaves the action bar at once",
+  "contract": "Removing a talent spell (Animate: Bone Wraith 805032 here) made the server and the client forget it, but its action bar button kept the spell until the next login dropped it. The button stayed clickable and, for a ground-targeted spell, left the hand stuck in targeting. A spell forgotten from every spec must leave the bar when it is removed.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "n",
+      "race": 1,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Learn the Animate: Bone Wraith talent spell",
+      "actor": "n",
+      "spell": 805032
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "knows_spell",
+      "equals": 1,
+      "label": "SETUP: the talent spell is known",
+      "spell": 805032
+    },
+    {
+      "action": "set_action_button",
+      "label": "Put it on the bar",
+      "actor": "n",
+      "spell": 805032,
+      "button": 5
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "action_button",
+      "equals": 805032,
+      "label": "SETUP: the bar holds it",
+      "button": 5
+    },
+    {
+      "action": "unlearn",
+      "label": "Remove the talent",
+      "actor": "n",
+      "spell": 805032,
+      "all_specs": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "knows_spell",
+      "equals": 0,
+      "label": "The spell is forgotten",
+      "spell": 805032
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "action_button",
+      "equals": 0,
+      "label": "DISCRIMINATING: the bar no longer holds the forgotten spell",
+      "button": 5
+    },
+    {
+      "action": "relog",
+      "actor": "n"
+    },
+    {
+      "action": "login_hooks",
+      "actor": "n"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "n",
+      "metric": "action_button",
+      "equals": 0,
+      "label": "and it stays gone after a login",
+      "button": 5
+    }
+  ]
+}

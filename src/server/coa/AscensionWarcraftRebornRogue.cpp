@@ -33,6 +33,8 @@ constexpr uint32 RELENTLESS_STRIKES_ENERGY = 1114181;
 constexpr float CRIMSON_TEMPEST_HIT_AP = 0.012f;
 constexpr float CRIMSON_TEMPEST_BLEED_AP = 0.00744f;
 constexpr float POISON_NOVA_AP = 0.0048f;
+constexpr uint32 CLOAK_OF_SHADOWS = 1131224;
+constexpr uint32 CLOAK_OF_SHADOWS_PURGE = 1135729;
 
 constexpr float DISPATCH_AP_MIN = 0.056f;
 
@@ -265,6 +267,13 @@ void ApplyAscensionWarcraftRebornRogueContracts(SpellInfo* spellInfo)
     if (spellInfo->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_DUMMY &&
         spellInfo->Effects[EFFECT_0].TriggerSpell == RELENTLESS_STRIKES_ENERGY)
         spellInfo->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_TARGET_TRIGGER;
+
+    if (spellInfo->Id == CLOAK_OF_SHADOWS && !spellInfo->Effects[EFFECT_1].Effect)
+    {
+        spellInfo->Effects[EFFECT_1].Effect = SPELL_EFFECT_TRIGGER_SPELL;
+        spellInfo->Effects[EFFECT_1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+        spellInfo->Effects[EFFECT_1].TriggerSpell = CLOAK_OF_SHADOWS_PURGE;
+    }
 }
 
 void AddAscensionWarcraftRebornRogueScripts()

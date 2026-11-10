@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "name": "Creature corpse falls after dying during a parabolic knockback (#7345)",
+  "contract": [
+    "#7345 reports a boar corpse left hard to reach after a knockback. The report's trigger spell is unknown;",
+    "existing spell 802600 is used only as a controlled native SPELL_EFFECT_KNOCK_BACK fixture.",
+    "A ground creature that dies during an active parabolic knockback must fall vertically to the valid",
+    "terrain or collision height beneath its corpse. Flying, hovering, underwater and ordinary ground deaths",
+    "keep their existing behavior. The discriminating observation is final corpse position_z against",
+    "ground_height, not knockback damage, displacement removal, loot contents or skinning data."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 10344.875976563,
+    "y": 985.76727294922,
+    "z": 1333.271484375,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "boar",
+      "owner": "caster",
+      "entry": 1984,
+      "level": 2,
+      "health": 1,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "Ground-level Z before the controlled knockback",
+      "actor": "boar",
+      "metric": "position_z",
+      "save_as": "before_knockback"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 802600
+    },
+    {
+      "action": "cast",
+      "label": "Start the native parabolic knockback without dealing damage",
+      "actor": "caster",
+      "spell": 802600
+    },
+    {
+      "action": "assert",
+      "label": "The boar rises above its starting height during the arc",
+      "actor": "boar",
+      "metric": "position_z",
+      "relative_to": "before_knockback",
+      "min": 0.2,
+      "within_ms": 400
+    },
+    {
+      "action": "assert",
+      "label": "The parabolic spline is still active before the killing blow",
+      "actor": "boar",
+      "metric": "spline_remaining_ms",
+      "min": 1
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill the boar through the native death path in mid-arc",
+      "actor": "caster",
+      "entry": 1984,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "boar",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Ground height beneath the corpse at its death X/Y",
+      "actor": "boar",
+      "metric": "ground_height",
+      "save_as": "death_ground"
+    },
+    {
+      "action": "assert",
+      "label": "The corpse begins the death fall above the ground",
+      "actor": "boar",
+      "metric": "position_z",
+      "ratio_to": "death_ground",
+      "min": 1.0001
+    },
+    {
+      "action": "assert",
+      "label": "The corpse reaches ground height instead of remaining suspended",
+      "actor": "boar",
+      "metric": "position_z",
+      "ratio_to": "death_ground",
+      "min": 0.9999,
+      "max": 1.0001,
+      "within_ms": 3000
+    },
+    {
+      "action": "loot_creature",
+      "label": "The landed corpse remains available for the native loot interaction",
+      "actor": "caster",
+      "target": "boar"
+    }
+  ]
+}

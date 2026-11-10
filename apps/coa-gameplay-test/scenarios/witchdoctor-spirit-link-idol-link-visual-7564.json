@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Spirit Link Idol shows its link to the party members every 2 sec (#7564)",
+  "contract": [
+    "Spirit Link Idol 706369 summons creature 522106 for $500992d. Spell.dbc gives 500992 'Spirit Link Idol' as an",
+    "APPLY_AURA on TARGET_UNIT_CASTER, PERIODIC_TRIGGER_SPELL every 2000 ms of 500993, with the aura tooltip",
+    "'Redistributing nearby allies health every $t1 sec.'; 500993 is a DUMMY on TARGET_UNIT_CASTER_AREA_RAID",
+    "(radius index 13) carrying SpellVisual 120959, the link drawn to each party member. The idol now holds 500992,",
+    "so every pulse casts 500993 and the grouped ally receives its SMSG_SPELL_GO from the idol, while the idol AI",
+    "still levels both players' health to the shared percentage."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "doctor", "race": 1, "class": 13, "level": 60, "allow_regeneration": false },
+    { "id": "ally", "race": 1, "class": 13, "level": 60, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the world settle", "ms": 5000 },
+    { "action": "group", "actor": "doctor", "target": "ally" },
+    { "action": "learn", "label": "Learn Spirit Link Idol", "actor": "doctor", "spell": 706369 },
+    { "action": "set_health", "actor": "ally", "value": 1 },
+    { "action": "cast", "label": "Drop the Spirit Link Idol", "actor": "doctor", "spell": 706369 },
+    {
+      "action": "assert", "label": "The Spirit Link Idol is summoned", "actor": "doctor",
+      "metric": "owned_creature_count", "entry": 522106, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the idol holds its Spirit Link Idol aura 500992", "actor": "doctor",
+      "metric": "owned_creature_count", "entry": 522106, "spell": 500992, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the ally receives the idol's link pulse 500993", "actor": "ally",
+      "metric": "spell_go_count", "spell": 500993, "entry": 522106, "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the link pulses again two seconds later", "actor": "ally",
+      "metric": "spell_go_count", "spell": 500993, "entry": 522106, "min": 2, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The pulse still raises the ally to the shared 50%", "actor": "ally",
+      "metric": "health_pct", "min": 49, "max": 51
+    }
+  ]
+}

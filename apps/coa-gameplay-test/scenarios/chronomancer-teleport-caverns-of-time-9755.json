@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Chronomancer Teleport: Caverns of Time lands the caster in Tanaris (#9755)",
+  "contract": [
+    "Teleport: Caverns of Time 804753 has Effect0 SPELL_EFFECT_TELEPORT_UNITS with TargetB TARGET_DEST_DB and the",
+    "tooltip 'Teleports the caster to the Caverns of Time in Tanaris.' Its spell_target_position row sends the caster",
+    "to the Tanaris entrance used by the stock spells 37778 and 46343 (map 1, -8167.18, -4766.8).",
+    "DISCRIMINATING: without the row the cast has no destination and the caster stays on map 0."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9483.25, "y": -17.99, "z": 56.96, "o": 3.8 },
+  "players": [ { "id": "m", "race": 1, "class": 22, "level": 60 } ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "learn", "actor": "m", "spell": 804753 },
+    { "action": "add_item", "label": "SETUP: 804753's DBC reagent (17031)", "actor": "m", "item": 17031 },
+    { "action": "assert", "label": "Starts on map 0", "actor": "m", "metric": "map_id", "equals": 0 },
+    { "action": "cast", "actor": "m", "spell": 804753 },
+    { "action": "assert", "label": "DISCRIMINATING: the caster is on Kalimdor", "actor": "m", "metric": "map_id", "equals": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "Lands at the Tanaris entrance (x)", "actor": "m", "metric": "position_x", "min": -8177.18, "max": -8157.18 },
+    { "action": "assert", "label": "Lands at the Tanaris entrance (y)", "actor": "m", "metric": "position_y", "min": -4776.8, "max": -4756.8 }
+  ]
+}

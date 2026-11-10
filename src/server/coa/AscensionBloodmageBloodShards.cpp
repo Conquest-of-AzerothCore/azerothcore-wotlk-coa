@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionPooledVitality.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
 #include "Random.h"
 #include "ScriptMgr.h"
@@ -27,6 +28,7 @@ enum BloodShardSpells : uint32
     SPELL_SHARD_COUNTER = 505366,
     SPELL_SHARD_VISUAL_FIRST = 505349,
     SPELL_SHARD_DAMAGE = 504115,
+    SPELL_SHARD_MISSILE_FIRST = 505357,
     SPELL_VEINBURST = 504260,
     SPELL_AORTIC_ASSAULT_HIT = 806502,
     SPELL_CURSED_FORM_REQUIREMENT = 525031,
@@ -34,6 +36,7 @@ enum BloodShardSpells : uint32
 };
 
 constexpr uint8 MAX_SHARDS = 8;
+constexpr uint32 SHARD_LAUNCH_INTERVAL_MS = 100;
 
 constexpr std::array<uint32, 10> BLOODMOON_BLAST_RANKS = {
     500125, 501607, 501608, 501609, 501610, 501611, 501612, 501613, 501614, 572332 };
@@ -123,16 +126,31 @@ bool ConsumeShard(Player* player)
     return true;
 }
 
-void LaunchShard(Player* player, Unit* target, ShardCoefficients coefficients)
+void LaunchShard(Player* player, Unit* target, ShardCoefficients coefficients, uint8 slot)
 {
     SpellInfo const* shard = sSpellMgr->GetSpellInfo(SPELL_SHARD_DAMAGE);
     if (!shard || !target || !target->IsAlive())
         return;
+    uint32 const missile = SPELL_SHARD_MISSILE_FIRST + std::min<uint8>(slot, MAX_SHARDS - 1);
+    player->CastSpell(target, missile, TRIGGERED_FULL_MASK);
     float amount = float(shard->Effects[EFFECT_0].CalcValue(player)) +
         player->GetTotalAttackPowerValue(BASE_ATTACK) * coefficients.AttackPower +
         float(player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)) * coefficients.SpellPower;
-    player->CastCustomSpell(SPELL_SHARD_DAMAGE, SPELLVALUE_BASE_POINT0,
-        int32(std::clamp(amount, 1.0f, float(std::numeric_limits<int32>::max() / 2))), target, TRIGGERED_FULL_MASK);
+    int32 const damage = int32(std::clamp(amount, 1.0f, float(std::numeric_limits<int32>::max() / 2)));
+    SpellInfo const* flight = sSpellMgr->GetSpellInfo(missile);
+    uint32 const travel = flight && flight->Speed > 0.0f ?
+        uint32(player->GetExactDist(target) / flight->Speed * IN_MILLISECONDS) : 0;
+    if (!travel)
+    {
+        player->CastCustomSpell(SPELL_SHARD_DAMAGE, SPELLVALUE_BASE_POINT0, damage, target, TRIGGERED_FULL_MASK);
+        return;
+    }
+    player->m_Events.AddEventAtOffset([guid = player->GetGUID(), victim = target->GetGUID(), damage]()
+    {
+        if (Player* owner = ObjectAccessor::FindPlayer(guid))
+            if (Unit* hit = ObjectAccessor::GetUnit(*owner, victim); hit && hit->IsAlive())
+                owner->CastCustomSpell(SPELL_SHARD_DAMAGE, SPELLVALUE_BASE_POINT0, damage, hit, TRIGGERED_FULL_MASK);
+    }, Milliseconds(travel));
 }
 
 bool IsEnemy(Player* player, Unit* target)
@@ -183,18 +201,31 @@ public:
         {
             ShardCoefficients const coefficients =
                 player->HasAura(SPELL_BLOOD_SHARDS_BLOODMOON) ? EMPOWERED_SHARD : BASIC_SHARD;
-            for (uint8 shards = Shards(player); shards; --shards)
-                LaunchShard(player, target, coefficients);
+            for (uint8 shards = Shards(player), launched = 0; shards; --shards, ++launched)
+            {
+                if (!launched)
+                {
+                    LaunchShard(player, target, coefficients, shards - 1);
+                    continue;
+                }
+                player->m_Events.AddEventAtOffset(
+                    [guid = player->GetGUID(), victim = target->GetGUID(), coefficients, slot = uint8(shards - 1)]()
+                    {
+                        if (Player* owner = ObjectAccessor::FindPlayer(guid))
+                            if (Unit* hit = ObjectAccessor::GetUnit(*owner, victim))
+                                LaunchShard(owner, hit, coefficients, slot);
+                    }, Milliseconds(SHARD_LAUNCH_INTERVAL_MS * launched));
+            }
             ClearShards(player);
             return;
         }
         if (info->Id == SPELL_AORTIC_ASSAULT_HIT && player->HasAura(SPELL_INHUMANE) && ConsumeShard(player))
-            LaunchShard(player, target, EMPOWERED_SHARD);
+            LaunchShard(player, target, EMPOWERED_SHARD, Shards(player));
         if (IsRank(BLOODFANG_BITE_RANKS, info->Id) && player->HasAura(SPELL_BLOODCHASER) && ConsumeShard(player))
-            LaunchShard(player, target, EMPOWERED_SHARD);
+            LaunchShard(player, target, EMPOWERED_SHARD, Shards(player));
         if (player->HasAura(SPELL_BATTLEWEAVER) &&
             AscensionBloodmage::GetEmpowerment(info->Id) == AscensionBloodmage::Bloodbolt && ConsumeShard(player))
-            LaunchShard(player, target, BASIC_SHARD);
+            LaunchShard(player, target, BASIC_SHARD, Shards(player));
         bool const shadowShard = player->HasAura(SPELL_BLOOD_SHARDS) &&
             (info->GetSchoolMask() & SPELL_SCHOOL_MASK_SHADOW);
         bool const bloodmoonShard = player->HasAura(SPELL_BLOOD_SHARDS_BLOODMOON) &&
@@ -238,11 +269,28 @@ class aura_ascension_bloodmage_blood_shard_counter : public AuraScript
             SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
     }
 };
+
+class bloodmage_blood_shard_missiles : public GlobalScript
+{
+public:
+    bloodmage_blood_shard_missiles() : GlobalScript("bloodmage_blood_shard_missiles",
+        {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR}) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* info) override
+    {
+        if (!info || info->Id < SPELL_SHARD_MISSILE_FIRST || info->Id >= SPELL_SHARD_MISSILE_FIRST + MAX_SHARDS ||
+            info->Effects[EFFECT_0].Effect != SPELL_EFFECT_TRIGGER_MISSILE)
+            return;
+        info->Effects[EFFECT_0].Effect = SPELL_EFFECT_DUMMY;
+        info->Effects[EFFECT_0].TriggerSpell = 0;
+    }
+};
 }
 
 void AddSC_AscensionBloodmageBloodShards()
 {
     new bloodmage_blood_shards();
+    new bloodmage_blood_shard_missiles();
     RegisterSpellScript(aura_ascension_bloodmage_blood_shard_expiry);
     RegisterSpellScript(aura_ascension_bloodmage_blood_shard_counter);
 }

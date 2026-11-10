@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "name": "Guild bank tabs answer after the Personal Bank was open (#7485)",
+  "contract": "#7485: after viewing the Personal Bank Vault, the guild bank shows only its first tab and every tab shows the same items until relog. The Personal Bank reuses the guild bank packets and has no close packet, so its session stays open after the window closes. A guild vault is a different banker: activating it and querying one of its tabs must reach the core guild handlers instead of being consumed by the Personal Bank hook, as in stock AzerothCore where every tab query reaches Guild::SendBankTabData. Reopening the Personal Bank afterwards still accepts a deposit.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "banker",
+      "race": 1,
+      "class": 22,
+      "level": 26
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "banker",
+      "item": 134985
+    },
+    {
+      "action": "use_item",
+      "actor": "banker",
+      "item": 134985,
+      "spell": 100702
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "personal_bank_open",
+      "actor": "banker",
+      "entry": 475001
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "banker",
+      "entry": 187290,
+      "distance": 2
+    },
+    {
+      "action": "client_packet",
+      "actor": "banker",
+      "opcode": 998,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        { "gameobject_guid": 187290 },
+        { "u8": 1 }
+      ],
+      "label": "Activating the guild vault reaches the core guild bank handler"
+    },
+    {
+      "action": "client_packet",
+      "actor": "banker",
+      "opcode": 999,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        { "gameobject_guid": 187290 },
+        { "u8": 1 },
+        { "u8": 0 }
+      ],
+      "label": "A tab query addressed to the guild vault reaches the core instead of the Personal Bank"
+    },
+    {
+      "action": "personal_bank_open",
+      "actor": "banker",
+      "entry": 475001
+    },
+    {
+      "action": "add_item",
+      "actor": "banker",
+      "item": 2589,
+      "count": 5
+    },
+    {
+      "action": "personal_bank_swap",
+      "actor": "banker",
+      "entry": 475001,
+      "direction": "deposit",
+      "item": 2589
+    },
+    {
+      "action": "assert",
+      "actor": "banker",
+      "metric": "item_count",
+      "item": 2589,
+      "equals": 0,
+      "label": "The reopened Personal Bank still takes the deposited stack"
+    }
+  ]
+}

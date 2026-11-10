@@ -125,7 +125,7 @@ int main()
     assert(AddLoot(&caster, staff, 1) && staff.items.front().itemid == 400);
     assert(!AddLoot(&caster, staff, 1) && staff.items.size() == 1);
 
-    for (uint32 rejected = 0; rejected < 14; ++rejected)
+    for (uint32 rejected = 0; rejected < 15; ++rejected)
     {
         Reset();
         Outfit(1, 5000);
@@ -149,11 +149,27 @@ int main()
             item.Name1 = "Bloodforged Stone Sledgehammer";
             item.Description = "@Bloodforged@";
         }
+        if (rejected == 14) item.Description = "@Mythic@Also serves as a mining pick.";
         objectMgr.items[500] = item;
         Index();
         Loot rejectedLoot;
         assert(!AddLoot(&physical, rejectedLoot, 1));
     }
+
+    Reset();
+    Creature kobold;
+    kobold.level = 60;
+    kobold.weapons[0] = 756;
+    objectMgr.items[756] = Gear(3743, ITEM_MOD_AGILITY, INVTYPE_2HWEAPON, 24);
+    objectMgr.items[756].Class = ITEM_CLASS_WEAPON;
+    objectMgr.items[756].SubClass = 1;
+    objectMgr.items[131103] = objectMgr.items[756];
+    objectMgr.items[131103].RequiredLevel = 60;
+    objectMgr.items[131103].Description = "@Mythic@Also serves as a mining pick.";
+    Index();
+    Loot pick;
+    pick.lootOwnerGUID = owner.guid;
+    assert(AddLoot(&kobold, pick, 1) && pick.items.front().itemid == 756);
 
     Reset();
     Outfit(1, 6000);

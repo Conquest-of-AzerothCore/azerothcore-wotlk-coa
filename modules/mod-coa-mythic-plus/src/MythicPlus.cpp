@@ -65,6 +65,7 @@
 #include "SpellInfo.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include "AscensionBattleResurrection.h"
 #include "AscensionCompatOpcodes.h"
 #include "AscensionDungeonRelease.h"
 #include "AscensionSpecLoot.h"
@@ -73,6 +74,7 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
+#include "TypeContainerVisitor.h"
 #include "Timer.h"
 
 #include <algorithm>
@@ -485,7 +487,8 @@ namespace
     // MythicPlus.Forces.WingFactor: "lfgId:factor" pairs that correct single wings to what live runs showed.
     float WingForcesFactor(uint32 lfgId)
     {
-        std::istringstream in(sConfigMgr->GetOption<std::string>("MythicPlus.Forces.WingFactor", "3320:0.626"));
+        std::istringstream in(sConfigMgr->GetOption<std::string>("MythicPlus.Forces.WingFactor",
+            "3320:0.626 2038:1.333"));
         std::string pair;
         while (in >> pair)
         {
@@ -960,6 +963,61 @@ namespace
         }
     }
 
+    bool Finished(Run const& run)
+    {
+        return run.state == STATE_TIMED || run.state == STATE_OVERTIME;
+    }
+
+    void RefuseToFight(Creature* creature)
+    {
+        if (!creature || !creature->IsInWorld() || !creature->IsAlive() || !TakesAffixes(creature))
+            return;
+        creature->SetReactState(REACT_PASSIVE);
+        creature->SetUnitFlag(UNIT_FLAG_PACIFIED);
+        creature->SetUnitFlag(UNIT_FLAG_SILENCED);
+        creature->SetHomePosition(creature->GetPosition());
+        creature->InterruptNonMeleeSpells(true);
+        creature->AttackStop();
+        creature->CombatStop(true);
+        creature->GetThreatMgr().ClearAllThreat();
+        creature->GetMotionMaster()->Clear();
+        creature->GetMotionMaster()->MoveIdle();
+        creature->StopMoving();
+        creature->SetControlled(true, UNIT_STATE_ROOT);
+    }
+
+    struct MapCreatureCollector
+    {
+        std::vector<Creature*> creatures;
+
+        void Visit(std::unordered_map<ObjectGuid, Creature*>& store)
+        {
+            for (auto const& [guid, creature] : store)
+                creatures.push_back(creature);
+        }
+
+        template<class T>
+        void Visit(std::unordered_map<ObjectGuid, T*>&) { }
+    };
+
+    void RefuseToFight(Map* map)
+    {
+        MapCreatureCollector collector;
+        TypeContainerVisitor<MapCreatureCollector, MapStoredObjectTypesContainer> visitor(collector);
+        visitor.Visit(map->GetObjectsStore());
+        for (Creature* creature : collector.creatures)
+            RefuseToFight(creature);
+    }
+
+    bool RefusesToFight(Unit const* unit)
+    {
+        Creature const* creature = unit ? unit->ToCreature() : nullptr;
+        if (!creature || !creature->HasUnitFlag(UNIT_FLAG_PACIFIED) || !creature->HasReactState(REACT_PASSIVE))
+            return false;
+        Run const* run = RunFor(creature->GetMap());
+        return run && Finished(*run);
+    }
+
     void Complete(Map* map, Run& run)
     {
         uint32 limit = run.dungeon.timeLimitMs;
@@ -988,6 +1046,7 @@ namespace
 
         CoAResurrectDeadPlayers(map);
         ClearRunSpawns(map);
+        RefuseToFight(map);
 
         ForEachPlayer(map, [&](Player* player)
         {
@@ -1109,6 +1168,7 @@ namespace
         run.affixes = Data::Instance().GetAffixes(run.rotation, key->level);
         run.state = STATE_COUNTDOWN;
         run.countdownMs = COUNTDOWN_MS;
+        Ascension::BattleResurrection::StartMythicPlusRun(map);
         ScaleForces(map->GetId(), uint32(map->GetDifficulty()), run);
 
         // The key loses a level now and gets its real new level at the end.
@@ -1437,6 +1497,33 @@ public:
         }
     }
 
+    void OnAllCreatureUpdate(Creature* creature, uint32 /*diff*/) override
+    {
+        if (!creature->HasUnitFlag(UNIT_FLAG_PACIFIED) || !creature->HasReactState(REACT_PASSIVE)
+            || creature->IsInEvadeMode() || !creature->IsAlive())
+            return;
+        bool const unattacked = creature->IsInCombat() && creature->getAttackers().empty();
+        if (creature->HasUnitState(UNIT_STATE_ROOT) && !unattacked)
+            return;
+        Map* map = creature->FindMap();
+        if (!map || !map->IsDungeon())
+            return;
+        std::lock_guard<std::recursive_mutex> guard(g_lock);
+        if (!RefusesToFight(creature))
+            return;
+        if (unattacked)
+        {
+            creature->CombatStop(true);
+            creature->GetThreatMgr().ClearAllThreat();
+            return;
+        }
+        creature->SetHomePosition(creature->GetPosition());
+        creature->GetMotionMaster()->Clear();
+        creature->GetMotionMaster()->MoveIdle();
+        creature->StopMoving();
+        creature->SetControlled(true, UNIT_STATE_ROOT);
+    }
+
     // Summons and creatures spawned during a run get the week's affixes too.
     void OnCreatureAddWorld(Creature* creature) override
     {
@@ -1450,6 +1537,13 @@ public:
             creature->SetVisible(run && run->Active());
         if (run && run->Active())
             ApplyCreatureAffixes(creature, *run);
+        if (run && Finished(*run))
+            creature->m_Events.AddEventAtOffset([creature]
+            {
+                std::lock_guard<std::recursive_mutex> guard(g_lock);
+                if (Run* current = RunFor(creature->GetMap()); current && Finished(*current))
+                    RefuseToFight(creature);
+            }, 1ms);
     }
 };
 
@@ -1459,24 +1553,47 @@ public:
     coa_mythic_plus_unit() : UnitScript("coa_mythic_plus_unit", true,
         { UNITHOOK_MODIFY_MELEE_DAMAGE, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN, UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK, UNITHOOK_ON_UNIT_DEATH }) { }
 
-    void ModifyMeleeDamage(Unit* /*target*/, Unit* attacker, uint32& damage) override
+    void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
     {
+        if (Refuses(target))
+        {
+            damage = 0;
+            return;
+        }
         if (float f = Factor(attacker, true); f != 1.0f)
             damage = uint32(damage * f);
     }
 
-    void ModifySpellDamageTaken(Unit* /*target*/, Unit* attacker, int32& damage, SpellInfo const* spellInfo) override
+    void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo) override
     {
+        if (Refuses(target))
+        {
+            damage = 0;
+            return;
+        }
         if (IsHealthShare(spellInfo))
             return;
         if (float f = Factor(attacker, IsPhysical(spellInfo)); f != 1.0f)
             damage = int32(damage * f);
     }
 
-    void ModifyPeriodicDamageAurasTick(Unit* /*target*/, Unit* attacker, uint32& damage, SpellInfo const* spellInfo) override
+    void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const* spellInfo) override
     {
+        if (Refuses(target))
+        {
+            damage = 0;
+            return;
+        }
         if (float f = Factor(attacker, IsPhysical(spellInfo)); f != 1.0f)
             damage = uint32(damage * f);
+    }
+
+    static bool Refuses(Unit const* target)
+    {
+        if (!target || !target->IsCreature() || !target->HasUnitFlag(UNIT_FLAG_PACIFIED))
+            return false;
+        std::lock_guard<std::recursive_mutex> guard(g_lock);
+        return RefusesToFight(target);
     }
 
     void OnUnitDeath(Unit* unit, Unit* /*killer*/) override
@@ -1673,6 +1790,21 @@ class spell_coa_mythic_life_steal : public SpellScript
     {
         OnEffectHitTarget += SpellEffectFn(spell_coa_mythic_life_steal::PreventSelfHeal, EFFECT_1, SPELL_EFFECT_APPLY_AURA);
         AfterHit += SpellHitFn(spell_coa_mythic_life_steal::HealCaster);
+    }
+};
+
+class spell_coa_mythic_horde : public AuraScript
+{
+    PrepareAuraScript(spell_coa_mythic_horde);
+
+    bool CheckAreaTarget(Unit* target)
+    {
+        return target != GetUnitOwner();
+    }
+
+    void Register() override
+    {
+        DoCheckAreaTarget += AuraCheckAreaTargetFn(spell_coa_mythic_horde::CheckAreaTarget);
     }
 };
 
@@ -2300,9 +2432,9 @@ public:
     }
 };
 
-// Mythical Boon (80215): right-click grants a random Mythical Boon to every player within 50 yards in line of sight
-// of the clicker, with Mythical Blessing's Holy Nova visual, and the boon vanishes. It shows only during a running
-// keystone; boon items still in bags work only there too.
+// Mythical Boon (80215): right-click puts a random Mythical Boon item in the bags of every player within 50 yards in
+// line of sight of the clicker, with Mythical Blessing's Holy Nova visual, and the boon vanishes. It shows only during
+// a running keystone; boon items work only there too.
 constexpr uint32 NPC_MYTHICAL_BOON = 80215;
 constexpr uint32 SPELL_MYTHICAL_BLESSING = 2104919;
 
@@ -2312,7 +2444,7 @@ bool InRunningKey(Map* map)
     return run && run->state == STATE_RUNNING;
 }
 
-void ApplyBoon(Player* user, uint32 spellId);
+std::vector<Player*> BoonTargets(Player* user);
 
 class npc_coa_mythic_boon : public CreatureScript
 {
@@ -2328,7 +2460,12 @@ public:
         if (!InRunningKey(creature->GetMap()))
             return true;
         player->CastSpell(player, SPELL_MYTHICAL_BLESSING, true);
-        ApplyBoon(player, BOONS[urand(0, BOONS.size() - 1)]);
+        for (Player* target : BoonTargets(player))
+        {
+            uint32 const boon = BOONS[urand(0, BOONS.size() - 1)];
+            if (!target->AddItem(boon, 1))
+                target->SendItemRetrievalMail(boon, 1);
+        }
         creature->DespawnOrUnsummon(0ms, 7 * 24h);
         return true;
     }
@@ -2338,18 +2475,23 @@ public:
 // 50 yards in line of sight of the user, so the script applies it to each of them and uses up the item.
 constexpr float BOON_RANGE = 50.0f;
 
-void ApplyBoon(Player* user, uint32 spellId)
+std::vector<Player*> BoonTargets(Player* user)
 {
-    SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
-    if (!info)
-        return;
     std::vector<Player*> targets;
     user->GetMap()->DoForAllPlayers([&](Player* target)
     {
         if (target->IsAlive() && (target == user || (target->IsWithinDistInMap(user, BOON_RANGE) && user->IsWithinLOSInMap(target))))
             targets.push_back(target);
     });
-    for (Player* target : targets)
+    return targets;
+}
+
+void ApplyBoon(Player* user, uint32 spellId)
+{
+    SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
+    if (!info)
+        return;
+    for (Player* target : BoonTargets(user))
     {
         bool aura = false;
         for (SpellEffectInfo const& effect : info->GetEffects())
@@ -3064,4 +3206,5 @@ void AddCoaMythicPlusScripts()
     new coa_mythic_plus_boss_kills();
     new coa_mythic_plus_keystone_use();
     RegisterSpellScript(spell_coa_mythic_life_steal);
+    RegisterSpellScript(spell_coa_mythic_horde);
 }

@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "name": "Sanguine Essence keeps the weapons drawn (#7008)",
+  "contract": [
+    "Sanguine Essence 680692 is a mortal-ability form: it grants abilities but does not transform the Bloodmage, who",
+    "stays in human form until the aura is cancelled. The cursed-form weapon hiding (AscensionBloodmageTalents.cpp,",
+    "UpdateCursedFormWeapons and the visible-item hook) treated every spell in the CursedForms list alike, and 680692 is on",
+    "it, so casting it cleared the visible main hand, off hand and ranged items while the stats stayed. The two",
+    "mortal-ability forms (680692 and 801076) no longer hide weapons; the real transforming forms still do, and restore",
+    "the weapons when they end. A level 20 Bloodmage with a worn shortsword casts Sanguine Essence: the item other",
+    "clients are told to draw in the main hand must stay. A transforming form (562572) set on the Bloodmage replaces it and",
+    "must hide the sword; when that form ends the sword is drawn again."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bm",
+      "race": 1,
+      "class": 20,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "bm",
+      "spell": 680692
+    },
+    {
+      "action": "add_item",
+      "actor": "bm",
+      "item": 25,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "bm",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: other clients are told to draw the sword",
+      "actor": "bm",
+      "metric": "visible_item",
+      "slot": 15,
+      "equals": 25
+    },
+    {
+      "action": "cast",
+      "label": "Cast Sanguine Essence",
+      "actor": "bm",
+      "spell": 680692
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Sanguine Essence is on",
+      "actor": "bm",
+      "metric": "aura",
+      "spell": 680692,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the sword is still drawn under Sanguine Essence",
+      "actor": "bm",
+      "metric": "visible_item",
+      "slot": 15,
+      "equals": 25
+    },
+    {
+      "action": "set_aura",
+      "label": "Add a transforming cursed form",
+      "actor": "bm",
+      "spell": 562572,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "A transforming cursed form still hides the sword",
+      "actor": "bm",
+      "metric": "visible_item",
+      "slot": 15,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Remove the transforming form",
+      "actor": "bm",
+      "spell": 562572,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "The sword is back when the transforming form ends",
+      "actor": "bm",
+      "metric": "visible_item",
+      "slot": 15,
+      "equals": 25,
+      "within_ms": 3000
+    }
+  ]
+}

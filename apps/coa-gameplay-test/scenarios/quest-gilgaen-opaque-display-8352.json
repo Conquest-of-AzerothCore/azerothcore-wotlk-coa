@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Gilgaen is drawn opaque, not as a ghost",
+  "contract": "Issue #8352: Gilgaen (161728) in The Eyrie used the stand-in display 12269, whose CreatureDisplayInfo alpha is 128, so the client drew him translucent. Display 4246 has the same model (55) and the same CreatureDisplayInfoExtra (2511) with alpha 255. The case summons Gilgaen and expects him on 4246.",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 1,
+    "x": 10815.2,
+    "y": 479.0,
+    "z": 1394.64,
+    "o": 0.9
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 25,
+      "level": 6
+    }
+  ],
+  "steps": [
+    {
+      "action": "summon",
+      "actor": "p",
+      "as": "gilgaen",
+      "entry": 161728,
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Gilgaen uses the opaque display",
+      "actor": "gilgaen",
+      "metric": "display_id",
+      "equals": 4246
+    }
+  ]
+}

@@ -342,6 +342,7 @@ public: /* PlayerScript */
     void OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource);
     uint8 GetMaxAllowedLevel(Player* player);
     bool OnPlayerHasNoBonusExperience(Player* player);
+    bool OnPlayerHoldsTankOrHealerRole(Player const* player);
     void OnPlayerHonorableKillingBlow(Player* killer, Player* victim);
     bool OnPlayerReputationChange(Player* player, uint32 factionID, int32& standing, bool incremental);
     void OnPlayerReputationRankChange(Player* player, uint32 factionID, ReputationRank newRank, ReputationRank oldRank, bool increased);
@@ -362,6 +363,7 @@ public: /* PlayerScript */
     void OnPlayerCreate(Player* player);
     bool OnPlayerCreateInitialItems(Player* player, bool& handled);
     void OnPlayerSave(Player* player);
+    void OnPlayerSaveInventory(Player* player, CharacterDatabaseTransaction trans);
     void OnPlayerNormalizeActionButtonSpell(Player* player, uint32& action, bool loading);
     void OnPlayerTemporarySpellReplacementNotice(Player* player, uint32 previous, uint32 replacement, bool sent);
     void OnPlayerTemporarySpellLearnNotice(Player* player, uint32 spellId, bool sent);
@@ -621,7 +623,7 @@ public: /* UnitScript */
     void ModifySpellDamageTaken(Unit* target, Unit* attacker, int32& damage, SpellInfo const* spellInfo);
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* spellInfo,
         uint8 effectIndex, float& value);
-    void ResolveSpellCast(Unit* caster, SpellInfo const*& spellInfo);
+    void ResolveSpellCast(Unit* caster, SpellInfo const*& spellInfo, AuraEffect const* triggeredByAura);
     void ModifyHealReceived(Unit* target, Unit* healer, uint32& addHealth, SpellInfo const* spellInfo);
     void OnBeforeHealAbsorb(HealInfo& healInfo);
     void OnAfterAuraEffectCalculateAmount(AuraEffect const* effect, Unit* caster, int32& amount);

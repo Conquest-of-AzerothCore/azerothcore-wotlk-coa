@@ -118,8 +118,18 @@ class necromancer_casts : public AllSpellScript
         : AllSpellScript("necromancer_casts",
                          {ALLSPELLHOOK_ON_SPELL_CHECK_CAST, ALLSPELLHOOK_ON_BEFORE_EFFECTS, ALLSPELLHOOK_ON_CAST,
                           ALLSPELLHOOK_ON_CALC_MAX_DURATION, ALLSPELLHOOK_ON_SUCCESSFUL_INTERRUPT,
-                           ALLSPELLHOOK_ON_CALCULATED_TARGET, ALLSPELLHOOK_ON_HIT_RESULT})
+                           ALLSPELLHOOK_ON_CALCULATED_TARGET, ALLSPELLHOOK_ON_HIT_RESULT,
+                           ALLSPELLHOOK_ON_CRIT_CHANCE})
     {
+    }
+    void OnSpellCritChance(Spell* spell, Unit*, float& chance) override
+    {
+        Player* player = Owner(spell->GetCaster());
+        if (!player || player != spell->GetCaster() || spell->GetSpellInfo()->Id != 707592)
+            return;
+        if (Aura const* stacks = player->GetAura(712434))
+            if (stacks->GetStackAmount() >= stacks->GetSpellInfo()->StackAmount)
+                chance = 100.0f;
     }
     void OnSpellHitResult(Spell* spell, Unit* target, uint8 miss, uint32, uint32,
                           bool) override
@@ -247,16 +257,16 @@ class necromancer_casts : public AllSpellScript
                     aura && aura->GetScriptValue(805011) == spell->GetScriptValue(buff))
                     aura->DropCharge();
         };
-        consume(801747, true);
+        consume(801747, Lichfrost(info) || Named(info, 801760) || id == 704355 || (id >= 707399 && id <= 707402));
         consume(800979, Named(info, 801760));
         consume(707176, Lichfrost(info) || Family(info, 2, 8192));
         consume(807856, Lichfrost(info));
         consume(572777, Command(info));
-        if (Chance(player, 704681))
+        if (info->SpellFamilyName == 29 && Chance(player, 704681))
             Ready(player, 801747, 2);
         if (Chance(player, 92122))
             Cast(player, player, 707421);
-        if (player->HasAura(704723))
+        if (info->SpellFamilyName == 29 && player->HasAura(704723))
             Cast(player, player, 707133);
         if (Command(info))
         {

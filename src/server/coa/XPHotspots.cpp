@@ -3,6 +3,7 @@
 #include "Chat.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
+#include "DataMap.h"
 #include "DBCStores.h"
 #include "GameTime.h"
 #include "Log.h"
@@ -22,6 +23,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <cctype>
 #include <array>
+#include <atomic>
 #include <map>
 #include <mutex>
 #include <sstream>
@@ -50,12 +52,16 @@ std::map<ObjectGuid, LocalPaintUpload> LocalPaint;
 std::map<ObjectGuid, std::vector<Point>> TraceDrafts;
 std::map<ObjectGuid, std::vector<std::pair<uint32, uint32>>> MergeSources;
 std::map<ObjectGuid, RequestWindow> Requests;
-std::map<ObjectGuid, uint32> Seen;
-std::map<ObjectGuid, uint32> Timers;
+std::string const PlayerSyncKey = "xp_hotspot_sync";
+struct PlayerSync final : DataMap::Base
+{
+    uint32 RemainingMs = 500;
+    uint32 SeenGeneration = 0;
+};
 std::map<uint32, std::vector<std::string>> Masks;
 std::map<uint32, std::pair<uint32, std::vector<std::string>>> MaskWork;
 std::map<uint32, Location> MaskRequests;
-bool Enabled = false;
+std::atomic<bool> Enabled = false;
 GeneralSettings General;
 std::string Brand;
 uint32 Generation = 1;
@@ -405,16 +411,23 @@ void SyncBuff(Player* player)
     Location const* best = nullptr;
     if (Enabled && player->IsInWorld() && player->FindMap() && !player->GetMap()->Instanceable() &&
         !sScriptMgr->OnPlayerHasNoBonusExperience(player))
+    {
+        uint64 const now = Now();
+        uint32 const map = player->GetMapId();
+        uint32 const zone = player->GetZoneId();
+        Point const position{player->GetPositionX(), player->GetPositionY()};
         for (uint32 id : ActiveIds)
         {
             auto const& r = Locations.at(id);
-            if (r.Ends > Now() && RotationAllowed(r) && Contains(r, player->GetMapId(), player->GetZoneId(),
-                {player->GetPositionX(), player->GetPositionY()}) && (!best || r.Bonus > best->Bonus))
+            if (r.Ends > now && RotationAllowed(r) && Contains(r, map, zone, position) &&
+                (!best || r.Bonus > best->Bonus))
                 best = &r;
         }
+    }
     if (!best)
     {
-        player->RemoveAurasDueToSpell(Buff);
+        if (player->HasAura(Buff))
+            player->RemoveAurasDueToSpell(Buff);
         return;
     }
     if (!player->HasAura(Buff))
@@ -1300,8 +1313,7 @@ public:
         std::lock_guard lock(Mutex);
         if (Enabled)
             p->RemoveAurasDueToSpell(Buff);
-        Timers.erase(p->GetGUID());
-        Seen.erase(p->GetGUID());
+        p->CustomData.Erase(PlayerSyncKey);
         Drafts.erase(p->GetGUID());
         PaintUndo.erase(p->GetGUID());
         TraceDrafts.erase(p->GetGUID());
@@ -1314,14 +1326,18 @@ public:
     {
         if (!Enabled)
             return;
-        std::lock_guard lock(Mutex);
-        if ((Timers[p->GetGUID()] += diff) < 500)
-            return;
-        Timers[p->GetGUID()] = 0;
-        SyncBuff(p);
-        if (Seen[p->GetGUID()] != Generation)
+        PlayerSync* sync = p->CustomData.GetDefault<PlayerSync>(PlayerSyncKey);
+        if (diff < sync->RemainingMs)
         {
-            Seen[p->GetGUID()] = Generation;
+            sync->RemainingMs -= diff;
+            return;
+        }
+        sync->RemainingMs = 500;
+        std::lock_guard lock(Mutex);
+        SyncBuff(p);
+        if (sync->SeenGeneration != Generation)
+        {
+            sync->SeenGeneration = Generation;
             Send(p, "CHANGED|" + std::to_string(Generation));
         }
     }

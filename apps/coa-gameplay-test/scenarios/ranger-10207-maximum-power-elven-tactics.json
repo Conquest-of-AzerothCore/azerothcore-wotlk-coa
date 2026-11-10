@@ -1,0 +1,714 @@
+{
+  "schema": 1,
+  "name": "Maximum Power extends Skirmish even when Elven Tactics skips consuming Advantage (#10207)",
+  "contract": [
+    "Maximum Power (560688): 'Abilities used with 5 stacks of Advantage now refresh the duration of your active",
+    "Skirmish by 5 sec' (560689, SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, misc 802039, +5000 ms, additive to",
+    "the aura's current remaining duration). Elven Tactics (560701) adds a flat -20 SPELLMOD_CHANCE_OF_SUCCESS to",
+    "Advantage Decrement Passive (582770), giving a probabilistic chance to not consume Advantage on a 5-stack",
+    "cast. In HandleAscensionClassMechanicsCast, Maximum Power's extension call used to live inside the",
+    "'roll_chance_f(consumeChance) succeeded' branch, so a no-consume roll (Elven Tactics triggering) skipped the",
+    "extension even though the ability was still used at 5 stacks; the fix moved the check out of that branch.",
+    "Skirmish (802039) itself requires caster aura 804329 (CasterAuraSpell) like other Advantage-gated abilities,",
+    "is self-targeted (no miss roll) and recastable, so the fixture resets Advantage to 5 stacks and recasts it",
+    "40 times to exercise the consume roll repeatedly without any external-target miss chance.",
+    "Extension casts (560689, triggered) and Decrement casts (520618, triggered) are both counted with",
+    "spell_cast_count. Under the bug, the extension can only ever fire together with a successful decrement, so",
+    "ExtensionCount <= DecrementCount always; the fix makes the extension fire on every 5-stack use while",
+    "Skirmish and Maximum Power are active, so ExtensionCount > DecrementCount as soon as a single no-consume",
+    "roll lands among the 40 attempts (independent 20% per-cast chance; 40 trials leave well under a tenth of a",
+    "percent chance of no such roll)."
+  ],
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 560688
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 560701
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Maximum Power is known",
+      "actor": "ranger",
+      "metric": "knows_spell",
+      "spell": 560688,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Elven Tactics is known",
+      "actor": "ranger",
+      "metric": "knows_spell",
+      "spell": 560701,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "label": "Establish Skirmish",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Skirmish is active",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 802039,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "ranger",
+      "spell": 804329,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "actor": "ranger",
+      "spell": 802039
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "snapshot",
+      "actor": "ranger",
+      "metric": "spell_cast_count",
+      "spell": 520618,
+      "save_as": "decrement_count"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Advantage was consumed at least once across 40 attempts",
+      "actor": "ranger",
+      "metric": "spell_cast_count",
+      "spell": 520618,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Maximum Power extended Skirmish more times than Advantage was consumed (#10207)",
+      "actor": "ranger",
+      "metric": "spell_cast_count",
+      "spell": 560689,
+      "relative_to": "decrement_count",
+      "min": 1
+    }
+  ]
+}

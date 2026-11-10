@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "name": "High-Risk (PvP) spellbook text states the aura's 20% experience bonus, not 15% (#9333)",
+  "contract": [
+    "High-Risk (PvP) 84421 is the spellbook spell that selects High-Risk. Its Spell.dbc description states",
+    "a literal 'grants 15% increased experience', while the High-Risk aura 1004019 it applies carries",
+    "SPELL_AURA_MOD_XP_PCT with EffectBasePoints 19 and EffectDieSides 1, a 20% bonus, and its buff text",
+    "reads $s1%. The fix streams the unchanged DBC description through coa_client_spell_description",
+    "(SMSG_PATCH_SPELL, opcode 2346, at login) with the number read from $1004019s1, so the spellbook",
+    "and the buff quote the same DBC value. Row 500639 (Runeshroud, published by the same table) is the",
+    "control for the stream. Rendered client text is outside the harness."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "p", "race": 1, "class": 12, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 7000 },
+    { "action": "assert", "label": "The existing description stream is captured", "actor": "p", "metric": "server_packet_contains", "opcode": 2346, "row": 500639, "text": "Requires Runeshroud", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The High-Risk (PvP) row is emitted", "actor": "p", "metric": "server_packets", "opcode": 2346, "row": 84421, "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the text reads the aura's experience bonus", "actor": "p", "metric": "server_packet_contains", "opcode": 2346, "row": 84421, "text": "grants $1004019s1% increased experience", "equals": 1 },
+    { "action": "assert", "label": "The stale literal is gone", "actor": "p", "metric": "server_packet_contains", "opcode": 2346, "row": 84421, "text": "15%", "equals": 0 },
+    { "action": "assert", "label": "The native description is kept", "actor": "p", "metric": "server_packet_contains", "opcode": 2346, "row": 84421, "text": "Can only be cast while in a rested area!", "equals": 1 },
+    { "action": "set_aura", "actor": "p", "spell": 1004019, "stacks": 1 },
+    { "action": "assert", "label": "The High-Risk aura applies the 20% experience bonus the text now quotes", "actor": "p", "metric": "aura_amount", "spell": 1004019, "equals": 20 }
+  ]
+}

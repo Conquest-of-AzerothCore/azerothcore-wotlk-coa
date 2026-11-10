@@ -1,0 +1,184 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: Brimstone Bludgeon stays on the action bar across logins",
+  "contract": "Since #11004 Brimstone Bludgeon (520005) is a temporary stand-in for Sever (500904 ranks) while the 800710 talent is up, and the client book holds no Sever. A button holding 520005 is saved as its Sever origin, and Refresh re-applies the replacement at login without upgrading the bar, so the button came back as a Sever the client does not know and vanished from the bar every login. Every button holding a Sever rank must show Brimstone Bludgeon again once the replacement is re-applied.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "k",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "k",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "k",
+      "item": 629951
+    },
+    {
+      "action": "equip",
+      "actor": "k",
+      "item": 629951,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 500904
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 501499
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 501500
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 501501
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 501502
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 501503
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 501504
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 501505
+    },
+    {
+      "action": "learn",
+      "label": "Brimstone Bludgeon talent",
+      "actor": "k",
+      "spell": 800710
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the talent grants Brimstone Bludgeon",
+      "actor": "k",
+      "metric": "knows_spell",
+      "spell": 520005,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the talent refresh run",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the spellbook holds one Brimstone Bludgeon, not a second row for the learned spell",
+      "actor": "k",
+      "metric": "client_spellbook_copies",
+      "spell": 520005,
+      "equals": 1
+    },
+    {
+      "action": "set_action_button",
+      "label": "Drag Brimstone Bludgeon to the bar",
+      "actor": "k",
+      "spell": 520005,
+      "button": 3
+    },
+    {
+      "action": "set_action_button",
+      "label": "A Sever button saved before the talent",
+      "actor": "k",
+      "spell": 501505,
+      "button": 4
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "action_button",
+      "button": 3,
+      "equals": 520005,
+      "label": "The bar holds Brimstone Bludgeon before the login"
+    },
+    {
+      "action": "relog",
+      "actor": "k"
+    },
+    {
+      "action": "login_hooks",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "action_button",
+      "button": 3,
+      "equals": 520005,
+      "label": "DISCRIMINATING: Brimstone Bludgeon is still on the bar after a login"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "action_button",
+      "button": 4,
+      "equals": 520005,
+      "label": "DISCRIMINATING: the Sever button shows Brimstone Bludgeon, which the client book holds"
+    },
+    {
+      "action": "relog",
+      "actor": "k"
+    },
+    {
+      "action": "login_hooks",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "action_button",
+      "button": 3,
+      "equals": 520005,
+      "label": "and after a second login"
+    }
+  ]
+}

@@ -378,8 +378,8 @@ inline constexpr std::array<ResourceGainRule, 191> ResourceGainRules =
         ResourceGainEvent::FirstSuccessfulDamagingHit},
     {30, 500523, 500523, 805077, 1, ResourceMutation::AuraStacks,
         ResourceGainEvent::FirstSuccessfulDamagingHit},
-    {30, 500523, 500523, 355461, 1, ResourceMutation::TriggerSpell,
-        ResourceGainEvent::FirstSuccessfulDamagingHit},
+    {30, 500523, 500523, 359019, 1, ResourceMutation::TriggerSpell,
+        ResourceGainEvent::EachSuccessfulDamagingHit},
     {30, 801328, 801328, 355461, 1, ResourceMutation::TriggerSpell,
         ResourceGainEvent::FirstSuccessfulHostileTarget},
     {30, 803834, 803839, 355461, 1, ResourceMutation::TriggerSpell,
@@ -470,7 +470,7 @@ struct NativePowerGainRule
     std::uint32_t AmountSpellId = 0;
 };
 
-inline constexpr std::array<NativePowerGainRule, 16> NativePowerGainRules =
+inline constexpr std::array<NativePowerGainRule, 18> NativePowerGainRules =
 {{
     {19, 0, 0, 3, 10, ResourceGainEvent::PeriodicDamageTick, 301253},
     {23, 704355, 704355, 6, 200,
@@ -490,6 +490,10 @@ inline constexpr std::array<NativePowerGainRule, 16> NativePowerGainRules =
     {30, 502668, 502671, 6, 150,
         ResourceGainEvent::FirstSuccessfulHostileTarget},
     {30, 567531, 567532, 6, 150,
+        ResourceGainEvent::FirstSuccessfulHostileTarget},
+    {30, 805717, 805717, 6, 150,
+        ResourceGainEvent::FirstSuccessfulHostileTarget},
+    {30, 806840, 806845, 6, 150,
         ResourceGainEvent::FirstSuccessfulHostileTarget},
     {30, 801624, 801624, 6, 200,
         ResourceGainEvent::FirstSuccessfulHostileTarget, 0, 0, 359504},

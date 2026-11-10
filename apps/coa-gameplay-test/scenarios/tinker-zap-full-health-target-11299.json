@@ -1,0 +1,297 @@
+{
+  "schema": 1,
+  "name": "Tinker: Rejuvenating Gadget and Stim Augmentation fire on a Zap! that lands on a full-health target (#11299)",
+  "contract": [
+    "Rejuvenating Gadget 805306: critical Zap! applies Rejuvenating Gas 706255 to allies around the target, restoring 15% of the value of the shot.",
+    "Stim Augmentation 653239 (equip aura 653240): direct healing abilities heal nearby allies for an additional 20% of the amount healed via 653241.",
+    "Both gated on the effective heal, which is 0 when the primary target is at full health, so neither fired. They now use the heal including overheal (Spell::GetScriptHealingIncludingOverheal, HealInfo::GetHeal), as Blessed By The Stars does after #11244.",
+    "Resourceful Tech 560791 makes Zap! a guaranteed crit on an ally carrying the Tinker's Nanobots. The Tinker with only a gun zaps a full-health Nanobot ally while a grouped ally beside it is wounded.",
+    "Control: without the talents the same Zap! leaves no Gas on the wounded ally and no 653241 heal. With them, both appear."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "full",
+      "race": 1,
+      "class": 12,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "hurt",
+      "race": 1,
+      "class": 12,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "tinker",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "full",
+      "map": 0,
+      "x": -9616.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "hurt",
+      "map": 0,
+      "x": -9615.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "group",
+      "actor": "tinker",
+      "target": "full"
+    },
+    {
+      "action": "group",
+      "actor": "tinker",
+      "target": "hurt"
+    },
+    {
+      "action": "destroy_item",
+      "label": "Remove the starting main-hand weapon",
+      "actor": "tinker",
+      "item": 431911
+    },
+    {
+      "action": "add_item",
+      "label": "Fixture: ranged gun",
+      "actor": "tinker",
+      "item": 450265
+    },
+    {
+      "action": "equip",
+      "actor": "tinker",
+      "item": 450265,
+      "slot": 17
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "equipped_item",
+      "slot": 17,
+      "equals": 450265
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 681298
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 801809
+    },
+    {
+      "action": "learn",
+      "label": "Resourceful Tech: Zap! always crits a Nanobot ally",
+      "actor": "tinker",
+      "spell": 560791
+    },
+    {
+      "action": "cast",
+      "label": "Nanobot Reconstruction on the full-health ally",
+      "actor": "tinker",
+      "spell": 801809,
+      "target": "full"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the full-health ally carries Nanobots",
+      "actor": "full",
+      "metric": "aura",
+      "spell": 801809,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown clear",
+      "ms": 1700
+    },
+    {
+      "action": "snapshot",
+      "actor": "full",
+      "metric": "max_health",
+      "save_as": "full_max"
+    },
+    {
+      "action": "set_health",
+      "actor": "hurt",
+      "value": 1,
+      "maximum": 100000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the primary target is at full health, so Zap! is all overheal",
+      "actor": "full",
+      "metric": "health",
+      "ratio_to": "full_max",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: Zap! the full-health ally without the talents",
+      "actor": "tinker",
+      "spell": 681298,
+      "target": "full"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the cast was accepted",
+      "actor": "tinker",
+      "metric": "cast_failure",
+      "spell": 681298,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Zap! landed a heal on the full-health ally",
+      "actor": "tinker",
+      "metric": "spell_heal_count",
+      "spell": 681298,
+      "target": "full",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Rejuvenating Gas without Rejuvenating Gadget",
+      "actor": "hurt",
+      "metric": "aura",
+      "spell": 706255,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Stim heal without Stim Augmentation",
+      "actor": "tinker",
+      "metric": "spell_heal_count",
+      "spell": 653241,
+      "target": "hurt",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 805306
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 653239
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 653239
+    },
+    {
+      "action": "assert",
+      "label": "Stim Augmentation is on the gun",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 653240,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Rejuvenating Gadget is active",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 805306,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "tinker",
+      "spell": 681298
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown clear",
+      "ms": 1700
+    },
+    {
+      "action": "set_health",
+      "actor": "hurt",
+      "value": 1,
+      "maximum": 100000
+    },
+    {
+      "action": "cast",
+      "label": "Zap! the full-health Nanobot ally with both talents",
+      "actor": "tinker",
+      "spell": 681298,
+      "target": "full"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the cast was accepted",
+      "actor": "tinker",
+      "metric": "cast_failure",
+      "spell": 681298,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Rejuvenating Gas lands on the wounded ally beside the full-health target",
+      "actor": "hurt",
+      "metric": "aura",
+      "spell": 706255,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Stim Augmentation heals the wounded ally beside the full-health target",
+      "actor": "tinker",
+      "metric": "spell_heal_count",
+      "spell": 653241,
+      "target": "hurt",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

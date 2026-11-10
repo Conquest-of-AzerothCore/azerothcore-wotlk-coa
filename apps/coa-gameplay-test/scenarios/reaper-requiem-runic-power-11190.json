@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "name": "Issue 11190: Requiem generates Runic Power once per cast",
+  "contract": "Every Requiem rank (805717, 806840-806845) says it is 'generating Runic Power', and none of its records carries an energize effect or a rune cost, so the gain must come from the server's native power rules. A Requiem that lands on two enemies must raise Runic Power above zero and grant it once, not per target. The amount is not stated by the tooltip or any retained source; it matches the 15 Runic Power (150 internal) placeholder of Soulrend and Doomrend, the sibling Soul Infusion spenders with the same wording, until a live value is confirmed.",
+  "players": [
+    {
+      "id": "reaper",
+      "race": 2,
+      "class": 30,
+      "level": 30,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 28,
+      "distance": 3
+    },
+    {
+      "id": "second",
+      "owner": "reaper",
+      "entry": 36,
+      "level": 28,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 197
+    },
+    {
+      "action": "add_item",
+      "actor": "reaper",
+      "item": 12282,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "reaper",
+      "item": 12282,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "reaper",
+      "spell": 806840
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "knows_spell",
+      "spell": 806840,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "reaper",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "reaper",
+      "power": 6,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "power",
+      "power": 6,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "enemy_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "second",
+      "metric": "health",
+      "save_as": "second_before"
+    },
+    {
+      "action": "cast",
+      "actor": "reaper",
+      "spell": 806840,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "enemy_before",
+      "max": -1,
+      "within_ms": 1000,
+      "label": "Requiem hits the first enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "second",
+      "metric": "health",
+      "relative_to": "second_before",
+      "max": -1,
+      "within_ms": 1000,
+      "label": "Requiem hits the second enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "reaper",
+      "metric": "power",
+      "power": 6,
+      "within_ms": 500,
+      "label": "A landed Requiem generates Runic Power once, not per target",
+      "equals": 150
+    }
+  ]
+}

@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "name": "A Tamed Beast whistle pet comes back after mount and dismount (#9186)",
+  "contract": [
+    "Mounting temporarily unsummons the hunter pet (Unit::Mount) and dismounting reloads it as the current pet through",
+    "Pet::LoadPetFromDB, which refuses a current pet whose creating spell has a duration (a temporary summon).",
+    "The wardrobe's Tamed Beast whistle (ReplaceTamedBeast) recorded Tame Beast 1515, the 20-second channel",
+    "(SpellDuration 18), as the creating spell, so the whistle pet never came back after a dismount and the pet bar",
+    "stayed empty. A native tame records 13481, the spell carrying SPELL_EFFECT_TAMECREATURE, which has no duration.",
+    "Appearance 48864 is Forest Spider 30 (family 3, tameable): after mount and dismount it must return."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "spider",
+      "name": "Spidertamer",
+      "race": 1,
+      "class": 10,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Spidertamer"
+    },
+    {
+      "action": "learn",
+      "label": "Tame Beast Abilities",
+      "actor": "spider",
+      "spell": 965200
+    },
+    {
+      "action": "assert",
+      "label": "Call Pet known",
+      "actor": "spider",
+      "metric": "knows_spell",
+      "spell": 883,
+      "equals": 1
+    },
+    {
+      "action": "apply_appearances",
+      "label": "Use the Forest Spider whistle",
+      "actor": "spider",
+      "selection": {
+        "33": 48864
+      }
+    },
+    {
+      "action": "assert",
+      "label": "The Forest Spider is the pet",
+      "actor": "spider",
+      "metric": "pet_entry",
+      "equals": 30,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Mount up on Brown Horse 458",
+      "actor": "spider",
+      "spell": 458,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Mounted",
+      "actor": "spider",
+      "metric": "mount_display_id",
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Mounting puts the Forest Spider away",
+      "actor": "spider",
+      "metric": "pet_entry",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "spider"
+    },
+    {
+      "action": "assert",
+      "label": "Dismounted",
+      "actor": "spider",
+      "metric": "mount_display_id",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Dismounting brings the Forest Spider back",
+      "actor": "spider",
+      "metric": "pet_entry",
+      "equals": 30,
+      "within_ms": 5000
+    }
+  ]
+}

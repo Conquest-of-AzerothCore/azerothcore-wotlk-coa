@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "name": "Summon Robot places Robotron 3000 next to the Concealed Control Panel (#11296)",
+  "contract": "Issue #11296. Quest 9433 A Dip in the Moonwell: Robotron Control Unit casts Summon Robot 30009, which needs the Concealed Control Panel (spell focus 1372) and summons the possessed Robotron 3000 17178 at TARGET_DEST_CASTER_RANDOM. Its client radius index 27 (50 yd) let the robot appear up the hill behind the panel. A spell correction sets the radius to 5 yd. A level 60 Orc stands at the panel guid 50008 and casts the spell three times; each robot is charmed by the pilot and lies within 5.5 yd (5 yd radius plus tolerance), and ending the channel releases it.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -4513.0,
+    "y": -848.97,
+    "z": -41.79,
+    "o": 3.14
+  },
+  "players": [
+    {
+      "id": "pilot",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "pilot",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "pilot",
+      "spell": 30009
+    },
+    {
+      "action": "cast",
+      "actor": "pilot",
+      "spell": 30009
+    },
+    {
+      "action": "assert",
+      "actor": "pilot",
+      "metric": "charm_entry",
+      "equals": 17178,
+      "within_ms": 3000,
+      "label": "cast 1: Summon Robot puts the pilot in control of Robotron 3000"
+    },
+    {
+      "action": "assert",
+      "actor": "pilot",
+      "metric": "charm_distance",
+      "min": 0,
+      "max": 5.5,
+      "label": "cast 1: the robot appears within 5 yd of the pilot at the control panel"
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "pilot",
+      "spell": 30009
+    },
+    {
+      "action": "assert",
+      "actor": "pilot",
+      "metric": "charm_entry",
+      "equals": 0,
+      "within_ms": 3000,
+      "label": "cast 1: ending the channel releases the robot"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "pilot",
+      "spell": 30009
+    },
+    {
+      "action": "cast",
+      "actor": "pilot",
+      "spell": 30009
+    },
+    {
+      "action": "assert",
+      "actor": "pilot",
+      "metric": "charm_entry",
+      "equals": 17178,
+      "within_ms": 3000,
+      "label": "cast 2: Summon Robot puts the pilot in control of Robotron 3000"
+    },
+    {
+      "action": "assert",
+      "actor": "pilot",
+      "metric": "charm_distance",
+      "min": 0,
+      "max": 5.5,
+      "label": "cast 2: the robot appears within 5 yd of the pilot at the control panel"
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "pilot",
+      "spell": 30009
+    },
+    {
+      "action": "assert",
+      "actor": "pilot",
+      "metric": "charm_entry",
+      "equals": 0,
+      "within_ms": 3000,
+      "label": "cast 2: ending the channel releases the robot"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "pilot",
+      "spell": 30009
+    },
+    {
+      "action": "cast",
+      "actor": "pilot",
+      "spell": 30009
+    },
+    {
+      "action": "assert",
+      "actor": "pilot",
+      "metric": "charm_entry",
+      "equals": 17178,
+      "within_ms": 3000,
+      "label": "cast 3: Summon Robot puts the pilot in control of Robotron 3000"
+    },
+    {
+      "action": "assert",
+      "actor": "pilot",
+      "metric": "charm_distance",
+      "min": 0,
+      "max": 5.5,
+      "label": "cast 3: the robot appears within 5 yd of the pilot at the control panel"
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "pilot",
+      "spell": 30009
+    },
+    {
+      "action": "assert",
+      "actor": "pilot",
+      "metric": "charm_entry",
+      "equals": 0,
+      "within_ms": 3000,
+      "label": "cast 3: ending the channel releases the robot"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "pilot",
+      "spell": 30009
+    }
+  ]
+}

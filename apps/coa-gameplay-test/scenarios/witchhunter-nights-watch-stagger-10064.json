@@ -1,0 +1,163 @@
+{
+  "schema": 1,
+  "name": "Night's Watch actually staggers Physical damage from monsters (#10064)",
+  "contract": [
+    "Night's Watch 807733 reads 'Stagger 25% of Physical damage taken from monsters, distributing it over 5",
+    "seconds.' Its EFFECT_1 is SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (87) in Spell.dbc, not SPELL_AURA_SCHOOL_ABSORB",
+    "(69), even though the C++ Absorb()/Tick()/Pay() stagger logic in AscensionWitchHunterDefenses.cpp was always",
+    "written for EFFECT_1 to be a real school-absorb effect that queues the absorbed amount into a 5-slot ring",
+    "buffer and pays it back to the Witch Hunter as self-inflicted DOT damage over the next 5 seconds. The engine",
+    "only calls OnEffectAbsorb for auras whose effect ApplyAuraName is actually SPELL_AURA_SCHOOL_ABSORB, so the",
+    "whole stagger path (including the delayed payback) was dead code; only the DBC's flat, unrelated -1%",
+    "MOD_DAMAGE_PERCENT_TAKEN ever applied, and no deferred self-damage ever occurred. The fix corrects EFFECT_1's",
+    "ApplyAuraName to SPELL_AURA_SCHOOL_ABSORB on load, wiring it into the existing Absorb()/Tick() handlers. A",
+    "hostile monster (never player-controlled, since Absorb() excludes IsControlledByPlayer attackers) lands",
+    "several Physical melee hits on the Witch Hunter, who then finishes it off; once the striker is dead (no",
+    "further external attacker, confirmed by its death and the Witch Hunter leaving combat), health must still",
+    "keep dropping on its own for several more seconds from the queued stagger payback alone - something that",
+    "cannot happen at all while EFFECT_1 stays dead code, since no debt is ever queued without a real absorb."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 15,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "striker",
+      "owner": "hunter",
+      "entry": 36,
+      "faction": 14,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_health",
+      "label": "Room for several monster swings plus the deferred payback",
+      "actor": "hunter",
+      "value": 300000,
+      "maximum": 300000
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply Night's Watch before any hit lands",
+      "actor": "hunter",
+      "spell": 807733,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Night's Watch is active",
+      "actor": "hunter",
+      "metric": "aura",
+      "spell": 807733,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "Health before the fight",
+      "actor": "hunter",
+      "metric": "health",
+      "save_as": "hp_start"
+    },
+    {
+      "action": "attack",
+      "label": "Pull the striker into melee",
+      "actor": "hunter",
+      "target": "striker"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the striker (a monster, never player-controlled) selects the Witch Hunter",
+      "actor": "striker",
+      "metric": "victim",
+      "target": "hunter",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "label": "Let several monster hits land and queue stagger debt",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: real combat damage occurred while the monster could reach the Witch Hunter",
+      "actor": "hunter",
+      "metric": "health",
+      "relative_to": "hp_start",
+      "max": -1
+    },
+    {
+      "action": "set_health",
+      "label": "Bring the striker to the brink so the next swing finishes it",
+      "actor": "striker",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Witch Hunter's own swing finishes the striker off",
+      "actor": "striker",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Witch Hunter leaves combat once the only attacker is dead",
+      "actor": "hunter",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "label": "Health once no external attacker remains",
+      "actor": "hunter",
+      "metric": "health",
+      "save_as": "hp_disengaged"
+    },
+    {
+      "action": "wait",
+      "label": "Let the queued stagger debt pay itself back with no monster nearby",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: health keeps dropping from the deferred payback with no attacker present",
+      "actor": "hunter",
+      "metric": "health",
+      "relative_to": "hp_disengaged",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "label": "The Witch Hunter survived the exchange",
+      "actor": "hunter",
+      "metric": "health",
+      "min": 1
+    }
+  ]
+}

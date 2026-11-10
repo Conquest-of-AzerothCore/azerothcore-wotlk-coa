@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "name": "Shadowglen herb spots rest on the ground (#10693)",
+  "contract": "GatherMate herb spots Peacebloom 12020312 and Silverleaf 12020314, 12020316, 12020322, 12020387 and 12020400 in Shadowglen were imported at the Teldrassil canopy height, 124-283 yd above the floor found under them (spawn_ground_gap measured 205.38, 185.54, 282.72, 124.52, 159.56 and 128.91 on the worldserver's map/vmap data; a probe 3 yd above the terrain found the floor exactly at the terrain height, 1350.70, 1335.51, 1329.19, 1345.32, 1325.19 and 1318.07). Each spot now rests on that floor and is not inside a model. Issue #10693.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Peacebloom 12020312 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12020312,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Peacebloom 12020312 is not inside a model",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "guid": 12020312,
+      "spawn_type": "gameobject",
+      "min": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Silverleaf 12020314 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12020314,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Silverleaf 12020314 is not inside a model",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "guid": 12020314,
+      "spawn_type": "gameobject",
+      "min": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Silverleaf 12020316 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12020316,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Silverleaf 12020316 is not inside a model",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "guid": 12020316,
+      "spawn_type": "gameobject",
+      "min": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Silverleaf 12020322 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12020322,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Silverleaf 12020322 is not inside a model",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "guid": 12020322,
+      "spawn_type": "gameobject",
+      "min": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Silverleaf 12020387 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12020387,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Silverleaf 12020387 is not inside a model",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "guid": 12020387,
+      "spawn_type": "gameobject",
+      "min": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Silverleaf 12020400 rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 12020400,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Silverleaf 12020400 is not inside a model",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "guid": 12020400,
+      "spawn_type": "gameobject",
+      "min": 0.5
+    }
+  ]
+}

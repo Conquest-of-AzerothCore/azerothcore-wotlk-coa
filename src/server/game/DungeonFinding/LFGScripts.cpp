@@ -271,6 +271,23 @@ namespace lfg
                 }
             }
         }
+
+        // A finished dungeon's group that is down to one member leaves the dungeon with that member as well:
+        // a group of one keeps no party frame, so the client offers no way to teleport out.
+        if (state == LFG_STATE_FINISHED_DUNGEON && group && group->GetMembersCount() == 1)
+            if (GroupReference* last = group->GetFirstMember())
+                if (Player* player = last->GetSource())
+                    if (!player->IsBeingTeleportedFar() && player->GetMap()->IsDungeon()
+                        && player->GetMapId() == sLFGMgr->GetDungeonMapId(gguid))
+                    {
+                        if (!player->IsAlive())
+                        {
+                            player->ResurrectPlayer(0.5f);
+                            player->SpawnCorpseBones();
+                        }
+
+                        player->TeleportToEntryPoint();
+                    }
     }
 
     void LFGGroupScript::OnDisband(Group* group)

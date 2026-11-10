@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Setis casts his live kit: the 4 s Meteor and the marked Call Lightning, and nothing no live kill shows",
+  "contract": [
+    "boss_setis_coa casts Meteor 83360 after 26.4 s at a target he marks (2119015), as the live kills",
+    "show; Call Lightning after 30.5 s, which first marks one spot per player, up to three and one more",
+    "for every ten (2119053). He casts none of the spells no live kill shows: Seeking Shadow Bolts",
+    "(2119001), the split Meteor (2119010) or Massive Thunder Stomp (2119022), and he has no Prismatic",
+    "Barrier, whose spells heal him to full."
+  ],
+  "timeout_ms": 150000,
+  "location": {
+    "map": 880,
+    "x": -8093.0,
+    "y": 1663.6,
+    "z": 12.9
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 500000000,
+      "maximum": 500000000
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 64600,
+      "as": "setis",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "tank",
+      "entry": 64600
+    },
+    {
+      "action": "assert",
+      "label": "Its target is marked while he casts",
+      "actor": "tank",
+      "metric": "aura",
+      "spell": 2119015,
+      "min": 1,
+      "within_ms": 32000
+    },
+    {
+      "action": "assert",
+      "label": "Meteor is the live 83360",
+      "actor": "setis",
+      "metric": "spell_cast_count",
+      "spell": 83360,
+      "min": 1,
+      "within_ms": 45000
+    },
+    {
+      "action": "assert",
+      "label": "Call Lightning marks a spot for the player",
+      "actor": "setis",
+      "metric": "spell_cast_count",
+      "spell": 2119053,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Seeking Shadow Bolts",
+      "actor": "setis",
+      "metric": "spell_cast_count",
+      "spell": 2119001,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no split Meteor",
+      "actor": "setis",
+      "metric": "spell_cast_count",
+      "spell": 2119010,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Massive Thunder Stomp",
+      "actor": "setis",
+      "metric": "spell_cast_count",
+      "spell": 2119022,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No Prismatic Barrier",
+      "actor": "setis",
+      "metric": "aura",
+      "spell": 2119030,
+      "equals": 0
+    }
+  ]
+}

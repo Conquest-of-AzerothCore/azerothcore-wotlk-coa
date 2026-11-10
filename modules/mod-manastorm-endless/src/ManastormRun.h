@@ -5,6 +5,7 @@
 #include "Position.h"
 
 #include <array>
+#include <algorithm>
 #include <limits>
 #include <unordered_set>
 #include <vector>
@@ -40,11 +41,50 @@ public:
 
     std::unordered_map<ObjectGuid::LowType, std::vector<CompanionTransfer>> CompanionTransfers;
 
+    struct StageBuff
+    {
+        uint32 Spell = 0;
+        ObjectGuid Caster;
+        ObjectGuid CastItem;
+        uint8 EffectMask = 0;
+        uint8 Stacks = 1;
+        uint8 Charges = 0;
+        uint8 RecalculateMask = 0;
+        int32 MaxDuration = 0;
+        std::array<int32, 3> Amounts{};
+        std::array<int32, 3> BaseAmounts{};
+    };
+
+    struct StageRecovery
+    {
+        uint32 DestinationInstanceId = 0;
+        std::vector<StageBuff> Buffs;
+    };
+
+    std::unordered_map<ObjectGuid::LowType, StageRecovery> StageRecoveries;
+
     uint64 GetRunId() const { return _runId; }
     uint64 GetSeed() const { return _seed; }
 
     ObjectGuid::LowType GetOwnerGuid() const { return _ownerGuid; }
     std::vector<ObjectGuid::LowType> const& GetMembers() const { return _members; }
+
+    bool RemoveMember(ObjectGuid::LowType guid)
+    {
+        auto member = std::find(_members.begin(), _members.end(), guid);
+        if (member == _members.end())
+            return false;
+        _members.erase(member);
+        if (_ownerGuid == guid)
+            _ownerGuid = _members.empty() ? 0 : _members.front();
+        _returnLocations.erase(guid);
+        _memberGadgetLoadouts.erase(guid);
+        _cooldownResetInstances.erase(guid);
+        _pendingStageTransferMembers.erase(guid);
+        CompanionTransfers.erase(guid);
+        StageRecoveries.erase(guid);
+        return true;
+    }
 
     ManastormMode GetMode() const { return _mode; }
     bool IsEndgame() const { return _endgame; }
@@ -72,11 +112,11 @@ public:
     uint32 GetDepth() const { return _depth; }
     bool MarkStageCooldownsReset(ObjectGuid::LowType guid)
     {
-        auto const previous = _cooldownResetDepths.find(guid);
-        if (previous != _cooldownResetDepths.end() && previous->second == _depth)
+        auto const previous = _cooldownResetInstances.find(guid);
+        if (previous != _cooldownResetInstances.end() && previous->second == _instanceId)
             return false;
 
-        _cooldownResetDepths[guid] = _depth;
+        _cooldownResetInstances[guid] = _instanceId;
         return true;
     }
     ObjectGuid GetPortalGuid() const { return _portalGuid; }
@@ -771,7 +811,7 @@ private:
     std::unordered_set<ObjectGuid::LowType>
         _chaoticLinkUnusedSpawnIds;
 
-    std::unordered_map<ObjectGuid::LowType, uint32> _cooldownResetDepths;
+    std::unordered_map<ObjectGuid::LowType, uint32> _cooldownResetInstances;
     uint32 _instanceId = 0;
 
     // During the five-second portal window the run may own the completed

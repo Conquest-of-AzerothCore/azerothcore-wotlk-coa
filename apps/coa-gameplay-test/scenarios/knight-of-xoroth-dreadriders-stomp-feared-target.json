@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "name": "Dreadrider's Stomp still hits a feared target (#9846)",
+  "contract": "Dreadrider's Stomp 804702 and Hellfire Trample 804704 are pure self-centered AoE effects (EffectImplicitTargetA/B 22/15 and 47/0, EffectRadiusIndex 14) with no explicit unit target at all; their tooltips promise damage to 'nearby enemies' with no crowd-control exception. Both carry Spell.dbc AttributesEx6 256 (SPELL_ATTR6_DO_NOT_CHAIN_TO_CROWD_CONTROLLED_TARGETS), confirmed via coa-dbc-viewer against the server's Spell.dbc. SpellInfo::CheckTarget (SpellInfo.cpp:2102) applies that bit to every implicitly-selected target, so a feared enemy (UNIT_STATE_FLEEING, part of UNIT_STATE_CONTROLLED) was silently dropped from the AoE's target list -- the attribute's documented purpose is to stop a chain-type spell from breaking CC on uninvolved targets, not to exclude CC'd targets from a flat stomp around the caster. AscensionCompatChangelogScript::OnLoadSpellCustomAttr now clears the bit for 804702/804704 at load time, the same pattern already used for 83086/9930889. Fear 5782 (EffectApplyAuraName[0] SPELL_AURA_MOD_FEAR) puts the target in UNIT_STATE_FLEEING without any CoA-specific mechanic, isolating the native attribute check. The feared fixture is entry 38 (Defias Thug, CreatureImmunitiesId 0), not the usual entry 36 dummy: entry 36 (Harvest Golem) carries creature_immunities row -93 (MechanicsMask 16777248, FEAR|HORROR), so it cannot be feared at all and would make this scenario untestable.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "feared", "owner": "knight", "entry": 38, "faction": 14, "level": 60, "health": 1000000, "distance": 1 },
+    { "id": "control", "owner": "knight", "entry": 36, "level": 60, "health": 1000000, "distance": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 804702 },
+    { "action": "learn", "actor": "knight", "spell": 5782 },
+    { "action": "add_item", "actor": "knight", "item": 629951 },
+    { "action": "equip", "label": "Dreadrider's Stomp requires a main-hand weapon (EquippedItemClass 2)", "actor": "knight", "item": 629951, "slot": 15 },
+    { "action": "wait", "ms": 500 },
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000, "label": "Dreadrider's Stomp costs Rage" },
+    {
+      "action": "cast", "label": "Fear before mounting: Fear has no SPELL_ATTR0_ALLOW_WHILE_MOUNTED",
+      "actor": "knight", "spell": 5782, "target": "feared"
+    },
+    {
+      "action": "assert", "label": "SETUP: the target is fleeing in fear",
+      "actor": "feared", "metric": "aura", "spell": 5782, "equals": 1, "within_ms": 2500
+    },
+    {
+      "action": "assert", "label": "SETUP: no Stomp damage on either dummy before the cast",
+      "actor": "knight", "metric": "spell_damage_count", "spell": 804702, "target": "feared", "equals": 0
+    },
+    { "action": "set_aura", "actor": "knight", "spell": 804703, "stacks": 1, "label": "Xorothian Warsteed mount, required by CasterAuraState (AscensionXorothAbilities.cpp:275); no wait here so the feared target has not yet fled out of Stomp's 8 yd radius" },
+    {
+      "action": "assert", "label": "SETUP: the knight is mounted",
+      "actor": "knight", "metric": "aura", "spell": 804703, "equals": 1
+    },
+    { "action": "cast", "actor": "knight", "spell": 804702, "target": "control" },
+    {
+      "action": "assert", "label": "CONTROL: Stomp hits the non-feared dummy",
+      "actor": "knight", "metric": "spell_damage_count", "spell": 804702, "target": "control", "min": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Stomp still hits the feared dummy",
+      "actor": "knight", "metric": "spell_damage_count", "spell": 804702, "target": "feared", "min": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "actor": "knight", "metric": "alive", "equals": 1
+    }
+  ]
+}

@@ -23,6 +23,7 @@
 
 #include "AllCreatureScript.h"
 #include "Containers.h"
+#include "CellImpl.h"
 #include "Creature.h"
 #include "DataMap.h"
 #include "GameObject.h"

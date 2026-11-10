@@ -1,0 +1,149 @@
+{
+  "schema": 1,
+  "name": "A no-mail challenge lets the hero take the Elite Warchest contents its full bags sent by mail (#10860)",
+  "contract": [
+    "Report #10860: under a challenge that forbids receiving mail the hero opened the Elite Warchest (2977351) with",
+    "full bags; the contents that did not fit were mailed and could not be taken (\"Your challenge forbids receiving",
+    "mail.\"). The warchest mails its overflow from the hero to the hero, which only the server can do (the client",
+    "refuses mail to oneself), but the challenge exempted only the warchest item itself from such a mail.",
+    "Expected: under Bloodbath (challenge 15, NO_MAIL) the overflowed Mekkatorque's Neverending Storage Contraption (134993) is taken",
+    "with MAIL_OK (0) and lands in the bags."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "name": "Coaoverhero",
+      "race": 1,
+      "class": 23,
+      "level": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "start_challenge",
+      "label": "Fixture: the hero runs Bloodbath (NO_MAIL)",
+      "actor": "hero",
+      "challenge": 15,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 2977351
+    },
+    {
+      "action": "fill_bags",
+      "label": "Leave one free bag slot",
+      "actor": "hero",
+      "slots": 1
+    },
+    {
+      "action": "use_item",
+      "label": "Open the Elite Warchest",
+      "actor": "hero",
+      "item": 2977351,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "The first reward fills the last slot",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 2499004,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The second reward is mailed",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 134993,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "destroy_item",
+      "label": "Free a slot for the take",
+      "actor": "hero",
+      "item": 2499004
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "hero",
+      "entry": 142119
+    },
+    {
+      "action": "client_packet",
+      "label": "DISCRIMINATING: the challenge hook passes the overflow take",
+      "actor": "hero",
+      "opcode": 582,
+      "early": false,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 134993
+        },
+        {
+          "mail_item_guid": 134993
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The mailbox hands over the overflowed reward",
+      "actor": "hero",
+      "opcode": 582,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 134993
+        },
+        {
+          "mail_item_guid": 134993
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 569,
+      "index": 2,
+      "equals": 0,
+      "label": "The take succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 134993,
+      "equals": 1,
+      "within_ms": 1000
+    }
+  ]
+}

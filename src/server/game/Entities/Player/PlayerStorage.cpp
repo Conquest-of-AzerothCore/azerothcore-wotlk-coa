@@ -2509,11 +2509,11 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
     if (proto->Class == ITEM_CLASS_ARMOR)
     {
         // Check for shields
-        if (proto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD && !(
-            IsClass(CLASS_PALADIN, CLASS_CONTEXT_EQUIP_SHIELDS)
+        if (proto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD && !(IsAscensionClass(getClass())
+            ? HasSkill(SKILL_SHIELD)
+            : (IsClass(CLASS_PALADIN, CLASS_CONTEXT_EQUIP_SHIELDS)
             || IsClass(CLASS_WARRIOR, CLASS_CONTEXT_EQUIP_SHIELDS)
-            || IsClass(CLASS_SHAMAN, CLASS_CONTEXT_EQUIP_SHIELDS)
-            || (IsAscensionClass(getClass()) && HasSkill(SKILL_SHIELD))))
+            || IsClass(CLASS_SHAMAN, CLASS_CONTEXT_EQUIP_SHIELDS))))
         {
             return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
         }
@@ -2553,7 +2553,7 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
         }
         else if (IsClass(CLASS_WARRIOR, CLASS_CONTEXT_EQUIP_ARMOR_CLASS))
         {
-            if ((proto->HasStat(ITEM_MOD_SPELL_POWER) || proto->HasSpellPowerStat()))
+            if (!IsAscensionClass(getClass()) && (proto->HasStat(ITEM_MOD_SPELL_POWER) || proto->HasSpellPowerStat()))
             {
                 return EQUIP_ERR_CANT_DO_RIGHT_NOW;
             }
@@ -2569,7 +2569,7 @@ InventoryResult Player::CanRollForItemInLFG(ItemTemplate const* proto, WorldObje
         }
         else if (IsClass(CLASS_ROGUE, CLASS_CONTEXT_EQUIP_ARMOR_CLASS))
         {
-            if (proto->HasStat(ITEM_MOD_SPELL_POWER) || proto->HasSpellPowerStat())
+            if (!IsAscensionClass(getClass()) && (proto->HasStat(ITEM_MOD_SPELL_POWER) || proto->HasSpellPowerStat()))
             {
                 return EQUIP_ERR_CANT_DO_RIGHT_NOW;
             }
@@ -6532,6 +6532,8 @@ void Player::_LoadQuestStatus(PreparedQueryResult result)
     // clear quest log tail
     for (uint16 i = slot; i < MAX_QUEST_LOG_SIZE; ++i)
         SetQuestSlot(i, 0);
+
+    PinTimedQuestsToNativeLog();
 }
 
 void Player::_LoadQuestStatusRewarded(PreparedQueryResult result)
@@ -7496,6 +7498,7 @@ void Player::_SaveAuras(CharacterDatabaseTransaction trans, bool logout)
 
 void Player::_SaveInventory(CharacterDatabaseTransaction trans)
 {
+    sScriptMgr->OnPlayerSaveInventory(this, trans);
     CharacterDatabasePreparedStatement* stmt = nullptr;
     // force items in buyback slots to new state
     // and remove those that aren't already

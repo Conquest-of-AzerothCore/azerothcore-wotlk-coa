@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: a Gurubashi Bat Rider can be stunned and dies by its own Unstable Concoction",
+  "contract": [
+    "On live a stun lands on Gurubashi Bat Riders (14750; a stun hit one in the live log of 2026-08-02), and",
+    "below 30% health the rider throws Unstable Concoction (24024), which kills it (spell text: \"killing the",
+    "caster in the process\"; tester, 2026-11-03). A paladin stuns a rider summoned at the entrance with Hammer of",
+    "Justice (10308), waits for the stun to fade, then wounds it below 30%."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "paladin",
+      "race": 1,
+      "class": 2,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "paladin",
+      "spell": 10308
+    },
+    {
+      "action": "teleport",
+      "actor": "paladin",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "paladin",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "summon",
+      "actor": "paladin",
+      "entry": 14750,
+      "as": "rider",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "label": "Hammer of Justice on the rider",
+      "actor": "paladin",
+      "spell": 10308,
+      "target": "rider"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the rider is stunned",
+      "actor": "rider",
+      "metric": "stunned",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the stun fades",
+      "actor": "rider",
+      "metric": "stunned",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound the rider below 30% health",
+      "actor": "paladin",
+      "entry": 14750,
+      "pct": 25
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the rider throws Unstable Concoction",
+      "actor": "paladin",
+      "metric": "spell_go_count",
+      "entry": 14750,
+      "spell": 24024,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the concoction kills the rider",
+      "actor": "rider",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

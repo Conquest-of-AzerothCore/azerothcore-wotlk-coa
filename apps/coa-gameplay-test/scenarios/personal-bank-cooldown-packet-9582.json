@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Personal Bank sends a live cooldown packet on use (#9582)",
+  "contract": "Using the Personal Bank item (#9582: 'Icon does not enter cooldown animation') must, besides recording the ten-minute server-side cooldown, push a native SMSG_SPELL_COOLDOWN to the owning session right away, so the bank icon starts its cooldown swipe without a relog or any other packet that happens to rebuild the spellbook.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "banker", "race": 1, "class": 12, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "add_item", "label": "Acquire the Personal Bank", "actor": "banker", "item": 134985, "count": 1 },
+    {
+      "action": "assert",
+      "label": "No cooldown packet has been sent for the bank spell yet",
+      "actor": "banker", "metric": "spell_cooldown_packet_ms", "spell": 100702, "equals": -1
+    },
+    { "action": "use_item", "label": "Summon through the item", "actor": "banker", "item": 134985, "spell": 100702 },
+    { "action": "wait", "label": "Let the vault summon land in the world", "ms": 3000 },
+    {
+      "action": "assert",
+      "label": "The server-side cooldown map holds the ten-minute cooldown",
+      "actor": "banker", "metric": "cooldown_ms", "spell": 100702, "min": 590000, "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "A live cooldown packet matching the ten-minute cooldown was sent to the session",
+      "actor": "banker", "metric": "spell_cooldown_packet_ms", "spell": 100702, "equals": 600000
+    }
+  ]
+}

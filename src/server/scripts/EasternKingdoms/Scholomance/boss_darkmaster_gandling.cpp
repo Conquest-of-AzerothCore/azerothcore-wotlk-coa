@@ -15,10 +15,12 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "BossControlTargeting.h"
 #include "CreatureScript.h"
 #include "Map.h"
 #include "Player.h"
 #include "ScriptedCreature.h"
+#include "SpellMgr.h"
 #include "SpellScript.h"
 #include "scholomance.h"
 
@@ -347,7 +349,8 @@ public:
                     break;
 
                 case SPELL_SHADOW_PORTAL:
-                    if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 15.0, true))
+                    if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0,
+                        BossControlTargetSelector(me, sSpellMgr->GetSpellInfo(SPELL_SHADOW_PORTAL), 15.0f, true, true, 0)))
                     {
                         room = FindRoom();
                         if (room < 6)

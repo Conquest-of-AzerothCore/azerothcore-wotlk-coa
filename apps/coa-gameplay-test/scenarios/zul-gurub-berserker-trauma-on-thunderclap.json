@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: the Gurubashi Berserker's Thunderclap puts Trauma on everyone it hits",
+  "contract": [
+    "In the live CoA combat logs of 2026-08-02 and 2026-08-09 all 155 Trauma (2118910) applications land with a",
+    "Thunderclap (340080) hit on the same player, never with a Trauma cast of their own. The Berserker (11352)",
+    "opens with Thunderclap at 3 s. The old kit cast Trauma only on its victim, 5-10 s into the fight, so the",
+    "bystander standing next to the tank never carried it."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "bystander",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "bystander",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "group",
+      "label": "Both heroes share one Zul'Gurub instance",
+      "actor": "tank",
+      "target": "bystander"
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "bystander",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let both transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 11352,
+      "as": "berserker",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the bystander carries no Trauma before the fight",
+      "actor": "bystander",
+      "metric": "aura",
+      "spell": 2118910,
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "label": "The tank engages the Berserker",
+      "actor": "tank",
+      "target": "berserker"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Berserker fights",
+      "actor": "berserker",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Berserker opens with Thunderclap",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "entry": 11352,
+      "spell": 340080,
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the bystander hit by Thunderclap carries Trauma",
+      "actor": "bystander",
+      "metric": "aura",
+      "spell": 2118910,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: so does the tank, right with the Thunderclap",
+      "actor": "tank",
+      "metric": "aura",
+      "spell": 2118910,
+      "equals": 1,
+      "within_ms": 1000
+    }
+  ]
+}

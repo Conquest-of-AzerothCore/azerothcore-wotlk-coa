@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Challenge rule gates and pet trial auras pass their server self-tests",
+  "contract": [
+    "The rule self-test compared kill, battleground and disadvantage XP against the raw 1000 granted, but OnPlayerGiveXP applies the global XP rate (RATE_XP_GLOBAL) before the challenge hooks run, so the passing rules reported FAIL.",
+    "NO_REALM_BANK had no enforcement and was skipped as not applicable; it now has a gate and a self-test that also checks the personal bank stays open.",
+    "Trial auras spread to summons through OnCreatureAddWorld, but the reset only stripped creatures in the summon slots, so a free summon such as the pet test's 50075 kept the Nightmare aura 93132.",
+    "Expected: every rule gate passes, and the reset strips the trial aura from both player and summon."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    { "id": "a", "race": 1, "class": 1, "level": 1 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "console", "label": "Run every rule gate", "command": "coa ruletestall Harnessa" },
+    {
+      "action": "assert", "label": "The rule self-test finished",
+      "actor": "a", "metric": "system_message_contains", "text": "Rule gates: ", "equals": 1, "within_ms": 90000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: no rule gate fails",
+      "actor": "a", "metric": "system_message_contains", "text": " FAIL [id ", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The realm bank rule is exercised, not skipped",
+      "actor": "a", "metric": "system_message_contains", "text": "CHALLENGE_RULES_TYPE_NO_REALM_BANK  ", "equals": 1
+    },
+    {
+      "action": "assert", "label": "The summary reports all rules passing",
+      "actor": "a", "metric": "system_message_contains", "text": " 0 failed -> ALL PASS", "equals": 1
+    },
+    { "action": "console", "label": "Run the pet trial aura test", "command": "coa pettest Harnessa" },
+    {
+      "action": "assert", "label": "The summon receives the trial aura",
+      "actor": "a", "metric": "system_message_contains", "text": "aura 93132 -> PASS", "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the reset strips the aura from player and summon",
+      "actor": "a", "metric": "system_message_contains",
+      "text": "aura stripped on reset -> player: PASS, summon: PASS", "equals": 1, "within_ms": 30000
+    }
+  ]
+}

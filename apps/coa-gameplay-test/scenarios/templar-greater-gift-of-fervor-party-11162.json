@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "name": "Issue 11162: Greater class buffs reach low-level party members",
+  "contract": "Greater Gift of Fervor (572630) reads 'Places an Oath on all raid and party members, increasing total stats by 10%'. CoA Greater class buffs have a single rank at level 50-60, so the native aura scaling rule dropped every party member more than ten levels below it. Live combat logs (2026-08-03, Razorfen Kraul) show Greater Spider Pheromones (680312) from a level 58 caster landing on party members whose own spells top out at levels 20-30. A cast must put the aura on the caster and on every nearby party member whatever their level; Greater Power Module (680315) follows the same rule.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9458.0,
+    "y": 42.0,
+    "z": 55.5
+  },
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 58
+    },
+    {
+      "id": "first",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    },
+    {
+      "id": "second",
+      "race": 1,
+      "class": 1,
+      "level": 45
+    },
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 58
+    }
+  ],
+  "steps": [
+    {
+      "action": "group",
+      "actor": "templar",
+      "target": "first"
+    },
+    {
+      "action": "group",
+      "actor": "templar",
+      "target": "second"
+    },
+    {
+      "action": "group",
+      "actor": "templar",
+      "target": "tinker"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 572630
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 572630
+    },
+    {
+      "action": "assert",
+      "actor": "templar",
+      "metric": "aura_stacks",
+      "spell": 572630,
+      "caster": "templar",
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "templar gets the Oath"
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "aura_stacks",
+      "spell": 572630,
+      "caster": "templar",
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "first gets the Oath"
+    },
+    {
+      "action": "assert",
+      "actor": "second",
+      "metric": "aura_stacks",
+      "spell": 572630,
+      "caster": "templar",
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "second gets the Oath"
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 680315
+    },
+    {
+      "action": "cast",
+      "actor": "tinker",
+      "spell": 680315
+    },
+    {
+      "action": "assert",
+      "actor": "first",
+      "metric": "aura_stacks",
+      "spell": 680315,
+      "caster": "tinker",
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "first gets Greater Power Module"
+    },
+    {
+      "action": "assert",
+      "actor": "second",
+      "metric": "aura_stacks",
+      "spell": 680315,
+      "caster": "tinker",
+      "equals": 1,
+      "within_ms": 3000,
+      "label": "second gets Greater Power Module"
+    }
+  ]
+}

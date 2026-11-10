@@ -210,8 +210,8 @@ TEST(ProbeRelay, LabAccountPrefixIsCaseInsensitive)
 
 TEST(ProbeRelay, ReadOnlyCommandsAreExactNames)
 {
-    for (std::string_view command : {"ping", "spell", "item", "auras", "spellbook", "known", "log", "state", "ca",
-             "frame", "errors"})
+    for (std::string_view command : {"ping", "spell", "item", "bagitem", "auras", "spellbook", "known", "log",
+             "state", "ca", "frame", "errors"})
         EXPECT_TRUE(IsReadOnlyCommand(command)) << command;
     for (std::string_view command : {"eval", "pksend", "pkwatch", "Ping", "pings", ""})
         EXPECT_FALSE(IsReadOnlyCommand(command)) << command;

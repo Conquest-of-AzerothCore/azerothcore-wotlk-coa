@@ -3,10 +3,13 @@
 #include "CoA.Challenges.Review.h"
 #include "RBAC.h"
 #include "KillRewarder.h"
+#include "Mail.h"
 #include "Random.h"
 #include "AllCreatureScript.h"
 #include "AccountScript.h"
 #include "AscensionClientLua.h"
+#include "AscensionPersonalBank.h"
+#include "AscensionHighRisk.h"
 #include "LocalLevelScaling.h"
 #include "AscensionRulesets.h"
 
@@ -14,6 +17,9 @@ using namespace Acore::ChatCommands;
 
 namespace CoAChallenges
 {
+
+    constexpr uint32 CHALLENGE_SLOW_AND_STEADY = 601;
+    constexpr uint32 CHALLENGE_PRESTIGE_SLOW_AND_STEADY = 602;
 
     bool ChallengeAllowsRuleset(Player* player, AscensionRulesets::Ruleset ruleset)
     {
@@ -24,9 +30,33 @@ namespace CoAChallenges
         return false;
     }
 
+    bool ChallengeAllowsBankAccess(Player* player, uint8 kind)
+    {
+        if (kind != AscensionPersonalBank::REALM || !PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_REALM_BANK"))
+            return true;
+        NotifyPlayer(player, "Your challenge forbids using the realm bank.");
+        return false;
+    }
+
+    bool ChallengeAllowsHighRiskLoot(Player* looter, uint32)
+    {
+        if (!PlayerHasRule(looter, "CHALLENGE_RULES_TYPE_NO_HIGH_RISK_LOOT"))
+            return true;
+        NotifyPlayer(looter, "Your challenge forbids looting the spoils of other players in High-Risk.");
+        return false;
+    }
+
     bool UsesCoreProfessionXP(Player* player)
     {
         return player && ActiveChallenges(player->GetGUID().GetCounter()).contains(167);
+    }
+
+    bool EarnsHalfExperience(Player* player)
+    {
+        if (!player)
+            return false;
+        std::set<uint32> const active = ActiveChallenges(player->GetGUID().GetCounter());
+        return active.contains(CHALLENGE_SLOW_AND_STEADY) || active.contains(CHALLENGE_PRESTIGE_SLOW_AND_STEADY);
     }
 
     // Heal-path helpers (defined below, used by HealBlocked earlier in this TU).
@@ -810,14 +840,15 @@ namespace CoAChallenges
     {
         if (!player)
             return;
+        static_assert(CoAParse::LevelScalingBlockCreature == LocalLevelScaling::ChallengeBlocksCreatureScaling);
+        static_assert(CoAParse::LevelScalingBlockQuest == LocalLevelScaling::ChallengeBlocksQuestScaling);
         uint8 blocks = 0;
         if (ChallengesEnabled())
         {
             uint32 level = 0;
-            if (ActiveChallengeWithRule(player, "CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING", level))
-                blocks |= LocalLevelScaling::ChallengeBlocksCreatureScaling;
-            if (ActiveChallengeWithRule(player, "CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING", level))
-                blocks |= LocalLevelScaling::ChallengeBlocksQuestScaling;
+            for (char const* rule : CoAParse::LevelScalingRules)
+                if (ActiveChallengeWithRule(player, rule, level))
+                    blocks |= CoAParse::LevelScalingBlockBits(rule);
         }
         if (StoreLevelScalingBlocks(player->GetGUID().GetCounter(), blocks) == blocks || !player->IsInWorld())
             return;
@@ -1040,11 +1071,12 @@ namespace CoAChallenges
     // OUTSIDE_INTERACTION). During the trial: the NO_MAIL rule forbids both
     // sending and receiving mail. Store items / reward caches are exempt.
     constexpr uint32 BazaarTokenItem = 975001;
+    constexpr uint32 EliteWarchestItem = 2977351;
     std::unordered_set<uint32> StoreItems;
 
     void LoadStoreItems()
     {
-        StoreItems = { BazaarTokenItem };
+        StoreItems = { BazaarTokenItem, EliteWarchestItem };
         if (QueryResult r = WorldDatabase.Query("SELECT `ItemID` FROM `coa_client_vanity_collection`"))
             do
                 StoreItems.insert(r->Fetch()[0].Get<uint32>());
@@ -1062,13 +1094,47 @@ namespace CoAChallenges
             std::to_string(entry));
     }
 
-    // NO_MAIL / NO_OUTSIDE_INTERACTION (rules) forbid RECEIVING mail during the
-    // trial, mirroring OnPlayerCanSendMail for the sending side. Exempt items
-    // (store items / reward caches, same list as MarkMailTaken) are never
-    // player-to-player mail, so they stay takeable; itemEntry is 0 for money.
-    bool MailTakeForbidden(Player* player, uint32 itemEntry = 0)
+    constexpr uint32 PostmasterEntry = 34337;
+
+    // Only the server mails a character to itself (the client cannot): the welcome
+    // Elite Warchest, the part of its contents that did not fit in the bags, and
+    // Customer Support mail sent with .send items from the console.
+    // Three more senders are exempt: the Postmaster (items returned to the character),
+    // the Recruit-A-Friend reward mail, and Customer Support mail from a game master's
+    // character. Only a game master's mail carries GM stationery with a character as
+    // sender: MailSender(Player*) sets it from IsGameMaster and the client cannot choose
+    // it. Other sender-less GM-stationery mail (boss loot, item recovery) stays blocked.
+    // The warchest has no binding, so a copy mailed by another character is not exempt.
+    bool IsRecruitAFriendRewardMail(Mail const& mail)
     {
-        if (player && !IsMailExemptItem(itemEntry)
+        return mail.IsSentByPlayer() && mail.sender == 0 && mail.stationery == MAIL_STATIONERY_GM
+            && mail.subject == RECRUIT_A_FRIEND_REWARD_MAIL_SUBJECT;
+    }
+
+    bool IsGameMasterMail(Mail const& mail)
+    {
+        return mail.IsSentByPlayer() && mail.sender != 0 && mail.stationery == MAIL_STATIONERY_GM;
+    }
+
+    bool IsMailExemptTake(Player* player, uint32 mailId, uint32 itemEntry)
+    {
+        Mail const* mail = player ? player->GetMail(mailId) : nullptr;
+        if (mail && mail->IsSentByPlayer() && mail->sender == player->GetGUID().GetCounter())
+            return true;
+        if (mail && mail->messageType == MAIL_CREATURE && mail->sender == PostmasterEntry)
+            return true;
+        if (mail && (IsRecruitAFriendRewardMail(*mail) || IsGameMasterMail(*mail)))
+            return true;
+        return itemEntry != EliteWarchestItem && IsMailExemptItem(itemEntry);
+    }
+
+    // NO_MAIL / NO_OUTSIDE_INTERACTION (rules) forbid RECEIVING mail during the
+    // trial, mirroring OnPlayerCanSendMail for the sending side. Exempt takes
+    // (store items / reward caches, same rule as MarkMailTaken) stay takeable;
+    // money is never exempt.
+    bool MailTakeForbidden(Player* player, bool exempt = false)
+    {
+        if (player && !exempt
             && (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_MAIL")
                 || NoOutsideInteraction(player)))
         {
@@ -1081,11 +1147,11 @@ namespace CoAChallenges
     // Mail is a facet of the OUTSIDE_INTERACTION condition: taking a non-exempt
     // item/currency (entry 0 = money) taints the character for the next trial
     // activation. Store items / reward caches are exempt.
-    void MarkMailTaken(Player* player, uint32 itemEntry)
+    void MarkMailTaken(Player* player, bool exempt)
     {
         if (!player || !ChallengesEnabled())
             return;
-        if (IsMailExemptItem(itemEntry))   // store items / reward caches: exempt
+        if (exempt)                        // store items / reward caches: exempt
             return;
         if (IsPrestiged(player))           // prestige uses the mailbox normally
             return;
@@ -1902,6 +1968,9 @@ namespace CoAChallenges
                 && victim->GetLevel() <= player->GetLevel())
                 amount = 0;
 
+            if (amount && EarnsHalfExperience(player))
+                amount = std::max(1u, amount / 2);
+
             // Prestige experience bonus: while a prestige cycle is in progress
             // the character earns the module's configured experience (the single
             // "Prestige Challenge" aura, 9930831, is the IsPrestiged() marker and
@@ -2044,7 +2113,17 @@ namespace CoAChallenges
         // purchases, not buyback.
         static bool IsVendorFoodOrDrink(ItemTemplate const* proto)
         {
-            if (!proto || proto->Class != ITEM_CLASS_CONSUMABLE)
+            if (!proto)
+                return false;
+            // Vendor reagents that craft unlimited food (Mild Spices -> Spice Bread).
+            switch (proto->ItemId)
+            {
+                case 2678:
+                    return true;
+                default:
+                    break;
+            }
+            if (proto->Class != ITEM_CLASS_CONSUMABLE)
                 return false;
             for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
             {
@@ -2547,14 +2626,15 @@ namespace CoAChallenges
             {
                 Item* item = player ? player->GetMItem(packet.read<uint32>(12)) : nullptr;
                 uint32 itemEntry = item ? item->GetEntry() : 0;
-                if (MailTakeForbidden(player, itemEntry))
+                bool const exempt = IsMailExemptTake(player, packet.read<uint32>(8), itemEntry);
+                if (MailTakeForbidden(player, exempt))
                 {
                     if (player)
                         player->SendMailResult(packet.read<uint32>(8), MAIL_ITEM_TAKEN, MAIL_ERR_INTERNAL_ERROR);
                     return false;
                 }
                 if (player)
-                    MarkMailTaken(player, itemEntry);
+                    MarkMailTaken(player, exempt);
                 return true;
             }
             if (opcode == CMSG_MAIL_TAKE_MONEY && packet.size() >= 12)
@@ -2565,7 +2645,7 @@ namespace CoAChallenges
                         player->SendMailResult(packet.read<uint32>(8), MAIL_MONEY_TAKEN, MAIL_ERR_INTERNAL_ERROR);
                     return false;
                 }
-                MarkMailTaken(player, 0);
+                MarkMailTaken(player, false);
                 return true;
             }
 
@@ -3237,7 +3317,7 @@ namespace CoAChallenges
 
         // .coa ruletest <player> <id>
         // GM-only: activates the challenge and checks the custom rules through
-        // the real hook dispatchers (NO_GUILD_BANK / NO_MANASTORM / N/A realm).
+        // the real hook dispatchers (NO_GUILD_BANK / NO_MANASTORM / NO_REALM_BANK).
         static bool HandleCoARuleTestCommand(ChatHandler* handler, std::string playerName, uint32 challengeId)
         {
             Player* p = ObjectAccessor::FindPlayerByName(playerName);
@@ -4102,6 +4182,8 @@ namespace CoAChallenges
 void Addmod_coa_challengesScripts()
 {
     AscensionRulesets::RegisterGuard(&CoAChallenges::ChallengeAllowsRuleset);
+    AscensionPersonalBank::RegisterAccessGuard(&CoAChallenges::ChallengeAllowsBankAccess);
+    HighRisk::RegisterLootGuard(&CoAChallenges::ChallengeAllowsHighRiskLoot);
     RegisterAscensionClientConfig(&CoAChallenges::AppendClientConfig);
     RegisterAscensionChallengeStateSync([](Player* player)
     {

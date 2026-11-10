@@ -1,0 +1,1196 @@
+{
+  "schema": 1,
+  "name": "Enchanted Straw Appendage's proc scares the creature it hits (#9602)",
+  "contract": "Enchanted Straw Appendage's equip spell is 303023, a passive aura 42 (proc trigger spell) on 303024 Panic, with tiers 312819/316819/320819 on the same item name. Their Spell.dbc records carry ProcFlags 0 and ProcChance 2 and the world had no spell_proc row, so Aura::GetProcEffectMask found no proc entry and the roll never ran (#9602). The tooltips promise a chance upon dealing direct magic damage; the tiers add a 90 sec internal cooldown. The repair grants PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG at the hit phase over every school and spell family and defers Chance to the record's ProcChance 2. spell_proc_chance reads the loaded entries' 2, and aura_proc_rate replays the aura's native proc decision 40000 times on a synthetic landed magic-class direct hit naming Frostbolt 116: about 2% for the direct hit, zero for a melee-class hit and for a periodic tick. Before the repair the chance lookups fail with 'Spell has no proc entry' and every rate reads 0. Real hits: the same four auras sit on a mage who casts Arcane Explosion 1449 (instant, GCD 1500 ms, magic damage class, hits every hostile within its radius) 55 times 1550 ms apart at eight dummies with mana refilled before each cast, so each aura rolls its 2% chance on 440 landed hits inside 84 seconds. spell_proc_count reads the Panic casts each aura triggered: the base aura has no internal cooldown and must show at least one (a 2% roll missing 440 times is about 0.014%), and each tier shows exactly one, since a 90 sec cooldown allows a single proc inside that window while 440 rolls without it expect about nine.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    },
+    {
+      "id": "dummy2",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    },
+    {
+      "id": "dummy3",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    },
+    {
+      "id": "dummy4",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    },
+    {
+      "id": "dummy5",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    },
+    {
+      "id": "dummy6",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    },
+    {
+      "id": "dummy7",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    },
+    {
+      "id": "dummy8",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Base item proc dummy",
+      "actor": "caster",
+      "spell": 303023,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Top tier proc dummy",
+      "actor": "caster",
+      "spell": 320819,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Second tier proc dummy",
+      "actor": "caster",
+      "spell": 312819,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Third tier proc dummy",
+      "actor": "caster",
+      "spell": 316819,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: base proc dummy aura is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 303023,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: top tier proc dummy aura is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 320819,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: second tier proc dummy aura is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 312819,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: third tier proc dummy aura is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 316819,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 303023 loads the record's 2% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 303023,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 312819 loads the record's 2% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 312819,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 316819 loads the record's 2% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 316819,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 320819 loads the record's 2% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 320819,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 1.2,
+      "max": 2.8,
+      "label": "DISCRIMINATING: landed direct magic damage procs the base dummy at about 2%",
+      "spell": 303023
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 1.2,
+      "max": 2.8,
+      "label": "DISCRIMINATING: landed direct magic damage procs the top tier dummy at about 2%",
+      "spell": 320819
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a melee-class hit is not magic damage",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 303023,
+      "target": "dummy",
+      "trigger_spell": 34027,
+      "type_mask": 16,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a periodic tick is not a landed direct hit",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 303023,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 262144,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "label": "Arcane Explosion hits every dummy in range",
+      "actor": "caster",
+      "spell": 1449
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Panic proc recorded for aura 303023 before the real hits",
+      "actor": "caster",
+      "metric": "spell_proc_count",
+      "spell": 303023,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Panic proc recorded for aura 312819 before the real hits",
+      "actor": "caster",
+      "metric": "spell_proc_count",
+      "spell": 312819,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Panic proc recorded for aura 316819 before the real hits",
+      "actor": "caster",
+      "metric": "spell_proc_count",
+      "spell": 316819,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Panic proc recorded for aura 320819 before the real hits",
+      "actor": "caster",
+      "metric": "spell_proc_count",
+      "spell": 320819,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 1449,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1550
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: every Arcane Explosion cast completed (mana refilled, GCD respected)",
+      "actor": "caster",
+      "metric": "spell_cast_count",
+      "spell": 1449,
+      "min": 55
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: real hits make the base aura cast Panic (no cooldown, 2% over 440 hits)",
+      "actor": "caster",
+      "metric": "spell_proc_count",
+      "spell": 303023,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: real hits make tier 312819 cast Panic exactly once inside its 90 sec cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_count",
+      "spell": 312819,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: real hits make tier 316819 cast Panic exactly once inside its 90 sec cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_count",
+      "spell": 316819,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: real hits make tier 320819 cast Panic exactly once inside its 90 sec cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_count",
+      "spell": 320819,
+      "equals": 1
+    }
+  ]
+}

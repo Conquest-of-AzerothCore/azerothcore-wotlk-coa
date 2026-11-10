@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "name": "Worldforged Thelsamar Bow rests on the ground in the Wetlands (#8729)",
+  "contract": "The Thelsamar Bow pickup (entry 387872, guid 6941227) stood 1.12 yd above the stock terrain at its spawn XY, where the reporter stood on the ground 2.7 yd away. Lower it to the measured ground; XY is unchanged.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -3025.69, "y": -2411.28, "z": 11.3, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 20 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the pickup is in the area", "actor": "p", "metric": "nearby_gameobject_count", "entry": 387872, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: it rests on the ground, not floating above it", "actor": "p", "metric": "spawn_ground_gap", "guid": 6941227, "spawn_type": "gameobject", "min": -0.3, "max": 0.3 },
+    { "action": "assert", "label": "it is grounded", "actor": "p", "metric": "spawn_placement", "guid": 6941227, "spawn_type": "gameobject", "tolerance": 0.8, "equals": 0 }
+  ]
+}

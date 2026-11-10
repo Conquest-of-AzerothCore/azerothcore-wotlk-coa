@@ -47,6 +47,7 @@ void Reduce(Player* player, uint32 root, int32 milliseconds);
 void ReduceLibrams(Player* player, int32 milliseconds);
 void Replacement(Player* player, uint32 root, uint32 replacement);
 void GrantOath(Player* player, uint32 oath);
+void SyncOaths(Player* player);
 void ClearOaths(Player* player);
 void Delay(Player* player, uint32 amount);
 void ReduceDebt(Player* player, uint32 percent, bool oneTick = false);

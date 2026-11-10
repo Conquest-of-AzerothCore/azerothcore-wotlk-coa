@@ -283,7 +283,7 @@ public:
         if (pos.UnitFieldFactionTemplatePos >= 0 && unit && target)
         {
             Player const* owner = unit->GetCharmerOrOwnerPlayerOrPlayerItself();
-            if (owner && ActiveMercenary(owner) && (unit == target || !InMercenaryWar(target)))
+            if (owner && ActiveMercenary(owner) && (owner == target || !InMercenaryWar(target)))
                 data.put(pos.UnitFieldFactionTemplatePos, RaceFaction(owner));
         }
         if (pos.UnitFieldBytes2Pos < 0 || !unit || !ShowsFreeForAllTo(unit->ToPlayer(), target))

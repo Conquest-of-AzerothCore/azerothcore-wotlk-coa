@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "A Glass Breach credits Outer Crystal of the Deeprun Tram once and is consumed (#10528)",
+  "contract": [
+    "Outer Crystal of the Deeprun Tram 175139 asks for 10 Glass Breaches (gameobject 2300699, objective index 1) repaired. Each breach is authored as a consumable goober, so one repair is one credit and the breach is used up.",
+    "With an auto-close time of 0 the goober was never marked in use, so the same breach credited the quest on every click, as reported. The breach here is the actor's own summoned copy of the template, used twice in a row with no wait.",
+    "Expected: the first use credits 1; the second use of the same breach is rejected, so the counter stays 1; the used breach then disappears. Before the repair the counter reads 2 and the breach stays."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "diver", "race": 1, "class": 12, "level": 30 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "prepare_quest", "actor": "diver", "quest": 175139, "complete": false },
+    { "action": "assert", "label": "SETUP: no breach repaired yet", "actor": "diver", "metric": "quest_objective_count", "quest": 175139, "index": 1, "equals": 0 },
+    { "action": "summon_gameobject", "actor": "diver", "entry": 2300699, "distance": 2 },
+    { "action": "assert", "label": "SETUP: one breach stands by the diver", "actor": "diver", "metric": "owned_gameobject_count", "entry": 2300699, "equals": 1 },
+    { "action": "use_gameobject", "label": "Repair the breach", "actor": "diver", "entry": 2300699 },
+    { "action": "use_gameobject", "label": "Click the same breach again at once", "actor": "diver", "entry": 2300699 },
+    { "action": "assert", "label": "SETUP: the first repair credits the quest", "actor": "diver", "metric": "quest_objective_count", "quest": 175139, "index": 1, "min": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the same breach credits only once", "actor": "diver", "metric": "quest_objective_count", "quest": 175139, "index": 1, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the used breach is consumed", "actor": "diver", "metric": "owned_gameobject_count", "entry": 2300699, "equals": 0, "within_ms": 5000 }
+  ]
+}

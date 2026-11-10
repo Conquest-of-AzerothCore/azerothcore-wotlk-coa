@@ -1,6 +1,7 @@
 // mod-coa-challenges (review split): CoA.Challenges.Lifecycle.cpp
 // Mechanical split of review-CoAChallenges.cpp; no logic changes.
 #include "CoA.Challenges.Review.h"
+#include "AscensionRulesets.h"
 #include "InstanceScript.h"
 
 #include <atomic>
@@ -475,7 +476,9 @@ namespace CoAChallenges
         // HIGH_RISK_ONLY (High Roller / Ironman - High-Risk): the character must
         // be in the High Risk ruleset (aura applied by CoA).
         if (CoAParse::ListContains(ChallengeRules(challengeID), "CHALLENGE_RULES_TYPE_HIGH_RISK_ONLY")
-            && HighRiskActivationBlocked(player))
+            && HighRiskActivationBlocked(player)
+            && !(IsTrialChallenge(challengeID)
+                && AscensionRulesets::CanApply(player, AscensionRulesets::Ruleset::HighRisk, true)))
         {
             ChatHandler(player->GetSession()).PSendSysMessage(
                 "{} requires you to be in High Risk.", ChallengeName(challengeID));
@@ -1497,12 +1500,13 @@ namespace CoAChallenges
             {
                 if (!IsTrackedObjective(o.type))
                     continue;
-                if (!o.v2 || o.v2 <= curLevel)
+                uint32 const objectiveGate = CoAParse::ObjectiveGateLevel(o);
+                if (!objectiveGate || objectiveGate <= curLevel)
                     continue;
                 if (IsObjectiveDone(guid, cid, o.key))
                     continue;
-                if (!gate || o.v2 < gate)
-                    gate = o.v2;
+                if (!gate || objectiveGate < gate)
+                    gate = objectiveGate;
             }
         }
         return gate;
@@ -1630,9 +1634,10 @@ namespace CoAChallenges
             uint32 level = 0;
             for (Objective const& o : GetObjectives(cid))
             {
-                if (o.type != type || o.v1 != eventValue)
+                if (o.type != type || CoAParse::ObjectiveTarget(o) != eventValue)
                     continue;
-                if (o.v2 && player->GetLevel() >= o.v2)
+                uint32 const objectiveGate = CoAParse::ObjectiveGateLevel(o);
+                if (objectiveGate && player->GetLevel() >= objectiveGate)
                     continue;
                 if (!IsObjectiveDone(guid, cid, o.key))
                 {
@@ -1694,7 +1699,8 @@ namespace CoAChallenges
             {
                 if (!IsTrackedObjective(o.type))
                     continue;
-                if (!o.v2 || player->GetLevel() < o.v2)
+                uint32 const objectiveGate = CoAParse::ObjectiveGateLevel(o);
+                if (!objectiveGate || player->GetLevel() < objectiveGate)
                     continue;
                 if (IsObjectiveDone(guid, cid, o.key))
                     continue;

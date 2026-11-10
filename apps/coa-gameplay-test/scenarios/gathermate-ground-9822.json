@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Heavy Jungle Chopper pickup 6940671 rests on the ground measured under it (#9822)",
+  "contract": "Heavy Jungle Chopper pickup (guid 6940671, Stranglethorn) was 1.26 yd under the ground (#9822). The target z is the vmap ground height measured under the spawn's x, y on the worldserver data.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Heavy Jungle Chopper pickup 6940671 rests on the ground measured under it",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6940671,
+      "spawn_type": "gameobject",
+      "x": -11678.5,
+      "y": -651.0,
+      "z": 32.357,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "rests on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6940671,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}

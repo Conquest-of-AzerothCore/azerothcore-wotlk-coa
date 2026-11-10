@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Coren Direbrew drops the CoA level-60 loot at live rates",
+  "contract": "As on live CoA, Coren Direbrew rolls the six level-60 Brewfest trinkets at 1.667% each and Direbrew's Shanker and Tankard O' Terror at 5% each instead of a guaranteed stock level-80 trinket, so about 18% of kills yield a rare or better item.",
+  "players": [
+    { "id": "reveler", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "About 18% of Coren Direbrew kills yield a rare or better item, not every kill",
+      "actor": "reveler",
+      "metric": "creature_loot_quality_rate",
+      "entry": 23872,
+      "min": 12,
+      "max": 25
+    }
+  ]
+}

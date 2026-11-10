@@ -59,6 +59,17 @@ namespace
     };
 
     constexpr uint32 AllEranikusWardensKilled = (1u << EranikusWardens.size()) - 1;
+    constexpr uint32 EranikusWardenBit(uint32 entry)
+    {
+        for (std::size_t i = 0; i < EranikusWardens.size(); ++i)
+            if (EranikusWardens[i].entry == entry)
+                return 1u << i;
+        return 0;
+    }
+
+    // On Ascension the four dragons of the Sanctum appear only once the Avatar of Hakkar and Jammal'an are dead.
+    constexpr uint32 SanctumDragonsReleased =
+        EranikusWardenBit(NPC_AVATAR_OF_HAKKAR) | EranikusWardenBit(NPC_JAMMAL_AN_THE_PROPHET);
     constexpr float EranikusSlumberNoticeRange = 40.0f;
     constexpr float EranikusSlumberNoticeResetRange = 70.0f;
     Position const ShadeOfHakkarSummonPosition = { -466.795f, 272.863f, -90.447f, 1.57f };
@@ -96,10 +107,59 @@ public:
                     if (!IsEranikusAwake())
                         creature->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
                     break;
+                case NPC_MORPHAZ:
+                case NPC_WEAVER:
+                case NPC_DREAMSCYTHE:
+                case NPC_HAZZAS:
+                    _sanctumDragonGUIDs.push_back(creature->GetGUID());
+                    if (!AreSanctumDragonsReleased())
+                    {
+                        HideSanctumDragon(creature);
+                        // SmartAI::JustRespawned makes the creature visible again on its first update.
+                        creature->m_Events.AddEventAtOffset([this, creature]
+                        {
+                            if (!AreSanctumDragonsReleased())
+                                HideSanctumDragon(creature);
+                        }, 1ms);
+                    }
+                    break;
             }
 
             if (creature->IsAlive() && creature->GetSpawnId() && creature->GetCreatureType() == CREATURE_TYPE_DRAGONKIN && creature->GetEntry() != NPC_SHADE_OF_ERANIKUS)
                 _dragonkinList.push_back(creature->GetGUID());
+
+            // The creatures the Avatar of Hakkar event summons fixate on the player who started it.
+            switch (creature->GetEntry())
+            {
+                case NPC_HAKKARI_BLOODKEEPER:
+                case NPC_HAKKARI_MINION:
+                case NPC_NIGHTMARE_SUPPRESSOR:
+                    if (!creature->GetSpawnId() && GetData(TYPE_HAKKAR_EVENT) == IN_PROGRESS)
+                    {
+                        // Passive until the next update, so nobody standing at the summon point pulls it first.
+                        creature->SetReactState(REACT_PASSIVE);
+                        creature->m_Events.AddEventAtOffset([this, creature]
+                        {
+                            creature->SetReactState(REACT_AGGRESSIVE);
+                            AttackHakkarActivator(creature);
+                        }, 1ms);
+                    }
+                    break;
+            }
+        }
+
+        void AttackHakkarActivator(Creature* creature)
+        {
+            if (GetData(TYPE_HAKKAR_EVENT) != IN_PROGRESS || !creature->IsAlive() || !creature->AI())
+                return;
+
+            Player* activator = ObjectAccessor::GetPlayer(instance, _hakkarActivatorGUID);
+            if (!activator || !activator->IsAlive() || activator->IsGameMaster() || !creature->IsValidAttackTarget(activator))
+                return;
+
+            creature->EngageWithTarget(activator);
+            creature->GetThreatMgr().FixateTarget(activator);
+            creature->AI()->AttackStart(activator);
         }
 
         void OnUnitDeath(Unit* unit) override
@@ -134,6 +194,31 @@ public:
                 nearestFlame->AI()->GossipHello(players.begin()->GetSource(), false);
         }
 
+        bool AreSanctumDragonsReleased() const
+        {
+            return (_eranikusWardensKilled & SanctumDragonsReleased) == SanctumDragonsReleased;
+        }
+
+        static void HideSanctumDragon(Creature* dragon)
+        {
+            dragon->SetVisible(false);
+            dragon->SetReactState(REACT_PASSIVE);
+            dragon->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+        }
+
+        void ReleaseSanctumDragons()
+        {
+            for (ObjectGuid const& guid : _sanctumDragonGUIDs)
+            {
+                if (Creature* dragon = instance->GetCreature(guid))
+                {
+                    dragon->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PC);
+                    dragon->SetReactState(REACT_AGGRESSIVE);
+                    dragon->SetVisible(true);
+                }
+            }
+        }
+
         bool IsEranikusAwake() const
         {
             return _eranikusWardensKilled == AllEranikusWardensKilled;
@@ -141,9 +226,13 @@ public:
 
         void OnEranikusWardenDeath(uint32 entry)
         {
+            bool const dragonsWereReleased = AreSanctumDragonsReleased();
             for (std::size_t i = 0; i < EranikusWardens.size(); ++i)
                 if (EranikusWardens[i].entry == entry)
                     _eranikusWardensKilled |= 1u << i;
+
+            if (!dragonsWereReleased && AreSanctumDragonsReleased())
+                ReleaseSanctumDragons();
 
             if (IsEranikusAwake())
                 if (Creature* eranikus = instance->GetCreature(_shadeOfEranikusGUID))
@@ -239,6 +328,15 @@ public:
                         gameobject->SetGameObjectFlag(GO_FLAG_NOT_SELECTABLE);
                     break;
             }
+        }
+
+        void SetGuidData(uint32 type, ObjectGuid guid) override
+        {
+            if (type != DATA_AWAKEN_SOULFLAYER || GetData(TYPE_HAKKAR_EVENT) != NOT_STARTED)
+                return;
+
+            _hakkarActivatorGUID = guid;
+            AwakenSoulflayer();
         }
 
         void SetData(uint32 type, uint32 data) override
@@ -355,7 +453,9 @@ public:
         ObjectGuid _worshipAltarGUID;
         GuidVector _eternalFlameGUIDs;
         ObjectGuid _jammalanGUID;
+        ObjectGuid _hakkarActivatorGUID;
         ObjectGuid _shadeOfEranikusGUID;
+        GuidVector _sanctumDragonGUIDs;
         GuidList _dragonkinList;
         EventMap _events;
     };
@@ -419,7 +519,7 @@ class spell_temple_of_atal_hakkar_awaken_the_soulflayer : public SpellScript
     {
         PreventHitDefaultEffect(effIndex);
         if (InstanceScript* instanceScript = GetCaster()->GetInstanceScript())
-            instanceScript->SetData(DATA_AWAKEN_SOULFLAYER, 0);
+            instanceScript->SetGuidData(DATA_AWAKEN_SOULFLAYER, GetCaster()->GetGUID());
     }
 
     void Register() override
@@ -433,10 +533,10 @@ class go_hakkar_worship_altar : public GameObjectScript
 public:
     go_hakkar_worship_altar() : GameObjectScript("go_hakkar_worship_altar") { }
 
-    bool OnGossipHello(Player* /*player*/, GameObject* go) override
+    bool OnGossipHello(Player* player, GameObject* go) override
     {
         if (InstanceScript* instanceScript = go->GetInstanceScript())
-            instanceScript->SetData(DATA_AWAKEN_SOULFLAYER, 0);
+            instanceScript->SetGuidData(DATA_AWAKEN_SOULFLAYER, player->GetGUID());
         return false;
     }
 };

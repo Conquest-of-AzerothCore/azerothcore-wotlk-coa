@@ -61,21 +61,20 @@ void Totem::InitStats(uint32 duration)
         uint32 slot = m_Properties->Slot;
         if (owner->IsPlayer() && slot >= SUMMON_SLOT_TOTEM_FIRE && slot < MAX_TOTEM_SLOT)
         {
-            // Non-totem creatures (e.g. Cultist tentacles) also use totem summon slots for the
-            // one-per-slot rule, but announcing them as totems puts them in the client's totem bar,
-            // where it colours their plate as an enemy totem. Only real totems are announced.
-            if (GetCreatureType() == CREATURE_TYPE_TOTEM)
-            {
-                WorldPackets::Totem::TotemCreated data;
-                data.Totem = GetGUID();
-                data.Slot = slot - SUMMON_SLOT_TOTEM_FIRE;
-                data.Duration = duration;
-                data.SpellID = GetUInt32Value(UNIT_CREATED_BY_SPELL);
-                owner->ToPlayer()->SendDirectMessage(data.Write());
+            // Any summon in a totem slot (e.g. Cultist tentacles, not only CREATURE_TYPE_TOTEM
+            // creatures) shares the one-per-slot rule and is tracked the same way on the owner's
+            // totem bar (dismiss, duration). Only the racial elemental totem model, which would
+            // misrepresent a non-totem creature's appearance, is restricted to real totems.
+            WorldPackets::Totem::TotemCreated data;
+            data.Totem = GetGUID();
+            data.Slot = slot - SUMMON_SLOT_TOTEM_FIRE;
+            data.Duration = duration;
+            data.SpellID = GetUInt32Value(UNIT_CREATED_BY_SPELL);
+            owner->ToPlayer()->SendDirectMessage(data.Write());
 
+            if (GetCreatureType() == CREATURE_TYPE_TOTEM)
                 if (uint32 modelId = sObjectMgr->GetModelForTotem(SummonSlot(slot), Races(owner->getRace())))
                     SetDisplayId(modelId);
-            }
         }
 
         SetLevel(owner->GetLevel());

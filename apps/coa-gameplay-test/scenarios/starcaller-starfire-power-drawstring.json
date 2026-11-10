@@ -1,0 +1,85 @@
+{
+  "schema": 1,
+  "name": "Starfire Power's payload grants Drawstring of Elune for five seconds",
+  "contract": "Starfire Power 707639 (passive, hidden, SpellFamilyName 32, ProcChance 20) reads 'Casting Starfire Shot now has a $h% chance to grant you Drawstring of Elune for $/1000;807673s1 sec.' Its payload is 807673 'Starfire Power [Proc]', whose two effects are the custom Ascension effects SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION (177) with EffectBasePoints 4999, DieSides 1 and EffectMiscValue 801975, and SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DURATION (178) with the same value and EffectTriggerSpell 801975: together 'apply 801975 for 5000 ms', and 5000/1000 is the five seconds the tooltip advertises. Both are implemented natively as Spell::EffectAscensionModifyAuraDuration and Spell::EffectAscensionTriggerSpellWithDuration, and the latter casts with triggered = true, so 801975's own 120000 ms cooldown is not started on the Starcaller's Drawstring button. 801975 is the aura the two Drawstring consumers read: the extra Scattered Stars on Huntress Shot and Starcall in AscensionStarcallerAbilities.cpp, and the 50 yard ranged override in SpellInfo::GetMaxRange. The script previously cast 803573 'Drawstring of Elune [SLS]' instead, whose only effect is an unscripted SPELL_AURA_DUMMY and which nothing in the source reads, so the talent granted a buff icon and no mechanics. SCOPE: this case characterises the payload and does not guard the change. It casts 807673 directly, which is what the roll does on success, and therefore passes against the pre-fix build too, where the script chose 803573 but 807673 still behaved this way in data. Guarding the script's choice needs the roll itself to land. Chance does succeed for 707639 and 807673 is what reaches the player: a six trial fixture that also learned the Barrage tracker 704739 recorded one cast of 807673, and 572319 alongside it, so OnSpellCast runs and Cast from inside it works. A thirty trial fixture nevertheless rolled nothing twice over, on the fixed and the pre-fix build alike, with all thirty casts completed and recorded by ProcCounter, which is unexplained: the harness seeds no RNG, 707639 carries ProcChance 20, and there is no spell_proc row and no spell_dbc override. Until a proc driven fixture is reliable, the script's choice of payload is covered by reading the source rather than by this case.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "starcaller",
+      "race": 4,
+      "class": 26,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Fixture: cast the proc payload directly",
+      "actor": "starcaller",
+      "spell": 807673
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Drawstring of Elune beforehand",
+      "actor": "starcaller",
+      "metric": "aura",
+      "spell": 801975,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Drawstring proc aura beforehand",
+      "actor": "starcaller",
+      "metric": "aura",
+      "spell": 803573,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "The payload the proc casts on success",
+      "actor": "starcaller",
+      "spell": 807673
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Drawstring of Elune is granted",
+      "actor": "starcaller",
+      "metric": "aura",
+      "spell": 801975,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "It lasts five seconds, not the ability's twenty",
+      "actor": "starcaller",
+      "metric": "aura_duration_ms",
+      "spell": 801975,
+      "max": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The inert proc aura is not used instead",
+      "actor": "starcaller",
+      "metric": "aura",
+      "spell": 803573,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Drawstring ability is not learned onto the bar",
+      "actor": "starcaller",
+      "metric": "knows_spell",
+      "spell": 801975,
+      "equals": 0
+    }
+  ]
+}

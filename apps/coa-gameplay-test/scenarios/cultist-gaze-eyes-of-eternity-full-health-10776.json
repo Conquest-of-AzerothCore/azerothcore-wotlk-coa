@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "name": "Gaze of C'Thun reveals stealth with Eyes of Eternity at full health (#10776)",
+  "contract": [
+    "Eyes of Eternity 706188: \"Healing an ally with Gaze of C'Thun now additionally reveals nearby stealthed",
+    "enemies for 8 seconds\" (buff 807344). The reveal hook in AscensionCultistAbilities.cpp gated on the",
+    "effective heal that OnSpellHitResult receives, which Spell::EffectHeal reduces to the amount actually gained,",
+    "so a Gaze that lands on a full-health caster (all overheal) never revealed anything. The hook now also accepts a",
+    "heal whose target is the caster itself, even when nothing is gained; any other target, such as a full-health chain",
+    "target, still needs a non-zero effective heal, so the reveal stays one cast per Gaze. A level 43 Cultist with the",
+    "talent at full health casts Gaze of C'Thun 502138 on itself; the 520333 heal still lands (spell_heal_count) and",
+    "807344 must now be applied exactly once. Without the talent the same cast at full health must not apply it, so the",
+    "talent gate is unchanged. The injured-target behaviour is covered by cultist-gaze-eyes-of-eternity."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 43
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 502138
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent a full-health Gaze heal lands but reveals nothing",
+      "actor": "cultist",
+      "metric": "aura",
+      "spell": 706188,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "cultist",
+      "spell": 502138
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "spell_heal_count",
+      "spell": 520333,
+      "target": "cultist",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "aura",
+      "spell": 807344,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "spell_cast_count",
+      "spell": 807344,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "cultist",
+      "spell": 706188
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "aura",
+      "spell": 706188,
+      "equals": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "cultist",
+      "spell": 502138
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "snapshot",
+      "actor": "cultist",
+      "metric": "spell_heal_count",
+      "spell": 520333,
+      "target": "cultist",
+      "save_as": "full_health_heals"
+    },
+    {
+      "action": "cast",
+      "actor": "cultist",
+      "spell": 502138
+    },
+    {
+      "action": "assert",
+      "label": "The full-health Gaze heal still lands",
+      "actor": "cultist",
+      "metric": "spell_heal_count",
+      "spell": 520333,
+      "target": "cultist",
+      "relative_to": "full_health_heals",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Eyes of Eternity reveals even though every point of the heal is overheal",
+      "actor": "cultist",
+      "metric": "aura",
+      "spell": 807344,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "cultist",
+      "metric": "spell_cast_count",
+      "spell": 807344,
+      "equals": 1
+    }
+  ]
+}

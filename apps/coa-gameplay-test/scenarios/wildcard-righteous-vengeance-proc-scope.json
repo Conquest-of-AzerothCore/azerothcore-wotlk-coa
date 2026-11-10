@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "name": "Righteous Vengeance procs off any direct critical strike with spells and abilities (#10355)",
+  "contract": "Righteous Vengeance (rank 3, spell 53382) tooltip reads 'Direct critical strikes with spells and abilities make your target take additional damage... as Holy damage', unrestricted by ability. Its handler spell_pal_righteous_vengeance (src/server/scripts/Spells/spell_paladin.cpp) has no CheckProc override, so the restriction came entirely from the effective spell_proc row for SpellId=-53380 (data/sql/updates/db_world/2026_02_18_01.sql:84,1392), which carried SpellFamilyMask0=0x00800000 (Judgement) and SpellFamilyMask1=0x00028000 (Crusader Strike/Divine Storm), letting only those three abilities proc the DoT. Holy Shock's damage spell (25912, cast via the DUMMY-effect driver 20473) is also SpellFamilyName=10 but carries unrelated SpellFamilyFlags (0x200000, 0, 0x1000000) that overlap neither restricted mask word, so before the fix a critical Holy Shock never applied Righteous Vengeance Dot (61840). rev_20261101_01_righteous_vengeance_proc_scope.sql zeroes both FamilyMask columns for SpellId=-53380, keeping SpellFamilyName=10 (Paladin-family abilities only, per the proc row's own scoping) while removing the ability-specific restriction, so any direct critical Paladin-family hit -- including Holy Shock -- now procs the DoT.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 100000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "hero",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "hero", "spell": 53382 },
+    { "action": "learn", "actor": "hero", "spell": 20473 },
+    {
+      "action": "assert", "label": "SETUP: the Righteous Vengeance talent is active",
+      "actor": "hero", "metric": "aura", "spell": 53382, "equals": 1
+    },
+    {
+      "action": "assert", "label": "No Righteous Vengeance DoT on the dummy before any cast",
+      "actor": "dummy", "metric": "aura", "spell": 61840, "caster": "hero", "equals": 0
+    },
+    { "action": "cast", "actor": "hero", "spell": 20473, "target": "dummy", "label": "A critical Holy Shock, outside the old Judgement/Crusader Strike/Divine Storm restriction" },
+    {
+      "action": "assert", "label": "CONTRACT (#10355): a critical Holy Shock applies the Righteous Vengeance DoT",
+      "actor": "dummy", "metric": "aura", "spell": 61840, "caster": "hero", "equals": 1, "within_ms": 5000
+    }
+  ]
+}

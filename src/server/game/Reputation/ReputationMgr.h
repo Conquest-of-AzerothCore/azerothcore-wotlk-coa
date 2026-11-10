@@ -69,6 +69,8 @@ public:                                                 // statics
 
     static ReputationRank ReputationToRank(int32 standing);
     static int32 ReputationRankToStanding(ReputationRank rank);
+    static int32 GetBaseReputation(FactionEntry const* factionEntry, uint32 raceMask, uint32 classMask);
+    static uint32 GetDefaultStateFlags(FactionEntry const* factionEntry, uint32 raceMask, uint32 classMask);
 
 public:                                                 // accessors
     uint8 GetVisibleFactionCount() const { return _visibleFactionCount; }
@@ -138,6 +140,7 @@ public:                                                 // senders
 private:                                                // internal helper functions
     void Initialize();
     uint32 GetDefaultStateFlags(FactionEntry const* factionEntry) const;
+    static int8 FindBaseReputationIndex(FactionEntry const* factionEntry, uint32 raceMask, uint32 classMask);
     bool SetReputation(FactionEntry const* factionEntry, float standing, bool incremental, bool noSpillOver = false, Optional<ReputationRank> repMaxCap = { });
     void SetVisible(FactionState* faction);
     void SetAtWar(FactionState* faction, bool atWar) const;

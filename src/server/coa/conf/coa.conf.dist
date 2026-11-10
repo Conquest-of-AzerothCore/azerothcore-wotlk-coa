@@ -35,6 +35,11 @@ CoA.MapClass10ToWarrior = 1
 CoA.ProbeRelay.Enable = 0
 CoA.ProbeRelay.AccountPrefix = "COALAB"
 
+CoA.LevelBoostNpc.Enable = 0
+CoA.LevelBoostNpc.Level = 60
+CoA.LevelBoostNpc.GoldReward = 5000
+CoA.LevelBoostNpc.RuneOfDescensionReward = 2000000
+
 # Log each consumed extension packet during protocol discovery.
 CoA.LogConsumedPackets = 1
 
@@ -43,6 +48,21 @@ CoA.LogConsumedPackets = 1
 # another account, auctioned or put in a guild bank while the account keeps at least the reserve. Mail between
 # the account's own characters is free. Farmed tokens above the reserve stay tradeable.
 CoA.BazaarTokens.WarchestRealmBound = 1
+
+CoA.BazaarTokens.HourlyCap.Amount = 0
+CoA.BazaarTokens.HourlyCap.WindowSeconds = 3600
+
+# PTR character copy: on the live realm players copy their own characters to the PTR with .ptr list and
+# .ptr copy <name>. The live realm saves the character and queues its dump in the shared auth database
+# (coa_ptr_copy_request); the PTR loads queued copies every few seconds, and the live realm then tells the player.
+# Both realms must share the auth database, because the copy keeps the account id.
+# TargetRealmID: on the live realm, the PTR's realmlist id; 0 disables the command.
+# Receive: 1 on the PTR, to load copies queued for its realm id.
+# A character has at most one live copy on the PTR; after deleting it, the next copy waits CooldownSeconds from
+# the previous one.
+CoA.PtrCopy.TargetRealmID = 0
+CoA.PtrCopy.Receive = 0
+CoA.PtrCopy.CooldownSeconds = 3600
 
 # Ascension character screen: enable/disable (activate/deactivate) and the
 # per-account character list sort order.
@@ -114,6 +134,21 @@ CoA.MonsterResistance.Enable = 1
 CoA.MonsterResistance.PerLevel = 1.0
 CoA.MonsterResistance.PerPercent = 5.0
 CoA.MonsterResistance.MaxReductionPct = 75.0
+
+# Level stats of the Ascension classes 12-32: level-60 base stats, base health and base mana from coa.bisbeard.com
+# with the race adjustments (ascension_class_stats, ascension_race_class_stats). Necromancer minions keep their
+# health either way. Restart to apply.
+# 1 - enabled.
+# 0 - the previous player_class_stats curve without race adjustments (default).
+CoA.ClassLevelSixtyStats.Enable = 0
+
+# Resilient Constitution (spell 552011), the class passive that lowers damage from players and their pets.
+# DamageReductionPct lowers every hit; CriticalReductionPct lowers critical hits again on top of it, so 50 and 20
+# leave 50% of a normal hit and 40% of a critical one. A player's pet gets PetSharePct percent of both reductions
+# through its owner's aura. Values are percentages from 0 to 100; higher values are capped at 100.
+CoA.ResilientConstitution.DamageReductionPct = 50
+CoA.ResilientConstitution.CriticalReductionPct = 20
+CoA.ResilientConstitution.PetSharePct = 85
 
 # Wardrobe, outfits, vanity and mount/companion collections for characters played by bots.
 # 0 - never: bot sessions skip the collections (default).
@@ -411,12 +446,26 @@ RatedSoloArena.Title.Rival = 2000
 RatedSoloArena.Title.Duelist = 2300
 RatedSoloArena.Title.Gladiator = 2600
 
+#    Ascension.PvPVendors.ReleaseStage
+#        Description: The newest PvP Season 1 vendor phase the realm has released, 0-2. Each phase's
+#                     vendors stand in Champion's Hall and the Hall of Legends only once it is released,
+#                     and earlier phases stay. Changes apply on .reload config.
+#                     0 - No Season 1 PvP vendors
+#                     1 - Phase 1: Lieutenant Thorne 48051/48052, Quartermaster Hadwin, Captain Korgash
+#                         49050/49051 and Warbringer Krogash (Corporal's, Grunt's, Challenger's,
+#                         Sergeant's and Captain's)
+#                     2 - Phase 2 as well: Lieutenant Thorne 48053, Captain Korgash 49053 and both
+#                         Vik "Angry" Smalls (CoA PvP Gear, Legionnaire's, Centurion's and the Legacy lists)
+#        Default:     1
+
+Ascension.PvPVendors.ReleaseStage = 1
+
 #    HighRisk.FelCommutation.Enable
 #        Description: Fel Commutation. A High-Risk character switches it on and picks the equipment slots to
 #                     insure in the window at the Fel Commutation Portal (object 8000053). While on, items in
 #                     insured slots that a High-Risk death would drop are kept if the character carries
-#                     enough gold for all of their fees, and the fees go into the death chest. If the gold
-#                     is short, the character keeps it and the items drop. The normal gold loss
+#                     enough gold for the fee, and the fee goes into the death chest. If the gold is short,
+#                     the character keeps it and the items drop. The normal gold loss
 #                     (HighRisk.GoldChance) still applies on top, from the gold left after the fees; the
 #                     death message shows the two parts separately.
 #        Default:     0 - (Disabled)
@@ -425,17 +474,18 @@ RatedSoloArena.Title.Gladiator = 2600
 HighRisk.FelCommutation.Enable = 0
 
 #    HighRisk.FelCommutation.FeeMultiplier
-#        Description: Multiplier applied to each item's fee. The base fee of an item is its item level times
-#                     the client's rate band for that level (for example 179 x 2750 copper).
+#        Description: Multiplier applied to the fee. The fee is one amount per death, as the client shows it:
+#                     the whole average equipped item level times the client's rate band for that level, plus
+#                     10 gold at the maximum player level (for example 74 x 1500 copper + 10 gold = 21g 10s).
 #        Default:     1.0
 
 HighRisk.FelCommutation.FeeMultiplier = 1.0
 
 #    HighRisk.FelCommutation.MaxSlots
 #        Description: Equipment slots a character may insure at once. 0 means no limit.
-#        Default:     3
+#        Default:     0
 
-HighRisk.FelCommutation.MaxSlots = 3
+HighRisk.FelCommutation.MaxSlots = 0
 
 #    HighRisk.FelCommutation.AltarRange
 #        Description: Distance in yards within which the portal must stand for the switch to be accepted.
@@ -486,12 +536,26 @@ PvePower.Enable = 1
 #                     creature corpses for High-Risk players from level 15, drawn from the reviewed
 #                     catalogue in coa_bloodforged_catalogue. The item pool and rate band follow the
 #                     player's level; creatures grey to the player give no roll. Drops obey the
-#                     standard corpse item limit and are scaled by Rate.Drop.Item.Uncommon, .Rare and
-#                     .Epic. Requires PvpPower.Enable.
+#                     standard corpse item limit and are scaled by Bloodforged.DropRate.Rare and
+#                     .Epic (not by Rate.Drop.Item.*). Requires PvpPower.Enable.
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 
 Bloodforged.Enable = 0
+
+#    HighRisk.ReleaseStage
+#        Description: The release stage 0-8 of High-Risk content, set apart from the rest of the realm
+#                     (Ascension.CallboardCache.ReleaseStage and .raidphase do not change it). It decides
+#                     which raids' Bloodforged gear (normal and Heroic copies) can drop and which Heroic
+#                     items Crow's Cache gives, and picks the stage value of
+#                     Bloodforged.EpicMaxItemLevelByStage and Bloodforged.BlueMaxItemLevelByStage.
+#                     Stages: 0 normal dungeons, 1 Heroic Dungeons, 2 Mythic Dungeons, 3 Zul'Gurub,
+#                     4 Molten Core, 5 Onyxia's Lair, 6 Blackwing Lair, 7 Ahn'Qiraj, 8 Naxxramas.
+#                     Applied on .reload config. .hr stage set <1-8> overrides this value in the
+#                     characters database until .hr stage clear; .hr stage shows the stage.
+#        Default:     3
+
+HighRisk.ReleaseStage = 3
 
 #    Bloodforged.Rates15
 #    Bloodforged.Rates25
@@ -500,14 +564,257 @@ Bloodforged.Enable = 0
 #    Bloodforged.Rates55
 #        Description: Base percent per eligible corpse for the level band starting at that level, as
 #                     three values: uncommon, rare, epic. One roll per quality, spread evenly across
-#                     that quality's pool, before the Rate.Drop.Item.* multipliers.
-#        Default:     "4.50 0.50 0.00", "4.00 1.00 0.00", "3.80 1.40 0.15", "3.60 1.80 0.25", "3.40 2.20 0.40"
+#                     that quality's pool, before the Bloodforged.DropRate.* multipliers. Uncommon is 0:
+#                     Bloodforged drops are rare or epic only. A non-zero uncommon rate must be
+#                     above the rare one. Elite mobs use Bloodforged.EliteEpicPercent for epics instead.
+#        Default:     "0.00 0.50 0.00", "0.00 1.00 0.00", "0.00 1.40 0.15", "0.00 1.80 0.25", "0.00 2.20 1.00"
 
-Bloodforged.Rates15 = "4.50 0.50 0.00"
-Bloodforged.Rates25 = "4.00 1.00 0.00"
-Bloodforged.Rates35 = "3.80 1.40 0.15"
-Bloodforged.Rates45 = "3.60 1.80 0.25"
-Bloodforged.Rates55 = "3.40 2.20 0.40"
+Bloodforged.Rates15 = "0.00 0.50 0.00"
+Bloodforged.Rates25 = "0.00 1.00 0.00"
+Bloodforged.Rates35 = "0.00 1.40 0.15"
+Bloodforged.Rates45 = "0.00 1.80 0.25"
+Bloodforged.Rates55 = "0.00 2.20 1.00"
+
+#    Bloodforged.EliteEpicPercent
+#        Description: Percent chance for a High-Risk elite (Bloodforged.HighRiskEliteEntries) to drop one epic
+#                     Bloodforged item that is not raid gear, within the stage cap, before the
+#                     Bloodforged.DropRate.Epic multiplier. Comes on top of its rare (blue) roll.
+#        Default:     15
+
+Bloodforged.EliteEpicPercent = 15
+
+#    Bloodforged.EliteHeroicUpgradePercent
+#        Description: Percent chance that the epic from Bloodforged.EliteEpicPercent is a Heroic
+#                     Bloodforged item instead, never raid gear, within the stage cap. Decimals allowed.
+#        Default:     2.5
+
+Bloodforged.EliteHeroicUpgradePercent = 2.5
+
+#    Bloodforged.BlueMaxItemLevelByStage
+#        Description: Highest item level of a rare (blue) Bloodforged item that drops, one value per
+#                     High-Risk release stage 0-8 (HighRisk.ReleaseStage). The lowest allowed
+#                     value is 57, the lowest item level of the level 60 blue items: a lower value is
+#                     raised to 57 and logged. Raid gear of released raids is not limited by it.
+#        Default:     "57 57 57 57 57 57 57 57 57"
+
+Bloodforged.BlueMaxItemLevelByStage = "57 57 57 57 57 57 57 57 57"
+
+#    Bloodforged.EpicMaxItemLevelByStage
+#        Description: Highest item level of an epic Bloodforged item that drops, one value per
+#                     High-Risk release stage 0-8 (HighRisk.ReleaseStage). Raid gear of
+#                     released raids is not limited by it.
+#        Default:     "61 61 64 65 70 70 70 70 70"
+
+Bloodforged.EpicMaxItemLevelByStage = "61 61 64 65 70 70 70 70 70"
+
+#    Bloodforged.Level60EndgameZonesOnly
+#        Description: Bloodforged items that require level 60 drop only in Western Plaguelands,
+#                     Eastern Plaguelands, Burning Steppes, Blasted Lands, Azshara, Winterspring,
+#                     Un'Goro Crater and Silithus.
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled)
+
+Bloodforged.Level60EndgameZonesOnly = 1
+
+#    Bloodforged.RareRaidItemPercent
+#    Bloodforged.RareEliteRaidItemPercent
+#        Description: Rare (rank 4) and rare elite (rank 2) mobs always drop one epic Bloodforged
+#                     item (rare quality when no epic fits the player's level) and one Heroic
+#                     Bloodforged item instead of the normal roll. The two values
+#                     are the percent chance that the Bloodforged item, and the Heroic
+#                     Bloodforged item, is epic raid gear of a released raid. Blue raid gear
+#                     comes only from Bloodforged.ExtraBluePercent.
+#        Default:     "15 5", "25 10"
+
+Bloodforged.RareRaidItemPercent = "15 5"
+Bloodforged.RareEliteRaidItemPercent = "25 10"
+
+#    Bloodforged.ExtraBluePercent
+#    Bloodforged.ExtraBlueRaidItemPercent
+#        Description: Rare mobs, rare elite mobs and the High-Risk elites in
+#                     Bloodforged.HighRiskEliteEntries have a Bloodforged.ExtraBluePercent chance to
+#                     drop one more rare (blue) Bloodforged item on top of their other drops. That
+#                     blue item is blue raid gear of a released raid with a
+#                     Bloodforged.ExtraBlueRaidItemPercent chance, when such a raid has blue items;
+#                     otherwise it comes from the normal blue pool. Not scaled by any drop rate
+#                     multiplier. 0 turns it off.
+#        Default:     50, 50
+
+Bloodforged.ExtraBluePercent = 50
+Bloodforged.ExtraBlueRaidItemPercent = 50
+
+#    Bloodforged.EndgameRareRespawnMinutes
+#    Bloodforged.EndgameRareEliteRespawnMinutes
+#        Description: Respawn time of rare (rank 4) and rare elite (rank 2) mobs in the level 60
+#                     zones listed under Bloodforged.Level60EndgameZonesOnly, as shortest and
+#                     longest minutes. A new random time is chosen at every death. "0 0" keeps
+#                     the spawn's own respawn time.
+#        Default:     "90 150", "150 210"
+
+Bloodforged.EndgameRareRespawnMinutes = "90 150"
+Bloodforged.EndgameRareEliteRespawnMinutes = "150 210"
+
+#    Bloodforged.EndgameRareRespawnMinLevel
+#        Description: Lowest creature level that gets the random respawn time above.
+#        Default:     45
+
+Bloodforged.EndgameRareRespawnMinLevel = 45
+
+#    Bloodforged.EndgameEliteHighRiskRespawnMinutes
+#        Description: Respawn time of an elite (rank 1) mob in the level 60 zones listed under
+#                     Bloodforged.Level60EndgameZonesOnly when a High-Risk player (or their pet) killed it
+#                     or owns its loot, as shortest and longest minutes, chosen at random at every such
+#                     death. Kills by other players keep the spawn's own respawn time, and so do elites
+#                     whose own respawn time is at least the shortest value. "0 0" turns it off.
+#                     The High-Risk elites in Bloodforged.HighRiskEliteEntries use
+#                     Bloodforged.HighRiskEliteRespawnMinutes instead.
+#        Default:     "10 15"
+
+Bloodforged.EndgameEliteHighRiskRespawnMinutes = "10 15"
+
+#    Bloodforged.HighRiskEliteRespawnMinutes
+#        Description: Respawn time of the High-Risk elites in Bloodforged.HighRiskEliteEntries in the open
+#                     world, as shortest and longest minutes, chosen at random at every death, whoever
+#                     killed them. "0 0" keeps the spawn's own respawn time.
+#        Default:     "45 60"
+
+Bloodforged.HighRiskEliteRespawnMinutes = "45 60"
+
+#    Bloodforged.HighRiskEliteEntries
+#        Description: Creature entries, separated by spaces, of the High-Risk elite mobs. Only these get
+#                     the elite rules: Bloodforged.EliteEpicPercent, Bloodforged.EliteHeroicUpgradePercent,
+#                     the elite Ephemeral Key chance and elite Marks of War. Every other elite drops like a
+#                     normal mob. The default lists Ascension's High-Risk elites (Scarlet Master Smith and
+#                     Skinner, Cult of the Damned, Azshara, Silithus and elemental elites, 918530-919450).
+#        Default:     "918530 918547 918550 918555 918562 918563 918578 918588 918589 918590 918591 918647 918648 918690 919448 919450"
+
+Bloodforged.HighRiskEliteEntries = "918530 918547 918550 918555 918562 918563 918578 918588 918589 918590 918591 918647 918648 918690 919448 919450"
+
+#    Bloodforged.EndgameRareMinRequiredLevel
+#        Description: In the level 60 zones listed under Bloodforged.Level60EndgameZonesOnly, rare and
+#                     rare elite mobs drop only Bloodforged items (normal, Heroic and raid gear) that
+#                     require at least this level, whatever the looter's level. 0 uses the looter's
+#                     level pool as everywhere else.
+#        Default:     60
+
+Bloodforged.EndgameRareMinRequiredLevel = 60
+
+#    Bloodforged.RareHiddenCachePercent
+#    Bloodforged.EpicHiddenCachePercent
+#        Description: High-Risk Hidden Caches (loot 9670 / 9671 / 9672, opened with an Ephemeral Key) add
+#                     Bloodforged items that require level 60 within the stage cap. A Hidden Cache always
+#                     gives one rare (blue) item. A Rare Hidden Cache always gives one epic and has the
+#                     two percent chances for a Heroic Bloodforged item and for raid gear of a released
+#                     raid. An Epic Hidden Cache always gives one raid item of a released raid (an epic
+#                     before any raid is released) and one epic; the two percent chances are for the raid
+#                     item to be its Heroic copy and for the epic to be a Heroic Bloodforged item.
+#        Default:     "15 5", "5 15"
+
+Bloodforged.RareHiddenCachePercent = "15 5"
+Bloodforged.EpicHiddenCachePercent = "5 15"
+
+#    Bloodforged.EphemeralKeyPercent
+#        Description: Percent chance for an Ephemeral Key (967680, opens a Hidden Cache) from a creature
+#                     killed by a High-Risk player in the open world, when the creature is not grey to
+#                     them, as four values: normal (and every other elite), High-Risk elite
+#                     (Bloodforged.HighRiskEliteEntries), rare, rare elite.
+#                     Decimals allowed. Not scaled by any drop rate multiplier.
+#        Default:     "8 50 100 100"
+
+Bloodforged.EphemeralKeyPercent = "8 50 100 100"
+
+#    Bloodforged.HighRiskEliteExtraKeyPercent
+#        Description: Percent chance that the Ephemeral Key a High-Risk elite (Bloodforged.HighRiskEliteEntries)
+#                     drops is two keys instead of one. It is only rolled when the High-Risk elite value of
+#                     Bloodforged.EphemeralKeyPercent gave a key, so such a kill gives 0, 1 or 2 keys.
+#                     Decimals allowed. Not scaled by any drop rate multiplier.
+#        Default:     10
+
+Bloodforged.HighRiskEliteExtraKeyPercent = 10
+
+#    Bloodforged.DropRate.Rare
+#    Bloodforged.DropRate.Epic
+#        Description: Turns Bloodforged rare (blue) and epic drops from mobs up or down. The chance
+#                     from Bloodforged.Rates* (normal mobs and ordinary elites) and the High-Risk elite
+#                     epic chance (Bloodforged.EliteEpicPercent) are multiplied by these values, and a
+#                     chance never goes above 100%. Example: Rates55 = "0.00 2.20 1.00" with Rare = 10 and
+#                     Epic = 4 gives a level 55-60 player 22% blue and 4% epic per kill.
+#                     Bloodforged items ignore Rate.Drop.Item.*. Items that always drop (rare mobs, Hidden
+#                     Caches, Crow's Cache) are not changed. 0 = no such drops. Decimals allowed.
+#        Default:     1
+
+Bloodforged.DropRate.Rare = 1
+Bloodforged.DropRate.Epic = 1
+
+#    Bloodforged.MarksOfWar.NormalMob
+#    Bloodforged.MarksOfWar.HighRiskElite
+#    Bloodforged.MarksOfWar.RareMob
+#    Bloodforged.MarksOfWar.RareEliteMob
+#    Bloodforged.MarksOfWar.HiddenCache
+#    Bloodforged.MarksOfWar.RareHiddenCache
+#    Bloodforged.MarksOfWar.EpicHiddenCache
+#        Description: Silver (1201002) and Golden (1201003) Marks of War that a High-Risk player gets from
+#                     each source. Each value has four numbers:
+#
+#                         "<Silver always> <% chance for 1 more Silver> <Gold always> <% chance for 1 more Gold>"
+#
+#                     The "always" marks are given every time; then one roll decides the extra Silver
+#                     and one roll the extra Gold. Examples:
+#                         "0 1 0 0"    = 1% chance for 1 Silver, never Gold
+#                         "1 10 0 10"  = always 1 Silver (10% chance for 2), 10% chance for 1 Gold
+#                         "2 50 1 20"  = always 2 Silver (50% for 3), always 1 Gold (20% for 2)
+#
+#                     NormalMob is used by normal mobs and ordinary elites, HighRiskElite only by the
+#                     entries in Bloodforged.HighRiskEliteEntries. The three HiddenCache keys are the
+#                     green, rare and epic Hidden Caches. Crow's Cache marks are set with
+#                     CrowsCache.SilverMarksOfWar and CrowsCache.GoldenMarksOfWar.
+#                     Marks are not scaled by Rate.Drop.Item.*; use the DropRate keys below.
+#        Default:     "0 5 0 0.5", "0 8 0 0.5", "1 10 0 10", "2 10 0 50", "1 10 0 0", "1 60 0 20", "2 50 1 20"
+
+Bloodforged.MarksOfWar.NormalMob = "0 5 0 0.5"
+Bloodforged.MarksOfWar.HighRiskElite = "0 8 0 0.5"
+Bloodforged.MarksOfWar.RareMob = "1 10 0 10"
+Bloodforged.MarksOfWar.RareEliteMob = "2 10 0 50"
+Bloodforged.MarksOfWar.HiddenCache = "1 10 0 0"
+Bloodforged.MarksOfWar.RareHiddenCache = "1 60 0 20"
+Bloodforged.MarksOfWar.EpicHiddenCache = "2 50 1 20"
+
+#    Bloodforged.DropRate.SilverMarkOfWar
+#    Bloodforged.DropRate.GoldenMarkOfWar
+#        Description: Turns all Marks of War chances above up or down at once. Only the "% chance"
+#                     numbers are multiplied, never the "always" marks, and a chance never goes above 100%.
+#                     Example: SilverMarkOfWar = 3 makes "0 1 0 0" a 3% Silver chance and "1 10 0 10"
+#                     always 1 Silver with a 30% chance for 2. 0 = only the "always" marks drop.
+#        Default:     1
+
+Bloodforged.DropRate.SilverMarkOfWar = 1
+Bloodforged.DropRate.GoldenMarkOfWar = 1
+
+#    Bloodforged.BazaarTokens.HighRiskElite
+#    Bloodforged.BazaarTokens.RareMob
+#    Bloodforged.BazaarTokens.RareEliteMob
+#        Description: Bazaar Tokens (975001) that every High-Risk player in the group gets for killing a
+#                     High-Risk elite (Bloodforged.HighRiskEliteEntries), a rare or a rare elite in the open
+#                     world, when the mob is not grey to them and they are close enough to share the loot.
+#                     Counts against the hourly Bazaar Token limit (CoA.BazaarTokens.HourlyCap.Amount);
+#                     tokens over the limit are not given. 0 = no tokens.
+#        Default:     300, 300, 300
+
+Bloodforged.BazaarTokens.HighRiskElite = 300
+Bloodforged.BazaarTokens.RareMob = 300
+Bloodforged.BazaarTokens.RareEliteMob = 300
+
+#    Bloodforged.BazaarTokens.HiddenCache
+#    Bloodforged.BazaarTokens.RareHiddenCache
+#    Bloodforged.BazaarTokens.EpicHiddenCache
+#        Description: Bazaar Tokens (975001) for the player who opens a green, rare or epic Hidden Cache.
+#                     Counts against the hourly Bazaar Token limit; tokens over the limit are not given.
+#                     0 = no tokens.
+#        Default:     40, 100, 150
+
+Bloodforged.BazaarTokens.HiddenCache = 40
+Bloodforged.BazaarTokens.RareHiddenCache = 100
+Bloodforged.BazaarTokens.EpicHiddenCache = 150
 
 #
 #    Ascension.PrestigiousCache.ReleaseStage
@@ -549,6 +856,15 @@ Ascension.PrestigiousCache.SecondTokenChancePercent = 5
 Ascension.PrestigiousCache.ClassicStages = 8
 
 #
+#    Ascension.PrestigiousCache.PreviousStageOnly
+#        Description: Hold Classic Prestigious Caches and their tier tokens one release stage
+#                     below Ascension.CallboardCache.ReleaseStage, so a raid's cache is paid
+#                     only once the stage after it is released.
+#        Default:     0
+
+Ascension.PrestigiousCache.PreviousStageOnly = 0
+
+#
 #    Ascension.PrestigiousCache.TbcStages
 #        Description: How many of the Burning Crusade Prestigious Caches are released, 0-9,
 #                     in the order 1297310 held for Karazhan, Gruul's Lair, Magtheridon's
@@ -566,8 +882,8 @@ Ascension.PrestigiousCache.TbcStages = 0
 #                     0 - normal dungeons only
 #                     1 - Heroic Dungeons
 #                     2 - Mythic Dungeons
-#                     3 - Molten Core
-#                     4 - Zul'Gurub
+#                     3 - Zul'Gurub
+#                     4 - Molten Core
 #                     5 - Onyxia's Lair
 #                     6 - Blackwing Lair
 #                     7 - Ruins of Ahn'Qiraj and Temple of Ahn'Qiraj
@@ -578,7 +894,11 @@ Ascension.PrestigiousCache.TbcStages = 0
 #                     client lists Heroic and Mythic difficulties only once they are released.
 #                     Callboard Caches follow the same stages: only released caches are
 #                     earned, and a generic Callboard Cache resolves to a released tier.
+#                     High-Risk content (Bloodforged raid gear, Crow's Cache) does not follow this
+#                     value; it uses HighRisk.ReleaseStage.
 #                     Applied on .reload config; the client's difficulty list on next login.
+#                     .raidphase set <0-8> overrides this value in the characters database
+#                     until .raidphase clear; .raidphase shows the stage.
 #        Default:     3
 
 Ascension.CallboardCache.ReleaseStage = 3
@@ -625,6 +945,45 @@ Ascension.CallboardCache.GoldMin = 5
 Ascension.CallboardCache.GoldMax = 15
 
 #
+#    CoA.CallboardContracts.Enable
+#        Description: Call Board Temporal Contracts. Every contract type listed in
+#                     ascension_callboard_contract earns DailyCompletions completions per day
+#                     begun since the weekly reset; missed days bank up until that reset. A
+#                     character can take and turn in quests of a type only while it has
+#                     completions left, and the Call Board's Complete Now button finishes the
+#                     banked ones for gold or Bazaar Tokens.
+#        Default:     1
+
+CoA.CallboardContracts.Enable = 1
+
+#
+#    CoA.CallboardContracts.DailyCompletions
+#        Description: Completions every contract type earns per day, shared by all its quests.
+#        Default:     1
+
+CoA.CallboardContracts.DailyCompletions = 1
+
+#
+#    CoA.CallboardContracts.MoneyCostMultiplier
+#    CoA.CallboardContracts.MinMoneyCost
+#        Description: Gold price of one Complete Now completion: the quest's money reward
+#                     times the multiplier, at least MinMoneyCost copper.
+#        Default:     2.0, 100000
+
+CoA.CallboardContracts.MoneyCostMultiplier = 2.0
+CoA.CallboardContracts.MinMoneyCost = 100000
+
+#
+#    CoA.CallboardContracts.TokenCostMultiplier
+#    CoA.CallboardContracts.MinTokenCost
+#        Description: Bazaar Token price of one Complete Now completion: the quest's Bazaar
+#                     Token reward times the multiplier, at least MinTokenCost tokens.
+#        Default:     2.0, 50
+
+CoA.CallboardContracts.TokenCostMultiplier = 2.0
+CoA.CallboardContracts.MinTokenCost = 50
+
+#
 #    CoA.DungeonTuning.Enable
 #        Description: Allow `.mythic damage` and `.mythic health` in 5-man dungeons. Every player can
 #                     raise or lower the damage and health of the creatures in their own instance
@@ -643,6 +1002,16 @@ CoA.DungeonTuning.Enable = 1
 #        Default:     1
 
 CoA.DungeonNormal.Enable = 1
+
+#
+#    CoA.FierceBlow.Enable
+#        Description: Ascension's Fierce Blow (975011) on every hostile creature fighting a player or a
+#                     player's unit: one every 6-9.5 s, taking the place of its next melee swing. It
+#                     cannot be dodged, parried or missed. Creatures that already schedule their own
+#                     Fierce Blow (boss kits, SmartAI, C++ scripts) keep their own timing.
+#        Default:     1
+
+CoA.FierceBlow.Enable = 1
 
 #
 #    CoA.DungeonNormal.RepeatFactor
@@ -670,9 +1039,38 @@ CoA.DungeonNormal.TargetHitCapPct = 40
 
 CoA.TestZoneBonus.AnnounceIntervalMinutes = 15
 
+#
+#    CrowsCache.Enable
+#        Description: The Crow's Cache High-Risk PvP event. A cache starts only from Mythic Dungeons
+#                     (HighRisk.ReleaseStage 2) and only while at least three Heroic
+#                     Bloodforged rewards are released, so it also needs Bloodforged.Enable = 1. Until
+#                     then the automatic schedule skips its turns (unclaimed caches are still removed at
+#                     each turn) and .crows start is refused.
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
 CrowsCache.Enable = 0
 CrowsCache.IntervalSeconds = 10800
 CrowsCache.WarningSeconds = 1800
+
+#    CrowsCache.SilverMarksOfWar
+#    CrowsCache.GoldenMarksOfWar
+#        Description: How many Silver (1201002) and Golden (1201003) Marks of War an opened Crow's Cache
+#                     gives, as "<lowest> <highest>". The amount is picked at random between the two
+#                     numbers each time. Use the same number twice for a fixed amount, "0 0" for none.
+#                     Highest allowed: 200. Not changed by any drop rate setting.
+#        Default:     "5 10", "10 10"
+
+CrowsCache.SilverMarksOfWar = "5 10"
+CrowsCache.GoldenMarksOfWar = "10 10"
+
+#    CrowsCache.BazaarTokens
+#        Description: Bazaar Tokens (975001) for the player who opens a claimed Crow's Cache in town.
+#                     Counts against the hourly Bazaar Token limit; tokens over the limit are not given.
+#                     0 = no tokens.
+#        Default:     400
+
+CrowsCache.BazaarTokens = 400
 CrowsCache.X = -7831
 CrowsCache.Y = -3465
 CrowsCache.Z = 56.87

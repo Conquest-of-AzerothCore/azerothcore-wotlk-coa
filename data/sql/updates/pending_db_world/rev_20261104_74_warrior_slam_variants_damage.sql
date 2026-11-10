@@ -1,0 +1,58 @@
+-- Arcane Slam 903100-903109, Shadow Slam 903110-903119, Burning Slam 903120-903129, Storm Slam ranks 2-10
+-- 903141-903149 and Brilliant Slam 907906-907915 are dummy-effect spells ('causing $9032xxs2% weapon damage plus
+-- $s1 ...strike damage. This uses Slam modifiers.') like Frozen Slam and Storm Slam rank 1, but nothing bound
+-- them, so they dealt no damage. Bind spell_warr_slam; DamageSpell() maps each rank range to the helper its
+-- tooltip names (Arcane 903242, Shadow 903243, Burning 903244, Storm 903246, Brilliant 903247), each a
+-- WEAPON_DAMAGE bp -1 + 65% weapon damage copy of 903245 that takes the rank's dummy value as its flat bonus.
+DELETE FROM `spell_script_names` WHERE `ScriptName` = 'spell_warr_slam' AND (`spell_id` BETWEEN 903100 AND 903129
+    OR `spell_id` BETWEEN 903141 AND 903149 OR `spell_id` BETWEEN 907906 AND 907915);
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(903100, 'spell_warr_slam'),
+(903101, 'spell_warr_slam'),
+(903102, 'spell_warr_slam'),
+(903103, 'spell_warr_slam'),
+(903104, 'spell_warr_slam'),
+(903105, 'spell_warr_slam'),
+(903106, 'spell_warr_slam'),
+(903107, 'spell_warr_slam'),
+(903108, 'spell_warr_slam'),
+(903109, 'spell_warr_slam'),
+(903110, 'spell_warr_slam'),
+(903111, 'spell_warr_slam'),
+(903112, 'spell_warr_slam'),
+(903113, 'spell_warr_slam'),
+(903114, 'spell_warr_slam'),
+(903115, 'spell_warr_slam'),
+(903116, 'spell_warr_slam'),
+(903117, 'spell_warr_slam'),
+(903118, 'spell_warr_slam'),
+(903119, 'spell_warr_slam'),
+(903120, 'spell_warr_slam'),
+(903121, 'spell_warr_slam'),
+(903122, 'spell_warr_slam'),
+(903123, 'spell_warr_slam'),
+(903124, 'spell_warr_slam'),
+(903125, 'spell_warr_slam'),
+(903126, 'spell_warr_slam'),
+(903127, 'spell_warr_slam'),
+(903128, 'spell_warr_slam'),
+(903129, 'spell_warr_slam'),
+(903141, 'spell_warr_slam'),
+(903142, 'spell_warr_slam'),
+(903143, 'spell_warr_slam'),
+(903144, 'spell_warr_slam'),
+(903145, 'spell_warr_slam'),
+(903146, 'spell_warr_slam'),
+(903147, 'spell_warr_slam'),
+(903148, 'spell_warr_slam'),
+(903149, 'spell_warr_slam'),
+(907906, 'spell_warr_slam'),
+(907907, 'spell_warr_slam'),
+(907908, 'spell_warr_slam'),
+(907909, 'spell_warr_slam'),
+(907910, 'spell_warr_slam'),
+(907911, 'spell_warr_slam'),
+(907912, 'spell_warr_slam'),
+(907913, 'spell_warr_slam'),
+(907914, 'spell_warr_slam'),
+(907915, 'spell_warr_slam');
