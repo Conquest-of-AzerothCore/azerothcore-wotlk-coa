@@ -56,6 +56,14 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (775899, 0, 2, 0, 0, 0, 100, 0, 9000, 11000, 15000, 18000, 0, 11, 12540, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 'Majara - In Combat - Cast Gouge'),
 (775899, 0, 3, 0, 2, 0, 100, 1, 0, 30, 0, 0, 0, 11, 3019, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Majara - Between 0-30% Health - Cast Frenzy (No Repeat)');
 
+-- one boss per quest at a time: a group (or a second player) accepting while that boss is still alive in the pit
+-- (~69 yd from Gorguk) joins the fight already running instead of summoning a copy
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 22 AND `SourceEntry` = 764795 AND `SourceId` = 0;
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(22, 1, 764795, 0, 0, 29, 1, 775897, 100, 0, 1, 0, 0, '', 'Gorguk Skullhook - summon Brakka only if no Brakka is alive in the pit'),
+(22, 2, 764795, 0, 0, 29, 1, 775898, 100, 0, 1, 0, 0, '', 'Gorguk Skullhook - summon Ironhide Gorefist only if none is alive in the pit'),
+(22, 3, 764795, 0, 0, 29, 1, 775899, 100, 0, 1, 0, 0, '', 'Gorguk Skullhook - summon Majara only if no Majara is alive in the pit');
+
 -- Gorguk points the player to the pit (one line per quest, from the gameplay video)
 DELETE FROM `creature_text` WHERE `CreatureID` = 764795;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
