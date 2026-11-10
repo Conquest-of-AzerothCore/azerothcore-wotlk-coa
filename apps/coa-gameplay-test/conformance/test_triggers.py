@@ -39,7 +39,7 @@ TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 8049
                     803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298, 705255,
                     680397, 524765, 560096, 707364, 504107, 706385, 523712, 520534, 504561, 504807, 500011,
                     92108, 92109, 300504, 300529, 301310, 680399, 681483, 704116, 804927, 805415, 806522, 705306,
-                    804912, 573452, 707391}
+                    804912, 573452, 707391, 801466}
 ETERNALLY_DEVOTED = 573452
 ETERNAL_BLESSING = 705300
 LORESCRIBE = 804927
@@ -59,6 +59,7 @@ ONE_WITH_THE_LIGHT = 504807
 VINDICATION_MAX_RANK = 573324
 ZEALOTRY_HIT = 801450
 CONDEMN = 804906
+HOLY_CLEAVE = 801445
 IMPROVED_SCARLET_HAMMER = 301254
 SCARLET_HAMMER = 807035
 DETERMINED = 705256
@@ -98,6 +99,8 @@ OATH_OF_RETRIBUTION = 804924
 SCHEDULED = 273
 KEEPING_THE_OATH = 92109
 ZEALOTRY = 92108
+LIBRAM_OF_ZEAL = 801466
+RIGHTEOUS_UPHEAVAL_501562 = 501562
 WHIRLING_TEMPEST = 300504
 LIGHTS_WARD = 300529
 LIGHTS_CHOSEN = 301310
@@ -1823,6 +1826,85 @@ class FerventCastigationAndBlessingOfEonarEntriesTest(unittest.TestCase):
         silverhand = next(entry for entry in entries if entry['trigger']['spell'] == SILVERHAND_INCANTATION)
         self.assertEqual(silverhand['co_learn'], [92111])
         self.assertIs(checked_entry(silverhand), silverhand)
+
+
+class LibramOfZealCooldownEntryTest(unittest.TestCase):
+    def entry(self):
+        return templar_trigger(LIBRAM_OF_ZEAL)
+
+    def test_entry_is_a_cooldown_delta_on_righteous_upheaval(self):
+        entry = self.entry()
+        self.assertEqual(entry['kind'], COOLDOWN_DELTA_KIND)
+        self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': HOLY_CLEAVE, 'target': 'dummy'})
+        self.assertEqual(entry['observe_spell'], RIGHTEOUS_UPHEAVAL)
+        self.assertEqual(entry['observe_target'], 'dummy')
+        self.assertEqual(entry['force_crit'], 'melee')
+        self.assertEqual(entry['observe_metric'], 'cooldown_ms')
+        self.assertEqual(entry['expected_delta_ms'], 2000)
+        self.assertEqual(entry['setup_casts'], [LIBRAM_OF_ZEAL])
+
+    def test_checked_cooldown_entry_accepts_the_entry(self):
+        self.assertIs(checked_cooldown_entry(self.entry()), self.entry())
+
+    def test_checked_cooldown_entry_rejects_a_seeded_non_positive_expected_delta(self):
+        broken = {**self.entry(), 'expected_delta_ms': 0}
+        with self.assertRaises(ValueError):
+            checked_cooldown_entry(broken)
+
+    def test_checked_cooldown_entry_rejects_a_seeded_non_integer_setup_cast(self):
+        broken = {**self.entry(), 'setup_casts': ['not-a-spell-id']}
+        with self.assertRaises(ValueError):
+            checked_cooldown_entry(broken)
+
+    def test_checked_cooldown_entry_rejects_a_seeded_unknown_observe_target(self):
+        broken = {**self.entry(), 'observe_target': 'not-a-target'}
+        with self.assertRaises(ValueError):
+            checked_cooldown_entry(broken)
+
+
+class CooldownDeltaObserveTargetTest(unittest.TestCase):
+    def test_cooldown_trial_steps_casts_the_observed_rank_at_the_named_target(self):
+        entry = templar_trigger(LIBRAM_OF_ZEAL)
+        steps = cooldown_trial_steps(CLASS_FILE, entry, 1, 'measured')
+        observe_casts = [step for step in steps if step.get('action') == 'cast'
+                        and step.get('spell') == entry['observe_spell']]
+        self.assertEqual(len(observe_casts), 1)
+        self.assertEqual(observe_casts[0].get('target'), 'dummy')
+
+    def test_cooldown_trial_steps_waits_after_the_observed_cast_to_clear_its_gcd(self):
+        entry = templar_trigger(LIBRAM_OF_ZEAL)
+        steps = cooldown_trial_steps(CLASS_FILE, entry, 1, 'measured')
+        before_index = next(index for index, step in enumerate(steps)
+                            if step.get('label', '').endswith('0 before'))
+        self.assertEqual(steps[before_index + 1]['action'], 'wait')
+        self.assertGreater(steps[before_index + 1]['ms'], 0)
+
+    def test_cooldown_trial_steps_casts_the_observed_rank_at_self_without_observe_target(self):
+        one_with_the_light = next(entry for entry in CLASS_FILE['triggers']
+                                  if entry['aura'] == ONE_WITH_THE_LIGHT and entry.get('kind') == COOLDOWN_DELTA_KIND)
+        entry = {**one_with_the_light, 'observe_target': None}
+        steps = cooldown_trial_steps(CLASS_FILE, entry, 1, 'measured')
+        observe_casts = [step for step in steps if step.get('action') == 'cast'
+                        and step.get('spell') == entry['observe_spell']]
+        self.assertEqual(len(observe_casts), 1)
+        self.assertNotIn('target', observe_casts[0])
+        before_index = next(index for index, step in enumerate(steps)
+                            if step.get('label', '').endswith('0 before'))
+        self.assertNotEqual(steps[before_index + 1].get('action'), 'wait')
+
+
+class CooldownDeltaForceCritTest(unittest.TestCase):
+    def test_cooldown_trigger_scenario_forces_the_trigger_cast_to_crit(self):
+        entry = templar_trigger(LIBRAM_OF_ZEAL)
+        scenario, _ = cooldown_trigger_scenario(CLASS_FILE, entry, 0)
+        self.assertEqual(scenario['players'][0]['melee_crit_rating'], FORCED_CRIT_RATING)
+
+    def test_cooldown_trigger_scenario_leaves_crit_rating_unset_without_force_crit(self):
+        one_with_the_light = next(entry for entry in CLASS_FILE['triggers']
+                                  if entry['aura'] == ONE_WITH_THE_LIGHT and entry.get('kind') == COOLDOWN_DELTA_KIND)
+        scenario, _ = cooldown_trigger_scenario(CLASS_FILE, one_with_the_light, 0)
+        self.assertNotIn('melee_crit_rating', scenario['players'][0])
+        self.assertNotIn('spell_crit_rating', scenario['players'][0])
 
 
 if __name__ == '__main__':

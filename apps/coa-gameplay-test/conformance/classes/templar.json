@@ -1460,6 +1460,23 @@
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
       "per_trigger_text": "your chance to parry is now increased"
+    },
+    {
+      "aura": 801466,
+      "name": "Libram of Zeal",
+      "tooltip": "Read from your |cffffffffLibram of Mortal Abdication|r, increasing your melee haste by $s2% and causes your damaging abilities to reduce the cooldown of |cFFFFFFFFRighteous Upheaval|r by $/1000;575328S1 sec for $d.\n\n@ext:Only 1 |cffffffffLibram|r spell can be active at a time.:ext@",
+      "trigger": {"action": "cast", "spell": 801445, "target": "dummy"},
+      "trigger_text": "causes your damaging abilities to reduce the cooldown of Righteous Upheaval",
+      "trigger_spell_text": "Holy Cleave",
+      "kind": "cooldown_delta",
+      "setup_casts": [801466],
+      "observe_spell": 572027,
+      "observe_target": "dummy",
+      "force_crit": "melee",
+      "observe_source": "AscensionTemplarEvents.cpp:204-205 (aura_ascension_templar_event::Check/Proc, case 801466): Check() requires damage && !periodic && Ability(info). Condemn 804906 was tried first and rejected: its Effect[0] is SPELL_AURA_PERIODIC_DAMAGE (a DoT), so every one of its proc events carries periodic=true and case 801466's own !periodic term rejects it outright, confirmed by a temporary LOG_ERROR trace (reverted, not committed) showing Reduce() never ran from a Condemn event. Holy Cleave 801445 (Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG, Effect[1] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, DmgClass SPELL_DAMAGE_CLASS_MELEE, SpellFamilyName 25; effect1 satisfies Ability(info)'s own HasEffect(SPELL_EFFECT_WEAPON_PERCENT_DAMAGE) term) is a direct, non-periodic melee-class hit, so force_crit: \"melee\" (cooldown_trigger_scenario previously never applied force_crit at all, unlike trigger_scenario; added here) makes every attempt a guaranteed-damage, non-periodic trial. Proc() then calls Reduce(player, 501562, std::abs(Amount(575328))): 501562 is spell_ranks' first_spell_id (rank 1) of the same chain as 572027, the reference character's own known rank (rank 7, rev_20260831_01_local_spell_progression.sql:293-299), and Named() matches by chain root, so the call reduces 572027, the rank this entry observes.",
+      "observe_metric": "cooldown_ms",
+      "expected_delta_ms": 2000,
+      "per_trigger_text": "causes your damaging abilities to reduce the cooldown of Righteous Upheaval"
     }
   ],
   "talent_modifiers": [

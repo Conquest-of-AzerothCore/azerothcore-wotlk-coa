@@ -33,6 +33,7 @@ A `triggers` entry of the class file is a passive whose tooltip says that someth
 | `effect` | optional: disambiguates two entries sharing one `aura` (one DBC spell with more than one proc/trigger effect that each need their own check or disposition); the generated scenario key includes it so the two do not collide |
 | `kind` | optional: `"cooldown_delta"` for a trigger whose effect is a fixed cooldown reduction rather than a counted cast/energize/aura-apply event (see "Cooldown-delta trigger entries" below); omitted for every ordinary entry, which keeps the shape above unchanged |
 | `expected_delta_ms` | `kind: "cooldown_delta"` only: the expected reduction in milliseconds, read once as a magnitude (`abs(EffectBasePoints + 1)`), never cast |
+| `observe_target` | `kind: "cooldown_delta"` only, optional: `"self"`/`"dummy"`/`"ally"`, the same vocabulary as `trigger`'s own `target`. Casts the observed rank at that target instead of with no target at all, for an observed rank whose own effect needs an explicit hostile/ally target to pass `CheckCast` (ADR 0054); omitted, the observed rank is cast with no target, unchanged from before this field existed. When set, `cooldown_trial_steps` also waits out the observed rank's own global cooldown (`observe_interval`) before casting the trigger, and `attempt_interval` reserves that wait a second time (once for this mid-trial wait, once for the existing end-of-trial spacing) |
 
 When a tooltip names more than one independent trigger spell for the same effect ("Casting Righteous Upheaval
 or Blade of Faith now grants you..."), each named spell gets its own entry: same `aura` and `observe_spell`,
@@ -161,7 +162,11 @@ always-on passive. Casting it fresh before every trigger cast keeps its buff act
 707111 whose hit is what actually gates the reduction; `setup_casts` runs in the baseline phase too, since
 705300 being active changes nothing there (the reduction itself still requires Eternally Devoted's own aura,
 checked only in `OnSpellHitResult`), so a baseline delta still proves nothing fires without the checked aura
-itself.
+itself. A `setup_casts` entry equal to `aura` itself (Libram of Zeal 801466, below) is the one exception:
+`cooldown_trial_steps` skips casting it specifically during the baseline phase, since casting it there would
+apply the very aura the baseline exists to withhold (confirmed by a real baseline alert, "cooldown delta 3518
+ms ... in a baseline trial without the passive", before this exclusion existed); every other `setup_casts`
+spell differs from `aura` and keeps running in both phases exactly as described above.
 
 `aura_apply_count` counts a target's `AuraApplyCounter` (`CoAGameplayTest.cpp`), a static `(unit, spell)` map
 recorded from `UnitScript::OnAuraApply`, the generic engine hook `Unit::_ApplyAura` calls after every aura
@@ -206,6 +211,7 @@ The Templar entries quote their trigger words from the cleaned DBC tooltips:
 | Disciplined Mind 681483 | "causes it to dispel 2 poison and disease effects", 578276 at `ally` | casts | 525052 casts (`EffectTriggerSpell[1]`/`[2]`, cast once) | 1 |
 | Deliverance 704116 | "Critically striking with Vindication", 573324 at `dummy`, `force_crit: "melee"` | casts | 801456 casts (`EffectTriggerSpell[0]`) | 1 |
 | Lorescribe 804927 (effect 1, `kind: "cooldown_delta"`) | "Casting Oath Breaker abilities", 572027 at `dummy` | cooldown delta of Libram of Tenacity 801461 | 4000 ms reduction (`Amount(806106)`, never cast) | n/a |
+| Libram of Zeal 801466 (`kind: "cooldown_delta"`) | "causes your damaging abilities to reduce the cooldown", Holy Cleave 801445 at `dummy`, `force_crit: "melee"` (most non-crit hits read 0 damage against the dummy fixture), `setup_casts: [801466]` (== `aura`, excluded from the baseline phase) | cooldown delta of Righteous Upheaval 572027 (the reference character's own known rank; `Reduce()` names rank-1 501562, matched by `spell_ranks` chain), `observe_target: "dummy"` (ADR 0054) | 2000 ms reduction (`Amount(575328)`, never cast) | n/a |
 | Scarlet Champion 805415 | "Your damaging critical strikes", 807268 at `dummy`, `force_crit: "melee"` | damage events | 805416 casts (`EffectTriggerSpell[0]`) | 1 |
 | Legacy of the Silver Hand 806522 | "Casting Argent Blade", 807268 at `dummy` | casts | 806523 casts (`EffectTriggerSpell[0]`) | 1 |
 

@@ -81,6 +81,9 @@ def checked_cooldown_entry(entry: dict) -> dict:
                          f'{sorted(FORCE_CRIT_RATINGS)}')
     if any(not isinstance(spell, int) for spell in entry.get('setup_casts', [])):
         raise ValueError(f'Cooldown-delta trigger {aura} has a non-integer setup_casts spell')
+    if entry.get('observe_target') is not None and entry['observe_target'] not in TRIGGER_TARGETS:
+        raise ValueError(f'Cooldown-delta trigger {aura} has an unknown observe_target '
+                         f'{entry["observe_target"]!r}, not one of {sorted(TRIGGER_TARGETS)}')
     return entry
 
 
@@ -210,6 +213,8 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
                    tick_spacing(class_file, facts, trigger['spell']))
     if entry.get('kind') == COOLDOWN_DELTA_KIND:
         interval += cast_interval(class_file, entry['observe_spell'], 0)
+        if entry.get('observe_target'):
+            interval += cast_interval(class_file, entry['observe_spell'], 0)
         interval += sum(cast_interval(class_file, spell, 0) for spell in entry.get('setup_casts', []))
     if entry.get('kind') == DURATION_DELTA_KIND:
         interval += cast_interval(class_file, entry['observe_spell'], 0)
@@ -422,13 +427,19 @@ def cooldown_trial_steps(class_file: dict, entry: dict, count: int, phase: str) 
     observe_interval = cast_interval(class_file, entry['observe_spell'], 0)
     trigger_interval = cast_interval(class_file, trigger['spell'], entry.get('internal_cooldown_ms', 0))
     trigger_target = trigger['target'] if trigger['target'] in (TARGET, ALLY) else None
+    observe_target = entry.get('observe_target')
+    observe_target = observe_target if observe_target in (TARGET, ALLY) else None
     steps = []
     for index in range(count):
         for setup_spell, facts, interval in zip(setup_spells, setup_facts, setup_intervals):
+            if phase == 'baseline' and setup_spell == aura:
+                continue
             steps += cast_steps(facts, setup_spell, None, interval, 1)
-        steps += cast_steps(observe_facts, entry['observe_spell'], None, 0, 1)
+        steps += cast_steps(observe_facts, entry['observe_spell'], observe_target, 0, 1)
         steps.append(measurement(cooldown_trial_label(aura, phase, index, 'before'), CASTER, 'cooldown_ms',
                                  spell=entry['observe_spell']))
+        if observe_target is not None:
+            steps.append({'action': 'wait', 'ms': observe_interval})
         steps += cast_steps(trigger_facts, trigger['spell'], trigger_target, 0, 1)
         steps.append(measurement(cooldown_trial_label(aura, phase, index, 'after'), CASTER, 'cooldown_ms',
                                  spell=entry['observe_spell']))
@@ -439,6 +450,8 @@ def cooldown_trial_steps(class_file: dict, entry: dict, count: int, phase: str) 
 def cooldown_trigger_rule(entry: dict) -> str:
     fixtures = ''.join(f'; before each trial, {spell} is reset and cast at self'
                        for spell in entry.get('setup_casts', []))
+    if entry.get('observe_target'):
+        fixtures += f'; {entry["observe_spell"]} cast at {entry["observe_target"]}, not self'
     return (f'baseline delta 0 ms over {BASELINE_ATTEMPTS} attempts without the passive; measured delta of '
             f'{entry["observe_metric"]} of {entry["observe_spell"]} between a cast of {entry["observe_spell"]} and '
             f'a cast of {entry["trigger"]["spell"]} matches {entry["expected_delta_ms"]:g} ms within '
@@ -475,7 +488,10 @@ def cooldown_trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> t
     contract = ('Cooldown delta of an always-on passive: no change before the learn, a fixed cooldown reduction per '
                'trigger after it, summed over its parts, against its tooltip.')
     scenario = scenario_shell(class_file, name, contract, steps)
-    if trigger['action'] == ATTACK or trigger.get('target') == TARGET:
+    force_crit = entry.get('force_crit')
+    if force_crit:
+        scenario['players'][0][FORCE_CRIT_RATINGS[force_crit]] = FORCED_CRIT_RATING
+    if trigger['action'] == ATTACK or trigger.get('target') == TARGET or entry.get('observe_target') == TARGET:
         scenario['creatures'] = [creature_fixture(class_file)]
     if trigger.get('target') == ALLY:
         scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
