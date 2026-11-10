@@ -117,6 +117,7 @@ DELIVERANCE = 704116
 DELIVERANCE_COPY = 801456
 RIGHTEOUSNESS = 680891
 RETRIBUTION = 707391
+HOLY_SCHOOL_MASK = 2
 RETRIBUTION_EXTRA_STRIKE = 525028
 TESTAMENT_OF_FORTITUDE = 500678
 SACRED_RESTRAINT = 102208
@@ -227,6 +228,25 @@ def retribution_magnitude_steps(trigger_total, observe_total, trigger_count, obs
             assert_step(RETRIBUTION_LABELS['observe_total'], str(observe_total)),
             assert_step(RETRIBUTION_LABELS['observe_count'], str(observe_count)),
             assert_step(RETRIBUTION_LABELS['aura'], str(aura))]
+
+
+RETRIBUTION_TARGET_LABELS = {'armor': 'target armor', 'view_level': 'target view_level',
+                             'resistance 1': 'target resistance 1'}
+
+
+def resisted_retribution_magnitude_expectation():
+    model = {**retribution_magnitude_model(), 'resisted_school_mask': HOLY_SCHOOL_MASK, 'caster_level': 60,
+             'target_measurements': RETRIBUTION_TARGET_LABELS}
+    return Expectation(magnitude_label(RETRIBUTION), MAGNITUDE_CHECK, RETRIBUTION, RETRIBUTION, None,
+                       'Melee damage dealt', 'magnitude rule', model)
+
+
+def resisted_retribution_magnitude_steps(observe_total, view_level=60, holy_resistance=0):
+    return retribution_magnitude_steps(trigger_total=10000, trigger_count=200, observe_total=observe_total,
+                                       observe_count=200) + [
+        assert_step(RETRIBUTION_TARGET_LABELS['armor'], '528'),
+        assert_step(RETRIBUTION_TARGET_LABELS['view_level'], str(view_level)),
+        assert_step(RETRIBUTION_TARGET_LABELS['resistance 1'], str(holy_resistance))]
 
 
 def trigger_model(per_trigger=0.5, part=0, parts=1, baseline=BASELINE_ATTEMPTS, attempts=SCHEDULED):
@@ -1085,6 +1105,57 @@ class MagnitudeTriggerCompareTest(unittest.TestCase):
                                                                   observe_total=TRIGGER_TRIALS - 1,
                                                                   observe_count=TRIGGER_TRIALS - 1))
         self.assertEqual(self.verdict().status, 'insufficient_trials')
+
+
+    def test_holy_strike_ratio_is_judged_after_the_level_sixty_dummys_average_resist(self):
+        self.workspace.scenario(RETRIBUTION_KEY, 'trigger', [resisted_retribution_magnitude_expectation()],
+                                steps=resisted_retribution_magnitude_steps(observe_total=2664))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.expected, 0.264)
+        self.assertIn('0.8800 kept', verdict.explanation)
+
+    def test_holy_strike_ratio_at_the_unresisted_tooltip_fraction_alerts_against_a_resisting_dummy(self):
+        self.workspace.scenario(RETRIBUTION_KEY, 'trigger', [resisted_retribution_magnitude_expectation()],
+                                steps=resisted_retribution_magnitude_steps(observe_total=3000))
+        self.assertEqual(self.verdict().status, 'alert')
+
+    def test_holy_strike_ratio_adds_the_dummys_own_holy_resistance(self):
+        self.workspace.scenario(RETRIBUTION_KEY, 'trigger', [resisted_retribution_magnitude_expectation()],
+                                steps=resisted_retribution_magnitude_steps(observe_total=2280, holy_resistance=60))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.expected, 0.3 * 0.76)
+
+    def test_holy_strike_ratio_without_the_target_readings_is_not_judged(self):
+        self.workspace.scenario(RETRIBUTION_KEY, 'trigger', [resisted_retribution_magnitude_expectation()],
+                                steps=retribution_magnitude_steps(trigger_total=10000, trigger_count=200,
+                                                                  observe_total=2664, observe_count=200))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('no magnitude measurements', verdict.explanation)
+
+
+class MagnitudeScenarioResistanceTest(unittest.TestCase):
+    def test_holy_copy_on_the_dummy_measures_the_dummys_level_and_holy_resistance(self):
+        scenario, [expectation] = magnitude_ratio_scenario(CLASS_FILE, templar_magnitude_trigger(RETRIBUTION))
+        self.assertEqual(expectation.model['resisted_school_mask'], HOLY_SCHOOL_MASK)
+        self.assertEqual(expectation.model['caster_level'], CLASS_FILE['level'])
+        measured = {step['label']: step for step in scenario['steps'] if step['action'] == 'assert'}
+        target = expectation.model['target_measurements']
+        self.assertEqual(measured[target['view_level']]['metric'], 'view_level')
+        self.assertEqual(measured[target['resistance 1']]['metric'], 'resistance')
+        self.assertEqual(measured[target['resistance 1']]['school'], 1)
+
+    def test_physical_copy_measures_no_target_resistance(self):
+        scenario, [expectation] = magnitude_ratio_scenario(CLASS_FILE, templar_magnitude_trigger(DELIVERANCE))
+        self.assertEqual(expectation.model['resisted_school_mask'], 0)
+        self.assertEqual(expectation.model['target_measurements'], {})
+        self.assertNotIn('resistance', [step.get('metric') for step in scenario['steps']])
+
+    def test_self_heal_copy_measures_no_target_resistance(self):
+        _, [expectation] = magnitude_ratio_scenario(CLASS_FILE, templar_magnitude_trigger(UTHERS_LEGACY))
+        self.assertEqual(expectation.model['resisted_school_mask'], 0)
 
 
 class CheckedMagnitudeEntryTest(unittest.TestCase):

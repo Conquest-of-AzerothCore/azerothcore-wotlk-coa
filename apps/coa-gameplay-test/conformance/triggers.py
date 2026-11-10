@@ -4,7 +4,8 @@ from typing import Sequence
 
 from behaviours import STRIKER, STRIKER_DISTANCE, STRIKER_HEALTH
 from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, UNMODELLED, Unmodelled, cast_steps, creature_fixture,
-                  records_of, scenario_shell, timed)
+                  magic_schools, records_of, scenario_shell, target_steps, timed)
+from mitigation import PHYSICAL_SCHOOL_MASK
 from procs import ATTACK, CAST, ENTRY_STATUSES, PART_BUDGET_MS, cast_interval, swing_interval, tick_spacing
 from profile import CASTER, SETTLE_MS, measurement, player_fixture
 from values import (ALLY, CHARGE_OFFSET_YD, FORCE_CRIT_RATINGS, FORCED_CRIT_RATING, TARGET, Expectation, RankFacts,
@@ -783,6 +784,15 @@ def magnitude_trigger_rule(entry: dict) -> str:
             f'("{entry["per_trigger_text"]}")')
 
 
+def magnitude_resisted_school(class_file: dict, entry: dict, cast_target: str | None) -> int:
+    if entry['observe_metric'] != 'spell_damage_total' or cast_target != TARGET:
+        return 0
+    school_mask = records_of(class_file).field('Spell', entry['observe_spell'], 'SchoolMask')
+    if school_mask & PHYSICAL_SCHOOL_MASK or not magic_schools(school_mask):
+        return 0
+    return school_mask
+
+
 def magnitude_ratio_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict, list[Expectation]]:
     trigger = entry['trigger']
     if trigger['action'] == CAST:
@@ -818,6 +828,11 @@ def magnitude_ratio_scenario(class_file: dict, entry: dict, part: int = 0) -> tu
     observe_count_metric = MAGNITUDE_OBSERVE_COUNT_METRICS[entry['observe_metric']]
     steps.append(measurement(labels['observe_count'], CASTER, observe_count_metric, spell=entry['observe_spell']))
     steps.append(measurement(labels['aura'], CASTER, 'aura', spell=aura))
+    resisted_school = magnitude_resisted_school(class_file, entry, cast_target)
+    target_labels: dict[str, str] = {}
+    if resisted_school:
+        resistance_steps, target_labels = target_steps(resisted_school)
+        steps += resistance_steps
     parts = len(plan.part_attempts)
     name = f'Conformance trigger {class_file["name"]} {entry["name"]} {aura} magnitude part {part + 1} of {parts}'
     contract = ('Mean magnitude of a triggered proc against the mean damage of the hits that triggered it, over '
@@ -832,7 +847,8 @@ def magnitude_ratio_scenario(class_file: dict, entry: dict, part: int = 0) -> tu
             'attempt_ms': plan.attempt_ms, 'minimum_trials': TRIGGER_TRIALS, 'trigger': dict(trigger),
             'trigger_metric': entry['trigger_metric'], 'observe_spell': entry['observe_spell'],
             'observe_metric': entry['observe_metric'], 'expected_ratio': entry['expected_ratio'],
-            'force_crit': force_crit, 'measurements': labels}
+            'force_crit': force_crit, 'measurements': labels, 'resisted_school_mask': resisted_school,
+            'caster_level': class_file['level'], 'target_measurements': target_labels}
     expectation = Expectation(magnitude_label(aura), MAGNITUDE_CHECK, aura, aura, None, entry['trigger_text'],
                               magnitude_trigger_rule(entry), model)
     return timed(scenario, SETTLE_MS + attempts * plan.attempt_ms + DRAIN_MS), [expectation]

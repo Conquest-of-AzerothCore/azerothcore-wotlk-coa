@@ -23,7 +23,8 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO,
                         BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER)
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
-                  WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model)
+                  WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, magic_schools, measured_hit_model)
+from mitigation import TargetProfile, expected_mitigation
 from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE, cleaned_tooltip, literal_token
@@ -1196,14 +1197,28 @@ def judge_trigger_duration(parts: list[ProcPart]) -> Verdict:
                                f'elapsed-time window; {expectation.rule} ({notes})')
 
 
+def magnitude_target_mitigation(model: dict, run: Run) -> float | None:
+    school_mask = model.get('resisted_school_mask')
+    if not school_mask:
+        return 1.0
+    labels = model['target_measurements']
+    level = run.values.get(labels['view_level'])
+    resistances = {1 << school: run.values.get(labels[f'resistance {school}'])
+                   for school in magic_schools(school_mask)}
+    if level is None or None in resistances.values():
+        return None
+    target = TargetProfile(entry=0, level=int(level), armor=0,
+                           resistances={bit: int(value) for bit, value in resistances.items()})
+    return expected_mitigation(school_mask, target, model['caster_level']).mean
+
+
 def judge_trigger_magnitude(parts: list[ProcPart]) -> Verdict:
     first_entry, _, expectation = parts[0]
     model = expectation.model
     base = Verdict(expectation.label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
                    expectation.rank_id, expectation.check)
     expected = model['expected_ratio']
-    margin = max(MAGNITUDE_RATIO_FLOOR, MAGNITUDE_RATIO_TOLERANCE * expected)
-    trigger_total = trigger_count = observe_total = observe_count = 0.0
+    trigger_total = trigger_count = observe_total = observe_count = kept_count = 0.0
     without_aura, unmeasured = [], []
     reasons: list[int] = []
     for _, run, part in parts:
@@ -1214,7 +1229,9 @@ def judge_trigger_magnitude(parts: list[ProcPart]) -> Verdict:
         trig_count = run.values.get(labels['trigger_count'])
         obs_total = run.values.get(labels['observe_total'])
         obs_count = run.values.get(labels['observe_count'])
-        if aura is None or trig_total is None or trig_count is None or obs_total is None or obs_count is None:
+        kept = magnitude_target_mitigation(part.model, run)
+        if aura is None or trig_total is None or trig_count is None or obs_total is None or obs_count is None \
+                or kept is None:
             unmeasured.append(f'{run.key} ({run.status}: {run.message})')
             continue
         if aura <= 0:
@@ -1224,6 +1241,7 @@ def judge_trigger_magnitude(parts: list[ProcPart]) -> Verdict:
         trigger_count += trig_count
         observe_total += obs_total
         observe_count += obs_count
+        kept_count += kept * obs_count
     usable = len(parts) - len(without_aura) - len(unmeasured)
     notes = f'{usable} usable parts of {model["parts"]}'
     if without_aura:
@@ -1245,18 +1263,24 @@ def judge_trigger_magnitude(parts: list[ProcPart]) -> Verdict:
     mean_trigger = trigger_total / trigger_count
     mean_observe = observe_total / observe_count
     ratio = mean_observe / mean_trigger
+    kept = kept_count / observe_count
+    tooltip_ratio = expected
+    expected = tooltip_ratio * kept
+    margin = max(MAGNITUDE_RATIO_FLOOR, MAGNITUDE_RATIO_TOLERANCE * expected)
     low, high = expected - margin, expected + margin
     judged = replace(base, measured=ratio, expected=expected, low=low, high=high)
     status = 'ok' if low - FLOAT_EPSILON <= ratio <= high + FLOAT_EPSILON else 'alert'
     trigger_source = 'main-hand melee attacks' if model['trigger']['action'] == 'attack' \
         else str(model['trigger']['spell'])
+    resisted = (f' (tooltip {tooltip_ratio:g} x {kept:.4f} kept after the target\'s average partial resist of school '
+                f'mask {model["resisted_school_mask"]})') if model.get('resisted_school_mask') else ''
     return replace(judged, status=status,
                    explanation=f'mean {mean_observe:g} {model["observe_metric"]} of {model["observe_spell"]} over '
                                f'{observe_count:g} of its own events, against mean {mean_trigger:g} '
                                f'{model["trigger_metric"]} of {trigger_source} over {trigger_count:g} of its own '
                                f'events, = {ratio:.4f}, within max({MAGNITUDE_RATIO_FLOOR:g}, '
-                               f'{MAGNITUDE_RATIO_TOLERANCE:.0%} of expected) of {expected:g}; {expectation.rule} '
-                               f'({notes})')
+                               f'{MAGNITUDE_RATIO_TOLERANCE:.0%} of expected) of {expected:g}{resisted}; '
+                               f'{expectation.rule} ({notes})')
 
 
 DETAIL_KEYS = ('config', 'baseline', 'index', 'passes', 'source', 'talents')

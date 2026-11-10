@@ -393,6 +393,9 @@ trigger spell for `cast`, `melee_damage_count` of the main hand for `attack`), a
 `ratio = (observe_total / observe_count) / (trigger_total / trigger_count)` — the triggered spell's own mean
 amount per occurrence, over the trigger side's own mean amount per attempt — against `expected_ratio` within
 `max(0.01, 5% of expected)` (the owner's own "within 5% on numbers" standard), everything outside is `alert`.
+When the observed copy is a magic-school `spell_damage_total` struck at the dummy, the scenario also reads the
+dummy's `view_level` and resistance and the expected value is `expected_ratio` times the kept fraction of
+`expected_mitigation` (linear monster resistance with its partial-resist steps, ADR 0092).
 Normalising by each side's *own* event count, rather than taking a plain ratio of the two raw sums, matters
 whenever the trigger does not fire on every attempt: summing raw totals instead would measure
 `expected_ratio × (the trigger's own fire rate) × (events per trigger)`, diluted by however rarely the aura
@@ -436,16 +439,17 @@ reproducible ~12% shortfall, not sampling noise (three independent 15-lane runs 
 this session and ruled out: `spell_bonus_data` zeroes 525028's AP/SP coefficients (so no bonus is added on top
 of the override); `EffectRealPointsPerLevel[0]` is 0 for 525028, so `SpellEffectInfo::CalcValue`'s per-level
 scaling branch never runs (`SpellInfo.cpp:474`) and the `BaseLevel`/`SpellLevel` 26 vs the level-60 test
-character cannot explain the gap that way; the dummy's measured Holy resistance is `0` (so no partial-resist
-mitigation applies to 525028); the generic engine's own `HandleAscensionPercentEventProc`
+character cannot explain the gap that way; the dummy's measured (authored) Holy resistance is `0`; the generic
+engine's own `HandleAscensionPercentEventProc`
 (`SpellAuraEffects.cpp:7283`) returns immediately for 707391 (its hardcoded id list does not include it), so
 the whole effect runs through the CoA-scripted path alone, `AscensionTemplarEvents.cpp`'s shared `Check`/`Proc`
 (`case 707391: return damage && melee && !periodic;` / `Copy(player, target, 525028, uint64(damage) * 30 / 100);`
-called twice), read in full. No mechanism in that path visibly scales the override down by ~12%; the cause is
-**not yet proven** and the clause is not closed. The next step is a per-swing pairing diagnostic (correlate each
-individual triggering swing's own damage with its own resulting 525028 cast's damage, rather than comparing
-pooled means) to see whether the shortfall is uniform across hits or concentrated in a subset (e.g. partial
-block/glancing swings specifically), which would point at the actual mechanism.
+called twice), read in full. The "Holy resistance 0" reading was the dummy's authored resistance only: monster
+linear resistance adds 60 Holy resistance at level 60 at combat time (`docs/coa/monster-linear-resistance.md`),
+12% average resist, and 0.3 x 0.88 = 0.264 is the measured ratio. The copy is not exempt from resistance
+(`TemplarCopies` ignores armor and modifiers only), so the check now multiplies the tooltip fraction by the
+dummy's kept fraction (ADR 0092); round 10's 0.2664 is `ok` against 0.264. The gameplay scenario
+`templar-retribution-holy-strike-resist` pins 30% against a level-1 dummy and 26.4% against a level-60 one.
 Holy Combatant 500011 (round5 `trigger-accounting`): "Your Argent Blade now also extends the duration of
 Interdict on your target by 1 sec" extends Interdict 560116's remaining duration by `Amount(500014)` (1000 ms)
 on every landed Argent Blade hit when the target still carries the caster's own Interdict
