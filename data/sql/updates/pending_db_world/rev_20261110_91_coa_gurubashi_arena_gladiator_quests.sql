@@ -57,12 +57,16 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (775899, 0, 3, 0, 2, 0, 100, 1, 0, 30, 0, 0, 0, 11, 3019, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Majara - Between 0-30% Health - Cast Frenzy (No Repeat)');
 
 -- one boss per quest at a time: a group (or a second player) accepting while that boss is still alive in the pit
--- (~69 yd from Gorguk) joins the fight already running instead of summoning a copy
+-- (~69 yd from Gorguk) joins the fight already running instead of summoning a copy; the same check guards the
+-- fight option below when it is selected, since its gossip conditions are only checked when the menu opens
 DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 22 AND `SourceEntry` = 764795 AND `SourceId` = 0;
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (22, 1, 764795, 0, 0, 29, 1, 775897, 100, 0, 1, 0, 0, '', 'Gorguk Skullhook - summon Brakka only if no Brakka is alive in the pit'),
 (22, 2, 764795, 0, 0, 29, 1, 775898, 100, 0, 1, 0, 0, '', 'Gorguk Skullhook - summon Ironhide Gorefist only if none is alive in the pit'),
-(22, 3, 764795, 0, 0, 29, 1, 775899, 100, 0, 1, 0, 0, '', 'Gorguk Skullhook - summon Majara only if no Majara is alive in the pit');
+(22, 3, 764795, 0, 0, 29, 1, 775899, 100, 0, 1, 0, 0, '', 'Gorguk Skullhook - summon Majara only if no Majara is alive in the pit'),
+(22, 7, 764795, 0, 0, 29, 1, 775897, 100, 0, 1, 0, 0, '', 'Gorguk Skullhook - fight option summons Brakka only if none is alive (two menus open at once)'),
+(22, 8, 764795, 0, 0, 29, 1, 775898, 100, 0, 1, 0, 0, '', 'Gorguk Skullhook - fight option summons Ironhide Gorefist only if none is alive'),
+(22, 9, 764795, 0, 0, 29, 1, 775899, 100, 0, 1, 0, 0, '', 'Gorguk Skullhook - fight option summons Majara only if none is alive');
 
 -- retry (ours): while the quest is incomplete and its boss is not alive in the pit (it died for someone else, or
 -- despawned after the player died), Gorguk offers to send in the opponent again
