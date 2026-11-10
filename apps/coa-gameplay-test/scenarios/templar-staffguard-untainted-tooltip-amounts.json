@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Templar Staffguard and Untainted apply the amounts their tooltips bill",
+  "contract": "Staffguard 705295 reads 'absorbing ${$706583m1+$STA*.3} damage, scaling with Stamina, parry and dodge rating'. 706583 e0 is SPELL_AURA_SCHOOL_ABSORB BasePoints 124 with 5 points per level from BaseLevel 24; the CoA client shows $706583m1 at rank 0, 125. Untainted 705298 is streamed as 'reduces your Physical damage taken by ${-$705299m1+$STA*0.1}'; 705299 e0 is SPELL_AURA_MOD_DAMAGE_TAKEN physical BasePoints -11, $705299m1 = -10. Two level 80 Templars receive both auras; 'armored' first gets Power Word: Fortitude 48161, Increased Dodge 96 18062 and Increased Parry 100 18063. The applied Staffguard absorb must be 125 + 0.3 x Stamina + 0.25 x (dodge + parry rating) and the applied Untainted amount -(10 + 0.1 x Stamina). Measured stats 109 / 224 Stamina and 0 / 196 dodge plus parry rating give 157 / 241 absorbed and -20 / -32 (integer truncation). The level-scaled CalcValue alone would give 405 for Staffguard, and a lost Stamina term 125 and -10 on both Templars.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "bare", "race": 1, "class": 19, "level": 80, "allow_regeneration": false },
+    { "id": "armored", "race": 1, "class": 19, "level": 80, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "set_aura", "actor": "armored", "spell": 48161, "stacks": 1 },
+    { "action": "set_aura", "actor": "armored", "spell": 18062, "stacks": 1 },
+    { "action": "set_aura", "actor": "armored", "spell": 18063, "stacks": 1 },
+    { "action": "wait", "label": "Let the stat and rating auras update the stats", "ms": 500 },
+    { "action": "assert", "label": "bare holds 109 Stamina", "actor": "bare", "metric": "stat", "stat": 2, "equals": 109 },
+    { "action": "assert", "label": "armored holds 224 Stamina with Power Word: Fortitude", "actor": "armored", "metric": "stat", "stat": 2, "equals": 224 },
+    { "action": "assert", "label": "bare has no dodge rating", "actor": "bare", "metric": "combat_rating", "rating": 2, "equals": 0 },
+    { "action": "assert", "label": "bare has no parry rating", "actor": "bare", "metric": "combat_rating", "rating": 3, "equals": 0 },
+    { "action": "assert", "label": "armored has 96 dodge rating", "actor": "armored", "metric": "combat_rating", "rating": 2, "equals": 96 },
+    { "action": "assert", "label": "armored has 100 parry rating", "actor": "armored", "metric": "combat_rating", "rating": 3, "equals": 100 },
+    { "action": "set_aura", "actor": "bare", "spell": 706583, "stacks": 1 },
+    { "action": "set_aura", "actor": "armored", "spell": 706583, "stacks": 1 },
+    { "action": "set_aura", "actor": "bare", "spell": 705299, "stacks": 1 },
+    { "action": "set_aura", "actor": "armored", "spell": 705299, "stacks": 1 },
+    { "action": "assert", "label": "Staffguard absorbs 125 + 0.3 x 109 Stamina", "actor": "bare", "metric": "aura_amount", "spell": 706583, "effect": 0, "equals": 157, "within_ms": 1000 },
+    { "action": "assert", "label": "Staffguard absorbs 125 + 0.3 x 224 Stamina + 0.25 x 196 dodge and parry rating", "actor": "armored", "metric": "aura_amount", "spell": 706583, "effect": 0, "equals": 241, "within_ms": 1000 },
+    { "action": "assert", "label": "Untainted reduces Physical damage taken by 10 + 0.1 x 109 Stamina", "actor": "bare", "metric": "aura_amount", "spell": 705299, "effect": 0, "equals": -20, "within_ms": 1000 },
+    { "action": "assert", "label": "Untainted reduces Physical damage taken by 10 + 0.1 x 224 Stamina", "actor": "armored", "metric": "aura_amount", "spell": 705299, "effect": 0, "equals": -32, "within_ms": 1000 }
+  ]
+}
