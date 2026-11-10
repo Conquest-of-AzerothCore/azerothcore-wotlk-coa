@@ -202,6 +202,12 @@ four now holds a single entry and no `ambiguous_tooltip` verdict remains for any
   verdict from `ambiguous_tooltip` to a reported `alert`, not `ok`: the single surviving reading is the
   tooltip-correct one, and the measured rate undershoots 20% once self-chains are counted — a real finding for
   an implementer to trace (root cause not established by this pass), not a fix proposed here.
+  The re-roll recurses inside the previous strike, so the server caps one chain at 8 strikes
+  (`MaxScourgebaneStrikesPerChain`, `AscensionTemplarEvents.cpp`); a chance modifier near 100% would otherwise
+  recurse until the target died or the stack overflowed. Grouping the archive's Scourgebane damage and miss events
+  by source, target and millisecond gives 16147 chains of 1 to 6 strikes (13929, 1949, 177, 78, 13, 1), so the
+  longest observed chain is 6 and the cap binds only past it (at most 0.3^8 of chains at Pure Focus rank 2's 30%).
+  Catalog scenario `templar-scourgebane-chain-cap` forces 100% and reads exactly 8 strikes per landed swing.
 
 Measured on 2026-11-09 (gameplay stage, `.cache/verify-all/20261109-093335/report.json`, simulated clock, no
 failed cast, exploratory-only selection, 91 of 91 parts passed natively; `conformance.py compare` against that

@@ -19,6 +19,7 @@ struct TemplarState
     uint64 sequence = 0;
     uint32 zealotry = 0;
     uint32 argent = 0;
+    uint32 scourgebaneDepth = 0;
     bool event = false;
     bool oath = false;
 };

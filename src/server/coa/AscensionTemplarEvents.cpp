@@ -14,6 +14,7 @@
 namespace
 {
 using namespace AscensionTemplar;
+constexpr uint32 MaxScourgebaneStrikesPerChain = 8;
 class aura_ascension_templar_event : public AuraScript
 {
     PrepareAuraScript(aura_ascension_templar_event);
@@ -36,6 +37,8 @@ class aura_ascension_templar_event : public AuraScript
         bool const legacyHeal = (id == 680397 || id == 705298) && info && info->Id == 707302;
         bool const scourgebaneChain = (id == 92111 || id == 520007) && info && info->Id == 801832;
         if (State(player).event && !legacyHeal && !scourgebaneChain)
+            return false;
+        if (scourgebaneChain && State(player).scourgebaneDepth >= MaxScourgebaneStrikesPerChain)
             return false;
         if (id == 300513)
             return event.GetActor() == GetTarget() && damage && !periodic;
@@ -127,7 +130,9 @@ class aura_ascension_templar_event : public AuraScript
             break;
         case 92111:
         case 520007:
+            ++State(player).scourgebaneDepth;
             Cast(player, target, 801832);
+            --State(player).scourgebaneDepth;
             break;
         case 704116:
             Copy(player, target, 801456, uint64(damage) * 50 / 100);
