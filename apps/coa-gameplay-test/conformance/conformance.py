@@ -24,10 +24,11 @@ from scaffold import LIVE_BASELINE_HEADER, SHARED_DEFINES, scaffold_class
 from sheets import write_sheets
 from stack import PASSES, STACK_CHECKS, STACK_DPS, STACK_KIND, stack_scenarios
 from tooltip import read_tooltip
-from triggers import (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND, MAGNITUDE_RATIO_KIND, SELF_TRIGGER_KIND,
-                      cooldown_trigger_scenario, duration_trigger_scenario, magnitude_ratio_scenario,
-                      self_trigger_scenario, shares_cooldown_effect, shares_trigger_aura, trigger_entries,
-                      trigger_plan, trigger_scenario, trigger_status_expectation, trigger_unmodelled_expectation)
+from triggers import (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND, GATE_ABSENCE_KIND, MAGNITUDE_RATIO_KIND,
+                      SELF_TRIGGER_KIND, cooldown_trigger_scenario, duration_trigger_scenario, gate_absence_scenario,
+                      magnitude_ratio_scenario, self_trigger_scenario, shares_cooldown_effect, shares_trigger_aura,
+                      trigger_entries, trigger_plan, trigger_scenario, trigger_status_expectation,
+                      trigger_unmodelled_expectation)
 from values import Expectation, armed_for, dataset, static_conditional_known, structure_stats, value_scenario
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -206,6 +207,8 @@ def add_trigger(writer: ManifestWriter, entry: dict):
             key_parts = (*key_parts, entry['observe_spell'])
     elif entry.get('kind') is None and not entry.get('status') and shares_trigger_aura(class_file, entry):
         key_parts = (aura, entry['trigger'].get('spell', entry['trigger']['action']))
+    elif entry.get('kind') == GATE_ABSENCE_KIND:
+        key_parts = (aura, 'gate')
     else:
         key_parts = (aura,)
     key = scenario_key(class_file['name'], 'trigger', *key_parts)
@@ -213,8 +216,8 @@ def add_trigger(writer: ManifestWriter, entry: dict):
         writer.add(key, 'trigger', None, aura, [trigger_status_expectation(entry)], name=name)
         return
     scenario_fn = {COOLDOWN_DELTA_KIND: cooldown_trigger_scenario, DURATION_DELTA_KIND: duration_trigger_scenario,
-                  MAGNITUDE_RATIO_KIND: magnitude_ratio_scenario,
-                  SELF_TRIGGER_KIND: self_trigger_scenario}.get(entry.get('kind'), trigger_scenario)
+                  MAGNITUDE_RATIO_KIND: magnitude_ratio_scenario, SELF_TRIGGER_KIND: self_trigger_scenario,
+                  GATE_ABSENCE_KIND: gate_absence_scenario}.get(entry.get('kind'), trigger_scenario)
     try:
         plan = trigger_plan(class_file, entry)
     except Unmodelled as error:

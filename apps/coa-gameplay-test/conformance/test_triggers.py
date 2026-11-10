@@ -17,14 +17,17 @@ from profile import DBC_DIR
 from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader
 from tooltip import Records
 from triggers import (BASELINE_ATTEMPTS, COOLDOWN_CHECK, COOLDOWN_DELTA_KIND, DURATION_CHECK, DURATION_DELTA_KIND,
-                      MAGNITUDE_CHECK, MAGNITUDE_RATIO_KIND, MAIN_HAND, PERIODIC, SELF_TRIGGER_CHECK,
+                      GATE_ABSENCE_CHECK, GATE_ABSENCE_KIND, MAGNITUDE_CHECK, MAGNITUDE_RATIO_KIND, MAIN_HAND,
+                      PERIODIC, SELF_TRIGGER_CHECK,
                       SELF_TRIGGER_KIND, TAKEN_HIT, TRIGGER_CHECK,
                       TRIGGER_TRIALS, attempt_interval,
                       attempt_steps, checked_cooldown_entry, checked_duration_entry, checked_entry,
-                      checked_magnitude_entry, checked_self_trigger_entry, checked_trigger_set,
+                      checked_gate_absence_entry, checked_magnitude_entry, checked_self_trigger_entry,
+                      checked_trigger_set,
                       cooldown_label, cooldown_trial_label, cooldown_trial_steps, cooldown_trigger_rule,
                       cooldown_trigger_scenario, count_step, counts, duration_label, duration_trial_label,
                       duration_trial_steps, duration_trigger_rule, duration_trigger_scenario,
+                      gate_absence_label, gate_absence_rule, gate_absence_scenario,
                       magnitude_label, magnitude_measurement_labels, magnitude_ratio_scenario,
                       magnitude_trigger_rule,
                       self_trigger_label, self_trigger_rule, self_trigger_scenario,
@@ -124,6 +127,11 @@ LABELS = trigger_measurements(SCARLET_SECRETS)
 
 def templar_trigger(aura):
     return next(entry for entry in CLASS_FILE['triggers'] if entry['aura'] == aura)
+
+
+def templar_gate_trigger(aura):
+    return next(entry for entry in CLASS_FILE['triggers']
+               if entry['aura'] == aura and entry.get('kind') == GATE_ABSENCE_KIND)
 
 
 def templar_magnitude_trigger(aura):
@@ -1266,6 +1274,151 @@ class SelfTriggerScenarioShapeTest(unittest.TestCase):
         self.assertIn('no separate passive', self_trigger_rule(entry))
 
 
+GATE_ABSENCE_LABELS = trigger_measurements(FAITH_GUARD)
+GATE_ABSENCE_KEY = f'conformance-templar-trigger-{FAITH_GUARD}-gate-part-1'
+
+
+def gate_absence_model(part=0, parts=1, attempts=SCHEDULED):
+    return {'part': part, 'parts': parts, 'scheduled_attempts': SCHEDULED, 'part_attempts': attempts,
+            'minimum_trials': TRIGGER_TRIALS, 'trigger': {'action': 'cast', 'spell': CHASTISE, 'target': 'dummy'},
+            'observe_spell': 706466, 'observe_metric': 'spell_cast_count', 'trial_metric': 'spell_cast_count',
+            'gate_text': 'While a Libram is active', 'measurements': GATE_ABSENCE_LABELS}
+
+
+def gate_absence_expectation(**model):
+    return Expectation(gate_absence_label(FAITH_GUARD), GATE_ABSENCE_CHECK, FAITH_GUARD, FAITH_GUARD, None,
+                       'will now unleash', 'gate-absence rule', gate_absence_model(**model))
+
+
+def gate_absence_steps(trials, events):
+    return [assert_step(GATE_ABSENCE_LABELS['trials'], str(trials)),
+           assert_step(GATE_ABSENCE_LABELS['events'], str(events))]
+
+
+class GateAbsenceCompareTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def verdict(self):
+        manifest, results = self.workspace.manifest()
+        verdicts = [verdict for verdict in compare(manifest, results, tooltips=constant_reader())
+                    if verdict.check == GATE_ABSENCE_CHECK]
+        self.assertEqual(len(verdicts), 1)
+        self.assertIn(verdicts[0].status, STATUSES)
+        return verdicts[0]
+
+    def test_no_events_with_the_condition_withheld_is_ok(self):
+        self.workspace.scenario(GATE_ABSENCE_KEY, 'trigger', [gate_absence_expectation()],
+                                steps=gate_absence_steps(SCHEDULED, 0))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual((verdict.measured, verdict.expected), (0.0, 0.0))
+
+    def test_any_event_with_the_condition_withheld_is_a_seeded_wrong_value_alert(self):
+        self.workspace.scenario(GATE_ABSENCE_KEY, 'trigger', [gate_absence_expectation()],
+                                steps=gate_absence_steps(SCHEDULED, 5))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'alert')
+        self.assertAlmostEqual(verdict.measured, 5)
+
+    def test_too_few_trials_is_insufficient(self):
+        self.workspace.scenario(GATE_ABSENCE_KEY, 'trigger',
+                                [gate_absence_expectation(attempts=TRIGGER_TRIALS - 1)],
+                                steps=gate_absence_steps(TRIGGER_TRIALS - 1, 0))
+        self.assertEqual(self.verdict().status, 'insufficient_trials')
+
+    def test_missing_measurement_is_an_alert(self):
+        self.workspace.scenario(GATE_ABSENCE_KEY, 'trigger', [gate_absence_expectation()],
+                                steps=[assert_step(GATE_ABSENCE_LABELS['trials'], str(SCHEDULED))])
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('no trigger measurements', verdict.explanation)
+
+    def test_parts_are_summed_with_no_baseline_phase_at_all(self):
+        second_key = f'conformance-templar-trigger-{FAITH_GUARD}-gate-part-2'
+        self.workspace.scenario(GATE_ABSENCE_KEY, 'trigger', [gate_absence_expectation(parts=2, attempts=150)],
+                                steps=gate_absence_steps(150, 0))
+        self.workspace.scenario(second_key, 'trigger',
+                                [gate_absence_expectation(part=1, parts=2, attempts=SCHEDULED - 150)],
+                                steps=gate_absence_steps(SCHEDULED - 150, 0))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual((verdict.measured, verdict.expected), (0.0, 0.0))
+        self.assertIn('2 of 2 parts', verdict.explanation)
+
+
+class CheckedGateAbsenceEntryTest(unittest.TestCase):
+    def entry(self):
+        return copy.deepcopy(templar_gate_trigger(FAITH_GUARD))
+
+    def test_accepts_a_gate_absence_entry(self):
+        entry = self.entry()
+        self.assertIs(checked_gate_absence_entry(entry), entry)
+
+    def test_rejects_a_non_cast_trigger(self):
+        entry = self.entry()
+        entry['trigger'] = {'action': PERIODIC, 'amplitude_ms': 1000}
+        with self.assertRaises(ValueError):
+            checked_gate_absence_entry(entry)
+
+    def test_rejects_an_unknown_target(self):
+        entry = self.entry()
+        entry['trigger'] = {'action': CAST, 'spell': CHASTISE, 'target': 'nowhere'}
+        with self.assertRaises(ValueError):
+            checked_gate_absence_entry(entry)
+
+    def test_rejects_an_unknown_observe_metric(self):
+        entry = self.entry()
+        entry['observe_metric'] = 'hit_mean'
+        with self.assertRaises(ValueError):
+            checked_gate_absence_entry(entry)
+
+    def test_rejects_attempt_auras(self):
+        entry = self.entry()
+        entry['attempt_auras'] = [{'spell': LIBRAM_OF_CONSECRATION, 'stacks': 1, 'source': 'test'}]
+        with self.assertRaises(ValueError):
+            checked_gate_absence_entry(entry)
+
+    def test_rejects_a_missing_gate_text(self):
+        entry = self.entry()
+        del entry['gate_text']
+        with self.assertRaises(ValueError):
+            checked_gate_absence_entry(entry)
+
+    def test_checked_entry_dispatches_to_gate_absence(self):
+        entry = self.entry()
+        self.assertIs(checked_entry(entry), entry)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class GateAbsenceScenarioShapeTest(unittest.TestCase):
+    def test_gate_absence_scenario_learns_the_trigger_and_the_aura_with_no_baseline_at_all(self):
+        entry = templar_gate_trigger(FAITH_GUARD)
+        scenario, [expectation] = gate_absence_scenario(CLASS_FILE, entry, part=0)
+        run.validate(scenario)
+        steps = scenario['steps']
+        self.assertEqual(casts_of(steps, CHASTISE), expectation.model['part_attempts'])
+        self.assertFalse(any('baseline' in step.get('label', '') for step in steps))
+        learns = {step['spell'] for step in steps if step['action'] == 'learn'}
+        self.assertEqual(learns, {CHASTISE, FAITH_GUARD})
+        self.assertEqual((expectation.label, expectation.check),
+                         (gate_absence_label(FAITH_GUARD), GATE_ABSENCE_CHECK))
+        self.assertLessEqual(scenario['timeout_ms'], MAX_SCENARIO_MS)
+
+    def test_gate_absence_scenario_never_sets_the_libram_aura(self):
+        entry = templar_gate_trigger(FAITH_GUARD)
+        scenario, _ = gate_absence_scenario(CLASS_FILE, entry, part=0)
+        self.assertFalse(any(step.get('action') == 'set_aura' and step.get('spell') == LIBRAM_OF_CONSECRATION
+                             for step in scenario['steps']))
+
+    def test_gate_absence_rule_names_the_withheld_condition(self):
+        entry = templar_gate_trigger(FAITH_GUARD)
+        self.assertIn('While a Libram is active', gate_absence_rule(entry))
+
+
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class TemplarTriggerEntriesTest(unittest.TestCase):
     def setUp(self):
@@ -1285,7 +1438,10 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                 self.assertEqual(entry['name'], self.spell(entry['aura'], 'SpellName[enUS]'))
                 cleaned = cleaned_tooltip(description)
                 self.assertIn(entry['trigger_text'], cleaned)
-                self.assertIn(entry['per_trigger_text'], cleaned)
+                if entry.get('kind') == GATE_ABSENCE_KIND:
+                    self.assertIn(entry['gate_text'], cleaned)
+                else:
+                    self.assertIn(entry['per_trigger_text'], cleaned)
                 observed = entry['observe_spell']
                 triggered = [self.spell(entry['aura'], f'EffectTriggerSpell[{index}]') for index in range(3)]
                 if entry.get('kind') in (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND):
@@ -1355,7 +1511,8 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
     def test_every_second_cast_is_the_only_half_rate(self):
         for entry in trigger_entries(CLASS_FILE):
             with self.subTest(aura=entry['aura']):
-                if entry.get('kind') in (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND, MAGNITUDE_RATIO_KIND):
+                if entry.get('kind') in (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND, MAGNITUDE_RATIO_KIND,
+                                         GATE_ABSENCE_KIND):
                     continue
                 if entry['per_trigger_text'].startswith('Every 2nd'):
                     expected = 0.5
@@ -1417,8 +1574,8 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                 self.assertEqual(sum(plan.part_attempts), SCHEDULED * entry.get('trial_attempts_factor', 1))
                 scenario_fn = {COOLDOWN_DELTA_KIND: cooldown_trigger_scenario,
                               DURATION_DELTA_KIND: duration_trigger_scenario,
-                              MAGNITUDE_RATIO_KIND: magnitude_ratio_scenario}.get(entry.get('kind'),
-                                                                                 trigger_scenario)
+                              MAGNITUDE_RATIO_KIND: magnitude_ratio_scenario,
+                              GATE_ABSENCE_KIND: gate_absence_scenario}.get(entry.get('kind'), trigger_scenario)
                 for part in range(len(plan.part_attempts)):
                     scenario, _ = scenario_fn(CLASS_FILE, entry, part)
                     run.validate(scenario)

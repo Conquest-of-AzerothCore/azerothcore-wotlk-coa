@@ -515,6 +515,37 @@ that depends on it running afterward — reproduced twice (Condemnation's three 
 ~15%, same rebuilt binary sha256 as the passing baseline). Both halves measured `ok` after the new-file fix,
 in two independent full runs.
 
+### Gate-absence trigger entries
+
+A `kind: "gate_absence"` entry is for a tooltip clause whose trigger is conditional ("**While a Libram is
+active**, your Chastise will now unleash..."): added **alongside** the class file's existing plain
+`trigger_count` entry for the same `aura` (same precedent as `magnitude_ratio`), it proves the opposite half of
+the clause — that the effect does *not* fire when the named condition is withheld, even though the passive
+itself is known. The plain entry's own baseline (no passive learned) cannot stand in for this: it proves "the
+passive is required", not "the named condition is required while the passive is known".
+
+Fields: the same `trigger` (`action: "cast"` only), `trial_metric`, `observe_spell`/`observe_source`/
+`observe_metric`/`observe_actor`, `trigger_text` as the default shape, plus `gate_text` (the tooltip words
+naming the withheld condition) in place of `per_trigger`/`per_trigger_text`. `checked_gate_absence_entry`
+additionally forbids `attempt_auras`: the entry must run with every optional fixture at its default, absent
+state, or it would silently reapply the very condition it claims to withhold.
+
+`gate_absence_scenario` reuses `trigger_plan`/`attempt_interval`/`attempt_steps`/`counts` unchanged: it learns
+the trigger spell and the aura (the passive must be known; only the named condition is withheld), then runs
+every scheduled attempt as a single measured phase with no baseline at all, the same single-phase shape
+`self_trigger_scenario` already uses. `judge_gate_absence` sums `trials`/`events` across parts and requires
+`events == 0` over at least `TRIGGER_TRIALS` trials: any nonzero count is `alert`; fewer trials is
+`insufficient_trials`; no trial at all is `alert` (there is no "as-expected absence" case to distinguish it
+from, the same choice `judge_self_trigger` already made). The judged label is `<aura> gate_absence_count`, and
+`add_trigger` (`conformance.py`) keys its scenario `(<aura>, "gate")` so it never collides with the plain
+`trigger_count` entry sharing the same `aura`.
+
+Faith Guard 705259 (round10 `proc-chains`): "While a Libram is active, your Chastise will now unleash a line of
+holy power..." The reference Templar carries no Libram by default (the sibling `trigger_count` entry needs its
+own `attempt_auras` to set one), so this entry withholds the condition for free, with no extra fixture. Two
+independent gameplay runs (stamps `20261110-024138` and `20261110-024246`) each measured 0 events of 706466
+over 273 trials of Chastise 503141, `gate_absence_count` `ok`.
+
 ### Self-trigger entries
 
 A `kind: "self_trigger"` entry is for a tooltip clause whose own cast is unconditionally its own trigger, with

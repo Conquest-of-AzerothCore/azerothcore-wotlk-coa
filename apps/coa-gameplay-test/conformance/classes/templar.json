@@ -1051,6 +1051,20 @@
       "per_trigger_text": "will now unleash"
     },
     {
+      "aura": 705259,
+      "name": "Faith Guard",
+      "kind": "gate_absence",
+      "tooltip": "While a |cffffffffLibram|r is active, your |cffffffffChastise|r will now unleash a line of holy power, dealing ${$706466m1*$<scalingbp>+$AP*.25} High Threat Holy damage.",
+      "trigger": {"action": "cast", "spell": 503141, "target": "dummy"},
+      "trigger_text": "your Chastise will now unleash",
+      "trigger_spell_text": "Chastise",
+      "trial_metric": "spell_cast_count",
+      "gate_text": "While a Libram is active",
+      "observe_spell": 706466,
+      "observe_source": "EffectTriggerSpell[0] of 705259",
+      "observe_metric": "spell_cast_count"
+    },
+    {
       "aura": 705286,
       "name": "Duty Calls",
       "tooltip": "Casting abilities that grant an |cffffffffOath|r now increases your damage dealt and movement speed by $560834s1% for $560834d, stacking $560834u times.",
