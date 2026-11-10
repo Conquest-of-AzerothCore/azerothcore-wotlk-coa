@@ -153,6 +153,7 @@ ABSOLUTION = 800424
 REBUKE = 525051
 HARMONIC_DISPOSITION = 560653
 INTERDICT = 560116
+ARGENT_KNIGHT = 300512
 
 
 def scarlet_judicator_entry() -> dict:
@@ -391,6 +392,21 @@ def temple_guardian_charge_recharge_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == TEMPLE_GUARDIAN)
 
 
+def sacred_resistance_armor_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == SACRED_RESISTANCE and entry.get('variant') == 'armor')
+
+
+def argent_knight_while_active_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == ARGENT_KNIGHT and entry.get('variant') == 'while_active')
+
+
+def righteous_tempest_requires_argent_knight_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == RIGHTEOUS_TEMPEST and entry.get('variant') == 'requires_argent_knight')
+
+
 class BehaviourEntryTests(unittest.TestCase):
     def test_scarlet_judicator_entry(self):
         spec = target_count_spec(scarlet_judicator_entry())
@@ -563,6 +579,47 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.expected, 1.32)
         self.assertEqual(spec.before_expected, 1.10)
 
+    def test_sacred_resistance_armor_entry(self):
+        spec = metric_delta_spec(sacred_resistance_armor_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(spec.trigger_spell, RECKONING_AT_60)
+        self.assertEqual(spec.metric, 'armor')
+        self.assertEqual(spec.fields, {})
+        self.assertEqual(spec.target, 'dummy')
+        self.assertEqual(spec.before_expected, 299)
+        self.assertEqual(spec.expected, 343)
+        self.assertEqual(spec.gate_timing, 'between')
+        self.assertFalse(spec.trigger_only_after)
+
+    def test_argent_knight_while_active_entry(self):
+        spec = metric_delta_spec(argent_knight_while_active_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(spec.spell, ARGENT_KNIGHT)
+        self.assertEqual(spec.trigger_spell, RIGHTEOUS_TEMPEST)
+        self.assertEqual(spec.gate_spell, ARGENT_KNIGHT)
+        self.assertEqual(spec.metric, 'aura_amount')
+        self.assertEqual(spec.fields, {'spell': RIGHTEOUS_TEMPEST, 'effect': 1})
+        self.assertEqual(spec.before_expected, 0)
+        self.assertEqual(spec.expected, -20)
+        self.assertEqual(spec.gate_timing, 'start')
+        self.assertTrue(spec.trigger_only_after)
+
+    def test_righteous_tempest_requires_argent_knight_entry(self):
+        spec = metric_delta_spec(righteous_tempest_requires_argent_knight_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(spec.spell, RIGHTEOUS_TEMPEST)
+        self.assertEqual(spec.trigger_spell, RIGHTEOUS_TEMPEST)
+        self.assertEqual(spec.gate_spell, ARGENT_KNIGHT)
+        self.assertEqual(spec.metric, 'aura_amount')
+        self.assertEqual(spec.fields, {'spell': RIGHTEOUS_TEMPEST, 'effect': 1})
+        self.assertEqual(spec.before_expected, 0)
+        self.assertEqual(spec.expected, -20)
+        self.assertEqual(spec.gate_timing, 'between')
+        self.assertFalse(spec.trigger_only_after)
+
 
 class BehaviourEntriesLookupTests(unittest.TestCase):
     def test_behaviour_entries_filters_by_spell(self):
@@ -574,7 +631,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 75)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 78)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1429,6 +1486,45 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['expected'], 1)
         self.assertEqual(expectations[0].model['before_expected'], 0)
         self.assertEqual(expectations[0].model['metric'], 'aura')
+
+    def test_trigger_only_after_skips_the_trigger_cast_in_the_before_phase(self):
+        spec = metric_delta_spec(argent_knight_while_active_entry())
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        cast_steps = [step for step in scenario['steps']
+                     if step.get('action') == 'cast' and step.get('spell') == RIGHTEOUS_TEMPEST]
+        self.assertEqual(len(cast_steps), 1)
+
+    def test_gate_timing_start_learns_the_gate_before_the_before_measurement(self):
+        spec = metric_delta_spec(argent_knight_while_active_entry())
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        gate_index = next(index for index, step in enumerate(steps)
+                          if step.get('action') == 'learn' and step.get('spell') == ARGENT_KNIGHT)
+        before_index = next(index for index, step in enumerate(steps)
+                            if step.get('metric') == 'aura_amount' and step.get('spell') == RIGHTEOUS_TEMPEST)
+        self.assertLess(gate_index, before_index)
+
+    def test_gate_timing_between_learns_the_gate_after_the_before_measurement(self):
+        spec = metric_delta_spec(righteous_tempest_requires_argent_knight_entry())
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        gate_index = next(index for index, step in enumerate(steps)
+                          if step.get('action') == 'learn' and step.get('spell') == ARGENT_KNIGHT)
+        before_index = next(index for index, step in enumerate(steps)
+                            if step.get('metric') == 'aura_amount' and step.get('spell') == RIGHTEOUS_TEMPEST)
+        self.assertGreater(gate_index, before_index)
+
+    def test_while_active_shape_catches_a_wrong_after_reading(self):
+        spec = metric_delta_spec(argent_knight_while_active_entry())
+        _, expectations = metric_delta_scenario(CLASS_FILE, spec)
+        expectation = expectations[0]
+        wrong_run = FakeRun({expectation.model['before_label']: 0.0, expectation.model['after_label']: 0.0})
+        verdict = judge_behaviour(base_verdict(expectation), wrong_run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+        right_run = FakeRun({expectation.model['before_label']: 0.0, expectation.model['after_label']: -20.0})
+        verdict = judge_behaviour(base_verdict(expectation), right_run, expectation)
+        self.assertEqual(verdict.status, 'ok')
 
     def test_label_suffix_disambiguates_a_second_metric_delta_check_on_the_same_spell(self):
         spec = metric_delta_spec(tyrs_guard_entry())

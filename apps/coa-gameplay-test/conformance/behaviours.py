@@ -892,6 +892,8 @@ class MetricDeltaSpec:
     measure_actor: str = CASTER
     tolerance: float | None = None
     cast_in_before: bool = True
+    gate_timing: str = 'between'
+    trigger_only_after: bool = False
 
 
 def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
@@ -940,9 +942,15 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         steps.append({'action': 'wait', 'ms': spec.wait_ms})
         return steps
 
+    if spec.gate_timing not in ('between', 'start'):
+        raise ValueError(f'unknown gate_timing {spec.gate_timing!r}')
+    gate_spell = spec.gate_spell if spec.gate_spell is not None else spec.spell
+    gate_step = [{'action': 'learn', 'actor': CASTER, 'spell': gate_spell}]
+    start_gate_steps = gate_step if spec.gate_timing == 'start' else []
+    between_gate_steps = gate_step if spec.gate_timing == 'between' else []
+
     before_label = metric_delta_label(spec, BEFORE)
     after_label = metric_delta_label(spec, AFTER)
-    gate_spell = spec.gate_spell if spec.gate_spell is not None else spec.spell
     gate_learn_step = {'action': 'learn', 'actor': CASTER, 'spell': gate_spell}
     if spec.setup_only_after:
         contract = (f'A/B target-condition check: {spec.metric} {spec.fields} around a cast of '
@@ -957,6 +965,19 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                  [{'action': 'wait', 'label': 'let the first phase fully expire', 'ms': spec.expire_ms}] +
                  cast_steps(apply_setup_casts=True) +
                  [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields)])
+    elif spec.gate_timing == 'start':
+        contract = (f'With/without-the-buff check: {spec.metric} {spec.fields} measured once with no cast of '
+                    f'{spec.trigger_spell} and once right after casting it, {gate_spell} already learned '
+                    f'throughout, isolating whether the buff is actually active rather than whether the passive '
+                    f'is known.')
+        learn_steps = [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] + \
+            [{'action': 'learn', 'actor': CASTER, 'spell': setup_spell} for setup_spell in spec.setup_casts]
+        steps = (base_steps(class_file) + learn_steps + start_gate_steps +
+                 cast_steps(include_cast=not spec.trigger_only_after) +
+                 [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields)] +
+                 between_gate_steps +
+                 [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}] +
+                 cast_steps() + [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields)])
     else:
         contract = (f'No-combat with/without check: {spec.metric} {spec.fields} around a cast of '
                     f'{spec.trigger_spell}, measured before and after {gate_spell} is learned, waiting '
@@ -965,7 +986,8 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                     f'{spec.trigger_spell} entirely (cast_in_before=False), measuring the baseline state alone.'))
         learn_steps = [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] + \
             [{'action': 'learn', 'actor': CASTER, 'spell': setup_spell} for setup_spell in spec.setup_casts]
-        steps = (base_steps(class_file) + learn_steps + cast_steps(include_cast=spec.cast_in_before) +
+        steps = (base_steps(class_file) + learn_steps +
+                 cast_steps(include_cast=spec.cast_in_before and not spec.trigger_only_after) +
                  [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields), gate_learn_step] +
                  [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}] +
                  cast_steps() + [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields)])
@@ -998,7 +1020,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('setup_actor_aura'), entry.get('gate_spell'), entry.get('label_suffix', ''),
                            entry.get('setup_only_after', False),
                            entry.get('measure_actor', CASTER), entry.get('tolerance'),
-                           entry.get('cast_in_before', True))
+                           entry.get('cast_in_before', True),
+                           entry.get('gate_timing', 'between'), entry.get('trigger_only_after', False))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10

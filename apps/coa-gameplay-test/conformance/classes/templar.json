@@ -1774,6 +1774,44 @@
       "target": "dummy"
     },
     {
+      "spell": 301309, "variant": "armor", "name": "Sacred Resistance (Armor stat)", "kind": "metric_delta",
+      "quote": "now increases your Armor by", "expected": 343,
+      "trigger_spell": 572741,
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 299,
+      "target": "dummy",
+      "label_suffix": "armor"
+    },
+    {
+      "spell": 300512, "variant": "while_active", "name": "Argent Knight (while Righteous Tempest active)",
+      "kind": "metric_delta",
+      "quote": "while active", "expected": -20,
+      "trigger_spell": 805409,
+      "gate_spell": 300512,
+      "metric": "aura_amount",
+      "fields": { "spell": 805409, "effect": 1 },
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 500,
+      "expire_ms": 4000,
+      "label_suffix": "while_active"
+    },
+    {
+      "spell": 805409, "variant": "requires_argent_knight", "name": "Righteous Tempest (requires Argent Knight)",
+      "kind": "metric_delta",
+      "quote": "reducing damage taken by", "expected": -20,
+      "trigger_spell": 805409,
+      "gate_spell": 300512,
+      "metric": "aura_amount",
+      "fields": { "spell": 805409, "effect": 1 },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 4000,
+      "label_suffix": "requires_argent_knight"
+    },
+    {
       "spell": 92109, "name": "Keeping the Oath", "kind": "metric_delta",
       "quote": "you no longer consume your Oaths with Oath Breakers", "expected": 1,
       "trigger_spell": 572741,
