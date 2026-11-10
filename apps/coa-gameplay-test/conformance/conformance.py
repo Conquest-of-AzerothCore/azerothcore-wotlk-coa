@@ -156,7 +156,8 @@ def add_passive(writer: ManifestWriter, spell: ClassSpell):
 def add_behaviour(writer: ManifestWriter, entry: dict):
     class_file = writer.class_file
     scenario, expectations = behaviour_scenario(class_file, entry)
-    key = scenario_key(class_file['name'], 'behaviour', entry['spell'], entry.get('variant', ''))
+    key = scenario_key(class_file['name'], 'behaviour', entry['spell'], entry.get('kind', ''),
+                        entry.get('variant', ''))
     writer.add(key, 'behaviour', None, entry['spell'], expectations, scenario, name=entry['name'])
 
 

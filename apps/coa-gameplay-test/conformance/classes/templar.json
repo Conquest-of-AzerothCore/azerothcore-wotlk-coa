@@ -1785,6 +1785,7 @@
       "spell": 300512, "variant": "while_active", "name": "Argent Knight (while Righteous Tempest active)",
       "kind": "metric_delta",
       "quote": "while active", "expected": -20,
+      "observe_source": "805409 (Righteous Tempest) DurationIndex 160 = 27 (coa-dbc-viewer Spell record); SpellDuration.dbc id 27 Duration/MaxDuration = 3000 ms (coa-dbc-viewer SpellDuration record), so the aura this clause is scoped to is gone well before expiry_wait_ms=4000 elapses after the after-measurement's own wait_ms=500 (total 4500 ms since the only 805409 cast in the scenario); the third measurement proves the -20% does not outlive 805409's own aura while 300512 stays known throughout.",
       "trigger_spell": 805409,
       "gate_spell": 300512,
       "metric": "aura_amount",
@@ -1794,6 +1795,8 @@
       "trigger_only_after": true,
       "wait_ms": 500,
       "expire_ms": 4000,
+      "expiry_wait_ms": 4000,
+      "after_expiry_expected": 0,
       "label_suffix": "while_active"
     },
     {

@@ -1007,6 +1007,8 @@ class MetricDeltaSpec:
     cast_in_before: bool = True
     gate_timing: str = 'between'
     trigger_only_after: bool = False
+    expiry_wait_ms: int | None = None
+    after_expiry_expected: float | None = None
 
 
 def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
@@ -1016,6 +1018,10 @@ def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
 def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict, list[Expectation]]:
     if spec.setup_only_after and not spec.setup_casts:
         raise ValueError(f'{spec.spell} sets setup_only_after without a setup_casts to withhold then apply')
+    if (spec.expiry_wait_ms is None) != (spec.after_expiry_expected is None):
+        raise ValueError(f'{spec.spell} must set expiry_wait_ms and after_expiry_expected together')
+    if spec.expiry_wait_ms is not None and spec.gate_timing != 'start':
+        raise ValueError(f'{spec.spell} sets expiry_wait_ms but gate_timing is not "start"')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
     facts = facts_of(records, spec.trigger_spell)
@@ -1085,12 +1091,21 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                     f'is known.')
         learn_steps = [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] + \
             [{'action': 'learn', 'actor': CASTER, 'spell': setup_spell} for setup_spell in spec.setup_casts]
+        if spec.expiry_wait_ms is not None:
+            contract += (f' A third measurement follows {spec.expiry_wait_ms} ms later, past the triggering '
+                         f'cast\'s own aura duration, to confirm the effect actually ends rather than '
+                         f'outliving the aura it is scoped to.')
         steps = (base_steps(class_file) + learn_steps + start_gate_steps +
                  cast_steps(include_cast=not spec.trigger_only_after) +
                  [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields)] +
                  between_gate_steps +
                  [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}] +
                  cast_steps() + [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields)])
+        if spec.expiry_wait_ms is not None:
+            expired_label = metric_delta_label(spec, 'expired')
+            steps = steps + [{'action': 'wait', 'label': 'let the triggering aura actually expire',
+                              'ms': spec.expiry_wait_ms},
+                             measurement(expired_label, spec.measure_actor, spec.metric, **spec.fields)]
     else:
         contract = (f'No-combat with/without check: {spec.metric} {spec.fields} around a cast of '
                     f'{spec.trigger_spell}, measured before and after {gate_spell} is learned, waiting '
@@ -1119,6 +1134,9 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
              'quote': entry.quote}
     if spec.tolerance is not None:
         model['tolerance'] = spec.tolerance
+    if spec.expiry_wait_ms is not None:
+        model['expired_label'] = metric_delta_label(spec, 'expired')
+        model['after_expiry_expected'] = spec.after_expiry_expected
     expectation = Expectation(label, BEHAVIOUR_METRIC_DELTA, spec.spell, spec.trigger_spell, None,
                               str(spec.expected), prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]
@@ -1134,7 +1152,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('setup_only_after', False),
                            entry.get('measure_actor', CASTER), entry.get('tolerance'),
                            entry.get('cast_in_before', True),
-                           entry.get('gate_timing', 'between'), entry.get('trigger_only_after', False))
+                           entry.get('gate_timing', 'between'), entry.get('trigger_only_after', False),
+                           entry.get('expiry_wait_ms'), entry.get('after_expiry_expected'))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10

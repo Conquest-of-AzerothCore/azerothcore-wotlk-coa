@@ -650,6 +650,8 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.expected, -20)
         self.assertEqual(spec.gate_timing, 'start')
         self.assertTrue(spec.trigger_only_after)
+        self.assertEqual(spec.expiry_wait_ms, 4000)
+        self.assertEqual(spec.after_expiry_expected, 0)
 
     def test_righteous_tempest_requires_argent_knight_entry(self):
         spec = metric_delta_spec(righteous_tempest_requires_argent_knight_entry())
@@ -1613,12 +1615,51 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         spec = metric_delta_spec(argent_knight_while_active_entry())
         _, expectations = metric_delta_scenario(CLASS_FILE, spec)
         expectation = expectations[0]
-        wrong_run = FakeRun({expectation.model['before_label']: 0.0, expectation.model['after_label']: 0.0})
+        expired_label = expectation.model['expired_label']
+        wrong_run = FakeRun({expectation.model['before_label']: 0.0, expectation.model['after_label']: 0.0,
+                             expired_label: 0.0})
         verdict = judge_behaviour(base_verdict(expectation), wrong_run, expectation)
         self.assertEqual(verdict.status, 'alert')
-        right_run = FakeRun({expectation.model['before_label']: 0.0, expectation.model['after_label']: -20.0})
+        right_run = FakeRun({expectation.model['before_label']: 0.0, expectation.model['after_label']: -20.0,
+                            expired_label: 0.0})
         verdict = judge_behaviour(base_verdict(expectation), right_run, expectation)
         self.assertEqual(verdict.status, 'ok')
+
+    def test_while_active_shape_catches_the_effect_outliving_its_own_aura(self):
+        spec = metric_delta_spec(argent_knight_while_active_entry())
+        _, expectations = metric_delta_scenario(CLASS_FILE, spec)
+        expectation = expectations[0]
+        expired_label = expectation.model['expired_label']
+        self.assertEqual(expectation.model['after_expiry_expected'], 0)
+        leaking_run = FakeRun({expectation.model['before_label']: 0.0, expectation.model['after_label']: -20.0,
+                               expired_label: -20.0})
+        verdict = judge_behaviour(base_verdict(expectation), leaking_run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+        expired_run = FakeRun({expectation.model['before_label']: 0.0, expectation.model['after_label']: -20.0,
+                               expired_label: 0.0})
+        verdict = judge_behaviour(base_verdict(expectation), expired_run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_expiry_wait_phase_adds_a_third_measurement_past_the_triggering_aura_duration(self):
+        spec = metric_delta_spec(argent_knight_while_active_entry())
+        scenario, expectations = metric_delta_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        measure_steps = [step for step in scenario['steps']
+                         if step.get('metric') == 'aura_amount' and step.get('spell') == RIGHTEOUS_TEMPEST]
+        self.assertEqual(len(measure_steps), 3)
+        self.assertEqual(measure_steps[-1]['label'], expectations[0].model['expired_label'])
+        total_wait_after_cast = spec.wait_ms + spec.expiry_wait_ms
+        self.assertGreater(total_wait_after_cast, 3000)
+
+    def test_expiry_wait_requires_gate_timing_start(self):
+        spec = replace(metric_delta_spec(argent_knight_while_active_entry()), gate_timing='between')
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(CLASS_FILE, spec)
+
+    def test_expiry_wait_and_after_expiry_expected_are_required_together(self):
+        spec = replace(metric_delta_spec(argent_knight_while_active_entry()), after_expiry_expected=None)
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(CLASS_FILE, spec)
 
     def test_label_suffix_disambiguates_a_second_metric_delta_check_on_the_same_spell(self):
         spec = metric_delta_spec(tyrs_guard_entry())

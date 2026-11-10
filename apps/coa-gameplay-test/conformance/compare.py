@@ -2211,10 +2211,20 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
     tolerance = float(model.get('tolerance', METRIC_DELTA_FLOAT_TOLERANCE))
     before_ok = abs(before - before_expected) <= tolerance
     after_ok = abs(after - expected) <= tolerance
-    status = 'ok' if before_ok and after_ok else 'alert'
+    expired_label = model.get('expired_label')
+    expired, expired_ok, expired_explanation = None, True, ''
+    if expired_label is not None:
+        expired = run.values.get(expired_label)
+        if expired is None:
+            return replace(base, explanation=missing_measurement(run, expired_label))
+        after_expiry_expected = float(model['after_expiry_expected'])
+        expired_ok = abs(expired - after_expiry_expected) <= tolerance
+        expired_explanation = (f'; {expired:g} once the triggering aura has actually expired (expected '
+                               f'{after_expiry_expected:g}), ruling out the effect outliving its own aura')
+    status = 'ok' if before_ok and after_ok and expired_ok else 'alert'
     explanation = (f'{model["metric"]} measured {before:g} before the learn (expected '
                    f'{before_expected:g}) and {after:g} after (expected {expected:g}); match within '
-                   f'{tolerance:g} required')
+                   f'{tolerance:g} required' + expired_explanation)
     explanation += (', wide enough to absorb IEEE-754 float32 round-trip noise on a ratio metric '
                     '(observed ~1e-7) but far below any real defect in this family of checks, with no '
                     'combat-roll variance of its own') if tolerance <= METRIC_DELTA_FLOAT_TOLERANCE else (
