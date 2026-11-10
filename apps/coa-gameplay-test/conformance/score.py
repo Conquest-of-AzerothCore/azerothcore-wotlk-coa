@@ -24,7 +24,7 @@ OPERATIONAL_FIELDS = {
                              'expected_ms', 'expected_ratio', 'levels', 'fraction'}),
     'passive_targets': frozenset({'spell', 'effect', 'targets'}),
     'talent_modifiers': frozenset({'talent', 'source'}),
-    'effect_overrides': frozenset({'spell', 'effect', 'misc_value'}),
+    'effect_overrides': frozenset({'spell', 'effect', 'misc_value', 'base_points'}),
     'unmodelled_effects': frozenset({'spell', 'effect'}),
     'literal_tokens': frozenset({'spell', 'effect', 'value'}),
     'effect_notes': frozenset({'spell', 'effect'}),

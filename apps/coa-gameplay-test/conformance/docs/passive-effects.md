@@ -112,6 +112,16 @@ rewrites it to 15 (`SPELLMOD_CRIT_DAMAGE_BONUS`) at load time to match its own "
 the `effect_overrides` entry makes the reader classify it as op 15 (`spell_critical_damage`/`crit_damage`, the
 "bonus" reading above), the op the live server actually installs.
 
+An entry may carry `base_points` instead of (or beside) `misc_value`: the rewritten `EffectBasePoints`, which the
+tooltip comparison reads in place of the record's own points, so an unsigned `$sN` token takes the sign of the
+rewritten value (`DbcTooltips.effect_points`). An entry without `misc_value` leaves `classify` on the record's op.
+Templar: Patience 712678 effect 1 is `EffectBasePoints[1]` -5001 (a 5 sec cooldown reduction on Interdict) in
+`Spell.dbc`; the owner ruled on 2026-11-10 that its tooltip, "Increases the duration of Interdict by
+$/1000;s1 sec and its cooldown by $/1000;s2 sec", lengthens the cooldown, `AscensionTemplarContracts.cpp` rewrites
+the points to 4999 (+5000 ms) and `AscensionTemplarAbilities.cpp` adds that amount to Interdict's cooldown after
+each cast; the entry `{"spell": 712678, "effect": 1, "base_points": 4999}` makes the `effect_value` check expect
++5000.
+
 ### Item-armor-subclass overrides
 
 A class file's `item_armor_subclass_effects` list (`[{"spell": <id>, "effect": <n>, "subclass": <n>,

@@ -261,7 +261,11 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   `Spell.dbc` record is signed. The expected value of such a token takes the sign of the points it shows
   (`EffectBasePoints + 1`, or `+ EffectDieSides` for `$MN`) of the named spell, and signed values are compared:
   `-50` measured for `$s1` shown as 50 is `ok` when the record is -51 and an alert when it is 49. Expressions and
-  `$<name>` variables keep their sign; a measured value of the opposite sign is `ambiguous_tooltip`.
+  `$<name>` variables keep their sign; a measured value of the opposite sign is `ambiguous_tooltip`. A class
+  file's `effect_overrides` entry with `base_points` replaces the record's points when a class contract rewrites
+  them at load, so the sign follows the decision the server applies: Patience 712678 effect 1 is -5001 in
+  `Spell.dbc`, the owner ruled on 2026-11-10 that "Increases ... its cooldown by $/1000;s2 sec" lengthens
+  Interdict's cooldown, and `AscensionTemplarContracts.cpp` sets 4999, so the token's 5 sec expects +5000.
 - Rolled effects (`effect_value`, `aura_amount` of an effect whose `EffectDieSides` is neither 0 nor 1):
   `spell_effect_value` returns `info->Effects[effect].CalcValue(caster)` (`CoAGameplayTest.cpp:4674`), and
   `SpellEffectInfo::CalcValue` (`SpellInfo.cpp:474`) adds one `irand(1, EffectDieSides)` roll (or

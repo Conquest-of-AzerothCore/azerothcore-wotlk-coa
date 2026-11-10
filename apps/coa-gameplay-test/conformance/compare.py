@@ -183,7 +183,10 @@ class DbcTooltips:
         return replace(readout, values=readout.values + literal) if literal else readout
 
     def effect_points(self, spell_id: int, effect: int) -> tuple[int, int]:
-        return (self.records.field('Spell', spell_id, f'EffectBasePoints[{effect}]'),
+        rewritten = next((entry['base_points'] for entry in self.class_file.get('effect_overrides', [])
+                          if (entry['spell'], entry['effect']) == (spell_id, effect) and 'base_points' in entry), None)
+        base_points = self.records.field('Spell', spell_id, f'EffectBasePoints[{effect}]')
+        return (base_points if rewritten is None else rewritten,
                 self.records.field('Spell', spell_id, f'EffectDieSides[{effect}]'))
 
     def first_effect(self, rank_id: int) -> int | None:

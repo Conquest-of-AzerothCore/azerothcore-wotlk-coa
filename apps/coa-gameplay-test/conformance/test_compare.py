@@ -1295,6 +1295,13 @@ class DbcTooltipsTest(unittest.TestCase):
         literal = next(value for value in values if value.text == 'Doubles the healing done to you')
         self.assertEqual((literal.value, literal.effect_index), (100.0, 0))
 
+    def test_effect_override_base_points_replace_the_spell_dbc_points_of_patience(self):
+        override = {'spell': PATIENCE, 'effect': 1, 'base_points': 4999, 'citation': 'contract'}
+        rewritten = {'effect_overrides': [override]}
+        self.assertEqual(DbcTooltips(DBC_DIR).effect_points(PATIENCE, 1), (-5001, 1))
+        self.assertEqual(DbcTooltips(DBC_DIR, rewritten).effect_points(PATIENCE, 1), (4999, 1))
+        self.assertEqual(DbcTooltips(DBC_DIR, rewritten).effect_points(PATIENCE, 0), (1999, 1))
+
     def test_literal_token_entries_are_absent_for_a_spell_without_one(self):
         tooltips = DbcTooltips(DBC_DIR, CLASS_FILE)
         caster = CasterStats(level=60, ap=100.0, rap=0.0, sp_by_school={school: 0.0 for school in range(1, 7)},

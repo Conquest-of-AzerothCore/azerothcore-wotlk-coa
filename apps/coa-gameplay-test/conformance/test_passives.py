@@ -11,8 +11,8 @@ import compare
 from classes import PROGRESSION_HEADER as HEADER, ClassSpell, class_spells, table_rows
 from passives import (ALIASED_REASON_MARKER, AURA_STATE_METRIC, FAMILIES, MAX_SPELLMOD, PARRY_CHANCE, PASSIVE_DELTA,
                       PHRASES, STAT_EXACT_METRIC, STAT_METRIC, MetricPlan, NotModelled, PassiveTarget,
-                      active_class_ranks, classify, crit_plans, family_of, literal_token, named_targets,
-                      own_token, passive_effects, passive_scenario, reference_spell, stat_after_token)
+                      active_class_ranks, classify, crit_plans, effect_override, family_of, literal_token,
+                      named_targets, own_token, passive_effects, passive_scenario, reference_spell, stat_after_token)
 from procs import proc_scenario
 from profile import CASTER, load_class_file, spell_power_label, stat_label
 from tooltip import Displayed, Records
@@ -1026,6 +1026,11 @@ class PassiveScenarioTest(unittest.TestCase):
     def test_reference_spell_still_unmodelled_without_a_matching_school_mask(self):
         with self.assertRaises(NotModelled):
             reference_spell(self.class_file, Records(dataset(DBC_DIR)), 'spell_healing_taken', 0)
+
+    def test_points_only_effect_override_keeps_the_spell_dbc_misc_value(self):
+        class_file = {'effect_overrides': [{'spell': UPHEAVE, 'effect': 0, 'base_points': 9, 'citation': 'points'}]}
+        self.assertIsNone(effect_override(class_file, {UPHEAVE}, 0))
+        self.assertEqual(effect_override(self.class_file, {UPHEAVE}, 0), 15)
 
     def test_dummy_target_brings_the_dummy(self):
         scenario, _ = self.scenario(UPHEAVE)

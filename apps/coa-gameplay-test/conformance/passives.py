@@ -562,7 +562,7 @@ def passive_override(class_file: dict, spell_ids: set[int], effect: int) -> dict
 
 def effect_override(class_file: dict, spell_ids: set[int], effect: int) -> int | None:
     entry = next((entry for entry in class_file.get('effect_overrides', [])
-                 if entry['spell'] in spell_ids and entry['effect'] == effect), None)
+                 if entry['spell'] in spell_ids and entry['effect'] == effect and 'misc_value' in entry), None)
     return entry['misc_value'] if entry else None
 
 

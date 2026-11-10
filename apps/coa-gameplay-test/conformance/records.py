@@ -10,7 +10,7 @@ REQUIRED_ENTRY_FIELDS = {
     'behaviours': ('kind', 'name', 'quote', 'spell'),
     'passive_targets': ('effect', 'spell', 'targets', 'tooltip_words'),
     'talent_modifiers': ('name', 'source', 'source_text', 'talent', 'token', 'tooltip'),
-    'effect_overrides': ('citation', 'effect', 'misc_value', 'spell'),
+    'effect_overrides': ('citation', 'effect', 'spell'),
     'unmodelled_effects': ('effect', 'reason', 'spell'),
     'literal_tokens': ('effect', 'quote', 'spell', 'value'),
     'effect_notes': ('effect', 'reason', 'spell'),
