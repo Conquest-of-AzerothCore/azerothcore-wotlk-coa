@@ -1,0 +1,273 @@
+{
+  "schema": 1,
+  "name": "Whirling Tempest stops slows landing during Righteous Tempest",
+  "contract": "Whirling Tempest 301340: 'While Righteous Tempest is active you now cannot be slowed.' A hostile caster casts Slow 31589 at the Templar during Righteous Tempest 805409 (cast with one Oath Chain 704576, its caster aura). Slow's effect 0 is the -60% movement speed snare (EffectMechanic 11); effects 1 and 2 slow ranged and spell haste and carry no mechanic. Without Whirling Tempest 300504 the snare lands and the Templar runs at 40%. With it the snare does not apply during the 3 s window: Slow's haste effects still land, and the Templar keeps Whirling Tempest's 120% run speed (0.48 if the snare applied). Once Righteous Tempest has ended the snare lands again.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "caster",
+      "owner": "templar",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 1,
+      "spell_hit_bonus": 100
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 805409
+    },
+    {
+      "action": "add_item",
+      "actor": "templar",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "templar",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 805409,
+      "label": "Righteous Tempest without Whirling Tempest"
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest is active without Whirling Tempest",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 805409,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "No Whirling Tempest aura without the talent",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 301340,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 31589,
+      "target": "templar",
+      "label": "Slow during Righteous Tempest without Whirling Tempest"
+    },
+    {
+      "action": "wait",
+      "label": "Let the slow land",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest is still active when the slow lands",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 805409,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Without Whirling Tempest the slow holds",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 31589,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Without Whirling Tempest Slow's snare effect is applied",
+      "actor": "templar",
+      "metric": "aura_amount",
+      "spell": 31589,
+      "effect": 0,
+      "equals": -60
+    },
+    {
+      "action": "assert",
+      "label": "Without Whirling Tempest the Templar runs at 40%",
+      "actor": "templar",
+      "metric": "run_speed_rate",
+      "min": 0.39,
+      "max": 0.41
+    },
+    {
+      "action": "wait",
+      "label": "Past Righteous Tempest's 3 s duration",
+      "ms": 3500
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 31589,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 300504
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 805409
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 805409,
+      "label": "Righteous Tempest with Whirling Tempest"
+    },
+    {
+      "action": "assert",
+      "label": "Righteous Tempest grants Whirling Tempest",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 301340,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 31589,
+      "target": "templar",
+      "label": "Slow during Righteous Tempest with Whirling Tempest"
+    },
+    {
+      "action": "wait",
+      "label": "Let the slow land",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Whirling Tempest is still active when the slow lands",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 301340,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "With Whirling Tempest Slow's haste effects still land",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 31589,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "With Whirling Tempest the Templar keeps 120% speed",
+      "actor": "templar",
+      "metric": "run_speed_rate",
+      "min": 1.19,
+      "max": 1.21
+    },
+    {
+      "action": "assert",
+      "label": "With Whirling Tempest Slow's ranged haste effect lands",
+      "actor": "templar",
+      "metric": "aura_amount",
+      "spell": 31589,
+      "effect": 1,
+      "equals": -60
+    },
+    {
+      "action": "wait",
+      "label": "Past Righteous Tempest's 3 s duration",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "Whirling Tempest ends with Righteous Tempest",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 301340,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 31589,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 31589,
+      "target": "templar",
+      "label": "Slow after Righteous Tempest with Whirling Tempest known"
+    },
+    {
+      "action": "wait",
+      "label": "Let the slow land",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "After Righteous Tempest Slow's snare effect is applied again",
+      "actor": "templar",
+      "metric": "aura_amount",
+      "spell": 31589,
+      "effect": 0,
+      "equals": -60
+    },
+    {
+      "action": "assert",
+      "label": "After Righteous Tempest the Templar runs at 40% again",
+      "actor": "templar",
+      "metric": "run_speed_rate",
+      "min": 0.39,
+      "max": 0.41
+    }
+  ]
+}
