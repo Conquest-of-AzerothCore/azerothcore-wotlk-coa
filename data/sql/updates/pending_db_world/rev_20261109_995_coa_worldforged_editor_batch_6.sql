@@ -15,3 +15,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 -- #11797
 -- pickup 6941648 (Doomwarden) moved 12.7 yd across and 7.41 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = -2014.859, `position_y` = 1926.0041, `position_z` = 71.2119, `orientation` = 2.807448, `rotation0` = -0.406886, `rotation1` = 0.560093, `rotation2` = 0.527353, `rotation3` = 0.492584 WHERE `guid` = 6941648 AND `id` = 254287;
+
+-- #11787
+-- pickup 6940799 (Left Behind Boots) moved 27.2 yd across and 4.94 yd up to its Ascension position on the dock
+UPDATE `gameobject` SET `position_x` = -11583.41, `position_y` = -38.3, `position_z` = 10.94, `orientation` = 0.49008, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.242595, `rotation3` = 0.970128 WHERE `guid` = 6940799 AND `id` = 95740;
