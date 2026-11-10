@@ -74,6 +74,7 @@ BEHAVIOUR_LABELS = {
     'spread': lambda entry: [f"{entry['spell']} behaviour_count"],
     'metric_delta': lambda entry: [f"{entry['spell']} behaviour_metric_delta"],
     'aura_metric_delta': lambda entry: [f"{entry['spell']} behaviour_metric_delta"],
+    'cast_applies_aura': lambda entry: [f"{entry['spell']} behaviour_cast_applies_aura"],
     'duration_refresh': lambda entry: [f"{entry['spell']} behaviour_duration_refresh"],
     'amount_delta': lambda entry: [f"{entry['spell']} behaviour_amount_delta"],
     'duration': lambda entry: [f"{entry['spell']} behaviour_duration"],

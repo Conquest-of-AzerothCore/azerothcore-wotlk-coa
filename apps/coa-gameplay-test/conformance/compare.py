@@ -9,7 +9,8 @@ import re
 from statistics import fmean, pstdev
 from typing import Callable, Mapping, Protocol
 
-from behaviours import (BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_COMBAT,
+from behaviours import (BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT,
+                        BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_CAST_COMBAT,
                         BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_CAST_GATE,
                         BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
                         BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
@@ -2661,6 +2662,25 @@ def behaviour_aggro_redirect_verdict(base: Verdict, run: Run, expectation: Expec
                 'victim (Unit::GetVictim() == caster) compared exactly to whether the clause redirects it')
 
 
+def behaviour_cast_applies_aura_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    before = run.values.get(model['before_label'])
+    after = run.values.get(model['after_label'])
+    if before is None or after is None:
+        return replace(base, explanation=missing_measurement(run, model['before_label'] if before is None
+                                                              else model['after_label']))
+    expected = float(model['expected_ms'])
+    low = expected - CAST_MARGIN_MS
+    before_ok = abs(before) <= FLOAT_EPSILON
+    after_ok = low - FLOAT_EPSILON <= after <= expected + FLOAT_EPSILON
+    status = 'ok' if before_ok and after_ok else 'alert'
+    return replace(base, status=status, measured=after, expected=expected, low=low, high=expected,
+                   explanation=f'{model["before_label"]} measured {before:g} ms before the cast (expected 0, '
+                               f'absent); {model["after_label"]} measured {after:g} ms right after it (expected '
+                               f'between {low:g} and {expected:g} ms, the instant-cast tick loss below '
+                               f'SpellDuration.dbc\'s {expected:g} ms); an aura present before the cast, or absent '
+                               f'or materially short right after it, is always an alert')
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
@@ -2677,6 +2697,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_fixed_count_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_PARTY_STAT_RATIO:
         return behaviour_party_stat_ratio_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_CAST_APPLIES_AURA:
+        return behaviour_cast_applies_aura_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_RATIO:
         if model.get('kind') == 'leech_ratio':
             return behaviour_leech_ratio_verdict(base, run, model)

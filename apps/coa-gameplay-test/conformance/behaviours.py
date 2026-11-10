@@ -37,6 +37,7 @@ BEHAVIOUR_INTERNAL_COOLDOWN = 'behaviour_internal_cooldown'
 BEHAVIOUR_CAST_COMBAT = 'behaviour_cast_combat'
 BEHAVIOUR_AGGRO_REDIRECT = 'behaviour_aggro_redirect'
 BEHAVIOUR_HEAL_BLOCK = 'behaviour_heal_block'
+BEHAVIOUR_CAST_APPLIES_AURA = 'behaviour_cast_applies_aura'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
@@ -45,13 +46,13 @@ BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVI
                     BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_PARTY_STAT_RATIO,
                     BEHAVIOUR_CAST_GATE, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_MOUNT_GRANT,
                     BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_AGGRO_REDIRECT,
-                    BEHAVIOUR_HEAL_BLOCK)
+                    BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_CAST_APPLIES_AURA)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
         'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition', 'mount_grant',
         'internal_cooldown', 'cast_combat', 'aggro_redirect', 'dispel_removal', 'aura_presence', 'heal_block',
-        'aura_metric_delta')
+        'aura_metric_delta', 'cast_applies_aura')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1351,6 +1352,58 @@ def aura_metric_delta_spec(entry: dict) -> AuraMetricDeltaSpec:
                                entry['metric'], entry['fields'], entry['before_expected'],
                                entry.get('aura_stacks', 1), entry.get('target', CASTER),
                                entry.get('label_suffix', ''))
+
+
+@dataclass(frozen=True)
+class CastAppliesAuraSpec:
+    spell: int
+    name: str
+    quote: str
+    expected_ms: float
+    applied_aura: int
+    target: str = CASTER
+
+
+def cast_applies_aura_label(spec: CastAppliesAuraSpec, moment: str) -> str:
+    return f'{spec.spell} {spec.applied_aura} aura_duration_ms cast_applies_aura {moment}'
+
+
+def cast_applies_aura_scenario(class_file: dict, spec: CastAppliesAuraSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'cast_applies_aura', spec.quote, spec.expected_ms)
+    before_label = cast_applies_aura_label(spec, BEFORE)
+    after_label = cast_applies_aura_label(spec, AFTER)
+    cast_target = spec.target
+    steps = base_steps(class_file) + [
+        {'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
+        measurement(before_label, CASTER, 'aura_duration_ms', spell=spec.applied_aura),
+        {'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': cast_target},
+        measurement(after_label, CASTER, 'aura_duration_ms', spell=spec.applied_aura)]
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour cast applies aura',
+        'contract': f'{spec.applied_aura}\'s remaining aura_duration_ms on the caster is read once right after '
+                    f'{spec.spell} is learned, before it is ever cast (expected absent, 0 ms, since nothing else '
+                    f'in this scenario could have applied {spec.applied_aura}), and once right after casting '
+                    f'{spec.spell} (expected within {CAST_MARGIN_MS:g} ms below its own SpellDuration.dbc value '
+                    f'of {spec.expected_ms:g} ms, the same instant-cast tick loss every aura_duration_ms check in '
+                    f'this tool tolerates), proving the cast itself applies {spec.applied_aura} rather than only '
+                    f'its $d token matching when read without a cast.',
+        'players': [player_fixture(class_file)],
+        'steps': steps}
+    if spec.target == TARGET:
+        scenario['creatures'] = [creature_fixture(class_file)]
+    label = f'{spec.spell} behaviour_cast_applies_aura'
+    model = {'kind': 'cast_applies_aura', 'before_label': before_label, 'after_label': after_label,
+             'expected_ms': spec.expected_ms, 'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_CAST_APPLIES_AURA, spec.spell, spec.applied_aura, None,
+                              str(spec.expected_ms), prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def cast_applies_aura_spec(entry: dict) -> CastAppliesAuraSpec:
+    return CastAppliesAuraSpec(entry['spell'], entry['name'], entry['quote'], entry['expected_ms'],
+                               entry['applied_aura'], entry.get('target', CASTER))
 
 
 DEBT_ASSERT_TIMEOUT_MS = 2000
@@ -2981,6 +3034,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return metric_delta_scenario(class_file, metric_delta_spec(entry))
     if entry['kind'] == 'aura_metric_delta':
         return aura_metric_delta_scenario(class_file, aura_metric_delta_spec(entry))
+    if entry['kind'] == 'cast_applies_aura':
+        return cast_applies_aura_scenario(class_file, cast_applies_aura_spec(entry))
     if entry['kind'] == 'health_ratio':
         return health_threshold_ratio_scenario(class_file, health_ratio_spec(entry))
     if entry['kind'] == 'duration':

@@ -262,8 +262,8 @@ class templar_casts : public AllSpellScript
         }
         if (Named(info, 804929) || info->Id == 807035)
             talent(806522, 806523);
-        if (Named(info, 801478) || info->Id == 801455 || info->Id == 1397742)
-            if (target || info->Id == 1397742)
+        if (Named(info, 801478) || info->Id == 801455 || info->Id == 1397742 || info->Id == 300514)
+            if (target || info->Id == 1397742 || info->Id == 300514)
                 Cast(player, target ? target : player, 102208);
     }
     void OnSpellHitResult(Spell* spell, Unit* target, uint8 miss, uint32 damage, uint32 healing, bool) override

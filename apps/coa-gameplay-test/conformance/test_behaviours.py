@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA,
-                        BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_HEAL_BLOCK,
+                        BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_HEAL_BLOCK,
                         BEHAVIOUR_CAST_CONDITION,
                         BEHAVIOUR_CAST_GATE,
                         BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
@@ -28,7 +28,8 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_AGGRO_
                         aura_metric_delta_scenario, aura_metric_delta_spec,
                         aura_presence_scenario, aura_presence_spec,
                         aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
-                        behaviour_scenario, cast_combat_scenario, cast_combat_spec,
+                        behaviour_scenario, cast_applies_aura_scenario, cast_applies_aura_spec,
+                        cast_combat_scenario, cast_combat_spec,
                         cast_condition_scenario, cast_condition_spec,
                         cast_gate_scenario, cast_gate_spec,
                         charge_recharge_scenario, charge_recharge_spec,
@@ -157,6 +158,8 @@ INTERDICT = 560116
 ARGENT_KNIGHT = 300512
 BINDING_SCRIPTURE = 801457
 BINDING_SCRIPTURE_DAMAGE_REDUCTION = 707307
+TESTAMENT_OF_STRENGTH = 300514
+SACRED_RESTRAINT = 102208
 
 
 def scarlet_judicator_entry() -> dict:
@@ -414,6 +417,10 @@ def binding_scripture_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == BINDING_SCRIPTURE)
 
 
+def testament_of_strength_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == TESTAMENT_OF_STRENGTH)
+
+
 class BehaviourEntryTests(unittest.TestCase):
     def test_scarlet_judicator_entry(self):
         spec = target_count_spec(scarlet_judicator_entry())
@@ -640,6 +647,15 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.before_expected, 1000)
         self.assertEqual(spec.expected, 950)
 
+    def test_testament_of_strength_entry(self):
+        spec = cast_applies_aura_spec(testament_of_strength_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'cast_applies_aura', spec.quote, spec.expected_ms)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(spec.spell, TESTAMENT_OF_STRENGTH)
+        self.assertEqual(spec.applied_aura, SACRED_RESTRAINT)
+        self.assertEqual(spec.target, 'caster')
+        self.assertEqual(spec.expected_ms, 60000)
+
 
 class BehaviourEntriesLookupTests(unittest.TestCase):
     def test_behaviour_entries_filters_by_spell(self):
@@ -651,7 +667,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 79)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 80)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1769,6 +1785,67 @@ class AuraMetricDeltaScenarioTests(unittest.TestCase):
         right_run = FakeRun({expectation.model['before_label']: 1000.0, expectation.model['after_label']: 950.0})
         verdict = judge_behaviour(base_verdict(expectation), right_run, expectation)
         self.assertEqual(verdict.status, 'ok')
+
+
+class CastAppliesAuraScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_expectations(self):
+        spec = cast_applies_aura_spec(testament_of_strength_entry())
+        scenario, expectations = cast_applies_aura_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_CAST_APPLIES_AURA)
+        self.assertTrue(expectation.rule.startswith('prose: "Applies Sacred Restraint for"'))
+        self.assertEqual(expectation.model['kind'], 'cast_applies_aura')
+        self.assertEqual(expectation.model['expected_ms'], 60000)
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, testament_of_strength_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_CAST_APPLIES_AURA)
+        self.assertEqual(expectations[0].model['expected_ms'], 60000)
+
+    def test_learn_then_cast_happens_between_the_before_and_after_measurements(self):
+        spec = cast_applies_aura_spec(testament_of_strength_entry())
+        scenario, _ = cast_applies_aura_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        measure_indexes = [index for index, step in enumerate(steps)
+                           if step.get('metric') == 'aura_duration_ms' and step.get('spell') == SACRED_RESTRAINT]
+        cast_index = next(index for index, step in enumerate(steps)
+                          if step.get('action') == 'cast' and step.get('spell') == TESTAMENT_OF_STRENGTH)
+        learn_index = next(index for index, step in enumerate(steps)
+                           if step.get('action') == 'learn' and step.get('spell') == TESTAMENT_OF_STRENGTH)
+        self.assertEqual(len(measure_indexes), 2)
+        self.assertLess(learn_index, measure_indexes[0])
+        self.assertLess(measure_indexes[0], cast_index)
+        self.assertLess(cast_index, measure_indexes[1])
+        cast_step = steps[cast_index]
+        self.assertEqual(cast_step['actor'], 'caster')
+        self.assertEqual(cast_step['target'], 'caster')
+
+    def test_caster_target_skips_the_creature_fixture(self):
+        spec = cast_applies_aura_spec(testament_of_strength_entry())
+        scenario, _ = cast_applies_aura_scenario(CLASS_FILE, spec)
+        self.assertNotIn('creatures', scenario)
+
+    def test_wrong_after_reading_is_caught(self):
+        spec = cast_applies_aura_spec(testament_of_strength_entry())
+        _, expectations = cast_applies_aura_scenario(CLASS_FILE, spec)
+        expectation = expectations[0]
+        wrong_run = FakeRun({expectation.model['before_label']: 0.0, expectation.model['after_label']: 0.0})
+        verdict = judge_behaviour(base_verdict(expectation), wrong_run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+        right_run = FakeRun({expectation.model['before_label']: 0.0, expectation.model['after_label']: 59985.0})
+        verdict = judge_behaviour(base_verdict(expectation), right_run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_aura_present_before_the_cast_is_caught(self):
+        spec = cast_applies_aura_spec(testament_of_strength_entry())
+        _, expectations = cast_applies_aura_scenario(CLASS_FILE, spec)
+        expectation = expectations[0]
+        wrong_run = FakeRun({expectation.model['before_label']: 60000.0, expectation.model['after_label']: 59985.0})
+        verdict = judge_behaviour(base_verdict(expectation), wrong_run, expectation)
+        self.assertEqual(verdict.status, 'alert')
 
     def test_setup_casts_cast_blade_of_faith_at_the_dummy_before_each_divine_force_cast(self):
         spec = metric_delta_spec(transcending_strikes_entry())
