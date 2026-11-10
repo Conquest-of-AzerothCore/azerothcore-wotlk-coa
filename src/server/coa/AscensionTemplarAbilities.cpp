@@ -134,7 +134,7 @@ class templar_casts : public AllSpellScript
             hit.crit = true;
         if (spell->GetScriptValue(524617) && spell->GetScriptValue(805416))
         {
-            factor *= 1.5f;
+            factor *= 1.0f + float(Amount(524617)) / 100.0f;
             hit.crit = true;
         }
         if (player->HasAura(300520) && target->HealthBelowPct(20) &&
