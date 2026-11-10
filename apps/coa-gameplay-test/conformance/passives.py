@@ -552,6 +552,17 @@ def effect_override(class_file: dict, spell_ids: set[int], effect: int) -> int |
     return entry['misc_value'] if entry else None
 
 
+def item_armor_subclass_override(class_file: dict, spell_ids: set[int], effect: int) -> dict | None:
+    return next((entry for entry in class_file.get('item_armor_subclass_effects', [])
+                 if entry['spell'] in spell_ids and entry['effect'] == effect), None)
+
+
+def item_armor_subclass_plans(spell_id: int, effect: int, entry: dict) -> tuple[MetricPlan, ...]:
+    reference = MetricPlan('item_armor_by_subclass', {'subclass': entry['subclass']}, 'add', judged=False)
+    reference_label = probe_label(spell_id, effect, reference.metric, [entry['subclass']])
+    return reference, MetricPlan('armor', {}, 'share', source=f'{reference_label} {BEFORE}')
+
+
 def effect_note(class_file: dict, spell_ids: set[int], effect: int) -> str | None:
     entry = next((entry for entry in class_file.get('effect_notes', [])
                  if entry['spell'] in spell_ids and entry['effect'] == effect), None)
@@ -666,14 +677,19 @@ def classify(class_file: dict, records: Records, spell_id: int, rank_id: int, ef
                 raise NotModelled(linked_reason(class_file, link, verdicts))
             raise NotModelled(FAMILY_REASONS[family])
         if aura == 142:
-            raise Closed(OUT_OF_SCOPE[142])
-        if aura in OUT_OF_SCOPE:
+            subclass_override = item_armor_subclass_override(class_file, {spell_id, rank_id}, effect)
+            if subclass_override is None:
+                raise Closed(OUT_OF_SCOPE[142])
+            if token is None:
+                raise NotModelled('no own token and no sibling token with equal points')
+            plans = item_armor_subclass_plans(spell_id, effect, subclass_override)
+        elif aura in OUT_OF_SCOPE:
             raise NotModelled(OUT_OF_SCOPE[aura])
-        if family == 'P1' and misc >= MAX_SPELLMOD:
+        elif family == 'P1' and misc >= MAX_SPELLMOD:
             raise NotModelled(f'SpellModOp {misc} is not below MAX_SPELLMOD {MAX_SPELLMOD}')
-        if token is None:
+        elif token is None:
             raise NotModelled('no own token and no sibling token with equal points')
-        if family == 'P1':
+        elif family == 'P1':
             plans = () if reason else modifier_plans(
                 aura, misc, alias_points if alias_points is not None else signed_points(records, rank_id, effect))
         else:
@@ -846,19 +862,29 @@ def passive_scenario(class_file: dict, spell: ClassSpell) -> tuple[dict | None, 
         return steps
 
     priming = []
+    item_level_override = None
+    for entry in class_file.get('item_armor_subclass_effects', []):
+        if entry['spell'] == rank_id:
+            priming += [{'action': 'add_item', 'actor': CASTER, 'item': entry['item']},
+                       {'action': 'equip', 'actor': CASTER, 'item': entry['item'], 'slot': entry['slot']}]
+            if entry.get('level'):
+                item_level_override = entry['level']
     if any(probe.metric == PARRY_CHANCE for probe in probes):
-        priming = [{'action': 'set_aura', 'actor': CASTER, 'spell': rank_id, 'stacks': 1},
-                   {'action': 'set_aura', 'actor': CASTER, 'spell': rank_id, 'stacks': 0}]
+        priming = priming + [{'action': 'set_aura', 'actor': CASTER, 'spell': rank_id, 'stacks': 1},
+                             {'action': 'set_aura', 'actor': CASTER, 'spell': rank_id, 'stacks': 0}]
     if aura_state_steps:
         priming = priming + [{'action': 'wait', 'ms': AURA_STATE_WAIT_MS}] + aura_state_steps
     learning = [{'action': 'learn', 'actor': CASTER, 'spell': rank_id},
                 measurement(aura_label, CASTER, 'aura', spell=rank_id)]
+    caster = player_fixture(class_file)
+    if item_level_override is not None:
+        caster = {**caster, 'level': item_level_override}
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spell.name} {rank_id} passive',
         'contract': 'No-combat with/without check: the quantities a passive changes, measured before and after '
                     'it is learned.',
-        'players': [player_fixture(class_file)],
+        'players': [caster],
         'steps': base_steps(class_file) + priming + measured(BEFORE) + learning + measured(AFTER)}
     if any(probe.fields.get('target') == TARGET for probe in probes):
         scenario['creatures'] = [creature_fixture(class_file)]

@@ -147,7 +147,8 @@ METRICS = TIMELINE_METRICS | {
     'ball_offer_count', 'ball_offers_quest',
     'ball_carried_count', 'ball_carried_quest', 'ball_turn_in_count', 'ball_turn_in_quest',
     'gossip_text',
-    'stat', 'stat_exact', 'attack_power', 'ranged_attack_power', 'armor', 'has_aura_state', 'weapon_damage_min',
+    'stat', 'stat_exact', 'attack_power', 'ranged_attack_power', 'armor', 'item_armor_by_subclass',
+    'has_aura_state', 'weapon_damage_min',
     'resistance',
     'attack_timer_ms',
     'attack_time_ms', 'pet_attack_time_ms', 'run_speed_rate', 'flight_speed_rate', 'display_id', 'mount_display_id', 'can_fly',
@@ -223,7 +224,7 @@ PLAYER_STAT_METRICS = {
 }
 METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item', 'entry', 'button',
                  'relative_to', 'ratio_to', 'target', 'quest', 'id', 'stat', 'aura_state', 'school', 'hand',
-                 'rating', 'op',
+                 'rating', 'op', 'subclass',
                  'base', 'key', 'index', 'pet', 'critical', 'target_pet', 'periodic', 'name', 'text',
                  'min_distance', 'owner_display', 'creator_only', 'ranged_weapon_subclass', 'sheath_state', 'skill',
                  'cache', 'table', 'exclude', 'dungeon', 'source', 'opcode', 'from', 'slot', 'achievement', 'title',

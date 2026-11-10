@@ -1393,7 +1393,8 @@ def delta_margin(metric: str, expected: float) -> float:
 def delta_status(metric: str, measured: float, expected: float) -> str:
     if abs(measured) <= FLOAT_EPSILON < abs(expected):
         return 'alert'
-    return 'ok' if abs(measured - expected) <= delta_margin(metric, expected) + FLOAT_EPSILON else 'alert'
+    margin = delta_margin(metric, expected)
+    return banded_status(measured, expected - margin, expected + margin, expected)
 
 
 def question_detail(kind: str, question: str, readings: list[dict], measured: float | None, *, conditions: str = '',

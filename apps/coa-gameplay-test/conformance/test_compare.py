@@ -737,6 +737,7 @@ HOLY_UPHEAVAL, ZEALOTRY, JUDICATOR, CALL_OF_THE_MONASTERY, PARAGON = 572547, 500
 BELLS_OF_LIGHT, ZEALOTRY_PASSIVE = 801204, 92108
 LEGACY, SCOURGEBANE_DAMAGE, TEMPLARS_MIGHT, RIGHTEOUS_LUNGE, CONDEMN = 806522, 801832, 705291, 570233, 567539
 UPHEAVE = 520442
+BLESSED_PADDING = 301311
 SPELL_NAMES = {(RECKONING, 'SpellName[enUS]'): 'Reckoning', (INTERDICT, 'SpellName[enUS]'): 'Interdict',
                (SACRED_RESTRAINT, 'SpellName[enUS]'): 'Sacred Restraint', (RECKONING, 'SchoolMask'): 2}
 
@@ -773,7 +774,8 @@ class PassiveDeltaTest(unittest.TestCase):
         within = self.single(entry, '1000', '-29000', token)
         self.assertEqual((within.status, within.measured, within.expected), ('ok', -30000.0, -30000.0))
         self.assertAlmostEqual(within.high - within.expected, 150.0)
-        self.assertEqual(self.single(entry, '1000', '-28800', token).status, 'alert')
+        self.assertEqual(self.single(entry, '1000', '-28800', token).status, 'tolerated')
+        self.assertEqual(self.single(entry, '1000', '-19000', token).status, 'alert')
 
     def test_divided_token_outside_a_duration_expects_the_undivided_points(self):
         entry = passive_expectation(AGGRAMARS_RAGE, 1, 'expertise', 'add', '$/10;s2', 10.0)
@@ -1057,6 +1059,18 @@ class PassiveDeltaTest(unittest.TestCase):
         self.assertEqual((verdict.status, verdict.expected), ('ok', 26.4))
         moved = self.single(entry, '0', '26', token, **{'stat 1': '150'})
         self.assertEqual((moved.status, moved.expected), ('alert', 30.0))
+
+    def test_share_against_an_item_armor_subclass_reference_bands_by_deviation(self):
+        source_label = f'{BLESSED_PADDING} e0 item_armor_by_subclass 3'
+        entry = passive_expectation(BLESSED_PADDING, 0, 'armor', 'share', '$s1', 50.0,
+                                    source_label=source_label, fields={})
+        token = [Displayed('$s1', 50.0, 0, 'percent')]
+        ok = self.single(entry, '5000', '5802', token, **{source_label: '1604'})
+        self.assertEqual((ok.status, ok.expected), ('ok', 802.0))
+        tolerated = self.single(entry, '5000', '5834', token, **{source_label: '1604'})
+        self.assertEqual((tolerated.status, tolerated.expected), ('tolerated', 802.0))
+        alert = self.single(entry, '5000', '5850', token, **{source_label: '1604'})
+        self.assertEqual((alert.status, alert.expected), ('alert', 802.0))
 
     def test_shared_token_takes_the_sign_of_the_effect_points(self):
         entry = passive_expectation(PALADIN_TRAINING, 1, 'spell_power_cost', 'scale', '$s1', -20.0, 570233,

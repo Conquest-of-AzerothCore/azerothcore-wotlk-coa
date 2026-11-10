@@ -1,3764 +1,3764 @@
 [
-  {
-    "spell": 3018,
-    "clause": "(empty tooltip)",
-    "labels": [],
-    "kind": "no_claim",
-    "reason": "Tooltip field is empty; no sentence exists to carry a gameplay claim. power_cost/hit_mean verdicts are mechanical metrics, not tooltip text."
-  },
-  {
-    "spell": 92108,
-    "clause": "Level 10 Passive",
-    "labels": [],
-    "kind": "no_claim",
-    "reason": "Label line stating the unlock level, not a gameplay claim."
-  },
-  {
-    "spell": 92108,
-    "clause": "Your off-hand auto attacks now trigger Zealotry.",
-    "labels": [
-      "92108 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 92109,
-    "clause": "Level 10 Passive",
-    "labels": [],
-    "kind": "no_claim",
-    "reason": "Label line, not a gameplay claim."
-  },
-  {
-    "spell": 92109,
-    "clause": "You now delay 40% of direct damage taken, instead taking it over $803237d.",
-    "labels": [
-      "92109 spell_duration 803237"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 92109,
-    "clause": "In addition, you no longer consume your Oaths with Oath Breakers.",
-    "labels": [
-      "92109 trigger_count",
-      "92109 e2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 92111,
-    "clause": "Direct damage dealt now has a $520007h% chance to strike an enemy with Scourgebane",
-    "labels": [
-      "92111 proc_rate"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 92111,
-    "clause": "dealing an additional $801832s2% Weapon damage",
-    "labels": [
-      "92111 effect_value 801832e1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 92111,
-    "clause": "plus ${$801832m1*$<scalingbp>+$SP*.25+$AP*.25} Holyflame Damage",
-    "labels": [
-      "92111 effect_value 801832e0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 92111,
-    "clause": "This is guaranteed to critically strike against Undead enemies.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 300501,
-    "clause": "Reduces the cooldown of Testament of Faith by $/1000;s1 sec",
-    "labels": [
-      "300501 effect_value e0",
-      "300501 e0 spell_modifier 501606"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300501,
-    "clause": "and the duration of Sacred Restraint by $/1000;s2 sec",
-    "labels": [
-      "300501 effect_value e1",
-      "300501 e1 spell_modifier 102208"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300502,
-    "clause": "Casting an Oath Breaker with 10 stacks of your Oath Chain now refreshes the duration of Blade of Faith on all nearby enemies.",
-    "labels": [
-      "300502 behaviour_duration_refresh"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300504,
-    "clause": "While Righteous Tempest is active you gain 20% increased movement speed.",
-    "labels": [
-      "300504 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300504,
-    "clause": "@ext: Movement speed gained in this way stacks with Courage.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 300512,
-    "clause": "Increases the damage dealt by Righteous Tempest and Condemn by $s1%.",
-    "labels": [
-      "300512 effect_value e0",
-      "300512 e0 spell_modifier 570205",
-      "300512 e2 spell_modifier 567539"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300512,
-    "clause": "Additionally, Righteous Tempest now reduces all damage taken by $s2% while active.",
-    "labels": [
-      "300512 effect_value e1",
-      "300512 e1 spell_modifier 807274",
-      "300512 e1 spell_effect_value 807274"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300513,
-    "clause": "Brand an enemy for $d,",
-    "labels": [
-      "300513 aura_duration_ms"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300513,
-    "clause": "preventing them from mounting,",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 300513,
-    "clause": "fleeing,",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 300513,
-    "clause": "or increasing their movement speed above normal movement speed",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 300513,
-    "clause": "and when they deal direct damage they take ${$573020m1*$<scalingbp>+$sph*0.275+$AP*.185} Holy Damage.",
-    "labels": [
-      "300513 effect_value 573020e0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300513,
-    "clause": "While marked enemies can always be seen by the Crusader even while stealthed or invisible.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 300514,
-    "clause": "Your next 3 Titanstrikes incur a $s1% reduced cooldown,",
-    "labels": [
-      "300514 effect_value e0",
-      "300514 aura_amount e0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300514,
-    "clause": "are usable regardless of your target's health percentage,",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 300514,
-    "clause": "and deal $s2% increased damage.",
-    "labels": [
-      "300514 effect_value e1",
-      "300514 aura_amount e1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300514,
-    "clause": "Lasts $d.",
-    "labels": [
-      "300514 aura_duration_ms"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300514,
-    "clause": "Applies Sacred Restraint for $102208d.",
-    "labels": [
-      "300514 spell_duration 102208"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300515,
-    "clause": "Allies within $a1 yds receive $s1% more healing.",
-    "labels": [
-      "300515 effect_radius e0",
-      "300515 effect_value e0 #1",
-      "300515 e0 spell_healing_taken 803792"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300515,
-    "clause": "Does not stack with similar effects.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 300515,
-    "clause": "Additionally, increases your maximum health by $s1%.",
-    "labels": [
-      "300515 effect_value e0 #2",
-      "300515 e1 max_health"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300520,
-    "clause": "Increases the damage of Scourgebane, Scarlet Hammer, and Titanstrike by $s1%",
-    "labels": [
-      "300520 effect_value e0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300520,
-    "clause": "on enemies below 20% health.",
-    "labels": [
-      "300520 e0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300522,
-    "clause": "Increases the duration of your Oath Chain by $/1000;s1 sec.",
-    "labels": [
-      "300522 effect_value e0",
-      "300522 e0 spell_modifier 704576",
-      "300522 e0 spell_modifier 706426",
-      "300522 e0 spell_modifier 707896"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300524,
-    "clause": "Increases the damage of Blade of Faith and Righteous Tempest by $s1%.",
-    "labels": [
-      "300524 effect_value e0",
-      "300524 e0 spell_modifier 570205",
-      "300524 e1 spell_modifier 803154",
-      "300524 e1 spell_modifier 803880"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300529,
-    "clause": "Level 50 Passive",
-    "labels": [],
-    "kind": "no_claim",
-    "reason": "Label line, not a gameplay claim."
-  },
-  {
-    "spell": 300529,
-    "clause": "Increases all magic resistances equal to 10% of your dodge rating",
-    "labels": [
-      "300529 e0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300529,
-    "clause": "and reduces your damage taken from periodic effects by $301283s2%.",
-    "labels": [
-      "300529 effect_value 301283e1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300530,
-    "clause": "Increases the effectiveness of Gift of Zeal by $s2%.",
-    "labels": [
-      "300530 effect_value e1",
-      "300530 e1 spell_modifier 300923",
-      "300530 e1 spell_modifier 300924"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300607,
-    "clause": "Your Titanstrike now heals you for twice the damage dealt.",
-    "labels": [
-      "300607 e0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300929,
-    "clause": "Increases the all damage dealt by party and raid members by $s1%.",
-    "labels": [
-      "300929 effect_value e0",
-      "300929 e0 spell_damage_done 572741",
-      "300929 e0 weapon_damage_min 0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300929,
-    "clause": "Does not stack with similar effects.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 300929,
-    "clause": "In addition, reduces the cost of your spells and abilities by $s2%.",
-    "labels": [
-      "300929 effect_value e1",
-      "300929 e1 spell_power_cost 300513"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 301059,
-    "clause": "Reduces the Energy cost of Righteous Lunge by $s1",
-    "labels": [
-      "301059 effect_value e0",
-      "301059 e0 spell_modifier 570233",
-      "301059 e0 spell_power_cost 570233"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 301059,
-    "clause": "and Sacred Swing by $s2.",
-    "labels": [
-      "301059 e1 spell_modifier 572769",
-      "301059 e1 spell_power_cost 572769"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 301065,
-    "clause": "Level 30 Passive",
-    "labels": [],
-    "kind": "no_claim",
-    "reason": "Label line, not a gameplay claim."
-  },
-  {
-    "spell": 301065,
-    "clause": "Casting Argent Blade while Warrior of Dawn is active now transforms your next Argent Blade into Scarlet Hammer.",
-    "labels": [
-      "301065 effect_value 807035e0",
-      "301065 effect_value 807035e1",
-      "301065 effect_value 500752e0",
-      "301065 effect_value 807182e0",
-      "301065 spell_duration 500752",
-      "301065 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 301253,
-    "clause": "Periodic damage dealt now generates $524987s1 Energy.",
-    "labels": [
-      "301253 effect_value 524987e0",
-      "301253 e0 behaviour_metric_delta"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 301254,
-    "clause": "Level 40 Passive",
-    "labels": [],
-    "kind": "no_claim",
-    "reason": "Label line, not a gameplay claim."
-  },
-  {
-    "spell": 301254,
-    "clause": "Casting Scarlet Hammer now generates $521240s1 Energy.",
-    "labels": [
-      "301254 effect_value 521240e0",
-      "301254 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 301309,
-    "clause": "Casting Reckoning now increases your Armor by $680870s1% for $680870d.",
-    "labels": [
-      "301309 effect_value 680870e0",
-      "301309 spell_duration 680870"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 301310,
-    "clause": "Level 20 Passive",
-    "labels": [],
-    "kind": "no_claim",
-    "reason": "Label line, not a gameplay claim."
-  },
-  {
-    "spell": 301310,
-    "clause": "Increases your spell power by $s1% of your Agility,",
-    "labels": [
-      "301310 effect_value e0",
-      "301310 e0 spell_power 1",
-      "301310 e0 spell_power 2",
-      "301310 e0 spell_power 3"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 301310,
-    "clause": "your critical strike rating by $s2% of your Intellect,",
-    "labels": [
-      "301310 effect_value e1",
-      "301310 e1 combat_rating 8",
-      "301310 e1 combat_rating 10"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 301310,
-    "clause": "and your spell penetration by $s3% of your Intellect.",
-    "labels": [
-      "301310 effect_value e2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 301311,
-    "clause": "Increases your Armor contribution from mail items by $s1%",
-    "labels": [
-      "301311 e0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 301311,
-    "clause": "and reduces damage taken from area of effect attacks by $s2%.",
-    "labels": [
-      "301311 effect_value e1",
-      "301311 e1 aoe_damage_taken 0",
-      "301311 e1 aoe_damage_taken 1",
-      "301311 e1 aoe_damage_taken 2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 301339,
-    "clause": "Damage dealt by Righteous Tempest now spreads Condemn on affected enemies to a nearby enemy.",
-    "labels": [
-      "301339 e0 behaviour_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 301360,
-    "clause": "Increases your Armor contribution from mail items by $s1%",
-    "labels": [
-      "301360 e0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 301360,
-    "clause": "and reduces damage taken from area of effect attacks by $s2%.",
-    "labels": [
-      "301360 effect_value e1",
-      "301360 e1 aoe_damage_taken 0",
-      "301360 e1 aoe_damage_taken 1",
-      "301360 e1 aoe_damage_taken 2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 500011,
-    "clause": "Your Argent Blade now also extends the duration of Interdict on your target by $/1000;500014s1 sec.",
-    "labels": [
-      "500011 effect_value 500014e0",
-      "500011 trigger_duration_delta"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 500678,
-    "clause": "Meditate for $d,",
-    "labels": [
-      "500678 aura_duration_ms"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 500678,
-    "clause": "restoring $s1% of your maximum health every $T1 sec",
-    "labels": [
-      "500678 effect_value e0",
-      "500678 aura_amount e0",
-      "500678 aura_amplitude_ms"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 500678,
-    "clause": "and reducing damage taken by $s2%.",
-    "labels": [
-      "500678 effect_value e1",
-      "500678 aura_amount e1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 500678,
-    "clause": "Each second you will also remove 1 disease effect from yourself.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 500678,
-    "clause": "Applies Sacred Restraint for $102208d.",
-    "labels": [
-      "500678 spell_duration 102208"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 500688,
-    "clause": "Call an ally's spirit back to their body, bringing them back to life.",
-    "labels": [
-      "500758 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 500688,
-    "clause": "Usable while in combat.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 500694,
-    "clause": "Explode with holy power, dealing ${$803153m1+$803153ppl1+$AP*0.25+$sph*.25} Holy damage",
-    "labels": [
-      "500694 effect_value 803153e0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 500694,
-    "clause": "and triggering Zealotry every $t3 sec to nearby enemies for $d.",
-    "labels": [
-      "500694 aura_amplitude_ms",
-      "500694 aura_duration_ms"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 500694,
-    "clause": "While active, your Temple Guardian spell has its Energy cost reduced by $s1%.",
-    "labels": [
-      "500694 effect_value e0",
-      "500694 aura_amount e0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572027,
-    "clause": "Unleash a dominating Oath Breaker, dealing ${$m1+0+$AP*0.45+$SP*0.45} Physical damage,",
-    "labels": [
-      "572027 effect_value e0",
-      "572027 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572027,
-    "clause": "increased by $807764s1% for each time you triggered Zealotry during your Oath Chain.",
-    "labels": [
-      "572027 effect_value 807764e0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572027,
-    "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 504107,
-    "clause": "Level 40 Passive",
-    "labels": [],
-    "kind": "no_claim",
-    "reason": "Label line, not a gameplay claim."
-  },
-  {
-    "spell": 504107,
-    "clause": "Triggering Zealotry 10 times now transforms your Vindication into Divine Fury.",
-    "labels": [
-      "504107 effect_value 500689e0",
-      "504107 effect_value 572051e0",
-      "504107 spell_duration 572051",
-      "504107 max_stacks 572051"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 504561,
-    "clause": "Triggering Zealotry now also heals you for ${$504809m1*$<scalingbp>+$SP*0.06}.",
-    "labels": [
-      "504561 effect_value 504809e0 #0",
-      "504561 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 504807,
-    "clause": "Casting Oath Breakers now triggers Zealotry on your target",
-    "labels": [
-      "504807 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 504807,
-    "clause": "and reduces the cooldown of Librams, Force of Golganneth, Divine Force, and Testament of Will by $/1000;505205s1 sec.",
-    "labels": [
-      "504807 effect_value 505205e0 #0",
-      "504807 trigger_cooldown_delta"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 504808,
-    "clause": "Triggering Zealotry now has an $h% chance to grant you an additional auto attack on your next strike.",
-    "labels": [
-      "504808 effect_value #0",
-      "504808 proc_rate"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 520009,
-    "clause": "Increases the damage and reduces the Energy cost of Righteous Lunge and Argent Blade by $s1%.",
-    "labels": [
-      "520009 effect_value e0 #0",
-      "520009 e0 spell_modifier 570233",
-      "520009 e0 spell_modifier 807268",
-      "520009 e0 spell_modifier 504810"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 520009,
-    "clause": "Increases the damage and reduces the Energy cost of Righteous Lunge and Argent Blade by $s1%. (Energy-cost half)",
-    "labels": [
-      "520009 e1 spell_modifier 570233",
-      "520009 e1 spell_modifier 807268",
-      "520009 e1 spell_power_cost 570233",
-      "520009 e1 spell_power_cost 807268",
-      "520009 e1 spell_power_cost 504810"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 520017,
-    "clause": "Argent Blade now has a $h% chance to strike an additional time.",
-    "labels": [
-      "520017 proc_rate"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 520032,
-    "clause": "Your Oath: Condemn now provides $s1% additional critical strike chance.",
-    "labels": [
-      "520032 effect_value e0 #0",
-      "520032 e0 spell_modifier 804922",
-      "520032 e0 spell_effect_value 804922"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 520034,
-    "clause": "Increases the damage of Chastise by $s1%",
-    "labels": [
-      "520034 effect_value e0 #0",
-      "520034 e0 spell_damage_done 503141",
-      "520034 e1 spell_modifier 801205",
-      "520034 e1 spell_effect_value 801205",
-      "520034 e1 spell_modifier 521052",
-      "520034 e1 spell_effect_value 521052"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 520034,
-    "clause": "on enemies above 75% health or affected by Tranquil Circle.",
-    "labels": [
-      "520034 effect_value e0 #0",
-      "520034 e0 spell_damage_done 503141",
-      "520034 e1 spell_modifier 801205"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 520442,
-    "clause": "Increases the critical damage of Righteous Upheaval by $s1%.",
-    "labels": [
-      "520442 effect_value e0 #0",
-      "520442 e0 spell_modifier 501561",
-      "520442 e0 spell_modifier 572027",
-      "520442 e0 spell_critical_damage 501561",
-      "520442 e0 spell_critical_damage 572027"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 520534,
-    "clause": "Damage dealt by Righteous Tempest now deals an additional ${$520544m1+$sph*0.5+$AP*0.085} Holy damage,",
-    "labels": [
-      "520534 effect_value 520544e0 #0",
-      "520534 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 520534,
-    "clause": "and upon dealing damage, you pull enemies within 15 yds towards you.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 520534,
-    "clause": "@ext:Enemies pulled cannot be pulled this way again within 15 seconds.:ext@",
-    "labels": [
-      "520534 effect_value #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 520608,
-    "clause": "Warrior of Dawn now also increases the damage ... of your next Argent Blade by $s1%.",
-    "labels": [
-      "520608 effect_value e0 #0",
-      "520608 e0 spell_modifier 561156",
-      "520608 e0 spell_effect_value 561156"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 520608,
-    "clause": "and critical strike chance of your next Argent Blade by $s1%.",
-    "labels": [
-      "520608 effect_value e0 #0",
-      "520608 e0 spell_modifier 561167"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 520812,
-    "clause": "Every 2nd cast of Argent Blade now grants you Oath: Retribution.",
-    "labels": [
-      "520812 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 520883,
-    "clause": "Argent Blade now has a $h% chance to strike an additional time.",
-    "labels": [
-      "520883 proc_rate"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 523712,
-    "clause": "Dealing damage with Zealotry now applies Iron Penance to the target, increasing their Physical damage taken by you by $523713s1% for $523713d, stacking $523713u times.",
-    "labels": [
-      "523712 effect_value 523713e0 #0",
-      "523712 spell_duration 523713 #1",
-      "523712 max_stacks 523713 #2",
-      "523712 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 524620,
-    "clause": "Damage dealt by Condemn now has a $h% chance to consecrate the earth around you with holy fervor, dealing ${$524619m1*$<scalingbp>+$sph*0.225+$AP*.1} Holy damage",
-    "labels": [
-      "524620 effect_value #0",
-      "524620 effect_value 524619e0 #1",
-      "524620 proc_rate"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 524620,
-    "clause": "to nearby enemies.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 524739,
-    "clause": "dealing ${$524740m1+$524740ppl1+$sph*1+$AP*1} Holy damage to up to $524740i enemies within $524740a1 yds",
-    "labels": [
-      "524739 effect_value 524740e0 #0",
-      "524739 effect_value #1",
-      "524739 effect_radius 524740e0 #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 524739,
-    "clause": "and reduces their damage and healing done by $520842s1% for $520842d.",
-    "labels": [
-      "524739 effect_value 520842e0 #3",
-      "524739 spell_duration 520842 #4"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 524739,
-    "clause": "Damage dealt pierces all immunities, resistances, and damage absorption effects.",
-    "labels": [
-      "524739 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 524739,
-    "clause": "Scales with modifiers to Chastise.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 524747,
-    "clause": "Reduces the cooldown of Divine Force by $/1000;s1 sec.",
-    "labels": [
-      "524747 effect_value e0 #0",
-      "524747 e0 spell_modifier 807805",
-      "524747 e0 spell_modifier 807890"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 524765,
-    "clause": "Healing with Benediction now causes your next Benediction to heal for $524766s1% more for $524766d.",
-    "labels": [
-      "524765 effect_value 524766e0 #0",
-      "524765 spell_duration 524766 #1",
-      "524765 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 524767,
-    "clause": "Increases the critical strike chance of Titanstrike by $s1%.",
-    "labels": [
-      "524767 effect_value e0 #0",
-      "524767 e0 spell_modifier 806835",
-      "524767 e0 spell_done_crit_chance 806835"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 524822,
-    "clause": "Increases the effectiveness of Oath: Righteous Lunge by $s1%.",
-    "labels": [
-      "524822 effect_value e0 #0",
-      "524822 e0 spell_modifier 804904",
-      "524822 e0 spell_modifier 805079",
-      "524822 e0 spell_modifier 807929",
-      "524822 e0 spell_modifier 805125",
-      "524822 e0 spell_modifier 805136",
-      "524822 e0 spell_modifier 805145",
-      "524822 e0 spell_modifier 805090"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 525024,
-    "clause": "Your Divine Force now strikes 2 additional enemies near the primary target.",
-    "labels": [
-      "525024 effect_value #0",
-      "525024 e0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 525051,
-    "clause": "Bask an ally in the light, dispelling $s1 magic, poison, and disease effects from them.",
-    "labels": [
-      "525051 effect_value e0 #0",
-      "525051 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 525080,
-    "clause": "Increases the effectiveness of Oath: Righteous Lunge by $s1%.",
-    "labels": [
-      "525080 effect_value e0 #0",
-      "525080 e0 spell_modifier 804904",
-      "525080 e0 spell_modifier 805079",
-      "525080 e0 spell_modifier 807929",
-      "525080 e0 spell_modifier 805125",
-      "525080 e0 spell_modifier 805136",
-      "525080 e0 spell_modifier 805145",
-      "525080 e0 spell_modifier 805090"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 527023,
-    "clause": "You and your party members leap upon a divine steed,",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 527023,
-    "clause": "increasing their movement speed by $527272s2%",
-    "labels": [
-      "527023 effect_value 527272e1 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 527023,
-    "clause": "and causing them to trample nearby enemies for ${$527270m3+$527270ppl3+$AP*.2+$sph*.4} Holy Damage every $527270t3 sec for $d.",
-    "labels": [
-      "527023 effect_value 527270e2 #1",
-      "527023 aura_duration_ms #3",
-      "527023 aura_amplitude_ms #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 527023,
-    "clause": "While active, casting does not dismount you or your allies.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 527023,
-    "clause": "Can only be used outdoors.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 560096,
-    "clause": "Increases all party and raid member's melee and ranged haste by $567572s1%.",
-    "labels": [
-      "560096 effect_value 567572e0 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 560096,
-    "clause": "Does not stack with similar effects.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 560096,
-    "clause": "Damage dealt with auto attacks reduce the cooldown of Libram spells by $/1000;560097S1 sec.",
-    "labels": [
-      "560096 effect_value 560097e0 #1",
-      "560096 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 560116,
-    "clause": "Forbid an enemy from sinning, silencing them for $d.",
-    "labels": [
-      "560116 aura_duration_ms #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 560116,
-    "clause": "If they are an Undead or Demon they are unable to be healed for the duration.",
-    "labels": [
-      "560116 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 560550,
-    "clause": "Increases the attack power of all party and raid members $s1%.",
-    "labels": [
-      "560550 effect_value e0 #0",
-      "560550 e0 attack_power"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 560550,
-    "clause": "Does not stack with similar effects.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 560550,
-    "clause": "In addition, increases your attack power by $s2%.",
-    "labels": [
-      "560550 effect_value e1 #1",
-      "560550 e2 attack_power"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 560648,
-    "clause": "Melee damage dealt now has a $h% chance to reset the cooldown and reduce the Energy cost of your next Argent Blade by $561156s1%.",
-    "labels": [
-      "560648 effect_value #0",
-      "560648 effect_value 561156e0 #1",
-      "560648 proc_rate"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 560649,
-    "clause": "Testament of Hope now summons an additional copy of yourself.",
-    "labels": [
-      "560649 effect_value #0",
-      "560649 e0",
-      "560649 e1",
-      "560649 e2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 560650,
-    "clause": "Increases your Holy critical strike chance by $s1%",
-    "labels": [
-      "560650 effect_value e0 #0",
-      "560650 e0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 560650,
-    "clause": "and your expertise by $s2.",
-    "labels": [
-      "560650 effect_value e1 #1",
-      "560650 e1 expertise"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 560653,
-    "clause": "You radiate a harmonic disposition to nearby party and raid members, causing fall damage to be reduced",
-    "labels": [
-      "560653 effect_value #0",
-      "560653 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 560653,
-    "clause": "and granting the ability to walk on water.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 560833,
-    "clause": "Increases your Energy regeneration by $s1%.",
-    "labels": [
-      "560833 effect_value e0 #0",
-      "560833 e0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 560835,
-    "clause": "Periodic damage dealt by Condemn now has a $h% chance to increase your parry chance by $561016s1% for $561016d, stacking $561016u times.",
-    "labels": [
-      "560835 effect_value 561016e0 #1",
-      "560835 spell_duration 561016 #2",
-      "560835 max_stacks 561016 #3",
-      "560835 proc_rate 561016"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 560835,
-    "clause": "Periodic damage dealt by Condemn also has a $h% chance to burst, dealing ${$561277m1*$<scalingbp>+$AP*.22} Holy damage to up to $561277i1 enemies within $561277a1 yds of the target.",
-    "labels": [
-      "560835 effect_value 561277e0 #5",
-      "560835 effect_radius 561277e0 #7",
-      "560835 proc_rate 561277"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 561346,
-    "clause": "Increases your Holy critical strike chance by $s1%",
-    "labels": [
-      "561346 effect_value e0 #0",
-      "561346 e0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 561346,
-    "clause": "and your expertise by $s2.",
-    "labels": [
-      "561346 effect_value e1 #1",
-      "561346 e1 expertise"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 562302,
-    "clause": "Increases mounted movement speed by $s1%",
-    "labels": [
-      "562302 effect_value e0 #0",
-      "562302 aura_amount e0 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 562302,
-    "clause": "for all party and raid members within $a1 yds",
-    "labels": [
-      "562302 effect_radius e0 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 562302,
-    "clause": "for $d",
-    "labels": [
-      "562302 aura_duration_ms #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 562302,
-    "clause": "Can only be used while Mounted.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 562302,
-    "clause": "Does not stack with similar effects.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 572546,
-    "clause": "Increases your melee haste by $s1%",
-    "labels": [
-      "572546 effect_value e0 #0",
-      "572546 e0 attack_time_ms 0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572546,
-    "clause": "and expertise by $s2",
-    "labels": [
-      "572546 effect_value e1 #1",
-      "572546 e1 expertise"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572547,
-    "clause": "Level 30 Passive",
-    "labels": [],
-    "kind": "no_claim",
-    "reason": "A level-availability label, carries no gameplay claim to verify."
-  },
-  {
-    "spell": 572547,
-    "clause": "Increases the effectiveness Righteous Upheaval gains per trigger of Zealotry by $s1%.",
-    "labels": [
-      "572547 effect_value e0 #0",
-      "572547 e0 spell_modifier 807764",
-      "572547 e0 spell_effect_value 807764"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572548,
-    "clause": "Increases the Weapon Damage dealt by Zealotry by $s1%",
-    "labels": [
-      "572548 effect_value e0 #0",
-      "572548 e0 spell_modifier 801450",
-      "572548 e0 spell_effect_value 801450"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572548,
-    "clause": "gives it a $h% chance to trigger twice",
-    "labels": [
-      "572548 effect_value #1",
-      "572548 e1",
-      "572548 proc_rate"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572554,
-    "clause": "Increases the Weapon Damage dealt by Zealotry by $s1%",
-    "labels": [
-      "572554 effect_value e0 #0",
-      "572554 e0 spell_modifier 801450",
-      "572554 e0 spell_effect_value 801450"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572554,
-    "clause": "gives it a $h% chance to trigger twice",
-    "labels": [
-      "572554 proc_rate"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572555,
-    "clause": "Increases your melee haste by $s1%",
-    "labels": [
-      "572555 effect_value e0 #0",
-      "572555 e0 attack_time_ms 0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572555,
-    "clause": "and expertise by $s2",
-    "labels": [
-      "572555 effect_value e1 #1",
-      "572555 e1 expertise"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572808,
-    "clause": "Place a blessing on a party or raid member",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 572808,
-    "clause": "reducing their total threat by $572809s1% every $t1 sec for $d",
-    "labels": [
-      "572808 effect_value 572809e0 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572808,
-    "clause": "every $t1 sec",
-    "labels": [
-      "572808 aura_amplitude_ms #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572808,
-    "clause": "for $d",
-    "labels": [
-      "572808 aura_duration_ms #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572808,
-    "clause": "Can only be placed on 1 target at a time.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 573452,
-    "clause": "Damage dealt through Eternal Blessing now reduces the cooldown of Libram spells by $/1000;806106s1 sec.",
-    "labels": [
-      "573452 effect_value 806106e0 #0",
-      "573452 trigger_cooldown_delta"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 680397,
-    "clause": "Your healing done triggers a holy pulse around healed targets",
-    "labels": [
-      "680397 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 680397,
-    "clause": "dealing ${$680398m1*$<scalingbp>+$AP*0.05+$AGI*0.2} Holy damage",
-    "labels": [
-      "680397 effect_value 680398e0 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 680397,
-    "clause": "to nearby enemies",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 680397,
-    "clause": "Can only occur once every 0.5 sec.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 680399,
-    "clause": "Increases the healing of Benediction by $s1%",
-    "labels": [
-      "680399 effect_value e0 #0",
-      "680399 e0 spell_modifier 578276"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 680399,
-    "clause": "causes it to dispel $525052s2 poison and disease effect",
-    "labels": [
-      "680399 effect_value 525052e1 #1",
-      "680399 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 680891,
-    "clause": "Your Chastise now always triggers Scourgebane on your target.",
-    "labels": [
-      "680891 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 680953,
-    "clause": "reducing the remaining cooldown of Testaments by $s1%",
-    "labels": [
-      "680953 effect_value e0 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 681009,
-    "clause": "Increases your maximum health ... by $s1%",
-    "labels": [
-      "681009 effect_value e0 #0",
-      "681009 e0 max_health"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 681009,
-    "clause": "and Energy by $s1%",
-    "labels": [
-      "681009 effect_value e0 #0",
-      "681009 e1 max_power 3"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 681483,
-    "clause": "Increases the healing of Benediction by $s1%",
-    "labels": [
-      "681483 effect_value e0 #0",
-      "681483 e0 spell_modifier 578276"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 681483,
-    "clause": "causes it to dispel 2 poison and disease effects",
-    "labels": [
-      "681483 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 681537,
-    "clause": "Increases your maximum health ... by $s1%",
-    "labels": [
-      "681537 effect_value e0 #0",
-      "681537 e0 max_health"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 681537,
-    "clause": "and Energy by $s1%",
-    "labels": [
-      "681537 effect_value e0 #0",
-      "681537 e1 max_power 3"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 704116,
-    "clause": "Critically striking with Vindication or Righteous Lunge now deals $s1% additional Physical damage.",
-    "labels": [
-      "704116 effect_value e0 #0",
-      "704116 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 704175,
-    "clause": "Increases the critical strike chance gained through Condemn by $s1%",
-    "labels": [
-      "704175 effect_value e0 #0",
-      "704175 e0",
-      "704175 e1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 704175,
-    "clause": "allows its periodic damage to critically strike",
-    "labels": [
-      "704175 e2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 704180,
-    "clause": "Reduces the Energy cost of your Oath Breakers by $s1.",
-    "labels": [
-      "704180 effect_value e0 #0",
-      "704180 e0 spell_modifier (multiple targets)",
-      "704180 e0 spell_power_cost (multiple targets)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705250,
-    "clause": "Increases your Agility by $s1%",
-    "labels": [
-      "705250 effect_value e0 #0",
-      "705250 e0 stat 1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705250,
-    "clause": "and your chance to hit by $s2%",
-    "labels": [
-      "705250 effect_value e1 #1",
-      "705250 e1 melee_hit_chance",
-      "705250 e1 spell_hit_chance"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705251,
-    "clause": "Increases your Agility by $s1%",
-    "labels": [
-      "705251 effect_value e0 #0",
-      "705251 e0 stat 1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705251,
-    "clause": "and your chance to hit by $s2%",
-    "labels": [
-      "705251 effect_value e1 #1",
-      "705251 e1 melee_hit_chance",
-      "705251 e1 spell_hit_chance"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705253,
-    "clause": "Increases the chance to trigger Scourgebane by $s1%",
-    "labels": [
-      "705253 effect_value e0 #0",
-      "705253 e0 spell_modifier 520007"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705253,
-    "clause": "and your chance to hit by $s2%",
-    "labels": [
-      "705253 effect_value e1 #1",
-      "705253 e1 melee_hit_chance",
-      "705253 e1 spell_hit_chance"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705255,
-    "clause": "Damage dealt by Scourgebane now increases the damage of Argent Blade by $803372s2%, stacking",
-    "labels": [
-      "705255 effect_value 803372e1 #0",
-      "705255 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705255,
-    "clause": "for $803372d",
-    "labels": [
-      "705255 spell_duration 803372 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705255,
-    "clause": "stacking $803372u times",
-    "labels": [
-      "705255 max_stacks 803372 #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705256,
-    "clause": "within $681136d",
-    "labels": [
-      "705256 spell_duration 681136 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705256,
-    "clause": "Your Temple Guardian now makes your next ability ... free of cost.",
-    "labels": [
-      "705256 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705259,
-    "clause": "While a Libram is active",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 705259,
-    "clause": "your Chastise will now unleash a line of holy power, dealing ${$706466m1*$<scalingbp>+$AP*.25} damage",
-    "labels": [
-      "705259 effect_value 706466e0 #0",
-      "705259 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705259,
-    "clause": "High Threat Holy damage",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 705263,
-    "clause": "Increases the duration of your Librams and Testaments by $/1000;s1 sec.",
-    "labels": [
-      "705263 effect_value e0 #0",
-      "705263 e0 spell_modifier (multiple targets)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705266,
-    "clause": "Reduces the cooldown of your Libram spells by $/1000;s1 sec.",
-    "labels": [
-      "705266 effect_value e0 #0",
-      "705266 e0 spell_modifier (multiple targets)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705268,
-    "clause": "Doubles the healing done to you by Testament of Fortitude",
-    "labels": [
-      "705268 e0 spell_modifier 500678 (and 6 other ranks)",
-      "705268 e0 spell_effect_value 500678 (and 6 other ranks)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705268,
-    "clause": "and Testament of Faith",
-    "labels": [
-      "705268 501606 behaviour_ratio",
-      "705268 e1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705271,
-    "clause": "Increases your critical strike chance by $s1%",
-    "labels": [
-      "705271 effect_value e0 #0",
-      "705271 e0 melee_crit_chance_refreshed"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705271,
-    "clause": "and reduces the duration of disarm effects against you by $s2%",
-    "labels": [
-      "705271 effect_value e1 #1",
-      "705271 e1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705272,
-    "clause": "Increases your critical damage with Holy spells and abilities by $s1%.",
-    "labels": [
-      "705272 effect_value e0 #0",
-      "705272 e0 spell_critical_damage 572741"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705274,
-    "clause": "Your Libram spells now grant you $705275s1% increased melee haste",
-    "labels": [
-      "705274 effect_value 705275e0 #0",
-      "705274 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705274,
-    "clause": "for $705275d",
-    "labels": [
-      "705274 spell_duration 705275 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705276,
-    "clause": "Increases your off-hand weapon damage by $s1%.",
-    "labels": [
-      "705276 effect_value e0 #0",
-      "705276 e0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705278,
-    "clause": "Increases your Holy healing done and received by $s1%.",
-    "labels": [
-      "705278 effect_value e0 #0",
-      "705278 e0 spell_healing_taken 803792",
-      "705278 e1 spell_healing_done 803792"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705281,
-    "clause": "Level 20 Passive",
-    "labels": [],
-    "kind": "no_claim",
-    "reason": "A level-availability label, carries no gameplay claim to verify."
-  },
-  {
-    "spell": 705281,
-    "clause": "Increases your Holy spell damage by $s1% of your attack power",
-    "labels": [
-      "705281 effect_value e0 #0",
-      "705281 e0 spell_power 1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705281,
-    "clause": "and your Armor penetration by $s2% of your Intellect",
-    "labels": [
-      "705281 effect_value e1 #1",
-      "705281 e1 combat_rating 24"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705283,
-    "clause": "Increases the duration of Oath Chain by $s1%.",
-    "labels": [
-      "conformance-templar-value-705283",
-      "conformance-templar-passive-705283 (704576/706426/707896 ok)",
-      "705283 e0 spell_modifier 560389 (passive_delta) -- measured 0.0 expected 200.0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705284,
-    "clause": "Increases the the damage of Oath Breakers, Condemn, and Titanstrike by $s1%.",
-    "labels": [
-      "conformance-templar-value-705284",
-      "conformance-templar-passive-705284 (806835 ok, e1 567539 ok, plus matching measured entries for 578276/803880/704573/503141/501567/501568/501569/801477/572741/572027)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705285,
-    "clause": "Condemn now stacks $s1 additional time.",
-    "labels": [
-      "conformance-templar-value-705285",
-      "705285 e0 spell_modifier 567539 ok",
-      "705285 e0 spell_max_stacks 567539 ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705286,
-    "clause": "Casting abilities that grant an Oath now increases your damage dealt and movement speed by $560834s1% for $560834d, stacking $560834u times.",
-    "labels": [
-      "705286 trigger_count ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705286,
-    "clause": "increases your damage dealt and movement speed by $560834s1%",
-    "labels": [
-      "705286 effect_value 560834e0 #0 ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705286,
-    "clause": "for $560834d",
-    "labels": [
-      "705286 spell_duration 560834 #1 ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705286,
-    "clause": "stacking $560834u times",
-    "labels": [
-      "705286 max_stacks 560834 #2 ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705287,
-    "clause": "Benediction now grants your target armor based on your Agility and Stamina",
-    "labels": [
-      "705287 e1 (unmodelled) -- closed: no check needed"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705287,
-    "clause": "for $/1000;s1 sec",
-    "labels": [
-      "conformance-templar-value-705287",
-      "705287 e0 spell_modifier 801409 ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705290,
-    "clause": "Using Libram spells now increases your damage dealt and healing done by $520537s1% for $520537d",
-    "labels": [
-      "705290 trigger_count ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705290,
-    "clause": "$?s520007[ or Silverhand Incantation][]",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 705290,
-    "clause": "increases your damage dealt and healing done by $520537s1%",
-    "labels": [
-      "conformance-templar-value-705290"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705290,
-    "clause": "for $520537d",
-    "labels": [
-      "705290 spell_duration 520537 #1 ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705291,
-    "clause": "increased by $s1%",
-    "labels": [
-      "conformance-templar-value-705291",
-      "705291 e0 spell_modifier 567539 ok",
-      "705291 e0 spell_effect_value 567539 ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705291,
-    "clause": "per stack",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 705291,
-    "clause": "on enemies affected by your Condemn",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 572769,
-    "clause": "Swing at enemies in front of you",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 572769,
-    "clause": "dealing $s2% High Threat Weapon Damage",
-    "labels": [
-      "conformance-templar-value-572769 (effect_value e1 #0)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572769,
-    "clause": "plus ${$m1+0}",
-    "labels": [
-      "conformance-templar-value-572769 (effect_value e0 #1)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572769,
-    "clause": "slowing their attack and movement speed by $301061s1% for $301061d",
-    "labels": [
-      "conformance-templar-value-572769 (effect_value 301061e0 #2 ok, -20%)",
-      "conformance-templar-value-572769 (spell_duration 301061 #3 ok)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572769,
-    "clause": "for $301061d",
-    "labels": [
-      "conformance-templar-value-572769 (spell_duration 301061 #3 ok)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 572769,
-    "clause": "Only usable after avoiding an attack.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 705295,
-    "clause": "Casting Sacred Swing now grants you Staffguard",
-    "labels": [
-      "705295 trigger_count ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705295,
-    "clause": "absorbing ${$706583m1+$STA*.3} damage, scaling with Stamina, parry and dodge rating",
-    "labels": [
-      "705295 effect_value #0 -- unmeasurable: effect 0 of spell 706583 is disabled by a server correction"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705295,
-    "clause": "for $706583d",
-    "labels": [
-      "conformance-templar-value-705295 (spell_duration 706583 #1)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705298,
-    "clause": "Effectively healing yourself now reduces your Physical damage taken",
-    "labels": [
-      "705298 trigger_count ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705298,
-    "clause": "by ${$705299m1+$STA*0.1}",
-    "labels": [
-      "705298 effect_value #0 -- unmeasurable: effect 0 of spell 705299 is disabled by a server correction"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705298,
-    "clause": "for $705299d",
-    "labels": [
-      "conformance-templar-value-705298 (spell_duration 705299 #1)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705298,
-    "clause": "Can only occur every 15 sec.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 705300,
-    "clause": "Increases your Holy damage and healing done by $s1% for $d.",
-    "labels": [
-      "conformance-templar-value-705300 (effect_value e0 #0, aura_amount e0 #0)",
-      "conformance-templar-value-705300 (aura_duration_ms #1)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705300,
-    "clause": "While active, Oath Breakers deal an additional ${$707111m3+$707111ppl3+$AP*.12} Holy damage to nearby enemies.",
-    "labels": [
-      "conformance-templar-value-705300 (effect_value 707111e2 #2, 178 vs 179.06 expected)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705300,
-    "clause": "$?s573452[Dealing damage this way reduces the cooldown of your Librams by $/1000;806106s1 sec.][]",
-    "labels": [
-      "conformance-templar-value-705300 (effect_value 806106e0 #3, -4000 ok)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705303,
-    "clause": "Level 20 Passive",
-    "labels": [],
-    "kind": "no_claim",
-    "reason": "A level-gate label, not a gameplay claim about a value or mechanic."
-  },
-  {
-    "spell": 705303,
-    "clause": "Increases your parry rating by $s1% of Agility",
-    "labels": [
-      "conformance-templar-value-705303 (effect_value e0)",
-      "705303 e0 combat_rating 3 ok (26 vs 26.4 expected)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705303,
-    "clause": "your dodge rating by $s2% of Intellect",
-    "labels": [
-      "conformance-templar-value-705303 (effect_value e1)",
-      "705303 e1 combat_rating 2 ok (6 vs 6.4 expected)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705306,
-    "clause": "When you take Physical damage you now strike back at enemies for $s1% of the damage dealt as Holy damage.",
-    "labels": [
-      "705306 trigger_count -- unmodelled: proven integer-truncation artifact of the only available taken_hit striker fixture"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705306,
-    "clause": "for $s1% of the damage dealt as Holy damage",
-    "labels": [
-      "conformance-templar-value-705306 (effect_value e0 #0, 15%)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705306,
-    "clause": "Can only occur once per sec.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 705306,
-    "clause": "@ext:Does not work on Bosses.:ext@",
-    "labels": [
-      "705306 effect_value #1 -- generic: client extension note, never a number"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 705307,
-    "clause": "Increases the damage of Reckoning by $s2%.",
-    "labels": [
-      "conformance-templar-value-705307 (effect_value e1)",
-      "705307 e1 spell_modifier 572741 ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706309,
-    "clause": "Reduces the cooldown of Righteous Upheaval by $/1000;s1 sec.",
-    "labels": [
-      "conformance-templar-value-706309",
-      "706309 e0 spell_modifier 501561 ok",
-      "706309 e0 spell_modifier 572027 ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706312,
-    "clause": "Damage dealt by Scourgebane and Scarlet Hammer now strikes $s1 additional nearby enemy.",
-    "labels": [
-      "conformance-templar-value-706312",
-      "706312 e0 spell_modifier 807035 ok",
-      "706312 e0 spell_modifier 801832 ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706318,
-    "clause": "Reduces the Energy cost of Vindication by $s1.",
-    "labels": [
-      "conformance-templar-value-706318",
-      "706318 e0 spell_modifier 573324 ok",
-      "706318 e0 spell_power_cost 573324 ok",
-      "706318 e0 spell_modifier 500689 measured (-5.0, matching, no mismatch)",
-      "706318 e0 spell_power_cost 500689 closed (no power cost to modify)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706320,
-    "clause": "Increases the effectiveness of Oaths by $s1%.",
-    "labels": [
-      "conformance-templar-value-706320",
-      "706320 e0 spell_modifier ok across all 13 listed targets"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706323,
-    "clause": "Increases your damage dealt versus Undead by ${$m1+0}",
-    "labels": [
-      "conformance-templar-value-706323 (effect_value e0, 53)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706323,
-    "clause": "scaling with level",
-    "labels": [
-      "706323 e0 (unmodelled) -- unmodelled: damage versus a creature type is level-scaled"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706323,
-    "clause": "increases your chance to resist disease effects by $s2%",
-    "labels": [
-      "conformance-templar-value-706323 (effect_value e1, 30)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706323,
-    "clause": "functional application of the disease resist chance",
-    "labels": [
-      "706323 e1 (unmodelled) -- unmodelled: scripted or crowd-control effect"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706325,
-    "clause": "Dealing damage with Condemn, Holy Cleave, or Blade of Faith now has a $h% chance to trigger Zealotry",
-    "labels": [
-      "706325 proc_rate ok (0.15 vs 0.15 expected)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706325,
-    "clause": "Dealing damage with Condemn, Holy Cleave, or Blade of Faith (each trigger source individually)",
-    "labels": [
-      "706325 proc_rate ok (aggregate only)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706325,
-    "clause": "if you are within melee range of your target",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 706357,
-    "clause": "Increases your Stamina by $s1",
-    "labels": [
-      "conformance-templar-value-706357 (effect_value e0 #0)",
-      "706357 e0 stat 2 ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706357,
-    "clause": "plus an additional amount equal to $s1% of your Agility",
-    "labels": [
-      "conformance-templar-value-706357 (effect_value e0 #1)",
-      "706357 e1 stat 2 ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706359,
-    "clause": "Increases your parry and dodge chance by $s1%.",
-    "labels": [
-      "conformance-templar-value-706359",
-      "706359 e0 parry_chance ok",
-      "706359 e1 dodge_chance ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706385,
-    "clause": "Your Condemn now heals you for $s1% of the damage dealt.",
-    "labels": [
-      "conformance-templar-value-706385",
-      "706385 trigger_count ok (594/594)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706431,
-    "clause": "Increases all primary attributes by $s1%.",
-    "labels": [
-      "conformance-templar-value-706431",
-      "706431 e0 stat 0/1/2/3/4 all ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706449,
-    "clause": "Your Benediction now has a $/1000;S1 sec cast time",
-    "labels": [
-      "conformance-templar-value-706449 (effect_value e0)",
-      "706449 e0 spell_modifier 578276 ok",
-      "706449 e0 spell_cast_time_ms 578276 ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706449,
-    "clause": "but now heals for $s2% more",
-    "labels": [
-      "conformance-templar-value-706449 (effect_value e1)",
-      "706449 e1 spell_modifier 578276 ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 706468,
-    "clause": "Level 30 Passive",
-    "labels": [],
-    "kind": "no_claim",
-    "reason": "A level-gate label, not a gameplay claim."
-  },
-  {
-    "spell": 706468,
-    "clause": "Using a Libram now removes $707208s1% of the delayed damage from Oathkeeper.",
-    "labels": [
-      "conformance-templar-value-706468 (effect_value 707208e0)",
-      "706468 behaviour_amount_delta ok (referenced)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300923,
-    "clause": "Places a Gift on a friendly target, increasing Agility by $s1",
-    "labels": [
-      "conformance-templar-value-300923 (effect_value, aura_amount)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 300923,
-    "clause": "for $d",
-    "labels": [
-      "conformance-templar-value-300923 (aura_duration_ms, ~1799988/1800000)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 707364,
-    "clause": "Casting Benediction now reduces the cost of your next Temple Guardian by $712378s1% for $712378d.",
-    "labels": [
-      "707364 trigger_count ok (273/273)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 707364,
-    "clause": "reduces the cost ... by $712378s1%",
-    "labels": [
-      "conformance-templar-value-707364 (effect_value 712378e0, -50)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 707364,
-    "clause": "for $712378d",
-    "labels": [
-      "conformance-templar-value-707364 (spell_duration 712378, 6000 ms)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 707364,
-    "clause": "your next Temple Guardian",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 707385,
-    "clause": "heals you for $s1% of your maximum health",
-    "labels": [
-      "conformance-templar-value-707385",
-      "707385 e0 spell_modifier 801461 ok",
-      "707385 e0 spell_effect_value 801461 ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 707385,
-    "clause": "Casting Libram of Tenacity now also heals you",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 707391,
-    "clause": "Melee damage dealt now has a $h% chance to strike 2 additional times",
-    "labels": [
-      "707391 proc_rate ok (0.187 vs 0.2 expected)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 707391,
-    "clause": "strike 2 additional times",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 707391,
-    "clause": "for $s1% of the damage dealt as Holy Damage",
-    "labels": [
-      "conformance-templar-value-707391 (effect_value e0 #1)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 707606,
-    "clause": "Casting Righteous Upheaval or Blade of Faith now grants you Oath: Retribution (per trigger spell)",
-    "labels": [
-      "707606 trigger_count ok (273/273, aggregate)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 707606,
-    "clause": "grants you Oath: Retribution",
-    "labels": [
-      "conformance-templar-value-707606 (effect_value 804924e0, 5)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 707606,
-    "clause": "and starts your Oath Chain",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 707663,
-    "clause": "Removes the cooldown from Benediction",
-    "labels": [
-      "707663 e0 spell_modifier 578276 ok (-1000, full removal)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 707663,
-    "clause": "increases its Energy cost by $s2",
-    "labels": [
-      "conformance-templar-value-707663 (effect_value e1)",
-      "707663 e1 spell_modifier 578276 ok",
-      "707663 e1 spell_power_cost 578276 ok"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 707754,
-    "clause": "Increases your movement speed ... by $s2%",
-    "labels": [
-      "707754 e0 run_speed_rate ok (+0.1)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 707754,
-    "clause": "reduces the duration of movement slowing effects on you by $s2%",
-    "labels": [
-      "conformance-templar-value-707754 (effect_value e1 #0, -10, ok)",
-      "707754 e1 (unmodelled) -- scripted or crowd-control effect"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 707851,
-    "clause": "Increases your critical strike chance by $s1%",
-    "labels": [
-      "707851 effect_value e0 #0",
-      "707851 e0 melee_crit_chance_refreshed"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 707851,
-    "clause": "reduces the duration of disarm effects against you by $s2%",
-    "labels": [
-      "707851 effect_value e1 #1",
-      "707851 e1 (unmodelled)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 707852,
-    "clause": "Increases the chance to trigger Scourgebane by $s1%",
-    "labels": [
-      "707852 effect_value e0 #0",
-      "707852 e0 spell_modifier 520007"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 707852,
-    "clause": "and your chance to hit by $s2%",
-    "labels": [
-      "707852 effect_value e1 #1",
-      "707852 e1 melee_hit_chance",
-      "707852 e1 spell_hit_chance"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 707853,
-    "clause": "Damage dealt by Scourgebane and Scarlet Hammer now strikes $s1 additional nearby enemies",
-    "labels": [
-      "707853 effect_value e0 #0",
-      "707853 e0 spell_modifier 807035",
-      "707853 e0 spell_modifier 801832"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 712346,
-    "clause": "Critical strikes now remove 1 sec from the duration of Oathkeeper when used.",
-    "labels": [
-      "712346 behaviour_duration (status ok, behaviour-scenarios.md)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 712437,
-    "clause": "Your Interdict now strikes 1 additional nearby target.",
-    "labels": [
-      "712437 behaviour_count (status ok, behaviour-scenarios.md)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 712466,
-    "clause": "Increases your movement speed",
-    "labels": [
-      "712466 e0 run_speed_rate"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 712466,
-    "clause": "reduces the duration of movement slowing effects on you by $s2%",
-    "labels": [
-      "712466 effect_value e1 #0",
-      "712466 e1 (unmodelled)",
-      "712466 behaviour_duration_ratio"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 712677,
-    "clause": "Casting Sacred Swing now increases your melee haste by $712679s1%",
-    "labels": [
-      "712677 effect_value 712679e0 #0",
-      "712677 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 712677,
-    "clause": "for $712679d",
-    "labels": [
-      "712677 spell_duration 712679 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 712677,
-    "clause": "stacking $712679u times",
-    "labels": [
-      "712677 max_stacks 712679 #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 712678,
-    "clause": "Increases the duration of Interdict by $/1000;s1 sec",
-    "labels": [
-      "712678 effect_value e0 #0",
-      "712678 e0 (unmodelled)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 712678,
-    "clause": "and its cooldown by $/1000;s2 sec",
-    "labels": [
-      "712678 effect_value e1 #1",
-      "712678 e1 (unmodelled)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 800424,
-    "clause": "Taunt all enemies within 8 yds",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 800424,
-    "clause": "for $d",
-    "labels": [
-      "800424 aura_duration_ms #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 800424,
-    "clause": "increase your movement speed by $520659s1% for $520659d",
-    "labels": [
-      "800424 effect_value 520659e0 #1",
-      "800424 spell_duration 520659 #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 803792,
-    "clause": "3 Charges",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 803792,
-    "clause": "35 sec recharge",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 803792,
-    "clause": "Charge towards an ally",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 803792,
-    "clause": "healing you and them for ${$m2+0+$AP*0.805+$sph*0.85}",
-    "labels": [
-      "803792 effect_value e1 #0",
-      "803792 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801202,
-    "clause": "While above 80% health or below 20% health, you now take 20% reduced Magic damage.",
-    "labels": [
-      "801202 90 behaviour_ratio",
-      "801202 50 behaviour_ratio",
-      "801202 10 behaviour_ratio"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801204,
-    "clause": "Increases your Agility ... by $s1%",
-    "labels": [
-      "801204 effect_value e0 #0",
-      "801204 e0 stat 1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801204,
-    "clause": "...Intellect ... by $s1%",
-    "labels": [
-      "801204 e2 stat 3"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801204,
-    "clause": "...and hit chance by $s1%",
-    "labels": [
-      "801204 e1 melee_hit_chance",
-      "801204 e1 spell_hit_chance"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801205,
-    "clause": "Place a holy circle on the ground at the target location for $d",
-    "labels": [
-      "801205 aura_duration_ms #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801205,
-    "clause": "slowing enemy movement speed by $s1%",
-    "labels": [
-      "801205 effect_value e0 #1",
-      "801205 aura_amount e0 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801205,
-    "clause": "Every $t2 sec, enemies within the radius enter a tranquil state",
-    "labels": [
-      "801205 aura_amplitude_ms #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 850010,
-    "clause": "falling asleep for $850010d",
-    "labels": [
-      "801205 spell_duration 850010 #3"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 850010,
-    "clause": "(8 sec vs players)",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 803893,
-    "clause": "causing damaging abilities to deal an ${$804148m1+$804148ppl1} additional Holy damage to your target",
-    "labels": [
-      "803893 effect_value 804148e0 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 803893,
-    "clause": "and 4 nearby enemies",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 803893,
-    "clause": "for $d",
-    "labels": [
-      "803893 aura_duration_ms #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 803893,
-    "clause": "@ext:Only 1 Libram spell can be active at a time.:ext@",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 570233,
-    "clause": "dealing $s2% Weapon Damage plus ${$m1+0}",
-    "labels": [
-      "570233 effect_value e1 #0",
-      "570233 effect_value e0 #1",
-      "570233 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 570233,
-    "clause": "and granting an Oath",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 804904,
-    "clause": "Oath: Your abilities damage or heal for $804904s2% more.",
-    "labels": [
-      "570233 effect_value 804904e1 #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 573049,
-    "clause": "dealing $s2% Weapon Damage plus $s1 to your target",
-    "labels": [
-      "573049 effect_value e1 #0",
-      "573049 effect_value e0 #1",
-      "573049 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 573049,
-    "clause": "and an additional nearby enemy",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 573049,
-    "clause": "and granting an Oath",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 804903,
-    "clause": "Oath: Your abilities strike $804903s1 additional nearby target.",
-    "labels": [
-      "573049 effect_value 804903e0 #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 573324,
-    "clause": "dealing ${$m1+0+$AP*0.285+$SP*0.75} Physical damage",
-    "labels": [
-      "801446 effect_value e0 #0",
-      "573324 effect_value e0 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 573324,
-    "clause": "triggering Zealotry",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 573324,
-    "clause": "and granting an Oath",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 805332,
-    "clause": "Oath: Your damaging abilities have a $805332s1% chance to trigger Zealotry.",
-    "labels": [
-      "573324 effect_value 805332e0 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 578276,
-    "clause": "restoring ${$m2+0+$STA*0.25+$SP*0.3} health to an ally, scaling with Stamina",
-    "labels": [
-      "803373 effect_value e1 #0",
-      "578276 effect_value e1 #0",
-      "578276 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 578276,
-    "clause": "Consumes your Oaths, dealing additional healing for each consumed.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 801455,
-    "clause": "making them immune to all movement impairing effects for $d",
-    "labels": [
-      "801455 aura_duration_ms #0",
-      "801455 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 102208,
-    "clause": "Applies Sacred Restraint for $102208d.",
-    "labels": [
-      "801455 spell_duration 102208 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801457,
-    "clause": "Healing an ally now redirects $705309s1% of their damage taken to you",
-    "labels": [
-      "801457 effect_value 705309e0 #0",
-      "801457 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801457,
-    "clause": "and reduces your damage taken by $707307s1% for $705309d",
-    "labels": [
-      "801457 effect_value 707307e0 #1",
-      "801457 spell_duration 705309 #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801457,
-    "clause": "stacking $705309u times",
-    "labels": [
-      "801457 max_stacks 705309 #3"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801457,
-    "clause": "@ext: Healing yourself does not trigger this effect.:ext@",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 801461,
-    "clause": "reducing your Physical Damage taken by $s2%",
-    "labels": [
-      "801461 effect_value e1 #0",
-      "801461 aura_amount e1 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801461,
-    "clause": "($s3% against players)",
-    "labels": [
-      "801461 effect_value e2 #1",
-      "801461 aura_amount e2 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801461,
-    "clause": "for $d",
-    "labels": [
-      "801461 aura_duration_ms #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801461,
-    "clause": "$?s707385[ and instantly healing you for $s1% maximum health][]",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 801461,
-    "clause": "@ext:Only 1 Libram spell can be active at a time.:ext@",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 801463,
-    "clause": "increasing your healing received by $s2%",
-    "labels": [
-      "801463 effect_value e1 #0",
-      "801463 aura_amount e1 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801463,
-    "clause": "and causing your damaging abilities to restore ${$804150m1+$AP*.1+$SP*.15} health",
-    "labels": [
-      "801463 effect_value 804150e0 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801463,
-    "clause": "to you and nearby allies",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 801463,
-    "clause": "for $d",
-    "labels": [
-      "801463 aura_duration_ms #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801463,
-    "clause": "@ext:Only 1 Libram spell can be active at a time.:ext@",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 801465,
-    "clause": "toss a holy hammer at your target, charging you to them",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 801465,
-    "clause": "and removing Sacred Restraint from you and them if they are an ally",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 801465,
-    "clause": "you deal ${$m1+$ppl1+$AP*2} Holy damage",
-    "labels": [
-      "801465 effect_value e0 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801465,
-    "clause": "to all nearby enemies",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 801465,
-    "clause": "and heal nearby allies for the same amount",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 801466,
-    "clause": "increasing your melee haste by $s2%",
-    "labels": [
-      "801466 effect_value e1 #0",
-      "801466 aura_amount e1 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801466,
-    "clause": "and causes your damaging abilities to reduce the cooldown of Righteous Upheaval by $/1000;575328S1 sec",
-    "labels": [
-      "801466 effect_value 575328e0 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801466,
-    "clause": "for $d",
-    "labels": [
-      "801466 aura_duration_ms #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801466,
-    "clause": "@ext:Only 1 Libram spell can be active at a time.:ext@",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 501606,
-    "clause": "healing them for ${$m1+0+$SP*1+$AP*2}",
-    "labels": [
-      "501606 effect_value e0 #0",
-      "501606 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 102208,
-    "clause": "Applies Sacred Restraint for $102208d.",
-    "labels": [
-      "501606 spell_duration 102208 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801480,
-    "clause": "Increases the damage dealt by Libram of Consecration by $s1%",
-    "labels": [
-      "801480 effect_value e0 #0",
-      "801480 e0 spell_modifier 804148"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801480,
-    "clause": "increases the effectiveness of your Librams by $s2%",
-    "labels": [
-      "801480 effect_value e1 #1",
-      "801480 e1 spell_modifier 803893"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801480,
-    "clause": "and reduces their cooldown by $s3%",
-    "labels": [
-      "801480 effect_value e2 #2",
-      "801480 e2 spell_modifier 803893"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801481,
-    "clause": "increasing your attack speed by $s1% for $d",
-    "labels": [
-      "801481 effect_value e0 #0",
-      "801481 aura_amount e0 #0",
-      "801481 aura_duration_ms #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 801481,
-    "clause": "After the duration, you gain Downfall.",
-    "labels": [
-      "801481 effect_value 801482e0 #2",
-      "801481 spell_duration 801482 #3",
-      "801481 effect_value 801483e0 #4",
-      "801481 effect_value 801483e2 #5",
-      "801481 spell_duration 801483 #6"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 503141,
-    "clause": "blasting an enemy for ${$m1+0+$sph*0.6+$AP*0.45} Holy damage",
-    "labels": [
-      "803157 effect_value e0 #0",
-      "503135 effect_value e0 #0",
-      "503136 effect_value e0 #0",
-      "503141 effect_value e0 #0",
-      "503141 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 503141,
-    "clause": "$?s806525[ plus an additional $806525s1% Weapon Damage][]",
-    "labels": [
-      "503141 effect_value 806525e0 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 503141,
-    "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 803158,
-    "clause": "Melee attacks now restore $804181s1 Energy",
-    "labels": [
-      "803158 effect_value 804181e0 #0",
-      "803158 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 803158,
-    "clause": "plus an additional 2 Energy when they critically strike",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 803159,
-    "clause": "Reduces the cooldown of Testaments by $/1000;s2 sec",
-    "labels": [
-      "803159 effect_value e1 #0",
-      "803159 e1 spell_modifier 501606",
-      "803159 e1 spell_modifier 500678",
-      "803159 e1 spell_modifier 1397742",
-      "803159 e1 spell_modifier 801455",
-      "803159 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 803159,
-    "clause": "and Oath Breakers now heal allies around the target for ${$m1+$SP*0.35}",
-    "labels": [
-      "803159 effect_value e0 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 803159,
-    "clause": "heal allies around the target",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 803163,
-    "clause": "Physical damage dealt now has a $h% chance",
-    "labels": [
-      "803163 proc_rate 803164 attack",
-      "803163 proc_rate 803164 501562"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 803163,
-    "clause": "increase the tick rate of your Blade of Faith and Condemn by $803164s1%",
-    "labels": [
-      "803163 effect_value 803164e0 #1",
-      "803163 e0 (unmodelled)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 803163,
-    "clause": "stacking $803164u times",
-    "labels": [
-      "803163 max_stacks 803164 #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 803219,
-    "clause": "Your Testament of Hope now reduces damage taken by an additional 5% per copy.",
-    "labels": [
-      "803219 effect_value (unmodelled)",
-      "803219 e0 (unmodelled)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 803842,
-    "clause": "Increases your Agility ... by $s1%",
-    "labels": [
-      "803842 effect_value e0 #0",
-      "803842 e0 stat 1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 803842,
-    "clause": "...Intellect ... by $s1%",
-    "labels": [
-      "803842 e2 stat 3"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 803842,
-    "clause": "...and hit chance by $s1%",
-    "labels": [
-      "803842 e1 melee_hit_chance",
-      "803842 e1 spell_hit_chance"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 803844,
-    "clause": "Reduces the cooldown of Testaments by $/1000;s2 sec",
-    "labels": [
-      "803844 effect_value e1 #0",
-      "803844 e1 spell_modifier 501606",
-      "803844 e1 spell_modifier 500678",
-      "803844 e1 spell_modifier 1397742",
-      "803844 e1 spell_modifier 801455",
-      "803844 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 803844,
-    "clause": "and Oath Breakers now heal allies around the target for ${$m1+$SP*0.35}",
-    "labels": [
-      "803844 effect_value e0 #1",
-      "803844 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 803872,
-    "clause": "Unleash a devastating Oath Breaker on an enemy dealing ${($d*1000/$T1)*($m1+0+$SP*.2+$AP*0.1)} Holy damage",
-    "labels": [
-      "803872 effect_value #0",
-      "803873 effect_value #0",
-      "803874 effect_value #0",
-      "803875 effect_value #0",
-      "803876 effect_value #0",
-      "803877 effect_value #0",
-      "803878 effect_value #0",
-      "803879 effect_value #0",
-      "803880 effect_value #0",
-      "803880 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 803872,
-    "clause": "over $d",
-    "labels": [
-      "803880 aura_duration_ms #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 803872,
-    "clause": "This ability can critically strike.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 803872,
-    "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 804228,
-    "clause": "granting immunity to fear, charm, and horrify effects for $d",
-    "labels": [
-      "804228 aura_duration_ms #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804228,
-    "clause": "Usable while feared.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 804228,
-    "clause": "Applies Sacred Restraint for $102208d.",
-    "labels": [
-      "804228 spell_duration 102208 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804571,
-    "clause": "Charging to an ally with Temple Guardian now has a $h% chance to refresh a charge.",
-    "labels": [
-      "804571 proc_rate"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804781,
-    "clause": "Pay a tithe of 1 silver",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 804781,
-    "clause": "to learn a special new ability to empower your entire party",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 804781,
-    "clause": "@ext: Eastern Kingdoms: Northshire Abbey, Deathknell, Cathedral of Light, Scarlet Monastery, Strahnbrad, Light's Hope Chapel, The Sepulcher.|n|nKalimdor: The Temple of the Moon, Ethel Rethor, Valley of Spirits, The Pools of Vision.$?s800981[.|n|nOutland: Chapel Yard, Shattrath City, Temple of Telhamat, Auchindoun, Ruins of Karabor, Oshu'gun.][]:ext@",
-    "labels": [
-      "804781 effect_value #0"
-    ],
-    "kind": "no_claim",
-    "reason": "Client note listing trainer locations where the ability can be learned; flavour/acquisition information, not a spell mechanic claim."
-  },
-  {
-    "spell": 804897,
-    "clause": "Your Divine Force will now trigger a $/1000;804918s1 sec reduced cooldown when used on enemies affected by Blade of Faith.",
-    "labels": [
-      "804897 effect_value 804918e0 #0",
-      "804897 e0 (behaviours entry 'Transcending Strikes', behaviour_metric_delta, status ok)",
-      "804897 e2 (reclassify note: already proven by the class file's own check)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804906,
-    "clause": "Condemn an enemy, dealing ${($d*1000/$T1)*($m1+0+$SP*.1+$AP*0.05)} Holy damage over $d",
-    "labels": [
-      "806866 effect_value #0",
-      "806867 effect_value #0",
-      "806868 effect_value #0",
-      "567538 effect_value #0",
-      "567539 effect_value #0",
-      "567539 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804906,
-    "clause": "stacking $u times",
-    "labels": [
-      "567539 max_stacks 567539 #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804906,
-    "clause": "and granting an Oath.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 804906,
-    "clause": "Oath: Increases your critical strike chance by $804922s1%.",
-    "labels": [
-      "567539 effect_value 804922e0 #3"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804912,
-    "clause": "your chance to parry is now increased by $560651s1%",
-    "labels": [
-      "804912 effect_value 560651e0 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804912,
-    "clause": "for $560651d",
-    "labels": [
-      "804912 spell_duration 560651 #1",
-      "804912 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804912,
-    "clause": "stacking $560651u times",
-    "labels": [
-      "804912 max_stacks 560651 #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804912,
-    "clause": "When you critically strike with auto attacks or parry an attack",
-    "labels": [
-      "804912 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804914,
-    "clause": "Taunt an enemy to attack you",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 804914,
-    "clause": "for $d",
-    "labels": [
-      "804914 aura_duration_ms #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804927,
-    "clause": "Level 40 Passive",
-    "labels": [],
-    "kind": "no_claim",
-    "reason": "A level-gate label, not a gameplay claim."
-  },
-  {
-    "spell": 804927,
-    "clause": "Casting Oath Breaker abilities now reduce the cooldown of Librams by $/1000;806106s1 sec.",
-    "labels": [
-      "804927 effect_value 806106e0 #0",
-      "804927 trigger_cooldown_delta"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804927,
-    "clause": "Increases your Holy spell damage by $s3% of your Agility.",
-    "labels": [
-      "804927 effect_value e2 #1",
-      "804927 e2 spell_power 1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804928,
-    "clause": "Reduces the Energy cost of your Testaments by $s1%.",
-    "labels": [
-      "804928 effect_value e0 #0",
-      "804928 e0 spell_modifier 500678",
-      "804928 e0 spell_modifier 1397742",
-      "804928 e0 spell_modifier 804228",
-      "804928 e0 spell_modifier 801455",
-      "804928 e0 spell_modifier 501606",
-      "804928 e0 spell_power_cost 500678",
-      "804928 e0 spell_power_cost 1397742",
-      "804928 e0 spell_power_cost 804228",
-      "804928 e0 spell_power_cost 801455",
-      "804928 e0 spell_power_cost 501606"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804929,
-    "clause": "dealing $s2% Weapon Damage plus ${$AP*0.4725+$sph*1.35+$m1+0}",
-    "labels": [
-      "807268 effect_value e1 #0",
-      "807268 effect_value e0 #1",
-      "807268 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804929,
-    "clause": "healing you equal to the damage dealt",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 804929,
-    "clause": "unleashes Scourgebane, dealing ${$801832m1*$<scalingbp>+$sph*0.25+$AP*0.25} Holy damage",
-    "labels": [
-      "807268 effect_value 801832e0 #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804930,
-    "clause": "Whenever the absorption shield from Staffguard breaks, inflict ${$801546m1+$801546ppl1+$AP*0.2+$sph*0.5} High Threat Holy damage to nearby enemies.",
-    "labels": [
-      "804930 effect_value 801546e0 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804932,
-    "clause": "Level 50 Passive",
-    "labels": [],
-    "kind": "no_claim",
-    "reason": "A level-gate label, not a gameplay claim."
-  },
-  {
-    "spell": 804932,
-    "clause": "Damaging abilities now grants you Unbroken Creed for $807648d, stacking up to $807648u times.",
-    "labels": [
-      "804932 spell_duration 807648 #0",
-      "804932 max_stacks 807648 #1",
-      "804932 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 804932,
-    "clause": "When you use a damaging Oath Breaker or Divine Fury you now consume the stacks and auto attack your target an amount of times equal to your stack count.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 805409,
-    "clause": "dealing $570205s2% Weapon Damage plus ${$570205m1+$SP*0.3} damage to nearby enemies, every $t1 sec",
-    "labels": [
-      "807274 effect_value 570205e1 #0",
-      "807274 effect_value 570205e0 #1",
-      "807274 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805409,
-    "clause": "scaling with spell power",
-    "labels": [
-      "807274 effect_value 570205e0 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805409,
-    "clause": "every $t1 sec",
-    "labels": [
-      "807274 aura_amplitude_ms #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805409,
-    "clause": "$?s300512[ and reducing damage taken by $300512s2%][] for $d",
-    "labels": [
-      "807274 effect_value 300512e1 #3",
-      "807274 aura_duration_ms #4"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805409,
-    "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 805410,
-    "clause": "Deals Weapon Damage plus ${$m1+0+$SP*.15}.",
-    "labels": [
-      "570205 effect_value e0 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805415,
-    "clause": "Your damaging critical strikes now increase your Holy damage dealt by $805416s1% for $805416d.",
-    "labels": [
-      "805415 effect_value 805416e0 #0",
-      "805415 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805415,
-    "clause": "stacking $805416u times",
-    "labels": [
-      "805415 max_stacks 805416 #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805415,
-    "clause": "for $805416d",
-    "labels": [
-      "805415 spell_duration 805416 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805415,
-    "clause": "Can only occur once per sec.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 805415,
-    "clause": "At 5 stacks, you are granted High General.@s:524617:0@",
-    "labels": [
-      "805415 effect_value 524617e0 #3"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805417,
-    "clause": "increasing the healing received by nearby party and raid members by $s3% for $d",
-    "labels": [
-      "805417 effect_value e2 #0",
-      "805417 aura_amount e2 #0",
-      "805417 aura_duration_ms #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805417,
-    "clause": "For the duration, threat generated by your allies is redirected to you.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 805420,
-    "clause": "Damage dealt by Sacred Swing and Reckoning now reduces casting speed by $572052s1% for $572052d, stacking $572052u times.",
-    "labels": [
-      "805420 effect_value 572052e0 #0",
-      "805420 spell_duration 572052 #1",
-      "805420 max_stacks 572052 #2",
-      "805420 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805421,
-    "clause": "dealing ${$m1+0+$AP*0.175+$STA*0.5} Holy damage",
-    "labels": [
-      "572741 effect_value e0 #0",
-      "572741 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805421,
-    "clause": "and restoring $521241s1 Energy for each enemy struck",
-    "labels": [
-      "572741 effect_value 521241e0 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805421,
-    "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 805422,
-    "clause": "Grants a shield equal to 100% of your maximum health",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 805422,
-    "clause": "for $d",
-    "labels": [
-      "805422 aura_duration_ms #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805422,
-    "clause": "resets the cooldown of Barrier of Light and Tranquil Circle",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 805422,
-    "clause": "and grants an additional effect for each.@s:806354:0@@s:807004:0@",
-    "labels": [
-      "805422 spell_duration 806354 #1",
-      "805422 spell_duration 807004 #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805423,
-    "clause": "granting you spell power equal to $s2% of your Agility",
-    "labels": [
-      "805423 effect_value e1 #0",
-      "805423 aura_amount e1 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805423,
-    "clause": "and attack power equal to $s1% of your Intellect",
-    "labels": [
-      "805423 effect_value e0 #1",
-      "805423 aura_amount e0 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805423,
-    "clause": "for $d",
-    "labels": [
-      "805423 aura_duration_ms #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 805423,
-    "clause": "@ext:Only 1 Libram spell can be active at a time.:ext@",
-    "labels": [
-      "805423 effect_value #3"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 806153,
-    "clause": "Leap at an enemy with divine force",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 806153,
-    "clause": "stunning them for $807890d",
-    "labels": [
-      "807805 spell_duration 807890 #0"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 806153,
-    "clause": "dealing ${$m3+0+$SP*1+$AP*.55} Holy damage",
-    "labels": [
-      "807805 effect_value e2 #1",
-      "807805 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 806153,
-    "clause": "and interrupting non-player spellcasting for $32747d",
-    "labels": [
-      "807805 spell_duration 32747 #2"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 806273,
-    "clause": "Oath Breakers now grant you a stack of Mending Ward for $806353d, stacking $806353u times.",
-    "labels": [
-      "806273 spell_duration 806353 #0",
-      "806273 max_stacks 806353 #1",
-      "806273 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 806516,
-    "clause": "Damaging abilities now grant Heaven's Finest for $805390d, stacking $805390u times.",
-    "labels": [
-      "806516 spell_duration 805390 #0",
-      "806516 max_stacks 805390 #1",
-      "806516 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 806521,
-    "clause": "dealing ${$m1+0+$AP*0.2+$sph*1} Holy Damage",
-    "labels": [
-      "806835 effect_value e0 #0",
-      "806835 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 806521,
-    "clause": "healing you equal to the damage dealt",
-    "labels": [
-      "806835 hit_mean"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 806521,
-    "clause": "and extending the duration of your Oath Chain by $/1000;707896s1 sec.",
-    "labels": [
-      "806835 effect_value 707896e0 #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 806521,
-    "clause": "Only usable on enemies below 35% health.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 806522,
-    "clause": "Casting Argent Blade or Scarlet Hammer now guarantees your next 2 instances of damage dealt by Scourgebane to critically strike.",
-    "labels": [
-      "806522 trigger_count"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 806522,
-    "clause": "Increases the critical damage of Scourgebane by $s2%.",
-    "labels": [
-      "806522 effect_value e1 #0",
-      "806522 e1 spell_modifier 801832",
-      "806522 e1 spell_critical_damage 801832",
-      "806522 e1 spell_modifier 92111/520007/801861/804916/807268 (measured, delta 0)",
-      "806522 e1 spell_critical_damage 92111/520007/801861/804916/807268 (measured, delta 0)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 806525,
-    "clause": "Level 50 Passive",
-    "labels": [],
-    "kind": "no_claim",
-    "reason": "A level-gate label, not a gameplay claim."
-  },
-  {
-    "spell": 806525,
-    "clause": "Your Chastise and Scarlet Hammer now deals an additional $s1% Weapon Damage.",
-    "labels": [
-      "806525 effect_value e0 #0",
-      "806525 e0 spell_modifier 503141",
-      "806525 e0 spell_effect_value 503141",
-      "806525 e1 spell_modifier 807035",
-      "806525 e1 spell_effect_value 807035"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 807814,
-    "clause": "restoring $o1 Energy over $d",
-    "labels": [
-      "807814 aura_duration_ms #1"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 807814,
-    "clause": "and reducing your threat each second",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 1397742,
-    "clause": "Summons $s1 copies of yourself that charge at a nearby enemy and aid you in combat for $d.",
-    "labels": [
-      "1397742 effect_value e0 #0",
-      "1397742 aura_duration_ms #1 (unmeasurable)"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 1397742,
-    "clause": "While within $704409a1 yds of you, each copy reduces all damage you take by $704409s2%.",
-    "labels": [
-      "1397742 effect_radius #2 (unmeasurable)",
-      "1397742 effect_value 704409e1 #3"
-    ],
-    "kind": "claim"
-  },
-  {
-    "spell": 1397742,
-    "clause": "Applies Sacred Restraint for $102208d.",
-    "labels": [
-      "1397742 spell_duration 102208 #4"
-    ],
-    "kind": "claim"
-  }
+ {
+  "spell": 3018,
+  "clause": "(empty tooltip)",
+  "labels": [],
+  "kind": "no_claim",
+  "reason": "Tooltip field is empty; no sentence exists to carry a gameplay claim. power_cost/hit_mean verdicts are mechanical metrics, not tooltip text."
+ },
+ {
+  "spell": 92108,
+  "clause": "Level 10 Passive",
+  "labels": [],
+  "kind": "no_claim",
+  "reason": "Label line stating the unlock level, not a gameplay claim."
+ },
+ {
+  "spell": 92108,
+  "clause": "Your off-hand auto attacks now trigger Zealotry.",
+  "labels": [
+   "92108 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 92109,
+  "clause": "Level 10 Passive",
+  "labels": [],
+  "kind": "no_claim",
+  "reason": "Label line, not a gameplay claim."
+ },
+ {
+  "spell": 92109,
+  "clause": "You now delay 40% of direct damage taken, instead taking it over $803237d.",
+  "labels": [
+   "92109 spell_duration 803237"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 92109,
+  "clause": "In addition, you no longer consume your Oaths with Oath Breakers.",
+  "labels": [
+   "92109 trigger_count",
+   "92109 e2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 92111,
+  "clause": "Direct damage dealt now has a $520007h% chance to strike an enemy with Scourgebane",
+  "labels": [
+   "92111 proc_rate"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 92111,
+  "clause": "dealing an additional $801832s2% Weapon damage",
+  "labels": [
+   "92111 effect_value 801832e1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 92111,
+  "clause": "plus ${$801832m1*$<scalingbp>+$SP*.25+$AP*.25} Holyflame Damage",
+  "labels": [
+   "92111 effect_value 801832e0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 92111,
+  "clause": "This is guaranteed to critically strike against Undead enemies.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 300501,
+  "clause": "Reduces the cooldown of Testament of Faith by $/1000;s1 sec",
+  "labels": [
+   "300501 effect_value e0",
+   "300501 e0 spell_modifier 501606"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300501,
+  "clause": "and the duration of Sacred Restraint by $/1000;s2 sec",
+  "labels": [
+   "300501 effect_value e1",
+   "300501 e1 spell_modifier 102208"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300502,
+  "clause": "Casting an Oath Breaker with 10 stacks of your Oath Chain now refreshes the duration of Blade of Faith on all nearby enemies.",
+  "labels": [
+   "300502 behaviour_duration_refresh"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300504,
+  "clause": "While Righteous Tempest is active you gain 20% increased movement speed.",
+  "labels": [
+   "300504 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300504,
+  "clause": "@ext: Movement speed gained in this way stacks with Courage.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 300512,
+  "clause": "Increases the damage dealt by Righteous Tempest and Condemn by $s1%.",
+  "labels": [
+   "300512 effect_value e0",
+   "300512 e0 spell_modifier 570205",
+   "300512 e2 spell_modifier 567539"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300512,
+  "clause": "Additionally, Righteous Tempest now reduces all damage taken by $s2% while active.",
+  "labels": [
+   "300512 effect_value e1",
+   "300512 e1 spell_modifier 807274",
+   "300512 e1 spell_effect_value 807274"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300513,
+  "clause": "Brand an enemy for $d,",
+  "labels": [
+   "300513 aura_duration_ms"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300513,
+  "clause": "preventing them from mounting,",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 300513,
+  "clause": "fleeing,",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 300513,
+  "clause": "or increasing their movement speed above normal movement speed",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 300513,
+  "clause": "and when they deal direct damage they take ${$573020m1*$<scalingbp>+$sph*0.275+$AP*.185} Holy Damage.",
+  "labels": [
+   "300513 effect_value 573020e0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300513,
+  "clause": "While marked enemies can always be seen by the Crusader even while stealthed or invisible.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 300514,
+  "clause": "Your next 3 Titanstrikes incur a $s1% reduced cooldown,",
+  "labels": [
+   "300514 effect_value e0",
+   "300514 aura_amount e0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300514,
+  "clause": "are usable regardless of your target's health percentage,",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 300514,
+  "clause": "and deal $s2% increased damage.",
+  "labels": [
+   "300514 effect_value e1",
+   "300514 aura_amount e1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300514,
+  "clause": "Lasts $d.",
+  "labels": [
+   "300514 aura_duration_ms"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300514,
+  "clause": "Applies Sacred Restraint for $102208d.",
+  "labels": [
+   "300514 spell_duration 102208"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300515,
+  "clause": "Allies within $a1 yds receive $s1% more healing.",
+  "labels": [
+   "300515 effect_radius e0",
+   "300515 effect_value e0 #1",
+   "300515 e0 spell_healing_taken 803792"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300515,
+  "clause": "Does not stack with similar effects.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 300515,
+  "clause": "Additionally, increases your maximum health by $s1%.",
+  "labels": [
+   "300515 effect_value e0 #2",
+   "300515 e1 max_health"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300520,
+  "clause": "Increases the damage of Scourgebane, Scarlet Hammer, and Titanstrike by $s1%",
+  "labels": [
+   "300520 effect_value e0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300520,
+  "clause": "on enemies below 20% health.",
+  "labels": [
+   "300520 e0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300522,
+  "clause": "Increases the duration of your Oath Chain by $/1000;s1 sec.",
+  "labels": [
+   "300522 effect_value e0",
+   "300522 e0 spell_modifier 704576",
+   "300522 e0 spell_modifier 706426",
+   "300522 e0 spell_modifier 707896"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300524,
+  "clause": "Increases the damage of Blade of Faith and Righteous Tempest by $s1%.",
+  "labels": [
+   "300524 effect_value e0",
+   "300524 e0 spell_modifier 570205",
+   "300524 e1 spell_modifier 803154",
+   "300524 e1 spell_modifier 803880"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300529,
+  "clause": "Level 50 Passive",
+  "labels": [],
+  "kind": "no_claim",
+  "reason": "Label line, not a gameplay claim."
+ },
+ {
+  "spell": 300529,
+  "clause": "Increases all magic resistances equal to 10% of your dodge rating",
+  "labels": [
+   "300529 e0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300529,
+  "clause": "and reduces your damage taken from periodic effects by $301283s2%.",
+  "labels": [
+   "300529 effect_value 301283e1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300530,
+  "clause": "Increases the effectiveness of Gift of Zeal by $s2%.",
+  "labels": [
+   "300530 effect_value e1",
+   "300530 e1 spell_modifier 300923",
+   "300530 e1 spell_modifier 300924"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300607,
+  "clause": "Your Titanstrike now heals you for twice the damage dealt.",
+  "labels": [
+   "300607 e0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300929,
+  "clause": "Increases the all damage dealt by party and raid members by $s1%.",
+  "labels": [
+   "300929 effect_value e0",
+   "300929 e0 spell_damage_done 572741",
+   "300929 e0 weapon_damage_min 0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300929,
+  "clause": "Does not stack with similar effects.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 300929,
+  "clause": "In addition, reduces the cost of your spells and abilities by $s2%.",
+  "labels": [
+   "300929 effect_value e1",
+   "300929 e1 spell_power_cost 300513"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 301059,
+  "clause": "Reduces the Energy cost of Righteous Lunge by $s1",
+  "labels": [
+   "301059 effect_value e0",
+   "301059 e0 spell_modifier 570233",
+   "301059 e0 spell_power_cost 570233"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 301059,
+  "clause": "and Sacred Swing by $s2.",
+  "labels": [
+   "301059 e1 spell_modifier 572769",
+   "301059 e1 spell_power_cost 572769"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 301065,
+  "clause": "Level 30 Passive",
+  "labels": [],
+  "kind": "no_claim",
+  "reason": "Label line, not a gameplay claim."
+ },
+ {
+  "spell": 301065,
+  "clause": "Casting Argent Blade while Warrior of Dawn is active now transforms your next Argent Blade into Scarlet Hammer.",
+  "labels": [
+   "301065 effect_value 807035e0",
+   "301065 effect_value 807035e1",
+   "301065 effect_value 500752e0",
+   "301065 effect_value 807182e0",
+   "301065 spell_duration 500752",
+   "301065 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 301253,
+  "clause": "Periodic damage dealt now generates $524987s1 Energy.",
+  "labels": [
+   "301253 effect_value 524987e0",
+   "301253 e0 behaviour_metric_delta"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 301254,
+  "clause": "Level 40 Passive",
+  "labels": [],
+  "kind": "no_claim",
+  "reason": "Label line, not a gameplay claim."
+ },
+ {
+  "spell": 301254,
+  "clause": "Casting Scarlet Hammer now generates $521240s1 Energy.",
+  "labels": [
+   "301254 effect_value 521240e0",
+   "301254 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 301309,
+  "clause": "Casting Reckoning now increases your Armor by $680870s1% for $680870d.",
+  "labels": [
+   "301309 effect_value 680870e0",
+   "301309 spell_duration 680870"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 301310,
+  "clause": "Level 20 Passive",
+  "labels": [],
+  "kind": "no_claim",
+  "reason": "Label line, not a gameplay claim."
+ },
+ {
+  "spell": 301310,
+  "clause": "Increases your spell power by $s1% of your Agility,",
+  "labels": [
+   "301310 effect_value e0",
+   "301310 e0 spell_power 1",
+   "301310 e0 spell_power 2",
+   "301310 e0 spell_power 3"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 301310,
+  "clause": "your critical strike rating by $s2% of your Intellect,",
+  "labels": [
+   "301310 effect_value e1",
+   "301310 e1 combat_rating 8",
+   "301310 e1 combat_rating 10"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 301310,
+  "clause": "and your spell penetration by $s3% of your Intellect.",
+  "labels": [
+   "301310 effect_value e2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 301311,
+  "clause": "Increases your Armor contribution from mail items by $s1%",
+  "labels": [
+   "301311 e0 armor"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 301311,
+  "clause": "and reduces damage taken from area of effect attacks by $s2%.",
+  "labels": [
+   "301311 effect_value e1",
+   "301311 e1 aoe_damage_taken 0",
+   "301311 e1 aoe_damage_taken 1",
+   "301311 e1 aoe_damage_taken 2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 301339,
+  "clause": "Damage dealt by Righteous Tempest now spreads Condemn on affected enemies to a nearby enemy.",
+  "labels": [
+   "301339 e0 behaviour_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 301360,
+  "clause": "Increases your Armor contribution from mail items by $s1%",
+  "labels": [
+   "301360 e0 armor"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 301360,
+  "clause": "and reduces damage taken from area of effect attacks by $s2%.",
+  "labels": [
+   "301360 effect_value e1",
+   "301360 e1 aoe_damage_taken 0",
+   "301360 e1 aoe_damage_taken 1",
+   "301360 e1 aoe_damage_taken 2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 500011,
+  "clause": "Your Argent Blade now also extends the duration of Interdict on your target by $/1000;500014s1 sec.",
+  "labels": [
+   "500011 effect_value 500014e0",
+   "500011 trigger_duration_delta"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 500678,
+  "clause": "Meditate for $d,",
+  "labels": [
+   "500678 aura_duration_ms"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 500678,
+  "clause": "restoring $s1% of your maximum health every $T1 sec",
+  "labels": [
+   "500678 effect_value e0",
+   "500678 aura_amount e0",
+   "500678 aura_amplitude_ms"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 500678,
+  "clause": "and reducing damage taken by $s2%.",
+  "labels": [
+   "500678 effect_value e1",
+   "500678 aura_amount e1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 500678,
+  "clause": "Each second you will also remove 1 disease effect from yourself.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 500678,
+  "clause": "Applies Sacred Restraint for $102208d.",
+  "labels": [
+   "500678 spell_duration 102208"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 500688,
+  "clause": "Call an ally's spirit back to their body, bringing them back to life.",
+  "labels": [
+   "500758 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 500688,
+  "clause": "Usable while in combat.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 500694,
+  "clause": "Explode with holy power, dealing ${$803153m1+$803153ppl1+$AP*0.25+$sph*.25} Holy damage",
+  "labels": [
+   "500694 effect_value 803153e0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 500694,
+  "clause": "and triggering Zealotry every $t3 sec to nearby enemies for $d.",
+  "labels": [
+   "500694 aura_amplitude_ms",
+   "500694 aura_duration_ms"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 500694,
+  "clause": "While active, your Temple Guardian spell has its Energy cost reduced by $s1%.",
+  "labels": [
+   "500694 effect_value e0",
+   "500694 aura_amount e0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572027,
+  "clause": "Unleash a dominating Oath Breaker, dealing ${$m1+0+$AP*0.45+$SP*0.45} Physical damage,",
+  "labels": [
+   "572027 effect_value e0",
+   "572027 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572027,
+  "clause": "increased by $807764s1% for each time you triggered Zealotry during your Oath Chain.",
+  "labels": [
+   "572027 effect_value 807764e0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572027,
+  "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 504107,
+  "clause": "Level 40 Passive",
+  "labels": [],
+  "kind": "no_claim",
+  "reason": "Label line, not a gameplay claim."
+ },
+ {
+  "spell": 504107,
+  "clause": "Triggering Zealotry 10 times now transforms your Vindication into Divine Fury.",
+  "labels": [
+   "504107 effect_value 500689e0",
+   "504107 effect_value 572051e0",
+   "504107 spell_duration 572051",
+   "504107 max_stacks 572051"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 504561,
+  "clause": "Triggering Zealotry now also heals you for ${$504809m1*$<scalingbp>+$SP*0.06}.",
+  "labels": [
+   "504561 effect_value 504809e0 #0",
+   "504561 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 504807,
+  "clause": "Casting Oath Breakers now triggers Zealotry on your target",
+  "labels": [
+   "504807 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 504807,
+  "clause": "and reduces the cooldown of Librams, Force of Golganneth, Divine Force, and Testament of Will by $/1000;505205s1 sec.",
+  "labels": [
+   "504807 effect_value 505205e0 #0",
+   "504807 trigger_cooldown_delta"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 504808,
+  "clause": "Triggering Zealotry now has an $h% chance to grant you an additional auto attack on your next strike.",
+  "labels": [
+   "504808 effect_value #0",
+   "504808 proc_rate"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 520009,
+  "clause": "Increases the damage and reduces the Energy cost of Righteous Lunge and Argent Blade by $s1%.",
+  "labels": [
+   "520009 effect_value e0 #0",
+   "520009 e0 spell_modifier 570233",
+   "520009 e0 spell_modifier 807268",
+   "520009 e0 spell_modifier 504810"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 520009,
+  "clause": "Increases the damage and reduces the Energy cost of Righteous Lunge and Argent Blade by $s1%. (Energy-cost half)",
+  "labels": [
+   "520009 e1 spell_modifier 570233",
+   "520009 e1 spell_modifier 807268",
+   "520009 e1 spell_power_cost 570233",
+   "520009 e1 spell_power_cost 807268",
+   "520009 e1 spell_power_cost 504810"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 520017,
+  "clause": "Argent Blade now has a $h% chance to strike an additional time.",
+  "labels": [
+   "520017 proc_rate"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 520032,
+  "clause": "Your Oath: Condemn now provides $s1% additional critical strike chance.",
+  "labels": [
+   "520032 effect_value e0 #0",
+   "520032 e0 spell_modifier 804922",
+   "520032 e0 spell_effect_value 804922"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 520034,
+  "clause": "Increases the damage of Chastise by $s1%",
+  "labels": [
+   "520034 effect_value e0 #0",
+   "520034 e0 spell_damage_done 503141",
+   "520034 e1 spell_modifier 801205",
+   "520034 e1 spell_effect_value 801205",
+   "520034 e1 spell_modifier 521052",
+   "520034 e1 spell_effect_value 521052"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 520034,
+  "clause": "on enemies above 75% health or affected by Tranquil Circle.",
+  "labels": [
+   "520034 effect_value e0 #0",
+   "520034 e0 spell_damage_done 503141",
+   "520034 e1 spell_modifier 801205"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 520442,
+  "clause": "Increases the critical damage of Righteous Upheaval by $s1%.",
+  "labels": [
+   "520442 effect_value e0 #0",
+   "520442 e0 spell_modifier 501561",
+   "520442 e0 spell_modifier 572027",
+   "520442 e0 spell_critical_damage 501561",
+   "520442 e0 spell_critical_damage 572027"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 520534,
+  "clause": "Damage dealt by Righteous Tempest now deals an additional ${$520544m1+$sph*0.5+$AP*0.085} Holy damage,",
+  "labels": [
+   "520534 effect_value 520544e0 #0",
+   "520534 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 520534,
+  "clause": "and upon dealing damage, you pull enemies within 15 yds towards you.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 520534,
+  "clause": "@ext:Enemies pulled cannot be pulled this way again within 15 seconds.:ext@",
+  "labels": [
+   "520534 effect_value #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 520608,
+  "clause": "Warrior of Dawn now also increases the damage ... of your next Argent Blade by $s1%.",
+  "labels": [
+   "520608 effect_value e0 #0",
+   "520608 e0 spell_modifier 561156",
+   "520608 e0 spell_effect_value 561156"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 520608,
+  "clause": "and critical strike chance of your next Argent Blade by $s1%.",
+  "labels": [
+   "520608 effect_value e0 #0",
+   "520608 e0 spell_modifier 561167"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 520812,
+  "clause": "Every 2nd cast of Argent Blade now grants you Oath: Retribution.",
+  "labels": [
+   "520812 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 520883,
+  "clause": "Argent Blade now has a $h% chance to strike an additional time.",
+  "labels": [
+   "520883 proc_rate"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 523712,
+  "clause": "Dealing damage with Zealotry now applies Iron Penance to the target, increasing their Physical damage taken by you by $523713s1% for $523713d, stacking $523713u times.",
+  "labels": [
+   "523712 effect_value 523713e0 #0",
+   "523712 spell_duration 523713 #1",
+   "523712 max_stacks 523713 #2",
+   "523712 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 524620,
+  "clause": "Damage dealt by Condemn now has a $h% chance to consecrate the earth around you with holy fervor, dealing ${$524619m1*$<scalingbp>+$sph*0.225+$AP*.1} Holy damage",
+  "labels": [
+   "524620 effect_value #0",
+   "524620 effect_value 524619e0 #1",
+   "524620 proc_rate"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 524620,
+  "clause": "to nearby enemies.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 524739,
+  "clause": "dealing ${$524740m1+$524740ppl1+$sph*1+$AP*1} Holy damage to up to $524740i enemies within $524740a1 yds",
+  "labels": [
+   "524739 effect_value 524740e0 #0",
+   "524739 effect_value #1",
+   "524739 effect_radius 524740e0 #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 524739,
+  "clause": "and reduces their damage and healing done by $520842s1% for $520842d.",
+  "labels": [
+   "524739 effect_value 520842e0 #3",
+   "524739 spell_duration 520842 #4"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 524739,
+  "clause": "Damage dealt pierces all immunities, resistances, and damage absorption effects.",
+  "labels": [
+   "524739 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 524739,
+  "clause": "Scales with modifiers to Chastise.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 524747,
+  "clause": "Reduces the cooldown of Divine Force by $/1000;s1 sec.",
+  "labels": [
+   "524747 effect_value e0 #0",
+   "524747 e0 spell_modifier 807805",
+   "524747 e0 spell_modifier 807890"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 524765,
+  "clause": "Healing with Benediction now causes your next Benediction to heal for $524766s1% more for $524766d.",
+  "labels": [
+   "524765 effect_value 524766e0 #0",
+   "524765 spell_duration 524766 #1",
+   "524765 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 524767,
+  "clause": "Increases the critical strike chance of Titanstrike by $s1%.",
+  "labels": [
+   "524767 effect_value e0 #0",
+   "524767 e0 spell_modifier 806835",
+   "524767 e0 spell_done_crit_chance 806835"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 524822,
+  "clause": "Increases the effectiveness of Oath: Righteous Lunge by $s1%.",
+  "labels": [
+   "524822 effect_value e0 #0",
+   "524822 e0 spell_modifier 804904",
+   "524822 e0 spell_modifier 805079",
+   "524822 e0 spell_modifier 807929",
+   "524822 e0 spell_modifier 805125",
+   "524822 e0 spell_modifier 805136",
+   "524822 e0 spell_modifier 805145",
+   "524822 e0 spell_modifier 805090"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 525024,
+  "clause": "Your Divine Force now strikes 2 additional enemies near the primary target.",
+  "labels": [
+   "525024 effect_value #0",
+   "525024 e0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 525051,
+  "clause": "Bask an ally in the light, dispelling $s1 magic, poison, and disease effects from them.",
+  "labels": [
+   "525051 effect_value e0 #0",
+   "525051 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 525080,
+  "clause": "Increases the effectiveness of Oath: Righteous Lunge by $s1%.",
+  "labels": [
+   "525080 effect_value e0 #0",
+   "525080 e0 spell_modifier 804904",
+   "525080 e0 spell_modifier 805079",
+   "525080 e0 spell_modifier 807929",
+   "525080 e0 spell_modifier 805125",
+   "525080 e0 spell_modifier 805136",
+   "525080 e0 spell_modifier 805145",
+   "525080 e0 spell_modifier 805090"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 527023,
+  "clause": "You and your party members leap upon a divine steed,",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 527023,
+  "clause": "increasing their movement speed by $527272s2%",
+  "labels": [
+   "527023 effect_value 527272e1 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 527023,
+  "clause": "and causing them to trample nearby enemies for ${$527270m3+$527270ppl3+$AP*.2+$sph*.4} Holy Damage every $527270t3 sec for $d.",
+  "labels": [
+   "527023 effect_value 527270e2 #1",
+   "527023 aura_duration_ms #3",
+   "527023 aura_amplitude_ms #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 527023,
+  "clause": "While active, casting does not dismount you or your allies.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 527023,
+  "clause": "Can only be used outdoors.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 560096,
+  "clause": "Increases all party and raid member's melee and ranged haste by $567572s1%.",
+  "labels": [
+   "560096 effect_value 567572e0 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 560096,
+  "clause": "Does not stack with similar effects.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 560096,
+  "clause": "Damage dealt with auto attacks reduce the cooldown of Libram spells by $/1000;560097S1 sec.",
+  "labels": [
+   "560096 effect_value 560097e0 #1",
+   "560096 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 560116,
+  "clause": "Forbid an enemy from sinning, silencing them for $d.",
+  "labels": [
+   "560116 aura_duration_ms #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 560116,
+  "clause": "If they are an Undead or Demon they are unable to be healed for the duration.",
+  "labels": [
+   "560116 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 560550,
+  "clause": "Increases the attack power of all party and raid members $s1%.",
+  "labels": [
+   "560550 effect_value e0 #0",
+   "560550 e0 attack_power"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 560550,
+  "clause": "Does not stack with similar effects.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 560550,
+  "clause": "In addition, increases your attack power by $s2%.",
+  "labels": [
+   "560550 effect_value e1 #1",
+   "560550 e2 attack_power"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 560648,
+  "clause": "Melee damage dealt now has a $h% chance to reset the cooldown and reduce the Energy cost of your next Argent Blade by $561156s1%.",
+  "labels": [
+   "560648 effect_value #0",
+   "560648 effect_value 561156e0 #1",
+   "560648 proc_rate"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 560649,
+  "clause": "Testament of Hope now summons an additional copy of yourself.",
+  "labels": [
+   "560649 effect_value #0",
+   "560649 e0",
+   "560649 e1",
+   "560649 e2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 560650,
+  "clause": "Increases your Holy critical strike chance by $s1%",
+  "labels": [
+   "560650 effect_value e0 #0",
+   "560650 e0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 560650,
+  "clause": "and your expertise by $s2.",
+  "labels": [
+   "560650 effect_value e1 #1",
+   "560650 e1 expertise"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 560653,
+  "clause": "You radiate a harmonic disposition to nearby party and raid members, causing fall damage to be reduced",
+  "labels": [
+   "560653 effect_value #0",
+   "560653 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 560653,
+  "clause": "and granting the ability to walk on water.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 560833,
+  "clause": "Increases your Energy regeneration by $s1%.",
+  "labels": [
+   "560833 effect_value e0 #0",
+   "560833 e0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 560835,
+  "clause": "Periodic damage dealt by Condemn now has a $h% chance to increase your parry chance by $561016s1% for $561016d, stacking $561016u times.",
+  "labels": [
+   "560835 effect_value 561016e0 #1",
+   "560835 spell_duration 561016 #2",
+   "560835 max_stacks 561016 #3",
+   "560835 proc_rate 561016"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 560835,
+  "clause": "Periodic damage dealt by Condemn also has a $h% chance to burst, dealing ${$561277m1*$<scalingbp>+$AP*.22} Holy damage to up to $561277i1 enemies within $561277a1 yds of the target.",
+  "labels": [
+   "560835 effect_value 561277e0 #5",
+   "560835 effect_radius 561277e0 #7",
+   "560835 proc_rate 561277"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 561346,
+  "clause": "Increases your Holy critical strike chance by $s1%",
+  "labels": [
+   "561346 effect_value e0 #0",
+   "561346 e0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 561346,
+  "clause": "and your expertise by $s2.",
+  "labels": [
+   "561346 effect_value e1 #1",
+   "561346 e1 expertise"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 562302,
+  "clause": "Increases mounted movement speed by $s1%",
+  "labels": [
+   "562302 effect_value e0 #0",
+   "562302 aura_amount e0 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 562302,
+  "clause": "for all party and raid members within $a1 yds",
+  "labels": [
+   "562302 effect_radius e0 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 562302,
+  "clause": "for $d",
+  "labels": [
+   "562302 aura_duration_ms #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 562302,
+  "clause": "Can only be used while Mounted.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 562302,
+  "clause": "Does not stack with similar effects.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 572546,
+  "clause": "Increases your melee haste by $s1%",
+  "labels": [
+   "572546 effect_value e0 #0",
+   "572546 e0 attack_time_ms 0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572546,
+  "clause": "and expertise by $s2",
+  "labels": [
+   "572546 effect_value e1 #1",
+   "572546 e1 expertise"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572547,
+  "clause": "Level 30 Passive",
+  "labels": [],
+  "kind": "no_claim",
+  "reason": "A level-availability label, carries no gameplay claim to verify."
+ },
+ {
+  "spell": 572547,
+  "clause": "Increases the effectiveness Righteous Upheaval gains per trigger of Zealotry by $s1%.",
+  "labels": [
+   "572547 effect_value e0 #0",
+   "572547 e0 spell_modifier 807764",
+   "572547 e0 spell_effect_value 807764"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572548,
+  "clause": "Increases the Weapon Damage dealt by Zealotry by $s1%",
+  "labels": [
+   "572548 effect_value e0 #0",
+   "572548 e0 spell_modifier 801450",
+   "572548 e0 spell_effect_value 801450"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572548,
+  "clause": "gives it a $h% chance to trigger twice",
+  "labels": [
+   "572548 effect_value #1",
+   "572548 e1",
+   "572548 proc_rate"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572554,
+  "clause": "Increases the Weapon Damage dealt by Zealotry by $s1%",
+  "labels": [
+   "572554 effect_value e0 #0",
+   "572554 e0 spell_modifier 801450",
+   "572554 e0 spell_effect_value 801450"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572554,
+  "clause": "gives it a $h% chance to trigger twice",
+  "labels": [
+   "572554 proc_rate"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572555,
+  "clause": "Increases your melee haste by $s1%",
+  "labels": [
+   "572555 effect_value e0 #0",
+   "572555 e0 attack_time_ms 0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572555,
+  "clause": "and expertise by $s2",
+  "labels": [
+   "572555 effect_value e1 #1",
+   "572555 e1 expertise"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572808,
+  "clause": "Place a blessing on a party or raid member",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 572808,
+  "clause": "reducing their total threat by $572809s1% every $t1 sec for $d",
+  "labels": [
+   "572808 effect_value 572809e0 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572808,
+  "clause": "every $t1 sec",
+  "labels": [
+   "572808 aura_amplitude_ms #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572808,
+  "clause": "for $d",
+  "labels": [
+   "572808 aura_duration_ms #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572808,
+  "clause": "Can only be placed on 1 target at a time.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 573452,
+  "clause": "Damage dealt through Eternal Blessing now reduces the cooldown of Libram spells by $/1000;806106s1 sec.",
+  "labels": [
+   "573452 effect_value 806106e0 #0",
+   "573452 trigger_cooldown_delta"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 680397,
+  "clause": "Your healing done triggers a holy pulse around healed targets",
+  "labels": [
+   "680397 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 680397,
+  "clause": "dealing ${$680398m1*$<scalingbp>+$AP*0.05+$AGI*0.2} Holy damage",
+  "labels": [
+   "680397 effect_value 680398e0 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 680397,
+  "clause": "to nearby enemies",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 680397,
+  "clause": "Can only occur once every 0.5 sec.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 680399,
+  "clause": "Increases the healing of Benediction by $s1%",
+  "labels": [
+   "680399 effect_value e0 #0",
+   "680399 e0 spell_modifier 578276"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 680399,
+  "clause": "causes it to dispel $525052s2 poison and disease effect",
+  "labels": [
+   "680399 effect_value 525052e1 #1",
+   "680399 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 680891,
+  "clause": "Your Chastise now always triggers Scourgebane on your target.",
+  "labels": [
+   "680891 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 680953,
+  "clause": "reducing the remaining cooldown of Testaments by $s1%",
+  "labels": [
+   "680953 effect_value e0 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 681009,
+  "clause": "Increases your maximum health ... by $s1%",
+  "labels": [
+   "681009 effect_value e0 #0",
+   "681009 e0 max_health"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 681009,
+  "clause": "and Energy by $s1%",
+  "labels": [
+   "681009 effect_value e0 #0",
+   "681009 e1 max_power 3"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 681483,
+  "clause": "Increases the healing of Benediction by $s1%",
+  "labels": [
+   "681483 effect_value e0 #0",
+   "681483 e0 spell_modifier 578276"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 681483,
+  "clause": "causes it to dispel 2 poison and disease effects",
+  "labels": [
+   "681483 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 681537,
+  "clause": "Increases your maximum health ... by $s1%",
+  "labels": [
+   "681537 effect_value e0 #0",
+   "681537 e0 max_health"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 681537,
+  "clause": "and Energy by $s1%",
+  "labels": [
+   "681537 effect_value e0 #0",
+   "681537 e1 max_power 3"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 704116,
+  "clause": "Critically striking with Vindication or Righteous Lunge now deals $s1% additional Physical damage.",
+  "labels": [
+   "704116 effect_value e0 #0",
+   "704116 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 704175,
+  "clause": "Increases the critical strike chance gained through Condemn by $s1%",
+  "labels": [
+   "704175 effect_value e0 #0",
+   "704175 e0",
+   "704175 e1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 704175,
+  "clause": "allows its periodic damage to critically strike",
+  "labels": [
+   "704175 e2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 704180,
+  "clause": "Reduces the Energy cost of your Oath Breakers by $s1.",
+  "labels": [
+   "704180 effect_value e0 #0",
+   "704180 e0 spell_modifier (multiple targets)",
+   "704180 e0 spell_power_cost (multiple targets)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705250,
+  "clause": "Increases your Agility by $s1%",
+  "labels": [
+   "705250 effect_value e0 #0",
+   "705250 e0 stat 1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705250,
+  "clause": "and your chance to hit by $s2%",
+  "labels": [
+   "705250 effect_value e1 #1",
+   "705250 e1 melee_hit_chance",
+   "705250 e1 spell_hit_chance"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705251,
+  "clause": "Increases your Agility by $s1%",
+  "labels": [
+   "705251 effect_value e0 #0",
+   "705251 e0 stat 1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705251,
+  "clause": "and your chance to hit by $s2%",
+  "labels": [
+   "705251 effect_value e1 #1",
+   "705251 e1 melee_hit_chance",
+   "705251 e1 spell_hit_chance"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705253,
+  "clause": "Increases the chance to trigger Scourgebane by $s1%",
+  "labels": [
+   "705253 effect_value e0 #0",
+   "705253 e0 spell_modifier 520007"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705253,
+  "clause": "and your chance to hit by $s2%",
+  "labels": [
+   "705253 effect_value e1 #1",
+   "705253 e1 melee_hit_chance",
+   "705253 e1 spell_hit_chance"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705255,
+  "clause": "Damage dealt by Scourgebane now increases the damage of Argent Blade by $803372s2%, stacking",
+  "labels": [
+   "705255 effect_value 803372e1 #0",
+   "705255 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705255,
+  "clause": "for $803372d",
+  "labels": [
+   "705255 spell_duration 803372 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705255,
+  "clause": "stacking $803372u times",
+  "labels": [
+   "705255 max_stacks 803372 #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705256,
+  "clause": "within $681136d",
+  "labels": [
+   "705256 spell_duration 681136 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705256,
+  "clause": "Your Temple Guardian now makes your next ability ... free of cost.",
+  "labels": [
+   "705256 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705259,
+  "clause": "While a Libram is active",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 705259,
+  "clause": "your Chastise will now unleash a line of holy power, dealing ${$706466m1*$<scalingbp>+$AP*.25} damage",
+  "labels": [
+   "705259 effect_value 706466e0 #0",
+   "705259 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705259,
+  "clause": "High Threat Holy damage",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 705263,
+  "clause": "Increases the duration of your Librams and Testaments by $/1000;s1 sec.",
+  "labels": [
+   "705263 effect_value e0 #0",
+   "705263 e0 spell_modifier (multiple targets)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705266,
+  "clause": "Reduces the cooldown of your Libram spells by $/1000;s1 sec.",
+  "labels": [
+   "705266 effect_value e0 #0",
+   "705266 e0 spell_modifier (multiple targets)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705268,
+  "clause": "Doubles the healing done to you by Testament of Fortitude",
+  "labels": [
+   "705268 e0 spell_modifier 500678 (and 6 other ranks)",
+   "705268 e0 spell_effect_value 500678 (and 6 other ranks)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705268,
+  "clause": "and Testament of Faith",
+  "labels": [
+   "705268 501606 behaviour_ratio",
+   "705268 e1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705271,
+  "clause": "Increases your critical strike chance by $s1%",
+  "labels": [
+   "705271 effect_value e0 #0",
+   "705271 e0 melee_crit_chance_refreshed"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705271,
+  "clause": "and reduces the duration of disarm effects against you by $s2%",
+  "labels": [
+   "705271 effect_value e1 #1",
+   "705271 e1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705272,
+  "clause": "Increases your critical damage with Holy spells and abilities by $s1%.",
+  "labels": [
+   "705272 effect_value e0 #0",
+   "705272 e0 spell_critical_damage 572741"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705274,
+  "clause": "Your Libram spells now grant you $705275s1% increased melee haste",
+  "labels": [
+   "705274 effect_value 705275e0 #0",
+   "705274 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705274,
+  "clause": "for $705275d",
+  "labels": [
+   "705274 spell_duration 705275 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705276,
+  "clause": "Increases your off-hand weapon damage by $s1%.",
+  "labels": [
+   "705276 effect_value e0 #0",
+   "705276 e0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705278,
+  "clause": "Increases your Holy healing done and received by $s1%.",
+  "labels": [
+   "705278 effect_value e0 #0",
+   "705278 e0 spell_healing_taken 803792",
+   "705278 e1 spell_healing_done 803792"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705281,
+  "clause": "Level 20 Passive",
+  "labels": [],
+  "kind": "no_claim",
+  "reason": "A level-availability label, carries no gameplay claim to verify."
+ },
+ {
+  "spell": 705281,
+  "clause": "Increases your Holy spell damage by $s1% of your attack power",
+  "labels": [
+   "705281 effect_value e0 #0",
+   "705281 e0 spell_power 1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705281,
+  "clause": "and your Armor penetration by $s2% of your Intellect",
+  "labels": [
+   "705281 effect_value e1 #1",
+   "705281 e1 combat_rating 24"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705283,
+  "clause": "Increases the duration of Oath Chain by $s1%.",
+  "labels": [
+   "conformance-templar-value-705283",
+   "conformance-templar-passive-705283 (704576/706426/707896 ok)",
+   "705283 e0 spell_modifier 560389 (passive_delta) -- measured 0.0 expected 200.0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705284,
+  "clause": "Increases the the damage of Oath Breakers, Condemn, and Titanstrike by $s1%.",
+  "labels": [
+   "conformance-templar-value-705284",
+   "conformance-templar-passive-705284 (806835 ok, e1 567539 ok, plus matching measured entries for 578276/803880/704573/503141/501567/501568/501569/801477/572741/572027)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705285,
+  "clause": "Condemn now stacks $s1 additional time.",
+  "labels": [
+   "conformance-templar-value-705285",
+   "705285 e0 spell_modifier 567539 ok",
+   "705285 e0 spell_max_stacks 567539 ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705286,
+  "clause": "Casting abilities that grant an Oath now increases your damage dealt and movement speed by $560834s1% for $560834d, stacking $560834u times.",
+  "labels": [
+   "705286 trigger_count ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705286,
+  "clause": "increases your damage dealt and movement speed by $560834s1%",
+  "labels": [
+   "705286 effect_value 560834e0 #0 ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705286,
+  "clause": "for $560834d",
+  "labels": [
+   "705286 spell_duration 560834 #1 ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705286,
+  "clause": "stacking $560834u times",
+  "labels": [
+   "705286 max_stacks 560834 #2 ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705287,
+  "clause": "Benediction now grants your target armor based on your Agility and Stamina",
+  "labels": [
+   "705287 e1 (unmodelled) -- closed: no check needed"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705287,
+  "clause": "for $/1000;s1 sec",
+  "labels": [
+   "conformance-templar-value-705287",
+   "705287 e0 spell_modifier 801409 ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705290,
+  "clause": "Using Libram spells now increases your damage dealt and healing done by $520537s1% for $520537d",
+  "labels": [
+   "705290 trigger_count ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705290,
+  "clause": "$?s520007[ or Silverhand Incantation][]",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 705290,
+  "clause": "increases your damage dealt and healing done by $520537s1%",
+  "labels": [
+   "conformance-templar-value-705290"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705290,
+  "clause": "for $520537d",
+  "labels": [
+   "705290 spell_duration 520537 #1 ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705291,
+  "clause": "increased by $s1%",
+  "labels": [
+   "conformance-templar-value-705291",
+   "705291 e0 spell_modifier 567539 ok",
+   "705291 e0 spell_effect_value 567539 ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705291,
+  "clause": "per stack",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 705291,
+  "clause": "on enemies affected by your Condemn",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 572769,
+  "clause": "Swing at enemies in front of you",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 572769,
+  "clause": "dealing $s2% High Threat Weapon Damage",
+  "labels": [
+   "conformance-templar-value-572769 (effect_value e1 #0)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572769,
+  "clause": "plus ${$m1+0}",
+  "labels": [
+   "conformance-templar-value-572769 (effect_value e0 #1)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572769,
+  "clause": "slowing their attack and movement speed by $301061s1% for $301061d",
+  "labels": [
+   "conformance-templar-value-572769 (effect_value 301061e0 #2 ok, -20%)",
+   "conformance-templar-value-572769 (spell_duration 301061 #3 ok)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572769,
+  "clause": "for $301061d",
+  "labels": [
+   "conformance-templar-value-572769 (spell_duration 301061 #3 ok)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 572769,
+  "clause": "Only usable after avoiding an attack.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 705295,
+  "clause": "Casting Sacred Swing now grants you Staffguard",
+  "labels": [
+   "705295 trigger_count ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705295,
+  "clause": "absorbing ${$706583m1+$STA*.3} damage, scaling with Stamina, parry and dodge rating",
+  "labels": [
+   "705295 effect_value #0 -- unmeasurable: effect 0 of spell 706583 is disabled by a server correction"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705295,
+  "clause": "for $706583d",
+  "labels": [
+   "conformance-templar-value-705295 (spell_duration 706583 #1)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705298,
+  "clause": "Effectively healing yourself now reduces your Physical damage taken",
+  "labels": [
+   "705298 trigger_count ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705298,
+  "clause": "by ${$705299m1+$STA*0.1}",
+  "labels": [
+   "705298 effect_value #0 -- unmeasurable: effect 0 of spell 705299 is disabled by a server correction"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705298,
+  "clause": "for $705299d",
+  "labels": [
+   "conformance-templar-value-705298 (spell_duration 705299 #1)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705298,
+  "clause": "Can only occur every 15 sec.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 705300,
+  "clause": "Increases your Holy damage and healing done by $s1% for $d.",
+  "labels": [
+   "conformance-templar-value-705300 (effect_value e0 #0, aura_amount e0 #0)",
+   "conformance-templar-value-705300 (aura_duration_ms #1)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705300,
+  "clause": "While active, Oath Breakers deal an additional ${$707111m3+$707111ppl3+$AP*.12} Holy damage to nearby enemies.",
+  "labels": [
+   "conformance-templar-value-705300 (effect_value 707111e2 #2, 178 vs 179.06 expected)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705300,
+  "clause": "$?s573452[Dealing damage this way reduces the cooldown of your Librams by $/1000;806106s1 sec.][]",
+  "labels": [
+   "conformance-templar-value-705300 (effect_value 806106e0 #3, -4000 ok)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705303,
+  "clause": "Level 20 Passive",
+  "labels": [],
+  "kind": "no_claim",
+  "reason": "A level-gate label, not a gameplay claim about a value or mechanic."
+ },
+ {
+  "spell": 705303,
+  "clause": "Increases your parry rating by $s1% of Agility",
+  "labels": [
+   "conformance-templar-value-705303 (effect_value e0)",
+   "705303 e0 combat_rating 3 ok (26 vs 26.4 expected)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705303,
+  "clause": "your dodge rating by $s2% of Intellect",
+  "labels": [
+   "conformance-templar-value-705303 (effect_value e1)",
+   "705303 e1 combat_rating 2 ok (6 vs 6.4 expected)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705306,
+  "clause": "When you take Physical damage you now strike back at enemies for $s1% of the damage dealt as Holy damage.",
+  "labels": [
+   "705306 trigger_count -- unmodelled: proven integer-truncation artifact of the only available taken_hit striker fixture"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705306,
+  "clause": "for $s1% of the damage dealt as Holy damage",
+  "labels": [
+   "conformance-templar-value-705306 (effect_value e0 #0, 15%)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705306,
+  "clause": "Can only occur once per sec.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 705306,
+  "clause": "@ext:Does not work on Bosses.:ext@",
+  "labels": [
+   "705306 effect_value #1 -- generic: client extension note, never a number"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 705307,
+  "clause": "Increases the damage of Reckoning by $s2%.",
+  "labels": [
+   "conformance-templar-value-705307 (effect_value e1)",
+   "705307 e1 spell_modifier 572741 ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706309,
+  "clause": "Reduces the cooldown of Righteous Upheaval by $/1000;s1 sec.",
+  "labels": [
+   "conformance-templar-value-706309",
+   "706309 e0 spell_modifier 501561 ok",
+   "706309 e0 spell_modifier 572027 ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706312,
+  "clause": "Damage dealt by Scourgebane and Scarlet Hammer now strikes $s1 additional nearby enemy.",
+  "labels": [
+   "conformance-templar-value-706312",
+   "706312 e0 spell_modifier 807035 ok",
+   "706312 e0 spell_modifier 801832 ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706318,
+  "clause": "Reduces the Energy cost of Vindication by $s1.",
+  "labels": [
+   "conformance-templar-value-706318",
+   "706318 e0 spell_modifier 573324 ok",
+   "706318 e0 spell_power_cost 573324 ok",
+   "706318 e0 spell_modifier 500689 measured (-5.0, matching, no mismatch)",
+   "706318 e0 spell_power_cost 500689 closed (no power cost to modify)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706320,
+  "clause": "Increases the effectiveness of Oaths by $s1%.",
+  "labels": [
+   "conformance-templar-value-706320",
+   "706320 e0 spell_modifier ok across all 13 listed targets"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706323,
+  "clause": "Increases your damage dealt versus Undead by ${$m1+0}",
+  "labels": [
+   "conformance-templar-value-706323 (effect_value e0, 53)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706323,
+  "clause": "scaling with level",
+  "labels": [
+   "706323 e0 (unmodelled) -- unmodelled: damage versus a creature type is level-scaled"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706323,
+  "clause": "increases your chance to resist disease effects by $s2%",
+  "labels": [
+   "conformance-templar-value-706323 (effect_value e1, 30)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706323,
+  "clause": "functional application of the disease resist chance",
+  "labels": [
+   "706323 e1 (unmodelled) -- unmodelled: scripted or crowd-control effect"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706325,
+  "clause": "Dealing damage with Condemn, Holy Cleave, or Blade of Faith now has a $h% chance to trigger Zealotry",
+  "labels": [
+   "706325 proc_rate ok (0.15 vs 0.15 expected)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706325,
+  "clause": "Dealing damage with Condemn, Holy Cleave, or Blade of Faith (each trigger source individually)",
+  "labels": [
+   "706325 proc_rate ok (aggregate only)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706325,
+  "clause": "if you are within melee range of your target",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 706357,
+  "clause": "Increases your Stamina by $s1",
+  "labels": [
+   "conformance-templar-value-706357 (effect_value e0 #0)",
+   "706357 e0 stat 2 ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706357,
+  "clause": "plus an additional amount equal to $s1% of your Agility",
+  "labels": [
+   "conformance-templar-value-706357 (effect_value e0 #1)",
+   "706357 e1 stat 2 ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706359,
+  "clause": "Increases your parry and dodge chance by $s1%.",
+  "labels": [
+   "conformance-templar-value-706359",
+   "706359 e0 parry_chance ok",
+   "706359 e1 dodge_chance ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706385,
+  "clause": "Your Condemn now heals you for $s1% of the damage dealt.",
+  "labels": [
+   "conformance-templar-value-706385",
+   "706385 trigger_count ok (594/594)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706431,
+  "clause": "Increases all primary attributes by $s1%.",
+  "labels": [
+   "conformance-templar-value-706431",
+   "706431 e0 stat 0/1/2/3/4 all ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706449,
+  "clause": "Your Benediction now has a $/1000;S1 sec cast time",
+  "labels": [
+   "conformance-templar-value-706449 (effect_value e0)",
+   "706449 e0 spell_modifier 578276 ok",
+   "706449 e0 spell_cast_time_ms 578276 ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706449,
+  "clause": "but now heals for $s2% more",
+  "labels": [
+   "conformance-templar-value-706449 (effect_value e1)",
+   "706449 e1 spell_modifier 578276 ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 706468,
+  "clause": "Level 30 Passive",
+  "labels": [],
+  "kind": "no_claim",
+  "reason": "A level-gate label, not a gameplay claim."
+ },
+ {
+  "spell": 706468,
+  "clause": "Using a Libram now removes $707208s1% of the delayed damage from Oathkeeper.",
+  "labels": [
+   "conformance-templar-value-706468 (effect_value 707208e0)",
+   "706468 behaviour_amount_delta ok (referenced)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300923,
+  "clause": "Places a Gift on a friendly target, increasing Agility by $s1",
+  "labels": [
+   "conformance-templar-value-300923 (effect_value, aura_amount)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300923,
+  "clause": "for $d",
+  "labels": [
+   "conformance-templar-value-300923 (aura_duration_ms, ~1799988/1800000)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 707364,
+  "clause": "Casting Benediction now reduces the cost of your next Temple Guardian by $712378s1% for $712378d.",
+  "labels": [
+   "707364 trigger_count ok (273/273)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 707364,
+  "clause": "reduces the cost ... by $712378s1%",
+  "labels": [
+   "conformance-templar-value-707364 (effect_value 712378e0, -50)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 707364,
+  "clause": "for $712378d",
+  "labels": [
+   "conformance-templar-value-707364 (spell_duration 712378, 6000 ms)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 707364,
+  "clause": "your next Temple Guardian",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 707385,
+  "clause": "heals you for $s1% of your maximum health",
+  "labels": [
+   "conformance-templar-value-707385",
+   "707385 e0 spell_modifier 801461 ok",
+   "707385 e0 spell_effect_value 801461 ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 707385,
+  "clause": "Casting Libram of Tenacity now also heals you",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 707391,
+  "clause": "Melee damage dealt now has a $h% chance to strike 2 additional times",
+  "labels": [
+   "707391 proc_rate ok (0.187 vs 0.2 expected)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 707391,
+  "clause": "strike 2 additional times",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 707391,
+  "clause": "for $s1% of the damage dealt as Holy Damage",
+  "labels": [
+   "conformance-templar-value-707391 (effect_value e0 #1)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 707606,
+  "clause": "Casting Righteous Upheaval or Blade of Faith now grants you Oath: Retribution (per trigger spell)",
+  "labels": [
+   "707606 trigger_count ok (273/273, aggregate)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 707606,
+  "clause": "grants you Oath: Retribution",
+  "labels": [
+   "conformance-templar-value-707606 (effect_value 804924e0, 5)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 707606,
+  "clause": "and starts your Oath Chain",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 707663,
+  "clause": "Removes the cooldown from Benediction",
+  "labels": [
+   "707663 e0 spell_modifier 578276 ok (-1000, full removal)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 707663,
+  "clause": "increases its Energy cost by $s2",
+  "labels": [
+   "conformance-templar-value-707663 (effect_value e1)",
+   "707663 e1 spell_modifier 578276 ok",
+   "707663 e1 spell_power_cost 578276 ok"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 707754,
+  "clause": "Increases your movement speed ... by $s2%",
+  "labels": [
+   "707754 e0 run_speed_rate ok (+0.1)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 707754,
+  "clause": "reduces the duration of movement slowing effects on you by $s2%",
+  "labels": [
+   "conformance-templar-value-707754 (effect_value e1 #0, -10, ok)",
+   "707754 e1 (unmodelled) -- scripted or crowd-control effect"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 707851,
+  "clause": "Increases your critical strike chance by $s1%",
+  "labels": [
+   "707851 effect_value e0 #0",
+   "707851 e0 melee_crit_chance_refreshed"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 707851,
+  "clause": "reduces the duration of disarm effects against you by $s2%",
+  "labels": [
+   "707851 effect_value e1 #1",
+   "707851 e1 (unmodelled)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 707852,
+  "clause": "Increases the chance to trigger Scourgebane by $s1%",
+  "labels": [
+   "707852 effect_value e0 #0",
+   "707852 e0 spell_modifier 520007"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 707852,
+  "clause": "and your chance to hit by $s2%",
+  "labels": [
+   "707852 effect_value e1 #1",
+   "707852 e1 melee_hit_chance",
+   "707852 e1 spell_hit_chance"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 707853,
+  "clause": "Damage dealt by Scourgebane and Scarlet Hammer now strikes $s1 additional nearby enemies",
+  "labels": [
+   "707853 effect_value e0 #0",
+   "707853 e0 spell_modifier 807035",
+   "707853 e0 spell_modifier 801832"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 712346,
+  "clause": "Critical strikes now remove 1 sec from the duration of Oathkeeper when used.",
+  "labels": [
+   "712346 behaviour_duration (status ok, behaviour-scenarios.md)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 712437,
+  "clause": "Your Interdict now strikes 1 additional nearby target.",
+  "labels": [
+   "712437 behaviour_count (status ok, behaviour-scenarios.md)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 712466,
+  "clause": "Increases your movement speed",
+  "labels": [
+   "712466 e0 run_speed_rate"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 712466,
+  "clause": "reduces the duration of movement slowing effects on you by $s2%",
+  "labels": [
+   "712466 effect_value e1 #0",
+   "712466 e1 (unmodelled)",
+   "712466 behaviour_duration_ratio"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 712677,
+  "clause": "Casting Sacred Swing now increases your melee haste by $712679s1%",
+  "labels": [
+   "712677 effect_value 712679e0 #0",
+   "712677 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 712677,
+  "clause": "for $712679d",
+  "labels": [
+   "712677 spell_duration 712679 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 712677,
+  "clause": "stacking $712679u times",
+  "labels": [
+   "712677 max_stacks 712679 #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 712678,
+  "clause": "Increases the duration of Interdict by $/1000;s1 sec",
+  "labels": [
+   "712678 effect_value e0 #0",
+   "712678 e0 (unmodelled)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 712678,
+  "clause": "and its cooldown by $/1000;s2 sec",
+  "labels": [
+   "712678 effect_value e1 #1",
+   "712678 e1 (unmodelled)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 800424,
+  "clause": "Taunt all enemies within 8 yds",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 800424,
+  "clause": "for $d",
+  "labels": [
+   "800424 aura_duration_ms #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 800424,
+  "clause": "increase your movement speed by $520659s1% for $520659d",
+  "labels": [
+   "800424 effect_value 520659e0 #1",
+   "800424 spell_duration 520659 #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 803792,
+  "clause": "3 Charges",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 803792,
+  "clause": "35 sec recharge",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 803792,
+  "clause": "Charge towards an ally",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 803792,
+  "clause": "healing you and them for ${$m2+0+$AP*0.805+$sph*0.85}",
+  "labels": [
+   "803792 effect_value e1 #0",
+   "803792 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801202,
+  "clause": "While above 80% health or below 20% health, you now take 20% reduced Magic damage.",
+  "labels": [
+   "801202 90 behaviour_ratio",
+   "801202 50 behaviour_ratio",
+   "801202 10 behaviour_ratio"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801204,
+  "clause": "Increases your Agility ... by $s1%",
+  "labels": [
+   "801204 effect_value e0 #0",
+   "801204 e0 stat 1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801204,
+  "clause": "...Intellect ... by $s1%",
+  "labels": [
+   "801204 e2 stat 3"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801204,
+  "clause": "...and hit chance by $s1%",
+  "labels": [
+   "801204 e1 melee_hit_chance",
+   "801204 e1 spell_hit_chance"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801205,
+  "clause": "Place a holy circle on the ground at the target location for $d",
+  "labels": [
+   "801205 aura_duration_ms #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801205,
+  "clause": "slowing enemy movement speed by $s1%",
+  "labels": [
+   "801205 effect_value e0 #1",
+   "801205 aura_amount e0 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801205,
+  "clause": "Every $t2 sec, enemies within the radius enter a tranquil state",
+  "labels": [
+   "801205 aura_amplitude_ms #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 850010,
+  "clause": "falling asleep for $850010d",
+  "labels": [
+   "801205 spell_duration 850010 #3"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 850010,
+  "clause": "(8 sec vs players)",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 803893,
+  "clause": "causing damaging abilities to deal an ${$804148m1+$804148ppl1} additional Holy damage to your target",
+  "labels": [
+   "803893 effect_value 804148e0 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 803893,
+  "clause": "and 4 nearby enemies",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 803893,
+  "clause": "for $d",
+  "labels": [
+   "803893 aura_duration_ms #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 803893,
+  "clause": "@ext:Only 1 Libram spell can be active at a time.:ext@",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 570233,
+  "clause": "dealing $s2% Weapon Damage plus ${$m1+0}",
+  "labels": [
+   "570233 effect_value e1 #0",
+   "570233 effect_value e0 #1",
+   "570233 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 570233,
+  "clause": "and granting an Oath",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 804904,
+  "clause": "Oath: Your abilities damage or heal for $804904s2% more.",
+  "labels": [
+   "570233 effect_value 804904e1 #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 573049,
+  "clause": "dealing $s2% Weapon Damage plus $s1 to your target",
+  "labels": [
+   "573049 effect_value e1 #0",
+   "573049 effect_value e0 #1",
+   "573049 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 573049,
+  "clause": "and an additional nearby enemy",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 573049,
+  "clause": "and granting an Oath",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 804903,
+  "clause": "Oath: Your abilities strike $804903s1 additional nearby target.",
+  "labels": [
+   "573049 effect_value 804903e0 #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 573324,
+  "clause": "dealing ${$m1+0+$AP*0.285+$SP*0.75} Physical damage",
+  "labels": [
+   "801446 effect_value e0 #0",
+   "573324 effect_value e0 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 573324,
+  "clause": "triggering Zealotry",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 573324,
+  "clause": "and granting an Oath",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 805332,
+  "clause": "Oath: Your damaging abilities have a $805332s1% chance to trigger Zealotry.",
+  "labels": [
+   "573324 effect_value 805332e0 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 578276,
+  "clause": "restoring ${$m2+0+$STA*0.25+$SP*0.3} health to an ally, scaling with Stamina",
+  "labels": [
+   "803373 effect_value e1 #0",
+   "578276 effect_value e1 #0",
+   "578276 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 578276,
+  "clause": "Consumes your Oaths, dealing additional healing for each consumed.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 801455,
+  "clause": "making them immune to all movement impairing effects for $d",
+  "labels": [
+   "801455 aura_duration_ms #0",
+   "801455 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 102208,
+  "clause": "Applies Sacred Restraint for $102208d.",
+  "labels": [
+   "801455 spell_duration 102208 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801457,
+  "clause": "Healing an ally now redirects $705309s1% of their damage taken to you",
+  "labels": [
+   "801457 effect_value 705309e0 #0",
+   "801457 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801457,
+  "clause": "and reduces your damage taken by $707307s1% for $705309d",
+  "labels": [
+   "801457 effect_value 707307e0 #1",
+   "801457 spell_duration 705309 #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801457,
+  "clause": "stacking $705309u times",
+  "labels": [
+   "801457 max_stacks 705309 #3"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801457,
+  "clause": "@ext: Healing yourself does not trigger this effect.:ext@",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 801461,
+  "clause": "reducing your Physical Damage taken by $s2%",
+  "labels": [
+   "801461 effect_value e1 #0",
+   "801461 aura_amount e1 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801461,
+  "clause": "($s3% against players)",
+  "labels": [
+   "801461 effect_value e2 #1",
+   "801461 aura_amount e2 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801461,
+  "clause": "for $d",
+  "labels": [
+   "801461 aura_duration_ms #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801461,
+  "clause": "$?s707385[ and instantly healing you for $s1% maximum health][]",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 801461,
+  "clause": "@ext:Only 1 Libram spell can be active at a time.:ext@",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 801463,
+  "clause": "increasing your healing received by $s2%",
+  "labels": [
+   "801463 effect_value e1 #0",
+   "801463 aura_amount e1 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801463,
+  "clause": "and causing your damaging abilities to restore ${$804150m1+$AP*.1+$SP*.15} health",
+  "labels": [
+   "801463 effect_value 804150e0 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801463,
+  "clause": "to you and nearby allies",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 801463,
+  "clause": "for $d",
+  "labels": [
+   "801463 aura_duration_ms #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801463,
+  "clause": "@ext:Only 1 Libram spell can be active at a time.:ext@",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 801465,
+  "clause": "toss a holy hammer at your target, charging you to them",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 801465,
+  "clause": "and removing Sacred Restraint from you and them if they are an ally",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 801465,
+  "clause": "you deal ${$m1+$ppl1+$AP*2} Holy damage",
+  "labels": [
+   "801465 effect_value e0 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801465,
+  "clause": "to all nearby enemies",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 801465,
+  "clause": "and heal nearby allies for the same amount",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 801466,
+  "clause": "increasing your melee haste by $s2%",
+  "labels": [
+   "801466 effect_value e1 #0",
+   "801466 aura_amount e1 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801466,
+  "clause": "and causes your damaging abilities to reduce the cooldown of Righteous Upheaval by $/1000;575328S1 sec",
+  "labels": [
+   "801466 effect_value 575328e0 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801466,
+  "clause": "for $d",
+  "labels": [
+   "801466 aura_duration_ms #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801466,
+  "clause": "@ext:Only 1 Libram spell can be active at a time.:ext@",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 501606,
+  "clause": "healing them for ${$m1+0+$SP*1+$AP*2}",
+  "labels": [
+   "501606 effect_value e0 #0",
+   "501606 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 102208,
+  "clause": "Applies Sacred Restraint for $102208d.",
+  "labels": [
+   "501606 spell_duration 102208 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801480,
+  "clause": "Increases the damage dealt by Libram of Consecration by $s1%",
+  "labels": [
+   "801480 effect_value e0 #0",
+   "801480 e0 spell_modifier 804148"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801480,
+  "clause": "increases the effectiveness of your Librams by $s2%",
+  "labels": [
+   "801480 effect_value e1 #1",
+   "801480 e1 spell_modifier 803893"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801480,
+  "clause": "and reduces their cooldown by $s3%",
+  "labels": [
+   "801480 effect_value e2 #2",
+   "801480 e2 spell_modifier 803893"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801481,
+  "clause": "increasing your attack speed by $s1% for $d",
+  "labels": [
+   "801481 effect_value e0 #0",
+   "801481 aura_amount e0 #0",
+   "801481 aura_duration_ms #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 801481,
+  "clause": "After the duration, you gain Downfall.",
+  "labels": [
+   "801481 effect_value 801482e0 #2",
+   "801481 spell_duration 801482 #3",
+   "801481 effect_value 801483e0 #4",
+   "801481 effect_value 801483e2 #5",
+   "801481 spell_duration 801483 #6"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 503141,
+  "clause": "blasting an enemy for ${$m1+0+$sph*0.6+$AP*0.45} Holy damage",
+  "labels": [
+   "803157 effect_value e0 #0",
+   "503135 effect_value e0 #0",
+   "503136 effect_value e0 #0",
+   "503141 effect_value e0 #0",
+   "503141 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 503141,
+  "clause": "$?s806525[ plus an additional $806525s1% Weapon Damage][]",
+  "labels": [
+   "503141 effect_value 806525e0 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 503141,
+  "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 803158,
+  "clause": "Melee attacks now restore $804181s1 Energy",
+  "labels": [
+   "803158 effect_value 804181e0 #0",
+   "803158 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 803158,
+  "clause": "plus an additional 2 Energy when they critically strike",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 803159,
+  "clause": "Reduces the cooldown of Testaments by $/1000;s2 sec",
+  "labels": [
+   "803159 effect_value e1 #0",
+   "803159 e1 spell_modifier 501606",
+   "803159 e1 spell_modifier 500678",
+   "803159 e1 spell_modifier 1397742",
+   "803159 e1 spell_modifier 801455",
+   "803159 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 803159,
+  "clause": "and Oath Breakers now heal allies around the target for ${$m1+$SP*0.35}",
+  "labels": [
+   "803159 effect_value e0 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 803159,
+  "clause": "heal allies around the target",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 803163,
+  "clause": "Physical damage dealt now has a $h% chance",
+  "labels": [
+   "803163 proc_rate 803164 attack",
+   "803163 proc_rate 803164 501562"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 803163,
+  "clause": "increase the tick rate of your Blade of Faith and Condemn by $803164s1%",
+  "labels": [
+   "803163 effect_value 803164e0 #1",
+   "803163 e0 (unmodelled)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 803163,
+  "clause": "stacking $803164u times",
+  "labels": [
+   "803163 max_stacks 803164 #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 803219,
+  "clause": "Your Testament of Hope now reduces damage taken by an additional 5% per copy.",
+  "labels": [
+   "803219 effect_value (unmodelled)",
+   "803219 e0 (unmodelled)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 803842,
+  "clause": "Increases your Agility ... by $s1%",
+  "labels": [
+   "803842 effect_value e0 #0",
+   "803842 e0 stat 1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 803842,
+  "clause": "...Intellect ... by $s1%",
+  "labels": [
+   "803842 e2 stat 3"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 803842,
+  "clause": "...and hit chance by $s1%",
+  "labels": [
+   "803842 e1 melee_hit_chance",
+   "803842 e1 spell_hit_chance"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 803844,
+  "clause": "Reduces the cooldown of Testaments by $/1000;s2 sec",
+  "labels": [
+   "803844 effect_value e1 #0",
+   "803844 e1 spell_modifier 501606",
+   "803844 e1 spell_modifier 500678",
+   "803844 e1 spell_modifier 1397742",
+   "803844 e1 spell_modifier 801455",
+   "803844 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 803844,
+  "clause": "and Oath Breakers now heal allies around the target for ${$m1+$SP*0.35}",
+  "labels": [
+   "803844 effect_value e0 #1",
+   "803844 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 803872,
+  "clause": "Unleash a devastating Oath Breaker on an enemy dealing ${($d*1000/$T1)*($m1+0+$SP*.2+$AP*0.1)} Holy damage",
+  "labels": [
+   "803872 effect_value #0",
+   "803873 effect_value #0",
+   "803874 effect_value #0",
+   "803875 effect_value #0",
+   "803876 effect_value #0",
+   "803877 effect_value #0",
+   "803878 effect_value #0",
+   "803879 effect_value #0",
+   "803880 effect_value #0",
+   "803880 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 803872,
+  "clause": "over $d",
+  "labels": [
+   "803880 aura_duration_ms #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 803872,
+  "clause": "This ability can critically strike.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 803872,
+  "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 804228,
+  "clause": "granting immunity to fear, charm, and horrify effects for $d",
+  "labels": [
+   "804228 aura_duration_ms #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804228,
+  "clause": "Usable while feared.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 804228,
+  "clause": "Applies Sacred Restraint for $102208d.",
+  "labels": [
+   "804228 spell_duration 102208 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804571,
+  "clause": "Charging to an ally with Temple Guardian now has a $h% chance to refresh a charge.",
+  "labels": [
+   "804571 proc_rate"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804781,
+  "clause": "Pay a tithe of 1 silver",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 804781,
+  "clause": "to learn a special new ability to empower your entire party",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 804781,
+  "clause": "@ext: Eastern Kingdoms: Northshire Abbey, Deathknell, Cathedral of Light, Scarlet Monastery, Strahnbrad, Light's Hope Chapel, The Sepulcher.|n|nKalimdor: The Temple of the Moon, Ethel Rethor, Valley of Spirits, The Pools of Vision.$?s800981[.|n|nOutland: Chapel Yard, Shattrath City, Temple of Telhamat, Auchindoun, Ruins of Karabor, Oshu'gun.][]:ext@",
+  "labels": [
+   "804781 effect_value #0"
+  ],
+  "kind": "no_claim",
+  "reason": "Client note listing trainer locations where the ability can be learned; flavour/acquisition information, not a spell mechanic claim."
+ },
+ {
+  "spell": 804897,
+  "clause": "Your Divine Force will now trigger a $/1000;804918s1 sec reduced cooldown when used on enemies affected by Blade of Faith.",
+  "labels": [
+   "804897 effect_value 804918e0 #0",
+   "804897 e0 (behaviours entry 'Transcending Strikes', behaviour_metric_delta, status ok)",
+   "804897 e2 (reclassify note: already proven by the class file's own check)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804906,
+  "clause": "Condemn an enemy, dealing ${($d*1000/$T1)*($m1+0+$SP*.1+$AP*0.05)} Holy damage over $d",
+  "labels": [
+   "806866 effect_value #0",
+   "806867 effect_value #0",
+   "806868 effect_value #0",
+   "567538 effect_value #0",
+   "567539 effect_value #0",
+   "567539 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804906,
+  "clause": "stacking $u times",
+  "labels": [
+   "567539 max_stacks 567539 #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804906,
+  "clause": "and granting an Oath.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 804906,
+  "clause": "Oath: Increases your critical strike chance by $804922s1%.",
+  "labels": [
+   "567539 effect_value 804922e0 #3"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804912,
+  "clause": "your chance to parry is now increased by $560651s1%",
+  "labels": [
+   "804912 effect_value 560651e0 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804912,
+  "clause": "for $560651d",
+  "labels": [
+   "804912 spell_duration 560651 #1",
+   "804912 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804912,
+  "clause": "stacking $560651u times",
+  "labels": [
+   "804912 max_stacks 560651 #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804912,
+  "clause": "When you critically strike with auto attacks or parry an attack",
+  "labels": [
+   "804912 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804914,
+  "clause": "Taunt an enemy to attack you",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 804914,
+  "clause": "for $d",
+  "labels": [
+   "804914 aura_duration_ms #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804927,
+  "clause": "Level 40 Passive",
+  "labels": [],
+  "kind": "no_claim",
+  "reason": "A level-gate label, not a gameplay claim."
+ },
+ {
+  "spell": 804927,
+  "clause": "Casting Oath Breaker abilities now reduce the cooldown of Librams by $/1000;806106s1 sec.",
+  "labels": [
+   "804927 effect_value 806106e0 #0",
+   "804927 trigger_cooldown_delta"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804927,
+  "clause": "Increases your Holy spell damage by $s3% of your Agility.",
+  "labels": [
+   "804927 effect_value e2 #1",
+   "804927 e2 spell_power 1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804928,
+  "clause": "Reduces the Energy cost of your Testaments by $s1%.",
+  "labels": [
+   "804928 effect_value e0 #0",
+   "804928 e0 spell_modifier 500678",
+   "804928 e0 spell_modifier 1397742",
+   "804928 e0 spell_modifier 804228",
+   "804928 e0 spell_modifier 801455",
+   "804928 e0 spell_modifier 501606",
+   "804928 e0 spell_power_cost 500678",
+   "804928 e0 spell_power_cost 1397742",
+   "804928 e0 spell_power_cost 804228",
+   "804928 e0 spell_power_cost 801455",
+   "804928 e0 spell_power_cost 501606"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804929,
+  "clause": "dealing $s2% Weapon Damage plus ${$AP*0.4725+$sph*1.35+$m1+0}",
+  "labels": [
+   "807268 effect_value e1 #0",
+   "807268 effect_value e0 #1",
+   "807268 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804929,
+  "clause": "healing you equal to the damage dealt",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 804929,
+  "clause": "unleashes Scourgebane, dealing ${$801832m1*$<scalingbp>+$sph*0.25+$AP*0.25} Holy damage",
+  "labels": [
+   "807268 effect_value 801832e0 #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804930,
+  "clause": "Whenever the absorption shield from Staffguard breaks, inflict ${$801546m1+$801546ppl1+$AP*0.2+$sph*0.5} High Threat Holy damage to nearby enemies.",
+  "labels": [
+   "804930 effect_value 801546e0 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804932,
+  "clause": "Level 50 Passive",
+  "labels": [],
+  "kind": "no_claim",
+  "reason": "A level-gate label, not a gameplay claim."
+ },
+ {
+  "spell": 804932,
+  "clause": "Damaging abilities now grants you Unbroken Creed for $807648d, stacking up to $807648u times.",
+  "labels": [
+   "804932 spell_duration 807648 #0",
+   "804932 max_stacks 807648 #1",
+   "804932 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 804932,
+  "clause": "When you use a damaging Oath Breaker or Divine Fury you now consume the stacks and auto attack your target an amount of times equal to your stack count.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 805409,
+  "clause": "dealing $570205s2% Weapon Damage plus ${$570205m1+$SP*0.3} damage to nearby enemies, every $t1 sec",
+  "labels": [
+   "807274 effect_value 570205e1 #0",
+   "807274 effect_value 570205e0 #1",
+   "807274 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805409,
+  "clause": "scaling with spell power",
+  "labels": [
+   "807274 effect_value 570205e0 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805409,
+  "clause": "every $t1 sec",
+  "labels": [
+   "807274 aura_amplitude_ms #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805409,
+  "clause": "$?s300512[ and reducing damage taken by $300512s2%][] for $d",
+  "labels": [
+   "807274 effect_value 300512e1 #3",
+   "807274 aura_duration_ms #4"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805409,
+  "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 805410,
+  "clause": "Deals Weapon Damage plus ${$m1+0+$SP*.15}.",
+  "labels": [
+   "570205 effect_value e0 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805415,
+  "clause": "Your damaging critical strikes now increase your Holy damage dealt by $805416s1% for $805416d.",
+  "labels": [
+   "805415 effect_value 805416e0 #0",
+   "805415 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805415,
+  "clause": "stacking $805416u times",
+  "labels": [
+   "805415 max_stacks 805416 #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805415,
+  "clause": "for $805416d",
+  "labels": [
+   "805415 spell_duration 805416 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805415,
+  "clause": "Can only occur once per sec.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 805415,
+  "clause": "At 5 stacks, you are granted High General.@s:524617:0@",
+  "labels": [
+   "805415 effect_value 524617e0 #3"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805417,
+  "clause": "increasing the healing received by nearby party and raid members by $s3% for $d",
+  "labels": [
+   "805417 effect_value e2 #0",
+   "805417 aura_amount e2 #0",
+   "805417 aura_duration_ms #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805417,
+  "clause": "For the duration, threat generated by your allies is redirected to you.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 805420,
+  "clause": "Damage dealt by Sacred Swing and Reckoning now reduces casting speed by $572052s1% for $572052d, stacking $572052u times.",
+  "labels": [
+   "805420 effect_value 572052e0 #0",
+   "805420 spell_duration 572052 #1",
+   "805420 max_stacks 572052 #2",
+   "805420 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805421,
+  "clause": "dealing ${$m1+0+$AP*0.175+$STA*0.5} Holy damage",
+  "labels": [
+   "572741 effect_value e0 #0",
+   "572741 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805421,
+  "clause": "and restoring $521241s1 Energy for each enemy struck",
+  "labels": [
+   "572741 effect_value 521241e0 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805421,
+  "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 805422,
+  "clause": "Grants a shield equal to 100% of your maximum health",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 805422,
+  "clause": "for $d",
+  "labels": [
+   "805422 aura_duration_ms #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805422,
+  "clause": "resets the cooldown of Barrier of Light and Tranquil Circle",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 805422,
+  "clause": "and grants an additional effect for each.@s:806354:0@@s:807004:0@",
+  "labels": [
+   "805422 spell_duration 806354 #1",
+   "805422 spell_duration 807004 #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805423,
+  "clause": "granting you spell power equal to $s2% of your Agility",
+  "labels": [
+   "805423 effect_value e1 #0",
+   "805423 aura_amount e1 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805423,
+  "clause": "and attack power equal to $s1% of your Intellect",
+  "labels": [
+   "805423 effect_value e0 #1",
+   "805423 aura_amount e0 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805423,
+  "clause": "for $d",
+  "labels": [
+   "805423 aura_duration_ms #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 805423,
+  "clause": "@ext:Only 1 Libram spell can be active at a time.:ext@",
+  "labels": [
+   "805423 effect_value #3"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 806153,
+  "clause": "Leap at an enemy with divine force",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 806153,
+  "clause": "stunning them for $807890d",
+  "labels": [
+   "807805 spell_duration 807890 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 806153,
+  "clause": "dealing ${$m3+0+$SP*1+$AP*.55} Holy damage",
+  "labels": [
+   "807805 effect_value e2 #1",
+   "807805 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 806153,
+  "clause": "and interrupting non-player spellcasting for $32747d",
+  "labels": [
+   "807805 spell_duration 32747 #2"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 806273,
+  "clause": "Oath Breakers now grant you a stack of Mending Ward for $806353d, stacking $806353u times.",
+  "labels": [
+   "806273 spell_duration 806353 #0",
+   "806273 max_stacks 806353 #1",
+   "806273 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 806516,
+  "clause": "Damaging abilities now grant Heaven's Finest for $805390d, stacking $805390u times.",
+  "labels": [
+   "806516 spell_duration 805390 #0",
+   "806516 max_stacks 805390 #1",
+   "806516 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 806521,
+  "clause": "dealing ${$m1+0+$AP*0.2+$sph*1} Holy Damage",
+  "labels": [
+   "806835 effect_value e0 #0",
+   "806835 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 806521,
+  "clause": "healing you equal to the damage dealt",
+  "labels": [
+   "806835 hit_mean"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 806521,
+  "clause": "and extending the duration of your Oath Chain by $/1000;707896s1 sec.",
+  "labels": [
+   "806835 effect_value 707896e0 #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 806521,
+  "clause": "Only usable on enemies below 35% health.",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 806522,
+  "clause": "Casting Argent Blade or Scarlet Hammer now guarantees your next 2 instances of damage dealt by Scourgebane to critically strike.",
+  "labels": [
+   "806522 trigger_count"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 806522,
+  "clause": "Increases the critical damage of Scourgebane by $s2%.",
+  "labels": [
+   "806522 effect_value e1 #0",
+   "806522 e1 spell_modifier 801832",
+   "806522 e1 spell_critical_damage 801832",
+   "806522 e1 spell_modifier 92111/520007/801861/804916/807268 (measured, delta 0)",
+   "806522 e1 spell_critical_damage 92111/520007/801861/804916/807268 (measured, delta 0)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 806525,
+  "clause": "Level 50 Passive",
+  "labels": [],
+  "kind": "no_claim",
+  "reason": "A level-gate label, not a gameplay claim."
+ },
+ {
+  "spell": 806525,
+  "clause": "Your Chastise and Scarlet Hammer now deals an additional $s1% Weapon Damage.",
+  "labels": [
+   "806525 effect_value e0 #0",
+   "806525 e0 spell_modifier 503141",
+   "806525 e0 spell_effect_value 503141",
+   "806525 e1 spell_modifier 807035",
+   "806525 e1 spell_effect_value 807035"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 807814,
+  "clause": "restoring $o1 Energy over $d",
+  "labels": [
+   "807814 aura_duration_ms #1"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 807814,
+  "clause": "and reducing your threat each second",
+  "labels": [],
+  "kind": "claim"
+ },
+ {
+  "spell": 1397742,
+  "clause": "Summons $s1 copies of yourself that charge at a nearby enemy and aid you in combat for $d.",
+  "labels": [
+   "1397742 effect_value e0 #0",
+   "1397742 aura_duration_ms #1 (unmeasurable)"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 1397742,
+  "clause": "While within $704409a1 yds of you, each copy reduces all damage you take by $704409s2%.",
+  "labels": [
+   "1397742 effect_radius #2 (unmeasurable)",
+   "1397742 effect_value 704409e1 #3"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 1397742,
+  "clause": "Applies Sacred Restraint for $102208d.",
+  "labels": [
+   "1397742 spell_duration 102208 #4"
+  ],
+  "kind": "claim"
+ }
 ]

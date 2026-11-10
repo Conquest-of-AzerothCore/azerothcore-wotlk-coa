@@ -3458,6 +3458,13 @@ private:
             return unit->GetTotalAttackPowerValue(metric == "attack_power" ? BASE_ATTACK : RANGED_ATTACK);
         if (metric == "armor")
             return unit->GetArmor();
+        if (metric == "item_armor_by_subclass")
+        {
+            uint32 subclass = step.get<uint32>("subclass");
+            Player* player = unit->ToPlayer();
+            Require(player != nullptr, "item_armor_by_subclass metric needs a player");
+            return player->GetItemArmorBySubclass(subclass);
+        }
         if (metric == "has_aura_state")
         {
             uint32 state = step.get<uint32>("aura_state");

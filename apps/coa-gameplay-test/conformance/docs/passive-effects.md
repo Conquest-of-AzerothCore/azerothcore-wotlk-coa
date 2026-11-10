@@ -112,6 +112,36 @@ rewrites it to 15 (`SPELLMOD_CRIT_DAMAGE_BONUS`) at load time to match its own "
 the `effect_overrides` entry makes the reader classify it as op 15 (`spell_critical_damage`/`crit_damage`, the
 "bonus" reading above), the op the live server actually installs.
 
+### Item-armor-subclass overrides
+
+A class file's `item_armor_subclass_effects` list (`[{"spell": <id>, "effect": <n>, "subclass": <n>,
+"item": <entry>, "slot": <n>, "level": <n, optional>, "citation": "..."}]`) models aura 142 (`SPELL_AURA_MOD_BASE_RESISTANCE_PCT`) for
+an effect whose `EffectMiscValueB` names an item-armor subclass (`ITEM_SUBCLASS_ARMOR_*`,
+`ItemTemplate.h:390-400`) that `SpellInfo::GetItemArmorSubclassMask()` (`SpellInfo.cpp`) recognises for the
+live `SpellInfo`, the same `{spell_id or rank_id, effect}` lookup as `effect_overrides`, checked before `aura
+142`'s generic `OUT_OF_SCOPE` closure. `Player::UpdateArmor()` (`StatSystem.cpp`) scales only the armor that
+subclass's equipped items contribute (`Player::GetItemArmorBySubclass`, raw and unscaled, tracked independently
+of any aura on equip/unequip, `Player.cpp:7372`), not the character's total Armor, so the delta a passive-check
+scenario measures on the generic `armor` metric cannot be judged against the tooltip percent directly: the
+reference character does not otherwise wear that subclass, and even if it did, its base/weapon-sourced Armor
+would inflate the "before" reading past the subclass-only contribution the percent actually multiplies. An
+override entry equips `item` at `slot` in priming (`add_item` then `equip`, before the `before` measurement)
+and gives effect 0 two plans instead of one: a non-judged `item_armor_by_subclass` probe (reads
+`Player::GetItemArmorBySubclass(subclass)` directly, a CoAGameplayTest metric, constant across the `learn`) that
+only *reports* its own before/after, and a judged `armor`/`share` plan whose `source` is that probe's own
+`before` label — `compare.py`'s existing `share` relation (`delta_readings`) multiplies whatever `run.values`
+holds under `source` by the tooltip's percent, with no change needed there. Templar: Blessed Padding 301311
+(50%) and 301360 (100%) both carry `EffectMiscValueB[0]` 8 (`1 << ITEM_SUBCLASS_ARMOR_MAIL`) for a `SpellInfo`
+whose `GetItemArmorSubclassMask()` previously whitelisted only `SpellFamilyName` 24, missing their own family
+25 — a server defect masking the whole effect regardless of equipped gear (fixed alongside this override,
+`SpellInfo.cpp`); both now equip the mail chest item 1065932 at slot 4 (chest), the same fixture
+`apps/coa-gameplay-test/scenarios/templar-blessed-padding.json` already named for this clause without the tool
+ever running it through the generated/compared pipeline; that fixture item's `RequiredLevel` (80) is above
+Templar's class-file reference level (60), so both entries carry `"level": 80`, which `passive_scenario` applies
+only to that one generated scenario's player, never the class file's own reference level. A spell using aura 142
+with no matching override entry
+still raises `Closed(OUT_OF_SCOPE[142])` exactly as before.
+
 ### Conditional tooltips
 
 A class file's `conditional_spells` list (`[{"spell": <rank>, "learn": <gating spell>, "reason": "..."}]`) names,
@@ -160,11 +190,13 @@ verdict, so the regression is not lost, but a reader who only skims the P5 point
 (`scripted or crowd-control effect`), 59 (`damage versus a creature type is level-scaled`), 122 (`no off-hand
 weapon damage metric`), 110 (`no energy regeneration metric`), a spell modifier op of 32 or more (`SpellModOp
 <op> is not below MAX_SPELLMOD 32`: `spell_modifier` requires `op < MAX_SPELLMOD`), and the auras of the table
-without a plan (31, 87, 283, 286: `aura <n> has no passive measurement`). Closed by rule: aura 142 (`closed: mail
-armor is out of scope`, owner ruling, round5 `closed-statuses`) — the reference character's armor slot never
-equips a mail item and the harness has no action to re-gear it for one passive check, a structural tool-scope
-gap the same shape as 59/122/110, but
-proven rather than left as open work since both ranks' clause is already fully accounted for elsewhere.
+without a plan (31, 87, 283, 286: `aura <n> has no passive measurement`). Closed by rule without a matching
+`item_armor_subclass_effects` entry: aura 142 (`closed: mail armor is out of scope`) — round5 `closed-statuses`
+found the reference character's armor slot never equips a mail item and the harness had no action to re-gear
+it for one passive check, a structural tool-scope gap the same shape as 59/122/110; round10 `judging` closed
+that gap with the "Item-armor-subclass overrides" section above, so a spell with a matching override entry
+(Blessed Padding 301311/301360, both ranks) is modelled instead of closed, and only a future aura-142 spell
+with no override entry still falls back to this rule.
 
 A class file's `unmodelled_effects` list (`[{"spell": <id>, "effect": <n>, "reason": "..."}]`) forces a specific
 effect straight to `unmodelled`, the same `{spell_id or rank_id, effect}` lookup as `effect_overrides`, checked

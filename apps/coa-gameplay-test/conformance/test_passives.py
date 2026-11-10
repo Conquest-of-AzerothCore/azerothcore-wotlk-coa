@@ -812,8 +812,19 @@ class TemplarPassiveTest(unittest.TestCase):
         self.assertEqual(effect.reason, 'unmodelled: the tooltip does not name ranged attack power')
         self.assertEqual(effect.plans, ())
 
-    def test_mail_armor_is_out_of_scope(self):
-        effect = effect_of(self.effects(BLESSED_PADDING), 0)
+    def test_mail_armor_contribution_is_modelled_via_the_class_file_override(self):
+        for spell_id in (301311, 301360):
+            effect = effect_of(self.effects(spell_id), 0)
+            self.assertEqual(effect.reason, '')
+            reference, delta = effect.plans
+            self.assertEqual((reference.metric, reference.fields, reference.judged),
+                             ('item_armor_by_subclass', {'subclass': 3}, False))
+            self.assertEqual((delta.metric, delta.relation, delta.source),
+                             ('armor', 'share', f'{spell_id} e0 item_armor_by_subclass 3 before'))
+
+    def test_mail_armor_is_out_of_scope_without_a_class_file_override(self):
+        class_file = {**self.class_file, 'item_armor_subclass_effects': []}
+        effect = effect_of(passive_effects(class_file, templar_passive(BLESSED_PADDING)), 0)
         self.assertEqual(effect.reason, 'closed: mail armor is out of scope')
 
     def test_other_out_of_scope_auras_stay_unmodelled(self):

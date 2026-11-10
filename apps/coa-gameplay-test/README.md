@@ -674,7 +674,9 @@ skill line for that spell.
 `Player::UpdateCritPercentage(BASE_ATTACK)`, the computation a stat update runs, and then reads the field: the query
 therefore writes `PLAYER_CRIT_PERCENTAGE`, which later melee crit rolls read. `expertise` reads main-hand
 expertise; `combat_rating` requires `rating` (0..24, native `CombatRating`) and reads the rating value. `stat` requires
-`stat` (0..4), `resistance` requires `school` (1..6); `armor`, `attack_power`, `ranged_attack_power`, the hasted
+`stat` (0..4), `resistance` requires `school` (1..6); `item_armor_by_subclass` requires `subclass`
+(`ITEM_SUBCLASS_ARMOR_*`, 0..10) and reads a player's `Player::GetItemArmorBySubclass`, the raw item-sourced
+Armor of that subclass, independent of any armor-percent aura; `armor`, `attack_power`, `ranged_attack_power`, the hasted
 `attack_time_ms` (optional `hand`, 0..2) and `run_speed_rate` read the unit's current totals.
 `pet_attack_time_ms` uses the same hand selection for a player's current pet and requires that
 pet to exist. `attack_timer_ms` (optional `hand`, 0..2) reads the time left until that hand's
