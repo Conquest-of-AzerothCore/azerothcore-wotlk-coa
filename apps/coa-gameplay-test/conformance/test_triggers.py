@@ -28,7 +28,7 @@ from triggers import (BASELINE_ATTEMPTS, COOLDOWN_CHECK, COOLDOWN_DELTA_KIND, DU
                       magnitude_label, magnitude_measurement_labels, magnitude_ratio_scenario,
                       magnitude_trigger_rule,
                       self_trigger_label, self_trigger_rule, self_trigger_scenario,
-                      shares_cooldown_aura, shares_trigger_aura, trigger_entries,
+                      shares_cooldown_aura, shares_cooldown_effect, shares_trigger_aura, trigger_entries,
                       trigger_label, trigger_measurements, trigger_plan, trigger_rule, trigger_scenario,
                       trigger_status_expectation)
 from values import ALLY, FORCED_CRIT_RATING, Expectation, dataset
@@ -490,6 +490,25 @@ class CooldownDeltaLabelDisambiguationTest(unittest.TestCase):
     def cooldown_entry(self):
         return templar_trigger(LORESCRIBE)
 
+    def two_entries_same_effect(self, aura=ONE_WITH_THE_LIGHT):
+        base = {'aura': aura, 'kind': COOLDOWN_DELTA_KIND, 'trigger': {'action': 'cast', 'spell': RIGHTEOUS_UPHEAVAL,
+                                                                       'target': 'dummy'},
+               'observe_metric': 'cooldown_ms', 'expected_delta_ms': 1000}
+        return {'triggers': [{**base, 'effect': 0, 'observe_spell': 1}, {**base, 'effect': 0, 'observe_spell': 2}]}
+
+    def test_shares_cooldown_effect_true_for_two_entries_of_the_same_aura_and_effect(self):
+        class_file = self.two_entries_same_effect()
+        self.assertTrue(shares_cooldown_effect(class_file, class_file['triggers'][0]))
+        self.assertTrue(shares_cooldown_effect(class_file, class_file['triggers'][1]))
+
+    def test_shares_cooldown_effect_false_for_two_entries_of_the_same_aura_but_different_effect(self):
+        class_file = self.two_entries()
+        self.assertFalse(shares_cooldown_effect(class_file, class_file['triggers'][0]))
+        self.assertFalse(shares_cooldown_effect(class_file, class_file['triggers'][1]))
+
+    def test_shares_cooldown_effect_false_for_a_sole_entry(self):
+        self.assertFalse(shares_cooldown_effect(CLASS_FILE, self.cooldown_entry()))
+
     def test_cooldown_label_with_observe_spell_is_distinct_per_entry(self):
         self.assertNotEqual(cooldown_label(ONE_WITH_THE_LIGHT, 1), cooldown_label(ONE_WITH_THE_LIGHT, 2))
         self.assertEqual(cooldown_label(ONE_WITH_THE_LIGHT), '504807 trigger_cooldown_delta')
@@ -563,30 +582,64 @@ class TriggerCountLabelDisambiguationTest(unittest.TestCase):
         self.assertEqual(len(entries), 2)
 
 
-class OneWithTheLightCooldownEntryTest(unittest.TestCase):
-    def entry(self):
-        return templar_trigger(ONE_WITH_THE_LIGHT)
+FORCE_OF_GOLGANNETH = 500694
+DIVINE_FORCE = 806153
+TESTAMENT_OF_WILL = 801455
 
+
+class OneWithTheLightCooldownEntryTest(unittest.TestCase):
     def cooldown_entries(self):
         return [entry for entry in CLASS_FILE['triggers'] if entry['aura'] == ONE_WITH_THE_LIGHT
                and entry.get('kind') == COOLDOWN_DELTA_KIND]
 
-    def test_exactly_one_new_cooldown_delta_entry_covers_effect_2(self):
-        entries = self.cooldown_entries()
+    def effect_0_entries(self):
+        return [entry for entry in self.cooldown_entries() if entry['effect'] == 0]
+
+    def entry_for(self, observe_spell):
+        return next(entry for entry in self.cooldown_entries() if entry['observe_spell'] == observe_spell)
+
+    def test_one_cooldown_delta_entry_covers_effect_2(self):
+        entries = [entry for entry in self.cooldown_entries() if entry['effect'] == 2]
         self.assertEqual(len(entries), 1)
-        self.assertEqual(entries[0]['effect'], 2)
         self.assertEqual(entries[0]['observe_spell'], LIBRAM_OF_TENACITY)
 
-    def test_effect_0_has_no_new_entry_and_is_closed_via_unmodelled_effects(self):
-        self.assertFalse(any(entry.get('effect') == 0 and entry.get('kind') == COOLDOWN_DELTA_KIND
-                             for entry in CLASS_FILE['triggers'] if entry['aura'] == ONE_WITH_THE_LIGHT))
-        override = next(entry for entry in CLASS_FILE['unmodelled_effects']
-                        if entry['spell'] == ONE_WITH_THE_LIGHT and entry['effect'] == 0)
-        self.assertIn('SPELL_FAILED_NOT_READY', override['reason'])
+    def test_three_new_cooldown_delta_entries_cover_effect_0_one_per_named_spell(self):
+        entries = self.effect_0_entries()
+        self.assertEqual(len(entries), 3)
+        self.assertEqual({entry['observe_spell'] for entry in entries},
+                         {FORCE_OF_GOLGANNETH, DIVINE_FORCE, TESTAMENT_OF_WILL})
+        self.assertTrue(all(entry['expected_delta_ms'] == 1000 for entry in entries))
 
-    def test_checked_entry_accepts_the_new_cooldown_entry(self):
-        entry = self.cooldown_entries()[0]
-        self.assertIs(checked_entry(entry), entry)
+    def test_effect_0_is_no_longer_in_unmodelled_effects(self):
+        self.assertFalse(any(entry['spell'] == ONE_WITH_THE_LIGHT and entry['effect'] == 0
+                             for entry in CLASS_FILE['unmodelled_effects']))
+
+    def test_force_of_golganneth_entry_self_casts_with_no_observe_target(self):
+        entry = self.entry_for(FORCE_OF_GOLGANNETH)
+        self.assertIsNone(entry.get('observe_target'))
+
+    def test_divine_force_entry_casts_at_the_hostile_dummy(self):
+        entry = self.entry_for(DIVINE_FORCE)
+        self.assertEqual(entry['observe_target'], 'dummy')
+
+    def test_testament_of_will_entry_casts_at_a_grouped_ally(self):
+        entry = self.entry_for(TESTAMENT_OF_WILL)
+        self.assertEqual(entry['observe_target'], 'ally')
+
+    def test_checked_entry_accepts_every_new_cooldown_entry(self):
+        for entry in self.effect_0_entries():
+            self.assertIs(checked_entry(entry), entry)
+
+    def test_cooldown_trigger_scenario_groups_an_ally_for_an_observe_target_ally_entry(self):
+        entry = self.entry_for(TESTAMENT_OF_WILL)
+        scenario, _ = cooldown_trigger_scenario(CLASS_FILE, entry, 0)
+        self.assertTrue(any(step.get('action') == 'group' for step in scenario['steps']))
+        self.assertEqual(len(scenario['players']), 2)
+
+    def test_cooldown_trigger_scenario_adds_a_creature_for_an_observe_target_dummy_entry(self):
+        entry = self.entry_for(DIVINE_FORCE)
+        scenario, _ = cooldown_trigger_scenario(CLASS_FILE, entry, 0)
+        self.assertIn('creatures', scenario)
 
 
 class HolyCombatantDurationEntryTest(unittest.TestCase):
@@ -1949,6 +2002,20 @@ class GenerateTriggerTest(unittest.TestCase):
         finally:
             shutil.rmtree(out)
 
+    def test_one_with_the_light_cooldown_scenario_keys_do_not_collide_across_three_shared_effect_entries(self):
+        from conformance import generate
+        out = Path(tempfile.mkdtemp(prefix='conformance-one-with-the-light-cooldown-'))
+        try:
+            manifest_path = generate(CLASS_FILE['class_id'], out, triggers=[ONE_WITH_THE_LIGHT])
+            manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+            keys = [entry['key'] for entry in manifest['scenarios']]
+            self.assertEqual(len(keys), len(set(keys)))
+            self.assertTrue(any(str(FORCE_OF_GOLGANNETH) in key for key in keys))
+            self.assertTrue(any(str(DIVINE_FORCE) in key for key in keys))
+            self.assertTrue(any(str(TESTAMENT_OF_WILL) in key for key in keys))
+        finally:
+            shutil.rmtree(out)
+
 
 class FerventCastigationAndBlessingOfEonarEntriesTest(unittest.TestCase):
     def entries(self, aura):
@@ -2026,16 +2093,24 @@ class CooldownDeltaObserveTargetTest(unittest.TestCase):
 
     def test_cooldown_trial_steps_casts_the_observed_rank_at_self_without_observe_target(self):
         one_with_the_light = next(entry for entry in CLASS_FILE['triggers']
-                                  if entry['aura'] == ONE_WITH_THE_LIGHT and entry.get('kind') == COOLDOWN_DELTA_KIND)
+                                  if entry['aura'] == ONE_WITH_THE_LIGHT and entry.get('kind') == COOLDOWN_DELTA_KIND
+                                  and entry.get('observe_spell') == 801461)
         entry = {**one_with_the_light, 'observe_target': None}
         steps = cooldown_trial_steps(CLASS_FILE, entry, 1, 'measured')
         observe_casts = [step for step in steps if step.get('action') == 'cast'
                         and step.get('spell') == entry['observe_spell']]
         self.assertEqual(len(observe_casts), 1)
         self.assertNotIn('target', observe_casts[0])
+
+    def test_cooldown_trial_steps_waits_after_a_self_cast_observed_rank_with_its_own_gcd_too(self):
+        one_with_the_light = next(entry for entry in CLASS_FILE['triggers']
+                                  if entry['aura'] == ONE_WITH_THE_LIGHT and entry.get('kind') == COOLDOWN_DELTA_KIND
+                                  and entry.get('observe_spell') == 500694)
+        steps = cooldown_trial_steps(CLASS_FILE, one_with_the_light, 1, 'measured')
         before_index = next(index for index, step in enumerate(steps)
                             if step.get('label', '').endswith('0 before'))
-        self.assertNotEqual(steps[before_index + 1].get('action'), 'wait')
+        self.assertEqual(steps[before_index + 1]['action'], 'wait')
+        self.assertGreater(steps[before_index + 1]['ms'], 0)
 
 
 class CooldownDeltaForceCritTest(unittest.TestCase):

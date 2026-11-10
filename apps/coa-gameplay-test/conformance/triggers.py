@@ -248,9 +248,7 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
     interval = max(cast_interval(class_file, trigger['spell'], cooldown),
                    tick_spacing(class_file, facts, trigger['spell']))
     if entry.get('kind') == COOLDOWN_DELTA_KIND:
-        interval += cast_interval(class_file, entry['observe_spell'], 0)
-        if entry.get('observe_target'):
-            interval += cast_interval(class_file, entry['observe_spell'], 0)
+        interval += 2 * cast_interval(class_file, entry['observe_spell'], 0)
         interval += sum(cast_interval(class_file, spell, 0) for spell in entry.get('setup_casts', []))
     if entry.get('kind') == DURATION_DELTA_KIND:
         interval += cast_interval(class_file, entry['observe_spell'], 0)
@@ -501,6 +499,12 @@ def shares_cooldown_aura(class_file: dict, entry: dict) -> bool:
               if other.get('kind') == COOLDOWN_DELTA_KIND and other['aura'] == entry['aura']) > 1
 
 
+def shares_cooldown_effect(class_file: dict, entry: dict) -> bool:
+    return sum(1 for other in class_file.get('triggers', [])
+              if other.get('kind') == COOLDOWN_DELTA_KIND and other['aura'] == entry['aura']
+              and other.get('effect') == entry.get('effect')) > 1
+
+
 def cooldown_trial_label(aura: int, phase: str, index: int, moment: str) -> str:
     return f'{aura} trigger cooldown {phase} {index} {moment}'
 
@@ -533,8 +537,7 @@ def cooldown_trial_steps(class_file: dict, entry: dict, count: int, phase: str) 
         steps += cast_steps(observe_facts, entry['observe_spell'], observe_target, 0, 1)
         steps.append(measurement(cooldown_trial_label(aura, phase, index, 'before'), CASTER, 'cooldown_ms',
                                  spell=entry['observe_spell']))
-        if observe_target is not None:
-            steps.append({'action': 'wait', 'ms': observe_interval})
+        steps.append({'action': 'wait', 'ms': observe_interval})
         steps += cast_steps(trigger_facts, trigger['spell'], trigger_target, 0, 1)
         steps.append(measurement(cooldown_trial_label(aura, phase, index, 'after'), CASTER, 'cooldown_ms',
                                  spell=entry['observe_spell']))
@@ -569,7 +572,7 @@ def cooldown_trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> t
     steps = [{'action': 'learn', 'actor': CASTER, 'spell': trigger['spell']},
              {'action': 'learn', 'actor': CASTER, 'spell': entry['observe_spell']}]
     steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in entry.get('setup_casts', [])]
-    if trigger.get('target') == ALLY:
+    if trigger.get('target') == ALLY or entry.get('observe_target') == ALLY:
         steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
     if baseline:
         steps += cooldown_trial_steps(class_file, entry, baseline, 'baseline')
@@ -588,7 +591,7 @@ def cooldown_trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> t
         scenario['players'][0][FORCE_CRIT_RATINGS[force_crit]] = FORCED_CRIT_RATING
     if trigger['action'] == ATTACK or trigger.get('target') == TARGET or entry.get('observe_target') == TARGET:
         scenario['creatures'] = [creature_fixture(class_file)]
-    if trigger.get('target') == ALLY:
+    if trigger.get('target') == ALLY or entry.get('observe_target') == ALLY:
         scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
     model = {'part': part, 'parts': parts, 'scheduled_attempts': plan.scheduled, 'part_attempts': attempts,
             'baseline_attempts': baseline, 'attempt_ms': plan.attempt_ms, 'minimum_trials': TRIGGER_TRIALS,

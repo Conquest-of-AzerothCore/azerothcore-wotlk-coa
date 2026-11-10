@@ -26,8 +26,8 @@ from stack import PASSES, STACK_CHECKS, STACK_DPS, STACK_KIND, stack_scenarios
 from tooltip import read_tooltip
 from triggers import (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND, MAGNITUDE_RATIO_KIND, SELF_TRIGGER_KIND,
                       cooldown_trigger_scenario, duration_trigger_scenario, magnitude_ratio_scenario,
-                      self_trigger_scenario, shares_trigger_aura, trigger_entries, trigger_plan, trigger_scenario,
-                      trigger_status_expectation, trigger_unmodelled_expectation)
+                      self_trigger_scenario, shares_cooldown_effect, shares_trigger_aura, trigger_entries,
+                      trigger_plan, trigger_scenario, trigger_status_expectation, trigger_unmodelled_expectation)
 from values import Expectation, armed_for, dataset, static_conditional_known, structure_stats, value_scenario
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -202,6 +202,8 @@ def add_trigger(writer: ManifestWriter, entry: dict):
     aura, name = entry['aura'], entry['name']
     if entry.get('effect') is not None:
         key_parts = (aura, entry['effect'])
+        if entry.get('kind') == COOLDOWN_DELTA_KIND and shares_cooldown_effect(class_file, entry):
+            key_parts = (*key_parts, entry['observe_spell'])
     elif entry.get('kind') is None and not entry.get('status') and shares_trigger_aura(class_file, entry):
         key_parts = (aura, entry['trigger'].get('spell', entry['trigger']['action']))
     else:
