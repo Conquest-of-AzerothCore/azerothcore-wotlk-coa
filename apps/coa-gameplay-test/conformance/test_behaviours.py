@@ -1997,6 +1997,37 @@ class OathConsumptionScenarioTests(unittest.TestCase):
                            if step.get('label', '').endswith('oath_consumption_before'))
         self.assertTrue(before_step['periodic'])
 
+    def test_a_second_oath_spec_fixtures_both_oaths_together_and_checks_both_are_consumed(self):
+        spec = replace(self.ratio_spec(), other_oath_spell=OATH_CONDEMN)
+        scenario, [expectation] = oath_consumption_scenario(CLASS_FILE, spec)
+        validated = run.validate(scenario)
+        model = expectation.model
+        self.assertIn('other_oath_spell', model)
+        other_alone_step = next(step for step in validated['steps']
+                                if step.get('label') == model['other_alone_label'])
+        both_step = next(step for step in validated['steps'] if step.get('label') == model['both_label'])
+        other_stacks_step = next(step for step in validated['steps']
+                                 if step.get('label') == model['other_stacks_label'])
+        self.assertEqual(other_alone_step['metric'], 'spell_damage_done')
+        self.assertEqual(other_stacks_step['spell'], OATH_CONDEMN)
+        set_aura_steps = [step for step in validated['steps']
+                         if step.get('action') == 'set_aura' and step.get('spell') == OATH_RIGHTEOUS_LUNGE]
+        self.assertEqual([step['stacks'] for step in set_aura_steps], [1, 0, 1])
+        other_set_aura = next(step for step in validated['steps']
+                              if step.get('action') == 'set_aura' and step.get('spell') == OATH_CONDEMN)
+        self.assertEqual(other_set_aura['stacks'], 1)
+        other_alone_index = validated['steps'].index(other_alone_step)
+        both_index = validated['steps'].index(both_step)
+        cast_index = next(index for index, step in enumerate(validated['steps'])
+                          if step.get('action') == 'cast' and step.get('spell') == UPHEAVAL_BREAKER)
+        self.assertLess(other_alone_index, both_index)
+        self.assertLess(both_index, cast_index)
+
+    def test_no_second_oath_spec_omits_the_additive_measurements(self):
+        scenario, [expectation] = oath_consumption_scenario(CLASS_FILE, self.ratio_spec())
+        self.assertNotIn('other_oath_spell', expectation.model)
+        self.assertNotIn('both_label', expectation.model)
+
     def test_entries_from_the_class_file_round_trip_through_the_spec_parser(self):
         entries = [entry for entry in CLASS_FILE['behaviours'] if entry['kind'] == 'oath_consumption']
         self.assertEqual(len(entries), 5)
@@ -2073,6 +2104,63 @@ class JudgeOathConsumptionTests(unittest.TestCase):
         expectation = self.ratio_expectation()
         verdict = judge_behaviour(base_verdict(expectation), None, expectation)
         self.assertIn('no scenario', verdict.explanation)
+
+    def both_expectation(self):
+        expectation = self.ratio_expectation()
+        model = {**expectation.model, 'other_oath_spell': OATH_CONDEMN, 'other_alone_label': 'other_alone',
+                 'both_label': 'both', 'other_stacks_label': 'other_stacks'}
+        return replace(expectation, model=model)
+
+    def flat_both_expectation(self):
+        expectation = self.flat_expectation()
+        model = {**expectation.model, 'other_oath_spell': OATH_RIGHTEOUS_LUNGE, 'other_alone_label': 'other_alone',
+                 'both_label': 'both', 'other_stacks_label': 'other_stacks'}
+        return replace(expectation, model=model)
+
+    def test_a_both_delta_matching_the_multiplicative_product_and_both_oaths_consumed_is_ok(self):
+        expectation = self.both_expectation()
+        values = {'before': 800.0, 'after': 1092.0, 'stacks': 0.0, 'other_alone': 950.0, 'both': 1296.75,
+                  'other_stacks': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_a_both_delta_that_credits_only_one_oath_is_an_alert(self):
+        expectation = self.both_expectation()
+        values = {'before': 800.0, 'after': 1092.0, 'stacks': 0.0, 'other_alone': 950.0, 'both': 1092.0,
+                  'other_stacks': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('not additive', verdict.explanation)
+
+    def test_a_second_oath_not_consumed_by_the_cast_is_an_alert(self):
+        expectation = self.both_expectation()
+        values = {'before': 800.0, 'after': 1092.0, 'stacks': 0.0, 'other_alone': 950.0, 'both': 1296.75,
+                  'other_stacks': 1.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('every held Oath', verdict.explanation)
+
+    def test_a_non_contributing_second_oath_still_consumed_is_ok(self):
+        expectation = self.flat_both_expectation()
+        values = {'before': 1000.0, 'after': 1025.0, 'stacks': 0.0, 'other_alone': 1000.0, 'both': 1025.0,
+                  'other_stacks': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_a_non_contributing_second_oath_not_consumed_is_an_alert(self):
+        expectation = self.flat_both_expectation()
+        values = {'before': 1000.0, 'after': 1025.0, 'stacks': 0.0, 'other_alone': 1000.0, 'both': 1025.0,
+                  'other_stacks': 1.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('every held Oath', verdict.explanation)
+
+    def test_missing_both_measurement_leaves_alert_with_explanation(self):
+        expectation = self.both_expectation()
+        values = {'before': 800.0, 'after': 1092.0, 'stacks': 0.0, 'other_alone': 950.0, 'other_stacks': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('both', verdict.explanation)
 
 
 RIGHTEOUS_LUNGE = 570233

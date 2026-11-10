@@ -1007,6 +1007,7 @@ class OathConsumptionSpec:
     effect: int = 0
     periodic: bool = False
     target: str = TARGET
+    other_oath_spell: int = 0
 
 
 def oath_consumption_label(spec: OathConsumptionSpec, moment: str) -> str:
@@ -1028,6 +1029,16 @@ def oath_consumption_scenario(class_file: dict, spec: OathConsumptionSpec) -> tu
     steps = [measurement(before_label, CASTER, spec.metric, **read_fields),
              {'action': 'set_aura', 'actor': CASTER, 'spell': spec.oath_spell, 'stacks': 1},
              measurement(after_label, CASTER, spec.metric, **read_fields)]
+    other_alone_label = other_label = other_stacks_label = None
+    if spec.other_oath_spell:
+        other_alone_label = f'{spec.other_oath_spell} {spec.metric} oath_consumption_other_alone'
+        other_label = f'{spec.oath_spell}+{spec.other_oath_spell} {spec.metric} oath_consumption_both'
+        other_stacks_label = f'{spec.other_oath_spell} aura_stacks oath_consumption {spec.spell} after'
+        steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spec.oath_spell, 'stacks': 0},
+                 {'action': 'set_aura', 'actor': CASTER, 'spell': spec.other_oath_spell, 'stacks': 1},
+                 measurement(other_alone_label, CASTER, spec.metric, **read_fields),
+                 {'action': 'set_aura', 'actor': CASTER, 'spell': spec.oath_spell, 'stacks': 1},
+                 measurement(other_label, CASTER, spec.metric, **read_fields)]
     if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
         steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
                      'value': facts.mana_cost})
@@ -1036,6 +1047,17 @@ def oath_consumption_scenario(class_file: dict, spec: OathConsumptionSpec) -> tu
     steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': spec.target})
     steps.append({'action': 'wait', 'ms': OATH_CONSUMPTION_SETTLE_MS})
     steps.append(measurement(stacks_label, CASTER, 'aura_stacks', spell=spec.oath_spell))
+    if spec.other_oath_spell:
+        steps.append(measurement(other_stacks_label, CASTER, 'aura_stacks', spell=spec.other_oath_spell))
+    other_contract = ''
+    if spec.other_oath_spell:
+        other_contract = (f' A second, different Oath aura {spec.other_oath_spell} is also fixtured alone (with '
+                          f'{spec.oath_spell} cleared) and then together with {spec.oath_spell}; the combined '
+                          f'reading must match each Oath\'s own standalone contribution over the no-Oath baseline '
+                          f'(ratio relations compound multiplicatively, flat relations add), proving the plural '
+                          f'"for each consumed" wording credits distinct held Oaths rather than crediting only '
+                          f'one. {spec.other_oath_spell}\'s own aura_stacks must also read 0 after the cast: every '
+                          f'held Oath type is consumed, not just the one this metric happens to measure.')
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour oath consumption',
@@ -1044,7 +1066,8 @@ def oath_consumption_scenario(class_file: dict, spec: OathConsumptionSpec) -> tu
                     f'cast), a deterministic formula call with no combat roll; the {spec.relation} delta between '
                     f'the two readings must match the Oath\'s own Spell.dbc SpellMod effect. {spec.trigger_spell} '
                     f'is then actually cast once and {spec.oath_spell}\'s aura_stacks is read afterward, which '
-                    f'must read 0: casting a Breaker spell consumes the Oath (AscensionTemplar.cpp ClearOaths).',
+                    f'must read 0: casting a Breaker spell consumes the Oath (AscensionTemplar.cpp '
+                    f'ClearOaths).{other_contract}',
         'players': [player_fixture(class_file)],
         'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}]
                  + steps}
@@ -1054,6 +1077,9 @@ def oath_consumption_scenario(class_file: dict, spec: OathConsumptionSpec) -> tu
     model = {'kind': 'oath_consumption', 'before_label': before_label, 'after_label': after_label,
             'stacks_label': stacks_label, 'relation': spec.relation, 'expected': spec.expected,
             'metric': spec.metric, 'oath_spell': spec.oath_spell, 'quote': entry.quote}
+    if spec.other_oath_spell:
+        model.update(other_oath_spell=spec.other_oath_spell, other_alone_label=other_alone_label,
+                     both_label=other_label, other_stacks_label=other_stacks_label)
     expectation = Expectation(label, BEHAVIOUR_OATH_CONSUMPTION, spec.spell, spec.trigger_spell, None,
                               str(spec.expected), prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]
@@ -1062,7 +1088,8 @@ def oath_consumption_scenario(class_file: dict, spec: OathConsumptionSpec) -> tu
 def oath_consumption_spec(entry: dict) -> OathConsumptionSpec:
     return OathConsumptionSpec(entry['spell'], entry['name'], entry['quote'], entry['trigger_spell'],
                                entry['oath_spell'], entry['relation'], entry['expected'], entry['metric'],
-                               entry.get('effect', 0), entry.get('periodic', False), entry.get('target', TARGET))
+                               entry.get('effect', 0), entry.get('periodic', False), entry.get('target', TARGET),
+                               entry.get('other_oath_spell', 0))
 
 
 OATH_CONSUMPTION_REMOVAL_SETTLE_MS = 500

@@ -2133,6 +2133,46 @@ def behaviour_oath_consumption_verdict(base: Verdict, run: Run, model: dict) -> 
                           explanation=verdict.explanation + f'; {model["stacks_label"]} measured {stacks:g} after '
                                       f'actually casting the trigger spell (expected 0: the Oath must be consumed, '
                                       f'not just read, {model["quote"]!r})')
+    if model.get('other_oath_spell') and verdict.status in ('ok', 'tolerated'):
+        other_labels = ('other_alone_label', 'both_label', 'other_stacks_label')
+        other_values = {label: run.values.get(model[label]) for label in other_labels}
+        other_missing = next((model[label] for label, value in other_values.items() if value is None), None)
+        if other_missing:
+            return replace(base, explanation=missing_measurement(run, other_missing))
+        other_alone, both, other_stacks = (other_values['other_alone_label'], other_values['both_label'],
+                                           other_values['other_stacks_label'])
+        other_delta = other_alone - before
+        if model['relation'] == 'ratio':
+            expected_both = after * other_alone / before if before else before
+            combine_why = (f'both Oaths\' own ratio multipliers over the no-Oath baseline compound '
+                           f'({after:g}/{before:g} * {other_alone:g}/{before:g})')
+        else:
+            expected_both = before + delta + other_delta
+            combine_why = 'both Oaths\' own flat deltas over the no-Oath baseline sum'
+        expected_both_delta = expected_both - before
+        both_delta = both - before
+        margin = margin_of(expected_both_delta)
+        both_status = banded_status(both_delta, expected_both_delta - margin, expected_both_delta + margin,
+                                    expected_both_delta)
+        if both_status == 'alert':
+            verdict = replace(verdict, status='alert', measured=both_delta, expected=expected_both_delta,
+                              explanation=verdict.explanation +
+                              f'; holding both {model["oath_spell"]} and {model["other_oath_spell"]} together '
+                              f'measured {model["metric"]} delta {both_delta:+g}, not what {combine_why} predicts '
+                              f'({expected_both_delta:+g}): "for each consumed" is not additive across distinct '
+                              f'Oaths ({model["quote"]!r})')
+        elif both_status == 'tolerated' and verdict.status == 'ok':
+            verdict = replace(verdict, status='tolerated', measured=both_delta, expected=expected_both_delta,
+                              explanation=verdict.explanation +
+                              f'; the combined delta {both_delta:+g} deviates from what {combine_why} predicts '
+                              f'{expected_both_delta:+g} by more than the usual band but within '
+                              f'{TOLERATED_RELATIVE:.0%}: tolerated')
+        if other_stacks != 0 and verdict.status in ('ok', 'tolerated'):
+            verdict = replace(verdict, status='alert',
+                              explanation=verdict.explanation +
+                              f'; {model["other_stacks_label"]} measured {other_stacks:g} after actually casting '
+                              f'the trigger spell (expected 0: every held Oath must be consumed, not just '
+                              f'{model["oath_spell"]}, {model["quote"]!r})')
     return verdict
 
 
