@@ -2271,6 +2271,9 @@ def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> V
         return replace(base, explanation=missing_measurement(run, missing))
     own_pct, partner_pct = model['own_pct'], model['partner_pct']
     personal_pct = model.get('personal_pct', 0.0)
+    mechanism = model.get('mechanism', 'spell_group')
+    mechanism_phrase = ('same spell_group SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT membership' if
+                        mechanism == 'spell_group' else "the same aura type's global cap, no spell_group needed")
     cap_pct = max(own_pct, partner_pct)
     own_expected = baseline * (1 + own_pct / 100) * (1 + personal_pct / 100)
     combined_expected = baseline * (1 + cap_pct / 100) * (1 + personal_pct / 100)
@@ -2283,8 +2286,7 @@ def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> V
                    low=combined_expected - combined_margin, high=combined_expected + combined_margin,
                    explanation=f'baseline {baseline:g}; after learning the own passive alone, measured {own:g} '
                                f'against expected {own_expected:g} (+{own_pct:g}%, +/-{own_margin:g}); after also '
-                               f'learning the partner ({partner_pct:g}%, same spell_group '
-                               f'SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT membership), measured {combined:g} '
+                               f'learning the partner ({partner_pct:g}%, {mechanism_phrase}), measured {combined:g} '
                                f'against expected {combined_expected:g} (capped at the stronger +{cap_pct:g}%, '
                                f'+/-{combined_margin:g}); a combined reading that reflects the sum of both '
                                f'percentages instead of their cap is always an alert')

@@ -1377,10 +1377,19 @@ class GroupStackCapSpec:
     fields: dict
     personal_effect: int | None = None
     wait_ms: int = GROUP_STACK_CAP_LEARN_WAIT_MS
+    mechanism: str = 'spell_group'
 
 
 def group_stack_cap_label(spec: GroupStackCapSpec, moment: str) -> str:
     return f'{spec.spell} {spec.partner} {spec.metric} {moment}'
+
+
+GROUP_STACK_CAP_MECHANISM_PHRASES = {
+    'spell_group': 'a different spell carrying the identical SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT '
+                   'spell_group membership (stock Unit::GetHighestExclusiveSameEffectSpellGroupValue)',
+    'aura_cap': "a different spell whose own aura is capped by the same aura type's global cap (stock "
+                'Unit::GetMaxPositiveAuraModifier), with no spell_group row needed at all',
+}
 
 
 def group_stack_cap_scenario(class_file: dict, spec: GroupStackCapSpec) -> tuple[dict, list[Expectation]]:
@@ -1400,19 +1409,19 @@ def group_stack_cap_scenario(class_file: dict, spec: GroupStackCapSpec) -> tuple
     steps.append({'action': 'learn', 'actor': CASTER, 'spell': spec.partner})
     steps.append({'action': 'wait', 'ms': spec.wait_ms})
     steps.append(measurement(combined_label, CASTER, spec.metric, **spec.fields))
+    mechanism_phrase = GROUP_STACK_CAP_MECHANISM_PHRASES[spec.mechanism]
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour group stack cap',
         'contract': f'Reads {spec.metric} with neither passive known, after learning {spec.spell} alone '
-                    f'({own_pct:g}%, effect {spec.effect}, plus an uncapped personal {personal_pct:g}% from '
-                    f'effect {spec.personal_effect} when one is given), waiting {spec.wait_ms} ms for the area '
-                    f'aura\'s own target-map rescan (Aura::UpdateOwner, SpellAuras.cpp) to reach the caster, and '
-                    f'again after additionally learning {spec.partner} ({partner_pct:g}%, effect '
-                    f'{spec.partner_effect}), a different spell carrying the identical '
-                    f'SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT spell_group membership (stock '
-                    f'Unit::GetHighestExclusiveSameEffectSpellGroupValue): {spec.quote!r}. The combined reading '
-                    f'must reflect only the stronger of the two area-aura percentages, never their sum, while any '
-                    f'separate personal (non-area) effect of {spec.spell} keeps applying in full.',
+                    f'({own_pct:g}%, effect {spec.effect}, plus an uncapped personal '
+                    f'{personal_pct:g}% from effect {spec.personal_effect} when one is given), waiting '
+                    f'{spec.wait_ms} ms for the area aura\'s own target-map rescan (Aura::UpdateOwner, '
+                    f'SpellAuras.cpp) to reach the caster, and again after additionally learning {spec.partner} '
+                    f'({partner_pct:g}%, effect {spec.partner_effect}), {mechanism_phrase}: {spec.quote!r}. The '
+                    f'combined reading must reflect only the stronger of the two area-aura percentages, never '
+                    f'their sum, while any separate personal (non-area) effect of {spec.spell} keeps applying '
+                    f'in full.',
         'players': [player_fixture(class_file)],
         'steps': steps}
     if spec.fields.get('target') == TARGET:
@@ -1420,6 +1429,7 @@ def group_stack_cap_scenario(class_file: dict, spec: GroupStackCapSpec) -> tuple
     label = f'{spec.spell} behaviour_group_stack_cap'
     model = {'kind': 'group_stack_cap', 'baseline_label': baseline_label, 'own_label': own_label,
              'combined_label': combined_label, 'own_pct': own_pct, 'partner_pct': partner_pct,
+             'mechanism': spec.mechanism,
              'personal_pct': personal_pct, 'quote': entry.quote}
     expectation = Expectation(label, BEHAVIOUR_GROUP_STACK_CAP, spec.spell, spec.partner, None,
                               str(max(own_pct, partner_pct)), prose_rule(entry.quote, spec.spell), model)
@@ -1429,7 +1439,8 @@ def group_stack_cap_scenario(class_file: dict, spec: GroupStackCapSpec) -> tuple
 def group_stack_cap_spec(entry: dict) -> GroupStackCapSpec:
     return GroupStackCapSpec(entry['spell'], entry['name'], entry['quote'], entry['effect'], entry['partner'],
                              entry['partner_effect'], entry['metric'], entry.get('fields', {}),
-                             entry.get('personal_effect'), entry.get('wait_ms', GROUP_STACK_CAP_LEARN_WAIT_MS))
+                             entry.get('personal_effect'), entry.get('wait_ms', GROUP_STACK_CAP_LEARN_WAIT_MS),
+                             entry.get('mechanism', 'spell_group'))
 
 
 SINGLE_TARGET_CAST_WAIT_MS = 300

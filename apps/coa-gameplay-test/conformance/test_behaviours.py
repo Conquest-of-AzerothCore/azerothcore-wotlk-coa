@@ -97,6 +97,8 @@ RUNIC_POWER = 300944
 CALL_OF_THE_MONASTERY = 560550
 UNLEASHED_RAGE = 30802
 RIGHTEOUS_CUSTODIAN = 572808
+FORTIFIED_BODY = 300515
+TREE_OF_LIFE = 34123
 
 
 def scarlet_judicator_entry() -> dict:
@@ -202,6 +204,11 @@ def serendipity_group_stack_cap_entry() -> dict:
 def call_of_the_monastery_group_stack_cap_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours']
                if entry['spell'] == CALL_OF_THE_MONASTERY and entry['kind'] == 'group_stack_cap')
+
+
+def fortified_body_group_stack_cap_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == FORTIFIED_BODY and entry['kind'] == 'group_stack_cap')
 
 
 def righteous_custodian_single_target_entry() -> dict:
@@ -392,7 +399,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 44)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 45)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1478,6 +1485,29 @@ class GroupStackCapScenarioTests(unittest.TestCase):
         scenario, _ = group_stack_cap_scenario(CLASS_FILE, spec)
         self.assertIn('creatures', scenario)
         self.assertGreaterEqual(len(scenario['creatures']), 1)
+
+    def test_mechanism_defaults_to_spell_group_for_entries_that_do_not_set_it(self):
+        spec = group_stack_cap_spec(serendipity_group_stack_cap_entry())
+        self.assertEqual(spec.mechanism, 'spell_group')
+        _, expectations = group_stack_cap_scenario(CLASS_FILE, spec)
+        self.assertEqual(expectations[0].model['mechanism'], 'spell_group')
+
+    def test_aura_cap_entry_is_a_healing_taken_self_query_with_no_creature_fixture(self):
+        spec = group_stack_cap_spec(fortified_body_group_stack_cap_entry())
+        self.assertEqual(spec.mechanism, 'aura_cap')
+        self.assertEqual(spec.metric, 'spell_healing_taken')
+        self.assertEqual(spec.fields, {'spell': BENEDICTION, 'target': 'caster'})
+        scenario, expectations = group_stack_cap_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertNotIn('creatures', scenario)
+        self.assertEqual(expectations[0].model['mechanism'], 'aura_cap')
+
+    def test_an_unknown_mechanism_raises_rather_than_silently_mislabel_the_contract(self):
+        entry = dict(fortified_body_group_stack_cap_entry())
+        entry['mechanism'] = 'not_a_real_mechanism'
+        spec = group_stack_cap_spec(entry)
+        with self.assertRaises(KeyError):
+            group_stack_cap_scenario(CLASS_FILE, spec)
 
 
 class SingleTargetScenarioTests(unittest.TestCase):
@@ -2831,6 +2861,31 @@ class JudgeGroupStackCapTests(unittest.TestCase):
         expectation = self.expectation()
         verdict = judge_behaviour(base_verdict(expectation), None, expectation)
         self.assertIn('no scenario', verdict.explanation)
+
+    def test_spell_group_mechanism_explanation_names_the_spell_group_rule(self):
+        expectation = self.expectation(own_pct=5.0, partner_pct=4.0)
+        expectation.model['mechanism'] = 'spell_group'
+        baseline = 1000.0
+        run = FakeRun({'baseline': baseline, 'own': baseline * 1.05, 'combined': baseline * 1.05})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertIn('SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT', verdict.explanation)
+
+    def test_aura_cap_mechanism_explanation_does_not_claim_a_spell_group(self):
+        expectation = self.expectation(own_pct=6.0, partner_pct=6.0)
+        expectation.model['mechanism'] = 'aura_cap'
+        baseline = 1000.0
+        run = FakeRun({'baseline': baseline, 'own': baseline * 1.06, 'combined': baseline * 1.06})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertNotIn('SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT', verdict.explanation)
+        self.assertIn('global cap', verdict.explanation)
+
+    def test_aura_cap_mechanism_still_catches_a_summed_combined_reading(self):
+        expectation = self.expectation(own_pct=6.0, partner_pct=6.0)
+        expectation.model['mechanism'] = 'aura_cap'
+        baseline = 1000.0
+        run = FakeRun({'baseline': baseline, 'own': baseline * 1.06, 'combined': baseline * 1.12})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
 
 
 class JudgeSingleTargetTests(unittest.TestCase):
