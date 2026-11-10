@@ -17,6 +17,8 @@ DURATION_DELTA_KIND = 'duration_delta'
 DURATION_CHECK = 'trigger_duration_delta'
 MAGNITUDE_RATIO_KIND = 'magnitude_ratio'
 MAGNITUDE_CHECK = 'trigger_magnitude_ratio'
+SELF_TRIGGER_KIND = 'self_trigger'
+SELF_TRIGGER_CHECK = 'self_trigger_count'
 MAGNITUDE_TRIGGER_METRICS_BY_ACTION = {'cast': frozenset({'spell_damage_total'}),
                                        'attack': frozenset({'melee_damage_total'})}
 MAGNITUDE_OBSERVE_METRICS = frozenset({'spell_damage_total', 'spell_heal_total'})
@@ -136,6 +138,38 @@ def checked_magnitude_entry(entry: dict) -> dict:
     return entry
 
 
+def checked_self_trigger_entry(entry: dict) -> dict:
+    aura = entry['aura']
+    trigger = entry['trigger']
+    if trigger['action'] != CAST:
+        raise ValueError(f'Self-trigger {aura} must cast, not {trigger["action"]!r}')
+    if trigger['spell'] != aura:
+        raise ValueError(f'Self-trigger {aura} trigger spell must equal the aura (its own cast is the trigger, '
+                         f'with no separate passive to gate a baseline against), not {trigger["spell"]}')
+    if trigger.get('target') not in TRIGGER_TARGETS:
+        raise ValueError(f'Self-trigger {aura} casts at {trigger.get("target")!r}, not one of '
+                         f'{sorted(TRIGGER_TARGETS)}')
+    if entry['trial_metric'] not in TRIAL_METRICS[CAST]:
+        raise ValueError(f'Trial metric {entry["trial_metric"]!r} of self-trigger {aura} does not count a cast')
+    if entry['observe_metric'] not in OBSERVE_METRICS:
+        raise ValueError(f'Unknown observe metric {entry["observe_metric"]!r} of self-trigger {aura}')
+    if entry.get('observe_actor', CASTER) not in OBSERVE_ACTORS:
+        raise ValueError(f'Unknown observe actor {entry.get("observe_actor")!r} of self-trigger {aura}')
+    if not 0 < entry['per_trigger'] <= 1:
+        raise ValueError(f'Self-trigger {aura} has {entry["per_trigger"]} events per trigger')
+    if any(not isinstance(spell, int) for spell in entry.get('co_learn', [])):
+        raise ValueError(f'Self-trigger {aura} has a non-integer co_learn spell')
+    if entry.get('force_crit') is not None and entry['force_crit'] not in FORCE_CRIT_RATINGS:
+        raise ValueError(f'Self-trigger {aura} has an unknown force_crit {entry["force_crit"]!r}, not one of '
+                         f'{sorted(FORCE_CRIT_RATINGS)}')
+    factor = entry.get('trial_attempts_factor', 1)
+    if factor < 1:
+        raise ValueError(f'Self-trigger {aura} has a trial attempts factor below 1')
+    if factor != 1 and not entry.get('trial_attempts_reason'):
+        raise ValueError(f'Self-trigger {aura} scales its trial attempts without a reason')
+    return entry
+
+
 def checked_entry(entry: dict) -> dict:
     aura = entry['aura']
     if entry.get('status'):
@@ -146,6 +180,8 @@ def checked_entry(entry: dict) -> dict:
         return checked_duration_entry(entry)
     if entry.get('kind') == MAGNITUDE_RATIO_KIND:
         return checked_magnitude_entry(entry)
+    if entry.get('kind') == SELF_TRIGGER_KIND:
+        return checked_self_trigger_entry(entry)
     trigger = entry['trigger']
     if trigger['action'] not in TRIAL_METRICS:
         raise ValueError(f'Unknown trigger action {trigger["action"]!r} of trigger {aura}')
@@ -394,6 +430,65 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
                               trigger_rule(entry), model)
     baseline_ms = baseline * plan.attempt_ms + DRAIN_MS if baseline else 0
     return timed(scenario, SETTLE_MS + baseline_ms + attempts * plan.attempt_ms + DRAIN_MS), [expectation]
+
+
+def self_trigger_label(aura: int) -> str:
+    return f'{aura} self_trigger_count'
+
+
+def self_trigger_rule(entry: dict) -> str:
+    trial = entry['trial_metric'] + f' of {entry["trigger"]["spell"]}'
+    fixtures = ''.join(f'; before each attempt aura {aura["spell"]} set to {aura["stacks"]} stacks ({aura["source"]})'
+                       for aura in entry.get('attempt_auras', []))
+    fixtures += ''.join(f'; {entry["aura"]} also learns {spell}' for spell in entry.get('co_learn', []))
+    if entry.get('force_crit'):
+        fixtures += f'; every attempt forced to crit ({entry["force_crit"]})'
+    factor = entry.get('trial_attempts_factor', 1)
+    scaled = f'; scheduled attempts x{factor:g} ({entry["trial_attempts_reason"]})' if factor != 1 else ''
+    on_target = ' on the target' if entry.get('observe_actor') == 'target' else ''
+    return (f'|events - trials x per_trigger| <= {EVENT_TOLERANCE} over at least {TRIGGER_TRIALS} trials; the '
+            f'trigger spell is its own tooltip clause, with no separate passive to gate a baseline against; '
+            f'trials: {trial}; events: {entry["observe_metric"]} of {entry["observe_spell"]}{on_target} '
+            f'({entry["observe_source"]}); {entry["per_trigger"]:g} per trigger ("{entry["per_trigger_text"]}")'
+            f'{fixtures}{scaled}')
+
+
+def self_trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict, list[Expectation]]:
+    class_file = armed_for(class_file, records_of(class_file), entry['trigger']['spell'])
+    plan = trigger_plan(class_file, entry)
+    if not 0 <= part < len(plan.part_attempts):
+        raise ValueError(f'Trigger {entry["aura"]} has parts 0 to {len(plan.part_attempts) - 1}, not {part}')
+    aura, trigger = entry['aura'], entry['trigger']
+    labels = trigger_measurements(aura)
+    attempts = plan.part_attempts[part]
+    steps = [{'action': 'learn', 'actor': CASTER, 'spell': aura}]
+    if trigger.get('target') == ALLY:
+        steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
+    steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in entry.get('co_learn', [])]
+    steps += attempt_steps(class_file, entry, plan, attempts, '')
+    steps += counts(entry, labels['trials'], labels['events'])
+    parts = len(plan.part_attempts)
+    name = f'Conformance trigger {class_file["name"]} {entry["name"]} {aura} self part {part + 1} of {parts}'
+    contract = ('Events of a self-triggering cast, whose own tooltip clause is the trigger with no separate '
+               'passive to gate a baseline against: judged over its scheduled trials, against its tooltip.')
+    scenario = scenario_shell(class_file, name, contract, steps)
+    force_crit = entry.get('force_crit')
+    if force_crit:
+        scenario['players'][0][FORCE_CRIT_RATINGS[force_crit]] = FORCED_CRIT_RATING
+    if trigger.get('target') == TARGET:
+        scenario['creatures'] = [creature_fixture(class_file)]
+    if trigger.get('target') == ALLY:
+        scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
+    model = {'part': part, 'parts': parts, 'scheduled_attempts': plan.scheduled, 'part_attempts': attempts,
+             'attempt_ms': plan.attempt_ms, 'minimum_trials': TRIGGER_TRIALS, 'per_trigger': entry['per_trigger'],
+             'trigger': dict(trigger), 'trial_metric': entry['trial_metric'], 'observe_spell': entry['observe_spell'],
+             'observe_metric': entry['observe_metric'], 'observe_actor': entry.get('observe_actor', CASTER),
+             'attempt_auras': [dict(aura) for aura in entry.get('attempt_auras', [])],
+             'co_learn': list(entry.get('co_learn', [])), 'force_crit': force_crit,
+             'trial_attempts_factor': entry.get('trial_attempts_factor', 1), 'measurements': labels}
+    expectation = Expectation(self_trigger_label(aura), SELF_TRIGGER_CHECK, aura, aura, None, entry['trigger_text'],
+                              self_trigger_rule(entry), model)
+    return timed(scenario, SETTLE_MS + attempts * plan.attempt_ms + DRAIN_MS), [expectation]
 
 
 def cooldown_label(aura: int, observe_spell: int | None = None) -> str:

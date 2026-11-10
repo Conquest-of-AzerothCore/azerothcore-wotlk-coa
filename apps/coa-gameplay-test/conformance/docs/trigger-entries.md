@@ -515,3 +515,41 @@ that depends on it running afterward — reproduced twice (Condemnation's three 
 ~15%, same rebuilt binary sha256 as the passing baseline). Both halves measured `ok` after the new-file fix,
 in two independent full runs.
 
+### Self-trigger entries
+
+A `kind: "self_trigger"` entry is for a tooltip clause whose own cast is unconditionally its own trigger, with
+no separate passive to learn and gate a baseline against (`trigger.spell == aura`): "Applies X" or "triggering
+Y" stated on the ability's own tooltip, not on a passive that modifies it. The default `trigger_count` shape
+cannot prove this (ADR 0055): it always learns `trigger.spell` before running a baseline phase (needed to cast
+it at all), so when the aura *is* the trigger spell that `learn` already teaches it before the baseline/measured
+split exists, and `judge_trigger`'s own guard then forces the verdict to `unmeasured` by design, since no part
+ever carries a real "without the passive" baseline.
+
+Fields: the same `trigger` (`action: "cast"` only, `trigger.spell` must equal `aura`), `trial_metric`,
+`observe_spell`/`observe_source`/`observe_metric`/`observe_actor`, `per_trigger`/`per_trigger_text`, `co_learn`,
+`force_crit`, `attempt_auras` and `trial_attempts_factor`/`trial_attempts_reason` as the default shape.
+`checked_self_trigger_entry` enforces `trigger.spell == aura` and runs the rest of the default shape's checks.
+`self_trigger_scenario` reuses `trigger_plan`/`attempt_interval`/`attempt_steps`/`counts` with no baseline phase
+at all: it learns the aura once, runs every scheduled attempt as a single measured phase, and reads `trials`/
+`events` once at the end — no "aura present" measurement, since an active ability learned into the spellbook is
+not an aura to check presence of. `judge_self_trigger` sums `trials`/`events` across parts and judges `events`
+against `trials x per_trigger` exactly like `judge_trigger`'s own measured-phase arithmetic, with no baseline
+or "absent passive" branch: a part with no measurement at all is an `alert` (there is no corresponding "the
+passive was absent, as expected" case left to distinguish it from).
+
+Testament of Fortitude 500678 (round10 `proc-chains`): "Applies Sacred Restraint for $102208d" —
+`EffectTriggerSpell[2]` of 500678 is 102208 (`Effect[2]` `SPELL_EFFECT_TRIGGER_SPELL`), cast on every cast of
+500678 itself; `observe_metric: "aura_apply_count"` of 102208. Two independent runs each measured 273/273,
+`self_trigger_count` `ok`.
+
+Vindication 573324 (round10 `proc-chains`): "triggering Zealotry" — `AscensionTemplarAbilities.cpp:305-307`
+(`OnSpellHitResult`) casts Zealotry (801450) unconditionally on every landed hit of the Vindication chain
+(`Named(info, 801446)`). A first run with no `attempt_auras` fixture measured 501 events over 273 trials, far
+above `per_trigger: 1` — reproduced, not an artifact: every Vindication cast also unconditionally grants/stacks
+Oath: Vindication (805332) via `GrantOath()` (`AscensionTemplarAbilities.cpp:155-162`, `OnSpellCast`), and that
+aura's own roll (`AscensionTemplarAbilities.cpp:311-313`) adds a second, cumulative Zealotry trigger as the
+stack grows across repeated casts — the tooltip's own separate "Oath" clause, not this one. An `attempt_auras`
+fixture (`{"spell": 805332, "stacks": 0, ...}`, the existing `set_aura` action with `stacks: 0`, which already
+removes the aura regardless of caster) clears the Oath before every attempt. Two independent runs after that
+fix each measured 273/273, `self_trigger_count` `ok`; the Oath's own chance clause remains separately unproven.
+

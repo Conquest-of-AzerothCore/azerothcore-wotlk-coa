@@ -27,8 +27,8 @@ from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUE
 from stack import (ADDS, MEASURED, MELEE_SOURCE, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE, TALENT_DELTA,
                    levers, mean_interval, ratio_interval)
 from tooltip import CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, Unreadable
-from triggers import (COOLDOWN_CHECK, DURATION_CHECK, EVENT_TOLERANCE, MAGNITUDE_CHECK, PERIODIC, TRIGGER_CHECK,
-                      cooldown_trial_label, duration_trial_label)
+from triggers import (COOLDOWN_CHECK, DURATION_CHECK, EVENT_TOLERANCE, MAGNITUDE_CHECK, PERIODIC,
+                      SELF_TRIGGER_CHECK, TRIGGER_CHECK, cooldown_trial_label, duration_trial_label)
 from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECTS, FIXED_DIE_SIDES, GENERIC, UNMEASURABLE, UNREADABLE,
                     Expectation, dataset, mean_samples, roll_range, sample_labels)
 
@@ -89,7 +89,7 @@ ADDITIVE_RELATIONS = frozenset({'add', 'share'})
 TRUNCATED_METRICS = frozenset({'stat'})
 CLASS_ENTRIES = {PROC_CHECK: ('procs', 'aura'), TRIGGER_CHECK: ('triggers', 'aura'),
                  COOLDOWN_CHECK: ('triggers', 'aura'), DURATION_CHECK: ('triggers', 'aura'),
-                 TALENT_DELTA: ('talent_modifiers', 'talent')}
+                 SELF_TRIGGER_CHECK: ('triggers', 'aura'), TALENT_DELTA: ('talent_modifiers', 'talent')}
 PER_LEVEL_TOKEN = re.compile(r'\$\d*ppl\d')
 DESCRIPTION_VARIABLE = re.compile(r'\$<\w+>')
 SENTENCE_END = re.compile(r'[.!?](?=\s|$|[$@])|\n')
@@ -895,6 +895,48 @@ def judge_trigger(parts: list[ProcPart]) -> Verdict:
                                    f'tied to the passive ({notes})')
     return replace(judged, status=status, explanation=f'{counts}; no event in {baseline[0]:g} baseline trials '
                                                       f'without the passive; {expectation.rule} ({notes})')
+
+
+def judge_self_trigger(parts: list[ProcPart]) -> Verdict:
+    first_entry, _, expectation = parts[0]
+    model = expectation.model
+    base = Verdict(expectation.label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
+                   expectation.rank_id, expectation.check)
+    labels = model['measurements']
+    observed = f'{model["observe_metric"]} of {model["observe_spell"]}'
+    trials = events = 0.0
+    counted, unmeasured, reasons = [], [], []
+    for _, run, part in parts:
+        reasons += failure_reasons(run, model['trigger']['spell'])
+        total_trials = run.values.get(labels['trials'])
+        total_events = run.values.get(labels['events'])
+        if total_trials is None or total_events is None:
+            unmeasured.append(f'{run.key} ({run.status}: {run.message})')
+            continue
+        counted.append(run.key)
+        trials += total_trials
+        events += total_events
+    notes = f'{len(counted)} of {model["parts"]} parts'
+    if unmeasured:
+        notes += f'; no trigger measurements in {", ".join(unmeasured)}'
+    if reasons:
+        notes += f'; failed casts: {describe_failures(reasons)}'
+    if trials <= 0:
+        status = 'alert' if unmeasured else 'unmeasured'
+        return replace(base, status=status, explanation=f'no usable trial ({notes})')
+    expected = trials * model['per_trigger']
+    low, high = expected - EVENT_TOLERANCE, expected + EVENT_TOLERANCE
+    counts = (f'{events:g} events ({observed}) in {trials:g} trials ({model["trial_metric"]} of '
+              f'{model["trigger"]["spell"]}), {model["per_trigger"]:g} per trigger expects {expected:g}')
+    judged = replace(base, measured=events, expected=expected, low=low, high=high)
+    if trials < model['minimum_trials']:
+        return replace(judged, status='insufficient_trials',
+                       explanation=f'{counts}; fewer than the {model["minimum_trials"]} trials the check needs '
+                                   f'({notes})')
+    status = 'ok' if low - FLOAT_EPSILON <= events <= high + FLOAT_EPSILON else 'alert'
+    return replace(judged, status=status,
+                   explanation=f'{counts}; the trigger spell is its own tooltip clause, with no separate passive to '
+                               f'gate a baseline against; {expectation.rule} ({notes})')
 
 
 def elapsed_between(run: Run, start_label: str, end_label: str) -> float | None:
@@ -2681,8 +2723,8 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                 delta_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             elif expectation.check in STACK_CHECKS and run is not None:
                 stack_parts.setdefault(expectation.label, []).append((entry, run, expectation))
-            elif expectation.check in (TRIGGER_CHECK, COOLDOWN_CHECK, DURATION_CHECK, MAGNITUDE_CHECK) \
-                    and run is not None:
+            elif expectation.check in (TRIGGER_CHECK, COOLDOWN_CHECK, DURATION_CHECK, MAGNITUDE_CHECK,
+                                       SELF_TRIGGER_CHECK) and run is not None:
                 trigger_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             elif expectation.check in HIT_CHECKS and expectation.model and run is not None:
                 if expectation.label not in hit_slots:
@@ -2701,7 +2743,8 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
     verdicts += [server_question(manifest, parts[0][2], judge_proc_delta(manifest, parts, tooltips), tooltips)
                  for parts in delta_parts.values()]
     trigger_judges = {TRIGGER_CHECK: judge_trigger, COOLDOWN_CHECK: judge_trigger_cooldown,
-                      DURATION_CHECK: judge_trigger_duration, MAGNITUDE_CHECK: judge_trigger_magnitude}
+                      DURATION_CHECK: judge_trigger_duration, MAGNITUDE_CHECK: judge_trigger_magnitude,
+                      SELF_TRIGGER_CHECK: judge_self_trigger}
     verdicts += [server_question(manifest, parts[0][2], trigger_judges[parts[0][2].check](parts), tooltips)
                  for parts in trigger_parts.values()]
     verdicts += judge_stack(manifest, stack_parts, tooltips, hit_model)

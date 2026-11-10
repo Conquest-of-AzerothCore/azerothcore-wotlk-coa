@@ -1477,6 +1477,40 @@
       "observe_metric": "cooldown_ms",
       "expected_delta_ms": 2000,
       "per_trigger_text": "causes your damaging abilities to reduce the cooldown of Righteous Upheaval"
+    },
+    {
+      "aura": 500678,
+      "name": "Testament of Fortitude",
+      "tooltip": "Meditate for $d, restoring $s1% of your maximum health every $T1 sec and reducing damage taken by $s2%.\r\n\r\nEach second you will also remove 1 disease effect from yourself. \r\n\r\nApplies |cffffffffSacred Restraint|r for $102208d.@s:102208:0@",
+      "kind": "self_trigger",
+      "trigger": {"action": "cast", "spell": 500678, "target": "self"},
+      "trigger_text": "Applies Sacred Restraint",
+      "trigger_spell_text": "Testament of Fortitude",
+      "trial_metric": "spell_cast_count",
+      "observe_spell": 102208,
+      "observe_source": "EffectTriggerSpell[2] of 500678",
+      "observe_metric": "aura_apply_count",
+      "per_trigger": 1,
+      "per_trigger_text": "Applies Sacred Restraint for $102208d",
+      "handler": "Effect[2]=64 SPELL_EFFECT_TRIGGER_SPELL, EffectTriggerSpell[2]=102208 (read via inspect_dbc.py; Effect[0]=6, Effect[1]=6 are the Meditate heal and damage-taken reduction) - unconditional on every cast of 500678 itself, with no separate passive to gate a baseline against, hence self_trigger rather than the ordinary trigger_count shape"
+    },
+    {
+      "aura": 573324,
+      "name": "Vindication",
+      "tooltip": "Strike an enemy with zeal, dealing ${$m1+0+$AP*0.285+$SP*0.75} Physical damage, triggering |cffffffffZealotry|r, and granting an |cffffffffOath|r.\r\n\r\n|cffffffffOath:|r Your damaging abilities have a $805332s1% chance to trigger |cffffffffZealotry|r.\r\n@s:801450:0@",
+      "kind": "self_trigger",
+      "trigger": {"action": "cast", "spell": 573324, "target": "dummy"},
+      "trigger_text": "triggering Zealotry",
+      "trigger_spell_text": "Vindication",
+      "trial_metric": "spell_damage_count",
+      "attempt_auras": [{"spell": 805332, "stacks": 0, "source": "Oath: Vindication 805332: granting an Oath"}],
+      "observe_spell": 801450,
+      "observe_source": "tooltip reference @s:801450:0@ of 573324",
+      "observe_note": "801450 (Zealotry) is cast by AscensionTemplarAbilities.cpp, not by an EffectTriggerSpell of 573324 (EffectTriggerSpell[0..2] of 573324 are all 0, read via inspect_dbc.py)",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "triggering Zealotry",
+      "handler": "AscensionTemplarAbilities.cpp:305-307 (OnSpellHitResult): if (Named(info, 801446) || info->Id == 500689) Zealotry(player, target); unconditional on every landed hit of the Vindication chain (chain root 801446, rank 573324 per rev_20260831_01_local_spell_progression.sql:1112, matched via Named()'s own GetFirstSpellInChain comparison, AscensionTemplar.cpp:39-42). Reproduced without the attempt_auras fixture (round10 proc-chains): 501 events over 273 trials, far above the per_trigger 1 this unconditional clause alone predicts, because AscensionTemplarAbilities.cpp:155-162 (OnSpellCast) unconditionally grants/stacks Oath: Vindication (805332) via GrantOath() on every Vindication cast, whose own roll at AscensionTemplarAbilities.cpp:311-313 (if (AuraEffect* oath = player->GetAuraEffect(805332, EFFECT_0)) if (roll_chance_i(oath->GetAmount())) Zealotry(...)) then adds a second, cumulative Zealotry trigger on the same or a later landed hit as the stack grows; the attempt_auras fixture clears 805332 to 0 stacks before every attempt so only this unconditional half is measured here; the Oath's own separate chance clause (805332 effect_value 805332e0) is not proven by this entry"
     }
   ],
   "talent_modifiers": [

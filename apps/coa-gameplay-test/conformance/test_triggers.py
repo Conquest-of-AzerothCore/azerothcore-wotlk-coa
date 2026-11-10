@@ -17,15 +17,17 @@ from profile import DBC_DIR
 from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader
 from tooltip import Records
 from triggers import (BASELINE_ATTEMPTS, COOLDOWN_CHECK, COOLDOWN_DELTA_KIND, DURATION_CHECK, DURATION_DELTA_KIND,
-                      MAGNITUDE_CHECK, MAGNITUDE_RATIO_KIND, MAIN_HAND, PERIODIC, TAKEN_HIT, TRIGGER_CHECK,
+                      MAGNITUDE_CHECK, MAGNITUDE_RATIO_KIND, MAIN_HAND, PERIODIC, SELF_TRIGGER_CHECK,
+                      SELF_TRIGGER_KIND, TAKEN_HIT, TRIGGER_CHECK,
                       TRIGGER_TRIALS, attempt_interval,
                       attempt_steps, checked_cooldown_entry, checked_duration_entry, checked_entry,
-                      checked_magnitude_entry, checked_trigger_set,
+                      checked_magnitude_entry, checked_self_trigger_entry, checked_trigger_set,
                       cooldown_label, cooldown_trial_label, cooldown_trial_steps, cooldown_trigger_rule,
                       cooldown_trigger_scenario, count_step, counts, duration_label, duration_trial_label,
                       duration_trial_steps, duration_trigger_rule, duration_trigger_scenario,
                       magnitude_label, magnitude_measurement_labels, magnitude_ratio_scenario,
                       magnitude_trigger_rule,
+                      self_trigger_label, self_trigger_rule, self_trigger_scenario,
                       shares_cooldown_aura, shares_trigger_aura, trigger_entries,
                       trigger_label, trigger_measurements, trigger_plan, trigger_rule, trigger_scenario,
                       trigger_status_expectation)
@@ -39,7 +41,7 @@ TEMPLAR_TRIGGERS = {520812, 705274, 705290, 705295, 712677, 707606, 806273, 8049
                     803844, 803159, 301065, 801457, 301254, 705256, 705259, 705286, 705298, 705255,
                     680397, 524765, 560096, 707364, 504107, 706385, 523712, 520534, 504561, 504807, 500011,
                     92108, 92109, 300504, 300529, 301310, 680399, 681483, 704116, 804927, 805415, 806522, 705306,
-                    804912, 573452, 707391, 801466}
+                    804912, 573452, 707391, 801466, 500678, 573324}
 ETERNALLY_DEVOTED = 573452
 ETERNAL_BLESSING = 705300
 LORESCRIBE = 804927
@@ -113,6 +115,8 @@ DELIVERANCE_COPY = 801456
 RIGHTEOUSNESS = 680891
 RETRIBUTION = 707391
 RETRIBUTION_EXTRA_STRIKE = 525028
+TESTAMENT_OF_FORTITUDE = 500678
+SACRED_RESTRAINT = 102208
 KEY = 'conformance-templar-trigger-520812-part-1'
 SECOND_KEY = 'conformance-templar-trigger-520812-part-2'
 LABELS = trigger_measurements(SCARLET_SECRETS)
@@ -1066,6 +1070,147 @@ class CheckedMagnitudeEntryTest(unittest.TestCase):
         entry['trigger'] = {'action': CAST, 'spell': VINDICATION_MAX_RANK, 'target': 'nowhere'}
         with self.assertRaises(ValueError):
             checked_magnitude_entry(entry)
+
+
+SELF_TRIGGER_LABELS = trigger_measurements(TESTAMENT_OF_FORTITUDE)
+SELF_TRIGGER_KEY = f'conformance-templar-trigger-{TESTAMENT_OF_FORTITUDE}-1-part-1'
+
+
+def self_trigger_model(part=0, parts=1, attempts=SCHEDULED, per_trigger=1):
+    return {'part': part, 'parts': parts, 'scheduled_attempts': SCHEDULED, 'part_attempts': attempts,
+            'minimum_trials': TRIGGER_TRIALS, 'per_trigger': per_trigger,
+            'trigger': {'action': 'cast', 'spell': TESTAMENT_OF_FORTITUDE, 'target': 'self'},
+            'observe_spell': SACRED_RESTRAINT, 'observe_metric': 'aura_apply_count',
+            'trial_metric': 'spell_cast_count', 'measurements': SELF_TRIGGER_LABELS}
+
+
+def self_trigger_expectation(**model):
+    return Expectation(self_trigger_label(TESTAMENT_OF_FORTITUDE), SELF_TRIGGER_CHECK, TESTAMENT_OF_FORTITUDE,
+                       TESTAMENT_OF_FORTITUDE, None, 'Applies Sacred Restraint', 'self-trigger rule',
+                       self_trigger_model(**model))
+
+
+def self_trigger_steps(trials, events):
+    return [assert_step(SELF_TRIGGER_LABELS['trials'], str(trials)),
+           assert_step(SELF_TRIGGER_LABELS['events'], str(events))]
+
+
+class SelfTriggerCompareTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def verdict(self):
+        manifest, results = self.workspace.manifest()
+        verdicts = [verdict for verdict in compare(manifest, results, tooltips=constant_reader())
+                    if verdict.check == SELF_TRIGGER_CHECK]
+        self.assertEqual(len(verdicts), 1)
+        self.assertIn(verdicts[0].status, STATUSES)
+        return verdicts[0]
+
+    def test_every_cast_applies_the_aura_is_ok(self):
+        self.workspace.scenario(SELF_TRIGGER_KEY, 'trigger', [self_trigger_expectation()],
+                                steps=self_trigger_steps(SCHEDULED, SCHEDULED))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual((verdict.measured, verdict.expected), (SCHEDULED, SCHEDULED))
+
+    def test_missing_events_is_a_seeded_wrong_value_alert(self):
+        self.workspace.scenario(SELF_TRIGGER_KEY, 'trigger', [self_trigger_expectation()],
+                                steps=self_trigger_steps(SCHEDULED, SCHEDULED - 50))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'alert')
+        self.assertAlmostEqual(verdict.measured, SCHEDULED - 50)
+
+    def test_too_few_trials_is_insufficient(self):
+        self.workspace.scenario(SELF_TRIGGER_KEY, 'trigger', [self_trigger_expectation(attempts=TRIGGER_TRIALS - 1)],
+                                steps=self_trigger_steps(TRIGGER_TRIALS - 1, TRIGGER_TRIALS - 1))
+        self.assertEqual(self.verdict().status, 'insufficient_trials')
+
+    def test_missing_measurement_is_an_alert(self):
+        self.workspace.scenario(SELF_TRIGGER_KEY, 'trigger', [self_trigger_expectation()],
+                                steps=[assert_step(SELF_TRIGGER_LABELS['trials'], str(SCHEDULED))])
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('no trigger measurements', verdict.explanation)
+
+    def test_parts_are_summed_with_no_baseline_phase_at_all(self):
+        second_key = f'conformance-templar-trigger-{TESTAMENT_OF_FORTITUDE}-1-part-2'
+        self.workspace.scenario(SELF_TRIGGER_KEY, 'trigger', [self_trigger_expectation(parts=2, attempts=150)],
+                                steps=self_trigger_steps(150, 150))
+        self.workspace.scenario(second_key, 'trigger',
+                                [self_trigger_expectation(part=1, parts=2, attempts=SCHEDULED - 150)],
+                                steps=self_trigger_steps(SCHEDULED - 150, SCHEDULED - 150))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual((verdict.measured, verdict.expected), (SCHEDULED, SCHEDULED))
+        self.assertIn('2 of 2 parts', verdict.explanation)
+        self.assertNotIn('baseline_attempts', self_trigger_model())
+
+
+class CheckedSelfTriggerEntryTest(unittest.TestCase):
+    def entry(self):
+        return copy.deepcopy(templar_trigger(TESTAMENT_OF_FORTITUDE))
+
+    def test_accepts_a_self_trigger_entry(self):
+        entry = self.entry()
+        self.assertIs(checked_self_trigger_entry(entry), entry)
+
+    def test_rejects_a_trigger_spell_different_from_the_aura(self):
+        entry = self.entry()
+        entry['trigger'] = {'action': CAST, 'spell': VINDICATION_MAX_RANK, 'target': 'self'}
+        with self.assertRaises(ValueError):
+            checked_self_trigger_entry(entry)
+
+    def test_rejects_a_non_cast_trigger(self):
+        entry = self.entry()
+        entry['trigger'] = {'action': PERIODIC, 'amplitude_ms': 1000}
+        with self.assertRaises(ValueError):
+            checked_self_trigger_entry(entry)
+
+    def test_rejects_an_unknown_target(self):
+        entry = self.entry()
+        entry['trigger'] = {'action': CAST, 'spell': TESTAMENT_OF_FORTITUDE, 'target': 'nowhere'}
+        with self.assertRaises(ValueError):
+            checked_self_trigger_entry(entry)
+
+    def test_rejects_an_unknown_observe_metric(self):
+        entry = self.entry()
+        entry['observe_metric'] = 'hit_mean'
+        with self.assertRaises(ValueError):
+            checked_self_trigger_entry(entry)
+
+    def test_checked_entry_dispatches_to_self_trigger(self):
+        entry = self.entry()
+        self.assertIs(checked_entry(entry), entry)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class SelfTriggerScenarioShapeTest(unittest.TestCase):
+    def test_self_trigger_scenario_learns_only_the_aura_with_no_baseline_at_all(self):
+        entry = templar_trigger(TESTAMENT_OF_FORTITUDE)
+        scenario, [expectation] = self_trigger_scenario(CLASS_FILE, entry, part=0)
+        run.validate(scenario)
+        steps = scenario['steps']
+        self.assertEqual(casts_of(steps, TESTAMENT_OF_FORTITUDE), expectation.model['part_attempts'])
+        self.assertFalse(any('baseline' in step.get('label', '') for step in steps))
+        self.assertEqual((expectation.label, expectation.check),
+                         (self_trigger_label(TESTAMENT_OF_FORTITUDE), SELF_TRIGGER_CHECK))
+        self.assertEqual(expectation.model['trigger']['spell'], TESTAMENT_OF_FORTITUDE)
+        self.assertLessEqual(scenario['timeout_ms'], MAX_SCENARIO_MS)
+
+    def test_self_trigger_scenario_casts_at_the_dummy_when_a_target_trigger(self):
+        entry = templar_trigger(VINDICATION_MAX_RANK)
+        scenario, [expectation] = self_trigger_scenario(CLASS_FILE, entry, part=0)
+        run.validate(scenario)
+        self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
+        self.assertEqual(expectation.model['observe_spell'], ZEALOTRY_HIT)
+
+    def test_self_trigger_rule_names_no_baseline(self):
+        entry = templar_trigger(TESTAMENT_OF_FORTITUDE)
+        self.assertIn('no separate passive', self_trigger_rule(entry))
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
