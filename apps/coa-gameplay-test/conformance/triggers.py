@@ -7,8 +7,8 @@ from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, UNMODELLED, Unmo
                   records_of, scenario_shell, timed)
 from procs import ATTACK, CAST, ENTRY_STATUSES, PART_BUDGET_MS, cast_interval, swing_interval, tick_spacing
 from profile import CASTER, SETTLE_MS, measurement, player_fixture
-from values import (ALLY, CHARGE_OFFSET_YD, FORCED_CRIT_RATING, TARGET, Expectation, RankFacts, armed_for,
-                    closes_distance, facts_of, fixture_health_step)
+from values import (ALLY, CHARGE_OFFSET_YD, FORCE_CRIT_RATINGS, FORCED_CRIT_RATING, TARGET, Expectation, RankFacts,
+                    armed_for, closes_distance, facts_of, fixture_health_step)
 
 TRIGGER_CHECK = 'trigger_count'
 COOLDOWN_DELTA_KIND = 'cooldown_delta'
@@ -41,7 +41,6 @@ PERIODIC_TRIAL_METRICS = frozenset({'spell_cast_count'})
 TAKEN_HIT_TRIAL_METRICS = frozenset({'spell_damage_count'})
 TRIAL_METRICS = {CAST: frozenset({'spell_cast_count', 'spell_damage_count'}), ATTACK: MELEE_COUNTS,
                 PERIODIC: PERIODIC_TRIAL_METRICS, TAKEN_HIT: TAKEN_HIT_TRIAL_METRICS}
-FORCE_CRIT_RATINGS = {'melee': 'melee_crit_rating', 'spell': 'spell_crit_rating'}
 TRIGGER_RULE = (f'|events - trials x per_trigger| <= {EVENT_TOLERANCE} over at least {TRIGGER_TRIALS} trials, '
                 f'no event in the {BASELINE_ATTEMPTS} baseline attempts without the passive')
 

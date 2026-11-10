@@ -50,6 +50,7 @@ AURA_STATE_HEALTHLESS_35_PERCENT = 13
 TARGET_HEALTH_FIXTURES = {AURA_STATE_HEALTHLESS_35_PERCENT: 30}
 TARGET_HEALTH_WAIT_MS = 1000
 FORCED_CRIT_RATING = 100000
+FORCE_CRIT_RATINGS = {'melee': 'melee_crit_rating', 'spell': 'spell_crit_rating'}
 
 
 class Unmodelled(Exception):

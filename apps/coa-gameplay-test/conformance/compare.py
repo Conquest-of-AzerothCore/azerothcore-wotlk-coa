@@ -10,11 +10,11 @@ from statistics import fmean, pstdev
 from typing import Callable, Mapping, Protocol
 
 from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT,
-                        BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
-                        BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_GROUP_STACK_CAP,
-                        BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION,
-                        BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET,
-                        BEHAVIOUR_TRIGGER)
+                        BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION,
+                        BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY,
+                        BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA,
+                        BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO,
+                        BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER)
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
@@ -2439,6 +2439,23 @@ def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> V
                                f'percentages instead of their cap is always an alert')
 
 
+def behaviour_crit_magnitude_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    attempts = run.values.get(model['attempts_label'])
+    crits = run.values.get(model['crits_label'])
+    total = run.values.get(model['total_label'])
+    missing = next((label for label, value in ((model['attempts_label'], attempts), (model['crits_label'], crits),
+                                                (model['total_label'], total)) if value is None), None)
+    if missing:
+        return replace(base, explanation=missing_measurement(run, missing))
+    expected = attempts * model['base_expected'] + crits * model['crit_bonus_expected']
+    status = 'ok' if abs(total - expected) <= FLOAT_EPSILON else 'alert'
+    return replace(base, status=status, measured=total, expected=expected, low=expected, high=expected,
+                   explanation=f'{model["metric"]} measured {total:g} over {attempts:g} forced-crit melee '
+                               f'attempts of which {crits:g} landed as a critical hit; expected {attempts:g} x '
+                               f'{model["base_expected"]:g} plus {crits:g} x {model["crit_bonus_expected"]:g} = '
+                               f'{expected:g}')
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
@@ -2477,6 +2494,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_group_stack_cap_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_SINGLE_TARGET:
         return behaviour_single_target_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_CRIT_MAGNITUDE:
+        return behaviour_crit_magnitude_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 

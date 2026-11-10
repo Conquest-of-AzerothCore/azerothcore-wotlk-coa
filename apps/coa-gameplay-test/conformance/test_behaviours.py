@@ -7,16 +7,17 @@ import tempfile
 import unittest
 
 from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
-                        BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH,
-                        BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
-                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
-                        BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER, MECHANIC_LAND_ATTEMPTS,
-                        STRIKER, NotModelled,
+                        BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
+                        BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_GROUP_STACK_CAP,
+                        BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION,
+                        BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET,
+                        BEHAVIOUR_TRIGGER, MECHANIC_LAND_ATTEMPTS, STRIKER, NotModelled,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
                         OathConsumptionRemovalSpec,
                         amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
                         aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
                         behaviour_scenario, crit_guarantee_scenario, crit_guarantee_spec,
+                        crit_magnitude_scenario, crit_magnitude_spec,
                         duration_refresh_scenario, duration_refresh_spec, duration_scenario, duration_spec,
                         exclusivity_chain_scenario, exclusivity_chain_spec,
                         group_stack_cap_scenario, group_stack_cap_spec,
@@ -101,6 +102,8 @@ FORTIFIED_BODY = 300515
 TREE_OF_LIFE = 34123
 SANCTIFY = 705274
 LIBRAM_OF_TENACITY = 801461
+CHAKRA_OF_POWER = 803158
+CHAKRA_OF_POWER_ENERGIZE = 804181
 
 
 def scarlet_judicator_entry() -> dict:
@@ -220,6 +223,10 @@ def righteous_custodian_single_target_entry() -> dict:
 
 def sanctify_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == SANCTIFY)
+
+
+def chakra_of_power_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == CHAKRA_OF_POWER)
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -405,7 +412,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 46)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 47)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1199,6 +1206,38 @@ class MetricDeltaScenarioTests(unittest.TestCase):
                      if step.get('action') == 'cast' and step.get('spell') == LIBRAM_OF_TENACITY]
         self.assertEqual(len(cast_steps), 2)
 
+    def test_dispatch_chakra_of_power_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, chakra_of_power_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_CRIT_MAGNITUDE)
+        self.assertEqual(expectations[0].model['base_expected'], 1.0)
+        self.assertEqual(expectations[0].model['crit_bonus_expected'], 2.0)
+        self.assertEqual(expectations[0].model['metric'], 'spell_energize_total')
+
+    def test_chakra_of_power_forces_melee_crit_and_attacks_the_dummy(self):
+        spec = crit_magnitude_spec(chakra_of_power_entry())
+        self.assertEqual(spec.observe_spell, CHAKRA_OF_POWER_ENERGIZE)
+        self.assertEqual(spec.force_crit, 'melee')
+        scenario, _ = crit_magnitude_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(scenario['players'][0]['melee_crit_rating'], FORCED_CRIT_RATING)
+        attack_steps = [step for step in scenario['steps'] if step.get('action') == 'attack']
+        self.assertEqual(len(attack_steps), 1)
+        self.assertEqual(attack_steps[0]['target'], 'dummy')
+
+    def test_chakra_of_power_measures_attempts_crits_and_total_energize(self):
+        spec = crit_magnitude_spec(chakra_of_power_entry())
+        _, expectations = crit_magnitude_scenario(CLASS_FILE, spec)
+        model = expectations[0].model
+        self.assertEqual(model['attempts_label'], '803158 804181 crit_magnitude attempts')
+        self.assertEqual(model['crits_label'], '803158 804181 crit_magnitude crits')
+        self.assertEqual(model['total_label'], '803158 804181 crit_magnitude total')
+
+    def test_crit_magnitude_rejects_an_unknown_metric(self):
+        spec = replace(crit_magnitude_spec(chakra_of_power_entry()), metric='spell_damage_total')
+        with self.assertRaises(ValueError):
+            crit_magnitude_scenario(CLASS_FILE, spec)
+
     def test_the_two_whirling_tempest_entries_share_a_spell_id_but_differ_by_variant(self):
         plain = whirling_tempest_entry()
         stacking = whirling_tempest_stacks_with_courage_entry()
@@ -1934,6 +1973,54 @@ class JudgeMetricDeltaTests(unittest.TestCase):
             base_verdict(expectation),
             FakeRun({'before': 2500.0, 'after': 2250.0}), expectation)
         self.assertEqual(verdict.status, 'alert')
+
+
+class JudgeCritMagnitudeTests(unittest.TestCase):
+    def expectation(self):
+        model = {'kind': 'crit_magnitude', 'attempts_label': 'attempts', 'crits_label': 'crits',
+                 'total_label': 'total', 'base_expected': 1.0, 'crit_bonus_expected': 2.0,
+                 'metric': 'spell_energize_total',
+                 'quote': 'an additional 2 Energy when they critically strike'}
+        return Expectation('label', BEHAVIOUR_CRIT_MAGNITUDE, CHAKRA_OF_POWER, CHAKRA_OF_POWER_ENERGIZE, None, '3.0',
+                           'prose: "an additional 2 Energy when they critically strike" (803158)', model)
+
+    def test_all_crits_matches_base_plus_bonus_times_attempts(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(
+            base_verdict(expectation),
+            FakeRun({'attempts': 10.0, 'crits': 10.0, 'total': 30.0}), expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.measured, 30.0)
+        self.assertEqual(verdict.expected, 30.0)
+
+    def test_a_few_missed_crits_still_matches_the_measured_crit_count(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(
+            base_verdict(expectation),
+            FakeRun({'attempts': 10.0, 'crits': 8.0, 'total': 26.0}), expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.expected, 26.0)
+
+    def test_a_seeded_wrong_total_missing_the_crit_bonus_is_alert(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(
+            base_verdict(expectation),
+            FakeRun({'attempts': 10.0, 'crits': 10.0, 'total': 10.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 10.0)
+        self.assertEqual(verdict.expected, 30.0)
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'attempts': 10.0, 'crits': 10.0}),
+                                  expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('total', verdict.explanation)
+
+    def test_no_run_reports_no_scenario(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), None, expectation)
+        self.assertIn('no scenario', verdict.explanation)
 
 
 class JudgeDurationTests(unittest.TestCase):

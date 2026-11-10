@@ -6,8 +6,8 @@ from hits import DRAIN_MS, MAIN_HAND, TIMEOUT_MARGIN_MS, aura_modifiers, cast_st
 from procs import swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import COLOR_CODE, Records
-from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_ENTRY, FORCED_CRIT_RATING, Expectation, TARGET,
-                    armed_for, dataset, facts_of, fixture_health_step, required_aura_steps,
+from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_ENTRY, FORCE_CRIT_RATINGS, FORCED_CRIT_RATING,
+                    Expectation, TARGET, armed_for, dataset, facts_of, fixture_health_step, required_aura_steps,
                     required_target_health_steps)
 
 BEHAVIOUR_COUNT = 'behaviour_count'
@@ -26,14 +26,15 @@ BEHAVIOUR_INTERNAL_COOLDOWN_GATE = 'behaviour_internal_cooldown_gate'
 BEHAVIOUR_EXCLUSIVITY = 'behaviour_exclusivity'
 BEHAVIOUR_GROUP_STACK_CAP = 'behaviour_group_stack_cap'
 BEHAVIOUR_SINGLE_TARGET = 'behaviour_single_target'
+BEHAVIOUR_CRIT_MAGNITUDE = 'behaviour_crit_magnitude'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
                     BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_EXCLUSIVITY,
-                    BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_SINGLE_TARGET)
+                    BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_CRIT_MAGNITUDE)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
-        'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target')
+        'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -666,6 +667,76 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('expire_ms', DEFAULT_METRIC_DELTA_EXPIRE_MS), entry.get('target', CASTER),
                            entry.get('disable_regeneration', False), tuple(entry.get('setup_casts', ())),
                            entry.get('setup_actor_aura'), entry.get('gate_spell'), entry.get('label_suffix', ''))
+
+
+CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10
+CRIT_MAGNITUDE_OBSERVE_METRICS = frozenset({'spell_energize_total'})
+
+
+@dataclass(frozen=True)
+class CritMagnitudeSpec:
+    spell: int
+    name: str
+    quote: str
+    observe_spell: int
+    metric: str
+    base_expected: float
+    crit_bonus_expected: float
+    attempts: int = CRIT_MAGNITUDE_DEFAULT_ATTEMPTS
+    force_crit: str = 'melee'
+
+
+def crit_magnitude_labels(spec: CritMagnitudeSpec) -> dict[str, str]:
+    base = f'{spec.spell} {spec.observe_spell} crit_magnitude'
+    return {'attempts': f'{base} attempts', 'crits': f'{base} crits', 'total': f'{base} total'}
+
+
+def crit_magnitude_contract(spec: CritMagnitudeSpec) -> str:
+    return (f'Forced-crit melee check: {spec.metric} of {spec.observe_spell} over {spec.attempts} forced-crit '
+            f'({FORCE_CRIT_RATINGS[spec.force_crit]} {FORCED_CRIT_RATING}) swings matches melee_attack_count x '
+            f'{spec.base_expected:g} plus melee_damage_count(critical) x {spec.crit_bonus_expected:g}.')
+
+
+def crit_magnitude_scenario(class_file: dict, spec: CritMagnitudeSpec) -> tuple[dict, list[Expectation]]:
+    if spec.metric not in CRIT_MAGNITUDE_OBSERVE_METRICS:
+        raise ValueError(f'crit_magnitude metric must be one of {sorted(CRIT_MAGNITUDE_OBSERVE_METRICS)}, not '
+                         f'{spec.metric!r}')
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'crit_magnitude', spec.quote,
+                            spec.base_expected + spec.crit_bonus_expected)
+    interval = swing_interval(class_file)
+    labels = crit_magnitude_labels(spec)
+    steps = [
+        {'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
+        {'action': 'attack', 'actor': CASTER, 'target': TARGET},
+        {'action': 'wait', 'label': f'{spec.spell} crit_magnitude swings', 'ms': spec.attempts * interval},
+        {'action': 'stop_attack', 'actor': CASTER},
+        {'action': 'wait', 'label': f'{spec.spell} crit_magnitude drain', 'ms': DRAIN_MS},
+        measurement(labels['attempts'], CASTER, 'melee_attack_count', hand=MAIN_HAND),
+        measurement(labels['crits'], CASTER, 'melee_damage_count', hand=MAIN_HAND, critical=True),
+        measurement(labels['total'], CASTER, spec.metric, spell=spec.observe_spell),
+    ]
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour crit magnitude',
+        'contract': crit_magnitude_contract(spec),
+        'players': [{**player_fixture(class_file), FORCE_CRIT_RATINGS[spec.force_crit]: FORCED_CRIT_RATING}],
+        'creatures': [creature_fixture(class_file)],
+        'steps': base_steps(class_file) + steps}
+    label = f'{spec.spell} behaviour_crit_magnitude'
+    model = {'kind': 'crit_magnitude', 'attempts_label': labels['attempts'], 'crits_label': labels['crits'],
+            'total_label': labels['total'], 'base_expected': spec.base_expected,
+            'crit_bonus_expected': spec.crit_bonus_expected, 'metric': spec.metric, 'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_CRIT_MAGNITUDE, spec.spell, spec.observe_spell, None,
+                              str(spec.base_expected + spec.crit_bonus_expected), prose_rule(entry.quote, spec.spell),
+                              model)
+    return scenario, [expectation]
+
+
+def crit_magnitude_spec(entry: dict) -> CritMagnitudeSpec:
+    return CritMagnitudeSpec(entry['spell'], entry['name'], entry['quote'], entry['observe_spell'], entry['metric'],
+                             entry['base_expected'], entry['crit_bonus_expected'],
+                             entry.get('attempts', CRIT_MAGNITUDE_DEFAULT_ATTEMPTS), entry.get('force_crit', 'melee'))
 
 
 DEBT_ASSERT_TIMEOUT_MS = 2000
@@ -1726,6 +1797,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return group_stack_cap_scenario(class_file, group_stack_cap_spec(entry))
     if entry['kind'] == 'single_target':
         return single_target_scenario(class_file, single_target_spec(entry))
+    if entry['kind'] == 'crit_magnitude':
+        return crit_magnitude_scenario(class_file, crit_magnitude_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 
