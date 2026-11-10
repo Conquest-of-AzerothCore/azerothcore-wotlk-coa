@@ -2,16 +2,14 @@
 -- Pridewing Wyvern paths and spawn heights (Highwind Hold, Stonetalon Mountains)
 -- Schema: ec4dbf0c7e2ffbe21a91d275b19a344f8bffe1dc476fe49e1502e6e9a75afc22
 -- Generated: 2026-11-07 (merged with additional_wyvern 2026-11-08)
-
-DELETE FROM `creature_addon` WHERE `guid` IN (29946, 29981);
-INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
-(29981, 299810, 0, 0, 1, 0, 0, ''),
-(29946, 299460, 0, 0, 1, 0, 0, NULL);
-
 -- Additional wyvern (guid 29949, id 4012): keep any existing addon row, just set its path
+
+DELETE FROM `creature_addon` WHERE `guid` IN (29946, 29981, 29949);
+
 INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
-(29949, 299490, 0, 0, 1, 0, 0, NULL)
-ON DUPLICATE KEY UPDATE `path_id` = VALUES(`path_id`);
+(29981, 299810, 0, 0, 1, 0, 0, NULL),
+(29946, 299460, 0, 0, 0, 0, 0, NULL),
+(29949, 299490, 0, 0, 1, 0, 0, NULL);
 
 DELETE FROM `waypoint_data` WHERE `id` IN (299400, 299570, 299560, 299510, 299500, 299590, 299580, 299810, 299520, 299540, 299460, 299530, 299490) AND `point` > 0;
 
