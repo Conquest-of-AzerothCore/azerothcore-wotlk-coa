@@ -6,7 +6,8 @@ import sys
 import tempfile
 import unittest
 
-from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_CAST_GATE,
+from behaviours import (AFTER, BEFORE, BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_CONDITION,
+                        BEHAVIOUR_CAST_GATE,
                         BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
                         BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
                         BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_FIXED_COUNT,
@@ -33,7 +34,7 @@ from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_
                         health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
                         healing_ratio_spec, icd_gate_scenario, icd_gate_spec, leech_heal_modifier_factor,
                         leech_ratio_scenario, leech_ratio_spec,
-                        mechanic_duration_scenario, mechanic_duration_spec, metric_delta_scenario,
+                        mechanic_duration_scenario, mechanic_duration_spec, metric_delta_label, metric_delta_scenario,
                         metric_delta_spec, nearby_ally_id, oath_consumption_scenario, oath_consumption_spec,
                         oath_consumption_removal_scenario, oath_consumption_removal_spec,
                         party_ally_id, party_stat_ratio_scenario, party_stat_ratio_spec,
@@ -197,7 +198,13 @@ def divine_charge_cast_condition_entry() -> dict:
 
 
 def crusaders_presence_cast_condition_entry() -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == CRUSADERS_PRESENCE)
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == CRUSADERS_PRESENCE and entry['kind'] == 'cast_condition')
+
+
+def crusaders_presence_speed_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == CRUSADERS_PRESENCE and entry['kind'] == 'metric_delta')
 
 
 def spiritual_abdicator_entry() -> dict:
@@ -510,7 +517,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 63)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 64)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1729,6 +1736,57 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['expected'], 1)
         self.assertEqual(expectations[0].model['before_expected'], 0)
         self.assertEqual(expectations[0].model['metric'], 'aura')
+
+    def test_cast_in_before_defaults_to_true_and_casts_the_trigger_in_both_phases(self):
+        spec = metric_delta_spec(tyrs_guard_entry())
+        self.assertTrue(spec.cast_in_before)
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        cast_steps = [step for step in scenario['steps']
+                     if step.get('action') == 'cast' and step.get('spell') == TESTAMENT_OF_HOPE]
+        self.assertEqual(len(cast_steps), 2)
+
+    def test_cast_in_before_false_skips_casting_the_trigger_before_the_baseline_measurement(self):
+        spec = metric_delta_spec(crusaders_presence_speed_entry())
+        self.assertFalse(spec.cast_in_before)
+        scenario, expectations = metric_delta_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        before_index = next(index for index, step in enumerate(scenario['steps'])
+                            if step.get('metric') == 'run_speed_rate' and step.get('label') ==
+                            metric_delta_label(spec, BEFORE))
+        cast_steps_before_baseline = [step for step in scenario['steps'][:before_index]
+                                      if step.get('action') == 'cast' and step.get('spell') == CRUSADERS_PRESENCE]
+        self.assertEqual(len(cast_steps_before_baseline), 0)
+        all_cast_steps = [step for step in scenario['steps']
+                         if step.get('action') == 'cast' and step.get('spell') == CRUSADERS_PRESENCE]
+        self.assertEqual(len(all_cast_steps), 1)
+        self.assertEqual(expectations[0].model['before_expected'], 1.60)
+        self.assertEqual(expectations[0].model['expected'], 2.40)
+
+    def test_cast_in_before_false_still_sets_the_setup_actor_aura_in_the_baseline_phase(self):
+        spec = metric_delta_spec(crusaders_presence_speed_entry())
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        before_index = next(index for index, step in enumerate(scenario['steps'])
+                            if step.get('metric') == 'run_speed_rate' and step.get('label') ==
+                            metric_delta_label(spec, BEFORE))
+        set_aura_before_baseline = [step for step in scenario['steps'][:before_index]
+                                    if step.get('action') == 'set_aura' and step.get('spell') == spec.setup_actor_aura]
+        self.assertEqual(len(set_aura_before_baseline), 1)
+
+    def test_cast_in_before_false_with_a_seeded_wrong_before_expected_alerts(self):
+        spec = replace(metric_delta_spec(crusaders_presence_speed_entry()), before_expected=1.0)
+        _, expectations = metric_delta_scenario(CLASS_FILE, spec)
+        expectation = expectations[0]
+        values = {metric_delta_label(spec, BEFORE): 1.60, metric_delta_label(spec, AFTER): 2.40}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_dispatch_crusaders_presence_speed_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, crusaders_presence_speed_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_DELTA)
+        self.assertEqual(expectations[0].model['expected'], 2.40)
+        self.assertEqual(expectations[0].model['before_expected'], 1.60)
+        self.assertEqual(expectations[0].model['metric'], 'run_speed_rate')
 
 
 TEMPLAR_CLASS_ID = 19

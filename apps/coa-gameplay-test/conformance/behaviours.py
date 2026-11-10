@@ -883,6 +883,7 @@ class MetricDeltaSpec:
     setup_only_after: bool = False
     measure_actor: str = CASTER
     tolerance: float | None = None
+    cast_in_before: bool = True
 
 
 def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
@@ -914,10 +915,12 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                          'value': facts.mana_cost})
         return steps
 
-    def cast_steps(apply_setup_casts: bool = True) -> list[dict]:
+    def cast_steps(apply_setup_casts: bool = True, include_cast: bool = True) -> list[dict]:
         steps = []
         if spec.setup_actor_aura is not None:
             steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': spec.setup_actor_aura, 'stacks': 1})
+        if not include_cast:
+            return steps
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
             steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
                          'value': facts.mana_cost})
@@ -950,10 +953,11 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         contract = (f'No-combat with/without check: {spec.metric} {spec.fields} around a cast of '
                     f'{spec.trigger_spell}, measured before and after {gate_spell} is learned, waiting '
                     f'{spec.expire_ms} ms between phases for the first cast\'s effect to fully expire before the '
-                    f'second cast.')
+                    f'second cast.' + ('' if spec.cast_in_before else ' The before phase skips casting '
+                    f'{spec.trigger_spell} entirely (cast_in_before=False), measuring the baseline state alone.'))
         learn_steps = [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] + \
             [{'action': 'learn', 'actor': CASTER, 'spell': setup_spell} for setup_spell in spec.setup_casts]
-        steps = (base_steps(class_file) + learn_steps + cast_steps() +
+        steps = (base_steps(class_file) + learn_steps + cast_steps(include_cast=spec.cast_in_before) +
                  [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields), gate_learn_step] +
                  [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}] +
                  cast_steps() + [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields)])
@@ -985,7 +989,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('disable_regeneration', False), tuple(entry.get('setup_casts', ())),
                            entry.get('setup_actor_aura'), entry.get('gate_spell'), entry.get('label_suffix', ''),
                            entry.get('setup_only_after', False),
-                           entry.get('measure_actor', CASTER), entry.get('tolerance'))
+                           entry.get('measure_actor', CASTER), entry.get('tolerance'),
+                           entry.get('cast_in_before', True))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10
