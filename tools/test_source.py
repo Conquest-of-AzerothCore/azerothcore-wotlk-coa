@@ -1,7 +1,10 @@
 from contextlib import redirect_stdout
 import io
 import json
+import os
+from pathlib import Path
 import subprocess
+import tempfile
 import unittest
 from unittest.mock import patch
 
@@ -91,6 +94,92 @@ class SourceSelectionTests(unittest.TestCase):
             result = check_source.execute([['one.py'], ['two.py']])
         self.assertEqual([entry['status'] for entry in result], ['failed', 'passed'])
         self.assertNotIn('PYTHONOPTIMIZE', execute.call_args.kwargs['env'])
+
+
+class WorkflowWhitespaceTests(unittest.TestCase):
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory(prefix='coa-workflow-whitespace-')
+        self.addCleanup(self.temporary.cleanup)
+        self.root = Path(self.temporary.name)
+        self.git('init', '-b', 'main')
+
+    def git(self, *arguments):
+        return subprocess.run(['git', '-c', 'user.name=CoA fixture', '-c', 'user.email=fixture@example.invalid',
+                               '-c', 'commit.gpgsign=false', *arguments], cwd=self.root,
+                              capture_output=True, text=True, check=True).stdout.strip()
+
+    def commit(self, name, contents):
+        (self.root / name).write_text(contents, encoding='utf-8')
+        self.git('add', name)
+        self.git('commit', '-m', 'fixture')
+        return self.git('rev-parse', 'HEAD')
+
+    def workflow_script(self):
+        workflow = (check_source.ROOT / '.github/workflows/quality.yml').read_text(encoding='utf-8')
+        marker = '      - name: Check whitespace across the change\n'
+        if marker not in workflow:
+            return workflow.rsplit('      - run: ', 1)[1].strip()
+        block = workflow.split(marker, 1)[1]
+        self.assertIn("CHECK_WHITESPACE_BASE: ${{ github.event_name == 'push' && github.event.before || '' }}", block)
+        lines = block.split('        run: |\n', 1)[1].splitlines()
+        return '\n'.join(line[10:] for line in lines if line.startswith('          '))
+
+    def check_whitespace(self, base=''):
+        environment = dict(os.environ, CHECK_WHITESPACE_BASE=base)
+        return subprocess.run(['bash', '-e', '-o', 'pipefail', '-c', self.workflow_script()], cwd=self.root,
+                              capture_output=True, text=True, env=environment)
+
+    def test_push_checks_earlier_commits_when_the_last_commit_is_clean(self):
+        before = self.commit('baseline.txt', 'clean\n')
+        self.commit('earlier.txt', 'trailing whitespace \n')
+        self.commit('last.txt', 'clean\n')
+        last_only = subprocess.run(['git', 'diff', '--check', 'HEAD^', 'HEAD'], cwd=self.root,
+                                   capture_output=True, text=True)
+        self.assertEqual(last_only.returncode, 0)
+        result = self.check_whitespace(before)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('earlier.txt', result.stdout)
+        self.assertIn('trailing whitespace', result.stdout)
+
+    def test_shallow_checkout_fetches_the_pre_push_commit(self):
+        before = self.commit('baseline.txt', 'clean\n')
+        self.commit('earlier.txt', 'trailing whitespace \n')
+        self.commit('last.txt', 'clean\n')
+        source = self.root
+        checkout = source / 'checkout'
+        self.git('clone', '--depth=2', source.as_uri(), str(checkout))
+        self.root = checkout
+        missing = subprocess.run(['git', 'cat-file', '-e', before + '^{commit}'], cwd=checkout,
+                                 capture_output=True, text=True)
+        self.assertNotEqual(missing.returncode, 0)
+        result = self.check_whitespace(before)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('earlier.txt', result.stdout)
+        self.assertIn('trailing whitespace', result.stdout)
+        self.git('cat-file', '-e', before + '^{commit}')
+
+    def test_pull_request_merge_keeps_the_first_parent_comparison(self):
+        self.commit('baseline.txt', 'clean\n')
+        self.git('checkout', '-b', 'feature')
+        self.commit('feature.txt', 'trailing whitespace \n')
+        self.git('checkout', 'main')
+        self.commit('main.txt', 'clean\n')
+        self.git('merge', '--no-ff', 'feature', '-m', 'fixture merge')
+        result = self.check_whitespace()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('feature.txt', result.stdout)
+
+    def test_clean_root_commit_passes_without_a_parent(self):
+        self.commit('root.txt', 'clean\n')
+        self.assertEqual(self.check_whitespace().returncode, 0)
+
+    def test_initial_push_checks_all_commits_from_the_empty_tree(self):
+        self.commit('root.txt', 'trailing whitespace \n')
+        self.commit('last.txt', 'clean\n')
+        result = self.check_whitespace('0' * 40)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('root.txt', result.stdout)
+        self.assertIn('trailing whitespace', result.stdout)
 
 
 if __name__ == '__main__':
