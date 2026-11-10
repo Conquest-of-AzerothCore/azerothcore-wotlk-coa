@@ -201,6 +201,7 @@ Position const RazLedgePos = { 406.1927f, 906.0121f, 163.4926f, 4.310963f };
 Position const RazObsidiusPos = { 308.9653f, 635.8195f, 64.79769f, 4.555309f };
 Position const RazBridgePos = { 400.9f, 821.1f, 106.5f };
 Position const ObsidiusPos = { 331.7f, 554.5f, 66.1f };
+Position const RazObsidiusCallPos = { 240.127f, 567.9303f, 73.23914f };
 Position const RazObsidiusStandPos = { 330.5491f, 559.3794f, 66.00645f, 4.945502f };
 
 std::array<Position, 12> const RazPathRomogg =
@@ -375,7 +376,7 @@ public:
                 return;
             }
             if (stage <= RAZ_CORLA && GetBossState(DATA_KARSH) == DONE &&
-                (PlayerNear(RazObsidiusPos, 60.0f) || PlayerNear(ObsidiusPos, 70.0f)))
+                (PlayerNear(RazObsidiusPos, 60.0f) || PlayerNear(ObsidiusPos, 70.0f) || PlayerNear(RazObsidiusCallPos, 15.0f)))
             {
                 StorePersistentData(PERSISTENT_RAZ_STAGE, RAZ_OBSIDIUS);
                 instance->SummonCreature(NPC_RAZ, RazObsidiusPos);
