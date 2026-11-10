@@ -2151,6 +2151,30 @@ def behaviour_leech_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdi
                                f'delta is always an alert')
 
 
+def behaviour_stat_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    stat = run.values.get(model['stat_label'])
+    amount = run.values.get(model['amount_label'])
+    if stat is None or amount is None:
+        return replace(base, explanation=missing_measurement(run, model['stat_label'] if stat is None
+                                                              else model['amount_label']))
+    if stat <= 0:
+        return replace(base, status='unmeasured', measured=amount,
+                       explanation=f'{model["stat_label"]} measured {stat:g}; a ratio needs a positive stat value')
+    ratio = amount / stat
+    expected_ratio = float(model['expected'])
+    delta = amount - stat
+    expected_delta = stat * (expected_ratio - 1.0)
+    status = delta_status(BEHAVIOUR_RATIO, delta, expected_delta)
+    margin_ratio = delta_margin(BEHAVIOUR_RATIO, expected_delta) / stat
+    return replace(base, status=status, measured=ratio, expected=expected_ratio, low=expected_ratio - margin_ratio,
+                   high=expected_ratio + margin_ratio,
+                   explanation=f'{model["target_name"]} applied an aura amount of {amount:g} against its own '
+                               f'{model["stat_metric"]} of {stat:g}, ratio {ratio:g}; measured delta {delta:+g} '
+                               f'against expected delta {expected_delta:+g} of {model["stat_label"]}, judged on '
+                               f'the stat scale, not the ratio scale, and a measured 0 against a nonzero expected '
+                               f'delta is always an alert')
+
+
 def behaviour_trigger_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     labels = (model['without_before_label'], model['without_after_label'],
              model['with_before_label'], model['with_after_label'])
@@ -2702,6 +2726,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
     if expectation.check == BEHAVIOUR_RATIO:
         if model.get('kind') == 'leech_ratio':
             return behaviour_leech_ratio_verdict(base, run, model)
+        if model.get('kind') == 'stat_ratio':
+            return behaviour_stat_ratio_verdict(base, run, model)
         return behaviour_ratio_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_DURATION_REFRESH:
         return behaviour_duration_refresh_verdict(base, run, model)

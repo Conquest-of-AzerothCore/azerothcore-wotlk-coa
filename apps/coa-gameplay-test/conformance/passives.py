@@ -75,6 +75,7 @@ BEHAVIOUR_LABELS = {
     'metric_delta': lambda entry: [f"{entry['spell']} behaviour_metric_delta"],
     'aura_metric_delta': lambda entry: [f"{entry['spell']} behaviour_metric_delta"],
     'cast_applies_aura': lambda entry: [f"{entry['spell']} behaviour_cast_applies_aura"],
+    'cast_stat_ratio': lambda entry: [f"{entry['spell']} behaviour_ratio"],
     'duration_refresh': lambda entry: [f"{entry['spell']} behaviour_duration_refresh"],
     'amount_delta': lambda entry: [f"{entry['spell']} behaviour_amount_delta"],
     'duration': lambda entry: [f"{entry['spell']} behaviour_duration"],

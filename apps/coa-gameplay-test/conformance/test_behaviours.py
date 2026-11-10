@@ -33,6 +33,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_AGGRO_
                         cast_condition_scenario, cast_condition_spec,
                         cast_gate_scenario, cast_gate_spec,
                         cast_leech_ratio_scenario, cast_leech_ratio_spec,
+                        cast_stat_ratio_scenario, cast_stat_ratio_spec,
                         charge_recharge_scenario, charge_recharge_spec,
                         crit_guarantee_scenario, crit_guarantee_spec,
                         crit_magnitude_scenario, crit_magnitude_spec,
@@ -164,6 +165,7 @@ TESTAMENT_OF_STRENGTH = 300514
 SACRED_RESTRAINT = 102208
 ARGENT_BLADE = 804929
 ARGENT_BLADE_HEAL = 807414
+TOME_OF_LIGHT = 805422
 
 
 def scarlet_judicator_entry() -> dict:
@@ -429,6 +431,10 @@ def argent_blade_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == ARGENT_BLADE)
 
 
+def tome_of_light_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == TOME_OF_LIGHT)
+
+
 class BehaviourEntryTests(unittest.TestCase):
     def test_scarlet_judicator_entry(self):
         spec = target_count_spec(scarlet_judicator_entry())
@@ -672,6 +678,15 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.heal_spell, ARGENT_BLADE_HEAL)
         self.assertEqual(spec.expected, 1.0)
 
+    def test_tome_of_light_entry(self):
+        spec = cast_stat_ratio_spec(tome_of_light_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'cast_stat_ratio', spec.quote, spec.expected)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(spec.spell, TOME_OF_LIGHT)
+        self.assertEqual(spec.stat_metric, 'max_health')
+        self.assertEqual(spec.effect, 1)
+        self.assertEqual(spec.expected, 1.0)
+
 
 class BehaviourEntriesLookupTests(unittest.TestCase):
     def test_behaviour_entries_filters_by_spell(self):
@@ -683,7 +698,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 81)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 82)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -2175,6 +2190,55 @@ class CastLeechRatioScenarioTests(unittest.TestCase):
     def test_ignores_caster_heal_modifiers_reads_the_dbc_attribute(self):
         self.assertTrue(ignores_caster_heal_modifiers(RECORDS, ARGENT_BLADE_HEAL))
         self.assertFalse(ignores_caster_heal_modifiers(RECORDS, TITANSTRIKE_MAX_RANK))
+
+
+class CastStatRatioScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_expectations(self):
+        spec = cast_stat_ratio_spec(tome_of_light_entry())
+        scenario, expectations = cast_stat_ratio_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_RATIO)
+        self.assertTrue(expectation.rule.startswith(
+            'prose: "Grants a shield equal to 100% of your maximum health"'))
+        self.assertEqual(expectation.model['kind'], 'stat_ratio')
+        self.assertEqual(expectation.model['stat_metric'], 'max_health')
+        self.assertEqual(expectation.model['expected'], 1.0)
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, tome_of_light_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_RATIO)
+        self.assertEqual(expectations[0].model['kind'], 'stat_ratio')
+
+    def test_stat_is_measured_before_the_cast_and_amount_after_it(self):
+        spec = cast_stat_ratio_spec(tome_of_light_entry())
+        scenario, expectations = cast_stat_ratio_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        model = expectations[0].model
+        stat_index = next(index for index, step in enumerate(steps)
+                          if step.get('metric') == 'max_health' and step.get('label') == model['stat_label'])
+        cast_index = next(index for index, step in enumerate(steps)
+                          if step.get('action') == 'cast' and step.get('spell') == TOME_OF_LIGHT)
+        amount_index = next(index for index, step in enumerate(steps)
+                            if step.get('metric') == 'aura_amount' and step.get('label') == model['amount_label'])
+        self.assertLess(stat_index, cast_index)
+        self.assertLess(cast_index, amount_index)
+        amount_step = steps[amount_index]
+        self.assertEqual(amount_step['spell'], TOME_OF_LIGHT)
+        self.assertEqual(amount_step['effect'], 1)
+
+    def test_wrong_amount_reading_is_caught(self):
+        spec = cast_stat_ratio_spec(tome_of_light_entry())
+        _, expectations = cast_stat_ratio_scenario(CLASS_FILE, spec)
+        expectation = expectations[0]
+        wrong_run = FakeRun({expectation.model['stat_label']: 40000.0, expectation.model['amount_label']: 1.0})
+        verdict = judge_behaviour(base_verdict(expectation), wrong_run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+        right_run = FakeRun({expectation.model['stat_label']: 40000.0, expectation.model['amount_label']: 40000.0})
+        verdict = judge_behaviour(base_verdict(expectation), right_run, expectation)
+        self.assertEqual(verdict.status, 'ok')
 
 
 TEMPLAR_CLASS_ID = 19

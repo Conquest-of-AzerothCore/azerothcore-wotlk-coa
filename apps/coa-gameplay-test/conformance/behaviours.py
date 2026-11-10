@@ -52,7 +52,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
         'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition', 'mount_grant',
         'internal_cooldown', 'cast_combat', 'aggro_redirect', 'dispel_removal', 'aura_presence', 'heal_block',
-        'aura_metric_delta', 'cast_applies_aura')
+        'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -694,6 +694,55 @@ def cast_leech_ratio_scenario(class_file: dict, spec: CastLeechRatioSpec) -> tup
 
 def cast_leech_ratio_spec(entry: dict) -> CastLeechRatioSpec:
     return CastLeechRatioSpec(entry['spell'], entry['name'], entry['quote'], entry['heal_spell'], entry['expected'])
+
+
+@dataclass(frozen=True)
+class CastStatRatioSpec:
+    spell: int
+    name: str
+    quote: str
+    stat_metric: str
+    expected: float
+    effect: int = 0
+
+
+def cast_stat_ratio_scenario(class_file: dict, spec: CastStatRatioSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'cast_stat_ratio', spec.quote, spec.expected)
+    facts = facts_of(records, spec.spell)
+    stat_label = f'{spec.spell} {spec.stat_metric} cast_stat_ratio stat'
+    amount_label = f'{spec.spell} {spec.effect} aura_amount cast_stat_ratio amount'
+    steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
+    if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+        steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost})
+    steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell})
+    steps += required_aura_steps(facts)
+    steps.append(measurement(stat_label, CASTER, spec.stat_metric))
+    steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': CASTER})
+    steps.append({'action': 'wait', 'ms': facts.cast_time_ms + CAST_MARGIN_MS})
+    steps.append(measurement(amount_label, CASTER, 'aura_amount', spell=spec.spell, effect=spec.effect))
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour cast stat ratio',
+        'contract': f'Real cast of {spec.spell} on the caster, measuring the caster\'s own {spec.stat_metric} stat '
+                    f'right before the cast and the magnitude {spec.spell} applies to its own effect {spec.effect} '
+                    f'aura on the caster right after, proving that magnitude tracks the stat (a script-computed '
+                    f'amount, not a fixed Spell.dbc base point) rather than only matching it by the coincidence of '
+                    f'the reference character\'s own fixed stat value.',
+        'players': [player_fixture(class_file)],
+        'steps': steps}
+    label = f'{spec.spell} behaviour_ratio'
+    model = {'kind': 'stat_ratio', 'stat_label': stat_label, 'amount_label': amount_label,
+             'expected': spec.expected, 'quote': entry.quote, 'target_name': spec.name,
+             'stat_metric': spec.stat_metric}
+    expectation = Expectation(label, BEHAVIOUR_RATIO, spec.spell, spec.spell, None, str(spec.expected),
+                              prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def cast_stat_ratio_spec(entry: dict) -> CastStatRatioSpec:
+    return CastStatRatioSpec(entry['spell'], entry['name'], entry['quote'], entry['stat_metric'], entry['expected'],
+                             entry.get('effect', 0))
 
 
 @dataclass(frozen=True)
@@ -3086,6 +3135,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return leech_ratio_scenario(class_file, leech_ratio_spec(entry))
     if entry['kind'] == 'cast_leech_ratio':
         return cast_leech_ratio_scenario(class_file, cast_leech_ratio_spec(entry))
+    if entry['kind'] == 'cast_stat_ratio':
+        return cast_stat_ratio_scenario(class_file, cast_stat_ratio_spec(entry))
     if entry['kind'] == 'spread':
         return aura_spread_scenario(class_file, aura_spread_spec(entry))
     if entry['kind'] == 'trigger':
