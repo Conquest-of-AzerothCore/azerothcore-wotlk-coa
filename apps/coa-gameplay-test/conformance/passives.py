@@ -73,6 +73,7 @@ BEHAVIOUR_LABELS = {
     'party_stat_ratio': lambda entry: [f"{entry['spell']} behaviour_party_stat_ratio"],
     'spread': lambda entry: [f"{entry['spell']} behaviour_count"],
     'metric_delta': lambda entry: [f"{entry['spell']} behaviour_metric_delta"],
+    'aura_metric_delta': lambda entry: [f"{entry['spell']} behaviour_metric_delta"],
     'duration_refresh': lambda entry: [f"{entry['spell']} behaviour_duration_refresh"],
     'amount_delta': lambda entry: [f"{entry['spell']} behaviour_amount_delta"],
     'duration': lambda entry: [f"{entry['spell']} behaviour_duration"],

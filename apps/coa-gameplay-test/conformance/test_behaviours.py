@@ -25,6 +25,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_AGGRO_
                         aggro_redirect_label, aggro_redirect_scenario, aggro_redirect_spec,
                         ally_heal_breadth_scenario, ally_heal_breadth_spec,
                         amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
+                        aura_metric_delta_scenario, aura_metric_delta_spec,
                         aura_presence_scenario, aura_presence_spec,
                         aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
                         behaviour_scenario, cast_combat_scenario, cast_combat_spec,
@@ -154,6 +155,8 @@ REBUKE = 525051
 HARMONIC_DISPOSITION = 560653
 INTERDICT = 560116
 ARGENT_KNIGHT = 300512
+BINDING_SCRIPTURE = 801457
+BINDING_SCRIPTURE_DAMAGE_REDUCTION = 707307
 
 
 def scarlet_judicator_entry() -> dict:
@@ -407,6 +410,10 @@ def righteous_tempest_requires_argent_knight_entry() -> dict:
                if entry['spell'] == RIGHTEOUS_TEMPEST and entry.get('variant') == 'requires_argent_knight')
 
 
+def binding_scripture_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == BINDING_SCRIPTURE)
+
+
 class BehaviourEntryTests(unittest.TestCase):
     def test_scarlet_judicator_entry(self):
         spec = target_count_spec(scarlet_judicator_entry())
@@ -620,6 +627,19 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.gate_timing, 'between')
         self.assertFalse(spec.trigger_only_after)
 
+    def test_binding_scripture_entry(self):
+        spec = aura_metric_delta_spec(binding_scripture_entry())
+        entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'aura_metric_delta', spec.quote, spec.expected)
+        self.assertIn(spec.quote, entry.tooltip)
+        self.assertEqual(spec.spell, BINDING_SCRIPTURE)
+        self.assertEqual(spec.aura_spell, BINDING_SCRIPTURE_DAMAGE_REDUCTION)
+        self.assertEqual(spec.metric, 'melee_damage_taken')
+        self.assertEqual(spec.fields, {'target': 'dummy'})
+        self.assertEqual(spec.aura_stacks, 1)
+        self.assertEqual(spec.target, 'dummy')
+        self.assertEqual(spec.before_expected, 1000)
+        self.assertEqual(spec.expected, 950)
+
 
 class BehaviourEntriesLookupTests(unittest.TestCase):
     def test_behaviour_entries_filters_by_spell(self):
@@ -631,7 +651,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 78)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 79)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1681,6 +1701,74 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         with_field, _ = metric_delta_scenario(CLASS_FILE, spec)
         without_field, _ = metric_delta_scenario(CLASS_FILE, replace(spec, setup_casts=()))
         self.assertEqual(with_field, without_field)
+
+
+class AuraMetricDeltaScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_expectations(self):
+        spec = aura_metric_delta_spec(binding_scripture_entry())
+        scenario, expectations = aura_metric_delta_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_METRIC_DELTA)
+        self.assertTrue(expectation.rule.startswith('prose: "reduces your damage taken by"'))
+        self.assertEqual(expectation.model['kind'], 'metric_delta')
+        self.assertEqual(expectation.model['expected'], 950)
+        self.assertEqual(expectation.model['before_expected'], 1000)
+        self.assertEqual(expectation.model['metric'], 'melee_damage_taken')
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, binding_scripture_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_DELTA)
+        self.assertEqual(expectations[0].model['expected'], 950)
+        self.assertEqual(expectations[0].model['before_expected'], 1000)
+
+    def test_measures_the_metric_before_and_after_setting_the_aura(self):
+        spec = aura_metric_delta_spec(binding_scripture_entry())
+        scenario, _ = aura_metric_delta_scenario(CLASS_FILE, spec)
+        measure_steps = [step for step in scenario['steps']
+                         if step.get('metric') == 'melee_damage_taken' and step.get('target') == 'dummy']
+        self.assertEqual(len(measure_steps), 2)
+        for step in measure_steps:
+            self.assertEqual(step['actor'], 'caster')
+
+    def test_set_aura_happens_between_the_before_and_after_measurements(self):
+        spec = aura_metric_delta_spec(binding_scripture_entry())
+        scenario, _ = aura_metric_delta_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        measure_indexes = [index for index, step in enumerate(steps) if step.get('metric') == 'melee_damage_taken']
+        reduction = BINDING_SCRIPTURE_DAMAGE_REDUCTION
+        set_aura_index = next(index for index, step in enumerate(steps)
+                              if step.get('action') == 'set_aura' and step.get('spell') == reduction)
+        self.assertEqual(len(measure_indexes), 2)
+        self.assertLess(measure_indexes[0], set_aura_index)
+        self.assertLess(set_aura_index, measure_indexes[1])
+        set_aura_step = steps[set_aura_index]
+        self.assertEqual(set_aura_step['actor'], 'caster')
+        self.assertEqual(set_aura_step['stacks'], 1)
+
+    def test_dummy_target_adds_the_creature_fixture(self):
+        spec = aura_metric_delta_spec(binding_scripture_entry())
+        scenario, _ = aura_metric_delta_scenario(CLASS_FILE, spec)
+        self.assertEqual(len(scenario['creatures']), 1)
+        self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
+
+    def test_caster_target_skips_the_creature_fixture(self):
+        spec = aura_metric_delta_spec(binding_scripture_entry())
+        scenario, _ = aura_metric_delta_scenario(CLASS_FILE, replace(spec, target='caster', fields={}))
+        self.assertNotIn('creatures', scenario)
+
+    def test_wrong_after_reading_is_caught(self):
+        spec = aura_metric_delta_spec(binding_scripture_entry())
+        _, expectations = aura_metric_delta_scenario(CLASS_FILE, spec)
+        expectation = expectations[0]
+        wrong_run = FakeRun({expectation.model['before_label']: 1000.0, expectation.model['after_label']: 1000.0})
+        verdict = judge_behaviour(base_verdict(expectation), wrong_run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+        right_run = FakeRun({expectation.model['before_label']: 1000.0, expectation.model['after_label']: 950.0})
+        verdict = judge_behaviour(base_verdict(expectation), right_run, expectation)
+        self.assertEqual(verdict.status, 'ok')
 
     def test_setup_casts_cast_blade_of_faith_at_the_dummy_before_each_divine_force_cast(self):
         spec = metric_delta_spec(transcending_strikes_entry())

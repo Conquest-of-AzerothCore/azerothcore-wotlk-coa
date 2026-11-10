@@ -2316,6 +2316,17 @@
       "quote": "If they are an Undead or Demon they are unable to be healed for the duration.",
       "creature_entry": 36, "block_spell": 561309, "blocked": false, "variant": "control",
       "reason": "Same mechanism as the 201/416 entries above; creature entry 36 (Harvest Golem, creature_template.type=9 Mechanical, already used elsewhere in this tool as DUMMY_ENTRY) is neither Undead nor Demon, so 561309 must stay absent after the cast. This is the positive control proving the check actually measures something (an unconditional-block defect would also pass the Undead/Demon entries vacuously), and is itself the regression check for the fix: before this round's fix, 561309 applied unconditionally and this control would have alerted (561309 present on a non-Undead/Demon target)."
+    },
+    {
+      "spell": 801457, "name": "Binding Scripture", "kind": "aura_metric_delta",
+      "quote": "reduces your damage taken by", "expected": 950,
+      "aura_spell": 707307,
+      "aura_stacks": 1,
+      "target": "dummy",
+      "metric": "melee_damage_taken",
+      "fields": { "target": "dummy" },
+      "before_expected": 1000,
+      "observe_source": "707307 (coa-dbc-viewer Spell 707307): Effect[0] SPELL_EFFECT_APPLY_AURA, EffectApplyAuraName[0] 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, EffectMiscValue[0] 127 (all schools), EffectBasePoints[0] -6/EffectDieSides[0] 1 (CalcValue rounds to -5, matching the tooltip's own $707307s1 token, already verified by effect_value 707307e0). Unit::MeleeDamageBonusTaken (Unit.cpp:11609-11633) multiplies the fixed 1000 base by GetTotalAuraMultiplier(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, ...) filtered through IsAscensionTuningDamageTakenSource (Unit.cpp:9948-9958), which returns true unconditionally for any aura id other than 887083 or an IsAscensionPvpTuningAura id, so 707307 is counted regardless of the measurement's 'dummy' attacker; the resulting -5% multiplier gives 1000*0.95=950, matching the measured run exactly. set_aura applies 707307 directly rather than reproducing the heal-an-ally trigger (already proven ok by this spell's own trigger_count verdict, 273/273), isolating only the magnitude claim."
     }
   ],
   "player_observations": [

@@ -50,7 +50,8 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
         'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition', 'mount_grant',
-        'internal_cooldown', 'cast_combat', 'aggro_redirect', 'dispel_removal', 'aura_presence', 'heal_block')
+        'internal_cooldown', 'cast_combat', 'aggro_redirect', 'dispel_removal', 'aura_presence', 'heal_block',
+        'aura_metric_delta')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1295,6 +1296,61 @@ def heal_block_spec(entry: dict) -> HealBlockSpec:
     return HealBlockSpec(entry['spell'], entry['name'], entry['quote'], entry['creature_entry'], entry['block_spell'],
                         entry['blocked'], entry.get('wait_ms', DEFAULT_HEAL_BLOCK_WAIT_MS),
                         entry.get('label_suffix', ''))
+
+
+@dataclass(frozen=True)
+class AuraMetricDeltaSpec:
+    spell: int
+    name: str
+    quote: str
+    expected: float
+    aura_spell: int
+    metric: str
+    fields: dict
+    before_expected: float
+    aura_stacks: int = 1
+    target: str = CASTER
+    label_suffix: str = ''
+
+
+def aura_metric_delta_label(spec: AuraMetricDeltaSpec, moment: str) -> str:
+    return f'{spec.spell} {spec.metric} aura_gated {moment}'
+
+
+def aura_metric_delta_scenario(class_file: dict, spec: AuraMetricDeltaSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'aura_metric_delta', spec.quote, spec.expected)
+    before_label = aura_metric_delta_label(spec, BEFORE)
+    after_label = aura_metric_delta_label(spec, AFTER)
+    steps = base_steps(class_file) + [
+        measurement(before_label, CASTER, spec.metric, **spec.fields),
+        {'action': 'set_aura', 'actor': CASTER, 'spell': spec.aura_spell, 'stacks': spec.aura_stacks},
+        measurement(after_label, CASTER, spec.metric, **spec.fields)]
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour aura metric delta',
+        'contract': f'{spec.metric} {spec.fields} is read once with no aura on the caster and once right after '
+                    f'{spec.aura_spell} is set directly on the caster at {spec.aura_stacks} stack(s), isolating the '
+                    f'aura\'s own effect from however it is normally applied in play (already proven by a separate '
+                    f'verdict).',
+        'players': [player_fixture(class_file)],
+        'steps': steps}
+    if spec.target == TARGET:
+        scenario['creatures'] = [creature_fixture(class_file)]
+    label = f'{spec.spell} behaviour_metric_delta' + (f' {spec.label_suffix}' if spec.label_suffix else '')
+    model = {'kind': 'metric_delta', 'before_label': before_label, 'after_label': after_label,
+             'expected': spec.expected, 'before_expected': spec.before_expected, 'metric': spec.metric,
+             'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_METRIC_DELTA, spec.spell, spec.aura_spell, None,
+                              str(spec.expected), prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def aura_metric_delta_spec(entry: dict) -> AuraMetricDeltaSpec:
+    return AuraMetricDeltaSpec(entry['spell'], entry['name'], entry['quote'], entry['expected'], entry['aura_spell'],
+                               entry['metric'], entry['fields'], entry['before_expected'],
+                               entry.get('aura_stacks', 1), entry.get('target', CASTER),
+                               entry.get('label_suffix', ''))
 
 
 DEBT_ASSERT_TIMEOUT_MS = 2000
@@ -2923,6 +2979,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return shield_break_trigger_scenario(class_file, shield_break_trigger_spec(entry))
     if entry['kind'] == 'metric_delta':
         return metric_delta_scenario(class_file, metric_delta_spec(entry))
+    if entry['kind'] == 'aura_metric_delta':
+        return aura_metric_delta_scenario(class_file, aura_metric_delta_spec(entry))
     if entry['kind'] == 'health_ratio':
         return health_threshold_ratio_scenario(class_file, health_ratio_spec(entry))
     if entry['kind'] == 'duration':
