@@ -61,3 +61,9 @@ UPDATE `gameobject` SET `position_x` = 7650.2247, `position_y` = -4919.5979, `po
 -- #11826
 -- pickup 6941796 (Grimtotem Bow) moved 14.0 yd across and 0.65 yd down to the tent next to Sage Nauchol, where LootCollector records it
 UPDATE `gameobject` SET `position_x` = -3628.5142, `position_y` = -1028.2337, `position_z` = 203.9655, `orientation` = 0.381159, `rotation0` = -0.761488, `rotation1` = 0.08334, `rotation2` = 0.391572, `rotation3` = 0.509766 WHERE `guid` = 6941796 AND `id` = 520699;
+
+-- #11835
+-- the copy on the ground below the tower: 6942160 (Sharpened Pike) hidden, not deleted
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6942160) AND `id` IN (95831);
+-- pickup 6942161 (Sharpened Pike) moved 11.3 yd across and 0.70 yd down to the tower floor (it hung 0.8 yd above it)
+UPDATE `gameobject` SET `position_x` = 1239.0983, `position_y` = -2205.9413, `position_z` = 113.516, `orientation` = 3.039075, `rotation0` = 0.030973, `rotation1` = 0.603709, `rotation2` = 0.795557, `rotation3` = 0.040815 WHERE `guid` = 6942161 AND `id` = 95831;
