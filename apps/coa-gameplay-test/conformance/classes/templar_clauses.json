@@ -72,7 +72,9 @@
   {
     "spell": 92111,
     "clause": "This is guaranteed to critically strike against Undead enemies.",
-    "labels": [],
+    "labels": [
+      "92111 behaviour_crit_guarantee 801832"
+    ],
     "kind": "claim"
   },
   {

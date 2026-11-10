@@ -75,6 +75,7 @@ BEHAVIOUR_LABELS = {
     'amount_delta': lambda entry: [f"{entry['spell']} behaviour_amount_delta"],
     'duration': lambda entry: [f"{entry['spell']} behaviour_duration"],
     'health_ratio': lambda entry: [f"{entry['spell']} {pct} behaviour_ratio" for pct, _ in entry['levels']],
+    'crit_guarantee': lambda entry: [f"{entry['spell']} behaviour_crit_guarantee {entry['trial_spell']}"],
 }
 FAMILY_REASONS = {
     'P5': 'proc or trigger effect without a trigger entry',

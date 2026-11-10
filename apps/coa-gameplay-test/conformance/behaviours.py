@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import re
 
-from hits import MAIN_HAND, aura_modifiers, creature_fixture
+from hits import DRAIN_MS, MAIN_HAND, TIMEOUT_MARGIN_MS, aura_modifiers, creature_fixture
 from procs import swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import COLOR_CODE, Records
@@ -17,10 +17,14 @@ BEHAVIOUR_TRIGGER = 'behaviour_trigger'
 BEHAVIOUR_METRIC_DELTA = 'behaviour_metric_delta'
 BEHAVIOUR_DURATION_REFRESH = 'behaviour_duration_refresh'
 BEHAVIOUR_AMOUNT_DELTA = 'behaviour_amount_delta'
+BEHAVIOUR_CRIT_GUARANTEE = 'behaviour_crit_guarantee'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
-                    BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA)
+                    BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
+                    BEHAVIOUR_CRIT_GUARANTEE)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
-        'amount_delta')
+        'amount_delta', 'crit_guarantee')
+CRIT_GUARANTEE_ATTEMPTS = 100
+CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 PROSE = 'prose: '
 BEFORE = 'before'
 AFTER = 'after'
@@ -841,6 +845,64 @@ def amount_delta_spec(entry: dict) -> AmountDeltaSpec:
                            entry['mechanism_label'])
 
 
+@dataclass(frozen=True)
+class CritGuaranteeSpec:
+    spell: int
+    name: str
+    quote: str
+    trial_spell: int
+    target_entry: int
+    target_type: int
+    target_type_name: str
+    attempts: int = CRIT_GUARANTEE_ATTEMPTS
+    minimum_events: int = CRIT_GUARANTEE_MINIMUM_EVENTS
+
+
+def crit_guarantee_labels(spec: CritGuaranteeSpec) -> tuple[str, str]:
+    return (f'{spec.spell} {spec.trial_spell} crit_guarantee crit',
+            f'{spec.spell} {spec.trial_spell} crit_guarantee noncrit')
+
+
+def crit_guarantee_scenario(class_file: dict, spec: CritGuaranteeSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'crit_guarantee', spec.quote, 1.0)
+    crit_label, noncrit_label = crit_guarantee_labels(spec)
+    attempt_ms = swing_interval(class_file)
+    waited_ms = spec.attempts * attempt_ms
+    target = {**creature_fixture(class_file), 'entry': spec.target_entry, 'reaction': 0}
+    steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
+             {'action': 'attack', 'actor': CASTER, 'target': TARGET},
+             {'action': 'wait', 'label': 'swings', 'ms': waited_ms},
+             {'action': 'stop_attack', 'actor': CASTER},
+             {'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS},
+             measurement(crit_label, CASTER, 'spell_damage_count', spell=spec.trial_spell, target=TARGET,
+                        critical=True),
+             measurement(noncrit_label, CASTER, 'spell_damage_count', spell=spec.trial_spell, target=TARGET,
+                        critical=False)])
+    scenario = {'schema': 1,
+               'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour crit guarantee',
+               'contract': f'{spec.attempts} auto-attack swings against a {spec.target_type_name} target '
+                           f'(creature_template.type {spec.target_type}, entry {spec.target_entry}); every '
+                           f'triggered hit of {spec.trial_spell} logged against it must be critical.',
+               'players': [player_fixture(class_file)], 'creatures': [target], 'steps': steps,
+               'timeout_ms': waited_ms + TIMEOUT_MARGIN_MS}
+    label = f'{spec.spell} behaviour_crit_guarantee {spec.trial_spell}'
+    model = {'crit_label': crit_label, 'noncrit_label': noncrit_label, 'minimum_events': spec.minimum_events,
+            'trial_spell': spec.trial_spell, 'target_name': f'{spec.target_type_name} (entry {spec.target_entry})',
+            'creature_type_source': f'creature_template.type {spec.target_type} ({spec.target_type_name})',
+            'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_CRIT_GUARANTEE, spec.spell, spec.trial_spell, None, '1.0',
+                              prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def crit_guarantee_spec(entry: dict) -> CritGuaranteeSpec:
+    return CritGuaranteeSpec(entry['spell'], entry['name'], entry['quote'], entry['trial_spell'],
+                             entry['target_entry'], entry['target_type'], entry['target_type_name'],
+                             entry.get('attempts', CRIT_GUARANTEE_ATTEMPTS),
+                             entry.get('minimum_events', CRIT_GUARANTEE_MINIMUM_EVENTS))
+
+
 MECHANIC_DR_RESET_MS = 15000
 MECHANIC_GAP_MARGIN_MS = 2000
 MECHANIC_LAND_ATTEMPTS = 3
@@ -1037,6 +1099,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return duration_refresh_scenario(class_file, duration_refresh_spec(entry))
     if entry['kind'] == 'amount_delta':
         return amount_delta_scenario(class_file, amount_delta_spec(entry))
+    if entry['kind'] == 'crit_guarantee':
+        return crit_guarantee_scenario(class_file, crit_guarantee_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

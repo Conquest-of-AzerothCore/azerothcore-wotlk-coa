@@ -6,13 +6,15 @@ import sys
 import tempfile
 import unittest
 
-from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_COUNT, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
-                        BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER,
-                        MECHANIC_LAND_ATTEMPTS, HealingRatioTarget, amount_delta_scenario, amount_delta_spec,
-                        aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
-                        behaviour_scenario, duration_refresh_scenario, duration_refresh_spec, duration_scenario,
-                        duration_spec, health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
-                        healing_ratio_spec, leech_heal_modifier_factor, leech_ratio_scenario, leech_ratio_spec,
+from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_DURATION,
+                        BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_METRIC_DELTA,
+                        BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER, MECHANIC_LAND_ATTEMPTS, CritGuaranteeSpec,
+                        HealingRatioTarget, amount_delta_scenario, amount_delta_spec, aura_spread_scenario,
+                        aura_spread_spec, behaviour_entries, behaviour_entry, behaviour_scenario,
+                        crit_guarantee_scenario, crit_guarantee_spec, duration_refresh_scenario,
+                        duration_refresh_spec, duration_scenario, duration_spec, health_ratio_spec,
+                        health_threshold_ratio_scenario, healing_ratio_scenario, healing_ratio_spec,
+                        leech_heal_modifier_factor, leech_ratio_scenario, leech_ratio_spec,
                         mechanic_duration_scenario, mechanic_duration_spec, metric_delta_scenario,
                         metric_delta_spec, shield_break_trigger_scenario, shield_break_trigger_spec,
                         target_count_scenario, target_count_spec)
@@ -350,7 +352,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 25)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 26)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1789,6 +1791,91 @@ class JudgeAmountDeltaTests(unittest.TestCase):
                                   expectation)
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('ta', verdict.explanation)
+
+    def test_no_run_reports_no_scenario(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), None, expectation)
+        self.assertIn('no scenario', verdict.explanation)
+
+
+SCOURGEBANE = 92111
+SCOURGEBANE_EXTRA_DAMAGE = 801832
+
+
+class CritGuaranteeScenarioTests(unittest.TestCase):
+    def spec(self):
+        return CritGuaranteeSpec(SCOURGEBANE, 'Scourgebane',
+                                 'This is guaranteed to critically strike against Undead enemies.',
+                                 SCOURGEBANE_EXTRA_DAMAGE, 1501, 6, 'Undead (Mindless Zombie)')
+
+    def test_scenario_attacks_the_overridden_creature_entry_not_the_shared_dummy(self):
+        scenario, [expectation] = crit_guarantee_scenario(CLASS_FILE, self.spec())
+        [creature] = scenario['creatures']
+        self.assertEqual(creature['entry'], 1501)
+        self.assertEqual(creature['reaction'], 0)
+        self.assertEqual(expectation.check, BEHAVIOUR_CRIT_GUARANTEE)
+        self.assertEqual(expectation.spell_id, SCOURGEBANE)
+        self.assertEqual(expectation.rank_id, SCOURGEBANE_EXTRA_DAMAGE)
+
+    def test_scenario_measures_both_critical_and_non_critical_hits_of_the_trial_spell(self):
+        scenario, [expectation] = crit_guarantee_scenario(CLASS_FILE, self.spec())
+        model = expectation.model
+        crit_step = next(step for step in scenario['steps'] if step.get('label') == model['crit_label'])
+        noncrit_step = next(step for step in scenario['steps'] if step.get('label') == model['noncrit_label'])
+        self.assertEqual(crit_step['spell'], SCOURGEBANE_EXTRA_DAMAGE)
+        self.assertTrue(crit_step['critical'])
+        self.assertFalse(noncrit_step['critical'])
+
+    def test_entry_from_class_file_round_trips_through_the_spec_parser(self):
+        entry = next(entry for entry in CLASS_FILE['behaviours']
+                    if entry['spell'] == SCOURGEBANE and entry['kind'] == 'crit_guarantee')
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
+        self.assertEqual(scenario['creatures'][0]['entry'], entry['target_entry'])
+        self.assertEqual(expectation.rule, f'prose: "{entry["quote"]}" ({SCOURGEBANE})')
+
+
+class JudgeCritGuaranteeTests(unittest.TestCase):
+    def expectation(self):
+        model = {'crit_label': 'crit', 'noncrit_label': 'noncrit', 'minimum_events': 5,
+                 'trial_spell': SCOURGEBANE_EXTRA_DAMAGE, 'target_name': 'Undead (Mindless Zombie) (entry 1501)',
+                 'creature_type_source': 'creature_template.type 6 (Undead (Mindless Zombie))',
+                 'quote': 'This is guaranteed to critically strike against Undead enemies.'}
+        return Expectation('label', BEHAVIOUR_CRIT_GUARANTEE, SCOURGEBANE, SCOURGEBANE_EXTRA_DAMAGE, None, '1.0',
+                           'prose: "This is guaranteed to critically strike against Undead enemies." (92111)',
+                           model)
+
+    def test_every_triggered_hit_critical_is_ok(self):
+        expectation = self.expectation()
+        values = {'crit': 28.0, 'noncrit': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.measured, 1.0)
+
+    def test_a_seeded_6_percent_deviation_is_an_alert(self):
+        expectation = self.expectation()
+        values = {'crit': 47.0, 'noncrit': 3.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.measured, 0.94)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_a_seeded_4_percent_deviation_is_tolerated(self):
+        expectation = self.expectation()
+        values = {'crit': 48.0, 'noncrit': 2.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.measured, 0.96)
+        self.assertEqual(verdict.status, 'tolerated')
+
+    def test_fewer_events_than_the_minimum_is_insufficient_trials(self):
+        expectation = self.expectation()
+        values = {'crit': 2.0, 'noncrit': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'insufficient_trials')
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'crit': 10.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('noncrit', verdict.explanation)
 
     def test_no_run_reports_no_scenario(self):
         expectation = self.expectation()

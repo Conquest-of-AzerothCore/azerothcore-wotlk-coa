@@ -9,9 +9,9 @@ import re
 from statistics import fmean, pstdev
 from typing import Callable, Mapping, Protocol
 
-from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_DURATION,
-                        BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_METRIC_DELTA,
-                        BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
+from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
+                        BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH,
+                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
@@ -2049,6 +2049,28 @@ def behaviour_amount_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
                                f'is always an alert')
 
 
+def behaviour_crit_guarantee_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    crit = run.values.get(model['crit_label'])
+    noncrit = run.values.get(model['noncrit_label'])
+    if crit is None or noncrit is None:
+        return replace(base, explanation=missing_measurement(run, model['crit_label'] if crit is None
+                                                              else model['noncrit_label']))
+    total = crit + noncrit
+    minimum = model['minimum_events']
+    if total < minimum:
+        return replace(base, status='insufficient_trials', measured=total,
+                       explanation=f'{model["crit_label"]} + {model["noncrit_label"]} measured {total:g} '
+                                   f'triggered hits of {model["trial_spell"]} against {model["target_name"]}, '
+                                   f'fewer than the {minimum:g} needed to judge the crit guarantee')
+    ratio = crit / total
+    status = banded_status(ratio, 1.0, 1.0, 1.0)
+    return replace(base, status=status, measured=ratio, expected=1.0, low=1.0, high=1.0,
+                   explanation=f'{crit:g} critical of {total:g} {model["trial_spell"]} hits against '
+                               f'{model["target_name"]} ({model["creature_type_source"]}); every triggered hit '
+                               f'must critically strike ({model["quote"]!r}); a ratio below 1.0 is tolerated '
+                               f'within {TOLERATED_RELATIVE:.0%} of 1.0, otherwise alert')
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
@@ -2071,6 +2093,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_duration_ratio_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_AMOUNT_DELTA:
         return behaviour_amount_delta_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_CRIT_GUARANTEE:
+        return behaviour_crit_guarantee_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 
