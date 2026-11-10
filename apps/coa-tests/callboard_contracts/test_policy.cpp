@@ -348,7 +348,7 @@ void Ledger()
     WeekLedger ledger;
     assert(ledger.Completions("Duel", 100) == 0);
     ledger.Roll(100);
-    assert(ledger.Add("Duel") == 1 && ledger.Add("Duel") == 2);
+    assert(ledger.Add("Duel").completions == 1 && ledger.Add("Duel").completions == 2);
     ledger.Set("CallToArms", 4);
     assert(ledger.Completions("Duel", 100) == 2 && ledger.Completions("CallToArms", 100) == 4);
     assert(ledger.Completions("Duel", 200) == 0);
@@ -358,7 +358,7 @@ void Ledger()
     ledger.Roll(200);
     assert(ledger.WeekStartTime() == 200);
     assert(ledger.Completions("Duel", 200) == 0 && ledger.Completions("CallToArms", 200) == 0);
-    assert(ledger.Add("Duel") == 1);
+    assert(ledger.Add("Duel").completions == 1);
 
     std::uint32_t const days = DaysBegun(200 + 7 * DaySeconds - 4 * DaySeconds, 200 + 7 * DaySeconds);
     assert(days == 3);
@@ -374,7 +374,7 @@ void LedgerMerge()
 
     WeekLedger live;
     live.Roll(100);
-    assert(live.Add("Duel") == 1);
+    assert(live.Add("Duel").completions == 1);
     std::vector<std::string> const unsaved = live.Types();
     assert(unsaved.size() == 1 && unsaved[0] == "Duel");
     live.Add("CallToArms");
@@ -395,6 +395,50 @@ void LedgerMerge()
     empty.Merge(stored);
     assert(empty.Completions("Duel", 100) == 3);
 }
+
+void EscalatingCompleteNow()
+{
+    std::uint32_t const base = MoneyCost(58333, 2.0, 700000);
+    assert(EscalatedMoneyCost(base, 2.0, 0) == 700000);
+    assert(EscalatedMoneyCost(base, 2.0, 1) == 1400000);
+    assert(EscalatedMoneyCost(base, 2.0, 3) == 5600000);
+    assert(EscalatedMoneyCost(base, 2.0, 12) == MaxMoneyCost);
+    assert(EscalatedMoneyCost(base, 2.0, std::numeric_limits<std::uint32_t>::max()) == MaxMoneyCost);
+    assert(EscalatedMoneyCost(base, 1.0, 5) == 700000);
+    assert(EscalatedMoneyCost(base, 0.5, 5) == 700000);
+    assert(EscalatedMoneyCost(base, 1.5, 2) == 1575000);
+
+    std::uint32_t const tokens = TokenCost(30, 2.0, 50);
+    assert(EscalatedTokenCost(tokens, 2.0, 0) == 60 && EscalatedTokenCost(tokens, 2.0, 2) == 240);
+    assert(EscalatedTokenCost(tokens, 2.0, 40) == std::numeric_limits<std::uint32_t>::max());
+
+    std::uint32_t const next = EscalatedMoneyCost(base, 2.0, 2);
+    std::uint32_t const remaining = 5;
+    assert(CostOfRemaining(next, remaining) / remaining == 2800000);
+}
+
+void LedgerPurchases()
+{
+    WeekLedger ledger;
+    ledger.Roll(100);
+    ledger.Add("Duel");
+    Tally const paid = ledger.Add("Duel", true);
+    assert(paid.completions == 2 && paid.purchases == 1);
+    ledger.Add("Duel", true);
+    assert(ledger.Completions("Duel", 100) == 3 && ledger.Purchases("Duel", 100) == 2);
+    assert(ledger.Purchases("CallToArms", 100) == 0);
+    assert(ledger.Purchases("Duel", 200) == 0);
+
+    WeekLedger stored;
+    stored.Roll(100);
+    stored.Set("Duel", 4, 3);
+    ledger.Merge(stored);
+    assert(ledger.Completions("Duel", 100) == 7 && ledger.Purchases("Duel", 100) == 5);
+
+    ledger.Roll(200);
+    assert(ledger.Purchases("Duel", 200) == 0);
+    assert(ledger.Add("Duel", true).purchases == 1);
+}
 }
 
 int main()
@@ -413,6 +457,8 @@ int main()
     PendingExpiry();
     Ledger();
     LedgerMerge();
+    EscalatingCompleteNow();
+    LedgerPurchases();
     std::cout << "callboard contracts policy checks passed\n";
     return 0;
 }
