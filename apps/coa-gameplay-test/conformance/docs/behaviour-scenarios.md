@@ -28,6 +28,8 @@ produce the same status vocabulary (`ok`, `alert`, `unmodelled`, `measured`, `am
 | `behaviour_oath_consumption_removal` (`kind: "oath_consumption_removal"`) | "Consumes your Oaths, dealing additional damage for each consumed"-shaped claims whose own ability bakes the bonus into its own aura's script value at cast time and consumes the Oaths only when that aura is later removed: one or more Oath auras are fixtured, each one's own `aura_amount` is read, the trigger spell is cast once, its own aura's `aura_script_value` is read shortly after (must equal the summed `aura_amount` readings) while every Oath's `aura_stacks` must still read 1, then after the aura expires naturally every Oath's `aura_stacks` must read 0 |
 | `behaviour_charge_recharge` | a native spell-charge count ("N Charges") and its recharge interval ("T sec recharge"), proven by spending every charge one cast at a time, confirming an over-cast attempt is refused, and bracketing the recharge window at a tolerance |
 | `behaviour_cast_gate` | a cast-attempt gate on the target's own `TargetAuraState`, and an optional bypass of that gate by a second, named spell's own ability-ignore-aurastate effect |
+| `behaviour_metric_delta` (`kind: "dispel_removal"`) | a dispel/cleanse active that removes a named debuff aura from a target (self or a grouped ally) the moment it is cast, read as the generic `aura` metric going from present to absent |
+| `behaviour_metric_delta` (`kind: "aura_presence"`) | an active that grants an arbitrary metric's "present" state (an aura, a water-walk flag, ...) on a target (self or a grouped ally) the moment it is cast, read going from absent to present |
 
 Every `Expectation.rule` of these checks starts with the literal prefix `prose: ` followed by the quoted
 `Description[enUS]` fragment that states the number, e.g.
@@ -37,7 +39,7 @@ skipped: it is what keeps a behaviour `ok` honestly distinguishable from a token
 | Field | Content |
 |---|---|
 | `spell`, `name` | the passive and its `SpellName[enUS]` |
-| `kind` | `count`, `ratio`, `duration`, `duration_ratio`, `duration_refresh`, `trigger`, `spread`, `metric_delta`, `health_ratio`, `crit_guarantee`, `aura_grant`, `oath_consumption`, `oath_consumption_removal`, `cast_gate` or `cast_condition`: which scenario builder and judge rule apply |
+| `kind` | `count`, `ratio`, `duration`, `duration_ratio`, `duration_refresh`, `trigger`, `spread`, `metric_delta`, `health_ratio`, `crit_guarantee`, `aura_grant`, `oath_consumption`, `oath_consumption_removal`, `cast_gate`, `cast_condition`, `dispel_removal` or `aura_presence`: which scenario builder and judge rule apply |
 | `quote` | the exact prose fragment of `Description[enUS]`, checked to be a substring at generation time |
 | `expected` | the number, ratio or duration the quote states (not used by `health_ratio`, which states its ratios in `levels` instead, one per health percentage, or by `duration`, which states its milliseconds in `expected_ms` instead) |
 | `variant` | optional; disambiguates the generated manifest key (`conformance.add_behaviour`) when a class legitimately needs more than one `behaviours` entry on the same `spell` id, e.g. a tooltip that makes two independently checkable claims about the same passive (magnitude, then an interaction with another buff). Defaults to `''`, which reproduces the pre-`variant` key exactly, so every existing entry is unaffected. |
@@ -628,6 +630,20 @@ than a single label, since both actors must satisfy the same clause together.
 The judge (`compare.behaviour_mount_grant_verdict`) reads both of a moment's labels and compares each to the
 entry's own `mount_display_id` for exact equality (`FLOAT_EPSILON`): `ok` only when both the caster and the ally
 read the expected display id, `alert` if either does not, with the explanation naming both readings.
+
+### Aura-presence scenarios (`behaviour_metric_delta`, `kind: "aura_presence"`)
+
+Some active spells grant a metric's "present" state to a target rather than remove one: a self-targeted area
+aura that radiates to nearby party/raid members ("granting the ability to walk on water"), or any other active
+whose effect a harness metric already reads as a 0/1 flag. `aura_presence_scenario` learns `spell`, groups the
+caster with `target` first when `target` is not the caster (the `group` action, so a party/raid area aura
+reaches the second player fixture), measures `metric`/`fields` on `target` ("before"), casts `spell` on the
+caster and waits `wait_ms`, then measures the same metric again ("after"). The judge
+(`compare.behaviour_metric_delta_verdict`, the same one `metric_delta` and `dispel_removal` use) requires the
+"before" reading to match `before_expected` (0.0: the metric must be absent beforehand) and the "after" reading
+to match `expected` (1.0: the metric must be present once the spell has had time to apply); `alert` on either
+mismatch, including a target that already carried the metric before the cast (a fixture bug, not a server
+proof) or one that never gains it.
 
 ### Templar entries
 

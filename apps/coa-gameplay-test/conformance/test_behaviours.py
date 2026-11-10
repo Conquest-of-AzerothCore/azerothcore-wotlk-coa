@@ -25,6 +25,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_AGGRO_
                         aggro_redirect_label, aggro_redirect_scenario, aggro_redirect_spec,
                         ally_heal_breadth_scenario, ally_heal_breadth_spec,
                         amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
+                        aura_presence_scenario, aura_presence_spec,
                         aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
                         behaviour_scenario, cast_combat_scenario, cast_combat_spec,
                         cast_condition_scenario, cast_condition_spec,
@@ -150,6 +151,7 @@ SPIRITUAL_ASCENSION = 500688
 BECKON = 804914
 ABSOLUTION = 800424
 REBUKE = 525051
+HARMONIC_DISPOSITION = 560653
 
 
 def scarlet_judicator_entry() -> dict:
@@ -322,6 +324,10 @@ def rebuke_entry() -> dict:
 def testament_of_fortitude_dispel_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours']
                if entry['spell'] == TESTAMENT_OF_FORTITUDE and entry['kind'] == 'dispel_removal')
+
+
+def harmonic_disposition_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == HARMONIC_DISPOSITION)
 
 
 def whirling_tempest_stacks_with_courage_entry() -> dict:
@@ -562,7 +568,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 71)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 72)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -4577,6 +4583,73 @@ class JudgeDispelRemovalTests(unittest.TestCase):
         expectation = self.expectation(55095)
         verdict = judge_behaviour(base_verdict(expectation),
                                   FakeRun({'before_55095': 0.0, 'after_55095': 0.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+
+class AuraPresenceScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_one_expectation(self):
+        spec = aura_presence_spec(harmonic_disposition_entry())
+        scenario, expectations = aura_presence_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_METRIC_DELTA)
+        self.assertEqual(expectation.model['metric'], 'water_walk')
+        self.assertEqual(expectation.model['before_expected'], 0.0)
+        self.assertEqual(expectation.model['expected'], 1.0)
+        self.assertTrue(expectation.rule.startswith('prose: "and granting the ability to walk on water."'))
+
+    def test_the_ally_is_grouped_and_measured_before_and_after_the_cast(self):
+        spec = aura_presence_spec(harmonic_disposition_entry())
+        scenario, _ = aura_presence_scenario(CLASS_FILE, spec)
+        group_steps = [step for step in scenario['steps'] if step.get('action') == 'group']
+        self.assertEqual(group_steps, [{'action': 'group', 'actor': 'caster', 'target': 'ally'}])
+        water_walk_measurements = [step for step in scenario['steps'] if step.get('metric') == 'water_walk']
+        self.assertEqual(len(water_walk_measurements), 2)
+        self.assertTrue(all(step['actor'] == 'ally' for step in water_walk_measurements))
+        self.assertEqual(len(scenario['players']), 2)
+        self.assertEqual(scenario['players'][1]['id'], 'ally')
+
+    def test_cast_targets_the_caster_and_comes_between_the_two_measurements(self):
+        spec = aura_presence_spec(harmonic_disposition_entry())
+        scenario, _ = aura_presence_scenario(CLASS_FILE, spec)
+        measure_indexes = [index for index, step in enumerate(scenario['steps']) if step.get('metric') == 'water_walk']
+        cast_index = next(index for index, step in enumerate(scenario['steps'])
+                          if step.get('action') == 'cast' and step.get('spell') == HARMONIC_DISPOSITION)
+        self.assertEqual(scenario['steps'][cast_index]['target'], 'caster')
+        self.assertEqual(measure_indexes, sorted(measure_indexes))
+        self.assertLess(measure_indexes[0], cast_index)
+        self.assertLess(cast_index, measure_indexes[1])
+
+    def test_dispatch_harmonic_disposition_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, harmonic_disposition_entry())
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+
+
+class JudgeAuraPresenceTests(unittest.TestCase):
+    def expectation(self) -> Expectation:
+        model = {'kind': 'metric_delta', 'before_label': 'before', 'after_label': 'after',
+                 'expected': 1.0, 'before_expected': 0.0, 'metric': 'water_walk',
+                 'quote': 'and granting the ability to walk on water.'}
+        return Expectation('label', BEHAVIOUR_METRIC_DELTA, HARMONIC_DISPOSITION, HARMONIC_DISPOSITION, None, '1',
+                           'prose: "and granting the ability to walk on water." (560653)', model)
+
+    def test_aura_actually_granted_is_ok(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 0.0, 'after': 1.0}), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_aura_never_granted_is_an_alert(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 0.0, 'after': 0.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 0.0)
+        self.assertEqual(verdict.expected, 1.0)
+
+    def test_aura_already_present_before_the_cast_is_an_alert(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 1.0, 'after': 1.0}), expectation)
         self.assertEqual(verdict.status, 'alert')
 
 
