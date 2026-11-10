@@ -587,6 +587,7 @@ class MetricDeltaSpec:
     setup_actor_aura: int | None = None
     gate_spell: int | None = None
     label_suffix: str = ''
+    setup_only_after: bool = False
 
 
 def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
@@ -594,6 +595,8 @@ def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
 
 
 def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict, list[Expectation]]:
+    if spec.setup_only_after and not spec.setup_casts:
+        raise ValueError(f'{spec.spell} sets setup_only_after without a setup_casts to withhold then apply')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
     facts = facts_of(records, spec.trigger_spell)
@@ -616,7 +619,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                          'value': facts.mana_cost})
         return steps
 
-    def cast_steps() -> list[dict]:
+    def cast_steps(apply_setup_casts: bool = True) -> list[dict]:
         steps = []
         if spec.setup_actor_aura is not None:
             steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': spec.setup_actor_aura, 'stacks': 1})
@@ -625,30 +628,47 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                          'value': facts.mana_cost})
         steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
         steps += required_aura_steps(facts)
-        steps += setup_cast_steps()
+        if apply_setup_casts:
+            steps += setup_cast_steps()
         steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': spec.target})
         steps.append({'action': 'wait', 'ms': spec.wait_ms})
         return steps
 
     before_label = metric_delta_label(spec, BEFORE)
     after_label = metric_delta_label(spec, AFTER)
+    gate_spell = spec.gate_spell if spec.gate_spell is not None else spec.spell
+    gate_learn_step = {'action': 'learn', 'actor': CASTER, 'spell': gate_spell}
+    if spec.setup_only_after:
+        contract = (f'A/B target-condition check: {spec.metric} {spec.fields} around a cast of '
+                    f'{spec.trigger_spell}, with {gate_spell} known throughout, once with none of '
+                    f'{spec.setup_casts} applied first and once with them applied first, waiting '
+                    f'{spec.expire_ms} ms between phases for the first cast\'s effect to fully expire before '
+                    f'the second cast.')
+        learn_steps = [gate_learn_step, {'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] + \
+            [{'action': 'learn', 'actor': CASTER, 'spell': setup_spell} for setup_spell in spec.setup_casts]
+        steps = (base_steps(class_file) + learn_steps + cast_steps(apply_setup_casts=False) +
+                 [measurement(before_label, CASTER, spec.metric, **spec.fields)] +
+                 [{'action': 'wait', 'label': 'let the first phase fully expire', 'ms': spec.expire_ms}] +
+                 cast_steps(apply_setup_casts=True) +
+                 [measurement(after_label, CASTER, spec.metric, **spec.fields)])
+    else:
+        contract = (f'No-combat with/without check: {spec.metric} {spec.fields} around a cast of '
+                    f'{spec.trigger_spell}, measured before and after {gate_spell} is learned, waiting '
+                    f'{spec.expire_ms} ms between phases for the first cast\'s effect to fully expire before the '
+                    f'second cast.')
+        learn_steps = [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] + \
+            [{'action': 'learn', 'actor': CASTER, 'spell': setup_spell} for setup_spell in spec.setup_casts]
+        steps = (base_steps(class_file) + learn_steps + cast_steps() +
+                 [measurement(before_label, CASTER, spec.metric, **spec.fields), gate_learn_step] +
+                 [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}] +
+                 cast_steps() + [measurement(after_label, CASTER, spec.metric, **spec.fields)])
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour metric delta',
-        'contract': f'No-combat with/without check: {spec.metric} {spec.fields} around a cast of {spec.trigger_spell},'
-                    f' measured before and after '
-                    f'{spec.gate_spell if spec.gate_spell is not None else spec.spell} is learned, waiting '
-                    f'{spec.expire_ms} ms between phases for the first cast\'s effect to fully expire before the '
-                    f'second cast.',
+        'contract': contract,
         'players': [{**player_fixture(class_file), 'allow_regeneration': False}] if spec.disable_regeneration
                    else [player_fixture(class_file)],
-        'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] +
-                 [{'action': 'learn', 'actor': CASTER, 'spell': setup_spell} for setup_spell in spec.setup_casts] +
-                 cast_steps() + [measurement(before_label, CASTER, spec.metric, **spec.fields)] +
-                 [{'action': 'learn', 'actor': CASTER, 'spell':
-                   spec.gate_spell if spec.gate_spell is not None else spec.spell}] +
-                 [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}] +
-                 cast_steps() + [measurement(after_label, CASTER, spec.metric, **spec.fields)]}
+        'steps': steps}
     if spec.target == TARGET:
         scenario['creatures'] = [creature_fixture(class_file)]
     label = f'{spec.spell} behaviour_metric_delta' + (f' {spec.label_suffix}' if spec.label_suffix else '')
@@ -666,7 +686,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('wait_ms', DEFAULT_METRIC_DELTA_WAIT_MS),
                            entry.get('expire_ms', DEFAULT_METRIC_DELTA_EXPIRE_MS), entry.get('target', CASTER),
                            entry.get('disable_regeneration', False), tuple(entry.get('setup_casts', ())),
-                           entry.get('setup_actor_aura'), entry.get('gate_spell'), entry.get('label_suffix', ''))
+                           entry.get('setup_actor_aura'), entry.get('gate_spell'), entry.get('label_suffix', ''),
+                           entry.get('setup_only_after', False))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10

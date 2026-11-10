@@ -188,7 +188,13 @@ def libram_exclusivity_entry() -> dict:
 
 
 def transcending_strikes_entry() -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == TRANSCENDING_STRIKES)
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == TRANSCENDING_STRIKES
+               and 'variant' not in entry)
+
+
+def transcending_strikes_target_gate_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == TRANSCENDING_STRIKES and entry.get('variant') == 'target_gate')
 
 
 def whirling_tempest_entry() -> dict:
@@ -412,7 +418,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 47)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 48)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1206,6 +1212,41 @@ class MetricDeltaScenarioTests(unittest.TestCase):
                      if step.get('action') == 'cast' and step.get('spell') == LIBRAM_OF_TENACITY]
         self.assertEqual(len(cast_steps), 2)
 
+    def test_dispatch_transcending_strikes_target_gate_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, transcending_strikes_target_gate_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_DELTA)
+        self.assertEqual(expectations[0].model['expected'], 86994)
+        self.assertEqual(expectations[0].model['before_expected'], 116994)
+        self.assertEqual(expectations[0].model['metric'], 'cooldown_ms')
+        self.assertTrue(expectations[0].label.endswith('target_gate'))
+
+    def test_transcending_strikes_target_gate_withholds_blade_of_faith_in_the_first_phase_only(self):
+        spec = metric_delta_spec(transcending_strikes_target_gate_entry())
+        self.assertTrue(spec.setup_only_after)
+        self.assertEqual(spec.setup_casts, (BLADE_OF_FAITH,))
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        steps = scenario['steps']
+        divine_force_indices = [index for index, step in enumerate(steps)
+                                if step.get('action') == 'cast' and step.get('spell') == DIVINE_FORCE]
+        blade_of_faith_indices = [index for index, step in enumerate(steps)
+                                  if step.get('action') == 'cast' and step.get('spell') == BLADE_OF_FAITH]
+        self.assertEqual(len(divine_force_indices), 2)
+        self.assertEqual(len(blade_of_faith_indices), 1)
+        self.assertLess(blade_of_faith_indices[0], divine_force_indices[1])
+        self.assertGreater(blade_of_faith_indices[0], divine_force_indices[0])
+        learn_gate_indices = [index for index, step in enumerate(steps)
+                             if step.get('action') == 'learn' and step.get('spell') == TRANSCENDING_STRIKES]
+        self.assertEqual(len(learn_gate_indices), 1)
+        self.assertLess(learn_gate_indices[0], divine_force_indices[0])
+
+    def test_metric_delta_setup_only_after_without_setup_casts_is_rejected(self):
+        entry = dict(transcending_strikes_target_gate_entry())
+        entry['setup_casts'] = []
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(CLASS_FILE, metric_delta_spec(entry))
+
     def test_dispatch_chakra_of_power_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, chakra_of_power_entry())
         run.validate(scenario)
@@ -1972,6 +2013,29 @@ class JudgeMetricDeltaTests(unittest.TestCase):
         verdict = judge_behaviour(
             base_verdict(expectation),
             FakeRun({'before': 2500.0, 'after': 2250.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+
+    def test_transcending_strikes_target_gate_matches_the_exact_cooldown_readings(self):
+        model = {'kind': 'metric_delta', 'before_label': 'before', 'after_label': 'after', 'expected': 86994,
+                 'before_expected': 116994, 'metric': 'cooldown_ms',
+                 'quote': 'when used on enemies affected by Blade of Faith'}
+        expectation = Expectation('label', BEHAVIOUR_METRIC_DELTA, TRANSCENDING_STRIKES, DIVINE_FORCE, None,
+                                  '86994', 'prose: "when used on enemies affected by Blade of Faith" (804897)',
+                                  model)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 116994.0, 'after': 86994.0}),
+                                 expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_a_seeded_wrong_target_gate_reading_without_the_debuff_gate_is_alert(self):
+        model = {'kind': 'metric_delta', 'before_label': 'before', 'after_label': 'after', 'expected': 86994,
+                 'before_expected': 116994, 'metric': 'cooldown_ms',
+                 'quote': 'when used on enemies affected by Blade of Faith'}
+        expectation = Expectation('label', BEHAVIOUR_METRIC_DELTA, TRANSCENDING_STRIKES, DIVINE_FORCE, None,
+                                  '86994', 'prose: "when used on enemies affected by Blade of Faith" (804897)',
+                                  model)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 86994.0, 'after': 86994.0}),
+                                 expectation)
         self.assertEqual(verdict.status, 'alert')
 
 

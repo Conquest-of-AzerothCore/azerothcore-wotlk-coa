@@ -2016,6 +2016,20 @@
       "observe_source": "Spell.dbc AttributesEx5 for 572808 is 0x20 (SPELL_ATTR5_LIMIT_N, 'Single-target aura: remove previous application to another unit if applied', SharedDefines.h:647); SpellInfo::IsSingleTarget (SpellInfo.cpp:1683-1689) returns true for this flag alone. Unit::AddAura (Unit.cpp:5440-5456) marks a newly applied single-target aura with SetIsSingleTarget and pushes it onto the caster's own GetSingleCastAuras() list, then (Unit.cpp:6072-6089) removes any other aura already on that list whose IsSingleTargetWith() matches, regardless of which unit holds it -- a stock engine mechanism, with no CoA script implementing or overriding it for 572808 (grep of src/server/coa/ for 572808 finds only its class-list registration in AscensionCustomClassData.h and this file's own entries; the harness's existing hit_notes entry for 572808 already establishes it carries no other custom scripting). This is an audit gap in the harness's measurement vocabulary (no scenario kind read a single-target aura's presence across two different recipients before this entry), not a server defect: the clause is already enforced by the DBC attribute alone."
     },
     {
+      "spell": 804897, "variant": "target_gate", "name": "Transcending Strikes (Blade of Faith gate)",
+      "kind": "metric_delta",
+      "quote": "when used on enemies affected by Blade of Faith", "expected": 86994,
+      "trigger_spell": 806153,
+      "setup_casts": [803872],
+      "setup_only_after": true,
+      "target": "dummy",
+      "metric": "cooldown_ms",
+      "fields": { "spell": 806153 },
+      "before_expected": 116994,
+      "label_suffix": "target_gate",
+      "observe_source": "Same AscensionTemplarAbilities.cpp:327-333 block as the entry above, but isolating the other half of its AND condition: player->HasAura(804897) is learned once at the very start and stays known through both phases of this entry (setup_only_after), while the target's Blade of Faith 803872 aura is withheld in the first phase and applied (via setup_casts, cast on the dummy by the caster) only in the second. The code's `for (auto const& pair : target->GetAppliedAuras()) if (Named(aura->GetSpellInfo(), 803872) && aura->GetCasterGUID() == player->GetGUID())` loop finds no match when the dummy carries no such aura, so Reduce() is never called regardless of the passive being known; before_expected 116994 is the same unreduced reading as the sibling entry's own before_expected (120000 base minus the 3000 ms wait_ms minus the 6 ms clock delta), confirming the reduction needs the target's debuff, not just the caster's passive. expected 86994 is the same post-reduction reading as the sibling entry's own `expected`, once Blade of Faith is cast on the dummy in the second phase: a Templar with 804897 known gets no reduction against a target without Blade of Faith, and the full 30000 ms reduction once the target carries it."
+    },
+    {
       "spell": 705274, "name": "Sanctify", "kind": "metric_delta",
       "quote": "now grant you $705275s1% increased melee haste", "expected": 2272.727294921875,
       "trigger_spell": 801461,
