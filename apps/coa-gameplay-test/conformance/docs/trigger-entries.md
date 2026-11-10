@@ -324,6 +324,9 @@ cast, 20 baseline trials and no baseline event in each entry): nine entries are 
 - Heaven's Finest 806516: 150 casts of 805390 in 273 Argent Blade hits. At 6 stacks the aura casts The Finest of
   Heaven 806517 and is removed (`AscensionTemplarAuras.cpp:134-138`), and no stack is granted while 806517 (8 s) is
   up (`AscensionTemplarEvents.cpp:208-214`); the text, its `@s:805390:0@` reference included, does not say so.
+  6f0ed44e04 then granted a stack on every hit and kept 805390 at 6 stacks, which let every hit at 6 stacks
+  refresh 806517 as well; 806517 is now cast only while it is absent, so it ends 8 s after its first application
+  ("Additional applications do not refresh the duration", scenario `templar-finest-of-heaven-no-refresh`).
 
 Both entries carry a `question`, so their alerts go to the "Findings" section of `questions.md`.
 

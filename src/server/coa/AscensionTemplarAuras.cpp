@@ -131,7 +131,7 @@ class aura_ascension_templar_lifecycle : public AuraScript
             uint64 duration = GetAura()->GetScriptValue(805390);
             if (duration)
                 GetAura()->SetDuration(std::min(GetAura()->GetDuration(), int32(duration)));
-            if (GetAura()->GetStackAmount() >= 6)
+            if (GetAura()->GetStackAmount() >= 6 && !player->HasAura(806517))
                 Cast(player, player, 806517);
         }
         if (id == 801202)
