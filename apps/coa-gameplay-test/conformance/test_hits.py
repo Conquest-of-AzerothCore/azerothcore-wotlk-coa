@@ -7,9 +7,10 @@ import unittest
 from classes import class_spells
 from compare import Run, Verdict, judge_hit
 from hits import (CLOSED, HIT_CHECKS, MAX_SCENARIO_MS, UNMODELLED, HitModel, Modifier, Unmodelled, WeaponProfile,
-                  casts_needed, effect_hit, expected_hit, hit_kind, hit_parts, hit_scenario, measured_hit_model,
-                  melee_scenario, records_of, periodic_tick_readout, reference_caster, reference_hit_model,
-                  reference_melee_model, rolled_values, scheduled_casts, self_stack_multiplier, weapon_profile)
+                  casts_needed, dual_target_entry, effect_hit, expected_hit, hit_kind, hit_parts, hit_scenario,
+                  measured_hit_model, melee_scenario, records_of, periodic_tick_readout, reference_caster,
+                  reference_hit_model, reference_melee_model, rolled_values, scheduled_casts,
+                  self_stack_multiplier, weapon_profile)
 from mitigation import REFERENCE_TARGET, MitigationModel, TargetProfile, expected_mitigation
 from profile import CLASSES_DIR, load_class_file
 from tooltip import CasterStats, Displayed, Readout, read_tooltip, weapon_skill_spells
@@ -642,6 +643,52 @@ class HitScenarioTest(unittest.TestCase):
                                 steps=[], max_step_ms=None)
         verdict = judge_hit(base, self.templar, [(scenario, one_receiver_only, hit)], measured_hit_model)
         self.assertEqual(verdict.status, 'insufficient_trials')
+
+    def test_temple_guardian_dual_target_entry_adds_a_caster_filtered_secondary_hit(self):
+        entry = dual_target_entry(self.templar, TEMPLE_GUARDIAN_LIVE_RANK)
+        self.assertEqual({key: value for key, value in entry.items() if key != 'reason'},
+                         {'spell': TEMPLE_GUARDIAN_LIVE_RANK, 'primary_effect': 1, 'secondary_effect': 2,
+                          'secondary_actor': 'caster'})
+        scenario, expectations = hit_scenario(self.templar, self.temple_guardian_spell(), 1)
+        primary = hit_expectation(expectations)
+        secondary = next(expectation for expectation in expectations
+                         if expectation.check == 'hit_mean' and expectation is not primary)
+        self.assertEqual(secondary.label, f'{primary.label} e2')
+        self.assertEqual(secondary.effect_index, 2)
+        self.assertEqual(secondary.displayed, primary.displayed)
+        self.assertEqual(secondary.model['minimum_hits'], primary.model['minimum_hits'] // 2)
+        total_label = secondary.model['measurements']['total']
+        count_label = secondary.model['measurements']['count']
+        total_steps = steps_with(scenario, action='assert', label=total_label)
+        count_steps = steps_with(scenario, action='assert', label=count_label)
+        self.assertTrue(total_steps)
+        self.assertTrue(count_steps)
+        for step in total_steps + count_steps:
+            self.assertEqual(step['target'], 'caster')
+            self.assertIs(step['critical'], False)
+
+    def test_temple_guardian_caster_heal_alerts_if_the_caster_never_receives_it(self):
+        scenario, expectations = hit_scenario(self.templar, self.temple_guardian_spell(), 1)
+        primary = hit_expectation(expectations)
+        secondary = next(expectation for expectation in expectations
+                         if expectation.check == 'hit_mean' and expectation is not primary)
+        measured = {**self.templar['reference_stats'], f'known_aura {CLASS_TUNING_AURA}': 1}
+        model = measured_hit_model(self.templar, secondary, measured)
+        labels = secondary.model['measurements']
+        minimum = secondary.model['minimum_hits']
+        base = Verdict(label=secondary.label, status='unmeasured', measured=None, expected=None, low=None,
+                       high=None, explanation='')
+        caster_healed = Run(key='caster-healed', status='ok', message='',
+                            values={**measured, labels['total']: model.mean * minimum, labels['count']: minimum},
+                            steps=[], max_step_ms=None)
+        caster_never_healed = Run(key='caster-never-healed', status='ok', message='',
+                                  values={**measured, labels['total']: 0.0, labels['count']: 0.0},
+                                  steps=[], max_step_ms=None)
+        ok_verdict = judge_hit(base, self.templar, [(scenario, caster_healed, secondary)], measured_hit_model)
+        self.assertEqual(ok_verdict.status, 'ok')
+        alert_verdict = judge_hit(base, self.templar, [(scenario, caster_never_healed, secondary)],
+                                  measured_hit_model)
+        self.assertEqual(alert_verdict.status, 'insufficient_trials')
 
     def test_benediction_hit_scenario_does_not_relocate_the_caster(self):
         scenario, expectations = hit_scenario(self.templar, self.benediction_spell(), 1)

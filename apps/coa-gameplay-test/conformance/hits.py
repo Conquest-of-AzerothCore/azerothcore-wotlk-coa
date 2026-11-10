@@ -671,6 +671,19 @@ def hit_measurements(rank_id: int, hit_spell: int, hostile: bool, labels: dict[s
     return steps
 
 
+def dual_target_entry(class_file: dict, rank_id: int) -> dict | None:
+    return next((entry for entry in class_file.get('dual_target_effects', []) if entry['spell'] == rank_id), None)
+
+
+def secondary_heal_labels(label: str, effect: int) -> dict[str, str]:
+    return {'total': f'{label} e{effect} total', 'count': f'{label} e{effect} count'}
+
+
+def secondary_heal_measurements(hit_spell: int, labels: dict[str, str], actor: str) -> list[dict]:
+    return [measurement(labels[part], CASTER, f'spell_heal_{part}', spell=hit_spell, target=actor, critical=False)
+           for part in ('total', 'count')]
+
+
 def weapon_note(class_file: dict, armed_file: dict, records: Records, rank_id: int) -> str:
     if armed_file is class_file:
         return ''
@@ -728,12 +741,22 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
     cast_target = TARGET if hostile else (ALLY if ally else None)
     cast_fixtures = [{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}] \
         if ally and closes_distance(hit.facts) else []
+    dual = dual_target_entry(class_file, rank_id) if not hostile else None
+    if dual and model.kind != 'heal':
+        raise ValueError(f'{rank_id} dual_target_effects needs a heal-kind model, got {model.kind!r}')
+    if dual and dual['secondary_effect'] not in hit.indexes:
+        raise ValueError(f'{rank_id} dual_target_effects secondary_effect {dual["secondary_effect"]} is not one '
+                         f'of {hit.indexes}')
+    secondary_label = f'{label} e{dual["secondary_effect"]}' if dual else None
+    secondary_labels = secondary_heal_labels(label, dual['secondary_effect']) if dual else None
     parts = []
     for part, performed in enumerate(shares):
         steps = (learn + [dict(step) for step in target]
                  + required_target_health_steps(hit.facts)
                  + cast_steps(hit.facts, rank_id, cast_target, interval, performed, cast_fixtures)
                  + hit_measurements(rank_id, hit.hit_spell, hostile, labels, ally))
+        if dual:
+            steps += secondary_heal_measurements(hit.hit_spell, secondary_labels, dual['secondary_actor'])
         titled = name if len(shares) == 1 else f'{name} part {part + 1} of {len(shares)}'
         scenario = scenario_shell(armed_file, titled, contract, steps)
         if hostile:
@@ -745,8 +768,17 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
         expectation = Expectation(label, check, spell.spell_id, rank_id, hit.indexes[0],
                                   ' | '.join(model.displayed), rule,
                                   {**record, 'part': part, 'parts': len(shares), 'part_casts': performed})
+        secondary_expectations = []
+        if dual:
+            secondary_record = {**model_record(scaled, hit.school_mask, weapon, secondary_labels, casts),
+                                'hit_spell': hit.hit_spell}
+            secondary_record['minimum_hits'] = casts
+            secondary_expectations = [Expectation(
+                secondary_label, check, spell.spell_id, rank_id, dual['secondary_effect'],
+                ' | '.join(model.displayed), rule,
+                {**secondary_record, 'part': part, 'parts': len(shares), 'part_casts': performed})]
         parts.append((timed(scenario, SETTLE_MS + performed * interval + DRAIN_MS),
-                       [expectation] + (unreadable if part == 0 else [])))
+                       [expectation] + secondary_expectations + (unreadable if part == 0 else [])))
     return parts
 
 

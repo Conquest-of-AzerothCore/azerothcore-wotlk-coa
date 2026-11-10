@@ -57,6 +57,18 @@ read this way: an aura the server makes periodic (`AuraEffect::CalculatePeriodic
 3, 8, 20, 21, 23, 24, 48, 53, 62, 64, 89, 162, 226, 227) with a positive `EffectAmplitude`. Rapid 680323 (aura 107,
 amplitude 1500) keeps its `$/1000;s1` as an `effect_value` in ms.
 
+`hits_per_cast` clearing the combined event count (above) proves a `heal` kind's events landed somewhere, but not on
+whom: two heals both landing on the ally would still clear `minimum_hits` for Temple Guardian. A class file's
+`dual_target_effects` list (`[{spell, primary_effect, secondary_effect, secondary_actor, reason}]`, ADR 0054) names a
+rank whose tooltip claims two differently-targeted recipients for a `heal` kind; `hit_parts` then adds a second,
+`target`-filtered `spell_heal_total`/`spell_heal_count` measurement (`critical: False`, same as the combined pair)
+for `secondary_actor`, and a second `hit_mean` expectation at `secondary_effect` whose `minimum_hits` is `casts`
+(one event per cast, not `hits_per_cast x casts`) since this measurement only ever sees one of the two events. The
+combined, unfiltered expectation (`hit.indexes[0]`) and its `minimum_hits` are unchanged, so every other caller of
+`hit_parts` is unaffected. `judge_hit` recomputes the expected mean from `expectation.rank_id` the same way for both
+expectations (the model does not depend on which effect index asked for it), so the secondary expectation is judged
+against the same formula value as the combined one, by the identity of the recipient instead of only the count.
+
 A `triggered_weapon` effect reads the tokens of the described spell's tooltip that belong to the triggered spell, each
 on the effect of its first `$<id>sN`/`$<id>mN`, and models them as a `weapon` hit of the triggered spell's effects,
 with the same DBC effect order (`weapon_percent_before_flat` is not consulted for a triggered spell). The triggered

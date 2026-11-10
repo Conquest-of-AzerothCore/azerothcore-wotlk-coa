@@ -26,6 +26,10 @@
     {"rank": 570233, "percent_per_stack": 5.0,
      "reason": "Righteous Lunge's own tooltip references $804904s2 (5%), the Oath chain buff AscensionTemplarAbilities.cpp:157/163 grants after every cast of a Family(info, 2, 1) ability (801443 included), stacking on chain aura 704576; the hit_mean scenario casts this rank several times in a row, so cast N carries N-1 pre-existing stacks instead of the 0 stacks a single isolated cast has. Isolated single-cast proof: round9 gameplay stamp 20261109-203303, conformance-templar-hit-570233-onecast measured mean 373.0 against the unstacked model 372.0 (0 stacks); the 3-cast scenario's measured mean (stamp 20261109-203047) matches the 1-stack-average model to within 0.2%."}
   ],
+  "dual_target_effects": [
+    {"spell": 803792, "primary_effect": 1, "secondary_effect": 2, "secondary_actor": "caster",
+     "reason": "Spell.dbc 803792 has two SPELL_EFFECT_HEAL effects with identical EffectBasePoints (285), EffectDieSides (7) and EffectRealPointsPerLevel (1.155): effect 1 targets TARGET_UNIT_TARGET_ALLY ('them') and effect 2 targets TARGET_UNIT_CASTER ('you'), confirmed via coa-dbc-viewer record --table Spell --id 803792. hit_kind groups both into one heal kind (hits_per_cast 2), so the generic hit_mean check already requires both heal events to land to reach its minimum_hits; this entry adds an explicit target=caster measurement so the heal to the caster is proven by recipient, not only by combined event count."}
+  ],
   "extra_spells": [
     {"spell": 801443, "name": "Righteous Lunge",
      "citation": "2026-08-02 18:36:00.041, spell 570233 Righteous Lunge, Ascension combat log, private archive"},
