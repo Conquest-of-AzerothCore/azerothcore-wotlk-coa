@@ -456,7 +456,8 @@ def ally_heal_breadth_scenario(class_file: dict, spec: AllyHealBreadthSpec) -> t
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour ally heal breadth',
         'contract': f'{spec.repeats} casts of {spec.trigger_spell} per phase, before without {spec.spell} known '
                     f'and after with it learned and, unless passive, cast on the caster, counting spell_heal_count '
-                    f'of {spec.heal_spell} toward {spec.expected} grouped, non-caster ally fixtures {spec.near_distance:g} yd from the caster: '
+                    f'of {spec.heal_spell} toward {spec.expected} grouped, non-caster ally fixtures '
+                    f'{spec.near_distance:g} yd from the caster: '
                     f'{spec.radius_reason}',
         'players': [player_fixture(class_file)] + allies,
         'creatures': creatures,

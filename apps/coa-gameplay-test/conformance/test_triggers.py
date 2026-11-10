@@ -1106,7 +1106,6 @@ class MagnitudeTriggerCompareTest(unittest.TestCase):
                                                                   observe_count=TRIGGER_TRIALS - 1))
         self.assertEqual(self.verdict().status, 'insufficient_trials')
 
-
     def test_holy_strike_ratio_is_judged_after_the_level_sixty_dummys_average_resist(self):
         self.workspace.scenario(RETRIBUTION_KEY, 'trigger', [resisted_retribution_magnitude_expectation()],
                                 steps=resisted_retribution_magnitude_steps(observe_total=2664))
