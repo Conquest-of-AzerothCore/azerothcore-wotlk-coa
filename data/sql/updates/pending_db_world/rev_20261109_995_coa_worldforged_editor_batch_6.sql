@@ -23,3 +23,7 @@ UPDATE `gameobject` SET `position_x` = -11583.41, `position_y` = -38.3, `positio
 -- #11781
 -- pickup 6942169 (Unearthed Treasures) moved 21.2 yd across and 165.43 yd down to its Ascension position on the cave floor
 UPDATE `gameobject` SET `position_x` = -5456.72, `position_y` = 128.94, `position_z` = 28.13, `orientation` = 5.21483, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.509133, `rotation3` = -0.860688 WHERE `guid` = 6942169 AND `id` = 96140;
+
+-- #11777
+-- pickup 6940837 (Old Ogre Relic) moved 82.3 yd across and 31.17 yd up to its Ascension position
+UPDATE `gameobject` SET `position_x` = -7733.8024, `position_y` = -2792.3808, `position_z` = 164.6, `orientation` = 5.40399, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.425575, `rotation3` = -0.904923 WHERE `guid` = 6940837 AND `id` = 254669;
