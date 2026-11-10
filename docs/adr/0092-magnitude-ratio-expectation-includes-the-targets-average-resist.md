@@ -40,7 +40,8 @@ deviation. Deliverance 801456 (Physical, `CU_IGNORE_ARMOR`) and Uther's Legacy 7
   model.
 - `judge_trigger_magnitude` multiplies `expected_ratio` by the observe-count-weighted mean of each usable part's
   kept fraction, and sets the `max(0.01, 5%)` band around that product. A part with a resisted school but no target
-  readings is `unmeasured`. A model without `resisted_school_mask` keeps the bare tooltip fraction.
+  readings counts as a part without measurements (an `alert` when no part is usable). A model without
+  `resisted_school_mask` keeps the bare tooltip fraction.
 - The explanation names the tooltip fraction and the kept fraction.
 
 ## Consequences
@@ -48,6 +49,6 @@ deviation. Deliverance 801456 (Physical, `CU_IGNORE_ARMOR`) and Uther's Legacy 7
 - Retribution's round 10 measurement 0.2664 falls inside the new band around 0.264 (0.2508-0.2772); a copy dealing
   the bare 30% against a level-60 dummy would alert. The round 10 scenarios carry no target readings, so the next
   conformance run regenerates them before the verdict changes.
-- The scenario `templar-retribution-holy-strike-resist` pins the server behaviour: the copy is 30% of the swing
-  against a level-1 dummy (0.2% average resist) and 26.4% against a level-60 dummy.
+- The scenario `templar-retribution-holy-strike-resist` pins the server behaviour: the copy is 30% of the swing,
+  0.295 after integer truncation, against a level-1 dummy (0.2% average resist) and 26.4% against a level-60 dummy.
 - ADR 0067's open finding is closed. No server change.
