@@ -45,8 +45,9 @@ deviation. Deliverance 801456 (Physical, `CU_IGNORE_ARMOR`) and Uther's Legacy 7
 
 ## Consequences
 
-- Retribution's round 10 measurement 0.2664 is `ok` against 0.264 (band 0.2508-0.2772); a copy dealing the bare
-  30% against a level-60 dummy would alert.
+- Retribution's round 10 measurement 0.2664 falls inside the new band around 0.264 (0.2508-0.2772); a copy dealing
+  the bare 30% against a level-60 dummy would alert. The round 10 scenarios carry no target readings, so the next
+  conformance run regenerates them before the verdict changes.
 - The scenario `templar-retribution-holy-strike-resist` pins the server behaviour: the copy is 30% of the swing
   against a level-1 dummy (0.2% average resist) and 26.4% against a level-60 dummy.
 - ADR 0067's open finding is closed. No server change.

@@ -448,7 +448,7 @@ called twice), read in full. The "Holy resistance 0" reading was the dummy's aut
 linear resistance adds 60 Holy resistance at level 60 at combat time (`docs/coa/monster-linear-resistance.md`),
 12% average resist, and 0.3 x 0.88 = 0.264 is the measured ratio. The copy is not exempt from resistance
 (`TemplarCopies` ignores armor and modifiers only), so the check now multiplies the tooltip fraction by the
-dummy's kept fraction (ADR 0092); round 10's 0.2664 is `ok` against 0.264. The gameplay scenario
+dummy's kept fraction (ADR 0092); round 10's 0.2664 falls inside the new band around 0.264. The gameplay scenario
 `templar-retribution-holy-strike-resist` pins 30% against a level-1 dummy and 26.4% against a level-60 one.
 Holy Combatant 500011 (round5 `trigger-accounting`): "Your Argent Blade now also extends the duration of
 Interdict on your target by 1 sec" extends Interdict 560116's remaining duration by `Amount(500014)` (1000 ms)
