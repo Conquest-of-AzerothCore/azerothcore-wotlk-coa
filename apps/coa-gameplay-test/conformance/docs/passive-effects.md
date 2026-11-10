@@ -278,13 +278,15 @@ longer reads as an open gap.
    sentence names Scourgebane only). A named spell whose records meet this effect's mask has those records as
    targets, resolved to the ranks the class level reaches, records outside a chain all kept (ADR 0017 D1: Pure
    Focus 705253 on Scourgebane 520007, not
-   92111, 801832, 801861 or 804916; Argent Knight 300512 on Righteous Tempest 570200 to 570205 and 805410, not the
-   aura 807274). A named spell with no record in this mask but one in **any other effect of the same rank's** mask
-   is that other effect's target only, not this one's — the sibling effect need not itself be a spell modifier
+   92111, 801832, 801861 or 804916; Argent Knight 300512 on Righteous Tempest 570205, the level-60 rank of the chain
+   805410, 570200 to 570205 that its cast ranks trigger, not the aura 807274). A named spell with no record in this
+   mask but one in **any other effect of the same rank's** mask is that other effect's target only, not this one's —
+   the sibling effect need not itself be a spell modifier
    (D2: Grace of Aman'thul's effect 1 takes Sacred Swing, not Righteous Lunge; Final Prayer 705268's effect 0,
    `SPELLMOD_EFFECT1`, does not claim Testament of Faith 501606/801478 because effect 1, `MOD_HEALING_RECEIVED`
    and not itself a `P1` effect, already claims it — round 5's `705268 e0 * 501606` fix). Otherwise a named spell
-   resolves to its rank at the class level through the chains of `AscensionSpellProgressionData.h`
+   resolves to its rank at the class level through the chains of `AscensionSpellProgressionData.h` and the chains
+   their cast ranks trigger ([spell sets](spell-sets.md))
    (Righteous Lunge → 570233, Argent Blade → 807268), else to every record of that name, outside the mask.
    `named_targets(records, family_name, text, level, in_mask, sibling_mask)` returns them; `sibling_mask` is built
    from every other effect index of the rank (`classify`'s `siblings`), regardless of that effect's own family. A

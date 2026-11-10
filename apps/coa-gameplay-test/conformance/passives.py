@@ -3,7 +3,7 @@ from functools import lru_cache
 from pathlib import Path
 import re
 
-from classes import PROGRESSION_HEADER, PROGRESSION_ROW, ClassSpell, class_spells, table_rows
+from classes import PROGRESSION_HEADER, ClassSpell, class_spells, progression_chains, table_rows
 from hits import creature_fixture
 from procs import proc_label, shares_aura, shares_proc_spell, trigger_key
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture, stat_label
@@ -220,10 +220,8 @@ def names_phrase(text: str, quantity: str) -> bool:
 
 
 @lru_cache(maxsize=None)
-def progression_ranks(header: Path) -> dict[int, tuple[int, tuple[tuple[int, int], ...]]]:
-    chains: dict[int, list[tuple[int, int]]] = {}
-    for _, first_spell, spell, required_level in PROGRESSION_ROW.findall(header.read_text(encoding='utf-8')):
-        chains.setdefault(int(first_spell), []).append((int(spell), int(required_level)))
+def progression_ranks(header: Path, dbc_dir: Path = DBC_DIR) -> dict[int, tuple[int, tuple[tuple[int, int], ...]]]:
+    chains = progression_chains(dataset(dbc_dir), header)
     ranks = {}
     for first_spell, chain in chains.items():
         for spell in [first_spell] + [rank for rank, _ in chain]:

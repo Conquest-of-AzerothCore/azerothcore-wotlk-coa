@@ -41,18 +41,20 @@ def write_fixture(directory: Path, header: Path):
     registry = schemas.registry()
     offsets = {table: {column.name: column.offset for column in registry[table].columns}
                for table in ('Spell', 'CharacterAdvancement', 'CharacterAdvancementClassTypes')}
-    names = {100: 'Alpha', 101: 'Beta', 200: 'Gamma', 300: 'Delta', 400: 'Epsilon', 500: 'Zeta'}
+    names = {100: 'Alpha', 101: 'Beta', 200: 'Gamma', 300: 'Delta', 400: 'Epsilon', 500: 'Zeta', 600: 'Eta',
+             601: 'Eta', 700: 'Eta', 701: 'Eta', 800: 'Theta', 801: 'Theta', 900: 'Theta'}
     strings, name_offset = b'\0', {}
     for spell_id, name in names.items():
         name_offset[spell_id] = len(strings)
         strings += name.encode() + b'\0'
 
-    def spell(spell_id, attributes, base_level=0):
+    def spell(spell_id, attributes, base_level=0, triggered=0):
         row = bytearray(SPELL_RECORD_BYTES)
         struct.pack_into('<I', row, offsets['Spell']['Id'], spell_id)
         struct.pack_into('<I', row, offsets['Spell']['Attributes'], attributes)
         struct.pack_into('<I', row, offsets['Spell']['BaseLevel'], base_level)
         struct.pack_into('<I', row, offsets['Spell']['SpellName[enUS]'], name_offset[spell_id])
+        struct.pack_into('<I', row, offsets['Spell']['EffectTriggerSpell[1]'], triggered)
         return bytes(row)
 
     def advancement(identity, class_type, level, *rank_spells):
@@ -71,10 +73,13 @@ def write_fixture(directory: Path, header: Path):
         struct.pack_into('<I', row, offsets['CharacterAdvancementClassTypes']['CustomClass'], custom)
         return bytes(row)
 
-    spells = [spell(100, 0), spell(101, 0), spell(200, PASSIVE), spell(300, 0), spell(400, 0, 7), spell(500, 0)]
+    spells = [spell(100, 0), spell(101, 0), spell(200, PASSIVE), spell(300, 0), spell(400, 0, 7), spell(500, 0),
+              spell(600, 0, 11, 700), spell(601, 0, 20, 701), spell(700, 0, 11), spell(701, 0, 20),
+              spell(800, 0, 11, 900), spell(801, 0, 20), spell(900, 0, 11)]
     advancements = [advancement(1, 5, 10, 100, 101), advancement(2, 5, 20, 200), advancement(3, 6, 30, 300),
                     advancement(4, 7, 40, 400), advancement(5, 8, 50, 500)]
-    class_types = [class_type(5, 19, 1), class_type(6, 19, 0), class_type(7, 20, 1), class_type(8, 10, 0)]
+    class_types = [class_type(5, 19, 1), class_type(6, 19, 0), class_type(7, 20, 1), class_type(8, 10, 0),
+                   class_type(9, 21, 1)]
     (directory / 'Spell.dbc').write_bytes(wdbc(spells, 234, SPELL_RECORD_BYTES, strings))
     (directory / 'CharacterAdvancement.dbc').write_bytes(wdbc(advancements, 179, ADVANCEMENT_RECORD_BYTES, b'\0'))
     (directory / 'CharacterAdvancementClassTypes.dbc').write_bytes(
@@ -82,7 +87,8 @@ def write_fixture(directory: Path, header: Path):
     header.write_text('\n'.join([
         'inline constexpr std::array<Rank, 5> Ranks =', '{{',
         '    { 19, 200, 201, 30 },', '    { 19, 200, 202, 58 },', '    { 19, 200, 203, 64 },',
-        '    { 19, 999, 998, 12 },', '    { 20, 400, 401, 10 },', '}};', '']), encoding='utf-8')
+        '    { 19, 999, 998, 12 },', '    { 20, 400, 401, 10 },', '    { 21, 600, 601, 20 },',
+        '    { 21, 800, 801, 20 },', '}};', '']), encoding='utf-8')
 
 
 class FixtureClassSpellTest(unittest.TestCase):
@@ -124,6 +130,18 @@ class FixtureClassSpellTest(unittest.TestCase):
                                                                   extra_spells=(400,))}
         self.assertEqual(sorted(spells), [100, 101, 200, 400])
         self.assertEqual(spells[400], ClassSpell(400, 'Epsilon', (400,), 400, 7, False))
+
+    def test_extra_spell_takes_the_ranks_its_chained_cast_ranks_trigger(self):
+        by_level = {level: {spell.spell_id: spell for spell in class_spells(self.directory, 21, self.header, level,
+                                                                            extra_spells=(700, 900))}
+                    for level in (19, 20)}
+        self.assertEqual(by_level[20][700].ranks, (700, 701))
+        self.assertEqual([by_level[level][700].max_rank for level in (19, 20)], [700, 701])
+        self.assertEqual(by_level[20][700].required_level, 11)
+
+    def test_extra_spell_has_no_chain_when_a_cast_rank_triggers_nothing(self):
+        spells = {spell.spell_id: spell for spell in class_spells(self.directory, 21, self.header, extra_spells=(900,))}
+        self.assertEqual(spells[900].ranks, (900,))
 
     def test_extra_spell_already_in_the_set_is_rejected(self):
         with self.assertRaises(ValueError):

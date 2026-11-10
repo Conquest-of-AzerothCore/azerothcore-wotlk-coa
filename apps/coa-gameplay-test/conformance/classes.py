@@ -12,6 +12,7 @@ from tooltip import PASSIVE_ATTRIBUTE, Records, weapon_skill_spells
 
 CHARACTER_LEVEL = 60
 RANK_SLOTS = 5
+TRIGGER_FIELDS = tuple(f'EffectTriggerSpell[{index}]' for index in range(3))
 PROGRESSION_HEADER = Path(__file__).resolve().parents[3] / 'src/server/coa/AscensionSpellProgressionData.h'
 PROGRESSION_ROW = re.compile(r'^\s*\{\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\s*\},?\s*$', re.MULTILINE)
 
@@ -45,12 +46,30 @@ def rows_by_identity(dataset: DataSet, name: str, identities: set[int], fields: 
             for identity in identities if identity in index}
 
 
-def progression_chains(header: Path, class_id: int) -> dict[int, list[tuple[int, int]]]:
+def header_chains(header: Path, class_id: int | None = None) -> dict[int, list[tuple[int, int]]]:
     chains: dict[int, list[tuple[int, int]]] = {}
     for row_class, first_spell, spell, required_level in PROGRESSION_ROW.findall(header.read_text(encoding='utf-8')):
-        if int(row_class) == class_id:
+        if class_id is None or int(row_class) == class_id:
             chains.setdefault(int(first_spell), []).append((int(spell), int(required_level)))
     return chains
+
+
+def triggered_chains(dbc: DataSet, chains: dict[int, list[tuple[int, int]]]) -> dict[int, list[tuple[int, int]]]:
+    casts = set(chains) | {rank for chain in chains.values() for rank, _ in chain}
+    triggers = rows_by_identity(dbc, 'Spell', casts, list(TRIGGER_FIELDS))
+    derived: dict[int, list[tuple[int, int]]] = {}
+    for first_spell, chain in chains.items():
+        cast_ranks = [first_spell] + [rank for rank, _ in chain]
+        for field in TRIGGER_FIELDS:
+            triggered = [triggers.get(rank, {}).get(field, 0) for rank in cast_ranks]
+            if all(triggered) and len(set(triggered)) == len(triggered) and not set(triggered) & casts:
+                derived.setdefault(triggered[0], [(spell, level) for spell, (_, level) in zip(triggered[1:], chain)])
+    return derived
+
+
+def progression_chains(dbc: DataSet, header: Path, class_id: int | None = None) -> dict[int, list[tuple[int, int]]]:
+    chains = header_chains(header, class_id)
+    return {**triggered_chains(dbc, chains), **chains}
 
 
 def class_type_ids(dataset: DataSet, class_id: int) -> set[int]:
@@ -85,7 +104,7 @@ def class_spells(dbc_dir: Path, class_id: int, progression_header: Path, level: 
     duplicated = sorted(set(extra_spells) & set(levels))
     if duplicated:
         raise ValueError(f'Extra spells {duplicated} are already CharacterAdvancement class spells')
-    chains = progression_chains(progression_header, class_id)
+    chains = progression_chains(dbc, progression_header, class_id)
     wanted = set(levels) | set(extra_spells)
     spells = rows_by_identity(dbc, 'Spell', wanted, ['SpellName[enUS]', 'Attributes', 'BaseLevel'])
     levels.update({spell_id: spells[spell_id]['BaseLevel'] for spell_id in extra_spells if spell_id in spells})

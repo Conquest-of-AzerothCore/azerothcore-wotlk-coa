@@ -9,6 +9,12 @@
 - `ranks` is the spell id followed by the spells that `src/server/coa/AscensionSpellProgressionData.h` chains to it
   (`{ClassId, FirstSpellId, SpellId, RequiredLevel}`); `max_rank` is the last rank whose required level is at most
   `level`. `required_level` is the `CharacterAdvancement` required level of the entry that holds the spell.
+- A spell the header does not chain takes its ranks from `Spell.dbc` when it is the `EffectTriggerSpell[i]` of the
+  base spell of a header chain and every rank of that chain triggers its own distinct spell through the same index
+  `i`, none of them in the header: the triggered spells are its ranks, each at the required level of the rank that
+  triggers it ([ADR 0094](../../../../docs/adr/0094-conformance-triggered-rank-chains-come-from-the-dbc.md)). The
+  rule is the same for every class (`classes.triggered_chains`), and `passives.progression_ranks` reads the same
+  chains.
 - `passive` is attribute bit 0x40 of the `Spell.dbc` record.
 - `class_spells(..., extra_spells=())` adds base spells that `CharacterAdvancement` lacks (ADR 0016), with ranks
   from the same header and `required_level` the `Spell.dbc` `BaseLevel` of the base spell. A listed spell already in
@@ -39,7 +45,9 @@ chains 801165 to Rank 2 803792 only, so the run judges Rank 2.
 
 Righteous Tempest 805410 (`AscensionTemplarAbilities.cpp`'s `RighteousTempest()`, ranks 805410/570200-570205) is a
 23rd `extra_spells` entry, logged at Rank 7 570205 (level 60); it is not one of the 34 `ClassSpells` candidates above
-(round 3, 2026-11-08), so ADR 0016's citation mechanism applies to it independently of that candidate list.
+(round 3, 2026-11-08), so ADR 0016's citation mechanism applies to it independently of that candidate list. Its chain
+is the one its cast ranks trigger: `EffectTriggerSpell[0]` of 805409 is 805410 and of 807269 to 807274 is 570200 to
+570205, at levels 20 to 60.
 
 Not confirmed, left out: Dodge 81, Block 107, Dual Wield 674, Auto Attack 6603, Resilient Constitution 552011,
 Divine Stand 807729, Detect Evil 562226, Gift of Fervor 572629, Shackle The Unrepentant 560963, Greater Gift of Fervor
