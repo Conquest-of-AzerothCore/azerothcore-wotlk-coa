@@ -1817,7 +1817,7 @@ class CritGuaranteeScenarioTests(unittest.TestCase):
 
     def test_scenario_attacks_the_overridden_creature_entry_not_the_shared_dummy(self):
         scenario, [expectation] = crit_guarantee_scenario(CLASS_FILE, self.spec())
-        [creature] = scenario['creatures']
+        creature, _control = scenario['creatures']
         self.assertEqual(creature['entry'], 1501)
         self.assertEqual(creature['reaction'], 0)
         self.assertEqual(expectation.check, BEHAVIOUR_CRIT_GUARANTEE)
@@ -1840,6 +1840,22 @@ class CritGuaranteeScenarioTests(unittest.TestCase):
         self.assertEqual(scenario['creatures'][0]['entry'], entry['target_entry'])
         self.assertEqual(expectation.rule, f'prose: "{entry["quote"]}" ({SCOURGEBANE})')
 
+    def test_scenario_also_attacks_a_non_undead_control_target(self):
+        scenario, [expectation] = crit_guarantee_scenario(CLASS_FILE, self.spec())
+        target, control = scenario['creatures']
+        validated = run.validate(scenario)
+        self.assertEqual(target['entry'], 1501)
+        self.assertNotEqual(control['entry'], 1501)
+        self.assertNotEqual(control['id'], target['id'])
+        model = expectation.model
+        control_crit_step = next(step for step in validated['steps']
+                                 if step.get('label') == model['control_crit_label'])
+        control_noncrit_step = next(step for step in validated['steps']
+                                    if step.get('label') == model['control_noncrit_label'])
+        self.assertEqual(control_crit_step['target'], control['id'])
+        self.assertTrue(control_crit_step['critical'])
+        self.assertFalse(control_noncrit_step['critical'])
+
 
 class JudgeCritGuaranteeTests(unittest.TestCase):
     def expectation(self):
@@ -1850,6 +1866,12 @@ class JudgeCritGuaranteeTests(unittest.TestCase):
         return Expectation('label', BEHAVIOUR_CRIT_GUARANTEE, SCOURGEBANE, SCOURGEBANE_EXTRA_DAMAGE, None, '1.0',
                            'prose: "This is guaranteed to critically strike against Undead enemies." (92111)',
                            model)
+
+    def expectation_with_control(self):
+        model = {**self.expectation().model, 'control_crit_label': 'control_crit',
+                 'control_noncrit_label': 'control_noncrit', 'control_target_name': 'a non-Undead control',
+                 'control_max_ratio': 0.9}
+        return replace(self.expectation(), model=model)
 
     def test_every_triggered_hit_critical_is_ok(self):
         expectation = self.expectation()
@@ -1889,9 +1911,36 @@ class JudgeCritGuaranteeTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), None, expectation)
         self.assertIn('no scenario', verdict.explanation)
 
+    def test_a_specific_undead_only_guarantee_with_a_low_control_ratio_is_ok(self):
+        expectation = self.expectation_with_control()
+        values = {'crit': 20.0, 'noncrit': 0.0, 'control_crit': 5.0, 'control_noncrit': 45.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_a_seeded_universal_crit_on_the_control_target_is_an_alert(self):
+        expectation = self.expectation_with_control()
+        values = {'crit': 20.0, 'noncrit': 0.0, 'control_crit': 50.0, 'control_noncrit': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('not specific', verdict.explanation)
+
+    def test_insufficient_control_trials_overrides_an_otherwise_ok_primary_verdict(self):
+        expectation = self.expectation_with_control()
+        values = {'crit': 20.0, 'noncrit': 0.0, 'control_crit': 1.0, 'control_noncrit': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'insufficient_trials')
+
+    def test_missing_control_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation_with_control()
+        values = {'crit': 20.0, 'noncrit': 0.0, 'control_crit': 1.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('control_noncrit', verdict.explanation)
+
 
 UPHEAVAL_BREAKER = 572027
 OATH_HOLY_CLEAVE = 804903
+OATH_CONDEMN = 804922
 
 
 class OathConsumptionScenarioTests(unittest.TestCase):

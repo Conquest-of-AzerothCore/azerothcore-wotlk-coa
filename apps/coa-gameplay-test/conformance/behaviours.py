@@ -6,8 +6,9 @@ from hits import DRAIN_MS, MAIN_HAND, TIMEOUT_MARGIN_MS, aura_modifiers, cast_st
 from procs import swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import COLOR_CODE, Records
-from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, FORCED_CRIT_RATING, Expectation, TARGET, armed_for,
-                    dataset, facts_of, fixture_health_step, required_aura_steps, required_target_health_steps)
+from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_ENTRY, FORCED_CRIT_RATING, Expectation, TARGET,
+                    armed_for, dataset, facts_of, fixture_health_step, required_aura_steps,
+                    required_target_health_steps)
 
 BEHAVIOUR_COUNT = 'behaviour_count'
 BEHAVIOUR_RATIO = 'behaviour_ratio'
@@ -31,6 +32,8 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'internal_cooldown_gate')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
+CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
+CRIT_GUARANTEE_CONTROL_MAX_RATIO = 0.9
 PROSE = 'prose: '
 BEFORE = 'before'
 AFTER = 'after'
@@ -869,13 +872,20 @@ def crit_guarantee_labels(spec: CritGuaranteeSpec) -> tuple[str, str]:
             f'{spec.spell} {spec.trial_spell} crit_guarantee noncrit')
 
 
+def crit_guarantee_control_labels(spec: CritGuaranteeSpec) -> tuple[str, str]:
+    return (f'{spec.spell} {spec.trial_spell} crit_guarantee control crit',
+            f'{spec.spell} {spec.trial_spell} crit_guarantee control noncrit')
+
+
 def crit_guarantee_scenario(class_file: dict, spec: CritGuaranteeSpec) -> tuple[dict, list[Expectation]]:
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'crit_guarantee', spec.quote, 1.0)
     crit_label, noncrit_label = crit_guarantee_labels(spec)
+    control_crit_label, control_noncrit_label = crit_guarantee_control_labels(spec)
     attempt_ms = swing_interval(class_file)
     waited_ms = spec.attempts * attempt_ms
     target = {**creature_fixture(class_file), 'entry': spec.target_entry, 'reaction': 0}
+    control = {**creature_fixture(class_file), 'id': CRIT_GUARANTEE_CONTROL_TARGET, 'reaction': 0}
     steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
              {'action': 'attack', 'actor': CASTER, 'target': TARGET},
              {'action': 'wait', 'label': 'swings', 'ms': waited_ms},
@@ -884,19 +894,32 @@ def crit_guarantee_scenario(class_file: dict, spec: CritGuaranteeSpec) -> tuple[
              measurement(crit_label, CASTER, 'spell_damage_count', spell=spec.trial_spell, target=TARGET,
                         critical=True),
              measurement(noncrit_label, CASTER, 'spell_damage_count', spell=spec.trial_spell, target=TARGET,
-                        critical=False)])
+                        critical=False),
+             {'action': 'attack', 'actor': CASTER, 'target': CRIT_GUARANTEE_CONTROL_TARGET},
+             {'action': 'wait', 'label': 'control swings', 'ms': waited_ms},
+             {'action': 'stop_attack', 'actor': CASTER},
+             {'action': 'wait', 'label': 'control drain', 'ms': DRAIN_MS},
+             measurement(control_crit_label, CASTER, 'spell_damage_count', spell=spec.trial_spell,
+                        target=CRIT_GUARANTEE_CONTROL_TARGET, critical=True),
+             measurement(control_noncrit_label, CASTER, 'spell_damage_count', spell=spec.trial_spell,
+                        target=CRIT_GUARANTEE_CONTROL_TARGET, critical=False)])
     scenario = {'schema': 1,
                'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour crit guarantee',
                'contract': f'{spec.attempts} auto-attack swings against a {spec.target_type_name} target '
                            f'(creature_template.type {spec.target_type}, entry {spec.target_entry}); every '
-                           f'triggered hit of {spec.trial_spell} logged against it must be critical.',
-               'players': [player_fixture(class_file)], 'creatures': [target], 'steps': steps,
-               'timeout_ms': waited_ms + TIMEOUT_MARGIN_MS}
+                           f'triggered hit of {spec.trial_spell} logged against it must be critical. A further '
+                           f'{spec.attempts} swings against a non-{spec.target_type_name} control target (entry '
+                           f'{DUMMY_ENTRY}) must NOT read an unconditional 100% crit ratio, proving the guarantee '
+                           f'is specific to {spec.target_type_name} and not a universal crit override.',
+               'players': [player_fixture(class_file)], 'creatures': [target, control], 'steps': steps,
+               'timeout_ms': 2 * (waited_ms + DRAIN_MS) + TIMEOUT_MARGIN_MS}
     label = f'{spec.spell} behaviour_crit_guarantee {spec.trial_spell}'
     model = {'crit_label': crit_label, 'noncrit_label': noncrit_label, 'minimum_events': spec.minimum_events,
             'trial_spell': spec.trial_spell, 'target_name': f'{spec.target_type_name} (entry {spec.target_entry})',
             'creature_type_source': f'creature_template.type {spec.target_type} ({spec.target_type_name})',
-            'quote': entry.quote}
+            'control_crit_label': control_crit_label, 'control_noncrit_label': control_noncrit_label,
+            'control_target_name': f'a non-{spec.target_type_name} control (entry {DUMMY_ENTRY})',
+            'control_max_ratio': CRIT_GUARANTEE_CONTROL_MAX_RATIO, 'quote': entry.quote}
     expectation = Expectation(label, BEHAVIOUR_CRIT_GUARANTEE, spec.spell, spec.trial_spell, None, '1.0',
                               prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]

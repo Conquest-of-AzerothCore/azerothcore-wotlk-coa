@@ -2066,11 +2066,34 @@ def behaviour_crit_guarantee_verdict(base: Verdict, run: Run, model: dict) -> Ve
                                    f'fewer than the {minimum:g} needed to judge the crit guarantee')
     ratio = crit / total
     status = banded_status(ratio, 1.0, 1.0, 1.0)
-    return replace(base, status=status, measured=ratio, expected=1.0, low=1.0, high=1.0,
-                   explanation=f'{crit:g} critical of {total:g} {model["trial_spell"]} hits against '
-                               f'{model["target_name"]} ({model["creature_type_source"]}); every triggered hit '
-                               f'must critically strike ({model["quote"]!r}); a ratio below 1.0 is tolerated '
-                               f'within {TOLERATED_RELATIVE:.0%} of 1.0, otherwise alert')
+    verdict = replace(base, status=status, measured=ratio, expected=1.0, low=1.0, high=1.0,
+                      explanation=f'{crit:g} critical of {total:g} {model["trial_spell"]} hits against '
+                                  f'{model["target_name"]} ({model["creature_type_source"]}); every triggered hit '
+                                  f'must critically strike ({model["quote"]!r}); a ratio below 1.0 is tolerated '
+                                  f'within {TOLERATED_RELATIVE:.0%} of 1.0, otherwise alert')
+    if 'control_crit_label' not in model or verdict.status not in ('ok', 'tolerated'):
+        return verdict
+    control_crit = run.values.get(model['control_crit_label'])
+    control_noncrit = run.values.get(model['control_noncrit_label'])
+    if control_crit is None or control_noncrit is None:
+        return replace(base, explanation=missing_measurement(run, model['control_crit_label'] if control_crit is
+                                                              None else model['control_noncrit_label']))
+    control_total = control_crit + control_noncrit
+    if control_total < minimum:
+        return replace(verdict, status='insufficient_trials', measured=control_total,
+                       explanation=verdict.explanation + f'; {model["control_crit_label"]} + '
+                                   f'{model["control_noncrit_label"]} measured only {control_total:g} triggered '
+                                   f'hits against {model["control_target_name"]}, fewer than the {minimum:g} '
+                                   f'needed to judge the specificity control')
+    control_ratio = control_crit / control_total
+    if control_ratio >= model['control_max_ratio']:
+        verdict = replace(verdict, status='alert', measured=control_ratio, expected=model['control_max_ratio'],
+                          explanation=verdict.explanation +
+                          f'; {control_crit:g} of {control_total:g} {model["trial_spell"]} hits against '
+                          f'{model["control_target_name"]} were also critical (ratio {control_ratio:.2f}, at or '
+                          f'above the {model["control_max_ratio"]:.0%} specificity ceiling): the guarantee is not '
+                          f'specific to {model["target_name"]}, {model["quote"]!r}')
+    return verdict
 
 
 def behaviour_aura_grant_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
