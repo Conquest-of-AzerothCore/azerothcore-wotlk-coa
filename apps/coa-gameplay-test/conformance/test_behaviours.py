@@ -12,8 +12,8 @@ from behaviours import (AFTER, BEFORE, BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GR
                         BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
                         BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_FIXED_COUNT,
                         BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA,
-                        BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO,
-                        BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER,
+                        BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
+                        BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER,
                         MECHANIC_LAND_ATTEMPTS, NO_CAST_FAILURE, SPELL_FAILED_ONLY_MOUNTED,
                         SPELL_FAILED_ONLY_OUTDOORS, SPELL_FAILED_TARGET_AURASTATE, STRIKER,
                         NotModelled,
@@ -35,7 +35,8 @@ from behaviours import (AFTER, BEFORE, BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GR
                         healing_ratio_spec, icd_gate_scenario, icd_gate_spec, leech_heal_modifier_factor,
                         leech_ratio_scenario, leech_ratio_spec,
                         mechanic_duration_scenario, mechanic_duration_spec, metric_delta_label, metric_delta_scenario,
-                        metric_delta_spec, nearby_ally_id, oath_consumption_scenario, oath_consumption_spec,
+                        metric_delta_spec, mount_grant_scenario, mount_grant_spec,
+                        nearby_ally_id, oath_consumption_scenario, oath_consumption_spec,
                         oath_consumption_removal_scenario, oath_consumption_removal_spec,
                         party_ally_id, party_stat_ratio_scenario, party_stat_ratio_spec,
                         shield_break_trigger_scenario, shield_break_trigger_spec,
@@ -205,6 +206,11 @@ def crusaders_presence_cast_condition_entry() -> dict:
 def crusaders_presence_speed_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours']
                if entry['spell'] == CRUSADERS_PRESENCE and entry['kind'] == 'metric_delta')
+
+
+def divine_charge_mount_grant_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == DIVINE_CHARGE and entry['kind'] == 'mount_grant')
 
 
 def spiritual_abdicator_entry() -> dict:
@@ -517,7 +523,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 64)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 65)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -4031,6 +4037,115 @@ class JudgeCastConditionTests(unittest.TestCase):
         run = FakeRun({expectation.label: float(SPELL_FAILED_ONLY_OUTDOORS)})
         verdict = judge_behaviour(base_verdict(expectation), run, expectation)
         self.assertEqual(verdict.status, 'alert')
+
+
+class MountGrantScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_expectations(self):
+        spec = mount_grant_spec(divine_charge_mount_grant_entry())
+        scenario, expectations = mount_grant_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 2)
+        granted, persisted = expectations
+        self.assertEqual(granted.check, BEHAVIOUR_MOUNT_GRANT)
+        self.assertEqual(granted.spell_id, DIVINE_CHARGE)
+        self.assertEqual(granted.displayed, '14584')
+        self.assertEqual(persisted.spell_id, DIVINE_CHARGE)
+        self.assertEqual(persisted.rank_id, CRUSADERS_PRESENCE)
+        self.assertEqual(persisted.displayed, '14584')
+
+    def test_scenario_groups_the_caster_with_the_ally(self):
+        spec = mount_grant_spec(divine_charge_mount_grant_entry())
+        scenario, _ = mount_grant_scenario(CLASS_FILE, spec)
+        self.assertTrue(any(step.get('action') == 'group' and step.get('target') == 'ally'
+                            for step in scenario['steps']))
+        self.assertEqual({player['id'] for player in scenario['players']}, {'caster', 'ally'})
+
+    def test_divine_charge_cast_precedes_the_persistence_cast(self):
+        spec = mount_grant_spec(divine_charge_mount_grant_entry())
+        scenario, _ = mount_grant_scenario(CLASS_FILE, spec)
+        grant_cast = next(index for index, step in enumerate(scenario['steps'])
+                          if step.get('action') == 'cast' and step.get('spell') == DIVINE_CHARGE)
+        persist_cast = next(index for index, step in enumerate(scenario['steps'])
+                            if step.get('action') == 'cast' and step.get('spell') == CRUSADERS_PRESENCE)
+        self.assertLess(grant_cast, persist_cast)
+
+    def test_every_cast_resets_its_own_cooldown_first(self):
+        spec = mount_grant_spec(divine_charge_mount_grant_entry())
+        scenario, _ = mount_grant_scenario(CLASS_FILE, spec)
+        for spell in (DIVINE_CHARGE, CRUSADERS_PRESENCE):
+            cast_index = next(index for index, step in enumerate(scenario['steps'])
+                              if step.get('action') == 'cast' and step.get('spell') == spell)
+            preceding = scenario['steps'][:cast_index]
+            self.assertTrue(any(step.get('action') == 'reset_cooldown' and step.get('spell') == spell
+                                for step in preceding))
+
+    def test_every_expectation_label_has_a_matching_measurement_step(self):
+        spec = mount_grant_spec(divine_charge_mount_grant_entry())
+        scenario, expectations = mount_grant_scenario(CLASS_FILE, spec)
+        measured_labels = {step.get('label') for step in scenario['steps'] if step.get('action') == 'assert'
+                           and step.get('metric') == 'mount_display_id'}
+        for expectation in expectations:
+            self.assertIn(expectation.model['caster_label'], measured_labels)
+            self.assertIn(expectation.model['ally_label'], measured_labels)
+
+    def test_dispatch_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, divine_charge_mount_grant_entry())
+        run.validate(scenario)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_MOUNT_GRANT)
+
+
+class JudgeMountGrantTests(unittest.TestCase):
+    def granted_expectation(self):
+        model = {'kind': 'mount_grant', 'caster_label': '527023 mount_grant caster granted',
+                 'ally_label': '527023 mount_grant ally granted', 'expected': 14584, 'moment': 'granted',
+                 'quote': 'You and your party members leap upon a divine steed,'}
+        return Expectation('527023 behaviour_mount_grant granted', BEHAVIOUR_MOUNT_GRANT, DIVINE_CHARGE,
+                           DIVINE_CHARGE, None, '14584',
+                           'prose: "You and your party members leap upon a divine steed," (527023)', model)
+
+    def persisted_expectation(self):
+        model = {'kind': 'mount_grant', 'caster_label': '527023 mount_grant caster persisted',
+                 'ally_label': '527023 mount_grant ally persisted', 'expected': 14584, 'moment': 'persisted',
+                 'quote': 'While active, casting does not dismount you or your allies.'}
+        return Expectation('527023 behaviour_mount_grant persisted', BEHAVIOUR_MOUNT_GRANT, DIVINE_CHARGE,
+                           CRUSADERS_PRESENCE, None, '14584',
+                           'prose: "While active, casting does not dismount you or your allies." (527023)', model)
+
+    def test_both_actors_mounted_is_ok(self):
+        expectation = self.granted_expectation()
+        run = FakeRun({'527023 mount_grant caster granted': 14584.0, '527023 mount_grant ally granted': 14584.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_ally_not_mounted_is_alert(self):
+        expectation = self.granted_expectation()
+        run = FakeRun({'527023 mount_grant caster granted': 14584.0, '527023 mount_grant ally granted': 0.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_caster_not_mounted_is_alert(self):
+        expectation = self.granted_expectation()
+        run = FakeRun({'527023 mount_grant caster granted': 0.0, '527023 mount_grant ally granted': 14584.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_both_actors_still_mounted_after_the_unrelated_cast_is_ok(self):
+        expectation = self.persisted_expectation()
+        run = FakeRun({'527023 mount_grant caster persisted': 14584.0, '527023 mount_grant ally persisted': 14584.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_caster_dismounted_by_the_unrelated_cast_is_alert(self):
+        expectation = self.persisted_expectation()
+        run = FakeRun({'527023 mount_grant caster persisted': 0.0, '527023 mount_grant ally persisted': 14584.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_missing_measurement_explains_which_label(self):
+        expectation = self.granted_expectation()
+        run = FakeRun({'527023 mount_grant caster granted': 14584.0})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertIn('527023 mount_grant ally granted', verdict.explanation)
 
 
 if __name__ == '__main__':

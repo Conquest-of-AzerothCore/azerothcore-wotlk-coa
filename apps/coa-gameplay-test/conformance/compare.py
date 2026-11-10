@@ -14,8 +14,8 @@ from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_
                         BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
                         BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_FIXED_COUNT,
                         BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA,
-                        BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO,
-                        BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER)
+                        BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
+                        BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER)
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
@@ -2572,6 +2572,23 @@ def behaviour_cast_gate_verdict(base: Verdict, run: Run, expectation: Expectatio
                 'cast_failure SpellCastResult reason compared exactly to the expected code')
 
 
+def behaviour_mount_grant_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    caster_value = run.values.get(model['caster_label'])
+    ally_value = run.values.get(model['ally_label'])
+    missing = model['caster_label'] if caster_value is None else (
+        model['ally_label'] if ally_value is None else None)
+    if missing:
+        return replace(base, explanation=missing_measurement(run, missing))
+    expected = float(model['expected'])
+    caster_ok = abs(caster_value - expected) <= FLOAT_EPSILON
+    ally_ok = abs(ally_value - expected) <= FLOAT_EPSILON
+    status = 'ok' if caster_ok and ally_ok else 'alert'
+    return replace(base, status=status, measured=caster_value, expected=expected, low=expected, high=expected,
+                   explanation=f'mount_display_id {model["moment"]}: caster {caster_value:g}, ally '
+                               f'{ally_value:g} (Unit::GetMountID(), both must equal {expected:g}); a mismatch '
+                               f'on either actor is always an alert')
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
@@ -2622,6 +2639,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_single_target_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_CRIT_MAGNITUDE:
         return behaviour_crit_magnitude_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_MOUNT_GRANT:
+        return behaviour_mount_grant_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 

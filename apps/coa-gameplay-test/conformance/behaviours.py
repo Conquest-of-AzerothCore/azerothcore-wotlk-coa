@@ -32,17 +32,18 @@ BEHAVIOUR_FIXED_COUNT = 'behaviour_fixed_count'
 BEHAVIOUR_PARTY_STAT_RATIO = 'behaviour_party_stat_ratio'
 BEHAVIOUR_CAST_GATE = 'behaviour_cast_gate'
 BEHAVIOUR_CAST_CONDITION = 'behaviour_cast_condition'
+BEHAVIOUR_MOUNT_GRANT = 'behaviour_mount_grant'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
                     BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_EXCLUSIVITY,
                     BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_CRIT_MAGNITUDE,
                     BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_PARTY_STAT_RATIO,
-                    BEHAVIOUR_CAST_GATE, BEHAVIOUR_CAST_CONDITION)
+                    BEHAVIOUR_CAST_GATE, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_MOUNT_GRANT)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
-        'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition')
+        'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition', 'mount_grant')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -2085,6 +2086,80 @@ def cast_condition_spec(entry: dict) -> CastConditionSpec:
                              entry['blocked_result'])
 
 
+@dataclass(frozen=True)
+class MountGrantSpec:
+    spell: int
+    name: str
+    grant_quote: str
+    persist_quote: str
+    mount_display_id: int
+    persist_spell: int
+
+
+def mount_grant_label(spec: MountGrantSpec, actor: str, moment: str) -> str:
+    return f'{spec.spell} mount_grant {actor} {moment}'
+
+
+def mount_grant_scenario(class_file: dict, spec: MountGrantSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    grant_entry = behaviour_entry(records, spec.spell, spec.name, 'mount_grant', spec.grant_quote,
+                                  spec.mount_display_id)
+    persist_entry = behaviour_entry(records, spec.spell, spec.name, 'mount_grant', spec.persist_quote,
+                                    spec.mount_display_id)
+    facts = facts_of(records, spec.spell)
+    persist_facts = facts_of(records, spec.persist_spell)
+    caster_granted_label = mount_grant_label(spec, CASTER, 'granted')
+    ally_granted_label = mount_grant_label(spec, ALLY, 'granted')
+    caster_persisted_label = mount_grant_label(spec, CASTER, 'persisted')
+    ally_persisted_label = mount_grant_label(spec, ALLY, 'persisted')
+    grant_steps = ([{'action': 'group', 'actor': CASTER, 'target': ALLY},
+                    {'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
+                    {'action': 'learn', 'actor': CASTER, 'spell': spec.persist_spell},
+                    {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell}]
+                  + cast_gate_power_step(facts)
+                  + required_aura_steps(facts)
+                  + [{'action': 'cast', 'actor': CASTER, 'spell': spec.spell},
+                     {'action': 'wait', 'ms': CAST_MARGIN_MS},
+                     measurement(caster_granted_label, CASTER, 'mount_display_id'),
+                     measurement(ally_granted_label, ALLY, 'mount_display_id')])
+    persist_steps = ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.persist_spell}]
+                     + cast_gate_power_step(persist_facts)
+                     + required_aura_steps(persist_facts)
+                     + [{'action': 'cast', 'actor': CASTER, 'spell': spec.persist_spell, 'target': CASTER},
+                        {'action': 'wait', 'ms': persist_facts.cast_time_ms + CAST_MARGIN_MS},
+                        measurement(caster_persisted_label, CASTER, 'mount_display_id'),
+                        measurement(ally_persisted_label, ALLY, 'mount_display_id')])
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour mount grant',
+        'contract': f'No-combat check: {spec.spell} is cast once with the caster grouped with an ally in range; '
+                    f'both actors\' mount_display_id (Unit::GetMountID()) must read {spec.mount_display_id} '
+                    f'(the display id the spell\'s own 527272/Mount() chain applies). The caster then casts the '
+                    f'unrelated {spec.persist_spell} while still mounted on the steed; both actors\' '
+                    f'mount_display_id must still read {spec.mount_display_id} afterwards, proving the cast did '
+                    f'not dismount either of them.',
+        'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY}],
+        'steps': base_steps(class_file) + grant_steps + persist_steps}
+    grant_model = {'kind': 'mount_grant', 'caster_label': caster_granted_label, 'ally_label': ally_granted_label,
+                  'expected': spec.mount_display_id, 'moment': 'granted', 'quote': grant_entry.quote}
+    persist_model = {'kind': 'mount_grant', 'caster_label': caster_persisted_label,
+                     'ally_label': ally_persisted_label, 'expected': spec.mount_display_id, 'moment': 'persisted',
+                     'quote': persist_entry.quote}
+    expectations = [
+        Expectation(f'{spec.spell} behaviour_mount_grant granted', BEHAVIOUR_MOUNT_GRANT, spec.spell, spec.spell,
+                   None, str(spec.mount_display_id), prose_rule(grant_entry.quote, spec.spell), grant_model),
+        Expectation(f'{spec.spell} behaviour_mount_grant persisted', BEHAVIOUR_MOUNT_GRANT, spec.spell,
+                   spec.persist_spell, None, str(spec.mount_display_id),
+                   prose_rule(persist_entry.quote, spec.spell), persist_model),
+    ]
+    return scenario, expectations
+
+
+def mount_grant_spec(entry: dict) -> MountGrantSpec:
+    return MountGrantSpec(entry['spell'], entry['name'], entry['grant_quote'], entry['persist_quote'],
+                          entry['mount_display_id'], entry['persist_spell'])
+
+
 MECHANIC_DR_RESET_MS = 15000
 MECHANIC_GAP_MARGIN_MS = 2000
 MECHANIC_LAND_ATTEMPTS = 3
@@ -2416,6 +2491,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return cast_gate_scenario(class_file, cast_gate_spec(entry))
     if entry['kind'] == 'cast_condition':
         return cast_condition_scenario(class_file, cast_condition_spec(entry))
+    if entry['kind'] == 'mount_grant':
+        return mount_grant_scenario(class_file, mount_grant_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 
