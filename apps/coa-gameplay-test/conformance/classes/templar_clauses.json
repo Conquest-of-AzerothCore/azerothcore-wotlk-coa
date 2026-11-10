@@ -1108,7 +1108,7 @@
     "clause": "Increases your Holy critical strike chance by $s1%",
     "labels": [
       "560650 effect_value e0 #0",
-      "560650 e0"
+      "560650 e0 spell_crit_chance 1"
     ],
     "kind": "claim"
   },
@@ -1173,7 +1173,7 @@
     "clause": "Increases your Holy critical strike chance by $s1%",
     "labels": [
       "561346 effect_value e0 #0",
-      "561346 e0"
+      "561346 e0 spell_crit_chance 1"
     ],
     "kind": "claim"
   },

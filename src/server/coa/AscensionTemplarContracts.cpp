@@ -143,9 +143,11 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[1].TargetB = SpellImplicitTargetInfo();
     }
     if ((id == 560650 || id == 561346) && info->Effects[0].ApplyAuraName == SPELL_AURA_MOD_CRIT_PCT &&
-        info->Effects[0].MiscValue == SPELLMOD_CRITICAL_CHANCE && info->Effects[0].SpellClassMask)
+        info->Effects[0].MiscValue == SPELLMOD_CRITICAL_CHANCE)
     {
-        info->Effects[0].ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
+        info->Effects[0].ApplyAuraName = SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL;
+        info->Effects[0].MiscValue = SPELL_SCHOOL_MASK_HOLY;
+        info->Effects[0].SpellClassMask = flag96();
     }
     if (id == 520034 && info->Effects[0].ApplyAuraName == SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE &&
         info->Effects[0].MiscValue == AURA_STATE_HEALTH_ABOVE_75_PERCENT && !info->Effects[0].SpellClassMask)

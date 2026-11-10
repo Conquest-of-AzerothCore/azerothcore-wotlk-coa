@@ -1,219 +1,97 @@
 {
   "schema": 1,
-  "name": "Aggramar's Rage: Holy ability crit chance and expertise (#1323)",
-  "contract": "Aggramar's Rage increases Holy critical strike chance by 3% and expertise by 5 (rank 1, 560650), or 6% and 10 (rank 2, 561346). Its crit effect names Chastise, Scarlet Hammer and Blade of Faith (client class mask; the 2026-01-07 changelog limits it to Chastise and Thousand Blades), not every attack.",
+  "name": "Aggramar's Rage: Holy critical strike chance and expertise (#1323)",
+  "contract": "Aggramar's Rage increases your Holy critical strike chance by 3% and your expertise by 5 (rank 1, 560650), or by 6% and 10 (rank 2, 561346). Every Holy-school ability gains the crit chance, whether melee (Chastise, Scarlet Hammer, Titanstrike, Condemn's periodic damage) or magic (Scourgebane); Physical abilities (Blade of Faith) and melee crit chance stay unchanged.",
   "timeout_ms": 90000,
   "players": [
     {
       "id": "control",
       "race": 1,
       "class": 19,
-      "level": 80
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
     },
     {
       "id": "rank_one",
       "race": 1,
       "class": 19,
-      "level": 80
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
     },
     {
       "id": "rank_two",
       "race": 1,
       "class": 19,
-      "level": 80
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
     }
   ],
   "creatures": [
     {
-      "id": "dummy",
+      "id": "dummy_control",
       "owner": "control",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "dummy_two",
+      "owner": "rank_two",
       "entry": 36,
       "health": 1000000,
       "distance": 3
     }
   ],
   "steps": [
-    {
-      "action": "wait",
-      "label": "Let spawn AI and level scaling settle",
-      "ms": 5000
-    },
-    {
-      "action": "add_item",
-      "actor": "control",
-      "item": 2495
-    },
-    {
-      "action": "equip",
-      "actor": "control",
-      "item": 2495,
-      "slot": 15
-    },
-    {
-      "action": "add_item",
-      "actor": "rank_one",
-      "item": 2495
-    },
-    {
-      "action": "equip",
-      "actor": "rank_one",
-      "item": 2495,
-      "slot": 15
-    },
-    {
-      "action": "add_item",
-      "actor": "rank_two",
-      "item": 2495
-    },
-    {
-      "action": "equip",
-      "actor": "rank_two",
-      "item": 2495,
-      "slot": 15
-    },
-    {
-      "action": "set_aura",
-      "label": "Baseline crit aura computes crit chance",
-      "actor": "control",
-      "spell": 14139,
-      "stacks": 1
-    },
-    {
-      "action": "set_aura",
-      "label": "Baseline crit aura computes crit chance",
-      "actor": "rank_one",
-      "spell": 14139,
-      "stacks": 1
-    },
-    {
-      "action": "set_aura",
-      "label": "Baseline crit aura computes crit chance",
-      "actor": "rank_two",
-      "spell": 14139,
-      "stacks": 1
-    },
-    {
-      "action": "snapshot",
-      "actor": "control",
-      "metric": "melee_crit_chance",
-      "save_as": "melee_crit"
-    },
-    {
-      "action": "snapshot",
-      "actor": "control",
-      "metric": "expertise",
-      "save_as": "expertise"
-    },
-    {
-      "action": "snapshot",
-      "actor": "control",
-      "metric": "spell_crit_chance",
-      "save_as": "holy_crit",
-      "school": 1
-    },
-    {
-      "action": "learn",
-      "actor": "rank_one",
-      "spell": 560650
-    },
-    {
-      "action": "learn",
-      "actor": "rank_two",
-      "spell": 561346
-    },
-    {
-      "action": "assert",
-      "label": "Rank 1 expertise",
-      "actor": "rank_one",
-      "metric": "expertise",
-      "relative_to": "expertise",
-      "equals": 5
-    },
-    {
-      "action": "assert",
-      "label": "Rank 2 expertise",
-      "actor": "rank_two",
-      "metric": "expertise",
-      "relative_to": "expertise",
-      "equals": 10
-    },
-    {
-      "action": "assert",
-      "label": "Rank 1 Chastise crit",
-      "actor": "rank_one",
-      "metric": "spell_modifier",
-      "spell": 503141,
-      "op": 7,
-      "base": 0,
-      "equals": 3
-    },
-    {
-      "action": "assert",
-      "label": "Rank 2 Chastise crit",
-      "actor": "rank_two",
-      "metric": "spell_modifier",
-      "spell": 503141,
-      "op": 7,
-      "base": 0,
-      "equals": 6
-    },
-    {
-      "action": "assert",
-      "label": "Rank 2 Scarlet Hammer crit",
-      "actor": "rank_two",
-      "metric": "spell_modifier",
-      "spell": 807035,
-      "op": 7,
-      "base": 0,
-      "equals": 6
-    },
-    {
-      "action": "assert",
-      "label": "Titanstrike is not named",
-      "actor": "rank_two",
-      "metric": "spell_modifier",
-      "spell": 806835,
-      "op": 7,
-      "base": 0,
-      "equals": 0
-    },
-    {
-      "action": "assert",
-      "label": "Melee crit chance is unchanged",
-      "actor": "rank_two",
-      "metric": "melee_crit_chance",
-      "relative_to": "melee_crit",
-      "min": -0.01,
-      "max": 0.01
-    },
-    {
-      "action": "assert",
-      "label": "General Holy spell crit is unchanged",
-      "actor": "rank_two",
-      "metric": "spell_crit_chance",
-      "school": 1,
-      "relative_to": "holy_crit",
-      "min": -0.01,
-      "max": 0.01
-    },
-    {
-      "action": "snapshot",
-      "actor": "control",
-      "metric": "spell_done_crit_chance",
-      "save_as": "chastise_crit",
-      "spell": 503141,
-      "target": "dummy"
-    },
-    {
-      "action": "assert",
-      "label": "Chastise's crit chance rises by 6",
-      "actor": "rank_two",
-      "metric": "spell_done_crit_chance",
-      "spell": 503141,
-      "target": "dummy",
-      "relative_to": "chastise_crit",
-      "min": 5.99,
-      "max": 6.01
-    }
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "add_item", "actor": "control", "item": 2495 },
+    { "action": "equip", "actor": "control", "item": 2495, "slot": 15 },
+    { "action": "add_item", "actor": "rank_one", "item": 2495 },
+    { "action": "equip", "actor": "rank_one", "item": 2495, "slot": 15 },
+    { "action": "add_item", "actor": "rank_two", "item": 2495 },
+    { "action": "equip", "actor": "rank_two", "item": 2495, "slot": 15 },
+    { "action": "set_aura", "label": "Baseline crit aura computes crit chance", "actor": "control", "spell": 14139, "stacks": 1 },
+    { "action": "set_aura", "label": "Baseline crit aura computes crit chance", "actor": "rank_one", "spell": 14139, "stacks": 1 },
+    { "action": "set_aura", "label": "Baseline crit aura computes crit chance", "actor": "rank_two", "spell": 14139, "stacks": 1 },
+    { "action": "learn", "label": "Condemn ticks can crit (Condemnation)", "actor": "control", "spell": 704175 },
+    { "action": "learn", "label": "Condemn ticks can crit (Condemnation)", "actor": "rank_two", "spell": 704175 },
+    { "action": "learn", "actor": "control", "spell": 567541 },
+    { "action": "learn", "actor": "rank_two", "spell": 567541 },
+    { "action": "learn", "actor": "rank_one", "spell": 560650 },
+    { "action": "learn", "actor": "rank_two", "spell": 561346 },
+    { "action": "snapshot", "actor": "control", "metric": "melee_crit_chance", "save_as": "melee_crit" },
+    { "action": "snapshot", "actor": "control", "metric": "expertise", "save_as": "expertise" },
+    { "action": "snapshot", "actor": "control", "metric": "spell_crit_chance", "school": 1, "save_as": "holy_crit" },
+    { "action": "snapshot", "actor": "control", "metric": "spell_done_crit_chance", "spell": 801832, "target": "dummy_control", "save_as": "scourgebane_crit" },
+    { "action": "snapshot", "actor": "control", "metric": "spell_done_crit_chance", "spell": 503141, "target": "dummy_control", "save_as": "chastise_crit" },
+    { "action": "snapshot", "actor": "control", "metric": "spell_done_crit_chance", "spell": 807035, "target": "dummy_control", "save_as": "scarlet_hammer_crit" },
+    { "action": "snapshot", "actor": "control", "metric": "spell_done_crit_chance", "spell": 806835, "target": "dummy_control", "save_as": "titanstrike_crit" },
+    { "action": "snapshot", "actor": "control", "metric": "spell_done_crit_chance", "spell": 803155, "target": "dummy_control", "save_as": "blade_of_faith_crit" },
+    { "action": "assert", "label": "Rank 1 expertise", "actor": "rank_one", "metric": "expertise", "relative_to": "expertise", "equals": 5 },
+    { "action": "assert", "label": "Rank 2 expertise", "actor": "rank_two", "metric": "expertise", "relative_to": "expertise", "equals": 10 },
+    { "action": "assert", "label": "Rank 1 Holy spell crit chance rises by 3", "actor": "rank_one", "metric": "spell_crit_chance", "school": 1, "relative_to": "holy_crit", "min": 2.99, "max": 3.01 },
+    { "action": "assert", "label": "Rank 2 Holy spell crit chance rises by 6", "actor": "rank_two", "metric": "spell_crit_chance", "school": 1, "relative_to": "holy_crit", "min": 5.99, "max": 6.01 },
+    { "action": "assert", "label": "Rank 1 Scourgebane crit chance rises by 3", "actor": "rank_one", "metric": "spell_done_crit_chance", "spell": 801832, "target": "dummy_control", "relative_to": "scourgebane_crit", "min": 2.99, "max": 3.01 },
+    { "action": "assert", "label": "Rank 2 Scourgebane crit chance rises by 6", "actor": "rank_two", "metric": "spell_done_crit_chance", "spell": 801832, "target": "dummy_two", "relative_to": "scourgebane_crit", "min": 5.99, "max": 6.01 },
+    { "action": "assert", "label": "Rank 2 Chastise crit chance rises by 6", "actor": "rank_two", "metric": "spell_done_crit_chance", "spell": 503141, "target": "dummy_two", "relative_to": "chastise_crit", "min": 5.99, "max": 6.01 },
+    { "action": "assert", "label": "Rank 2 Scarlet Hammer crit chance rises by 6", "actor": "rank_two", "metric": "spell_done_crit_chance", "spell": 807035, "target": "dummy_two", "relative_to": "scarlet_hammer_crit", "min": 5.99, "max": 6.01 },
+    { "action": "assert", "label": "Rank 2 Titanstrike crit chance rises by 6", "actor": "rank_two", "metric": "spell_done_crit_chance", "spell": 806835, "target": "dummy_two", "relative_to": "titanstrike_crit", "min": 5.99, "max": 6.01 },
+    { "action": "assert", "label": "Physical Blade of Faith crit chance is unchanged", "actor": "rank_two", "metric": "spell_done_crit_chance", "spell": 803155, "target": "dummy_two", "relative_to": "blade_of_faith_crit", "min": -0.01, "max": 0.01 },
+    { "action": "assert", "label": "Melee crit chance is unchanged", "actor": "rank_two", "metric": "melee_crit_chance", "relative_to": "melee_crit", "min": -0.01, "max": 0.01 },
+    { "action": "set_power", "actor": "control", "power": 3, "value": 100 },
+    { "action": "set_power", "actor": "rank_two", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "control", "spell": 567541, "target": "dummy_control" },
+    { "action": "cast", "actor": "rank_two", "spell": 567541, "target": "dummy_two" },
+    { "action": "assert", "label": "Condemn lands (control)", "actor": "dummy_control", "metric": "aura", "spell": 567541, "caster": "control", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "Condemn lands (rank 2)", "actor": "dummy_two", "metric": "aura", "spell": 567541, "caster": "rank_two", "equals": 1, "within_ms": 2000 },
+    { "action": "snapshot", "actor": "dummy_control", "metric": "aura_crit_chance", "spell": 567541, "caster": "control", "effect": 0, "save_as": "condemn_tick_crit" },
+    { "action": "assert", "label": "Condemn tick crit chance can crit at all", "actor": "dummy_control", "metric": "aura_crit_chance", "spell": 567541, "caster": "control", "effect": 0, "min": 1 },
+    { "action": "assert", "label": "Rank 2 Condemn tick crit chance rises by 6", "actor": "dummy_two", "metric": "aura_crit_chance", "spell": 567541, "caster": "rank_two", "effect": 0, "relative_to": "condemn_tick_crit", "min": 5.99, "max": 6.01 }
   ]
 }

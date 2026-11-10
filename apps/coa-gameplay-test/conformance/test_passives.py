@@ -546,12 +546,13 @@ class TemplarPassiveTest(unittest.TestCase):
         for expectation in expectations:
             self.assertIn(f'"{expectation.label}"', effect.reason)
 
-    def test_unmodelled_effects_mark_the_scoped_spellmod_crit_bonus_unmodelled(self):
+    def test_aggramars_rage_crit_effect_judges_holy_spell_crit_on_both_ranks(self):
         for spell_id in (560650, 561346):
             effect = effect_of(self.effects(spell_id), 0)
-            self.assertTrue(effect.reason.startswith('unmodelled: round4 alert-triage: '), (spell_id, effect.reason))
-            self.assertEqual(effect.plans, ())
+            plan = plan_named(effect, 'spell_crit_chance')
+            self.assertEqual((plan.fields, plan.relation, plan.judged), ({'school': 1}, 'add', True))
             self.assertEqual(effect.family, 'P2')
+            self.assertEqual(effect.reason, '')
 
     def test_unmodelled_effects_mark_patiences_scripted_effects_on_interdict(self):
         for index in (0, 1):
@@ -780,10 +781,9 @@ class TemplarPassiveTest(unittest.TestCase):
         expertise = plan_named(effect_of(self.effects(AGGRAMARS_RAGE), 1), 'expertise')
         self.assertEqual(expertise.relation, 'add')
 
-    def test_aggramars_rage_crit_effect_is_unmodelled_by_the_round4_override(self):
-        effect = effect_of(self.effects(AGGRAMARS_RAGE), 0)
-        self.assertTrue(effect.reason.startswith('unmodelled: round4 alert-triage: '), effect.reason)
-        self.assertEqual(effect.plans, ())
+    def test_aggramars_rage_crit_effect_is_no_longer_in_unmodelled_effects(self):
+        self.assertFalse(any(entry['spell'] in (560650, AGGRAMARS_RAGE) and entry['effect'] == 0
+                             for entry in self.class_file['unmodelled_effects']))
 
     def test_generic_crit_phrase_judges_melee_and_measures_spell_crit(self):
         effect = effect_of(self.effects(FINESSE), 0)
