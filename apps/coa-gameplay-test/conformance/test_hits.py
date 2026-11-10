@@ -15,7 +15,8 @@ from hits import (CLOSED, HIT_CHECKS, MAX_SCENARIO_MS, UNMODELLED, HitModel, Mod
 from mitigation import REFERENCE_TARGET, MitigationModel, TargetProfile, expected_mitigation
 from profile import CLASSES_DIR, load_class_file
 from tooltip import CasterStats, Displayed, Readout, read_tooltip, weapon_skill_spells
-from values import ALLY, CHARGE_OFFSET_YD, UNREADABLE
+from values import (ALLY, CHARGE_OFFSET_YD, DUMMY_DISTANCE, GAP_CLOSER_DISTANCE, NOMINAL_MELEE_RANGE_YD, TARGET,
+                    UNREADABLE)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -56,6 +57,7 @@ OATH_CHAIN = 704576
 DIVINE_FORCE = 806153
 DIVINE_FORCE_MAX_RANK = 807805
 DIVINE_FORCE_SKILL_LINE = 72
+SILVERHAND_INCANTATION = 801465
 RECKONING = 805421
 RECKONING_MAX_RANK = 572741
 RECKONING_BASE_POINTS = 165
@@ -601,6 +603,49 @@ class HitScenarioTest(unittest.TestCase):
         for step in total_steps + count_steps:
             self.assertNotIn('target', step)
 
+    def gap_closer_expectation(self, expectations):
+        return next(expectation for expectation in expectations if expectation.check == GAP_CLOSER_DISTANCE)
+
+    def test_temple_guardian_gap_closer_distance_measures_the_caster_to_ally_distance(self):
+        scenario, expectations = hit_scenario(self.templar, self.temple_guardian_spell(), 1)
+        gap = self.gap_closer_expectation(expectations)
+        self.assertEqual((gap.spell_id, gap.rank_id, gap.displayed), (TEMPLE_GUARDIAN, TEMPLE_GUARDIAN_LIVE_RANK,
+                                                                      str(NOMINAL_MELEE_RANGE_YD)))
+        gap_steps = steps_with(scenario, action='assert', label=gap.label)
+        self.assertEqual(len(gap_steps), 1)
+        self.assertEqual((gap_steps[0]['metric'], gap_steps[0]['target']), ('distance_2d', ALLY))
+
+    def test_divine_force_gap_closer_distance_relocates_the_caster_away_from_the_dummy(self):
+        scenario, expectations = hit_scenario(self.templar, self.spells[DIVINE_FORCE], 1)
+        gap = self.gap_closer_expectation(expectations)
+        self.assertEqual((gap.spell_id, gap.rank_id), (DIVINE_FORCE, DIVINE_FORCE_MAX_RANK))
+        records = records_of(self.templar)
+        range_max = records.field('SpellRange', 11, 'RangeMax[0]')
+        relocates = steps_with(scenario, action='relocate', actor='caster')
+        self.assertTrue(relocates)
+        for step in relocates:
+            self.assertEqual(step['dx'], CHARGE_OFFSET_YD)
+            self.assertLess(step['dx'] + DUMMY_DISTANCE, range_max)
+        gap_steps = steps_with(scenario, action='assert', label=gap.label)
+        self.assertEqual(len(gap_steps), 1)
+        self.assertEqual((gap_steps[0]['metric'], gap_steps[0]['target']), ('distance_2d', TARGET))
+        self.assertTrue(scenario.get('creatures'))
+
+    def test_silverhand_incantation_closes_distance_although_its_hit_mean_is_unmodelled(self):
+        scenario, expectations = hit_scenario(self.templar, self.spells[SILVERHAND_INCANTATION], 1)
+        hit = hit_expectation(expectations)
+        self.assertEqual(hit.check, 'unmodelled')
+        gap = self.gap_closer_expectation(expectations)
+        self.assertEqual((gap.spell_id, gap.rank_id), (SILVERHAND_INCANTATION, SILVERHAND_INCANTATION))
+        casts = steps_with(scenario, action='cast', spell=SILVERHAND_INCANTATION)
+        self.assertEqual(len(casts), 1)
+        self.assertEqual(casts[0]['target'], ALLY)
+        self.assertTrue(steps_with(scenario, action='relocate', actor='caster', dx=CHARGE_OFFSET_YD))
+        gap_steps = steps_with(scenario, action='assert', label=gap.label)
+        self.assertEqual(len(gap_steps), 1)
+        self.assertEqual((gap_steps[0]['metric'], gap_steps[0]['target']), ('distance_2d', ALLY))
+        self.assertIn({'id': ALLY}, [{'id': player.get('id')} for player in scenario['players']])
+
     def test_temple_guardian_hit_mean_alerts_if_only_the_self_heal_is_counted(self):
         scenario, expectations = hit_scenario(self.templar, self.temple_guardian_spell(), 1)
         hit = hit_expectation(expectations)
@@ -876,12 +921,15 @@ class HitScenarioTest(unittest.TestCase):
                 for expectation in expectations:
                     if expectation.check == 'unmodelled':
                         self.assertTrue(expectation.rule.startswith((UNMODELLED, CLOSED)))
+                    elif expectation.check == GAP_CLOSER_DISTANCE:
+                        self.assertIn(expectation.label, labels)
                     elif not expectation.rule.startswith(UNREADABLE):
                         self.assertIn(expectation.label + ' total', labels)
                         self.assertIn(expectation.label + ' count', labels)
                     checks[expectation.check] = checks.get(expectation.check, 0) + 1
         self.assertTrue(checks.get('hit_mean'))
         self.assertTrue(checks.get('unmodelled'))
+        self.assertTrue(checks.get(GAP_CLOSER_DISTANCE))
 
 
 if __name__ == '__main__':

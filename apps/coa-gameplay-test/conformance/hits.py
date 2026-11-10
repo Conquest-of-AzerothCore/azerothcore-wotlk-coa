@@ -12,11 +12,12 @@ from profile import (CASTER, DBC_DIR, SETTLE_MS, base_steps, caster_stats_from, 
 from tooltip import (MIXED_PERIOD, OVER_TICKS, CasterStats, ForcedPoints, Readout, Records, Tooltip, Unreadable,
                      mixed_period_reason, period_reading, read_tooltip)
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, EFFECT_TOKEN,
-                    EFFECTS, GCD_WAIT_MS, MEAN_HALF_WIDTH, READ_STEP_MS, TARGET, UNREADABLE, Z_99, Expectation,
-                    RankFacts, Unmodelled, armed_for, closes_distance, dataset, equip_requirement, facts_of,
-                    required_aura_steps, required_target_health_steps, targets_ally)
+                    EFFECTS, GAP_CLOSER_DISTANCE, GCD_WAIT_MS, MEAN_HALF_WIDTH, READ_STEP_MS, TARGET, UNREADABLE,
+                    Z_99, Expectation, RankFacts, Unmodelled, armed_for, closes_distance, dataset, equip_requirement,
+                    facts_of, gap_closer_expectation, gap_closer_target, is_hostile, required_aura_steps,
+                    required_target_health_steps, targets_ally)
 
-HIT_CHECKS = ('hit_mean', 'melee_mean', 'periodic_total', 'unmodelled')
+HIT_CHECKS = ('hit_mean', 'melee_mean', 'periodic_total', 'unmodelled', GAP_CLOSER_DISTANCE)
 UNMODELLED = 'unmodelled: '
 CLOSED = 'closed: '
 NEVER_CAST = 'passive spell is never cast'
@@ -737,6 +738,8 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
         learn = learn + [{'action': 'learn', 'actor': CASTER, 'spell': gate[2]}]
     records = records_of(class_file)
     armed_file = armed_for(class_file, records, rank_id)
+    facts = facts_of(records, rank_id)
+    gap_closing = closes_distance(facts)
     try:
         hit = rank_hit(armed_file, rank_id, reference_caster(armed_file), REFERENCE_TARGET,
                        armed_file.get('known_auras', []))
@@ -754,7 +757,24 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
         prefix = CLOSED if note and note.startswith('no check needed:') else UNMODELLED
         reason = prefix + (note if note is not None else error.reason)
         unmodelled = Expectation(label, 'unmodelled', spell.spell_id, rank_id, None, '', reason)
-        return [(timed(scenario_shell(armed_file, name, contract, learn), SETTLE_MS), [unmodelled])]
+        expectations = [unmodelled]
+        steps = list(learn)
+        wait_ms = SETTLE_MS
+        target_kind = gap_closer_target(facts) if gap_closing else None
+        if gap_closing:
+            fixtures = [{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}]
+            gap_interval = max(records.field('Spell', rank_id, 'StartRecoveryTime'), facts.cast_time_ms) \
+                + CAST_MARGIN_MS
+            gap_steps, gap_expectation = gap_closer_expectation(rank_id, spell.spell_id, label, target_kind)
+            steps += cast_steps(facts, rank_id, target_kind, gap_interval, 1, fixtures) + gap_steps
+            expectations.append(gap_expectation)
+            wait_ms += gap_interval
+        scenario = scenario_shell(armed_file, name, contract, steps)
+        if target_kind == TARGET:
+            scenario['creatures'] = [creature_fixture(armed_file)]
+        elif target_kind == ALLY:
+            scenario['players'].append({**player_fixture(armed_file), 'id': ALLY})
+        return [(timed(scenario, wait_ms), expectations)]
     model = hit.model
     hostile = model.kind not in HEAL_KINDS
     ally = not hostile and targets_ally(hit.facts)
@@ -770,7 +790,7 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
                               UNREADABLE + entry) for ordinal, entry in enumerate(hit.readout.unreadable)]
     cast_target = TARGET if hostile else (ALLY if ally else None)
     cast_fixtures = [{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}] \
-        if ally and closes_distance(hit.facts) else []
+        if (ally and closes_distance(hit.facts)) or (gap_closing and cast_target) else []
     if gate is not None:
         cast_fixtures = cast_fixtures + gate_fixture_steps(gate_facts, gate[0], hit.facts)
     dual = dual_target_entry(class_file, rank_id) if not hostile else None
@@ -781,11 +801,16 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
                          f'of {hit.indexes}')
     secondary_label = f'{label} e{dual["secondary_effect"]}' if dual else None
     secondary_labels = secondary_heal_labels(label, dual['secondary_effect']) if dual else None
+    gap_steps, gap_expectations = [], []
+    if gap_closing and cast_target:
+        gap_steps, gap_expectation = gap_closer_expectation(rank_id, spell.spell_id, label, cast_target)
+        gap_expectations = [gap_expectation]
     parts = []
     for part, performed in enumerate(shares):
         steps = (learn + [dict(step) for step in target]
                  + required_target_health_steps(hit.facts)
                  + cast_steps(hit.facts, rank_id, cast_target, interval, performed, cast_fixtures)
+                 + (gap_steps if part == 0 else [])
                  + hit_measurements(rank_id, hit.hit_spell, hostile, labels, ally))
         if dual:
             steps += secondary_heal_measurements(hit.hit_spell, secondary_labels, dual['secondary_actor'])
@@ -813,7 +838,8 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
                 ' | '.join(model.displayed), rule,
                 {**secondary_record, 'part': part, 'parts': len(shares), 'part_casts': performed})]
         parts.append((timed(scenario, SETTLE_MS + performed * budget_interval + DRAIN_MS),
-                       [expectation] + secondary_expectations + (unreadable if part == 0 else [])))
+                       [expectation] + secondary_expectations + (unreadable if part == 0 else [])
+                       + (gap_expectations if part == 0 else [])))
     return parts
 
 

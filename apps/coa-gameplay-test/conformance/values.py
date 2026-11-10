@@ -24,6 +24,9 @@ FRIEND_TARGETS = frozenset({21})
 RESURRECT_EFFECTS = frozenset({18, 113})
 ALLY = 'ally'
 CHARGE_OFFSET_YD = 10
+NOMINAL_MELEE_RANGE_YD = 5.0
+GAP_CLOSER_MARGIN_YD = 2.0
+GAP_CLOSER_DISTANCE = 'gap_closer_distance'
 POWER_DISPLAY_DIVISOR = {0: 1, 1: 10, 2: 1, 3: 1, 4: 1000, 5: 1, 6: 10}
 MANA = 0
 CAST_MARGIN_MS = 500
@@ -150,11 +153,26 @@ def targets_resurrect(facts: RankFacts) -> bool:
     return any(facts.effects[effect] in RESURRECT_EFFECTS for effect in EFFECTS)
 
 
-CHARGE_EFFECTS = frozenset({96, 149})
+CHARGE_EFFECTS = frozenset({42, 96, 149})
 
 
 def closes_distance(facts: RankFacts) -> bool:
     return any(facts.effects[effect] in CHARGE_EFFECTS for effect in EFFECTS)
+
+
+def gap_closer_target(facts: RankFacts) -> str:
+    return TARGET if is_hostile(facts) else ALLY
+
+
+def gap_closer_expectation(rank_id: int, spell_id: int, label: str, target_kind: str) -> tuple[list[dict], Expectation]:
+    gap_label = f'{label} gap_closer_distance'
+    steps = [measurement(gap_label, CASTER, 'distance_2d', target=target_kind)]
+    rule = (f'gap-closer effect (SPELL_EFFECT_CHARGE/CHARGE_DEST/JUMP_DEST, SharedDefines.h) must bring the '
+            f'caster within {NOMINAL_MELEE_RANGE_YD} yd of {target_kind} (NOMINAL_MELEE_RANGE, '
+            f'ObjectDefines.h)')
+    expectation = Expectation(gap_label, GAP_CLOSER_DISTANCE, spell_id, rank_id, None, str(NOMINAL_MELEE_RANGE_YD),
+                              rule)
+    return steps, expectation
 
 
 def aura_carrier(facts: RankFacts, effect: int) -> dict:

@@ -32,14 +32,16 @@ from stack import (ADDS, MEASURED, MELEE_SOURCE, MULTIPLIES, STACK_CHECKS, STACK
 from tooltip import CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, Unreadable
 from triggers import (COOLDOWN_CHECK, DURATION_CHECK, EVENT_TOLERANCE, GATE_ABSENCE_CHECK, MAGNITUDE_CHECK,
                       PERIODIC, SELF_TRIGGER_CHECK, TRIGGER_CHECK, cooldown_trial_label, duration_trial_label)
-from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECTS, FIXED_DIE_SIDES, GENERIC, UNMEASURABLE, UNREADABLE,
-                    Expectation, dataset, mean_samples, roll_range, sample_labels)
+from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECTS, FIXED_DIE_SIDES, GAP_CLOSER_DISTANCE,
+                    GAP_CLOSER_MARGIN_YD, GENERIC, UNMEASURABLE, UNREADABLE, Expectation, dataset, mean_samples,
+                    roll_range, sample_labels)
 
 STATUSES = ('ok', 'tolerated', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials',
             'unmeasured', MEASURED, 'closed')
 NOT_ALERTS = frozenset({'ok', MEASURED, 'closed'})
 CONFORMANT = frozenset({'ok', 'tolerated', 'closed'})
-CAST_DEPENDENT_CHECKS = frozenset({'cooldown_ms', 'aura_amount', 'aura_duration_ms', 'aura_amplitude_ms'})
+CAST_DEPENDENT_CHECKS = frozenset({'cooldown_ms', 'aura_amount', 'aura_duration_ms', 'aura_amplitude_ms',
+                                   GAP_CLOSER_DISTANCE})
 NO_CAST_FAILURE = 0
 CAST_RESULTS_HEADER = Path(__file__).resolve().parents[3] / 'src/server/shared/SharedDefines.h'
 CAST_RESULT_ENUM = re.compile(r'enum SpellCastResult\b[^{]*\{(?P<body>[^}]*)\}')
@@ -353,6 +355,13 @@ def exact(base: Verdict, measured: float, expected: float, why: str) -> Verdict:
     status = 'ok' if abs(measured - expected) <= FLOAT_EPSILON else 'alert'
     return replace(base, status=status, measured=measured, expected=expected, low=expected, high=expected,
                    explanation=f'{why}; a count is compared exactly')
+
+
+def judge_gap_closer_distance(base: Verdict, measured: float, expected: float, rule: str) -> Verdict:
+    high = expected + GAP_CLOSER_MARGIN_YD
+    status = 'ok' if measured <= high else 'alert'
+    return replace(base, status=status, measured=measured, expected=expected, low=0.0, high=high,
+                   explanation=f'{rule}; measured <= NOMINAL_MELEE_RANGE + {GAP_CLOSER_MARGIN_YD:g} yd margin')
 
 
 def elapsed_bound(run: Run, label: str) -> float | None:
@@ -2906,6 +2915,8 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
                                  f'spell_power_cost divided by the display divisor {divisor.group(1)}')
     if check == 'cooldown_ms':
         return judge_time(base, run, measured, float(expectation.displayed), rule)
+    if check == GAP_CLOSER_DISTANCE:
+        return judge_gap_closer_distance(base, measured, float(expectation.displayed), rule)
     if check in TOKEN_CHECKS and rule.startswith(READ_RULE):
         verdict = judge_token(base, expectation, run, measured, tokens, tooltips, entry['spell_name'])
         if check == 'effect_value':

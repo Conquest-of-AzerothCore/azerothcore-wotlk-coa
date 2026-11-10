@@ -17,7 +17,8 @@ from hits import HitModel, Modifier
 from profile import CLASSES_DIR, DBC_DIR
 from classes import class_spells
 from tooltip import CasterStats, Displayed, Readout, read_tooltip
-from values import Expectation, mean_samples, sample_labels, structure_stats, value_scenario
+from values import (GAP_CLOSER_DISTANCE, GAP_CLOSER_MARGIN_YD, NOMINAL_MELEE_RANGE_YD, Expectation, mean_samples,
+                    sample_labels, structure_stats, value_scenario)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import batch
@@ -520,6 +521,25 @@ class CompareTest(unittest.TestCase):
         self.workspace.scenario(VALUE_KEY, 'value', [Expectation(label, 'known_aura', 887007, 887007, None, '887007',
                                                                  'reference profile aura')], [], [])
         verdict = {verdict.label: verdict for verdict in self.verdicts(constant_reader(), **{label: '0'})}[label]
+        self.assertEqual(verdict.status, 'alert')
+
+    def gap_closer_verdict(self, measured):
+        label = '1001 hit_mean gap_closer_distance'
+        self.workspace.scenario(VALUE_KEY, 'value',
+                                [Expectation(label, GAP_CLOSER_DISTANCE, SPELL, RANK, None,
+                                            str(NOMINAL_MELEE_RANGE_YD),
+                                            'gap-closer effect must bring the caster within '
+                                            f'{NOMINAL_MELEE_RANGE_YD} yd of ally')], [], [])
+        return {verdict.label: verdict for verdict in self.verdicts(constant_reader(), **{label: measured})}[label]
+
+    def test_gap_closer_distance_within_the_margin_of_melee_range_is_ok(self):
+        margin = NOMINAL_MELEE_RANGE_YD + GAP_CLOSER_MARGIN_YD
+        verdict = self.gap_closer_verdict(str(margin - 0.1))
+        self.assertEqual((verdict.status, verdict.expected, verdict.high), ('ok', NOMINAL_MELEE_RANGE_YD, margin))
+
+    def test_gap_closer_distance_beyond_the_margin_is_an_alert(self):
+        margin = NOMINAL_MELEE_RANGE_YD + GAP_CLOSER_MARGIN_YD
+        verdict = self.gap_closer_verdict(str(margin + 0.1))
         self.assertEqual(verdict.status, 'alert')
 
     def test_unreadable_unmeasurable_and_unmodelled_rules_are_never_ok(self):

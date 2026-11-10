@@ -157,6 +157,36 @@ because it has no claim of its own left unaccounted for, but the deferred check 
 free-text reason until a future item builds it. 3 of the 35 (300514 Testament of Strength, 500678 Testament of
 Fortitude, 500694 Force of Golganneth) found no existing evidence to cite and stay `unmodelled`.
 
+## Gap-closer distance scenarios (`gap_closer_distance`, ADR 0057)
+
+`closes_distance(facts)` (`values.py`) reports whether any of a rank's three effects is
+`SPELL_EFFECT_CHARGE`/`SPELL_EFFECT_CHARGE_DEST`/`SPELL_EFFECT_JUMP_DEST` (96/149/42): a prose claim that the
+caster itself moves to its target ("Charge towards an ally", "charging you to them", "Leap at an enemy with
+divine force"), reachable through `Spell::EffectCharge`/`EffectChargeDest`/`EffectJumpDest`
+(`SpellEffects.cpp`), all three of which relocate the caster through `MotionMaster`. `hit_parts` relocates
+the caster `CHARGE_OFFSET_YD` yd away from the cast target (`gap_closer_target(facts)`: `ally` for a
+non-hostile rank, `dummy` for a hostile one) before every repeat cast, the same fixture Temple Guardian's
+own ally-heal scenario already used to stay in range of a stationary ally; the target creature/player fixture
+never moves on its own, so the fixture opens the same gap before every repeat regardless of target kind.
+Once per `hit_parts` call (`part == 0`), it adds a `gap_closer_distance` measurement
+(`distance_2d {target: gap target}` on the caster) right after that first cast and an `Expectation` judged by
+`compare.judge_gap_closer_distance`: `ok` when the measured distance is at or below
+`NOMINAL_MELEE_RANGE_YD` (5.0, `ObjectDefines.h`'s `NOMINAL_MELEE_RANGE`) plus `GAP_CLOSER_MARGIN_YD` (2.0,
+missile travel/positioning slop), `alert` otherwise; `gap_closer_distance` is a `CAST_DEPENDENT_CHECK`, so a
+failed cast reports `unmeasured`, never a false `alert`.
+
+A rank whose own damage/heal effect has no `hit_kind` model still gets this check: `hit_parts` reads
+`closes_distance`/`gap_closer_target` from `facts_of` before attempting `rank_hit`, so the `Unmodelled`
+branch builds its own one-cast scenario (`learn`, the same relocate fixture, `cast`, the
+`gap_closer_distance` measurement) whenever the rank closes distance, independent of whether its hit is
+measurable. Silverhand Incantation 801465 (`TRIGGER_MISSILE_SPELL_WITH_VALUE` effect 0, `CHARGE` effect 1)
+is the first such rank: its own `hit_notes` entry already named "a separate charge-closure check this round
+does not wire" as the open gap this check closes, independent of the triggered spell's own damage, which
+stays `closed: no check needed` (a distinct spell, 801501, carries that verdict).
+
+Templar: Temple Guardian 803792 (ally), Silverhand Incantation 801465 (hostile, `Unmodelled` branch),
+Divine Force 806153/807805 (hostile, `SPELL_EFFECT_JUMP_DEST`).
+
 ## Self-stacking ranks (`self_stack_bonus`, ADR 0049)
 
 `hit_parts`'s repeated casts (`casts_needed`/`scheduled_casts`) assume every cast is an independent, identically
