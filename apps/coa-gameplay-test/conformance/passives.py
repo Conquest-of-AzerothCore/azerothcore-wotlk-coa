@@ -70,6 +70,7 @@ LINKED_FAMILY = 'P5'
 BEHAVIOUR_LABELS = {
     'count': lambda entry: [f"{entry['spell']} behaviour_count"],
     'ally_heal_breadth': lambda entry: [f"{entry['spell']} behaviour_count"],
+    'party_stat_ratio': lambda entry: [f"{entry['spell']} behaviour_party_stat_ratio"],
     'spread': lambda entry: [f"{entry['spell']} behaviour_count"],
     'metric_delta': lambda entry: [f"{entry['spell']} behaviour_metric_delta"],
     'duration_refresh': lambda entry: [f"{entry['spell']} behaviour_duration_refresh"],

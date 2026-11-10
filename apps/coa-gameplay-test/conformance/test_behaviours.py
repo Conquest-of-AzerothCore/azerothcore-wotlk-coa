@@ -121,6 +121,7 @@ TEMPLE_GUARDIAN = 803792
 
 HOLY_CLEAVE = 573049
 CALL_OF_THE_MONASTERY = 560550
+DEVOTION_OF_KHAZGOROTH = 560096
 SERENDIPITY = 300929
 FORTIFIED_BODY = 300515
 LIBRAM_OF_GRACE = 801463
@@ -137,6 +138,10 @@ def holy_cleave_entry() -> dict:
 
 def call_of_the_monastery_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == CALL_OF_THE_MONASTERY)
+
+
+def devotion_of_khazgoroth_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == DEVOTION_OF_KHAZGOROTH)
 
 
 def serendipity_entry() -> dict:
@@ -485,7 +490,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 59)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 60)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -630,6 +635,23 @@ class PartyStatRatioScenarioTests(unittest.TestCase):
                            if step.get('label') == expectations[0].model['near_after_label'])
         self.assertLess(before_index, learn_index)
         self.assertLess(learn_index, after_index)
+
+    def test_devotion_of_khazgoroth_reads_attack_time_ms_on_the_ally_only(self):
+        spec = party_stat_ratio_spec(devotion_of_khazgoroth_entry())
+        self.assertEqual(spec.metric, 'attack_time_ms')
+        self.assertIsNone(spec.radius)
+        self.assertAlmostEqual(spec.expected, 1.0 / 1.1, places=9)
+        scenario, expectations = party_stat_ratio_scenario(CLASS_FILE, spec)
+        validated = run.validate(scenario)
+        ally_ids = {p['id'] for p in validated['players']}
+        self.assertEqual(ally_ids, {'caster', party_ally_id(0)})
+        measure_steps = [step for step in scenario['steps']
+                         if step.get('action') == 'assert' and step.get('metric') == 'attack_time_ms']
+        self.assertEqual(len(measure_steps), 2)
+        for step in measure_steps:
+            self.assertEqual(step['actor'], party_ally_id(0))
+            self.assertNotIn('hand', step)
+        self.assertEqual(expectations[0].displayed, str(spec.expected))
 
 
 class AllyHealBreadthScenarioTests(unittest.TestCase):

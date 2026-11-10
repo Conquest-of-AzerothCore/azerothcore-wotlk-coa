@@ -1700,6 +1700,12 @@
       "radius_reason": "300515 effect 0 (ApplyAuraName 118 SPELL_AURA_MOD_HEALING_PCT, EffectRadiusIndex[0]=23 -> SpellRadius.dbc 40.0 yd, matching the tooltip's $a1 token) is Effect[0]=65 SPELL_EFFECT_APPLY_AREA_AURA_RAID; EffectBasePoints[0]=5 with EffectDieSides[0]=1 gives CalcValue 6 (+1 roll), matching the tooltip's $s1 token. spell_healing_taken with reference spell 803792 is the same formula call and reference spell the existing self-measured passive_delta note for this spell already names; here it is read on a non-caster grouped ally at a controlled distance, with a second ally beyond 40 yd expected to show no change, isolating the radius gate the self-measurement could not."
     },
     {
+      "spell": 560096, "name": "Devotion of Khaz'goroth", "kind": "party_stat_ratio",
+      "quote": "Increases all party and raid member's melee and ranged haste by $567572s1%.", "expected": 0.9090909090909091,
+      "metric": "attack_time_ms",
+      "radius_reason": "560096 Effect[0]=6 SPELL_EFFECT_APPLY_AURA (AuraName 42 SPELL_AURA_PROC_TRIGGER_SPELL) only arms a proc (560097); the actual party-wide haste comes from 567572, which templar_player::OnPlayerUpdate (AscensionTemplar.cpp:293-296) casts on the player every tick while 560096 is known and removes once it is not, so 'learn' on 560096 plus the default settle wait is enough for 567572 to self-apply. 567572 Effect[0]=65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, ApplyAuraName[0]=192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, EffectRadiusIndex[0]=287 -> SpellRadius.dbc 100.0 yd (no distance token in the tooltip, not tested); EffectBasePoints[0]=9 with EffectDieSides[0]=1 gives CalcValue 10 (+1 roll), matching the tooltip's $567572s1 token. AuraEffect::HandleModMeleeRangedSpeedPct (SpellAuraEffects.cpp:5056-5073) applies the same GetAmount() to BASE_ATTACK, OFF_ATTACK and RANGED_ATTACK alike via ApplyAttackTimePercentMod, so a single BASE_ATTACK attack_time_ms read proves both the melee and ranged halves use one shared percent modifier, not two independent ones. attack_time_ms reads UNIT_FIELD_BASEATTACKTIME directly (Unit::SetAttackTime stores val * m_modAttackSpeedPct, so the field is already the hasted value); +10% haste shortens the swing timer to 1/1.10 of its unhasted value, hence expected 0.909090909... (1/1.10), not 1.10."
+    },
+    {
       "spell": 525024, "name": "Scarlet Judicator", "kind": "count",
       "quote": "strikes 2 additional enemies near the primary target", "expected": 2,
       "target_rank": 807805,
