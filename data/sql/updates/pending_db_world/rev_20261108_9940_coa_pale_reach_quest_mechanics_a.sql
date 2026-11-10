@@ -56,3 +56,5 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (164528, 0, 15, 0, 1, 0, 100, 0, 5000, 5000, 0, 0, 0, 0, 50, 2399010, 60, 0, 0, 0, 0, 1, 0, 0, 0, 0, -5, 0, 33.8, 0, '[TG] watchtower_dynamite_charge - After 5 seconds - Set the tower on fire for 1 minute'),
 (164528, 0, 16, 0, 1, 0, 100, 0, 5000, 5000, 0, 0, 0, 0, 50, 2399010, 60, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 5, 33.8, 0, '[TG] watchtower_dynamite_charge - After 5 seconds - Set the tower on fire for 1 minute'),
 (164528, 0, 17, 0, 1, 0, 100, 0, 5000, 5000, 0, 0, 0, 0, 50, 2399010, 60, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, -5, 33.8, 0, '[TG] watchtower_dynamite_charge - After 5 seconds - Set the tower on fire for 1 minute');
+UPDATE `smart_scripts` SET `event_flags` = 1
+WHERE `entryorguid` = 164528 AND `source_type` = 0 AND (`id` = 0 OR `id` BETWEEN 2 AND 17);
