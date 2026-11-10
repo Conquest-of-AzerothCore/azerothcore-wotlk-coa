@@ -4557,6 +4557,18 @@ class DispelRemovalScenarioTests(unittest.TestCase):
         self.assertEqual(set_aura_step['actor'], 'caster')
         self.assertEqual(set_aura_step['spell'], 55095)
 
+    def test_entries_declaring_gameplay_clock_carry_it_into_every_expectation(self):
+        spec = dispel_removal_spec(testament_of_fortitude_dispel_entry())
+        self.assertEqual(spec.gameplay_clock, 'real')
+        _, expectations = dispel_removal_scenario(CLASS_FILE, spec)
+        self.assertEqual(expectations[0].model['gameplay_clock'], 'real')
+
+    def test_entries_without_gameplay_clock_leave_it_unset(self):
+        spec = dispel_removal_spec(rebuke_entry())
+        self.assertIsNone(spec.gameplay_clock)
+        _, expectations = dispel_removal_scenario(CLASS_FILE, spec)
+        self.assertTrue(all(expectation.model['gameplay_clock'] is None for expectation in expectations))
+
     def test_dispatch_rebuke_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, rebuke_entry())
         run.validate(scenario)

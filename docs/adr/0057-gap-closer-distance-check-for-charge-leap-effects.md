@@ -39,3 +39,7 @@ Divine Force and Silverhand Incantation's own charge step use) was not recognise
   `unmeasured` rather than a false `alert`.
 - Any other class's charge/leap active gets the same scenario for free, since `closes_distance`/
   `gap_closer_target` read only the DBC effect/target fields, no class-specific code.
+- `NOMINAL_MELEE_RANGE_YD` departs from the project's "expected values come from the DBC or tooltip" rule:
+  none of the three gap-closer clauses carries a literal number, so the pass/fail boundary is read from the
+  C++ engine constant `NOMINAL_MELEE_RANGE` instead, acknowledged here as a deliberate exception for a
+  qualitative ("close enough to melee") claim with nothing else to anchor it to.

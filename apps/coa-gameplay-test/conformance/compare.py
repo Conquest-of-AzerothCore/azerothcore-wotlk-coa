@@ -43,6 +43,8 @@ NOT_ALERTS = frozenset({'ok', MEASURED, 'closed'})
 CONFORMANT = frozenset({'ok', 'tolerated', 'closed'})
 CAST_DEPENDENT_CHECKS = frozenset({'cooldown_ms', 'aura_amount', 'aura_duration_ms', 'aura_amplitude_ms',
                                    GAP_CLOSER_DISTANCE})
+GAMEPLAY_CLOCK_REAL = 'real'
+GAMEPLAY_CLOCK_SIMULATED = 'simulated'
 NO_CAST_FAILURE = 0
 CAST_RESULTS_HEADER = Path(__file__).resolve().parents[3] / 'src/server/shared/SharedDefines.h'
 CAST_RESULT_ENUM = re.compile(r'enum SpellCastResult\b[^{]*\{(?P<body>[^}]*)\}')
@@ -144,6 +146,7 @@ class Run:
     steps: list[dict]
     max_step_ms: float | None
     cast_failures: dict[int, list[int]] = field(default_factory=dict)
+    clock: str | None = None
 
 
 class TooltipSource(Protocol):
@@ -227,6 +230,17 @@ def recorded_scenario_hash(directory: Path) -> str | None:
     return file_sha256(scenario) if scenario.is_file() else None
 
 
+def recorded_clock(directory: Path) -> str | None:
+    summary = directory / 'summary.json'
+    if not summary.is_file():
+        return None
+    try:
+        data = json.loads(summary.read_text(encoding='utf-8'))
+    except ValueError:
+        return None
+    return GAMEPLAY_CLOCK_SIMULATED if isinstance(data.get('simulation'), dict) else GAMEPLAY_CLOCK_REAL
+
+
 def runs_by_hash(results_dir: Path) -> dict[str, Path]:
     found = {}
     for directory in sorted(results_dir.joinpath(*EXPLORATORY).glob('*/')):
@@ -251,7 +265,7 @@ def load_run(results_dir: Path, entry: dict, by_hash: Mapping[str, Path]) -> Run
     max_step = result.get('max_step_ms')
     return Run(entry['key'], result.get('status', ''), result.get('message') or '', measured_values(result),
                result.get('steps', []), None if max_step is None else number(max_step, 'max_step_ms'),
-               cast_failures(result))
+               cast_failures(result), recorded_clock(directory))
 
 
 def cast_failures(result: dict) -> dict[int, list[int]]:
@@ -2892,6 +2906,12 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
                    expectation.rank_id, expectation.check)
     rule, check = expectation.rule, expectation.check
     measured = run.values.get(expectation.label) if run else None
+    required_clock = (expectation.model or {}).get('gameplay_clock')
+    if required_clock and run is not None and run.clock not in (None, required_clock):
+        return replace(base, status='unmeasured', measured=measured,
+                       explanation=f'recorded under the {run.clock} clock; this scenario requires '
+                                   f'--gameplay-clock {required_clock} to exercise the tooltip clause, so this '
+                                   f'attempt cannot prove or disprove it')
     if rule.startswith(CLOSED):
         return replace(base, status='closed', measured=measured, explanation=rule)
     if (check == 'unmodelled' or rule.startswith(UNMODELLED) or rule.startswith(UNMEASURABLE)

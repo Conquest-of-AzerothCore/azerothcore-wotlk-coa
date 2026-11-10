@@ -1083,6 +1083,7 @@ class DispelRemovalSpec:
     target: str = CASTER
     wait_ms: int = DEFAULT_DISPEL_REMOVAL_WAIT_MS
     label_suffix: str = ''
+    gameplay_clock: str | None = None
 
 
 def dispel_removal_label(spec: DispelRemovalSpec, debuff: int, moment: str) -> str:
@@ -1126,7 +1127,8 @@ def dispel_removal_scenario(class_file: dict, spec: DispelRemovalSpec) -> tuple[
         before_label = dispel_removal_label(spec, debuff, BEFORE)
         after_label = dispel_removal_label(spec, debuff, AFTER)
         model = {'kind': 'metric_delta', 'before_label': before_label, 'after_label': after_label,
-                 'expected': 0.0, 'before_expected': 1.0, 'metric': 'aura', 'quote': entry.quote}
+                 'expected': 0.0, 'before_expected': 1.0, 'metric': 'aura', 'quote': entry.quote,
+                 'gameplay_clock': spec.gameplay_clock}
         label = f'{spec.spell} behaviour_dispel_removal {debuff}' + \
             (f' {spec.label_suffix}' if spec.label_suffix else '')
         expectations.append(Expectation(label, BEHAVIOUR_METRIC_DELTA, spec.spell, spec.spell, None, '0',
@@ -1137,7 +1139,7 @@ def dispel_removal_scenario(class_file: dict, spec: DispelRemovalSpec) -> tuple[
 def dispel_removal_spec(entry: dict) -> DispelRemovalSpec:
     return DispelRemovalSpec(entry['spell'], entry['name'], entry['quote'], tuple(entry['debuffs']),
                              entry.get('target', CASTER), entry.get('wait_ms', DEFAULT_DISPEL_REMOVAL_WAIT_MS),
-                             entry.get('label_suffix', ''))
+                             entry.get('label_suffix', ''), entry.get('gameplay_clock'))
 
 
 DEFAULT_AURA_PRESENCE_WAIT_MS = 1500

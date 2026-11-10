@@ -13,6 +13,7 @@ from compare import (ALERT_COLUMNS, EFFECT_VALUE_SCOPE, PERCENT_POINT_METRICS, D
                      alert_rows, banded_status, compare, delta_margin, log_query_of, measured_values,
                      observation_lines, owner_fallback, question_detail, read_verdicts, resolve_linked_statuses,
                      write_outputs)
+from behaviours import BEHAVIOUR_METRIC_DELTA
 from hits import HitModel, Modifier
 from profile import CLASSES_DIR, DBC_DIR
 from classes import class_spells
@@ -88,7 +89,7 @@ class Workspace:
         shutil.rmtree(self.root, ignore_errors=True)
 
     def scenario(self, key, kind, expectations, tokens=(), steps=(), recorded_hash=None, spell=SPELL,
-                 name='Test Strike', rank=RANK):
+                 name='Test Strike', rank=RANK, clock='real'):
         path = self.root / 'out' / 'scenarios' / f'{key}.json'
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps({'name': key}, indent=2) + '\n', encoding='utf-8')
@@ -97,11 +98,11 @@ class Workspace:
                                'spell_id': spell, 'spell_name': name, 'rank_id': rank,
                                'tokens': list(tokens), 'expectations': [asdict(entry) for entry in expectations]})
         if steps is not None:
-            self.runs[key] = (list(steps), recorded_hash or sha)
+            self.runs[key] = (list(steps), recorded_hash or sha, clock)
 
     def rename_run(self, key, folder):
-        steps, recorded_hash = self.runs.pop(key)
-        self.runs[folder] = (steps, recorded_hash)
+        steps, recorded_hash, clock = self.runs.pop(key)
+        self.runs[folder] = (steps, recorded_hash, clock)
 
     def manifest(self, known_modifiers=None, **base_overrides):
         manifest = {'schema': 1, 'class_id': CLASS_FILE['class_id'], 'class_name': CLASS_FILE['name'],
@@ -111,7 +112,7 @@ class Workspace:
         path = self.root / 'out' / 'manifest.json'
         path.write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
         results = self.root / 'stamp'
-        for key, (steps, recorded_hash) in self.runs.items():
+        for key, (steps, recorded_hash, clock) in self.runs.items():
             directory = results / 'gameplay' / 'exploratory' / key
             directory.mkdir(parents=True)
             base = [assert_step(label, actual) for label, actual in {**BASE_ACTUALS, **base_overrides}.items()]
@@ -121,7 +122,10 @@ class Workspace:
             if key in self.cast_failures:
                 result['cast_failures'] = self.cast_failures[key]
             (directory / 'result.json').write_text(json.dumps(result), encoding='utf-8')
-            (directory / 'summary.json').write_text(json.dumps({'scenario_sha256': recorded_hash}), encoding='utf-8')
+            summary = {'scenario_sha256': recorded_hash}
+            if clock == 'simulated':
+                summary['simulation'] = {'pace': 'accelerated'}
+            (directory / 'summary.json').write_text(json.dumps(summary), encoding='utf-8')
         return path, results
 
 
@@ -781,6 +785,34 @@ BLESSED_PADDING = 301311
 FURY_OF_AGGRAMAR, LIBRAM_OF_CONSECRATION, LIBRAM_OF_FERVOR = 801480, 803893, 805423
 SPELL_NAMES = {(RECKONING, 'SpellName[enUS]'): 'Reckoning', (INTERDICT, 'SpellName[enUS]'): 'Interdict',
                (SACRED_RESTRAINT, 'SpellName[enUS]'): 'Sacred Restraint', (RECKONING, 'SchoolMask'): 2}
+
+
+class GameplayClockGateTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def expectation(self):
+        model = {'kind': 'metric_delta', 'before_label': 'before', 'after_label': 'after', 'expected': 0.0,
+                 'before_expected': 1.0, 'metric': 'aura', 'gameplay_clock': 'real'}
+        return Expectation('500678 behaviour_dispel_removal 55095', BEHAVIOUR_METRIC_DELTA, SPELL, RANK, None, '0',
+                           'prose: "remove 1 disease effect from yourself" (500678)', model)
+
+    def verdict_of(self, clock):
+        item = self.expectation()
+        self.workspace.scenario('clock-gate', 'behaviour', [item],
+                                steps=[assert_step('before', '1'), assert_step('after', '0')], clock=clock)
+        manifest, results = self.workspace.manifest()
+        verdicts = {verdict.label: verdict for verdict in compare(manifest, results)}
+        return verdicts[item.label]
+
+    def test_a_simulated_run_of_a_real_clock_only_scenario_is_unmeasured_not_a_false_pass(self):
+        self.assertEqual(self.verdict_of('simulated').status, 'unmeasured')
+
+    def test_a_real_clock_run_of_a_real_clock_only_scenario_is_judged_normally(self):
+        self.assertEqual(self.verdict_of('real').status, 'ok')
 
 
 class PassiveDeltaTest(unittest.TestCase):
