@@ -10,7 +10,9 @@ PREPARE `coa_dungeon_creature_damage_spell` FROM @coa_dungeon_creature_damage_sp
 EXECUTE `coa_dungeon_creature_damage_spell`;
 DEALLOCATE PREPARE `coa_dungeon_creature_damage_spell`;
 
--- Ragefire Chasm: Taragaman the Hungerer's Fire Nova hit for about 2k at level 60 (#11768); three times that.
-DELETE FROM `coa_dungeon_creature_damage` WHERE `entry` = 11520 AND `spell_id` = 11970;
+-- Ragefire Chasm: Taragaman the Hungerer's novas hit far too softly at level 60 (#11768): Fire Nova about 2k.
+-- Fire Nova x3, Massive Fire Nova x5, as the tester asked.
+DELETE FROM `coa_dungeon_creature_damage` WHERE `entry` = 11520 AND `spell_id` IN (11970, 2102516);
 INSERT INTO `coa_dungeon_creature_damage` (`entry`, `spell_id`, `multiplier`, `comment`) VALUES
-(11520, 11970, 3, 'Taragaman the Hungerer: Fire Nova x3');
+(11520, 11970, 3, 'Taragaman the Hungerer: Fire Nova x3'),
+(11520, 2102516, 5, 'Taragaman the Hungerer: Massive Fire Nova x5');
