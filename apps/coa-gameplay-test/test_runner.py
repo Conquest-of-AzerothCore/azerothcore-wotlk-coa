@@ -741,6 +741,21 @@ class RunnerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             run.validate(self.scenario)
 
+    def test_aura_effect_amount_fixture(self):
+        valid = {'action': 'set_aura', 'actor': 'caster', 'spell': 707852, 'stacks': 1, 'amount': 80}
+        for extra in ({}, {'effect': 0}, {'effect': 2, 'amount': -20}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({**valid, **extra})
+            with self.subTest(extra=extra):
+                self.assertIs(run.validate(scenario), scenario)
+        without_amount = {key: value for key, value in valid.items() if key != 'amount'} | {'effect': 0}
+        for step in ({**valid, 'stacks': 0}, {**valid, 'effect': 3}, {**valid, 'amount': 1.5},
+                     {**valid, 'amount': 2**31}, without_amount):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append(step)
+            with self.subTest(step=step), self.assertRaises(ValueError):
+                run.validate(scenario)
+
     def test_cancel_aura_requires_player_and_spell(self):
         self.scenario['steps'].append({'action': 'cancel_aura', 'actor': 'caster', 'spell': 802229})
         self.assertIs(run.validate(self.scenario), self.scenario)

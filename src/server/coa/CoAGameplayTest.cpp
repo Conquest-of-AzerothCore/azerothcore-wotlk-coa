@@ -7419,6 +7419,12 @@ private:
                     aura->SetMaxDuration(60000);
                     aura->SetDuration(60000);
                 }
+                if (auto amount = step.get_optional<int32>("amount"))
+                {
+                    AuraEffect* effect = aura->GetEffect(uint8(step.get<uint32>("effect", EFFECT_0)));
+                    Require(effect != nullptr, "Fixture aura has no such effect");
+                    effect->ChangeAmount(*amount);
+                }
             }
         }
         else if (action == "money")
