@@ -20,6 +20,7 @@
 #include "BattlefieldMgr.h"
 #include "BattlegroundIC.h"
 #include "Chat.h"
+#include "ClientDBC.h"
 #include "DBCStores.h"
 #include "InstanceScript.h"
 #include "ObjectMgr.h"
@@ -34,6 +35,7 @@
 #include "World.h"
 
 #include <algorithm>
+#include <map>
 #include <memory>
 #include <unordered_set>
 
@@ -672,6 +674,14 @@ uint8 SpellMgr::GetSpellRank(uint32 spell_id) const
         return node->rank;
 
     return 0;
+}
+
+uint32 SpellMgr::GetSpellWithRankFor(uint32 stockFirstRank, uint32 relatedSpellId, bool strict) const
+{
+    SpellInfo const* related = GetSpellInfo(relatedSpellId);
+    if (!related)
+        return strict ? 0 : stockFirstRank;
+    return GetSpellWithRank(GetSpellTwinFor(stockFirstRank, relatedSpellId), related->GetRank(), strict);
 }
 
 uint32 SpellMgr::GetSpellWithRank(uint32 spell_id, uint32 rank, bool strict) const
@@ -1323,6 +1333,48 @@ void SpellMgr::LoadSpellTalentRanks()
     }
 }
 
+namespace
+{
+constexpr uint32 SPELL_RANK_FIRST_SPELL = 1;
+constexpr uint32 SPELL_RANK_SPELL = 2;
+constexpr uint32 SPELL_RANK_RANK = 3;
+}
+
+std::vector<std::vector<uint32>> SpellMgr::LoadClientSpellRankChains() const
+{
+    std::vector<std::vector<uint32>> chains;
+    ClientDBC ranks;
+    if (!ranks.Load(GetClientDBCPath("SpellRank.dbc"), SPELL_RANK_RANK + 1))
+        return chains;
+
+    std::map<uint32, std::map<uint32, uint32>> byChain;
+    for (uint32 row = 0; row < ranks.GetRecordCount(); ++row)
+    {
+        ClientDBC::Record const record = ranks.GetRecord(row);
+        byChain[record.GetUInt32(SPELL_RANK_FIRST_SPELL)][record.GetUInt32(SPELL_RANK_RANK)] =
+            record.GetUInt32(SPELL_RANK_SPELL);
+    }
+
+    for (auto const& [key, ladder] : byChain)
+    {
+        std::vector<uint32> chain;
+        for (auto const& [rank, spellId] : ladder)
+        {
+            if (rank != chain.size() + 1 || !GetSpellInfo(spellId))
+            {
+                LOG_ERROR("server.loading", "SpellRank.dbc chain {} rank {} (spell {}) is out of order or does not exist, chain skipped.",
+                    key, rank, spellId);
+                chain.clear();
+                break;
+            }
+            chain.push_back(spellId);
+        }
+        if (chain.size() >= 2)
+            chains.push_back(std::move(chain));
+    }
+    return chains;
+}
+
 void SpellMgr::LoadSpellRanks()
 {
     // cleanup data and load spell ranks for talents from dbc
@@ -1330,20 +1382,22 @@ void SpellMgr::LoadSpellRanks()
 
     uint32 oldMSTime = getMSTime();
 
+    // SpellRank.dbc is the client's own rank table and wins over `spell_ranks`; the table still provides the
+    // chains the client file does not list, and may extend a client chain with further ranks
+    std::vector<std::vector<uint32>> chains = LoadClientSpellRankChains();
+    uint32 const clientChains = chains.size();
+    std::unordered_map<uint32, std::size_t> clientChainOf;
+    for (std::size_t index = 0; index < chains.size(); ++index)
+        for (uint32 spellId : chains[index])
+            clientChainOf[spellId] = index;
+
     //                                               0               1          2
     QueryResult result = WorldDatabase.Query("SELECT first_spell_id, spell_id, `rank` from spell_ranks ORDER BY first_spell_id, `rank`");
 
-    if (!result)
-    {
-        LOG_WARN("server.loading", ">> Loaded 0 spell rank records. DB table `spell_ranks` is empty.");
-        LOG_INFO("server.loading", " ");
-        return;
-    }
+    uint32 tableChains = 0;
+    bool finished = !result;
 
-    uint32 count = 0;
-    bool finished = false;
-
-    do
+    while (!finished)
     {
         // spellid, rank
         std::list < std::pair < int32, int32 > > rankChain;
@@ -1406,31 +1460,49 @@ void SpellMgr::LoadSpellRanks()
         }
         if (!valid)
             continue;
-        int32 prevRank = 0;
-        // insert the chain
-        std::list<std::pair<int32, int32> >::iterator itr = rankChain.begin();
-        do
-        {
-            ++count;
-            int32 addedSpell = itr->first;
-            mSpellChains[addedSpell].first = GetSpellInfo(lastSpell);
-            mSpellChains[addedSpell].last = GetSpellInfo(rankChain.back().first);
-            mSpellChains[addedSpell].rank = itr->second;
-            mSpellChains[addedSpell].prev = GetSpellInfo(prevRank);
-            mSpellInfoMap[addedSpell]->ChainEntry = &mSpellChains[addedSpell];
-            prevRank = addedSpell;
-            ++itr;
-            if (itr == rankChain.end())
-            {
-                mSpellChains[addedSpell].next = nullptr;
-                break;
-            }
-            else
-                mSpellChains[addedSpell].next = GetSpellInfo(itr->first);
-        } while (true);
-    } while (!finished);
 
-    LOG_INFO("server.loading", ">> Loaded {} spell rank records in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
+        std::vector<uint32> chain;
+        for (auto const& [spellId, rank] : rankChain)
+            chain.push_back(spellId);
+
+        auto const client = clientChainOf.find(chain.front());
+        if (client != clientChainOf.end())
+        {
+            std::vector<uint32>& clientChain = chains[client->second];
+            if (chain.size() > clientChain.size() && std::equal(clientChain.begin(), clientChain.end(), chain.begin()) &&
+                std::none_of(chain.begin() + clientChain.size(), chain.end(),
+                    [&clientChainOf](uint32 spellId) { return clientChainOf.contains(spellId); }))
+            {
+                clientChain = std::move(chain);
+                ++tableChains;
+            }
+            continue;
+        }
+        if (std::any_of(chain.begin(), chain.end(), [&clientChainOf](uint32 spellId) { return clientChainOf.contains(spellId); }))
+            continue;
+
+        chains.push_back(std::move(chain));
+        ++tableChains;
+    }
+
+    uint32 count = 0;
+    for (std::vector<uint32> const& chain : chains)
+    {
+        for (std::size_t rank = 0; rank < chain.size(); ++rank)
+        {
+            SpellChainNode& node = mSpellChains[chain[rank]];
+            node.first = GetSpellInfo(chain.front());
+            node.last = GetSpellInfo(chain.back());
+            node.rank = uint8(rank + 1);
+            node.prev = rank ? GetSpellInfo(chain[rank - 1]) : nullptr;
+            node.next = rank + 1 < chain.size() ? GetSpellInfo(chain[rank + 1]) : nullptr;
+            mSpellInfoMap[chain[rank]]->ChainEntry = &node;
+        }
+        count += chain.size();
+    }
+
+    LOG_INFO("server.loading", ">> Loaded {} spell rank records ({} chains from SpellRank.dbc, {} from `spell_ranks`) in {} ms",
+        count, clientChains, tableChains, GetMSTimeDiffToNow(oldMSTime));
     LOG_INFO("server.loading", " ");
 }
 
