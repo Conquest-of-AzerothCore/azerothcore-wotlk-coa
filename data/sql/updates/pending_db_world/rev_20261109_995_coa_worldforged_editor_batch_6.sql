@@ -31,3 +31,19 @@ UPDATE `gameobject` SET `position_x` = -7733.8024, `position_y` = -2792.3808, `p
 -- #11766
 -- pickup 6942389 (Fallen Glaive) moved 18.3 yd across and 5.09 yd up to the spot checked in the editor
 UPDATE `gameobject` SET `position_x` = 3243.3101, `position_y` = -4320.4489, `position_z` = 132.3855, `orientation` = 4.469775, `rotation0` = -0.433165, `rotation1` = 0.561066, `rotation2` = 0.552553, `rotation3` = -0.438472 WHERE `guid` = 6942389 AND `id` = 254411;
+
+-- #11778
+-- pickup 6941104 (Dragon Handler's Equipment) moved 726.3 yd across and 59.69 yd down to its Ascension position, on top of two crates inside Draco'dar's hut
+UPDATE `gameobject` SET `position_x` = -8347.91, `position_y` = -921.715, `position_z` = 209.0322, `orientation` = 1.588163, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.71322, `rotation3` = 0.70094 WHERE `guid` = 6941104 AND `id` = 254665;
+-- the crates it rests on and the bedroll were missing from the hut (Ascension props, placed in the editor)
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `size`, `Data0`, `Data1`, `AIName`, `ScriptName`) VALUES (9900051, 5, 285, 'Long Brown Crate', 1, 0, 0, '', '') ON DUPLICATE KEY UPDATE `type` = 5, `displayId` = 285, `name` = 'Long Brown Crate', `size` = 1, `Data0` = 0, `Data1` = 0, `AIName` = '', `ScriptName` = '';
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `size`, `Data0`, `Data1`, `AIName`, `ScriptName`) VALUES (9900052, 5, 1011606, 'Bedroll', 1, 0, 0, '', '') ON DUPLICATE KEY UPDATE `type` = 5, `displayId` = 1011606, `name` = 'Bedroll', `size` = 1, `Data0` = 0, `Data1` = 0, `AIName` = '', `ScriptName` = '';
+-- Long Brown Crate under the pickup
+DELETE FROM `gameobject` WHERE `guid` = 6976008;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976008, 9900051, 0, 1, 1, -8346.9409, -921.7269, 208.3951, 1.793379, 0, 0, 0.781265, 0.6242, 300, 100, 1);
+-- second Long Brown Crate under the pickup
+DELETE FROM `gameobject` WHERE `guid` = 6976010;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976010, 9900051, 0, 1, 1, -8348.3716, -921.8816, 208.4069, 1.45618, 0, 0, 0.665445, 0.746447, 300, 100, 1);
+-- Bedroll
+DELETE FROM `gameobject` WHERE `guid` = 6976009;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976009, 9900052, 0, 1, 1, -8354.11, -910.969, 208.3964, 0, 0, 0, 0, 1, 300, 100, 1);
