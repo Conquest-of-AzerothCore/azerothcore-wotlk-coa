@@ -9,8 +9,8 @@ import re
 from statistics import fmean, pstdev
 from typing import Callable, Mapping, Protocol
 
-from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT,
-                        BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION,
+from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_CHECKS,
+                        BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION,
                         BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY,
                         BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA,
                         BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO,
@@ -2461,6 +2461,40 @@ def behaviour_crit_magnitude_verdict(base: Verdict, run: Run, model: dict) -> Ve
                                f'{expected:g}')
 
 
+def behaviour_charge_recharge_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    labels = [model['initial_label'], *model['attempt_labels'], model['overcast_label'],
+             model['cast_failure_label'], model['before_recharge_label'], model['after_recharge_label']]
+    values = {label: run.values.get(label) for label in labels}
+    missing = next((label for label, value in values.items() if value is None), None)
+    if missing:
+        return replace(base, explanation=missing_measurement(run, missing))
+    max_charges = int(model['max_charges'])
+    initial = values[model['initial_label']]
+    attempts = [values[label] for label in model['attempt_labels']]
+    overcast = values[model['overcast_label']]
+    cast_failure = values[model['cast_failure_label']]
+    before_recharge = values[model['before_recharge_label']]
+    after_recharge = values[model['after_recharge_label']]
+    expected_attempts = [max_charges - (index + 1) for index in range(max_charges)]
+    initial_ok = initial == max_charges
+    attempts_ok = attempts == expected_attempts
+    overcast_ok = overcast == 0 and cast_failure != 0
+    before_recharge_ok = before_recharge == 0
+    after_recharge_ok = after_recharge == 1
+    status = 'ok' if initial_ok and attempts_ok and overcast_ok and before_recharge_ok and after_recharge_ok \
+        else 'alert'
+    tolerance = float(model['tolerance'])
+    explanation = (f'{max_charges} native charges expected; measured {initial:g} at the start, {attempts} after '
+                   f'each of {max_charges} consecutive casts (expected {expected_attempts}); an attempted '
+                   f'over-cast left {overcast:g} charges (expected 0) and was refused with reason {cast_failure:g} '
+                   f'(expected nonzero); {before_recharge:g} charges remained at {model["recharge_ms"]:g} ms x '
+                   f'{1.0 - tolerance:g} (expected 0, not recharged early) and '
+                   f'{after_recharge:g} charges were available at {model["recharge_ms"]:g} ms x '
+                   f'{1.0 + tolerance:g} (expected 1, recharged by then)')
+    return replace(base, status=status, measured=after_recharge, expected=1.0, low=0.0, high=1.0,
+                   explanation=explanation)
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
@@ -2481,6 +2515,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_duration_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_DURATION_RATIO:
         return behaviour_duration_ratio_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_CHARGE_RECHARGE:
+        return behaviour_charge_recharge_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_AMOUNT_DELTA:
         return behaviour_amount_delta_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_CRIT_GUARANTEE:

@@ -3,12 +3,12 @@ from pathlib import Path
 import re
 
 from hits import DRAIN_MS, MAIN_HAND, TIMEOUT_MARGIN_MS, aura_modifiers, cast_steps, creature_fixture
-from procs import swing_interval
+from procs import cast_interval, swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import COLOR_CODE, Records
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_ENTRY, FORCE_CRIT_RATINGS, FORCED_CRIT_RATING,
-                    GCD_WAIT_MS, Expectation, TARGET, armed_for, dataset, facts_of, fixture_health_step,
-                    required_aura_steps, required_target_health_steps)
+                    GCD_WAIT_MS, Expectation, TARGET, armed_for, closes_distance, dataset, facts_of,
+                    fixture_health_step, required_aura_steps, required_target_health_steps)
 
 BEHAVIOUR_COUNT = 'behaviour_count'
 BEHAVIOUR_RATIO = 'behaviour_ratio'
@@ -27,14 +27,17 @@ BEHAVIOUR_EXCLUSIVITY = 'behaviour_exclusivity'
 BEHAVIOUR_GROUP_STACK_CAP = 'behaviour_group_stack_cap'
 BEHAVIOUR_SINGLE_TARGET = 'behaviour_single_target'
 BEHAVIOUR_CRIT_MAGNITUDE = 'behaviour_crit_magnitude'
+BEHAVIOUR_CHARGE_RECHARGE = 'behaviour_charge_recharge'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
                     BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_EXCLUSIVITY,
-                    BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_CRIT_MAGNITUDE)
+                    BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_CRIT_MAGNITUDE,
+                    BEHAVIOUR_CHARGE_RECHARGE)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
-        'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude')
+        'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
+        'charge_recharge')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1781,6 +1784,111 @@ def duration_refresh_spec(entry: dict) -> DurationRefreshSpec:
                                entry.get('refresh_margin_ms', DEFAULT_DURATION_REFRESH_MARGIN_MS))
 
 
+CHARGE_RECHARGE_TARGETS = frozenset({CASTER, TARGET, ALLY})
+DEFAULT_CHARGE_RECHARGE_TOLERANCE = 0.05
+
+
+@dataclass(frozen=True)
+class ChargeRechargeSpec:
+    spell: int
+    name: str
+    quote: str
+    max_charges: int
+    recharge_ms: int
+    target: str = CASTER
+    tolerance: float = DEFAULT_CHARGE_RECHARGE_TOLERANCE
+
+
+def charge_recharge_label(spec: ChargeRechargeSpec, moment: str) -> str:
+    return f'{spec.spell} spell_charges {moment}'
+
+
+def charge_recharge_scenario(class_file: dict, spec: ChargeRechargeSpec) -> tuple[dict, list[Expectation]]:
+    if spec.target not in CHARGE_RECHARGE_TARGETS:
+        raise NotModelled(f'charge recharge target {spec.target!r} is not one of {sorted(CHARGE_RECHARGE_TARGETS)}')
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'charge_recharge', spec.quote, float(spec.max_charges))
+    facts = facts_of(records, spec.spell)
+    interval_ms = cast_interval(class_file, spec.spell)
+
+    def attempt_steps() -> list[dict]:
+        steps = [{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}] \
+            if spec.target == ALLY and closes_distance(facts) else []
+        if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
+                         'value': facts.mana_cost})
+        steps += required_aura_steps(facts)
+        cast = {'action': 'cast', 'actor': CASTER, 'spell': spec.spell}
+        if spec.target != CASTER:
+            cast['target'] = spec.target
+        steps.append(cast)
+        steps.append({'action': 'wait', 'ms': interval_ms})
+        return steps
+
+    initial_label = charge_recharge_label(spec, 'initial')
+    attempt_labels = [charge_recharge_label(spec, f'after_attempt_{i}') for i in range(1, spec.max_charges + 1)]
+    overcast_label = charge_recharge_label(spec, 'after_overcast')
+    cast_failure_label = f'{spec.spell} cast_failure overcast'
+    before_recharge_label = charge_recharge_label(spec, 'before_recharge')
+    after_recharge_label = charge_recharge_label(spec, 'after_recharge')
+
+    elapsed_since_first_charge_consumed_ms = (spec.max_charges + 1) * interval_ms
+    target_before_ms = spec.recharge_ms * (1.0 - spec.tolerance)
+    target_after_ms = spec.recharge_ms * (1.0 + spec.tolerance)
+    if elapsed_since_first_charge_consumed_ms >= target_before_ms:
+        raise NotModelled(f'{spec.spell} spends {elapsed_since_first_charge_consumed_ms} ms casting its '
+                          f'{spec.max_charges} charges and one over-cast attempt, which already reaches the '
+                          f'{spec.tolerance:g} tolerance lower bound of its {spec.recharge_ms} ms recharge window')
+    early_wait_ms = round(target_before_ms - elapsed_since_first_charge_consumed_ms)
+    late_wait_ms = round(target_after_ms - elapsed_since_first_charge_consumed_ms) - early_wait_ms
+
+    steps = [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
+    if spec.target == ALLY:
+        steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
+    steps.append(measurement(initial_label, CASTER, 'spell_charges', spell=spec.spell))
+    for label in attempt_labels:
+        steps += attempt_steps()
+        steps.append(measurement(label, CASTER, 'spell_charges', spell=spec.spell))
+    steps += attempt_steps()
+    steps.append(measurement(overcast_label, CASTER, 'spell_charges', spell=spec.spell))
+    steps.append(measurement(cast_failure_label, CASTER, 'cast_failure', spell=spec.spell))
+    steps.append({'action': 'wait', 'label': 'up to the recharge window', 'ms': early_wait_ms})
+    steps.append(measurement(before_recharge_label, CASTER, 'spell_charges', spell=spec.spell))
+    steps.append({'action': 'wait', 'label': 'through the recharge window', 'ms': late_wait_ms})
+    steps.append(measurement(after_recharge_label, CASTER, 'spell_charges', spell=spec.spell))
+
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour charge recharge',
+        'contract': f'Spends all {spec.max_charges} native charges of {spec.spell} one cast at a time, confirms an '
+                    f'over-cast attempt beyond the last charge is refused rather than granting a fourth, then '
+                    f'brackets the {spec.recharge_ms} ms recharge window at +-{spec.tolerance * 100:g}% to prove '
+                    f'one charge returns neither early nor late.',
+        'players': [player_fixture(class_file)],
+        'steps': base_steps(class_file) + steps}
+    if spec.target == ALLY:
+        scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
+    elif spec.target == TARGET:
+        scenario['creatures'] = [creature_fixture(class_file)]
+
+    label = f'{spec.spell} behaviour_charge_recharge'
+    model = {'kind': 'charge_recharge', 'initial_label': initial_label, 'attempt_labels': attempt_labels,
+             'overcast_label': overcast_label, 'cast_failure_label': cast_failure_label,
+             'before_recharge_label': before_recharge_label, 'after_recharge_label': after_recharge_label,
+             'max_charges': spec.max_charges, 'recharge_ms': spec.recharge_ms, 'tolerance': spec.tolerance,
+             'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_CHARGE_RECHARGE, spec.spell, spec.spell, None,
+                              f'{spec.max_charges} charges, {spec.recharge_ms} ms recharge',
+                              prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def charge_recharge_spec(entry: dict) -> ChargeRechargeSpec:
+    return ChargeRechargeSpec(entry['spell'], entry['name'], entry['quote'], entry['max_charges'],
+                              entry['recharge_ms'], entry.get('target', CASTER),
+                              entry.get('tolerance', DEFAULT_CHARGE_RECHARGE_TOLERANCE))
+
+
 def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
     if entry['kind'] == 'count':
         return target_count_scenario(class_file, target_count_spec(entry))
@@ -1822,6 +1930,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return single_target_scenario(class_file, single_target_spec(entry))
     if entry['kind'] == 'crit_magnitude':
         return crit_magnitude_scenario(class_file, crit_magnitude_spec(entry))
+    if entry['kind'] == 'charge_recharge':
+        return charge_recharge_scenario(class_file, charge_recharge_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

@@ -6,17 +6,18 @@ import sys
 import tempfile
 import unittest
 
-from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
-                        BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
-                        BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_GROUP_STACK_CAP,
-                        BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION,
-                        BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET,
-                        BEHAVIOUR_TRIGGER, MECHANIC_LAND_ATTEMPTS, STRIKER, NotModelled,
+from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_COUNT,
+                        BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION,
+                        BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY,
+                        BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA,
+                        BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO,
+                        BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER, MECHANIC_LAND_ATTEMPTS, STRIKER, NotModelled,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
                         OathConsumptionRemovalSpec,
                         amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
                         aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
-                        behaviour_scenario, crit_guarantee_scenario, crit_guarantee_spec,
+                        behaviour_scenario, charge_recharge_scenario, charge_recharge_spec,
+                        crit_guarantee_scenario, crit_guarantee_spec,
                         crit_magnitude_scenario, crit_magnitude_spec,
                         duration_refresh_scenario, duration_refresh_spec, duration_scenario, duration_spec,
                         exclusivity_chain_scenario, exclusivity_chain_spec,
@@ -32,6 +33,7 @@ from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_
                         target_count_scenario, target_count_spec)
 from compare import Verdict, judge_behaviour
 from hits import aura_modifiers
+from procs import cast_interval
 from profile import DBC_DIR, load_class_file
 from tooltip import Records
 from values import Expectation, FORCED_CRIT_RATING, dataset
@@ -109,6 +111,7 @@ CHASTISE = 503141
 MARTIAL_TRAINING = 806525
 LIBRAM_OF_TENACITY = 801461
 TENACIOUS_DEFENDER = 707385
+TEMPLE_GUARDIAN = 803792
 
 
 def scarlet_judicator_entry() -> dict:
@@ -256,6 +259,10 @@ def chastise_weapon_damage_gate_entry() -> dict:
 
 def libram_of_tenacity_heal_gate_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == LIBRAM_OF_TENACITY)
+
+
+def temple_guardian_charge_recharge_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == TEMPLE_GUARDIAN)
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -441,7 +448,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 52)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 53)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1211,6 +1218,39 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         correct = {'801461 spell_effect_value before': 0.0, '801461 spell_effect_value after': 20.0}
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(correct), expectation).status, 'ok')
         seeded_wrong = {'801461 spell_effect_value before': 0.0, '801461 spell_effect_value after': 0.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(seeded_wrong), expectation).status,
+                         'alert')
+
+    def test_temple_guardian_charge_recharge_consumes_three_charges_then_brackets_the_recharge_window(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, temple_guardian_charge_recharge_entry())
+        run.validate(scenario)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_CHARGE_RECHARGE)
+        self.assertEqual(expectation.model['max_charges'], 3)
+        self.assertEqual(expectation.model['recharge_ms'], 35000)
+        self.assertEqual(len(expectation.model['attempt_labels']), 3)
+        cast_steps = [step for step in scenario['steps']
+                     if step.get('action') == 'cast' and step.get('spell') == TEMPLE_GUARDIAN]
+        self.assertEqual(len(cast_steps), 4)
+        self.assertTrue(all(step.get('target') == 'ally' for step in cast_steps))
+        group_steps = [step for step in scenario['steps'] if step.get('action') == 'group']
+        self.assertEqual(len(group_steps), 1)
+        self.assertEqual(scenario['players'][1]['id'], 'ally')
+        recharge_wait_ms = [step['ms'] for step in scenario['steps']
+                            if step.get('label') in ('up to the recharge window', 'through the recharge window')]
+        elapsed_before_window_ms = 4 * cast_interval(CLASS_FILE, TEMPLE_GUARDIAN)
+        self.assertEqual(sum(recharge_wait_ms), round(35000 * 1.05) - elapsed_before_window_ms)
+
+    def test_temple_guardian_charge_recharge_judges_seeded_wrong_values_as_alert(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, temple_guardian_charge_recharge_entry())
+        expectation = expectations[0]
+        model = expectation.model
+        correct = {model['initial_label']: 3.0, model['attempt_labels'][0]: 2.0, model['attempt_labels'][1]: 1.0,
+                  model['attempt_labels'][2]: 0.0, model['overcast_label']: 0.0,
+                  model['cast_failure_label']: 24.0, model['before_recharge_label']: 0.0,
+                  model['after_recharge_label']: 1.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(correct), expectation).status, 'ok')
+        seeded_wrong = {**correct, model['after_recharge_label']: 0.0}
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(seeded_wrong), expectation).status,
                          'alert')
 

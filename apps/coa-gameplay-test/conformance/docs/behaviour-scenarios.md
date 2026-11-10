@@ -26,6 +26,7 @@ produce the same status vocabulary (`ok`, `alert`, `unmodelled`, `measured`, `am
 | `behaviour_aura_grant` (`kind: "aura_grant"`) | "and granting an Oath"-shaped claims: a single cast of a named ability must grant a named aura and increase a named stacking aura's `aura_stacks` by exactly 1, judged by exact equality (no tolerated band: an integer stack delta has no near-miss) |
 | `behaviour_oath_consumption` (`kind: "oath_consumption"`) | "Consumes your Oaths, dealing additional damage/healing for each consumed"-shaped claims: a deterministic damage/healing formula metric is read before and after fixturing one Oath aura to the caster (no cast), then the trigger spell is actually cast once and the Oath's own `aura_stacks` is read afterward (must be 0, consumed) |
 | `behaviour_oath_consumption_removal` (`kind: "oath_consumption_removal"`) | "Consumes your Oaths, dealing additional damage for each consumed"-shaped claims whose own ability bakes the bonus into its own aura's script value at cast time and consumes the Oaths only when that aura is later removed: one or more Oath auras are fixtured, each one's own `aura_amount` is read, the trigger spell is cast once, its own aura's `aura_script_value` is read shortly after (must equal the summed `aura_amount` readings) while every Oath's `aura_stacks` must still read 1, then after the aura expires naturally every Oath's `aura_stacks` must read 0 |
+| `behaviour_charge_recharge` | a native spell-charge count ("N Charges") and its recharge interval ("T sec recharge"), proven by spending every charge one cast at a time, confirming an over-cast attempt is refused, and bracketing the recharge window at a tolerance |
 
 Every `Expectation.rule` of these checks starts with the literal prefix `prose: ` followed by the quoted
 `Description[enUS]` fragment that states the number, e.g.
@@ -498,6 +499,27 @@ first: nonzero is an immediate `alert` (fired again before the window closed). O
 between the last two readings: exactly `+1` is `ok`, anything else `alert`. No tolerated band — an integer event
 count at a fixed timing boundary has no near-miss.
 
+### Charge-recharge scenarios (`behaviour_charge_recharge`, `kind: "charge_recharge"`)
+
+A tooltip's "N Charges" / "T sec recharge" pair names the WotLK-era spell-charge system (`SpellInfo::MaxCharges`/
+`ChargeRecoveryTime`, read by `Player::GetSpellCharges`/`HasSpellCooldown`), not a plain cooldown; no other
+behaviour kind spends a resource down to zero and times its recovery. `charge_recharge_scenario` learns `spell`,
+then casts it `max_charges` times in a row (relocating `CHARGE_OFFSET_YD` away between casts whenever `spell`
+closes distance via `SPELL_EFFECT_CHARGE`/149, the same fixture the existing `triggers.py` entries that repeat-
+cast this spell already use), snapshotting `spell_charges` after each cast. It then attempts one more cast past
+the last charge and snapshots both `spell_charges` (must stay at 0) and `cast_failure` (must be nonzero: the
+native `HasSpellCooldown` gate refuses a cast with `Available == 0` rather than letting a fourth consumption
+through). Finally it waits to `recharge_ms * (1 - tolerance)` and snapshots `spell_charges` again (still 0, i.e.
+not recharged early), then waits the rest of the way to `recharge_ms * (1 + tolerance)` and snapshots once more
+(must now read 1, i.e. recharged by then). `tolerance` defaults to 0.05 (the owner's standing 5%-on-numbers
+rule) and is carried in the model so the judge never hard-codes it.
+
+The judge (`compare.behaviour_charge_recharge_verdict`) computes the whole expected sequence from `max_charges`
+in Python (`max_charges - 1, max_charges - 2, ..., 0`) and compares it against the measured snapshots alongside
+the over-cast refusal and the before/after-recharge pair; `ok` only when every one of those checks holds, `alert`
+otherwise (a wrong starting count, a charge sequence that does not strictly decrement, a fourth charge granted
+instead of refused, an early recharge, or a recharge that never arrives are all caught).
+
 ### Templar entries
 
 | Passive | Kind | Quote | Expected | Mechanism |
@@ -539,6 +561,7 @@ count at a fixed timing boundary has no near-miss.
 | Disciplined Blows 680397 | internal_cooldown_gate (`trigger_spell: 578276`, `internal_cooldown_ms: 500`) | "Cnly occur once every 0.5 sec." | no new event 250 ms after the first fire, exactly 1 new event 750 ms after that | `AscensionTemplarEvents.cpp:74-76,157-159`'s `State(player).cooldowns` timer, not `spell_proc.Cooldown`; `ok` in both runs |
 | Untainted 705298 | internal_cooldown_gate (`trigger_spell: 803792`, `internal_cooldown_ms: 15000`, `restore_charges: true`) | "Can only occur every 15 sec." | no new event 7500 ms after the first fire, exactly 1 new event 8000 ms after that | same `State(player).cooldowns` timer mechanism; 803792's own `SPELL_EFFECT_CHARGE` pulls the caster to melee range of the ally on every successful cast, so `icd_gate_attempt_fixtures` relocates the caster +10 yd before every attempt (not once), matching the 5-30 yd range its `SpellRange.dbc` entry needs; a first attempt without the per-attempt relocate measured two real `SPELL_FAILED_TOO_CLOSE` cast failures; `ok` in both runs |
 | Scarlet Champion 805415 | internal_cooldown_gate (`trigger_spell: 807268`, `internal_cooldown_ms: 1000`, `force_crit: melee`) | "Can only occur once per sec." | no new event 500 ms after the first fire, exactly 1 new event 1000 ms after that | same `State(player).cooldowns` timer mechanism; `ok` in both runs |
+| Temple Guardian 803792 | charge_recharge | "3 Charges, 35 sec recharge" | 3 charges, 35000 ms recharge | round10 `formula-value-scaling`: Spell.dbc's own charge fields for 803792 are all zero (`ProcCharges`/`RecoveryTime`/`Category`, `coa-dbc-viewer record --table Spell --id 803792`); the real numbers come from `SpellCharges.dbc` (`Spell=803792 -> Category=251`) and `SpellChargesCategory.dbc` (`ID=251, MaxCharges=3, RecoveryTime=35000`), applied to `SpellInfo` by `ApplyClientSpellCharges` (`AscensionClassMechanics.cpp:1082-1096`), called unconditionally for every spell — a class-agnostic native system, no Templar script involved. Target `"ally"` reuses the same relocate-and-charge fixture the existing 804571/705256/705298 trigger entries above already exercise on this same spell (803792's effect 0 is `SPELL_EFFECT_CHARGE`) |
 
 The 10-yard and 8-yard fixture radii above are both read from server source, never guessed, per each entry's own
 `radius_reason`.
