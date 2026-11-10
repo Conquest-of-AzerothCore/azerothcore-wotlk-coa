@@ -385,7 +385,8 @@ case (an omitted field is disabled) and is likewise run exclusively. Its optiona
 `AllowTwoSide.Interaction.Group`, which keeps the configured value when omitted. Optional
 `ptr_character_copy: true` makes this realm both the source and the target of `.ptr copy` for that case, with no
 cooldown, and is likewise run exclusively. Queued copies load and report within a 5-second poll, so wait after
-the command before asserting.
+the command before asserting. With it, `ptr_character_copy_interruption: "before_load"` or `"after_load"` stops
+the first claimed copy at that point, as a realm stopping mid-load would; the next poll recovers the request.
 The [talent and item scenario](scenarios/talent-and-items.json) exercises talent learning, passive removal,
 equipping a shirt and consuming a healing potion. It does not measure the talent's damage coefficient.
 The [Shadowblast scenario](scenarios/shadowblast-shadow-rage.json) reproduces a Shadow Rage pet-targeting crash

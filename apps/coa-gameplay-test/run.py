@@ -482,7 +482,8 @@ def validate_raid_role(player):
 def validate(scenario):
     keys(scenario, {'schema', 'name', 'players', 'steps'},
          {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour',
-          'creature_scaling', 'ptr_character_copy', 'vanity_ownership', 'two_side', 'quest_log_size'},
+          'creature_scaling', 'ptr_character_copy', 'ptr_character_copy_interruption', 'vanity_ownership',
+          'two_side', 'quest_log_size'},
          'scenario')
     schema = scenario['schema']
     require(type(schema) is int and schema in MAX_PLAYERS, 'Unsupported scenario schema')
@@ -492,6 +493,11 @@ def validate(scenario):
         number(scenario['hour'], 'hour', 0, HOURS_PER_DAY - 1, True)
     require(type(scenario.get('creature_scaling', False)) is bool, 'creature_scaling must be boolean')
     require(type(scenario.get('ptr_character_copy', False)) is bool, 'ptr_character_copy must be boolean')
+    if 'ptr_character_copy_interruption' in scenario:
+        require(scenario.get('ptr_character_copy') is True,
+                'ptr_character_copy_interruption needs ptr_character_copy')
+        require(scenario['ptr_character_copy_interruption'] in ('before_load', 'after_load'),
+                'ptr_character_copy_interruption must be before_load or after_load')
     if 'vanity_ownership' in scenario:
         ownership = scenario['vanity_ownership']
         keys(ownership, {'unlock_all'}, {'unlock_all', 'starter_items'}, 'vanity_ownership')

@@ -1853,7 +1853,14 @@ public:
         if (_scenario.get<bool>("creature_scaling", false))
             _creatureScaling.emplace();
         if (_scenario.get<bool>("ptr_character_copy", false))
-            _ptrCharacterCopy.emplace();
+        {
+            std::string const interruption = _scenario.get<std::string>("ptr_character_copy_interruption", "");
+            Require(interruption.empty() || interruption == "before_load" || interruption == "after_load",
+                "Invalid ptr_character_copy_interruption");
+            _ptrCharacterCopy.emplace(interruption == "before_load" ? PtrCharacterCopy::Interruption::BeforeLoad
+                : interruption == "after_load" ? PtrCharacterCopy::Interruption::AfterLoad
+                : PtrCharacterCopy::Interruption::None);
+        }
         if (auto ownership = _scenario.get_child_optional("vanity_ownership"))
         {
             std::string starterItems;

@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "PTR character copy: a copy renamed past 12 letters completes once",
+  "contract": "A copy whose name is taken on the target realm is named after the original plus its GUID in hex (PlayerDumpReader), up to MAX_PLAYER_NAME (25) letters. coa_ptr_copy_request kept copy_name at 12 letters, so under strict SQL mode the completing UPDATE failed, the request stayed pending and the target loaded it again on every poll (live PTR: 126 copies of one character, stopped only by CharactersPerRealm). The request columns hold full names and the target claims a request before loading it, so the copy loads once and the source realm reports it with its full name; a name cut back to 12 letters (non-strict SQL mode) would equal the source name, and the source realm would not announce the rename. ptr_character_copy makes this realm both the source and the target, so the name is always taken.",
+  "timeout_ms": 90000,
+  "ptr_character_copy": true,
+  "players": [
+    { "id": "a", "name": "Harnessalong", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "relog", "actor": "a" },
+    { "action": "assert", "label": "The source account starts with one character", "actor": "a",
+      "metric": "account_character_count", "equals": 1 },
+    { "action": "command", "label": "Copy the online character", "actor": "a", "command": ".ptr copy Harnessalong" },
+    { "action": "assert", "label": "The copy is queued for the target realm", "actor": "a",
+      "metric": "system_message_contains", "text": "Harnessalong is on its way to", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The queued copy loads as a second character on the same account", "actor": "a",
+      "metric": "account_character_count", "equals": 2, "within_ms": 15000 },
+    { "action": "assert", "label": "DISCRIMINATING: the request completes, so the source realm reports the copy",
+      "actor": "a", "metric": "system_message_contains", "text": "Harnessalong was copied to", "equals": 1,
+      "within_ms": 15000 },
+    { "action": "assert",
+      "label": "DISCRIMINATING: the stored copy name differs from the source, so it was not cut back to 12 letters",
+      "actor": "a", "metric": "system_message_contains", "text": "choose a new one at login", "equals": 1 },
+    { "action": "assert", "label": "The copy is renamed at login", "actor": "a",
+      "metric": "account_other_at_login_flag", "id": 1, "equals": 1 },
+    { "action": "wait", "label": "Let the target realm poll the request table three more times", "ms": 16000 },
+    { "action": "assert", "label": "DISCRIMINATING: the completed request is not loaded again", "actor": "a",
+      "metric": "account_character_count", "equals": 2 }
+  ]
+}
