@@ -57,3 +57,7 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6960034) AND `id` IN (9
 -- #11808
 -- pickup 6942017 (Owlbeast Talon) moved 9.5 yd across and 0.31 yd up to out of the rock it was buried in
 UPDATE `gameobject` SET `position_x` = 7650.2247, `position_y` = -4919.5979, `position_z` = 697.0921, `orientation` = 2.68263, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.973785, `rotation3` = 0.227472 WHERE `guid` = 6942017 AND `id` = 1345104;
+
+-- #11826
+-- pickup 6941796 (Grimtotem Bow) moved 14.0 yd across and 0.65 yd down to the tent next to Sage Nauchol, where LootCollector records it
+UPDATE `gameobject` SET `position_x` = -3628.5142, `position_y` = -1028.2337, `position_z` = 203.9655, `orientation` = 0.381159, `rotation0` = -0.761488, `rotation1` = 0.08334, `rotation2` = 0.391572, `rotation3` = 0.509766 WHERE `guid` = 6941796 AND `id` = 520699;
