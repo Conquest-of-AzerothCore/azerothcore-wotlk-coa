@@ -1,4 +1,4 @@
-# 0057. `gate_absence` trigger kind proves a withheld condition suppresses a trigger
+# 0072. `gate_absence` trigger kind proves a withheld condition suppresses a trigger
 
 - Status: accepted
 - Date: 2026-11-10

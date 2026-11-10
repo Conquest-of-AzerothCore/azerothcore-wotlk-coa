@@ -1,4 +1,4 @@
-# 0055. `cast_combat` behaviour kind for "usable while in combat" clauses
+# 0085. `cast_combat` behaviour kind for "usable while in combat" clauses
 
 - Status: accepted
 - Date: 2026-11-10

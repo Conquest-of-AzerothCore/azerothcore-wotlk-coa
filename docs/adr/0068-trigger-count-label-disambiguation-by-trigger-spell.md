@@ -1,4 +1,4 @@
-# 0053. `trigger_count` entries sharing an aura are disambiguated by trigger spell
+# 0068. `trigger_count` entries sharing an aura are disambiguated by trigger spell
 
 - Status: accepted
 - Date: 2026-11-10

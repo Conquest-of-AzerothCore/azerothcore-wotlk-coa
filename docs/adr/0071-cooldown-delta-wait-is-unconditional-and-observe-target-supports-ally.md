@@ -1,4 +1,4 @@
-# 0056. `cooldown_delta`'s observe-cast wait is unconditional, and `observe_target` groups an ally
+# 0071. `cooldown_delta`'s observe-cast wait is unconditional, and `observe_target` groups an ally
 
 - Status: accepted
 - Date: 2026-11-10

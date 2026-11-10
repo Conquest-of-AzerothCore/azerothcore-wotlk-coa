@@ -1,4 +1,4 @@
-# 0053. `mount_grant` behaviour kind for multi-actor mount grant and cast-persistence clauses
+# 0083. `mount_grant` behaviour kind for multi-actor mount grant and cast-persistence clauses
 
 - Status: accepted
 - Date: 2026-11-10

@@ -1,4 +1,4 @@
-# 0051. A `magnitude_ratio` trigger kind measures a proc's magnitude against its own trigger hit
+# 0066. A `magnitude_ratio` trigger kind measures a proc's magnitude against its own trigger hit
 
 - Status: accepted
 - Date: 2026-11-09

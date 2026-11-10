@@ -1,4 +1,4 @@
-# 0051. An `exclusivity` behaviour kind for mutual-exclusion chains
+# 0061. An `exclusivity` behaviour kind for mutual-exclusion chains
 
 - Status: accepted
 - Date: 2026-11-09

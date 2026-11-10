@@ -1,4 +1,4 @@
-# 0052. The `magnitude_ratio` trigger kind accepts a probabilistic `attack` trigger, judged per-event
+# 0067. The `magnitude_ratio` trigger kind accepts a probabilistic `attack` trigger, judged per-event
 
 - Status: accepted
 - Date: 2026-11-09

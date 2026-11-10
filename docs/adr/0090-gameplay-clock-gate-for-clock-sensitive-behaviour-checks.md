@@ -1,4 +1,4 @@
-# 0060. Gameplay-clock gate for clock-sensitive behaviour checks
+# 0090. Gameplay-clock gate for clock-sensitive behaviour checks
 
 ## Context
 

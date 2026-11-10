@@ -1,4 +1,4 @@
-# 0058. `metric_delta`'s `setup_only_after` isolates a target-condition gate from the passive gate
+# 0073. `metric_delta`'s `setup_only_after` isolates a target-condition gate from the passive gate
 
 - Status: accepted
 - Date: 2026-11-10

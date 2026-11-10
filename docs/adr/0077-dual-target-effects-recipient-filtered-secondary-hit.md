@@ -1,4 +1,4 @@
-# 0054. A `dual_target_effects` secondary, recipient-filtered `hit_mean` check
+# 0077. A `dual_target_effects` secondary, recipient-filtered `hit_mean` check
 
 - Status: accepted
 - Date: 2026-11-10

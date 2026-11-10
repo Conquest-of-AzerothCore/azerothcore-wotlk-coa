@@ -1,4 +1,4 @@
-# 0054. `internal_cooldown` behaviour kind for proc-throttle clauses
+# 0084. `internal_cooldown` behaviour kind for proc-throttle clauses
 
 - Status: accepted
 - Date: 2026-11-10

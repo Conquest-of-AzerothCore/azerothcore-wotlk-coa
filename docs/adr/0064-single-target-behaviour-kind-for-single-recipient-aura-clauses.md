@@ -1,4 +1,4 @@
-# 0057. A `single_target` behaviour kind for "only 1 target at a time" clauses
+# 0064. A `single_target` behaviour kind for "only 1 target at a time" clauses
 
 - Status: accepted
 - Date: 2026-11-10

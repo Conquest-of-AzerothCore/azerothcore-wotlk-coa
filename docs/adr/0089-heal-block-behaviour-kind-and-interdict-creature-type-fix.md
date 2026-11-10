@@ -1,4 +1,4 @@
-# 0059. Heal-block behaviour kind, and a Templar server fix for Interdict's creature-type gate
+# 0089. Heal-block behaviour kind, and a Templar server fix for Interdict's creature-type gate
 
 ## Context
 

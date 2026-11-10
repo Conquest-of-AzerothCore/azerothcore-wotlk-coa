@@ -1,4 +1,4 @@
-# 0052. `behaviour_metric_delta` reads a configurable actor and an optional explicit tolerance
+# 0075. `behaviour_metric_delta` reads a configurable actor and an optional explicit tolerance
 
 - Status: accepted
 - Date: 2026-11-10

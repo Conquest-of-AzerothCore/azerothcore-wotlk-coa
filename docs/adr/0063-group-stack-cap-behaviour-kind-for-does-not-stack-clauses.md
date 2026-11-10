@@ -1,4 +1,4 @@
-# 0056. A `group_stack_cap` behaviour kind for "Does not stack with similar effects" clauses
+# 0063. A `group_stack_cap` behaviour kind for "Does not stack with similar effects" clauses
 
 - Status: accepted
 - Date: 2026-11-10

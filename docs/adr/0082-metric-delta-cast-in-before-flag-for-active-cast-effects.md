@@ -1,4 +1,4 @@
-# 0052. `cast_in_before` flag on `metric_delta` for an active spell's own cast-time effect
+# 0082. `cast_in_before` flag on `metric_delta` for an active spell's own cast-time effect
 
 - Status: accepted
 - Date: 2026-11-10

@@ -1,4 +1,4 @@
-# 0053. A `charge_recharge` behaviour kind for native spell-charge count and recharge timing
+# 0076. A `charge_recharge` behaviour kind for native spell-charge count and recharge timing
 
 - Status: accepted
 - Date: 2026-11-10

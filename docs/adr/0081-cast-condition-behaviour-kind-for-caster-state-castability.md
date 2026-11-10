@@ -1,4 +1,4 @@
-# 0051. `cast_condition` behaviour kind for caster-state castability clauses, and a Templar mounted-only fix
+# 0081. `cast_condition` behaviour kind for caster-state castability clauses, and a Templar mounted-only fix
 
 - Status: accepted
 - Date: 2026-11-10

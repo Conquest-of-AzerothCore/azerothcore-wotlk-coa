@@ -1,4 +1,4 @@
-# 0051. Live aura-presence check for a data-listed foreign-duration grant
+# 0074. Live aura-presence check for a data-listed foreign-duration grant
 
 - Status: accepted
 - Date: 2026-11-10

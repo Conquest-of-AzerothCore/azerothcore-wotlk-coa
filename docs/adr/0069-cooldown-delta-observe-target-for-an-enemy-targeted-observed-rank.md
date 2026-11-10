@@ -1,4 +1,4 @@
-# 0054. `cooldown_delta` entries can cast the observed rank at a named target
+# 0069. `cooldown_delta` entries can cast the observed rank at a named target
 
 - Status: accepted
 - Date: 2026-11-10

@@ -1,4 +1,4 @@
-# 0052. An `aura_grant` behaviour kind for cast-triggered buff grants
+# 0062. An `aura_grant` behaviour kind for cast-triggered buff grants
 
 - Status: accepted
 - Date: 2026-11-09

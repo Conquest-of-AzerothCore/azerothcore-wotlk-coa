@@ -1,4 +1,4 @@
-# 0059. A `mechanism` field on `group_stack_cap` for non-stacking caps that are not a `spell_group`
+# 0065. A `mechanism` field on `group_stack_cap` for non-stacking caps that are not a `spell_group`
 
 - Status: accepted
 - Date: 2026-11-10

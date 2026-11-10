@@ -1,4 +1,4 @@
-# 0051. `party_stat_ratio` behaviour check for raid-wide and radius-gated party buffs
+# 0079. `party_stat_ratio` behaviour check for raid-wide and radius-gated party buffs
 
 - Status: accepted
 - Date: 2026-11-10

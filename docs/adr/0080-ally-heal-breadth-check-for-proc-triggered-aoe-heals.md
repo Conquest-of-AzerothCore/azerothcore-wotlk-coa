@@ -1,4 +1,4 @@
-# 0052. `ally_heal_breadth` behaviour check for proc-triggered AoE heals landing on allies
+# 0080. `ally_heal_breadth` behaviour check for proc-triggered AoE heals landing on allies
 
 - Status: accepted
 - Date: 2026-11-10

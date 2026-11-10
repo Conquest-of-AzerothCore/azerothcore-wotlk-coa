@@ -1,4 +1,4 @@
-# 0056. `aggro_redirect` behaviour kind for taunt victim-switch clauses
+# 0086. `aggro_redirect` behaviour kind for taunt victim-switch clauses
 
 - Status: accepted
 - Date: 2026-11-10

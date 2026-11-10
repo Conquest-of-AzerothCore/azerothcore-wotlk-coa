@@ -1,4 +1,4 @@
-# 0055. A `target_aura_gates` recast-on-target gated `hit_mean` check
+# 0078. A `target_aura_gates` recast-on-target gated `hit_mean` check
 
 - Status: accepted
 - Date: 2026-11-10

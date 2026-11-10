@@ -1,4 +1,4 @@
-# 0055. `self_trigger` kind for a clause whose own cast is the trigger, with no baseline
+# 0070. `self_trigger` kind for a clause whose own cast is the trigger, with no baseline
 
 - Status: accepted
 - Date: 2026-11-10
