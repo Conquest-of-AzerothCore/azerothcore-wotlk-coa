@@ -20,11 +20,13 @@ BEHAVIOUR_AMOUNT_DELTA = 'behaviour_amount_delta'
 BEHAVIOUR_CRIT_GUARANTEE = 'behaviour_crit_guarantee'
 BEHAVIOUR_AURA_GRANT = 'behaviour_aura_grant'
 BEHAVIOUR_OATH_CONSUMPTION = 'behaviour_oath_consumption'
+BEHAVIOUR_OATH_CONSUMPTION_REMOVAL = 'behaviour_oath_consumption_removal'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
-                    BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION)
+                    BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
+                    BEHAVIOUR_OATH_CONSUMPTION_REMOVAL)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
-        'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption')
+        'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 PROSE = 'prose: '
@@ -1038,6 +1040,99 @@ def oath_consumption_spec(entry: dict) -> OathConsumptionSpec:
                                entry.get('effect', 0), entry.get('periodic', False), entry.get('target', TARGET))
 
 
+OATH_CONSUMPTION_REMOVAL_SETTLE_MS = 500
+OATH_CONSUMPTION_REMOVAL_EXPIRE_MARGIN_MS = 1500
+
+
+@dataclass(frozen=True)
+class OathConsumptionRemovalSpec:
+    spell: int
+    name: str
+    quote: str
+    trigger_spell: int
+    oath_spells: tuple[int, ...]
+    oath_effect: int = 2
+    settle_ms: int = OATH_CONSUMPTION_REMOVAL_SETTLE_MS
+    expire_margin_ms: int = OATH_CONSUMPTION_REMOVAL_EXPIRE_MARGIN_MS
+
+
+def oath_consumption_removal_amount_label(spec: OathConsumptionRemovalSpec, oath: int) -> str:
+    return f'{spec.spell} {oath} aura_amount oath_consumption_removal before'
+
+
+def oath_consumption_removal_script_label(spec: OathConsumptionRemovalSpec) -> str:
+    return f'{spec.spell} aura_script_value oath_consumption_removal'
+
+
+def oath_consumption_removal_stacks_label(spec: OathConsumptionRemovalSpec, oath: int, moment: str) -> str:
+    return f'{spec.spell} {oath} aura_stacks oath_consumption_removal {moment}'
+
+
+def oath_consumption_removal_scenario(class_file: dict, spec: OathConsumptionRemovalSpec
+                                      ) -> tuple[dict, list[Expectation]]:
+    if not spec.oath_spells:
+        raise NotModelled('oath_consumption_removal needs at least one oath_spell')
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'oath_consumption_removal', spec.quote, 0.0)
+    class_file = armed_for(class_file, records, spec.trigger_spell)
+    facts = facts_of(records, spec.trigger_spell)
+    amount_labels = [oath_consumption_removal_amount_label(spec, oath) for oath in spec.oath_spells]
+    script_label = oath_consumption_removal_script_label(spec)
+    before_removal_labels = [oath_consumption_removal_stacks_label(spec, oath, 'held') for oath in spec.oath_spells]
+    after_removal_labels = [oath_consumption_removal_stacks_label(spec, oath, 'removed')
+                            for oath in spec.oath_spells]
+    duration_ms = records.duration_ms(spec.trigger_spell)
+    remaining_ms = max(0, int(duration_ms) - spec.settle_ms) + spec.expire_margin_ms
+    steps = []
+    if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+        steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
+                     'value': facts.mana_cost})
+    steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
+    steps += required_aura_steps(facts)
+    for oath in spec.oath_spells:
+        steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': oath, 'stacks': 1})
+    for oath, label in zip(spec.oath_spells, amount_labels):
+        steps.append(measurement(label, CASTER, 'aura_amount', spell=oath, effect=spec.oath_effect))
+    steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': CASTER})
+    steps.append({'action': 'wait', 'label': f'{spec.spell} oath consumption removal settle', 'ms': spec.settle_ms})
+    steps.append(measurement(script_label, CASTER, 'aura_script_value', spell=spec.trigger_spell,
+                             key=spec.trigger_spell))
+    for oath, label in zip(spec.oath_spells, before_removal_labels):
+        steps.append(measurement(label, CASTER, 'aura_stacks', spell=oath))
+    steps.append({'action': 'wait', 'label': f'{spec.spell} let the lifecycle aura expire', 'ms': remaining_ms})
+    for oath, label in zip(spec.oath_spells, after_removal_labels):
+        steps.append(measurement(label, CASTER, 'aura_stacks', spell=oath))
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour oath consumption removal',
+        'contract': f'Each of {spec.oath_spells} is fixtured to 1 stack (set_aura, no cast) and its own EFFECT_'
+                    f'{spec.oath_effect} aura_amount is read; {spec.trigger_spell} is then cast once at the caster '
+                    f'and, {spec.settle_ms} ms later (well inside its own {duration_ms:g} ms duration), its own '
+                    f'applied aura\'s aura_script_value (key {spec.trigger_spell}) must equal the sum of the '
+                    f'fixtured Oaths\' own aura_amount readings; every Oath\'s own aura_stacks must still read 1 at '
+                    f'that same moment (the Oath is not consumed by the cast), then after waiting out the rest of '
+                    f'the aura\'s duration plus a {spec.expire_margin_ms} ms margin so it expires naturally, every '
+                    f'Oath\'s own aura_stacks must read 0 (consumed only once the lifecycle aura is removed, '
+                    f'AscensionTemplarAuras.cpp aura_ascension_templar_lifecycle::Remove).',
+        'players': [player_fixture(class_file)],
+        'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}]
+                 + steps}
+    label = f'{spec.spell} behaviour_oath_consumption_removal'
+    model = {'kind': 'oath_consumption_removal', 'amount_labels': amount_labels, 'script_label': script_label,
+            'before_removal_labels': before_removal_labels, 'after_removal_labels': after_removal_labels,
+            'oath_spells': list(spec.oath_spells), 'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, spec.spell, spec.trigger_spell, None,
+                              'sum(oath aura_amount)', prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def oath_consumption_removal_spec(entry: dict) -> OathConsumptionRemovalSpec:
+    return OathConsumptionRemovalSpec(entry['spell'], entry['name'], entry['quote'], entry['trigger_spell'],
+                                      tuple(entry['oath_spells']), entry.get('oath_effect', 2),
+                                      entry.get('settle_ms', OATH_CONSUMPTION_REMOVAL_SETTLE_MS),
+                                      entry.get('expire_margin_ms', OATH_CONSUMPTION_REMOVAL_EXPIRE_MARGIN_MS))
+
+
 MECHANIC_DR_RESET_MS = 15000
 MECHANIC_GAP_MARGIN_MS = 2000
 MECHANIC_LAND_ATTEMPTS = 3
@@ -1240,6 +1335,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return aura_grant_scenario(class_file, aura_grant_spec(entry))
     if entry['kind'] == 'oath_consumption':
         return oath_consumption_scenario(class_file, oath_consumption_spec(entry))
+    if entry['kind'] == 'oath_consumption_removal':
+        return oath_consumption_removal_scenario(class_file, oath_consumption_removal_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

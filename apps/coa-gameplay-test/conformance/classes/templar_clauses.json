@@ -3455,7 +3455,7 @@
   {
     "spell": 805409,
     "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
-    "labels": [],
+    "labels": ["805409 behaviour_oath_consumption_removal"],
     "kind": "claim"
   },
   {

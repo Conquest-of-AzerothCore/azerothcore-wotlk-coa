@@ -8,9 +8,11 @@ import unittest
 
 from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
                         BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH,
-                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER,
+                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
+                        BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER,
                         MECHANIC_LAND_ATTEMPTS, NotModelled,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, OathConsumptionSpec,
+                        OathConsumptionRemovalSpec,
                         amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
                         aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
                         behaviour_scenario, crit_guarantee_scenario, crit_guarantee_spec,
@@ -19,6 +21,7 @@ from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_
                         healing_ratio_spec, leech_heal_modifier_factor, leech_ratio_scenario, leech_ratio_spec,
                         mechanic_duration_scenario, mechanic_duration_spec, metric_delta_scenario,
                         metric_delta_spec, oath_consumption_scenario, oath_consumption_spec,
+                        oath_consumption_removal_scenario, oath_consumption_removal_spec,
                         shield_break_trigger_scenario, shield_break_trigger_spec,
                         target_count_scenario, target_count_spec)
 from compare import Verdict, judge_behaviour
@@ -355,7 +358,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 35)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 36)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -2098,6 +2101,129 @@ class JudgeAuraGrantTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 0.0, 'after': 1.0}), expectation)
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('oath', verdict.explanation)
+
+    def test_no_run_reports_no_scenario(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), None, expectation)
+        self.assertIn('no scenario', verdict.explanation)
+
+
+RIGHTEOUS_TEMPEST = 805409
+OATH_CONDEMN = 804922
+
+
+class OathConsumptionRemovalScenarioTests(unittest.TestCase):
+    def spec(self):
+        return OathConsumptionRemovalSpec(RIGHTEOUS_TEMPEST, 'Righteous Tempest',
+                                          'Consumes your Oaths, dealing additional damage for each consumed.',
+                                          RIGHTEOUS_TEMPEST, (OATH_RIGHTEOUS_LUNGE, OATH_CONDEMN))
+
+    def test_a_spec_with_no_oaths_is_not_modelled(self):
+        with self.assertRaises(NotModelled):
+            oath_consumption_removal_scenario(CLASS_FILE, replace(self.spec(), oath_spells=()))
+
+    def test_scenario_fixtures_every_oath_reads_the_bonus_then_proves_removal_timing(self):
+        scenario, [expectation] = oath_consumption_removal_scenario(CLASS_FILE, self.spec())
+        validated = run.validate(scenario)
+        self.assertEqual(expectation.check, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL)
+        self.assertEqual(expectation.spell_id, RIGHTEOUS_TEMPEST)
+        self.assertEqual(expectation.rank_id, RIGHTEOUS_TEMPEST)
+        model = expectation.model
+        self.assertEqual(model['oath_spells'], [OATH_RIGHTEOUS_LUNGE, OATH_CONDEMN])
+        amount_steps = [next(step for step in validated['steps'] if step.get('label') == label)
+                        for label in model['amount_labels']]
+        script_step = next(step for step in validated['steps'] if step.get('label') == model['script_label'])
+        held_steps = [next(step for step in validated['steps'] if step.get('label') == label)
+                     for label in model['before_removal_labels']]
+        removed_steps = [next(step for step in validated['steps'] if step.get('label') == label)
+                         for label in model['after_removal_labels']]
+        for step, oath in zip(amount_steps, (OATH_RIGHTEOUS_LUNGE, OATH_CONDEMN)):
+            self.assertEqual(step['metric'], 'aura_amount')
+            self.assertEqual(step['spell'], oath)
+            self.assertEqual(step['effect'], 2)
+        self.assertEqual(script_step['metric'], 'aura_script_value')
+        self.assertEqual(script_step['spell'], RIGHTEOUS_TEMPEST)
+        self.assertEqual(script_step['key'], RIGHTEOUS_TEMPEST)
+        for step, oath in zip(held_steps, (OATH_RIGHTEOUS_LUNGE, OATH_CONDEMN)):
+            self.assertEqual(step['metric'], 'aura_stacks')
+            self.assertEqual(step['spell'], oath)
+        for step, oath in zip(removed_steps, (OATH_RIGHTEOUS_LUNGE, OATH_CONDEMN)):
+            self.assertEqual(step['metric'], 'aura_stacks')
+            self.assertEqual(step['spell'], oath)
+        set_aura_steps = [step for step in validated['steps'] if step.get('action') == 'set_aura']
+        self.assertLessEqual({OATH_RIGHTEOUS_LUNGE, OATH_CONDEMN}, {step['spell'] for step in set_aura_steps})
+        cast_steps = [step for step in validated['steps']
+                     if step.get('action') == 'cast' and step.get('spell') == RIGHTEOUS_TEMPEST]
+        self.assertEqual(len(cast_steps), 1)
+        indices = {step['label']: validated['steps'].index(step) for step in validated['steps'] if 'label' in step}
+        for label in model['amount_labels']:
+            self.assertLess(indices[label], validated['steps'].index(cast_steps[0]))
+        cast_index = validated['steps'].index(cast_steps[0])
+        self.assertLess(cast_index, indices[model['script_label']])
+        for label in model['before_removal_labels']:
+            self.assertLess(indices[model['script_label']], indices[label])
+        for before_label, after_label in zip(model['before_removal_labels'], model['after_removal_labels']):
+            self.assertLess(indices[before_label], indices[after_label])
+
+    def test_entries_from_the_class_file_round_trip_through_the_spec_parser(self):
+        entries = [entry for entry in CLASS_FILE['behaviours'] if entry['kind'] == 'oath_consumption_removal']
+        self.assertEqual(len(entries), 1)
+        for entry in entries:
+            scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
+            self.assertEqual(expectation.rule, f'prose: "{entry["quote"]}" ({entry["spell"]})')
+            run.validate(scenario)
+
+
+class JudgeOathConsumptionRemovalTests(unittest.TestCase):
+    def expectation(self):
+        model = {'kind': 'oath_consumption_removal', 'amount_labels': ['amount_0', 'amount_1'],
+                 'script_label': 'script', 'before_removal_labels': ['held_0', 'held_1'],
+                 'after_removal_labels': ['removed_0', 'removed_1'],
+                 'oath_spells': [OATH_RIGHTEOUS_LUNGE, OATH_CONDEMN],
+                 'quote': 'Consumes your Oaths, dealing additional damage for each consumed.'}
+        return Expectation('label', BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, RIGHTEOUS_TEMPEST, RIGHTEOUS_TEMPEST, None,
+                           'sum(oath aura_amount)', 'prose: "..." (805409)', model)
+
+    def values(self, script=60.0, held=(1.0, 1.0), removed=(0.0, 0.0)):
+        return {'amount_0': 30.0, 'amount_1': 30.0, 'script': script, 'held_0': held[0], 'held_1': held[1],
+                'removed_0': removed[0], 'removed_1': removed[1]}
+
+    def test_the_summed_amount_matching_the_script_value_with_correct_timing_is_ok(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(self.values()), expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.measured, 60.0)
+        self.assertEqual(verdict.expected, 60.0)
+
+    def test_a_6_percent_deviation_from_the_summed_amount_is_an_alert(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(self.values(script=60.0 * 1.06)), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_a_4_percent_deviation_from_the_summed_amount_is_tolerated(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(self.values(script=60.0 * 1.04)), expectation)
+        self.assertEqual(verdict.status, 'tolerated')
+
+    def test_an_oath_consumed_too_early_is_an_alert(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(self.values(held=(0.0, 1.0))), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('held', verdict.explanation)
+
+    def test_an_oath_never_consumed_after_removal_is_an_alert(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(self.values(removed=(1.0, 0.0))), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('removed', verdict.explanation)
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation()
+        values = self.values()
+        del values['script']
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('script', verdict.explanation)
 
     def test_no_run_reports_no_scenario(self):
         expectation = self.expectation()

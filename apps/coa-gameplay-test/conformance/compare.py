@@ -12,7 +12,7 @@ from typing import Callable, Mapping, Protocol
 from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT,
                         BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
                         BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION,
-                        BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
+                        BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
@@ -2112,6 +2112,34 @@ def behaviour_oath_consumption_verdict(base: Verdict, run: Run, model: dict) -> 
     return verdict
 
 
+def behaviour_oath_consumption_removal_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    amount_labels = model['amount_labels']
+    amounts = [run.values.get(label) for label in amount_labels]
+    missing = next((label for label, value in zip(amount_labels, amounts) if value is None), None)
+    if missing is None:
+        missing = next((label for label in (model['script_label'], *model['before_removal_labels'],
+                                            *model['after_removal_labels']) if run.values.get(label) is None), None)
+    if missing is not None:
+        return replace(base, explanation=missing_measurement(run, missing))
+    script = run.values[model['script_label']]
+    before_removal = [run.values[label] for label in model['before_removal_labels']]
+    after_removal = [run.values[label] for label in model['after_removal_labels']]
+    expected = sum(amounts)
+    verdict = deterministic(base, script, script, expected,
+                            f'{model["oath_spells"]}\'s own aura_amount readings ({amounts}) sum to {expected:g}; '
+                            f'{model["script_label"]} measured {script:g} right after the cast')
+    held_wrong = [label for label, stacks in zip(model['before_removal_labels'], before_removal) if stacks != 1]
+    removed_wrong = [label for label, stacks in zip(model['after_removal_labels'], after_removal) if stacks != 0]
+    if (held_wrong or removed_wrong) and verdict.status in ('ok', 'tolerated'):
+        verdict = replace(verdict, status='alert',
+                          explanation=verdict.explanation +
+                          f'; aura_stacks while held {dict(zip(model["before_removal_labels"], before_removal))} '
+                          f'(every Oath must still read 1, not consumed by the cast itself), after the lifecycle '
+                          f'aura expired {dict(zip(model["after_removal_labels"], after_removal))} (every Oath must '
+                          f'read 0, consumed only on removal): {model["quote"]!r}')
+    return verdict
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
@@ -2140,6 +2168,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_aura_grant_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_OATH_CONSUMPTION:
         return behaviour_oath_consumption_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_OATH_CONSUMPTION_REMOVAL:
+        return behaviour_oath_consumption_removal_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 

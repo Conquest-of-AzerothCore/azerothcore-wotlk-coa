@@ -1700,6 +1700,13 @@
       "trigger_spell": 572741, "oath_spell": 804904, "relation": "ratio", "expected": 1.365,
       "metric": "spell_damage_done", "effect": 0, "periodic": false, "target": "dummy",
       "source": "805421's own clause is proven via its max rank, 572741 (coa-dbc-viewer record: SpellFamilyFlags word 2 = 128, Effect[0] 2 SPELL_EFFECT_SCHOOL_DAMAGE), the same castable spell the class file's existing 572741-labelled checks for this clause's own headline damage already use. Same SpellMod mechanism and the same ground-truthed 1.365 ratio as 572027's own oath_consumption entry (see its source note for the spell_modifier diagnostic)."
+    },
+    {
+      "spell": 805409, "name": "Righteous Tempest", "kind": "oath_consumption_removal",
+      "quote": "Consumes your Oaths, dealing additional damage for each consumed.",
+      "trigger_spell": 805409, "oath_spells": [804904, 804922], "oath_effect": 2,
+      "settle_ms": 500, "expire_margin_ms": 1500,
+      "source": "805409 is exempt from AscensionTemplarAbilities.cpp:174's unconditional ClearOaths on a Breaker cast (!Named(info, 805409)), so it never clears Oaths at cast time unlike every other oath_consumption entry above. AscensionTemplarAuras.cpp's aura_ascension_templar_lifecycle::Calculate (id == 805409, index == 0) instead sums max(0, GetAuraEffect(oath, EFFECT_2)->GetAmount()) over {804904, 804922, 804924, 805332} into GetAura()->SetScriptValue(805409, bonus), read back by AscensionTemplarAbilities.cpp's OnSpellCalculatedTarget as factor *= 1.0f + scriptValue/100.0f on every RighteousTempest() hit (805410, 570200-570205). The Oaths are cleared only by ::Remove's own Named(GetSpellInfo(), 805409) branch, which runs AfterEffectRemove for AURA_EFFECT_HANDLE_REAL with no remove-mode filter, so a natural expiry fires it exactly like a manual dispel. coa-dbc-viewer record confirms all four summed Oaths' own EFFECT_2 is SPELL_AURA_ADD_PCT_MODIFIER with EffectBasePoints[2] == 29 and EffectDieSides[2] == 1 (SpellEffectInfo::CalcValue's die roll adds +1, giving a live aura_amount of 30 for each, confirmed by reading it directly rather than hand-deriving it); 804904 and 804922 (two different Oath types) are fixtured together so the scenario proves the sum is genuinely additive across distinct Oaths, not a single id's own amount reused. 805409's own DurationIndex is 27 (SpellDuration.dbc: 3000 ms), so settle_ms 500 reads the baked-in bonus and the still-held Oaths well before expiry, and expire_margin_ms 1500 on top of the remaining 2500 ms reliably outlasts the natural removal."
     }
   ],
   "player_observations": [

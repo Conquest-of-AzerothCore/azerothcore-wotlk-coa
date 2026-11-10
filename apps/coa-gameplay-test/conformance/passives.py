@@ -78,6 +78,7 @@ BEHAVIOUR_LABELS = {
     'crit_guarantee': lambda entry: [f"{entry['spell']} behaviour_crit_guarantee {entry['trial_spell']}"],
     'aura_grant': lambda entry: [f"{entry['spell']} behaviour_aura_grant"],
     'oath_consumption': lambda entry: [f"{entry['spell']} behaviour_oath_consumption"],
+    'oath_consumption_removal': lambda entry: [f"{entry['spell']} behaviour_oath_consumption_removal"],
 }
 FAMILY_REASONS = {
     'P5': 'proc or trigger effect without a trigger entry',
