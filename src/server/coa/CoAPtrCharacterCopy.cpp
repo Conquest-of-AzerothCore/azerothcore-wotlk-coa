@@ -33,6 +33,7 @@ enum class RequestState : uint8
     Pending = 0,
     Copied = 1,
     Failed = 2,
+    Loading = 3,
 };
 
 constexpr uint32 PollIntervalMs = 5000;
@@ -116,7 +117,7 @@ std::optional<std::string> QueueRefusal(Settings const& settings, SourceCharacte
 {
     uint32 const thisRealm = realm.Id.Realm;
     if (LoginDatabase.Query("SELECT 1 FROM coa_ptr_copy_request WHERE source_realm = {} AND source_guid = {} "
-        "AND state = {}", thisRealm, source.guid, uint8(RequestState::Pending)))
+        "AND state IN ({}, {})", thisRealm, source.guid, uint8(RequestState::Pending), uint8(RequestState::Loading)))
         return Acore::StringFormat("A copy of {} is already on its way to {}.", source.name, targetName);
 
     QueryResult lastCopy = LoginDatabase.Query("SELECT MAX(requested_at) FROM coa_ptr_copy_request "
@@ -212,8 +213,23 @@ void Complete(uint32 id, RequestState state, std::string result, uint32 copyGuid
         Now(), id);
 }
 
+bool Claim(uint32 id)
+{
+    LoginDatabase.DirectExecute("UPDATE coa_ptr_copy_request SET state = {} WHERE id = {} AND state = {}",
+        uint8(RequestState::Loading), id, uint8(RequestState::Pending));
+    return LoginDatabase.Query("SELECT 1 FROM coa_ptr_copy_request WHERE id = {} AND state = {}", id,
+        uint8(RequestState::Loading)) != nullptr;
+}
+
 void LoadCopy(PendingCopy const& copy)
 {
+    if (!Claim(copy.id))
+    {
+        LOG_ERROR("misc", "PTR copy request {} of {} (realm {}, guid {}) could not be claimed and is not loaded",
+            copy.id, copy.sourceName, copy.sourceRealm, copy.sourceGuid);
+        return;
+    }
+
     if (std::optional<std::string> liveName = LiveCopyName(copy))
     {
         Complete(copy.id, RequestState::Failed, Acore::StringFormat(
@@ -263,8 +279,8 @@ void LoadOldestPendingCopy(QueryResult pending)
 std::string FinishedCopiesQuery()
 {
     return Acore::StringFormat("SELECT id, account, source_name, target_realm, state, result, copy_name "
-        "FROM coa_ptr_copy_request WHERE source_realm = {} AND notified = 0 AND state <> {}", realm.Id.Realm,
-        uint8(RequestState::Pending));
+        "FROM coa_ptr_copy_request WHERE source_realm = {} AND notified = 0 AND state IN ({}, {})", realm.Id.Realm,
+        uint8(RequestState::Copied), uint8(RequestState::Failed));
 }
 
 std::unordered_map<uint32, Player*> OnlinePlayersByAccount()
@@ -365,6 +381,7 @@ public:
                 switch (RequestState(fields[1].Get<uint8>()))
                 {
                     case RequestState::Pending:
+                    case RequestState::Loading:
                         statusByGuid[fields[0].Get<uint32>()] = "copy on its way";
                         break;
                     case RequestState::Copied:
