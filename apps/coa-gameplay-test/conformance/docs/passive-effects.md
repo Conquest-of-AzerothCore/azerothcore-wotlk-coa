@@ -210,7 +210,10 @@ server bug), left `unmodelled` and judged instead by the per-cast `behaviour_met
 scripted duration and cooldown. Aggramar's Rage (560650/561346) carried a second entry while the server rewrote its
 crit effect into a classmask-scoped `SPELL_AURA_ADD_FLAT_MODIFIER`; since the 2026-11-10 fix the same contract makes
 effect 0 a Holy-school `SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL` aura, the entry is gone and the generic Holy
-`spell_crit_chance` probe judges it.
+`spell_crit_chance` probe judges it. Real rolls (2026-11-10) show it reaches melee Holy abilities too: rank 2 over
+440 casts each, Chastise (Holy, melee damage class) crit 0 times without the talent and 21 with it (predicted
+chance 0 and 6%), Scourgebane (Holy, magic) 14 and 45 (2.93% and 8.93%), Physical Argent Blade 0 and 0;
+`templar-aggramars-rage-holy-crit-rolls` forces effect 0 to 100 so every Chastise and Scourgebane crits.
 
 A class file's `effect_notes` list (`[{"spell": <id>, "effect": <n>, "reason": "..."}]`) substitutes a specific
 explanation for `classify`'s own generic `unmodelled: ` reason, the same `{spell_id or rank_id, effect}` lookup as
