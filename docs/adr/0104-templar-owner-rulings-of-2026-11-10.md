@@ -74,7 +74,9 @@ For texts only the player's client shows that state the losing option:
   `templar-divine-charge-trample-dbc-radius`.
 - The D6 readings still need their contrast tests (fleeing creature marked against unmarked, max-not-sum haste and
   mounted speed, threat slope x2, armor rising with Agility and with Stamina, Sacred Swing after hit, miss and block);
-  until then those clauses stay unproven.
+  until then those clauses stay unproven. The Templar clause ledger holds Improved Benediction's armor clause with no
+  label, and marks the tick spell 805410's `$SP*.15` clause `no_claim` under D1
+  (`apps/coa-gameplay-test/conformance/docs/clause-ledger.md`).
 - Player-visible texts that contradict a ruling remain: the tick spells' `$SP*.15`, the strike's `$AP*0.15` "over $d",
   the heal's `$SP*0.14+$AP*0.08`, Force of Golganneth's buff tooltip (Physical, `$AP*.4`) and Righteous Tempest's buff
   tooltip, which bills `$570205s1` without spell power. Changing them is a separate owner decision (option 2 above).

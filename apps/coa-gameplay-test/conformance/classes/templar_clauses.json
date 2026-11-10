@@ -1833,9 +1833,7 @@
   {
     "spell": 705287,
     "clause": "Benediction now grants your target armor based on your Agility and Stamina",
-    "labels": [
-      "705287 e1 (unmodelled) -- closed: no check needed"
-    ],
+    "labels": [],
     "kind": "claim"
   },
   {
@@ -3587,10 +3585,9 @@
   {
     "spell": 805410,
     "clause": "Deals Weapon Damage plus ${$m1+0+$SP*.15}.",
-    "labels": [
-      "570205 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "Owner ruling 2026-11-10 (ADR 0104 D1): the tick spell's Description is not the governing text; Righteous Tempest's spellbook $SP*0.3 is judged on its own clause (805409, 807274 hit_mean); this $SP*.15 is a client-only text kept in the owner's register."
   },
   {
     "spell": 805415,

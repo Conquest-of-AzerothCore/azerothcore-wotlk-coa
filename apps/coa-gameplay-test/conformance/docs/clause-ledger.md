@@ -39,6 +39,12 @@ The integrator merges these fragments into the ledger by matching on `(spell, cl
 entry's `labels` (a `kind: "no_claim"` entry is never produced by a fragment; only the ledger's initial
 generation from the clause audit sets it).
 
+An owner ruling is the one other source of `no_claim`: when the owner rules that a tooltip text does not govern
+(it loses to another text the player sees), the commit applying the ruling sets that clause's `kind` to
+`"no_claim"`, empties its `labels` and cites the ruling in `reason`. Example: Righteous Tempest's tick spell
+805410, whose `$SP*.15` loses to the spellbook's `$SP*0.3` (ADR 0104 D1). A ruling that keeps a clause as a claim
+but leaves it without a proving test empties its `labels`, so the clause counts as unproven until that test exists.
+
 ## Coverage
 
 `coverage.clause_coverage(clauses, verdicts)` returns `(proven, total, unproven)`:
