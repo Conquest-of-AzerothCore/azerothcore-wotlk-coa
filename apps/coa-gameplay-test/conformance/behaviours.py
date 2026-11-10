@@ -189,6 +189,9 @@ class FixedTargetCountSpec:
             object.__setattr__(self, 'target_rank', self.cast_spell)
 
 
+FIXED_COUNT_FAR_MARGIN_YD = 5.0
+
+
 def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) -> tuple[dict, list[Expectation]]:
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'fixed_count', spec.quote, spec.expected)
@@ -196,7 +199,9 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
     primary_distance = 3.0
     distances = [primary_distance] + [
         primary_distance + spec.radius * (index / dummy_count) for index in range(1, dummy_count)]
-    creatures = [dummy_fixture(index, class_file, distances[index]) for index in range(dummy_count)]
+    far_index = dummy_count
+    distances.append(primary_distance + spec.radius + FIXED_COUNT_FAR_MARGIN_YD)
+    creatures = [dummy_fixture(index, class_file, distances[index]) for index in range(far_index + 1)]
 
     facts = facts_of(records, spec.cast_spell)
     wait_ms = facts.cast_time_ms + CAST_MARGIN_MS
@@ -214,20 +219,24 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
         return steps
 
     def measure() -> list[dict]:
-        return [hit_measurement(spec, index, AFTER) for index in range(dummy_count)]
+        return [hit_measurement(spec, index, AFTER) for index in range(far_index + 1)]
 
     extra_labels = [hit_label(spec, index, AFTER) for index in range(1, dummy_count)]
+    far_label = hit_label(spec, far_index, AFTER)
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour fixed count',
         'contract': f'{spec.repeats} casts, "ever hit at least once" per dummy, single phase (the breadth is '
-                    f'inherent to the cast, not gated by a separate passive learn): {spec.radius_reason}',
+                    f'inherent to the cast, not gated by a separate passive learn), plus one dummy '
+                    f'{FIXED_COUNT_FAR_MARGIN_YD:g} yd beyond the radius that must stay unhit, proving the limit '
+                    f'and not only the count: {spec.radius_reason}',
         'players': [player_fixture(class_file)],
         'creatures': creatures,
         'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}] +
                  cast_steps() + measure()}
     label = f'{spec.spell} behaviour_fixed_count'
-    model = {'kind': 'fixed_count', 'dummy_labels': extra_labels, 'expected': spec.expected, 'quote': entry.quote}
+    model = {'kind': 'fixed_count', 'dummy_labels': extra_labels, 'far_label': far_label, 'expected': spec.expected,
+             'quote': entry.quote}
     expectation = Expectation(label, BEHAVIOUR_FIXED_COUNT, spec.spell, spec.target_rank, None, str(spec.expected),
                               prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]

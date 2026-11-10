@@ -2013,11 +2013,20 @@ def behaviour_fixed_count_verdict(base: Verdict, run: Run, model: dict) -> Verdi
     expected = float(model['expected'])
     status = delta_status(BEHAVIOUR_FIXED_COUNT, measured, expected)
     margin = delta_margin(BEHAVIOUR_FIXED_COUNT, expected)
+    far_label = model.get('far_label')
+    far_detail = ''
+    if far_label is not None:
+        far_value = run.values.get(far_label)
+        if far_value is None:
+            return replace(base, explanation=missing_measurement(run, far_label))
+        if far_value > 0:
+            status = 'alert'
+        far_detail = f'; beyond-radius dummy hit count {far_value:g} (must stay 0, proving the radius limit)'
     return replace(base, status=status, measured=measured, expected=expected, low=expected - margin,
                    high=expected + margin,
                    explanation=f'{int(measured)} of {len(hits)} additional dummies hit; |measured - expected| <= '
                                f'max({delta_floor(BEHAVIOUR_FIXED_COUNT):g}, {RELATIVE_TOLERANCE:.1%} of expected), '
-                               f'and a measured 0 against a nonzero expected is always an alert')
+                               f'and a measured 0 against a nonzero expected is always an alert{far_detail}')
 
 
 PARTY_STAT_RATIO_TOLERANCE = 1e-4

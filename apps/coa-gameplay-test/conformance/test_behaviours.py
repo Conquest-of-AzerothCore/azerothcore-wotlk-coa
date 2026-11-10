@@ -543,16 +543,25 @@ class FixedTargetCountScenarioTests(unittest.TestCase):
         spec = fixed_target_count_spec(holy_cleave_entry())
         scenario, expectations = fixed_target_count_scenario(CLASS_FILE, spec)
         validated = run.validate(scenario)
-        self.assertEqual(len(validated['creatures']), 2)
+        self.assertEqual(len(validated['creatures']), 3)
         self.assertEqual(len(expectations), 1)
         expectation = expectations[0]
         self.assertEqual(expectation.check, BEHAVIOUR_FIXED_COUNT)
         self.assertTrue(expectation.rule.startswith('prose: "and an additional nearby enemy'))
         self.assertEqual(len(expectation.model['dummy_labels']), 1)
+        self.assertIsNotNone(expectation.model['far_label'])
+
+    def test_far_dummy_sits_beyond_the_radius(self):
+        spec = fixed_target_count_spec(holy_cleave_entry())
+        scenario, _ = fixed_target_count_scenario(CLASS_FILE, spec)
+        validated = run.validate(scenario)
+        creatures_by_id = {c['id']: c for c in validated['creatures']}
+        self.assertGreater(creatures_by_id['extra2']['distance'] - creatures_by_id['primary']['distance'],
+                           spec.radius)
 
     def test_dispatch_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, holy_cleave_entry())
-        self.assertEqual(len(run.validate(scenario)['creatures']), 2)
+        self.assertEqual(len(run.validate(scenario)['creatures']), 3)
         self.assertEqual(expectations[0].check, BEHAVIOUR_FIXED_COUNT)
 
     def test_single_phase_has_no_before_measurement(self):
@@ -561,7 +570,7 @@ class FixedTargetCountScenarioTests(unittest.TestCase):
         measure_steps = [step for step in scenario['steps']
                          if step.get('action') == 'assert' and step.get('metric') == spec.metric
                          and step.get('spell') == spec.target_rank]
-        self.assertEqual(len(measure_steps), 2)
+        self.assertEqual(len(measure_steps), 3)
 
     def test_cast_spell_defaults_to_the_claim_spell(self):
         spec = fixed_target_count_spec(holy_cleave_entry())
@@ -2184,24 +2193,41 @@ class JudgeAllyHealBreadthTests(unittest.TestCase):
 
 
 class JudgeFixedTargetCountTests(unittest.TestCase):
-    def expectation(self, expected=1):
+    def expectation(self, expected=1, far_label='far'):
         model = {'kind': 'fixed_count', 'expected': expected, 'quote': 'and an additional nearby enemy',
-                 'dummy_labels': ['a1']}
+                 'dummy_labels': ['a1'], 'far_label': far_label}
         return Expectation('label', BEHAVIOUR_FIXED_COUNT, HOLY_CLEAVE, HOLY_CLEAVE, None, '1',
                            'prose: "and an additional nearby enemy" (573049)', model)
 
-    def test_measured_count_matches_expected_is_ok(self):
+    def test_measured_count_matches_expected_and_far_dummy_unhit_is_ok(self):
         expectation = self.expectation()
-        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 1.0}), expectation)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 1.0, 'far': 0.0}), expectation)
         self.assertEqual(verdict.status, 'ok')
         self.assertEqual(verdict.measured, 1.0)
 
     def test_seeded_zero_hit_against_a_nonzero_expectation_fails(self):
         expectation = self.expectation()
-        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 0.0}), expectation)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 0.0, 'far': 0.0}), expectation)
         self.assertEqual(verdict.status, 'alert')
         self.assertEqual(verdict.measured, 0.0)
         self.assertEqual(verdict.expected, 1.0)
+
+    def test_seeded_far_dummy_hit_fails_even_though_the_near_count_matches(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 1.0, 'far': 1.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('beyond-radius dummy hit count 1', verdict.explanation)
+
+    def test_missing_far_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 1.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('far', verdict.explanation)
+
+    def test_no_far_label_skips_the_radius_check(self):
+        expectation = self.expectation(far_label=None)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 1.0}), expectation)
+        self.assertEqual(verdict.status, 'ok')
 
     def test_missing_measurement_leaves_alert_with_explanation(self):
         expectation = self.expectation()
