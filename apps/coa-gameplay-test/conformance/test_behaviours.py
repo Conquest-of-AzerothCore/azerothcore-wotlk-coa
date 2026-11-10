@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA,
-                        BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_COMBAT,
+                        BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_HEAL_BLOCK,
                         BEHAVIOUR_CAST_CONDITION,
                         BEHAVIOUR_CAST_GATE,
                         BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
@@ -40,7 +40,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_AGGRO_
                         fixed_target_count_scenario, fixed_target_count_spec,
                         group_stack_cap_scenario, group_stack_cap_spec,
                         health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
-                        healing_ratio_spec, icd_gate_scenario, icd_gate_spec,
+                        healing_ratio_spec, heal_block_scenario, heal_block_spec, icd_gate_scenario, icd_gate_spec,
                         internal_cooldown_scenario, internal_cooldown_spec, leech_heal_modifier_factor,
                         leech_ratio_scenario, leech_ratio_spec,
                         mechanic_duration_scenario, mechanic_duration_spec, metric_delta_label, metric_delta_scenario,
@@ -152,6 +152,7 @@ BECKON = 804914
 ABSOLUTION = 800424
 REBUKE = 525051
 HARMONIC_DISPOSITION = 560653
+INTERDICT = 560116
 
 
 def scarlet_judicator_entry() -> dict:
@@ -328,6 +329,11 @@ def testament_of_fortitude_dispel_entry() -> dict:
 
 def harmonic_disposition_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == HARMONIC_DISPOSITION)
+
+
+def interdict_heal_block_entry(variant: str) -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+               if entry['spell'] == INTERDICT and entry.get('variant') == variant)
 
 
 def whirling_tempest_stacks_with_courage_entry() -> dict:
@@ -568,7 +574,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 72)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 75)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -4651,6 +4657,82 @@ class JudgeAuraPresenceTests(unittest.TestCase):
         expectation = self.expectation()
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 1.0, 'after': 1.0}), expectation)
         self.assertEqual(verdict.status, 'alert')
+
+
+class HealBlockScenarioTests(unittest.TestCase):
+    def test_scenario_validates_and_shapes_one_blocked_expectation_for_undead(self):
+        spec = heal_block_spec(interdict_heal_block_entry('undead'))
+        scenario, expectations = heal_block_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_HEAL_BLOCK)
+        self.assertEqual(expectation.model['blocked'], True)
+        self.assertTrue(expectation.rule.startswith(
+            'prose: "If they are an Undead or Demon they are unable to be healed for the duration."'))
+
+    def test_scenario_shapes_an_unblocked_expectation_for_the_control(self):
+        spec = heal_block_spec(interdict_heal_block_entry('control'))
+        scenario, expectations = heal_block_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(expectations[0].model['blocked'], False)
+
+    def test_silence_cast_comes_between_the_before_and_after_aura_measurements(self):
+        spec = heal_block_spec(interdict_heal_block_entry('undead'))
+        scenario, _ = heal_block_scenario(CLASS_FILE, spec)
+        cast_index = next(index for index, step in enumerate(scenario['steps'])
+                          if step.get('action') == 'cast' and step.get('spell') == INTERDICT)
+        self.assertEqual(scenario['steps'][cast_index]['target'], 'dummy')
+        measure_indexes = [index for index, step in enumerate(scenario['steps'])
+                          if step.get('metric') == 'aura' and step.get('spell') == 561309]
+        self.assertEqual(len(measure_indexes), 2)
+        self.assertTrue(all(step['actor'] == 'dummy' for index, step in enumerate(scenario['steps'])
+                            if index in measure_indexes))
+        self.assertLess(measure_indexes[0], cast_index)
+        self.assertLess(cast_index, measure_indexes[1])
+
+    def test_creature_fixture_uses_the_entry_s_own_creature_type(self):
+        spec = heal_block_spec(interdict_heal_block_entry('demon'))
+        scenario, _ = heal_block_scenario(CLASS_FILE, spec)
+        self.assertEqual(scenario['creatures'][0]['entry'], 416)
+        self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
+
+    def test_dispatch_interdict_through_behaviour_scenario(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, interdict_heal_block_entry('undead'))
+        run.validate(scenario)
+        self.assertEqual(len(expectations), 1)
+
+
+class JudgeHealBlockTests(unittest.TestCase):
+    def expectation(self, blocked: bool) -> Expectation:
+        model = {'kind': 'heal_block', 'before_label': 'before', 'after_label': 'after', 'blocked': blocked,
+                 'quote': 'If they are an Undead or Demon they are unable to be healed for the duration.'}
+        return Expectation('label', BEHAVIOUR_HEAL_BLOCK, INTERDICT, INTERDICT, None,
+                           'blocked' if blocked else 'heals',
+                           'prose: "If they are an Undead or Demon they are unable to be healed for the '
+                           'duration." (560116)', model)
+
+    def test_block_aura_present_after_the_cast_is_ok(self):
+        expectation = self.expectation(True)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 0.0, 'after': 1.0}), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_block_aura_absent_although_it_should_be_present_is_an_alert(self):
+        expectation = self.expectation(True)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 0.0, 'after': 0.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 0.0)
+
+    def test_block_aura_absent_on_the_unblocked_control_is_ok(self):
+        expectation = self.expectation(False)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 0.0, 'after': 0.0}), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_block_aura_present_on_the_control_is_an_alert(self):
+        expectation = self.expectation(False)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 0.0, 'after': 1.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 1.0)
 
 
 if __name__ == '__main__':

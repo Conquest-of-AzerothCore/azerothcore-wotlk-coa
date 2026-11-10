@@ -117,6 +117,9 @@ class templar_casts : public AllSpellScript
         if (!player || !target)
             return;
         SpellInfo const* info = spell->GetSpellInfo();
+        if (info->Id == 561309 && target->GetCreatureType() != CREATURE_TYPE_UNDEAD &&
+            target->GetCreatureType() != CREATURE_TYPE_DEMON)
+            hit.missCondition = SPELL_MISS_IMMUNE;
         if (Named(info, 804929))
             spell->SetScriptValue(801832, 1);
         float factor = 1.0f;

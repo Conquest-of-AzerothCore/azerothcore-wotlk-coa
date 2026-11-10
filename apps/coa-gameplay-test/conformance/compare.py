@@ -14,7 +14,8 @@ from behaviours import (BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA, BEHAVI
                         BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
                         BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
                         BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_FIXED_COUNT,
-                        BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
+                        BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_INTERNAL_COOLDOWN,
+                        BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
                         BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
                         BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO,
                         BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER)
@@ -2182,6 +2183,24 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
                    high=expected + tolerance, explanation=explanation)
 
 
+def behaviour_heal_block_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    before = run.values.get(model['before_label'])
+    after = run.values.get(model['after_label'])
+    if before is None or after is None:
+        return replace(base, explanation=missing_measurement(run, model['before_label'] if before is None
+                                                              else model['after_label']))
+    blocked = bool(model['blocked'])
+    expected = 1.0 if blocked else 0.0
+    before_ok = abs(before - 0.0) <= METRIC_DELTA_FLOAT_TOLERANCE
+    after_ok = abs(after - expected) <= METRIC_DELTA_FLOAT_TOLERANCE
+    status = 'ok' if before_ok and after_ok else 'alert'
+    requirement = ('the heal-block aura must be present after the cast' if blocked
+                   else 'the heal-block aura must stay absent after the cast')
+    return replace(base, status=status, measured=after, expected=expected, low=expected, high=expected,
+                   explanation=f'aura measured {before:g} before the cast (expected 0) and {after:g} after '
+                               f'(expected {expected:g}); {requirement}')
+
+
 def behaviour_duration_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     before = run.values.get(model['before_label'])
     after = run.values.get(model['after_label'])
@@ -2654,6 +2673,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_trigger_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_METRIC_DELTA:
         return behaviour_metric_delta_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_HEAL_BLOCK:
+        return behaviour_heal_block_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_DURATION:
         return behaviour_duration_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_DURATION_RATIO:

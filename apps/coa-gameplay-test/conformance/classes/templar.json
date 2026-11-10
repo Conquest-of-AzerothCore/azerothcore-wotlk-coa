@@ -2260,6 +2260,24 @@
       "quote": "and granting the ability to walk on water.",
       "metric": "water_walk", "fields": {}, "target": "ally", "wait_ms": 1500,
       "reason": "560653 EffectImplicitTargetA[1]=1 (TARGET_UNIT_CASTER), Effect[1]=65 (SPELL_EFFECT_APPLY_AREA_AURA_RAID), EffectApplyAuraName[1]=104 (SPELL_AURA_WATER_WALK, Unit::HasWaterWalkAura/SpellAuraDefines.h:167), EffectRadiusIndex[1]=23 (SpellRadius.dbc id 23, 40 yd); an AREA_AURA_RAID effect is carried by the caster and the server's own area-aura update re-applies its aura to every nearby raid/party member within radius, so a grouped ally (player_fixture spawns co-located with the caster, well inside 40 yd) must gain the water_walk aura once the caster has it, not only the caster itself. Range.dbc id 1 is Self Only, so the cast targets the caster; the party grouping (the 'group' action) is what puts the second player fixture in range of the area-aura system, matching the tooltip's own 'nearby party and raid members' clause this spell's Description opens with."
+    },
+    {
+      "spell": 560116, "name": "Interdict", "kind": "heal_block",
+      "quote": "If they are an Undead or Demon they are unable to be healed for the duration.",
+      "creature_entry": 201, "block_spell": 561309, "blocked": true, "variant": "undead",
+      "reason": "560116 Effect[0]=6 (SPELL_EFFECT_APPLY_AURA, SPELL_AURA_MOD_SILENCE) plus Effect[1]=64 (SPELL_EFFECT_TRIGGER_SPELL, EffectTriggerSpell[1]=561309 'Atone for your Sins!'); 561309's own Effect[0]=6 applies SPELL_AURA_MOD_HEALING_PCT EffectBasePoints -101 unconditionally (Spell::EffectTriggerSpell at SpellEffects.cpp has no per-spell creature-type gate for any trigger spell, confirmed by reading the function and grepping src/server/coa for 560116/561309, both absent before this round's fix), over-applying the heal block to every target regardless of type -- a Templar server defect now fixed in AscensionTemplarAbilities.cpp's OnSpellCalculatedTarget (templar_casts), which sets hit.missCondition = SPELL_MISS_IMMUNE for the 561309 trigger cast when the target's GetCreatureType() is neither CREATURE_TYPE_UNDEAD nor CREATURE_TYPE_DEMON, suppressing the heal-block aura on non-Undead/Demon targets while leaving it intact on Undead/Demon ones. Creature entry 201 (Brittlebones Skeleton, creature_template.type=6 Undead) proves the block holds on Undead: 561309 is measured present (aura metric) on the target after the cast. A creature self-cast of a direct heal spell was tried first as the measurement and found unreliable in this harness independent of Interdict (a bare self-heal cast by an owned TempSummon never actually applies, with no error reported, for a reason this round did not chase further since the aura-presence measurement sidesteps it entirely and is the more precise, more direct signal of the mechanism anyway)."
+    },
+    {
+      "spell": 560116, "name": "Interdict", "kind": "heal_block",
+      "quote": "If they are an Undead or Demon they are unable to be healed for the duration.",
+      "creature_entry": 416, "block_spell": 561309, "blocked": true, "variant": "demon",
+      "reason": "Same mechanism and fix as the 201 (Undead) entry above; creature entry 416 (Imp, creature_template.type=3 Demon) proves the block also holds on Demon, the tooltip's other named type."
+    },
+    {
+      "spell": 560116, "name": "Interdict", "kind": "heal_block",
+      "quote": "If they are an Undead or Demon they are unable to be healed for the duration.",
+      "creature_entry": 36, "block_spell": 561309, "blocked": false, "variant": "control",
+      "reason": "Same mechanism as the 201/416 entries above; creature entry 36 (Harvest Golem, creature_template.type=9 Mechanical, already used elsewhere in this tool as DUMMY_ENTRY) is neither Undead nor Demon, so 561309 must stay absent after the cast. This is the positive control proving the check actually measures something (an unconditional-block defect would also pass the Undead/Demon entries vacuously), and is itself the regression check for the fix: before this round's fix, 561309 applied unconditionally and this control would have alerted (561309 present on a non-Undead/Demon target)."
     }
   ],
   "player_observations": [

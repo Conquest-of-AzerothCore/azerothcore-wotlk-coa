@@ -36,6 +36,7 @@ BEHAVIOUR_MOUNT_GRANT = 'behaviour_mount_grant'
 BEHAVIOUR_INTERNAL_COOLDOWN = 'behaviour_internal_cooldown'
 BEHAVIOUR_CAST_COMBAT = 'behaviour_cast_combat'
 BEHAVIOUR_AGGRO_REDIRECT = 'behaviour_aggro_redirect'
+BEHAVIOUR_HEAL_BLOCK = 'behaviour_heal_block'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
@@ -43,12 +44,13 @@ BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVI
                     BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_CRIT_MAGNITUDE,
                     BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_PARTY_STAT_RATIO,
                     BEHAVIOUR_CAST_GATE, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_MOUNT_GRANT,
-                    BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_AGGRO_REDIRECT)
+                    BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_AGGRO_REDIRECT,
+                    BEHAVIOUR_HEAL_BLOCK)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
         'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition', 'mount_grant',
-        'internal_cooldown', 'cast_combat', 'aggro_redirect', 'dispel_removal', 'aura_presence')
+        'internal_cooldown', 'cast_combat', 'aggro_redirect', 'dispel_removal', 'aura_presence', 'heal_block')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1203,6 +1205,71 @@ def aura_presence_spec(entry: dict) -> AuraPresenceSpec:
     return AuraPresenceSpec(entry['spell'], entry['name'], entry['quote'], entry['metric'], entry.get('fields', {}),
                             entry.get('target', CASTER), entry.get('wait_ms', DEFAULT_AURA_PRESENCE_WAIT_MS),
                             entry.get('label_suffix', ''))
+
+
+DEFAULT_HEAL_BLOCK_WAIT_MS = 1000
+
+
+@dataclass(frozen=True)
+class HealBlockSpec:
+    spell: int
+    name: str
+    quote: str
+    creature_entry: int
+    block_spell: int
+    blocked: bool
+    wait_ms: int = DEFAULT_HEAL_BLOCK_WAIT_MS
+    label_suffix: str = ''
+
+
+def heal_block_label(spec: HealBlockSpec, moment: str) -> str:
+    return f'{spec.spell} aura {spec.block_spell} {spec.creature_entry} {moment}'
+
+
+def heal_block_scenario(class_file: dict, spec: HealBlockSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'heal_block', spec.quote, 1.0 if spec.blocked else 0.0)
+    facts = facts_of(records, spec.spell)
+
+    before_label = heal_block_label(spec, BEFORE)
+    after_label = heal_block_label(spec, AFTER)
+
+    cast_steps = []
+    if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+        cast_steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
+                           'value': facts.mana_cost})
+    cast_steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell})
+    cast_steps += required_aura_steps(facts)
+    cast_steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': TARGET})
+    cast_steps.append({'action': 'wait', 'ms': spec.wait_ms})
+
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour heal block '
+                f'{spec.creature_entry}',
+        'contract': f'{spec.spell} cast on a creature (entry {spec.creature_entry}); the creature\'s own '
+                    f'{spec.block_spell} (the heal-block aura {spec.spell} triggers) is measured before the cast '
+                    f'and {spec.wait_ms} ms after.',
+        'players': [player_fixture(class_file)],
+        'creatures': [{'id': TARGET, 'owner': CASTER, 'entry': spec.creature_entry, 'level': class_file['level'],
+                       'health': 100000, 'distance': 3, 'stationary': True}],
+        'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] +
+                 [measurement(before_label, TARGET, 'aura', spell=spec.block_spell)] + cast_steps +
+                 [measurement(after_label, TARGET, 'aura', spell=spec.block_spell)]}
+
+    model = {'kind': 'heal_block', 'before_label': before_label, 'after_label': after_label, 'blocked': spec.blocked,
+             'quote': entry.quote}
+    label = f'{spec.spell} behaviour_heal_block {spec.creature_entry}' + \
+        (f' {spec.label_suffix}' if spec.label_suffix else '')
+    expectation = Expectation(label, BEHAVIOUR_HEAL_BLOCK, spec.spell, spec.spell, None,
+                              'blocked' if spec.blocked else 'heals', prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def heal_block_spec(entry: dict) -> HealBlockSpec:
+    return HealBlockSpec(entry['spell'], entry['name'], entry['quote'], entry['creature_entry'], entry['block_spell'],
+                        entry['blocked'], entry.get('wait_ms', DEFAULT_HEAL_BLOCK_WAIT_MS),
+                        entry.get('label_suffix', ''))
 
 
 DEBT_ASSERT_TIMEOUT_MS = 2000
@@ -2877,6 +2944,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return dispel_removal_scenario(class_file, dispel_removal_spec(entry))
     if entry['kind'] == 'aura_presence':
         return aura_presence_scenario(class_file, aura_presence_spec(entry))
+    if entry['kind'] == 'heal_block':
+        return heal_block_scenario(class_file, heal_block_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 
