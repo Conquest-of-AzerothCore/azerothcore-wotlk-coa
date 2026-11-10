@@ -24,11 +24,11 @@
     },
     {
       "action": "assert",
-      "label": "The Mythic difficulty string (SMSG_PATCH_GLOBAL_STRINGS)",
+      "label": "The Mythic difficulty string (SMSG_PATCH_GLOBAL_STRINGS; PvE Power and Fel Commutation send theirs too)",
       "actor": "hero",
       "metric": "server_packets",
       "opcode": 1654,
-      "equals": 1
+      "min": 1
     },
     {
       "action": "assert",
