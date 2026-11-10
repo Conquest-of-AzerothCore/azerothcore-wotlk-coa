@@ -1707,6 +1707,27 @@
       "trigger_spell": 805409, "oath_spells": [804904, 804922], "oath_effect": 2,
       "settle_ms": 500, "expire_margin_ms": 1500,
       "source": "805409 is exempt from AscensionTemplarAbilities.cpp:174's unconditional ClearOaths on a Breaker cast (!Named(info, 805409)), so it never clears Oaths at cast time unlike every other oath_consumption entry above. AscensionTemplarAuras.cpp's aura_ascension_templar_lifecycle::Calculate (id == 805409, index == 0) instead sums max(0, GetAuraEffect(oath, EFFECT_2)->GetAmount()) over {804904, 804922, 804924, 805332} into GetAura()->SetScriptValue(805409, bonus), read back by AscensionTemplarAbilities.cpp's OnSpellCalculatedTarget as factor *= 1.0f + scriptValue/100.0f on every RighteousTempest() hit (805410, 570200-570205). The Oaths are cleared only by ::Remove's own Named(GetSpellInfo(), 805409) branch, which runs AfterEffectRemove for AURA_EFFECT_HANDLE_REAL with no remove-mode filter, so a natural expiry fires it exactly like a manual dispel. coa-dbc-viewer record confirms all four summed Oaths' own EFFECT_2 is SPELL_AURA_ADD_PCT_MODIFIER with EffectBasePoints[2] == 29 and EffectDieSides[2] == 1 (SpellEffectInfo::CalcValue's die roll adds +1, giving a live aura_amount of 30 for each, confirmed by reading it directly rather than hand-deriving it); 804904 and 804922 (two different Oath types) are fixtured together so the scenario proves the sum is genuinely additive across distinct Oaths, not a single id's own amount reused. 805409's own DurationIndex is 27 (SpellDuration.dbc: 3000 ms), so settle_ms 500 reads the baked-in bonus and the still-held Oaths well before expiry, and expire_margin_ms 1500 on top of the remaining 2500 ms reliably outlasts the natural removal."
+    },
+    {
+      "spell": 680397, "name": "Disciplined Blows", "kind": "internal_cooldown_gate",
+      "quote": "Cnly occur once every 0.5 sec.",
+      "trigger_spell": 578276, "observe_spell": 680398, "internal_cooldown_ms": 500,
+      "target": "self", "caster_health_pct": 50,
+      "source": "AscensionTemplarEvents.cpp:74-76 (aura_ascension_templar_event::Check, case 680397): fires only when !State(player).cooldowns.HasTimeUntilEvent(680397). Proc() (line 157-159) unconditionally schedules State(player).cooldowns.ScheduleEvent(680397, 500ms) on every fire, a per-player world-tick timer distinct from the engine's own spell_proc.Cooldown column (the spell_proc row this aura carries, rev_20260909_04_templar_completion.sql line 10-11, has no Cooldown value, confirming the gate is this scripted timer, not Aura::IsProcOnCooldown). Casting 578276 (Benediction) at self three times, spaced 250 ms then 750 ms apart (total 1000 ms, 500 ms past the window), must show no new 680398 cast between the first two and exactly one between the last two."
+    },
+    {
+      "spell": 705298, "name": "Untainted", "kind": "internal_cooldown_gate",
+      "quote": "Can only occur every 15 sec.",
+      "trigger_spell": 803792, "observe_spell": 705299, "internal_cooldown_ms": 15000,
+      "target": "ally", "caster_health_pct": 50, "restore_charges": true,
+      "source": "AscensionTemplarEvents.cpp:77-79 (Check, case 705298): fires only when !State(player).cooldowns.HasTimeUntilEvent(705298). Proc() (line 161-163) schedules ScheduleEvent(705298, 15s) on every fire, the same per-player timer as 680397. Reuses the trigger shape (cast 803792 at an ally, caster_health_pct 50, restore_charges) already proven by this aura's existing triggers.py proc_rate entry. Casting 803792 three times, spaced 7500 ms then 8000 ms apart (total 15500 ms, 500 ms past the window), must show no new 705299 cast between the first two and exactly one between the last two. 803792's own Effect[0] is SPELL_EFFECT_CHARGE (coa-dbc-viewer record) with RangeMin 5 yd/RangeMax 30 yd (SpellRange.dbc id 54): a first attempt without a per-attempt relocate measured two real SPELL_FAILED_TOO_CLOSE (128) cast failures (round10/judging-work/step9/run1, stamp 20261110-021200) because the charge itself pulls the caster to melee range of the ally on every successful cast, leaving it inside the 5 yd minimum for the next attempt; `icd_gate_attempt_fixtures` now relocates the caster +10 yd (CHARGE_OFFSET_YD) before every attempt, not once, matching `triggers.py`'s own `closes_distance`-gated relocate fixture for this same charge effect."
+    },
+    {
+      "spell": 805415, "name": "Scarlet Champion", "kind": "internal_cooldown_gate",
+      "quote": "Can only occur once per sec.",
+      "trigger_spell": 807268, "observe_spell": 805416, "internal_cooldown_ms": 1000,
+      "target": "dummy", "force_crit": "melee",
+      "source": "AscensionTemplarEvents.cpp:91-92 (Check, case 805415): fires only when !State(player).cooldowns.HasTimeUntilEvent(805415). Proc() (line 178-179) schedules ScheduleEvent(805415, 1s) on every fire, the same per-player timer mechanism. Casting 807268 (Argent Blade, forced to crit) three times, spaced 500 ms then 1000 ms apart (total 1500 ms, 500 ms past the window), must show no new 805416 cast between the first two and exactly one between the last two."
     }
   ],
   "player_observations": [

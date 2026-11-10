@@ -1340,7 +1340,9 @@
   {
     "spell": 680397,
     "clause": "Can only occur once every 0.5 sec.",
-    "labels": [],
+    "labels": [
+      "680397 behaviour_internal_cooldown_gate"
+    ],
     "kind": "claim"
   },
   {
@@ -1936,7 +1938,9 @@
   {
     "spell": 705298,
     "clause": "Can only occur every 15 sec.",
-    "labels": [],
+    "labels": [
+      "705298 behaviour_internal_cooldown_gate"
+    ],
     "kind": "claim"
   },
   {
@@ -3455,7 +3459,9 @@
   {
     "spell": 805409,
     "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
-    "labels": ["805409 behaviour_oath_consumption_removal"],
+    "labels": [
+      "805409 behaviour_oath_consumption_removal"
+    ],
     "kind": "claim"
   },
   {
@@ -3494,7 +3500,9 @@
   {
     "spell": 805415,
     "clause": "Can only occur once per sec.",
-    "labels": [],
+    "labels": [
+      "805415 behaviour_internal_cooldown_gate"
+    ],
     "kind": "claim"
   },
   {

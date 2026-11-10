@@ -478,6 +478,26 @@ in this file uses. Either a wrong "still held" stacks reading (not 1) right afte
 "removed" stacks reading (not 0) once the aura has expired always downgrades an otherwise-passing verdict to
 `alert`.
 
+### Internal-cooldown-gate scenarios (`behaviour_internal_cooldown_gate`, `kind: "internal_cooldown_gate"`)
+
+Some proc tooltips end in a sentence no existing kind measures: "Can only occur every/once per ...". The gating
+auras already have proven `trigger_count` proc entries in `triggers.py`, but those entries deliberately space
+every attempt past the cooldown (via `internal_cooldown_ms`) so the rate check is never contaminated by the
+gate — which also means they never actually exercise the gate's own window. `AscensionTemplarEvents.cpp`'s
+`Check`/`Proc` enforce it with a per-player `State(player).cooldowns` world-tick timer the CoA scripts own
+directly (`ScheduleEvent`/`HasTimeUntilEvent`), not the engine's native `Aura::IsProcOnCooldown` (ADR 0059).
+
+`icd_gate_scenario` casts `trigger_spell` three times (via `hits.cast_steps`, which resets its cooldown, sets its
+power cost and applies `required_aura_steps` before each cast, plus any `restore_charges`/`caster_health_pct`
+fixture reapplied every time): the gap after the first cast is half of `internal_cooldown_ms` (inside the
+window), the gap after the second is the remaining half plus `reopen_margin_ms` (default 500 ms, past it).
+`observe_spell`'s cumulative `spell_cast_count` is read right after each cast.
+
+The judge (`compare.behaviour_internal_cooldown_gate_verdict`) checks the delta between the first two readings
+first: nonzero is an immediate `alert` (fired again before the window closed). Only then does it check the delta
+between the last two readings: exactly `+1` is `ok`, anything else `alert`. No tolerated band — an integer event
+count at a fixed timing boundary has no near-miss.
+
 ### Templar entries
 
 | Passive | Kind | Quote | Expected | Mechanism |
@@ -515,6 +535,9 @@ in this file uses. Either a wrong "still held" stacks reading (not 1) right afte
 | Blade of Faith 803872 | oath_consumption (`oath_spell: 804903`, `periodic: true`) | "Consumes your Oaths, dealing additional damage for each consumed." | flat +25 | 803872 is a periodic-damage spell, so its formula reads `SPELLMOD_DOT` instead of `SPELLMOD_DAMAGE`; only 804903 ("Oath: Holy Cleave") carries a `SPELLMOD_DOT`-keyed `ADD_FLAT_MODIFIER` effect matching 803872's `SpellFamilyFlags[1]` bit 2048 (the other 4 Oaths' matching effect is `SPELLMOD_DAMAGE`-keyed, never consulted by a DOT formula read); ground-truthed with `spell_modifier` (base 1000, op 22): 1000 -> 1025 exactly; `ok` in both runs, independent of the open dot-overshoot question (`round10/questions-judging.md`), which concerns 803872's own base `periodic_total` value, not this Oath delta |
 | Reckoning 805421 (`trigger_spell: 572741`, its max rank) | oath_consumption (`oath_spell: 804904`) | "Consumes your Oaths, dealing additional damage for each consumed." | ratio 1.365 | same mechanism and ground-truthed ratio as Righteous Upheaval, proven via 805421's own max castable rank, 572741, the same spell the class file's existing headline-damage checks for this clause already use; `ok` in both runs |
 | Righteous Tempest 805409 | oath_consumption_removal (`oath_spells: [804904, 804922]`) | "Consumes your Oaths, dealing additional damage for each consumed." | `aura_script_value` == summed `aura_amount` (both Oaths read 30 each, ground-truthed live, not hand-derived) | `aura_ascension_templar_lifecycle::Calculate` bakes the sum of the two fixtured Oaths' own `EFFECT_2` `aura_amount` into 805409's own aura `SetScriptValue(805409, ...)` at cast time; both Oaths' `aura_stacks` still read 1 immediately after the cast (not consumed by casting) and 0 once the aura expires naturally 3000 ms later plus margin (consumed only by `::Remove`); `ok` in both runs |
+| Disciplined Blows 680397 | internal_cooldown_gate (`trigger_spell: 578276`, `internal_cooldown_ms: 500`) | "Cnly occur once every 0.5 sec." | no new event 250 ms after the first fire, exactly 1 new event 750 ms after that | `AscensionTemplarEvents.cpp:74-76,157-159`'s `State(player).cooldowns` timer, not `spell_proc.Cooldown`; `ok` in both runs |
+| Untainted 705298 | internal_cooldown_gate (`trigger_spell: 803792`, `internal_cooldown_ms: 15000`, `restore_charges: true`) | "Can only occur every 15 sec." | no new event 7500 ms after the first fire, exactly 1 new event 8000 ms after that | same `State(player).cooldowns` timer mechanism; 803792's own `SPELL_EFFECT_CHARGE` pulls the caster to melee range of the ally on every successful cast, so `icd_gate_attempt_fixtures` relocates the caster +10 yd before every attempt (not once), matching the 5-30 yd range its `SpellRange.dbc` entry needs; a first attempt without the per-attempt relocate measured two real `SPELL_FAILED_TOO_CLOSE` cast failures; `ok` in both runs |
+| Scarlet Champion 805415 | internal_cooldown_gate (`trigger_spell: 807268`, `internal_cooldown_ms: 1000`, `force_crit: melee`) | "Can only occur once per sec." | no new event 500 ms after the first fire, exactly 1 new event 1000 ms after that | same `State(player).cooldowns` timer mechanism; `ok` in both runs |
 
 The 10-yard and 8-yard fixture radii above are both read from server source, never guessed, per each entry's own
 `radius_reason`.

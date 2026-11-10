@@ -79,6 +79,7 @@ BEHAVIOUR_LABELS = {
     'aura_grant': lambda entry: [f"{entry['spell']} behaviour_aura_grant"],
     'oath_consumption': lambda entry: [f"{entry['spell']} behaviour_oath_consumption"],
     'oath_consumption_removal': lambda entry: [f"{entry['spell']} behaviour_oath_consumption_removal"],
+    'internal_cooldown_gate': lambda entry: [f"{entry['spell']} behaviour_internal_cooldown_gate"],
 }
 FAMILY_REASONS = {
     'P5': 'proc or trigger effect without a trigger entry',

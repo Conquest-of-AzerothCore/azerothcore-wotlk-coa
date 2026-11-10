@@ -11,8 +11,9 @@ from typing import Callable, Mapping, Protocol
 
 from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT,
                         BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
-                        BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION,
-                        BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
+                        BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA,
+                        BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO,
+                        BEHAVIOUR_TRIGGER)
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
@@ -2140,6 +2141,29 @@ def behaviour_oath_consumption_removal_verdict(base: Verdict, run: Run, model: d
     return verdict
 
 
+def behaviour_internal_cooldown_gate_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    labels = ('after1_label', 'after2_label', 'after3_label')
+    values = {label: run.values.get(model[label]) for label in labels}
+    missing = next((model[label] for label, value in values.items() if value is None), None)
+    if missing:
+        return replace(base, explanation=missing_measurement(run, missing))
+    after1, after2, after3 = values['after1_label'], values['after2_label'], values['after3_label']
+    icd = model['internal_cooldown_ms']
+    blocked_delta = after2 - after1
+    if blocked_delta != 0:
+        return replace(base, status='alert', measured=blocked_delta, expected=0.0, low=0.0, high=0.0,
+                       explanation=f'{model["after2_label"]} fired {blocked_delta:+g} times {model["short_gap_ms"]} '
+                                   f'ms after the first cast, before its own {icd:g} ms internal cooldown elapsed '
+                                   f'({model["quote"]!r})')
+    reopened_delta = after3 - after2
+    status = 'ok' if reopened_delta == 1 else 'alert'
+    return replace(base, status=status, measured=reopened_delta, expected=1.0, low=1.0, high=1.0,
+                   explanation=f'no event between the first and second cast ({model["short_gap_ms"]} ms apart, '
+                               f'inside the {icd:g} ms internal cooldown); {reopened_delta:+g} event(s) between '
+                               f'the second and third ({model["reopen_gap_ms"]} ms apart, {icd:g} ms internal '
+                               f'cooldown plus margin) ({model["quote"]!r})')
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
@@ -2170,6 +2194,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_oath_consumption_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_OATH_CONSUMPTION_REMOVAL:
         return behaviour_oath_consumption_removal_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_INTERNAL_COOLDOWN_GATE:
+        return behaviour_internal_cooldown_gate_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 

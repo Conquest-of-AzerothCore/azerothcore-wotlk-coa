@@ -2,12 +2,12 @@ from dataclasses import dataclass
 from pathlib import Path
 import re
 
-from hits import DRAIN_MS, MAIN_HAND, TIMEOUT_MARGIN_MS, aura_modifiers, creature_fixture
+from hits import DRAIN_MS, MAIN_HAND, TIMEOUT_MARGIN_MS, aura_modifiers, cast_steps, creature_fixture
 from procs import swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import COLOR_CODE, Records
-from values import (CAST_MARGIN_MS, FORCED_CRIT_RATING, Expectation, TARGET, armed_for, dataset, facts_of,
-                    fixture_health_step, required_aura_steps, required_target_health_steps)
+from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, FORCED_CRIT_RATING, Expectation, TARGET, armed_for,
+                    dataset, facts_of, fixture_health_step, required_aura_steps, required_target_health_steps)
 
 BEHAVIOUR_COUNT = 'behaviour_count'
 BEHAVIOUR_RATIO = 'behaviour_ratio'
@@ -21,12 +21,14 @@ BEHAVIOUR_CRIT_GUARANTEE = 'behaviour_crit_guarantee'
 BEHAVIOUR_AURA_GRANT = 'behaviour_aura_grant'
 BEHAVIOUR_OATH_CONSUMPTION = 'behaviour_oath_consumption'
 BEHAVIOUR_OATH_CONSUMPTION_REMOVAL = 'behaviour_oath_consumption_removal'
+BEHAVIOUR_INTERNAL_COOLDOWN_GATE = 'behaviour_internal_cooldown_gate'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
-                    BEHAVIOUR_OATH_CONSUMPTION_REMOVAL)
+                    BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_INTERNAL_COOLDOWN_GATE)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
-        'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal')
+        'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
+        'internal_cooldown_gate')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 PROSE = 'prose: '
@@ -1133,6 +1135,95 @@ def oath_consumption_removal_spec(entry: dict) -> OathConsumptionRemovalSpec:
                                       entry.get('expire_margin_ms', OATH_CONSUMPTION_REMOVAL_EXPIRE_MARGIN_MS))
 
 
+ICD_GATE_REOPEN_MARGIN_MS = 500
+ICD_GATE_FORCE_CRIT_RATINGS = {'melee': 'melee_crit_rating', 'spell': 'spell_crit_rating'}
+
+
+@dataclass(frozen=True)
+class IcdGateSpec:
+    spell: int
+    name: str
+    quote: str
+    trigger_spell: int
+    observe_spell: int
+    internal_cooldown_ms: int
+    target: str | None = TARGET
+    caster_health_pct: int | None = None
+    restore_charges: bool = False
+    force_crit: str | None = None
+    reopen_margin_ms: int = ICD_GATE_REOPEN_MARGIN_MS
+
+
+def icd_gate_label(spec: IcdGateSpec, moment: str) -> str:
+    return f'{spec.spell} spell_cast_count icd_gate_{moment}'
+
+
+def icd_gate_attempt_fixtures(spec: IcdGateSpec) -> list[dict]:
+    fixtures = []
+    if spec.target == ALLY:
+        fixtures.append({'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD})
+    if spec.restore_charges:
+        fixtures.append({'action': 'restore_charges', 'actor': CASTER, 'spell': spec.trigger_spell})
+    if spec.caster_health_pct is not None:
+        fixtures.append(fixture_health_step(CASTER, spec.caster_health_pct))
+    return fixtures
+
+
+def icd_gate_scenario(class_file: dict, spec: IcdGateSpec) -> tuple[dict, list[Expectation]]:
+    if spec.internal_cooldown_ms <= 0:
+        raise NotModelled('internal_cooldown_gate needs a positive internal_cooldown_ms')
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'internal_cooldown_gate', spec.quote, 0.0)
+    class_file = armed_for(class_file, records, spec.trigger_spell)
+    facts = facts_of(records, spec.trigger_spell)
+    cast_target = spec.target if spec.target in (TARGET, ALLY) else None
+    fixtures = icd_gate_attempt_fixtures(spec)
+    short_gap_ms = max(1, spec.internal_cooldown_ms // 2)
+    reopen_gap_ms = spec.internal_cooldown_ms - short_gap_ms + spec.reopen_margin_ms
+    labels = {moment: icd_gate_label(spec, moment) for moment in ('after1', 'after2', 'after3')}
+    steps = []
+    if spec.target == ALLY:
+        steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
+    steps += cast_steps(facts, spec.trigger_spell, cast_target, short_gap_ms, 1, fixtures)
+    steps.append(measurement(labels['after1'], CASTER, 'spell_cast_count', spell=spec.observe_spell))
+    steps += cast_steps(facts, spec.trigger_spell, cast_target, reopen_gap_ms, 1, fixtures)
+    steps.append(measurement(labels['after2'], CASTER, 'spell_cast_count', spell=spec.observe_spell))
+    steps += cast_steps(facts, spec.trigger_spell, cast_target, DRAIN_MS, 1, fixtures)
+    steps.append(measurement(labels['after3'], CASTER, 'spell_cast_count', spell=spec.observe_spell))
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour internal cooldown gate',
+        'contract': f'Three casts of {spec.trigger_spell}, {short_gap_ms} ms then {reopen_gap_ms} ms apart (total '
+                    f'{short_gap_ms + reopen_gap_ms} ms, {spec.reopen_margin_ms} ms past the tooltip\'s own '
+                    f'{spec.internal_cooldown_ms} ms internal cooldown): {spec.observe_spell}\'s spell_cast_count '
+                    f'is read after each. It must not increase between the first and second cast (the gate is '
+                    f'still closed {short_gap_ms} ms after the first fire, inside the {spec.internal_cooldown_ms} '
+                    f'ms window) and must increase by exactly 1 between the second and third (the gate has '
+                    f'reopened by then).',
+        'players': [player_fixture(class_file)],
+        'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell},
+                                           {'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + steps}
+    if spec.target == TARGET:
+        scenario['creatures'] = [creature_fixture(class_file)]
+    if spec.target == ALLY:
+        scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
+    if spec.force_crit:
+        scenario['players'][0][ICD_GATE_FORCE_CRIT_RATINGS[spec.force_crit]] = FORCED_CRIT_RATING
+    model = {'kind': 'internal_cooldown_gate', 'after1_label': labels['after1'], 'after2_label': labels['after2'],
+            'after3_label': labels['after3'], 'internal_cooldown_ms': spec.internal_cooldown_ms,
+            'short_gap_ms': short_gap_ms, 'reopen_gap_ms': reopen_gap_ms, 'quote': entry.quote}
+    expectation = Expectation(f'{spec.spell} behaviour_internal_cooldown_gate', BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
+                              spec.spell, spec.trigger_spell, None, '1', prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def icd_gate_spec(entry: dict) -> IcdGateSpec:
+    return IcdGateSpec(entry['spell'], entry['name'], entry['quote'], entry['trigger_spell'],
+                      entry['observe_spell'], entry['internal_cooldown_ms'], entry.get('target', TARGET),
+                      entry.get('caster_health_pct'), entry.get('restore_charges', False),
+                      entry.get('force_crit'), entry.get('reopen_margin_ms', ICD_GATE_REOPEN_MARGIN_MS))
+
+
 MECHANIC_DR_RESET_MS = 15000
 MECHANIC_GAP_MARGIN_MS = 2000
 MECHANIC_LAND_ATTEMPTS = 3
@@ -1337,6 +1428,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return oath_consumption_scenario(class_file, oath_consumption_spec(entry))
     if entry['kind'] == 'oath_consumption_removal':
         return oath_consumption_removal_scenario(class_file, oath_consumption_removal_spec(entry))
+    if entry['kind'] == 'internal_cooldown_gate':
+        return icd_gate_scenario(class_file, icd_gate_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

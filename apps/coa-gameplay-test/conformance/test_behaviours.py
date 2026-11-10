@@ -8,17 +8,18 @@ import unittest
 
 from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
                         BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH,
-                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
-                        BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER,
+                        BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_OATH_CONSUMPTION,
+                        BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER,
                         MECHANIC_LAND_ATTEMPTS, NotModelled,
-                        AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, OathConsumptionSpec,
+                        AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
                         OathConsumptionRemovalSpec,
                         amount_delta_scenario, amount_delta_spec, aura_grant_scenario, aura_grant_spec,
                         aura_spread_scenario, aura_spread_spec, behaviour_entries, behaviour_entry,
                         behaviour_scenario, crit_guarantee_scenario, crit_guarantee_spec,
                         duration_refresh_scenario, duration_refresh_spec, duration_scenario, duration_spec,
                         health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
-                        healing_ratio_spec, leech_heal_modifier_factor, leech_ratio_scenario, leech_ratio_spec,
+                        healing_ratio_spec, icd_gate_scenario, icd_gate_spec, leech_heal_modifier_factor,
+                        leech_ratio_scenario, leech_ratio_spec,
                         mechanic_duration_scenario, mechanic_duration_spec, metric_delta_scenario,
                         metric_delta_spec, oath_consumption_scenario, oath_consumption_spec,
                         oath_consumption_removal_scenario, oath_consumption_removal_spec,
@@ -28,7 +29,7 @@ from compare import Verdict, judge_behaviour
 from hits import aura_modifiers
 from profile import DBC_DIR, load_class_file
 from tooltip import Records
-from values import Expectation, dataset
+from values import Expectation, FORCED_CRIT_RATING, dataset
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -358,7 +359,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 36)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 39)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -2224,6 +2225,98 @@ class JudgeOathConsumptionRemovalTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('script', verdict.explanation)
+
+    def test_no_run_reports_no_scenario(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), None, expectation)
+        self.assertIn('no scenario', verdict.explanation)
+
+
+DISCIPLINED_BLOWS = 680397
+BENEDICTION = 578276
+DISCIPLINED_BLOWS_TICK = 680398
+SCARLET_CHAMPION = 805415
+ARGENT_BLADE = 807268
+SCARLET_CHAMPION_STACK = 805416
+
+
+class IcdGateScenarioTests(unittest.TestCase):
+    def spec(self):
+        return IcdGateSpec(DISCIPLINED_BLOWS, 'Disciplined Blows', 'Cnly occur once every 0.5 sec.', BENEDICTION,
+                           DISCIPLINED_BLOWS_TICK, 500, target='self', caster_health_pct=50)
+
+    def test_a_non_positive_internal_cooldown_is_not_modelled(self):
+        with self.assertRaises(NotModelled):
+            icd_gate_scenario(CLASS_FILE, replace(self.spec(), internal_cooldown_ms=0))
+
+    def test_scenario_casts_three_times_with_the_second_gap_inside_the_cooldown(self):
+        scenario, [expectation] = icd_gate_scenario(CLASS_FILE, self.spec())
+        validated = run.validate(scenario)
+        self.assertEqual(expectation.check, BEHAVIOUR_INTERNAL_COOLDOWN_GATE)
+        self.assertEqual(expectation.spell_id, DISCIPLINED_BLOWS)
+        model = expectation.model
+        self.assertEqual(model['short_gap_ms'], 250)
+        self.assertEqual(model['reopen_gap_ms'], 750)
+        cast_steps = [step for step in validated['steps']
+                     if step.get('action') == 'cast' and step.get('spell') == BENEDICTION]
+        self.assertEqual(len(cast_steps), 3)
+        for label in (model['after1_label'], model['after2_label'], model['after3_label']):
+            step = next(step for step in validated['steps'] if step.get('label') == label)
+            self.assertEqual(step['metric'], 'spell_cast_count')
+            self.assertEqual(step['spell'], DISCIPLINED_BLOWS_TICK)
+        health_steps = [step for step in validated['steps'] if step.get('action') == 'set_health']
+        self.assertGreaterEqual(len(health_steps), 3)
+
+    def test_a_force_crit_scenario_sets_the_player_fixture(self):
+        spec = IcdGateSpec(SCARLET_CHAMPION, 'Scarlet Champion', 'Can only occur once per sec.', ARGENT_BLADE,
+                           SCARLET_CHAMPION_STACK, 1000, target='dummy', force_crit='melee')
+        scenario, _ = icd_gate_scenario(CLASS_FILE, spec)
+        self.assertEqual(scenario['players'][0]['melee_crit_rating'], FORCED_CRIT_RATING)
+
+    def test_entries_from_the_class_file_round_trip_through_the_spec_parser(self):
+        entries = [entry for entry in CLASS_FILE['behaviours'] if entry['kind'] == 'internal_cooldown_gate']
+        self.assertEqual(len(entries), 3)
+        for entry in entries:
+            scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
+            self.assertEqual(expectation.rule, f'prose: "{entry["quote"]}" ({entry["spell"]})')
+            run.validate(scenario)
+
+
+class JudgeIcdGateTests(unittest.TestCase):
+    def expectation(self):
+        model = {'kind': 'internal_cooldown_gate', 'after1_label': 'after1', 'after2_label': 'after2',
+                 'after3_label': 'after3', 'internal_cooldown_ms': 500, 'short_gap_ms': 250,
+                 'reopen_gap_ms': 750, 'quote': 'Cnly occur once every 0.5 sec.'}
+        return Expectation('label', BEHAVIOUR_INTERNAL_COOLDOWN_GATE, DISCIPLINED_BLOWS, BENEDICTION, None, '1',
+                           'prose: "Cnly occur once every 0.5 sec." (680397)', model)
+
+    def test_blocked_then_reopened_is_ok(self):
+        expectation = self.expectation()
+        values = {'after1': 1.0, 'after2': 1.0, 'after3': 2.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.measured, 1.0)
+
+    def test_a_seeded_early_second_fire_is_an_alert(self):
+        expectation = self.expectation()
+        values = {'after1': 1.0, 'after2': 2.0, 'after3': 3.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 1.0)
+        self.assertIn('before its own', verdict.explanation)
+
+    def test_a_seeded_missing_reopen_is_an_alert(self):
+        expectation = self.expectation()
+        values = {'after1': 1.0, 'after2': 1.0, 'after3': 1.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 0.0)
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'after1': 1.0, 'after2': 1.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('after3', verdict.explanation)
 
     def test_no_run_reports_no_scenario(self):
         expectation = self.expectation()
