@@ -18,11 +18,12 @@ BEHAVIOUR_METRIC_DELTA = 'behaviour_metric_delta'
 BEHAVIOUR_DURATION_REFRESH = 'behaviour_duration_refresh'
 BEHAVIOUR_AMOUNT_DELTA = 'behaviour_amount_delta'
 BEHAVIOUR_CRIT_GUARANTEE = 'behaviour_crit_guarantee'
+BEHAVIOUR_AURA_GRANT = 'behaviour_aura_grant'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
-                    BEHAVIOUR_CRIT_GUARANTEE)
+                    BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
-        'amount_delta', 'crit_guarantee')
+        'amount_delta', 'crit_guarantee', 'aura_grant')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 PROSE = 'prose: '
@@ -903,6 +904,65 @@ def crit_guarantee_spec(entry: dict) -> CritGuaranteeSpec:
                              entry.get('minimum_events', CRIT_GUARANTEE_MINIMUM_EVENTS))
 
 
+AURA_GRANT_SETTLE_MS = 500
+DEFAULT_CHAIN_AURA = 704576
+
+
+@dataclass(frozen=True)
+class AuraGrantSpec:
+    spell: int
+    name: str
+    quote: str
+    trigger_spell: int
+    oath_aura: int
+    chain_aura: int = DEFAULT_CHAIN_AURA
+
+
+def aura_grant_label(spec: AuraGrantSpec, moment: str) -> str:
+    return f'{spec.chain_aura} amount grant {spec.spell} {moment}'
+
+
+def aura_grant_scenario(class_file: dict, spec: AuraGrantSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'aura_grant', spec.quote, 1)
+    class_file = armed_for(class_file, records, spec.trigger_spell)
+    facts = facts_of(records, spec.trigger_spell)
+    before_label = aura_grant_label(spec, BEFORE)
+    after_label = aura_grant_label(spec, AFTER)
+    oath_label = f'{spec.oath_aura} aura grant {spec.spell} after'
+    steps = []
+    if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+        steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost})
+    steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
+    steps += required_aura_steps(facts)
+    steps.append(measurement(before_label, CASTER, 'aura_stacks', spell=spec.chain_aura))
+    steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': TARGET})
+    steps.append({'action': 'wait', 'ms': AURA_GRANT_SETTLE_MS})
+    steps.append(measurement(after_label, CASTER, 'aura_stacks', spell=spec.chain_aura))
+    steps.append(measurement(oath_label, CASTER, 'aura', spell=spec.oath_aura))
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour aura grant',
+        'contract': f'A single cast of {spec.trigger_spell} against a fresh target, by a caster holding no prior '
+                    f'Oath, grants Oath aura {spec.oath_aura} and increases the Oath Chain ({spec.chain_aura}) '
+                    f'stack by exactly 1, read via aura_stacks before and after the cast.',
+        'players': [player_fixture(class_file)], 'creatures': [creature_fixture(class_file)],
+        'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}]
+                 + steps}
+    label = f'{spec.spell} behaviour_aura_grant'
+    model = {'kind': 'aura_grant', 'before_label': before_label, 'after_label': after_label,
+            'oath_label': oath_label, 'oath_aura': spec.oath_aura, 'chain_aura': spec.chain_aura, 'expected': 1,
+            'quote': entry.quote}
+    expectation = Expectation(label, BEHAVIOUR_AURA_GRANT, spec.spell, spec.trigger_spell, None, '1',
+                              prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def aura_grant_spec(entry: dict) -> AuraGrantSpec:
+    return AuraGrantSpec(entry['spell'], entry['name'], entry['quote'], entry['trigger_spell'], entry['oath_aura'],
+                        entry.get('chain_aura', DEFAULT_CHAIN_AURA))
+
+
 MECHANIC_DR_RESET_MS = 15000
 MECHANIC_GAP_MARGIN_MS = 2000
 MECHANIC_LAND_ATTEMPTS = 3
@@ -1101,6 +1161,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return amount_delta_scenario(class_file, amount_delta_spec(entry))
     if entry['kind'] == 'crit_guarantee':
         return crit_guarantee_scenario(class_file, crit_guarantee_spec(entry))
+    if entry['kind'] == 'aura_grant':
+        return aura_grant_scenario(class_file, aura_grant_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

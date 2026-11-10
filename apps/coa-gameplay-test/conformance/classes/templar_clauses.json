@@ -2633,7 +2633,9 @@
   {
     "spell": 570233,
     "clause": "and granting an Oath",
-    "labels": [],
+    "labels": [
+      "570233 behaviour_aura_grant"
+    ],
     "kind": "claim"
   },
   {
@@ -2663,7 +2665,9 @@
   {
     "spell": 573049,
     "clause": "and granting an Oath",
-    "labels": [],
+    "labels": [
+      "573049 behaviour_aura_grant"
+    ],
     "kind": "claim"
   },
   {
@@ -2692,7 +2696,9 @@
   {
     "spell": 573324,
     "clause": "and granting an Oath",
-    "labels": [],
+    "labels": [
+      "573324 behaviour_aura_grant"
+    ],
     "kind": "claim"
   },
   {
@@ -3245,7 +3251,9 @@
   {
     "spell": 804906,
     "clause": "and granting an Oath.",
-    "labels": [],
+    "labels": [
+      "804906 behaviour_aura_grant"
+    ],
     "kind": "claim"
   },
   {

@@ -1637,6 +1637,34 @@
       "target_type": 6,
       "target_type_name": "Undead (Mindless Zombie)",
       "source": "AscensionTemplarAbilities.cpp:120 (OnSpellCalculatedTarget): if (info->Id == 801832 && (target->GetCreatureType() == CREATURE_TYPE_UNDEAD || spell->GetScriptValue(806523))) hit.crit = true; - an unconditional hard override of the hit outcome for Scourgebane's own damage spell 801832 whenever the target's creature_template.type is CREATURE_TYPE_UNDEAD (6), independent of the player's own crit chance/rating. creature_template entry 1501 (Mindless Zombie) is type 6 (data/sql/base/db_world/creature_template.sql); DUMMY_ENTRY 36 (Harvest Golem), used by every other Templar scenario including 92111's own proc_rate entry, is type 9 (Mechanical), so this entry needs its own target override rather than the shared dummy. A direct per-hit crit flag is needed because the override happens inside OnSpellCalculatedTarget's TargetInfo.crit at damage-calculation time, not through a SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE-style stat change: Player::SpellDoneCritChance/Unit::SpellTakenCritChance (the spell_taken_crit_chance metric already used for this exact clause shape on other classes, e.g. the chronomancer Wand of Time scenario) do not read this hook and would read the caster's ordinary crit chance regardless of target type. 100 auto-attack swings (Scourgebane's own 20% per-hit chance, $520007h, means an expected ~20 triggers) against the Undead target, counting spell_damage_count of 801832 split by the critical flag: every triggered hit landing on it must be critical (crit_label total == crit+noncrit total), or the clause is violated."
+    },
+    {
+      "spell": 570233, "name": "Righteous Lunge", "kind": "aura_grant",
+      "quote": "and granting an Oath",
+      "trigger_spell": 570233,
+      "oath_aura": 804904,
+      "source": "AscensionTemplarAbilities.cpp:155-165 (OnSpellCast, unconditional on spell->IsTriggered()==false): if (Family(info, 2, 1) || info->Id == 500689) { uint32 oath = Named(info, 801443) ? 804904 : Named(info, 801445) ? 804903 : Named(info, 804906) ? 804922 : 805332; GrantOath(player, oath); }. 570233 Righteous Lunge has SpellFamilyName 25 and SpellFamilyFlags[2] bit 0 set (confirmed via coa-dbc-viewer record), matching Family(info,2,1); sSpellMgr->GetFirstSpellInChain(570233) chains to root 801443 (extra_spells citation), selecting oath 804904 (\"Oath: Righteous Lunge\"). GrantOath (AscensionTemplar.cpp:163-175) casts the oath aura on the caster and the Oath Chain 704576, incrementing its stack by exactly 1 (capped at 10), unconditional on hit/miss since OnSpellCast fires regardless of the target roll."
+    },
+    {
+      "spell": 573049, "name": "Holy Cleave", "kind": "aura_grant",
+      "quote": "and granting an Oath",
+      "trigger_spell": 573049,
+      "oath_aura": 804903,
+      "source": "AscensionTemplarAbilities.cpp:155-165, same Family(info,2,1) GrantOath block as 570233. 573049 Holy Cleave has SpellFamilyFlags[2] bit 0 set (coa-dbc-viewer record); sSpellMgr->GetFirstSpellInChain(573049) chains to root 801445, selecting oath 804903 (\"Oath: Holy Cleave\"), per Named(info, 801445) in the ternary above."
+    },
+    {
+      "spell": 573324, "name": "Vindication", "kind": "aura_grant",
+      "quote": "and granting an Oath",
+      "trigger_spell": 573324,
+      "oath_aura": 805332,
+      "source": "AscensionTemplarAbilities.cpp:155-165, same Family(info,2,1) GrantOath block as 570233. 573324 Vindication has SpellFamilyFlags[2] bit 0 set (coa-dbc-viewer record); its chain root matches neither Named(info,801443) nor Named(info,801445) nor Named(info,804906), falling through the ternary's else branch to oath 805332 (\"Oath: Vindication\")."
+    },
+    {
+      "spell": 804906, "name": "Condemn", "kind": "aura_grant",
+      "quote": "and granting an Oath.",
+      "trigger_spell": 804906,
+      "oath_aura": 804922,
+      "source": "AscensionTemplarAbilities.cpp:155-165, same Family(info,2,1) GrantOath block as 570233. 804906 Condemn has SpellFamilyFlags[2] bit 0 set (coa-dbc-viewer record); Named(info, 804906) matches 804906 directly, selecting oath 804922 (\"Oath: Condemn\")."
     }
   ],
   "player_observations": [

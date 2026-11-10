@@ -6,10 +6,11 @@ import sys
 import tempfile
 import unittest
 
-from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_DURATION,
-                        BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_METRIC_DELTA,
-                        BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER, MECHANIC_LAND_ATTEMPTS, CritGuaranteeSpec,
-                        HealingRatioTarget, amount_delta_scenario, amount_delta_spec, aura_spread_scenario,
+from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
+                        BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH,
+                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER, MECHANIC_LAND_ATTEMPTS,
+                        AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, amount_delta_scenario,
+                        amount_delta_spec, aura_grant_scenario, aura_grant_spec, aura_spread_scenario,
                         aura_spread_spec, behaviour_entries, behaviour_entry, behaviour_scenario,
                         crit_guarantee_scenario, crit_guarantee_spec, duration_refresh_scenario,
                         duration_refresh_spec, duration_scenario, duration_spec, health_ratio_spec,
@@ -352,7 +353,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 26)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 30)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1876,6 +1877,89 @@ class JudgeCritGuaranteeTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({'crit': 10.0}), expectation)
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('noncrit', verdict.explanation)
+
+    def test_no_run_reports_no_scenario(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), None, expectation)
+        self.assertIn('no scenario', verdict.explanation)
+
+
+RIGHTEOUS_LUNGE = 570233
+OATH_RIGHTEOUS_LUNGE = 804904
+OATH_CHAIN = 704576
+
+
+class AuraGrantScenarioTests(unittest.TestCase):
+    def spec(self):
+        return AuraGrantSpec(RIGHTEOUS_LUNGE, 'Righteous Lunge', 'and granting an Oath', RIGHTEOUS_LUNGE,
+                             OATH_RIGHTEOUS_LUNGE)
+
+    def test_scenario_casts_once_and_measures_the_chain_stack_and_the_oath_aura(self):
+        scenario, [expectation] = aura_grant_scenario(CLASS_FILE, self.spec())
+        validated = run.validate(scenario)
+        self.assertEqual(expectation.check, BEHAVIOUR_AURA_GRANT)
+        self.assertEqual(expectation.spell_id, RIGHTEOUS_LUNGE)
+        self.assertEqual(expectation.rank_id, RIGHTEOUS_LUNGE)
+        model = expectation.model
+        before_step = next(step for step in validated['steps'] if step.get('label') == model['before_label'])
+        after_step = next(step for step in validated['steps'] if step.get('label') == model['after_label'])
+        oath_step = next(step for step in validated['steps'] if step.get('label') == model['oath_label'])
+        self.assertEqual(before_step['metric'], 'aura_stacks')
+        self.assertEqual(before_step['spell'], OATH_CHAIN)
+        self.assertEqual(after_step['spell'], OATH_CHAIN)
+        self.assertEqual(oath_step['metric'], 'aura')
+        self.assertEqual(oath_step['spell'], OATH_RIGHTEOUS_LUNGE)
+        cast_steps = [step for step in validated['steps']
+                     if step.get('action') == 'cast' and step.get('spell') == RIGHTEOUS_LUNGE]
+        self.assertEqual(len(cast_steps), 1)
+        before_index = validated['steps'].index(before_step)
+        cast_index = validated['steps'].index(cast_steps[0])
+        after_index = validated['steps'].index(after_step)
+        self.assertLess(before_index, cast_index)
+        self.assertLess(cast_index, after_index)
+
+    def test_entries_from_the_class_file_round_trip_through_the_spec_parser(self):
+        entries = [entry for entry in CLASS_FILE['behaviours'] if entry['kind'] == 'aura_grant']
+        self.assertEqual(len(entries), 4)
+        for entry in entries:
+            scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
+            self.assertEqual(expectation.rule, f'prose: "{entry["quote"]}" ({entry["spell"]})')
+            run.validate(scenario)
+
+
+class JudgeAuraGrantTests(unittest.TestCase):
+    def expectation(self):
+        model = {'kind': 'aura_grant', 'before_label': 'before', 'after_label': 'after', 'oath_label': 'oath',
+                 'oath_aura': OATH_RIGHTEOUS_LUNGE, 'chain_aura': OATH_CHAIN, 'expected': 1,
+                 'quote': 'and granting an Oath'}
+        return Expectation('label', BEHAVIOUR_AURA_GRANT, RIGHTEOUS_LUNGE, RIGHTEOUS_LUNGE, None, '1',
+                           'prose: "and granting an Oath" (570233)', model)
+
+    def test_a_chain_stack_up_by_one_with_the_oath_present_is_ok(self):
+        expectation = self.expectation()
+        values = {'before': 0.0, 'after': 1.0, 'oath': 1.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.measured, 1.0)
+
+    def test_a_seeded_unchanged_chain_stack_is_an_alert(self):
+        expectation = self.expectation()
+        values = {'before': 0.0, 'after': 0.0, 'oath': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.measured, 0.0)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_a_chain_stack_up_by_one_without_the_oath_aura_present_is_an_alert(self):
+        expectation = self.expectation()
+        values = {'before': 0.0, 'after': 1.0, 'oath': 0.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_missing_measurement_leaves_alert_with_explanation(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 0.0, 'after': 1.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('oath', verdict.explanation)
 
     def test_no_run_reports_no_scenario(self):
         expectation = self.expectation()

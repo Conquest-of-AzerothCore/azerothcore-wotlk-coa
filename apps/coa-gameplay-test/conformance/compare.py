@@ -9,9 +9,9 @@ import re
 from statistics import fmean, pstdev
 from typing import Callable, Mapping, Protocol
 
-from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
-                        BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH,
-                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
+from behaviours import (BEHAVIOUR_AMOUNT_DELTA, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT,
+                        BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
+                        BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_RATIO, BEHAVIOUR_TRIGGER)
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, measured_hit_model)
 from observations import player_observations
@@ -2071,6 +2071,23 @@ def behaviour_crit_guarantee_verdict(base: Verdict, run: Run, model: dict) -> Ve
                                f'within {TOLERATED_RELATIVE:.0%} of 1.0, otherwise alert')
 
 
+def behaviour_aura_grant_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    labels = ('before_label', 'after_label', 'oath_label')
+    values = {label: run.values.get(model[label]) for label in labels}
+    missing = next((model[label] for label, value in values.items() if value is None), None)
+    if missing:
+        return replace(base, explanation=missing_measurement(run, missing))
+    before, after, oath = values['before_label'], values['after_label'], values['oath_label']
+    delta = after - before
+    expected = model['expected']
+    status = 'ok' if delta == expected and oath >= 1 else 'alert'
+    return replace(base, status=status, measured=delta, expected=expected, low=expected, high=expected,
+                   explanation=f'{model["chain_aura"]} aura_stacks measured {before:g} before the cast and '
+                               f'{after:g} after (delta {delta:+g}, expected +{expected:g}); {model["oath_aura"]} '
+                               f'aura present after the cast: {bool(oath)}; a delta other than +{expected:g} or a '
+                               f'missing Oath aura is always an alert ({model["quote"]!r})')
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
@@ -2095,6 +2112,8 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
         return behaviour_amount_delta_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_CRIT_GUARANTEE:
         return behaviour_crit_guarantee_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_AURA_GRANT:
+        return behaviour_aura_grant_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 
