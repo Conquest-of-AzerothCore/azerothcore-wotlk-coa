@@ -120,8 +120,9 @@ Testament of Hope retains the native two-creature summon effect and 20-second li
 uses the native clone-caster appearance/equipment aura, follows the owner and fights valid targets.
 Display 775 is the verified classic fallback before the clone aura. Divine Charge uses existing display
 14584, a finite aura-owned mount, and scoped cast permission while that exact mount is active. Allies
-provide the trample center; the Templar remains its damage owner. Aura removal cleans up the mount even
-if its original caster is gone. The copied appearance and movement still need gameplay acceptance.
+provide the trample center; the Templar remains its damage owner. The trample reaches enemies within Divine
+Trample's own DBC radius (3 yd, combat reaches added), per the owner's 2026-11-10 ruling. Aura removal cleans
+up the mount even if its original caster is gone. The copied appearance and movement still need gameplay acceptance.
 
 Install only after an explicit build request. Use matching source, pending world SQL04 and the combined
 client candidate, preserving the pending Necromancer SQL03 and its source. SQL04 has 86 exact bindings,

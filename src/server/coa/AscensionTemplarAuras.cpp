@@ -181,7 +181,7 @@ class aura_ascension_templar_lifecycle : public AuraScript
                 GetAura()->Remove();
                 return;
             }
-            for (Unit* enemy : Nearby(GetTarget(), 5.0f))
+            for (Unit* enemy : Nearby(GetTarget(), Radius(527269, EFFECT_0, player)))
                 if (player->IsValidAttackTarget(enemy))
                 {
                     Cast(player, enemy, 527269);

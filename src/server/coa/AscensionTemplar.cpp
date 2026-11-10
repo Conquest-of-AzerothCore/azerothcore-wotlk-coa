@@ -76,6 +76,11 @@ int32 Amount(uint32 spell, uint8 effect, Unit* caster)
     SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
     return info ? info->Effects[effect].CalcValue(caster) : 0;
 }
+float Radius(uint32 spell, uint8 effect, Unit* caster)
+{
+    SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
+    return info ? info->Effects[effect].CalcRadius(caster) : 0.0f;
+}
 void Cast(Unit* caster, Unit* target, uint32 spell)
 {
     if (caster && target && target->IsAlive() && caster->IsInWorld())
