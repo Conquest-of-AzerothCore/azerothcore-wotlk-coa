@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "name": "Manastorm floor XP: a run without a max-level member still grants floor XP to its lower-level members",
+  "contract": [
+    "Control for manastorm-floor-xp-max-level-carry. ManastormExperience::PrepareCompletion queues the repeatable",
+    "RDF 258 quest XP for every run member below MaxPlayerLevel on each completed floor, and ManastormProgression",
+    "settles it for online members right after the floor commits. With no member at MaxPlayerLevel (80 on this",
+    "realm), the level-56 member gains XP in the same update as the objective death, before the next floor's",
+    "teleport. The member holds Servant's Errand (192), whose SPELL_AURA_MOD_XP_PCT -100 covers only the kill XP",
+    "source, so the dungeon's group kill-XP share adds nothing and the gain is the floor reward alone."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "leader",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    },
+    {
+      "id": "member",
+      "race": 5,
+      "class": 23,
+      "level": 56,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "label": "member joins the leader's group so both are run members",
+      "actor": "leader",
+      "target": "member"
+    },
+    {
+      "action": "command",
+      "actor": "leader",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader entered a private Manastorm instance",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the member was brought into the same run",
+      "actor": "member",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the member starts the floor with no XP",
+      "actor": "member",
+      "metric": "xp",
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "Servant's Errand blocks only kill XP for the low-level member",
+      "actor": "member",
+      "command": ".aura 192"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the low-level member holds Servant's Errand",
+      "actor": "member",
+      "metric": "aura",
+      "spell": 192,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so the boss is visible to this lane",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "Only the leader goes to Taragaman",
+      "actor": "leader",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader left the entrance protection at the boss",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "The member received floor XP when the objective kill completed the floor",
+      "actor": "member",
+      "metric": "xp",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the objective kill completed the floor and the next floor restored entrance protection",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 12000,
+      "equals": 1
+    }
+  ]
+}
