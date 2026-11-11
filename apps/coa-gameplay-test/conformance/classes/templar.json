@@ -670,6 +670,21 @@
   ],
   "triggers": [
     {
+      "aura": 706325,
+      "name": "Condemnation",
+      "kind": "gate_absence",
+      "tooltip": "Dealing damage with |cffffffffCondemn|r, |cFFFFFFFFHoly Cleave|r, or |cFFFFFFFFBlade of Faith|r now has a $h% chance to trigger |cffffffffZealotry|r if you are within melee range of your target.@s:801450:0@",
+      "trigger": {"action": "cast", "spell": 804906, "target": "dummy"},
+      "trigger_text": "Dealing damage with Condemn",
+      "trigger_spell_text": "Condemn",
+      "trial_metric": "spell_damage_count",
+      "gate_text": "if you are within melee range of your target",
+      "away_yd": 15.0,
+      "observe_spell": 801450,
+      "observe_source": "EffectTriggerSpell[0] of 706325",
+      "observe_metric": "spell_cast_count"
+    },
+    {
       "aura": 504561,
       "name": "Priest Training",
       "tooltip": "Triggering |cffffffffZealotry|r now also heals you for ${$504809m1*$<scalingbp>+$SP*0.06}.@s:801450:0@",

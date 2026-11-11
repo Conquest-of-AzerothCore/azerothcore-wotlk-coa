@@ -2380,26 +2380,33 @@
     "spell": 706325,
     "clause": "Dealing damage with Condemn, Holy Cleave, or Blade of Faith now has a $h% chance to trigger Zealotry",
     "labels": [
-      "706325 proc_rate ok (0.15 vs 0.15 expected)"
+      "706325 proc_rate 801450 804906",
+      "706325 proc_rate 801450 801445",
+      "706325 proc_rate 801450 803880"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the label 706325 proc_rate ok (0.15 vs 0.15 expected) named no verdict; the three stored per-source rates (Condemn, Holy Cleave, Blade of Faith), each judged against $h 15%, name the same spell and quantity"
   },
   {
     "spell": 706325,
     "clause": "Dealing damage with Condemn, Holy Cleave, or Blade of Faith (each trigger source individually)",
     "labels": [
-      "706325 proc_rate ok (aggregate only)",
       "706325 proc_rate 801450 804906",
       "706325 proc_rate 801450 801445",
       "706325 proc_rate 801450 803880"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the label 706325 proc_rate ok (aggregate only) named no verdict and is dropped; the three per-source rates stay"
   },
   {
     "spell": 706325,
     "clause": "if you are within melee range of your target",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "706325 gate_absence_count",
+      "706325 proc_rate 801450 804906"
+    ],
+    "kind": "claim",
+    "reason": "out of melee range: 0 Zealotry in the Condemn ticks with the caster 18 yd from the dummy (gate_absence away_yd 15); in range: the Condemn rate at 15%. Check at AscensionTemplarEvents.cpp:83-85 (IsWithinMeleeRange)"
   },
   {
     "spell": 706357,
