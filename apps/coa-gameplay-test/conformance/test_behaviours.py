@@ -6004,6 +6004,29 @@ def cost_gate_entry(spell: int, variant: str | None = None) -> dict:
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class TrialToolStepTests(unittest.TestCase):
+    def test_a_metric_delta_arms_the_caster_for_its_trigger_spell(self):
+        entry = {**class_entry(705285, 'metric_delta'), 'trigger_spell': 573324, 'setup_casts': []}
+        scenario, _ = behaviour_scenario(CLASS_FILE, entry)
+        equipped = [step['item'] for step in run.validate(scenario)['steps'] if step['action'] == 'equip']
+        self.assertIn(CLASS_FILE['alternate_weapons'][0]['item'], equipped)
+
+    def test_a_cooldown_gate_learns_its_after_casts(self):
+        entry = {**class_entry(706309, 'cost_gate'), 'after_casts': [[807268, 'dummy']], 'after_wait_ms': 2000}
+        scenario, _ = behaviour_scenario(CLASS_FILE, entry)
+        steps = run.validate(scenario)['steps']
+        learned = first_index(steps, action='learn', spell=807268)
+        self.assertLess(learned, first_index(steps, action='cast', spell=807268))
+
+    def test_a_talent_aura_is_set_afresh_in_each_talent_arm(self):
+        entry = {**class_entry(500694, 'cost_gate'), 'talent_aura_each_arm': True}
+        scenario, _ = behaviour_scenario(CLASS_FILE, entry)
+        sets = [step['stacks'] for step in run.validate(scenario)['steps']
+                if step['action'] == 'set_aura' and step['spell'] == 500694]
+        self.assertEqual(sets, [0, 1, 0, 1])
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class CostGateScenarioTests(unittest.TestCase):
     def test_power_gate_refuses_without_the_talent_and_one_point_beyond(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, cost_gate_entry(301059, 'sacred_swing'))

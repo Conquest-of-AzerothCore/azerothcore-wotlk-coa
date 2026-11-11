@@ -213,6 +213,9 @@ would already include the effect under test, leaving no ungated baseline; `cast_
 `reset_cooldown`/mana-fixture/`cast`/`wait` steps for that one phase while still applying `setup_actor_aura`
 (so a caster-state precondition like being mounted is still set up), and the "after" phase casts normally.
 
+The caster is armed for `trigger_spell` (`values.armed_for`): a trigger that needs another weapon class than the
+reference weapon gets the class file's matching alternate (Divine Fury 500689, a one-hand weapon).
+
 `attack_swings` (default 0, omitting it reproduces every existing entry's generated scenario byte-for-byte) replaces
 the cast with auto attacks at the dummy, for a passive whose trigger is a swing: each phase attacks for
 `attack_swings` reference swing intervals and stops before its reading, the gate is learned between the phases, and
@@ -843,6 +846,11 @@ arms with the talent only, each after a reset of its own cooldown; the cooldown 
 Profound Enlightenment 680953 "reducing the remaining cooldown of Testaments by $s1%" is cast 20000 ms after Testament
 of Faith 801478, when 160000 ms remain, so `reduction` is 80000; a cut of half the full cooldown would let the
 `beyond` attempt through. A power gate, or an `after_wait_ms` not below the `beyond` wait, is refused.
+
+The `after_casts` spells are learned with the gated spell (One With The Light 504807: Righteous Upheaval 572027
+after the priming cast of a Libram, Force of Golganneth, Divine Force or Testament of Will). `talent_aura_each_arm`
+sets the `talent_aura` afresh (stacks 0, then 1) before every talent arm with a setup, for a buff shorter than the
+cooldown wait (Libram of Zeal 801466, 20000 ms, gating Righteous Upheaval's 20000 ms cooldown).
 
 A cooldown gate may wait up to the accelerated cap (`hits.MAX_ACCELERATED_SCENARIO_MS`, ADR 0152), as expiry
 scenarios may; a power gate keeps the ten-minute budget. Eternally Devoted 573452 gates Libram of Tenacity 801461's

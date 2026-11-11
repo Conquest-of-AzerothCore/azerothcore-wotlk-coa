@@ -1151,6 +1151,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
     facts = facts_of(records, spec.trigger_spell)
+    class_file = armed_for(class_file, records, spec.trigger_spell)
 
     def setup_cast_steps() -> list[dict]:
         if not spec.setup_casts:
@@ -2839,6 +2840,7 @@ class CostGateSpec:
     after_casts: tuple[tuple[int, str], ...] = ()
     after_wait_ms: int = 0
     resets: bool = False
+    talent_aura_each_arm: bool = False
 
 
 @dataclass(frozen=True)
@@ -2970,16 +2972,18 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
 
     steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.gated_spell}]
     steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in dict.fromkeys(
-        spell for spell, _ in spec.setup_casts)]
+        spell for spell, _ in spec.setup_casts + spec.after_casts)]
     expectations = []
     rule = prose_rule(entry.quote, spec.spell)
     model = {'kind': 'cost_gate', 'resource': spec.resource, 'base': base, 'reduction': spec.reduction,
              'quote': entry.quote}
     talent_steps = ([{'action': 'set_aura', 'actor': CASTER, 'spell': spec.talent_aura, 'stacks': 1}]
                     if spec.talent_aura else [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}])
+    if spec.talent_aura and spec.talent_aura_each_arm:
+        talent_steps = [{'action': 'set_aura', 'actor': CASTER, 'spell': spec.talent_aura, 'stacks': 0}] + talent_steps
     learned = False
     for arm in cost_gate_arms(spec, base):
-        if arm.with_talent and not learned:
+        if arm.with_talent and (not learned or (spec.talent_aura_each_arm and arm.setup)):
             steps += talent_steps
             learned = True
         label = cost_gate_label(spec, arm.name)
@@ -3041,7 +3045,8 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
                         entry.get('next_arm', False), entry.get('aura_duration_ms'),
                         entry.get('duration_margin_ms', COST_GATE_DURATION_MARGIN_MS),
                         tuple((int(spell), target) for spell, target in entry.get('after_casts', ())),
-                        entry.get('after_wait_ms', 0), entry.get('resets', False))
+                        entry.get('after_wait_ms', 0), entry.get('resets', False),
+                        bool(entry.get('talent_aura_each_arm', False)))
 
 
 SITE_PURCHASE_SETTLE_MS = 3000
