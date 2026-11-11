@@ -6579,6 +6579,8 @@ class TakenHitScenarioTests(unittest.TestCase):
         self.assertEqual(len(strikes), 5 * 5)
         self.assertTrue(all(step['target'] == CASTER and step['spell'] == 41394 for step in strikes))
         self.assertEqual(expectations[0].check, BEHAVIOUR_TAKEN_HIT)
+        striker = next(creature for creature in scenario['creatures'] if creature['id'] == STRIKER)
+        self.assertNotIn('reaction', striker)
         absorbs = [step for step in steps if step.get('metric') == 'spell_absorb_total']
         self.assertTrue(all(step['caster'] == STRIKER and step['target'] == CASTER for step in absorbs))
 
