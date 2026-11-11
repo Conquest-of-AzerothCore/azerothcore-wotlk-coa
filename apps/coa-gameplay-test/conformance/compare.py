@@ -25,7 +25,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO,
                         BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER, BEHAVIOUR_EVENT_DELAY,
                         BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
-                        strongest_percent)
+                        BEHAVIOUR_DISPEL_COUNT, DISPEL_TYPE_NAMES, strongest_percent)
 from bonus import (Bonus, band_excluded_text, band_status, bonus_detail, bonus_of, bonus_status, bonus_text,
                    per_event_sample, sized_trials)
 from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readings
@@ -3600,7 +3600,37 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
         return behaviour_taken_hit_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_THREAT_REDIRECT:
         return behaviour_threat_redirect_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_DISPEL_COUNT:
+        return behaviour_dispel_count_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
+
+
+def behaviour_dispel_count_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    removed, carried = [], []
+    for trial in model['reads']:
+        values = []
+        for before_label, after_label in trial:
+            before, after = run.values.get(before_label), run.values.get(after_label)
+            if before is None or after is None:
+                return replace(base, explanation=missing_measurement(
+                    run, before_label if before is None else after_label))
+            values.append((before, after))
+        carried.append(sum(1 for before, _ in values if before > 0))
+        removed.append(sum(1 for before, after in values if before > 0 and after <= 0))
+    kind = DISPEL_TYPE_NAMES[model['dispel_type']]
+    expected = model['expected']
+    if any(count != len(model['reads'][0]) for count in carried):
+        return replace(base, status='unmeasured', explanation=(
+            f'{model["arm"]}: the ally carried {carried} {kind} debuffs before the casts, not '
+            f'{len(model["reads"][0])} each time; the removals cannot be counted'))
+    faults = [f'trial {index}: {count} removed' for index, count in enumerate(removed, 1) if count != expected]
+    status = 'alert' if faults else 'ok'
+    mean = sum(removed) / len(removed)
+    return replace(base, status=status, measured=float(mean), expected=float(expected), low=float(expected),
+                   high=float(expected), explanation=(
+                       f'{model["arm"]}: {kind} debuffs removed per cast {removed} of {carried[0]} carried, against '
+                       f'{expected}; ' + ('; '.join(faults) if faults else 'every cast matches')
+                       + '; each count is compared exactly'))
 
 
 def taken_hit_formula(constant: float, coefficients: list[float], sums: list[float]) -> int:

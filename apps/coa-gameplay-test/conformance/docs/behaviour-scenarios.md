@@ -32,6 +32,7 @@ produce the same status vocabulary (`ok`, `alert`, `unmodelled`, `measured`, `am
 | `behaviour_immunity` (`kind: "immunity"`) | "granting immunity to fear ... effects": each named effect lands before the cast and none lands after it |
 | `behaviour_threat_slope` (`kind: "threat_slope"`) | "High Threat" damage: threat per point of damage of one landed hit, the flat `SPELL_EFFECT_THREAT` amount taken out |
 | `behaviour_event_delay` (`kind: "event_delay"`) | "After a short delay": the time from a cast to the delayed cast of another spell, read from event stamps |
+| `behaviour_dispel_count` (`kind: "dispel_count"`) | a cast that dispels a stated number of effects per dispel type from an ally, counted per cast against a control arm |
 | `behaviour_metric_delta` (`kind: "dispel_removal"`) | a dispel/cleanse active that removes a named debuff aura from a target (self or a grouped ally) the moment it is cast, read as the generic `aura` metric going from present to absent |
 | `behaviour_metric_delta` (`kind: "aura_presence"`) | an active that grants an arbitrary metric's "present" state (an aura, a water-walk flag, ...) on a target (self or a grouped ally) the moment it is cast, read going from absent to present |
 | `behaviour_taken_hit` (`kind: "taken_hit"`) | a hit the caster takes: a striker's fixed-damage spell, its absorbed amount, absorbed share or delayed debt read from the damage logs the caster receives |
@@ -954,6 +955,20 @@ is not fixed, so each reading is the sum of the fixtures' `aura` values (`sum_la
 `compare.behaviour_cast_gate_verdict`. The fixtures must outlast the window. `power` sets the caster's power before the cast in place of the plain
 cost, for a channel that also drains power per second (Testament of Fortitude: `ManaPerSecond` 15 on top of
 `ManaCost` 15; at exactly the cost the channel ended at its first tick).
+
+### Dispel-count scenarios (`behaviour_dispel_count`, `kind: "dispel_count"`)
+
+"causes it to dispel 2 poison and disease effects" states a count per dispel type. `dispel_count_scenario` puts a
+second level 60 player, the ally, beside the caster and gives it every `debuffs` fixture (`[[dispel type, [spell,
+...]], ...]`; each fixture's `Dispel` must be that type in Spell.dbc). Each arm sets its `auras` on the caster, then,
+for each of `trials` (3), sets the fixtures on the ally, reads each one's `aura` before and `wait_ms` (800) after a cast
+of `cast_spell` at the ally, and removes them. An arm without auras is the control and is required. Each arm states
+its `expected` count per type; the verdict `<spell> behaviour_dispel_count <arm> <type>` counts, per cast, the
+fixtures of that type present before and absent after, and is `ok` only when every cast removes exactly that many
+(`compare.behaviour_dispel_count_verdict`). A fixture missing before a cast makes the verdict `unmeasured`. The count
+cannot show more removals than the fixtures of a type, so a type needs at least as many fixtures as its count.
+Disciplined Mind 680399 / 681483 (ADR 0158) uses Frost Fever 55095 and Blood Plague 55078 (disease), Deadly Poison
+2818 and Mind-numbing Poison 25810 (poison), and Benediction 578276.
 
 ### Threat-tick periods
 

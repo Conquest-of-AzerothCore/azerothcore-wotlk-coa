@@ -6,7 +6,7 @@ import re
 from classes import PROGRESSION_HEADER, ClassSpell, class_spells, progression_chains, table_rows
 from hits import creature_fixture
 from procs import proc_label, shares_aura, shares_proc_spell, trigger_key
-from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture, stat_label
+from profile import CASTER, DBC_DIR, DISPEL_TYPE_NAMES, base_steps, measurement, player_fixture, stat_label
 from stack import class_mask, family_flags
 from tooltip import COLOR_CODE, Displayed, Records, Unreadable, read_tooltip
 from triggers import (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND, cooldown_label, duration_label,
@@ -100,6 +100,9 @@ BEHAVIOUR_LABELS = {
                                 + ('behaviour_hit_ratio' if entry['judge'] == 'damage_ratio' else 'behaviour_taken_hit')
                                 + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
     'threat_redirect': lambda entry: [f"{entry['spell']} behaviour_threat_redirect"],
+    'dispel_count': lambda entry: [f"{entry['spell']} behaviour_dispel_count {arm['name']} "
+                                   f"{DISPEL_TYPE_NAMES[int(kind)]}"
+                                   for arm in entry['arms'] for kind, _ in arm['expected']],
     'fixed_count': lambda entry: [f"{entry['spell']} behaviour_fixed_count"],
     'group_target': lambda entry: [f"{entry['spell']} group_target {arm} {metric}"
                                    for arm in ('outsider', 'party', *(('raid',) if entry.get('raid', True) else ()))

@@ -13,6 +13,7 @@ UNBOUNDED = 10**9
 SPELL_POWER_SCHOOLS = range(1, 7)
 STATS = range(5)
 CASTER = 'caster'
+DISPEL_TYPE_NAMES = {1: 'magic', 2: 'curse', 3: 'disease', 4: 'poison'}
 EQUIPMENT_SLOT_MAIN_HAND = 15
 EQUIPMENT_SLOT_OFF_HAND = 16
 WEAPON_ITEM_CLASS = 2

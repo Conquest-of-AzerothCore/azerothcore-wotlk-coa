@@ -6,8 +6,8 @@ import re
 from hits import (DRAIN_MS, MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS, MAX_SCENARIO_MS, TIMEOUT_MARGIN_MS,
                   aura_modifiers, cast_steps, creature_fixture, timed)
 from procs import cast_interval, swing_interval
-from profile import (CASTER, DBC_DIR, base_steps, measurement, off_hand_steps, off_hand_weapon, one_hand_main,
-                     player_fixture)
+from profile import (CASTER, DBC_DIR, DISPEL_TYPE_NAMES, base_steps, measurement, off_hand_steps, off_hand_weapon,
+                     one_hand_main, player_fixture)
 from tooltip import COLOR_CODE, Records
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_ENTRY, FORCE_CRIT_RATINGS, FORCED_CRIT_RATING,
                     GCD_WAIT_MS, Expectation, TARGET, armed_for, closes_distance, dataset, facts_of,
@@ -51,6 +51,7 @@ BEHAVIOUR_EVENT_DELAY = 'behaviour_event_delay'
 BEHAVIOUR_PROC_RESET = 'behaviour_proc_reset'
 BEHAVIOUR_TAKEN_HIT = 'behaviour_taken_hit'
 BEHAVIOUR_THREAT_REDIRECT = 'behaviour_threat_redirect'
+BEHAVIOUR_DISPEL_COUNT = 'behaviour_dispel_count'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
@@ -61,7 +62,8 @@ BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVI
                     BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_AGGRO_REDIRECT,
                     BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_METRIC_RATIO_DELTA,
                     BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_HIT_RATIO, BEHAVIOUR_IMMUNITY, BEHAVIOUR_THREAT_SLOPE,
-                    BEHAVIOUR_EVENT_DELAY, BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT)
+                    BEHAVIOUR_EVENT_DELAY, BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
+                    BEHAVIOUR_DISPEL_COUNT)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
@@ -69,7 +71,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'internal_cooldown', 'cast_combat', 'aggro_redirect', 'dispel_removal', 'aura_presence', 'heal_block',
         'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio', 'threat_tick_ratio', 'absorb_pierce_ratio',
         'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate', 'site_purchase',
-        'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect')
+        'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -5110,7 +5112,120 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return taken_hit_scenario(class_file, taken_hit_spec(entry))
     if entry['kind'] == 'threat_redirect':
         return threat_redirect_scenario(class_file, threat_redirect_spec(entry))
+    if entry['kind'] == 'dispel_count':
+        return dispel_count_scenario(class_file, dispel_count_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
+
+
+DISPEL_COUNT_TARGET = ALLY
+DISPEL_COUNT_TRIALS = 3
+DISPEL_COUNT_WAIT_MS = 800
+
+
+@dataclass(frozen=True)
+class DispelCountArm:
+    name: str
+    auras: tuple[tuple[int, int], ...]
+    expected: tuple[tuple[int, int], ...]
+
+
+@dataclass(frozen=True)
+class DispelCountSpec:
+    spell: int
+    name: str
+    quote: str
+    cast_spell: int
+    debuffs: tuple[tuple[int, tuple[int, ...]], ...]
+    arms: tuple[DispelCountArm, ...]
+    trials: int = DISPEL_COUNT_TRIALS
+    wait_ms: int = DISPEL_COUNT_WAIT_MS
+
+
+def dispel_count_read_label(spec: DispelCountSpec, arm: str, trial: int, debuff: int, moment: str) -> str:
+    return f'{spec.spell} {BEHAVIOUR_DISPEL_COUNT} {arm} {trial} {debuff} {moment}'
+
+
+def dispel_count_label(spec: DispelCountSpec, arm: str, dispel_type: int) -> str:
+    return f'{spec.spell} {BEHAVIOUR_DISPEL_COUNT} {arm} {DISPEL_TYPE_NAMES[dispel_type]}'
+
+
+def dispel_count_validate(records: Records, spec: DispelCountSpec):
+    names = [arm.name for arm in spec.arms]
+    if len(set(names)) != len(names) or len(names) < 2:
+        raise ValueError(f'{spec.spell} dispel_count needs at least two distinct arms, here {names}')
+    if not any(not arm.auras for arm in spec.arms):
+        raise ValueError(f'{spec.spell} dispel_count needs a control arm without auras')
+    types = [dispel_type for dispel_type, _ in spec.debuffs]
+    for dispel_type, debuffs in spec.debuffs:
+        if dispel_type not in DISPEL_TYPE_NAMES or not debuffs:
+            raise ValueError(f'{spec.spell} dispel_count type {dispel_type} needs a known dispel type and debuffs')
+        for debuff in debuffs:
+            if records.field('Spell', debuff, 'Dispel') != dispel_type:
+                raise ValueError(f'{spec.spell} dispel_count debuff {debuff} is not of dispel type {dispel_type}')
+    for arm in spec.arms:
+        if sorted(dispel_type for dispel_type, _ in arm.expected) != sorted(types):
+            raise ValueError(f'{spec.spell} dispel_count arm {arm.name} must state a count for every dispel type')
+        for dispel_type, count in arm.expected:
+            if not 0 <= count <= len(dict(spec.debuffs)[dispel_type]):
+                raise ValueError(f'{spec.spell} dispel_count arm {arm.name} expects {count} of type {dispel_type}, '
+                                 f'more than the {len(dict(spec.debuffs)[dispel_type])} debuffs it carries')
+
+
+def dispel_count_scenario(class_file: dict, spec: DispelCountSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    dispel_count_validate(records, spec)
+    entry = behaviour_entry(records, spec.spell, spec.name, 'dispel_count', spec.quote, 0.0)
+    debuffs = [debuff for _, group in spec.debuffs for debuff in group]
+    steps = [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}]
+    for arm in spec.arms:
+        steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
+                  for spell, stacks in arm.auras]
+        for trial in range(1, spec.trials + 1):
+            steps += [{'action': 'set_aura', 'actor': DISPEL_COUNT_TARGET, 'spell': debuff, 'stacks': 1}
+                      for debuff in debuffs]
+            steps += [measurement(dispel_count_read_label(spec, arm.name, trial, debuff, BEFORE), DISPEL_COUNT_TARGET,
+                                  'aura', spell=debuff) for debuff in debuffs]
+            steps += hit_ratio_cast(records, spec.cast_spell, CASTER, DISPEL_COUNT_TARGET)
+            steps.append({'action': 'wait', 'ms': spec.wait_ms})
+            steps += [measurement(dispel_count_read_label(spec, arm.name, trial, debuff, AFTER), DISPEL_COUNT_TARGET,
+                                  'aura', spell=debuff) for debuff in debuffs]
+            steps += [{'action': 'set_aura', 'actor': DISPEL_COUNT_TARGET, 'spell': debuff, 'stacks': 0}
+                      for debuff in debuffs]
+        steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell, _ in arm.auras]
+    waited = waited_ms(steps)
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour dispel count',
+        'contract': f'The ally carries {[list(group) for _, group in spec.debuffs]} (dispel types '
+                    f'{[dispel_type for dispel_type, _ in spec.debuffs]}); the caster casts {spec.cast_spell} on it '
+                    f'{spec.trials} times per arm {[arm.name for arm in spec.arms]}, each arm setting its auras first; '
+                    f'each debuff is read before and {spec.wait_ms} ms after every cast, and the removals are counted '
+                    f'per dispel type.',
+        'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': DISPEL_COUNT_TARGET}],
+        'steps': base_steps(class_file) + steps,
+        'timeout_ms': waited + TIMEOUT_MARGIN_MS}
+    expectations = []
+    for arm in spec.arms:
+        for dispel_type, count in arm.expected:
+            group = dict(spec.debuffs)[dispel_type]
+            reads = [[[dispel_count_read_label(spec, arm.name, trial, debuff, BEFORE),
+                       dispel_count_read_label(spec, arm.name, trial, debuff, AFTER)] for debuff in group]
+                     for trial in range(1, spec.trials + 1)]
+            model = {'kind': 'dispel_count', 'arm': arm.name, 'dispel_type': dispel_type, 'reads': reads,
+                     'expected': count, 'quote': entry.quote}
+            expectations.append(Expectation(dispel_count_label(spec, arm.name, dispel_type), BEHAVIOUR_DISPEL_COUNT,
+                                            spec.spell, spec.cast_spell, None, str(count),
+                                            prose_rule(entry.quote, spec.spell), model))
+    return scenario, expectations
+
+
+def dispel_count_spec(entry: dict) -> DispelCountSpec:
+    arms = tuple(DispelCountArm(arm['name'], tuple((int(spell), int(stacks)) for spell, stacks in arm.get('auras', ())),
+                                tuple((int(kind), int(count)) for kind, count in arm['expected']))
+                 for arm in entry['arms'])
+    debuffs = tuple((int(kind), tuple(int(debuff) for debuff in group)) for kind, group in entry['debuffs'])
+    return DispelCountSpec(entry['spell'], entry['name'], entry['quote'], entry['cast_spell'], debuffs, arms,
+                           entry.get('trials', DISPEL_COUNT_TRIALS), entry.get('wait_ms', DISPEL_COUNT_WAIT_MS))
 
 
 def behaviour_entries(class_file: dict, spell_ids: list[int] | None) -> list[dict]:
