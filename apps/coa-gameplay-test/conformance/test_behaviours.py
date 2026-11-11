@@ -6544,7 +6544,7 @@ class ProcResetScenarioTests(unittest.TestCase):
         self.assertEqual(verdict.status, 'insufficient_trials')
 
 
-def class_entry(spell: int, variant: str) -> dict:
+def route_entry(spell: int, variant: str) -> dict:
     return next(entry for entry in CLASS_FILE['behaviours']
                 if entry['spell'] == spell and entry.get('variant') == variant)
 
@@ -6573,7 +6573,7 @@ def taken_hit_values(model: dict, trial_values) -> dict:
 
 class TakenHitScenarioTests(unittest.TestCase):
     def test_a_striker_spell_hits_the_caster_in_every_trial_of_every_arm(self):
-        scenario, expectations = behaviour_scenario(CLASS_FILE, class_entry(705295, 'absorb'))
+        scenario, expectations = behaviour_scenario(CLASS_FILE, route_entry(705295, 'absorb'))
         steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
         strikes = [step for step in steps if step['action'] == 'cast' and step['actor'] == STRIKER]
         self.assertEqual(len(strikes), 5 * 5)
@@ -6585,7 +6585,7 @@ class TakenHitScenarioTests(unittest.TestCase):
         self.assertTrue(all(step['caster'] == STRIKER and step['target'] == CASTER for step in absorbs))
 
     def test_seeded_absorb_without_the_stamina_term_alerts(self):
-        _, expectations = behaviour_scenario(CLASS_FILE, class_entry(705295, 'absorb'))
+        _, expectations = behaviour_scenario(CLASS_FILE, route_entry(705295, 'absorb'))
         expectation = expectations[0]
 
         def trial(arm: str, absorbed: float):
@@ -6597,7 +6597,7 @@ class TakenHitScenarioTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(wrong), expectation).status, 'alert')
 
     def test_seeded_absorb_in_the_control_arm_alerts(self):
-        _, expectations = behaviour_scenario(CLASS_FILE, class_entry(705295, 'absorb'))
+        _, expectations = behaviour_scenario(CLASS_FILE, route_entry(705295, 'absorb'))
         expectation = expectations[0]
         values = taken_hit_values(expectation.model, lambda arm, _: {'damage': 952.0, 'count': 1.0, 'absorb': 148.0,
                                                                      'logs': 1.0})
@@ -6612,8 +6612,8 @@ class TakenHitScenarioTests(unittest.TestCase):
         return taken_hit_values(model, trial)
 
     def test_a_debt_paid_before_its_end_alerts_only_where_the_end_is_judged(self):
-        _, over = behaviour_scenario(CLASS_FILE, class_entry(92109, 'over'))
-        _, delay = behaviour_scenario(CLASS_FILE, class_entry(92109, 'delay'))
+        _, over = behaviour_scenario(CLASS_FILE, route_entry(92109, 'over'))
+        _, delay = behaviour_scenario(CLASS_FILE, route_entry(92109, 'delay'))
         for expectations, early, status in ((over, 385.0, 'ok'), (over, 440.0, 'alert'), (delay, 440.0, 'ok')):
             expectation = expectations[0]
             verdict = judge_behaviour(base_verdict(expectation), FakeRun(self.oath_values(expectation.model, early)),
@@ -6622,7 +6622,7 @@ class TakenHitScenarioTests(unittest.TestCase):
                 self.assertEqual(verdict.status, status)
 
     def test_seeded_debt_not_reduced_by_holy_books_alerts(self):
-        _, expectations = behaviour_scenario(CLASS_FILE, class_entry(706468, 'debt'))
+        _, expectations = behaviour_scenario(CLASS_FILE, route_entry(706468, 'debt'))
         expectation = expectations[0]
 
         def trial(paid: float):
@@ -6635,7 +6635,7 @@ class TakenHitScenarioTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(wrong), expectation).status, 'alert')
 
     def test_a_damage_ratio_holds_the_caster_health_and_reads_noncritical_strikes(self):
-        scenario, expectations = behaviour_scenario(CLASS_FILE, class_entry(801202, 'taken_10'))
+        scenario, expectations = behaviour_scenario(CLASS_FILE, route_entry(801202, 'taken_10'))
         steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
         healths = [step for step in steps if step['action'] == 'set_health']
         self.assertTrue(healths and all(step['value'] == 10000 and step['maximum'] == 100000 for step in healths))
@@ -6656,14 +6656,14 @@ class TakenHitScenarioTests(unittest.TestCase):
                          'alert')
 
     def test_a_share_judge_refuses_several_strikes_per_trial(self):
-        entry = {**class_entry(92109, 'delay'), 'strikes': 2}
+        entry = {**route_entry(92109, 'delay'), 'strikes': 2}
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, entry)
 
 
 class ThreatRedirectScenarioTests(unittest.TestCase):
     def test_the_ally_attacks_before_and_after_the_cast_in_a_group(self):
-        scenario, expectations = behaviour_scenario(CLASS_FILE, class_entry(805417, 'redirect'))
+        scenario, expectations = behaviour_scenario(CLASS_FILE, route_entry(805417, 'redirect'))
         steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
         self.assertEqual([step['actor'] for step in steps if step['action'] == 'attack'], [ALLY, ALLY])
         self.assertTrue(any(step['action'] == 'group' and step['target'] == ALLY for step in steps))
@@ -6671,7 +6671,7 @@ class ThreatRedirectScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].check, BEHAVIOUR_THREAT_REDIRECT)
 
     def test_seeded_threat_kept_by_the_ally_alerts(self):
-        _, expectations = behaviour_scenario(CLASS_FILE, class_entry(805417, 'redirect'))
+        _, expectations = behaviour_scenario(CLASS_FILE, route_entry(805417, 'redirect'))
         expectation = expectations[0]
         reads = expectation.model['reads']
 
@@ -6689,7 +6689,7 @@ class ThreatRedirectScenarioTests(unittest.TestCase):
 
 class UncappedAreaAndControlledLeechTests(unittest.TestCase):
     def test_an_uncapped_area_around_the_caster_offers_dummies_inside_and_one_beyond(self):
-        scenario, expectations = behaviour_scenario(CLASS_FILE, class_entry(680397, 'area'))
+        scenario, expectations = behaviour_scenario(CLASS_FILE, route_entry(680397, 'area'))
         run.validate(scenario, run.SIMULATED_CLOCK)
         distances = [creature['distance'] for creature in scenario['creatures']]
         self.assertEqual(distances, [1.0, 2.0, 3.0, 4.0, 10.0])
@@ -6698,7 +6698,7 @@ class UncappedAreaAndControlledLeechTests(unittest.TestCase):
         self.assertTrue(all(step['target'] == CASTER for step in casts))
 
     def test_seeded_heal_in_the_control_cast_alerts(self):
-        _, expectations = behaviour_scenario(CLASS_FILE, class_entry(801481, 'downfall_heal'))
+        _, expectations = behaviour_scenario(CLASS_FILE, route_entry(801481, 'downfall_heal'))
         expectation = expectations[0]
         model = expectation.model
         right = {model['damage_baseline_label']: 470.0, model['heal_baseline_label']: 0.0,
