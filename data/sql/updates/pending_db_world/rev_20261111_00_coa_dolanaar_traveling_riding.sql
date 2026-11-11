@@ -70,12 +70,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9013402, 12358, 1, 0, 0, 1, 1, 0, 9899.432, 946.29724, 1312.7339, 3.0967073, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0,
     0, 'Riding Striped Frostsaber on show beside Maelira Rider');
 
--- They stand where Dolanaar's Pilgrim's Bounty table (game event 26) is set up, so they leave while it runs.
 DELETE FROM `game_event_creature` WHERE `guid` BETWEEN 9013400 AND 9013402;
-INSERT INTO `game_event_creature` (`eventEntry`, `guid`) VALUES
-(-26, 9013400),
-(-26, 9013401),
-(-26, 9013402);
 
 DELETE FROM `ascension_npc_overhead_icons` WHERE `creature_entry` = 449168;
 INSERT INTO `ascension_npc_overhead_icons` (`creature_entry`, `spell_id`, `enabled`) VALUES

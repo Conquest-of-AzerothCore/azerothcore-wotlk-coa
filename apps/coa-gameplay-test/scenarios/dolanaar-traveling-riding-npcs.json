@@ -6,8 +6,8 @@
     "Merchant> and a Riding Striped Frostsaber 12358 stood by the Dolanaar stable; the server had none of them.",
     "Maelira sold Reins of the Ancient Frostsaber 12302 and Reins of the Nightsaber 12303 at 100g (db.exil.es).",
     "Expected: both NPCs spawn in Dolanaar; Sylindra offers riding training with Novice Riding 33379 available to",
-    "an Alliance player of any race; Maelira's shop holds exactly the two reins at 100g each. They stand where",
-    "Dolanaar's Pilgrim's Bounty table (game event 26) is set up, so all three leave while that event runs."
+    "an Alliance player of any race; Maelira's shop holds exactly the two reins at 100g each. They stay all year,",
+    "including while Pilgrim's Bounty (game event 26) runs."
   ],
   "timeout_ms": 60000,
   "location": {"map": 1, "x": 9895.5, "y": 950.5, "z": 1311.9, "o": 0.9},
@@ -18,7 +18,6 @@
   ],
   "steps": [
     {"action": "wait", "label": "Let login settle", "ms": 3000},
-    {"action": "game_event", "label": "Pilgrim's Bounty is not running", "event": 26, "active": false},
     {"action": "assert", "label": "DISCRIMINATING: Sylindra Starweave stands in Dolanaar", "actor": "human",
      "metric": "map_creature_count", "entry": 449169, "equals": 1, "within_ms": 5000},
     {"action": "assert", "label": "DISCRIMINATING: Maelira Rider stands in Dolanaar", "actor": "human",
@@ -41,9 +40,10 @@
     {"action": "assert", "label": "Reins of the Nightsaber cost 100g", "actor": "human", "metric": "vendor_price",
      "item": 12303, "equals": 1000000},
     {"action": "game_event", "label": "Pilgrim's Bounty begins", "event": 26, "active": true},
-    {"action": "assert", "label": "DISCRIMINATING: Sylindra Starweave leaves for Pilgrim's Bounty", "actor": "human",
-     "metric": "map_creature_count", "entry": 449169, "equals": 0, "within_ms": 5000},
-    {"action": "assert", "label": "Maelira Rider leaves for Pilgrim's Bounty", "actor": "human",
-     "metric": "map_creature_count", "entry": 449168, "equals": 0, "within_ms": 5000}
+    {"action": "wait", "label": "Let the event's spawns update", "ms": 3000},
+    {"action": "assert", "label": "Sylindra Starweave stays through Pilgrim's Bounty", "actor": "human",
+     "metric": "map_creature_count", "entry": 449169, "equals": 1},
+    {"action": "assert", "label": "Maelira Rider stays through Pilgrim's Bounty", "actor": "human",
+     "metric": "map_creature_count", "entry": 449168, "equals": 1}
   ]
 }
