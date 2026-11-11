@@ -267,7 +267,7 @@ namespace
     constexpr uint32 SETIS_MAX_FLEX = 40;
     constexpr uint32 ITEM_RUNE_OF_ASCENSION = 375250;
     constexpr uint32 ITEM_BAZAAR_TOKEN = 975001;
-    constexpr uint32 ITEM_TREASURES_OF_AZEROTH = 978059;
+    constexpr uint32 ITEM_TREASURES_OF_AZEROTH = 1615011;
     constexpr uint32 SETIS_RUNES = 250;
     constexpr uint32 SETIS_TOKENS_MIN = 100;
     constexpr uint32 SETIS_TOKENS_MAX = 150;
@@ -589,6 +589,8 @@ namespace
         SPELL_WATER_SPIKE       = 2119765,
         SPELL_HAIL              = 2119769,
         SPELL_HAIL_SHARD        = 2119773,
+        SPELL_HAIL_MISSILE_LEFT = 2119771,
+        SPELL_HAIL_MISSILE_RIGHT= 2119772,
         SPELL_STEAL_WARMTH      = 2119777,
         SPELL_CHILLED           = 2119778,
         SPELL_SHOCK_FROST       = 2119779,
@@ -603,23 +605,71 @@ namespace
     enum SnowgraveEvents
     {
         EW_STOMP = 1, EW_HAIL, EW_GRASP, EW_WARMTH, EW_SHOCK, EW_FIERCE,
-        TW_ICICLE_WARN, TW_ICICLE, TW_HAIL, TW_RING, TW_RING_HIT, TW_WARMTH,
+        TW_ICICLE_WARN, TW_ICICLE, TW_HAIL, TW_HAIL_IMPACT, TW_RING, TW_RING_HIT, TW_WARMTH,
     };
 
     constexpr uint8 CHILL_FROZEN      = 10;
-    constexpr float HUDDLE_RANGE      = 2.0f;   // Body Heat's radius
-    constexpr uint8 HAIL_VOLLEYS      = 4;
-    constexpr uint8 GRASP_RINGS       = 8;
+    constexpr uint32 GO_FALLEN_ICICLE = 978098;
+    constexpr float HUDDLE_RANGE      = 5.0f;   // close enough to share Body Heat
+    constexpr uint8 HAIL_VOLLEYS      = 20;  // one shard every 150 ms through the 3s channel
+    constexpr float HAIL_RADIUS       = 5.0f;
+    constexpr float RING_THROW_XY     = 8.0f;   // about six yards, onto the next ring
+    constexpr float RING_THROW_Z      = 4.0f;
+    constexpr uint8 GRASP_RINGS       = 6;
+    constexpr uint8 MAX_FALLEN        = 12;  // icicles left on the ground at once; the oldest melts
 
     struct boss_snowgrave_coa : public custom_world_boss_coa
     {
         explicit boss_snowgrave_coa(Creature* creature) : custom_world_boss_coa(creature) { }
 
+        void ApplyFlex()
+        {
+            Level const* lv = LevelOf(me);
+            if (!lv || !lv->health)
+                return;
+            uint32 const players = std::clamp<uint32>(me->GetMap()->GetPlayersCountExceptGMs(), 10, 40);
+            float const pct = me->GetHealthPct();
+            uint32 const health = lv->health * players;
+            me->SetCreateHealth(health);
+            me->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(health));
+            me->UpdateMaxHealth();
+            me->SetHealth(std::max<uint32>(uint32(me->GetMaxHealth() * pct / 100.0f), 1));
+            me->ResetPlayerDamageReq();
+        }
+
+        void JustEngagedWith(Unit* who) override
+        {
+            ApplyFlex();
+            custom_world_boss_coa::JustEngagedWith(who);
+        }
+
         void Reset() override
         {
             custom_world_boss_coa::Reset();
+            me->SetLootMode(me->GetMap()->IsHeroic() ? LOOT_MODE_HARD_MODE_1 : LOOT_MODE_DEFAULT);
+            _hailImpacts.clear();
+            ApplyFlex();
             DoCastSelf(SPELL_FROZEN_CLUB, true);
             _stomps = 0;
+            ClearIcicles();
+        }
+
+        void JustDied(Unit* killer) override
+        {
+            ClearIcicles();
+            custom_world_boss_coa::JustDied(killer);
+        }
+
+        void ClearIcicles()
+        {
+            me->RemoveDynObject(SPELL_WATER_SPIKE);
+            me->RemoveDynObject(SPELL_ICE_SPIKE_WARNING);
+            me->RemoveDynObject(SPELL_CAVE_IN_WARNING);
+            me->GetMap()->DoForAllPlayers([](Player* p) { p->RemoveAurasDueToSpell(SPELL_CHILLED); });
+            for (ObjectGuid const& guid : _fallen)
+                if (GameObject* icicle = me->GetMap()->GetGameObject(guid))
+                    icicle->DespawnOrUnsummon();
+            _fallen.clear();
         }
 
         void Schedule() override
@@ -675,7 +725,7 @@ namespace
                 }
                 case SPELL_HAIL:
                     _hailVolleys = HAIL_VOLLEYS;
-                    _clock.ScheduleEvent(TW_HAIL, 500ms);
+                    _clock.ScheduleEvent(TW_HAIL, 150ms);
                     break;
                 case SPELL_WINTERS_GRASP:
                     _ring = _ringHit = 0;
@@ -721,35 +771,66 @@ namespace
                     _icicles.clear();
                     for (Player* p : pool)
                     {
-                        _icicles.push_back(p->GetPosition());
-                        CastAt(p->GetPosition(), SPELL_CAVE_IN_WARNING);
+                        // On the ground under the player, even one who is in the air when it is picked.
+                        Position pos = p->GetPosition();
+                        pos.m_positionZ = me->GetMap()->GetHeight(me->GetPhaseMask(), pos.GetPositionX(),
+                            pos.GetPositionY(), pos.GetPositionZ() + 2.0f);
+                        _icicles.push_back(pos);
+                        CastAt(pos, SPELL_CAVE_IN_WARNING);
                     }
                     _clock.ScheduleEvent(TW_ICICLE, 4s);
                     break;
                 }
                 case TW_ICICLE:
+                    // The icicle stays where it fell until the fight ends; the last wave's chilling areas go (each
+                    // one lasts ten minutes, and wave after wave of them weighs on every client).
+                    me->RemoveDynObject(SPELL_WATER_SPIKE);
                     for (Position const& pos : _icicles)
-                        CastAt(pos, SPELL_WATER_SPIKE);
-                    break;
-                case TW_HAIL:
-                    if (Unit* t = ObjectAccessor::GetUnit(*me, _hailTarget))
                     {
-                        float const toward = me->GetAngle(t);
-                        for (Player* p : PlayersWithin(me, 40.0f))
+                        CastAt(pos, SPELL_WATER_SPIKE);
+                        if (GameObject* icicle = me->SummonGameObject(GO_FALLEN_ICICLE, pos.GetPositionX(),
+                                pos.GetPositionY(), pos.GetPositionZ(), frand(0.0f, 2 * float(M_PI)), 0, 0, 0, 0, 0))
+                            _fallen.push_back(icicle->GetGUID());
+                        if (_fallen.size() > MAX_FALLEN)
                         {
-                            float const off = Position::NormalizeOrientation(me->GetAngle(p) - toward);
-                            if (off < float(M_PI) / 8 || off > 2 * float(M_PI) - float(M_PI) / 8)
-                                me->CastSpell(p, SPELL_HAIL_SHARD, true);
+                            if (GameObject* oldest = me->GetMap()->GetGameObject(_fallen.front()))
+                                oldest->DespawnOrUnsummon();
+                            _fallen.erase(_fallen.begin());
                         }
                     }
+                    break;
+                case TW_HAIL:
+                    // Each volley is thrown at where the target stands now: the shards follow them, and land where
+                    // they were, so one who keeps moving leaves a trail of them behind.
+                    if (Unit* t = ObjectAccessor::GetUnit(*me, _hailTarget))
+                    {
+                        Position pos = t->GetPosition();
+                        pos.m_positionZ = me->GetMap()->GetHeight(me->GetPhaseMask(), pos.GetPositionX(),
+                            pos.GetPositionY(), pos.GetPositionZ() + 2.0f);
+                        CastAt(pos, _hailVolleys % 2 ? SPELL_HAIL_MISSILE_LEFT : SPELL_HAIL_MISSILE_RIGHT);
+                        _hailImpacts.push_back(pos);
+                        uint32 const flight = uint32(me->GetExactDist(&pos) / 60.0f * 1000);
+                        _clock.ScheduleEvent(TW_HAIL_IMPACT, Milliseconds(flight));
+                    }
                     if (--_hailVolleys)
-                        _clock.ScheduleEvent(TW_HAIL, 750ms);
+                        _clock.ScheduleEvent(TW_HAIL, 150ms);
+                    break;
+                case TW_HAIL_IMPACT:
+                    if (!_hailImpacts.empty())
+                    {
+                        Position const pos = _hailImpacts.front();
+                        _hailImpacts.erase(_hailImpacts.begin());
+                        for (Player* p : PlayersWithin(me, 100.0f))
+                            if (p->GetExactDist2d(&pos) < HAIL_RADIUS)
+                                me->CastSpell(p, SPELL_HAIL_SHARD, true);
+                    }
                     break;
                 case TW_RING:
                 {
-                    // A ring every 1.5s, six yards further out, a spike every seven yards on it.
+                    // A ring every 1.5s, six yards further out, a spike every twelve yards on it (at most twelve, so a
+                    // full raid's clients are not flooded with spike effects).
                     float const radius = 6.0f * (_ring + 1);
-                    uint32 const spikes = std::max<uint32>(6, uint32(2 * float(M_PI) * radius / 7.0f));
+                    uint32 const spikes = std::clamp<uint32>(uint32(2 * float(M_PI) * radius / 12.0f), 6, 12);
                     std::vector<Position>& ring = _ringSpikes[_ring % 2];
                     ring.clear();
                     for (uint32 i = 0; i < spikes; ++i)
@@ -768,9 +849,25 @@ namespace
                     break;
                 }
                 case TW_RING_HIT:
+                {
+                    float const radius = 6.0f * (_ringHit + 1);
+                    std::vector<Player*> onRing = PlayersWithin(me, radius + 3.0f);
+                    std::erase_if(onRing, [&](Player* p) { return me->GetExactDist2d(p) < radius - 3.0f; });
+                    // The spikes nobody stands by; those under a player are cast at that player below.
                     for (Position const& pos : _ringSpikes[_ringHit++ % 2])
-                        CastAt(pos, SPELL_ICE_SPIKE);
+                        if (std::none_of(onRing.begin(), onRing.end(),
+                                [&](Player* p) { return p->GetExactDist2d(&pos) < 6.0f; }))
+                            CastAt(pos, SPELL_ICE_SPIKE);
+                    // Everyone on the ring is hit and thrown outward onto the next ring, six yards out. No spell
+                    // effect per player: a full raid on one ring would flood the clients with spikes.
+                    int32 const spike = Info(me, SPELL_ICE_SPIKE);
+                    for (Player* p : onRing)
+                    {
+                        Hit(me, p, SPELL_ICE_SPIKE, spike);
+                        p->KnockbackFrom(me->GetPositionX(), me->GetPositionY(), RING_THROW_XY, RING_THROW_Z);
+                    }
                     break;
+                }
                 case TW_WARMTH:
                     // Isolated players gain a stack each second, huddled ones lose one.
                     for (Player* p : PlayersWithin(me, 100.0f))
@@ -793,6 +890,9 @@ namespace
                     }
                     if (--_warmthSeconds)
                         _clock.ScheduleEvent(TW_WARMTH, 1s);
+                    else
+                        for (Player* p : PlayersWithin(me, 100.0f))
+                            p->RemoveAurasDueToSpell(SPELL_CHILLED);
                     break;
             }
         }
@@ -805,7 +905,9 @@ namespace
         uint8 _ringHit = 0;
         uint8 _warmthSeconds = 0;
         ObjectGuid _hailTarget;
+        std::vector<Position> _hailImpacts;
         std::vector<Position> _icicles;
+        std::vector<ObjectGuid> _fallen;
         std::vector<Position> _ringSpikes[2];
     };
 
@@ -1514,6 +1616,8 @@ void AddCoaCustomWorldBossScripts()
     new setis_checkpoint_packets();
     new setis_checkpoint_players();
     new custom_script<boss_snowgrave_coa>("boss_snowgrave_coa");
+    void AddCoaSnowgraveInstanceScripts();
+    AddCoaSnowgraveInstanceScripts();
     new custom_script<boss_soggoth_coa>("boss_soggoth_coa");
     new custom_script<npc_psychophage_coa>("npc_psychophage_coa");
     new custom_script<boss_atalzul_coa>("boss_atalzul_coa");
