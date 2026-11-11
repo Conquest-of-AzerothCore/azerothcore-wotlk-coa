@@ -3816,6 +3816,22 @@
       "observe_source": "$/1000;806106s1 = 4 sec (806106 EffectBasePoints[0] -4001, EffectDieSides[0] 1, -4000 ms). AscensionTemplarAbilities.cpp:182-200: an Oath Breaker cast (Breaker, Righteous Upheaval 572027) with the Eternal Blessing 705300 buff up casts 707111 on the caster; :305-308: a hit of 707111 with 573452 known calls ReduceLibrams(player, 4000) once per spell (AscensionTemplar.cpp:129-133, Libram of Tenacity 801461 among the five Librams). Gated spell Libram of Tenacity 801461, RecoveryTime 180000 ms. Each arm casts Eternal Blessing and a first Righteous Upheaval before the priming cast (no Libram cooldown runs yet), primes the Libram, then, in the arms with 573452, casts Righteous Upheaval at the dummy 2000 ms later. Attempts timed from the priming cast: 176500 ms without 573452 (refused, SPELL_FAILED_NOT_READY 67), 176500 ms with it (goes through), 175500 ms with it (refused: no more than 4 sec). The scenario waits 549400 ms of game time and runs on the accelerated clock only (ADR 0152)."
     },
     {
+      "spell": 680399, "name": "Disciplined Mind", "kind": "dispel_count",
+      "quote": "causes it to dispel $525052s2 poison and disease effect", "cast_spell": 578276,
+      "debuffs": [[3, [55095, 55078]], [4, [2818, 25810]]],
+      "arms": [{"name": "control", "expected": [[3, 0], [4, 0]]},
+               {"name": "rank_1", "auras": [[680399, 1]], "expected": [[3, 1], [4, 1]]}],
+      "expected_source": "$525052s2 = 1, and the owner ruling 'Disciplined Mind' (2026-11-11) keeps rank 1 at 1 of each. Disciplined Mind ranks cast 525052 from Benediction's OnSpellCast hook (AscensionTemplarAbilities.cpp:231-235); 525052 Effect[0] and Effect[1] are SPELL_EFFECT_DISPEL (38), EffectMiscValue 3 (DISPEL_DISEASE) and 4 (DISPEL_POISON), each EffectBasePoints 0 + EffectDieSides 1 = 1 effect. The ally carries Frost Fever 55095 and Blood Plague 55078 (Dispel 3) and Deadly Poison 2818 and Mind-numbing Poison 25810 (Dispel 4)"
+    },
+    {
+      "spell": 681483, "name": "Disciplined Mind", "kind": "dispel_count",
+      "quote": "causes it to dispel 2 poison and disease effects", "cast_spell": 578276,
+      "debuffs": [[3, [55095, 55078]], [4, [2818, 25810]]],
+      "arms": [{"name": "control", "expected": [[3, 0], [4, 0]]},
+               {"name": "rank_2", "auras": [[681483, 1]], "expected": [[3, 2], [4, 2]]}],
+      "expected_source": "The owner ruling 'Disciplined Mind' (2026-11-11): rank 2 dispels 2 poison and 2 disease effects per Benediction; 681483 repeats EffectTriggerSpell 525052 on effects 1 and 2 in the DBC. Disciplined Mind ranks cast 525052 from Benediction's OnSpellCast hook (AscensionTemplarAbilities.cpp:231-235); 525052 Effect[0] and Effect[1] are SPELL_EFFECT_DISPEL (38), EffectMiscValue 3 (DISPEL_DISEASE) and 4 (DISPEL_POISON), each EffectBasePoints 0 + EffectDieSides 1 = 1 effect. The ally carries Frost Fever 55095 and Blood Plague 55078 (Dispel 3) and Deadly Poison 2818 and Mind-numbing Poison 25810 (Dispel 4)"
+    },
+    {
       "spell": 680399,
       "name": "Disciplined Mind",
       "kind": "hit_ratio",

@@ -1602,7 +1602,12 @@
       },
       {
         "claim": "poison and disease",
-        "labels": []
+        "labels": [
+          "680399 behaviour_dispel_count rank_1 disease",
+          "680399 behaviour_dispel_count rank_1 poison",
+          "680399 behaviour_dispel_count control disease",
+          "680399 behaviour_dispel_count control poison"
+        ]
       }
     ],
     "kind": "claim"
@@ -1667,10 +1672,16 @@
       },
       {
         "claim": "2 poison and disease effects",
-        "labels": []
+        "labels": [
+          "681483 behaviour_dispel_count rank_2 disease",
+          "681483 behaviour_dispel_count rank_2 poison",
+          "681483 behaviour_dispel_count control disease",
+          "681483 behaviour_dispel_count control poison"
+        ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "confirmed defect by the owner ruling 'Disciplined Mind' (2026-11-11, method-study/owner-rulings-2026-11-10.md): rank 2 must dispel 2 poison and 2 disease effects per Benediction. Measured (ADR 0158, runs 20261111-213735 and -213819): rank 2 removes 1 disease and 1 poison of 2 each per cast, as rank 1 does (1 and 1, ok). Fix pending a fix note to the mentor"
   },
   {
     "spell": 681537,

@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_TAKEN_HIT,
-                        BEHAVIOUR_THREAT_REDIRECT,
+                        BEHAVIOUR_THREAT_REDIRECT, BEHAVIOUR_DISPEL_COUNT,
                         BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA,
                         BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_HEAL_BLOCK,
                         BEHAVIOUR_CAST_CONDITION,
@@ -735,7 +735,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 216)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 218)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -6715,6 +6715,56 @@ class ThreatRedirectScenarioTests(unittest.TestCase):
                          'ok')
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values(320.0, 0.0)), expectation).status,
                          'alert')
+
+
+def dispel_count_entry(spell: int) -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+                if entry['spell'] == spell and entry['kind'] == 'dispel_count')
+
+
+class DispelCountScenarioTests(unittest.TestCase):
+    def test_each_arm_casts_benediction_at_an_ally_carrying_two_of_each_kind(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, dispel_count_entry(681483))
+        steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
+        casts = [step for step in steps if step['action'] == 'cast']
+        self.assertEqual([(step['spell'], step['target']) for step in casts], [(578276, ALLY)] * 6)
+        self.assertEqual([player['id'] for player in scenario['players']], [CASTER, ALLY])
+        self.assertEqual([player['level'] for player in scenario['players']], [60, 60])
+        self.assertEqual([(expectation.label, expectation.check, expectation.model['expected'])
+                          for expectation in expectations],
+                         [('681483 behaviour_dispel_count control disease', BEHAVIOUR_DISPEL_COUNT, 0),
+                          ('681483 behaviour_dispel_count control poison', BEHAVIOUR_DISPEL_COUNT, 0),
+                          ('681483 behaviour_dispel_count rank_2 disease', BEHAVIOUR_DISPEL_COUNT, 2),
+                          ('681483 behaviour_dispel_count rank_2 poison', BEHAVIOUR_DISPEL_COUNT, 2)])
+
+    def test_rank_two_removing_one_of_each_alerts_and_two_passes(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, dispel_count_entry(681483))
+        expectation = next(expectation for expectation in expectations if expectation.model['arm'] == 'rank_2')
+
+        def values(removed: int) -> dict:
+            values = {}
+            for trial in expectation.model['reads']:
+                for index, (before, after) in enumerate(trial):
+                    values[before] = 1.0
+                    values[after] = 0.0 if index < removed else 1.0
+            return values
+
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values(2)), expectation).status, 'ok')
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values(1)), expectation)
+        self.assertEqual((verdict.status, verdict.measured), ('alert', 1.0))
+
+    def test_a_debuff_missing_before_the_cast_is_not_counted(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, dispel_count_entry(680399))
+        expectation = expectations[-1]
+        values = {label: 1.0 for trial in expectation.model['reads'] for pair in trial for label in pair}
+        values[expectation.model['reads'][0][0][0]] = 0.0
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status,
+                         'unmeasured')
+
+    def test_a_debuff_of_the_wrong_dispel_type_is_refused(self):
+        entry = {**dispel_count_entry(680399), 'debuffs': [[3, [55095, 2818]], [4, [2818, 25810]]]}
+        with self.assertRaisesRegex(ValueError, 'not of dispel type 3'):
+            behaviour_scenario(CLASS_FILE, entry)
 
 
 class UncappedAreaAndControlledLeechTests(unittest.TestCase):
