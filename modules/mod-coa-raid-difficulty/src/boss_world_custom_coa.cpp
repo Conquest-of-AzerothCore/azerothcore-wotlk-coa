@@ -1165,13 +1165,17 @@ namespace
             if (held && wanted)
                 return;
             if (held)
+            {
+                LOG_INFO("module", "[wbi] vessel {}: despawn {}", me->GetSpawnId(), entry);
                 held->DespawnOrUnsummon();
+            }
             guid.Clear();
             if (!wanted)
                 return;
             if (TempSummon* made = me->SummonCreature(entry, me->GetPositionX(), me->GetPositionY(),
                 me->GetPositionZ() + rise, 0, TEMPSUMMON_MANUAL_DESPAWN))
             {
+                LOG_INFO("module", "[wbi] vessel {}: summon {}", me->GetSpawnId(), entry);
                 made->SetReactState(REACT_PASSIVE);
                 guid = made->GetGUID();
             }
