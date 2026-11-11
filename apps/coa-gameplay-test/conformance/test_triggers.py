@@ -4,6 +4,7 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import re
 import shutil
 import sys
 import tempfile
@@ -1573,6 +1574,12 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                     self.assertIn(observed, triggered)
                     self.assertEqual(entry['observe_source'],
                                      f'EffectTriggerSpell[{triggered.index(observed)}] of {entry["aura"]}')
+                elif entry['observe_source'].startswith('tooltip token'):
+                    token = re.match(rf'tooltip token (\${observed}\w+) of {entry["aura"]}$', entry['observe_source'])
+                    self.assertTrue(token)
+                    self.assertIn(token.group(1), description)
+                    self.assertNotIn(observed, triggered)
+                    self.assertTrue(entry['observe_note'])
                 else:
                     self.assertEqual(entry['observe_source'], f'tooltip reference @s:{observed}:0@ of {entry["aura"]}')
                     self.assertIn(f'@s:{observed}:0@', description)
