@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Scourgebane's re-roll chain stops at eight strikes when its chance is forced to 100%",
-  "contract": "Scourgebane 92111: 'Direct damage dealt now has a $520007h% chance to strike an enemy with Scourgebane'. The strike 801832 is itself direct damage and re-rolls the chance, synchronously inside the previous strike. Pure Focus 707852 adds its effect 0 amount to the 520007 chance (20 + 10); the fixture sets that amount to 80, so the chance reads 100%. Without a bound the chain would recurse until the target died or the stack overflowed; the cap allows at most 8 strikes per chain, against a longest observed chain of 6 in the Ascension logs. Every landed main-hand swing therefore produces exactly 8 strikes, which also shows that the 7 re-rolls below the cap still happen.",
+  "name": "A Scourgebane strike never triggers another Scourgebane strike, even at a forced 100% chance",
+  "contract": "Scourgebane 92111: 'Direct damage dealt now has a $520007h% chance to strike an enemy with Scourgebane'. Owner ruling 2026-11-11: the chance applies to weapon hits only and a Scourgebane strike 801832 never triggers Scourgebane again, as the isolated Ascension live logs show (after 1229 isolated melee swings, 263 gave a strike on the swing's target and 1 a second one). Pure Focus 707852 adds its effect 0 amount to the 520007 chance (20 + 10); the fixture sets that amount to 80, so the chance reads 100%. Every landed main-hand swing then gives exactly one strike; a server whose strike re-rolls the chance gives a chain of strikes per swing.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -63,22 +63,22 @@
     },
     {
       "action": "assert",
-      "label": "Exactly 8 Scourgebane strikes deal damage per landed swing",
+      "label": "DISCRIMINATING: exactly 1 Scourgebane strike deals damage per landed swing",
       "actor": "templar",
       "metric": "spell_damage_count",
       "spell": 801832,
       "target": "dummy",
       "ratio_to": "swings",
-      "equals": 8
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "Exactly 8 Scourgebane strikes are cast per landed swing",
+      "label": "DISCRIMINATING: exactly 1 Scourgebane strike is cast per landed swing",
       "actor": "templar",
       "metric": "spell_cast_count",
       "spell": 801832,
       "ratio_to": "swings",
-      "equals": 8
+      "equals": 1
     },
     {
       "action": "assert",
