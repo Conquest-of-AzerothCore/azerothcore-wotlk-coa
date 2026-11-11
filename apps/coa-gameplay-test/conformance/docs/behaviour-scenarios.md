@@ -782,7 +782,8 @@ caster's power to the reduced cost (rounded up; regeneration is off), `resource:
 `cast_failure` reading `<spell> cost_gate <gated>[ <label_suffix>] <arm>`:
 
 - `without`: the talent unknown, refused (`SPELL_FAILED_NO_POWER` 85 or `SPELL_FAILED_NOT_READY` 67): the control;
-- `with`: the talent learned (or `talent_aura` set), goes through (0);
+- `with`: the talent learned (or `talent_aura` set, whose presence is then read before each talent arm's attempt as
+  `<label> aura`, expected 1), goes through (0);
 - `next` (`next_arm`): a second attempt right after `with`, without the `setup_casts`, refused: only the next cast
   is reduced;
 - `beyond`: one power point below the reduced cost (two when the reduced cost is fractional), or `margin_ms` before
@@ -829,6 +830,16 @@ A `cast_applies_aura` entry may name `cast_spell` (and `cast_target`) when the a
 than the entry's own, for example a talent whose aura a class ability grants: the talent is learned, `cast_spell` is
 learned, its power and caster aura are set, and it is cast at `cast_target` (default `target`). The expiry pair is
 timed from that cast.
+
+### Periodic-dispel scenarios (`behaviour_cast_condition`, `kind: "periodic_dispel"`)
+
+"Each second you will also remove 1 disease effect from yourself" states a removal per period and a count per
+removal. `periodic_dispel_scenario` sets every `debuffs` fixture (at least two, of the dispelled type) on the caster
+and reads them after the whole window with no cast (`<spell> periodic_dispel control`: all present, the time-matched
+control), removes and sets them again, casts `spell`, and reads them `margin_ms` (200) before the first `period_ms`
+(`before_first`: all present) and `margin_ms` after each period (`after_<n>`: one fewer each time). The removal order
+is not fixed, so each reading is the sum of the fixtures' `aura` values (`sum_labels`), judged exactly by
+`compare.behaviour_cast_gate_verdict`. The fixtures must outlast the window.
 
 ### Threat-tick periods
 
@@ -927,6 +938,8 @@ Custodian's 30 minutes, therefore runs only through the default accelerated game
 | Pious Sweep 520034 (`variant: "above_75"`/`"below_75"`) | hit_ratio | "Increases the damage of Chastise by" / "on enemies above 75% health or affected by Tranquil Circle." | 1.25 at full health, 1.0 at 50% | aura 303 on `AURA_STATE_HEALTH_ABOVE_75_PERCENT`, Chastise mask (`AscensionTemplarContracts.cpp:152-156`) |
 | Force of Golganneth 500694 | cost_gate (`talent_aura`) | "While active, your Temple Guardian spell has its Energy cost reduced by" | 8 Energy while the aura is up | aura 108 `SPELLMOD_COST` -50% |
 | Testament of Fortitude 500678 | cast_applies_aura | "Meditate for" | 15000 ms | `DurationIndex` 8 |
+| Testament of Fortitude 500678 | periodic_dispel | "Each second you will also remove 1 disease effect from yourself." | 2 without the spell, 2 at 800 ms, 1 at 1200 ms, 0 at 2200 ms | Frost Fever 55095 and Blood Plague 55078 (15000 ms each); 500690 `Effect[2]` `SPELL_EFFECT_DISPEL` disease, every 1000 ms |
+| Pious Sweep 520034 (`variant: "circle_without_talent"`) | hit_ratio | "on enemies above 75% health or affected by Tranquil Circle." | 1.0 | the Tranquil Circle arm without Pious Sweep learned: the without-talent control of the circle claim |
 | Staffguard 705295 | cast_applies_aura (`cast_spell` 572769) | "for" | 8000 ms | `AscensionTemplarAbilities.cpp:239-243`, 706583 `DurationIndex` 31 |
 | Tithe 804781 | site_purchase | "Pay a tithe of 1 silver to learn a special new ability" | 100 copper, Light's Hope Chapel then Strahnbrad | `AscensionTemplarTithe.cpp` (`TITHE_COST`, site table) |
 | Warrior of Tyr 301253 | metric_delta | "Periodic damage dealt now generates" | 10 (Energy, power type 3) | `AscensionCustomResourceData.h:475` `NativePowerGainRules` (`ClassId 19, PowerType 3, InternalAmount 10, Event PeriodicDamageTick, RequiredAuraSpellId 301253`), consumed by `AscensionCompat.cpp:3632-3680` `OnPeriodicDamageTick`; Condemn 567541 (periodic damage, 3000 ms ticks) is cast as a real tick source, with the scenario's own mana-cost fixture resetting Energy to a known baseline immediately before each cast; matches the already-written issue scenario `templar-5163-warrior-of-tyr-energy-generation.json` (#5163, #4432). No code or SQL fix needed — the prior `triggers` entry for 301253 (removed) searched only the `ProcFlags`/`spell_proc` path and missed this separate native-resource-rule path |

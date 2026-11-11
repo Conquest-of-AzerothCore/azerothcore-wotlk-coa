@@ -2950,6 +2950,13 @@ def behaviour_charge_recharge_verdict(base: Verdict, run: Run, model: dict) -> V
 
 
 def behaviour_cast_gate_verdict(base: Verdict, run: Run, expectation: Expectation) -> Verdict:
+    summed = (expectation.model or {}).get('sum_labels')
+    if summed:
+        missing = next((label for label in summed if run.values.get(label) is None), None)
+        if missing:
+            return replace(base, explanation=missing_measurement(run, missing))
+        return exact(base, sum(float(run.values[label]) for label in summed), float(expectation.displayed),
+                     f'the sum of {", ".join(summed)} compared exactly to the expected count')
     measured = run.values.get(expectation.label)
     if measured is None:
         return replace(base, explanation=missing_measurement(run, expectation.label))

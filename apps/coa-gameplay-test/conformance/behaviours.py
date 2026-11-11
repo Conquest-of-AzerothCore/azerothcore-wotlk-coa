@@ -61,7 +61,8 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition', 'mount_grant',
         'internal_cooldown', 'cast_combat', 'aggro_redirect', 'dispel_removal', 'aura_presence', 'heal_block',
         'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio', 'threat_tick_ratio', 'absorb_pierce_ratio',
-        'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate', 'site_purchase')
+        'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate', 'site_purchase',
+        'periodic_dispel')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1205,7 +1206,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
     if spec.force_crit:
         scenario['players'][0][FORCE_CRIT_RATINGS[spec.force_crit]] = FORCED_CRIT_RATING
     if spec.attack_swings:
-        scenario['timeout_ms'] = sum(step['ms'] for step in steps if step['action'] == 'wait') + TIMEOUT_MARGIN_MS
+        timed(scenario, sum(step['ms'] for step in steps if step['action'] == 'wait'))
     if spec.target == TARGET or spec.measure_actor == TARGET:
         scenario['creatures'] = [creature_fixture(class_file)]
     label = f'{spec.spell} behaviour_metric_delta' + (f' {spec.label_suffix}' if spec.label_suffix else '')
@@ -2836,6 +2837,11 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
         opening = setup() if arm.setup else []
         if arm.held_ms:
             opening.append({'action': 'wait', 'label': f'{arm.name} aura wait', 'ms': arm.held_ms})
+        if spec.talent_aura and arm.with_talent:
+            aura_label = f'{label} aura'
+            opening.append(measurement(aura_label, CASTER, 'aura', spell=spec.talent_aura))
+            expectations.append(Expectation(aura_label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.talent_aura, None,
+                                            str(STATE_PRESENT), rule, {**model, 'arm': arm.name, 'reading': 'aura'}))
         if spec.resource == 'power':
             steps += opening + attempt(label, [{'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
                                                 'value': int(arm.level)}])
@@ -2946,6 +2952,76 @@ def site_purchase_spec(entry: dict) -> SitePurchaseSpec:
         raise ValueError(f'{entry["spell"]} site_purchase needs exactly two sites')
     return SitePurchaseSpec(entry['spell'], entry['name'], entry['quote'], int(entry['price']), sites,
                             site(entry['outside'], 0), entry.get('settle_ms', SITE_PURCHASE_SETTLE_MS))
+
+
+PERIODIC_DISPEL_MARGIN_MS = 200
+
+
+@dataclass(frozen=True)
+class PeriodicDispelSpec:
+    spell: int
+    name: str
+    quote: str
+    debuffs: tuple[int, ...]
+    period_ms: int
+    margin_ms: int = PERIODIC_DISPEL_MARGIN_MS
+
+
+def periodic_dispel_label(spell: int, moment: str, debuff: int | None = None) -> str:
+    return f'{spell} periodic_dispel {moment}' + (f' {debuff}' if debuff is not None else '')
+
+
+def periodic_dispel_scenario(class_file: dict, spec: PeriodicDispelSpec) -> tuple[dict, list[Expectation]]:
+    if len(spec.debuffs) < 2:
+        raise ValueError(f'{spec.spell} periodic_dispel needs at least two debuffs to count one removal per period')
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    count = len(spec.debuffs)
+    entry = behaviour_entry(records, spec.spell, spec.name, 'periodic_dispel', spec.quote, 1.0)
+    facts = facts_of(records, spec.spell)
+
+    def place() -> list[dict]:
+        return [{'action': 'set_aura', 'actor': CASTER, 'spell': debuff, 'stacks': 1} for debuff in spec.debuffs]
+
+    def read(moment: str) -> list[dict]:
+        return [measurement(periodic_dispel_label(spec.spell, moment, debuff), CASTER, 'aura', spell=debuff)
+                for debuff in spec.debuffs]
+
+    moments = [('before_first', spec.period_ms - spec.margin_ms, count)]
+    moments += [(f'after_{tick}', tick * spec.period_ms + spec.margin_ms, max(count - tick, 0))
+                for tick in range(1, count + 1)]
+    control_wait = moments[-1][1]
+    steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + place()
+             + [{'action': 'wait', 'label': 'control without the spell wait', 'ms': control_wait}] + read('control')
+             + [{'action': 'set_aura', 'actor': CASTER, 'spell': debuff, 'stacks': 0} for debuff in spec.debuffs]
+             + place() + cast_gate_power_step(facts) + required_aura_steps(facts)
+             + [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell},
+                {'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': CASTER}])
+    elapsed = 0
+    for moment, at_ms, _ in moments:
+        steps += [{'action': 'wait', 'label': f'{moment} wait', 'ms': at_ms - elapsed}] + read(moment)
+        elapsed = at_ms
+    rule = prose_rule(entry.quote, spec.spell)
+    model = {'kind': 'periodic_dispel', 'period_ms': spec.period_ms, 'quote': entry.quote}
+    expectations = [Expectation(periodic_dispel_label(spec.spell, moment), BEHAVIOUR_CAST_CONDITION, spec.spell,
+                                spec.spell, None, str(present), rule,
+                                {**model, 'sum_labels': [periodic_dispel_label(spec.spell, moment, debuff)
+                                                         for debuff in spec.debuffs]})
+                    for moment, present in [('control', count)] + [(m, n) for m, _, n in moments]]
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour periodic dispel',
+        'contract': f'{count} debuffs {list(spec.debuffs)} stay on the caster for {control_wait} ms without '
+                    f'{spec.spell}; with it cast, all are present {spec.margin_ms} ms before its first period and one '
+                    f'fewer is present {spec.margin_ms} ms after each period of {spec.period_ms} ms, proving the '
+                    f'"{spec.quote}" clause.',
+        'players': [player_fixture(class_file)],
+        'steps': steps}
+    return timed(scenario, waited_ms(steps)), expectations
+
+
+def periodic_dispel_spec(entry: dict) -> PeriodicDispelSpec:
+    return PeriodicDispelSpec(entry['spell'], entry['name'], entry['quote'], tuple(int(d) for d in entry['debuffs']),
+                              int(entry['period_ms']), entry.get('margin_ms', PERIODIC_DISPEL_MARGIN_MS))
 
 
 SPELL_FAILED_TARGET_AURASTATE = 111
@@ -4223,6 +4299,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return cost_gate_scenario(class_file, cost_gate_spec(entry))
     if entry['kind'] == 'site_purchase':
         return site_purchase_scenario(class_file, site_purchase_spec(entry))
+    if entry['kind'] == 'periodic_dispel':
+        return periodic_dispel_scenario(class_file, periodic_dispel_spec(entry))
     if entry['kind'] == 'absorb_pierce_ratio':
         return absorb_pierce_ratio_scenario(class_file, absorb_pierce_ratio_spec(entry))
     if entry['kind'] == 'hit_ratio':

@@ -369,7 +369,7 @@ class templar_scaling : public UnitScript
         if (Player* striker = Owner(attacker))
             if (info && Named(info, 806521) && info->HasEffect(SPELL_EFFECT_HEALTH_LEECH) &&
                 striker->HasAura(300520) && target->HealthBelowPct(20))
-                damage = int32(damage * 1.25f);
+                damage = int32(damage * (1.0f + float(Amount(300520, EFFECT_0, striker)) / 100.0f));
     }
     void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
     {

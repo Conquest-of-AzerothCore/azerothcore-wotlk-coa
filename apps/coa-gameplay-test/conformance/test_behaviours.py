@@ -347,8 +347,9 @@ def rebuke_entry() -> dict:
 
 
 def testament_of_fortitude_dispel_entry() -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours']
-               if entry['spell'] == TESTAMENT_OF_FORTITUDE and entry['kind'] == 'dispel_removal')
+    return {'spell': TESTAMENT_OF_FORTITUDE, 'name': 'Testament of Fortitude', 'kind': 'dispel_removal',
+            'quote': 'remove 1 disease effect from yourself', 'target': 'caster', 'wait_ms': 15200,
+            'gameplay_clock': 'real', 'debuffs': [55095]}
 
 
 def harmonic_disposition_entry() -> dict:
@@ -731,7 +732,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 114)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 115)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -6080,6 +6081,37 @@ class AttackMetricDeltaTest(unittest.TestCase):
                        {'force_crit': 'ranged'}):
             with self.subTest(change=change), self.assertRaises(ValueError):
                 metric_delta_scenario(CLASS_FILE, metric_delta_spec({**self.entry, **change}))
+
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class PeriodicDispelScenarioTests(unittest.TestCase):
+    def setUp(self):
+        self.scenario, self.expectations = behaviour_scenario(CLASS_FILE,
+                                                              class_entry(TESTAMENT_OF_FORTITUDE, 'periodic_dispel'))
+        self.steps = run.validate(self.scenario)['steps']
+
+    def test_control_then_one_removal_per_period(self):
+        self.assertEqual([(e.label, e.displayed) for e in self.expectations],
+                         [('500678 periodic_dispel control', '2'), ('500678 periodic_dispel before_first', '2'),
+                          ('500678 periodic_dispel after_1', '1'), ('500678 periodic_dispel after_2', '0')])
+        control = first_index(self.steps, label='500678 periodic_dispel control 55095')
+        cast = first_index(self.steps, action='cast', spell=TESTAMENT_OF_FORTITUDE)
+        self.assertLess(control, cast)
+        waits = [step['ms'] for step in self.steps if step.get('label', '').endswith(' wait')]
+        self.assertEqual(waits, [2200, 800, 400, 1000])
+
+    def test_seeded_removal_of_both_diseases_at_the_first_tick_is_alert(self):
+        after_1 = self.expectations[2]
+        values = FakeRun({label: 0.0 for label in after_1.model['sum_labels']})
+        self.assertEqual(judge_behaviour(base_verdict(after_1), values, after_1).status, 'alert')
+        values = FakeRun({after_1.model['sum_labels'][0]: 1.0, after_1.model['sum_labels'][1]: 0.0})
+        self.assertEqual(judge_behaviour(base_verdict(after_1), values, after_1).status, 'ok')
+
+    def test_one_debuff_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {**class_entry(TESTAMENT_OF_FORTITUDE, 'periodic_dispel'),
+                                            'debuffs': [55095]})
 
 
 if __name__ == '__main__':

@@ -19,7 +19,8 @@
     "labels": [
       "92108 trigger_count"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Proven with a dual-wield fixture (Dual Wield 674, off-hand Cudgel 2492; classes/templar.json triggers, Zealotry dual_wield). Owner ruling 'Templar off-hand' (method-study/owner-rulings-2026-11-10.md, 2026-11-11): the live Zealot Templar wields two one-hand weapons, so the fixture result counts. Dependency: a Templar on this server has no dual-wield grant today, a missing implementation handled in its own step."
   },
   {
     "spell": 92109,
@@ -604,7 +605,10 @@
     "spell": 500678,
     "clause": "Each second you will also remove 1 disease effect from yourself.",
     "labels": [
-      "500678 behaviour_dispel_removal 55095"
+      "500678 periodic_dispel control",
+      "500678 periodic_dispel before_first",
+      "500678 periodic_dispel after_1",
+      "500678 periodic_dispel after_2"
     ],
     "kind": "claim"
   },
@@ -659,7 +663,9 @@
       "500694 aura_amount e0",
       "500694 cost_gate 803792 without",
       "500694 cost_gate 803792 with",
-      "500694 cost_gate 803792 beyond"
+      "500694 cost_gate 803792 beyond",
+      "500694 cost_gate 803792 with aura",
+      "500694 cost_gate 803792 beyond aura"
     ],
     "kind": "claim"
   },
@@ -815,7 +821,8 @@
         "claim": "or affected by Tranquil Circle.",
         "labels": [
           "520034 e1 spell_modifier 801205",
-          "520034 behaviour_hit_ratio tranquil_circle"
+          "520034 behaviour_hit_ratio tranquil_circle",
+          "520034 behaviour_hit_ratio circle_without_talent"
         ]
       }
     ],
@@ -3002,10 +3009,21 @@
   {
     "spell": 573324,
     "clause": "dealing ${$m1+0+$AP*0.285+$SP*0.75} Physical damage",
-    "labels": [
-      "801446 effect_value e0 #0",
-      "573324 effect_value e0 #0",
-      "573324 hit_mean"
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$AP*0.285 ...} Physical damage",
+        "labels": [
+          "801446 effect_value e0 #0",
+          "573324 effect_value e0 #0",
+          "573324 hit_mean"
+        ]
+      },
+      {
+        "claim": "+$SP*0.75}",
+        "labels": [
+          "573324 effect_value e0 #0"
+        ]
+      }
     ],
     "kind": "claim"
   },
