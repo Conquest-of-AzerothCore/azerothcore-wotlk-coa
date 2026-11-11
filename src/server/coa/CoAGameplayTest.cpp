@@ -7243,9 +7243,19 @@ private:
         }
         else if (action == "gossip_hello")
         {
-            ObjectGuid guid = step.get_optional<std::string>("target") ?
-                GetUnit(step.get<std::string>("target"))->GetGUID() : player->GetCritterGUID();
-            Require(!guid.IsEmpty(), "Gossip needs a target or summoned companion");
+            ObjectGuid guid = player->GetCritterGUID();
+            if (auto target = step.get_optional<std::string>("target"))
+                guid = GetUnit(*target)->GetGUID();
+            else if (auto entry = step.get_optional<uint32>("entry"))
+            {
+                Creature* creature = player->FindNearestCreature(*entry, 40.0f, true);
+                Require(creature != nullptr, "Gossip needs a living creature of that entry within 40 yards");
+                if (!creature->IsWithinDistInMap(player, INTERACTION_DISTANCE))
+                    player->UpdatePosition(creature->GetPositionX(), creature->GetPositionY(),
+                                           creature->GetPositionZ(), player->GetOrientation(), true);
+                guid = creature->GetGUID();
+            }
+            Require(!guid.IsEmpty(), "Gossip needs a target, a creature entry or a summoned companion");
             player->PlayerTalkClass->ClearMenus();
             WorldPacket packet(CMSG_GOSSIP_HELLO, 8);
             packet << guid;
