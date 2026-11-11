@@ -144,10 +144,10 @@
      "reason": "$?s300512 true branch names 300512's own effect 1, a static value independent of caster state"}
   ],
   "item_armor_subclass_effects": [
-    {"spell": 301311, "effect": 0, "subclass": 3, "item": 1065932, "slot": 4, "level": 80,
-     "citation": "Blessed Padding rank 1: aura 142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT, EffectMiscValue[0] 1 (SPELL_SCHOOL_MASK_NORMAL), EffectMiscValueB[0] 8 (1<<ITEM_SUBCLASS_ARMOR_MAIL); SpellInfo.cpp GetItemArmorSubclassMask() now whitelists 301311/301360 (SpellFamilyName 25) to return mask 8, matching StatSystem.cpp Player::UpdateArmor()'s per-subclass GetItemArmorBySubclass(3) scaling. Item 1065932 (mail chest) is the fixture apps/coa-gameplay-test/scenarios/templar-blessed-padding.json already equips at slot 4; its RequiredLevel is 80 (verified via a carried_item_required_level probe this round, item_template is SQL data outside coa-dbc-viewer's DBC scope), above this class file's reference level 60, so this entry bumps this one generated scenario's player to level 80"},
-    {"spell": 301360, "effect": 0, "subclass": 3, "item": 1065932, "slot": 4, "level": 80,
-     "citation": "Blessed Padding rank 2: same aura 142 shape and same level-80 item 1065932 as 301311, EffectMiscValueB[0] 8, doubling (100%) instead of 50%"}
+    {"spell": 301311, "effect": 0, "subclass": 3, "item": 30298, "slot": 4, "required_level": 60,
+     "citation": "Blessed Padding rank 1: aura 142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT, EffectMiscValue[0] 1 (SPELL_SCHOOL_MASK_NORMAL), EffectMiscValueB[0] 8 (1<<ITEM_SUBCLASS_ARMOR_MAIL); SpellInfo.cpp GetItemArmorSubclassMask() now whitelists 301311/301360 (SpellFamilyName 25) to return mask 8, matching StatSystem.cpp Player::UpdateArmor()'s per-subclass GetItemArmorBySubclass(3) scaling. Item 30298, Void Slayer's Tunic: acore_world.item_template of the in-RAM test database (read 2026-11-11) gives class 4, subclass 3 (mail), InventoryType 5 (chest, equip slot 4), ItemLevel 109, RequiredLevel 60, armor 704, ArmorDamageModifier 0, AllowableClass and AllowableRace -1, no required skill or spell, ScalingStatDistribution 0, the values of the 2026-09-14 repack dump. It replaces the RequiredLevel 80 chest 1065932, so the player stays at the class level 60"},
+    {"spell": 301360, "effect": 0, "subclass": 3, "item": 30298, "slot": 4, "required_level": 60,
+     "citation": "Blessed Padding rank 2: same aura 142 shape and same RequiredLevel 60 mail chest 30298 as 301311, EffectMiscValueB[0] 8, doubling (100%) instead of 50%"}
   ],
   "effect_overrides": [
     {"spell": 520442, "effect": 0, "misc_value": 15,
