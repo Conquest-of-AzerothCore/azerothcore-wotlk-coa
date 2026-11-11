@@ -750,6 +750,8 @@ that target. It reads position and nothing else, so displacement from a knockbac
 the difference between two observations; take a `snapshot` first and assert `relative_to` it. Height is excluded.
 `position_x`, `position_y` and `position_z` read the unit's native coordinates on its current map, so a
 teleport's landing can be held to its destination with `min`/`max` bounds; pair them with `map_id`.
+`object_scale` reads the unit's object scale (UNIT_FIELD_SCALE), e.g. a boss keeping its model size after a
+display change.
 `in_flight` is 1 while a player rides a taxi and `taxi_destination` is the last node of the route still
 ahead (0 when none). `discover_taxi_node` (player `actor`, TaxiNodes `entry`) marks a node discovered, as
 talking to its flight master does, so a scenario can request a route through it.

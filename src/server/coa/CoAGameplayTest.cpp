@@ -3192,6 +3192,8 @@ private:
             return unit->GetPositionY();
         if (metric == "position_z")
             return unit->GetPositionZ();
+        if (metric == "object_scale")
+            return unit->GetObjectScale();
         if (metric == "combat")
             return unit->IsInCombat();
         if (metric == "can_attack")
