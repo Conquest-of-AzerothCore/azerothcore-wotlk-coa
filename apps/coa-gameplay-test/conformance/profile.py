@@ -1,3 +1,5 @@
+from functools import lru_cache
+import hashlib
 import json
 from pathlib import Path
 from typing import Mapping
@@ -44,6 +46,43 @@ def probe_aura_label(spell_id: int) -> str:
 
 
 CLAUSE_LEDGER_SUFFIX = '_clauses'
+SPELL_DBC = 'Spell.dbc'
+
+
+class DbcSetMismatch(ValueError):
+    pass
+
+
+@lru_cache(maxsize=8)
+def file_sha256(path: Path, size: int, mtime_ns: int) -> str:
+    with path.open('rb') as stream:
+        return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+
+def spell_dbc_sha256(dbc_dir: Path) -> str:
+    path = Path(dbc_dir).resolve() / SPELL_DBC
+    if not path.is_file():
+        raise DbcSetMismatch(f'{path} does not exist')
+    stat = path.stat()
+    return file_sha256(path, stat.st_size, stat.st_mtime_ns)
+
+
+def server_spell_dbc_sha256() -> str:
+    return spell_dbc_sha256(DBC_DIR)
+
+
+def require_server_sha(sha: str | None, source: str) -> str:
+    server = server_spell_dbc_sha256()
+    if sha != server:
+        raise DbcSetMismatch(f'{source} has {SPELL_DBC} sha256 {sha}, the server set {DBC_DIR} has {server}; '
+                             f'measure and judge on the server set only')
+    return sha
+
+
+def server_dbc_dir(dbc_dir: Path) -> Path:
+    dbc_dir = Path(dbc_dir)
+    require_server_sha(spell_dbc_sha256(dbc_dir), str(dbc_dir))
+    return dbc_dir
 
 
 def class_file_paths() -> list[Path]:
@@ -54,6 +93,8 @@ def load_class_file(class_id: int) -> dict:
     for path in class_file_paths():
         class_file = json.loads(path.read_text(encoding='utf-8'))
         if class_file['class_id'] == class_id:
+            if 'dbc_dir' in class_file:
+                server_dbc_dir(class_file['dbc_dir'])
             return class_file
     raise ValueError(f'No class file for class {class_id}')
 

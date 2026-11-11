@@ -18,7 +18,7 @@ from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, hit_part
                   reference_hit_model, reference_melee_model)
 from procs import (DELTA_CHECK, delta_proc_plan, delta_proc_scenario, proc_entries, proc_plan, proc_scenario,
                    proc_status_expectation, proc_unmodelled_expectation, shares_aura, shares_proc_spell, trigger_key)
-from profile import DBC_DIR, load_class_file
+from profile import DBC_DIR, load_class_file, server_dbc_dir, spell_dbc_sha256
 from questions import QUESTIONS_FILE
 from scaffold import LIVE_BASELINE_HEADER, SHARED_DEFINES, scaffold_class
 from sheets import write_sheets
@@ -314,7 +314,7 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
              triggers: list[int] | None = None, behaviours: list[int] | None = None,
              target_gates: list[int] | None = None) -> Path:
     class_file = load_class_file(class_id)
-    dbc_dir = Path(class_file.get('dbc_dir', DBC_DIR))
+    dbc_dir = server_dbc_dir(class_file.get('dbc_dir', DBC_DIR))
     out = Path(out)
     scenario_dir = out / SCENARIO_DIR
     if scenario_dir.is_dir() and any(scenario_dir.glob('*.json')):
@@ -354,7 +354,8 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
     if everything:
         add_melee(writer)
     manifest = {'schema': 1, 'class_id': class_file['class_id'], 'class_name': class_file['name'],
-                'level': class_file['level'], 'dbc_dir': str(dbc_dir), 'class_file': class_file,
+                'level': class_file['level'], 'dbc_dir': str(dbc_dir),
+                'spell_dbc_sha256': spell_dbc_sha256(dbc_dir), 'class_file': class_file,
                 'known_modifiers': known_modifiers(class_file), 'scenarios': writer.entries}
     path = out / MANIFEST_FILE
     path.write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
@@ -364,8 +365,9 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
 def scaffold_command(args) -> int:
     if args.out.exists():
         raise ValueError(f'{args.out} already exists; scaffold into a new file')
-    class_file = scaffold_class(args.class_id, args.dbc_dir, args.config, args.mysql, level=args.level,
-                                shared_defines=args.shared_defines, live_baseline=args.live_baseline)
+    class_file = scaffold_class(args.class_id, server_dbc_dir(args.dbc_dir), args.config, args.mysql,
+                                level=args.level, shared_defines=args.shared_defines,
+                                live_baseline=args.live_baseline)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open('x', encoding='utf-8') as stream:
         stream.write(json.dumps(class_file, indent=2) + '\n')
@@ -402,7 +404,7 @@ def compare_command(args) -> int:
 
 def sheets_command(args) -> int:
     class_file = load_class_file(args.class_id)
-    dbc_dir = Path(class_file.get('dbc_dir', DBC_DIR))
+    dbc_dir = server_dbc_dir(class_file.get('dbc_dir', DBC_DIR))
     written = write_sheets(dbc_dir, class_file, args.out, args.spell, args.verdicts)
     print(f'{len(written)} sheets in {args.out}')
     return 0

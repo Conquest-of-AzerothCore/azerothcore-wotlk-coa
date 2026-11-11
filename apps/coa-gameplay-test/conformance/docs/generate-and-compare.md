@@ -23,6 +23,11 @@ runner writes and hashes as `scenario_sha256` (`batch.py` `write_case`), and is 
 the DBC directory, the known modifiers read from `Spell.dbc` and, per scenario, its key, file, SHA-256, spell, rank,
 the tooltip tokens read at generation and its `Expectation` list.
 
+`generate`, `sheets` and `scaffold` refuse a DBC set whose `Spell.dbc` sha256 differs from the server set's
+(`profile.DBC_DIR`), whether it comes from the class file's `dbc_dir` or from `scaffold --dbc-dir`; `generate`
+records the sha in the manifest (`spell_dbc_sha256`) and `compare` refuses a manifest whose recorded sha is not the
+server set's.
+
 `compare` reads `STAMP/gameplay/exploratory/<key>/result.json`, or the result folder whose recorded hash is the
 manifest hash when no folder has the key. The recorded hash is `scenario_sha256` of the folder's `summary.json`
 (or the hash of its `scenario.json`). A result whose hash differs from the manifest stops the comparison with an
@@ -31,7 +36,8 @@ every `actual` as a string; it is converted to a number, and a value that is not
 (default: the manifest directory) has one row per verdict that is neither `ok` nor `measured`; `report.md` counts the
 verdicts per status, per spell and, for passive scenarios, per measurement family ("Passives"), and lists the known
 modifiers, the probe auras, the scenarios without a result and the runs that did not pass. `verdicts.json` keeps every
-verdict with its interval, detail and explanation (schema 1) for `diff`. `questions.md` lists the checks a reviewer must
+verdict with its interval, detail and explanation (schema 1) for `diff`, with the manifest's `Spell.dbc` sha256 in
+its header. `questions.md` lists the checks a reviewer must
 settle from the reference logs (see [Open conformance checks](#open-conformance-checks)). When the run holds stack
 verdicts, `compare` also
 writes `levers.md`.

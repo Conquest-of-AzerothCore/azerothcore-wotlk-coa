@@ -29,7 +29,8 @@ from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE, cleaned_tooltip, literal_token
 from procs import AMBIGUOUS_TOOLTIP, CAST, DELTA_CHECK, DELTA_SANITY_FACTOR, PROC_CHECK, chance_of, wilson_interval
-from profile import DBC_DIR, EQUIP_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label
+from profile import (DBC_DIR, EQUIP_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label,
+                     require_server_sha)
 from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE, asked, cleaned,
                        questions, spell_name, write_questions)
 from stack import (ADDS, MEASURED, MELEE_SOURCE, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE, TALENT_DELTA,
@@ -3134,6 +3135,8 @@ def resolve_linked_statuses(verdicts: list[Verdict]) -> list[Verdict]:
 def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource | None = None,
              hit_model: HitModelSource | None = None) -> Comparison:
     manifest = json.loads(Path(manifest_path).read_text(encoding='utf-8'))
+    if 'spell_dbc_sha256' in manifest:
+        require_server_sha(manifest['spell_dbc_sha256'], str(manifest_path))
     runs, missing = load_runs(manifest, Path(results_dir))
     tooltips = tooltips or DbcTooltips(manifest.get('dbc_dir', DBC_DIR), manifest.get('class_file'))
     hit_model = hit_model or measured_hit_model
@@ -3359,6 +3362,7 @@ def write_verdicts(manifest: dict, manifest_path: Path, results_dir: Path, verdi
                    out_dir: Path) -> Path:
     document = {'schema': VERDICTS_SCHEMA, 'class_id': manifest['class_id'], 'class_name': manifest['class_name'],
                 'level': manifest['level'], 'manifest': str(manifest_path), 'results': str(results_dir),
+                'spell_dbc_sha256': manifest.get('spell_dbc_sha256'),
                 'verdicts': [asdict(verdict) for verdict in verdicts]}
     path = Path(out_dir) / VERDICTS_FILE
     path.write_text(json.dumps(document, indent=2) + '\n', encoding='utf-8')

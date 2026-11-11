@@ -1,14 +1,17 @@
+import json
 from pathlib import Path
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 
-from compare import Verdict, write_verdicts
+from compare import Verdict, evaluate, write_verdicts
 from conformance import DIFF_EXIT, main
 from coverage import COVERAGE_FILE, clause_coverage, coverage, write_coverage
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
 from passives import PASSIVE_DELTA
 from procs import PROC_CHECK
+from profile import DbcSetMismatch, load_class_file, server_dbc_dir, spell_dbc_sha256
 from triggers import TRIGGER_CHECK
 
 CLASS = {'class_id': 19, 'class_name': 'Templar', 'level': 60}
@@ -17,6 +20,8 @@ ARGENT_BLADE = 807268
 SACRED_SWING = 572769
 SERENDIPITY = 300929
 FERVENT_CASTIGATION = 707606
+SERVER_SHA = 'a' * 64
+CLIENT_SHA = 'b' * 64
 
 
 def verdict(label, status, spell, scenario, check, explanation=''):
@@ -232,6 +237,58 @@ class ClauseCoverageTest(unittest.TestCase):
                            f'conformance-templar-value-{ARGENT_BLADE}', 'effect_value')]
         proven, total, unproven = clause_coverage(clauses, verdicts)
         self.assertEqual((proven, total), (0, 1))
+
+
+class SpellDbcGuardTest(unittest.TestCase):
+    def setUp(self):
+        self.root = Path(tempfile.mkdtemp(prefix='conformance-dbc-guard-'))
+
+    def tearDown(self):
+        shutil.rmtree(self.root)
+
+    def dbc_set(self, name, content):
+        directory = self.root / name
+        directory.mkdir()
+        (directory / 'Spell.dbc').write_bytes(content)
+        return directory
+
+    def test_a_set_with_another_spell_dbc_is_refused(self):
+        server = self.dbc_set('server', b'server')
+        client = self.dbc_set('client', b'client')
+        copy = self.dbc_set('copy', b'server')
+        with mock.patch('profile.DBC_DIR', server):
+            self.assertEqual(server_dbc_dir(copy), copy)
+            with self.assertRaises(DbcSetMismatch):
+                server_dbc_dir(client)
+        with self.assertRaises(DbcSetMismatch):
+            spell_dbc_sha256(self.root / 'missing')
+
+    def test_a_class_file_pointing_at_another_set_is_refused(self):
+        server = self.dbc_set('server', b'server')
+        client = self.dbc_set('client', b'client')
+        classes = self.root / 'classes'
+        classes.mkdir()
+        (classes / 'probe.json').write_text(json.dumps({'class_id': 99, 'dbc_dir': str(client)}), encoding='utf-8')
+        with mock.patch('profile.DBC_DIR', server), mock.patch('profile.CLASSES_DIR', classes):
+            with self.assertRaises(DbcSetMismatch):
+                load_class_file(99)
+            (classes / 'probe.json').write_text(json.dumps({'class_id': 99, 'dbc_dir': str(server)}),
+                                                encoding='utf-8')
+            self.assertEqual(load_class_file(99)['class_id'], 99)
+
+    def test_compare_refuses_a_manifest_generated_on_another_set(self):
+        manifest = self.root / 'manifest.json'
+        manifest.write_text(json.dumps({'spell_dbc_sha256': CLIENT_SHA, 'scenarios': []}), encoding='utf-8')
+        with mock.patch('profile.server_spell_dbc_sha256', return_value=SERVER_SHA):
+            with self.assertRaises(DbcSetMismatch):
+                evaluate(manifest, self.root)
+
+    def test_verdicts_record_the_set_of_their_manifest(self):
+        out = self.root / 'out'
+        out.mkdir()
+        path = write_verdicts({**CLASS, 'spell_dbc_sha256': SERVER_SHA}, out / 'manifest.json', self.root / 'results',
+                              [value(ARGENT_BLADE)], out)
+        self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['spell_dbc_sha256'], SERVER_SHA)
 
 
 if __name__ == '__main__':
