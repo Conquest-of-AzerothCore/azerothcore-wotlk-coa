@@ -3958,6 +3958,158 @@
       "after_wait_ms": 2000,
       "resets": true,
       "observe_source": "AscensionTemplarAuras.cpp:122-126: Tome of Light 805422 also calls Reduce(player, 801205, INT32_MAX) on Tranquil Circle. Tranquil Circle 801205 RecoveryTime 120000 ms, ManaCost 30 Energy, cast at the dummy. Arms as for Barrier: 2500 ms after the priming cast, refused without Tome of Light, through with Tome cast at 2000 ms."
+    },
+    {
+      "spell": 801202, "name": "Battlepriest", "kind": "taken_hit", "variant": "taken_90", "label_suffix": "taken_90",
+      "judge": "damage_ratio", "expected": 0.8, "quote": "take 20% reduced Magic damage", "strike_spell": 41394,
+      "caster_health_pct": 90, "caster_max_health": 100000, "trials": 10,
+      "arms": [{"name": "control"}, {"name": "treatment", "auras": [[801202, 1]]}],
+      "observe_source": "AscensionTemplarContracts.cpp:296-298 (Mitigation, applied in ModifySpellDamageTaken at :351): with 801202 on the caster, a magic-school hit taken is multiplied by .8f while HealthAbovePct(80) or HealthBelowPct(20); 801202's own periodic effects and 803843/807903 are dummied (:192-195). A level 60 striker (entry 36) casts Light of the Naaru 41394 (SPELL_EFFECT_SCHOOL_DAMAGE, Holy, EffectBasePoints 1099, EffectDieSides 1, no level scaling) at the caster, held at 90% of 100000 health before every strike; control without 801202, treatment with it set; non-critical hits compared from the damage logs the caster receives."
+    },
+    {
+      "spell": 801202, "name": "Battlepriest", "kind": "taken_hit", "variant": "taken_50", "label_suffix": "taken_50",
+      "judge": "damage_ratio", "expected": 1.0, "quote": "take 20% reduced Magic damage", "strike_spell": 41394,
+      "caster_health_pct": 50, "caster_max_health": 100000, "trials": 10,
+      "arms": [{"name": "control"}, {"name": "treatment", "auras": [[801202, 1]]}],
+      "observe_source": "AscensionTemplarContracts.cpp:296-298 (Mitigation, applied in ModifySpellDamageTaken at :351): with 801202 on the caster, a magic-school hit taken is multiplied by .8f while HealthAbovePct(80) or HealthBelowPct(20); 801202's own periodic effects and 803843/807903 are dummied (:192-195). A level 60 striker (entry 36) casts Light of the Naaru 41394 (SPELL_EFFECT_SCHOOL_DAMAGE, Holy, EffectBasePoints 1099, EffectDieSides 1, no level scaling) at the caster, held at 50% of 100000 health before every strike; control without 801202, treatment with it set; non-critical hits compared from the damage logs the caster receives."
+    },
+    {
+      "spell": 801202, "name": "Battlepriest", "kind": "taken_hit", "variant": "taken_10", "label_suffix": "taken_10",
+      "judge": "damage_ratio", "expected": 0.8, "quote": "take 20% reduced Magic damage", "strike_spell": 41394,
+      "caster_health_pct": 10, "caster_max_health": 100000, "trials": 10,
+      "arms": [{"name": "control"}, {"name": "treatment", "auras": [[801202, 1]]}],
+      "observe_source": "AscensionTemplarContracts.cpp:296-298 (Mitigation, applied in ModifySpellDamageTaken at :351): with 801202 on the caster, a magic-school hit taken is multiplied by .8f while HealthAbovePct(80) or HealthBelowPct(20); 801202's own periodic effects and 803843/807903 are dummied (:192-195). A level 60 striker (entry 36) casts Light of the Naaru 41394 (SPELL_EFFECT_SCHOOL_DAMAGE, Holy, EffectBasePoints 1099, EffectDieSides 1, no level scaling) at the caster, held at 10% of 100000 health before every strike; control without 801202, treatment with it set; non-critical hits compared from the damage logs the caster receives."
+    },
+    {
+      "spell": 705295, "name": "Staffguard", "kind": "taken_hit", "variant": "absorb", "label_suffix": "absorb",
+      "judge": "absorb", "quote": "absorbing ${$706583m1+$STA*.3} damage, scaling with Stamina, parry and dodge rating",
+      "strike_spell": 41394, "trials": 5, "caster_health_pct": 100,
+      "caster_max_health": 20000, "absorb_constant": 125,
+      "absorb_terms": [{"coefficient": 0.3, "reads": [{"metric": "stat", "stat": 2}]},
+                       {"coefficient": 0.25, "reads": [{"metric": "combat_rating", "rating": 2},
+                                                       {"metric": "combat_rating", "rating": 3}]}],
+      "arms": [{"name": "control", "casts": [[572769, "dummy"]]},
+               {"name": "staffguard", "auras": [[705295, 1]], "casts": [[572769, "dummy"]], "absorb": "formula"},
+               {"name": "stamina", "auras": [[705295, 1], [9119, 1]], "casts": [[572769, "dummy"]],
+                "absorb": "formula"},
+               {"name": "dodge", "auras": [[705295, 1], [13673, 1]], "casts": [[572769, "dummy"]], "absorb": "formula"},
+               {"name": "parry", "auras": [[705295, 1], [13668, 1]], "casts": [[572769, "dummy"]],
+                "absorb": "formula"}],
+      "observe_source": "AscensionTemplarAuras.cpp:60-63 sets Staffguard 706583's absorb to int32(125 + .3f * Stamina + .25f * (dodge rating + parry rating)) when Sacred Swing 572769 grants it (AscensionTemplarAbilities.cpp:239-243); $706583m1 is 125 (EffectBasePoints 124, EffectDieSides 1) and the owner accepted the .25 per rating point (ruling 2026-11-11). Each trial holds the caster at 20000 health, casts Sacred Swing at the dummy, then a level 60 striker (entry 36) casts Light of the Naaru 41394 (1100 Holy, above every expected absorb) at the caster; the absorbed amount comes from the damage log. Arms: no Staffguard (nothing absorbed), Staffguard, Staffguard with +12 Stamina (Increased Stamina 12 9119), with +60 dodge rating (Increased Dodge 60 13673) and with +60 parry rating (Increased Parry 60 13668); the expected absorb of each arm is computed in float from that arm's own Stamina and ratings, read before its trials."
+    },
+    {
+      "spell": 805422, "name": "Tome of Light", "kind": "taken_hit", "variant": "absorb_3000",
+      "label_suffix": "absorb_3000", "judge": "absorb",
+      "quote": "Grants a shield equal to 100% of your maximum health", "strike_spell": 41394,
+      "strikes": 3, "trials": 4, "caster_health_pct": 100, "caster_max_health": 3000,
+      "absorb_terms": [{"coefficient": 1, "reads": [{"metric": "max_health"}]}],
+      "arms": [{"name": "control", "strikes": 1},
+               {"name": "shield", "casts": [[805422, "caster"]], "absorb": "formula"}],
+      "observe_source": "AscensionTemplarAuras.cpp:56-57 sets Tome of Light 805422's Effect[1] absorb (aura 69, all schools) to the caster's maximum health when it applies. The caster's maximum health is set to 3000 before the arm and every trial, Tome of Light is cast, and a level 60 striker (entry 36) casts Light of the Naaru 41394 (1100 Holy) at the caster 3 times, more than the shield holds; the amounts absorbed over the trial's strikes are summed from the damage logs. Control: no Tome of Light, one strike per trial, nothing absorbed."
+    },
+    {
+      "spell": 805422, "name": "Tome of Light", "kind": "taken_hit", "variant": "absorb_6000",
+      "label_suffix": "absorb_6000", "judge": "absorb",
+      "quote": "Grants a shield equal to 100% of your maximum health", "strike_spell": 41394,
+      "strikes": 6, "trials": 4, "caster_health_pct": 100, "caster_max_health": 6000,
+      "absorb_terms": [{"coefficient": 1, "reads": [{"metric": "max_health"}]}],
+      "arms": [{"name": "control", "strikes": 1},
+               {"name": "shield", "casts": [[805422, "caster"]], "absorb": "formula"}],
+      "observe_source": "AscensionTemplarAuras.cpp:56-57 sets Tome of Light 805422's Effect[1] absorb (aura 69, all schools) to the caster's maximum health when it applies. The caster's maximum health is set to 6000 before the arm and every trial, Tome of Light is cast, and a level 60 striker (entry 36) casts Light of the Naaru 41394 (1100 Holy) at the caster 6 times, more than the shield holds; the amounts absorbed over the trial's strikes are summed from the damage logs. Control: no Tome of Light, one strike per trial, nothing absorbed."
+    },
+    {
+      "spell": 92109, "name": "Keeping the Oath", "kind": "taken_hit", "variant": "delay", "label_suffix": "delay",
+      "judge": "absorb", "quote": "You now delay 40% of direct damage taken, instead taking it over $803237d.",
+      "strike_spell": 41394, "trials": 4, "caster_health_pct": 100, "caster_max_health": 20000, "debt_spell": 803237,
+      "arms": [{"name": "control"},
+               {"name": "oath", "auras": [[92109, 1]], "absorb": "share", "share_pct": 40, "debt_removed_pct": 0}],
+      "observe_source": "Keeping the Oath 92109 carries the stagger absorb (AscensionTemplarContracts.cpp:104-117 turns its Effect[0] into SPELL_AURA_SCHOOL_ABSORB on all schools; AscensionTemplarAuras.cpp:21-29 absorbs uint64(damage) * 40 / 100 of a non-periodic hit from another unit and Delay()s it into Oathkeeper 803237, AscensionTemplar.cpp:182-198; each 1000 ms tick deals the remaining debt divided by the ticks left, AscensionTemplarAuras.cpp:164-174, logged as 803237 damage on the caster). A level 60 striker (entry 36) casts Light of the Naaru 41394 (1100 Holy) at the caster, held at 20000 health, once per trial. Control: no 92109, nothing absorbed. Treatment: 92109 set; every strike must absorb floor(40% of its damage), and the whole absorbed amount must be paid as 803237 damage, with the debt gone, 500 ms after the debt's 8000 ms end."
+    },
+    {
+      "spell": 92109, "name": "Keeping the Oath", "kind": "taken_hit", "variant": "over", "label_suffix": "over",
+      "judge": "absorb", "quote": "You now delay 40% of direct damage taken, instead taking it over $803237d.",
+      "strike_spell": 41394, "trials": 4, "caster_health_pct": 100, "caster_max_health": 20000, "debt_spell": 803237,
+      "debt_ends": true,
+      "arms": [{"name": "control"},
+               {"name": "oath", "auras": [[92109, 1]], "absorb": "share", "share_pct": 40, "debt_removed_pct": 0}],
+      "observe_source": "As the delay entry, and the debt must also still be present with part of it unpaid 500 ms before its 8000 ms end ($803237d, Oathkeeper 803237 DurationIndex 31): the delayed damage is taken over the whole duration."
+    },
+    {
+      "spell": 706468, "name": "Holy Books", "kind": "taken_hit", "variant": "debt", "label_suffix": "debt",
+      "judge": "absorb", "quote": "Using a Libram now removes $707208s1% of the delayed damage from Oathkeeper.",
+      "strike_spell": 41394, "trials": 4, "caster_health_pct": 100, "caster_max_health": 20000, "debt_spell": 803237,
+      "arms": [{"name": "control", "auras": [[92109, 1]], "after_casts": [[801441, "caster"]], "absorb": "share",
+                "share_pct": 40, "debt_removed_pct": 0},
+               {"name": "holy_books", "auras": [[92109, 1], [706468, 1]], "after_casts": [[801441, "caster"]],
+                "absorb": "share", "share_pct": 40, "debt_removed_pct": 70}],
+      "observe_source": "AscensionTemplarAbilities.cpp:225-226 (OnSpellCast): a Libram cast with Holy Books 706468 known calls ReduceDebt(player, 70), which removes uint64(debt) * 70 / 100 of Oathkeeper 803237 (AscensionTemplar.cpp:199-211). Both arms carry Keeping the Oath 92109, take one Light of the Naaru 41394 strike (1100 Holy) from a level 60 striker (entry 36) at 20000 health, and cast Libram of Consecration 801441 300 ms later, before the debt's first tick; the treatment arm also carries 706468. The debt paid from the 803237 damage logs must be the whole absorbed amount without Holy Books and the absorbed amount less floor(70%%) with it, all paid by the debt's end."
+    },
+    {
+      "spell": 801481, "name": "Glory", "kind": "cast_leech_ratio", "variant": "downfall_heal",
+      "label_suffix": "downfall_heal", "quote": "After the duration, you gain", "heal_spell": 803331,
+      "expected": 0.5, "cast_spell": 572769, "auras": [[801482, 1]],
+      "observe_source": "Downfall 801482 (801481 Effect[1] triggers Downfall 801482 at Glory's end, and Downfall's removal by expiry casts Redemption 801483, AscensionTemplarAuras.cpp:216-217): its proc (AscensionTemplarEvents.cpp:33-35, any outgoing damage to another unit) casts Downfall 803331 on the caster with uint64(damage) * 50 / 100 (Events.cpp:148-150, Copy at AscensionTemplar.cpp:89-94), the tooltip's $s1 = 50 (EffectBasePoints 49, EffectDieSides 1). A Sacred Swing 572769 cast at the dummy without the aura heals nothing (control); with 801482 set on the caster, the next cast's damage and the 803331 healing are read from the combat logs."
+    },
+    {
+      "spell": 801481, "name": "Glory", "kind": "cast_leech_ratio", "variant": "redemption_heal",
+      "label_suffix": "redemption_heal", "quote": "After the duration, you gain", "heal_spell": 803331,
+      "expected": 0.5, "cast_spell": 572769, "auras": [[801483, 1]],
+      "observe_source": "Redemption 801483 (801481 Effect[1] triggers Downfall 801482 at Glory's end, and Downfall's removal by expiry casts Redemption 801483, AscensionTemplarAuras.cpp:216-217): its proc (AscensionTemplarEvents.cpp:33-35, any outgoing damage to another unit, while Downfall 801482 is absent) casts Downfall 803331 on the caster with uint64(damage) * 50 / 100 (Events.cpp:148-150, Copy at AscensionTemplar.cpp:89-94), the tooltip's $s3 = 50 (EffectBasePoints 49, EffectDieSides 1). A Sacred Swing 572769 cast at the dummy without the aura heals nothing (control); with 801483 set on the caster, the next cast's damage and the 803331 healing are read from the combat logs."
+    },
+    {
+      "spell": 801481, "name": "Glory", "kind": "metric_delta", "quote": "After the duration, you gain Downfall.",
+      "expected": 1, "before_expected": 0, "trigger_spell": 801481, "gate_timing": "start", "trigger_only_after": true,
+      "metric": "aura", "fields": {"spell": 801482}, "wait_ms": 9500, "expire_ms": 500, "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0, "label_suffix": "downfall_end", "variant": "downfall_end",
+      "observe_source": "Downfall 801482 is gained at Glory's 5000 ms end (Glory's Effect[1] aura 23, EffectAmplitude 5000, against its DurationIndex 28; the downfall entry reads it absent at 4000 ms and present at 6000 ms) and lasts $d, 5000 ms (DurationIndex 28): present 9500 ms after the Glory cast, absent 10500 ms after it. Control: absent before any cast."
+    },
+    {
+      "spell": 801481, "name": "Glory", "kind": "metric_delta", "quote": "After the duration, you gain Downfall.",
+      "expected": 0, "before_expected": 0, "trigger_spell": 801481, "gate_timing": "start", "trigger_only_after": true,
+      "metric": "aura", "fields": {"spell": 801483}, "wait_ms": 9500, "expire_ms": 500, "expiry_wait_ms": 1000,
+      "after_expiry_expected": 1, "label_suffix": "redemption_start", "variant": "redemption_start",
+      "observe_source": "Redemption 801483 is cast when Downfall 801482 is removed by expiry (AscensionTemplarAuras.cpp:216-217), 10000 ms after the Glory cast: absent at 9500 ms, present at 10500 ms. Control: absent before any cast."
+    },
+    {
+      "spell": 801481, "name": "Glory", "kind": "metric_delta", "quote": "After the duration, you gain Downfall.",
+      "expected": 1, "before_expected": 0, "trigger_spell": 801481, "gate_timing": "start", "trigger_only_after": true,
+      "metric": "aura", "fields": {"spell": 801483}, "wait_ms": 14500, "expire_ms": 500, "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0, "label_suffix": "redemption_end", "variant": "redemption_end",
+      "observe_source": "Redemption 801483 lasts $d, 5000 ms (DurationIndex 28), from Downfall's end 10000 ms after the Glory cast: present at 14500 ms, absent at 15500 ms. Control: absent before any cast."
+    },
+    {
+      "spell": 801481, "name": "Glory", "kind": "metric_delta", "quote": "After the duration, you gain Downfall.",
+      "expected": 1923.076904296875, "before_expected": 2500.0, "trigger_spell": 801481, "cast_in_before": false,
+      "metric": "attack_time_ms", "fields": {"hand": 0}, "wait_ms": 12000, "expire_ms": 500,
+      "label_suffix": "redemption_haste", "variant": "redemption_haste",
+      "observe_source": "Redemption 801483 $s1 = 30 (EffectBasePoints[0] 29, EffectDieSides[0] 1): Effect[0] aura 138 SPELL_AURA_MOD_MELEE_HASTE, active from 10000 to 15000 ms after a Glory cast (Glory's own 30% haste ends at 5000 ms, Downfall has none). Unit::ApplyAttackTimePercentMod multiplies the 2500 ms reference swing by 100.0f / 130.0f in float: 1923.076904296875 read 12000 ms after the cast; the before phase does not cast Glory and reads 2500 (control)."
+    },
+    {
+      "spell": 680397, "name": "Disciplined Blows", "kind": "fixed_count", "variant": "area",
+      "quote": "to nearby enemies", "expected": 3, "radius": 5.0, "cast_spell": 578276, "target_rank": 680398,
+      "cast_target": "caster", "cast_target_health_pct": 50, "learn": [680397], "uncapped": true,
+      "radius_reason": "AscensionTemplarEvents.cpp:156-158 casts the pulse 680398 at the healed target's position (CastSpell(x, y, z, 680398)); AscensionTemplarContracts.cpp:226-230 sets its Effect[0] target to TARGET_UNIT_DEST_AREA_ENEMY with EffectRadiusIndex 192, 5 yd; its MaxAffectedTargets is 10, above the four dummies offered. Benediction 578276 heals the caster, held at 50% health before every cast so the heal is effective (the proc checks GetEffectiveHeal, Events.cpp:28); four dummies stand 1 to 4 yd from the caster and one 10 yd away. Every dummy inside must be hit and the far one never: the tooltip states no count, so every offered candidate is stated."
+    },
+    {
+      "spell": 805417, "name": "Barrier of Light", "kind": "threat_redirect", "variant": "redirect",
+      "quote": "For the duration, threat generated by your allies is redirected to you.",
+      "observe_source": "805417 Effect[1] (SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 23 every 3000 ms) triggers 807698, whose Effect[0] SPELL_EFFECT_FORCE_CAST (TARGET_UNIT_TARGET_RAID) makes 807694 (Effect 130 SPELL_EFFECT_REDIRECT_THREAT, 100%%) register the redirect; AscensionThreatRedirect.cpp:108-121 unregisters it when Barrier's Effect[0] aura is removed. The ally, grouped with the caster, melee-attacks a REACT_DEFENSIVE dummy for three swing intervals before Barrier of Light and again 3500 ms after it (past the first 3000 ms trigger); the dummy's threat on the ally and on the caster is read before and after each attack. Players and the dummy are at level 60."
+    },
+    {
+      "spell": 805422, "name": "Tome of Light", "kind": "metric_delta", "variant": "barrier_debt",
+      "label_suffix": "barrier_debt", "quote": "and grants an additional effect for each.",
+      "trigger_spell": 805417, "target": "caster", "metric": "aura", "fields": {"spell": 803237},
+      "before_expected": 1, "expected": 0, "setup_casts": [805422], "setup_only_after": true,
+      "setup_actor_aura": 803237, "wait_ms": 1000,
+      "observe_source": "Tome of Light: Barrier of Light 806354, \"Your next Barrier of Light within $d removes the Oathkeeper stagger debuff.\" Tome of Light 805422 casts 806354 on the caster (AscensionTemplarAuras.cpp:122-128); a Barrier of Light 805417 cast that selects it calls ReduceDebt(player, 100) (AscensionTemplarAbilities.cpp:221-222), which removes Oathkeeper 803237 (AscensionTemplar.cpp:199-211). 803237 is set on the caster before each Barrier cast: without Tome of Light it stays (1), with Tome of Light cast first it is gone (0), read 1000 ms after the cast. Players are at level 60."
+    },
+    {
+      "spell": 805422, "name": "Tome of Light", "kind": "metric_delta", "variant": "circle_instant",
+      "label_suffix": "circle_instant", "quote": "and grants an additional effect for each.",
+      "trigger_spell": 801205, "target": "dummy", "metric": "aura", "fields": {"spell": 850010},
+      "measure_actor": "dummy", "before_expected": 0, "expected": 1, "setup_casts": [805422],
+      "setup_only_after": true, "wait_ms": 1000, "expire_ms": 45000,
+      "observe_source": "Tome of Light: Tranquil Circle 807004, \"Your next Tranquil Circle within $d triggers instantly.\" Tranquil Circle 801205 Effect[1] (aura 23, EffectAmplitude 2000) triggers Tranquil State 850010 on the enemies in its area; with 807004 on the caster its periodic timer is set to 0 when the aura applies (AscensionTemplarAuras.cpp:73-74, 90-91), so the first trigger comes at once instead of after 2000 ms. Read 1000 ms after the cast at the dummy: without Tome of Light 850010 is absent (0), with Tome of Light cast first it is present (1). 850010 lasts 40000 ms on a creature, so the phases are 45000 ms apart. Players and the dummy are at level 60."
     }
   ],
   "player_observations": [

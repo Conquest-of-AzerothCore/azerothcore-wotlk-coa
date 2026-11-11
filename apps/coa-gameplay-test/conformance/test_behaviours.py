@@ -6,7 +6,8 @@ import sys
 import tempfile
 import unittest
 
-from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB_PIERCE_RATIO,
+from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_TAKEN_HIT,
+                        BEHAVIOUR_THREAT_REDIRECT,
                         BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA,
                         BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_HEAL_BLOCK,
                         BEHAVIOUR_CAST_CONDITION,
@@ -65,9 +66,9 @@ from bonus import bonus_band
 from compare import Verdict, judge_behaviour
 from hits import MAX_SCENARIO_MS, aura_modifiers
 from procs import cast_interval
-from profile import DBC_DIR, load_class_file
+from profile import CASTER, DBC_DIR, load_class_file
 from tooltip import Records
-from values import Expectation, FORCED_CRIT_RATING, dataset
+from values import ALLY, Expectation, FORCED_CRIT_RATING, dataset
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -734,7 +735,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 193)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 212)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -6541,6 +6542,168 @@ class ProcResetScenarioTests(unittest.TestCase):
     def test_too_few_procs_are_not_judged(self):
         verdict = self.judged(self.readings(self.baseline(), self.conformant({3, 10})))
         self.assertEqual(verdict.status, 'insufficient_trials')
+
+
+def class_entry(spell: int, variant: str) -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+                if entry['spell'] == spell and entry.get('variant') == variant)
+
+
+def taken_hit_values(model: dict, trial_values) -> dict:
+    values = {}
+    for arm in model['arms']:
+        totals = dict.fromkeys(arm['marks']['start'], 0.0)
+        values.update({label: 0.0 for label in arm['marks']['start'].values()})
+        for term, labels in enumerate(arm['terms']):
+            values.update(dict.fromkeys(labels, 79.0 if term == 0 else 0.0))
+        for trial in range(1, model['trials'] + 1):
+            delta = trial_values(arm['name'], trial)
+            for key in ('damage', 'count', 'absorb', 'logs', 'paid'):
+                if key in totals:
+                    totals[key] += delta.get(key, 0.0)
+            for key, label in arm['marks'][str(trial)].items():
+                if key in totals:
+                    values[label] = totals[key]
+                elif key.startswith('paid '):
+                    values[label] = totals['paid'] - delta['paid'] + delta[key]
+                else:
+                    values[label] = delta[key]
+    return values
+
+
+class TakenHitScenarioTests(unittest.TestCase):
+    def test_a_striker_spell_hits_the_caster_in_every_trial_of_every_arm(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, class_entry(705295, 'absorb'))
+        steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
+        strikes = [step for step in steps if step['action'] == 'cast' and step['actor'] == STRIKER]
+        self.assertEqual(len(strikes), 5 * 5)
+        self.assertTrue(all(step['target'] == CASTER and step['spell'] == 41394 for step in strikes))
+        self.assertEqual(expectations[0].check, BEHAVIOUR_TAKEN_HIT)
+        absorbs = [step for step in steps if step.get('metric') == 'spell_absorb_total']
+        self.assertTrue(all(step['caster'] == STRIKER and step['target'] == CASTER for step in absorbs))
+
+    def test_seeded_absorb_without_the_stamina_term_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, class_entry(705295, 'absorb'))
+        expectation = expectations[0]
+
+        def trial(arm: str, absorbed: float):
+            return {'damage': 1100.0 - absorbed, 'count': 1.0, 'absorb': absorbed, 'logs': 1.0}
+
+        right = taken_hit_values(expectation.model, lambda arm, _: trial(arm, 0.0 if arm == 'control' else 148.0))
+        wrong = taken_hit_values(expectation.model, lambda arm, _: trial(arm, 0.0 if arm == 'control' else 125.0))
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(right), expectation).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(wrong), expectation).status, 'alert')
+
+    def test_seeded_absorb_in_the_control_arm_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, class_entry(705295, 'absorb'))
+        expectation = expectations[0]
+        values = taken_hit_values(expectation.model, lambda arm, _: {'damage': 952.0, 'count': 1.0, 'absorb': 148.0,
+                                                                     'logs': 1.0})
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status, 'alert')
+
+    def oath_values(self, model: dict, early_paid: float) -> dict:
+        def trial(arm: str, _):
+            if arm == 'control':
+                return {'damage': 1100.0, 'count': 1.0, 'absorb': 0.0, 'logs': 1.0}
+            return {'damage': 660.0, 'count': 1.0, 'absorb': 440.0, 'logs': 1.0, 'paid': 440.0,
+                    'paid early': early_paid, 'paid late': 440.0, 'debt early': 1.0, 'debt late': 0.0}
+        return taken_hit_values(model, trial)
+
+    def test_a_debt_paid_before_its_end_alerts_only_where_the_end_is_judged(self):
+        _, over = behaviour_scenario(CLASS_FILE, class_entry(92109, 'over'))
+        _, delay = behaviour_scenario(CLASS_FILE, class_entry(92109, 'delay'))
+        for expectations, early, status in ((over, 385.0, 'ok'), (over, 440.0, 'alert'), (delay, 440.0, 'ok')):
+            expectation = expectations[0]
+            verdict = judge_behaviour(base_verdict(expectation), FakeRun(self.oath_values(expectation.model, early)),
+                                      expectation)
+            with self.subTest(label=expectation.label, early=early):
+                self.assertEqual(verdict.status, status)
+
+    def test_seeded_debt_not_reduced_by_holy_books_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, class_entry(706468, 'debt'))
+        expectation = expectations[0]
+
+        def trial(paid: float):
+            return {'damage': 660.0, 'count': 1.0, 'absorb': 440.0, 'logs': 1.0, 'paid': paid, 'paid early': paid,
+                    'paid late': paid, 'debt early': 1.0, 'debt late': 0.0}
+
+        right = taken_hit_values(expectation.model, lambda arm, _: trial(440.0 if arm == 'control' else 132.0))
+        wrong = taken_hit_values(expectation.model, lambda arm, _: trial(440.0))
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(right), expectation).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(wrong), expectation).status, 'alert')
+
+    def test_a_damage_ratio_holds_the_caster_health_and_reads_noncritical_strikes(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, class_entry(801202, 'taken_10'))
+        steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
+        healths = [step for step in steps if step['action'] == 'set_health']
+        self.assertTrue(healths and all(step['value'] == 10000 and step['maximum'] == 100000 for step in healths))
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_HIT_RATIO)
+        reads = expectation.model['reads']
+
+        def values(per_hit: float) -> dict:
+            found = {}
+            for arm, marks in reads.items():
+                for index, (total, count) in enumerate(marks):
+                    found[total] = index * (1100.0 if arm == 'control' else per_hit)
+                    found[count] = float(index)
+            return found
+
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values(880.0)), expectation).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values(1100.0)), expectation).status,
+                         'alert')
+
+    def test_a_share_judge_refuses_several_strikes_per_trial(self):
+        entry = {**class_entry(92109, 'delay'), 'strikes': 2}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
+
+
+class ThreatRedirectScenarioTests(unittest.TestCase):
+    def test_the_ally_attacks_before_and_after_the_cast_in_a_group(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, class_entry(805417, 'redirect'))
+        steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
+        self.assertEqual([step['actor'] for step in steps if step['action'] == 'attack'], [ALLY, ALLY])
+        self.assertTrue(any(step['action'] == 'group' and step['target'] == ALLY for step in steps))
+        self.assertEqual(scenario['creatures'][0]['reaction'], AGGRO_REDIRECT_REACTION)
+        self.assertEqual(expectations[0].check, BEHAVIOUR_THREAT_REDIRECT)
+
+    def test_seeded_threat_kept_by_the_ally_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, class_entry(805417, 'redirect'))
+        expectation = expectations[0]
+        reads = expectation.model['reads']
+
+        def values(ally_after: float, caster_after: float) -> dict:
+            return {reads['control']['before'][ALLY]: 0.0, reads['control']['before'][CASTER]: 0.0,
+                    reads['control']['after'][ALLY]: 160.0, reads['control']['after'][CASTER]: 0.0,
+                    reads['treatment']['before'][ALLY]: 160.0, reads['treatment']['before'][CASTER]: 0.0,
+                    reads['treatment']['after'][ALLY]: ally_after, reads['treatment']['after'][CASTER]: caster_after}
+
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values(160.0, 155.0)), expectation).status,
+                         'ok')
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values(320.0, 0.0)), expectation).status,
+                         'alert')
+
+
+class UncappedAreaAndControlledLeechTests(unittest.TestCase):
+    def test_an_uncapped_area_around_the_caster_offers_dummies_inside_and_one_beyond(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, class_entry(680397, 'area'))
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        distances = [creature['distance'] for creature in scenario['creatures']]
+        self.assertEqual(distances, [1.0, 2.0, 3.0, 4.0, 10.0])
+        self.assertTrue(expectations[0].model['all_offered'])
+        casts = [step for step in scenario['steps'] if step['action'] == 'cast']
+        self.assertTrue(all(step['target'] == CASTER for step in casts))
+
+    def test_seeded_heal_in_the_control_cast_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, class_entry(801481, 'downfall_heal'))
+        expectation = expectations[0]
+        model = expectation.model
+        right = {model['damage_baseline_label']: 470.0, model['heal_baseline_label']: 0.0,
+                 model['damage_label']: 942.0, model['heal_label']: 236.0}
+        wrong = {**right, model['heal_baseline_label']: 235.0, model['heal_label']: 471.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(right), expectation).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(wrong), expectation).status, 'alert')
 
 
 if __name__ == '__main__':
