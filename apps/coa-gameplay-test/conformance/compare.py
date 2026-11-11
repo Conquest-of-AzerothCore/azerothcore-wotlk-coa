@@ -101,6 +101,12 @@ PERCENT_POINT_METRICS = frozenset({'melee_crit_chance', 'melee_crit_chance_refre
                                    'spell_done_crit_chance'})
 FRACTIONAL_METRICS = PERCENT_POINT_METRICS | {'weapon_damage_min'}
 FRACTIONAL_FLOOR = 0.01
+DETERMINISTIC_STAT_METRICS = frozenset({'stat', 'stat_exact', 'armor', 'combat_rating', 'melee_hit_chance',
+                                        'spell_hit_chance', 'expertise', 'spell_power', 'attack_power',
+                                        'ranged_attack_power', 'max_health', 'max_power', 'power', 'run_speed_rate',
+                                        'attack_time_ms', 'parry_chance', 'dodge_chance', 'block_chance',
+                                        'melee_crit_chance', 'melee_crit_chance_refreshed', 'spell_crit_chance',
+                                        'weapon_damage_min', 'resistance', 'mana_regen'})
 CRITICAL_DAMAGE_BASE = 1000
 DIRECT_CRIT_DAMAGE_AURA = 163
 DURATION_KIND = 'duration_ms'
@@ -1759,13 +1765,25 @@ def delta_floor(metric: str) -> float:
 
 def delta_margin(metric: str, expected: float) -> float:
     floor = delta_floor(metric)
+    if metric in DETERMINISTIC_STAT_METRICS:
+        return floor
     return max(floor, RELATIVE_TOLERANCE * abs(expected))
+
+
+def delta_margin_rule(metric: str) -> str:
+    floor = delta_floor(metric)
+    if metric in DETERMINISTIC_STAT_METRICS:
+        return (f'|delta - expected| <= {floor:g}, the rounding of a deterministic {metric} reading, with no '
+                f'relative margin and no tolerated tier')
+    return f'|delta - expected| <= max({floor:g}, {RELATIVE_TOLERANCE:.1%} of expected)'
 
 
 def delta_status(metric: str, measured: float, expected: float) -> str:
     if abs(measured) <= FLOAT_EPSILON < abs(expected):
         return 'alert'
     margin = delta_margin(metric, expected)
+    if metric in DETERMINISTIC_STAT_METRICS:
+        return 'ok' if abs(measured - expected) <= margin + FLOAT_EPSILON else 'alert'
     return banded_status(measured, expected - margin, expected + margin, expected)
 
 
@@ -2031,13 +2049,10 @@ def interval_verdict(base: Verdict, metric: str, delta: float, judged: list[tupl
                      context: str) -> Verdict:
     reading, status = judged[0]
     margin = delta_margin(metric, reading.delta)
-    floor = delta_floor(metric)
     readings = '; '.join(f'{item.name} ({item.why}): expected delta {item.delta:+.6g}: {item_status}'
                          for item, item_status in judged)
     return replace(base, status=status, measured=delta, expected=reading.delta, low=reading.delta - margin,
-                   high=reading.delta + margin,
-                   explanation=f'{context}; {readings}; |delta - expected| <= max({floor:g}, '
-                               f'{RELATIVE_TOLERANCE:.1%} of expected)')
+                   high=reading.delta + margin, explanation=f'{context}; {readings}; {delta_margin_rule(metric)}')
 
 
 def change(before: float, delta: float) -> str:
@@ -2863,8 +2878,8 @@ def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> V
     cap_pct = strongest_percent(own_pct, partner_pct)
     own_expected = baseline * (1 + own_pct / 100) * (1 + personal_pct / 100)
     combined_expected = baseline * (1 + cap_pct / 100) * (1 + personal_pct / 100)
-    own_margin = max(ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE * abs(own_expected))
-    combined_margin = max(ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE * abs(combined_expected))
+    own_margin = delta_margin(model['metric'], own_expected)
+    combined_margin = delta_margin(model['metric'], combined_expected)
     own_ok = abs(own - own_expected) <= own_margin
     combined_ok = abs(combined - combined_expected) <= combined_margin
     status = 'ok' if own_ok and combined_ok else 'alert'
@@ -3232,7 +3247,7 @@ def exact_truncated_verdict(base: Verdict, manifest: dict, run: Run, model: dict
     if not exact_readings:
         return None
     reading = exact_readings[0]
-    margin = max(FRACTIONAL_FLOOR, RELATIVE_TOLERANCE * abs(reading.delta))
+    margin = FRACTIONAL_FLOOR
     status = 'ok' if abs(exact_delta - reading.delta) <= margin + FLOAT_EPSILON else 'alert'
     unmoved = (f'the integer {model["metric"]} the game uses read {run.values.get(model["before_label"]):g} '
                f'before and {run.values.get(model["after_label"]):g} after; only the pre-truncation value moved')
@@ -3240,8 +3255,8 @@ def exact_truncated_verdict(base: Verdict, manifest: dict, run: Run, model: dict
                    low=reading.delta - margin, high=reading.delta + margin, detail={DATA_ONLY: unmoved},
                    explanation=f'{context}; the pre-truncation {model["metric"]} read {exact_before:g} before and '
                                f'{exact_after:g} after, delta {exact_delta:+.6g}; {reading.name} ({reading.why}): '
-                               f'expected delta {reading.delta:+.6g}; |delta - expected| <= max({FRACTIONAL_FLOOR:g}, '
-                               f'{RELATIVE_TOLERANCE:.1%} of expected)')
+                               f'expected delta {reading.delta:+.6g}; |delta - expected| <= {FRACTIONAL_FLOOR:g}, the '
+                               f'rounding of the pre-truncation reading, with no relative margin')
 
 
 def passive_verdict(manifest: dict, entry: dict, run: Run | None, expectation: Expectation,

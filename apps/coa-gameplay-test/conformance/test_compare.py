@@ -1304,10 +1304,22 @@ class PassiveDeltaTest(unittest.TestCase):
         token = [Displayed('$s1', 50.0, 0, 'percent')]
         ok = self.single(entry, '5000', '5802', token, **{source_label: '1604'})
         self.assertEqual((ok.status, ok.expected), ('ok', 802.0))
-        tolerated = self.single(entry, '5000', '5834', token, **{source_label: '1604'})
-        self.assertEqual((tolerated.status, tolerated.expected), ('tolerated', 802.0))
+        rounded = self.single(entry, '5000', '5803', token, **{source_label: '1604'})
+        self.assertEqual((rounded.status, rounded.high), ('ok', 803.0))
         alert = self.single(entry, '5000', '5850', token, **{source_label: '1604'})
         self.assertEqual((alert.status, alert.expected), ('alert', 802.0))
+
+    def test_seeded_stat_reading_off_by_more_than_its_rounding_is_an_alert(self):
+        source_label = f'{BLESSED_PADDING} e0 item_armor_by_subclass 3'
+        entry = passive_expectation(BLESSED_PADDING, 0, 'armor', 'share', '$s1', 50.0,
+                                    source_label=source_label, fields={})
+        token = [Displayed('$s1', 50.0, 0, 'percent')]
+        inside_the_old_relative_margin = self.single(entry, '5000', '5805', token, **{source_label: '1604'})
+        inside_the_old_tolerated_tier = self.single(entry, '5000', '5834', token, **{source_label: '1604'})
+        self.assertEqual(inside_the_old_relative_margin.status, 'alert')
+        self.assertEqual(inside_the_old_tolerated_tier.status, 'alert')
+        self.assertIn('the rounding of a deterministic armor reading', inside_the_old_tolerated_tier.explanation)
+        self.assertEqual(banded_status(834.0, 802.0 - 4.01, 802.0 + 4.01, 802.0), 'tolerated')
 
     def test_shared_token_takes_the_sign_of_the_effect_points(self):
         entry = passive_expectation(PALADIN_TRAINING, 1, 'spell_power_cost', 'scale', '$s1', -20.0, 570233,
@@ -1371,6 +1383,8 @@ class QuestionDetailTest(unittest.TestCase):
         self.assertEqual(delta_margin('attack_time_ms', 1.0), 1.0)
         self.assertEqual(delta_margin('weapon_damage_min', 1.87), 0.01)
         self.assertEqual(delta_margin('spell_modifier', -30000.0), 150.0)
+        self.assertEqual(delta_margin('armor', 1631.0), 1.0)
+        self.assertEqual(delta_margin('spell_crit_chance', 600.0), 0.01)
         self.assertEqual(PERCENT_POINT_METRICS, frozenset({'melee_crit_chance', 'melee_crit_chance_refreshed',
                                                            'spell_crit_chance', 'melee_hit_chance', 'spell_hit_chance',
                                                            'parry_chance', 'dodge_chance', 'spell_done_crit_chance'}))

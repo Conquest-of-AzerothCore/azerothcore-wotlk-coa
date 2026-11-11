@@ -483,6 +483,14 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   about 1.9 (a 1-point floor would accept 1.4% to 4.6%), else `max(1, 0.5% of |expected|)`. Liberty 705266 on Libram
   of Tenacity 801461: `$/1000;s1` reads 30000 ms, points −30000, expected −30000 ± 150; 1000 → −29000 is `ok`, 1000 →
   −28800 an alert. Solemn Soldier 572555: 2500 → 2272.73 ms is `ok`, 2500 → 2250 an alert.
+  Deterministic stat readings (ADR 0135, owner ruling of 2026-11-11): for a metric of
+  `compare.DETERMINISTIC_STAT_METRICS` (stats, armor, ratings, power, hit, crit, parry, dodge and block chances,
+  expertise, attack time, weapon damage, resistances, mana regeneration, run speed) the margin is the metric's floor
+  alone, the rounding of the reading (1 point, or 0.01 for the percent-point metrics and `weapon_damage_min`), with
+  no 0.5% relative part and no `tolerated` tier: outside it the verdict is an alert. Blessed Padding 301311 armor
+  +802 expected: +803 is `ok`, +805 and +834 are alerts. The same holds for the pre-truncation `stat_exact` reading
+  (0.01) and for the readings of a `behaviour_group_stack_cap` on such a metric. Where the rounding cannot separate
+  the stated value, `data_only` below keeps the clause data conformant.
   Spell modifier targets (D5, ADR 0017): a mask spell the tooltip does not name, beside named targets of the same
   effect and metric, is `measured`; beside named targets that are all `unmodelled` for that effect and metric (a
   named spell without the consumer's effect: `target <id> has no effect <n>`) it is `unmodelled`, the reason naming
