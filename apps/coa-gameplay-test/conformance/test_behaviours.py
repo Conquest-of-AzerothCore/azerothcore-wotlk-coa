@@ -1076,7 +1076,7 @@ class AuraSpreadScenarioTests(unittest.TestCase):
 
     def test_dispatch_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, holy_tempest_entry())
-        self.assertEqual(len(run.validate(scenario)['creatures']), 2)
+        self.assertEqual(len(run.validate(scenario)['creatures']), 3)
         self.assertEqual(expectations[0].check, BEHAVIOUR_COUNT)
 
     def test_seed_cast_targets_the_primary_dummy_before_the_tempest_cast(self):

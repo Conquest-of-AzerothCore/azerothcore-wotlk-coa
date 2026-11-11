@@ -713,7 +713,8 @@ class TemplarProcEntriesTest(unittest.TestCase):
                 for spell_id, fields in entry['dbc'].items():
                     for name in ('ProcChance', 'ProcFlags', 'ProcCharges'):
                         self.assertEqual(fields[name], self.spell(int(spell_id), name))
-                token_spell = TOKEN_SPELL.match(entry['chance_token']).group(1) or str(entry['aura'])
+                token = TOKEN_SPELL.match(entry['chance_token'])
+                token_spell = (token.group(1) if token else '') or str(entry['aura'])
                 self.assertIn(entry['chance_token'], entry['tooltip'])
                 self.assertIn(token_spell, entry['dbc'])
 
