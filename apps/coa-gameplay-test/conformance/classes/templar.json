@@ -36,6 +36,11 @@
     {"spell": 803792, "primary_effect": 1, "secondary_effect": 2, "secondary_actor": "caster",
      "reason": "Spell.dbc 803792 has two SPELL_EFFECT_HEAL effects with identical EffectBasePoints (285), EffectDieSides (7) and EffectRealPointsPerLevel (1.155): effect 1 targets TARGET_UNIT_TARGET_ALLY ('them') and effect 2 targets TARGET_UNIT_CASTER ('you'), confirmed via coa-dbc-viewer record --table Spell --id 803792. hit_kind groups both into one heal kind (hits_per_cast 2), so the generic hit_mean check already requires both heal events to land to reach its minimum_hits; this entry adds an explicit target=caster measurement so the heal to the caster is proven by recipient, not only by combined event count."}
   ],
+  "learned_hits": [
+    {"spell": 806525, "name": "Martial Training", "rank": 503141, "label_suffix": "weapon_damage",
+     "quote": "plus an additional $806525s1% Weapon Damage",
+     "reason": "Chastise 503141 Effect[2] 31 SPELL_EFFECT_WEAPON_PERCENT_DAMAGE resolves to 0 (EffectBasePoints[2] -1, EffectDieSides[2] 1) unless Martial Training 806525 is known: its Effect[0] ADD_FLAT_MODIFIER on SPELLMOD_EFFECT3 (EffectMiscValue[0] 23, EffectSpellClassMask[1] 67108864, Chastise's SpellFamilyFlags[1] 67108865) adds 150. Spell::EffectWeaponDmg then rolls the main-hand weapon without its total percent (CalculateDamage with addTotalPct false for the Holy school, Unit.cpp:3577-3640, StatSystem.cpp:727-767: weapon damage plus attack power / 14 x speed), applies 150%, passes MeleeDamageBonusDone, and adds it to the school damage of Effect[0] in the same hit (SpellEffects.cpp:4685-4760); resists and crits are taken on the sum. The 503141 hit_mean scenario, without 806525, is the control: its model has no weapon part."}
+  ],
   "target_aura_gates": [
     {"spell": 705291, "name": "Templar's Might", "quote": "on enemies affected by your Condemn",
      "rank": 503141, "gate_spell": 567539, "percent": 18.0, "label_suffix": "condemn_gate", "stack_arms": [0, 1],
@@ -1723,6 +1728,27 @@
     {"name": "c7_scarlet", "talents": [301065, 520812, 806525]}
   ],
   "behaviours": [
+    {
+      "spell": 1397742, "name": "Testament of Hope (copy radius)", "kind": "taken_hit", "variant": "radius",
+      "label_suffix": "radius", "judge": "damage_ratio", "expected": 1.2345679, "quote": "While within",
+      "strike_spell": 41394, "caster_health_pct": 100, "caster_max_health": 100000, "trials": 6,
+      "targets": [["near", 16], ["far", 24]],
+      "arms": [
+        {"name": "control", "opening_casts": [[1397742, "caster"]], "select": "near", "select_settle_ms": 2500,
+         "checks": [{"metric": "combat_reach", "equals": 1.5},
+                    {"metric": "owned_creature_count", "entry": 50250, "min_distance": 12, "equals": 2},
+                    {"metric": "owned_creature_count", "entry": 50250, "min_distance": 16.5, "equals": 0}]},
+        {"name": "treatment", "select": "far", "select_settle_ms": 2500,
+         "checks": [{"metric": "owned_creature_count", "entry": 50250, "min_distance": 20, "equals": 2}]}
+      ],
+      "observe_source": "704409 Effect[1] 143 SPELL_EFFECT_APPLY_AREA_AURA_OWNER, aura 87 (-10%), radius $704409a1 = 15 yd; UnitAura::FillTargetMap (SpellAuras.cpp:2945-2951) keeps the owner only while the copy IsWithinDistInMap(owner, 15), which adds both combat reaches (Object.cpp:1256-1263; copy 50250 display 775 CombatReach 2.25). The copies attack the owner's selected hostile unit (AscensionTemplarSummons.cpp UpdateAI), so the selection places them: one Testament of Hope cast, the dummy 'near' (12 yd) selected, both copies held within 14 yd; then 'far' (25 yd) selected, both copies beyond 21 yd. Light of the Naaru 41394 (Holy, fixed 1100) from the striker hits 890 with both copies near (0.9 x 0.9, truncated) and 1100 with both far: 1100 / 890 against 1 / 0.81. Both arms run inside the copies' 20 s."
+    },
+    {
+      "spell": 806153, "name": "Divine Force interrupt", "kind": "school_lockout", "variant": "lockout",
+      "label_suffix": "lockout", "quote": "and interrupting non-player spellcasting for", "interrupt_spell": 32747,
+      "cast_spell": 807805, "channel_spell": 12051,
+      "observe_source": "807805 (top rank of 806153) carries SPELL_ATTR7_CAN_CAUSE_INTERRUPT (AttributesEx7 2048); Spell::_cast casts SPELL_INTERRUPT_NONPLAYER 32747 at a creature target (Spell.cpp:4173-4178) within the instant cast. 32747 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 (3000 ms); Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and PreventionType is silence, and locks that channel's school for the duration (Creature::ProhibitSpellSchool). The dummy channels Evocation 12051 (Arcane, PreventionType 1, ChannelInterruptFlags 31756, 8 s) on itself; its Arcane lockout is read with school_prohibited, so the 6 s stun 807890 the same cast lands later does not hide it."
+    },
     {
       "spell": 560096, "name": "Devotion of Khaz'goroth group stack cap", "kind": "group_stack_cap",
       "quote": "Does not stack with similar effects.",

@@ -3620,9 +3620,12 @@
     "clause": "$?s806525[ plus an additional $806525s1% Weapon Damage][]",
     "labels": [
       "503141 effect_value 806525e0 #1",
-      "503141 behaviour_metric_delta weapon_damage_gate"
+      "503141 behaviour_metric_delta weapon_damage_gate",
+      "503141 hit_mean weapon_damage",
+      "503141 hit_mean"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "route a (ADR 0172): with Martial Training 806525 learned, the Chastise hit model adds 150% of the reference weapon roll to the school part (503141 hit_mean weapon_damage); without it, 503141 hit_mean has no weapon part (control)"
   },
   {
     "spell": 503141,
@@ -4435,10 +4438,11 @@
     "spell": 806153,
     "clause": "and interrupting non-player spellcasting for $32747d",
     "labels": [
-      "807805 spell_duration 32747 #2"
+      "807805 spell_duration 32747 #2",
+      "806153 behaviour_expiry lockout"
     ],
     "kind": "claim",
-    "reason": "route pending: 807805 SPELL_ATTR7_CAN_CAUSE_INTERRUPT casts SPELL_INTERRUPT_NONPLAYER 32747 on a non-player target (Spell.cpp:3027-3029, :4173-4178; 4 casts of 32747 per Divine Force in diagnostic 20261111-224641); the 3 s lockout acts only on a creature casting at the hit, and the 6 s stun of the same cast hides it, so it needs a stun-immune casting creature and a school-lockout read"
+    "reason": "route a (I4 second attempt): the dummy channels Evocation 12051 and a real 807805 cast interrupts it through SPELL_INTERRUPT_NONPLAYER 32747 (SPELL_ATTR7_CAN_CAUSE_INTERRUPT, Spell.cpp:4173-4178); the Arcane lockout, read with school_prohibited (Creature::IsSpellProhibited), is set 2876 ms after the cast and free 3026 ms after it, against 3000 ms; free before the cast while the channel runs (ADR 0171)"
   },
   {
     "spell": 806273,
@@ -4586,7 +4590,7 @@
       {
         "claim": "While within $704409a1 yds of you",
         "labels": [
-          "1397742 effect_radius #2 (unmeasurable)"
+          "1397742 behaviour_hit_ratio radius"
         ]
       },
       {
@@ -4597,7 +4601,7 @@
         ]
       }
     ],
-    "reason": "two copies summoned by a real cast: Light of the Naaru hits 1100 without, 890 with both (0.9 x 0.9, truncated); route pending for the radius: the copies stay 2.5-3.5 yd from the owner (AscensionTemplarSummons.cpp HopeSpot, repositioned every 500 ms), so a copy beyond 15 yd needs the copies held in place"
+    "reason": "two copies summoned by a real cast: Light of the Naaru hits 1100 without, 890 with both (0.9 x 0.9, truncated); radius (route a, ADR 0171): with a selected dummy placing both copies 12-16.5 yd from the caster the strike hits 890, with both beyond 20 yd it hits 1100 (2D centre distances; the engine adds the combat reaches 1.5 and 2.25 to the 15 yd)"
   },
   {
     "spell": 1397742,
