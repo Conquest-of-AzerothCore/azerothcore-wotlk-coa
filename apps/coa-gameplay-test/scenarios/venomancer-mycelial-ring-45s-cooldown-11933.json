@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Mycelial Ring keeps its 45 sec cooldown (#11933)",
+  "contract": [
+    "Mycelial Ring 681056 has RecoveryTime 45000 in spell category 38. Its triggered ring spells 681291 and",
+    "681552-681556 share category 38 with a 120000 ms category cooldown, so casting the ring left Mycelial Ring itself",
+    "on a 2 min cooldown. Expected: right after the cast its cooldown is at most 45 sec."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "label": "The Mycelial Ring talent, which teaches the ring",
+      "actor": "v",
+      "spell": 805238
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 681056
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 681056
+    },
+    {
+      "action": "assert",
+      "label": "Mycelial Ring is cast",
+      "actor": "v",
+      "metric": "cast_failure",
+      "spell": 681056,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Let the ring's triggered spells land",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Mycelial Ring is on cooldown",
+      "actor": "v",
+      "metric": "cooldown_ms",
+      "spell": 681056,
+      "min": 42000
+    },
+    {
+      "action": "assert",
+      "label": "and the cooldown is the tooltip's 45 sec, not 2 min",
+      "actor": "v",
+      "metric": "cooldown_ms",
+      "spell": 681056,
+      "max": 45000
+    }
+  ]
+}

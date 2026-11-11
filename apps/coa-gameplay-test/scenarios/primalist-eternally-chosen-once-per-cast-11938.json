@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "name": "Primalist Eternally Chosen summons two spirits per cast, not per enemy hit (#11938)",
+  "contract": "Eternally Chosen 802888: Spirit Charge and Primal Rush \"now summons 2 Spirits of Life\" (creature 840002). Its spell_proc row procs on every spell event of the cast, so a Primal Rush into a pack summoned two spirits per enemy hit and lagged the server. Expected: a Primal Rush 500696 into four enemies hits all four and leaves exactly two Spirits of Life.",
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "a",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 60,
+      "distance": 3
+    },
+    {
+      "id": "b",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 60,
+      "distance": 3
+    },
+    {
+      "id": "c",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 60,
+      "distance": 4
+    },
+    {
+      "id": "d",
+      "owner": "primalist",
+      "entry": 28168,
+      "health": 500000,
+      "level": 60,
+      "distance": 4
+    }
+  ],
+  "timeout_ms": 60000,
+  "steps": [
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 58
+    },
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 802888
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "primalist",
+      "spell": 500696
+    },
+    {
+      "action": "set_power",
+      "actor": "primalist",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500696,
+      "target": "a"
+    },
+    {
+      "action": "assert",
+      "label": "Primal Rush is cast",
+      "actor": "primalist",
+      "metric": "cast_failure",
+      "spell": 500696,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Primal Rush hits enemy a",
+      "actor": "a",
+      "metric": "health",
+      "max": 499999
+    },
+    {
+      "action": "assert",
+      "label": "Primal Rush hits enemy b",
+      "actor": "b",
+      "metric": "health",
+      "max": 499999
+    },
+    {
+      "action": "assert",
+      "label": "Primal Rush hits enemy c",
+      "actor": "c",
+      "metric": "health",
+      "max": 499999
+    },
+    {
+      "action": "assert",
+      "label": "Primal Rush hits enemy d",
+      "actor": "d",
+      "metric": "health",
+      "max": 499999
+    },
+    {
+      "action": "assert",
+      "label": "Eternally Chosen summons exactly two spirits for the cast, not two per enemy hit",
+      "actor": "primalist",
+      "metric": "owned_creature_count",
+      "entry": 840002,
+      "equals": 2
+    }
+  ]
+}

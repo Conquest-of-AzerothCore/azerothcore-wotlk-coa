@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "name": "Polished Battlegear of Valor cache hands out both rings it lists (#11942)",
+  "contract": "Polished Battlegear of Valor - Heirloom Cache 1339062 (item_ethereal_set_cache, spell 60034) lists Ring of the Vanguard 1339079 and Ring of the Lionhearted 1339082 among its nine pieces; the reporter received neither. Expected: opening it hands out both rings with the armor and consumes the cache.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 1339062
+    },
+    {
+      "action": "add_item",
+      "label": "An 18-slot bag for the nine pieces",
+      "actor": "p",
+      "item": 14156
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 14156,
+      "slot": 19
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: at least ten slots are free",
+      "actor": "p",
+      "metric": "free_inventory_slots",
+      "min": 10
+    },
+    {
+      "action": "use_item",
+      "label": "Open the cache",
+      "actor": "p",
+      "item": 1339062,
+      "spell": 60034
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "the cache opens without being refused",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 60034,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Ring of the Vanguard is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1339079,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Ring of the Lionhearted is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1339082,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the cloak is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1339085,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the belt is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1339097,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the boots is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1339104,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the bracers is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1339111,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the platelegs is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1339118,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the helmet is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1339125,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the gauntlets is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1339132,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the cache itself is consumed",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1339062,
+      "equals": 0
+    }
+  ]
+}
