@@ -583,6 +583,20 @@ class RunnerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'metric needs the text'):
             run.validate(scenario)
 
+    def test_console_restore_is_one_command(self):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, {'action': 'console', 'command': 'raidphase set 2', 'restore': 'raidphase clear'})
+        self.assertIs(run.validate(scenario), scenario)
+        for restore in ('', ' ', 'raidphase clear\nserver shutdown 1', 7):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, {'action': 'console', 'command': 'raidphase set 2', 'restore': restore})
+            with self.subTest(restore=restore), self.assertRaisesRegex(ValueError, 'one restore command'):
+                run.validate(scenario)
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, {'action': 'command', 'actor': 'caster', 'command': '.gps', 'restore': '.gps'})
+        with self.assertRaisesRegex(ValueError, 'step 0'):
+            run.validate(scenario)
+
     def test_game_event_needs_an_event_id_and_a_boolean_state(self):
         for step in ({'action': 'game_event', 'event': 12, 'active': True},
                      {'action': 'game_event', 'event': 12, 'active': False}):

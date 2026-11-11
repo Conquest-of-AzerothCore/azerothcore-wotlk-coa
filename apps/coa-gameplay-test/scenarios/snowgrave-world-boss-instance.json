@@ -2,10 +2,12 @@
   "schema": 1,
   "name": "Korrim Snowgrave: the shrine takes the raid to his map (Normal only), he pays every player and leaves a portal back",
   "contract": [
-    "The shrine (978095) refuses a heroic raid difficulty and on Normal takes raid members to",
-    "his map (889). His health is per player in his map, 10 to 40, so 11200940 for two",
+    "The shrine (978095) refuses a heroic raid difficulty. His map (889) opens with Molten Core: at release",
+    "stage 3 (Zul'Gurub) the shrine leaves the raid on map 1, and at stage 4 it takes raid members to",
+    "his map. His health is per player in his map, 10 to 40, so 11200940 for two",
     "players. Every player in his map gets 250 Runes of Ascension, 100 to 150 Bazaar Tokens and a Treasures of",
-    "Azeroth chest (1615011); the portal out (978096) opens at its fixed spot and takes the player back."
+    "Azeroth chest (1615011); the portal out (978096) opens at its fixed spot and takes the player back.",
+    "The case clears the stage override when it ends, also after a failure."
   ],
   "timeout_ms": 180000,
   "location": {
@@ -145,6 +147,38 @@
     {
       "action": "wait",
       "ms": 500
+    },
+    {
+      "action": "console",
+      "label": "SETUP: the realm is at the Zul'Gurub release stage",
+      "command": "raidphase set 3",
+      "restore": "raidphase clear"
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "raider",
+      "entry": 978095
+    },
+    {
+      "action": "gossip_select",
+      "actor": "raider",
+      "option": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at the Zul'Gurub stage his map stays closed",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 1
+    },
+    {
+      "action": "console",
+      "label": "SETUP: the realm reaches the Molten Core release stage",
+      "command": "raidphase set 4"
     },
     {
       "action": "use_gameobject",
@@ -294,6 +328,11 @@
       "metric": "map_id",
       "equals": 1,
       "within_ms": 8000
+    },
+    {
+      "action": "console",
+      "label": "CLEANUP: the release stage returns to the configured one",
+      "command": "raidphase clear"
     }
   ]
 }

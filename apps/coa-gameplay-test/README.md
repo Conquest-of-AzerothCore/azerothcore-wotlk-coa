@@ -481,7 +481,7 @@ assert stable maximums and final levels when testing damage coefficients.
 
 | Action | Fields and behavior |
 | --- | --- |
-| `console` | `command`: execute one console command on the test server; capture its output. |
+| `console` | `command`: execute one console command on the test server; capture its output. Optional `restore`: one console command that undoes it, run when the case ends, whether it passed or failed (the latest step's first); use it for process-global state such as `raidphase set`. |
 | `game_event` | `event`, `active`: start or stop a game event whatever the realm date, so a holiday case passes on any day; `event start`/`event stop` refuse an event already in that state. The case restores each event's original state when it ends and runs exclusively, because events are process-global. |
 | `command` | `actor`, `command` beginning with `.`: execute with the player's normal permissions. Optional `rejected: true` instead requires the command to be refused (unknown, malformed or answered with an error). |
 | `whisper` | Player `actor`, `to`, `text`, optional `language` (Common by default): the client's whisper packet, sent as typed. |
