@@ -390,17 +390,17 @@ class ProcCompareTest(unittest.TestCase):
             self.assertIn(status, STATUSES)
 
 
-def per_trigger_expectation(triggers, minimum=1699):
-    entry = templar_proc(SCOURGEBANE)
+def per_trigger_expectation(triggers, minimum=1699, aura=SCOURGEBANE):
+    entry = templar_proc(aura)
     _, [expectation] = proc_scenario(CLASS_FILE, entry)
     model = {**expectation.model, 'part': 0, 'parts': 1, 'part_attempts': triggers, 'minimum_trials': minimum,
              'trigger_boundaries': trigger_boundaries(entry, triggers)}
     return replace(expectation, model=model)
 
 
-def per_trigger_steps(outcomes, aura=1):
-    boundaries = trigger_boundaries(templar_proc(SCOURGEBANE), len(outcomes))
-    steps, hits, events = [assert_step(LABELS['aura'], str(aura))], 0, 0
+def per_trigger_steps(outcomes, aura=1, proc=SCOURGEBANE):
+    boundaries = trigger_boundaries(templar_proc(proc), len(outcomes))
+    steps, hits, events = [assert_step(f'{proc} proc aura', str(aura))], 0, 0
     for index, boundary in enumerate(boundaries):
         if index:
             hits, events = hits + outcomes[index - 1][0], events + outcomes[index - 1][1]
@@ -480,6 +480,59 @@ class PerTriggerCompareTest(unittest.TestCase):
         outcomes = swings(1360, 340)
         verdict = self.verdict(outcomes, steps=per_trigger_steps(outcomes, aura=0))
         self.assertEqual(verdict.status, 'unmeasured')
+
+
+def strikes(*counts):
+    return [outcome for events, count in counts for outcome in [(1, events)] * count]
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class WholeProcsPerTriggerCompareTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def verdict(self, outcomes):
+        expectation = per_trigger_expectation(len(outcomes), aura=RETRIBUTION)
+        self.workspace.scenario(f'conformance-templar-proc-{RETRIBUTION}-part-1', 'proc', [expectation],
+                                steps=per_trigger_steps(outcomes, proc=RETRIBUTION), spell=RETRIBUTION,
+                                name='Retribution', rank=RETRIBUTION)
+        manifest, results = self.workspace.manifest()
+        from compare import compare
+        [verdict] = [verdict for verdict in compare(manifest, results, tooltips=chance_reader(text='$h'))
+                     if verdict.check == PROC_CHECK]
+        return verdict
+
+    def test_retribution_counts_one_proc_of_two_strikes_per_landed_swing(self):
+        entry = templar_proc(RETRIBUTION)
+        self.assertEqual((entry['events_per_proc'], entry[PER_TRIGGER]), (2, 1))
+        self.assertIn("'strike 2 additional times'", entry[PER_TRIGGER_SOURCE])
+
+    def test_two_strikes_in_a_fifth_of_the_swings_are_ok(self):
+        verdict = self.verdict(strikes((0, 1360), (2, 340)))
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 0.2)
+        self.assertIn('procs per one-hit trigger 0: 1360, 1: 340', verdict.explanation)
+        self.assertNotIn('part of a proc', verdict.explanation)
+
+    def test_one_swing_with_a_single_strike_is_an_alert(self):
+        verdict = self.verdict(strikes((0, 1360), (2, 339), (1, 1)))
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('1 of 1700 one-hit triggers gave a part of a proc (events not a whole multiple of 2)',
+                      verdict.explanation)
+
+    def test_a_server_striking_once_per_proc_is_an_alert(self):
+        verdict = self.verdict(strikes((0, 1360), (1, 340)))
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('340 of 1700 one-hit triggers gave a part of a proc', verdict.explanation)
+
+    def test_three_strikes_in_one_swing_are_an_alert(self):
+        verdict = self.verdict(strikes((0, 1360), (2, 339), (3, 1)))
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('1 of 1700 one-hit triggers gave more than 1 proc (at most 1.5)', verdict.explanation)
+        self.assertIn('1 of 1700 one-hit triggers gave a part of a proc', verdict.explanation)
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')

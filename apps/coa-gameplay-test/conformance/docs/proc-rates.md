@@ -69,7 +69,9 @@ exactly one landed main-hand hit, states how many it left out and gives the hist
 trigger. A trigger with more procs than the limit is an `alert` whatever the rate: under a chain a proc's own event
 rolls again, so some swings give two or more procs (the prototype's chaining server: 77 of 1540 one-hit swings),
 which a summed rate cannot see. Otherwise the rate is the one-hit triggers with a proc over the one-hit triggers,
-judged like any other rate.
+judged like any other rate. With `events_per_proc` above 1, a one-hit trigger whose events are not a whole multiple
+of it (one strike of Retribution's two) is an `alert` too, so the entry proves the stated number of events per proc
+and not only their mean (ADR 0180).
 
 `trials_needed(p)` is `ceil(2.576^2 x p (1 - p) / 0.025^2)`, the trials that put the half width of the 99% interval
 of the rate at 2.5 points: 1699 for 20%, 956 for 10%. The scenario performs `ceil(1.5 x trials_needed)` attempts

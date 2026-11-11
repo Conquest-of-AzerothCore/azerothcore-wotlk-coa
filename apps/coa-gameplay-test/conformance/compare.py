@@ -1023,7 +1023,11 @@ def judge_proc_per_trigger(manifest: dict, parts: list[ProcPart], tooltips: Tool
     over = sum(count for procs, count in counts.items() if procs > limit)
     multiplicity = (f'{over} of {len(single)} one-hit triggers gave more than {limit} proc (at most '
                     f'{max(counts):g})' if over else f'no one-hit trigger gave more than {limit} proc')
-    if over:
+    partial = sum(count for procs, count in counts.items() if not float(procs).is_integer())
+    if partial:
+        multiplicity += (f'; {partial} of {len(single)} one-hit triggers gave a part of a proc (events not a whole '
+                         f'multiple of {model["events_per_proc"]})')
+    if over or partial:
         status, low, high = 'alert', None, None
     return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
                    explanation=f'{multiplicity}; procs per one-hit trigger {histogram}; {with_proc:g} of '
