@@ -446,12 +446,12 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   exception (ADR 0147, owner ruling "Per-level truncation", 2026-11-11): when the rolled effect has a fractional
   per-level term, the engine truncates `level x EffectRealPointsPerLevel` before the sum (`SpellInfo.cpp:497`, with
   stock's MaxLevel/BaseLevel clamp and `max(BaseLevel, SpellLevel)`). If every read is the int32 truncation of a
-  per-roll value less that lost fraction, the verdict is "known engine rounding, per-level term truncated before the
-  sum", judged around the engine mean, and `detail['per_level_rounding']` holds the term, its truncation, the loss
-  and the engine's integer range. The model has no effect-modifier factor. A `hit_mean`, `melee_mean` or
-  `periodic_total` alert on a rank with such a term says "per-level truncation, engine computation not modelled"
-  and stays an alert. Fewer reads than the count the mean needs at the measured stats
-  (`detail['reads_needed']`), or a mean of 0, give `measured`. A single read inside the roll range proves nothing
+  per-roll value less that lost fraction, and the fraction changes the integer set the rolls give, the verdict is
+  "known engine rounding, per-level term truncated before the sum", judged around the engine mean, and
+  `detail['per_level_rounding']` holds the term, its truncation, the loss and the engine's integer range. The model
+  has no effect-modifier factor. A `hit_mean`, `melee_mean` or `periodic_total` alert on a rank with such a term says
+  "per-level truncation, engine computation not modelled" and stays an alert. Fewer reads than the count the mean
+  needs at the measured stats (`detail['reads_needed']`), or a mean of 0, give `measured`. A single read inside the roll range proves nothing
   about a constant offset smaller than the range: the fix round of the phase-2 Templar run found six such `ok`
   verdicts (Reckoning 572741, 748507, 805421; Vindication 501589, 501590, 501592), whose server value adds a
   per-level part the expected value omits. An `aura_amount` of a rolled effect has one read (one cast) and is

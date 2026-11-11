@@ -35,7 +35,9 @@ engine computation not modelled". A mutant of the same size that the computation
   level clamped to MaxLevel (when set) or raised to BaseLevel, less `max(BaseLevel, SpellLevel)`, times the float32
   rate. It keeps the truncation and the lost fraction.
 - `compare.judge_roll`: if some read lies outside the per-roll range and every read is
-  `trunc(float32(value - loss))` of a per-roll value, the verdict is judged around the engine mean (the 99% interval
+  `trunc(float32(value - loss))` of a per-roll value, and that loss changes the integer set the rolls give (a
+  loss below the fraction of the per-roll minimum leaves the set unchanged and ADR 0145 names it), the verdict is judged
+  around the engine mean (the 99% interval
   half-width as before, no widening). The explanation names "known engine rounding, per-level term truncated before
   the sum (SpellInfo.cpp:497)". `detail['per_level_rounding']` holds `per_level`, `truncated_to`, `loss`,
   `engine_range` and `engine_mean`. Otherwise ADR 0145 applies unchanged; a read the engine model does not explain is
