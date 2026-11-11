@@ -3680,6 +3680,43 @@
       "after_casts": [[680953, "caster"]],
       "after_wait_ms": 20000,
       "observe_source": "$s1 = 50 (680953 EffectBasePoints[0..2] 49, EffectDieSides 1). Effect[0..2] 192 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, EffectMiscValue 500678, 801478, 1397742 (Testament of Fortitude, Faith, Hope). The class script replaces the effect: AscensionTemplarAbilities.cpp:377-388 (Enlighten, bound at :424-425 for 680953) walks the known spells, and for each one in a Testament's chain (Named, AscensionTemplar.cpp:39-42) with a running cooldown calls ModifySpellCooldown(-CalculatePct(remaining, 50)) (Player.cpp:11950-11956 moves the stored end). Gated spell Testament of Faith 801478, RecoveryTime 180000 ms. Arms timed from a priming cast on the caster: without Profound Enlightenment, refused 100500 ms later (SPELL_FAILED_NOT_READY 67); with it, Profound Enlightenment is cast 20000 ms after the priming cast, when 160000 ms remain, so 80000 ms are left and the Testament goes through 100500 ms after the priming cast and is refused 99500 ms after it. Half of the full cooldown (90000 ms) instead of the remaining one would let the 99500 ms attempt through. One of the three Testaments is tested; the other two go through the same loop."
+    },
+    {
+      "spell": 712677,
+      "name": "Conviction",
+      "kind": "cast_applies_aura",
+      "quote": "for",
+      "expected_ms": 15000,
+      "applied_aura": 712679,
+      "target": "caster",
+      "cast_spell": 572769,
+      "cast_target": "dummy",
+      "observe_source": "AscensionTemplarAbilities.cpp:242-246: a Sacred Swing cast (Named 705293) with 712677 known casts Conviction 712679 on the caster (talent(712677, 712679)); 712679 DurationIndex 8 (15000 ms, $712679d). 712677's own aura 42 effect is dummied at load (712677 is listed in AscensionTemplarData.h:201). Sacred Swing 572769 is cast at the dummy with its CasterAuraSpell 681170 set and its Energy cost filled. The expiry pair reads 712679 before and after its stated end, timed from the cast."
+    },
+    {
+      "spell": 712677,
+      "name": "Conviction",
+      "kind": "metric_delta",
+      "quote": "stacking",
+      "expected": 4,
+      "before_expected": 0,
+      "trigger_spell": 572769,
+      "target": "dummy",
+      "metric": "aura_stacks",
+      "fields": {"spell": 712679},
+      "setup_casts": [572769, 572769, 572769, 572769],
+      "setup_wait_ms": 1100,
+      "observe_source": "712679 StackAmount 4 ($712679u), DurationIndex 8 (15000 ms). Each phase casts Sacred Swing 572769 five times at the dummy, 1100 ms apart (StartRecoveryTime 1000), and reads the stacks of 712679 on the caster. Without 712677 learned the five casts leave 0 stacks (control); with it learned, AscensionTemplarAbilities.cpp:242-246 casts 712679 on every Sacred Swing and the stack count reads the cap of 4, not 5. The 20500 ms wait between the phases outlasts the aura."
+    },
+    {
+      "spell": 805417,
+      "name": "Barrier of Light",
+      "kind": "cast_applies_aura",
+      "quote": "for $d",
+      "expected_ms": 15000,
+      "applied_aura": 805417,
+      "target": "caster",
+      "observe_source": "805417 DurationIndex 8 (15000 ms, $d); its three effects are raid area auras (Effect 65) centred on the caster (EffectImplicitTargetA 1), so the caster holds the aura that carries the healing-received effect (Effect[2] aura 319). The expiry pair reads 805417 on the caster before and after its stated end, timed from the cast."
     }
   ],
   "player_observations": [

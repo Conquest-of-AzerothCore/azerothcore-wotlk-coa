@@ -2839,7 +2839,8 @@
     "spell": 712677,
     "clause": "for $712679d",
     "labels": [
-      "712677 spell_duration 712679 #1"
+      "712677 spell_duration 712679 #1",
+      "712677 behaviour_expiry"
     ],
     "kind": "claim"
   },
@@ -2847,7 +2848,8 @@
     "spell": 712677,
     "clause": "stacking $712679u times",
     "labels": [
-      "712677 max_stacks 712679 #2"
+      "712677 max_stacks 712679 #2",
+      "712677 behaviour_metric_delta"
     ],
     "kind": "claim"
   },
@@ -4079,7 +4081,8 @@
       {
         "claim": "for $d",
         "labels": [
-          "805417 aura_duration_ms #1"
+          "805417 aura_duration_ms #1",
+          "805417 behaviour_expiry"
         ]
       }
     ],
