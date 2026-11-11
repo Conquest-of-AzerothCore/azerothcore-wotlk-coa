@@ -1,10 +1,10 @@
 -- Snowgrave (64627) in his boss map (889), the way Setis is fought: a shrine in
--- Winterspring takes players in (Normal only), the portal he leaves where he falls and the shrine at
+-- Winterspring takes players in (Normal only), the portal he leaves at its fixed spot and the shrine at
 -- the entrance take them back, and players who die in his map rise at its start. The shrine's spot is taken in game.
 
 -- Loot: one roll of his ten items (the drops seen on Ascension; loot mode 2 holds their heroic ones);
--- snowgrave_instance_death_coa rolls one more for every four players in his map, and every player gets the runes
--- and the Treasures of Azeroth chest.
+-- snowgrave_instance_death_coa gives one of them for every four players in his map (never none), and every
+-- player gets the runes and the Treasures of Azeroth chest.
 UPDATE `creature_template` SET `lootid` = 64627 WHERE `entry` = 64627;
 DELETE FROM `creature_loot_template` WHERE `Entry` = 64627;
 INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`,
@@ -131,8 +131,9 @@ REPLACE INTO `creaturemodeldata_dbc` (`ID`, `Flags`, `ModelName`, `SizeClass`, `
   `AttachedEffectScale`, `MissileCollisionRadius`, `MissileCollisionPush`, `MissileCollisionRaise`) VALUES
 (113990, 0, 'Creature\\korrim\\korrim.m2', 3, 1.0, 3, 1, 18.0, 12.0, 1.0, 0, 2, 11, 193, 4.0, 2.083, 0.0, -2.2947, -4.1475, -0.0213, 2.4742, 4.0076, 7.679, 1.0, 0.75, 0.0, 0.0, 0.0);
 
--- World bosses give Ascension's own Treasures of Azeroth chest (1615011), which holds what 978059 held.
-DELETE FROM `item_loot_template` WHERE `Entry` IN (978059, 1615011);
+-- World bosses give Ascension's own Treasures of Azeroth chest (1615011), which holds what 978059 holds;
+-- 978059 keeps its loot for the chests players still hold.
+DELETE FROM `item_loot_template` WHERE `Entry` = 1615011;
 INSERT INTO `item_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`,
   `MinCount`, `MaxCount`, `Comment`) VALUES
 (1615011, 978059, 978059, 100, 0, 1, 0, 1, 1, 'Treasures of Azeroth - a Heroic Dungeon epic'),

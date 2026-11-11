@@ -2,17 +2,17 @@
   "schema": 1,
   "name": "Korrim Snowgrave: the shrine takes the raid to his map (Normal only), he pays every player and leaves a portal back",
   "contract": [
-    "The shrine (978095) refuses a heroic raid difficulty and on Normal takes the raid leader to",
-    "his map (889). His health is per player in his map, 10 to 40, so 11200940 for one",
-    "player. Every player gets 250 Runes of Ascension, 100 to 150 Bazaar Tokens and a Treasures of",
-    "Azeroth chest; the portal out (978096) opens where he falls and takes the player back."
+    "The shrine (978095) refuses a heroic raid difficulty and on Normal takes raid members to",
+    "his map (889). His health is per player in his map, 10 to 40, so 11200940 for two",
+    "players. Every player in his map gets 250 Runes of Ascension, 100 to 150 Bazaar Tokens and a Treasures of",
+    "Azeroth chest (1615011); the portal out (978096) opens at its fixed spot and takes the player back."
   ],
   "timeout_ms": 180000,
   "location": {
     "map": 1,
-    "x": 4744.0,
-    "y": -4932.0,
-    "z": 886.0
+    "x": 5191.0,
+    "y": -4905.0,
+    "z": 752.5
   },
   "players": [
     {
@@ -82,12 +82,6 @@
     {
       "action": "wait",
       "ms": 500
-    },
-    {
-      "action": "summon_gameobject",
-      "actor": "raider",
-      "entry": 978095,
-      "distance": 2
     },
     {
       "action": "use_gameobject",
@@ -165,6 +159,24 @@
       "within_ms": 8000
     },
     {
+      "action": "use_gameobject",
+      "actor": "mate1",
+      "entry": 978095
+    },
+    {
+      "action": "gossip_select",
+      "actor": "mate1",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "The shrine takes another raid member in too",
+      "actor": "mate1",
+      "metric": "map_id",
+      "equals": 889,
+      "within_ms": 8000
+    },
+    {
       "action": "summon",
       "actor": "raider",
       "entry": 64627,
@@ -221,12 +233,37 @@
       "label": "A Treasures of Azeroth chest",
       "actor": "raider",
       "metric": "item_count",
-      "item": 978059,
+      "item": 1615011,
       "equals": 1
     },
     {
       "action": "assert",
-      "label": "The portal out opens where he fell",
+      "label": "The other raid member gets the runes too",
+      "actor": "mate1",
+      "metric": "item_count",
+      "item": 375250,
+      "equals": 250,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The other raid member gets a chest too",
+      "actor": "mate1",
+      "metric": "item_count",
+      "item": 1615011,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "raider",
+      "map": 889,
+      "x": 4680.514,
+      "y": -4834.152,
+      "z": 676.87
+    },
+    {
+      "action": "assert",
+      "label": "The portal out opens at its fixed spot",
       "actor": "raider",
       "metric": "nearby_gameobject_count",
       "entry": 978096,

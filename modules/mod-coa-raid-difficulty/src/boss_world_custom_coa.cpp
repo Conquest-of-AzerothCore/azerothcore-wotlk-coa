@@ -647,6 +647,7 @@ namespace
         {
             custom_world_boss_coa::Reset();
             me->SetLootMode(me->GetMap()->IsHeroic() ? LOOT_MODE_HARD_MODE_1 : LOOT_MODE_DEFAULT);
+            _hailImpacts.clear();
             ApplyFlex();
             DoCastSelf(SPELL_FROZEN_CLUB, true);
             _stomps = 0;
