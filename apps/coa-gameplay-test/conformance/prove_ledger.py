@@ -56,7 +56,8 @@ def ledger_evidence(rows: list[dict], outcomes: Sequence[RunOutcome]) -> list[di
 def coverage_figures(ledger: Sequence[dict], outcome: RunOutcome) -> dict:
     result = clause_coverage(list(ledger), outcome.verdicts, outcome.header.get('build'))
     return {'proven': result.proven, 'behaviour': result.behaviour, 'data': result.data, 'total': result.total,
-            'not_measured': len(result.not_measured)}
+            'not_measured': len(result.not_measured), 'tool_gaps_accepted': result.accepted_tool_gaps,
+            'tool_gaps_pending': result.pending_tool_gaps, 'resolved': result.resolved}
 
 
 def ledger_coverage(ledger: Sequence[dict]) -> Callable[[Sequence[RunOutcome]], Mapping]:

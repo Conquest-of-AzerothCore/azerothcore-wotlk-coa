@@ -201,6 +201,49 @@ def require_claims(clauses: list[dict]):
                 raise EvidenceError(f'{where} declares {claim!r}; a claim is {{"claim": <words>, "labels": [...]}}')
 
 
+TOOL_GAP = 'tool_gap'
+TOOL_GAP_ACCEPTED = 'accepted'
+TOOL_GAP_PENDING = 'pending'
+MIN_TOOL_GAP_AGENTS = 2
+
+
+def text_field(value) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
+def require_tool_gaps(clauses: list[dict]):
+    for clause in clauses:
+        if TOOL_GAP not in clause:
+            continue
+        where = f"spell {clause.get('spell')}: {clause.get('clause')!r}"
+        gap = clause[TOOL_GAP]
+        if clause.get('kind') != 'claim':
+            raise EvidenceError(f'{where} declares a tool gap but is not a claim entry')
+        if not isinstance(gap, dict) or not text_field(gap.get('reason')) or not isinstance(gap.get('attempts'), list):
+            raise EvidenceError(f'{where} declares {gap!r}; a tool gap is {{"reason": <text>, "attempts": [...]}}')
+        if not gap['attempts']:
+            raise EvidenceError(f'{where} declares a tool gap with no attempt')
+        for attempt in gap['attempts']:
+            if not isinstance(attempt, dict) or not text_field(attempt.get('agent')) \
+                    or not text_field(attempt.get('report')):
+                raise EvidenceError(f'{where} declares the attempt {attempt!r}; an attempt is '
+                                    f'{{"agent": <who tried>, "report": <where it is written>}}')
+        acceptance = gap.get('owner_acceptance')
+        if acceptance is not None and (not isinstance(acceptance, dict) or not text_field(acceptance.get('ruling'))):
+            raise EvidenceError(f'{where} declares the owner acceptance {acceptance!r}; it is '
+                                f'{{"ruling": <the ruling that accepts the gap>}}')
+
+
+def tool_gap_state(clause: dict) -> str | None:
+    gap = clause.get(TOOL_GAP)
+    if gap is None:
+        return None
+    agents = {attempt['agent'].strip() for attempt in gap['attempts']}
+    if gap.get('owner_acceptance') or len(agents) >= MIN_TOOL_GAP_AGENTS:
+        return TOOL_GAP_ACCEPTED
+    return TOOL_GAP_PENDING
+
+
 def clause_proven(labels: list[str], statuses: dict[str, str]) -> bool:
     if not labels:
         return False
@@ -294,10 +337,23 @@ class ClauseCoverage:
     evidence: list[tuple[dict, str]]
     not_measured: list[str]
     claim_evidence: list[list[str]] = field(default_factory=list)
+    tool_gaps: list[tuple[dict, str]] = field(default_factory=list)
 
     @property
     def data(self) -> int:
         return self.proven - self.behaviour
+
+    @property
+    def accepted_tool_gaps(self) -> int:
+        return sum(state == TOOL_GAP_ACCEPTED for _, state in self.tool_gaps)
+
+    @property
+    def pending_tool_gaps(self) -> int:
+        return sum(state == TOOL_GAP_PENDING for _, state in self.tool_gaps)
+
+    @property
+    def resolved(self) -> int:
+        return self.proven + self.accepted_tool_gaps
 
 
 def require_build(verdicts: list[Verdict], build: str | None, where: str):
@@ -381,6 +437,7 @@ def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | N
     require_build(verdicts, build, 'clause coverage')
     require_known_checks(verdicts)
     require_claims(clauses)
+    require_tool_gaps(clauses)
     by_label = {verdict.label: verdict for verdict in verdicts}
     statuses = {verdict.label: verdict.status for verdict in verdicts}
     claims = [clause for clause in clauses if clause.get('kind') == 'claim']
@@ -389,14 +446,19 @@ def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | N
     unproven = [clause for clause, status in evidence if status == UNPROVEN]
     behaviour = sum(status == BEHAVIOUR for _, status in evidence)
     not_measured = sorted(verdict.label for verdict in verdicts if verdict.status == NOT_MEASURED)
+    tool_gaps = [(clause, tool_gap_state(clause)) for clause in unproven if TOOL_GAP in clause]
     return ClauseCoverage(len(claims) - len(unproven), behaviour, len(claims), unproven, evidence, not_measured,
-                          per_claim)
+                          per_claim, tool_gaps)
 
 
 def clause_coverage_lines(result: ClauseCoverage) -> list[str]:
     lines = [f'clauses proven: {share(result.proven, result.total)}',
              f'behaviour proven: {share(result.behaviour, result.total)}',
              f'data conformant: {share(result.data, result.total)}',
+             f'tool gaps accepted (a second attempt by another agent or an owner acceptance, counted resolved, not '
+             f'proven): {result.accepted_tool_gaps}',
+             f'tool gaps pending (one agent\'s attempt only, counted unresolved): {result.pending_tool_gaps}',
+             f'clauses resolved (proven or accepted tool gap): {share(result.resolved, result.total)}',
              f'not measured (CalcValue read of an effect whose amount a CalcAmount hook sets, counted unproven): '
              f'{len(result.not_measured)}', '']
     if result.not_measured:
@@ -413,10 +475,26 @@ def clause_coverage_lines(result: ClauseCoverage) -> list[str]:
             lines.append(f"  spell {clause.get('spell')}: {clause.get('clause')}")
             for claim, status in zip(clause_claims(clause), found.get(id(clause), [])):
                 lines.append(f"    claim {claim[CLAIM_WORDS]!r}: {status} (labels {claim['labels']})")
+    if result.tool_gaps:
+        lines.append('Tool gaps (ADR 0127):')
+        for clause, state in result.tool_gaps:
+            gap = clause[TOOL_GAP]
+            agents = ', '.join(attempt['agent'] for attempt in gap['attempts'])
+            accepted = f"; owner acceptance {gap['owner_acceptance']['ruling']}" if gap.get('owner_acceptance') else ''
+            lines.append(f"  spell {clause.get('spell')}: {clause.get('clause')}: {state} ({gap['reason']}; attempts "
+                         f"by {agents}{accepted})")
     return lines
 
 
 def claim_rows(clause: dict, statuses: list[str], sha: str) -> list[dict]:
+    rows = evidence_rows(clause, statuses, sha)
+    if TOOL_GAP not in clause:
+        return rows
+    return [{**row, TOOL_GAP: clause[TOOL_GAP], 'tool_gap_state': tool_gap_state(clause)}
+            if row['evidence'] == UNPROVEN else row for row in rows]
+
+
+def evidence_rows(clause: dict, statuses: list[str], sha: str) -> list[dict]:
     claims = clause_claims(clause)
     status = claims_evidence(statuses)
     if DECLARED_CLAIMS not in clause:

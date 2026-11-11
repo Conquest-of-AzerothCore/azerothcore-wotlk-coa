@@ -285,7 +285,8 @@ It starts nothing but the `coa-verify` command below.
    names the latter), the worldserver `build`,
    the `server_commit` and the verdict counts per status; `flips`, `not_judged`, `flip_reports`, the `fragment` row
    count and the excluded rows, `coverage` per run when `--clauses` is given (proven, behaviour, data, total,
-   not_measured), `missing_results` (the run directory and scenario keys of the run that lacked results),
+   not_measured, tool_gaps_accepted, tool_gaps_pending, resolved), `missing_results` (the run directory and scenario
+   keys of the run that lacked results),
    `failed_run` (that run's record), `failure` and `exit`.
 
 A flip is two judged verdicts of one (label, check, scenario) whose status classes differ: conformant (`ok`,

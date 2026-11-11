@@ -16,7 +16,8 @@ from compare import DATA_ONLY, NOT_MEASURED, Verdict, evaluate, judge_behaviour,
 from conformance import DIFF_EXIT, main
 from coverage import (BEHAVIOUR, BY_METRIC, COVERAGE_FILE, DATA, EVENT, EVIDENCE, METRIC_EVIDENCE, READBACK, STATE,
                       STATE_PROMISES, UNPROVEN, EvidenceError, clause_coverage, clause_coverage_lines, coverage,
-                      fragment_entries, load_clauses, read_fragment, require_claims, write_coverage, write_fragment)
+                      TOOL_GAP, TOOL_GAP_ACCEPTED, TOOL_GAP_PENDING, fragment_entries, load_clauses, read_fragment,
+                      require_claims, write_coverage, write_fragment)
 from expiry import BEHAVIOUR_EXPIRY
 from profile import DBC_DIR, DbcSetMismatch, class_file_paths, load_class_file, server_dbc_dir, spell_dbc_sha256
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
@@ -658,6 +659,69 @@ class DeclaredClaimsTest(unittest.TestCase):
         for path in sorted(Path(__file__).parent.joinpath('classes').glob('*_clauses.json')):
             with self.subTest(ledger=path.name):
                 require_claims(load_clauses(path))
+
+
+def gapped(text, *agents, ruling=None, labels=()):
+    gap = {'reason': 'no fixture forces an off-hand swing',
+           'attempts': [{'agent': agent, 'report': f'round/{agent}.md'} for agent in agents]}
+    if ruling:
+        gap['owner_acceptance'] = {'ruling': ruling}
+    return {**claim(text, *labels), TOOL_GAP: gap}
+
+
+class ToolGapTest(unittest.TestCase):
+    def test_one_agents_attempt_is_a_pending_gap_counted_unresolved(self):
+        result = clause_coverage([gapped('off-hand swings trigger', 'arm-a'), claim('open')], [], BUILD)
+        self.assertEqual((result.accepted_tool_gaps, result.pending_tool_gaps, result.resolved), (0, 1, 0))
+        self.assertEqual([state for _, state in result.tool_gaps], [TOOL_GAP_PENDING])
+
+    def test_a_second_attempt_by_another_agent_resolves_the_gap(self):
+        result = clause_coverage([gapped('off-hand swings trigger', 'arm-a', 'arm-b')], [], BUILD)
+        self.assertEqual((result.proven, result.accepted_tool_gaps, result.resolved), (0, 1, 1))
+
+    def test_two_attempts_by_the_same_agent_stay_pending(self):
+        result = clause_coverage([gapped('off-hand swings trigger', 'arm-a', ' arm-a')], [], BUILD)
+        self.assertEqual(result.pending_tool_gaps, 1)
+        with mock.patch('coverage.MIN_TOOL_GAP_AGENTS', 1):
+            seeded = clause_coverage([gapped('off-hand swings trigger', 'arm-a', 'arm-a')], [], BUILD)
+        self.assertNotEqual(seeded.pending_tool_gaps, 1)
+
+    def test_an_owner_acceptance_resolves_a_single_attempt(self):
+        result = clause_coverage([gapped('off-hand swings trigger', 'arm-a', ruling='owner-rulings.md#gaps')], [],
+                                 BUILD)
+        self.assertEqual((result.accepted_tool_gaps, result.resolved), (1, 1))
+
+    def test_a_proven_clause_is_not_a_tool_gap(self):
+        result = clause_coverage([gapped('extra', 'arm-a', labels=(f'{ARGENT_BLADE} effect_value #0',))],
+                                 [value(ARGENT_BLADE)], BUILD)
+        self.assertEqual((result.proven, result.tool_gaps, result.resolved), (1, [], 1))
+
+    def test_a_malformed_tool_gap_is_refused(self):
+        bad = [{**claim('x'), TOOL_GAP: {'reason': 'r', 'attempts': []}},
+               {**claim('x'), TOOL_GAP: {'attempts': [{'agent': 'a', 'report': 'r'}]}},
+               {**claim('x'), TOOL_GAP: {'reason': 'r', 'attempts': [{'agent': 'a'}]}},
+               {**gapped('x', 'a'), 'kind': 'no_claim'},
+               {**gapped('x', 'a'), TOOL_GAP: {**gapped('x', 'a')[TOOL_GAP], 'owner_acceptance': {}}}]
+        for clause in bad:
+            with self.subTest(clause=clause), self.assertRaises(EvidenceError):
+                clause_coverage([clause], [], BUILD)
+
+    def test_the_report_counts_both_states_and_lists_the_gaps(self):
+        result = clause_coverage([gapped('off-hand swings trigger', 'arm-a'),
+                                  gapped('cone of 8 yds', 'arm-a', 'arm-b')], [], BUILD)
+        lines = clause_coverage_lines(result)
+        self.assertIn('tool gaps pending (one agent\'s attempt only, counted unresolved): 1', lines)
+        self.assertIn('clauses resolved (proven or accepted tool gap): 1 of 2 (50.0%)', lines)
+        self.assertIn(f'  spell {ARGENT_BLADE}: cone of 8 yds: {TOOL_GAP_ACCEPTED} (no fixture forces an off-hand '
+                      f'swing; attempts by arm-a, arm-b)', lines)
+
+    def test_fragment_rows_carry_the_gap_and_its_state(self):
+        result = clause_coverage([gapped('off-hand swings trigger', 'arm-a')], [], BUILD)
+        with mock.patch('profile.server_spell_dbc_sha256', return_value=SERVER_SHA):
+            entries = fragment_entries(result, {'spell_dbc_sha256': SERVER_SHA, 'results': 'r'})
+        self.assertEqual([(entry['evidence'], entry['tool_gap_state']) for entry in entries],
+                         [(UNPROVEN, TOOL_GAP_PENDING)])
+        self.assertEqual(entries[0][TOOL_GAP]['attempts'][0]['agent'], 'arm-a')
 
 
 class FragmentTest(unittest.TestCase):

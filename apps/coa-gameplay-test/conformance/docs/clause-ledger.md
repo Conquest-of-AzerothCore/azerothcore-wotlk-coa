@@ -27,6 +27,9 @@ A JSON array. Each entry is one clause:
 - `claims` (optional, a `"claim"` entry only): the stated claims of a clause whose labels would otherwise prove only
   part of it, each `{"claim": "<the tooltip words of that claim>", "labels": [...]}`, at least two, in place of the
   entry's `labels` (an entry carrying both is refused). Without `claims` the entry's `labels` are its one claim.
+- `tool_gap` (optional, a `"claim"` entry only): a clause an agent could not prove because the tool lacks a metric,
+  step or setup, `{"reason": "<what the tool lacks>", "attempts": [{"agent": "<who tried>", "report": "<where>"}],
+  "owner_acceptance": {"ruling": "<file#section>"}}` (`owner_acceptance` optional). See [Tool gaps](#tool-gaps).
 
 ### Stated claims
 
@@ -89,6 +92,32 @@ but leaves it without a proving test empties its `labels`, so the clause counts 
   conformant (not just one), since each is a distinct occurrence of the same clause in the tooltip. A label
   that already ends in `" #<ordinal>"` is matched exactly, never expanded.
 - `unproven` is the list of clause entries that did not qualify, for printing with their tooltip words.
+
+### Tool gaps
+
+A tool gap is never proof: the clause stays unproven and in the coverage denominator. It counts as **resolved**
+(`tool_gap_state` `accepted`) only after a second attempt by another agent, two `attempts` with different `agent`
+values, or an explicit owner acceptance (`owner_acceptance.ruling`, the ruling that accepts it); one agent's
+attempt, or several by the same agent, is `pending` and counts unresolved (ADR 0127; prototype review I4: two tool
+gaps one arm declared were disproved by another arm). The second attempt is a fresh try to prove the clause, not a
+review of the first report; an agent that proves it removes the `tool_gap` and cites its labels. `clause_coverage`
+refuses a malformed `tool_gap` (no reason, no attempt, an attempt without agent or report, a non-claim entry) and
+ignores the gap of a clause that is proven. `ClauseCoverage.tool_gaps` lists the unproven clauses with a gap and
+their state; `accepted_tool_gaps`, `pending_tool_gaps` and `resolved` (`proven + accepted_tool_gaps`) are printed by
+`coverage --clauses` and written per run by `prove` (`summary.json` `coverage`). A fragment row of an unproven
+clause carries the clause's `tool_gap` and its `tool_gap_state`; the integrator appends a fragment's attempts to the
+ledger entry's `attempts`, never replaces them.
+
+Example of the shape (one attempt, so `pending`; a second entry in `attempts` by another agent, or an
+`owner_acceptance`, would make it `accepted`):
+
+```json
+{"spell": 92108, "clause": "Your off-hand auto attacks now trigger Zealotry.", "labels": ["92108 trigger_count"],
+ "kind": "claim", "tool_gap": {"reason": "the harness cannot produce an off-hand swing for this class",
+ "attempts": [{"agent": "round10/proc-chains", "report": "round10/workstreams/proc-chains.md"}]}}
+```
+
+No Templar ledger entry declares a `tool_gap` yet.
 
 ### Two proof statuses
 
@@ -155,8 +184,9 @@ Run it from the command line together with the ordinary before/after coverage re
 python conformance.py coverage --before <dir> --after <dir> --clauses classes/templar_clauses.json
 ```
 
-This prints `clauses proven: N of M (P%)`, `behaviour proven`, `data conformant` and the `not_measured` count,
-followed by every unproven clause's spell id, text and current labels, read from `--after`'s `verdicts.json`, so the
+This prints `clauses proven: N of M (P%)`, `behaviour proven`, `data conformant`, the accepted and pending tool gaps,
+`clauses resolved` and the `not_measured` count, followed by every unproven clause's spell id, text and current
+labels and the tool gaps with their state, read from `--after`'s `verdicts.json`, so the
 number always matches the run being reported on, never a cached or hand-recorded count. An unknown check or metric,
 verdicts of another build, or a fragment request on verdicts of another `Spell.dbc` end the command with exit code 3
 and no clause count; `--fragment <path>` writes the fragment to a new file.
