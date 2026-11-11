@@ -39,6 +39,12 @@ passes); the gameplay line of the run gives the passed/failed counts. Keep the o
 (`.agents/plans/class-conformance/<class>/`). Past run sizes, timings and fix-round history:
 [Generate and compare § A full class run](docs/generate-and-compare.md#a-full-class-run).
 
+## Method rule
+
+No server change whose only evidence is our own check: a server fix cites the tooltip text, the Ascension logs or an
+owner ruling (owner, 2026-11-11; ADR 0128). A conformance alert is a lead, not evidence. Every server-fix item of a
+round uses the [server-fix brief](docs/fix-brief.md).
+
 ## Where to find what
 
 Each topic lives in its own page under `docs/`, so an agent reads only the page it needs:
@@ -57,7 +63,7 @@ Each topic lives in its own page under `docs/`, so an agent reads only the page 
   entries.
 - [Behaviour scenarios](docs/behaviour-scenarios.md) — prose-only behaviours: target count, healing ratio, aura
   spread, shield break, metric delta, health-threshold ratio, leech ratio, duration, duration ratio, duration
-  refresh, amount delta, Templar entries.
+  refresh, amount delta, expiry pairs, Templar entries.
 - [Player observations and readings](docs/player-observations.md) — a class file's `player_observations` and
   `player_tooltip_readings` arrays.
 - [Talent stack (lever map)](docs/talent-stack.md) — cumulative talent configurations, DPS levers, the owner
@@ -66,9 +72,11 @@ Each topic lives in its own page under `docs/`, so an agent reads only the page 
   leaves for a human.
 - [Generate and compare](docs/generate-and-compare.md) — `generate`/`compare` CLI, a full class run, the impact
   report, coverage comparison, behaviour sheets, the `prove` runner, verdict statuses, open conformance checks.
+- [Server-fix brief](docs/fix-brief.md) — the method rule for server fixes and the brief template round workflows
+  copy into each fix item.
 - [Clause ledger and clause coverage](docs/clause-ledger.md) — `classes/<name>_clauses.json` format, how a
   workstream contributes labels, `coverage.py coverage --clauses`, the behaviour-proven and data-conformant
-  statuses and the `Spell.dbc` sha256 of fragments.
+  statuses, tool gaps and the `Spell.dbc` sha256 of fragments.
 
 ## Run
 
